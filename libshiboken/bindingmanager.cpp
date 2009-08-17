@@ -1,0 +1,107 @@
+/*
+ * This file is part of the Shiboken Python Binding Generator project.
+ *
+ * Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+ *
+ * Contact: PySide team <contact@pyside.org>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * version 2.1 as published by the Free Software Foundation. Please
+ * review the following information to ensure the GNU Lesser General
+ * Public License version 2.1 requirements will be met:
+ * http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+ *
+ * As a special exception to the GNU Lesser General Public License
+ * version 2.1, the object code form of a "work that uses the Library"
+ * may incorporate material from a header file that is part of the
+ * Library.  You may distribute such object code under terms of your
+ * choice, provided that the incorporated material (i) does not exceed
+ * more than 5% of the total size of the Library; and (ii) is limited to
+ * numerical parameters, data structure layouts, accessors, macros,
+ * inline functions and templates.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ */
+
+#include "bindingmanager.h"
+
+namespace Shiboken
+{
+
+BindingManager& BindingManager::instance() {
+    static BindingManager singleton;
+    return singleton;
+}
+
+bool BindingManager::hasWrapper(void* cptr)
+{
+    return m_wrapperMapper.count(cptr);
+}
+
+void BindingManager::assignWrapper(PyObject* wrapper, void* cptr)
+{
+    std::map<void*, PyObject*>::iterator iter = m_wrapperMapper.find(cptr);
+    if (iter == m_wrapperMapper.end())
+        m_wrapperMapper.insert(std::pair<void*, PyObject*>(cptr, wrapper));
+    else
+        iter->second = wrapper;
+}
+
+void BindingManager::releaseWrapper(void *cptr)
+{
+    std::map<void*, PyObject*>::iterator iter = m_wrapperMapper.find(cptr);
+    if (iter != m_wrapperMapper.end())
+        m_wrapperMapper.erase(iter);
+}
+
+inline void BindingManager::releaseWrapper(PyObject* wrapper)
+{
+    releaseWrapper(PyBaseWrapper_cptr(wrapper));
+}
+
+PyObject* BindingManager::retrieveWrapper(void* cptr)
+{
+    std::map<void*, PyObject*>::iterator iter = m_wrapperMapper.find(cptr);
+    if (iter == m_wrapperMapper.end())
+        return 0;
+    return iter->second;
+}
+
+PyObject* BindingManager::getOverride(void* cptr, const char* methodName)
+{
+    PyObject* wrapper = retrieveWrapper(cptr);
+
+    fprintf(stderr, "[%s:%d] method: %s, wrapper: %s\n", __FUNCTION__, __LINE__, methodName, wrapper->ob_type->tp_name);
+
+    if (wrapper) {
+        PyTypeObject* baseWrapperType = ((Shiboken::PyBaseWrapper*)wrapper)->baseWrapperType;
+        fprintf(stderr, "[%s:%d] basewrapper: %s\n", __FUNCTION__, __LINE__, baseWrapperType->tp_name);
+        PyObject* method = PyObject_GetAttrString(wrapper, const_cast<char*>(methodName));
+        if (method != 0) {
+            PyObject* defaultMethod = 0;
+            if (PyMethod_Check(method) &&
+                ((PyMethodObject*) method)->im_self == wrapper &&
+                baseWrapperType->tp_dict != 0) {
+                defaultMethod = PyDict_GetItemString(baseWrapperType->tp_dict, const_cast<char*>(methodName));
+            }
+
+            if (((PyMethodObject*)method)->im_func != defaultMethod)
+                return method;
+
+            Py_DECREF(method);
+        }
+    }
+
+    return 0;
+}
+
+} // namespace Shiboken

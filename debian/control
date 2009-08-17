@@ -1,0 +1,25 @@
+Source: shiboken
+Section: devel
+Priority: extra
+Maintainer: Marcelo Lira <marcelo.lira@indt.org.br>
+Build-Depends: cdbs, debhelper (>= 5), libapiextractor-dev (>= 0.2), libqt4-dev (>= 4.5), cmake (>= 2.6.0)
+Standards-Version: 3.7.3
+
+Package: shiboken
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libapiextractor (>= 0.2)
+Description: Generates Python bindings for qt based libraries.
+ Generates CPython based bindings for C++ libraries.
+
+Package: libshiboken
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Support library for Python bindings created with Shiboken generator.
+ Support library for Python bindings created with Shiboken generator.
+
+Package: libshiboken-dev
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libshiboken
+Description: Development files for libshiboken.
+ Development files for libshiboken.
+

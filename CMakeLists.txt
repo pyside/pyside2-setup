@@ -1,0 +1,54 @@
+project(shiboken)
+
+cmake_minimum_required(VERSION 2.6)
+
+find_package(Qt4 4.5.0 REQUIRED)
+find_package(ApiExtractor REQUIRED)
+
+add_definitions(${QT_DEFINITIONS})
+
+set(shiboken_VERSION 0.1)
+set(CMAKE_BUILD_TYPE Debug)
+
+set(shiboken_SRC
+shibokengenerator.cpp
+headergenerator.cpp
+cppgenerator.cpp
+docgenerator.cpp
+polymorphicdata.cpp
+main.cpp
+)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}
+                    ${APIEXTRACTOR_INCLUDE_DIR}
+                    ${APIEXTRACTOR_INCLUDE_DIR}/..
+                    ${QT_INCLUDE_DIR}
+                    ${QT_QTCORE_INCLUDE_DIR})
+
+add_executable(shiboken ${shiboken_SRC})
+
+target_link_libraries(shiboken
+                      ${APIEXTRACTOR_LIBRARY}
+                      ${QT_QTCORE_LIBRARY}
+                      ${QT_QTXML_LIBRARY})
+
+# uninstall target
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
+               "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+               IMMEDIATE @ONLY)
+add_custom_target(uninstall "${CMAKE_COMMAND}"
+                  -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
+
+enable_testing()
+
+add_subdirectory(libshiboken)
+add_subdirectory(tests)
+
+# "make dist", in fact "make package_source"
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "shiboken-${shiboken_VERSION}")
+set(CPACK_SOURCE_GENERATOR TGZ)
+set(CPACK_SOURCE_IGNORE_FILES "~$" ".svn" "debian/" "build/" ".swp$" "*.kdev4")
+include(CPack)
+
+install(TARGETS shiboken DESTINATION bin)
+

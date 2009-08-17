@@ -1,0 +1,10 @@
+build
+.kdev4
+*.log
+*.pyc
+*.o
+*.so
+.preprocessed.tmp
+.*.swp
+*.kdev4
+doc/_build

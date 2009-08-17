@@ -1,0 +1,13 @@
+# - try to find Shiboken
+#  SHIBOKEN_INCLUDE_DIR   - Directories to include to use Shiboken
+#  SHIBOKEN_LIBRARIES     - Files to link against to use Shiboken
+#  SHIBOKEN_FOUND         - Shiboken was found
+
+find_path(SHIBOKEN_INCLUDE_DIR shiboken.h @CMAKE_INSTALL_PREFIX@/include/shiboken)
+find_library(SHIBOKEN_LIBRARY shiboken @CMAKE_INSTALL_PREFIX@/lib)
+
+set(SHIBOKEN_FOUND "NO")
+if(SHIBOKEN_LIBRARY AND SHIBOKEN_INCLUDE_DIR)
+    set(SHIBOKEN_FOUND "YES")
+endif(SHIBOKEN_LIBRARY AND SHIBOKEN_INCLUDE_DIR)
+

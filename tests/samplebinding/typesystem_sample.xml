@@ -1,0 +1,216 @@
+<?xml version="1.0"?>
+<typesystem package="sample">
+    <primitive-type name="bool"/>
+    <primitive-type name="double"/>
+    <primitive-type name="int"/>
+    <primitive-type name="char"/>
+
+    <primitive-type name="Complex" target-lang-api-name="PyComplex">
+        <conversion-rule file="complex_conversions.h"/>
+    </primitive-type>
+
+    <container-type name="std::pair" type="pair">
+        <conversion-rule file="pair_conversions.h"/>
+        <include file-name="utility" location="global"/>
+    </container-type>
+    <container-type name="std::list" type="list">
+        <conversion-rule file="list_conversions.h"/>
+        <include file-name="list" location="global"/>
+    </container-type>
+
+    <enum-type name="Abstract::PrintFormat"/>
+    <enum-type name="PolymorphicFuncEnum"/>
+    <enum-type name="Derived::OtherPolymorphicFuncEnum"/>
+    <enum-type name="Modifications::PolymorphicModFunc"/>
+    <enum-type name="ImplicitConv::CtorEnum"/>
+    <!-- BUG:
+    renaming the ICPolymorphicFuncEnum to the same name
+    of a global enum causes the generator to confuse the
+    two types.
+    -->
+    <enum-type name="ImplicitConv::ICPolymorphicFuncEnum"/>
+    <enum-type name="SampleNamespace::Option" extensible="yes"/>
+    <enum-type name="SampleNamespace::InValue"/>
+    <enum-type name="SampleNamespace::OutValue"/>
+    <enum-type name="GlobalEnum"/>
+    <enum-type name="GlobalPolyFuncEnum"/>
+
+    <namespace-type name="SampleNamespace"/>
+
+    <object-type name="Abstract">
+        <modify-function signature="id()" rename="id_"/>
+    </object-type>
+
+    <object-type name="Derived"/>
+
+    <template name="boolptr_at_end_fix_beginning">
+        bool __ok__;
+        %0 = ((%TYPE*) ((Shiboken::PyBaseWrapper*) self)->cptr)->
+                %TYPE::%FUNCTION_NAME(%ARGUMENT_NAMES, &amp;__ok__);
+    </template>
+
+    <template name="boolptr_at_start_fix_beginning">
+        bool __ok__;
+        %0 = ((%TYPE*) ((Shiboken::PyBaseWrapper*) self)->cptr)->
+                %TYPE::%FUNCTION_NAME(&amp;__ok__, %ARGUMENT_NAMES);
+    </template>
+
+    <template name="boolptr_fix_end">
+        PyObject* _item_;
+        PyObject* _tuple_ = PyTuple_New(2);
+        _item_ = Shiboken::Converter&lt; %RETURN_TYPE &gt;::toPython(Shiboken::ValueHolder&lt; %RETURN_TYPE &gt;(%0));
+        PyTuple_SET_ITEM(_tuple_, 0, _item_);
+        _item_ = Shiboken::Converter&lt;bool&gt;::toPython(Shiboken::ValueHolder&lt;bool&gt;(__ok__));
+        PyTuple_SET_ITEM(_tuple_, 1, _item_);
+        return _tuple_;
+    </template>
+
+    <object-type name="Modifications">
+
+        <modify-function signature="polymorphic(int, bool, int, double)">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code class="native" position="beginning">
+                %0 = ((%TYPE*) ((Shiboken::PyBaseWrapper*) self)->cptr)->
+                        %TYPE::%FUNCTION_NAME(%1, true, %3, %4);
+            </inject-code>
+        </modify-function>
+
+        <modify-function signature="polymorphic(int, bool, int, int)">
+            <modify-argument index="3">
+                <remove-argument/>
+                <replace-default-expression with="321"/>
+            </modify-argument>
+            <!--
+            <modify-argument index="4">
+                <remove-default-expression/>
+            </modify-argument>
+            -->
+        </modify-function>
+
+        <!--
+        this alteration will trigger an interesting
+        compile time error on the binding
+        -->
+        <!--
+        <modify-function signature="polymorphic(int, bool, Point, Point)">
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+        </modify-function>
+        -->
+
+        <!--
+        renaming this signature should remove it from the other
+        polymorphic methods decision tree
+        -->
+        <modify-function signature="polymorphic(int, bool, Point, Point)" rename="poly"/>
+
+        <!--
+        'ok' must be removed and the return value will be changed
+        to a tuple (PyObject*) containing the expected result plus
+        the 'ok' value as a Python boolean
+        -->
+        <modify-function signature="pointToPair(Point, bool*)">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PyObject*"/>
+            </modify-argument>
+            <inject-code class="native" position="beginning">
+                <insert-template name="boolptr_at_end_fix_beginning"/>
+            </inject-code>
+            <inject-code class="native" position="end">
+                <insert-template name="boolptr_fix_end"/>
+            </inject-code>
+        </modify-function>
+
+        <!-- same as 'pointToPair' except that this time 'ok' is the first argument -->
+        <modify-function signature="multiplyPointCoordsPlusValue(bool*, Point, double)">
+            <modify-argument index="1">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PyObject*"/>
+            </modify-argument>
+            <inject-code class="native" position="beginning">
+                <insert-template name="boolptr_at_start_fix_beginning"/>
+            </inject-code>
+            <inject-code class="native" position="end">
+                <insert-template name="boolptr_fix_end"/>
+            </inject-code>
+        </modify-function>
+
+        <!-- completely remove 'plus' from the Python side -->
+        <modify-function signature="doublePlus(int, int)">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+        </modify-function>
+
+        <!-- the default value for both arguments must be changed in Python -->
+        <modify-function signature="power(int, int)">
+            <modify-argument index="1">
+                <replace-default-expression with="2"/>
+            </modify-argument>
+            <modify-argument index="2">
+                <replace-default-expression with="1"/>
+            </modify-argument>
+        </modify-function>
+
+        <!-- in Python set argument default value to 10 -->
+        <modify-function signature="timesTen(int)">
+            <modify-argument index="1">
+                <replace-default-expression with="10"/>
+            </modify-argument>
+        </modify-function>
+
+        <!-- in Python remove the argument default value -->
+        <modify-function signature="increment(int)">
+            <modify-argument index="1">
+                <remove-default-expression/>
+            </modify-argument>
+        </modify-function>
+
+        <!-- don't export this method to Python -->
+        <modify-function signature="exclusiveCppStuff()" remove="all"/>
+
+        <!-- change the name of this regular method -->
+        <modify-function signature="cppMultiply(int, int)" rename="calculateArea"/>
+
+        <!-- change the name of this virtual method -->
+        <modify-function signature="className()" rename="name"/>
+    </object-type>
+
+    <object-type name="AbstractModifications">
+        <!--
+        completely removing the pure virtual method from this
+        class will generate an #error directive.
+        -->
+        <!--
+        <modify-function signature="pointlessPureVirtualMethod()" remove="all"/>
+        -->
+    </object-type>
+
+    <value-type name="Reference"/>
+
+    <value-type name="ImplicitConv"/>
+
+    <value-type name="Point"/>
+    <value-type name="Size"/>
+    <value-type name="PairUser"/>
+    <value-type name="ListUser"/>
+
+    <rejection class="ListUser" function-name="createList()"/>
+    <rejection class="ListUser" function-name="callCreateList()"/>
+    <rejection class="ListUser" function-name="createComplexList(Complex, Complex)"/>
+    <rejection class="ListUser" function-name="sumList(std::list&lt;int&gt;)"/>
+    <rejection class="ListUser" function-name="sumList(std::list&lt;double&gt;)"/>
+
+    <rejection class="" function-name="gimmeComplexList()"/>
+    <rejection class="" function-name="makeCString()"/>
+    <rejection class="" function-name="returnCString()"/>
+</typesystem>
+
