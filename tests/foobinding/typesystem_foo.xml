@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<typesystem package="foo">
+  <object-type name="Foo"/>
+  <object-type name="Bar"/>
+</typesystem>
+
