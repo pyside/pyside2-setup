@@ -1,0 +1,12 @@
+Source: boostpythongenerator
+Section: devel
+Priority: extra
+Maintainer: PySide team <contact@pyside.org>
+Build-Depends: cdbs, debhelper (>= 5), libapiextractor-dev (>= 0.1), libqt4-dev (>= 4.5), cmake (>= 2.6.0)
+Standards-Version: 3.7.3
+
+Package: boostpythongenerator
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libapiextractor (>= 0.1)
+Description: Generates Python bindings for qt based libraries
+ Generates Boost::Python-based bindings for qt based libraries.
