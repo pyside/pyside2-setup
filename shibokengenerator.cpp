@@ -723,7 +723,7 @@ CodeSnipList ShibokenGenerator::getCodeSnips(const AbstractMetaFunction *func)
 {
     CodeSnipList result;
     const AbstractMetaClass* metaClass = func->implementingClass();
-    while (!metaClass) {
+    while (metaClass) {
         foreach (FunctionModification mod, func->modifications(metaClass)) {
             if (mod.isCodeInjection())
                 result << mod.snips;
