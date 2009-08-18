@@ -30,7 +30,6 @@
 #include <QtCore/QXmlStreamReader>
 #include <QtCore/QFile>
 #include <QtCore/QDir>
-#include <boost/graph/graph_concepts.hpp>
 
 static Indentor INDENT;
 
