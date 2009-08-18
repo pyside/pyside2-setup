@@ -7,7 +7,7 @@ find_package(ApiExtractor REQUIRED)
 
 add_definitions(${QT_DEFINITIONS})
 
-set(boostpythongenerator_VERSION 0.1)
+set(boostpythongenerator_VERSION 0.2)
 configure_file(boostpythongeneratorversion.h.in ${CMAKE_CURRENT_BINARY_DIR}/boostpythongeneratorversion.h @ONLY)
 set(CMAKE_BUILD_TYPE Debug)
 
@@ -51,4 +51,6 @@ include(CPack)
 install(TARGETS boostpythongenerator DESTINATION bin)
 
 enable_testing()
+add_subdirectory(libbindgen)
 add_subdirectory(tests)
+
