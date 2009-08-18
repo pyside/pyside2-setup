@@ -51,6 +51,6 @@ include(CPack)
 install(TARGETS boostpythongenerator DESTINATION bin)
 
 enable_testing()
-add_subdirectory(libbindgen)
+#add_subdirectory(libbindgen)
 add_subdirectory(tests)
 
