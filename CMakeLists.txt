@@ -90,10 +90,16 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake" "${CMAKE_CURR
 add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 
 # "make dist", in fact "make package_source"
-set(CPACK_SOURCE_PACKAGE_FILE_NAME "libapiextractor-${apiextractor_VERSION}")
-set(CPACK_SOURCE_GENERATOR TGZ)
-set(CPACK_SOURCE_IGNORE_FILES "~$" ".svn" "debian/" "build/" ".swp$" "*.kdev4")
-include(CPack)
+#set(CPACK_SOURCE_PACKAGE_FILE_NAME "libapiextractor-${apiextractor_VERSION}")
+#set(CPACK_SOURCE_GENERATOR TGZ)
+#set(CPACK_SOURCE_IGNORE_FILES "~$" ".svn" "debian/" "build/" ".swp$" "*.kdev4")
+#include(CPack)
+
+set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${apiextractor_VERSION})
+add_custom_target(dist
+    COMMAND git archive --prefix=${ARCHIVE_NAME}/ HEAD
+        | bzip2 > ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 set(root_HEADERS
 abstractmetalang.h
