@@ -106,8 +106,6 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
             int i = 1;
             foreach (AbstractMetaArgument* arg, func->arguments()) {
                 QString type = arg->type()->name();
-                /* XXX Hack to get arguments working inside namespaces types */
-                type = type.split("::").last();
 
                 if (arg->type()->isConstant())
                     type.prepend("const ");

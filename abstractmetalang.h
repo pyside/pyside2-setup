@@ -345,7 +345,7 @@ public:
     }
     QString name() const
     {
-        return m_typeEntry->targetLangName();
+        return QString(m_typeEntry->targetLangName()).split("::").last();
     }
     QString fullName() const
     {
@@ -1365,7 +1365,7 @@ public:
     AbstractMetaFunctionList implicitConversions() const;
 
     /**
-     *   Retrives all class' operator overloads that meet
+     *   Retrieves all class' operator overloads that meet
      *   query crieteria defined with the OperatorQueryOption
      *   enum.
      *   /param query composition of OperatorQueryOption enum values
@@ -1428,6 +1428,10 @@ public:
         return package() + "." + name();
     }
 
+    /**
+     *   Retrieves the class name without any namespace/scope information.
+     *   /return the class name without scope information
+     */
     QString name() const;
 
     QString baseClassName() const

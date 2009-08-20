@@ -1306,8 +1306,7 @@ bool AbstractMetaClass::hasSignal(const AbstractMetaFunction *other) const
 
 QString AbstractMetaClass::name() const
 {
-    return m_typeEntry->targetLangName();
-//     return QString(m_typeEntry->targetLangName()).replace("::", "_");
+    return QString(m_typeEntry->targetLangName()).split("::").last();
 }
 
 void AbstractMetaClass::setBaseClass(AbstractMetaClass *baseClass)
