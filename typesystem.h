@@ -961,8 +961,7 @@ private:
     PrimitiveTypeEntry* m_aliasedTypeEntry;
 };
 
-
-
+typedef QList<const PrimitiveTypeEntry*> PrimitiveTypeEntryList;
 
 struct EnumValueRedirection
 {
@@ -1501,6 +1500,7 @@ private:
     Type m_type;
 };
 
+typedef QList<const ContainerTypeEntry*> ContainerTypeEntryList;
 
 class NamespaceTypeEntry : public ComplexTypeEntry
 {
