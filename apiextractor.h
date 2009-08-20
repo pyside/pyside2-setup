@@ -25,6 +25,7 @@
 #define APIEXTRACTOR_H
 
 #include "reporthandler.h"
+#include "abstractmetalang.h"
 #include <QStringList>
 
 class AbstractMetaBuilder;
@@ -42,7 +43,18 @@ public:
     void setSuppressWarnings(bool value);
     void setSilent(bool value);
     void addTypesystemSearchPath(const QString& path);
+    void addTypesystemSearchPath(const QStringList& paths);
     void addIncludePath(const QString& path);
+    void addIncludePath(const QStringList& paths);
+
+    AbstractMetaEnumList globalEnums() const;
+    AbstractMetaFunctionList globalFunctions() const;
+    AbstractMetaClassList classes() const;
+    PrimitiveTypeEntryList primitiveTypes() const;
+    ContainerTypeEntryList containerTypes() const;
+    QSet<QString> qtMetaTypeDeclaredTypeNames() const;
+
+    int classCount() const;
 
     bool run();
 private:

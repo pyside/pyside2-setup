@@ -57,9 +57,20 @@ void ApiExtractor::addTypesystemSearchPath ( const QString& path )
     TypeDatabase::instance()->addTypesystemPath(path);
 }
 
+void ApiExtractor::addTypesystemSearchPath ( const QStringList& paths )
+{
+    foreach (QString path, paths)
+        addTypesystemSearchPath(path);
+}
+
 void ApiExtractor::addIncludePath ( const QString& path )
 {
     m_includePaths << path;
+}
+
+void ApiExtractor::addIncludePath ( const QStringList& paths )
+{
+    m_includePaths << paths;
 }
 
 void ApiExtractor::setCppFileName(const QString& cppFileName)
@@ -85,6 +96,46 @@ void ApiExtractor::setSuppressWarnings ( bool value )
 void ApiExtractor::setSilent ( bool value )
 {
     ReportHandler::setSilent(value);
+}
+
+AbstractMetaEnumList ApiExtractor::globalEnums() const
+{
+    Q_ASSERT(m_builder);
+    return m_builder->globalEnums();
+}
+
+AbstractMetaFunctionList ApiExtractor::globalFunctions() const
+{
+    Q_ASSERT(m_builder);
+    return m_builder->globalFunctions();
+}
+
+AbstractMetaClassList ApiExtractor::classes() const
+{
+    Q_ASSERT(m_builder);
+    return m_builder->classes();
+}
+
+PrimitiveTypeEntryList ApiExtractor::primitiveTypes() const
+{
+    return TypeDatabase::instance()->primitiveTypes();
+}
+
+ContainerTypeEntryList ApiExtractor::containerTypes() const
+{
+    return TypeDatabase::instance()->containerTypes();
+}
+
+QSet<QString> ApiExtractor::qtMetaTypeDeclaredTypeNames() const
+{
+    Q_ASSERT(m_builder);
+    return m_builder->qtMetaTypeDeclaredTypeNames();
+}
+
+int ApiExtractor::classCount() const
+{
+    Q_ASSERT(m_builder);
+    return m_builder->classes().count();
 }
 
 bool ApiExtractor::run()
