@@ -38,7 +38,7 @@ static bool preprocess(const QString& sourceFile,
                        QFile& targetFile,
                        const QStringList& includes);
 
-ApiExtractor::ApiExtractor()
+ApiExtractor::ApiExtractor() : m_builder(0)
 {
     // Environment TYPESYSTEMPATH
     QString envTypesystemPaths = getenv("TYPESYSTEMPATH");
@@ -49,6 +49,7 @@ ApiExtractor::ApiExtractor()
 
 ApiExtractor::~ApiExtractor()
 {
+    delete m_builder;
 }
 
 void ApiExtractor::addTypesystemSearchPath ( const QString& path )
@@ -76,9 +77,14 @@ void ApiExtractor::setDebugLevel(ReportHandler::DebugLevel debugLevel)
     ReportHandler::setDebugLevel(debugLevel);
 }
 
-void ApiExtractor::setSupressWarnings ( bool value )
+void ApiExtractor::setSuppressWarnings ( bool value )
 {
     TypeDatabase::instance()->setSuppressWarnings(value);
+}
+
+void ApiExtractor::setSilent ( bool value )
+{
+    ReportHandler::setSilent(value);
 }
 
 bool ApiExtractor::run()

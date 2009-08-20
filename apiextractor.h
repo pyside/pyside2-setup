@@ -39,7 +39,8 @@ public:
     void setTypeSystem(const QString& typeSystemFileName);
     void setCppFileName(const QString& cppFileName);
     void setDebugLevel(ReportHandler::DebugLevel debugLevel);
-    void setSupressWarnings(bool value);
+    void setSuppressWarnings(bool value);
+    void setSilent(bool value);
     void addTypesystemSearchPath(const QString& path);
     void addIncludePath(const QString& path);
 
