@@ -26,7 +26,9 @@
 #define PP_ENVIRONMENT_H
 
 #include <vector>
+#include <string>
 #include <cstring>
+#include "pp-macro.h"
 
 namespace rpp
 {

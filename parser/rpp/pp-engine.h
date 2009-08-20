@@ -25,6 +25,12 @@
 #ifndef PP_ENGINE_H
 #define PP_ENGINE_H
 
+#include <string>
+#include <vector>
+#include "pp-scanner.h"
+#include "pp-macro-expander.h"
+#include "pp-environment.h"
+
 namespace rpp
 {
 
