@@ -24,36 +24,31 @@
 #ifndef APIEXTRACTOR_H
 #define APIEXTRACTOR_H
 
-#include <QLinkedList>
-#include <QMap>
-#include <QString>
+#include "reporthandler.h"
+#include <QStringList>
 
-class Generator;
+class AbstractMetaBuilder;
+class QIODevice;
 
 class ApiExtractor
 {
 public:
-    ApiExtractor(int argc, char** argv);
+    ApiExtractor();
     ~ApiExtractor();
 
-    void addGenerator(Generator* generator);
-    void setVersionHandler(void (*versionHandler)(const char*))
-    {
-        m_versionHandler = versionHandler;
-    }
+    void setTypeSystem(const QString& typeSystemFileName);
+    void setCppFileName(const QString& cppFileName);
+    void setDebugLevel(ReportHandler::DebugLevel debugLevel);
+    void setSupressWarnings(bool value);
+    void addTypesystemSearchPath(const QString& path);
+    void addIncludePath(const QString& path);
 
-    int exec();
-
+    bool run();
 private:
-    QLinkedList<Generator*> m_generators;
-    QMap<QString, QString> m_args;
     QString m_typeSystemFileName;
-    QString m_globalHeaderFileName;
-    const char* m_programName;
-    void (*m_versionHandler)(const char*);
-
-    bool parseGeneralArgs();
-    void printUsage();
+    QString m_cppFileName;
+    QStringList m_includePaths;
+    AbstractMetaBuilder* m_builder;
 
     // disable copy
     ApiExtractor(const ApiExtractor&);

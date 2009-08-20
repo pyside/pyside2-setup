@@ -248,9 +248,6 @@ public:
     CodeSnip() : language(TypeSystem::TargetLangCode) { }
     CodeSnip(TypeSystem::Language lang) : language(lang) { }
 
-    // Very simple, easy to make code ugly if you try
-    QTextStream &formattedCode(QTextStream &s, Indentor &indentor) const;
-
     TypeSystem::Language language;
     Position position;
     ArgumentMap argumentMap;

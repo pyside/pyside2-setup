@@ -30,8 +30,6 @@
 
 class FileOut : public QObject
 {
-    Q_OBJECT
-
 private:
     QByteArray tmp;
     QString name;

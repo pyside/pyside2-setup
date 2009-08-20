@@ -31,7 +31,6 @@ docparser.cpp
 doxygenparser.cpp
 qtdocparser.cpp
 fileout.cpp
-generator.cpp
 reporthandler.cpp
 typeparser.cpp
 typesystem.cpp
@@ -59,13 +58,7 @@ parser/rpp/preprocessor.cpp
 )
 
 qt4_add_resources(apiextractor_RCCS_SRC generator.qrc)
-
-set(apiextractor_MOC_HEADERS
-    fileout.h
-    generator.h
-)
-
-qt4_wrap_cpp(apiextractor_MOC_SRC ${apiextractor_MOC_HEADERS})
+qt4_automoc(apiextractor_SRC)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
@@ -76,7 +69,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${LIBXML2_INCLUDE_DIRS}
                     )
 
-add_library(apiextractor SHARED ${apiextractor_SRC} ${apiextractor_MOC_SRC} ${apiextractor_RCCS_SRC})
+add_library(apiextractor SHARED ${apiextractor_SRC} ${apiextractor_RCCS_SRC})
 target_link_libraries(apiextractor ${Boost_GRAPH_LIBRARY} ${LIBXSLT_LIBRARIES} ${LIBXML2_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTXMLPATTERNS_LIBRARY} ${QT_QTXML_LIBRARY})
 set_target_properties(apiextractor PROPERTIES SOVERSION ${apiextractor_VERSION})
 
@@ -103,7 +96,6 @@ add_custom_target(dist
 
 set(root_HEADERS
 abstractmetalang.h
-generator.h
 apiextractor.h
 reporthandler.h
 typesystem.h
