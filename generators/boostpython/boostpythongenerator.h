@@ -24,10 +24,12 @@
 #ifndef BOOSTPYTHONGENERATOR_H
 #define BOOSTPYTHONGENERATOR_H
 
-#include <apiextractor/generator.h>
 #include <QtCore/QTextStream>
+#include "generator.h"
 
 class DocParser;
+
+QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor);
 
 /**
 * Abstract generator that contains common methods used in CppGenerator and HppGenerator.
@@ -127,7 +129,7 @@ public:
     static QString getWrapperName(const AbstractMetaClass* clazz);
 
 
-    virtual bool prepareGeneration(const QMap<QString, QString>& args);
+    virtual bool doSetup(const QMap<QString, QString>& args);
 
 protected:
     // verify if the class is copyalbe

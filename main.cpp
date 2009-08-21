@@ -49,7 +49,6 @@ static void printOptions(QTextStream& s, const QMap<QString, QString>& options) 
 }
 
 typedef QLinkedList<Generator*> (*getGeneratorsFunc)();
-typedef QLinkedList<Generator*> GeneratorList;
 
 QMap<QString, QString> getCommandLineArgs(int argc, char** argv)
 {

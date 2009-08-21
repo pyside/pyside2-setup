@@ -26,11 +26,18 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QDir>
-#include "abstractmetalang.h"
+#include <QtCore/QLinkedList>
+#include <apiextractor/abstractmetalang.h>
 
 class ApiExtractor;
 class AbstractMetaBuilder;
 class QFile;
+
+#define EXPORT_GENERATOR_PLUGIN(X)\
+extern "C" Q_DECL_EXPORT GeneratorList getGenerators()\
+{\
+    return GeneratorList() << X;\
+}\
 
 /**
  *   Base class for all generators. The default implementations does nothing,
@@ -245,7 +252,7 @@ protected:
      */
     virtual QString fileNameForClass(const AbstractMetaClass* metaClass) const = 0;
 
-    virtual bool doSetup(QMap<QString, QString> args) = 0;
+    virtual bool doSetup(const QMap<QString, QString>& args) = 0;
 
     /**
      *    Returns the subdirectory path for a given package
@@ -292,6 +299,8 @@ private:
     // License comment
     QString m_licenseComment;
 };
+
+typedef QLinkedList<Generator*> GeneratorList;
 
 /**
 * Utility class to store the identation level, use it in a QTextStream.

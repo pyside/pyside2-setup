@@ -5,6 +5,9 @@ cmake_minimum_required(VERSION 2.6)
 find_package(Qt4 4.5.0 REQUIRED)
 find_package(ApiExtractor REQUIRED)
 
+# lib generator version
+set(generator_VERSION "0.1")
+
 add_definitions(${QT_DEFINITIONS})
 
 set(boostpythongenerator_VERSION 0.2)
@@ -13,21 +16,23 @@ set(CMAKE_BUILD_TYPE Debug)
 
 set(boostpythongenerator_SRC
 main.cpp
-generator.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
                     ${APIEXTRACTOR_INCLUDE_DIR}
                     ${APIEXTRACTOR_INCLUDE_DIR}/..
-                    ${QT_INCLUDE_DIR}
                     ${QT_QTCORE_INCLUDE_DIR})
+
+add_library(generator SHARED generator.cpp)
+set_target_properties(generator PROPERTIES SOVERSION ${generator_VERSION})
+target_link_libraries(generator ${QT_QTCORE_LIBRARY} ${APIEXTRACTOR_LIBRARY})
 
 add_executable(boostpythongenerator ${boostpythongenerator_SRC})
 target_link_libraries(boostpythongenerator
+                      generator
                       ${APIEXTRACTOR_LIBRARY}
-                      ${QT_QTCORE_LIBRARY}
-                      ${QT_QTXML_LIBRARY})
+                      ${QT_QTCORE_LIBRARY})
 
 # uninstall target
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
@@ -37,11 +42,6 @@ add_custom_target(uninstall "${CMAKE_COMMAND}"
                   -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 
 
-# "make dist", in fact "make package_source"
-#set(CPACK_SOURCE_PACKAGE_FILE_NAME "boostpythongenerator-${boostpythongenerator_VERSION}")
-#set(CPACK_SOURCE_GENERATOR TGZ)
-#set(CPACK_SOURCE_IGNORE_FILES "~$" ".svn" "debian/" "build/" ".swp$" "*.kdev4")
-#include(CPack)
 
 set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${boostpythongenerator_VERSION})
 add_custom_target(dist
@@ -50,8 +50,10 @@ add_custom_target(dist
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 install(TARGETS boostpythongenerator DESTINATION bin)
+install(TARGETS generator DESTINATION lib)
+install(FILES generator.h DESTINATION include)
 
 enable_testing()
 #add_subdirectory(libbindgen)
 # add_subdirectory(tests)
-
+add_subdirectory(generators)

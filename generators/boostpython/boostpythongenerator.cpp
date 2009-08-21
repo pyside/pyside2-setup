@@ -36,6 +36,78 @@
 static Indentor INDENT;
 static void dump_function(AbstractMetaFunctionList lst);
 
+static QString formattedCodeHelper(QTextStream &s, Indentor &indentor, QStringList &lines)
+{
+    bool multilineComment = false;
+    bool lastEmpty = true;
+    QString lastLine;
+    while (!lines.isEmpty()) {
+        const QString line = lines.takeFirst().trimmed();
+        if (line.isEmpty()) {
+            if (!lastEmpty)
+                s << endl;
+            lastEmpty = true;
+            continue;
+        } else
+            lastEmpty = false;
+
+        if (line.startsWith("/*"))
+            multilineComment = true;
+
+        if (multilineComment) {
+            s << indentor;
+            if (line.startsWith("*"))
+                s << " ";
+            s << line << endl;
+            if (line.endsWith("*/"))
+                multilineComment = false;
+        } else if (line.startsWith("}"))
+            return line;
+        else if (line.endsWith("")) {
+            s << indentor << line << endl;
+            return 0;
+        } else if (line.endsWith("{")) {
+            s << indentor << line << endl;
+            QString tmp;
+            {
+                Indentation indent(indentor);
+                tmp = formattedCodeHelper(s, indentor, lines);
+            }
+            if (!tmp.isNull())
+                s << indentor << tmp << endl;
+
+            lastLine = tmp;
+            continue;
+        } else {
+            s << indentor;
+            if (!lastLine.isEmpty() &&
+                !lastLine.endsWith(";") &&
+                !line.startsWith("@") &&
+                !line.startsWith("//") &&
+                !lastLine.startsWith("//") &&
+                !lastLine.endsWith("}") &&
+                !line.startsWith("{"))
+                s << "    ";
+            s << line << endl;
+        }
+        lastLine = line;
+    }
+    return 0;
+}
+
+QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
+{
+    QStringList lst(code.split("\n"));
+    while (!lst.isEmpty()) {
+        QString tmp = formattedCodeHelper(s, indentor, lst);
+        if (!tmp.isNull())
+            s << indentor << tmp << endl;
+
+    }
+    s.flush();
+    return s;
+}
+
 FunctionModificationList BoostPythonGenerator::functionModifications(const AbstractMetaFunction *metaFunction)
 {
     FunctionModificationList mods;
@@ -419,7 +491,7 @@ void BoostPythonGenerator::writeCodeSnips(QTextStream &s,
 
         QString code;
         QTextStream tmpStream(&code);
-        snip.formattedCode(tmpStream, INDENT);
+        formatCode(tmpStream, snip.code(), INDENT);
 
         if (func)
             replaceTemplateVariables(code, func);
@@ -488,7 +560,7 @@ static void dump_function(AbstractMetaFunctionList lst)
 }
 
 
-bool BoostPythonGenerator::prepareGeneration(const QMap<QString, QString>&)
+bool BoostPythonGenerator::doSetup(const QMap<QString, QString>&)
 {
     return true;
 }

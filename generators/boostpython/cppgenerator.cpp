@@ -1405,9 +1405,9 @@ void CppGenerator::writeGlobalFunctions()
     if (moduleEntry && moduleEntry->codeSnips().size() > 0) {
         foreach (CodeSnip snip, moduleEntry->codeSnips()) {
             if (snip.position == CodeSnip().Beginning)
-                snip.formattedCode(s, INDENT);
+                formatCode(s, snip.code(), INDENT);
             else
-                snip.formattedCode(snipEnd, INDENT);
+                formatCode(snipEnd, snip.code(), INDENT);
         }
     }
 
