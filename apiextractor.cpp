@@ -133,8 +133,10 @@ int ApiExtractor::exec()
 
     QLatin1String ppFileName(".preprocessed.tmp");
 
-    if (!TypeDatabase::instance()->parseFile(m_typeSystemFileName))
+    if (!TypeDatabase::instance()->parseFile(m_typeSystemFileName)) {
         std::cerr << "Cannot parse file: " << qPrintable(m_typeSystemFileName);
+        return 1;
+    }
 
     if (!preprocess(m_globalHeaderFileName, ppFileName, m_args.value("include-paths"))) {
         std::cerr << "Preprocessor failed on file: " << qPrintable(m_globalHeaderFileName);
