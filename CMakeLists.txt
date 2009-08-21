@@ -58,6 +58,9 @@ parser/rpp/pp-main.cpp
 parser/rpp/preprocessor.cpp
 )
 
+set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
+set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
+
 qt4_add_resources(apiextractor_RCCS_SRC generator.qrc)
 
 set(apiextractor_MOC_HEADERS
@@ -121,8 +124,8 @@ install(FILES ${root_HEADERS} DESTINATION include/apiextractor)
 #         FILES_MATCHING PATTERN "*.h"
 #         PATTERN ".svn" EXCLUDE
 #         )
-install(TARGETS apiextractor LIBRARY DESTINATION lib)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/apiextractor.pc DESTINATION lib/pkgconfig)
+install(TARGETS apiextractor LIBRARY DESTINATION ${LIB_INSTALL_DIR})
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/apiextractor.pc DESTINATION ${LIB_INSTALL_DIR}/pkgconfig)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FindApiExtractor.cmake
         DESTINATION share/cmake-2.6/Modules)
 
