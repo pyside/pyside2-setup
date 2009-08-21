@@ -949,7 +949,7 @@ void CppGenerator::writeBoostDeclaration(QTextStream& s, const AbstractMetaClass
             s << INDENT << "python_cls."
               << strAccess
               << "(\"" << field->name() << "\", &"
-              << field->enclosingClass()->name() << "::" << field->name() << ");" << endl;
+              << field->enclosingClass()->typeEntry()->qualifiedCppName() << "::" << field->name() << ");" << endl;
         }
     }
 
