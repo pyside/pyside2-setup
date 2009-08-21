@@ -39,6 +39,8 @@ extern "C" Q_DECL_EXPORT GeneratorList getGenerators()\
     return GeneratorList() << X;\
 }\
 
+QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor);
+
 /**
  *   Base class for all generators. The default implementations does nothing,
  *   you must subclass this to create your own generators.
@@ -241,6 +243,9 @@ public:
         return QString(m_packageName).remove(0, m_packageName.lastIndexOf('.') + 1);
     }
 
+    /// returns the code snips of a function
+    CodeSnipList getCodeSnips(const AbstractMetaFunction *func);
+
 protected:
     QString m_packageName;
 
@@ -251,6 +256,12 @@ protected:
      *   /return the file name used to write the binding code for the class
      */
     virtual QString fileNameForClass(const AbstractMetaClass* metaClass) const = 0;
+
+    static FunctionModificationList functionModifications(const AbstractMetaFunction *meta_function);
+    AbstractMetaFunctionList filterFunctions(const AbstractMetaClass *cppClass);
+    AbstractMetaFunctionList queryFunctions(const AbstractMetaClass *cpp_class, bool all_function = false);
+    AbstractMetaFunctionList queryGlobalOperators(const AbstractMetaClass *cpp_class);
+    AbstractMetaFunctionList sortContructor(AbstractMetaFunctionList list);
 
     virtual bool doSetup(const QMap<QString, QString>& args) = 0;
 

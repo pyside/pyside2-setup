@@ -29,8 +29,6 @@
 
 class DocParser;
 
-QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor);
-
 /**
 * Abstract generator that contains common methods used in CppGenerator and HppGenerator.
 */
@@ -98,8 +96,6 @@ public:
                         CodeSnip::Position position,
                         TypeSystem::Language language,
                         const AbstractMetaFunction *cpp_function = 0);
-    /// returns the code snips of a function
-    CodeSnipList getCodeSnips(const AbstractMetaFunction *func);
     static bool canCreateWrapperFor(const AbstractMetaClass* cppClass);
     /**
     *   Function witch parse the metafunction information
@@ -135,13 +131,7 @@ protected:
     // verify if the class is copyalbe
     bool isCopyable(const AbstractMetaClass *cpp_class);
 
-    static FunctionModificationList functionModifications(const AbstractMetaFunction *meta_function);
-    AbstractMetaFunctionList queryFunctions(const AbstractMetaClass *cpp_class, bool all_function = false);
     void writeFunctionCall(QTextStream &s, const AbstractMetaFunction *cpp_func, uint options = 0);
-
-    AbstractMetaFunctionList filterFunctions(const AbstractMetaClass *cpp_class);
-    AbstractMetaFunctionList queryGlobalOperators(const AbstractMetaClass *cpp_class);
-    AbstractMetaFunctionList sortContructor(AbstractMetaFunctionList list);
 };
 
 
