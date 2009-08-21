@@ -1,9 +1,13 @@
-project(boostpythongenerator)
+project(generatorrunner)
 
 cmake_minimum_required(VERSION 2.6)
 
 find_package(Qt4 4.5.0 REQUIRED)
 find_package(ApiExtractor REQUIRED)
+
+set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
+set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
+
 
 # lib generator version
 set(generator_VERSION "0.1")
@@ -14,23 +18,20 @@ set(boostpythongenerator_VERSION 0.2)
 configure_file(boostpythongeneratorversion.h.in ${CMAKE_CURRENT_BINARY_DIR}/boostpythongeneratorversion.h @ONLY)
 set(CMAKE_BUILD_TYPE Debug)
 
-set(boostpythongenerator_SRC
-main.cpp
-)
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
                     ${APIEXTRACTOR_INCLUDE_DIR}
                     ${APIEXTRACTOR_INCLUDE_DIR}/..
+                    ${QT_INCLUDE_DIR}
                     ${QT_QTCORE_INCLUDE_DIR})
 
-add_library(generator SHARED generator.cpp)
-set_target_properties(generator PROPERTIES SOVERSION ${generator_VERSION})
-target_link_libraries(generator ${QT_QTCORE_LIBRARY} ${APIEXTRACTOR_LIBRARY})
+add_library(genrunner SHARED generator.cpp)
+set_target_properties(genrunner PROPERTIES SOVERSION ${generator_VERSION})
+target_link_libraries(genrunner ${QT_QTCORE_LIBRARY} ${APIEXTRACTOR_LIBRARY})
 
-add_executable(boostpythongenerator ${boostpythongenerator_SRC})
-target_link_libraries(boostpythongenerator
-                      generator
+add_executable(generatorrunner main.cpp)
+target_link_libraries(generatorrunner
+                      genrunner
                       ${APIEXTRACTOR_LIBRARY}
                       ${QT_QTCORE_LIBRARY})
 
@@ -49,8 +50,8 @@ add_custom_target(dist
         | bzip2 > ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
-install(TARGETS boostpythongenerator DESTINATION bin)
-install(TARGETS generator DESTINATION lib)
+install(TARGETS genrunner DESTINATION ${LIB_INSTALL_DIR})
+install(TARGETS generatorrunner DESTINATION bin)
 install(FILES generator.h DESTINATION include)
 
 enable_testing()
