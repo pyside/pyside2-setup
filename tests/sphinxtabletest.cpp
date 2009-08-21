@@ -22,7 +22,7 @@
 */
 
 #include "sphinxtabletest.h"
-#include "docgenerator.h"
+#include "qtdocgenerator.h"
 #include <QtTest/QTest>
 #include <QDebug>
 
@@ -33,7 +33,7 @@ QString SphinxTableTest::transformXml(const char* xml)
 
 void SphinxTableTest::setUp()
 {
-    m_generator = new DocGenerator;
+    m_generator = new QtDocGenerator;
 }
 
 void SphinxTableTest::tearDown()

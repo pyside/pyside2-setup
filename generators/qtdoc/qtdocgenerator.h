@@ -180,6 +180,15 @@ protected:
     QString fileNameForClass(const AbstractMetaClass* cppClass) const;
     void generateClass(QTextStream& s, const AbstractMetaClass* cppClass);
     void finishGeneration();
+
+    void writeFunctionArguments(QTextStream&, const AbstractMetaFunction*, uint) const {}
+    void writeArgumentNames(QTextStream&, const AbstractMetaFunction*, uint) const {}
+    QString subDirectoryForClass(const AbstractMetaClass* clazz) const
+    {
+        Q_ASSERT(false);
+        return QString();
+    }
+
 private:
     void writeEnums(QTextStream& s, const AbstractMetaClass* cppClass);
 

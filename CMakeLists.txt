@@ -55,6 +55,6 @@ install(TARGETS generatorrunner DESTINATION bin)
 install(FILES generator.h DESTINATION include)
 
 enable_testing()
-#add_subdirectory(libbindgen)
-# add_subdirectory(tests)
+
 add_subdirectory(generators)
+add_subdirectory(tests)

@@ -91,48 +91,24 @@ public:
 
     bool setup(const ApiExtractor& extractor, const QMap<QString, QString> args);
 
-    virtual QMap<QString, QString> options() const
-    {
-        return QMap<QString, QString>();
-    }
+    virtual QMap<QString, QString> options() const;
 
     /// Returns the classes used to generate the binding code.
-    AbstractMetaClassList classes() const
-    {
-        return m_classes;
-    }
+    AbstractMetaClassList classes() const;
 
-    AbstractMetaFunctionList globalFunctions() const
-    {
-        return m_globalFunctions;
-    }
+    AbstractMetaFunctionList globalFunctions() const;
 
-    AbstractMetaEnumList globalEnums() const
-    {
-        return m_globalEnums;
-    }
+    AbstractMetaEnumList globalEnums() const;
 
-    QList<const PrimitiveTypeEntry*> primitiveTypes() const
-    {
-        return m_primitiveTypes;
-    }
+    QList<const PrimitiveTypeEntry*> primitiveTypes() const;
 
-    QList<const ContainerTypeEntry*> containerTypes() const
-    {
-        return m_containerTypes;
-    }
+    QList<const ContainerTypeEntry*> containerTypes() const;
 
     /// Returns the output directory
-    QString outputDirectory() const
-    {
-        return m_outDir;
-    }
+    QString outputDirectory() const;
 
     /// Set the output directory
-    void setOutputDirectory(const QString &outDir)
-    {
-        m_outDir = outDir;
-    }
+    void setOutputDirectory(const QString &outDir);
 
     /**
     *   Start the code generation, be sure to call setClasses before callign this method.
@@ -169,9 +145,9 @@ public:
     *   \param option some extra options
     *   \return the metatype translated to binding source format
     */
-    virtual QString translateType(const AbstractMetaType *metatype,
-                                  const AbstractMetaClass *context,
-                                  int option = NoOption) const = 0;
+    QString translateType(const AbstractMetaType *metatype,
+                          const AbstractMetaClass *context,
+                          int option = NoOption) const;
 
     /**
     *   Function used to write the fucntion arguments on the class buffer.

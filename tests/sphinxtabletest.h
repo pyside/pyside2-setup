@@ -26,7 +26,7 @@
 
 #include <QObject>
 
-class DocGenerator;
+class QtDocGenerator;
 class SphinxTableTest : public QObject {
     Q_OBJECT
 
@@ -40,7 +40,7 @@ private slots:
     void testComplexTable();
     void testRowSpan2();
 private:
-    DocGenerator* m_generator;
+    QtDocGenerator* m_generator;
 
     QString transformXml(const char* xml);
 };

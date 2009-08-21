@@ -60,6 +60,48 @@ bool Generator::setup(const ApiExtractor& extractor, const QMap< QString, QStrin
     return doSetup(args);
 }
 
+QMap< QString, QString > Generator::options() const
+{
+    return QMap<QString, QString>();
+}
+
+AbstractMetaClassList Generator::classes() const
+{
+    return m_classes;
+}
+
+AbstractMetaFunctionList Generator::globalFunctions() const
+{
+    return m_globalFunctions;
+}
+
+AbstractMetaEnumList Generator::globalEnums() const
+{
+    return m_globalEnums;
+}
+
+QList<const PrimitiveTypeEntry*> Generator::primitiveTypes() const
+{
+    return m_primitiveTypes;
+}
+
+QList<const ContainerTypeEntry*> Generator::containerTypes() const
+{
+    return m_containerTypes;
+}
+
+/// Returns the output directory
+QString Generator::outputDirectory() const
+{
+    return m_outDir;
+}
+
+/// Set the output directory
+void Generator::setOutputDirectory(const QString &outDir)
+{
+    m_outDir = outDir;
+}
+
 void Generator::generate()
 {
     foreach (AbstractMetaClass *cls, m_classes) {
@@ -345,4 +387,53 @@ CodeSnipList Generator::getCodeSnips(const AbstractMetaFunction *func)
     }
 
     return result;
+}
+
+QString Generator::translateType(const AbstractMetaType *cType,
+                                 const AbstractMetaClass *context,
+                                 int option) const
+{
+    QString s;
+
+    if (context && cType &&
+        context->typeEntry()->isGenericClass() &&
+        cType->originalTemplateType()) {
+            qDebug() << "set original templateType" << cType->name();
+            cType = cType->originalTemplateType();
+    }
+
+    if (!cType) {
+        s = "void";
+    } else if (cType->isArray()) {
+        s = translateType(cType->arrayElementType(), context) + "[]";
+    } else if (cType->isEnum() || cType->isFlags()) {
+        if (option & Generator::EnumAsInts)
+            s = "int";
+        else
+            s = cType->cppSignature();
+#if 0
+    } else if (c_type->isContainer()) {
+        qDebug() << "is container" << c_type->cppSignature();
+        s = c_type->name();
+        if (!(option & SkipTemplateParameters)) {
+            s += " < ";
+            QList<AbstractMetaType *> args = c_type->instantiations();
+            for (int i = 0; i < args.size(); ++i) {
+                if (i)
+                    s += ", ";
+                qDebug() << "container type: " << args.at(i)->cppSignature() << " / " << args.at(i)->instantiations().count();
+                s += translateType(args.at(i), context, option);
+            }
+            s += " > ";
+        }
+#endif
+    } else {
+        s = cType->cppSignature();
+        if (cType->isConstant() && (option & Generator::ExcludeConst))
+            s.replace("const", "");
+        if (cType->isReference() && (option & Generator::ExcludeReference))
+            s.replace("&", "");
+    }
+
+    return s;
 }

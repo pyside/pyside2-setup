@@ -36,55 +36,6 @@
 static Indentor INDENT;
 static void dump_function(AbstractMetaFunctionList lst);
 
-QString BoostPythonGenerator::translateType(const AbstractMetaType *cType,
-                                            const AbstractMetaClass *context,
-                                            int option) const
-{
-    QString s;
-
-    if (context && cType &&
-        context->typeEntry()->isGenericClass() &&
-        cType->originalTemplateType()) {
-            qDebug() << "set original templateType" << cType->name();
-            cType = cType->originalTemplateType();
-    }
-
-    if (!cType) {
-        s = "void";
-    } else if (cType->isArray()) {
-        s = translateType(cType->arrayElementType(), context) + "[]";
-    } else if (cType->isEnum() || cType->isFlags()) {
-        if (option & Generator::EnumAsInts)
-            s = "int";
-        else
-            s = cType->cppSignature();
-#if 0
-    } else if (c_type->isContainer()) {
-        qDebug() << "is container" << c_type->cppSignature();
-        s = c_type->name();
-        if (!(option & SkipTemplateParameters)) {
-            s += " < ";
-            QList<AbstractMetaType *> args = c_type->instantiations();
-            for (int i = 0; i < args.size(); ++i) {
-                if (i)
-                    s += ", ";
-                qDebug() << "container type: " << args.at(i)->cppSignature() << " / " << args.at(i)->instantiations().count();
-                s += translateType(args.at(i), context, option);
-            }
-            s += " > ";
-        }
-#endif
-    } else {
-        s = cType->cppSignature();
-        if (cType->isConstant() && (option & Generator::ExcludeConst))
-            s.replace("const", "");
-        if (cType->isReference() && (option & Generator::ExcludeReference))
-            s.replace("&", "");
-    }
-
-    return s;
-}
-
 QString BoostPythonGenerator::getWrapperName(const AbstractMetaClass* clazz)
 {
     QString result = clazz->name().toLower();
