@@ -12,11 +12,8 @@ configure_file(boostpythongeneratorversion.h.in ${CMAKE_CURRENT_BINARY_DIR}/boos
 set(CMAKE_BUILD_TYPE Debug)
 
 set(boostpythongenerator_SRC
-boostpythongenerator.cpp
-convertergenerator.cpp
-docgenerator.cpp
-hppgenerator.cpp
-cppgenerator.cpp
+main.cpp
+generator.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
@@ -26,13 +23,11 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${QT_INCLUDE_DIR}
                     ${QT_QTCORE_INCLUDE_DIR})
 
-add_library(libboostpythongenerator STATIC ${boostpythongenerator_SRC})
-target_link_libraries(libboostpythongenerator
+add_executable(boostpythongenerator ${boostpythongenerator_SRC})
+target_link_libraries(boostpythongenerator
                       ${APIEXTRACTOR_LIBRARY}
                       ${QT_QTCORE_LIBRARY}
                       ${QT_QTXML_LIBRARY})
-add_executable(boostpythongenerator main.cpp)
-target_link_libraries(boostpythongenerator libboostpythongenerator)
 
 # uninstall target
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
@@ -58,5 +53,5 @@ install(TARGETS boostpythongenerator DESTINATION bin)
 
 enable_testing()
 #add_subdirectory(libbindgen)
-add_subdirectory(tests)
+# add_subdirectory(tests)
 
