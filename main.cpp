@@ -75,11 +75,6 @@ QMap<QString, QString> getCommandLineArgs(int argc, char** argv)
 
 void printUsage(const GeneratorList& generators)
 {
-    #if defined(Q_OS_WIN32)
-    #define PATHSPLITTER ";"
-    #else
-    #define PATHSPLITTER ":"
-    #endif
     QTextStream s(stdout);
     s << "Usage:\n  "
     << "generator [options] header-file typesystem-file\n\n"
@@ -90,8 +85,8 @@ void printUsage(const GeneratorList& generators)
     generalOptions.insert("help", "Display this help and exit");
     generalOptions.insert("no-suppress-warnings", "Show all warnings");
     generalOptions.insert("output-directory=[dir]", "The directory where the generated files will be written");
-    generalOptions.insert("include-paths=<path>[" PATHSPLITTER "<path>" PATHSPLITTER "...]", "Include paths used by the C++ parser");
-    generalOptions.insert("typesystem-paths=<path>[" PATHSPLITTER "<path>" PATHSPLITTER "...]", "Paths used when searching for typesystems");
+    generalOptions.insert("include-paths=<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]", "Include paths used by the C++ parser");
+    generalOptions.insert("typesystem-paths=<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]", "Paths used when searching for typesystems");
     generalOptions.insert("documentation-only", "Do not generates any code, just the documentation");
     generalOptions.insert("license-file=[licensefile]", "File used for copyright headers of generated files");
     generalOptions.insert("version", "Output version information and exit");
