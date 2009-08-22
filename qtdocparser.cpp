@@ -53,7 +53,8 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     if (!metaClass)
         return;
 
-    QString sourceFile = documentationDataDirectory() + '/' + metaClass->name().toLower() + ".xml";
+    QString filename = metaClass->qualifiedCppName().toLower().replace("::", "-");
+    QString sourceFile = documentationDataDirectory() + '/' + filename + ".xml";
     if (metaClass->enclosingClass())
         sourceFile.replace("::", "-");
 
