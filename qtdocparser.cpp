@@ -69,11 +69,10 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     xquery.setFocus(QUrl(sourceFile));
 
     QString className = metaClass->name();
-    QString nameType = metaClass->enclosingClass() ? "fullname" : "name";
 
     // Class/Namespace documentation
     QString type = metaClass->isNamespace() ? QLatin1String("namespace") : QLatin1String("class");
-    QString query = "/WebXML/document/" + type + "[@" + nameType + "=\"" + className + "\"]/description";
+    QString query = "/WebXML/document/" + type + "[@" + "name" + "=\"" + className + "\"]/description";
 
     DocModificationList signedModifs, classModifs;
     foreach (DocModification docModif, metaClass->typeEntry()->docModifications()) {
@@ -93,7 +92,7 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
         if (!func || func->isPrivate())
             continue;
 
-        QString query = "/WebXML/document/" + type + "[@" + nameType + "=\"" + className + "\"]";
+        QString query = "/WebXML/document/" + type + "[@" + "name" + "=\"" + className + "\"]";
         // properties
         if (func->isPropertyReader() || func->isPropertyWriter() || func->isPropertyResetter()) {
             query += "/property[@name=\"" + func->propertySpec()->name() + "\"]";
@@ -146,7 +145,7 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     // Enums
     AbstractMetaEnumList enums = metaClass->enums();
     foreach (AbstractMetaEnum *meta_enum, enums) {
-        QString query = "/WebXML/document/" + type + "[@" + nameType + "=\""
+        QString query = "/WebXML/document/" + type + "[@" + "name" + "=\""
                         + className + "\"]/enum[@name=\""
                         + meta_enum->name() + "\"]/description";
         doc.setValue(getDocumentation(xquery, query, DocModificationList()));
