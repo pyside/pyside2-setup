@@ -10,7 +10,9 @@ pkg_check_modules(LIBXSLT REQUIRED libxslt>=1.1.19)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -DAPIEXTRACTOR_ENABLE_DUPLICATE_ENUM_VALUES")
 
-set(apiextractor_VERSION 0.2)
+set(apiextractor_MAJOR_VERSION 0)
+set(apiextractor_MINOR_VERSION 2)
+set(apiextractor_VERSION "${apiextractor_MAJOR_VERSION}.${apiextractor_MINOR_VERSION}")
 configure_file(apiextractorversion.h.in ${CMAKE_CURRENT_BINARY_DIR}/apiextractorversion.h @ONLY)
 set(QT_USE_QTCORE 1)
 set(QT_USE_QTXML 1)
@@ -81,7 +83,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 
 add_library(apiextractor SHARED ${apiextractor_SRC} ${apiextractor_MOC_SRC} ${apiextractor_RCCS_SRC})
 target_link_libraries(apiextractor ${Boost_GRAPH_LIBRARY} ${LIBXSLT_LIBRARIES} ${LIBXML2_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTXMLPATTERNS_LIBRARY} ${QT_QTXML_LIBRARY})
-set_target_properties(apiextractor PROPERTIES SOVERSION ${apiextractor_VERSION})
+set_target_properties(apiextractor PROPERTIES VERSION ${apiextractor_VERSION} SOVERSION ${apiextractor_MAJOR_VERSION})
 
 # create pkg-config file
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/apiextractor.pc.in
@@ -91,12 +93,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/FindApiExtractor.cmake.in ${CMAKE_CUR
 # uninstall target
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake" "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
 add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
-
-# "make dist", in fact "make package_source"
-#set(CPACK_SOURCE_PACKAGE_FILE_NAME "libapiextractor-${apiextractor_VERSION}")
-#set(CPACK_SOURCE_GENERATOR TGZ)
-#set(CPACK_SOURCE_IGNORE_FILES "~$" ".svn" "debian/" "build/" ".swp$" "*.kdev4")
-#include(CPack)
 
 set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${apiextractor_VERSION})
 add_custom_target(dist
@@ -119,11 +115,6 @@ enable_testing()
 add_subdirectory(tests)
 
 install(FILES ${root_HEADERS} DESTINATION include/apiextractor)
-# TODO We do not need to expose these internal headers!
-# install(DIRECTORY parser DESTINATION include/apiextractor
-#         FILES_MATCHING PATTERN "*.h"
-#         PATTERN ".svn" EXCLUDE
-#         )
 install(TARGETS apiextractor LIBRARY DESTINATION ${LIB_INSTALL_DIR})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/apiextractor.pc DESTINATION ${LIB_INSTALL_DIR}/pkgconfig)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FindApiExtractor.cmake
