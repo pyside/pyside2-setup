@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     // Try to load a generator
     QString generatorSet = args.value("generatorSet");
     if (!generatorSet.isEmpty()) {
-        QLibrary plugin(generatorSet);
+        QLibrary plugin(generatorSet+"_generator");
         getGeneratorsFunc getGenerators = reinterpret_cast<getGeneratorsFunc>(plugin.resolve("getGenerators"));
         if (getGenerators)
             generators = getGenerators();
