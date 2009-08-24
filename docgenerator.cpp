@@ -762,7 +762,7 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
 }
 
 static QString getClassName(const AbstractMetaClass *cppClass) {
-    return cppClass->name().replace("::", ".");
+    return QString(cppClass->typeEntry()->qualifiedCppName()).replace("::", ".");
 }
 
 static QString getFuncName(const AbstractMetaFunction *cppFunc) {
@@ -942,9 +942,18 @@ QString DocGenerator::parseFunctionDeclaration(const QString &doc, const Abstrac
     QString methName = data.mid(0, data.indexOf("("));
     QString methArgs = data.mid(data.indexOf("("));
 
-    data = QString("def :meth:`%1<%2.%3>` %4")
+    QString scope = cppClass->name();
+    QStringList splitedMethName = methName.split(".");
+
+    if (splitedMethName.first() == scope) {
+        splitedMethName.removeFirst();
+        methName = splitedMethName.join(".");
+    }
+    scope.append(".");
+
+    data = QString("def :meth:`%1<%2%3>` %4")
         .arg(methName)
-        .arg(cppClass->name())
+        .arg(scope)
         .arg(methName)
         .arg(methArgs);
 
