@@ -32,15 +32,13 @@
 class CppGenerator : public BoostPythonGenerator
 {
 public:
-    void setDisableNamedArgs(bool disable)
-    {
-        m_disableNamedArgs = disable;
-    }
-
     const char* name() const
     {
         return "CppGenerator";
     }
+
+    QMap<QString, QString> options() const;
+    bool prepareGeneration(const QMap<QString, QString>& args);
 
 protected:
     QString fileNameForClass(const AbstractMetaClass *cppClass) const;

@@ -1429,3 +1429,15 @@ void CppGenerator::writeGlobalFunctions()
     s << "}\n";
 }
 
+QMap<QString, QString> CppGenerator::options() const
+{
+    QMap<QString, QString> res;
+    res.insert("disable-named-arg", "Disable Python names arguments.");
+    return res;
+}
+
+bool CppGenerator::prepareGeneration(const QMap<QString, QString>& args)
+{
+    BoostPythonGenerator::prepareGeneration(args);
+    m_disableNamedArgs = args.contains("disable-named-arg");
+}
