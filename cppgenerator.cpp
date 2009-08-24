@@ -624,11 +624,13 @@ void CppGenerator::writeModifiedConstructorImpl ( QTextStream& s, const Abstract
 
 void CppGenerator::writeConstructorImpl(QTextStream& s, const AbstractMetaFunction* func)
 {
-    s << functionSignature(func, getWrapperName(func->ownerClass()) + "::", "",
-                           (Option)(OriginalTypeDescription | SkipDefaultValues));
-    s << " : ";
+    QString wrapperName = getWrapperName(func->ownerClass());
+    s << wrapperName << "::" << wrapperName << "(PyObject *py_self" << (func->arguments().size() ? ", " : "");
+    writeFunctionArguments(s, func, OriginalTypeDescription | SkipDefaultValues);
+    s << ")" << endl;
+    s << INDENT << " : ";
     writeFunctionCall(s, func);
-    s << " {" << endl;
+    s << ", wrapper(py_self)" << endl << "{" << endl;
     writeCodeSnips(s, getCodeSnips(func), CodeSnip::Beginning, TypeSystem::All, func);
     writeCodeSnips(s, getCodeSnips(func), CodeSnip::End, TypeSystem::All, func);
     s << '}' << endl << endl;
@@ -644,7 +646,7 @@ void CppGenerator::writeVirtualMethodImplHead(QTextStream& s, const AbstractMeta
                        CodeSnip::Beginning, TypeSystem::NativeCode, func);
     }
 
-    s << INDENT << "python::object method = PySide::detail::get_override(this, \"" << func->implementingClass()->name();
+    s << INDENT << "python::object method = get_override(\"" << func->implementingClass()->name();
     if (func->implementingClass()->typeEntry()->isObject() || func->implementingClass()->typeEntry()->isQObject())
         s << '*';
 
@@ -682,9 +684,7 @@ void CppGenerator::writeVirtualMethodImplHead(QTextStream& s, const AbstractMeta
                     (func->type()->isObject() || func->type()->isQObject())) {
 
                     s << INDENT << "PySide::qptr<" << QString(typeName).replace("*", "") << " > __ptr(__result.ptr());" << endl
-                      << INDENT << "if (__ptr.is_wrapper()) {" << endl
-                      << INDENT << INDENT << "python::incref(__result.ptr());" << endl
-                      << INDENT << "}" << endl
+                      << INDENT << "python::incref(__result.ptr());" << endl
                       << INDENT << "__ptr.release_ownership();" << endl;
                 }
 
