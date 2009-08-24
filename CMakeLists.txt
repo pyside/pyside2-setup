@@ -10,7 +10,9 @@ set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The s
 
 
 # lib generator version
-set(generator_VERSION "0.1")
+set(generator_MAJOR_VERSION "0")
+set(generator_MINOR_VERSION "1")
+set(generator_VERSION "${generator_MAJOR_VERSION}.${generator_MINOR_VERSION}")
 
 add_definitions(${QT_DEFINITIONS})
 
@@ -26,7 +28,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${QT_QTCORE_INCLUDE_DIR})
 
 add_library(genrunner SHARED generator.cpp)
-set_target_properties(genrunner PROPERTIES SOVERSION ${generator_VERSION})
+set_target_properties(genrunner PROPERTIES SOVERSION ${generator_VERSION} VERSION ${generator_MAJOR_VERSION})
 target_link_libraries(genrunner ${QT_QTCORE_LIBRARY} ${APIEXTRACTOR_LIBRARY})
 
 add_executable(generatorrunner main.cpp)
