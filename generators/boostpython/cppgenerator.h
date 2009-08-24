@@ -38,7 +38,7 @@ public:
     }
 
     QMap<QString, QString> options() const;
-    bool prepareGeneration(const QMap<QString, QString>& args);
+    bool doSetup(const QMap<QString, QString>& args);
 
 protected:
     QString fileNameForClass(const AbstractMetaClass *cppClass) const;

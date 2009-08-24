@@ -1432,8 +1432,8 @@ QMap<QString, QString> CppGenerator::options() const
     return res;
 }
 
-bool CppGenerator::prepareGeneration(const QMap<QString, QString>& args)
+bool CppGenerator::doSetup(const QMap<QString, QString>& args )
 {
-    BoostPythonGenerator::prepareGeneration(args);
     m_disableNamedArgs = args.contains("disable-named-arg");
+    return BoostPythonGenerator::doSetup(args);
 }
