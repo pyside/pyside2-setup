@@ -484,12 +484,18 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
         if (l_type == "function" && !m_context.isEmpty()) {
             l_linktag = " :meth:`";
             QStringList rawlinklist = l_linkref.split(".");
-            if (rawlinklist.size() == 1 || rawlinklist[0] == m_context)
-                l_linkref.prepend("~" + m_context + '.');
+            if (rawlinklist.size() == 1 || rawlinklist.first() == m_context)
+                l_linkref.prepend('~' + m_context + '.');
         } else if (l_type == "function" && m_context.isEmpty()) {
             l_linktag = " :func:`";
         } else if (l_type == "class") {
             l_linktag = " :class:`";
+            QStringList rawlinklist = l_linkref.split(".");
+            QStringList splitedContext = m_context.split(".");
+            if (rawlinklist.size() == 1 || rawlinklist.first() == splitedContext.last()) {
+                splitedContext.removeLast();
+                l_linkref.prepend('~' + splitedContext.join(".") + '.');
+            }
         } else if (l_type == "enum") {
             l_linktag = " :attr:`";
         } else if (l_type == "page" && l_linkref == m_generator->moduleName()) {
@@ -1221,6 +1227,8 @@ void DocGenerator::writeFunctionSignature(QTextStream& s, const AbstractMetaClas
 {
     if (!func->isConstructor())
         s << getClassName(cppClass) << '.';
+    else if (func->implementingClass() && func->implementingClass()->enclosingClass())
+        s << func->implementingClass()->enclosingClass()->name() << '.';
     s << getFuncName(func) << "(" << parseArgDocStyle(cppClass, func) << ")";
 }
 
