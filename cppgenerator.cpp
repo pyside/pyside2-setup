@@ -243,19 +243,29 @@ QString CppGenerator::writeFunctionCast(QTextStream &s,
 
 QString CppGenerator::verifyDefaultReturnPolicy(const AbstractMetaFunction *cppFunction, const QString& callPolicy)
 {
+    //If return type replaced, the return policy need be set manually.
+    if (!cppFunction->typeReplaced(0).isEmpty())
+        return QString();
+
     AbstractMetaType *type = cppFunction->type();
     QString returnPolicy;
 
-    if (type && type->isReference() && type->isConstant()) {
-        returnPolicy = "python::return_value_policy<python::copy_const_reference";
+    if (type && type->isConstant()) {
+        returnPolicy = "python::return_value_policy<";
+
+        if (type->isQObject() || type->isObject() || type->isNativePointer()) {
+            returnPolicy += "PySide::return_const_ptr_object";
+        } else if (type->isReference()) {
+            returnPolicy += "python::copy_const_reference";
+        } else {
+            returnPolicy += "python::return_by_value";
+        }
         if (!callPolicy.isEmpty())
             returnPolicy += ", " + callPolicy;
         returnPolicy += " >()";
     } else if (type && (type->isReference() || type->isQObject() || type->isObject())) {
-        bool cppOwnership = type->isConstant();
-        if (cppFunction->isStatic() || cppOwnership) {
-            returnPolicy = "python::return_value_policy<PySide::return_ptr_object< "
-                            + (cppOwnership ? QString("true") : QString("false")) + "> >()";
+        if (cppFunction->isStatic()) {
+            returnPolicy = "python::return_value_policy<PySide::return_ptr_object<false> >()";
         } else if (type->isQObject() || type->isObject()) {
             returnPolicy = QString("PySide::return_object<1, 0, %1, %2 %3 %4 >()")
                             .arg(getArgumentType(cppFunction->ownerClass(), cppFunction, -1))
