@@ -36,16 +36,6 @@ class BoostPythonGenerator : public Generator
 {
 public:
     /**
-    *   Translate metatypes to boost::python format.
-    *   \param boost_type a pointer to metatype
-    *   \param context the current meta class
-    *   \param option some extra options
-    *   \return the metatype translated to boost::python format
-    */
-    virtual QString translateType(const AbstractMetaType *boost_type,
-                                  const AbstractMetaClass *context,
-                                  int option = NoOption) const;
-    /**
     *   Write a function argument in the boost::python format in the text stream \p s.
     *   This function just call \code s << argumentString(); \endcode
     *   \param s text stream used to write the output.
