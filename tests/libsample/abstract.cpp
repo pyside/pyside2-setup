@@ -5,39 +5,39 @@ using namespace std;
 
 Abstract::Abstract(int id) : m_id(id)
 {
-    cout << __PRETTY_FUNCTION__;
-    show();
-    cout << endl;
+    //cout << __PRETTY_FUNCTION__;
+    //show();
+    //cout << endl;
 }
 
 Abstract::~Abstract()
 {
-    cout << __PRETTY_FUNCTION__;
-    show();
-    cout << endl;
+    //cout << __PRETTY_FUNCTION__;
+    //show();
+    //cout << endl;
 }
 
 void
 Abstract::unpureVirtual()
 {
-    cout << __PRETTY_FUNCTION__ << endl;
+    //cout << __PRETTY_FUNCTION__ << endl;
 }
 
 void
 Abstract::callUnpureVirtual()
 {
-    cout << __PRETTY_FUNCTION__ << " --- BEGIN" << endl;
+    //cout << __PRETTY_FUNCTION__ << " --- BEGIN" << endl;
     this->unpureVirtual();
-    cout << __PRETTY_FUNCTION__ << " --- END" << endl;
+    //cout << __PRETTY_FUNCTION__ << " --- END" << endl;
 }
 
 
 void
 Abstract::callPureVirtual()
 {
-    cout << __PRETTY_FUNCTION__ << " --- BEGIN" << endl;
+    //cout << __PRETTY_FUNCTION__ << " --- BEGIN" << endl;
     this->pureVirtual();
-    cout << __PRETTY_FUNCTION__ << " --- END" << endl;
+    //cout << __PRETTY_FUNCTION__ << " --- END" << endl;
 }
 
 void

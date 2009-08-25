@@ -5,9 +5,9 @@ using namespace std;
 
 KinderGarten::~KinderGarten()
 {
-    cout << __PRETTY_FUNCTION__ << " ---- BEGIN" << endl;
+    //cout << __PRETTY_FUNCTION__ << " ---- BEGIN" << endl;
     killChildren();
-    cout << __PRETTY_FUNCTION__ << " ---- END" << endl;
+    //cout << __PRETTY_FUNCTION__ << " ---- END" << endl;
 }
 
 void
@@ -19,10 +19,10 @@ KinderGarten::addChild(Abstract* child)
 void
 KinderGarten::killChildren()
 {
-    cout << __PRETTY_FUNCTION__ << endl;
+    //cout << __PRETTY_FUNCTION__ << endl;
     while (!m_children.empty()) {
-        m_children.back()->show();
-        cout << endl;
+        //m_children.back()->show();
+        //cout << endl;
         delete m_children.back();
         m_children.pop_back();
     }
@@ -31,7 +31,7 @@ KinderGarten::killChildren()
 void
 KinderGarten::killChild(Abstract* child)
 {
-    cout << __PRETTY_FUNCTION__ << endl;
+    //cout << __PRETTY_FUNCTION__ << endl;
     if (child) {
         m_children.remove(child);
 //         delete child;
@@ -62,3 +62,4 @@ KinderGarten::show()
     }
     cout << "]";
 }
+

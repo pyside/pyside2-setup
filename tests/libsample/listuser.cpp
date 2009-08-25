@@ -8,14 +8,14 @@ using namespace std;
 std::list<int>
 ListUser::callCreateList()
 {
-    cout << __PRETTY_FUNCTION__ << endl;
+    //cout << __PRETTY_FUNCTION__ << endl;
     return createList();
 }
 
 std::list<int>
 ListUser::createList()
 {
-    cout << __PRETTY_FUNCTION__ << endl;
+    //cout << __PRETTY_FUNCTION__ << endl;
     std::list<int> retval;
     for (int i = 0; i < 4; i++)
         retval.push_front(rand());
@@ -25,7 +25,7 @@ ListUser::createList()
 std::list<Complex>
 ListUser::createComplexList(Complex cpx0, Complex cpx1)
 {
-    cout << __PRETTY_FUNCTION__ << endl;
+    //cout << __PRETTY_FUNCTION__ << endl;
     std::list<Complex> retval;
     retval.push_back(cpx0);
     retval.push_back(cpx1);
@@ -43,5 +43,4 @@ ListUser::sumList(std::list<double> vallist)
 {
     return std::accumulate(vallist.begin(), vallist.end(), 0.0);
 }
-
 
