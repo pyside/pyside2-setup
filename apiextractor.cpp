@@ -207,7 +207,7 @@ static bool preprocess(const QString& sourceFile,
 
     QDir::setCurrent(currentDir);
 
-    if (!targetFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    if (!targetFile.open(QIODevice::ReadWrite | QIODevice::Text)) {
         std::cerr << "Failed to write preprocessed file: " << qPrintable(targetFile.fileName()) << std::endl;
         return false;
     }
