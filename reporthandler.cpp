@@ -83,7 +83,7 @@ void ReportHandler::progress(const QString& str, ...)
 
 void ReportHandler::printProgress()
 {
-    printf(m_progressBuffer);
+    printf("%s", m_progressBuffer);
     fflush(stdout);
 }
 
