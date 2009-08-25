@@ -21,7 +21,7 @@
  *
  */
 
-#include "docgenerator.h"
+#include "qtdocgenerator.h"
 #include <reporthandler.h>
 #include <qtdocparser.h>
 #include <algorithm>
@@ -65,7 +65,7 @@ QString escape(const QStringRef& strref)
 
 }
 
-QtXmlToSphinx::QtXmlToSphinx(DocGenerator* generator, const QString& doc, const QString& context)
+QtXmlToSphinx::QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, const QString& context)
         : m_context(context), m_generator(generator), m_insideBold(false), m_insideItalic(false)
 {
     m_handlerMap.insert("heading", &QtXmlToSphinx::handleHeadingTag);
@@ -843,12 +843,12 @@ static QString getFuncName(const AbstractMetaFunction *cppFunc) {
     return result.replace("::", ".");
 }
 
-QString DocGenerator::fileNameForClass(const AbstractMetaClass *cppClass) const
+QString QtDocGenerator::fileNameForClass(const AbstractMetaClass *cppClass) const
 {
     return QString("%1.rst").arg(getClassName(cppClass));
 }
 
-void DocGenerator::writeFormatedText(QTextStream& s, const Documentation& doc, const AbstractMetaClass* metaClass)
+void QtDocGenerator::writeFormatedText(QTextStream& s, const Documentation& doc, const AbstractMetaClass* metaClass)
 {
     QString metaClassName;
 
@@ -865,7 +865,7 @@ void DocGenerator::writeFormatedText(QTextStream& s, const Documentation& doc, c
     s << endl;
 }
 
-void DocGenerator::writeFunctionBrief(QTextStream &s,
+void QtDocGenerator::writeFunctionBrief(QTextStream &s,
                                       const AbstractMetaClass *cppClass,
                                       const AbstractMetaFunction *cppFunction)
 {
@@ -878,7 +878,7 @@ void DocGenerator::writeFunctionBrief(QTextStream &s,
       << " (" << parseArgDocStyle(cppClass, cppFunction) << "):";
 }
 
-void DocGenerator::generateClass(QTextStream &s, const AbstractMetaClass *cppClass)
+void QtDocGenerator::generateClass(QTextStream &s, const AbstractMetaClass *cppClass)
 {
     QString doc;
     QTextStream  doc_s(&doc);
@@ -897,35 +897,6 @@ void DocGenerator::generateClass(QTextStream &s, const AbstractMetaClass *cppCla
     //Function list
     AbstractMetaFunctionList functionList = filterFunctions(cppClass);
     qSort(functionList.begin(), functionList.end(), functionSort);
-
-#if 0
-    if (functionList.size() > 0)
-    {
-        QtXmlToSphinx::Table functionTable;
-        QtXmlToSphinx::TableRow row;
-
-        s << "Functions\n"
-             "---------\n\n";
-
-
-        foreach (AbstractMetaFunction *func, functionList) {
-            if ((func->isConstructor() || func->isModifiedRemoved()) ||
-                (func->declaringClass() != cppClass))
-                continue;
-
-            QString rowString;
-            QTextStream rowStream(&rowString);
-
-            writeFunctionBrief(rowStream, cppClass, func);
-            row << rowString;
-            functionTable << row;
-            row.clear();
-        }
-        functionTable.normalize();
-        s << functionTable;
-    }
-
-#endif
 
     doc_s << "Detailed Description\n"
              "--------------------\n\n";
@@ -961,7 +932,7 @@ void DocGenerator::generateClass(QTextStream &s, const AbstractMetaClass *cppCla
     s << doc;
 }
 
-QString DocGenerator::parseFunctionDeclaration(const QString &doc, const AbstractMetaClass *cppClass)
+QString QtDocGenerator::parseFunctionDeclaration(const QString &doc, const AbstractMetaClass *cppClass)
 {
     //.. method:: QObject.childEvent(arg__1)
     //def :meth:`removeEventFilter<QObject.removeEventFilter>` (arg__1):
@@ -1001,7 +972,7 @@ QString DocGenerator::parseFunctionDeclaration(const QString &doc, const Abstrac
 }
 
 
-void DocGenerator::writeFunctionList(QTextStream &s, const QString &content, const AbstractMetaClass *cppClass)
+void QtDocGenerator::writeFunctionList(QTextStream &s, const QString &content, const AbstractMetaClass *cppClass)
 {
     QStringList functionList;
     QStringList staticFunctionList;
@@ -1058,7 +1029,7 @@ void DocGenerator::writeFunctionList(QTextStream &s, const QString &content, con
     }
 }
 
-void DocGenerator::writeEnums(QTextStream& s, const AbstractMetaClass* cppClass)
+void QtDocGenerator::writeEnums(QTextStream& s, const AbstractMetaClass* cppClass)
 {
     static const QString section_title(".. attribute:: ");
 
@@ -1068,7 +1039,7 @@ void DocGenerator::writeEnums(QTextStream& s, const AbstractMetaClass* cppClass)
     }
 }
 
-void DocGenerator::writeFields(QTextStream &s, const AbstractMetaClass *cppClass)
+void QtDocGenerator::writeFields(QTextStream &s, const AbstractMetaClass *cppClass)
 {
     static const QString section_title(".. attribute:: ");
 
@@ -1079,7 +1050,7 @@ void DocGenerator::writeFields(QTextStream &s, const AbstractMetaClass *cppClass
     }
 }
 
-void DocGenerator::writeConstructors(QTextStream &s, const AbstractMetaClass *cppClass)
+void QtDocGenerator::writeConstructors(QTextStream &s, const AbstractMetaClass *cppClass)
 {
     static const QString sectionTitle = ".. class:: ";
     static const QString sectionTitleSpace = QString(sectionTitle.size(), ' ');
@@ -1122,7 +1093,7 @@ void DocGenerator::writeConstructors(QTextStream &s, const AbstractMetaClass *cp
     }
 }
 
-QString DocGenerator::parseArgDocStyle(const AbstractMetaClass *cppClass, const AbstractMetaFunction *func)
+QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass *cppClass, const AbstractMetaFunction *func)
 {
     QString ret;
     bool optional = false;
@@ -1152,7 +1123,7 @@ QString DocGenerator::parseArgDocStyle(const AbstractMetaClass *cppClass, const 
     return ret;
 }
 
-void DocGenerator::writeDocSnips(QTextStream &s,
+void QtDocGenerator::writeDocSnips(QTextStream &s,
                                  const CodeSnipList &codeSnips,
                                  CodeSnip::Position position,
                                  TypeSystem::Language language)
@@ -1215,7 +1186,7 @@ void DocGenerator::writeDocSnips(QTextStream &s,
     }
 }
 
-void DocGenerator::writeInjectDocumentation(QTextStream &s,
+void QtDocGenerator::writeInjectDocumentation(QTextStream &s,
                                             DocModification::Mode mode,
                                             const AbstractMetaClass *cppClass,
                                             const AbstractMetaFunction *func)
@@ -1257,7 +1228,7 @@ void DocGenerator::writeInjectDocumentation(QTextStream &s,
     }
 }
 
-void DocGenerator::writeFunctionSignature(QTextStream& s, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func)
+void QtDocGenerator::writeFunctionSignature(QTextStream& s, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func)
 {
     if (!func->isConstructor())
         s << getClassName(cppClass) << '.';
@@ -1266,7 +1237,7 @@ void DocGenerator::writeFunctionSignature(QTextStream& s, const AbstractMetaClas
     s << getFuncName(func) << "(" << parseArgDocStyle(cppClass, func) << ")";
 }
 
-QString DocGenerator::translateToPythonType(const AbstractMetaType *type, const AbstractMetaClass *cppClass)
+QString QtDocGenerator::translateToPythonType(const AbstractMetaType *type, const AbstractMetaClass *cppClass)
 {
     QString originalType = translateType(type, cppClass, Generator::ExcludeConst | Generator::ExcludeReference);
     QString strType = originalType;
@@ -1299,13 +1270,13 @@ QString DocGenerator::translateToPythonType(const AbstractMetaType *type, const 
     }
 }
 
-void DocGenerator::writeParamerteType(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaArgument *arg)
+void QtDocGenerator::writeParamerteType(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaArgument *arg)
 {
     s << INDENT << ":param " << arg->argumentName() << ": "
       << translateToPythonType(arg->type(), cppClass) << endl;
 }
 
-void DocGenerator::writeFunctionParametersType(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaFunction* func)
+void QtDocGenerator::writeFunctionParametersType(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaFunction* func)
 {
     Indentation indentation(INDENT);
 
@@ -1324,7 +1295,7 @@ void DocGenerator::writeFunctionParametersType(QTextStream &s, const AbstractMet
     s << endl;
 }
 
-void DocGenerator::writeFunction(QTextStream &s, bool writeDoc, const AbstractMetaClass *cppClass, const AbstractMetaFunction* func)
+void QtDocGenerator::writeFunction(QTextStream &s, bool writeDoc, const AbstractMetaClass *cppClass, const AbstractMetaFunction* func)
 {
     writeFunctionSignature(s, cppClass, func);
     s << endl;
@@ -1339,7 +1310,7 @@ void DocGenerator::writeFunction(QTextStream &s, bool writeDoc, const AbstractMe
     }
 }
 
-void DocGenerator::finishGeneration()
+void QtDocGenerator::finishGeneration()
 {
     if (classes().isEmpty())
         return;
@@ -1383,9 +1354,8 @@ void DocGenerator::finishGeneration()
     }
 }
 
-bool DocGenerator::prepareGeneration(const QMap<QString, QString>& args)
+bool QtDocGenerator::doSetup(const QMap<QString, QString>& args)
 {
-    BoostPythonGenerator::prepareGeneration(args);
     m_libSourceDir = args.value("library-source-dir");
     setOutputDirectory(args.value("documentation-out-dir"));
     m_docDataDir = args.value("documentation-data-dir");
@@ -1409,7 +1379,7 @@ bool DocGenerator::prepareGeneration(const QMap<QString, QString>& args)
 }
 
 
-QMap<QString, QString> DocGenerator::options() const
+QMap<QString, QString> QtDocGenerator::options() const
 {
     QMap<QString, QString> options;
     options.insert("library-source-dir", "Directory where library source code is located");

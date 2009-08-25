@@ -1,5 +1,5 @@
 /*
-* This file is part of the Boost Python Generator project.
+* This file is part of the API Extractor project.
 *
 * Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
 *
@@ -21,28 +21,9 @@
 *
 */
 
-#ifndef SPHINXTABLETEST_H
-#define SPHINXTABLETEST_H
+#include "generator.h"
+#include "hppgenerator.h"
+#include "cppgenerator.h"
+#include "convertergenerator.h"
 
-#include <QObject>
-
-class QtDocGenerator;
-class SphinxTableTest : public QObject {
-    Q_OBJECT
-
-private slots:
-    void setUp();
-    void tearDown();
-    void testEmptyString();
-    void testSimpleTable();
-    void testRowSpan();
-    void testColSpan();
-    void testComplexTable();
-    void testRowSpan2();
-private:
-    QtDocGenerator* m_generator;
-
-    QString transformXml(const char* xml);
-};
-
-#endif
+EXPORT_GENERATOR_PLUGIN(new HppGenerator << new CppGenerator << new ConverterGenerator)

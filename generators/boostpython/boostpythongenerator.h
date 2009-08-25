@@ -24,8 +24,8 @@
 #ifndef BOOSTPYTHONGENERATOR_H
 #define BOOSTPYTHONGENERATOR_H
 
-#include <apiextractor/generator.h>
 #include <QtCore/QTextStream>
+#include "generator.h"
 
 class DocParser;
 
@@ -35,16 +35,6 @@ class DocParser;
 class BoostPythonGenerator : public Generator
 {
 public:
-    /**
-    *   Translate metatypes to boost::python format.
-    *   \param boost_type a pointer to metatype
-    *   \param context the current meta class
-    *   \param option some extra options
-    *   \return the metatype translated to boost::python format
-    */
-    virtual QString translateType(const AbstractMetaType *boost_type,
-                                  const AbstractMetaClass *context,
-                                  int option = NoOption) const;
     /**
     *   Write a function argument in the boost::python format in the text stream \p s.
     *   This function just call \code s << argumentString(); \endcode
@@ -96,8 +86,6 @@ public:
                         CodeSnip::Position position,
                         TypeSystem::Language language,
                         const AbstractMetaFunction *cpp_function = 0);
-    /// returns the code snips of a function
-    CodeSnipList getCodeSnips(const AbstractMetaFunction *func);
     static bool canCreateWrapperFor(const AbstractMetaClass* cppClass);
     /**
     *   Function witch parse the metafunction information
@@ -127,19 +115,13 @@ public:
     static QString getWrapperName(const AbstractMetaClass* clazz);
 
 
-    virtual bool prepareGeneration(const QMap<QString, QString>& args);
+    virtual bool doSetup(const QMap<QString, QString>& args);
 
 protected:
     // verify if the class is copyalbe
     bool isCopyable(const AbstractMetaClass *cpp_class);
 
-    static FunctionModificationList functionModifications(const AbstractMetaFunction *meta_function);
-    AbstractMetaFunctionList queryFunctions(const AbstractMetaClass *cpp_class, bool all_function = false);
     void writeFunctionCall(QTextStream &s, const AbstractMetaFunction *cpp_func, uint options = 0);
-
-    AbstractMetaFunctionList filterFunctions(const AbstractMetaClass *cpp_class);
-    AbstractMetaFunctionList queryGlobalOperators(const AbstractMetaClass *cpp_class);
-    AbstractMetaFunctionList sortContructor(AbstractMetaFunctionList list);
 };
 
 

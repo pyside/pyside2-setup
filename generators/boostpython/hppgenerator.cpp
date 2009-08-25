@@ -38,8 +38,8 @@ QString HppGenerator::fileNameForClass(const AbstractMetaClass *cppClass) const
 
 void HppGenerator::writeCopyCtor(QTextStream &s, const AbstractMetaClass *cppClass)
 {
-    s << INDENT <<  getWrapperName(cppClass) << "(const " << cppClass->qualifiedCppName() << "& self)"
-      << " : " << cppClass->qualifiedCppName() << "(self)" << endl
+    s << INDENT <<  getWrapperName(cppClass) << "(PyObject *py_self, const " << cppClass->qualifiedCppName() << "& self)"
+      << " :  " << cppClass->qualifiedCppName() << "(self), wrapper(py_self)" << endl
       << INDENT << "{" << endl
       << INDENT << "}" << endl;
 }
@@ -67,11 +67,13 @@ void HppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *cppCla
     if (!cppClass->isPolymorphic() || cppClass->hasPrivateDestructor() || cppClass->isNamespace())
         s << "namespace " << wrapperName << " {" << endl << endl;
 
+    bool needWriteBackReference = false;
     if (cppClass->isNamespace()) {
         s << INDENT << "struct Namespace {};" << endl;
     } else {
         QString className;
         bool create_wrapper = canCreateWrapperFor(cppClass);
+        bool is_wrapper = false;
         // detect the held type
         QString held_type = cppClass->typeEntry()->heldTypeValue();
         if (held_type.isEmpty() && create_wrapper)
@@ -81,16 +83,10 @@ void HppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *cppCla
                        CodeSnip::Declaration, TypeSystem::NativeCode);
 
         if (cppClass->isPolymorphic() && !cppClass->hasPrivateDestructor()) {
-            if (!held_type.isEmpty()) {
-                s << "// held type forward decalration" << endl;
-                s << "template<typename T> class " << held_type << ';' << endl;
-            }
-
             // Class
             s << "class PYSIDE_LOCAL " << wrapperName;
             if (create_wrapper) {
-                s << " : public " << cppClass->qualifiedCppName() << ", public boost::python::wrapper<";
-                s << cppClass->qualifiedCppName() << '>';
+                s << " : public " << cppClass->qualifiedCppName() << ", public PySide::wrapper";
             }
             s << endl;
             s << "{" << endl;
@@ -101,22 +97,20 @@ void HppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *cppCla
 
         if (cppClass->isPolymorphic() && !cppClass->hasPrivateDestructor()) {
             s << endl << "private:" << endl;
-
-            if (cppClass->hasPrivateDestructor())
-                className = cppClass->qualifiedCppName();
-            else
-                className = wrapperName;
+            className = wrapperName;
+            is_wrapper = true;
         } else {
             className = cppClass->qualifiedCppName();
         }
 
         // print the huge boost::python::class_ typedef
-        s << INDENT << "typedef boost::python::class_< " << className;
+        s << INDENT << "typedef boost::python::class_< " << cppClass->qualifiedCppName();
 
         writeBaseClass(s, cppClass);
 
         if (!held_type.isEmpty())
-            s << ", PySide::" << held_type << " < " << className << ", PySide::qptr_base::avoid_cache > ";
+            s << ", PySide::" << held_type << " < " << className << ", qptr_base::no_check_cache | qptr_base::"
+              << ( is_wrapper ? "wrapper_pointer" : "no_wrapper_pointer") << "> ";
 
         if (!isCopyable(cppClass))
             s << ", boost::noncopyable";
@@ -143,7 +137,6 @@ void HppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *cppCla
 
         writeCodeSnips(s, cppClass->typeEntry()->codeSnips(),
                        CodeSnip::End, TypeSystem::ShellDeclaration);
-
     }
 
     QString staticKeyword = cppClass->isNamespace() ? QLatin1String("") : QLatin1String("static ");
@@ -159,6 +152,7 @@ void HppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *cppCla
 
 
     s << "};" << endl << endl;
+
     s << "#endif // __" << wrapperName.toUpper() << "__" << endl << endl;
 }
 
@@ -179,7 +173,14 @@ void HppGenerator::writeFunction(QTextStream &s, const AbstractMetaFunction* fun
             s << INDENT << "static " << signatureForDefaultVirtualMethod(func, "", "_default", Generator::SkipName) << ';' << endl;
         }
 
-        s << INDENT << functionSignature(func, "", "", Generator::OriginalTypeDescription |  Generator::SkipName);
+        if (func->isConstructor()) {
+            s << INDENT << getWrapperName(func->ownerClass()) << "(PyObject *py_self" << (func->arguments().size() ? "," : "");
+            writeFunctionArguments(s, func, Generator::OriginalTypeDescription |  Generator::SkipName);
+            s << ")";
+        } else {
+            s << INDENT << functionSignature(func, "", "", Generator::OriginalTypeDescription |  Generator::SkipName);
+        }
+
         if (func->isModifiedRemoved() && func->isAbstract())
             writeDefaultImplementation(s, func);
         else

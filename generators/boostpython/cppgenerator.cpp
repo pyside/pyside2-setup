@@ -244,18 +244,27 @@ QString CppGenerator::writeFunctionCast(QTextStream &s,
 QString CppGenerator::verifyDefaultReturnPolicy(const AbstractMetaFunction *cppFunction, const QString& callPolicy)
 {
     AbstractMetaType *type = cppFunction->type();
+
+    //If return type replaced, the return policy need be set manually.
+    if (!type || !cppFunction->typeReplaced(0).isEmpty())
+        return QString();
+
+    //avoid natives types
+    if (!type->name().startsWith("Q"))
+        return QString();
+
     QString returnPolicy;
 
-    if (type && type->isReference() && type->isConstant()) {
+    if (type->isConstant() && type->isReference()) {
         returnPolicy = "python::return_value_policy<python::copy_const_reference";
         if (!callPolicy.isEmpty())
             returnPolicy += ", " + callPolicy;
         returnPolicy += " >()";
-    } else if (type && (type->isReference() || type->isQObject() || type->isObject())) {
+    } else if (type->isReference() || type->isQObject() || type->isObject() || type->isNativePointer()) {
         bool cppOwnership = type->isConstant();
         if (cppFunction->isStatic() || cppOwnership) {
-            returnPolicy = "python::return_value_policy<PySide::return_ptr_object< "
-                            + (cppOwnership ? QString("true") : QString("false")) + "> >()";
+            returnPolicy = QString("python::return_value_policy<PySide::return_ptr_object<")
+                         + (cppOwnership ? "true" : "false") + QString("> >()");
         } else if (type->isQObject() || type->isObject()) {
             returnPolicy = QString("PySide::return_object<1, 0, %1, %2 %3 %4 >()")
                             .arg(getArgumentType(cppFunction->ownerClass(), cppFunction, -1))
@@ -624,11 +633,13 @@ void CppGenerator::writeModifiedConstructorImpl ( QTextStream& s, const Abstract
 
 void CppGenerator::writeConstructorImpl(QTextStream& s, const AbstractMetaFunction* func)
 {
-    s << functionSignature(func, getWrapperName(func->ownerClass()) + "::", "",
-                           (Option)(OriginalTypeDescription | SkipDefaultValues));
-    s << " : ";
+    QString wrapperName = getWrapperName(func->ownerClass());
+    s << wrapperName << "::" << wrapperName << "(PyObject *py_self" << (func->arguments().size() ? ", " : "");
+    writeFunctionArguments(s, func, OriginalTypeDescription | SkipDefaultValues);
+    s << ")" << endl;
+    s << INDENT << " : ";
     writeFunctionCall(s, func);
-    s << " {" << endl;
+    s << ", wrapper(py_self)" << endl << "{" << endl;
     writeCodeSnips(s, getCodeSnips(func), CodeSnip::Beginning, TypeSystem::All, func);
     writeCodeSnips(s, getCodeSnips(func), CodeSnip::End, TypeSystem::All, func);
     s << '}' << endl << endl;
@@ -644,7 +655,7 @@ void CppGenerator::writeVirtualMethodImplHead(QTextStream& s, const AbstractMeta
                        CodeSnip::Beginning, TypeSystem::NativeCode, func);
     }
 
-    s << INDENT << "python::object method = PySide::detail::get_override(this, \"" << func->implementingClass()->name();
+    s << INDENT << "python::object method = get_override(\"" << func->implementingClass()->name();
     if (func->implementingClass()->typeEntry()->isObject() || func->implementingClass()->typeEntry()->isQObject())
         s << '*';
 
@@ -682,9 +693,7 @@ void CppGenerator::writeVirtualMethodImplHead(QTextStream& s, const AbstractMeta
                     (func->type()->isObject() || func->type()->isQObject())) {
 
                     s << INDENT << "PySide::qptr<" << QString(typeName).replace("*", "") << " > __ptr(__result.ptr());" << endl
-                      << INDENT << "if (__ptr.is_wrapper()) {" << endl
-                      << INDENT << INDENT << "python::incref(__result.ptr());" << endl
-                      << INDENT << "}" << endl
+                      << INDENT << "python::incref(__result.ptr());" << endl
                       << INDENT << "__ptr.release_ownership();" << endl;
                 }
 
@@ -902,11 +911,8 @@ void CppGenerator::writeBoostDeclaration(QTextStream& s, const AbstractMetaClass
     s << INDENT << "python::scope " << wrapperName << "_scope(python_cls);" << endl;
 
     if (cppClass->templateBaseClass() && cppClass->templateBaseClass()->typeEntry()->isContainer()) {
-        //const ContainerTypeEntry *type = static_cast<const ContainerTypeEntry*>(cppClass->templateBaseClass()->typeEntry());
-        //if (type->type() == ContainerTypeEntry::ListContainer) {
         s << endl << INDENT << "//Index suite for QContainer" << endl
           << INDENT << "python_cls.def(qcontainer_indexing_suite< " << cppClass->qualifiedCppName() << " >());" << endl << endl;
-        //}
     }
 
     if (isCopyable(cppClass) && !cppClass->isNamespace()) {
@@ -1399,9 +1405,9 @@ void CppGenerator::writeGlobalFunctions()
     if (moduleEntry && moduleEntry->codeSnips().size() > 0) {
         foreach (CodeSnip snip, moduleEntry->codeSnips()) {
             if (snip.position == CodeSnip().Beginning)
-                snip.formattedCode(s, INDENT);
+                formatCode(s, snip.code(), INDENT);
             else
-                snip.formattedCode(snipEnd, INDENT);
+                formatCode(snipEnd, snip.code(), INDENT);
         }
     }
 
@@ -1419,3 +1425,15 @@ void CppGenerator::writeGlobalFunctions()
     s << "}\n";
 }
 
+QMap<QString, QString> CppGenerator::options() const
+{
+    QMap<QString, QString> res;
+    res.insert("disable-named-arg", "Disable Python names arguments.");
+    return res;
+}
+
+bool CppGenerator::doSetup(const QMap<QString, QString>& args )
+{
+    m_disableNamedArgs = args.contains("disable-named-arg");
+    return BoostPythonGenerator::doSetup(args);
+}

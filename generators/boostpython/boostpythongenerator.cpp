@@ -36,69 +36,6 @@
 static Indentor INDENT;
 static void dump_function(AbstractMetaFunctionList lst);
 
-FunctionModificationList BoostPythonGenerator::functionModifications(const AbstractMetaFunction *metaFunction)
-{
-    FunctionModificationList mods;
-    const AbstractMetaClass *cls = metaFunction->implementingClass();
-    while (cls) {
-        mods += metaFunction->modifications(cls);
-
-        if (cls == cls->baseClass())
-            break;
-        cls = cls->baseClass();
-    }
-    return mods;
-}
-
-QString BoostPythonGenerator::translateType(const AbstractMetaType *cType,
-                                            const AbstractMetaClass *context,
-                                            int option) const
-{
-    QString s;
-
-    if (context && cType &&
-        context->typeEntry()->isGenericClass() &&
-        cType->originalTemplateType()) {
-            qDebug() << "set original templateType" << cType->name();
-            cType = cType->originalTemplateType();
-    }
-
-    if (!cType) {
-        s = "void";
-    } else if (cType->isArray()) {
-        s = translateType(cType->arrayElementType(), context) + "[]";
-    } else if (cType->isEnum() || cType->isFlags()) {
-        if (option & Generator::EnumAsInts)
-            s = "int";
-        else
-            s = cType->cppSignature();
-#if 0
-    } else if (c_type->isContainer()) {
-        qDebug() << "is container" << c_type->cppSignature();
-        s = c_type->name();
-        if (!(option & SkipTemplateParameters)) {
-            s += " < ";
-            QList<AbstractMetaType *> args = c_type->instantiations();
-            for (int i = 0; i < args.size(); ++i) {
-                if (i)
-                    s += ", ";
-                qDebug() << "container type: " << args.at(i)->cppSignature() << " / " << args.at(i)->instantiations().count();
-                s += translateType(args.at(i), context, option);
-            }
-            s += " > ";
-        }
-#endif
-    } else {
-        s = cType->cppSignature();
-        if (cType->isConstant() && (option & Generator::ExcludeConst))
-            s.replace("const", "");
-        if (cType->isReference() && (option & Generator::ExcludeReference))
-            s.replace("&", "");
-    }
-
-    return s;
-}
-
 QString BoostPythonGenerator::getWrapperName(const AbstractMetaClass* metaClass)
 {
     QString result = metaClass->typeEntry()->qualifiedCppName().toLower();
@@ -271,77 +208,6 @@ void BoostPythonGenerator::writeArgumentNames(QTextStream &s,
     }
 }
 
-AbstractMetaFunctionList BoostPythonGenerator::queryGlobalOperators(const AbstractMetaClass *cppClass)
-{
-    AbstractMetaFunctionList result;
-
-    foreach (AbstractMetaFunction *func, cppClass->functions()) {
-        if (func->isInGlobalScope() && func->isOperatorOverload())
-            result.append(func);
-    }
-    return result;
-}
-
-AbstractMetaFunctionList BoostPythonGenerator::sortContructor(AbstractMetaFunctionList list)
-{
-    AbstractMetaFunctionList result;
-
-    foreach (AbstractMetaFunction *func, list) {
-        bool inserted = false;
-        foreach (AbstractMetaArgument *arg, func->arguments()) {
-            if (arg->type()->isFlags() || arg->type()->isEnum()) {
-                result.push_back(func);
-                inserted = true;
-                break;
-            }
-        }
-        if (!inserted)
-            result.push_front(func);
-    }
-
-    return result;
-}
-
-AbstractMetaFunctionList BoostPythonGenerator::queryFunctions(const AbstractMetaClass *cppClass, bool allFunctions)
-{
-    AbstractMetaFunctionList result;
-
-    if (allFunctions) {
-        int default_flags = AbstractMetaClass::NormalFunctions |  AbstractMetaClass::Visible;
-        default_flags |= cppClass->isInterface() ? 0 :  AbstractMetaClass::ClassImplements;
-
-        // Constructors
-        result = cppClass->queryFunctions(AbstractMetaClass::Constructors |
-                                           default_flags);
-
-        // put enum constructor first to avoid conflict with int contructor
-        result = sortContructor(result);
-
-        // Final functions
-        result += cppClass->queryFunctions(AbstractMetaClass::FinalInTargetLangFunctions |
-                                            AbstractMetaClass::NonStaticFunctions |
-                                            default_flags);
-
-        //virtual
-        result += cppClass->queryFunctions(AbstractMetaClass::VirtualInTargetLangFunctions |
-                                            AbstractMetaClass::NonStaticFunctions |
-                                            default_flags);
-
-        // Static functions
-        result += cppClass->queryFunctions(AbstractMetaClass::StaticFunctions | default_flags);
-
-        // Empty, private functions, since they aren't caught by the other ones
-        result += cppClass->queryFunctions(AbstractMetaClass::Empty |
-                                            AbstractMetaClass::Invisible | default_flags);
-        // Signals
-        result += cppClass->queryFunctions(AbstractMetaClass::Signals | default_flags);
-    } else {
-        result = cppClass->functionsInTargetLang();
-    }
-
-    return result;
-}
-
 void BoostPythonGenerator::writeFunctionCall(QTextStream &s,
                                              const AbstractMetaFunction* func,
                                              uint options)
@@ -353,55 +219,6 @@ void BoostPythonGenerator::writeFunctionCall(QTextStream &s,
     s << '(';
     writeArgumentNames(s, func, options);
     s << ')';
-}
-
-AbstractMetaFunctionList BoostPythonGenerator::filterFunctions(const AbstractMetaClass *cppClass)
-{
-    AbstractMetaFunctionList lst = queryFunctions(cppClass, true);
-    foreach (AbstractMetaFunction *func, lst) {
-        //skip signals
-        if (func->isSignal() ||
-            func->isDestructor() ||
-            (func->isModifiedRemoved() && !func->isAbstract())) {
-            lst.removeOne(func);
-        }
-    }
-
-    //virtual not implemented in current class
-    AbstractMetaFunctionList virtual_lst = cppClass->queryFunctions(AbstractMetaClass::VirtualFunctions);
-    foreach (AbstractMetaFunction *func, virtual_lst) {
-        if ((func->implementingClass() != cppClass) &&
-            !lst.contains(func)) {
-            lst.append(func);
-        }
-    }
-
-    //append global operators
-    foreach (AbstractMetaFunction *func , queryGlobalOperators(cppClass)) {
-        if (!lst.contains(func))
-            lst.append(func);
-    }
-
-    return lst;
-    //return cpp_class->functions();
-}
-
-CodeSnipList BoostPythonGenerator::getCodeSnips(const AbstractMetaFunction *func)
-{
-    CodeSnipList result;
-    const AbstractMetaClass *cppClass = func->implementingClass();
-    while (cppClass) {
-        foreach (FunctionModification mod, func->modifications(cppClass)) {
-            if (mod.isCodeInjection())
-                result << mod.snips;
-        }
-
-        if (cppClass == cppClass->baseClass())
-            break;
-        cppClass = cppClass->baseClass();
-    }
-
-    return result;
 }
 
 void BoostPythonGenerator::writeCodeSnips(QTextStream &s,
@@ -419,7 +236,7 @@ void BoostPythonGenerator::writeCodeSnips(QTextStream &s,
 
         QString code;
         QTextStream tmpStream(&code);
-        snip.formattedCode(tmpStream, INDENT);
+        formatCode(tmpStream, snip.code(), INDENT);
 
         if (func)
             replaceTemplateVariables(code, func);
@@ -488,7 +305,7 @@ static void dump_function(AbstractMetaFunctionList lst)
 }
 
 
-bool BoostPythonGenerator::prepareGeneration(const QMap<QString, QString>&)
+bool BoostPythonGenerator::doSetup(const QMap<QString, QString>&)
 {
     return true;
 }

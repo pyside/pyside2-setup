@@ -23,11 +23,16 @@
 #ifndef DOCGENERATOR_H
 #define DOCGENERATOR_H
 
-#include "boostpythongenerator.h"
 #include <QtCore/QStack>
+#include <QtCore/QHash>
+#include <QtCore/QTextStream>
+#include <apiextractor/abstractmetalang.h>
+#include "generator.h"
 
+class AbstractMetaFunction;
+class AbstractMetaClass;
 class QXmlStreamReader;
-class DocGenerator;
+class QtDocGenerator;
 
 class QtXmlToSphinx
 {
@@ -77,7 +82,7 @@ public:
             bool m_normalized;
     };
 
-    QtXmlToSphinx(DocGenerator* generator, const QString& doc, const QString& context = QString());
+    QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, const QString& context = QString());
 
     QString result() const
     {
@@ -128,7 +133,7 @@ private:
     Table m_currentTable;
     bool m_tableHasHeader;
     QString m_context;
-    DocGenerator* m_generator;
+    QtDocGenerator* m_generator;
     bool m_insideBold;
     bool m_insideItalic;
     QString m_lastTagName;
@@ -150,24 +155,19 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table);
 /**
 *   The DocGenerator generates documentation from library being binded.
 */
-class DocGenerator : public BoostPythonGenerator
+class QtDocGenerator : public Generator
 {
 public:
-    virtual GeneratorType type() const
-    {
-        return DocumentationType;
-    }
-
     QString libSourceDir() const
     {
         return m_libSourceDir;
     }
 
-    virtual bool prepareGeneration(const QMap<QString, QString>& args);
+    bool doSetup(const QMap<QString, QString>& args);
 
     const char* name() const
     {
-        return "DocGenerator";
+        return "QtDocGenerator";
     }
 
     QMap<QString, QString> options() const;
@@ -181,6 +181,15 @@ protected:
     QString fileNameForClass(const AbstractMetaClass* cppClass) const;
     void generateClass(QTextStream& s, const AbstractMetaClass* cppClass);
     void finishGeneration();
+
+    void writeFunctionArguments(QTextStream&, const AbstractMetaFunction*, uint) const {}
+    void writeArgumentNames(QTextStream&, const AbstractMetaFunction*, uint) const {}
+    QString subDirectoryForClass(const AbstractMetaClass* clazz) const
+    {
+        Q_ASSERT(false);
+        return QString();
+    }
+
 private:
     void writeEnums(QTextStream& s, const AbstractMetaClass* cppClass);
 
