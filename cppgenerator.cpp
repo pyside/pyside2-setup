@@ -243,29 +243,28 @@ QString CppGenerator::writeFunctionCast(QTextStream &s,
 
 QString CppGenerator::verifyDefaultReturnPolicy(const AbstractMetaFunction *cppFunction, const QString& callPolicy)
 {
+    AbstractMetaType *type = cppFunction->type();
+
     //If return type replaced, the return policy need be set manually.
-    if (!cppFunction->typeReplaced(0).isEmpty())
+    if (!type || !cppFunction->typeReplaced(0).isEmpty())
         return QString();
 
-    AbstractMetaType *type = cppFunction->type();
+    //avoid natives types
+    if (!type->name().startsWith("Q"))
+        return QString();
+
     QString returnPolicy;
 
-    if (type && type->isConstant()) {
-        returnPolicy = "python::return_value_policy<";
-
-        if (type->isQObject() || type->isObject() || type->isNativePointer()) {
-            returnPolicy += "PySide::return_const_ptr_object";
-        } else if (type->isReference()) {
-            returnPolicy += "python::copy_const_reference";
-        } else {
-            returnPolicy += "python::return_by_value";
-        }
+    if (type->isConstant() && type->isReference()) {
+        returnPolicy = "python::return_value_policy<python::copy_const_reference";
         if (!callPolicy.isEmpty())
             returnPolicy += ", " + callPolicy;
         returnPolicy += " >()";
-    } else if (type && (type->isReference() || type->isQObject() || type->isObject())) {
-        if (cppFunction->isStatic()) {
-            returnPolicy = "python::return_value_policy<PySide::return_ptr_object<false> >()";
+    } else if (type->isReference() || type->isQObject() || type->isObject() || type->isNativePointer()) {
+        bool cppOwnership = type->isConstant();
+        if (cppFunction->isStatic() || cppOwnership) {
+            returnPolicy = QString("python::return_value_policy<PySide::return_ptr_object<")
+                         + (cppOwnership ? "true" : "false") + QString("> >()");
         } else if (type->isQObject() || type->isObject()) {
             returnPolicy = QString("PySide::return_object<1, 0, %1, %2 %3 %4 >()")
                             .arg(getArgumentType(cppFunction->ownerClass(), cppFunction, -1))
@@ -912,11 +911,8 @@ void CppGenerator::writeBoostDeclaration(QTextStream& s, const AbstractMetaClass
     s << INDENT << "python::scope " << wrapperName << "_scope(python_cls);" << endl;
 
     if (cppClass->templateBaseClass() && cppClass->templateBaseClass()->typeEntry()->isContainer()) {
-        //const ContainerTypeEntry *type = static_cast<const ContainerTypeEntry*>(cppClass->templateBaseClass()->typeEntry());
-        //if (type->type() == ContainerTypeEntry::ListContainer) {
         s << endl << INDENT << "//Index suite for QContainer" << endl
           << INDENT << "python_cls.def(qcontainer_indexing_suite< " << cppClass->qualifiedCppName() << " >());" << endl << endl;
-        //}
     }
 
     if (isCopyable(cppClass) && !cppClass->isNamespace()) {

@@ -83,13 +83,6 @@ void HppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *cppCla
                        CodeSnip::Declaration, TypeSystem::NativeCode);
 
         if (cppClass->isPolymorphic() && !cppClass->hasPrivateDestructor()) {
-            /*
-            if (!held_type.isEmpty()) {
-                s << "// held type forward decalration" << endl;
-                s << "template<typename T> class " << held_type << ';' << endl;
-            }
-            */
-
             // Class
             s << "class PYSIDE_LOCAL " << wrapperName;
             if (create_wrapper) {
