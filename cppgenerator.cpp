@@ -715,7 +715,7 @@ void CppGenerator::writePolymorphicDecisor(QTextStream& s, PolymorphicData* pare
             if (polymorphicData->argType()->isContainer() &&
                 ((ContainerTypeEntry*)polymorphicData->argType()->typeEntry())->type()
                     == ContainerTypeEntry::PairContainer) {
-                s << " && PyTuple_GET_SIZE(" << pyArgName << ") == 2";
+                s << " && PySequence_Size(" << pyArgName << ") == 2";
             }
 
             if (signatureFound && varargs) {

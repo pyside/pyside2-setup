@@ -317,10 +317,11 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry* type)
             case ContainerTypeEntry::VectorContainer:
             case ContainerTypeEntry::StackContainer:
             case ContainerTypeEntry::QueueContainer:
-                baseName = "PyList";
-                break;
+                //baseName = "PyList";
+                //break;
             case ContainerTypeEntry::PairContainer:
-                baseName = "PyTuple";
+                //baseName = "PyTuple";
+                baseName = "PySequence";
                 break;
             case ContainerTypeEntry::SetContainer:
                 baseName = "PySet";
