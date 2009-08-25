@@ -17,8 +17,8 @@ struct Converter_std_list
     static StdList toCpp(PyObject* pyobj)
     {
         StdList result;
-        for (int i = 0; i < PyTuple_GET_SIZE(pyobj); i++) {
-            PyObject* pyItem = PyTuple_GET_ITEM(pyobj, i);
+        for (int i = 0; i < PySequence_Size(pyobj); i++) {
+            PyObject* pyItem = PySequence_GetItem(pyobj, i);
             result.push_back(Converter<typename StdList::value_type>::toCpp(pyItem));
         }
         return result;
