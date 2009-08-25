@@ -7,6 +7,7 @@
 #include "kindergarten.h"
 #include "pairuser.h"
 #include "listuser.h"
+#include "mapuser.h"
 #include "samplenamespace.h"
 #include "modifications.h"
 #include "implicitconv.h"

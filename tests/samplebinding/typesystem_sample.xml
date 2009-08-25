@@ -17,6 +17,10 @@
         <conversion-rule file="list_conversions.h"/>
         <include file-name="list" location="global"/>
     </container-type>
+    <container-type name="std::map" type="map">
+        <conversion-rule file="map_conversions.h"/>
+        <include file-name="map" location="global"/>
+    </container-type>
 
     <enum-type name="Abstract::PrintFormat"/>
     <enum-type name="PolymorphicFuncEnum"/>
@@ -200,6 +204,7 @@
 
     <value-type name="Point"/>
     <value-type name="Size"/>
+    <value-type name="MapUser"/>
     <value-type name="PairUser"/>
     <value-type name="ListUser"/>
 

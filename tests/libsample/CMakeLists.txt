@@ -9,6 +9,7 @@ implicitconv.cpp
 kindergarten.cpp
 listuser.cpp
 modifications.cpp
+mapuser.cpp
 pairuser.cpp
 point.cpp
 reference.cpp
