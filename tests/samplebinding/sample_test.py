@@ -12,13 +12,14 @@ class ModuleTest(unittest.TestCase):
 
     def testModuleMembers(self):
         '''Test availability of classes, global functions and other members on binding'''
-        expected_members = set(['Abstract', 'Derived', 'ListUser', 'PairUser',
-                                'Point', 'gimmeComplexList', 'gimmeDouble',
-                                'gimmeInt', 'makeCString', 'multiplyPair',
-                                'returnCString', 'transmuteComplexIntoPoint',
+        expected_members = set(['Abstract', 'Derived', 'Point',
+                                'ListUser', 'PairUser', 'MapUser',
+                                'gimmeComplexList', 'gimmeDouble', 'gimmeInt',
+                                'makeCString', 'multiplyPair', 'returnCString',
+                                'SampleNamespace', 'transmuteComplexIntoPoint',
                                 'transmutePointIntoComplex', 'sumComplexPair',
-                                'SampleNamespace', 'GlobalEnum', 'NoThing',
-                                'FirstThing', 'SecondThing', 'ThirdThing'])
+                                'FirstThing', 'SecondThing', 'ThirdThing',
+                                'GlobalEnum', 'NoThing'])
         self.assert_(expected_members.issubset(dir(sample)))
 
     def testAbstractPrintFormatEnum(self):

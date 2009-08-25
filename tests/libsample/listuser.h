@@ -17,6 +17,12 @@ public:
 
     double sumList(std::list<int> vallist);
     double sumList(std::list<double> vallist);
+
+    void setList(std::list<int> lst) { m_lst = lst; }
+    std::list<int> getList() { return m_lst; }
+
+private:
+    std::list<int> m_lst;
 };
 
 #endif // LISTUSER_H
