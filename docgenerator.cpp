@@ -129,6 +129,38 @@ QString QtXmlToSphinx::popOutputBuffer()
     return strcpy;
 }
 
+QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName)
+{
+    QString currentClass = m_context.split(".").last();
+
+    const AbstractMetaClass* metaClass = 0;
+    foreach (const AbstractMetaClass* cls, m_generator->classes()) {
+        if (cls->name() == currentClass) {
+            metaClass = cls;
+            break;
+        }
+    }
+
+    if (metaClass) {
+        QList<const AbstractMetaFunction*> funcList;
+        foreach (const AbstractMetaFunction* func, metaClass->queryFunctionsByName(methodName)) {
+            if (methodName == func->name())
+                funcList.append(func);
+        }
+
+        const AbstractMetaClass* implementingClass = 0;
+        foreach (const AbstractMetaFunction* func, funcList) {
+            implementingClass = func->implementingClass();
+            if (implementingClass->name() == currentClass)
+                break;
+        }
+
+        if (implementingClass)
+            return implementingClass->name();
+    }
+
+    return m_context;
+}
 
 QString QtXmlToSphinx::transform(const QString& doc)
 {
@@ -484,17 +516,19 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
         if (l_type == "function" && !m_context.isEmpty()) {
             l_linktag = " :meth:`";
             QStringList rawlinklist = l_linkref.split(".");
-            if (rawlinklist.size() == 1 || rawlinklist.first() == m_context)
-                l_linkref.prepend('~' + m_context + '.');
+            if (rawlinklist.size() == 1 || rawlinklist.first() == m_context) {
+                QString context = resolveContextForMethod(rawlinklist.last());
+                l_linkref.prepend('~' + context + '.');
+            }
         } else if (l_type == "function" && m_context.isEmpty()) {
             l_linktag = " :func:`";
         } else if (l_type == "class") {
             l_linktag = " :class:`";
             QStringList rawlinklist = l_linkref.split(".");
-            QStringList splitedContext = m_context.split(".");
-            if (rawlinklist.size() == 1 || rawlinklist.first() == splitedContext.last()) {
-                splitedContext.removeLast();
-                l_linkref.prepend('~' + splitedContext.join(".") + '.');
+            QStringList splittedContext = m_context.split(".");
+            if (rawlinklist.size() == 1 || rawlinklist.first() == splittedContext.last()) {
+                splittedContext.removeLast();
+                l_linkref.prepend('~' + splittedContext.join(".") + '.');
             }
         } else if (l_type == "enum") {
             l_linktag = " :attr:`";
@@ -949,11 +983,11 @@ QString DocGenerator::parseFunctionDeclaration(const QString &doc, const Abstrac
     QString methArgs = data.mid(data.indexOf("("));
 
     QString scope = cppClass->name();
-    QStringList splitedMethName = methName.split(".");
+    QStringList splittedMethName = methName.split(".");
 
-    if (splitedMethName.first() == scope) {
-        splitedMethName.removeFirst();
-        methName = splitedMethName.join(".");
+    if (splittedMethName.first() == scope) {
+        splittedMethName.removeFirst();
+        methName = splittedMethName.join(".");
     }
     scope.append(".");
 
