@@ -52,23 +52,23 @@ ApiExtractor::~ApiExtractor()
     delete m_builder;
 }
 
-void ApiExtractor::addTypesystemSearchPath ( const QString& path )
+void ApiExtractor::addTypesystemSearchPath (const QString& path)
 {
     TypeDatabase::instance()->addTypesystemPath(path);
 }
 
-void ApiExtractor::addTypesystemSearchPath ( const QStringList& paths )
+void ApiExtractor::addTypesystemSearchPath(const QStringList& paths)
 {
     foreach (QString path, paths)
         addTypesystemSearchPath(path);
 }
 
-void ApiExtractor::addIncludePath ( const QString& path )
+void ApiExtractor::addIncludePath(const QString& path)
 {
     m_includePaths << path;
 }
 
-void ApiExtractor::addIncludePath ( const QStringList& paths )
+void ApiExtractor::addIncludePath(const QStringList& paths)
 {
     m_includePaths << paths;
 }
@@ -154,6 +154,7 @@ bool ApiExtractor::run()
         std::cerr << "Preprocessor failed on file: " << qPrintable(m_cppFileName);
         return 1;
     }
+    ppFile.seek(0);
     m_builder = new AbstractMetaBuilder;
     m_builder->build(&ppFile);
     return true;
