@@ -1832,13 +1832,12 @@ void AbstractMetaBuilder::decideUsagePattern(AbstractMetaType *metaType)
     } else if (type->isThread()) {
         Q_ASSERT(metaType->indirections() == 1);
         metaType->setTypeUsagePattern(AbstractMetaType::ThreadPattern);
-
-    } else if (type->isValue()
-               && !metaType->indirections()
-               && (metaType->isConstant() == metaType->isReference()
-                   || !metaType->isReference())) {
-        metaType->setTypeUsagePattern(AbstractMetaType::ValuePattern);
-
+    } else if (type->isValue()) {
+        if (metaType->indirections() == 1) {
+            metaType->setTypeUsagePattern(AbstractMetaType::ValuePointerPattern);
+        } else {
+            metaType->setTypeUsagePattern(AbstractMetaType::ValuePattern);
+        }
     } else {
         metaType->setTypeUsagePattern(AbstractMetaType::NativePointerPattern);
         ReportHandler::debugFull(QString("native pointer pattern for '%1'")

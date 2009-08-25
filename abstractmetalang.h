@@ -318,6 +318,7 @@ public:
         CharPattern,
         ObjectPattern,
         QObjectPattern,
+        ValuePointerPattern,
         NativePointerPattern,
         ContainerPattern,
         VariantPattern,
@@ -426,6 +427,11 @@ public:
     bool isValue() const
     {
         return m_pattern == ValuePattern;
+    }
+
+    bool isValuePointer() const
+    {
+        return m_pattern == ValuePointerPattern;
     }
 
     // returns true for more complex types...
