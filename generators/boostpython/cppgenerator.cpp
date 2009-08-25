@@ -246,11 +246,7 @@ QString CppGenerator::verifyDefaultReturnPolicy(const AbstractMetaFunction *cppF
     AbstractMetaType *type = cppFunction->type();
 
     //If return type replaced, the return policy need be set manually.
-    if (!type || !cppFunction->typeReplaced(0).isEmpty())
-        return QString();
-
-    //avoid natives types
-    if (!type->name().startsWith("Q"))
+    if (!type || !cppFunction->typeReplaced(0).isEmpty() || type->isNativePointer())
         return QString();
 
     QString returnPolicy;
@@ -260,7 +256,7 @@ QString CppGenerator::verifyDefaultReturnPolicy(const AbstractMetaFunction *cppF
         if (!callPolicy.isEmpty())
             returnPolicy += ", " + callPolicy;
         returnPolicy += " >()";
-    } else if (type->isReference() || type->isQObject() || type->isObject() || type->isNativePointer()) {
+    } else if (type->isReference() || type->isQObject() || type->isObject() || type->isValuePointer()) {
         bool cppOwnership = type->isConstant();
         if (cppFunction->isStatic() || cppOwnership) {
             returnPolicy = QString("python::return_value_policy<PySide::return_ptr_object<")
@@ -1074,7 +1070,7 @@ void CppGenerator::writeFunctionArgsDef(QTextStream &sOut,
             QString defaultValue = arg->defaultValueExpression();
             bool isPointer = arg->type()->isObject() ||
                               arg->type()->isQObject() ||
-                              arg->type()->isNativePointer();
+                              arg->type()->isValuePointer();
 
             if (isPointer && defaultValue == "0") {
                 defaultValue = "python::object()";
