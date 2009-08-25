@@ -13,8 +13,8 @@ struct Converter_std_pair
     static StdPair toCpp(PyObject* pyobj)
     {
         StdPair result;
-        PyObject* pyFirst = PyTuple_GET_ITEM(pyobj, 0);
-        PyObject* pySecond = PyTuple_GET_ITEM(pyobj, 1);
+        PyObject* pyFirst = PySequence_GetItem(pyobj, 0);
+        PyObject* pySecond = PySequence_GetItem(pyobj, 1);
         result.first = Converter<typename StdPair::first_type>::toCpp(pyFirst);
         result.second = Converter<typename StdPair::second_type>::toCpp(pySecond);
         return result;

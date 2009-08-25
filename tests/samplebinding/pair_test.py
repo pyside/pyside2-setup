@@ -69,7 +69,7 @@ class PairConversionTest(unittest.TestCase):
         pu.setPair(pair)
         result = pu.getPair()
         self.assertNotEqual(result, pair)
-        self.assertEqual(result, list(pair))
+        self.assertEqual(result, tuple(pair))
 
 if __name__ == '__main__':
     unittest.main()
