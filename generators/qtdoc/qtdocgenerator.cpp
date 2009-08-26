@@ -159,7 +159,7 @@ QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName)
             return implementingClass->name();
     }
 
-    return m_context;
+    return QLatin1String("~") + m_context;
 }
 
 QString QtXmlToSphinx::transform(const QString& doc)
@@ -518,7 +518,7 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
             QStringList rawlinklist = l_linkref.split(".");
             if (rawlinklist.size() == 1 || rawlinklist.first() == m_context) {
                 QString context = resolveContextForMethod(rawlinklist.last());
-                l_linkref.prepend('~' + context + '.');
+                l_linkref.prepend(context + '.');
             }
         } else if (l_type == "function" && m_context.isEmpty()) {
             l_linktag = " :func:`";
