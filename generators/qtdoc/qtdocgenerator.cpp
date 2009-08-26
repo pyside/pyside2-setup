@@ -31,6 +31,8 @@
 #include <QtCore/QFile>
 #include <QtCore/QDir>
 
+EXPORT_GENERATOR_PLUGIN(new QtDocGenerator)
+
 static Indentor INDENT;
 
 namespace
