@@ -46,7 +46,7 @@ public:
     void writeArgument(QTextStream &s,
                        const AbstractMetaFunction *boost_function,
                        const AbstractMetaArgument *boost_argument,
-                       uint options = 0) const;
+                       Options options = NoOption) const;
     /**
     *   Create a QString in the boost::python format to an function argument.
     *   \param boost_fuction the current metafunction.
@@ -55,11 +55,11 @@ public:
     */
     QString argumentString(const AbstractMetaFunction *boost_function,
                            const AbstractMetaArgument *boost_argument,
-                           uint options = 0) const;
+                           Options options = NoOption) const;
 
     void writeArgumentNames(QTextStream &s,
                             const AbstractMetaFunction *cpp_function,
-                            uint options = 0) const;
+                            Options options = NoOption) const;
 
     /**
     *   Function used to write the fucntion arguments on the class buffer.
@@ -70,8 +70,8 @@ public:
     */
     void writeFunctionArguments(QTextStream &s,
                                 const AbstractMetaFunction *boost_function,
-                                uint options = 0) const;
-    QString functionReturnType(const AbstractMetaFunction* func, int option = NoOption);
+                                Options options = NoOption) const;
+    QString functionReturnType(const AbstractMetaFunction* func, Options options = NoOption);
     /**
     *   Write a code snip into the buffer \p s.
     *   CodeSnip are codes inside inject-code tags.
@@ -96,13 +96,13 @@ public:
     QString functionSignature(const AbstractMetaFunction *boost_function,
                               QString prepend = "",
                               QString append = "",
-                              int option = NoOption,
+                              Options options = NoOption,
                               int arg_count = -1);
 
     QString signatureForDefaultVirtualMethod(const AbstractMetaFunction *cpp_function,
                                              QString prepend = "",
                                              QString append = "_default",
-                                             int option = NoOption,
+                                             Options = NoOption,
                                              int arg_count = -1);
 
     virtual QString subDirectoryForClass(const AbstractMetaClass* metaClass) const
@@ -121,7 +121,7 @@ protected:
     // verify if the class is copyalbe
     bool isCopyable(const AbstractMetaClass *cpp_class);
 
-    void writeFunctionCall(QTextStream &s, const AbstractMetaFunction *cpp_func, uint options = 0);
+    void writeFunctionCall(QTextStream &s, const AbstractMetaFunction *cpp_func, Options options = NoOption);
 };
 
 

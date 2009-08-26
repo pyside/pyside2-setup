@@ -175,10 +175,10 @@ void HppGenerator::writeFunction(QTextStream &s, const AbstractMetaFunction* fun
 
         if (func->isConstructor()) {
             s << INDENT << getWrapperName(func->ownerClass()) << "(PyObject *py_self" << (func->arguments().size() ? "," : "");
-            writeFunctionArguments(s, func, Generator::OriginalTypeDescription |  Generator::SkipName);
+            writeFunctionArguments(s, func, Options(OriginalTypeDescription) |  SkipName);
             s << ")";
         } else {
-            s << INDENT << functionSignature(func, "", "", Generator::OriginalTypeDescription |  Generator::SkipName);
+            s << INDENT << functionSignature(func, "", "", Options(OriginalTypeDescription) |  SkipName);
         }
 
         if (func->isModifiedRemoved() && func->isAbstract())
