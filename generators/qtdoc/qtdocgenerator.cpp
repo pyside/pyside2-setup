@@ -129,6 +129,38 @@ QString QtXmlToSphinx::popOutputBuffer()
     return strcpy;
 }
 
+QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName)
+{
+    QString currentClass = m_context.split(".").last();
+
+    const AbstractMetaClass* metaClass = 0;
+    foreach (const AbstractMetaClass* cls, m_generator->classes()) {
+        if (cls->name() == currentClass) {
+            metaClass = cls;
+            break;
+        }
+    }
+
+    if (metaClass) {
+        QList<const AbstractMetaFunction*> funcList;
+        foreach (const AbstractMetaFunction* func, metaClass->queryFunctionsByName(methodName)) {
+            if (methodName == func->name())
+                funcList.append(func);
+        }
+
+        const AbstractMetaClass* implementingClass = 0;
+        foreach (const AbstractMetaFunction* func, funcList) {
+            implementingClass = func->implementingClass();
+            if (implementingClass->name() == currentClass)
+                break;
+        }
+
+        if (implementingClass)
+            return implementingClass->name();
+    }
+
+    return QLatin1String("~") + m_context;
+}
 
 QString QtXmlToSphinx::transform(const QString& doc)
 {
@@ -484,12 +516,20 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
         if (l_type == "function" && !m_context.isEmpty()) {
             l_linktag = " :meth:`";
             QStringList rawlinklist = l_linkref.split(".");
-            if (rawlinklist.size() == 1 || rawlinklist[0] == m_context)
-                l_linkref.prepend("~" + m_context + '.');
+            if (rawlinklist.size() == 1 || rawlinklist.first() == m_context) {
+                QString context = resolveContextForMethod(rawlinklist.last());
+                l_linkref.prepend(context + '.');
+            }
         } else if (l_type == "function" && m_context.isEmpty()) {
             l_linktag = " :func:`";
         } else if (l_type == "class") {
             l_linktag = " :class:`";
+            QStringList rawlinklist = l_linkref.split(".");
+            QStringList splittedContext = m_context.split(".");
+            if (rawlinklist.size() == 1 || rawlinklist.first() == splittedContext.last()) {
+                splittedContext.removeLast();
+                l_linkref.prepend('~' + splittedContext.join(".") + '.');
+            }
         } else if (l_type == "enum") {
             l_linktag = " :attr:`";
         } else if (l_type == "page" && l_linkref == m_generator->moduleName()) {
@@ -762,7 +802,7 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
 }
 
 static QString getClassName(const AbstractMetaClass *cppClass) {
-    return cppClass->name().replace("::", ".");
+    return QString(cppClass->typeEntry()->qualifiedCppName()).replace("::", ".");
 }
 
 static QString getFuncName(const AbstractMetaFunction *cppFunc) {
@@ -913,9 +953,18 @@ QString QtDocGenerator::parseFunctionDeclaration(const QString &doc, const Abstr
     QString methName = data.mid(0, data.indexOf("("));
     QString methArgs = data.mid(data.indexOf("("));
 
-    data = QString("def :meth:`%1<%2.%3>` %4")
+    QString scope = cppClass->name();
+    QStringList splittedMethName = methName.split(".");
+
+    if (splittedMethName.first() == scope) {
+        splittedMethName.removeFirst();
+        methName = splittedMethName.join(".");
+    }
+    scope.append(".");
+
+    data = QString("def :meth:`%1<%2%3>` %4")
         .arg(methName)
-        .arg(cppClass->name())
+        .arg(scope)
         .arg(methName)
         .arg(methArgs);
 
@@ -1183,6 +1232,8 @@ void QtDocGenerator::writeFunctionSignature(QTextStream& s, const AbstractMetaCl
 {
     if (!func->isConstructor())
         s << getClassName(cppClass) << '.';
+    else if (func->implementingClass() && func->implementingClass()->enclosingClass())
+        s << func->implementingClass()->enclosingClass()->name() << '.';
     s << getFuncName(func) << "(" << parseArgDocStyle(cppClass, func) << ")";
 }
 

@@ -36,9 +36,9 @@
 static Indentor INDENT;
 static void dump_function(AbstractMetaFunctionList lst);
 
-QString BoostPythonGenerator::getWrapperName(const AbstractMetaClass* clazz)
+QString BoostPythonGenerator::getWrapperName(const AbstractMetaClass* metaClass)
 {
-    QString result = clazz->name().toLower();
+    QString result = metaClass->typeEntry()->qualifiedCppName().toLower();
     result.replace("::", "_");
     result += "_wrapper";
     return result;

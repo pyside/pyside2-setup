@@ -90,6 +90,7 @@ public:
     }
 
 private:
+    QString resolveContextForMethod(const QString& methodName);
     QString transform(const QString& doc);
 
     void handleHeadingTag(QXmlStreamReader& reader);
