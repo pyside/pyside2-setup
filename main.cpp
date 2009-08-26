@@ -184,7 +184,8 @@ int main(int argc, char *argv[])
     }
     extractor.setCppFileName(cppFileName);
     extractor.setTypeSystem(typeSystemFileName);
-    extractor.run();
+    if (!extractor.run())
+        return EXIT_FAILURE;
 
     if (!extractor.classCount()) {
         std::cerr << "No C++ classes found!" << std::endl;
