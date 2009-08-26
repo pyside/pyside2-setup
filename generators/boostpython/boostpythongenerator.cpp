@@ -46,13 +46,13 @@ QString BoostPythonGenerator::getWrapperName(const AbstractMetaClass* metaClass)
 
 QString BoostPythonGenerator::argumentString(const AbstractMetaFunction *cppFunction,
                                              const AbstractMetaArgument *cppArgument,
-                                             uint options) const
+                                             Options options) const
 {
     QString modifiedType = cppFunction->typeReplaced(cppArgument->argumentIndex() + 1);
     QString arg;
 
     if (modifiedType.isEmpty())
-        arg = translateType(cppArgument->type(), cppFunction->implementingClass(), (Generator::Option) options);
+        arg = translateType(cppArgument->type(), cppFunction->implementingClass(), options);
     else
         arg = modifiedType.replace('$', '.');
 
@@ -82,14 +82,14 @@ QString BoostPythonGenerator::argumentString(const AbstractMetaFunction *cppFunc
 void BoostPythonGenerator::writeArgument(QTextStream &s,
                                          const AbstractMetaFunction *func,
                                          const AbstractMetaArgument *cppArgument,
-                                         uint options) const
+                                         Options options) const
 {
     s << argumentString(func, cppArgument, options);
 }
 
 void BoostPythonGenerator::writeFunctionArguments(QTextStream &s,
                                                   const AbstractMetaFunction *func,
-                                                  uint options) const
+                                                  Options options) const
 {
     AbstractMetaArgumentList arguments = func->arguments();
 
@@ -112,19 +112,19 @@ void BoostPythonGenerator::writeFunctionArguments(QTextStream &s,
     }
 }
 
-QString BoostPythonGenerator::functionReturnType(const AbstractMetaFunction* func, int option)
+QString BoostPythonGenerator::functionReturnType(const AbstractMetaFunction* func, Options options)
 {
     QString modifiedReturnType = QString(func->typeReplaced(0));
-    if (!modifiedReturnType.isNull() && (!(option & OriginalTypeDescription)))
+    if (!modifiedReturnType.isNull() && (!(options & OriginalTypeDescription)))
         return modifiedReturnType;
     else
-        return translateType(func->type(), func->implementingClass(), option);
+        return translateType(func->type(), func->implementingClass(), options);
 }
 
 QString BoostPythonGenerator::functionSignature(const AbstractMetaFunction *func,
                                                 QString prepend,
                                                 QString append,
-                                                int option,
+                                                Options options,
                                                 int argCount)
 {
     AbstractMetaArgumentList arguments = func->arguments();
@@ -137,9 +137,9 @@ QString BoostPythonGenerator::functionSignature(const AbstractMetaFunction *func
     if (!(func->isEmptyFunction() ||
           func->isNormal() ||
           func->isSignal())) {
-        option = Option(option | Generator::SkipReturnType);
+        options |= Generator::SkipReturnType;
     } else {
-        s << functionReturnType(func, option) << ' ';
+        s << functionReturnType(func, options) << ' ';
     }
 
     // name
@@ -148,10 +148,10 @@ QString BoostPythonGenerator::functionSignature(const AbstractMetaFunction *func
         name = getWrapperName(func->ownerClass());
 
     s << prepend << name << append << "(";
-    writeFunctionArguments(s, func, option);
+    writeFunctionArguments(s, func, options);
     s << ")";
 
-    if (func->isConstant() && (!(option & Generator::ExcludeMethodConst)))
+    if (func->isConstant() && (!(options & Generator::ExcludeMethodConst)))
         s << " const";
 
     return result;
@@ -160,16 +160,16 @@ QString BoostPythonGenerator::functionSignature(const AbstractMetaFunction *func
 QString BoostPythonGenerator::signatureForDefaultVirtualMethod(const AbstractMetaFunction *cppFunction,
                                                                QString prepend,
                                                                QString append,
-                                                               int option,
+                                                               Options options,
                                                                int arg_count)
 {
-    QString defaultMethodSignature = functionSignature(cppFunction, prepend, append, option, arg_count);
+    QString defaultMethodSignature = functionSignature(cppFunction, prepend, append, options, arg_count);
     QString staticSelf("(");
     if (cppFunction->isConstant())
         staticSelf += "const ";
 
     staticSelf += cppFunction->ownerClass()->qualifiedCppName() + "& ";
-    if (!(option & SkipName))
+    if (!(options & SkipName))
         staticSelf += " self";
 
     if (cppFunction->arguments().size() > 0)
@@ -182,7 +182,7 @@ QString BoostPythonGenerator::signatureForDefaultVirtualMethod(const AbstractMet
 
 void BoostPythonGenerator::writeArgumentNames(QTextStream &s,
                                               const AbstractMetaFunction *func,
-                                              uint options) const
+                                              Options options) const
 {
     AbstractMetaArgumentList arguments = func->arguments();
     int argCount = 0;
@@ -210,7 +210,7 @@ void BoostPythonGenerator::writeArgumentNames(QTextStream &s,
 
 void BoostPythonGenerator::writeFunctionCall(QTextStream &s,
                                              const AbstractMetaFunction* func,
-                                             uint options)
+                                             Options options)
 
 {
     if (!(options & Generator::SkipName))

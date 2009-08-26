@@ -89,8 +89,8 @@ void CppGenerator::writeConstructorInitialization(QTextStream &s, const Abstract
     QStringList nonOpts;
     QStringList opts;
 
+    Options options = Options(SkipName) | SkipDefaultValues;
     foreach (AbstractMetaArgument *arg, function->arguments()) {
-        uint options = SkipName | SkipDefaultValues;
         QString argType = argumentString(function, arg, options);
         if (arg->defaultValueExpression().isEmpty())
             nonOpts << argType;
@@ -142,7 +142,7 @@ void CppGenerator::writeConstructorInitialization(QTextStream &s, const Abstract
             if (arg->argumentName() == "parent") {
                 parentIndex = arg->argumentIndex();
                 parentType = translateType(arg->type(), function->ownerClass(),
-                                            Generator::ExcludeConst | Generator::ExcludeReference).replace("*", "");
+                                           Options(ExcludeConst) | ExcludeReference).replace("*", "");
                 break;
             }
         }
@@ -226,7 +226,7 @@ QString CppGenerator::writeFunctionCast(QTextStream &s,
         if (func->arguments().size() > 0)
             s << ", ";
     }
-    int options = SkipName | SkipDefaultValues | SkipRemovedArguments;
+    Options options = Options(SkipName) | SkipDefaultValues | SkipRemovedArguments;
     if (isWrapped && !func->isStatic())
         options |= WriteSelf;
 
@@ -303,11 +303,11 @@ QString CppGenerator::getArgumentType(const AbstractMetaClass *cppClass, const A
         retval = cppClass->qualifiedCppName();
     } else if (idx == 0 && func->type()) {
         retval = translateType(func->type(), cppClass,
-                             Generator::ExcludeConst | Generator::ExcludeReference);
+                             Options(Generator::ExcludeConst) | Generator::ExcludeReference);
     } else if (idx > 0) {
         retval = argumentString(func, func->arguments()[idx-1],
-                              Generator::SkipDefaultValues | Generator::ExcludeConst |
-                              Generator::ExcludeReference | Generator::SkipName);
+                              Options(SkipDefaultValues) | ExcludeConst |
+                              ExcludeReference | SkipName);
     }
 
     retval = retval.trimmed();
@@ -635,7 +635,7 @@ void CppGenerator::writeConstructorImpl(QTextStream& s, const AbstractMetaFuncti
 {
     QString wrapperName = getWrapperName(func->ownerClass());
     s << wrapperName << "::" << wrapperName << "(PyObject *py_self" << (func->arguments().size() ? ", " : "");
-    writeFunctionArguments(s, func, OriginalTypeDescription | SkipDefaultValues);
+    writeFunctionArguments(s, func, Options(OriginalTypeDescription) | SkipDefaultValues);
     s << ")" << endl;
     s << INDENT << " : ";
     writeFunctionCall(s, func);
@@ -717,7 +717,7 @@ void CppGenerator::writeVirtualMethodImpl(QTextStream& s, const AbstractMetaFunc
 
     QString prefix = getWrapperName(func->ownerClass()) + "::";
     s << functionSignature(func, prefix, "",
-                           Generator::OriginalTypeDescription | Generator::SkipDefaultValues)
+                           Options(Generator::OriginalTypeDescription) | Generator::SkipDefaultValues)
       << endl << "{" << endl;
 
     writeVirtualMethodImplHead(s, func);
@@ -804,7 +804,7 @@ void CppGenerator::writeNonVirtualModifiedFunctionImpl(QTextStream& s, const Abs
     s << "static " << getFunctionReturnType(func) << ' ';
     s << func->ownerClass()->name() << '_' << func->originalName() << "_modified(";
 
-    uint options = SkipRemovedArguments | SkipDefaultValues;
+    Options options = Options(SkipRemovedArguments) | SkipDefaultValues;
     if (!func->isStatic())
         options |= WriteSelf;
 
@@ -1192,7 +1192,7 @@ void CppGenerator::writeGlobalOperatorOverloadImpl(QTextStream& s, const Abstrac
 
     const AbstractMetaClass *klass = cppFunction->ownerClass();
     s << "python::object " << funcName << "(";
-    writeFunctionArguments(s, cppFunction, SkipDefaultValues | SkipRemovedArguments);
+    writeFunctionArguments(s, cppFunction, Options(SkipDefaultValues) | SkipRemovedArguments);
     s << ")" << endl << "{" << endl
       << INDENT << cppFunction->arguments()[reverse]->argumentName()
       << operatorStr << cppFunction->arguments()[!reverse]->argumentName() << ";" << endl

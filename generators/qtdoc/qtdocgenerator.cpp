@@ -1239,7 +1239,7 @@ void QtDocGenerator::writeFunctionSignature(QTextStream& s, const AbstractMetaCl
 
 QString QtDocGenerator::translateToPythonType(const AbstractMetaType *type, const AbstractMetaClass *cppClass)
 {
-    QString originalType = translateType(type, cppClass, Generator::ExcludeConst | Generator::ExcludeReference);
+    QString originalType = translateType(type, cppClass, Options(ExcludeConst) | ExcludeReference);
     QString strType = originalType;
 
     //remove "*"

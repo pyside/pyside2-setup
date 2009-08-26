@@ -178,7 +178,7 @@ void Generator::replaceTemplateVariables(QString &code, const AbstractMetaFuncti
     if (code.contains("%ARGUMENTS")) {
         QString str;
         QTextStream aux_stream(&str);
-        writeFunctionArguments(aux_stream, func, Generator::SkipDefaultValues | Generator::SkipRemovedArguments);
+        writeFunctionArguments(aux_stream, func, Options(SkipDefaultValues) | SkipRemovedArguments);
         code.replace("%ARGUMENTS", str);
     }
 }
@@ -391,47 +391,30 @@ CodeSnipList Generator::getCodeSnips(const AbstractMetaFunction *func)
 
 QString Generator::translateType(const AbstractMetaType *cType,
                                  const AbstractMetaClass *context,
-                                 int option) const
+                                 Options options) const
 {
     QString s;
 
     if (context && cType &&
         context->typeEntry()->isGenericClass() &&
         cType->originalTemplateType()) {
-            qDebug() << "set original templateType" << cType->name();
-            cType = cType->originalTemplateType();
+        cType = cType->originalTemplateType();
     }
 
     if (!cType) {
         s = "void";
     } else if (cType->isArray()) {
-        s = translateType(cType->arrayElementType(), context) + "[]";
+        s = translateType(cType->arrayElementType(), context, options) + "[]";
     } else if (cType->isEnum() || cType->isFlags()) {
-        if (option & Generator::EnumAsInts)
+        if (options & Generator::EnumAsInts)
             s = "int";
         else
             s = cType->cppSignature();
-#if 0
-    } else if (c_type->isContainer()) {
-        qDebug() << "is container" << c_type->cppSignature();
-        s = c_type->name();
-        if (!(option & SkipTemplateParameters)) {
-            s += " < ";
-            QList<AbstractMetaType *> args = c_type->instantiations();
-            for (int i = 0; i < args.size(); ++i) {
-                if (i)
-                    s += ", ";
-                qDebug() << "container type: " << args.at(i)->cppSignature() << " / " << args.at(i)->instantiations().count();
-                s += translateType(args.at(i), context, option);
-            }
-            s += " > ";
-        }
-#endif
     } else {
         s = cType->cppSignature();
-        if (cType->isConstant() && (option & Generator::ExcludeConst))
+        if (cType->isConstant() && (options & Generator::ExcludeConst))
             s.replace("const", "");
-        if (cType->isReference() && (option & Generator::ExcludeReference))
+        if (cType->isReference() && (options & Generator::ExcludeReference))
             s.replace("&", "");
     }
 

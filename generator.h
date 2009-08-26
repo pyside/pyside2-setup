@@ -85,6 +85,7 @@ public:
 
         ForceValueType           = ExcludeReference | ExcludeConst
     };
+    Q_DECLARE_FLAGS(Options, Option)
 
     Generator();
     virtual ~Generator();
@@ -147,7 +148,7 @@ public:
     */
     QString translateType(const AbstractMetaType *metatype,
                           const AbstractMetaClass *context,
-                          int option = NoOption) const;
+                          Options options = NoOption) const;
 
     /**
     *   Function used to write the fucntion arguments on the class buffer.
@@ -158,11 +159,11 @@ public:
     */
     virtual void writeFunctionArguments(QTextStream &s,
                                         const AbstractMetaFunction *metafunction,
-                                        uint options = 0) const = 0;
+                                        Options options = NoOption) const = 0;
 
     virtual void writeArgumentNames(QTextStream &s,
                                     const AbstractMetaFunction *metafunction,
-                                    uint options = 0) const = 0;
+                                    Options options = NoOption) const = 0;
 
     void replaceTemplateVariables(QString &code, const AbstractMetaFunction *func);
 

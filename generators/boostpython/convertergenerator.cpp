@@ -134,10 +134,8 @@ void ConverterGenerator::checkFunctionMetaTypes(AbstractMetaFunction* func)
         checkMetaType(functionReturnType(func));
 
     foreach (AbstractMetaArgument* arg, func->arguments()) {
-        if (arg->type()) {
-            checkMetaType(argumentString(func, arg,
-                          (Generator::SkipName | Generator::SkipDefaultValues)));
-        }
+        if (arg->type())
+            checkMetaType(argumentString(func, arg, Options(SkipName) | SkipDefaultValues));
     }
 }
 

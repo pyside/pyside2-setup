@@ -54,7 +54,7 @@ add_custom_target(dist
 
 install(TARGETS genrunner DESTINATION ${LIB_INSTALL_DIR})
 install(TARGETS generatorrunner DESTINATION bin)
-install(FILES generator.h DESTINATION include)
+install(FILES generator.h DESTINATION include/generatorrunner)
 
 enable_testing()
 

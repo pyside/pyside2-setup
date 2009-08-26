@@ -182,8 +182,8 @@ protected:
     void generateClass(QTextStream& s, const AbstractMetaClass* cppClass);
     void finishGeneration();
 
-    void writeFunctionArguments(QTextStream&, const AbstractMetaFunction*, uint) const {}
-    void writeArgumentNames(QTextStream&, const AbstractMetaFunction*, uint) const {}
+    void writeFunctionArguments(QTextStream&, const AbstractMetaFunction*, Options) const {}
+    void writeArgumentNames(QTextStream&, const AbstractMetaFunction*, Options) const {}
     QString subDirectoryForClass(const AbstractMetaClass* clazz) const
     {
         Q_ASSERT(false);
