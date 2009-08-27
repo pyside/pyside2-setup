@@ -35,6 +35,9 @@ target_link_libraries(shiboken_generator
                       ${QT_QTXML_LIBRARY}
                       -lgenrunner) # FIXME libgenrunner needs a cmake FindPkg script!
 
+add_executable(shiboken main.cpp)
+target_link_libraries(shiboken ${QT_QTCORE_LIBRARY})
+
 # uninstall target
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
                "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
@@ -47,17 +50,14 @@ enable_testing()
 add_subdirectory(libshiboken)
 add_subdirectory(tests)
 
-# "make dist", in fact "make package_source"
-#set(CPACK_SOURCE_PACKAGE_FILE_NAME "shiboken-${shiboken_VERSION}")
-#set(CPACK_SOURCE_GENERATOR TGZ)
-#set(CPACK_SOURCE_IGNORE_FILES "~$" ".svn" "debian/" "build/" ".swp$" "*.kdev4")
-#include(CPack)
-
 set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${shiboken_VERSION})
 add_custom_target(dist
     COMMAND git archive --prefix=${ARCHIVE_NAME}/ HEAD
         | bzip2 > ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+add_dependencies(shiboken shiboken_generator)
+
 install(TARGETS shiboken_generator DESTINATION ${LIB_INSTALL_DIR})
+install(TARGETS shiboken DESTINATION bin)
 
