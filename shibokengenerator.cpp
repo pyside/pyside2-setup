@@ -113,7 +113,6 @@ void ShibokenGenerator::initPrimitiveTypesCorrespondences()
 
     // Initialize format units for C++->Python->C++ conversion
     m_formatUnits.clear();
-    m_formatUnits.insert("bool", "i");
     m_formatUnits.insert("char", "b");
     m_formatUnits.insert("unsigned char", "B");
     m_formatUnits.insert("int", "i");
@@ -340,17 +339,20 @@ void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaT
 QString ShibokenGenerator::getFormatUnitString(const AbstractMetaArgumentList arguments) const
 {
     QString result;
-    foreach (const AbstractMetaArgument *arg, arguments) {
+    foreach (const AbstractMetaArgument* arg, arguments) {
         if (arg->type()->isQObject()
             || arg->type()->isObject()
             || arg->type()->isValue()
             || arg->type()->isReference()) {
-            result += "O";
+            result += 'O';
         } else if (arg->type()->isPrimitive()) {
             const PrimitiveTypeEntry* ptype = (const PrimitiveTypeEntry*) arg->type()->typeEntry();
             if (ptype->basicAliasedTypeEntry())
                 ptype = ptype->basicAliasedTypeEntry();
-            result += m_formatUnits[ptype->name()];
+            if (m_formatUnits.contains(ptype->name()))
+                result += m_formatUnits[ptype->name()];
+            else
+                result += 'O';
         } else if (arg->type()->isNativePointer() && arg->type()->name() == "char") {
             result += 'z';
         } else {

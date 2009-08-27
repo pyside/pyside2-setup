@@ -318,14 +318,16 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 Indentation indentation(INDENT);
                 bool convert = arg->type()->isObject()
                                 || arg->type()->isValue()
-                                || arg->type()->isReference();
+                                || arg->type()->isReference()
+                                || (arg->type()->isPrimitive()
+                                    && !m_formatUnits.contains(arg->type()->typeEntry()->name()));
                 s << INDENT;
                 if (convert) {
                     s << "Shiboken::Converter< ";
                     s << translateType(arg->type(), func->ownerClass());
                     s << " >::toPython(Shiboken::ValueHolder< ";
                     s << translateTypeForWrapperMethod(arg->type(), func->ownerClass());
-                    s << "  >(";
+                    s << " >(";
                 }
                 s << arg->argumentName();
                 if (convert)
