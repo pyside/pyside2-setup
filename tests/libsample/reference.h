@@ -14,6 +14,12 @@ public:
     static int usesReference(Reference& r) { return r.m_objId; }
     static int usesConstReference(const Reference& r) { return r.m_objId; }
 
+    virtual int usesReferenceVirtual(Reference& r, int inc);
+    virtual int usesConstReferenceVirtual(const Reference& r, int inc);
+
+    int callUsesReferenceVirtual(Reference& r, int inc);
+    int callUsesConstReferenceVirtual(const Reference& r, int inc);
+
     void show() const;
 
 private:
