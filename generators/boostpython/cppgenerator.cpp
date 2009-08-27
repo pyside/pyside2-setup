@@ -594,6 +594,13 @@ void CppGenerator::writePrelude(QTextStream& s, const AbstractMetaClass* cppClas
         }
     }
 
+    //Fields
+    foreach (AbstractMetaField *field, cppClass->fields()) {
+        if (field->isPublic()) {
+            writeFieldAccess(s, cppClass, field);
+        }
+    }
+
     //inject code native end
     writeCodeSnips(s, cppClass->typeEntry()->codeSnips(),
                    CodeSnip::End, TypeSystem::NativeCode);
@@ -846,6 +853,72 @@ AbstractMetaFunction* CppGenerator::findMainConstructor(const AbstractMetaClass*
     return 0;
 }
 
+void CppGenerator::writeGetterFieldFunction(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaField *field)
+{
+    s << "static ";
+
+    bool pointer = false;
+    if (field->type()->isQObject() || field->type()->isObject())
+        pointer = true;
+
+    if (pointer)
+        s << "python::object";
+    else
+        s << field->type()->cppSignature();
+
+    s << " getter_" << cppClass->name() << "_" << field->name() << "(";
+
+    if (!field->isStatic())
+        s << cppClass->qualifiedCppName() << " &self";
+
+    s  << ")" << endl << "{" << endl
+       << INDENT << "return ";
+
+    if (pointer)
+        s << "python::object(PySide::ptr(";
+
+    if (!field->isStatic())
+        s << "self.";
+    else
+        s << field->enclosingClass()->typeEntry()->qualifiedCppName() << "::";
+
+    s << field->name();
+
+    if (pointer)
+        s << "))";
+
+    s << ";" << endl << "}" << endl;
+}
+
+void CppGenerator::writeSetterFieldFunction(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaField *field)
+{
+    s << "static void setter_" << cppClass->name() << "_" << field->name() << "(";
+
+    if (!field->isStatic())
+        s << cppClass->qualifiedCppName() << " &self, ";
+
+    s  << field->type()->cppSignature() << " _value)" << endl << "{" << endl
+       << INDENT;
+
+    if (!field->isStatic())
+        s << "self.";
+    else
+        s << field->enclosingClass()->typeEntry()->qualifiedCppName() << "::";
+
+    s << field->name() << " = _value;" << endl << "}" << endl;
+}
+
+
+void CppGenerator::writeFieldAccess(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaField *field)
+{
+    Indentation indent(INDENT);
+
+    writeGetterFieldFunction(s, cppClass, field);
+    if (!field->type()->isConstant())
+        writeSetterFieldFunction(s, cppClass, field);
+}
+
+
 void CppGenerator::writeHashFunction(QTextStream& s, const AbstractMetaClass* cppClass)
 {
     QString argType;
@@ -943,15 +1016,15 @@ void CppGenerator::writeBoostDeclaration(QTextStream& s, const AbstractMetaClass
         QString strAccess;
 
         if (field->isPublic()) {
-            if (field->type()->isConstant())
-                strAccess = "def_readonly";
-            else
-                strAccess = "def_readwrite";
 
-            s << INDENT << "python_cls."
-              << strAccess
-              << "(\"" << field->name() << "\", &"
-              << field->enclosingClass()->typeEntry()->qualifiedCppName() << "::" << field->name() << ");" << endl;
+            s << INDENT << "python_cls.add_property("
+              << "\"" << field->name() << "\""
+              << ", getter_" << cppClass->name() << "_" << field->name();
+            if (!field->type()->isConstant())
+                s << ", setter_" << cppClass->name() << "_" << field->name();
+
+            s << ");" << endl;
+
         }
     }
 

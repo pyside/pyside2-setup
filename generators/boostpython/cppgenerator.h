@@ -79,6 +79,11 @@ private:
     QString operatorFunctionName(const AbstractMetaFunction *func);
     QString getOperatorArgumentTypeName(const AbstractMetaFunction *func, int argumentIndex);
 
+    // Field access related
+    void writeSetterFieldFunction(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaField *field);
+    void writeGetterFieldFunction(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaField *field);
+    void writeFieldAccess(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaField *field);
+
     // call policy related
     QString verifyDefaultReturnPolicy(const AbstractMetaFunction *func, const QString &callPolicy);
     QString getFunctionCallPolicy(const AbstractMetaFunction *func);
@@ -86,6 +91,7 @@ private:
     // enum related
     void writeEnums(QTextStream &s, const AbstractMetaClass *cppClass, bool useNamespace);
     void writeEnum(QTextStream &s, const AbstractMetaEnum *cppEnum, const QString &nameSpace);
+
     // write implicitly conversions
     void writeImplicitlyConversion(QTextStream &s, const AbstractMetaClass *cppClass);
     void writeVirtualDefaultFunction(QTextStream &s, const AbstractMetaFunction *arg2);
