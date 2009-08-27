@@ -185,9 +185,9 @@ static bool preprocess(const QString& sourceFile,
     preprocess.operator()(ba.constData(), ba.constData() + ba.size(), null_out);
 
     preprocess.push_include_path(".");
-    preprocess.push_include_path("/usr/include");
     foreach (QString include, includes)
         preprocess.push_include_path(QDir::convertSeparators(include).toStdString());
+    preprocess.push_include_path("/usr/include");
 
     QString currentDir = QDir::current().absolutePath();
     QFileInfo sourceInfo(sourceFile);
