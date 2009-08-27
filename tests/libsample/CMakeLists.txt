@@ -15,6 +15,7 @@ point.cpp
 reference.cpp
 samplenamespace.cpp
 size.cpp
+virtualmethods.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})

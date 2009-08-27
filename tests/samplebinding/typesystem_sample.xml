@@ -199,6 +199,7 @@
     </object-type>
 
     <value-type name="Reference"/>
+    <value-type name="VirtualMethods"/>
 
     <value-type name="ImplicitConv"/>
 

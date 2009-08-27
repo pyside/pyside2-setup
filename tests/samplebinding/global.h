@@ -12,4 +12,5 @@
 #include "modifications.h"
 #include "implicitconv.h"
 #include "reference.h"
+#include "virtualmethods.h"
 
