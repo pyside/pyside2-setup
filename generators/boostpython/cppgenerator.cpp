@@ -456,7 +456,7 @@ void CppGenerator::writeEnum(QTextStream &s,
     //register enum in typemanager
     s << INDENT
     << "type_manager::instance().register_native_type<int>(\""
-    <<  cppEnum->qualifier() << "::" << cppEnum->name() << "\");\n\n";
+    <<  nameSpace << cppEnum->name() << "\");\n\n";
 }
 
 void CppGenerator::writeEnums(QTextStream &s, const AbstractMetaClass *cppClass, bool useNamespace)
