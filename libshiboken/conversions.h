@@ -60,6 +60,12 @@ struct Converter
     }
 };
 
+template <typename T>
+struct Converter<T &> : Converter<T> {};
+
+template <typename T>
+struct Converter<const T &> : Converter<T> {};
+
 // Object Types ---------------------------------------------------------------
 template <>
 struct Converter<void*>

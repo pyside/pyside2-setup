@@ -341,9 +341,11 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaArgumentList ar
 {
     QString result;
     foreach (const AbstractMetaArgument *arg, arguments) {
-        if ((arg->type()->isQObject() || arg->type()->isObject() || arg->type()->isValue())) { // &&
-//             !arg->type()->isReference()) {
-            result += "O&";
+        if (arg->type()->isQObject()
+            || arg->type()->isObject()
+            || arg->type()->isValue()
+            || arg->type()->isReference()) {
+            result += "O";
         } else if (arg->type()->isPrimitive()) {
             const PrimitiveTypeEntry* ptype = (const PrimitiveTypeEntry*) arg->type()->typeEntry();
             if (ptype->basicAliasedTypeEntry())

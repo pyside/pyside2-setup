@@ -287,23 +287,6 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         s << "::" << func->minimalSignature();
         s << "\" must be implement but was completely removed on typesystem." << endl;
     } else {
-//             QString converter_calls;
-//             QTextStream s_converter_calls(&converter_calls);
-//             QString callDefault = returnKeyword + "default_method(self";
-//             foreach (const AbstractMetaArgument* arg, func->arguments()) {
-//                 Indentation indentation(INDENT);
-//                 callDefault += ", " + arg->argumentName();
-//                 s_converter_calls << INDENT << ", " << '&' << arg->argumentName()
-//                 if ((arg->type()->isQObject() || arg->type()->isObject() || arg->type()->isValue()) &&
-//                     !arg->type()->isReference()) {
-//                     s_converter_calls << '&' << arg->argumentName() << ", nagasaki::to_python_converter" << endl;
-//                 } else {
-//                     s_converter_calls << "nagasaki::convert_to_python< "
-//                                         << argumentString(func, arg, SkipName | SkipDefaultValues)
-//                                         << " >(" << arg->argumentName() << ')' << endl;
-//                 }
-//             }
-//             callDefault += ");";
         if (func->allowThread())
             s << INDENT << "// how to say to Python to allow threads?" << endl;
 
@@ -330,16 +313,28 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         if (func->arguments().isEmpty()) {
             s << "PyTuple_New(0);" << endl;
         } else {
-            s << "Py_BuildValue(\"(" << getFormatUnitString(func->arguments()) << ")\"";
+            s << "Py_BuildValue(\"(" << getFormatUnitString(func->arguments()) << ")\"," << endl;
             foreach (const AbstractMetaArgument* arg, func->arguments()) {
-                s << ", " << arg->argumentName();
-                if ((arg->type()->isObject() || arg->type()->isValue()) && !arg->type()->isReference()) {
-                    s << ", Shiboken::Converter< ";
+                Indentation indentation(INDENT);
+                bool convert = arg->type()->isObject()
+                                || arg->type()->isValue()
+                                || arg->type()->isReference();
+                s << INDENT;
+                if (convert) {
+                    s << "Shiboken::Converter< ";
+                    s << translateType(arg->type(), func->ownerClass());
+                    s << " >::toPython(Shiboken::ValueHolder< ";
                     s << translateTypeForWrapperMethod(arg->type(), func->ownerClass());
-                    s << " >::toPython";
+                    s << "  >(";
                 }
+                s << arg->argumentName();
+                if (convert)
+                    s << "))";
+                if (arg->argumentIndex() != func->arguments().size() - 1)
+                    s << ',';
+                s << endl;
             }
-            s << ");" << endl;
+            s << INDENT << ");" << endl;
         }
         s << endl;
 
