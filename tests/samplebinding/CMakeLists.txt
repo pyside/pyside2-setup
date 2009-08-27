@@ -46,5 +46,5 @@ target_link_libraries(sample
                       ${PYTHON_LIBRARIES}
                       libshiboken)
 
-add_dependencies(sample shiboken)
+add_dependencies(sample shiboken_generator)
 
