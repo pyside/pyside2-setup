@@ -368,7 +368,7 @@ void CppGenerator::writeNonVirtualModifiedFunctionNative(QTextStream& s, const A
     s << getFunctionReturnType(func) << ' ';
     s << func->ownerClass()->name() << '_' << func->originalName() << "_modified(";
 
-    uint options = SkipRemovedArguments | SkipDefaultValues;
+    Options options = Options(SkipRemovedArguments) | SkipDefaultValues;
     if (!func->isStatic())
         options |= WriteSelf;
 
@@ -503,7 +503,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         }
 
         if (rfunc->type())
-            s << INDENT << getFunctionReturnType(rfunc) << ' ' << retvalVariableName() << ';' << endl;
+            s << INDENT << translateTypeForWrapperMethod(rfunc->type(), rfunc->implementingClass()) << ' ' << retvalVariableName() << ';' << endl;
 
         if (minArgs != maxArgs || maxArgs > 1) {
             s << INDENT << "int numArgs = ";

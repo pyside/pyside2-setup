@@ -7,6 +7,9 @@ find_package(ApiExtractor REQUIRED)
 
 add_definitions(${QT_DEFINITIONS})
 
+set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
+set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
+
 set(shiboken_VERSION 0.1)
 set(CMAKE_BUILD_TYPE Debug)
 
@@ -14,9 +17,8 @@ set(shiboken_SRC
 shibokengenerator.cpp
 headergenerator.cpp
 cppgenerator.cpp
-docgenerator.cpp
 polymorphicdata.cpp
-main.cpp
+shiboken.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
@@ -25,12 +27,13 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${QT_INCLUDE_DIR}
                     ${QT_QTCORE_INCLUDE_DIR})
 
-add_executable(shiboken ${shiboken_SRC})
+add_library(shiboken_generator SHARED ${shiboken_SRC})
 
-target_link_libraries(shiboken
+target_link_libraries(shiboken_generator
                       ${APIEXTRACTOR_LIBRARY}
                       ${QT_QTCORE_LIBRARY}
-                      ${QT_QTXML_LIBRARY})
+                      ${QT_QTXML_LIBRARY}
+                      -lgenrunner) # FIXME libgenrunner needs a cmake FindPkg script!
 
 # uninstall target
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
@@ -56,6 +59,5 @@ add_custom_target(dist
         | bzip2 > ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
-
-install(TARGETS shiboken DESTINATION bin)
+install(TARGETS shiboken_generator DESTINATION ${LIB_INSTALL_DIR})
 

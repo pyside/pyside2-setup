@@ -24,7 +24,7 @@
 #ifndef SHIBOKENGENERATOR_H
 #define SHIBOKENGENERATOR_H
 
-#include <apiextractor/generator.h>
+#include <generatorrunner/generator.h>
 #include <QtCore/QTextStream>
 
 class DocParser;
@@ -37,20 +37,8 @@ class ShibokenGenerator : public Generator
 public:
     ShibokenGenerator();
 
-    /**
-     *   Translate metatypes to C++ format.
-     *   \param metaType a pointer to metatype
-     *   \param context the current meta class
-     *   \param option some extra options
-     *   \return the metatype translated to C++ format
-     */
-    virtual QString translateType(const AbstractMetaType* metaType,
-                                  const AbstractMetaClass* context,
-                                  int option = NoOption) const;
-
     QString translateTypeForWrapperMethod(const AbstractMetaType* cType,
                                           const AbstractMetaClass* context) const;
-
 
     /**
      *   Write a function argument in the C++ in the text stream \p s.
@@ -63,7 +51,7 @@ public:
     void writeArgument(QTextStream &s,
                        const AbstractMetaFunction* func,
                        const AbstractMetaArgument* argument,
-                       uint options = 0) const;
+                       Options options = NoOption) const;
     /**
      *   Create a QString in the C++ format to an function argument.
      *   \param func the current metafunction.
@@ -72,11 +60,11 @@ public:
      */
     QString argumentString(const AbstractMetaFunction* func,
                            const AbstractMetaArgument* argument,
-                           uint options = 0) const;
+                           Options options = NoOption) const;
 
     void writeArgumentNames(QTextStream &s,
                             const AbstractMetaFunction* func,
-                            uint options = 0) const;
+                            Options options = NoOption) const;
 
     /**
      *   Function used to write the fucntion arguments on the class buffer.
@@ -87,8 +75,8 @@ public:
      */
     void writeFunctionArguments(QTextStream &s,
                                 const AbstractMetaFunction* func,
-                                uint options = 0) const;
-    QString functionReturnType(const AbstractMetaFunction* func, int option = NoOption) const;
+                                Options options = NoOption) const;
+    QString functionReturnType(const AbstractMetaFunction* func, Options options = NoOption) const;
     /**
      *   Write a code snip into the buffer \p s.
      *   CodeSnip are codes inside inject-code tags.
@@ -115,13 +103,13 @@ public:
     QString functionSignature(const AbstractMetaFunction* func,
                               QString prepend = "",
                               QString append = "",
-                              int option = NoOption,
+                              Options options = NoOption,
                               int arg_count = -1) const;
 
     QString signatureForDefaultVirtualMethod(const AbstractMetaFunction* func,
                                              QString prepend = "",
                                              QString append = "_default",
-                                             int option = NoOption,
+                                             Options option = NoOption,
                                              int arg_count = -1) const;
 
     virtual QString subDirectoryForClass(const AbstractMetaClass* metaClass) const
@@ -179,13 +167,11 @@ public:
         return cpythonEnumName(metaEnum->typeEntry());
     }
 
-    QString getFunctionReturnType(const AbstractMetaFunction* func) const;
+    QString getFunctionReturnType(const AbstractMetaFunction* func, Options options = NoOption) const;
     QString getFormatUnitString(const AbstractMetaArgumentList arguments) const;
 
-    virtual bool prepareGeneration(const QMap<QString, QString>& args)
-    {
-        return true;
-    }
+
+    bool doSetup(const QMap<QString, QString>& args);
 
 protected:
     bool m_native_jump_table;
@@ -206,7 +192,7 @@ protected:
     AbstractMetaFunctionList queryFunctions(const AbstractMetaClass* metaClass, bool allFunction = false);
     void writeFunctionCall(QTextStream& s,
                            const AbstractMetaFunction* metaFunc,
-                           uint options = 0) const;
+                           Options options = NoOption) const;
 
     AbstractMetaFunctionList filterFunctions(const AbstractMetaClass* metaClass);
     AbstractMetaFunctionList queryGlobalOperators(const AbstractMetaClass* metaClass);

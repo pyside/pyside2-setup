@@ -21,8 +21,10 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/size_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/virtualmethods_wrapper.cpp
 )
 
+find_program(GENERATOR generatorrunner REQUIRED)
+
 add_custom_command(OUTPUT ${sample_SRC}
-COMMAND ${CMAKE_BINARY_DIR}/shiboken
+COMMAND ${GENERATOR} --generatorSet=${shiboken_BINARY_DIR}/shiboken
         ${CMAKE_CURRENT_SOURCE_DIR}/global.h
         --include-paths=${libsample_SOURCE_DIR}
         --typesystem-paths=${CMAKE_CURRENT_SOURCE_DIR}

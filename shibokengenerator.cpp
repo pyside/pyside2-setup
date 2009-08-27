@@ -142,46 +142,6 @@ FunctionModificationList ShibokenGenerator::functionModifications(const Abstract
     return mods;
 }
 
-/*
-QString ShibokenGenerator::translateType(const AbstractMetaType* cType,
-                                         const AbstractMetaClass* context,
-                                         int option) const
-{
-    QString s;
-
-    if (context != 0
-        && cType != 0
-        && context->typeEntry()->isGenericClass()
-        && cType->originalTemplateType())
-    {
-        cType = cType->originalTemplateType();
-    }
-
-    if (!cType) {
-        s = "void";
-    } else if (cType->isArray()) {
-        s = translateType(cType->arrayElementType(), context) + "[]";
-    } else if (cType->isEnum() || cType->isFlags()) {
-        if (option & Generator::EnumAsInts)
-            s = "int";
-        else
-            s = cType->cppSignature();
-    } else if (cType->isValue() || cType->isObject() || cType->isReference()) {
-        s = cType->typeEntry()->qualifiedCppName();
-        if (cType->isObject())
-            s.append('*');
-    } else {
-        s = cType->cppSignature();
-        if (cType->isConstant() && (option & Generator::ExcludeConst))
-            s.replace("const", "");
-        if (cType->isReference() && (option & Generator::ExcludeReference))
-            s.replace("&", "");
-    }
-
-    return s;
-}
-*/
-
 QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType* cType,
                                                          const AbstractMetaClass* context) const
 {
@@ -198,58 +158,6 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType*
     }
 
     return result;
-}
-
-QString ShibokenGenerator::translateType(const AbstractMetaType *cType,
-                                         const AbstractMetaClass *context,
-                                         int option) const
-{
-    QString s;
-
-    if (context && cType &&
-        context->typeEntry()->isGenericClass() &&
-        cType->originalTemplateType()) {
-            qDebug() << "set original templateType" << cType->name();
-            cType = cType->originalTemplateType();
-    }
-
-    if (!cType) {
-        s = "void";
-    } else if (cType->isArray()) {
-        s = translateType(cType->arrayElementType(), context) + "[]";
-    } else if (cType->isEnum() || cType->isFlags()) {
-        if (option & Generator::EnumAsInts)
-            s = "int";
-        else
-            s = cType->cppSignature();
-#if 0
-    } else if (c_type->isContainer()) {
-        qDebug() << "is container" << c_type->cppSignature();
-        s = c_type->name();
-        if (!(option & SkipTemplateParameters)) {
-            s += " < ";
-            QList<AbstractMetaType *> args = c_type->instantiations();
-            for (int i = 0; i < args.size(); ++i) {
-                if (i)
-                    s += ", ";
-                qDebug() << "container type: " << args.at(i)->cppSignature() << " / " << args.at(i)->instantiations().count();
-                s += translateType(args.at(i), context, option);
-            }
-            s += " > ";
-        }
-#endif
-    } else {
-        s = cType->cppSignature();
-        if (cType->isConstant() && (option & Generator::ExcludeConst))
-            s.replace("const", "");
-        if (cType->isReference() && (option & Generator::ExcludeReference))
-            s.replace("&", "");
-    }
-
-    s.replace(" *", "*");
-    s.replace("char*", "char *");
-
-    return s;
 }
 
 QString ShibokenGenerator::wrapperName(const AbstractMetaClass* metaClass)
@@ -293,7 +201,7 @@ QString ShibokenGenerator::cpythonEnumName(const EnumTypeEntry* enumEntry)
     return result;
 }
 
-QString ShibokenGenerator::getFunctionReturnType(const AbstractMetaFunction* func) const
+QString ShibokenGenerator::getFunctionReturnType(const AbstractMetaFunction* func, Options options) const
 {
     if (func->ownerClass() && (func->isConstructor() || func->isCopyConstructor()))
         return func->ownerClass()->qualifiedCppName() + '*';
@@ -520,13 +428,13 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool gene
 
 QString ShibokenGenerator::argumentString(const AbstractMetaFunction *func,
                                           const AbstractMetaArgument *argument,
-                                          uint options) const
+                                          Options options) const
 {
     QString modified_type = func->typeReplaced(argument->argumentIndex() + 1);
     QString arg;
 
     if (modified_type.isEmpty())
-        arg = translateType(argument->type(), func->implementingClass(), (Generator::Option) options);
+        arg = translateType(argument->type(), func->implementingClass(), options);
     else
         arg = modified_type.replace('$', '.');
 
@@ -557,14 +465,14 @@ QString ShibokenGenerator::argumentString(const AbstractMetaFunction *func,
 void ShibokenGenerator::writeArgument(QTextStream &s,
                                       const AbstractMetaFunction *func,
                                       const AbstractMetaArgument *argument,
-                                      uint options) const
+                                      Options options) const
 {
     s << argumentString(func, argument, options);
 }
 
 void ShibokenGenerator::writeFunctionArguments(QTextStream &s,
                                                const AbstractMetaFunction *func,
-                                               uint options) const
+                                               Options options) const
 {
     AbstractMetaArgumentList arguments = func->arguments();
 
@@ -586,19 +494,19 @@ void ShibokenGenerator::writeFunctionArguments(QTextStream &s,
     }
 }
 
-QString ShibokenGenerator::functionReturnType(const AbstractMetaFunction* func, int option) const
+QString ShibokenGenerator::functionReturnType(const AbstractMetaFunction* func, Options options) const
 {
     QString modifiedReturnType = QString(func->typeReplaced(0));
-    if (!modifiedReturnType.isNull() && !(option & OriginalTypeDescription))
+    if (!modifiedReturnType.isNull() && !(options & OriginalTypeDescription))
         return modifiedReturnType;
     else
-        return translateType(func->type(), func->implementingClass(), option);
+        return translateType(func->type(), func->implementingClass(), options);
 }
 
 QString ShibokenGenerator::functionSignature(const AbstractMetaFunction *func,
                                              QString prepend,
                                              QString append,
-                                             int option,
+                                             Options options,
                                              int argCount) const
 {
     AbstractMetaArgumentList arguments = func->arguments();
@@ -610,9 +518,9 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunction *func,
     if (!(func->isEmptyFunction() ||
           func->isNormal() ||
           func->isSignal())) {
-        option = Option(option | Generator::SkipReturnType);
+        options |= Generator::SkipReturnType;
     } else {
-        s << functionReturnType(func, option) << ' ';
+        s << functionReturnType(func, options) << ' ';
     }
 
     // name
@@ -621,10 +529,10 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunction *func,
         name = wrapperName(func->ownerClass());
 
     s << prepend << name << append << '(';
-    writeFunctionArguments(s, func, option);
+    writeFunctionArguments(s, func, options);
     s << ')';
 
-    if (func->isConstant() && !(option & Generator::ExcludeMethodConst))
+    if (func->isConstant() && !(options & Generator::ExcludeMethodConst))
         s << " const";
 
     return result;
@@ -633,10 +541,10 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunction *func,
 QString ShibokenGenerator::signatureForDefaultVirtualMethod(const AbstractMetaFunction *func,
                                                             QString prepend,
                                                             QString append,
-                                                            int option,
+                                                            Options options,
                                                             int argCount) const
 {
-    QString defaultMethodSignature = functionSignature(func, prepend, append, option, argCount);
+    QString defaultMethodSignature = functionSignature(func, prepend, append, options, argCount);
     QString staticSelf("(");
     if (func->isConstant())
         staticSelf += "const ";
@@ -659,7 +567,7 @@ bool ShibokenGenerator::hasInjectedCodeOrSignatureModification(const AbstractMet
 
 void ShibokenGenerator::writeArgumentNames(QTextStream &s,
                                            const AbstractMetaFunction *func,
-                                           uint options) const
+                                           Options options) const
 {
     AbstractMetaArgumentList arguments = func->arguments();
     int argCount = 0;
@@ -762,7 +670,7 @@ AbstractMetaFunctionList ShibokenGenerator::queryFunctions(const AbstractMetaCla
 
 void ShibokenGenerator::writeFunctionCall(QTextStream& s,
                                           const AbstractMetaFunction* func,
-                                          uint options) const
+                                          Options options) const
 {
     if (!(options & Generator::SkipName))
         s << (func->isConstructor() ? func->ownerClass()->qualifiedCppName() : func->originalName());
@@ -828,7 +736,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
         QTextStream tmpStream(&code);
         Indentation indent1(INDENT);
         Indentation indent2(INDENT);
-        snip.formattedCode(tmpStream, INDENT);
+        formatCode(tmpStream, snip.code(), INDENT);
 
         if (func) {
             // replace template variable for return variable name
@@ -904,3 +812,10 @@ static void dumpFunction(AbstractMetaFunctionList lst)
                         << "is operator:" << func->isOperatorOverload()
                         << "is global:" << func->isInGlobalScope();
 }
+
+
+bool ShibokenGenerator::doSetup(const QMap<QString, QString>& args)
+{
+    return true;
+}
+
