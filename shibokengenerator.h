@@ -47,6 +47,11 @@ public:
     virtual QString translateType(const AbstractMetaType* metaType,
                                   const AbstractMetaClass* context,
                                   int option = NoOption) const;
+
+    QString translateTypeForWrapperMethod(const AbstractMetaType* cType,
+                                          const AbstractMetaClass* context) const;
+
+
     /**
      *   Write a function argument in the C++ in the text stream \p s.
      *   This function just call \code s << argumentString(); \endcode

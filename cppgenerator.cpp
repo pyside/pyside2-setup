@@ -334,9 +334,9 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             foreach (const AbstractMetaArgument* arg, func->arguments()) {
                 s << ", " << arg->argumentName();
                 if ((arg->type()->isObject() || arg->type()->isValue()) && !arg->type()->isReference()) {
-                    s << ", Shiboken::Converter< "
-                      << translateType(arg->type(), func->ownerClass())
-                      << " >::toPython";
+                    s << ", Shiboken::Converter< ";
+                    s << translateTypeForWrapperMethod(arg->type(), func->ownerClass());
+                    s << " >::toPython";
                 }
             }
             s << ");" << endl;
@@ -741,7 +741,8 @@ void CppGenerator::writePolymorphicDecisor(QTextStream& s, PolymorphicData* pare
                     if (varargs)
                         pyArgName = QString("pyargs[%1]").arg(i);
                     const AbstractMetaType* type = func->arguments()[i + removed]->type();
-                    s << INDENT << translateType(type, func->implementingClass()) << ' ' << argName << " = ";
+                    s << INDENT << translateTypeForWrapperMethod(type, func->implementingClass());
+                    s << ' ' << argName << " = ";
                     writeToCppConversion(s, type, func->implementingClass(), pyArgName);
                     s << ';' << endl;
                 }
@@ -1104,7 +1105,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                         s << arg0TypeName << "& cpp_other = *";
                         s << cpythonWrapperCPtr(metaClass, "other");
                     } else {
-                        s << translateType(type, metaClass) << " cpp_other = ";
+                        s << translateTypeForWrapperMethod(type, metaClass) << " cpp_other = ";
                         writeToCppConversion(s, type, metaClass, "other");
                     }
                     s << ';' << endl;

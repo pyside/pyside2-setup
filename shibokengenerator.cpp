@@ -143,6 +143,7 @@ FunctionModificationList ShibokenGenerator::functionModifications(const Abstract
     return mods;
 }
 
+/*
 QString ShibokenGenerator::translateType(const AbstractMetaType* cType,
                                          const AbstractMetaClass* context,
                                          int option) const
@@ -177,6 +178,77 @@ QString ShibokenGenerator::translateType(const AbstractMetaType* cType,
         if (cType->isReference() && (option & Generator::ExcludeReference))
             s.replace("&", "");
     }
+
+    return s;
+}
+*/
+
+QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType* cType,
+                                                         const AbstractMetaClass* context) const
+{
+    QString result;
+
+    if (cType->isValue() || cType->isObject() || cType->isReference()) {
+        result = cType->typeEntry()->qualifiedCppName();
+        if (cType->isObject())
+            result.append('*');
+    } else if (cType->isArray()) {
+        result = translateTypeForWrapperMethod(cType->arrayElementType(), context) + "[]";
+    } else {
+        result = translateType(cType, context);
+    }
+
+    return result;
+}
+
+QString ShibokenGenerator::translateType(const AbstractMetaType *cType,
+                                         const AbstractMetaClass *context,
+                                         int option) const
+{
+    QString s;
+
+    if (context && cType &&
+        context->typeEntry()->isGenericClass() &&
+        cType->originalTemplateType()) {
+            qDebug() << "set original templateType" << cType->name();
+            cType = cType->originalTemplateType();
+    }
+
+    if (!cType) {
+        s = "void";
+    } else if (cType->isArray()) {
+        s = translateType(cType->arrayElementType(), context) + "[]";
+    } else if (cType->isEnum() || cType->isFlags()) {
+        if (option & Generator::EnumAsInts)
+            s = "int";
+        else
+            s = cType->cppSignature();
+#if 0
+    } else if (c_type->isContainer()) {
+        qDebug() << "is container" << c_type->cppSignature();
+        s = c_type->name();
+        if (!(option & SkipTemplateParameters)) {
+            s += " < ";
+            QList<AbstractMetaType *> args = c_type->instantiations();
+            for (int i = 0; i < args.size(); ++i) {
+                if (i)
+                    s += ", ";
+                qDebug() << "container type: " << args.at(i)->cppSignature() << " / " << args.at(i)->instantiations().count();
+                s += translateType(args.at(i), context, option);
+            }
+            s += " > ";
+        }
+#endif
+    } else {
+        s = cType->cppSignature();
+        if (cType->isConstant() && (option & Generator::ExcludeConst))
+            s.replace("const", "");
+        if (cType->isReference() && (option & Generator::ExcludeReference))
+            s.replace("&", "");
+    }
+
+    s.replace(" *", "*");
+    s.replace("char*", "char *");
 
     return s;
 }
@@ -227,7 +299,7 @@ QString ShibokenGenerator::getFunctionReturnType(const AbstractMetaFunction* fun
     if (func->ownerClass() && (func->isConstructor() || func->isCopyConstructor()))
         return func->ownerClass()->qualifiedCppName() + '*';
 
-    return translateType(func->type(), func->implementingClass());
+    return translateTypeForWrapperMethod(func->type(), func->implementingClass());
 
     //TODO: check these lines
     //QString modifiedReturnType = QString(func->typeReplaced(0));
@@ -245,7 +317,7 @@ QString ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMet
             ptype = ptype->basicAliasedTypeEntry();
         typeName = ptype->name();
     } else {
-        typeName = translateType(type, context);
+        typeName = translateTypeForWrapperMethod(type, context);
     }
     s << "Shiboken::Converter< " << typeName << " >::";
     return typeName;
