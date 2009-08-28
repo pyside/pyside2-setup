@@ -8,8 +8,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/FindShiboken.cmake.in
                ${CMAKE_CURRENT_BINARY_DIR}/FindShiboken.cmake @ONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/shiboken.pc.in
                ${CMAKE_CURRENT_BINARY_DIR}/shiboken.pc @ONLY)
-set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
-set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
 
 set(libshiboken_SRC
 basewrapper.cpp
@@ -35,5 +33,5 @@ install(TARGETS libshiboken DESTINATION ${LIB_INSTALL_DIR})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FindShiboken.cmake
         DESTINATION share/cmake-2.6/Modules)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/shiboken.pc
-        DESTINATION "${LIB_INSTALL_DIR})/pkgconfig")
+        DESTINATION "${LIB_INSTALL_DIR}/pkgconfig")
 
