@@ -48,6 +48,7 @@ KinderGarten::releaseChild(Abstract* child)
             return child;
         }
     }
+    return 0;
 }
 
 void

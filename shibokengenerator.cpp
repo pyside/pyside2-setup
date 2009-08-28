@@ -316,6 +316,8 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry* type)
             case ContainerTypeEntry::MultiHashContainer:
                 baseName = "PyDict";
                 break;
+            default:
+                Q_ASSERT(false);
         }
     } else {
         baseName = "PyObject";
@@ -510,7 +512,6 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunction *func,
                                              int argCount) const
 {
     AbstractMetaArgumentList arguments = func->arguments();
-    int argumentCount = argCount < 0 ? arguments.size() : argCount;
 
     QString result;
     QTextStream s(&result);

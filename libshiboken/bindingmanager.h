@@ -35,8 +35,8 @@
 #ifndef BINDINGMANAGER_H
 #define BINDINGMANAGER_H
 
-#include <map>
 #include <Python.h>
+#include <map>
 #include <basewrapper.h>
 
 namespace Shiboken

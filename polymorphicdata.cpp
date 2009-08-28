@@ -27,8 +27,8 @@
 
 // Prepare the information about polymorphic methods signatures
 PolymorphicData::PolymorphicData(const AbstractMetaFunctionList overloads)
-    : m_minArgs(256), m_maxArgs(0), m_argType(0),
-      m_argPos(-1), m_headPolymorphicData(this)
+    : m_minArgs(256), m_maxArgs(0), m_argPos(-1), m_argType(0),
+      m_headPolymorphicData(this)
 {
     foreach (const AbstractMetaFunction* func, overloads) {
         m_overloads.append(func);
@@ -52,7 +52,7 @@ PolymorphicData::PolymorphicData(const AbstractMetaFunctionList overloads)
 
 PolymorphicData::PolymorphicData(PolymorphicData* headPolymorphicData, const AbstractMetaFunction* func,
                                  const AbstractMetaType* argType, int argPos)
-    : m_minArgs(256), m_maxArgs(0), m_argType(argType), m_argPos(argPos),
+    : m_minArgs(256), m_maxArgs(0), m_argPos(argPos), m_argType(argType),
       m_headPolymorphicData(headPolymorphicData)
 {
     if (func)
@@ -376,7 +376,7 @@ QString PolymorphicData::dumpGraph(const PolymorphicData* polyData) const
 
 int PolymorphicData::functionNumber(const AbstractMetaFunction* func) const
 {
-    m_headPolymorphicData->m_overloads.indexOf(func);
+    return m_headPolymorphicData->m_overloads.indexOf(func);
 }
 
 PolymorphicData::~PolymorphicData()
