@@ -1393,12 +1393,16 @@ void CppGenerator::finishGeneration()
 
         s << "// Global functions ";
         s << "------------------------------------------------------------" << endl;
+#if 0
         s << globalFunctionImpl << endl;
 
         s << "static PyMethodDef " << moduleName() << "_methods[] = {" << endl;
         s << globalFunctionDecl;
         s << INDENT << "{0} // Sentinel" << endl << "};" << endl << endl;
-
+#else
+        #warning Binding of global functions DISABLED due to an APIExtractor bug!!!!!!!
+        s << "static PyMethodDef " << moduleName() << "_methods[] = { {0} };" << endl;
+#endif
         s << "// Classes initialization functions ";
         s << "------------------------------------------------------------" << endl;
         s << classInitDecl << endl;
