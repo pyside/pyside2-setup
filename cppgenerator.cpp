@@ -859,7 +859,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
             s << '(';
             if (func->isCopyConstructor())
-                s << "*((" << func->ownerClass()->qualifiedCppName() << "*)cpp_arg0)";
+                s << "cpp_arg0";
             else
                 s << userArgs.join(", ");
             s << ");" << endl;
