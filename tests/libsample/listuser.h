@@ -8,6 +8,7 @@ class ListUser
 {
 public:
     ListUser() {}
+    ListUser(const ListUser& other) : m_lst(other.m_lst) {}
     ~ListUser() {}
 
     virtual std::list<int> createList();
