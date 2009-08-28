@@ -246,29 +246,33 @@ QString CppGenerator::verifyDefaultReturnPolicy(const AbstractMetaFunction *cppF
     AbstractMetaType *type = cppFunction->type();
 
     //If return type replaced, the return policy need be set manually.
-    if (!type || !cppFunction->typeReplaced(0).isEmpty() || type->isNativePointer())
+    if (!type || !cppFunction->typeReplaced(0).isEmpty()) {
         return QString();
+    }
 
     QString returnPolicy;
 
-    if (type->isConstant() && type->isReference()) {
-        returnPolicy = "python::return_value_policy<python::copy_const_reference";
+    if (type->isReference()) {
+        QString detail;
+        if (type->isConstant()) {
+            detail = "copy_const_reference";
+        } else {
+            detail = "copy_non_const_reference";
+        }
+
+        returnPolicy = "python::return_value_policy<python::" + detail;
         if (!callPolicy.isEmpty())
             returnPolicy += ", " + callPolicy;
         returnPolicy += " >()";
-    } else if (type->isReference() || type->isQObject() || type->isObject() || type->isValuePointer()) {
+    } else if (type->isQObject() || type->isObject() || type->isValuePointer()) {
         bool cppOwnership = type->isConstant();
         if (cppFunction->isStatic() || cppOwnership) {
             returnPolicy = QString("python::return_value_policy<PySide::return_ptr_object<")
                          + (cppOwnership ? "true" : "false") + QString("> >()");
-        } else if (type->isQObject() || type->isObject()) {
+        } else {
             returnPolicy = QString("PySide::return_object<1, 0, %1, %2 %3 %4 >()")
                             .arg(getArgumentType(cppFunction->ownerClass(), cppFunction, -1))
                             .arg(getArgumentType(cppFunction->ownerClass(), cppFunction, 0))
-                            .arg(callPolicy.isEmpty() ? "" : ",")
-                            .arg(callPolicy);
-        } else {
-            returnPolicy = QString("python::return_internal_reference<%1 %2>()")
                             .arg(callPolicy.isEmpty() ? "" : ",")
                             .arg(callPolicy);
         }
