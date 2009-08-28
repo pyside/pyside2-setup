@@ -32,9 +32,6 @@
  */
 class CppGenerator : public ShibokenGenerator
 {
-public:
-    void setDisableNamedArgs(bool disable) {  m_disableNamedArgs = disable; }
-
 protected:
     QString fileNameForClass(const AbstractMetaClass* metaClass) const;
     QList<AbstractMetaFunctionList> filterGroupedFunctions(const AbstractMetaClass* metaClass = 0);
@@ -72,8 +69,6 @@ private:
     void writeEnumNewMethod(QTextStream& s, const AbstractMetaEnum* metaEnum);
     void writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* metaEnum);
     void writeEnumInitialization(QTextStream& s, const AbstractMetaEnum* metaEnum);
-
-    bool m_disableNamedArgs;
 };
 
 #endif // CPPGENERATOR_H
