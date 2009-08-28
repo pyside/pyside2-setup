@@ -796,7 +796,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             }
 
             // If any argument's default value was modified the method must be called
-            // with this new value whenever the user doesn't pass a explicit value to it.
+            // with this new value whenever the user doesn't pass an explicit value to it.
             // Also, any unmodified default value coming after the last user specified
             // argument and before the modified argument must be splicitly stated.
             QStringList otherArgs;
@@ -858,7 +858,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             }
 
             s << '(';
-            if (func->isCopyConstructor())
+            if (func->isCopyConstructor() && lastArg == 1)
                 s << "cpp_arg0";
             else
                 s << userArgs.join(", ");
