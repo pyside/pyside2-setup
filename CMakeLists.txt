@@ -7,6 +7,9 @@ find_package(ApiExtractor REQUIRED)
 
 add_definitions(${QT_DEFINITIONS})
 
+set(CMAKE_CXX_FLAGS_RELEASE "-Wall -DNDEBUG -O2 -Wl,-O1 -Wl,--hash-style=gnu")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall")
+
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
 set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
 
