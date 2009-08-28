@@ -184,10 +184,8 @@ void HeaderGenerator::writeTypeCheckMacro(QTextStream& s, const TypeEntry* type)
     s << pyTypeName << ')' << endl;
 }
 
-void HeaderGenerator::writeTypeConverter(QTextStream& s, const TypeEntry* type)
+void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* type)
 {
-    QString pyTypeName = cpythonTypeName(type);
-    QString checkFunction = cpythonCheckFunction(type);
     QString cppName = type->name();
     if (type->isObject())
         cppName.append('*');
@@ -195,89 +193,95 @@ void HeaderGenerator::writeTypeConverter(QTextStream& s, const TypeEntry* type)
     s << "template<>" << endl;
     s << "struct Converter< " << cppName << " >" << endl << '{' << endl;
 
-    s << INDENT << "static PyObject* toPython(ValueHolder< ";
-    s << cppName << " > cppobj)" << endl << INDENT << '{' << endl;
-    {
-        Indentation indent(INDENT);
-        s << INDENT << "PyObject* pyobj;" << endl;
+    s << INDENT << "static PyObject* toPython(ValueHolder< " << cppName << " > cppobj);" << endl;
+    s << INDENT << "static " << cppName << " toCpp(PyObject* pyobj);" << endl;
+    s << "};" << endl;
+}
 
-        if (!type->isEnum()) {
-            s << INDENT << "ValueHolder<void*> holder((void*) ";
-            if (type->isValue())
-                s << "new " << cppName << "(cppobj.value)";
-            else
-                s << "cppobj.value";
-            s << ");" << endl;
-        }
+void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
+{
+    QString pyTypeName = cpythonTypeName(type);
+    QString cppName = type->name();
+    if (type->isObject())
+        cppName.append('*');
 
-        s << INDENT << "pyobj = ";
+    s << "inline PyObject* Converter< " << cppName << " >::toPython(ValueHolder< " << cppName << " > cppobj)" << endl;
+    s << '{' << endl;
+    s << INDENT << "PyObject* pyobj;" << endl;
 
-        if (type->isEnum()) {
-            s << "Shiboken::PyEnumObject_New(&" << pyTypeName << ',' << endl;
-            s << INDENT << INDENT << "\"ReturnedValue\", (long) cppobj.value);" << endl;
-        } else {
-            QString newWrapper = QString("Shiboken::PyBaseWrapper_New(&")
-                                    + pyTypeName + ", &" + pyTypeName
-                                    + ", holder.value);";
-            if (type->isValue()) {
-                s << newWrapper << endl;
-            } else {
-                s << "Shiboken::Converter<void*>::toPython(holder);" << endl;
-                s << INDENT << "if (!pyobj)" << endl;
-                {
-                    Indentation indent(INDENT);
-                    s << INDENT << "pyobj = " << newWrapper << endl;
-                }
-            }
-        }
-
-        s << INDENT << "return pyobj;" << endl;
+    if (!type->isEnum()) {
+        s << INDENT << "ValueHolder<void*> holder((void*) ";
+        if (type->isValue())
+            s << "new " << cppName << "(cppobj.value)";
+        else
+            s << "cppobj.value";
+        s << ");" << endl;
     }
-    s << INDENT << '}' << endl;
 
-    s << INDENT << "static inline " << cppName << " toCpp(PyObject* pyobj)" << endl;
-    s << INDENT << '{' << endl;
-    {
-        Indentation indent(INDENT);
+    s << INDENT << "pyobj = ";
 
+    if (type->isEnum()) {
+        s << "Shiboken::PyEnumObject_New(&" << pyTypeName << ',' << endl;
+        s << INDENT << INDENT << "\"ReturnedValue\", (long) cppobj.value);" << endl;
+    } else {
+        QString newWrapper = QString("Shiboken::PyBaseWrapper_New(&")
+                                + pyTypeName + ", &" + pyTypeName
+                                + ", holder.value);";
         if (type->isValue()) {
-            AbstractMetaFunctionList implicitConverters;
-            if (type->isValue()) {
-                const AbstractMetaClass* metaClass = classes().findClass(type->qualifiedCppName());
-                if (metaClass)
-                    implicitConverters = metaClass->implicitConversions();
-            }
-            bool firstImplicitIf = true;
-            foreach (const AbstractMetaFunction* ctor, implicitConverters) {
-                const AbstractMetaType* argType = ctor->arguments().first()->type();
-                s << INDENT;
-                if (firstImplicitIf)
-                    firstImplicitIf = false;
-                else
-                    s << "else ";
-                s << "if (" << cpythonCheckFunction(argType) << "(pyobj))" << endl;
-                {
-                    Indentation indent(INDENT);
-                    s << INDENT << "return " << cppName;
-                    s << "(Converter< " << argType->cppSignature() << " >::toCpp(pyobj));" << endl;
-                }
-            }
-        }
-
-        s << INDENT << "return ";
-        if (type->isEnum()) {
-            s << '(' << type->qualifiedCppName() << ") ((Shiboken::PyEnumObject*)pyobj)->ob_ival";
+            s << newWrapper << endl;
         } else {
-            if (type->isValue())
-                s << '*';
-            s << "((" << cppName;
-            if (type->isValue())
-                s << '*';
-            s << ") ((Shiboken::PyBaseWrapper*)pyobj)->cptr)";
+            s << "Shiboken::Converter<void*>::toPython(holder);" << endl;
+            s << INDENT << "if (!pyobj)" << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "pyobj = " << newWrapper << endl;
+            }
         }
-        s << ';' << endl;
     }
-    s << INDENT << '}' << endl << "};" << endl;
+
+    s << INDENT << "return pyobj;" << endl;
+    s << '}' << endl << endl;
+
+    s << "inline " << cppName << " Converter< " << cppName << " >::toCpp(PyObject* pyobj)" << endl;
+    s << '{' << endl;
+
+    if (type->isValue()) {
+        AbstractMetaFunctionList implicitConverters;
+        if (type->isValue()) {
+            const AbstractMetaClass* metaClass = classes().findClass(type->qualifiedCppName());
+            if (metaClass)
+                implicitConverters = metaClass->implicitConversions();
+        }
+        bool firstImplicitIf = true;
+        foreach (const AbstractMetaFunction* ctor, implicitConverters) {
+            const AbstractMetaType* argType = ctor->arguments().first()->type();
+            s << INDENT;
+            if (firstImplicitIf)
+                firstImplicitIf = false;
+            else
+                s << "else ";
+            s << "if (" << cpythonCheckFunction(argType) << "(pyobj))" << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "return " << cppName;
+                s << "(Converter< " << argType->cppSignature() << " >::toCpp(pyobj));" << endl;
+            }
+        }
+    }
+
+    s << INDENT << "return ";
+    if (type->isEnum()) {
+        s << '(' << type->qualifiedCppName() << ") ((Shiboken::PyEnumObject*)pyobj)->ob_ival";
+    } else {
+        if (type->isValue())
+            s << '*';
+        s << "((" << cppName;
+        if (type->isValue())
+            s << '*';
+        s << ") ((Shiboken::PyBaseWrapper*)pyobj)->cptr)";
+    }
+    s << ';' << endl;
+    s << '}' << endl << endl;
 }
 
 void HeaderGenerator::finishGeneration()
@@ -290,8 +294,10 @@ void HeaderGenerator::finishGeneration()
     QSet<QString> enumIncludes;
     QString pythonTypeStuff;
     QTextStream s_pts(&pythonTypeStuff);
-    QString converters;
-    QTextStream s_c(&converters);
+    QString convertersDecl;
+    QString convertersImpl;
+    QTextStream convDecl(&convertersDecl);
+    QTextStream convImpl(&convertersImpl);
 
     Indentation indent(INDENT);
 
@@ -302,8 +308,9 @@ void HeaderGenerator::finishGeneration()
             enumIncludes << incFile;
         writeTypeCheckMacro(s_pts, cppEnum->typeEntry());
         s_pts << endl;
-        writeTypeConverter(s_c, cppEnum->typeEntry());
-        s_c << endl;
+        writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
+        writeTypeConverterImpl(convImpl, cppEnum->typeEntry());
+        convDecl << endl;
     }
 
     foreach (AbstractMetaClass* metaClass, classes()) {
@@ -327,8 +334,9 @@ void HeaderGenerator::finishGeneration()
         foreach (const AbstractMetaEnum* cppEnum, metaClass->enums()) {
             writeTypeCheckMacro(s_pts, cppEnum->typeEntry());
             s_pts << endl;
-            writeTypeConverter(s_c, cppEnum->typeEntry());
-            s_c << endl;
+            writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
+            writeTypeConverterImpl(convImpl, cppEnum->typeEntry());
+            convDecl << endl;
         }
 
         if (!metaClass->isNamespace()) {
@@ -337,8 +345,9 @@ void HeaderGenerator::finishGeneration()
             writeTypeCheckMacro(s_pts, classType);
             s_pts << "#define Py" << metaClass->name() << "_cptr(pyobj) ((";
             s_pts << metaClass->name() << "*)PyBaseWrapper_cptr(pyobj))" << endl << endl;
-            writeTypeConverter(s_c, classType);
-            s_c << endl;
+            writeTypeConverterDecl(convDecl, classType);
+            writeTypeConverterImpl(convImpl, classType);
+            convDecl << endl;
         }
     }
 
@@ -360,6 +369,7 @@ void HeaderGenerator::finishGeneration()
 
         s << "#include <Python.h>" << endl;
         s << "#include <conversions.h>" << endl;
+        s << "#include <pyenum.h>" << endl;
         s << "#include <basewrapper.h>" << endl;
         s << "#include <bindingmanager.h>" << endl << endl;
 
@@ -406,7 +416,8 @@ void HeaderGenerator::finishGeneration()
 
         s << "// Generated converters -----------------------------------------------" << endl << endl;
 
-        s << converters << endl;
+        s << convertersDecl << endl;
+        s << convertersImpl << endl;
 
         s << "} // namespace Shiboken" << endl << endl;
 

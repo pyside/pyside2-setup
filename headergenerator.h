@@ -42,7 +42,8 @@ private:
     void writeDefaultImplementation(QTextStream& s, const AbstractMetaFunction* func) const;
     void writeVirtualDispatcher(QTextStream &s, const AbstractMetaFunction *func) const;
     void writeTypeCheckMacro(QTextStream& s, const TypeEntry* type);
-    void writeTypeConverter(QTextStream& s, const TypeEntry* type);
+    void writeTypeConverterDecl(QTextStream& s, const TypeEntry* type);
+    void writeTypeConverterImpl(QTextStream& s, const TypeEntry* type);
 };
 
 #endif // HEADERGENERATOR_H
