@@ -59,6 +59,7 @@ public:
     static QPair<int, int> getMinMaxArguments(const AbstractMetaFunctionList overloads);
 
     void dumpGraph(QString filename) const;
+    QString dumpGraph() const;
 
     ~PolymorphicData();
 
@@ -69,7 +70,6 @@ private:
     void addPolymorphic(const AbstractMetaFunction* func);
     PolymorphicData* addPolymorphicData(const AbstractMetaFunction* func, const AbstractMetaType* argType);
 
-    QString dumpGraph(const PolymorphicData* polyData) const;
     int functionNumber(const AbstractMetaFunction* func) const;
     PolymorphicDataList polymorphicDataOnPosition(PolymorphicData* polyData, int argPos) const;
 

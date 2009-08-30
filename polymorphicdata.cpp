@@ -241,26 +241,23 @@ void PolymorphicData::dumpGraph(QString filename) const
     QFile file(filename);
     if (file.open(QFile::WriteOnly)) {
         QTextStream s(&file);
-        s << dumpGraph(m_headPolymorphicData);
+        s << m_headPolymorphicData->dumpGraph();
     }
 }
 
-QString PolymorphicData::dumpGraph(const PolymorphicData* polyData) const
+QString PolymorphicData::dumpGraph() const
 {
-    if (!polyData)
-        return QString();
-
     QString indent(4, ' ');
     QString result;
     QTextStream s(&result);
-    if (polyData->m_argPos == -1) {
-        const AbstractMetaFunction* rfunc = polyData->referenceFunction();
+    if (m_argPos == -1) {
+        const AbstractMetaFunction* rfunc = referenceFunction();
         s << "digraph PolymorphicFunction {" << endl;
         s << indent << "graph [fontsize=12 fontname=freemono labelloc=t splines=true overlap=false rankdir=LR];" << endl;
 
         // Shows all function signatures
         s << "legend [fontsize=9 fontname=freemono shape=rect label=\"";
-        foreach (const AbstractMetaFunction* func, polyData->overloads()) {
+        foreach (const AbstractMetaFunction* func, overloads()) {
             s << "f" << functionNumber(func) << " : ";
             if (func->type())
                 s << func->type()->cppSignature().replace('<', "&lt;").replace('>', "&gt;");
@@ -294,7 +291,7 @@ QString PolymorphicData::dumpGraph(const PolymorphicData* polyData) const
         s << "</td></tr>";
 
         // Shows type changes for all function signatures
-        foreach (const AbstractMetaFunction* func, polyData->overloads()) {
+        foreach (const AbstractMetaFunction* func, overloads()) {
             if (func->typeReplaced(0).isEmpty())
                 continue;
             s << "<tr><td bgcolor=\"gray\" align=\"right\">f" << functionNumber(func);
@@ -317,18 +314,18 @@ QString PolymorphicData::dumpGraph(const PolymorphicData* polyData) const
 
         // Overloads for the signature to present point
         s << "<tr><td bgcolor=\"gray\" align=\"right\">overloads</td><td bgcolor=\"gray\" align=\"left\">";
-        foreach (const AbstractMetaFunction* func, polyData->overloads())
+        foreach (const AbstractMetaFunction* func, overloads())
             s << 'f' << functionNumber(func) << ' ';
         s << "</td></tr>";
 
         s << "</table>> ];" << endl;
 
-        foreach (const PolymorphicData* pd, polyData->nextPolymorphicData())
-            s << indent << '"' << rfunc->name() << "\" -> " << dumpGraph(pd);
+        foreach (const PolymorphicData* pd, nextPolymorphicData())
+            s << indent << '"' << rfunc->name() << "\" -> " << pd->dumpGraph();
 
         s << "}" << endl;
     } else {
-        QString argId = QString("arg_%1").arg((long)polyData);
+        QString argId = QString("arg_%1").arg((ulong)this);
         s << argId << ';' << endl;
 
         s << indent << '"' << argId << "\" [shape=\"plaintext\" style=\"filled,bold\" margin=\"0\" fontname=\"freemono\" fillcolor=\"white\" penwidth=1 ";
@@ -336,21 +333,21 @@ QString PolymorphicData::dumpGraph(const PolymorphicData* polyData) const
 
         // Argument box title
         s << "<tr><td bgcolor=\"black\" align=\"left\" cellpadding=\"2\" colspan=\"2\">";
-        s << "<font color=\"white\" point-size=\"11\">arg #" << polyData->argPos() << "</font></td></tr>";
+        s << "<font color=\"white\" point-size=\"11\">arg #" << argPos() << "</font></td></tr>";
 
         // Argument type information
         s << "<tr><td bgcolor=\"gray\" align=\"right\">type</td><td bgcolor=\"gray\" align=\"left\">";
-        s << polyData->argType()->cppSignature().replace("&", "&amp;") << "</td></tr>";
+        s << argType()->cppSignature().replace("&", "&amp;") << "</td></tr>";
 
         // Overloads for the signature to present point
         s << "<tr><td bgcolor=\"gray\" align=\"right\">overloads</td><td bgcolor=\"gray\" align=\"left\">";
-        foreach (const AbstractMetaFunction* func, polyData->overloads())
+        foreach (const AbstractMetaFunction* func, overloads())
             s << 'f' << functionNumber(func) << ' ';
         s << "</td></tr>";
 
         // Show default values (original and modified) for various functions
-        foreach (const AbstractMetaFunction* func, polyData->overloads()) {
-            const AbstractMetaArgument* arg = polyData->argument(func);
+        foreach (const AbstractMetaFunction* func, overloads()) {
+            const AbstractMetaArgument* arg = argument(func);
             if (!arg)
                 continue;
             if (!arg->defaultValueExpression().isEmpty() ||
@@ -368,8 +365,8 @@ QString PolymorphicData::dumpGraph(const PolymorphicData* polyData) const
 
         s << "</table>>];" << endl;
 
-        foreach (const PolymorphicData* pd, polyData->nextPolymorphicData())
-            s << indent << argId << " -> " << dumpGraph(pd);
+        foreach (const PolymorphicData* pd, nextPolymorphicData())
+            s << indent << argId << " -> " << pd->dumpGraph();
     }
     return result;
 }
