@@ -11,7 +11,7 @@ pkg_check_modules(LIBXSLT REQUIRED libxslt>=1.1.19)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -DAPIEXTRACTOR_ENABLE_DUPLICATE_ENUM_VALUES")
 
 set(apiextractor_MAJOR_VERSION 0)
-set(apiextractor_MINOR_VERSION 2)
+set(apiextractor_MINOR_VERSION 3)
 set(apiextractor_VERSION "${apiextractor_MAJOR_VERSION}.${apiextractor_MINOR_VERSION}")
 configure_file(apiextractorversion.h.in ${CMAKE_CURRENT_BINARY_DIR}/apiextractorversion.h @ONLY)
 set(QT_USE_QTCORE 1)
