@@ -52,12 +52,8 @@ struct ValueHolder
 template <typename T>
 struct Converter
 {
-    static PyObject* toPython(ValueHolder<T> cppobj) {
-        return 0;
-    }
-    static T toCpp(PyObject* pyobj) {
-        return T();
-    }
+    static PyObject* toPython(ValueHolder<T> cppobj);
+    static T toCpp(PyObject* pyobj);
 };
 
 template <typename T>
