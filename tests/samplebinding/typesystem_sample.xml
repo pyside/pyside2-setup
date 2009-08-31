@@ -208,6 +208,7 @@
     <value-type name="MapUser"/>
     <value-type name="PairUser"/>
     <value-type name="ListUser"/>
+    <value-type name="NonDefaultCtor" />
 
     <rejection class="ListUser" function-name="createList()"/>
     <rejection class="ListUser" function-name="callCreateList()"/>
