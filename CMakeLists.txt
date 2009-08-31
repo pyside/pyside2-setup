@@ -37,6 +37,12 @@ target_link_libraries(generatorrunner
                       ${APIEXTRACTOR_LIBRARY}
                       ${QT_QTCORE_LIBRARY})
 
+# create pkg-config file
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/generatorrunner.pc.in
+               ${CMAKE_CURRENT_BINARY_DIR}/generatorrunner.pc @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/FindGeneratorRunner.cmake.in
+               ${CMAKE_CURRENT_BINARY_DIR}/FindGeneratorRunner.cmake @ONLY)
+
 # uninstall target
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
                "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
@@ -55,6 +61,10 @@ add_custom_target(dist
 install(TARGETS genrunner DESTINATION ${LIB_INSTALL_DIR})
 install(TARGETS generatorrunner DESTINATION bin)
 install(FILES generator.h DESTINATION include/generatorrunner)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generatorrunner.pc DESTINATION
+        ${LIB_INSTALL_DIR}/pkgconfig)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FindGeneratorRunner.cmake
+        DESTINATION share/cmake-2.6/Modules)
 
 enable_testing()
 

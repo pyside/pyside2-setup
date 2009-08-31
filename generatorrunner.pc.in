@@ -1,0 +1,13 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=@CMAKE_INSTALL_PREFIX@
+libdir=@CMAKE_INSTALL_PREFIX@/lib
+includedir=@CMAKE_INSTALL_PREFIX@/include
+
+
+Name: generatorrunner
+Description: Python binding generator based on Boost.Python
+Requires: apiextractor
+Version: @boostpythongenerator_VERSION@
+Libs: -L${libdir} -lgenrunner
+Cflags: -I${includedir}
+
