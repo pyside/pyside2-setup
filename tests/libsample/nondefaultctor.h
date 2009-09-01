@@ -23,6 +23,16 @@ public:
     {
         return *this;
     }
+
+    virtual NonDefaultCtor returnMyselfVirtual()
+    {
+        return *this;
+    }
+
+    NonDefaultCtor callReturnMyselfVirtual()
+    {
+        return *this;
+    }
 };
 
 #endif
