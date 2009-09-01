@@ -37,11 +37,17 @@
 
 class NonDefaultCtor
 {
+    int m_value;
 public:
-    NonDefaultCtor(int)
+    NonDefaultCtor(int value) : m_value(value)
     {
     }
 
+    int value()
+    {
+        return m_value;
+    }
+    
     NonDefaultCtor returnMyself()
     {
         return *this;
@@ -64,7 +70,7 @@ public:
 
     NonDefaultCtor callReturnMyselfVirtual()
     {
-        return *this;
+        return returnMyselfVirtual();
     }
 };
 
