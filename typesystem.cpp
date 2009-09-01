@@ -1530,12 +1530,12 @@ bool Handler::startElement(const QString &, const QString &n,
             Include inc(loc, attributes["file-name"]);
 
             ComplexTypeEntry *ctype = static_cast<ComplexTypeEntry *>(element->entry);
-            if (topElement.type & StackElement::ComplexTypeEntryMask)
-                ctype->setInclude(inc);
-             else if (topElement.type == StackElement::ExtraIncludes)
-                ctype->addExtraInclude(inc);
-             else {
-                m_error = "Only supported parents are complex types and extra-includes";
+            if (topElement.type & (StackElement::ComplexTypeEntryMask | StackElement::PrimitiveTypeEntry)) {
+                element->entry->setInclude(inc);
+            } else if (topElement.type == StackElement::ExtraIncludes) {
+                element->entry->addExtraInclude(inc);
+            } else {
+                m_error = "Only supported parent tags are primitive-type, complex types or extra-includes";
                 return false;
             }
 

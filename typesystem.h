@@ -763,6 +763,31 @@ public:
         return m_docModifications;
     }
 
+    IncludeList extraIncludes() const
+    {
+        return m_extraIncludes;
+    }
+    void setExtraIncludes(const IncludeList &includes)
+    {
+        m_extraIncludes = includes;
+    }
+    void addExtraInclude(const Include &include)
+    {
+        if (!m_includesUsed.value(include.name, false)) {
+            m_extraIncludes << include;
+            m_includesUsed[include.name] = true;
+        }
+    }
+
+    Include include() const
+    {
+        return m_include;
+    }
+    void setInclude(const Include &inc)
+    {
+        m_include = inc;
+    }
+
 private:
     QString m_name;
     Type m_type;
@@ -772,6 +797,9 @@ private:
     bool m_preferredConversion;
     CodeSnipList m_codeSnips;
     DocModificationList m_docModifications;
+    IncludeList m_extraIncludes;
+    Include m_include;
+    QHash<QString, bool> m_includesUsed;
 };
 typedef QHash<QString, QList<TypeEntry *> > TypeEntryHash;
 typedef QHash<QString, TypeEntry *> SingleTypeEntryHash;
@@ -1210,22 +1238,6 @@ public:
         return true;
     }
 
-    IncludeList extraIncludes() const
-    {
-        return m_extraIncludes;
-    }
-    void setExtraIncludes(const IncludeList &includes)
-    {
-        m_extraIncludes = includes;
-    }
-    void addExtraInclude(const Include &include)
-    {
-        if (!m_includesUsed.value(include.name, false)) {
-            m_extraIncludes << include;
-            m_includesUsed[include.name] = true;
-        }
-    }
-
     ComplexTypeEntry *copy() const
     {
         ComplexTypeEntry *centry = new ComplexTypeEntry(name(), type());
@@ -1254,16 +1266,6 @@ public:
     QString targetLangApiName() const
     {
         return strings_jobject;
-    }
-
-
-    Include include() const
-    {
-        return m_include;
-    }
-    void setInclude(const Include &inc)
-    {
-        m_include = inc;
     }
 
     void setTypeFlags(TypeFlags flags)
@@ -1419,9 +1421,6 @@ public:
 
 
 private:
-    IncludeList m_extraIncludes;
-    Include m_include;
-    QHash<QString, bool> m_includesUsed;
     FunctionModificationList m_functionMods;
     FieldModificationList m_fieldMods;
     QString m_package;
