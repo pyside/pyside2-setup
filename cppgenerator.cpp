@@ -454,6 +454,40 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     s << '}' << endl << endl;
 }
 
+void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    if (!metaClass)
+        return;
+
+    AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
+    const AbstractMetaFunction* ctor = 0;
+
+    foreach (const AbstractMetaFunction* candidate, ctors) {
+        if (candidate->arguments().size() == 0)
+            return;
+
+        bool allPrimitives = true;
+        foreach (const AbstractMetaArgument* arg, candidate->arguments()) {
+            if (!arg->type()->isPrimitive()) {
+                allPrimitives = false;
+                break;
+            }
+        }
+        if (allPrimitives) {
+            if (!ctor || candidate->arguments().size() < ctor->arguments().size())
+                ctor = candidate;
+        }
+    }
+
+    if (!ctor)
+        return;
+
+    QStringList argValues;
+    for (int i = 0; i < ctor->arguments().size(); i++)
+        argValues << QLatin1String("0");
+    s << '(' << argValues.join(QLatin1String(", ")) << ')';
+}
+
 void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunctionList overloads)
 {
     PolymorphicData polymorphicData(overloads);
@@ -502,8 +536,13 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             s << INDENT << INDENT << "return 0;" << endl << endl;
         }
 
-        if (rfunc->type())
-            s << INDENT << translateTypeForWrapperMethod(rfunc->type(), rfunc->implementingClass()) << ' ' << retvalVariableName() << ';' << endl;
+        if (rfunc->type()) {
+            s << INDENT << translateTypeForWrapperMethod(rfunc->type(), rfunc->implementingClass());
+            s << ' ' << retvalVariableName();
+            if (rfunc->type()->isValue() || rfunc->type()->isObject())
+                writeMinimalConstructorCallArguments(s, classes().findClass(rfunc->type()->name()));
+            s << ';' << endl;
+        }
 
         if (minArgs != maxArgs || maxArgs > 1) {
             s << INDENT << "int numArgs = ";
