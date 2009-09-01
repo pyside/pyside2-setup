@@ -14,3 +14,4 @@
 #include "reference.h"
 #include "virtualmethods.h"
 #include "nondefaultctor.h"
+#include "privatedtor.h"

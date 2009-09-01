@@ -209,6 +209,7 @@
     <value-type name="PairUser"/>
     <value-type name="ListUser"/>
     <value-type name="NonDefaultCtor" />
+    <object-type name="PrivateDtor" />
 
     <rejection class="ListUser" function-name="createList()"/>
     <rejection class="ListUser" function-name="callCreateList()"/>
