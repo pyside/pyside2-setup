@@ -174,18 +174,21 @@ template <> struct Converter<double> : Converter_PyFloat<double> {};
 
 // C Sting Types --------------------------------------------------------------
 
-template <>
-struct Converter<const char*>
+template <typename CString>
+struct Converter_CString
 {
-    static PyObject* toPython(ValueHolder<const char*> holder)
+    static PyObject* toPython(ValueHolder<CString> holder)
     {
         return PyString_FromString(holder.value);
     }
-    static const char* toCpp(PyObject* pyobj)
+    static CString toCpp(PyObject* pyobj)
     {
         return PyString_AsString(pyobj);
     }
 };
+
+template <> struct Converter<char*> : Converter_CString<char*> {};
+template <> struct Converter<const char*> : Converter_CString<const char*> {};
 
 } // namespace Shiboken
 
