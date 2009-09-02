@@ -715,11 +715,11 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
     if (!parentOverloadData->isHeadOverloadData()) {
         foreach (const AbstractMetaFunction* func, parentOverloadData->overloads()) {
             if (parentOverloadData->isFinalOccurrence(func)) {
-                int lastArg = parentOverloadData->argPos() + 1;
-                s << "if (numArgs == " << lastArg << ") { // final:" << func->minimalSignature() << endl;
+                int numArgs = parentOverloadData->argPos() + 1;
+                s << "if (numArgs == " << numArgs << ") { // final:" << func->minimalSignature() << endl;
                 {
                     Indentation indent(INDENT);
-                    writeMethodCall(s, func, lastArg);
+                    writeMethodCall(s, func, numArgs);
                 }
                 s << INDENT << "} else ";
             }
@@ -761,10 +761,10 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
             {
                 Indentation indent(INDENT);
                 int allRemoved = OverloadData::numberOfRemovedArguments(func);
-                int lastArg = signatureFound ? func->arguments().size() - allRemoved
+                int maxArgs = signatureFound ? func->arguments().size() - allRemoved
                                                 : overloadData->argPos() + 1;
                 int removed = 0;
-                for (int i = overloadData->argPos(); i < lastArg; i++) {
+                for (int i = overloadData->argPos(); i < maxArgs; i++) {
                     if (func->argumentRemoved(i + 1))
                         removed++;
                     QString argName = QString("cpp_arg%1").arg(i);
@@ -790,7 +790,7 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
         s << "goto " << cpythonFunctionName(rfunc) << "_TypeError;" << endl;
 }
 
-void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* func, int lastArg)
+void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* func, int maxArgs)
 {
     s << INDENT << "// " << func->minimalSignature() << endl;
 
@@ -812,7 +812,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         QStringList userArgs;
         if (!func->isCopyConstructor()) {
             int removed = 0;
-            for (int i = 0; i < lastArg + removed; i++) {
+            for (int i = 0; i < maxArgs + removed; i++) {
                 const AbstractMetaArgument* arg = func->arguments()[i];
                 if (func->argumentRemoved(i + 1)) {
                     // If some argument with default value is removed from a
@@ -834,7 +834,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             // argument and before the modified argument must be splicitly stated.
             QStringList otherArgs;
             bool defaultModified = false;
-            for (int i = func->arguments().size() - 1; i >= lastArg; i--) {
+            for (int i = func->arguments().size() - 1; i >= maxArgs; i--) {
                 const AbstractMetaArgument* arg = func->arguments()[i];
                 defaultModified = defaultModified || arg->defaultValueExpression() != arg->originalDefaultValueExpression();
                 if (defaultModified) {
@@ -890,7 +890,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             isCtor = true;
             s << "cptr = new " << wrapperName(func->ownerClass());
             s << '(';
-            if (func->isCopyConstructor() && lastArg == 1)
+            if (func->isCopyConstructor() && maxArgs == 1)
                 s << "cpp_arg0";
             else
                 s << userArgs.join(", ");

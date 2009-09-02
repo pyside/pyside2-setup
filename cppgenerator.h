@@ -58,7 +58,7 @@ private:
     void writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName);
 
     void writeOverloadedMethodDecisor(QTextStream& s, OverloadData* parentOverloadData);
-    void writeMethodCall(QTextStream& s, const AbstractMetaFunction* func, int lastArg = 0);
+    void writeMethodCall(QTextStream& s, const AbstractMetaFunction* func, int maxArgs = 0);
 
     void writeClassRegister(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeClassDefinition(QTextStream& s, const AbstractMetaClass* metaClass);
