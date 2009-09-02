@@ -47,7 +47,7 @@ public:
     {
         return m_value;
     }
-    
+
     NonDefaultCtor returnMyself()
     {
         return *this;
