@@ -91,11 +91,16 @@ public:
                         CodeSnip::Position position,
                         TypeSystem::Language language,
                         const AbstractMetaFunction* func = 0);
-    /// returns the code snips of a function
-    CodeSnipList getCodeSnips(const AbstractMetaFunction* func);
-    static bool canCreateWrapperFor(const AbstractMetaClass* metaClass);
+
     /**
-     *   Function witch parse the metafunction information
+     *   Returns a function's code snippets.
+     *   \param func the function from which retrieve the code snippets
+     *   \return a list containing the function code snippets
+     */
+    CodeSnipList getCodeSnips(const AbstractMetaFunction* func);
+
+    /**
+     *   Function which parse the metafunction information
      *   \param func the function witch will be parserd
      *   \param option some extra options
      *   \param arg_count the number of function arguments

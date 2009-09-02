@@ -774,11 +774,6 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
     }
 }
 
-bool ShibokenGenerator::canCreateWrapperFor(const AbstractMetaClass* metaClass)
-{
-    return !metaClass->hasPrivateDestructor();
-}
-
 QStringList ShibokenGenerator::getBaseClasses(const AbstractMetaClass* metaClass)
 {
     QStringList baseClass;

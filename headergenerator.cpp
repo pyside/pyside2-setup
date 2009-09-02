@@ -59,7 +59,7 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
     s << "#ifndef " << wrapperName.toUpper() << "_H" << endl;
     s << "#define " << wrapperName.toUpper() << "_H" << endl<< endl;
 
-    if (!metaClass->isNamespace()) {
+    if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
         s << "// The mother of all C++ binding hacks!" << endl;
         s << "#define protected public" << endl << endl;
     }
@@ -73,9 +73,7 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
     writeCodeSnips(s, metaClass->typeEntry()->codeSnips(),
                    CodeSnip::Declaration, TypeSystem::NativeCode);
 
-    if (!metaClass->isNamespace()) {
-        bool createWrapper = canCreateWrapperFor(metaClass);
-
+    if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
         /*
          * BOTOWTI (Beast of The Old World to be Investigated)
         // detect the held type
@@ -92,8 +90,7 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
 
         // Class
         s << "class SHIBOKEN_LOCAL " << wrapperName;
-        if (createWrapper)
-            s << " : public " << metaClass->qualifiedCppName();
+        s << " : public " << metaClass->qualifiedCppName();
 
         s << endl << '{' << endl << "public:" << endl;
 
@@ -103,13 +100,11 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
         foreach (AbstractMetaFunction *func, filterFunctions(metaClass))
             writeFunction(s, func);
 
-        if (createWrapper) {
-            //destructor
-            s << INDENT << "~" << wrapperName << "();" << endl;
+        //destructor
+        s << INDENT << "~" << wrapperName << "();" << endl;
 
-            if (metaClass->isQObject() && (metaClass->name() != "QObject"))
-                s << INDENT << "using QObject::parent;" << endl;
-        }
+        if (metaClass->isQObject() && (metaClass->name() != "QObject"))
+            s << INDENT << "using QObject::parent;" << endl;
 
         writeCodeSnips(s, metaClass->typeEntry()->codeSnips(),
                        CodeSnip::PrototypeInitialization, TypeSystem::NativeCode);

@@ -103,7 +103,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     // write license comment
     s << licenseComment() << endl;
 
-    if (!metaClass->isNamespace()) {
+    if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
         //workaround to access protected functions
         s << "//workaround to access protected functions" << endl;
         s << "#define protected public" << endl << endl;
@@ -136,12 +136,9 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     if (metaClass->typeEntry()->typeFlags() & ComplexTypeEntry::Deprecated)
         s << "#Deprecated" << endl;
 
-    if (!canCreateWrapperFor(metaClass))
-        return;
-
     s << "using namespace Shiboken;" << endl << endl;
 
-    if (!metaClass->isNamespace()) {
+    if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
         s << "// Native ---------------------------------------------------------" << endl << endl;
 
         //inject code native beginner
@@ -943,7 +940,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     else
         baseClassName = QString("0");
 
-    if (metaClass->isNamespace()) {
+    if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
         tp_flags = QString("Py_TPFLAGS_HAVE_CLASS");
         tp_new = QString("0");
         tp_dealloc = QString("0");

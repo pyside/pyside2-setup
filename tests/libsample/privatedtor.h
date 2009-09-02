@@ -37,13 +37,23 @@
 
 class PrivateDtor
 {
-    PrivateDtor* instance()
+public:
+    static PrivateDtor* instance()
     {
         static PrivateDtor self;
+        self.m_instanciations++;
         return &self;
     }
+
+    int instanceCalls()
+    {
+        return m_instanciations;
+    }
+
 private:
-    PrivateDtor() {}
+    int m_instanciations;
+
+    PrivateDtor() : m_instanciations(0) {}
     PrivateDtor(const PrivateDtor&) {}
     ~PrivateDtor() {}
 };
