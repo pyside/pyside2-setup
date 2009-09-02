@@ -13,6 +13,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/listuser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/modifications_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/mapuser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/nondefaultctor_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/oddbooluser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pairuser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/point_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/privatedtor_wrapper.cpp

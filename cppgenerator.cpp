@@ -536,13 +536,8 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             s << INDENT << INDENT << "return 0;" << endl << endl;
         }
 
-        if (rfunc->type()) {
-            s << INDENT << translateTypeForWrapperMethod(rfunc->type(), rfunc->implementingClass());
-            s << ' ' << retvalVariableName();
-            if (rfunc->type()->isValue() || rfunc->type()->isObject())
-                writeMinimalConstructorCallArguments(s, classes().findClass(rfunc->type()->name()));
-            s << ';' << endl;
-        }
+        if (rfunc->type() && !rfunc->isInplaceOperator())
+            s << INDENT << "PyObject* " << retvalVariableName() << " = 0;" << endl;
 
         if (minArgs != maxArgs || maxArgs > 1) {
             s << INDENT << "int numArgs = ";
@@ -554,16 +549,23 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
 
         writePolymorphicDecisor(s, &polymorphicData);
 
-        s << endl << INDENT << "if (PyErr_Occurred())" << endl;
-        s << INDENT << INDENT << "return 0;" << endl;
+        s << endl << INDENT << "if (PyErr_Occurred()";
+        if (rfunc->type() && !rfunc->isInplaceOperator())
+            s << " || !" << retvalVariableName();
+        s << ')' << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "return 0;" << endl;
+        }
 
-        s << INDENT;
+        s << endl << INDENT;
         if (rfunc->type()) {
             s << "return ";
             if (rfunc->isInplaceOperator())
                 s << "self";
             else
-                writeToPythonConversion(s, rfunc->type(), rfunc->ownerClass(), retvalVariableName());
+                s << retvalVariableName();
+//                 writeToPythonConversion(s, rfunc->type(), rfunc->ownerClass(), retvalVariableName());
         } else {
             s << "Py_RETURN_NONE";
         }
@@ -573,11 +575,6 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             writeErrorSection(s, polymorphicData);
     }
     s << '}' << endl << endl;
-
-    // TODO: take this off when operator generation is fixed
-//     if (rfunc->isOperatorOverload())
-//     if (rfunc->isInplaceOperator())
-//         s << "*/" << endl;
 }
 
 void CppGenerator::writeArgumentsInitializer(QTextStream& s, PolymorphicData& polymorphicData)
@@ -854,6 +851,16 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             userArgs += otherArgs;
         }
 
+        bool isCtor = false;
+        QString methodCall;
+        QTextStream mc(&methodCall);
+
+        // This indentation is here for aesthetical reasons concerning the generated code.
+        if (func->type() && !func->isInplaceOperator()) {
+            Indentation indent(INDENT);
+            mc << endl << INDENT;
+        }
+
         if (badModifications) {
             // When an argument is removed from a method signature and no other
             // means of calling the method is provided the generator must write
@@ -877,32 +884,39 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             s << INDENT;
             if (!func->isInplaceOperator())
                 s << retvalVariableName() << " = ";
-            if (func->isBinaryOperator())
-                s << firstArg << ' ';
-            s << op << ' ' << secondArg << ';';// << endl;
-            s << "// " << func->minimalSignature() << func->isOperatorOverload() << func->isReverseOperator() << func->isUnaryOperator() << endl;
-        } else {
-            s << INDENT;
-            if (func->isConstructor() || func->isCopyConstructor()) {
-                s << "cptr = new " << wrapperName(func->ownerClass());
-            } else {
-                if (func->type())
-                    s << retvalVariableName() << " = ";
-                if (func->ownerClass()) {
-                    if (!func->isStatic())
-                        s << cpythonWrapperCPtr(func->ownerClass()) << "->";
-                    s << func->ownerClass()->name() << "::";
-                }
-                s << func->originalName();
-            }
 
+            if (func->isBinaryOperator())
+                mc << firstArg << ' ';
+            mc << op << ' ' << secondArg;
+        } else if (func->isConstructor() || func->isCopyConstructor()) {
+            s << INDENT;
+            isCtor = true;
+            s << "cptr = new " << wrapperName(func->ownerClass());
             s << '(';
             if (func->isCopyConstructor() && lastArg == 1)
                 s << "cpp_arg0";
             else
                 s << userArgs.join(", ");
-            s << ");" << endl;
+            s << ')';
+        } else {
+            s << INDENT;
+            if (func->type())
+                s << retvalVariableName() << " = ";
+            if (func->ownerClass()) {
+                if (!func->isStatic())
+                    mc << cpythonWrapperCPtr(func->ownerClass()) << "->";
+                mc << func->ownerClass()->name() << "::";
+            }
+            mc << func->originalName() << '(' << userArgs.join(", ") << ')';
         }
+
+        if (!func->type() || func->isInplaceOperator()) {
+            s << methodCall;
+        } else if (!isCtor) {
+            mc << endl << INDENT;
+            writeToPythonConversion(s, func->type(), func->ownerClass(), methodCall);
+        }
+        s << ';' << endl;
     }
 
     writeCodeSnips(s, getCodeSnips(func), CodeSnip::End, TypeSystem::All, func);

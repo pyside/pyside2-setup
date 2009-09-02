@@ -186,7 +186,7 @@ protected:
      */
     static void initPrimitiveTypesCorrespondences();
 
-    static QString retvalVariableName() { return QString("cpp_result"); }
+    static QString retvalVariableName() { return QString("py_result"); }
 
     static FunctionModificationList functionModifications(const AbstractMetaFunction* func);
     AbstractMetaFunctionList queryFunctions(const AbstractMetaClass* metaClass, bool allFunction = false);

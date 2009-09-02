@@ -7,6 +7,12 @@
 
     <primitive-type name="Complex" target-lang-api-name="PyComplex">
         <conversion-rule file="complex_conversions.h"/>
+        <include file-name="complex.h" location="global"/>
+    </primitive-type>
+
+    <primitive-type name="OddBool" target-lang-api-name="PyBool">
+        <conversion-rule file="oddbool_conversions.h"/>
+        <include file-name="oddbool.h" location="global"/>
     </primitive-type>
 
     <container-type name="std::pair" type="pair">
@@ -49,21 +55,24 @@
 
     <template name="boolptr_at_end_fix_beginning">
         bool __ok__;
-        %0 = ((%TYPE*) ((Shiboken::PyBaseWrapper*) self)->cptr)->
-                %TYPE::%FUNCTION_NAME(%ARGUMENT_NAMES, &amp;__ok__);
+        %0 = Shiboken::Converter&lt; %RETURN_TYPE &gt;::toPython(Shiboken::ValueHolder&lt; %RETURN_TYPE &gt;
+            (
+                ((%TYPE*) ((Shiboken::PyBaseWrapper*) self)->cptr)->%TYPE::%FUNCTION_NAME(%ARGUMENT_NAMES, &amp;__ok__)
+            ));
     </template>
 
     <template name="boolptr_at_start_fix_beginning">
         bool __ok__;
-        %0 = ((%TYPE*) ((Shiboken::PyBaseWrapper*) self)->cptr)->
-                %TYPE::%FUNCTION_NAME(&amp;__ok__, %ARGUMENT_NAMES);
+        %0 = Shiboken::Converter&lt; %RETURN_TYPE &gt;::toPython(Shiboken::ValueHolder&lt; %RETURN_TYPE &gt;
+            (
+                ((%TYPE*) ((Shiboken::PyBaseWrapper*) self)->cptr)->%TYPE::%FUNCTION_NAME(&amp;__ok__, %ARGUMENT_NAMES)
+            ));
     </template>
 
     <template name="boolptr_fix_end">
         PyObject* _item_;
         PyObject* _tuple_ = PyTuple_New(2);
-        _item_ = Shiboken::Converter&lt; %RETURN_TYPE &gt;::toPython(Shiboken::ValueHolder&lt; %RETURN_TYPE &gt;(%0));
-        PyTuple_SET_ITEM(_tuple_, 0, _item_);
+        PyTuple_SET_ITEM(_tuple_, 0, %0);
         _item_ = Shiboken::Converter&lt;bool&gt;::toPython(Shiboken::ValueHolder&lt;bool&gt;(__ok__));
         PyTuple_SET_ITEM(_tuple_, 1, _item_);
         return _tuple_;
@@ -76,8 +85,10 @@
                 <remove-argument/>
             </modify-argument>
             <inject-code class="native" position="beginning">
-                %0 = ((%TYPE*) ((Shiboken::PyBaseWrapper*) self)->cptr)->
-                        %TYPE::%FUNCTION_NAME(%1, true, %3, %4);
+                %0 = Shiboken::Converter&lt; %RETURN_TYPE &gt;::toPython(Shiboken::ValueHolder&lt; %RETURN_TYPE &gt;
+                    (
+                        ((%TYPE*) ((Shiboken::PyBaseWrapper*) self)->cptr)->%TYPE::%FUNCTION_NAME(%1, true, %3, %4)
+                    ));
             </inject-code>
         </modify-function>
 
@@ -209,6 +220,7 @@
     <value-type name="PairUser"/>
     <value-type name="ListUser"/>
     <value-type name="NonDefaultCtor" />
+    <value-type name="OddBoolUser" />
     <object-type name="PrivateDtor" />
 
     <rejection class="ListUser" function-name="createList()"/>
