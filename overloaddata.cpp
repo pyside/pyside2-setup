@@ -22,13 +22,13 @@
  */
 
 #include <QtCore/QFile>
-#include "polymorphicdata.h"
+#include "overloaddata.h"
 #include "shibokengenerator.h"
 
-// Prepare the information about polymorphic methods signatures
-PolymorphicData::PolymorphicData(const AbstractMetaFunctionList overloads)
+// Prepare the information about overloaded methods signatures
+OverloadData::OverloadData(const AbstractMetaFunctionList overloads)
     : m_minArgs(256), m_maxArgs(0), m_argPos(-1), m_argType(0),
-      m_headPolymorphicData(this)
+      m_headOverloadData(this)
 {
     foreach (const AbstractMetaFunction* func, overloads) {
         m_overloads.append(func);
@@ -37,89 +37,89 @@ PolymorphicData::PolymorphicData(const AbstractMetaFunctionList overloads)
             m_minArgs = argSize;
         else if (m_maxArgs < argSize)
             m_maxArgs = argSize;
-        PolymorphicData* currentPolymorphicData = this;
+        OverloadData* currentOverloadData = this;
         foreach (const AbstractMetaArgument* arg, func->arguments()) {
             if (func->argumentRemoved(arg->argumentIndex() + 1))
                 continue;
-            currentPolymorphicData = currentPolymorphicData->addPolymorphicData(func, arg->type());
+            currentOverloadData = currentOverloadData->addOverloadData(func, arg->type());
         }
     }
 
     // Fix minArgs
     if (minArgs() > maxArgs())
-        m_headPolymorphicData->m_minArgs = maxArgs();
+        m_headOverloadData->m_minArgs = maxArgs();
 }
 
-PolymorphicData::PolymorphicData(PolymorphicData* headPolymorphicData, const AbstractMetaFunction* func,
+OverloadData::OverloadData(OverloadData* headOverloadData, const AbstractMetaFunction* func,
                                  const AbstractMetaType* argType, int argPos)
     : m_minArgs(256), m_maxArgs(0), m_argPos(argPos), m_argType(argType),
-      m_headPolymorphicData(headPolymorphicData)
+      m_headOverloadData(headOverloadData)
 {
     if (func)
-        this->addPolymorphic(func);
+        this->addOverload(func);
 }
 
-void PolymorphicData::addPolymorphic(const AbstractMetaFunction* func)
+void OverloadData::addOverload(const AbstractMetaFunction* func)
 {
     int origNumArgs = func->arguments().size();
     int removed = numberOfRemovedArguments(func);
     int numArgs = origNumArgs - removed;
 
-    if (numArgs > m_headPolymorphicData->m_maxArgs)
-        m_headPolymorphicData->m_maxArgs = numArgs;
+    if (numArgs > m_headOverloadData->m_maxArgs)
+        m_headOverloadData->m_maxArgs = numArgs;
 
-    if (numArgs < m_headPolymorphicData->m_minArgs)
-        m_headPolymorphicData->m_minArgs = numArgs;
+    if (numArgs < m_headOverloadData->m_minArgs)
+        m_headOverloadData->m_minArgs = numArgs;
 
-    for (int i = 0; m_headPolymorphicData->m_minArgs > 0 && i < origNumArgs; i++) {
+    for (int i = 0; m_headOverloadData->m_minArgs > 0 && i < origNumArgs; i++) {
         if (func->argumentRemoved(i + 1))
             continue;
         if (!func->arguments()[i]->defaultValueExpression().isEmpty()) {
             int fixedArgIndex = i - removed;
-            if (fixedArgIndex < m_headPolymorphicData->m_minArgs)
-                m_headPolymorphicData->m_minArgs = fixedArgIndex;
+            if (fixedArgIndex < m_headOverloadData->m_minArgs)
+                m_headOverloadData->m_minArgs = fixedArgIndex;
         }
     }
 
     m_overloads.append(func);
 }
 
-PolymorphicData* PolymorphicData::addPolymorphicData(const AbstractMetaFunction* func,
+OverloadData* OverloadData::addOverloadData(const AbstractMetaFunction* func,
                                                      const AbstractMetaType* argType)
 {
-    PolymorphicData* polymorphicData = 0;
-    foreach (PolymorphicData* tmp, m_nextPolymorphicData) {
+    OverloadData* overloadData = 0;
+    foreach (OverloadData* tmp, m_nextOverloadData) {
         // TODO: 'const char *', 'char *' and 'char' will have the same TypeEntry?
         if (tmp->m_argType->typeEntry() == argType->typeEntry()) {
-            tmp->addPolymorphic(func);
-            polymorphicData = tmp;
+            tmp->addOverload(func);
+            overloadData = tmp;
             continue;
         }
     }
 
-    if (!polymorphicData) {
-        polymorphicData = new PolymorphicData(m_headPolymorphicData, func, argType, m_argPos + 1);
+    if (!overloadData) {
+        overloadData = new OverloadData(m_headOverloadData, func, argType, m_argPos + 1);
         // The following code always put PyInt as the last element to be checked.
         // This is useful to check the python argument as PyNumber instead of
         // PyInt, but not getting in the way of other tipes of higher precision
         // (e.g. PyFloat)
         if (ShibokenGenerator::isPyInt(argType))
-            m_nextPolymorphicData.append(polymorphicData);
+            m_nextOverloadData.append(overloadData);
         else
-            m_nextPolymorphicData.prepend(polymorphicData);
+            m_nextOverloadData.prepend(overloadData);
     }
 
-    return polymorphicData;
+    return overloadData;
 }
 
-const AbstractMetaFunction* PolymorphicData::referenceFunction() const
+const AbstractMetaFunction* OverloadData::referenceFunction() const
 {
     return m_overloads.at(0);
 }
 
-const AbstractMetaArgument* PolymorphicData::argument(const AbstractMetaFunction* func) const
+const AbstractMetaArgument* OverloadData::argument(const AbstractMetaFunction* func) const
 {
-    if (isHeadPolymorphicData() || !m_overloads.contains(func))
+    if (isHeadOverloadData() || !m_overloads.contains(func))
         return 0;
 
     int argPos = 0;
@@ -134,44 +134,44 @@ const AbstractMetaArgument* PolymorphicData::argument(const AbstractMetaFunction
     return func->arguments()[m_argPos + removed];
 }
 
-PolymorphicDataList PolymorphicData::polymorphicDataOnPosition(PolymorphicData* polyData, int argPos) const
+OverloadDataList OverloadData::overloadDataOnPosition(OverloadData* overloadData, int argPos) const
 {
-    PolymorphicDataList polyDataList;
-    if (polyData->argPos() == argPos) {
-        polyDataList.append(polyData);
-    } else if (polyData->argPos() < argPos) {
-        foreach (PolymorphicData* pd, polyData->nextPolymorphicData())
-            polyDataList += polymorphicDataOnPosition(pd, argPos);
+    OverloadDataList overloadDataList;
+    if (overloadData->argPos() == argPos) {
+        overloadDataList.append(overloadData);
+    } else if (overloadData->argPos() < argPos) {
+        foreach (OverloadData* pd, overloadData->nextOverloadData())
+            overloadDataList += overloadDataOnPosition(pd, argPos);
     }
-    return polyDataList;
+    return overloadDataList;
 }
 
-PolymorphicDataList PolymorphicData::polymorphicDataOnPosition(int argPos) const
+OverloadDataList OverloadData::overloadDataOnPosition(int argPos) const
 {
-    PolymorphicDataList polyDataList;
-    polyDataList += polymorphicDataOnPosition(m_headPolymorphicData, argPos);
-    return polyDataList;
+    OverloadDataList overloadDataList;
+    overloadDataList += overloadDataOnPosition(m_headOverloadData, argPos);
+    return overloadDataList;
 }
 
-bool PolymorphicData::nextArgumentHasDefaultValue() const
+bool OverloadData::nextArgumentHasDefaultValue() const
 {
-    foreach (PolymorphicData* polymorphicData, m_nextPolymorphicData) {
-        if (polymorphicData->hasDefaultValue())
+    foreach (OverloadData* overloadData, m_nextOverloadData) {
+        if (overloadData->hasDefaultValue())
             return true;
     }
     return false;
 }
 
-bool PolymorphicData::isFinalOccurrence(const AbstractMetaFunction* func) const
+bool OverloadData::isFinalOccurrence(const AbstractMetaFunction* func) const
 {
-    foreach (const PolymorphicData* pd, m_nextPolymorphicData) {
+    foreach (const OverloadData* pd, m_nextOverloadData) {
         if (pd->overloads().contains(func))
             return false;
     }
     return true;
 }
 
-bool PolymorphicData::hasDefaultValue() const
+bool OverloadData::hasDefaultValue() const
 {
     foreach (const AbstractMetaFunction* func, m_overloads) {
         if (!func->arguments()[m_argPos]->defaultValueExpression().isEmpty())
@@ -180,10 +180,10 @@ bool PolymorphicData::hasDefaultValue() const
     return false;
 }
 
-QList<int> PolymorphicData::invalidArgumentLengths() const
+QList<int> OverloadData::invalidArgumentLengths() const
 {
     QSet<int> validArgLengths;
-    foreach (const AbstractMetaFunction* func, m_headPolymorphicData->m_overloads) {
+    foreach (const AbstractMetaFunction* func, m_headOverloadData->m_overloads) {
         validArgLengths << func->arguments().size();
         foreach (const AbstractMetaArgument* arg, func->arguments()) {
             if (!arg->defaultValueExpression().isEmpty())
@@ -200,7 +200,7 @@ QList<int> PolymorphicData::invalidArgumentLengths() const
     return invalidArgLengths;
 }
 
-int PolymorphicData::numberOfRemovedArguments(const AbstractMetaFunction* func, int finalArgPos)
+int OverloadData::numberOfRemovedArguments(const AbstractMetaFunction* func, int finalArgPos)
 {
     int removed = 0;
     if (finalArgPos < 0)
@@ -212,7 +212,7 @@ int PolymorphicData::numberOfRemovedArguments(const AbstractMetaFunction* func, 
     return removed;
 }
 
-QPair<int, int> PolymorphicData::getMinMaxArguments(const AbstractMetaFunctionList overloads)
+QPair<int, int> OverloadData::getMinMaxArguments(const AbstractMetaFunctionList overloads)
 {
     int minArgs = 10000;
     int maxArgs = 0;
@@ -236,23 +236,23 @@ QPair<int, int> PolymorphicData::getMinMaxArguments(const AbstractMetaFunctionLi
     return QPair<int, int>(minArgs, maxArgs);
 }
 
-void PolymorphicData::dumpGraph(QString filename) const
+void OverloadData::dumpGraph(QString filename) const
 {
     QFile file(filename);
     if (file.open(QFile::WriteOnly)) {
         QTextStream s(&file);
-        s << m_headPolymorphicData->dumpGraph();
+        s << m_headOverloadData->dumpGraph();
     }
 }
 
-QString PolymorphicData::dumpGraph() const
+QString OverloadData::dumpGraph() const
 {
     QString indent(4, ' ');
     QString result;
     QTextStream s(&result);
     if (m_argPos == -1) {
         const AbstractMetaFunction* rfunc = referenceFunction();
-        s << "digraph PolymorphicFunction {" << endl;
+        s << "digraph OverloadedFunction {" << endl;
         s << indent << "graph [fontsize=12 fontname=freemono labelloc=t splines=true overlap=false rankdir=LR];" << endl;
 
         // Shows all function signatures
@@ -320,7 +320,7 @@ QString PolymorphicData::dumpGraph() const
 
         s << "</table>> ];" << endl;
 
-        foreach (const PolymorphicData* pd, nextPolymorphicData())
+        foreach (const OverloadData* pd, nextOverloadData())
             s << indent << '"' << rfunc->name() << "\" -> " << pd->dumpGraph();
 
         s << "}" << endl;
@@ -365,19 +365,19 @@ QString PolymorphicData::dumpGraph() const
 
         s << "</table>>];" << endl;
 
-        foreach (const PolymorphicData* pd, nextPolymorphicData())
+        foreach (const OverloadData* pd, nextOverloadData())
             s << indent << argId << " -> " << pd->dumpGraph();
     }
     return result;
 }
 
-int PolymorphicData::functionNumber(const AbstractMetaFunction* func) const
+int OverloadData::functionNumber(const AbstractMetaFunction* func) const
 {
-    return m_headPolymorphicData->m_overloads.indexOf(func);
+    return m_headOverloadData->m_overloads.indexOf(func);
 }
 
-PolymorphicData::~PolymorphicData()
+OverloadData::~OverloadData()
 {
-    while (!m_nextPolymorphicData.isEmpty())
-        delete m_nextPolymorphicData.takeLast();
+    while (!m_nextOverloadData.isEmpty())
+        delete m_nextOverloadData.takeLast();
 }

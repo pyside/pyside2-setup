@@ -29,21 +29,21 @@
     </container-type>
 
     <enum-type name="Abstract::PrintFormat"/>
-    <enum-type name="PolymorphicFuncEnum"/>
-    <enum-type name="Derived::OtherPolymorphicFuncEnum"/>
-    <enum-type name="Modifications::PolymorphicModFunc"/>
+    <enum-type name="OverloadedFuncEnum"/>
+    <enum-type name="Derived::OtherOverloadedFuncEnum"/>
+    <enum-type name="Modifications::OverloadedModFunc"/>
     <enum-type name="ImplicitConv::CtorEnum"/>
     <!-- BUG:
-    renaming the ICPolymorphicFuncEnum to the same name
+    renaming the ICOverloadedFuncEnum to the same name
     of a global enum causes the generator to confuse the
     two types.
     -->
-    <enum-type name="ImplicitConv::ICPolymorphicFuncEnum"/>
+    <enum-type name="ImplicitConv::ICOverloadedFuncEnum"/>
     <enum-type name="SampleNamespace::Option" extensible="yes"/>
     <enum-type name="SampleNamespace::InValue"/>
     <enum-type name="SampleNamespace::OutValue"/>
     <enum-type name="GlobalEnum"/>
-    <enum-type name="GlobalPolyFuncEnum"/>
+    <enum-type name="GlobalOverloadFuncEnum"/>
 
     <namespace-type name="SampleNamespace"/>
 
@@ -80,7 +80,7 @@
 
     <object-type name="Modifications">
 
-        <modify-function signature="polymorphic(int, bool, int, double)">
+        <modify-function signature="overloaded(int, bool, int, double)">
             <modify-argument index="2">
                 <remove-argument/>
             </modify-argument>
@@ -92,7 +92,7 @@
             </inject-code>
         </modify-function>
 
-        <modify-function signature="polymorphic(int, bool, int, int)">
+        <modify-function signature="overloaded(int, bool, int, int)">
             <modify-argument index="3">
                 <remove-argument/>
                 <replace-default-expression with="321"/>
@@ -109,7 +109,7 @@
         compile time error on the binding
         -->
         <!--
-        <modify-function signature="polymorphic(int, bool, Point, Point)">
+        <modify-function signature="overloaded(int, bool, Point, Point)">
             <modify-argument index="3">
                 <remove-argument/>
             </modify-argument>
@@ -118,9 +118,9 @@
 
         <!--
         renaming this signature should remove it from the other
-        polymorphic methods decision tree
+        overloaded methods decision tree
         -->
-        <modify-function signature="polymorphic(int, bool, Point, Point)" rename="poly"/>
+        <modify-function signature="overloaded(int, bool, Point, Point)" rename="over"/>
 
         <!--
         'ok' must be removed and the return value will be changed

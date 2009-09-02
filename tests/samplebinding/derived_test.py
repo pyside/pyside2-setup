@@ -6,7 +6,7 @@ import sys
 import unittest
 
 import sample
-from sample import Abstract, Derived, PolymorphicFuncEnum
+from sample import Abstract, Derived, OverloadedFuncEnum
 
 class Deviant(Derived):
     def __init__(self):
@@ -32,45 +32,45 @@ class DerivedTest(unittest.TestCase):
                                  'id_', 'pureVirtual', 'unpureVirtual'])
         self.assert_(inherited_methods.issubset(dir(Derived)))
 
-    def testPolymorphicMethodCall(self):
-        '''Test if the correct polymorphic method is being called.'''
+    def testOverloadedMethodCall(self):
+        '''Test if the correct overloaded method is being called.'''
         derived = Derived()
 
-        result = derived.polymorphic(1, 2)
-        self.assertEqual(type(result), PolymorphicFuncEnum)
-        self.assertEqual(result, sample.PolymorphicFunc_ii)
+        result = derived.overloaded(1, 2)
+        self.assertEqual(type(result), OverloadedFuncEnum)
+        self.assertEqual(result, sample.OverloadedFunc_ii)
 
-        result = derived.polymorphic(3)
-        self.assertEqual(type(result), PolymorphicFuncEnum)
-        self.assertEqual(result, sample.PolymorphicFunc_ii)
+        result = derived.overloaded(3)
+        self.assertEqual(type(result), OverloadedFuncEnum)
+        self.assertEqual(result, sample.OverloadedFunc_ii)
 
-        result = derived.polymorphic(4.4)
-        self.assertEqual(type(result), PolymorphicFuncEnum)
-        self.assertEqual(result, sample.PolymorphicFunc_d)
+        result = derived.overloaded(4.4)
+        self.assertEqual(type(result), OverloadedFuncEnum)
+        self.assertEqual(result, sample.OverloadedFunc_d)
 
-    def testOtherPolymorphicMethodCall(self):
-        '''Another test to check polymorphic method calling, just to double check.'''
+    def testOtherOverloadedMethodCall(self):
+        '''Another test to check overloaded method calling, just to double check.'''
         derived = Derived()
 
-        result = derived.otherPolymorphic(1, 2, True, 3.3)
-        self.assertEqual(type(result), Derived.OtherPolymorphicFuncEnum)
-        self.assertEqual(result, sample.Derived.OtherPolymorphicFunc_iibd)
+        result = derived.otherOverloaded(1, 2, True, 3.3)
+        self.assertEqual(type(result), Derived.OtherOverloadedFuncEnum)
+        self.assertEqual(result, sample.Derived.OtherOverloadedFunc_iibd)
 
-        result = derived.otherPolymorphic(1, 2.2)
-        self.assertEqual(type(result), Derived.OtherPolymorphicFuncEnum)
-        self.assertEqual(result, Derived.OtherPolymorphicFunc_id)
+        result = derived.otherOverloaded(1, 2.2)
+        self.assertEqual(type(result), Derived.OtherOverloadedFuncEnum)
+        self.assertEqual(result, Derived.OtherOverloadedFunc_id)
 
-    def testPolymorphicMethodCallWithDifferentNumericTypes(self):
-        '''Test if the correct polymorphic method accepts a different numeric type as argument.'''
+    def testOverloadedMethodCallWithDifferentNumericTypes(self):
+        '''Test if the correct overloaded method accepts a different numeric type as argument.'''
         derived = Derived()
-        result = derived.polymorphic(1.1, 2.2)
-        self.assertEqual(type(result), PolymorphicFuncEnum)
-        self.assertEqual(result, sample.PolymorphicFunc_ii)
+        result = derived.overloaded(1.1, 2.2)
+        self.assertEqual(type(result), OverloadedFuncEnum)
+        self.assertEqual(result, sample.OverloadedFunc_ii)
 
-    def testPolymorphicMethodCallWithWrongNumberOfArguments(self):
-        '''Test if a call to a polymorphic method with the wrong number of arguments raises an exception.'''
+    def testOverloadedMethodCallWithWrongNumberOfArguments(self):
+        '''Test if a call to an overloaded method with the wrong number of arguments raises an exception.'''
         derived = Derived()
-        self.assertRaises(TypeError, lambda : derived.otherPolymorphic(1, 2, True))
+        self.assertRaises(TypeError, lambda : derived.otherOverloaded(1, 2, True))
 
     def testReimplementedPureVirtualMethodCall(self):
         '''Test if a Python override of a implemented pure virtual method is correctly called from C++.'''

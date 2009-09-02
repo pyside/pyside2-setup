@@ -11,7 +11,7 @@ class ImplicitConvTest(unittest.TestCase):
     '''Test case for implicit conversions'''
 
     def testImplicitConversions(self):
-        '''Test if polymorphic function call decisor takes implicit conversions into account.'''
+        '''Test if overloaded function call decisor takes implicit conversions into account.'''
         ic = ImplicitConv.implicitConvCommon(ImplicitConv())
         self.assertEqual(ic.ctorEnum(), ImplicitConv.CtorNone)
 

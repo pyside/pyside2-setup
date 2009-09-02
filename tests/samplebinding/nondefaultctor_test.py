@@ -16,7 +16,6 @@ class DerivedNonDefaultCtor (NonDefaultCtor):
 class NonDefaultCtorTest(unittest.TestCase):
 
     def testNonDefaultCtor(self):
-        '''Test if polymorphic function call decisor takes implicit conversions into account.'''
         c = NonDefaultCtor(2)
         # these functions returns NonDefaultCtor by value, so a PyObjecy  is created every time
         self.assertNotEqual(c.returnMyself(), c)

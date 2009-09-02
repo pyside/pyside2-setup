@@ -37,17 +37,17 @@
 
 #include "abstract.h"
 
-enum PolymorphicFuncEnum {
-    PolymorphicFunc_ii,
-    PolymorphicFunc_d
+enum OverloadedFuncEnum {
+    OverloadedFunc_ii,
+    OverloadedFunc_d
 };
 
 class Derived : public Abstract
 {
 public:
-    enum OtherPolymorphicFuncEnum {
-        OtherPolymorphicFunc_iibd,
-        OtherPolymorphicFunc_id
+    enum OtherOverloadedFuncEnum {
+        OtherOverloadedFunc_iibd,
+        OtherOverloadedFunc_id
     };
 
     Derived(int id = -1);
@@ -65,12 +65,12 @@ public:
     double defaultValue(int n = 0);
 
     // overloads
-    PolymorphicFuncEnum polymorphic(int i = 0, int d = 0);
-    PolymorphicFuncEnum polymorphic(double n);
+    OverloadedFuncEnum overloaded(int i = 0, int d = 0);
+    OverloadedFuncEnum overloaded(double n);
 
     // more overloads
-    OtherPolymorphicFuncEnum otherPolymorphic(int a, int b, bool c, double d);
-    OtherPolymorphicFuncEnum otherPolymorphic(int a, double b);
+    OtherOverloadedFuncEnum otherOverloaded(int a, int b, bool c, double d);
+    OtherOverloadedFuncEnum otherOverloaded(int a, double b);
 
 protected:
     const char* getClassName() { return className(); }

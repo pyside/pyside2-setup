@@ -18,11 +18,11 @@ set(shiboken_VERSION 0.1)
 set(CMAKE_BUILD_TYPE Debug)
 
 set(shiboken_SRC
-shibokengenerator.cpp
-headergenerator.cpp
 cppgenerator.cpp
-polymorphicdata.cpp
+headergenerator.cpp
+overloaddata.cpp
 shiboken.cpp
+shibokengenerator.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}

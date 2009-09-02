@@ -44,22 +44,22 @@ public:
     Modifications() {}
     ~Modifications() {}
 
-    enum PolymorphicModFunc {
-        PolymorphicNone,
-        Polymorphic_ibid,
-        Polymorphic_ibib,
-        Polymorphic_ibiP,
-        Polymorphic_ibii,
-        Polymorphic_ibPP
+    enum OverloadedModFunc {
+        OverloadedNone,
+        Overloaded_ibid,
+        Overloaded_ibib,
+        Overloaded_ibiP,
+        Overloaded_ibii,
+        Overloaded_ibPP
     };
 
-    // those polymorphic methods should be heavily modified
+    // those overloaded methods should be heavily modified
     // to push the overload decisor to its limits
-    PolymorphicModFunc polymorphic(int a0, bool b0, int c0, double d0) { return Polymorphic_ibid; }
-    PolymorphicModFunc polymorphic(int a1, bool b1, int c1, bool d1) { return Polymorphic_ibib; }
-    PolymorphicModFunc polymorphic(int a2, bool b2, int c2, Point d2) { return Polymorphic_ibiP; }
-    PolymorphicModFunc polymorphic(int a3, bool b3, int c3 = 123, int d3 = 456) { return Polymorphic_ibii; }
-    PolymorphicModFunc polymorphic(int a4, bool b4, Point c4, Point d4) { return Polymorphic_ibPP; }
+    OverloadedModFunc overloaded(int a0, bool b0, int c0, double d0) { return Overloaded_ibid; }
+    OverloadedModFunc overloaded(int a1, bool b1, int c1, bool d1) { return Overloaded_ibib; }
+    OverloadedModFunc overloaded(int a2, bool b2, int c2, Point d2) { return Overloaded_ibiP; }
+    OverloadedModFunc overloaded(int a3, bool b3, int c3 = 123, int d3 = 456) { return Overloaded_ibii; }
+    OverloadedModFunc overloaded(int a4, bool b4, Point c4, Point d4) { return Overloaded_ibPP; }
 
     // 'ok' must be removed and the return value will be changed
     // to a tuple (PyObject*) containing the expected result plus

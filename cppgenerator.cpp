@@ -398,8 +398,8 @@ void CppGenerator::writeNonVirtualModifiedFunctionNative(QTextStream& s, const A
 
 void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFunctionList overloads)
 {
-    PolymorphicData polymorphicData(overloads);
-    const AbstractMetaFunction* rfunc = polymorphicData.referenceFunction();
+    OverloadData overloadData(overloads);
+    const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
     QString className = rfunc->ownerClass()->qualifiedCppName();
 
     s << "PyObject*" << endl;
@@ -424,14 +424,14 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     s << INDENT << "if (!PyType_IsSubtype(type, &Py" << className << "_Type))" << endl;
     s << INDENT << INDENT << "return 0;" << endl << endl;
 
-      if (polymorphicData.maxArgs() > 0) {
+      if (overloadData.maxArgs() > 0) {
         s  << endl << INDENT << "int numArgs = ";
-        writeArgumentsInitializer(s, polymorphicData);
+        writeArgumentsInitializer(s, overloadData);
     }
 
     writeCodeSnips(s, getCodeSnips(rfunc), CodeSnip::Beginning, TypeSystem::All, rfunc);
 
-    writePolymorphicDecisor(s, &polymorphicData);
+    writeOverloadedMethodDecisor(s, &overloadData);
     s << endl;
 
     s << INDENT << "self = Shiboken::PyBaseWrapper_New(type, &Py" << className << "_Type, cptr);" << endl;
@@ -446,8 +446,8 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     writeCodeSnips(s, getCodeSnips(rfunc), CodeSnip::End, TypeSystem::All, rfunc);
 
     s << endl << INDENT << "return self;" << endl;
-    if (polymorphicData.maxArgs() > 0)
-        writeErrorSection(s, polymorphicData);
+    if (overloadData.maxArgs() > 0)
+        writeErrorSection(s, overloadData);
     s << '}' << endl << endl;
 }
 
@@ -487,13 +487,13 @@ void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const Ab
 
 void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunctionList overloads)
 {
-    PolymorphicData polymorphicData(overloads);
-    const AbstractMetaFunction* rfunc = polymorphicData.referenceFunction();
+    OverloadData overloadData(overloads);
+    const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
 
     //DEBUG
     //if (rfunc->isOperatorOverload()) {
     //    QString dumpFile = QString("%1_%2.dot").arg(m_packageName).arg(pythonOperatorFunctionName(rfunc)).toLower();
-    //    polymorphicData.dumpGraph(dumpFile);
+    //    overloadData.dumpGraph(dumpFile);
     //}
     //DEBUG
 
@@ -502,8 +502,8 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
 //     if (rfunc->isInplaceOperator())
 //         s << "/*" << endl;
 
-    int minArgs = polymorphicData.minArgs();
-    int maxArgs = polymorphicData.maxArgs();
+    int minArgs = overloadData.minArgs();
+    int maxArgs = overloadData.maxArgs();
     if (ShibokenGenerator::isReverseOperator(rfunc)) {
         minArgs--;
         maxArgs--;
@@ -541,10 +541,10 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             if (minArgs == 0 && maxArgs == 1)
                 s << "(arg == 0 ? 0 : 1);" << endl;
             else
-                writeArgumentsInitializer(s, polymorphicData);
+                writeArgumentsInitializer(s, overloadData);
         }
 
-        writePolymorphicDecisor(s, &polymorphicData);
+        writeOverloadedMethodDecisor(s, &overloadData);
 
         s << endl << INDENT << "if (PyErr_Occurred()";
         if (rfunc->type() && !rfunc->isInplaceOperator())
@@ -569,26 +569,26 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         s << ';' << endl;
 
         if (maxArgs > 0)
-            writeErrorSection(s, polymorphicData);
+            writeErrorSection(s, overloadData);
     }
     s << '}' << endl << endl;
 }
 
-void CppGenerator::writeArgumentsInitializer(QTextStream& s, PolymorphicData& polymorphicData)
+void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overloadData)
 {
-    const AbstractMetaFunction* rfunc = polymorphicData.referenceFunction();
+    const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
     s << "PyTuple_GET_SIZE(args);" << endl;
 
     s << INDENT << "PyObject* pyargs[] = {";
-    s << QString(polymorphicData.maxArgs(), '0').split("", QString::SkipEmptyParts).join(", ");
+    s << QString(overloadData.maxArgs(), '0').split("", QString::SkipEmptyParts).join(", ");
     s << "};" << endl << endl;
 
     QStringList palist;
-    for (int i = 0; i < polymorphicData.maxArgs(); i++)
+    for (int i = 0; i < overloadData.maxArgs(); i++)
         palist << QString("&(pyargs[%1])").arg(i);
     QString pyargs = palist.join(", ");
 
-    QList<int> invalidArgsLength = polymorphicData.invalidArgumentLengths();
+    QList<int> invalidArgsLength = overloadData.invalidArgumentLengths();
     if (!invalidArgsLength.isEmpty()) {
         QStringList invArgsLen;
         foreach (int i, invalidArgsLength)
@@ -605,7 +605,7 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, PolymorphicData& po
         funcName = rfunc->name();
 
     s << INDENT << "if (!PyArg_UnpackTuple(args, \"" << funcName << "\", ";
-    s << polymorphicData.minArgs() << ", " << polymorphicData.maxArgs();
+    s << overloadData.minArgs() << ", " << overloadData.maxArgs();
     s  << ", " << pyargs << "))" << endl;
     {
         Indentation indent(INDENT);
@@ -614,9 +614,9 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, PolymorphicData& po
     s << endl;
 }
 
-void CppGenerator::writeErrorSection(QTextStream& s, PolymorphicData& polymorphicData)
+void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
 {
-    const AbstractMetaFunction* rfunc = polymorphicData.referenceFunction();
+    const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
     s << endl << INDENT << cpythonFunctionName(rfunc) << "_TypeError:" << endl;
     Indentation indentation(INDENT);
     QString funcName;
@@ -629,9 +629,9 @@ void CppGenerator::writeErrorSection(QTextStream& s, PolymorphicData& polymorphi
     s << INDENT << "return 0;" << endl;
 }
 
-void CppGenerator::writeTypeCheck(QTextStream& s, const PolymorphicData* polyData, QString argumentName)
+void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName)
 {
-    const AbstractMetaType* argType = polyData->argType();
+    const AbstractMetaType* argType = overloadData->argType();
     AbstractMetaFunctionList implicitConverters;
     if (argType->isValue()) {
         const AbstractMetaClass* metaClass = classes().findClass(argType->name());
@@ -640,15 +640,15 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const PolymorphicData* polyDat
     }
 
     int alternativeNumericTypes = 0;
-    foreach (PolymorphicData* pd, polyData->polymorphicDataOnPosition(polyData->argPos())) {
+    foreach (OverloadData* pd, overloadData->overloadDataOnPosition(overloadData->argPos())) {
         if (!pd->argType()->isPrimitive())
             continue;
         if (ShibokenGenerator::isNumber(pd->argType()->typeEntry()))
             alternativeNumericTypes++;
     }
 
-    // This condition trusts that the PolymorphicData object will arrange for
-    // PyInt type to be the last entry on a list of polymorphic argument data.
+    // This condition trusts that the OverloadData object will arrange for
+    // PyInt type to be the last entry on a list of overload argument data.
     bool numberType = alternativeNumericTypes == 1 || ShibokenGenerator::isPyInt(argType);
 
     if (implicitConverters.size() > 0)
@@ -666,33 +666,33 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const PolymorphicData* polyDat
         s << ')';
 }
 
-void CppGenerator::writePolymorphicDecisor(QTextStream& s, PolymorphicData* parentPolymorphicData)
+void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* parentOverloadData)
 {
-    bool hasDefaultCall = parentPolymorphicData->nextArgumentHasDefaultValue();
-    if (!hasDefaultCall && parentPolymorphicData->isHeadPolymorphicData()) {
-        foreach (const AbstractMetaFunction* func, parentPolymorphicData->overloads()) {
-            if (parentPolymorphicData->isFinalOccurrence(func)) {
+    bool hasDefaultCall = parentOverloadData->nextArgumentHasDefaultValue();
+    if (!hasDefaultCall && parentOverloadData->isHeadOverloadData()) {
+        foreach (const AbstractMetaFunction* func, parentOverloadData->overloads()) {
+            if (parentOverloadData->isFinalOccurrence(func)) {
                 hasDefaultCall = true;
                 break;
             }
         }
     }
 
-    const AbstractMetaFunction* rfunc = parentPolymorphicData->referenceFunction();
+    const AbstractMetaFunction* rfunc = parentOverloadData->referenceFunction();
 
-    int minArgs = parentPolymorphicData->minArgs();
-    int maxArgs = parentPolymorphicData->maxArgs();
+    int minArgs = parentOverloadData->minArgs();
+    int maxArgs = parentOverloadData->maxArgs();
     if (ShibokenGenerator::isReverseOperator(rfunc)) {
         minArgs--;
         maxArgs--;
     }
 
     if (maxArgs == 0
-        || (!parentPolymorphicData->isHeadPolymorphicData()
-        && (parentPolymorphicData->nextPolymorphicData().isEmpty()
-        || (!hasDefaultCall && parentPolymorphicData->overloads().size() == 1)))) {
-        const AbstractMetaFunction* func = parentPolymorphicData->overloads()[0];
-        int removed = PolymorphicData::numberOfRemovedArguments(func);
+        || (!parentOverloadData->isHeadOverloadData()
+        && (parentOverloadData->nextOverloadData().isEmpty()
+        || (!hasDefaultCall && parentOverloadData->overloads().size() == 1)))) {
+        const AbstractMetaFunction* func = parentOverloadData->overloads()[0];
+        int removed = OverloadData::numberOfRemovedArguments(func);
         writeMethodCall(s, func, func->arguments().size() - removed);
         return;
     }
@@ -703,19 +703,19 @@ void CppGenerator::writePolymorphicDecisor(QTextStream& s, PolymorphicData* pare
 
     // can make a default call
     if (hasDefaultCall) {
-        s << "if (numArgs == " << parentPolymorphicData->argPos() + 1 << ") { // hasDefaultCall" << endl;
+        s << "if (numArgs == " << parentOverloadData->argPos() + 1 << ") { // hasDefaultCall" << endl;
         {
             Indentation indent(INDENT);
-            writeMethodCall(s, rfunc, parentPolymorphicData->argPos() + 1);
+            writeMethodCall(s, rfunc, parentOverloadData->argPos() + 1);
         }
         s << INDENT << "} else ";
     }
 
     // last occurrence of function signature
-    if (!parentPolymorphicData->isHeadPolymorphicData()) {
-        foreach (const AbstractMetaFunction* func, parentPolymorphicData->overloads()) {
-            if (parentPolymorphicData->isFinalOccurrence(func)) {
-                int lastArg = parentPolymorphicData->argPos() + 1;
+    if (!parentOverloadData->isHeadOverloadData()) {
+        foreach (const AbstractMetaFunction* func, parentOverloadData->overloads()) {
+            if (parentOverloadData->isFinalOccurrence(func)) {
+                int lastArg = parentOverloadData->argPos() + 1;
                 s << "if (numArgs == " << lastArg << ") { // final:" << func->minimalSignature() << endl;
                 {
                     Indentation indent(INDENT);
@@ -726,33 +726,33 @@ void CppGenerator::writePolymorphicDecisor(QTextStream& s, PolymorphicData* pare
         }
     }
 
-    foreach (PolymorphicData* polymorphicData, parentPolymorphicData->nextPolymorphicData()) {
+    foreach (OverloadData* overloadData, parentOverloadData->nextOverloadData()) {
         if (maxArgs > 0) {
-            bool signatureFound = polymorphicData->overloads().size() == 1 &&
-                                  !polymorphicData->nextArgumentHasDefaultValue();
-            const AbstractMetaFunction* func = polymorphicData->overloads()[0];
-            QString pyArgName = varargs ? QString("pyargs[%1]").arg(polymorphicData->argPos()) : "arg";
+            bool signatureFound = overloadData->overloads().size() == 1 &&
+                                  !overloadData->nextArgumentHasDefaultValue();
+            const AbstractMetaFunction* func = overloadData->overloads()[0];
+            QString pyArgName = varargs ? QString("pyargs[%1]").arg(overloadData->argPos()) : "arg";
 
             s << "if (";
             if (signatureFound && varargs) {
                 s << "numArgs == ";
-                s << func->arguments().size() - PolymorphicData::numberOfRemovedArguments(func);
+                s << func->arguments().size() - OverloadData::numberOfRemovedArguments(func);
                 s << " && ";
             }
 
-            writeTypeCheck(s, polymorphicData, pyArgName);
+            writeTypeCheck(s, overloadData, pyArgName);
 
-            if (polymorphicData->argType()->isContainer() &&
-                ((ContainerTypeEntry*)polymorphicData->argType()->typeEntry())->type()
+            if (overloadData->argType()->isContainer() &&
+                ((ContainerTypeEntry*)overloadData->argType()->typeEntry())->type()
                     == ContainerTypeEntry::PairContainer) {
                 s << " && PySequence_Size(" << pyArgName << ") == 2";
             }
 
             if (signatureFound && varargs) {
-                int numArgs = func->arguments().size() - PolymorphicData::numberOfRemovedArguments(func);
-                PolymorphicData* tmp = polymorphicData;
-                for (int i = polymorphicData->argPos() + 1; i < numArgs; i++) {
-                    tmp = tmp->nextPolymorphicData()[0];
+                int numArgs = func->arguments().size() - OverloadData::numberOfRemovedArguments(func);
+                OverloadData* tmp = overloadData;
+                for (int i = overloadData->argPos() + 1; i < numArgs; i++) {
+                    tmp = tmp->nextOverloadData()[0];
                     s << " && ";
                     writeTypeCheck(s, tmp, QString("pyargs[%1]").arg(i));
                 }
@@ -760,11 +760,11 @@ void CppGenerator::writePolymorphicDecisor(QTextStream& s, PolymorphicData* pare
             s << ") {" << endl;
             {
                 Indentation indent(INDENT);
-                int allRemoved = PolymorphicData::numberOfRemovedArguments(func);
+                int allRemoved = OverloadData::numberOfRemovedArguments(func);
                 int lastArg = signatureFound ? func->arguments().size() - allRemoved
-                                                : polymorphicData->argPos() + 1;
+                                                : overloadData->argPos() + 1;
                 int removed = 0;
-                for (int i = polymorphicData->argPos(); i < lastArg; i++) {
+                for (int i = overloadData->argPos(); i < lastArg; i++) {
                     if (func->argumentRemoved(i + 1))
                         removed++;
                     QString argName = QString("cpp_arg%1").arg(i);
@@ -781,7 +781,7 @@ void CppGenerator::writePolymorphicDecisor(QTextStream& s, PolymorphicData* pare
 
         {
             Indentation indent(INDENT);
-            writePolymorphicDecisor(s, polymorphicData);
+            writeOverloadedMethodDecisor(s, overloadData);
         }
 
         s << INDENT << "} else ";
@@ -1107,12 +1107,12 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
     {
         Indentation indent(INDENT);
         foreach (AbstractMetaFunctionList overloads, cmpOverloads) {
-            PolymorphicData polyData(overloads);
+            OverloadData overloadData(overloads);
             const AbstractMetaFunction* rfunc = overloads[0];
 
             // DEBUG
             // QString dumpFile = QString("%1_%2.dot").arg(rfunc->ownerClass()->name()).arg(pythonOperatorFunctionName(rfunc)).toLower();
-            // polyData.dumpGraph(dumpFile);
+            // overloadData.dumpGraph(dumpFile);
             // DEBUG
 
             s << INDENT << "case " << ShibokenGenerator::pythonRichCompareOperatorId(rfunc) << ':' << endl;
@@ -1192,7 +1192,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
 
 void CppGenerator::writeMethodDefinition(QTextStream& s, const AbstractMetaFunctionList overloads)
 {
-    QPair<int, int> minMax = PolymorphicData::getMinMaxArguments(overloads);
+    QPair<int, int> minMax = OverloadData::getMinMaxArguments(overloads);
     const AbstractMetaFunction* func = overloads[0];
 
     s << INDENT << "{const_cast<char*>(\"" << func->name() << "\"), (PyCFunction)";

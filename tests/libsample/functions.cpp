@@ -105,15 +105,15 @@ returnCString()
     return __PRETTY_FUNCTION__;
 }
 
-GlobalPolyFuncEnum
-polymorphicFunc(int val)
+GlobalOverloadFuncEnum
+overloadedFunc(int val)
 {
-    return GlobalPolyFunc_i;
+    return GlobalOverloadFunc_i;
 }
 
-GlobalPolyFuncEnum
-polymorphicFunc(double val)
+GlobalOverloadFuncEnum
+overloadedFunc(double val)
 {
-    return GlobalPolyFunc_d;
+    return GlobalOverloadFunc_d;
 }
 

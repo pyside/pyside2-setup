@@ -21,37 +21,37 @@
  *
  */
 
-#ifndef POLYMORPHICDATA_H
-#define POLYMORPHICDATA_H
+#ifndef OVERLOADDATA_H
+#define OVERLOADDATA_H
 
 #include <apiextractor/abstractmetalang.h>
 #include <QtCore/QList>
 #include <QtCore/QBitArray>
 
-class PolymorphicData;
-typedef QList<PolymorphicData*> PolymorphicDataList;
+class OverloadData;
+typedef QList<OverloadData*> OverloadDataList;
 
-class PolymorphicData
+class OverloadData
 {
 public:
-    PolymorphicData(const AbstractMetaFunctionList overloads);
+    OverloadData(const AbstractMetaFunctionList overloads);
 
-    int minArgs() const { return m_headPolymorphicData->m_minArgs; }
-    int maxArgs() const { return m_headPolymorphicData->m_maxArgs; }
+    int minArgs() const { return m_headOverloadData->m_minArgs; }
+    int maxArgs() const { return m_headOverloadData->m_maxArgs; }
     int argPos() const { return m_argPos; }
 
     const AbstractMetaType* argType() const { return m_argType; }
     const AbstractMetaFunction* referenceFunction() const;
     const AbstractMetaArgument* argument(const AbstractMetaFunction* func) const;
-    PolymorphicDataList polymorphicDataOnPosition(int argPos) const;
+    OverloadDataList overloadDataOnPosition(int argPos) const;
 
-    bool isHeadPolymorphicData() const { return this == m_headPolymorphicData; }
+    bool isHeadOverloadData() const { return this == m_headOverloadData; }
     bool hasDefaultValue() const;
     bool nextArgumentHasDefaultValue() const;
     bool isFinalOccurrence(const AbstractMetaFunction* func) const;
 
     QList<const AbstractMetaFunction*> overloads() const { return m_overloads; }
-    PolymorphicDataList nextPolymorphicData() const { return m_nextPolymorphicData; }
+    OverloadDataList nextOverloadData() const { return m_nextOverloadData; }
 
     QList<int> invalidArgumentLengths() const;
 
@@ -61,17 +61,17 @@ public:
     void dumpGraph(QString filename) const;
     QString dumpGraph() const;
 
-    ~PolymorphicData();
+    ~OverloadData();
 
 private:
-    PolymorphicData(PolymorphicData* headPolymorphicData, const AbstractMetaFunction* func,
+    OverloadData(OverloadData* headOverloadData, const AbstractMetaFunction* func,
                     const AbstractMetaType* argType, int argPos);
 
-    void addPolymorphic(const AbstractMetaFunction* func);
-    PolymorphicData* addPolymorphicData(const AbstractMetaFunction* func, const AbstractMetaType* argType);
+    void addOverload(const AbstractMetaFunction* func);
+    OverloadData* addOverloadData(const AbstractMetaFunction* func, const AbstractMetaType* argType);
 
     int functionNumber(const AbstractMetaFunction* func) const;
-    PolymorphicDataList polymorphicDataOnPosition(PolymorphicData* polyData, int argPos) const;
+    OverloadDataList overloadDataOnPosition(OverloadData* overloadData, int argPos) const;
 
     int m_minArgs;
     int m_maxArgs;
@@ -79,9 +79,9 @@ private:
     const AbstractMetaType* m_argType;
     QList<const AbstractMetaFunction*> m_overloads;
 
-    PolymorphicData* m_headPolymorphicData;
-    PolymorphicDataList m_nextPolymorphicData;
+    OverloadData* m_headOverloadData;
+    OverloadDataList m_nextOverloadData;
 };
 
 
-#endif // POLYMORPHICDATA_H
+#endif // OVERLOADDATA_H

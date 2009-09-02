@@ -45,11 +45,11 @@ public:
         CtorThree
     };
 
-    enum ICPolymorphicFuncEnum {
-        PolyFunc_Ii,
-        PolyFunc_Ib,
-        PolyFunc_i,
-        PolyFunc_C
+    enum ICOverloadedFuncEnum {
+        OverFunc_Ii,
+        OverFunc_Ib,
+        OverFunc_i,
+        OverFunc_C
     };
 
     ImplicitConv() : m_ctorEnum(CtorNone), m_objId(-1) {}
@@ -64,10 +64,10 @@ public:
 
     static ImplicitConv implicitConvDefault(ImplicitConv implicit = CtorTwo);
 
-    static ICPolymorphicFuncEnum implicitConvPolymorphism(ImplicitConv implicit, int dummyArg);
-    static ICPolymorphicFuncEnum implicitConvPolymorphism(ImplicitConv implicit, bool dummyArg);
-    static ICPolymorphicFuncEnum implicitConvPolymorphism(int dummyArg);
-    static ICPolymorphicFuncEnum implicitConvPolymorphism(CtorEnum dummyArg);
+    static ICOverloadedFuncEnum implicitConvOverloading(ImplicitConv implicit, int dummyArg);
+    static ICOverloadedFuncEnum implicitConvOverloading(ImplicitConv implicit, bool dummyArg);
+    static ICOverloadedFuncEnum implicitConvOverloading(int dummyArg);
+    static ICOverloadedFuncEnum implicitConvOverloading(CtorEnum dummyArg);
 
 private:
     CtorEnum m_ctorEnum;

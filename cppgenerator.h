@@ -25,7 +25,7 @@
 #define CPPGENERATOR_H
 
 #include "shibokengenerator.h"
-#include "polymorphicdata.h"
+#include "overloaddata.h"
 
 /**
  *   The CppGenerator generate the implementations of C++ bindings classes.
@@ -52,12 +52,12 @@ private:
     void writeDestructorWrapper(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeMinimalConstructorCallArguments(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeMethodWrapper(QTextStream &s, const AbstractMetaFunctionList overloads);
-    void writeArgumentsInitializer(QTextStream& s, PolymorphicData& polymorphicData);
+    void writeArgumentsInitializer(QTextStream& s, OverloadData& overloadData);
 
-    void writeErrorSection(QTextStream& s, PolymorphicData& polymorphicData);
-    void writeTypeCheck(QTextStream& s, const PolymorphicData* polyData, QString argumentName);
+    void writeErrorSection(QTextStream& s, OverloadData& overloadData);
+    void writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName);
 
-    void writePolymorphicDecisor(QTextStream& s, PolymorphicData* parentPolymorphicData);
+    void writeOverloadedMethodDecisor(QTextStream& s, OverloadData* parentOverloadData);
     void writeMethodCall(QTextStream& s, const AbstractMetaFunction* func, int lastArg = 0);
 
     void writeClassRegister(QTextStream& s, const AbstractMetaClass* metaClass);

@@ -84,31 +84,31 @@ Derived::defaultValue(int n)
     return ((double) n) + 0.1;
 }
 
-PolymorphicFuncEnum
-Derived::polymorphic(int i, int d)
+OverloadedFuncEnum
+Derived::overloaded(int i, int d)
 {
     //cout << __PRETTY_FUNCTION__ << "[i = 0, d = 0]" << endl;
-    return PolymorphicFunc_ii;
+    return OverloadedFunc_ii;
 }
 
-PolymorphicFuncEnum
-Derived::polymorphic(double n)
+OverloadedFuncEnum
+Derived::overloaded(double n)
 {
     //cout << __PRETTY_FUNCTION__ << endl;
-    return PolymorphicFunc_d;
+    return OverloadedFunc_d;
 }
 
-Derived::OtherPolymorphicFuncEnum
-Derived::otherPolymorphic(int a, int b, bool c, double d)
+Derived::OtherOverloadedFuncEnum
+Derived::otherOverloaded(int a, int b, bool c, double d)
 {
     //cout << __PRETTY_FUNCTION__ << endl;
-    return OtherPolymorphicFunc_iibd;
+    return OtherOverloadedFunc_iibd;
 }
 
-Derived::OtherPolymorphicFuncEnum
-Derived::otherPolymorphic(int a, double b)
+Derived::OtherOverloadedFuncEnum
+Derived::otherOverloaded(int a, double b)
 {
     //cout << __PRETTY_FUNCTION__ << endl;
-    return OtherPolymorphicFunc_id;
+    return OtherOverloadedFunc_id;
 }
 

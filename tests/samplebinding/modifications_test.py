@@ -26,12 +26,12 @@ class ModificationsTest(unittest.TestCase):
 
     def testClassMembersAvailability(self):
         '''Test if Modified class really have the expected members.'''
-        expected_members = set(['PolymorphicModFunc', 'PolymorphicNone',
-                                'Polymorphic_ibiP', 'Polymorphic_ibib',
-                                'Polymorphic_ibid', 'Polymorphic_ibii',
+        expected_members = set(['OverloadedModFunc', 'OverloadedNone',
+                                'Overloaded_ibiP', 'Overloaded_ibib',
+                                'Overloaded_ibid', 'Overloaded_ibii',
                                 'calculateArea', 'doublePlus', 'increment',
                                 'multiplyPointCoordsPlusValue', 'name',
-                                'pointToPair', 'polymorphic', 'power',
+                                'pointToPair', 'overloaded', 'power',
                                 'timesTen'])
         self.assert_(expected_members.issubset(dir(Modifications)))
 
@@ -98,17 +98,17 @@ class ModificationsTest(unittest.TestCase):
         self.assertEqual(type(result), float)
         self.assertEqual(result, 14.1)
 
-    def testPolymorphicMethodModifications(self):
-        '''Tests modifications to a polymorphic method'''
-        # polymorphic(int, bool[removed], int, double)
-        self.assertEqual(self.mods.polymorphic(1, 2, 3.1), Modifications.Polymorphic_ibid)
-        # polymorphic(int, bool, int[removed,default=321], int)
-        self.assertEqual(self.mods.polymorphic(1, True, 2), Modifications.Polymorphic_ibii)
+    def testOverloadedMethodModifications(self):
+        '''Tests modifications to an overloaded method'''
+        # overloaded(int, bool[removed], int, double)
+        self.assertEqual(self.mods.overloaded(1, 2, 3.1), Modifications.Overloaded_ibid)
+        # overloaded(int, bool, int[removed,default=321], int)
+        self.assertEqual(self.mods.overloaded(1, True, 2), Modifications.Overloaded_ibii)
         # the others weren't modified
-        self.assertEqual(self.mods.polymorphic(1, True, 2, False), Modifications.Polymorphic_ibib)
-        self.assertEqual(self.mods.polymorphic(1, False, 2, Point(3, 4)), Modifications.Polymorphic_ibiP)
-        self.assertRaises(TypeError, lambda : self.mods.polymorphic(1, True, Point(2, 3), Point(4, 5)))
-        self.assertEqual(self.mods.poly(1, True, Point(2, 3), Point(4, 5)), Modifications.Polymorphic_ibPP)
+        self.assertEqual(self.mods.overloaded(1, True, 2, False), Modifications.Overloaded_ibib)
+        self.assertEqual(self.mods.overloaded(1, False, 2, Point(3, 4)), Modifications.Overloaded_ibiP)
+        self.assertRaises(TypeError, lambda : self.mods.overloaded(1, True, Point(2, 3), Point(4, 5)))
+        self.assertEqual(self.mods.over(1, True, Point(2, 3), Point(4, 5)), Modifications.Overloaded_ibPP)
 
 if __name__ == '__main__':
     unittest.main()

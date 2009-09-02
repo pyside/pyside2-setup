@@ -46,27 +46,27 @@ ImplicitConv::implicitConvDefault(ImplicitConv implicit)
     return implicit;
 }
 
-ImplicitConv::ICPolymorphicFuncEnum
-ImplicitConv::implicitConvPolymorphism(ImplicitConv implicit, int dummyArg)
+ImplicitConv::ICOverloadedFuncEnum
+ImplicitConv::implicitConvOverloading(ImplicitConv implicit, int dummyArg)
 {
-    return ImplicitConv::PolyFunc_Ii;
+    return ImplicitConv::OverFunc_Ii;
 }
 
-ImplicitConv::ICPolymorphicFuncEnum
-ImplicitConv::implicitConvPolymorphism(ImplicitConv implicit, bool dummyArg)
+ImplicitConv::ICOverloadedFuncEnum
+ImplicitConv::implicitConvOverloading(ImplicitConv implicit, bool dummyArg)
 {
-    return ImplicitConv::PolyFunc_Ib;
+    return ImplicitConv::OverFunc_Ib;
 }
 
-ImplicitConv::ICPolymorphicFuncEnum
-ImplicitConv::implicitConvPolymorphism(int dummyArg)
+ImplicitConv::ICOverloadedFuncEnum
+ImplicitConv::implicitConvOverloading(int dummyArg)
 {
-    return ImplicitConv::PolyFunc_i;
+    return ImplicitConv::OverFunc_i;
 }
 
-ImplicitConv::ICPolymorphicFuncEnum
-ImplicitConv::implicitConvPolymorphism(CtorEnum dummyArg)
+ImplicitConv::ICOverloadedFuncEnum
+ImplicitConv::implicitConvOverloading(CtorEnum dummyArg)
 {
-    return ImplicitConv::PolyFunc_C;
+    return ImplicitConv::OverFunc_C;
 }
 

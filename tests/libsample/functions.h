@@ -46,9 +46,9 @@ enum GlobalEnum {
     ThirdThing
 };
 
-enum GlobalPolyFuncEnum {
-    GlobalPolyFunc_i,
-    GlobalPolyFunc_d
+enum GlobalOverloadFuncEnum {
+    GlobalOverloadFunc_i,
+    GlobalOverloadFunc_d
 };
 
 void printSomething();
@@ -62,9 +62,9 @@ int countCharacters(const char* text);
 char* makeCString();
 const char* returnCString();
 
-// Tests polymorphism on functions (!methods)
-GlobalPolyFuncEnum polymorphicFunc(int val);
-GlobalPolyFuncEnum polymorphicFunc(double val);
+// Tests overloading on functions (!methods)
+GlobalOverloadFuncEnum overloadedFunc(int val);
+GlobalOverloadFuncEnum overloadedFunc(double val);
 
 #endif // FUNCTIONS_H
 
