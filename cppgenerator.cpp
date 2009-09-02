@@ -1393,6 +1393,16 @@ void CppGenerator::finishGeneration()
     foreach (AbstractMetaFunctionList globalOverloads, filterGroupedFunctions()) {
         AbstractMetaFunctionList overloads;
         foreach (AbstractMetaFunction* func, globalOverloads) {
+            // TODO: this is an ugly hack to avoid binding global
+            // functions from outside the library beign processed.
+            // The decent solution is to expand API Extractor so
+            // that it support global function declarations on
+            // type system files.
+            QString incFile = func->includeFile();
+            QRegExp regex("\\b(?:lib)?" + moduleName() + "\\b");
+            if (regex.indexIn(incFile) == -1)
+                continue;
+
             if (!func->isModifiedRemoved())
                 overloads.append(func);
         }
@@ -1443,16 +1453,12 @@ void CppGenerator::finishGeneration()
 
         s << "// Global functions ";
         s << "------------------------------------------------------------" << endl;
-#if 0
         s << globalFunctionImpl << endl;
 
         s << "static PyMethodDef " << moduleName() << "_methods[] = {" << endl;
         s << globalFunctionDecl;
         s << INDENT << "{0} // Sentinel" << endl << "};" << endl << endl;
-#else
-        #warning Binding of global functions DISABLED due to an APIExtractor bug!!!!!!!
-        s << "static PyMethodDef " << moduleName() << "_methods[] = { {0} };" << endl;
-#endif
+
         s << "// Classes initialization functions ";
         s << "------------------------------------------------------------" << endl;
         s << classInitDecl << endl;
