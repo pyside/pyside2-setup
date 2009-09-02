@@ -11,12 +11,13 @@ set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The s
 
 # lib generator version
 set(generator_MAJOR_VERSION "0")
-set(generator_MINOR_VERSION "4")
-set(generator_VERSION "${generator_MAJOR_VERSION}.${generator_MINOR_VERSION}")
+set(generator_MINOR_VERSION "3")
+set(generator_MICRO_VERSION "1")
+set(generator_VERSION "${generator_MAJOR_VERSION}.${generator_MINOR_VERSION}.${generator_MICRO_VERSION}")
 
 add_definitions(${QT_DEFINITIONS})
 
-set(boostpythongenerator_VERSION 0.4)
+set(boostpythongenerator_VERSION ${generator_VERSION})
 configure_file(boostpythongeneratorversion.h.in ${CMAKE_CURRENT_BINARY_DIR}/boostpythongeneratorversion.h @ONLY)
 set(CMAKE_BUILD_TYPE Debug)
 
