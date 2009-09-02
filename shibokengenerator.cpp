@@ -235,6 +235,8 @@ QString ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMet
 void ShibokenGenerator::writeToPythonConversion(QTextStream& s, const AbstractMetaType* type,
                                                 const AbstractMetaClass* context, QString argumentName)
 {
+    if (!type || argumentName.isEmpty())
+        return;
     QString typeName = writeBaseConversion(s, type, context);
     s << "toPython(Shiboken::ValueHolder< " << typeName << " >(" << argumentName << "))";
 }
