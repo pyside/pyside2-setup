@@ -383,8 +383,17 @@ void HeaderGenerator::finishGeneration()
             s << endl;
         }
 
+        if (!primitiveTypes().isEmpty()) {
+            s << "// Conversion Includes - Primitive Types" << endl;
+            foreach (const PrimitiveTypeEntry* ptype, primitiveTypes()) {
+                if (ptype->include().isValid())
+                    s << ptype->include().toString() << endl;
+            }
+            s << endl;
+        }
+
         if (!containerTypes().isEmpty()) {
-            s << "// Conversion Includes" << endl;
+            s << "// Conversion Includes - Container Types" << endl;
             foreach (const ContainerTypeEntry* ctype, containerTypes()) {
                 if (ctype->include().isValid())
                     s << ctype->include().toString() << endl;
