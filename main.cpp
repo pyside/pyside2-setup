@@ -27,6 +27,7 @@
 #include <iostream>
 #include <apiextractor/apiextractor.h>
 #include "boostpythongeneratorversion.h"
+#include "generator_plugin_dir.h"
 #include "generator.h"
 
 #if defined(Q_OS_WIN32)
@@ -120,7 +121,8 @@ int main(int argc, char *argv[])
     // Try to load a generator
     QString generatorSet = args.value("generatorSet");
     if (!generatorSet.isEmpty()) {
-        QLibrary plugin(generatorSet+"_generator");
+        QString generatorFile = QString(GENERATOR_PUGIN_DIR) + "/lib" + generatorSet + "_generator";
+        QLibrary plugin(generatorFile);
         getGeneratorsFunc getGenerators = reinterpret_cast<getGeneratorsFunc>(plugin.resolve("getGenerators"));
         if (getGenerators)
             generators = getGenerators();
