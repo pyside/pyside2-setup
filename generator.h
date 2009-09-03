@@ -137,7 +137,7 @@ public:
     virtual bool shouldGenerate(const AbstractMetaClass *) const;
 
     /// Returns the subdirectory used to write the binding code of an AbstractMetaClass.
-    virtual QString subDirectoryForClass(const AbstractMetaClass* clazz) const = 0;
+    virtual QString subDirectoryForClass(const AbstractMetaClass* clazz) const;
 
     /**
     *   Translate metatypes to binding source format.
@@ -251,12 +251,7 @@ protected:
      *    or nothing the use the name of the currently processed package
      *    /return a string representing the subdirectory path for the given package
      */
-    virtual QString subDirectoryForPackage(QString packageName = QString()) const
-    {
-        if (packageName.isEmpty())
-            packageName = m_packageName;
-        return QString(packageName).replace(".", QDir::separator());
-    }
+    virtual QString subDirectoryForPackage(QString packageName = QString()) const;
 
     /**
      *   Write the bindding code for an AbstractMetaClass.

@@ -420,3 +420,17 @@ QString Generator::translateType(const AbstractMetaType *cType,
 
     return s;
 }
+
+
+QString Generator::subDirectoryForClass(const AbstractMetaClass* clazz) const
+{
+    return subDirectoryForPackage(clazz->package());
+}
+
+QString Generator::subDirectoryForPackage(QString packageName) const
+{
+    if (packageName.isEmpty())
+        packageName = m_packageName;
+    return QString(packageName).replace(".", QDir::separator());
+}
+

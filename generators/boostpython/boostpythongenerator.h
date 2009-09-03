@@ -105,11 +105,6 @@ public:
                                              Options = NoOption,
                                              int arg_count = -1);
 
-    virtual QString subDirectoryForClass(const AbstractMetaClass* metaClass) const
-    {
-        return subDirectoryForPackage(metaClass->package());
-    }
-
     QStringList getBaseClasses(const AbstractMetaClass* cppClass);
 
     static QString getWrapperName(const AbstractMetaClass* clazz);

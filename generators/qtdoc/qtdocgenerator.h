@@ -184,11 +184,6 @@ protected:
 
     void writeFunctionArguments(QTextStream&, const AbstractMetaFunction*, Options) const {}
     void writeArgumentNames(QTextStream&, const AbstractMetaFunction*, Options) const {}
-    QString subDirectoryForClass(const AbstractMetaClass* clazz) const
-    {
-        Q_ASSERT(false);
-        return QString();
-    }
 
 private:
     void writeEnums(QTextStream& s, const AbstractMetaClass* cppClass);
