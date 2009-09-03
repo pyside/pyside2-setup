@@ -1,4 +1,0 @@
-#ifndef GENERATOR_PLUGIN_DIR_H
-#define GENERATOR_PLUGIN_DIR_H
-#define GENERATOR_PUGIN_DIR "@generator_plugin_DIR@"
-#endif

@@ -26,8 +26,7 @@
 #include <QLibrary>
 #include <iostream>
 #include <apiextractor/apiextractor.h>
-#include "boostpythongeneratorversion.h"
-#include "generator_plugin_dir.h"
+#include "generatorrunnerconfig.h"
 #include "generator.h"
 
 #if defined(Q_OS_WIN32)
@@ -113,7 +112,7 @@ int main(int argc, char *argv[])
     GeneratorList generators;
 
     if (args.contains("version")) {
-        std::cout << "generator v" BOOSTPYTHONGENERATOR_VERSION << std::endl;
+        std::cout << "generator v" GENERATORRUNNER_VERSION << std::endl;
         std::cout << "Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies)" << std::endl;
         return EXIT_SUCCESS;
     }
@@ -121,7 +120,7 @@ int main(int argc, char *argv[])
     // Try to load a generator
     QString generatorSet = args.value("generatorSet");
     if (!generatorSet.isEmpty()) {
-        QString generatorFile = QString(GENERATOR_PUGIN_DIR) + "/lib" + generatorSet + "_generator";
+        QString generatorFile = QString(GENERATORRUNNER_PUGIN_DIR) + "/lib" + generatorSet + "_generator";
         QLibrary plugin(generatorFile);
         getGeneratorsFunc getGenerators = reinterpret_cast<getGeneratorsFunc>(plugin.resolve("getGenerators"));
         if (getGenerators)

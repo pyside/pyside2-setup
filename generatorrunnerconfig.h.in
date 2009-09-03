@@ -1,0 +1,10 @@
+#ifndef GENERATORRUNNERCONFIG_H
+#define GENERATORRUNNERCONFIG_H
+
+// generatorrunner version
+#define GENERATORRUNNER_VERSION "@generator_VERSION@"
+
+// generatorrunner plugin dir
+#define GENERATORRUNNER_PUGIN_DIR "@generator_plugin_DIR@"
+
+#endif

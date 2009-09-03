@@ -19,11 +19,7 @@ set(generator_plugin_DIR ${LIB_INSTALL_DIR}/generatorrunner)
 
 add_definitions(${QT_DEFINITIONS})
 
-set(boostpythongenerator_VERSION ${generator_VERSION})
-configure_file(boostpythongeneratorversion.h.in ${CMAKE_CURRENT_BINARY_DIR}/boostpythongeneratorversion.h @ONLY)
-
-# TODO Install it.
-configure_file(generator_plugin_dir.h.in ${CMAKE_CURRENT_BINARY_DIR}/generator_plugin_dir.h @ONLY)
+configure_file(generatorrunnerconfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/generatorrunnerconfig.h @ONLY)
 
 set(CMAKE_BUILD_TYPE Debug)
 
@@ -59,7 +55,7 @@ add_custom_target(uninstall "${CMAKE_COMMAND}"
 
 
 
-set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${boostpythongenerator_VERSION})
+set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${generator_VERSION})
 add_custom_target(dist
     COMMAND git archive --prefix=${ARCHIVE_NAME}/ HEAD
         | bzip2 > ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2
