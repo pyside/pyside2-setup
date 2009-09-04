@@ -1147,7 +1147,8 @@ void CppGenerator::writeFunctionArgsDef(QTextStream &sOut,
             QString defaultValue = arg->defaultValueExpression();
             bool isPointer = arg->type()->isObject() ||
                               arg->type()->isQObject() ||
-                              arg->type()->isValuePointer();
+                              arg->type()->isValuePointer() ||
+                              arg->type()->isNativePointer();
 
             if (isPointer && defaultValue == "0") {
                 defaultValue = "python::object()";
