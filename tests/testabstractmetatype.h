@@ -21,20 +21,18 @@
 *
 */
 
-#ifndef TESTABSTRACTMETACLASS_H
-#define TESTABSTRACTMETACLASS_H
+#ifndef TESTABSTRACTMETATYPE_H
+#define TESTABSTRACTMETATYPE_H
 
 #include <QObject>
 
-class AbstractMetaBuilder;
-
-class TestAbstractMetaClass : public QObject
+class TestAbstractMetaType : public QObject
 {
     Q_OBJECT
 private slots:
-    void testClassName();
-    void testClassNameUnderNamespace();
-    void testVirtualMethods();
+    void testConstCharPtrType();
+    void testCharType();
+    void testTypedef();
 };
 
-#endif // TESTABSTRACTMETACLASS_H
+#endif

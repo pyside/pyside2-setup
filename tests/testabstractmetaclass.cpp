@@ -24,42 +24,14 @@
 #include "testabstractmetaclass.h"
 #include "abstractmetabuilder.h"
 #include <QtTest/QTest>
-#include <QBuffer>
-
-
-TestAbstractMetaClass::TestAbstractMetaClass() : m_builder(0)
-{
-}
-
-void TestAbstractMetaClass::init()
-{
-    m_builder = new AbstractMetaBuilder;
-}
-
-void TestAbstractMetaClass::cleanup()
-{
-    delete m_builder;
-    m_builder = 0;
-}
-
-void TestAbstractMetaClass::processCode (const char* cppCode, const char* xmlCode )
-{
-    QBuffer buffer;
-    // parse typesystem
-    buffer.setData(xmlCode);
-    TypeDatabase::instance()->parseFile(&buffer);
-    buffer.close();
-    // parse C++ code
-    buffer.setData(cppCode);
-    m_builder->build(&buffer);
-}
+#include "testutil.h"
 
 void TestAbstractMetaClass::testClassName()
 {
     const char* cppCode ="class ClassName {};";
     const char* xmlCode = "<typesystem package=\"Foo\"><value-type name=\"ClassName\"/></typesystem>";
-    processCode(cppCode, xmlCode);
-    AbstractMetaClassList classes = m_builder->classes();
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 1);
     QCOMPARE(classes[0]->name(), QString("ClassName"));
 }
@@ -72,12 +44,97 @@ void TestAbstractMetaClass::testClassNameUnderNamespace()
         <namespace-type name=\"Namespace\"/> \
         <value-type name=\"Namespace::ClassName\"/> \
     </typesystem>";
-    processCode(cppCode, xmlCode);
-    AbstractMetaClassList classes = m_builder->classes();
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 2); // 1 namespace + 1 class
     QCOMPARE(classes[0]->name(), QString("ClassName"));
     QCOMPARE(classes[0]->qualifiedCppName(), QString("Namespace::ClassName"));
     QCOMPARE(classes[1]->name(), QString("Namespace"));
+    QVERIFY(classes[1]->isNamespace());
+
+    // Check ctors info
+    QVERIFY(classes[0]->hasConstructors());
+    QCOMPARE(classes[0]->functions().size(), 1);
+    AbstractMetaFunctionList ctors = classes[0]->queryFunctions(AbstractMetaClass::Constructors);
+    QCOMPARE(ctors.size(), 1);
+    QCOMPARE(ctors[0]->arguments().size(), 0);
+    QVERIFY(!classes[0]->hasPrivateDestructor());
+
+    QVERIFY(classes[0]->hasCloneOperator()); // implicity default copy ctor
+    QVERIFY(!classes[0]->hasHashFunction());
+    QVERIFY(classes[0]->hasNonPrivateConstructor());
+}
+
+void TestAbstractMetaClass::testVirtualMethods()
+{
+    const char* cppCode ="\
+    class A {\
+    public:\
+        virtual int pureVirtual() const = 0;\
+    };\
+    class B : public A {};\
+    class C : public B {\
+    public:\
+        int pureVirtual() const { return 0; }\
+    };\
+    ";
+    const char* xmlCode = "\
+    <typesystem package=\"Foo\"> \
+        <primitive-type name='int' />\
+        <object-type name='A'/> \
+        <object-type name='B'/> \
+        <object-type name='C'/> \
+    </typesystem>";
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.count(), 3);
+    AbstractMetaClass* a = classes.findClass("A");
+    AbstractMetaClass* b = classes.findClass("B");
+    AbstractMetaClass* c = classes.findClass("C");
+
+    AbstractMetaClass* no_class = 0;
+
+    QCOMPARE(a->baseClass(), no_class);
+    QCOMPARE(b->baseClass(), a);
+    QCOMPARE(c->baseClass(), b);
+
+    QCOMPARE(a->functions().size(), 2); // implicity ctor + the pv method
+    QCOMPARE(b->functions().size(), 2);
+    QCOMPARE(c->functions().size(), 2);
+
+    // implementing class, ownclass, declaringclass
+    AbstractMetaFunction* ctorA = a->queryFunctions(AbstractMetaClass::Constructors).first();
+    AbstractMetaFunction* ctorB = b->queryFunctions(AbstractMetaClass::Constructors).first();
+    AbstractMetaFunction* ctorC = c->queryFunctions(AbstractMetaClass::Constructors).first();
+    QVERIFY(ctorA->isConstructor());
+    QVERIFY(!ctorA->isVirtual());
+    QVERIFY(ctorB->isConstructor());
+    QVERIFY(!ctorB->isVirtual());
+    QVERIFY(ctorC->isConstructor());
+    QVERIFY(!ctorC->isVirtual());
+    QCOMPARE(ctorA->implementingClass(), a);
+    QCOMPARE(ctorA->ownerClass(), a);
+    QCOMPARE(ctorA->declaringClass(), a);
+
+    QCOMPARE(a->virtualFunctions().size(), 1); // Add a pureVirtualMethods method !?
+    QCOMPARE(b->virtualFunctions().size(), 1);
+    QCOMPARE(c->virtualFunctions().size(), 1);
+
+    AbstractMetaFunction* funcA = a->virtualFunctions().first();
+    AbstractMetaFunction* funcB = b->virtualFunctions().first();
+    AbstractMetaFunction* funcC = c->virtualFunctions().first();
+
+    QCOMPARE(funcA->ownerClass(), a);
+    QCOMPARE(funcB->ownerClass(), b);
+    QCOMPARE(funcC->ownerClass(), c);
+
+    QCOMPARE(funcA->declaringClass(), a);
+    QCOMPARE(funcB->declaringClass(), a);
+    QCOMPARE(funcC->declaringClass(), a);
+
+    QCOMPARE(funcA->implementingClass(), no_class);
+    QCOMPARE(funcB->implementingClass(), no_class);
+    QCOMPARE(funcC->implementingClass(), c);
 }
 
 

@@ -21,20 +21,15 @@
 *
 */
 
-#ifndef TESTABSTRACTMETACLASS_H
-#define TESTABSTRACTMETACLASS_H
-
+#ifndef TESTENUM_H
+#define TESTENUM_H
 #include <QObject>
 
-class AbstractMetaBuilder;
-
-class TestAbstractMetaClass : public QObject
+class TestEnum : public QObject
 {
     Q_OBJECT
 private slots:
-    void testClassName();
-    void testClassNameUnderNamespace();
-    void testVirtualMethods();
+    void testEnumCppSignature();
 };
 
-#endif // TESTABSTRACTMETACLASS_H
+#endif
