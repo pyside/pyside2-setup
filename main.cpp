@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
         if (generatorSet.contains(QDir::separator()))
             generatorFile = generatorSet;
         else
-            generatorFile = QString(GENERATORRUNNER_PUGIN_DIR) + "/lib" + generatorSet + "_generator";
+            generatorFile = QString(GENERATORRUNNER_PLUGIN_DIR) + "/lib" + generatorSet + "_generator";
 
         QLibrary plugin(generatorFile);
         getGeneratorsFunc getGenerators = reinterpret_cast<getGeneratorsFunc>(plugin.resolve("getGenerators"));

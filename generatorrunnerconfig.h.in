@@ -5,6 +5,6 @@
 #define GENERATORRUNNER_VERSION "@generator_VERSION@"
 
 // generatorrunner plugin dir
-#define GENERATORRUNNER_PUGIN_DIR "@generator_plugin_DIR@"
+#define GENERATORRUNNER_PLUGIN_DIR "@generator_plugin_DIR@"
 
 #endif
