@@ -884,7 +884,10 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
             if (func->isBinaryOperator())
                 mc << firstArg << ' ';
-            mc << op << ' ' << secondArg;
+            if (op == "[]")
+                mc << '[' << secondArg << ']';
+            else
+                mc << op << ' ' << secondArg;
         } else if (func->isConstructor() || func->isCopyConstructor()) {
             s << INDENT;
             isCtor = true;
