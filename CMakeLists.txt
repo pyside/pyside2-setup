@@ -65,6 +65,6 @@ add_custom_target(dist
 
 add_dependencies(shiboken shiboken_generator)
 
-install(TARGETS shiboken_generator DESTINATION ${GENERATORRUNNER_PUGIN_DIR})
+install(TARGETS shiboken_generator DESTINATION ${GENERATORRUNNER_PLUGIN_DIR})
 install(TARGETS shiboken DESTINATION bin)
 
