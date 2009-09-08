@@ -68,6 +68,7 @@ void ShibokenGenerator::initPrimitiveTypesCorrespondences()
 
     // PyLong
     m_pythonPrimitiveTypeName["unsigned long"] = "PyLong";
+    m_pythonPrimitiveTypeName["ulong"] = "PyLong";
     m_pythonPrimitiveTypeName["long long"] = "PyLong";
     m_pythonPrimitiveTypeName["__int64"] = "PyLong";
     m_pythonPrimitiveTypeName["unsigned long long"] = "PyLong";
@@ -113,6 +114,8 @@ void ShibokenGenerator::initPrimitiveTypesCorrespondences()
     m_pythonOperators["operator<="] = "le";
     m_pythonOperators["operator>="] = "ge";
 
+    m_pythonOperators["operator[]"] = "getitem";
+    
     // Initialize format units for C++->Python->C++ conversion
     m_formatUnits.clear();
     m_formatUnits.insert("char", "b");
@@ -354,6 +357,17 @@ QString ShibokenGenerator::pythonPrimitiveTypeName(const PrimitiveTypeEntry* typ
     return pythonPrimitiveTypeName(type->name());
 }
 
+QString ShibokenGenerator::pythonOperatorFunctionName(QString cppOpFuncName)
+{
+    QString value = m_pythonOperators.value(cppOpFuncName);
+    if (value.isEmpty()) {
+        ReportHandler::warning("Unknown operator: "+cppOpFuncName);
+        value = "UNKNOWN_OPERATOR";
+    }
+    value.prepend("__").append("__");
+    return value;
+}
+
 QString ShibokenGenerator::pythonOperatorFunctionName(const AbstractMetaFunction* func)
 {
     QString op = pythonOperatorFunctionName(func->originalName());
@@ -368,6 +382,16 @@ QString ShibokenGenerator::pythonOperatorFunctionName(const AbstractMetaFunction
         op = op.insert(2, 'r');
     }
     return op;
+}
+
+QString ShibokenGenerator::pythonRichCompareOperatorId(QString cppOpFuncName)
+{
+    return QString("Py_%1").arg(m_pythonOperators.value(cppOpFuncName).toUpper());
+}
+
+QString ShibokenGenerator::pythonRichCompareOperatorId(const AbstractMetaFunction* func)
+{
+    return pythonRichCompareOperatorId(func->originalName());
 }
 
 bool ShibokenGenerator::isNumber(QString cpythonApiName)

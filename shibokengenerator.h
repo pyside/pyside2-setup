@@ -117,11 +117,6 @@ public:
                                              Options option = NoOption,
                                              int arg_count = -1) const;
 
-    virtual QString subDirectoryForClass(const AbstractMetaClass* metaClass) const
-    {
-        return subDirectoryForPackage(metaClass->package());
-    }
-
     bool hasInjectedCodeOrSignatureModification(const AbstractMetaFunction* func);
     QStringList getBaseClasses(const AbstractMetaClass* metaClass);
 
@@ -137,19 +132,10 @@ public:
     static QString pythonPrimitiveTypeName(QString cppTypeName);
     static QString pythonPrimitiveTypeName(const PrimitiveTypeEntry* type);
 
-    static QString pythonOperatorFunctionName(QString cppOpFuncName)
-    {
-        return QString("__%1__").arg(m_pythonOperators.value(cppOpFuncName));
-    }
+    static QString pythonOperatorFunctionName(QString cppOpFuncName);
     static QString pythonOperatorFunctionName(const AbstractMetaFunction* func);
-    static QString pythonRichCompareOperatorId(QString cppOpFuncName)
-    {
-        return QString("Py_%1").arg(m_pythonOperators.value(cppOpFuncName).toUpper());
-    }
-    static QString pythonRichCompareOperatorId(const AbstractMetaFunction* func)
-    {
-        return pythonRichCompareOperatorId(func->originalName());
-    }
+    static QString pythonRichCompareOperatorId(QString cppOpFuncName);
+    static QString pythonRichCompareOperatorId(const AbstractMetaFunction* func);
 
     static QString cpythonOperatorFunctionName(const AbstractMetaFunction* func);
 
