@@ -223,6 +223,10 @@
     <value-type name="OddBoolUser" />
     <object-type name="PrivateDtor" />
 
+    <interface-type name="MBase"/>
+    <object-type name="MBase2"/>
+    <object-type name="MDerived"/>
+
     <rejection class="ListUser" function-name="createList()"/>
     <rejection class="ListUser" function-name="callCreateList()"/>
     <rejection class="ListUser" function-name="createComplexList(Complex, Complex)"/>

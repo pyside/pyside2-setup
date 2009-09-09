@@ -10,6 +10,7 @@ kindergarten.cpp
 listuser.cpp
 modifications.cpp
 mapuser.cpp
+multiple_derived.cpp
 pairuser.cpp
 point.cpp
 reference.cpp
