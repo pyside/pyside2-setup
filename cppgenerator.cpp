@@ -1413,6 +1413,8 @@ void CppGenerator::finishGeneration()
         if (overloads.isEmpty())
             continue;
 
+        includes << overloads.first()->includeFile();
+        
         writeMethodWrapper(s_globalFunctionImpl, overloads);
         writeMethodDefinition(s_globalFunctionDef, overloads);
     }
@@ -1451,7 +1453,7 @@ void CppGenerator::finishGeneration()
         s << "#include <shiboken.h>" << endl;
         s << "#include \"" << moduleName().toLower() << "_python.h\"" << endl << endl;
         foreach (const QString& include, includes)
-            s << "#include <" << include << ">" << endl;
+            s << "#include \"" << include << '\"' << endl;
         s << endl;
 
         s << "// Global functions ";
