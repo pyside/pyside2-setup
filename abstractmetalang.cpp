@@ -841,7 +841,7 @@ bool AbstractMetaFunction::isInplaceOperator() const
 
 bool AbstractMetaFunction::isVirtual() const
 {
-    return !isFinal() && !isSignal() && !isStatic() && !isFinalInCpp();
+    return !isFinal() && !isSignal() && !isStatic() && !isFinalInCpp() && !isConstructor();
 }
 
 bool AbstractMetaFunction::isCopyConstructor() const
