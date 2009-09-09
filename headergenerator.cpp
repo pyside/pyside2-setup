@@ -249,6 +249,9 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
         }
         bool firstImplicitIf = true;
         foreach (const AbstractMetaFunction* ctor, implicitConverters) {
+            if (ctor->isModifiedRemoved())
+                continue;
+
             const AbstractMetaType* argType = ctor->arguments().first()->type();
             s << INDENT;
             if (firstImplicitIf)
@@ -299,8 +302,8 @@ void HeaderGenerator::finishGeneration()
     s_pts << endl << "// Global enums" << endl;
     foreach (const AbstractMetaEnum* cppEnum, globalEnums()) {
         QString incFile = cppEnum->includeFile().split(QDir::separator()).takeLast();
-        if (!incFile.isEmpty() && !classIncludes.contains(QString("<%1>").arg(incFile)))
-            enumIncludes << incFile;
+        if (!incFile.isEmpty())
+            enumIncludes << cppEnum->includeFile();
         writeTypeCheckMacro(s_pts, cppEnum->typeEntry());
         s_pts << endl;
         writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
