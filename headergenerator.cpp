@@ -34,7 +34,7 @@ static Indentor INDENT;
 
 QString HeaderGenerator::fileNameForClass(const AbstractMetaClass* metaClass) const
 {
-    return metaClass->qualifiedCppName().toLower() + QLatin1String("_wrapper.h");
+    return metaClass->qualifiedCppName().toLower().replace("::", "_") + QLatin1String("_wrapper.h");
 }
 
 void HeaderGenerator::writeCopyCtor(QTextStream& s, const AbstractMetaClass* metaClass) const

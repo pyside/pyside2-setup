@@ -37,7 +37,7 @@ QString CppGenerator::cpythonWrapperCPtr(const AbstractMetaClass* metaClass, QSt
 
 QString CppGenerator::fileNameForClass(const AbstractMetaClass *metaClass) const
 {
-    return metaClass->qualifiedCppName().toLower() + QLatin1String("_wrapper.cpp");
+    return metaClass->qualifiedCppName().toLower().replace("::", "_") + QLatin1String("_wrapper.cpp");
 }
 
 QList<AbstractMetaFunctionList> CppGenerator::filterGroupedFunctions(const AbstractMetaClass* metaClass)
