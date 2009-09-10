@@ -26,6 +26,7 @@
 #include <QtCore/QStack>
 #include <QtCore/QHash>
 #include <QtCore/QTextStream>
+#include <QXmlStreamReader>
 #include <apiextractor/abstractmetalang.h>
 #include "generator.h"
 

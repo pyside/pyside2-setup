@@ -215,7 +215,7 @@ public:
      *    dots ('.') the generator subclass must overload this method.
      *    /return a string representing the last part of a package name
      */
-    virtual QString moduleName()
+    virtual QString moduleName() const
     {
         return QString(m_packageName).remove(0, m_packageName.lastIndexOf('.') + 1);
     }
