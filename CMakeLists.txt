@@ -4,10 +4,9 @@ cmake_minimum_required(VERSION 2.6)
 
 find_package(Boost COMPONENTS graph REQUIRED)
 find_package(Qt4 4.5.0 REQUIRED)
-find_package(PkgConfig)
-pkg_check_modules(LIBXML2 REQUIRED libxml-2.0>=2.6.32)
-pkg_check_modules(LIBXSLT REQUIRED libxslt>=1.1.19)
 
+find_package(LibXml2 2.6.32 REQUIRED)
+find_package(LibXslt 1.1.19 REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -DAPIEXTRACTOR_ENABLE_DUPLICATE_ENUM_VALUES")
 
 set(apiextractor_MAJOR_VERSION 0)
@@ -71,8 +70,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}/parser
                     ${CMAKE_CURRENT_SOURCE_DIR}/parser/rpp
                     ${QT_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
-                    ${LIBXSLT_INCLUDE_DIRS}
-                    ${LIBXML2_INCLUDE_DIRS}
+                    ${LIBXSLT_INCLUDE_DIR}
+                    ${LIBXML2_INCLUDE_DIR}
                     )
 
 add_library(apiextractor SHARED ${apiextractor_SRC} ${apiextractor_RCCS_SRC})
