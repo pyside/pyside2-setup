@@ -23,7 +23,7 @@
 
 #include "typesystem.h"
 #include "reporthandler.h"
-#include <Qt/QtXml>
+#include <QtXml>
 
 QString strings_Object = QLatin1String("Object");
 QString strings_String = QLatin1String("String");
