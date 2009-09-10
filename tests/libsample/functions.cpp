@@ -117,3 +117,7 @@ overloadedFunc(double val)
     return GlobalOverloadFunc_d;
 }
 
+char* returnNull()
+{
+    return 0;
+}

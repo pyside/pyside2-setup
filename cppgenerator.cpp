@@ -530,7 +530,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             // If the wrapped C++ library have no function that steals ownership and
             // deletes the C++ object this check would not be needed.
             s << INDENT << "if (!Shiboken::cppObjectIsValid((Shiboken::PyBaseWrapper*)self))" << endl;
-            s << INDENT << INDENT << "return 0;" << endl << endl;
+            s << INDENT << INDENT << "Py_RETURN_NONE;" << endl << endl;
         }
 
         if (rfunc->type() && !rfunc->isInplaceOperator())
@@ -552,7 +552,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         s << ')' << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << "return 0;" << endl;
+            s << INDENT << "Py_RETURN_NONE;" << endl;
         }
 
         s << endl << INDENT;

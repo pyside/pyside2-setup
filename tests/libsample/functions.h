@@ -61,6 +61,7 @@ Complex sumComplexPair(std::pair<Complex, Complex> cpx_pair);
 int countCharacters(const char* text);
 char* makeCString();
 const char* returnCString();
+char* returnNull();
 
 // Tests overloading on functions (!methods)
 GlobalOverloadFuncEnum overloadedFunc(int val);
