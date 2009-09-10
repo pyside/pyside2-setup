@@ -1,0 +1,120 @@
+2009-09-09  Renato Araujo Oliveira Filho <renato.filho@openbossa.org>
+
+  * abstractmetalang.cpp: Check for constructors in isVirtual function.  Fixes
+  Bug #46.  Reviewed by Hugo Parente
+
+2009-09-08  Hugo Lima <hugo.lima@openbossa.org>
+
+  * CMakeLists.txt: Do not link with boost::graph library.  Fix bug#37
+
+2009-09-02  Lauro Neto <lauro.neto@openbossa.org>
+
+  * CMakeLists.txt: Bump version to 0.4 (current development version)
+
+2009-08-31  Lauro Neto <lauro.neto@openbossa.org>
+
+  * CMakeLists.txt: Bump version to 0.3.
+
+2009-09-01  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * typesystem.cpp, typesystem.h: moved setInclude, addExtraIncludes and
+  related methods from ComplexTypeEntry to TypeEntry, this way they will be
+  also available on PrimitiveTypeEntry; the type system format now accepts the
+  'include' tag
+
+2009-08-27  Chris Hills <chaz@chaz6.com>
+
+  * apiextractor.cpp: Re-order include path for using non-system Qt libraries
+
+2009-08-25  Renato Araujo Oliveira Filho <renato.filho@openbossa.org>
+
+  * abstractmetabuilder.cpp, abstractmetalang.h: Create a new method to
+  AbstractType: isValuePointer.  Separeted value pointers from native pointer
+  for help generators.  Reviewed by Marcelo Lira <marcelo.lira@openbossa.org>
+
+2009-08-26  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * apiextractor.cpp: emits an error message when no type system file is passed
+  to ApiExtractor::run  Reviewed by Hugo Parente <hugo.lima@openbossa.org>
+
+2009-08-22  Lauro Neto <lauro.neto@openbossa.org>
+
+  * qtdocparser.cpp: Use name instead of fullname for classes in namespaces 
+  Reviewed by Hugo Parente <hugo.lima@openbossa.org>
+
+  * qtdocparser.cpp: Fix loading of xml files for classes in namespaces
+
+2009-08-20  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * abstractmetalang.cpp, abstractmetalang.h, qtdocparser.cpp:
+  AbstractMetaClass::name() and AbstractMetaType::name() now return only the
+  name of the class/type without namespace/scope information
+
+2009-08-25  Renato Araujo Oliveira Filho <renato.filho@openbossa.org>
+
+  * apiextractor.cpp: Changed acess to preprocessor file, to be reused in the
+  same process.
+
+2009-08-25  Hugo Lima <hugo.lima@openbossa.org>
+
+  * apiextractor.cpp: - Rewind the file pointer before runing the parser. -
+  Fixed some code style issues.
+
+2009-08-24  Hugo Lima <hugo.lima@openbossa.org>
+
+  * CMakeLists.txt: Fixed apiextractor version, so it now creates the symlinks
+  for libapiextractor.so.0 and libapiextractor.so.0.x  Reviewed by Lauro Moura
+
+  * CMakeLists.txt: Backport: Fixed apiextractor version, so it now creates the
+  symlinks for libapiextractor.so.0 and libapiextractor.so.0.x
+
+2009-08-20  Hugo Lima <hugo.lima@openbossa.org>
+
+  * apiextractor.cpp, apiextractor.h: Added a lot of helper methods to
+  APIExtractor interface  Reviewed by Setanta
+
+2009-08-21  Hugo Lima <hugo.lima@openbossa.org>
+
+  * apiextractor.cpp: Do not continue when an error occur in reading the
+  typesystem file
+
+  * reporthandler.cpp: - Fix compilation when using restritive security flags
+  -Wformat - Werror=format-security in gcc  Thanks Helio Castro.  fixes bug#8
+
+2009-08-21  Carlos Gonçalves <mail@cgoncalves.info>
+
+  * CMakeLists.txt: Allow defining the 'lib' dir (eg. 'lib64').  This is
+  required by some distributions such as openSUSE, where 64-bit libraries are
+  installed in lib64 directories and 32-bit libraries in the lib directories.
+
+2009-08-20  Hugo Lima <hugo.lima@openbossa.org>
+
+  * typesystem.h: Added typedefs to QList<const PrimitiveTypeEntry*> and
+  QList<const ContainerTypeEntry*>.
+
+  * apiextractor.cpp, apiextractor.h: - Correctly initialize and delete the
+  AbstractMetaBuilder - Fix typo in setSuppressWarning method - Added setSilent
+  method
+
+  * parser/rpp/pp-engine.h, parser/rpp/pp-environment.h: Add missing include
+  directives in the C++ parser code.
+
+  * CMakeLists.txt, apiextractor.cpp, apiextractor.h, fileout.h, generator.cpp,
+  generator.h, typesystem.cpp, typesystem.h: Removed all generator stuff from
+  APIExtractor, this stuff should be moved to the generator, and the
+  apiextractor library should be just what their name means, an API extractor. 
+  This break the APIExtractor source compatibility with no mercy!
+
+2009-08-19  Lauro Neto <lauro.neto@openbossa.org>
+
+  * CMakeLists.txt: Adding target 'dist' using git-archive.
+
+2009-08-18  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * CMakeLists.txt: updated API Extractor version to 0.2
+
+  * doc/conf.py: fixed API Extractor version on documentation
+
+2009-08-17  Hugo Lima <hugo.lima@openbossa.org>
+
+ The genesis...
