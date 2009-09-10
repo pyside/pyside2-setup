@@ -1,0 +1,253 @@
+2009-09-08  Hugo Lima <hugo.lima@openbossa.org>
+
+  * generatorrunnerconfig.h.in, main.cpp: Fix typo: GENERATORRUNNER_PUGIN_DIR
+  => GENERATORRUNNER_PLUGIN_DIR
+
+  * FindGeneratorRunner.cmake.in: Fix typo
+
+  * FindGeneratorRunner.cmake.in: Fix missing parenteses in
+  FindGeneratorRunner.cmake
+
+2009-09-04  Hugo Lima <hugo.lima@openbossa.org>
+
+  * generators/boostpython/cppgenerator.cpp: Fixed bug#26.  Reviewed by Renato
+  Araújo
+
+  * main.cpp: When the user passes an absolute path as the plugin name,
+  generator runner will load the desired file instead of doing a mess with the
+  absolute path and the GENERATORRUNNER_PLUGIN_DIR variable.  This is usefull
+  to test generators plugins without installing them.  Reviewed by Renato
+  Araújo
+
+2009-09-03  Hugo Lima <hugo.lima@openbossa.org>
+
+  * CMakeLists.txt, FindGeneratorRunner.cmake.in,
+  boostpythongeneratorversion.h.in, generator_plugin_dir.h.in,
+  generatorrunnerconfig.h.in, main.cpp: - Merged
+  boostpythongeneratorversion.h.in and generator_plugin_dir.h.in into
+  generatorrunnerconfig.h  - Added some variables to FindGeneratorRunner.cmake
+  * GENERATORRUNNER_PLUGIN_DIR The dir where the generator plugins should be
+  installed. * GENERATORRUNNER_VERSION The generatorrunner current version.
+
+  * generator.cpp, generator.h, generators/boostpython/boostpythongenerator.h,
+  generators/qtdoc/qtdocgenerator.h: Fixed assert failure when using
+  qtdocgenerator.  Added a default implementation for
+  Generator::subDirectoryForClass. This breaks the binary compatibility but NOT
+  the source compatibility.
+
+2009-09-03  Lauro Neto <lauro.neto@openbossa.org>
+
+  * CMakeLists.txt, generator_plugin_dir.h.in,
+  generators/boostpython/CMakeLists.txt, generators/qtdoc/CMakeLists.txt,
+  main.cpp: Installs generator plugins in its own directory.
+
+2009-09-02  Lauro Neto <lauro.neto@openbossa.org>
+
+  * CMakeLists.txt: Bump version to 0.4 (development version)
+
+2009-08-31  Lauro Neto <lauro.neto@openbossa.org>
+
+  * CMakeLists.txt: Bump to 0.3
+
+2009-08-31  Chris Hills <chaz@chaz6.com>
+
+  * CMakeLists.txt, FindGeneratorRunner.cmake.in, generatorrunner.pc.in: Add
+  pkg-config and cmake support  Reviewed by Hugo Parente
+
+2009-08-28  Renato Araujo Oliveira Filho <renato.filho@openbossa.org>
+
+  * generators/boostpython/cppgenerator.cpp: Fixed default return policy for
+  functions which return references.
+
+2009-08-27  Renato Araujo Oliveira Filho <renato.filho@openbossa.org>
+
+  * generators/boostpython/cppgenerator.cpp: Fixed export enums without
+  namespace.
+
+  * generators/boostpython/cppgenerator.cpp,
+  generators/boostpython/cppgenerator.h: Implemneted QAbstrctField as Python
+  properties.  This implementation avoid Karmic python and boost conflict for
+  readonly fields.  Reviewed by Lauro Neto <lauro.neto@openbossa.org>
+
+2009-08-25  Renato Araujo Oliveira Filho <renato.filho@openbossa.org>
+
+  * generators/boostpython/cppgenerator.cpp: Skip native types using only
+  inNativePointer.  with this new isNativePointer, the generator can avoid
+  create useless return policies.  Reviewed by Marcelo Lira
+  <marcelo.lira@openbossa.org>
+
+2009-08-26  Hugo Lima <hugo.lima@openbossa.org>
+
+  * generators/qtdoc/qtdocgenerator.cpp: Add missing macro to export
+  qtdocgenerator plugin.  Reviewed by Luciano Wolf
+
+2009-08-26  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * main.cpp: the generator runner exits with an error code if the call to
+  ApiExtractor.run() returns false  Reviewed by Hugo Parente
+  <hugo.lima@openbossa.org>
+
+2009-08-25  Hugo Lima <hugo.lima@openbossa.org>
+
+  * generator.cpp, generator.h,
+  generators/boostpython/boostpythongenerator.cpp,
+  generators/boostpython/boostpythongenerator.h,
+  generators/boostpython/convertergenerator.cpp,
+  generators/boostpython/cppgenerator.cpp,
+  generators/boostpython/hppgenerator.cpp, generators/qtdoc/qtdocgenerator.cpp,
+  generators/qtdoc/qtdocgenerator.h: Use QFlags instead of an int as parameter
+  type in some methods.  Reviewed by Setanta
+
+  * CMakeLists.txt: Install the generator header file into
+  include/generatorrunner  Reviewed by Setanta
+
+2009-08-26  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * generators/boostpython/CMakeLists.txt, generators/boostpython/main.cpp,
+  generators/qtdoc/CMakeLists.txt, generators/qtdoc/main.cpp: added convenience
+  binary applications to call the generatorrunner with --generatorSet
+  parameters for boostpython and docgenerator  Reviewed by Hugo Parente
+  <hugo.lima@openbossa.org>
+
+2009-08-25  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * generators/qtdoc/qtdocgenerator.cpp: moved the code for prepending the
+  Sphinx tag '~' to QtXmlToSphinx::resolveContextForMethod  Reviewed by Hugo
+  Parente <hugo.lima@openbossa.org>
+
+  * docgenerator.cpp, docgenerator.h: DocGenerator now resolves context for
+  method references: it searchs for the class that have implemented the method
+  and link to its definition instead of producing a broken link to the current
+  inheriting class documentation
+
+2009-08-25  Renato Araujo Oliveira Filho <renato.filho@openbossa.org>
+
+  * tests/CMakeLists.txt: Fixed typo in tests CMakesLists.
+
+2009-08-24  Hugo Lima <hugo.lima@openbossa.org>
+
+  * generators/boostpython/CMakeLists.txt: Fix the libgenrunner name in
+  target_link_libraries
+
+  * CMakeLists.txt: Fix the libgenrunner version number
+
+  * generators/boostpython/cppgenerator.cpp,
+  generators/boostpython/cppgenerator.h: Backport "disable named args" bugfix
+  from mainline
+
+  * main.cpp: Plugins always ends with _generator in their names
+
+  * generators/boostpython/boostpythongenerator.h: translateType method has
+  been moved to Generator class
+
+2009-08-21  Hugo Lima <hugo.lima@openbossa.org>
+
+  * CMakeLists.txt, generator.cpp, generator.h,
+  generators/boostpython/boostpythongenerator.cpp,
+  generators/qtdoc/CMakeLists.txt, generators/qtdoc/qtdocgenerator.h,
+  tests/CMakeLists.txt, tests/sphinxtabletest.cpp, tests/sphinxtabletest.h:
+  Removed QtDocGenerator dependence from BoostPythonGenerator, so a lot of
+  function were moved from BoostPythonGenerator to the Generator class.  In
+  other words, QtDocGenerator finally compiles and their unit test pass :-)
+
+  * generator.cpp, generator.h, generators/CMakeLists.txt,
+  generators/boostpython/CMakeLists.txt,
+  generators/boostpython/boostpythongenerator.cpp,
+  generators/boostpython/boostpythongenerator.h,
+  generators/qtdoc/CMakeLists.txt, generators/qtdoc/qtdocgenerator.cpp,
+  generators/qtdoc/qtdocgenerator.h: - QtDocGenerator is now a GeneratorRunner
+  plugin. - A lot of methods moved from boostpythongenerator to the generator
+  class.
+
+  * CMakeLists.txt: libgenerator is called libgenrunner and
+  boostpythongenerator is called generatorrunner from now and beyond.
+
+  * docgenerator.cpp, docgenerator.h, generators/qtdoc/qtdocgenerator.cpp,
+  generators/qtdoc/qtdocgenerator.h: Moved docgenerator to generators/qtdoc and
+  renamed it to qtdocgenerator
+
+  * main.cpp: Removed redundant PATHSPLITTER macro, using the already definied
+  PATH_SPLITTER one instead.
+
+  * CMakeLists.txt, generator.h, generators/CMakeLists.txt,
+  generators/boostpython/CMakeLists.txt,
+  generators/boostpython/boostpython.cpp,
+  generators/boostpython/boostpythongenerator.cpp,
+  generators/boostpython/boostpythongenerator.h,
+  generators/boostpython/cppgenerator.cpp, main.cpp: Added boostpython as a
+  generator plugin.
+
+2009-08-20  Hugo Lima <hugo.lima@openbossa.org>
+
+  * CMakeLists.txt, boostpythongenerator.cpp, boostpythongenerator.h,
+  convertergenerator.cpp, convertergenerator.h, cppgenerator.cpp,
+  cppgenerator.h, generator.cpp, generator.h,
+  generators/boostpython/boostpythongenerator.cpp,
+  generators/boostpython/boostpythongenerator.h,
+  generators/boostpython/convertergenerator.cpp,
+  generators/boostpython/convertergenerator.h,
+  generators/boostpython/cppgenerator.cpp,
+  generators/boostpython/cppgenerator.h,
+  generators/boostpython/hppgenerator.cpp,
+  generators/boostpython/hppgenerator.h, hppgenerator.cpp, hppgenerator.h,
+  main.cpp: The current generators will be just plugins and all generator stuff
+  in APIExtractor were moved to this project.  So we need to re-think if
+  boostpythongenerator still a good name for the project, because
+  boostpythongenerator will be the name of the plugin to generate bindings for
+  boost::python.  Also the generators were just moved to a subdirectory
+  (generators) and the boostpython generators to a sub-subdirectory
+  (generators/boostpython), transform them in plugins will be a second
+  milestone.
+
+2009-08-25  Renato Araujo Oliveira Filho <renato.filho@openbossa.org>
+
+  * cppgenerator.cpp, hppgenerator.cpp: Removed use of return_const_prt.  This
+  not work, because some c++ object does not have a copy constructor.
+
+2009-08-24  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * docgenerator.cpp: fixed links to classes inside namespaces
+
+2009-08-24  Renato Araujo Oliveira Filho <renato.filho@openbossa.org>
+
+  * cppgenerator.cpp: Use of return_const_ptr_object for functions with const
+  pointer return.
+
+2009-08-24  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * docgenerator.cpp: fixed problem on documentation: method lists for classes
+  get the scope duplicated when the owner class is inside a namespace
+
+2009-08-24  Hugo Lima <hugo.lima@openbossa.org>
+
+  * cppgenerator.cpp, cppgenerator.h: Proper initialize m_disableNamedArgs
+  variable.
+
+2009-08-24  Renato Araujo Oliveira Filho <renato.filho@openbossa.org>
+
+  * cppgenerator.cpp, hppgenerator.cpp: Replaced use of boost::python::wrapper
+  to PySide::wrapper.
+
+2009-08-21  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * boostpythongenerator.cpp, cppgenerator.cpp: writes correct full qualified
+  C++ names for classes and other components and also fixes the generated
+  source code file names to follow changes on API Extractor
+
+2009-08-19  Lauro Neto <lauro.neto@openbossa.org>
+
+  * CMakeLists.txt: Adding 'make dist' with git-archive
+
+2009-08-18  Hugo Lima <hugo.lima@openbossa.org>
+
+  * CMakeLists.txt: Remove libbindgen from project, it doesnt exists yet.
+
+2009-08-18  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * CMakeLists.txt: updated BoostPythonGenerator version to 0.2
+
+  * docgenerator.cpp: removed wrong include statement from DocGenerator
+
+2009-08-17  Hugo Lima <hugo.lima@openbossa.org>
+
+  The genesis...
