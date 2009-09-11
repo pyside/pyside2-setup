@@ -73,6 +73,11 @@ void ApiExtractor::addIncludePath(const QStringList& paths)
     m_includePaths << paths;
 }
 
+void ApiExtractor::setLogDirectory(const QString& logDir)
+{
+    m_logDirectory = logDir;
+}
+
 void ApiExtractor::setCppFileName(const QString& cppFileName)
 {
     m_cppFileName = cppFileName;
@@ -159,7 +164,9 @@ bool ApiExtractor::run()
     }
     ppFile.seek(0);
     m_builder = new AbstractMetaBuilder;
+    m_builder->setLogDirectory(m_logDirectory);
     m_builder->build(&ppFile);
+
     return true;
 }
 

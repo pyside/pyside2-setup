@@ -47,6 +47,8 @@ public:
     void addIncludePath(const QString& path);
     void addIncludePath(const QStringList& paths);
 
+    void setLogDirectory(const QString& logDir);
+
     AbstractMetaEnumList globalEnums() const;
     AbstractMetaFunctionList globalFunctions() const;
     AbstractMetaClassList classes() const;
@@ -62,6 +64,7 @@ private:
     QString m_cppFileName;
     QStringList m_includePaths;
     AbstractMetaBuilder* m_builder;
+    QString m_logDirectory;
 
     // disable copy
     ApiExtractor(const ApiExtractor&);

@@ -48,6 +48,7 @@
 #include <boost/graph/graph_traits.hpp>
 
 #include <cstdio>
+#include <QDir>
 
 static QString stripTemplateArgs(const QString &name)
 {
@@ -55,7 +56,7 @@ static QString stripTemplateArgs(const QString &name)
     return pos < 0 ? name : name.left(pos);
 }
 
-AbstractMetaBuilder::AbstractMetaBuilder() : m_currentClass(0)
+AbstractMetaBuilder::AbstractMetaBuilder() : m_currentClass(0), m_logDirectory(QString('.')+QDir::separator())
 {
 }
 
@@ -494,6 +495,13 @@ bool AbstractMetaBuilder::build(QIODevice* input)
     }
     std::puts("");
     return true;
+}
+
+void AbstractMetaBuilder::setLogDirectory(const QString& logDir)
+{
+    m_logDirectory = logDir;
+    if (!m_logDirectory.endsWith(QDir::separator()))
+       m_logDirectory.append(QDir::separator());
 }
 
 void AbstractMetaBuilder::addAbstractMetaClass(AbstractMetaClass *cls)
@@ -2435,10 +2443,10 @@ static void writeRejectLogFile(const QString &name,
 
 void AbstractMetaBuilder::dumpLog()
 {
-    writeRejectLogFile("mjb_rejected_classes.log", m_rejectedClasses);
-    writeRejectLogFile("mjb_rejected_enums.log", m_rejectedEnums);
-    writeRejectLogFile("mjb_rejected_functions.log", m_rejectedFunctions);
-    writeRejectLogFile("mjb_rejected_fields.log", m_rejectedFields);
+    writeRejectLogFile(m_logDirectory + "mjb_rejected_classes.log", m_rejectedClasses);
+    writeRejectLogFile(m_logDirectory + "mjb_rejected_enums.log", m_rejectedEnums);
+    writeRejectLogFile(m_logDirectory + "mjb_rejected_functions.log", m_rejectedFunctions);
+    writeRejectLogFile(m_logDirectory + "mjb_rejected_fields.log", m_rejectedFields);
 }
 
 AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const AbstractMetaClass* cppClass) const

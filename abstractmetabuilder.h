@@ -86,6 +86,7 @@ public:
     void dumpLog();
 
     bool build(QIODevice* input);
+    void setLogDirectory(const QString& logDir);
 
     void figureOutEnumValuesForClass(AbstractMetaClass *metaClass, QSet<AbstractMetaClass *> *classes);
     int figureOutEnumValue(const QString &name, int value, AbstractMetaEnum *meta_enum, AbstractMetaFunction *metaFunction = 0);
@@ -220,6 +221,8 @@ private:
 
     // QtScript
     QSet<QString> m_qmetatypeDeclaredTypenames;
+
+    QString m_logDirectory;
 };
 
 #endif // ABSTRACTMETBUILDER_H
