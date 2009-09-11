@@ -106,6 +106,37 @@ void TestAbstractMetaType::testTypedef()
     QVERIFY(c->isTypeAlias());
 }
 
+void TestAbstractMetaType::testTypedefWithTemplates()
+{
+    const char* cppCode ="\
+    template<typename T>\
+    class A {};\
+    \
+    class B {};\
+    typedef A<B> C;\
+    \
+    void func(C c);\
+    ";
+    const char* xmlCode = "<typesystem package=\"Foo\">\
+    <container-type name='A' type='list'/>\
+    <value-type name='B' />\
+    </typesystem>";
+    TestUtil t(cppCode, xmlCode);
+
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.size(), 1);
+    AbstractMetaFunctionList functions = t.builder()->globalFunctions();
+    QCOMPARE(functions.count(), 1);
+    AbstractMetaFunction* function = functions.first();
+    AbstractMetaArgumentList args = function->arguments();
+    QCOMPARE(args.count(), 1);
+    AbstractMetaArgument* arg = args.first();
+    AbstractMetaType* metaType = arg->type();
+    QCOMPARE(metaType->cppSignature(), QString("A<B >"));
+    qDebug() << metaType->typeEntry()->isContainer();
+//     QVERIFY(c->isTypeAlias());
+}
+
 QTEST_APPLESS_MAIN(TestAbstractMetaType)
 
 #include "testabstractmetatype.moc"

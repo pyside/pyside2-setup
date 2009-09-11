@@ -33,6 +33,7 @@ private slots:
     void testConstCharPtrType();
     void testCharType();
     void testTypedef();
+    void testTypedefWithTemplates();
 };
 
 #endif
