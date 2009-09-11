@@ -159,8 +159,10 @@ int main(int argc, char *argv[])
         }
     }
 
+    QString outputDirectory = args.contains("output-directory") ? args["output-directory"] : "out";
     // Create and set-up API Extractor
     ApiExtractor extractor;
+    extractor.setLogDirectory(outputDirectory);
 
     if (args.contains("silent")) {
         extractor.setSilent(true);
@@ -198,8 +200,6 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-
-    QString outputDirectory = args.contains("output-directory") ? args["output-directory"] : "out";
     foreach (Generator* g, generators) {
         g->setOutputDirectory(outputDirectory);
         g->setLicenseComment(licenseComment);
