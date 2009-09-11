@@ -301,7 +301,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 s << INDENT << "return";
                 if (func->type()) {
                     s << ' ';
-                    writeMinimalConstructorCallArguments(s, func->type()->typeEntry());
+                    writeMinimalConstructorCallArguments(s, func->type());
                 }
             } else {
                 s << "return this->" << func->implementingClass()->qualifiedCppName() << "::";
@@ -318,7 +318,9 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             foreach (const AbstractMetaArgument* arg, func->arguments()) {
                 Indentation indentation(INDENT);
                 bool convert = arg->type()->isObject()
+                                || arg->type()->isQObject()
                                 || arg->type()->isValue()
+                                || arg->type()->isFlags()
                                 || arg->type()->isReference()
                                 || (arg->type()->isPrimitive()
                                     && !m_formatUnits.contains(arg->type()->typeEntry()->name()));
@@ -489,11 +491,15 @@ void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const Ab
     s << '(' << argValues.join(QLatin1String(", ")) << ')';
 }
 
-void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const TypeEntry* type)
+void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const AbstractMetaType* metaType)
 {
-    Q_ASSERT(type);
+    Q_ASSERT(metaType);
+    const TypeEntry* type = metaType->typeEntry();
     if (type->isPrimitive() || type->isObject()) {
         s << "0";
+    } else if (type->isContainer()){
+        s << metaType->cppSignature() << "()";
+        qDebug() << metaType->cppSignature();
     } else {
         // this is slowwwww, FIXME: Fix the API od APIExtractor, these things should be easy!
         foreach (AbstractMetaClass* metaClass, classes()) {
@@ -502,7 +508,7 @@ void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const Ty
                 return;
             }
         }
-        ReportHandler::warning("Could not find a AbstractMetaClass for type "+type->name());
+        ReportHandler::warning("Could not find a AbstractMetaClass for type "+metaType->name());
     }
 }
 
