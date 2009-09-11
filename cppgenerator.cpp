@@ -466,8 +466,10 @@ void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const Ab
     const AbstractMetaFunction* ctor = 0;
 
     foreach (const AbstractMetaFunction* candidate, ctors) {
-        if (candidate->arguments().size() == 0)
-            return;
+        if (candidate->arguments().size() == 0) {
+            ctor = candidate;
+            break;
+        }
 
         bool allPrimitives = true;
         foreach (const AbstractMetaArgument* arg, candidate->arguments()) {
@@ -482,24 +484,26 @@ void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const Ab
         }
     }
 
-    if (!ctor)
+    if (!ctor) {
+        ReportHandler::warning("Class "+metaClass->name()+" does not have a default ctor.");
         return;
+    }
 
     QStringList argValues;
     for (int i = 0; i < ctor->arguments().size(); i++)
         argValues << QLatin1String("0");
-    s << '(' << argValues.join(QLatin1String(", ")) << ')';
+    s << metaClass->qualifiedCppName() << '(' << argValues.join(QLatin1String(", ")) << ')';
 }
 
 void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const AbstractMetaType* metaType)
 {
     Q_ASSERT(metaType);
     const TypeEntry* type = metaType->typeEntry();
+
     if (type->isPrimitive() || type->isObject()) {
         s << "0";
     } else if (type->isContainer()){
         s << metaType->cppSignature() << "()";
-        qDebug() << metaType->cppSignature();
     } else {
         // this is slowwwww, FIXME: Fix the API od APIExtractor, these things should be easy!
         foreach (AbstractMetaClass* metaClass, classes()) {

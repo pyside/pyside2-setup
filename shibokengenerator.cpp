@@ -115,7 +115,7 @@ void ShibokenGenerator::initPrimitiveTypesCorrespondences()
     m_pythonOperators["operator>="] = "ge";
 
     m_pythonOperators["operator[]"] = "getitem";
-    
+
     // Initialize format units for C++->Python->C++ conversion
     m_formatUnits.clear();
     m_formatUnits.insert("char", "b");
@@ -326,6 +326,8 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry* type)
             default:
                 Q_ASSERT(false);
         }
+    } else if (type->isFlags()) {
+        baseName = "PyMethod"; // FIXME: This is just a placeholder! Add support for qflags!
     } else {
         baseName = "PyObject";
     }
