@@ -299,6 +299,10 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 s << func->ownerClass()->name() << '.' << func->name();
                 s << "()' not implemented.\");" << endl;
                 s << INDENT << "return";
+                if (func->type()) {
+                    s << ' ';
+                    writeMinimalConstructorCallArguments(s, func->type()->typeEntry());
+                }
             } else {
                 s << "return this->" << func->implementingClass()->qualifiedCppName() << "::";
                 writeFunctionCall(s, func);
@@ -483,6 +487,23 @@ void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const Ab
     for (int i = 0; i < ctor->arguments().size(); i++)
         argValues << QLatin1String("0");
     s << '(' << argValues.join(QLatin1String(", ")) << ')';
+}
+
+void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const TypeEntry* type)
+{
+    Q_ASSERT(type);
+    if (type->isPrimitive() || type->isObject()) {
+        s << "0";
+    } else {
+        // this is slowwwww, FIXME: Fix the API od APIExtractor, these things should be easy!
+        foreach (AbstractMetaClass* metaClass, classes()) {
+            if (metaClass->typeEntry() == type) {
+                writeMinimalConstructorCallArguments(s, metaClass);
+                return;
+            }
+        }
+        ReportHandler::warning("Could not find a AbstractMetaClass for type "+type->name());
+    }
 }
 
 void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunctionList overloads)
@@ -1414,7 +1435,7 @@ void CppGenerator::finishGeneration()
             continue;
 
         includes << overloads.first()->includeFile();
-        
+
         writeMethodWrapper(s_globalFunctionImpl, overloads);
         writeMethodDefinition(s_globalFunctionDef, overloads);
     }

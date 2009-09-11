@@ -51,6 +51,7 @@ private:
     void writeConstructorWrapper(QTextStream &s, const AbstractMetaFunctionList overloads);
     void writeDestructorWrapper(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeMinimalConstructorCallArguments(QTextStream& s, const AbstractMetaClass* metaClass);
+    void writeMinimalConstructorCallArguments(QTextStream& s, const TypeEntry* type);
     void writeMethodWrapper(QTextStream &s, const AbstractMetaFunctionList overloads);
     void writeArgumentsInitializer(QTextStream& s, OverloadData& overloadData);
 
