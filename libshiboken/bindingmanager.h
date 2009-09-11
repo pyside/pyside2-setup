@@ -47,18 +47,19 @@ class BindingManager
 public:
     static BindingManager& instance();
 
-    bool hasWrapper(void *cptr);
-    void assignWrapper(PyObject* wrapper, void* cptr);
+    bool hasWrapper(const void *cptr);
+    void assignWrapper(PyObject* wrapper, const void* cptr);
     void releaseWrapper(void* cptr);
     inline void releaseWrapper(PyObject* wrapper);
-    PyObject* retrieveWrapper(void* cptr);
-    PyObject* getOverride(void* cptr, const char* methodName);
+    PyObject* retrieveWrapper(const void* cptr);
+    PyObject* getOverride(const void* cptr, const char* methodName);
 
 private:
     BindingManager() {}
     BindingManager(const BindingManager&);
 
-    std::map<void*, PyObject*> m_wrapperMapper;
+    typedef std::map<const void*, PyObject*> WrapperMap;
+    WrapperMap m_wrapperMapper;
 };
 
 } // namespace Shiboken

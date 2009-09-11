@@ -42,23 +42,23 @@ BindingManager& BindingManager::instance() {
     return singleton;
 }
 
-bool BindingManager::hasWrapper(void* cptr)
+bool BindingManager::hasWrapper(const void* cptr)
 {
     return m_wrapperMapper.count(cptr);
 }
 
-void BindingManager::assignWrapper(PyObject* wrapper, void* cptr)
+void BindingManager::assignWrapper(PyObject* wrapper, const void* cptr)
 {
-    std::map<void*, PyObject*>::iterator iter = m_wrapperMapper.find(cptr);
+    WrapperMap::iterator iter = m_wrapperMapper.find(cptr);
     if (iter == m_wrapperMapper.end())
-        m_wrapperMapper.insert(std::pair<void*, PyObject*>(cptr, wrapper));
+        m_wrapperMapper.insert(std::make_pair(cptr, wrapper));
     else
         iter->second = wrapper;
 }
 
 void BindingManager::releaseWrapper(void *cptr)
 {
-    std::map<void*, PyObject*>::iterator iter = m_wrapperMapper.find(cptr);
+    WrapperMap::iterator iter = m_wrapperMapper.find(cptr);
     if (iter != m_wrapperMapper.end())
         m_wrapperMapper.erase(iter);
 }
@@ -68,15 +68,15 @@ inline void BindingManager::releaseWrapper(PyObject* wrapper)
     releaseWrapper(PyBaseWrapper_cptr(wrapper));
 }
 
-PyObject* BindingManager::retrieveWrapper(void* cptr)
+PyObject* BindingManager::retrieveWrapper(const void* cptr)
 {
-    std::map<void*, PyObject*>::iterator iter = m_wrapperMapper.find(cptr);
+    WrapperMap::iterator iter = m_wrapperMapper.find(cptr);
     if (iter == m_wrapperMapper.end())
         return 0;
     return iter->second;
 }
 
-PyObject* BindingManager::getOverride(void* cptr, const char* methodName)
+PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
 {
     PyObject* wrapper = retrieveWrapper(cptr);
 
