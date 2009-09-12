@@ -325,6 +325,10 @@ QString CppGenerator::getFunctionCallPolicy(const AbstractMetaFunction *func)
 
     const int numArgs = func->arguments().count();
 
+    if (func->type() && (func->type()->name() == "HANDLE")) {
+        return "python::return_value_policy<PySide::return_QHANDLE>()";
+    }
+
     for (int i = -1; i <= numArgs; ++i) {
         ArgumentOwner ao = func->argumentOwner(cppClass, i);
         //Parent Policy
