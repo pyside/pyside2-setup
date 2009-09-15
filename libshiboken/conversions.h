@@ -43,16 +43,9 @@ namespace Shiboken
 {
 
 template <typename T>
-struct ValueHolder
-{
-    explicit ValueHolder(T val) : value(val) {}
-    T value;
-};
-
-template <typename T>
 struct Converter
 {
-    static PyObject* toPython(ValueHolder<T> cppobj);
+    static PyObject* toPython(T cppobj);
     static T toCpp(PyObject* pyobj);
 };
 
@@ -66,9 +59,9 @@ struct Converter<const T &> : Converter<T> {};
 template <>
 struct Converter<void*>
 {
-    static PyObject* toPython(ValueHolder<void*> cppobj)
+    static PyObject* toPython(void* cppobj)
     {
-        PyObject* obj = BindingManager::instance().retrieveWrapper(cppobj.value);
+        PyObject* obj = BindingManager::instance().retrieveWrapper(cppobj);
         Py_XINCREF(obj);
         return obj;
     }
@@ -82,9 +75,9 @@ struct Converter<void*>
 template <>
 struct Converter<bool>
 {
-    static PyObject* toPython(ValueHolder<bool> holder)
+    static PyObject* toPython(bool holder)
     {
-        return PyBool_FromLong(holder.value);
+        return PyBool_FromLong(holder);
     }
     static bool toCpp(PyObject* pyobj)
     {
@@ -95,9 +88,9 @@ struct Converter<bool>
 template <typename PyIntEquiv>
 struct Converter_PyInt
 {
-    static PyObject* toPython(ValueHolder<PyIntEquiv> holder)
+    static PyObject* toPython(PyIntEquiv holder)
     {
-        return PyInt_FromLong((long) holder.value);
+        return PyInt_FromLong((long) holder);
     }
     static PyIntEquiv toCpp(PyObject* pyobj)
     {
@@ -118,9 +111,9 @@ template <> struct Converter<long> : Converter_PyInt<long> {};
 template <>
 struct Converter<unsigned long>
 {
-    static PyObject* toPython(ValueHolder<unsigned long> holder)
+    static PyObject* toPython(unsigned long holder)
     {
-        return PyLong_FromUnsignedLong(holder.value);
+        return PyLong_FromUnsignedLong(holder);
     }
     static unsigned long toCpp(PyObject* pyobj)
     {
@@ -131,9 +124,9 @@ struct Converter<unsigned long>
 template <>
 struct Converter<PY_LONG_LONG>
 {
-    static PyObject* toPython(ValueHolder<PY_LONG_LONG> holder)
+    static PyObject* toPython(PY_LONG_LONG holder)
     {
-        return PyLong_FromLongLong(holder.value);
+        return PyLong_FromLongLong(holder);
     }
     static PY_LONG_LONG toCpp(PyObject* pyobj)
     {
@@ -144,9 +137,9 @@ struct Converter<PY_LONG_LONG>
 template <>
 struct Converter<unsigned PY_LONG_LONG>
 {
-    static PyObject* toPython(ValueHolder<unsigned PY_LONG_LONG> holder)
+    static PyObject* toPython(unsigned PY_LONG_LONG holder)
     {
-        return PyLong_FromUnsignedLongLong(holder.value);
+        return PyLong_FromUnsignedLongLong(holder);
     }
     static unsigned PY_LONG_LONG toCpp(PyObject* pyobj)
     {
@@ -157,9 +150,9 @@ struct Converter<unsigned PY_LONG_LONG>
 template <typename PyFloatEquiv>
 struct Converter_PyFloat
 {
-    static PyObject* toPython(ValueHolder<PyFloatEquiv> holder)
+    static PyObject* toPython(PyFloatEquiv holder)
     {
-        return PyFloat_FromDouble((double) holder.value);
+        return PyFloat_FromDouble((double) holder);
     }
     static PyFloatEquiv toCpp(PyObject* pyobj)
     {
@@ -177,9 +170,9 @@ template <> struct Converter<double> : Converter_PyFloat<double> {};
 template <typename CString>
 struct Converter_CString
 {
-    static PyObject* toPython(ValueHolder<CString> holder)
+    static PyObject* toPython(CString holder)
     {
-        return PyString_FromString(holder.value);
+        return PyString_FromString(holder);
     }
     static CString toCpp(PyObject* pyobj)
     {

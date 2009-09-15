@@ -1,15 +1,15 @@
 template <typename StdMap>
 struct Converter_std_map
 {
-    static PyObject* toPython(ValueHolder<StdMap> holder)
+    static PyObject* toPython(StdMap holder)
     {
         PyObject* result = PyDict_New();
         typedef typename StdMap::iterator IT;
         IT it;
 
-        for (it = holder.value.begin(); it != holder.value.end(); it++) {
-            ValueHolder<typename StdMap::key_type> h_key((*it).first);
-            ValueHolder<typename StdMap::mapped_type> h_val((*it).second);
+        for (it = holder.begin(); it != holder.end(); it++) {
+            typename StdMap::key_type h_key((*it).first);
+            typename StdMap::mapped_type h_val((*it).second);
             PyDict_SetItem(result,
                            Converter<typename StdMap::key_type>::toPython(h_key),
                            Converter<typename StdMap::mapped_type>::toPython(h_val));

@@ -1,9 +1,9 @@
 template <>
 struct Converter<OddBool>
 {
-    static PyObject* toPython(ValueHolder<OddBool> holder)
+    static PyObject* toPython(OddBool holder)
     {
-        return PyBool_FromLong(holder.value.value());
+        return PyBool_FromLong(holder.value());
     }
     static OddBool toCpp(PyObject* pyobj)
     {

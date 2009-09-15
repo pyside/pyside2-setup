@@ -188,7 +188,7 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
     s << "template<>" << endl;
     s << "struct Converter< " << cppName << " >" << endl << '{' << endl;
 
-    s << INDENT << "static PyObject* toPython(ValueHolder< " << cppName << " > cppobj);" << endl;
+    s << INDENT << "static PyObject* toPython(" << cppName << " cppobj);" << endl;
     s << INDENT << "static " << cppName << " toCpp(PyObject* pyobj);" << endl;
     s << "};" << endl;
 }
@@ -200,28 +200,28 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
     if (type->isObject())
         cppName.append('*');
 
-    s << "inline PyObject* Converter< " << cppName << " >::toPython(ValueHolder< " << cppName << " > cppobj)" << endl;
+    s << "inline PyObject* Converter< " << cppName << " >::toPython(" << cppName << " cppobj)" << endl;
     s << '{' << endl;
     s << INDENT << "PyObject* pyobj;" << endl;
 
     if (!type->isEnum()) {
-        s << INDENT << "ValueHolder<void*> holder((void*) ";
+        s << INDENT << "void* holder = (void*) ";
         if (type->isValue())
-            s << "new " << cppName << "(cppobj.value)";
+            s << "new " << cppName << "(cppobj)";
         else
-            s << "cppobj.value";
-        s << ");" << endl;
+            s << "cppobj";
+        s << ";" << endl;
     }
 
     s << INDENT << "pyobj = ";
 
     if (type->isEnum()) {
         s << "Shiboken::PyEnumObject_New(&" << pyTypeName << ',' << endl;
-        s << INDENT << INDENT << "\"ReturnedValue\", (long) cppobj.value);" << endl;
+        s << INDENT << INDENT << "\"ReturnedValue\", (long) cppobj);" << endl;
     } else {
         QString newWrapper = QString("Shiboken::PyBaseWrapper_New(&")
                                 + pyTypeName + ", &" + pyTypeName
-                                + ", holder.value);";
+                                + ", holder);";
         if (type->isValue()) {
             s << newWrapper << endl;
         } else {

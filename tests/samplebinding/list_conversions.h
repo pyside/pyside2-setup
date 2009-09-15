@@ -1,14 +1,14 @@
 template <typename StdList>
 struct Converter_std_list
 {
-    static PyObject* toPython(ValueHolder<StdList> holder)
+    static PyObject* toPython(StdList holder)
     {
-        PyObject* result = PyList_New((int) holder.value.size());
+        PyObject* result = PyList_New((int) holder.size());
         typedef typename StdList::iterator IT;
         IT it;
         int idx = 0;
-        for (it = holder.value.begin(); it != holder.value.end(); it++) {
-            ValueHolder<typename StdList::value_type> vh(*it);
+        for (it = holder.begin(); it != holder.end(); it++) {
+            typename StdList::value_type vh(*it);
             PyList_SET_ITEM(result, idx, Converter<typename StdList::value_type>::toPython(vh));
             idx++;
         }

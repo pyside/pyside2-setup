@@ -328,13 +328,11 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 if (convert) {
                     s << "Shiboken::Converter< ";
                     s << translateType(arg->type(), func->ownerClass());
-                    s << " >::toPython(Shiboken::ValueHolder< ";
-                    s << translateTypeForWrapperMethod(arg->type(), func->ownerClass());
-                    s << " >(";
+                    s << " >::toPython(";
                 }
                 s << arg->argumentName();
                 if (convert)
-                    s << "))";
+                    s << ")";
                 if (arg->argumentIndex() != func->arguments().size() - 1)
                     s << ',';
                 s << endl;

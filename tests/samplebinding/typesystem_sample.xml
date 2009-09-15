@@ -55,25 +55,23 @@
 
     <template name="boolptr_at_end_fix_beginning">
         bool __ok__;
-        %0 = Shiboken::Converter&lt; %RETURN_TYPE &gt;::toPython(Shiboken::ValueHolder&lt; %RETURN_TYPE &gt;
-            (
+        %0 = Shiboken::Converter&lt; %RETURN_TYPE &gt;::toPython(
                 ((%TYPE*) ((Shiboken::PyBaseWrapper*) self)->cptr)->%TYPE::%FUNCTION_NAME(%ARGUMENT_NAMES, &amp;__ok__)
-            ));
+            );
     </template>
 
     <template name="boolptr_at_start_fix_beginning">
         bool __ok__;
-        %0 = Shiboken::Converter&lt; %RETURN_TYPE &gt;::toPython(Shiboken::ValueHolder&lt; %RETURN_TYPE &gt;
-            (
+        %0 = Shiboken::Converter&lt; %RETURN_TYPE &gt;::toPython(
                 ((%TYPE*) ((Shiboken::PyBaseWrapper*) self)->cptr)->%TYPE::%FUNCTION_NAME(&amp;__ok__, %ARGUMENT_NAMES)
-            ));
+            );
     </template>
 
     <template name="boolptr_fix_end">
         PyObject* _item_;
         PyObject* _tuple_ = PyTuple_New(2);
         PyTuple_SET_ITEM(_tuple_, 0, %0);
-        _item_ = Shiboken::Converter&lt;bool&gt;::toPython(Shiboken::ValueHolder&lt;bool&gt;(__ok__));
+        _item_ = Shiboken::Converter&lt;bool&gt;::toPython(__ok__);
         PyTuple_SET_ITEM(_tuple_, 1, _item_);
         return _tuple_;
     </template>
@@ -85,10 +83,9 @@
                 <remove-argument/>
             </modify-argument>
             <inject-code class="native" position="beginning">
-                %0 = Shiboken::Converter&lt; %RETURN_TYPE &gt;::toPython(Shiboken::ValueHolder&lt; %RETURN_TYPE &gt;
-                    (
+                %0 = Shiboken::Converter&lt; %RETURN_TYPE &gt;::toPython(
                         ((%TYPE*) ((Shiboken::PyBaseWrapper*) self)->cptr)->%TYPE::%FUNCTION_NAME(%1, true, %3, %4)
-                    ));
+                    );
             </inject-code>
         </modify-function>
 

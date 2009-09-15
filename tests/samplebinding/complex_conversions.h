@@ -1,7 +1,7 @@
 template<>
 struct Converter<Complex>
 {
-    static PyObject* toPython(ValueHolder<Complex> cpx)
+    static PyObject* toPython(Complex cpx)
     {
         /*
         fprintf(stderr, "[%s:%d] cpx.real: %f, cpx.imag: %f\n",
@@ -12,7 +12,7 @@ struct Converter<Complex>
         fprintf(stderr, "\n");
         return result;
         */
-        return PyComplex_FromDoubles(cpx.value.real(), cpx.value.imag());
+        return PyComplex_FromDoubles(cpx.real(), cpx.imag());
     }
     static Complex toCpp(PyObject* pyobj)
     {

@@ -1,10 +1,10 @@
 template <typename StdPair>
 struct Converter_std_pair
 {
-    static PyObject* toPython(ValueHolder<StdPair> holder)
+    static PyObject* toPython(StdPair holder)
     {
-        ValueHolder<typename StdPair::first_type> first(holder.value.first);
-        ValueHolder<typename StdPair::second_type> second(holder.value.second);
+        typename StdPair::first_type first(holder.first);
+        typename StdPair::second_type second(holder.second);
         PyObject* tuple = PyTuple_New(2);
         PyTuple_SET_ITEM(tuple, 0, Converter<typename StdPair::first_type>::toPython(first));
         PyTuple_SET_ITEM(tuple, 1, Converter<typename StdPair::second_type>::toPython(second));

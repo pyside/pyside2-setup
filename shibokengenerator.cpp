@@ -240,8 +240,8 @@ void ShibokenGenerator::writeToPythonConversion(QTextStream& s, const AbstractMe
 {
     if (!type || argumentName.isEmpty())
         return;
-    QString typeName = writeBaseConversion(s, type, context);
-    s << "toPython(Shiboken::ValueHolder< " << typeName << " >(" << argumentName << "))";
+    writeBaseConversion(s, type, context);
+    s << "toPython(" << argumentName << ")";
 }
 
 void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaType* type,
