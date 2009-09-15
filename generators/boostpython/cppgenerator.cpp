@@ -575,7 +575,24 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *cppCla
         if (cppClass->isPolymorphic() && !cppClass->hasPrivateDestructor())
             writeDestructor(s, cppClass);
     }
+
+    writeFieldsAccessFunctions(s, cppClass);
+
+    //inject code native end
+    writeCodeSnips(s, cppClass->typeEntry()->codeSnips(),
+                   CodeSnip::End, TypeSystem::NativeCode);
+
     writeBoostDeclaration(s, cppClass);
+}
+
+void CppGenerator::writeFieldsAccessFunctions(QTextStream& s, const AbstractMetaClass* cppClass)
+{
+    //Fields
+    foreach (AbstractMetaField *field, cppClass->fields()) {
+        if (field->isPublic()) {
+            writeFieldAccess(s, cppClass, field);
+        }
+    }
 }
 
 void CppGenerator::writePrelude(QTextStream& s, const AbstractMetaClass* cppClass)
@@ -601,17 +618,6 @@ void CppGenerator::writePrelude(QTextStream& s, const AbstractMetaClass* cppClas
             writeGlobalOperatorOverloadImpl(s, func);
         }
     }
-
-    //Fields
-    foreach (AbstractMetaField *field, cppClass->fields()) {
-        if (field->isPublic()) {
-            writeFieldAccess(s, cppClass, field);
-        }
-    }
-
-    //inject code native end
-    writeCodeSnips(s, cppClass->typeEntry()->codeSnips(),
-                   CodeSnip::End, TypeSystem::NativeCode);
 }
 
 
@@ -850,11 +856,15 @@ void CppGenerator::writeNonVirtualModifiedFunctionImpl(QTextStream& s, const Abs
 
 AbstractMetaFunction* CppGenerator::findMainConstructor(const AbstractMetaClass* clazz)
 {
-    foreach (AbstractMetaFunction* func, clazz->functions()) {
+    foreach (AbstractMetaFunction* func, filterFunctions(clazz)) {
         if (func->isConstructor() &&
             func->isPublic() &&
             !func->isModifiedRemoved() &&
             !func->isPrivate()) {
+
+            //do not use copy constructor here
+            if (func->isCopyConstructor())
+                continue;
             return func;
         }
     }
@@ -992,10 +1002,6 @@ void CppGenerator::writeBoostDeclaration(QTextStream& s, const AbstractMetaClass
           << INDENT << "python_cls.def(qcontainer_indexing_suite< " << cppClass->qualifiedCppName() << " >());" << endl << endl;
     }
 
-    if (isCopyable(cppClass) && !cppClass->isNamespace()) {
-        s << INDENT << "python_cls.def(python::init<const ";
-        s << cppClass->qualifiedCppName() << "&>());" << endl;
-    }
 
     if (cppClass->isPolymorphic() && !cppClass->hasPrivateDestructor() && canCreateWrapperFor(cppClass)) {
         QString heldType = cppClass->typeEntry()->heldTypeValue();
@@ -1040,17 +1046,18 @@ void CppGenerator::writeBoostDeclaration(QTextStream& s, const AbstractMetaClass
                    CodeSnip::Beginning, TypeSystem::TargetLangCode);
 
     QSet<QString> staticMethods;
+    AbstractMetaFunctionList functionList = filterFunctions(cppClass);
 
     if (!cppClass->isNamespace()) {
         //search for all static methods to match with normal functions
         //to rename when match with one member function
-        foreach (AbstractMetaFunction *func, filterFunctions(cppClass)) {
+        foreach (AbstractMetaFunction *func, functionList) {
             if (func->isStatic() && !func->isOperatorOverload())
                 staticMethods << func->name();
         }
     }
 
-    foreach (AbstractMetaFunction *func, filterFunctions(cppClass)) {
+    foreach (AbstractMetaFunction *func, functionList) {
         if (func->isModifiedRemoved() || func->isPrivate() || func->isSignal())
             continue;
 
@@ -1073,8 +1080,10 @@ void CppGenerator::writeBoostDeclaration(QTextStream& s, const AbstractMetaClass
             if (func->originalName() == func->name())
                 writeOperatorOverload(s, func);
         } else if (func->isConstructor()) {
-            if (mainCtorHasModifications || func != mainCtor)
+            //Use same rule as hpp genenrator for copy constructor
+            if ((mainCtorHasModifications || func != mainCtor) && !func->isCopyConstructor()) {
                 writeConstructor(s, func);
+            }
         } else if (!func->isVirtual() &&
                    (func->hasInjectedCode() ||
                     func->isThread() || func->allowThread())) {
@@ -1086,6 +1095,12 @@ void CppGenerator::writeBoostDeclaration(QTextStream& s, const AbstractMetaClass
         //if is namespace all methothds is stattic
         if (cppClass->isNamespace())
             s << INDENT << "python_cls.staticmethod(\"" << func->name() << "\");" << endl;
+    }
+
+    //write copy constructor here
+    if (isCopyable(cppClass) && !cppClass->isNamespace()) {
+        s << INDENT << "python_cls.def(python::init<const ";
+        s << cppClass->qualifiedCppName() << "&>());" << endl;
     }
 
     writeCodeSnips(s, cppClass->typeEntry()->codeSnips(),
@@ -1415,11 +1430,12 @@ void CppGenerator::finishGeneration()
         }
         s << endl;
 
+
+
         s << INDENT << "register_type_converters_" << moduleName().toLower() << "();" << endl << endl
           << classPythonDefines << endl
           << INDENT << "register_global_functions_" << moduleName().toLower() << "();" << endl
           << INDENT << "//Namespaces" << endl;
-
 
         s << "}" << endl << endl;
     }

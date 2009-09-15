@@ -280,7 +280,9 @@ QStringList BoostPythonGenerator::getBaseClasses(const AbstractMetaClass *cppCla
 
 bool BoostPythonGenerator::isCopyable(const AbstractMetaClass *cppClass)
 {
-    if (cppClass->typeEntry()->copyable() == ComplexTypeEntry::Unknown)
+    if (cppClass->isNamespace())
+        return false;
+    else if (cppClass->typeEntry()->copyable() == ComplexTypeEntry::Unknown)
         return cppClass->hasCloneOperator();
     else
         return (cppClass->typeEntry()->copyable() == ComplexTypeEntry::CopyableSet);

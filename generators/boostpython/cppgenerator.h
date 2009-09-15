@@ -83,6 +83,7 @@ private:
     void writeSetterFieldFunction(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaField *field);
     void writeGetterFieldFunction(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaField *field);
     void writeFieldAccess(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaField *field);
+    void writeFieldsAccessFunctions(QTextStream& s, const AbstractMetaClass* cppClass);
 
     // call policy related
     QString verifyDefaultReturnPolicy(const AbstractMetaFunction *func, const QString &callPolicy);
