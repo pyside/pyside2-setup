@@ -231,10 +231,10 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         writeTypeAsNumberDefinition(s, metaClass);
     }
 
-    if (hasComparisonOperator) {
-        s << "// Rich comparison" << endl;
-        writeRichCompareFunction(s, metaClass);
-    }
+//     if (hasComparisonOperator) {
+//         s << "// Rich comparison" << endl;
+//         writeRichCompareFunction(s, metaClass);
+//     }
 
     s << "extern \"C\"" << endl << '{' << endl << endl;
     writeClassDefinition(s, metaClass);
@@ -982,8 +982,6 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE";
         tp_new = QString("(newfunc)Py%1_New").arg(className);
         tp_dealloc = QString("(destructor)&(Shiboken::PyBaseWrapper_Dealloc< %1 >)").arg(className);
-        if (metaClass->hasComparisonOperatorOverload())
-            tp_richcompare = QString("(richcmpfunc)Py%1_richcompare").arg(className);
     }
 
     s << "// Class Definition -----------------------------------------------" << endl;
@@ -1013,7 +1011,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_doc*/              0," << endl;
     s << INDENT << "/*tp_traverse*/         0," << endl;
     s << INDENT << "/*tp_clear*/            0," << endl;
-    s << INDENT << "/*tp_richcompare*/      " << tp_richcompare << ',' << endl;
+    s << INDENT << "/*tp_richcompare*/      0," << endl;
     s << INDENT << "/*tp_weaklistoffset*/   0," << endl;
     s << INDENT << "/*tp_iter*/             0," << endl;
     s << INDENT << "/*tp_iternext*/         0," << endl;
@@ -1122,6 +1120,7 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
     s << "};" << endl << endl;
 }
 
+#if 0
 void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     s << "static PyObject*" << endl;
@@ -1214,7 +1213,6 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
         s << INDENT << "Py_RETURN_TRUE;" << endl;
     }
     s << INDENT << "Py_RETURN_FALSE;" << endl << endl;
-
     s << INDENT << "Py" << metaClass->name() << "_RichComparison_TypeError:" << endl;
     {
         Indentation indent(INDENT);
@@ -1223,6 +1221,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
     }
     s << '}' << endl << endl;
 }
+#endif
 
 void CppGenerator::writeMethodDefinition(QTextStream& s, const AbstractMetaFunctionList overloads)
 {
