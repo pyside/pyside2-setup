@@ -204,7 +204,7 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
     s << '{' << endl;
     s << INDENT << "PyObject* pyobj;" << endl;
 
-    if (!type->isEnum()) {
+    if (!(type->isEnum() || type->isFlags())) {
         s << INDENT << "void* holder = (void*) ";
         if (type->isValue())
             s << "new " << cppName << "(cppobj)";
@@ -215,7 +215,7 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
 
     s << INDENT << "pyobj = ";
 
-    if (type->isEnum()) {
+    if (type->isEnum() || type->isFlags()) {
         s << "Shiboken::PyEnumObject_New(&" << pyTypeName << ',' << endl;
         s << INDENT << INDENT << "\"ReturnedValue\", (long) cppobj);" << endl;
     } else {
@@ -268,7 +268,7 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
     }
 
     s << INDENT << "return ";
-    if (type->isEnum()) {
+    if (type->isEnum() || type->isFlags()) {
         s << '(' << type->qualifiedCppName() << ") ((Shiboken::PyEnumObject*)pyobj)->ob_ival";
     } else {
         if (type->isValue())
@@ -334,6 +334,11 @@ void HeaderGenerator::finishGeneration()
             s_pts << endl;
             writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
             writeTypeConverterImpl(convImpl, cppEnum->typeEntry());
+            FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
+            if (flagsEntry) {
+                writeTypeConverterDecl(convDecl, flagsEntry);
+                writeTypeConverterImpl(convImpl, flagsEntry);
+            }
             convDecl << endl;
         }
 

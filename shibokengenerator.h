@@ -152,10 +152,20 @@ public:
     QString cpythonCheckFunction(const TypeEntry* type, bool genericNumberType = false);
     QString cpythonCheckFunction(const AbstractMetaType* type, bool genericNumberType = false);
     QString cpythonFunctionName(const AbstractMetaFunction* func);
+
     QString cpythonEnumName(const EnumTypeEntry* enumEntry);
     QString cpythonEnumName(const AbstractMetaEnum* metaEnum)
     {
         return cpythonEnumName(metaEnum->typeEntry());
+    }
+
+    QString cpythonFlagsName(const FlagsTypeEntry* flagsEntry);
+    QString cpythonFlagsName(const AbstractMetaEnum* metaEnum)
+    {
+        FlagsTypeEntry* flags = metaEnum->typeEntry()->flags();
+        if (!flags)
+            return QString();
+        return cpythonFlagsName(flags);
     }
 
     QString getFunctionReturnType(const AbstractMetaFunction* func, Options options = NoOption) const;

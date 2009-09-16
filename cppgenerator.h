@@ -71,6 +71,17 @@ private:
     void writeEnumNewMethod(QTextStream& s, const AbstractMetaEnum* metaEnum);
     void writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* metaEnum);
     void writeEnumInitialization(QTextStream& s, const AbstractMetaEnum* metaEnum);
+
+    void writeFlagsDefinition(QTextStream& s, const AbstractMetaEnum* cppEnum);
+    void writeFlagsMethods(QTextStream& s, const AbstractMetaEnum* cppEnum);
+    void writeFlagsNumberMethodsDefinition(QTextStream& s, const AbstractMetaEnum* cppEnum);
+    void writeFlagsBinaryOperator(QTextStream& s, const AbstractMetaEnum* cppEnum,
+                                  QString pyOpName, QString cppOpName);
+    void writeFlagsInplaceOperator(QTextStream& s, const AbstractMetaEnum* cppEnum,
+                                   QString pyOpName, QString cppOpName);
+    void writeFlagsUnaryOperator(QTextStream& s, const AbstractMetaEnum* cppEnum,
+                                 QString pyOpName, QString cppOpName, bool boolResult = false);
+
 };
 
 #endif // CPPGENERATOR_H

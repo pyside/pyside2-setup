@@ -240,8 +240,22 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     writeClassDefinition(s, metaClass);
     s << endl;
 
-    foreach (AbstractMetaEnum* cppEnum, metaClass->enums())
+    foreach (AbstractMetaEnum* cppEnum, metaClass->enums()) {
+        bool hasFlags = cppEnum->typeEntry()->flags();
+        if (hasFlags) {
+            writeFlagsMethods(s, cppEnum);
+            writeFlagsNumberMethodsDefinition(s, cppEnum);
+            s << endl;
+        }
+
         writeEnumDefinition(s, cppEnum);
+
+        if (hasFlags) {
+            // Write Enum as Flags definition (at the moment used only by QFlags<enum>)
+            writeFlagsDefinition(s, cppEnum);
+            s << endl;
+        }
+    }
     s << endl;
 
     writeClassRegister(s, metaClass);
@@ -1266,7 +1280,24 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
     s << INDENT << addFunction << endl;
     s << INDENT << INDENT << INDENT << "const_cast<char*>(\"";
     s << cppEnum->name() << "\"), ((PyObject*)&" << cpythonName;
-    s << "_Type));" << endl;
+    s << "_Type));" << endl << endl;
+
+    FlagsTypeEntry* flags = cppEnum->typeEntry()->flags();
+    if (flags) {
+        QString flagsName = cpythonFlagsName(flags);
+        s << INDENT << "// init flags class: " << flags->name() << endl;
+
+        s << INDENT << "if (PyType_Ready(&" << flagsName << "_Type) < 0)" << endl;
+        s << INDENT << INDENT << "return;" << endl;
+
+        s << INDENT << "Py_INCREF(&" << flagsName << "_Type);" << endl;
+
+        s << INDENT << addFunction << endl;
+        s << INDENT << INDENT << INDENT << "const_cast<char*>(\"";
+        s << flags->flagsName() << "\"), ((PyObject*)&" << flagsName;
+        s << "_Type));" << endl << endl;
+    }
+
 
     foreach (const AbstractMetaEnumValue* enumValue, cppEnum->values()) {
         if (cppEnum->typeEntry()->isEnumValueRejected(enumValue->name()))
@@ -1315,6 +1346,10 @@ void CppGenerator::writeEnumNewMethod(QTextStream& s, const AbstractMetaEnum* cp
 void CppGenerator::writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* cppEnum)
 {
     QString cpythonName = cpythonEnumName(cppEnum);
+    QString tp_as_number("0");
+    if (cppEnum->typeEntry()->flags())
+        tp_as_number = QString("&%1_as_number").arg(cpythonName);
+
     QString newFunc;
 
     if (cppEnum->typeEntry()->isExtensible()) {
@@ -1342,7 +1377,7 @@ void CppGenerator::writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* c
     s << INDENT << "/*tp_setattr*/          0," << endl;
     s << INDENT << "/*tp_compare*/          0," << endl;
     s << INDENT << "/*tp_repr*/             Shiboken::PyEnumObject_repr," << endl;
-    s << INDENT << "/*tp_as_number*/        0," << endl;
+    s << INDENT << "/*tp_as_number*/        " << tp_as_number << ',' << endl;
     s << INDENT << "/*tp_as_sequence*/      0," << endl;
     s << INDENT << "/*tp_as_mapping*/       0," << endl;
     s << INDENT << "/*tp_hash*/             0," << endl;
@@ -1378,6 +1413,241 @@ void CppGenerator::writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* c
     s << INDENT << "/*tp_subclasses*/       0," << endl;
     s << INDENT << "/*tp_weaklist*/         0" << endl;
     s << "};" << endl << endl;
+}
+
+void CppGenerator::writeFlagsMethods(QTextStream& s, const AbstractMetaEnum* cppEnum)
+{
+    writeFlagsBinaryOperator(s, cppEnum, "and", "&");
+    writeFlagsBinaryOperator(s, cppEnum, "or", "|");
+    writeFlagsBinaryOperator(s, cppEnum, "xor", "^");
+
+    writeFlagsInplaceOperator(s, cppEnum, "iand", "&=");
+    writeFlagsInplaceOperator(s, cppEnum, "ior", "|=");
+    writeFlagsInplaceOperator(s, cppEnum, "ixor", "^=");
+
+    writeFlagsUnaryOperator(s, cppEnum, "neg", "~");
+    writeFlagsUnaryOperator(s, cppEnum, "not", "!", true);
+    s << endl;
+}
+
+void CppGenerator::writeFlagsNumberMethodsDefinition(QTextStream& s, const AbstractMetaEnum* cppEnum)
+{
+    QString cpythonName = cpythonEnumName(cppEnum);
+
+    s << "static PyNumberMethods " << cpythonName << "_as_number = {" << endl;
+    s << INDENT << "/*nb_add*/                  0," << endl;
+    s << INDENT << "/*nb_subtract*/             0," << endl;
+    s << INDENT << "/*nb_multiply*/             0," << endl;
+    s << INDENT << "/*nb_divide*/               0," << endl;
+    s << INDENT << "/*nb_remainder*/            0," << endl;
+    s << INDENT << "/*nb_divmod*/               0," << endl;
+    s << INDENT << "/*nb_power*/                0," << endl;
+    s << INDENT << "/*nb_negative*/             (unaryfunc)" << cpythonName << "___neg__," << endl;
+    s << INDENT << "/*nb_positive*/             0," << endl;
+    s << INDENT << "/*nb_absolute*/             0," << endl;
+    s << INDENT << "/*nb_nonzero*/              0," << endl;
+    s << INDENT << "/*nb_invert*/               0," << endl;
+    s << INDENT << "/*nb_lshift*/               0," << endl;
+    s << INDENT << "/*nb_rshift*/               0," << endl;
+    s << INDENT << "/*nb_and*/                  (binaryfunc)" << cpythonName  << "___and__" << ',' << endl;
+    s << INDENT << "/*nb_xor*/                  (binaryfunc)" << cpythonName  << "___xor__" << ',' << endl;
+    s << INDENT << "/*nb_or*/                   (binaryfunc)" << cpythonName  << "___or__" << ',' << endl;
+    s << INDENT << "/*nb_coerce*/               0," << endl;
+    s << INDENT << "/*nb_int*/                  0," << endl;
+    s << INDENT << "/*nb_long*/                 0," << endl;
+    s << INDENT << "/*nb_float*/                0," << endl;
+    s << INDENT << "/*nb_oct*/                  0," << endl;
+    s << INDENT << "/*nb_hex*/                  0," << endl;
+    s << INDENT << "/*nb_inplace_add*/          0," << endl;
+    s << INDENT << "/*nb_inplace_subtract*/     0," << endl;
+    s << INDENT << "/*nb_inplace_multiply*/     0," << endl;
+    s << INDENT << "/*nb_inplace_divide*/       0," << endl;
+    s << INDENT << "/*nb_inplace_remainder*/    0," << endl;
+    s << INDENT << "/*nb_inplace_power*/        0," << endl;
+    s << INDENT << "/*nb_inplace_lshift*/       0," << endl;
+    s << INDENT << "/*nb_inplace_rshift*/       0," << endl;
+    s << INDENT << "/*nb_inplace_and*/          (binaryfunc)" << cpythonName  << "___iand__" << ',' << endl;
+    s << INDENT << "/*nb_inplace_xor*/          (binaryfunc)" << cpythonName  << "___ixor__" << ',' << endl;
+    s << INDENT << "/*nb_inplace_or*/           (binaryfunc)" << cpythonName  << "___ior__" << ',' << endl;
+    s << INDENT << "/*nb_floor_divide*/         0," << endl;
+    s << INDENT << "/*nb_true_divide*/          0," << endl;
+    s << INDENT << "/*nb_inplace_floor_divide*/ 0," << endl;
+    s << INDENT << "/*nb_inplace_true_divide*/  0," << endl;
+    s << INDENT << "/*nb_index*/                0" << endl;
+    s << "};" << endl << endl;
+}
+
+void CppGenerator::writeFlagsDefinition(QTextStream& s, const AbstractMetaEnum* cppEnum)
+{
+    FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
+    if (!flagsEntry)
+        return;
+    QString cpythonName = cpythonFlagsName(cppEnum);
+    QString enumName = cpythonEnumName(cppEnum);
+
+    s << "PyTypeObject " << cpythonName << "_Type = {" << endl;
+    s << INDENT << "PyObject_HEAD_INIT(&PyType_Type)" << endl;
+    s << INDENT << "/*ob_size*/             0," << endl;
+    s << INDENT << "/*tp_name*/             const_cast<char*>(\"" << flagsEntry->flagsName() << "\")," << endl;
+    s << INDENT << "/*tp_basicsize*/        sizeof(Shiboken::PyEnumObject)," << endl;
+    s << INDENT << "/*tp_itemsize*/         0," << endl;
+    s << INDENT << "/*tp_dealloc*/          0," << endl;
+    s << INDENT << "/*tp_print*/            0," << endl;
+    s << INDENT << "/*tp_getattr*/          0," << endl;
+    s << INDENT << "/*tp_setattr*/          0," << endl;
+    s << INDENT << "/*tp_compare*/          0," << endl;
+    s << INDENT << "/*tp_repr*/             Shiboken::PyEnumObject_repr," << endl;
+    s << INDENT << "/*tp_as_number*/        0," << endl;
+    s << INDENT << "/*tp_as_sequence*/      0," << endl;
+    s << INDENT << "/*tp_as_mapping*/       0," << endl;
+    s << INDENT << "/*tp_hash*/             0," << endl;
+    s << INDENT << "/*tp_call*/             0," << endl;
+    s << INDENT << "/*tp_str*/              Shiboken::PyEnumObject_repr," << endl;
+    s << INDENT << "/*tp_getattro*/         0," << endl;
+    s << INDENT << "/*tp_setattro*/         0," << endl;
+    s << INDENT << "/*tp_as_buffer*/        0," << endl;
+    s << INDENT << "/*tp_flags*/            Py_TPFLAGS_DEFAULT," << endl;
+    s << INDENT << "/*tp_doc*/              0," << endl;
+    s << INDENT << "/*tp_traverse*/         0," << endl;
+    s << INDENT << "/*tp_clear*/            0," << endl;
+    s << INDENT << "/*tp_richcompare*/      0," << endl;
+    s << INDENT << "/*tp_weaklistoffset*/   0," << endl;
+    s << INDENT << "/*tp_iter*/             0," << endl;
+    s << INDENT << "/*tp_iternext*/         0," << endl;
+    s << INDENT << "/*tp_methods*/          0," << endl;
+    s << INDENT << "/*tp_members*/          0," << endl;
+    s << INDENT << "/*tp_getset*/           0," << endl;
+    s << INDENT << "/*tp_base*/             &" << enumName << "_Type," << endl;
+    s << INDENT << "/*tp_dict*/             0," << endl;
+    s << INDENT << "/*tp_descr_get*/        0," << endl;
+    s << INDENT << "/*tp_descr_set*/        0," << endl;
+    s << INDENT << "/*tp_dictoffset*/       0," << endl;
+    s << INDENT << "/*tp_init*/             0," << endl;
+    s << INDENT << "/*tp_alloc*/            0," << endl;
+    s << INDENT << "/*tp_new*/              Shiboken::PyEnumObject_NonExtensibleNew," << endl;
+    s << INDENT << "/*tp_free*/             0," << endl;
+    s << INDENT << "/*tp_is_gc*/            0," << endl;
+    s << INDENT << "/*tp_bases*/            0," << endl;
+    s << INDENT << "/*tp_mro*/              0," << endl;
+    s << INDENT << "/*tp_cache*/            0," << endl;
+    s << INDENT << "/*tp_subclasses*/       0," << endl;
+    s << INDENT << "/*tp_weaklist*/         0" << endl;
+    s << "};" << endl << endl;
+}
+
+void CppGenerator::writeFlagsBinaryOperator(QTextStream& s, const AbstractMetaEnum* cppEnum,
+                                            QString pyOpName, QString cppOpName)
+{
+    FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
+    Q_ASSERT(flagsEntry);
+    QString cppName = cppEnum->typeEntry()->name();
+    QString cpythonName = cpythonEnumName(cppEnum);
+
+    s << "PyObject*" << endl;
+    s << cpythonName << "___" << pyOpName << "__(PyObject* self, PyObject* arg)" << endl;
+    s << '{' << endl;
+    s << INDENT << "PyObject* py_result = 0;" << endl;
+    s << INDENT << "if (" << cpythonName << "_Check(arg)) {" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "py_result = Shiboken::Converter< ";
+        s << flagsEntry->originalName() << " >::toPython(" << endl;
+        s << INDENT << "((" << flagsEntry->originalName() << ") ((PyEnumObject*)self)->ob_ival) " << cppOpName << endl;
+        s << INDENT << "Shiboken::Converter< " << cppEnum->typeEntry()->qualifiedCppName() << " >::toCpp(arg)" << endl;
+        s << INDENT << ");" << endl;
+    }
+    QString typeErrorLabel = QString("%1___%2___TypeError").arg(cpythonName).arg(pyOpName);
+    s << INDENT << "} else goto " << typeErrorLabel << ';' << endl << endl;
+
+    s << INDENT << "if (PyErr_Occurred() || !py_result)" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "return 0;" << endl;
+    }
+    s << endl << INDENT << "return py_result;" << endl << endl;
+    s << INDENT << typeErrorLabel << ':' << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "PyErr_SetString(PyExc_TypeError, \"'__" << pyOpName;
+        s << "__()' called with wrong parameters.\");" << endl;
+        s << INDENT << "return 0;" << endl;
+    }
+    s << '}' << endl << endl;
+}
+
+void CppGenerator::writeFlagsInplaceOperator(QTextStream& s, const AbstractMetaEnum* cppEnum,
+                                             QString pyOpName, QString cppOpName)
+{
+    FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
+    Q_ASSERT(flagsEntry);
+    QString cppName = cppEnum->typeEntry()->name();
+    QString cpythonName = cpythonEnumName(cppEnum);
+
+    s << "PyObject*" << endl;
+    s << cpythonName << "___" << pyOpName << "__(PyObject* self, PyObject* arg)" << endl;
+    s << '{' << endl;
+    s << INDENT << "PyObject* py_result = 0;" << endl;
+    s << INDENT << "if (" << cpythonName << "_Check(arg)) {" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "((" << flagsEntry->originalName() << ") ((PyEnumObject*)self)->ob_ival) " << cppOpName << endl;
+        s << INDENT << "Shiboken::Converter< " << cppEnum->typeEntry()->qualifiedCppName() << " >::toCpp(arg);" << endl;
+    }
+    QString typeErrorLabel = QString("%1___%2___TypeError").arg(cpythonName).arg(pyOpName);
+    s << INDENT << "} else goto " << typeErrorLabel << ';' << endl << endl;
+
+    s << INDENT << "if (PyErr_Occurred() || !py_result)" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "return 0;" << endl;
+    }
+    s << endl;
+    s << INDENT << "Py_INCREF(self);" << endl;
+    s << INDENT << "return self;" << endl << endl;
+    s << INDENT << typeErrorLabel << ':' << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "PyErr_SetString(PyExc_TypeError, \"'__" << pyOpName;
+        s << "__()' called with wrong parameters.\");" << endl;
+        s << INDENT << "return 0;" << endl;
+    }
+    s << '}' << endl << endl;
+}
+
+void CppGenerator::writeFlagsUnaryOperator(QTextStream& s, const AbstractMetaEnum* cppEnum,
+                                           QString pyOpName, QString cppOpName, bool boolResult)
+{
+    FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
+    Q_ASSERT(flagsEntry);
+    QString cppName = cppEnum->typeEntry()->name();
+    QString cpythonName = cpythonEnumName(cppEnum);
+
+    s << "PyObject*" << endl;
+    s << cpythonName << "___" << pyOpName << "__(PyObject* self, PyObject* arg)" << endl;
+    s << '{' << endl;
+    s << INDENT << "PyObject* py_result = 0;" << endl;
+    s << INDENT << "if (" << cpythonName << "_Check(arg)) {" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "py_result = Shiboken::Converter< ";
+        if (boolResult)
+            s << "bool";
+        else
+            s << flagsEntry->originalName();
+        s << " >::toPython(" << endl;
+        s << INDENT << ' ' << cppOpName << " Shiboken::Converter< ";
+        s << flagsEntry->originalName() << " >::toCpp(arg)" << endl;
+        s << INDENT << ");" << endl;
+    }
+    s << INDENT << '}' << endl << endl;
+
+    s << INDENT << "if (PyErr_Occurred() || !py_result)" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "return 0;" << endl;
+    }
+    s << endl << INDENT << "return py_result;" << endl;
+    s << '}' << endl << endl;
 }
 
 void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* metaClass)

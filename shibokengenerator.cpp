@@ -198,12 +198,21 @@ QString ShibokenGenerator::cpythonFunctionName(const AbstractMetaFunction* func)
     return result;
 }
 
-QString ShibokenGenerator::cpythonEnumName(const EnumTypeEntry* enumEntry)
+static QString cpythonEnumFlagsName(QString moduleName, QString qualifiedCppName)
 {
-    QString result = QString("Py") + moduleName() + '_'
-                    + enumEntry->qualifiedCppName();
+    QString result = QString("Py%1_%2").arg(moduleName).arg(qualifiedCppName);
     result.replace("::", "_");
     return result;
+}
+
+QString ShibokenGenerator::cpythonEnumName(const EnumTypeEntry* enumEntry)
+{
+    return cpythonEnumFlagsName(moduleName(), enumEntry->qualifiedCppName());
+}
+
+QString ShibokenGenerator::cpythonFlagsName(const FlagsTypeEntry* flagsEntry)
+{
+    return cpythonEnumFlagsName(moduleName(), flagsEntry->originalName());
 }
 
 QString ShibokenGenerator::getFunctionReturnType(const AbstractMetaFunction* func, Options options) const
