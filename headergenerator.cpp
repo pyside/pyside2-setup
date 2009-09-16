@@ -188,7 +188,10 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
     s << "template<>" << endl;
     s << "struct Converter< " << cppName << " >" << endl << '{' << endl;
 
-    s << INDENT << "static PyObject* toPython(" << cppName << " cppobj);" << endl;
+    s << INDENT << "static PyObject* toPython(";
+    if (type->isObject())
+        s << "const ";
+    s << cppName << " cppobj);" << endl;
     s << INDENT << "static " << cppName << " toCpp(PyObject* pyobj);" << endl;
     s << "};" << endl;
 }
@@ -200,7 +203,10 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
     if (type->isObject())
         cppName.append('*');
 
-    s << "inline PyObject* Converter< " << cppName << " >::toPython(" << cppName << " cppobj)" << endl;
+    s << "inline PyObject* Converter< " << cppName << " >::toPython(";
+    if (type->isObject())
+        s << "const ";
+    s << cppName << " cppobj)" << endl;
     s << '{' << endl;
     s << INDENT << "PyObject* pyobj;" << endl;
 

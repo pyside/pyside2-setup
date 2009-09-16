@@ -240,6 +240,14 @@ QString ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMet
     } else {
         typeName = translateTypeForWrapperMethod(type, context);
     }
+
+
+    // If the type is an Object (and a pointer) remove its constness
+    // (len("const ") == 6) since it is already inserted for everyone
+    // in the generated converter declaration.
+    if ((type->isQObject() || type->isObject()) && typeName.startsWith("const "))
+        typeName.remove(0, 6);
+
     s << "Shiboken::Converter< " << typeName << " >::";
     return typeName;
 }

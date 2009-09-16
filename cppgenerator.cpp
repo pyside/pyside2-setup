@@ -340,9 +340,11 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                                     && !m_formatUnits.contains(arg->type()->typeEntry()->name()));
                 s << INDENT;
                 if (convert) {
-                    s << "Shiboken::Converter< ";
-                    s << translateType(arg->type(), func->ownerClass());
-                    s << " >::toPython(";
+                    QString typeName = translateType(arg->type(), func->ownerClass());
+                    if ((arg->type()->isQObject() || arg->type()->isObject())
+                        && typeName.startsWith("const "))
+                        typeName.remove(0, 6);
+                    s << "Shiboken::Converter< " << typeName << " >::toPython(";
                 }
                 s << arg->argumentName();
                 if (convert)
