@@ -37,31 +37,28 @@
 namespace Shiboken
 {
 
-int
-PySequence_to_argc_argv(_object* argList, char** argv[])
+bool
+PySequence_to_argc_argv(PyObject* argList, int* argc, char*** argv)
 {
     if (!PySequence_Check(argList))
-        return -1;
+        return false;
+    // Check all items
+    int numArgs = PySequence_Size(argList);
+    for (int i = 0; i < numArgs; ++i)
+        if (!PyString_Check(PySequence_GetItem(argList, i)))
+            return false;
 
-    int argc = (int) PySequence_Size(argList);
-    (*argv) = new char*[argc];
-    for (int i = 0; i < argc; ++i) {
+    *argc = (int) PySequence_Size(argList);
+    *argv = new char*[*argc];
+    for (int i = 0; i < *argc; ++i) {
         PyObject* item = PySequence_GetItem(argList, i);
-        if (!PyString_Check(item)) {
-            argc = -1;
-            for (int j = 0; j < i; ++j)
-                delete (*argv)[j];
-            Py_DECREF(item);
-            return -1;
-        }
-        char *origArg = PyString_AS_STRING(item);
-        int size = strlen(origArg);
+        char* string = PyString_AS_STRING(item);
+        int size = strlen(string);
         (*argv)[i] = new char[size+1];
-        (*argv)[i] = strcpy((*argv)[i], origArg);
+        (*argv)[i] = strcpy((*argv)[i], string);
         Py_DECREF(item);
     }
-
-    return argc;
+    return true;
 }
 
 } // namespace Shiboken

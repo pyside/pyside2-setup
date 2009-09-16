@@ -64,7 +64,7 @@ namespace Shiboken
 #define SHIBOKEN_API SHIBOKEN_HELPER_DLL_EXPORT
 #define SHIBOKEN_LOCAL SHIBOKEN_HELPER_DLL_LOCAL
 
-int PySequence_to_argc_argv(PyObject* argList, char** argv[]);
+bool PySequence_to_argc_argv(PyObject* argList, int* argc, char*** argv);
 
 } // namespace Shiboken
 
