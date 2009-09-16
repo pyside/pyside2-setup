@@ -328,7 +328,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         if (func->arguments().isEmpty()) {
             s << "PyTuple_New(0);" << endl;
         } else {
-            s << "Py_BuildValue(\"(" << getFormatUnitString(func->arguments()) << ")\"," << endl;
+            s << "Py_BuildValue(\"(" << getFormatUnitString(func) << ")\"," << endl;
             foreach (const AbstractMetaArgument* arg, func->arguments()) {
                 Indentation indentation(INDENT);
                 bool convert = arg->type()->isObject()

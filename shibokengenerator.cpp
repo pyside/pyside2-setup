@@ -268,10 +268,13 @@ void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaT
     s << "toCpp(" << argumentName << ')';
 }
 
-QString ShibokenGenerator::getFormatUnitString(const AbstractMetaArgumentList arguments) const
+QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func) const
 {
     QString result;
-    foreach (const AbstractMetaArgument* arg, arguments) {
+    foreach (const AbstractMetaArgument* arg, func->arguments()) {
+        if (func->argumentRemoved(arg->argumentIndex()))
+            continue;
+
         if (arg->type()->isQObject()
             || arg->type()->isObject()
             || arg->type()->isValue()
@@ -558,8 +561,6 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunction *func,
                                              Options options,
                                              int argCount) const
 {
-    AbstractMetaArgumentList arguments = func->arguments();
-
     QString result;
     QTextStream s(&result);
     // The actual function

@@ -169,7 +169,7 @@ public:
     }
 
     QString getFunctionReturnType(const AbstractMetaFunction* func, Options options = NoOption) const;
-    QString getFormatUnitString(const AbstractMetaArgumentList arguments) const;
+    QString getFormatUnitString(const AbstractMetaFunction* func) const;
 
 
     bool doSetup(const QMap<QString, QString>& args);
