@@ -987,13 +987,15 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         baseClassName = QString("0");
 
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
-        tp_flags = QString("Py_TPFLAGS_HAVE_CLASS");
-        tp_new = QString("0");
-        tp_dealloc = QString("0");
+        tp_flags = "Py_TPFLAGS_HAVE_CLASS";
+        tp_new = "0";
+        tp_dealloc = "0";
     } else {
         tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE";
-        tp_new = QString("(newfunc)Py%1_New").arg(className);
         tp_dealloc = QString("(destructor)&(Shiboken::PyBaseWrapper_Dealloc< %1 >)").arg(className);
+
+        AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
+        tp_new = ctors.isEmpty() ? "0" : "Py"+className+"_New";
     }
 
     s << "// Class Definition -----------------------------------------------" << endl;
