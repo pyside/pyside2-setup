@@ -563,7 +563,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
     }
     s << ')' << endl << '{' << endl;
 
-    if (rfunc->isAbstract()) {
+    if (overloads.count() == 1 && rfunc->isAbstract()) {
         s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
         s << rfunc->ownerClass()->name() << '.' << rfunc->name();
         s << "()' not implemented.\");" << endl;
@@ -574,8 +574,10 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             // Checks if the underlying C++ object is valid.
             // If the wrapped C++ library have no function that steals ownership and
             // deletes the C++ object this check would not be needed.
-            s << INDENT << "if (!Shiboken::cppObjectIsValid((Shiboken::PyBaseWrapper*)self))" << endl;
-            s << INDENT << INDENT << "Py_RETURN_NONE;" << endl << endl;
+            s << INDENT << "if (!Shiboken::cppObjectIsValid((Shiboken::PyBaseWrapper*)self)) {\n";
+            s << INDENT << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"C++ object is invalid.\");\n";
+            s << INDENT << INDENT << "return 0;\n";
+            s << INDENT << "}\n";
         }
 
         if (rfunc->type() && !rfunc->isInplaceOperator())
@@ -597,7 +599,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         s << ')' << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << "Py_RETURN_NONE;" << endl;
+            s << INDENT << "return 0;" << endl;
         }
 
         s << endl << INDENT;
@@ -804,22 +806,24 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
             }
             s << ") {" << endl;
             {
-                Indentation indent(INDENT);
-                int allRemoved = OverloadData::numberOfRemovedArguments(func);
-                int maxArgs = signatureFound ? func->arguments().size() - allRemoved
-                                                : overloadData->argPos() + 1;
-                int removed = 0;
-                for (int i = overloadData->argPos(); i < maxArgs; i++) {
-                    if (func->argumentRemoved(i + 1))
-                        removed++;
-                    QString argName = QString("cpp_arg%1").arg(i);
-                    if (varargs)
-                        pyArgName = QString("pyargs[%1]").arg(i);
-                    const AbstractMetaType* type = func->arguments()[i + removed]->type();
-                    s << INDENT << translateTypeForWrapperMethod(type, func->implementingClass());
-                    s << ' ' << argName << " = ";
-                    writeToCppConversion(s, type, func->implementingClass(), pyArgName);
-                    s << ';' << endl;
+                if (!func->isAbstract()) {
+                    Indentation indent(INDENT);
+                    int allRemoved = OverloadData::numberOfRemovedArguments(func);
+                    int maxArgs = signatureFound ? func->arguments().size() - allRemoved
+                                                    : overloadData->argPos() + 1;
+                    int removed = 0;
+                    for (int i = overloadData->argPos(); i < maxArgs; i++) {
+                        if (func->argumentRemoved(i + 1))
+                            removed++;
+                        QString argName = QString("cpp_arg%1").arg(i);
+                        if (varargs)
+                            pyArgName = QString("pyargs[%1]").arg(i);
+                        const AbstractMetaType* type = func->arguments()[i + removed]->type();
+                        s << INDENT << translateTypeForWrapperMethod(type, func->implementingClass());
+                        s << ' ' << argName << " = ";
+                        writeToCppConversion(s, type, func->implementingClass(), pyArgName);
+                        s << ';' << endl;
+                    }
                 }
             }
         }
@@ -838,6 +842,12 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
 void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* func, int maxArgs)
 {
     s << INDENT << "// " << func->minimalSignature() << endl;
+
+    if (func->isAbstract()) {
+        s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '"
+          << func->ownerClass()->name() << '.' << func->name() << "()' not implemented.\");" << endl;
+        return;
+    }
 
     bool writeCall = true;
     if (func->hasSignatureModifications()) {
