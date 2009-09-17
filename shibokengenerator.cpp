@@ -248,7 +248,16 @@ QString ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMet
     if ((type->isQObject() || type->isObject()) && typeName.startsWith("const "))
         typeName.remove(0, 6);
 
-    s << "Shiboken::Converter< " << typeName << " >::";
+    QString conversion = typeName;
+    if (type->isValuePointer()) {
+        // If the type is a pointer to a Value Type,
+        // remove the pointer symbol ('*')
+        conversion.chop(1);
+        // And the constness, if any
+        if (conversion.startsWith("const "))
+            conversion.remove(0, 6);
+    }
+    s << "Shiboken::Converter< " << conversion << " >::";
     return typeName;
 }
 
@@ -264,6 +273,8 @@ void ShibokenGenerator::writeToPythonConversion(QTextStream& s, const AbstractMe
 void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaType* type,
                                              const AbstractMetaClass* context, QString argumentName)
 {
+    if (type->isValuePointer())
+        s << '&';
     writeBaseConversion(s, type, context);
     s << "toCpp(" << argumentName << ')';
 }
