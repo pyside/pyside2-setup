@@ -155,7 +155,7 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType*
     if (cType->isValue() || cType->isObject()
         || (cType->isReference() && !cType->isContainer())) {
         result = cType->typeEntry()->qualifiedCppName();
-        if (cType->isObject())
+        if (cType->isObject() || cType->isQObject())
             result.append('*');
     } else if (cType->isArray()) {
         result = translateTypeForWrapperMethod(cType->arrayElementType(), context) + "[]";

@@ -879,7 +879,12 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                     else
                         userArgs << arg->defaultValueExpression();
                 } else {
-                    userArgs << QString("cpp_arg%1").arg(arg->argumentIndex() - removed);
+                    QString argName = QString("cpp_arg%1").arg(arg->argumentIndex() - removed);
+                    if (arg->type()->typeEntry()->isObject() && arg->type()->isReference()) {
+                        argName.prepend("(*");
+                        argName.append(')');
+                    }
+                    userArgs << argName;
                 }
             }
 
