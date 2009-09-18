@@ -152,7 +152,8 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType*
 {
     QString result;
 
-    if (cType->isValue() || cType->isObject() || cType->isReference()) {
+    if (cType->isValue() || cType->isObject()
+        || (cType->isReference() && !cType->isContainer())) {
         result = cType->typeEntry()->qualifiedCppName();
         if (cType->isObject())
             result.append('*');
