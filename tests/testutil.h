@@ -37,7 +37,7 @@ public:
         QBuffer buffer;
         // parse typesystem
         buffer.setData(xmlCode);
-        TypeDatabase::instance()->parseFile(&buffer);
+        TypeDatabase::instance(true)->parseFile(&buffer);
         buffer.close();
         // parse C++ code
         buffer.setData(cppCode);
