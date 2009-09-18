@@ -35,8 +35,6 @@ private slots:
     void testClassName();
     void testClassNameUnderNamespace();
     void testVirtualMethods();
-    void testDefaultValues();
-    void testModifiedDefaultValues();
 };
 
 #endif // TESTABSTRACTMETACLASS_H

@@ -1517,7 +1517,10 @@ AbstractMetaFunction *AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
             if (!expr.isEmpty())
                 metaArg->setOriginalDefaultValueExpression(expr);
 
-            metaArg->setDefaultValueExpression(metaArg->originalDefaultValueExpression());
+            if (m_currentClass) {
+                expr = translateDefaultValue(arg, metaArg->type(), metaFunction, m_currentClass, i);
+                metaArg->setDefaultValueExpression(expr);
+            }
 
             if (expr.isEmpty())
                 firstDefaultArgument = i;
@@ -1848,6 +1851,94 @@ void AbstractMetaBuilder::decideUsagePattern(AbstractMetaType *metaType)
         ReportHandler::debugFull(QString("native pointer pattern for '%1'")
                                  .arg(metaType->cppSignature()));
     }
+}
+
+QString AbstractMetaBuilder::translateDefaultValue(ArgumentModelItem item, AbstractMetaType *type,
+                                                   AbstractMetaFunction *fnc, AbstractMetaClass *implementingClass,
+                                                   int argumentIndex)
+{
+    QString functionName = fnc->name();
+    QString className = implementingClass->qualifiedCppName();
+
+    QString replacedExpression = fnc->replacedDefaultExpression(implementingClass, argumentIndex + 1);
+    if (fnc->removedDefaultExpression(implementingClass, argumentIndex + 1))
+        return "";
+    else if (!replacedExpression.isEmpty())
+        return replacedExpression;
+
+    QString expr = item->defaultValueExpression();
+    if (type) {
+        if (type->isPrimitive()) {
+            if (type->name() == "boolean") {
+                if (expr != "false" && expr != "true") {
+                    bool ok = false;
+                    int number = expr.toInt(&ok);
+                    if (ok && number)
+                        expr = "true";
+                    else
+                        expr = "false";
+                }
+            } else if (expr == "QVariant::Invalid") {
+                expr = QString::number(QVariant::Invalid);
+            } else {
+                // This can be an enum or flag so I need to delay the
+                // translation untill all namespaces are completly
+                // processed. This is done in figureOutEnumValues()
+            }
+        } else if (type->isFlags() || type->isEnum()) {
+            bool isNumber;
+            expr.toInt(&isNumber);
+            if (!isNumber && expr.indexOf("::") < 0) {
+                // Add the enum/flag scope to default value, making it usable
+                // from other contexts beside its owner class hierarchy
+                QRegExp typeRegEx("[^<]*[<]([^:]*::).*");
+                typeRegEx.indexIn(type->minimalSignature());
+                expr = typeRegEx.cap(1) + expr;
+            }
+        } else if (type->isContainer() && expr.contains('<')) {
+            QRegExp typeRegEx("[^<]*<(.*)>");
+            typeRegEx.indexIn(type->minimalSignature());
+            QRegExp defaultRegEx("([^<]*<).*(>[^>]*)");
+            defaultRegEx.indexIn(expr);
+            expr = defaultRegEx.cap(1) + typeRegEx.cap(1) + defaultRegEx.cap(2);
+        } else {
+            // Here the default value is supposed to be a constructor,
+            // a class field, or a constructor receiving a class field
+            QRegExp defaultRegEx("([^\\(]*\\(|)([^\\)]*)(\\)|)");
+            defaultRegEx.indexIn(expr);
+
+            QString defaultValueCtorName = defaultRegEx.cap(1);
+            if (defaultValueCtorName.endsWith('('))
+                defaultValueCtorName.chop(1);
+
+            // Fix the scope for constructor using the already
+            // resolved argument type as a reference.
+            // The following regular expression extracts any
+            // use of namespaces/scopes from the type string.
+            QRegExp typeRegEx("^(?:const[\\s]+|)([\\w:]*::|)([A-Za-z_]\\w*)\\s*[&\\*]?$");
+            typeRegEx.indexIn(type->minimalSignature());
+
+            QString typeNamespace = typeRegEx.cap(1);
+            QString typeCtorName = typeRegEx.cap(2);
+            if (!typeNamespace.isEmpty() && defaultValueCtorName == typeCtorName)
+                expr.prepend(typeNamespace);
+
+            // Fix scope if the parameter is a field of the current class
+            foreach (const AbstractMetaField* field, implementingClass->fields()) {
+                if (defaultRegEx.cap(2) == field->name()) {
+                    expr = defaultRegEx.cap(1) + implementingClass->name() + "::" + defaultRegEx.cap(2) + defaultRegEx.cap(3);
+                    break;
+                }
+            }
+        }
+    } else {
+        QString warn = QString("undefined type for default value '%3' of argument in function '%1', class '%2'")
+                       .arg(functionName).arg(className).arg(item->defaultValueExpression());
+        ReportHandler::warning(warn);
+        expr = QString();
+    }
+
+    return expr;
 }
 
 bool AbstractMetaBuilder::isQObject(const QString &qualifiedName)

@@ -137,59 +137,6 @@ void TestAbstractMetaClass::testVirtualMethods()
     QCOMPARE(funcC->implementingClass(), c);
 }
 
-void TestAbstractMetaClass::testDefaultValues()
-{
-    const char* cppCode ="\
-    struct A {\
-        class B {};\
-        void method(B b = B());\
-    };\
-    ";
-    const char* xmlCode = "\
-    <typesystem package=\"Foo\"> \
-        <value-type name='A'/> \
-        <value-type name='A::B'/> \
-    </typesystem>";
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
-    QCOMPARE(classes.count(), 2);
-    AbstractMetaClass* classA = classes.findClass("A");
-    QCOMPARE(classA->queryFunctionsByName("method").count(), 1);
-    AbstractMetaFunction* method = classA->queryFunctionsByName("method").first();
-    AbstractMetaArgument* arg = method->arguments().first();
-    QCOMPARE(arg->defaultValueExpression(), arg->originalDefaultValueExpression());
-}
-
-void TestAbstractMetaClass::testModifiedDefaultValues()
-{
-    const char* cppCode ="\
-    struct A {\
-        class B {};\
-        void method(B b = B());\
-    };\
-    ";
-    const char* xmlCode = "\
-    <typesystem package=\"Foo\"> \
-        <value-type name='A'> \
-        <modify-function signature='method'>\
-            <modify-argument index='1'>\
-                <replace-default-expression with='Hello'/>\
-            </modify-argument>\
-        </modify-function>\
-        </value-type>\
-        <value-type name='A::B'/> \
-    </typesystem>";
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
-    QCOMPARE(classes.count(), 2);
-    AbstractMetaClass* classA = classes.findClass("A");
-    QCOMPARE(classA->queryFunctionsByName("method").count(), 1);
-    AbstractMetaFunction* method = classA->queryFunctionsByName("method").first();
-    AbstractMetaArgument* arg = method->arguments().first();
-    QCOMPARE(arg->defaultValueExpression(), QString("B()"));
-    QCOMPARE(arg->originalDefaultValueExpression(), QString("Hello"));
-}
-
 
 QTEST_APPLESS_MAIN(TestAbstractMetaClass)
 
