@@ -1670,6 +1670,21 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     s << "PyAPI_FUNC(void)" << endl;
     s << "init_" << metaClass->name().toLower() << "(PyObject *module)" << endl;
     s << '{' << endl;
+
+    // Multiple inheritance
+    if (metaClass->baseClassNames().size() > 1) {
+        s << INDENT << pyTypeName << ".tp_bases = PyTuple_Pack(";
+        s << metaClass->baseClassNames().size();
+        s << ',' << endl;
+        QStringList bases;
+        foreach (QString baseName, metaClass->baseClassNames()) {
+            const AbstractMetaClass* base = classes().findClass(baseName);
+            bases << QString("&%1").arg(cpythonTypeName(base->typeEntry()));
+        }
+        Indentation indent(INDENT);
+        s << INDENT << bases.join(", ") << ");" << endl << endl;
+    }
+
     s << INDENT << "if (PyType_Ready(&" << pyTypeName << ") < 0)" << endl;
     s << INDENT << INDENT << "return;" << endl << endl;
     s << INDENT << "Py_INCREF(&" << pyTypeName << ");" << endl;
