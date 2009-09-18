@@ -1591,9 +1591,14 @@ bool Handler::startElement(const QString &, const QString &n,
     return true;
 }
 
-TypeDatabase *TypeDatabase::instance()
+TypeDatabase *TypeDatabase::instance(bool newInstance)
 {
-    static TypeDatabase *db = new TypeDatabase();
+    static TypeDatabase *db = 0;
+    if (!db || newInstance) {
+        if (db)
+            delete db;
+        db = new TypeDatabase;
+    }
     return db;
 }
 

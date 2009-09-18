@@ -1718,10 +1718,17 @@ struct TypeRejection
 
 class TypeDatabase
 {
-public:
     TypeDatabase();
+    TypeDatabase(const TypeDatabase&);
+    TypeDatabase& operator=(const TypeDatabase&);
+public:
 
-    static TypeDatabase *instance();
+    /**
+    * Return the type system instance.
+    * \param newInstance This parameter is usefull just for unit testing, because singletons causes
+    *                    too many side effects on unit testing.
+    */
+    static TypeDatabase *instance(bool newInstance = false);
 
     QStringList requiredTargetImports()
     {
