@@ -39,8 +39,7 @@ target_link_libraries(shiboken_generator
                       ${APIEXTRACTOR_LIBRARY}
                       ${GENERATORRUNNER_LIBRARY}
                       ${QT_QTCORE_LIBRARY}
-                      ${QT_QTXML_LIBRARY}
-                      -lgenrunner) # FIXME libgenrunner needs a cmake FindPkg script!
+                      ${QT_QTXML_LIBRARY})
 
 add_executable(shiboken main.cpp)
 target_link_libraries(shiboken ${QT_QTCORE_LIBRARY})
