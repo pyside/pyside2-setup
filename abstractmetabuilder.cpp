@@ -1513,14 +1513,16 @@ AbstractMetaFunction *AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
 
         if (arg->defaultValue() || !replacedExpression.isEmpty()) {
             QString expr = arg->defaultValueExpression();
+            expr = fixDefaultValue(arg, metaArg->type(), metaFunction, m_currentClass, i);
+            metaArg->setOriginalDefaultValueExpression(expr);
 
-            if (!expr.isEmpty())
-                metaArg->setOriginalDefaultValueExpression(expr);
-
-            if (m_currentClass) {
-                expr = translateDefaultValue(arg, metaArg->type(), metaFunction, m_currentClass, i);
-                metaArg->setDefaultValueExpression(expr);
+            QString replacedExpression = metaFunction->replacedDefaultExpression(m_currentClass, i + 1);
+            if (metaFunction->removedDefaultExpression(m_currentClass, i + 1)) {
+                expr = "";
+            } else if (!replacedExpression.isEmpty()) {
+                expr = replacedExpression;
             }
+            metaArg->setDefaultValueExpression(expr);
 
             if (expr.isEmpty())
                 firstDefaultArgument = i;
@@ -1853,18 +1855,12 @@ void AbstractMetaBuilder::decideUsagePattern(AbstractMetaType *metaType)
     }
 }
 
-QString AbstractMetaBuilder::translateDefaultValue(ArgumentModelItem item, AbstractMetaType *type,
+QString AbstractMetaBuilder::fixDefaultValue(ArgumentModelItem item, AbstractMetaType *type,
                                                    AbstractMetaFunction *fnc, AbstractMetaClass *implementingClass,
                                                    int argumentIndex)
 {
     QString functionName = fnc->name();
-    QString className = implementingClass->qualifiedCppName();
-
-    QString replacedExpression = fnc->replacedDefaultExpression(implementingClass, argumentIndex + 1);
-    if (fnc->removedDefaultExpression(implementingClass, argumentIndex + 1))
-        return "";
-    else if (!replacedExpression.isEmpty())
-        return replacedExpression;
+    QString className = implementingClass ? implementingClass->qualifiedCppName() : QString();
 
     QString expr = item->defaultValueExpression();
     if (type) {
@@ -1924,10 +1920,12 @@ QString AbstractMetaBuilder::translateDefaultValue(ArgumentModelItem item, Abstr
                 expr.prepend(typeNamespace);
 
             // Fix scope if the parameter is a field of the current class
-            foreach (const AbstractMetaField* field, implementingClass->fields()) {
-                if (defaultRegEx.cap(2) == field->name()) {
-                    expr = defaultRegEx.cap(1) + implementingClass->name() + "::" + defaultRegEx.cap(2) + defaultRegEx.cap(3);
-                    break;
+            if (implementingClass) {
+                foreach (const AbstractMetaField* field, implementingClass->fields()) {
+                    if (defaultRegEx.cap(2) == field->name()) {
+                        expr = defaultRegEx.cap(1) + implementingClass->name() + "::" + defaultRegEx.cap(2) + defaultRegEx.cap(3);
+                        break;
+                    }
                 }
             }
         }

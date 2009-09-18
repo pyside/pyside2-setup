@@ -117,7 +117,7 @@ public:
     void setupClonable(AbstractMetaClass *cls);
     void setupFunctionDefaults(AbstractMetaFunction *metaFunction, AbstractMetaClass *metaClass);
 
-    QString translateDefaultValue(ArgumentModelItem item, AbstractMetaType *type,
+    QString fixDefaultValue(ArgumentModelItem item, AbstractMetaType *type,
                                   AbstractMetaFunction *fnc, AbstractMetaClass *,
                                   int argumentIndex);
     AbstractMetaType *translateType(const TypeInfo &type, bool *ok, bool resolveType = true, bool resolveScope = true);
