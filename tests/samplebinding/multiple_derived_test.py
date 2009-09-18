@@ -24,7 +24,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-'''Test cases for std::list container conversions'''
+'''Test cases for multiple inheritance'''
 
 import sys
 import unittest
@@ -32,13 +32,17 @@ import unittest
 from sample import MBase, MBase2, MDerived
 
 class MultipleDerivedTest(unittest.TestCase):
-    '''Test case for multiple inheritance ''' 
+    '''Test cases for multiple inheritance'''
 
-    def testType(self):
+    def testIsInstance(self):
         k = MDerived()
         self.assert_(isinstance(k, MDerived))
         self.assert_(isinstance(k, MBase))
         self.assert_(isinstance(k, MBase2))
+
+    def testIsSubclass(self):
+        self.assert_(issubclass(MDerived, MBase))
+        self.assert_(issubclass(MDerived, MBase2))
 
     def testCast(self):
         k = MDerived()
@@ -51,3 +55,4 @@ class MultipleDerivedTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
