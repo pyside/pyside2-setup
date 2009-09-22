@@ -148,6 +148,7 @@ public:
 
     QString cpythonBaseName(const TypeEntry* type);
     QString cpythonBaseName(const AbstractMetaType* type);
+    QString cpythonTypeName(const AbstractMetaClass* metaClass);
     QString cpythonTypeName(const TypeEntry* type);
     QString cpythonCheckFunction(const TypeEntry* type, bool genericNumberType = false);
     QString cpythonCheckFunction(const AbstractMetaType* type, bool genericNumberType = false);

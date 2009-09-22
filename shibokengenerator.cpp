@@ -177,15 +177,11 @@ QString ShibokenGenerator::wrapperName(const AbstractMetaClass* metaClass)
 
 QString ShibokenGenerator::cpythonFunctionName(const AbstractMetaFunction* func)
 {
-    QString result = QLatin1String("Py");
+    QString result;
 
     if (func->ownerClass()) {
-        result += func->ownerClass()->name();
-        if (func->ownerClass()->enclosingClass()) // is a inner class
-            result.replace("::", "_");
-
+        result = cpythonBaseName(func->ownerClass()->typeEntry());
         result += '_';
-
         if (func->isConstructor() || func->isCopyConstructor())
             result += "New";
         else if (func->isOperatorOverload())
@@ -193,7 +189,7 @@ QString ShibokenGenerator::cpythonFunctionName(const AbstractMetaFunction* func)
         else
             result += func->name();
     } else {
-        result += moduleName() + "Module_" + func->name();
+        result = "Py" + moduleName() + "Module_" + func->name();
     }
 
     return result;
@@ -319,7 +315,7 @@ QString ShibokenGenerator::cpythonBaseName(const AbstractMetaType* type)
 QString ShibokenGenerator::cpythonBaseName(const TypeEntry* type)
 {
     QString baseName;
-    if ((type->isObject() || type->isValue())) { // && !type->isReference()) {
+    if ((type->isObject() || type->isValue() || type->isNamespace())) { // && !type->isReference()) {
         baseName = QString("Py") + type->name();
     } else if (type->isPrimitive()) {
         const PrimitiveTypeEntry* ptype = (const PrimitiveTypeEntry*) type;
@@ -363,7 +359,12 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry* type)
     } else {
         baseName = "PyObject";
     }
-    return baseName;
+    return baseName.replace("::", "_");
+}
+
+QString ShibokenGenerator::cpythonTypeName(const AbstractMetaClass* metaClass)
+{
+    return cpythonTypeName(metaClass->typeEntry());
 }
 
 QString ShibokenGenerator::cpythonTypeName(const TypeEntry* type)

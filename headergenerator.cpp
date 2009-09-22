@@ -330,11 +330,6 @@ void HeaderGenerator::finishGeneration()
         if (metaClass->typeEntry()->include().isValid())
             s_cin << metaClass->typeEntry()->include().toString() << endl;
 
-        foreach (AbstractMetaClass* innerClass, metaClass->innerClasses()) {
-            if (shouldGenerate(innerClass))
-                s_cin << innerClass->typeEntry()->include().toString() << endl;
-        }
-
         foreach (const AbstractMetaEnum* cppEnum, metaClass->enums()) {
             writeTypeCheckMacro(s_pts, cppEnum->typeEntry());
             s_pts << endl;
@@ -349,6 +344,17 @@ void HeaderGenerator::finishGeneration()
         }
 
         if (!metaClass->isNamespace()) {
+            foreach (AbstractMetaClass* innerClass, metaClass->innerClasses()) {
+                if (shouldGenerate(innerClass)) {
+                    s_cin << innerClass->typeEntry()->include().toString() << endl;
+                    s_pts << "PyAPI_FUNC(PyObject*) " << cpythonBaseName(innerClass->typeEntry());
+                    s_pts << "_New(PyTypeObject* type, PyObject* args, PyObject* kwds);" << endl;
+                    writeTypeCheckMacro(s_pts, innerClass->typeEntry());
+                    writeTypeConverterDecl(convDecl, innerClass->typeEntry());
+                    writeTypeConverterImpl(convImpl, innerClass->typeEntry());
+                    convDecl << endl;
+                }
+            }
             s_pts << "PyAPI_FUNC(PyObject*) " << cpythonBaseName(metaClass->typeEntry());
             s_pts << "_New(PyTypeObject* type, PyObject* args, PyObject* kwds);" << endl;
             writeTypeCheckMacro(s_pts, classType);

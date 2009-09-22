@@ -119,7 +119,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     s << "#include \"" << headerfile << '"' << endl;
     foreach (AbstractMetaClass* innerClass, metaClass->innerClasses()) {
         if (shouldGenerate(innerClass)) {
-            QString headerfile = fileNameForClass(metaClass);
+            QString headerfile = fileNameForClass(innerClass);
             headerfile.replace("cpp", "h");
             s << "#include \"" << headerfile << '"' << endl;
         }
@@ -201,8 +201,10 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
             writeMethodDefinition(md, overloads);
     }
 
+    QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
+
     // Write methods definition
-    s << "static PyMethodDef Py" << metaClass->qualifiedCppName() << "_methods[] = {" << endl;
+    s << "static PyMethodDef " << className << "_methods[] = {" << endl;
     s << methodsDefinitions << INDENT << "{0} // Sentinel" << endl << "};" << endl << endl;
 
     if (typeAsNumber) {
@@ -420,7 +422,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
 {
     OverloadData overloadData(overloads);
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
-    QString className = rfunc->ownerClass()->qualifiedCppName();
+    QString className = cpythonTypeName(rfunc->ownerClass());
 
     s << "PyObject*" << endl;
     s << cpythonFunctionName(rfunc) << "(PyTypeObject *type, PyObject *args, PyObject *kwds)" << endl;
@@ -430,18 +432,18 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     s << INDENT << getFunctionReturnType(rfunc) << " cptr;" << endl << endl;
 
     if (rfunc->ownerClass()->isAbstract()) {
-        s << INDENT << "if (type == &Py" << className << "_Type) {" << endl;
+        s << INDENT << "if (type == &" << className << ") {" << endl;
         {
             Indentation indent(INDENT);
             s << INDENT << "PyErr_SetString(PyExc_NotImplementedError," << endl;
-            s << INDENT << INDENT << "\"'" << className;
+            s << INDENT << INDENT << "\"'" << rfunc->ownerClass()->qualifiedCppName();
             s << "' represents a C++ abstract class and cannot be instanciated\");" << endl;
             s << INDENT << "return 0;" << endl;
         }
         s << INDENT << '}' << endl << endl;
     }
 
-    s << INDENT << "if (!PyType_IsSubtype(type, &Py" << className << "_Type))" << endl;
+    s << INDENT << "if (!PyType_IsSubtype(type, &" << className << "))" << endl;
     s << INDENT << INDENT << "return 0;" << endl << endl;
 
       if (overloadData.maxArgs() > 0) {
@@ -454,7 +456,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     writeOverloadedMethodDecisor(s, &overloadData);
     s << endl;
 
-    s << INDENT << "self = Shiboken::PyBaseWrapper_New(type, &Py" << className << "_Type, cptr);" << endl;
+    s << INDENT << "self = Shiboken::PyBaseWrapper_New(type, &" << className << ", cptr);" << endl;
     s << endl << INDENT << "if (!self) {" << endl;
     {
         Indentation indentation(INDENT);
@@ -989,13 +991,14 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     QString tp_dealloc;
     QString tp_as_number = QString('0');
     QString tp_richcompare = QString('0');
-    QString className = metaClass->qualifiedCppName();
+    QString cppClassName = metaClass->qualifiedCppName();
+    QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
     QString baseClassName;
 
     if (metaClass->hasArithmeticOperatorOverload()
         || metaClass->hasLogicalOperatorOverload()
         || metaClass->hasBitwiseOperatorOverload()) {
-        tp_as_number = QString("&Py%1_as_number").arg(metaClass->qualifiedCppName());
+        tp_as_number = QString("&Py%1_as_number").arg(cppClassName);
     }
 
     if (metaClass->baseClass())
@@ -1009,18 +1012,18 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         tp_dealloc = "0";
     } else {
         tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE";
-        tp_dealloc = QString("(destructor)&(Shiboken::PyBaseWrapper_Dealloc< %1 >)").arg(className);
+        tp_dealloc = QString("(destructor)&(Shiboken::PyBaseWrapper_Dealloc< %1 >)").arg(cppClassName);
 
         AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
-        tp_new = ctors.isEmpty() ? "0" : "Py"+className+"_New";
+        tp_new = ctors.isEmpty() ? "0" : className + "_New";
     }
 
     s << "// Class Definition -----------------------------------------------" << endl;
 
-    s << "PyTypeObject Py" << className << "_Type = {" << endl;
+    s << "PyTypeObject " << className + "_Type" << " = {" << endl;
     s << INDENT << "PyObject_HEAD_INIT(&PyType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
-    s << INDENT << "/*tp_name*/             const_cast<char*>(\"" << className << "\")," << endl;
+    s << INDENT << "/*tp_name*/             const_cast<char*>(\"" << cppClassName << "\")," << endl;
     s << INDENT << "/*tp_basicsize*/        sizeof(Shiboken::PyBaseWrapper)," << endl;
     s << INDENT << "/*tp_itemsize*/         0," << endl;
     s << INDENT << "/*tp_dealloc*/          " << tp_dealloc << ',' << endl;
@@ -1046,7 +1049,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_weaklistoffset*/   0," << endl;
     s << INDENT << "/*tp_iter*/             0," << endl;
     s << INDENT << "/*tp_iternext*/         0," << endl;
-    s << INDENT << "/*tp_methods*/          Py" << className << "_methods," << endl;
+    s << INDENT << "/*tp_methods*/          " << className << "_methods," << endl;
     s << INDENT << "/*tp_members*/          0," << endl;
     s << INDENT << "/*tp_getset*/           0," << endl;
     s << INDENT << "/*tp_base*/             " << baseClassName << ',' << endl;
@@ -1671,7 +1674,7 @@ void CppGenerator::writeFlagsUnaryOperator(QTextStream& s, const AbstractMetaEnu
 
 void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* metaClass)
 {
-    QString pyTypeName = "Py" + metaClass->name() + "_Type";
+    QString pyTypeName = cpythonTypeName(metaClass);
     s << "PyAPI_FUNC(void)" << endl;
     s << "init_" << metaClass->name().toLower() << "(PyObject *module)" << endl;
     s << '{' << endl;
