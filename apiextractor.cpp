@@ -160,7 +160,7 @@ bool ApiExtractor::run()
     // run rpp pre-processor
     if (!preprocess(m_cppFileName, ppFile, m_includePaths)) {
         std::cerr << "Preprocessor failed on file: " << qPrintable(m_cppFileName);
-        return 1;
+        return false;
     }
     ppFile.seek(0);
     m_builder = new AbstractMetaBuilder;
