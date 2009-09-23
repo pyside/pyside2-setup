@@ -7,6 +7,7 @@ find_package(Qt4 4.5.0 REQUIRED)
 
 find_package(LibXml2 2.6.32 REQUIRED)
 find_package(LibXslt 1.1.19 REQUIRED)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -DAPIEXTRACTOR_ENABLE_DUPLICATE_ENUM_VALUES")
 
 set(apiextractor_MAJOR_VERSION 0)
@@ -21,8 +22,6 @@ add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 add_definitions(-DRXX_ALLOCATOR_INIT_0)
-
-set(CMAKE_BUILD_TYPE Debug)
 
 set(apiextractor_SRC
 apiextractor.cpp
@@ -59,7 +58,7 @@ parser/rpp/pp-main.cpp
 parser/rpp/preprocessor.cpp
 )
 
-set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
+set(LIB_DEBUG_POSTFIX "_d" CACHE STRING "Define postfix used in debug library name")
 set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
 
 qt4_add_resources(apiextractor_RCCS_SRC generator.qrc)
@@ -76,7 +75,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 
 add_library(apiextractor SHARED ${apiextractor_SRC} ${apiextractor_RCCS_SRC})
 target_link_libraries(apiextractor ${LIBXSLT_LIBRARIES} ${LIBXML2_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTXMLPATTERNS_LIBRARY} ${QT_QTXML_LIBRARY})
-set_target_properties(apiextractor PROPERTIES VERSION ${apiextractor_VERSION} SOVERSION ${apiextractor_MAJOR_VERSION})
+set_target_properties(apiextractor PROPERTIES
+                        VERSION ${apiextractor_VERSION} SOVERSION ${apiextractor_MAJOR_VERSION}
+                        DEBUG_POSTFIX ${LIB_DEBUG_POSTFIX})
 
 # create pkg-config file
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/apiextractor.pc.in
