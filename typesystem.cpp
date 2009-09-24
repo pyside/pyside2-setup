@@ -123,7 +123,7 @@ public:
             : m_database(database), m_generate(generate ? TypeEntry::GenerateAll : TypeEntry::GenerateForSubclass)
     {
         m_currentEnum = 0;
-        current = 0;
+        m_current = 0;
 
         tagNames["rejection"] = StackElement::Rejection;
         tagNames["primitive-type"] = StackElement::PrimitiveTypeEntry;
@@ -189,7 +189,7 @@ private:
     bool convertBoolean(const QString &, const QString &, bool);
 
     TypeDatabase *m_database;
-    StackElement* current;
+    StackElement* m_current;
     QString m_defaultPackage;
     QString m_defaultSuperclass;
     QString m_error;
@@ -252,15 +252,15 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
     if (tagName == "import-file")
         return true;
 
-    if (!current)
+    if (!m_current)
         return true;
 
-    switch (current->type) {
+    switch (m_current->type) {
     case StackElement::ObjectTypeEntry:
     case StackElement::ValueTypeEntry:
     case StackElement::InterfaceTypeEntry:
     case StackElement::NamespaceTypeEntry: {
-        ComplexTypeEntry *centry = static_cast<ComplexTypeEntry *>(current->entry);
+        ComplexTypeEntry *centry = static_cast<ComplexTypeEntry *>(m_current->entry);
         centry->setFunctionModifications(m_functionMods);
         centry->setFieldModifications(m_fieldMods);
         centry->setCodeSnips(m_codeSnips);
@@ -277,43 +277,43 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
     }
     break;
     case StackElement::CustomMetaConstructor: {
-        current->entry->setCustomConstructor(*current->value.customFunction);
-        delete current->value.customFunction;
+        m_current->entry->setCustomConstructor(*m_current->value.customFunction);
+        delete m_current->value.customFunction;
     }
     break;
     case StackElement::CustomMetaDestructor: {
-        current->entry->setCustomDestructor(*current->value.customFunction);
-        delete current->value.customFunction;
+        m_current->entry->setCustomDestructor(*m_current->value.customFunction);
+        delete m_current->value.customFunction;
     }
     break;
     case StackElement::EnumTypeEntry:
-        current->entry->setDocModification(m_docModifications);
+        m_current->entry->setDocModification(m_docModifications);
         m_docModifications = DocModificationList();
         m_currentEnum = 0;
         break;
     case StackElement::Template:
-        m_database->addTemplate(current->value.templateEntry);
+        m_database->addTemplate(m_current->value.templateEntry);
         break;
     case StackElement::TemplateInstanceEnum:
-        if (current->parent->type == StackElement::InjectCode)
-            m_codeSnips.last().addTemplateInstance(current->value.templateInstance);
-         else if (current->parent->type == StackElement::Template)
-            current->parent->value.templateEntry->addTemplateInstance(current->value.templateInstance);
-         else if (current->parent->type == StackElement::CustomMetaConstructor
-                  || current->parent->type == StackElement::CustomMetaConstructor)
-            current->parent->value.customFunction->addTemplateInstance(current->value.templateInstance);
-         else if (current->parent->type == StackElement::ConversionRule)
-            m_functionMods.last().argument_mods.last().conversion_rules.last().addTemplateInstance(current->value.templateInstance);
-         else if (current->parent->type == StackElement::InjectCodeInFunction)
-            m_functionMods.last().snips.last().addTemplateInstance(current->value.templateInstance);
+        if (m_current->parent->type == StackElement::InjectCode)
+            m_codeSnips.last().addTemplateInstance(m_current->value.templateInstance);
+         else if (m_current->parent->type == StackElement::Template)
+            m_current->parent->value.templateEntry->addTemplateInstance(m_current->value.templateInstance);
+         else if (m_current->parent->type == StackElement::CustomMetaConstructor
+                  || m_current->parent->type == StackElement::CustomMetaConstructor)
+            m_current->parent->value.customFunction->addTemplateInstance(m_current->value.templateInstance);
+         else if (m_current->parent->type == StackElement::ConversionRule)
+            m_functionMods.last().argument_mods.last().conversion_rules.last().addTemplateInstance(m_current->value.templateInstance);
+         else if (m_current->parent->type == StackElement::InjectCodeInFunction)
+            m_functionMods.last().snips.last().addTemplateInstance(m_current->value.templateInstance);
 
         break;
     default:
         break;
     }
 
-    StackElement *child = current;
-    current = current->parent;
+    StackElement *child = m_current;
+    m_current = m_current->parent;
     delete(child);
 
     return true;
@@ -321,27 +321,27 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
 
 bool Handler::characters(const QString &ch)
 {
-    if (current->type == StackElement::Template) {
-        current->value.templateEntry->addCode(ch);
+    if (m_current->type == StackElement::Template) {
+        m_current->value.templateEntry->addCode(ch);
         return true;
     }
 
-    if (current->type == StackElement::CustomMetaConstructor || current->type == StackElement::CustomMetaDestructor) {
-        current->value.customFunction->addCode(ch);
+    if (m_current->type == StackElement::CustomMetaConstructor || m_current->type == StackElement::CustomMetaDestructor) {
+        m_current->value.customFunction->addCode(ch);
         return true;
     }
 
-    if (current->type == StackElement::ConversionRule
-        && current->parent->type == StackElement::ModifyArgument) {
+    if (m_current->type == StackElement::ConversionRule
+        && m_current->parent->type == StackElement::ModifyArgument) {
         m_functionMods.last().argument_mods.last().conversion_rules.last().addCode(ch);
         return true;
     }
 
-    if (current->parent) {
-        if ((current->type & StackElement::CodeSnipMask)) {
-            switch (current->parent->type) {
+    if (m_current->parent) {
+        if ((m_current->type & StackElement::CodeSnipMask)) {
+            switch (m_current->parent->type) {
             case StackElement::Root:
-                ((TypeSystemTypeEntry *) current->parent->entry)->codeSnips().last().addCode(ch);
+                ((TypeSystemTypeEntry *) m_current->parent->entry)->codeSnips().last().addCode(ch);
                 break;
             case StackElement::ModifyFunction:
                 m_functionMods.last().snips.last().addCode(ch);
@@ -360,7 +360,7 @@ bool Handler::characters(const QString &ch)
         }
     }
 
-    if (current->type & StackElement::DocumentationMask)
+    if (m_current->type & StackElement::DocumentationMask)
         m_docModifications.last().setCode(ch);
 
     return true;
@@ -446,7 +446,7 @@ bool Handler::startElement(const QString &, const QString &n,
         return importFileElement(atts);
 
 
-    StackElement *element = new StackElement(current);
+    StackElement *element = new StackElement(m_current);
 
     if (!tagNames.contains(tagName)) {
         m_error = QString("Unknown tag name: '%1'").arg(tagName);
@@ -455,7 +455,7 @@ bool Handler::startElement(const QString &, const QString &n,
 
     element->type = tagNames[tagName];
     if (element->type & StackElement::TypeEntryMask) {
-        if (current->type != StackElement::Root) {
+        if (m_current->type != StackElement::Root) {
             m_error = "Nested types not supported";
             return false;
         }
@@ -733,7 +733,7 @@ bool Handler::startElement(const QString &, const QString &n,
         const int validParent = StackElement::TypeEntryMask
                                 | StackElement::ModifyFunction
                                 | StackElement::ModifyField;
-        if (current->parent && current->parent->type & validParent) {
+        if (m_current->parent && m_current->parent->type & validParent) {
             QString modeName = attributes["mode"];
             DocModification::Mode mode;
             if (modeName == "append") {
@@ -760,7 +760,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 return false;
             }
 
-            QString signature = current->type & StackElement::TypeEntryMask ? QString() : m_currentSignature;
+            QString signature = m_current->type & StackElement::TypeEntryMask ? QString() : m_currentSignature;
             DocModification mod(mode, signature);
             mod.format = lang;
             m_docModifications << mod;
@@ -777,8 +777,8 @@ bool Handler::startElement(const QString &, const QString &n,
         const int validParent = StackElement::TypeEntryMask
                                 | StackElement::ModifyFunction
                                 | StackElement::ModifyField;
-        if (current->parent && current->parent->type & validParent) {
-            QString signature = (current->type & StackElement::TypeEntryMask) ? QString() : m_currentSignature;
+        if (m_current->parent && m_current->parent->type & validParent) {
+            QString signature = (m_current->type & StackElement::TypeEntryMask) ? QString() : m_currentSignature;
             m_docModifications << DocModification(attributes["xpath"], signature);
         } else {
             m_error = "modify-documentation must be inside modify-function, "
@@ -794,12 +794,12 @@ bool Handler::startElement(const QString &, const QString &n,
                         || element->type == StackElement::ConversionRule
                         || element->type == StackElement::Template;
 
-        if (!topLevel && current->type == StackElement::Root) {
+        if (!topLevel && m_current->type == StackElement::Root) {
             m_error = QString("Tag requires parent: '%1'").arg(tagName);
             return false;
         }
 
-        StackElement topElement = !current ? StackElement(0) : *current;
+        StackElement topElement = !m_current ? StackElement(0) : *m_current;
         element->entry = topElement.entry;
 
         QHash<QString, QString> attributes;
@@ -1588,7 +1588,7 @@ bool Handler::startElement(const QString &, const QString &n,
         };
     }
 
-    current = element;
+    m_current = element;
     return true;
 }
 
