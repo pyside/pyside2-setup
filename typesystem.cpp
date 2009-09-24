@@ -777,9 +777,10 @@ bool Handler::startElement(const QString &, const QString &n,
         const int validParent = StackElement::TypeEntryMask
                                 | StackElement::ModifyFunction
                                 | StackElement::ModifyField;
-        if (current->parent && current->parent->type & validParent)
-            m_docModifications << DocModification(attributes["xpath"], m_currentSignature);
-        else {
+        if (current->parent && current->parent->type & validParent) {
+            QString signature = (current->type & StackElement::TypeEntryMask) ? QString() : m_currentSignature;
+            m_docModifications << DocModification(attributes["xpath"], signature);
+        } else {
             m_error = "modify-documentation must be inside modify-function, "
                       "modify-field or other tags that creates a type";
             return false;

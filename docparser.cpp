@@ -95,7 +95,19 @@ QString DocParser::applyDocModifications(const DocModificationList& mods, const 
     if (mods.isEmpty())
         return xml;
 
-    QString xsl = QLatin1String("<xsl:transform version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
+    bool hasXPathBasedModification = false;
+    foreach (DocModification mod, mods) {
+        if (mod.mode() == DocModification::XPathReplace) {
+            hasXPathBasedModification = true;
+            break;
+        }
+    }
+
+    if (!hasXPathBasedModification)
+        return xml;
+
+    QString xsl = QLatin1String("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
+                                "<xsl:transform version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
                                 "<xsl:template match=\"/\">\n"
                                 "    <xsl:apply-templates />\n"
                                 "</xsl:template>\n"
@@ -140,7 +152,7 @@ QString DocParser::applyDocModifications(const DocModificationList& mods, const 
     int bufferSize;
     QString result;
     if (!xsltSaveResultToString(&buffer, &bufferSize, res.xslResult, res.xslt)) {
-        result = QByteArray(reinterpret_cast<char*>(buffer), bufferSize);
+        result = QString::fromUtf8(reinterpret_cast<char*>(buffer), bufferSize);
         std::free(buffer);
     } else {
         result = xml;
