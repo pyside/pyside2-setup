@@ -69,6 +69,10 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generatorrunner.pc DESTINATION
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FindGeneratorRunner.cmake
         DESTINATION share/cmake-2.6/Modules)
 
+#FIXME: manpages should be installed only on Linux targets
+file(GLOB manpages ${CMAKE_CURRENT_SOURCE_DIR}/*.1)
+install(FILES ${manpages} DESTINATION share/man/man1)
+
 enable_testing()
 
 add_subdirectory(generators)
