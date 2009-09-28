@@ -836,6 +836,7 @@ public:
     {
         return isOperatorOverload(originalName());
     }
+    bool isCastOperator() const;
 
     bool isArithmeticOperator() const;
     bool isBitwiseOperator() const;

@@ -729,6 +729,11 @@ bool AbstractMetaFunction::isOperatorOverload(QString funcName)
     return opRegEx.indexIn(funcName) > -1;
 }
 
+bool AbstractMetaFunction::isCastOperator() const
+{
+    return originalName().startsWith("operator ");
+}
+
 bool AbstractMetaFunction::isArithmeticOperator() const
 {
     if (!isOperatorOverload())
