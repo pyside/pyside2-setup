@@ -53,8 +53,6 @@ QList<AbstractMetaFunctionList> CppGenerator::filterGroupedFunctions(const Abstr
         //skip signals
         if (func->isSignal() || func->isDestructor() || (func->isModifiedRemoved() && !func->isAbstract()))
             continue;
-        if (!results.contains(func->name()))
-            results[func->name()] = AbstractMetaFunctionList();
         results[func->name()].append(func);
     }
 
@@ -84,8 +82,6 @@ QList<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(con
         }
         QPair<QString, QPair<int, bool> > op(func->name(),
                         QPair<int, bool>(args, revOp));
-        if (!results.contains(op))
-            results[op] = AbstractMetaFunctionList();
         results[op].append(func);
     }
     return results.values();
