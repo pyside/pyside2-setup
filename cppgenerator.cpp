@@ -67,21 +67,18 @@ QList<AbstractMetaFunctionList> CppGenerator::filterGroupedFunctions(const Abstr
 QList<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(const AbstractMetaClass* metaClass,
                                                                              uint query)
 {
-    QMap<QPair<QString, QPair<int, bool> >, AbstractMetaFunctionList> results;
+    // ( func_name, num_args ) => func_list
+    QMap<QPair<QString, int >, AbstractMetaFunctionList> results;
     foreach (AbstractMetaFunction* func, metaClass->operatorOverloads(query)) {
-        if (func->isModifiedRemoved())
+        if (func->isModifiedRemoved() || ShibokenGenerator::isReverseOperator(func))
             continue;
         int args;
-        bool revOp;
         if (func->isComparisonOperator()) {
             args = -1;
-            revOp = false;
         } else {
             args = func->arguments().size();
-            revOp = ShibokenGenerator::isReverseOperator(func);
         }
-        QPair<QString, QPair<int, bool> > op(func->name(),
-                        QPair<int, bool>(args, revOp));
+        QPair<QString, int > op(func->name(), args);
         results[op].append(func);
     }
     return results.values();
