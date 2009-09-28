@@ -177,7 +177,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     foreach (AbstractMetaFunctionList allOverloads, filterGroupedFunctions(metaClass)) {
         AbstractMetaFunctionList overloads;
         foreach (AbstractMetaFunction* func, allOverloads) {
-            if (!func->isModifiedRemoved() && !func->isPrivate() &&
+            if (!func->isAssignmentOperator() && !func->isCastOperator() && !func->isModifiedRemoved() && !func->isPrivate() &&
                 func->ownerClass() == func->implementingClass())
                 overloads.append(func);
         }
