@@ -226,10 +226,10 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         writeTypeAsNumberDefinition(s, metaClass);
     }
 
-//     if (hasComparisonOperator) {
-//         s << "// Rich comparison" << endl;
-//         writeRichCompareFunction(s, metaClass);
-//     }
+    if (hasComparisonOperator) {
+        s << "// Rich comparison" << endl;
+        writeRichCompareFunction(s, metaClass);
+    }
 
     s << "extern \"C\"" << endl << '{' << endl << endl;
     writeClassDefinition(s, metaClass);
@@ -983,7 +983,6 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     QString tp_new;
     QString tp_dealloc;
     QString tp_as_number = QString('0');
-    QString tp_richcompare = QString('0');
     QString cppClassName = metaClass->qualifiedCppName();
     QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
     QString baseClassName;
@@ -1011,6 +1010,13 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         tp_new = ctors.isEmpty() ? "0" : className + "_New";
     }
 
+    QString tp_richcompare = QString('0');
+    if (metaClass->hasComparisonOperatorOverload())
+        tp_richcompare = cpythonBaseName(metaClass->typeEntry()) + "_richcompare";
+
+    QString tp_repr("0");
+    QString tp_str("0");
+
     s << "// Class Definition -----------------------------------------------" << endl;
 
     s << "PyTypeObject " << className + "_Type" << " = {" << endl;
@@ -1024,7 +1030,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_getattr*/          0," << endl;
     s << INDENT << "/*tp_setattr*/          0," << endl;
     s << INDENT << "/*tp_compare*/          0," << endl;
-    s << INDENT << "/*tp_repr*/             0," << endl;
+    s << INDENT << "/*tp_repr*/             " << tp_repr << "," << endl;
     s << INDENT << "/*tp_as_number*/        " << tp_as_number << ',' << endl;
     s << INDENT << "/*tp_as_sequence*/      0," << endl;
     s << INDENT << "/*tp_as_mapping*/       0," << endl;
@@ -1038,7 +1044,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_doc*/              0," << endl;
     s << INDENT << "/*tp_traverse*/         0," << endl;
     s << INDENT << "/*tp_clear*/            0," << endl;
-    s << INDENT << "/*tp_richcompare*/      0," << endl;
+    s << INDENT << "/*tp_richcompare*/      " << tp_richcompare << ',' << endl;
     s << INDENT << "/*tp_weaklistoffset*/   0," << endl;
     s << INDENT << "/*tp_iter*/             0," << endl;
     s << INDENT << "/*tp_iternext*/         0," << endl;
@@ -1147,12 +1153,12 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
     s << "};" << endl << endl;
 }
 
-#if 0
+
 void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     s << "static PyObject*" << endl;
-    s << "Py" << metaClass->qualifiedCppName();
-    s << "_richcompare(PyObject* self, PyObject* other, int op)" << endl;
+
+    s << cpythonBaseName(metaClass->typeEntry()) << "_richcompare(PyObject* self, PyObject* other, int op)" << endl;
     s << '{' << endl;
 
     QList<AbstractMetaFunctionList> cmpOverloads = filterGroupedOperatorFunctions(metaClass, AbstractMetaClass::ComparisonOp);
@@ -1248,7 +1254,6 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
     }
     s << '}' << endl << endl;
 }
-#endif
 
 void CppGenerator::writeMethodDefinition(QTextStream& s, const AbstractMetaFunctionList overloads)
 {

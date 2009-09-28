@@ -66,7 +66,7 @@ private:
     void writeMethodDefinition(QTextStream& s, const AbstractMetaFunctionList overloads);
     void writeTypeAsNumberDefinition(QTextStream& s, const AbstractMetaClass* metaClass);
 
-//     void writeRichCompareFunction(QTextStream& s, const AbstractMetaClass* metaClass);
+    void writeRichCompareFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
     void writeEnumNewMethod(QTextStream& s, const AbstractMetaEnum* metaEnum);
     void writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* metaEnum);
