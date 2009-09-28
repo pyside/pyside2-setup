@@ -1099,7 +1099,7 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
 
     foreach (AbstractMetaFunctionList opOverload, opOverloads) {
         const AbstractMetaFunction* rfunc = opOverload[0];
-        QString opName = ShibokenGenerator::pythonOperatorFunctionName(rfunc->originalName());
+        QString opName = ShibokenGenerator::pythonOperatorFunctionName(rfunc);
         nb[opName] = cpythonFunctionName(rfunc);
     }
 
