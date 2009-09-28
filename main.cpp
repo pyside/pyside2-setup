@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
             generatorFile = QString(GENERATORRUNNER_PLUGIN_DIR) + "/lib" + generatorSet + "_generator";
 
         QLibrary plugin(generatorFile);
-        getGeneratorsFunc getGenerators = reinterpret_cast<getGeneratorsFunc>(plugin.resolve("getGenerators"));
+        getGeneratorsFunc getGenerators = (getGeneratorsFunc)plugin.resolve("getGenerators");
         if (getGenerators)
             generators = getGenerators();
         else {
