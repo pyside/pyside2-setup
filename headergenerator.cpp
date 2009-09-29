@@ -192,7 +192,10 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
     if (type->isObject())
         s << "const ";
     s << cppName << " cppobj);" << endl;
-    s << INDENT << "static " << cppName << " toCpp(PyObject* pyobj);" << endl;
+    s << INDENT << "static " << cppName;
+    if (type->isValue())
+        s << '*';
+    s << " toCpp(PyObject* pyobj);" << endl;
     s << "};" << endl;
 }
 
@@ -243,7 +246,10 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
     s << INDENT << "return pyobj;" << endl;
     s << '}' << endl << endl;
 
-    s << "inline " << cppName << " Converter< " << cppName << " >::toCpp(PyObject* pyobj)" << endl;
+    s << "inline " << cppName;
+    if (type->isValue())
+        s << '*';
+    s << " Converter< " << cppName << " >::toCpp(PyObject* pyobj)" << endl;
     s << '{' << endl;
 
     if (type->isValue()) {
@@ -267,8 +273,10 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
             s << "if (" << cpythonCheckFunction(argType) << "(pyobj))" << endl;
             {
                 Indentation indent(INDENT);
-                s << INDENT << "return " << cppName;
-                s << "(Converter< " << argType->cppSignature() << " >::toCpp(pyobj));" << endl;
+                s << INDENT << "return ";
+                if (type->isValue())
+                    s << "new ";
+                s << cppName << "(Converter< " << argType->cppSignature() << " >::toCpp(pyobj));" << endl;
             }
         }
     }
@@ -277,8 +285,6 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
     if (type->isEnum() || type->isFlags()) {
         s << '(' << type->qualifiedCppName() << ") ((Shiboken::PyEnumObject*)pyobj)->ob_ival";
     } else {
-        if (type->isValue())
-            s << '*';
         s << "((" << cppName;
         if (type->isValue())
             s << '*';
