@@ -1306,9 +1306,8 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
     s << INDENT << "Py_INCREF(&" << cpythonName << "_Type);" << endl;
 
     s << INDENT << addFunction << endl;
-    s << INDENT << INDENT << INDENT << "const_cast<char*>(\"";
-    s << cppEnum->name() << "\"), ((PyObject*)&" << cpythonName;
-    s << "_Type));" << endl << endl;
+    s << INDENT << INDENT << INDENT << '\"' << cppEnum->name() << "\",";
+    s << "((PyObject*)&" << cpythonName << "_Type));" << endl << endl;
 
     FlagsTypeEntry* flags = cppEnum->typeEntry()->flags();
     if (flags) {
@@ -1321,9 +1320,8 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
         s << INDENT << "Py_INCREF(&" << flagsName << "_Type);" << endl;
 
         s << INDENT << addFunction << endl;
-        s << INDENT << INDENT << INDENT << "const_cast<char*>(\"";
-        s << flags->flagsName() << "\"), ((PyObject*)&" << flagsName;
-        s << "_Type));" << endl << endl;
+        s << INDENT << INDENT << INDENT << '\"' << flags->flagsName() << "\",";
+        s << "((PyObject*)&" << flagsName << "_Type));" << endl << endl;
     }
 
 
@@ -1333,15 +1331,14 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
 
         s << INDENT << "enum_item = Shiboken::PyEnumObject_New(&";
         s << cpythonName << "_Type," << endl;
-        s << INDENT << INDENT << INDENT << "const_cast<char*>(\"";
-        s << enumValue->name() << "\"), (long) ";
+        s << INDENT << INDENT << INDENT << '\"' << enumValue->name() << "\",";
+        s << "(long) ";
         if (cppEnum->enclosingClass())
             s << cppEnum->enclosingClass()->qualifiedCppName() << "::";
         s << enumValue->name() << ");" << endl;
 
         s << INDENT << addFunction << endl;
-        s << INDENT << INDENT << INDENT << "const_cast<char*>(\"";
-        s << enumValue->name() << "\"), enum_item);" << endl;
+        s << INDENT << INDENT << INDENT << '\"' << enumValue->name() << "\", enum_item);" << endl;
     }
     s << endl;
 }
@@ -1389,7 +1386,7 @@ void CppGenerator::writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* c
     }
 
     s << "static PyGetSetDef " << cpythonName << "_getsetlist[] = {" << endl;
-    s << INDENT << "{const_cast<char *>(\"name\"), (getter)Shiboken::PyEnumObject_name}," << endl;
+    s << INDENT << "{const_cast<char*>(\"name\"), (getter)Shiboken::PyEnumObject_name}," << endl;
     s << INDENT << "{0}  // Sentinel" << endl;
     s << "};" << endl << endl;
 
@@ -1702,8 +1699,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     s << INDENT << "if (PyType_Ready(&" << pyTypeName << ") < 0)" << endl;
     s << INDENT << INDENT << "return;" << endl << endl;
     s << INDENT << "Py_INCREF(&" << pyTypeName << ");" << endl;
-    s << INDENT << "PyModule_AddObject(module, const_cast<char*>(\"";
-    s << metaClass->name() << "\")," << endl;
+    s << INDENT << "PyModule_AddObject(module, \"" << metaClass->name() << "\"," << endl;
     s << INDENT << INDENT << "((PyObject*)&" << pyTypeName << "));" << endl << endl;
 
     if (!metaClass->enums().isEmpty()) {
