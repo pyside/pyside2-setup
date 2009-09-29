@@ -558,6 +558,14 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
     }
     s << ')' << endl << '{' << endl;
 
+    // Support for reverse operators
+    if (rfunc->isOperatorOverload() && maxArgs > 0) {
+        s << INDENT << "if (!" << cpythonCheckFunction(rfunc->ownerClass()->typeEntry()) << "(self))\n";
+        s << INDENT << INDENT << "std::swap(self, arg);\n\n";
+    }
+
+
+
     if (overloads.count() == 1 && rfunc->isAbstract()) {
         s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
         s << rfunc->ownerClass()->name() << '.' << rfunc->name();
@@ -1003,7 +1011,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         tp_new = "0";
         tp_dealloc = "0";
     } else {
-        tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE";
+        tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES";
         tp_dealloc = QString("(destructor)&(Shiboken::PyBaseWrapper_Dealloc< %1 >)").arg(cppClassName);
 
         AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
@@ -1022,7 +1030,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << "PyTypeObject " << className + "_Type" << " = {" << endl;
     s << INDENT << "PyObject_HEAD_INIT(&PyType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
-    s << INDENT << "/*tp_name*/             const_cast<char*>(\"" << cppClassName << "\")," << endl;
+    s << INDENT << "/*tp_name*/             \"" << cppClassName << "\"," << endl;
     s << INDENT << "/*tp_basicsize*/        sizeof(Shiboken::PyBaseWrapper)," << endl;
     s << INDENT << "/*tp_itemsize*/         0," << endl;
     s << INDENT << "/*tp_dealloc*/          " << tp_dealloc << ',' << endl;
@@ -1260,7 +1268,7 @@ void CppGenerator::writeMethodDefinition(QTextStream& s, const AbstractMetaFunct
     QPair<int, int> minMax = OverloadData::getMinMaxArguments(overloads);
     const AbstractMetaFunction* func = overloads[0];
 
-    s << INDENT << "{const_cast<char*>(\"" << func->name() << "\"), (PyCFunction)";
+    s << INDENT << "{\"" << func->name() << "\", (PyCFunction)";
     s << cpythonFunctionName(func) << ", ";
 
     if (minMax.second < 2) {
@@ -1388,7 +1396,7 @@ void CppGenerator::writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* c
     s << "PyTypeObject " << cpythonName << "_Type = {" << endl;
     s << INDENT << "PyObject_HEAD_INIT(&PyType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
-    s << INDENT << "/*tp_name*/             const_cast<char*>(\"" << cppEnum->name() << "\")," << endl;
+    s << INDENT << "/*tp_name*/             \"" << cppEnum->name() << "\"," << endl;
     s << INDENT << "/*tp_basicsize*/        sizeof(Shiboken::PyEnumObject)," << endl;
     s << INDENT << "/*tp_itemsize*/         0," << endl;
     s << INDENT << "/*tp_dealloc*/          0," << endl;
@@ -1508,7 +1516,7 @@ void CppGenerator::writeFlagsDefinition(QTextStream& s, const AbstractMetaEnum* 
     s << "PyTypeObject " << cpythonName << "_Type = {" << endl;
     s << INDENT << "PyObject_HEAD_INIT(&PyType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
-    s << INDENT << "/*tp_name*/             const_cast<char*>(\"" << flagsEntry->flagsName() << "\")," << endl;
+    s << INDENT << "/*tp_name*/             \"" << flagsEntry->flagsName() << "\"," << endl;
     s << INDENT << "/*tp_basicsize*/        sizeof(Shiboken::PyEnumObject)," << endl;
     s << INDENT << "/*tp_itemsize*/         0," << endl;
     s << INDENT << "/*tp_dealloc*/          0," << endl;
