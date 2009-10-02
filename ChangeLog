@@ -1,3 +1,44 @@
+2009-09-28  Hugo Lima <hugo.lima@openbossa.org>
+
+  * main.cpp: reinterpert_cast replaced by a C-style cast, to avoid compiler
+  errors on some plataforms.  Cast an object pointer to a function pointer is
+  an undefinied behaviour in some exotic platforms, so some compiler raise a
+  flag against it. However if we use a C-style cast the compiler ignores it. 
+  This problem is related to the QLibrary API returning a void* instead of a
+  generic function pointer.
+
+2009-09-25  Bruno dos Santos de Araujo <bruno.araujo@openbossa.org>
+
+  * CMakeLists.txt, boostpythongenerator.1, docgenerator.1, generatorrunner.1:
+  Add manpages for generatorrunner, docgenerator and boostpythongenerator.
+  (Fixes: #29)
+
+2009-09-15  Renato Araujo Oliveira Filho <renato.filho@openbossa.org>
+
+  * generators/boostpython/boostpythongenerator.cpp,
+  generators/boostpython/cppgenerator.cpp,
+  generators/boostpython/cppgenerator.h: Fixed generation of fields for non
+  wrapped class.  Fixed copy constructor generation.
+
+2009-09-12  Renato Araujo Oliveira Filho <renato.filho@openbossa.org>
+
+  * generators/boostpython/cppgenerator.cpp: Implemented support to return
+  policy for Qt::HANDLE.
+
+2009-09-10  Renato Araujo Oliveira Filho <renato.filho@openbossa.org>
+
+  * generator.h, generators/qtdoc/qtdocgenerator.h: Fixed missing include in
+  docgenerator.  Fixes Bug #5
+
+2009-09-11  Hugo Lima <hugo.lima@openbossa.org>
+
+  * main.cpp: Write logs in the outputdirectory instead of the current working
+  directory.
+
+2009-09-10  Renato Araujo Oliveira Filho <renato.filho@openbossa.org>
+
+  * ChangeLog: Created ChangeLog file.
+
 2009-09-08  Hugo Lima <hugo.lima@openbossa.org>
 
   * generatorrunnerconfig.h.in, main.cpp: Fix typo: GENERATORRUNNER_PUGIN_DIR
