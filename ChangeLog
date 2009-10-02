@@ -1,3 +1,80 @@
+2009-09-24  Hugo Lima <hugo.lima@openbossa.org>
+
+  * typesystem.cpp: Handler::current renamed to Handler::m_current  With
+  kdevelop4 it's so easy :-D
+
+  * docparser.cpp, typesystem.cpp: Fix bug#38.
+
+2009-09-23  Hugo Lima <hugo.lima@openbossa.org>
+
+  * tests/CMakeLists.txt, tests/a.xml, tests/testmodifydocumentation.cpp,
+  tests/testmodifydocumentation.h: Unit test to catch the bug#38.
+
+2009-09-23  Renato Araujo Oliveira Filho <renato.filho@openbossa.org>
+
+  * CMakeLists.txt: Created CMake flag LIB_DEBUG_POSTFIX for modify library
+  name when using CMAKE_BUILD_TYPE=Debug.
+
+2009-09-22  Renato Araujo Oliveira Filho <renato.filho@openbossa.org>
+
+  * apiextractor.cpp: Fixed error when running generator whithout set correct
+  global header.  Rev: Hugo Lima <hugo.lima@openbossa.org>
+
+2009-09-18  Hugo Lima <hugo.lima@openbossa.org>
+
+  * abstractmetabuilder.cpp, abstractmetabuilder.h: Fixed bugs related to the
+  strings returned by defaultValue and originalDefaultValue.  - If there are no
+  typesystem modifications, originalDefaultValue will be equals to
+  defautlvalue, so originalDefaultValue will not be the same string found by
+  the C++ parser, it will be usefull only to check if there are some default
+  values modifications.
+
+  * tests/testutil.h: Reset the type database before runing each test.
+
+  * typesystem.cpp, typesystem.h: - Turn ctors of TypeDatabase private (It's a
+  singleton!) - Makes possible to reset the TypeDatabase, this is usefull in
+  unit tests when you need to make all unit tests independent of each other.
+
+  * tests/testabstractmetaclass.cpp, tests/testabstractmetaclass.h: Add tests
+  for defaultValue and originalDefaultValue methods.
+
+2009-09-11  Hugo Lima <hugo.lima@openbossa.org>
+
+  * tests/testabstractmetatype.cpp, tests/testabstractmetatype.h: Added more
+  tests for APIExtractor.
+
+2009-09-10  Hugo Lima <hugo.lima@openbossa.org>
+
+  * abstractmetabuilder.cpp, abstractmetabuilder.h,
+  tests/testabstractmetaclass.cpp, tests/testabstractmetaclass.h: Fix a bug
+  related to function default values.  ApiExtractor tries to modify the
+  defaultValue every time, so then return value of originalDefaultValue() if
+  diferent from the return value of defaultValue() when they dont need to be. 
+  Unit test included.
+
+2009-09-11  Hugo Lima <hugo.lima@openbossa.org>
+
+  * abstractmetabuilder.cpp, abstractmetabuilder.h, apiextractor.cpp,
+  apiextractor.h: Add the option to set the directory where all log files will
+  be created.
+
+2009-09-10  Renato Araujo Oliveira Filho <renato.filho@openbossa.org>
+
+  * typesystem.cpp: Use specific Qt include headers for OS compatibility. 
+  Fixes Bug #49.  Reviewed by Luciano Miguel Wolf <luciano.wolf@openbossa.org>
+
+  * CMakeLists.txt: Avoid use of pkg_config for search for libraries.  Fixes
+  Bug #39.  Reviewed by Luciano Miguel Wolf <luciano.wolf@openbossa.org>
+
+  * ChangeLog: Created ChangeLog file.
+
+2009-09-04  Hugo Lima <hugo.lima@openbossa.org>
+
+  * tests/CMakeLists.txt, tests/testabstractmetaclass.cpp,
+  tests/testabstractmetaclass.h, tests/testabstractmetatype.cpp,
+  tests/testabstractmetatype.h, tests/testenum.cpp, tests/testenum.h,
+  tests/testutil.h: Added more tests for AbstractMetaClass and AbstractMetaEnum
+
 2009-09-09  Renato Araujo Oliveira Filho <renato.filho@openbossa.org>
 
   * abstractmetalang.cpp: Check for constructors in isVirtual function.  Fixes
