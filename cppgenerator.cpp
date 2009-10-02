@@ -684,12 +684,7 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
 void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName)
 {
     const AbstractMetaType* argType = overloadData->argType();
-    AbstractMetaFunctionList implicitConverters;
-    if (argType->isValue()) {
-        const AbstractMetaClass* metaClass = classes().findClass(argType->name());
-        if (metaClass)
-            implicitConverters = metaClass->implicitConversions();
-    }
+    AbstractMetaFunctionList implicitConvs = implicitConversions(argType);
 
     int alternativeNumericTypes = 0;
     foreach (OverloadData* pd, overloadData->overloadDataOnPosition(overloadData->argPos())) {
@@ -703,18 +698,18 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadDa
     // PyInt type to be the last entry on a list of overload argument data.
     bool numberType = alternativeNumericTypes == 1 || ShibokenGenerator::isPyInt(argType);
 
-    if (implicitConverters.size() > 0)
+    if (implicitConvs.size() > 0)
         s << '(';
 
     s << cpythonCheckFunction(argType, numberType) << '(' << argumentName << ')';
 
-    foreach (const AbstractMetaFunction* ctor, implicitConverters) {
+    foreach (const AbstractMetaFunction* ctor, implicitConvs) {
         s << " || ";
         s << cpythonCheckFunction(ctor->arguments().first()->type(), numberType);
         s << '(' << argumentName << ')';
     }
 
-    if (implicitConverters.size() > 0)
+    if (implicitConvs.size() > 0)
         s << ')';
 }
 
@@ -749,7 +744,7 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
         return;
     }
 
-    bool varargs = maxArgs > 1 || rfunc->isConstructor();
+    bool manyArgs = maxArgs > 1 || rfunc->isConstructor();
 
     s << INDENT;
 
@@ -778,15 +773,21 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
         }
     }
 
+    // The implicit conversions of value types generate a new instance
+    // of the type, and this instance must be freed after use.
+    typedef QPair<int, QString> ArgTypeCheck;
+
     foreach (OverloadData* overloadData, parentOverloadData->nextOverloadData()) {
+        QList<ArgTypeCheck> implicitConvTypes;
+
         if (maxArgs > 0) {
             bool signatureFound = overloadData->overloads().size() == 1 &&
                                   !overloadData->nextArgumentHasDefaultValue();
             const AbstractMetaFunction* func = overloadData->overloads()[0];
-            QString pyArgName = varargs ? QString("pyargs[%1]").arg(overloadData->argPos()) : "arg";
+            QString pyArgName = manyArgs ? QString("pyargs[%1]").arg(overloadData->argPos()) : "arg";
 
             s << "if (";
-            if (signatureFound && varargs) {
+            if (signatureFound && manyArgs) {
                 s << "numArgs == ";
                 s << func->arguments().size() - OverloadData::numberOfRemovedArguments(func);
                 s << " && ";
@@ -800,13 +801,14 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
                 s << " && PySequence_Size(" << pyArgName << ") == 2";
             }
 
-            if (signatureFound && varargs) {
+            if (signatureFound && manyArgs) {
                 int numArgs = func->arguments().size() - OverloadData::numberOfRemovedArguments(func);
                 OverloadData* tmp = overloadData;
                 for (int i = overloadData->argPos() + 1; i < numArgs; i++) {
                     tmp = tmp->nextOverloadData()[0];
                     s << " && ";
-                    writeTypeCheck(s, tmp, QString("pyargs[%1]").arg(i));
+                    QString currentArgName = QString("pyargs[%1]").arg(i);
+                    writeTypeCheck(s, tmp, currentArgName);
                 }
             }
             s << ") {" << endl;
@@ -821,12 +823,17 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
                         if (func->argumentRemoved(i + 1))
                             removed++;
                         QString argName = QString("cpp_arg%1").arg(i);
-                        if (varargs)
+                        if (manyArgs)
                             pyArgName = QString("pyargs[%1]").arg(i);
                         const AbstractMetaType* type = func->arguments()[i + removed]->type();
                         s << INDENT << translateTypeForWrapperMethod(type, func->implementingClass());
-                        if (type->isValue())
+                        if (type->isValue()) {
                             s << "* ";
+                            if (!implicitConversions(type).isEmpty()) {
+                                QString typeCheck = QString("!%1(%2)").arg(cpythonCheckFunction(type)).arg(pyArgName);
+                                implicitConvTypes.append(ArgTypeCheck(i, typeCheck));
+                            }
+                        }
                         s << ' ' << argName << " = ";
                         writeToCppConversion(s, type, func->implementingClass(), pyArgName);
                         s << ';' << endl;
@@ -838,10 +845,20 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
         {
             Indentation indent(INDENT);
             writeOverloadedMethodDecisor(s, overloadData);
+
+            foreach (ArgTypeCheck arg, implicitConvTypes) {
+                s << INDENT << "if (" << arg.second << ')' << endl;
+                {
+                    Indentation indent(INDENT);
+                    s << INDENT << "delete cpp_arg" << arg.first << ';' << endl;
+                }
+            }
+
         }
 
         s << INDENT << "} else ";
     }
+
     if (maxArgs > 0)
         s << "goto " << cpythonFunctionName(rfunc) << "_TypeError;" << endl;
 }
