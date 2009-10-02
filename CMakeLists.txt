@@ -12,7 +12,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -DAPIEXTRACTOR_ENABLE_DUPLICATE_EN
 
 set(apiextractor_MAJOR_VERSION 0)
 set(apiextractor_MINOR_VERSION 3)
-set(apiextractor_MICRO_VERSION 1)
+set(apiextractor_MICRO_VERSION 2)
 set(apiextractor_VERSION "${apiextractor_MAJOR_VERSION}.${apiextractor_MINOR_VERSION}.${apiextractor_MICRO_VERSION}")
 configure_file(apiextractorversion.h.in ${CMAKE_CURRENT_BINARY_DIR}/apiextractorversion.h @ONLY)
 set(QT_USE_QTCORE 1)
