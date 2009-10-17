@@ -95,7 +95,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-html_theme = 'default'
+html_theme = 'pysidedocs'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -104,7 +104,7 @@ html_theme = 'default'
 #}
 
 # Add any paths that contain custom themes here, relative to this directory.
-#html_theme_path = []
+html_theme_path = ['_themes']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -142,17 +142,16 @@ html_use_smartypants = True
 # template names.
 html_additional_pages = { 'index' : 'index.html'}
 
-# If false, no module index is generated.
-#html_use_modindex = True
-
 # If false, no index is generated.
-html_use_index = True
+html_use_index = False
 
 # If true, the index is split into individual pages for each letter.
 html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
-html_show_sourcelink = True
+html_show_sourcelink = False
+
+html_add_permalinks = False;
 
 # If true, an OpenSearch description file will be output, and all pages will
 # contain a <link> tag referring to it.  The value of this option must be the
