@@ -441,6 +441,52 @@ struct FieldModification: public Modification
 };
 typedef QList<FieldModification> FieldModificationList;
 
+struct AddedFunction
+{
+    AddedFunction(QString signature, TypeEntry* returnType);
+
+    QString name() const
+    {
+        return m_name;
+    }
+
+    TypeEntry* returnType() const
+    {
+        return m_returnType;
+    }
+
+    CodeSnipList codeSnips() const
+    {
+        return m_codeSnips;
+    }
+
+    void setCodeSnips(const CodeSnipList& codeSnips)
+    {
+        m_codeSnips = codeSnips;
+    }
+
+    void addCodeSnip(const CodeSnip& codeSnip)
+    {
+        m_codeSnips << codeSnip;
+    }
+
+    QList<QPair<ArgumentPair, const TypeEntry*> > arguments()
+    {
+        return m_arguments;
+    }
+
+    // ArgumentPair.first: argument name
+    // ArgumentPair.second: default value
+    typedef QPair<QString, QString> ArgumentPair;
+
+private:
+    QString m_name;
+    QList<QPair<ArgumentPair, const TypeEntry*> > m_arguments;
+    TypeEntry* m_returnType;
+    CodeSnipList m_codeSnips;
+};
+typedef QList<AddedFunction> AddedFunctionList;
+
 struct ExpensePolicy
 {
     ExpensePolicy() : limit(-1) {}

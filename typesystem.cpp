@@ -1994,6 +1994,12 @@ QString FunctionModification::toString() const
     return str;
 }
 
+AddedFunction::AddedFunction(QString signature, TypeEntry* returnType)
+    : m_returnType(returnType)
+{
+
+}
+
 /*
 static void injectCode(ComplexTypeEntry *e,
                        const char *signature,
