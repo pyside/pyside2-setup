@@ -35,6 +35,7 @@ class Indentor;
 class AbstractMetaType;
 class QTextStream;
 
+class TypeEntry;
 class EnumTypeEntry;
 class FlagsTypeEntry;
 
@@ -443,11 +444,37 @@ typedef QList<FieldModification> FieldModificationList;
 
 struct AddedFunction
 {
-    AddedFunction(QString signature, TypeEntry* returnType);
+
+    enum Access {
+        Private =   0x1,
+        Protected = 0x2,
+        Public =    0x3
+    };
+
+    // ArgumentPair.first: argument name
+    // ArgumentPair.second: default value
+    typedef QPair<QString, QString> ArgumentPair;
+
+    AddedFunction(QString signature, TypeEntry* returnType = 0);
 
     QString name() const
     {
         return m_name;
+    }
+
+    void setAccess(Access access)
+    {
+        m_access = access;
+    }
+
+    Access access() const
+    {
+        return m_access;
+    }
+
+    void setReturnType(TypeEntry* returnType)
+    {
+        m_returnType = returnType;
     }
 
     TypeEntry* returnType() const
@@ -475,12 +502,9 @@ struct AddedFunction
         return m_arguments;
     }
 
-    // ArgumentPair.first: argument name
-    // ArgumentPair.second: default value
-    typedef QPair<QString, QString> ArgumentPair;
-
 private:
     QString m_name;
+    Access m_access;
     QList<QPair<ArgumentPair, const TypeEntry*> > m_arguments;
     TypeEntry* m_returnType;
     CodeSnipList m_codeSnips;
@@ -1289,6 +1313,7 @@ public:
         ComplexTypeEntry *centry = new ComplexTypeEntry(name(), type());
         centry->setInclude(include());
         centry->setExtraIncludes(extraIncludes());
+        centry->setAddedFunctions(addedFunctions());
         centry->setFunctionModifications(functionModifications());
         centry->setFieldModifications(fieldModifications());
         centry->setQObject(isQObject());
@@ -1337,6 +1362,19 @@ public:
         m_functionMods << functionModification;
     }
     FunctionModificationList functionModifications(const QString &signature) const;
+
+    AddedFunctionList addedFunctions() const
+    {
+        return m_addedFunctions;
+    }
+    void setAddedFunctions(const AddedFunctionList &addedFunctions)
+    {
+        m_addedFunctions = addedFunctions;
+    }
+    void addNewFunction(const AddedFunction &addedFunction)
+    {
+        m_addedFunctions << addedFunction;
+    }
 
     FieldModification fieldModification(const QString &name) const;
     void setFieldModifications(const FieldModificationList &mods)
@@ -1467,6 +1505,7 @@ public:
 
 
 private:
+    AddedFunctionList m_addedFunctions;
     FunctionModificationList m_functionMods;
     FieldModificationList m_fieldMods;
     QString m_package;

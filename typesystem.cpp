@@ -199,6 +199,7 @@ private:
     EnumTypeEntry *m_currentEnum;
 
     CodeSnipList m_codeSnips;
+    AddedFunctionList m_addedFunctions;
     FunctionModificationList m_functionMods;
     FieldModificationList m_fieldMods;
     DocModificationList m_docModifications;
@@ -262,6 +263,7 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
     case StackElement::InterfaceTypeEntry:
     case StackElement::NamespaceTypeEntry: {
         ComplexTypeEntry *centry = static_cast<ComplexTypeEntry *>(m_current->entry);
+        centry->setAddedFunctions(m_addedFunctions);
         centry->setFunctionModifications(m_functionMods);
         centry->setFieldModifications(m_fieldMods);
         centry->setCodeSnips(m_codeSnips);
@@ -272,6 +274,7 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
             centry->designatedInterface()->setFunctionModifications(m_functionMods);
         }
         m_codeSnips = CodeSnipList();
+        m_addedFunctions = AddedFunctionList();
         m_functionMods = FunctionModificationList();
         m_fieldMods = FieldModificationList();
         m_docModifications = DocModificationList();
@@ -347,6 +350,9 @@ bool Handler::characters(const QString &ch)
             case StackElement::ModifyFunction:
                 m_functionMods.last().snips.last().addCode(ch);
                 m_functionMods.last().modifiers |= FunctionModification::CodeInjection;
+                break;
+            case StackElement::AddFunction:
+                m_addedFunctions.last().codeSnips().last().addCode(ch);
                 break;
             case StackElement::NamespaceTypeEntry:
             case StackElement::ObjectTypeEntry:
@@ -826,6 +832,11 @@ bool Handler::startElement(const QString &, const QString &n,
             attributes["class"] = "target";
             attributes["owner"] = "";
             break;
+        case StackElement::AddFunction:
+            attributes["signature"] = QString();
+            attributes["return-type"] = QString("void");
+            attributes["access"] = QString("public");
+            break;
         case StackElement::ModifyFunction:
             attributes["signature"] = QString();
             attributes["access"] = QString();
@@ -1254,6 +1265,40 @@ bool Handler::startElement(const QString &, const QString &n,
             if (write == "true") fm.modifiers |= FieldModification::Writable;
 
             m_fieldMods << fm;
+        }
+        break;
+        case StackElement::AddFunction: {
+            if (!(topElement.type & StackElement::ComplexTypeEntryMask)) {
+                m_error = QString::fromLatin1("Add function requires complex type as parent"
+                                              ", was=%1").arg(topElement.type, 0, 16);
+                return false;
+            }
+            QString signature = attributes["signature"];
+
+            signature = QMetaObject::normalizedSignature(signature.toLocal8Bit().constData());
+            if (signature.isEmpty()) {
+                m_error = "No signature for the added function";
+                return false;
+            }
+
+            AddedFunction func(signature);
+            m_currentSignature = signature;
+
+            QString access = attributes["access"].toLower();
+            if (!access.isEmpty()) {
+                if (access == QLatin1String("private"))
+                    func.setAccess(AddedFunction::Private);
+                else if (access == QLatin1String("protected"))
+                    func.setAccess(AddedFunction::Protected);
+                else if (access == QLatin1String("public"))
+                    func.setAccess(AddedFunction::Public);
+                else {
+                    m_error = QString::fromLatin1("Bad access type '%1'").arg(access);
+                    return false;
+                }
+            }
+
+            m_addedFunctions << func;
         }
         break;
         case StackElement::ModifyFunction: {
