@@ -42,6 +42,7 @@ public:
         // parse C++ code
         buffer.setData(cppCode);
         bool res = m_builder->build(&buffer);
+        Q_UNUSED(res);
         Q_ASSERT(res);
     }
 
