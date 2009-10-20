@@ -681,7 +681,7 @@ void CppGenerator::writeVirtualMethodImplHead(QTextStream& s, const AbstractMeta
 
     {
         Indentation indentation(INDENT);
-        s << INDENT;
+        s << INDENT << "try {" << endl << INDENT << INDENT;
         if (func->type())
             s << "python::object __result = ";
 
@@ -717,6 +717,13 @@ void CppGenerator::writeVirtualMethodImplHead(QTextStream& s, const AbstractMeta
                 s << INDENT << "return __return_value;" << endl;
             }
         }
+
+        s << INDENT << "} catch (boost::python::error_already_set) {" << endl;
+        s << INDENT << INDENT << "PyErr_Print();" << endl;
+        s << INDENT << INDENT << "throw boost::python::error_already_set();" << endl;
+        s << INDENT << "}" << endl;
+
+
     }
     s << INDENT << "}" << endl;
 }
