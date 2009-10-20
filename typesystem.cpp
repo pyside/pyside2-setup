@@ -1281,7 +1281,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 return false;
             }
 
-            AddedFunction func(signature);
+            AddedFunction func(signature, attributes["return-value"]);
             m_currentSignature = signature;
 
             QString access = attributes["access"].toLower();
@@ -2039,10 +2039,83 @@ QString FunctionModification::toString() const
     return str;
 }
 
-AddedFunction::AddedFunction(QString signature, TypeEntry* returnType)
-    : m_returnType(returnType)
+static AddedFunction::TypeInfo parseType(const QString& signature, int startPos = 0, int* endPos = 0)
 {
+    AddedFunction::TypeInfo result;
+    QRegExp regex("\\w");
+    int length = signature.length();
+    int start = signature.indexOf(regex, startPos);
+    if (start == -1) { // error
+        if (endPos)
+            *endPos = length;
+        return result;
+    }
 
+    int cantStop = 0;
+    QString paramString;
+    QChar c;
+    int i = start;
+    for (; i < length; ++i) {
+        c = signature[i];
+        if (c == '<')
+            cantStop++;
+        if (c == '>')
+            cantStop--;
+        if (cantStop < 0)
+            break; // FIXME: report error?
+        if ((c == ')' || c == ',') && !cantStop)
+            break;
+        paramString += signature[i];
+    }
+    if (endPos)
+        *endPos = i;
+
+    // Check default value
+    if (paramString.contains('=')) {
+        QStringList lst = paramString.split('=');
+        paramString = lst[0].trimmed();
+        result.defaultValue = lst[1].trimmed();
+    }
+
+    // check constness
+    if (paramString.startsWith("const ")) {
+        result.isConst = true;
+        paramString.remove(0, sizeof("const")/sizeof(char));
+        paramString = paramString.trimmed();
+    }
+    // check reference
+    if (paramString.endsWith("&")) {
+        result.isRef = true;
+        paramString.chop(1);
+        paramString = paramString.trimmed();
+    }
+    // check Indirections
+    while (paramString.endsWith("*")) {
+        result.indirections++;
+        paramString.chop(1);
+        paramString = paramString.trimmed();
+    }
+    result.name = paramString;
+
+    return result;
+}
+
+AddedFunction::AddedFunction(QString signature, QString returnType) : m_access(Public)
+{
+    m_returnType = parseType(returnType);
+    signature = signature.trimmed();
+    int endPos = signature.indexOf('(');
+    m_name = signature.left(endPos).trimmed();
+    int signatureLength = signature.length();
+    while (endPos < signatureLength) {
+        TypeInfo arg = parseType(signature, endPos, &endPos);
+        m_arguments.append(arg);
+        // end of parameters...
+        if (signature[endPos] == ')')
+            break;
+    }
+    // is const?
+    m_isConst = signature.right(signatureLength - endPos).contains("const");
 }
 
 /*

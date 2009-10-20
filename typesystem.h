@@ -35,7 +35,6 @@ class Indentor;
 class AbstractMetaType;
 class QTextStream;
 
-class TypeEntry;
 class EnumTypeEntry;
 class FlagsTypeEntry;
 
@@ -440,22 +439,27 @@ struct FieldModification: public Modification
 
     QString name;
 };
+
 typedef QList<FieldModification> FieldModificationList;
 
 struct AddedFunction
 {
-
     enum Access {
         Private =   0x1,
         Protected = 0x2,
         Public =    0x3
     };
 
-    // ArgumentPair.first: argument name
-    // ArgumentPair.second: default value
-    typedef QPair<QString, QString> ArgumentPair;
+    struct TypeInfo {
+        TypeInfo() : isConst(false), indirections(0), isRef(false) {}
+        QString name;
+        bool isConst;
+        int indirections;
+        bool isRef;
+        QString defaultValue;
+    };
 
-    AddedFunction(QString signature, TypeEntry* returnType = 0);
+    AddedFunction(QString signature, QString returnType);
 
     QString name() const
     {
@@ -472,12 +476,7 @@ struct AddedFunction
         return m_access;
     }
 
-    void setReturnType(TypeEntry* returnType)
-    {
-        m_returnType = returnType;
-    }
-
-    TypeEntry* returnType() const
+    TypeInfo returnType() const
     {
         return m_returnType;
     }
@@ -497,16 +496,21 @@ struct AddedFunction
         m_codeSnips << codeSnip;
     }
 
-    QList<QPair<ArgumentPair, const TypeEntry*> > arguments()
+    QList<TypeInfo> arguments() const
     {
         return m_arguments;
     }
 
+    bool isConst() const
+    {
+        return m_isConst;
+    }
 private:
     QString m_name;
     Access m_access;
-    QList<QPair<ArgumentPair, const TypeEntry*> > m_arguments;
-    TypeEntry* m_returnType;
+    QList<TypeInfo> m_arguments;
+    TypeInfo m_returnType;
+    bool m_isConst;
     CodeSnipList m_codeSnips;
 };
 typedef QList<AddedFunction> AddedFunctionList;
@@ -595,6 +599,7 @@ public:
         ArrayType,
         TypeSystemType,
         CustomType,
+        TargetLangType
     };
 
     enum CodeGeneration {
