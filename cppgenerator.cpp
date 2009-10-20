@@ -566,8 +566,6 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         s << INDENT << INDENT << "std::swap(self, arg);\n\n";
     }
 
-
-
     if (overloads.count() == 1 && rfunc->isAbstract()) {
         s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
         s << rfunc->ownerClass()->name() << '.' << rfunc->name();
@@ -608,7 +606,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         }
 
         s << endl << INDENT;
-        if (rfunc->type()) {
+        if (rfunc->type() && !rfunc->argumentRemoved(0)) {
             s << "return ";
             if (rfunc->isInplaceOperator())
                 s << "self";

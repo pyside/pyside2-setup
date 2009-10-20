@@ -15,6 +15,7 @@ pairuser.cpp
 point.cpp
 reference.cpp
 samplenamespace.cpp
+simplefile.cpp
 size.cpp
 virtualmethods.cpp
 )

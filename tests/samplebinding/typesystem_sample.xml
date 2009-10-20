@@ -4,6 +4,7 @@
     <primitive-type name="double"/>
     <primitive-type name="int"/>
     <primitive-type name="char"/>
+    <primitive-type name="long"/>
 
     <primitive-type name="Complex" target-lang-api-name="PyComplex">
         <conversion-rule file="complex_conversions.h"/>
@@ -218,6 +219,16 @@
     <value-type name="ListUser"/>
     <value-type name="NonDefaultCtor" />
     <value-type name="OddBoolUser" />
+
+    <value-type name="SimpleFile">
+        <modify-function signature="open()">
+            <modify-argument index="return">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code class="native" position="end" file="simplefile_glue.cpp"/>
+        </modify-function>
+    </value-type>
+
     <object-type name="PrivateDtor" />
 
     <interface-type name="MBase"/>

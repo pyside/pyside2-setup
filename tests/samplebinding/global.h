@@ -10,6 +10,7 @@
 #include "mapuser.h"
 #include "multiple_derived.h"
 #include "samplenamespace.h"
+#include "simplefile.h"
 #include "modifications.h"
 #include "implicitconv.h"
 #include "reference.h"
