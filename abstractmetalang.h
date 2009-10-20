@@ -746,7 +746,8 @@ public:
         SignalFunction,
         EmptyFunction,
         SlotFunction,
-        GlobalScopeFunction
+        GlobalScopeFunction,
+        UserAddedFunction, // Function added by the typesystem
     };
 
     enum CompareResult {

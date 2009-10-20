@@ -166,6 +166,7 @@ public:
         tagNames["parent"] = StackElement::ParentOwner;
         tagNames["inject-documentation"] = StackElement::InjectDocumentation;
         tagNames["modify-documentation"] = StackElement::ModifyDocumentation;
+        tagNames["add-function"] = StackElement::AddFunction;
     }
 
     bool startElement(const QString &namespaceURI, const QString &localName,
@@ -348,11 +349,9 @@ bool Handler::characters(const QString &ch)
                 ((TypeSystemTypeEntry *) m_current->parent->entry)->codeSnips().last().addCode(ch);
                 break;
             case StackElement::ModifyFunction:
+            case StackElement::AddFunction:
                 m_functionMods.last().snips.last().addCode(ch);
                 m_functionMods.last().modifiers |= FunctionModification::CodeInjection;
-                break;
-            case StackElement::AddFunction:
-                m_addedFunctions.last().codeSnips().last().addCode(ch);
                 break;
             case StackElement::NamespaceTypeEntry:
             case StackElement::ObjectTypeEntry:
@@ -1281,24 +1280,26 @@ bool Handler::startElement(const QString &, const QString &n,
                 return false;
             }
 
-            AddedFunction func(signature, attributes["return-value"]);
+            AddedFunction func(signature, attributes["return-type"]);
             m_currentSignature = signature;
 
             QString access = attributes["access"].toLower();
             if (!access.isEmpty()) {
-                if (access == QLatin1String("private"))
-                    func.setAccess(AddedFunction::Private);
-                else if (access == QLatin1String("protected"))
+                if (access == QLatin1String("protected")) {
                     func.setAccess(AddedFunction::Protected);
-                else if (access == QLatin1String("public"))
+                } else if (access == QLatin1String("public")) {
                     func.setAccess(AddedFunction::Public);
-                else {
+                } else {
                     m_error = QString::fromLatin1("Bad access type '%1'").arg(access);
                     return false;
                 }
             }
 
             m_addedFunctions << func;
+
+            FunctionModification mod;
+            mod.signature = signature;
+            m_functionMods << mod;
         }
         break;
         case StackElement::ModifyFunction: {
@@ -1538,7 +1539,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 return false;
             }
 
-            if (topElement.type == StackElement::ModifyFunction) {
+            if (topElement.type == StackElement::ModifyFunction || topElement.type == StackElement::AddFunction) {
                 FunctionModification mod = m_functionMods.last();
                 if (snip.language == TypeSystem::ShellDeclaration) {
                     m_error = "no function implementation in shell declaration in which to inject code";
@@ -1802,7 +1803,6 @@ FunctionModificationList ComplexTypeEntry::functionModifications(const QString &
         const FunctionModification &mod = m_functionMods.at(i);
         if (mod.signature == signature)
             lst << mod;
-
     }
 
     return lst;
@@ -2079,13 +2079,13 @@ static AddedFunction::TypeInfo parseType(const QString& signature, int startPos 
 
     // check constness
     if (paramString.startsWith("const ")) {
-        result.isConst = true;
+        result.isConstant = true;
         paramString.remove(0, sizeof("const")/sizeof(char));
         paramString = paramString.trimmed();
     }
     // check reference
     if (paramString.endsWith("&")) {
-        result.isRef = true;
+        result.isReference = true;
         paramString.chop(1);
         paramString = paramString.trimmed();
     }
@@ -2102,6 +2102,7 @@ static AddedFunction::TypeInfo parseType(const QString& signature, int startPos 
 
 AddedFunction::AddedFunction(QString signature, QString returnType) : m_access(Public)
 {
+    Q_ASSERT(!returnType.isEmpty());
     m_returnType = parseType(returnType);
     signature = signature.trimmed();
     int endPos = signature.indexOf('(');
@@ -2109,7 +2110,8 @@ AddedFunction::AddedFunction(QString signature, QString returnType) : m_access(P
     int signatureLength = signature.length();
     while (endPos < signatureLength) {
         TypeInfo arg = parseType(signature, endPos, &endPos);
-        m_arguments.append(arg);
+        if (!arg.name.isEmpty())
+            m_arguments.append(arg);
         // end of parameters...
         if (signature[endPos] == ')')
             break;

@@ -1210,6 +1210,15 @@ void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scopeItem, AbstractMe
             applyFunctionModifications(metaFunction);
         }
     }
+
+    // Add the functions added by the typesystem
+    foreach (AddedFunction addedFunc, metaClass->typeEntry()->addedFunctions()) {
+        AbstractMetaFunction* func = traverseFunction(addedFunc);
+        func->setDeclaringClass(metaClass);
+        func->setImplementingClass(metaClass);
+        metaClass->addFunction(func);
+    }
+
 }
 
 void AbstractMetaBuilder::applyFunctionModifications(AbstractMetaFunction* func)
@@ -1371,6 +1380,33 @@ void AbstractMetaBuilder::traverseEnums(ScopeModelItem scopeItem, AbstractMetaCl
             meta_enum->setEnclosingClass(metaClass);
         }
     }
+}
+
+AbstractMetaFunction *AbstractMetaBuilder::traverseFunction(const AddedFunction& addedFunc)
+{
+    AbstractMetaFunction* metaFunction = createMetaFunction();
+    metaFunction->setConstant(addedFunc.isConstant());
+    metaFunction->setName(addedFunc.name());
+    metaFunction->setOriginalName(addedFunc.name());
+    int visibility = addedFunc.access() == AddedFunction::Public ? AbstractMetaAttributes::Public : AbstractMetaAttributes::Protected;
+    metaFunction->setVisibility(visibility);
+    metaFunction->setFunctionType(AbstractMetaFunction::UserAddedFunction);
+    metaFunction->setType(translateType(addedFunc.returnType()));
+
+    QList<AddedFunction::TypeInfo> args = addedFunc.arguments();
+    for (int i = 0; i < args.count(); ++i) {
+        AddedFunction::TypeInfo& typeInfo = args[i];
+        AbstractMetaArgument* metaArg = createMetaArgument();
+        AbstractMetaType* type = translateType(typeInfo);
+        metaArg->setType(type);
+        metaArg->setArgumentIndex(i);
+        metaArg->setDefaultValueExpression(typeInfo.defaultValue);
+        metaArg->setOriginalDefaultValueExpression(typeInfo.defaultValue);
+        metaArg->setName(typeInfo.name);
+        metaFunction->addArgument(metaArg);
+    }
+
+    return metaFunction;
 }
 
 AbstractMetaFunction *AbstractMetaBuilder::traverseFunction(FunctionModelItem functionItem)
@@ -1546,6 +1582,27 @@ AbstractMetaFunction *AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
     return metaFunction;
 }
 
+AbstractMetaType* AbstractMetaBuilder::translateType(const AddedFunction::TypeInfo& typeInfo)
+{
+    Q_ASSERT(!typeInfo.name.isEmpty());
+    AbstractMetaType *metaType = createMetaType();
+    TypeDatabase* typeDb = TypeDatabase::instance();
+    TypeEntry* type;
+
+    if (typeInfo.name == "void") {
+        return 0;
+    }
+
+    type = typeDb->findType(typeInfo.name);
+    if (!type)
+        type = new TypeEntry(typeInfo.name, TypeEntry::TargetLangType);
+
+    metaType->setTypeEntry(type);
+    metaType->setIndirections(typeInfo.indirections);
+    metaType->setReference(typeInfo.isReference);
+    metaType->setConstant(typeInfo.isConstant);
+    return metaType;
+}
 
 AbstractMetaType *AbstractMetaBuilder::translateType(const TypeInfo &_typei, bool *ok, bool resolveType, bool resolveScope)
 {

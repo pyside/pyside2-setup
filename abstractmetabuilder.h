@@ -105,6 +105,7 @@ public:
     void traverseFields(ScopeModelItem item, AbstractMetaClass *parent);
     void traverseStreamOperator(FunctionModelItem functionItem);
     void traverseOperatorFunction(FunctionModelItem item);
+    AbstractMetaFunction *traverseFunction(const AddedFunction& addedFunc);
     AbstractMetaFunction *traverseFunction(FunctionModelItem function);
     AbstractMetaField *traverseField(VariableModelItem field, const AbstractMetaClass *cls);
     void checkFunctionModifications();
@@ -120,6 +121,7 @@ public:
     QString fixDefaultValue(ArgumentModelItem item, AbstractMetaType *type,
                                   AbstractMetaFunction *fnc, AbstractMetaClass *,
                                   int argumentIndex);
+    AbstractMetaType* translateType(const AddedFunction::TypeInfo& typeInfo);
     AbstractMetaType *translateType(const TypeInfo &type, bool *ok, bool resolveType = true, bool resolveScope = true);
 
     void decideUsagePattern(AbstractMetaType *type);

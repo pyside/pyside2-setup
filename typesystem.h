@@ -445,17 +445,16 @@ typedef QList<FieldModification> FieldModificationList;
 struct AddedFunction
 {
     enum Access {
-        Private =   0x1,
-        Protected = 0x2,
-        Public =    0x3
+        Protected = 0x1,
+        Public =    0x2
     };
 
     struct TypeInfo {
-        TypeInfo() : isConst(false), indirections(0), isRef(false) {}
+        TypeInfo() : isConstant(false), indirections(0), isReference(false) {}
         QString name;
-        bool isConst;
+        bool isConstant;
         int indirections;
-        bool isRef;
+        bool isReference;
         QString defaultValue;
     };
 
@@ -481,37 +480,22 @@ struct AddedFunction
         return m_returnType;
     }
 
-    CodeSnipList codeSnips() const
-    {
-        return m_codeSnips;
-    }
-
-    void setCodeSnips(const CodeSnipList& codeSnips)
-    {
-        m_codeSnips = codeSnips;
-    }
-
-    void addCodeSnip(const CodeSnip& codeSnip)
-    {
-        m_codeSnips << codeSnip;
-    }
-
     QList<TypeInfo> arguments() const
     {
         return m_arguments;
     }
 
-    bool isConst() const
+    bool isConstant() const
     {
         return m_isConst;
     }
+
 private:
     QString m_name;
     Access m_access;
     QList<TypeInfo> m_arguments;
     TypeInfo m_returnType;
     bool m_isConst;
-    CodeSnipList m_codeSnips;
 };
 typedef QList<AddedFunction> AddedFunctionList;
 
