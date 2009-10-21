@@ -30,11 +30,6 @@
 
 static Indentor INDENT;
 
-QString CppGenerator::cpythonWrapperCPtr(const AbstractMetaClass* metaClass, QString argName)
-{
-    return QString("%1_cptr(%2)").arg(cpythonBaseName(metaClass->typeEntry())).arg(argName);
-}
-
 QString CppGenerator::fileNameForClass(const AbstractMetaClass *metaClass) const
 {
     return metaClass->qualifiedCppName().toLower().replace("::", "_") + QLatin1String("_wrapper.cpp");

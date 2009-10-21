@@ -37,8 +37,6 @@ protected:
     QList<AbstractMetaFunctionList> filterGroupedFunctions(const AbstractMetaClass* metaClass = 0);
     QList<AbstractMetaFunctionList> filterGroupedOperatorFunctions(const AbstractMetaClass* metaClass,
                                                                    uint query);
-    QString cpythonWrapperCPtr(const AbstractMetaClass* metaClass, QString argName = "self");
-
     void generateClass(QTextStream& s, const AbstractMetaClass* metaClass);
     void finishGeneration();
 

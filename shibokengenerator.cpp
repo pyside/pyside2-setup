@@ -212,6 +212,11 @@ QString ShibokenGenerator::cpythonFlagsName(const FlagsTypeEntry* flagsEntry)
     return cpythonEnumFlagsName(moduleName(), flagsEntry->originalName());
 }
 
+QString ShibokenGenerator::cpythonWrapperCPtr(const AbstractMetaClass* metaClass, QString argName)
+{
+    return QString("%1_cptr(%2)").arg(cpythonBaseName(metaClass->typeEntry())).arg(argName);
+}
+
 QString ShibokenGenerator::getFunctionReturnType(const AbstractMetaFunction* func, Options options) const
 {
     if (func->ownerClass() && (func->isConstructor() || func->isCopyConstructor()))
@@ -813,6 +818,13 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
         if (func) {
             // replace template variable for return variable name
             code.replace("%0", retvalVariableName());
+
+            // replace template variable for self Python object
+            code.replace("%SELF", "self");
+
+            // replace template variable for pointer to C++ this object
+            if (func->implementingClass())
+                code.replace("%CPPOBJ", cpythonWrapperCPtr(func->implementingClass()));
 
             // replace template variables for individual arguments
             int removed = 0;

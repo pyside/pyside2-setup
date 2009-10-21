@@ -153,6 +153,7 @@ public:
     QString cpythonCheckFunction(const TypeEntry* type, bool genericNumberType = false);
     QString cpythonCheckFunction(const AbstractMetaType* type, bool genericNumberType = false);
     QString cpythonFunctionName(const AbstractMetaFunction* func);
+    QString cpythonWrapperCPtr(const AbstractMetaClass* metaClass, QString argName = "self");
 
     QString cpythonEnumName(const EnumTypeEntry* enumEntry);
     QString cpythonEnumName(const AbstractMetaEnum* metaEnum)
