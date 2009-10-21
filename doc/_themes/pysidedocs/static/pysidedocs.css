@@ -44,6 +44,11 @@ strong {
     width: 100%;
 }
 
+#footer img {
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
 #sidebar {
     float: left;
     width: 250px;
