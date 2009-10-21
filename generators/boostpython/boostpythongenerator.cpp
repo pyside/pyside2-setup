@@ -51,7 +51,7 @@ QString BoostPythonGenerator::argumentString(const AbstractMetaFunction *cppFunc
     QString modifiedType = cppFunction->typeReplaced(cppArgument->argumentIndex() + 1);
     QString arg;
 
-    if (modifiedType.isEmpty())
+    if ((options & OriginalTypeDescription) || modifiedType.isEmpty())
         arg = translateType(cppArgument->type(), cppFunction->implementingClass(), options);
     else
         arg = modifiedType.replace('$', '.');
@@ -196,13 +196,21 @@ void BoostPythonGenerator::writeArgumentNames(QTextStream &s,
         if (argCount > 0)
             s << ", ";
 
+        QString argName = arguments.at(j)->argumentName();
+        if (((options & Generator::VirtualCall) == 0) &&
+                (!func->conversionRule(TypeSystem::NativeCode, arguments.at(j)->argumentIndex() + 1).isEmpty() ||
+                 !func->conversionRule(TypeSystem::TargetLangCode, arguments.at(j)->argumentIndex() + 1).isEmpty())
+           )
+            argName += "_out";
+
         if ((options & Generator::BoxedPrimitive) &&
             !arguments.at(j)->type()->isReference() &&
             (arguments.at(j)->type()->isQObject() ||
              arguments.at(j)->type()->isObject())) {
-            s << "PySide::ptr( " << arguments.at(j)->argumentName() << ")";
+
+            s << "PySide::ptr( " << argName << ")";
         } else {
-            s << arguments.at(j)->argumentName();
+            s << argName;
         }
         argCount++;
     }

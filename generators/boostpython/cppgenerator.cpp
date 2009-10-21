@@ -35,6 +35,16 @@
 static Indentor INDENT;
 
 // utiliy functions
+inline void writeConversionRule(QTextStream &s, TypeSystem::Language lang, const AbstractMetaFunction *function, const AbstractMetaArgument *arg)
+{
+    QString convRule = function->conversionRule(lang, arg->argumentIndex() + 1);
+    if (!convRule.isEmpty()) {
+        convRule.replace("%in", arg->argumentName());
+        convRule.replace("%out", arg->argumentName() + "_out");
+        s << convRule;
+    }
+}
+
 inline QString getMethodPointerString(const AbstractMetaFunction* func)
 {
     QString className;
@@ -685,8 +695,12 @@ void CppGenerator::writeVirtualMethodImplHead(QTextStream& s, const AbstractMeta
         if (func->type())
             s << "python::object __result = ";
 
-        s << "method(";
-        writeArgumentNames(s, func, BoxedPrimitive);
+        foreach(AbstractMetaArgument *arg, func->arguments()) {
+            writeConversionRule(s, TypeSystem::TargetLangCode, func, arg);
+        }
+
+        s << INDENT << "method(";
+        writeArgumentNames(s, func, Generator::Options(Generator::BoxedPrimitive | Generator::SkipRemovedArguments));
         s << ");" << endl;
 
         QString typeName = getFunctionReturnType(func);
@@ -741,7 +755,7 @@ void CppGenerator::writeVirtualMethodImpl(QTextStream& s, const AbstractMetaFunc
 
     QString prefix = getWrapperName(func->ownerClass()) + "::";
     s << functionSignature(func, prefix, "",
-                           Options(Generator::OriginalTypeDescription) | Generator::SkipDefaultValues)
+                           Options(Generator::OriginalTypeDescription) | Generator::SkipDefaultValues | Generator::VirtualCall)
       << endl << "{" << endl;
 
     writeVirtualMethodImplHead(s, func);
@@ -782,7 +796,7 @@ void CppGenerator::writeVirtualMethodImplFoot(QTextStream& s, const AbstractMeta
             s << INDENT << "py_allow_threads allow_threads;" << endl;
 
         s << INDENT << returnKeyword << func->implementingClass()->qualifiedCppName() << "::";
-        writeFunctionCall(s, func);
+        writeFunctionCall(s, func, Generator::VirtualCall);
         s << ';' << endl;
     }
     s << INDENT << '}' << endl;
@@ -792,7 +806,9 @@ void CppGenerator::writeVirtualDefaultFunction(QTextStream &s, const AbstractMet
 {
     Indentation indentation(INDENT);
     QString returnKeyword = func->type() ? QLatin1String("return ") : QString();
-    QString defaultMethodSignature = signatureForDefaultVirtualMethod(func, getWrapperName(func->ownerClass()) + "::", "_default", Generator::SkipDefaultValues);
+    Generator::Options opt = Generator::Options(Generator::SkipDefaultValues);
+    QString defaultMethodSignature = signatureForDefaultVirtualMethod(func, getWrapperName(func->ownerClass()) + "::", "_default",
+                                                                      opt | Generator::SkipRemovedArguments | Generator::VirtualCall);
     s << defaultMethodSignature << endl << '{' << endl;
 
     if (func->allowThread())
@@ -807,9 +823,13 @@ void CppGenerator::writeVirtualDefaultFunction(QTextStream &s, const AbstractMet
         }
     }
 
+    foreach(AbstractMetaArgument *arg, func->arguments()) {
+        writeConversionRule(s, TypeSystem::NativeCode, func, arg);
+    }
+
     if (!hasVirtualEndCode) {
         s << INDENT << returnKeyword << "self." << func->implementingClass()->qualifiedCppName() << "::";
-        writeFunctionCall(s, func);
+        writeFunctionCall(s, func, opt);
         s << ";" << endl;
     } else  {
         writeCodeSnips(s, getCodeSnips(func),

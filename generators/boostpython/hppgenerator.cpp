@@ -170,7 +170,7 @@ void HppGenerator::writeFunction(QTextStream &s, const AbstractMetaFunction* fun
         if (func->isVirtual() && !func->isAbstract() && !func->isConstructor()
             && !func->ownerClass()->hasPrivateDestructor()
             && func->implementingClass() == func->ownerClass()) {
-            s << INDENT << "static " << signatureForDefaultVirtualMethod(func, "", "_default", Generator::SkipName) << ';' << endl;
+            s << INDENT << "static " << signatureForDefaultVirtualMethod(func, "", "_default", Generator::Options( Generator::SkipName | Generator::SkipRemovedArguments) ) << ';' << endl;
         }
 
         if (func->isConstructor()) {
