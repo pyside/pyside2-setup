@@ -1,7 +1,6 @@
 * {
     font: 100% Verdana, Arial, Helvetica, sans-serif;
     font-size:12px;
-    color: #333;
 }
 
 html {
@@ -14,6 +13,7 @@ body {
     text-align: center;
     background-color: #EBEBEB;
     height: 100%;
+    color: #333;
 }
 
 strong {
@@ -125,6 +125,7 @@ pre {
     background-color: #fafafa;
     padding: 5px;
     font: 100% monospace;
+    overflow: auto;
 }
 
 pre * {
@@ -193,7 +194,7 @@ table.docutils td {
 table.docutils th {
     border: none;
     font-weight: bold;
-    vertical-align: middle;
+    vertical-align: top;
 }
 
 h2 em {
@@ -367,4 +368,20 @@ em {
 
 p.biglink a {
     font-size: 20px;
+}
+
+dt:target, .highlight {
+    background-color: #fbe54e;
+}
+
+img {
+    border: 0px;
+}
+
+.figure .caption {
+    font-style:italic;
+}
+
+table.footnote {
+    margin: 0px;
 }
