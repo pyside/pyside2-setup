@@ -442,13 +442,26 @@ struct FieldModification: public Modification
 
 typedef QList<FieldModification> FieldModificationList;
 
+/**
+*   \internal
+*   Struct used to store information about functions added by the typesystem.
+*   This info will be used later to create a fake AbstractMetaFunction which
+*   will be inserted into the right AbstractMetaClass.
+*/
 struct AddedFunction
 {
+    /// Function access types.
     enum Access {
         Protected = 0x1,
         Public =    0x2
     };
 
+    /**
+    *   \internal
+    *   Internal struct used to store information about arguments and return type of the
+    *   functions added by the type system. This information is later used to create
+    *   AbstractMetaType and AbstractMetaArgument for the AbstractMetaFunctions.
+    */
     struct TypeInfo {
         TypeInfo() : isConstant(false), indirections(0), isReference(false) {}
         QString name;
@@ -458,33 +471,40 @@ struct AddedFunction
         QString defaultValue;
     };
 
+    /// Creates a new AddedFunction with a signature and a return type.
     AddedFunction(QString signature, QString returnType);
 
+    /// Returns the function name.
     QString name() const
     {
         return m_name;
     }
 
+    /// Set the function access type.
     void setAccess(Access access)
     {
         m_access = access;
     }
 
+    /// Returns the function access type.
     Access access() const
     {
         return m_access;
     }
 
+    /// Returns the function return type.
     TypeInfo returnType() const
     {
         return m_returnType;
     }
 
+    /// Returns a list of argument type infos.
     QList<TypeInfo> arguments() const
     {
         return m_arguments;
     }
 
+    /// Returns true if this is a constant method.
     bool isConstant() const
     {
         return m_isConst;
