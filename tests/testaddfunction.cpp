@@ -89,6 +89,11 @@ void TestAddFunction::testAddFunction()
     QCOMPARE(addedFunc->ownerClass(), classA);
     QCOMPARE(addedFunc->implementingClass(), classA);
     QCOMPARE(addedFunc->declaringClass(), classA);
+    QVERIFY(!addedFunc->isVirtual());
+    QVERIFY(!addedFunc->isSignal());
+    QVERIFY(!addedFunc->isSlot());
+    QVERIFY(!addedFunc->isStatic());
+
     AbstractMetaType* returnType = addedFunc->type();
     QCOMPARE(returnType->typeEntry(), typeDb->findPrimitiveType("int"));
     AbstractMetaArgumentList args = addedFunc->arguments();

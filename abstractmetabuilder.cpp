@@ -1391,6 +1391,7 @@ AbstractMetaFunction *AbstractMetaBuilder::traverseFunction(const AddedFunction&
     int visibility = addedFunc.access() == AddedFunction::Public ? AbstractMetaAttributes::Public : AbstractMetaAttributes::Protected;
     metaFunction->setVisibility(visibility);
     metaFunction->setFunctionType(AbstractMetaFunction::UserAddedFunction);
+    metaFunction->setAttributes(metaFunction->attributes() | AbstractMetaAttributes::Final);
     metaFunction->setType(translateType(addedFunc.returnType()));
 
     QList<AddedFunction::TypeInfo> args = addedFunc.arguments();
