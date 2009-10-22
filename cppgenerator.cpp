@@ -840,137 +840,138 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         return;
     }
 
-    bool writeCall = true;
-    if (func->hasSignatureModifications()) {
+    if (func->hasSignatureModifications() || func->hasInjectedCode()) {
         CodeSnipList snips = getCodeSnips(func);
-        foreach (CodeSnip snip, snips) {
-            if (snip.position == CodeSnip::Beginning) {
-                // modified signature was provided with custom code for the method call
-                writeCall = false;
-                break;
-            }
+        if (!snips.isEmpty()) {
+            if (func->ownerClass())
+                s << INDENT << func->ownerClass()->name() << "* cppSelf = " << cpythonWrapperCPtr(func->ownerClass(), "self") << ';' << endl;
+            writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::All, func);
+            writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::All, func);
+            return;
         }
-        writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::All, func);
     }
 
-    if (writeCall) {
-        bool badModifications = false;
-        QStringList userArgs;
-        if (!func->isCopyConstructor()) {
-            int removed = 0;
-            for (int i = 0; i < maxArgs + removed; i++) {
-                const AbstractMetaArgument* arg = func->arguments()[i];
-                if (func->argumentRemoved(i + 1)) {
-                    // If some argument with default value is removed from a
-                    // method signature, the said value must be explicitly
-                    // added to the method call.
-                    removed++;
-                    if (arg->defaultValueExpression().isEmpty())
-                        badModifications = true;
-                    else
-                        userArgs << arg->defaultValueExpression();
-                } else {
-                    QString argName = QString("cpp_arg%1").arg(arg->argumentIndex() - removed);
-                    if (arg->type()->typeEntry()->isObject() && arg->type()->isReference()) {
-                        argName.prepend("(*");
-                        argName.append(')');
-                    }
-                    userArgs << argName;
+    // If we are here, this function does not have injected code
+
+    bool badModifications = false;
+    QStringList userArgs;
+    if (!func->isCopyConstructor()) {
+        int removed = 0;
+        for (int i = 0; i < maxArgs + removed; i++) {
+            const AbstractMetaArgument* arg = func->arguments()[i];
+            if (func->argumentRemoved(i + 1)) {
+                // If some argument with default value is removed from a
+                // method signature, the said value must be explicitly
+                // added to the method call.
+                removed++;
+                if (arg->defaultValueExpression().isEmpty())
+                    badModifications = true;
+                else
+                    userArgs << arg->defaultValueExpression();
+            } else {
+                QString argName = QString("cpp_arg%1").arg(arg->argumentIndex() - removed);
+                if (arg->type()->typeEntry()->isObject() && arg->type()->isReference()) {
+                    argName.prepend("(*");
+                    argName.append(')');
                 }
+                userArgs << argName;
             }
+        }
 
-            // If any argument's default value was modified the method must be called
-            // with this new value whenever the user doesn't pass an explicit value to it.
-            // Also, any unmodified default value coming after the last user specified
-            // argument and before the modified argument must be splicitly stated.
-            QStringList otherArgs;
-            bool defaultModified = false;
-            for (int i = func->arguments().size() - 1; i >= maxArgs; i--) {
-                const AbstractMetaArgument* arg = func->arguments()[i];
-                defaultModified = defaultModified || arg->defaultValueExpression() != arg->originalDefaultValueExpression();
-                if (defaultModified) {
-                    if (arg->defaultValueExpression().isEmpty())
-                        badModifications = true;
-                    else
-                        otherArgs.prepend(arg->defaultValueExpression());
-                }
+        // If any argument's default value was modified the method must be called
+        // with this new value whenever the user doesn't pass an explicit value to it.
+        // Also, any unmodified default value coming after the last user specified
+        // argument and before the modified argument must be splicitly stated.
+        QStringList otherArgs;
+        bool defaultModified = false;
+        for (int i = func->arguments().size() - 1; i >= maxArgs; i--) {
+            const AbstractMetaArgument* arg = func->arguments()[i];
+            defaultModified = defaultModified || arg->defaultValueExpression() != arg->originalDefaultValueExpression();
+            if (defaultModified) {
+                if (arg->defaultValueExpression().isEmpty())
+                    badModifications = true;
+                else
+                    otherArgs.prepend(arg->defaultValueExpression());
             }
-
-            userArgs += otherArgs;
         }
 
-        bool isCtor = false;
-        QString methodCall;
-        QTextStream mc(&methodCall);
-
-        // This indentation is here for aesthetical reasons concerning the generated code.
-        if (func->type() && !func->isInplaceOperator()) {
-            Indentation indent(INDENT);
-            mc << endl << INDENT;
-        }
-
-        if (badModifications) {
-            // When an argument is removed from a method signature and no other
-            // means of calling the method is provided the generator must write
-            // a compiler error line stating the situation.
-            s << INDENT << "#error No way to call \"" << func->ownerClass()->name();
-            s << "::" << func->minimalSignature();
-            s << "\" with the modifications provided on typesystem file" << endl;
-        } else if (func->isOperatorOverload()) {
-            QString firstArg("cpp_arg0");
-            QString secondArg("cpp_arg0");
-            QString selfArg = QString("(*%1)").arg(cpythonWrapperCPtr(func->ownerClass()));
-
-            if (ShibokenGenerator::isReverseOperator(func) || func->isUnaryOperator())
-                secondArg = selfArg;
-            else
-                firstArg = selfArg;
-
-            QString op = func->originalName();
-            op = op.right(op.size() - QString("operator").size());
-
-            s << INDENT;
-            if (!func->isInplaceOperator())
-                s << retvalVariableName() << " = ";
-
-            if (func->isBinaryOperator())
-                mc << firstArg << ' ';
-            if (op == "[]")
-                mc << '[' << secondArg << ']';
-            else
-                mc << op << ' ' << secondArg;
-        } else if (func->isConstructor() || func->isCopyConstructor()) {
-            s << INDENT;
-            isCtor = true;
-            s << "cptr = new " << wrapperName(func->ownerClass());
-            s << '(';
-            if (func->isCopyConstructor() && maxArgs == 1)
-                s << "cpp_arg0";
-            else
-                s << userArgs.join(", ");
-            s << ')';
-        } else {
-            s << INDENT;
-            if (func->type())
-                s << retvalVariableName() << " = ";
-            if (func->ownerClass()) {
-                if (!func->isStatic())
-                    mc << cpythonWrapperCPtr(func->ownerClass()) << "->";
-                mc << func->ownerClass()->name() << "::";
-            }
-            mc << func->originalName() << '(' << userArgs.join(", ") << ')';
-        }
-
-        if (!func->type() || func->isInplaceOperator()) {
-            s << methodCall;
-        } else if (!isCtor) {
-            mc << endl << INDENT;
-            writeToPythonConversion(s, func->type(), func->ownerClass(), methodCall);
-        }
-        s << ';' << endl;
+        userArgs += otherArgs;
     }
 
-    writeCodeSnips(s, getCodeSnips(func), CodeSnip::End, TypeSystem::All, func);
+    bool isCtor = false;
+    QString methodCall;
+    QTextStream mc(&methodCall);
+
+    // This indentation is here for aesthetical reasons concerning the generated code.
+    if (func->type() && !func->isInplaceOperator()) {
+        Indentation indent(INDENT);
+        mc << endl << INDENT;
+    }
+
+    if (badModifications) {
+        // When an argument is removed from a method signature and no other
+        // means of calling the method is provided the generator must write
+        // a compiler error line stating the situation.
+        s << INDENT << "#error No way to call \"" << func->ownerClass()->name();
+        s << "::" << func->minimalSignature();
+        s << "\" with the modifications provided on typesystem file" << endl;
+    } else if (func->isOperatorOverload()) {
+        QString firstArg("cpp_arg0");
+        QString secondArg("cpp_arg0");
+        QString selfArg = QString("(*%1)").arg(cpythonWrapperCPtr(func->ownerClass()));
+
+        if (ShibokenGenerator::isReverseOperator(func) || func->isUnaryOperator())
+            secondArg = selfArg;
+        else
+            firstArg = selfArg;
+
+        QString op = func->originalName();
+        op = op.right(op.size() - QString("operator").size());
+
+        s << INDENT;
+        if (!func->isInplaceOperator())
+            s << retvalVariableName() << " = ";
+
+        if (func->isBinaryOperator())
+            mc << firstArg << ' ';
+        if (op == "[]")
+            mc << '[' << secondArg << ']';
+        else
+            mc << op << ' ' << secondArg;
+    } else if (func->isConstructor() || func->isCopyConstructor()) {
+        s << INDENT;
+        isCtor = true;
+        s << "cptr = new " << wrapperName(func->ownerClass());
+        s << '(';
+        if (func->isCopyConstructor() && maxArgs == 1)
+            s << "cpp_arg0";
+        else
+            s << userArgs.join(", ");
+        s << ')';
+    } else {
+        s << INDENT;
+        if (func->type())
+            s << retvalVariableName() << " = ";
+        if (func->ownerClass()) {
+            if (!func->isStatic())
+                mc << cpythonWrapperCPtr(func->ownerClass()) << "->";
+            mc << func->ownerClass()->name() << "::";
+        }
+        mc << func->originalName() << '(' << userArgs.join(", ") << ')';
+    }
+
+    if (!func->type() || func->isInplaceOperator()) {
+        s << methodCall;
+    } else if (!isCtor) {
+        mc << endl << INDENT;
+        writeToPythonConversion(s, func->type(), func->ownerClass(), methodCall);
+    }
+    s << ';' << endl;
+}
+
+static bool isPythonToString(const AbstractMetaFunction* func)
+{
+    return func->name() == "__str__" && !func->actualMinimumArgumentCount();
 }
 
 void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass* metaClass)
@@ -1011,7 +1012,15 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         tp_richcompare = cpythonBaseName(metaClass->typeEntry()) + "_richcompare";
 
     QString tp_repr("0");
+
     QString tp_str("0");
+    // search for a __str__ function
+    foreach (AbstractMetaFunction* func, metaClass->functions()) {
+        if (isPythonToString(func)) {
+            tp_str = cpythonFunctionName(func);
+            break;
+        }
+    }
 
     s << "// Class Definition -----------------------------------------------" << endl;
 
@@ -1032,7 +1041,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_as_mapping*/       0," << endl;
     s << INDENT << "/*tp_hash*/             0," << endl;
     s << INDENT << "/*tp_call*/             0," << endl;
-    s << INDENT << "/*tp_str*/              0," << endl;
+    s << INDENT << "/*tp_str*/              " << tp_str << ',' << endl;
     s << INDENT << "/*tp_getattro*/         0," << endl;
     s << INDENT << "/*tp_setattro*/         0," << endl;
     s << INDENT << "/*tp_as_buffer*/        0," << endl;
@@ -1253,8 +1262,11 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
 
 void CppGenerator::writeMethodDefinition(QTextStream& s, const AbstractMetaFunctionList overloads)
 {
+    Q_ASSERT(!overloads.isEmpty());
     QPair<int, int> minMax = OverloadData::getMinMaxArguments(overloads);
     const AbstractMetaFunction* func = overloads[0];
+    if (isPythonToString(func))
+        return;
 
     s << INDENT << "{\"" << func->name() << "\", (PyCFunction)";
     s << cpythonFunctionName(func) << ", ";

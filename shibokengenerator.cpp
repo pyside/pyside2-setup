@@ -835,6 +835,8 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 argumentNames += QString("cpp_arg%1").arg(i++);
             }
             code.replace("%ARGUMENT_NAMES", argumentNames);
+            code.replace("%SELF.", "cppSelf->");
+            code.replace("%SELF", "cppSelf");
 
             replaceTemplateVariables(code, func);
         }
