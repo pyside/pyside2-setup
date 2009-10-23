@@ -218,6 +218,12 @@
             %0 = PyString_FromFormat("Point(%d, %d)", (int) %CPPSELF.x(), (int) %CPPSELF.y());
             </inject-code>
         </add-function>
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning">
+            %0 = PyString_FromFormat("&lt;Point object at %p: (%d, %d)&gt;",
+                                     %CPPSELF, (int) %CPPSELF.x(), (int) %CPPSELF.y());
+            </inject-code>
+        </add-function>
     </value-type>
     <value-type name="Size"/>
     <value-type name="MapUser"/>

@@ -182,6 +182,9 @@ protected:
     static QHash<QString, QString> m_pythonPrimitiveTypeName;
     static QHash<QString, QString> m_pythonOperators;
     static QHash<QString, QString> m_formatUnits;
+    static QHash<QString, QString> m_tpFuncs;
+
+    void clearTpFuncs();
 
     const char* name() const { return "Shiboken"; }
 

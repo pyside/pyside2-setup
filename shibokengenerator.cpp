@@ -36,11 +36,21 @@ static void dumpFunction(AbstractMetaFunctionList lst);
 QHash<QString, QString> ShibokenGenerator::m_pythonPrimitiveTypeName = QHash<QString, QString>();
 QHash<QString, QString> ShibokenGenerator::m_pythonOperators = QHash<QString, QString>();
 QHash<QString, QString> ShibokenGenerator::m_formatUnits = QHash<QString, QString>();
+QHash<QString, QString> ShibokenGenerator::m_tpFuncs = QHash<QString, QString>();
 
 ShibokenGenerator::ShibokenGenerator() : Generator()
 {
     if (m_pythonPrimitiveTypeName.isEmpty())
         ShibokenGenerator::initPrimitiveTypesCorrespondences();
+
+    if (m_tpFuncs.isEmpty())
+        ShibokenGenerator::clearTpFuncs();
+}
+
+void ShibokenGenerator::clearTpFuncs()
+{
+    m_tpFuncs["__str__"] = QString("0");
+    m_tpFuncs["__repr__"] = QString("0");
 }
 
 void ShibokenGenerator::initPrimitiveTypesCorrespondences()

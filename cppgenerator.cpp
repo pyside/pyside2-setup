@@ -969,11 +969,6 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     s << ';' << endl;
 }
 
-static bool isPythonToString(const AbstractMetaFunction* func)
-{
-    return func->name() == "__str__" && !func->actualMinimumArgumentCount();
-}
-
 void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     QString tp_flags;
@@ -1011,15 +1006,11 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     if (metaClass->hasComparisonOperatorOverload())
         tp_richcompare = cpythonBaseName(metaClass->typeEntry()) + "_richcompare";
 
-    QString tp_repr("0");
-
-    QString tp_str("0");
-    // search for a __str__ function
+    // search for special functions
+    ShibokenGenerator::clearTpFuncs();
     foreach (AbstractMetaFunction* func, metaClass->functions()) {
-        if (isPythonToString(func)) {
-            tp_str = cpythonFunctionName(func);
-            break;
-        }
+        if (m_tpFuncs.contains(func->name()))
+            m_tpFuncs[func->name()] = cpythonFunctionName(func);
     }
 
     s << "// Class Definition -----------------------------------------------" << endl;
@@ -1035,13 +1026,13 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_getattr*/          0," << endl;
     s << INDENT << "/*tp_setattr*/          0," << endl;
     s << INDENT << "/*tp_compare*/          0," << endl;
-    s << INDENT << "/*tp_repr*/             " << tp_repr << "," << endl;
+    s << INDENT << "/*tp_repr*/             " << m_tpFuncs["__repr__"] << "," << endl;
     s << INDENT << "/*tp_as_number*/        " << tp_as_number << ',' << endl;
     s << INDENT << "/*tp_as_sequence*/      0," << endl;
     s << INDENT << "/*tp_as_mapping*/       0," << endl;
     s << INDENT << "/*tp_hash*/             0," << endl;
     s << INDENT << "/*tp_call*/             0," << endl;
-    s << INDENT << "/*tp_str*/              " << tp_str << ',' << endl;
+    s << INDENT << "/*tp_str*/              " << m_tpFuncs["__str__"] << ',' << endl;
     s << INDENT << "/*tp_getattro*/         0," << endl;
     s << INDENT << "/*tp_setattro*/         0," << endl;
     s << INDENT << "/*tp_as_buffer*/        0," << endl;
@@ -1265,7 +1256,7 @@ void CppGenerator::writeMethodDefinition(QTextStream& s, const AbstractMetaFunct
     Q_ASSERT(!overloads.isEmpty());
     QPair<int, int> minMax = OverloadData::getMinMaxArguments(overloads);
     const AbstractMetaFunction* func = overloads[0];
-    if (isPythonToString(func))
+    if (m_tpFuncs.contains(func->name()))
         return;
 
     s << INDENT << "{\"" << func->name() << "\", (PyCFunction)";
