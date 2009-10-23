@@ -423,23 +423,14 @@ void HeaderGenerator::finishGeneration()
         s << "namespace Shiboken" << endl << '{' << endl << endl;
 
         s << "// User defined converters --------------------------------------------" << endl;
-
-        foreach (const PrimitiveTypeEntry* ptype, primitiveTypes()) {
-            if (!ptype->codeSnips().isEmpty()) {
-                foreach (CodeSnip snip, ptype->codeSnips())
-                    s << snip.code();
-            }
-        }
-
-        foreach (const ContainerTypeEntry* ctype, containerTypes()) {
-            if (!ctype->codeSnips().isEmpty()) {
-                foreach (CodeSnip snip, ctype->codeSnips())
-                    s << snip.code();
+        foreach (TypeEntry* typeEntry, TypeDatabase::instance()->entries()) {
+            if (typeEntry->hasConversionRule()) {
+                s << "// Conversion rule for: " << typeEntry->name() << endl;
+                s << typeEntry->conversionRule();
             }
         }
 
         s << "// Generated converters -----------------------------------------------" << endl << endl;
-
         s << convertersDecl << endl;
         s << convertersImpl << endl;
 
