@@ -43,7 +43,6 @@ public:
     explicit SimpleFile(const char* filename)
         : m_filename(filename), m_descriptor(0), m_size(0)
     {
-        printf("[%s] filename: %s\n", __PRETTY_FUNCTION__, m_filename);
     }
 
     ~SimpleFile()
