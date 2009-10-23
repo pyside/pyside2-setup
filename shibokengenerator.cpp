@@ -810,11 +810,13 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             code.replace("%0", retvalVariableName());
 
             // replace template variable for self Python object
-            code.replace("%SELF", "self");
+            code.replace("%PYSELF", "self");
 
             // replace template variable for pointer to C++ this object
-            if (func->implementingClass())
-                code.replace("%CPPOBJ", cpythonWrapperCPtr(func->implementingClass()));
+            if (func->implementingClass()) {
+                code.replace("%CPPSELF.", "cppSelf->");
+                code.replace("%CPPSELF", "cppSelf");
+            }
 
             // replace template variables for individual arguments
             int removed = 0;
@@ -835,8 +837,6 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 argumentNames += QString("cpp_arg%1").arg(i++);
             }
             code.replace("%ARGUMENT_NAMES", argumentNames);
-            code.replace("%SELF.", "cppSelf->");
-            code.replace("%SELF", "cppSelf");
 
             replaceTemplateVariables(code, func);
         }
