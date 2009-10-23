@@ -362,8 +362,6 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
     if (!returnKeyword.isEmpty()) {
         s << INDENT << returnKeyword;
-        if (func->type()->isValue())
-            s << '*';
         writeToCppConversion(s, func->type(), func->implementingClass(), "method_result");
         s << ';' << endl;
     }
@@ -818,8 +816,6 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
                             pyArgName = QString("pyargs[%1]").arg(i);
                         const AbstractMetaType* type = func->arguments()[i + removed]->type();
                         s << INDENT << translateTypeForWrapperMethod(type, func->implementingClass());
-                        if (type->isValue())
-                            s << "* ";
                         s << ' ' << argName << " = ";
                         writeToCppConversion(s, type, func->implementingClass(), pyArgName);
                         s << ';' << endl;
@@ -880,8 +876,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                         userArgs << arg->defaultValueExpression();
                 } else {
                     QString argName = QString("cpp_arg%1").arg(arg->argumentIndex() - removed);
-                    if ((arg->type()->typeEntry()->isObject() && arg->type()->isReference())
-                        || arg->type()->isValue()){
+                    if (arg->type()->typeEntry()->isObject() && arg->type()->isReference()) {
                         argName.prepend("(*");
                         argName.append(')');
                     }
@@ -927,11 +922,8 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             s << "::" << func->minimalSignature();
             s << "\" with the modifications provided on typesystem file" << endl;
         } else if (func->isOperatorOverload()) {
-            QString star;
-            if (!func->arguments().isEmpty() && func->arguments().at(0)->type()->isValue())
-                star = QString('*');
-            QString firstArg(star + "cpp_arg0");
-            QString secondArg(firstArg);
+            QString firstArg("cpp_arg0");
+            QString secondArg("cpp_arg0");
             QString selfArg = QString("(*%1)").arg(cpythonWrapperCPtr(func->ownerClass()));
 
             if (ShibokenGenerator::isReverseOperator(func) || func->isUnaryOperator())
@@ -957,13 +949,10 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             isCtor = true;
             s << "cptr = new " << wrapperName(func->ownerClass());
             s << '(';
-            if (func->isCopyConstructor() && maxArgs == 1) {
-                if (func->arguments().at(0)->type()->isValue())
-                    s << '*';
+            if (func->isCopyConstructor() && maxArgs == 1)
                 s << "cpp_arg0";
-            } else {
+            else
                 s << userArgs.join(", ");
-            }
             s << ')';
         } else {
             s << INDENT;

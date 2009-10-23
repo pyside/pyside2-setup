@@ -223,6 +223,11 @@ QString ShibokenGenerator::getFunctionReturnType(const AbstractMetaFunction* fun
         return func->ownerClass()->qualifiedCppName() + '*';
 
     return translateTypeForWrapperMethod(func->type(), func->implementingClass());
+
+    //TODO: check these lines
+    //QString modifiedReturnType = QString(func->typeReplaced(0));
+    //return modifiedReturnType.isNull() ?
+    //translateType(func->type(), func->implementingClass()) : modifiedReturnType;
 }
 
 QString ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaType* type,
@@ -270,24 +275,9 @@ void ShibokenGenerator::writeToPythonConversion(QTextStream& s, const AbstractMe
 void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaType* type,
                                              const AbstractMetaClass* context, QString argumentName)
 {
-    QString typeName;
-    if (type->isPrimitive()) {
-        const PrimitiveTypeEntry* ptype = (const PrimitiveTypeEntry*) type->typeEntry();
-        if (ptype->basicAliasedTypeEntry())
-            ptype = ptype->basicAliasedTypeEntry();
-        typeName = ptype->name();
-    } else {
-        typeName = translateTypeForWrapperMethod(type, context);
-    }
-
-    if (type->isObject() || type->isQObject()) {
-        if (typeName.startsWith("const "))
-            typeName.remove(0, 6);
-        if (!typeName.endsWith('*'))
-            typeName.append('*');
-    }
-
-    s << "Shiboken::Converter< " << typeName << " >::";
+    if (type->isValuePointer())
+        s << '&';
+    writeBaseConversion(s, type, context);
     s << "toCpp(" << argumentName << ')';
 }
 
@@ -831,10 +821,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             for (int i = 0; i < func->arguments().size(); i++) {
                 if (func->argumentRemoved(i+1))
                     removed++;
-                QString star;
-                if (func->arguments().at(i)->type()->isValue())
-                    star = QString('*');
-                code.replace("%" + QString::number(i+1), QString(star + "cpp_arg%1").arg(i - removed));
+                code.replace("%" + QString::number(i+1), QString("cpp_arg%1").arg(i - removed));
             }
 
             // replace template variables for not removed arguments
@@ -845,8 +832,6 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                     continue;
                 if (i > 0)
                     argumentNames += ", ";
-                if (arg->type()->isValue())
-                    argumentNames += '*';
                 argumentNames += QString("cpp_arg%1").arg(i++);
             }
             code.replace("%ARGUMENT_NAMES", argumentNames);
