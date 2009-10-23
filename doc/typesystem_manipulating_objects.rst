@@ -97,3 +97,21 @@ add-function
          </object-type>
 
     The ``return-type`` attribute defaults to *void*, and the ``access`` to *public*.
+
+.. _conversion-rule:
+
+conversion-rule
+^^^^^^^^^^^^^^^
+
+    The conversion-rule node allows you to write customized code to convert the given argument between the target
+    language and C++, and is a child of the :ref:`value-type`, :ref:`object-type`, :ref:`primitive-type` and
+    :ref:`container-type` nodes.
+
+    The code pointed by the file attribute is very tied to the generator using APIExtractor, so it don't follow any
+    rules, but the generator rules..
+
+    .. code-block:: xml
+
+        <value-type name="Foo">
+            <convertion-rule file="my_converter_implementation.h" />
+        </value-type>

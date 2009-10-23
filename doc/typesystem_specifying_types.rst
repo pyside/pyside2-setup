@@ -63,6 +63,7 @@ rejection
     function, set the class attribute to \*. You can use an empty class field
     to denote a global function.
 
+.. _primitive-type:
 
 primitive-type
 ^^^^^^^^^^^^^^
@@ -207,7 +208,7 @@ interface-type
 
     The interface-type node indicates that the given class is replaced by an
     interface pattern when mapping from C++ to the target language. Using the
-    interface-type node implicitly makes the given type an :ref:`object type`.
+    interface-type node implicitly makes the given type an :ref:`object-type`.
 
     .. code-block:: xml
 
@@ -222,3 +223,10 @@ interface-type
     If there is no C++ base class, the *optional* **default-superclass** attribute
     can be used to specify a superclass in the generated target language API, for
     the given class.
+
+.. _container-type:
+
+container-type
+^^^^^^^^^^^^^^
+
+    .. note:: This tag is not documented yet.
