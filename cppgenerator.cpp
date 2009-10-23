@@ -576,7 +576,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             s << INDENT << "}\n";
         }
 
-        if (rfunc->type() && !rfunc->isInplaceOperator())
+        if (rfunc->type() && !rfunc->argumentRemoved(0) && !rfunc->isInplaceOperator())
             s << INDENT << "PyObject* " << retvalVariableName() << " = 0;" << endl;
 
         if (minArgs != maxArgs || maxArgs > 1) {
@@ -590,7 +590,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         writeOverloadedMethodDecisor(s, &overloadData);
 
         s << endl << INDENT << "if (PyErr_Occurred()";
-        if (rfunc->type() && !rfunc->isInplaceOperator())
+        if (rfunc->type() && !rfunc->argumentRemoved(0) && !rfunc->isInplaceOperator())
             s << " || !" << retvalVariableName();
         s << ')' << endl;
         {
