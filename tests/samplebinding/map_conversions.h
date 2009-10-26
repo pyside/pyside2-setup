@@ -1,6 +1,11 @@
 template <typename StdMap>
 struct Converter_std_map
 {
+    static bool isConvertible(const PyObject* pyObj)
+    {
+        return PyDict_Check(const_cast<PyObject*>(pyObj));
+    }
+
     static PyObject* toPython(StdMap holder)
     {
         PyObject* result = PyDict_New();

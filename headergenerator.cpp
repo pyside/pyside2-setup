@@ -171,12 +171,7 @@ void HeaderGenerator::writeVirtualDispatcher(QTextStream& s, const AbstractMetaF
 void HeaderGenerator::writeTypeCheckMacro(QTextStream& s, const TypeEntry* type)
 {
     QString pyTypeName = cpythonTypeName(type);
-    QString checkFunction = cpythonCheckFunction(type);
     s << "PyAPI_DATA(PyTypeObject) " << pyTypeName << ';' << endl;
-    s << "#define " << checkFunction << "(op) PyObject_TypeCheck(op, &";
-    s << pyTypeName << ')' << endl;
-    s << "#define " << checkFunction << "Exact(op) ((op)->ob_type == &";
-    s << pyTypeName << ')' << endl;
 }
 
 void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* type)
@@ -188,11 +183,9 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
     s << "template<>" << endl;
     s << "struct Converter< " << cppName << " >" << endl << '{' << endl;
 
-    s << INDENT << "static PyObject* toPython(";
-    if (type->isObject())
-        s << "const ";
-    s << cppName << " cppobj);" << endl;
-    s << INDENT << "static " << cppName << " toCpp(PyObject* pyobj);" << endl;
+    s << INDENT << "static bool isConvertible(const PyObject* pyObj);\n";
+    s << INDENT << "static PyObject* toPython(const " << cppName << " cppobj);\n";
+    s << INDENT << "static " << cppName << " toCpp(PyObject* pyobj);\n";
     s << "};" << endl;
 }
 
@@ -205,10 +198,14 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
     if (type->isObject())
         cppName.append('*');
 
-    s << "inline PyObject* Converter< " << cppName << " >::toPython(";
-    if (type->isObject())
-        s << "const ";
-    s << cppName << " cppobj)" << endl;
+    // write isConvertible function
+    s << "inline bool Converter<" << cppName << " >::isConvertible(const PyObject* pyObj)\n";
+    s << "{\n";
+    s << INDENT << "return PyObject_TypeCheck(pyObj, &" << pyTypeName << ");\n";
+    s << "}\n";
+
+    // write toPython function
+    s << "inline PyObject* Converter<" << cppName << " >::toPython(const " << cppName << " cppobj)\n";
     s << '{' << endl;
     s << INDENT << "PyObject* pyobj;" << endl;
 
@@ -245,7 +242,8 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
     s << INDENT << "return pyobj;" << endl;
     s << '}' << endl << endl;
 
-    s << "inline " << cppName << " Converter< " << cppName << " >::toCpp(PyObject* pyobj)" << endl;
+    // write toCpp function
+    s << "inline " << cppName << " Converter<" << cppName << " >::toCpp(PyObject* pyobj)" << endl;
     s << '{' << endl;
 
     if (type->isValue()) {
@@ -269,8 +267,9 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
             s << "if (" << cpythonCheckFunction(argType) << "(pyobj))" << endl;
             {
                 Indentation indent(INDENT);
-                s << INDENT << "return " << cppName;
-                s << "(Converter< " << argType->cppSignature() << " >::toCpp(pyobj));" << endl;
+                s << INDENT << "return " << cppName << '(';
+                writeBaseConversion(s, argType, 0);
+                s << "toCpp(pyobj));\n";
             }
         }
     }
@@ -424,6 +423,9 @@ void HeaderGenerator::finishGeneration()
 
         s << "namespace Shiboken" << endl << '{' << endl << endl;
 
+        s << "// Generated converters declarations ----------------------------------" << endl << endl;
+        s << convertersDecl << endl;
+
         s << "// User defined converters --------------------------------------------" << endl;
         foreach (TypeEntry* typeEntry, TypeDatabase::instance()->entries()) {
             if (typeEntry->hasConversionRule()) {
@@ -432,8 +434,7 @@ void HeaderGenerator::finishGeneration()
             }
         }
 
-        s << "// Generated converters -----------------------------------------------" << endl << endl;
-        s << convertersDecl << endl;
+        s << "// Generated converters implementations -------------------------------" << endl << endl;
         s << convertersImpl << endl;
 
         s << "} // namespace Shiboken" << endl << endl;

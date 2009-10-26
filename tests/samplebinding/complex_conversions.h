@@ -1,6 +1,10 @@
 template<>
 struct Converter<Complex>
 {
+    static bool isConvertible(const PyObject* pyObj)
+    {
+        return PyComplex_Check(pyObj);
+    }
     static PyObject* toPython(Complex cpx)
     {
         /*

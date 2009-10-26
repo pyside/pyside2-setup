@@ -1,6 +1,11 @@
 template <typename StdList>
 struct Converter_std_list
 {
+    static bool isConvertible(const PyObject* pyObj)
+    {
+        return PySequence_Check(const_cast<PyObject*>(pyObj));
+    }
+
     static PyObject* toPython(StdList holder)
     {
         PyObject* result = PyList_New((int) holder.size());

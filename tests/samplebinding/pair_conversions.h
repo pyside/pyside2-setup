@@ -1,6 +1,10 @@
 template <typename StdPair>
 struct Converter_std_pair
 {
+    static bool isConvertible(const PyObject* pyObj)
+    {
+        return PySequence_Check(const_cast<PyObject*>(pyObj));
+    }
     static PyObject* toPython(StdPair holder)
     {
         typename StdPair::first_type first(holder.first);

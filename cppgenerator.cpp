@@ -330,7 +330,9 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                                     && !m_formatUnits.contains(arg->type()->typeEntry()->name()));
                 s << INDENT;
                 if (convert) {
-                    QString typeName = translateType(arg->type(), func->ownerClass());
+                    QString typeName = translateType(arg->type(), func->ownerClass(), ExcludeReference | ExcludeConst);
+                    if (typeName.endsWith(" const"))
+                        typeName = typeName.right(typeName.count()-5);
                     if ((arg->type()->isQObject() || arg->type()->isObject())
                         && typeName.startsWith("const "))
                         typeName.remove(0, 6);
@@ -1558,12 +1560,13 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream& s, const AbstractMetaEn
     Q_ASSERT(flagsEntry);
     QString cppName = cppEnum->typeEntry()->name();
     QString cpythonName = cpythonEnumName(cppEnum);
+    QString checkFunction = cpythonCheckFunction(cppEnum->typeEntry());
 
     s << "PyObject*" << endl;
     s << cpythonName << "___" << pyOpName << "__(PyObject* self, PyObject* arg)" << endl;
     s << '{' << endl;
     s << INDENT << "PyObject* py_result = 0;" << endl;
-    s << INDENT << "if (" << cpythonName << "_Check(arg)) {" << endl;
+    s << INDENT << "if (" << checkFunction << "(arg)) {" << endl;
     {
         Indentation indent(INDENT);
         s << INDENT << "py_result = Shiboken::Converter< ";
@@ -1598,12 +1601,13 @@ void CppGenerator::writeFlagsInplaceOperator(QTextStream& s, const AbstractMetaE
     Q_ASSERT(flagsEntry);
     QString cppName = cppEnum->typeEntry()->name();
     QString cpythonName = cpythonEnumName(cppEnum);
+    QString checkFunction = cpythonCheckFunction(cppEnum->typeEntry());
 
     s << "PyObject*" << endl;
     s << cpythonName << "___" << pyOpName << "__(PyObject* self, PyObject* arg)" << endl;
     s << '{' << endl;
     s << INDENT << "PyObject* py_result = 0;" << endl;
-    s << INDENT << "if (" << cpythonName << "_Check(arg)) {" << endl;
+    s << INDENT << "if (" << checkFunction << "(arg)) {" << endl;
     {
         Indentation indent(INDENT);
         s << INDENT << "((" << flagsEntry->originalName() << ") ((PyEnumObject*)self)->ob_ival) " << cppOpName << endl;
@@ -1637,12 +1641,13 @@ void CppGenerator::writeFlagsUnaryOperator(QTextStream& s, const AbstractMetaEnu
     Q_ASSERT(flagsEntry);
     QString cppName = cppEnum->typeEntry()->name();
     QString cpythonName = cpythonEnumName(cppEnum);
+    QString checkFunction = cpythonCheckFunction(cppEnum->typeEntry());
 
     s << "PyObject*" << endl;
     s << cpythonName << "___" << pyOpName << "__(PyObject* self, PyObject* arg)" << endl;
     s << '{' << endl;
     s << INDENT << "PyObject* py_result = 0;" << endl;
-    s << INDENT << "if (" << cpythonName << "_Check(arg)) {" << endl;
+    s << INDENT << "if (" << checkFunction << "(arg)) {" << endl;
     {
         Indentation indent(INDENT);
         s << INDENT << "py_result = Shiboken::Converter< ";

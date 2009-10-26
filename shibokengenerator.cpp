@@ -59,30 +59,30 @@ void ShibokenGenerator::initPrimitiveTypesCorrespondences()
     m_pythonPrimitiveTypeName.clear();
 
     // PyBool
-    m_pythonPrimitiveTypeName["bool"] = "PyBool";
+    m_pythonPrimitiveTypeName["bool"] = "bool";
 
     // PyInt
-    m_pythonPrimitiveTypeName["char"] = "PyInt";
-    m_pythonPrimitiveTypeName["unsigned char"] = "PyInt";
-    m_pythonPrimitiveTypeName["int"] = "PyInt";
-    m_pythonPrimitiveTypeName["uint"] = "PyInt";
-    m_pythonPrimitiveTypeName["unsigned int"] = "PyInt";
-    m_pythonPrimitiveTypeName["short"] = "PyInt";
-    m_pythonPrimitiveTypeName["ushort"] = "PyInt";
-    m_pythonPrimitiveTypeName["unsigned short"] = "PyInt";
-    m_pythonPrimitiveTypeName["long"] = "PyInt";
+    m_pythonPrimitiveTypeName["char"] = "char";
+    m_pythonPrimitiveTypeName["unsigned char"] = "unsigned char";
+    m_pythonPrimitiveTypeName["int"] = "int";
+    m_pythonPrimitiveTypeName["uint"] = "unsigned int";
+    m_pythonPrimitiveTypeName["unsigned int"] = "unsigned int";
+    m_pythonPrimitiveTypeName["short"] = "short";
+    m_pythonPrimitiveTypeName["ushort"] = "unsigned short";
+    m_pythonPrimitiveTypeName["unsigned short"] = "unsigned short";
+    m_pythonPrimitiveTypeName["long"] = "long";
 
     // PyFloat
-    m_pythonPrimitiveTypeName["double"] = "PyFloat";
-    m_pythonPrimitiveTypeName["float"] = "PyFloat";
+    m_pythonPrimitiveTypeName["double"] = "float";
+    m_pythonPrimitiveTypeName["float"] = "double";
 
     // PyLong
-    m_pythonPrimitiveTypeName["unsigned long"] = "PyLong";
-    m_pythonPrimitiveTypeName["ulong"] = "PyLong";
-    m_pythonPrimitiveTypeName["long long"] = "PyLong";
-    m_pythonPrimitiveTypeName["__int64"] = "PyLong";
-    m_pythonPrimitiveTypeName["unsigned long long"] = "PyLong";
-    m_pythonPrimitiveTypeName["unsigned __int64"] = "PyLong";
+    m_pythonPrimitiveTypeName["unsigned long"] = "unsigned long";
+    m_pythonPrimitiveTypeName["ulong"] = "unsigned long";
+    m_pythonPrimitiveTypeName["long long"] = "PY_LONG_LONG";
+    m_pythonPrimitiveTypeName["__int64"] = "PY_LONG_LONG";
+    m_pythonPrimitiveTypeName["unsigned long long"] = "PY_LONG_LONG";
+    m_pythonPrimitiveTypeName["unsigned __int64"] = "unsigned PY_LONG_LONG";
 
     // Python operators
     m_pythonOperators.clear();
@@ -261,15 +261,17 @@ QString ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMet
         typeName.remove(0, 6);
 
     QString conversion = typeName;
-    if (type->isValuePointer()) {
-        // If the type is a pointer to a Value Type,
-        // remove the pointer symbol ('*')
+    // If the type is a pointer to a Value Type,
+    // remove the pointer symbol ('*')
+    if (type->isValuePointer())
         conversion.chop(1);
-        // And the constness, if any
-        if (conversion.startsWith("const "))
-            conversion.remove(0, 6);
-    }
-    s << "Shiboken::Converter< " << conversion << " >::";
+
+    // And the constness, if any
+    if (conversion.startsWith("const ") && type->name() != "char")
+        conversion.remove(0, 6);
+    if (conversion.endsWith("&"))
+        conversion.chop(1);
+    s << "Shiboken::Converter<" << conversion << " >::";
     return typeName;
 }
 
@@ -489,21 +491,27 @@ bool ShibokenGenerator::isReverseOperator(const AbstractMetaFunction* func)
             args[1]->type()->typeEntry() == cppClass->typeEntry();
 }
 
-static QString checkFunctionName(QString baseName, bool genericNumberType)
-{
-    if (genericNumberType && ShibokenGenerator::isNumber(baseName))
-        baseName = "PyNumber";
-    return baseName + "_Check";
-}
-
 QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* type, bool genericNumberType)
 {
-    return checkFunctionName(cpythonBaseName(type), genericNumberType);
+    if (genericNumberType && ShibokenGenerator::isNumber(cpythonBaseName(type)))
+        return "PyNumber_Check";
+
+    QString baseName;
+    QTextStream s(&baseName);
+    writeBaseConversion(s, type, 0);
+    s << "isConvertible";
+    s.flush();
+    return baseName;
 }
 
 QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool genericNumberType)
 {
-    return checkFunctionName(cpythonBaseName(type), genericNumberType);
+    if (genericNumberType && ShibokenGenerator::isNumber(cpythonBaseName(type)))
+        return "PyNumber_Check";
+    else {
+        QString typeName;
+        return "Converter<" + type->qualifiedCppName() + " >::isConvertible";
+    }
 }
 
 QString ShibokenGenerator::argumentString(const AbstractMetaFunction *func,
