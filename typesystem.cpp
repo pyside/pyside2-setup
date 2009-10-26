@@ -881,8 +881,8 @@ bool Handler::startElement(const QString &, const QString &n,
             attributes["file"] = QString();
             break;
         case StackElement::ConversionRule:
-            attributes["class"] = "";
-            attributes["file"] = "";
+            attributes["class"] = QString();
+            attributes["file"] = QString();
             break;
         case StackElement::RejectEnumValue:
             attributes["name"] = "";
@@ -986,10 +986,17 @@ bool Handler::startElement(const QString &, const QString &n,
         break;
         case StackElement::ConversionRule: {
             if (topElement.type != StackElement::ModifyArgument
+                && topElement.type != StackElement::ValueTypeEntry
+                && topElement.type != StackElement::ObjectTypeEntry
                 && topElement.type != StackElement::PrimitiveTypeEntry
                 && topElement.type != StackElement::ContainerTypeEntry) {
-                m_error = "Conversion rules can only be specified for argument modification"
-                          " and to primitive or container types conversion.";
+                m_error = "Conversion rules can only be specified for argument modification, "
+                          "value-type, object-type, primitive-type or container-type conversion.";
+                return false;
+            }
+
+            if (topElement.entry->hasConversionRule()) {
+                m_error = "Types can have only one conversion rule";
                 return false;
             }
 
@@ -1011,7 +1018,8 @@ bool Handler::startElement(const QString &, const QString &n,
                 snip.language = lang;
                 m_functionMods.last().argument_mods.last().conversion_rules.append(snip);
             } else {
-                QString sourceFile = attributes["file"].toLower();
+
+                QString sourceFile = attributes["file"];
                 if (sourceFile.isEmpty()) {
                     m_error = QString("'file' attribute required; the source file containing the"
                                       " containing the conversion functions must be provided");
@@ -1021,17 +1029,13 @@ bool Handler::startElement(const QString &, const QString &n,
                 //Handler constructor....
                 if (m_generate != TypeEntry::GenerateForSubclass
                     && m_generate != TypeEntry::GenerateNothing) {
-                    if (QFile::exists(sourceFile)) {
-                        QFile conversionSource(sourceFile);
-                        if (conversionSource.open(QIODevice::ReadOnly)) {
-                            CodeSnip snip;
-                            snip.addCode(conversionSource.readAll());
-                            topElement.entry->addCodeSnip(snip);
-                        }
+                    QFile conversionSource(sourceFile);
+                    if (conversionSource.open(QIODevice::ReadOnly)) {
+                        topElement.entry->setConversionRule(conversionSource.readAll());
                     } else {
                         ReportHandler::warning("File containing conversion code for "
                                                + topElement.entry->name()
-                                               + " type does not exist: "
+                                               + " type does not exist or is not redable: "
                                                + sourceFile);
                     }
                 }
@@ -1552,8 +1556,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 element->type = StackElement::InjectCodeInFunction;
 
             } else if (topElement.type == StackElement::Root) {
-                ((TypeSystemTypeEntry *) element->entry)->addCodeSnip(snip);
-
+                element->entry->addCodeSnip(snip);
             } else if (topElement.type != StackElement::Root)
                 m_codeSnips << snip;
 

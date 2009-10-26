@@ -867,6 +867,24 @@ public:
         m_include = inc;
     }
 
+    /// Set the type convertion rule
+    void setConversionRule(const QString& conversionRule)
+    {
+        m_conversionRule = conversionRule;
+    }
+
+    /// Returns the type convertion rule
+    QString conversionRule() const
+    {
+        return m_conversionRule;
+    }
+
+    /// Returns true if there are any conversiton rule for this type, false otherwise.
+    bool hasConversionRule() const
+    {
+        return !m_conversionRule.isEmpty();
+    }
+
 private:
     QString m_name;
     Type m_type;
@@ -879,6 +897,7 @@ private:
     IncludeList m_extraIncludes;
     Include m_include;
     QHash<QString, bool> m_includesUsed;
+    QString m_conversionRule;
 };
 typedef QHash<QString, QList<TypeEntry *> > TypeEntryHash;
 typedef QHash<QString, TypeEntry *> SingleTypeEntryHash;
