@@ -76,4 +76,5 @@ install(FILES ${manpages} DESTINATION share/man/man1)
 enable_testing()
 
 add_subdirectory(generators)
+add_subdirectory(tests)
 
