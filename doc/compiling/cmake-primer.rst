@@ -6,7 +6,7 @@ CMake primer
 ************
 
 This chapter is a basic introduction to CMake, the build system used by PySide
-and the boost binding generator.
+and the binding generator runner.
 
 The practical steps will focus on how to use cmake on a Unix-like (GNU/Linux)
 environment.

@@ -4,7 +4,7 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "Boost Python Generator Backend"
+PROJECT_NAME           = "Generator Runner"
 PROJECT_NUMBER         = 0.1
 OUTPUT_DIRECTORY       = doc
 CREATE_SUBDIRS         = NO
@@ -25,7 +25,7 @@ ABBREVIATE_BRIEF       = "The $name class" \
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
 FULL_PATH_NAMES        = YES
-STRIP_FROM_PATH        = /tmp/src/boostbackend/
+STRIP_FROM_PATH        = /tmp/src/generatorrunner/
 STRIP_FROM_INC_PATH    =
 SHORT_NAMES            = NO
 JAVADOC_AUTOBRIEF      = YES
@@ -94,7 +94,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = /tmp/src/boostbackend
+INPUT                  = /tmp/src/generatorrunner
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.cc \
@@ -270,8 +270,8 @@ SKIP_FUNCTION_MACROS   = YES
 #---------------------------------------------------------------------------
 # Configuration::additions related to external references
 #---------------------------------------------------------------------------
-TAGFILES               = ../libgenerator/libgenerator.tag=../libgenerator
-GENERATE_TAGFILE       = boostbackend.tag
+TAGFILES               = ../libgenrunner/libgenrunner.tag=../libgenrunner
+GENERATE_TAGFILE       = generatorrunner.tag
 ALLEXTERNALS           = NO
 EXTERNAL_GROUPS        = YES
 PERL_PATH              = /usr/bin/perl

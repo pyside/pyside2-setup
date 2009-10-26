@@ -1,9 +1,14 @@
+2009-10-26  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * moved BoostPythonGenerator out of GeneratorRunner and created
+    a separated project for the latter.
+
 2009-09-28  Hugo Lima <hugo.lima@openbossa.org>
 
   * main.cpp: reinterpert_cast replaced by a C-style cast, to avoid compiler
   errors on some plataforms.  Cast an object pointer to a function pointer is
   an undefinied behaviour in some exotic platforms, so some compiler raise a
-  flag against it. However if we use a C-style cast the compiler ignores it. 
+  flag against it. However if we use a C-style cast the compiler ignores it.
   This problem is related to the QLibrary API returning a void* instead of a
   generic function pointer.
 

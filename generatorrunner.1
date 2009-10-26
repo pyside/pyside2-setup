@@ -9,27 +9,17 @@ generatorrunner \- plugin-based code generator
 is a utility that uses the information taken from APIExtractor
 related to the provided C++ headers and typesystem files and execute
 generators using this information. Generators are plugins and you need
-to specify one using the --generatorSet parameter. At the moment there 
+to specify one using the --generatorSet parameter. At the moment there
 are two generators available:
 
-.B boostpython
-\- Generates Boost::Python-based wrappers that compound a Python binding
-for the library described in the typesystem, making the C++ classes available
-for Python developers. Can be called by supplying
-.B --generatorSet=boostpython
-to 
-.B generatorrunner
-or by calling the convenience executable
-.B boostpythongenerator.
-
 .B qtdoc
-\- Generates Sphinx-based documentation for C++ libraries documented using 
-.B qdoc3 
-documentation syntax, using the XML files created by the documentation tool 
+\- Generates Sphinx-based documentation for C++ libraries documented using
+.B qdoc3
+documentation syntax, using the XML files created by the documentation tool
 .B (qdoc3).
 Can be called supplying
 .B --generatorSet=qtdoc
-to 
+to
 .B generatorrunner
 or by calling the convenience executable
 .B docgenerator.
@@ -66,8 +56,6 @@ The directories where the generator will search for the
 external typesystems referred by the main one.
 .IP --version
 Displays the current version.
-.SS "Specific to boostpython plugin"
-.IP --disable-named-arg
 Drops support for named args.
 .SS "Specific to qtdoc plugin"
 .IP --documentation-code-snippets-dir

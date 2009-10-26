@@ -5,9 +5,9 @@ includedir=@CMAKE_INSTALL_PREFIX@/include
 
 
 Name: generatorrunner
-Description: Python binding generator based on Boost.Python
+Description: Generator Runner loads and calls binding generator front-ends.
 Requires: apiextractor
-Version: @boostpythongenerator_VERSION@
+Version: @generatorrunner_VERSION@
 Libs: -L${libdir} -lgenrunner
 Cflags: -I${includedir}
 

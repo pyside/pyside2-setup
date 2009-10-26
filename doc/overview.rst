@@ -20,7 +20,7 @@ Each module of the generator system has an specific role.
 
 1. Provide enough data about the classes and functions.
 2. Generate valid code, with modifications from typesystems and injected codes.
-3. Modify the API to expose the objects in a Python-friendly way.
+3. Modify the API to expose the objects in a way that fits you target language best.
 4. Insert customizations where handwritten code is needed.
 
 .. figure:: images/boostqtarch.png

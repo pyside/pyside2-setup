@@ -2,16 +2,14 @@
 {% set title = 'Overview' %}
 {% block body %}
 <div class="section">
-  <h1>BoostPythonGenerator {{ version }}</h1>
+  <h1>GeneratorRunner {{ version }}</h1>
 
-    <p>BoostPythonGenerator is a tool that eases the development of Python bindings for Qt-based
-    libraries by automating most of the process. It relies heavily on the ApiExtractor library
-    to parse the header files and manipulate the classes information while generating the code.
-    This generated code uses the
-    <a href="http://www.boost.org/doc/libs/1_39_0/libs/python/doc/index.html">Boost::Python library</a>
-    in order to bridge the C++ library and Python.</p>
+    <p>GeneratorRunner is a tool that eases the development of binding generators for C++ and Qt-based
+    libraries by providing a framework to help automating most of the process. It uses the
+    ApiExtractor library to parse the header files and manipulate the classes information while
+    generating the binding code using front-end modules provided by the user.
 
-    <p>BoostPythonGenerator is based on the
+    <p>GeneratorRunner is based on the
     <a href="http://labs.trolltech.com/page/Projects/QtScript/Generator">QtScriptGenerator</a> project.</p>
 
   <h2>Documentation</h2>
@@ -24,7 +22,7 @@
     </td>
     <td width="50%">
       <p class="biglink"><a class="biglink" href="{{ pathto("compiling/compiling") }}">Compiling/Installing</a><br/>
-         <span class="linkdescr">how to compile and install BoostPythonGenerator</span></p>
+         <span class="linkdescr">how to compile and install GeneratorRunner</span></p>
       <p class="biglink"><a class="biglink" href="{{ pathto("contents") }}">Contents</a><br/>
          <span class="linkdescr">for a complete overview</span></p>
     </td></tr>

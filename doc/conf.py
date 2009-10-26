@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# BoostPythonGenerator documentation build configuration file, created by
+# GeneratorRunner documentation build configuration file, created by
 # sphinx-quickstart on Wed Apr 22 15:04:20 2009.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -25,7 +25,7 @@ import sys, os
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.ifconfig', 'sphinx.ext.refcounting', 'sphinx.ext.coverage']
 
 rst_epilog = """
-.. |project| replace:: BoostPythonGenerator
+.. |project| replace:: GeneratorRunner
 """
 
 # Add any paths that contain templates here, relative to this directory.
@@ -41,7 +41,7 @@ source_encoding = 'utf-8'
 #master_doc = 'contents'
 
 # General information about the project.
-project = u'BoostPythonGenerator'
+project = u'GeneratorRunner'
 copyright = u'2009, Nokia Corporation'
 
 # The version info for the project you're documenting, acts as replacement for

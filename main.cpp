@@ -1,5 +1,5 @@
 /*
- * This file is part of the Boost Python Generator project.
+ * This file is part of the PySide project.
  *
  * Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
  *
@@ -90,7 +90,7 @@ void printUsage(const GeneratorList& generators)
     generalOptions.insert("documentation-only", "Do not generates any code, just the documentation");
     generalOptions.insert("license-file=[licensefile]", "File used for copyright headers of generated files");
     generalOptions.insert("version", "Output version information and exit");
-    generalOptions.insert("generatorSet", "generatorSet to be used. e.g. boostpython");
+    generalOptions.insert("generatorSet", "generatorSet to be used. e.g. qtdoc");
     printOptions(s, generalOptions);
 
     foreach (Generator* generator, generators) {

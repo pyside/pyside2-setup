@@ -1,17 +1,18 @@
 
-.. _boost-python-generator:
+.. _generatorrunner:
 
-***********************
-Boost::Python Generator
-***********************
+****************
+Generator Runner
+****************
 
 Overview
 =========================================
 
-The **Boost::Python Generator** (A.K.A. :program:`boostpythongenerator`) is
-the program that creates the bindings source files from Qt headers and
-auxiliary files  (typesystems, ``global.h`` and glue files). It makes
-heavy use of the :ref:`api-extractor` library.
+The **GeneratorRunner** (A.K.A. :program:`generatorrunner`) is
+the program that collects relevant data from C++ headers (paying
+special attention to Qt provided information, like signals and
+properties) and auxiliary files (typesystems, ``global.h`` and
+glue files). For this it relies on the :ref:`api-extractor` library.
 
 
 Getting the sources
