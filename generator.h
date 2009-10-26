@@ -283,6 +283,7 @@ private:
     QString m_licenseComment;
 };
 
+Q_DECLARE_OPERATORS_FOR_FLAGS(Generator::Options)
 typedef QLinkedList<Generator*> GeneratorList;
 
 /**
