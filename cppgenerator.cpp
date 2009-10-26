@@ -256,7 +256,7 @@ void CppGenerator::writeConstructorNative(QTextStream& s, const AbstractMetaFunc
 {
     Indentation indentation(INDENT);
     s << functionSignature(func, wrapperName(func->ownerClass()) + "::", "",
-                           (Option)(OriginalTypeDescription | SkipDefaultValues));
+                           OriginalTypeDescription | SkipDefaultValues);
     s << " : ";
     writeFunctionCall(s, func);
     s << " {" << endl;
