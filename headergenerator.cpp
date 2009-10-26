@@ -198,6 +198,8 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
 
 void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
 {
+    if (type->hasConversionRule())
+        return;
     QString pyTypeName = cpythonTypeName(type);
     QString cppName = type->name();
     if (type->isObject())
