@@ -59,30 +59,30 @@ void ShibokenGenerator::initPrimitiveTypesCorrespondences()
     m_pythonPrimitiveTypeName.clear();
 
     // PyBool
-    m_pythonPrimitiveTypeName["bool"] = "bool";
+    m_pythonPrimitiveTypeName["bool"] = "PyBool";
 
     // PyInt
-    m_pythonPrimitiveTypeName["char"] = "char";
-    m_pythonPrimitiveTypeName["unsigned char"] = "unsigned char";
-    m_pythonPrimitiveTypeName["int"] = "int";
-    m_pythonPrimitiveTypeName["uint"] = "unsigned int";
-    m_pythonPrimitiveTypeName["unsigned int"] = "unsigned int";
-    m_pythonPrimitiveTypeName["short"] = "short";
-    m_pythonPrimitiveTypeName["ushort"] = "unsigned short";
-    m_pythonPrimitiveTypeName["unsigned short"] = "unsigned short";
-    m_pythonPrimitiveTypeName["long"] = "long";
+    m_pythonPrimitiveTypeName["char"] = "PyInt";
+    m_pythonPrimitiveTypeName["unsigned char"] = "PyInt";
+    m_pythonPrimitiveTypeName["int"] = "PyInt";
+    m_pythonPrimitiveTypeName["uint"] = "PyInt";
+    m_pythonPrimitiveTypeName["unsigned int"] = "PyInt";
+    m_pythonPrimitiveTypeName["short"] = "PyInt";
+    m_pythonPrimitiveTypeName["ushort"] = "PyInt";
+    m_pythonPrimitiveTypeName["unsigned short"] = "PyInt";
+    m_pythonPrimitiveTypeName["long"] = "PyInt";
 
     // PyFloat
-    m_pythonPrimitiveTypeName["double"] = "float";
-    m_pythonPrimitiveTypeName["float"] = "double";
+    m_pythonPrimitiveTypeName["double"] = "PyFloat";
+    m_pythonPrimitiveTypeName["float"] = "PyFloat";
 
     // PyLong
-    m_pythonPrimitiveTypeName["unsigned long"] = "unsigned long";
-    m_pythonPrimitiveTypeName["ulong"] = "unsigned long";
-    m_pythonPrimitiveTypeName["long long"] = "PY_LONG_LONG";
-    m_pythonPrimitiveTypeName["__int64"] = "PY_LONG_LONG";
-    m_pythonPrimitiveTypeName["unsigned long long"] = "PY_LONG_LONG";
-    m_pythonPrimitiveTypeName["unsigned __int64"] = "unsigned PY_LONG_LONG";
+    m_pythonPrimitiveTypeName["unsigned long"] = "PyLong";
+    m_pythonPrimitiveTypeName["ulong"] = "PyLong";
+    m_pythonPrimitiveTypeName["long long"] = "PyLong";
+    m_pythonPrimitiveTypeName["__int64"] = "PyLong";
+    m_pythonPrimitiveTypeName["unsigned long long"] = "PyLong";
+    m_pythonPrimitiveTypeName["unsigned __int64"] = "PyLong";
 
     // Python operators
     m_pythonOperators.clear();
