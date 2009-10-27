@@ -162,7 +162,7 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType*
 {
     QString result;
 
-    if (cType->isValue() || cType->isObject()
+    if (cType->isValue() || cType->isValuePointer() || cType->isObject()
         || (cType->isReference() && !cType->isContainer())) {
         result = cType->typeEntry()->qualifiedCppName();
         if (cType->isObject() || cType->isQObject())
@@ -261,16 +261,13 @@ QString ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMet
         typeName.remove(0, 6);
 
     QString conversion = typeName;
-    // If the type is a pointer to a Value Type,
-    // remove the pointer symbol ('*')
-    if (type->isValuePointer())
-        conversion.chop(1);
 
-    // And the constness, if any
+    // Remove the constness, if any
     if (conversion.startsWith("const ") && type->name() != "char")
         conversion.remove(0, 6);
     if (conversion.endsWith("&"))
         conversion.chop(1);
+
     s << "Shiboken::Converter<" << conversion << " >::";
     return typeName;
 }
@@ -287,8 +284,6 @@ void ShibokenGenerator::writeToPythonConversion(QTextStream& s, const AbstractMe
 void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaType* type,
                                              const AbstractMetaClass* context, QString argumentName)
 {
-    if (type->isValuePointer())
-        s << '&';
     writeBaseConversion(s, type, context);
     s << "toCpp(" << argumentName << ')';
 }
