@@ -1,4 +1,5 @@
 #include "abstract.h"
+#include "collector.h"
 #include "derived.h"
 #include "point.h"
 #include "size.h"

@@ -31,31 +31,31 @@ import unittest
 
 from sample import Overload, Point, Size
 
-class OVerloadTest(unittest.TestCase):
+class OverloadTest(unittest.TestCase):
     '''Test case for Overload class'''
 
     def testOverloadMethod0(self):
-        '''Check overloaded method calling for signature "overloaded()".'''
+        '''Check overloaded method call for signature "overloaded()".'''
         overload = Overload()
         result = overload.overloaded()
         self.assertEqual(result, Overload.Function0)
 
     def testOverloadMethod1(self):
-        '''Check overloaded method calling for signature "overloaded(Size*)".'''
+        '''Check overloaded method call for signature "overloaded(Size*)".'''
         overload = Overload()
         size = Size()
         result = overload.overloaded(size)
         self.assertEqual(result, Overload.Function1)
 
     def testOverloadMethod2(self):
-        '''Check overloaded method calling for signature "overloaded(Point*, ParamEnum)".'''
+        '''Check overloaded method call for signature "overloaded(Point*, ParamEnum)".'''
         overload = Overload()
         point = Point()
         result = overload.overloaded(point, Overload.Param1)
         self.assertEqual(result, Overload.Function2)
 
     def testOverloadMethod3(self):
-        '''Check overloaded method calling for signature "overloaded(const Point&)".'''
+        '''Check overloaded method call for signature "overloaded(const Point&)".'''
         overload = Overload()
         point = Point()
         result = overload.overloaded(point)

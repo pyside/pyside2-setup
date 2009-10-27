@@ -234,6 +234,7 @@
     <value-type name="NonDefaultCtor" />
     <value-type name="OddBoolUser" />
     <value-type name="Overload" />
+    <value-type name="Collector" />
 
     <value-type name="SimpleFile">
         <modify-function signature="open()">

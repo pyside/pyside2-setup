@@ -2,6 +2,7 @@ project(libsample)
 
 set(libsample_SRC
 abstract.cpp
+collector.cpp
 complex.cpp
 derived.cpp
 functions.cpp
