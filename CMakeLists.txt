@@ -31,7 +31,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${QT_QTCORE_INCLUDE_DIR})
 
 add_library(genrunner SHARED generator.cpp)
-set_target_properties(genrunner PROPERTIES SOVERSION ${generator_VERSION} VERSION ${generator_MAJOR_VERSION})
+set_target_properties(genrunner PROPERTIES SOVERSION ${generator_MAJOR_VERSION} VERSION ${generator_VERSION})
 target_link_libraries(genrunner ${QT_QTCORE_LIBRARY} ${APIEXTRACTOR_LIBRARY})
 
 add_executable(generatorrunner main.cpp)
