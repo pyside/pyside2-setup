@@ -550,12 +550,6 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
     }
     s << ')' << endl << '{' << endl;
 
-    // Support for reverse operators
-    if (rfunc->isOperatorOverload() && maxArgs > 0) {
-        s << INDENT << "if (!" << cpythonCheckFunction(rfunc->ownerClass()->typeEntry()) << "(self))\n";
-        s << INDENT << INDENT << "std::swap(self, arg);\n\n";
-    }
-
     if (overloads.count() == 1 && rfunc->isAbstract()) {
         s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
         s << rfunc->ownerClass()->name() << '.' << rfunc->name();
