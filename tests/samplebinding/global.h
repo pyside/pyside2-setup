@@ -9,6 +9,7 @@
 #include "listuser.h"
 #include "mapuser.h"
 #include "multiple_derived.h"
+#include "overload.h"
 #include "samplenamespace.h"
 #include "simplefile.h"
 #include "modifications.h"

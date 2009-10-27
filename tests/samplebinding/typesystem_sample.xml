@@ -45,6 +45,8 @@
     <enum-type name="SampleNamespace::OutValue"/>
     <enum-type name="GlobalEnum"/>
     <enum-type name="GlobalOverloadFuncEnum"/>
+    <enum-type name="Overload::FunctionEnum"/>
+    <enum-type name="Overload::ParamEnum"/>
 
     <namespace-type name="SampleNamespace"/>
 
@@ -231,6 +233,7 @@
     <value-type name="ListUser"/>
     <value-type name="NonDefaultCtor" />
     <value-type name="OddBoolUser" />
+    <value-type name="Overload" />
 
     <value-type name="SimpleFile">
         <modify-function signature="open()">
