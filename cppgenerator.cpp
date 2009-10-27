@@ -1208,17 +1208,14 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                     s << INDENT;
                 }
 
+                // TODO: Optimize this method: When the "other" type IS a QString, we dont need to call the converter,
+                //       we just need to get the cptr and avoid object copying.
                 s << "if (" << cpythonCheckFunction(type, numberType) << "(other)) {" << endl;
                 {
                     Indentation indent(INDENT);
                     s << INDENT;
-                    if (type->isValue() || type->isObject()) {
-                        s << arg0TypeName << "& cpp_other = *";
-                        s << cpythonWrapperCPtr(metaClass, "other");
-                    } else {
-                        s << translateTypeForWrapperMethod(type, metaClass) << " cpp_other = ";
-                        writeToCppConversion(s, type, metaClass, "other");
-                    }
+                    s << translateTypeForWrapperMethod(type, metaClass) << " cpp_other = ";
+                    writeToCppConversion(s, type, metaClass, "other");
                     s << ';' << endl;
                     s << INDENT << "result = (cpp_self " << op << " cpp_other);" << endl;
                 }
