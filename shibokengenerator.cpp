@@ -265,7 +265,10 @@ QString ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMet
     // Remove the constness, if any
     if (conversion.startsWith("const ") && type->name() != "char")
         conversion.remove(0, 6);
-    if (conversion.endsWith("&"))
+
+    if (type->isValue() && type->isReference())
+        conversion.append('&');
+    else if (conversion.endsWith("&"))
         conversion.chop(1);
 
     s << "Shiboken::Converter<" << conversion << " >::";
