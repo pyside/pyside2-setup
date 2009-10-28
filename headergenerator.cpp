@@ -171,7 +171,12 @@ void HeaderGenerator::writeVirtualDispatcher(QTextStream& s, const AbstractMetaF
 void HeaderGenerator::writeTypeCheckMacro(QTextStream& s, const TypeEntry* type)
 {
     QString pyTypeName = cpythonTypeName(type);
+    QString checkFunction = cpythonCheckFunction(type);
     s << "PyAPI_DATA(PyTypeObject) " << pyTypeName << ';' << endl;
+    s << "#define " << checkFunction << "(op) PyObject_TypeCheck(op, &";
+    s << pyTypeName << ')' << endl;
+    s << "#define " << checkFunction << "Exact(op) ((op)->ob_type == &";
+    s << pyTypeName << ')' << endl;
 }
 
 void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* type)
@@ -264,7 +269,7 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
                 firstImplicitIf = false;
             else
                 s << "else ";
-            s << "if (" << cpythonCheckFunction(argType) << "(pyobj))" << endl;
+            s << "if (" << cpythonIsConvertibleFunction(argType) << "(pyobj))" << endl;
             {
                 Indentation indent(INDENT);
                 s << INDENT << "return " << cppName << '(';

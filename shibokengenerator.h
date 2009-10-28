@@ -151,7 +151,9 @@ public:
     QString cpythonTypeName(const AbstractMetaClass* metaClass);
     QString cpythonTypeName(const TypeEntry* type);
     QString cpythonCheckFunction(const TypeEntry* type, bool genericNumberType = false);
-    QString cpythonCheckFunction(const AbstractMetaType* type, bool genericNumberType = false);
+    QString cpythonCheckFunction(const AbstractMetaType* metaType, bool genericNumberType = false);
+    QString cpythonIsConvertibleFunction(const TypeEntry* type, bool genericNumberType = false);
+    QString cpythonIsConvertibleFunction(const AbstractMetaType* metaType, bool genericNumberType = false);
     QString cpythonFunctionName(const AbstractMetaFunction* func);
     QString cpythonWrapperCPtr(const AbstractMetaClass* metaClass, QString argName = "self");
 

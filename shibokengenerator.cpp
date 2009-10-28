@@ -486,27 +486,41 @@ bool ShibokenGenerator::isReverseOperator(const AbstractMetaFunction* func)
             args[1]->type()->typeEntry() == cppClass->typeEntry();
 }
 
-QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* type, bool genericNumberType)
+static QString checkFunctionName(QString baseName, bool genericNumberType)
 {
-    if (genericNumberType && ShibokenGenerator::isNumber(cpythonBaseName(type)))
+    if (genericNumberType && ShibokenGenerator::isNumber(baseName))
+        baseName = "PyNumber";
+    return baseName + "_Check";
+}
+
+QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType, bool genericNumberType)
+{
+    return checkFunctionName(cpythonBaseName(metaType), genericNumberType);
+}
+
+QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool genericNumberType)
+{
+    return checkFunctionName(cpythonBaseName(type), genericNumberType);
+}
+
+QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* metaType, bool genericNumberType)
+{
+    if (genericNumberType && ShibokenGenerator::isNumber(cpythonBaseName(metaType)))
         return "PyNumber_Check";
 
     QString baseName;
     QTextStream s(&baseName);
-    writeBaseConversion(s, type, 0);
+    writeBaseConversion(s, metaType, 0);
     s << "isConvertible";
     s.flush();
     return baseName;
 }
 
-QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool genericNumberType)
+QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry* type, bool genericNumberType)
 {
     if (genericNumberType && ShibokenGenerator::isNumber(cpythonBaseName(type)))
         return "PyNumber_Check";
-    else {
-        QString typeName;
-        return "Converter<" + type->qualifiedCppName() + " >::isConvertible";
-    }
+    return "Converter<" + type->qualifiedCppName() + " >::isConvertible";
 }
 
 QString ShibokenGenerator::argumentString(const AbstractMetaFunction *func,

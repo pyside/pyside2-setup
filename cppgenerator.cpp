@@ -694,11 +694,11 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadDa
     if (implicitConvs.size() > 0)
         s << '(';
 
-    s << cpythonCheckFunction(argType, numberType) << '(' << argumentName << ')';
+    s << cpythonIsConvertibleFunction(argType, numberType) << '(' << argumentName << ')';
 
     foreach (const AbstractMetaFunction* ctor, implicitConvs) {
         s << " || ";
-        s << cpythonCheckFunction(ctor->arguments().first()->type(), numberType);
+        s << cpythonIsConvertibleFunction(ctor->arguments().first()->type(), numberType);
         s << '(' << argumentName << ')';
     }
 
@@ -1557,7 +1557,7 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream& s, const AbstractMetaEn
     Q_ASSERT(flagsEntry);
     QString cppName = cppEnum->typeEntry()->name();
     QString cpythonName = cpythonEnumName(cppEnum);
-    QString checkFunction = cpythonCheckFunction(cppEnum->typeEntry());
+    QString checkFunction = cpythonIsConvertibleFunction(cppEnum->typeEntry());
 
     s << "PyObject*" << endl;
     s << cpythonName << "___" << pyOpName << "__(PyObject* self, PyObject* arg)" << endl;
@@ -1598,7 +1598,7 @@ void CppGenerator::writeFlagsInplaceOperator(QTextStream& s, const AbstractMetaE
     Q_ASSERT(flagsEntry);
     QString cppName = cppEnum->typeEntry()->name();
     QString cpythonName = cpythonEnumName(cppEnum);
-    QString checkFunction = cpythonCheckFunction(cppEnum->typeEntry());
+    QString checkFunction = cpythonIsConvertibleFunction(cppEnum->typeEntry());
 
     s << "PyObject*" << endl;
     s << cpythonName << "___" << pyOpName << "__(PyObject* self, PyObject* arg)" << endl;
@@ -1638,7 +1638,7 @@ void CppGenerator::writeFlagsUnaryOperator(QTextStream& s, const AbstractMetaEnu
     Q_ASSERT(flagsEntry);
     QString cppName = cppEnum->typeEntry()->name();
     QString cpythonName = cpythonEnumName(cppEnum);
-    QString checkFunction = cpythonCheckFunction(cppEnum->typeEntry());
+    QString checkFunction = cpythonIsConvertibleFunction(cppEnum->typeEntry());
 
     s << "PyObject*" << endl;
     s << cpythonName << "___" << pyOpName << "__(PyObject* self, PyObject* arg)" << endl;
