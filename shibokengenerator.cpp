@@ -503,24 +503,14 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool gene
     return checkFunctionName(cpythonBaseName(type), genericNumberType);
 }
 
-QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* metaType, bool genericNumberType)
+QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* metaType)
 {
-    if (genericNumberType && ShibokenGenerator::isNumber(cpythonBaseName(metaType)))
-        return "PyNumber_Check";
-
     QString baseName;
     QTextStream s(&baseName);
     writeBaseConversion(s, metaType, 0);
     s << "isConvertible";
     s.flush();
     return baseName;
-}
-
-QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry* type, bool genericNumberType)
-{
-    if (genericNumberType && ShibokenGenerator::isNumber(cpythonBaseName(type)))
-        return "PyNumber_Check";
-    return "Converter<" + type->qualifiedCppName() + " >::isConvertible";
 }
 
 QString ShibokenGenerator::argumentString(const AbstractMetaFunction *func,
@@ -896,15 +886,20 @@ QStringList ShibokenGenerator::getBaseClasses(const AbstractMetaClass* metaClass
     return baseClass;
 }
 
-AbstractMetaFunctionList ShibokenGenerator::implicitConversions(const AbstractMetaType* metaType) const
+AbstractMetaFunctionList ShibokenGenerator::implicitConversions(const TypeEntry* type) const
 {
     AbstractMetaFunctionList implicits;
-    if (metaType->isValue()) {
-        const AbstractMetaClass* metaClass = classes().findClass(metaType->name());
+    if (type->isValue()) {
+        const AbstractMetaClass* metaClass = classes().findClass(type->name());
         if (metaClass)
             implicits = metaClass->implicitConversions();
     }
     return implicits;
+}
+
+AbstractMetaFunctionList ShibokenGenerator::implicitConversions(const AbstractMetaType* metaType) const
+{
+    return implicitConversions(metaType->typeEntry());
 }
 
 static void dumpFunction(AbstractMetaFunctionList lst)

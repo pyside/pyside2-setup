@@ -691,19 +691,13 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadDa
     // PyInt type to be the last entry on a list of overload argument data.
     bool numberType = alternativeNumericTypes == 1 || ShibokenGenerator::isPyInt(argType);
 
-    if (implicitConvs.size() > 0)
+    if (!implicitConvs.isEmpty())
         s << '(';
 
-    s << cpythonIsConvertibleFunction(argType, numberType) << '(' << argumentName << ')';
+    s << cpythonCheckFunction(argType, numberType) << '(' << argumentName << ')';
 
-    foreach (const AbstractMetaFunction* ctor, implicitConvs) {
-        s << " || ";
-        s << cpythonIsConvertibleFunction(ctor->arguments().first()->type(), numberType);
-        s << '(' << argumentName << ')';
-    }
-
-    if (implicitConvs.size() > 0)
-        s << ')';
+    if (!implicitConvs.isEmpty())
+        s << " || " << cpythonIsConvertibleFunction(argType) << ')';
 }
 
 void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* parentOverloadData)
@@ -1557,7 +1551,7 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream& s, const AbstractMetaEn
     Q_ASSERT(flagsEntry);
     QString cppName = cppEnum->typeEntry()->name();
     QString cpythonName = cpythonEnumName(cppEnum);
-    QString checkFunction = cpythonIsConvertibleFunction(cppEnum->typeEntry());
+    QString checkFunction = cpythonCheckFunction(cppEnum->typeEntry());
 
     s << "PyObject*" << endl;
     s << cpythonName << "___" << pyOpName << "__(PyObject* self, PyObject* arg)" << endl;
@@ -1598,7 +1592,7 @@ void CppGenerator::writeFlagsInplaceOperator(QTextStream& s, const AbstractMetaE
     Q_ASSERT(flagsEntry);
     QString cppName = cppEnum->typeEntry()->name();
     QString cpythonName = cpythonEnumName(cppEnum);
-    QString checkFunction = cpythonIsConvertibleFunction(cppEnum->typeEntry());
+    QString checkFunction = cpythonCheckFunction(cppEnum->typeEntry());
 
     s << "PyObject*" << endl;
     s << cpythonName << "___" << pyOpName << "__(PyObject* self, PyObject* arg)" << endl;
@@ -1638,7 +1632,7 @@ void CppGenerator::writeFlagsUnaryOperator(QTextStream& s, const AbstractMetaEnu
     Q_ASSERT(flagsEntry);
     QString cppName = cppEnum->typeEntry()->name();
     QString cpythonName = cpythonEnumName(cppEnum);
-    QString checkFunction = cpythonIsConvertibleFunction(cppEnum->typeEntry());
+    QString checkFunction = cpythonCheckFunction(cppEnum->typeEntry());
 
     s << "PyObject*" << endl;
     s << cpythonName << "___" << pyOpName << "__(PyObject* self, PyObject* arg)" << endl;

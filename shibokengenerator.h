@@ -152,8 +152,7 @@ public:
     QString cpythonTypeName(const TypeEntry* type);
     QString cpythonCheckFunction(const TypeEntry* type, bool genericNumberType = false);
     QString cpythonCheckFunction(const AbstractMetaType* metaType, bool genericNumberType = false);
-    QString cpythonIsConvertibleFunction(const TypeEntry* type, bool genericNumberType = false);
-    QString cpythonIsConvertibleFunction(const AbstractMetaType* metaType, bool genericNumberType = false);
+    QString cpythonIsConvertibleFunction(const AbstractMetaType* metaType);
     QString cpythonFunctionName(const AbstractMetaFunction* func);
     QString cpythonWrapperCPtr(const AbstractMetaClass* metaClass, QString argName = "self");
 
@@ -176,6 +175,7 @@ public:
     QString getFormatUnitString(const AbstractMetaFunction* func) const;
 
     AbstractMetaFunctionList implicitConversions(const AbstractMetaType* metaType) const;
+    AbstractMetaFunctionList implicitConversions(const TypeEntry* type) const;
 
     bool doSetup(const QMap<QString, QString>& args);
 

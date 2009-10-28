@@ -188,9 +188,10 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
     s << "template<>" << endl;
     s << "struct Converter< " << cppName << " >" << endl << '{' << endl;
 
-    s << INDENT << "static bool isConvertible(const PyObject* pyObj);\n";
-    s << INDENT << "static PyObject* toPython(const " << cppName << " cppobj);\n";
-    s << INDENT << "static " << cppName << " toCpp(PyObject* pyobj);\n";
+    if (implicitConversions(type).size() > 0)
+        s << INDENT << "static bool isConvertible(PyObject* pyObj);" << endl;
+    s << INDENT << "static PyObject* toPython(const " << cppName << " cppobj);" << endl;
+    s << INDENT << "static " << cppName << " toCpp(PyObject* pyobj);" << endl;
     s << "};" << endl;
 }
 
@@ -204,10 +205,24 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
         cppName.append('*');
 
     // write isConvertible function
-    s << "inline bool Converter<" << cppName << " >::isConvertible(const PyObject* pyObj)\n";
-    s << "{\n";
-    s << INDENT << "return PyObject_TypeCheck(pyObj, &" << pyTypeName << ");\n";
-    s << "}\n";
+    AbstractMetaFunctionList implicitConvs = implicitConversions(type);
+    if (implicitConvs.size() > 0) {
+        s << "inline bool Converter<" << cppName << " >::isConvertible(PyObject* pyObj)" << endl;
+        s << '{' << endl;
+        s << INDENT << "return ";
+        bool isFirst = true;
+        foreach (const AbstractMetaFunction* ctor, implicitConvs) {
+            Indentation indent(INDENT);
+            if (isFirst)
+                isFirst = false;
+            else
+                s << endl << INDENT << " || ";
+            s << cpythonCheckFunction(ctor->arguments().first()->type());
+            s << "(pyObj)";
+        }
+        s << ';' << endl;
+        s << '}' << endl;
+    }
 
     // write toPython function
     s << "inline PyObject* Converter<" << cppName << " >::toPython(const " << cppName << " cppobj)\n";
@@ -269,7 +284,7 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
                 firstImplicitIf = false;
             else
                 s << "else ";
-            s << "if (" << cpythonIsConvertibleFunction(argType) << "(pyobj))" << endl;
+            s << "if (" << cpythonCheckFunction(argType) << "(pyobj))" << endl;
             {
                 Indentation indent(INDENT);
                 s << INDENT << "return " << cppName << '(';
