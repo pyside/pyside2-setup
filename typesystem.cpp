@@ -2109,18 +2109,23 @@ AddedFunction::AddedFunction(QString signature, QString returnType) : m_access(P
     m_returnType = parseType(returnType);
     signature = signature.trimmed();
     int endPos = signature.indexOf('(');
-    m_name = signature.left(endPos).trimmed();
-    int signatureLength = signature.length();
-    while (endPos < signatureLength) {
-        TypeInfo arg = parseType(signature, endPos, &endPos);
-        if (!arg.name.isEmpty())
-            m_arguments.append(arg);
-        // end of parameters...
-        if (signature[endPos] == ')')
-            break;
+    if (endPos < 0) {
+        m_isConst = false;
+        m_name = signature;
+    } else {
+        m_name = signature.left(endPos).trimmed();
+        int signatureLength = signature.length();
+        while (endPos < signatureLength) {
+            TypeInfo arg = parseType(signature, endPos, &endPos);
+            if (!arg.name.isEmpty())
+                m_arguments.append(arg);
+            // end of parameters...
+            if (signature[endPos] == ')')
+                break;
+        }
+        // is const?
+        m_isConst = signature.right(signatureLength - endPos).contains("const");
     }
-    // is const?
-    m_isConst = signature.right(signatureLength - endPos).contains("const");
 }
 
 /*

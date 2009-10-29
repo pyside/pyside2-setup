@@ -33,6 +33,7 @@ private slots:
     void testAddFunction();
     void testAddFunctionTagDefaultValues();
     void testAddFunctionCodeSnippets();
+    void testFunctionWithoutParenteses();
 };
 
 #endif

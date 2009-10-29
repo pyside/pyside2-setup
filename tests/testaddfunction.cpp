@@ -144,6 +144,14 @@ void TestAddFunction::testAddFunctionCodeSnippets()
     QVERIFY(addedFunc->hasInjectedCode());
 }
 
+void TestAddFunction::testFunctionWithoutParenteses()
+{
+    const char sig1[] = "func";
+    AddedFunction f1(sig1, "void");
+    QCOMPARE(f1.name(), QString("func"));
+    QCOMPARE(f1.arguments().count(), 0);
+    QCOMPARE(f1.isConstant(), false);
+}
 
 QTEST_APPLESS_MAIN(TestAddFunction)
 
