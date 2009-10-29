@@ -410,7 +410,7 @@ void CppGenerator::writeNonVirtualModifiedFunctionNative(QTextStream& s, const A
 
 void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFunctionList overloads)
 {
-    OverloadData overloadData(overloads);
+    OverloadData overloadData(overloads, this);
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
     QString className = cpythonTypeName(rfunc->ownerClass());
 
@@ -524,7 +524,7 @@ void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const Ab
 
 void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunctionList overloads)
 {
-    OverloadData overloadData(overloads);
+    OverloadData overloadData(overloads, this);
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
 
     //DEBUG
@@ -688,7 +688,7 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadDa
     }
 
     // This condition trusts that the OverloadData object will arrange for
-    // PyInt type to be the last entry on a list of overload argument data.
+    // PyInt type to come after the more precise numeric types (e.g. float)
     bool numberType = alternativeNumericTypes == 1 || ShibokenGenerator::isPyInt(argType);
 
     if (!implicitConvs.isEmpty())
@@ -1165,7 +1165,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
     {
         Indentation indent(INDENT);
         foreach (AbstractMetaFunctionList overloads, cmpOverloads) {
-            OverloadData overloadData(overloads);
+            OverloadData overloadData(overloads, this);
             const AbstractMetaFunction* rfunc = overloads[0];
 
             // DEBUG

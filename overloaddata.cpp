@@ -25,10 +25,15 @@
 #include "overloaddata.h"
 #include "shibokengenerator.h"
 
+static bool overloadDataLessThan(const OverloadData* o1, const OverloadData* o2)
+{
+    return o1->argTypeWeight() < o2->argTypeWeight();
+}
+
 // Prepare the information about overloaded methods signatures
-OverloadData::OverloadData(const AbstractMetaFunctionList overloads)
+OverloadData::OverloadData(const AbstractMetaFunctionList overloads, const ShibokenGenerator* generator)
     : m_minArgs(256), m_maxArgs(0), m_argPos(-1), m_argType(0),
-      m_headOverloadData(this)
+      m_headOverloadData(this), m_generator(generator)
 {
     foreach (const AbstractMetaFunction* func, overloads) {
         m_overloads.append(func);
@@ -44,6 +49,11 @@ OverloadData::OverloadData(const AbstractMetaFunctionList overloads)
             currentOverloadData = currentOverloadData->addOverloadData(func, arg->type());
         }
     }
+
+    // Sort the overload possibilities so that the overload decisor code goes for the most
+    // important cases first, based on the weight system defined in OverloadData::addOverloadData
+    if (m_nextOverloadData.size() > 1)
+        qSort(m_nextOverloadData.begin(), m_nextOverloadData.end(), overloadDataLessThan);
 
     // Fix minArgs
     if (minArgs() > maxArgs())
@@ -85,7 +95,7 @@ void OverloadData::addOverload(const AbstractMetaFunction* func)
 }
 
 OverloadData* OverloadData::addOverloadData(const AbstractMetaFunction* func,
-                                                     const AbstractMetaType* argType)
+                                            const AbstractMetaType* argType)
 {
     OverloadData* overloadData = 0;
     foreach (OverloadData* tmp, m_nextOverloadData) {
@@ -99,14 +109,30 @@ OverloadData* OverloadData::addOverloadData(const AbstractMetaFunction* func,
 
     if (!overloadData) {
         overloadData = new OverloadData(m_headOverloadData, func, argType, m_argPos + 1);
-        // The following code always put PyInt as the last element to be checked.
-        // This is useful to check the python argument as PyNumber instead of
-        // PyInt, but not getting in the way of other tipes of higher precision
-        // (e.g. PyFloat)
-        if (ShibokenGenerator::isPyInt(argType))
-            m_nextOverloadData.append(overloadData);
-        else
-            m_nextOverloadData.prepend(overloadData);
+        overloadData->m_generator = this->m_generator;
+
+        // The following code sets weights to the types of the possible arguments
+        // following the current one.
+        // The rule is: native strings goes first, followed by the primitive types
+        // (among those the most precise have more priority), and finally the wrapped C++
+        // types are ordered based on how many implicit conversions they have (the ones who
+        // have more go to the end).
+        if (ShibokenGenerator::isPyInt(argType)) {
+            overloadData->m_argTypeWeight = -1;
+        } else if (argType->isPrimitive()) {
+            if (argType->typeEntry()->name() == "double" || argType->typeEntry()->name() == "float")
+                overloadData->m_argTypeWeight = -3;
+            else
+                overloadData->m_argTypeWeight = -2;
+        } else if (argType->name() == "char" && argType->isNativePointer()) {
+            overloadData->m_argTypeWeight = -4;
+        } else if (argType->typeEntry()->isValue() || argType->typeEntry()->isObject()) {
+            overloadData->m_argTypeWeight = m_generator->implicitConversions(argType).size();
+        } else {
+            overloadData->m_argTypeWeight = 0;
+        }
+
+        m_nextOverloadData.append(overloadData);
     }
 
     return overloadData;

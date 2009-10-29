@@ -28,13 +28,15 @@
 #include <QtCore/QList>
 #include <QtCore/QBitArray>
 
+#include "shibokengenerator.h"
+
 class OverloadData;
 typedef QList<OverloadData*> OverloadDataList;
 
 class OverloadData
 {
 public:
-    OverloadData(const AbstractMetaFunctionList overloads);
+    OverloadData(const AbstractMetaFunctionList overloads, const ShibokenGenerator* generator);
 
     int minArgs() const { return m_headOverloadData->m_minArgs; }
     int maxArgs() const { return m_headOverloadData->m_maxArgs; }
@@ -61,11 +63,13 @@ public:
     void dumpGraph(QString filename) const;
     QString dumpGraph() const;
 
+    int argTypeWeight() const { return m_argTypeWeight; }
+
     ~OverloadData();
 
 private:
     OverloadData(OverloadData* headOverloadData, const AbstractMetaFunction* func,
-                    const AbstractMetaType* argType, int argPos);
+                 const AbstractMetaType* argType, int argPos);
 
     void addOverload(const AbstractMetaFunction* func);
     OverloadData* addOverloadData(const AbstractMetaFunction* func, const AbstractMetaType* argType);
@@ -77,10 +81,12 @@ private:
     int m_maxArgs;
     int m_argPos;
     const AbstractMetaType* m_argType;
+    int m_argTypeWeight;
     QList<const AbstractMetaFunction*> m_overloads;
 
     OverloadData* m_headOverloadData;
     OverloadDataList m_nextOverloadData;
+    const ShibokenGenerator* m_generator;
 };
 
 
