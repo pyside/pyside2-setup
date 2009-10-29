@@ -3,6 +3,39 @@
 Modifying Arguments
 -------------------
 
+.. _conversion-rule:
+
+conversion-rule
+^^^^^^^^^^^^^^^
+
+    The conversion-rule node allows you to write customized code to convert
+    the given argument between the target language and C++, and it is a child of the modify-argument node.
+
+    .. code-block:: xml
+
+        <modify-argument ...>
+        <conversion-rule class="target | native">
+            // the code
+        </conversion-rule>
+        </modify-argument>
+
+    This node is typically used in combination with the replace-type and
+    remove-argument nodes. The given code is used instead of the generator's
+    conversion code.
+
+    Writing %N in the code (where N is a number), will insert the name of the
+    nth argument. Alternatively, %in and %out which will be replaced with the
+    name of the conversion's input and output variable, respectively. Note the
+    output variable must be declared explicitly, for example:
+
+    .. code-block:: xml
+
+        <conversion-rule class="native">
+        bool %out = (bool) %in;
+        </conversion-rule>
+
+    .. note:: You can also use the conversion-rule node to specify :ref:`a conversion code which will be used instead of the generator's conversion code everywhere for a given type <conversion-rule-on-types>`.
+
 remove-argument
 ^^^^^^^^^^^^^^^
 

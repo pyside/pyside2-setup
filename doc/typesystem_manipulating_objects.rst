@@ -98,7 +98,7 @@ add-function
 
     The ``return-type`` attribute defaults to *void*, and the ``access`` to *public*.
 
-.. _conversion-rule:
+.. _conversion-rule-on-types:
 
 conversion-rule
 ^^^^^^^^^^^^^^^
@@ -115,3 +115,6 @@ conversion-rule
         <value-type name="Foo">
             <convertion-rule file="my_converter_implementation.h" />
         </value-type>
+
+    .. note:: You can also use the conversion-rule node to specify :ref:`how the conversion of a single function argument should be done in a function <conversion-rule>`.
+
