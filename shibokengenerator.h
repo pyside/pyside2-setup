@@ -155,6 +155,8 @@ public:
     QString cpythonIsConvertibleFunction(const AbstractMetaType* metaType);
     QString cpythonFunctionName(const AbstractMetaFunction* func);
     QString cpythonWrapperCPtr(const AbstractMetaClass* metaClass, QString argName = "self");
+    QString cpythonWrapperCPtr(const AbstractMetaType* metaType, QString argName);
+    QString cpythonWrapperCPtr(const TypeEntry* type, QString argName);
 
     QString cpythonEnumName(const EnumTypeEntry* enumEntry);
     QString cpythonEnumName(const AbstractMetaEnum* metaEnum)

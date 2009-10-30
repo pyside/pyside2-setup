@@ -224,7 +224,19 @@ QString ShibokenGenerator::cpythonFlagsName(const FlagsTypeEntry* flagsEntry)
 
 QString ShibokenGenerator::cpythonWrapperCPtr(const AbstractMetaClass* metaClass, QString argName)
 {
-    return QString("%1_cptr(%2)").arg(cpythonBaseName(metaClass->typeEntry())).arg(argName);
+    return cpythonWrapperCPtr(metaClass->typeEntry(), argName);
+}
+
+QString ShibokenGenerator::cpythonWrapperCPtr(const AbstractMetaType* metaType, QString argName)
+{
+    return cpythonWrapperCPtr(metaType->typeEntry(), argName);
+}
+
+QString ShibokenGenerator::cpythonWrapperCPtr(const TypeEntry* type, QString argName)
+{
+    if (type->isValue() || type->isObject())
+        return QString("%1_cptr(%2)").arg(cpythonBaseName(type)).arg(argName);
+    return QString();
 }
 
 QString ShibokenGenerator::getFunctionReturnType(const AbstractMetaFunction* func, Options options) const
