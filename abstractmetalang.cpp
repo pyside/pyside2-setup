@@ -1323,10 +1323,16 @@ void AbstractMetaClass::setBaseClass(AbstractMetaClass *baseClass)
 
 bool AbstractMetaClass::hasFunction(const QString &str) const
 {
-    foreach (const AbstractMetaFunction *f, functions())
-    if (f->name() == str)
-        return true;
-    return false;
+    return findFunction(str);
+}
+
+const AbstractMetaFunction* AbstractMetaClass::findFunction(const QString& functionName) const
+{
+    foreach (const AbstractMetaFunction *f, functions()) {
+        if (f->name() == functionName)
+            return f;
+    }
+    return 0;
 }
 
 /* Returns true if this class has one or more functions that are

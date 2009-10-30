@@ -1332,6 +1332,7 @@ public:
     void addFunction(AbstractMetaFunction *function);
     bool hasFunction(const AbstractMetaFunction *f) const;
     bool hasFunction(const QString &str) const;
+    const AbstractMetaFunction* findFunction(const QString& functionName) const;
     bool hasSignal(const AbstractMetaFunction *f) const;
 
     bool hasConstructors() const;
