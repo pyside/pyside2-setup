@@ -40,7 +40,7 @@ using namespace std;
 void
 Reference::show() const
 {
-    cout << "Reference.objId: " << m_objId;
+    cout << "Reference.objId: " << m_objId << ", address: " << this;
 }
 
 int
@@ -65,5 +65,17 @@ int
 Reference::callUsesConstReferenceVirtual(const Reference& r, int inc)
 {
     return usesConstReferenceVirtual(r, inc);
+}
+
+void
+Reference::alterReferenceIdVirtual(Reference& r)
+{
+    r.setObjId(r.objId() * Reference::multiplier());
+}
+
+void
+Reference::callAlterReferenceIdVirtual(Reference& r)
+{
+    alterReferenceIdVirtual(r);
 }
 

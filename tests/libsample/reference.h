@@ -35,6 +35,8 @@
 #ifndef REFERENCE_H
 #define REFERENCE_H
 
+#include "str.h"
+
 class Reference
 {
 public:
@@ -42,7 +44,7 @@ public:
             : m_objId(objId) {}
     ~Reference() {}
 
-    double objId() { return m_objId; }
+    int objId() { return m_objId; }
     void setObjId(int objId) { m_objId = objId; }
 
     static int usesReference(Reference& r) { return r.m_objId; }
@@ -54,7 +56,12 @@ public:
     int callUsesReferenceVirtual(Reference& r, int inc);
     int callUsesConstReferenceVirtual(const Reference& r, int inc);
 
+    virtual void alterReferenceIdVirtual(Reference& r);
+    void callAlterReferenceIdVirtual(Reference& r);
+
     void show() const;
+
+    static int multiplier() { return 10; }
 
 private:
     int m_objId;
