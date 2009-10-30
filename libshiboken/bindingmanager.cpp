@@ -83,7 +83,7 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
     if (wrapper) {
         PyTypeObject* baseWrapperType = ((Shiboken::PyBaseWrapper*)wrapper)->baseWrapperType;
         PyObject* method = PyObject_GetAttrString(wrapper, const_cast<char*>(methodName));
-        if (method != 0) {
+        if (method) {
             PyObject* defaultMethod = 0;
             if (PyMethod_Check(method) &&
                 ((PyMethodObject*) method)->im_self == wrapper &&
@@ -91,7 +91,7 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
                 defaultMethod = PyDict_GetItemString(baseWrapperType->tp_dict, const_cast<char*>(methodName));
             }
 
-            if (((PyMethodObject*)method)->im_func != defaultMethod)
+            if (defaultMethod && ((PyMethodObject*)method)->im_func != defaultMethod)
                 return method;
 
             Py_DECREF(method);
