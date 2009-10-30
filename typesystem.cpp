@@ -1285,6 +1285,8 @@ bool Handler::startElement(const QString &, const QString &n,
             }
 
             AddedFunction func(signature, attributes["return-type"]);
+            if (!signature.contains("("))
+                signature += "()";
             m_currentSignature = signature;
 
             QString access = attributes["access"].toLower();
@@ -1302,7 +1304,7 @@ bool Handler::startElement(const QString &, const QString &n,
             m_addedFunctions << func;
 
             FunctionModification mod;
-            mod.signature = signature;
+            mod.signature = m_currentSignature;
             m_functionMods << mod;
         }
         break;
