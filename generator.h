@@ -223,6 +223,18 @@ public:
     /// returns the code snips of a function
     CodeSnipList getCodeSnips(const AbstractMetaFunction *func);
 
+    /**
+     *   Retrieves a list of constructors used in implicit conversions
+     *   available on the given type. The TypeEntry must be a value-type
+     *   or else it will return an empty list.
+     *   \param type a TypeEntry that is expected to be a value-type
+     *   \return a list of constructors that could be used as implicit converters
+     */
+    AbstractMetaFunctionList implicitConversions(const TypeEntry* type) const;
+
+    /// Convenience function for implicitConversions(const TypeEntry* type).
+    AbstractMetaFunctionList implicitConversions(const AbstractMetaType* metaType) const;
+
 protected:
     QString m_packageName;
 

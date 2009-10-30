@@ -389,6 +389,22 @@ CodeSnipList Generator::getCodeSnips(const AbstractMetaFunction *func)
     return result;
 }
 
+AbstractMetaFunctionList Generator::implicitConversions(const TypeEntry* type) const
+{
+    AbstractMetaFunctionList implicits;
+    if (type->isValue()) {
+        const AbstractMetaClass* metaClass = classes().findClass(type->name());
+        if (metaClass)
+            implicits = metaClass->implicitConversions();
+    }
+    return implicits;
+}
+
+AbstractMetaFunctionList Generator::implicitConversions(const AbstractMetaType* metaType) const
+{
+    return implicitConversions(metaType->typeEntry());
+}
+
 QString Generator::translateType(const AbstractMetaType *cType,
                                  const AbstractMetaClass *context,
                                  Options options) const
