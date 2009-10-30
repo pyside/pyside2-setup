@@ -123,7 +123,7 @@ public:
     QString writeBaseConversion(QTextStream& s, const AbstractMetaType* type,
                                 const AbstractMetaClass* context);
     void writeToPythonConversion(QTextStream& s, const AbstractMetaType* type,
-                                 const AbstractMetaClass* context, QString argumentName);
+                                 const AbstractMetaClass* context, QString argumentName = QString());
     void writeToCppConversion(QTextStream& s, const AbstractMetaType* type,
                               const AbstractMetaClass* context, QString argumentName);
 
