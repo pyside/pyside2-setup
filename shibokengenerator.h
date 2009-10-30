@@ -176,9 +176,6 @@ public:
     QString getFunctionReturnType(const AbstractMetaFunction* func, Options options = NoOption) const;
     QString getFormatUnitString(const AbstractMetaFunction* func) const;
 
-    AbstractMetaFunctionList implicitConversions(const AbstractMetaType* metaType) const;
-    AbstractMetaFunctionList implicitConversions(const TypeEntry* type) const;
-
     bool doSetup(const QMap<QString, QString>& args);
 
 protected:

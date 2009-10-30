@@ -883,22 +883,6 @@ QStringList ShibokenGenerator::getBaseClasses(const AbstractMetaClass* metaClass
     return baseClass;
 }
 
-AbstractMetaFunctionList ShibokenGenerator::implicitConversions(const TypeEntry* type) const
-{
-    AbstractMetaFunctionList implicits;
-    if (type->isValue()) {
-        const AbstractMetaClass* metaClass = classes().findClass(type->name());
-        if (metaClass)
-            implicits = metaClass->implicitConversions();
-    }
-    return implicits;
-}
-
-AbstractMetaFunctionList ShibokenGenerator::implicitConversions(const AbstractMetaType* metaType) const
-{
-    return implicitConversions(metaType->typeEntry());
-}
-
 static void dumpFunction(AbstractMetaFunctionList lst)
 {
     qDebug() << "DUMP FUNCTIONS: ";
