@@ -330,13 +330,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                                     && !m_formatUnits.contains(arg->type()->typeEntry()->name()));
                 s << INDENT;
                 if (convert) {
-                    QString typeName = translateType(arg->type(), func->ownerClass(), ExcludeReference | ExcludeConst);
-                    if (typeName.endsWith(" const"))
-                        typeName = typeName.right(typeName.count()-5);
-                    if ((arg->type()->isQObject() || arg->type()->isObject())
-                        && typeName.startsWith("const "))
-                        typeName.remove(0, 6);
-                    s << "Shiboken::Converter< " << typeName << " >::toPython(";
+                    writeToPythonConversion(s, arg->type(), func->ownerClass());
+                    s << '(';
                 }
                 s << arg->argumentName();
                 if (convert)
@@ -806,9 +801,41 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
                         if (manyArgs)
                             pyArgName = QString("pyargs[%1]").arg(i);
                         const AbstractMetaType* type = func->arguments()[i + removed]->type();
-                        s << INDENT << translateTypeForWrapperMethod(type, func->implementingClass());
-                        s << ' ' << argName << " = ";
-                        writeToCppConversion(s, type, func->implementingClass(), pyArgName);
+                        QString typeName = translateTypeForWrapperMethod(type, func->implementingClass());
+
+                        bool isReferenceToNonExistentValueType = type->isValue()
+                                && type->isReference()
+                                && !implicitConversions(type).isEmpty();
+
+                        if (isReferenceToNonExistentValueType) {
+                            QString baseTypeName = QString(typeName);
+                            baseTypeName.chop(1);
+                            s << INDENT << baseTypeName << "* " << argName << "_ptr;" << endl;
+                            s << INDENT << "std::auto_ptr<" << baseTypeName << "> " << argName << "_auto_ptr;" << endl;
+                            s << INDENT << "if (" << cpythonCheckFunction(type) << '(' << pyArgName << ")) {" << endl;
+                            {
+                                Indentation indent(INDENT);
+                                s << INDENT << argName << "_ptr = ";
+                                s << cpythonWrapperCPtr(type, pyArgName) << ';' << endl;
+                            }
+                            s << INDENT << "} else {" << endl;
+                            {
+                                Indentation indent(INDENT);
+                                s << INDENT << argName << "_ptr = new " << baseTypeName;
+                                s << "(Shiboken::Converter<" << baseTypeName << " >::toCpp(" << pyArgName << "));" << endl;
+                                s << INDENT << argName << "_auto_ptr = std::auto_ptr<" << baseTypeName;
+                                s << " >(" << argName << "_ptr);" << endl;
+                            }
+                            s << INDENT << '}' << endl;
+                        }
+
+                        s << INDENT << typeName << ' ' << argName << " = ";
+
+                        if (isReferenceToNonExistentValueType)
+                            s << '*' << argName << "_ptr";
+                        else
+                            writeToCppConversion(s, type, func->implementingClass(), pyArgName);
+
                         s << ';' << endl;
                     }
                 }

@@ -409,6 +409,8 @@ void HeaderGenerator::finishGeneration()
         s << "#include <basewrapper.h>" << endl;
         s << "#include <bindingmanager.h>" << endl << endl;
 
+        s << "#include <memory>" << endl << endl;
+
         s << "// Class Includes" << endl;
         s << classIncludes << endl;
 

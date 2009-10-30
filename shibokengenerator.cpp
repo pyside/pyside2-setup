@@ -167,6 +167,8 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType*
         result = cType->typeEntry()->qualifiedCppName();
         if (cType->isObject() || cType->isQObject())
             result.append('*');
+        else if (cType->isValue() && cType->isReference())
+            result.append('&');
     } else if (cType->isArray()) {
         result = translateTypeForWrapperMethod(cType->arrayElementType(), context) + "[]";
     } else {
@@ -277,7 +279,8 @@ QString ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMet
     // Remove the constness, if any
     if (conversion.startsWith("const ") && type->name() != "char")
         conversion.remove(0, 6);
-    if (conversion.endsWith("&"))
+
+    if (conversion.endsWith("&") && !(type->isValue() && type->isReference()))
         conversion.chop(1);
 
     s << "Shiboken::Converter<" << conversion << " >::";
