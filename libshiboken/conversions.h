@@ -57,7 +57,7 @@ struct Converter
 template <>
 struct Converter<void*>
 {
-    static PyObject* toPython(void* cppobj)
+    static PyObject* toPython(const void* cppobj)
     {
         PyObject* obj = BindingManager::instance().retrieveWrapper(cppobj);
         Py_XINCREF(obj);
@@ -68,6 +68,26 @@ struct Converter<void*>
         return ((Shiboken::PyBaseWrapper*) pyobj)->cptr;
     }
 };
+
+// C++ References to Value Types ----------------------------------------------
+template <typename T>
+struct Converter<const T&> : Converter<T>
+{
+    static PyObject* toPython(const T& cppobj)
+    {
+        PyObject* pyobj = Converter<void*>::toPython(&cppobj);
+        if (!pyobj)
+            pyobj = Converter<T>::toPython(cppobj);
+        return pyobj;
+    }
+    static T& toCpp(PyObject* pyobj)
+    {
+        return *((T*) ((Shiboken::PyBaseWrapper*)pyobj)->cptr);
+    }
+};
+
+template <typename T>
+struct Converter<T&> : Converter<const T&> {};
 
 // Primitive Types ------------------------------------------------------------
 template <>
