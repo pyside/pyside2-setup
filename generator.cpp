@@ -196,7 +196,7 @@ AbstractMetaFunctionList Generator::queryFunctions(const AbstractMetaClass *cppC
         default_flags);
 
         // put enum constructor first to avoid conflict with int contructor
-        result = sortContructor(result);
+        result = sortConstructor(result);
 
         // Final functions
         result += cppClass->queryFunctions(AbstractMetaClass::FinalInTargetLangFunctions |
@@ -265,7 +265,7 @@ AbstractMetaFunctionList Generator::queryGlobalOperators(const AbstractMetaClass
     return result;
 }
 
-AbstractMetaFunctionList Generator::sortContructor(AbstractMetaFunctionList list)
+AbstractMetaFunctionList Generator::sortConstructor(AbstractMetaFunctionList list)
 {
     AbstractMetaFunctionList result;
 

@@ -238,7 +238,7 @@ protected:
     AbstractMetaFunctionList filterFunctions(const AbstractMetaClass *cppClass);
     AbstractMetaFunctionList queryFunctions(const AbstractMetaClass *cpp_class, bool all_function = false);
     AbstractMetaFunctionList queryGlobalOperators(const AbstractMetaClass *cpp_class);
-    AbstractMetaFunctionList sortContructor(AbstractMetaFunctionList list);
+    AbstractMetaFunctionList sortConstructor(AbstractMetaFunctionList list);
 
     virtual bool doSetup(const QMap<QString, QString>& args) = 0;
 
