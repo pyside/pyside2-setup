@@ -1050,6 +1050,13 @@ public:
     */
     bool hasInjectedCode() const;
     /**
+    *   Returns a list of code snips for this function.
+    *   The code snips can be filtered by position and language.
+    *   \return list of code snips
+    */
+    CodeSnipList injectedCodeSnips(CodeSnip::Position position = CodeSnip::Any,
+                                   TypeSystem::Language language = TypeSystem::All) const;
+    /**
     *   Verifies if any modification to the function alters/removes its
     *   arguments types or default values.
     *   \return true if there is some modification to function signature

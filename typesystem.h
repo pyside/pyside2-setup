@@ -242,7 +242,8 @@ public:
         Declaration,
         PrototypeInitialization,
         ConstructorInitialization,
-        Constructor
+        Constructor,
+        Any
     };
 
     CodeSnip() : language(TypeSystem::TargetLangCode) { }

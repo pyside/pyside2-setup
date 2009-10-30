@@ -697,6 +697,21 @@ bool AbstractMetaFunction::hasInjectedCode() const
     return false;
 }
 
+CodeSnipList AbstractMetaFunction::injectedCodeSnips(CodeSnip::Position position, TypeSystem::Language language) const
+{
+    CodeSnipList result;
+    foreach (const FunctionModification mod, modifications(ownerClass())) {
+        if (mod.isCodeInjection()) {
+            QList<CodeSnip>::const_iterator it = mod.snips.constBegin();
+            for (;it != mod.snips.constEnd(); ++it) {
+                if ((it->language & language) && (it->position == position || position == CodeSnip::Any))
+                    result << *it;
+            }
+        }
+    }
+    return result;
+}
+
 bool AbstractMetaFunction::hasSignatureModifications() const
 {
     foreach (const FunctionModification mod, modifications(ownerClass())) {
