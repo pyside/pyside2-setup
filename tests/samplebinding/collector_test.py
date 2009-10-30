@@ -46,7 +46,7 @@ class CollectorTest(unittest.TestCase):
         collector = Collector()
         collector << 2 << 3 << 5 << 7 << 11
         self.assertEqual(collector.size(), 5)
-        self.assertEqual(collector.items(), [2, 3, 5, 7, 11])
+        self.assertEqual(collector.items(), [2, 3, 5, 7, 11, 13])
 
 
 if __name__ == '__main__':

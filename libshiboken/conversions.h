@@ -70,23 +70,6 @@ struct Converter<void*>
     }
 };
 
-// Value Types References -----------------------------------------------------
-template <typename T>
-struct Converter<T&> : Converter<T>
-{
-    static PyObject* toPython(T& cppobj)
-    {
-        return Converter<void*>::toPython(&cppobj);
-    }
-    static T& toCpp(PyObject* pyobj)
-    {
-        return *((T*) ((Shiboken::PyBaseWrapper*)pyobj)->cptr);
-    }
-};
-
-template <typename T>
-struct Converter<const T&> : Converter<T&> {};
-
 // Primitive Types ------------------------------------------------------------
 template <>
 struct Converter<bool>
