@@ -708,26 +708,6 @@ AbstractMetaFunctionList ShibokenGenerator::queryGlobalOperators(const AbstractM
     return result;
 }
 
-AbstractMetaFunctionList ShibokenGenerator::sortContructor(AbstractMetaFunctionList list)
-{
-    AbstractMetaFunctionList result;
-
-    foreach (AbstractMetaFunction *func, list) {
-        bool inserted = false;
-        foreach (AbstractMetaArgument *arg, func->arguments()) {
-            if (arg->type()->isFlags() || arg->type()->isEnum()) {
-                result.push_back(func);
-                inserted = true;
-                break;
-            }
-        }
-        if (!inserted)
-            result.push_front(func);
-    }
-
-    return result;
-}
-
 AbstractMetaFunctionList ShibokenGenerator::queryFunctions(const AbstractMetaClass *metaClass, bool allFunctions)
 {
     AbstractMetaFunctionList result;
@@ -741,7 +721,7 @@ AbstractMetaFunctionList ShibokenGenerator::queryFunctions(const AbstractMetaCla
                                            | defaultFlags);
 
         // put enum constructor first to avoid conflict with int contructor
-        result = sortContructor(result);
+        result = sortConstructor(result);
 
         // Final functions
         result += metaClass->queryFunctions(AbstractMetaClass::FinalInTargetLangFunctions

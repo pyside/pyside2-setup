@@ -207,7 +207,6 @@ protected:
 
     AbstractMetaFunctionList filterFunctions(const AbstractMetaClass* metaClass);
     AbstractMetaFunctionList queryGlobalOperators(const AbstractMetaClass* metaClass);
-    AbstractMetaFunctionList sortContructor(AbstractMetaFunctionList list);
 };
 
 
