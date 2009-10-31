@@ -52,6 +52,21 @@ public:
 
 private:
     std::list<int> m_items;
+
+    Collector(const Collector&);
+    Collector& operator=(const Collector&);
 };
+
+/* Helper for testing external operators */
+class IntWrapper
+{
+public:
+    IntWrapper(int x=0):value(x){}
+
+    int value;
+};
+
+Collector &operator<<(Collector&, const IntWrapper&);
+
 #endif // COLLECTOR_H
 

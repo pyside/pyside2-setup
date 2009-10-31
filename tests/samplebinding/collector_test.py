@@ -29,7 +29,7 @@
 import sys
 import unittest
 
-from sample import Collector
+from sample import Collector, IntWrapper
 
 class CollectorTest(unittest.TestCase):
     '''Test cases for Collector class' shift operators.'''
@@ -48,6 +48,15 @@ class CollectorTest(unittest.TestCase):
         self.assertEqual(collector.size(), 5)
         self.assertEqual(collector.items(), [2, 3, 5, 7, 11])
 
+class CollectorExternalOperator(unittest.TestCase):
+    '''Test cases for external operators of Collector'''
+
+    def testLShiftExternal(self):
+        '''Collector external operator'''
+        collector = Collector()
+        collector << IntWrapper(5)
+        self.assertEqual(collector.size(), 1)
+        self.assertEqual(collector.items(), [5])
 
 if __name__ == '__main__':
     unittest.main()

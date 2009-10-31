@@ -59,3 +59,8 @@ Collector::size()
     return (int) m_items.size();
 }
 
+Collector &operator<<(Collector &s, const IntWrapper &w)
+{
+    s << w.value;
+    return s;
+}
