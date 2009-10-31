@@ -996,6 +996,8 @@ AbstractMetaClass *AbstractMetaBuilder::traverseClass(ClassModelItem classItem)
     metaClass->setTypeEntry(type);
     metaClass->setBaseClassNames(classItem->baseClasses());
     *metaClass += AbstractMetaAttributes::Public;
+    if (type->stream())
+        metaClass->setStream(true);
 
     AbstractMetaClass *oldCurrentClass = m_currentClass;
     m_currentClass = metaClass;

@@ -1321,8 +1321,9 @@ public:
               m_templateBaseClass(0),
               m_extractedInterface(0),
               m_primaryInterfaceImplementor(0),
-              m_typeEntry(0)//,
+              m_typeEntry(0),
               //m_qDebugStreamFunction(0)
+              m_stream(false)
     {}
 
     virtual ~AbstractMetaClass();
@@ -1739,6 +1740,16 @@ public:
         return m_isTypeAlias;
     }
 
+    void setStream(bool stream)
+    {
+        m_stream = stream;
+    }
+
+    bool isStream() const
+    {
+        return m_stream;
+    }
+
 private:
     uint m_namespace : 1;
     uint m_qobject : 1;
@@ -1779,6 +1790,8 @@ private:
     QList<TypeEntry *> m_templateArgs;
     ComplexTypeEntry *m_typeEntry;
 //     FunctionModelItem m_qDebugStreamFunction;
+
+    bool m_stream;
 };
 
 class QPropertySpec
