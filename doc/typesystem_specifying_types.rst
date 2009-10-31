@@ -170,13 +170,18 @@ value-type
         <typesystem>
             <value-type  name="..."
              copyable="yes | no"
-             hash-function="..." />
+             hash-function="..."
+             stream="yes | no" />
         </typesystem>
 
     The **name** attribute is the fully qualified C++ class name, such as
     "QMatrix" or "QPainterPath::Element". The **copyable** attribute is used to
     force or not specify if this type is copyable. The *optional* **hash-function**
     attribute informs the function name of a hash function for the type.
+
+    The *optional* attribute **stream** specifies whether this type will be able to
+    use externally defined operators, like QDataStream << and >>. If equals to **yes**,
+    these operators will be called as normal methods within the current class.
 
 
 .. _object-type:
@@ -193,7 +198,8 @@ object-type
         <typesystem>
             <object-type name="..."
              copyable="yes | no"
-             hash-function="..." />
+             hash-function="..."
+             stream="yes | no" />
         </typesystem>
 
     The **name** attribute is the fully qualified C++ class name. If there is no
@@ -201,6 +207,10 @@ object-type
     superclass for the given type, in the generated target language API. The
     **copyable** and **hash-function** attributes are the same as described for
     :ref:`value-type`.
+
+    The *optional* attribute **stream** specifies whether this type will be able to
+    use externally defined operators, like QDataStream << and >>. If equals to **yes**,
+    these operators will be called as normal methods within the current class.
 
 
 interface-type

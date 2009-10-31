@@ -220,8 +220,7 @@ void AbstractMetaBuilder::traverseStreamOperator(FunctionModelItem item)
         AbstractMetaClass *streamClass = argumentToClass(arguments.at(0));
         AbstractMetaClass *streamedClass = argumentToClass(arguments.at(1));
 
-        if (streamClass && streamedClass
-            && (streamClass->name() == "QDataStream" || streamClass->name() == "QTextStream")) {
+        if (streamClass && streamedClass && (streamClass->isStream())) {
             AbstractMetaClass *oldCurrentClass = m_currentClass;
             m_currentClass = streamedClass;
             AbstractMetaFunction *streamFunction = traverseFunction(item);
