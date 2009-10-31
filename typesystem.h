@@ -621,7 +621,8 @@ public:
             : m_name(name),
               m_type(t),
               m_codeGeneration(GenerateAll),
-              m_preferredConversion(true)
+              m_preferredConversion(true),
+              m_stream(false)
     {
     };
 
@@ -711,6 +712,16 @@ public:
     virtual void setPreferredConversion(bool b)
     {
         m_preferredConversion = b;
+    }
+
+    bool stream() const
+    {
+        return m_stream;
+    }
+
+    void setStream(bool b)
+    {
+        m_stream = b;
     }
 
     // The type's name in C++, fully qualified
@@ -899,6 +910,7 @@ private:
     Include m_include;
     QHash<QString, bool> m_includesUsed;
     QString m_conversionRule;
+    bool m_stream;
 };
 typedef QHash<QString, QList<TypeEntry *> > TypeEntryHash;
 typedef QHash<QString, TypeEntry *> SingleTypeEntryHash;

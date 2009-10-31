@@ -493,6 +493,7 @@ bool Handler::startElement(const QString &, const QString &n,
             attributes["force-abstract"] = QString("no");
             attributes["deprecated"] = QString("no");
             attributes["hash-function"] = QString("");
+            attributes["stream"] = QString("no");
             // fall throooough
         case StackElement::InterfaceTypeEntry:
             attributes["default-superclass"] = m_defaultSuperclass;
@@ -649,6 +650,7 @@ bool Handler::startElement(const QString &, const QString &n,
             if (!element->entry)
                 element->entry = new ValueTypeEntry(name);
 
+            element->entry->setStream(attributes["stream"] == QString("yes"));
 
             ComplexTypeEntry *ctype = static_cast<ComplexTypeEntry *>(element->entry);
             ctype->setTargetLangPackage(attributes["package"]);
