@@ -122,6 +122,8 @@ public:
 
     void writeBaseConversion(QTextStream& s, const AbstractMetaType* type,
                              const AbstractMetaClass* context);
+    /// Simpler version of writeBaseConversion, uses only the base name of the type.
+    void writeBaseConversion(QTextStream& s, const TypeEntry* type);
     void writeToPythonConversion(QTextStream& s, const AbstractMetaType* type,
                                  const AbstractMetaClass* context, QString argumentName = QString());
     void writeToCppConversion(QTextStream& s, const AbstractMetaType* type,

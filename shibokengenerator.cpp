@@ -254,6 +254,16 @@ QString ShibokenGenerator::getFunctionReturnType(const AbstractMetaFunction* fun
     //translateType(func->type(), func->implementingClass()) : modifiedReturnType;
 }
 
+static QString baseConversionString(QString typeName)
+{
+    return QString("Shiboken::Converter<%1 >::").arg(typeName);
+}
+
+void ShibokenGenerator::writeBaseConversion(QTextStream& s, const TypeEntry* type)
+{
+    s << baseConversionString(type->name());
+}
+
 void ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaType* type,
                                             const AbstractMetaClass* context)
 {
@@ -281,7 +291,7 @@ void ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaTy
     if (typeName.endsWith("&") && !(type->isValue() && type->isReference()))
         typeName.chop(1);
 
-    s << "Shiboken::Converter<" << typeName << " >::";
+    s << baseConversionString(typeName);
 }
 
 void ShibokenGenerator::writeToPythonConversion(QTextStream& s, const AbstractMetaType* type,
@@ -521,7 +531,7 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* 
 {
     QString baseName;
     QTextStream s(&baseName);
-    writeBaseConversion(s, metaType, 0);
+    writeBaseConversion(s, metaType->typeEntry());
     s << "isConvertible";
     s.flush();
     return baseName;
