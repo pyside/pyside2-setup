@@ -35,8 +35,6 @@
 #ifndef REFERENCE_H
 #define REFERENCE_H
 
-#include "str.h"
-
 class Reference
 {
 public:
