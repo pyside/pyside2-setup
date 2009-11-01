@@ -39,14 +39,14 @@ namespace Shiboken
 {
 
 PyObject*
-PyBaseWrapper_New(PyTypeObject* instanceType, PyTypeObject* baseWrapperType, void* cptr, uint hasOwnership)
+PyBaseWrapper_New(PyTypeObject* instanceType, PyTypeObject* baseWrapperType, const void* cptr, uint hasOwnership)
 {
     if (!cptr)
         return 0;
 
     PyObject *self = instanceType->tp_alloc(instanceType, 0);
     ((Shiboken::PyBaseWrapper*)self)->baseWrapperType = baseWrapperType;
-    ((Shiboken::PyBaseWrapper*)self)->cptr = cptr;
+    ((Shiboken::PyBaseWrapper*)self)->cptr = const_cast<void*>(cptr);
     ((Shiboken::PyBaseWrapper*)self)->hasOwnership = hasOwnership;
     ((Shiboken::PyBaseWrapper*)self)->validCppObject = 1;
     BindingManager::instance().assignWrapper(self, cptr);

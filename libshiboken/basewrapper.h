@@ -115,7 +115,7 @@ typedef struct {
 
 PyAPI_FUNC(PyObject*)
 PyBaseWrapper_New(PyTypeObject *instanceType, PyTypeObject *baseWrapperType,
-                  void *cptr, uint hasOwnership = 1);
+                  const void *cptr, uint hasOwnership = 1);
 
 inline bool
 cppObjectIsValid(PyBaseWrapper* self)
