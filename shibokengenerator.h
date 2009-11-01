@@ -120,8 +120,8 @@ public:
     bool hasInjectedCodeOrSignatureModification(const AbstractMetaFunction* func);
     QStringList getBaseClasses(const AbstractMetaClass* metaClass);
 
-    QString writeBaseConversion(QTextStream& s, const AbstractMetaType* type,
-                                const AbstractMetaClass* context);
+    void writeBaseConversion(QTextStream& s, const AbstractMetaType* type,
+                             const AbstractMetaClass* context);
     void writeToPythonConversion(QTextStream& s, const AbstractMetaType* type,
                                  const AbstractMetaClass* context, QString argumentName = QString());
     void writeToCppConversion(QTextStream& s, const AbstractMetaType* type,

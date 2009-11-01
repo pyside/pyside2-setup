@@ -254,8 +254,8 @@ QString ShibokenGenerator::getFunctionReturnType(const AbstractMetaFunction* fun
     //translateType(func->type(), func->implementingClass()) : modifiedReturnType;
 }
 
-QString ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaType* type,
-                                               const AbstractMetaClass* context)
+void ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaType* type,
+                                            const AbstractMetaClass* context)
 {
     QString typeName;
     if (type->isPrimitive()) {
@@ -274,17 +274,14 @@ QString ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMet
     if ((type->isQObject() || type->isObject()) && typeName.startsWith("const "))
         typeName.remove(0, 6);
 
-    QString conversion = typeName;
-
     // Remove the constness, if any
-    if (conversion.startsWith("const ") && type->name() != "char")
-        conversion.remove(0, 6);
+    if (typeName.startsWith("const ") && type->name() != "char")
+        typeName.remove(0, 6);
 
-    if (conversion.endsWith("&") && !(type->isValue() && type->isReference()))
-        conversion.chop(1);
+    if (typeName.endsWith("&") && !(type->isValue() && type->isReference()))
+        typeName.chop(1);
 
-    s << "Shiboken::Converter<" << conversion << " >::";
-    return typeName;
+    s << "Shiboken::Converter<" << typeName << " >::";
 }
 
 void ShibokenGenerator::writeToPythonConversion(QTextStream& s, const AbstractMetaType* type,
