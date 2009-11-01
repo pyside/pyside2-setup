@@ -36,70 +36,83 @@
 #define CONVERSIONS_H
 
 #include <Python.h>
+#include <pyenum.h>
 #include <basewrapper.h>
 #include <bindingmanager.h>
 
 namespace Shiboken
 {
 
+// Value (base) Conversions --------------------------------------------------
 template <typename T>
 struct Converter
 {
-    static bool isConvertible(PyObject* pyObj)
+    static bool isConvertible(PyObject* pyobj)
     {
         return false;
     }
-    static PyObject* toPython(T cppObj);
-    static T toCpp(PyObject* pyObj);
+    static PyObject* createWrapper(const T* cppobj)
+    {
+        return 0;
+    }
+    static PyObject* createWrapper(const T& cppobj)
+    {
+        return Converter<T>::createWrapper(&cppobj);
+    }
+    static PyObject* toPython(T cppobj);
+    static T toCpp(PyObject* pyobj);
 };
 
-// Object Types ---------------------------------------------------------------
-template <>
-struct Converter<void*>
-{
-    static PyObject* toPython(const void* cppobj)
-    {
-        PyObject* obj = BindingManager::instance().retrieveWrapper(cppobj);
-        Py_XINCREF(obj);
-        return obj;
-    }
-    static void* toCpp(PyObject* pyobj)
-    {
-        return ((Shiboken::PyBaseWrapper*) pyobj)->cptr;
-    }
-};
-
-// C++ References to Value Types ----------------------------------------------
+// Pointer Conversions -------------------------------------------------------
 template <typename T>
-struct Converter<const T&> : Converter<T>
+struct Converter<T*> : Converter<T>
+{
+    static PyObject* toPython(const T* cppobj)
+    {
+        PyObject* pyobj = BindingManager::instance().retrieveWrapper(cppobj);
+        if (pyobj)
+            Py_INCREF(pyobj);
+        else
+            pyobj = Converter<T*>::createWrapper(cppobj);
+        return pyobj;
+    }
+    static T* toCpp(PyObject* pyobj)
+    {
+        return (T*) ((Shiboken::PyBaseWrapper*) pyobj)->cptr;
+    }
+};
+
+template <typename T>
+struct Converter<const T*> : Converter<T*> {};
+
+// Reference Conversions -----------------------------------------------------
+template <typename T>
+struct Converter<T&> : Converter<T*>
 {
     static PyObject* toPython(const T& cppobj)
     {
-        PyObject* pyobj = Converter<void*>::toPython(&cppobj);
-        if (!pyobj)
-            pyobj = Converter<T>::toPython(cppobj);
-        return pyobj;
+        return Converter<T*>::toPython(&cppobj);
     }
     static T& toCpp(PyObject* pyobj)
     {
-        return *((T*) ((Shiboken::PyBaseWrapper*)pyobj)->cptr);
+        return *Converter<T*>::toCpp(pyobj);
     }
 };
 
 template <typename T>
-struct Converter<T&> : Converter<const T&> {};
+struct Converter<const T&> : Converter<T&> {};
 
-// Primitive Types ------------------------------------------------------------
+// Primitive Conversions ------------------------------------------------------
 template <>
 struct Converter<bool>
 {
-    static bool isConvertible(PyObject* pyObj)
+    static bool isConvertible(PyObject* pyobj)
     {
-        return PyInt_Check(pyObj);
+        return PyInt_Check(pyobj);
     }
-    static PyObject* toPython(bool cppObj)
+    static PyObject* toPython(bool cppobj)
     {
-        return PyBool_FromLong(cppObj);
+        return PyBool_FromLong(cppobj);
     }
     static bool toCpp(PyObject* pyobj)
     {
@@ -110,9 +123,9 @@ struct Converter<bool>
 template <typename PyIntEquiv>
 struct Converter_PyInt
 {
-    static PyObject* toPython(PyIntEquiv cppObj)
+    static PyObject* toPython(PyIntEquiv cppobj)
     {
-        return PyInt_FromLong((long) cppObj);
+        return PyInt_FromLong((long) cppobj);
     }
     static PyIntEquiv toCpp(PyObject* pyobj)
     {
@@ -187,8 +200,22 @@ struct Converter_PyFloat
 template <> struct Converter<float> : Converter_PyFloat<float> {};
 template <> struct Converter<double> : Converter_PyFloat<double> {};
 
-// C Sting Types --------------------------------------------------------------
+// PyEnum Conversions ---------------------------------------------------------
+template <typename CppEnum>
+struct Converter_CppEnum
+{
+    static PyObject* createWrapper(const CppEnum& cppobj);
+    static CppEnum toCpp(PyObject* pyobj)
+    {
+        return (CppEnum) ((Shiboken::PyEnumObject*)pyobj)->ob_ival;
+    }
+    static PyObject* toPython(CppEnum cppenum)
+    {
+        return Converter<CppEnum>::createWrapper(cppenum);
+    }
+};
 
+// C Sting Types --------------------------------------------------------------
 template <typename CString>
 struct Converter_CString
 {

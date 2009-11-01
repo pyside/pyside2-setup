@@ -686,7 +686,7 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadDa
     s << cpythonCheckFunction(argType, numberType) << '(' << argumentName << ')';
 
     if (!implicitConvs.isEmpty())
-        s << " || " << cpythonIsConvertibleFunction(argType) << ')';
+        s << " || " << cpythonIsConvertibleFunction(argType) << '(' << argumentName << "))";
 }
 
 void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* parentOverloadData)
