@@ -30,6 +30,18 @@
 
 static Indentor INDENT;
 
+
+CppGenerator::CppGenerator()
+{
+    // sequence protocol functions
+    typedef QPair<QString, QString> StrPair;
+    m_sequenceProtocol.insert("__len__", StrPair("PyObject* self", "Py_ssize_t"));
+    m_sequenceProtocol.insert("__getitem__", StrPair("PyObject* self, Py_ssize_t _i", "PyObject*"));
+    m_sequenceProtocol.insert("__setitem__", StrPair("PyObject* self, Py_ssize_t _i, PyObject* _value", "int"));
+    m_sequenceProtocol.insert("__contains__", StrPair("PyObject* self, PyObject* _value", "int"));
+    m_sequenceProtocol.insert("__concat__", StrPair("PyObject* self, PyObject* _other", "PyObject*"));
+}
+
 QString CppGenerator::fileNameForClass(const AbstractMetaClass *metaClass) const
 {
     return metaClass->qualifiedCppName().toLower().replace("::", "_") + QLatin1String("_wrapper.cpp");
@@ -174,6 +186,9 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
             continue;
 
         const AbstractMetaFunction* rfunc = overloads[0];
+        if (m_sequenceProtocol.contains(rfunc->name()))
+            continue;
+
         if (rfunc->isConstructor())
             writeConstructorWrapper(s, overloads);
         else if (rfunc->isArithmeticOperator()
@@ -219,6 +234,11 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
         s << "// type has number operators" << endl;
         writeTypeAsNumberDefinition(s, metaClass);
+    }
+
+    if (supportsSequenceProtocol(metaClass)) {
+        writeSequenceMethods(s, metaClass);
+        writeTypeAsSequenceDefinition(s, metaClass);
     }
 
     if (hasComparisonOperator) {
@@ -986,12 +1006,22 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     s << ';' << endl;
 }
 
+bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass* metaClass)
+{
+    foreach(QString funcName, m_sequenceProtocol.keys()) {
+        if (metaClass->hasFunction(funcName))
+            return true;
+    }
+    return false;
+}
+
 void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     QString tp_flags;
     QString tp_new;
     QString tp_dealloc;
-    QString tp_as_number = QString('0');
+    QString tp_as_number('0');
+    QString tp_as_sequence('0');
     QString cppClassName = metaClass->qualifiedCppName();
     QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
     QString baseClassName;
@@ -1001,6 +1031,10 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         || metaClass->hasBitwiseOperatorOverload()) {
         tp_as_number = QString("&Py%1_as_number").arg(cppClassName);
     }
+
+    // sequence protocol check
+    if (supportsSequenceProtocol(metaClass))
+        tp_as_sequence = QString("&Py%1_as_sequence").arg(cppClassName);
 
     if (metaClass->baseClass())
         baseClassName = QString("&") + cpythonTypeName(metaClass->baseClass()->typeEntry());
@@ -1045,7 +1079,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_compare*/          0," << endl;
     s << INDENT << "/*tp_repr*/             " << m_tpFuncs["__repr__"] << "," << endl;
     s << INDENT << "/*tp_as_number*/        " << tp_as_number << ',' << endl;
-    s << INDENT << "/*tp_as_sequence*/      0," << endl;
+    s << INDENT << "/*tp_as_sequence*/      " << tp_as_sequence << ',' << endl;
     s << INDENT << "/*tp_as_mapping*/       0," << endl;
     s << INDENT << "/*tp_hash*/             0," << endl;
     s << INDENT << "/*tp_call*/             0," << endl;
@@ -1080,6 +1114,58 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_subclasses*/       0," << endl;
     s << INDENT << "/*tp_weaklist*/         0" << endl;
     s << "};" << endl << endl;
+}
+
+
+void CppGenerator::writeSequenceMethods(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    QMap<QString, QString> funcs;
+
+    QHash< QString, QPair< QString, QString > >::const_iterator it = m_sequenceProtocol.begin();
+    for (; it != m_sequenceProtocol.end(); ++it) {
+        const AbstractMetaFunction* func = metaClass->findFunction(it.key());
+        if (!func)
+            continue;
+        QString funcName = cpythonFunctionName(func);
+        QString funcArgs = it.value().first;
+        QString funcRetVal = it.value().second;
+
+        CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
+        s << funcRetVal << ' ' << funcName << '(' << funcArgs << ')'
+          << "\n{\n"
+          << INDENT << "if (!Shiboken::cppObjectIsValid((Shiboken::PyBaseWrapper*)self)) {\n"
+          << INDENT << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"C++ object is invalid.\");\n"
+          << INDENT << INDENT << "return 0;\n"
+          << INDENT << "}\n"
+          << INDENT << func->ownerClass()->name() << "* cppSelf = " << cpythonWrapperCPtr(func->ownerClass(), "self") << ";\n"
+          << INDENT << "(void)cppSelf; // avoid warnings about unused variables\n";
+          writeCodeSnips(s, snips,CodeSnip::Any, TypeSystem::TargetLangCode, func);
+        s << "}\n\n";
+    }
+}
+
+void CppGenerator::writeTypeAsSequenceDefinition(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    QString className = metaClass->qualifiedCppName();
+    QMap<QString, QString> funcs;
+
+    foreach(QString funcName, m_sequenceProtocol.keys()) {
+        const AbstractMetaFunction* func = metaClass->findFunction(funcName);
+        funcs[funcName] = func ? cpythonFunctionName(func).prepend("&") : "0";
+    }
+
+    s << "static PySequenceMethods Py" << className << "_as_sequence = {\n"
+      << INDENT << "/*sq_length*/ " << funcs["__len__"] << ",\n"
+      << INDENT << "/*sq_concat*/ " << funcs["__concat__"] << ",\n"
+      << INDENT << "/*sq_repeat*/ 0,\n"
+      << INDENT << "/*sq_item*/ " << funcs["__getitem__"] << ",\n"
+      << INDENT << "/*sq_slice*/ 0,\n"
+      << INDENT << "/*sq_ass_item*/ " << funcs["__setitem__"] << ",\n"
+      << INDENT << "/*sq_ass_slice*/ 0,\n"
+      << INDENT << "/*sq_contains*/ " << funcs["__contains__"] << ",\n"
+      << INDENT << "/*sq_inplace_concat*/ 0,\n"
+      << INDENT << "/*sq_inplace_repeat*/ 0\n"
+      << "};\n\n";
 }
 
 void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMetaClass* metaClass)

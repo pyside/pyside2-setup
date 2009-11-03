@@ -251,6 +251,36 @@
                 %0 = PyString_FromString(%CPPSELF.cstring());
             </inject-code>
         </add-function>
+        <add-function signature="__len__" >
+            <inject-code class="target" position="end">
+                return %CPPSELF.size();
+            </inject-code>
+        </add-function>
+        <add-function signature="__getitem__" >
+            <inject-code class="target" position="beginning">
+                if (_i &lt; 0 || _i >= %CPPSELF.size()) {
+                    PyErr_BadArgument();
+                    return 0;
+                } else {
+                    char res[2];
+                    res[0] = %CPPSELF.get_char(_i);
+                    res[1] = 0;
+                    return PyString_FromString(res);
+                }
+            </inject-code>
+        </add-function>
+        <add-function signature="__setitem__" >
+            <inject-code class="target" position="beginning">
+                PyObject* args = Py_BuildValue("(iO)", _i, _value);
+                PyObject* result = PyStr_set_char(self, args);
+                Py_DECREF(args);
+                int ok = result == Py_True;
+                if (result) {
+                    Py_DECREF(result);
+                }
+                return !ok ? -1 : 0;
+            </inject-code>
+        </add-function>
     </value-type>
 
     <value-type name="SimpleFile">

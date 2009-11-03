@@ -32,6 +32,8 @@
  */
 class CppGenerator : public ShibokenGenerator
 {
+public:
+    CppGenerator();
 protected:
     QString fileNameForClass(const AbstractMetaClass* metaClass) const;
     QList<AbstractMetaFunctionList> filterGroupedFunctions(const AbstractMetaClass* metaClass = 0);
@@ -62,6 +64,10 @@ private:
     void writeClassRegister(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeClassDefinition(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeMethodDefinition(QTextStream& s, const AbstractMetaFunctionList overloads);
+    /// Writes the implementation of all methods part of python sequence protocol
+    void writeSequenceMethods(QTextStream& s, const AbstractMetaClass* metaClass);
+    /// Writes the struct PySequenceMethods for types thats supports the python sequence protocol
+    void writeTypeAsSequenceDefinition(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeTypeAsNumberDefinition(QTextStream& s, const AbstractMetaClass* metaClass);
 
     void writeRichCompareFunction(QTextStream& s, const AbstractMetaClass* metaClass);
@@ -80,6 +86,11 @@ private:
     void writeFlagsUnaryOperator(QTextStream& s, const AbstractMetaEnum* cppEnum,
                                  QString pyOpName, QString cppOpName, bool boolResult = false);
 
+    /// Returns true if the given class supports the python sequence protocol
+    bool supportsSequenceProtocol(const AbstractMetaClass* metaClass);
+    // Maps special function names to function parameters and return types
+    // used by CPython API in the sequence protocol.
+    QHash<QString, QPair<QString, QString> > m_sequenceProtocol;
 };
 
 #endif // CPPGENERATOR_H

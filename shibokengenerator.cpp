@@ -824,7 +824,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                                        const AbstractMetaFunction* func)
 {
     foreach (CodeSnip snip, codeSnips) {
-        if ((snip.position != position) || !(snip.language & language))
+        if ((position != CodeSnip::Any && snip.position != position) || !(snip.language & language))
             continue;
 
         QString code;

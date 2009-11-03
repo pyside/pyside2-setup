@@ -50,6 +50,39 @@ class StrTest(unittest.TestCase):
         '''Test passing a Python class implicitly convertible to a wrapped class that is expected to be passed as reference.'''
         s1 = Str('This is %VAR!').arg('Athens')
         self.assertEqual(str(s1), 'This is Athens!')
+    def testSequenceOperators(self):
+        s1 = Str("abcdef")
+        self.assertEqual(len(s1), 6);
+        self.assertEqual(len(Str()), 0);
+
+        # getitem
+        self.assertEqual(s1[0], "a");
+        self.assertEqual(s1[1], "b");
+        self.assertEqual(s1[2], "c");
+        self.assertEqual(s1[3], "d");
+        self.assertEqual(s1[4], "e");
+        self.assertEqual(s1[5], "f");
+        self.assertEqual(s1[-1], "f");
+        self.assertEqual(s1[-2], "e");
+
+        try:
+            print s1[6]
+            self.assertFalse(true);
+        except:
+            pass
+
+        # setitem
+        s1[0] = 65
+        s1[1] = 66
+        self.assertEqual(s1[0], "A");
+        self.assertEqual(s1[1], "B");
+        try:
+            s1[6] = 67
+            self.assertFalse(true);
+        except:
+            pass
+
+
 
 if __name__ == '__main__':
     unittest.main()
