@@ -48,14 +48,17 @@ public:
     double x() const { return m_x; }
     double y() const { return m_y; }
 
+    void setX(double x) { m_x = x; }
+    void setY(double y) { m_y = y; }
+
     bool operator==(const Point& other);
     Point operator+(const Point& other);
     Point operator-(const Point& other);
 
-    friend Point operator*(Point& pt, double mult);
-    friend Point operator*(Point& pt, int mult);
-    friend Point operator*(double mult, Point& pt);
-    friend Point operator*(int mult, Point& pt);
+    friend Point operator*(const Point& pt, double mult);
+    friend Point operator*(const Point& pt, int mult);
+    friend Point operator*(double mult, const Point& pt);
+    friend Point operator*(int mult, const Point& pt);
     friend Point operator-(const Point& pt);
     friend bool operator!(const Point& pt);
 
@@ -69,17 +72,17 @@ private:
     double m_y;
 };
 
-Point operator*(Point& pt, double mult);
-Point operator*(Point& pt, int mult);
-Point operator*(double mult, Point& pt);
-Point operator*(int mult, Point& pt);
+Point operator*(const Point& pt, double mult);
+Point operator*(const Point& pt, int mult);
+Point operator*(double mult, const Point& pt);
+Point operator*(int mult, const Point& pt);
 Point operator-(const Point& pt);
 bool operator!(const Point& pt);
 
-Complex transmutePointIntoComplex(Point point);
-Point transmuteComplexIntoPoint(Complex cpx);
+Complex transmutePointIntoComplex(const Point& point);
+Point transmuteComplexIntoPoint(const Complex& cpx);
 
-Point operator*(Point& pt, double multiplier);
+Point operator*(const Point& pt, double multiplier);
 
 #endif // POINT_H
 

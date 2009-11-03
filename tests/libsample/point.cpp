@@ -88,25 +88,25 @@ Point::operator-=(Point &other)
 }
 
 Point
-operator*(Point& pt, double mult)
+operator*(const Point& pt, double mult)
 {
     return Point(pt.m_x * mult, pt.m_y * mult);
 }
 
 Point
-operator*(Point& pt, int mult)
+operator*(const Point& pt, int mult)
 {
     return Point(((int) pt.m_x) * mult, ((int) pt.m_y) * mult);
 }
 
 Point
-operator*(double mult, Point& pt)
+operator*(double mult, const Point& pt)
 {
     return Point(pt.m_x * mult, pt.m_y * mult);
 }
 
 Point
-operator*(int mult, Point& pt)
+operator*(int mult, const Point& pt)
 {
     return Point(((int) pt.m_x) * mult, ((int) pt.m_y) * mult);
 }
@@ -124,22 +124,16 @@ operator!(const Point& pt)
 }
 
 Complex
-transmutePointIntoComplex(Point point)
+transmutePointIntoComplex(const Point& point)
 {
     Complex cpx(point.x(), point.y());
-    // cout << __PRETTY_FUNCTION__ << " ";
-    // point.show();
-    // cout << endl;
     return cpx;
 }
 
 Point
-transmuteComplexIntoPoint(Complex cpx)
+transmuteComplexIntoPoint(const Complex& cpx)
 {
     Point pt(cpx.real(), cpx.imag());
-    // cout << __PRETTY_FUNCTION__ << " ";
-    // cpx.show();
-    // cout << endl;
     return pt;
 }
 
