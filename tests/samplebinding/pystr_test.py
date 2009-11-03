@@ -37,7 +37,7 @@ class PyStrTest(unittest.TestCase):
     def testPyStr(self):
         '''Test case for defined __str__ method.'''
         pt = Point(5, 2)
-        self.assertEqual(str(pt), 'Point(5, 2)')
+        self.assertEqual(str(pt), 'Point(5.0, 2.0)')
 
 if __name__ == '__main__':
     unittest.main()

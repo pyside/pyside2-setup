@@ -217,13 +217,20 @@
     <value-type name="Point">
         <add-function signature="__str__()" return-type="PyObject*">
             <inject-code class="target" position="beginning">
-            %0 = PyString_FromFormat("Point(%d, %d)", (int) %CPPSELF.x(), (int) %CPPSELF.y());
+            int x1 = (int) %CPPSELF.x();
+            int x2 = ((int) (%CPPSELF.x() * 100)) - (x1 * 100);
+            int y1 = (int) %CPPSELF.y();
+            int y2 = ((int) (%CPPSELF.y() * 100)) - (y1 * 100);
+            %0 = PyString_FromFormat("Point(%d.%d, %d.%d)", x1, x2, y1, y2);
             </inject-code>
         </add-function>
         <add-function signature="__repr__()" return-type="PyObject*">
             <inject-code class="target" position="beginning">
-            %0 = PyString_FromFormat("&lt;Point object at %p: (%d, %d)&gt;",
-                                     %CPPSELF, (int) %CPPSELF.x(), (int) %CPPSELF.y());
+            int x1 = (int) %CPPSELF.x();
+            int x2 = ((int) (%CPPSELF.x() * 10)) - (x1 * 10);
+            int y1 = (int) %CPPSELF.y();
+            int y2 = ((int) (%CPPSELF.y() * 10)) - (y1 * 10);
+            %0 = PyString_FromFormat("&lt;Point object at %p: (%d.%d, %d.%d)&gt;", %CPPSELF, x1, x2, y1, y2);
             </inject-code>
         </add-function>
     </value-type>
