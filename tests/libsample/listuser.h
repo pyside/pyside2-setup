@@ -37,10 +37,13 @@
 
 #include <list>
 #include "complex.h"
+#include "point.h"
 
 class ListUser
 {
 public:
+    typedef std::list<Point*> PointList;
+
     ListUser() {}
     ListUser(const ListUser& other) : m_lst(other.m_lst) {}
     ~ListUser() {}
@@ -52,6 +55,8 @@ public:
 
     double sumList(std::list<int> vallist);
     double sumList(std::list<double> vallist);
+
+    static void multiplyPointList(PointList& points, double multiplier);
 
     void setList(std::list<int> lst) { m_lst = lst; }
     std::list<int> getList() { return m_lst; }

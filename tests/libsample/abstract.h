@@ -53,6 +53,9 @@ public:
     // factory method
     static Abstract* createObject() { return 0; }
 
+    // method that receives an Object Type
+    static int getObjectId(Abstract* obj) { return obj->id(); }
+
     virtual void pureVirtual() = 0;
     virtual void unpureVirtual();
 

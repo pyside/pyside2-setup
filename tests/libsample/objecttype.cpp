@@ -32,33 +32,60 @@
  * 02110-1301 USA
  */
 
-#ifndef STR_H
-#define STR_H
+#include "objecttype.h"
 
-class Str
+using namespace std;
+
+ObjectType::ObjectType(ObjectType* parent) : m_parent(0)
 {
-public:
-    Str(const Str& s);
-    Str(const char* cstr = "");
-    ~Str();
+    m_objectName = new Str("");
+    setParent(parent);
+}
 
-    Str arg(const Str& s) const;
+ObjectType::~ObjectType()
+{
+    while (!m_children.empty()) {
+        delete m_children.back();
+        m_children.pop_back();
+    }
 
-    Str& append(const Str& s);
+    delete m_objectName;
+}
 
-    const char* cstring() const;
-    char get_char(int pos) const;
-    bool set_char(int pos, char ch);
+void
+ObjectType::setParent(ObjectType* parent)
+{
+    if (m_parent == parent)
+        return;
 
-    void show() const;
+    if (m_parent) {
+        for(ObjectTypeList::iterator child_iter = m_parent->m_children.begin();
+            child_iter != m_parent->m_children.end(); child_iter++) {
+            if (this == *child_iter)
+                m_parent->m_children.erase(child_iter);
+        }
+    }
 
-    int size() const { return m_size; }
+    m_parent = parent;
+    if (m_parent)
+        m_parent->m_children.push_back(this);
+}
 
-private:
-    void init(const char* cstr);
-    char* m_str;
-    int m_size;
-};
+void
+ObjectType::setObjectName(const Str& name)
+{
+    delete m_objectName;
+    m_objectName = new Str(name);
+}
 
-#endif // STR_H
+Str
+ObjectType::objectName() const
+{
+    return *m_objectName;
+}
+
+bool ObjectType::event()
+{
+    return true;
+}
 

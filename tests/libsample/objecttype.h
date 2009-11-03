@@ -32,33 +32,36 @@
  * 02110-1301 USA
  */
 
-#ifndef STR_H
-#define STR_H
+#ifndef OBJECTTYPE_H
+#define OBJECTTYPE_H
 
-class Str
+#include <list>
+#include "str.h"
+
+class ObjectType
 {
 public:
-    Str(const Str& s);
-    Str(const char* cstr = "");
-    ~Str();
+    typedef std::list<ObjectType*> ObjectTypeList;
 
-    Str arg(const Str& s) const;
+    ObjectType(ObjectType* parent = 0);
+    virtual ~ObjectType();
 
-    Str& append(const Str& s);
+    void setParent(ObjectType* parent);
+    ObjectType* parent() const { return m_parent; }
+    const ObjectTypeList& children() const { return m_children; }
 
-    const char* cstring() const;
-    char get_char(int pos) const;
-    bool set_char(int pos, char ch);
+    Str objectName() const;
+    void setObjectName(const Str& name);
 
-    void show() const;
-
-    int size() const { return m_size; }
+    virtual bool event();
 
 private:
-    void init(const char* cstr);
-    char* m_str;
-    int m_size;
-};
+    ObjectType(const ObjectType&);
+    ObjectType& operator=(const ObjectType&);
 
-#endif // STR_H
+    Str* m_objectName;
+    ObjectType* m_parent;
+    ObjectTypeList m_children;
+};
+#endif // OBJECTTYPE_H
 

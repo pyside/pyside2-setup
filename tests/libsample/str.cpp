@@ -88,6 +88,17 @@ Str::arg(const Str& s) const
     return result;
 }
 
+Str&
+Str::append(const Str& s)
+{
+    char* tmp = m_str;
+    m_str = (char*) malloc (m_size + s.size() + 1);
+    strncpy(m_str, tmp, m_size + 1);
+    strncat(m_str, s.cstring(), s.size());
+    m_size = m_size + s.size();
+    return *this;
+}
+
 const char*
 Str::cstring() const
 {

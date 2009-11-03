@@ -29,7 +29,7 @@
 import sys
 import unittest
 
-from sample import ListUser
+from sample import ListUser, Point
 
 class ExtendedListUser(ListUser):
     def __init__(self):
@@ -92,6 +92,16 @@ class ListConversionTest(unittest.TestCase):
         result = lu.getList()
         self.assertNotEqual(result, lst)
         self.assertEqual(result, list(lst))
+
+    def testConversionOfListOfObjectsPassedAsArgument(self):
+        '''Calls method with a Python list of wrapped objects to be converted to a C++ list.'''
+        mult = 3
+        pts0 = (Point(1.0, 2.0), Point(3.3, 4.4), Point(5, 6))
+        pts1 = (Point(1.0, 2.0), Point(3.3, 4.4), Point(5, 6))
+        ListUser.multiplyPointList(pts1, mult)
+        for pt0, pt1 in zip(pts0, pts1):
+            self.assertEqual(pt0.x() * mult, pt1.x())
+            self.assertEqual(pt0.y() * mult, pt1.y())
 
 if __name__ == '__main__':
     unittest.main()

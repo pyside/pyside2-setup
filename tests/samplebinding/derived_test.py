@@ -132,6 +132,12 @@ class DerivedTest(unittest.TestCase):
         self.assertEqual(d.defaultValue(3), 3.1)
         self.assertEqual(d.defaultValue(), 0.1)
 
+    def testCallToMethodWithAbstractArgument(self):
+        '''Call to method that expects an Abstract argument.'''
+        objId = 123
+        d = Derived(objId)
+        self.assertEqual(Abstract.getObjectId(d), objId)
+
 if __name__ == '__main__':
     unittest.main()
 
