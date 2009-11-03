@@ -43,29 +43,29 @@
 namespace Shiboken
 {
 
-// Value (base) Conversions --------------------------------------------------
+// Base Conversions ----------------------------------------------------------
+template <typename T> struct Converter;
+
 template <typename T>
-struct Converter
+struct ConverterBase
 {
-    static bool isConvertible(PyObject* pyobj)
-    {
-        return false;
-    }
-    static PyObject* createWrapper(const T* cppobj)
-    {
-        return 0;
-    }
-    static PyObject* createWrapper(const T& cppobj)
-    {
-        return Converter<T>::createWrapper(&cppobj);
-    }
-    static PyObject* toPython(T cppobj);
-    static T toCpp(PyObject* pyobj);
+    static PyObject* createWrapper(const T* cppobj) { return 0; }
+    static T* copyCppObject(const T& cppobj) { return 0; }
+    static bool isConvertible(PyObject* pyobj) { return false; }
+
+    // Must be reimplemented.
+    static PyObject* toPython(const T& cppobj);
+
+    // Classes with implicit conversions are expected to reimplement
+    // this to build T from its various implicit constructors.
+    static T toCpp(PyObject* pyobj) { return *Converter<T*>::toCpp(pyobj); }
 };
 
-// Pointer Conversions -------------------------------------------------------
+// Specialization meant to be used by abstract classes and object-types
+// (i.e. classes with private copy constructors and = operators).
+// Example: "struct Converter<AbstractClass* > : ConverterBase<AbstractClass* >"
 template <typename T>
-struct Converter<T*> : Converter<T>
+struct ConverterBase<T*> : ConverterBase<T>
 {
     static PyObject* toPython(const T* cppobj)
     {
@@ -82,10 +82,30 @@ struct Converter<T*> : Converter<T>
     }
 };
 
+// Pointer Conversions
+template <typename T> struct Converter : ConverterBase<T> {};
 template <typename T>
-struct Converter<const T*> : Converter<T*> {};
+struct Converter<T*> : Converter<T>
+{
+    static PyObject* toPython(const T* cppobj)
+    {
+        PyObject* pyobj = BindingManager::instance().retrieveWrapper(cppobj);
+        if (pyobj)
+            Py_INCREF(pyobj);
+        else
+            pyobj = Converter<T>::createWrapper(cppobj);
+        return pyobj;
+    }
+    static T* toCpp(PyObject* pyobj)
+    {
+        if (Converter<T>::isConvertible(pyobj))
+            return Converter<T>::copyCppObject(Converter<T>::toCpp(pyobj));
+        return (T*) ((Shiboken::PyBaseWrapper*) pyobj)->cptr;
+    }
+};
+template <typename T> struct Converter<const T*> : Converter<T*> {};
 
-// Reference Conversions -----------------------------------------------------
+// Reference Conversions
 template <typename T>
 struct Converter<T&> : Converter<T*>
 {
@@ -98,9 +118,7 @@ struct Converter<T&> : Converter<T*>
         return *Converter<T*>::toCpp(pyobj);
     }
 };
-
-template <typename T>
-struct Converter<const T&> : Converter<T&> {};
+template <typename T> struct Converter<const T&> : Converter<T&> {};
 
 // Primitive Conversions ------------------------------------------------------
 template <>
@@ -204,7 +222,7 @@ template <> struct Converter<double> : Converter_PyFloat<double> {};
 template <typename CppEnum>
 struct Converter_CppEnum
 {
-    static PyObject* createWrapper(const CppEnum& cppobj);
+    static PyObject* createWrapper(CppEnum cppobj);
     static CppEnum toCpp(PyObject* pyobj)
     {
         return (CppEnum) ((Shiboken::PyEnumObject*)pyobj)->ob_ival;

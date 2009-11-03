@@ -854,17 +854,20 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 code.replace("%" + QString::number(i+1), QString("cpp_arg%1").arg(i - removed));
             }
 
-            // replace template variables for not removed arguments
+            // replace template variables for unremoved arguments
             int i = 0;
-            QString argumentNames;
+            QStringList argumentNames;
             foreach (const AbstractMetaArgument* arg, func->arguments()) {
-                if (func->argumentRemoved(arg->argumentIndex()+1))
+                if (func->argumentRemoved(arg->argumentIndex() + 1))
                     continue;
-                if (i > 0)
-                    argumentNames += ", ";
-                argumentNames += QString("cpp_arg%1").arg(i++);
+
+                QString argName = QString("cpp_arg%1").arg(i++);
+                if (shouldDereferenceArgumentPointer(arg))
+                    argName.prepend('*');
+                argumentNames << argName;
             }
-            code.replace("%ARGUMENT_NAMES", argumentNames);
+
+            code.replace("%ARGUMENT_NAMES", argumentNames.join(", "));
 
             replaceTemplateVariables(code, func);
         }

@@ -794,43 +794,44 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
                         QString argName = QString("cpp_arg%1").arg(i);
                         if (manyArgs)
                             pyArgName = QString("pyargs[%1]").arg(i);
-                        const AbstractMetaType* type = func->arguments()[i + removed]->type();
-                        QString typeName = translateTypeForWrapperMethod(type, func->implementingClass());
 
-                        bool isReferenceToNonExistentValueType = type->isValue()
-                                && type->isReference()
+                        const AbstractMetaType* type = func->arguments()[i + removed]->type();
+                        QString typeName;
+                        QString baseTypeName;
+                        if (type->typeEntry()->isValue() || type->typeEntry()->isObject()) {
+                            baseTypeName = type->typeEntry()->name();
+                            typeName = baseTypeName + '*';
+                        } else {
+                            typeName = translateTypeForWrapperMethod(type, func->implementingClass());
+                        }
+
+                        if (type->typeEntry()->isContainer()) {
+                            if (typeName.startsWith("const "))
+                                typeName.remove(0, 6);
+                            if (typeName.endsWith("&"))
+                                typeName.chop(1);
+                        }
+
+                        bool hasImplicitConversions = type->isValue()
                                 && !implicitConversions(type).isEmpty();
 
-                        if (isReferenceToNonExistentValueType) {
-                            QString baseTypeName = QString(typeName);
-                            baseTypeName.chop(1);
-                            s << INDENT << baseTypeName << "* " << argName << "_ptr;" << endl;
-                            s << INDENT << "std::auto_ptr<" << baseTypeName << "> " << argName << "_auto_ptr;" << endl;
-                            s << INDENT << "if (" << cpythonCheckFunction(type) << '(' << pyArgName << ")) {" << endl;
-                            {
-                                Indentation indent(INDENT);
-                                s << INDENT << argName << "_ptr = ";
-                                s << cpythonWrapperCPtr(type, pyArgName) << ';' << endl;
-                            }
-                            s << INDENT << "} else {" << endl;
-                            {
-                                Indentation indent(INDENT);
-                                s << INDENT << argName << "_ptr = new " << baseTypeName;
-                                s << "(Shiboken::Converter<" << baseTypeName << " >::toCpp(" << pyArgName << "));" << endl;
-                                s << INDENT << argName << "_auto_ptr = std::auto_ptr<" << baseTypeName;
-                                s << " >(" << argName << "_ptr);" << endl;
-                            }
-                            s << INDENT << '}' << endl;
+                        if (hasImplicitConversions) {
+                            s << INDENT << "std::auto_ptr<" << baseTypeName << " > ";
+                            s << argName << "_auto_ptr;" << endl;
                         }
 
                         s << INDENT << typeName << ' ' << argName << " = ";
-
-                        if (isReferenceToNonExistentValueType)
-                            s << '*' << argName << "_ptr";
-                        else
-                            writeToCppConversion(s, type, func->implementingClass(), pyArgName);
-
+                        s << "Shiboken::Converter<" << typeName << " >::toCpp(" << pyArgName << ')';
+                        //writeToCppConversion(s, type, func->implementingClass(), pyArgName);
                         s << ';' << endl;
+
+                        if (hasImplicitConversions) {
+                            s << INDENT << "if (!" << cpythonCheckFunction(type) << '(' << pyArgName << "))";
+                            s << endl;
+                            Indentation indent(INDENT);
+                            s << INDENT << argName << "_auto_ptr = std::auto_ptr<" << baseTypeName;
+                            s << " >(" << argName << ");" << endl;
+                        }
                     }
                 }
             }
@@ -887,10 +888,8 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                     userArgs << arg->defaultValueExpression();
             } else {
                 QString argName = QString("cpp_arg%1").arg(arg->argumentIndex() - removed);
-                if (arg->type()->typeEntry()->isObject() && arg->type()->isReference())
+                if (shouldDereferenceArgumentPointer(arg))
                     argName.prepend('*');
-                else if (arg->type()->isValuePointer())
-                    argName.prepend('&');
                 userArgs << argName;
             }
         }
@@ -933,14 +932,15 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         s << "::" << func->minimalSignature();
         s << "\" with the modifications provided on typesystem file" << endl;
     } else if (func->isOperatorOverload()) {
-        QString firstArg("cpp_arg0");
+        QString firstArg = QString("(*%1)").arg(cpythonWrapperCPtr(func->ownerClass()));
         QString secondArg("cpp_arg0");
-        QString selfArg = QString("(*%1)").arg(cpythonWrapperCPtr(func->ownerClass()));
+        if (!func->isUnaryOperator() && shouldDereferenceArgumentPointer(func->arguments().at(0))) {
+            secondArg.prepend("(*");
+            secondArg.append(')');
+        }
 
         if (ShibokenGenerator::isReverseOperator(func) || func->isUnaryOperator())
-            secondArg = selfArg;
-        else
-            firstArg = selfArg;
+            std::swap(firstArg, secondArg);
 
         QString op = func->originalName();
         op = op.right(op.size() - QString("operator").size());
@@ -961,7 +961,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         s << "cptr = new " << wrapperName(func->ownerClass());
         s << '(';
         if (func->isCopyConstructor() && maxArgs == 1)
-            s << "cpp_arg0";
+            s << "*cpp_arg0";
         else
             s << userArgs.join(", ");
         s << ')';

@@ -181,24 +181,41 @@ void HeaderGenerator::writeTypeCheckMacro(QTextStream& s, const TypeEntry* type)
 
 void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* type)
 {
-    QString cppName = type->name();
-
     s << "template<>" << endl;
-    s << "struct Converter<" << cppName << " >";
-    if (type->isEnum() || type->isFlags())
-        s << " : Converter_CppEnum<" << cppName << " >";
-    s << endl << '{' << endl;
 
-    if (implicitConversions(type).size() > 0)
+    const AbstractMetaClass* metaClass = classes().findClass(type->name());
+    bool isAbstractOrObjectType = (metaClass &&  metaClass->isAbstract()) || type->isObject();
+
+    s << "struct Converter<" << type->name() << (isAbstractOrObjectType ? "*" : "") << " > : ";
+    if (type->isEnum() || type->isFlags())
+        s << "Converter_CppEnum";
+    else
+        s << "ConverterBase";
+    s << '<' << type->name() << (isAbstractOrObjectType ? "*" : "") << " >" << endl;
+    s << '{' << endl;
+
+    bool hasImplicitConversions = !implicitConversions(type).isEmpty();
+
+    if (hasImplicitConversions)
         s << INDENT << "static bool isConvertible(PyObject* pyobj);" << endl;
 
-    s << INDENT << "static PyObject* createWrapper(const " << cppName;
-    s << (type->isObject() || type->isValue() ? '*' : '&');
-    s << " cppobj);" << endl;
+    s << INDENT << "static PyObject* createWrapper(";
+    QString convArg = type->name();
+    if (!type->isEnum() && !type->isFlags()) {
+        convArg.prepend("const ");
+        convArg.append('*');
+    }
+    s << convArg << " cppobj);" << endl;
+
+    if (type->isValue() && hasImplicitConversions) {
+        s << INDENT << "static " << type->name() << "* copyCppObject(const ";
+        s << type->name() << "& cppobj);" << endl;
+    }
 
     if (type->isValue()) {
-        s << INDENT << "static PyObject* toPython(" << cppName << " cppobj);" << endl;
-        s << INDENT << "static " << cppName << " toCpp(PyObject* pyobj);" << endl;
+        s << INDENT << "static PyObject* toPython(const " << type->name() << "& cppobj);" << endl;
+        if (hasImplicitConversions)
+            s << INDENT << "static " << type->name() << " toCpp(PyObject* pyobj);" << endl;
     }
     s << "};" << endl;
 }
@@ -207,36 +224,22 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
 {
     if (type->hasConversionRule())
         return;
-    QString pyTypeName = cpythonTypeName(type);
-    QString cppName = type->name();
 
-    // Write Converter<T>::isConvertible function
-    AbstractMetaFunctionList implicitConvs = implicitConversions(type);
-    if (implicitConvs.size() > 0) {
-        s << "inline bool Converter<" << cppName << " >::isConvertible(PyObject* pyobj)" << endl;
-        s << '{' << endl;
-        s << INDENT << "return ";
-        bool isFirst = true;
-        foreach (const AbstractMetaFunction* ctor, implicitConvs) {
-            Indentation indent(INDENT);
-            if (isFirst)
-                isFirst = false;
-            else
-                s << endl << INDENT << " || ";
-            s << cpythonCheckFunction(ctor->arguments().first()->type());
-            s << "(pyobj)";
-        }
-        s << ';' << endl;
-        s << '}' << endl;
-    }
+    QString pyTypeName = cpythonTypeName(type);
+
+    const AbstractMetaClass* metaClass = classes().findClass(type->name());
+    bool isAbstractOrObjectType = (metaClass &&  metaClass->isAbstract()) || type->isObject();
 
     // Write Converter<T>::createWrapper function
-    s << "inline PyObject* Converter<" << cppName << " >::createWrapper(const " << cppName;
-    if (type->isObject() || type->isValue())
-        s << '*';
-    else
-        s << '&';
-    s << " cppobj)" << endl;
+    s << "inline PyObject* Converter<" << type->name() << (isAbstractOrObjectType ? "*" : "");
+    s << " >::createWrapper(";
+    QString convArg = type->name();
+    if (!type->isEnum() && !type->isFlags()) {
+        convArg.prepend("const ");
+        convArg.append('*');
+    }
+    s << convArg << " cppobj)" << endl;
+
     s << '{' << endl;
     s << INDENT << "return " << "Shiboken::";
     if (type->isObject() || type->isValue()) {
@@ -254,49 +257,73 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
     s << " cppobj);" << endl;
     s << '}' << endl << endl;
 
-    // Write Converter<T>::toPython function
-    if (type->isValue()) {
-        s << "inline PyObject* Converter<" << cppName << " >::toPython(const ";
-        s << cppName << " cppobj)" << endl;
+    AbstractMetaFunctionList implicitConvs = implicitConversions(type);
+    bool hasImplicitConversions = !implicitConvs.isEmpty();
+
+    if (hasImplicitConversions) {
+        // Write Converter<T>::isConvertible
+        s << "inline bool Converter<" << type->name() << " >::isConvertible(PyObject* pyobj)" << endl;
         s << '{' << endl;
-        s << INDENT << "return Converter<" << cppName << " >::createWrapper(new ";
-        s << cppName << "(cppobj));" << endl;
+        s << INDENT << "return ";
+        bool isFirst = true;
+        foreach (const AbstractMetaFunction* ctor, implicitConvs) {
+            Indentation indent(INDENT);
+            if (isFirst)
+                isFirst = false;
+            else
+                s << endl << INDENT << " || ";
+            s << cpythonCheckFunction(ctor->arguments().first()->type());
+            s << "(pyobj)";
+        }
+        s << ';' << endl;
         s << '}' << endl << endl;
     }
 
     if (!type->isValue())
         return;
 
-    // Write Converter<T>::toCpp function
-    s << "inline " << cppName << " Converter<" << cppName << " >::toCpp(PyObject* pyobj)" << endl;
+    // Write Converter<T>::toPython function
+    s << "inline PyObject* Converter<" << type->name() << " >::toPython(const ";
+    s << type->name() << "& cppobj)" << endl;
     s << '{' << endl;
+    s << INDENT << "return Converter<" << type->name() << " >::createWrapper(new ";
+    s << type->name() << "(cppobj));" << endl;
+    s << '}' << endl << endl;
 
-    AbstractMetaFunctionList implicitConverters;
-    const AbstractMetaClass* metaClass = classes().findClass(type->qualifiedCppName());
-    if (metaClass)
-        implicitConverters = metaClass->implicitConversions();
+    if (!hasImplicitConversions)
+        return;
+
+    // Write Converter<T>::toCpp function
+    s << "inline " << type->name() << " Converter<" << type->name() << " >::toCpp(PyObject* pyobj)" << endl;
+    s << '{' << endl << INDENT;
 
     bool firstImplicitIf = true;
-    foreach (const AbstractMetaFunction* ctor, implicitConverters) {
+    foreach (const AbstractMetaFunction* ctor, implicitConvs) {
         if (ctor->isModifiedRemoved())
             continue;
 
         const AbstractMetaType* argType = ctor->arguments().first()->type();
-        s << INDENT;
         if (firstImplicitIf)
             firstImplicitIf = false;
         else
-            s << "else ";
+            s << INDENT << "else ";
         s << "if (" << cpythonCheckFunction(argType) << "(pyobj))" << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << "return " << cppName << '(';
+            s << INDENT << "return " << type->name() << '(';
             writeBaseConversion(s, argType, 0);
-            s << "toCpp(pyobj));\n";
+            s << "toCpp(pyobj));" << endl;
         }
     }
 
-    s << INDENT << "return *Converter<" << cppName << "* >::toCpp(pyobj);" << endl;
+    s << INDENT << "return *Converter<" << type->name() << "* >::toCpp(pyobj);" << endl;
+    s << '}' << endl << endl;
+
+    // Write Converter<T>::copyCppObject function
+    s << "inline " << type->name() << "* Converter<" << type->name();
+    s << " >::copyCppObject(const " << type->name() << "& cppobj)" << endl;
+    s << '{' << endl;
+    s << INDENT << "return new " << type->name() << "(cppobj);" << endl;
     s << '}' << endl << endl;
 }
 
