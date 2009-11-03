@@ -510,6 +510,13 @@ bool ShibokenGenerator::isReverseOperator(const AbstractMetaFunction* func)
             args[1]->type()->typeEntry() == cppClass->typeEntry();
 }
 
+bool ShibokenGenerator::shouldDereferenceArgumentPointer(const AbstractMetaArgument* arg)
+{
+    const AbstractMetaType* argType = arg->type();
+    const TypeEntry* type = argType->typeEntry();
+    return (type->isValue() || type->isObject()) && (argType->isValue() || argType->isReference());
+}
+
 static QString checkFunctionName(QString baseName, bool genericNumberType)
 {
     if (genericNumberType && ShibokenGenerator::isNumber(baseName))
