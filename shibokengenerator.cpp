@@ -165,7 +165,7 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType*
     if (cType->isValue() || cType->isValuePointer() || cType->isObject()
         || (cType->isReference() && !cType->isContainer())) {
         result = cType->typeEntry()->qualifiedCppName();
-        if (cType->isObject() || cType->isQObject())
+        if (cType->isObject() || cType->isQObject() || cType->isValuePointer())
             result.append('*');
         else if (cType->isValue() && cType->isReference())
             result.append('&');
