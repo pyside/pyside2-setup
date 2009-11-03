@@ -138,7 +138,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     s << "using namespace Shiboken;" << endl << endl;
 
-    if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
+    if (metaClass->isPolymorphic() && !metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
         s << "// Native ---------------------------------------------------------" << endl << endl;
 
         //inject code native beginner
@@ -451,7 +451,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     s << INDENT << "if (!PyType_IsSubtype(type, &" << className << "))" << endl;
     s << INDENT << INDENT << "return 0;" << endl << endl;
 
-      if (overloadData.maxArgs() > 0) {
+    if (overloadData.maxArgs() > 0) {
         s  << endl << INDENT << "int numArgs = ";
         writeArgumentsInitializer(s, overloadData);
     }

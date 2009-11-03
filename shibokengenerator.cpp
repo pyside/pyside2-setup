@@ -180,11 +180,16 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType*
 
 QString ShibokenGenerator::wrapperName(const AbstractMetaClass* metaClass)
 {
-    QString result = metaClass->name();
-    if (metaClass->enclosingClass()) // is a inner class
-        result.replace("::", "_");
-    result +="Wrapper";
-    return result;
+    if (metaClass->isPolymorphic()) {
+        QString result = metaClass->name();
+        if (metaClass->enclosingClass()) // is a inner class
+            result.replace("::", "_");
+
+        result +="Wrapper";
+        return result;
+    } else {
+        return metaClass->qualifiedCppName();
+    }
 }
 
 QString ShibokenGenerator::cpythonFunctionName(const AbstractMetaFunction* func)

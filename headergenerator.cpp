@@ -56,8 +56,8 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
     QString wrapperName = HeaderGenerator::wrapperName(metaClass);
 
     // Header
-    s << "#ifndef " << wrapperName.toUpper() << "_H" << endl;
-    s << "#define " << wrapperName.toUpper() << "_H" << endl<< endl;
+    s << "#ifndef SBK_" << wrapperName.toUpper() << "_H" << endl;
+    s << "#define SBK_" << wrapperName.toUpper() << "_H" << endl<< endl;
 
     if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
         s << "// The mother of all C++ binding hacks!" << endl;
@@ -73,7 +73,7 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
     writeCodeSnips(s, metaClass->typeEntry()->codeSnips(),
                    CodeSnip::Declaration, TypeSystem::NativeCode);
 
-    if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
+    if (metaClass->isPolymorphic() && !metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
         /*
          * BOTOWTI (Beast of The Old World to be Investigated)
         // detect the held type
@@ -112,7 +112,7 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
         s << "};" << endl << endl;
     }
 
-    s << "#endif // " << wrapperName.toUpper() << "_H" << endl << endl;
+    s << "#endif // SBK_" << wrapperName.toUpper() << "_H" << endl << endl;
 }
 
 void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* func) const
