@@ -61,6 +61,32 @@ class PointTest(unittest.TestCase):
         pt2 = Point(5.0, 2.3)
         self.assertRaises(NotImplementedError, lambda : pt1.__ne__(pt2))
 
+    def testReturnNewCopy(self):
+        '''Point returns a copy of itself.'''
+        pt1 = Point(1.1, 2.3)
+        pt2 = pt1.copy()
+        self.assertEqual(pt1, pt2)
+        pt2 += pt1
+        self.assertNotEqual(pt1, pt2)
+
+    def testReturnConstPointer(self):
+        '''Point returns a const pointer for itself.'''
+        pt1 = Point(5.0, 2.3)
+        refcount1 = sys.getrefcount(pt1)
+        pt2 = pt1.getSelf()
+        self.assertEqual(pt1, pt2)
+        self.assertEqual(sys.getrefcount(pt1), refcount1 + 1)
+        self.assertEqual(sys.getrefcount(pt1), sys.getrefcount(pt2))
+
+    def testReturnConstReference(self):
+        '''Point returns a const reference for itself.'''
+        pt1 = Point(5.0, 2.3)
+        refcount1 = sys.getrefcount(pt1)
+        pt2 = pt1.getConstReferenceToSelf()
+        self.assertEqual(pt1, pt2)
+        self.assertEqual(sys.getrefcount(pt1), refcount1 + 1)
+        self.assertEqual(sys.getrefcount(pt1), sys.getrefcount(pt2))
+
 if __name__ == '__main__':
     unittest.main()
 

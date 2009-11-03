@@ -39,12 +39,19 @@ using namespace std;
 
 Point::Point(int x, int y) : m_x(x), m_y(y)
 {
-    // cout << __PRETTY_FUNCTION__ << " [x=0, y=0]" << endl;
 }
 
 Point::Point(double x, double y) : m_x(x), m_y(y)
 {
-    // cout << __PRETTY_FUNCTION__ << endl;
+}
+
+Point*
+Point::copy() const
+{
+    Point* pt = new Point();
+    pt->m_x = m_x;
+    pt->m_y = m_y;
+    return pt;
 }
 
 void

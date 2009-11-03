@@ -51,6 +51,11 @@ public:
     void setX(double x) { m_x = x; }
     void setY(double y) { m_y = y; }
 
+    Point* copy() const;
+
+    const Point& getConstReferenceToSelf() const { return *this; }
+    const Point* getSelf() const { return this; }
+
     bool operator==(const Point& other);
     Point operator+(const Point& other);
     Point operator-(const Point& other);
