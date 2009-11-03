@@ -44,14 +44,15 @@ class MultipleDerivedTest(unittest.TestCase):
         self.assert_(issubclass(MDerived, MBase))
         self.assert_(issubclass(MDerived, MBase2))
 
-    def testCast(self):
+    def testCastFromDerivedToBase(self):
         k = MDerived()
-
         b = k.transformFromBase(k)
         self.assertEqual(k, b)
 
-        b2 = k.transformFromBase2(k)
-        self.assertEqual(k, b2)
+    def testCastFromDerivedToBase2(self):
+        k = MDerived()
+        b = k.transformFromBase2(k)
+        self.assertEqual(k, b)
 
 if __name__ == '__main__':
     unittest.main()
