@@ -60,6 +60,9 @@ QList<AbstractMetaFunctionList> CppGenerator::filterGroupedFunctions(const Abstr
         //skip signals
         if (func->isSignal() || func->isDestructor() || (func->isModifiedRemoved() && !func->isAbstract()))
             continue;
+        // weird operator overloads
+        if (func->name() == "operator[]" || func->name() == "operator->")  // FIXME: what about cast operators?
+            continue;
         results[func->name()].append(func);
     }
 
@@ -77,7 +80,7 @@ QList<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(con
     // ( func_name, num_args ) => func_list
     QMap<QPair<QString, int >, AbstractMetaFunctionList> results;
     foreach (AbstractMetaFunction* func, metaClass->operatorOverloads(query)) {
-        if (func->isModifiedRemoved() || ShibokenGenerator::isReverseOperator(func))
+        if (func->isModifiedRemoved() || ShibokenGenerator::isReverseOperator(func) || func->name() == "operator[]" || func->name() == "operator->")
             continue;
         int args;
         if (func->isComparisonOperator()) {
