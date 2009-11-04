@@ -1258,16 +1258,12 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
 void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     s << "static PyObject*" << endl;
-
     s << cpythonBaseName(metaClass->typeEntry()) << "_richcompare(PyObject* self, PyObject* other, int op)" << endl;
     s << '{' << endl;
 
     QList<AbstractMetaFunctionList> cmpOverloads = filterGroupedOperatorFunctions(metaClass, AbstractMetaClass::ComparisonOp);
-
     s << INDENT << "bool result;" << endl;
-
-    QString arg0TypeName = metaClass->qualifiedCppName();
-    s << INDENT << arg0TypeName << "& cpp_self = *" << cpythonWrapperCPtr(metaClass) << ';' << endl;
+    s << INDENT << metaClass->qualifiedCppName() << "& cpp_self = *" << cpythonWrapperCPtr(metaClass) << ';' << endl;
     s << endl;
 
     s << INDENT << "switch (op) {" << endl;
@@ -1276,11 +1272,6 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
         foreach (AbstractMetaFunctionList overloads, cmpOverloads) {
             OverloadData overloadData(overloads, this);
             const AbstractMetaFunction* rfunc = overloads[0];
-
-            // DEBUG
-            // QString dumpFile = QString("%1_%2.dot").arg(rfunc->ownerClass()->name()).arg(pythonOperatorFunctionName(rfunc)).toLower();
-            // overloadData.dumpGraph(dumpFile);
-            // DEBUG
 
             s << INDENT << "case " << ShibokenGenerator::pythonRichCompareOperatorId(rfunc) << ':' << endl;
 
@@ -1297,12 +1288,16 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
             }
 
             bool first = true;
+            bool comparesWithSameType = false;
             foreach (const AbstractMetaFunction* func, overloads) {
                 if (func->isStatic())
                     continue;
 
                 const AbstractMetaType* type = func->arguments()[0]->type();
                 bool numberType = alternativeNumericTypes == 1 || ShibokenGenerator::isPyInt(type);
+
+                if (!comparesWithSameType)
+                    comparesWithSameType = type->typeEntry() == metaClass->typeEntry();
 
                 if (!first) {
                     s << " else ";
@@ -1311,19 +1306,43 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                     s << INDENT;
                 }
 
-                // TODO: Optimize this method: When the "other" type IS a QString, we dont need to call the converter,
-                //       we just need to get the cptr and avoid object copying.
                 s << "if (" << cpythonCheckFunction(type, numberType) << "(other)) {" << endl;
                 {
                     Indentation indent(INDENT);
                     s << INDENT;
-                    s << translateTypeForWrapperMethod(type, metaClass) << " cpp_other = ";
-                    writeToCppConversion(s, type, metaClass, "other");
+                    if (type->typeEntry()->isValue())
+                        s << type->name() << '*';
+                    else
+                        s << translateTypeForWrapperMethod(type, metaClass);
+                    s << " cpp_other = ";
+                    if (type->typeEntry()->isValue())
+                        s << cpythonWrapperCPtr(type, "other");
+                    else
+                        writeToCppConversion(s, type, metaClass, "other");
                     s << ';' << endl;
-                    s << INDENT << "result = (cpp_self " << op << " cpp_other);" << endl;
+                    s << INDENT << "result = (cpp_self " << op << ' ' << (type->typeEntry()->isValue() ? "(*" : "");
+                    s << "cpp_other" << (type->typeEntry()->isValue() ? ")" : "") << ");" << endl;
                 }
                 s << INDENT << '}';
             }
+
+            // Compares with implicit conversions
+            if (comparesWithSameType && !metaClass->implicitConversions().isEmpty()) {
+                AbstractMetaType temporaryType;
+                temporaryType.setTypeEntry(metaClass->typeEntry());
+                temporaryType.setConstant(true);
+                temporaryType.setReference(false);
+                temporaryType.setTypeUsagePattern(AbstractMetaType::ValuePattern);
+                s << " else if (" << cpythonIsConvertibleFunction(metaClass->typeEntry());
+                s << "(other)) {" << endl;
+                {
+                    Indentation indent(INDENT);
+                    writeArgumentConversion(s, &temporaryType, "cpp_other", "other", metaClass);
+                    s << INDENT << "result = (cpp_self " << op << " (*cpp_other));" << endl;
+                }
+                s << INDENT << '}';
+            }
+
             s << " else goto Py" << metaClass->name() << "_RichComparison_TypeError;" << endl;
             s << endl;
 
