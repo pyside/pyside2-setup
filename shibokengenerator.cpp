@@ -539,11 +539,11 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool gene
     return checkFunctionName(cpythonBaseName(type), genericNumberType);
 }
 
-QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* metaType)
+QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry* type)
 {
     QString baseName;
     QTextStream s(&baseName);
-    writeBaseConversion(s, metaType->typeEntry());
+    writeBaseConversion(s, type);
     s << "isConvertible";
     s.flush();
     return baseName;
