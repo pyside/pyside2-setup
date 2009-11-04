@@ -304,10 +304,15 @@ void ShibokenGenerator::writeToPythonConversion(QTextStream& s, const AbstractMe
 {
     if (!type)
         return;
+
     writeBaseConversion(s, type, context);
     s << "toPython";
-    if (!argumentName.isEmpty())
-        s << '(' << argumentName << ')';
+
+    if (!argumentName.isEmpty()) {
+        bool isReferenceToObjectType = type->isObject() && type->isReference();
+        s << '(' << (isReferenceToObjectType ? "&(" : "") << argumentName;
+        s << (isReferenceToObjectType ? ")" : "") << ')';
+    }
 }
 
 void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaType* type,
