@@ -294,7 +294,7 @@
 
     <object-type name="PrivateDtor" />
 
-    <interface-type name="MBase"/>
+    <interface-type name="MBase1"/>
     <object-type name="MBase2"/>
     <object-type name="MDerived"/>
 

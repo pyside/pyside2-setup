@@ -32,7 +32,6 @@
  * 02110-1301 USA
  */
 
-#include <iostream>
 #include "multiple_derived.h"
 
 MDerived::MDerived()
@@ -43,27 +42,44 @@ MDerived::~MDerived()
 {
 }
 
-const char* MDerived::name()
+const char*
+MDerived::name()
 {
     return "MDerived";
 }
 
 // Base2 methods
-const char* MDerived::funcName()
+const char*
+MDerived::funcName()
 {
     return "MDerived.funcName";
 }
 
-MDerived* MDerived::transformFromBase2(MBase2 *self)
+MBase1*
+MDerived::castToMBase1()
 {
-    MDerived* a =  dynamic_cast<MDerived*>(self);
-    return a;
+    MBase1* ptr = (MBase1*) this;
+    return ptr;
 }
 
-MDerived* MDerived::transformFromBase(MBase *self)
+MBase2*
+MDerived::castToMBase2()
 {
-    MDerived* a =  dynamic_cast<MDerived*>(self);
-    return a;
+    MBase2* ptr = (MBase2*) this;
+    return ptr;
 }
 
+MDerived*
+MDerived::transformFromBase1(MBase1* self)
+{
+    MDerived* ptr = dynamic_cast<MDerived*>(self);
+    return ptr;
+}
+
+MDerived*
+MDerived::transformFromBase2(MBase2* self)
+{
+    MDerived* ptr = dynamic_cast<MDerived*>(self);
+    return ptr;
+}
 

@@ -35,34 +35,37 @@
 #ifndef MDERIVED_H
 #define MDERIVED_H
 
-class MBase
+class MBase1
 {
 public:
-    ~MBase() {}
-    virtual const char *name() { return "Base"; }
+    ~MBase1() {}
+    virtual const char* name() { return "MBase"; }
 };
 
 class MBase2
 {
 public:
     ~MBase2() {}
-    virtual const char *funcName() { return "Base2.funcName"; }
+    virtual const char* funcName() { return "MBase2.funcName"; }
 };
 
-class MDerived : public MBase, public MBase2
+class MDerived : public MBase1, public MBase2
 {
 public:
     MDerived();
     virtual ~MDerived();
 
-    // Base methods
+    // MBase1 methods
     const char* name();
 
-    // Base2 methods
+    // MBase2 methods
     const char* funcName();
 
-    MDerived* transformFromBase2(MBase2 *self);
-    MDerived* transformFromBase(MBase *self);
+    MBase1* castToMBase1();
+    MBase2* castToMBase2();
+
+    static MDerived* transformFromBase1(MBase1 *self);
+    static MDerived* transformFromBase2(MBase2 *self);
 };
 #endif // MDERIVED_H
 

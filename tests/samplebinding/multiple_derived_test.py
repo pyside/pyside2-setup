@@ -29,30 +29,55 @@
 import sys
 import unittest
 
-from sample import MBase, MBase2, MDerived
+from sample import MBase1, MBase2, MDerived
 
 class MultipleDerivedTest(unittest.TestCase):
     '''Test cases for multiple inheritance'''
 
     def testIsInstance(self):
-        k = MDerived()
-        self.assert_(isinstance(k, MDerived))
-        self.assert_(isinstance(k, MBase))
-        self.assert_(isinstance(k, MBase2))
+        '''MDerived is instance of its parents MBase1 and MBase2.'''
+        a = MDerived()
+        self.assert_(isinstance(a, MDerived))
+        self.assert_(isinstance(a, MBase1))
+        self.assert_(isinstance(a, MBase2))
 
     def testIsSubclass(self):
-        self.assert_(issubclass(MDerived, MBase))
+        '''MDerived is subclass of its parents MBase1 and MBase2.'''
+        self.assert_(issubclass(MDerived, MBase1))
         self.assert_(issubclass(MDerived, MBase2))
 
-    def testCastFromDerivedToBase(self):
-        k = MDerived()
-        b = k.transformFromBase(k)
-        self.assertEqual(k, b)
+    def testCallToFunctionWithMBase1ArgumentThatCastsBackToMDerived(self):
+        '''MDerived is passed as an MBase1 argument to method that returns it casted back to MDerived.'''
+        a = MDerived()
+        b = MDerived.transformFromBase1(a)
+        self.assertEqual(a, b)
 
-    def testCastFromDerivedToBase2(self):
-        k = MDerived()
-        b = k.transformFromBase2(k)
-        self.assertEqual(k, b)
+    def testCallToFunctionWithMBase2ArgumentThatCastsBackToMDerived(self):
+        '''MDerived is passed as an MBase2 argument to method that returns it casted back to MDerived.'''
+        a = MDerived()
+        b = MDerived.transformFromBase2(a)
+        self.assertEqual(a, b)
+
+    def testCastFromMDerivedToMBase1(self):
+        '''MDerived is casted by C++ to its first parent MBase2 and the binding must return the MDerived wrapper.'''
+        a = MDerived()
+        refcnt = sys.getrefcount(a)
+        b = a.castToMBase1()
+        self.assert_(isinstance(b, MDerived))
+        self.assertEqual(a, b)
+        self.assertEqual(sys.getrefcount(a), refcnt + 1)
+
+    """
+    # This method must be commented since it will break the test flow until the problem is fixed.
+    def testCastFromMDerivedToMBase2(self):
+        '''MDerived is casted by C++ to its second parent MBase2 and the binding must return the MDerived wrapper.'''
+        a = MDerived()
+        refcnt = sys.getrefcount(a)
+        b = a.castToMBase2()
+        self.assert_(isinstance(b, MDerived))
+        self.assertEqual(a, b)
+        self.assertEqual(sys.getrefcount(a), refcnt + 1)
+    """
 
 if __name__ == '__main__':
     unittest.main()

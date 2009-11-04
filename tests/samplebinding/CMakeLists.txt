@@ -12,8 +12,8 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/derived_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/implicitconv_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/listuser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/mapuser_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/mbase1_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/mbase2_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/sample/mbase_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/mderived_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/modifications_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/nondefaultctor_wrapper.cpp
