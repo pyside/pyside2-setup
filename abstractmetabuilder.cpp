@@ -229,9 +229,13 @@ void AbstractMetaBuilder::traverseStreamOperator(FunctionModelItem item)
                 QString name = item->name();
                 streamFunction->setFunctionType(AbstractMetaFunction::GlobalScopeFunction);
                 // Strip first argument, since that is the containing object
-                //AbstractMetaArgumentList arguments = streamFunction->arguments();
-                //arguments.pop_front();
-                //streamFunction->setArguments(arguments);
+                AbstractMetaArgumentList arguments = streamFunction->arguments();
+                if (!streamClass->typeEntry()->generateCode())
+                    arguments.pop_back();
+                else
+                    arguments.pop_front();
+
+                streamFunction->setArguments(arguments);
 
                 *streamFunction += AbstractMetaAttributes::Final;
                 *streamFunction += AbstractMetaAttributes::Public;
