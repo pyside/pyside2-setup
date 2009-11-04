@@ -709,6 +709,44 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadDa
         s << " || " << cpythonIsConvertibleFunction(argType) << '(' << argumentName << "))";
 }
 
+void CppGenerator::writeArgumentConversion(QTextStream& s,
+                                           const AbstractMetaType* argType,
+                                           QString argName, QString pyArgName,
+                                           const AbstractMetaClass* context)
+{
+    QString typeName;
+    QString baseTypeName = argType->typeEntry()->name();
+    if (argType->typeEntry()->isValue() || argType->typeEntry()->isObject())
+        typeName = baseTypeName + '*';
+    else
+        typeName = translateTypeForWrapperMethod(argType, context);
+
+    if (argType->typeEntry()->isContainer()) {
+        if (typeName.startsWith("const "))
+            typeName.remove(0, 6);
+        if (typeName.endsWith("&"))
+            typeName.chop(1);
+    }
+
+    bool hasImplicitConversions = !implicitConversions(argType).isEmpty();
+
+    if (hasImplicitConversions) {
+        s << INDENT << "std::auto_ptr<" << baseTypeName << " > ";
+        s << argName << "_auto_ptr;" << endl;
+    }
+
+    s << INDENT << typeName << ' ' << argName << " = ";
+    s << "Shiboken::Converter<" << typeName << " >::toCpp(" << pyArgName << ");" << endl;
+
+    if (hasImplicitConversions) {
+        s << INDENT << "if (!" << cpythonCheckFunction(argType) << '(' << pyArgName << "))";
+        s << endl;
+        Indentation indent(INDENT);
+        s << INDENT << argName << "_auto_ptr = std::auto_ptr<" << baseTypeName;
+        s << " >(" << argName << ");" << endl;
+    }
+}
+
 void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* parentOverloadData)
 {
     bool hasDefaultCall = parentOverloadData->nextArgumentHasDefaultValue();
@@ -811,47 +849,11 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
                     for (int i = overloadData->argPos(); i < maxArgs; i++) {
                         if (func->argumentRemoved(i + 1))
                             removed++;
-                        QString argName = QString("cpp_arg%1").arg(i);
                         if (manyArgs)
                             pyArgName = QString("pyargs[%1]").arg(i);
-
-                        const AbstractMetaType* type = func->arguments()[i + removed]->type();
-                        QString typeName;
-                        QString baseTypeName;
-                        if (type->typeEntry()->isValue() || type->typeEntry()->isObject()) {
-                            baseTypeName = type->typeEntry()->name();
-                            typeName = baseTypeName + '*';
-                        } else {
-                            typeName = translateTypeForWrapperMethod(type, func->implementingClass());
-                        }
-
-                        if (type->typeEntry()->isContainer()) {
-                            if (typeName.startsWith("const "))
-                                typeName.remove(0, 6);
-                            if (typeName.endsWith("&"))
-                                typeName.chop(1);
-                        }
-
-                        bool hasImplicitConversions = type->isValue()
-                                && !implicitConversions(type).isEmpty();
-
-                        if (hasImplicitConversions) {
-                            s << INDENT << "std::auto_ptr<" << baseTypeName << " > ";
-                            s << argName << "_auto_ptr;" << endl;
-                        }
-
-                        s << INDENT << typeName << ' ' << argName << " = ";
-                        s << "Shiboken::Converter<" << typeName << " >::toCpp(" << pyArgName << ')';
-                        //writeToCppConversion(s, type, func->implementingClass(), pyArgName);
-                        s << ';' << endl;
-
-                        if (hasImplicitConversions) {
-                            s << INDENT << "if (!" << cpythonCheckFunction(type) << '(' << pyArgName << "))";
-                            s << endl;
-                            Indentation indent(INDENT);
-                            s << INDENT << argName << "_auto_ptr = std::auto_ptr<" << baseTypeName;
-                            s << " >(" << argName << ");" << endl;
-                        }
+                        writeArgumentConversion(s, func->arguments().at(i + removed),
+                                                QString("cpp_arg%1").arg(i), pyArgName,
+                                                func->implementingClass());
                     }
                 }
             }

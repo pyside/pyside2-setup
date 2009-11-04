@@ -58,6 +58,28 @@ private:
     void writeErrorSection(QTextStream& s, OverloadData& overloadData);
     void writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName);
 
+    /**
+     *   Writes Python to C++ conversions for arguments on Python wrappers.
+     *   If implicit conversions, and thus new object allocation, are needed,
+     *   code to deallocate a possible new instance is also generated.
+     *   \param s text stream to write
+     *   \param metatype a pointer to the argument type to be converted
+     *   \param context the current meta class
+     *   \param argName C++ argument name
+     *   \param argName Python argument name
+     */
+    void writeArgumentConversion(QTextStream& s, const AbstractMetaType* argType,
+                                 QString argName, QString pyArgName,
+                                 const AbstractMetaClass* context = 0);
+    /// Convenience method to call writeArgumentConversion with an AbstractMetaArgument
+    /// instead of an AbstractMetaType.
+    void writeArgumentConversion(QTextStream& s, const AbstractMetaArgument* arg,
+                                 QString argName, QString pyArgName,
+                                 const AbstractMetaClass* context = 0)
+    {
+        writeArgumentConversion(s, arg->type(), argName, pyArgName, context);
+    }
+
     void writeOverloadedMethodDecisor(QTextStream& s, OverloadData* parentOverloadData);
     void writeMethodCall(QTextStream& s, const AbstractMetaFunction* func, int maxArgs = 0);
 
