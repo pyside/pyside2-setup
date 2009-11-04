@@ -41,7 +41,14 @@ Collector::clear()
 }
 
 Collector&
-Collector::operator<<(int item)
+Collector::operator<<(unsigned int item)
+{
+    m_items.push_back(item);
+    return *this;
+}
+
+Collector&
+Collector::operator<<(signed int item)
 {
     m_items.push_back(item);
     return *this;

@@ -63,8 +63,10 @@ void ShibokenGenerator::initPrimitiveTypesCorrespondences()
 
     // PyInt
     m_pythonPrimitiveTypeName["char"] = "PyInt";
+    m_pythonPrimitiveTypeName["signed char"] = "PyInt";
     m_pythonPrimitiveTypeName["unsigned char"] = "PyInt";
     m_pythonPrimitiveTypeName["int"] = "PyInt";
+    m_pythonPrimitiveTypeName["signed int"] = "PyInt";
     m_pythonPrimitiveTypeName["uint"] = "PyInt";
     m_pythonPrimitiveTypeName["unsigned int"] = "PyInt";
     m_pythonPrimitiveTypeName["short"] = "PyInt";
@@ -78,6 +80,7 @@ void ShibokenGenerator::initPrimitiveTypesCorrespondences()
 
     // PyLong
     m_pythonPrimitiveTypeName["unsigned long"] = "PyLong";
+    m_pythonPrimitiveTypeName["signed long"] = "PyLong";
     m_pythonPrimitiveTypeName["ulong"] = "PyLong";
     m_pythonPrimitiveTypeName["long long"] = "PyLong";
     m_pythonPrimitiveTypeName["__int64"] = "PyLong";

@@ -154,6 +154,7 @@ struct Converter_PyInt
 };
 
 template <> struct Converter<char> : Converter_PyInt<char> {};
+template <> struct Converter<signed char> : Converter_PyInt<signed char> {};
 template <> struct Converter<unsigned char> : Converter_PyInt<unsigned char> {};
 template <> struct Converter<int> : Converter_PyInt<int> {};
 template <> struct Converter<unsigned int> : Converter_PyInt<unsigned int> {};

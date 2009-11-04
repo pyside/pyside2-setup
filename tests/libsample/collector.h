@@ -45,7 +45,8 @@ public:
 
     void clear();
 
-    Collector& operator<<(int item);
+    Collector& operator<<(unsigned int item);
+    Collector& operator<<(signed int item);
 
     std::list<int> items();
     int size();
