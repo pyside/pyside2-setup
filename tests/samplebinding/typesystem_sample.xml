@@ -40,7 +40,7 @@
     two types.
     -->
     <enum-type name="ImplicitConv::ICOverloadedFuncEnum"/>
-    <enum-type name="SampleNamespace::Option" extensible="yes"/>
+    <enum-type name="SampleNamespace::Option"/>
     <enum-type name="SampleNamespace::InValue"/>
     <enum-type name="SampleNamespace::OutValue"/>
     <enum-type name="GlobalEnum"/>

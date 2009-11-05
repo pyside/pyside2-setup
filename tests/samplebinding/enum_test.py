@@ -24,7 +24,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-'''Test cases for Python representation of C++ enums'''
+'''Test cases for Python representation of C++ enums.'''
 
 import sys
 import unittest
@@ -32,26 +32,18 @@ import unittest
 from sample import SampleNamespace
 
 class EnumTest(unittest.TestCase):
-    '''Test case for Abstract class'''
+    '''Test case for Python representation of C++ enums.'''
 
     def testPassingIntegerOnEnumArgument(self):
-        '''Test if replacing an enum argument with an integer raises an exception.'''
+        '''Tries to use an integer in place of an enum argument.'''
         self.assertRaises(TypeError, lambda : SampleNamespace.getNumber(1))
 
-    def testExtendingEnum(self):
-        '''Test if can create new items for an enum declared as extensible on the typesystem file.'''
-        name, value = 'NewItem', 13
-        enumitem = SampleNamespace.Option(name, value)
-        self.assert_(type(enumitem), SampleNamespace.Option)
-        self.assert_(enumitem.name, name)
-        self.assert_(int(enumitem), value)
-
     def testExtendingNonExtensibleEnum(self):
-        '''Test if trying to create a new enum item for an unextensible enum raises an exception.'''
+        '''Tries to create a new enum item for an unextensible enum.'''
         self.assertRaises(TypeError, lambda : SampleNamespace.InValue(13))
 
     def testEnumConversionToAndFromPython(self):
-        '''Test conversion of enum objects to Python and C++ in both directions.'''
+        '''Conversion of enum objects from Python to C++ back again.'''
         enumout = SampleNamespace.enumInEnumOut(SampleNamespace.TwoIn)
         self.assert_(enumout, SampleNamespace.TwoOut)
 
