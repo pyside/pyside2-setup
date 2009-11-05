@@ -33,9 +33,12 @@
  */
 
 #include "str.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <sstream>
+
+using namespace std;
 
 Str::Str(const Str& s)
 {
@@ -50,85 +53,74 @@ Str::Str(const char* cstr)
 void
 Str::init(const char* cstr)
 {
-    m_size = strlen(cstr);
-    m_str = (char *) malloc(m_size + 1);
-    if (m_size == 0)
-        m_str[0] = '\0';
-    else
-        strncpy(m_str, cstr, m_size + 1);
+    m_str = cstr;
 }
 
 Str::~Str()
 {
-    free(m_str);
 }
 
 Str
 Str::arg(const Str& s) const
 {
-    char* var = strstr(m_str, "%VAR");
-    if (!var)
-        return Str(m_str);
-
-    char* newstr = (char*) malloc (m_size + s.size() - 3);
-
-    int var_pos = 0;
-    for (const char* ptr = m_str; ptr != var; ptr++)
-        var_pos++;
-
-    strncpy(newstr, m_str, var_pos);
-    char* ptr = newstr + var_pos;
-    strncpy(ptr, s.cstring(), s.size());
-    ptr = ptr + s.size();
-    strcpy(ptr, m_str + var_pos + 4);
-
-    Str result(newstr);
-    free(newstr);
-
-    return result;
+    size_t idx = m_str.find_first_of("%VAR");
+    if (idx == std::string::npos) {
+        return *this;
+    } else {
+        std::string result = m_str;
+        result.replace(idx, 4, s.m_str);
+        return result.c_str();
+    }
 }
 
 Str&
 Str::append(const Str& s)
 {
-    char* tmp = m_str;
-    m_str = (char*) malloc (m_size + s.size() + 1);
-    strncpy(m_str, tmp, m_size + 1);
-    strncat(m_str, s.cstring(), s.size());
-    m_size = m_size + s.size();
+    m_str += s.m_str;
     return *this;
 }
 
 const char*
 Str::cstring() const
 {
-    return m_str;
+    return m_str.c_str();
 }
 
 void
 Str::show() const
 {
-    printf("%s", m_str);
+    printf("%s", cstring());
 }
 
 char
 Str::get_char(int pos) const
 {
-    if (pos < 0)
-        pos = m_size - pos;
-    if (pos < 0 || pos >= m_size)
-        return -1;
     return m_str[pos];
 }
 
 bool
 Str::set_char(int pos, char ch)
 {
-    if (pos < 0)
-        pos = m_size - pos;
-    if (pos < 0 || pos >= m_size)
-        return false;
     m_str[pos] = ch;
     return true;
+}
+
+Str Str::operator+(int number) const
+{
+    ostringstream in;
+    in << m_str << number;
+    return in.str().c_str();
+}
+
+bool Str::operator==(const Str& other) const
+{
+    return m_str == other.m_str;
+}
+
+Str operator+(int number, const Str& str)
+{
+    ostringstream in;
+    in << number << str.m_str;
+    return in.str().c_str();
 }
 

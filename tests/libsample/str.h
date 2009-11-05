@@ -34,6 +34,7 @@
 
 #ifndef STR_H
 #define STR_H
+#include <string>
 
 class Str
 {
@@ -52,13 +53,20 @@ public:
 
     void show() const;
 
-    int size() const { return m_size; }
+    int size() const { return m_str.size(); }
+
+    // nonsense operator just to test reverse operators
+    Str operator+(int number) const;
+    bool operator==(const Str& other) const;
 
 private:
     void init(const char* cstr);
-    char* m_str;
-    int m_size;
+    std::string m_str;
+
+    friend Str operator+(int number, const Str& str);
 };
+
+Str operator+(int number, const Str& str);
 
 #endif // STR_H
 
