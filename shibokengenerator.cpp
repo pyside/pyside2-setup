@@ -371,6 +371,8 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry* type)
             baseName = ptype->targetLangApiName();
     } else if (type->isEnum()) {
         baseName = cpythonEnumName((const EnumTypeEntry*) type);
+    } else if (type->isFlags()) {
+        baseName = cpythonFlagsName((const FlagsTypeEntry*) type);
     } else if (type->isContainer()) {
         const ContainerTypeEntry* ctype = (const ContainerTypeEntry*) type;
         switch (ctype->type()) {
@@ -398,8 +400,6 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry* type)
             default:
                 Q_ASSERT(false);
         }
-    } else if (type->isFlags()) {
-        baseName = "PyMethod"; // FIXME: This is just a placeholder! Add support for qflags!
     } else {
         baseName = "PyObject";
     }
