@@ -525,21 +525,21 @@ bool ShibokenGenerator::shouldDereferenceArgumentPointer(const AbstractMetaArgum
     return (type->isValue() || type->isObject()) && (argType->isValue() || argType->isReference());
 }
 
-static QString checkFunctionName(QString baseName, bool genericNumberType)
+static QString checkFunctionName(QString baseName, bool genericNumberType, bool checkExact)
 {
-    if (genericNumberType && ShibokenGenerator::isNumber(baseName))
-        baseName = "PyNumber";
-    return baseName + "_Check";
+    return QString("%1_Check%2")
+           .arg((genericNumberType && ShibokenGenerator::isNumber(baseName) ? "PyNumber" : baseName))
+           .arg((checkExact && !genericNumberType ? "Exact" : ""));
 }
 
-QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType, bool genericNumberType)
+QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType, bool genericNumberType, bool checkExact)
 {
-    return checkFunctionName(cpythonBaseName(metaType), genericNumberType);
+    return checkFunctionName(cpythonBaseName(metaType), genericNumberType, checkExact);
 }
 
-QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool genericNumberType)
+QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool genericNumberType, bool checkExact)
 {
-    return checkFunctionName(cpythonBaseName(type), genericNumberType);
+    return checkFunctionName(cpythonBaseName(type), genericNumberType, checkExact);
 }
 
 QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry* type)
