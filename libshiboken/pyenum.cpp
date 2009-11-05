@@ -38,8 +38,10 @@ namespace Shiboken
 {
 
 PyObject*
-PyEnumObject_New(PyTypeObject *type, PyObject* item_name, long item_value)
+PyEnumObject_New(PyTypeObject *type, long item_value, PyObject* item_name)
 {
+    if (!item_name)
+        item_name = PyString_FromString("");
     PyEnumObject* enum_obj = (PyEnumObject*) type->tp_alloc(type, 0);
     enum_obj->ob_name = item_name;
     enum_obj->ob_ival = item_value;
@@ -47,20 +49,27 @@ PyEnumObject_New(PyTypeObject *type, PyObject* item_name, long item_value)
 }
 
 PyObject*
-PyEnumObject_New(PyTypeObject *type, const char* item_name, long item_value)
+PyEnumObject_New(PyTypeObject *type, long item_value, const char* item_name)
 {
-    PyObject* py_item_name = PyString_FromString(item_name);
-    PyObject* enum_obj = PyEnumObject_New(type, py_item_name, item_value);
+    PyObject* py_item_name = 0;
+    if (item_name)
+        py_item_name = PyString_FromString(item_name);
+
+    PyObject* enum_obj = PyEnumObject_New(type, item_value, py_item_name);
     if (!enum_obj) {
-        Py_DECREF(py_item_name);
+        Py_XDECREF(py_item_name);
         return 0;
     }
-    PyObject* values = PyDict_GetItemString(type->tp_dict, const_cast<char*>("values"));
-    if (!values) {
-        values = PyDict_New();
-        PyDict_SetItemString(type->tp_dict, const_cast<char*>("values"), values);
+
+    if (item_name) {
+        PyObject* values = PyDict_GetItemString(type->tp_dict, const_cast<char*>("values"));
+        if (!values) {
+            values = PyDict_New();
+            PyDict_SetItemString(type->tp_dict, const_cast<char*>("values"), values);
+        }
+        PyDict_SetItemString(values, item_name, enum_obj);
     }
-    PyDict_SetItemString(values, item_name, enum_obj);
+
     return enum_obj;
 }
 
@@ -70,7 +79,7 @@ extern "C"
 PyObject*
 PyEnumObject_NonExtensibleNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-    PyErr_SetString(PyExc_TypeError, "this enum is not extensible");
+    PyErr_SetString(PyExc_TypeError, "enum is not extensible");
     return 0;
 }
 
@@ -94,3 +103,4 @@ PyEnumObject_name(PyObject* self)
 } // extern "C"
 
 } // namespace Shiboken
+

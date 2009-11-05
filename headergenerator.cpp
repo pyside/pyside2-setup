@@ -246,13 +246,7 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
         s << "PyBaseWrapper_New(&" << pyTypeName << ", &" << pyTypeName << ',';
     } else {
         // Type is enum or flag
-        s << "PyEnumObject_New(" << endl;
-        {
-            Indentation indent1(INDENT);
-            Indentation indent2(INDENT);
-            s << INDENT << '&' << pyTypeName << ',' << endl;
-            s << INDENT << "\"ReturnedValue\", (long)";
-        }
+        s << "PyEnumObject_New(&" << pyTypeName << ", (long)";
     }
     s << " cppobj);" << endl;
     s << '}' << endl << endl;
@@ -350,6 +344,9 @@ void HeaderGenerator::finishGeneration()
         if (!incFile.isEmpty())
             enumIncludes << cppEnum->includeFile();
         writeTypeCheckMacro(s_pts, cppEnum->typeEntry());
+        FlagsTypeEntry* flags = cppEnum->typeEntry()->flags();
+        if (flags)
+            writeTypeCheckMacro(s_pts, flags);
         s_pts << endl;
         writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
         writeTypeConverterImpl(convImpl, cppEnum->typeEntry());
@@ -371,14 +368,15 @@ void HeaderGenerator::finishGeneration()
 
         foreach (const AbstractMetaEnum* cppEnum, metaClass->enums()) {
             writeTypeCheckMacro(s_pts, cppEnum->typeEntry());
-            s_pts << endl;
             writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
             writeTypeConverterImpl(convImpl, cppEnum->typeEntry());
             FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
             if (flagsEntry) {
+                writeTypeCheckMacro(s_pts, flagsEntry);
                 writeTypeConverterDecl(convDecl, flagsEntry);
                 writeTypeConverterImpl(convImpl, flagsEntry);
             }
+            s_pts << endl;
             convDecl << endl;
         }
 

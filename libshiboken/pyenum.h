@@ -56,11 +56,11 @@ PyAPI_FUNC(PyObject*) PyEnumObject_NonExtensibleNew(PyTypeObject* type, PyObject
 } // extern "C"
 
 PyObject* PyEnumObject_New(PyTypeObject *instanceType,
-                           const char* item_name,
-                           long item_value);
+                           long item_value,
+                           const char* item_name);
 PyObject* PyEnumObject_New(PyTypeObject *instanceType,
-                           PyObject* item_name,
-                           long item_value);
+                           long item_value,
+                           PyObject* item_name = 0);
 
 } // namespace Shiboken
 
