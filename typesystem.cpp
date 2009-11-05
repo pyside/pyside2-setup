@@ -949,8 +949,8 @@ bool Handler::startElement(const QString &, const QString &n,
                 m_error = "No typesystem name specified";
                 return false;
             }
-
-            if (!m_database->parseFile(name, convertBoolean(attributes["generate"], "generate", true))) {
+            bool generateChild = (convertBoolean(attributes["generate"], "generate", true) && (m_generate == TypeEntry::GenerateAll));
+            if (!m_database->parseFile(name, generateChild)) {
                 m_error = QString("Failed to parse: '%1'").arg(name);
                 return false;
             }
