@@ -194,10 +194,10 @@ void AbstractMetaBuilder::traverseOperatorFunction(FunctionModelItem item)
                 // not of the same type of its owning class we suppose that it
                 // must be an reverse operator (e.g. CLASS::operator(TYPE, CLASS)).
                 // All operator overloads that operate over a class are already
-                // beign added as member functions of that class by the API Extractor,
-                // in addition to this the reverse operators are marked as static
-                // for identification purposes.
-                *metaFunction += AbstractMetaAttributes::Static;
+                // beign added as member functions of that class by the API Extractor.
+                arguments.pop_back();
+                metaFunction->setArguments(arguments);
+                metaFunction->setReverseOperator(true);
             }
             metaFunction->setFunctionType(AbstractMetaFunction::NormalFunction);
             metaFunction->setVisibility(AbstractMetaFunction::Public);
