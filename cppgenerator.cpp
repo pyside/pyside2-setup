@@ -80,7 +80,7 @@ QList<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(con
     // ( func_name, num_args ) => func_list
     QMap<QPair<QString, int >, AbstractMetaFunctionList> results;
     foreach (AbstractMetaFunction* func, metaClass->operatorOverloads(query)) {
-        if (func->isModifiedRemoved() || ShibokenGenerator::isReverseOperator(func) || func->name() == "operator[]" || func->name() == "operator->")
+        if (func->isModifiedRemoved() || func->name() == "operator[]" || func->name() == "operator->")
             continue;
         int args;
         if (func->isComparisonOperator()) {
@@ -225,7 +225,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
             foreach (AbstractMetaFunction* func, allOverloads) {
                 if (!func->isModifiedRemoved()
                     && !func->isPrivate()
-                    && func->ownerClass() == func->implementingClass())
+                    && (func->ownerClass() == func->implementingClass() || func->isAbstract()))
                     overloads.append(func);
             }
 
@@ -546,23 +546,14 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
 
     //DEBUG
-    //if (rfunc->isOperatorOverload()) {
-    //    QString dumpFile = QString("%1_%2.dot").arg(m_packageName).arg(pythonOperatorFunctionName(rfunc)).toLower();
-    //    overloadData.dumpGraph(dumpFile);
-    //}
+//     if (rfunc->name() == "operator+" && rfunc->ownerClass()->name() == "Str") {
+//         QString dumpFile = QString("/tmp/%1_%2.dot").arg(m_packageName).arg(pythonOperatorFunctionName(rfunc)).toLower();
+//         overloadData.dumpGraph(dumpFile);
+//     }
     //DEBUG
-
-    // TODO: take this off when operator generation is fixed
-    //     if (rfunc->isOperatorOverload())
-//     if (rfunc->isInplaceOperator())
-//         s << "/*" << endl;
 
     int minArgs = overloadData.minArgs();
     int maxArgs = overloadData.maxArgs();
-    if (ShibokenGenerator::isReverseOperator(rfunc)) {
-        minArgs--;
-        maxArgs--;
-    }
 
     s << "static PyObject*" << endl;
     s << cpythonFunctionName(rfunc) << "(PyObject* self";
@@ -581,13 +572,25 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
     } else {
         if (rfunc->implementingClass() &&
             (!rfunc->implementingClass()->isNamespace() && !rfunc->isStatic())) {
+
+            if (rfunc->isOperatorOverload() && rfunc->isBinaryOperator()) {
+                QString checkFunc = cpythonCheckFunction(rfunc->ownerClass()->typeEntry());
+                s << INDENT << "// FIXME: Optimize this: Only do this when there is a reverse operator in this function group\n";
+                s << INDENT << "bool isReverse = " << checkFunc << "(arg) && !" << checkFunc << "(self);\n"
+                  << INDENT << "if (isReverse)\n"
+                  << INDENT << INDENT << "std::swap(self, arg);\n\n";
+            }
+
             // Checks if the underlying C++ object is valid.
             // If the wrapped C++ library have no function that steals ownership and
             // deletes the C++ object this check would not be needed.
-            s << INDENT << "if (!Shiboken::cppObjectIsValid((Shiboken::PyBaseWrapper*)self)) {\n";
-            s << INDENT << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"C++ object is invalid.\");\n";
-            s << INDENT << INDENT << "return 0;\n";
-            s << INDENT << "}\n";
+            // Value type objects are always valid
+            if (!rfunc->ownerClass()->typeEntry()->isValue()) {
+                s << INDENT << "if (!Shiboken::cppObjectIsValid((Shiboken::PyBaseWrapper*)self)) {\n";
+                s << INDENT << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"C++ object is invalid.\");\n";
+                s << INDENT << INDENT << "return 0;\n";
+                s << INDENT << "}\n";
+            }
         }
 
         if (rfunc->type() && !rfunc->argumentRemoved(0) && !rfunc->isInplaceOperator())
@@ -787,12 +790,7 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
         }
     }
 
-    int minArgs = parentOverloadData->minArgs();
     int maxArgs = parentOverloadData->maxArgs();
-    if (ShibokenGenerator::isReverseOperator(referenceFunction)) {
-        minArgs--;
-        maxArgs--;
-    }
     // Python constructors always receive multiple arguments.
     bool manyArgs = maxArgs > 1 || referenceFunction->isConstructor();
 
@@ -858,6 +856,9 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
                 }
             }
 
+            if (referenceFunction->isOperatorOverload()) {
+                s << (overloadData->overloads().first()->isReverseOperator() ? "" : "!") << "isReverse && ";
+            }
             writeTypeCheck(s, overloadData, pyArgName);
 
             if (overloadData->overloads().size() == 1) {
@@ -914,7 +915,7 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
 
 void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* func, int maxArgs)
 {
-    s << INDENT << "// " << func->minimalSignature() << endl;
+    s << INDENT << "// " << func->minimalSignature() << (func->isReverseOperator() ? " [reverse operator]": "") << endl;
 
     if (func->isAbstract()) {
         s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '"
@@ -1003,22 +1004,23 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             secondArg.append(')');
         }
 
-        if (ShibokenGenerator::isReverseOperator(func) || func->isUnaryOperator())
+        if (func->isUnaryOperator())
             std::swap(firstArg, secondArg);
 
         QString op = func->originalName();
-        op = op.right(op.size() - QString("operator").size());
+        op = op.right(op.size() - (sizeof("operator")/sizeof(char)-1));
 
         s << INDENT;
         if (!func->isInplaceOperator())
             s << retvalVariableName() << " = ";
 
-        if (func->isBinaryOperator())
-            mc << firstArg << ' ';
-        if (op == "[]")
-            mc << '[' << secondArg << ']';
-        else
+        if (func->isBinaryOperator()) {
+            if (func->isReverseOperator())
+                std::swap(firstArg, secondArg);
+            mc << firstArg << ' ' << op << ' ' << secondArg;
+        } else {
             mc << op << ' ' << secondArg;
+        }
     } else if (func->isConstructor() || func->isCopyConstructor()) {
         s << INDENT;
         isCtor = true;

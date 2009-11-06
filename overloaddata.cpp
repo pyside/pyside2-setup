@@ -98,12 +98,14 @@ OverloadData* OverloadData::addOverloadData(const AbstractMetaFunction* func,
                                             const AbstractMetaType* argType)
 {
     OverloadData* overloadData = 0;
-    foreach (OverloadData* tmp, m_nextOverloadData) {
-        // TODO: 'const char *', 'char *' and 'char' will have the same TypeEntry?
-        if (tmp->m_argType->typeEntry() == argType->typeEntry()) {
-            tmp->addOverload(func);
-            overloadData = tmp;
-            continue;
+    if (!func->isOperatorOverload()) {
+        foreach (OverloadData* tmp, m_nextOverloadData) {
+            // TODO: 'const char *', 'char *' and 'char' will have the same TypeEntry?
+            if (tmp->m_argType->typeEntry() == argType->typeEntry()) {
+                tmp->addOverload(func);
+                overloadData = tmp;
+                continue;
+            }
         }
     }
 

@@ -38,7 +38,7 @@ class StrTest(unittest.TestCase):
         '''Test if the binding correcly implements the Python __str__ method.'''
         s1 = 'original string'
         s2 = Str(s1)
-        self.assertNotEqual(s1, s2)
+        self.assertEqual(s1, s2)
         self.assertEqual(s1, str(s2))
 
     def testPassExactClassAsReferenceToArgument(self):
@@ -82,6 +82,11 @@ class StrTest(unittest.TestCase):
         except:
             pass
 
+    def testReverseOperator(self):
+        s1 = Str("hello")
+        n1 = 2
+        self.assertEqual(s1+2, "hello2")
+        self.assertEqual(2+s1, "2hello")
 
 
 if __name__ == '__main__':

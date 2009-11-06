@@ -504,20 +504,6 @@ bool ShibokenGenerator::isPyInt(const AbstractMetaType* type)
     return isPyInt(type->typeEntry());
 }
 
-bool ShibokenGenerator::isReverseOperator(const AbstractMetaFunction* func)
-{
-    if (!func->isOperatorOverload())
-        return false;
-
-    const AbstractMetaClass* cppClass = func->ownerClass();
-    AbstractMetaArgumentList args = func->arguments();
-    // Here we expect static operator overloads with
-    // 2 arguments to represent reverse operators.
-    // e.g. static operator*(double,TYPE) => double * TYPE => TYPE.__rmul__(double).
-    return args.size() == 2 && cppClass &&
-            args[1]->type()->typeEntry() == cppClass->typeEntry();
-}
-
 bool ShibokenGenerator::shouldDereferenceArgumentPointer(const AbstractMetaArgument* arg)
 {
     const AbstractMetaType* argType = arg->type();
