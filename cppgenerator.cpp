@@ -834,22 +834,33 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
 
     foreach (OverloadData* overloadData, parentOverloadData->nextOverloadData()) {
         if (maxArgs > 0) {
-            bool signatureFound = overloadData->overloads().size() == 1 &&
-                                  !overloadData->nextArgumentHasDefaultValue();
+            bool signatureFound = overloadData->overloads().size() == 1
+                                  && !overloadData->hasDefaultValue();
+
+            OverloadData* nextArgWithDefault = 0;
+            if (signatureFound) {
+                nextArgWithDefault = overloadData->findNextArgWithDefault();
+                signatureFound = !nextArgWithDefault;
+            }
+
             const AbstractMetaFunction* func = overloadData->overloads()[0];
+            int numRemovedArgs = OverloadData::numberOfRemovedArguments(func);
             QString pyArgName = manyArgs ? QString("pyargs[%1]").arg(overloadData->argPos()) : "arg";
 
             s << "if (";
-            if (signatureFound && manyArgs) {
-                s << "numArgs == ";
-                s << func->arguments().size() - OverloadData::numberOfRemovedArguments(func);
-                s << " && ";
+            int numArgs = 0;
+            if (manyArgs) {
+                if (signatureFound) {
+                    numArgs = func->arguments().size() - numRemovedArgs;
+                    s << "numArgs == " << numArgs << " && ";
+                } else if (nextArgWithDefault) {
+                    numArgs = nextArgWithDefault->argPos();
+                }
             }
 
             writeTypeCheck(s, overloadData, pyArgName);
 
-            if (signatureFound && manyArgs) {
-                int numArgs = func->arguments().size() - OverloadData::numberOfRemovedArguments(func);
+            if (overloadData->overloads().size() == 1) {
                 OverloadData* tmp = overloadData;
                 for (int i = overloadData->argPos() + 1; i < numArgs; i++) {
                     tmp = tmp->nextOverloadData()[0];
@@ -857,13 +868,19 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
                     writeTypeCheck(s, tmp, QString("pyargs[%1]").arg(i));
                 }
             }
+
             s << ") {" << endl;
             {
                 if (!func->isAbstract()) {
                     Indentation indent(INDENT);
-                    int allRemoved = OverloadData::numberOfRemovedArguments(func);
-                    int maxArgs = signatureFound ? func->arguments().size() - allRemoved
-                                                    : overloadData->argPos() + 1;
+                    int maxArgs;
+                    if (signatureFound)
+                        maxArgs = func->arguments().size() - numRemovedArgs;
+                    else if (nextArgWithDefault)
+                        maxArgs = nextArgWithDefault->argPos();
+                    else
+                        maxArgs = overloadData->argPos() + 1;
+
                     int removed = 0;
                     for (int i = overloadData->argPos(); i < maxArgs; i++) {
                         if (func->argumentRemoved(i + 1))
@@ -876,6 +893,11 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
                     }
                 }
             }
+
+            if (nextArgWithDefault) {
+                while (overloadData->nextOverloadData()[0] != nextArgWithDefault)
+                    overloadData = overloadData->nextOverloadData()[0];
+            }
         }
 
         {
@@ -885,6 +907,7 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
 
         s << INDENT << "} else ";
     }
+
     if (maxArgs > 0)
         s << "goto " << cpythonFunctionName(referenceFunction) << "_TypeError;" << endl;
 }
