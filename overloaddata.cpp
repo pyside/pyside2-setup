@@ -188,6 +188,25 @@ bool OverloadData::nextArgumentHasDefaultValue() const
     return false;
 }
 
+static OverloadData* _findNextArgWithDefault(OverloadData* overloadData)
+{
+    if (overloadData->hasDefaultValue())
+        return overloadData;
+
+    OverloadData* result = 0;
+    foreach (OverloadData* odata, overloadData->nextOverloadData()) {
+        OverloadData* tmp = _findNextArgWithDefault(odata);
+        if (!result || (tmp && result->argPos() > tmp->argPos()))
+            result = tmp;
+    }
+    return result;
+}
+
+OverloadData* OverloadData::findNextArgWithDefault()
+{
+    return _findNextArgWithDefault(this);
+}
+
 bool OverloadData::isFinalOccurrence(const AbstractMetaFunction* func) const
 {
     foreach (const OverloadData* pd, m_nextOverloadData) {

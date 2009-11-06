@@ -50,6 +50,8 @@ public:
     bool isHeadOverloadData() const { return this == m_headOverloadData; }
     bool hasDefaultValue() const;
     bool nextArgumentHasDefaultValue() const;
+    /// Returns the nearest occurrence, including this instance, of an argument with a default value.
+    OverloadData* findNextArgWithDefault();
     bool isFinalOccurrence(const AbstractMetaFunction* func) const;
 
     QList<const AbstractMetaFunction*> overloads() const { return m_overloads; }
