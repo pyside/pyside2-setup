@@ -760,61 +760,66 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
 void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* parentOverloadData)
 {
     bool hasDefaultCall = parentOverloadData->nextArgumentHasDefaultValue();
-    if (!hasDefaultCall && parentOverloadData->isHeadOverloadData()) {
+    const AbstractMetaFunction* referenceFunction = parentOverloadData->referenceFunction();
+
+    // If the next argument has not an argument with a default value, it is still possible
+    // that one of the overloads for the current overload data has its final occurrence here.
+    // If found, the final occurrence of a method is attributed to the referenceFunction
+    // variable to be used further on this method on the conditional that writes default
+    // method calls.
+    if (!hasDefaultCall) {
         foreach (const AbstractMetaFunction* func, parentOverloadData->overloads()) {
             if (parentOverloadData->isFinalOccurrence(func)) {
+                referenceFunction = func;
                 hasDefaultCall = true;
                 break;
             }
         }
     }
 
-    const AbstractMetaFunction* rfunc = parentOverloadData->referenceFunction();
-
     int minArgs = parentOverloadData->minArgs();
     int maxArgs = parentOverloadData->maxArgs();
-    if (ShibokenGenerator::isReverseOperator(rfunc)) {
+    if (ShibokenGenerator::isReverseOperator(referenceFunction)) {
         minArgs--;
         maxArgs--;
     }
+    // Python constructors always receive multiple arguments.
+    bool manyArgs = maxArgs > 1 || referenceFunction->isConstructor();
 
-    if (maxArgs == 0
-        || (!parentOverloadData->isHeadOverloadData()
-        && (parentOverloadData->nextOverloadData().isEmpty()
-        || (!hasDefaultCall && parentOverloadData->overloads().size() == 1)))) {
-        const AbstractMetaFunction* func = parentOverloadData->overloads()[0];
-        int removed = OverloadData::numberOfRemovedArguments(func);
-        writeMethodCall(s, func, func->arguments().size() - removed);
+    // Functions without arguments are written right away.
+    if (maxArgs == 0) {
+        writeMethodCall(s, referenceFunction);
         return;
-    }
 
-    bool manyArgs = maxArgs > 1 || rfunc->isConstructor();
+    // To decide if a method call is possible at this point the current overload
+    // data object cannot be the head, since it is just an entry point, or a root,
+    // for the tree of arguments and it does not represent a valid method call.
+    } else if (!parentOverloadData->isHeadOverloadData()) {
+        bool isLastArgument = parentOverloadData->nextOverloadData().isEmpty();
+        bool signatureFound = parentOverloadData->overloads().size() == 1;
+
+        // The current overload data describes the last argument of a signature,
+        // so the method can be called right now.
+        if (isLastArgument || (signatureFound && !hasDefaultCall)) {
+            const AbstractMetaFunction* func = parentOverloadData->overloads()[0];
+            int numRemovedArgs = OverloadData::numberOfRemovedArguments(func);
+            writeMethodCall(s, func, func->arguments().size() - numRemovedArgs);
+            return;
+        }
+    }
 
     s << INDENT;
 
-    // can make a default call
+    // If the next argument has a default value the decisor can perform a method call;
+    // it just need to check if the number of arguments received from Python are equal
+    // to the number of parameters preceding the argument with the default value.
     if (hasDefaultCall) {
-        s << "if (numArgs == " << parentOverloadData->argPos() + 1 << ") { // hasDefaultCall" << endl;
+        s << "if (numArgs == " << parentOverloadData->argPos() + 1 << ") {" << endl;
         {
             Indentation indent(INDENT);
-            writeMethodCall(s, rfunc, parentOverloadData->argPos() + 1);
+            writeMethodCall(s, referenceFunction, parentOverloadData->argPos() + 1);
         }
         s << INDENT << "} else ";
-    }
-
-    // last occurrence of function signature
-    if (!parentOverloadData->isHeadOverloadData()) {
-        foreach (const AbstractMetaFunction* func, parentOverloadData->overloads()) {
-            if (parentOverloadData->isFinalOccurrence(func)) {
-                int numArgs = parentOverloadData->argPos() + 1;
-                s << "if (numArgs == " << numArgs << ") { // final:" << func->minimalSignature() << endl;
-                {
-                    Indentation indent(INDENT);
-                    writeMethodCall(s, func, numArgs);
-                }
-                s << INDENT << "} else ";
-            }
-        }
     }
 
     foreach (OverloadData* overloadData, parentOverloadData->nextOverloadData()) {
@@ -877,7 +882,7 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
         s << INDENT << "} else ";
     }
     if (maxArgs > 0)
-        s << "goto " << cpythonFunctionName(rfunc) << "_TypeError;" << endl;
+        s << "goto " << cpythonFunctionName(referenceFunction) << "_TypeError;" << endl;
 }
 
 void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* func, int maxArgs)
