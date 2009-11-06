@@ -703,7 +703,14 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadDa
     // PyInt type to come after the more precise numeric types (e.g. float)
     bool numberType = alternativeNumericTypes == 1 || ShibokenGenerator::isPyInt(argType);
 
+    bool isPairContainer = overloadData->argType()->isContainer()
+                            && ((ContainerTypeEntry*)overloadData->argType()->typeEntry())->type()
+                                == ContainerTypeEntry::PairContainer;
+
     if (!implicitConvs.isEmpty())
+        s << '(';
+
+    if (isPairContainer)
         s << '(';
 
     if (argType->typeEntry()->isFlags())
@@ -714,6 +721,9 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadDa
         s << cpythonCheckFunction(argType, numberType);
 
     s << '(' << argumentName << ')';
+
+    if (isPairContainer)
+        s << " && PySequence_Size(" << argumentName << ") == 2)";
 
     if (!implicitConvs.isEmpty())
         s << " || " << cpythonIsConvertibleFunction(argType) << '(' << argumentName << "))";
@@ -837,12 +847,6 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
             }
 
             writeTypeCheck(s, overloadData, pyArgName);
-
-            if (overloadData->argType()->isContainer() &&
-                ((ContainerTypeEntry*)overloadData->argType()->typeEntry())->type()
-                    == ContainerTypeEntry::PairContainer) {
-                s << " && PySequence_Size(" << pyArgName << ") == 2";
-            }
 
             if (signatureFound && manyArgs) {
                 int numArgs = func->arguments().size() - OverloadData::numberOfRemovedArguments(func);
