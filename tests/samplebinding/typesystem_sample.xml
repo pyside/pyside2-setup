@@ -34,6 +34,7 @@
     <enum-type name="Derived::OtherOverloadedFuncEnum"/>
     <enum-type name="Modifications::OverloadedModFunc"/>
     <enum-type name="ImplicitConv::CtorEnum"/>
+    <enum-type name="Time::NumArgs"/>
     <!-- BUG:
     renaming the ICOverloadedFuncEnum to the same name
     of a global enum causes the generator to confuse the
@@ -236,6 +237,7 @@
             </inject-code>
         </add-function>
     </value-type>
+    <value-type name="Time"/>
     <value-type name="Size"/>
     <value-type name="MapUser"/>
     <value-type name="PairUser"/>

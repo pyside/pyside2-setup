@@ -20,6 +20,7 @@ reference.cpp
 samplenamespace.cpp
 simplefile.cpp
 size.cpp
+sometime.cpp
 str.cpp
 virtualmethods.cpp
 )

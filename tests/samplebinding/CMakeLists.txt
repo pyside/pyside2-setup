@@ -29,6 +29,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/samplenamespace_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/simplefile_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/size_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/str_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/time_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/virtualmethods_wrapper.cpp
 )
 

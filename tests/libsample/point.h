@@ -56,7 +56,10 @@ public:
     const Point& getConstReferenceToSelf() const { return *this; }
     const Point* getSelf() const { return this; }
 
+    // The != operator is not implemented for the purpose of testing
+    // for the absense of the __ne__ method in the Python binding.
     bool operator==(const Point& other);
+
     Point operator+(const Point& other);
     Point operator-(const Point& other);
 

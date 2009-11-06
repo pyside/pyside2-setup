@@ -21,5 +21,6 @@
 #include "simplefile.h"
 #include "size.h"
 #include "str.h"
+#include "sometime.h"
 #include "virtualmethods.h"
 
