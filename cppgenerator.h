@@ -58,6 +58,8 @@ private:
     void writeErrorSection(QTextStream& s, OverloadData& overloadData);
     void writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName);
 
+    void writeTypeConverterImpl(QTextStream& s, const TypeEntry* type);
+
     /**
      *   Writes Python to C++ conversions for arguments on Python wrappers.
      *   If implicit conversions, and thus new object allocation, are needed,

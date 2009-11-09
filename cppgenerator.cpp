@@ -117,6 +117,13 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     s << "#include <shiboken.h>" << endl;
     s << "#include \"" << moduleName().toLower() << "_python.h\"" << endl << endl;
 
+    QString converterImpl;
+    QTextStream convImpl(&converterImpl);
+    if (!metaClass->isNamespace()) {
+        Indentation indentation(INDENT);
+        writeTypeConverterImpl(convImpl, metaClass->typeEntry());
+    }
+
     QString headerfile = fileNameForClass(metaClass);
     headerfile.replace("cpp", "h");
     s << "#include \"" << headerfile << '"' << endl;
@@ -256,12 +263,14 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     foreach (AbstractMetaEnum* cppEnum, metaClass->enums()) {
         bool hasFlags = cppEnum->typeEntry()->flags();
         if (hasFlags) {
+            writeTypeConverterImpl(convImpl, cppEnum->typeEntry()->flags());
             writeFlagsMethods(s, cppEnum);
             writeFlagsNumberMethodsDefinition(s, cppEnum);
             s << endl;
         }
 
         writeEnumDefinition(s, cppEnum);
+        writeTypeConverterImpl(convImpl, cppEnum->typeEntry());
 
         if (hasFlags) {
             // Write Enum as Flags definition (at the moment used only by QFlags<enum>)
@@ -272,7 +281,12 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     s << endl;
 
     writeClassRegister(s, metaClass);
-    s << endl << "} // extern \"C\"" << endl;
+    s << endl << "} // extern \"C\"" << endl << endl;
+
+    s << "namespace Shiboken" << endl << '{' << endl;
+    s << "// Converter implementations" << endl;
+    s << converterImpl;
+    s << "} // namespace Shiboken" << endl << endl;
 }
 
 void CppGenerator::writeConstructorNative(QTextStream& s, const AbstractMetaFunction* func)
@@ -1809,6 +1823,107 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     s << '}' << endl << endl;
 }
 
+void CppGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
+{
+    if (type->hasConversionRule())
+        return;
+
+    QString pyTypeName = cpythonTypeName(type);
+
+    const AbstractMetaClass* metaClass = classes().findClass(type->name());
+    bool isAbstractOrObjectType = (metaClass &&  metaClass->isAbstract()) || type->isObject();
+
+    // Write Converter<T>::createWrapper function
+    s << "PyObject* Converter<" << type->name() << (isAbstractOrObjectType ? "*" : "");
+    s << " >::createWrapper(";
+    QString convArg = type->name();
+    if (!type->isEnum() && !type->isFlags()) {
+        convArg.prepend("const ");
+        convArg.append('*');
+    }
+    s << convArg << " cppobj)" << endl;
+
+    s << '{' << endl;
+    s << INDENT << "return " << "Shiboken::";
+    if (type->isObject() || type->isValue()) {
+        s << "PyBaseWrapper_New(&" << pyTypeName << ", &" << pyTypeName << ',';
+    } else {
+        // Type is enum or flag
+        s << "PyEnumObject_New(&" << pyTypeName << ", (long)";
+    }
+    s << " cppobj);" << endl;
+    s << '}' << endl << endl;
+
+    AbstractMetaFunctionList implicitConvs = implicitConversions(type);
+    bool hasImplicitConversions = !implicitConvs.isEmpty();
+
+    if (hasImplicitConversions) {
+        // Write Converter<T>::isConvertible
+        s << "bool Converter<" << type->name() << " >::isConvertible(PyObject* pyobj)" << endl;
+        s << '{' << endl;
+        s << INDENT << "return ";
+        bool isFirst = true;
+        foreach (const AbstractMetaFunction* ctor, implicitConvs) {
+            Indentation indent(INDENT);
+            if (isFirst)
+                isFirst = false;
+            else
+                s << endl << INDENT << " || ";
+            s << cpythonCheckFunction(ctor->arguments().first()->type());
+            s << "(pyobj)";
+        }
+        s << ';' << endl;
+        s << '}' << endl << endl;
+    }
+
+    if (!type->isValue())
+        return;
+
+    // Write Converter<T>::toPython function
+    s << "PyObject* Converter<" << type->name() << " >::toPython(const ";
+    s << type->name() << "& cppobj)" << endl;
+    s << '{' << endl;
+    s << INDENT << "return Converter<" << type->name() << " >::createWrapper(new ";
+    s << type->name() << "(cppobj));" << endl;
+    s << '}' << endl << endl;
+
+    if (!hasImplicitConversions)
+        return;
+
+    // Write Converter<T>::toCpp function
+    s << type->name() << " Converter<" << type->name() << " >::toCpp(PyObject* pyobj)" << endl;
+    s << '{' << endl << INDENT;
+
+    bool firstImplicitIf = true;
+    foreach (const AbstractMetaFunction* ctor, implicitConvs) {
+        if (ctor->isModifiedRemoved())
+            continue;
+
+        const AbstractMetaType* argType = ctor->arguments().first()->type();
+        if (firstImplicitIf)
+            firstImplicitIf = false;
+        else
+            s << INDENT << "else ";
+        s << "if (" << cpythonCheckFunction(argType) << "(pyobj))" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "return " << type->name() << '(';
+            writeBaseConversion(s, argType, 0);
+            s << "toCpp(pyobj));" << endl;
+        }
+    }
+
+    s << INDENT << "return *Converter<" << type->name() << "* >::toCpp(pyobj);" << endl;
+    s << '}' << endl << endl;
+
+    // Write Converter<T>::copyCppObject function
+    s << type->name() << "* Converter<" << type->name();
+    s << " >::copyCppObject(const " << type->name() << "& cppobj)" << endl;
+    s << '{' << endl;
+    s << INDENT << "return new " << type->name() << "(cppobj);" << endl;
+    s << '}' << endl << endl;
+}
+
 void CppGenerator::finishGeneration()
 {
     //Generate CPython wrapper file
@@ -1903,11 +2018,23 @@ void CppGenerator::finishGeneration()
         s << classInitDecl << endl;
 
         if (!globalEnums().isEmpty()) {
+            QString converterImpl;
+            QTextStream convImpl(&converterImpl);
+
             s << "// Enum definitions ";
             s << "------------------------------------------------------------" << endl;
             foreach (const AbstractMetaEnum* cppEnum, globalEnums()) {
+                writeTypeConverterImpl(convImpl, cppEnum->typeEntry());
                 writeEnumDefinition(s, cppEnum);
                 s << endl;
+            }
+
+            if (!converterImpl.isEmpty()) {
+                s << "// Enum converters ";
+                s << "------------------------------------------------------------" << endl;
+                s << "namespace Shiboken" << endl << '{' << endl;
+                s << converterImpl << endl;
+                s << "} // namespace Shiboken" << endl << endl;
             }
         }
 

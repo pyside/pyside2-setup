@@ -220,107 +220,6 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
     s << "};" << endl;
 }
 
-void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
-{
-    if (type->hasConversionRule())
-        return;
-
-    QString pyTypeName = cpythonTypeName(type);
-
-    const AbstractMetaClass* metaClass = classes().findClass(type->name());
-    bool isAbstractOrObjectType = (metaClass &&  metaClass->isAbstract()) || type->isObject();
-
-    // Write Converter<T>::createWrapper function
-    s << "inline PyObject* Converter<" << type->name() << (isAbstractOrObjectType ? "*" : "");
-    s << " >::createWrapper(";
-    QString convArg = type->name();
-    if (!type->isEnum() && !type->isFlags()) {
-        convArg.prepend("const ");
-        convArg.append('*');
-    }
-    s << convArg << " cppobj)" << endl;
-
-    s << '{' << endl;
-    s << INDENT << "return " << "Shiboken::";
-    if (type->isObject() || type->isValue()) {
-        s << "PyBaseWrapper_New(&" << pyTypeName << ", &" << pyTypeName << ',';
-    } else {
-        // Type is enum or flag
-        s << "PyEnumObject_New(&" << pyTypeName << ", (long)";
-    }
-    s << " cppobj);" << endl;
-    s << '}' << endl << endl;
-
-    AbstractMetaFunctionList implicitConvs = implicitConversions(type);
-    bool hasImplicitConversions = !implicitConvs.isEmpty();
-
-    if (hasImplicitConversions) {
-        // Write Converter<T>::isConvertible
-        s << "inline bool Converter<" << type->name() << " >::isConvertible(PyObject* pyobj)" << endl;
-        s << '{' << endl;
-        s << INDENT << "return ";
-        bool isFirst = true;
-        foreach (const AbstractMetaFunction* ctor, implicitConvs) {
-            Indentation indent(INDENT);
-            if (isFirst)
-                isFirst = false;
-            else
-                s << endl << INDENT << " || ";
-            s << cpythonCheckFunction(ctor->arguments().first()->type());
-            s << "(pyobj)";
-        }
-        s << ';' << endl;
-        s << '}' << endl << endl;
-    }
-
-    if (!type->isValue())
-        return;
-
-    // Write Converter<T>::toPython function
-    s << "inline PyObject* Converter<" << type->name() << " >::toPython(const ";
-    s << type->name() << "& cppobj)" << endl;
-    s << '{' << endl;
-    s << INDENT << "return Converter<" << type->name() << " >::createWrapper(new ";
-    s << type->name() << "(cppobj));" << endl;
-    s << '}' << endl << endl;
-
-    if (!hasImplicitConversions)
-        return;
-
-    // Write Converter<T>::toCpp function
-    s << "inline " << type->name() << " Converter<" << type->name() << " >::toCpp(PyObject* pyobj)" << endl;
-    s << '{' << endl << INDENT;
-
-    bool firstImplicitIf = true;
-    foreach (const AbstractMetaFunction* ctor, implicitConvs) {
-        if (ctor->isModifiedRemoved())
-            continue;
-
-        const AbstractMetaType* argType = ctor->arguments().first()->type();
-        if (firstImplicitIf)
-            firstImplicitIf = false;
-        else
-            s << INDENT << "else ";
-        s << "if (" << cpythonCheckFunction(argType) << "(pyobj))" << endl;
-        {
-            Indentation indent(INDENT);
-            s << INDENT << "return " << type->name() << '(';
-            writeBaseConversion(s, argType, 0);
-            s << "toCpp(pyobj));" << endl;
-        }
-    }
-
-    s << INDENT << "return *Converter<" << type->name() << "* >::toCpp(pyobj);" << endl;
-    s << '}' << endl << endl;
-
-    // Write Converter<T>::copyCppObject function
-    s << "inline " << type->name() << "* Converter<" << type->name();
-    s << " >::copyCppObject(const " << type->name() << "& cppobj)" << endl;
-    s << '{' << endl;
-    s << INDENT << "return new " << type->name() << "(cppobj);" << endl;
-    s << '}' << endl << endl;
-}
-
 void HeaderGenerator::finishGeneration()
 {
     // Generate the main header for this module.
@@ -332,9 +231,7 @@ void HeaderGenerator::finishGeneration()
     QString pythonTypeStuff;
     QTextStream s_pts(&pythonTypeStuff);
     QString convertersDecl;
-    QString convertersImpl;
     QTextStream convDecl(&convertersDecl);
-    QTextStream convImpl(&convertersImpl);
 
     Indentation indent(INDENT);
 
@@ -349,7 +246,6 @@ void HeaderGenerator::finishGeneration()
             writeTypeCheckMacro(s_pts, flags);
         s_pts << endl;
         writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
-        writeTypeConverterImpl(convImpl, cppEnum->typeEntry());
         convDecl << endl;
     }
 
@@ -369,12 +265,10 @@ void HeaderGenerator::finishGeneration()
         foreach (const AbstractMetaEnum* cppEnum, metaClass->enums()) {
             writeTypeCheckMacro(s_pts, cppEnum->typeEntry());
             writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
-            writeTypeConverterImpl(convImpl, cppEnum->typeEntry());
             FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
             if (flagsEntry) {
                 writeTypeCheckMacro(s_pts, flagsEntry);
                 writeTypeConverterDecl(convDecl, flagsEntry);
-                writeTypeConverterImpl(convImpl, flagsEntry);
             }
             s_pts << endl;
             convDecl << endl;
@@ -388,7 +282,6 @@ void HeaderGenerator::finishGeneration()
                     s_pts << "_New(PyTypeObject* type, PyObject* args, PyObject* kwds);" << endl;
                     writeTypeCheckMacro(s_pts, innerClass->typeEntry());
                     writeTypeConverterDecl(convDecl, innerClass->typeEntry());
-                    writeTypeConverterImpl(convImpl, innerClass->typeEntry());
                     convDecl << endl;
                 }
             }
@@ -398,7 +291,6 @@ void HeaderGenerator::finishGeneration()
             s_pts << "#define Py" << metaClass->name() << "_cptr(pyobj) ((";
             s_pts << metaClass->name() << "*)PyBaseWrapper_cptr(pyobj))" << endl << endl;
             writeTypeConverterDecl(convDecl, classType);
-            writeTypeConverterImpl(convImpl, classType);
             convDecl << endl;
         }
     }
@@ -471,9 +363,6 @@ void HeaderGenerator::finishGeneration()
                 s << typeEntry->conversionRule();
             }
         }
-
-        s << "// Generated converters implementations -------------------------------" << endl << endl;
-        s << convertersImpl << endl;
 
         s << "} // namespace Shiboken" << endl << endl;
 
