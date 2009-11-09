@@ -52,4 +52,11 @@ PyBaseWrapper_New(PyTypeObject* instanceType, PyTypeObject* baseWrapperType, con
     return self;
 }
 
+void
+PyBaseWrapper_Dealloc_PrivateDtor(PyObject* self)
+{
+    BindingManager::instance().releaseWrapper(self);
+    Py_TYPE(((PyBaseWrapper*)self))->tp_free((PyObject*)self);
+}
+
 } // namespace Shiboken

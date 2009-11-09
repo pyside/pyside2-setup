@@ -137,6 +137,8 @@ PyBaseWrapper_Dealloc(PyObject* self)
     Py_TYPE(((PyBaseWrapper*)self))->tp_free((PyObject*)self);
 }
 
+PyAPI_FUNC(void) PyBaseWrapper_Dealloc_PrivateDtor(PyObject* self);
+
 } // namespace Shiboken
 
 #endif // BASEWRAPPER_H
