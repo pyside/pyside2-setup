@@ -2,6 +2,7 @@
 #include "collector.h"
 #include "complex.h"
 #include "derived.h"
+#include "echo.h"
 #include "functions.h"
 #include "implicitconv.h"
 #include "kindergarten.h"

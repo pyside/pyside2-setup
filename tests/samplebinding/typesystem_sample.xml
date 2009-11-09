@@ -300,6 +300,14 @@
     <object-type name="MBase2"/>
     <object-type name="MDerived"/>
 
+    <value-type name="Echo">
+        <add-function signature="echo(const char *)">
+            <inject-code class="target" position="beginning">
+                return PyString_FromString(%1);
+            </inject-code>
+        </add-function>
+    </value-type>
+
     <rejection class="ListUser" function-name="createList()"/>
     <rejection class="ListUser" function-name="callCreateList()"/>
     <rejection class="ListUser" function-name="createComplexList(Complex, Complex)"/>

@@ -5,6 +5,7 @@ abstract.cpp
 collector.cpp
 complex.cpp
 derived.cpp
+echo.cpp
 functions.cpp
 implicitconv.cpp
 kindergarten.cpp
