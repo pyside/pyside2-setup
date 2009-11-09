@@ -32,6 +32,7 @@
  * 02110-1301 USA
  */
 
+#include "basewrapper.h"
 #include "bindingmanager.h"
 
 namespace Shiboken
@@ -63,7 +64,7 @@ void BindingManager::releaseWrapper(void *cptr)
         m_wrapperMapper.erase(iter);
 }
 
-inline void BindingManager::releaseWrapper(PyObject* wrapper)
+void BindingManager::releaseWrapper(PyObject* wrapper)
 {
     releaseWrapper(PyBaseWrapper_cptr(wrapper));
 }

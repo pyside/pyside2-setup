@@ -33,7 +33,6 @@
  */
 
 #include "basewrapper.h"
-#include "bindingmanager.h"
 
 namespace Shiboken
 {

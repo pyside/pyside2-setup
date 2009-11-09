@@ -36,6 +36,7 @@
 #define BASEWRAPPER_H
 
 #include <Python.h>
+#include <bindingmanager.h>
 
 namespace Shiboken
 {
@@ -130,9 +131,9 @@ template <typename T>
 PyAPI_FUNC(void)
 PyBaseWrapper_Dealloc(PyObject* self)
 {
-    if (PyBaseWrapper_hasOwnership(self)) {
+    BindingManager::instance().releaseWrapper(self);
+    if (PyBaseWrapper_hasOwnership(self))
         delete ((T*)PyBaseWrapper_cptr(self));
-    }
     Py_TYPE(((PyBaseWrapper*)self))->tp_free((PyObject*)self);
 }
 

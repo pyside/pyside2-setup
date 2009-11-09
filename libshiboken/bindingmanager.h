@@ -37,7 +37,6 @@
 
 #include <Python.h>
 #include <map>
-#include <basewrapper.h>
 
 namespace Shiboken
 {
@@ -50,7 +49,7 @@ public:
     bool hasWrapper(const void *cptr);
     void assignWrapper(PyObject* wrapper, const void* cptr);
     void releaseWrapper(void* cptr);
-    inline void releaseWrapper(PyObject* wrapper);
+    void releaseWrapper(PyObject* wrapper);
     PyObject* retrieveWrapper(const void* cptr);
     PyObject* getOverride(const void* cptr, const char* methodName);
 
