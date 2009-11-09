@@ -239,4 +239,19 @@ interface-type
 container-type
 ^^^^^^^^^^^^^^
 
-    .. note:: This tag is not documented yet.
+    The container-type node indicates that the given class is a container and
+    must be handled using one of the conversion helpers provided by attribute **type**.
+
+    .. code-block:: xml
+
+        <typesystem>
+            <container-type name="..."
+                type ="..." />
+        </typesystem>
+
+    The **name** attribute is the fully qualified C++ class name. The **type**
+    attribute is used to indicate what conversion rule will be applied to the
+    container. It can be: *list*, *string-list*, *linked-list*, *vector*, *stack*,
+    *queue*, *set*, *map*, *multi-map*, *hash*, *multi-hash* or *pair*.
+
+
