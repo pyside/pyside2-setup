@@ -1399,6 +1399,7 @@ AbstractMetaFunction *AbstractMetaBuilder::traverseFunction(const AddedFunction&
         AddedFunction::TypeInfo& typeInfo = args[i];
         AbstractMetaArgument* metaArg = createMetaArgument();
         AbstractMetaType* type = translateType(typeInfo);
+        decideUsagePattern(type);
         metaArg->setType(type);
         metaArg->setArgumentIndex(i);
         metaArg->setDefaultValueExpression(typeInfo.defaultValue);
