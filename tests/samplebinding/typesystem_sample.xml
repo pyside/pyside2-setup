@@ -572,6 +572,10 @@
         </modify-function>
     </value-type>
 
+    <value-type name="ImplicitBase"/>
+    <value-type name="SortedOverload"/>
+    <value-type name="ImplicitTarget"/>
+
     <value-type name="Point">
         <add-function signature="__str__()" return-type="PyObject*">
             <inject-code class="target" position="beginning">

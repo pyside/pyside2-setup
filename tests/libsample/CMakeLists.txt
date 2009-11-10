@@ -16,6 +16,7 @@ mapuser.cpp
 multiple_derived.cpp
 objecttype.cpp
 overload.cpp
+overloadsort.cpp
 pairuser.cpp
 point.cpp
 protected.cpp
