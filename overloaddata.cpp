@@ -25,9 +25,62 @@
 #include "overloaddata.h"
 #include "shibokengenerator.h"
 
-static bool overloadDataLessThan(const OverloadData* o1, const OverloadData* o2)
+#include <boost/graph/topological_sort.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graph_traits.hpp>
+
+/**
+ * Topologically sort the overloads by implicit convertion order
+ *
+ * This avoids using an implicit conversion if there's an explicit
+ * overload for the convertible type. So, if there's an implicit convert
+ * like TargetType(ConvertibleType foo) and both
+ *
+ * Side effects: Modifies m_nextOverloadData
+ */
+void OverloadData::sortOverloads()
 {
-    return o1->argTypeWeight() < o2->argTypeWeight();
+    using namespace boost;
+
+    OverloadDataList sorted;
+    QList<int> unmappedResult;
+    QSet<QPair<int, int> > deps;
+    QHash<QString, int> map;
+    QHash<int, OverloadData *>reverseMap;
+
+    int i = 0;
+    foreach(OverloadData *ov, m_nextOverloadData) {
+        map[ov->argType()->typeEntry()->name()] = i;
+        reverseMap[i] = ov;
+        i++;
+    }
+
+    foreach(OverloadData *ov, m_nextOverloadData) {
+        AbstractMetaFunctionList conversions = m_generator->implicitConversions(ov->argType());
+        const AbstractMetaType *targetType = ov->argType();
+        foreach(AbstractMetaFunction *function, conversions) {
+            AbstractMetaType *convertibleType = function->arguments().first()->type();
+
+            if (!map.contains(convertibleType->typeEntry()->name()))
+                continue;
+
+            deps << qMakePair(map[targetType->typeEntry()->name()],
+                              map[convertibleType->typeEntry()->name()]);
+        }
+    }
+
+    // Special case for double(int i) (not tracked by m_generator->implicitConversions
+    if (map.contains("double") && map.contains("int"))
+        deps << qMakePair(map["int"], map["double"]);
+
+    typedef adjacency_list<vecS, vecS, directedS> Graph;
+    Graph g(deps.begin(), deps.end(), reverseMap.size());
+    topological_sort(g, std::back_inserter(unmappedResult));
+
+    foreach(int i, unmappedResult)
+        sorted << reverseMap[i];
+
+    m_nextOverloadData = sorted;
 }
 
 // Prepare the information about overloaded methods signatures
@@ -51,9 +104,9 @@ OverloadData::OverloadData(const AbstractMetaFunctionList overloads, const Shibo
     }
 
     // Sort the overload possibilities so that the overload decisor code goes for the most
-    // important cases first, based on the weight system defined in OverloadData::addOverloadData
+    // important cases first, based on the topological order of the implicit conversions
     if (m_nextOverloadData.size() > 1)
-        qSort(m_nextOverloadData.begin(), m_nextOverloadData.end(), overloadDataLessThan);
+        sortOverloads();
 
     // Fix minArgs
     if (minArgs() > maxArgs())
@@ -112,28 +165,6 @@ OverloadData* OverloadData::addOverloadData(const AbstractMetaFunction* func,
     if (!overloadData) {
         overloadData = new OverloadData(m_headOverloadData, func, argType, m_argPos + 1);
         overloadData->m_generator = this->m_generator;
-
-        // The following code sets weights to the types of the possible arguments
-        // following the current one.
-        // The rule is: native strings goes first, followed by the primitive types
-        // (among those the most precise have more priority), and finally the wrapped C++
-        // types are ordered based on how many implicit conversions they have (the ones who
-        // have more go to the end).
-        if (ShibokenGenerator::isPyInt(argType)) {
-            overloadData->m_argTypeWeight = -1;
-        } else if (argType->isPrimitive()) {
-            if (argType->typeEntry()->name() == "double" || argType->typeEntry()->name() == "float")
-                overloadData->m_argTypeWeight = -3;
-            else
-                overloadData->m_argTypeWeight = -2;
-        } else if (argType->name() == "char" && argType->isNativePointer()) {
-            overloadData->m_argTypeWeight = -4;
-        } else if (argType->typeEntry()->isValue() || argType->typeEntry()->isObject()) {
-            overloadData->m_argTypeWeight = m_generator->implicitConversions(argType).size();
-        } else {
-            overloadData->m_argTypeWeight = 0;
-        }
-
         m_nextOverloadData.append(overloadData);
     }
 

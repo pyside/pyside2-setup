@@ -65,8 +65,6 @@ public:
     void dumpGraph(QString filename) const;
     QString dumpGraph() const;
 
-    int argTypeWeight() const { return m_argTypeWeight; }
-
     ~OverloadData();
 
 private:
@@ -76,6 +74,8 @@ private:
     void addOverload(const AbstractMetaFunction* func);
     OverloadData* addOverloadData(const AbstractMetaFunction* func, const AbstractMetaType* argType);
 
+    void sortOverloads();
+
     int functionNumber(const AbstractMetaFunction* func) const;
     OverloadDataList overloadDataOnPosition(OverloadData* overloadData, int argPos) const;
 
@@ -83,7 +83,6 @@ private:
     int m_maxArgs;
     int m_argPos;
     const AbstractMetaType* m_argType;
-    int m_argTypeWeight;
     QList<const AbstractMetaFunction*> m_overloads;
 
     OverloadData* m_headOverloadData;
