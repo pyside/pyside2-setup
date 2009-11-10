@@ -940,7 +940,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     if (func->hasSignatureModifications() || func->hasInjectedCode()) {
         CodeSnipList snips = getCodeSnips(func);
         if (!snips.isEmpty()) {
-            if (func->ownerClass())
+            if (func->ownerClass() && !func->isConstructor())
                 s << INDENT << func->ownerClass()->name() << "* cppSelf = " << cpythonWrapperCPtr(func->ownerClass(), "self") << ';' << endl;
             writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::All, func);
             writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::All, func);
