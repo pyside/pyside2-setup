@@ -37,7 +37,6 @@
 
 #include <Python.h>
 #include <basewrapper.h>
-#include <containers.h>
 #include <conversions.h>
 #include <helper.h>
 #include <pyenum.h>
