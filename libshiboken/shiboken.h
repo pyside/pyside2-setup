@@ -36,11 +36,12 @@
 #define SHIBOKEN_H
 
 #include <Python.h>
-#include <basewrapper.h>
-#include <conversions.h>
-#include <helper.h>
-#include <pyenum.h>
-#include <bindingmanager.h>
+#include "shibokenmacros.h"
+#include "basewrapper.h"
+#include "conversions.h"
+#include "helper.h"
+#include "pyenum.h"
+#include "bindingmanager.h"
 
 #endif // SHIBOKEN_H
 

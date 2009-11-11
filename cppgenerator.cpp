@@ -2042,7 +2042,7 @@ void CppGenerator::finishGeneration()
         s << "------------------------------------------------------------" << endl;
         s << "extern \"C\" {" << endl << endl;
 
-        s << "PyMODINIT_FUNC" << endl << "init" << moduleName() << "()" << endl;
+        s << getApiExportMacro() << " PyMODINIT_FUNC" << endl << "init" << moduleName() << "()" << endl;
         s << '{' << endl;
 
         foreach (const QString& requiredModule, TypeDatabase::instance()->requiredTargetImports()) {

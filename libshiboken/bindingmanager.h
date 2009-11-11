@@ -37,11 +37,12 @@
 
 #include <Python.h>
 #include <map>
+#include "shibokenmacros.h"
 
 namespace Shiboken
 {
 
-class BindingManager
+class LIBSHIBOKEN_API BindingManager
 {
 public:
     static BindingManager& instance();
@@ -54,11 +55,14 @@ public:
     PyObject* getOverride(const void* cptr, const char* methodName);
 
 private:
-    BindingManager() {}
+    ~BindingManager();
+    // disable copy
+    BindingManager();
     BindingManager(const BindingManager&);
+    BindingManager& operator=(const BindingManager&);
 
-    typedef std::map<const void*, PyObject*> WrapperMap;
-    WrapperMap m_wrapperMapper;
+    struct BindingManagerPrivate;
+    BindingManagerPrivate* m_d;
 };
 
 } // namespace Shiboken

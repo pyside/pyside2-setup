@@ -38,6 +38,22 @@
 namespace Shiboken
 {
 
+typedef std::map<const void*, PyObject*> WrapperMap;
+
+struct BindingManager::BindingManagerPrivate {
+    WrapperMap wrapperMapper;
+};
+
+BindingManager::BindingManager()
+{
+    m_d = new BindingManager::BindingManagerPrivate;
+}
+
+BindingManager::~BindingManager()
+{
+    delete m_d;
+}
+
 BindingManager& BindingManager::instance() {
     static BindingManager singleton;
     return singleton;
@@ -45,23 +61,23 @@ BindingManager& BindingManager::instance() {
 
 bool BindingManager::hasWrapper(const void* cptr)
 {
-    return m_wrapperMapper.count(cptr);
+    return m_d->wrapperMapper.count(cptr);
 }
 
 void BindingManager::assignWrapper(PyObject* wrapper, const void* cptr)
 {
-    WrapperMap::iterator iter = m_wrapperMapper.find(cptr);
-    if (iter == m_wrapperMapper.end())
-        m_wrapperMapper.insert(std::make_pair(cptr, wrapper));
+    WrapperMap::iterator iter = m_d->wrapperMapper.find(cptr);
+    if (iter == m_d->wrapperMapper.end())
+        m_d->wrapperMapper.insert(std::make_pair(cptr, wrapper));
     else
         iter->second = wrapper;
 }
 
 void BindingManager::releaseWrapper(void *cptr)
 {
-    WrapperMap::iterator iter = m_wrapperMapper.find(cptr);
-    if (iter != m_wrapperMapper.end())
-        m_wrapperMapper.erase(iter);
+    WrapperMap::iterator iter = m_d->wrapperMapper.find(cptr);
+    if (iter != m_d->wrapperMapper.end())
+        m_d->wrapperMapper.erase(iter);
 }
 
 void BindingManager::releaseWrapper(PyObject* wrapper)
@@ -71,8 +87,8 @@ void BindingManager::releaseWrapper(PyObject* wrapper)
 
 PyObject* BindingManager::retrieveWrapper(const void* cptr)
 {
-    WrapperMap::iterator iter = m_wrapperMapper.find(cptr);
-    if (iter == m_wrapperMapper.end())
+    WrapperMap::iterator iter = m_d->wrapperMapper.find(cptr);
+    if (iter == m_d->wrapperMapper.end())
         return 0;
     return iter->second;
 }

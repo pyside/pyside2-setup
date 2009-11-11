@@ -9,8 +9,10 @@ find_package(Boost COMPONENTS graph REQUIRED)
 
 add_definitions(${QT_DEFINITIONS})
 
-set(CMAKE_CXX_FLAGS_RELEASE "-Wall -DNDEBUG -O2 -Wl,-O1 -Wl,--hash-style=gnu")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall")
+set(CMAKE_CXX_FLAGS_RELEASE "-Wall -DNDEBUG -O2 -Wl,-O1 -Wl,--hash-style=gnu -fvisibility=hidden")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -fvisibility=hidden")
+# We need to define this when building shiboken, because windows need to known when to use dll_export or dll_import.
+add_definitions("-DLIBSHIBOKEN_BUILD")
 
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
 set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)

@@ -897,6 +897,12 @@ QStringList ShibokenGenerator::getBaseClasses(const AbstractMetaClass* metaClass
     return baseClass;
 }
 
+
+QString ShibokenGenerator::getApiExportMacro() const
+{
+    return "SHIBOKEN_"+moduleName().toUpper()+"_API"; // a longer name to avoid name clashes
+}
+
 static void dumpFunction(AbstractMetaFunctionList lst)
 {
     qDebug() << "DUMP FUNCTIONS: ";

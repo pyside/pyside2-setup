@@ -36,35 +36,12 @@
 #define HELPER_H
 
 #include <Python.h>
+#include "shibokenmacros.h"
 
 namespace Shiboken
 {
 
-// Generic helper definitions for shared library support
-#if defined _WIN32 || defined __CYGWIN__
-#define SHIBOKEN_HELPER_DLL_IMPORT __declspec(dllimport)
-#define SHIBOKEN_HELPER_DLL_EXPORT __declspec(dllexport)
-#define SHIBOKEN_HELPER_DLL_LOCAL
-#else
-#if __GNUC__ >= 4
-#define SHIBOKEN_HELPER_DLL_IMPORT __attribute__ ((visibility("default")))
-#define SHIBOKEN_HELPER_DLL_EXPORT __attribute__ ((visibility("default")))
-#define SHIBOKEN_HELPER_DLL_LOCAL  __attribute__ ((visibility("internal")))
-#else
-#define SHIBOKEN_HELPER_DLL_IMPORT
-#define SHIBOKEN_HELPER_DLL_EXPORT
-#define SHIBOKEN_HELPER_DLL_LOCAL
-#endif
-#endif
-
-// Now we use the generic helper definitions above to define SHIBOKEN_API and SHIBOKEN_LOCAL.
-// SHIBOKEN_API is used for the public API symbols. It either DLL imports or DLL exports (or does nothing for static build)
-// SHIBOKEN_LOCAL is used for non-api symbols.
-
-#define SHIBOKEN_API SHIBOKEN_HELPER_DLL_EXPORT
-#define SHIBOKEN_LOCAL SHIBOKEN_HELPER_DLL_LOCAL
-
-bool PySequence_to_argc_argv(PyObject* argList, int* argc, char*** argv);
+LIBSHIBOKEN_API bool PySequence_to_argc_argv(PyObject* argList, int* argc, char*** argv);
 
 } // namespace Shiboken
 

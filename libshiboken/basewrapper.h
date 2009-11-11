@@ -36,7 +36,7 @@
 #define BASEWRAPPER_H
 
 #include <Python.h>
-#include <bindingmanager.h>
+#include "bindingmanager.h"
 
 namespace Shiboken
 {
@@ -114,7 +114,7 @@ typedef struct {
 #endif
 
 
-PyAPI_FUNC(PyObject*)
+LIBSHIBOKEN_API PyAPI_FUNC(PyObject*)
 PyBaseWrapper_New(PyTypeObject *instanceType, PyTypeObject *baseWrapperType,
                   const void *cptr, uint hasOwnership = 1);
 
@@ -137,7 +137,7 @@ PyBaseWrapper_Dealloc(PyObject* self)
     Py_TYPE(((PyBaseWrapper*)self))->tp_free((PyObject*)self);
 }
 
-PyAPI_FUNC(void) PyBaseWrapper_Dealloc_PrivateDtor(PyObject* self);
+LIBSHIBOKEN_API PyAPI_FUNC(void) PyBaseWrapper_Dealloc_PrivateDtor(PyObject* self);
 
 } // namespace Shiboken
 

@@ -183,6 +183,8 @@ public:
     QString getFunctionReturnType(const AbstractMetaFunction* func, Options options = NoOption) const;
     QString getFormatUnitString(const AbstractMetaFunction* func) const;
 
+    /// Returns the name of the macro used to export symbols
+    QString getApiExportMacro() const;
     bool doSetup(const QMap<QString, QString>& args);
 
 protected:

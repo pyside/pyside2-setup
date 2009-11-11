@@ -36,6 +36,7 @@
 #define PYENUM_H
 
 #include <Python.h>
+#include "shibokenmacros.h"
 
 namespace Shiboken
 {
@@ -49,16 +50,16 @@ typedef struct {
     PyObject* ob_name;
 } PyEnumObject;
 
-PyAPI_FUNC(PyObject*) PyEnumObject_repr(PyObject* self);
-PyAPI_FUNC(PyObject*) PyEnumObject_name(PyObject* self);
-PyAPI_FUNC(PyObject*) PyEnumObject_NonExtensibleNew(PyTypeObject* type, PyObject* args, PyObject* kwds);
+LIBSHIBOKEN_API PyAPI_FUNC(PyObject*) PyEnumObject_repr(PyObject* self);
+LIBSHIBOKEN_API PyAPI_FUNC(PyObject*) PyEnumObject_name(PyObject* self);
+LIBSHIBOKEN_API PyAPI_FUNC(PyObject*) PyEnumObject_NonExtensibleNew(PyTypeObject* type, PyObject* args, PyObject* kwds);
 
 } // extern "C"
 
-PyObject* PyEnumObject_New(PyTypeObject *instanceType,
+LIBSHIBOKEN_API PyObject* PyEnumObject_New(PyTypeObject *instanceType,
                            long item_value,
                            const char* item_name);
-PyObject* PyEnumObject_New(PyTypeObject *instanceType,
+LIBSHIBOKEN_API PyObject* PyEnumObject_New(PyTypeObject *instanceType,
                            long item_value,
                            PyObject* item_name = 0);
 

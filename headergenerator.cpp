@@ -89,7 +89,7 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
         */
 
         // Class
-        s << "class SHIBOKEN_LOCAL " << wrapperName;
+        s << "class " << wrapperName;
         s << " : public " << metaClass->qualifiedCppName();
 
         s << endl << '{' << endl << "public:" << endl;
@@ -318,6 +318,7 @@ void HeaderGenerator::finishGeneration()
         s << "#include <bindingmanager.h>" << endl << endl;
 
         s << "#include <memory>" << endl << endl;
+        writeExportMacros(s);
 
         s << "// Class Includes" << endl;
         s << classIncludes << endl;
@@ -369,3 +370,21 @@ void HeaderGenerator::finishGeneration()
         s << "#endif // " << includeShield << endl << endl;
     }
 }
+
+
+void HeaderGenerator::writeExportMacros(QTextStream& s)
+{
+    QString macro = getApiExportMacro();
+    s << "\
+#if defined _WIN32 || defined __CYGWIN__\n\
+    #define " << macro << " __declspec(dllexport)\n\
+#else\n\
+#if __GNUC__ >= 4\n\
+    #define " << macro << " __attribute__ ((visibility(\"default\")))\n\
+#else\n\
+    #define " << macro << "\n\
+#endif\n\
+#endif\n\
+\n";
+}
+
