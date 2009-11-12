@@ -134,38 +134,7 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
         // TODO: when modified an abstract method ceases to be virtual but stays abstract
         //if (func->isModifiedRemoved() && func->isAbstract()) {
         //}
-
-        // TODO: APIExtractor: strange that something that is abstract couldn't be considered virtual too.
-        if (func->isVirtual() && !func->isAbstract() && !func->isConstructor() &&
-            !func->ownerClass()->hasPrivateDestructor() &&
-            func->implementingClass() == func->ownerClass()) {
-            writeVirtualDispatcher(s, func);
-        }
     }
-}
-
-void HeaderGenerator::writeVirtualDispatcher(QTextStream& s, const AbstractMetaFunction* func) const
-{
-    QString returnKeyword = func->type() ? QLatin1String("return ") : QString();
-    s << INDENT << "static " << signatureForDefaultVirtualMethod(func, "", "_dispatcher") << " {" << endl;
-    {
-        Indentation indentation(INDENT);
-        s << INDENT << returnKeyword;
-        if (func->isModifiedRemoved() && func->isAbstract()) {
-            if (func->type()
-                && (func->type()->isObject()
-                || func->type()->isQObject()
-                || func->type()->name() == "void"))
-                s << "0";
-            else
-                s << functionReturnType(func) << "()";
-        } else {
-            s << "self." << func->implementingClass()->qualifiedCppName() << "::";
-            writeFunctionCall(s, func);
-        }
-        s << ';' << endl;
-    }
-    s << INDENT << '}' << endl;
 }
 
 void HeaderGenerator::writeTypeCheckMacro(QTextStream& s, const TypeEntry* type)

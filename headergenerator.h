@@ -41,7 +41,6 @@ private:
     void writeFunction(QTextStream& s, const AbstractMetaFunction* func) const;
     void writePureVirtualEmptyImpl(QTextStream& , const AbstractMetaFunction* func) const;
     void writeDefaultImplementation(QTextStream& s, const AbstractMetaFunction* func) const;
-    void writeVirtualDispatcher(QTextStream &s, const AbstractMetaFunction *func) const;
     void writeTypeCheckMacro(QTextStream& s, const TypeEntry* type);
     void writeExportMacros(QTextStream& s);
     void writeTypeConverterDecl(QTextStream& s, const TypeEntry* type);
