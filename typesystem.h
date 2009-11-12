@@ -1687,30 +1687,6 @@ public:
     }
 };
 
-class JObjectWrapperTypeEntry: public ValueTypeEntry
-{
-public:
-    JObjectWrapperTypeEntry(const QString &name) : ValueTypeEntry(name, JObjectWrapperType) { }
-
-    QString targetLangApiName() const
-    {
-        return strings_jobject;
-    }
-    QString targetLangName() const
-    {
-        return strings_Object;
-    }
-    QString targetLangPackage() const
-    {
-        return stringsJavaLang;
-    }
-
-    bool isNativeIdBased() const
-    {
-        return false;
-    }
-};
-
 class VariantTypeEntry: public ValueTypeEntry
 {
 public:
