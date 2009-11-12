@@ -1770,24 +1770,6 @@ private:
     InterfaceTypeEntry *m_interface;
 };
 
-class CustomTypeEntry : public ComplexTypeEntry
-{
-public:
-    CustomTypeEntry(const QString &name) : ComplexTypeEntry(name, CustomType) {}
-
-    virtual void generateCppTargetLangToQt(QTextStream &s,
-                                           const AbstractMetaType* targetLangType,
-                                           const QString &envName,
-                                           const QString &qtName,
-                                           const QString &targetLangName) const = 0;
-
-    virtual void generateCppQtToTargetLang(QTextStream &s,
-                                           const AbstractMetaType* targetLangType,
-                                           const QString &envName,
-                                           const QString &qtName,
-                                           const QString &targetLangName) const = 0;
-};
-
 struct TypeRejection
 {
     QString class_name;
