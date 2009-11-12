@@ -926,29 +926,6 @@ public:
     };
 };
 
-
-class ThreadTypeEntry : public TypeEntry
-{
-public:
-    ThreadTypeEntry() : TypeEntry("QThread", ThreadType)
-    {
-        setCodeGeneration(GenerateNothing);
-    }
-
-    QString targetLangApiName() const
-    {
-        return strings_jobject;
-    }
-    QString targetLangName() const
-    {
-        return strings_Thread;
-    }
-    QString targetLangPackage() const
-    {
-        return stringsJavaLang;
-    }
-};
-
 class VoidTypeEntry : public TypeEntry
 {
 public:
