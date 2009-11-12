@@ -26,7 +26,7 @@
 
 #include "docparser.h"
 
-class QtDocParser : public DocParser
+class APIEXTRACTOR_API QtDocParser : public DocParser
 {
 public:
     QtDocParser() {}

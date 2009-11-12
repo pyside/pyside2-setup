@@ -27,6 +27,7 @@
 #include <QtCore/QString>
 #include <QtCore/QSet>
 #include <cstring>
+#include "apiextractormacros.h"
 
 class ProgressAnimation
 {
@@ -75,7 +76,7 @@ private:
     }
 };
 
-class ReportHandler
+class APIEXTRACTOR_API ReportHandler
 {
 public:
     enum DebugLevel { NoDebug, SparseDebug, MediumDebug, FullDebug };

@@ -42,7 +42,7 @@ class AbstractMetaEnumValue;
 class AbstractMetaEnum;
 class QPropertySpec;
 
-class Documentation
+class APIEXTRACTOR_API Documentation
 {
 public:
     enum Format {
@@ -80,7 +80,7 @@ private:
 typedef QList<AbstractMetaField *> AbstractMetaFieldList;
 typedef QList<AbstractMetaArgument *> AbstractMetaArgumentList;
 typedef QList<AbstractMetaFunction *> AbstractMetaFunctionList;
-class AbstractMetaClassList : public  QList<AbstractMetaClass *>
+class APIEXTRACTOR_API AbstractMetaClassList : public  QList<AbstractMetaClass *>
 {
 public:
     AbstractMetaClass *findClass(const QString &name) const;
@@ -89,9 +89,7 @@ public:
 
 };
 
-
-
-class AbstractMetaAttributes
+class APIEXTRACTOR_API AbstractMetaAttributes
 {
 public:
     AbstractMetaAttributes() : m_attributes(0) {};
@@ -305,7 +303,7 @@ private:
 };
 
 
-class AbstractMetaType
+class APIEXTRACTOR_API AbstractMetaType
 {
 public:
     enum TypeUsagePattern {
@@ -610,7 +608,7 @@ private:
     uint m_reserved : 25; // unused
 };
 
-class AbstractMetaVariable
+class APIEXTRACTOR_API AbstractMetaVariable
 {
 public:
     AbstractMetaVariable() : m_type(0) {}
@@ -651,7 +649,7 @@ private:
 
 
 
-class AbstractMetaArgument : public AbstractMetaVariable
+class APIEXTRACTOR_API AbstractMetaArgument : public AbstractMetaVariable
 {
 public:
     AbstractMetaArgument() : m_argumentIndex(0) {};
@@ -736,7 +734,7 @@ private:
 };
 
 
-class AbstractMetaFunction : public AbstractMetaAttributes
+class APIEXTRACTOR_API AbstractMetaFunction : public AbstractMetaAttributes
 {
 public:
     enum FunctionType {
@@ -1255,7 +1253,7 @@ private:
 
 typedef QList<AbstractMetaEnum *> AbstractMetaEnumList;
 
-class AbstractMetaClass : public AbstractMetaAttributes
+class APIEXTRACTOR_API AbstractMetaClass : public AbstractMetaAttributes
 {
 public:
     enum FunctionQueryOption {

@@ -27,8 +27,9 @@
 #include <QtCore/QObject>
 #include <QtCore/QFile>
 #include <QtCore/QTextStream>
+#include "apiextractormacros.h"
 
-class FileOut : public QObject
+class APIEXTRACTOR_API FileOut : public QObject
 {
 private:
     QByteArray tmp;

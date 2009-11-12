@@ -8,7 +8,7 @@ find_package(Qt4 4.5.0 REQUIRED)
 find_package(LibXml2 2.6.32 REQUIRED)
 find_package(LibXslt 1.1.19 REQUIRED)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -DAPIEXTRACTOR_ENABLE_DUPLICATE_ENUM_VALUES")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -DAPIEXTRACTOR_ENABLE_DUPLICATE_ENUM_VALUES -DAPIEXTRACTOR_BUILD -fvisibility=hidden")
 
 set(apiextractor_MAJOR_VERSION 0)
 set(apiextractor_MINOR_VERSION 3)
@@ -92,6 +92,7 @@ add_custom_target(dist
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 set(root_HEADERS
+apiextractormacros.h
 abstractmetalang.h
 apiextractor.h
 reporthandler.h

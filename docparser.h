@@ -25,7 +25,6 @@
 
 #include <QString>
 #include <QDir>
-// #include <QtCore/QMap>
 
 #include "abstractmetalang.h"
 
@@ -33,7 +32,7 @@ class QDomDocument;
 class QDomNode;
 class QXmlQuery;
 
-class DocParser
+class APIEXTRACTOR_API DocParser
 {
 public:
     DocParser();

@@ -26,12 +26,13 @@
 
 #include "reporthandler.h"
 #include "abstractmetalang.h"
+#include "apiextractormacros.h"
 #include <QStringList>
 
 class AbstractMetaBuilder;
 class QIODevice;
 
-class ApiExtractor
+class APIEXTRACTOR_API ApiExtractor
 {
 public:
     ApiExtractor();

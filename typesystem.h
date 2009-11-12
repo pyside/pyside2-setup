@@ -29,6 +29,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QMap>
 #include <QtCore/QDebug>
+#include "apiextractormacros.h"
 
 class Indentor;
 
@@ -46,7 +47,7 @@ extern QString stringsJavaLang;
 extern QString strings_jchar;
 extern QString strings_jobject;
 
-struct Include
+struct APIEXTRACTOR_API Include
 {
     enum IncludeType {
         IncludePath,
@@ -144,7 +145,7 @@ struct ArgumentOwner
     int index;
 };
 
-class CodeSnipFragment
+class APIEXTRACTOR_API CodeSnipFragment
 {
 private:
     const QString m_code;
@@ -161,7 +162,7 @@ public:
     QString code() const;
 };
 
-class CodeSnipAbstract
+class APIEXTRACTOR_API CodeSnipAbstract
 {
 public:
     QString code() const;
@@ -231,7 +232,7 @@ private:
 };
 
 
-class CodeSnip : public CodeSnipAbstract
+class APIEXTRACTOR_API CodeSnip : public CodeSnipAbstract
 {
 public:
     enum Position {
@@ -449,7 +450,7 @@ typedef QList<FieldModification> FieldModificationList;
 *   This info will be used later to create a fake AbstractMetaFunction which
 *   will be inserted into the right AbstractMetaClass.
 */
-struct AddedFunction
+struct APIEXTRACTOR_API AddedFunction
 {
     /// Function access types.
     enum Access {
@@ -582,7 +583,7 @@ private:
 
 typedef QList<DocModification> DocModificationList;
 
-class TypeEntry
+class APIEXTRACTOR_API TypeEntry
 {
 public:
     enum Type {
@@ -1010,7 +1011,7 @@ private:
 };
 
 
-class PrimitiveTypeEntry : public TypeEntry
+class APIEXTRACTOR_API PrimitiveTypeEntry : public TypeEntry
 {
 public:
     PrimitiveTypeEntry(const QString &name)
@@ -1316,7 +1317,7 @@ private:
 };
 
 
-class ComplexTypeEntry : public TypeEntry
+class APIEXTRACTOR_API ComplexTypeEntry : public TypeEntry
 {
 public:
     enum TypeFlag {
@@ -1842,7 +1843,7 @@ struct TypeRejection
     QString enum_name;
 };
 
-class TypeDatabase
+class APIEXTRACTOR_API TypeDatabase
 {
     TypeDatabase();
     TypeDatabase(const TypeDatabase&);

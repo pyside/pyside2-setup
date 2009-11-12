@@ -31,7 +31,7 @@
 
 #include <QtCore/QSet>
 
-class AbstractMetaBuilder
+class APIEXTRACTOR_API AbstractMetaBuilder
 {
 public:
     enum RejectReason {
