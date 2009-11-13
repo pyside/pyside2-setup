@@ -33,32 +33,63 @@
  */
 
 #include "injectcode.h"
+#include <sstream>
+
+using namespace std;
 
 InjectCode::InjectCode()
 {
 }
 
-int
-InjectCode::simpleMethod(int arg0, int arg1)
+InjectCode::~InjectCode()
 {
-    return arg0 + arg1;
 }
 
-double
-InjectCode::overloadedMethod(int arg)
+template<typename T>
+const char* InjectCode::toStr(const T& value)
 {
-    return arg * 2;
+    std::ostringstream s;
+    s << value;
+    m_valueHolder = s.str();
+    return m_valueHolder.c_str();
 }
 
-double
-InjectCode::overloadedMethod(double arg)
+const char* InjectCode::simpleMethod1(int arg0, int arg1)
 {
-    return arg * 1.5;
+    return toStr(arg0 + arg1);
 }
 
-int
-InjectCode::virtualMethod(int arg)
+const char* InjectCode::simpleMethod2()
 {
-    return arg * 10;
+    return "_";
+}
+
+const char* InjectCode::simpleMethod3(int argc, char** argv)
+{
+    for (int i = 0; i < argc; ++i)
+        m_valueHolder += argv[i];
+    return m_valueHolder.c_str();
+}
+
+const char* InjectCode::overloadedMethod(int arg0, bool arg1)
+{
+    toStr(arg0);
+    m_valueHolder += arg1 ? "true" : "false";
+    return m_valueHolder.c_str();
+}
+
+const char* InjectCode::overloadedMethod(int arg0, double arg1)
+{
+    return toStr(arg0 + arg1);
+}
+
+const char* InjectCode::overloadedMethod(int argc, char** argv)
+{
+    return simpleMethod3(argc, argv);
+}
+
+const char* InjectCode::virtualMethod(int arg)
+{
+    return toStr(arg);
 }
 
