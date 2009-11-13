@@ -123,15 +123,19 @@ Below is the example C++ class for whom wrapper code will be generated.
         };
 
 From the C++ class, |project| will generate a ``injectcode_wrapper.cpp`` file
-with the binding code. The next section will use a simplified version of its
-contents with the injection spots marked.
+with the binding code. The next section will use a simplified version of the
+generated wrapper code with the injection spots marked with comments.
 
-Noteworthy Situations
----------------------
+Noteworthy Cases
+----------------
 
 The type system description system gives the binding developer a lot of
 flexibility, which is power, which comes with responsibility. Some modifications
 to the wrapped API will not be complete without some code injection.
+
+
+Removing arguments and setting a default values for them
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A simple case is when a function have one argument removed, as when the C++
 method ``METHOD(ARG)`` is modified to be used from Python as ``METHOD()``;
@@ -140,11 +144,42 @@ on what to do to call it. The most common solution is to remove the argument and
 set a default value for it at the same time, so the original C++ method could be
 called without problems.
 
+Removing arguments and calling the method with your own hands
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 If the argument is removed and no default value is provided, the generator will
 not write any call to the method and expect the ``modify-function - target/beginning``
 code injection to call the original C++ method on its own terms. If even this
 custom code is not provided the generator will put an ``#error`` clause to
 prevent compilation of erroneus binding code.
+
+Calling the method with your own hands always!
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If your custom code to be injected contains a call to the wrapped C++ method,
+it surely means that you don't want the generator to write another call to the
+same method. As expected |project| will detect the user written call on the code
+injection and will not write its own call, but for this to work properly the
+binding developer must use the template variable ``%FUNCTION_NAME`` instead
+of writing the actual name of the wrapped method/function.
+
+In other words, use
+
+    .. code-block:: xml
+
+         <inject-code class="target" position="beginning | end">
+             %CPPSELF.originalMethodName();
+         </inject-code>
+
+
+instead of
+
+
+    .. code-block:: xml
+
+         <inject-code class="target" position="beginning | end">
+            %CPPSELF.%FUNCTION_NAME();
+         </inject-code>
 
 
 Code Injection for Functions/Methods
