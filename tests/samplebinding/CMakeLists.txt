@@ -12,6 +12,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/derived_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/echo_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/implicitconv_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/intwrapper_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/injectcode_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/listuser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/mapuser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/mbase1_wrapper.cpp

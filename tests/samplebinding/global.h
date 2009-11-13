@@ -5,6 +5,7 @@
 #include "echo.h"
 #include "functions.h"
 #include "implicitconv.h"
+#include "injectcode.h"
 #include "kindergarten.h"
 #include "listuser.h"
 #include "mapuser.h"

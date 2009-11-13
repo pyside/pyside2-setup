@@ -8,6 +8,7 @@ derived.cpp
 echo.cpp
 functions.cpp
 implicitconv.cpp
+injectcode.cpp
 kindergarten.cpp
 listuser.cpp
 modifications.cpp
