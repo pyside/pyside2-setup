@@ -90,7 +90,7 @@
             <modify-argument index="2">
                 <remove-argument/>
             </modify-argument>
-            <inject-code class="native" position="beginning">
+            <inject-code class="target" position="beginning">
                 %0 = Shiboken::Converter&lt; %RETURN_TYPE &gt;::toPython(
                         %CPPSELF.%TYPE::%FUNCTION_NAME(%1, true, %3, %4)
                     );
@@ -139,10 +139,10 @@
             <modify-argument index="return">
                 <replace-type modified-type="PyObject*"/>
             </modify-argument>
-            <inject-code class="native" position="beginning">
+            <inject-code class="target" position="beginning">
                 <insert-template name="boolptr_at_end_fix_beginning"/>
             </inject-code>
-            <inject-code class="native" position="end">
+            <inject-code class="target" position="end">
                 <insert-template name="boolptr_fix_end"/>
             </inject-code>
         </modify-function>
@@ -155,10 +155,10 @@
             <modify-argument index="return">
                 <replace-type modified-type="PyObject*"/>
             </modify-argument>
-            <inject-code class="native" position="beginning">
+            <inject-code class="target" position="beginning">
                 <insert-template name="boolptr_at_start_fix_beginning"/>
             </inject-code>
-            <inject-code class="native" position="end">
+            <inject-code class="target" position="end">
                 <insert-template name="boolptr_fix_end"/>
             </inject-code>
         </modify-function>
@@ -295,7 +295,7 @@
             <modify-argument index="return">
                 <remove-argument/>
             </modify-argument>
-            <inject-code class="native" position="end" file="simplefile_glue.cpp"/>
+            <inject-code class="target" position="end" file="simplefile_glue.cpp"/>
         </modify-function>
     </value-type>
 
@@ -306,9 +306,9 @@
     <object-type name="MDerived"/>
 
     <value-type name="Echo">
-        <add-function signature="echo(const char *)">
+        <add-function signature="echo(const char *)" return-type="PyObject*">
             <inject-code class="target" position="beginning">
-                return PyString_FromString(%1);
+                %0 = PyString_FromString(%1);
             </inject-code>
         </add-function>
     </value-type>

@@ -148,32 +148,29 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     s << "using namespace Shiboken;" << endl << endl;
 
-    if (metaClass->isPolymorphic() && !metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
-        s << "// Native ---------------------------------------------------------" << endl << endl;
-
-        //inject code native beginner
+    // class inject-code native/beginning
+    if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
         writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Beginning, TypeSystem::NativeCode);
+        s << endl;
+    }
 
-        foreach (const AbstractMetaFunction *func, filterFunctions(metaClass)) {
+    if (metaClass->isPolymorphic() && !metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
+        s << "// Native ---------------------------------------------------------" << endl;
+        s << endl;
+
+        foreach (const AbstractMetaFunction* func, filterFunctions(metaClass)) {
             if (func->isPrivate() || (func->isModifiedRemoved() && !func->isAbstract()))
                 continue;
-
-            if (func->isConstructor() && !func->isCopyConstructor()) {
+            if (func->isConstructor() && !func->isCopyConstructor())
                 writeConstructorNative(s, func);
-            } else if (func->isVirtual() || func->isAbstract()) {
+            else if (func->isVirtual() || func->isAbstract())
                 writeVirtualMethodNative(s, func);
-//             } else if (func->hasInjectedCodeOrSignatureModifications() ||
-//                         func->isThread() || func->allowThread()) {
-//                 writeNonVirtualModifiedFunctionNative(s, func);
-            }
         }
 
         writeDestructorNative(s, metaClass);
 
-        //inject code native end
-        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::End, TypeSystem::NativeCode);
-
-        s << endl << "// Target ---------------------------------------------------------" << endl << endl;
+        s << endl << "// Target ---------------------------------------------------------" << endl;
+        s << endl;
     }
 
     Indentation indentation(INDENT);
@@ -287,6 +284,12 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     s << "// Converter implementations" << endl;
     s << converterImpl;
     s << "} // namespace Shiboken" << endl << endl;
+
+    // class inject-code native/beginning
+    if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
+        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Beginning, TypeSystem::NativeCode);
+        s << endl;
+    }
 }
 
 void CppGenerator::writeConstructorNative(QTextStream& s, const AbstractMetaFunction* func)
@@ -317,10 +320,14 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
     Indentation indentation(INDENT);
 
+    CodeSnipList snips;
     if (func->hasInjectedCode()) {
-        writeCodeSnips(s, getCodeSnips(func), CodeSnip::Beginning, TypeSystem::NativeCode, func);
-        writeCodeSnips(s, getCodeSnips(func), CodeSnip::End, TypeSystem::NativeCode, func);
-    } else if (func->isAbstract() && func->isModifiedRemoved()) {
+        snips = getCodeSnips(func);
+        writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::NativeCode, func);
+        s << endl;
+    }
+
+    if (func->isAbstract() && func->isModifiedRemoved()) {
         s << INDENT << "#error Pure virtual method \"" << func->ownerClass()->name();
         s << "::" << func->minimalSignature();
         s << "\" must be implement but was completely removed on typesystem." << endl;
@@ -392,6 +399,11 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         s << INDENT << "Py_XDECREF(method);" << endl;
 
         s << endl << INDENT << "// check and set Python error here..." << endl;
+    }
+
+    if (func->hasInjectedCode()) {
+        s << endl;
+        writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::NativeCode, func);
     }
 
     if (!returnKeyword.isEmpty()) {
@@ -473,8 +485,6 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
         writeArgumentsInitializer(s, overloadData);
     }
 
-    writeCodeSnips(s, getCodeSnips(rfunc), CodeSnip::Beginning, TypeSystem::All, rfunc);
-
     writeOverloadedMethodDecisor(s, &overloadData);
     s << endl;
 
@@ -486,8 +496,6 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
         s << INDENT << "return 0;" << endl;
     }
     s << INDENT << '}' << endl;
-
-    writeCodeSnips(s, getCodeSnips(rfunc), CodeSnip::End, TypeSystem::All, rfunc);
 
     s << endl << INDENT << "return self;" << endl;
     if (overloadData.maxArgs() > 0)
@@ -937,133 +945,142 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         return;
     }
 
-    if (func->hasSignatureModifications() || func->hasInjectedCode()) {
-        CodeSnipList snips = getCodeSnips(func);
-        if (!snips.isEmpty()) {
-            if (func->ownerClass() && !func->isConstructor())
-                s << INDENT << func->ownerClass()->name() << "* cppSelf = " << cpythonWrapperCPtr(func->ownerClass(), "self") << ';' << endl;
-            writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::All, func);
-            writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::All, func);
-            return;
+    CodeSnipList snips;
+    if (func->hasInjectedCode()) {
+        snips = getCodeSnips(func);
+        if (injectedCodeUsesCppSelf(func)) {
+            s << INDENT << func->ownerClass()->name() << "* cppSelf = ";
+            s << cpythonWrapperCPtr(func->ownerClass(), "self") << ';' << endl;
         }
+        writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::TargetLangCode, func);
+        s << endl;
     }
 
-    // If we are here, this function does not have injected code
-
-    bool badModifications = false;
-    QStringList userArgs;
-    if (!func->isCopyConstructor()) {
-        int removed = 0;
-        for (int i = 0; i < maxArgs + removed; i++) {
-            const AbstractMetaArgument* arg = func->arguments()[i];
-            if (func->argumentRemoved(i + 1)) {
-                // If some argument with default value is removed from a
-                // method signature, the said value must be explicitly
-                // added to the method call.
-                removed++;
-                if (arg->defaultValueExpression().isEmpty())
-                    badModifications = true;
-                else
-                    userArgs << arg->defaultValueExpression();
-            } else {
-                QString argName = QString("cpp_arg%1").arg(arg->argumentIndex() - removed);
-                if (shouldDereferenceArgumentPointer(arg))
-                    argName.prepend('*');
-                userArgs << argName;
+    if (func->functionType() != AbstractMetaFunction::UserAddedFunction) {
+        bool badModifications = false;
+        QStringList userArgs;
+        if (!func->isCopyConstructor()) {
+            int removed = 0;
+            for (int i = 0; i < maxArgs + removed; i++) {
+                const AbstractMetaArgument* arg = func->arguments()[i];
+                if (func->argumentRemoved(i + 1)) {
+                    // If some argument with default value is removed from a
+                    // method signature, the said value must be explicitly
+                    // added to the method call.
+                    removed++;
+                    if (arg->defaultValueExpression().isEmpty())
+                        badModifications = true;
+                    else
+                        userArgs << arg->defaultValueExpression();
+                } else {
+                    QString argName = QString("cpp_arg%1").arg(arg->argumentIndex() - removed);
+                    if (shouldDereferenceArgumentPointer(arg))
+                        argName.prepend('*');
+                    userArgs << argName;
+                }
             }
-        }
 
-        // If any argument's default value was modified the method must be called
-        // with this new value whenever the user doesn't pass an explicit value to it.
-        // Also, any unmodified default value coming after the last user specified
-        // argument and before the modified argument must be splicitly stated.
-        QStringList otherArgs;
-        bool defaultModified = false;
-        for (int i = func->arguments().size() - 1; i >= maxArgs; i--) {
-            const AbstractMetaArgument* arg = func->arguments()[i];
-            defaultModified = defaultModified || arg->defaultValueExpression() != arg->originalDefaultValueExpression();
-            if (defaultModified) {
-                if (arg->defaultValueExpression().isEmpty())
-                    badModifications = true;
-                else
-                    otherArgs.prepend(arg->defaultValueExpression());
+            // If any argument's default value was modified the method must be called
+            // with this new value whenever the user doesn't pass an explicit value to it.
+            // Also, any unmodified default value coming after the last user specified
+            // argument and before the modified argument must be splicitly stated.
+            QStringList otherArgs;
+            bool defaultModified = false;
+            for (int i = func->arguments().size() - 1; i >= maxArgs; i--) {
+                const AbstractMetaArgument* arg = func->arguments()[i];
+                defaultModified = defaultModified || arg->defaultValueExpression() != arg->originalDefaultValueExpression();
+                if (defaultModified) {
+                    if (arg->defaultValueExpression().isEmpty())
+                        badModifications = true;
+                    else
+                        otherArgs.prepend(arg->defaultValueExpression());
+                }
             }
+
+            userArgs += otherArgs;
         }
 
-        userArgs += otherArgs;
-    }
+        bool isCtor = false;
+        QString methodCall;
+        QTextStream mc(&methodCall);
 
-    bool isCtor = false;
-    QString methodCall;
-    QTextStream mc(&methodCall);
-
-    // This indentation is here for aesthetical reasons concerning the generated code.
-    if (func->type() && !func->isInplaceOperator()) {
-        Indentation indent(INDENT);
-        mc << endl << INDENT;
-    }
-
-    if (badModifications) {
-        // When an argument is removed from a method signature and no other
-        // means of calling the method is provided the generator must write
-        // a compiler error line stating the situation.
-        s << INDENT << "#error No way to call \"" << func->ownerClass()->name();
-        s << "::" << func->minimalSignature();
-        s << "\" with the modifications provided on typesystem file" << endl;
-    } else if (func->isOperatorOverload()) {
-        QString firstArg = QString("(*%1)").arg(cpythonWrapperCPtr(func->ownerClass()));
-        QString secondArg("cpp_arg0");
-        if (!func->isUnaryOperator() && shouldDereferenceArgumentPointer(func->arguments().at(0))) {
-            secondArg.prepend("(*");
-            secondArg.append(')');
+        // This indentation is here for aesthetical reasons concerning the generated code.
+        if (func->type() && !func->isInplaceOperator()) {
+            Indentation indent(INDENT);
+            mc << endl << INDENT;
         }
 
-        if (func->isUnaryOperator())
-            std::swap(firstArg, secondArg);
+        if (badModifications) {
+            // When an argument is removed from a method signature and no other
+            // means of calling the method is provided (as with code injection)
+            // the generator must write a compiler error line stating the situation.
+            if (func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode).isEmpty()) {
+                s << INDENT << "#error No way to call \"" << func->ownerClass()->name();
+                s << "::" << func->minimalSignature();
+                s << "\" with the modifications provided on typesystem file" << endl;
+            }
+        } else if (func->isOperatorOverload()) {
+            QString firstArg = QString("(*%1)").arg(cpythonWrapperCPtr(func->ownerClass()));
+            QString secondArg("cpp_arg0");
+            if (!func->isUnaryOperator() && shouldDereferenceArgumentPointer(func->arguments().at(0))) {
+                secondArg.prepend("(*");
+                secondArg.append(')');
+            }
 
-        QString op = func->originalName();
-        op = op.right(op.size() - (sizeof("operator")/sizeof(char)-1));
-
-        s << INDENT;
-        if (!func->isInplaceOperator())
-            s << retvalVariableName() << " = ";
-
-        if (func->isBinaryOperator()) {
-            if (func->isReverseOperator())
+            if (func->isUnaryOperator())
                 std::swap(firstArg, secondArg);
-            mc << firstArg << ' ' << op << ' ' << secondArg;
-        } else {
-            mc << op << ' ' << secondArg;
+
+            QString op = func->originalName();
+            op = op.right(op.size() - (sizeof("operator")/sizeof(char)-1));
+
+            s << INDENT;
+            if (!func->isInplaceOperator())
+                s << retvalVariableName() << " = ";
+
+            if (func->isBinaryOperator()) {
+                if (func->isReverseOperator())
+                    std::swap(firstArg, secondArg);
+                mc << firstArg << ' ' << op << ' ' << secondArg;
+            } else {
+                mc << op << ' ' << secondArg;
+            }
+        } else if (func->isConstructor() || func->isCopyConstructor()) {
+            s << INDENT;
+            isCtor = true;
+            s << "cptr = new " << wrapperName(func->ownerClass());
+            s << '(';
+            if (func->isCopyConstructor() && maxArgs == 1)
+                s << "*cpp_arg0";
+            else
+                s << userArgs.join(", ");
+            s << ')';
+        } else if (!injectedCodeCallsCppFunction(func)) {
+            s << INDENT;
+            if (func->type())
+                s << retvalVariableName() << " = ";
+            if (func->ownerClass()) {
+                if (!func->isStatic())
+                    mc << cpythonWrapperCPtr(func->ownerClass()) << "->";
+                mc << func->ownerClass()->name() << "::";
+            }
+            mc << func->originalName() << '(' << userArgs.join(", ") << ')';
         }
-    } else if (func->isConstructor() || func->isCopyConstructor()) {
-        s << INDENT;
-        isCtor = true;
-        s << "cptr = new " << wrapperName(func->ownerClass());
-        s << '(';
-        if (func->isCopyConstructor() && maxArgs == 1)
-            s << "*cpp_arg0";
-        else
-            s << userArgs.join(", ");
-        s << ')';
-    } else {
-        s << INDENT;
-        if (func->type())
-            s << retvalVariableName() << " = ";
-        if (func->ownerClass()) {
-            if (!func->isStatic())
-                mc << cpythonWrapperCPtr(func->ownerClass()) << "->";
-            mc << func->ownerClass()->name() << "::";
+
+        if (!injectedCodeCallsCppFunction(func)) {
+            if (!func->type() || func->isInplaceOperator()) {
+                s << methodCall;
+            } else if (!isCtor) {
+                mc << endl << INDENT;
+                writeToPythonConversion(s, func->type(), func->ownerClass(), methodCall);
+            }
+            s << ';' << endl;
         }
-        mc << func->originalName() << '(' << userArgs.join(", ") << ')';
     }
 
-    if (!func->type() || func->isInplaceOperator()) {
-        s << methodCall;
-    } else if (!isCtor) {
-        mc << endl << INDENT;
-        writeToPythonConversion(s, func->type(), func->ownerClass(), methodCall);
+    if (func->hasInjectedCode()) {
+        s << endl;
+        writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::TargetLangCode, func);
     }
-    s << ';' << endl;
 }
 
 bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass* metaClass)
@@ -1793,6 +1810,12 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     s << "init_" << metaClass->name().toLower() << "(PyObject *module)" << endl;
     s << '{' << endl;
 
+    // class inject-code target/beginning
+    if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
+        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Beginning, TypeSystem::TargetLangCode);
+        s << endl;
+    }
+
     // Multiple inheritance
     if (metaClass->baseClassNames().size() > 1) {
         s << INDENT << pyTypeName << ".tp_bases = PyTuple_Pack(";
@@ -1819,6 +1842,12 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     }
     foreach (const AbstractMetaEnum* cppEnum, metaClass->enums())
         writeEnumInitialization(s, cppEnum);
+
+    // class inject-code target/end
+    if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
+        s << endl;
+        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::End, TypeSystem::TargetLangCode);
+    }
 
     s << '}' << endl << endl;
 }
