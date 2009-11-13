@@ -873,6 +873,26 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
     }
 }
 
+bool ShibokenGenerator::injectedCodeUsesCppSelf(const AbstractMetaFunction* func)
+{
+    CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
+    foreach (CodeSnip snip, snips) {
+        if (snip.code().contains("%CPPSELF"))
+            return true;
+    }
+    return false;
+}
+
+bool ShibokenGenerator::injectedCodeCallsCppFunction(const AbstractMetaFunction* func)
+{
+    CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
+    foreach (CodeSnip snip, snips) {
+        if (snip.code().contains("%FUNCTION_NAME("))
+            return true;
+    }
+    return false;
+}
+
 QStringList ShibokenGenerator::getBaseClasses(const AbstractMetaClass* metaClass)
 {
     QStringList baseClass;

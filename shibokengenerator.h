@@ -100,6 +100,23 @@ public:
     CodeSnipList getCodeSnips(const AbstractMetaFunction* func);
 
     /**
+     *   Verifies if any of the function's code injections needs the
+     *   type system variable "%CPPSELF".
+     *   \param func the function to check
+     *   \return true if the function's code snippets use "%CPPSELF"
+     */
+    bool injectedCodeUsesCppSelf(const AbstractMetaFunction* func);
+
+    /**
+     *   Verifies if any of the function's code injections makes a call
+     *   to the C++ method. This is used by the generator to avoid writing calls
+     *   to C++ when the user custom code already does this.
+     *   \param func the function to check
+     *   \return true if the function's code snippets call the wrapped C++ function
+     */
+    bool injectedCodeCallsCppFunction(const AbstractMetaFunction* func);
+
+    /**
      *   Function which parse the metafunction information
      *   \param func the function witch will be parserd
      *   \param option some extra options
