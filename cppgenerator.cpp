@@ -414,44 +414,6 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     s << '}' << endl << endl;
 }
 
-void CppGenerator::writeNonVirtualModifiedFunctionNative(QTextStream& s, const AbstractMetaFunction* func)
-{
-    Indentation indentation(INDENT);
-
-    s << getFunctionReturnType(func) << ' ';
-    s << func->ownerClass()->name() << '_' << func->originalName() << "_modified(";
-
-    Options options = Options(SkipRemovedArguments) | SkipDefaultValues;
-    if (!func->isStatic())
-        options |= WriteSelf;
-
-    writeFunctionArguments(s, func, options);
-    s << ")" << endl << "{" << endl;
-
-    if (func->isThread())
-        s << INDENT << "thread_locker lock;" << endl;
-
-    if (func->allowThread())
-        s << INDENT << "py_allow_threads allow_threads;" << endl;
-
-    if (!getCodeSnips(func).isEmpty()) {
-        writeCodeSnips(s, getCodeSnips(func), CodeSnip::Beginning, TypeSystem::All, func);
-        writeCodeSnips(s, getCodeSnips(func), CodeSnip::End, TypeSystem::All, func);
-    } else {
-        s << INDENT;
-        if (func->type())
-            s << "return ";
-        if (func->isStatic())
-            s << func->declaringClass()->name() << "::";
-        else
-            s << "self.";
-        writeFunctionCall(s, func);
-        s << ";" << endl;
-    }
-
-    s << '}' << endl << endl;
-}
-
 void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFunctionList overloads)
 {
     OverloadData overloadData(overloads, this);

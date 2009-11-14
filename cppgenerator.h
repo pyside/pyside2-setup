@@ -43,7 +43,6 @@ protected:
     void finishGeneration();
 
 private:
-    void writeNonVirtualModifiedFunctionNative(QTextStream& s, const AbstractMetaFunction* func);
     void writeConstructorNative(QTextStream& s, const AbstractMetaFunction* func);
     void writeDestructorNative(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeVirtualMethodNative(QTextStream& s, const AbstractMetaFunction* func);
