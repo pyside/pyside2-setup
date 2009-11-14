@@ -885,9 +885,17 @@ bool ShibokenGenerator::injectedCodeUsesCppSelf(const AbstractMetaFunction* func
 
 bool ShibokenGenerator::injectedCodeCallsCppFunction(const AbstractMetaFunction* func)
 {
+    QString funcCall = QString("%1(").arg(func->originalName());
+    QString wrappedCtorCall;
+    if (func->isConstructor()) {
+        funcCall.prepend("new ");
+        wrappedCtorCall = QString("new %1(").arg(wrapperName(func->ownerClass()));
+    }
     CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
     foreach (CodeSnip snip, snips) {
-        if (snip.code().contains("%FUNCTION_NAME("))
+        if (snip.code().contains("%FUNCTION_NAME(") || snip.code().contains(funcCall)
+            || (func->isConstructor() && func->ownerClass()->isPolymorphic()
+                && snip.code().contains(wrappedCtorCall)))
             return true;
     }
     return false;

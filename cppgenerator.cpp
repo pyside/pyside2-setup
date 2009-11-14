@@ -285,9 +285,9 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     s << converterImpl;
     s << "} // namespace Shiboken" << endl << endl;
 
-    // class inject-code native/beginning
+    // class inject-code native/end
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
-        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Beginning, TypeSystem::NativeCode);
+        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::End, TypeSystem::NativeCode);
         s << endl;
     }
 }
@@ -1044,26 +1044,28 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             } else {
                 mc << op << ' ' << secondArg;
             }
-        } else if (func->isConstructor() || func->isCopyConstructor()) {
-            s << INDENT;
-            isCtor = true;
-            s << "cptr = new " << wrapperName(func->ownerClass());
-            s << '(';
-            if (func->isCopyConstructor() && maxArgs == 1)
-                s << "*cpp_arg0";
-            else
-                s << userArgs.join(", ");
-            s << ')';
         } else if (!injectedCodeCallsCppFunction(func)) {
-            s << INDENT;
-            if (func->type())
-                s << retvalVariableName() << " = ";
-            if (func->ownerClass()) {
-                if (!func->isStatic())
-                    mc << cpythonWrapperCPtr(func->ownerClass()) << "->";
-                mc << func->ownerClass()->name() << "::";
+            if (func->isConstructor() || func->isCopyConstructor()) {
+                s << INDENT;
+                isCtor = true;
+                s << "cptr = new " << wrapperName(func->ownerClass());
+                s << '(';
+                if (func->isCopyConstructor() && maxArgs == 1)
+                    s << "*cpp_arg0";
+                else
+                    s << userArgs.join(", ");
+                s << ')';
+            } else {
+                s << INDENT;
+                if (func->type())
+                    s << retvalVariableName() << " = ";
+                if (func->ownerClass()) {
+                    if (!func->isStatic())
+                        mc << cpythonWrapperCPtr(func->ownerClass()) << "->";
+                    mc << func->ownerClass()->name() << "::";
+                }
+                mc << func->originalName() << '(' << userArgs.join(", ") << ')';
             }
-            mc << func->originalName() << '(' << userArgs.join(", ") << ')';
         }
 
         if (!injectedCodeCallsCppFunction(func)) {
