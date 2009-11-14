@@ -344,9 +344,12 @@ bool Handler::characters(const QString &ch)
 
     if (m_current->parent) {
         if ((m_current->type & StackElement::CodeSnipMask)) {
+            CodeSnipList snips;
             switch (m_current->parent->type) {
             case StackElement::Root:
-                ((TypeSystemTypeEntry *) m_current->parent->entry)->codeSnips().last().addCode(ch);
+                snips = m_current->parent->entry->codeSnips();
+                snips.last().addCode(ch);
+                m_current->parent->entry->setCodeSnips(snips);
                 break;
             case StackElement::ModifyFunction:
             case StackElement::AddFunction:
