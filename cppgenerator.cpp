@@ -2034,6 +2034,15 @@ void CppGenerator::finishGeneration()
             s << "#include \"" << include << '\"' << endl;
         s << endl;
 
+        TypeSystemTypeEntry* moduleEntry = reinterpret_cast<TypeSystemTypeEntry*>(TypeDatabase::instance()->findType(m_packageName));
+        CodeSnipList snips = moduleEntry->codeSnips();
+
+        // module inject-code native/beginning
+        if (!snips.isEmpty()) {
+            writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::NativeCode);
+            s << endl;
+        }
+
         s << "// Global functions ";
         s << "------------------------------------------------------------" << endl;
         s << globalFunctionImpl << endl;
@@ -2074,6 +2083,12 @@ void CppGenerator::finishGeneration()
         s << getApiExportMacro() << " PyMODINIT_FUNC" << endl << "init" << moduleName() << "()" << endl;
         s << '{' << endl;
 
+        // module inject-code target/beginning
+        if (!snips.isEmpty()) {
+            writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::TargetLangCode);
+            s << endl;
+        }
+
         foreach (const QString& requiredModule, TypeDatabase::instance()->requiredTargetImports()) {
             s << INDENT << "if (PyImport_ImportModule(\"" << requiredModule << "\") == NULL) {" << endl;
             s << INDENT << INDENT << "PyErr_SetString(PyExc_ImportError," << "\"could not import ";
@@ -2098,9 +2113,21 @@ void CppGenerator::finishGeneration()
         foreach (const AbstractMetaEnum* cppEnum, globalEnums())
            writeEnumInitialization(s, cppEnum);
 
+        // module inject-code target/end
+        if (!snips.isEmpty()) {
+            writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::TargetLangCode);
+            s << endl;
+        }
+
         s << INDENT << "if (PyErr_Occurred())" << endl;
         s << INDENT << INDENT << "Py_FatalError(\"can't initialize module ";
         s << moduleName() << "\");" << endl << '}' << endl << endl;
         s << "} // extern \"C\"" << endl << endl;
+
+        // module inject-code native/end
+        if (!snips.isEmpty()) {
+            writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::NativeCode);
+            s << endl;
+        }
     }
 }
