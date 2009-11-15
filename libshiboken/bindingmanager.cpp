@@ -98,7 +98,7 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
     PyObject* wrapper = retrieveWrapper(cptr);
 
     if (wrapper) {
-        PyTypeObject* baseWrapperType = ((Shiboken::PyBaseWrapper*)wrapper)->baseWrapperType;
+        PyTypeObject* baseWrapperType = (PyTypeObject*) ((Shiboken::PyBaseWrapper*)wrapper)->baseWrapperType;
         PyObject* method = PyObject_GetAttrString(wrapper, const_cast<char*>(methodName));
         if (method) {
             PyObject* defaultMethod = 0;

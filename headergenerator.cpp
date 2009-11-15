@@ -141,10 +141,15 @@ void HeaderGenerator::writeTypeCheckMacro(QTextStream& s, const TypeEntry* type)
 {
     QString pyTypeName = cpythonTypeName(type);
     QString checkFunction = cpythonCheckFunction(type);
-    s << "PyAPI_DATA(PyTypeObject) " << pyTypeName << ';' << endl;
-    s << "#define " << checkFunction << "(op) PyObject_TypeCheck(op, &";
+    s << "PyAPI_DATA(";
+    if (type->isObject() || type->isValue())
+        s << "Shiboken::ShiboTypeObject";
+    else
+        s << "PyTypeObject";
+    s << ") " << pyTypeName << ';' << endl;
+    s << "#define " << checkFunction << "(op) PyObject_TypeCheck(op, (PyTypeObject*)&";
     s << pyTypeName << ')' << endl;
-    s << "#define " << checkFunction << "Exact(op) ((op)->ob_type == &";
+    s << "#define " << checkFunction << "Exact(op) ((op)->ob_type == (PyTypeObject*)&";
     s << pyTypeName << ')' << endl;
 }
 

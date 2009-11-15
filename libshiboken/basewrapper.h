@@ -44,10 +44,20 @@ namespace Shiboken
 extern "C"
 {
 
+typedef int* (*MultipleInheritanceInitFunction)(const void*);
+
+// TODO: explain
+struct ShiboTypeObject
+{
+    PyTypeObject pytype;
+    int* mi_offsets;
+    MultipleInheritanceInitFunction mi_init;
+};
+
 struct PyBaseWrapper
 {
     PyObject_HEAD
-    PyTypeObject* baseWrapperType;
+    ShiboTypeObject* baseWrapperType;
     void* cptr;
     uint hasOwnership : 1;
     uint validCppObject : 1;
@@ -55,8 +65,8 @@ struct PyBaseWrapper
 
 } // extern "C"
 
-#define PyBaseWrapper_Check(op) PyObject_TypeCheck(op, &PyBaseWrapper_Type)
-#define PyBaseWrapper_CheckExact(op) ((op)->ob_type == &PyBaseWrapper_Type)
+#define PyBaseWrapper_Check(op) PyObject_TypeCheck(op, &Shiboken::PyBaseWrapper_Type)
+#define PyBaseWrapper_CheckExact(op) ((op)->ob_type == &Shiboken::PyBaseWrapper_Type)
 
 #define PyBaseWrapper_cptr(pyobj)                   (((Shiboken::PyBaseWrapper*)pyobj)->cptr)
 #define PyBaseWrapper_setCptr(pyobj,c)              (((Shiboken::PyBaseWrapper*)pyobj)->cptr = c)
@@ -115,7 +125,7 @@ typedef struct {
 
 
 LIBSHIBOKEN_API PyAPI_FUNC(PyObject*)
-PyBaseWrapper_New(PyTypeObject *instanceType, PyTypeObject *baseWrapperType,
+PyBaseWrapper_New(PyTypeObject* instanceType, ShiboTypeObject* baseWrapperType,
                   const void *cptr, uint hasOwnership = 1);
 
 inline bool
