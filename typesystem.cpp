@@ -938,12 +938,15 @@ bool Handler::startElement(const QString &, const QString &n,
             m_defaultPackage = attributes["package"];
             m_defaultSuperclass = attributes["default-superclass"];
             element->type = StackElement::Root;
-            element->entry = new TypeSystemTypeEntry(m_defaultPackage);
+            {
+                TypeSystemTypeEntry* moduleEntry = reinterpret_cast<TypeSystemTypeEntry*>(
+                        m_database->findType(m_defaultPackage));
+                element->entry = moduleEntry ? moduleEntry : new TypeSystemTypeEntry(m_defaultPackage);
+            }
 
             if ((m_generate == TypeEntry::GenerateForSubclass ||
                  m_generate == TypeEntry::GenerateNothing) && m_defaultPackage != "")
                 TypeDatabase::instance()->addRequiredTargetImport(m_defaultPackage);
-
 
             if (!element->entry->qualifiedCppName().isEmpty())
                 m_database->addType(element->entry);
