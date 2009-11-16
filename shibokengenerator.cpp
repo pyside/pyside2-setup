@@ -976,6 +976,14 @@ QStringList ShibokenGenerator::getBaseClasses(const AbstractMetaClass* metaClass
     return baseClass;
 }
 
+const AbstractMetaClass* ShibokenGenerator::getMultipleInheritingClass(const AbstractMetaClass* metaClass)
+{
+    if (!metaClass || metaClass->baseClassNames().isEmpty())
+        return 0;
+    if (metaClass->baseClassNames().size() > 1)
+        return metaClass;
+    return getMultipleInheritingClass(metaClass->baseClass());
+}
 
 QString ShibokenGenerator::getApiExportMacro() const
 {

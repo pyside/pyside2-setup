@@ -156,6 +156,8 @@ public:
     bool hasInjectedCodeOrSignatureModification(const AbstractMetaFunction* func);
     QStringList getBaseClasses(const AbstractMetaClass* metaClass);
 
+    const AbstractMetaClass* getMultipleInheritingClass(const AbstractMetaClass* metaClass);
+
     void writeBaseConversion(QTextStream& s, const AbstractMetaType* type,
                              const AbstractMetaClass* context);
     /// Simpler version of writeBaseConversion, uses only the base name of the type.

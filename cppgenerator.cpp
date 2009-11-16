@@ -1084,21 +1084,27 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 void CppGenerator::writeMultipleInheritanceInitializerFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     QString className = metaClass->qualifiedCppName();
+    s << "static int mi_offsets[] = { ";
+    for (int i = 0; i < metaClass->baseClassNames().size(); i++)
+        s << "-1, ";
+    s << "-1 };" << endl;
     s << "int*" << endl;
     s << multipleInheritanceInitializerFunctionName(metaClass) << "(const void* cptr)" << endl;
     s << '{' << endl;
-    s << INDENT << "const " << className << "* class_ptr = reinterpret_cast<const " << className << "*>(cptr);" << endl;
-    s << INDENT << "size_t base = (size_t) class_ptr;" << endl;
-    s << INDENT << "static int offset[] = {" << endl;
+    s << INDENT << "if (mi_offsets[0] == -1) {" << endl;
     {
         Indentation indent(INDENT);
+        s << INDENT << "const " << className << "* class_ptr = reinterpret_cast<const " << className << "*>(cptr);" << endl;
+        s << INDENT << "size_t base = (size_t) class_ptr;" << endl;
+        int i = 0;
         foreach (QString parentName, metaClass->baseClassNames()) {
-            s << INDENT << "((size_t) static_cast<const " << parentName << "*>(class_ptr)) - base," << endl;
+            s << INDENT << "mi_offsets[" << i << "] = ";
+            s << "((size_t) static_cast<const " << parentName << "*>(class_ptr)) - base;" << endl;
+            i++;
         }
-        s << INDENT << "-1," << endl;
     }
-    s << INDENT << "};" << endl;
-    s << INDENT << "return offset;" << endl;
+    s << INDENT << '}' << endl;
+    s << INDENT << "return mi_offsets;" << endl;
     s << '}' << endl;
 }
 
@@ -1169,10 +1175,16 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     }
 
     // class or some ancestor has multiple inheritance
-    if (metaClass->baseClassNames().size() > 1) {
+    const AbstractMetaClass* miClass = getMultipleInheritingClass(metaClass);
+    if (miClass) {
         mi_init = QString("(Shiboken::MultipleInheritanceInitFunction)%1")
-                            .arg(multipleInheritanceInitializerFunctionName(metaClass));
-        writeMultipleInheritanceInitializerFunction(s, metaClass);
+                            .arg(multipleInheritanceInitializerFunctionName(miClass));
+        if (metaClass == miClass) {
+            writeMultipleInheritanceInitializerFunction(s, metaClass);
+        } else {
+            s << "extern int* " << multipleInheritanceInitializerFunctionName(miClass);
+            s << "(const void* cptr);" << endl;
+        }
         s << endl;
     }
 
