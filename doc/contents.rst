@@ -5,6 +5,7 @@ Table of contents
     :maxdepth: 3
 
     faq.rst
+    typesystemvariables.rst
     codeinjectionsemantics.rst
     sequenceprotocol.rst
     compiling.rst
