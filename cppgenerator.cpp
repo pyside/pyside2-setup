@@ -47,33 +47,6 @@ QString CppGenerator::fileNameForClass(const AbstractMetaClass *metaClass) const
     return metaClass->qualifiedCppName().toLower().replace("::", "_") + QLatin1String("_wrapper.cpp");
 }
 
-QList<AbstractMetaFunctionList> CppGenerator::filterGroupedFunctions(const AbstractMetaClass* metaClass)
-{
-    AbstractMetaFunctionList lst;
-    if (metaClass)
-        lst = queryFunctions(metaClass, true);
-    else
-        lst = globalFunctions();
-
-    QMap<QString, AbstractMetaFunctionList> results;
-    foreach (AbstractMetaFunction* func, lst) {
-        //skip signals
-        if (func->isSignal() || func->isDestructor() || (func->isModifiedRemoved() && !func->isAbstract()))
-            continue;
-        // weird operator overloads
-        if (func->name() == "operator[]" || func->name() == "operator->")  // FIXME: what about cast operators?
-            continue;
-        results[func->name()].append(func);
-    }
-
-    //TODO: put these lines back to work
-
-    //append global operators
-    //lst += queryGlobalOperators(metaClass);
-
-    return results.values();
-}
-
 QList<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(const AbstractMetaClass* metaClass,
                                                                              uint query)
 {
@@ -181,7 +154,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     bool hasComparisonOperator = false;
     bool typeAsNumber = false;
 
-    foreach (AbstractMetaFunctionList allOverloads, filterGroupedFunctions(metaClass)) {
+    foreach (AbstractMetaFunctionList allOverloads, getFunctionGroups(metaClass).values()) {
         AbstractMetaFunctionList overloads;
         foreach (AbstractMetaFunction* func, allOverloads) {
             if (!func->isAssignmentOperator() && !func->isCastOperator() && !func->isModifiedRemoved() && !func->isPrivate() &&
@@ -1937,7 +1910,7 @@ void CppGenerator::finishGeneration()
 
     Indentation indent(INDENT);
 
-    foreach (AbstractMetaFunctionList globalOverloads, filterGroupedFunctions()) {
+    foreach (AbstractMetaFunctionList globalOverloads, getFunctionGroups().values()) {
         AbstractMetaFunctionList overloads;
         foreach (AbstractMetaFunction* func, globalOverloads) {
             // TODO: this is an ugly hack to avoid binding global

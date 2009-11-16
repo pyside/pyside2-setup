@@ -26,6 +26,7 @@
 
 #include <QtCore/QDir>
 #include <QtCore/QDebug>
+#include <limits>
 
 #define NULL_VALUE "NULL"
 #define COMMENT_LINE_WIDTH  77
@@ -820,6 +821,24 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                                        TypeSystem::Language language,
                                        const AbstractMetaFunction* func)
 {
+    static QRegExp toPythonRegex("%CONVERTTOPYTHON\\[([^\\[]*)\\]");
+    static QRegExp pyArgsRegex("%PYARG_(\\d+)");
+
+    // detect is we should use pyargs instead of args as variable name for python arguments
+    bool usePyArgs;
+    int numArgs;
+    if (func) {
+        // calc num of real arguments.
+        int argsRemoved = 0;
+        for (int i = 0; i < func->arguments().size(); i++) {
+            if (func->argumentRemoved(i+1))
+                argsRemoved++;
+        }
+        numArgs = func->arguments().size() - argsRemoved;
+
+        usePyArgs = getMinMaxArguments(func).second > 1;
+    }
+
     foreach (CodeSnip snip, codeSnips) {
         if ((position != CodeSnip::Any && snip.position != position) || !(snip.language & language))
             continue;
@@ -831,6 +850,20 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
         formatCode(tmpStream, snip.code(), INDENT);
 
         if (func) {
+            // replace "toPython "converters
+            code.replace(toPythonRegex, "Shiboken::Converter<\\1>::toPython");
+
+
+            // replace %PYARG variables
+            if (numArgs > 1) {
+                code.replace(pyArgsRegex, "pyargs[\\1-1]");
+            } else {
+                static QRegExp pyArgsRegexCheck("%PYARG_([2-9]+)");
+                if (pyArgsRegexCheck.indexIn(code) != -1)
+                    ReportHandler::warning("Wrong index for %PYARG variable ("+pyArgsRegexCheck.cap(1)+") on "+func->signature());
+                else
+                    code.replace("%PYARG_1", usePyArgs ? "pyargs[0]" : "arg");
+            }
             // replace template variable for return variable name
             code.replace("%0", retvalVariableName());
 
@@ -946,6 +979,60 @@ static void dumpFunction(AbstractMetaFunctionList lst)
                         << "is global:" << func->isInGlobalScope();
 }
 
+static bool isGroupable(const AbstractMetaFunction* func)
+{
+    if (func->isSignal() || func->isDestructor() || (func->isModifiedRemoved() && !func->isAbstract()))
+        return false;
+    // weird operator overloads
+    if (func->name() == "operator[]" || func->name() == "operator->")  // FIXME: what about cast operators?
+        return false;;
+    return true;
+}
+
+QMap< QString, AbstractMetaFunctionList > ShibokenGenerator::getFunctionGroups(const AbstractMetaClass* scope)
+{
+    AbstractMetaFunctionList lst = scope ? scope->functions() : globalFunctions();
+
+    QMap<QString, AbstractMetaFunctionList> results;
+    foreach (AbstractMetaFunction* func, lst) {
+        if (isGroupable(func))
+            results[func->name()].append(func);
+    }
+    return results;
+}
+
+AbstractMetaFunctionList ShibokenGenerator::getFunctionOverloads(const AbstractMetaClass* scope, const QString& functionName)
+{
+    AbstractMetaFunctionList lst = scope ? scope->functions() : globalFunctions();
+
+    AbstractMetaFunctionList results;
+    foreach (AbstractMetaFunction* func, lst) {
+        if (func->name() != functionName)
+            continue;
+        if (isGroupable(func))
+            results << func;
+    }
+    return results;
+
+}
+
+QPair< int, int > ShibokenGenerator::getMinMaxArguments(const AbstractMetaFunction* metaFunction)
+{
+    AbstractMetaFunctionList overloads = getFunctionOverloads(metaFunction->ownerClass(), metaFunction->name());
+
+    int minArgs = std::numeric_limits<int>::max();
+    int maxArgs = 0;
+    foreach (const AbstractMetaFunction* func, overloads) {
+        int numArgs = 0;
+        foreach (const AbstractMetaArgument* arg, func->arguments()) {
+            if (!func->argumentRemoved(arg->argumentIndex() + 1))
+                numArgs++;
+        }
+        maxArgs = std::max(maxArgs, numArgs);
+        minArgs = std::min(minArgs, numArgs);
+    }
+    return qMakePair(minArgs, maxArgs);
+}
 
 bool ShibokenGenerator::doSetup(const QMap<QString, QString>& args)
 {

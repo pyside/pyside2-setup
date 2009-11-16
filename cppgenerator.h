@@ -36,7 +36,6 @@ public:
     CppGenerator();
 protected:
     QString fileNameForClass(const AbstractMetaClass* metaClass) const;
-    QList<AbstractMetaFunctionList> filterGroupedFunctions(const AbstractMetaClass* metaClass = 0);
     QList<AbstractMetaFunctionList> filterGroupedOperatorFunctions(const AbstractMetaClass* metaClass,
                                                                    uint query);
     void generateClass(QTextStream& s, const AbstractMetaClass* metaClass);

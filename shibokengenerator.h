@@ -41,6 +41,23 @@ public:
                                           const AbstractMetaClass* context) const;
 
     /**
+    *   Returns a map with all functions grouped, the function name is used as key.
+    *   Example ofg return value: { "foo" -> ["foo(int)", "foo(int, long)], "bar" -> "bar(double)"}
+    * \param scope Where to search for functions, null means all global functions.
+    */
+    QMap<QString, AbstractMetaFunctionList> getFunctionGroups(const AbstractMetaClass* scope = 0);
+    /**
+    *   Returns all overloads for a function named \p functionName.
+    *   \param scope scope used to search for overloads.
+    *   \param functionName the function name.
+    */
+    AbstractMetaFunctionList getFunctionOverloads(const AbstractMetaClass* scope, const QString& functionName);
+    /**
+    *   Returns the minimun and maximun number of arguments which this function and all overloads
+    *   can accept. Arguments removed by typesystem are considered as well.
+    */
+    QPair<int, int> getMinMaxArguments(const AbstractMetaFunction* metaFunction);
+    /**
      *   Write a function argument in the C++ in the text stream \p s.
      *   This function just call \code s << argumentString(); \endcode
      *   \param s text stream used to write the output.
