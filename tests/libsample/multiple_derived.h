@@ -80,6 +80,9 @@ class SonOfMDerived1 : public MDerived1
 public:
     SonOfMDerived1() : m_value(0) {}
     ~SonOfMDerived1() {}
+
+    MDerived1* castToMDerived1() { return (MDerived1*) this; }
+
     int sonOfMDerived1Method() { return m_value; }
 private:
     int m_value;
@@ -154,6 +157,8 @@ public:
 
     MDerived1* castToMDerived1() { return (MDerived1*) this; }
     MDerived2* castToMDerived2() { return (MDerived2*) this; }
+
+    Base3* castToBase3() { return (Base3*) this; }
 
 private:
     int m_value;
