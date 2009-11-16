@@ -154,10 +154,15 @@ OverloadData* OverloadData::addOverloadData(const AbstractMetaFunction* func,
     if (!func->isOperatorOverload()) {
         foreach (OverloadData* tmp, m_nextOverloadData) {
             // TODO: 'const char *', 'char *' and 'char' will have the same TypeEntry?
-            if (tmp->m_argType->typeEntry() == argType->typeEntry()) {
+
+            // If an argument have a type replacement, then we should create a new overloaddata
+            // for it, unless the next argument also have a identical type replacement.
+            QString replacedArg = func->typeReplaced(tmp->m_argPos + 1);
+            bool argsReplaced = !replacedArg.isEmpty() || !tmp->m_argTypeReplaced.isEmpty();
+            if ((!argsReplaced && tmp->m_argType->typeEntry() == argType->typeEntry())
+                || (argsReplaced && replacedArg == tmp->argumentTypeReplaced())) {
                 tmp->addOverload(func);
                 overloadData = tmp;
-                continue;
             }
         }
     }
@@ -165,6 +170,10 @@ OverloadData* OverloadData::addOverloadData(const AbstractMetaFunction* func,
     if (!overloadData) {
         overloadData = new OverloadData(m_headOverloadData, func, argType, m_argPos + 1);
         overloadData->m_generator = this->m_generator;
+        QString typeReplaced = func->typeReplaced(overloadData->m_argPos + 1);
+
+        if (!typeReplaced.isEmpty())
+            overloadData->m_argTypeReplaced = typeReplaced;
         m_nextOverloadData.append(overloadData);
     }
 
@@ -414,8 +423,13 @@ QString OverloadData::dumpGraph() const
         s << "<font color=\"white\" point-size=\"11\">arg #" << argPos() << "</font></td></tr>";
 
         // Argument type information
+        QString type = hasArgumentTypeReplace() ? argumentTypeReplaced() : argType()->cppSignature();
         s << "<tr><td bgcolor=\"gray\" align=\"right\">type</td><td bgcolor=\"gray\" align=\"left\">";
-        s << argType()->cppSignature().replace("&", "&amp;") << "</td></tr>";
+        s << type.replace("&", "&amp;") << "</td></tr>";
+        if (hasArgumentTypeReplace()) {
+            s << "<tr><td bgcolor=\"gray\" align=\"right\">orig. type</td><td bgcolor=\"gray\" align=\"left\">";
+            s << argType()->cppSignature().replace("&", "&amp;") << "</td></tr>";
+        }
 
         // Overloads for the signature to present point
         s << "<tr><td bgcolor=\"gray\" align=\"right\">overloads</td><td bgcolor=\"gray\" align=\"left\">";
@@ -459,3 +473,14 @@ OverloadData::~OverloadData()
     while (!m_nextOverloadData.isEmpty())
         delete m_nextOverloadData.takeLast();
 }
+
+bool OverloadData::hasArgumentTypeReplace() const
+{
+    return !m_argTypeReplaced.isEmpty();
+}
+
+QString OverloadData::argumentTypeReplaced() const
+{
+    return m_argTypeReplaced;
+}
+

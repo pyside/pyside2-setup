@@ -37,6 +37,7 @@ class OverloadData
 {
 public:
     OverloadData(const AbstractMetaFunctionList overloads, const ShibokenGenerator* generator);
+    ~OverloadData();
 
     int minArgs() const { return m_headOverloadData->m_minArgs; }
     int maxArgs() const { return m_headOverloadData->m_maxArgs; }
@@ -65,7 +66,8 @@ public:
     void dumpGraph(QString filename) const;
     QString dumpGraph() const;
 
-    ~OverloadData();
+    bool hasArgumentTypeReplace() const;
+    QString argumentTypeReplaced() const;
 
 private:
     OverloadData(OverloadData* headOverloadData, const AbstractMetaFunction* func,
@@ -83,6 +85,7 @@ private:
     int m_maxArgs;
     int m_argPos;
     const AbstractMetaType* m_argType;
+    QString m_argTypeReplaced;
     QList<const AbstractMetaFunction*> m_overloads;
 
     OverloadData* m_headOverloadData;
