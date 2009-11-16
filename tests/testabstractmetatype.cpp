@@ -43,11 +43,10 @@ void TestAbstractMetaType::testConstCharPtrType()
     QVERIFY(!rtype->isArray());
     QVERIFY(!rtype->isContainer());
     QVERIFY(!rtype->isObject());
-    QVERIFY(rtype->isPrimitive());
+    QVERIFY(!rtype->isPrimitive()); // const char* differs from char, so it's not considered a primitive type by apiextractor
     QVERIFY(rtype->isNativePointer());
     QVERIFY(!rtype->isQObject());
     QVERIFY(!rtype->isReference());
-    QVERIFY(rtype->isTargetLangChar());
     QVERIFY(!rtype->isValue());
     QVERIFY(!rtype->isValuePointer());
 }
@@ -81,8 +80,7 @@ void TestAbstractMetaType::testCharType()
     QVERIFY(!rtype->isNativePointer());
     QVERIFY(!rtype->isQObject());
     QVERIFY(!rtype->isReference());
-    QVERIFY(rtype->isTargetLangChar());
-    QVERIFY(rtype->isValue());
+    QVERIFY(!rtype->isValue());
     QVERIFY(!rtype->isValuePointer());
 }
 
@@ -133,8 +131,6 @@ void TestAbstractMetaType::testTypedefWithTemplates()
     AbstractMetaArgument* arg = args.first();
     AbstractMetaType* metaType = arg->type();
     QCOMPARE(metaType->cppSignature(), QString("A<B >"));
-    qDebug() << metaType->typeEntry()->isContainer();
-//     QVERIFY(c->isTypeAlias());
 }
 
 QTEST_APPLESS_MAIN(TestAbstractMetaType)
