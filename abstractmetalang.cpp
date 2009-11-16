@@ -513,7 +513,7 @@ QString AbstractMetaFunction::argumentReplaced(int key) const
 {
     FunctionModificationList modifications = this->modifications(declaringClass());
     foreach (FunctionModification modification, modifications) {
-        QList<ArgumentModification> argumentModifications = modification.argument_mods;
+        QList<ArgumentModification>& argumentModifications = modification.argument_mods;
         foreach (ArgumentModification argumentModification, argumentModifications) {
             if (argumentModification.index == key && !argumentModification.replace_value.isEmpty())
                 return argumentModification.replace_value;

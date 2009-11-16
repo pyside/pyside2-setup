@@ -298,7 +298,7 @@ struct ArgumentModification
     ArgumentOwner owner;
 };
 
-struct Modification
+struct APIEXTRACTOR_API Modification
 {
     enum Modifiers {
         Private =               0x0001,
@@ -383,7 +383,7 @@ struct Modification
     QString renamedToName;
 };
 
-struct FunctionModification: public Modification
+struct APIEXTRACTOR_API FunctionModification: public Modification
 {
     FunctionModification() : removal(TypeSystem::NoLanguage), m_thread(false), m_allowThread(false) {}
 
@@ -917,7 +917,7 @@ typedef QHash<QString, QList<TypeEntry *> > TypeEntryHash;
 typedef QHash<QString, TypeEntry *> SingleTypeEntryHash;
 
 
-class TypeSystemTypeEntry : public TypeEntry
+class APIEXTRACTOR_API TypeSystemTypeEntry : public TypeEntry
 {
 public:
     TypeSystemTypeEntry(const QString &name)
@@ -926,13 +926,13 @@ public:
     };
 };
 
-class VoidTypeEntry : public TypeEntry
+class APIEXTRACTOR_API VoidTypeEntry : public TypeEntry
 {
 public:
     VoidTypeEntry() : TypeEntry("void", VoidType) { }
 };
 
-class TemplateArgumentEntry : public TypeEntry
+class APIEXTRACTOR_API TemplateArgumentEntry : public TypeEntry
 {
 public:
     TemplateArgumentEntry(const QString &name)
@@ -953,7 +953,7 @@ private:
     int m_ordinal;
 };
 
-class ArrayTypeEntry : public TypeEntry
+class APIEXTRACTOR_API ArrayTypeEntry : public TypeEntry
 {
 public:
     ArrayTypeEntry(const TypeEntry *nested_type)
@@ -1091,7 +1091,7 @@ struct EnumValueRedirection
     QString used;
 };
 
-class EnumTypeEntry : public TypeEntry
+class APIEXTRACTOR_API EnumTypeEntry : public TypeEntry
 {
 public:
     EnumTypeEntry(const QString &nspace, const QString &enumName)
@@ -1232,7 +1232,7 @@ private:
     bool m_forceInteger;
 };
 
-class FlagsTypeEntry : public TypeEntry
+class APIEXTRACTOR_API FlagsTypeEntry : public TypeEntry
 {
 public:
     FlagsTypeEntry(const QString &name) : TypeEntry(name, FlagsType), m_enum(0)
@@ -1546,7 +1546,7 @@ private:
     QString m_hashFunction;
 };
 
-class ContainerTypeEntry : public ComplexTypeEntry
+class APIEXTRACTOR_API ContainerTypeEntry : public ComplexTypeEntry
 {
 public:
     enum Type {
@@ -1605,7 +1605,7 @@ private:
 
 typedef QList<const ContainerTypeEntry*> ContainerTypeEntryList;
 
-class NamespaceTypeEntry : public ComplexTypeEntry
+class APIEXTRACTOR_API NamespaceTypeEntry : public ComplexTypeEntry
 {
 public:
     NamespaceTypeEntry(const QString &name) : ComplexTypeEntry(name, NamespaceType) { }
@@ -1712,7 +1712,7 @@ public:
 };
 
 
-class InterfaceTypeEntry : public ComplexTypeEntry
+class APIEXTRACTOR_API InterfaceTypeEntry : public ComplexTypeEntry
 {
 public:
     InterfaceTypeEntry(const QString &name)
@@ -1746,7 +1746,7 @@ private:
 };
 
 
-class ObjectTypeEntry : public ComplexTypeEntry
+class APIEXTRACTOR_API ObjectTypeEntry : public ComplexTypeEntry
 {
 public:
     ObjectTypeEntry(const QString &name)
