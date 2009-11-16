@@ -1080,12 +1080,22 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     }
 }
 
+QStringList CppGenerator::getAncestorMultipleInheritance(const AbstractMetaClass* metaClass)
+{
+    QStringList result = metaClass->baseClassNames();
+    if (!result.isEmpty()) {
+        foreach (const AbstractMetaClass* pClass, getBaseClasses(metaClass))
+            result.append(getAncestorMultipleInheritance(pClass));
+    }
+    return result;
+}
 
 void CppGenerator::writeMultipleInheritanceInitializerFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     QString className = metaClass->qualifiedCppName();
+    QStringList ancestors = getAncestorMultipleInheritance(metaClass);
     s << "static int mi_offsets[] = { ";
-    for (int i = 0; i < metaClass->baseClassNames().size(); i++)
+    for (int i = 0; i < ancestors.size(); i++)
         s << "-1, ";
     s << "-1 };" << endl;
     s << "int*" << endl;
@@ -1097,9 +1107,9 @@ void CppGenerator::writeMultipleInheritanceInitializerFunction(QTextStream& s, c
         s << INDENT << "const " << className << "* class_ptr = reinterpret_cast<const " << className << "*>(cptr);" << endl;
         s << INDENT << "size_t base = (size_t) class_ptr;" << endl;
         int i = 0;
-        foreach (QString parentName, metaClass->baseClassNames()) {
+        foreach (QString ancestor, ancestors) {
             s << INDENT << "mi_offsets[" << i << "] = ";
-            s << "((size_t) static_cast<const " << parentName << "*>(class_ptr)) - base;" << endl;
+            s << "((size_t) static_cast<const " << ancestor << "*>(class_ptr)) - base;" << endl;
             i++;
         }
     }

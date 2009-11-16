@@ -121,6 +121,9 @@ private:
      */
     QString multipleInheritanceInitializerFunctionName(const AbstractMetaClass* metaClass);
 
+    /// Returns a list of all classes to which the given class could be casted.
+    QStringList getAncestorMultipleInheritance(const AbstractMetaClass* metaClass);
+
     /// Returns true if the given class supports the python sequence protocol
     bool supportsSequenceProtocol(const AbstractMetaClass* metaClass);
     // Maps special function names to function parameters and return types
