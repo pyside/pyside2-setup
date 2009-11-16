@@ -54,7 +54,8 @@ PyBaseWrapper_New(PyTypeObject* instanceType, ShiboTypeObject* baseWrapperType, 
     if (((ShiboTypeObject*) instanceType)->mi_offsets) {
         int* offset = ((ShiboTypeObject*) instanceType)->mi_offsets;
         while (*offset != -1) {
-            BindingManager::instance().assignWrapper(self, (void*) ((size_t) cptr + (*offset)));
+            if (*offset > 0)
+                BindingManager::instance().assignWrapper(self, (void*) ((size_t) cptr + (*offset)));
             offset++;
         }
     }
