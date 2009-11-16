@@ -952,28 +952,12 @@ bool ShibokenGenerator::injectedCodeCallsCppFunction(const AbstractMetaFunction*
     return false;
 }
 
-QStringList ShibokenGenerator::getBaseClasses(const AbstractMetaClass* metaClass)
+AbstractMetaClassList ShibokenGenerator::getBaseClasses(const AbstractMetaClass* metaClass)
 {
-    QStringList baseClass;
-
-    if (!metaClass->baseClassName().isEmpty() &&
-        (metaClass->name() != metaClass->baseClassName()))
-        baseClass.append(metaClass->baseClassName());
-
-    foreach (AbstractMetaClass* interface, metaClass->interfaces()) {
-        AbstractMetaClass* aux = interface->primaryInterfaceImplementor();
-        if (!aux)
-            continue;
-
-        //skip templates
-        if (!aux->templateArguments().isEmpty())
-            continue;
-
-        if (!aux->name().isEmpty() && (metaClass->name() != aux->name()))
-            baseClass.append(aux->name());
-    }
-
-    return baseClass;
+    AbstractMetaClassList baseClasses;
+    foreach (QString parent, metaClass->baseClassNames())
+        baseClasses << classes().findClass(parent);
+    return baseClasses;
 }
 
 const AbstractMetaClass* ShibokenGenerator::getMultipleInheritingClass(const AbstractMetaClass* metaClass)

@@ -154,7 +154,9 @@ public:
                                              int arg_count = -1) const;
 
     bool hasInjectedCodeOrSignatureModification(const AbstractMetaFunction* func);
-    QStringList getBaseClasses(const AbstractMetaClass* metaClass);
+
+    /// Returns a list of parent classes for a method.
+    AbstractMetaClassList getBaseClasses(const AbstractMetaClass* metaClass);
 
     const AbstractMetaClass* getMultipleInheritingClass(const AbstractMetaClass* metaClass);
 

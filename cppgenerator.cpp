@@ -1868,10 +1868,8 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         s << metaClass->baseClassNames().size();
         s << ',' << endl;
         QStringList bases;
-        foreach (QString baseName, metaClass->baseClassNames()) {
-            const AbstractMetaClass* base = classes().findClass(baseName);
+        foreach (const AbstractMetaClass* base, getBaseClasses(metaClass))
             bases << QString("(PyTypeObject*)&%1").arg(cpythonTypeName(base->typeEntry()));
-        }
         Indentation indent(INDENT);
         s << INDENT << bases.join(", ") << ");" << endl << endl;
     }
