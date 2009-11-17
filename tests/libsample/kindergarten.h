@@ -36,24 +36,19 @@
 #define KINDERGARTEN_H
 
 #include <list>
-#include "abstract.h"
+#include "objecttype.h"
 
 class KinderGarten
 {
 public:
-    typedef std::list<Abstract*> ChildList;
+    typedef std::list<ObjectType*> ChildList;
 
     KinderGarten() {}
     ~KinderGarten();
 
-    void addChild(Abstract* child);
-    Abstract* releaseChild(Abstract* child);
+    void addChild(ObjectType* child);
+    ObjectType* releaseChild(ObjectType* child);
     ChildList children() { return m_children; }
-
-    void killChildren();
-    void killChild(Abstract* child);
-
-    void show();
 
 private:
     ChildList m_children;

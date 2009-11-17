@@ -909,11 +909,12 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         s << endl;
     }
 
+    int removed = 0;
+
     if (func->functionType() != AbstractMetaFunction::UserAddedFunction) {
         bool badModifications = false;
         QStringList userArgs;
         if (!func->isCopyConstructor()) {
-            int removed = 0;
             for (int i = 0; i < maxArgs + removed; i++) {
                 const AbstractMetaArgument* arg = func->arguments()[i];
                 if (func->argumentRemoved(i + 1)) {
@@ -1035,6 +1036,42 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     if (func->hasInjectedCode()) {
         s << endl;
         writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::TargetLangCode, func);
+    }
+
+    // Ownership transference between C++ and Python.
+    QList<ArgumentModification> ownership_mods;
+    foreach (FunctionModification func_mod, functionModifications(func)) {
+        foreach (ArgumentModification arg_mod, func_mod.argument_mods) {
+            if (!arg_mod.ownerships.isEmpty() && arg_mod.ownerships.contains(TypeSystem::TargetLangCode))
+                ownership_mods.append(arg_mod);
+        }
+    }
+
+    if (!ownership_mods.isEmpty()) {
+        s << INDENT << "// Ownership transferences." << endl;
+        foreach (ArgumentModification arg_mod, ownership_mods) {
+            s << INDENT << "PyBaseWrapper_setOwnership(";
+            if (arg_mod.index == 0) {
+                s << "self";
+            } else if (arg_mod.index == 0) {
+                s << retvalVariableName();
+            } else {
+                AbstractMetaFunctionList overloads = getFunctionGroups(func->implementingClass())[func->name()];
+                bool singleArgument = true;
+                foreach (const AbstractMetaFunction* f, overloads) {
+                    if (f->arguments().size() - removed > 1) {
+                        singleArgument = false;
+                        break;
+                    }
+                }
+                if (singleArgument)
+                    s << "arg";
+                else
+                    s << "pyargs[" << arg_mod.index - 1 << ']';
+            }
+            s << ", " << (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::TargetLangOwnership);
+            s << ");" << endl;
+        }
     }
 }
 
