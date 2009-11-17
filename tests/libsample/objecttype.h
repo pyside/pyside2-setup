@@ -38,6 +38,20 @@
 #include <list>
 #include "str.h"
 
+struct Event
+{
+    enum EventType {
+        NO_EVENT,
+        BASIC_EVENT,
+        SOME_EVENT,
+        ANY_EVENT
+    };
+    Event(EventType eventType) : m_eventType(eventType) {}
+    EventType eventType() { return m_eventType; }
+private:
+    EventType m_eventType;
+};
+
 class ObjectType
 {
 public:
@@ -53,7 +67,10 @@ public:
     Str objectName() const;
     void setObjectName(const Str& name);
 
-    virtual bool event();
+    bool causeEvent(Event::EventType eventType);
+
+    // Returns true if the event is processed.
+    virtual bool event(Event* event);
 
 private:
     ObjectType(const ObjectType&);

@@ -10,6 +10,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/abstract_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/collector_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/derived_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/echo_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/event_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/implicitconv_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/intwrapper_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/injectcode_wrapper.cpp

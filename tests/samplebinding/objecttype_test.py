@@ -29,7 +29,19 @@
 import sys
 import unittest
 
-from sample import ObjectType, Str
+from sample import ObjectType, Event, Str
+
+
+class ExtObjectType(ObjectType):
+    def __init__(self):
+        ObjectType.__init__(self)
+        self.type_of_last_event = None
+        self.last_event = None
+    def event(self, event):
+        self.last_event = event
+        self.type_of_last_event = event.eventType()
+        return True
+
 
 class ObjectTypeTest(unittest.TestCase):
     '''Test cases  ObjectType class of object-type with privates copy constructor and = operator.'''
@@ -53,6 +65,13 @@ class ObjectTypeTest(unittest.TestCase):
         o = ObjectType()
         o.setObjectName('object name')
         self.assertEqual(str(o.objectName()), 'object name')
+
+    def testInvalidateAfterUse(self):
+        '''In ObjectType.event(Event*) the wrapper object created for Event must me marked as invalid after the method is called.'''
+        o = ExtObjectType()
+        o.causeEvent(Event.SOME_EVENT)
+        self.assertEqual(o.type_of_last_event, Event.SOME_EVENT)
+        self.assertRaises(RuntimeError, o.last_event.eventType)
 
 if __name__ == '__main__':
     unittest.main()

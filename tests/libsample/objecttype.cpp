@@ -84,7 +84,13 @@ ObjectType::objectName() const
     return *m_objectName;
 }
 
-bool ObjectType::event()
+bool ObjectType::causeEvent(Event::EventType eventType)
+{
+    Event e(eventType);
+    return this->event(&e);
+}
+
+bool ObjectType::event(Event* event)
 {
     return true;
 }

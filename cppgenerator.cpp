@@ -369,6 +369,16 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             s << "PyObject* method_result = ";
         s << "PyObject_Call(method, args, NULL);" << endl;
         s << INDENT << "PyGILState_Release(gil_state);" << endl << endl;
+
+        foreach (FunctionModification func_mod, functionModifications(func)) {
+            foreach (ArgumentModification arg_mod, func_mod.argument_mods) {
+                if (!arg_mod.resetAfterUse)
+                    continue;
+                s << INDENT << "PyBaseWrapper_setValidCppObject(PyTuple_GET_ITEM(args, ";
+                s << (arg_mod.index - 1) << "), false);" << endl;
+            }
+        }
+
         s << INDENT << "Py_XDECREF(args);" << endl;
         s << INDENT << "Py_XDECREF(method);" << endl;
 

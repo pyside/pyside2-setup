@@ -50,6 +50,7 @@
     <enum-type name="GlobalOverloadFuncEnum"/>
     <enum-type name="Overload::FunctionEnum"/>
     <enum-type name="Overload::ParamEnum"/>
+    <enum-type name="Event::EventType"/>
 
     <namespace-type name="SampleNamespace"/>
 
@@ -59,7 +60,12 @@
 
     <object-type name="Derived"/>
 
-    <object-type name="ObjectType"/>
+    <object-type name="ObjectType">
+        <modify-function signature="event(Event*)">
+            <modify-argument index="1" invalidate-after-use="yes"/>
+        </modify-function>
+    </object-type>
+    <value-type name="Event"/>
 
     <template name="boolptr_at_end_fix_beginning">
         bool __ok__;
