@@ -334,6 +334,7 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func)
         if (arg->type()->isQObject()
             || arg->type()->isObject()
             || arg->type()->isValue()
+            || arg->type()->isValuePointer()
             || arg->type()->isReference()) {
             result += 'O';
         } else if (arg->type()->isPrimitive()) {

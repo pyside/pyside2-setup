@@ -341,6 +341,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 bool convert = arg->type()->isObject()
                                 || arg->type()->isQObject()
                                 || arg->type()->isValue()
+                                || arg->type()->isValuePointer()
                                 || arg->type()->isFlags()
                                 || arg->type()->isReference()
                                 || (arg->type()->isPrimitive()
