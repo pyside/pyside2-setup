@@ -1941,9 +1941,6 @@ void CppGenerator::finishGeneration()
         if (!shouldGenerate(cls) || cls->enclosingClass())
             continue;
 
-        if (m_packageName.isEmpty())
-            m_packageName = cls->package();
-
         s_classInitDecl << "extern \"C\" PyAPI_FUNC(void) init_"
                         << cls->name().toLower() << "(PyObject* module);" << endl;
 
@@ -1954,7 +1951,7 @@ void CppGenerator::finishGeneration()
             s_classPythonDefines << INDENT << defineStr << endl;
     }
 
-    QString moduleFileName(outputDirectory() + "/" + subDirectoryForPackage(m_packageName));
+    QString moduleFileName(outputDirectory() + "/" + subDirectoryForPackage(packageName()));
     moduleFileName += "/" + moduleName().toLower() + "_module_wrapper.cpp";
 
     QFile file(moduleFileName);
@@ -1974,7 +1971,7 @@ void CppGenerator::finishGeneration()
             s << "#include \"" << include << '\"' << endl;
         s << endl;
 
-        TypeSystemTypeEntry* moduleEntry = reinterpret_cast<TypeSystemTypeEntry*>(TypeDatabase::instance()->findType(m_packageName));
+        TypeSystemTypeEntry* moduleEntry = reinterpret_cast<TypeSystemTypeEntry*>(TypeDatabase::instance()->findType(packageName()));
         CodeSnipList snips = moduleEntry->codeSnips();
 
         // module inject-code native/beginning

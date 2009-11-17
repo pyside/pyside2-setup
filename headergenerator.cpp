@@ -224,9 +224,6 @@ void HeaderGenerator::finishGeneration()
             !(classType->isObject() || classType->isValue() || classType->isNamespace()))
             continue;
 
-        if (m_packageName.isEmpty())
-            m_packageName = metaClass->package();
-
         //Includes
         if (metaClass->typeEntry()->include().isValid())
             s_cin << metaClass->typeEntry()->include().toString() << endl;
@@ -265,7 +262,7 @@ void HeaderGenerator::finishGeneration()
     }
 
     QString moduleHeaderFileName(outputDirectory() + QDir::separator()
-                                 + subDirectoryForPackage(m_packageName));
+                                 + subDirectoryForPackage(packageName()));
     moduleHeaderFileName += QDir::separator() + moduleName().toLower() + "_python.h";
 
     QString includeShield = moduleName().toUpper() + "_PYTHON_H";
