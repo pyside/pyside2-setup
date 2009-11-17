@@ -545,7 +545,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             // Value type objects are always valid
             if (!rfunc->ownerClass()->typeEntry()->isValue()) {
                 s << INDENT << "if (!Shiboken::cppObjectIsValid((Shiboken::PyBaseWrapper*)self)) {\n";
-                s << INDENT << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"C++ object is invalid.\");\n";
+                s << INDENT << INDENT << "PyErr_SetString(PyExc_RuntimeError, \"C++ object is invalid.\");\n";
                 s << INDENT << INDENT << "return 0;\n";
                 s << INDENT << "}\n";
             }
@@ -1152,7 +1152,7 @@ void CppGenerator::writeSequenceMethods(QTextStream& s, const AbstractMetaClass*
         s << funcRetVal << ' ' << funcName << '(' << funcArgs << ')'
           << "\n{\n"
           << INDENT << "if (!Shiboken::cppObjectIsValid((Shiboken::PyBaseWrapper*)self)) {\n"
-          << INDENT << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"C++ object is invalid.\");\n"
+          << INDENT << INDENT << "PyErr_SetString(PyExc_RuntimeError, \"C++ object is invalid.\");\n"
           << INDENT << INDENT << "return 0;\n"
           << INDENT << "}\n"
           << INDENT << func->ownerClass()->name() << "* cppSelf = " << cpythonWrapperCPtr(func->ownerClass(), "self") << ";\n"
