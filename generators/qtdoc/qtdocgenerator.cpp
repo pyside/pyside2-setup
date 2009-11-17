@@ -224,15 +224,16 @@ QString QtXmlToSphinx::readFromLocation(QString& location, QString& identifier)
 
     while (!inputFile.atEnd()) {
         line = inputFile.readLine();
-        if (identifierIsEmpty)
+        if (identifierIsEmpty) {
             code += line;
-        else if (getCode && !line.contains(searchString))
+        } else if (getCode && !line.contains(searchString)) {
             code += line.replace(codeSnippetCode, "");
-        else if (line.contains(searchString))
+        } else if (line.contains(searchString)) {
             if (getCode)
                 break;
             else
                 getCode = true;
+        }
     }
 
     if (code.isEmpty())
@@ -248,7 +249,7 @@ void QtXmlToSphinx::handleHeadingTag(QXmlStreamReader& reader)
     static char types[] = { '-', '^' };
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        int typeIdx = reader.attributes().value("level").toString().toInt();
+        uint typeIdx = reader.attributes().value("level").toString().toInt();
         if (typeIdx >= sizeof(types))
             type = types[sizeof(types)-1];
         else
@@ -765,7 +766,6 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
 
         // print line
         s << INDENT << '+';
-        char c = (!i && table.hasHeader()) ? '=' : '-';
         for (int col = 0, max = colWidths.count(); col < max; ++col) {
             char c;
             if (row[col].rowSpan == -1)
