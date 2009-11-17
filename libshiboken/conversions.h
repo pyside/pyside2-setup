@@ -69,6 +69,8 @@ struct ConverterBase<T*> : ConverterBase<T>
 {
     static PyObject* toPython(const T* cppobj)
     {
+        if (!cppobj)
+            Py_RETURN_NONE;
         PyObject* pyobj = BindingManager::instance().retrieveWrapper(cppobj);
         if (pyobj)
             Py_INCREF(pyobj);
@@ -89,6 +91,8 @@ struct Converter<T*> : Converter<T>
 {
     static PyObject* toPython(const T* cppobj)
     {
+        if (!cppobj)
+            Py_RETURN_NONE;
         PyObject* pyobj = BindingManager::instance().retrieveWrapper(cppobj);
         if (pyobj)
             Py_INCREF(pyobj);
