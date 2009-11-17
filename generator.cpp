@@ -90,13 +90,11 @@ QList<const ContainerTypeEntry*> Generator::containerTypes() const
     return m_containerTypes;
 }
 
-/// Returns the output directory
 QString Generator::outputDirectory() const
 {
     return m_outDir;
 }
 
-/// Set the output directory
 void Generator::setOutputDirectory(const QString &outDir)
 {
     m_outDir = outDir;
