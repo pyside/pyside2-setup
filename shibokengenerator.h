@@ -155,6 +155,9 @@ public:
 
     bool hasInjectedCodeOrSignatureModification(const AbstractMetaFunction* func);
 
+    /// Returns true if there are cases of multiple inheritance in any of its ancestors.
+    bool hasMultipleInheritanceInAncestry(const AbstractMetaClass* metaClass);
+
     /// Returns a list of parent classes for a method.
     AbstractMetaClassList getBaseClasses(const AbstractMetaClass* metaClass);
 

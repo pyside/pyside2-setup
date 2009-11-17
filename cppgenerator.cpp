@@ -1120,7 +1120,8 @@ void CppGenerator::writeMultipleInheritanceInitializerFunction(QTextStream& s, c
 
 QString CppGenerator::multipleInheritanceInitializerFunctionName(const AbstractMetaClass* metaClass)
 {
-    // TODO: check is the class has multiple inheritance in its ancestry
+    if (!hasMultipleInheritanceInAncestry(metaClass))
+        return QString();
     return QString("%1_mi_init").arg(cpythonBaseName(metaClass->typeEntry()));
 }
 

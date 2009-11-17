@@ -951,6 +951,15 @@ bool ShibokenGenerator::injectedCodeCallsCppFunction(const AbstractMetaFunction*
     return false;
 }
 
+bool ShibokenGenerator::hasMultipleInheritanceInAncestry(const AbstractMetaClass* metaClass)
+{
+    if (!metaClass || metaClass->baseClassNames().isEmpty())
+        return false;
+    if (metaClass->baseClassNames().size() > 1)
+        return true;
+    return hasMultipleInheritanceInAncestry(metaClass->baseClass());
+}
+
 AbstractMetaClassList ShibokenGenerator::getBaseClasses(const AbstractMetaClass* metaClass)
 {
     AbstractMetaClassList baseClasses;
