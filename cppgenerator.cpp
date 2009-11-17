@@ -88,6 +88,12 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     // headers
     s << "// default includes" << endl;
     s << "#include <shiboken.h>" << endl;
+
+    // The multiple inheritance initialization function
+    // needs the 'set' class from C++ STL.
+    if (hasMultipleInheritanceInAncestry(metaClass))
+        s << "#include <set>" << endl;
+
     s << "#include \"" << moduleName().toLower() << "_python.h\"" << endl << endl;
 
     QString converterImpl;
@@ -1082,8 +1088,12 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
 QStringList CppGenerator::getAncestorMultipleInheritance(const AbstractMetaClass* metaClass)
 {
-    QStringList result = metaClass->baseClassNames();
-    if (!result.isEmpty()) {
+    QStringList result;
+    if (!metaClass->baseClassNames().isEmpty()) {
+        foreach (QString base, metaClass->baseClassNames()) {
+            result.append(QString("((size_t) static_cast<const %1*>(class_ptr)) - base").arg(base));
+            result.append(QString("((size_t) static_cast<const %1*>((%2*)((void*)class_ptr))) - base").arg(base).arg(metaClass->name()));
+        }
         foreach (const AbstractMetaClass* pClass, getBaseClasses(metaClass))
             result.append(getAncestorMultipleInheritance(pClass));
     }
@@ -1104,14 +1114,26 @@ void CppGenerator::writeMultipleInheritanceInitializerFunction(QTextStream& s, c
     s << INDENT << "if (mi_offsets[0] == -1) {" << endl;
     {
         Indentation indent(INDENT);
+        s << INDENT << "std::set<int> offsets;" << endl;
+        s << INDENT << "std::set<int>::iterator it;" << endl;
         s << INDENT << "const " << className << "* class_ptr = reinterpret_cast<const " << className << "*>(cptr);" << endl;
         s << INDENT << "size_t base = (size_t) class_ptr;" << endl;
-        int i = 0;
-        foreach (QString ancestor, ancestors) {
-            s << INDENT << "mi_offsets[" << i << "] = ";
-            s << "((size_t) static_cast<const " << ancestor << "*>(class_ptr)) - base;" << endl;
-            i++;
+
+        foreach (QString ancestor, ancestors)
+            s << INDENT << "offsets.insert(" << ancestor << ");" << endl;
+
+        s << endl;
+        s << INDENT << "offsets.erase(0);" << endl;
+        s << endl;
+
+        s << INDENT << "int i = 0;" << endl;
+        s << INDENT << "for (it = offsets.begin(); it != offsets.end(); it++) {" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "mi_offsets[i] = *it;" << endl;
+            s << INDENT << "i++;" << endl;
         }
+        s << INDENT << '}' << endl;
     }
     s << INDENT << '}' << endl;
     s << INDENT << "return mi_offsets;" << endl;
