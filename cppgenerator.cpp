@@ -542,13 +542,13 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             // Checks if the underlying C++ object is valid.
             // If the wrapped C++ library have no function that steals ownership and
             // deletes the C++ object this check would not be needed.
-            // Value type objects are always valid
-            if (!rfunc->ownerClass()->typeEntry()->isValue()) {
-                s << INDENT << "if (!Shiboken::cppObjectIsValid((Shiboken::PyBaseWrapper*)self)) {\n";
-                s << INDENT << INDENT << "PyErr_SetString(PyExc_RuntimeError, \"C++ object is invalid.\");\n";
-                s << INDENT << INDENT << "return 0;\n";
-                s << INDENT << "}\n";
+            s << INDENT << "if (!Shiboken::cppObjectIsValid((Shiboken::PyBaseWrapper*)self)) {" << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "PyErr_SetString(PyExc_RuntimeError, \"C++ object is invalid.\");" << endl;
+                s << INDENT << "return 0;" << endl;
             }
+            s << INDENT << '}' << endl;
         }
 
         if (rfunc->type() && !rfunc->argumentRemoved(0) && !rfunc->isInplaceOperator())
