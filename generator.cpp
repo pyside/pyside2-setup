@@ -31,32 +31,39 @@
 #include <QtCore/QFileInfo>
 #include <QDebug>
 
-Generator::Generator() : m_numGenerated(0), m_numGeneratedWritten(0)
-{}
+struct Generator::GeneratorPrivate {
+    const ApiExtractor* apiextractor;
+    QString outDir;
+    // License comment
+    QString licenseComment;
+    QString packageName;
+    int numGenerated;
+    int numGeneratedWritten;
+};
+
+Generator::Generator() : m_d(new GeneratorPrivate)
+{
+    m_d->numGenerated = 0;
+    m_d->numGeneratedWritten = 0;
+}
 
 Generator::~Generator()
 {
+    delete m_d;
 }
 
 bool Generator::setup(const ApiExtractor& extractor, const QMap< QString, QString > args)
 {
-    m_globalEnums = extractor.globalEnums();
-    m_globalFunctions = extractor.globalFunctions();
-    m_classes = extractor.classes();
-    m_primitiveTypes = extractor.primitiveTypes();
-    m_containerTypes = extractor.containerTypes();
-
+    m_d->apiextractor = &extractor;
     // FIXME: Avoid this ugly hack to get the package name.. and... why the name "package"!?
-    foreach (const AbstractMetaClass* cppClass, m_classes) {
-        if (m_packageName.isEmpty()
+    foreach (const AbstractMetaClass* cppClass, m_d->apiextractor->classes()) {
+        if (m_d->packageName.isEmpty()
             && cppClass->typeEntry()->generateCode()
             && !cppClass->package().isEmpty()) {
-            m_packageName = cppClass->package();
+            m_d->packageName = cppClass->package();
             break;
         }
     }
-    // does anyone use this?
-    m_qmetatypeDeclaredTypenames = extractor.qtMetaTypeDeclaredTypeNames();
     return doSetup(args);
 }
 
@@ -67,42 +74,78 @@ QMap< QString, QString > Generator::options() const
 
 AbstractMetaClassList Generator::classes() const
 {
-    return m_classes;
+    return m_d->apiextractor->classes();
 }
 
 AbstractMetaFunctionList Generator::globalFunctions() const
 {
-    return m_globalFunctions;
+    return m_d->apiextractor->globalFunctions();
 }
 
 AbstractMetaEnumList Generator::globalEnums() const
 {
-    return m_globalEnums;
+    return m_d->apiextractor->globalEnums();
 }
 
 QList<const PrimitiveTypeEntry*> Generator::primitiveTypes() const
 {
-    return m_primitiveTypes;
+    return m_d->apiextractor->primitiveTypes();
 }
 
 QList<const ContainerTypeEntry*> Generator::containerTypes() const
 {
-    return m_containerTypes;
+    return m_d->apiextractor->containerTypes();
+}
+
+QSet< QString > Generator::qtMetaTypeDeclaredTypeNames() const
+{
+    return m_d->apiextractor->qtMetaTypeDeclaredTypeNames();
+}
+
+QString Generator::licenseComment() const
+{
+    return m_d->licenseComment;
+}
+
+void Generator::setLicenseComment(const QString& licenseComment)
+{
+    m_d->licenseComment = licenseComment;
+}
+
+QString Generator::packageName() const
+{
+    return m_d->packageName;
+}
+
+QString Generator::moduleName() const
+{
+    QString& pkgName = m_d->packageName;
+    return QString(pkgName).remove(0, pkgName.lastIndexOf('.') + 1);
 }
 
 QString Generator::outputDirectory() const
 {
-    return m_outDir;
+    return m_d->outDir;
 }
 
 void Generator::setOutputDirectory(const QString &outDir)
 {
-    m_outDir = outDir;
+    m_d->outDir = outDir;
+}
+
+int Generator::numGenerated() const
+{
+    return m_d->numGenerated;
+}
+
+int Generator::numGeneratedAndWritten() const
+{
+    return m_d->numGeneratedWritten;
 }
 
 void Generator::generate()
 {
-    foreach (AbstractMetaClass *cls, m_classes) {
+    foreach (AbstractMetaClass *cls, m_d->apiextractor->classes()) {
         if (!shouldGenerate(cls))
             continue;
 
@@ -115,8 +158,8 @@ void Generator::generate()
         generateClass(fileOut.stream, cls);
 
         if (fileOut.done())
-            ++m_numGeneratedWritten;
-        ++m_numGenerated;
+            ++m_d->numGeneratedWritten;
+        ++m_d->numGenerated;
     }
     finishGeneration();
 }
@@ -126,7 +169,7 @@ bool Generator::shouldGenerate(const AbstractMetaClass* metaClass) const
     return metaClass->typeEntry()->codeGeneration() & TypeEntry::GenerateTargetLang;
 }
 
-void Generator::verifyDirectoryFor(const QFile &file)
+void verifyDirectoryFor(const QFile &file)
 {
     QDir dir = QFileInfo(file).dir();
     if (!dir.exists()) {
@@ -141,7 +184,7 @@ bool Generator::hasDefaultConstructor(const AbstractMetaType *type)
     QString full_name = type->typeEntry()->qualifiedTargetLangName();
     QString class_name = type->typeEntry()->targetLangName();
 
-    foreach (const AbstractMetaClass *cls, m_classes) {
+    foreach (const AbstractMetaClass *cls, m_d->apiextractor->classes()) {
         if (cls->typeEntry()->qualifiedTargetLangName() == full_name) {
             AbstractMetaFunctionList functions = cls->functions();
             foreach (const AbstractMetaFunction *function, functions) {
@@ -369,7 +412,7 @@ QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
     return s;
 }
 
-CodeSnipList Generator::getCodeSnips(const AbstractMetaFunction *func)
+CodeSnipList Generator::getCodeSnips(const AbstractMetaFunction *func) const
 {
     CodeSnipList result;
     const AbstractMetaClass *cppClass = func->implementingClass();
@@ -444,7 +487,7 @@ QString Generator::subDirectoryForClass(const AbstractMetaClass* clazz) const
 QString Generator::subDirectoryForPackage(QString packageName) const
 {
     if (packageName.isEmpty())
-        packageName = m_packageName;
+        packageName = m_d->packageName;
     return QString(packageName).replace(".", QDir::separator());
 }
 

@@ -40,7 +40,10 @@ extern "C" GENRUNNER_API GeneratorList getGenerators()\
     return GeneratorList() << X;\
 }\
 
+GENRUNNER_API
 QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor);
+GENRUNNER_API
+void verifyDirectoryFor(const QFile &file);
 
 /**
  *   Base class for all generators. The default implementations does nothing,
@@ -98,12 +101,16 @@ public:
     /// Returns the classes used to generate the binding code.
     AbstractMetaClassList classes() const;
 
+    /// Returns all global functions found by APIExtractor
     AbstractMetaFunctionList globalFunctions() const;
 
+    /// Returns all global enums found by APIExtractor
     AbstractMetaEnumList globalEnums() const;
 
+    /// Returns all primitive types found by APIExtractor
     QList<const PrimitiveTypeEntry*> primitiveTypes() const;
 
+    /// Returns all container types found by APIExtractor
     QList<const ContainerTypeEntry*> containerTypes() const;
 
     /// Returns the output directory
@@ -121,17 +128,12 @@ public:
     void generate();
 
     /// Returns the number of generated items
-    int numGenerated()
-    {
-        return m_numGenerated;
-    }
+    int numGenerated() const;
 
     /// Returns the number of generated items written
-    int numGeneratedAndWritten()
-    {
-        return m_numGeneratedWritten;
-    }
+    int numGeneratedAndWritten() const;
 
+    /// Returns the generator's name. Used for cosmetic purposes.
     virtual const char* name() const = 0;
 
     /// Returns true if the generator should generate any code for the AbstractMetaClass
@@ -168,61 +170,33 @@ public:
 
     void replaceTemplateVariables(QString &code, const AbstractMetaFunction *func);
 
-    bool hasDefaultConstructor(const AbstractMetaType *type);
-
     // QtScript
-    QSet<QString> qtMetaTypeDeclaredTypeNames() const
-    {
-        return m_qmetatypeDeclaredTypenames;
-    }
+    QSet<QString> qtMetaTypeDeclaredTypeNames() const;
 
     /**
     *   Returns the license comment to be prepended to each source file generated.
     */
-    QString licenseComment()
-    {
-        return m_licenseComment;
-    }
+    QString licenseComment() const;
 
     /**
     *   Sets the license comment to be prepended to each source file generated.
     */
-    void setLicenseComment(const QString &licenseComment)
-    {
-        m_licenseComment = licenseComment;
-    }
+    void setLicenseComment(const QString &licenseComment);
 
     /**
      *   Returns the package name.
      */
-    QString packageName()
-    {
-        return m_packageName;
-    }
+    QString packageName() const;
 
     /**
-     *   Sets the package name.
+     *  Retrieves the name of the currently processed module.
+     *  While package name is a complete package idetification, e.g. 'PySide.QtCore',
+     *  a module name represents the last part of the package, e.g. 'QtCore'.
+     *  If the target language separates the modules with characters other than
+     *  dots ('.') the generator subclass must overload this method.
+     *  \return a string representing the last part of a package name
      */
-    void setPackageName(const QString &packageName)
-    {
-        m_packageName = packageName;
-    }
-
-    /**
-     *    Retrieves the name of the currently processed module. While package name
-     *    is a complete package idetification, e.g. 'PySide.QtCore', a module name
-     *    represents the last part of the package, e.g. 'QtCore'.
-     *    If the target language separates the modules with characters other than
-     *    dots ('.') the generator subclass must overload this method.
-     *    /return a string representing the last part of a package name
-     */
-    virtual QString moduleName() const
-    {
-        return QString(m_packageName).remove(0, m_packageName.lastIndexOf('.') + 1);
-    }
-
-    /// returns the code snips of a function
-    CodeSnipList getCodeSnips(const AbstractMetaFunction *func);
+    virtual QString moduleName() const;
 
     /**
      *   Retrieves a list of constructors used in implicit conversions
@@ -237,63 +211,70 @@ public:
     AbstractMetaFunctionList implicitConversions(const AbstractMetaType* metaType) const;
 
 protected:
-    QString m_packageName;
-
     /**
      *   Returns the file name used to write the binding code of an AbstractMetaClass.
-     *   /param metaClass the AbstractMetaClass for which the file name must be
+     *   \param metaClass the AbstractMetaClass for which the file name must be
      *   returned
-     *   /return the file name used to write the binding code for the class
+     *   \return the file name used to write the binding code for the class
      */
     virtual QString fileNameForClass(const AbstractMetaClass* metaClass) const = 0;
 
-    static FunctionModificationList functionModifications(const AbstractMetaFunction *meta_function);
-    AbstractMetaFunctionList filterFunctions(const AbstractMetaClass *cppClass);
-    AbstractMetaFunctionList queryFunctions(const AbstractMetaClass *cpp_class, bool all_function = false);
-    AbstractMetaFunctionList queryGlobalOperators(const AbstractMetaClass *cpp_class);
-    AbstractMetaFunctionList sortConstructor(AbstractMetaFunctionList list);
 
     virtual bool doSetup(const QMap<QString, QString>& args) = 0;
 
     /**
-     *    Returns the subdirectory path for a given package
-     *    (aka module, aka library) name.
-     *    If the target language separates the package modules with characters other
-     *    than dots ('.') the generator subclass must overload this method.
-     *    /param packageName complete package name for which to return the subdirectory path
-     *    or nothing the use the name of the currently processed package
-     *    /return a string representing the subdirectory path for the given package
-     */
-    virtual QString subDirectoryForPackage(QString packageName = QString()) const;
-
-    /**
      *   Write the bindding code for an AbstractMetaClass.
-     *   This is called by the default implementation of generate method.
+     *   This is called by generate method.
      *   \param  s   text stream to write the generated output
      *   \param  metaClass  the class that should be generated
      */
     virtual void generateClass(QTextStream& s, const AbstractMetaClass* metaClass) = 0;
     virtual void finishGeneration() = 0;
 
-    void verifyDirectoryFor(const QFile &file);
+    /**
+    *    Returns the subdirectory path for a given package
+    *    (aka module, aka library) name.
+    *    If the target language separates the package modules with characters other
+    *    than dots ('.') the generator subclass must overload this method.
+    *    /param packageName complete package name for which to return the subdirectory path
+    *    or nothing the use the name of the currently processed package
+    *    /return a string representing the subdirectory path for the given package
+    */
+    virtual QString subDirectoryForPackage(QString packageName = QString()) const;
 
-    int m_numGenerated;
-    int m_numGeneratedWritten;
+    /**
+    *   @deprecated This function doesn't belongs to the generator world and will sooner be moved to APIExtractor
+    */
+    static FunctionModificationList functionModifications(const AbstractMetaFunction *meta_function) GENRUNNER_DEPRECATED;
+    /**
+    *   @deprecated This function doesn't belongs to the generator world and will sooner be moved to APIExtractor
+    */
+    AbstractMetaFunctionList filterFunctions(const AbstractMetaClass *cppClass) GENRUNNER_DEPRECATED;
+    /**
+    *   @deprecated This function doesn't belongs to the generator world and will sooner be moved to APIExtractor
+    */
+    AbstractMetaFunctionList queryFunctions(const AbstractMetaClass *cpp_class, bool all_function = false) GENRUNNER_DEPRECATED;
+    /**
+    *   @deprecated This function doesn't belongs to the generator world and will sooner be moved to APIExtractor
+    */
+    AbstractMetaFunctionList queryGlobalOperators(const AbstractMetaClass *cpp_class) GENRUNNER_DEPRECATED;
+    /**
+    *   @deprecated This function doesn't belongs to the generator world and will sooner be moved to APIExtractor
+    */
+    AbstractMetaFunctionList sortConstructor(AbstractMetaFunctionList list) GENRUNNER_DEPRECATED;
+    /**
+    *   Returns the code snips of a function
+    *   \deprecated Use AbstractMetaFunction::injectedCodeSnips() instead.
+    */
+    CodeSnipList getCodeSnips(const AbstractMetaFunction *func) const GENRUNNER_DEPRECATED;
+    /**
+    *   @deprecated This function doesn't belongs to the generator world and will sooner be moved to APIExtractor
+    */
+    bool hasDefaultConstructor(const AbstractMetaType *type) GENRUNNER_DEPRECATED;
 
 private:
-    AbstractMetaClassList m_classes;
-    AbstractMetaFunctionList m_globalFunctions;
-    AbstractMetaEnumList m_globalEnums;
-    QString m_outDir;
-
-    QList<const PrimitiveTypeEntry*> m_primitiveTypes;
-    QList<const ContainerTypeEntry*> m_containerTypes;
-
-    // QtScript
-    QSet<QString> m_qmetatypeDeclaredTypenames;
-
-    // License comment
-    QString m_licenseComment;
+    struct GeneratorPrivate;
+    GeneratorPrivate* m_d;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Generator::Options)
@@ -305,8 +286,7 @@ typedef QLinkedList<Generator*> GeneratorList;
 class GENRUNNER_API Indentor
 {
 public:
-    Indentor():
-            indent(0) {}
+    Indentor() : indent(0) {}
     int indent;
 };
 

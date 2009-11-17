@@ -39,4 +39,5 @@
     #endif
 #endif
 
+#define GENRUNNER_DEPRECATED __attribute__ ((deprecated))
 #endif
