@@ -819,7 +819,8 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                                        const CodeSnipList& codeSnips,
                                        CodeSnip::Position position,
                                        TypeSystem::Language language,
-                                       const AbstractMetaFunction* func)
+                                       const AbstractMetaFunction* func,
+                                       const AbstractMetaClass* context)
 {
     static QRegExp toPythonRegex("%CONVERTTOPYTHON\\[([^\\[]*)\\]");
     static QRegExp pyArgsRegex("%PYARG_(\\d+)");
@@ -849,6 +850,13 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
         Indentation indent2(INDENT);
         formatCode(tmpStream, snip.code(), INDENT);
 
+        if (context) {
+            // replace template variable for the Python Type object for the
+            // class context in which the variable is used
+            QString pytype = cpythonTypeName(context);
+            code.replace("%PYTHONTYPEOBJECT", pytype);
+        }
+
         if (func) {
             // replace "toPython "converters
             code.replace(toPythonRegex, "Shiboken::Converter<\\1>::toPython");
@@ -874,6 +882,15 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             if (func->implementingClass()) {
                 code.replace("%CPPSELF.", "cppSelf->");
                 code.replace("%CPPSELF", "cppSelf");
+
+                // replace template variable for the Python Type object for the
+                // class implementing the method in which the code snip is written
+                if (func->isStatic()) {
+                    code.replace("%PYTHONTYPEOBJECT", cpythonTypeName(func->implementingClass()));
+                } else {
+                    code.replace("%PYTHONTYPEOBJECT.", "self->ob_type->");
+                    code.replace("%PYTHONTYPEOBJECT", "self->ob_type");
+                }
             }
 
             // replace template variables for individual arguments

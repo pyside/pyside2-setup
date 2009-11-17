@@ -98,16 +98,18 @@ public:
      *   Write a code snip into the buffer \p s.
      *   CodeSnip are codes inside inject-code tags.
      *   \param s    the buffer
-     *   \param func the cpp function
      *   \param code_snips   a list of code snips
      *   \param position     the position to insert the code snip
      *   \param language     the kind of code snip
+     *   \param func the cpp function
+     *   \param context the class context for the place where the code snip will be written
      */
     void writeCodeSnips(QTextStream &s,
                         const CodeSnipList &code_snips,
                         CodeSnip::Position position,
                         TypeSystem::Language language,
-                        const AbstractMetaFunction* func = 0);
+                        const AbstractMetaFunction* func = 0,
+                        const AbstractMetaClass* context = 0);
 
     /**
      *   Returns a function's code snippets.

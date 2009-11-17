@@ -59,6 +59,12 @@ Variables
   bounded to the Python wrapper method which receives the custom code.
 
 
+**%PYTHONTYPEOBJECT**
+
+  Replaced by the Python type object for the context in which it is inserted:
+  method or class modification.
+
+
 **%RETURN_TYPE**
 
   Replaced by the type returned by a function or method.

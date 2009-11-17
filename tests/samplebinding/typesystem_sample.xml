@@ -235,7 +235,7 @@
             Tested in InjectCodeTest.testTypeNativeBeginning_TypeTargetBeginning:
         -->
         <inject-code class="target" position="beginning">
-        PyInjectCode_Type.tp_str = InjectCode_tpstr;
+        %PYTHONTYPEOBJECT.tp_str = InjectCode_tpstr;
         </inject-code>
 
         <!-- Tested in InjectCodeTest.testFunctionTargetBeginning_FunctionTargetEnd -->
