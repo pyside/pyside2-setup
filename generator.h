@@ -28,13 +28,14 @@
 #include <QtCore/QDir>
 #include <QtCore/QLinkedList>
 #include <apiextractor/abstractmetalang.h>
+#include "generatorrunnermacros.h"
 
 class ApiExtractor;
 class AbstractMetaBuilder;
 class QFile;
 
 #define EXPORT_GENERATOR_PLUGIN(X)\
-extern "C" Q_DECL_EXPORT GeneratorList getGenerators()\
+extern "C" GENRUNNER_API GeneratorList getGenerators()\
 {\
     return GeneratorList() << X;\
 }\
@@ -45,7 +46,7 @@ QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
  *   Base class for all generators. The default implementations does nothing,
  *   you must subclass this to create your own generators.
  */
-class Generator
+class GENRUNNER_API Generator
 {
 public:
     /// Optiosn used around the generator code
@@ -301,7 +302,7 @@ typedef QLinkedList<Generator*> GeneratorList;
 /**
 * Utility class to store the identation level, use it in a QTextStream.
 */
-class Indentor
+class GENRUNNER_API Indentor
 {
 public:
     Indentor():
@@ -312,7 +313,7 @@ public:
 /**
 *   Class that use the RAII idiom to set and unset the identation level.
 */
-class Indentation
+class GENRUNNER_API Indentation
 {
 public:
     Indentation(Indentor &indentor) : indentor(indentor)
@@ -328,7 +329,7 @@ private:
     Indentor &indentor;
 };
 
-inline QTextStream &operator <<(QTextStream &s, const Indentor &indentor)
+GENRUNNER_API inline QTextStream &operator <<(QTextStream &s, const Indentor &indentor)
 {
     for (int i = 0; i < indentor.indent; ++i)
         s << "    ";

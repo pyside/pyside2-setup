@@ -35,7 +35,7 @@ class AbstractMetaClass;
 class QXmlStreamReader;
 class QtDocGenerator;
 
-class QtXmlToSphinx
+class GENRUNNER_API QtXmlToSphinx
 {
 public:
     struct TableCell
@@ -156,7 +156,7 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table);
 /**
 *   The DocGenerator generates documentation from library being binded.
 */
-class QtDocGenerator : public Generator
+class GENRUNNER_API QtDocGenerator : public Generator
 {
 public:
     QString libSourceDir() const
