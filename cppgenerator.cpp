@@ -795,7 +795,12 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
         s << "if (numArgs == " << parentOverloadData->argPos() + 1 << ") {" << endl;
         {
             Indentation indent(INDENT);
-            writeMethodCall(s, referenceFunction, parentOverloadData->argPos() + 1);
+            const AbstractMetaFunction* func = referenceFunction;
+            foreach (OverloadData* overloadData, parentOverloadData->nextOverloadData()) {
+                if (overloadData->hasDefaultValue())
+                    func = overloadData->overloads().at(0);
+            }
+            writeMethodCall(s, func, parentOverloadData->argPos() + 1);
         }
         s << INDENT << "} else ";
     }
