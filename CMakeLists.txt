@@ -54,7 +54,6 @@ parser/tokens.cpp
 parser/type_compiler.cpp
 parser/visitor.cpp
 parser/rpp/builtin-macros.cpp
-parser/rpp/pp-main.cpp
 parser/rpp/preprocessor.cpp
 )
 
