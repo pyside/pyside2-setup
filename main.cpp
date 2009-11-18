@@ -160,6 +160,12 @@ int main(int argc, char *argv[])
     }
 
     QString outputDirectory = args.contains("output-directory") ? args["output-directory"] : "out";
+    if (!QDir(outputDirectory).exists()) {
+        if (!QDir().mkpath(outputDirectory)) {
+            ReportHandler::warning("Can't create output directory: "+outputDirectory);
+            return EXIT_FAILURE;
+        }
+    }
     // Create and set-up API Extractor
     ApiExtractor extractor;
     extractor.setLogDirectory(outputDirectory);
