@@ -117,7 +117,21 @@ overloadedFunc(double val)
     return GlobalOverloadFunc_d;
 }
 
-char* returnNull()
+char*
+returnNullPrimitivePointer()
 {
     return 0;
 }
+
+ObjectType*
+returnNullObjectTypePointer()
+{
+    return 0;
+}
+
+Event*
+returnNullValueTypePointer()
+{
+    return 0;
+}
+

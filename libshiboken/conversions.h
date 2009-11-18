@@ -242,9 +242,11 @@ struct Converter_CppEnum
 template <typename CString>
 struct Converter_CString
 {
-    static PyObject* toPython(CString holder)
+    static PyObject* toPython(CString cppobj)
     {
-        return PyString_FromString(holder);
+        if (!cppobj)
+            Py_RETURN_NONE;
+        return PyString_FromString(cppobj);
     }
     static CString toCpp(PyObject* pyobj)
     {

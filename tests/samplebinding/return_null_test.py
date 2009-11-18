@@ -24,18 +24,31 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-'''Test cases for Abstract class'''
+'''Test case for functions that could return a NULL pointer.'''
 
 import sys
 import unittest
 
-from sample import returnNull
+from sample import returnNullPrimitivePointer, returnNullValueTypePointer, returnNullObjectTypePointer
 
-class RetrunTest(unittest.TestCase):
-    '''Test case for functions with null return'''
+class ReturnNullTest(unittest.TestCase):
+    '''Test case for functions that could return a NULL pointer.'''
 
-    def testNull(self):
-        o = returnNull()
-        self.assert_(o == None)
+    def testReturnNull(self):
+        '''Function returns a NULL pointer to a primitive type.'''
+        o = returnNullPrimitivePointer()
+        self.assertEqual(o, None)
 
+    def testReturnNullObjectType(self):
+        '''Function returns a NULL pointer to an object-type.'''
+        o = returnNullObjectTypePointer()
+        self.assertEqual(o, None)
+
+    def testReturnNullValueType(self):
+        '''Function returns a NULL pointer to a value-type.'''
+        o = returnNullValueTypePointer()
+        self.assertEqual(o, None)
+
+if __name__ == '__main__':
+    unittest.main()
 

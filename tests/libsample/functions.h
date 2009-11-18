@@ -38,6 +38,7 @@
 #include <list>
 #include <utility>
 #include "complex.h"
+#include "objecttype.h"
 
 enum GlobalEnum {
     NoThing,
@@ -61,7 +62,10 @@ Complex sumComplexPair(std::pair<Complex, Complex> cpx_pair);
 int countCharacters(const char* text);
 char* makeCString();
 const char* returnCString();
-char* returnNull();
+
+char* returnNullPrimitivePointer();
+ObjectType* returnNullObjectTypePointer();
+Event* returnNullValueTypePointer();
 
 // Tests overloading on functions (!methods)
 GlobalOverloadFuncEnum overloadedFunc(int val);
