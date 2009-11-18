@@ -212,6 +212,7 @@ int main(int argc, char *argv[])
         if (g->setup(extractor, args))
             g->generate();
     }
+    qDeleteAll(generators);
 
     std::cout << "Done, " << ReportHandler::warningCount();
     std::cout << " warnings (" << ReportHandler::suppressedCount() << " known issues)";
