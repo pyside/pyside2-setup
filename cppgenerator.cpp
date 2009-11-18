@@ -550,15 +550,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             }
 
             // Checks if the underlying C++ object is valid.
-            // If the wrapped C++ library have no function that steals ownership and
-            // deletes the C++ object this check would not be needed.
-            s << INDENT << "if (!Shiboken::cppObjectIsValid((Shiboken::PyBaseWrapper*)self)) {" << endl;
-            {
-                Indentation indent(INDENT);
-                s << INDENT << "PyErr_SetString(PyExc_RuntimeError, \"C++ object is invalid.\");" << endl;
-                s << INDENT << "return 0;" << endl;
-            }
-            s << INDENT << '}' << endl;
+            writeInvalidCppObjectCheck(s);
         }
 
         if (rfunc->type() && !rfunc->argumentRemoved(0) && !rfunc->isInplaceOperator())
@@ -655,6 +647,17 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
     s << INDENT << "PyErr_SetString(PyExc_TypeError, \"'" << funcName;
     s << "()' called with wrong parameters.\");" << endl;
     s << INDENT << "return 0;" << endl;
+}
+
+void CppGenerator::writeInvalidCppObjectCheck(QTextStream& s)
+{
+    s << INDENT << "if (!Shiboken::cppObjectIsValid((Shiboken::PyBaseWrapper*)self)) {" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "PyErr_SetString(PyExc_RuntimeError, \"underlying C++ object was deleted.\");" << endl;
+        s << INDENT << "return 0;" << endl;
+    }
+    s << INDENT << '}' << endl;
 }
 
 void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName)
@@ -1203,16 +1206,13 @@ void CppGenerator::writeSequenceMethods(QTextStream& s, const AbstractMetaClass*
         QString funcRetVal = it.value().second;
 
         CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
-        s << funcRetVal << ' ' << funcName << '(' << funcArgs << ')'
-          << "\n{\n"
-          << INDENT << "if (!Shiboken::cppObjectIsValid((Shiboken::PyBaseWrapper*)self)) {\n"
-          << INDENT << INDENT << "PyErr_SetString(PyExc_RuntimeError, \"C++ object is invalid.\");\n"
-          << INDENT << INDENT << "return 0;\n"
-          << INDENT << "}\n"
-          << INDENT << func->ownerClass()->name() << "* cppSelf = " << cpythonWrapperCPtr(func->ownerClass(), "self") << ";\n"
-          << INDENT << "(void)cppSelf; // avoid warnings about unused variables\n";
-          writeCodeSnips(s, snips,CodeSnip::Any, TypeSystem::TargetLangCode, func);
-        s << "}\n\n";
+        s << funcRetVal << ' ' << funcName << '(' << funcArgs << ')' << endl << '{' << endl;
+        writeInvalidCppObjectCheck(s);
+        s << INDENT << func->ownerClass()->name() << "* cppSelf = ";
+        s << cpythonWrapperCPtr(func->ownerClass(), "self") << ';' << endl;
+        s << INDENT << "(void)cppSelf; // avoid warnings about unused variables" << endl;
+        writeCodeSnips(s, snips,CodeSnip::Any, TypeSystem::TargetLangCode, func);
+        s << '}' << endl << endl;
     }
 }
 
