@@ -32,7 +32,7 @@
 #define COMMENT_LINE_WIDTH  77
 
 static Indentor INDENT;
-static void dumpFunction(AbstractMetaFunctionList lst);
+//static void dumpFunction(AbstractMetaFunctionList lst);
 
 QHash<QString, QString> ShibokenGenerator::m_pythonPrimitiveTypeName = QHash<QString, QString>();
 QHash<QString, QString> ShibokenGenerator::m_pythonOperators = QHash<QString, QString>();
@@ -982,6 +982,7 @@ QString ShibokenGenerator::getApiExportMacro() const
     return "SHIBOKEN_"+moduleName().toUpper()+"_API"; // a longer name to avoid name clashes
 }
 
+/*
 static void dumpFunction(AbstractMetaFunctionList lst)
 {
     qDebug() << "DUMP FUNCTIONS: ";
@@ -996,6 +997,7 @@ static void dumpFunction(AbstractMetaFunctionList lst)
                         << "is operator:" << func->isOperatorOverload()
                         << "is global:" << func->isInGlobalScope();
 }
+*/
 
 static bool isGroupable(const AbstractMetaFunction* func)
 {
