@@ -861,6 +861,8 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
                     for (int i = overloadData->argPos(); i < maxArgs; i++) {
                         if (func->argumentRemoved(i + 1))
                             removed++;
+                        else if (!func->typeReplaced(i + 1).isEmpty())
+                            continue;
                         if (manyArgs)
                             pyArgName = QString("pyargs[%1]").arg(i);
                         writeArgumentConversion(s, func->arguments().at(i + removed),
