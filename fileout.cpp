@@ -170,6 +170,9 @@ static void diff(QList<QByteArray> a, QList<QByteArray> b)
 bool FileOut::done()
 {
     Q_ASSERT(!isDone);
+    if (name.isEmpty())
+        return false;
+
     isDone = true;
     bool fileEqual = false;
     QFile fileRead(name);
