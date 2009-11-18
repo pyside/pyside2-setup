@@ -1056,7 +1056,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         s << INDENT << "// Ownership transferences." << endl;
         foreach (ArgumentModification arg_mod, ownership_mods) {
             s << INDENT << "PyBaseWrapper_setOwnership(";
-            if (arg_mod.index == 0) {
+            if (arg_mod.index == -1) {
                 s << "self";
             } else if (arg_mod.index == 0) {
                 s << retvalVariableName();
