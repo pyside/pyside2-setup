@@ -34,11 +34,12 @@
 
 #include "basewrapper.h"
 #include "bindingmanager.h"
+#include "google/dense_hash_map"
 
 namespace Shiboken
 {
 
-typedef std::map<const void*, PyObject*> WrapperMap;
+typedef google::dense_hash_map<const void*, PyObject*> WrapperMap;
 
 struct BindingManager::BindingManagerPrivate {
     WrapperMap wrapperMapper;
@@ -47,6 +48,8 @@ struct BindingManager::BindingManagerPrivate {
 BindingManager::BindingManager()
 {
     m_d = new BindingManager::BindingManagerPrivate;
+    m_d->wrapperMapper.set_empty_key((WrapperMap::key_type)0);
+    m_d->wrapperMapper.set_deleted_key((WrapperMap::key_type)1);
 }
 
 BindingManager::~BindingManager()

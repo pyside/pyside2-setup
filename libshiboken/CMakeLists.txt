@@ -17,7 +17,8 @@ bindingmanager.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-                    ${PYTHON_INCLUDE_PATH})
+                    ${PYTHON_INCLUDE_PATH}
+                    ${CMAKE_SOURCE_DIR}/ext/sparsehash)
 add_library(libshiboken SHARED ${libshiboken_SRC})
 set_property(TARGET libshiboken PROPERTY PREFIX "")
 target_link_libraries(libshiboken

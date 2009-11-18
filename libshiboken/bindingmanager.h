@@ -36,7 +36,6 @@
 #define BINDINGMANAGER_H
 
 #include <Python.h>
-#include <map>
 #include "shibokenmacros.h"
 
 namespace Shiboken
