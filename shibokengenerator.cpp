@@ -821,6 +821,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                                        CodeSnip::Position position,
                                        TypeSystem::Language language,
                                        const AbstractMetaFunction* func,
+                                       const AbstractMetaArgument* lastArg,
                                        const AbstractMetaClass* context)
 {
     static QRegExp toPythonRegex("%CONVERTTOPYTHON\\[([^\\[]*)\\]");
@@ -860,7 +861,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
 
         if (func) {
             // replace "toPython "converters
-            code.replace(toPythonRegex, "Shiboken::Converter<\\1>::toPython");
+            code.replace(toPythonRegex, "Shiboken::Converter<\\1 >::toPython");
 
             // replace %PYARG_# variables
             if (numArgs > 1) {
@@ -912,12 +913,15 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             int removed = 0;
             for (int i = 0; i < func->arguments().size(); i++) {
                 QString argReplacement;
+                const AbstractMetaArgument* arg = func->arguments().at(i);
                 if (func->argumentRemoved(i+1)) {
-                    const AbstractMetaArgument* arg = func->arguments().at(i);
                     if (!arg->defaultValueExpression().isEmpty())
                         argReplacement = arg->defaultValueExpression();
                     removed++;
                 }
+
+                if (lastArg && arg->argumentIndex() > lastArg->argumentIndex())
+                    argReplacement = arg->defaultValueExpression();
 
                 if (argReplacement.isEmpty())
                     argReplacement = QString("cpp_arg%1").arg(i - removed);
@@ -935,9 +939,14 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                     continue;
                 }
 
-                QString argName = QString("cpp_arg%1").arg(arg->argumentIndex() - removed);
-                if (shouldDereferenceArgumentPointer(arg))
-                    argName.prepend('*');
+                QString argName;
+                if (lastArg && arg->argumentIndex() > lastArg->argumentIndex()) {
+                    argName = arg->defaultValueExpression();
+                } else {
+                    argName = QString("cpp_arg%1").arg(arg->argumentIndex() - removed);
+                    if (shouldDereferenceArgumentPointer(arg))
+                        argName.prepend('*');
+                }
                 argumentNames << argName;
             }
 

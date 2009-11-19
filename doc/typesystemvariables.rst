@@ -54,9 +54,14 @@ Variables
 **%ARGUMENT_NAMES**
 
   Replaced by a comma separated list with the names of all C++ arguments that
-  were not removed on the type system description for the method/function. If
+  were not removed on the type system description for the method/function. When
   the removed argument has a default value (original or provided in the type
-  system), this value will be inserted in the argument list.
+  system), this value will be inserted in the argument list. If you want to remove
+  the argument so completely that it doesn't appear in any form on the
+  ``%ARGUMENT_NAMES`` replacement, don't forget to remove also its default value
+  with the `<remove-default-expression/>
+  <http://www.pyside.org/docs/apiextractor/typesystem_arguments.html#remove-default-expression>`_
+  type system tag.
 
   Take the following method and related type system description as an example:
 

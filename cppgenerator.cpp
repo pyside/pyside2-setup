@@ -123,7 +123,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     // class inject-code native/beginning
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
-        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Beginning, TypeSystem::NativeCode, 0, metaClass);
+        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Beginning, TypeSystem::NativeCode, 0, 0, metaClass);
         s << endl;
     }
 
@@ -260,7 +260,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     // class inject-code native/end
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
-        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::End, TypeSystem::NativeCode, 0, metaClass);
+        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::End, TypeSystem::NativeCode, 0, 0, metaClass);
         s << endl;
     }
 }
@@ -804,7 +804,7 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
                 if (overloadData->hasDefaultValue())
                     func = overloadData->overloads().first();
             }
-            writeMethodCall(s, func, numArgs);;
+            writeMethodCall(s, func, numArgs);
         }
         s << INDENT << "} else ";
     }
@@ -1796,7 +1796,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
 
     // class inject-code target/beginning
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
-        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Beginning, TypeSystem::TargetLangCode, 0, metaClass);
+        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Beginning, TypeSystem::TargetLangCode, 0, 0, metaClass);
         s << endl;
     }
 
@@ -1830,7 +1830,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     // class inject-code target/end
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
         s << endl;
-        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::End, TypeSystem::TargetLangCode, 0, metaClass);
+        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::End, TypeSystem::TargetLangCode, 0, 0, metaClass);
     }
 
     s << '}' << endl << endl;
