@@ -553,7 +553,9 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             writeInvalidCppObjectCheck(s);
         }
 
-        if (rfunc->type() && !rfunc->argumentRemoved(0) && !rfunc->isInplaceOperator())
+        bool hasReturnValue = (rfunc->type() && !rfunc->argumentRemoved(0)) || !rfunc->typeReplaced(0).isEmpty();
+
+        if (hasReturnValue && !rfunc->isInplaceOperator())
             s << INDENT << "PyObject* " << retvalVariableName() << " = 0;" << endl;
 
         if (minArgs != maxArgs || maxArgs > 1) {
@@ -567,22 +569,22 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         writeOverloadedMethodDecisor(s, &overloadData);
 
         s << endl << INDENT << "if (PyErr_Occurred()";
-        if (rfunc->type() && !rfunc->argumentRemoved(0) && !rfunc->isInplaceOperator())
+        if (hasReturnValue && !rfunc->isInplaceOperator())
             s << " || !" << retvalVariableName();
         s << ')' << endl;
         {
             Indentation indent(INDENT);
             s << INDENT << "return 0;" << endl;
         }
+        s << endl;
 
-        s << endl << INDENT;
-        if (rfunc->type() && !rfunc->argumentRemoved(0)) {
+        s << INDENT;
+        if (hasReturnValue) {
             s << "return ";
             if (rfunc->isInplaceOperator())
                 s << "self";
             else
                 s << retvalVariableName();
-//                 writeToPythonConversion(s, rfunc->type(), rfunc->ownerClass(), retvalVariableName());
         } else {
             s << "Py_RETURN_NONE";
         }
@@ -885,6 +887,9 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         return;
     }
 
+    // Used to provide contextual information to injected code writer.
+    const AbstractMetaArgument* lastArg = 0;
+
     CodeSnipList snips;
     if (func->hasInjectedCode()) {
         snips = getCodeSnips(func);
@@ -892,7 +897,23 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             s << INDENT << func->ownerClass()->name() << "* cppSelf = ";
             s << cpythonWrapperCPtr(func->ownerClass(), "self") << ';' << endl;
         }
-        writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::TargetLangCode, func);
+
+        // Find the last argument available in the method call to provide
+        // the injected code writer with information to avoid invalid replacements
+        // on the %# variable.
+        if (maxArgs > 0
+            && maxArgs < func->arguments().size() - OverloadData::numberOfRemovedArguments(func)) {
+            int removedArgs = 0;
+            for (int i = 0; i < maxArgs + removedArgs; i++) {
+                lastArg = func->arguments()[i];
+                if (func->argumentRemoved(i + 1))
+                    removedArgs++;
+                s << INDENT << "// arg: " << lastArg->type()->cppSignature() << " " << lastArg->argumentName() << " = ";
+                s << lastArg->defaultValueExpression() << endl;
+            }
+        }
+
+        writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::TargetLangCode, func, lastArg);
         s << endl;
     }
 
@@ -1030,7 +1051,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
     if (func->hasInjectedCode()) {
         s << endl;
-        writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::TargetLangCode, func);
+        writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::TargetLangCode, func, lastArg);
     }
 
     // Ownership transference between C++ and Python.
