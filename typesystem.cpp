@@ -1696,7 +1696,10 @@ bool TypeDatabase::parseFile(const QString &filename, bool generate)
         return m_parsedTypesystemFiles[filepath];
 
     QFile file(filepath);
-    Q_ASSERT_X(file.exists(), __FUNCTION__, ("Can't find " + filename).toLocal8Bit().data());
+    if (!file.exists()) {
+        ReportHandler::warning("Can't find " + filename+", typesystme paths: "+m_typesystemPaths.join(", "));
+        return false;
+    }
 
     int count = m_entries.size();
     bool ok = parseFile(&file, generate);
