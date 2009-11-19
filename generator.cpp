@@ -340,75 +340,29 @@ FunctionModificationList Generator::functionModifications(const AbstractMetaFunc
     return mods;
 }
 
-static QString formattedCodeHelper(QTextStream &s, Indentor &indentor, QStringList &lines)
-{
-    bool multilineComment = false;
-    bool lastEmpty = true;
-    QString lastLine;
-    while (!lines.isEmpty()) {
-        const QString line = lines.takeFirst().trimmed();
-        if (line.isEmpty()) {
-            if (!lastEmpty)
-                s << endl;
-            lastEmpty = true;
-            continue;
-        } else
-            lastEmpty = false;
-
-        if (line.startsWith("/*"))
-            multilineComment = true;
-
-        if (multilineComment) {
-            s << indentor;
-            if (line.startsWith("*"))
-                s << " ";
-            s << line << endl;
-            if (line.endsWith("*/"))
-                multilineComment = false;
-        } else if (line.startsWith("}"))
-            return line;
-        else if (line.endsWith("")) {
-            s << indentor << line << endl;
-            return 0;
-        } else if (line.endsWith("{")) {
-            s << indentor << line << endl;
-            QString tmp;
-            {
-                Indentation indent(indentor);
-                tmp = formattedCodeHelper(s, indentor, lines);
-            }
-            if (!tmp.isNull())
-                s << indentor << tmp << endl;
-
-            lastLine = tmp;
-            continue;
-        } else {
-            s << indentor;
-            if (!lastLine.isEmpty() &&
-                !lastLine.endsWith(";") &&
-                !line.startsWith("@") &&
-                !line.startsWith("//") &&
-                !lastLine.startsWith("//") &&
-                !lastLine.endsWith("}") &&
-                !line.startsWith("{"))
-                s << "    ";
-            s << line << endl;
-        }
-        lastLine = line;
-    }
-    return 0;
-}
-
 QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
 {
+    // detect number of spaces before the first character
     QStringList lst(code.split("\n"));
-    while (!lst.isEmpty()) {
-        QString tmp = formattedCodeHelper(s, indentor, lst);
-        if (!tmp.isNull())
-            s << indentor << tmp << endl;
-
+    QRegExp nonSpaceRegex("[^\\s]");
+    int spacesToRemove = 0;
+    foreach(QString line, lst) {
+        if (!line.trimmed().isEmpty()) {
+            spacesToRemove = line.indexOf(nonSpaceRegex);
+            if (spacesToRemove == -1)
+                spacesToRemove = 0;
+            break;
+        }
     }
-    s.flush();
+
+    foreach(QString line, lst) {
+        int limit = 0;
+        for(int i = 0; i < spacesToRemove; ++i) {
+            if (line[i] == ' ')
+                limit++;
+        }
+        s << indentor << line.remove(0, limit) << endl;
+    }
     return s;
 }
 
