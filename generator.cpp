@@ -358,8 +358,9 @@ QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
     foreach(QString line, lst) {
         int limit = 0;
         for(int i = 0; i < spacesToRemove; ++i) {
-            if (line[i] == ' ')
-                limit++;
+            if (!line[i].isSpace())
+                break;
+            limit++;
         }
         s << indentor << line.remove(0, limit) << endl;
     }
