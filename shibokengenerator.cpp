@@ -862,8 +862,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             // replace "toPython "converters
             code.replace(toPythonRegex, "Shiboken::Converter<\\1>::toPython");
 
-
-            // replace %PYARG variables
+            // replace %PYARG_# variables
             if (numArgs > 1) {
                 code.replace(pyArgsRegex, "pyargs[\\1-1]");
             } else {
@@ -873,6 +872,21 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 else
                     code.replace("%PYARG_1", usePyArgs ? "pyargs[0]" : "arg");
             }
+
+            // replace %ARG#_TYPE variables
+            foreach (const AbstractMetaArgument* arg, func->arguments()) {
+                QString argTypeVar = QString("%ARG%1_TYPE").arg(arg->argumentIndex() + 1);
+                QString argTypeVal = arg->type()->cppSignature();
+                code.replace(argTypeVar, argTypeVal);
+            }
+
+            static QRegExp cppArgTypeRegexCheck("%ARG(\\d+)_TYPE");
+            int pos = 0;
+            while ((pos = cppArgTypeRegexCheck.indexIn(code, pos)) != -1) {
+                ReportHandler::warning("Wrong index for %ARG#_TYPE variable ("+cppArgTypeRegexCheck.cap(1)+") on "+func->signature());
+                pos += cppArgTypeRegexCheck.matchedLength();
+            }
+
             // replace template variable for return variable name
             code.replace("%0", retvalVariableName());
 
