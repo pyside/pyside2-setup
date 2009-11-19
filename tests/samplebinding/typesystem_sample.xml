@@ -82,25 +82,24 @@
 
     <template name="boolptr_at_end_fix_beginning">
         bool __ok__;
-        %0 = Shiboken::Converter&lt; %RETURN_TYPE &gt;::toPython(
+        %0 = %CONVERTTOPYTHON[%RETURN_TYPE](
                 %CPPSELF.%TYPE::%FUNCTION_NAME(%ARGUMENT_NAMES, &amp;__ok__)
             );
     </template>
 
     <template name="boolptr_at_start_fix_beginning">
         bool __ok__;
-        %0 = Shiboken::Converter&lt; %RETURN_TYPE &gt;::toPython(
+        %0 = %CONVERTTOPYTHON[%RETURN_TYPE](
                 %CPPSELF.%TYPE::%FUNCTION_NAME(&amp;__ok__, %ARGUMENT_NAMES)
             );
     </template>
 
     <template name="boolptr_fix_end">
-        PyObject* _item_;
         PyObject* _tuple_ = PyTuple_New(2);
         PyTuple_SET_ITEM(_tuple_, 0, %0);
-        _item_ = Shiboken::Converter&lt;bool&gt;::toPython(__ok__);
+        PyObject* _item_ = %CONVERTTOPYTHON[bool](__ok__);
         PyTuple_SET_ITEM(_tuple_, 1, _item_);
-        return _tuple_;
+        %0 = _tuple_;
     </template>
 
     <object-type name="Modifications">
@@ -110,7 +109,7 @@
                 <remove-argument/>
             </modify-argument>
             <inject-code class="target" position="beginning">
-                %0 = Shiboken::Converter&lt; %RETURN_TYPE &gt;::toPython(
+                %0 = %CONVERTTOPYTHON[%RETURN_TYPE](
                         %CPPSELF.%TYPE::%FUNCTION_NAME(%1, true, %3, %4)
                     );
             </inject-code>
