@@ -182,7 +182,7 @@ OverloadData* OverloadData::addOverloadData(const AbstractMetaFunction* func,
 
 const AbstractMetaFunction* OverloadData::referenceFunction() const
 {
-    return m_overloads.at(0);
+    return m_overloads.first();
 }
 
 const AbstractMetaArgument* OverloadData::argument(const AbstractMetaFunction* func) const
@@ -261,7 +261,12 @@ bool OverloadData::isFinalOccurrence(const AbstractMetaFunction* func) const
 bool OverloadData::hasDefaultValue() const
 {
     foreach (const AbstractMetaFunction* func, m_overloads) {
-        if (!func->arguments()[m_argPos]->defaultValueExpression().isEmpty())
+        int removedArgs = 0;
+        for (int i = 0; i <= m_argPos + removedArgs; i++) {
+            if (func->argumentRemoved(i + 1))
+                removedArgs++;
+        }
+        if (!func->arguments()[m_argPos + removedArgs]->defaultValueExpression().isEmpty())
             return true;
     }
     return false;
