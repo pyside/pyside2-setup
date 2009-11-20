@@ -24,94 +24,32 @@
 #ifndef REPORTHANDLER_H
 #define REPORTHANDLER_H
 
-#include <QtCore/QString>
-#include <QtCore/QSet>
-#include <cstring>
+class QString;
 #include "apiextractormacros.h"
-
-class ProgressAnimation
-{
-public:
-    ProgressAnimation()
-    {
-        anim_data = "|/-\\";
-        anim_frame = anim_data;
-        std::strcpy(anim_string, "[ ]");
-        m_current = m_max = 0;
-    }
-    const char* toString()
-    {
-        step();
-        return anim_string;
-    }
-    template<typename T>
-    void setCollection(T collection)
-    {
-        m_current = 1;
-        m_max = collection.count();
-    }
-
-    int current() const
-    {
-        return m_current;
-    }
-    int max() const
-    {
-        return m_max;
-    }
-
-private:
-    const char* anim_data;
-    char anim_string[4];
-    const char* anim_frame;
-    int m_max;
-    int m_current;
-
-    void step()
-    {
-        if (!*(++anim_frame))
-            anim_frame = anim_data;
-        anim_string[1] = *anim_frame;
-        m_current++;
-    }
-};
 
 class APIEXTRACTOR_API ReportHandler
 {
 public:
     enum DebugLevel { NoDebug, SparseDebug, MediumDebug, FullDebug };
 
-    static void setContext(const QString &context)
-    {
-        m_context = context;
-    }
+    static void setContext(const QString &context);
 
-    static DebugLevel debugLevel()
-    {
-        return m_debugLevel;
-    }
-    static void setDebugLevel(DebugLevel level)
-    {
-        m_debugLevel = level;
-    }
+    static DebugLevel debugLevel();
+    static void setDebugLevel(DebugLevel level);
 
-    static int warningCount()
-    {
-        return m_warningCount;
-    }
+    static int warningCount();
 
-    static int suppressedCount()
-    {
-        return m_suppressedCount;
-    }
+    static int suppressedCount();
 
     static void warning(const QString &str);
 
     template <typename T>
     static void setProgressReference(T collection)
     {
-        m_anim.setCollection(collection);
+        setProgressReference(collection.count());
     }
+
+    static void setProgressReference(int max);
 
     static void progress(const QString &str, ...);
 
@@ -129,27 +67,8 @@ public:
     }
     static void debug(DebugLevel level, const QString &str);
 
-    static bool isSilent()
-    {
-        return m_silent;
-    }
-    static void setSilent(bool silent)
-    {
-        m_silent = silent;
-    }
-
-private:
-    static bool m_silent;
-    static int m_warningCount;
-    static int m_suppressedCount;
-    static DebugLevel m_debugLevel;
-    static QString m_context;
-    static QSet<QString> m_reportedWarnings;
-
-    static ProgressAnimation m_anim;
-    static char m_progressBuffer[1024];
-
-    static void printProgress();
+    static bool isSilent();
+    static void setSilent(bool silent);
 };
 
 #endif // REPORTHANDLER_H
