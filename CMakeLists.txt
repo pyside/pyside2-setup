@@ -8,7 +8,11 @@ find_package(Qt4 4.5.0 REQUIRED)
 find_package(LibXml2 2.6.32 REQUIRED)
 find_package(LibXslt 1.1.19 REQUIRED)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -DAPIEXTRACTOR_ENABLE_DUPLICATE_ENUM_VALUES -DAPIEXTRACTOR_BUILD -fvisibility=hidden")
+if (MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /O2 /GS- /GR- /DAPIEXTRACTOR_ENABLE_DUPLICATE_ENUM_VALUES /DAPIEXTRACTOR_BUILD")
+else (MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -DAPIEXTRACTOR_ENABLE_DUPLICATE_ENUM_VALUES -fvisibility=hidden")
+endif(MSVC)
 
 set(apiextractor_MAJOR_VERSION 0)
 set(apiextractor_MINOR_VERSION 3)
@@ -105,7 +109,9 @@ enable_testing()
 add_subdirectory(tests)
 
 install(FILES ${root_HEADERS} DESTINATION include/apiextractor)
-install(TARGETS apiextractor LIBRARY DESTINATION ${LIB_INSTALL_DIR})
+install(TARGETS apiextractor LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+                             ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+                             RUNTIME DESTINATION bin)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/apiextractor.pc DESTINATION ${LIB_INSTALL_DIR}/pkgconfig)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FindApiExtractor.cmake
         DESTINATION share/cmake-2.6/Modules)
