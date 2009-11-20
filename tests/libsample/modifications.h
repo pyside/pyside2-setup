@@ -61,6 +61,21 @@ public:
     OverloadedModFunc overloaded(int a3, bool b3, int c3 = 123, int d3 = 456) { return Overloaded_ibii; }
     OverloadedModFunc overloaded(int a4, bool b4, Point c4, Point d4) { return Overloaded_ibPP; }
 
+    void argRemoval0(int a0, bool a1, int a2 = 123, int a3 = 456) {}
+    void argRemoval0(int a0, bool a1, int a2, bool a3) {}
+
+    void argRemoval1(int a0, bool a1, Point a2 = Point(1, 2), Point a3 = Point(3, 4), int a4 = 333) {}
+    void argRemoval1(int a0, bool a1, int a2, bool a3) {}
+
+    void argRemoval2(int a0, bool a1, Point a2 = Point(1, 2), Point a3 = Point(3, 4), int a4 = 333) {}
+
+    void argRemoval3(int a0, Point a1 = Point(1, 2), bool a2 = true, Point a3 = Point(3, 4), int a4 = 333) {}
+
+    void argRemoval4(int a0, Point a1, bool a2, Point a3 = Point(3, 4), int a4 = 333) {}
+
+    void argRemoval5(int a0, bool a1, Point a2 = Point(1, 2), Point a3 = Point(3, 4), int a4 = 333) {}
+    void argRemoval5(int a0, bool a1, int a2, bool a3) {}
+
     // 'ok' must be removed and the return value will be changed
     // to a tuple (PyObject*) containing the expected result plus
     // the 'ok' value as a Python boolean

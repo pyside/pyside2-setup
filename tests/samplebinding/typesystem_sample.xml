@@ -102,6 +102,28 @@
         %0 = _tuple_;
     </template>
 
+    <template name="return_4_arguments_as_tuple">
+        %0 = PyTuple_New(4);
+        PyTuple_SET_ITEM(%0, 0, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
+        PyTuple_SET_ITEM(%0, 1, %CONVERTTOPYTHON[%ARG2_TYPE](%2));
+        PyTuple_SET_ITEM(%0, 2, %CONVERTTOPYTHON[%ARG3_TYPE](%3));
+        PyTuple_SET_ITEM(%0, 3, %CONVERTTOPYTHON[%ARG4_TYPE](%4));
+    </template>
+
+    <template name="return_5_arguments_as_tuple">
+        %0 = PyTuple_New(5);
+        PyTuple_SET_ITEM(%0, 0, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
+        PyTuple_SET_ITEM(%0, 1, %CONVERTTOPYTHON[%ARG2_TYPE](%2));
+        PyTuple_SET_ITEM(%0, 2, %CONVERTTOPYTHON[%ARG3_TYPE](%3));
+        PyTuple_SET_ITEM(%0, 3, %CONVERTTOPYTHON[%ARG4_TYPE](%4));
+        PyTuple_SET_ITEM(%0, 4, %CONVERTTOPYTHON[%ARG5_TYPE](%5));
+    </template>
+
+    <template name="return_none">
+        %0 = Py_None;
+        Py_INCREF(Py_None);
+    </template>
+
     <object-type name="Modifications">
 
         <modify-function signature="overloaded(int, bool, int, double)">
@@ -125,6 +147,118 @@
                 <remove-default-expression/>
             </modify-argument>
             -->
+        </modify-function>
+
+        <modify-function signature="argRemoval0(int, bool, int, int)">
+            <modify-argument index="3">
+                <remove-argument/>
+                <replace-default-expression with="321"/>
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PyObject*"/>
+            </modify-argument>
+            <inject-code class="target" position="end">
+                <insert-template name="return_4_arguments_as_tuple"/>
+            </inject-code>
+        </modify-function>
+
+        <modify-function signature="argRemoval1(int, bool, Point, Point, int)">
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="4">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PyObject*"/>
+            </modify-argument>
+            <inject-code class="target" position="end">
+                <insert-template name="return_5_arguments_as_tuple"/>
+            </inject-code>
+        </modify-function>
+
+        <modify-function signature="argRemoval1(int, bool, int, bool)">
+            <inject-code class="target" position="end">
+                <insert-template name="return_none"/>
+            </inject-code>
+        </modify-function>
+
+        <modify-function signature="argRemoval2(int, bool, Point, Point, int)">
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="4">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PyObject*"/>
+            </modify-argument>
+            <inject-code class="target" position="end">
+                <insert-template name="return_5_arguments_as_tuple"/>
+            </inject-code>
+        </modify-function>
+
+        <modify-function signature="argRemoval3(int, Point, bool, Point, int)">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="4">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PyObject*"/>
+            </modify-argument>
+            <inject-code class="target" position="end">
+                <insert-template name="return_5_arguments_as_tuple"/>
+            </inject-code>
+        </modify-function>
+
+        <modify-function signature="argRemoval4(int, Point, bool, Point, int)">
+            <modify-argument index="2">
+                <remove-argument/>
+                <replace-default-expression with="Point(6, 9)"/>
+            </modify-argument>
+            <modify-argument index="4">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PyObject*"/>
+            </modify-argument>
+            <inject-code class="target" position="end">
+                <insert-template name="return_5_arguments_as_tuple"/>
+            </inject-code>
+        </modify-function>
+
+        <modify-function signature="argRemoval5(int, bool, Point, Point, int)">
+            <modify-argument index="1">
+                <remove-argument/>
+                <replace-default-expression with="100"/>
+            </modify-argument>
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="4">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PyObject*"/>
+            </modify-argument>
+            <inject-code class="target" position="end">
+                <insert-template name="return_5_arguments_as_tuple"/>
+            </inject-code>
+        </modify-function>
+
+        <modify-function signature="argRemoval5(int, bool, int, bool)">
+            <modify-argument index="1">
+                <remove-argument/>
+                <replace-default-expression with="200"/>
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PyObject*"/>
+            </modify-argument>
+            <inject-code class="target" position="end">
+                <insert-template name="return_4_arguments_as_tuple"/>
+            </inject-code>
         </modify-function>
 
         <!--
