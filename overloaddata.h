@@ -44,11 +44,22 @@ public:
     int argPos() const { return m_argPos; }
 
     const AbstractMetaType* argType() const { return m_argType; }
+
+    /// Returns a string list containing all the possible return types (including void) for the current OverloadData.
+    QStringList returnTypes() const;
+
+    /// Returns true if any of the overloads for the current OverloadData has a return type different from void.
+    bool hasNonVoidReturnType() const;
+
     const AbstractMetaFunction* referenceFunction() const;
     const AbstractMetaArgument* argument(const AbstractMetaFunction* func) const;
     OverloadDataList overloadDataOnPosition(int argPos) const;
 
     bool isHeadOverloadData() const { return this == m_headOverloadData; }
+
+    /// Returns the root OverloadData object that represents all the overloads.
+    OverloadData* headOverloadData() const { return m_headOverloadData; }
+
     bool hasDefaultValue() const;
     bool nextArgumentHasDefaultValue() const;
     /// Returns the nearest occurrence, including this instance, of an argument with a default value.

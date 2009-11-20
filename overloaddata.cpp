@@ -180,6 +180,26 @@ OverloadData* OverloadData::addOverloadData(const AbstractMetaFunction* func,
     return overloadData;
 }
 
+QStringList OverloadData::returnTypes() const
+{
+    QSet<QString> retTypes;
+    foreach (const AbstractMetaFunction* func, m_overloads) {
+        if (!func->typeReplaced(0).isEmpty())
+            retTypes << func->typeReplaced(0);
+        else if (func->type() && !func->argumentRemoved(0))
+            retTypes << func->type()->cppSignature();
+        else
+            retTypes << "void";
+    }
+    return QStringList(retTypes.toList());
+}
+
+bool OverloadData::hasNonVoidReturnType() const
+{
+    QStringList retTypes = returnTypes();
+    return !retTypes.contains("void") || retTypes.size() > 1;
+}
+
 const AbstractMetaFunction* OverloadData::referenceFunction() const
 {
     return m_overloads.first();
