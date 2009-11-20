@@ -702,7 +702,7 @@ private:
 };
 
 
-class AbstractMetaField : public AbstractMetaVariable, public AbstractMetaAttributes
+class APIEXTRACTOR_API AbstractMetaField : public AbstractMetaVariable, public AbstractMetaAttributes
 {
 public:
     AbstractMetaField();
@@ -732,7 +732,6 @@ private:
     mutable AbstractMetaFunction *m_setter;
     const AbstractMetaClass *m_class;
 };
-
 
 class APIEXTRACTOR_API AbstractMetaFunction : public AbstractMetaAttributes
 {
