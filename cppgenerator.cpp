@@ -813,8 +813,11 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
             Indentation indent(INDENT);
             const AbstractMetaFunction* func = referenceFunction;
             foreach (OverloadData* overloadData, parentOverloadData->nextOverloadData()) {
-                if (overloadData->hasDefaultValue())
-                    func = overloadData->overloads().first();
+                const AbstractMetaFunction* defValFunc = overloadData->getFunctionWithDefaultValue();
+                if (defValFunc) {
+                    func = defValFunc;
+                    break;
+                }
             }
             writeMethodCall(s, func, numArgs);
             if (!func->isConstructor())
@@ -825,7 +828,7 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
 
     foreach (OverloadData* overloadData, parentOverloadData->nextOverloadData()) {
         bool signatureFound = overloadData->overloads().size() == 1
-                                && !overloadData->hasDefaultValue()
+                                && !overloadData->getFunctionWithDefaultValue()
                                 && !overloadData->findNextArgWithDefault();
 
         const AbstractMetaFunction* refFunc = overloadData->referenceFunction();

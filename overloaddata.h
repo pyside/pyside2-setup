@@ -60,7 +60,9 @@ public:
     /// Returns the root OverloadData object that represents all the overloads.
     OverloadData* headOverloadData() const { return m_headOverloadData; }
 
-    bool hasDefaultValue() const;
+    /// Returns the function that has a default value at the current OverloadData argument position, otherwise returns null.
+    const AbstractMetaFunction* getFunctionWithDefaultValue() const;
+
     bool nextArgumentHasDefaultValue() const;
     /// Returns the nearest occurrence, including this instance, of an argument with a default value.
     OverloadData* findNextArgWithDefault();

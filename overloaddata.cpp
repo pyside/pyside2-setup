@@ -244,7 +244,7 @@ OverloadDataList OverloadData::overloadDataOnPosition(int argPos) const
 bool OverloadData::nextArgumentHasDefaultValue() const
 {
     foreach (OverloadData* overloadData, m_nextOverloadData) {
-        if (overloadData->hasDefaultValue())
+        if (overloadData->getFunctionWithDefaultValue())
             return true;
     }
     return false;
@@ -252,7 +252,7 @@ bool OverloadData::nextArgumentHasDefaultValue() const
 
 static OverloadData* _findNextArgWithDefault(OverloadData* overloadData)
 {
-    if (overloadData->hasDefaultValue())
+    if (overloadData->getFunctionWithDefaultValue())
         return overloadData;
 
     OverloadData* result = 0;
@@ -278,7 +278,7 @@ bool OverloadData::isFinalOccurrence(const AbstractMetaFunction* func) const
     return true;
 }
 
-bool OverloadData::hasDefaultValue() const
+const AbstractMetaFunction* OverloadData::getFunctionWithDefaultValue() const
 {
     foreach (const AbstractMetaFunction* func, m_overloads) {
         int removedArgs = 0;
@@ -287,9 +287,9 @@ bool OverloadData::hasDefaultValue() const
                 removedArgs++;
         }
         if (!func->arguments()[m_argPos + removedArgs]->defaultValueExpression().isEmpty())
-            return true;
+            return func;
     }
-    return false;
+    return 0;
 }
 
 QList<int> OverloadData::invalidArgumentLengths() const
