@@ -60,6 +60,9 @@ public:
     FunctionEnum overloaded(Size* size);
     FunctionEnum overloaded(Point* point, ParamEnum param);
     FunctionEnum overloaded(const Point& point);
+
+    void differentReturnTypes(ParamEnum param = Param0) {}
+    int differentReturnTypes(ParamEnum param, int val) { return val; }
 };
 #endif // OVERLOAD_H
 
