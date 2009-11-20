@@ -553,7 +553,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             writeInvalidCppObjectCheck(s);
         }
 
-        bool hasReturnValue = (rfunc->type() && !rfunc->argumentRemoved(0)) || !rfunc->typeReplaced(0).isEmpty();
+        bool hasReturnValue = overloadData.hasNonVoidReturnType();
 
         if (hasReturnValue && !rfunc->isInplaceOperator())
             s << INDENT << "PyObject* " << retvalVariableName() << " = 0;" << endl;
@@ -745,6 +745,14 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
     }
 }
 
+void CppGenerator::writeNoneReturn(QTextStream& s, const AbstractMetaFunction* func, bool thereIsReturnValue)
+{
+    if (thereIsReturnValue && (!func->type() || func->argumentRemoved(0)) && !injectedCodeHasReturnValueAttribution(func)) {
+        s << INDENT << retvalVariableName() << " = Py_None;" << endl;
+        s << INDENT << "Py_INCREF(Py_None);" << endl;
+    }
+}
+
 void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* parentOverloadData)
 {
     bool hasDefaultCall = parentOverloadData->nextArgumentHasDefaultValue();
@@ -787,6 +795,8 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
             const AbstractMetaFunction* func = parentOverloadData->referenceFunction();
             int numRemovedArgs = OverloadData::numberOfRemovedArguments(func);
             writeMethodCall(s, func, func->arguments().size() - numRemovedArgs);
+            if (!func->isConstructor())
+                writeNoneReturn(s, func, parentOverloadData->headOverloadData()->hasNonVoidReturnType());
             return;
         }
     }
@@ -807,6 +817,8 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
                     func = overloadData->overloads().first();
             }
             writeMethodCall(s, func, numArgs);
+            if (!func->isConstructor())
+                writeNoneReturn(s, func, parentOverloadData->headOverloadData()->hasNonVoidReturnType());
         }
         s << INDENT << "} else ";
     }
@@ -908,8 +920,6 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 lastArg = func->arguments()[i];
                 if (func->argumentRemoved(i + 1))
                     removedArgs++;
-                s << INDENT << "// arg: " << lastArg->type()->cppSignature() << " " << lastArg->argumentName() << " = ";
-                s << lastArg->defaultValueExpression() << endl;
             }
         }
 

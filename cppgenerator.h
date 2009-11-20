@@ -82,6 +82,23 @@ private:
         writeArgumentConversion(s, arg->type(), argName, pyArgName, context);
     }
 
+    /**
+     *   Set the Python method wrapper return value variable to Py_None if
+     *   there are return types different from void in any of the other overloads
+     *   for the function passed as parameter.
+     *   \param s text stream to write
+     *   \param func a pointer to the function that will possibly return Py_None
+     *   \param thereIsReturnValue indicates if the return type of any of the other overloads
+     *                             for this function is different from 'void'
+     */
+    void writeNoneReturn(QTextStream& s, const AbstractMetaFunction* func, bool thereIsReturnValue);
+
+    /**
+     *   Writes the Python method wrapper overload decisor that selects which C++
+     *   method/function to call with the received Python arguments.
+     *   \param s text stream to write
+     *   \param parentOverloadData a pointer to overload data describing the argument being evaluated
+     */
     void writeOverloadedMethodDecisor(QTextStream& s, OverloadData* parentOverloadData);
     void writeMethodCall(QTextStream& s, const AbstractMetaFunction* func, int maxArgs = 0);
 
