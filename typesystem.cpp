@@ -25,13 +25,13 @@
 #include "reporthandler.h"
 #include <QtXml>
 
-QString strings_Object = QLatin1String("Object");
-QString strings_String = QLatin1String("String");
-QString strings_Thread = QLatin1String("Thread");
-QString strings_char = QLatin1String("char");
-QString stringsJavaLang = QLatin1String("java.lang");
-QString strings_jchar = QLatin1String("jchar");
-QString strings_jobject = QLatin1String("jobject");
+static QString strings_Object = QLatin1String("Object");
+static QString strings_String = QLatin1String("String");
+static QString strings_Thread = QLatin1String("Thread");
+static QString strings_char = QLatin1String("char");
+static QString stringsJavaLang = QLatin1String("java.lang");
+static QString strings_jchar = QLatin1String("jchar");
+static QString strings_jobject = QLatin1String("jobject");
 
 class StackElement
 {
@@ -2139,6 +2139,48 @@ AddedFunction::AddedFunction(QString signature, QString returnType) : m_access(P
         // is const?
         m_isConst = signature.right(signatureLength - endPos).contains("const");
     }
+}
+
+QString PrimitiveTypeEntry::javaObjectPackage() const
+{
+    return stringsJavaLang;
+}
+
+QString ComplexTypeEntry::targetLangApiName() const
+{
+    return strings_jobject;
+}
+QString StringTypeEntry::targetLangApiName() const
+{
+    return strings_jobject;
+}
+QString StringTypeEntry::targetLangName() const
+{
+    return strings_String;
+}
+QString StringTypeEntry::targetLangPackage() const
+{
+    return stringsJavaLang;
+}
+QString CharTypeEntry::targetLangApiName() const
+{
+    return strings_jchar;
+}
+QString CharTypeEntry::targetLangName() const
+{
+    return strings_char;
+}
+QString VariantTypeEntry::targetLangApiName() const
+{
+    return strings_jobject;
+}
+QString VariantTypeEntry::targetLangName() const
+{
+    return strings_Object;
+}
+QString VariantTypeEntry::targetLangPackage() const
+{
+    return stringsJavaLang;
 }
 
 /*

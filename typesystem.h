@@ -39,14 +39,6 @@ class QTextStream;
 class EnumTypeEntry;
 class FlagsTypeEntry;
 
-extern QString strings_Object;
-extern QString strings_String;
-extern QString strings_Thread;
-extern QString strings_char;
-extern QString stringsJavaLang;
-extern QString strings_jchar;
-extern QString strings_jobject;
-
 struct APIEXTRACTOR_API Include
 {
     enum IncludeType {
@@ -1047,10 +1039,7 @@ public:
         return javaObjectPackage() + "." + javaObjectName();
     }
     QString javaObjectName() const;
-    QString javaObjectPackage() const
-    {
-        return stringsJavaLang;
-    }
+    QString javaObjectPackage() const;
 
     virtual bool preferredConversion() const
     {
@@ -1353,10 +1342,7 @@ public:
         return m_lookupName.isEmpty() ? targetLangName() : m_lookupName;
     }
 
-    QString targetLangApiName() const
-    {
-        return strings_jobject;
-    }
+    QString targetLangApiName() const;
 
     void setTypeFlags(TypeFlags flags)
     {
@@ -1641,18 +1627,9 @@ public:
         setCodeGeneration(GenerateNothing);
     }
 
-    QString targetLangApiName() const
-    {
-        return strings_jobject;
-    }
-    QString targetLangName() const
-    {
-        return strings_String;
-    }
-    QString targetLangPackage() const
-    {
-        return stringsJavaLang;
-    }
+    QString targetLangApiName() const;
+    QString targetLangName() const;
+    QString targetLangPackage() const;
 
     virtual bool isNativeIdBased() const
     {
@@ -1668,14 +1645,8 @@ public:
         setCodeGeneration(GenerateNothing);
     }
 
-    QString targetLangApiName() const
-    {
-        return strings_jchar;
-    }
-    QString targetLangName() const
-    {
-        return strings_char;
-    }
+    QString targetLangApiName() const;
+    QString targetLangName() const;
     QString targetLangPackage() const
     {
         return QString();
@@ -1692,18 +1663,9 @@ class VariantTypeEntry: public ValueTypeEntry
 public:
     VariantTypeEntry(const QString &name) : ValueTypeEntry(name, VariantType) { }
 
-    QString targetLangApiName() const
-    {
-        return strings_jobject;
-    }
-    QString targetLangName() const
-    {
-        return strings_Object;
-    }
-    QString targetLangPackage() const
-    {
-        return stringsJavaLang;
-    }
+    QString targetLangApiName() const;
+    QString targetLangName() const;
+    QString targetLangPackage() const;
 
     virtual bool isNativeIdBased() const
     {

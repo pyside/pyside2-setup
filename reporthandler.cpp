@@ -171,7 +171,7 @@ void ReportHandler::progress(const QString& str, ...)
     QString msg = QString("\033[1K\r" COLOR_WHITE "%1 (%2/%3) " COLOR_END).arg(m_anim.toString()).arg(m_anim.current()).arg(m_anim.max()) + str;
     std::va_list argp;
     va_start(argp, str);
-    std::vsnprintf(m_progressBuffer, sizeof(m_progressBuffer), msg.toLocal8Bit().constData(), argp);
+    vsnprintf(m_progressBuffer, sizeof(m_progressBuffer), msg.toLocal8Bit().constData(), argp);
     va_end(argp);
     printProgress();
 }
