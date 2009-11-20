@@ -987,6 +987,17 @@ bool ShibokenGenerator::injectedCodeCallsCppFunction(const AbstractMetaFunction*
     return false;
 }
 
+bool ShibokenGenerator::injectedCodeHasReturnValueAttribution(const AbstractMetaFunction* func)
+{
+    static QRegExp retValAttributionRegexCheck("%0\\s*=[^=]\\s*.+");
+    CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
+    foreach (CodeSnip snip, snips) {
+        if (retValAttributionRegexCheck.indexIn(snip.code()) != -1)
+            return true;
+    }
+    return false;
+}
+
 QStringList ShibokenGenerator::getBaseClasses(const AbstractMetaClass* metaClass)
 {
     QStringList baseClass;
