@@ -5,7 +5,12 @@ cmake_minimum_required(VERSION 2.6)
 find_package(Qt4 4.5.0 REQUIRED)
 find_package(ApiExtractor REQUIRED)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -DGENRUNNER_BUILD -fvisibility=hidden")
+if (MSVC)
+    set(CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /w /EHsc- /GS- /GR- /DGENRUNNER_BUILD -D_SCL_SECURE_NO_WARNINGS")
+else (MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fvisibility=hidden")
+endif(MSVC)
+
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
 set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
 
