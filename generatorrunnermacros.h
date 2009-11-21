@@ -27,9 +27,9 @@
 // GENRUNNER_API is used for the public API symbols.
 #if defined _WIN32 || defined __CYGWIN__
     #if GENRUNNER_BUILD
-        #define GENRUNNER_API __declspec(dllimport)
-    #else
         #define GENRUNNER_API __declspec(dllexport)
+    #else
+        #define GENRUNNER_API __declspec(dllimport)
     #endif
 #else
     #if __GNUC__ >= 4
