@@ -34,7 +34,8 @@
  *
  * This avoids using an implicit conversion if there's an explicit
  * overload for the convertible type. So, if there's an implicit convert
- * like TargetType(ConvertibleType foo) and both
+ * like TargetType(ConvertibleType foo) and both are in the overload list,
+ * ConvertibleType is checked before TargetType.
  *
  * Side effects: Modifies m_nextOverloadData
  */
@@ -64,8 +65,28 @@ void OverloadData::sortOverloads()
             if (!map.contains(convertibleType->typeEntry()->name()))
                 continue;
 
-            deps << qMakePair(map[targetType->typeEntry()->name()],
-                              map[convertibleType->typeEntry()->name()]);
+            int target = map[targetType->typeEntry()->name()];
+            int convertible = map[convertibleType->typeEntry()->name()];
+
+            // If a reverse pair already exists, remove it. Probably due to the
+            // container check (This happened to QVariant and QHash)
+            QPair<int, int> reversePair = qMakePair(convertible, target);
+            if (deps.contains(reversePair))
+                deps.remove(reversePair);
+
+            deps << qMakePair(target, convertible);
+        }
+
+        if (targetType->hasInstantiations()) {
+            foreach(AbstractMetaType *instantiation, targetType->instantiations()) {
+                if (map.contains(instantiation->typeEntry()->name())) {
+                    int target = map[targetType->typeEntry()->name()];
+                    int convertible = map[instantiation->typeEntry()->name()];
+
+                    if (!deps.contains(qMakePair(convertible, target))) // Avoid cyclic dependency.
+                        deps << qMakePair(target, convertible);
+                }
+            }
         }
     }
 
