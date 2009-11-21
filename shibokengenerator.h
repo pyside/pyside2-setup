@@ -121,12 +121,20 @@ public:
     CodeSnipList getCodeSnips(const AbstractMetaFunction* func);
 
     /**
-     *   Verifies if any of the function's code injections needs the
-     *   type system variable "%CPPSELF".
+     *   Verifies if any of the function's code injections of the "target"
+     *   type needs the type system variable "%CPPSELF".
      *   \param func the function to check
-     *   \return true if the function's code snippets use "%CPPSELF"
+     *   \return true if the function's target code snippets use "%CPPSELF"
      */
     bool injectedCodeUsesCppSelf(const AbstractMetaFunction* func);
+
+    /**
+     *   Verifies if any of the function's code injections of the "native"
+     *   type needs the type system variable "%PYSELF".
+     *   \param func the function to check
+     *   \return true if the function's native code snippets use "%PYSELF"
+     */
+    bool injectedCodeUsesPySelf(const AbstractMetaFunction* func);
 
     /**
      *   Verifies if any of the function's code injections makes a call

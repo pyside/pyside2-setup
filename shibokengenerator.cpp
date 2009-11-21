@@ -969,6 +969,16 @@ bool ShibokenGenerator::injectedCodeUsesCppSelf(const AbstractMetaFunction* func
     return false;
 }
 
+bool ShibokenGenerator::injectedCodeUsesPySelf(const AbstractMetaFunction* func)
+{
+    CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::NativeCode);
+    foreach (CodeSnip snip, snips) {
+        if (snip.code().contains("%PYSELF"))
+            return true;
+    }
+    return false;
+}
+
 bool ShibokenGenerator::injectedCodeCallsCppFunction(const AbstractMetaFunction* func)
 {
     QString funcCall = QString("%1(").arg(func->originalName());
