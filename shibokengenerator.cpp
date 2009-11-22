@@ -652,24 +652,6 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunction *func,
     return result;
 }
 
-QString ShibokenGenerator::signatureForDefaultVirtualMethod(const AbstractMetaFunction *func,
-                                                            QString prepend,
-                                                            QString append,
-                                                            Options options,
-                                                            int argCount) const
-{
-    QString defaultMethodSignature = functionSignature(func, prepend, append, options, argCount);
-    QString staticSelf("(");
-    if (func->isConstant())
-        staticSelf += "const ";
-    staticSelf += func->ownerClass()->qualifiedCppName()+"& self";
-    if (!func->arguments().isEmpty())
-        staticSelf += ", ";
-    defaultMethodSignature.replace(defaultMethodSignature.lastIndexOf(") const"), 7, ")");
-    defaultMethodSignature.replace(defaultMethodSignature.indexOf('('), 1, staticSelf);
-    return defaultMethodSignature;
-}
-
 bool ShibokenGenerator::hasInjectedCodeOrSignatureModification(const AbstractMetaFunction* func)
 {
     foreach (FunctionModification mod, functionModifications(func)) {

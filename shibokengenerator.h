@@ -174,12 +174,6 @@ public:
                               Options options = NoOption,
                               int arg_count = -1) const;
 
-    QString signatureForDefaultVirtualMethod(const AbstractMetaFunction* func,
-                                             QString prepend = "",
-                                             QString append = "_default",
-                                             Options option = NoOption,
-                                             int arg_count = -1) const;
-
     bool hasInjectedCodeOrSignatureModification(const AbstractMetaFunction* func);
     QStringList getBaseClasses(const AbstractMetaClass* metaClass);
 
