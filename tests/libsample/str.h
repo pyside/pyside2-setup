@@ -46,6 +46,7 @@ public:
     Str arg(const Str& s) const;
 
     Str& append(const Str& s);
+    Str& prepend(const Str& s);
 
     const char* cstring() const;
     char get_char(int pos) const;

@@ -37,6 +37,7 @@
 
 #include "point.h"
 #include "complex.h"
+#include "str.h"
 
 class VirtualMethods
 {
@@ -49,6 +50,38 @@ public:
     {
         return virtualMethod0(pt, val, cpx, b);
     }
+
+    // Binding modification: rename.
+    virtual int sum0(int a0, int a1, int a2) { return a0 + a1 + a2; }
+    int callSum0(int a0, int a1, int a2) { return sum0(a0, a1, a2); }
+
+    // Binding modification: set default value for the last argument.
+    virtual int sum1(int a0, int a1, int a2) { return a0 + a1 + a2; }
+    int callSum1(int a0, int a1, int a2) { return sum1(a0, a1, a2); }
+
+    // Binding modification: remove the last argument and set a default value for it.
+    virtual int sum2(int a0, int a1, int a2) { return a0 + a1 + a2; }
+    int callSum2(int a0, int a1, int a2) { return sum2(a0, a1, a2); }
+
+    // Binding modification: remove the second argument.
+    virtual int sum3(int a0, int a1, int a2) { return a0 + a1 + a2; }
+    int callSum3(int a0, int a1, int a2) { return sum3(a0, a1, a2); }
+
+    // Binding modification: remove the second argument and set its default
+    // value, then inject code on the binding reimplementation of the virtual
+    // (with a native inject-code) to sum the value of the removed
+    // argument to the first argument before the method is called.
+    virtual int sum4(int a0, int a1, int a2) { return a0 + a1 + a2; }
+    int callSum4(int a0, int a1, int a2) { return sum4(a0, a1, a2); }
+
+    // Binding modification: prepend a string to the results of a Python override.
+    virtual Str name() { return Str("VirtualMethods"); }
+    Str callName() { return name(); }
+
+    // Binding modification: code injection that calls the Python override by itself.
+    virtual void callMe() {}
+    void callCallMe() { callMe(); }
+
 };
 
 #endif // VIRTUALMETHODS_H

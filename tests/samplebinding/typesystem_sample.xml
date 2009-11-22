@@ -367,9 +367,56 @@
     </object-type>
 
     <value-type name="Reference"/>
-    <value-type name="VirtualMethods"/>
-
     <value-type name="ImplicitConv"/>
+
+    <value-type name="VirtualMethods">
+        <modify-function signature="sum0(int, int, int)" rename="sumThree"/>
+        <modify-function signature="sum1(int, int, int)">
+            <modify-argument index="3">
+                <replace-default-expression with="1000"/>
+            </modify-argument>
+        </modify-function>
+        <modify-function signature="sum2(int, int, int)">
+            <modify-argument index="3">
+                <remove-argument/>
+                <replace-default-expression with="2000"/>
+            </modify-argument>
+        </modify-function>
+        <modify-function signature="sum3(int, int, int)">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+                %0 = %CONVERTTOPYTHON[%RETURN_TYPE](
+                        %CPPSELF.%TYPE::%FUNCTION_NAME(%1, %1+%3, %3)
+                    );
+            </inject-code>
+        </modify-function>
+        <modify-function signature="sum4(int, int, int)">
+            <modify-argument index="2">
+                <remove-argument/>
+                <replace-default-expression with="3000"/>
+            </modify-argument>
+            <inject-code class="native" position="beginning">
+                PyObject* new_arg0 = PyInt_FromLong(PyInt_AS_LONG(%PYARG_1) - %2);
+                Py_DECREF(%PYARG_1);
+                %PYARG_1 = new_arg0;
+            </inject-code>
+        </modify-function>
+        <modify-function signature="name()">
+            <inject-code class="native" position="end">
+                PyStr_cptr(%0)->prepend(Str("Pimped"));
+            </inject-code>
+        </modify-function>
+        <modify-function signature="callMe()">
+            <inject-code class="native" position="end">
+                PyGILState_STATE gil_state = PyGILState_Ensure();
+                PyObject_Call(%PYTHON_METHOD_OVERRIDE, %PYTHON_ARGUMENTS, NULL);
+                PyGILState_Release(gil_state);
+            </inject-code>
+        </modify-function>
+    </value-type>
+
     <value-type name="InjectCode">
         <!--
             Various tests for inject codes.

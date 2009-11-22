@@ -80,6 +80,13 @@ Str::append(const Str& s)
     return *this;
 }
 
+Str&
+Str::prepend(const Str& s)
+{
+    m_str = s.m_str + m_str;
+    return *this;
+}
+
 const char*
 Str::cstring() const
 {
