@@ -328,7 +328,7 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func)
 {
     QString result;
     foreach (const AbstractMetaArgument* arg, func->arguments()) {
-        if (func->argumentRemoved(arg->argumentIndex()))
+        if (func->argumentRemoved(arg->argumentIndex() + 1))
             continue;
 
         if (arg->type()->isQObject()

@@ -66,9 +66,10 @@ The following table describes the semantics of ``inject-code`` tag as used on
     |               |      |         |code here will be executed after all the wrapped class        |
     |               |      |         |components have been initialized.                             |
     +---------------+------+---------+--------------------------------------------------------------+
-    |modify-function|native|beginning|Code here is put on the beginning of a virtual method         |
-    |               |      |         |override on the C++ wrapper class (the one responsible for    |
-    |               |      |         |passing C++ calls to Python overrides, if there is any).      |
+    |modify-function|native|beginning|Code here is put on the virtual method override of a C++      |
+    |               |      |         |wrapper class (the one responsible for passing C++ calls to a |
+    |               |      |         |Python override, if there is any), right after the C++        |
+    |               |      |         |arguments have been converted but before the Python call.     |
     |               |      +---------+--------------------------------------------------------------+
     |               |      |end      |This code injection goes to the end of a virtual method       |
     |               |      |         |override on the C++ wrapper class, right before the return    |
@@ -199,8 +200,11 @@ class is polymorphic.
             if (!method)
                 return this->InjectCode::virtualMethod(arg);
 
+            (... here C++ arguments are converted to Python ...)
+
             // INJECT-CODE: <modify-function><inject-code class="native" position="beginning">
-            // Uses: pre method call custom code.
+            // Uses: pre method call custom code, modify the argument before the
+            // Python call.
 
             (... Python method call goes in here ...)
 

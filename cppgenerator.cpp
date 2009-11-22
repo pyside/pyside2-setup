@@ -293,97 +293,110 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
     Indentation indentation(INDENT);
 
-    CodeSnipList snips;
-    if (func->hasInjectedCode()) {
-        snips = getCodeSnips(func);
-        writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::NativeCode, func);
-        s << endl;
-    }
-
     if (func->isAbstract() && func->isModifiedRemoved()) {
         s << INDENT << "#error Pure virtual method \"" << func->ownerClass()->name();
         s << "::" << func->minimalSignature();
         s << "\" must be implement but was completely removed on typesystem." << endl;
-    } else {
-        if (func->allowThread())
-            s << INDENT << "// how to say to Python to allow threads?" << endl;
-
-        s << INDENT << "PyObject* method = BindingManager::instance().getOverride(this, \"";
-        s << func->name() << "\");" << endl;
-
-        s << INDENT << "if (!method) {" << endl;
-        {
-            Indentation indentation(INDENT);
-            s << INDENT;
-            if (func->isAbstract()) {
-                s << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
-                s << func->ownerClass()->name() << '.' << func->name();
-                s << "()' not implemented.\");" << endl;
-                s << INDENT << "return";
-                if (func->type()) {
-                    s << ' ';
-                    writeMinimalConstructorCallArguments(s, func->type());
-                }
-            } else {
-                s << "return this->" << func->implementingClass()->qualifiedCppName() << "::";
-                writeFunctionCall(s, func);
-            }
-        }
-        s << ';' << endl << INDENT << '}' << endl << endl;
-
-        s << INDENT << "PyObject* args = ";
-        if (func->arguments().isEmpty()) {
-            s << "PyTuple_New(0);" << endl;
-        } else {
-            s << "Py_BuildValue(\"(" << getFormatUnitString(func) << ")\"," << endl;
-            foreach (const AbstractMetaArgument* arg, func->arguments()) {
-                Indentation indentation(INDENT);
-                bool convert = arg->type()->isObject()
-                                || arg->type()->isQObject()
-                                || arg->type()->isValue()
-                                || arg->type()->isValuePointer()
-                                || arg->type()->isFlags()
-                                || arg->type()->isReference()
-                                || (arg->type()->isPrimitive()
-                                    && !m_formatUnits.contains(arg->type()->typeEntry()->name()));
-                s << INDENT;
-                if (convert) {
-                    writeToPythonConversion(s, arg->type(), func->ownerClass());
-                    s << '(';
-                }
-                s << arg->argumentName();
-                if (convert)
-                    s << ")";
-                if (arg->argumentIndex() != func->arguments().size() - 1)
-                    s << ',';
-                s << endl;
-            }
-            s << INDENT << ");" << endl;
-        }
-        s << endl;
-
-        s << INDENT << "PyGILState_STATE gil_state = PyGILState_Ensure();" << endl;
-
-        s << INDENT;
-        if (!returnKeyword.isEmpty())
-            s << "PyObject* method_result = ";
-        s << "PyObject_Call(method, args, NULL);" << endl;
-        s << INDENT << "PyGILState_Release(gil_state);" << endl << endl;
-
-        foreach (FunctionModification func_mod, functionModifications(func)) {
-            foreach (ArgumentModification arg_mod, func_mod.argument_mods) {
-                if (!arg_mod.resetAfterUse)
-                    continue;
-                s << INDENT << "PyBaseWrapper_setValidCppObject(PyTuple_GET_ITEM(args, ";
-                s << (arg_mod.index - 1) << "), false);" << endl;
-            }
-        }
-
-        s << INDENT << "Py_XDECREF(args);" << endl;
-        s << INDENT << "Py_XDECREF(method);" << endl;
-
-        s << endl << INDENT << "// check and set Python error here..." << endl;
+        s << '}' << endl << endl;
+        return;
     }
+
+    if (func->allowThread())
+        s << INDENT << "// how to say to Python to allow threads?" << endl;
+
+    s << INDENT << "PyObject* method = BindingManager::instance().getOverride(this, \"";
+    s << func->name() << "\");" << endl;
+
+    s << INDENT << "if (!method) {" << endl;
+    {
+        Indentation indentation(INDENT);
+        s << INDENT;
+        if (func->isAbstract()) {
+            s << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
+            s << func->ownerClass()->name() << '.' << func->name();
+            s << "()' not implemented.\");" << endl;
+            s << INDENT << "return";
+            if (func->type()) {
+                s << ' ';
+                writeMinimalConstructorCallArguments(s, func->type());
+            }
+        } else {
+            s << "return this->" << func->implementingClass()->qualifiedCppName() << "::";
+            writeFunctionCall(s, func);
+        }
+    }
+    s << ';' << endl;
+    s << INDENT << '}' << endl << endl;
+
+    s << INDENT << "PyObject* pyargs = ";
+    if (func->arguments().isEmpty()) {
+        s << "PyTuple_New(0);" << endl;
+    } else {
+        QStringList argConversions;
+        foreach (const AbstractMetaArgument* arg, func->arguments()) {
+            if (func->argumentRemoved(arg->argumentIndex() + 1))
+                continue;
+
+            QString argConv;
+            QTextStream ac(&argConv);
+            bool convert = arg->type()->isObject()
+                            || arg->type()->isQObject()
+                            || arg->type()->isValue()
+                            || arg->type()->isValuePointer()
+                            || arg->type()->isFlags()
+                            || arg->type()->isReference()
+                            || (arg->type()->isPrimitive()
+                                && !m_formatUnits.contains(arg->type()->typeEntry()->name()));
+
+            Indentation indentation(INDENT);
+            ac << INDENT;
+            if (convert) {
+                writeToPythonConversion(ac, arg->type(), func->ownerClass());
+                ac << '(';
+            }
+            ac << arg->argumentName() << (convert ? ")" : "");
+
+            argConversions << argConv;
+        }
+
+        s << "Py_BuildValue(\"(" << getFormatUnitString(func) << ")\"," << endl;
+        s << argConversions.join(",\n") << endl;
+        s << INDENT << ");" << endl;
+    }
+    s << endl;
+
+    CodeSnipList snips;
+    if (func->hasInjectedCode()) {
+        snips = getCodeSnips(func);
+
+        if (injectedCodeUsesPySelf(func))
+            s << INDENT << "PyObject* pySelf = BindingManager::instance().retrieveWrapper(this);" << endl;
+
+        writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::NativeCode, func);
+        s << endl;
+    }
+
+    s << INDENT << "PyGILState_STATE gil_state = PyGILState_Ensure();" << endl;
+
+    s << INDENT;
+    if (!returnKeyword.isEmpty())
+        s << "PyObject* " << retvalVariableName() << " = ";
+    s << "PyObject_Call(method, pyargs, NULL);" << endl;
+    s << INDENT << "PyGILState_Release(gil_state);" << endl << endl;
+
+    foreach (FunctionModification func_mod, functionModifications(func)) {
+        foreach (ArgumentModification arg_mod, func_mod.argument_mods) {
+            if (!arg_mod.resetAfterUse)
+                continue;
+            s << INDENT << "PyBaseWrapper_setValidCppObject(PyTuple_GET_ITEM(pyargs, ";
+            s << (arg_mod.index - 1) << "), false);" << endl;
+        }
+    }
+
+    s << INDENT << "Py_XDECREF(pyargs);" << endl;
+    s << INDENT << "Py_XDECREF(method);" << endl;
+
+    s << endl << INDENT << "// check and set Python error here..." << endl;
 
     if (func->hasInjectedCode()) {
         s << endl;
@@ -392,7 +405,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
     if (!returnKeyword.isEmpty()) {
         s << INDENT << returnKeyword;
-        writeToCppConversion(s, func->type(), func->implementingClass(), "method_result");
+        writeToCppConversion(s, func->type(), func->implementingClass(), retvalVariableName());
         s << ';' << endl;
     }
     s << '}' << endl << endl;
