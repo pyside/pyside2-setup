@@ -864,14 +864,23 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             code.replace(toPythonRegex, "Shiboken::Converter<\\1 >::toPython");
 
             // replace %PYARG_# variables
-            if (numArgs > 1) {
-                code.replace(pyArgsRegex, "pyargs[\\1-1]");
+            if (snip.language == TypeSystem::TargetLangCode) {
+                if (numArgs > 1) {
+                    code.replace(pyArgsRegex, "pyargs[\\1-1]");
+                } else {
+                    static QRegExp pyArgsRegexCheck("%PYARG_([2-9]+)");
+                    if (pyArgsRegexCheck.indexIn(code) != -1)
+                        ReportHandler::warning("Wrong index for %PYARG variable ("+pyArgsRegexCheck.cap(1)+") on "+func->signature());
+                    else
+                        code.replace("%PYARG_1", usePyArgs ? "pyargs[0]" : "arg");
+                }
             } else {
-                static QRegExp pyArgsRegexCheck("%PYARG_([2-9]+)");
-                if (pyArgsRegexCheck.indexIn(code) != -1)
-                    ReportHandler::warning("Wrong index for %PYARG variable ("+pyArgsRegexCheck.cap(1)+") on "+func->signature());
-                else
-                    code.replace("%PYARG_1", usePyArgs ? "pyargs[0]" : "arg");
+                // Replaces the simplest case of attribution to a Python argument
+                // on the binding virtual method.
+                static QRegExp pyArgsAttributionRegex("%PYARG_(\\d+)\\s*=[^=]\\s*([^;]+)");
+                code.replace(pyArgsAttributionRegex, "PyTuple_SET_ITEM(pyargs, \\1-1, \\2)");
+
+                code.replace(pyArgsRegex, "PyTuple_GET_ITEM(pyargs, \\1-1)");
             }
 
             // replace %ARG#_TYPE variables
@@ -892,65 +901,88 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             code.replace("%0", retvalVariableName());
 
             // replace template variable for self Python object
-            code.replace("%PYSELF", "self");
+            QString pySelf;
+            if (snip.language == TypeSystem::NativeCode)
+                pySelf = "pySelf";
+            else
+                pySelf = "self";
+            code.replace("%PYSELF", pySelf);
 
             // replace template variable for pointer to C++ this object
             if (func->implementingClass()) {
-                code.replace("%CPPSELF.", "cppSelf->");
-                code.replace("%CPPSELF", "cppSelf");
+                QString cppSelf;
+                if (snip.language == TypeSystem::NativeCode)
+                    cppSelf = "this";
+                else
+                    cppSelf = "cppSelf";
+                code.replace("%CPPSELF.", QString("%1->").arg(cppSelf));
+                code.replace("%CPPSELF", cppSelf);
 
                 // replace template variable for the Python Type object for the
                 // class implementing the method in which the code snip is written
                 if (func->isStatic()) {
                     code.replace("%PYTHONTYPEOBJECT", cpythonTypeName(func->implementingClass()));
                 } else {
-                    code.replace("%PYTHONTYPEOBJECT.", "self->ob_type->");
-                    code.replace("%PYTHONTYPEOBJECT", "self->ob_type");
+                    code.replace("%PYTHONTYPEOBJECT.", QString("%1->ob_type->").arg(pySelf));
+                    code.replace("%PYTHONTYPEOBJECT", QString("%1->ob_type").arg(pySelf));
                 }
             }
 
             // replace template variables for individual arguments
             int removed = 0;
             for (int i = 0; i < func->arguments().size(); i++) {
-                QString argReplacement;
                 const AbstractMetaArgument* arg = func->arguments().at(i);
-                if (func->argumentRemoved(i+1)) {
-                    if (!arg->defaultValueExpression().isEmpty())
+                QString argReplacement;
+                if (snip.language == TypeSystem::TargetLangCode) {
+                    if (func->argumentRemoved(i+1)) {
+                        if (!arg->defaultValueExpression().isEmpty())
+                            argReplacement = arg->defaultValueExpression();
+                        removed++;
+                    }
+
+                    if (lastArg && arg->argumentIndex() > lastArg->argumentIndex())
                         argReplacement = arg->defaultValueExpression();
-                    removed++;
+
+                    if (argReplacement.isEmpty())
+                        argReplacement = QString("cpp_arg%1").arg(i - removed);
+                } else {
+                    argReplacement = arg->argumentName();
                 }
-
-                if (lastArg && arg->argumentIndex() > lastArg->argumentIndex())
-                    argReplacement = arg->defaultValueExpression();
-
-                if (argReplacement.isEmpty())
-                    argReplacement = QString("cpp_arg%1").arg(i - removed);
                 code.replace("%" + QString::number(i+1), argReplacement);
             }
 
-            // replace template variables for a list of arguments
+            // replace template %ARGUMENT_NAMES variable for a list of arguments
             removed = 0;
             QStringList argumentNames;
             foreach (const AbstractMetaArgument* arg, func->arguments()) {
-                if (func->argumentRemoved(arg->argumentIndex() + 1)) {
-                    if (!arg->defaultValueExpression().isEmpty())
-                        argumentNames << arg->defaultValueExpression();
-                    removed++;
-                    continue;
-                }
+                if (snip.language == TypeSystem::TargetLangCode) {
+                    if (func->argumentRemoved(arg->argumentIndex() + 1)) {
+                        if (!arg->defaultValueExpression().isEmpty())
+                            argumentNames << arg->defaultValueExpression();
+                        removed++;
+                        continue;
+                    }
 
-                QString argName;
-                if (lastArg && arg->argumentIndex() > lastArg->argumentIndex()) {
-                    argName = arg->defaultValueExpression();
+                    QString argName;
+                    if (lastArg && arg->argumentIndex() > lastArg->argumentIndex()) {
+                        argName = arg->defaultValueExpression();
+                    } else {
+                        argName = QString("cpp_arg%1").arg(arg->argumentIndex() - removed);
+                        if (shouldDereferenceArgumentPointer(arg))
+                            argName.prepend('*');
+                    }
+                    argumentNames << argName;
                 } else {
-                    argName = QString("cpp_arg%1").arg(arg->argumentIndex() - removed);
-                    if (shouldDereferenceArgumentPointer(arg))
-                        argName.prepend('*');
+                    argumentNames << arg->argumentName();
                 }
-                argumentNames << argName;
             }
-
             code.replace("%ARGUMENT_NAMES", argumentNames.join(", "));
+
+            // replace template %PYTHON_ARGUMENTS variable for a pointer to the Python tuple
+            // containing the converted virtual method arguments received from C++ to be passed
+            // to the Python override
+            if (snip.language == TypeSystem::NativeCode)
+                code.replace("%PYTHON_ARGUMENTS", "pyargs");
 
             replaceTemplateVariables(code, func);
         }

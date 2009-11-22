@@ -150,6 +150,43 @@ Variables
   Similar to ``%#``, but is replaced by the Python arguments (PyObjects)
   received by the Python wrapper method.
 
+  If used in the context of a native code injection, i.e. in a virtual method
+  override, ``%PYARG_#`` will be translated to one item of the Python tuple
+  holding the arguments that should be passed to the Python override for this
+  virtual method.
+
+  The example
+
+      .. code-block:: c++
+
+          long a = PyInt_AS_LONG(%PYARG_1);
+
+
+  is equivalent of
+
+      .. code-block:: c++
+
+          long a = PyInt_AS_LONG(PyTuple_GET_ITEM(%PYTHON_ARGUMENTS, 0));
+
+
+  The generator tries to be smart with attributions, but it will work for the
+  only simplest cases.
+
+  This example
+
+      .. code-block:: c++
+
+           Py_DECREF(%PYARG_1);
+           %PYARG_1 = PyInt_FromLong(10);
+
+
+  is equivalent of
+
+      .. code-block:: c++
+
+          Py_DECREF(PyTuple_GET_ITEM(%PYTHON_ARGUMENTS, 0));
+          PyTuple_SET_ITEM(%PYTHON_ARGUMENTS, 0, PyInt_FromLong(10));
+
 
 .. _pyself:
 
@@ -157,6 +194,16 @@ Variables
 
   Replaced by the Python wrapper variable (a PyObject) representing the instance
   bounded to the Python wrapper method which receives the custom code.
+
+
+.. _python_arguments:
+
+**%PYTHON_ARGUMENTS**
+
+  Replaced by the pointer to the Python tuple with Python objects converted from
+  the C++ arguments received on the binding override of a virtual method.
+  This tuple is the same passed as arguments to the Python method overriding the
+  C++ parent's one.
 
 
 .. _pythontypeobject:
