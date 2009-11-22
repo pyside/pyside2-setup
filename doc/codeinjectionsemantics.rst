@@ -71,9 +71,9 @@ The following table describes the semantics of ``inject-code`` tag as used on
     |               |      |         |Python override, if there is any), right after the C++        |
     |               |      |         |arguments have been converted but before the Python call.     |
     |               |      +---------+--------------------------------------------------------------+
-    |               |      |end      |This code injection goes to the end of a virtual method       |
-    |               |      |         |override on the C++ wrapper class, right before the return    |
-    |               |      |         |statement (if any).                                           |
+    |               |      |end      |This code injection is put in a virtual method override on the|
+    |               |      |         |C++ wrapper class, after the call to Python and before        |
+    |               |      |         |dereferencing the Python method and tuple of arguments.       |
     |               +------+---------+--------------------------------------------------------------+
     |               |target|beginning|This code is injected on the Python method wrapper            |
     |               |      |         |(``PyCLASS_METHOD(...)``), right after the decisor have found |
@@ -186,6 +186,9 @@ instead of
 Code Injection for Functions/Methods
 ====================================
 
+
+.. _codeinjecting_method_native:
+
 On The Native Side
 ------------------
 
@@ -197,7 +200,7 @@ class is polymorphic.
         int InjectCodeWrapper::virtualMethod(int arg)
         {
             PyObject* method = BindingManager::instance().getOverride(this, "virtualMethod");
-            if (!method)
+            if (!py_override)
                 return this->InjectCode::virtualMethod(arg);
 
             (... here C++ arguments are converted to Python ...)
@@ -211,6 +214,8 @@ class is polymorphic.
             // INJECT-CODE: <modify-function><inject-code class="native" position="end">
             // Uses: post method call custom code, modify the result before delivering
             // it to C++ caller.
+
+            (... Python method and argument tuple are dereferenced here ...)
 
             return Shiboken::Converter<int>::toCpp(method_result);
         }

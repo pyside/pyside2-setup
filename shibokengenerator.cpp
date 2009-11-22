@@ -978,11 +978,16 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             }
             code.replace("%ARGUMENT_NAMES", argumentNames.join(", "));
 
-            // replace template %PYTHON_ARGUMENTS variable for a pointer to the Python tuple
-            // containing the converted virtual method arguments received from C++ to be passed
-            // to the Python override
-            if (snip.language == TypeSystem::NativeCode)
+            if (snip.language == TypeSystem::NativeCode) {
+                // replace template %PYTHON_ARGUMENTS variable for a pointer to the Python tuple
+                // containing the converted virtual method arguments received from C++ to be passed
+                // to the Python override
                 code.replace("%PYTHON_ARGUMENTS", "pyargs");
+
+                // replace variable %PYTHON_METHOD_OVERRIDE for a pointer to the Python method
+                // override for the C++ virtual method in which this piece of code was inserted
+                code.replace("%PYTHON_METHOD_OVERRIDE", "py_override");
+            }
 
             replaceTemplateVariables(code, func);
         }
@@ -1024,6 +1029,17 @@ bool ShibokenGenerator::injectedCodeCallsCppFunction(const AbstractMetaFunction*
         if (snip.code().contains("%FUNCTION_NAME(") || snip.code().contains(funcCall)
             || (func->isConstructor() && func->ownerClass()->isPolymorphic()
                 && snip.code().contains(wrappedCtorCall)))
+            return true;
+    }
+    return false;
+}
+
+bool ShibokenGenerator::injectedCodeCallsPythonOverride(const AbstractMetaFunction* func)
+{
+    static QRegExp overrideCallRegexCheck("PyObject_Call\\s*\\(\\s*%PYTHON_METHOD_OVERRIDE\\s*,");
+    CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::NativeCode);
+    foreach (CodeSnip snip, snips) {
+        if (overrideCallRegexCheck.indexIn(snip.code()) != -1)
             return true;
     }
     return false;

@@ -304,10 +304,10 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     if (func->allowThread())
         s << INDENT << "// how to say to Python to allow threads?" << endl;
 
-    s << INDENT << "PyObject* method = BindingManager::instance().getOverride(this, \"";
+    s << INDENT << "PyObject* py_override = BindingManager::instance().getOverride(this, \"";
     s << func->name() << "\");" << endl;
 
-    s << INDENT << "if (!method) {" << endl;
+    s << INDENT << "if (!py_override) {" << endl;
     {
         Indentation indentation(INDENT);
         s << INDENT;
@@ -376,13 +376,14 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         s << endl;
     }
 
-    s << INDENT << "PyGILState_STATE gil_state = PyGILState_Ensure();" << endl;
-
-    s << INDENT;
-    if (!returnKeyword.isEmpty())
-        s << "PyObject* " << retvalVariableName() << " = ";
-    s << "PyObject_Call(method, pyargs, NULL);" << endl;
-    s << INDENT << "PyGILState_Release(gil_state);" << endl << endl;
+    if (!injectedCodeCallsPythonOverride(func)) {
+        s << INDENT << "PyGILState_STATE gil_state = PyGILState_Ensure();" << endl;
+        s << INDENT;
+        if (!returnKeyword.isEmpty())
+            s << "PyObject* " << retvalVariableName() << " = ";
+        s << "PyObject_Call(py_override, pyargs, NULL);" << endl;
+        s << INDENT << "PyGILState_Release(gil_state);" << endl << endl;
+    }
 
     foreach (FunctionModification func_mod, functionModifications(func)) {
         foreach (ArgumentModification arg_mod, func_mod.argument_mods) {
@@ -393,15 +394,15 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         }
     }
 
-    s << INDENT << "Py_XDECREF(pyargs);" << endl;
-    s << INDENT << "Py_XDECREF(method);" << endl;
-
-    s << endl << INDENT << "// check and set Python error here..." << endl;
-
     if (func->hasInjectedCode()) {
         s << endl;
         writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::NativeCode, func);
     }
+
+    s << INDENT << "Py_XDECREF(pyargs);" << endl;
+    s << INDENT << "Py_XDECREF(py_override);" << endl;
+
+    s << endl << INDENT << "// check and set Python error here..." << endl;
 
     if (!returnKeyword.isEmpty()) {
         s << INDENT << returnKeyword;

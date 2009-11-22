@@ -206,6 +206,15 @@ Variables
   C++ parent's one.
 
 
+.. _python_method_override:
+
+**%PYTHON_METHOD_OVERRIDE**
+
+  This variable is used only on :ref:`native method code injections
+  <codeinjecting_method_native>`, i.e. on the binding overrides for C++ virtual
+  methods. It is replaced by a pointer to the Python method override.
+
+
 .. _pythontypeobject:
 
 **%PYTHONTYPEOBJECT**

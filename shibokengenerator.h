@@ -146,6 +146,15 @@ public:
     bool injectedCodeCallsCppFunction(const AbstractMetaFunction* func);
 
     /**
+     *   Verifies if any of the function's code injections of the "native" class makes a
+     *   call to the C++ method. This is used by the generator to avoid writing calls to
+     *   Python overrides of C++ virtual methods when the user custom code already does this.
+     *   \param func the function to check
+     *   \return true if the function's code snippets call the Python override for a C++ virtual method
+     */
+    bool injectedCodeCallsPythonOverride(const AbstractMetaFunction* func);
+
+    /**
      *   Verifies if any of the function's code injections attributes values to
      *   the return variable (%0).
      *   \param func the function to check
