@@ -60,13 +60,6 @@ public:
         return m_size;
     }
 
-    int fileno()
-    {
-        if (m_descriptor)
-            return m_descriptor->_fileno;
-        return -1;
-    }
-
     bool open();
     void close();
 

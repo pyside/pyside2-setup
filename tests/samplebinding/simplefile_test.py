@@ -61,7 +61,6 @@ class SimpleFileTest(unittest.TestCase):
         f = SimpleFile(self.existing_filename)
         self.assertEqual(f.filename(), self.existing_filename)
         f.open()
-        self.assertNotEqual(f.fileno(), -1)
         self.assertNotEqual(f.size(), 0)
         f.close()
 
@@ -70,7 +69,6 @@ class SimpleFileTest(unittest.TestCase):
         f = SimpleFile(self.non_existing_filename)
         self.assertEqual(f.filename(), self.non_existing_filename)
         self.assertRaises(IOError, f.open)
-        self.assertEqual(f.fileno(), -1)
         self.assertEqual(f.size(), 0)
 
 if __name__ == '__main__':
