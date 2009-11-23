@@ -6,17 +6,24 @@
 /* Namespace for Google classes */
 #define GOOGLE_NAMESPACE ::google
 
-/* the location of the header defining hash functions */
-#define HASH_FUN_H <tr1/functional>
-
-/* the namespace of the hash<> function */
-#define HASH_NAMESPACE std::tr1
+#ifdef _WIN32
+    /* the location of the header defining hash functions */
+    #define HASH_FUN_H <hash_map>
+    /* the namespace of the hash<> function */
+    #define HASH_NAMESPACE stdext
+    /* The system-provided hash function including the namespace. */
+    #define SPARSEHASH_HASH  HASH_NAMESPACE::hash_compare
+#else
+    /* the location of the header defining hash functions */
+    #define HASH_FUN_H <tr1/functional>
+    /* the namespace of the hash<> function */
+    #define HASH_NAMESPACE std::tr1
+    /* The system-provided hash function including the namespace. */
+    #define SPARSEHASH_HASH HASH_NAMESPACE::hash
+#endif
 
 /* Define to 1 if the system has the type `long long'. */
 #define HAVE_LONG_LONG 1
-
-/* The system-provided hash function including the namespace. */
-#define SPARSEHASH_HASH HASH_NAMESPACE::hash
 
 /* the namespace where STL code like vector<> is defined */
 #define STL_NAMESPACE std
