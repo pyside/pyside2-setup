@@ -180,9 +180,14 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType*
     return result;
 }
 
+bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClass* metaClass)
+{
+    return metaClass->isPolymorphic() && !metaClass->isNamespace() && !metaClass->hasPrivateDestructor();
+}
+
 QString ShibokenGenerator::wrapperName(const AbstractMetaClass* metaClass)
 {
-    if (metaClass->isPolymorphic()) {
+    if (shouldGenerateCppWrapper(metaClass)) {
         QString result = metaClass->name();
         if (metaClass->enclosingClass()) // is a inner class
             result.replace("::", "_");

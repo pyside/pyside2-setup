@@ -127,7 +127,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         s << endl;
     }
 
-    if (metaClass->isPolymorphic() && !metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
+    if (shouldGenerateCppWrapper(metaClass)) {
         s << "// Native ---------------------------------------------------------" << endl;
         s << endl;
 

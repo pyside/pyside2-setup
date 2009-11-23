@@ -59,8 +59,7 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
     s << "#ifndef SBK_" << wrapperName.toUpper() << "_H" << endl;
     s << "#define SBK_" << wrapperName.toUpper() << "_H" << endl<< endl;
 
-    if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
-        s << "// The mother of all C++ binding hacks!" << endl;
+    if (shouldGenerateCppWrapper(metaClass)) {
         s << "#define protected public" << endl << endl;
     }
 
@@ -73,7 +72,7 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
     writeCodeSnips(s, metaClass->typeEntry()->codeSnips(),
                    CodeSnip::Declaration, TypeSystem::NativeCode);
 
-    if (metaClass->isPolymorphic() && !metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
+    if (shouldGenerateCppWrapper(metaClass)) {
         // Class
         s << "class " << wrapperName;
         s << " : public " << metaClass->qualifiedCppName();
@@ -91,9 +90,6 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
 
         if (metaClass->isQObject() && (metaClass->name() != "QObject"))
             s << INDENT << "using QObject::parent;" << endl;
-
-        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(),
-                       CodeSnip::PrototypeInitialization, TypeSystem::NativeCode);
 
         s << "};" << endl << endl;
     }
