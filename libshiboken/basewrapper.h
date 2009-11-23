@@ -49,8 +49,8 @@ struct PyBaseWrapper
     PyObject_HEAD
     PyTypeObject* baseWrapperType;
     void* cptr;
-    uint hasOwnership : 1;
-    uint validCppObject : 1;
+    unsigned int hasOwnership : 1;
+    unsigned int validCppObject : 1;
 };
 
 } // extern "C"
@@ -116,7 +116,7 @@ typedef struct {
 
 LIBSHIBOKEN_API PyAPI_FUNC(PyObject*)
 PyBaseWrapper_New(PyTypeObject *instanceType, PyTypeObject *baseWrapperType,
-                  const void *cptr, uint hasOwnership = 1);
+                  const void *cptr, unsigned int hasOwnership = 1);
 
 inline bool
 cppObjectIsValid(PyBaseWrapper* self)
@@ -128,8 +128,7 @@ cppObjectIsValid(PyBaseWrapper* self)
 }
 
 template <typename T>
-PyAPI_FUNC(void)
-PyBaseWrapper_Dealloc(PyObject* self)
+void PyBaseWrapper_Dealloc(PyObject* self)
 {
     BindingManager::instance().releaseWrapper(self);
     if (PyBaseWrapper_hasOwnership(self))

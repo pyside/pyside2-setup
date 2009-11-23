@@ -38,7 +38,7 @@ namespace Shiboken
 {
 
 PyObject*
-PyBaseWrapper_New(PyTypeObject* instanceType, PyTypeObject* baseWrapperType, const void* cptr, uint hasOwnership)
+PyBaseWrapper_New(PyTypeObject* instanceType, PyTypeObject* baseWrapperType, const void* cptr, unsigned int hasOwnership)
 {
     if (!cptr)
         return 0;
