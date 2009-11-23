@@ -9,10 +9,12 @@ find_package(Boost COMPONENTS graph REQUIRED)
 
 add_definitions(${QT_DEFINITIONS})
 
-set(CMAKE_CXX_FLAGS_RELEASE "-Wall -DNDEBUG -O2 -Wl,-O1 -Wl,--hash-style=gnu -fvisibility=hidden")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -fvisibility=hidden")
-# We need to define this when building shiboken, because windows need to known when to use dll_export or dll_import.
-add_definitions("-DLIBSHIBOKEN_BUILD")
+if (MSVC)
+    set(CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /w /EHsc- /GS- /GR- /DLIBSHIBOKEN_BUILD -D_SCL_SECURE_NO_WARNINGS")
+else (MSVC)
+    set(CMAKE_CXX_FLAGS_RELEASE "-Wall -DNDEBUG -O2 -Wl,-O1 -Wl,--hash-style=gnu -fvisibility=hidden")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -fvisibility=hidden")
+endif (MSVC)
 
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
 set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
@@ -34,7 +36,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${GENERATORRUNNER_INCLUDE_DIR}
                     ${GENERATORRUNNER_INCLUDE_DIR}/..
                     ${QT_INCLUDE_DIR}
-                    ${QT_QTCORE_INCLUDE_DIR})
+                    ${QT_QTCORE_INCLUDE_DIR}
+		    ${Boost_INCLUDE_DIR})
 
 add_library(shiboken_generator SHARED ${shiboken_SRC})
 
@@ -67,6 +70,6 @@ add_custom_target(dist
 
 add_dependencies(shiboken shiboken_generator)
 
-install(TARGETS shiboken_generator DESTINATION ${GENERATORRUNNER_PLUGIN_DIR})
+install(TARGETS shiboken_generator DESTINATION "${GENERATORRUNNER_PLUGIN_DIR}")
 install(TARGETS shiboken DESTINATION bin)
 
