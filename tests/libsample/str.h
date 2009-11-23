@@ -36,7 +36,9 @@
 #define STR_H
 #include <string>
 
-class Str
+#include "libsamplemacros.h"
+
+class LIBSAMPLE_API Str
 {
 public:
     Str(const Str& s);
@@ -64,10 +66,10 @@ private:
     void init(const char* cstr);
     std::string m_str;
 
-    friend Str operator+(int number, const Str& str);
+    friend LIBSAMPLE_API Str operator+(int number, const Str& str);
 };
 
-Str operator+(int number, const Str& str);
+LIBSAMPLE_API Str operator+(int number, const Str& str);
 
 #endif // STR_H
 

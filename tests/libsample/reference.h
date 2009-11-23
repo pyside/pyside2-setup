@@ -35,7 +35,9 @@
 #ifndef REFERENCE_H
 #define REFERENCE_H
 
-class Reference
+#include "libsamplemacros.h"
+
+class LIBSAMPLE_API Reference
 {
 public:
     explicit Reference(int objId = -1)

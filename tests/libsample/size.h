@@ -35,7 +35,9 @@
 #ifndef SIZE_H
 #define SIZE_H
 
-class Size
+#include "libsamplemacros.h"
+
+class LIBSAMPLE_API Size
 {
 public:
     Size(double width = 0.0, double height = 0.0) : m_width(width), m_height(height) {}

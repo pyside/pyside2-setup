@@ -35,10 +35,11 @@
 #ifndef KINDERGARTEN_H
 #define KINDERGARTEN_H
 
+#include "libsamplemacros.h"
 #include <list>
 #include "objecttype.h"
 
-class KinderGarten
+class LIBSAMPLE_API KinderGarten
 {
 public:
     typedef std::list<ObjectType*> ChildList;

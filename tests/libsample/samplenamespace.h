@@ -35,32 +35,34 @@
 #ifndef SAMPLENAMESPACE_H
 #define SAMPLENAMESPACE_H
 
+#include "libsamplemacros.h"
+
 namespace SampleNamespace
 {
 
-enum Option {
+enum LIBSAMPLE_API Option {
     None,
     RandomNumber,
     UnixTime
 };
 
-enum InValue {
+enum LIBSAMPLE_API InValue {
     ZeroIn,
     OneIn,
     TwoIn
 };
 
-enum OutValue {
+enum LIBSAMPLE_API OutValue {
     ZeroOut,
     OneOut,
     TwoOut
 };
 
-OutValue enumInEnumOut(InValue in);
+LIBSAMPLE_API OutValue enumInEnumOut(InValue in);
 
-int getNumber(Option opt);
+LIBSAMPLE_API int getNumber(Option opt);
 
-inline double powerOfTwo(double num) {
+LIBSAMPLE_API inline double powerOfTwo(double num) {
     return num * num;
 }
 

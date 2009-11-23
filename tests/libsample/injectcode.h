@@ -35,10 +35,11 @@
 #ifndef INJECTCODE_H
 #define INJECTCODE_H
 
+#include "libsamplemacros.h"
 #include <utility>
 #include <string>
 
-class InjectCode
+class LIBSAMPLE_API InjectCode
 {
 public:
     InjectCode();

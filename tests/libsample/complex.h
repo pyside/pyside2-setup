@@ -35,7 +35,9 @@
 #ifndef COMPLEX_H
 #define COMPLEX_H
 
-class Complex
+#include "libsamplemacros.h"
+
+class LIBSAMPLE_API Complex
 {
 public:
     Complex(double real = 0.0, double imag = 0.0);

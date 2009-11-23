@@ -39,7 +39,9 @@
 #include "complex.h"
 #include "point.h"
 
-class ListUser
+#include "libsamplemacros.h"
+
+class LIBSAMPLE_API ListUser
 {
 public:
     typedef std::list<Point*> PointList;

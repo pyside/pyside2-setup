@@ -35,7 +35,9 @@
 #ifndef ODDBOOL_H
 #define ODDBOOL_H
 
-class OddBool
+#include "libsamplemacros.h"
+
+class LIBSAMPLE_API OddBool
 {
 
 public:
@@ -55,7 +57,7 @@ inline bool operator!=(OddBool b1, bool b2) { return !b1 != !b2; }
 inline bool operator!=(bool b1, OddBool b2) { return !b1 != !b2; }
 inline bool operator!=(OddBool b1, OddBool b2) { return !b1 != !b2; }
 
-class OddBoolUser
+class LIBSAMPLE_API OddBoolUser
 {
 public:
     OddBoolUser() : m_oddbool(OddBool(false)) {};

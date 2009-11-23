@@ -35,21 +35,23 @@
 #ifndef MDERIVED_H
 #define MDERIVED_H
 
-class MBase1
+#include "libsamplemacros.h"
+
+class LIBSAMPLE_API MBase1
 {
 public:
     ~MBase1() {}
     virtual const char* name() { return "MBase"; }
 };
 
-class MBase2
+class LIBSAMPLE_API MBase2
 {
 public:
     ~MBase2() {}
     virtual const char* funcName() { return "MBase2.funcName"; }
 };
 
-class MDerived : public MBase1, public MBase2
+class LIBSAMPLE_API MDerived : public MBase1, public MBase2
 {
 public:
     MDerived();

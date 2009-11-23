@@ -38,7 +38,9 @@
 #include "complex.h"
 #include <utility>
 
-class Point
+#include "libsamplemacros.h"
+
+class LIBSAMPLE_API Point
 {
 public:
     Point(int x = 0, int y = 0);
@@ -63,12 +65,12 @@ public:
     Point operator+(const Point& other);
     Point operator-(const Point& other);
 
-    friend Point operator*(const Point& pt, double mult);
-    friend Point operator*(const Point& pt, int mult);
-    friend Point operator*(double mult, const Point& pt);
-    friend Point operator*(int mult, const Point& pt);
-    friend Point operator-(const Point& pt);
-    friend bool operator!(const Point& pt);
+    friend LIBSAMPLE_API Point operator*(const Point& pt, double mult);
+    friend LIBSAMPLE_API Point operator*(const Point& pt, int mult);
+    friend LIBSAMPLE_API Point operator*(double mult, const Point& pt);
+    friend LIBSAMPLE_API Point operator*(int mult, const Point& pt);
+    friend LIBSAMPLE_API Point operator-(const Point& pt);
+    friend LIBSAMPLE_API bool operator!(const Point& pt);
 
     Point& operator+=(Point &other);
     Point& operator-=(Point &other);
@@ -80,17 +82,17 @@ private:
     double m_y;
 };
 
-Point operator*(const Point& pt, double mult);
-Point operator*(const Point& pt, int mult);
-Point operator*(double mult, const Point& pt);
-Point operator*(int mult, const Point& pt);
-Point operator-(const Point& pt);
-bool operator!(const Point& pt);
+LIBSAMPLE_API Point operator*(const Point& pt, double mult);
+LIBSAMPLE_API Point operator*(const Point& pt, int mult);
+LIBSAMPLE_API Point operator*(double mult, const Point& pt);
+LIBSAMPLE_API Point operator*(int mult, const Point& pt);
+LIBSAMPLE_API Point operator-(const Point& pt);
+LIBSAMPLE_API bool operator!(const Point& pt);
 
-Complex transmutePointIntoComplex(const Point& point);
-Point transmuteComplexIntoPoint(const Complex& cpx);
+LIBSAMPLE_API Complex transmutePointIntoComplex(const Point& point);
+LIBSAMPLE_API Point transmuteComplexIntoPoint(const Complex& cpx);
 
-Point operator*(const Point& pt, double multiplier);
+LIBSAMPLE_API Point operator*(const Point& pt, double multiplier);
 
 #endif // POINT_H
 

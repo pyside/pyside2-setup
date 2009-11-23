@@ -38,7 +38,9 @@
 #include "size.h"
 #include "point.h"
 
-class Overload
+#include "libsamplemacros.h"
+
+class LIBSAMPLE_API Overload
 {
 public:
     enum FunctionEnum {

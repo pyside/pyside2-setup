@@ -35,7 +35,9 @@
 #ifndef ECHO_H
 #define ECHO_H
 
-class Echo
+#include "libsamplemacros.h"
+
+class LIBSAMPLE_API Echo
 {
 public:
     Echo(){}

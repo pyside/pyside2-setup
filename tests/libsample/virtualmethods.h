@@ -39,7 +39,9 @@
 #include "complex.h"
 #include "str.h"
 
-class VirtualMethods
+#include "libsamplemacros.h"
+
+class LIBSAMPLE_API VirtualMethods
 {
 public:
     VirtualMethods() {}

@@ -35,41 +35,42 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
+#include "libsamplemacros.h"
 #include <list>
 #include <utility>
 #include "complex.h"
 #include "objecttype.h"
 
-enum GlobalEnum {
+enum LIBSAMPLE_API GlobalEnum {
     NoThing,
     FirstThing,
     SecondThing,
     ThirdThing
 };
 
-enum GlobalOverloadFuncEnum {
+enum LIBSAMPLE_API GlobalOverloadFuncEnum {
     GlobalOverloadFunc_i,
     GlobalOverloadFunc_d
 };
 
-void printSomething();
-int gimmeInt();
-double gimmeDouble();
-double multiplyPair(std::pair<double, double> pair);
-std::list<Complex> gimmeComplexList();
-Complex sumComplexPair(std::pair<Complex, Complex> cpx_pair);
+LIBSAMPLE_API void printSomething();
+LIBSAMPLE_API int gimmeInt();
+LIBSAMPLE_API double gimmeDouble();
+LIBSAMPLE_API double multiplyPair(std::pair<double, double> pair);
+LIBSAMPLE_API std::list<Complex> gimmeComplexList();
+LIBSAMPLE_API Complex sumComplexPair(std::pair<Complex, Complex> cpx_pair);
 
-int countCharacters(const char* text);
-char* makeCString();
-const char* returnCString();
+LIBSAMPLE_API int countCharacters(const char* text);
+LIBSAMPLE_API char* makeCString();
+LIBSAMPLE_API const char* returnCString();
 
-char* returnNullPrimitivePointer();
-ObjectType* returnNullObjectTypePointer();
-Event* returnNullValueTypePointer();
+LIBSAMPLE_API char* returnNullPrimitivePointer();
+LIBSAMPLE_API ObjectType* returnNullObjectTypePointer();
+LIBSAMPLE_API Event* returnNullValueTypePointer();
 
 // Tests overloading on functions (!methods)
-GlobalOverloadFuncEnum overloadedFunc(int val);
-GlobalOverloadFuncEnum overloadedFunc(double val);
+LIBSAMPLE_API GlobalOverloadFuncEnum overloadedFunc(int val);
+LIBSAMPLE_API GlobalOverloadFuncEnum overloadedFunc(double val);
 
 #endif // FUNCTIONS_H
 

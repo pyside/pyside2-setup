@@ -38,7 +38,9 @@
 #include <utility>
 #include "complex.h"
 
-class PairUser
+#include "libsamplemacros.h"
+
+class LIBSAMPLE_API PairUser
 {
 public:
     PairUser() {}

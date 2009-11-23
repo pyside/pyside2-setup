@@ -35,10 +35,11 @@
 #ifndef MODIFICATIONS_H
 #define MODIFICATIONS_H
 
+#include "libsamplemacros.h"
 #include <utility>
 #include "point.h"
 
-class Modifications
+class LIBSAMPLE_API Modifications
 {
 public:
     Modifications() {}
@@ -106,7 +107,7 @@ public:
     virtual const char* className();
 };
 
-class AbstractModifications : public Modifications
+class LIBSAMPLE_API AbstractModifications : public Modifications
 {
 public:
     AbstractModifications() {}

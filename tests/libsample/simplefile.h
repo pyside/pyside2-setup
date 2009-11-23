@@ -35,9 +35,10 @@
 #ifndef SIMPLEFILE_H
 #define SIMPLEFILE_H
 
+#include "libsamplemacros.h"
 #include <stdio.h>
 
-class SimpleFile
+class LIBSAMPLE_API SimpleFile
 {
 public:
     explicit SimpleFile(const char* filename)

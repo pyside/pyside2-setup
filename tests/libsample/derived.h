@@ -35,14 +35,15 @@
 #ifndef DERIVED_H
 #define DERIVED_H
 
+#include "libsamplemacros.h"
 #include "abstract.h"
 
-enum OverloadedFuncEnum {
+enum LIBSAMPLE_API OverloadedFuncEnum {
     OverloadedFunc_ii,
     OverloadedFunc_d
 };
 
-class Derived : public Abstract
+class LIBSAMPLE_API Derived : public Abstract
 {
 public:
     enum OtherOverloadedFuncEnum {

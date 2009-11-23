@@ -35,7 +35,9 @@
 #ifndef NONDEFAULTCTOR_H
 #define NONDEFAULTCTOR_H
 
-class NonDefaultCtor
+#include "libsamplemacros.h"
+
+class LIBSAMPLE_API NonDefaultCtor
 {
     int m_value;
 public:

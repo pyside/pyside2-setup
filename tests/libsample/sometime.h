@@ -35,11 +35,12 @@
 #ifndef SOMETIME_H
 #define SOMETIME_H
 
+#include "libsamplemacros.h"
 #include "str.h"
 #include "implicitconv.h"
 #include "objecttype.h"
 
-class Time
+class LIBSAMPLE_API Time
 {
 public:
     enum NumArgs {

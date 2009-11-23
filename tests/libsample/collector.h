@@ -36,8 +36,9 @@
 #define COLLECTOR_H
 
 #include <list>
+#include "libsamplemacros.h"
 
-class Collector
+class LIBSAMPLE_API Collector
 {
 public:
     Collector() {}
@@ -59,7 +60,7 @@ private:
 };
 
 /* Helper for testing external operators */
-class IntWrapper
+class LIBSAMPLE_API IntWrapper
 {
 public:
     IntWrapper(int x=0):value(x){}
@@ -67,7 +68,7 @@ public:
     int value;
 };
 
-Collector &operator<<(Collector&, const IntWrapper&);
+LIBSAMPLE_API Collector &operator<<(Collector&, const IntWrapper&);
 
 #endif // COLLECTOR_H
 

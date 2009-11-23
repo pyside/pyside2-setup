@@ -35,7 +35,9 @@
 #ifndef ABSTRACT_H
 #define ABSTRACT_H
 
-class Abstract
+#include "libsamplemacros.h"
+
+class LIBSAMPLE_API Abstract
 {
 public:
     enum PrintFormat {

@@ -38,7 +38,9 @@
 #include <list>
 #include "str.h"
 
-struct Event
+#include "libsamplemacros.h"
+
+struct LIBSAMPLE_API Event
 {
     enum EventType {
         NO_EVENT,
@@ -52,7 +54,7 @@ private:
     EventType m_eventType;
 };
 
-class ObjectType
+class LIBSAMPLE_API ObjectType
 {
 public:
     typedef std::list<ObjectType*> ObjectTypeList;

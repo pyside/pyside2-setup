@@ -40,7 +40,9 @@
 #include <utility>
 #include "complex.h"
 
-class MapUser
+#include "libsamplemacros.h"
+
+class LIBSAMPLE_API MapUser
 {
 public:
     MapUser() {}

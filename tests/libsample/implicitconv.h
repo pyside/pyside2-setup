@@ -35,7 +35,9 @@
 #ifndef IMPLICITCONV_H
 #define IMPLICITCONV_H
 
-class ImplicitConv
+#include "libsamplemacros.h"
+
+class LIBSAMPLE_API ImplicitConv
 {
 public:
     enum CtorEnum {
