@@ -67,14 +67,16 @@ add_custom_target(dist
         | bzip2 > ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
-install(TARGETS genrunner DESTINATION ${LIB_INSTALL_DIR})
+install(TARGETS genrunner LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+                          ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+                          RUNTIME DESTINATION bin)
 install(TARGETS generatorrunner DESTINATION bin)
 install(FILES generator.h DESTINATION include/generatorrunner)
 install(FILES generatorrunnermacros.h DESTINATION include/generatorrunner)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generatorrunner.pc DESTINATION
         ${LIB_INSTALL_DIR}/pkgconfig)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FindGeneratorRunner.cmake
-        DESTINATION share/cmake-2.6/Modules)
+        DESTINATION "share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules")
 
 #FIXME: manpages should be installed only on Linux targets
 file(GLOB manpages ${CMAKE_CURRENT_SOURCE_DIR}/*.1)
