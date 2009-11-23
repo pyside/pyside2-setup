@@ -74,20 +74,6 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
                    CodeSnip::Declaration, TypeSystem::NativeCode);
 
     if (metaClass->isPolymorphic() && !metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
-        /*
-         * BOTOWTI (Beast of The Old World to be Investigated)
-        // detect the held type
-        QString held_type = metaClass->typeEntry()->heldTypeValue();
-        if (held_type.isEmpty() && createWrapper) {
-            held_type = "qptr";
-        }
-
-        if (!held_type.isEmpty()) {
-            s << "// held type forward decalration" << endl;
-            s << "template<typename T> class " << held_type << ';' << endl;
-        }
-        */
-
         // Class
         s << "class " << wrapperName;
         s << " : public " << metaClass->qualifiedCppName();
