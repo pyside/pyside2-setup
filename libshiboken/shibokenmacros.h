@@ -40,9 +40,9 @@
 // Generic helper definitions for shared library support
 #if defined _WIN32 || defined __CYGWIN__
     #if LIBSHIBOKEN_BUILD
-        #define LIBSHIBOKEN_API __declspec(dllimport)
-    #else
         #define LIBSHIBOKEN_API __declspec(dllexport)
+    #else
+        #define LIBSHIBOKEN_API __declspec(dllimport)
     #endif
 #else
 #if __GNUC__ >= 4
