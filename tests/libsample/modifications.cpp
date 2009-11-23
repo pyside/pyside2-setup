@@ -85,7 +85,7 @@ Modifications::increment(int number)
 void
 Modifications::exclusiveCppStuff()
 {
-    cout << __PRETTY_FUNCTION__ << endl;
+    cout << __FUNCTION__ << endl;
 }
 
 int

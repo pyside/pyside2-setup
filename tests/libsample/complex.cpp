@@ -40,7 +40,6 @@ using namespace std;
 Complex::Complex(double real, double imag)
     : m_real(real), m_imag(imag)
 {
-    // cout << __PRETTY_FUNCTION__ << "[real=0.0, imag=0.0]" << endl;
 }
 
 Complex

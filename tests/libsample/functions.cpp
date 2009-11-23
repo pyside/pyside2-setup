@@ -41,7 +41,7 @@ using namespace std;
 void
 printSomething()
 {
-    cout << __PRETTY_FUNCTION__ << endl;
+    cout << __FUNCTION__ << endl;
 }
 
 int
@@ -102,7 +102,7 @@ makeCString()
 const char*
 returnCString()
 {
-    return __PRETTY_FUNCTION__;
+    return __FUNCTION__;
 }
 
 GlobalOverloadFuncEnum

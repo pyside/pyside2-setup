@@ -39,16 +39,10 @@ using namespace std;
 
 Derived::Derived(int id) : Abstract(id)
 {
-    //cout << __PRETTY_FUNCTION__;
-    //show();
-    //cout << endl;
 }
 
 Derived::~Derived()
 {
-    //cout << __PRETTY_FUNCTION__;
-    //show();
-    //cout << endl;
 }
 
 Abstract*
@@ -61,54 +55,46 @@ Derived::createObject()
 void
 Derived::pureVirtual()
 {
-    //cout << __PRETTY_FUNCTION__ << endl;
 }
 
 void
 Derived::unpureVirtual()
 {
-    //cout << __PRETTY_FUNCTION__ << endl;
 }
 
 bool
 Derived::singleArgument(bool b)
 {
-    //cout << __PRETTY_FUNCTION__ << endl;
     return !b;
 }
 
 double
 Derived::defaultValue(int n)
 {
-    //cout << __PRETTY_FUNCTION__ << "[n = 0]" << endl;
     return ((double) n) + 0.1;
 }
 
 OverloadedFuncEnum
 Derived::overloaded(int i, int d)
 {
-    //cout << __PRETTY_FUNCTION__ << "[i = 0, d = 0]" << endl;
     return OverloadedFunc_ii;
 }
 
 OverloadedFuncEnum
 Derived::overloaded(double n)
 {
-    //cout << __PRETTY_FUNCTION__ << endl;
     return OverloadedFunc_d;
 }
 
 Derived::OtherOverloadedFuncEnum
 Derived::otherOverloaded(int a, int b, bool c, double d)
 {
-    //cout << __PRETTY_FUNCTION__ << endl;
     return OtherOverloadedFunc_iibd;
 }
 
 Derived::OtherOverloadedFuncEnum
 Derived::otherOverloaded(int a, double b)
 {
-    //cout << __PRETTY_FUNCTION__ << endl;
     return OtherOverloadedFunc_id;
 }
 
