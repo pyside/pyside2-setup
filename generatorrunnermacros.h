@@ -31,13 +31,15 @@
     #else
         #define GENRUNNER_API __declspec(dllimport)
     #endif
+	// dont worry about deprecated functions under windows
+	#define GENRUNNER_DEPRECATED
 #else
     #if __GNUC__ >= 4
         #define GENRUNNER_API __attribute__ ((visibility("default")))
     #else
         #define GENRUNNER_API
     #endif
+	#define GENRUNNER_DEPRECATED __attribute__ ((deprecated))
 #endif
 
-#define GENRUNNER_DEPRECATED __attribute__ ((deprecated))
 #endif
