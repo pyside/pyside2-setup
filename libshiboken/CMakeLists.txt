@@ -22,8 +22,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 add_library(libshiboken SHARED ${libshiboken_SRC})
 set_property(TARGET libshiboken PROPERTY PREFIX "")
 target_link_libraries(libshiboken
-                      ${PYTHON_LIBRARIES}
-                      -lutil)
+                      ${PYTHON_LIBRARIES})
 
 install(DIRECTORY . DESTINATION include/shiboken
         FILES_MATCHING PATTERN "*.h"
