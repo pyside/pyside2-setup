@@ -48,7 +48,7 @@ static void printOptions(QTextStream& s, const QMap<QString, QString>& options) 
     }
 }
 
-typedef QLinkedList<Generator*> (*getGeneratorsFunc)();
+typedef void (*getGeneratorsFunc)(QLinkedList<Generator*>*);
 
 QMap<QString, QString> getCommandLineArgs(int argc, char** argv)
 {
@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
         QLibrary plugin(generatorFile);
         getGeneratorsFunc getGenerators = (getGeneratorsFunc)plugin.resolve("getGenerators");
         if (getGenerators)
-            generators = getGenerators();
+            getGenerators(&generators);
         else {
             std::cerr << argv[0] << ": Error loading generatorset plugin: " << qPrintable(plugin.errorString()) << std::endl;
             return EXIT_FAILURE;

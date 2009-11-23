@@ -35,9 +35,9 @@ class AbstractMetaBuilder;
 class QFile;
 
 #define EXPORT_GENERATOR_PLUGIN(X)\
-extern "C" GENRUNNER_API GeneratorList getGenerators()\
+extern "C" GENRUNNER_EXPORT void getGenerators(GeneratorList* list)\
 {\
-    return GeneratorList() << X;\
+    *list << X;\
 }\
 
 GENRUNNER_API
