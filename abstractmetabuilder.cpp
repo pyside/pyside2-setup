@@ -2575,6 +2575,9 @@ AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const Abstra
                 // check methods with default args
                 QString defaultExpression = arg->originalDefaultValueExpression();
                 if (!defaultExpression.isEmpty()) {
+                    if ((defaultExpression == "0") && (arg->type()->isValue()))
+                        defaultExpression = arg->type()->name();
+
                     defaultExpression.replace(regex1, "");
                     defaultExpression.replace(regex2, "");
                 }
