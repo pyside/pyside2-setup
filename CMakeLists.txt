@@ -115,4 +115,4 @@ install(TARGETS apiextractor LIBRARY DESTINATION ${LIB_INSTALL_DIR}
                              RUNTIME DESTINATION bin)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/apiextractor.pc DESTINATION ${LIB_INSTALL_DIR}/pkgconfig)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FindApiExtractor.cmake
-        DESTINATION share/cmake-2.6/Modules)
+        DESTINATION "share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules")
