@@ -1,14 +1,170 @@
+2009-11-19  Hugo Lima <hugo.lima@openbossa.org>
+
+  * generator.cpp: Fix the formatCode function (again).  Reviewed by Marcelo
+  Lira <marcelo.lira@openbossa.org>
+
+  * generator.cpp: Fix the formatCode function.  Reviewed by Marcelo Lira
+  <marcelo.lira@openbossa.org>
+
+2009-11-18  Hugo Lima <hugo.lima@openbossa.org>
+
+  * main.cpp: Delete all generators at exit.  Reviewed by Marcelo Lira
+  <marcelo.lira@openbossa.org>
+
+  * main.cpp: Creates the output directory if it doesn't exists.
+
+2009-11-17  Hugo Lima <hugo.lima@openbossa.org>
+
+  * generators/qtdoc/qtdocgenerator.cpp: Remove two compilation warnings from
+  qtdoc generator.  Reviewed by Renato Araujo <renato.filho@openbossa.org>
+
+  * generator.cpp, generator.h, generatorrunnermacros.h: - Prepare
+  libgenerator.so for a near future when we will need to worry about BIC
+  changes, Now it uses a d-pointer and do not export private
+  methods/structures. - Mark some methods as deprecated, as they doesn't belong
+  to Generator, being a huge cohesion failure IMO. - Fixed constness of some
+  methods.  Deprecated methods: AbstractMetaFunctionList filterFunctions(const
+  AbstractMetaClass *cppClass); AbstractMetaFunctionList queryFunctions(const
+  AbstractMetaClass *cpp_class, bool all_function = false);
+  AbstractMetaFunctionList queryGlobalOperators(const AbstractMetaClass
+  *cpp_class); AbstractMetaFunctionList
+  sortConstructor(AbstractMetaFunctionList list);  Moved method:
+  verifyDirectoryFor is now a ordinary global function like formatCode, because
+  it's a helper function not related with code generation.  All these methods
+  would be somewhere/somehow in APIExtractor, because they are basically helper
+  methods to supply some APIExtractor missing functionalities.  Note: Shiboken
+  and BoostPython generator needs some minor fixes to adapt to changed caused
+  by this patch.
+
+  * generator.cpp: Remove duplicated documentation.
+
+  * CMakeLists.txt: Fixes bug91  Create only one symlink, libgenrunner.so,
+  pointing to libgenrunner.so.x.y.z
+
+  * CMakeLists.txt, generator.h, generatorrunnermacros.h,
+  generators/qtdoc/qtdocgenerator.h: Add symbol visibility rules to generator
+  runner.
+
+2009-10-30  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * generator.cpp, generator.h: added Generator::implicitConversions(type)
+  method that returns the constructors for implicit conversions for the given
+  type, which should be a value-type  Reviewed by Hugo Parente
+  <hugo.lima@openbossa.org>
+
+  * generator.cpp, generator.h: fixed typo in Generator::sortConstructor method
+  name
+
+2009-10-27  Lauro Neto <lauro.neto@openbossa.org>
+
+  * CMakeLists.txt: Fix SOVERSION/VERSION  SOVERSION -> MAJOR_VERSION VERSION
+  -> full VERSION
+
+2009-10-26  Hugo Lima <hugo.lima@openbossa.org>
+
+  * generator.h: Add the missing qflags macro to Options qflag.
+
 2009-10-26  Marcelo Lira <marcelo.lira@openbossa.org>
 
-  * moved BoostPythonGenerator out of GeneratorRunner and created
-    a separated project for the latter.
+  * generatorrunner.1: applied patch from  Didier Raboud, to fix mixed hyphens
+  and minuses on manpage.
+
+  * doc/images/boostgenarch.png, doc/images/genrunnerarch.png: renamed
+  generator architecture diagram file to a proper name
+
+  * doc/images/boostgenarch.png, doc/images/boostgenarch.svg,
+  doc/images/genrunnerarch.svg: updated generator architecture diagram for
+  Generator Runner
+
+  * CMakeLists.txt, tests/CMakeLists.txt, tests/sphinxtabletest.cpp,
+  tests/sphinxtabletest.h: readded tests for qtdoc generator that were left
+  behind when forking from boostpythongenerator
+
+  * CMakeLists.txt, ChangeLog, Doxyfile, boostpythongenerator.1, doc/Makefile,
+  doc/_templates/index.html, doc/compiling/cmake-primer.rst,
+  doc/compiling/setup-generator.rst, doc/conf.py, doc/overview.rst,
+  doc/tutorial/bindinglibfoo.rst, doc/tutorial/buildingthebinding.rst,
+  doc/tutorial/globalheader.rst, doc/tutorial/images/generatorworkings.png,
+  doc/tutorial/images/generatorworkings.svg, doc/tutorial/introduction.rst,
+  doc/tutorial/libfoo.rst, doc/tutorial/typesystemcreation.rst,
+  generatorrunner.1, generatorrunner.pc.in, generators/CMakeLists.txt,
+  generators/boostpython/CMakeLists.txt,
+  generators/boostpython/boostpython.cpp,
+  generators/boostpython/boostpythongenerator.cpp,
+  generators/boostpython/boostpythongenerator.h,
+  generators/boostpython/convertergenerator.cpp,
+  generators/boostpython/convertergenerator.h,
+  generators/boostpython/cppgenerator.cpp,
+  generators/boostpython/cppgenerator.h,
+  generators/boostpython/hppgenerator.cpp,
+  generators/boostpython/hppgenerator.h, generators/boostpython/main.cpp,
+  generators/qtdoc/main.cpp, generators/qtdoc/qtdocgenerator.cpp,
+  generators/qtdoc/qtdocgenerator.h, main.cpp, tests/CMakeLists.txt,
+  tests/Makefile, tests/foo_test.py, tests/foobinding/Makefile,
+  tests/foobinding/foo/Makefile, tests/foobinding/global.h,
+  tests/foobinding/typesystem_foo.xml, tests/libfoo/Makefile,
+  tests/libfoo/bar.cpp, tests/libfoo/bar.h, tests/libfoo/foo.cpp,
+  tests/libfoo/foo.h, tests/libfoo/main.cpp, tests/sphinxtabletest.cpp,
+  tests/sphinxtabletest.h: forked boostpythongenerator project to separate the
+  generatorrunner so that it could be used independently; the qtdoc generator
+  module remained part of generatorrunner
+
+2009-10-21  Hugo Lima <hugo.lima@openbossa.org>
+
+  * doc/_themes/pysidedocs/static/logo_openbossa.png,
+  doc/_themes/pysidedocs/static/pysidedocs.css: Fixed the openbossa logo on the
+  pysidedocs theme.
+
+  * doc/_templates/index.html, doc/_templates/layout.html,
+  doc/_themes/pysidedocs/defindex.html,
+  doc/_themes/pysidedocs/genindex-single.html,
+  doc/_themes/pysidedocs/genindex-split.html,
+  doc/_themes/pysidedocs/genindex.html, doc/_themes/pysidedocs/layout.html,
+  doc/_themes/pysidedocs/modindex.html, doc/_themes/pysidedocs/opensearch.xml,
+  doc/_themes/pysidedocs/page.html, doc/_themes/pysidedocs/search.html,
+  doc/_themes/pysidedocs/static/.directory,
+  doc/_themes/pysidedocs/static/bg_header.png,
+  doc/_themes/pysidedocs/static/bg_topo.jpg,
+  doc/_themes/pysidedocs/static/doctools.js,
+  doc/_themes/pysidedocs/static/fakebar.png,
+  doc/_themes/pysidedocs/static/jquery.js,
+  doc/_themes/pysidedocs/static/logo_indt.jpg,
+  doc/_themes/pysidedocs/static/logo_openbossa.png,
+  doc/_themes/pysidedocs/static/logo_python.jpg,
+  doc/_themes/pysidedocs/static/logo_qt.png,
+  doc/_themes/pysidedocs/static/pysidedocs.css,
+  doc/_themes/pysidedocs/static/pysidelogo.png,
+  doc/_themes/pysidedocs/static/relbar_bg.png,
+  doc/_themes/pysidedocs/static/searchtools.js,
+  doc/_themes/pysidedocs/theme.conf, doc/conf.py: Added pysidedocs theme to the
+  generatorrunner documentation.
+
+2009-10-21  renato araujo <renato@renato-mac.osmtc.indt.org.br>
+
+  * generators/boostpython/boostpythongenerator.cpp,
+  generators/boostpython/cppgenerator.cpp,
+  generators/boostpython/hppgenerator.cpp: Implemented support to
+  conversion-rule tag.  Reviwed by: Marcelo Lira <marcelo.lira@openbossa.org>
+
+2009-10-20  renato araujo <renato@renato-mac.osmtc.indt.org.br>
+
+  * generators/boostpython/cppgenerator.cpp: Created execption handle for
+  virtual functions.
+
+2009-10-05  Lauro Neto <lauro.neto@openbossa.org>
+
+  * CMakeLists.txt: Bump to 0.3.2
+
+2009-10-02  Lauro Neto <lauro.neto@openbossa.org>
+
+  * ChangeLog: Update changelog for 0.3.1
 
 2009-09-28  Hugo Lima <hugo.lima@openbossa.org>
 
   * main.cpp: reinterpert_cast replaced by a C-style cast, to avoid compiler
   errors on some plataforms.  Cast an object pointer to a function pointer is
   an undefinied behaviour in some exotic platforms, so some compiler raise a
-  flag against it. However if we use a C-style cast the compiler ignores it.
+  flag against it. However if we use a C-style cast the compiler ignores it. 
   This problem is related to the QLibrary API returning a void* instead of a
   generic function pointer.
 
