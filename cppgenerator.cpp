@@ -274,9 +274,9 @@ void CppGenerator::writeConstructorNative(QTextStream& s, const AbstractMetaFunc
     s << " : ";
     writeFunctionCall(s, func);
     s << " {" << endl;
-    writeCodeSnips(s, getCodeSnips(func), CodeSnip::Beginning, TypeSystem::All, func);
+    writeCodeSnips(s, getCodeSnips(func), CodeSnip::Beginning, TypeSystem::NativeCode, func);
     s << INDENT << "// ... middle" << endl;
-    writeCodeSnips(s, getCodeSnips(func), CodeSnip::End, TypeSystem::All, func);
+    writeCodeSnips(s, getCodeSnips(func), CodeSnip::End, TypeSystem::NativeCode, func);
     s << '}' << endl << endl;
 }
 
