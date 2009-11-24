@@ -1308,6 +1308,8 @@ public:
               m_hasNonPrivateConstructor(false),
               m_functionsFixed(false),
               m_hasPrivateDestructor(false),
+              m_hasProtectedDestructor(false),
+              m_hasVirtualDestructor(false),
               m_forceShellClass(false),
               m_hasHashFunction(false),
               m_hasEqualsOperator(false),
@@ -1362,6 +1364,26 @@ public:
     void setHasPrivateDestructor(bool value)
     {
         m_hasPrivateDestructor = value;
+    }
+
+    bool hasProtectedDestructor() const
+    {
+        return m_hasProtectedDestructor;
+    }
+
+    void setHasProtectedDestructor(bool value)
+    {
+        m_hasProtectedDestructor = value;
+    }
+
+    bool hasVirtualDestructor() const
+    {
+        return m_hasVirtualDestructor;
+    }
+
+    void setHasVirtualDestructor(bool value)
+    {
+        m_hasVirtualDestructor = value;
     }
 
     AbstractMetaFunctionList queryFunctionsByName(const QString &name) const;
@@ -1757,6 +1779,8 @@ private:
     uint m_hasNonPrivateConstructor : 1;
     uint m_functionsFixed : 1;
     uint m_hasPrivateDestructor : 1;
+    uint m_hasProtectedDestructor : 1;
+    uint m_hasVirtualDestructor : 1;
     uint m_forceShellClass : 1;
     uint m_hasHashFunction : 1;
     uint m_hasEqualsOperator : 1;
