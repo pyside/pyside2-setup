@@ -1,3 +1,259 @@
+2009-11-23  renato araujo oliveira <renato@renato-note.(none)>
+
+  * abstractmetabuilder.cpp: Fix topological sort for args with default
+  expression 0 and value type.  Reviewed by Lauro Moura
+  <lauro.moura@openbossa.org>
+
+2009-11-20  Hugo Lima <hugo.lima@openbossa.org>
+
+  * CMakeLists.txt: - Fixes flags used with msvc. - Set the library output path
+  to the tests directory, so the unit tests can find the apiextractory library
+  on windows.  Reviewed by Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * FindApiExtractor.cmake.in: Fixes various bugs on FindApiExtractor.cmake
+  found when trying to compile generatorrunner on other platforms.
+
+  * abstractmetalang.h: Export AbstractMetaField class.
+
+  * reporthandler.cpp, typesystem.cpp, typesystem.h: Do not export global
+  variables used only in typesystem.cpp.
+
+  * CMakeLists.txt: Fix install command, so it works on windows. When compiling
+  with msvc, use msvc specific flags, not the gcc ones.
+
+  * reporthandler.cpp, reporthandler.h: Export a minimal set of classes in
+  ReportHandler interface, to speep up compilation and avoid link errors on
+  windows.
+
+2009-11-19  Hugo Lima <hugo.lima@openbossa.org>
+
+  * typesystem.cpp: Do not exit with a assertion failure when the typesystem
+  was not found.  Reviewed by Marcelo Lira <marcelo.lira@openbossa.org>
+
+2009-11-18  Hugo Lima <hugo.lima@openbossa.org>
+
+  * fileout.cpp: Do not attempt to write/read a file when the file name is a
+  empty string.  Reviewed by Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * apiextractormacros.h: Fix windows macros for dll export/import.  Reviewed
+  by Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * CMakeLists.txt, parser/rpp/pp-main.cpp: Removed unused parser file.
+
+2009-11-16  Hugo Lima <hugo.lima@openbossa.org>
+
+  * tests/testabstractmetaclass.cpp, tests/testabstractmetatype.cpp: Fix
+  apiextractor unit tests.  Reviewed by Marcelo Lira
+  <marcelo.lira@openbossa.org>
+
+  * abstractmetalang.cpp, typesystem.h: Add public visibility for more classes.
+   Reviewed by Marcelo Lira <marcelo.lira@openbossa.org>
+
+2009-11-12  Hugo Lima <hugo.lima@openbossa.org>
+
+  * typesystem.h: Remove CustomTypeEntry class
+
+  * typesystem.h: Remove JObjectWrapperTypeEntry class
+
+  * typesystem.h: Remove QThreadTypeEntry class
+
+2009-11-16  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * typesystem.cpp: The type system parser now reuses TypeSystemTypeEntry for
+  the any module file being parsed. The existing module retrieval is based on
+  the module name given as attribute of the "typesystem" tag. This allows helps
+  when a single module is described on multiple type system files.  Reviewed by
+  Renato Araujo <renato.filho@openbossa.org>
+
+2009-11-14  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * typesystem.cpp: fixed the appending of code injection to the module;
+  previously only code injected from a file was being stored correctly in the
+  module object, code written inside the 'inject-code' tag was always lost
+
+2009-11-09  Luciano Wolf <luciano.wolf@openbossa.org>
+
+  * doc/typesystem_specifying_types.rst: Documentation for container-type tag
+  into typesystem.  Reviewed by Hugo Parente <hugo.lima@openbossa.org>
+
+2009-11-05  Hugo Lima <hugo.lima@openbossa.org>
+
+  * abstractmetabuilder.cpp, tests/CMakeLists.txt,
+  tests/testreverseoperators.cpp, tests/testreverseoperators.h: - All reverse
+  operators are now properly tagged as "reverse operator". - Reverse operators
+  aren't tagged as static methods anymore. - Reverse operators now have just
+  one parameter, the one that matters.  Reviewed by Marcelo Lira
+  <marcelo.lira@openbossa.org>
+
+2009-11-03  Lauro Neto <lauro.neto@openbossa.org>
+
+  * abstractmetabuilder.cpp: Remove the stream argument when modifying <</>> 
+  The global operator function was being added to a class' method list but
+  without modifying the argument list by removing the owner class.  It was
+  removed a long time ago when working on boostpythongenerator.  Reviewed by
+  Hugo Parente <hugo.lima@openbossa.org>
+
+2009-10-31  Lauro Neto <lauro.neto@openbossa.org>
+
+  * abstractmetabuilder.cpp, doc/typesystem_specifying_types.rst: Use isStream
+  instead of hardcoding QDataStream  Also added documentation
+
+  * typesystem.cpp, typesystem.h: Adding support to attribute stream in
+  TypeEntry
+
+  * abstractmetabuilder.cpp, abstractmetalang.h: Add m_stream attribute to
+  AbstractMetaClass
+
+2009-11-09  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * abstractmetabuilder.cpp: The AbstractMetaBuilder::traverseFunction method
+  for added functions now decide the usage pattern for the AbstractMetaTypes of
+  the arguments.  Reviewed by Hugo Parente <hugo.lima@openbossa.org>
+
+2009-11-05  renato araujo oliveira <renato@renato-note.(none)>
+
+  * typesystem.cpp: Propagate generate flag for child typesystems.  Reviewed by
+  Hugo Parente <hugo.lima@openbossa.org>
+
+2009-10-30  Hugo Lima <hugo.lima@openbossa.org>
+
+  * typesystem.cpp: Add "()" to the function signature of functions without
+  parenteses. Without this the function without parenteses will be like an
+  alien to all others APIExtractor functions.  Reviewed by Marcelo Lira
+  <marcelo.lira@openbossa.org>
+
+  * abstractmetalang.cpp, abstractmetalang.h, tests/testaddfunction.cpp,
+  typesystem.h: Added convenience method
+  AbstractMetaFunction::injectedCodeSnips.  It returns all code snips in a
+  function.
+
+  * abstractmetalang.cpp, abstractmetalang.h: Added convenience method
+  AbstractMetaClass::findFunction.  This function returns the first
+  AbstractMetaFunction found with a given name or a null pointer if no
+  functions were found.
+
+2009-10-29  Hugo Lima <hugo.lima@openbossa.org>
+
+  * tests/testaddfunction.cpp, tests/testaddfunction.h, typesystem.cpp: Fix a
+  crash when the function signature provided by add-function tag does not have
+  parenteses.  Reviewed by Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * doc/typesystem_arguments.rst, doc/typesystem_manipulating_objects.rst:
+  Updated documentation of conversion-rule for argument-modification.  Reviewed
+  by Luciano Wolf <luciano.wolf@openbossa.org>
+
+2009-10-23  Hugo Lima <hugo.lima@openbossa.org>
+
+  * doc/typesystem_manipulating_objects.rst,
+  doc/typesystem_specifying_types.rst: Added documentation for tag
+  conversion-rule.
+
+2009-10-22  Hugo Lima <hugo.lima@openbossa.org>
+
+  * abstractmetabuilder.cpp, tests/testaddfunction.cpp: Added functions aren't
+  marked as virtual anymore.  Reviewed by Renato Araujo
+  <renato.filho@openbossa.org>
+
+2009-10-21  Hugo Lima <hugo.lima@openbossa.org>
+
+  * doc/_themes/pysidedocs/static/logo_openbossa.png,
+  doc/_themes/pysidedocs/static/pysidedocs.css: Fixed the openbossa logo on the
+  pysidedocs theme.
+
+2009-10-21  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * typesystem.h: Added documentation for the new class "AddedFunction" 
+  Reviewed by Marcelo Lira <marcelo.lira@openbossa.org>
+
+2009-10-20  Hugo Lima <hugo.lima@openbossa.org>
+
+  * abstractmetabuilder.cpp, abstractmetabuilder.h, abstractmetalang.h,
+  tests/testaddfunction.cpp, tests/testaddfunction.h, typesystem.cpp,
+  typesystem.h: Added support for add-function tag into typesystem.
+
+  * tests/CMakeLists.txt, tests/testaddfunction.cpp, tests/testaddfunction.h,
+  typesystem.cpp, typesystem.h: Implemented a signature parser for the
+  AddedFunction class.
+
+2009-10-19  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * typesystem.cpp, typesystem.h: improved AddedFunction struct with more
+  informations; extended ComplexTypeEntry with a list of AddedFunctions
+
+  * typesystem.cpp, typesystem.h: added AddFunction struct to type system
+  collection of objects; the purpose is to allow the creation of new
+  function/method signatures
+
+2009-10-19  Hugo Lima <hugo.lima@openbossa.org>
+
+  * typesystem.cpp: Added an entry for AddFunction tag in the StackElement enum
+
+  * CMakeLists.txt: Removed code that always add _d as debug postfix, debug
+  postfix is usefull for some packagers but awful for other distros or simple
+  raw builds, because debug libs will be generated with a difenrent name and
+  all other projects are expecting the library name without the debug postfix,
+  resulting in a linker error, because the library was not found.  For all
+  packagers that still want to set a debug postfix, just use the cmake flag: 
+  -DCMAKE_DEBUG_POSTFIX:STRING="my_debug_postfix"
+
+  * tests/testutil.h: Avoid warning about an unused variable when not compiling
+  as debug.
+
+2009-10-21  Hugo Lima <hugo.lima@openbossa.org>
+
+  * doc/_themes/pysidedocs/static/pysidedocs.css: Fixed minor CSS issues on
+  pysidedocs sphinx theme
+
+  * doc/conf.py: Removed latex sphinx config options.
+
+2009-10-17  Hugo Lima <hugo.lima@openbossa.org>
+
+  * doc/_templates/index.html, doc/_templates/layout.html,
+  doc/_themes/pysidedocs/defindex.html,
+  doc/_themes/pysidedocs/genindex-single.html,
+  doc/_themes/pysidedocs/genindex-split.html,
+  doc/_themes/pysidedocs/genindex.html, doc/_themes/pysidedocs/layout.html,
+  doc/_themes/pysidedocs/modindex.html, doc/_themes/pysidedocs/opensearch.xml,
+  doc/_themes/pysidedocs/page.html, doc/_themes/pysidedocs/search.html,
+  doc/_themes/pysidedocs/static/.directory,
+  doc/_themes/pysidedocs/static/bg_header.png,
+  doc/_themes/pysidedocs/static/bg_topo.jpg,
+  doc/_themes/pysidedocs/static/doctools.js,
+  doc/_themes/pysidedocs/static/fakebar.png,
+  doc/_themes/pysidedocs/static/jquery.js,
+  doc/_themes/pysidedocs/static/logo_indt.jpg,
+  doc/_themes/pysidedocs/static/logo_openbossa.png,
+  doc/_themes/pysidedocs/static/logo_python.jpg,
+  doc/_themes/pysidedocs/static/logo_qt.png,
+  doc/_themes/pysidedocs/static/pysidedocs.css,
+  doc/_themes/pysidedocs/static/pysidelogo.png,
+  doc/_themes/pysidedocs/static/relbar_bg.png,
+  doc/_themes/pysidedocs/static/searchtools.js,
+  doc/_themes/pysidedocs/theme.conf, doc/conf.py: Added a new sphinx theme for
+  APIExtractor documentation.  This theme should be used on all sphinx-based
+  pyside documentation.
+
+  * doc/typesystem.rst, doc/typesystem_arguments.rst,
+  doc/typesystem_documentation.rst, doc/typesystem_manipulating_objects.rst,
+  doc/typesystem_modify_function.rst, doc/typesystem_solving_compilation.rst,
+  doc/typesystem_specifying_types.rst, doc/typesystem_templates.rst: -
+  Typesystem documentation broken in smaller parts, so it's more redable now
+  (IMO). - Added cross referencing for nodes cited along the documentation. -
+  Added documentation for the new and not implemented yet, add-function tag.
+
+  * .gitignore: Added doc/_build to the git ignore list
+
+2009-09-28  Hugo Lima <hugo.lima@openbossa.org>
+
+  * abstractmetalang.cpp, abstractmetalang.h: Add method
+  AbstractMetaFunction::isCastOperator.
+
+2009-10-02  Lauro Neto <lauro.neto@openbossa.org>
+
+  * CMakeLists.txt: Bump version to 0.3.2
+
+  * ChangeLog: Update changelog before bump
+
 2009-09-24  Hugo Lima <hugo.lima@openbossa.org>
 
   * typesystem.cpp: Handler::current renamed to Handler::m_current  With
@@ -194,4 +450,4 @@
 
 2009-08-17  Hugo Lima <hugo.lima@openbossa.org>
 
- The genesis...
+   The genesis...
