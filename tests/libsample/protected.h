@@ -35,7 +35,9 @@
 #ifndef PROTECTED_H
 #define PROTECTED_H
 
-class ProtectedNonPolymorphic
+#include "libsamplemacros.h"
+
+class LIBSAMPLE_API ProtectedNonPolymorphic
 {
 public:
     explicit ProtectedNonPolymorphic(const char* name) : m_name(name) {}
@@ -58,7 +60,7 @@ private:
     const char* m_name;
 };
 
-class ProtectedPolymorphic
+class LIBSAMPLE_API ProtectedPolymorphic
 {
 public:
     explicit ProtectedPolymorphic(const char* name) : m_name(name) {}
@@ -77,7 +79,7 @@ private:
     const char* m_name;
 };
 
-class ProtectedVirtualDestructor
+class LIBSAMPLE_API ProtectedVirtualDestructor
 {
 public:
     ProtectedVirtualDestructor() {}

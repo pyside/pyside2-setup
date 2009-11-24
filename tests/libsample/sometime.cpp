@@ -33,7 +33,7 @@
  */
 
 #include "sometime.h"
-#include "stdio.h"
+#include <stdio.h>
 
 void
 Time::setTime()

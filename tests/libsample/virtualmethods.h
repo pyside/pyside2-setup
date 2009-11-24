@@ -86,7 +86,7 @@ public:
 
 };
 
-class VirtualDtor
+class LIBSAMPLE_API VirtualDtor
 {
 public:
     VirtualDtor() {}

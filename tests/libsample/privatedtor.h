@@ -35,7 +35,9 @@
 #ifndef PRIVATEDTOR_H
 #define PRIVATEDTOR_H
 
-class PrivateDtor
+#include "libsamplemacros.h"
+
+class LIBSAMPLE_API PrivateDtor
 {
 public:
     static PrivateDtor* instance()
