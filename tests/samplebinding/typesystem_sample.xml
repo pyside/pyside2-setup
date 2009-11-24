@@ -417,6 +417,8 @@
         </modify-function>
     </value-type>
 
+    <value-type name="VirtualDtor"/>
+
     <value-type name="InjectCode">
         <!--
             Various tests for inject codes.

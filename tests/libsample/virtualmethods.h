@@ -86,5 +86,18 @@ public:
 
 };
 
+class VirtualDtor
+{
+public:
+    VirtualDtor() {}
+    virtual ~VirtualDtor() { VirtualDtor::dtor_called++; }
+
+    static int dtorCalled() { return dtor_called; }
+
+private:
+    static int dtor_called;
+};
+
+
 #endif // VIRTUALMETHODS_H
 

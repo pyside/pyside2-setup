@@ -35,6 +35,8 @@
 #include <string.h>
 #include "virtualmethods.h"
 
+int VirtualDtor::dtor_called = 0;
+
 double
 VirtualMethods::virtualMethod0(Point pt, int val, Complex cpx, bool b)
 {
