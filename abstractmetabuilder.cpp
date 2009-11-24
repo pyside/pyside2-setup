@@ -1209,8 +1209,10 @@ void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scopeItem, AbstractMe
                 }
 
                 metaClass->addFunction(metaFunction);
-            } else if (metaFunction->isDestructor() && metaFunction->isPrivate()) {
-                metaClass->setHasPrivateDestructor(true);
+            } else if (metaFunction->isDestructor()) {
+                metaClass->setHasPrivateDestructor(metaFunction->isPrivate());
+                metaClass->setHasProtectedDestructor(metaFunction->isProtected());
+                metaClass->setHasVirtualDestructor(metaFunction->isVirtual());
             }
             applyFunctionModifications(metaFunction);
         }
