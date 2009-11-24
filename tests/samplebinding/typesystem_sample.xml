@@ -573,7 +573,13 @@
     </value-type>
 
     <value-type name="ImplicitBase"/>
-    <value-type name="SortedOverload"/>
+    <value-type name="SortedOverload">
+        <add-function signature="overload(PyObject *)" return-type="const char *">
+            <inject-code class="target" position="beginning">
+                return PyString_FromString("PyObject");
+            </inject-code>
+        </add-function>
+    </value-type>
     <value-type name="ImplicitTarget"/>
 
     <value-type name="Point">

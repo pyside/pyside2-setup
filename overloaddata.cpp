@@ -48,11 +48,19 @@ void OverloadData::sortOverloads()
     QSet<QPair<int, int> > deps;
     QHash<QString, int> map;
     QHash<int, OverloadData *>reverseMap;
+    bool checkPyObject = false;
+    int pyobjectIndex = 0;
 
     int i = 0;
     foreach(OverloadData *ov, m_nextOverloadData) {
         map[ov->argType()->typeEntry()->name()] = i;
         reverseMap[i] = ov;
+
+        if (!checkPyObject && ov->argType()->typeEntry()->name().contains("PyObject")) {
+            checkPyObject = true;
+            pyobjectIndex = i;
+        }
+
         i++;
     }
 
@@ -87,6 +95,12 @@ void OverloadData::sortOverloads()
                         deps << qMakePair(target, convertible);
                 }
             }
+        }
+
+        /* Add dependency on PyObject, so its check is the last one (too generic) */
+        if (checkPyObject && !targetType->typeEntry()->name().contains("PyObject")) {
+            deps << qMakePair(pyobjectIndex,
+                              map[targetType->typeEntry()->name()]);
         }
     }
 

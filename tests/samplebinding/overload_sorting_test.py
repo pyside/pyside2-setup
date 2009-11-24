@@ -31,6 +31,9 @@ import unittest
 
 from sample import SortedOverload, ImplicitBase, ImplicitTarget
 
+class Dummy(object):
+    pass
+
 class SimpleOverloadSorting(unittest.TestCase):
 
     def setUp(self):
@@ -50,6 +53,9 @@ class SimpleOverloadSorting(unittest.TestCase):
         '''Overloads with containers arguments'''
         self.assertEqual(self.obj.overload([ImplicitBase()]), "list(ImplicitBase)")
 
+    def testPyObject(self):
+        '''Overloads with PyObject args'''
+        self.assertEqual(self.obj.overload(Dummy()), "PyObject")
 
     def testImplicitOnly(self):
         '''Passing an implicit convertible object to an overload'''
