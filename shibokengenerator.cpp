@@ -991,7 +991,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             // calls to %FUNCTION_NAME on user written custom code for calls to the protected
             // dispatcher.
             bool hasProtectedOverload = false;
-            if (func->functionType() == AbstractMetaFunction::UserAddedFunction) {
+            if (func->isUserAdded()) {
                 foreach (const AbstractMetaFunction* f, getFunctionOverloads(func->ownerClass(), func->name()))
                     hasProtectedOverload |= f->isProtected();
             }

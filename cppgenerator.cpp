@@ -955,7 +955,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         s << endl;
     }
 
-    if (func->functionType() != AbstractMetaFunction::UserAddedFunction) {
+    if (!func->isUserAdded()) {
         bool badModifications = false;
         QStringList userArgs;
         if (!func->isCopyConstructor()) {
