@@ -27,6 +27,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/oddbooluser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/overload_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pairuser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/point_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/pointerholder_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/privatedtor_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/protectednonpolymorphic_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/protectedpolymorphic_wrapper.cpp

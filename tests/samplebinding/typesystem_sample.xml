@@ -465,6 +465,23 @@
         </modify-function>
     </value-type>
 
+    <value-type name="PointerHolder">
+        <modify-function signature="PointerHolder(void*)" remove="all"/>
+        <add-function signature="PointerHolder(PyObject*)">
+            <inject-code class="target" position="beginning">
+                %0 = new %TYPE(%1);
+            </inject-code>
+        </add-function>
+        <modify-function signature="pointer() const">
+            <inject-code class="target" position="beginning">
+                %0 = (PyObject*)%CPPSELF.%FUNCTION_NAME();
+                if (!%0)
+                    %0 = Py_None;
+                Py_XINCREF(%0);
+            </inject-code>
+        </modify-function>
+    </value-type>
+
     <value-type name="InjectCode">
         <!--
             Various tests for inject codes.

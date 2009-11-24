@@ -113,6 +113,14 @@ struct Converter<T*> : Converter<T>
 };
 template <typename T> struct Converter<const T*> : Converter<T*> {};
 
+// PyObject* specialization to avoid converting what doesn't need to be converted.
+template<>
+struct Converter<PyObject*> : ConverterBase<PyObject*>
+{
+    inline static PyObject* toCpp(PyObject* pyobj) { return pyobj; }
+};
+template <> struct Converter<const PyObject*> : Converter<PyObject*> {};
+
 // Reference Conversions
 template <typename T>
 struct Converter<T&> : Converter<T*>
