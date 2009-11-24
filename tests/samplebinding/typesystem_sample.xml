@@ -80,6 +80,46 @@
         </modify-function>
     </value-type>
 
+    <value-type name="ProtectedNonPolymorphic">
+        <modify-function signature="create()">
+            <modify-argument index="return">
+                <define-ownership owner="target"/>
+            </modify-argument>
+        </modify-function>
+        <modify-function signature="modifiedProtectedSum(int, int)">
+            <inject-code class="target" position="beginning">
+                %0 = %CONVERTTOPYTHON[%RETURN_TYPE](%CPPSELF.%TYPE::%FUNCTION_NAME(%1, %2) * 10);
+            </inject-code>
+        </modify-function>
+        <modify-function signature="dataTypeName(void*) const" remove="all"/>
+        <modify-function signature="dataTypeName(int) const">
+            <modify-argument index="1">
+                <replace-default-expression with="0"/>
+            </modify-argument>
+        </modify-function>
+        <add-function signature="dataTypeName(PyObject*)const" return-type="const char*">
+            <inject-code class="target" position="beginning">
+                %0 = %CONVERTTOPYTHON[%RETURN_TYPE](%CPPSELF.%FUNCTION_NAME(%1));
+            </inject-code>
+        </add-function>
+    </value-type>
+
+    <value-type name="ProtectedPolymorphic">
+        <modify-function signature="create()">
+            <modify-argument index="return">
+                <define-ownership owner="target"/>
+            </modify-argument>
+        </modify-function>
+    </value-type>
+
+    <value-type name="ProtectedVirtualDestructor">
+        <modify-function signature="create()">
+            <modify-argument index="return">
+                <define-ownership owner="target"/>
+            </modify-argument>
+        </modify-function>
+    </value-type>
+
     <template name="boolptr_at_end_fix_beginning">
         bool __ok__;
         %0 = %CONVERTTOPYTHON[%RETURN_TYPE](
@@ -417,7 +457,13 @@
         </modify-function>
     </value-type>
 
-    <value-type name="VirtualDtor"/>
+    <value-type name="VirtualDtor">
+        <modify-function signature="create()">
+            <modify-argument index="return">
+                <define-ownership owner="target"/>
+            </modify-argument>
+        </modify-function>
+    </value-type>
 
     <value-type name="InjectCode">
         <!--

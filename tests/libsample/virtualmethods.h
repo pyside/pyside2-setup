@@ -90,9 +90,11 @@ class VirtualDtor
 {
 public:
     VirtualDtor() {}
-    virtual ~VirtualDtor() { VirtualDtor::dtor_called++; }
+    virtual ~VirtualDtor() { dtor_called++; }
 
+    static VirtualDtor* create() { return new VirtualDtor(); }
     static int dtorCalled() { return dtor_called; }
+    static void resetDtorCounter() { dtor_called = 0; }
 
 private:
     static int dtor_called;

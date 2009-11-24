@@ -18,6 +18,7 @@ objecttype.cpp
 overload.cpp
 pairuser.cpp
 point.cpp
+protected.cpp
 reference.cpp
 samplenamespace.cpp
 simplefile.cpp

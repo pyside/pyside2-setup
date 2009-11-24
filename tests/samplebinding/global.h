@@ -18,6 +18,7 @@
 #include "pairuser.h"
 #include "point.h"
 #include "privatedtor.h"
+#include "protected.h"
 #include "reference.h"
 #include "samplenamespace.h"
 #include "simplefile.h"
