@@ -893,7 +893,10 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             }
 
             // replace template variable for return variable name
-            code.replace("%0", retvalVariableName());
+            if (func->isConstructor())
+                code.replace("%0", "cptr");
+            else
+                code.replace("%0", retvalVariableName());
 
             // replace template variable for self Python object
             QString pySelf;
@@ -1004,6 +1007,9 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 code.replace("%FUNCTION_NAME", QString("%1_protected").arg(func->originalName()));
             }
 #endif
+
+            if (func->isConstructor() && shouldGenerateCppWrapper(func->ownerClass()))
+                code.replace("%TYPE", wrapperName(func->ownerClass()));
 
             replaceTemplateVariables(code, func);
         }
