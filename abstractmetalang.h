@@ -743,8 +743,7 @@ public:
         SignalFunction,
         EmptyFunction,
         SlotFunction,
-        GlobalScopeFunction,
-        UserAddedFunction, // Function added by the typesystem
+        GlobalScopeFunction
     };
 
     enum CompareResult {
@@ -774,6 +773,7 @@ public:
             m_constant(false),
             m_invalid(false),
             m_reverse(false),
+            m_userAdded(false),
             m_explicit(false)
     {
     }
@@ -1002,6 +1002,16 @@ public:
         m_constant = constant;
     }
 
+    /// Returns true if the AbstractMetaFunction was added by the user via the type system description.
+    bool isUserAdded() const
+    {
+        return m_userAdded;
+    }
+    void setUserAdded(bool userAdded)
+    {
+        m_userAdded = userAdded;
+    }
+
     QString toString() const
     {
         return m_name;
@@ -1100,6 +1110,7 @@ private:
     uint m_constant                 : 1;
     uint m_invalid                  : 1;
     uint m_reverse                  : 1;
+    uint m_userAdded                : 1;
     uint m_explicit                 : 1;
 };
 

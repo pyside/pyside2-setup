@@ -31,6 +31,7 @@ class TestAddFunction : public QObject
 private slots:
     void testParsingFuncNameAndConstness();
     void testAddFunction();
+    void testAddFunctionConstructor();
     void testAddFunctionTagDefaultValues();
     void testAddFunctionCodeSnippets();
     void testFunctionWithoutParenteses();

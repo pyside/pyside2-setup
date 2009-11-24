@@ -85,7 +85,8 @@ void TestAddFunction::testAddFunction()
 
     AbstractMetaFunction* addedFunc = classA->functions().last();
     QCOMPARE(addedFunc->visibility(), uint(AbstractMetaFunction::Protected));
-    QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::UserAddedFunction);
+    QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::NormalFunction);
+    QVERIFY(addedFunc->isUserAdded());
     QCOMPARE(addedFunc->ownerClass(), classA);
     QCOMPARE(addedFunc->implementingClass(), classA);
     QCOMPARE(addedFunc->declaringClass(), classA);
@@ -101,6 +102,28 @@ void TestAddFunction::testAddFunction()
     QCOMPARE(args[0]->type()->typeEntry(), returnType->typeEntry());
     QCOMPARE(args[1]->defaultValueExpression(), QString("4.6"));
     QCOMPARE(args[2]->type()->typeEntry(), typeDb->findType("B"));
+}
+
+void TestAddFunction::testAddFunctionConstructor()
+{
+    const char cppCode[] = "struct A { A() {} };";
+    const char xmlCode[] = "\
+    <typesystem package=\"Foo\">\
+        <value-type name='A'>\
+            <add-function signature='A(int)' />\
+        </value-type>\
+    </typesystem>";
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* classA = classes.findClass("A");
+    QVERIFY(classA);
+    QCOMPARE(classA->functions().count(), 2); // default and added ctors
+    AbstractMetaFunction* addedFunc = classA->functions().last();
+    QCOMPARE(addedFunc->visibility(), uint(AbstractMetaFunction::Public));
+    QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::ConstructorFunction);
+    QCOMPARE(addedFunc->arguments().size(), 1);
+    QVERIFY(addedFunc->isUserAdded());
+    QVERIFY(!addedFunc->type());
 }
 
 void TestAddFunction::testAddFunctionTagDefaultValues()
@@ -119,10 +142,10 @@ void TestAddFunction::testAddFunctionTagDefaultValues()
     QCOMPARE(classA->functions().count(), 2); // default ctor and the added function
     AbstractMetaFunction* addedFunc = classA->functions().last();
     QCOMPARE(addedFunc->visibility(), uint(AbstractMetaFunction::Public));
-    QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::UserAddedFunction);
+    QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::NormalFunction);
+    QVERIFY(addedFunc->isUserAdded());
     QVERIFY(!addedFunc->type());
 }
-
 
 void TestAddFunction::testAddFunctionCodeSnippets()
 {
