@@ -79,11 +79,12 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     // write license comment
     s << licenseComment() << endl;
 
+#ifndef AVOID_PROTECTED_HACK
     if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
-        //workaround to access protected functions
         s << "//workaround to access protected functions" << endl;
         s << "#define protected public" << endl << endl;
     }
+#endif
 
     // headers
     s << "// default includes" << endl;
@@ -165,7 +166,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         if (overloads.isEmpty())
             continue;
 
-        const AbstractMetaFunction* rfunc = overloads[0];
+        const AbstractMetaFunction* rfunc = overloads.first();
         if (m_sequenceProtocol.contains(rfunc->name()))
             continue;
 
@@ -423,7 +424,9 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     s << '{' << endl;
 
     s << INDENT << "PyObject* self;" << endl;
-    s << INDENT << getFunctionReturnType(rfunc) << " cptr;" << endl << endl;
+    s << INDENT;
+    s << (shouldGenerateCppWrapper(rfunc->ownerClass()) ? wrapperName(rfunc->ownerClass()) : rfunc->ownerClass()->qualifiedCppName());
+    s << "* cptr;" << endl << endl;
 
     if (rfunc->ownerClass()->isAbstract()) {
         s << INDENT << "if (type == &" << className << ") {" << endl;
@@ -923,7 +926,15 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     if (func->hasInjectedCode()) {
         snips = getCodeSnips(func);
         if (injectedCodeUsesCppSelf(func)) {
-            s << INDENT << func->ownerClass()->name() << "* cppSelf = ";
+            s << INDENT;
+#ifdef AVOID_PROTECTED_HACK
+            bool hasProtectedFunctions = func->ownerClass()->hasProtectedFunctions();
+            QString _wrapperName = wrapperName(func->ownerClass());
+            s << (hasProtectedFunctions ? _wrapperName : func->ownerClass()->qualifiedCppName()) << "* cppSelf = ";
+            s << (hasProtectedFunctions ? QString("(%1*)").arg(_wrapperName) : "");
+#else
+            s << func->ownerClass()->qualifiedCppName() << "* cppSelf = ";
+#endif
             s << cpythonWrapperCPtr(func->ownerClass(), "self") << ';' << endl;
         }
 
@@ -1055,11 +1066,24 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 if (func->type())
                     s << retvalVariableName() << " = ";
                 if (func->ownerClass()) {
+#ifndef AVOID_PROTECTED_HACK
                     if (!func->isStatic())
                         mc << cpythonWrapperCPtr(func->ownerClass()) << "->";
-                    mc << func->ownerClass()->name() << "::";
+                    mc << func->ownerClass()->name() << "::" << func->originalName();
+#else
+                    if (!func->isStatic()) {
+                        if (func->isProtected())
+                            mc << "((" << wrapperName(func->ownerClass()) << "*)";
+                        mc << cpythonWrapperCPtr(func->ownerClass());
+                        mc << (func->isProtected() ? ")" : "") << "->";
+                    }
+                    mc << (func->isProtected() ? wrapperName(func->ownerClass()) : func->ownerClass()->name());
+                    mc << "::" << func->originalName() << (func->isProtected() ? "_protected" : "");
+#endif
+                } else {
+                    mc << func->originalName();
                 }
-                mc << func->originalName() << '(' << userArgs.join(", ") << ')';
+                mc << '(' << userArgs.join(", ") << ')';
             }
         }
 
@@ -1160,7 +1184,13 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         tp_new = "0";
     } else {
         tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES";
-        tp_dealloc = QString("(destructor)&(Shiboken::PyBaseWrapper_Dealloc< %1 >)").arg(cppClassName);
+
+        QString deallocClassName;
+        if (shouldGenerateCppWrapper(metaClass))
+            deallocClassName = wrapperName(metaClass);
+        else
+            deallocClassName = cppClassName;
+        tp_dealloc = QString("(destructor)&(Shiboken::PyBaseWrapper_Dealloc< %1 >)").arg(deallocClassName);
 
         AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
         tp_new = ctors.isEmpty() ? "0" : className + "_New";
@@ -1246,7 +1276,20 @@ void CppGenerator::writeSequenceMethods(QTextStream& s, const AbstractMetaClass*
         CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
         s << funcRetVal << ' ' << funcName << '(' << funcArgs << ')' << endl << '{' << endl;
         writeInvalidCppObjectCheck(s);
-        s << INDENT << func->ownerClass()->name() << "* cppSelf = ";
+        s << INDENT;
+
+#ifndef AVOID_PROTECTED_HACK
+        s << func->ownerClass()->name() << "* cppSelf = ";
+#else
+        if (func->isProtected())
+            s << wrapperName(func->ownerClass());
+        else
+            s << func->ownerClass()->name();
+        s << "* cppSelf = ";
+        if (func->isProtected())
+            s << '(' << wrapperName(func->ownerClass()) << "*) ";
+#endif
+
         s << cpythonWrapperCPtr(func->ownerClass(), "self") << ';' << endl;
         s << INDENT << "(void)cppSelf; // avoid warnings about unused variables" << endl;
         writeCodeSnips(s, snips,CodeSnip::Any, TypeSystem::TargetLangCode, func);

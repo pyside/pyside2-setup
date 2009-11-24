@@ -59,18 +59,15 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
     s << "#ifndef SBK_" << wrapperName.toUpper() << "_H" << endl;
     s << "#define SBK_" << wrapperName.toUpper() << "_H" << endl<< endl;
 
-    if (shouldGenerateCppWrapper(metaClass)) {
-        s << "#define protected public" << endl << endl;
-    }
+#ifndef AVOID_PROTECTED_HACK
+    s << "#define protected public" << endl << endl;
+#endif
 
     s << "#include <shiboken.h>" << endl << endl;
 
     //Includes
     if (metaClass->typeEntry()->include().isValid())
         s << metaClass->typeEntry()->include().toString() << endl << endl;
-
-    writeCodeSnips(s, metaClass->typeEntry()->codeSnips(),
-                   CodeSnip::Declaration, TypeSystem::NativeCode);
 
     if (shouldGenerateCppWrapper(metaClass)) {
         // Class
@@ -86,7 +83,9 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
             writeFunction(s, func);
 
         //destructor
-        s << INDENT << "~" << wrapperName << "();" << endl;
+        s << INDENT << (metaClass->hasVirtualDestructor() ? "virtual " : "") << "~" << wrapperName << "();" << endl;
+
+        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Declaration, TypeSystem::NativeCode);
 
         if (metaClass->isQObject() && (metaClass->name() != "QObject"))
             s << INDENT << "using QObject::parent;" << endl;
@@ -99,12 +98,22 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
 
 void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* func) const
 {
-    // pure virtual functions need a default implementation
-    if (func->isPrivate() || (func->isModifiedRemoved() && !func->isAbstract()))
-        return;
-
     // do not write copy ctors here.
     if (func->isCopyConstructor())
+        return;
+
+#ifdef AVOID_PROTECTED_HACK
+    if (func->isProtected() && !func->isConstructor()) {
+        s << INDENT << "inline " << (func->isStatic() ? "static " : "");
+        s << functionSignature(func, "", "_protected") << " { ";
+        s << (func->type() ? "return " : "") << func->ownerClass()->qualifiedCppName() << "::";
+        writeFunctionCall(s, func);
+        s << "; }" << endl;
+    }
+#endif
+
+    // pure virtual functions need a default implementation
+    if (func->isPrivate() || (func->isModifiedRemoved() && !func->isAbstract()))
         return;
 
     if (func->isConstructor() || func->isAbstract() || func->isVirtual()) {

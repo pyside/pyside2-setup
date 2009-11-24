@@ -182,7 +182,11 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType*
 
 bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClass* metaClass)
 {
-    return metaClass->isPolymorphic() && !metaClass->isNamespace() && !metaClass->hasPrivateDestructor();
+    bool result = metaClass->isPolymorphic() || metaClass->hasVirtualDestructor();
+#ifdef AVOID_PROTECTED_HACK
+    result = result || metaClass->hasProtectedFunctions() || metaClass->hasProtectedDestructor();
+#endif
+    return result && !metaClass->isNamespace() && !metaClass->hasPrivateDestructor();
 }
 
 QString ShibokenGenerator::wrapperName(const AbstractMetaClass* metaClass)
@@ -767,7 +771,11 @@ AbstractMetaFunctionList ShibokenGenerator::filterFunctions(const AbstractMetaCl
         //skip signals
         if (func->isSignal()
             || func->isDestructor()
+#ifndef AVOID_PROTECTED_HACK
             || (func->isModifiedRemoved() && !func->isAbstract()))
+#else
+            || (func->isModifiedRemoved() && !func->isAbstract() && !func->isProtected()))
+#endif
             lst.removeOne(func);
     }
 
@@ -975,6 +983,27 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 // override for the C++ virtual method in which this piece of code was inserted
                 code.replace("%PYTHON_METHOD_OVERRIDE", "py_override");
             }
+
+#ifdef AVOID_PROTECTED_HACK
+            // If the function being processed was added by the user via type system,
+            // Shiboken needs to find out if there are other overloads for the same method
+            // name and if any of them is of the protected visibility. This is used to replace
+            // calls to %FUNCTION_NAME on user written custom code for calls to the protected
+            // dispatcher.
+            bool hasProtectedOverload = false;
+            if (func->functionType() == AbstractMetaFunction::UserAddedFunction) {
+                foreach (const AbstractMetaFunction* f, getFunctionOverloads(func->ownerClass(), func->name()))
+                    hasProtectedOverload |= f->isProtected();
+            }
+
+            if (func->isProtected() || hasProtectedOverload) {
+                code.replace("%TYPE::%FUNCTION_NAME",
+                             QString("%1::%2_protected")
+                             .arg(wrapperName(func->ownerClass()))
+                             .arg(func->originalName()));
+                code.replace("%FUNCTION_NAME", QString("%1_protected").arg(func->originalName()));
+            }
+#endif
 
             replaceTemplateVariables(code, func);
         }
