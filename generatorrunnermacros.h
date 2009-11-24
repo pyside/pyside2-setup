@@ -26,18 +26,22 @@
 
 // GENRUNNER_API is used for the public API symbols.
 #if defined _WIN32 || defined __CYGWIN__
+	#define GENRUNNER_EXPORT __declspec(dllexport)
     #if GENRUNNER_BUILD
-        #define GENRUNNER_API __declspec(dllimport)
+        #define GENRUNNER_API GENRUNNER_EXPORT
     #else
-        #define GENRUNNER_API __declspec(dllexport)
+        #define GENRUNNER_API __declspec(dllimport)
     #endif
+	// dont worry about deprecated functions under windows
+	#define GENRUNNER_DEPRECATED
 #else
+	#define GENRUNNER_EXPORT __attribute__ ((visibility("default")))
     #if __GNUC__ >= 4
-        #define GENRUNNER_API __attribute__ ((visibility("default")))
+        #define GENRUNNER_API GENRUNNER_EXPORT
     #else
         #define GENRUNNER_API
     #endif
+	#define GENRUNNER_DEPRECATED __attribute__ ((deprecated))
 #endif
 
-#define GENRUNNER_DEPRECATED __attribute__ ((deprecated))
 #endif

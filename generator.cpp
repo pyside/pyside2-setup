@@ -356,6 +356,8 @@ QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
     }
 
     foreach(QString line, lst) {
+        while (line.end()->isSpace())
+            line.chop(1);
         int limit = 0;
         for(int i = 0; i < spacesToRemove; ++i) {
             if (!line[i].isSpace())
