@@ -77,7 +77,7 @@ private:
     int m_value;
 };
 
-class SonOfMDerived1 : public MDerived1
+class LIBSAMPLE_API SonOfMDerived1 : public MDerived1
 {
 public:
     SonOfMDerived1() : m_value(0) {}
@@ -90,7 +90,7 @@ private:
     int m_value;
 };
 
-class Base3
+class LIBSAMPLE_API Base3
 {
 public:
     explicit Base3(int val = 3) : m_value(val) {}
@@ -100,7 +100,7 @@ private:
     int m_value;
 };
 
-class Base4
+class LIBSAMPLE_API Base4
 {
 public:
     Base4() : m_value(4) {}
@@ -110,7 +110,7 @@ private:
     int m_value;
 };
 
-class Base5
+class LIBSAMPLE_API Base5
 {
 public:
     Base5() : m_value(5) {}
@@ -120,7 +120,7 @@ private:
     int m_value;
 };
 
-class Base6
+class LIBSAMPLE_API Base6
 {
 public:
     Base6() : m_value(6) {}
@@ -131,7 +131,7 @@ private:
 };
 
 
-class MDerived2 : public Base3, public Base4, public Base5, public Base6
+class LIBSAMPLE_API MDerived2 : public Base3, public Base4, public Base5, public Base6
 {
 public:
     MDerived2();
@@ -149,7 +149,7 @@ private:
     int m_value;
 };
 
-class MDerived3 : public MDerived1, public MDerived2
+class LIBSAMPLE_API MDerived3 : public MDerived1, public MDerived2
 {
 public:
     MDerived3();
@@ -166,7 +166,7 @@ private:
     int m_value;
 };
 
-class MDerived4 : public Base3, public Base4
+class LIBSAMPLE_API MDerived4 : public Base3, public Base4
 {
 public:
     MDerived4();
@@ -180,7 +180,7 @@ private:
     int m_value;
 };
 
-class MDerived5 : public Base3, public Base4
+class LIBSAMPLE_API MDerived5 : public Base3, public Base4
 {
 public:
     MDerived5();
