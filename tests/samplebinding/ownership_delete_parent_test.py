@@ -24,7 +24,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-'''Tests for destroying/invalidating the parent'''
+'''Tests for destroying the parent'''
 
 import sys
 import unittest
@@ -38,7 +38,8 @@ class DeleteParentTest(unittest.TestCase):
     def testParentDestructor(self):
         '''Delete parent object should invalidate child'''
         parent = ObjectType()
-        child = ObjectType(parent)
+        child = ObjectType()
+        child.setParent(parent)
 
         refcount_before = sys.getrefcount(child)
 
@@ -49,7 +50,10 @@ class DeleteParentTest(unittest.TestCase):
     def testParentDestructorMultipleChildren(self):
         '''Delete parent object should invalidate all children'''
         parent = ObjectType()
-        children = [ObjectType(parent) for _ in range(10)]
+        children = [ObjectType() for _ in range(10)]
+
+        for child in children:
+            child.setParent(parent)
 
         del parent
         for i, child in enumerate(children):
