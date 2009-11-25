@@ -127,6 +127,20 @@ private:
     void writeFlagsUnaryOperator(QTextStream& s, const AbstractMetaEnum* cppEnum,
                                  QString pyOpName, QString cppOpName, bool boolResult = false);
 
+    /// Writes the function that registers the multiple inheritance information for the classes that need it.
+    void writeMultipleInheritanceInitializerFunction(QTextStream& s, const AbstractMetaClass* metaClass);
+
+    /**
+     *   Returns the multiple inheritance initializer function for the given class.
+     *   \param metaClass the class for whom the function name must be generated.
+     *   \return name of the multiple inheritance information initializer function or
+     *           an empty string if there is no multiple inheritance in its ancestry.
+     */
+    QString multipleInheritanceInitializerFunctionName(const AbstractMetaClass* metaClass);
+
+    /// Returns a list of all classes to which the given class could be casted.
+    QStringList getAncestorMultipleInheritance(const AbstractMetaClass* metaClass);
+
     /// Returns true if the given class supports the python sequence protocol
     bool supportsSequenceProtocol(const AbstractMetaClass* metaClass);
     // Maps special function names to function parameters and return types

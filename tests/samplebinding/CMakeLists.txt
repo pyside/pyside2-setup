@@ -7,6 +7,12 @@ ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_sample.xml
 set(sample_SRC
 ${CMAKE_CURRENT_BINARY_DIR}/sample/abstractmodifications_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/abstract_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/base1_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/base2_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/base3_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/base4_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/base5_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/base6_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/collector_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/derived_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/echo_wrapper.cpp
@@ -20,9 +26,11 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/injectcode_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/kindergarten_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/listuser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/mapuser_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/sample/mbase1_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/sample/mbase2_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/sample/mderived_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/mderived1_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/mderived2_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/mderived3_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/mderived4_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/mderived5_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/modifications_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/nondefaultctor_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objecttype_wrapper.cpp
@@ -40,6 +48,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/sample_module_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/samplenamespace_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/simplefile_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/size_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/sonofmderived1_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/str_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/time_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/virtualdtor_wrapper.cpp

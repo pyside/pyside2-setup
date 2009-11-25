@@ -38,17 +38,27 @@ namespace Shiboken
 {
 
 PyObject*
-PyBaseWrapper_New(PyTypeObject* instanceType, PyTypeObject* baseWrapperType, const void* cptr, unsigned int hasOwnership)
+PyBaseWrapper_New(PyTypeObject* instanceType, ShiboTypeObject* baseWrapperType, const void* cptr, unsigned int hasOwnership)
 {
     if (!cptr)
         return 0;
 
-    PyObject *self = instanceType->tp_alloc(instanceType, 0);
-    ((Shiboken::PyBaseWrapper*)self)->baseWrapperType = baseWrapperType;
-    ((Shiboken::PyBaseWrapper*)self)->cptr = const_cast<void*>(cptr);
-    ((Shiboken::PyBaseWrapper*)self)->hasOwnership = hasOwnership;
-    ((Shiboken::PyBaseWrapper*)self)->validCppObject = 1;
+    PyObject* self = ((ShiboTypeObject*) instanceType)->pytype.tp_alloc((PyTypeObject*) instanceType, 0);
+    ((PyBaseWrapper*)self)->baseWrapperType = baseWrapperType;
+    ((PyBaseWrapper*)self)->cptr = const_cast<void*>(cptr);
+    ((PyBaseWrapper*)self)->hasOwnership = hasOwnership;
+    ((PyBaseWrapper*)self)->validCppObject = 1;
+    if (((ShiboTypeObject*) instanceType)->mi_init && !((ShiboTypeObject*) instanceType)->mi_offsets)
+        ((ShiboTypeObject*) instanceType)->mi_offsets = ((ShiboTypeObject*) instanceType)->mi_init(cptr);
     BindingManager::instance().assignWrapper(self, cptr);
+    if (((ShiboTypeObject*) instanceType)->mi_offsets) {
+        int* offset = ((ShiboTypeObject*) instanceType)->mi_offsets;
+        while (*offset != -1) {
+            if (*offset > 0)
+                BindingManager::instance().assignWrapper(self, (void*) ((size_t) cptr + (*offset)));
+            offset++;
+        }
+    }
     return self;
 }
 

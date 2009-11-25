@@ -34,52 +34,37 @@
 
 #include "multiple_derived.h"
 
-MDerived::MDerived()
+MDerived1::MDerived1() : m_value(100)
 {
 }
 
-MDerived::~MDerived()
+MDerived2::MDerived2() : m_value(200)
 {
 }
 
-const char*
-MDerived::name()
+MDerived3::MDerived3() : m_value(3000)
 {
-    return "MDerived";
 }
 
-// Base2 methods
-const char*
-MDerived::funcName()
+MDerived4::MDerived4()
 {
-    return "MDerived.funcName";
 }
 
-MBase1*
-MDerived::castToMBase1()
+MDerived5::MDerived5()
 {
-    MBase1* ptr = (MBase1*) this;
+}
+
+MDerived1*
+MDerived1::transformFromBase1(Base1* self)
+{
+    MDerived1* ptr = dynamic_cast<MDerived1*>(self);
     return ptr;
 }
 
-MBase2*
-MDerived::castToMBase2()
+MDerived1*
+MDerived1::transformFromBase2(Base2* self)
 {
-    MBase2* ptr = (MBase2*) this;
-    return ptr;
-}
-
-MDerived*
-MDerived::transformFromBase1(MBase1* self)
-{
-    MDerived* ptr = dynamic_cast<MDerived*>(self);
-    return ptr;
-}
-
-MDerived*
-MDerived::transformFromBase2(MBase2* self)
-{
-    MDerived* ptr = dynamic_cast<MDerived*>(self);
+    MDerived1* ptr = dynamic_cast<MDerived1*>(self);
     return ptr;
 }
 

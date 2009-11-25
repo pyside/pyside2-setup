@@ -85,7 +85,16 @@ void BindingManager::releaseWrapper(void *cptr)
 
 void BindingManager::releaseWrapper(PyObject* wrapper)
 {
-    releaseWrapper(PyBaseWrapper_cptr(wrapper));
+    void* cptr = PyBaseWrapper_cptr(wrapper);
+    releaseWrapper(cptr);
+    if (((ShiboTypeObject*) wrapper->ob_type)->mi_offsets) {
+        int* offset = ((ShiboTypeObject*) wrapper->ob_type)->mi_offsets;
+        while (*offset != -1) {
+            if (*offset > 0)
+                BindingManager::instance().releaseWrapper((void*) ((size_t) cptr + (*offset)));
+            offset++;
+        }
+    }
 }
 
 PyObject* BindingManager::retrieveWrapper(const void* cptr)
@@ -101,7 +110,7 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
     PyObject* wrapper = retrieveWrapper(cptr);
 
     if (wrapper) {
-        PyTypeObject* baseWrapperType = ((Shiboken::PyBaseWrapper*)wrapper)->baseWrapperType;
+        PyTypeObject* baseWrapperType = (PyTypeObject*) ((Shiboken::PyBaseWrapper*)wrapper)->baseWrapperType;
         PyObject* method = PyObject_GetAttrString(wrapper, const_cast<char*>(methodName));
         if (method) {
             PyObject* defaultMethod = 0;

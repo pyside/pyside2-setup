@@ -850,8 +850,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
         if (context) {
             // replace template variable for the Python Type object for the
             // class context in which the variable is used
-            QString pytype = cpythonTypeName(context);
-            code.replace("%PYTHONTYPEOBJECT", pytype);
+            code.replace("%PYTHONTYPEOBJECT", cpythonTypeName(context) + ".pytype");
         }
 
         if (func) {
@@ -919,7 +918,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 // replace template variable for the Python Type object for the
                 // class implementing the method in which the code snip is written
                 if (func->isStatic()) {
-                    code.replace("%PYTHONTYPEOBJECT", cpythonTypeName(func->implementingClass()));
+                    code.replace("%PYTHONTYPEOBJECT", cpythonTypeName(func->implementingClass()) + ".pytype");
                 } else {
                     code.replace("%PYTHONTYPEOBJECT.", QString("%1->ob_type->").arg(pySelf));
                     code.replace("%PYTHONTYPEOBJECT", QString("%1->ob_type").arg(pySelf));
@@ -1078,30 +1077,31 @@ bool ShibokenGenerator::injectedCodeHasReturnValueAttribution(const AbstractMeta
     return false;
 }
 
-QStringList ShibokenGenerator::getBaseClasses(const AbstractMetaClass* metaClass)
+bool ShibokenGenerator::hasMultipleInheritanceInAncestry(const AbstractMetaClass* metaClass)
 {
-    QStringList baseClass;
-
-    if (!metaClass->baseClassName().isEmpty() &&
-        (metaClass->name() != metaClass->baseClassName()))
-        baseClass.append(metaClass->baseClassName());
-
-    foreach (AbstractMetaClass* interface, metaClass->interfaces()) {
-        AbstractMetaClass* aux = interface->primaryInterfaceImplementor();
-        if (!aux)
-            continue;
-
-        //skip templates
-        if (!aux->templateArguments().isEmpty())
-            continue;
-
-        if (!aux->name().isEmpty() && (metaClass->name() != aux->name()))
-            baseClass.append(aux->name());
-    }
-
-    return baseClass;
+    if (!metaClass || metaClass->baseClassNames().isEmpty())
+        return false;
+    if (metaClass->baseClassNames().size() > 1)
+        return true;
+    return hasMultipleInheritanceInAncestry(metaClass->baseClass());
 }
 
+AbstractMetaClassList ShibokenGenerator::getBaseClasses(const AbstractMetaClass* metaClass)
+{
+    AbstractMetaClassList baseClasses;
+    foreach (QString parent, metaClass->baseClassNames())
+        baseClasses << classes().findClass(parent);
+    return baseClasses;
+}
+
+const AbstractMetaClass* ShibokenGenerator::getMultipleInheritingClass(const AbstractMetaClass* metaClass)
+{
+    if (!metaClass || metaClass->baseClassNames().isEmpty())
+        return 0;
+    if (metaClass->baseClassNames().size() > 1)
+        return metaClass;
+    return getMultipleInheritingClass(metaClass->baseClass());
+}
 
 QString ShibokenGenerator::getApiExportMacro() const
 {

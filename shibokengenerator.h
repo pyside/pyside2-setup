@@ -175,7 +175,14 @@ public:
                               int arg_count = -1) const;
 
     bool hasInjectedCodeOrSignatureModification(const AbstractMetaFunction* func);
-    QStringList getBaseClasses(const AbstractMetaClass* metaClass);
+
+    /// Returns true if there are cases of multiple inheritance in any of its ancestors.
+    bool hasMultipleInheritanceInAncestry(const AbstractMetaClass* metaClass);
+
+    /// Returns a list of parent classes for a method.
+    AbstractMetaClassList getBaseClasses(const AbstractMetaClass* metaClass);
+
+    const AbstractMetaClass* getMultipleInheritingClass(const AbstractMetaClass* metaClass);
 
     void writeBaseConversion(QTextStream& s, const AbstractMetaType* type,
                              const AbstractMetaClass* context);
