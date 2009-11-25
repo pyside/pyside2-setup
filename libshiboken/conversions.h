@@ -36,9 +36,9 @@
 #define CONVERSIONS_H
 
 #include <Python.h>
-#include <pyenum.h>
-#include <basewrapper.h>
-#include <bindingmanager.h>
+#include "pyenum.h"
+#include "basewrapper.h"
+#include "bindingmanager.h"
 
 // When the user adds a function with an argument unknown for the typesystem, the generator writes type checks as
 // TYPENAME_Check, so this macro allows users to add PyObject arguments to their added functions.

@@ -43,7 +43,15 @@ typedef google::dense_hash_map<const void*, PyObject*> WrapperMap;
 
 struct BindingManager::BindingManagerPrivate {
     WrapperMap wrapperMapper;
+    void releaseWrapper(void* cptr);
 };
+
+void BindingManager::BindingManagerPrivate::releaseWrapper(void* cptr)
+{
+    WrapperMap::iterator iter = wrapperMapper.find(cptr);
+    if (iter != wrapperMapper.end())
+        wrapperMapper.erase(iter);
+}
 
 BindingManager::BindingManager()
 {
@@ -76,22 +84,15 @@ void BindingManager::assignWrapper(PyObject* wrapper, const void* cptr)
         iter->second = wrapper;
 }
 
-void BindingManager::releaseWrapper(void *cptr)
-{
-    WrapperMap::iterator iter = m_d->wrapperMapper.find(cptr);
-    if (iter != m_d->wrapperMapper.end())
-        m_d->wrapperMapper.erase(iter);
-}
-
 void BindingManager::releaseWrapper(PyObject* wrapper)
 {
     void* cptr = PyBaseWrapper_cptr(wrapper);
-    releaseWrapper(cptr);
+    m_d->releaseWrapper(cptr);
     if (((ShiboTypeObject*) wrapper->ob_type)->mi_offsets) {
         int* offset = ((ShiboTypeObject*) wrapper->ob_type)->mi_offsets;
         while (*offset != -1) {
             if (*offset > 0)
-                BindingManager::instance().releaseWrapper((void*) ((size_t) cptr + (*offset)));
+                m_d->releaseWrapper((void*) ((size_t) cptr + (*offset)));
             offset++;
         }
     }
@@ -130,4 +131,11 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
     return 0;
 }
 
+void BindingManager::invalidateWrapper(PyObject* wrapper)
+{
+    PyBaseWrapper_setValidCppObject(wrapper, false);
+    releaseWrapper(wrapper);
+}
+
 } // namespace Shiboken
+

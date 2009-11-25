@@ -396,8 +396,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         foreach (ArgumentModification arg_mod, func_mod.argument_mods) {
             if (!arg_mod.resetAfterUse)
                 continue;
-            s << INDENT << "PyBaseWrapper_setValidCppObject(PyTuple_GET_ITEM(pyargs, ";
-            s << (arg_mod.index - 1) << "), false);" << endl;
+            s << INDENT << "BindingManager::instance().invalidateWrapper(PyTuple_GET_ITEM(pyargs, ";
+            s << (arg_mod.index - 1) << "));" << endl;
         }
     }
 

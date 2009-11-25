@@ -48,10 +48,12 @@ public:
 
     bool hasWrapper(const void *cptr);
     void assignWrapper(PyObject* wrapper, const void* cptr);
-    void releaseWrapper(void* cptr);
     void releaseWrapper(PyObject* wrapper);
     PyObject* retrieveWrapper(const void* cptr);
     PyObject* getOverride(const void* cptr, const char* methodName);
+
+    /// Invalidate the Python wrapper and removes the relations from C++ objects the Python wrapper.
+    void invalidateWrapper(PyObject* wrapper);
 
 private:
     ~BindingManager();
