@@ -678,8 +678,20 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
 void CppGenerator::writeInvalidCppObjectCheck(QTextStream& s, QString pyArgName, const TypeEntry* type)
 {
     s << INDENT << "if (";
-    if (type)
-        s << cpythonCheckFunction(type) << '(' << pyArgName << ") && ";
+    if (type) {
+        QString implicitChecks;
+        QTextStream ic(&implicitChecks);
+        foreach (const AbstractMetaFunction* ctor, implicitConversions(type)) {
+            const TypeEntry* te = ctor->arguments().first()->type()->typeEntry();
+            if (te->isValue() || te->isObject())
+                ic << " || " << cpythonCheckFunction(te) << '(' << pyArgName << ')';
+        }
+        s << (!implicitChecks.isEmpty() ? "(" : "");
+        s << cpythonCheckFunction(type) << '(' << pyArgName << ')';
+        if (!implicitChecks.isEmpty())
+            s << implicitChecks << ')';
+        s << " && ";
+    }
     s << "Shiboken::cppObjectIsInvalid(" << pyArgName << "))" << endl;
     {
         Indentation indent(INDENT);
