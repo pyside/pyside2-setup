@@ -583,7 +583,7 @@
     <value-type name="ImplicitTarget"/>
 
     <value-type name="Point">
-        <add-function signature="__str__()" return-type="PyObject*">
+        <add-function signature="__str__" return-type="PyObject*">
             <inject-code class="target" position="beginning">
             int x1 = (int) %CPPSELF.x();
             int x2 = ((int) (%CPPSELF.x() * 100)) - (x1 * 100);
@@ -592,7 +592,7 @@
             %0 = PyString_FromFormat("Point(%d.%d, %d.%d)", x1, x2, y1, y2);
             </inject-code>
         </add-function>
-        <add-function signature="__repr__()" return-type="PyObject*">
+        <add-function signature="__repr__" return-type="PyObject*">
             <inject-code class="target" position="beginning">
             int x1 = (int) %CPPSELF.x();
             int x2 = ((int) (%CPPSELF.x() * 10)) - (x1 * 10);
@@ -602,6 +602,20 @@
             </inject-code>
         </add-function>
     </value-type>
+
+    <value-type name="Polygon">
+        <modify-function signature="stealOwnershipFromPython(Point*)">
+            <modify-argument index="1">
+                <define-ownership owner="c++"/>
+            </modify-argument>
+        </modify-function>
+        <modify-function signature="stealOwnershipFromPython(Polygon*)">
+            <modify-argument index="1">
+                <define-ownership owner="c++"/>
+            </modify-argument>
+        </modify-function>
+    </value-type>
+
     <value-type name="Time"/>
     <value-type name="Size"/>
     <value-type name="MapUser"/>

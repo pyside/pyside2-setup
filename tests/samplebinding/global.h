@@ -19,6 +19,7 @@
 #include "pairuser.h"
 #include "point.h"
 #include "pointerholder.h"
+#include "polygon.h"
 #include "privatedtor.h"
 #include "protected.h"
 #include "reference.h"
