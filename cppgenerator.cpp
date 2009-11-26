@@ -289,6 +289,7 @@ void CppGenerator::writeConstructorNative(QTextStream& s, const AbstractMetaFunc
 void CppGenerator::writeDestructorNative(QTextStream &s, const AbstractMetaClass *metaClass)
 {
     s << wrapperName(metaClass) << "::~" << wrapperName(metaClass) << "()" << endl << '{' << endl;
+    s << INDENT << "BindingManager::instance().invalidateWrapper(this);" << endl;
     s << '}' << endl;
 }
 

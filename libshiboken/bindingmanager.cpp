@@ -138,5 +138,12 @@ void BindingManager::invalidateWrapper(PyObject* wrapper)
     releaseWrapper(wrapper);
 }
 
+void BindingManager::invalidateWrapper(const void* cptr)
+{
+    WrapperMap::iterator iter = m_d->wrapperMapper.find(cptr);
+    if (iter != m_d->wrapperMapper.end())
+        invalidateWrapper(iter->second);
+}
+
 } // namespace Shiboken
 

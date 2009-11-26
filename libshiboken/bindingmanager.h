@@ -54,6 +54,8 @@ public:
 
     /// Invalidate the Python wrapper and removes the relations from C++ objects the Python wrapper.
     void invalidateWrapper(PyObject* wrapper);
+    /// Convenience method to invalidate the Python wrapper for a C++ wrapped object. Do nothing if C++ pointer has no Python wrapper.
+    void invalidateWrapper(const void* cptr);
 
 private:
     ~BindingManager();
