@@ -350,11 +350,16 @@ QList<int> OverloadData::invalidArgumentLengths() const
 int OverloadData::numberOfRemovedArguments(const AbstractMetaFunction* func, int finalArgPos)
 {
     int removed = 0;
-    if (finalArgPos < 0)
-        finalArgPos = func->arguments().size();
-    for (int i = 0; i < finalArgPos; i++) {
-        if (func->argumentRemoved(i + 1))
-            removed++;
+    if (finalArgPos < 0) {
+        for (int i = 0; i < func->arguments().size(); i++) {
+            if (func->argumentRemoved(i + 1))
+                removed++;
+        }
+    } else {
+        for (int i = 0; i < finalArgPos + removed; i++) {
+            if (func->argumentRemoved(i + 1))
+                removed++;
+        }
     }
     return removed;
 }
