@@ -54,8 +54,13 @@ private:
     void writeArgumentsInitializer(QTextStream& s, OverloadData& overloadData);
 
     void writeErrorSection(QTextStream& s, OverloadData& overloadData);
-    /// Writes the check section for the validity of wrapped C++ objects.
-    void writeInvalidCppObjectCheck(QTextStream& s, QString pyArgName = "self");
+    /**
+     *   Writes the check section for the validity of wrapped C++ objects.
+     *   \param s text stream to write
+     *   \param argName Python argument name
+     *   \param type the TypeEntry passed when the validity check must confirm the type of the Python wrapper to be checked
+     */
+    void writeInvalidCppObjectCheck(QTextStream& s, QString pyArgName = "self", const TypeEntry* type = 0);
     void writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName);
 
     void writeTypeConverterImpl(QTextStream& s, const TypeEntry* type);

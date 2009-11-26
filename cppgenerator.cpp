@@ -574,6 +574,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
 
             // Checks if the underlying C++ object is valid.
             writeInvalidCppObjectCheck(s);
+            s << endl;
         }
 
         bool hasReturnValue = overloadData.hasNonVoidReturnType();
@@ -674,14 +675,16 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
     s << INDENT << "return 0;" << endl;
 }
 
-void CppGenerator::writeInvalidCppObjectCheck(QTextStream& s, QString pyArgName)
+void CppGenerator::writeInvalidCppObjectCheck(QTextStream& s, QString pyArgName, const TypeEntry* type)
 {
-    s << INDENT << "if (Shiboken::cppObjectIsInvalid(" << pyArgName << "))" << endl;
+    s << INDENT << "if (";
+    if (type)
+        s << cpythonCheckFunction(type) << '(' << pyArgName << ") && ";
+    s << "Shiboken::cppObjectIsInvalid(" << pyArgName << "))" << endl;
     {
         Indentation indent(INDENT);
         s << INDENT << "return 0;" << endl;
     }
-    s << endl;
 }
 
 void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName)
@@ -736,7 +739,8 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
 {
     QString typeName;
     QString baseTypeName = argType->typeEntry()->name();
-    if (argType->typeEntry()->isValue() || argType->typeEntry()->isObject())
+    bool isWrappedCppClass = argType->typeEntry()->isValue() || argType->typeEntry()->isObject();
+    if (isWrappedCppClass)
         typeName = baseTypeName + '*';
     else
         typeName = translateTypeForWrapperMethod(argType, context);
@@ -749,6 +753,11 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
     }
 
     bool hasImplicitConversions = !implicitConversions(argType).isEmpty();
+
+    if (isWrappedCppClass) {
+        const TypeEntry* type = (hasImplicitConversions ? argType->typeEntry() : 0);
+        writeInvalidCppObjectCheck(s, pyArgName, type);
+    }
 
     if (hasImplicitConversions) {
         s << INDENT << "std::auto_ptr<" << baseTypeName << " > ";
