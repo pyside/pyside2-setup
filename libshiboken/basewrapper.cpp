@@ -38,7 +38,11 @@ namespace Shiboken
 {
 
 PyObject*
-PyBaseWrapper_New(PyTypeObject* instanceType, ShiboTypeObject* baseWrapperType, const void* cptr, unsigned int hasOwnership)
+PyBaseWrapper_New(PyTypeObject* instanceType,
+                  ShiboTypeObject* baseWrapperType,
+                  const void* cptr,
+                  unsigned int hasOwnership,
+                  unsigned int containsCppWrapper)
 {
     if (!cptr)
         return 0;
@@ -47,6 +51,7 @@ PyBaseWrapper_New(PyTypeObject* instanceType, ShiboTypeObject* baseWrapperType, 
     ((PyBaseWrapper*)self)->baseWrapperType = baseWrapperType;
     ((PyBaseWrapper*)self)->cptr = const_cast<void*>(cptr);
     ((PyBaseWrapper*)self)->hasOwnership = hasOwnership;
+    ((PyBaseWrapper*)self)->containsCppWrapper = containsCppWrapper;
     ((PyBaseWrapper*)self)->validCppObject = 1;
     if (((ShiboTypeObject*) instanceType)->mi_init && !((ShiboTypeObject*) instanceType)->mi_offsets)
         ((ShiboTypeObject*) instanceType)->mi_offsets = ((ShiboTypeObject*) instanceType)->mi_init(cptr);

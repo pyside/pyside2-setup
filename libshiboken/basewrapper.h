@@ -44,9 +44,10 @@ namespace Shiboken
 extern "C"
 {
 
+/// Function signature for the multiple inheritance information initializers that should be provided by classes with multiple inheritance.
 typedef int* (*MultipleInheritanceInitFunction)(const void*);
 
-// TODO: explain
+// PyTypeObject extended with C++ multiple inheritance information.
 struct ShiboTypeObject
 {
     PyTypeObject pytype;
@@ -54,12 +55,19 @@ struct ShiboTypeObject
     MultipleInheritanceInitFunction mi_init;
 };
 
+/// Base Python object for all the wrapped C++ classes.
 struct PyBaseWrapper
 {
     PyObject_HEAD
+    /// First binding provided parent type of a Python class that inherits from a wrapped class.
     ShiboTypeObject* baseWrapperType;
+    /// Pointer to the C++ class.
     void* cptr;
+    /// True when Python is responsible for freeing the used memory.
     unsigned int hasOwnership : 1;
+    /// Is true when the C++ class of the wrapped object has a virtual destructor AND was created by Python.
+    unsigned int containsCppWrapper : 1;
+    /// Marked as false when the object is lost to C++ and the binding can not know if it was deleted or not.
     unsigned int validCppObject : 1;
 };
 
@@ -72,6 +80,8 @@ struct PyBaseWrapper
 #define PyBaseWrapper_setCptr(pyobj,c)              (((Shiboken::PyBaseWrapper*)pyobj)->cptr = c)
 #define PyBaseWrapper_hasOwnership(pyobj)           (((Shiboken::PyBaseWrapper*)pyobj)->hasOwnership)
 #define PyBaseWrapper_setOwnership(pyobj,o)         (((Shiboken::PyBaseWrapper*)pyobj)->hasOwnership = o)
+#define PyBaseWrapper_containsCppWrapper(pyobj)     (((Shiboken::PyBaseWrapper*)pyobj)->containsCppWrapper)
+#define PyBaseWrapper_setContainsCppWrapper(pyobj,o)(((Shiboken::PyBaseWrapper*)pyobj)->containsCppWrapper= o)
 #define PyBaseWrapper_validCppObject(pyobj)         (((Shiboken::PyBaseWrapper*)pyobj)->validCppObject)
 #define PyBaseWrapper_setValidCppObject(pyobj,v)    (((Shiboken::PyBaseWrapper*)pyobj)->validCppObject = v)
 
@@ -125,8 +135,11 @@ typedef struct {
 
 
 LIBSHIBOKEN_API PyAPI_FUNC(PyObject*)
-PyBaseWrapper_New(PyTypeObject* instanceType, ShiboTypeObject* baseWrapperType,
-                  const void *cptr, unsigned int hasOwnership = 1);
+PyBaseWrapper_New(PyTypeObject* instanceType,
+                  ShiboTypeObject* baseWrapperType,
+                  const void *cptr,
+                  unsigned int hasOwnership = 1,
+                  unsigned int containsCppWrapper = 0);
 
 /// Returns true and sets a Python RuntimeError if the Python wrapper is not marked as valid.
 LIBSHIBOKEN_API bool cppObjectIsInvalid(PyObject* wrapper);

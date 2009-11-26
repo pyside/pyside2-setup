@@ -424,6 +424,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     OverloadData overloadData(overloads, this);
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
     QString className = cpythonTypeName(rfunc->ownerClass());
+    bool hasCppWrapper = shouldGenerateCppWrapper(rfunc->ownerClass());
 
     s << "PyObject*" << endl;
     s << cpythonFunctionName(rfunc) << "(PyTypeObject *type, PyObject *args, PyObject *kwds)" << endl;
@@ -431,7 +432,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
 
     s << INDENT << "PyObject* self;" << endl;
     s << INDENT;
-    s << (shouldGenerateCppWrapper(rfunc->ownerClass()) ? wrapperName(rfunc->ownerClass()) : rfunc->ownerClass()->qualifiedCppName());
+    s << (hasCppWrapper ? wrapperName(rfunc->ownerClass()) : rfunc->ownerClass()->qualifiedCppName());
     s << "* cptr;" << endl << endl;
 
     if (rfunc->ownerClass()->isAbstract()) {
@@ -457,7 +458,16 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     writeOverloadedMethodDecisor(s, &overloadData);
     s << endl;
 
-    s << INDENT << "self = Shiboken::PyBaseWrapper_New(type, &" << className << ", cptr);" << endl;
+    s << INDENT << "self = Shiboken::PyBaseWrapper_New(type, &" << className << ", cptr";
+
+    // If the created C++ object has a C++ wrapper the ownership is assigned to Python
+    // (first "1") and the flag indicating that the Python wrapper holds an C++ wrapper
+    // is marked as true (the second "1"). Otherwise the default values apply:
+    // Python owns it and C++ wrapper is false.
+    if (hasCppWrapper)
+        s << ", 1, 1";
+
+    s << ");" << endl;
     s << endl << INDENT << "if (!self) {" << endl;
     {
         Indentation indentation(INDENT);
