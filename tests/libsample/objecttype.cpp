@@ -53,22 +53,40 @@ ObjectType::~ObjectType()
 }
 
 void
+ObjectType::removeChild(const ObjectType *child)
+{
+    for(ObjectTypeList::iterator child_iter = m_children.begin();
+        child_iter != m_children.end(); child_iter++) {
+        if (this == *child_iter)
+            m_children.erase(child_iter);
+    }
+}
+
+void
 ObjectType::setParent(ObjectType* parent)
 {
     if (m_parent == parent)
         return;
 
-    if (m_parent) {
-        for(ObjectTypeList::iterator child_iter = m_parent->m_children.begin();
-            child_iter != m_parent->m_children.end(); child_iter++) {
-            if (this == *child_iter)
-                m_parent->m_children.erase(child_iter);
-        }
-    }
+    if (m_parent)
+        m_parent->removeChild(this);
 
     m_parent = parent;
     if (m_parent)
         m_parent->m_children.push_back(this);
+}
+
+void ObjectType::killChild(const Str &name)
+{
+    for (ObjectTypeList::iterator child_iter = m_children.begin();
+         child_iter != m_children.end(); child_iter++) {
+
+        if ((*child_iter)->objectName() == name) {
+            this->removeChild(*child_iter);
+            delete *child_iter;
+            break;
+        }
+    }
 }
 
 void

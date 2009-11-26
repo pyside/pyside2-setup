@@ -68,6 +68,8 @@ public:
     void setParent(ObjectType* parent);
     ObjectType* parent() const { return m_parent; }
     const ObjectTypeList& children() const { return m_children; }
+    void killChild(const Str& name);
+    void removeChild(const ObjectType *child);
 
     Str objectName() const;
     void setObjectName(const Str& name);
