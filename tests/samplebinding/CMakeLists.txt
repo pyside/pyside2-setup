@@ -13,6 +13,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/base3_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/base4_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/base5_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/base6_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/blackbox_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/collector_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/derived_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/echo_wrapper.cpp
@@ -23,7 +24,6 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/implicittarget_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/sortedoverload_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/intwrapper_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/injectcode_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/sample/kindergarten_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/listuser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/mapuser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/mderived1_wrapper.cpp

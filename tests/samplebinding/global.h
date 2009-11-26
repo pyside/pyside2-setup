@@ -1,4 +1,5 @@
 #include "abstract.h"
+#include "blackbox.h"
 #include "collector.h"
 #include "complex.h"
 #include "derived.h"
@@ -7,7 +8,6 @@
 #include "implicitconv.h"
 #include "overloadsort.h"
 #include "injectcode.h"
-#include "kindergarten.h"
 #include "listuser.h"
 #include "mapuser.h"
 #include "modifications.h"

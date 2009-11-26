@@ -2,6 +2,7 @@ project(libsample)
 
 set(libsample_SRC
 abstract.cpp
+blackbox.cpp
 collector.cpp
 complex.cpp
 derived.cpp
@@ -9,7 +10,6 @@ echo.cpp
 functions.cpp
 implicitconv.cpp
 injectcode.cpp
-kindergarten.cpp
 listuser.cpp
 modifications.cpp
 mapuser.cpp

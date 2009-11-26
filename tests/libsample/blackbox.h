@@ -32,35 +32,38 @@
  * 02110-1301 USA
  */
 
-#include "kindergarten.h"
+#ifndef BLACKBOX_H
+#define BLACKBOX_H
 
-using namespace std;
+#include "libsamplemacros.h"
+#include <list>
+#include "objecttype.h"
+#include "point.h"
 
-KinderGarten::~KinderGarten()
+class LIBSAMPLE_API BlackBox
 {
-    // Free children objects.
-    while (!m_children.empty()) {
-        delete m_children.back();
-        m_children.pop_back();
-    }
-}
+public:
+    typedef std::list<ObjectType*> ObjectTypeList;
+    typedef std::list<Point*> PointList;
 
-void
-KinderGarten::addChild(ObjectType* child)
-{
-    m_children.push_back(child);
-}
+    BlackBox() {}
+    ~BlackBox();
 
-ObjectType*
-KinderGarten::releaseChild(ObjectType* child)
-{
-    for(ChildList::iterator child_iter = m_children.begin();
-        child_iter != m_children.end(); child_iter++) {
-        if (child == *child_iter) {
-            m_children.erase(child_iter);
-            return child;
-        }
-    }
-    return 0;
-}
+    void keepObjectType(ObjectType* object);
+    ObjectType* retrieveObjectType(ObjectType* object);
+    void disposeObjectType(ObjectType* object);
+
+    void keepPoint(Point* point);
+    Point* retrievePoint(Point* point);
+    void disposePoint(Point* point);
+
+    ObjectTypeList objects() { return m_objects; }
+    PointList points() { return m_points; }
+
+private:
+    ObjectTypeList m_objects;
+    PointList m_points;
+};
+
+#endif // BLACKBOX_H
 

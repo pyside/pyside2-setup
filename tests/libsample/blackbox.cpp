@@ -32,28 +32,70 @@
  * 02110-1301 USA
  */
 
-#ifndef KINDERGARTEN_H
-#define KINDERGARTEN_H
+#include "blackbox.h"
 
-#include "libsamplemacros.h"
-#include <list>
-#include "objecttype.h"
+using namespace std;
 
-class LIBSAMPLE_API KinderGarten
+BlackBox::~BlackBox()
 {
-public:
-    typedef std::list<ObjectType*> ChildList;
+    // Free all lists.
+    while (!m_objects.empty()) {
+        delete m_objects.back();
+        m_objects.pop_back();
+    }
+    while (!m_points.empty()) {
+        delete m_points.back();
+        m_points.pop_back();
+    }
+}
 
-    KinderGarten() {}
-    ~KinderGarten();
+void
+BlackBox::keepObjectType(ObjectType* object)
+{
+    m_objects.push_back(object);
+}
 
-    void addChild(ObjectType* child);
-    ObjectType* releaseChild(ObjectType* child);
-    ChildList children() { return m_children; }
+ObjectType*
+BlackBox::retrieveObjectType(ObjectType* object)
+{
+    for(ObjectTypeList::iterator objecttype_iter = m_objects.begin();
+        objecttype_iter != m_objects.end(); objecttype_iter++) {
+        if (object == *objecttype_iter) {
+            m_objects.erase(objecttype_iter);
+            return object;
+        }
+    }
+    return 0;
+}
 
-private:
-    ChildList m_children;
-};
+void
+BlackBox::disposeObjectType(ObjectType* object)
+{
+//TODO: implement + describe inside typesystem file.
+}
 
-#endif // KINDERGARTEN_H
+void
+BlackBox::keepPoint(Point* point)
+{
+    m_points.push_back(point);
+}
+
+Point*
+BlackBox::retrievePoint(Point* point)
+{
+    for(PointList::iterator point_iter = m_points.begin();
+        point_iter != m_points.end(); point_iter++) {
+        if (point == *point_iter) {
+            m_points.erase(point_iter);
+            return point;
+        }
+    }
+    return 0;
+}
+
+void
+BlackBox::disposePoint(Point* point)
+{
+//TODO: implement + describe inside typesystem file.
+}
 
