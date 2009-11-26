@@ -62,6 +62,15 @@ PyBaseWrapper_New(PyTypeObject* instanceType, ShiboTypeObject* baseWrapperType, 
     return self;
 }
 
+bool
+cppObjectIsInvalid(PyObject* wrapper)
+{
+    if (((Shiboken::PyBaseWrapper*)wrapper)->validCppObject)
+        return false;
+    PyErr_SetString(PyExc_RuntimeError, "internal C++ object already deleted.");
+    return true;
+}
+
 void
 PyBaseWrapper_Dealloc_PrivateDtor(PyObject* self)
 {
@@ -70,3 +79,4 @@ PyBaseWrapper_Dealloc_PrivateDtor(PyObject* self)
 }
 
 } // namespace Shiboken
+

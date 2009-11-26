@@ -128,14 +128,8 @@ LIBSHIBOKEN_API PyAPI_FUNC(PyObject*)
 PyBaseWrapper_New(PyTypeObject* instanceType, ShiboTypeObject* baseWrapperType,
                   const void *cptr, unsigned int hasOwnership = 1);
 
-inline bool
-cppObjectIsValid(PyBaseWrapper* self)
-{
-    if (self->validCppObject)
-        return true;
-    PyErr_SetString(PyExc_RuntimeError, "internal C++ object already deleted.");
-    return false;
-}
+/// Returns true and sets a Python RuntimeError if the Python wrapper is not marked as valid.
+LIBSHIBOKEN_API bool cppObjectIsInvalid(PyObject* wrapper);
 
 template <typename T>
 void PyBaseWrapper_Dealloc(PyObject* self)
@@ -151,3 +145,4 @@ LIBSHIBOKEN_API PyAPI_FUNC(void) PyBaseWrapper_Dealloc_PrivateDtor(PyObject* sel
 } // namespace Shiboken
 
 #endif // BASEWRAPPER_H
+

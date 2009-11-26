@@ -674,15 +674,14 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
     s << INDENT << "return 0;" << endl;
 }
 
-void CppGenerator::writeInvalidCppObjectCheck(QTextStream& s)
+void CppGenerator::writeInvalidCppObjectCheck(QTextStream& s, QString pyArgName)
 {
-    s << INDENT << "if (!Shiboken::cppObjectIsValid((Shiboken::PyBaseWrapper*)self)) {" << endl;
+    s << INDENT << "if (Shiboken::cppObjectIsInvalid(" << pyArgName << "))" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "PyErr_SetString(PyExc_RuntimeError, \"underlying C++ object was deleted.\");" << endl;
         s << INDENT << "return 0;" << endl;
     }
-    s << INDENT << '}' << endl;
+    s << endl;
 }
 
 void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName)

@@ -55,7 +55,7 @@ private:
 
     void writeErrorSection(QTextStream& s, OverloadData& overloadData);
     /// Writes the check section for the validity of wrapped C++ objects.
-    void writeInvalidCppObjectCheck(QTextStream& s);
+    void writeInvalidCppObjectCheck(QTextStream& s, QString pyArgName = "self");
     void writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName);
 
     void writeTypeConverterImpl(QTextStream& s, const TypeEntry* type);
