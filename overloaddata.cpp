@@ -383,6 +383,18 @@ QPair<int, int> OverloadData::getMinMaxArguments(const AbstractMetaFunctionList 
     return QPair<int, int>(minArgs, maxArgs);
 }
 
+bool OverloadData::isSingleArgument(const AbstractMetaFunctionList overloads)
+{
+    bool singleArgument = true;
+    foreach (const AbstractMetaFunction* func, overloads) {
+        if (func->arguments().size() - numberOfRemovedArguments(func) > 1) {
+            singleArgument = false;
+            break;
+        }
+    }
+    return singleArgument;
+}
+
 void OverloadData::dumpGraph(QString filename) const
 {
     QFile file(filename);

@@ -75,6 +75,8 @@ public:
 
     static int numberOfRemovedArguments(const AbstractMetaFunction* func, int finalArgPos = -1);
     static QPair<int, int> getMinMaxArguments(const AbstractMetaFunctionList overloads);
+    /// Returns true if all overloads have no more than one argument.
+    static bool isSingleArgument(const AbstractMetaFunctionList overloads);
 
     void dumpGraph(QString filename) const;
     QString dumpGraph() const;
