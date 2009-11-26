@@ -1153,27 +1153,46 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     if (!ownership_mods.isEmpty()) {
         s << INDENT << "// Ownership transferences." << endl;
         foreach (ArgumentModification arg_mod, ownership_mods) {
-            s << INDENT << "PyBaseWrapper_setOwnership(";
+            const AbstractMetaClass* wrappedClass = 0;
+            QString pyArgName;
             if (arg_mod.index == -1) {
-                s << "self";
+                pyArgName = QString("self");
+                wrappedClass = func->implementingClass();
             } else if (arg_mod.index == 0) {
-                s << retvalVariableName();
+                pyArgName = retvalVariableName();
+                wrappedClass = classes().findClass(func->type()->typeEntry()->name());
             } else {
-                AbstractMetaFunctionList overloads = getFunctionGroups(func->implementingClass())[func->name()];
-                bool singleArgument = true;
-                foreach (const AbstractMetaFunction* f, overloads) {
-                    if (f->arguments().size() - OverloadData::numberOfRemovedArguments(f) > 1) {
-                        singleArgument = false;
-                        break;
-                    }
-                }
-                if (singleArgument)
-                    s << "arg";
+                int real_index = OverloadData::numberOfRemovedArguments(func, arg_mod.index - 1);
+                wrappedClass = classes().findClass(func->arguments().at(real_index)->type()->typeEntry()->name());
+                if ((arg_mod.index == 1)
+                    && OverloadData::isSingleArgument(getFunctionGroups(func->implementingClass())[func->name()]))
+                    pyArgName = QString("arg");
                 else
-                    s << "pyargs[" << arg_mod.index - 1 << ']';
+                    pyArgName = QString("pyargs[%1]").arg(arg_mod.index - 1);
             }
-            s << ", " << (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::TargetLangOwnership);
-            s << ");" << endl;
+
+            if (!wrappedClass) {
+                s << "#error Invalid ownership modification for argument " << arg_mod.index << endl << endl;
+                break;
+            }
+
+            s << INDENT;
+            if (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::TargetLangOwnership) {
+                s << "PyBaseWrapper_setOwnership(" << pyArgName << ", true);" << endl;
+            } else if (wrappedClass->hasVirtualDestructor()) {
+                s << "if (PyBaseWrapper_containsCppWrapper(" << pyArgName << "))" << endl;
+                {
+                    Indentation indent(INDENT);
+                    s << INDENT << "PyBaseWrapper_setOwnership(" << pyArgName << ", false);" << endl;
+                }
+                s << INDENT << "else" << endl;
+                {
+                    Indentation indent(INDENT);
+                    s << INDENT << "BindingManager::instance().invalidateWrapper(" << pyArgName << ");" << endl;
+                }
+            } else {
+                s << "BindingManager::instance().invalidateWrapper(" << pyArgName << ");" << endl;
+            }
         }
     }
 }
