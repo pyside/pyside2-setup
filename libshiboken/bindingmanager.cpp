@@ -134,6 +134,7 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
 void BindingManager::invalidateWrapper(PyObject* wrapper)
 {
     PyBaseWrapper_setValidCppObject(wrapper, false);
+    PyBaseWrapper_setOwnership(wrapper, false);
     releaseWrapper(wrapper);
 }
 
