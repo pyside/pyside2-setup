@@ -5,4 +5,5 @@ Table of contents
     :maxdepth: 3
 
     overview.rst
+    ownership.rst
     typesystem.rst
