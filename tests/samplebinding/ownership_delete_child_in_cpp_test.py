@@ -42,7 +42,7 @@ class DeleteChildInPython(unittest.TestCase):
         child.setObjectName('child')
 
         parent.killChild('child')
-        parent.assertRaises(RuntimeError, child.objectName)
+        self.assertRaises(RuntimeError, child.objectName)
         self.assertEqual(parent.objectName(), 'parent')
 
 if __name__ == '__main__':
