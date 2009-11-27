@@ -24,15 +24,15 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-'''The KinderGarten class has cases of ownership transference between C++ and Python.'''
+'''The BlackBox class has cases of ownership transference between C++ and Python.'''
 
 import sys
 import unittest
 
-from sample import ObjectType, KinderGarten
+from sample import ObjectType, BlackBox
 
-class KinderGartenTest(unittest.TestCase):
-    '''The KinderGarten class has cases of ownership transference between C++ and Python.'''
+class BlackBoxTest(unittest.TestCase):
+    '''The BlackBox class has cases of ownership transference between C++ and Python.'''
 
     def testOwnershipTransference(self):
         '''Ownership transference from Python to C++ and back again.'''
@@ -42,29 +42,39 @@ class KinderGartenTest(unittest.TestCase):
         o2 = ObjectType()
         o2.setObjectName('object2')
         o2_refcnt = sys.getrefcount(o2)
-        kg = KinderGarten()
-        kg.addChild(o1)
-        kg.addChild(o2)
-        self.assertEqual(kg.children(), [o1, o2])
+        bb = BlackBox()
+        bb.keepObjectType(o1)
+        bb.keepObjectType(o2)
+        self.assertEqual(bb.objects(), [o1, o2])
         self.assertEqual(str(o1.objectName()), 'object1')
         self.assertEqual(str(o2.objectName()), 'object2')
         self.assertEqual(sys.getrefcount(o1), o1_refcnt)
         self.assertEqual(sys.getrefcount(o2), o2_refcnt)
-        o2 = kg.releaseChild(o2)
+        o2 = bb.retrieveObjectType(o2)
         self.assertEqual(sys.getrefcount(o2), o2_refcnt)
-        del kg
-        self.assertNotEqual(str(o1.objectName()), 'object1')
+        del bb
+        self.assertRaises(RuntimeError, o1.objectName)
         self.assertEqual(str(o2.objectName()), 'object2')
         self.assertEqual(sys.getrefcount(o2), o2_refcnt)
 
-    def testKinderGartenReleasingUnknownChild(self):
-        '''Asks KinderGarten to release an unknown child object.'''
+    def testBlackBoxReleasingUnknownObjectType(self):
+        '''Asks BlackBox to release an unknown ObjectType.'''
         o1 = ObjectType()
         o2 = ObjectType()
-        kg = KinderGarten()
-        kg.addChild(o1)
-        o3 = kg.releaseChild(o2)
+        bb = BlackBox()
+        bb.keepObjectType(o1)
+        o3 = bb.retrieveObjectType(o2)
         self.assertEqual(o3, None)
+
+    def testOwnershipTransferenceCppCreated(self):
+        '''Ownership transference using a C++ created object.'''
+        o1 = ObjectType.create()
+        o1.setObjectName('object1')
+        o1_refcnt = sys.getrefcount(o1)
+        bb = BlackBox()
+        bb.keepObjectType(o1)
+        self.assertEqual(bb.objects(), [o1])
+        self.assertEqual(str(o1.objectName()), 'object1')
 
 if __name__ == '__main__':
     unittest.main()
