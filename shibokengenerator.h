@@ -253,9 +253,13 @@ public:
 
     /// Returns the name of the macro used to export symbols
     QString getApiExportMacro() const;
+    QMap< QString, QString > options() const;
+
+    /// Returns true if the user enabled the so called "parent constructor heuristic".
+    bool useCtorHeuristic() const;
+protected:
     bool doSetup(const QMap<QString, QString>& args);
 
-protected:
     bool m_native_jump_table;
     static QHash<QString, QString> m_pythonPrimitiveTypeName;
     static QHash<QString, QString> m_pythonOperators;
@@ -281,6 +285,8 @@ protected:
 
     AbstractMetaFunctionList filterFunctions(const AbstractMetaClass* metaClass);
     AbstractMetaFunctionList queryGlobalOperators(const AbstractMetaClass* metaClass);
+private:
+    bool m_useCtorHeuristic;
 };
 
 

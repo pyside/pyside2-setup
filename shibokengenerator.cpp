@@ -29,7 +29,7 @@
 #include <limits>
 
 #define NULL_VALUE "NULL"
-#define COMMENT_LINE_WIDTH  77
+#define PARENT_CTOR_HEURISTIC "enable-parent-ctor-heuristic"
 
 static Indentor INDENT;
 //static void dumpFunction(AbstractMetaFunctionList lst);
@@ -1180,8 +1180,21 @@ QPair< int, int > ShibokenGenerator::getMinMaxArguments(const AbstractMetaFuncti
     return qMakePair(minArgs, maxArgs);
 }
 
+QMap<QString, QString> ShibokenGenerator::options() const
+{
+    QMap<QString, QString> opts(Generator::options());
+    opts.insert(PARENT_CTOR_HEURISTIC, "Enable heuristics to detect parent relationship on constructors.");
+    return opts;
+}
+
 bool ShibokenGenerator::doSetup(const QMap<QString, QString>& args)
 {
+    m_useCtorHeuristic = args.contains(PARENT_CTOR_HEURISTIC);
     return true;
+}
+
+bool ShibokenGenerator::useCtorHeuristic() const
+{
+    return m_useCtorHeuristic;
 }
 

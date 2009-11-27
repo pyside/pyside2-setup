@@ -2337,17 +2337,32 @@ void CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
 {
     const int numArgs = func->arguments().count();
     const AbstractMetaClass* cppClass = func->ownerClass();
+    bool ctorHeuristicEnabled = func->isConstructor() && useCtorHeuristic();
+
+    // -1   = return value
+    // 0    = self
+    // 1..n = func. args.
     for (int i = -1; i <= numArgs; ++i) {
         QString parentVariable;
         QString childVariable;
         ArgumentOwner argOwner = func->argumentOwner(cppClass, i);
         bool usePyArgs = getMinMaxArguments(func).second > 1 || func->isConstructor();
 
-        if (argOwner.action != ArgumentOwner::Invalid) {
-            if (!usePyArgs && i > 1)
-                ReportHandler::warning("");
+        ArgumentOwner::Action action = argOwner.action;
+        int childIndex = argOwner.index; // for argOwner.index, -1 is self... wtf?
+        if (ctorHeuristicEnabled && i > 0 && numArgs) {
+            AbstractMetaArgument* arg = func->arguments().at(i-1);
+            if (arg->argumentName() == "parent" && (arg->type()->isObject() || arg->type()->isQObject())) {
+                action = ArgumentOwner::Add;
+                childIndex = -1;
+            }
+        }
 
-            if (argOwner.index == -1)
+        if (action != ArgumentOwner::Invalid) {
+            if (!usePyArgs && i > 1)
+                ReportHandler::warning("Argument index for parent tag out of bounds: "+func->signature());
+
+            if (childIndex == -1)
                 childVariable = "self";
             else
                 childVariable = usePyArgs ? "pyargs["+QString::number(argOwner.index-1)+"]" : "arg";
