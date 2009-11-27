@@ -36,33 +36,34 @@
 #define BLACKBOX_H
 
 #include "libsamplemacros.h"
-#include <list>
+#include <map>
 #include "objecttype.h"
 #include "point.h"
 
 class LIBSAMPLE_API BlackBox
 {
 public:
-    typedef std::list<ObjectType*> ObjectTypeList;
-    typedef std::list<Point*> PointList;
+    typedef std::map<int, ObjectType*> ObjectTypeMap;
+    typedef std::map<int, Point*> PointMap;
 
-    BlackBox() {}
+    BlackBox() { m_ticket = -1;}
     ~BlackBox();
 
-    void keepObjectType(ObjectType* object);
-    ObjectType* retrieveObjectType(ObjectType* object);
-    void disposeObjectType(ObjectType* object);
+    int keepObjectType(ObjectType* object);
+    ObjectType* retrieveObjectType(int ticket);
+    void disposeObjectType(int ticket);
 
-    void keepPoint(Point* point);
-    Point* retrievePoint(Point* point);
-    void disposePoint(Point* point);
+    int keepPoint(Point* point);
+    Point* retrievePoint(int ticket);
+    void disposePoint(int ticket);
 
-    ObjectTypeList objects() { return m_objects; }
-    PointList points() { return m_points; }
+    ObjectTypeMap objects() { return m_objects; }
+    PointMap points() { return m_points; }
 
 private:
-    ObjectTypeList m_objects;
-    PointList m_points;
+    ObjectTypeMap m_objects;
+    PointMap m_points;
+    int m_ticket;
 };
 
 #endif // BLACKBOX_H

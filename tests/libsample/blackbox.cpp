@@ -38,64 +38,72 @@ using namespace std;
 
 BlackBox::~BlackBox()
 {
-    // Free all lists.
+    // Free all maps.
     while (!m_objects.empty()) {
-        delete m_objects.back();
-        m_objects.pop_back();
+        delete (*m_objects.begin()).second;
+        m_objects.erase(m_objects.begin());
     }
     while (!m_points.empty()) {
-        delete m_points.back();
-        m_points.pop_back();
+        delete (*m_points.begin()).second;
+        m_points.erase(m_points.begin());
     }
 }
 
-void
+int
 BlackBox::keepObjectType(ObjectType* object)
 {
-    m_objects.push_back(object);
+    m_ticket++;
+    std::pair<int, ObjectType*> item(m_ticket, object);
+    m_objects.insert(item);
+
+    return m_ticket;
 }
 
 ObjectType*
-BlackBox::retrieveObjectType(ObjectType* object)
+BlackBox::retrieveObjectType(int ticket)
 {
-    for(ObjectTypeList::iterator objecttype_iter = m_objects.begin();
-        objecttype_iter != m_objects.end(); objecttype_iter++) {
-        if (object == *objecttype_iter) {
-            m_objects.erase(objecttype_iter);
-            return object;
-        }
+    map<int, ObjectType*>::iterator it = m_objects.find(ticket);
+    if (it != m_objects.end()) {
+        m_objects.erase(it);
+        return it->second;
     }
     return 0;
 }
 
 void
-BlackBox::disposeObjectType(ObjectType* object)
+BlackBox::disposeObjectType(int ticket)
 {
-//TODO: implement + describe inside typesystem file.
+    ObjectType* object = retrieveObjectType(ticket);
+    if (object)
+        delete object;
 }
 
-void
+int
 BlackBox::keepPoint(Point* point)
 {
-    m_points.push_back(point);
+    m_ticket++;
+    std::pair<int, Point*> item(m_ticket, point);
+    m_points.insert(item);
+
+    return m_ticket;
 }
 
 Point*
-BlackBox::retrievePoint(Point* point)
+BlackBox::retrievePoint(int ticket)
 {
-    for(PointList::iterator point_iter = m_points.begin();
-        point_iter != m_points.end(); point_iter++) {
-        if (point == *point_iter) {
-            m_points.erase(point_iter);
-            return point;
-        }
+    map<int, Point*>::iterator it = m_points.find(ticket);
+    if (it != m_points.end()) {
+        m_points.erase(it);
+        return it->second;
     }
     return 0;
 }
 
 void
-BlackBox::disposePoint(Point* point)
+BlackBox::disposePoint(int ticket)
 {
-//TODO: implement + describe inside typesystem file.
+    Point* point = retrievePoint(ticket);
+    if (point)
+        delete point;
 }
 
