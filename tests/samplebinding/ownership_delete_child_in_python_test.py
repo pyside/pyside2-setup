@@ -24,26 +24,28 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-'''Tests for destroying the parent'''
+'''Tests for deleting a child object in python'''
 
 import unittest
+import random
+import string
 
-from sample import ObjectType, BlackBox
+from sample import ObjectType
 
 
-class InvalidateParentTest(unittest.TestCase):
-    '''Test case for deleting an parent object'''
+class DeleteChildInPython(unittest.TestCase):
+    '''Test case for deleting (unref) a child in python'''
 
-    def testInvalidateParent(self):
-        '''Invalidate parent should invalidate children'''
-        parent = ObjectType.create()
+    def testDeleteChild(self):
+        '''Delete child in python should not invalidate child'''
+        parent = ObjectType()
         child = ObjectType(parent)
-        bbox = BlackBox()
+        name = ''.join(random.sample(string.letters, 5))
+        child.setObjectName(name)
 
-        bbox.keepObjectType(parent) # Should invalidate the parent
-
-        self.assertRaises(RuntimeError, parent.objectName)
-        self.assertRaises(RuntimeError, child.objectName)
+        del child
+        new_child = parent.children()[0]
+        self.assertEqual(new_child.objectName(), name)
 
 if __name__ == '__main__':
     unittest.main()
