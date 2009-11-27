@@ -425,7 +425,6 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     OverloadData overloadData(overloads, this);
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
     QString className = cpythonTypeName(rfunc->ownerClass());
-    bool hasCppWrapper = shouldGenerateCppWrapper(rfunc->ownerClass());
 
     s << "PyObject*" << endl;
     s << cpythonFunctionName(rfunc) << "(PyTypeObject *type, PyObject *args, PyObject *kwds)" << endl;
@@ -433,6 +432,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
 
     s << INDENT << "PyObject* self;" << endl;
     s << INDENT;
+    bool hasCppWrapper = shouldGenerateCppWrapper(rfunc->ownerClass());
     s << (hasCppWrapper ? wrapperName(rfunc->ownerClass()) : rfunc->ownerClass()->qualifiedCppName());
     s << "* cptr;" << endl << endl;
 
@@ -457,18 +457,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     }
 
     writeOverloadedMethodDecisor(s, &overloadData);
-    s << endl;
 
-    s << INDENT << "self = Shiboken::PyBaseWrapper_New(type, &" << className << ", cptr";
-
-    // If the created C++ object has a C++ wrapper the ownership is assigned to Python
-    // (first "1") and the flag indicating that the Python wrapper holds an C++ wrapper
-    // is marked as true (the second "1"). Otherwise the default values apply:
-    // Python owns it and C++ wrapper is false.
-    if (hasCppWrapper)
-        s << ", 1, 1";
-
-    s << ");" << endl;
     s << endl << INDENT << "if (!self) {" << endl;
     {
         Indentation indentation(INDENT);
@@ -1141,6 +1130,21 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         s << endl;
         writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::TargetLangCode, func, lastArg);
     }
+
+    if (func->isConstructor()) {
+
+        QString className = cpythonTypeName(func->ownerClass());
+        s << INDENT << "self = Shiboken::PyBaseWrapper_New(type, &" << className << ", cptr";
+        // If the created C++ object has a C++ wrapper the ownership is assigned to Python
+        // (first "1") and the flag indicating that the Python wrapper holds an C++ wrapper
+        // is marked as true (the second "1"). Otherwise the default values apply:
+        // Python owns it and C++ wrapper is false.
+        if (shouldGenerateCppWrapper(func->ownerClass()))
+            s << ", 1, 1";
+
+        s << ");" << endl;
+    }
+    writeParentChildManagement(s, func);
 
     // Ownership transference between C++ and Python.
     QList<ArgumentModification> ownership_mods;
@@ -2333,6 +2337,38 @@ void CppGenerator::finishGeneration()
         if (!snips.isEmpty()) {
             writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::NativeCode);
             s << endl;
+        }
+    }
+}
+
+void CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func)
+{
+    const int numArgs = func->arguments().count();
+    const AbstractMetaClass* cppClass = func->ownerClass();
+    for (int i = -1; i <= numArgs; ++i) {
+        QString parentVariable;
+        QString childVariable;
+        ArgumentOwner argOwner = func->argumentOwner(cppClass, i);
+        bool usePyArgs = getMinMaxArguments(func).second > 1 || func->isConstructor();
+
+        if (argOwner.action != ArgumentOwner::Invalid) {
+            if (!usePyArgs && i > 1)
+                ReportHandler::warning("");
+
+            if (argOwner.index == -1)
+                childVariable = "self";
+            else
+                childVariable = usePyArgs ? "pyargs["+QString::number(argOwner.index-1)+"]" : "arg";
+
+            if (argOwner.action == ArgumentOwner::Remove)
+                parentVariable = "0";
+            else if (i == 0)
+                parentVariable = "self";
+            else
+                parentVariable = usePyArgs ? "pyargs["+QString::number(i-1)+"]" : "arg";
+
+            s << INDENT << "Shiboken::setParent(" << parentVariable << ", " << childVariable << ");\n";
+
         }
     }
 }

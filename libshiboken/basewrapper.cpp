@@ -33,42 +33,109 @@
  */
 
 #include "basewrapper.h"
+#include <cstddef>
+#include <algorithm>
 
 namespace Shiboken
 {
 
-PyObject*
-PyBaseWrapper_New(PyTypeObject* instanceType,
-                  ShiboTypeObject* baseWrapperType,
-                  const void* cptr,
-                  unsigned int hasOwnership,
-                  unsigned int containsCppWrapper)
+void removeParent(PyBaseWrapper* child)
+{
+    if (child->parentInfo->parent) {
+        ShiboChildrenList& oldBrothers = child->parentInfo->parent->parentInfo->children;
+        oldBrothers.remove(child);
+        child->parentInfo->parent = 0;
+        Py_DECREF(child);
+    }
+}
+
+void setParent(PyObject* parent, PyObject* child)
+{
+    if (!child || child == Py_None || child == parent)
+        return;
+
+    bool parentIsNull = !parent || parent == Py_None;
+
+    PyBaseWrapper* parent_ = reinterpret_cast<PyBaseWrapper*>(parent);
+    PyBaseWrapper* child_ = reinterpret_cast<PyBaseWrapper*>(child);
+    if (!child_->parentInfo)
+        child_->parentInfo = new ShiboParentInfo;
+
+    if (!parentIsNull) {
+        if (!parent_->parentInfo)
+            parent_->parentInfo = new ShiboParentInfo;
+        // do not re-add a child
+        ShiboChildrenList& children = parent_->parentInfo->children;
+        if (std::find(children.begin(), children.end(), child_) != children.end())
+            return;
+    }
+
+    bool hasAnotherParent = child_->parentInfo->parent && child_->parentInfo->parent != parent_;
+
+    // check if we need to remove this child from the old parent
+    if (parentIsNull || hasAnotherParent)
+        removeParent(child_);
+
+    // Add the child to the new parent
+    if (!parentIsNull) {
+        child_->parentInfo->parent = parent_;
+        parent_->parentInfo->children.push_back(child_);
+        Py_INCREF(child_);
+    }
+}
+
+void destroyParentInfo(PyBaseWrapper* obj, bool removeFromParent)
+{
+    if (removeFromParent && obj->parentInfo->parent)
+        removeParent(obj);
+    // invalidate all children
+    ShiboChildrenList::iterator it = obj->parentInfo->children.begin();
+    for (; it != obj->parentInfo->children.end(); ++it) {
+        PyBaseWrapper*& child = *it;
+        destroyParentInfo(child, false);
+        BindingManager::instance().invalidateWrapper(reinterpret_cast<PyObject*>(child));
+        Py_DECREF(child);
+    }
+    delete obj->parentInfo;
+    obj->parentInfo = 0;
+}
+
+PyObject* PyBaseWrapper_New(PyTypeObject* instanceType,
+                            ShiboTypeObject* baseWrapperType,
+                            const void* cptr,
+                            unsigned int hasOwnership,
+                            unsigned int containsCppWrapper)
 {
     if (!cptr)
         return 0;
 
-    PyObject* self = ((ShiboTypeObject*) instanceType)->pytype.tp_alloc((PyTypeObject*) instanceType, 0);
-    ((PyBaseWrapper*)self)->baseWrapperType = baseWrapperType;
-    ((PyBaseWrapper*)self)->cptr = const_cast<void*>(cptr);
-    ((PyBaseWrapper*)self)->hasOwnership = hasOwnership;
-    ((PyBaseWrapper*)self)->containsCppWrapper = containsCppWrapper;
-    ((PyBaseWrapper*)self)->validCppObject = 1;
-    if (((ShiboTypeObject*) instanceType)->mi_init && !((ShiboTypeObject*) instanceType)->mi_offsets)
-        ((ShiboTypeObject*) instanceType)->mi_offsets = ((ShiboTypeObject*) instanceType)->mi_init(cptr);
-    BindingManager::instance().assignWrapper(self, cptr);
-    if (((ShiboTypeObject*) instanceType)->mi_offsets) {
-        int* offset = ((ShiboTypeObject*) instanceType)->mi_offsets;
+    ShiboTypeObject* const& instanceType_ = reinterpret_cast<ShiboTypeObject*>(instanceType);
+    PyBaseWrapper* self = (PyBaseWrapper*)instanceType_->pytype.tp_alloc((PyTypeObject*) instanceType, 0);
+
+    self->baseWrapperType = baseWrapperType;
+    self->cptr = const_cast<void*>(cptr);
+    self->hasOwnership = hasOwnership;
+    self->containsCppWrapper = containsCppWrapper;
+    self->validCppObject = 1;
+    self->parentInfo = 0;
+
+    if (instanceType_->mi_init && !instanceType_->mi_offsets)
+        instanceType_->mi_offsets = instanceType_->mi_init(cptr);
+    BindingManager::instance().assignWrapper(reinterpret_cast<PyObject*>(self), cptr);
+    if (instanceType_->mi_offsets) {
+        int* offset = instanceType_->mi_offsets;
         while (*offset != -1) {
-            if (*offset > 0)
-                BindingManager::instance().assignWrapper(self, (void*) ((size_t) cptr + (*offset)));
+            if (*offset > 0) {
+                BindingManager::instance().assignWrapper(reinterpret_cast<PyObject*>(self),
+                                                         reinterpret_cast<void*>((std::size_t) cptr + (*offset)));
+            }
             offset++;
         }
     }
-    return self;
+    return reinterpret_cast<PyObject*>(self);
 }
 
-bool
-cppObjectIsInvalid(PyObject* wrapper)
+bool cppObjectIsInvalid(PyObject* wrapper)
 {
     if (((Shiboken::PyBaseWrapper*)wrapper)->validCppObject)
         return false;
@@ -76,8 +143,7 @@ cppObjectIsInvalid(PyObject* wrapper)
     return true;
 }
 
-void
-PyBaseWrapper_Dealloc_PrivateDtor(PyObject* self)
+void PyBaseWrapper_Dealloc_PrivateDtor(PyObject* self)
 {
     BindingManager::instance().releaseWrapper(self);
     Py_TYPE(((PyBaseWrapper*)self))->tp_free((PyObject*)self);

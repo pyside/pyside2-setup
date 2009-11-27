@@ -135,6 +135,7 @@ private:
     /// Writes the function that registers the multiple inheritance information for the classes that need it.
     void writeMultipleInheritanceInitializerFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
+    void writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func);
     /**
      *   Returns the multiple inheritance initializer function for the given class.
      *   \param metaClass the class for whom the function name must be generated.
