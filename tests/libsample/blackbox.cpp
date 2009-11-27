@@ -107,3 +107,28 @@ BlackBox::disposePoint(int ticket)
         delete point;
 }
 
+
+std::list<ObjectType*>
+BlackBox::objects()
+{
+    std::list<ObjectType*> l;
+    map<int, ObjectType*>::iterator it;
+
+    for ( it = m_objects.begin() ; it != m_objects.end(); it++ )
+        l.push_back((*it).second);
+
+    return l;
+}
+
+std::list<Point*>
+BlackBox::points()
+{
+    std::list<Point*> l;
+    map<int, Point*>::iterator it;
+
+    for ( it = m_points.begin() ; it != m_points.end(); it++ )
+        l.push_back((*it).second);
+
+    return l;
+}
+

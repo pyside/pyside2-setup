@@ -43,14 +43,14 @@ class BlackBoxTest(unittest.TestCase):
         o2.setObjectName('object2')
         o2_refcnt = sys.getrefcount(o2)
         bb = BlackBox()
-        bb.keepObjectType(o1)
-        bb.keepObjectType(o2)
-        self.assertEqual(bb.objects(), [o1, o2])
+        o1_ticket = bb.keepObjectType(o1)
+        o2_ticket = bb.keepObjectType(o2)
+        self.assertEqual(set(bb.objects()), set([o1, o2]))
         self.assertEqual(str(o1.objectName()), 'object1')
         self.assertEqual(str(o2.objectName()), 'object2')
         self.assertEqual(sys.getrefcount(o1), o1_refcnt)
         self.assertEqual(sys.getrefcount(o2), o2_refcnt)
-        o2 = bb.retrieveObjectType(o2)
+        o2 = bb.retrieveObjectType(o2_ticket)
         self.assertEqual(sys.getrefcount(o2), o2_refcnt)
         del bb
         self.assertRaises(RuntimeError, o1.objectName)
@@ -62,8 +62,8 @@ class BlackBoxTest(unittest.TestCase):
         o1 = ObjectType()
         o2 = ObjectType()
         bb = BlackBox()
-        bb.keepObjectType(o1)
-        o3 = bb.retrieveObjectType(o2)
+        o1_ticket = bb.keepObjectType(o1)
+        o3 = bb.retrieveObjectType(-5)
         self.assertEqual(o3, None)
 
     def testOwnershipTransferenceCppCreated(self):
@@ -72,7 +72,7 @@ class BlackBoxTest(unittest.TestCase):
         o1.setObjectName('object1')
         o1_refcnt = sys.getrefcount(o1)
         bb = BlackBox()
-        bb.keepObjectType(o1)
+        o1_ticket = bb.keepObjectType(o1)
         self.assertRaises(RuntimeError, o1.objectName)
 
 if __name__ == '__main__':

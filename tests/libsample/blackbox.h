@@ -57,8 +57,8 @@ public:
     Point* retrievePoint(int ticket);
     void disposePoint(int ticket);
 
-    ObjectTypeMap objects() { return m_objects; }
-    PointMap points() { return m_points; }
+    std::list<ObjectType*> objects();
+    std::list<Point*> points();
 
 private:
     ObjectTypeMap m_objects;
