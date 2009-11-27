@@ -135,7 +135,7 @@ parent
 
     .. code-block:: xml
 
-        <modify-argument>
+        <modify-argument index="1">
               <parent index="this" action="add | remove" />
         </modify-argument>
 
