@@ -69,7 +69,7 @@ public:
     ObjectType* parent() const { return m_parent; }
     const ObjectTypeList& children() const { return m_children; }
     void killChild(const Str& name);
-    void removeChild(const ObjectType *child);
+    void removeChild(ObjectType* child);
 
     Str objectName() const;
     void setObjectName(const Str& name);
@@ -83,7 +83,7 @@ private:
     ObjectType(const ObjectType&);
     ObjectType& operator=(const ObjectType&);
 
-    Str* m_objectName;
+    Str m_objectName;
     ObjectType* m_parent;
     ObjectTypeList m_children;
 };

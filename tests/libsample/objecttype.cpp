@@ -33,32 +33,47 @@
  */
 
 #include "objecttype.h"
+#include <algorithm>
 
 using namespace std;
 
 ObjectType::ObjectType(ObjectType* parent) : m_parent(0)
 {
-    m_objectName = new Str("");
     setParent(parent);
 }
 
 ObjectType::~ObjectType()
 {
-    while (!m_children.empty()) {
-        delete m_children.back();
-        m_children.pop_back();
-    }
-
-    delete m_objectName;
+    for (ObjectTypeList::iterator child_iter = m_children.begin();
+         child_iter != m_children.end(); ++child_iter)
+        delete *child_iter;
 }
 
 void
-ObjectType::removeChild(const ObjectType *child)
+ObjectType::removeChild(ObjectType* child)
 {
-    for(ObjectTypeList::iterator child_iter = m_children.begin();
-        child_iter != m_children.end(); child_iter++) {
-        if (this == *child_iter)
-            m_children.erase(child_iter);
+    if (!child)
+        return;
+
+    ObjectTypeList::iterator child_iter = std::find(m_children.begin(), m_children.end(), child);
+    if (child_iter != m_children.end()) {
+        m_children.erase(child_iter);
+        child->m_parent = 0;
+    }
+}
+
+void
+ObjectType::killChild(const Str& name)
+{
+    for (ObjectTypeList::iterator child_iter = m_children.begin();
+         child_iter != m_children.end(); ++child_iter) {
+
+        if ((*child_iter)->objectName() == name) {
+            ObjectType* child = *child_iter;
+            removeChild(child);
+            delete child;
+            break;
+        }
     }
 }
 
@@ -76,39 +91,27 @@ ObjectType::setParent(ObjectType* parent)
         m_parent->m_children.push_back(this);
 }
 
-void ObjectType::killChild(const Str &name)
-{
-    for (ObjectTypeList::iterator child_iter = m_children.begin();
-         child_iter != m_children.end(); child_iter++) {
-
-        if ((*child_iter)->objectName() == name) {
-            this->removeChild(*child_iter);
-            delete *child_iter;
-            break;
-        }
-    }
-}
-
 void
 ObjectType::setObjectName(const Str& name)
 {
-    delete m_objectName;
-    m_objectName = new Str(name);
+    m_objectName = name;
 }
 
 Str
 ObjectType::objectName() const
 {
-    return *m_objectName;
+    return m_objectName;
 }
 
-bool ObjectType::causeEvent(Event::EventType eventType)
+bool
+ObjectType::causeEvent(Event::EventType eventType)
 {
     Event e(eventType);
-    return this->event(&e);
+    return event(&e);
 }
 
-bool ObjectType::event(Event* event)
+bool
+ObjectType::event(Event* event)
 {
     return true;
 }
