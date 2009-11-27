@@ -51,28 +51,22 @@ class DeleteParentTest(unittest.TestCase):
         parent = ObjectType()
         children = [ObjectType(parent) for _ in range(10)]
 
-        refcount_before = map(sys.getrefcount, children)
-
         del parent
         for i, child in enumerate(children):
             self.assertRaises(RuntimeError, child.objectName)
-            self.assertEqual(sys.getrefcount(child), refcount_before[i]-1)
+            self.assertEqual(sys.getrefcount(child), 4)
 
     def testRecursiveParentDelete(self):
         '''Delete parent should invalidate grandchildren'''
-
         parent = ObjectType()
         child = ObjectType(parent)
         grandchild = ObjectType(child)
 
-        refcount_before = sys.getrefcount(child)
-        grand_refcount_before = sys.getrefcount(grandchild)
-
         del parent
         self.assertRaises(RuntimeError, child.objectName)
-        self.assertEqual(sys.getrefcount(child), refcount_before-1)
+        self.assertEqual(sys.getrefcount(child), 2)
         self.assertRaises(RuntimeError, grandchild.objectName)
-        self.assertEqual(sys.getrefcount(grandchild), grand_refcount_before-1)
+        self.assertEqual(sys.getrefcount(grandchild), 2)
 
 
 if __name__ == '__main__':
