@@ -62,6 +62,9 @@ public:
     ObjectType(ObjectType* parent = 0);
     virtual ~ObjectType();
 
+    // factory method
+    static ObjectType* create() { return new ObjectType(); }
+
     void setParent(ObjectType* parent);
     ObjectType* parent() const { return m_parent; }
     const ObjectTypeList& children() const { return m_children; }

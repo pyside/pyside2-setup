@@ -64,6 +64,11 @@
         <modify-function signature="event(Event*)">
             <modify-argument index="1" invalidate-after-use="yes"/>
         </modify-function>
+        <modify-function signature="create()">
+            <modify-argument index="return">
+                <define-ownership owner="target"/>
+            </modify-argument>
+        </modify-function>
     </object-type>
     <value-type name="Event"/>
 

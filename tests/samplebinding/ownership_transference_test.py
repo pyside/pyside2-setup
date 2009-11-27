@@ -73,8 +73,7 @@ class BlackBoxTest(unittest.TestCase):
         o1_refcnt = sys.getrefcount(o1)
         bb = BlackBox()
         bb.keepObjectType(o1)
-        self.assertEqual(bb.objects(), [o1])
-        self.assertEqual(str(o1.objectName()), 'object1')
+        self.assertRaises(RuntimeError, o1.objectName)
 
 if __name__ == '__main__':
     unittest.main()
