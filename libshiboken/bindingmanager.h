@@ -64,6 +64,14 @@ public:
     /// Convenience method to invalidate the Python wrapper for a C++ wrapped object. Do nothing if C++ pointer has no Python wrapper.
     void invalidateWrapper(const void* cptr);
 
+    /// Transfers the ownership of a Python wrapper to C++.
+    void transferOwnershipToCpp(PyBaseWrapper* wrapper);
+    /// Convenience method to call transferOwnershipToCpp with a properly cast PyBaseWrapper.
+    inline void transferOwnershipToCpp(PyObject* wrapper)
+    {
+        transferOwnershipToCpp(reinterpret_cast<PyBaseWrapper*>(wrapper));
+    }
+
 private:
     ~BindingManager();
     // disable copy

@@ -1183,22 +1183,13 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             }
 
             s << INDENT;
-            if (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::TargetLangOwnership) {
-                s << "PyBaseWrapper_setOwnership(" << pyArgName << ", true);" << endl;
-            } else if (wrappedClass->hasVirtualDestructor()) {
-                s << "if (PyBaseWrapper_containsCppWrapper(" << pyArgName << "))" << endl;
-                {
-                    Indentation indent(INDENT);
-                    s << INDENT << "PyBaseWrapper_setOwnership(" << pyArgName << ", false);" << endl;
-                }
-                s << INDENT << "else" << endl;
-                {
-                    Indentation indent(INDENT);
-                    s << INDENT << "BindingManager::instance().invalidateWrapper(" << pyArgName << ");" << endl;
-                }
-            } else {
-                s << "BindingManager::instance().invalidateWrapper(" << pyArgName << ");" << endl;
-            }
+            if (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::TargetLangOwnership)
+                s << "PyBaseWrapper_setOwnership(" << pyArgName << ", true";
+            else if (wrappedClass->hasVirtualDestructor())
+                s << "BindingManager::instance().transferOwnershipToCpp(" << pyArgName;
+            else
+                s << "BindingManager::instance().invalidateWrapper(" << pyArgName;
+            s << ");" << endl;
         }
     }
 }

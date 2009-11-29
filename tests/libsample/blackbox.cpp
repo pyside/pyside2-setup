@@ -55,6 +55,7 @@ BlackBox::keepObjectType(ObjectType* object)
     m_ticket++;
     std::pair<int, ObjectType*> item(m_ticket, object);
     m_objects.insert(item);
+    object->setParent(0);
 
     return m_ticket;
 }

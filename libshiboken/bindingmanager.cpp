@@ -153,5 +153,16 @@ void BindingManager::invalidateWrapper(const void* cptr)
         invalidateWrapper(iter->second);
 }
 
+void BindingManager::transferOwnershipToCpp(PyBaseWrapper* wrapper)
+{
+    if (wrapper->parentInfo)
+        Shiboken::removeParent(wrapper);
+
+    if (PyBaseWrapper_containsCppWrapper(wrapper))
+        PyBaseWrapper_setOwnership(wrapper, false);
+    else
+        invalidateWrapper(wrapper);
+}
+
 } // namespace Shiboken
 
