@@ -84,20 +84,24 @@ void setParent(PyObject* parent, PyObject* child)
     }
 }
 
-void destroyParentInfo(PyBaseWrapper* obj, bool removeFromParent)
+static void _destroyParentInfo(PyBaseWrapper* obj, bool removeFromParent)
 {
     if (removeFromParent && obj->parentInfo->parent)
         removeParent(obj);
-    // invalidate all children
     ShiboChildrenList::iterator it = obj->parentInfo->children.begin();
     for (; it != obj->parentInfo->children.end(); ++it) {
         PyBaseWrapper*& child = *it;
-        destroyParentInfo(child, false);
-        BindingManager::instance().invalidateWrapper(reinterpret_cast<PyObject*>(child));
+        _destroyParentInfo(child, false);
         Py_DECREF(child);
     }
     delete obj->parentInfo;
     obj->parentInfo = 0;
+}
+
+void destroyParentInfo(PyBaseWrapper* obj, bool removeFromParent)
+{
+    BindingManager::instance().invalidateWrapper(obj);
+    _destroyParentInfo(obj, removeFromParent);
 }
 
 PyObject* PyBaseWrapper_New(PyTypeObject* instanceType,

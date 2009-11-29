@@ -41,6 +41,8 @@
 namespace Shiboken
 {
 
+struct PyBaseWrapper;
+
 class LIBSHIBOKEN_API BindingManager
 {
 public:
@@ -52,8 +54,13 @@ public:
     PyObject* retrieveWrapper(const void* cptr);
     PyObject* getOverride(const void* cptr, const char* methodName);
 
-    /// Invalidate the Python wrapper and removes the relations from C++ objects the Python wrapper.
-    void invalidateWrapper(PyObject* wrapper);
+    /// Invalidate the Python wrapper and removes the relations from C++ pointers to the Python wrapper.
+    void invalidateWrapper(PyBaseWrapper* wrapper);
+    /// Convenience method to call invalidateWrapper with a properly cast PyBaseWrapper.
+    inline void invalidateWrapper(PyObject* wrapper)
+    {
+        invalidateWrapper(reinterpret_cast<PyBaseWrapper*>(wrapper));
+    }
     /// Convenience method to invalidate the Python wrapper for a C++ wrapped object. Do nothing if C++ pointer has no Python wrapper.
     void invalidateWrapper(const void* cptr);
 

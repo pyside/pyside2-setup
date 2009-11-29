@@ -24,7 +24,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-'''Tests for destroying the parent'''
+'''Tests for invalidating a parent of other objects.'''
 
 import unittest
 
@@ -37,13 +37,22 @@ class InvalidateParentTest(unittest.TestCase):
     def testInvalidateParent(self):
         '''Invalidate parent should invalidate children'''
         parent = ObjectType.create()
-        child = ObjectType(parent)
+        child1 = ObjectType(parent)
+        child2 = ObjectType.create()
+        child2.setParent(parent)
+        grandchild1 = ObjectType(child1)
+        grandchild2 = ObjectType.create()
+        grandchild2.setParent(child2)
         bbox = BlackBox()
 
         bbox.keepObjectType(parent) # Should invalidate the parent
 
         self.assertRaises(RuntimeError, parent.objectName)
-        self.assertRaises(RuntimeError, child.objectName)
+        self.assertRaises(RuntimeError, child1.objectName)
+        self.assertRaises(RuntimeError, child2.objectName)
+        self.assertRaises(RuntimeError, grandchild1.objectName)
+        self.assertRaises(RuntimeError, grandchild2.objectName)
 
 if __name__ == '__main__':
     unittest.main()
+

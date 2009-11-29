@@ -131,11 +131,19 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
     return 0;
 }
 
-void BindingManager::invalidateWrapper(PyObject* wrapper)
+void BindingManager::invalidateWrapper(PyBaseWrapper* wrapper)
 {
+    if (!PyBaseWrapper_validCppObject(wrapper))
+        return;
     PyBaseWrapper_setValidCppObject(wrapper, false);
     PyBaseWrapper_setOwnership(wrapper, false);
-    releaseWrapper(wrapper);
+    // If it is a parent invalidate all children.
+    if (PyBaseWrapper_hasParentInfo(wrapper)) {
+        ShiboChildrenList::iterator it = wrapper->parentInfo->children.begin();
+        for (; it != wrapper->parentInfo->children.end(); ++it)
+            invalidateWrapper(*it);
+    }
+    releaseWrapper(reinterpret_cast<PyObject*>(wrapper));
 }
 
 void BindingManager::invalidateWrapper(const void* cptr)
