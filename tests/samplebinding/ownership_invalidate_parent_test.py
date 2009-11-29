@@ -32,7 +32,7 @@ from sample import ObjectType, BlackBox
 
 
 class InvalidateParentTest(unittest.TestCase):
-    '''Test case for deleting an parent object'''
+    '''Tests for invalidating a parent of other objects.'''
 
     def testInvalidateParent(self):
         '''Invalidate parent should invalidate children'''

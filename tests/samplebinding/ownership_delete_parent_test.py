@@ -33,7 +33,7 @@ from sample import ObjectType
 
 
 class DeleteParentTest(unittest.TestCase):
-    '''Test case for deleting an parent object'''
+    '''Test case for deleting a parent object'''
 
     def testParentDestructor(self):
         '''Delete parent object should invalidate child'''
