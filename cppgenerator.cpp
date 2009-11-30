@@ -2340,8 +2340,8 @@ void CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
     bool ctorHeuristicEnabled = func->isConstructor() && useCtorHeuristic();
 
     // -1   = return value
-    // 0    = self
-    // 1..n = func. args.
+    //  0    = self
+    //  1..n = func. args.
     for (int i = -1; i <= numArgs; ++i) {
         QString parentVariable;
         QString childVariable;
@@ -2371,6 +2371,8 @@ void CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
                 parentVariable = "0";
             else if (i == 0)
                 parentVariable = "self";
+            else if (i == -1)
+                parentVariable = retvalVariableName();
             else
                 parentVariable = usePyArgs ? "pyargs["+QString::number(i-1)+"]" : "arg";
 
