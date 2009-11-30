@@ -67,12 +67,16 @@ public:
 
     // factory method
     static ObjectType* create() { return new ObjectType(); }
+    static ObjectType* createWithChild();
 
     void setParent(ObjectType* parent);
     ObjectType* parent() const { return m_parent; }
     const ObjectTypeList& children() const { return m_children; }
     void killChild(const Str& name);
     void removeChild(ObjectType* child);
+    ObjectType* takeChild(ObjectType* child);
+    ObjectType* takeChild(const Str& name);
+    ObjectType* findChild(const Str& name);
 
     Str objectName() const;
     void setObjectName(const Str& name);

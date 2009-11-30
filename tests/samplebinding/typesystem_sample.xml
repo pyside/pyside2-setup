@@ -69,6 +69,11 @@
                 <define-ownership owner="target"/>
             </modify-argument>
         </modify-function>
+        <modify-function signature="createWithChild()">
+            <modify-argument index="return">
+                <define-ownership owner="target"/>
+            </modify-argument>
+        </modify-function>
         <modify-function signature="setParent(ObjectType*)">
             <modify-argument index="1">
                 <parent index="this" action="add"/>
@@ -80,6 +85,31 @@
                 ObjectTypeList::const_iterator it = objChildren.begin();
                 for (; it != objChildren.end(); ++it) {
                     Shiboken::setParent(%PYSELF, %CONVERTTOPYTHON[ObjectType*](*it));
+                }
+            </inject-code>
+        </modify-function>
+        <modify-function signature="takeChild(ObjectType*)">
+            <modify-argument index="return">
+                <define-ownership owner="target"/>
+                <parent index="this" action="remove"/>
+            </modify-argument>
+        </modify-function>
+        <modify-function signature="takeChild(const Str&amp;)">
+            <modify-argument index="return">
+                <define-ownership owner="target"/>
+                <parent index="this" action="remove"/>
+            </modify-argument>
+        </modify-function>
+        <modify-function signature="findChild(const Str&amp;)">
+            <modify-argument index="this">
+                <parent index="return" action="add"/>
+            </modify-argument>
+        </modify-function>
+        <modify-function signature="children()const">
+            <inject-code class="target" position="end">
+                Py_ssize_t max = PyList_GET_SIZE(%0);
+                for (int i = 0; i &lt; max; ++i) {
+                    Shiboken::setParent(%PYSELF, PyList_GET_ITEM(%0, i));
                 }
             </inject-code>
         </modify-function>

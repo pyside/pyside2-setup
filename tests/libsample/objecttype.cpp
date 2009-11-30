@@ -50,6 +50,16 @@ ObjectType::~ObjectType()
         delete *child_iter;
 }
 
+ObjectType*
+ObjectType::createWithChild()
+{
+    ObjectType* parent = create();
+    ObjectType* child = create();
+    child->setObjectName("child");
+    child->setParent(parent);
+    return parent;
+}
+
 void
 ObjectType::removeChild(ObjectType* child)
 {
@@ -61,6 +71,40 @@ ObjectType::removeChild(ObjectType* child)
         m_children.erase(child_iter);
         child->m_parent = 0;
     }
+}
+
+ObjectType*
+ObjectType::takeChild(ObjectType* child)
+{
+    if (!child)
+        return 0;
+
+    ObjectTypeList::iterator child_iter = std::find(m_children.begin(), m_children.end(), child);
+    if (child_iter != m_children.end()) {
+        m_children.erase(child_iter);
+        child->m_parent = 0;
+        return child;
+    }
+    return 0;
+}
+
+ObjectType*
+ObjectType::takeChild(const Str& name)
+{
+    return takeChild(findChild(name));
+
+}
+
+ObjectType*
+ObjectType::findChild(const Str& name)
+{
+    for (ObjectTypeList::iterator child_iter = m_children.begin();
+         child_iter != m_children.end(); ++child_iter) {
+
+        if ((*child_iter)->objectName() == name)
+            return *child_iter;
+    }
+    return 0;
 }
 
 void
