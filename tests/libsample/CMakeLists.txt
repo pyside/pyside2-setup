@@ -15,6 +15,7 @@ modifications.cpp
 mapuser.cpp
 multiple_derived.cpp
 objecttype.cpp
+objecttypelayout.cpp
 overload.cpp
 overloadsort.cpp
 pairuser.cpp

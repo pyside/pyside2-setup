@@ -33,6 +33,7 @@
  */
 
 #include "objecttype.h"
+#include "objecttypelayout.h"
 #include <algorithm>
 
 using namespace std;
@@ -114,5 +115,14 @@ bool
 ObjectType::event(Event* event)
 {
     return true;
+}
+
+void ObjectType::setObjectLayout(ObjectTypeLayout* layout)
+{
+    layout->setParent(this);
+    std::list<ObjectType*> objects = layout->objects();
+    std::list<ObjectType*>::const_iterator it = objects.begin();
+    for (; it != objects.end(); ++it)
+        (*it)->setParent(this);
 }
 

@@ -14,6 +14,7 @@
 #include "multiple_derived.h"
 #include "nondefaultctor.h"
 #include "objecttype.h"
+#include "objecttypelayout.h"
 #include "oddbool.h"
 #include "overload.h"
 #include "pairuser.h"

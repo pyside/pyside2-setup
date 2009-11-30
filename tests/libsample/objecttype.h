@@ -54,10 +54,13 @@ private:
     EventType m_eventType;
 };
 
+class ObjectTypeLayout;
+class ObjectType;
+typedef std::list<ObjectType*> ObjectTypeList;
+
 class LIBSAMPLE_API ObjectType
 {
 public:
-    typedef std::list<ObjectType*> ObjectTypeList;
 
     ObjectType(ObjectType* parent = 0);
     virtual ~ObjectType();
@@ -78,6 +81,9 @@ public:
 
     // Returns true if the event is processed.
     virtual bool event(Event* event);
+    // This nonsense method emulate QWidget.setLayout method
+    // All layout objects will became children of this object.
+    void setObjectLayout(ObjectTypeLayout* layout);
 
 private:
     ObjectType(const ObjectType&);

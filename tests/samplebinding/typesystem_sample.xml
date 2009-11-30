@@ -74,7 +74,18 @@
                 <parent index="this" action="add"/>
             </modify-argument>
         </modify-function>
+        <modify-function signature="setObjectLayout(ObjectTypeLayout*)">
+            <inject-code class="target" position="end">
+                const ObjectTypeList&amp; objChildren = %CPPSELF.children();
+                ObjectTypeList::const_iterator it = objChildren.begin();
+                for (; it != objChildren.end(); ++it) {
+                    Shiboken::setParent(%PYSELF, %CONVERTTOPYTHON[ObjectType*](*it));
+                }
+            </inject-code>
+        </modify-function>
     </object-type>
+    <object-type name="ObjectTypeLayout" />
+
     <value-type name="Event"/>
 
     <value-type name="BlackBox">
