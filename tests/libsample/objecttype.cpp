@@ -35,10 +35,11 @@
 #include "objecttype.h"
 #include "objecttypelayout.h"
 #include <algorithm>
+#include <iostream>
 
 using namespace std;
 
-ObjectType::ObjectType(ObjectType* parent) : m_parent(0)
+ObjectType::ObjectType(ObjectType* parent) : m_parent(0), m_layout(0)
 {
     setParent(parent);
 }
@@ -161,12 +162,47 @@ ObjectType::event(Event* event)
     return true;
 }
 
-void ObjectType::setObjectLayout(ObjectTypeLayout* layout)
+void ObjectType::setLayout(ObjectTypeLayout* l)
 {
-    layout->setParent(this);
-    std::list<ObjectType*> objects = layout->objects();
-    std::list<ObjectType*>::const_iterator it = objects.begin();
-    for (; it != objects.end(); ++it)
-        (*it)->setParent(this);
+    if (!l) {
+        cerr << "[WARNING] ObjectType::setLayout: Cannot set layout to 0." << endl;
+        return;
+    }
+
+    if (layout()) {
+        if (layout() != l) {
+            cerr << "[WARNING] ObjectType::setLayout: Attempting to set ObjectTypeLayout '" << l->objectName().cstring();
+            cerr << "' on ObjectType '" << objectName().cstring() << "', which already has a layout." << endl;
+        }
+        return;
+    }
+
+    ObjectType* oldParent = l->parent();
+    if (oldParent && oldParent != this) {
+        if (oldParent->isLayoutType()) {
+            cerr << "[WARNING] ObjectType::setLayout: Attempting to set ObjectTypeLayout '" << l->objectName().cstring();
+            cerr << "' on ObjectType '" << objectName().cstring() << "', when the ObjectTypeLayout already has a parent layout." << endl;
+            return;
+        } else {
+            // Steal the layout from an ObjectType parent.
+            oldParent->takeLayout();
+        }
+    }
+
+    m_layout = l;
+    if (oldParent != this) {
+        l->setParent(this);
+        l->reparentChildren(this);
+    }
+}
+
+ObjectTypeLayout* ObjectType::takeLayout()
+{
+    ObjectTypeLayout* l = layout();
+    if (!l)
+        return 0;
+    m_layout = 0;
+    l->setParent(0);
+    return l;
 }
 

@@ -85,17 +85,27 @@ public:
 
     // Returns true if the event is processed.
     virtual bool event(Event* event);
+
     // This nonsense method emulate QWidget.setLayout method
     // All layout objects will became children of this object.
-    void setObjectLayout(ObjectTypeLayout* layout);
+    void setLayout(ObjectTypeLayout* layout);
+    ObjectTypeLayout* layout() const { return m_layout; }
+
+    // This method should be reimplemented by ObjectTypeLayout.
+    virtual bool isLayoutType() { return false; }
 
 private:
     ObjectType(const ObjectType&);
     ObjectType& operator=(const ObjectType&);
 
+    ObjectTypeLayout* takeLayout();
+
     Str m_objectName;
     ObjectType* m_parent;
     ObjectTypeList m_children;
+
+    ObjectTypeLayout* m_layout;
 };
+
 #endif // OBJECTTYPE_H
 

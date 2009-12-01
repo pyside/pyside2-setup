@@ -46,8 +46,14 @@ class LIBSAMPLE_API ObjectTypeLayout : public ObjectType
 public:
     void addObject(ObjectType* obj);
     std::list<ObjectType*> objects() const;
+
+    virtual bool isLayoutType() { return true; }
 private:
     std::list<ObjectType*> m_objects;
+
+    void reparentChildren(ObjectType* parent);
+    friend LIBSAMPLE_API void ObjectType::setLayout(ObjectTypeLayout* l);
 };
 
-#endif
+#endif // OBJECTTYPELAYOUT_H
+
