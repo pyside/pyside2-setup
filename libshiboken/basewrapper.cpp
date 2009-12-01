@@ -141,7 +141,7 @@ PyObject* PyBaseWrapper_New(PyTypeObject* instanceType,
 
 bool cppObjectIsInvalid(PyObject* wrapper)
 {
-    if (((Shiboken::PyBaseWrapper*)wrapper)->validCppObject)
+    if (wrapper == Py_None || ((Shiboken::PyBaseWrapper*)wrapper)->validCppObject)
         return false;
     PyErr_SetString(PyExc_RuntimeError, "internal C++ object already deleted.");
     return true;
