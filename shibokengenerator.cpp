@@ -534,12 +534,23 @@ static QString checkFunctionName(QString baseName, bool genericNumberType, bool 
 
 QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType, bool genericNumberType, bool checkExact)
 {
+    if (metaType->typeEntry()->isCustom())
+        return guessCPythonCheckFunction(metaType->typeEntry()->name());
     return checkFunctionName(cpythonBaseName(metaType), genericNumberType, checkExact);
 }
 
 QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool genericNumberType, bool checkExact)
 {
+    if (type->isCustom())
+        return guessCPythonCheckFunction(type->name());
     return checkFunctionName(cpythonBaseName(type), genericNumberType, checkExact);
+}
+
+QString ShibokenGenerator::guessCPythonCheckFunction(const QString& type)
+{
+    if (type == "PyTypeObject")
+        return "PyType_Check";
+    return type+"_Check";
 }
 
 QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry* type)

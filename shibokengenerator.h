@@ -224,6 +224,7 @@ public:
     QString cpythonTypeName(const TypeEntry* type);
     QString cpythonCheckFunction(const TypeEntry* type, bool genericNumberType = false, bool checkExact = false);
     QString cpythonCheckFunction(const AbstractMetaType* metaType, bool genericNumberType = false, bool checkExact = false);
+    QString guessCPythonCheckFunction(const QString& type);
     QString cpythonIsConvertibleFunction(const TypeEntry* type);
     QString cpythonIsConvertibleFunction(const AbstractMetaType* metaType);
     QString cpythonIsConvertibleFunction(const AbstractMetaArgument* metaArg) {

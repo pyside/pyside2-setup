@@ -731,7 +731,7 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadDa
         s << '(';
 
     if (overloadData->hasArgumentTypeReplace()) {
-        s << overloadData->argumentTypeReplaced() << "_Check";
+        s << guessCPythonCheckFunction(overloadData->argumentTypeReplaced());
     } else if (argType->typeEntry()->isFlags())
         s << cpythonCheckFunction(((FlagsTypeEntry*) argType->typeEntry())->originator(), true);
     else if (argType->isEnum())
