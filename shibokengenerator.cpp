@@ -969,7 +969,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                     if (argReplacement.isEmpty()) {
                         argReplacement = QString("cpp_arg%1").arg(i - removed);
                         if (shouldDereferenceArgumentPointer(arg))
-                            argReplacement.prepend('*');
+                            argReplacement.prepend("(*").append(')');
                     }
                 } else {
                     argReplacement = arg->argumentName();
