@@ -1608,7 +1608,7 @@ AbstractMetaType* AbstractMetaBuilder::translateType(const AddedFunction::TypeIn
 
     type = typeDb->findType(typeInfo.name);
     if (!type)
-        type = new TypeEntry(typeInfo.name, TypeEntry::TargetLangType);
+        type = new TypeEntry(typeInfo.name, TypeEntry::CustomType);
 
     metaType->setTypeEntry(type);
     metaType->setIndirections(typeInfo.indirections);
