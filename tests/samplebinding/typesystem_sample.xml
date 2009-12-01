@@ -75,11 +75,14 @@
             </modify-argument>
         </modify-function>
         <modify-function signature="setParent(ObjectType*)">
-            <modify-argument index="1">
-                <parent index="this" action="add"/>
+            <modify-argument index="this">
+                <parent index="1" action="add"/>
             </modify-argument>
         </modify-function>
         <modify-function signature="setLayout(ObjectTypeLayout*)">
+            <modify-argument index="1">
+                <parent index="this" action="add"/>
+            </modify-argument>
             <inject-code class="target" position="end">
                 const ObjectTypeList&amp; objChildren = %CPPSELF.children();
                 ObjectTypeList::const_iterator it = objChildren.begin();
@@ -101,8 +104,8 @@
             </modify-argument>
         </modify-function>
         <modify-function signature="findChild(const Str&amp;)">
-            <modify-argument index="this">
-                <parent index="return" action="add"/>
+            <modify-argument index="return">
+                <parent index="this" action="add"/>
             </modify-argument>
         </modify-function>
         <modify-function signature="children()const">
