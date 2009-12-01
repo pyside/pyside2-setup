@@ -225,8 +225,9 @@ public:
     QString cpythonCheckFunction(const TypeEntry* type, bool genericNumberType = false, bool checkExact = false);
     QString cpythonCheckFunction(const AbstractMetaType* metaType, bool genericNumberType = false, bool checkExact = false);
     QString cpythonIsConvertibleFunction(const TypeEntry* type);
-    QString cpythonIsConvertibleFunction(const AbstractMetaType* metaType) {
-        return cpythonIsConvertibleFunction(metaType->typeEntry());
+    QString cpythonIsConvertibleFunction(const AbstractMetaType* metaType);
+    QString cpythonIsConvertibleFunction(const AbstractMetaArgument* metaArg) {
+        return cpythonIsConvertibleFunction(metaArg->type());
     }
     QString cpythonFunctionName(const AbstractMetaFunction* func);
     QString cpythonWrapperCPtr(const AbstractMetaClass* metaClass, QString argName = "self");

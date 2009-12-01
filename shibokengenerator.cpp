@@ -552,6 +552,21 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry* type)
     return baseName;
 }
 
+QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* metaType)
+{
+    QString baseName;
+    QTextStream s(&baseName);
+    if (metaType->isValuePointer() || metaType->typeEntry()->isObject()) {
+        const AbstractMetaClass* context = classes().findClass(metaType->typeEntry()->name());
+        writeBaseConversion(s, metaType, context);
+    } else {
+        writeBaseConversion(s, metaType->typeEntry());
+    }
+    s << "isConvertible";
+    s.flush();
+    return baseName;
+}
+
 QString ShibokenGenerator::argumentString(const AbstractMetaFunction *func,
                                           const AbstractMetaArgument *argument,
                                           Options options) const
