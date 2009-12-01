@@ -182,7 +182,7 @@
         </modify-function>
         <add-function signature="dataTypeName(PyObject*)const" return-type="const char*">
             <inject-code class="target" position="beginning">
-                %0 = %CONVERTTOPYTHON[%RETURN_TYPE](%CPPSELF.%FUNCTION_NAME(%1));
+                %0 = %CONVERTTOPYTHON[%RETURN_TYPE](%CPPSELF.%FUNCTION_NAME(%PYARG_1));
             </inject-code>
         </add-function>
     </value-type>
@@ -552,7 +552,7 @@
         <modify-function signature="PointerHolder(void*)" remove="all"/>
         <add-function signature="PointerHolder(PyObject*)">
             <inject-code class="target" position="beginning">
-                %0 = new %TYPE(%1);
+                %0 = new %TYPE(%PYARG_1);
             </inject-code>
         </add-function>
         <modify-function signature="pointer() const">

@@ -753,6 +753,9 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
                                            QString argName, QString pyArgName,
                                            const AbstractMetaClass* context)
 {
+    if (argType->typeEntry()->isCustom())
+        return;
+
     QString typeName;
     QString baseTypeName = argType->typeEntry()->name();
     bool isWrappedCppClass = argType->typeEntry()->isValue() || argType->typeEntry()->isObject();
