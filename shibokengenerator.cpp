@@ -940,8 +940,11 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                     if (lastArg && arg->argumentIndex() > lastArg->argumentIndex())
                         argReplacement = arg->defaultValueExpression();
 
-                    if (argReplacement.isEmpty())
+                    if (argReplacement.isEmpty()) {
                         argReplacement = QString("cpp_arg%1").arg(i - removed);
+                        if (shouldDereferenceArgumentPointer(arg))
+                            argReplacement.prepend('*');
+                    }
                 } else {
                     argReplacement = arg->argumentName();
                 }
