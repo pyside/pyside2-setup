@@ -37,24 +37,11 @@ class OwnershipInvalidateNonPolymorphicTest(unittest.TestCase):
     def testOwnershipTransference(self):
         '''Ownership transference from Python to C++ and back again.'''
         p1 = Point(10, 20)
-        p1_refcnt = sys.getrefcount(p1)
-        p2 = Point(25, 35)
-        p2_refcnt = sys.getrefcount(p2)
         bb = BlackBox()
-        bb.keepPoint(p1)
-        bb.keepPoint(p2)
-        #self.assertEqual(bb.points(), [p1, p2])
-        #self.assertEqual(p1.x(), 10)
-        #self.assertEqual(p2.x(), 25)
-        #self.assertEqual(sys.getrefcount(p1), p1_refcnt)
-        #self.assertEqual(sys.getrefcount(p2), p2_refcnt)
-        #p2 = bb.retrievePoint(p2)
-        #self.assertEqual(sys.getrefcount(p2), p2_refcnt)
-        #del bb
-        #self.assertRaises(RuntimeError, p1.x)
-        #self.assertEqual(p2.y(), 35)
-        #self.assertEqual(sys.getrefcount(p2), p2_refcnt)
-
+        p1_ticket = bb.keepPoint(p1)
+        self.assertRaises(RuntimeError, p1.x)
+        p1_ret = bb.retrievePoint(p1_ticket)
+        self.assertEqual(p1_ret, Point(10, 20))
 
 if __name__ == '__main__':
     unittest.main()

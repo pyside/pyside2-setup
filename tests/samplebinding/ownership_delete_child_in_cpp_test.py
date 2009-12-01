@@ -31,7 +31,7 @@ import unittest
 from sample import ObjectType
 
 
-class DeleteChildInPython(unittest.TestCase):
+class DeleteChildInCpp(unittest.TestCase):
     '''Test case for destroying a child in c++'''
 
     def testDeleteChild(self):
