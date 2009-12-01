@@ -55,7 +55,7 @@ struct ConverterBase
 {
     static PyObject* createWrapper(const T* cppobj) { return 0; }
     static T* copyCppObject(const T& cppobj) { return 0; }
-    static bool isConvertible(PyObject* pyobj) { return false; }
+    static bool isConvertible(PyObject* pyobj) { return pyobj == Py_None; }
 
     // Must be reimplemented.
     static PyObject* toPython(const T& cppobj);
@@ -84,6 +84,8 @@ struct ConverterBase<T*> : ConverterBase<T>
     }
     static T* toCpp(PyObject* pyobj)
     {
+        if (pyobj == Py_None)
+            return 0;
         return (T*) ((Shiboken::PyBaseWrapper*) pyobj)->cptr;
     }
 };
@@ -106,7 +108,9 @@ struct Converter<T*> : Converter<T>
     }
     static T* toCpp(PyObject* pyobj)
     {
-        if (Converter<T>::isConvertible(pyobj))
+        if (pyobj == Py_None)
+            return 0;
+        else if (Converter<T>::isConvertible(pyobj))
             return Converter<T>::copyCppObject(Converter<T>::toCpp(pyobj));
         return (T*) ((Shiboken::PyBaseWrapper*) pyobj)->cptr;
     }
