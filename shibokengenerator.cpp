@@ -868,10 +868,10 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             code.replace("%PYTHONTYPEOBJECT", cpythonTypeName(context) + ".pytype");
         }
 
-        if (func) {
-            // replace "toPython "converters
-            code.replace(toPythonRegex, "Shiboken::Converter<\\1 >::toPython");
+        // replace "toPython "converters
+        code.replace(toPythonRegex, "Shiboken::Converter<\\1 >::toPython");
 
+        if (func) {
             // replace %PYARG_# variables
             if (snip.language == TypeSystem::TargetLangCode) {
                 if (numArgs > 1) {
