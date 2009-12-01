@@ -703,7 +703,6 @@ void CppGenerator::writeInvalidCppObjectCheck(QTextStream& s, QString pyArgName,
 void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName)
 {
     const AbstractMetaType* argType = overloadData->argType();
-    AbstractMetaFunctionList implicitConvs = implicitConversions(argType);
 
     int alternativeNumericTypes = 0;
     foreach (OverloadData* pd, overloadData->overloadDataOnPosition(overloadData->argPos())) {
@@ -721,7 +720,11 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadDa
                             && ((ContainerTypeEntry*)overloadData->argType()->typeEntry())->type()
                                 == ContainerTypeEntry::PairContainer;
 
-    if (!implicitConvs.isEmpty())
+    bool writeIsConvertibleCheck = !implicitConversions(argType).isEmpty()
+                                    || argType->typeEntry()->isObject()
+                                    || argType->isValuePointer();
+
+    if (writeIsConvertibleCheck)
         s << '(';
 
     if (isPairContainer)
@@ -741,7 +744,7 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadDa
     if (isPairContainer)
         s << " && PySequence_Size(" << argumentName << ") == 2)";
 
-    if (!implicitConvs.isEmpty())
+    if (writeIsConvertibleCheck)
         s << " || " << cpythonIsConvertibleFunction(argType) << '(' << argumentName << "))";
 }
 
