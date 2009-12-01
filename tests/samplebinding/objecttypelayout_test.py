@@ -141,6 +141,51 @@ class ObjectTypeLayoutTest(unittest.TestCase):
         self.assertEqual(l1.parent(), p1)
         self.assertEqual(l2.parent(), l1)
 
+        del p1
+
+        self.assertRaises(RuntimeError, c1.objectName)
+        self.assertRaises(RuntimeError, c2.objectName)
+        self.assertRaises(RuntimeError, c3.objectName)
+        self.assertRaises(RuntimeError, c4.objectName)
+        self.assertRaises(RuntimeError, l1.objectName)
+        self.assertRaises(RuntimeError, l2.objectName)
+
+    def testObjectTypeLayoutInsideAnotherLayoutAndEveryoneCreatedInCpp(self):
+        '''Adds one ObjectTypeLayout to another and sets the parent to an ObjectType. All the objects are created in C++.'''
+        p1 = ObjectType.create()
+
+        l1 = ObjectTypeLayout.create()
+        c1 = ObjectType.create()
+        l1.addObject(c1)
+        c2 = ObjectType.create()
+        l1.addObject(c2)
+
+        l2 = ObjectTypeLayout.create()
+        c3 = ObjectType.create()
+        l2.addObject(c3)
+        c4 = ObjectType.create()
+        l2.addObject(c4)
+
+        l1.addObject(l2)
+
+        p1.setLayout(l1)
+
+        self.assertEqual(c1.parent(), p1)
+        self.assertEqual(c2.parent(), p1)
+        self.assertEqual(c3.parent(), p1)
+        self.assertEqual(c4.parent(), p1)
+        self.assertEqual(l1.parent(), p1)
+        self.assertEqual(l2.parent(), l1)
+
+        del p1
+
+        self.assertRaises(RuntimeError, c1.objectName)
+        self.assertRaises(RuntimeError, c2.objectName)
+        self.assertRaises(RuntimeError, c3.objectName)
+        self.assertRaises(RuntimeError, c4.objectName)
+        self.assertRaises(RuntimeError, l1.objectName)
+        self.assertRaises(RuntimeError, l2.objectName)
+
     def testTransferNestedLayoutsBetweenObjects(self):
         '''Adds one ObjectTypeLayout to another, sets the parent to an ObjectType and then transfer it to another object.'''
         p1 = ObjectType()
@@ -178,6 +223,64 @@ class ObjectTypeLayoutTest(unittest.TestCase):
         self.assertEqual(c4.parent(), p2)
         self.assertEqual(l1.parent(), p2)
         self.assertEqual(l2.parent(), l1)
+
+        del p2
+
+        self.assertRaises(RuntimeError, c1.objectName)
+        self.assertRaises(RuntimeError, c2.objectName)
+        self.assertRaises(RuntimeError, c3.objectName)
+        self.assertRaises(RuntimeError, c4.objectName)
+        self.assertRaises(RuntimeError, l1.objectName)
+        self.assertRaises(RuntimeError, l2.objectName)
+
+    def testTransferNestedLayoutsBetweenObjectsAndEveryoneCreatedInCpp(self):
+        '''Adds one ObjectTypeLayout to another, sets the parent to an ObjectType and then transfer it to another object.
+        All the objects are created in C++.'''
+        p1 = ObjectType.create()
+        p2 = ObjectType.create()
+
+        l1 = ObjectTypeLayout.create()
+        c1 = ObjectType.create()
+        l1.addObject(c1)
+        c2 = ObjectType.create()
+        l1.addObject(c2)
+
+        l2 = ObjectTypeLayout.create()
+        c3 = ObjectType.create()
+        l2.addObject(c3)
+        c4 = ObjectType.create()
+        l2.addObject(c4)
+
+        l1.addObject(l2)
+
+        p1.setLayout(l1)
+
+        self.assertEqual(c1.parent(), p1)
+        self.assertEqual(c2.parent(), p1)
+        self.assertEqual(c3.parent(), p1)
+        self.assertEqual(c4.parent(), p1)
+        self.assertEqual(l1.parent(), p1)
+        self.assertEqual(l2.parent(), l1)
+
+        p2.setLayout(l1)
+        del p1
+
+        self.assertEqual(c1.parent(), p2)
+        self.assertEqual(c2.parent(), p2)
+        self.assertEqual(c3.parent(), p2)
+        self.assertEqual(c4.parent(), p2)
+        self.assertEqual(l1.parent(), p2)
+        self.assertEqual(l2.parent(), l1)
+
+        del p2
+
+        self.assertRaises(RuntimeError, c1.objectName)
+        self.assertRaises(RuntimeError, c2.objectName)
+        self.assertRaises(RuntimeError, c3.objectName)
+        self.assertRaises(RuntimeError, c4.objectName)
+        self.assertRaises(RuntimeError, l1.objectName)
+        self.assertRaises(RuntimeError, l2.objectName)
+
 
 if __name__ == '__main__':
     unittest.main()

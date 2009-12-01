@@ -48,6 +48,7 @@ public:
     std::list<ObjectType*> objects() const;
 
     virtual bool isLayoutType() { return true; }
+    static ObjectTypeLayout* create() { return new ObjectTypeLayout(); }
 private:
     std::list<ObjectType*> m_objects;
 

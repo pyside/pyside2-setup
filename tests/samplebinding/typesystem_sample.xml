@@ -79,16 +79,29 @@
                 <parent index="1" action="add"/>
             </modify-argument>
         </modify-function>
+        <inject-code class="native" position="beginning">
+            static void reparent_layout_items(PyObject* parent, PyObject* layout)
+            {
+                const ObjectTypeList&amp; objChildren = PyObjectTypeLayout_cptr(layout)->objects();
+                ObjectTypeList::const_iterator it = objChildren.begin();
+                for (; it != objChildren.end(); ++it) {
+                    if ((*it)->isLayoutType()) {
+                        ObjectTypeLayout* l = reinterpret_cast&lt;ObjectTypeLayout*>(*it);
+                        reparent_layout_items(parent, %CONVERTTOPYTHON[ObjectTypeLayout*](l));
+                        Shiboken::setParent(layout, %CONVERTTOPYTHON[ObjectTypeLayout*](l));
+                    } else {
+                        Shiboken::setParent(parent, %CONVERTTOPYTHON[ObjectType*](*it));
+                    }
+                }
+            }
+        </inject-code>
         <modify-function signature="setLayout(ObjectTypeLayout*)">
             <modify-argument index="1">
                 <parent index="this" action="add"/>
             </modify-argument>
             <inject-code class="target" position="end">
-                const ObjectTypeList&amp; objChildren = %CPPSELF.children();
-                ObjectTypeList::const_iterator it = objChildren.begin();
-                for (; it != objChildren.end(); ++it) {
-                    Shiboken::setParent(%PYSELF, %CONVERTTOPYTHON[ObjectType*](*it));
-                }
+                if (%PYARG_1 != Py_None)
+                    reparent_layout_items(%PYSELF, %PYARG_1);
             </inject-code>
         </modify-function>
         <modify-function signature="takeChild(ObjectType*)">
@@ -117,7 +130,13 @@
             </inject-code>
         </modify-function>
     </object-type>
-    <object-type name="ObjectTypeLayout" />
+    <object-type name="ObjectTypeLayout">
+        <modify-function signature="create()">
+            <modify-argument index="return">
+                <define-ownership owner="target"/>
+            </modify-argument>
+        </modify-function>
+    </object-type>
 
     <value-type name="Event"/>
 
