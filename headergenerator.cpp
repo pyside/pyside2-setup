@@ -54,10 +54,11 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
     s << licenseComment();
 
     QString wrapperName = HeaderGenerator::wrapperName(metaClass);
+    QString headerGuard = wrapperName.replace("::", "_").toUpper();
 
     // Header
-    s << "#ifndef SBK_" << wrapperName.toUpper() << "_H" << endl;
-    s << "#define SBK_" << wrapperName.toUpper() << "_H" << endl<< endl;
+    s << "#ifndef SBK_" << headerGuard << "_H" << endl;
+    s << "#define SBK_" << headerGuard << "_H" << endl<< endl;
 
 #ifndef AVOID_PROTECTED_HACK
     s << "#define protected public" << endl << endl;
@@ -93,7 +94,7 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
         s << "};" << endl << endl;
     }
 
-    s << "#endif // SBK_" << wrapperName.toUpper() << "_H" << endl << endl;
+    s << "#endif // SBK_" << headerGuard << "_H" << endl << endl;
 }
 
 void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* func) const
