@@ -29,14 +29,33 @@
 import os
 import unittest
 
-from sample import ProtectedNonPolymorphic, ProtectedPolymorphic, ProtectedVirtualDestructor
+from sample import ProtectedNonPolymorphic, ProtectedVirtualDestructor
+from sample import ProtectedPolymorphic, ProtectedPolymorphicDaughter, ProtectedPolymorphicGrandDaughter
 from sample import Point
 
 class ExtendedProtectedPolymorphic(ProtectedPolymorphic):
     def __init__(self, name):
         ProtectedPolymorphic.__init__(self, name)
+        self.protectedName_called = False
     def protectedName(self):
+        self.protectedName_called = True
         return 'Extended' + ProtectedPolymorphic.protectedName(self)
+
+class ExtendedProtectedPolymorphicDaughter(ProtectedPolymorphicDaughter):
+    def __init__(self, name):
+        self.protectedName_called = False
+        ProtectedPolymorphicDaughter.__init__(self, name)
+    def protectedName(self):
+        self.protectedName_called = True
+        return 'ExtendedDaughter' + ProtectedPolymorphicDaughter.protectedName(self)
+
+class ExtendedProtectedPolymorphicGrandDaughter(ProtectedPolymorphicGrandDaughter):
+    def __init__(self, name):
+        self.protectedName_called = False
+        ProtectedPolymorphicGrandDaughter.__init__(self, name)
+    def protectedName(self):
+        self.protectedName_called = True
+        return 'ExtendedGrandDaughter' + ProtectedPolymorphicGrandDaughter.protectedName(self)
 
 class ExtendedProtectedVirtualDestructor(ProtectedVirtualDestructor):
     def __init__(self):
@@ -84,9 +103,49 @@ class ProtectedPolymorphicTest(unittest.TestCase):
 
     def testReimplementedProtectedCall(self):
         '''Calls a reimplemented virtual protected method.'''
-        p = ExtendedProtectedPolymorphic('Poly')
+        original_name = 'Poly'
+        p = ExtendedProtectedPolymorphic(original_name)
+        name = p.callProtectedName()
+        self.assert_(p.protectedName_called)
+        self.assertEqual(p.protectedName(), name)
+        self.assertEqual(ProtectedPolymorphic.protectedName(p), original_name)
+
+class ProtectedPolymorphicDaugherTest(unittest.TestCase):
+    '''Test cases for protected method in a class inheriting for a class with virtual methods.'''
+
+    def testProtectedCallWithInstanceCreatedOnCpp(self):
+        '''Calls a virtual protected method from parent class on an instance created in C++.'''
+        p = ProtectedPolymorphicDaughter.create()
+        self.assertEqual(p.publicName(), p.protectedName())
         self.assertEqual(p.callProtectedName(), p.protectedName())
 
+    def testReimplementedProtectedCall(self):
+        '''Calls a reimplemented virtual protected method from parent class.'''
+        original_name = 'Poly'
+        p = ExtendedProtectedPolymorphicDaughter(original_name)
+        name = p.callProtectedName()
+        self.assert_(p.protectedName_called)
+        self.assertEqual(p.protectedName(), name)
+        self.assertEqual(ProtectedPolymorphicDaughter.protectedName(p), original_name)
+
+class ProtectedPolymorphicGrandDaugherTest(unittest.TestCase):
+    '''Test cases for protected method in a class inheriting for a class that inherits from
+    another with protected virtual methods.'''
+
+    def testProtectedCallWithInstanceCreatedOnCpp(self):
+        '''Calls a virtual protected method from parent class on an instance created in C++.'''
+        p = ProtectedPolymorphicGrandDaughter.create()
+        self.assertEqual(p.publicName(), p.protectedName())
+        self.assertEqual(p.callProtectedName(), p.protectedName())
+
+    def testReimplementedProtectedCall(self):
+        '''Calls a reimplemented virtual protected method from parent class.'''
+        original_name = 'Poly'
+        p = ExtendedProtectedPolymorphicGrandDaughter(original_name)
+        name = p.callProtectedName()
+        self.assert_(p.protectedName_called)
+        self.assertEqual(p.protectedName(), name)
+        self.assertEqual(ProtectedPolymorphicGrandDaughter.protectedName(p), original_name)
 
 class ProtectedVirtualDtorTest(unittest.TestCase):
     '''Test cases for protected virtual destructor.'''

@@ -195,6 +195,22 @@
         </modify-function>
     </value-type>
 
+    <value-type name="ProtectedPolymorphicDaughter">
+        <modify-function signature="create()">
+            <modify-argument index="return">
+                <define-ownership owner="target"/>
+            </modify-argument>
+        </modify-function>
+    </value-type>
+
+    <value-type name="ProtectedPolymorphicGrandDaughter">
+        <modify-function signature="create()">
+            <modify-argument index="return">
+                <define-ownership owner="target"/>
+            </modify-argument>
+        </modify-function>
+    </value-type>
+
     <value-type name="ProtectedVirtualDestructor">
         <modify-function signature="create()">
             <modify-argument index="return">

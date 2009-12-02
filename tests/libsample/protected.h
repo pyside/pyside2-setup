@@ -64,7 +64,7 @@ class LIBSAMPLE_API ProtectedPolymorphic
 {
 public:
     explicit ProtectedPolymorphic(const char* name) : m_name(name) {}
-    ~ProtectedPolymorphic() {}
+    virtual ~ProtectedPolymorphic() {}
 
     const char* publicName() { return m_name; }
 
@@ -77,6 +77,20 @@ protected:
 
 private:
     const char* m_name;
+};
+
+class LIBSAMPLE_API ProtectedPolymorphicDaughter : public ProtectedPolymorphic
+{
+public:
+    explicit ProtectedPolymorphicDaughter(const char* name) : ProtectedPolymorphic(name) {}
+    static ProtectedPolymorphicDaughter* create() { return new ProtectedPolymorphicDaughter("created"); }
+};
+
+class LIBSAMPLE_API ProtectedPolymorphicGrandDaughter: public ProtectedPolymorphicDaughter
+{
+public:
+    explicit ProtectedPolymorphicGrandDaughter(const char* name) : ProtectedPolymorphicDaughter(name) {}
+    static ProtectedPolymorphicGrandDaughter* create() { return new ProtectedPolymorphicGrandDaughter("created"); }
 };
 
 class LIBSAMPLE_API ProtectedVirtualDestructor
