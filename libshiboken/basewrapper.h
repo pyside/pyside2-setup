@@ -75,8 +75,6 @@ struct LIBSHIBOKEN_API ShiboTypeObject
 struct LIBSHIBOKEN_API PyBaseWrapper
 {
     PyObject_HEAD
-    /// First binding provided parent type of a Python class that inherits from a wrapped class.
-    ShiboTypeObject* baseWrapperType;
     /// Pointer to the C++ class.
     void* cptr;
     /// True when Python is responsible for freeing the used memory.
@@ -174,7 +172,6 @@ typedef struct {
 
 LIBSHIBOKEN_API PyAPI_FUNC(PyObject*)
 PyBaseWrapper_New(PyTypeObject* instanceType,
-                  ShiboTypeObject* baseWrapperType,
                   const void *cptr,
                   unsigned int hasOwnership = 1,
                   unsigned int containsCppWrapper = 0);

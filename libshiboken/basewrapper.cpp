@@ -105,7 +105,6 @@ void destroyParentInfo(PyBaseWrapper* obj, bool removeFromParent)
 }
 
 PyObject* PyBaseWrapper_New(PyTypeObject* instanceType,
-                            ShiboTypeObject* baseWrapperType,
                             const void* cptr,
                             unsigned int hasOwnership,
                             unsigned int containsCppWrapper)
@@ -116,7 +115,6 @@ PyObject* PyBaseWrapper_New(PyTypeObject* instanceType,
     ShiboTypeObject* const& instanceType_ = reinterpret_cast<ShiboTypeObject*>(instanceType);
     PyBaseWrapper* self = (PyBaseWrapper*)instanceType_->pytype.tp_alloc((PyTypeObject*) instanceType, 0);
 
-    self->baseWrapperType = baseWrapperType;
     self->cptr = const_cast<void*>(cptr);
     self->hasOwnership = hasOwnership;
     self->containsCppWrapper = containsCppWrapper;

@@ -1141,7 +1141,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     if (func->isConstructor()) {
 
         QString className = cpythonTypeName(func->ownerClass());
-        s << INDENT << "self = Shiboken::PyBaseWrapper_New(type, &" << className << ", cptr";
+        s << INDENT << "self = Shiboken::PyBaseWrapper_New(type, cptr";
         // If the created C++ object has a C++ wrapper the ownership is assigned to Python
         // (first "1") and the flag indicating that the Python wrapper holds an C++ wrapper
         // is marked as true (the second "1"). Otherwise the default values apply:
@@ -2085,7 +2085,7 @@ void CppGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
     s << '{' << endl;
     s << INDENT << "return " << "Shiboken::";
     if (type->isObject() || type->isValue()) {
-        s << "PyBaseWrapper_New((PyTypeObject*)&" << pyTypeName << ", &" << pyTypeName << ',';
+        s << "PyBaseWrapper_New((PyTypeObject*)&" << pyTypeName << ',';
     } else {
         // Type is enum or flag
         s << "PyEnumObject_New(&" << pyTypeName << ", (long)";

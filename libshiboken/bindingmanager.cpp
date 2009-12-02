@@ -109,25 +109,32 @@ PyObject* BindingManager::retrieveWrapper(const void* cptr)
 PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
 {
     PyObject* wrapper = retrieveWrapper(cptr);
+    if (!wrapper)
+        return 0;
 
-    if (wrapper) {
-        PyTypeObject* baseWrapperType = (PyTypeObject*) ((Shiboken::PyBaseWrapper*)wrapper)->baseWrapperType;
-        PyObject* method = PyObject_GetAttrString(wrapper, const_cast<char*>(methodName));
-        if (method) {
-            PyObject* defaultMethod = 0;
-            if (PyMethod_Check(method) &&
-                ((PyMethodObject*) method)->im_self == wrapper &&
-                baseWrapperType->tp_dict != 0) {
-                defaultMethod = PyDict_GetItemString(baseWrapperType->tp_dict, const_cast<char*>(methodName));
+    PyObject* pyMethodName = PyString_FromString(methodName);
+    PyObject* method = PyObject_GetAttr(wrapper, pyMethodName);
+
+    if (method && PyMethod_Check(method) && reinterpret_cast<PyMethodObject*>(method)->im_self == wrapper) {
+        PyObject* defaultMethod;
+        PyObject* mro = wrapper->ob_type->tp_mro;
+
+        // The first class in the mro (index 0) is the class being checked and it should not be tested.
+        // The last class in the mro (size - 1) is the base Python object class which should not be tested also.
+        for (int i = 1; i < PyTuple_GET_SIZE(mro) - 1; i++) {
+            PyTypeObject* parent = reinterpret_cast<PyTypeObject*>(PyTuple_GET_ITEM(mro, i));
+            if (parent->tp_dict) {
+                defaultMethod = PyDict_GetItem(parent->tp_dict, pyMethodName);
+                if (defaultMethod && reinterpret_cast<PyMethodObject*>(method)->im_func != defaultMethod) {
+                    Py_DECREF(pyMethodName);
+                    return method;
+                }
             }
-
-            if (defaultMethod && ((PyMethodObject*)method)->im_func != defaultMethod)
-                return method;
-
-            Py_DECREF(method);
         }
     }
 
+    Py_XDECREF(method);
+    Py_DECREF(pyMethodName);
     return 0;
 }
 
