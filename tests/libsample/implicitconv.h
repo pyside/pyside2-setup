@@ -37,6 +37,8 @@
 
 #include "libsamplemacros.h"
 
+class ObjectType;
+
 class LIBSAMPLE_API ImplicitConv
 {
 public:
@@ -44,7 +46,8 @@ public:
         CtorNone,
         CtorOne,
         CtorTwo,
-        CtorThree
+        CtorThree,
+        CtorObjectTypeReference
     };
 
     enum ICOverloadedFuncEnum {
@@ -57,6 +60,7 @@ public:
     ImplicitConv() : m_ctorEnum(CtorNone), m_objId(-1) {}
     ImplicitConv(int objId) : m_ctorEnum(CtorOne), m_objId(objId) {}
     ImplicitConv(CtorEnum ctorEnum) : m_ctorEnum(ctorEnum), m_objId(-1) {}
+    ImplicitConv(ObjectType&) : m_ctorEnum(CtorObjectTypeReference), m_objId(-1) {}
     ~ImplicitConv() {}
 
     CtorEnum ctorEnum() { return m_ctorEnum; }

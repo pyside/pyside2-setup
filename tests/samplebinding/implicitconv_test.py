@@ -29,7 +29,7 @@
 import sys
 import unittest
 
-from sample import ImplicitConv
+from sample import ImplicitConv, ObjectType
 
 class ImplicitConvTest(unittest.TestCase):
     '''Test case for implicit conversions'''
@@ -45,6 +45,10 @@ class ImplicitConvTest(unittest.TestCase):
 
         ic = ImplicitConv.implicitConvCommon(ImplicitConv.CtorThree)
         self.assertEqual(ic.ctorEnum(), ImplicitConv.CtorThree)
+
+        obj = ObjectType()
+        ic = ImplicitConv.implicitConvCommon(obj)
+        self.assertEqual(ic.ctorEnum(), ImplicitConv.CtorObjectTypeReference)
 
 if __name__ == '__main__':
     unittest.main()
