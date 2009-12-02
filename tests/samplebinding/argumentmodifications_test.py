@@ -84,7 +84,7 @@ class ArgumentModificationsTest(unittest.TestCase):
         # void [-> PyObject*] argRemoval4(int, Point [removed, new val = Point(6, 9)], bool, Point = Point(3, 4) [removed], int = 333)
         # code-injection: returns tuple with received parameters plus removed ones
         a0, a1, a2 = 1, True, 2
-        self.assertRaises(TypeError, lambda : self.mods.argRemoval4(a0))
+        self.assertRaises(TypeError, self.mods.argRemoval4, a0)
         self.assertEqual(self.mods.argRemoval4(a0, a1), (a0, Point(6, 9), a1, Point(3, 4), 333))
         self.assertEqual(self.mods.argRemoval4(a0, a1, a2), (a0, Point(6, 9), a1, Point(3, 4), a2))
 

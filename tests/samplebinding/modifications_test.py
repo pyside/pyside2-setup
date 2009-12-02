@@ -82,7 +82,7 @@ class ModificationsTest(unittest.TestCase):
 
     def testArgumentRemoval(self):
         '''Test if second argument of Modifications::doublePlus(int, int) was removed.'''
-        self.assertRaises(TypeError, lambda : self.mods.doublePlus(3, 7))
+        self.assertRaises(TypeError, self.mods.doublePlus, 3, 7)
         self.assertEqual(self.mods.doublePlus(7), 14)
 
     def testDefaultValueRemoval(self):
@@ -131,7 +131,7 @@ class ModificationsTest(unittest.TestCase):
         # the others weren't modified
         self.assertEqual(self.mods.overloaded(1, True, 2, False), Modifications.Overloaded_ibib)
         self.assertEqual(self.mods.overloaded(1, False, 2, Point(3, 4)), Modifications.Overloaded_ibiP)
-        self.assertRaises(TypeError, lambda : self.mods.overloaded(1, True, Point(2, 3), Point(4, 5)))
+        self.assertRaises(TypeError, self.mods.overloaded, 1, True, Point(2, 3), Point(4, 5))
         self.assertEqual(self.mods.over(1, True, Point(2, 3), Point(4, 5)), Modifications.Overloaded_ibPP)
 
 if __name__ == '__main__':

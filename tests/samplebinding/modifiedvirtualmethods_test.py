@@ -94,7 +94,7 @@ class VirtualMethodsTest(unittest.TestCase):
         result1 = self.vm.sumThree(a0, a1, a2)
         self.assertEqual(result0, a0 + a1 + a2)
         self.assertEqual(result0, result1)
-        self.assertRaises(AttributeError, lambda : self.vm.sum0(a0, a1, a2))
+        self.assertRaises(AttributeError, getattr, self.vm, 'sum0')
 
     def testReimplementedModifiedVirtualMethod0(self):
         '''Override of a renamed virtual method.'''
@@ -132,7 +132,7 @@ class VirtualMethodsTest(unittest.TestCase):
         result1 = self.vm.sum2(a0, a1)
         result2 = self.vm.callSum2(a0, a1, 2000)
         self.assertEqual(result1, result2)
-        self.assertRaises(TypeError, lambda : self.vm.sum2(1, 2, 3))
+        self.assertRaises(TypeError, self.vm.sum2, 1, 2, 3)
 
     def testReimplementedModifiedVirtualMethod2(self):
         '''Override of the virtual method originally with three arguments, the last one was removed and the default value set to 2000.'''
@@ -153,7 +153,7 @@ class VirtualMethodsTest(unittest.TestCase):
         self.assertNotEqual(result0, result1)
         result2 = self.vm.callSum3(a0, a0 + a1, a1)
         self.assertEqual(result0, result2)
-        self.assertRaises(TypeError, lambda : self.vm.sum3(1, 2, 3))
+        self.assertRaises(TypeError, self.vm.sum3, 1, 2, 3)
 
     def testReimplementedModifiedVirtualMethod3(self):
         '''Override of the virtual method originally with three arguments have the second one removed and replaced
@@ -175,7 +175,7 @@ class VirtualMethodsTest(unittest.TestCase):
         removed_arg_value = 100
         result1 = self.vm.callSum4(a0, removed_arg_value, a1)
         self.assertEqual(result1, a0 + removed_arg_value + a1)
-        self.assertRaises(TypeError, lambda : self.vm.sum4(1, 2, 3))
+        self.assertRaises(TypeError, self.vm.sum4, 1, 2, 3)
 
     def testReimplementedModifiedVirtualMethod4(self):
         '''Override of the virtual method originally with three arguments, the last one was removed

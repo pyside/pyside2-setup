@@ -38,19 +38,19 @@ class WrapperValidityOfArgumentsTest(unittest.TestCase):
         '''Call to method using invalidated Python wrapper as argument should raise RuntimeError.'''
         poly = Polygon()
         Polygon.stealOwnershipFromPython(poly)
-        self.assertRaises(RuntimeError, lambda : Polygon.doublePolygonScale(poly))
+        self.assertRaises(RuntimeError, Polygon.doublePolygonScale, poly)
 
     def testInvalidArgumentToConstructor(self):
         '''Call to constructor using invalidated Python wrapper as argument should raise RuntimeError.'''
         pt = Point(1, 2)
         Polygon.stealOwnershipFromPython(pt)
-        self.assertRaises(RuntimeError, lambda : Polygon(pt))
+        self.assertRaises(RuntimeError, Polygon, pt)
 
     def testInvalidArgumentWithImplicitConversion(self):
         '''Call to method using invalidated Python wrapper to be implicitly converted should raise RuntimeError.'''
         pt = Point(1, 2)
         Polygon.stealOwnershipFromPython(pt)
-        self.assertRaises(RuntimeError, lambda : Polygon.doublePolygonScale(pt))
+        self.assertRaises(RuntimeError, Polygon.doublePolygonScale, pt)
 
 if __name__ == '__main__':
     unittest.main()

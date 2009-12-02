@@ -94,7 +94,7 @@ class DerivedTest(unittest.TestCase):
     def testOverloadedMethodCallWithWrongNumberOfArguments(self):
         '''Test if a call to an overloaded method with the wrong number of arguments raises an exception.'''
         derived = Derived()
-        self.assertRaises(TypeError, lambda : derived.otherOverloaded(1, 2, True))
+        self.assertRaises(TypeError, derived.otherOverloaded, 1, 2, True)
 
     def testReimplementedPureVirtualMethodCall(self):
         '''Test if a Python override of a implemented pure virtual method is correctly called from C++.'''

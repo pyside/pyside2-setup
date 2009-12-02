@@ -36,11 +36,11 @@ class EnumTest(unittest.TestCase):
 
     def testPassingIntegerOnEnumArgument(self):
         '''Tries to use an integer in place of an enum argument.'''
-        self.assertRaises(TypeError, lambda : SampleNamespace.getNumber(1))
+        self.assertRaises(TypeError, SampleNamespace.getNumber, 1)
 
     def testExtendingNonExtensibleEnum(self):
         '''Tries to create a new enum item for an unextensible enum.'''
-        self.assertRaises(TypeError, lambda : SampleNamespace.InValue(13))
+        self.assertRaises(TypeError, SampleNamespace.InValue, 13)
 
     def testEnumConversionToAndFromPython(self):
         '''Conversion of enum objects from Python to C++ back again.'''

@@ -59,7 +59,7 @@ class OwnershipInvalidateAfterUseTest(unittest.TestCase):
         ot = ObjectType()
         eot.causeEvent(Event.ANY_EVENT)
         self.assertEqual(eot.type_of_last_event, Event.ANY_EVENT)
-        self.assertRaises(RuntimeError, lambda : ot.event(eot.last_event))
+        self.assertRaises(RuntimeError, ot.event, eot.last_event)
 
 if __name__ == '__main__':
     unittest.main()

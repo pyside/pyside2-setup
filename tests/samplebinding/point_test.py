@@ -59,7 +59,7 @@ class PointTest(unittest.TestCase):
         '''Test Point class != operator.'''
         pt1 = Point(5.0, 2.3)
         pt2 = Point(5.0, 2.3)
-        self.assertRaises(NotImplementedError, lambda : pt1.__ne__(pt2))
+        self.assertRaises(NotImplementedError, pt1.__ne__, pt2)
 
     def testReturnNewCopy(self):
         '''Point returns a copy of itself.'''
