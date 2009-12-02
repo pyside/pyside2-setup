@@ -53,6 +53,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/size_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/sonofmderived1_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/str_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/time_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/virtualdaughter_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/virtualdtor_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/virtualmethods_wrapper.cpp
 )

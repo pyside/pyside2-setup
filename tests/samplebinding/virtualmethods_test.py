@@ -29,7 +29,7 @@
 import sys
 import unittest
 
-from sample import VirtualMethods, Point
+from sample import VirtualMethods, VirtualDaughter, Point
 
 class ExtendedVirtualMethods(VirtualMethods):
     def __init__(self):
@@ -39,6 +39,24 @@ class ExtendedVirtualMethods(VirtualMethods):
     def virtualMethod0(self, pt, val, cpx, b):
         self.virtual_method0_called = True
         return VirtualMethods.virtualMethod0(self, pt, val, cpx, b) * -1.0
+
+class ExtendedVirtualDaughter(VirtualDaughter):
+    def __init__(self, name):
+        VirtualDaughter.__init__(self, name)
+        self.grand_daughter_name_called = False
+
+    def name(self):
+        self.grand_daughter_name_called = True
+        return VirtualDaughter.name(self).prepend('Extended')
+
+class ExtendedExtendedVirtualDaughter(ExtendedVirtualDaughter):
+    def __init__(self, name):
+        ExtendedVirtualDaughter.__init__(self, name)
+        self.grand_grand_daughter_name_called = False
+
+    def name(self):
+        self.grand_grand_daughter_name_called = True
+        return ExtendedVirtualDaughter.name(self).prepend('Extended')
 
 class VirtualMethodsTest(unittest.TestCase):
     '''Test case for virtual methods'''
@@ -54,6 +72,35 @@ class VirtualMethodsTest(unittest.TestCase):
         result0 = vm.callVirtualMethod0(pt, val, cpx, b)
         result1 = evm.callVirtualMethod0(pt, val, cpx, b)
         self.assertEqual(result0 * -1.0, result1)
+
+    def testReimplementedVirtualMethodInheritedFromGrandParent(self):
+        '''Test Python override of a virtual method inherited from a grand parent.'''
+        original_name = 'Foo'
+        evd = ExtendedVirtualDaughter(original_name)
+
+        self.assertEqual(VirtualDaughter.name(evd), original_name)
+        self.assertEqual(VirtualMethods.name(evd), original_name)
+        self.assertFalse(evd.grand_daughter_name_called)
+
+        name = evd.callName()
+        self.assert_(evd.grand_daughter_name_called)
+        self.assertEqual(evd.name(), name)
+
+    def testReimplementedVirtualMethodInheritedFromGrandGrandParent(self):
+        '''Test Python override of a virtual method inherited from a grand grand parent.'''
+        original_name = 'Foo'
+        eevd = ExtendedExtendedVirtualDaughter(original_name)
+
+        self.assertEqual(VirtualDaughter.name(eevd), original_name)
+        self.assertEqual(VirtualMethods.name(eevd), original_name)
+        self.assertFalse(eevd.grand_daughter_name_called)
+        self.assertFalse(eevd.grand_grand_daughter_name_called)
+
+        name = eevd.callName()
+        self.assert_(eevd.grand_daughter_name_called)
+        self.assert_(eevd.grand_grand_daughter_name_called)
+        self.assertEqual(eevd.name(), name)
+
 
 if __name__ == '__main__':
     unittest.main()

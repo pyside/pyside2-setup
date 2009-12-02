@@ -44,7 +44,7 @@
 class LIBSAMPLE_API VirtualMethods
 {
 public:
-    VirtualMethods() {}
+    VirtualMethods(Str name = "VirtualMethods") : m_name(name) {}
     ~VirtualMethods() {}
 
     virtual double virtualMethod0(Point pt, int val, Complex cpx, bool b);
@@ -77,13 +77,22 @@ public:
     int callSum4(int a0, int a1, int a2) { return sum4(a0, a1, a2); }
 
     // Binding modification: prepend a string to the results of a Python override.
-    virtual Str name() { return Str("VirtualMethods"); }
+    virtual Str name() { return m_name; }
     Str callName() { return name(); }
 
     // Binding modification: code injection that calls the Python override by itself.
     virtual void callMe() {}
     void callCallMe() { callMe(); }
 
+private:
+    Str m_name;
+};
+
+class LIBSAMPLE_API VirtualDaughter : public VirtualMethods
+{
+public:
+    VirtualDaughter() : VirtualMethods() {}
+    VirtualDaughter(Str name) : VirtualMethods(name) {}
 };
 
 class LIBSAMPLE_API VirtualDtor
@@ -99,7 +108,6 @@ public:
 private:
     static int dtor_called;
 };
-
 
 #endif // VIRTUALMETHODS_H
 

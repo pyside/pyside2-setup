@@ -539,6 +539,7 @@
             </inject-code>
         </modify-function>
     </value-type>
+    <value-type name="VirtualDaughter" />
 
     <value-type name="VirtualDtor">
         <modify-function signature="create()">
