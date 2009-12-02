@@ -163,14 +163,14 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType*
                                                          const AbstractMetaClass* context) const
 {
     QString result;
+    const TypeEntry* tentry = cType->typeEntry();
 
-    if (cType->isValue() || cType->isValuePointer() || cType->isObject()
-        || (cType->isReference() && !cType->isContainer())) {
-        result = cType->typeEntry()->qualifiedCppName();
-        if (cType->isObject() || cType->isQObject() || cType->isValuePointer())
-            result.append('*');
-        else if (cType->isValue() && cType->isReference())
+    if (tentry->isValue() || tentry->isObject() || (cType->isReference() && !cType->isContainer())) {
+        result = tentry->qualifiedCppName();
+        if (cType->isReference())
             result.append('&');
+        else if (tentry->isObject() || cType->isValuePointer())
+            result.append('*');
     } else if (cType->isArray()) {
         result = translateTypeForWrapperMethod(cType->arrayElementType(), context) + "[]";
     } else {
@@ -293,18 +293,18 @@ void ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaTy
         typeName = translateTypeForWrapperMethod(type, context);
     }
 
+    const TypeEntry* tentry = type->typeEntry();
 
-    // If the type is an Object (and a pointer) remove its constness
-    // (len("const ") == 6) since it is already inserted for everyone
-    // in the generated converter declaration.
-    if ((type->isQObject() || type->isObject()) && typeName.startsWith("const "))
-        typeName.remove(0, 6);
+    // If the type is an Object (and a pointer) remove its constness since it
+    // is already declared as const in the signature of the generated converter.
+    if (tentry->isObject() && typeName.startsWith("const "))
+        typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
 
     // Remove the constness, if any
     if (typeName.startsWith("const ") && type->name() != "char")
-        typeName.remove(0, 6);
+        typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
 
-    if (typeName.endsWith("&") && !(type->isValue() && type->isReference()))
+    if (typeName.endsWith("&") && (tentry->isPrimitive() || tentry->isContainer()))
         typeName.chop(1);
 
     s << baseConversionString(typeName);
@@ -319,11 +319,8 @@ void ShibokenGenerator::writeToPythonConversion(QTextStream& s, const AbstractMe
     writeBaseConversion(s, type, context);
     s << "toPython";
 
-    if (!argumentName.isEmpty()) {
-        bool isReferenceToObjectType = type->isObject() && type->isReference();
-        s << '(' << (isReferenceToObjectType ? "&(" : "") << argumentName;
-        s << (isReferenceToObjectType ? ")" : "") << ')';
-    }
+    if (!argumentName.isEmpty())
+        s << '(' << argumentName << ')';
 }
 
 void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaType* type,
