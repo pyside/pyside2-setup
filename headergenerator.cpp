@@ -88,9 +88,6 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
 
         writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Declaration, TypeSystem::NativeCode);
 
-        if (metaClass->isQObject() && (metaClass->name() != "QObject"))
-            s << INDENT << "using QObject::parent;" << endl;
-
         s << "};" << endl << endl;
     }
 
