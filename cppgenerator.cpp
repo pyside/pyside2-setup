@@ -30,7 +30,6 @@
 
 static Indentor INDENT;
 
-
 CppGenerator::CppGenerator()
 {
     // sequence protocol functions
@@ -1256,6 +1255,25 @@ void CppGenerator::writeMultipleInheritanceInitializerFunction(QTextStream& s, c
     s << '}' << endl;
 }
 
+void CppGenerator::writeSpecialCastFunction(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    s << "static void* " << cpythonSpecialCastFunctionName(metaClass) << "(PyObject* obj, ShiboTypeObject* desiredType)\n";
+    s << "{\n";
+    s << INDENT << metaClass->qualifiedCppName() << "* me = " << cpythonWrapperCPtr(metaClass, "obj") << ";\n";
+    AbstractMetaClassList bases = getBaseClasses(metaClass);
+    bool firstClass = true;
+    foreach(const AbstractMetaClass* baseClass, bases) {
+        s << INDENT << (!firstClass ? "else " : "") << "if (desiredType == &" << cpythonTypeName(baseClass) << ")\n";
+        Indentation indent(INDENT);
+        s << INDENT << "return static_cast<" << baseClass->qualifiedCppName() << "*>(me);\n";
+        firstClass = false;
+    }
+    s << INDENT << "else\n";
+    Indentation indent(INDENT);
+    s << INDENT << "return me;\n";
+    s << "}\n\n";
+}
+
 QString CppGenerator::multipleInheritanceInitializerFunctionName(const AbstractMetaClass* metaClass)
 {
     if (!hasMultipleInheritanceInAncestry(metaClass))
@@ -1280,6 +1298,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     QString tp_as_number('0');
     QString tp_as_sequence('0');
     QString mi_init('0');
+    QString mi_specialCast('0');
     QString cppClassName = metaClass->qualifiedCppName();
     QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
     QString baseClassName;
@@ -1340,6 +1359,8 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
             s << "extern int* " << multipleInheritanceInitializerFunctionName(miClass);
             s << "(const void* cptr);" << endl;
         }
+        mi_specialCast = '&'+cpythonSpecialCastFunctionName(metaClass);
+        writeSpecialCastFunction(s, metaClass);
         s << endl;
     }
 
@@ -1394,7 +1415,8 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_weaklist*/         0" << endl;
     s << "}," << endl;
     s << INDENT << "/*mi_offsets*/          0," << endl;
-    s << INDENT << "/*mi_init*/             " << mi_init << endl;
+    s << INDENT << "/*mi_init*/             " << mi_init << ',' << endl;
+    s << INDENT << "/*mi_specialCast*/      " << mi_specialCast << endl;
     s << "};" << endl;
 }
 

@@ -195,6 +195,8 @@ void HeaderGenerator::finishGeneration()
     QTextStream s_pts(&pythonTypeStuff);
     QString convertersDecl;
     QTextStream convDecl(&convertersDecl);
+    QString pyTypeFunctions;
+    QTextStream typeFunctions(&pyTypeFunctions);
 
     Indentation indent(INDENT);
 
@@ -235,6 +237,9 @@ void HeaderGenerator::finishGeneration()
         }
 
         if (!metaClass->isNamespace()) {
+            // declaration/implementation of PyType function.
+            typeFunctions <<  "template<>\ninline ShiboTypeObject* PyType<" << metaClass->qualifiedCppName() << ">() { return &" << cpythonTypeName(metaClass) << "; }\n";
+
             foreach (AbstractMetaClass* innerClass, metaClass->innerClasses()) {
                 if (shouldGenerate(innerClass)) {
                     s_cin << innerClass->typeEntry()->include().toString() << endl;
@@ -314,6 +319,8 @@ void HeaderGenerator::finishGeneration()
 
         s << "namespace Shiboken" << endl << '{' << endl << endl;
 
+        s << "// PyType functions, to get the PyObjectType for a type T\n";
+        s << pyTypeFunctions << endl;
         s << "// Generated converters declarations ----------------------------------" << endl << endl;
         s << convertersDecl << endl;
 

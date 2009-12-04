@@ -134,6 +134,8 @@ private:
 
     /// Writes the function that registers the multiple inheritance information for the classes that need it.
     void writeMultipleInheritanceInitializerFunction(QTextStream& s, const AbstractMetaClass* metaClass);
+    /// Writes the implementation of special cast functions, used when we need to cast a class with mulltiple inheritance.
+    void writeSpecialCastFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
     void writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func);
     /**

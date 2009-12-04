@@ -65,6 +65,18 @@ struct ConverterBase
     static T toCpp(PyObject* pyobj) { return *Converter<T*>::toCpp(pyobj); }
 };
 
+/**
+*   This function template is used to get the PyObjectType of a C++ type T.
+*   It's main usage if handle multiple inheritance casts.
+*   \see SpecialCastFunction
+*/
+template<typename T>
+inline ShiboTypeObject* PyType()
+{
+    assert(false); // This *SHOULD* never be called.
+    return 0;
+}
+
 // Specialization meant to be used by abstract classes and object-types
 // (i.e. classes with private copy constructors and = operators).
 // Example: "struct Converter<AbstractClass* > : ConverterBase<AbstractClass* >"
@@ -86,6 +98,9 @@ struct ConverterBase<T*> : ConverterBase<T>
     {
         if (pyobj == Py_None)
             return 0;
+        ShiboTypeObject* shiboType = reinterpret_cast<ShiboTypeObject*>(pyobj->ob_type);
+        if (shiboType->mi_specialcast)
+            return (T*) shiboType->mi_specialcast(pyobj, PyType<T>());
         return (T*) ((Shiboken::PyBaseWrapper*) pyobj)->cptr;
     }
 };

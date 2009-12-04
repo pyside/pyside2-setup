@@ -249,6 +249,8 @@ public:
             return QString();
         return cpythonFlagsName(flags);
     }
+    /// Returns the special cast function name, the function used to proper cast class with multiple inheritance.
+    QString cpythonSpecialCastFunctionName(const AbstractMetaClass* metaClass);
 
     QString getFunctionReturnType(const AbstractMetaFunction* func, Options options = NoOption) const;
     QString getFormatUnitString(const AbstractMetaFunction* func) const;

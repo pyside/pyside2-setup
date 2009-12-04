@@ -240,6 +240,11 @@ QString ShibokenGenerator::cpythonFlagsName(const FlagsTypeEntry* flagsEntry)
     return cpythonEnumFlagsName(moduleName(), flagsEntry->originalName());
 }
 
+QString ShibokenGenerator::cpythonSpecialCastFunctionName(const AbstractMetaClass* metaClass)
+{
+    return cpythonBaseName(metaClass->typeEntry())+"SpecialCastFunction";
+}
+
 QString ShibokenGenerator::cpythonWrapperCPtr(const AbstractMetaClass* metaClass, QString argName)
 {
     return cpythonWrapperCPtr(metaClass->typeEntry(), argName);
