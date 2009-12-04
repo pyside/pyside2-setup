@@ -37,6 +37,8 @@ CppGenerator::CppGenerator()
     m_sequenceProtocol.insert("__len__", StrPair("PyObject* self", "Py_ssize_t"));
     m_sequenceProtocol.insert("__getitem__", StrPair("PyObject* self, Py_ssize_t _i", "PyObject*"));
     m_sequenceProtocol.insert("__setitem__", StrPair("PyObject* self, Py_ssize_t _i, PyObject* _value", "int"));
+    m_sequenceProtocol.insert("__getslice__", StrPair("PyObject* self, Py_ssize_t _i1, Py_ssize_t _i2", "PyObject*"));
+    m_sequenceProtocol.insert("__setslice__", StrPair("PyObject* self, Py_ssize_t _i1, Py_ssize_t _i2, PyObject* _value", "int"));
     m_sequenceProtocol.insert("__contains__", StrPair("PyObject* self, PyObject* _value", "int"));
     m_sequenceProtocol.insert("__concat__", StrPair("PyObject* self, PyObject* _other", "PyObject*"));
 }
@@ -1494,9 +1496,9 @@ void CppGenerator::writeTypeAsSequenceDefinition(QTextStream& s, const AbstractM
       << INDENT << "/*sq_concat*/ " << funcs["__concat__"] << ",\n"
       << INDENT << "/*sq_repeat*/ 0,\n"
       << INDENT << "/*sq_item*/ " << funcs["__getitem__"] << ",\n"
-      << INDENT << "/*sq_slice*/ 0,\n"
+      << INDENT << "/*sq_slice*/ " << funcs["__getslice__"] << ",\n"
       << INDENT << "/*sq_ass_item*/ " << funcs["__setitem__"] << ",\n"
-      << INDENT << "/*sq_ass_slice*/ 0,\n"
+      << INDENT << "/*sq_ass_slice*/ " << funcs["__setslice__"] << ",\n"
       << INDENT << "/*sq_contains*/ " << funcs["__contains__"] << ",\n"
       << INDENT << "/*sq_inplace_concat*/ 0,\n"
       << INDENT << "/*sq_inplace_repeat*/ 0\n"
