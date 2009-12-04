@@ -3,7 +3,7 @@ add_subdirectory(samplebinding)
 
 file(GLOB TEST_FILES samplebinding/*_test.py)
 
-set(test_blacklist "multiple_derived")
+set(test_blacklist "")
 
 foreach(test_file ${TEST_FILES})
     string(REGEX MATCH "/([^/]+)_test.py" test_name ${test_file})
