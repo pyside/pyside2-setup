@@ -424,24 +424,28 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
 {
     OverloadData overloadData(overloads, this);
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
-    QString className = cpythonTypeName(rfunc->ownerClass());
+    const AbstractMetaClass* metaClass = rfunc->ownerClass();
+    QString className = cpythonTypeName(metaClass);
 
     s << "PyObject*" << endl;
-    s << cpythonFunctionName(rfunc) << "(PyTypeObject *type, PyObject *args, PyObject *kwds)" << endl;
+    s << cpythonFunctionName(rfunc) << "(PyTypeObject* type, PyObject* args, PyObject* kwds)" << endl;
     s << '{' << endl;
 
     s << INDENT << "PyObject* self;" << endl;
     s << INDENT;
-    bool hasCppWrapper = shouldGenerateCppWrapper(rfunc->ownerClass());
-    s << (hasCppWrapper ? wrapperName(rfunc->ownerClass()) : rfunc->ownerClass()->qualifiedCppName());
+    bool hasCppWrapper = shouldGenerateCppWrapper(metaClass);
+    s << (hasCppWrapper ? wrapperName(metaClass) : metaClass->qualifiedCppName());
     s << "* cptr;" << endl << endl;
 
-    if (rfunc->ownerClass()->isAbstract()) {
+    if (metaClass->isAbstract()) {
         s << INDENT << "if (type == (PyTypeObject*)&" << className << ") {" << endl;
         {
             Indentation indent(INDENT);
             s << INDENT << "PyErr_SetString(PyExc_NotImplementedError," << endl;
-            s << INDENT << INDENT << "\"'" << rfunc->ownerClass()->qualifiedCppName();
+            {
+                Indentation indentation(INDENT);
+                s << INDENT << "\"'" << metaClass->qualifiedCppName();
+            }
             s << "' represents a C++ abstract class and cannot be instanciated\");" << endl;
             s << INDENT << "return 0;" << endl;
         }
@@ -449,7 +453,24 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     }
 
     s << INDENT << "if (!PyType_IsSubtype(type, (PyTypeObject*)&" << className << "))" << endl;
-    s << INDENT << INDENT << "return 0;" << endl << endl;
+    {
+        Indentation indentation(INDENT);
+        s << INDENT << "return 0;" << endl << endl;
+    }
+
+    if (metaClass->baseClassNames().size() > 1) {
+        if (!metaClass->isAbstract())
+            s << INDENT << "if (type != (PyTypeObject*)&" << className << ") {" << endl;
+        {
+            Indentation indentation(INDENT);
+            s << INDENT << "ShiboTypeObject* shibotype = reinterpret_cast<ShiboTypeObject*>(type);" << endl;
+            s << INDENT << "shibotype->mi_init = " << className << ".mi_init;" << endl;
+            s << INDENT << "shibotype->mi_offsets = " << className << ".mi_offsets;" << endl;
+            s << INDENT << "shibotype->mi_specialcast = " << className << ".mi_specialcast;" << endl;
+        }
+        if (!metaClass->isAbstract())
+            s << INDENT << '}' << endl << endl;
+    }
 
     if (overloadData.maxArgs() > 0) {
         s  << endl << INDENT << "int numArgs = ";
