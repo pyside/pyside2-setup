@@ -30,7 +30,7 @@ install(DIRECTORY . DESTINATION include/shiboken
         )
 install(TARGETS libshiboken DESTINATION ${LIB_INSTALL_DIR})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FindShiboken.cmake
-        DESTINATION share/cmake-2.6/Modules)
+        DESTINATION "share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules")
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/shiboken.pc
         DESTINATION "${LIB_INSTALL_DIR}/pkgconfig")
 
