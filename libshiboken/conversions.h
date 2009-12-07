@@ -47,6 +47,17 @@
 
 namespace Shiboken
 {
+/**
+*   This function template is used to get the PyObjectType of a C++ type T.
+*   It's main usage if handle multiple inheritance casts.
+*   \see SpecialCastFunction
+*/
+template<typename T>
+inline PyTypeObject* PyType()
+{
+    assert(false); // This *SHOULD* never be called.
+    return 0;
+}
 
 // Base Conversions ----------------------------------------------------------
 template <typename T> struct Converter;
@@ -54,7 +65,10 @@ template <typename T> struct Converter;
 template <typename T>
 struct ConverterBase
 {
-    static PyObject* createWrapper(const T* cppobj) { return 0; }
+    static PyObject* createWrapper(const T* cppobj)
+    {
+        return Shiboken::PyBaseWrapper_New(PyType<T>(), cppobj);;
+    }
     static T* copyCppObject(const T& cppobj) { return 0; }
     static bool isConvertible(PyObject* pyobj) { return pyobj == Py_None; }
 
@@ -65,18 +79,6 @@ struct ConverterBase
     // this to build T from its various implicit constructors.
     static T toCpp(PyObject* pyobj) { return *Converter<T*>::toCpp(pyobj); }
 };
-
-/**
-*   This function template is used to get the PyObjectType of a C++ type T.
-*   It's main usage if handle multiple inheritance casts.
-*   \see SpecialCastFunction
-*/
-template<typename T>
-inline ShiboTypeObject* PyType()
-{
-    assert(false); // This *SHOULD* never be called.
-    return 0;
-}
 
 // Specialization meant to be used by abstract classes and object-types
 // (i.e. classes with private copy constructors and = operators).
@@ -92,7 +94,7 @@ struct ConverterBase<T*> : ConverterBase<T>
         if (pyobj)
             Py_INCREF(pyobj);
         else
-            pyobj = Converter<T*>::createWrapper(cppobj);
+            pyobj = createWrapper(cppobj);
         return pyobj;
     }
     static T* toCpp(PyObject* pyobj)
@@ -101,7 +103,7 @@ struct ConverterBase<T*> : ConverterBase<T>
             return 0;
         ShiboTypeObject* shiboType = reinterpret_cast<ShiboTypeObject*>(pyobj->ob_type);
         if (shiboType->mi_specialcast)
-            return (T*) shiboType->mi_specialcast(pyobj, PyType<T>());
+            return (T*) shiboType->mi_specialcast(pyobj, reinterpret_cast<ShiboTypeObject*>(PyType<T>()));
         return (T*) ((Shiboken::PyBaseWrapper*) pyobj)->cptr;
     }
 };
@@ -119,7 +121,7 @@ struct Converter<T*> : Converter<T>
         if (pyobj)
             Py_INCREF(pyobj);
         else
-            pyobj = Converter<T>::createWrapper(cppobj);
+            pyobj = createWrapper(cppobj);
         return pyobj;
     }
     static T* toCpp(PyObject* pyobj)
@@ -264,7 +266,10 @@ template <> struct Converter<double> : Converter_PyFloat<double> {};
 template <typename CppEnum>
 struct Converter_CppEnum
 {
-    static PyObject* createWrapper(CppEnum cppobj);
+    static PyObject* createWrapper(CppEnum cppobj)
+    {
+        return PyEnumObject_New(PyType<CppEnum>(), (long)cppobj);
+    }
     static CppEnum toCpp(PyObject* pyobj)
     {
         return (CppEnum) ((Shiboken::PyEnumObject*)pyobj)->ob_ival;

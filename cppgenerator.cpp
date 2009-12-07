@@ -2117,27 +2117,6 @@ void CppGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
     const AbstractMetaClass* metaClass = classes().findClass(type->name());
     bool isAbstractOrObjectType = (metaClass &&  metaClass->isAbstract()) || type->isObject();
 
-    // Write Converter<T>::createWrapper function
-    s << "PyObject* Converter<" << type->name() << (isAbstractOrObjectType ? "*" : "");
-    s << " >::createWrapper(";
-    QString convArg = type->name();
-    if (!type->isEnum() && !type->isFlags()) {
-        convArg.prepend("const ");
-        convArg.append('*');
-    }
-    s << convArg << " cppobj)" << endl;
-
-    s << '{' << endl;
-    s << INDENT << "return " << "Shiboken::";
-    if (type->isObject() || type->isValue()) {
-        s << "PyBaseWrapper_New((PyTypeObject*)&" << pyTypeName << ',';
-    } else {
-        // Type is enum or flag
-        s << "PyEnumObject_New(&" << pyTypeName << ", (long)";
-    }
-    s << " cppobj);" << endl;
-    s << '}' << endl << endl;
-
     AbstractMetaFunctionList implicitConvs = implicitConversions(type);
     bool hasImplicitConversions = !implicitConvs.isEmpty();
 

@@ -44,6 +44,8 @@ private:
     void writeTypeCheckMacro(QTextStream& s, const TypeEntry* type);
     void writeExportMacros(QTextStream& s);
     void writeTypeConverterDecl(QTextStream& s, const TypeEntry* type);
+    void writePyTypeFunction(QTextStream& s, const AbstractMetaEnum* cppEnum);
+    void writePyTypeFunction(QTextStream& s, const AbstractMetaClass* cppClass);
 };
 
 #endif // HEADERGENERATOR_H

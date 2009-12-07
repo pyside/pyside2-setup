@@ -162,14 +162,6 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
     if (hasImplicitConversions)
         s << INDENT << "static bool isConvertible(PyObject* pyobj);" << endl;
 
-    s << INDENT << "static PyObject* createWrapper(";
-    QString convArg = type->name();
-    if (!type->isEnum() && !type->isFlags()) {
-        convArg.prepend("const ");
-        convArg.append('*');
-    }
-    s << convArg << " cppobj);" << endl;
-
     if (type->isValue() && hasImplicitConversions) {
         s << INDENT << "static " << type->name() << "* copyCppObject(const ";
         s << type->name() << "& cppobj);" << endl;
@@ -212,6 +204,7 @@ void HeaderGenerator::finishGeneration()
         s_pts << endl;
         writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
         convDecl << endl;
+        writePyTypeFunction(typeFunctions, cppEnum);
     }
 
     foreach (AbstractMetaClass* metaClass, classes()) {
@@ -234,11 +227,11 @@ void HeaderGenerator::finishGeneration()
             }
             s_pts << endl;
             convDecl << endl;
+            writePyTypeFunction(typeFunctions, cppEnum);
         }
 
         if (!metaClass->isNamespace()) {
-            // declaration/implementation of PyType function.
-            typeFunctions <<  "template<>\ninline ShiboTypeObject* PyType<" << metaClass->qualifiedCppName() << ">() { return &" << cpythonTypeName(metaClass) << "; }\n";
+            writePyTypeFunction(typeFunctions, metaClass);
 
             foreach (AbstractMetaClass* innerClass, metaClass->innerClasses()) {
                 if (shouldGenerate(innerClass)) {
@@ -355,3 +348,23 @@ void HeaderGenerator::writeExportMacros(QTextStream& s)
 \n";
 }
 
+void HeaderGenerator::writePyTypeFunction(QTextStream& s, const AbstractMetaEnum* cppEnum)
+{
+    QString enumPrefix;
+    if (cppEnum->enclosingClass())
+        enumPrefix = cppEnum->enclosingClass()->qualifiedCppName() + "::";
+    s <<  "template<>\ninline PyTypeObject* PyType<" << enumPrefix << cppEnum->name() << " >() "
+      << "{ return &" << cpythonTypeName(cppEnum->typeEntry()) << "; }\n";
+
+    FlagsTypeEntry* flag = cppEnum->typeEntry()->flags();
+    if (flag) {
+        s <<  "template<>\ninline PyTypeObject* PyType<" << flag->name() << " >() "
+          << "{ return &" << cpythonTypeName(flag) << "; }\n";
+    }
+}
+
+void HeaderGenerator::writePyTypeFunction(QTextStream& s, const AbstractMetaClass* cppClass)
+{
+    s <<  "template<>\ninline PyTypeObject* PyType<" << cppClass->qualifiedCppName() << " >() "
+      <<  "{ return reinterpret_cast<PyTypeObject*>(&" << cpythonTypeName(cppClass) << "); }\n";
+}
