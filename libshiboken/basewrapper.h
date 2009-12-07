@@ -118,6 +118,12 @@ LIBSHIBOKEN_API void removeParent(PyBaseWrapper* child);
 */
 LIBSHIBOKEN_API void destroyParentInfo(PyBaseWrapper* obj, bool removeFromParent = true);
 
+
+/**
+ * Shiboken_TypeCheck macro performs a type check using the values registered with PyType<>() template.
+ */
+#define Shiboken_TypeCheck(pyobj, type) (PyObject_TypeCheck(pyobj, PyType<type>()))
+
 #define PyBaseWrapper_Check(op) PyObject_TypeCheck(op, &Shiboken::PyBaseWrapper_Type)
 #define PyBaseWrapper_CheckExact(op) ((op)->ob_type == &Shiboken::PyBaseWrapper_Type)
 

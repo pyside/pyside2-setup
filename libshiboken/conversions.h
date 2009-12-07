@@ -126,11 +126,11 @@ struct Converter<T*> : Converter<T>
     }
     static T* toCpp(PyObject* pyobj)
     {
-        if (pyobj == Py_None)
-            return 0;
+        if (Shiboken_TypeCheck(pyobj, T))
+            return (T*) ((Shiboken::PyBaseWrapper*) pyobj)->cptr;
         else if (Converter<T>::isConvertible(pyobj))
             return Converter<T>::copyCppObject(Converter<T>::toCpp(pyobj));
-        return (T*) ((Shiboken::PyBaseWrapper*) pyobj)->cptr;
+        return 0;
     }
 };
 template <typename T> struct Converter<const T*> : Converter<T*> {};

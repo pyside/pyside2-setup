@@ -2155,28 +2155,35 @@ void CppGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
 
     // Write Converter<T>::toCpp function
     s << type->name() << " Converter<" << type->name() << " >::toCpp(PyObject* pyobj)" << endl;
-    s << '{' << endl << INDENT;
+    s << '{' << endl;
 
-    bool firstImplicitIf = true;
-    foreach (const AbstractMetaFunction* ctor, implicitConvs) {
-        if (ctor->isModifiedRemoved())
-            continue;
+    if (!implicitConvs.isEmpty()) {
+        s << INDENT << "if (!Shiboken_TypeCheck(pyobj, " << type->name() << ")) {" << endl;
+        bool firstImplicitIf = true;
+        foreach (const AbstractMetaFunction* ctor, implicitConvs) {
+            if (ctor->isModifiedRemoved())
+                continue;
 
-        const AbstractMetaType* argType = ctor->arguments().first()->type();
-        if (firstImplicitIf)
-            firstImplicitIf = false;
-        else
-            s << INDENT << "else ";
-        s << "if (" << cpythonCheckFunction(argType) << "(pyobj))" << endl;
-        {
             Indentation indent(INDENT);
-            s << INDENT << "return " << type->name() << '(';
-            writeBaseConversion(s, argType, 0);
-            s << "toCpp(pyobj));" << endl;
+            s << INDENT;
+
+            const AbstractMetaType* argType = ctor->arguments().first()->type();
+            if (firstImplicitIf)
+                firstImplicitIf = false;
+            else
+                s << "else ";
+            s << "if (" << cpythonCheckFunction(argType) << "(pyobj))" << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "return " << type->name() << '(';
+                writeBaseConversion(s, argType, 0);
+                s << "toCpp(pyobj));" << endl;
+            }
         }
+        s << INDENT << '}' << endl;
     }
 
-    s << INDENT << "return *Converter<" << type->name() << "* >::toCpp(pyobj);" << endl;
+    s << INDENT << "return *" << cpythonWrapperCPtr(type, "pyobj") << ';' << endl;
     s << '}' << endl << endl;
 
     // Write Converter<T>::copyCppObject function
