@@ -135,3 +135,9 @@ returnNullValueTypePointer()
     return 0;
 }
 
+unsigned int
+doubleUnsignedInt(unsigned int value)
+{
+    return value * 2;
+}
+

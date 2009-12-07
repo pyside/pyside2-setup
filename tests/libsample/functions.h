@@ -72,5 +72,7 @@ LIBSAMPLE_API Event* returnNullValueTypePointer();
 LIBSAMPLE_API GlobalOverloadFuncEnum overloadedFunc(int val);
 LIBSAMPLE_API GlobalOverloadFuncEnum overloadedFunc(double val);
 
+LIBSAMPLE_API unsigned int doubleUnsignedInt(unsigned int value);
+
 #endif // FUNCTIONS_H
 

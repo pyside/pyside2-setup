@@ -36,6 +36,7 @@
 #define CONVERSIONS_H
 
 #include <Python.h>
+#include <limits>
 #include "pyenum.h"
 #include "basewrapper.h"
 #include "bindingmanager.h"
@@ -182,9 +183,14 @@ struct Converter_PyInt
     }
     static PyIntEquiv toCpp(PyObject* pyobj)
     {
+        long result;
         if (PyFloat_Check(pyobj))
-            return (PyIntEquiv) PyFloat_AS_DOUBLE(pyobj);
-        return (PyIntEquiv) PyInt_AS_LONG(pyobj);
+            result = (long) PyFloat_AS_DOUBLE(pyobj);
+        else
+            result = PyInt_AS_LONG(pyobj);
+        if (result < std::numeric_limits<PyIntEquiv>::min() || result > std::numeric_limits<PyIntEquiv>::max())
+            PyErr_SetObject(PyExc_OverflowError, 0);
+        return (PyIntEquiv) result;
     }
 };
 
@@ -206,7 +212,7 @@ struct Converter<unsigned long>
     }
     static unsigned long toCpp(PyObject* pyobj)
     {
-        return (unsigned long) PyLong_AsUnsignedLong(pyobj);
+        return PyLong_AsUnsignedLong(pyobj);
     }
 };
 
