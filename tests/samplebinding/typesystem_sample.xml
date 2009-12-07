@@ -729,7 +729,7 @@
     <value-type name="IntWrapper" />
 
     <value-type name="Str">
-        <add-function signature="__str__()" return-type="PyObject*">
+        <add-function signature="__str__" return-type="PyObject*">
             <inject-code class="target" position="beginning">
                 %0 = PyString_FromString(%CPPSELF.cstring());
             </inject-code>
@@ -762,6 +762,27 @@
                     Py_DECREF(result);
                 }
                 return !ok ? -1 : 0;
+            </inject-code>
+        </add-function>
+    </value-type>
+
+    <value-type name="StrList">
+        <add-function signature="__len__" >
+            <inject-code class="target" position="end">
+                return %CPPSELF.size();
+            </inject-code>
+        </add-function>
+        <add-function signature="__getitem__" >
+            <inject-code class="target" position="beginning">
+                if (_i &lt; 0 || _i >= %CPPSELF.size()) {
+                    PyErr_BadArgument();
+                    return 0;
+                } else {
+                    %TYPE::const_iterator it = %CPPSELF.begin();
+                    for (Py_ssize_t i = 1; i &lt;= _i; i++)
+                        ++it;
+                    return %CONVERTTOPYTHON[Str](*it);
+                }
             </inject-code>
         </add-function>
     </value-type>

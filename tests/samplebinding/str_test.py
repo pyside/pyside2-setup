@@ -26,7 +26,6 @@
 
 '''Test cases for a method that receives a reference to class that is implicitly convertible from a Python native type.'''
 
-import sys
 import unittest
 
 from sample import Str

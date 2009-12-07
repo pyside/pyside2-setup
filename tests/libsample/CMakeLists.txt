@@ -28,6 +28,7 @@ simplefile.cpp
 size.cpp
 sometime.cpp
 str.cpp
+strlist.cpp
 virtualmethods.cpp
 )
 
