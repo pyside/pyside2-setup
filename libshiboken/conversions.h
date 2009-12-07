@@ -37,6 +37,7 @@
 
 #include <Python.h>
 #include <limits>
+
 #include "pyenum.h"
 #include "basewrapper.h"
 #include "bindingmanager.h"
@@ -298,6 +299,122 @@ struct Converter_CString
 
 template <> struct Converter<char*> : Converter_CString<char*> {};
 template <> struct Converter<const char*> : Converter_CString<const char*> {};
+
+// C++ containers -------------------------------------------------------------
+// The following container converters are meant to be used for pairs, lists and maps
+// that are similar to the STL containers of the same name.
+
+// For example to create a converter for a std::list the following code is enough:
+// template<typename T> struct Converter<std::list<T> > : Converter_std_list<std::list<T> > {};
+
+// And this for a std::map:
+// template<typename KT, typename VT>
+// struct Converter<std::map<KT, VT> > : Converter_std_map<std::map<KT, VT> > {};
+
+template <typename StdList>
+struct Converter_std_list
+{
+    static bool isConvertible(const PyObject* pyObj)
+    {
+        return PySequence_Check(const_cast<PyObject*>(pyObj));
+    }
+
+    static PyObject* toPython(StdList holder)
+    {
+        PyObject* result = PyList_New((int) holder.size());
+        typedef typename StdList::iterator IT;
+        IT it;
+        int idx = 0;
+        for (it = holder.begin(); it != holder.end(); it++) {
+            typename StdList::value_type vh(*it);
+            PyList_SET_ITEM(result, idx, Converter<typename StdList::value_type>::toPython(vh));
+            idx++;
+        }
+        return result;
+    }
+    static StdList toCpp(PyObject* pyobj)
+    {
+        StdList result;
+        for (int i = 0; i < PySequence_Size(pyobj); i++) {
+            PyObject* pyItem = PySequence_GetItem(pyobj, i);
+            result.push_back(Converter<typename StdList::value_type>::toCpp(pyItem));
+        }
+        return result;
+    }
+};
+
+template <typename StdPair>
+struct Converter_std_pair
+{
+    static bool isConvertible(const PyObject* pyObj)
+    {
+        return PySequence_Check(const_cast<PyObject*>(pyObj));
+    }
+    static PyObject* toPython(StdPair holder)
+    {
+        typename StdPair::first_type first(holder.first);
+        typename StdPair::second_type second(holder.second);
+        PyObject* tuple = PyTuple_New(2);
+        PyTuple_SET_ITEM(tuple, 0, Converter<typename StdPair::first_type>::toPython(first));
+        PyTuple_SET_ITEM(tuple, 1, Converter<typename StdPair::second_type>::toPython(second));
+        return tuple;
+    }
+    static StdPair toCpp(PyObject* pyobj)
+    {
+        StdPair result;
+        PyObject* pyFirst = PySequence_GetItem(pyobj, 0);
+        PyObject* pySecond = PySequence_GetItem(pyobj, 1);
+        result.first = Converter<typename StdPair::first_type>::toCpp(pyFirst);
+        result.second = Converter<typename StdPair::second_type>::toCpp(pySecond);
+        return result;
+    }
+};
+
+template <typename StdMap>
+struct Converter_std_map
+{
+    static bool isConvertible(const PyObject* pyObj)
+    {
+        return PyDict_Check(const_cast<PyObject*>(pyObj));
+    }
+
+    static PyObject* toPython(StdMap holder)
+    {
+        PyObject* result = PyDict_New();
+        typedef typename StdMap::iterator IT;
+        IT it;
+
+        for (it = holder.begin(); it != holder.end(); it++) {
+            typename StdMap::key_type h_key((*it).first);
+            typename StdMap::mapped_type h_val((*it).second);
+            PyDict_SetItem(result,
+                           Converter<typename StdMap::key_type>::toPython(h_key),
+                           Converter<typename StdMap::mapped_type>::toPython(h_val));
+        }
+
+        return result;
+    }
+    static StdMap toCpp(PyObject* pyobj)
+    {
+        StdMap result;
+
+        PyObject* key;
+        PyObject* value;
+        Py_ssize_t pos = 0;
+
+        Py_INCREF(pyobj);
+
+        while (PyDict_Next(pyobj, &pos, &key, &value)) {
+            result.insert(typename StdMap::value_type(
+                    Converter<typename StdMap::key_type>::toCpp(key),
+                    Converter<typename StdMap::mapped_type>::toCpp(value)));
+        }
+
+        Py_DECREF(pyobj);
+
+        return result;
+    }
+};
 
 } // namespace Shiboken
 
