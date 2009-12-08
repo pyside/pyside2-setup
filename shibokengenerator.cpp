@@ -1149,6 +1149,13 @@ QString ShibokenGenerator::getApiExportMacro() const
     return "SHIBOKEN_"+moduleName().toUpper()+"_API"; // a longer name to avoid name clashes
 }
 
+QString ShibokenGenerator::getModuleHeaderFileName(QString modName) const
+{
+    if (modName.isEmpty())
+        modName = moduleName();
+    return QString("%1_python.h").arg(modName.toLower());
+}
+
 /*
 static void dumpFunction(AbstractMetaFunctionList lst)
 {

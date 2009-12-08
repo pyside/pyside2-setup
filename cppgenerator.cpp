@@ -96,7 +96,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     if (hasMultipleInheritanceInAncestry(metaClass))
         s << "#include <set>" << endl;
 
-    s << "#include \"" << moduleName().toLower() << "_python.h\"" << endl << endl;
+    s << "#include \"" << getModuleHeaderFileName() << '"' << endl << endl;
 
     QString converterImpl;
     QTextStream convImpl(&converterImpl);
@@ -2270,7 +2270,7 @@ void CppGenerator::finishGeneration()
 
         s << "#include <Python.h>" << endl;
         s << "#include <shiboken.h>" << endl;
-        s << "#include \"" << moduleName().toLower() << "_python.h\"" << endl << endl;
+        s << "#include \"" << getModuleHeaderFileName() << '"' << endl << endl;
         foreach (const QString& include, includes)
             s << "#include \"" << include << '\"' << endl;
         s << endl;

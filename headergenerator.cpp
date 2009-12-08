@@ -253,11 +253,11 @@ void HeaderGenerator::finishGeneration()
         }
     }
 
-    QString moduleHeaderFileName(outputDirectory() + QDir::separator()
-                                 + subDirectoryForPackage(packageName()));
-    moduleHeaderFileName += QDir::separator() + moduleName().toLower() + "_python.h";
+    QString moduleHeaderFileName(outputDirectory()
+                                 + QDir::separator() + subDirectoryForPackage(packageName())
+                                 + QDir::separator() + getModuleHeaderFileName());
 
-    QString includeShield = moduleName().toUpper() + "_PYTHON_H";
+    QString includeShield("SBK_" + moduleName().toUpper() + "_PYTHON_H");
 
     QFile file(moduleHeaderFileName);
     if (file.open(QFile::WriteOnly)) {
