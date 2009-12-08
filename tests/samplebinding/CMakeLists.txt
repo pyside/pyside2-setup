@@ -79,7 +79,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${PYTHON_INCLUDE_PATH}
                     ${libsample_SOURCE_DIR}
                     ${libshiboken_SOURCE_DIR})
-add_library(sample MODULE ${sample_SRC})
+add_library(sample SHARED ${sample_SRC})
 set_property(TARGET sample PROPERTY PREFIX "")
 target_link_libraries(sample
                       libsample

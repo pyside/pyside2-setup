@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<typesystem package="other">
+    <load-typesystem name="typesystem_sample.xml" generate="no" />
+
+    <object-type name="OtherDerived" />
+
+</typesystem>
+

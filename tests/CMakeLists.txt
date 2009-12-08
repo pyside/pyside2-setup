@@ -1,7 +1,9 @@
 add_subdirectory(libsample)
+add_subdirectory(libother)
 add_subdirectory(samplebinding)
+add_subdirectory(otherbinding)
 
-file(GLOB TEST_FILES samplebinding/*_test.py)
+file(GLOB TEST_FILES samplebinding/*_test.py otherbinding/*_test.py)
 
 set(test_blacklist "")
 
