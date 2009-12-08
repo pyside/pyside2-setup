@@ -130,7 +130,7 @@ void HeaderGenerator::writeTypeCheckMacro(QTextStream& s, const TypeEntry* type)
 {
     QString pyTypeName = cpythonTypeName(type);
     QString checkFunction = cpythonCheckFunction(type);
-    s << "PyAPI_DATA(";
+    s << getApiExportMacro() << " PyAPI_DATA(";
     if (type->isObject() || type->isValue())
         s << "Shiboken::ShiboTypeObject";
     else
@@ -236,14 +236,14 @@ void HeaderGenerator::finishGeneration()
             foreach (AbstractMetaClass* innerClass, metaClass->innerClasses()) {
                 if (shouldGenerate(innerClass)) {
                     s_cin << innerClass->typeEntry()->include().toString() << endl;
-                    s_pts << "PyAPI_FUNC(PyObject*) " << cpythonBaseName(innerClass->typeEntry());
+                    s_pts << getApiExportMacro() << " PyAPI_FUNC(PyObject*) " << cpythonBaseName(innerClass->typeEntry());
                     s_pts << "_New(PyTypeObject* type, PyObject* args, PyObject* kwds);" << endl;
                     writeTypeCheckMacro(s_pts, innerClass->typeEntry());
                     writeTypeConverterDecl(convDecl, innerClass->typeEntry());
                     convDecl << endl;
                 }
             }
-            s_pts << "PyAPI_FUNC(PyObject*) " << cpythonBaseName(metaClass->typeEntry());
+            s_pts << getApiExportMacro() << " PyAPI_FUNC(PyObject*) " << cpythonBaseName(metaClass->typeEntry());
             s_pts << "_New(PyTypeObject* type, PyObject* args, PyObject* kwds);" << endl;
             writeTypeCheckMacro(s_pts, classType);
             s_pts << "#define Sbk" << metaClass->name() << "_cptr(pyobj) ((";
