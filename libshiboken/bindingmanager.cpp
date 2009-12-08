@@ -86,7 +86,7 @@ void BindingManager::assignWrapper(PyObject* wrapper, const void* cptr)
 
 void BindingManager::releaseWrapper(PyObject* wrapper)
 {
-    void* cptr = PyBaseWrapper_cptr(wrapper);
+    void* cptr = SbkBaseWrapper_cptr(wrapper);
     m_d->releaseWrapper(cptr);
     if (((ShiboTypeObject*) wrapper->ob_type)->mi_offsets) {
         int* offset = ((ShiboTypeObject*) wrapper->ob_type)->mi_offsets;
@@ -138,14 +138,14 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
     return 0;
 }
 
-void BindingManager::invalidateWrapper(PyBaseWrapper* wrapper)
+void BindingManager::invalidateWrapper(SbkBaseWrapper* wrapper)
 {
-    if (!PyBaseWrapper_validCppObject(wrapper))
+    if (!SbkBaseWrapper_validCppObject(wrapper))
         return;
-    PyBaseWrapper_setValidCppObject(wrapper, false);
-    PyBaseWrapper_setOwnership(wrapper, false);
+    SbkBaseWrapper_setValidCppObject(wrapper, false);
+    SbkBaseWrapper_setOwnership(wrapper, false);
     // If it is a parent invalidate all children.
-    if (PyBaseWrapper_hasParentInfo(wrapper)) {
+    if (SbkBaseWrapper_hasParentInfo(wrapper)) {
         ShiboChildrenList::iterator it = wrapper->parentInfo->children.begin();
         for (; it != wrapper->parentInfo->children.end(); ++it)
             invalidateWrapper(*it);
@@ -160,13 +160,13 @@ void BindingManager::invalidateWrapper(const void* cptr)
         invalidateWrapper(iter->second);
 }
 
-void BindingManager::transferOwnershipToCpp(PyBaseWrapper* wrapper)
+void BindingManager::transferOwnershipToCpp(SbkBaseWrapper* wrapper)
 {
     if (wrapper->parentInfo)
         Shiboken::removeParent(wrapper);
 
-    if (PyBaseWrapper_containsCppWrapper(wrapper))
-        PyBaseWrapper_setOwnership(wrapper, false);
+    if (SbkBaseWrapper_containsCppWrapper(wrapper))
+        SbkBaseWrapper_setOwnership(wrapper, false);
     else
         invalidateWrapper(wrapper);
 }

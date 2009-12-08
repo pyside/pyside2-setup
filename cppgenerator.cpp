@@ -1163,7 +1163,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     if (func->isConstructor()) {
 
         QString className = cpythonTypeName(func->ownerClass());
-        s << INDENT << "self = Shiboken::PyBaseWrapper_New(type, cptr";
+        s << INDENT << "self = Shiboken::SbkBaseWrapper_New(type, cptr";
         // If the created C++ object has a C++ wrapper the ownership is assigned to Python
         // (first "1") and the flag indicating that the Python wrapper holds an C++ wrapper
         // is marked as true (the second "1"). Otherwise the default values apply:
@@ -1212,7 +1212,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
             s << INDENT;
             if (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::TargetLangOwnership)
-                s << "PyBaseWrapper_setOwnership(" << pyArgName << ", true";
+                s << "SbkBaseWrapper_setOwnership(" << pyArgName << ", true";
             else if (wrappedClass->hasVirtualDestructor())
                 s << "BindingManager::instance().transferOwnershipToCpp(" << pyArgName;
             else
@@ -1342,7 +1342,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
         tp_flags = "Py_TPFLAGS_HAVE_CLASS";
         tp_dealloc = metaClass->hasPrivateDestructor() ?
-                     "(destructor)Shiboken::PyBaseWrapper_Dealloc_PrivateDtor" : "0";
+                     "(destructor)Shiboken::SbkBaseWrapper_Dealloc_PrivateDtor" : "0";
         tp_new = "0";
     } else {
         tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES";
@@ -1352,7 +1352,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
             deallocClassName = wrapperName(metaClass);
         else
             deallocClassName = cppClassName;
-        tp_dealloc = QString("(destructor)&(Shiboken::PyBaseWrapper_Dealloc< %1 >)").arg(deallocClassName);
+        tp_dealloc = QString("(destructor)&(Shiboken::SbkBaseWrapper_Dealloc< %1 >)").arg(deallocClassName);
 
         AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
         tp_new = ctors.isEmpty() ? "0" : className + "_New";
@@ -1391,7 +1391,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "PyObject_HEAD_INIT(&PyType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
     s << INDENT << "/*tp_name*/             \"" << cppClassName << "\"," << endl;
-    s << INDENT << "/*tp_basicsize*/        sizeof(Shiboken::PyBaseWrapper)," << endl;
+    s << INDENT << "/*tp_basicsize*/        sizeof(Shiboken::SbkBaseWrapper)," << endl;
     s << INDENT << "/*tp_itemsize*/         0," << endl;
     s << INDENT << "/*tp_dealloc*/          " << tp_dealloc << ',' << endl;
     s << INDENT << "/*tp_print*/            0," << endl;
@@ -1676,7 +1676,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                 s << INDENT << '}';
             }
 
-            s << " else goto Py" << metaClass->name() << "_RichComparison_TypeError;" << endl;
+            s << " else goto Sbk" << metaClass->name() << "_RichComparison_TypeError;" << endl;
             s << endl;
 
             s << INDENT << "break;" << endl;
@@ -1696,7 +1696,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
         s << INDENT << "Py_RETURN_TRUE;" << endl;
     }
     s << INDENT << "Py_RETURN_FALSE;" << endl << endl;
-    s << INDENT << "Py" << metaClass->name() << "_RichComparison_TypeError:" << endl;
+    s << INDENT << "Sbk" << metaClass->name() << "_RichComparison_TypeError:" << endl;
     {
         Indentation indent(INDENT);
         s << INDENT << "PyErr_SetString(PyExc_TypeError, \"operator called with wrong parameters.\");" << endl;
@@ -1736,7 +1736,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
     QString cpythonName = cpythonEnumName(cppEnum);
     QString addFunction;
     if (cppEnum->enclosingClass()) {
-        addFunction = QString("PyDict_SetItemString(Py")
+        addFunction = QString("PyDict_SetItemString(Sbk")
                       + cppEnum->enclosingClass()->name()
                       + "_Type.pytype.tp_dict,";
     } else {
@@ -1774,7 +1774,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
         if (cppEnum->typeEntry()->isEnumValueRejected(enumValue->name()))
             continue;
 
-        s << INDENT << "enum_item = Shiboken::PyEnumObject_New(&";
+        s << INDENT << "enum_item = Shiboken::SbkEnumObject_New(&";
         s << cpythonName << "_Type," << endl;
         {
             Indentation indent(INDENT);
@@ -1807,7 +1807,7 @@ void CppGenerator::writeFlagsNewMethod(QTextStream& s, const FlagsTypeEntry* cpp
         Indentation indent(INDENT);
         s << INDENT << "return 0;" << endl;
     }
-    s << INDENT << "PyObject* self = Shiboken::PyEnumObject_New(type, item_value);" << endl << endl;
+    s << INDENT << "PyObject* self = Shiboken::SbkEnumObject_New(type, item_value);" << endl << endl;
     s << INDENT << "if (!self)" << endl;
     {
         Indentation indent(INDENT);
@@ -1824,7 +1824,7 @@ void CppGenerator::writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* c
         tp_as_number = QString("&%1_as_number").arg(cpythonName);
 
     s << "static PyGetSetDef " << cpythonName << "_getsetlist[] = {" << endl;
-    s << INDENT << "{const_cast<char*>(\"name\"), (getter)Shiboken::PyEnumObject_name}," << endl;
+    s << INDENT << "{const_cast<char*>(\"name\"), (getter)Shiboken::SbkEnumObject_name}," << endl;
     s << INDENT << "{0}  // Sentinel" << endl;
     s << "};" << endl << endl;
 
@@ -1832,20 +1832,20 @@ void CppGenerator::writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* c
     s << INDENT << "PyObject_HEAD_INIT(&PyType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
     s << INDENT << "/*tp_name*/             \"" << cppEnum->name() << "\"," << endl;
-    s << INDENT << "/*tp_basicsize*/        sizeof(Shiboken::PyEnumObject)," << endl;
+    s << INDENT << "/*tp_basicsize*/        sizeof(Shiboken::SbkEnumObject)," << endl;
     s << INDENT << "/*tp_itemsize*/         0," << endl;
     s << INDENT << "/*tp_dealloc*/          0," << endl;
     s << INDENT << "/*tp_print*/            0," << endl;
     s << INDENT << "/*tp_getattr*/          0," << endl;
     s << INDENT << "/*tp_setattr*/          0," << endl;
     s << INDENT << "/*tp_compare*/          0," << endl;
-    s << INDENT << "/*tp_repr*/             Shiboken::PyEnumObject_repr," << endl;
+    s << INDENT << "/*tp_repr*/             Shiboken::SbkEnumObject_repr," << endl;
     s << INDENT << "/*tp_as_number*/        " << tp_as_number << ',' << endl;
     s << INDENT << "/*tp_as_sequence*/      0," << endl;
     s << INDENT << "/*tp_as_mapping*/       0," << endl;
     s << INDENT << "/*tp_hash*/             0," << endl;
     s << INDENT << "/*tp_call*/             0," << endl;
-    s << INDENT << "/*tp_str*/              Shiboken::PyEnumObject_repr," << endl;
+    s << INDENT << "/*tp_str*/              Shiboken::SbkEnumObject_repr," << endl;
     s << INDENT << "/*tp_getattro*/         0," << endl;
     s << INDENT << "/*tp_setattro*/         0," << endl;
     s << INDENT << "/*tp_as_buffer*/        0," << endl;
@@ -1867,7 +1867,7 @@ void CppGenerator::writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* c
     s << INDENT << "/*tp_dictoffset*/       0," << endl;
     s << INDENT << "/*tp_init*/             0," << endl;
     s << INDENT << "/*tp_alloc*/            0," << endl;
-    s << INDENT << "/*tp_new*/              Shiboken::PyEnumObject_NonExtensibleNew," << endl;
+    s << INDENT << "/*tp_new*/              Shiboken::SbkEnumObject_NonExtensibleNew," << endl;
     s << INDENT << "/*tp_free*/             0," << endl;
     s << INDENT << "/*tp_is_gc*/            0," << endl;
     s << INDENT << "/*tp_bases*/            0," << endl;
@@ -1956,20 +1956,20 @@ void CppGenerator::writeFlagsDefinition(QTextStream& s, const AbstractMetaEnum* 
     s << INDENT << "PyObject_HEAD_INIT(&PyType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
     s << INDENT << "/*tp_name*/             \"" << flagsEntry->flagsName() << "\"," << endl;
-    s << INDENT << "/*tp_basicsize*/        sizeof(Shiboken::PyEnumObject)," << endl;
+    s << INDENT << "/*tp_basicsize*/        sizeof(Shiboken::SbkEnumObject)," << endl;
     s << INDENT << "/*tp_itemsize*/         0," << endl;
     s << INDENT << "/*tp_dealloc*/          0," << endl;
     s << INDENT << "/*tp_print*/            0," << endl;
     s << INDENT << "/*tp_getattr*/          0," << endl;
     s << INDENT << "/*tp_setattr*/          0," << endl;
     s << INDENT << "/*tp_compare*/          0," << endl;
-    s << INDENT << "/*tp_repr*/             Shiboken::PyEnumObject_repr," << endl;
+    s << INDENT << "/*tp_repr*/             Shiboken::SbkEnumObject_repr," << endl;
     s << INDENT << "/*tp_as_number*/        0," << endl;
     s << INDENT << "/*tp_as_sequence*/      0," << endl;
     s << INDENT << "/*tp_as_mapping*/       0," << endl;
     s << INDENT << "/*tp_hash*/             0," << endl;
     s << INDENT << "/*tp_call*/             0," << endl;
-    s << INDENT << "/*tp_str*/              Shiboken::PyEnumObject_repr," << endl;
+    s << INDENT << "/*tp_str*/              Shiboken::SbkEnumObject_repr," << endl;
     s << INDENT << "/*tp_getattro*/         0," << endl;
     s << INDENT << "/*tp_setattro*/         0," << endl;
     s << INDENT << "/*tp_as_buffer*/        0," << endl;
@@ -2014,7 +2014,7 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream& s, const AbstractMetaEn
     s << INDENT << "return Shiboken::Converter< " << flagsEntry->originalName() << " >::toPython(" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "((" << flagsEntry->originalName() << ") ((PyEnumObject*)self)->ob_ival)" << endl;
+        s << INDENT << "((" << flagsEntry->originalName() << ") ((SbkEnumObject*)self)->ob_ival)" << endl;
         s << INDENT << cppOpName << " Shiboken::Converter< ";
         s << flagsEntry->originalName() << " >::toCpp(arg)" << endl;
     }
@@ -2032,7 +2032,7 @@ void CppGenerator::writeFlagsInplaceOperator(QTextStream& s, const AbstractMetaE
     s << cpythonEnumName(cppEnum) << "___" << pyOpName << "__(PyObject* self, PyObject* arg)" << endl;
     s << '{' << endl;
 
-    s << INDENT << "((" << flagsEntry->originalName() << ") ((PyEnumObject*)self)->ob_ival) " << cppOpName << endl;
+    s << INDENT << "((" << flagsEntry->originalName() << ") ((SbkEnumObject*)self)->ob_ival) " << cppOpName << endl;
     s << INDENT << "Shiboken::Converter< " << flagsEntry->originalName() << " >::toCpp(arg);" << endl;
 
     s << INDENT << "Py_INCREF(self);" << endl;

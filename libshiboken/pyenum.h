@@ -48,18 +48,18 @@ typedef struct {
     PyObject_HEAD
     long ob_ival;
     PyObject* ob_name;
-} PyEnumObject;
+} SbkEnumObject;
 
-LIBSHIBOKEN_API PyAPI_FUNC(PyObject*) PyEnumObject_repr(PyObject* self);
-LIBSHIBOKEN_API PyAPI_FUNC(PyObject*) PyEnumObject_name(PyObject* self);
-LIBSHIBOKEN_API PyAPI_FUNC(PyObject*) PyEnumObject_NonExtensibleNew(PyTypeObject* type, PyObject* args, PyObject* kwds);
+LIBSHIBOKEN_API PyAPI_FUNC(PyObject*) SbkEnumObject_repr(PyObject* self);
+LIBSHIBOKEN_API PyAPI_FUNC(PyObject*) SbkEnumObject_name(PyObject* self);
+LIBSHIBOKEN_API PyAPI_FUNC(PyObject*) SbkEnumObject_NonExtensibleNew(PyTypeObject* type, PyObject* args, PyObject* kwds);
 
 } // extern "C"
 
-LIBSHIBOKEN_API PyObject* PyEnumObject_New(PyTypeObject *instanceType,
+LIBSHIBOKEN_API PyObject* SbkEnumObject_New(PyTypeObject *instanceType,
                            long item_value,
                            const char* item_name);
-LIBSHIBOKEN_API PyObject* PyEnumObject_New(PyTypeObject *instanceType,
+LIBSHIBOKEN_API PyObject* SbkEnumObject_New(PyTypeObject *instanceType,
                            long item_value,
                            PyObject* item_name = 0);
 

@@ -38,24 +38,24 @@ namespace Shiboken
 {
 
 PyObject*
-PyEnumObject_New(PyTypeObject *type, long item_value, PyObject* item_name)
+SbkEnumObject_New(PyTypeObject *type, long item_value, PyObject* item_name)
 {
     if (!item_name)
         item_name = PyString_FromString("");
-    PyEnumObject* enum_obj = (PyEnumObject*) type->tp_alloc(type, 0);
+    SbkEnumObject* enum_obj = (SbkEnumObject*) type->tp_alloc(type, 0);
     enum_obj->ob_name = item_name;
     enum_obj->ob_ival = item_value;
     return (PyObject*) enum_obj;
 }
 
 PyObject*
-PyEnumObject_New(PyTypeObject *type, long item_value, const char* item_name)
+SbkEnumObject_New(PyTypeObject *type, long item_value, const char* item_name)
 {
     PyObject* py_item_name = 0;
     if (item_name)
         py_item_name = PyString_FromString(item_name);
 
-    PyObject* enum_obj = PyEnumObject_New(type, item_value, py_item_name);
+    PyObject* enum_obj = SbkEnumObject_New(type, item_value, py_item_name);
     if (!enum_obj) {
         Py_XDECREF(py_item_name);
         return 0;
@@ -77,7 +77,7 @@ extern "C"
 {
 
 PyObject*
-PyEnumObject_NonExtensibleNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
+SbkEnumObject_NonExtensibleNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     PyErr_SetString(PyExc_TypeError, "enum is not extensible");
     return 0;
@@ -85,19 +85,19 @@ PyEnumObject_NonExtensibleNew(PyTypeObject *type, PyObject *args, PyObject *kwds
 
 
 PyObject*
-PyEnumObject_repr(PyObject* self)
+SbkEnumObject_repr(PyObject* self)
 {
     return PyString_FromFormat("<enum-item %s.%s (%ld)>",
                                self->ob_type->tp_name,
-                               PyString_AS_STRING(((PyEnumObject*)self)->ob_name),
-                               ((PyEnumObject*)self)->ob_ival);
+                               PyString_AS_STRING(((SbkEnumObject*)self)->ob_name),
+                               ((SbkEnumObject*)self)->ob_ival);
 }
 
 PyObject*
-PyEnumObject_name(PyObject* self)
+SbkEnumObject_name(PyObject* self)
 {
-    Py_INCREF(((PyEnumObject*)self)->ob_name);
-    return ((PyEnumObject*)self)->ob_name;
+    Py_INCREF(((SbkEnumObject*)self)->ob_name);
+    return ((SbkEnumObject*)self)->ob_name;
 }
 
 } // extern "C"

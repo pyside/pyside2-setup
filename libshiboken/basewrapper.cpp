@@ -39,7 +39,7 @@
 namespace Shiboken
 {
 
-void removeParent(PyBaseWrapper* child)
+void removeParent(SbkBaseWrapper* child)
 {
     if (child->parentInfo->parent) {
         ShiboChildrenList& oldBrothers = child->parentInfo->parent->parentInfo->children;
@@ -56,8 +56,8 @@ void setParent(PyObject* parent, PyObject* child)
 
     bool parentIsNull = !parent || parent == Py_None;
 
-    PyBaseWrapper* parent_ = reinterpret_cast<PyBaseWrapper*>(parent);
-    PyBaseWrapper* child_ = reinterpret_cast<PyBaseWrapper*>(child);
+    SbkBaseWrapper* parent_ = reinterpret_cast<SbkBaseWrapper*>(parent);
+    SbkBaseWrapper* child_ = reinterpret_cast<SbkBaseWrapper*>(child);
     if (!child_->parentInfo)
         child_->parentInfo = new ShiboParentInfo;
 
@@ -84,13 +84,13 @@ void setParent(PyObject* parent, PyObject* child)
     }
 }
 
-static void _destroyParentInfo(PyBaseWrapper* obj, bool removeFromParent)
+static void _destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent)
 {
     if (removeFromParent && obj->parentInfo->parent)
         removeParent(obj);
     ShiboChildrenList::iterator it = obj->parentInfo->children.begin();
     for (; it != obj->parentInfo->children.end(); ++it) {
-        PyBaseWrapper*& child = *it;
+        SbkBaseWrapper*& child = *it;
         _destroyParentInfo(child, false);
         Py_DECREF(child);
     }
@@ -98,13 +98,13 @@ static void _destroyParentInfo(PyBaseWrapper* obj, bool removeFromParent)
     obj->parentInfo = 0;
 }
 
-void destroyParentInfo(PyBaseWrapper* obj, bool removeFromParent)
+void destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent)
 {
     BindingManager::instance().invalidateWrapper(obj);
     _destroyParentInfo(obj, removeFromParent);
 }
 
-PyObject* PyBaseWrapper_New(PyTypeObject* instanceType,
+PyObject* SbkBaseWrapper_New(PyTypeObject* instanceType,
                             const void* cptr,
                             unsigned int hasOwnership,
                             unsigned int containsCppWrapper)
@@ -113,7 +113,7 @@ PyObject* PyBaseWrapper_New(PyTypeObject* instanceType,
         return 0;
 
     ShiboTypeObject* const& instanceType_ = reinterpret_cast<ShiboTypeObject*>(instanceType);
-    PyBaseWrapper* self = (PyBaseWrapper*)instanceType_->pytype.tp_alloc((PyTypeObject*) instanceType, 0);
+    SbkBaseWrapper* self = (SbkBaseWrapper*)instanceType_->pytype.tp_alloc((PyTypeObject*) instanceType, 0);
 
     self->cptr = const_cast<void*>(cptr);
     self->hasOwnership = hasOwnership;
@@ -139,16 +139,16 @@ PyObject* PyBaseWrapper_New(PyTypeObject* instanceType,
 
 bool cppObjectIsInvalid(PyObject* wrapper)
 {
-    if (wrapper == Py_None || ((Shiboken::PyBaseWrapper*)wrapper)->validCppObject)
+    if (wrapper == Py_None || ((Shiboken::SbkBaseWrapper*)wrapper)->validCppObject)
         return false;
     PyErr_SetString(PyExc_RuntimeError, "internal C++ object already deleted.");
     return true;
 }
 
-void PyBaseWrapper_Dealloc_PrivateDtor(PyObject* self)
+void SbkBaseWrapper_Dealloc_PrivateDtor(PyObject* self)
 {
     BindingManager::instance().releaseWrapper(self);
-    Py_TYPE(((PyBaseWrapper*)self))->tp_free((PyObject*)self);
+    Py_TYPE(((SbkBaseWrapper*)self))->tp_free((PyObject*)self);
 }
 
 } // namespace Shiboken

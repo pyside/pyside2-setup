@@ -54,7 +54,7 @@ namespace Shiboken
 *   \see SpecialCastFunction
 */
 template<typename T>
-inline PyTypeObject* PyType()
+inline PyTypeObject* SbkType()
 {
     assert(false); // This *SHOULD* never be called.
     return 0;
@@ -68,7 +68,7 @@ struct ConverterBase
 {
     static PyObject* createWrapper(const T* cppobj)
     {
-        return Shiboken::PyBaseWrapper_New(PyType<T>(), cppobj);;
+        return Shiboken::SbkBaseWrapper_New(SbkType<T>(), cppobj);;
     }
     static T* copyCppObject(const T& cppobj) { return 0; }
     static bool isConvertible(PyObject* pyobj) { return pyobj == Py_None; }
@@ -104,8 +104,8 @@ struct ConverterBase<T*> : ConverterBase<T>
             return 0;
         ShiboTypeObject* shiboType = reinterpret_cast<ShiboTypeObject*>(pyobj->ob_type);
         if (shiboType->mi_specialcast)
-            return (T*) shiboType->mi_specialcast(pyobj, reinterpret_cast<ShiboTypeObject*>(PyType<T>()));
-        return (T*) ((Shiboken::PyBaseWrapper*) pyobj)->cptr;
+            return (T*) shiboType->mi_specialcast(pyobj, reinterpret_cast<ShiboTypeObject*>(SbkType<T>()));
+        return (T*) ((Shiboken::SbkBaseWrapper*) pyobj)->cptr;
     }
 };
 
@@ -128,7 +128,7 @@ struct Converter<T*> : Converter<T>
     static T* toCpp(PyObject* pyobj)
     {
         if (Shiboken_TypeCheck(pyobj, T))
-            return (T*) ((Shiboken::PyBaseWrapper*) pyobj)->cptr;
+            return (T*) ((Shiboken::SbkBaseWrapper*) pyobj)->cptr;
         else if (Converter<T>::isConvertible(pyobj))
             return Converter<T>::copyCppObject(Converter<T>::toCpp(pyobj));
         return 0;
@@ -269,11 +269,11 @@ struct Converter_CppEnum
 {
     static PyObject* createWrapper(CppEnum cppobj)
     {
-        return PyEnumObject_New(PyType<CppEnum>(), (long)cppobj);
+        return SbkEnumObject_New(SbkType<CppEnum>(), (long)cppobj);
     }
     static CppEnum toCpp(PyObject* pyobj)
     {
-        return (CppEnum) ((Shiboken::PyEnumObject*)pyobj)->ob_ival;
+        return (CppEnum) ((Shiboken::SbkEnumObject*)pyobj)->ob_ival;
     }
     static PyObject* toPython(CppEnum cppenum)
     {

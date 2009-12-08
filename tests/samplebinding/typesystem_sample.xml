@@ -82,7 +82,7 @@
         <inject-code class="native" position="beginning">
             static void reparent_layout_items(PyObject* parent, PyObject* layout)
             {
-                const ObjectTypeList&amp; objChildren = PyObjectTypeLayout_cptr(layout)->objects();
+                const ObjectTypeList&amp; objChildren = SbkObjectTypeLayout_cptr(layout)->objects();
                 ObjectTypeList::const_iterator it = objChildren.begin();
                 for (; it != objChildren.end(); ++it) {
                     if ((*it)->isLayoutType()) {
@@ -544,7 +544,7 @@
         </modify-function>
         <modify-function signature="name()">
             <inject-code class="native" position="end">
-                PyStr_cptr(%0)->prepend(Str("Pimped"));
+                SbkStr_cptr(%0)->prepend(Str("Pimped"));
             </inject-code>
         </modify-function>
         <modify-function signature="callMe()">
@@ -755,7 +755,7 @@
         <add-function signature="__setitem__" >
             <inject-code class="target" position="beginning">
                 PyObject* args = Py_BuildValue("(iO)", _i, _value);
-                PyObject* result = PyStr_set_char(self, args);
+                PyObject* result = SbkStr_set_char(self, args);
                 Py_DECREF(args);
                 int ok = result == Py_True;
                 if (result) {

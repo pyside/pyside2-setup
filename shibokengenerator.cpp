@@ -217,7 +217,7 @@ QString ShibokenGenerator::cpythonFunctionName(const AbstractMetaFunction* func)
         else
             result += func->name();
     } else {
-        result = "Py" + moduleName() + "Module_" + func->name();
+        result = "Sbk" + moduleName() + "Module_" + func->name();
     }
 
     return result;
@@ -225,7 +225,7 @@ QString ShibokenGenerator::cpythonFunctionName(const AbstractMetaFunction* func)
 
 static QString cpythonEnumFlagsName(QString moduleName, QString qualifiedCppName)
 {
-    QString result = QString("Py%1_%2").arg(moduleName).arg(qualifiedCppName);
+    QString result = QString("Sbk%1_%2").arg(moduleName).arg(qualifiedCppName);
     result.replace("::", "_");
     return result;
 }
@@ -376,7 +376,7 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry* type)
 {
     QString baseName;
     if ((type->isObject() || type->isValue() || type->isNamespace())) { // && !type->isReference()) {
-        baseName = QString("Py") + type->name();
+        baseName = QString("Sbk") + type->name();
     } else if (type->isPrimitive()) {
         const PrimitiveTypeEntry* ptype = (const PrimitiveTypeEntry*) type;
         if (ptype->basicAliasedTypeEntry())
@@ -436,7 +436,7 @@ QString ShibokenGenerator::cpythonOperatorFunctionName(const AbstractMetaFunctio
 {
     if (!func->isOperatorOverload())
         return QString();
-    return QString("Py") + func->ownerClass()->name()
+    return QString("Sbk") + func->ownerClass()->name()
             + '_' + pythonOperatorFunctionName(func->originalName());
 }
 

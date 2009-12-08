@@ -42,10 +42,10 @@
 namespace Shiboken
 {
 
-struct PyBaseWrapper;
+struct SbkBaseWrapper;
 
-/// Linked list of PyBaseWrapper pointers
-typedef std::list<PyBaseWrapper*> ShiboChildrenList;
+/// Linked list of SbkBaseWrapper pointers
+typedef std::list<SbkBaseWrapper*> ShiboChildrenList;
 
 /// Struct used to store information about object parent and children.
 struct LIBSHIBOKEN_API ShiboParentInfo
@@ -53,7 +53,7 @@ struct LIBSHIBOKEN_API ShiboParentInfo
     /// Default ctor.
     ShiboParentInfo() : parent(0) {}
     /// Pointer to parent object.
-    PyBaseWrapper* parent;
+    SbkBaseWrapper* parent;
     /// List of object children.
     ShiboChildrenList children;
 };
@@ -81,7 +81,7 @@ struct LIBSHIBOKEN_API ShiboTypeObject
 };
 
 /// Base Python object for all the wrapped C++ classes.
-struct LIBSHIBOKEN_API PyBaseWrapper
+struct LIBSHIBOKEN_API SbkBaseWrapper
 {
     PyObject_HEAD
     /// Pointer to the C++ class.
@@ -110,32 +110,32 @@ LIBSHIBOKEN_API void setParent(PyObject* parent, PyObject* child);
 *   Remove this child from their parent, if any.
 *   \param child the child.
 */
-LIBSHIBOKEN_API void removeParent(PyBaseWrapper* child);
+LIBSHIBOKEN_API void removeParent(SbkBaseWrapper* child);
 
 /**
-* \internal This is an internal function called by PyBaseWrapper_Dealloc, it's exported just for techinical reasons.
+* \internal This is an internal function called by SbkBaseWrapper_Dealloc, it's exported just for techinical reasons.
 * \note Do not call this function inside your bindings.
 */
-LIBSHIBOKEN_API void destroyParentInfo(PyBaseWrapper* obj, bool removeFromParent = true);
+LIBSHIBOKEN_API void destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent = true);
 
 
 /**
- * Shiboken_TypeCheck macro performs a type check using the values registered with PyType<>() template.
+ * Shiboken_TypeCheck macro performs a type check using the values registered with SbkType<>() template.
  */
-#define Shiboken_TypeCheck(pyobj, type) (PyObject_TypeCheck(pyobj, PyType<type>()))
+#define Shiboken_TypeCheck(pyobj, type) (PyObject_TypeCheck(pyobj, SbkType<type>()))
 
-#define PyBaseWrapper_Check(op) PyObject_TypeCheck(op, &Shiboken::PyBaseWrapper_Type)
-#define PyBaseWrapper_CheckExact(op) ((op)->ob_type == &Shiboken::PyBaseWrapper_Type)
+#define SbkBaseWrapper_Check(op) PyObject_TypeCheck(op, &Shiboken::SbkBaseWrapper_Type)
+#define SbkBaseWrapper_CheckExact(op) ((op)->ob_type == &Shiboken::SbkBaseWrapper_Type)
 
-#define PyBaseWrapper_cptr(pyobj)                   (((Shiboken::PyBaseWrapper*)pyobj)->cptr)
-#define PyBaseWrapper_setCptr(pyobj,c)              (((Shiboken::PyBaseWrapper*)pyobj)->cptr = c)
-#define PyBaseWrapper_hasOwnership(pyobj)           (((Shiboken::PyBaseWrapper*)pyobj)->hasOwnership)
-#define PyBaseWrapper_setOwnership(pyobj,o)         (((Shiboken::PyBaseWrapper*)pyobj)->hasOwnership = o)
-#define PyBaseWrapper_hasParentInfo(pyobj)          (((Shiboken::PyBaseWrapper*)pyobj)->parentInfo)
-#define PyBaseWrapper_containsCppWrapper(pyobj)     (((Shiboken::PyBaseWrapper*)pyobj)->containsCppWrapper)
-#define PyBaseWrapper_setContainsCppWrapper(pyobj,o)(((Shiboken::PyBaseWrapper*)pyobj)->containsCppWrapper= o)
-#define PyBaseWrapper_validCppObject(pyobj)         (((Shiboken::PyBaseWrapper*)pyobj)->validCppObject)
-#define PyBaseWrapper_setValidCppObject(pyobj,v)    (((Shiboken::PyBaseWrapper*)pyobj)->validCppObject = v)
+#define SbkBaseWrapper_cptr(pyobj)                   (((Shiboken::SbkBaseWrapper*)pyobj)->cptr)
+#define SbkBaseWrapper_setCptr(pyobj,c)              (((Shiboken::SbkBaseWrapper*)pyobj)->cptr = c)
+#define SbkBaseWrapper_hasOwnership(pyobj)           (((Shiboken::SbkBaseWrapper*)pyobj)->hasOwnership)
+#define SbkBaseWrapper_setOwnership(pyobj,o)         (((Shiboken::SbkBaseWrapper*)pyobj)->hasOwnership = o)
+#define SbkBaseWrapper_hasParentInfo(pyobj)          (((Shiboken::SbkBaseWrapper*)pyobj)->parentInfo)
+#define SbkBaseWrapper_containsCppWrapper(pyobj)     (((Shiboken::SbkBaseWrapper*)pyobj)->containsCppWrapper)
+#define SbkBaseWrapper_setContainsCppWrapper(pyobj,o)(((Shiboken::SbkBaseWrapper*)pyobj)->containsCppWrapper= o)
+#define SbkBaseWrapper_validCppObject(pyobj)         (((Shiboken::SbkBaseWrapper*)pyobj)->validCppObject)
+#define SbkBaseWrapper_setValidCppObject(pyobj,v)    (((Shiboken::SbkBaseWrapper*)pyobj)->validCppObject = v)
 
 /* The #defines below were taken from Cython-generated code to allow shiboken to be used with python2.5.
  * Maybe not all of these defines are useful to us, time will tell which ones are really needed or not.
@@ -186,27 +186,28 @@ typedef struct {
 #endif
 
 LIBSHIBOKEN_API PyAPI_FUNC(PyObject*)
-PyBaseWrapper_New(PyTypeObject* instanceType,
-                  const void *cptr,
-                  unsigned int hasOwnership = 1,
-                  unsigned int containsCppWrapper = 0);
+SbkBaseWrapper_New(PyTypeObject* instanceType,
+                   const void *cptr,
+                   unsigned int hasOwnership = 1,
+                   unsigned int containsCppWrapper = 0);
 
 /// Returns true and sets a Python RuntimeError if the Python wrapper is not marked as valid.
 LIBSHIBOKEN_API bool cppObjectIsInvalid(PyObject* wrapper);
 
 template <typename T>
-void PyBaseWrapper_Dealloc(PyObject* self)
+void SbkBaseWrapper_Dealloc(PyObject* self)
 {
     BindingManager::instance().releaseWrapper(self);
-    if (PyBaseWrapper_hasOwnership(self))
-        delete ((T*)PyBaseWrapper_cptr(self));
-    if (PyBaseWrapper_hasParentInfo(self))
-        destroyParentInfo(reinterpret_cast<PyBaseWrapper*>(self));
-    Py_TYPE(((PyBaseWrapper*)self))->tp_free((PyObject*)self);
+    if (SbkBaseWrapper_hasOwnership(self))
+        delete ((T*)SbkBaseWrapper_cptr(self));
+    if (SbkBaseWrapper_hasParentInfo(self))
+        destroyParentInfo(reinterpret_cast<SbkBaseWrapper*>(self));
+    Py_TYPE(((SbkBaseWrapper*)self))->tp_free((PyObject*)self);
 }
 
-LIBSHIBOKEN_API PyAPI_FUNC(void) PyBaseWrapper_Dealloc_PrivateDtor(PyObject* self);
+LIBSHIBOKEN_API PyAPI_FUNC(void) SbkBaseWrapper_Dealloc_PrivateDtor(PyObject* self);
 
 } // namespace Shiboken
 
 #endif // BASEWRAPPER_H
+

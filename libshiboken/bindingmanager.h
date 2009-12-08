@@ -41,7 +41,7 @@
 namespace Shiboken
 {
 
-struct PyBaseWrapper;
+struct SbkBaseWrapper;
 
 class LIBSHIBOKEN_API BindingManager
 {
@@ -55,21 +55,21 @@ public:
     PyObject* getOverride(const void* cptr, const char* methodName);
 
     /// Invalidate the Python wrapper and removes the relations from C++ pointers to the Python wrapper.
-    void invalidateWrapper(PyBaseWrapper* wrapper);
-    /// Convenience method to call invalidateWrapper with a properly cast PyBaseWrapper.
+    void invalidateWrapper(SbkBaseWrapper* wrapper);
+    /// Convenience method to call invalidateWrapper with a properly cast SbkBaseWrapper.
     inline void invalidateWrapper(PyObject* wrapper)
     {
-        invalidateWrapper(reinterpret_cast<PyBaseWrapper*>(wrapper));
+        invalidateWrapper(reinterpret_cast<SbkBaseWrapper*>(wrapper));
     }
     /// Convenience method to invalidate the Python wrapper for a C++ wrapped object. Do nothing if C++ pointer has no Python wrapper.
     void invalidateWrapper(const void* cptr);
 
     /// Transfers the ownership of a Python wrapper to C++.
-    void transferOwnershipToCpp(PyBaseWrapper* wrapper);
-    /// Convenience method to call transferOwnershipToCpp with a properly cast PyBaseWrapper.
+    void transferOwnershipToCpp(SbkBaseWrapper* wrapper);
+    /// Convenience method to call transferOwnershipToCpp with a properly cast SbkBaseWrapper.
     inline void transferOwnershipToCpp(PyObject* wrapper)
     {
-        transferOwnershipToCpp(reinterpret_cast<PyBaseWrapper*>(wrapper));
+        transferOwnershipToCpp(reinterpret_cast<SbkBaseWrapper*>(wrapper));
     }
 
 private:
@@ -86,3 +86,4 @@ private:
 } // namespace Shiboken
 
 #endif // BINDINGMANAGER_H
+
