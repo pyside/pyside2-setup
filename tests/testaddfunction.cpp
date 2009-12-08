@@ -167,7 +167,7 @@ void TestAddFunction::testAddFunctionCodeSnippets()
     QVERIFY(addedFunc->hasInjectedCode());
 }
 
-void TestAddFunction::testFunctionWithoutParenteses()
+void TestAddFunction::testAddFunctionWithoutParenteses()
 {
     const char sig1[] = "func";
     AddedFunction f1(sig1, "void");
@@ -195,6 +195,38 @@ void TestAddFunction::testFunctionWithoutParenteses()
     QVERIFY(addedFunc->hasInjectedCode());
     QCOMPARE(addedFunc->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode).count(), 1);
 
+}
+
+void TestAddFunction::testAddFunctionWithDefaultArgs()
+{
+    const char sig1[] = "func";
+    AddedFunction f1(sig1, "void");
+
+    QCOMPARE(f1.name(), QString("func"));
+    QCOMPARE(f1.arguments().count(), 0);
+    QCOMPARE(f1.isConstant(), false);
+
+    const char cppCode[] = "struct A { };";
+    const char xmlCode[] = "\
+    <typesystem package=\"Foo\">\
+        <primitive-type name='int'/> \
+        <value-type name='A'>\
+            <add-function signature='func(int, int)'>\
+              <modify-argument index='2'>\
+                <replace-default-expression with='2'/> \
+              </modify-argument> \
+            </add-function>\
+        </value-type>\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, false);
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* classA = classes.findClass("A");
+    QVERIFY(classA);
+    const AbstractMetaFunction* addedFunc = classA->findFunction("func");
+    QVERIFY(addedFunc);
+    AbstractMetaArgument *arg = addedFunc->arguments()[1];
+    QCOMPARE(arg->defaultValueExpression(), QString("2"));
 }
 
 QTEST_APPLESS_MAIN(TestAddFunction)

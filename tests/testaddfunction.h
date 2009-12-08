@@ -34,7 +34,8 @@ private slots:
     void testAddFunctionConstructor();
     void testAddFunctionTagDefaultValues();
     void testAddFunctionCodeSnippets();
-    void testFunctionWithoutParenteses();
+    void testAddFunctionWithoutParenteses();
+    void testAddFunctionWithDefaultArgs();
 };
 
 #endif

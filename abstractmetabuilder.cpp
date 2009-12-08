@@ -1406,6 +1406,8 @@ AbstractMetaFunction *AbstractMetaBuilder::traverseFunction(const AddedFunction&
     metaFunction->setType(translateType(addedFunc.returnType()));
 
     QList<AddedFunction::TypeInfo> args = addedFunc.arguments();
+    AbstractMetaArgumentList metaArguments;
+
     for (int i = 0; i < args.count(); ++i) {
         AddedFunction::TypeInfo& typeInfo = args[i];
         AbstractMetaArgument* metaArg = createMetaArgument();
@@ -1413,10 +1415,33 @@ AbstractMetaFunction *AbstractMetaBuilder::traverseFunction(const AddedFunction&
         decideUsagePattern(type);
         metaArg->setType(type);
         metaArg->setArgumentIndex(i);
+        metaArg->setName(typeInfo.name);
         metaArg->setDefaultValueExpression(typeInfo.defaultValue);
         metaArg->setOriginalDefaultValueExpression(typeInfo.defaultValue);
-        metaArg->setName(typeInfo.name);
-        metaFunction->addArgument(metaArg);
+        metaArguments.append(metaArg);
+    }
+
+    metaFunction->setArguments(metaArguments);
+
+    // Find the correct default values
+    for (int i = 0; i < metaArguments.size(); ++i) {
+        AbstractMetaArgument *metaArg = metaArguments.at(i);
+
+        //use relace-default-expression for set default value
+        QString replacedExpression;
+        if (m_currentClass)
+            replacedExpression = metaFunction->replacedDefaultExpression(m_currentClass, i + 1);
+
+        if (!replacedExpression.isEmpty()) {
+            QString expr = replacedExpression;
+            if (!metaFunction->removedDefaultExpression(m_currentClass, i + 1)) {
+                metaArg->setDefaultValueExpression(expr);
+                metaArg->setOriginalDefaultValueExpression(expr);
+
+                if (metaArg->type()->isEnum() || metaArg->type()->isFlags())
+                    m_enumDefaultArguments << QPair<AbstractMetaArgument *, AbstractMetaFunction *>(metaArg, metaFunction);
+            }
+        }
     }
 
     return metaFunction;
@@ -1565,7 +1590,6 @@ AbstractMetaFunction *AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
             expr = fixDefaultValue(arg, metaArg->type(), metaFunction, m_currentClass, i);
             metaArg->setOriginalDefaultValueExpression(expr);
 
-            QString replacedExpression = metaFunction->replacedDefaultExpression(m_currentClass, i + 1);
             if (metaFunction->removedDefaultExpression(m_currentClass, i + 1)) {
                 expr = "";
             } else if (!replacedExpression.isEmpty()) {

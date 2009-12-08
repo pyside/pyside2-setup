@@ -1053,7 +1053,8 @@ bool Handler::startElement(const QString &, const QString &n,
 
         break;
         case StackElement::ModifyArgument: {
-            if (topElement.type != StackElement::ModifyFunction) {
+            if (topElement.type != StackElement::ModifyFunction
+                && topElement.type != StackElement::AddFunction) {
                 m_error = QString::fromLatin1("argument modification requires function"
                                               " modification as parent, was %1")
                           .arg(topElement.type, 0, 16);
