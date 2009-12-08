@@ -15,11 +15,11 @@ Variables
 =========
 
 
-.. _return_argument:
+.. _cpp_return_argument:
 
 **%0**
 
-  Replaced by the name of the return variable of the Python method/function wrapper.
+  Replaced by the C++ return variable of the Python method/function wrapper.
 
 
 .. _arg_number:
@@ -120,6 +120,14 @@ Variables
   value ``123``.
 
 
+.. _converttocpp:
+
+**%CONVERTTOCPP[CPPTYPE]**
+
+  Replaced by a |project| conversion call that converts a Python variable
+  to a C++ variable of the type indicated by ``CPPTYPE``.
+
+
 .. _converttopython:
 
 **%CONVERTTOPYTHON[CPPTYPE]**
@@ -141,6 +149,14 @@ Variables
 **%FUNCTION_NAME**
 
   Replaced by the name of a function or method.
+
+
+
+.. _py_return_argument:
+
+**%PYARG_0**
+
+  Replaced by the name of the Python return variable of the Python method/function wrapper.
 
 
 .. _pyarg:

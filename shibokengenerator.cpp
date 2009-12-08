@@ -848,6 +848,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                                        const AbstractMetaClass* context)
 {
     static QRegExp toPythonRegex("%CONVERTTOPYTHON\\[([^\\[]*)\\]");
+    static QRegExp toCppRegex("%CONVERTTOCPP\\[([^\\[]*)\\]");
     static QRegExp pyArgsRegex("%PYARG_(\\d+)");
 
     // detect is we should use pyargs instead of args as variable name for python arguments
@@ -884,8 +885,12 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
         // replace "toPython "converters
         code.replace(toPythonRegex, "Shiboken::Converter<\\1 >::toPython");
 
+        // replace "toCpp "converters
+        code.replace(toCppRegex, "Shiboken::Converter<\\1 >::toCpp");
+
         if (func) {
             // replace %PYARG_# variables
+            code.replace("%PYARG_0", retvalVariableName());
             if (snip.language == TypeSystem::TargetLangCode) {
                 if (numArgs > 1) {
                     code.replace(pyArgsRegex, "pyargs[\\1-1]");
@@ -920,10 +925,15 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             }
 
             // replace template variable for return variable name
-            if (func->isConstructor())
+            if (func->isConstructor()) {
+                code.replace("%0.", QString("%1->").arg("cptr"));
                 code.replace("%0", "cptr");
-            else
-                code.replace("%0", retvalVariableName());
+            } else if (func->type()) {
+                QString pyRetVal = cpythonWrapperCPtr(func->type(), retvalVariableName());
+                if (func->type()->typeEntry()->isValue() || func->type()->typeEntry()->isObject())
+                    code.replace("%0.", QString("%1->").arg(pyRetVal));
+                code.replace("%0", pyRetVal);
+            }
 
             // replace template variable for self Python object
             QString pySelf;
@@ -953,7 +963,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 }
             }
 
-            // replace template variables for individual arguments
+            // replace template variables %# for individual arguments
             int removed = 0;
             for (int i = 0; i < func->arguments().size(); i++) {
                 const AbstractMetaArgument* arg = func->arguments().at(i);
@@ -1099,7 +1109,7 @@ bool ShibokenGenerator::injectedCodeCallsPythonOverride(const AbstractMetaFuncti
 
 bool ShibokenGenerator::injectedCodeHasReturnValueAttribution(const AbstractMetaFunction* func)
 {
-    static QRegExp retValAttributionRegexCheck("%0\\s*=[^=]\\s*.+");
+    static QRegExp retValAttributionRegexCheck("%PYARG_0\\s*=[^=]\\s*.+");
     CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
     foreach (CodeSnip snip, snips) {
         if (retValAttributionRegexCheck.indexIn(snip.code()) != -1)
