@@ -1590,8 +1590,9 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
 
 void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
+    QString baseName = cpythonBaseName(metaClass->typeEntry());
     s << "static PyObject*" << endl;
-    s << cpythonBaseName(metaClass->typeEntry()) << "_richcompare(PyObject* self, PyObject* other, int op)" << endl;
+    s << baseName << "_richcompare(PyObject* self, PyObject* other, int op)" << endl;
     s << '{' << endl;
 
     QList<AbstractMetaFunctionList> cmpOverloads = filterGroupedOperatorFunctions(metaClass, AbstractMetaClass::ComparisonOp);
@@ -1676,7 +1677,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                 s << INDENT << '}';
             }
 
-            s << " else goto Sbk" << metaClass->name() << "_RichComparison_TypeError;" << endl;
+            s << " else goto " << baseName << "_RichComparison_TypeError;" << endl;
             s << endl;
 
             s << INDENT << "break;" << endl;
@@ -1696,7 +1697,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
         s << INDENT << "Py_RETURN_TRUE;" << endl;
     }
     s << INDENT << "Py_RETURN_FALSE;" << endl << endl;
-    s << INDENT << "Sbk" << metaClass->name() << "_RichComparison_TypeError:" << endl;
+    s << INDENT << baseName << "_RichComparison_TypeError:" << endl;
     {
         Indentation indent(INDENT);
         s << INDENT << "PyErr_SetString(PyExc_TypeError, \"operator called with wrong parameters.\");" << endl;
