@@ -156,21 +156,9 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
         s << "ConverterBase";
     s << '<' << type->name() << (isAbstractOrObjectType ? "*" : "") << " >" << endl;
     s << '{' << endl;
-
-    bool hasImplicitConversions = !implicitConversions(type).isEmpty();
-
-    if (hasImplicitConversions)
+    if (type->isValue() && !implicitConversions(type).isEmpty()) {
+        s << INDENT << "static " << type->name() << " toCpp(PyObject* pyobj);" << endl;
         s << INDENT << "static bool isConvertible(PyObject* pyobj);" << endl;
-
-    if (type->isValue() && hasImplicitConversions) {
-        s << INDENT << "static " << type->name() << "* copyCppObject(const ";
-        s << type->name() << "& cppobj);" << endl;
-    }
-
-    if (type->isValue()) {
-        s << INDENT << "static PyObject* toPython(const " << type->name() << "& cppobj);" << endl;
-        if (hasImplicitConversions)
-            s << INDENT << "static " << type->name() << " toCpp(PyObject* pyobj);" << endl;
     }
     s << "};" << endl;
 }
@@ -187,8 +175,8 @@ void HeaderGenerator::finishGeneration()
     QTextStream s_pts(&pythonTypeStuff);
     QString convertersDecl;
     QTextStream convDecl(&convertersDecl);
-    QString pyTypeFunctions;
-    QTextStream typeFunctions(&pyTypeFunctions);
+    QString sbkTypeFunctions;
+    QTextStream typeFunctions(&sbkTypeFunctions);
 
     Indentation indent(INDENT);
 
@@ -204,7 +192,7 @@ void HeaderGenerator::finishGeneration()
         s_pts << endl;
         writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
         convDecl << endl;
-        writePyTypeFunction(typeFunctions, cppEnum);
+        writeSbkTypeFunction(typeFunctions, cppEnum);
     }
 
     foreach (AbstractMetaClass* metaClass, classes()) {
@@ -227,11 +215,13 @@ void HeaderGenerator::finishGeneration()
             }
             s_pts << endl;
             convDecl << endl;
-            writePyTypeFunction(typeFunctions, cppEnum);
+            writeSbkTypeFunction(typeFunctions, cppEnum);
         }
 
         if (!metaClass->isNamespace()) {
-            writePyTypeFunction(typeFunctions, metaClass);
+            writeSbkTypeFunction(typeFunctions, metaClass);
+
+            writeSbkCopyCppObjectFunction(typeFunctions, metaClass);
 
             foreach (AbstractMetaClass* innerClass, metaClass->innerClasses()) {
                 if (shouldGenerate(innerClass)) {
@@ -313,7 +303,7 @@ void HeaderGenerator::finishGeneration()
         s << "namespace Shiboken" << endl << '{' << endl << endl;
 
         s << "// PyType functions, to get the PyObjectType for a type T\n";
-        s << pyTypeFunctions << endl;
+        s << sbkTypeFunctions << endl;
         s << "// Generated converters declarations ----------------------------------" << endl << endl;
         s << convertersDecl << endl;
 
@@ -348,7 +338,7 @@ void HeaderGenerator::writeExportMacros(QTextStream& s)
 \n";
 }
 
-void HeaderGenerator::writePyTypeFunction(QTextStream& s, const AbstractMetaEnum* cppEnum)
+void HeaderGenerator::writeSbkTypeFunction(QTextStream& s, const AbstractMetaEnum* cppEnum)
 {
     QString enumPrefix;
     if (cppEnum->enclosingClass())
@@ -363,8 +353,17 @@ void HeaderGenerator::writePyTypeFunction(QTextStream& s, const AbstractMetaEnum
     }
 }
 
-void HeaderGenerator::writePyTypeFunction(QTextStream& s, const AbstractMetaClass* cppClass)
+void HeaderGenerator::writeSbkTypeFunction(QTextStream& s, const AbstractMetaClass* cppClass)
 {
     s <<  "template<>\ninline PyTypeObject* SbkType<" << cppClass->qualifiedCppName() << " >() "
       <<  "{ return reinterpret_cast<PyTypeObject*>(&" << cpythonTypeName(cppClass) << "); }\n";
+}
+
+void HeaderGenerator::writeSbkCopyCppObjectFunction(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    if (!metaClass->typeEntry()->isValue() || !shouldGenerateCppWrapper(metaClass))
+        return;
+    s << "template<> " << metaClass->qualifiedCppName();
+    s << "* SbkCopyCppObject<" << metaClass->qualifiedCppName() << ">(const ";
+    s << metaClass->qualifiedCppName() << "& cppobj);" << endl;
 }

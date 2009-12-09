@@ -65,6 +65,8 @@ private:
 
     void writeTypeConverterImpl(QTextStream& s, const TypeEntry* type);
 
+    void writeSbkCopyCppObjectFunction(QTextStream& s, const AbstractMetaClass* metaClass);
+
     /**
      *   Writes Python to C++ conversions for arguments on Python wrappers.
      *   If implicit conversions, and thus new object allocation, are needed,

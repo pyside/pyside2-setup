@@ -100,9 +100,13 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     QString converterImpl;
     QTextStream convImpl(&converterImpl);
+    QString copyCppObjectImpl;
+    QTextStream copyImpl(&copyCppObjectImpl);
+
     if (!metaClass->isNamespace()) {
         Indentation indentation(INDENT);
         writeTypeConverterImpl(convImpl, metaClass->typeEntry());
+        writeSbkCopyCppObjectFunction(copyImpl, metaClass);
     }
 
     QString headerfile = fileNameForClass(metaClass);
@@ -262,6 +266,8 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     s << endl << "} // extern \"C\"" << endl << endl;
 
     s << "namespace Shiboken" << endl << '{' << endl;
+    s << "// Copy C++ object implementation" << endl;
+    s << copyCppObjectImpl;
     s << "// Converter implementations" << endl;
     s << converterImpl;
     s << "} // namespace Shiboken" << endl << endl;
@@ -2142,18 +2148,9 @@ void CppGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
         s << '}' << endl << endl;
     }
 
-    if (!type->isValue())
-        return;
-
-    // Write Converter<T>::toPython function
-    s << "PyObject* Converter<" << type->name() << " >::toPython(const ";
-    s << type->name() << "& cppobj)" << endl;
-    s << '{' << endl;
-    s << INDENT << "return Converter<" << type->name() << " >::createWrapper(new ";
-    s << type->name() << "(cppobj));" << endl;
-    s << '}' << endl << endl;
-
-    if (!hasImplicitConversions)
+    // A specialized Converter<T>::toCpp method is only need for
+    // value-types with implicit conversions.
+    if (!type->isValue() || !hasImplicitConversions)
         return;
 
     // Write Converter<T>::toCpp function
@@ -2188,13 +2185,19 @@ void CppGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
 
     s << INDENT << "return *" << cpythonWrapperCPtr(type, "pyobj") << ';' << endl;
     s << '}' << endl << endl;
+}
 
-    // Write Converter<T>::copyCppObject function
-    s << type->name() << "* Converter<" << type->name();
-    s << " >::copyCppObject(const " << type->name() << "& cppobj)" << endl;
+void CppGenerator::writeSbkCopyCppObjectFunction(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    if (!metaClass->typeEntry()->isValue() || !shouldGenerateCppWrapper(metaClass))
+        return;
+    s << "template<>" << endl;
+    s << metaClass->qualifiedCppName() << "* SbkCopyCppObject<";
+    s << metaClass->qualifiedCppName() << " >(const ";
+    s << metaClass->qualifiedCppName() << "& cppobj)" << endl;
     s << '{' << endl;
-    s << INDENT << "return new " << type->name() << "(cppobj);" << endl;
-    s << '}' << endl << endl;
+    s << INDENT << "return new " << wrapperName(metaClass) << "(cppobj);" << endl;
+    s << '}' << endl;
 }
 
 void CppGenerator::finishGeneration()
