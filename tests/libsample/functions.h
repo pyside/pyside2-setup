@@ -74,5 +74,11 @@ LIBSAMPLE_API GlobalOverloadFuncEnum overloadedFunc(double val);
 
 LIBSAMPLE_API unsigned int doubleUnsignedInt(unsigned int value);
 
+LIBSAMPLE_API int acceptInt(int x);
+LIBSAMPLE_API unsigned int acceptUInt(unsigned int x);
+LIBSAMPLE_API long acceptLong(long x);
+LIBSAMPLE_API unsigned long acceptULong(unsigned long x);
+LIBSAMPLE_API double acceptDouble(double x);
+
 #endif // FUNCTIONS_H
 

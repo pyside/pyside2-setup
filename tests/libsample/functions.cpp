@@ -141,3 +141,32 @@ doubleUnsignedInt(unsigned int value)
     return value * 2;
 }
 
+int
+acceptInt(int x)
+{
+    return x;
+}
+
+unsigned int
+acceptUInt(unsigned int x)
+{
+    return x;
+}
+
+long
+acceptLong(long x)
+{
+    return x;
+}
+
+unsigned long
+acceptULong(unsigned long x)
+{
+    return x;
+}
+
+double
+acceptDouble(double x)
+{
+    return x;
+}

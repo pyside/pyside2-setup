@@ -194,6 +194,15 @@ struct Converter<bool>
     }
 };
 
+/**
+ * Helper template for checking if a value of SourceT overflows when cast to TargetT
+ */
+template<typename SourceT, typename TargetT>
+inline bool overflowCheck(SourceT value)
+{
+    return value < std::numeric_limits<TargetT>::min() || value > std::numeric_limits<TargetT>::max();
+}
+
 template <typename PyIntEquiv>
 struct Converter_PyInt
 {
@@ -203,12 +212,19 @@ struct Converter_PyInt
     }
     static PyIntEquiv toCpp(PyObject* pyobj)
     {
+        double d_result;
         long result;
-        if (PyFloat_Check(pyobj))
-            result = (long) PyFloat_AS_DOUBLE(pyobj);
-        else
-            result = PyInt_AS_LONG(pyobj);
-        if (result < std::numeric_limits<PyIntEquiv>::min() || result > std::numeric_limits<PyIntEquiv>::max())
+        if (PyFloat_Check(pyobj)) {
+            d_result = PyFloat_AS_DOUBLE(pyobj);
+            // If cast to long directly it could overflow silently
+            if (overflowCheck<double, PyIntEquiv>(d_result))
+                PyErr_SetObject(PyExc_OverflowError, 0);
+            return (PyIntEquiv) d_result;
+        } else {
+            result = PyLong_AsLong(pyobj);
+        }
+
+        if (overflowCheck<long, PyIntEquiv>(result))
             PyErr_SetObject(PyExc_OverflowError, 0);
         return (PyIntEquiv) result;
     }
@@ -232,7 +248,18 @@ struct Converter<unsigned long>
     }
     static unsigned long toCpp(PyObject* pyobj)
     {
-        return PyLong_AsUnsignedLong(pyobj);
+        unsigned long result;
+        if (PyFloat_Check(pyobj)) {
+            // Need to check for negatives manually
+            double double_result = PyFloat_AS_DOUBLE(pyobj);
+            if (overflowCheck<double, unsigned long>(double_result))
+                PyErr_SetObject(PyExc_OverflowError, 0);
+            result = (unsigned long) double_result;
+        } else {
+            result = PyLong_AsUnsignedLong(pyobj);
+        }
+
+        return result;
     }
 };
 
@@ -271,9 +298,9 @@ struct Converter_PyFloat
     }
     static PyFloatEquiv toCpp(PyObject* pyobj)
     {
-        if (PyInt_Check(pyobj))
-            return (PyFloatEquiv) PyInt_AS_LONG(pyobj);
-        return (PyFloatEquiv) PyFloat_AS_DOUBLE(pyobj);
+        if (PyInt_Check(pyobj) || PyLong_Check(pyobj))
+            return (PyFloatEquiv) PyLong_AsLong(pyobj);
+        return (PyFloatEquiv) PyFloat_AsDouble(pyobj);
     }
 };
 

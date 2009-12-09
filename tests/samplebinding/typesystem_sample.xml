@@ -7,6 +7,7 @@
     <primitive-type name="signed int" />
     <primitive-type name="char"/>
     <primitive-type name="long"/>
+    <primitive-type name="unsigned long"/>
 
     <primitive-type name="Complex" target-lang-api-name="PyComplex">
         <conversion-rule file="complex_conversions.h"/>
