@@ -471,7 +471,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
             s << INDENT << "if (type != (PyTypeObject*)&" << className << ") {" << endl;
         {
             Indentation indentation(INDENT);
-            s << INDENT << "ShiboTypeObject* shibotype = reinterpret_cast<ShiboTypeObject*>(type);" << endl;
+            s << INDENT << "SbkBaseWrapperType* shibotype = reinterpret_cast<SbkBaseWrapperType*>(type);" << endl;
             s << INDENT << "shibotype->mi_init = " << className << ".mi_init;" << endl;
             s << INDENT << "shibotype->mi_offsets = " << className << ".mi_offsets;" << endl;
             s << INDENT << "shibotype->mi_specialcast = " << className << ".mi_specialcast;" << endl;
@@ -1286,7 +1286,7 @@ void CppGenerator::writeMultipleInheritanceInitializerFunction(QTextStream& s, c
 
 void CppGenerator::writeSpecialCastFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
-    s << "static void* " << cpythonSpecialCastFunctionName(metaClass) << "(PyObject* obj, ShiboTypeObject* desiredType)\n";
+    s << "static void* " << cpythonSpecialCastFunctionName(metaClass) << "(PyObject* obj, SbkBaseWrapperType* desiredType)\n";
     s << "{\n";
     s << INDENT << metaClass->qualifiedCppName() << "* me = " << cpythonWrapperCPtr(metaClass, "obj") << ";\n";
     AbstractMetaClassList bases = getBaseClasses(metaClass);
@@ -1395,7 +1395,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
 
     s << "// Class Definition -----------------------------------------------" << endl;
 
-    s << "Shiboken::ShiboTypeObject " << className + "_Type" << " = { {" << endl;
+    s << "Shiboken::SbkBaseWrapperType " << className + "_Type" << " = { {" << endl;
     s << INDENT << "PyObject_HEAD_INIT(&PyType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
     s << INDENT << "/*tp_name*/             \"" << cppClassName << "\"," << endl;

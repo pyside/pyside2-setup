@@ -88,8 +88,8 @@ void BindingManager::releaseWrapper(PyObject* wrapper)
 {
     void* cptr = SbkBaseWrapper_cptr(wrapper);
     m_d->releaseWrapper(cptr);
-    if (((ShiboTypeObject*) wrapper->ob_type)->mi_offsets) {
-        int* offset = ((ShiboTypeObject*) wrapper->ob_type)->mi_offsets;
+    if (((SbkBaseWrapperType*) wrapper->ob_type)->mi_offsets) {
+        int* offset = ((SbkBaseWrapperType*) wrapper->ob_type)->mi_offsets;
         while (*offset != -1) {
             if (*offset > 0)
                 m_d->releaseWrapper((void*) ((size_t) cptr + (*offset)));

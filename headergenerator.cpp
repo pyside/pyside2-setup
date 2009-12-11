@@ -132,7 +132,7 @@ void HeaderGenerator::writeTypeCheckMacro(QTextStream& s, const TypeEntry* type)
     QString checkFunction = cpythonCheckFunction(type);
     s << getApiExportMacro() << " PyAPI_DATA(";
     if (type->isObject() || type->isValue())
-        s << "Shiboken::ShiboTypeObject";
+        s << "Shiboken::SbkBaseWrapperType";
     else
         s << "PyTypeObject";
     s << ") " << pyTypeName << ';' << endl;

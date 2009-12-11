@@ -112,7 +112,7 @@ PyObject* SbkBaseWrapper_New(PyTypeObject* instanceType,
     if (!cptr)
         return 0;
 
-    ShiboTypeObject* const& instanceType_ = reinterpret_cast<ShiboTypeObject*>(instanceType);
+    SbkBaseWrapperType* const& instanceType_ = reinterpret_cast<SbkBaseWrapperType*>(instanceType);
     SbkBaseWrapper* self = (SbkBaseWrapper*)instanceType_->pytype.tp_alloc((PyTypeObject*) instanceType, 0);
 
     self->cptr = const_cast<void*>(cptr);

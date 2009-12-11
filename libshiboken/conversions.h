@@ -118,9 +118,9 @@ struct ConverterBase<T*> : ConverterBase<T>
     {
         if (pyobj == Py_None)
             return 0;
-        ShiboTypeObject* shiboType = reinterpret_cast<ShiboTypeObject*>(pyobj->ob_type);
+        SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(pyobj->ob_type);
         if (shiboType->mi_specialcast)
-            return (T*) shiboType->mi_specialcast(pyobj, reinterpret_cast<ShiboTypeObject*>(SbkType<T>()));
+            return (T*) shiboType->mi_specialcast(pyobj, reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()));
         return (T*) SbkBaseWrapper_cptr(pyobj);
     }
 };
