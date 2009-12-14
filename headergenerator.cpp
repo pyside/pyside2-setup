@@ -227,14 +227,14 @@ void HeaderGenerator::finishGeneration()
                 if (shouldGenerate(innerClass)) {
                     s_cin << innerClass->typeEntry()->include().toString() << endl;
                     s_pts << getApiExportMacro() << " PyAPI_FUNC(PyObject*) " << cpythonBaseName(innerClass->typeEntry());
-                    s_pts << "_New(PyTypeObject* type, PyObject* args, PyObject* kwds);" << endl;
+                    s_pts << "_New(Shiboken::SbkBaseWrapperType* type, PyObject* args, PyObject* kwds);" << endl;
                     writeTypeCheckMacro(s_pts, innerClass->typeEntry());
                     writeTypeConverterDecl(convDecl, innerClass->typeEntry());
                     convDecl << endl;
                 }
             }
             s_pts << getApiExportMacro() << " PyAPI_FUNC(PyObject*) " << cpythonBaseName(metaClass->typeEntry());
-            s_pts << "_New(PyTypeObject* type, PyObject* args, PyObject* kwds);" << endl;
+            s_pts << "_New(Shiboken::SbkBaseWrapperType* type, PyObject* args, PyObject* kwds);" << endl;
             writeTypeCheckMacro(s_pts, classType);
             s_pts << "#define Sbk" << metaClass->name() << "_cptr(pyobj) ((";
             s_pts << metaClass->name() << "*)SbkBaseWrapper_cptr(pyobj))" << endl << endl;

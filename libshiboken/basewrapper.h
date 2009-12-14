@@ -70,10 +70,13 @@ struct SbkBaseWrapperType;
 */
 typedef void* (*SpecialCastFunction)(PyObject*, SbkBaseWrapperType*);
 
+LIBSHIBOKEN_API PyAPI_DATA(PyTypeObject) SbkBaseWrapperType_Type;
+LIBSHIBOKEN_API PyAPI_DATA(SbkBaseWrapperType) SbkBaseWrapper_Type;
+
 /// PyTypeObject extended with C++ multiple inheritance information.
 struct LIBSHIBOKEN_API SbkBaseWrapperType
 {
-    PyTypeObject pytype;
+    PyHeapTypeObject super;
     int* mi_offsets;
     MultipleInheritanceInitFunction mi_init;
     /// Special cast function, null if this class doesn't have multiple inheritance.
@@ -95,6 +98,8 @@ struct LIBSHIBOKEN_API SbkBaseWrapper
     /// Information about the object parents and children, can be null.
     ShiboParentInfo* parentInfo;
 };
+
+LIBSHIBOKEN_API PyAPI_FUNC(void) init_shiboken();
 
 } // extern "C"
 
@@ -186,7 +191,7 @@ typedef struct {
 #endif
 
 LIBSHIBOKEN_API PyAPI_FUNC(PyObject*)
-SbkBaseWrapper_New(PyTypeObject* instanceType,
+SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
                    const void *cptr,
                    unsigned int hasOwnership = 1,
                    unsigned int containsCppWrapper = 0);
@@ -199,10 +204,10 @@ void SbkBaseWrapper_Dealloc(PyObject* self)
 {
     BindingManager::instance().releaseWrapper(self);
     if (SbkBaseWrapper_hasOwnership(self))
-        delete ((T*)SbkBaseWrapper_cptr(self));
+        delete (reinterpret_cast<T*>(SbkBaseWrapper_cptr(self)));
     if (SbkBaseWrapper_hasParentInfo(self))
         destroyParentInfo(reinterpret_cast<SbkBaseWrapper*>(self));
-    Py_TYPE(((SbkBaseWrapper*)self))->tp_free((PyObject*)self);
+    Py_TYPE(reinterpret_cast<SbkBaseWrapper*>(self))->tp_free(self);
 }
 
 LIBSHIBOKEN_API PyAPI_FUNC(void) SbkBaseWrapper_Dealloc_PrivateDtor(PyObject* self);

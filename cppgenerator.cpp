@@ -436,7 +436,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     QString className = cpythonTypeName(metaClass);
 
     s << "PyObject*" << endl;
-    s << cpythonFunctionName(rfunc) << "(PyTypeObject* type, PyObject* args, PyObject* kwds)" << endl;
+    s << cpythonFunctionName(rfunc) << "(Shiboken::SbkBaseWrapperType* type, PyObject* args, PyObject* kwds)" << endl;
     s << '{' << endl;
 
     s << INDENT << "PyObject* self;" << endl;
@@ -446,7 +446,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     s << "* cptr;" << endl << endl;
 
     if (metaClass->isAbstract()) {
-        s << INDENT << "if (type == (PyTypeObject*)&" << className << ") {" << endl;
+        s << INDENT << "if (type == &" << className << ") {" << endl;
         {
             Indentation indent(INDENT);
             s << INDENT << "PyErr_SetString(PyExc_NotImplementedError," << endl;
@@ -460,7 +460,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
         s << INDENT << '}' << endl << endl;
     }
 
-    s << INDENT << "if (!PyType_IsSubtype(type, (PyTypeObject*)&" << className << "))" << endl;
+    s << INDENT << "if (!PyType_IsSubtype((PyTypeObject*)type, (PyTypeObject*)&" << className << "))" << endl;
     {
         Indentation indentation(INDENT);
         s << INDENT << "return 0;" << endl << endl;
@@ -468,13 +468,12 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
 
     if (metaClass->baseClassNames().size() > 1) {
         if (!metaClass->isAbstract())
-            s << INDENT << "if (type != (PyTypeObject*)&" << className << ") {" << endl;
+            s << INDENT << "if (type != &" << className << ") {" << endl;
         {
             Indentation indentation(INDENT);
-            s << INDENT << "SbkBaseWrapperType* shibotype = reinterpret_cast<SbkBaseWrapperType*>(type);" << endl;
-            s << INDENT << "shibotype->mi_init = " << className << ".mi_init;" << endl;
-            s << INDENT << "shibotype->mi_offsets = " << className << ".mi_offsets;" << endl;
-            s << INDENT << "shibotype->mi_specialcast = " << className << ".mi_specialcast;" << endl;
+            s << INDENT << "type->mi_init = " << className << ".mi_init;" << endl;
+            s << INDENT << "type->mi_offsets = " << className << ".mi_offsets;" << endl;
+            s << INDENT << "type->mi_specialcast = " << className << ".mi_specialcast;" << endl;
         }
         if (!metaClass->isAbstract())
             s << INDENT << '}' << endl << endl;
@@ -1327,10 +1326,10 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     QString tp_as_number('0');
     QString tp_as_sequence('0');
     QString mi_init('0');
-    QString mi_specialCast('0');
+    QString mi_specialcast('0');
     QString cppClassName = metaClass->qualifiedCppName();
     QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
-    QString baseClassName;
+    QString baseClassName("(PyTypeObject*)&");
 
     if (metaClass->hasArithmeticOperatorOverload()
         || metaClass->hasLogicalOperatorOverload()
@@ -1343,9 +1342,9 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         tp_as_sequence = QString("&Py%1_as_sequence").arg(cppClassName);
 
     if (metaClass->baseClass())
-        baseClassName = QString("(PyTypeObject*)&%1").arg(cpythonTypeName(metaClass->baseClass()->typeEntry()));
+        baseClassName.append(cpythonTypeName(metaClass->baseClass()->typeEntry()));
     else
-        baseClassName = QString("0");
+        baseClassName.append("Shiboken::SbkBaseWrapper_Type");
 
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
         tp_flags = "Py_TPFLAGS_HAVE_CLASS";
@@ -1353,7 +1352,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
                      "(destructor)Shiboken::SbkBaseWrapper_Dealloc_PrivateDtor" : "0";
         tp_new = "0";
     } else {
-        tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES";
+        tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES";//|Py_TPFLAGS_HAVE_GC";
 
         QString deallocClassName;
         if (shouldGenerateCppWrapper(metaClass))
@@ -1363,7 +1362,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         tp_dealloc = QString("(destructor)&(Shiboken::SbkBaseWrapper_Dealloc< %1 >)").arg(deallocClassName);
 
         AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
-        tp_new = ctors.isEmpty() ? "0" : className + "_New";
+        tp_new = ctors.isEmpty() ? "0" : QString("(newfunc)%1_New").arg(className);
     }
 
     QString tp_richcompare = QString('0');
@@ -1388,15 +1387,15 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
             s << "extern int* " << multipleInheritanceInitializerFunctionName(miClass);
             s << "(const void* cptr);" << endl;
         }
-        mi_specialCast = '&'+cpythonSpecialCastFunctionName(metaClass);
+        mi_specialcast = '&'+cpythonSpecialCastFunctionName(metaClass);
         writeSpecialCastFunction(s, metaClass);
         s << endl;
     }
 
     s << "// Class Definition -----------------------------------------------" << endl;
 
-    s << "Shiboken::SbkBaseWrapperType " << className + "_Type" << " = { {" << endl;
-    s << INDENT << "PyObject_HEAD_INIT(&PyType_Type)" << endl;
+    s << "Shiboken::SbkBaseWrapperType " << className + "_Type" << " = { { {" << endl;
+    s << INDENT << "PyObject_HEAD_INIT(&Shiboken::SbkBaseWrapperType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
     s << INDENT << "/*tp_name*/             \"" << cppClassName << "\"," << endl;
     s << INDENT << "/*tp_basicsize*/        sizeof(Shiboken::SbkBaseWrapper)," << endl;
@@ -1433,19 +1432,19 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_descr_set*/        0," << endl;
     s << INDENT << "/*tp_dictoffset*/       0," << endl;
     s << INDENT << "/*tp_init*/             0," << endl;
-    s << INDENT << "/*tp_alloc*/            PyType_GenericAlloc," << endl;
+    s << INDENT << "/*tp_alloc*/            0," << endl;
     s << INDENT << "/*tp_new*/              " << tp_new << ',' << endl;
-    s << INDENT << "/*tp_free*/             PyObject_Del," << endl;
+    s << INDENT << "/*tp_free*/             0," << endl;
     s << INDENT << "/*tp_is_gc*/            0," << endl;
     s << INDENT << "/*tp_bases*/            0," << endl;
     s << INDENT << "/*tp_mro*/              0," << endl;
     s << INDENT << "/*tp_cache*/            0," << endl;
     s << INDENT << "/*tp_subclasses*/       0," << endl;
     s << INDENT << "/*tp_weaklist*/         0" << endl;
-    s << "}," << endl;
+    s << "}, }," << endl;
     s << INDENT << "/*mi_offsets*/          0," << endl;
     s << INDENT << "/*mi_init*/             " << mi_init << ',' << endl;
-    s << INDENT << "/*mi_specialCast*/      " << mi_specialCast << endl;
+    s << INDENT << "/*mi_specialcast*/      " << mi_specialcast << endl;
     s << "};" << endl;
 }
 
@@ -1747,7 +1746,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
     if (cppEnum->enclosingClass()) {
         addFunction = QString("PyDict_SetItemString(Sbk")
                       + cppEnum->enclosingClass()->name()
-                      + "_Type.pytype.tp_dict,";
+                      + "_Type.super.ht_type.tp_dict,";
     } else {
         addFunction = "PyModule_AddObject(module,";
     }
@@ -1806,7 +1805,7 @@ void CppGenerator::writeFlagsNewMethod(QTextStream& s, const FlagsTypeEntry* cpp
 {
     QString cpythonName = cpythonFlagsName(cppFlags);
     s << "static PyObject*" << endl;
-    s << cpythonName << "_New(PyTypeObject *type, PyObject *args, PyObject *kwds)" << endl;
+    s << cpythonName << "_New(PyTypeObject* type, PyObject* args, PyObject* kwds)" << endl;
     s << '{' << endl;
     s << INDENT << "if (!PyType_IsSubtype(type, &" << cpythonName << "_Type))" << endl;
     s << INDENT << INDENT << "return 0;" << endl << endl;
@@ -2073,7 +2072,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
 {
     QString pyTypeName = cpythonTypeName(metaClass);
     s << "PyAPI_FUNC(void)" << endl;
-    s << "init_" << metaClass->name().toLower() << "(PyObject *module)" << endl;
+    s << "init_" << metaClass->name().toLower() << "(PyObject* module)" << endl;
     s << '{' << endl;
 
     // class inject-code target/beginning
@@ -2084,7 +2083,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
 
     // Multiple inheritance
     if (metaClass->baseClassNames().size() > 1) {
-        s << INDENT << pyTypeName << ".pytype.tp_bases = PyTuple_Pack(";
+        s << INDENT << pyTypeName << ".super.ht_type.tp_bases = PyTuple_Pack(";
         s << metaClass->baseClassNames().size();
         s << ',' << endl;
         QStringList bases;
@@ -2340,6 +2339,7 @@ void CppGenerator::finishGeneration()
             s << INDENT << "}" << endl << endl;
         }
 
+        s << INDENT << "Shiboken::init_shiboken();" << endl;
         s << INDENT << "PyObject* module = Py_InitModule(\""  << moduleName() << "\", ";
         s << moduleName() << "_methods);" << endl << endl;
 
@@ -2363,9 +2363,14 @@ void CppGenerator::finishGeneration()
             s << endl;
         }
 
-        s << INDENT << "if (PyErr_Occurred())" << endl;
-        s << INDENT << INDENT << "Py_FatalError(\"can't initialize module ";
-        s << moduleName() << "\");" << endl << '}' << endl << endl;
+        s << INDENT << "if (PyErr_Occurred()) {" << endl;
+        {
+            Indentation indentation(INDENT);
+            s << INDENT << "PyErr_Print();" << endl;
+            s << INDENT << "Py_FatalError(\"can't initialize module " << moduleName() << "\");" << endl;
+        }
+        s << INDENT << '}' << endl;
+        s << '}' << endl << endl;
         s << "} // extern \"C\"" << endl << endl;
 
         // module inject-code native/end

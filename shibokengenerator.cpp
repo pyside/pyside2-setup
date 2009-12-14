@@ -879,7 +879,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
         if (context) {
             // replace template variable for the Python Type object for the
             // class context in which the variable is used
-            code.replace("%PYTHONTYPEOBJECT", cpythonTypeName(context) + ".pytype");
+            code.replace("%PYTHONTYPEOBJECT", cpythonTypeName(context) + ".super.ht_type");
         }
 
         // replace "toPython "converters
@@ -956,7 +956,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 // replace template variable for the Python Type object for the
                 // class implementing the method in which the code snip is written
                 if (func->isStatic()) {
-                    code.replace("%PYTHONTYPEOBJECT", cpythonTypeName(func->implementingClass()) + ".pytype");
+                    code.replace("%PYTHONTYPEOBJECT", cpythonTypeName(func->implementingClass()) + ".super.ht_type");
                 } else {
                     code.replace("%PYTHONTYPEOBJECT.", QString("%1->ob_type->").arg(pySelf));
                     code.replace("%PYTHONTYPEOBJECT", QString("%1->ob_type").arg(pySelf));

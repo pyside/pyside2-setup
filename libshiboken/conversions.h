@@ -79,7 +79,7 @@ struct ConverterBase
 {
     static PyObject* createWrapper(const T* cppobj)
     {
-        return Shiboken::SbkBaseWrapper_New(SbkType<T>(), cppobj);
+        return Shiboken::SbkBaseWrapper_New(reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()), cppobj);
     }
     static bool isConvertible(PyObject* pyobj) { return pyobj == Py_None; }
 
