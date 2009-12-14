@@ -1063,13 +1063,14 @@ public:
     */
     CodeSnipList injectedCodeSnips(CodeSnip::Position position = CodeSnip::Any,
                                    TypeSystem::Language language = TypeSystem::All) const;
+
     /**
     *   Verifies if any modification to the function alters/removes its
     *   arguments types or default values.
     *   \return true if there is some modification to function signature
     */
     bool hasSignatureModifications() const;
-    FunctionModificationList modifications(const AbstractMetaClass *implementor) const;
+    FunctionModificationList modifications(const AbstractMetaClass* implementor = 0) const;
 
     // If this function stems from an interface, this returns the
     // interface that declares it.

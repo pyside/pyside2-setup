@@ -300,6 +300,8 @@ bool AbstractMetaBuilder::build(QIODevice* input)
             return false;
     }
 
+    TypeDatabase* types = TypeDatabase::instance();
+
     QByteArray contents = input->readAll();
     input->close();
 
@@ -318,7 +320,6 @@ bool AbstractMetaBuilder::build(QIODevice* input)
     QHash<QString, ClassModelItem> typeMap = m_dom->classMap();
 
     // fix up QObject's in the type system..
-    TypeDatabase *types = TypeDatabase::instance();
     fixQObjectForScope(types, model_dynamic_cast<NamespaceModelItem>(m_dom));
 
     // Start the generation...
@@ -496,6 +497,14 @@ bool AbstractMetaBuilder::build(QIODevice* input)
             m_globalFunctions << metaFunc;
         }
     }
+
+    // Functions added to the module on the type system.
+    foreach (AddedFunction addedFunc, types->addedFunctions()) {
+        AbstractMetaFunction* metaFunc = traverseFunction(addedFunc);
+        metaFunc->setFunctionType(AbstractMetaFunction::NormalFunction);
+        m_globalFunctions << metaFunc;
+    }
+
     std::puts("");
     return true;
 }
@@ -2641,7 +2650,6 @@ AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const Abstra
 
     return result;
 }
-
 
 AbstractMetaArgumentList AbstractMetaBuilder::reverseList(const AbstractMetaArgumentList& list)
 {

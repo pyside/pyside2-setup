@@ -675,12 +675,22 @@ QString AbstractMetaFunction::minimalSignature() const
     return minimalSignature;
 }
 
-FunctionModificationList AbstractMetaFunction::modifications(const AbstractMetaClass *implementor) const
+FunctionModificationList AbstractMetaFunction::modifications(const AbstractMetaClass* implementor) const
 {
-    // FIXME Global functions do not support modifications
     if (!implementor)
-        return FunctionModificationList();
-    return implementor->typeEntry()->functionModifications(minimalSignature());
+        implementor = ownerClass();
+
+    if (!implementor)
+        return TypeDatabase::instance()->functionModifications(minimalSignature());
+
+    FunctionModificationList mods;
+    while (implementor) {
+        mods += implementor->typeEntry()->functionModifications(minimalSignature());
+        if (implementor == implementor->baseClass())
+            break;
+        implementor = implementor->baseClass();
+    }
+    return mods;
 }
 
 bool AbstractMetaFunction::hasModifications(const AbstractMetaClass *implementor) const
@@ -714,7 +724,7 @@ CodeSnipList AbstractMetaFunction::injectedCodeSnips(CodeSnip::Position position
 
 bool AbstractMetaFunction::hasSignatureModifications() const
 {
-    foreach (const FunctionModification mod, modifications(ownerClass())) {
+    foreach (const FunctionModification mod, modifications()) {
         foreach (const ArgumentModification argmod, mod.argument_mods) {
             // since zero represents the return type and we're
             // interested only in checking the function arguments,

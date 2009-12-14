@@ -1876,6 +1876,26 @@ public:
         m_templates[t->name()] = t;
     }
 
+    AddedFunctionList addedFunctions() const
+    {
+        return m_addedFunctions;
+    }
+    void setAddedFunctions(const AddedFunctionList& addedFunctions)
+    {
+        m_addedFunctions = addedFunctions;
+    }
+    AddedFunctionList findAddedFunctions(const QString& name) const;
+
+    void setFunctionModifications(const FunctionModificationList& functionModifications)
+    {
+        m_functionMods = functionModifications;
+    }
+    void addFunctionModification(const FunctionModification& functionModification)
+    {
+        m_functionMods << functionModification;
+    }
+    FunctionModificationList functionModifications(const QString& signature) const;
+
     void setSuppressWarnings(bool on)
     {
         m_suppressWarnings = on;
@@ -1931,6 +1951,9 @@ private:
     SingleTypeEntryHash m_flagsEntries;
     TemplateEntryHash m_templates;
     QStringList m_suppressedWarnings;
+
+    AddedFunctionList m_addedFunctions;
+    FunctionModificationList m_functionMods;
 
     QStringList m_requiredTargetImports;
 

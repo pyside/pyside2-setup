@@ -229,6 +229,38 @@ void TestAddFunction::testAddFunctionWithDefaultArgs()
     QCOMPARE(arg->defaultValueExpression(), QString("2"));
 }
 
+void TestAddFunction::testAddFunctionAtModuleLevel()
+{
+    const char cppCode[] = "struct A { };";
+    const char xmlCode[] = "\
+    <typesystem package=\"Foo\">\
+        <primitive-type name='int'/> \
+        <value-type name='A'/>\
+        <add-function signature='func(int, int)'>\
+            <inject-code class='target' position='beginning'>custom_code();</inject-code>\
+        </add-function>\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, false);
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* classA = classes.findClass("A");
+    QVERIFY(classA);
+
+    TypeDatabase* typeDb = TypeDatabase::instance();
+
+    AddedFunctionList addedFuncs = typeDb->findAddedFunctions("func");
+
+    QCOMPARE(addedFuncs.size(), 1);
+
+    FunctionModificationList mods = typeDb->functionModifications("func(int,int)");
+
+    QCOMPARE(mods.size(), 1);
+    QVERIFY(mods.first().isCodeInjection());
+    CodeSnip snip = mods.first().snips.first();
+    QCOMPARE(snip.code(), QString("custom_code();"));
+}
+
 QTEST_APPLESS_MAIN(TestAddFunction)
 
 #include "testaddfunction.moc"
+

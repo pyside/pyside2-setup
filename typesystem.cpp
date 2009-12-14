@@ -259,6 +259,11 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
         return true;
 
     switch (m_current->type) {
+    case StackElement::Root: {
+        TypeDatabase::instance()->setAddedFunctions(m_addedFunctions);
+        TypeDatabase::instance()->setFunctionModifications(m_functionMods);
+    }
+    break;
     case StackElement::ObjectTypeEntry:
     case StackElement::ValueTypeEntry:
     case StackElement::InterfaceTypeEntry:
@@ -803,6 +808,7 @@ bool Handler::startElement(const QString &, const QString &n,
                         || element->type == StackElement::LoadTypesystem
                         || element->type == StackElement::InjectCode
                         || element->type == StackElement::ConversionRule
+                        || element->type == StackElement::AddFunction
                         || element->type == StackElement::Template;
 
         if (!topLevel && m_current->type == StackElement::Root) {
@@ -1280,8 +1286,8 @@ bool Handler::startElement(const QString &, const QString &n,
         }
         break;
         case StackElement::AddFunction: {
-            if (!(topElement.type & StackElement::ComplexTypeEntryMask)) {
-                m_error = QString::fromLatin1("Add function requires complex type as parent"
+            if (!(topElement.type & (StackElement::ComplexTypeEntryMask | StackElement::Root))) {
+                m_error = QString::fromLatin1("Add function requires a complex type or a root tag as parent"
                                               ", was=%1").arg(topElement.type, 0, 16);
                 return false;
             }
@@ -1972,9 +1978,32 @@ FlagsTypeEntry *TypeDatabase::findFlagsType(const QString &name) const
     return fte ? fte : (FlagsTypeEntry *) m_flagsEntries.value(name);
 }
 
+AddedFunctionList TypeDatabase::findAddedFunctions(const QString& name) const
+{
+    AddedFunctionList addedFunctions;
+    foreach (AddedFunction func, m_addedFunctions) {
+        if (func.name() == name)
+            addedFunctions.append(func);
+    }
+    return addedFunctions;
+}
+
+
 QString TypeDatabase::globalNamespaceClassName(const TypeEntry * /*entry*/)
 {
     return QLatin1String("Global");
+}
+
+FunctionModificationList TypeDatabase::functionModifications(const QString& signature) const
+{
+    FunctionModificationList lst;
+    for (int i = 0; i < m_functionMods.count(); ++i) {
+        const FunctionModification& mod = m_functionMods.at(i);
+        if (mod.signature == signature)
+            lst << mod;
+    }
+
+    return lst;
 }
 
 
