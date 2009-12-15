@@ -725,6 +725,8 @@ CodeSnipList AbstractMetaFunction::injectedCodeSnips(CodeSnip::Position position
 bool AbstractMetaFunction::hasSignatureModifications() const
 {
     foreach (const FunctionModification mod, modifications()) {
+        if (mod.isRenameModifier())
+            return true;
         foreach (const ArgumentModification argmod, mod.argument_mods) {
             // since zero represents the return type and we're
             // interested only in checking the function arguments,
