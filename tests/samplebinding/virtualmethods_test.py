@@ -29,7 +29,7 @@
 import sys
 import unittest
 
-from sample import VirtualMethods, VirtualDaughter, Point
+from sample import VirtualMethods, VirtualDaughter, Point, Str
 
 class ExtendedVirtualMethods(VirtualMethods):
     def __init__(self):
@@ -61,6 +61,12 @@ class ExtendedExtendedVirtualDaughter(ExtendedVirtualDaughter):
 class VirtualMethodsTest(unittest.TestCase):
     '''Test case for virtual methods'''
 
+    def setUp(self):
+        self.prefix_from_codeinjection = Str('Pimped')
+
+    def tearDown(self):
+        del self.prefix_from_codeinjection
+
     def testReimplementedVirtualMethod0(self):
         '''Test Python override of a virtual method with various different parameters is correctly called from C++.'''
         vm = VirtualMethods()
@@ -84,7 +90,7 @@ class VirtualMethodsTest(unittest.TestCase):
 
         name = evd.callName()
         self.assert_(evd.grand_daughter_name_called)
-        self.assertEqual(evd.name(), name)
+        self.assertEqual(evd.name().prepend(self.prefix_from_codeinjection), name)
 
     def testReimplementedVirtualMethodInheritedFromGrandGrandParent(self):
         '''Test Python override of a virtual method inherited from a grand grand parent.'''
@@ -99,7 +105,7 @@ class VirtualMethodsTest(unittest.TestCase):
         name = eevd.callName()
         self.assert_(eevd.grand_daughter_name_called)
         self.assert_(eevd.grand_grand_daughter_name_called)
-        self.assertEqual(eevd.name(), name)
+        self.assertEqual(eevd.name().prepend(self.prefix_from_codeinjection), name)
 
 
 if __name__ == '__main__':
