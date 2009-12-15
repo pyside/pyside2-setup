@@ -114,13 +114,6 @@ public:
                         const AbstractMetaClass* context = 0);
 
     /**
-     *   Returns a function's code snippets.
-     *   \param func the function from which retrieve the code snippets
-     *   \return a list containing the function code snippets
-     */
-    CodeSnipList getCodeSnips(const AbstractMetaFunction* func);
-
-    /**
      *   Verifies if any of the function's code injections of the "target"
      *   type needs the type system variable "%CPPSELF".
      *   \param func the function to check
@@ -285,7 +278,6 @@ protected:
 
     static QString retvalVariableName() { return QString("py_result"); }
 
-    static FunctionModificationList functionModifications(const AbstractMetaFunction* func);
     AbstractMetaFunctionList queryFunctions(const AbstractMetaClass* metaClass, bool allFunction = false);
     void writeFunctionCall(QTextStream& s,
                            const AbstractMetaFunction* metaFunc,

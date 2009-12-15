@@ -146,19 +146,6 @@ void ShibokenGenerator::initPrimitiveTypesCorrespondences()
     m_formatUnits.insert("float", "f");
 }
 
-FunctionModificationList ShibokenGenerator::functionModifications(const AbstractMetaFunction* func)
-{
-    FunctionModificationList mods;
-    const AbstractMetaClass *cls = func->ownerClass();
-    while (cls) {
-        mods += func->modifications(cls);
-        if (cls == cls->baseClass())
-            break;
-        cls = cls->baseClass();
-    }
-    return mods;
-}
-
 QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType* cType,
                                                          const AbstractMetaClass* context) const
 {
@@ -691,7 +678,7 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunction *func,
 
 bool ShibokenGenerator::hasInjectedCodeOrSignatureModification(const AbstractMetaFunction* func)
 {
-    foreach (FunctionModification mod, functionModifications(func)) {
+    foreach (FunctionModification mod, func->modifications()) {
         if (mod.isCodeInjection() || mod.isRenameModifier())
             return true;
     }
@@ -819,24 +806,6 @@ AbstractMetaFunctionList ShibokenGenerator::filterFunctions(const AbstractMetaCl
 
     return lst;
     //return metaClass->functions();
-}
-
-CodeSnipList ShibokenGenerator::getCodeSnips(const AbstractMetaFunction *func)
-{
-    CodeSnipList result;
-    const AbstractMetaClass* metaClass = func->implementingClass();
-    while (metaClass) {
-        foreach (FunctionModification mod, func->modifications(metaClass)) {
-            if (mod.isCodeInjection())
-                result << mod.snips;
-        }
-
-        if (metaClass == metaClass->baseClass())
-            break;
-        metaClass = metaClass->baseClass();
-    }
-
-    return result;
 }
 
 void ShibokenGenerator::writeCodeSnips(QTextStream& s,

@@ -287,9 +287,9 @@ void CppGenerator::writeConstructorNative(QTextStream& s, const AbstractMetaFunc
     s << " : ";
     writeFunctionCall(s, func);
     s << " {" << endl;
-    writeCodeSnips(s, getCodeSnips(func), CodeSnip::Beginning, TypeSystem::NativeCode, func);
+    writeCodeSnips(s, func->injectedCodeSnips(), CodeSnip::Beginning, TypeSystem::NativeCode, func);
     s << INDENT << "// ... middle" << endl;
-    writeCodeSnips(s, getCodeSnips(func), CodeSnip::End, TypeSystem::NativeCode, func);
+    writeCodeSnips(s, func->injectedCodeSnips(), CodeSnip::End, TypeSystem::NativeCode, func);
     s << '}' << endl << endl;
 }
 
@@ -383,7 +383,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
     CodeSnipList snips;
     if (func->hasInjectedCode()) {
-        snips = getCodeSnips(func);
+        snips = func->injectedCodeSnips();
 
         if (injectedCodeUsesPySelf(func))
             s << INDENT << "PyObject* pySelf = BindingManager::instance().retrieveWrapper(this);" << endl;
@@ -401,7 +401,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         s << INDENT << "PyGILState_Release(gil_state);" << endl << endl;
     }
 
-    foreach (FunctionModification func_mod, functionModifications(func)) {
+    foreach (FunctionModification func_mod, func->modifications()) {
         foreach (ArgumentModification arg_mod, func_mod.argument_mods) {
             if (!arg_mod.resetAfterUse)
                 continue;
@@ -986,7 +986,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
     CodeSnipList snips;
     if (func->hasInjectedCode()) {
-        snips = getCodeSnips(func);
+        snips = func->injectedCodeSnips();
         if (injectedCodeUsesCppSelf(func)) {
             s << INDENT;
 #ifdef AVOID_PROTECTED_HACK
@@ -1184,7 +1184,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
     // Ownership transference between C++ and Python.
     QList<ArgumentModification> ownership_mods;
-    foreach (FunctionModification func_mod, functionModifications(func)) {
+    foreach (FunctionModification func_mod, func->modifications()) {
         foreach (ArgumentModification arg_mod, func_mod.argument_mods) {
             if (!arg_mod.ownerships.isEmpty() && arg_mod.ownerships.contains(TypeSystem::TargetLangCode))
                 ownership_mods.append(arg_mod);
@@ -2227,7 +2227,7 @@ void CppGenerator::finishGeneration()
             // type system files.
             QString incFile = func->includeFile();
             QRegExp regex("\\b(?:lib)?" + moduleName() + "\\b");
-            if (regex.indexIn(incFile) == -1)
+            if (!func->isUserAdded() && regex.indexIn(incFile) == -1)
                 continue;
 
             if (!func->isModifiedRemoved())
@@ -2237,7 +2237,9 @@ void CppGenerator::finishGeneration()
         if (overloads.isEmpty())
             continue;
 
-        includes << overloads.first()->includeFile();
+        QString includeFile = overloads.first()->includeFile();
+        if (!includeFile.isEmpty())
+            includes << includeFile;
 
         writeMethodWrapper(s_globalFunctionImpl, overloads);
         writeMethodDefinition(s_globalFunctionDef, overloads);
