@@ -200,7 +200,8 @@ bool Generator::hasDefaultConstructor(const AbstractMetaType *type)
 void Generator::replaceTemplateVariables(QString &code, const AbstractMetaFunction *func)
 {
     const AbstractMetaClass *cpp_class = func->ownerClass();
-    code.replace("%TYPE", cpp_class->name());
+    if (cpp_class)
+        code.replace("%TYPE", cpp_class->name());
 
     foreach (AbstractMetaArgument *arg, func->arguments())
         code.replace("%" + QString::number(arg->argumentIndex() + 1), arg->argumentName());
