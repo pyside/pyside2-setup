@@ -256,6 +256,8 @@ public:
 
     /// Returns true if the user enabled the so called "parent constructor heuristic".
     bool useCtorHeuristic() const;
+    /// Returns true if the user enabled PySide extensions.
+    bool usePySideExtensions() const;
 protected:
     bool doSetup(const QMap<QString, QString>& args);
 
@@ -285,6 +287,7 @@ protected:
     AbstractMetaFunctionList queryGlobalOperators(const AbstractMetaClass* metaClass);
 private:
     bool m_useCtorHeuristic;
+    bool m_usePySideExtensions;
 };
 
 

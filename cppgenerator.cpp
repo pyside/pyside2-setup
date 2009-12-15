@@ -90,6 +90,8 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     // headers
     s << "// default includes" << endl;
     s << "#include <shiboken.h>" << endl;
+    if (usePySideExtensions())
+        s << "#include <typeresolver.h>\n";
 
     // The multiple inheritance initialization function
     // needs the 'set' class from C++ STL.
@@ -2110,6 +2112,13 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
         s << endl;
         writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::End, TypeSystem::TargetLangCode, 0, 0, metaClass);
+    }
+
+    if (usePySideExtensions() && !metaClass->isNamespace()) {
+        QString type = metaClass->typeEntry()->isValue() ? "Value" : "Object";
+        QString typeName = metaClass->qualifiedCppName();
+        s << INDENT << "PySide::TypeResolver::create" << type << "TypeResolver<" << typeName << " >";
+        s << "(\"" << typeName << "\");\n";
     }
 
     s << '}' << endl << endl;

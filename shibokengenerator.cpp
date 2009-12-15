@@ -30,6 +30,7 @@
 
 #define NULL_VALUE "NULL"
 #define PARENT_CTOR_HEURISTIC "enable-parent-ctor-heuristic"
+#define ENABLE_PYSIDE_EXTENSIONS "enable-pyside-extensions"
 
 static Indentor INDENT;
 //static void dumpFunction(AbstractMetaFunctionList lst);
@@ -1192,17 +1193,24 @@ QMap<QString, QString> ShibokenGenerator::options() const
 {
     QMap<QString, QString> opts(Generator::options());
     opts.insert(PARENT_CTOR_HEURISTIC, "Enable heuristics to detect parent relationship on constructors.");
+    opts.insert(ENABLE_PYSIDE_EXTENSIONS, "Enable PySide extensions, such as support for signal/slots, use this if you are creating a binding for a Qt-based library.");
     return opts;
 }
 
 bool ShibokenGenerator::doSetup(const QMap<QString, QString>& args)
 {
     m_useCtorHeuristic = args.contains(PARENT_CTOR_HEURISTIC);
+    m_usePySideExtensions = args.contains(ENABLE_PYSIDE_EXTENSIONS);
     return true;
 }
 
 bool ShibokenGenerator::useCtorHeuristic() const
 {
     return m_useCtorHeuristic;
+}
+
+bool ShibokenGenerator::usePySideExtensions() const
+{
+    return m_usePySideExtensions;
 }
 
