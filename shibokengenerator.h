@@ -167,8 +167,6 @@ public:
                               Options options = NoOption,
                               int arg_count = -1) const;
 
-    bool hasInjectedCodeOrSignatureModification(const AbstractMetaFunction* func);
-
     /// Returns true if there are cases of multiple inheritance in any of its ancestors.
     bool hasMultipleInheritanceInAncestry(const AbstractMetaClass* metaClass);
 

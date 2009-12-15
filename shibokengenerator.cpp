@@ -676,15 +676,6 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunction *func,
     return result;
 }
 
-bool ShibokenGenerator::hasInjectedCodeOrSignatureModification(const AbstractMetaFunction* func)
-{
-    foreach (FunctionModification mod, func->modifications()) {
-        if (mod.isCodeInjection() || mod.isRenameModifier())
-            return true;
-    }
-    return false;
-}
-
 void ShibokenGenerator::writeArgumentNames(QTextStream &s,
                                            const AbstractMetaFunction *func,
                                            Options options) const
