@@ -1293,7 +1293,7 @@ bool Handler::startElement(const QString &, const QString &n,
             }
             QString signature = attributes["signature"];
 
-            signature = QMetaObject::normalizedSignature(signature.toLocal8Bit().constData());
+            signature = TypeDatabase::normalizedSignature(signature.toLocal8Bit().constData());
             if (signature.isEmpty()) {
                 m_error = "No signature for the added function";
                 return false;
@@ -1331,7 +1331,7 @@ bool Handler::startElement(const QString &, const QString &n,
             }
             QString signature = attributes["signature"];
 
-            signature = QMetaObject::normalizedSignature(signature.toLocal8Bit().constData());
+            signature = TypeDatabase::normalizedSignature(signature.toLocal8Bit().constData());
             if (signature.isEmpty()) {
                 m_error = "No signature for modified function";
                 return false;
@@ -1668,6 +1668,24 @@ TypeDatabase *TypeDatabase::instance(bool newInstance)
         db = new TypeDatabase;
     }
     return db;
+}
+
+QString TypeDatabase::normalizedSignature(const char* signature)
+{
+    QString normalized = QMetaObject::normalizedSignature(signature);
+
+    if (!instance() || !QString(signature).contains("unsigned"))
+        return normalized;
+
+    QStringList types;
+    types << "char" << "short" << "int" << "long";
+    foreach (const QString& type, types) {
+        if (instance()->findType(QString("u%1").arg(type)))
+            continue;
+        normalized.replace(QRegExp(QString("\\bu%1\\b").arg(type)), QString("unsigned %1").arg(type));
+    }
+
+    return normalized;
 }
 
 TypeDatabase::TypeDatabase() : m_suppressWarnings(true)

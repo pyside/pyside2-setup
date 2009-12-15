@@ -305,7 +305,7 @@ QStringList AbstractMetaFunction::introspectionCompatibleSignatures(const QStrin
 {
     AbstractMetaArgumentList arguments = this->arguments();
     if (arguments.size() == resolvedArguments.size()) {
-        return (QStringList() << QMetaObject::normalizedSignature((name() + "(" + resolvedArguments.join(",") + ")").toUtf8().constData()));
+        return (QStringList() << TypeDatabase::normalizedSignature((name() + "(" + resolvedArguments.join(",") + ")").toUtf8().constData()));
     } else {
         QStringList returned;
 
@@ -669,7 +669,7 @@ QString AbstractMetaFunction::minimalSignature() const
     if (isConstant())
         minimalSignature += "const";
 
-    minimalSignature = QMetaObject::normalizedSignature(minimalSignature.toLocal8Bit().constData());
+    minimalSignature = TypeDatabase::normalizedSignature(minimalSignature.toLocal8Bit().constData());
     m_cachedMinimalSignature = minimalSignature;
 
     return minimalSignature;

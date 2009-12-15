@@ -1754,6 +1754,8 @@ public:
     */
     static TypeDatabase *instance(bool newInstance = false);
 
+    static QString normalizedSignature(const char* signature);
+
     QStringList requiredTargetImports()
     {
         return m_requiredTargetImports;
