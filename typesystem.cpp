@@ -1695,6 +1695,7 @@ TypeDatabase::TypeDatabase() : m_suppressWarnings(true)
     addType(e);
 
     addType(new VoidTypeEntry());
+    addType(new VarargsTypeEntry());
 }
 
 QString TypeDatabase::modifiedTypesystemFilepath(const QString &ts_file)
@@ -2109,9 +2110,15 @@ static AddedFunction::TypeInfo parseType(const QString& signature, int startPos 
     QRegExp regex("\\w");
     int length = signature.length();
     int start = signature.indexOf(regex, startPos);
-    if (start == -1) { // error
-        if (endPos)
-            *endPos = length;
+    if (start == -1) {
+        if (signature.mid(startPos + 1, 3) == "...") { // varargs
+            if (endPos)
+                *endPos = startPos + 4;
+            result.name = "...";
+        } else { // error
+            if (endPos)
+                *endPos = length;
+        }
         return result;
     }
 

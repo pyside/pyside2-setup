@@ -1884,6 +1884,9 @@ void AbstractMetaBuilder::decideUsagePattern(AbstractMetaType *metaType)
     } else if (type->isVoid()) {
         metaType->setTypeUsagePattern(AbstractMetaType::NativePointerPattern);
 
+    } else if (type->isVarargs()) {
+        metaType->setTypeUsagePattern(AbstractMetaType::VarargsPattern);
+
     } else if (type->isString()
                && metaType->indirections() == 0
                && (metaType->isConstant() == metaType->isReference()

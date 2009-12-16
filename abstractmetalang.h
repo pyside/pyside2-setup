@@ -320,6 +320,7 @@ public:
         NativePointerPattern,
         ContainerPattern,
         VariantPattern,
+        VarargsPattern,
         JObjectWrapperPattern,
         ArrayPattern,
         ThreadPattern
@@ -454,6 +455,12 @@ public:
     bool isVariant() const
     {
         return m_pattern == VariantPattern;
+    }
+
+    // return true if the type was originally a varargs
+    bool isVarargs() const
+    {
+        return m_pattern == VarargsPattern;
     }
 
     // return true if the type was originally a JObjectWrapper or const JObjectWrapper &

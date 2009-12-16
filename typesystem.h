@@ -581,6 +581,7 @@ public:
     enum Type {
         PrimitiveType,
         VoidType,
+        VarargsType,
         FlagsType,
         EnumType,
         TemplateArgumentType,
@@ -680,6 +681,10 @@ public:
     bool isVoid() const
     {
         return m_type == VoidType;
+    }
+    bool isVarargs() const
+    {
+        return m_type == VarargsType;
     }
     bool isThread() const
     {
@@ -922,6 +927,12 @@ class APIEXTRACTOR_API VoidTypeEntry : public TypeEntry
 {
 public:
     VoidTypeEntry() : TypeEntry("void", VoidType) { }
+};
+
+class APIEXTRACTOR_API VarargsTypeEntry : public TypeEntry
+{
+public:
+    VarargsTypeEntry() : TypeEntry("...", VarargsType) { }
 };
 
 class APIEXTRACTOR_API TemplateArgumentEntry : public TypeEntry
