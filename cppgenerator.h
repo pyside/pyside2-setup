@@ -45,6 +45,7 @@ private:
     void writeConstructorNative(QTextStream& s, const AbstractMetaFunction* func);
     void writeDestructorNative(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeVirtualMethodNative(QTextStream& s, const AbstractMetaFunction* func);
+    void writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass* metaClass);
 
     void writeConstructorWrapper(QTextStream &s, const AbstractMetaFunctionList overloads);
     void writeDestructorWrapper(QTextStream& s, const AbstractMetaClass* metaClass);

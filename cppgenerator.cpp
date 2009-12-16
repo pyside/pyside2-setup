@@ -90,8 +90,11 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     // headers
     s << "// default includes" << endl;
     s << "#include <shiboken.h>" << endl;
-    if (usePySideExtensions())
+    if (usePySideExtensions()) {
         s << "#include <typeresolver.h>\n";
+        if (metaClass->isQObject())
+            s << "#include <signalmanager.h>\n";
+    }
 
     // The multiple inheritance initialization function
     // needs the 'set' class from C++ STL.
@@ -153,6 +156,9 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
             else if (func->isVirtual() || func->isAbstract())
                 writeVirtualMethodNative(s, func);
         }
+
+        if (usePySideExtensions() && metaClass->isQObject())
+            writeMetaObjectMethod(s, metaClass);
 
         writeDestructorNative(s, metaClass);
 
@@ -428,6 +434,21 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         s << ';' << endl;
     }
     s << '}' << endl << endl;
+}
+
+void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    Indentation indentation(INDENT);
+    QString prefix = wrapperName(metaClass) + "::";
+    s << "const QMetaObject* " << wrapperName(metaClass) << "::metaObject() const\n{\n";
+    s << INDENT << "const QMetaObject* qmetaObject = PySide::SignalManager::instance().getMetaObject(this);\n";
+    s << INDENT << "if (!qmetaObject)\n";
+    {
+        Indentation indentation(INDENT);
+        s << INDENT << "qmetaObject = &" << metaClass->qualifiedCppName() << "::staticMetaObject;\n";
+    }
+    s << INDENT << "return qmetaObject;\n";
+    s << "}\n\n";
 }
 
 void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFunctionList overloads)

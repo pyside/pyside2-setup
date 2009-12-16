@@ -83,6 +83,9 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
         foreach (AbstractMetaFunction *func, filterFunctions(metaClass))
             writeFunction(s, func);
 
+        if (usePySideExtensions() && metaClass->isQObject())
+            s << INDENT << "virtual const QMetaObject* metaObject() const;\n";;
+
         //destructor
         s << INDENT << (metaClass->hasVirtualDestructor() ? "virtual " : "") << "~" << wrapperName << "();" << endl;
 
