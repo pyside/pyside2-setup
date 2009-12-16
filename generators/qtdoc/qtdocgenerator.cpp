@@ -742,7 +742,7 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
     QVector<int> rowHeights(table.count());
     for (int i = 0, maxI = table.count(); i < maxI; ++i) {
         const QtXmlToSphinx::TableRow& row = table[i];
-        for (int j = 0, maxJ = row.count(); j < maxJ; ++j) {
+        for (int j = 0, maxJ = std::min(row.count(), colWidths.size()); j < maxJ; ++j) {
             QStringList rowLines = row[j].data.split('\n'); // cache this would be a good idea
             foreach (QString str, rowLines)
                 colWidths[j] = std::max(colWidths[j], str.count());
@@ -781,7 +781,7 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
 
         // Print the table cells
         for (int rowLine = 0; rowLine < rowHeights[i]; ++rowLine) { // for each line in a row
-            for (int j = 0, maxJ = row.count(); j < maxJ; ++j) { // for each column
+            for (int j = 0, maxJ = std::min(row.count(), colWidths.size()); j < maxJ; ++j) { // for each column
                 const QtXmlToSphinx::TableCell& cell = row[j];
                 QStringList rowLines = cell.data.split('\n'); // FIXME: Cache this!!!
                 if (!j) // First column, so we need print the identation
