@@ -819,6 +819,14 @@
         </add-function>
     </value-type>
 
+    <add-function signature="multiplyString(PyString*, unsigned int)" return-type="const char*">
+        <inject-code class="target" position="beginning">
+            %PYARG_0 = PyString_FromString("");
+            for (int i = 0; i &lt; %2; ++i)
+                PyString_Concat(&amp;%PYARG_0, %PYARG_1);
+        </inject-code>
+    </add-function>
+
     <rejection class="ListUser" function-name="createList()"/>
     <rejection class="ListUser" function-name="callCreateList()"/>
     <rejection class="ListUser" function-name="createComplexList(Complex, Complex)"/>

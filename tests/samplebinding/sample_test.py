@@ -57,6 +57,12 @@ class ModuleTest(unittest.TestCase):
         enum_members = set(['Option', 'None', 'RandomNumber', 'UnixTime'])
         self.assert_(enum_members.issubset(dir(sample.SampleNamespace)))
 
+    def testAddedFunctionAtModuleLevel(self):
+        '''Calls function added to module from type system description.'''
+        str1 = 'Foo'
+        self.assertEqual(sample.multiplyString(str1, 3), str1 * 3)
+        self.assertEqual(sample.multiplyString(str1, 0), str1 * 0)
+
 if __name__ == '__main__':
     unittest.main()
 
