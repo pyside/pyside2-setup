@@ -231,6 +231,7 @@ void HeaderGenerator::finishGeneration()
                     writeTypeCheckMacro(s_pts, innerClass->typeEntry());
                     writeTypeConverterDecl(convDecl, innerClass->typeEntry());
                     convDecl << endl;
+                    writeSbkTypeFunction(typeFunctions, innerClass);
                 }
             }
             s_pts << getApiExportMacro() << " PyAPI_FUNC(PyObject*) " << cpythonBaseName(metaClass->typeEntry());
