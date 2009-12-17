@@ -1,4 +1,45 @@
+2009-12-16  Bruno dos Santos de Araujo <bruno.araujo@openbossa.org>
+
+  * generators/qtdoc/qtdocgenerator.cpp: Add constraint to avoid index
+  out-of-range errors  Reviewer: Lauro Neto <lauro.neto@openbossa.org>
+
+2009-12-15  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * generator.cpp: Improved Generator::replaceTemplateVariables method to avoid
+  segfaults.  Reviewed by Hugo Parente <hugo.lima@openbossa.org>
+
+2009-11-24  renato araujo oliveira <renato@renato-note.(none)>
+
+  * CMakeLists.txt: Bump to version 0.3.3.
+
+  * ChangeLog: Updated Changelog.
+
+2009-11-23  Hugo Lima <hugo.lima@openbossa.org>
+
+  * generator.h, generatorrunnermacros.h, main.cpp: Change the getGenerators
+  signature, because on some platforms a function exported as a C function
+  can't return a C++ type by value.  All generators plugins *MUST* be
+  recompiled.  Reviewed by Luciano Wolf <luciano.wolf@openbossa.org>
+
+  * generatorrunnermacros.h: Disable GENRUNNER_DEPRECATED macro when using
+  msvc.
+
+  * FindGeneratorRunner.cmake.in: FindGeneratorRunner.cmake now respect the
+  find_package REQUIRED attribute.
+
+  * CMakeLists.txt: Install FindGenRunner.cmake and libgenrunner in the correct
+  directory.
+
+2009-11-21  Hugo Lima <hugo.lima@openbossa.org>
+
+  * CMakeLists.txt: Add proper compiler flags for msvc.
+
+  * generatorrunnermacros.h: Fix macros about dllexport/dllimport.
+
 2009-11-19  Hugo Lima <hugo.lima@openbossa.org>
+
+  * generator.cpp: Remove white spaces at end of each line when formating
+  injected code.
 
   * generator.cpp: Fix the formatCode function (again).  Reviewed by Marcelo
   Lira <marcelo.lira@openbossa.org>
@@ -452,4 +493,39 @@
 
 2009-08-17  Hugo Lima <hugo.lima@openbossa.org>
 
-  The genesis...
+  * debian/boostpythongenerator.1, debian/boostpythongenerator.manpages,
+  debian/changelog, debian/cmake.mk, debian/compat, debian/control,
+  debian/copyright, debian/rules: Added files for debian package creation
+
+  * .gitignore, AUTHORS, CMakeLists.txt, COPYING, Doxyfile,
+  boostpythongenerator.cpp, boostpythongenerator.h,
+  boostpythongeneratorversion.h.in, cmake_uninstall.cmake,
+  convertergenerator.cpp, convertergenerator.h, cppgenerator.cpp,
+  cppgenerator.h, doc/Makefile, doc/_static/basic.css,
+  doc/_static/bindingexample.tar.bz2, doc/_static/default.css,
+  doc/_static/images/._background_search.jpg,
+  doc/_static/images/._bread_crumb.png, doc/_static/images/._button_search.jpg,
+  doc/_static/images/._side_background.jpg,
+  doc/_static/images/._top_background.jpg,
+  doc/_static/images/background_search.jpg, doc/_static/images/bg.jpg,
+  doc/_static/images/bread_crumb.png, doc/_static/images/button_search.png,
+  doc/_static/images/side_background.jpg,
+  doc/_static/images/top_background.jpg, doc/_templates/index.html,
+  doc/_templates/layout.html, doc/compiling/cmake-primer.rst,
+  doc/compiling/compiling.rst, doc/compiling/setup-apiextractor.rst,
+  doc/compiling/setup-generator.rst, doc/conf.py, doc/contents.rst,
+  doc/dependency-pyside.svg, doc/images/.directory,
+  doc/images/bindinggen-development.png, doc/images/bindinggen-development.svg,
+  doc/images/boostgenarch.png, doc/images/boostgenarch.svg,
+  doc/images/boostqtarch.png, doc/images/boostqtarch.svg, doc/overview.rst,
+  doc/tutorial/bindinglibfoo.rst, doc/tutorial/buildingthebinding.rst,
+  doc/tutorial/globalheader.rst, doc/tutorial/images/generatorworkings.png,
+  doc/tutorial/images/generatorworkings.svg, doc/tutorial/introduction.rst,
+  doc/tutorial/libfoo.rst, doc/tutorial/typesystemcreation.rst,
+  docgenerator.cpp, docgenerator.h, hppgenerator.cpp, hppgenerator.h, main.cpp,
+  tests/CMakeLists.txt, tests/Makefile, tests/foo_test.py,
+  tests/foobinding/Makefile, tests/foobinding/foo/Makefile,
+  tests/foobinding/global.h, tests/foobinding/typesystem_foo.xml,
+  tests/libfoo/Makefile, tests/libfoo/bar.cpp, tests/libfoo/bar.h,
+  tests/libfoo/foo.cpp, tests/libfoo/foo.h, tests/libfoo/main.cpp,
+  tests/sphinxtabletest.cpp, tests/sphinxtabletest.h: The genesis...
