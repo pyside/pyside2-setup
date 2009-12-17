@@ -2136,10 +2136,14 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     }
 
     if (usePySideExtensions() && !metaClass->isNamespace()) {
-        QString type = metaClass->typeEntry()->isValue() ? "Value" : "Object";
+        bool isValueType = metaClass->typeEntry()->isValue();
+        QString type = isValueType ? "Value" : "Object";
         QString typeName = metaClass->qualifiedCppName();
         s << INDENT << "PySide::TypeResolver::create" << type << "TypeResolver<" << typeName << " >";
-        s << "(\"" << typeName << "\");\n";
+        s << "(\"" << typeName;
+        if (!isValueType)
+            s << '*';
+        s << "\");\n";
     }
 
     s << '}' << endl << endl;
