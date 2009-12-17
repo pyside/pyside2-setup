@@ -1,3 +1,88 @@
+2009-12-16  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * abstractmetabuilder.cpp, abstractmetalang.h, tests/testaddfunction.cpp,
+  tests/testaddfunction.h, typesystem.cpp, typesystem.h: Adds support for
+  varargs in AbstractMetaArgument, AbstractMetaType and VarargsTypeEntry. 
+  Reviewed by Hugo Parente <hugo.lima@openbossa.org>
+
+2009-12-15  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * abstractmetalang.cpp, typesystem.cpp, typesystem.h: Adds
+  normalizedSignature static method to TypeDatabase.  All the uses of
+  QMetaObject::normalizedSignature were replaced to use
+  TypeDatabase::normalizedSignature; the former always changes the unsigned
+  primitives to the shorter versions (e.g. "unsigned int" becomes "uint") that
+  aren't necessarily used by the parsed library. The new normalizer changes
+  back "uNUMBER" to "unsigned NUMBER" if the former is not present in the
+  TypeDatabase.  Reviewed by Hugo Parente <hugo.lima@openbossa.org>
+
+  * abstractmetalang.cpp: Modifications in ancestors are not returned if the
+  current class reimplements the function.
+
+  * abstractmetalang.cpp: Modified
+  AbstractMetaFunction::hasSignatureModifications to check for function
+  renaming.
+
+2009-12-14  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * abstractmetabuilder.cpp, abstractmetalang.cpp, abstractmetalang.h,
+  tests/testaddfunction.cpp, tests/testaddfunction.h, typesystem.cpp,
+  typesystem.h: Adds support for module level 'add-function' tag.  The
+  TypeDatabase now stores global added functions as well as function
+  modifications. The AbstractMetaFunction::modifications method was improved to
+  check for global modifications.  The test suite was updated with the changes.
+
+2009-12-08  renato <renato.filho@openbossa.org>
+
+  * abstractmetabuilder.cpp, tests/testaddfunction.cpp,
+  tests/testaddfunction.h, typesystem.cpp: Fixed support for modify args in
+  add-function tag.  Created tests.  Reviewed by Hugo Lima
+  <hugo.lima@openbossa.org>
+
+2009-12-01  Hugo Lima <hugo.lima@openbossa.org>
+
+  * abstractmetabuilder.cpp: TypeEntries created for unknown types found in
+  user added functions are marked as CustomType isntead of TargetLangType. 
+  Reviewed by Marcelo Lira <marcelo.lira@openbossa.org>
+
+2009-11-26  Lauro Neto <lauro.neto@openbossa.org>
+
+  * doc/contents.rst, doc/ownership.rst: Initial version of ownership
+  documentation  Reviewed by Marcelo Lira <marcelo.lira@openbossa.org>
+
+2009-11-27  Lauro Neto <lauro.neto@openbossa.org>
+
+  * doc/typesystem_arguments.rst: Adding index attr to parent example
+
+2009-11-24  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * abstractmetabuilder.cpp, abstractmetalang.h, tests/testaddfunction.cpp,
+  tests/testaddfunction.h: Modified the AbstractMetaFunction class to have a
+  separated flag to indicate that it was added by the user or not, instead of
+  using the AbstractMetaFunction::UserAddedFunction enum value. The old way
+  prevented the function to be an UserAddedFunction and a ConstructorFunction
+  at the same time, since this information was stored as an enum of the
+  AbstractMetaFunction::FunctionType type. A test case was also added. 
+  Reviewed by Hugo Parente <hugo.lima@openbossa.org>
+
+2009-11-24  renato araujo oliveira <renato@renato-note.(none)>
+
+  * CMakeLists.txt: Bump version to 0.3.3
+
+  * ChangeLog: updated changelog.
+
+2009-11-23  Hugo Lima <hugo.lima@openbossa.org>
+
+  * CMakeLists.txt: Install FindApiExtractor.cmake in the correct directory
+  when using cmake 2.8.  Reviewed by Luciano Wolf <luciano.wolf@openbossa.org>
+
+2009-11-24  Marcelo Lira <marcelo.lira@openbossa.org>
+
+  * abstractmetabuilder.cpp, abstractmetalang.h, tests/CMakeLists.txt,
+  tests/testdtorinformation.cpp, tests/testdtorinformation.h: Added methods to
+  set and check for protected and virtual destructor on AbstractMetaClass
+  objects. Also added tests for this.
+
 2009-11-23  renato araujo oliveira <renato@renato-note.(none)>
 
   * abstractmetabuilder.cpp: Fix topological sort for args with default
@@ -450,4 +535,46 @@
 
 2009-08-17  Hugo Lima <hugo.lima@openbossa.org>
 
-   The genesis...
+  * .gitignore, AUTHORS, CMakeLists.txt, COPYING, Doxyfile,
+  FindApiExtractor.cmake.in, abstractmetabuilder.cpp, abstractmetabuilder.h,
+  abstractmetalang.cpp, abstractmetalang.h, apiextractor.cpp, apiextractor.h,
+  apiextractor.pc.in, apiextractorversion.h.in, asttoxml.cpp, asttoxml.h,
+  cmake_uninstall.cmake, doc/Makefile, doc/_static/basic.css,
+  doc/_static/default.css, doc/_static/images/._background_search.jpg,
+  doc/_static/images/._bread_crumb.png, doc/_static/images/._button_search.jpg,
+  doc/_static/images/._side_background.jpg,
+  doc/_static/images/._top_background.jpg,
+  doc/_static/images/background_search.jpg, doc/_static/images/bg.jpg,
+  doc/_static/images/bread_crumb.png, doc/_static/images/button_search.png,
+  doc/_static/images/side_background.jpg,
+  doc/_static/images/top_background.jpg, doc/_templates/index.html,
+  doc/_templates/layout.html, doc/conf.py, doc/contents.rst,
+  doc/dependency-apiextractor.svg, doc/overview.rst, doc/typesystem.rst,
+  docparser.cpp, docparser.h, doxygenparser.cpp, doxygenparser.h, fileout.cpp,
+  fileout.h, generator.cpp, generator.h, generator.qrc, merge.xsl,
+  parser/ast.cpp, parser/ast.h, parser/binder.cpp, parser/binder.h,
+  parser/class_compiler.cpp, parser/class_compiler.h, parser/codemodel.cpp,
+  parser/codemodel.h, parser/codemodel_finder.cpp, parser/codemodel_finder.h,
+  parser/codemodel_fwd.h, parser/codemodel_pointer.h,
+  parser/compiler_utils.cpp, parser/compiler_utils.h, parser/control.cpp,
+  parser/control.h, parser/declarator_compiler.cpp,
+  parser/declarator_compiler.h, parser/default_visitor.cpp,
+  parser/default_visitor.h, parser/dumptree.cpp, parser/dumptree.h,
+  parser/lexer.cpp, parser/lexer.h, parser/list.cpp, parser/list.h,
+  parser/name_compiler.cpp, parser/name_compiler.h, parser/parser.cpp,
+  parser/parser.h, parser/r++.macros, parser/rpp-allocator.h,
+  parser/rpp/builtin-macros.cpp, parser/rpp/pp-cctype.h,
+  parser/rpp/pp-configuration, parser/rpp/pp-engine-bits.h,
+  parser/rpp/pp-engine.h, parser/rpp/pp-environment.h, parser/rpp/pp-fwd.h,
+  parser/rpp/pp-internal.h, parser/rpp/pp-iterator.h,
+  parser/rpp/pp-macro-expander.h, parser/rpp/pp-macro.h,
+  parser/rpp/pp-main.cpp, parser/rpp/pp-qt-configuration,
+  parser/rpp/pp-scanner.h, parser/rpp/pp-string.h, parser/rpp/pp-symbol.h,
+  parser/rpp/pp.h, parser/rpp/preprocessor.cpp, parser/rpp/preprocessor.h,
+  parser/rxx_allocator.h, parser/smallobject.cpp, parser/smallobject.h,
+  parser/symbol.h, parser/tokens.cpp, parser/tokens.h,
+  parser/type_compiler.cpp, parser/type_compiler.h, parser/visitor.cpp,
+  parser/visitor.h, qtdocparser.cpp, qtdocparser.h, reporthandler.cpp,
+  reporthandler.h, tests/CMakeLists.txt, tests/testabstractmetaclass.cpp,
+  tests/testabstractmetaclass.h, typeparser.cpp, typeparser.h, typesystem.cpp,
+  typesystem.h: The genesis...
