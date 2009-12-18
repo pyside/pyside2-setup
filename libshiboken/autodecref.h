@@ -32,17 +32,38 @@
  * 02110-1301 USA
  */
 
-#ifndef SHIBOKEN_H
-#define SHIBOKEN_H
+#ifndef AUTODECREF_H
+#define AUTODECREF_H
 
 #include <Python.h>
-#include "autodecref.h"
-#include "basewrapper.h"
-#include "bindingmanager.h"
-#include "conversions.h"
-#include "helper.h"
-#include "pyenum.h"
 #include "shibokenmacros.h"
 
-#endif // SHIBOKEN_H
+namespace Shiboken
+{
+
+/**
+ *  AutoDecRef holds a PyObject pointer and decrement its reference counter when destroyed.
+ */
+class LIBSHIBOKEN_API AutoDecRef
+{
+public:
+    /**
+     * AutoDecRef constructor.
+     * /param pyobj A borrowed reference to a Python object
+     */
+    AutoDecRef(PyObject* pyobj) : m_pyobj(pyobj) {}
+    ~AutoDecRef() {
+        Py_XDECREF(m_pyobj);
+    }
+
+    /// Returns the pointer of the Python object being held.
+    PyObject* object() { return m_pyobj; }
+private:
+    PyObject* m_pyobj;
+};
+
+
+} // namespace Shiboken
+
+#endif // AUTODECREF_H
 
