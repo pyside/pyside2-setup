@@ -676,12 +676,29 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
     s << "PyTuple_GET_SIZE(args);" << endl;
 
+    int minArgs = overloadData.minArgs();
+    int maxArgs = overloadData.maxArgs();
+
     s << INDENT << "PyObject* pyargs[] = {";
-    s << QString(overloadData.maxArgs(), '0').split("", QString::SkipEmptyParts).join(", ");
+    s << QString(maxArgs, '0').split("", QString::SkipEmptyParts).join(", ");
     s << "};" << endl << endl;
 
+    if (overloadData.hasVarargs()) {
+        maxArgs--;
+        if (minArgs > maxArgs)
+            minArgs = maxArgs;
+    }
+
+    if (overloadData.hasVarargs()) {
+        s << INDENT << "PyObject* nonvarargs = PyTuple_GetSlice(args, 0, " << maxArgs << ");" << endl;
+        s << INDENT << "Shiboken::AutoDecRef auto_nonvarargs(nonvarargs);" << endl;
+        s << INDENT << "pyargs[" << maxArgs << "] = PyTuple_GetSlice(args, " << maxArgs << ", numArgs);" << endl;
+        s << INDENT << "Shiboken::AutoDecRef auto_varargs(pyargs[" << maxArgs << "]);" << endl;
+        s << endl;
+    }
+
     QStringList palist;
-    for (int i = 0; i < overloadData.maxArgs(); i++)
+    for (int i = 0; i < maxArgs; i++)
         palist << QString("&(pyargs[%1])").arg(i);
     QString pyargs = palist.join(", ");
 
@@ -701,9 +718,8 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
     else
         funcName = rfunc->name();
 
-    s << INDENT << "if (!PyArg_UnpackTuple(args, \"" << funcName << "\", ";
-    s << overloadData.minArgs() << ", " << overloadData.maxArgs();
-    s  << ", " << pyargs << "))" << endl;
+    s << INDENT << "if (!PyArg_UnpackTuple(" << (overloadData.hasVarargs() ?  "nonvarargs" : "args");
+    s << ", \"" << funcName << "\", " << minArgs << ", " << maxArgs  << ", " << pyargs << "))" << endl;
     {
         Indentation indent(INDENT);
         s << INDENT << "return 0;" << endl;
@@ -805,7 +821,7 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
 {
     const TypeEntry* type = argType->typeEntry();
 
-    if (type->isCustom())
+    if (type->isCustom() || type->isVarargs())
         return;
 
     QString typeName;
@@ -937,8 +953,10 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
 
         s << "if (";
         if (manyArgs && signatureFound) {
-            int numArgs = refFunc->arguments().size() - OverloadData::numberOfRemovedArguments(refFunc);
-            s << "numArgs == " << numArgs << " && ";
+            AbstractMetaArgumentList args = refFunc->arguments();
+            int lastArgIsVarargs = (int) (args.size() > 1 && args.last()->type()->isVarargs());
+            int numArgs = args.size() - OverloadData::numberOfRemovedArguments(refFunc) - lastArgIsVarargs;
+            s << "numArgs " << (lastArgIsVarargs ? ">=" : "==") << " " << numArgs << " && ";
         }
 
         if (refFunc->isOperatorOverload())
@@ -952,7 +970,7 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
         QString pyArgName = manyArgs ? QString("pyargs[%1]").arg(overloadData->argPos()) : "arg";
 
         OverloadData* od = overloadData;
-        while (od) {
+        while (od && !od->argType()->isVarargs()) {
             if (manyArgs)
                 pyArgName = QString("pyargs[%1]").arg(od->argPos());
 
@@ -973,8 +991,9 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
                 overloadData = od;
                 od = 0;
             } else {
-                tck << " && ";
                 od = od->nextOverloadData().first();
+                if (!od->argType()->isVarargs())
+                    tck << " && ";
             }
         }
 
@@ -2157,7 +2176,6 @@ void CppGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
     QString pyTypeName = cpythonTypeName(type);
 
     const AbstractMetaClass* metaClass = classes().findClass(type->name());
-    bool isAbstractOrObjectType = (metaClass &&  metaClass->isAbstract()) || type->isObject();
 
     AbstractMetaFunctionList implicitConvs = implicitConversions(type);
     bool hasImplicitConversions = !implicitConvs.isEmpty();
