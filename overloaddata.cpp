@@ -235,6 +235,16 @@ bool OverloadData::hasNonVoidReturnType() const
     return !retTypes.contains("void") || retTypes.size() > 1;
 }
 
+bool OverloadData::hasVarargs() const
+{
+    foreach (const AbstractMetaFunction* func, m_overloads) {
+        AbstractMetaArgumentList args = func->arguments();
+        if (args.size() > 1 && args.last()->type()->isVarargs())
+            return true;
+    }
+    return false;
+}
+
 const AbstractMetaFunction* OverloadData::referenceFunction() const
 {
     return m_overloads.first();

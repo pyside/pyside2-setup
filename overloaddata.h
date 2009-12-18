@@ -51,6 +51,9 @@ public:
     /// Returns true if any of the overloads for the current OverloadData has a return type different from void.
     bool hasNonVoidReturnType() const;
 
+    /// Returns true if any of the overloads for the current OverloadData has a varargs argument.
+    bool hasVarargs() const;
+
     const AbstractMetaFunction* referenceFunction() const;
     const AbstractMetaArgument* argument(const AbstractMetaFunction* func) const;
     OverloadDataList overloadDataOnPosition(int argPos) const;
