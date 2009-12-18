@@ -828,6 +828,12 @@
         </inject-code>
     </add-function>
 
+    <add-function signature="countVarargs(int, ...)" return-type="int">
+        <inject-code class="target" position="beginning">
+            %PYARG_0 = %CONVERTTOPYTHON[int](PyTuple_GET_SIZE(%PYARG_2));
+        </inject-code>
+    </add-function>
+
     <rejection class="ListUser" function-name="createList()"/>
     <rejection class="ListUser" function-name="callCreateList()"/>
     <rejection class="ListUser" function-name="createComplexList(Complex, Complex)"/>

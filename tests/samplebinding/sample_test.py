@@ -63,6 +63,12 @@ class ModuleTest(unittest.TestCase):
         self.assertEqual(sample.multiplyString(str1, 3), str1 * 3)
         self.assertEqual(sample.multiplyString(str1, 0), str1 * 0)
 
+    def testAddedFunctionWithVarargs(self):
+        '''Calls function that receives varargs added to module from type system description.'''
+        self.assertEqual(sample.countVarargs(1), 0)
+        self.assertEqual(sample.countVarargs(1, 2), 1)
+        self.assertEqual(sample.countVarargs(1, 2, 3, 'a', 'b', 4, (5, 6)), 6)
+
 if __name__ == '__main__':
     unittest.main()
 
