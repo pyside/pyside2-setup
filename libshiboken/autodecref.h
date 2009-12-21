@@ -51,15 +51,20 @@ public:
      * AutoDecRef constructor.
      * /param pyobj A borrowed reference to a Python object
      */
-    AutoDecRef(PyObject* pyobj) : m_pyobj(pyobj) {}
+    explicit AutoDecRef(PyObject* pyobj) : m_pyobj(pyobj) {}
+
     ~AutoDecRef() {
         Py_XDECREF(m_pyobj);
     }
 
     /// Returns the pointer of the Python object being held.
     PyObject* object() { return m_pyobj; }
+    operator PyObject*() { return m_pyobj; }
+    operator bool() const { return m_pyobj; }
 private:
     PyObject* m_pyobj;
+    AutoDecRef(const AutoDecRef&);
+    AutoDecRef& operator=(const AutoDecRef&);
 };
 
 
