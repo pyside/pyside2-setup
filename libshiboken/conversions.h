@@ -88,21 +88,24 @@ template <typename T> struct Converter;
 template <typename T>
 struct ConverterBase
 {
-    static PyObject* createWrapper(const T* cppobj)
+    static inline PyObject* createWrapper(const T* cppobj)
     {
         return Shiboken::SbkBaseWrapper_New(reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()), cppobj);
     }
-    static bool isConvertible(PyObject* pyobj) { return pyobj == Py_None; }
+    static inline bool isConvertible(PyObject* pyobj) { return pyobj == Py_None; }
 
-    // Must be reimplemented.
-    static PyObject* toPython(const T& cppobj)
+    static inline PyObject* toPython(void* cppobj)
+    {
+        return toPython(*reinterpret_cast<T*>(cppobj));
+    }
+    static inline PyObject* toPython(const T& cppobj)
     {
         return createWrapper(SbkCopyCppObject<T>(cppobj));
     }
 
     // Classes with implicit conversions are expected to reimplement
     // this to build T from its various implicit constructors.
-    static T toCpp(PyObject* pyobj)
+    static inline T toCpp(PyObject* pyobj)
     {
         return *Converter<T*>::toCpp(pyobj);
     }
@@ -114,6 +117,10 @@ struct ConverterBase
 template <typename T>
 struct ConverterBase<T*> : ConverterBase<T>
 {
+    static inline PyObject* toPython(void* cppobj)
+    {
+        return toPython(reinterpret_cast<T*>(cppobj));
+    }
     static PyObject* toPython(const T* cppobj)
     {
         if (!cppobj)
@@ -142,6 +149,10 @@ template <typename T> struct Converter : ConverterBase<T> {};
 template <typename T>
 struct Converter<T*> : Converter<T>
 {
+    static inline PyObject* toPython(void* cppobj)
+    {
+        return toPython(reinterpret_cast<T*>(cppobj));
+    }
     static PyObject* toPython(const T* cppobj)
     {
         if (!cppobj)
@@ -168,7 +179,7 @@ template <typename T> struct Converter<const T*> : Converter<T*> {};
 template<>
 struct Converter<PyObject*> : ConverterBase<PyObject*>
 {
-    inline static PyObject* toCpp(PyObject* pyobj) { return pyobj; }
+    static inline PyObject* toCpp(PyObject* pyobj) { return pyobj; }
 };
 template <> struct Converter<const PyObject*> : Converter<PyObject*> {};
 
@@ -176,11 +187,15 @@ template <> struct Converter<const PyObject*> : Converter<PyObject*> {};
 template <typename T>
 struct Converter<T&> : Converter<T*>
 {
-    static PyObject* toPython(const T& cppobj)
+    static inline PyObject* toPython(void* cppobj)
+    {
+        return toPython(*reinterpret_cast<T*>(cppobj));
+    }
+    static inline PyObject* toPython(const T& cppobj)
     {
         return Converter<T*>::toPython(&cppobj);
     }
-    static T& toCpp(PyObject* pyobj)
+    static inline T& toCpp(PyObject* pyobj)
     {
         return *Converter<T*>::toCpp(pyobj);
     }
@@ -191,15 +206,19 @@ template <typename T> struct Converter<const T&> : Converter<T&> {};
 template <>
 struct Converter<bool>
 {
-    static bool isConvertible(PyObject* pyobj)
+    static inline bool isConvertible(PyObject* pyobj)
     {
         return PyInt_Check(pyobj);
     }
-    static PyObject* toPython(bool cppobj)
+    static inline PyObject* toPython(void* cppobj)
+    {
+        return toPython(*reinterpret_cast<bool*>(cppobj));
+    }
+    static inline PyObject* toPython(bool cppobj)
     {
         return PyBool_FromLong(cppobj);
     }
-    static bool toCpp(PyObject* pyobj)
+    static inline bool toCpp(PyObject* pyobj)
     {
         return pyobj == Py_True;
     }
@@ -217,7 +236,11 @@ inline bool overflowCheck(SourceT value)
 template <typename PyIntEquiv>
 struct Converter_PyInt
 {
-    static PyObject* toPython(PyIntEquiv cppobj)
+    static inline PyObject* toPython(void* cppobj)
+    {
+        return toPython(*reinterpret_cast<PyIntEquiv*>(cppobj));
+    }
+    static inline PyObject* toPython(PyIntEquiv cppobj)
     {
         return PyInt_FromLong((long) cppobj);
     }
@@ -253,11 +276,15 @@ template <> struct Converter<long> : Converter_PyInt<long> {};
 template <>
 struct Converter<unsigned long>
 {
-    static PyObject* toPython(unsigned long holder)
+    static inline PyObject* toPython(void* cppobj)
     {
-        return PyLong_FromUnsignedLong(holder);
+        return toPython(*reinterpret_cast<unsigned long*>(cppobj));
     }
-    static unsigned long toCpp(PyObject* pyobj)
+    static inline PyObject* toPython(unsigned long cppobj)
+    {
+        return PyLong_FromUnsignedLong(cppobj);
+    }
+    static inline unsigned long toCpp(PyObject* pyobj)
     {
         unsigned long result;
         if (PyFloat_Check(pyobj)) {
@@ -277,11 +304,15 @@ struct Converter<unsigned long>
 template <>
 struct Converter<PY_LONG_LONG>
 {
-    static PyObject* toPython(PY_LONG_LONG holder)
+    static inline PyObject* toPython(void* cppobj)
     {
-        return PyLong_FromLongLong(holder);
+        return toPython(*reinterpret_cast<PY_LONG_LONG*>(cppobj));
     }
-    static PY_LONG_LONG toCpp(PyObject* pyobj)
+    static inline PyObject* toPython(PY_LONG_LONG cppobj)
+    {
+        return PyLong_FromLongLong(cppobj);
+    }
+    static inline PY_LONG_LONG toCpp(PyObject* pyobj)
     {
         return (PY_LONG_LONG) PyLong_AsLongLong(pyobj);
     }
@@ -290,11 +321,15 @@ struct Converter<PY_LONG_LONG>
 template <>
 struct Converter<unsigned PY_LONG_LONG>
 {
-    static PyObject* toPython(unsigned PY_LONG_LONG holder)
+    static inline PyObject* toPython(void* cppobj)
     {
-        return PyLong_FromUnsignedLongLong(holder);
+        return toPython(*reinterpret_cast<unsigned PY_LONG_LONG*>(cppobj));
     }
-    static unsigned PY_LONG_LONG toCpp(PyObject* pyobj)
+    static inline PyObject* toPython(unsigned PY_LONG_LONG cppobj)
+    {
+        return PyLong_FromUnsignedLongLong(cppobj);
+    }
+    static inline unsigned PY_LONG_LONG toCpp(PyObject* pyobj)
     {
         return (unsigned PY_LONG_LONG) PyLong_AsUnsignedLongLong(pyobj);
     }
@@ -303,11 +338,15 @@ struct Converter<unsigned PY_LONG_LONG>
 template <typename PyFloatEquiv>
 struct Converter_PyFloat
 {
-    static PyObject* toPython(PyFloatEquiv holder)
+    static inline PyObject* toPython(void* cppobj)
     {
-        return PyFloat_FromDouble((double) holder);
+        return toPython(*reinterpret_cast<PyFloatEquiv*>(cppobj));
     }
-    static PyFloatEquiv toCpp(PyObject* pyobj)
+    static inline PyObject* toPython(PyFloatEquiv cppobj)
+    {
+        return PyFloat_FromDouble((double) cppobj);
+    }
+    static inline PyFloatEquiv toCpp(PyObject* pyobj)
     {
         if (PyInt_Check(pyobj) || PyLong_Check(pyobj))
             return (PyFloatEquiv) PyLong_AsLong(pyobj);
@@ -322,15 +361,19 @@ template <> struct Converter<double> : Converter_PyFloat<double> {};
 template <typename CppEnum>
 struct Converter_CppEnum
 {
-    static PyObject* createWrapper(CppEnum cppobj)
+    static inline PyObject* createWrapper(CppEnum cppobj)
     {
         return SbkEnumObject_New(SbkType<CppEnum>(), (long)cppobj);
     }
-    static CppEnum toCpp(PyObject* pyobj)
+    static inline CppEnum toCpp(PyObject* pyobj)
     {
         return (CppEnum) ((Shiboken::SbkEnumObject*)pyobj)->ob_ival;
     }
-    static PyObject* toPython(CppEnum cppenum)
+    static inline PyObject* toPython(void* cppobj)
+    {
+        return toPython(*reinterpret_cast<CppEnum*>(cppobj));
+    }
+    static inline PyObject* toPython(CppEnum cppenum)
     {
         return Converter<CppEnum>::createWrapper(cppenum);
     }
@@ -340,13 +383,17 @@ struct Converter_CppEnum
 template <typename CString>
 struct Converter_CString
 {
-    static PyObject* toPython(CString cppobj)
+    static inline PyObject* toPython(void* cppobj)
+    {
+        return toPython(reinterpret_cast<CString>(cppobj));
+    }
+    static inline PyObject* toPython(CString cppobj)
     {
         if (!cppobj)
             Py_RETURN_NONE;
         return PyString_FromString(cppobj);
     }
-    static CString toCpp(PyObject* pyobj)
+    static inline CString toCpp(PyObject* pyobj)
     {
         return PyString_AsString(pyobj);
     }
@@ -369,18 +416,17 @@ template <> struct Converter<const char*> : Converter_CString<const char*> {};
 template <typename StdList>
 struct Converter_std_list
 {
-    static bool isConvertible(const PyObject* pyObj)
+    static inline bool isConvertible(const PyObject* pyObj)
     {
         return PySequence_Check(const_cast<PyObject*>(pyObj));
     }
-
-    static PyObject* toPython(StdList holder)
+    static PyObject* toPython(StdList cppobj)
     {
-        PyObject* result = PyList_New((int) holder.size());
+        PyObject* result = PyList_New((int) cppobj.size());
         typedef typename StdList::iterator IT;
         IT it;
         int idx = 0;
-        for (it = holder.begin(); it != holder.end(); it++) {
+        for (it = cppobj.begin(); it != cppobj.end(); it++) {
             typename StdList::value_type vh(*it);
             PyList_SET_ITEM(result, idx, Converter<typename StdList::value_type>::toPython(vh));
             idx++;
@@ -401,14 +447,14 @@ struct Converter_std_list
 template <typename StdPair>
 struct Converter_std_pair
 {
-    static bool isConvertible(const PyObject* pyObj)
+    static inline bool isConvertible(const PyObject* pyObj)
     {
         return PySequence_Check(const_cast<PyObject*>(pyObj));
     }
-    static PyObject* toPython(StdPair holder)
+    static PyObject* toPython(StdPair cppobj)
     {
-        typename StdPair::first_type first(holder.first);
-        typename StdPair::second_type second(holder.second);
+        typename StdPair::first_type first(cppobj.first);
+        typename StdPair::second_type second(cppobj.second);
         PyObject* tuple = PyTuple_New(2);
         PyTuple_SET_ITEM(tuple, 0, Converter<typename StdPair::first_type>::toPython(first));
         PyTuple_SET_ITEM(tuple, 1, Converter<typename StdPair::second_type>::toPython(second));
@@ -428,18 +474,18 @@ struct Converter_std_pair
 template <typename StdMap>
 struct Converter_std_map
 {
-    static bool isConvertible(const PyObject* pyObj)
+    static inline bool isConvertible(const PyObject* pyObj)
     {
         return PyDict_Check(const_cast<PyObject*>(pyObj));
     }
 
-    static PyObject* toPython(StdMap holder)
+    static PyObject* toPython(StdMap cppobj)
     {
         PyObject* result = PyDict_New();
         typedef typename StdMap::iterator IT;
         IT it;
 
-        for (it = holder.begin(); it != holder.end(); it++) {
+        for (it = cppobj.begin(); it != cppobj.end(); it++) {
             typename StdMap::key_type h_key((*it).first);
             typename StdMap::mapped_type h_val((*it).second);
             PyDict_SetItem(result,
