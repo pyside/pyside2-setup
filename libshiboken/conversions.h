@@ -57,84 +57,19 @@ namespace Shiboken
 template<typename T>
 PyTypeObject* SbkType();
 
-template<>
-inline PyTypeObject* SbkType<int>()
-{
-    return &PyInt_Type;
-}
-
-template<>
-inline PyTypeObject* SbkType<unsigned int>()
-{
-    return &PyLong_Type;
-}
-
-template<>
-inline PyTypeObject* SbkType<short>()
-{
-    return &PyInt_Type;
-}
-
-template<>
-inline PyTypeObject* SbkType<unsigned short>()
-{
-    return &PyInt_Type;
-}
-
-template<>
-inline PyTypeObject* SbkType<long>()
-{
-    return &PyLong_Type;
-}
-
-template<>
-inline PyTypeObject* SbkType<unsigned long>()
-{
-    return &PyLong_Type;
-}
-
-
-template<>
-inline PyTypeObject* SbkType<long long>()
-{
-    return &PyLong_Type;
-}
-
-template<>
-inline PyTypeObject* SbkType<unsigned long long>()
-{
-    return &PyLong_Type;
-}
-
-template<>
-inline PyTypeObject* SbkType<bool>()
-{
-    return &PyBool_Type;
-}
-
-template<>
-inline PyTypeObject* SbkType<float>()
-{
-    return &PyFloat_Type;
-}
-
-template<>
-inline PyTypeObject* SbkType<double>()
-{
-    return &PyFloat_Type;
-}
-
-template<>
-inline PyTypeObject* SbkType<char>()
-{
-    return &PyInt_Type;
-}
-
-template<>
-inline PyTypeObject* SbkType<unsigned char>()
-{
-    return &PyInt_Type;
-}
+template<> inline PyTypeObject* SbkType<int>() { return &PyInt_Type; }
+template<> inline PyTypeObject* SbkType<unsigned int>() { return &PyLong_Type; }
+template<> inline PyTypeObject* SbkType<short>() { return &PyInt_Type; }
+template<> inline PyTypeObject* SbkType<unsigned short>() { return &PyInt_Type; }
+template<> inline PyTypeObject* SbkType<long>() { return &PyLong_Type; }
+template<> inline PyTypeObject* SbkType<unsigned long>() { return &PyLong_Type; }
+template<> inline PyTypeObject* SbkType<PY_LONG_LONG>() { return &PyLong_Type; }
+template<> inline PyTypeObject* SbkType<unsigned PY_LONG_LONG>() { return &PyLong_Type; }
+template<> inline PyTypeObject* SbkType<bool>() { return &PyBool_Type; }
+template<> inline PyTypeObject* SbkType<float>() { return &PyFloat_Type; }
+template<> inline PyTypeObject* SbkType<double>() { return &PyFloat_Type; }
+template<> inline PyTypeObject* SbkType<char>() { return &PyInt_Type; }
+template<> inline PyTypeObject* SbkType<unsigned char>() { return &PyInt_Type; }
 
 /**
  *   This function template is used to copy a C++ object using the proper
