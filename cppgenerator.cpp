@@ -2238,10 +2238,8 @@ void CppGenerator::writeSbkCopyCppObjectFunction(QTextStream& s, const AbstractM
 {
     if (!metaClass->typeEntry()->isValue() || !shouldGenerateCppWrapper(metaClass))
         return;
-    s << "template<>" << endl;
-    s << metaClass->qualifiedCppName() << "* SbkCopyCppObject<";
-    s << metaClass->qualifiedCppName() << " >(const ";
-    s << metaClass->qualifiedCppName() << "& cppobj)" << endl;
+    QString className = metaClass->qualifiedCppName();
+    s << className << "* CppObjectCopier<" << className << " >::copy(const " << className << "& cppobj)" << endl;
     s << '{' << endl;
     s << INDENT << "return new " << wrapperName(metaClass) << "(cppobj);" << endl;
     s << '}' << endl;

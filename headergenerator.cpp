@@ -367,7 +367,12 @@ void HeaderGenerator::writeSbkCopyCppObjectFunction(QTextStream& s, const Abstra
 {
     if (!metaClass->typeEntry()->isValue() || !shouldGenerateCppWrapper(metaClass))
         return;
-    s << "template<> " << metaClass->qualifiedCppName();
-    s << "* SbkCopyCppObject<" << metaClass->qualifiedCppName() << ">(const ";
-    s << metaClass->qualifiedCppName() << "& cppobj);" << endl;
+    QString className = metaClass->qualifiedCppName();
+    s << "template <>" << endl;
+    s << "struct CppObjectCopier<" << className << " >" << endl;
+    s << '{' << endl;
+    s << INDENT << "static const bool isCppWrapper = true;" << endl;
+    s << INDENT << "static inline " << className << "* copy(const " << className << "& cppobj);" << endl;
+    s << "};" << endl;
 }
+
