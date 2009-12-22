@@ -107,8 +107,8 @@ void destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent)
 
 PyObject* SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
                              const void* cptr,
-                             unsigned int hasOwnership,
-                             unsigned int containsCppWrapper)
+                             bool hasOwnership,
+                             bool containsCppWrapper)
 {
     static PyObject* zeroargs = 0;
     if (!cptr)

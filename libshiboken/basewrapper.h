@@ -138,7 +138,7 @@ LIBSHIBOKEN_API void destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParen
 #define SbkBaseWrapper_setOwnership(pyobj,o)         (((Shiboken::SbkBaseWrapper*)pyobj)->hasOwnership = o)
 #define SbkBaseWrapper_hasParentInfo(pyobj)          (((Shiboken::SbkBaseWrapper*)pyobj)->parentInfo)
 #define SbkBaseWrapper_containsCppWrapper(pyobj)     (((Shiboken::SbkBaseWrapper*)pyobj)->containsCppWrapper)
-#define SbkBaseWrapper_setContainsCppWrapper(pyobj,o)(((Shiboken::SbkBaseWrapper*)pyobj)->containsCppWrapper= o)
+#define SbkBaseWrapper_setContainsCppWrapper(pyobj,o)(((Shiboken::SbkBaseWrapper*)pyobj)->containsCppWrapper = o)
 #define SbkBaseWrapper_validCppObject(pyobj)         (((Shiboken::SbkBaseWrapper*)pyobj)->validCppObject)
 #define SbkBaseWrapper_setValidCppObject(pyobj,v)    (((Shiboken::SbkBaseWrapper*)pyobj)->validCppObject = v)
 
@@ -193,8 +193,8 @@ typedef struct {
 LIBSHIBOKEN_API PyAPI_FUNC(PyObject*)
 SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
                    const void *cptr,
-                   unsigned int hasOwnership = 1,
-                   unsigned int containsCppWrapper = 0);
+                   bool hasOwnership = true,
+                   bool containsCppWrapper = false);
 
 /// Returns true and sets a Python RuntimeError if the Python wrapper is not marked as valid.
 LIBSHIBOKEN_API bool cppObjectIsInvalid(PyObject* wrapper);
