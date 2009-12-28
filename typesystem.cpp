@@ -846,6 +846,7 @@ bool Handler::startElement(const QString &, const QString &n,
             attributes["signature"] = QString();
             attributes["return-type"] = QString("void");
             attributes["access"] = QString("public");
+            attributes["static"] = QString("no");
             break;
         case StackElement::ModifyFunction:
             attributes["signature"] = QString();
@@ -1300,6 +1301,7 @@ bool Handler::startElement(const QString &, const QString &n,
             }
 
             AddedFunction func(signature, attributes["return-type"]);
+            func.setStatic(attributes["static"] == "yes");
             if (!signature.contains("("))
                 signature += "()";
             m_currentSignature = signature;

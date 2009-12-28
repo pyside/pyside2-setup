@@ -93,10 +93,10 @@ add-function
     .. code-block:: xml
 
          <object-type>
-             <add-function signature="..." return-type="..." access="public | protected" />
+             <add-function signature="..." return-type="..." access="public | protected" static="yes | no" />
          </object-type>
 
-    The ``return-type`` attribute defaults to *void*, and the ``access`` to *public*.
+    The ``return-type`` attribute defaults to *void*, the ``access`` to *public* and the ``static`` one to *no*.
 
 .. _conversion-rule-on-types:
 

@@ -504,12 +504,24 @@ struct APIEXTRACTOR_API AddedFunction
         return m_isConst;
     }
 
+    /// Set this method static.
+    void setStatic(bool value)
+    {
+        m_isStatic = value;
+    }
+
+    /// Returns true if this is a static method.
+    bool isStatic() const
+    {
+        return m_isStatic;
+    }
 private:
     QString m_name;
     Access m_access;
     QList<TypeInfo> m_arguments;
     TypeInfo m_returnType;
     bool m_isConst;
+    bool m_isStatic;
 };
 typedef QList<AddedFunction> AddedFunctionList;
 

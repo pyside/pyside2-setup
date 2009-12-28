@@ -289,6 +289,28 @@ void TestAddFunction::testAddFunctionWithVarargs()
     QVERIFY(arg->type()->typeEntry()->isVarargs());
 }
 
+void TestAddFunction::testAddStaticFunction()
+{
+    const char cppCode[] = "struct A { };";
+    const char xmlCode[] = "\
+    <typesystem package=\"Foo\">\
+        <primitive-type name='int'/> \
+        <value-type name='A'>\
+            <add-function signature='func(int, int)' static='yes'>\
+                <inject-code class='target' position='beginning'>custom_code();</inject-code>\
+            </add-function>\
+        </value-type>\
+    </typesystem>";
+    TestUtil t(cppCode, xmlCode, false);
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* classA = classes.findClass("A");
+    QVERIFY(classA);
+    qDebug() << classes[0]->name();
+    const AbstractMetaFunction* addedFunc = classA->findFunction("func");
+    QVERIFY(addedFunc);
+    QVERIFY(addedFunc->isStatic());
+}
+
 QTEST_APPLESS_MAIN(TestAddFunction)
 
 #include "testaddfunction.moc"
