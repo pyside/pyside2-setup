@@ -138,6 +138,11 @@ class DerivedTest(unittest.TestCase):
         d = Derived(objId)
         self.assertEqual(Abstract.getObjectId(d), objId)
 
+    def testObjectCreationWithParentType(self):
+        '''Derived class creates an instance of itself in C++ and returns it as a pointer to its ancestor Abstract.'''
+        obj = Derived.createObject()
+        self.assertEqual(type(obj), Derived)
+
 if __name__ == '__main__':
     unittest.main()
 
