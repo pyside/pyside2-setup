@@ -318,6 +318,11 @@ void CppGenerator::writeDestructorNative(QTextStream &s, const AbstractMetaClass
 
 void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFunction* func)
 {
+    //skip metaObject function, this will be write manually ahead
+    if (usePySideExtensions() && func->ownerClass() && func->ownerClass()->isQObject() &&
+        ((func->name() == "metaObject") || (func->name() == "qt_metacall")))
+        return;
+
     QString returnKeyword = func->type() ? QLatin1String("return ") : QString();
     QString prefix = wrapperName(func->ownerClass()) + "::";
     s << functionSignature(func, prefix, "", Generator::SkipDefaultValues) << endl << "{" << endl;
@@ -451,10 +456,12 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
     QString wrapperClassName = wrapperName(metaClass);
     QString prefix = wrapperClassName + "::";
     s << "const QMetaObject* " << wrapperClassName << "::metaObject() const\n{\n";
-    s << INDENT << "if (!m_metaObject)\n";
+    s << INDENT << "if (!m_metaObject) {\n";
     {
         Indentation indentation(INDENT);
-        s << INDENT << "m_metaObject = new PySide::DynamicQMetaObject(&" << metaClass->qualifiedCppName() << "::staticMetaObject);\n";
+        s << INDENT << "PyObject *pySelf = BindingManager::instance().retrieveWrapper(this);\n";
+        s << INDENT << "m_metaObject = new PySide::DynamicQMetaObject(pySelf->ob_type->tp_name, &" << metaClass->qualifiedCppName() << "::staticMetaObject);\n";
+        s << INDENT << "}\n";
     }
     s << INDENT << "return m_metaObject;\n";
     s << "}\n\n";
@@ -2187,8 +2194,6 @@ void CppGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
         return;
 
     QString pyTypeName = cpythonTypeName(type);
-
-    const AbstractMetaClass* metaClass = classes().findClass(type->name());
 
     AbstractMetaFunctionList implicitConvs = implicitConversions(type);
     bool hasImplicitConversions = !implicitConvs.isEmpty();
