@@ -92,8 +92,10 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     s << "#include <shiboken.h>" << endl;
     if (usePySideExtensions()) {
         s << "#include <typeresolver.h>\n";
-        if (metaClass->isQObject())
+        if (metaClass->isQObject()) {
             s << "#include <signalmanager.h>\n";
+            s << "#include <dynamicqmetaobject.h>\n";
+        }
     }
 
     // The multiple inheritance initialization function
@@ -294,6 +296,8 @@ void CppGenerator::writeConstructorNative(QTextStream& s, const AbstractMetaFunc
                            OriginalTypeDescription | SkipDefaultValues);
     s << " : ";
     writeFunctionCall(s, func);
+    if (usePySideExtensions() && func->ownerClass()->isQObject())
+        s << ", m_metaObject(0)";
     s << " {" << endl;
     writeCodeSnips(s, func->injectedCodeSnips(), CodeSnip::Beginning, TypeSystem::NativeCode, func);
     s << INDENT << "// ... middle" << endl;
@@ -306,6 +310,8 @@ void CppGenerator::writeDestructorNative(QTextStream &s, const AbstractMetaClass
     Indentation indentation(INDENT);
     s << wrapperName(metaClass) << "::~" << wrapperName(metaClass) << "()" << endl << '{' << endl;
     s << INDENT << "BindingManager::instance().invalidateWrapper(this);" << endl;
+    if (usePySideExtensions() && metaClass->isQObject())
+        s << INDENT << "delete m_metaObject;\n";
     s << '}' << endl;
 }
 
@@ -439,15 +445,21 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     Indentation indentation(INDENT);
-    QString prefix = wrapperName(metaClass) + "::";
-    s << "const QMetaObject* " << wrapperName(metaClass) << "::metaObject() const\n{\n";
-    s << INDENT << "const QMetaObject* qmetaObject = PySide::SignalManager::instance().getMetaObject(this);\n";
-    s << INDENT << "if (!qmetaObject)\n";
+    QString wrapperClassName = wrapperName(metaClass);
+    QString prefix = wrapperClassName + "::";
+    s << "const QMetaObject* " << wrapperClassName << "::metaObject() const\n{\n";
+    s << INDENT << "if (!m_metaObject)\n";
     {
         Indentation indentation(INDENT);
-        s << INDENT << "qmetaObject = &" << metaClass->qualifiedCppName() << "::staticMetaObject;\n";
+        s << INDENT << "m_metaObject = new PySide::DynamicQMetaObject(&" << metaClass->qualifiedCppName() << "::staticMetaObject);\n";
     }
-    s << INDENT << "return qmetaObject;\n";
+    s << INDENT << "return m_metaObject;\n";
+    s << "}\n\n";
+
+    s << "int " << wrapperClassName << "::qt_metacall(QMetaObject::Call call, int id, void** args)\n";
+    s << "{\n";
+    s << INDENT << "id = " << metaClass->qualifiedCppName() << "::qt_metacall(call, id, args);\n";
+    s << INDENT << "return id < 0 ? id : PySide::SignalManager::qt_metacall(this, call, id, args);\n";
     s << "}\n\n";
 }
 

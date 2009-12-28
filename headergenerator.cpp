@@ -71,6 +71,10 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
         s << metaClass->typeEntry()->include().toString() << endl << endl;
 
     if (shouldGenerateCppWrapper(metaClass)) {
+
+        if (usePySideExtensions() && metaClass->isQObject())
+            s << "namespace PySide { class DynamicQMetaObject; }\n\n";
+
         // Class
         s << "class " << wrapperName;
         s << " : public " << metaClass->qualifiedCppName();
@@ -83,13 +87,18 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
         foreach (AbstractMetaFunction *func, filterFunctions(metaClass))
             writeFunction(s, func);
 
-        if (usePySideExtensions() && metaClass->isQObject())
-            s << INDENT << "virtual const QMetaObject* metaObject() const;\n";;
-
         //destructor
         s << INDENT << (metaClass->hasVirtualDestructor() ? "virtual " : "") << "~" << wrapperName << "();" << endl;
 
         writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Declaration, TypeSystem::NativeCode);
+
+        if (usePySideExtensions() && metaClass->isQObject()) {
+            s << "public:\n";
+            s << INDENT << "virtual const QMetaObject* metaObject() const;\n";;
+            s << INDENT << "virtual int qt_metacall(QMetaObject::Call call, int id, void** args);\n";;
+            s << "private:\n";
+            s << INDENT << "mutable PySide::DynamicQMetaObject* m_metaObject;\n";
+        }
 
         s << "};" << endl << endl;
     }
