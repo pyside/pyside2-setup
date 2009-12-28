@@ -186,7 +186,7 @@ void TestAddFunction::testAddFunctionWithoutParenteses()
         </value-type>\
     </typesystem>";
 
-    TestUtil t(cppCode, xmlCode, false);
+    TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass("A");
     QVERIFY(classA);
@@ -218,7 +218,7 @@ void TestAddFunction::testAddFunctionWithDefaultArgs()
         </value-type>\
     </typesystem>";
 
-    TestUtil t(cppCode, xmlCode, false);
+    TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass("A");
     QVERIFY(classA);
@@ -240,7 +240,7 @@ void TestAddFunction::testAddFunctionAtModuleLevel()
         </add-function>\
     </typesystem>";
 
-    TestUtil t(cppCode, xmlCode, false);
+    TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass("A");
     QVERIFY(classA);
@@ -278,7 +278,7 @@ void TestAddFunction::testAddFunctionWithVarargs()
         </value-type>\
     </typesystem>";
 
-    TestUtil t(cppCode, xmlCode, false);
+    TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass("A");
     QVERIFY(classA);
