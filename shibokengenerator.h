@@ -102,7 +102,9 @@ public:
      *   \param position     the position to insert the code snip
      *   \param language     the kind of code snip
      *   \param func the cpp function
-     *   \param lastArg last argument whose value is available
+     *   \param lastArg last argument whose value is available, usually the last;
+     *                  a NULL pointer indicates that no argument will be available,
+     *                  i.e. a call without arguments.
      *   \param context the class context for the place where the code snip will be written
      */
     void writeCodeSnips(QTextStream &s,

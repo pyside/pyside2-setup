@@ -299,9 +299,10 @@ void CppGenerator::writeConstructorNative(QTextStream& s, const AbstractMetaFunc
     if (usePySideExtensions() && func->ownerClass()->isQObject())
         s << ", m_metaObject(0)";
     s << " {" << endl;
-    writeCodeSnips(s, func->injectedCodeSnips(), CodeSnip::Beginning, TypeSystem::NativeCode, func);
+    const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().last();
+    writeCodeSnips(s, func->injectedCodeSnips(), CodeSnip::Beginning, TypeSystem::NativeCode, func, lastArg);
     s << INDENT << "// ... middle" << endl;
-    writeCodeSnips(s, func->injectedCodeSnips(), CodeSnip::End, TypeSystem::NativeCode, func);
+    writeCodeSnips(s, func->injectedCodeSnips(), CodeSnip::End, TypeSystem::NativeCode, func, lastArg);
     s << '}' << endl << endl;
 }
 
@@ -402,7 +403,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         if (injectedCodeUsesPySelf(func))
             s << INDENT << "PyObject* pySelf = BindingManager::instance().retrieveWrapper(this);" << endl;
 
-        writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::NativeCode, func);
+        const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().last();
+        writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::NativeCode, func, lastArg);
         s << endl;
     }
 
@@ -426,7 +428,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
     if (func->hasInjectedCode()) {
         s << endl;
-        writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::NativeCode, func);
+        const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().last();
+        writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::NativeCode, func, lastArg);
     }
 
     s << INDENT << "Py_XDECREF(pyargs);" << endl;
@@ -1057,14 +1060,15 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         // Find the last argument available in the method call to provide
         // the injected code writer with information to avoid invalid replacements
         // on the %# variable.
-        if (maxArgs > 0
-            && maxArgs < func->arguments().size() - OverloadData::numberOfRemovedArguments(func)) {
+        if (maxArgs > 0 && maxArgs < func->arguments().size() - OverloadData::numberOfRemovedArguments(func)) {
             int removedArgs = 0;
             for (int i = 0; i < maxArgs + removedArgs; i++) {
                 lastArg = func->arguments()[i];
                 if (func->argumentRemoved(i + 1))
                     removedArgs++;
             }
+        } else if (maxArgs != 0 && !func->arguments().isEmpty()) {
+            lastArg = func->arguments().last();
         }
 
         writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::TargetLangCode, func, lastArg);
@@ -1535,7 +1539,8 @@ void CppGenerator::writeSequenceMethods(QTextStream& s, const AbstractMetaClass*
 
         s << cpythonWrapperCPtr(func->ownerClass(), "self") << ';' << endl;
         s << INDENT << "(void)cppSelf; // avoid warnings about unused variables" << endl;
-        writeCodeSnips(s, snips,CodeSnip::Any, TypeSystem::TargetLangCode, func);
+        const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().last();
+        writeCodeSnips(s, snips,CodeSnip::Any, TypeSystem::TargetLangCode, func, lastArg);
         s << '}' << endl << endl;
     }
 }

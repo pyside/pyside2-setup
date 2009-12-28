@@ -930,14 +930,13 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 const AbstractMetaArgument* arg = func->arguments().at(i);
                 QString argReplacement;
                 if (snip.language == TypeSystem::TargetLangCode) {
-                    if (func->argumentRemoved(i+1)) {
+                    if (!lastArg || func->argumentRemoved(i+1)) {
                         if (!arg->defaultValueExpression().isEmpty())
                             argReplacement = arg->defaultValueExpression();
                         removed++;
-                    }
-
-                    if (lastArg && arg->argumentIndex() > lastArg->argumentIndex())
+                    } else if (lastArg && (arg->argumentIndex() > lastArg->argumentIndex())) {
                         argReplacement = arg->defaultValueExpression();
+                    }
 
                     if (argReplacement.isEmpty()) {
                         argReplacement = QString("cpp_arg%1").arg(i - removed);
