@@ -281,6 +281,14 @@ void HeaderGenerator::finishGeneration()
         s << "#include <memory>" << endl << endl;
         writeExportMacros(s);
 
+        QStringList requiredTargetImports = TypeDatabase::instance()->requiredTargetImports();
+        if (!requiredTargetImports.isEmpty()) {
+            s << "// Module Includes" << endl;
+            foreach (const QString& requiredModule, requiredTargetImports)
+                s << "#include <" << getModuleHeaderFileName(requiredModule) << ">" << endl;
+            s << endl;
+        }
+
         s << "// Class Includes" << endl;
         s << classIncludes << endl;
 
