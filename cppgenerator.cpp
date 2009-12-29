@@ -468,8 +468,8 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
 
     s << "int " << wrapperClassName << "::qt_metacall(QMetaObject::Call call, int id, void** args)\n";
     s << "{\n";
-    s << INDENT << "id = " << metaClass->qualifiedCppName() << "::qt_metacall(call, id, args);\n";
-    s << INDENT << "return id < 0 ? id : PySide::SignalManager::qt_metacall(this, call, id, args);\n";
+    s << INDENT << "int result = " << metaClass->qualifiedCppName() << "::qt_metacall(call, id, args);\n";
+    s << INDENT << "return result < 0 ? result : PySide::SignalManager::qt_metacall(this, call, id, args);\n";
     s << "}\n\n";
 }
 
