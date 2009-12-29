@@ -61,6 +61,7 @@ public:
     PyObject* object() { return m_pyobj; }
     operator PyObject*() { return m_pyobj; }
     operator bool() const { return m_pyobj; }
+    PyObject* operator->() { return m_pyobj; }
 private:
     PyObject* m_pyobj;
     AutoDecRef(const AutoDecRef&);
