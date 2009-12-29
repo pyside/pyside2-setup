@@ -234,6 +234,13 @@
             );
     </template>
 
+    <template name="boolptr_at_start_and_one_arg_fix_beginning">
+        bool __ok__;
+        %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](
+                %CPPSELF.%TYPE::%FUNCTION_NAME(&amp;__ok__, %2)
+            );
+    </template>
+
     <template name="boolptr_fix_end">
         PyObject* _tuple_ = PyTuple_New(2);
         PyTuple_SET_ITEM(_tuple_, 0, %PYARG_0);
@@ -765,6 +772,20 @@
                 return !ok ? -1 : 0;
             </inject-code>
         </add-function>
+        <modify-function signature="toInt(bool*, int)const">
+            <modify-argument index="1">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PyObject*"/>
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+                <insert-template name="boolptr_at_start_and_one_arg_fix_beginning"/>
+            </inject-code>
+            <inject-code class="target" position="end">
+                <insert-template name="boolptr_fix_end"/>
+            </inject-code>
+        </modify-function>
     </value-type>
 
     <value-type name="StrList">

@@ -54,6 +54,8 @@ public:
     char get_char(int pos) const;
     bool set_char(int pos, char ch);
 
+    int toInt(bool* ok = 0, int base = 10) const;
+
     void show() const;
 
     int size() const { return m_str.size(); }

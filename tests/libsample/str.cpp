@@ -93,6 +93,31 @@ Str::cstring() const
     return m_str.c_str();
 }
 
+int
+Str::toInt(bool* ok, int base) const
+{
+    bool my_ok;
+    int result = 0;
+    istringstream conv(m_str);
+    switch (base) {
+        case 8:
+            conv >> std::oct >> result;
+            break;
+        case 10:
+            conv >> std::dec >> result;
+            break;
+        case 16:
+            conv >> std::hex >> result;
+            break;
+    }
+    my_ok = istringstream::eofbit & conv.rdstate();
+    if (!my_ok)
+        result = 0;
+    if (ok)
+        *ok = my_ok;
+    return result;
+}
+
 void
 Str::show() const
 {
