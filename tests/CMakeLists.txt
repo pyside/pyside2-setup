@@ -5,7 +5,7 @@ add_subdirectory(otherbinding)
 
 file(GLOB TEST_FILES samplebinding/*_test.py otherbinding/*_test.py)
 
-set(test_blacklist "")
+set(test_blacklist derived otherderived)
 
 foreach(test_file ${TEST_FILES})
     string(REGEX MATCH "/([^/]+)_test.py" test_name ${test_file})
