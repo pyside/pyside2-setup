@@ -668,12 +668,14 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         s << endl << INDENT << "if (PyErr_Occurred()";
         if (hasReturnValue && !rfunc->isInplaceOperator())
             s << " || !" << retvalVariableName();
-        s << ')' << endl;
+        s << ") {" << endl;
         {
             Indentation indent(INDENT);
+            if (hasReturnValue  && !rfunc->isInplaceOperator())
+                s << INDENT << "Py_XDECREF(" << retvalVariableName() << ");" << endl;
             s << INDENT << "return 0;" << endl;
         }
-        s << endl;
+        s << INDENT << '}' << endl;
 
         s << INDENT;
         if (hasReturnValue) {
