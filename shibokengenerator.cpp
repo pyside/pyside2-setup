@@ -939,9 +939,13 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                     }
 
                     if (argReplacement.isEmpty()) {
-                        argReplacement = QString("cpp_arg%1").arg(i - removed);
-                        if (shouldDereferenceArgumentPointer(arg))
-                            argReplacement.prepend("(*").append(')');
+                        if (arg->type()->typeEntry()->isCustom()) {
+                            argReplacement = usePyArgs ? QString("pyargs[%1]").arg(i - removed) : "arg";
+                        } else {
+                            argReplacement = QString("cpp_arg%1").arg(i - removed);
+                            if (shouldDereferenceArgumentPointer(arg))
+                                argReplacement.prepend("(*").append(')');
+                        }
                     }
                 } else {
                     argReplacement = arg->argumentName();
