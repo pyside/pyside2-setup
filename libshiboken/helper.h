@@ -37,9 +37,29 @@
 
 #include <Python.h>
 #include "shibokenmacros.h"
+#include "conversions.h"
 
 namespace Shiboken
 {
+
+template<typename A, typename B>
+inline PyObject* makeTuple(const A& a, const B& b)
+{
+    PyObject* tuple = PyTuple_New(2);
+    PyTuple_SET_ITEM(tuple, 0, Converter<A>::toPython(a));
+    PyTuple_SET_ITEM(tuple, 1, Converter<B>::toPython(b));
+    return tuple;
+}
+
+template<typename A, typename B, typename C>
+inline PyObject* makeTuple(const A& a, const B& b, const C& c)
+{
+    PyObject* tuple = PyTuple_New(3);
+    PyTuple_SET_ITEM(tuple, 0, Converter<A>::toPython(a));
+    PyTuple_SET_ITEM(tuple, 1, Converter<B>::toPython(b));
+    PyTuple_SET_ITEM(tuple, 2, Converter<C>::toPython(c));
+    return tuple;
+}
 
 LIBSHIBOKEN_API bool PySequence_to_argc_argv(PyObject* argList, int* argc, char*** argv);
 
