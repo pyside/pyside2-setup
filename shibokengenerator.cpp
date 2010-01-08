@@ -1094,8 +1094,11 @@ bool ShibokenGenerator::hasMultipleInheritanceInAncestry(const AbstractMetaClass
 AbstractMetaClassList ShibokenGenerator::getBaseClasses(const AbstractMetaClass* metaClass)
 {
     AbstractMetaClassList baseClasses;
-    foreach (QString parent, metaClass->baseClassNames())
-        baseClasses << classes().findClass(parent);
+    foreach (QString parent, metaClass->baseClassNames()) {
+        AbstractMetaClass* clazz = classes().findClass(parent);
+        if (clazz)
+            baseClasses << clazz;
+    }
     return baseClasses;
 }
 
