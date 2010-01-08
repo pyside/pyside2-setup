@@ -1703,8 +1703,10 @@ TypeDatabase::TypeDatabase() : m_suppressWarnings(true)
 QString TypeDatabase::modifiedTypesystemFilepath(const QString &ts_file)
 {
     if (!QFile::exists(ts_file)) {
+        int idx = ts_file.lastIndexOf('/');
+        QString fileName = idx >= 0 ? ts_file.right(ts_file.length() - idx - 1) : ts_file;
         foreach (const QString &path, m_typesystemPaths) {
-            QString filepath(path + '/' + ts_file);
+            QString filepath(path + '/' + fileName);
             if (QFile::exists(filepath))
                 return filepath;
         }
@@ -1714,18 +1716,13 @@ QString TypeDatabase::modifiedTypesystemFilepath(const QString &ts_file)
 
 bool TypeDatabase::parseFile(const QString &filename, bool generate)
 {
-    QString filepath;
-    if (filename[0] != '/')
-        filepath = modifiedTypesystemFilepath(filename);
-    else
-        filepath = filename;
-
+    QString filepath = modifiedTypesystemFilepath(filename);
     if (m_parsedTypesystemFiles.contains(filepath))
         return m_parsedTypesystemFiles[filepath];
 
     QFile file(filepath);
     if (!file.exists()) {
-        ReportHandler::warning("Can't find " + filename+", typesystme paths: "+m_typesystemPaths.join(", "));
+        ReportHandler::warning("Can't find " + filename+", typesystem paths: "+m_typesystemPaths.join(", "));
         return false;
     }
 
