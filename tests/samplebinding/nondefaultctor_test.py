@@ -34,7 +34,10 @@ from sample import NonDefaultCtor
 class DerivedNonDefaultCtor (NonDefaultCtor):
     def returnMyselfVirtual(self):
         return NonDefaultCtor(self.value()+1)
-    pass
+
+class AnotherDerivedNonDefaultCtor (NonDefaultCtor):
+    def __init__(self, some_string):
+        pass
 
 class NonDefaultCtorTest(unittest.TestCase):
 
@@ -55,6 +58,8 @@ class NonDefaultCtorTest(unittest.TestCase):
         self.assertEqual(c.returnMyselfVirtual().value(), 4)
         self.assertEqual(c.callReturnMyselfVirtual().value(), 4)
 
+    def testCtorOverload(self):
+        c = AnotherDerivedNonDefaultCtor("testing")
 
 if __name__ == '__main__':
     unittest.main()
