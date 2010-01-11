@@ -1119,7 +1119,8 @@ QString ShibokenGenerator::getApiExportMacro() const
 QString ShibokenGenerator::getModuleHeaderFileName(QString modName) const
 {
     if (modName.isEmpty())
-        modName = moduleName();
+        modName = packageName();
+    modName.replace(".", "_");
     return QString("%1_python.h").arg(modName.toLower());
 }
 
