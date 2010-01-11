@@ -199,7 +199,7 @@ QString ShibokenGenerator::cpythonFunctionName(const AbstractMetaFunction* func)
         result = cpythonBaseName(func->ownerClass()->typeEntry());
         result += '_';
         if (func->isConstructor() || func->isCopyConstructor())
-            result += "New";
+            result += "Init";
         else if (func->isOperatorOverload())
             result += ShibokenGenerator::pythonOperatorFunctionName(func);
         else

@@ -30,7 +30,7 @@
 
 static Indentor INDENT;
 
-CppGenerator::CppGenerator()
+CppGenerator::CppGenerator() : m_currentErrorCode(0)
 {
     // sequence protocol functions
     typedef QPair<QString, QString> StrPair;
@@ -479,16 +479,21 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
     const AbstractMetaClass* metaClass = rfunc->ownerClass();
     QString className = cpythonTypeName(metaClass);
+    m_currentErrorCode = -1;
 
-    s << "PyObject*" << endl;
-    s << cpythonFunctionName(rfunc) << "(Shiboken::SbkBaseWrapperType* type, PyObject* args, PyObject* kwds)" << endl;
+    s << "int" << endl;
+    s << cpythonFunctionName(rfunc) << "(PyObject* self, PyObject* args, PyObject* kwds)" << endl;
     s << '{' << endl;
 
-    s << INDENT << "PyObject* self;" << endl;
     s << INDENT;
     bool hasCppWrapper = shouldGenerateCppWrapper(metaClass);
     s << (hasCppWrapper ? wrapperName(metaClass) : metaClass->qualifiedCppName());
-    s << "* cptr;" << endl << endl;
+    s << "* cptr;" << endl;
+    s << INDENT << "SbkBaseWrapper* sbkSelf = reinterpret_cast<SbkBaseWrapper*>(self);" << endl;
+    s << INDENT << "assert(!sbkSelf->cptr);\n"; // FIXME: object reinitialization not supported
+
+    if (metaClass->isAbstract() || metaClass->baseClassNames().size() > 1)
+        s << INDENT << "SbkBaseWrapperType* type = reinterpret_cast<SbkBaseWrapperType*>(self->ob_type);" << endl;
 
     if (metaClass->isAbstract()) {
         s << INDENT << "if (type == &" << className << ") {" << endl;
@@ -500,20 +505,15 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
                 s << INDENT << "\"'" << metaClass->qualifiedCppName();
             }
             s << "' represents a C++ abstract class and cannot be instanciated\");" << endl;
-            s << INDENT << "return 0;" << endl;
+            s << INDENT << "return " << m_currentErrorCode << ';' << endl;
         }
         s << INDENT << '}' << endl << endl;
     }
 
-    s << INDENT << "if (!PyType_IsSubtype((PyTypeObject*)type, (PyTypeObject*)&" << className << "))" << endl;
-    {
-        Indentation indentation(INDENT);
-        s << INDENT << "return 0;" << endl << endl;
-    }
-
     if (metaClass->baseClassNames().size() > 1) {
-        if (!metaClass->isAbstract())
+        if (!metaClass->isAbstract()) {
             s << INDENT << "if (type != &" << className << ") {" << endl;
+        }
         {
             Indentation indentation(INDENT);
             s << INDENT << "type->mi_init = " << className << ".mi_init;" << endl;
@@ -531,18 +531,22 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
 
     writeOverloadedMethodDecisor(s, &overloadData);
 
-    s << endl << INDENT << "if (!self) {" << endl;
-    {
-        Indentation indentation(INDENT);
-        s << INDENT << "if (cptr) delete cptr;" << endl;
-        s << INDENT << "return 0;" << endl;
-    }
-    s << INDENT << '}' << endl;
+    s << endl;
+    s << INDENT << "sbkSelf->cptr = cptr;" << endl;
+    s << INDENT << "sbkSelf->validCppObject = 1;" << endl;
+    // If the created C++ object has a C++ wrapper the ownership is assigned to Python
+    // (first "1") and the flag indicating that the Python wrapper holds an C++ wrapper
+    // is marked as true (the second "1"). Otherwise the default values apply:
+    // Python owns it and C++ wrapper is false.
+    if (shouldGenerateCppWrapper(overloads.first()->ownerClass()))
+        s << INDENT << "sbkSelf->containsCppWrapper = 1;" << endl;
+    s << INDENT << "BindingManager::instance().registerWrapper(sbkSelf);" << endl;
 
-    s << endl << INDENT << "return self;" << endl;
+    s << endl << INDENT << "return 1;" << endl;
     if (overloadData.maxArgs() > 0)
         writeErrorSection(s, overloadData);
     s << '}' << endl << endl;
+    m_currentErrorCode = 0;
 }
 
 void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const AbstractMetaClass* metaClass)
@@ -632,7 +636,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
         s << rfunc->ownerClass()->name() << '.' << rfunc->name();
         s << "()' not implemented.\");" << endl;
-        s << INDENT << "return 0;" << endl;
+        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
     } else {
         if (rfunc->implementingClass() &&
             (!rfunc->implementingClass()->isNamespace() && !rfunc->isStatic())) {
@@ -673,7 +677,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             Indentation indent(INDENT);
             if (hasReturnValue  && !rfunc->isInplaceOperator())
                 s << INDENT << "Py_XDECREF(" << retvalVariableName() << ");" << endl;
-            s << INDENT << "return 0;" << endl;
+            s << INDENT << "return " << m_currentErrorCode << ';' << endl;
         }
         s << INDENT << '}' << endl;
 
@@ -746,7 +750,7 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
     s << ", \"" << funcName << "\", " << minArgs << ", " << maxArgs  << ", " << pyargs << "))" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "return 0;" << endl;
+        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
     }
     s << endl;
 }
@@ -763,7 +767,7 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
         funcName = rfunc->name();
     s << INDENT << "PyErr_SetString(PyExc_TypeError, \"'" << funcName;
     s << "()' called with wrong parameters.\");" << endl;
-    s << INDENT << "return 0;" << endl;
+    s << INDENT << "return " << m_currentErrorCode << ';' << endl;
 }
 
 void CppGenerator::writeInvalidCppObjectCheck(QTextStream& s, QString pyArgName, const TypeEntry* type)
@@ -786,7 +790,7 @@ void CppGenerator::writeInvalidCppObjectCheck(QTextStream& s, QString pyArgName,
     s << "Shiboken::cppObjectIsInvalid(" << pyArgName << "))" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "return 0;" << endl;
+        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
     }
 }
 
@@ -1234,19 +1238,6 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::TargetLangCode, func, lastArg);
     }
 
-    if (func->isConstructor()) {
-
-        QString className = cpythonTypeName(func->ownerClass());
-        s << INDENT << "self = Shiboken::SbkBaseWrapper_New(type, cptr";
-        // If the created C++ object has a C++ wrapper the ownership is assigned to Python
-        // (first "1") and the flag indicating that the Python wrapper holds an C++ wrapper
-        // is marked as true (the second "1"). Otherwise the default values apply:
-        // Python owns it and C++ wrapper is false.
-        if (shouldGenerateCppWrapper(func->ownerClass()))
-            s << ", 1, 1";
-
-        s << ");" << endl;
-    }
     writeParentChildManagement(s, func);
 
     // Ownership transference between C++ and Python.
@@ -1388,6 +1379,7 @@ bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass* metaClass)
 void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     QString tp_flags;
+    QString tp_init;
     QString tp_new;
     QString tp_dealloc;
     QString tp_as_number('0');
@@ -1417,7 +1409,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         tp_flags = "Py_TPFLAGS_HAVE_CLASS";
         tp_dealloc = metaClass->hasPrivateDestructor() ?
                      "(destructor)Shiboken::SbkBaseWrapper_Dealloc_PrivateDtor" : "0";
-        tp_new = "0";
+        tp_init = "0";
     } else {
         tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES";//|Py_TPFLAGS_HAVE_GC";
 
@@ -1429,8 +1421,13 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         tp_dealloc = QString("(destructor)&(Shiboken::SbkBaseWrapper_Dealloc< %1 >)").arg(deallocClassName);
 
         AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
-        tp_new = ctors.isEmpty() ? "0" : QString("(newfunc)%1_New").arg(className);
+        tp_init = ctors.isEmpty() ? "0" : QString("(initproc)%1_Init").arg(className);
     }
+
+    if (metaClass->hasPrivateDestructor())
+        tp_new = "0";
+    else
+        tp_new = "Shiboken::SbkBaseWrapper_TpNew";
 
     QString tp_richcompare = QString('0');
     if (metaClass->hasComparisonOperatorOverload())
@@ -1498,7 +1495,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_descr_get*/        0," << endl;
     s << INDENT << "/*tp_descr_set*/        0," << endl;
     s << INDENT << "/*tp_dictoffset*/       0," << endl;
-    s << INDENT << "/*tp_init*/             0," << endl;
+    s << INDENT << "/*tp_init*/             " << tp_init << ',' << endl;
     s << INDENT << "/*tp_alloc*/            0," << endl;
     s << INDENT << "/*tp_new*/              " << tp_new << ',' << endl;
     s << INDENT << "/*tp_free*/             0," << endl;
@@ -1669,7 +1666,6 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
     s << "static PyObject*" << endl;
     s << baseName << "_richcompare(PyObject* self, PyObject* other, int op)" << endl;
     s << '{' << endl;
-
     QList<AbstractMetaFunctionList> cmpOverloads = filterGroupedOperatorFunctions(metaClass, AbstractMetaClass::ComparisonOp);
     s << INDENT << "bool result;" << endl;
     s << INDENT << metaClass->qualifiedCppName() << "& cpp_self = *" << cpythonWrapperCPtr(metaClass) << ';' << endl;
@@ -1761,7 +1757,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
         {
             Indentation indent(INDENT);
             s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"operator not implemented.\");" << endl;
-            s << INDENT << "return 0;" << endl;
+            s << INDENT << "return " << m_currentErrorCode << ';' << endl;
         }
     }
     s << INDENT << '}' << endl << endl;
@@ -1776,7 +1772,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
     {
         Indentation indent(INDENT);
         s << INDENT << "PyErr_SetString(PyExc_TypeError, \"operator called with wrong parameters.\");" << endl;
-        s << INDENT << "return 0;" << endl;
+        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
     }
     s << '}' << endl << endl;
 }

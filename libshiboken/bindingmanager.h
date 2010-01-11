@@ -49,7 +49,8 @@ public:
     static BindingManager& instance();
 
     bool hasWrapper(const void *cptr);
-    void assignWrapper(PyObject* wrapper, const void* cptr);
+
+    void registerWrapper(SbkBaseWrapper* pyobj);
     void releaseWrapper(PyObject* wrapper);
     PyObject* retrieveWrapper(const void* cptr);
     PyObject* getOverride(const void* cptr, const char* methodName);

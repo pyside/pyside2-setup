@@ -157,6 +157,7 @@ private:
     // Maps special function names to function parameters and return types
     // used by CPython API in the sequence protocol.
     QHash<QString, QPair<QString, QString> > m_sequenceProtocol;
+    int m_currentErrorCode;
 };
 
 #endif // CPPGENERATOR_H

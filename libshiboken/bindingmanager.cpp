@@ -44,6 +44,7 @@ typedef google::dense_hash_map<const void*, PyObject*> WrapperMap;
 struct BindingManager::BindingManagerPrivate {
     WrapperMap wrapperMapper;
     void releaseWrapper(void* cptr);
+    void assignWrapper(PyObject* wrapper, const void* cptr);
 };
 
 void BindingManager::BindingManagerPrivate::releaseWrapper(void* cptr)
@@ -51,6 +52,16 @@ void BindingManager::BindingManagerPrivate::releaseWrapper(void* cptr)
     WrapperMap::iterator iter = wrapperMapper.find(cptr);
     if (iter != wrapperMapper.end())
         wrapperMapper.erase(iter);
+}
+
+void BindingManager::BindingManagerPrivate::assignWrapper(PyObject* wrapper, const void* cptr)
+{
+    assert(cptr);
+    WrapperMap::iterator iter = wrapperMapper.find(cptr);
+    if (iter == wrapperMapper.end())
+        wrapperMapper.insert(std::make_pair(cptr, wrapper));
+    else
+        iter->second = wrapper;
 }
 
 BindingManager::BindingManager()
@@ -74,14 +85,22 @@ bool BindingManager::hasWrapper(const void* cptr)
 {
     return m_d->wrapperMapper.count(cptr);
 }
-
-void BindingManager::assignWrapper(PyObject* wrapper, const void* cptr)
+void BindingManager::registerWrapper(SbkBaseWrapper* pyobj)
 {
-    WrapperMap::iterator iter = m_d->wrapperMapper.find(cptr);
-    if (iter == m_d->wrapperMapper.end())
-        m_d->wrapperMapper.insert(std::make_pair(cptr, wrapper));
-    else
-        iter->second = wrapper;
+    SbkBaseWrapperType* instanceType = reinterpret_cast<SbkBaseWrapperType*>(pyobj->ob_type);
+    void* cptr = pyobj->cptr;
+
+    if (instanceType->mi_init && !instanceType->mi_offsets)
+        instanceType->mi_offsets = instanceType->mi_init(cptr);
+    m_d->assignWrapper(reinterpret_cast<PyObject*>(pyobj), cptr);
+    if (instanceType->mi_offsets) {
+        int* offset = instanceType->mi_offsets;
+        while (*offset != -1) {
+            if (*offset > 0)
+                m_d->assignWrapper(reinterpret_cast<PyObject*>(pyobj), reinterpret_cast<void*>((std::size_t) cptr + (*offset)));
+            offset++;
+        }
+    }
 }
 
 void BindingManager::releaseWrapper(PyObject* wrapper)

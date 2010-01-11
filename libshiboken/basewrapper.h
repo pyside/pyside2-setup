@@ -192,10 +192,12 @@ typedef struct {
 
 LIBSHIBOKEN_API PyAPI_FUNC(PyObject*)
 SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
-                   const void *cptr,
+                   const void* cptr,
                    bool hasOwnership = true,
                    bool containsCppWrapper = false);
 
+LIBSHIBOKEN_API PyAPI_FUNC(PyObject*)
+SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*);
 /// Returns true and sets a Python RuntimeError if the Python wrapper is not marked as valid.
 LIBSHIBOKEN_API bool cppObjectIsInvalid(PyObject* wrapper);
 

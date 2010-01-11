@@ -35,6 +35,7 @@
 #include "basewrapper.h"
 #include <cstddef>
 #include <algorithm>
+#include "autodecref.h"
 
 namespace Shiboken
 {
@@ -110,33 +111,25 @@ PyObject* SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
                              bool hasOwnership,
                              bool containsCppWrapper)
 {
-    static PyObject* zeroargs = 0;
-    if (!cptr)
-        return 0;
-    else if (!zeroargs)
-        zeroargs = PyTuple_New(0);
-
-    SbkBaseWrapper* self = reinterpret_cast<SbkBaseWrapper*>(PyBaseObject_Type.tp_new(reinterpret_cast<PyTypeObject*>(instanceType), zeroargs, 0));
-
+    SbkBaseWrapper* self = reinterpret_cast<SbkBaseWrapper*>(SbkBaseWrapper_TpNew(reinterpret_cast<PyTypeObject*>(instanceType), 0, 0));
     self->cptr = const_cast<void*>(cptr);
     self->hasOwnership = hasOwnership;
     self->containsCppWrapper = containsCppWrapper;
     self->validCppObject = 1;
     self->parentInfo = 0;
+    BindingManager::instance().registerWrapper(self);
+    return reinterpret_cast<PyObject*>(self);
+}
 
-    if (instanceType->mi_init && !instanceType->mi_offsets)
-        instanceType->mi_offsets = instanceType->mi_init(cptr);
-    BindingManager::instance().assignWrapper(reinterpret_cast<PyObject*>(self), cptr);
-    if (instanceType->mi_offsets) {
-        int* offset = instanceType->mi_offsets;
-        while (*offset != -1) {
-            if (*offset > 0) {
-                BindingManager::instance().assignWrapper(reinterpret_cast<PyObject*>(self),
-                                                         reinterpret_cast<void*>((std::size_t) cptr + (*offset)));
-            }
-            offset++;
-        }
-    }
+PyObject* SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*)
+{
+    Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
+    SbkBaseWrapper* self = reinterpret_cast<SbkBaseWrapper*>(PyBaseObject_Type.tp_new(subtype, emptyTuple, 0));
+    self->cptr = 0;
+    self->hasOwnership = 1;
+    self->containsCppWrapper = 0;
+    self->validCppObject = 0;
+    self->parentInfo = 0;
     return reinterpret_cast<PyObject*>(self);
 }
 
