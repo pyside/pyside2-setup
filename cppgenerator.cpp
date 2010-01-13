@@ -1276,13 +1276,18 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             }
 
             s << INDENT;
-            if (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::TargetLangOwnership)
-                s << "SbkBaseWrapper_setOwnership(" << pyArgName << ", true";
-            else if (wrappedClass->hasVirtualDestructor())
-                s << "BindingManager::instance().transferOwnershipToCpp(" << pyArgName;
-            else
-                s << "BindingManager::instance().invalidateWrapper(" << pyArgName;
-            s << ");" << endl;
+            if (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::TargetLangOwnership) {
+                s << "SbkBaseWrapper_setOwnership(" << pyArgName << ", true);";
+            } else if (wrappedClass->hasVirtualDestructor()) {
+                if (arg_mod.index == 0) {
+                    s << "SbkBaseWrapper_setOwnership(py_result, 0);";
+                } else {
+                    s << "BindingManager::instance().transferOwnershipToCpp(" << pyArgName << ");";
+                }
+            } else {
+                s << "BindingManager::instance().invalidateWrapper(" << pyArgName << ");";
+            }
+            s << endl;
         }
     }
 }
