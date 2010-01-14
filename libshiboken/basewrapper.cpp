@@ -203,7 +203,7 @@ PyTypeObject SbkBaseWrapperType_Type = {
     /*tp_weaklist*/         0
 };
 
-SbkBaseWrapperType SbkBaseWrapper_Type = {
+SbkBaseWrapperType SbkBaseWrapper_Type = { { {
     PyObject_HEAD_INIT(&SbkBaseWrapperType_Type)
     /*ob_size*/             0,
     /*tp_name*/             "Shiboken.BaseWrapper",
@@ -250,6 +250,10 @@ SbkBaseWrapperType SbkBaseWrapper_Type = {
     /*tp_cache*/            0,
     /*tp_subclasses*/       0,
     /*tp_weaklist*/         0
+}, },
+/*mi_offsets*/          0,
+/*mi_init*/             0,
+/*mi_specialcast*/      0
 };
 
 PyAPI_FUNC(void) init_shiboken()
