@@ -69,6 +69,7 @@ template<> inline PyTypeObject* SbkType<bool>() { return &PyBool_Type; }
 template<> inline PyTypeObject* SbkType<float>() { return &PyFloat_Type; }
 template<> inline PyTypeObject* SbkType<double>() { return &PyFloat_Type; }
 template<> inline PyTypeObject* SbkType<char>() { return &PyInt_Type; }
+template<> inline PyTypeObject* SbkType<signed char>() { return &PyInt_Type; }
 template<> inline PyTypeObject* SbkType<unsigned char>() { return &PyInt_Type; }
 
 /**
