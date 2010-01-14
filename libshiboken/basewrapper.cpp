@@ -272,6 +272,10 @@ PyAPI_FUNC(void) init_shiboken()
     if (shibokenAlreadInitialised)
         return;
 
+#ifdef WITH_THREAD
+    PyEval_InitThreads();
+#endif
+
     SbkBaseWrapperType_Type.tp_base = &PyType_Type;
 
     if (PyType_Ready(&SbkBaseWrapperType_Type) < 0)
