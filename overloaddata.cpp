@@ -245,6 +245,15 @@ bool OverloadData::hasVarargs() const
     return false;
 }
 
+bool OverloadData::hasAllowThread() const
+{
+    foreach (const AbstractMetaFunction* func, m_overloads) {
+        if (func->allowThread())
+            return true;
+    }
+    return false;
+}
+
 const AbstractMetaFunction* OverloadData::referenceFunction() const
 {
     return m_overloads.first();

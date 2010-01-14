@@ -54,6 +54,9 @@ public:
     /// Returns true if any of the overloads for the current OverloadData has a varargs argument.
     bool hasVarargs() const;
 
+    /// Returns true if any of the overloads for the current OverloadData allows threads when called.
+    bool hasAllowThread() const;
+
     const AbstractMetaFunction* referenceFunction() const;
     const AbstractMetaArgument* argument(const AbstractMetaFunction* func) const;
     OverloadDataList overloadDataOnPosition(int argPos) const;
