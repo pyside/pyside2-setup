@@ -90,8 +90,9 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     // headers
     s << "// default includes" << endl;
     s << "#include <shiboken.h>" << endl;
+    s << "#include <typeresolver.h>\n";
+    s << "#include <typeinfo>\n";
     if (usePySideExtensions()) {
-        s << "#include <typeresolver.h>\n";
         if (metaClass->isQObject()) {
             s << "#include <signalmanager.h>\n";
             s << "#include <dynamicqmetaobject.h>\n";
@@ -145,6 +146,9 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Beginning, TypeSystem::NativeCode, 0, 0, metaClass);
         s << endl;
     }
+
+    if (metaClass->isPolymorphic())
+        writeTypeNameFunction(s, metaClass);
 
     if (shouldGenerateCppWrapper(metaClass)) {
         s << "// Native ---------------------------------------------------------" << endl;
@@ -1390,6 +1394,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     QString tp_as_number('0');
     QString tp_as_sequence('0');
     QString mi_init('0');
+    QString type_name_func('0');
     QString mi_specialcast('0');
     QString cppClassName = metaClass->qualifiedCppName();
     QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
@@ -1428,6 +1433,9 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
         tp_init = ctors.isEmpty() ? "0" : QString("(initproc)%1_Init").arg(className);
     }
+
+    if (metaClass->isPolymorphic())
+        type_name_func = cpythonBaseName(metaClass->typeEntry()) + "_typeName";
 
     if (metaClass->hasPrivateDestructor())
         tp_new = "0";
@@ -1513,7 +1521,8 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << "}, }," << endl;
     s << INDENT << "/*mi_offsets*/          0," << endl;
     s << INDENT << "/*mi_init*/             " << mi_init << ',' << endl;
-    s << INDENT << "/*mi_specialcast*/      " << mi_specialcast << endl;
+    s << INDENT << "/*mi_specialcast*/      " << mi_specialcast << ',' << endl;
+    s << INDENT << "/*type_name_func*/      " << type_name_func << endl;
     s << "};" << endl;
 }
 
@@ -2181,11 +2190,15 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::End, TypeSystem::TargetLangCode, 0, 0, metaClass);
     }
 
-    if (usePySideExtensions() && !metaClass->isNamespace()) {
+    if (!metaClass->isNamespace()) {
         bool isObjectType = metaClass->typeEntry()->isObject();
-        QString typeName = metaClass->qualifiedCppName() + (isObjectType ? "*" : "");
-        s << INDENT << "PySide::TypeResolver::create" << (isObjectType ? "Object" : "Value");
-        s << "TypeResolver<" << typeName << " >" << "(\"" << typeName << "\");\n";
+        QString typeName = metaClass->qualifiedCppName();
+        QString registeredTypeName = typeName + (isObjectType ? "*" : "");
+        QString functionSufix = isObjectType ? "Object" : "Value";
+        s << INDENT << "Shiboken::TypeResolver::create" << functionSufix;
+        s << "TypeResolver<" << typeName << " >" << "(\"" << registeredTypeName << "\");\n";
+        s << INDENT << "Shiboken::TypeResolver::create" << functionSufix;
+        s << "TypeResolver<" << typeName << " >" << "(typeid(" << typeName << ").name());\n";
     }
 
     s << '}' << endl << endl;
@@ -2257,6 +2270,13 @@ void CppGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
 
     s << INDENT << "return *" << cpythonWrapperCPtr(type, "pyobj") << ';' << endl;
     s << '}' << endl << endl;
+}
+void CppGenerator::writeTypeNameFunction(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    Indentation indent(INDENT);
+    s << "static const char* " << cpythonBaseName(metaClass->typeEntry()) << "_typeName(const void* cptr)\n{\n";
+    s << INDENT << "return typeid(*reinterpret_cast<const " << metaClass->qualifiedCppName() << "*>(cptr)).name();\n";
+    s << "}\n\n";
 }
 
 void CppGenerator::writeSbkCopyCppObjectFunction(QTextStream& s, const AbstractMetaClass* metaClass)

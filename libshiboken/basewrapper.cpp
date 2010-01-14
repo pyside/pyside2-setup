@@ -36,6 +36,7 @@
 #include <cstddef>
 #include <algorithm>
 #include "autodecref.h"
+#include "typeresolver.h"
 
 namespace Shiboken
 {
@@ -109,12 +110,24 @@ void destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent)
 PyObject* SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
                              const void* cptr,
                              bool hasOwnership,
-                             bool containsCppWrapper)
+                             bool isExactType)
 {
+    // Try to find the exact type of cptr.
+    if (!isExactType && instanceType->type_name_func) {
+        const char* typeName = instanceType->type_name_func(cptr);
+        TypeResolver* typeResolver = TypeResolver::get(typeName);
+        if (typeResolver)
+            instanceType = reinterpret_cast<SbkBaseWrapperType*>(typeResolver->pythonType());
+        #ifndef NDEBUG
+        else
+            fprintf(stderr, "[SHIBOKEN] Can't find type resolver for %s.\n", typeName);
+        #endif
+    }
+
     SbkBaseWrapper* self = reinterpret_cast<SbkBaseWrapper*>(SbkBaseWrapper_TpNew(reinterpret_cast<PyTypeObject*>(instanceType), 0, 0));
     self->cptr = const_cast<void*>(cptr);
     self->hasOwnership = hasOwnership;
-    self->containsCppWrapper = containsCppWrapper;
+    self->containsCppWrapper = 0;
     self->validCppObject = 1;
     self->parentInfo = 0;
     BindingManager::instance().registerWrapper(self);
@@ -253,7 +266,8 @@ SbkBaseWrapperType SbkBaseWrapper_Type = { { {
 }, },
 /*mi_offsets*/          0,
 /*mi_init*/             0,
-/*mi_specialcast*/      0
+/*mi_specialcast*/      0,
+/*type_name_func*/      0
 };
 
 PyAPI_FUNC(void) init_shiboken()

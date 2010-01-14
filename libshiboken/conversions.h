@@ -89,10 +89,10 @@ struct CppObjectCopier
  * Convenience template to create wrappers using the proper Python type for a given C++ class instance.
  */
 template<typename T>
-inline PyObject* SbkCreateWrapper(const T* cppobj, bool hasOwnership = false, bool containsCppWrapper = false)
+inline PyObject* SbkCreateWrapper(const T* cppobj, bool hasOwnership = false, bool isExactType = false)
 {
     return SbkBaseWrapper_New(reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()),
-                              cppobj, hasOwnership, containsCppWrapper);
+                              cppobj, hasOwnership, isExactType);
 }
 
 // Base Conversions ----------------------------------------------------------
@@ -105,7 +105,9 @@ struct ConverterBase
     static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<T*>(cppobj)); }
     static inline PyObject* toPython(const T& cppobj)
     {
-        return SbkCreateWrapper<T>(CppObjectCopier<T>::copy(cppobj), true, CppObjectCopier<T>::isCppWrapper);
+        PyObject* obj = SbkCreateWrapper<T>(CppObjectCopier<T>::copy(cppobj), true, true);
+        SbkBaseWrapper_setContainsCppWrapper(obj, CppObjectCopier<T>::isCppWrapper);
+        return obj;
     }
     // Classes with implicit conversions are expected to reimplement
     // this to build T from its various implicit constructors.
