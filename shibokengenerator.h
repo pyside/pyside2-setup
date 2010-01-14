@@ -211,6 +211,7 @@ public:
     /// before calling the C++ method.
     static bool shouldDereferenceArgumentPointer(const AbstractMetaArgument* arg);
 
+    QString cpythonBaseName(const AbstractMetaClass* metaClass);
     QString cpythonBaseName(const TypeEntry* type);
     QString cpythonBaseName(const AbstractMetaType* type);
     QString cpythonTypeName(const AbstractMetaClass* metaClass);

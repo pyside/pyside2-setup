@@ -1431,11 +1431,11 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         tp_dealloc = QString("(destructor)&(Shiboken::SbkBaseWrapper_Dealloc< %1 >)").arg(deallocClassName);
 
         AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
-        tp_init = ctors.isEmpty() ? "0" : QString("(initproc)%1_Init").arg(className);
+        tp_init = ctors.isEmpty() ? "0" : cpythonFunctionName(ctors.first());
     }
 
     if (metaClass->isPolymorphic())
-        type_name_func = cpythonBaseName(metaClass->typeEntry()) + "_typeName";
+        type_name_func = cpythonBaseName(metaClass) + "_typeName";
 
     if (metaClass->hasPrivateDestructor())
         tp_new = "0";
@@ -1444,7 +1444,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
 
     QString tp_richcompare = QString('0');
     if (metaClass->hasComparisonOperatorOverload())
-        tp_richcompare = cpythonBaseName(metaClass->typeEntry()) + "_richcompare";
+        tp_richcompare = cpythonBaseName(metaClass) + "_richcompare";
 
     // search for special functions
     ShibokenGenerator::clearTpFuncs();
@@ -1676,7 +1676,7 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
 
 void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
-    QString baseName = cpythonBaseName(metaClass->typeEntry());
+    QString baseName = cpythonBaseName(metaClass);
     s << "static PyObject*" << endl;
     s << baseName << "_richcompare(PyObject* self, PyObject* other, int op)" << endl;
     s << '{' << endl;
@@ -2274,7 +2274,7 @@ void CppGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
 void CppGenerator::writeTypeNameFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     Indentation indent(INDENT);
-    s << "static const char* " << cpythonBaseName(metaClass->typeEntry()) << "_typeName(const void* cptr)\n{\n";
+    s << "static const char* " << cpythonBaseName(metaClass) << "_typeName(const void* cptr)\n{\n";
     s << INDENT << "return typeid(*reinterpret_cast<const " << metaClass->qualifiedCppName() << "*>(cptr)).name();\n";
     s << "}\n\n";
 }

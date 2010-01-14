@@ -360,6 +360,11 @@ QString ShibokenGenerator::cpythonBaseName(const AbstractMetaType* type)
     return cpythonBaseName(type->typeEntry());
 }
 
+QString ShibokenGenerator::cpythonBaseName(const AbstractMetaClass* metaClass)
+{
+    return cpythonBaseName(metaClass->typeEntry());
+}
+
 QString ShibokenGenerator::cpythonBaseName(const TypeEntry* type)
 {
     QString baseName;
