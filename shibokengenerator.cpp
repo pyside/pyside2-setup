@@ -858,7 +858,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
 
         if (func) {
             // replace %PYARG_# variables
-            code.replace("%PYARG_0", retvalVariableName());
+            code.replace("%PYARG_0", pythonReturnVariableName());
             if (snip.language == TypeSystem::TargetLangCode) {
                 if (numArgs > 1) {
                     code.replace(pyArgsRegex, "pyargs[\\1-1]");
@@ -897,7 +897,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 code.replace("%0.", QString("%1->").arg("cptr"));
                 code.replace("%0", "cptr");
             } else if (func->type()) {
-                QString pyRetVal = cpythonWrapperCPtr(func->type(), retvalVariableName());
+                QString pyRetVal = cpythonWrapperCPtr(func->type(), pythonReturnVariableName());
                 if (func->type()->typeEntry()->isValue() || func->type()->typeEntry()->isObject())
                     code.replace("%0.", QString("%1->").arg(pyRetVal));
                 code.replace("%0", pyRetVal);
