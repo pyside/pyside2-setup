@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/sh
 
 # This is a nasty workaround of a CTest limitation
 # of setting the environment variables for the test.
