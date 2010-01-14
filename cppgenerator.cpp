@@ -485,7 +485,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     QString className = cpythonTypeName(metaClass);
     m_currentErrorCode = -1;
 
-    s << "int" << endl;
+    s << "static int" << endl;
     s << cpythonFunctionName(rfunc) << "(PyObject* self, PyObject* args, PyObject* kwds)" << endl;
     s << '{' << endl;
 

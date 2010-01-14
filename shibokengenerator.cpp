@@ -197,13 +197,15 @@ QString ShibokenGenerator::cpythonFunctionName(const AbstractMetaFunction* func)
 
     if (func->ownerClass()) {
         result = cpythonBaseName(func->ownerClass()->typeEntry());
-        result += '_';
-        if (func->isConstructor() || func->isCopyConstructor())
-            result += "Init";
-        else if (func->isOperatorOverload())
-            result += ShibokenGenerator::pythonOperatorFunctionName(func);
-        else
-            result += func->name();
+        if (func->isConstructor() || func->isCopyConstructor()) {
+            result += "_Init";
+        } else {
+            result += "Func_";
+            if (func->isOperatorOverload())
+                result += ShibokenGenerator::pythonOperatorFunctionName(func);
+            else
+                result += func->name();
+        }
     } else {
         result = "Sbk" + moduleName() + "Module_" + func->name();
     }
