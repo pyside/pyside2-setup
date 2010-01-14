@@ -687,11 +687,12 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
 
         s << INDENT;
         if (hasReturnValue) {
-            s << "return ";
-            if (rfunc->isInplaceOperator())
-                s << "self";
-            else
-                s << retvalVariableName();
+            if (rfunc->isInplaceOperator()) {
+                s << INDENT << "Py_INCREF(self);\n";
+                s << INDENT << "return self;\n";
+            } else {
+                s << INDENT << "return " << retvalVariableName() << ";\n";
+            }
         } else {
             s << "Py_RETURN_NONE";
         }
