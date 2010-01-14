@@ -1259,10 +1259,10 @@ void AbstractMetaClass::setFunctions(const AbstractMetaFunctionList &functions)
     foreach (AbstractMetaFunction *f, m_functions) {
         f->setOwnerClass(this);
 
-        m_hasVirtualSlots |= f->isVirtualSlot();
-        m_hasVirtuals |= !f->isFinal() || f->isVirtualSlot();
-        m_isPolymorphic |= m_hasVirtuals;
-        m_hasNonpublic |= !f->isPublic();
+        m_hasVirtualSlots = m_hasVirtualSlots || f->isVirtualSlot();
+        m_hasVirtuals = m_hasVirtuals || !f->isFinal() || f->isVirtualSlot();
+        m_isPolymorphic = m_isPolymorphic || m_hasVirtuals || hasVirtualDestructor();
+        m_hasNonpublic = m_hasNonpublic || !f->isPublic();
 
         // If we have non-virtual overloads of a virtual function, we have to implement
         // all the overloads in the shell class to override the hiding rule
