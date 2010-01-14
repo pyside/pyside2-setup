@@ -493,6 +493,8 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     bool hasCppWrapper = shouldGenerateCppWrapper(metaClass);
     s << (hasCppWrapper ? wrapperName(metaClass) : metaClass->qualifiedCppName());
     s << "* cptr;" << endl;
+    if (overloadData.hasAllowThread())
+        s << INDENT << "PyThreadState* " << threadStateVariableName() << ';' << endl;
     s << INDENT << "SbkBaseWrapper* sbkSelf = reinterpret_cast<SbkBaseWrapper*>(self);" << endl;
     s << INDENT << "assert(!sbkSelf->cptr);\n"; // FIXME: object reinitialization not supported
 
@@ -662,6 +664,9 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
 
         if (hasReturnValue && !rfunc->isInplaceOperator())
             s << INDENT << "PyObject* " << pythonReturnVariableName() << " = 0;" << endl;
+        if (overloadData.hasAllowThread())
+            s << INDENT << "PyThreadState* " << threadStateVariableName() << ';' << endl;
+        s << endl;
 
         if (minArgs != maxArgs || maxArgs > 1) {
             s << INDENT << "int numArgs = ";
@@ -1180,15 +1185,14 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             }
         } else if (!injectedCodeCallsCppFunction(func)) {
             if (func->isConstructor() || func->isCopyConstructor()) {
-                s << INDENT;
                 isCtor = true;
-                s << "cptr = new " << wrapperName(func->ownerClass());
-                s << '(';
+                mc << "new " << wrapperName(func->ownerClass());
+                mc << '(';
                 if (func->isCopyConstructor() && maxArgs == 1)
-                    s << "*cpp_arg0";
+                    mc << "*cpp_arg0";
                 else
-                    s << userArgs.join(", ");
-                s << ')';
+                    mc << userArgs.join(", ");
+                mc << ')';
             } else {
                 if (func->ownerClass()) {
 #ifndef AVOID_PROTECTED_HACK
@@ -1214,19 +1218,22 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
         if (!badModifications) {
             if (!injectedCodeCallsCppFunction(func)) {
+                if (func->allowThread())
+                    s << INDENT << threadStateVariableName() << " = PyEval_SaveThread();" << endl;
                 s << INDENT;
-                if (!func->type() || func->isInplaceOperator()) {
-                    s << methodCall;
-                } else if (!isCtor) {
-                    if (func->type())
-                        s << func->type()->cppSignature() << ' ' << cppReturnVariableName() << " = ";
-                    s << methodCall << ';' << endl;
-                    s << INDENT;
-                    if (func->type())
-                        s << pythonReturnVariableName() << " = ";
+                if (isCtor)
+                    s << "cptr = ";
+                else if (func->type() && !func->isInplaceOperator())
+                    s << func->type()->cppSignature() << ' ' << cppReturnVariableName() << " = ";
+                s << methodCall << ';' << endl;
+                if (func->allowThread())
+                    s << INDENT << "PyEval_RestoreThread(" << threadStateVariableName() << ");" << endl;
+
+                if (!isCtor && !func->isInplaceOperator() && func->type()) {
+                    s << INDENT << pythonReturnVariableName() << " = ";
                     writeToPythonConversion(s, func->type(), func->ownerClass(), cppReturnVariableName());
+                    s << ';' << endl;
                 }
-                s << ';' << endl;
             }
         }
     }
@@ -1248,7 +1255,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     }
 
     if (!ownership_mods.isEmpty()) {
-        s << INDENT << "// Ownership transferences." << endl;
+        s << endl << INDENT << "// Ownership transferences." << endl;
         foreach (ArgumentModification arg_mod, ownership_mods) {
             const AbstractMetaClass* wrappedClass = 0;
             QString pyArgName;
