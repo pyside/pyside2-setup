@@ -35,8 +35,12 @@
 #ifndef OTHERDERIVED_H
 #define OTHERDERIVED_H
 
-#include <libsample/libsamplemacros.h>
-#include <libsample/abstract.h>
+#include "libsamplemacros.h"
+#include "abstract.h"
+#include "derived.h"
+
+class ObjectType;
+class Complex;
 
 class LIBSAMPLE_API OtherDerived : public Abstract
 {
@@ -45,6 +49,10 @@ public:
     virtual ~OtherDerived();
     virtual void pureVirtual();
     virtual void unpureVirtual();
+
+    void useObjectTypeFromOtherModule(ObjectType*) {}
+    void useValueTypeFromOtherModule(const Complex&) {}
+    void useEnumTypeFromOtherModule(OverloadedFuncEnum) {}
 
     // factory method
     static Abstract* createObject();

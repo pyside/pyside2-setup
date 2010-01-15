@@ -235,12 +235,12 @@ static QString cpythonEnumFlagsName(QString moduleName, QString qualifiedCppName
 
 QString ShibokenGenerator::cpythonEnumName(const EnumTypeEntry* enumEntry)
 {
-    return cpythonEnumFlagsName(moduleName(), enumEntry->qualifiedCppName());
+    return cpythonEnumFlagsName(enumEntry->targetLangPackage().replace(".", "_"), enumEntry->qualifiedCppName());
 }
 
 QString ShibokenGenerator::cpythonFlagsName(const FlagsTypeEntry* flagsEntry)
 {
-    return cpythonEnumFlagsName(moduleName(), flagsEntry->originalName());
+    return cpythonEnumFlagsName(flagsEntry->targetLangPackage().replace(".", "_"), flagsEntry->originalName());
 }
 
 QString ShibokenGenerator::cpythonSpecialCastFunctionName(const AbstractMetaClass* metaClass)
