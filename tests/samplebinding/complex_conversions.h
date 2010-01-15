@@ -1,11 +1,14 @@
 template<>
-struct Converter<Complex>
+struct Converter<Complex> : public ConverterBase<Complex>
 {
     static bool isConvertible(const PyObject* pyObj)
     {
         return PyComplex_Check(pyObj);
     }
-    static PyObject* toPython(Complex cpx)
+
+    using ConverterBase<Complex>::toPython;
+
+    static PyObject* toPython(const Complex& cpx)
     {
         return PyComplex_FromDoubles(cpx.real(), cpx.imag());
     }

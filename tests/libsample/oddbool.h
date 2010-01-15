@@ -42,7 +42,7 @@ class LIBSAMPLE_API OddBool
 
 public:
     inline explicit OddBool(bool b) : m_value(b) {}
-    bool value() { return m_value; }
+    bool value() const { return m_value; }
 
     inline OddBool operator!() const { return OddBool(!m_value); }
 

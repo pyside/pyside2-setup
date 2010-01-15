@@ -1,12 +1,14 @@
 template <>
-struct Converter<OddBool>
+struct Converter<OddBool> : public ConverterBase<OddBool>
 {
     static bool isConvertible(const PyObject* pyObj)
     {
         return PyBool_Check(pyObj);
     }
 
-    static PyObject* toPython(OddBool holder)
+    using ConverterBase<OddBool>::toPython;
+
+    static PyObject* toPython(const OddBool& holder)
     {
         return PyBool_FromLong(holder.value());
     }
