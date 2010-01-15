@@ -557,9 +557,7 @@
         </modify-function>
         <modify-function signature="callMe()">
             <inject-code class="native" position="end">
-                PyGILState_STATE gil_state = PyGILState_Ensure();
                 PyObject_Call(%PYTHON_METHOD_OVERRIDE, %PYTHON_ARGUMENTS, NULL);
-                PyGILState_Release(gil_state);
             </inject-code>
         </modify-function>
     </value-type>

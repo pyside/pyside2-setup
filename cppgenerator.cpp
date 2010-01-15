@@ -327,7 +327,9 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         ((func->name() == "metaObject") || (func->name() == "qt_metacall")))
         return;
 
-    QString returnKeyword = func->type() ? QLatin1String("return ") : QString();
+    const TypeEntry* type = func->type() ? func->type()->typeEntry() : 0;
+    bool isWrappedCppClass = type ? (type->isValue() || type->isObject()) : false;
+
     QString prefix = wrapperName(func->ownerClass()) + "::";
     s << functionSignature(func, prefix, "", Generator::SkipDefaultValues) << endl << "{" << endl;
 
@@ -341,13 +343,15 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         return;
     }
 
-    if (func->allowThread())
-        s << INDENT << "// how to say to Python to allow threads?" << endl;
+    s << INDENT << "PyGILState_STATE gil_state = PyGILState_Ensure();" << endl;
 
     s << INDENT << "PyObject* py_override = BindingManager::instance().getOverride(this, \"";
     s << func->name() << "\");" << endl;
+    s << INDENT << "bool hasOverride = py_override;" << endl;
 
-    s << INDENT << "if (!py_override) {" << endl;
+    s << INDENT << "PyGILState_Release(gil_state);" << endl << endl;
+
+    s << INDENT << "if (!hasOverride) {" << endl;
     {
         Indentation indentation(INDENT);
         s << INDENT;
@@ -367,6 +371,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     }
     s << ';' << endl;
     s << INDENT << '}' << endl << endl;
+
+    s << INDENT << "gil_state = PyGILState_Ensure();" << endl << endl;
 
     s << INDENT << "PyObject* pyargs = ";
     if (func->arguments().isEmpty()) {
@@ -418,12 +424,20 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     }
 
     if (!injectedCodeCallsPythonOverride(func)) {
-        s << INDENT << "PyGILState_STATE gil_state = PyGILState_Ensure();" << endl;
         s << INDENT;
-        if (!returnKeyword.isEmpty())
+        if (type)
             s << "PyObject* " << pythonReturnVariableName() << " = ";
         s << "PyObject_Call(py_override, pyargs, NULL);" << endl;
-        s << INDENT << "PyGILState_Release(gil_state);" << endl << endl;
+        if (type) {
+            s << INDENT;
+            if (isWrappedCppClass) {
+                s << type->name() << "* " << cppReturnVariableName() << " = " << cpythonWrapperCPtr(type, pythonReturnVariableName());
+            } else {
+                s << translateTypeForWrapperMethod(func->type(), func->implementingClass()) << ' ' << cppReturnVariableName() << " = ";
+                writeToCppConversion(s, func->type(), func->implementingClass(), pythonReturnVariableName());
+            }
+            s << ';' << endl;
+        }
     }
 
     foreach (FunctionModification func_mod, func->modifications()) {
@@ -443,12 +457,11 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
     s << INDENT << "Py_XDECREF(pyargs);" << endl;
     s << INDENT << "Py_XDECREF(py_override);" << endl;
+    s << INDENT << "PyGILState_Release(gil_state);" << endl << endl;
 
-    s << endl << INDENT << "// check and set Python error here..." << endl;
-
-    if (!returnKeyword.isEmpty()) {
-        s << INDENT << returnKeyword;
-        writeToCppConversion(s, func->type(), func->implementingClass(), pythonReturnVariableName());
+    if (type) {
+        s << INDENT << "return ";
+        s << (shouldDereferenceAbstractMetaTypePointer(func->type()) ? "*" : "") << cppReturnVariableName();
         s << ';' << endl;
     }
     s << '}' << endl << endl;
