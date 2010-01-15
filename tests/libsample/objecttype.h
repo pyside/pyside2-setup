@@ -85,6 +85,7 @@ public:
 
     // Returns true if the event is processed.
     virtual bool event(Event* event);
+    static int processEvent(ObjectTypeList objects, Event *event);
 
     // This nonsense method emulate QWidget.setLayout method
     // All layout objects will became children of this object.

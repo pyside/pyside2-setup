@@ -162,6 +162,21 @@ ObjectType::event(Event* event)
     return true;
 }
 
+int
+ObjectType::processEvent(ObjectTypeList objects, Event *event)
+{
+    int evaluated = 0;
+
+    for (ObjectTypeList::iterator obj_iter = objects.begin();
+         obj_iter != objects.end(); ++obj_iter) {
+        if((*obj_iter)->event(event))
+            evaluated++;
+    }
+
+    return evaluated;
+
+}
+
 void ObjectType::setLayout(ObjectTypeLayout* l)
 {
     if (!l) {

@@ -831,6 +831,10 @@
     <object-type name="MDerived5"/>
     <object-type name="SonOfMDerived1"/>
 
+    <object-type name="Bucket">
+        <modify-function signature="lock()" allow-thread="yes" />
+    </object-type>
+
     <value-type name="Echo">
         <add-function signature="echo(const char *)" return-type="PyObject*">
             <inject-code class="target" position="beginning">

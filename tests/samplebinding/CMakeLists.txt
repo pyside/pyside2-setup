@@ -14,6 +14,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/base4_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/base5_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/base6_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/blackbox_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/bucket_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/collector_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/derived_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/echo_wrapper.cpp

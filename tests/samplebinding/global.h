@@ -1,5 +1,6 @@
 #include "abstract.h"
 #include "blackbox.h"
+#include "bucket.h"
 #include "collector.h"
 #include "complex.h"
 #include "derived.h"
