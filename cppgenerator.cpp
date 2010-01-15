@@ -778,6 +778,25 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
     s << endl;
 }
 
+void CppGenerator::writeCppSelfDefinition(QTextStream& s, const AbstractMetaFunction* func)
+{
+    if (!func->ownerClass() || func->isStatic() || func->isConstructor())
+        return;
+
+    s << INDENT;
+#ifdef AVOID_PROTECTED_HACK
+    bool hasProtectedFunctions = func->ownerClass()->hasProtectedFunctions();
+    QString _wrapperName = wrapperName(func->ownerClass());
+    s << (hasProtectedFunctions ? _wrapperName : func->ownerClass()->qualifiedCppName()) << "* " << cppSelfVariableName() << " = ";
+    s << (hasProtectedFunctions ? QString("(%1*)").arg(_wrapperName) : "");
+#else
+    s << func->ownerClass()->qualifiedCppName() << "* " << cppSelfVariableName() << " = ";
+#endif
+    s << cpythonWrapperCPtr(func->ownerClass(), "self") << ';' << endl;
+    if (func->isUserAdded())
+        s << INDENT << "(void)" << cppSelfVariableName() << "; // avoid warnings about unused variables" << endl;
+}
+
 void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
 {
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
@@ -1073,25 +1092,14 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
           << func->ownerClass()->name() << '.' << func->name() << "()' not implemented.\");" << endl;
         return;
     }
+    writeCppSelfDefinition(s, func);
 
-    // Used to provide contextual information to injected code writer.
+    // Used to provide contextual information to custom code writer function.
     const AbstractMetaArgument* lastArg = 0;
 
     CodeSnipList snips;
     if (func->hasInjectedCode()) {
         snips = func->injectedCodeSnips();
-        if (injectedCodeUsesCppSelf(func)) {
-            s << INDENT;
-#ifdef AVOID_PROTECTED_HACK
-            bool hasProtectedFunctions = func->ownerClass()->hasProtectedFunctions();
-            QString _wrapperName = wrapperName(func->ownerClass());
-            s << (hasProtectedFunctions ? _wrapperName : func->ownerClass()->qualifiedCppName()) << "* cppSelf = ";
-            s << (hasProtectedFunctions ? QString("(%1*)").arg(_wrapperName) : "");
-#else
-            s << func->ownerClass()->qualifiedCppName() << "* cppSelf = ";
-#endif
-            s << cpythonWrapperCPtr(func->ownerClass(), "self") << ';' << endl;
-        }
 
         // Find the last argument available in the method call to provide
         // the injected code writer with information to avoid invalid replacements
@@ -1176,7 +1184,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 s << "\" with the modifications described on the type system file" << endl;
             }
         } else if (func->isOperatorOverload()) {
-            QString firstArg = QString("(*%1)").arg(cpythonWrapperCPtr(func->ownerClass()));
+            QString firstArg = QString("(*%1)").arg(cppSelfVariableName());
             QString secondArg("cpp_arg0");
             if (!func->isUnaryOperator() && shouldDereferenceArgumentPointer(func->arguments().first())) {
                 secondArg.prepend("(*");
@@ -1210,14 +1218,13 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 if (func->ownerClass()) {
 #ifndef AVOID_PROTECTED_HACK
                     if (!func->isStatic())
-                        mc << cpythonWrapperCPtr(func->ownerClass()) << "->";
+                        mc << cppSelfVariableName() << "->";
                     mc << func->ownerClass()->name() << "::" << func->originalName();
 #else
                     if (!func->isStatic()) {
                         if (func->isProtected())
-                            mc << "((" << wrapperName(func->ownerClass()) << "*)";
-                        mc << cpythonWrapperCPtr(func->ownerClass());
-                        mc << (func->isProtected() ? ")" : "") << "->";
+                            mc << "((" << wrapperName(func->ownerClass()) << "*) ";
+                        mc << cppSelfVariableName() << (func->isProtected() ? ")" : "") << "->";
                     }
                     mc << (func->isProtected() ? wrapperName(func->ownerClass()) : func->ownerClass()->name());
                     mc << "::" << func->originalName() << (func->isProtected() ? "_protected" : "");
@@ -1557,22 +1564,9 @@ void CppGenerator::writeSequenceMethods(QTextStream& s, const AbstractMetaClass*
         CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
         s << funcRetVal << ' ' << funcName << '(' << funcArgs << ')' << endl << '{' << endl;
         writeInvalidCppObjectCheck(s);
-        s << INDENT;
 
-#ifndef AVOID_PROTECTED_HACK
-        s << func->ownerClass()->name() << "* cppSelf = ";
-#else
-        if (func->isProtected())
-            s << wrapperName(func->ownerClass());
-        else
-            s << func->ownerClass()->name();
-        s << "* cppSelf = ";
-        if (func->isProtected())
-            s << '(' << wrapperName(func->ownerClass()) << "*) ";
-#endif
+        writeCppSelfDefinition(s, func);
 
-        s << cpythonWrapperCPtr(func->ownerClass(), "self") << ';' << endl;
-        s << INDENT << "(void)cppSelf; // avoid warnings about unused variables" << endl;
         const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().last();
         writeCodeSnips(s, snips,CodeSnip::Any, TypeSystem::TargetLangCode, func, lastArg);
         s << '}' << endl << endl;

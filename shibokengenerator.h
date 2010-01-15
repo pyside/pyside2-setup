@@ -283,6 +283,7 @@ protected:
     static QString pythonReturnVariableName() { return QString("py_result"); }
     static QString cppReturnVariableName() { return QString("cpp_result"); }
     static QString threadStateVariableName() { return QString("thread_state"); }
+    static QString cppSelfVariableName() { return QString("cppSelf"); }
 
     AbstractMetaFunctionList queryFunctions(const AbstractMetaClass* metaClass, bool allFunction = false);
     void writeFunctionCall(QTextStream& s,
