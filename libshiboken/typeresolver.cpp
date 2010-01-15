@@ -34,6 +34,7 @@
 
 #include "typeresolver.h"
 #include "google/dense_hash_map"
+#include "sbkdbg.h"
 #include <cstdlib>
 
 using namespace Shiboken;
@@ -95,7 +96,12 @@ TypeResolver::~TypeResolver()
 TypeResolver* TypeResolver::get(const char* typeName)
 {
     TypeResolverMap::const_iterator it = typeResolverMap.find(typeName);
-    return it == typeResolverMap.end() ? 0 : it->second;
+    if (it != typeResolverMap.end()) {
+        return it->second;
+    } else {
+        SbkDbg() << "Can't find type resolver for " << typeName;
+        return 0;
+    }
 }
 
 const char* TypeResolver::typeName() const

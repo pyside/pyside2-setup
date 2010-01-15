@@ -118,10 +118,6 @@ PyObject* SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
         TypeResolver* typeResolver = TypeResolver::get(typeName);
         if (typeResolver)
             instanceType = reinterpret_cast<SbkBaseWrapperType*>(typeResolver->pythonType());
-        #ifndef NDEBUG
-        else
-            fprintf(stderr, "[SHIBOKEN] Can't find type resolver for %s.\n", typeName);
-        #endif
     }
 
     SbkBaseWrapper* self = reinterpret_cast<SbkBaseWrapper*>(SbkBaseWrapper_TpNew(reinterpret_cast<PyTypeObject*>(instanceType), 0, 0));
