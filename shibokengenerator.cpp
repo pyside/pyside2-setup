@@ -901,10 +901,9 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 code.replace("%0.", QString("%1->").arg("cptr"));
                 code.replace("%0", "cptr");
             } else if (func->type()) {
-                QString pyRetVal = cpythonWrapperCPtr(func->type(), pythonReturnVariableName());
                 if (func->type()->typeEntry()->isValue() || func->type()->typeEntry()->isObject())
-                    code.replace("%0.", QString("%1->").arg(pyRetVal));
-                code.replace("%0", pyRetVal);
+                    code.replace("%0.", QString("%1->").arg(cppReturnVariableName()));
+                code.replace("%0", cppReturnVariableName());
             }
 
             // replace template variable for self Python object
