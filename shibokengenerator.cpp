@@ -820,8 +820,8 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
     static QRegExp pyArgsRegex("%PYARG_(\\d+)");
 
     // detect is we should use pyargs instead of args as variable name for python arguments
-    bool usePyArgs;
-    int numArgs;
+    bool usePyArgs = false;
+    int numArgs = 0;
     if (func) {
         // calc num of real arguments.
         int argsRemoved = 0;
