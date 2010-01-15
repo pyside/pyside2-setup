@@ -517,9 +517,13 @@ bool ShibokenGenerator::isPyInt(const AbstractMetaType* type)
 
 bool ShibokenGenerator::shouldDereferenceArgumentPointer(const AbstractMetaArgument* arg)
 {
-    const AbstractMetaType* argType = arg->type();
-    const TypeEntry* type = argType->typeEntry();
-    return (type->isValue() || type->isObject()) && (argType->isValue() || argType->isReference());
+    return shouldDereferenceAbstractMetaTypePointer(arg->type());
+}
+
+bool ShibokenGenerator::shouldDereferenceAbstractMetaTypePointer(const AbstractMetaType* metaType)
+{
+    const TypeEntry* type = metaType->typeEntry();
+    return (type->isValue() || type->isObject()) && (metaType->isValue() || metaType->isReference());
 }
 
 static QString checkFunctionName(QString baseName, bool genericNumberType, bool checkExact)
