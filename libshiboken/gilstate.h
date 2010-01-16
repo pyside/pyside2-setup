@@ -1,7 +1,7 @@
 /*
  * This file is part of the Shiboken Python Bindings Generator project.
  *
- * Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -32,18 +32,24 @@
  * 02110-1301 USA
  */
 
-#ifndef SHIBOKEN_H
-#define SHIBOKEN_H
+#ifndef GILSTATE_H
+#define GILSTATE_H
 
 #include <Python.h>
-#include "autodecref.h"
-#include "basewrapper.h"
-#include "bindingmanager.h"
-#include "conversions.h"
-#include "gilstate.h"
-#include "helper.h"
-#include "pyenum.h"
-#include "shibokenmacros.h"
 
-#endif // SHIBOKEN_H
+namespace Shiboken
+{
+
+class LIBSHIBOKEN_API GilState
+{
+public:
+    GilState() { m_gstate = PyGILState_Ensure(); }
+    ~GilState() { PyGILState_Release(m_gstate); }
+private:
+    PyGILState_STATE m_gstate;
+};
+
+} // namespace Shiboken
+
+#endif // GILSTATE_H
 
