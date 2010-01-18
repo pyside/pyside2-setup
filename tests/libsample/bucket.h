@@ -57,7 +57,7 @@ public:
 private:
     std::list<int> m_data;
 
-    bool m_locked;
+    volatile bool m_locked;
 };
 
 #endif // BUCKET_H
