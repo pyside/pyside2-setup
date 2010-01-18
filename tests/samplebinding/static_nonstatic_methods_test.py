@@ -3,7 +3,7 @@
 #
 # This file is part of the Shiboken Python Bindings Generator project.
 #
-# Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
 #
 # Contact: PySide team <contact@pyside.org>
 #
@@ -24,15 +24,15 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-'''Test cases for SimpleFile class'''
+'''Test cases for overloads involving static and non-static versions of a method.'''
 
 import os
 import unittest
 
 from sample import SimpleFile
 
-class SimpleFileTest(unittest.TestCase):
-    '''Test cases for SimpleFile class.'''
+class StaticNonStaticMethodsTest(unittest.TestCase):
+    '''Test cases for overloads involving static and non-static versions of a method.'''
 
     def setUp(self):
         filename = 'simplefile%d.txt' % os.getpid()
@@ -56,20 +56,23 @@ class SimpleFileTest(unittest.TestCase):
         if self.delete_file:
             os.remove(self.existing_filename)
 
-    def testExistingFile(self):
-        '''Test SimpleFile class with existing file.'''
-        f = SimpleFile(self.existing_filename)
-        self.assertEqual(f.filename(), self.existing_filename)
-        f.open()
-        self.assertNotEqual(f.size(), 0)
-        f.close()
+    def testCallingStaticMethodWithClass(self):
+        '''Call static method using class.'''
+        self.assert_(SimpleFile.exists(self.existing_filename))
+        self.assertFalse(SimpleFile.exists(self.non_existing_filename))
 
-    def testNonExistingFile(self):
-        '''Test SimpleFile class with non-existing file.'''
+    def testCallingStaticMethodWithInstance(self):
+        '''Call static method using instance of class.'''
         f = SimpleFile(self.non_existing_filename)
-        self.assertEqual(f.filename(), self.non_existing_filename)
-        self.assertRaises(IOError, f.open)
-        self.assertEqual(f.size(), 0)
+        self.assert_(f.exists(self.existing_filename))
+        self.assertFalse(f.exists(self.non_existing_filename))
+
+    def testCallingInstanceMethod(self):
+        '''Call instance method.'''
+        f1 = SimpleFile(self.non_existing_filename)
+        self.assertFalse(f1.exists())
+        f2 = SimpleFile(self.existing_filename)
+        self.assert_(f2.exists())
 
 if __name__ == '__main__':
     unittest.main()

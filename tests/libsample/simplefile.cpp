@@ -32,6 +32,7 @@
  * 02110-1301 USA
  */
 
+#include <fstream>
 #include "simplefile.h"
 
 bool
@@ -54,5 +55,19 @@ SimpleFile::close()
         fclose(m_descriptor);
         m_descriptor = 0;
     }
+}
+
+bool
+SimpleFile::exists() const
+{
+    std::ifstream ifile(m_filename);
+    return ifile;
+}
+
+bool
+SimpleFile::exists(const char* filename)
+{
+    std::ifstream ifile(filename);
+    return ifile;
 }
 

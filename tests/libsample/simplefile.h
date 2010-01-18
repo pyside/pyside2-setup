@@ -64,6 +64,9 @@ public:
     bool open();
     void close();
 
+    bool exists() const;
+    static bool exists(const char* filename);
+
 private:
     const char* m_filename;
     FILE* m_descriptor;
