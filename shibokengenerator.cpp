@@ -862,7 +862,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
 
         if (func) {
             // replace %PYARG_# variables
-            code.replace("%PYARG_0", pythonReturnVariableName());
+            code.replace("%PYARG_0", PYTHON_RETURN_VAR);
             if (snip.language == TypeSystem::TargetLangCode) {
                 if (numArgs > 1) {
                     code.replace(pyArgsRegex, "pyargs[\\1-1]");
@@ -902,8 +902,8 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 code.replace("%0", "cptr");
             } else if (func->type()) {
                 if (func->type()->typeEntry()->isValue() || func->type()->typeEntry()->isObject())
-                    code.replace("%0.", QString("%1->").arg(cppReturnVariableName()));
-                code.replace("%0", cppReturnVariableName());
+                    code.replace("%0.", QString("%1->").arg(CPP_RETURN_VAR));
+                code.replace("%0", CPP_RETURN_VAR);
             }
 
             // replace template variable for self Python object

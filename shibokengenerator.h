@@ -24,6 +24,11 @@
 #ifndef SHIBOKENGENERATOR_H
 #define SHIBOKENGENERATOR_H
 
+#define PYTHON_RETURN_VAR         "py_result"
+#define CPP_RETURN_VAR            "cpp_result"
+#define THREAD_STATE_SAVER_VAR    "thread_state_saver"
+#define CPP_SELF_VAR              "cppSelf"
+
 #include <generatorrunner/generator.h>
 #include <QtCore/QTextStream>
 
@@ -279,11 +284,6 @@ protected:
      *   Initialize correspondences between primitive and Python types
      */
     static void initPrimitiveTypesCorrespondences();
-
-    static QString pythonReturnVariableName() { return QString("py_result"); }
-    static QString cppReturnVariableName() { return QString("cpp_result"); }
-    static QString threadStateVariableName() { return QString("thread_state_saver"); }
-    static QString cppSelfVariableName() { return QString("cppSelf"); }
 
     AbstractMetaFunctionList queryFunctions(const AbstractMetaClass* metaClass, bool allFunction = false);
     void writeFunctionCall(QTextStream& s,

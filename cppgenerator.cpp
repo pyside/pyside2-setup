@@ -362,8 +362,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             }
         } else {
             if (func->allowThread()) {
-                s << INDENT << "Shiboken::ThreadStateSaver " << threadStateVariableName() << ';' << endl;
-                s << INDENT << threadStateVariableName() << ".save();" << endl;
+                s << INDENT << "Shiboken::ThreadStateSaver " << THREAD_STATE_SAVER_VAR << ';' << endl;
+                s << INDENT << THREAD_STATE_SAVER_VAR << ".save();" << endl;
             }
             s << INDENT << "return this->" << func->implementingClass()->qualifiedCppName() << "::";
             writeFunctionCall(s, func);
@@ -424,15 +424,15 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     if (!injectedCodeCallsPythonOverride(func)) {
         s << INDENT;
         if (type)
-            s << "PyObject* " << pythonReturnVariableName() << " = ";
+            s << "PyObject* " << PYTHON_RETURN_VAR << " = ";
         s << "PyObject_Call(py_override, pyargs, NULL);" << endl;
         if (type) {
             s << INDENT;
             if (isWrappedCppClass) {
-                s << type->name() << "* " << cppReturnVariableName() << " = " << cpythonWrapperCPtr(type, pythonReturnVariableName());
+                s << type->name() << "* " << CPP_RETURN_VAR << " = " << cpythonWrapperCPtr(type, PYTHON_RETURN_VAR);
             } else {
-                s << translateTypeForWrapperMethod(func->type(), func->implementingClass()) << ' ' << cppReturnVariableName() << " = ";
-                writeToCppConversion(s, func->type(), func->implementingClass(), pythonReturnVariableName());
+                s << translateTypeForWrapperMethod(func->type(), func->implementingClass()) << ' ' << CPP_RETURN_VAR << " = ";
+                writeToCppConversion(s, func->type(), func->implementingClass(), PYTHON_RETURN_VAR);
             }
             s << ';' << endl;
         }
@@ -458,7 +458,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
     if (type) {
         s << INDENT << "return ";
-        s << (shouldDereferenceAbstractMetaTypePointer(func->type()) ? "*" : "") << cppReturnVariableName();
+        s << (shouldDereferenceAbstractMetaTypePointer(func->type()) ? "*" : "") << CPP_RETURN_VAR;
         s << ';' << endl;
     }
     s << '}' << endl << endl;
@@ -504,7 +504,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     s << (hasCppWrapper ? wrapperName(metaClass) : metaClass->qualifiedCppName());
     s << "* cptr;" << endl;
     if (overloadData.hasAllowThread())
-        s << INDENT << "Shiboken::ThreadStateSaver " << threadStateVariableName() << ';' << endl;
+        s << INDENT << "Shiboken::ThreadStateSaver " << THREAD_STATE_SAVER_VAR << ';' << endl;
     s << INDENT << "SbkBaseWrapper* sbkSelf = reinterpret_cast<SbkBaseWrapper*>(self);" << endl;
     s << INDENT << "assert(!sbkSelf->cptr);\n"; // FIXME: object reinitialization not supported
 
@@ -673,9 +673,9 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         bool hasReturnValue = overloadData.hasNonVoidReturnType();
 
         if (hasReturnValue && !rfunc->isInplaceOperator())
-            s << INDENT << "PyObject* " << pythonReturnVariableName() << " = 0;" << endl;
+            s << INDENT << "PyObject* " << PYTHON_RETURN_VAR << " = 0;" << endl;
         if (overloadData.hasAllowThread())
-            s << INDENT << "Shiboken::ThreadStateSaver " << threadStateVariableName() << ';' << endl;
+            s << INDENT << "Shiboken::ThreadStateSaver " << THREAD_STATE_SAVER_VAR << ';' << endl;
         s << endl;
 
         if (minArgs != maxArgs || maxArgs > 1) {
@@ -690,12 +690,12 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
 
         s << endl << INDENT << "if (PyErr_Occurred()";
         if (hasReturnValue && !rfunc->isInplaceOperator())
-            s << " || !" << pythonReturnVariableName();
+            s << " || !" << PYTHON_RETURN_VAR;
         s << ") {" << endl;
         {
             Indentation indent(INDENT);
             if (hasReturnValue  && !rfunc->isInplaceOperator())
-                s << INDENT << "Py_XDECREF(" << pythonReturnVariableName() << ");" << endl;
+                s << INDENT << "Py_XDECREF(" << PYTHON_RETURN_VAR << ");" << endl;
             s << INDENT << "return " << m_currentErrorCode << ';' << endl;
         }
         s << INDENT << '}' << endl;
@@ -706,7 +706,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
                 s << INDENT << "Py_INCREF(self);\n";
                 s << INDENT << "return self;\n";
             } else {
-                s << INDENT << "return " << pythonReturnVariableName() << ";\n";
+                s << INDENT << "return " << PYTHON_RETURN_VAR << ";\n";
             }
         } else {
             s << "Py_RETURN_NONE";
@@ -784,14 +784,14 @@ void CppGenerator::writeCppSelfDefinition(QTextStream& s, const AbstractMetaFunc
 #ifdef AVOID_PROTECTED_HACK
     bool hasProtectedFunctions = func->ownerClass()->hasProtectedFunctions();
     QString _wrapperName = wrapperName(func->ownerClass());
-    s << (hasProtectedFunctions ? _wrapperName : func->ownerClass()->qualifiedCppName()) << "* " << cppSelfVariableName() << " = ";
+    s << (hasProtectedFunctions ? _wrapperName : func->ownerClass()->qualifiedCppName()) << "* " << CPP_SELF_VAR << " = ";
     s << (hasProtectedFunctions ? QString("(%1*)").arg(_wrapperName) : "");
 #else
-    s << func->ownerClass()->qualifiedCppName() << "* " << cppSelfVariableName() << " = ";
+    s << func->ownerClass()->qualifiedCppName() << "* " << CPP_SELF_VAR << " = ";
 #endif
     s << cpythonWrapperCPtr(func->ownerClass(), "self") << ';' << endl;
     if (func->isUserAdded())
-        s << INDENT << "(void)" << cppSelfVariableName() << "; // avoid warnings about unused variables" << endl;
+        s << INDENT << "(void)" << CPP_SELF_VAR << "; // avoid warnings about unused variables" << endl;
 }
 
 void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
@@ -933,7 +933,7 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
 void CppGenerator::writeNoneReturn(QTextStream& s, const AbstractMetaFunction* func, bool thereIsReturnValue)
 {
     if (thereIsReturnValue && (!func->type() || func->argumentRemoved(0)) && !injectedCodeHasReturnValueAttribution(func)) {
-        s << INDENT << pythonReturnVariableName() << " = Py_None;" << endl;
+        s << INDENT << PYTHON_RETURN_VAR << " = Py_None;" << endl;
         s << INDENT << "Py_INCREF(Py_None);" << endl;
     }
 }
@@ -1181,7 +1181,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 s << "\" with the modifications described on the type system file" << endl;
             }
         } else if (func->isOperatorOverload()) {
-            QString firstArg = QString("(*%1)").arg(cppSelfVariableName());
+            QString firstArg = QString("(*%1)").arg(CPP_SELF_VAR);
             QString secondArg("cpp_arg0");
             if (!func->isUnaryOperator() && shouldDereferenceArgumentPointer(func->arguments().first())) {
                 secondArg.prepend("(*");
@@ -1215,13 +1215,13 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 if (func->ownerClass()) {
 #ifndef AVOID_PROTECTED_HACK
                     if (!func->isStatic())
-                        mc << cppSelfVariableName() << "->";
+                        mc << CPP_SELF_VAR << "->";
                     mc << func->ownerClass()->name() << "::" << func->originalName();
 #else
                     if (!func->isStatic()) {
                         if (func->isProtected())
                             mc << "((" << wrapperName(func->ownerClass()) << "*) ";
-                        mc << cppSelfVariableName() << (func->isProtected() ? ")" : "") << "->";
+                        mc << CPP_SELF_VAR << (func->isProtected() ? ")" : "") << "->";
                     }
                     mc << (func->isProtected() ? wrapperName(func->ownerClass()) : func->ownerClass()->name());
                     mc << "::" << func->originalName() << (func->isProtected() ? "_protected" : "");
@@ -1236,19 +1236,19 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         if (!badModifications) {
             if (!injectedCodeCallsCppFunction(func)) {
                 if (func->allowThread())
-                    s << INDENT << threadStateVariableName() << ".save();" << endl;
+                    s << INDENT << THREAD_STATE_SAVER_VAR << ".save();" << endl;
                 s << INDENT;
                 if (isCtor)
                     s << "cptr = ";
                 else if (func->type() && !func->isInplaceOperator())
-                    s << func->type()->cppSignature() << ' ' << cppReturnVariableName() << " = ";
+                    s << func->type()->cppSignature() << ' ' << CPP_RETURN_VAR << " = ";
                 s << methodCall << ';' << endl;
                 if (func->allowThread())
-                    s << INDENT << threadStateVariableName() << ".restore();" << endl;
+                    s << INDENT << THREAD_STATE_SAVER_VAR << ".restore();" << endl;
 
                 if (!isCtor && !func->isInplaceOperator() && func->type()) {
-                    s << INDENT << pythonReturnVariableName() << " = ";
-                    writeToPythonConversion(s, func->type(), func->ownerClass(), cppReturnVariableName());
+                    s << INDENT << PYTHON_RETURN_VAR << " = ";
+                    writeToPythonConversion(s, func->type(), func->ownerClass(), CPP_RETURN_VAR);
                     s << ';' << endl;
                 }
             }
@@ -1280,7 +1280,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 pyArgName = QString("self");
                 wrappedClass = func->implementingClass();
             } else if (arg_mod.index == 0) {
-                pyArgName = pythonReturnVariableName();
+                pyArgName = PYTHON_RETURN_VAR;
                 wrappedClass = classes().findClass(func->type()->typeEntry()->name());
             } else {
                 int real_index = OverloadData::numberOfRemovedArguments(func, arg_mod.index - 1);
@@ -1302,7 +1302,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 s << "SbkBaseWrapper_setOwnership(" << pyArgName << ", true);";
             } else if (wrappedClass->hasVirtualDestructor()) {
                 if (arg_mod.index == 0) {
-                    s << "SbkBaseWrapper_setOwnership(" << pythonReturnVariableName() << ", 0);";
+                    s << "SbkBaseWrapper_setOwnership(" << PYTHON_RETURN_VAR << ", 0);";
                 } else {
                     s << "BindingManager::instance().transferOwnershipToCpp(" << pyArgName << ");";
                 }
@@ -2511,7 +2511,7 @@ void CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
                 ReportHandler::warning("Argument index for parent tag out of bounds: "+func->signature());
 
             if (parentIndex == 0)
-                parentVariable = pythonReturnVariableName();
+                parentVariable = PYTHON_RETURN_VAR;
             else if (parentIndex == -1)
                 parentVariable = "self";
             else
@@ -2520,7 +2520,7 @@ void CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
             if (argOwner.action == ArgumentOwner::Remove)
                 childVariable = "0";
             else if (childIndex == 0)
-                childVariable = pythonReturnVariableName();
+                childVariable = PYTHON_RETURN_VAR;
             else if (childIndex == -1)
                 childVariable = "self";
             else
