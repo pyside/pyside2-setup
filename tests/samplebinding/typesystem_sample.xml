@@ -833,6 +833,7 @@
 
     <object-type name="Bucket">
         <modify-function signature="lock()" allow-thread="yes" />
+        <modify-function signature="virtualBlockerMethod()" allow-thread="yes"/>
     </object-type>
 
     <value-type name="Echo">

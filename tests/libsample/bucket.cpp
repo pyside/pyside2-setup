@@ -69,3 +69,11 @@ void Bucket::unlock()
 {
     m_locked = false;
 }
+
+bool Bucket::virtualBlockerMethod()
+{
+    lock();
+    // The return value was added just for diversity sake.
+    return true;
+}
+
