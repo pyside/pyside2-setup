@@ -343,20 +343,16 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         return;
     }
 
-    s << INDENT << "PyGILState_STATE gil_state = PyGILState_Ensure();" << endl;
+    s << INDENT << "Shiboken::GilState gil;" << endl;
 
     s << INDENT << "PyObject* py_override = BindingManager::instance().getOverride(this, \"";
     s << func->name() << "\");" << endl;
-    s << INDENT << "bool hasOverride = py_override;" << endl;
 
-    s << INDENT << "PyGILState_Release(gil_state);" << endl << endl;
-
-    s << INDENT << "if (!hasOverride) {" << endl;
+    s << INDENT << "if (!py_override) {" << endl;
     {
         Indentation indentation(INDENT);
-        s << INDENT;
         if (func->isAbstract()) {
-            s << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
+            s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
             s << func->ownerClass()->name() << '.' << func->name();
             s << "()' not implemented.\");" << endl;
             s << INDENT << "return";
@@ -365,14 +361,16 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 writeMinimalConstructorCallArguments(s, func->type());
             }
         } else {
-            s << "return this->" << func->implementingClass()->qualifiedCppName() << "::";
+            if (func->allowThread()) {
+                s << INDENT << "Shiboken::ThreadStateSaver " << threadStateVariableName() << ';' << endl;
+                s << INDENT << threadStateVariableName() << ".save();" << endl;
+            }
+            s << INDENT << "return this->" << func->implementingClass()->qualifiedCppName() << "::";
             writeFunctionCall(s, func);
         }
     }
     s << ';' << endl;
     s << INDENT << '}' << endl << endl;
-
-    s << INDENT << "gil_state = PyGILState_Ensure();" << endl << endl;
 
     s << INDENT << "PyObject* pyargs = ";
     if (func->arguments().isEmpty()) {
@@ -457,7 +455,6 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
     s << INDENT << "Py_XDECREF(pyargs);" << endl;
     s << INDENT << "Py_XDECREF(py_override);" << endl;
-    s << INDENT << "PyGILState_Release(gil_state);" << endl << endl;
 
     if (type) {
         s << INDENT << "return ";
@@ -507,7 +504,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     s << (hasCppWrapper ? wrapperName(metaClass) : metaClass->qualifiedCppName());
     s << "* cptr;" << endl;
     if (overloadData.hasAllowThread())
-        s << INDENT << "PyThreadState* " << threadStateVariableName() << ';' << endl;
+        s << INDENT << "Shiboken::ThreadStateSaver " << threadStateVariableName() << ';' << endl;
     s << INDENT << "SbkBaseWrapper* sbkSelf = reinterpret_cast<SbkBaseWrapper*>(self);" << endl;
     s << INDENT << "assert(!sbkSelf->cptr);\n"; // FIXME: object reinitialization not supported
 
@@ -678,7 +675,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         if (hasReturnValue && !rfunc->isInplaceOperator())
             s << INDENT << "PyObject* " << pythonReturnVariableName() << " = 0;" << endl;
         if (overloadData.hasAllowThread())
-            s << INDENT << "PyThreadState* " << threadStateVariableName() << ';' << endl;
+            s << INDENT << "Shiboken::ThreadStateSaver " << threadStateVariableName() << ';' << endl;
         s << endl;
 
         if (minArgs != maxArgs || maxArgs > 1) {
@@ -1239,7 +1236,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         if (!badModifications) {
             if (!injectedCodeCallsCppFunction(func)) {
                 if (func->allowThread())
-                    s << INDENT << threadStateVariableName() << " = PyEval_SaveThread();" << endl;
+                    s << INDENT << threadStateVariableName() << ".save();" << endl;
                 s << INDENT;
                 if (isCtor)
                     s << "cptr = ";
@@ -1247,7 +1244,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                     s << func->type()->cppSignature() << ' ' << cppReturnVariableName() << " = ";
                 s << methodCall << ';' << endl;
                 if (func->allowThread())
-                    s << INDENT << "PyEval_RestoreThread(" << threadStateVariableName() << ");" << endl;
+                    s << INDENT << threadStateVariableName() << ".restore();" << endl;
 
                 if (!isCtor && !func->isInplaceOperator() && func->type()) {
                     s << INDENT << pythonReturnVariableName() << " = ";
