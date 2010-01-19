@@ -177,6 +177,12 @@ public:
     /// Returns true if there are cases of multiple inheritance in any of its ancestors.
     bool hasMultipleInheritanceInAncestry(const AbstractMetaClass* metaClass);
 
+    /// Returns true if the class needs to have a getattro function.
+    bool classNeedsGetattroFunction(const AbstractMetaClass* metaClass);
+
+    /// Returns a list of methods of the given class where each one is part of a different overload with both static and non-static method.
+    AbstractMetaFunctionList getMethodsWithBothStaticAndNonStaticMethods(const AbstractMetaClass* metaClass);
+
     /// Returns a list of parent classes for a method.
     AbstractMetaClassList getBaseClasses(const AbstractMetaClass* metaClass);
 
@@ -231,6 +237,8 @@ public:
         return cpythonIsConvertibleFunction(metaArg->type());
     }
     QString cpythonFunctionName(const AbstractMetaFunction* func);
+    QString cpythonMethodDefinitionName(const AbstractMetaFunction* func);
+    QString cpythonGetattroFunctionName(const AbstractMetaClass* metaClass);
     QString cpythonWrapperCPtr(const AbstractMetaClass* metaClass, QString argName = "self");
     QString cpythonWrapperCPtr(const AbstractMetaType* metaType, QString argName);
     QString cpythonWrapperCPtr(const TypeEntry* type, QString argName);

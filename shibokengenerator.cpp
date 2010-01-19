@@ -22,6 +22,7 @@
  */
 
 #include "shibokengenerator.h"
+#include "overloaddata.h"
 #include <reporthandler.h>
 
 #include <QtCore/QDir>
@@ -211,6 +212,18 @@ QString ShibokenGenerator::cpythonFunctionName(const AbstractMetaFunction* func)
     }
 
     return result;
+}
+
+QString ShibokenGenerator::cpythonMethodDefinitionName(const AbstractMetaFunction* func)
+{
+    if (!func->ownerClass())
+        return QString();
+    return QString("%1Method_%2").arg(cpythonBaseName(func->ownerClass()->typeEntry())).arg(func->name());
+}
+
+QString ShibokenGenerator::cpythonGetattroFunctionName(const AbstractMetaClass* metaClass)
+{
+    return QString("%1_getattro").arg(cpythonBaseName(metaClass));
 }
 
 static QString cpythonEnumFlagsName(QString moduleName, QString qualifiedCppName)
@@ -1099,6 +1112,49 @@ bool ShibokenGenerator::hasMultipleInheritanceInAncestry(const AbstractMetaClass
     if (metaClass->baseClassNames().size() > 1)
         return true;
     return hasMultipleInheritanceInAncestry(metaClass->baseClass());
+}
+
+bool ShibokenGenerator::classNeedsGetattroFunction(const AbstractMetaClass* metaClass)
+{
+    if (!metaClass)
+        return false;
+    foreach (AbstractMetaFunctionList allOverloads, getFunctionGroups(metaClass).values()) {
+        AbstractMetaFunctionList overloads;
+        foreach (AbstractMetaFunction* func, allOverloads) {
+            if (func->isAssignmentOperator() || func->isCastOperator() || func->isModifiedRemoved()
+                || func->isPrivate() || func->ownerClass() != func->implementingClass()
+                || func->isConstructor() || func->isOperatorOverload())
+                continue;
+            overloads.append(func);
+        }
+        if (overloads.isEmpty())
+            continue;
+        if (OverloadData::hasStaticAndInstanceFunctions(overloads))
+            return true;
+    }
+    return false;
+}
+
+AbstractMetaFunctionList ShibokenGenerator::getMethodsWithBothStaticAndNonStaticMethods(const AbstractMetaClass* metaClass)
+{
+    AbstractMetaFunctionList methods;
+    if (metaClass) {
+        foreach (AbstractMetaFunctionList allOverloads, getFunctionGroups(metaClass).values()) {
+            AbstractMetaFunctionList overloads;
+            foreach (AbstractMetaFunction* func, allOverloads) {
+                if (func->isAssignmentOperator() || func->isCastOperator() || func->isModifiedRemoved()
+                    || func->isPrivate() || func->ownerClass() != func->implementingClass()
+                    || func->isConstructor() || func->isOperatorOverload())
+                    continue;
+                overloads.append(func);
+            }
+            if (overloads.isEmpty())
+                continue;
+            if (OverloadData::hasStaticAndInstanceFunctions(overloads))
+                methods.append(overloads.first());
+        }
+    }
+    return methods;
 }
 
 AbstractMetaClassList ShibokenGenerator::getBaseClasses(const AbstractMetaClass* metaClass)
