@@ -213,9 +213,9 @@ inline bool overflowCheck(SourceT value)
 template <typename PyIntEquiv>
 struct Converter_PyInt
 {
-    static inline PyIntEquiv isConvertible(PyObject* pyobj) { return PyNumber_Check(pyobj); }
+    static inline bool isConvertible(PyObject* pyobj) { return PyNumber_Check(pyobj); }
     static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<PyIntEquiv*>(cppobj)); }
-    static inline PyObject* toPython(PyIntEquiv cppobj) { return PyInt_FromLong((long) cppobj); }
+    static inline PyObject* toPython(const PyIntEquiv& cppobj) { return PyInt_FromLong((long) cppobj); }
     static PyIntEquiv toCpp(PyObject* pyobj)
     {
         double d_result;
