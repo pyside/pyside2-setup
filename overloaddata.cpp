@@ -254,6 +254,52 @@ bool OverloadData::hasAllowThread() const
     return false;
 }
 
+bool OverloadData::hasStaticFunction(const AbstractMetaFunctionList& overloads)
+{
+    foreach (const AbstractMetaFunction* func, overloads) {
+        if (func->isStatic())
+            return true;
+    }
+    return false;
+}
+
+bool OverloadData::hasStaticFunction() const
+{
+    foreach (const AbstractMetaFunction* func, m_overloads) {
+        if (func->isStatic())
+            return true;
+    }
+    return false;
+}
+
+bool OverloadData::hasInstanceFunction(const AbstractMetaFunctionList& overloads)
+{
+    foreach (const AbstractMetaFunction* func, overloads) {
+        if (!func->isStatic())
+            return true;
+    }
+    return false;
+}
+
+bool OverloadData::hasInstanceFunction() const
+{
+    foreach (const AbstractMetaFunction* func, m_overloads) {
+        if (!func->isStatic())
+            return true;
+    }
+    return false;
+}
+
+bool OverloadData::hasStaticAndInstanceFunctions(const AbstractMetaFunctionList& overloads)
+{
+    return OverloadData::hasStaticFunction(overloads) && OverloadData::hasInstanceFunction(overloads);
+}
+
+bool OverloadData::hasStaticAndInstanceFunctions() const
+{
+    return OverloadData::hasStaticFunction() && OverloadData::hasInstanceFunction();
+}
+
 const AbstractMetaFunction* OverloadData::referenceFunction() const
 {
     return m_overloads.first();

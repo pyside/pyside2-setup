@@ -57,6 +57,24 @@ public:
     /// Returns true if any of the overloads for the current OverloadData allows threads when called.
     bool hasAllowThread() const;
 
+    /// Returns true if any of the overloads for the current OverloadData is static.
+    bool hasStaticFunction() const;
+
+    /// Returns true if any of the overloads passed as argument is static.
+    static bool hasStaticFunction(const AbstractMetaFunctionList& overloads);
+
+    /// Returns true if any of the overloads for the current OverloadData is not static.
+    bool hasInstanceFunction() const;
+
+    /// Returns true if any of the overloads passed as argument is not static.
+    static bool hasInstanceFunction(const AbstractMetaFunctionList& overloads);
+
+    /// Returns true if among the overloads for the current OverloadData there are static and non-static methods altogether.
+    bool hasStaticAndInstanceFunctions() const;
+
+    /// Returns true if among the overloads passed as argument there are static and non-static methods altogether.
+    static bool hasStaticAndInstanceFunctions(const AbstractMetaFunctionList& overloads);
+
     const AbstractMetaFunction* referenceFunction() const;
     const AbstractMetaArgument* argument(const AbstractMetaFunction* func) const;
     OverloadDataList overloadDataOnPosition(int argPos) const;
@@ -74,7 +92,7 @@ public:
     OverloadData* findNextArgWithDefault();
     bool isFinalOccurrence(const AbstractMetaFunction* func) const;
 
-    QList<const AbstractMetaFunction*> overloads() const { return m_overloads; }
+    const QList<const AbstractMetaFunction*>& overloads() const { return m_overloads; }
     OverloadDataList nextOverloadData() const { return m_nextOverloadData; }
 
     QList<int> invalidArgumentLengths() const;
