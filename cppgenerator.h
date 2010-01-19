@@ -70,6 +70,8 @@ private:
 
     void writeSbkCopyCppObjectFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
+    void writeGetattroFunction(QTextStream& s, const AbstractMetaClass* metaClass);
+
     /**
      *   Writes Python to C++ conversions for arguments on Python wrappers.
      *   If implicit conversions, and thus new object allocation, are needed,
@@ -114,6 +116,7 @@ private:
 
     void writeClassRegister(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeClassDefinition(QTextStream& s, const AbstractMetaClass* metaClass);
+    void writeMethodDefinitionEntry(QTextStream& s, const AbstractMetaFunctionList overloads);
     void writeMethodDefinition(QTextStream& s, const AbstractMetaFunctionList overloads);
     /// Writes the implementation of all methods part of python sequence protocol
     void writeSequenceMethods(QTextStream& s, const AbstractMetaClass* metaClass);

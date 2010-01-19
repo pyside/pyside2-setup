@@ -176,6 +176,8 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     QString methodsDefinitions;
     QTextStream md(&methodsDefinitions);
+    QString singleMethodDefinitions;
+    QTextStream smd(&singleMethodDefinitions);
 
     bool hasComparisonOperator = false;
     bool typeAsNumber = false;
@@ -206,15 +208,33 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         else
             writeMethodWrapper(s, overloads);
 
-        if (!rfunc->isConstructor() && !rfunc->isOperatorOverload())
+        if (!rfunc->isConstructor() && !rfunc->isOperatorOverload()) {
+            if (OverloadData::hasStaticAndInstanceFunctions(overloads)) {
+                QString methDefName = cpythonMethodDefinitionName(rfunc);
+                smd << "static PyMethodDef " << methDefName << " = {" << endl;
+                smd << INDENT;
+                writeMethodDefinitionEntry(smd, overloads);
+                smd << endl << "};" << endl << endl;
+            }
             writeMethodDefinition(md, overloads);
+        }
     }
 
     QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
 
+    // Write single method definitions
+    s << singleMethodDefinitions;
+
     // Write methods definition
     s << "static PyMethodDef " << className << "_methods[] = {" << endl;
-    s << methodsDefinitions << INDENT << "{0} // Sentinel" << endl << "};" << endl << endl;
+    s << methodsDefinitions << INDENT << "{0} // Sentinel" << endl;
+    s << "};" << endl << endl;
+
+    // Write tp_getattro function
+    if (classNeedsGetattroFunction(metaClass)) {
+        writeGetattroFunction(s, metaClass);
+        s << endl;
+    }
 
     if (typeAsNumber) {
         QList<AbstractMetaFunctionList> opOverloads = filterGroupedOperatorFunctions(
@@ -666,7 +686,16 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             }
 
             // Checks if the underlying C++ object is valid.
-            writeInvalidCppObjectCheck(s);
+            if (OverloadData::hasStaticAndInstanceFunctions(overloads)) {
+                s << INDENT << "if (self) {" << endl;
+                {
+                    Indentation indent(INDENT);
+                    writeInvalidCppObjectCheck(s);
+                }
+                s << INDENT << '}' << endl;
+            } else {
+                writeInvalidCppObjectCheck(s);
+            }
             s << endl;
         }
 
@@ -1408,6 +1437,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     QString tp_flags;
     QString tp_init;
     QString tp_new;
+    QString tp_getattro('0');
     QString tp_dealloc;
     QString tp_as_number('0');
     QString tp_as_sequence('0');
@@ -1451,6 +1481,9 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
         tp_init = ctors.isEmpty() ? "0" : cpythonFunctionName(ctors.first());
     }
+
+    if (classNeedsGetattroFunction(metaClass))
+        tp_getattro = cpythonGetattroFunctionName(metaClass);
 
     if (metaClass->isPolymorphic())
         type_name_func = cpythonBaseName(metaClass) + "_typeName";
@@ -1507,7 +1540,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_hash*/             0," << endl;
     s << INDENT << "/*tp_call*/             0," << endl;
     s << INDENT << "/*tp_str*/              " << m_tpFuncs["__str__"] << ',' << endl;
-    s << INDENT << "/*tp_getattro*/         0," << endl;
+    s << INDENT << "/*tp_getattro*/         " << tp_getattro << ',' << endl;
     s << INDENT << "/*tp_setattro*/         0," << endl;
     s << INDENT << "/*tp_as_buffer*/        0," << endl;
     s << INDENT << "/*tp_flags*/            " << tp_flags << ',' << endl;
@@ -1796,17 +1829,12 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
     s << '}' << endl << endl;
 }
 
-void CppGenerator::writeMethodDefinition(QTextStream& s, const AbstractMetaFunctionList overloads)
+void CppGenerator::writeMethodDefinitionEntry(QTextStream& s, const AbstractMetaFunctionList overloads)
 {
     Q_ASSERT(!overloads.isEmpty());
     QPair<int, int> minMax = OverloadData::getMinMaxArguments(overloads);
-    const AbstractMetaFunction* func = overloads[0];
-    if (m_tpFuncs.contains(func->name()))
-        return;
-
-    s << INDENT << "{\"" << func->name() << "\", (PyCFunction)";
-    s << cpythonFunctionName(func) << ", ";
-
+    const AbstractMetaFunction* func = overloads.first();
+    s << '"' << func->name() << "\", (PyCFunction)" << cpythonFunctionName(func) << ", ";
     if (minMax.second < 2) {
         if (minMax.first == 0)
             s << "METH_NOARGS";
@@ -1817,9 +1845,26 @@ void CppGenerator::writeMethodDefinition(QTextStream& s, const AbstractMetaFunct
     } else {
         s << "METH_VARARGS";
     }
-    if (func->ownerClass() && func->isStatic())
+    if (func->ownerClass() && OverloadData::hasStaticFunction(overloads))
         s << "|METH_STATIC";
-    s << "}," << endl;
+}
+
+void CppGenerator::writeMethodDefinition(QTextStream& s, const AbstractMetaFunctionList overloads)
+{
+    Q_ASSERT(!overloads.isEmpty());
+    const AbstractMetaFunction* func = overloads.first();
+    if (m_tpFuncs.contains(func->name()))
+        return;
+
+    s << INDENT;
+    if (OverloadData::hasStaticAndInstanceFunctions(overloads)) {
+        s << cpythonMethodDefinitionName(func);
+    } else {
+        s << '{';
+        writeMethodDefinitionEntry(s, overloads);
+        s << '}';
+    }
+    s << ',' << endl;
 }
 
 void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnum* cppEnum)
@@ -2292,6 +2337,25 @@ void CppGenerator::writeSbkCopyCppObjectFunction(QTextStream& s, const AbstractM
     s << className << "* CppObjectCopier<" << className << " >::copy(const " << className << "& cppobj)" << endl;
     s << '{' << endl;
     s << INDENT << "return new " << wrapperName(metaClass) << "(cppobj);" << endl;
+    s << '}' << endl;
+}
+
+void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    s << "static PyObject* " << cpythonGetattroFunctionName(metaClass) << "(PyObject* self, PyObject* name)" << endl;
+    s << '{' << endl;
+    s << INDENT << "if (self) {" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "const char* cname = PyString_AS_STRING(name);" << endl;
+        foreach (const AbstractMetaFunction* func, getMethodsWithBothStaticAndNonStaticMethods(metaClass)) {
+            s << INDENT << "if (strcmp(cname, \"" << func->name() << "\") == 0)" << endl;
+            Indentation indent(INDENT);
+            s << INDENT << "return PyCFunction_NewEx(&" << cpythonMethodDefinitionName(func) << ", self, 0);" << endl;
+        }
+    }
+    s << INDENT << '}' << endl;
+    s << INDENT << "return PyObject_GenericGetAttr(self, name);" << endl;
     s << '}' << endl;
 }
 
