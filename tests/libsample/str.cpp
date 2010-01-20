@@ -45,6 +45,12 @@ Str::Str(const Str& s)
     init(s.cstring());
 }
 
+Str::Str(char c)
+{
+    char str[2] = { c, 0 };
+    init(str);
+}
+
 Str::Str(const char* cstr)
 {
     init(cstr);

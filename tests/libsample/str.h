@@ -42,6 +42,7 @@ class LIBSAMPLE_API Str
 {
 public:
     Str(const Str& s);
+    Str(char c);
     Str(const char* cstr = "");
     ~Str();
 
