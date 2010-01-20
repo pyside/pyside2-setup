@@ -41,18 +41,15 @@
  */
 void OverloadData::sortOverloads()
 {
-    using namespace boost;
-
-    OverloadDataList sorted;
-    QList<int> unmappedResult;
-    QSet<QPair<int, int> > deps;
-    QHash<QString, int> map;
-    QHash<int, OverloadData *>reverseMap;
+    QHash<QString, int> map; // type_name -> id
+    QHash<int, OverloadData*> reverseMap; // id -> type_name
     bool checkPyObject = false;
     int pyobjectIndex = 0;
 
+    // Creates the map and reverseMap, to map type names to ids, these ids will be used by the topological
+    // sort algorithm, because is easier and faster to work with boost::graph using ints.
     int i = 0;
-    foreach(OverloadData *ov, m_nextOverloadData) {
+    foreach(OverloadData* ov, m_nextOverloadData) {
         map[ov->argType()->typeEntry()->name()] = i;
         reverseMap[i] = ov;
 
@@ -60,29 +57,29 @@ void OverloadData::sortOverloads()
             checkPyObject = true;
             pyobjectIndex = i;
         }
-
         i++;
     }
 
-    foreach(OverloadData *ov, m_nextOverloadData) {
-        AbstractMetaFunctionList conversions = m_generator->implicitConversions(ov->argType());
-        const AbstractMetaType *targetType = ov->argType();
-        foreach(AbstractMetaFunction *function, conversions) {
-            AbstractMetaType *convertibleType = function->arguments().first()->type();
+    // Create the graph of type dependencies based on implicity conversions.
+    QSet<QPair<int, int> > deps;
+    foreach(OverloadData* ov, m_nextOverloadData) {
+        const AbstractMetaType* targetType = ov->argType();
+        foreach(AbstractMetaFunction* function, m_generator->implicitConversions(ov->argType())) {
+            QString convertibleType = function->arguments().first()->type()->typeEntry()->name();
 
-            if (!map.contains(convertibleType->typeEntry()->name()))
+            if (!map.contains(convertibleType))
                 continue;
 
-            int target = map[targetType->typeEntry()->name()];
-            int convertible = map[convertibleType->typeEntry()->name()];
+            int targetTypeId = map[targetType->typeEntry()->name()];
+            int convertibleTypeId = map[convertibleType];
 
             // If a reverse pair already exists, remove it. Probably due to the
             // container check (This happened to QVariant and QHash)
-            QPair<int, int> reversePair = qMakePair(convertible, target);
+            QPair<int, int> reversePair = qMakePair(convertibleTypeId, targetTypeId);
             if (deps.contains(reversePair))
                 deps.remove(reversePair);
 
-            deps << qMakePair(target, convertible);
+            deps << qMakePair(targetTypeId, convertibleTypeId);
         }
 
         if (targetType->hasInstantiations()) {
@@ -108,14 +105,15 @@ void OverloadData::sortOverloads()
     if (map.contains("double") && map.contains("int"))
         deps << qMakePair(map["int"], map["double"]);
 
-    typedef adjacency_list<vecS, vecS, directedS> Graph;
+    // sort the overloads topologicaly based on the deps graph.
+    typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> Graph;
     Graph g(deps.begin(), deps.end(), reverseMap.size());
-    topological_sort(g, std::back_inserter(unmappedResult));
+    QList<int> unmappedResult;
+    boost::topological_sort(g, std::back_inserter(unmappedResult));
 
+    m_nextOverloadData.clear();
     foreach(int i, unmappedResult)
-        sorted << reverseMap[i];
-
-    m_nextOverloadData = sorted;
+        m_nextOverloadData << reverseMap[i];
 }
 
 // Prepare the information about overloaded methods signatures
