@@ -387,7 +387,7 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry* type)
         baseName = QString("Sbk") + type->name();
     } else if (type->isPrimitive()) {
         const PrimitiveTypeEntry* ptype = (const PrimitiveTypeEntry*) type;
-        if (ptype->basicAliasedTypeEntry())
+        while (ptype->basicAliasedTypeEntry())
             ptype = ptype->basicAliasedTypeEntry();
         if (ptype->targetLangApiName() == ptype->name())
             baseName = m_pythonPrimitiveTypeName[ptype->name()];
