@@ -236,9 +236,34 @@ struct Converter_PyInt
     }
 };
 
-template <> struct Converter<char> : Converter_PyInt<char> {};
-template <> struct Converter<signed char> : Converter_PyInt<signed char> {};
-template <> struct Converter<unsigned char> : Converter_PyInt<unsigned char> {};
+/// Check if we can treat the pyobj as a char, i.e. it's a number or a string with just one character.
+#define SbkChar_Check(pyobj) (PyNumber_Check(pyobj) || (PyString_Check(pyobj) && PyString_Size(pyobj) == 1))
+
+/// Specialization to convert char and unsigned char, it accepts Python numbers and strings with just one character.
+template <typename CharType>
+struct CharConverter
+{
+    static inline bool isConvertible(PyObject* pyobj) { return SbkChar_Check(pyobj); }
+    static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<CharType*>(cppobj)); }
+    static inline PyObject* toPython(const CharType& cppobj) { return PyInt_FromLong(cppobj); }
+    static CharType toCpp(PyObject* pyobj)
+    {
+        long result;
+        if (PyString_Check(pyobj)) {
+            assert(PyString_Size(pyobj) == 1); // This check is made on SbkChar_Check
+            result = PyString_AS_STRING(pyobj)[0];
+        } else {
+            result = PyLong_AsLong(pyobj);
+            if (overflowCheck<long, CharType>(result))
+                PyErr_SetObject(PyExc_OverflowError, 0);
+        }
+        return static_cast<CharType>(result);
+    }
+};
+
+template <> struct Converter<char> : CharConverter<char> {};
+template <> struct Converter<signed char> : CharConverter<signed char> {};
+template <> struct Converter<unsigned char> : CharConverter<unsigned char> {};
 template <> struct Converter<int> : Converter_PyInt<int> {};
 template <> struct Converter<unsigned int> : Converter_PyInt<unsigned int> {};
 template <> struct Converter<short> : Converter_PyInt<short> {};
