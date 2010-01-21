@@ -2347,6 +2347,19 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
     s << INDENT << "if (self) {" << endl;
     {
         Indentation indent(INDENT);
+        s << INDENT << "if (SbkBaseWrapper_instanceDict(self)) {" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "PyObject* meth = PyDict_GetItem(SbkBaseWrapper_instanceDict(self), name);" << endl;
+            s << INDENT << "if (meth) {" << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "Py_INCREF(meth);" << endl;
+                s << INDENT << "return meth;" << endl;
+            }
+            s << INDENT << '}' << endl;
+        }
+        s << INDENT << '}' << endl;
         s << INDENT << "const char* cname = PyString_AS_STRING(name);" << endl;
         foreach (const AbstractMetaFunction* func, getMethodsWithBothStaticAndNonStaticMethods(metaClass)) {
             s << INDENT << "if (strcmp(cname, \"" << func->name() << "\") == 0)" << endl;

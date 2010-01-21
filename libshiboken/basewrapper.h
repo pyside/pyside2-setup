@@ -91,6 +91,8 @@ struct LIBSHIBOKEN_API SbkBaseWrapper
     PyObject_HEAD
     /// Pointer to the C++ class.
     void* cptr;
+    /// Instance dictionary.
+    PyObject* ob_dict;
     /// True when Python is responsible for freeing the used memory.
     unsigned int hasOwnership : 1;
     /// Is true when the C++ class of the wrapped object has a virtual destructor AND was created by Python.
@@ -136,6 +138,8 @@ LIBSHIBOKEN_API void destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParen
 
 #define SbkBaseWrapper_cptr(pyobj)                   (((Shiboken::SbkBaseWrapper*)pyobj)->cptr)
 #define SbkBaseWrapper_setCptr(pyobj,c)              (((Shiboken::SbkBaseWrapper*)pyobj)->cptr = c)
+#define SbkBaseWrapper_instanceDict(pyobj)           (((Shiboken::SbkBaseWrapper*)pyobj)->ob_dict)
+#define SbkBaseWrapper_setInstanceDict(pyobj,d)      (((Shiboken::SbkBaseWrapper*)pyobj)->ob_dict = d)
 #define SbkBaseWrapper_hasOwnership(pyobj)           (((Shiboken::SbkBaseWrapper*)pyobj)->hasOwnership)
 #define SbkBaseWrapper_setOwnership(pyobj,o)         (((Shiboken::SbkBaseWrapper*)pyobj)->hasOwnership = o)
 #define SbkBaseWrapper_hasParentInfo(pyobj)          (((Shiboken::SbkBaseWrapper*)pyobj)->parentInfo)

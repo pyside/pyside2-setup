@@ -126,6 +126,7 @@ PyObject* SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
     self->containsCppWrapper = 0;
     self->validCppObject = 1;
     self->parentInfo = 0;
+    self->ob_dict = 0;
     BindingManager::instance().registerWrapper(self);
     return reinterpret_cast<PyObject*>(self);
 }
@@ -139,6 +140,7 @@ PyObject* SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*)
     self->containsCppWrapper = 0;
     self->validCppObject = 0;
     self->parentInfo = 0;
+    self->ob_dict = 0;
     return reinterpret_cast<PyObject*>(self);
 }
 
@@ -212,6 +214,26 @@ PyTypeObject SbkBaseWrapperType_Type = {
     /*tp_weaklist*/         0
 };
 
+} // extern "C"
+
+static PyObject* SbkBaseWrapper_get_dict(SbkBaseWrapper* obj)
+{
+    if (!obj->ob_dict)
+        obj->ob_dict = PyDict_New();
+    if (!obj->ob_dict)
+        return 0;
+    Py_INCREF(obj->ob_dict);
+    return obj->ob_dict;
+}
+
+static PyGetSetDef SbkBaseWrapper_getsetlist[] = {
+    {"__dict__", (getter)SbkBaseWrapper_get_dict, 0},
+    {0} // Sentinel
+};
+
+extern "C"
+{
+
 SbkBaseWrapperType SbkBaseWrapper_Type = { { {
     PyObject_HEAD_INIT(&SbkBaseWrapperType_Type)
     /*ob_size*/             0,
@@ -243,12 +265,12 @@ SbkBaseWrapperType SbkBaseWrapper_Type = { { {
     /*tp_iternext*/         0,
     /*tp_methods*/          0,
     /*tp_members*/          0,
-    /*tp_getset*/           0,
+    /*tp_getset*/           SbkBaseWrapper_getsetlist,
     /*tp_base*/             0,
     /*tp_dict*/             0,
     /*tp_descr_get*/        0,
     /*tp_descr_set*/        0,
-    /*tp_dictoffset*/       0,
+    /*tp_dictoffset*/       offsetof(SbkBaseWrapper, ob_dict),
     /*tp_init*/             0,
     /*tp_alloc*/            0,
     /*tp_new*/              0,
@@ -260,10 +282,10 @@ SbkBaseWrapperType SbkBaseWrapper_Type = { { {
     /*tp_subclasses*/       0,
     /*tp_weaklist*/         0
 }, },
-/*mi_offsets*/          0,
-/*mi_init*/             0,
-/*mi_specialcast*/      0,
-/*type_name_func*/      0
+    /*mi_offsets*/          0,
+    /*mi_init*/             0,
+    /*mi_specialcast*/      0,
+    /*type_name_func*/      0
 };
 
 PyAPI_FUNC(void) init_shiboken()

@@ -131,6 +131,14 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
     if (!wrapper)
         return 0;
 
+    if (SbkBaseWrapper_instanceDict(wrapper)) {
+        PyObject* method = PyDict_GetItemString(SbkBaseWrapper_instanceDict(wrapper), methodName);
+        if (method) {
+            Py_INCREF(method);
+            return method;
+        }
+    }
+
     PyObject* pyMethodName = PyString_FromString(methodName);
     PyObject* method = PyObject_GetAttr(wrapper, pyMethodName);
 
