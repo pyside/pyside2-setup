@@ -23,6 +23,7 @@
 
 #include "testmodifydocumentation.h"
 
+#include <QCoreApplication>
 #include <QtTest/QTest>
 #include "testutil.h"
 #include <qtdocparser.h>
@@ -61,6 +62,10 @@ void TestModifyDocumentation::testModifyDocumentation()
 </description>\n"));
 }
 
-QTEST_MAIN(TestModifyDocumentation)
+// we need an event loop to run these tests
+int argv = 0;
+const char* argc[] = {""};
+QCoreApplication app(argv, const_cast<char**>(argc));
+QTEST_APPLESS_MAIN(TestModifyDocumentation)
 
 #include "testmodifydocumentation.moc"
