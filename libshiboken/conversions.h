@@ -255,6 +255,14 @@ struct Converter_PyInt
     }
 };
 
+template <typename T>
+struct Converter_PyULongInt : Converter_PyInt<T>
+{
+    static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<T*>(cppobj)); }
+    static inline PyObject* toPython(const T& cppobj) { return PyLong_FromUnsignedLong(cppobj); }
+};
+
+
 /// Check if we can treat the pyobj as a char, i.e. it's a number or a string with just one character.
 #define SbkChar_Check(pyobj) (PyNumber_Check(pyobj) || (PyString_Check(pyobj) && PyString_Size(pyobj) == 1))
 
@@ -279,27 +287,8 @@ struct CharConverter
     }
 };
 
-template <>
-struct Converter<unsigned long>
-{
-    static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<unsigned long*>(cppobj)); }
-    static inline PyObject* toPython(unsigned long cppobj) { return PyLong_FromUnsignedLong(cppobj); }
-    static inline unsigned long toCpp(PyObject* pyobj)
-    {
-        if (PyFloat_Check(pyobj)) {
-            // Need to check for negatives manually
-            double doubleResult = PyFloat_AS_DOUBLE(pyobj);
-            if (overflowCheck<unsigned long>(doubleResult))
-                PyErr_SetObject(PyExc_OverflowError, 0);
-            return static_cast<unsigned long>(doubleResult);
-        } else {
-            return PyLong_AsUnsignedLong(pyobj);
-        }
-    }
-};
-template <> struct Converter<unsigned int> : Converter<unsigned long> {};
-
-
+template <> struct Converter<unsigned long> : Converter_PyULongInt<unsigned long> {};
+template <> struct Converter<unsigned int> : Converter_PyULongInt<unsigned int> {};
 template <> struct Converter<char> : CharConverter<char> {};
 template <> struct Converter<signed char> : CharConverter<signed char> {};
 template <> struct Converter<unsigned char> : CharConverter<unsigned char> {};
