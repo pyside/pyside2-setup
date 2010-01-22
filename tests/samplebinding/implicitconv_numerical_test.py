@@ -58,7 +58,7 @@ class FloatImplicitConvert(NumericTester):
 
     def testFloatAsUInt(self):
         '''Float as unsigned Int'''
-        self.check_value(3.14, 3, sample.acceptUInt, int)
+        self.check_value(3.14, 3, sample.acceptUInt, long)
         self.assertRaises(OverflowError, sample.acceptUInt, -3.14)
 
     def testFloatAsULong(self):
@@ -89,7 +89,7 @@ class IntImplicitConvert(NumericTester):
 
     def testIntAsUInt(self):
         '''Int as unsigned Int'''
-        self.check_value(3, 3, sample.acceptUInt, int)
+        self.check_value(3, 3, sample.acceptUInt, long)
         self.assertRaises(OverflowError, sample.acceptUInt, -3)
 
     def testIntAsULong(self):
@@ -117,7 +117,7 @@ class LongImplicitConvert(NumericTester):
 
     def testLongAsUInt(self):
         '''Long as unsigned Int'''
-        self.check_value(260l, 260, sample.acceptUInt, int)
+        self.check_value(260l, 260, sample.acceptUInt, long)
         self.assertRaises(OverflowError, sample.acceptUInt, -42)
 
     def testLongAsULong(self):
