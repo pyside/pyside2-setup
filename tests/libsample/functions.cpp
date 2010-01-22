@@ -141,6 +141,12 @@ doubleUnsignedInt(unsigned int value)
     return value * 2;
 }
 
+short
+doubleShort(short value)
+{
+    return value * 2;
+}
+
 int
 acceptInt(int x)
 {

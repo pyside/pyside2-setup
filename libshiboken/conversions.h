@@ -204,10 +204,32 @@ struct Converter<bool>
 /**
  * Helper template for checking if a value of SourceT overflows when cast to TargetT
  */
-template<typename SourceT, typename TargetT>
-inline bool overflowCheck(SourceT value)
+template<typename T>
+inline bool overflowCheck(const PY_LONG_LONG& value)
 {
-    return value < std::numeric_limits<TargetT>::min() || value > std::numeric_limits<TargetT>::max();
+    return value < static_cast<PY_LONG_LONG>(std::numeric_limits<T>::min())
+           || value > std::numeric_limits<T>::max();
+}
+
+// If the type is long, there'll be no overflows
+template<>
+inline bool overflowCheck<PY_LONG_LONG>(const PY_LONG_LONG&)
+{
+    return false;
+}
+
+// Version for floating point values (without sign check)
+template<typename TargetT>
+inline bool overflowCheck(const double& value)
+{
+    return value < std::numeric_limits<TargetT>::min()
+           || value > std::numeric_limits<TargetT>::max();
+}
+
+template<>
+inline bool overflowCheck<double>(const double&)
+{
+    return false;
 }
 
 template <typename PyIntEquiv>
@@ -218,21 +240,18 @@ struct Converter_PyInt
     static inline PyObject* toPython(const PyIntEquiv& cppobj) { return PyInt_FromLong((long) cppobj); }
     static PyIntEquiv toCpp(PyObject* pyobj)
     {
-        double d_result;
-        long result;
         if (PyFloat_Check(pyobj)) {
-            d_result = PyFloat_AS_DOUBLE(pyobj);
+            double d_result = PyFloat_AS_DOUBLE(pyobj);
             // If cast to long directly it could overflow silently
-            if (overflowCheck<double, PyIntEquiv>(d_result))
+            if (overflowCheck<PyIntEquiv>(d_result))
                 PyErr_SetObject(PyExc_OverflowError, 0);
-            return (PyIntEquiv) d_result;
+            return static_cast<PyIntEquiv>(d_result);
         } else {
-            result = PyLong_AsLong(pyobj);
+            PY_LONG_LONG result = PyLong_AsLongLong(pyobj);
+            if (overflowCheck<PyIntEquiv>(result))
+                PyErr_SetObject(PyExc_OverflowError, 0);
+            return static_cast<PyIntEquiv>(result);
         }
-
-        if (overflowCheck<long, PyIntEquiv>(result))
-            PyErr_SetObject(PyExc_OverflowError, 0);
-        return (PyIntEquiv) result;
     }
 };
 
@@ -248,27 +267,17 @@ struct CharConverter
     static inline PyObject* toPython(const CharType& cppobj) { return PyInt_FromLong(cppobj); }
     static CharType toCpp(PyObject* pyobj)
     {
-        long result;
         if (PyString_Check(pyobj)) {
             assert(PyString_Size(pyobj) == 1); // This check is made on SbkChar_Check
-            result = PyString_AS_STRING(pyobj)[0];
+            return PyString_AS_STRING(pyobj)[0];
         } else {
-            result = PyLong_AsLong(pyobj);
-            if (overflowCheck<long, CharType>(result))
+            PY_LONG_LONG result = PyLong_AsLongLong(pyobj);
+            if (overflowCheck<CharType>(result))
                 PyErr_SetObject(PyExc_OverflowError, 0);
+            return result;
         }
-        return static_cast<CharType>(result);
     }
 };
-
-template <> struct Converter<char> : CharConverter<char> {};
-template <> struct Converter<signed char> : CharConverter<signed char> {};
-template <> struct Converter<unsigned char> : CharConverter<unsigned char> {};
-template <> struct Converter<int> : Converter_PyInt<int> {};
-template <> struct Converter<unsigned int> : Converter_PyInt<unsigned int> {};
-template <> struct Converter<short> : Converter_PyInt<short> {};
-template <> struct Converter<unsigned short> : Converter_PyInt<unsigned short> {};
-template <> struct Converter<long> : Converter_PyInt<long> {};
 
 template <>
 struct Converter<unsigned long>
@@ -277,19 +286,27 @@ struct Converter<unsigned long>
     static inline PyObject* toPython(unsigned long cppobj) { return PyLong_FromUnsignedLong(cppobj); }
     static inline unsigned long toCpp(PyObject* pyobj)
     {
-        unsigned long result;
         if (PyFloat_Check(pyobj)) {
             // Need to check for negatives manually
-            double double_result = PyFloat_AS_DOUBLE(pyobj);
-            if (overflowCheck<double, unsigned long>(double_result))
+            double doubleResult = PyFloat_AS_DOUBLE(pyobj);
+            if (overflowCheck<unsigned long>(doubleResult))
                 PyErr_SetObject(PyExc_OverflowError, 0);
-            result = (unsigned long) double_result;
+            return static_cast<unsigned long>(doubleResult);
         } else {
-            result = PyLong_AsUnsignedLong(pyobj);
+            return PyLong_AsUnsignedLong(pyobj);
         }
-        return result;
     }
 };
+template <> struct Converter<unsigned int> : Converter<unsigned long> {};
+
+
+template <> struct Converter<char> : CharConverter<char> {};
+template <> struct Converter<signed char> : CharConverter<signed char> {};
+template <> struct Converter<unsigned char> : CharConverter<unsigned char> {};
+template <> struct Converter<int> : Converter_PyInt<int> {};
+template <> struct Converter<short> : Converter_PyInt<short> {};
+template <> struct Converter<unsigned short> : Converter_PyInt<unsigned short> {};
+template <> struct Converter<long> : Converter_PyInt<long> {};
 
 template <>
 struct Converter<PY_LONG_LONG>

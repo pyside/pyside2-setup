@@ -3,6 +3,7 @@
     <primitive-type name="bool"/>
     <primitive-type name="double"/>
     <primitive-type name="int"/>
+    <primitive-type name="short"/>
     <primitive-type name="unsigned int" />
     <primitive-type name="signed int" />
     <primitive-type name="char"/>

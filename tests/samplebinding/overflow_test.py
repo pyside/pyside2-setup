@@ -29,7 +29,7 @@
 import sys
 import unittest
 
-from sample import doubleUnsignedInt
+from sample import *
 
 class OverflowTest(unittest.TestCase):
     '''Test case for overflowing C++ numeric types.'''
@@ -44,6 +44,13 @@ class OverflowTest(unittest.TestCase):
     def testOverflow(self):
         '''Calls function with unsigned int parameter using an overflowing value.'''
         self.assertRaises(OverflowError, doubleUnsignedInt, 42415335332353253)
+        doubleUnsignedInt(0xdeadbeef)
+
+    def testShortOverflow(self):
+        doubleShort(-3)
+        '''Calls function with unsigned int parameter using an overflowing value.'''
+        self.assertRaises(OverflowError, doubleShort, 0xFFFF*-1)
+        self.assertRaises(OverflowError, doubleShort, 0xFFFF + 1)
 
 if __name__ == '__main__':
     unittest.main()
