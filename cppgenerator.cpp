@@ -929,7 +929,8 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
         typeName = translateTypeForWrapperMethod(argType, context);
 
     if (type->isContainer() || type->isPrimitive()) {
-        if (typeName.startsWith("const "))
+        // If the type is a const char*, we don't remove the "const".
+        if (typeName.startsWith("const ") && !(argType->isNativePointer() && argType->name() == "char"))
             typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
         if (typeName.endsWith("&"))
             typeName.chop(1);
