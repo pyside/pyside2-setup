@@ -271,6 +271,10 @@ void HeaderGenerator::finishGeneration()
 
         s << "#ifndef " << includeShield << endl;
         s << "#define " << includeShield << endl<< endl;
+        #ifndef AVOID_PROTECTED_HACK
+        s << "//workaround to access protected functions" << endl;
+        s << "#define protected public" << endl << endl;
+        #endif
 
         s << "#include <Python.h>" << endl;
         s << "#include <conversions.h>" << endl;
