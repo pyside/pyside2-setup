@@ -12,6 +12,11 @@ add_definitions(${QT_DEFINITIONS})
 
 option(AVOID_PROTECTED_HACK "Avoid protected hack on generated bindings." FALSE)
 
+if (NOT CMAKE_BUILD_TYPE)
+    message("No build type provided. Setting to Debug by default")
+    set(CMAKE_BUILD_TYPE "Debug")
+endif()
+
 if (MSVC)
     set(CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /w /EHsc- /GS- /GR- /DLIBSHIBOKEN_BUILD -D_SCL_SECURE_NO_WARNINGS")
 else()
@@ -32,7 +37,6 @@ set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
 set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
 
 set(shiboken_VERSION 0.1)
-set(CMAKE_BUILD_TYPE Debug)
 
 set(shiboken_SRC
 cppgenerator.cpp
