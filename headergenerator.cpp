@@ -236,6 +236,7 @@ void HeaderGenerator::finishGeneration()
 
             foreach (AbstractMetaClass* innerClass, metaClass->innerClasses()) {
                 if (shouldGenerate(innerClass)) {
+                    writeSbkCopyCppObjectFunction(typeFunctions, innerClass);
                     s_cin << innerClass->typeEntry()->include().toString() << endl;
                     s_pts << getApiExportMacro() << " PyAPI_FUNC(PyObject*) " << cpythonBaseName(innerClass->typeEntry());
                     s_pts << "_New(Shiboken::SbkBaseWrapperType* type, PyObject* args, PyObject* kwds);" << endl;
