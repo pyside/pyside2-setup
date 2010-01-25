@@ -48,20 +48,16 @@ shibokengenerator.cpp
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${APIEXTRACTOR_INCLUDE_DIR}
-                    ${APIEXTRACTOR_INCLUDE_DIR}/..
                     ${GENERATORRUNNER_INCLUDE_DIR}
-                    ${GENERATORRUNNER_INCLUDE_DIR}/..
                     ${QT_INCLUDE_DIR}
                     ${QT_QTCORE_INCLUDE_DIR}
-		    ${Boost_INCLUDE_DIR})
+                    ${Boost_INCLUDE_DIR})
 
 add_library(shiboken_generator SHARED ${shiboken_SRC})
 
 target_link_libraries(shiboken_generator
-                      ${APIEXTRACTOR_LIBRARY}
                       ${GENERATORRUNNER_LIBRARY}
-                      ${QT_QTCORE_LIBRARY}
-                      ${QT_QTXML_LIBRARY})
+                      ${QT_QTCORE_LIBRARY})
 
 add_executable(shiboken main.cpp)
 target_link_libraries(shiboken ${QT_QTCORE_LIBRARY})
