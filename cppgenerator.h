@@ -34,6 +34,8 @@ class CppGenerator : public ShibokenGenerator
 {
 public:
     CppGenerator();
+    void clazclasses(QString arg1);
+    void AbstractMeclasses(QString arg1);
 protected:
     QString fileNameForClass(const AbstractMetaClass* metaClass) const;
     QList<AbstractMetaFunctionList> filterGroupedOperatorFunctions(const AbstractMetaClass* metaClass,

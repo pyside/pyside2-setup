@@ -1765,9 +1765,11 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                 {
                     Indentation indent(INDENT);
                     s << INDENT;
-                    if (type->typeEntry()->isValue())
-                        s << type->name() << '*';
-                    else
+                    if (type->typeEntry()->isValue()) {
+                        AbstractMetaClass* clz = classes().findClass(type->typeEntry());
+                        Q_ASSERT(clz);
+                        s << clz->qualifiedCppName() << '*';
+                    } else
                         s << translateTypeForWrapperMethod(type, metaClass);
                     s << " cpp_other = ";
                     if (type->typeEntry()->isValue())

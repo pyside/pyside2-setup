@@ -55,6 +55,7 @@ public:
     public:
         void uselessMethod() {}
         SomeInnerClass operator+(const SomeInnerClass& other) { return other; }
+        bool operator==(const SomeInnerClass& other) { return true; }
     };
 
     Derived(int id = -1);
