@@ -2200,7 +2200,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
 {
     QString pyTypeName = cpythonTypeName(metaClass);
     s << "PyAPI_FUNC(void)" << endl;
-    s << "init_" << metaClass->name().toLower() << "(PyObject* module)" << endl;
+    s << "init_" << metaClass->qualifiedCppName().replace("::", "_") << "(PyObject* module)" << endl;
     s << '{' << endl;
 
     // class inject-code target/beginning
@@ -2423,9 +2423,9 @@ void CppGenerator::finishGeneration()
             continue;
 
         s_classInitDecl << "extern \"C\" PyAPI_FUNC(void) init_"
-                        << cls->name().toLower() << "(PyObject* module);" << endl;
+                        << cls->qualifiedCppName().replace("::", "_") << "(PyObject* module);" << endl;
 
-        QString defineStr = "init_" + cls->name().toLower() + "(module);";
+        QString defineStr = "init_" + cls->qualifiedCppName().replace("::", "_") + "(module);";
         if (cls->isNamespace())
             s_namespaceDefines << INDENT << defineStr << endl;
         else
