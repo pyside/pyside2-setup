@@ -24,7 +24,7 @@
 #ifndef OVERLOADDATA_H
 #define OVERLOADDATA_H
 
-#include <apiextractor/abstractmetalang.h>
+#include <abstractmetalang.h>
 #include <QtCore/QList>
 #include <QtCore/QBitArray>
 

@@ -29,7 +29,7 @@
 #define THREAD_STATE_SAVER_VAR    "thread_state_saver"
 #define CPP_SELF_VAR              "cppSelf"
 
-#include <generatorrunner/generator.h>
+#include <generator.h>
 #include <QtCore/QTextStream>
 
 class DocParser;

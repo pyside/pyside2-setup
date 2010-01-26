@@ -22,7 +22,7 @@
  */
 
 #include "headergenerator.h"
-#include <apiextractor/reporthandler.h>
+#include <reporthandler.h>
 
 #include <QtCore/QDir>
 #include <QtCore/QTextStream>
