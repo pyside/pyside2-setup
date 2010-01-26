@@ -1449,7 +1449,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     if (metaClass->hasArithmeticOperatorOverload()
         || metaClass->hasLogicalOperatorOverload()
         || metaClass->hasBitwiseOperatorOverload()) {
-        tp_as_number = QString("&Py%1_as_number").arg(cppClassName);
+        tp_as_number = QString("&%1_as_number").arg(cpythonBaseName(metaClass));
     }
 
     // sequence protocol check
@@ -1665,7 +1665,7 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
         nb[opName] = cpythonFunctionName(rfunc);
     }
 
-    s << "static PyNumberMethods Py" << metaClass->qualifiedCppName();
+    s << "static PyNumberMethods " << cpythonBaseName(metaClass);
     s << "_as_number = {" << endl;
     s << INDENT << "/*nb_add*/                  (binaryfunc)" << nb["__add__"] << ',' << endl;
     s << INDENT << "/*nb_subtract*/             (binaryfunc)" << nb["__sub__"] << ',' << endl;
