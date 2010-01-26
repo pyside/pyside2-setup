@@ -25,7 +25,7 @@
 #include <QLinkedList>
 #include <QLibrary>
 #include <iostream>
-#include <apiextractor/apiextractor.h>
+#include <apiextractor.h>
 #include "generatorrunnerconfig.h"
 #include "generator.h"
 

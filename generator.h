@@ -27,7 +27,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QDir>
 #include <QtCore/QLinkedList>
-#include <apiextractor/abstractmetalang.h>
+#include <abstractmetalang.h>
 #include "generatorrunnermacros.h"
 
 class ApiExtractor;

@@ -27,7 +27,7 @@
 #include <QtCore/QHash>
 #include <QtCore/QTextStream>
 #include <QXmlStreamReader>
-#include <apiextractor/abstractmetalang.h>
+#include <abstractmetalang.h>
 #include "generator.h"
 
 class AbstractMetaFunction;

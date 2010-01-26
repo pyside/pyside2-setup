@@ -32,7 +32,6 @@ set(CMAKE_BUILD_TYPE Debug)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
                     ${APIEXTRACTOR_INCLUDE_DIR}
-                    ${APIEXTRACTOR_INCLUDE_DIR}/..
                     ${QT_INCLUDE_DIR}
                     ${QT_QTCORE_INCLUDE_DIR})
 
