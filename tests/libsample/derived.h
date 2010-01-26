@@ -51,6 +51,11 @@ public:
         OtherOverloadedFunc_id
     };
 
+    class SomeInnerClass {
+    public:
+        void uselessMethod() {}
+    };
+
     Derived(int id = -1);
     virtual ~Derived();
     virtual void pureVirtual();
@@ -74,6 +79,8 @@ public:
     // more overloads
     OtherOverloadedFuncEnum otherOverloaded(int a, int b, bool c, double d);
     OtherOverloadedFuncEnum otherOverloaded(int a, double b);
+
+    SomeInnerClass returnMyParameter(const SomeInnerClass& s) { return s; }
 
 protected:
     const char* getClassName() { return className(); }

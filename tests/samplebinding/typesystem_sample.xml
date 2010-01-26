@@ -61,6 +61,7 @@
     </object-type>
 
     <object-type name="Derived"/>
+    <value-type name="Derived::SomeInnerClass" />
 
     <object-type name="ObjectType">
         <modify-function signature="event(Event*)">

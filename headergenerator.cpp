@@ -241,6 +241,8 @@ void HeaderGenerator::finishGeneration()
                     s_pts << getApiExportMacro() << " PyAPI_FUNC(PyObject*) " << cpythonBaseName(innerClass->typeEntry());
                     s_pts << "_New(Shiboken::SbkBaseWrapperType* type, PyObject* args, PyObject* kwds);" << endl;
                     writeTypeCheckMacro(s_pts, innerClass->typeEntry());
+                    s_pts << "#define " << cpythonWrapperCPtr(innerClass, "pyobj") << " ((";
+                    s_pts << innerClass->qualifiedCppName() << "*)SbkBaseWrapper_cptr(pyobj))" << endl << endl;
                     writeTypeConverterDecl(convDecl, innerClass->typeEntry());
                     convDecl << endl;
                     writeSbkTypeFunction(typeFunctions, innerClass);
@@ -249,8 +251,8 @@ void HeaderGenerator::finishGeneration()
             s_pts << getApiExportMacro() << " PyAPI_FUNC(PyObject*) " << cpythonBaseName(metaClass->typeEntry());
             s_pts << "_New(Shiboken::SbkBaseWrapperType* type, PyObject* args, PyObject* kwds);" << endl;
             writeTypeCheckMacro(s_pts, classType);
-            s_pts << "#define Sbk" << metaClass->name() << "_cptr(pyobj) ((";
-            s_pts << metaClass->name() << "*)SbkBaseWrapper_cptr(pyobj))" << endl << endl;
+            s_pts << "#define " << cpythonWrapperCPtr(metaClass, "pyobj") << " ((";
+            s_pts << metaClass->qualifiedCppName() << "*)SbkBaseWrapper_cptr(pyobj))" << endl << endl;
             writeTypeConverterDecl(convDecl, classType);
             convDecl << endl;
         }
