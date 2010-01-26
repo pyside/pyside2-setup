@@ -56,6 +56,8 @@ public:
     virtual void pureVirtual();
     virtual void unpureVirtual();
 
+    virtual PrintFormat returnAnEnum() { return Short; }
+
     // factory method
     static Abstract* createObject();
 

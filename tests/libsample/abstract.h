@@ -61,6 +61,8 @@ public:
     virtual void pureVirtual() = 0;
     virtual void unpureVirtual();
 
+    virtual PrintFormat returnAnEnum() = 0;
+
     void callPureVirtual();
     void callUnpureVirtual();
 

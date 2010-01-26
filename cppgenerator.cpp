@@ -627,7 +627,7 @@ void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const Ab
 
     if (type->isPrimitive() || type->isObject()) {
         s << "0";
-    } else if (type->isContainer() || type->isFlags()){
+    } else if (type->isContainer() || type->isFlags() || type->isEnum()){
         s << metaType->cppSignature() << "()";
     } else {
         // this is slowwwww, FIXME: Fix the API od APIExtractor, these things should be easy!

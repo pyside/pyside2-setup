@@ -49,6 +49,7 @@ public:
     virtual ~OtherDerived();
     virtual void pureVirtual();
     virtual void unpureVirtual();
+    virtual PrintFormat returnAnEnum() { return Short; }
 
     void useObjectTypeFromOtherModule(ObjectType*) {}
     void useValueTypeFromOtherModule(const Complex&) {}
