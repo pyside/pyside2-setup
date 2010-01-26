@@ -179,8 +179,8 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     QString singleMethodDefinitions;
     QTextStream smd(&singleMethodDefinitions);
 
-    bool hasComparisonOperator = false;
-    bool typeAsNumber = false;
+    bool hasComparisonOperator = metaClass->hasComparisonOperatorOverload();
+    bool typeAsNumber = metaClass->hasArithmeticOperatorOverload() || metaClass->hasLogicalOperatorOverload() || metaClass->hasBitwiseOperatorOverload();
 
     foreach (AbstractMetaFunctionList allOverloads, getFunctionGroups(metaClass).values()) {
         AbstractMetaFunctionList overloads;
@@ -199,16 +199,9 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
         if (rfunc->isConstructor())
             writeConstructorWrapper(s, overloads);
-        else if (rfunc->isArithmeticOperator()
-                 || rfunc->isLogicalOperator()
-                 || rfunc->isBitwiseOperator())
-            typeAsNumber = true;
-        else if (rfunc->isComparisonOperator())
-            hasComparisonOperator = true;
-        else
-            writeMethodWrapper(s, overloads);
 
         if (!rfunc->isConstructor() && !rfunc->isOperatorOverload()) {
+            writeMethodWrapper(s, overloads);
             if (OverloadData::hasStaticAndInstanceFunctions(overloads)) {
                 QString methDefName = cpythonMethodDefinitionName(rfunc);
                 smd << "static PyMethodDef " << methDefName << " = {" << endl;
