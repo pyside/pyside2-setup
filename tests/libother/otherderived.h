@@ -38,9 +38,10 @@
 #include "libsamplemacros.h"
 #include "abstract.h"
 #include "derived.h"
+#include "objecttype.h"
+#include "complex.h"
 
 class ObjectType;
-class Complex;
 
 class LIBSAMPLE_API OtherDerived : public Abstract
 {
@@ -52,7 +53,8 @@ public:
     virtual PrintFormat returnAnEnum() { return Short; }
 
     void useObjectTypeFromOtherModule(ObjectType*) {}
-    void useValueTypeFromOtherModule(const Complex&) {}
+    Event useValueTypeFromOtherModule(const Event& e) { return e; }
+    Complex useValueTypeFromOtherModule(const Complex& c) { return c; }
     void useEnumTypeFromOtherModule(OverloadedFuncEnum) {}
 
     // factory method

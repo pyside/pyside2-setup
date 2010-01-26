@@ -160,14 +160,19 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
     const AbstractMetaClass* metaClass = classes().findClass(type->name());
     bool isAbstractOrObjectType = (metaClass &&  metaClass->isAbstract()) || type->isObject();
 
-    s << "struct Converter<" << type->name() << (isAbstractOrObjectType ? "*" : "") << " > : ";
+    bool isValueTypeWithImplConversions = type->isValue() && !implicitConversions(type).isEmpty();
+
+    s << "struct ";
+    if (isValueTypeWithImplConversions)
+        s << getApiExportMacro() << ' ';
+    s << "Converter<" << type->name() << (isAbstractOrObjectType ? "*" : "") << " > : ";
     if (type->isEnum() || type->isFlags())
         s << "Converter_CppEnum";
     else
         s << "ConverterBase";
     s << '<' << type->name() << (isAbstractOrObjectType ? "*" : "") << " >" << endl;
     s << '{' << endl;
-    if (type->isValue() && !implicitConversions(type).isEmpty()) {
+    if (isValueTypeWithImplConversions) {
         s << INDENT << "static " << type->name() << " toCpp(PyObject* pyobj);" << endl;
         s << INDENT << "static bool isConvertible(PyObject* pyobj);" << endl;
     }
