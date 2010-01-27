@@ -1133,7 +1133,7 @@ AbstractMetaFunctionList AbstractMetaClass::operatorOverloads(uint query) const
 bool AbstractMetaClass::hasOperatorOverload() const
 {
     foreach (const AbstractMetaFunction *f, m_functions) {
-        if (f->isOperatorOverload())
+        if (f->ownerClass() == f->implementingClass() && f->isOperatorOverload())
             return true;
     }
     return false;
@@ -1142,7 +1142,7 @@ bool AbstractMetaClass::hasOperatorOverload() const
 bool AbstractMetaClass::hasArithmeticOperatorOverload() const
 {
     foreach (const AbstractMetaFunction *f, m_functions) {
-        if (f->isArithmeticOperator())
+        if (f->ownerClass() == f->implementingClass() && f->isArithmeticOperator())
             return true;
     }
     return false;
@@ -1151,7 +1151,7 @@ bool AbstractMetaClass::hasArithmeticOperatorOverload() const
 bool AbstractMetaClass::hasBitwiseOperatorOverload() const
 {
     foreach (const AbstractMetaFunction *f, m_functions) {
-        if (f->isBitwiseOperator())
+        if (f->ownerClass() == f->implementingClass() && f->isBitwiseOperator())
             return true;
     }
     return false;
@@ -1160,7 +1160,7 @@ bool AbstractMetaClass::hasBitwiseOperatorOverload() const
 bool AbstractMetaClass::hasComparisonOperatorOverload() const
 {
     foreach (const AbstractMetaFunction *f, m_functions) {
-        if (f->isComparisonOperator())
+        if (f->ownerClass() == f->implementingClass() && f->isComparisonOperator())
             return true;
     }
     return false;
@@ -1169,7 +1169,7 @@ bool AbstractMetaClass::hasComparisonOperatorOverload() const
 bool AbstractMetaClass::hasLogicalOperatorOverload() const
 {
     foreach (const AbstractMetaFunction *f, m_functions) {
-        if (f->isLogicalOperator())
+        if (f->ownerClass() == f->implementingClass() && f->isLogicalOperator())
             return true;
     }
     return false;
@@ -1178,7 +1178,7 @@ bool AbstractMetaClass::hasLogicalOperatorOverload() const
 bool AbstractMetaClass::hasSubscriptOperatorOverload() const
 {
     foreach (const AbstractMetaFunction *f, m_functions) {
-        if (f->isSubscriptOperator())
+        if (f->ownerClass() == f->implementingClass() && f->isSubscriptOperator())
             return true;
     }
     return false;
@@ -1187,7 +1187,7 @@ bool AbstractMetaClass::hasSubscriptOperatorOverload() const
 bool AbstractMetaClass::hasAssignmentOperatorOverload() const
 {
     foreach (const AbstractMetaFunction *f, m_functions) {
-        if (f->isAssignmentOperator())
+        if (f->ownerClass() == f->implementingClass() && f->isAssignmentOperator())
             return true;
     }
     return false;
@@ -1196,7 +1196,7 @@ bool AbstractMetaClass::hasAssignmentOperatorOverload() const
 bool AbstractMetaClass::hasConversionOperatorOverload() const
 {
     foreach (const AbstractMetaFunction *f, m_functions) {
-        if (f->isConversionOperator())
+        if (f->ownerClass() == f->implementingClass() && f->isConversionOperator())
             return true;
     }
     return false;
