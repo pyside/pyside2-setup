@@ -84,6 +84,7 @@ class APIEXTRACTOR_API AbstractMetaClassList : public  QList<AbstractMetaClass *
 {
 public:
     AbstractMetaClass *findClass(const QString &name) const;
+    AbstractMetaClass *findClass(const TypeEntry* typeEntry) const;
     AbstractMetaEnumValue *findEnumValue(const QString &string) const;
     AbstractMetaEnum *findEnum(const EnumTypeEntry *entry) const;
 

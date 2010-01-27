@@ -2210,3 +2210,12 @@ AbstractMetaClass *AbstractMetaClassList::findClass(const QString &name) const
 
     return 0;
 }
+
+AbstractMetaClass *AbstractMetaClassList::findClass(const TypeEntry* typeEntry) const
+{
+    foreach (AbstractMetaClass* c, *this) {
+        if (c->typeEntry() == typeEntry)
+            return c;
+    }
+    return 0;
+}
