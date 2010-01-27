@@ -2211,11 +2211,12 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
 
     // Multiple inheritance
     if (metaClass->baseClassNames().size() > 1) {
+        AbstractMetaClassList baseClasses = getBaseClasses(metaClass);
         s << INDENT << pyTypeName << ".super.ht_type.tp_bases = PyTuple_Pack(";
-        s << metaClass->baseClassNames().size();
+        s << baseClasses.size();
         s << ',' << endl;
         QStringList bases;
-        foreach (const AbstractMetaClass* base, getBaseClasses(metaClass))
+        foreach (const AbstractMetaClass* base, baseClasses)
             bases << QString("(PyTypeObject*)&%1").arg(cpythonTypeName(base->typeEntry()));
         Indentation indent(INDENT);
         s << INDENT << bases.join(", ") << ");" << endl << endl;
