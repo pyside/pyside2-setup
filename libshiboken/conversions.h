@@ -191,6 +191,30 @@ struct Converter<T&> : Converter<T*>
 };
 template <typename T> struct Converter<const T&> : Converter<T&> {};
 
+// Void pointer conversions
+template<>
+struct Converter<void*>
+{
+    static inline bool isConvertible(PyObject* pyobj) { return false; }
+    static PyObject* toPython(const void* cppobj)
+    {
+        PyObject* pyobj = BindingManager::instance().retrieveWrapper(cppobj);
+        if (pyobj)
+            Py_INCREF(pyobj);
+        else
+            pyobj = SbkBaseWrapper_New(&SbkBaseWrapper_Type, cppobj, false, false);
+        return pyobj;
+    }
+    static void* toCpp(PyObject* pyobj)
+    {
+        if (pyobj == Py_None)
+            return 0;
+        return SbkBaseWrapper_cptr(pyobj);
+    }
+};
+template <> struct Converter<const void*> : Converter<void*> {};
+
+
 // Primitive Conversions ------------------------------------------------------
 template <>
 struct Converter<bool>

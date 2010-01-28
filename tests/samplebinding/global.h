@@ -32,4 +32,5 @@
 #include "strlist.h"
 #include "sometime.h"
 #include "virtualmethods.h"
+#include "voidholder.h"
 

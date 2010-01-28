@@ -818,6 +818,8 @@
         </modify-function>
     </value-type>
 
+    <value-type name="VoidHolder"/>
+
     <object-type name="PrivateDtor" />
 
     <object-type name="Base1"/>
