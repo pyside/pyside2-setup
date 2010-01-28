@@ -61,7 +61,15 @@ inline PyObject* makeTuple(const A& a, const B& b, const C& c)
     return tuple;
 }
 
-LIBSHIBOKEN_API bool PySequence_to_argc_argv(PyObject* argList, int* argc, char*** argv);
+/**
+* It transforms a python sequence into two C variables, argc and argv.
+* If the sequence is empty and defaultAppName was provided, argc will be 1 and
+* argv will have a copy of defaultAppName.
+*
+* \note argc and argv *should* be deleted by the user.
+* \returns True on sucess, false otherwise.
+*/
+LIBSHIBOKEN_API bool PySequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defaultAppName = 0);
 
 } // namespace Shiboken
 

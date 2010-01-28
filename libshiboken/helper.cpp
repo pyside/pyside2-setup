@@ -38,25 +38,33 @@ namespace Shiboken
 {
 
 bool
-PySequence_to_argc_argv(PyObject* argList, int* argc, char*** argv)
+PySequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defaultAppName)
 {
     if (!PySequence_Check(argList))
         return false;
+
     // Check all items
     int numArgs = PySequence_Size(argList);
     for (int i = 0; i < numArgs; ++i)
         if (!PyString_Check(PySequence_GetItem(argList, i)))
             return false;
 
-    *argc = (int) PySequence_Size(argList);
+    bool addAppName = !numArgs && defaultAppName;
+    *argc = addAppName ? 1 : numArgs;
+
     *argv = new char*[*argc];
-    for (int i = 0; i < *argc; ++i) {
+    for (int i = 0; i < numArgs; ++i) {
         PyObject* item = PySequence_GetItem(argList, i);
         char* string = PyString_AS_STRING(item);
         int size = strlen(string);
         (*argv)[i] = new char[size+1];
         (*argv)[i] = strcpy((*argv)[i], string);
         Py_DECREF(item);
+    }
+
+    if (addAppName) {
+        (*argv)[0] = new char[strlen(defaultAppName)+1];
+        (*argv)[0] = strcpy((*argv)[0], defaultAppName);
     }
     return true;
 }

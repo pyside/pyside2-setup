@@ -642,7 +642,7 @@
             <inject-code class="target" position="beginning">
                 int argc;
                 char** argv;
-                if (!PySequence_to_argc_argv(%PYARG_1, &amp;argc, &amp;argv)) {
+                if (!PySequenceToArgcArgv(%PYARG_1, &amp;argc, &amp;argv)) {
                     PyErr_SetString(PyExc_TypeError, "error");
                     return 0;
                 }
@@ -666,7 +666,7 @@
             <inject-code class="target" position="beginning">
                 int argc;
                 char** argv;
-                if (!PySequence_to_argc_argv(%PYARG_1, &amp;argc, &amp;argv)) {
+                if (!PySequenceToArgcArgv(%PYARG_1, &amp;argc, &amp;argv)) {
                     PyErr_SetString(PyExc_TypeError, "error");
                     return 0;
                 }
