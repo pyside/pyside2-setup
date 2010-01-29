@@ -1086,8 +1086,7 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
         }
 
         s << typeChecks << ") {" << endl;
-        if (!refFunc->isAbstract())
-            s << typeConversions;
+        s << typeConversions;
 
         {
             Indentation indent(INDENT);
