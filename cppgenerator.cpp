@@ -519,7 +519,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     s << INDENT;
     bool hasCppWrapper = shouldGenerateCppWrapper(metaClass);
     s << (hasCppWrapper ? wrapperName(metaClass) : metaClass->qualifiedCppName());
-    s << "* cptr;" << endl;
+    s << "* cptr = 0;" << endl;
     if (overloadData.hasAllowThread())
         s << INDENT << "Shiboken::ThreadStateSaver " << THREAD_STATE_SAVER_VAR << ';' << endl;
     s << INDENT << "SbkBaseWrapper* sbkSelf = reinterpret_cast<SbkBaseWrapper*>(self);" << endl;
@@ -563,6 +563,17 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     }
 
     writeOverloadedMethodDecisor(s, &overloadData);
+
+    if (overloadData.maxArgs() > 0) {
+        s << endl;
+        s << INDENT << "if (PyErr_Occurred()) {" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "delete cptr;" << endl;
+            s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+        }
+        s << INDENT << '}' << endl;
+    }
 
     s << endl;
     s << INDENT << "sbkSelf->cptr = cptr;" << endl;

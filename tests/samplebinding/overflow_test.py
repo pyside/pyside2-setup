@@ -47,10 +47,14 @@ class OverflowTest(unittest.TestCase):
         doubleUnsignedInt(0xdeadbeef)
 
     def testShortOverflow(self):
+        '''Calls function with short parameter using an overflowing value.'''
         doubleShort(-3)
-        '''Calls function with unsigned int parameter using an overflowing value.'''
         self.assertRaises(OverflowError, doubleShort, 0xFFFF*-1)
         self.assertRaises(OverflowError, doubleShort, 0xFFFF + 1)
+
+    def testOverflowOnCtor(self):
+        '''Calls object ctor with int parameter using overflowing values.'''
+        self.assertRaises(OverflowError, Point, 42415335332353253, 42415335332353253)
 
 if __name__ == '__main__':
     unittest.main()
