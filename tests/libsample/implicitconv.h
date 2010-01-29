@@ -57,14 +57,16 @@ public:
         OverFunc_C
     };
 
-    ImplicitConv() : m_ctorEnum(CtorNone), m_objId(-1) {}
-    ImplicitConv(int objId) : m_ctorEnum(CtorOne), m_objId(objId) {}
-    ImplicitConv(CtorEnum ctorEnum) : m_ctorEnum(ctorEnum), m_objId(-1) {}
-    ImplicitConv(ObjectType&) : m_ctorEnum(CtorObjectTypeReference), m_objId(-1) {}
+    ImplicitConv() : m_ctorEnum(CtorNone), m_objId(-1), m_value(-1.0) {}
+    ImplicitConv(int objId) : m_ctorEnum(CtorOne), m_objId(objId), m_value(-1.0) {}
+    ImplicitConv(CtorEnum ctorEnum) : m_ctorEnum(ctorEnum), m_objId(-1), m_value(-1.0) {}
+    ImplicitConv(ObjectType&) : m_ctorEnum(CtorObjectTypeReference), m_objId(-1), m_value(-1.0) {}
+    ImplicitConv(double value, bool=true) : m_ctorEnum(CtorNone), m_value(value) {}
     ~ImplicitConv() {}
 
     CtorEnum ctorEnum() { return m_ctorEnum; }
     int objId() { return m_objId; }
+    double value() { return m_value; }
 
     static ImplicitConv implicitConvCommon(ImplicitConv implicit);
 
@@ -78,6 +80,7 @@ public:
 private:
     CtorEnum m_ctorEnum;
     int m_objId;
+    double m_value;
 };
 
 #endif // IMPLICITCONV_H

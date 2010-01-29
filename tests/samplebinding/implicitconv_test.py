@@ -50,6 +50,9 @@ class ImplicitConvTest(unittest.TestCase):
         ic = ImplicitConv.implicitConvCommon(obj)
         self.assertEqual(ic.ctorEnum(), ImplicitConv.CtorObjectTypeReference)
 
+        ic = ImplicitConv.implicitConvCommon(42.42)
+        self.assertEqual(ic.value(), 42.42)
+
 if __name__ == '__main__':
     unittest.main()
 
