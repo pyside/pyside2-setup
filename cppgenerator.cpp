@@ -665,83 +665,77 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
     }
     s << ')' << endl << '{' << endl;
 
-    if (overloads.count() == 1 && rfunc->isAbstract()) {
-        s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
-        s << rfunc->ownerClass()->name() << '.' << rfunc->name();
-        s << "()' not implemented.\");" << endl;
-        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
-    } else {
-        if (rfunc->implementingClass() &&
-            (!rfunc->implementingClass()->isNamespace() && !rfunc->isStatic())) {
+    if (rfunc->implementingClass() &&
+        (!rfunc->implementingClass()->isNamespace() && !rfunc->isStatic())) {
 
-            if (rfunc->isOperatorOverload() && rfunc->isBinaryOperator()) {
-                QString checkFunc = cpythonCheckFunction(rfunc->ownerClass()->typeEntry());
-                s << INDENT << "// FIXME: Optimize this: Only do this when there is a reverse operator in this function group\n";
-                s << INDENT << "bool isReverse = " << checkFunc << "(arg) && !" << checkFunc << "(self);\n"
-                  << INDENT << "if (isReverse)\n"
-                  << INDENT << INDENT << "std::swap(self, arg);\n\n";
-            }
+        if (rfunc->isOperatorOverload() && rfunc->isBinaryOperator()) {
+            QString checkFunc = cpythonCheckFunction(rfunc->ownerClass()->typeEntry());
+            s << INDENT << "// FIXME: Optimize this: Only do this when there is a reverse operator in this function group\n";
+            s << INDENT << "bool isReverse = " << checkFunc << "(arg) && !" << checkFunc << "(self);\n"
+                << INDENT << "if (isReverse)\n"
+                << INDENT << INDENT << "std::swap(self, arg);\n\n";
+        }
 
-            // Checks if the underlying C++ object is valid.
-            if (OverloadData::hasStaticAndInstanceFunctions(overloads)) {
-                s << INDENT << "if (self) {" << endl;
-                {
-                    Indentation indent(INDENT);
-                    writeInvalidCppObjectCheck(s);
-                }
-                s << INDENT << '}' << endl;
-            } else {
+        // Checks if the underlying C++ object is valid.
+        if (OverloadData::hasStaticAndInstanceFunctions(overloads)) {
+            s << INDENT << "if (self) {" << endl;
+            {
+                Indentation indent(INDENT);
                 writeInvalidCppObjectCheck(s);
             }
-            s << endl;
-        }
-
-        bool hasReturnValue = overloadData.hasNonVoidReturnType();
-
-        if (hasReturnValue && !rfunc->isInplaceOperator())
-            s << INDENT << "PyObject* " << PYTHON_RETURN_VAR << " = 0;" << endl;
-        if (overloadData.hasAllowThread())
-            s << INDENT << "Shiboken::ThreadStateSaver " << THREAD_STATE_SAVER_VAR << ';' << endl;
-        s << endl;
-
-        if (minArgs != maxArgs || maxArgs > 1) {
-            s << INDENT << "int numArgs = ";
-            if (minArgs == 0 && maxArgs == 1)
-                s << "(arg == 0 ? 0 : 1);" << endl;
-            else
-                writeArgumentsInitializer(s, overloadData);
-        }
-
-        writeOverloadedMethodDecisor(s, &overloadData);
-
-        s << endl << INDENT << "if (PyErr_Occurred()";
-        if (hasReturnValue && !rfunc->isInplaceOperator())
-            s << " || !" << PYTHON_RETURN_VAR;
-        s << ") {" << endl;
-        {
-            Indentation indent(INDENT);
-            if (hasReturnValue  && !rfunc->isInplaceOperator())
-                s << INDENT << "Py_XDECREF(" << PYTHON_RETURN_VAR << ");" << endl;
-            s << INDENT << "return " << m_currentErrorCode << ';' << endl;
-        }
-        s << INDENT << '}' << endl;
-
-        s << INDENT;
-        if (hasReturnValue) {
-            if (rfunc->isInplaceOperator()) {
-                s << INDENT << "Py_INCREF(self);\n";
-                s << INDENT << "return self;\n";
-            } else {
-                s << INDENT << "return " << PYTHON_RETURN_VAR << ";\n";
-            }
+            s << INDENT << '}' << endl;
         } else {
-            s << "Py_RETURN_NONE";
+            writeInvalidCppObjectCheck(s);
         }
-        s << ';' << endl;
-
-        if (maxArgs > 0)
-            writeErrorSection(s, overloadData);
+        s << endl;
     }
+
+    bool hasReturnValue = overloadData.hasNonVoidReturnType();
+
+    if (hasReturnValue && !rfunc->isInplaceOperator())
+        s << INDENT << "PyObject* " << PYTHON_RETURN_VAR << " = 0;" << endl;
+    if (overloadData.hasAllowThread())
+        s << INDENT << "Shiboken::ThreadStateSaver " << THREAD_STATE_SAVER_VAR << ';' << endl;
+    s << endl;
+
+    if (minArgs != maxArgs || maxArgs > 1) {
+        s << INDENT << "int numArgs = ";
+        if (minArgs == 0 && maxArgs == 1)
+            s << "(arg == 0 ? 0 : 1);" << endl;
+        else
+            writeArgumentsInitializer(s, overloadData);
+    }
+
+    writeOverloadedMethodDecisor(s, &overloadData);
+
+    s << endl << INDENT << "if (PyErr_Occurred()";
+    if (hasReturnValue && !rfunc->isInplaceOperator())
+        s << " || !" << PYTHON_RETURN_VAR;
+    s << ") {" << endl;
+    {
+        Indentation indent(INDENT);
+        if (hasReturnValue  && !rfunc->isInplaceOperator())
+            s << INDENT << "Py_XDECREF(" << PYTHON_RETURN_VAR << ");" << endl;
+        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+    }
+    s << INDENT << '}' << endl;
+
+    s << INDENT;
+    if (hasReturnValue) {
+        if (rfunc->isInplaceOperator()) {
+            s << INDENT << "Py_INCREF(self);\n";
+            s << INDENT << "return self;\n";
+        } else {
+            s << INDENT << "return " << PYTHON_RETURN_VAR << ";\n";
+        }
+    } else {
+        s << "Py_RETURN_NONE";
+    }
+    s << ';' << endl;
+
+    if (maxArgs > 0)
+        writeErrorSection(s, overloadData);
+
     s << '}' << endl << endl;
 }
 
@@ -1111,11 +1105,18 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 {
     s << INDENT << "// " << func->minimalSignature() << (func->isReverseOperator() ? " [reverse operator]": "") << endl;
 
+
     if (func->isAbstract()) {
-        s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '"
-          << func->ownerClass()->name() << '.' << func->name() << "()' not implemented.\");" << endl;
-        return;
+        s << INDENT << "if (SbkBaseWrapper_containsCppWrapper(self)) {\n";
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
+            s << func->ownerClass()->name() << '.' << func->name() << "()' not implemented.\");" << endl;
+            s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+        }
+        s << INDENT << "}\n";
     }
+
     writeCppSelfDefinition(s, func);
 
     // Used to provide contextual information to custom code writer function.
@@ -1243,15 +1244,18 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 #ifndef AVOID_PROTECTED_HACK
                     if (!func->isStatic())
                         mc << CPP_SELF_VAR << "->";
-                    mc << func->ownerClass()->name() << "::" << func->originalName();
+                    if (!func->isAbstract())
+                        mc << func->ownerClass()->name() << "::";
+                    mc << func->originalName();
 #else
                     if (!func->isStatic()) {
                         if (func->isProtected())
                             mc << "((" << wrapperName(func->ownerClass()) << "*) ";
                         mc << CPP_SELF_VAR << (func->isProtected() ? ")" : "") << "->";
                     }
-                    mc << (func->isProtected() ? wrapperName(func->ownerClass()) : func->ownerClass()->name());
-                    mc << "::" << func->originalName() << (func->isProtected() ? "_protected" : "");
+                    if (!func->isAbstract())
+                        mc << (func->isProtected() ? wrapperName(func->ownerClass()) : func->ownerClass()->name()) << "::";
+                    mc << func->originalName() << (func->isProtected() ? "_protected" : "");
 #endif
                 } else {
                     mc << func->originalName();
