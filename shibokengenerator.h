@@ -293,13 +293,11 @@ protected:
      */
     static void initPrimitiveTypesCorrespondences();
 
-    AbstractMetaFunctionList queryFunctions(const AbstractMetaClass* metaClass, bool allFunction = false);
     void writeFunctionCall(QTextStream& s,
                            const AbstractMetaFunction* metaFunc,
                            Options options = NoOption) const;
 
     AbstractMetaFunctionList filterFunctions(const AbstractMetaClass* metaClass);
-    AbstractMetaFunctionList queryGlobalOperators(const AbstractMetaClass* metaClass);
 private:
     bool m_useCtorHeuristic;
     bool m_usePySideExtensions;

@@ -732,58 +732,6 @@ void ShibokenGenerator::writeArgumentNames(QTextStream &s,
     }
 }
 
-AbstractMetaFunctionList ShibokenGenerator::queryGlobalOperators(const AbstractMetaClass *metaClass)
-{
-    AbstractMetaFunctionList result;
-
-    foreach (AbstractMetaFunction *func, metaClass->functions()) {
-        if (func->isInGlobalScope() && func->isOperatorOverload())
-            result.append(func);
-    }
-    return result;
-}
-
-AbstractMetaFunctionList ShibokenGenerator::queryFunctions(const AbstractMetaClass *metaClass, bool allFunctions)
-{
-    AbstractMetaFunctionList result;
-
-    if (allFunctions) {
-        int defaultFlags = AbstractMetaClass::NormalFunctions | AbstractMetaClass::Visible;
-        defaultFlags |= metaClass->isInterface() ? 0 : AbstractMetaClass::ClassImplements;
-
-        // Constructors
-        result = metaClass->queryFunctions(AbstractMetaClass::Constructors
-                                           | defaultFlags);
-
-        // put enum constructor first to avoid conflict with int contructor
-        result = sortConstructor(result);
-
-        // Final functions
-        result += metaClass->queryFunctions(AbstractMetaClass::FinalInTargetLangFunctions
-                                            | AbstractMetaClass::NonStaticFunctions
-                                            | defaultFlags);
-
-        //virtual
-        result += metaClass->queryFunctions(AbstractMetaClass::VirtualInTargetLangFunctions
-                                            | AbstractMetaClass::NonStaticFunctions
-                                            | defaultFlags);
-
-        // Static functions
-        result += metaClass->queryFunctions(AbstractMetaClass::StaticFunctions | defaultFlags);
-
-        // Empty, private functions, since they aren't caught by the other ones
-        result += metaClass->queryFunctions(AbstractMetaClass::Empty
-                                            | AbstractMetaClass::Invisible
-                                            | defaultFlags);
-        // Signals
-        result += metaClass->queryFunctions(AbstractMetaClass::Signals | defaultFlags);
-    } else {
-        result = metaClass->functionsInTargetLang();
-    }
-
-    return result;
-}
-
 void ShibokenGenerator::writeFunctionCall(QTextStream& s,
                                           const AbstractMetaFunction* func,
                                           Options options) const
@@ -797,31 +745,21 @@ void ShibokenGenerator::writeFunctionCall(QTextStream& s,
 
 AbstractMetaFunctionList ShibokenGenerator::filterFunctions(const AbstractMetaClass* metaClass)
 {
-    AbstractMetaFunctionList lst = queryFunctions(metaClass, true);
-    foreach (AbstractMetaFunction *func, lst) {
+    AbstractMetaFunctionList result;
+    foreach (AbstractMetaFunction *func, metaClass->functions()) {
         //skip signals
         if (func->isSignal()
             || func->isDestructor()
 #ifndef AVOID_PROTECTED_HACK
-            || (func->isModifiedRemoved() && !func->isAbstract()))
+            || (func->isModifiedRemoved() && !func->isAbstract())) {
 #else
-            || (func->isModifiedRemoved() && !func->isAbstract() && !func->isProtected()))
+            || (func->isModifiedRemoved() && !func->isAbstract() && !func->isProtected())) {
 #endif
-            lst.removeOne(func);
+            continue;
+        }
+        result << func;
     }
-
-    //virtual not implemented in current class
-    AbstractMetaFunctionList virtualLst = metaClass->queryFunctions(AbstractMetaClass::VirtualFunctions);
-    foreach (AbstractMetaFunction* func, virtualLst) {
-        if ((func->implementingClass() != metaClass) && !lst.contains(func))
-            lst.append(func);
-    }
-
-    //append global operators
-    lst += queryGlobalOperators(metaClass);
-
-    return lst;
-    //return metaClass->functions();
+    return result;
 }
 
 void ShibokenGenerator::writeCodeSnips(QTextStream& s,
