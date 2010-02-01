@@ -1333,14 +1333,6 @@ bool AbstractMetaBuilder::setupInheritance(AbstractMetaClass *metaClass)
 
         // true for primary base class
         else if (!baseClassEntry->designatedInterface()) {
-            if (primaries > 0) {
-                ReportHandler::warning(QString("class '%1' has multiple primary base classes"
-                                               " '%2' and '%3'")
-                                       .arg(metaClass->name())
-                                       .arg(baseClasses.at(primary))
-                                       .arg(baseClassEntry->name()));
-                return false;
-            }
             primaries++;
             primary = i;
         }
@@ -1370,7 +1362,7 @@ bool AbstractMetaBuilder::setupInheritance(AbstractMetaClass *metaClass)
 
             setupInheritance(baseClass);
 
-            QString interfaceName = InterfaceTypeEntry::interfaceName(baseClass->name());
+            QString interfaceName = baseClass->isInterface() ? InterfaceTypeEntry::interfaceName(baseClass->name()) : baseClass->name();
             AbstractMetaClass *iface = m_metaClasses.findClass(interfaceName);
             if (!iface) {
                 ReportHandler::warning(QString("unknown interface for '%1': '%2'")
