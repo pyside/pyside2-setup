@@ -57,9 +57,11 @@ public:
         Py_XDECREF(m_pyobj);
     }
 
+    bool isNull() const { return m_pyobj == 0; }
     /// Returns the pointer of the Python object being held.
     PyObject* object() { return m_pyobj; }
     operator PyObject*() { return m_pyobj; }
+    operator PyTupleObject*() { return reinterpret_cast<PyTupleObject*>(m_pyobj); }
     operator bool() const { return m_pyobj; }
     PyObject* operator->() { return m_pyobj; }
 private:

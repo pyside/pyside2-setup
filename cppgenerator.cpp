@@ -362,10 +362,10 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
     s << INDENT << "Shiboken::GilState gil;" << endl;
 
-    s << INDENT << "PyObject* py_override = BindingManager::instance().getOverride(this, \"";
-    s << func->name() << "\");" << endl;
+    s << INDENT << "Shiboken::AutoDecRef py_override(BindingManager::instance().getOverride(this, \"";
+    s << func->name() << "\"));" << endl;
 
-    s << INDENT << "if (!py_override) {" << endl;
+    s << INDENT << "if (py_override.isNull()) {" << endl;
     {
         Indentation indentation(INDENT);
         if (func->isAbstract()) {
@@ -389,9 +389,9 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     s << ';' << endl;
     s << INDENT << '}' << endl << endl;
 
-    s << INDENT << "PyObject* pyargs = ";
+    s << INDENT << "Shiboken::AutoDecRef pyargs(";
     if (func->arguments().isEmpty()) {
-        s << "PyTuple_New(0);" << endl;
+        s << "PyTuple_New(0));" << endl;
     } else {
         QStringList argConversions;
         foreach (const AbstractMetaArgument* arg, func->arguments()) {
@@ -423,7 +423,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
         s << "Py_BuildValue(\"(" << getFormatUnitString(func) << ")\"," << endl;
         s << argConversions.join(",\n") << endl;
-        s << INDENT << ");" << endl;
+        s << INDENT << "));" << endl;
     }
     s << endl;
 
@@ -470,9 +470,6 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().last();
         writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::NativeCode, func, lastArg);
     }
-
-    s << INDENT << "Py_XDECREF(pyargs);" << endl;
-    s << INDENT << "Py_XDECREF(py_override);" << endl;
 
     if (type) {
         s << INDENT << "return ";
