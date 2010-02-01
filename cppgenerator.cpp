@@ -157,7 +157,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         foreach (const AbstractMetaFunction* func, filterFunctions(metaClass)) {
             if (func->isPrivate() || (func->isModifiedRemoved() && !func->isAbstract()))
                 continue;
-            if (func->isConstructor() && !func->isCopyConstructor())
+            if (func->isConstructor() && !func->isCopyConstructor() && !func->isUserAdded())
                 writeConstructorNative(s, func);
             else if (func->isVirtual() || func->isAbstract())
                 writeVirtualMethodNative(s, func);

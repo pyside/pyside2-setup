@@ -111,6 +111,9 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
     if (func->isCopyConstructor())
         return;
 
+    if (func->isConstructor() && func->isUserAdded())
+        return;
+
 #ifdef AVOID_PROTECTED_HACK
     if (func->isProtected() && !func->isConstructor()) {
         s << INDENT << "inline " << (func->isStatic() ? "static " : "");
