@@ -1837,8 +1837,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
     s << INDENT << baseName << "_RichComparison_TypeError:" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "PyErr_SetString(PyExc_TypeError, \"operator called with wrong parameters.\");" << endl;
-        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+        s << INDENT << "Py_RETURN_FALSE;" << endl;
     }
     s << '}' << endl << endl;
 }
