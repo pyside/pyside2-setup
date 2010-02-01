@@ -123,15 +123,16 @@ OverloadData::OverloadData(const AbstractMetaFunctionList overloads, const Shibo
 {
     foreach (const AbstractMetaFunction* func, overloads) {
         m_overloads.append(func);
-        int argSize = func->arguments().size();
+        int argSize = func->arguments().size() - numberOfRemovedArguments(func);
         if (m_minArgs > argSize)
             m_minArgs = argSize;
         else if (m_maxArgs < argSize)
             m_maxArgs = argSize;
         OverloadData* currentOverloadData = this;
         foreach (const AbstractMetaArgument* arg, func->arguments()) {
-            if (func->argumentRemoved(arg->argumentIndex() + 1))
+            if (func->argumentRemoved(arg->argumentIndex() + 1)) {
                 continue;
+            }
             currentOverloadData = currentOverloadData->addOverloadData(func, arg->type());
         }
     }
