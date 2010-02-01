@@ -89,3 +89,12 @@ Abstract::show(PrintFormat format)
     cout << '>';
 }
 
+void Abstract::callVirtualGettingEnum(PrintFormat p)
+{
+    virtualGettingAEnum(p);
+}
+
+void Abstract::virtualGettingAEnum(Abstract::PrintFormat p)
+{
+}
+

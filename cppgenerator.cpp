@@ -405,6 +405,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                             || arg->type()->isValue()
                             || arg->type()->isValuePointer()
                             || arg->type()->isFlags()
+                            || arg->type()->isEnum()
                             || arg->type()->isReference()
                             || (arg->type()->isPrimitive()
                                 && !m_formatUnits.contains(arg->type()->typeEntry()->name()));

@@ -349,6 +349,8 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func)
             || arg->type()->isObject()
             || arg->type()->isValue()
             || arg->type()->isValuePointer()
+            || arg->type()->isEnum()
+            || arg->type()->isFlags()
             || arg->type()->isReference()) {
             result += 'O';
         } else if (arg->type()->isPrimitive()) {
@@ -362,7 +364,9 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func)
         } else if (arg->type()->isNativePointer() && arg->type()->name() == "char") {
             result += 'z';
         } else {
-            result += 'Y';
+            Q_ASSERT(false);
+            ReportHandler::warning("Unknown type used in ShibokenGenerator::getFormatUnitString!");
+            result += '?';
         }
     }
     return result;

@@ -47,6 +47,9 @@ class Concrete(Abstract):
     def unpureVirtual(self):
         self.unpure_virtual_called = True
 
+    def virtualGettingAEnum(self, enum):
+        self.virtual_getting_enum = True
+
 
 class AbstractTest(unittest.TestCase):
     '''Test case for Abstract class'''
@@ -80,6 +83,12 @@ class AbstractTest(unittest.TestCase):
         c = Concrete()
         c.callPureVirtual()
         self.assert_(c.pure_virtual_called)
+
+    def testEnumParameterOnVirtualMethodCall(self):
+        '''testEnumParameterOnVirtualMethodCall'''
+        c = Concrete()
+        c.callVirtualGettingEnum(Abstract.Short)
+        self.assert_(c.virtual_getting_enum)
 
 if __name__ == '__main__':
     unittest.main()
