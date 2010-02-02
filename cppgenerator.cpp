@@ -624,8 +624,9 @@ void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const Ab
     }
 
     QStringList argValues;
-    for (int i = 0; i < ctor->arguments().size(); i++)
-        argValues << QLatin1String("0");
+    AbstractMetaArgumentList args = ctor->arguments();
+    for (int i = 0; i < args.size(); i++)
+        argValues << args[i]->type()->name()+"(0)";
     s << metaClass->qualifiedCppName() << '(' << argValues.join(QLatin1String(", ")) << ')';
 }
 
@@ -634,8 +635,10 @@ void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const Ab
     Q_ASSERT(metaType);
     const TypeEntry* type = metaType->typeEntry();
 
-    if (type->isPrimitive() || type->isObject()) {
+    if (type->isObject()) {
         s << "0";
+    } else if (type->isPrimitive()) {
+        s << type->name() << "(0)";
     } else if (type->isContainer() || type->isFlags() || type->isEnum()){
         s << metaType->cppSignature() << "()";
     } else {
