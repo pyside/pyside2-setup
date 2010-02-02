@@ -341,7 +341,6 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         return;
 
     const TypeEntry* type = func->type() ? func->type()->typeEntry() : 0;
-    bool isWrappedCppClass = type ? (type->isValue() || type->isObject()) : false;
 
     QString prefix = wrapperName(func->ownerClass()) + "::";
     s << functionSignature(func, prefix, "", Generator::SkipDefaultValues) << endl << "{" << endl;
@@ -441,17 +440,23 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
     if (!injectedCodeCallsPythonOverride(func)) {
         s << INDENT;
-        if (type)
-            s << "PyObject* " << PYTHON_RETURN_VAR << " = ";
-        s << "PyObject_Call(py_override, pyargs, NULL);" << endl;
+        s << "Shiboken::AutoDecRef " PYTHON_RETURN_VAR "(PyObject_Call(py_override, pyargs, NULL));" << endl;
         if (type) {
-            s << INDENT;
-            if (isWrappedCppClass) {
-                s << type->name() << "* " << CPP_RETURN_VAR << " = " << cpythonWrapperCPtr(type, PYTHON_RETURN_VAR);
-            } else {
-                s << translateTypeForWrapperMethod(func->type(), func->implementingClass()) << ' ' << CPP_RETURN_VAR << " = ";
-                writeToCppConversion(s, func->type(), func->implementingClass(), PYTHON_RETURN_VAR);
+            s << INDENT << "// An error happened in python code!" << endl;
+            s << INDENT << "if (" PYTHON_RETURN_VAR ".isNull()) {" << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "PyErr_Print();" << endl;
+                s << INDENT << "return ";
+                writeMinimalConstructorCallArguments(s, func->type());
+                s << ';' << endl;
             }
+            s << INDENT << '}' << endl;
+
+            s << INDENT;
+            s << translateTypeForWrapperMethod(func->type(), func->implementingClass()) << ' ' << CPP_RETURN_VAR << "(";
+            writeToCppConversion(s, func->type(), func->implementingClass(), PYTHON_RETURN_VAR);
+            s << ')';
             s << ';' << endl;
         }
     }
@@ -471,11 +476,16 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::NativeCode, func, lastArg);
     }
 
-    if (type) {
-        s << INDENT << "return ";
-        s << (shouldDereferenceAbstractMetaTypePointer(func->type()) ? "*" : "") << CPP_RETURN_VAR;
-        s << ';' << endl;
-    }
+    // write ownership rules
+    TypeSystem::Ownership ownership = func->ownership(func->ownerClass(), TypeSystem::TargetLangCode, 0);
+    if (ownership == TypeSystem::CppOwnership) {
+        s << INDENT << "// Return value ownership transference" << endl;
+        s << INDENT << "SbkBaseWrapper_setOwnership("PYTHON_RETURN_VAR".object(), 0);" << endl;
+    } else
+        writeReturnValueHeuristics(s, func, "BindingManager::instance().retrieveWrapper(this)");
+
+    if (type)
+        s << INDENT << "return "CPP_RETURN_VAR";" << endl;
     s << '}' << endl << endl;
 }
 
@@ -2625,7 +2635,7 @@ void CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
     writeReturnValueHeuristics(s, func);
 }
 
-void CppGenerator::writeReturnValueHeuristics(QTextStream& s, const AbstractMetaFunction* func)
+void CppGenerator::writeReturnValueHeuristics(QTextStream& s, const AbstractMetaFunction* func, const QString& self)
 {
     AbstractMetaType *type = func->type();
     if (!useReturnValueHeuristic()
@@ -2638,5 +2648,5 @@ void CppGenerator::writeReturnValueHeuristics(QTextStream& s, const AbstractMeta
     }
 
     if (type->isQObject() || type->isObject() || type->isValuePointer())
-        s << INDENT << "Shiboken::setParent(self, " PYTHON_RETURN_VAR ");" << endl;
+        s << INDENT << "Shiboken::setParent(" << self << ", " PYTHON_RETURN_VAR ");" << endl;
 }

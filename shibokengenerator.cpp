@@ -856,8 +856,9 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 code.replace("%0.", QString("%1->").arg("cptr"));
                 code.replace("%0", "cptr");
             } else if (func->type()) {
+                QString returnValueOp = func->type()->isObject() || func->type()->isQObject() ? "%1->" : "%1.";
                 if (func->type()->typeEntry()->isValue() || func->type()->typeEntry()->isObject())
-                    code.replace("%0.", QString("%1->").arg(CPP_RETURN_VAR));
+                    code.replace("%0.", returnValueOp.arg(CPP_RETURN_VAR));
                 code.replace("%0", CPP_RETURN_VAR);
             }
 
