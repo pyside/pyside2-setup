@@ -801,7 +801,6 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
         QString code;
         QTextStream tmpStream(&code);
         Indentation indent1(INDENT);
-        Indentation indent2(INDENT);
         formatCode(tmpStream, snip.code(), INDENT);
 
         if (context) {
@@ -984,7 +983,11 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             replaceTemplateVariables(code, func);
         }
 
-        s << code;
+        if (!code.isEmpty()) {
+            s << INDENT << "// Begin code injection" << endl;
+            s << code;
+            s << INDENT << "// End of code injection" << endl;
+        }
     }
 }
 
