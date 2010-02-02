@@ -313,7 +313,13 @@ struct CharConverter
 
 template <> struct Converter<unsigned long> : Converter_PyULongInt<unsigned long> {};
 template <> struct Converter<unsigned int> : Converter_PyULongInt<unsigned int> {};
-template <> struct Converter<char> : CharConverter<char> {};
+template <> struct Converter<char> : CharConverter<char> {
+    // Should we really return a string?
+    using CharConverter<char>::toPython;
+    static inline PyObject* toPython(const char& cppObj) {
+        return PyString_FromFormat("%c", cppObj);
+    }
+};
 template <> struct Converter<signed char> : CharConverter<signed char> {};
 template <> struct Converter<unsigned char> : CharConverter<unsigned char> {};
 template <> struct Converter<int> : Converter_PyInt<int> {};
