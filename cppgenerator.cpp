@@ -2619,4 +2619,21 @@ void CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
 
         }
     }
+    writeReturnValueHeuristics(s, func);
+}
+
+void CppGenerator::writeReturnValueHeuristics(QTextStream& s, const AbstractMetaFunction* func)
+{
+    AbstractMetaType *type = func->type();
+    if (!useReturnValueHeuristic()
+        || !func->ownerClass()
+        || func->ownership(func->ownerClass(), TypeSystem::TargetLangCode, 0) != TypeSystem::InvalidOwnership
+        || !type
+        || func->isStatic()
+        || !func->typeReplaced(0).isEmpty()) {
+        return;
+    }
+
+    if (type->isQObject() || type->isObject() || type->isValuePointer())
+        s << INDENT << "Shiboken::setParent(self, " PYTHON_RETURN_VAR ");" << endl;
 }

@@ -148,6 +148,7 @@ private:
     void writeSpecialCastFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
     void writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func);
+    void writeReturnValueHeuristics(QTextStream& s, const AbstractMetaFunction* func);
     /**
      *   Returns the multiple inheritance initializer function for the given class.
      *   \param metaClass the class for whom the function name must be generated.

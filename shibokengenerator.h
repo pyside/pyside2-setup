@@ -273,6 +273,8 @@ public:
 
     /// Returns true if the user enabled the so called "parent constructor heuristic".
     bool useCtorHeuristic() const;
+    /// Returns true if the user enabled the so called "return value heuristic".
+    bool useReturnValueHeuristic() const;
     /// Returns true if the user enabled PySide extensions.
     bool usePySideExtensions() const;
 protected:
@@ -300,6 +302,7 @@ protected:
     AbstractMetaFunctionList filterFunctions(const AbstractMetaClass* metaClass);
 private:
     bool m_useCtorHeuristic;
+    bool m_userReturnValueHeuristic;
     bool m_usePySideExtensions;
 };
 
