@@ -452,9 +452,12 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             s << INDENT << '}' << endl;
 
             s << INDENT << "// Check return type" << endl;
-            s << INDENT << "bool typeIsValid = " << cpythonCheckFunction(func->type()) << "(" << PYTHON_RETURN_VAR << ".object());" << endl;
+            s << INDENT << "bool typeIsValid = " << cpythonCheckFunction(func->type()) << "(" << PYTHON_RETURN_VAR << ");" << endl;
+            if (func->type()->isQObject() || func->type()->isObject() || func->type()->isValuePointer()) {
+                s << INDENT << "typeIsValid = typeIsValid || (" << PYTHON_RETURN_VAR << " == Py_None);" << endl;
+            }
             s << INDENT << "if (!typeIsValid) {" << endl;
-            s << INDENT << INDENT << "PyErr_SetString(PyExc_TypeError, \"Invalid return value in function QWidget.sizeHint\");" << endl;
+            s << INDENT << INDENT << "PyErr_SetString(PyExc_TypeError, \"Invalid return value in function " << func->ownerClass()->name() << "." << func->name() << "\");" << endl;
             s << INDENT << INDENT << "return ";
             writeMinimalConstructorCallArguments(s, func->type());
             s << INDENT << INDENT << ";" << endl;
