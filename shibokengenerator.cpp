@@ -1019,8 +1019,10 @@ bool ShibokenGenerator::injectedCodeCallsCppFunction(const AbstractMetaFunction*
     CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
     foreach (CodeSnip snip, snips) {
         if (snip.code().contains("%FUNCTION_NAME(") || snip.code().contains(funcCall)
-            || (func->isConstructor() && func->ownerClass()->isPolymorphic()
-                && snip.code().contains(wrappedCtorCall)))
+            || (func->isConstructor()
+                && (func->ownerClass()->isPolymorphic() && snip.code().contains(wrappedCtorCall))
+                    || snip.code().contains("new %TYPE("))
+            )
             return true;
     }
     return false;
