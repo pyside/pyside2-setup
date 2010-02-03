@@ -221,9 +221,24 @@ QString ShibokenGenerator::cpythonMethodDefinitionName(const AbstractMetaFunctio
     return QString("%1Method_%2").arg(cpythonBaseName(func->ownerClass()->typeEntry())).arg(func->name());
 }
 
+QString ShibokenGenerator::cpythonGettersSettersDefinitionName(const AbstractMetaClass* metaClass)
+{
+    return QString("%1_getsetlist").arg(cpythonBaseName(metaClass));
+}
+
 QString ShibokenGenerator::cpythonGetattroFunctionName(const AbstractMetaClass* metaClass)
 {
     return QString("%1_getattro").arg(cpythonBaseName(metaClass));
+}
+
+QString ShibokenGenerator::cpythonGetterFunctionName(const AbstractMetaField* metaField)
+{
+    return QString("%1_get_%2").arg(cpythonBaseName(metaField->enclosingClass())).arg(metaField->name());
+}
+
+QString ShibokenGenerator::cpythonSetterFunctionName(const AbstractMetaField* metaField)
+{
+    return QString("%1_set_%2").arg(cpythonBaseName(metaField->enclosingClass())).arg(metaField->name());
 }
 
 static QString cpythonEnumFlagsName(QString moduleName, QString qualifiedCppName)
