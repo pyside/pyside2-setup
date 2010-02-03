@@ -127,6 +127,9 @@ private:
     void writeTypeAsSequenceDefinition(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeTypeAsNumberDefinition(QTextStream& s, const AbstractMetaClass* metaClass);
 
+    void writeGetterFunction(QTextStream& s, const AbstractMetaField* metaField);
+    void writeSetterFunction(QTextStream& s, const AbstractMetaField* metaField);
+
     void writeRichCompareFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
     void writeFlagsNewMethod(QTextStream& s, const FlagsTypeEntry* cppFlags);
@@ -163,6 +166,10 @@ private:
 
     /// Returns true if the given class supports the python sequence protocol
     bool supportsSequenceProtocol(const AbstractMetaClass* metaClass);
+
+    /// Returns true if generator should produce getters and setters for the given class.
+    bool shouldGenerateGetSetList(const AbstractMetaClass* metaClass);
+
     // Maps special function names to function parameters and return types
     // used by CPython API in the sequence protocol.
     QHash<QString, QPair<QString, QString> > m_sequenceProtocol;

@@ -308,6 +308,25 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         writeRichCompareFunction(s, metaClass);
     }
 
+    if (shouldGenerateGetSetList(metaClass)) {
+        foreach (const AbstractMetaField* metaField, metaClass->fields()) {
+            writeGetterFunction(s, metaField);
+            writeSetterFunction(s, metaField);
+            s << endl;
+        }
+
+        s << "// Getters and Setters for " << metaClass->name() << endl;
+        s << "static PyGetSetDef " << cpythonGettersSettersDefinitionName(metaClass) << "[] = {" << endl;
+        foreach (const AbstractMetaField* metaField, metaClass->fields()) {
+            s << INDENT << "{const_cast<char*>(\"" << metaField->name() << "\"), ";
+            s << "(getter)" << cpythonGetterFunctionName(metaField);
+            s << ", (setter)" << cpythonSetterFunctionName(metaField);
+            s << "}," << endl;
+        }
+        s << INDENT << "{0}  // Sentinel" << endl;
+        s << "};" << endl << endl;
+    }
+
     s << "extern \"C\"" << endl << '{' << endl << endl;
     writeClassDefinition(s, metaClass);
     s << endl;
@@ -1595,6 +1614,11 @@ bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass* metaClass)
     return false;
 }
 
+bool CppGenerator::shouldGenerateGetSetList(const AbstractMetaClass* metaClass)
+{
+    return !metaClass->fields().isEmpty();
+}
+
 void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     QString tp_flags;
@@ -1660,6 +1684,10 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     if (metaClass->hasComparisonOperatorOverload())
         tp_richcompare = cpythonBaseName(metaClass) + "_richcompare";
 
+    QString tp_getset = QString('0');
+    if (shouldGenerateGetSetList(metaClass))
+        tp_getset = cpythonGettersSettersDefinitionName(metaClass);
+
     // search for special functions
     ShibokenGenerator::clearTpFuncs();
     foreach (AbstractMetaFunction* func, metaClass->functions()) {
@@ -1716,7 +1744,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_iternext*/         0," << endl;
     s << INDENT << "/*tp_methods*/          " << className << "_methods," << endl;
     s << INDENT << "/*tp_members*/          0," << endl;
-    s << INDENT << "/*tp_getset*/           0," << endl;
+    s << INDENT << "/*tp_getset*/           " << tp_getset << ',' << endl;
     s << INDENT << "/*tp_base*/             " << baseClassName << ',' << endl;
     s << INDENT << "/*tp_dict*/             0," << endl;
     s << INDENT << "/*tp_descr_get*/        0," << endl;
@@ -1874,6 +1902,49 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
     s << "};" << endl << endl;
 }
 
+void CppGenerator::writeGetterFunction(QTextStream& s, const AbstractMetaField* metaField)
+{
+    s << "static PyObject* " << cpythonGetterFunctionName(metaField) << "(SbkBaseWrapper* self)" << endl;
+    s << '{' << endl;
+    s << INDENT << "return ";
+    QString cppField= QString("%1->%2").arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self")).arg(metaField->name());
+    writeToPythonConversion(s, metaField->type(), metaField->enclosingClass(), cppField);
+    s << ';' << endl;
+    s << '}' << endl;
+}
+
+void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* metaField)
+{
+    s << "static int " << cpythonSetterFunctionName(metaField) << "(SbkBaseWrapper* self, PyObject* value)" << endl;
+    s << '{' << endl;
+
+    s << INDENT << "if (value == 0) {" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "PyErr_SetString(PyExc_TypeError, \"'";
+        s << metaField->name() << "' may not be deleted\");" << endl;
+        s << INDENT << "return -1;" << endl;
+    }
+    s << INDENT << '}' << endl;
+
+    s << INDENT << "if (!";
+    writeTypeCheck(s, metaField->type(), "value");
+    s << ") {" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "PyErr_SetString(PyExc_TypeError, \"wrong type attributed to '";
+        s << metaField->name() << "', '" << metaField->type()->name() << "' or convertible type expected\");" << endl;
+        s << INDENT << "return -1;" << endl;
+    }
+    s << INDENT << '}' << endl;
+
+    s << INDENT << cpythonWrapperCPtr(metaField->enclosingClass(), "self") << "->" << metaField->name() << " = ";
+    writeToCppConversion(s, metaField->type(), metaField->enclosingClass(), "value");
+    s << ';' << endl;
+
+    s << INDENT << "return 0;" << endl;
+    s << '}' << endl;
+}
 
 void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
