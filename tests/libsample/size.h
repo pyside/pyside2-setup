@@ -63,12 +63,22 @@ public:
 
     inline bool operator>(const Size& other)
     {
-        return calculateArea() > other.calculateArea();
+        // On some x86 hardware and compiler combinations, floating point
+        // comparisons may fail due to a hardware bug. One workaround is to
+        // simplify comparison expressions by putting partial results in
+        // variables. See http://gcc.gnu.org/bugzilla/show_bug.cgi?id=323#c109
+        // for details.
+        double a = calculateArea();
+        double b = other.calculateArea();
+        return a > b;
     }
 
     inline bool operator<=(const Size& other)
     {
-        return calculateArea() <= other.calculateArea();
+        // See comments for operator>()
+        double a = calculateArea();
+        double b = other.calculateArea();
+        return a <= b;
     }
 
     inline bool operator>=(const Size& other)
