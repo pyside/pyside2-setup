@@ -2298,7 +2298,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
 
     s << INDENT << "if (PyType_Ready((PyTypeObject*)&" << pyTypeName << ") < 0)" << endl;
     s << INDENT << INDENT << "return;" << endl << endl;
-    s << INDENT << "Py_INCREF(&" << pyTypeName << ");" << endl;
+    s << INDENT << "Py_INCREF(reinterpret_cast<PyObject*>(&" << pyTypeName << "));" << endl;
     s << INDENT << "PyModule_AddObject(module, \"" << metaClass->name() << "\"," << endl;
     s << INDENT << INDENT << "((PyObject*)&" << pyTypeName << "));" << endl << endl;
 
