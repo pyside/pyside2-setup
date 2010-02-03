@@ -537,6 +537,20 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     bool hasCppWrapper = shouldGenerateCppWrapper(metaClass);
     s << (hasCppWrapper ? wrapperName(metaClass) : metaClass->qualifiedCppName());
     s << "* cptr = 0;" << endl;
+
+
+    bool hasCodeInjectionsAtEnd = false;
+    foreach(AbstractMetaFunction* func, overloads) {
+        foreach (CodeSnip cs, func->injectedCodeSnips()) {
+            if (cs.position == CodeSnip::End) {
+                hasCodeInjectionsAtEnd = true;
+                break;
+            }
+        }
+    }
+    if (hasCodeInjectionsAtEnd)
+        s << INDENT << "int overloadId = -1;" << endl;
+
     if (overloadData.hasAllowThread())
         s << INDENT << "Shiboken::ThreadStateSaver " << THREAD_STATE_SAVER_VAR << ';' << endl;
     s << INDENT << "SbkBaseWrapper* sbkSelf = reinterpret_cast<SbkBaseWrapper*>(self);" << endl;
@@ -602,6 +616,28 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     if (shouldGenerateCppWrapper(overloads.first()->ownerClass()))
         s << INDENT << "sbkSelf->containsCppWrapper = 1;" << endl;
     s << INDENT << "BindingManager::instance().registerWrapper(sbkSelf);" << endl;
+
+    // Constructor code injections, position=end
+    if (hasCodeInjectionsAtEnd) {
+        // FIXME: C++ arguments are not available in code injection on constructor when position = end.
+        s << INDENT << "switch(overloadId) {" << endl;
+        foreach(AbstractMetaFunction* func, overloads) {
+            Indentation indent(INDENT);
+            foreach (CodeSnip cs, func->injectedCodeSnips()) {
+                if (cs.position == CodeSnip::End) {
+                    s << INDENT << "case " << metaClass->functions().indexOf(func) << ':' << endl;
+                    s << INDENT << '{' << endl;
+                    {
+                        Indentation indent(INDENT);
+                        writeCodeSnips(s, func->injectedCodeSnips(), CodeSnip::End, TypeSystem::TargetLangCode, func);
+                    }
+                    s << INDENT << '}' << endl;
+                    break;
+                }
+            }
+        }
+        s << '}' << endl;
+    }
 
     s << endl << INDENT << "return 1;" << endl;
     if (overloadData.maxArgs() > 0)
@@ -1134,7 +1170,14 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
 void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* func, int maxArgs)
 {
     s << INDENT << "// " << func->minimalSignature() << (func->isReverseOperator() ? " [reverse operator]": "") << endl;
-
+    if (func->isConstructor()) {
+        foreach (CodeSnip cs, func->injectedCodeSnips()) {
+            if (cs.position == CodeSnip::End) {
+                s << INDENT << "overloadId = " << func->ownerClass()->functions().indexOf(const_cast<AbstractMetaFunction* const>(func)) << ';' << endl;
+                break;
+            }
+        }
+    }
 
     if (func->isAbstract()) {
         s << INDENT << "if (SbkBaseWrapper_containsCppWrapper(self)) {\n";
@@ -1316,7 +1359,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         }
     }
 
-    if (func->hasInjectedCode()) {
+    if (func->hasInjectedCode() && !func->isConstructor()) {
         s << endl;
         writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::TargetLangCode, func, lastArg);
     }

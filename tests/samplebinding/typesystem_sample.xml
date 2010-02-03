@@ -725,7 +725,16 @@
     </value-type>
 
     <value-type name="Time"/>
-    <value-type name="Size"/>
+    <value-type name="Size">
+        <add-function signature="Size(const char*)">
+        <inject-code class="target" position="beginning">
+            %0 = new %TYPE();
+        </inject-code>
+        <inject-code class="target" position="end">
+            Shiboken::AutoDecRef result(PyObject_CallMethod(%PYSELF, "setHeight", "i", 2));
+        </inject-code>
+        </add-function>
+    </value-type>
     <value-type name="MapUser"/>
     <value-type name="PairUser"/>
     <value-type name="ListUser"/>
