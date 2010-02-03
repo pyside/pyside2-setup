@@ -300,6 +300,8 @@ protected:
                            Options options = NoOption) const;
 
     AbstractMetaFunctionList filterFunctions(const AbstractMetaClass* metaClass);
+
+    Indentor INDENT;
 private:
     bool m_useCtorHeuristic;
     bool m_userReturnValueHeuristic;

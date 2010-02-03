@@ -34,7 +34,6 @@
 #define RETURN_VALUE_HEURISTIC "enable-return-value-heuristic"
 #define ENABLE_PYSIDE_EXTENSIONS "enable-pyside-extensions"
 
-static Indentor INDENT;
 //static void dumpFunction(AbstractMetaFunctionList lst);
 
 QHash<QString, QString> ShibokenGenerator::m_pythonPrimitiveTypeName = QHash<QString, QString>();
@@ -800,7 +799,6 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
 
         QString code;
         QTextStream tmpStream(&code);
-        Indentation indent1(INDENT);
         formatCode(tmpStream, snip.code(), INDENT);
 
         if (context) {

@@ -28,8 +28,6 @@
 #include <QtCore/QTextStream>
 #include <QtCore/QDebug>
 
-static Indentor INDENT;
-
 CppGenerator::CppGenerator() : m_currentErrorCode(0)
 {
     // sequence protocol functions

@@ -30,8 +30,6 @@
 #include <QtCore/QRegExp>
 #include <QtCore/QDebug>
 
-static Indentor INDENT;
-
 QString HeaderGenerator::fileNameForClass(const AbstractMetaClass* metaClass) const
 {
     return metaClass->qualifiedCppName().toLower().replace("::", "_") + QLatin1String("_wrapper.h");
