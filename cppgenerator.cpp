@@ -980,28 +980,10 @@ void CppGenerator::writeInvalidCppObjectCheck(QTextStream& s, QString pyArgName,
     }
 }
 
-void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName)
+void CppGenerator::writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, QString customCheck)
 {
-    const AbstractMetaType* argType = overloadData->argType();
-
-    int alternativeNumericTypes = 0;
-    QSet<const TypeEntry*> numericTypes;
-    foreach (OverloadData* pd, overloadData->overloadDataOnPosition(overloadData->argPos())) {
-        if (!pd->argType()->isPrimitive())
-            continue;
-        if (ShibokenGenerator::isNumber(pd->argType()->typeEntry()))
-            numericTypes << pd->argType()->typeEntry();
-    }
-    alternativeNumericTypes = numericTypes.count();
-
-    // This condition trusts that the OverloadData object will arrange for
-    // PyInt type to come after the more precise numeric types (e.g. float)
-    bool numberType = alternativeNumericTypes == 1 || ShibokenGenerator::isPyInt(argType);
-
-    bool isPairContainer = overloadData->argType()->isContainer()
-                            && ((ContainerTypeEntry*)overloadData->argType()->typeEntry())->type()
-                                == ContainerTypeEntry::PairContainer;
-
+    bool isPairContainer = argType->isContainer()
+                            && ((ContainerTypeEntry*)argType->typeEntry())->type() == ContainerTypeEntry::PairContainer;
     bool writeIsConvertibleCheck = !implicitConversions(argType).isEmpty()
                                     || argType->typeEntry()->isObject()
                                     || argType->isValuePointer();
@@ -1012,14 +994,14 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadDa
     if (isPairContainer)
         s << '(';
 
-    if (overloadData->hasArgumentTypeReplace())
-        s << guessCPythonCheckFunction(overloadData->argumentTypeReplaced());
+    if (!customCheck.isEmpty())
+        s << customCheck;
     else if (argType->typeEntry()->isFlags())
         s << cpythonCheckFunction(((FlagsTypeEntry*) argType->typeEntry())->originator(), true);
     else if (argType->isEnum())
         s << cpythonCheckFunction(argType, false, true);
-    else
-        s << cpythonCheckFunction(argType, numberType);
+    else // Should be treated as a generic number in the case the type is one
+        s << cpythonCheckFunction(argType, true);
 
     s << '(' << argumentName << ')';
 
@@ -1028,6 +1010,30 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadDa
 
     if (writeIsConvertibleCheck)
         s << " || " << cpythonIsConvertibleFunction(argType) << '(' << argumentName << "))";
+}
+
+void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName)
+{
+    const AbstractMetaType* argType = overloadData->argType();
+
+    int alternativeNumericTypes = 0;
+    foreach (OverloadData* pd, overloadData->overloadDataOnPosition(overloadData->argPos())) {
+        if (!pd->argType()->isPrimitive())
+            continue;
+        if (ShibokenGenerator::isNumber(pd->argType()->typeEntry()))
+            alternativeNumericTypes++;
+    }
+
+    // This condition trusts that the OverloadData object will arrange for
+    // PyInt type to come after the more precise numeric types (e.g. float)
+    bool numberType = alternativeNumericTypes == 1 || ShibokenGenerator::isPyInt(argType);
+
+    QString customCheck;
+    if (overloadData->hasArgumentTypeReplace())
+        customCheck = guessCPythonCheckFunction(overloadData->argumentTypeReplaced());
+    else if (!numberType)
+        customCheck = cpythonCheckFunction(argType, numberType);
+    writeTypeCheck(s, argType, argumentName, customCheck);
 }
 
 void CppGenerator::writeArgumentConversion(QTextStream& s,
