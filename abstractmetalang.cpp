@@ -1105,8 +1105,14 @@ AbstractMetaFunctionList AbstractMetaClass::implicitConversions() const
     AbstractMetaFunctionList list = queryFunctions(Constructors);
     AbstractMetaFunctionList returned;
     foreach (AbstractMetaFunction *f, list) {
-        if ((f->actualMinimumArgumentCount() == 1 || f->arguments().size() == 1) && !f->isExplicit() && !f->isCopyConstructor() && !f->isModifiedRemoved() && hasCloneOperator())
+        if ((f->actualMinimumArgumentCount() == 1 || f->arguments().size() == 1)
+            && !f->isExplicit()
+            && !f->isCopyConstructor()
+            && !f->isModifiedRemoved()
+            && !f->isUserAdded()
+            && hasCloneOperator()) {
             returned += f;
+        }
     }
     return returned;
 }
