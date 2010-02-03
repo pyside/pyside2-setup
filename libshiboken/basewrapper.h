@@ -101,6 +101,8 @@ struct LIBSHIBOKEN_API SbkBaseWrapper
     unsigned int validCppObject : 1;
     /// Information about the object parents and children, can be null.
     ShiboParentInfo* parentInfo;
+    /// List of weak references
+    PyObject *weakreflist;
 };
 
 LIBSHIBOKEN_API PyAPI_FUNC(void) init_shiboken();

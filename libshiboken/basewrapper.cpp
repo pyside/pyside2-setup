@@ -132,6 +132,7 @@ PyObject* SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
     self->validCppObject = 1;
     self->parentInfo = 0;
     self->ob_dict = 0;
+    self->weakreflist = 0;
     BindingManager::instance().registerWrapper(self);
     return reinterpret_cast<PyObject*>(self);
 }
@@ -146,6 +147,7 @@ PyObject* SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*)
     self->validCppObject = 0;
     self->parentInfo = 0;
     self->ob_dict = 0;
+    self->weakreflist = 0;
     return reinterpret_cast<PyObject*>(self);
 }
 
@@ -159,6 +161,10 @@ bool cppObjectIsInvalid(PyObject* wrapper)
 
 void SbkBaseWrapper_Dealloc_PrivateDtor(PyObject* self)
 {
+
+    if (((SbkBaseWrapper *)self)->weakreflist)
+        PyObject_ClearWeakRefs(self);
+
     BindingManager::instance().releaseWrapper(self);
     Py_TYPE(reinterpret_cast<SbkBaseWrapper*>(self))->tp_free(self);
 }
@@ -265,7 +271,7 @@ SbkBaseWrapperType SbkBaseWrapper_Type = { { {
     /*tp_traverse*/         0,
     /*tp_clear*/            0,
     /*tp_richcompare*/      0,
-    /*tp_weaklistoffset*/   0,
+    /*tp_weaklistoffset*/   offsetof(SbkBaseWrapper, weakreflist),
     /*tp_iter*/             0,
     /*tp_iternext*/         0,
     /*tp_methods*/          0,
