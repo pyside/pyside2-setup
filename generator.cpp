@@ -390,13 +390,12 @@ CodeSnipList Generator::getCodeSnips(const AbstractMetaFunction *func) const
 
 AbstractMetaFunctionList Generator::implicitConversions(const TypeEntry* type) const
 {
-    AbstractMetaFunctionList implicits;
     if (type->isValue()) {
-        const AbstractMetaClass* metaClass = classes().findClass(type->name());
+        const AbstractMetaClass* metaClass = classes().findClass(type);
         if (metaClass)
-            implicits = metaClass->implicitConversions();
+            return metaClass->implicitConversions();
     }
-    return implicits;
+    return AbstractMetaFunctionList();
 }
 
 AbstractMetaFunctionList Generator::implicitConversions(const AbstractMetaType* metaType) const
