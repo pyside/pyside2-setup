@@ -75,6 +75,9 @@ void setParent(PyObject* parent, PyObject* child)
 
     bool hasAnotherParent = child_->parentInfo->parent && child_->parentInfo->parent != parent_;
 
+    //Avoid destroy child during reparent operation
+    Py_INCREF(child);
+
     // check if we need to remove this child from the old parent
     if (parentIsNull || hasAnotherParent)
         removeParent(child_);
@@ -85,6 +88,8 @@ void setParent(PyObject* parent, PyObject* child)
         parent_->parentInfo->children.push_back(child_);
         Py_INCREF(child_);
     }
+
+    Py_DECREF(child);
 }
 
 static void _destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent)
