@@ -7,6 +7,8 @@ file(GLOB TEST_FILES samplebinding/*_test.py otherbinding/*_test.py)
 
 set(test_blacklist "")
 
+find_package(PythonInterp REQUIRED)
+
 foreach(test_file ${TEST_FILES})
     string(REGEX MATCH "/([^/]+)_test.py" test_name ${test_file})
     list(FIND test_blacklist ${CMAKE_MATCH_1} expect_fail)
