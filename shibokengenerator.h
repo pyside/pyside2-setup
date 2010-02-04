@@ -279,6 +279,8 @@ public:
     bool usePySideExtensions() const;
 protected:
     bool doSetup(const QMap<QString, QString>& args);
+    // verify whether the class is copyable
+    bool isCopyable(const AbstractMetaClass* metaClass);
 
     bool m_native_jump_table;
     static QHash<QString, QString> m_pythonPrimitiveTypeName;

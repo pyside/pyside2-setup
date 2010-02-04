@@ -1142,6 +1142,19 @@ QString ShibokenGenerator::getModuleHeaderFileName(QString modName) const
     return QString("%1_python.h").arg(modName.toLower());
 }
 
+bool ShibokenGenerator::isCopyable(const AbstractMetaClass *metaClass)
+
+{
+    if (metaClass->isNamespace())
+        return false;
+    else if (metaClass->typeEntry()->copyable() == ComplexTypeEntry::Unknown)
+        return metaClass->hasCloneOperator();
+    else
+        return (metaClass->typeEntry()->copyable() == ComplexTypeEntry::CopyableSet);
+
+    return false;
+}
+
 /*
 static void dumpFunction(AbstractMetaFunctionList lst)
 {

@@ -79,7 +79,7 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
 
         s << endl << '{' << endl << "public:" << endl;
 
-        if (metaClass->hasCloneOperator())
+        if (isCopyable(metaClass))
             writeCopyCtor(s, metaClass);
 
         foreach (AbstractMetaFunction *func, filterFunctions(metaClass))
