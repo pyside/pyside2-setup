@@ -2339,7 +2339,12 @@ void CppGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
 
     QString pyTypeName = cpythonTypeName(type);
 
-    AbstractMetaFunctionList implicitConvs = implicitConversions(type);
+    AbstractMetaFunctionList implicitConvs;
+    foreach (AbstractMetaFunction* func, implicitConversions(type)) {
+        if (!func->isUserAdded())
+            implicitConvs << func;
+    }
+
     bool hasImplicitConversions = !implicitConvs.isEmpty();
 
     if (hasImplicitConversions) {

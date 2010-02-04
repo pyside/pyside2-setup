@@ -161,7 +161,12 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
     const AbstractMetaClass* metaClass = classes().findClass(type->name());
     bool isAbstractOrObjectType = (metaClass &&  metaClass->isAbstract()) || type->isObject();
 
-    bool isValueTypeWithImplConversions = type->isValue() && !implicitConversions(type).isEmpty();
+    AbstractMetaFunctionList implicitConvs;
+    foreach (AbstractMetaFunction* func, implicitConversions(type)) {
+        if (!func->isUserAdded())
+            implicitConvs << func;
+    }
+    bool isValueTypeWithImplConversions = type->isValue() && !implicitConvs.isEmpty();
 
     s << "struct ";
     if (isValueTypeWithImplConversions)
