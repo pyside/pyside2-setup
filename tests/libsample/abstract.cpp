@@ -34,19 +34,19 @@
 
 #include <iostream>
 #include "abstract.h"
+#include "objecttype.h"
 
 using namespace std;
 
 Abstract::Abstract(int id) : m_id(id)
 {
-    //show();
-    //cout << endl;
+    primitiveField = 123;
+    valueTypeField = Point(12, 34);
+    objectTypeField = 0;
 }
 
 Abstract::~Abstract()
 {
-    //show();
-    //cout << endl;
 }
 
 void

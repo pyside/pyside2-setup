@@ -36,6 +36,9 @@
 #define ABSTRACT_H
 
 #include "libsamplemacros.h"
+#include "point.h"
+
+class ObjectType;
 
 class LIBSAMPLE_API Abstract
 {
@@ -46,6 +49,10 @@ public:
         OnlyId,
         ClassNameAndId
     };
+
+    int primitiveField;
+    Point valueTypeField;
+    ObjectType* objectTypeField;
 
     Abstract(int id = -1);
     virtual ~Abstract();
