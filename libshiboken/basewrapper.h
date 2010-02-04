@@ -212,6 +212,9 @@ LIBSHIBOKEN_API bool cppObjectIsInvalid(PyObject* wrapper);
 template <typename T>
 void SbkBaseWrapper_Dealloc(PyObject* self)
 {
+    if (((SbkBaseWrapper *)self)->weakreflist)
+        PyObject_ClearWeakRefs(self);
+
     BindingManager::instance().releaseWrapper(self);
     if (SbkBaseWrapper_hasOwnership(self))
         delete (reinterpret_cast<T*>(SbkBaseWrapper_cptr(self)));

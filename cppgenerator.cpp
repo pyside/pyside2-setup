@@ -1540,7 +1540,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         baseClassName.append("Shiboken::SbkBaseWrapper_Type");
 
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
-        tp_flags = "Py_TPFLAGS_HAVE_CLASS";
+        tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES";
         tp_dealloc = metaClass->hasPrivateDestructor() ?
                      "(destructor)Shiboken::SbkBaseWrapper_Dealloc_PrivateDtor" : "0";
         tp_init = "0";

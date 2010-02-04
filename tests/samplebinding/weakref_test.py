@@ -29,20 +29,32 @@
 import weakref
 import unittest
 
-from sample import ObjectType
+from sample import ObjectType, PrivateDtor
 
 
 class WeakrefBasicTest(unittest.TestCase):
     '''Simple test case of using a weakref'''
 
+    def setUp(self):
+        self.called = False
+
     def cb(self, *args):
-        print 'callback',  args
         self.called = True
 
     def testBasic(self):
         '''ObjectType weakref'''
         obj = ObjectType()
         ref = weakref.ref(obj, self.cb)
+        del obj
+        self.assert_(self.called)
+
+    def testPrivateDtor(self):
+        '''PrivateDtor weakref'''
+        obj = PrivateDtor.instance()
+        print obj
+        ref = weakref.ref(obj, self.cb)
+        del obj
+        self.assert_(self.called)
 
 
 if __name__ == '__main__':
