@@ -45,20 +45,34 @@ namespace Shiboken
 template<typename A, typename B>
 inline PyObject* makeTuple(const A& a, const B& b)
 {
-    PyObject* tuple = PyTuple_New(2);
-    PyTuple_SET_ITEM(tuple, 0, Converter<A>::toPython(a));
-    PyTuple_SET_ITEM(tuple, 1, Converter<B>::toPython(b));
-    return tuple;
+    return PyTuple_Pack(2, Converter<A>::toPython(a), Converter<B>::toPython(b));
 }
 
 template<typename A, typename B, typename C>
 inline PyObject* makeTuple(const A& a, const B& b, const C& c)
 {
-    PyObject* tuple = PyTuple_New(3);
-    PyTuple_SET_ITEM(tuple, 0, Converter<A>::toPython(a));
-    PyTuple_SET_ITEM(tuple, 1, Converter<B>::toPython(b));
-    PyTuple_SET_ITEM(tuple, 2, Converter<C>::toPython(c));
-    return tuple;
+    return PyTuple_Pack(3, Converter<A>::toPython(a),
+                           Converter<B>::toPython(b),
+                           Converter<C>::toPython(c));
+}
+
+template<typename A, typename B, typename C, typename D>
+inline PyObject* makeTuple(const A& a, const B& b, const C& c, const D& d)
+{
+    return PyTuple_Pack(4, Converter<A>::toPython(a),
+                           Converter<B>::toPython(b),
+                           Converter<C>::toPython(c),
+                           Converter<D>::toPython(d));
+}
+
+template<typename A, typename B, typename C, typename D, typename E>
+inline PyObject* makeTuple(const A& a, const B& b, const C& c, const D& d, const E& e)
+{
+    return PyTuple_Pack(5, Converter<A>::toPython(a),
+                           Converter<B>::toPython(b),
+                           Converter<C>::toPython(c),
+                           Converter<D>::toPython(d),
+                           Converter<E>::toPython(e));
 }
 
 /**
