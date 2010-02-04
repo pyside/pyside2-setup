@@ -871,11 +871,16 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             // replace template variable for pointer to C++ this object
             if (func->implementingClass()) {
                 QString cppSelf;
-                if (snip.language == TypeSystem::NativeCode)
+                QString replacement("%1->");
+                if (func->isStatic()) {
+                    cppSelf = func->ownerClass()->qualifiedCppName();
+                    replacement = "%1::";
+                } else if (snip.language == TypeSystem::NativeCode) {
                     cppSelf = "this";
-                else
+                } else {
                     cppSelf = "cppSelf";
-                code.replace("%CPPSELF.", QString("%1->").arg(cppSelf));
+                }
+                code.replace("%CPPSELF.", replacement.arg(cppSelf));
                 code.replace("%CPPSELF", cppSelf);
 
                 // replace template variable for the Python Type object for the
