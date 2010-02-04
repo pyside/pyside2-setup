@@ -1936,11 +1936,38 @@ void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* 
         s << metaField->name() << "', '" << metaField->type()->name() << "' or convertible type expected\");" << endl;
         s << INDENT << "return -1;" << endl;
     }
-    s << INDENT << '}' << endl;
+    s << INDENT << '}' << endl << endl;
 
-    s << INDENT << cpythonWrapperCPtr(metaField->enclosingClass(), "self") << "->" << metaField->name() << " = ";
+    QString fieldStr = QString("%1->%2").arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self")).arg(metaField->name());
+
+    bool pythonWrapperRefCounting = metaField->type()->typeEntry()->isObject() || metaField->type()->isValuePointer();
+
+    if (pythonWrapperRefCounting) {
+        s << INDENT << "Py_INCREF(value);" << endl;
+        s << INDENT << "PyObject* oldvalue;" << endl;
+
+        s << INDENT << "if (" << fieldStr << ")" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "oldvalue = BindingManager::instance().retrieveWrapper(";
+            s << fieldStr << ");" << endl;
+        }
+        s << INDENT << "else" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "oldvalue = Py_None;" << endl;
+        }
+        s << endl;
+    }
+
+    s << INDENT << fieldStr << " = ";
     writeToCppConversion(s, metaField->type(), metaField->enclosingClass(), "value");
-    s << ';' << endl;
+    s << ';' << endl << endl;
+
+    if (pythonWrapperRefCounting) {
+        s << INDENT << "Py_XDECREF(oldvalue);" << endl;
+        s << endl;
+    }
 
     s << INDENT << "return 0;" << endl;
     s << '}' << endl;
