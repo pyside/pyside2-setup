@@ -394,12 +394,19 @@ const AbstractMetaFunction* OverloadData::getFunctionWithDefaultValue() const
 QList<int> OverloadData::invalidArgumentLengths() const
 {
     QSet<int> validArgLengths;
+
     foreach (const AbstractMetaFunction* func, m_headOverloadData->m_overloads) {
-        validArgLengths << func->arguments().size();
-        foreach (const AbstractMetaArgument* arg, func->arguments()) {
-            if (!arg->defaultValueExpression().isEmpty())
-                validArgLengths << arg->argumentIndex();
+        const AbstractMetaArgumentList args = func->arguments();
+        int offset = 0;
+        for (int i = 0; i < args.size(); ++i) {
+            if (func->argumentRemoved(i+1)) {
+                offset++;
+            } else {
+                if (!args[i]->defaultValueExpression().isEmpty())
+                    validArgLengths << i-offset;
+            }
         }
+        validArgLengths << args.size() - offset;
     }
 
     QList<int> invalidArgLengths;
