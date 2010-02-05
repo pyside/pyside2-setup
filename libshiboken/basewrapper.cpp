@@ -57,8 +57,14 @@ void setParent(PyObject* parent, PyObject* child)
     if (!child || child == Py_None || child == parent)
         return;
 
-    bool parentIsNull = !parent || parent == Py_None;
+    //Recursive for sequence protocol
+    if (PySequence_Check(child)) {
+        for (int i = 0, max = PySequence_Size(child); i < max; ++i)
+            setParent(parent, PySequence_Fast_GET_ITEM(child, i));
+        return;
+    }
 
+    bool parentIsNull = !parent || parent == Py_None;
     SbkBaseWrapper* parent_ = reinterpret_cast<SbkBaseWrapper*>(parent);
     SbkBaseWrapper* child_ = reinterpret_cast<SbkBaseWrapper*>(child);
     if (!child_->parentInfo)
