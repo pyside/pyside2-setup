@@ -115,7 +115,7 @@ private:
     void addOverload(const AbstractMetaFunction* func);
     OverloadData* addOverloadData(const AbstractMetaFunction* func, const AbstractMetaType* argType);
 
-    void sortOverloads();
+    void sortNextOverloads();
 
     int functionNumber(const AbstractMetaFunction* func) const;
     OverloadDataList overloadDataOnPosition(OverloadData* overloadData, int argPos) const;

@@ -39,12 +39,20 @@
  *
  * Side effects: Modifies m_nextOverloadData
  */
-void OverloadData::sortOverloads()
+void OverloadData::sortNextOverloads()
 {
     QHash<QString, int> map; // type_name -> id
     QHash<int, OverloadData*> reverseMap; // id -> type_name
     bool checkPyObject = false;
     int pyobjectIndex = 0;
+
+    // sort the children overloads
+    foreach(OverloadData *ov, m_nextOverloadData) {
+        ov->sortNextOverloads();
+    }
+
+    if (m_nextOverloadData.size() <= 1)
+        return;
 
     // Creates the map and reverseMap, to map type names to ids, these ids will be used by the topological
     // sort algorithm, because is easier and faster to work with boost::graph using ints.
@@ -116,7 +124,23 @@ void OverloadData::sortOverloads()
         m_nextOverloadData << reverseMap[i];
 }
 
-// Prepare the information about overloaded methods signatures
+/**
+ * Root constructor for OverloadData
+ *
+ * This constructor receives the list of overloads for a given function and iterates generating
+ * the graph of OverloadData instances. Each OverloadData instance references an argument/type
+ * combination.
+ *
+ * Example:
+ *      addStuff(double, PyObject *)
+ *      addStuff(double, int)
+ *
+ * Given these two overloads, there will be the following graph:
+ *
+ *   addStuff - double - PyObject*
+ *                    \- int
+ *
+ */
 OverloadData::OverloadData(const AbstractMetaFunctionList overloads, const ShibokenGenerator* generator)
     : m_minArgs(256), m_maxArgs(0), m_argPos(-1), m_argType(0),
       m_headOverloadData(this), m_generator(generator)
@@ -139,8 +163,7 @@ OverloadData::OverloadData(const AbstractMetaFunctionList overloads, const Shibo
 
     // Sort the overload possibilities so that the overload decisor code goes for the most
     // important cases first, based on the topological order of the implicit conversions
-    if (m_nextOverloadData.size() > 1)
-        sortOverloads();
+    sortNextOverloads();
 
     // Fix minArgs
     if (minArgs() > maxArgs())

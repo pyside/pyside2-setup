@@ -79,6 +79,10 @@ public:
     int implicit_overload(const ImplicitBase &x) {
         return 1;
     }
+
+    const char *overloadDeep(int x, ImplicitBase &y) {
+        return "ImplicitBase";
+    }
 };
 
 #endif // OVERLOADSORT_H

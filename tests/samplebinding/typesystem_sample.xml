@@ -684,6 +684,12 @@
                 return PyString_FromString("PyObject");
             </inject-code>
         </add-function>
+
+        <add-function signature="overloadDeep(int, PyObject *)" return-type="const char *">
+            <inject-code class="target" position="beginning">
+                return PyString_FromString("PyObject");
+            </inject-code>
+        </add-function>
     </value-type>
     <value-type name="ImplicitTarget"/>
 
