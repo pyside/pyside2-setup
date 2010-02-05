@@ -16,6 +16,7 @@
 #include "nondefaultctor.h"
 #include "objecttype.h"
 #include "objecttypelayout.h"
+#include "objectview.h"
 #include "oddbool.h"
 #include "overload.h"
 #include "pairuser.h"

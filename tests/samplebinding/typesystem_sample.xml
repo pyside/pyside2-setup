@@ -138,6 +138,8 @@
         </modify-function>
     </object-type>
 
+    <object-type name="ObjectView"/>
+
     <value-type name="Event"/>
 
     <value-type name="BlackBox">
