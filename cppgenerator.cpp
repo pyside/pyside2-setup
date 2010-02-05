@@ -598,7 +598,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
 
     if (overloadData.maxArgs() > 0) {
         s << endl;
-        s << INDENT << "if (PyErr_Occurred()) {" << endl;
+        s << INDENT << "if (!cptr || PyErr_Occurred()) {" << endl;
         {
             Indentation indent(INDENT);
             s << INDENT << "delete cptr;" << endl;
