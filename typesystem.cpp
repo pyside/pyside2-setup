@@ -1045,8 +1045,8 @@ bool Handler::startElement(const QString &, const QString &n,
                 if (m_generate != TypeEntry::GenerateForSubclass
                     && m_generate != TypeEntry::GenerateNothing) {
                     QFile conversionSource(sourceFile);
-                    if (conversionSource.open(QIODevice::ReadOnly)) {
-                        topElement.entry->setConversionRule(conversionSource.readAll());
+                    if (conversionSource.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                        topElement.entry->setConversionRule(QString::fromUtf8(conversionSource.readAll()));
                     } else {
                         ReportHandler::warning("File containing conversion code for "
                                                + topElement.entry->name()

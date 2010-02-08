@@ -34,6 +34,7 @@ void TestCodeInjections::testReadFileUtf8()
     QString xmlCode = "\
     <typesystem package=\"Foo\"> \
         <value-type name='A'> \
+            <conversion-rule file='"+filePath+"/utf8code.txt'/>\
             <inject-code class='target' file='"+filePath+"/utf8code.txt' />\
         </value-type>\
         <value-type name='A::B'/> \
@@ -44,6 +45,8 @@ void TestCodeInjections::testReadFileUtf8()
     QCOMPARE(classA->typeEntry()->codeSnips().count(), 1);
     QString code = classA->typeEntry()->codeSnips().first().code();
     QString utf8Data = QString::fromUtf8("\xC3\xA1\xC3\xA9\xC3\xAD\xC3\xB3\xC3\xBA");
+    QVERIFY(code.indexOf(utf8Data) != -1);
+    code = classA->typeEntry()->conversionRule();
     QVERIFY(code.indexOf(utf8Data) != -1);
 }
 
