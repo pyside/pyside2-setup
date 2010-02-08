@@ -113,7 +113,7 @@ private:
                  const AbstractMetaType* argType, int argPos);
 
     void addOverload(const AbstractMetaFunction* func);
-    OverloadData* addOverloadData(const AbstractMetaFunction* func, const AbstractMetaType* argType);
+    OverloadData* addOverloadData(const AbstractMetaFunction* func, const AbstractMetaArgument* arg);
 
     void sortNextOverloads();
 

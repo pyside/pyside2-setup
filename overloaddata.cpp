@@ -154,10 +154,9 @@ OverloadData::OverloadData(const AbstractMetaFunctionList overloads, const Shibo
             m_maxArgs = argSize;
         OverloadData* currentOverloadData = this;
         foreach (const AbstractMetaArgument* arg, func->arguments()) {
-            if (func->argumentRemoved(arg->argumentIndex() + 1)) {
+            if (func->argumentRemoved(arg->argumentIndex() + 1))
                 continue;
-            }
-            currentOverloadData = currentOverloadData->addOverloadData(func, arg->type());
+            currentOverloadData = currentOverloadData->addOverloadData(func, arg);
         }
     }
 
@@ -205,8 +204,9 @@ void OverloadData::addOverload(const AbstractMetaFunction* func)
 }
 
 OverloadData* OverloadData::addOverloadData(const AbstractMetaFunction* func,
-                                            const AbstractMetaType* argType)
+                                            const AbstractMetaArgument* arg)
 {
+    const AbstractMetaType* argType = arg->type();
     OverloadData* overloadData = 0;
     if (!func->isOperatorOverload()) {
         foreach (OverloadData* tmp, m_nextOverloadData) {
@@ -227,7 +227,7 @@ OverloadData* OverloadData::addOverloadData(const AbstractMetaFunction* func,
     if (!overloadData) {
         overloadData = new OverloadData(m_headOverloadData, func, argType, m_argPos + 1);
         overloadData->m_generator = this->m_generator;
-        QString typeReplaced = func->typeReplaced(overloadData->m_argPos + 1);
+        QString typeReplaced = func->typeReplaced(arg->argumentIndex() + 1);
 
         if (!typeReplaced.isEmpty())
             overloadData->m_argTypeReplaced = typeReplaced;
