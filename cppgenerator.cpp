@@ -926,12 +926,14 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadDa
     const AbstractMetaType* argType = overloadData->argType();
 
     int alternativeNumericTypes = 0;
+    QSet<const TypeEntry*> numericTypes;
     foreach (OverloadData* pd, overloadData->overloadDataOnPosition(overloadData->argPos())) {
         if (!pd->argType()->isPrimitive())
             continue;
         if (ShibokenGenerator::isNumber(pd->argType()->typeEntry()))
-            alternativeNumericTypes++;
+            numericTypes << pd->argType()->typeEntry();
     }
+    alternativeNumericTypes = numericTypes.count();
 
     // This condition trusts that the OverloadData object will arrange for
     // PyInt type to come after the more precise numeric types (e.g. float)
