@@ -28,6 +28,51 @@
 #include <QtCore/QTextStream>
 #include <QtCore/QDebug>
 
+inline CodeSnipList getConversionRule(TypeSystem::Language lang, const AbstractMetaFunction *function)
+{
+    CodeSnipList list;
+
+    foreach(AbstractMetaArgument *arg, function->arguments()) {
+        QString convRule = function->conversionRule(lang, arg->argumentIndex() + 1);
+        if (!convRule.isEmpty()) {
+            CodeSnip snip(TypeSystem::TargetLangCode);
+            snip.position = CodeSnip::Beginning;
+
+            convRule.replace("%in", arg->argumentName());
+            convRule.replace("%out", arg->argumentName() + "_out");
+
+            snip.addCode(convRule);
+            list << snip;
+        }
+
+    }
+    return list;
+}
+
+// utiliy functions
+inline CodeSnipList getReturnConversionRule(TypeSystem::Language lang,
+                                            const AbstractMetaFunction *function,
+                                            const QString& inputName,
+                                            const QString& outputName)
+{
+    CodeSnipList list;
+
+    QString convRule = function->conversionRule(lang, 0);
+    if (!convRule.isEmpty()) {
+        CodeSnip snip(lang);
+        snip.position = CodeSnip::Beginning;
+
+        convRule.replace("%in", inputName);
+        convRule.replace("%out", outputName);
+
+        snip.addCode(convRule);
+        list << snip;
+    }
+
+    return list;
+}
+
+
 CppGenerator::CppGenerator() : m_currentErrorCode(0)
 {
     // sequence protocol functions
@@ -380,14 +425,20 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 s << INDENT << "Shiboken::ThreadStateSaver " << THREAD_STATE_SAVER_VAR << ';' << endl;
                 s << INDENT << THREAD_STATE_SAVER_VAR << ".save();" << endl;
             }
+
             s << INDENT << "return this->" << func->implementingClass()->qualifiedCppName() << "::";
-            writeFunctionCall(s, func);
+            writeFunctionCall(s, func, Generator::VirtualCall);
         }
     }
     s << ';' << endl;
     s << INDENT << '}' << endl << endl;
 
+    CodeSnipList convRules = getConversionRule(TypeSystem::TargetLangCode, func);
+    if (convRules.size())
+        writeCodeSnips(s, convRules, CodeSnip::Beginning, TypeSystem::TargetLangCode, func);
+
     s << INDENT << "Shiboken::AutoDecRef pyargs(";
+
     if (func->arguments().isEmpty()) {
         s << "PyTuple_New(0));" << endl;
     } else {
@@ -395,6 +446,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         foreach (const AbstractMetaArgument* arg, func->arguments()) {
             if (func->argumentRemoved(arg->argumentIndex() + 1))
                 continue;
+
 
             QString argConv;
             QTextStream ac(&argConv);
@@ -408,13 +460,19 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                             || (arg->type()->isPrimitive()
                                 && !m_formatUnits.contains(arg->type()->typeEntry()->name()));
 
+            bool hasConversionRule = !func->conversionRule(TypeSystem::TargetLangCode, arg->argumentIndex() + 1).isEmpty();
+
             Indentation indentation(INDENT);
             ac << INDENT;
-            if (convert) {
+            if (convert && !hasConversionRule) {
                 writeToPythonConversion(ac, arg->type(), func->ownerClass());
                 ac << '(';
             }
-            ac << arg->argumentName() << (convert ? ")" : "");
+
+            if (hasConversionRule)
+                ac << arg->argumentName() << "_out";
+            else
+                ac << arg->argumentName() << (convert ? ")" : "");
 
             argConversions << argConv;
         }
@@ -1221,6 +1279,10 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         s << endl;
     }
 
+    CodeSnipList convRules = getConversionRule(TypeSystem::NativeCode, func);
+    if (convRules.size())
+        writeCodeSnips(s, convRules, CodeSnip::Beginning, TypeSystem::TargetLangCode, func);
+
     if (!func->isUserAdded()) {
         bool badModifications = false;
         QStringList userArgs;
@@ -1229,19 +1291,34 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             for (int i = 0; i < maxArgs + removedArgs; i++) {
                 const AbstractMetaArgument* arg = func->arguments()[i];
                 if (func->argumentRemoved(i + 1)) {
+
                     // If some argument with default value is removed from a
                     // method signature, the said value must be explicitly
                     // added to the method call.
                     removedArgs++;
-                    if (arg->defaultValueExpression().isEmpty())
-                        badModifications = true;
-                    else
-                        userArgs << arg->defaultValueExpression();
+
+                    // If have conversion rules I will use this for removed args
+                    bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, arg->argumentIndex() + 1).isEmpty();
+                    if (hasConversionRule) {
+                        userArgs << arg->argumentName() + "_out";
+                    } else {
+                       if (arg->defaultValueExpression().isEmpty())
+                           badModifications = true;
+                       else
+                           userArgs << arg->defaultValueExpression();
+                    }
                 } else {
                     int idx = arg->argumentIndex() - removedArgs;
-                    QString argName = QString("cpp_arg%1").arg(idx);
-                    if (shouldDereferenceArgumentPointer(arg))
-                        argName.prepend('*');
+                    QString argName;
+
+                    bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, arg->argumentIndex() + 1).isEmpty();
+                    if (hasConversionRule) {
+                        argName = arg->argumentName() + "_out";
+                    } else {
+                        argName = QString("cpp_arg%1").arg(idx);
+                        if (shouldDereferenceArgumentPointer(arg))
+                            argName.prepend('*');
+                    }
                     userArgs << argName;
                 }
             }
@@ -1391,9 +1468,10 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 pyArgName = PYTHON_RETURN_VAR;
                 wrappedClass = classes().findClass(func->type()->typeEntry()->name());
             } else {
-                int real_index = OverloadData::numberOfRemovedArguments(func, arg_mod.index - 1);
+                int removed_count = OverloadData::numberOfRemovedArguments(func, arg_mod.index - 1);
+                int real_index = arg_mod.index - 1 - removed_count;
                 wrappedClass = classes().findClass(func->arguments().at(real_index)->type()->typeEntry()->name());
-                if ((arg_mod.index == 1)
+                if ((real_index  == 0)
                     && OverloadData::isSingleArgument(getFunctionGroups(func->implementingClass())[func->name()]))
                     pyArgName = QString("arg");
                 else

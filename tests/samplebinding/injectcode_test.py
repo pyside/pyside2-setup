@@ -33,6 +33,7 @@ class MyInjectCode(InjectCode):
     def __init__(self):
         InjectCode.__init__(self)
         self.multiplier = 2
+
     def arrayMethod(self, values):
         return self.multiplier * sum(values)
 

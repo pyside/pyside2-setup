@@ -345,7 +345,9 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func)
         if (func->argumentRemoved(arg->argumentIndex() + 1))
             continue;
 
-        if (arg->type()->isQObject()
+        if (!func->typeReplaced(arg->argumentIndex() + 1).isEmpty()) {
+            result += 'O';
+        } else if (arg->type()->isQObject()
             || arg->type()->isObject()
             || arg->type()->isValue()
             || arg->type()->isValuePointer()
@@ -721,18 +723,24 @@ void ShibokenGenerator::writeArgumentNames(QTextStream &s,
         if (argCount > 0)
             s << ", ";
 
-        QString argName;
-
         if ((options & Generator::BoxedPrimitive) &&
             !arguments.at(j)->type()->isReference() &&
             (arguments.at(j)->type()->isQObject() ||
              arguments.at(j)->type()->isObject())) {
             //s << "brian::wrapper_manager::instance()->retrieve( " << arguments.at(j)->argumentName() << " )";
             // TODO: replace boost thing
+            Q_ASSERT(false);
             s << "python::ptr( " << arguments.at(j)->argumentName() << " )";
         } else {
             s << arguments.at(j)->argumentName();
         }
+
+        if (((options & Generator::VirtualCall) == 0) &&
+            (!func->conversionRule(TypeSystem::NativeCode, arguments.at(j)->argumentIndex() + 1).isEmpty() ||
+             !func->conversionRule(TypeSystem::TargetLangCode, arguments.at(j)->argumentIndex() + 1).isEmpty())
+           )
+           s << "_out";
+
         argCount++;
     }
 }
@@ -792,6 +800,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
         numArgs = func->arguments().size() - argsRemoved;
 
         usePyArgs = getMinMaxArguments(func).second > 1 || func->isConstructor();
+
     }
 
     foreach (CodeSnip snip, codeSnips) {
@@ -825,7 +834,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                     if (pyArgsRegexCheck.indexIn(code) != -1)
                         ReportHandler::warning("Wrong index for %PYARG variable ("+pyArgsRegexCheck.cap(1)+") on "+func->signature());
                     else
-                        code.replace("%PYARG_1", usePyArgs ? "pyargs[0]" : "arg");
+                        code.replace("%PYARG_1", usePyArgs  ? "pyargs[0]" : "arg");
                 }
             } else {
                 // Replaces the simplest case of attribution to a Python argument

@@ -54,7 +54,7 @@ public:
     const char* overloadedMethod(int arg0, bool arg1);
 
     virtual int arrayMethod(int count, int* values) const;
-    int callArrayMethod(int count, int* values) const { return arrayMethod(count, values); }
+    int callArrayMethod(int count, int *values) const { return arrayMethod(count, values); }
     virtual const char* virtualMethod(int arg);
 private:
     // This attr is just to retain the memory pointed by all return values,
