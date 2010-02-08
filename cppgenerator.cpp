@@ -1254,6 +1254,28 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
         s << "goto " << cpythonFunctionName(referenceFunction) << "_TypeError;" << endl;
 }
 
+QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction* func, int argIndex, const AbstractMetaClass** wrappedClass)
+{
+    *wrappedClass = 0;
+    QString pyArgName;
+    if (argIndex == -1) {
+        pyArgName = QString("self");
+        *wrappedClass = func->implementingClass();
+    } else if (argIndex == 0) {
+        pyArgName = PYTHON_RETURN_VAR;
+        *wrappedClass = classes().findClass(func->type()->typeEntry()->name());
+    } else {
+        int real_index = OverloadData::numberOfRemovedArguments(func, argIndex - 1);
+        *wrappedClass = classes().findClass(func->arguments().at(real_index)->type()->typeEntry()->name());
+        if ((argIndex == 1)
+            && OverloadData::isSingleArgument(getFunctionGroups(func->implementingClass())[func->name()]))
+            pyArgName = QString("arg");
+        else
+            pyArgName = QString("pyargs[%1]").arg(argIndex - 1);
+    }
+    return pyArgName;
+}
+
 void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* func, int maxArgs)
 {
     s << INDENT << "// " << func->minimalSignature() << (func->isReverseOperator() ? " [reverse operator]": "") << endl;
@@ -1485,24 +1507,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         s << endl << INDENT << "// Ownership transferences." << endl;
         foreach (ArgumentModification arg_mod, ownership_mods) {
             const AbstractMetaClass* wrappedClass = 0;
-            QString pyArgName;
-            if (arg_mod.index == -1) {
-                pyArgName = QString("self");
-                wrappedClass = func->implementingClass();
-            } else if (arg_mod.index == 0) {
-                pyArgName = PYTHON_RETURN_VAR;
-                wrappedClass = classes().findClass(func->type()->typeEntry()->name());
-            } else {
-                int removed_count = OverloadData::numberOfRemovedArguments(func, arg_mod.index - 1);
-                int real_index = arg_mod.index - 1 - removed_count;
-                wrappedClass = classes().findClass(func->arguments().at(real_index)->type()->typeEntry()->name());
-                if ((real_index  == 0)
-                    && OverloadData::isSingleArgument(getFunctionGroups(func->implementingClass())[func->name()]))
-                    pyArgName = QString("arg");
-                else
-                    pyArgName = QString("pyargs[%1]").arg(arg_mod.index - 1);
-            }
-
+            QString pyArgName = argumentNameFromIndex(func, arg_mod.index, &wrappedClass);
             if (!wrappedClass) {
                 s << "#error Invalid ownership modification for argument " << arg_mod.index << endl << endl;
                 break;

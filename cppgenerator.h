@@ -115,6 +115,8 @@ private:
      *   \param parentOverloadData a pointer to overload data describing the argument being evaluated
      */
     void writeOverloadedMethodDecisor(QTextStream& s, OverloadData* parentOverloadData);
+    /// Returns a string containing the name of an argument for the given function and argument index.
+    QString argumentNameFromIndex(const AbstractMetaFunction* func, int argIndex, const AbstractMetaClass** wrappedClass);
     void writeMethodCall(QTextStream& s, const AbstractMetaFunction* func, int maxArgs = 0);
 
     void writeClassRegister(QTextStream& s, const AbstractMetaClass* metaClass);
