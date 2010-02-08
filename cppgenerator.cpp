@@ -341,7 +341,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     const TypeEntry* type = func->type() ? func->type()->typeEntry() : 0;
 
     QString prefix = wrapperName(func->ownerClass()) + "::";
-    s << functionSignature(func, prefix, "", Generator::SkipDefaultValues) << endl << "{" << endl;
+    s << functionSignature(func, prefix, "", Generator::SkipDefaultValues|Generator::OriginalTypeDescription) << endl;
+    s << "{" << endl;
 
     Indentation indentation(INDENT);
 
@@ -953,9 +954,9 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadDa
     if (isPairContainer)
         s << '(';
 
-    if (overloadData->hasArgumentTypeReplace()) {
+    if (overloadData->hasArgumentTypeReplace())
         s << guessCPythonCheckFunction(overloadData->argumentTypeReplaced());
-    } else if (argType->typeEntry()->isFlags())
+    else if (argType->typeEntry()->isFlags())
         s << cpythonCheckFunction(((FlagsTypeEntry*) argType->typeEntry())->originator(), true);
     else if (argType->isEnum())
         s << cpythonCheckFunction(argType, false, true);

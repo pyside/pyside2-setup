@@ -128,9 +128,12 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
 
     if (func->isConstructor() || func->isAbstract() || func->isVirtual()) {
         s << INDENT;
-        if (func->isVirtual() || func->isAbstract())
+        Options virtualOption = Generator::NoOption;
+        if (func->isVirtual() || func->isAbstract()) {
+            virtualOption = Generator::OriginalTypeDescription;
             s << "virtual ";
-        s << functionSignature(func) << ';' << endl;
+        }
+        s << functionSignature(func, "", "", virtualOption) << ';' << endl;
 
         // TODO: when modified an abstract method ceases to be virtual but stays abstract
         //if (func->isModifiedRemoved() && func->isAbstract()) {

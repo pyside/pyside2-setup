@@ -364,7 +364,6 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func)
         } else if (arg->type()->isNativePointer() && arg->type()->name() == "char") {
             result += 'z';
         } else {
-            Q_ASSERT(false);
             ReportHandler::warning("Unknown type used in ShibokenGenerator::getFormatUnitString!");
             result += '?';
         }
@@ -600,7 +599,9 @@ QString ShibokenGenerator::argumentString(const AbstractMetaFunction *func,
                                           const AbstractMetaArgument *argument,
                                           Options options) const
 {
-    QString modified_type = func->typeReplaced(argument->argumentIndex() + 1);
+    QString modified_type;
+    if (!(options & OriginalTypeDescription))
+        modified_type = func->typeReplaced(argument->argumentIndex() + 1);
     QString arg;
 
     if (modified_type.isEmpty())

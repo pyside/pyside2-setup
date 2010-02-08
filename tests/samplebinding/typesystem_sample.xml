@@ -607,6 +607,9 @@
                     cppItems[i] = %CONVERTTOCPP[int](PySequence_GetItem(%PYARG_1, i));
                 %PYARG_0 = %CONVERTTOPYTHON[int](%CPPSELF.%FUNCTION_NAME(numItems, cppItems));
             </inject-code>
+            <inject-code class="native" position="beginning">
+                // TODO
+            </inject-code>
         </modify-function>
 
         <!--
