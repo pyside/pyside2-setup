@@ -592,6 +592,23 @@
             Various tests for inject codes.
             Note: Some uses of inject code here are used just for testing purposes, consider using the add-function tag.
         -->
+
+        <modify-function signature="arrayMethod(int, int*) const">
+            <modify-argument index="1">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="2">
+                <replace-type modified-type="PySequence"/>
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+                int numItems = PySequence_Size(%PYARG_1);
+                int cppItems[numItems];
+                for (int i = 0; i &lt; numItems; i++)
+                    cppItems[i] = %CONVERTTOCPP[int](PySequence_GetItem(%PYARG_1, i));
+                %PYARG_0 = %CONVERTTOPYTHON[int](%CPPSELF.%FUNCTION_NAME(numItems, cppItems));
+            </inject-code>
+        </modify-function>
+
         <!--
             Inject the tp_str method using this alternative way
             Tested in InjectCodeTest.testTypeNativeBeginning_TypeTargetBeginning:

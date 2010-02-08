@@ -61,5 +61,12 @@ class InjectCodeTest(unittest.TestCase):
         ret = ic.simpleMethod3(["1", "2", "3", "4"])
         self.assertEqual(ret, "1234")
 
+    def testArgumentRemovalAndArgumentTypeModification(self):
+        '''A method has its first argument removed and the second modified.'''
+        ic = InjectCode()
+        values = (1, 2, 3, 4, 5)
+        result = ic.arrayMethod(values)
+        self.assertEqual(result, sum(values))
+
 if __name__ == '__main__':
     unittest.main()

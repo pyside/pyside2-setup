@@ -93,3 +93,11 @@ const char* InjectCode::virtualMethod(int arg)
     return toStr(arg);
 }
 
+int InjectCode::arrayMethod(int count, int* values) const
+{
+    int ret = 0;
+    for (int i=0; i < count; i++)
+        ret += values[i];
+    return ret;
+}
+
