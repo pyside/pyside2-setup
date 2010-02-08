@@ -112,7 +112,37 @@ define-ownership
         <modify-argument>
               <define-ownership class="target | shell"
                                 owner="target | c++ | default" />
-         </modify-argument>
+        </modify-argument>
+
+
+reference-count
+^^^^^^^^^^^^^^^
+
+    The reference-count tag dictates how an argument should be handled by the
+    target language reference counting system (if there is any), it also indicates
+    the kind of relationship the class owning the function being modified has with
+    the argument. For instance, in a model/view relation a view receiving a model
+    as argument for a **setModel** method should increment the model's reference
+    counting, since the model should be kept alive as much as the view lives.
+    Remember that out hypothetical view could not become parent of the model,
+    since the said model could be used by other views as well.
+    The ``action`` attribute specifies what should be done to the argument
+    reference counting when the modified method is called. It accepts the
+    following values:
+
+        * add: increments the argument reference counter.
+        * remove: decrements the argument reference counter.
+        * ignore: does nothing with the argument reference counter
+                  (sounds worthless, but could be used in situations
+                   where the reference counter increase is mandatory
+                   by default).
+
+    .. code-block:: xml
+
+        <modify-argument>
+              <reference-count action="add|remove|ignore" />
+        </modify-argument>
+
 
 replace-value
 ^^^^^^^^^^^^^

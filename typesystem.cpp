@@ -97,10 +97,8 @@ public:
         DefineOwnership          = 0x10000000,
         RemoveDefaultExpression  = 0x20000000,
         NoNullPointers           = 0x40000000,
-#if 0
         ReferenceCount           = 0x80000000,
-#endif
-        ParentOwner              = 0x80000000,
+        ParentOwner              = 0x90000000,
         ArgumentModifiers        = 0xff000000
     };
 
@@ -160,9 +158,7 @@ public:
         tagNames["insert-template"] = StackElement::TemplateInstanceEnum;
         tagNames["replace"] = StackElement::Replace;
         tagNames["no-null-pointer"] = StackElement::NoNullPointers;
-#if 0
         tagNames["reference-count"] = StackElement::ReferenceCount;
-#endif
         tagNames["parent"] = StackElement::ParentOwner;
         tagNames["inject-documentation"] = StackElement::InjectDocumentation;
         tagNames["modify-documentation"] = StackElement::ModifyDocumentation;
@@ -925,11 +921,9 @@ bool Handler::startElement(const QString &, const QString &n,
             attributes["from"] = QString();
             attributes["to"] = QString();
             break;
-#if 0
         case StackElement::ReferenceCount:
             attributes["action"] = QString();
             break;
-#endif
         case StackElement::ParentOwner:
             attributes["index"] = QString();
             attributes["action"] = QString();
@@ -1417,7 +1411,6 @@ bool Handler::startElement(const QString &, const QString &n,
             element->value.customFunction = func;
         }
         break;
-#if 0
         case StackElement::ReferenceCount: {
             if (topElement.type != StackElement::ModifyArgument) {
                 m_error = "reference-count must be child of modify-argument";
@@ -1429,9 +1422,9 @@ bool Handler::startElement(const QString &, const QString &n,
             static QHash<QString, ReferenceCount::Action> actions;
             if (actions.isEmpty()) {
                 actions["add"] = ReferenceCount::Add;
-                actions["add-all"] = ReferenceCount::AddAll;
+                //actions["add-all"] = ReferenceCount::AddAll;
                 actions["remove"] = ReferenceCount::Remove;
-                actions["set"] = ReferenceCount::Set;
+                //actions["set"] = ReferenceCount::Set;
                 actions["ignore"] = ReferenceCount::Ignore;
             }
             rc.action = actions.value(attributes["action"].toLower(), ReferenceCount::Invalid);
@@ -1439,13 +1432,12 @@ bool Handler::startElement(const QString &, const QString &n,
             if (rc.action == ReferenceCount::Invalid) {
                 m_error = "unrecognized value for action attribute. supported actions:";
                 foreach (QString action, actions.keys())
-                m_error += " " + action;
+                    m_error += " " + action;
             }
 
             m_functionMods.last().argument_mods.last().referenceCounts.append(rc);
         }
         break;
-#endif
 
         case StackElement::ParentOwner: {
             if (topElement.type != StackElement::ModifyArgument) {
