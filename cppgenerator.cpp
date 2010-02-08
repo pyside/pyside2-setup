@@ -1135,7 +1135,7 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
             writeTypeCheck(tck, od, pyArgName);
 
             Indentation indent(INDENT);
-            if (od->overloads().first()->typeReplaced(od->argPos() + 1).isEmpty()) {
+            if (od->argumentTypeReplaced().isEmpty()) {
                 writeArgumentConversion(tcv, od->argType(),
                                         QString("cpp_arg%1").arg(od->argPos()),
                                         pyArgName,
