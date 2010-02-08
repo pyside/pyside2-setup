@@ -1446,6 +1446,7 @@ AbstractMetaFunction *AbstractMetaBuilder::traverseFunction(const AddedFunction&
         }
     }
 
+    metaFunction->setOriginalAttributes(metaFunction->attributes());
     return metaFunction;
 }
 

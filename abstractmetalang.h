@@ -93,7 +93,7 @@ public:
 class APIEXTRACTOR_API AbstractMetaAttributes
 {
 public:
-    AbstractMetaAttributes() : m_attributes(0) {};
+    AbstractMetaAttributes() : m_attributes(0), m_originalAttributes(0) {};
 
     enum Attribute {
         None                        = 0x00000000,
