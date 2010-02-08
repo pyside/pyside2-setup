@@ -1,0 +1,52 @@
+/*
+* This file is part of the API Extractor project.
+*
+* Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+*
+* Contact: PySide team <contact@pyside.org>
+*
+* This program is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* version 2 as published by the Free Software Foundation.
+*
+* This program is distributed in the hope that it will be useful, but
+* WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+* General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+* 02110-1301 USA
+*
+*/
+
+#include "testcodeinjection.h"
+#include <QFileInfo>
+#include <QDir>
+#include <QtTest/QTest>
+#include "testutil.h"
+
+void TestCodeInjections::testReadFileUtf8()
+{
+    const char* cppCode ="struct A {};";
+    QString filePath = QFileInfo(__FILE__).absoluteDir().absolutePath();
+    QString xmlCode = "\
+    <typesystem package=\"Foo\"> \
+        <value-type name='A'> \
+            <inject-code class='target' file='"+filePath+"/utf8code.txt' />\
+        </value-type>\
+        <value-type name='A::B'/> \
+    </typesystem>";
+    TestUtil t(cppCode, xmlCode.toLocal8Bit().constData());
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* classA = classes.findClass("A");
+    QCOMPARE(classA->typeEntry()->codeSnips().count(), 1);
+    QString code = classA->typeEntry()->codeSnips().first().code();
+    QString utf8Data = QString::fromUtf8("\xC3\xA1\xC3\xA9\xC3\xAD\xC3\xB3\xC3\xBA");
+    QVERIFY(code.indexOf(utf8Data) != -1);
+}
+
+QTEST_APPLESS_MAIN(TestCodeInjections)
+
+#include "testcodeinjection.moc"

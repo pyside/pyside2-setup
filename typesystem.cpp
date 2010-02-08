@@ -1541,10 +1541,9 @@ bool Handler::startElement(const QString &, const QString &n,
                 m_generate != TypeEntry::GenerateNothing &&
                 !file_name.isEmpty()) {
                 if (QFile::exists(file_name)) {
-                    QFile code_file(file_name);
-                    if (code_file.open(QIODevice::ReadOnly)) {
-                        QString content;
-                        content = code_file.readAll();
+                    QFile codeFile(file_name);
+                    if (codeFile.open(QIODevice::Text | QIODevice::ReadOnly)) {
+                        QString content = QString::fromUtf8(codeFile.readAll());
                         content.prepend("// ========================================================================\n"
                                         "// START of custom code block [file: " + file_name + "]\n");
                         content.append("\n// END of custom code block [file: " + file_name + "]\n"
