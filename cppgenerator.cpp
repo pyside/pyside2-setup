@@ -2228,6 +2228,14 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
             s << INDENT << '"' << enumValue->name() << "\", enum_item);" << endl;
         }
     }
+
+    // TypeResolver stuff
+    s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<int>(\"";
+    if (cppEnum->enclosingClass())
+        s << cppEnum->enclosingClass()->qualifiedCppName() << "::";
+    s << cppEnum->name() << "\");\n";
+
+
     s << endl;
 }
 
