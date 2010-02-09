@@ -608,7 +608,25 @@
                 %PYARG_0 = %CONVERTTOPYTHON[int](%CPPSELF.%FUNCTION_NAME(numItems, cppItems));
             </inject-code>
             <inject-code class="native" position="beginning">
-                // TODO
+                PyObject* __py_values__ = PyList_New(count);
+                for (int i = 0; i &lt; %1; i++)
+                    PyList_SET_ITEM(__py_values__, i, %CONVERTTOPYTHON[int](%2[i]));
+                Shiboken::AutoDecRef %PYTHON_ARGUMENTS(Py_BuildValue("(O)", __py_values__));
+            </inject-code>
+        </modify-function>
+        <modify-function signature="callArrayMethod(int, int*) const">
+            <modify-argument index="1">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="2">
+                <replace-type modified-type="PySequence"/>
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+                int numItems = PySequence_Size(%PYARG_1);
+                int cppItems[numItems];
+                for (int i = 0; i &lt; numItems; i++)
+                    cppItems[i] = %CONVERTTOCPP[int](PySequence_GetItem(%PYARG_1, i));
+                %PYARG_0 = %CONVERTTOPYTHON[int](%CPPSELF.%FUNCTION_NAME(numItems, cppItems));
             </inject-code>
         </modify-function>
 

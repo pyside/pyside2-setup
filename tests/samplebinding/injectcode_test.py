@@ -29,6 +29,13 @@
 import unittest
 from sample import InjectCode
 
+class MyInjectCode(InjectCode):
+    def __init__(self):
+        InjectCode.__init__(self)
+        self.multiplier = 2
+    def arrayMethod(self, values):
+        return self.multiplier * sum(values)
+
 class InjectCodeTest(unittest.TestCase):
 
     def testTypeNativeBeginning_TypeTargetBeginning(self):
@@ -67,6 +74,20 @@ class InjectCodeTest(unittest.TestCase):
         values = (1, 2, 3, 4, 5)
         result = ic.arrayMethod(values)
         self.assertEqual(result, sum(values))
+
+    def testCallVirtualMethodWithArgumentRemovalAndArgumentTypeModification(self):
+        '''A virtual method has its first argument removed and the second modified.'''
+        ic = InjectCode()
+        values = (1, 2, 3, 4, 5)
+        result = ic.callArrayMethod(values)
+        self.assertEqual(result, sum(values))
+
+    def testCallReimplementedVirtualMethodWithArgumentRemovalAndArgumentTypeModification(self):
+        '''Calls a reimplemented virtual method that had its first argument removed and the second modified.'''
+        ic = MyInjectCode()
+        values = (1, 2, 3, 4, 5)
+        result = ic.callArrayMethod(values)
+        self.assertEqual(result, ic.multiplier * sum(values))
 
 if __name__ == '__main__':
     unittest.main()
