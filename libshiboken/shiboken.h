@@ -45,6 +45,7 @@
 #include "helper.h"
 #include "pyenum.h"
 #include "shibokenmacros.h"
+#include "typeresolver.h"
 
 #endif // SHIBOKEN_H
 
