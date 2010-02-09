@@ -184,6 +184,18 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     s << "using namespace Shiboken;" << endl << endl;
 
+    // If the class has any method with "reference-count" modifications
+    // the support system will need C++ STL's pair and map.
+    if (hasMethodsWithReferenceCountModifications(metaClass)) {
+        s << "#include <map>" << endl;
+        s << "#include <utility>" << endl;
+        s << "using std::make_pair;" << endl;
+        s << "typedef std::pair<PyObject*, const char*> SbkRefCountKey;" << endl;
+        s << "typedef std::map<SbkRefCountKey, PyObject*> SbkRefCountMap;" << endl;
+        s << "static SbkRefCountMap sbk_refcount_map;" << endl;
+        s << endl;
+    }
+
     // class inject-code native/beginning
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
         writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Beginning, TypeSystem::NativeCode, 0, 0, metaClass);
@@ -1496,10 +1508,14 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
     // Ownership transference between C++ and Python.
     QList<ArgumentModification> ownership_mods;
+    // Python object reference management.
+    QList<ArgumentModification> refcount_mods;
     foreach (FunctionModification func_mod, func->modifications()) {
         foreach (ArgumentModification arg_mod, func_mod.argument_mods) {
             if (!arg_mod.ownerships.isEmpty() && arg_mod.ownerships.contains(TypeSystem::TargetLangCode))
                 ownership_mods.append(arg_mod);
+            else if (!arg_mod.referenceCounts.isEmpty())
+                refcount_mods.append(arg_mod);
         }
     }
 
@@ -1526,6 +1542,28 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 s << "BindingManager::instance().invalidateWrapper(" << pyArgName << ");";
             }
             s << endl;
+        }
+
+    } else if (!refcount_mods.isEmpty()) {
+        foreach (ArgumentModification arg_mod, refcount_mods) {
+            if (arg_mod.referenceCounts.first().action != ReferenceCount::Add)
+                continue;
+            const AbstractMetaClass* wrappedClass = 0;
+            QString pyArgName = argumentNameFromIndex(func, arg_mod.index, &wrappedClass);
+            if (!wrappedClass) {
+                s << "#error Invalid reference count modification for argument " << arg_mod.index << endl << endl;
+                break;
+            }
+
+            s << INDENT << "SbkRefCountKey sbk_refcount_key = make_pair(self, \"" << func->minimalSignature() << "\");" << endl;
+            s << INDENT << "SbkRefCountMap::iterator sbk_refcount_iter = sbk_refcount_map.find(sbk_refcount_key);" << endl;
+            s << INDENT << "if (sbk_refcount_iter != sbk_refcount_map.end())" << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "Py_XDECREF(sbk_refcount_iter->second);" << endl;
+            }
+            s << INDENT << "Py_INCREF(" << pyArgName << ");" << endl;
+            s << INDENT << "sbk_refcount_map[sbk_refcount_key] = " << pyArgName << ';' << endl;
         }
     }
 }
