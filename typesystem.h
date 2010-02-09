@@ -1901,21 +1901,21 @@ public:
         m_templates[t->name()] = t;
     }
 
-    AddedFunctionList addedFunctions() const
+    AddedFunctionList globalUserFunctions() const
     {
-        return m_addedFunctions;
+        return m_globalUserFunctions;
     }
-    void setAddedFunctions(const AddedFunctionList& addedFunctions)
+    void addGlobalUserFunctions(const AddedFunctionList& functions)
     {
-        m_addedFunctions = addedFunctions;
+        m_globalUserFunctions << functions;
     }
-    AddedFunctionList findAddedFunctions(const QString& name) const;
+    AddedFunctionList findGlobalUserFunctions(const QString& name) const;
 
-    void setFunctionModifications(const FunctionModificationList& functionModifications)
+    void addGlobalUserFunctionModifications(const FunctionModificationList& functionModifications)
     {
-        m_functionMods = functionModifications;
+        m_functionMods << functionModifications;
     }
-    void addFunctionModification(const FunctionModification& functionModification)
+    void addGlobalUserFunctionModification(const FunctionModification& functionModification)
     {
         m_functionMods << functionModification;
     }
@@ -1977,7 +1977,7 @@ private:
     TemplateEntryHash m_templates;
     QStringList m_suppressedWarnings;
 
-    AddedFunctionList m_addedFunctions;
+    AddedFunctionList m_globalUserFunctions;
     FunctionModificationList m_functionMods;
 
     QStringList m_requiredTargetImports;

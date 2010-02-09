@@ -499,7 +499,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
     }
 
     // Functions added to the module on the type system.
-    foreach (AddedFunction addedFunc, types->addedFunctions()) {
+    foreach (AddedFunction addedFunc, types->globalUserFunctions()) {
         AbstractMetaFunction* metaFunc = traverseFunction(addedFunc);
         metaFunc->setFunctionType(AbstractMetaFunction::NormalFunction);
         m_globalFunctions << metaFunc;

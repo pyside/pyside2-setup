@@ -39,6 +39,7 @@ private slots:
     void testAddFunctionAtModuleLevel();
     void testAddFunctionWithVarargs();
     void testAddStaticFunction();
+    void testAddGlobalFunction();
 };
 
 #endif

@@ -255,11 +255,16 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
         return true;
 
     switch (m_current->type) {
-    case StackElement::Root: {
-        TypeDatabase::instance()->setAddedFunctions(m_addedFunctions);
-        TypeDatabase::instance()->setFunctionModifications(m_functionMods);
-    }
-    break;
+    case StackElement::AddFunction:
+        if (m_generate == TypeEntry::GenerateAll
+            && m_current->parent
+            && m_current->parent->type == StackElement::Root) { // Global function
+            TypeDatabase::instance()->addGlobalUserFunctions(m_addedFunctions);
+            TypeDatabase::instance()->addGlobalUserFunctionModifications(m_functionMods);
+            m_addedFunctions.clear();
+            m_functionMods.clear();
+        }
+        break;
     case StackElement::ObjectTypeEntry:
     case StackElement::ValueTypeEntry:
     case StackElement::InterfaceTypeEntry:
@@ -1987,10 +1992,10 @@ FlagsTypeEntry *TypeDatabase::findFlagsType(const QString &name) const
     return fte ? fte : (FlagsTypeEntry *) m_flagsEntries.value(name);
 }
 
-AddedFunctionList TypeDatabase::findAddedFunctions(const QString& name) const
+AddedFunctionList TypeDatabase::findGlobalUserFunctions(const QString& name) const
 {
     AddedFunctionList addedFunctions;
-    foreach (AddedFunction func, m_addedFunctions) {
+    foreach (AddedFunction func, m_globalUserFunctions) {
         if (func.name() == name)
             addedFunctions.append(func);
     }

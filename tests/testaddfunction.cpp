@@ -247,7 +247,7 @@ void TestAddFunction::testAddFunctionAtModuleLevel()
 
     TypeDatabase* typeDb = TypeDatabase::instance();
 
-    AddedFunctionList addedFuncs = typeDb->findAddedFunctions("func");
+    AddedFunctionList addedFuncs = typeDb->findGlobalUserFunctions("func");
 
     QCOMPARE(addedFuncs.size(), 1);
 
@@ -308,6 +308,30 @@ void TestAddFunction::testAddStaticFunction()
     const AbstractMetaFunction* addedFunc = classA->findFunction("func");
     QVERIFY(addedFunc);
     QVERIFY(addedFunc->isStatic());
+}
+
+void TestAddFunction::testAddGlobalFunction()
+{
+    const char cppCode[] = "struct A { };struct B {};";
+    const char xmlCode[] = "\
+    <typesystem package=\"Foo\">\
+        <primitive-type name='int'/> \
+        <value-type name='A' />\
+        <add-function signature='globalFunc(int, int)' static='yes'>\
+            <inject-code class='target' position='beginning'>custom_code();</inject-code>\
+        </add-function>\
+        <add-function signature='globalFunc2(int, int)' static='yes'>\
+            <inject-code class='target' position='beginning'>custom_code();</inject-code>\
+        </add-function>\
+        <value-type name='B' />\
+    </typesystem>";
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaFunctionList globalFuncs = t.builder()->globalFunctions();
+    QCOMPARE(globalFuncs.count(), 2);
+    QVERIFY(!t.builder()->classes().findClass("B")->findFunction("globalFunc"));
+    QVERIFY(!t.builder()->classes().findClass("B")->findFunction("globalFunc2"));
+    QVERIFY(!globalFuncs[0]->injectedCodeSnips().isEmpty());
+    QVERIFY(!globalFuncs[1]->injectedCodeSnips().isEmpty());
 }
 
 QTEST_APPLESS_MAIN(TestAddFunction)
