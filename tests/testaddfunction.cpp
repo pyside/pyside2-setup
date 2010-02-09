@@ -301,11 +301,10 @@ void TestAddFunction::testAddStaticFunction()
             </add-function>\
         </value-type>\
     </typesystem>";
-    TestUtil t(cppCode, xmlCode, false);
+    TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass("A");
     QVERIFY(classA);
-    qDebug() << classes[0]->name();
     const AbstractMetaFunction* addedFunc = classA->findFunction("func");
     QVERIFY(addedFunc);
     QVERIFY(addedFunc->isStatic());
