@@ -177,6 +177,12 @@ public:
     /// Returns true if there are cases of multiple inheritance in any of its ancestors.
     bool hasMultipleInheritanceInAncestry(const AbstractMetaClass* metaClass);
 
+    /// Returns true if the class needs reference counting control.
+    bool needsReferenceCountControl(const AbstractMetaClass* metaClass);
+
+    /// Returns true if the class has any method that modifies the reference counting of any of its arguments.
+    bool hasMethodsWithReferenceCountModifications(const AbstractMetaClass* metaClass);
+
     /// Returns true if the class needs to have a getattro function.
     bool classNeedsGetattroFunction(const AbstractMetaClass* metaClass);
 
