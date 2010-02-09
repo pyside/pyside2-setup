@@ -138,7 +138,13 @@
         </modify-function>
     </object-type>
 
-    <object-type name="ObjectView"/>
+    <object-type name="ObjectView">
+        <modify-function signature="setModel(ObjectType*)">
+            <modify-argument index="1">
+                <reference-count action="add"/>
+            </modify-argument>
+        </modify-function>
+    </object-type>
 
     <value-type name="Event"/>
 
