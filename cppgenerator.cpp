@@ -685,19 +685,20 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     }
 
     writeOverloadedMethodDecisor(s, &overloadData);
+    s << endl;
 
     if (overloadData.maxArgs() > 0) {
-        s << endl;
-        s << INDENT << "if (!cptr || PyErr_Occurred()) {" << endl;
+        s << INDENT << "if (PyErr_Occurred()) {" << endl;
         {
             Indentation indent(INDENT);
             s << INDENT << "delete cptr;" << endl;
             s << INDENT << "return " << m_currentErrorCode << ';' << endl;
         }
         s << INDENT << '}' << endl;
+        s << INDENT << "if (!cptr) goto " << cpythonFunctionName(rfunc) << "_TypeError;" << endl;
+        s << endl;
     }
 
-    s << endl;
     s << INDENT << "sbkSelf->cptr = cptr;" << endl;
     s << INDENT << "sbkSelf->validCppObject = 1;" << endl;
     // If the created C++ object has a C++ wrapper the ownership is assigned to Python
