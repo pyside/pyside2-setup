@@ -1093,9 +1093,13 @@ bool ShibokenGenerator::hasMultipleInheritanceInAncestry(const AbstractMetaClass
 
 bool ShibokenGenerator::needsReferenceCountControl(const AbstractMetaClass* metaClass)
 {
-    if (!metaClass->fields().isEmpty())
+    if (!metaClass->fields().isEmpty() || hasMethodsWithReferenceCountModifications(metaClass))
         return true;
-    return hasMethodsWithReferenceCountModifications(metaClass);
+    foreach (const AbstractMetaClass* parent, getBaseClasses(metaClass)) {
+        if (needsReferenceCountControl(parent))
+            return true;
+    }
+    return false;
 }
 
 bool ShibokenGenerator::hasMethodsWithReferenceCountModifications(const AbstractMetaClass* metaClass)
