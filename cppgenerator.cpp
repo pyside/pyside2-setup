@@ -184,18 +184,6 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     s << "using namespace Shiboken;" << endl << endl;
 
-    // If the class has any method with "reference-count" modifications
-    // the support system will need C++ STL's pair and map.
-    if (hasMethodsWithReferenceCountModifications(metaClass)) {
-        s << "#include <map>" << endl;
-        s << "#include <utility>" << endl;
-        s << "using std::make_pair;" << endl;
-        s << "typedef std::pair<PyObject*, const char*> SbkRefCountKey;" << endl;
-        s << "typedef std::map<SbkRefCountKey, PyObject*> SbkRefCountMap;" << endl;
-        s << "static SbkRefCountMap sbk_refcount_map;" << endl;
-        s << endl;
-    }
-
     // class inject-code native/beginning
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
         writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Beginning, TypeSystem::NativeCode, 0, 0, metaClass);
@@ -707,6 +695,8 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     // Python owns it and C++ wrapper is false.
     if (shouldGenerateCppWrapper(overloads.first()->ownerClass()))
         s << INDENT << "sbkSelf->containsCppWrapper = 1;" << endl;
+    if (needsReferenceCountControl(metaClass))
+        s << INDENT << "sbkSelf->referredObjects = new Shiboken::RefCountMap;" << endl;
     s << INDENT << "BindingManager::instance().registerWrapper(sbkSelf);" << endl;
 
     // Constructor code injections, position=end
@@ -1551,16 +1541,8 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 s << "#error Invalid reference count modification for argument " << arg_mod.index << endl << endl;
                 break;
             }
-
-            s << INDENT << "SbkRefCountKey sbk_refcount_key = make_pair(self, \"" << func->minimalSignature() << "\");" << endl;
-            s << INDENT << "SbkRefCountMap::iterator sbk_refcount_iter = sbk_refcount_map.find(sbk_refcount_key);" << endl;
-            s << INDENT << "if (sbk_refcount_iter != sbk_refcount_map.end())" << endl;
-            {
-                Indentation indent(INDENT);
-                s << INDENT << "Py_XDECREF(sbk_refcount_iter->second);" << endl;
-            }
-            s << INDENT << "Py_INCREF(" << pyArgName << ");" << endl;
-            s << INDENT << "sbk_refcount_map[sbk_refcount_key] = " << pyArgName << ';' << endl;
+            s << INDENT << "Shiboken::SbkBaseWrapper_keepReference(reinterpret_cast<SbkBaseWrapper*>(self), \"";
+            s << func->minimalSignature() << arg_mod.index << "\", " << pyArgName << ");" << endl;
         }
     }
 }
@@ -1980,32 +1962,17 @@ void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* 
 
     QString fieldStr = QString("%1->%2").arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self")).arg(metaField->name());
 
-    bool pythonWrapperRefCounting = metaField->type()->typeEntry()->isObject() || metaField->type()->isValuePointer();
-
-    if (pythonWrapperRefCounting) {
-        s << INDENT << "Py_INCREF(value);" << endl;
-        s << INDENT << "PyObject* oldvalue;" << endl;
-
-        s << INDENT << "if (" << fieldStr << ")" << endl;
-        {
-            Indentation indent(INDENT);
-            s << INDENT << "oldvalue = BindingManager::instance().retrieveWrapper(";
-            s << fieldStr << ");" << endl;
-        }
-        s << INDENT << "else" << endl;
-        {
-            Indentation indent(INDENT);
-            s << INDENT << "oldvalue = Py_None;" << endl;
-        }
-        s << endl;
-    }
 
     s << INDENT << fieldStr << " = ";
     writeToCppConversion(s, metaField->type(), metaField->enclosingClass(), "value");
     s << ';' << endl << endl;
 
+    bool pythonWrapperRefCounting = metaField->type()->typeEntry()->isObject()
+                                    || metaField->type()->isValuePointer();
     if (pythonWrapperRefCounting) {
-        s << INDENT << "Py_XDECREF(oldvalue);" << endl;
+        s << INDENT << "Shiboken::SbkBaseWrapper_keepReference(reinterpret_cast<SbkBaseWrapper*>(self), \"";
+        s << metaField->name() << "\", value);" << endl;
+        //s << INDENT << "Py_XDECREF(oldvalue);" << endl;
         s << endl;
     }
 
