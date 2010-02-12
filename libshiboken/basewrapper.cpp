@@ -169,6 +169,7 @@ void SbkBaseWrapper_Dealloc_PrivateDtor(PyObject* self)
         PyObject_ClearWeakRefs(self);
 
     BindingManager::instance().releaseWrapper(self);
+    SbkBaseWrapper_clearReferences(reinterpret_cast<SbkBaseWrapper*>(self));
     Py_TYPE(reinterpret_cast<SbkBaseWrapper*>(self))->tp_free(self);
 }
 
