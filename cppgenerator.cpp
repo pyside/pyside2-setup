@@ -1950,7 +1950,7 @@ void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* 
     s << INDENT << '}' << endl;
 
     s << INDENT << "if (!";
-    writeTypeCheck(s, metaField->type(), "value");
+    writeTypeCheck(s, metaField->type(), "value", isNumber(metaField->type()->typeEntry()));
     s << ") {" << endl;
     {
         Indentation indent(INDENT);
