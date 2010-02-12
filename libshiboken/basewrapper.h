@@ -256,6 +256,8 @@ void SbkBaseWrapper_Dealloc(PyObject* self)
 
 LIBSHIBOKEN_API PyAPI_FUNC(void) SbkBaseWrapper_Dealloc_PrivateDtor(PyObject* self);
 
+LIBSHIBOKEN_API bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr);
+
 } // namespace Shiboken
 
 #endif // BASEWRAPPER_H

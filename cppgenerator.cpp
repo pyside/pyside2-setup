@@ -635,11 +635,13 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     s << INDENT << "SbkBaseWrapper* sbkSelf = reinterpret_cast<SbkBaseWrapper*>(self);" << endl;
     s << INDENT << "assert(!sbkSelf->cptr);\n"; // FIXME: object reinitialization not supported
 
-    if (metaClass->isAbstract() || metaClass->baseClassNames().size() > 1)
+    if (metaClass->isAbstract() || metaClass->baseClassNames().size() > 1) {
         s << INDENT << "SbkBaseWrapperType* type = reinterpret_cast<SbkBaseWrapperType*>(self->ob_type);" << endl;
+        s << INDENT << "SbkBaseWrapperType* myType = reinterpret_cast<SbkBaseWrapperType*>(" << cpythonTypeNameExt(metaClass->typeEntry()) << ");" << endl;
+    }
 
     if (metaClass->isAbstract()) {
-        s << INDENT << "if (type == &" << className << ") {" << endl;
+        s << INDENT << "if (type == myType) {" << endl;
         {
             Indentation indent(INDENT);
             s << INDENT << "PyErr_SetString(PyExc_NotImplementedError," << endl;
@@ -655,13 +657,13 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
 
     if (metaClass->baseClassNames().size() > 1) {
         if (!metaClass->isAbstract()) {
-            s << INDENT << "if (type != &" << className << ") {" << endl;
+            s << INDENT << "if (type != myType) {" << endl;
         }
         {
             Indentation indentation(INDENT);
-            s << INDENT << "type->mi_init = " << className << ".mi_init;" << endl;
-            s << INDENT << "type->mi_offsets = " << className << ".mi_offsets;" << endl;
-            s << INDENT << "type->mi_specialcast = " << className << ".mi_specialcast;" << endl;
+            s << INDENT << "type->mi_init = myType->mi_init;" << endl;
+            s << INDENT << "type->mi_offsets = myType->mi_offsets;" << endl;
+            s << INDENT << "type->mi_specialcast = myType->mi_specialcast;" << endl;
         }
         if (!metaClass->isAbstract())
             s << INDENT << '}' << endl << endl;
@@ -1609,7 +1611,7 @@ void CppGenerator::writeSpecialCastFunction(QTextStream& s, const AbstractMetaCl
     AbstractMetaClassList bases = getBaseClasses(metaClass);
     bool firstClass = true;
     foreach(const AbstractMetaClass* baseClass, bases) {
-        s << INDENT << (!firstClass ? "else " : "") << "if (desiredType == &" << cpythonTypeName(baseClass) << ")\n";
+        s << INDENT << (!firstClass ? "else " : "") << "if (desiredType == reinterpret_cast<SbkBaseWrapperType*>(" << cpythonTypeNameExt(baseClass->typeEntry()) << "))\n";
         Indentation indent(INDENT);
         s << INDENT << "return static_cast<" << baseClass->qualifiedCppName() << "*>(me);\n";
         firstClass = false;
@@ -1655,7 +1657,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     QString mi_specialcast('0');
     QString cppClassName = metaClass->qualifiedCppName();
     QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
-    QString baseClassName("(PyTypeObject*)&");
+    QString baseClassName('0');
 
     if (metaClass->hasArithmeticOperatorOverload()
         || metaClass->hasLogicalOperatorOverload()
@@ -1667,10 +1669,8 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     if (supportsSequenceProtocol(metaClass))
         tp_as_sequence = QString("&Py%1_as_sequence").arg(cppClassName);
 
-    if (metaClass->baseClass())
-        baseClassName.append(cpythonTypeName(metaClass->baseClass()->typeEntry()));
-    else
-        baseClassName.append("Shiboken::SbkBaseWrapper_Type");
+    if (!metaClass->baseClass())
+        baseClassName = "reinterpret_cast<PyTypeObject*>(&Shiboken::SbkBaseWrapper_Type)";
 
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
         tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES";
@@ -1735,7 +1735,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
 
     s << "// Class Definition -----------------------------------------------" << endl;
 
-    s << "Shiboken::SbkBaseWrapperType " << className + "_Type" << " = { { {" << endl;
+    s << "static SbkBaseWrapperType " << className + "_Type" << " = { { {" << endl;
     s << INDENT << "PyObject_HEAD_INIT(&Shiboken::SbkBaseWrapperType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
     s << INDENT << "/*tp_name*/             \"" << cppClassName << "\"," << endl;
@@ -2149,7 +2149,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
     }
 
     s << INDENT << "// init enum class: " << cppEnum->name() << endl;
-
+    s << INDENT << cpythonTypeNameExt(cppEnum->typeEntry()) << " = &" << cpythonTypeName(cppEnum->typeEntry()) << ';' << endl;
     s << INDENT << "if (PyType_Ready((PyTypeObject*)&" << cpythonName << "_Type) < 0)" << endl;
     s << INDENT << INDENT << "return;" << endl;
 
@@ -2163,6 +2163,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
     if (flags) {
         QString flagsName = cpythonFlagsName(flags);
         s << INDENT << "// init flags class: " << flags->name() << endl;
+        s << INDENT << cpythonTypeNameExt(flags) << " = &" << cpythonTypeName(flags) << ';' << endl;
 
         s << INDENT << "if (PyType_Ready((PyTypeObject*)&" << flagsName << "_Type) < 0)" << endl;
         s << INDENT << INDENT << "return;" << endl;
@@ -2241,7 +2242,7 @@ void CppGenerator::writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* c
     s << INDENT << "{0}  // Sentinel" << endl;
     s << "};" << endl << endl;
 
-    s << "PyTypeObject " << cpythonName << "_Type = {" << endl;
+    s << "static PyTypeObject " << cpythonName << "_Type = {" << endl;
     s << INDENT << "PyObject_HEAD_INIT(&PyType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
     s << INDENT << "/*tp_name*/             \"" << cppEnum->name() << "\"," << endl;
@@ -2361,11 +2362,11 @@ void CppGenerator::writeFlagsDefinition(QTextStream& s, const AbstractMetaEnum* 
     QString cpythonName = cpythonFlagsName(flagsEntry);
     QString enumName = cpythonEnumName(cppEnum);
 
-    QString newFunc = QString("(newfunc)") + cpythonName + "_New";
-    writeFlagsNewMethod(s, flagsEntry);
-    s << endl;
+    QString newFunc = cpythonName + "_New";
 
-    s << "PyTypeObject " << cpythonName << "_Type = {" << endl;
+    s << "// forward declaration of new function" << endl;
+    s << "static PyObject* " << newFunc << "(PyTypeObject*, PyObject*, PyObject*);" << endl << endl;
+    s << "static PyTypeObject " << cpythonName << "_Type = {" << endl;
     s << INDENT << "PyObject_HEAD_INIT(&PyType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
     s << INDENT << "/*tp_name*/             \"" << flagsEntry->flagsName() << "\"," << endl;
@@ -2413,6 +2414,9 @@ void CppGenerator::writeFlagsDefinition(QTextStream& s, const AbstractMetaEnum* 
     s << INDENT << "/*tp_subclasses*/       0," << endl;
     s << INDENT << "/*tp_weaklist*/         0" << endl;
     s << "};" << endl << endl;
+
+    writeFlagsNewMethod(s, flagsEntry);
+    s << endl;
 }
 
 void CppGenerator::writeFlagsBinaryOperator(QTextStream& s, const AbstractMetaEnum* cppEnum,
@@ -2480,12 +2484,17 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     s << "init_" << metaClass->qualifiedCppName().replace("::", "_") << "(PyObject* module)" << endl;
     s << '{' << endl;
 
+    if (!metaClass->isNamespace())
+        s << INDENT << cpythonTypeNameExt(metaClass->typeEntry()) << " = reinterpret_cast<PyTypeObject*>(&" << cpythonTypeName(metaClass->typeEntry()) << ");" << endl << endl;
+
     // class inject-code target/beginning
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
         writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Beginning, TypeSystem::TargetLangCode, 0, 0, metaClass);
         s << endl;
     }
 
+    if (metaClass->baseClass())
+        s << INDENT << pyTypeName << ".super.ht_type.tp_base = " << cpythonTypeNameExt(metaClass->baseClass()->typeEntry()) << ';' << endl;
     // Multiple inheritance
     if (metaClass->baseClassNames().size() > 1) {
         AbstractMetaClassList baseClasses = getBaseClasses(metaClass);
@@ -2494,7 +2503,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         s << ',' << endl;
         QStringList bases;
         foreach (const AbstractMetaClass* base, baseClasses)
-            bases << QString("(PyTypeObject*)&%1").arg(cpythonTypeName(base->typeEntry()));
+            bases << "(PyTypeObject*)"+cpythonTypeNameExt(base->typeEntry());
         Indentation indent(INDENT);
         s << INDENT << bases.join(", ") << ");" << endl << endl;
     }
@@ -2777,6 +2786,10 @@ void CppGenerator::finishGeneration()
             }
         }
 
+        s << "PyTypeObject** " << cppApiVariableName() << ";" << endl << endl;;
+        foreach (const QString& requiredModule, TypeDatabase::instance()->requiredTargetImports())
+            s << "PyTypeObject** " << cppApiVariableName(requiredModule) << ";" << endl << endl;;
+
         s << "// Module initialization ";
         s << "------------------------------------------------------------" << endl;
         s << "extern \"C\" {" << endl << endl;
@@ -2791,7 +2804,7 @@ void CppGenerator::finishGeneration()
         }
 
         foreach (const QString& requiredModule, TypeDatabase::instance()->requiredTargetImports()) {
-            s << INDENT << "if (PyImport_ImportModule(\"" << requiredModule << "\") == NULL) {" << endl;
+            s << INDENT << "if (!Shiboken::importModule(\"" << requiredModule << "\", &" << cppApiVariableName(requiredModule) << ")) {" << endl;
             s << INDENT << INDENT << "PyErr_SetString(PyExc_ImportError," << "\"could not import ";
             s << requiredModule << "\");" << endl << INDENT << INDENT << "return;" << endl;
             s << INDENT << "}" << endl << endl;
@@ -2801,6 +2814,11 @@ void CppGenerator::finishGeneration()
         s << INDENT << "PyObject* module = Py_InitModule(\""  << moduleName() << "\", ";
         s << moduleName() << "_methods);" << endl << endl;
 
+        s << INDENT << "// Create a CObject containing the API pointer array's address" << endl;
+        s << INDENT << "static PyTypeObject* cppApi[" << "SBK_" << moduleName() << "_IDX_COUNT" << "];" << endl;
+        s << INDENT << cppApiVariableName() << " = cppApi;" << endl;
+        s << INDENT << "PyObject* cppApiObject = PyCObject_FromVoidPtr(reinterpret_cast<void*>(cppApi), 0);" << endl;
+        s << INDENT << "PyModule_AddObject(module, \"_Cpp_Api\", cppApiObject);" << endl << endl;
         s << INDENT << "// Initialize classes in the type system" << endl;
         s << classPythonDefines << endl;
 

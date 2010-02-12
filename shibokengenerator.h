@@ -234,6 +234,7 @@ public:
     QString cpythonBaseName(const AbstractMetaType* type);
     QString cpythonTypeName(const AbstractMetaClass* metaClass);
     QString cpythonTypeName(const TypeEntry* type);
+    QString cpythonTypeNameExt(const TypeEntry* type);
     QString cpythonCheckFunction(const TypeEntry* type, bool genericNumberType = false, bool checkExact = false);
     QString cpythonCheckFunction(const AbstractMetaType* metaType, bool genericNumberType = false, bool checkExact = false);
     QString guessCPythonCheckFunction(const QString& type);
@@ -286,6 +287,8 @@ public:
     bool useReturnValueHeuristic() const;
     /// Returns true if the user enabled PySide extensions.
     bool usePySideExtensions() const;
+    QString cppApiVariableName(const QString& moduleName = QString()) const;
+    QString getTypeIndexVariableName(const TypeEntry* metaType);
 protected:
     bool doSetup(const QMap<QString, QString>& args);
     // verify whether the class is copyable

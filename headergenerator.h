@@ -47,6 +47,9 @@ private:
     void writeSbkTypeFunction(QTextStream& s, const AbstractMetaEnum* cppEnum);
     void writeSbkTypeFunction(QTextStream& s, const AbstractMetaClass* cppClass);
     void writeSbkCopyCppObjectFunction(QTextStream& s, const AbstractMetaClass* metaClass);
+    void writeTypeIndexDefineLine(QTextStream& s, const TypeEntry* typeEntry, int& idx);
+    void writeTypeIndexDefine(QTextStream& s, const AbstractMetaClass* metaClass, int& idx);
+
 };
 
 #endif // HEADERGENERATOR_H

@@ -196,6 +196,22 @@ void SbkBaseWrapper_clearReferences(SbkBaseWrapper* self)
     delete self->referredObjects;
 }
 
+bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr)
+{
+    Shiboken::AutoDecRef module(PyImport_ImportModule(moduleName));
+    if (module.isNull())
+        return false;
+
+    Shiboken::AutoDecRef cppApi(PyObject_GetAttrString(module, "_Cpp_Api"));
+    if (cppApi.isNull())
+        return false;
+
+    if (PyCObject_Check(cppApi))
+        *cppApiPtr = reinterpret_cast<PyTypeObject**>(PyCObject_AsVoidPtr(cppApi));
+
+    return true;
+}
+
 // Wrapper metatype and base type ----------------------------------------------------------
 
 extern "C"

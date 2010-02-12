@@ -460,6 +460,11 @@ QString ShibokenGenerator::cpythonTypeName(const TypeEntry* type)
     return cpythonBaseName(type) + "_Type";
 }
 
+QString ShibokenGenerator::cpythonTypeNameExt(const TypeEntry* type)
+{
+    return cppApiVariableName(type->targetLangPackage()) + '[' + getTypeIndexVariableName(type) + ']';
+}
+
 QString ShibokenGenerator::cpythonOperatorFunctionName(const AbstractMetaFunction* func)
 {
     if (!func->isOperatorOverload())
@@ -1308,3 +1313,22 @@ bool ShibokenGenerator::usePySideExtensions() const
     return m_usePySideExtensions;
 }
 
+QString ShibokenGenerator::cppApiVariableName(const QString& moduleName) const
+{
+    QString result = moduleName.isEmpty() ? ShibokenGenerator::packageName() : moduleName;
+    result.replace(".", "_");
+    result.prepend("Sbk");
+    result.append("Types");
+    return result;
+}
+
+QString ShibokenGenerator::getTypeIndexVariableName(const TypeEntry* metaType)
+{
+    QString res("SBK_");
+    res += metaType->qualifiedCppName();
+    res.replace("::", "_");
+    res.replace("<", "_");
+    res.replace(">", "_");
+    res += "_IDX";
+    return res.toUpper();
+}

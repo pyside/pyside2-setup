@@ -143,17 +143,11 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
 
 void HeaderGenerator::writeTypeCheckMacro(QTextStream& s, const TypeEntry* type)
 {
-    QString pyTypeName = cpythonTypeName(type);
+    QString pyTypeName = cppApiVariableName() + '[' + getTypeIndexVariableName(type) + ']';
     QString checkFunction = cpythonCheckFunction(type);
-    s << getApiExportMacro() << " PyAPI_DATA(";
-    if (type->isObject() || type->isValue())
-        s << "Shiboken::SbkBaseWrapperType";
-    else
-        s << "PyTypeObject";
-    s << ") " << pyTypeName << ';' << endl;
-    s << "#define " << checkFunction << "(op) PyObject_TypeCheck(op, (PyTypeObject*)&";
+    s << "#define " << checkFunction << "(op) PyObject_TypeCheck(op, (PyTypeObject*)";
     s << pyTypeName << ')' << endl;
-    s << "#define " << checkFunction << "Exact(op) ((op)->ob_type == (PyTypeObject*)&";
+    s << "#define " << checkFunction << "Exact(op) ((op)->ob_type == (PyTypeObject*)";
     s << pyTypeName << ')' << endl;
 }
 
@@ -188,8 +182,38 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
     s << "};" << endl;
 }
 
+void HeaderGenerator::writeTypeIndexDefineLine(QTextStream& s, const TypeEntry* typeEntry, int& idx)
+{
+    if (!typeEntry || !typeEntry->generateCode())
+        return;
+    s.setFieldAlignment(QTextStream::AlignLeft);
+    s << "#define ";
+    s.setFieldWidth(60);
+    s << getTypeIndexVariableName(typeEntry);
+    s.setFieldWidth(0);
+    s << ' ' << (idx++) << endl;
+    if (typeEntry->isEnum()) {
+        const EnumTypeEntry* ete = reinterpret_cast<const EnumTypeEntry*>(typeEntry);
+        if (ete->flags())
+            writeTypeIndexDefineLine(s, ete->flags(), idx);
+    }
+}
+
+void HeaderGenerator::writeTypeIndexDefine(QTextStream& s, const AbstractMetaClass* metaClass, int& idx)
+{
+    if (!metaClass->typeEntry()->generateCode())
+        return;
+    if (!metaClass->isNamespace())
+        writeTypeIndexDefineLine(s, metaClass->typeEntry(), idx);
+    foreach (const AbstractMetaEnum* metaEnum, metaClass->enums())
+        writeTypeIndexDefineLine(s, metaEnum->typeEntry(), idx);
+}
+
 void HeaderGenerator::finishGeneration()
 {
+    if (classes().isEmpty())
+        return;
+
     // Generate the main header for this module.
     // This header should be included by binding modules
     // extendind on top of this one.
@@ -205,7 +229,19 @@ void HeaderGenerator::finishGeneration()
 
     Indentation indent(INDENT);
 
-    s_pts << endl << "// Global enums" << endl;
+    s_pts << "// Type indices" << endl;
+    int idx = 0;
+    foreach (const AbstractMetaClass* metaClass, classes())
+        writeTypeIndexDefine(s_pts, metaClass, idx);
+    foreach (const AbstractMetaEnum* metaEnum, globalEnums())
+        writeTypeIndexDefineLine(s_pts, metaEnum->typeEntry(), idx);
+    s_pts << "#define ";
+    s_pts.setFieldWidth(60);
+    s_pts << "SBK_"+moduleName()+"_IDX_COUNT";
+    s_pts.setFieldWidth(0);
+    s_pts << ' ' << idx << endl << endl;
+    s_pts << "extern PyTypeObject** " << cppApiVariableName() << ';' << endl << endl;
+
     foreach (const AbstractMetaEnum* cppEnum, globalEnums()) {
         QString incFile = cppEnum->includeFile().split(QDir::separator()).takeLast();
         if (!incFile.isEmpty())
@@ -381,19 +417,19 @@ void HeaderGenerator::writeSbkTypeFunction(QTextStream& s, const AbstractMetaEnu
     if (cppEnum->enclosingClass())
         enumPrefix = cppEnum->enclosingClass()->qualifiedCppName() + "::";
     s <<  "template<>\ninline PyTypeObject* SbkType<" << enumPrefix << cppEnum->name() << " >() "
-      << "{ return &" << cpythonTypeName(cppEnum->typeEntry()) << "; }\n";
+      << "{ return " << cpythonTypeNameExt(cppEnum->typeEntry()) << "; }\n";
 
     FlagsTypeEntry* flag = cppEnum->typeEntry()->flags();
     if (flag) {
         s <<  "template<>\ninline PyTypeObject* SbkType<" << flag->name() << " >() "
-          << "{ return &" << cpythonTypeName(flag) << "; }\n";
+          << "{ return " << cpythonTypeNameExt(flag) << "; }\n";
     }
 }
 
 void HeaderGenerator::writeSbkTypeFunction(QTextStream& s, const AbstractMetaClass* cppClass)
 {
     s <<  "template<>\ninline PyTypeObject* SbkType<" << cppClass->qualifiedCppName() << " >() "
-      <<  "{ return reinterpret_cast<PyTypeObject*>(&" << cpythonTypeName(cppClass) << "); }\n";
+      <<  "{ return reinterpret_cast<PyTypeObject*>(" << cpythonTypeNameExt(cppClass->typeEntry()) << "); }\n";
 }
 
 void HeaderGenerator::writeSbkCopyCppObjectFunction(QTextStream& s, const AbstractMetaClass* metaClass)
