@@ -134,11 +134,7 @@ PyObject* SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
     SbkBaseWrapper* self = reinterpret_cast<SbkBaseWrapper*>(SbkBaseWrapper_TpNew(reinterpret_cast<PyTypeObject*>(instanceType), 0, 0));
     self->cptr = const_cast<void*>(cptr);
     self->hasOwnership = hasOwnership;
-    self->containsCppWrapper = 0;
     self->validCppObject = 1;
-    self->parentInfo = 0;
-    self->ob_dict = 0;
-    self->weakreflist = 0;
     BindingManager::instance().registerWrapper(self);
     return reinterpret_cast<PyObject*>(self);
 }
