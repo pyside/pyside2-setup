@@ -150,6 +150,7 @@ PyObject* SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*)
     self->parentInfo = 0;
     self->ob_dict = 0;
     self->weakreflist = 0;
+    self->referredObjects = 0;
     return reinterpret_cast<PyObject*>(self);
 }
 
@@ -169,6 +170,29 @@ void SbkBaseWrapper_Dealloc_PrivateDtor(PyObject* self)
 
     BindingManager::instance().releaseWrapper(self);
     Py_TYPE(reinterpret_cast<SbkBaseWrapper*>(self))->tp_free(self);
+}
+
+void SbkBaseWrapper_keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObject)
+{
+    if (!self->referredObjects)
+        return;
+    RefCountMap& refCountMap = *(self->referredObjects);
+    Py_INCREF(referredObject);
+    RefCountMap::iterator iter = refCountMap.find(key);
+    if (iter != refCountMap.end())
+        Py_DECREF(iter->second);
+    refCountMap[key] = referredObject;
+}
+
+void SbkBaseWrapper_clearReferences(SbkBaseWrapper* self)
+{
+    if (!self->referredObjects)
+        return;
+    RefCountMap& refCountMap = *(self->referredObjects);
+    RefCountMap::iterator iter;
+    for (iter = refCountMap.begin(); iter != refCountMap.end(); ++iter)
+        Py_DECREF(iter->second);
+    delete self->referredObjects;
 }
 
 // Wrapper metatype and base type ----------------------------------------------------------

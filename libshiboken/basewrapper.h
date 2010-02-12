@@ -38,6 +38,7 @@
 #include <Python.h>
 #include "bindingmanager.h"
 #include <list>
+#include <map>
 
 namespace Shiboken
 {
@@ -57,6 +58,12 @@ struct LIBSHIBOKEN_API ShiboParentInfo
     /// List of object children.
     ShiboChildrenList children;
 };
+
+/**
+ * This mapping associates a method and argument of an wrapper object with the wrapper of
+ * said argument when it needs the binding to help manage its reference counting.
+ */
+typedef std::map<const char*, PyObject*> RefCountMap;
 
 extern "C"
 {
@@ -102,7 +109,9 @@ struct LIBSHIBOKEN_API SbkBaseWrapper
     /// Information about the object parents and children, can be null.
     ShiboParentInfo* parentInfo;
     /// List of weak references
-    PyObject *weakreflist;
+    PyObject* weakreflist;
+    /// Manage reference counting of objects that are referred but not owned.
+    RefCountMap* referredObjects;
 };
 
 LIBSHIBOKEN_API PyAPI_FUNC(void) init_shiboken();
@@ -206,6 +215,27 @@ SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
 
 LIBSHIBOKEN_API PyAPI_FUNC(PyObject*)
 SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*);
+
+/**
+ *   Increments the reference count of the referred Python object.
+ *   A previous Python object in the same position identified by the 'key' parameter
+ *   will have its reference counter decremented automatically when replaced.
+ *   All the kept references should be decremented when the Python wrapper indicated by
+ *   'self' dies.
+ *   No checking is done for any of the passed arguments, since it is meant to be used
+ *   by generated code it is supposed that the generator is correct.
+ *   \param self            the wrapper instance that keeps references to other objects.
+ *   \param key             a key that identifies the C++ method signature and argument where the referredObject came from.
+ *   \parem referredObject  the object whose reference is used by the self object.
+ */
+LIBSHIBOKEN_API void SbkBaseWrapper_keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObject);
+
+/**
+ *   Decrements the reference counters of every object referred by self.
+ *   \param self    the wrapper instance that keeps references to other objects.
+ */
+LIBSHIBOKEN_API void SbkBaseWrapper_clearReferences(SbkBaseWrapper* self);
+
 /// Returns true and sets a Python RuntimeError if the Python wrapper is not marked as valid.
 LIBSHIBOKEN_API bool cppObjectIsInvalid(PyObject* wrapper);
 
@@ -220,6 +250,7 @@ void SbkBaseWrapper_Dealloc(PyObject* self)
         delete (reinterpret_cast<T*>(SbkBaseWrapper_cptr(self)));
     if (SbkBaseWrapper_hasParentInfo(self))
         destroyParentInfo(reinterpret_cast<SbkBaseWrapper*>(self));
+    SbkBaseWrapper_clearReferences(reinterpret_cast<SbkBaseWrapper*>(self));
     Py_TYPE(reinterpret_cast<SbkBaseWrapper*>(self))->tp_free(self);
 }
 
