@@ -1518,6 +1518,11 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 break;
             }
 
+            // The default ownership does nothing. This is useful to avoid automatic heuristically
+            // based generation of code defining parenting.
+            if (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::DefaultOwnership)
+                continue;
+
             s << INDENT;
             if (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::TargetLangOwnership) {
                 s << "SbkBaseWrapper_setOwnership(" << pyArgName << ", true);";
