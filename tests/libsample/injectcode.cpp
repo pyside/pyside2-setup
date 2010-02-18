@@ -100,3 +100,15 @@ int InjectCode::arrayMethod(int count, int *values) const
         ret += values[i];
     return ret;
 }
+
+int InjectCode::sumArrayAndLength(int* values) const
+{
+    int sum = 0;
+
+    while(*values) {
+        sum = sum + *values + 1;
+        values++;
+    }
+
+    return sum;
+}

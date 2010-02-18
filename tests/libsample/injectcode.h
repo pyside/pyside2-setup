@@ -56,6 +56,7 @@ public:
     virtual int arrayMethod(int count, int* values) const;
     int callArrayMethod(int count, int *values) const { return arrayMethod(count, values); }
     virtual const char* virtualMethod(int arg);
+    int sumArrayAndLength(int* values) const;
 private:
     // This attr is just to retain the memory pointed by all return values,
     // So, the memory returned by all methods will be valid until someone call

@@ -90,5 +90,27 @@ class InjectCodeTest(unittest.TestCase):
         result = ic.callArrayMethod(values)
         self.assertEqual(result, ic.multiplier * sum(values))
 
+
+class IntArrayTest(unittest.TestCase):
+    '''Test case for converting python sequence to int array'''
+
+    def testBasic(self):
+        '''Shiboken::sequenceToIntArray - basic case'''
+        args = [1, 2, 3, 4]
+        ic = InjectCode()
+        self.assertEqual(sum(args) + len(args), ic.sumArrayAndLength(args))
+
+    def testEmpty(self):
+        '''Shiboken::sequenceToIntArray - empty sequence'''
+        args = []
+        ic = InjectCode()
+        self.assertEqual(sum(args) + len(args), ic.sumArrayAndLength(args))
+
+    def testWithZero(self):
+        '''Shiboken::sequenceToIntArray - count only up to zero'''
+        args = [1, 2, 0, 3]
+        ic = InjectCode()
+        self.assertEqual(sum([1, 2]) + len([1, 2]), ic.sumArrayAndLength(args))
+
 if __name__ == '__main__':
     unittest.main()
