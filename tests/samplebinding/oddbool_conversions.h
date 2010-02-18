@@ -1,3 +1,4 @@
+namespace Shiboken {
 template <>
 struct Converter<OddBool> : public ConverterBase<OddBool>
 {
@@ -17,4 +18,4 @@ struct Converter<OddBool> : public ConverterBase<OddBool>
         return OddBool(pyobj == Py_True);
     }
 };
-
+}

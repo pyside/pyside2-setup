@@ -382,6 +382,7 @@ void HeaderGenerator::finishGeneration()
         s << sbkTypeFunctions << endl;
         s << "// Generated converters declarations ----------------------------------" << endl << endl;
         s << convertersDecl << endl;
+        s << "} // namespace Shiboken" << endl << endl;
 
         s << "// User defined converters --------------------------------------------" << endl;
         foreach (TypeEntry* typeEntry, TypeDatabase::instance()->entries()) {
@@ -390,8 +391,6 @@ void HeaderGenerator::finishGeneration()
                 s << typeEntry->conversionRule();
             }
         }
-
-        s << "} // namespace Shiboken" << endl << endl;
         s << "// Generated converters implemantations -------------------------------" << endl << endl;
         s << converterImpl << endl;
 

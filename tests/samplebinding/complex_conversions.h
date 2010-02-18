@@ -1,3 +1,4 @@
+namespace Shiboken {
 template<>
 struct Converter<Complex> : public ConverterBase<Complex>
 {
@@ -19,3 +20,4 @@ struct Converter<Complex> : public ConverterBase<Complex>
         return Complex(real, imag);
     }
 };
+}
