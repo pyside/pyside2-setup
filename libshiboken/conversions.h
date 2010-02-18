@@ -418,16 +418,13 @@ struct Converter_std_list
     {
         return PySequence_Check(const_cast<PyObject*>(pyObj));
     }
-    static PyObject* toPython(StdList cppobj)
+    static PyObject* toPython(const StdList& cppobj)
     {
         PyObject* result = PyList_New((int) cppobj.size());
-        typedef typename StdList::iterator IT;
-        IT it;
-        int idx = 0;
-        for (it = cppobj.begin(); it != cppobj.end(); it++) {
+        typename StdList::const_iterator it = cppobj.begin();
+        for (int idx = 0; it != cppobj.end(); ++it, ++idx) {
             typename StdList::value_type vh(*it);
             PyList_SET_ITEM(result, idx, Converter<typename StdList::value_type>::toPython(vh));
-            idx++;
         }
         return result;
     }
@@ -449,7 +446,7 @@ struct Converter_std_pair
     {
         return PySequence_Check(const_cast<PyObject*>(pyObj));
     }
-    static PyObject* toPython(StdPair cppobj)
+    static PyObject* toPython(const StdPair& cppobj)
     {
         typename StdPair::first_type first(cppobj.first);
         typename StdPair::second_type second(cppobj.second);
@@ -477,13 +474,12 @@ struct Converter_std_map
         return PyDict_Check(const_cast<PyObject*>(pyObj));
     }
 
-    static PyObject* toPython(StdMap cppobj)
+    static PyObject* toPython(const StdMap& cppobj)
     {
         PyObject* result = PyDict_New();
-        typedef typename StdMap::iterator IT;
-        IT it;
+        typename StdMap::const_iterator it = cppobj.begin();
 
-        for (it = cppobj.begin(); it != cppobj.end(); it++) {
+        for (; it != cppobj.end(); ++it) {
             typename StdMap::key_type h_key((*it).first);
             typename StdMap::mapped_type h_val((*it).second);
             PyDict_SetItem(result,
