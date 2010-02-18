@@ -69,4 +69,41 @@ PySequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* def
     return true;
 }
 
+int*
+sequenceToIntArray(PyObject* obj, bool zeroTerminated)
+{
+    int* array = NULL;
+    int i;
+    int size;
+
+    if (!PySequence_Check(obj)) {
+        PyErr_SetString(PyExc_TypeError, "Sequence of ints expected");
+        return NULL;
+    }
+
+    size = PySequence_Size(obj);
+
+    array = new int[size + zeroTerminated ? 1 : 0];
+
+    for (i = 0; i < size; i++) {
+        PyObject* item = PySequence_GetItem(obj, i);
+        if (!PyInt_Check(item)) {
+            PyErr_SetString(PyExc_TypeError, "Sequence of ints expected");
+            Py_DECREF(item);
+            if (array)
+                delete array;
+            return NULL;
+        } else {
+            array[i] = PyInt_AsLong(item);
+            Py_DECREF(item);
+        }
+    }
+
+    if (zeroTerminated)
+        array[i] = 0;
+
+    return array;
+}
+
+
 } // namespace Shiboken
