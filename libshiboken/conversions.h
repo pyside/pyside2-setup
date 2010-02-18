@@ -145,7 +145,7 @@ struct ConverterBase<T*> : ConverterBase<T>
 };
 
 // Pointer Conversions
-template <typename T> struct Converter : ConverterBase<T> {};
+template <typename T> struct Converter {};
 
 template <typename T>
 struct Converter<T*> : Converter<T>
