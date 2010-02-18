@@ -976,8 +976,11 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
     else
         funcName = rfunc->name();
     if (rfunc->ownerClass()) {
-        funcName.prepend('.');
-        funcName.prepend(rfunc->ownerClass()->fullName());
+        QString fullName = rfunc->ownerClass()->fullName();
+        if (rfunc->isConstructor())
+            funcName = fullName;
+        else
+            funcName.prepend(fullName + '.');
     }
 
     QString argsVar = !rfunc->isConstructor() && overloadData.maxArgs() == 1 ? "arg" : "args";
