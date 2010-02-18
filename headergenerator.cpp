@@ -165,10 +165,7 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
     }
     bool isValueTypeWithImplConversions = type->isValue() && !implicitConvs.isEmpty();
 
-    s << "struct ";
-    if (isValueTypeWithImplConversions)
-        s << getApiExportMacro() << ' ';
-    s << "Converter<" << type->name() << (isAbstractOrObjectType ? "*" : "") << " > : ";
+    s << "struct Converter<" << type->name() << (isAbstractOrObjectType ? "*" : "") << " > : ";
     if (type->isEnum() || type->isFlags())
         s << "Converter_CppEnum";
     else
@@ -226,6 +223,8 @@ void HeaderGenerator::finishGeneration()
     QTextStream convDecl(&convertersDecl);
     QString sbkTypeFunctions;
     QTextStream typeFunctions(&sbkTypeFunctions);
+    QString converterImpl;
+    QTextStream convImpl(&converterImpl);
 
     Indentation indent(INDENT);
 
@@ -282,16 +281,17 @@ void HeaderGenerator::finishGeneration()
         if (!metaClass->isNamespace()) {
             writeSbkTypeFunction(typeFunctions, metaClass);
 
-            writeSbkCopyCppObjectFunction(typeFunctions, metaClass);
+            writeSbkCopyCppObjectFunction(convDecl, metaClass);
 
             foreach (AbstractMetaClass* innerClass, metaClass->innerClasses()) {
                 if (shouldGenerate(innerClass)) {
-                    writeSbkCopyCppObjectFunction(typeFunctions, innerClass);
+                    writeSbkCopyCppObjectFunction(convDecl, innerClass);
                     s_cin << innerClass->typeEntry()->include().toString() << endl;
                     writeTypeCheckMacro(s_pts, innerClass->typeEntry());
                     s_pts << "#define " << cpythonWrapperCPtr(innerClass, "pyobj") << " ((";
                     s_pts << innerClass->qualifiedCppName() << "*)SbkBaseWrapper_cptr(pyobj))" << endl << endl;
                     writeTypeConverterDecl(convDecl, innerClass->typeEntry());
+                    writeTypeConverterImpl(convImpl, innerClass->typeEntry());
                     convDecl << endl;
                     writeSbkTypeFunction(typeFunctions, innerClass);
                 }
@@ -300,6 +300,7 @@ void HeaderGenerator::finishGeneration()
             s_pts << "#define " << cpythonWrapperCPtr(metaClass, "pyobj") << " ((";
             s_pts << metaClass->qualifiedCppName() << "*)SbkBaseWrapper_cptr(pyobj))" << endl << endl;
             writeTypeConverterDecl(convDecl, classType);
+            writeTypeConverterImpl(convImpl, classType);
             convDecl << endl;
         }
     }
@@ -389,6 +390,8 @@ void HeaderGenerator::finishGeneration()
         }
 
         s << "} // namespace Shiboken" << endl << endl;
+        s << "// Generated converters implemantations -------------------------------" << endl << endl;
+        s << converterImpl << endl;
 
         s << "#endif // " << includeShield << endl << endl;
     }
@@ -443,5 +446,78 @@ void HeaderGenerator::writeSbkCopyCppObjectFunction(QTextStream& s, const Abstra
     s << INDENT << "static const bool isCppWrapper = true;" << endl;
     s << INDENT << "static " << className << "* copy(const " << className << "& cppobj);" << endl;
     s << "};" << endl;
+}
+
+void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
+{
+    if (type->hasConversionRule())
+        return;
+
+    QString pyTypeName = cpythonTypeName(type);
+
+    AbstractMetaFunctionList implicitConvs;
+    foreach (AbstractMetaFunction* func, implicitConversions(type)) {
+        if (!func->isUserAdded())
+            implicitConvs << func;
+    }
+
+    bool hasImplicitConversions = !implicitConvs.isEmpty();
+
+    if (hasImplicitConversions) {
+        // Write Converter<T>::isConvertible
+        s << "inline bool Shiboken::Converter<" << type->name() << " >::isConvertible(PyObject* pyobj)" << endl;
+        s << '{' << endl;
+        s << INDENT << "return ";
+        bool isFirst = true;
+        foreach (const AbstractMetaFunction* ctor, implicitConvs) {
+            Indentation indent(INDENT);
+            if (isFirst)
+                isFirst = false;
+            else
+                s << endl << INDENT << " || ";
+            s << cpythonCheckFunction(ctor->arguments().first()->type());
+            s << "(pyobj)";
+        }
+        s << ';' << endl;
+        s << '}' << endl << endl;
+    }
+
+    // A specialized Converter<T>::toCpp method is only need for
+    // value-types with implicit conversions.
+    if (!type->isValue() || !hasImplicitConversions)
+        return;
+
+    // Write Converter<T>::toCpp function
+    s << "inline " << type->name() << " Shiboken::Converter<" << type->name() << " >::toCpp(PyObject* pyobj)" << endl;
+    s << '{' << endl;
+
+    if (!implicitConvs.isEmpty()) {
+        s << INDENT << "if (!Shiboken_TypeCheck(pyobj, " << type->name() << ")) {" << endl;
+        bool firstImplicitIf = true;
+        foreach (const AbstractMetaFunction* ctor, implicitConvs) {
+            if (ctor->isModifiedRemoved())
+                continue;
+
+            Indentation indent(INDENT);
+            s << INDENT;
+
+            const AbstractMetaType* argType = ctor->arguments().first()->type();
+            if (firstImplicitIf)
+                firstImplicitIf = false;
+            else
+                s << "else ";
+            s << "if (" << cpythonCheckFunction(argType) << "(pyobj))" << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "return " << type->name() << '(';
+                writeToCppConversion(s, argType, 0, "pyobj");
+                s << ");" << endl;
+            }
+        }
+        s << INDENT << '}' << endl;
+    }
+
+    s << INDENT << "return *" << cpythonWrapperCPtr(type, "pyobj") << ';' << endl;
+    s << '}' << endl << endl;
 }
 

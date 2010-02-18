@@ -156,7 +156,6 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     if (!metaClass->isNamespace()) {
         Indentation indentation(INDENT);
-        writeTypeConverterImpl(convImpl, metaClass->typeEntry());
         writeSbkCopyCppObjectFunction(copyImpl, metaClass);
     }
 
@@ -334,14 +333,12 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     foreach (AbstractMetaEnum* cppEnum, metaClass->enums()) {
         bool hasFlags = cppEnum->typeEntry()->flags();
         if (hasFlags) {
-            writeTypeConverterImpl(convImpl, cppEnum->typeEntry()->flags());
             writeFlagsMethods(s, cppEnum);
             writeFlagsNumberMethodsDefinition(s, cppEnum);
             s << endl;
         }
 
         writeEnumDefinition(s, cppEnum);
-        writeTypeConverterImpl(convImpl, cppEnum->typeEntry());
 
         if (hasFlags) {
             // Write Enum as Flags definition (at the moment used only by QFlags<enum>)
@@ -2584,78 +2581,6 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     s << '}' << endl << endl;
 }
 
-void CppGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
-{
-    if (type->hasConversionRule())
-        return;
-
-    QString pyTypeName = cpythonTypeName(type);
-
-    AbstractMetaFunctionList implicitConvs;
-    foreach (AbstractMetaFunction* func, implicitConversions(type)) {
-        if (!func->isUserAdded())
-            implicitConvs << func;
-    }
-
-    bool hasImplicitConversions = !implicitConvs.isEmpty();
-
-    if (hasImplicitConversions) {
-        // Write Converter<T>::isConvertible
-        s << "bool Converter<" << type->name() << " >::isConvertible(PyObject* pyobj)" << endl;
-        s << '{' << endl;
-        s << INDENT << "return ";
-        bool isFirst = true;
-        foreach (const AbstractMetaFunction* ctor, implicitConvs) {
-            Indentation indent(INDENT);
-            if (isFirst)
-                isFirst = false;
-            else
-                s << endl << INDENT << " || ";
-            s << cpythonCheckFunction(ctor->arguments().first()->type());
-            s << "(pyobj)";
-        }
-        s << ';' << endl;
-        s << '}' << endl << endl;
-    }
-
-    // A specialized Converter<T>::toCpp method is only need for
-    // value-types with implicit conversions.
-    if (!type->isValue() || !hasImplicitConversions)
-        return;
-
-    // Write Converter<T>::toCpp function
-    s << type->name() << " Converter<" << type->name() << " >::toCpp(PyObject* pyobj)" << endl;
-    s << '{' << endl;
-
-    if (!implicitConvs.isEmpty()) {
-        s << INDENT << "if (!Shiboken_TypeCheck(pyobj, " << type->name() << ")) {" << endl;
-        bool firstImplicitIf = true;
-        foreach (const AbstractMetaFunction* ctor, implicitConvs) {
-            if (ctor->isModifiedRemoved())
-                continue;
-
-            Indentation indent(INDENT);
-            s << INDENT;
-
-            const AbstractMetaType* argType = ctor->arguments().first()->type();
-            if (firstImplicitIf)
-                firstImplicitIf = false;
-            else
-                s << "else ";
-            s << "if (" << cpythonCheckFunction(argType) << "(pyobj))" << endl;
-            {
-                Indentation indent(INDENT);
-                s << INDENT << "return " << type->name() << '(';
-                writeBaseConversion(s, argType, 0);
-                s << "toCpp(pyobj));" << endl;
-            }
-        }
-        s << INDENT << '}' << endl;
-    }
-
-    s << INDENT << "return *" << cpythonWrapperCPtr(type, "pyobj") << ';' << endl;
-    s << '}' << endl << endl;
-}
 void CppGenerator::writeTypeNameFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     Indentation indent(INDENT);
@@ -2815,7 +2740,6 @@ void CppGenerator::finishGeneration()
             s << "// Enum definitions ";
             s << "------------------------------------------------------------" << endl;
             foreach (const AbstractMetaEnum* cppEnum, globalEnums()) {
-                writeTypeConverterImpl(convImpl, cppEnum->typeEntry());
                 writeEnumDefinition(s, cppEnum);
                 s << endl;
             }

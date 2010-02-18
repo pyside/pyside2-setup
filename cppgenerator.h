@@ -68,7 +68,6 @@ private:
     void writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, bool isNumber = false, QString customType = "");
     void writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName);
 
-    void writeTypeConverterImpl(QTextStream& s, const TypeEntry* type);
     void writeTypeNameFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
     void writeSbkCopyCppObjectFunction(QTextStream& s, const AbstractMetaClass* metaClass);
