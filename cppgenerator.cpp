@@ -975,8 +975,43 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
         funcName = ShibokenGenerator::pythonOperatorFunctionName(rfunc);
     else
         funcName = rfunc->name();
-    s << INDENT << "PyErr_SetString(PyExc_TypeError, \"'" << funcName;
-    s << "()' called with wrong parameters.\");" << endl;
+    if (rfunc->ownerClass()) {
+        funcName.prepend('.');
+        funcName.prepend(rfunc->ownerClass()->fullName());
+    }
+
+    QString argsVar = !rfunc->isConstructor() && overloadData.maxArgs() == 1 ? "arg" : "args";
+    if (verboseErrorMessagesDisabled()) {
+        s << INDENT << "Shiboken::setErrorAboutWrongArguments(" << argsVar << ", \"" << funcName << "\", 0);" << endl;
+    } else {
+        QStringList overloadSignatures;
+        foreach (const AbstractMetaFunction* f, overloadData.overloads()) {
+            QStringList args;
+            foreach(AbstractMetaArgument* arg, f->arguments()) {
+                QString strArg;
+                if (arg->type()->isNativePointer() && arg->type()->name() == "char") {
+                    strArg = "str";
+                } else if (arg->type()->isPrimitive()) {
+                    const PrimitiveTypeEntry* ptp = reinterpret_cast<const PrimitiveTypeEntry*>(arg->type()->typeEntry());
+                    while (ptp->aliasedTypeEntry())
+                        ptp = ptp->aliasedTypeEntry();
+                    strArg = ptp->name().replace(QRegExp("^signed\\s+"), "");
+                    if (strArg == "double")
+                        strArg = "float";
+                } else {
+                    strArg = arg->type()->fullName();
+                }
+                if (!arg->defaultValueExpression().isEmpty()) {
+                    strArg += " = ";
+                    strArg += arg->defaultValueExpression().replace("::", ".").replace("\"", "\\\"");
+                }
+                args << strArg;
+            }
+            overloadSignatures << "\""+args.join(", ")+"\"";
+        }
+        s << INDENT << "const char* overloads[] = {" << overloadSignatures.join(", ") << ", 0};" << endl;
+        s << INDENT << "Shiboken::setErrorAboutWrongArguments(" << argsVar << ", \"" << funcName << "\", overloads);" << endl;
+    }
     s << INDENT << "return " << m_currentErrorCode << ';' << endl;
 }
 

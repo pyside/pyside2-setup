@@ -33,6 +33,7 @@
 #define PARENT_CTOR_HEURISTIC "enable-parent-ctor-heuristic"
 #define RETURN_VALUE_HEURISTIC "enable-return-value-heuristic"
 #define ENABLE_PYSIDE_EXTENSIONS "enable-pyside-extensions"
+#define DISABLE_VERBOSE_ERROR_MESSAGES "disable-verbose-error-messages"
 
 //static void dumpFunction(AbstractMetaFunctionList lst);
 
@@ -1287,6 +1288,7 @@ QMap<QString, QString> ShibokenGenerator::options() const
     opts.insert(PARENT_CTOR_HEURISTIC, "Enable heuristics to detect parent relationship on constructors.");
     opts.insert(RETURN_VALUE_HEURISTIC, "Enable heuristics to detect parent relationship on return values (USE WITH CAUTION!)");
     opts.insert(ENABLE_PYSIDE_EXTENSIONS, "Enable PySide extensions, such as support for signal/slots, use this if you are creating a binding for a Qt-based library.");
+    opts.insert(DISABLE_VERBOSE_ERROR_MESSAGES, "Disable verbose error messages. Turn the python code hard to debug but safe few kB on the generated bindings.");
     return opts;
 }
 
@@ -1295,6 +1297,7 @@ bool ShibokenGenerator::doSetup(const QMap<QString, QString>& args)
     m_useCtorHeuristic = args.contains(PARENT_CTOR_HEURISTIC);
     m_usePySideExtensions = args.contains(ENABLE_PYSIDE_EXTENSIONS);
     m_userReturnValueHeuristic = args.contains(RETURN_VALUE_HEURISTIC);
+    m_verboseErrorMessagesDisabled = args.contains(DISABLE_VERBOSE_ERROR_MESSAGES);
     return true;
 }
 
@@ -1332,3 +1335,9 @@ QString ShibokenGenerator::getTypeIndexVariableName(const TypeEntry* metaType)
     res += "_IDX";
     return res.toUpper();
 }
+
+bool ShibokenGenerator::verboseErrorMessagesDisabled() const
+{
+    return m_verboseErrorMessagesDisabled;
+}
+

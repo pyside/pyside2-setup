@@ -289,6 +289,9 @@ public:
     bool usePySideExtensions() const;
     QString cppApiVariableName(const QString& moduleName = QString()) const;
     QString getTypeIndexVariableName(const TypeEntry* metaType);
+    /// Returns true if the user don't want verbose error messages on the generated bindings.
+    bool verboseErrorMessagesDisabled() const;
+
 protected:
     bool doSetup(const QMap<QString, QString>& args);
     // verify whether the class is copyable
@@ -320,6 +323,7 @@ private:
     bool m_useCtorHeuristic;
     bool m_userReturnValueHeuristic;
     bool m_usePySideExtensions;
+    bool m_verboseErrorMessagesDisabled;
 };
 
 

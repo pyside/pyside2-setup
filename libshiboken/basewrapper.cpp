@@ -37,6 +37,7 @@
 #include <algorithm>
 #include "autodecref.h"
 #include "typeresolver.h"
+#include <string>
 
 namespace Shiboken
 {
@@ -364,6 +365,43 @@ PyAPI_FUNC(void) init_shiboken()
 }
 
 } // extern "C"
+
+void setErrorAboutWrongArguments(PyObject* args, const char* funcName, const char** cppOverloads)
+{
+    std::string msg;
+    std::string params;
+    if (args) {
+        if (PyTuple_Check(args)) {
+            for (int i = 0, max = PyTuple_Size(args); i < max; ++i) {
+                if (i)
+                    params += ", ";
+                params += PyTuple_GET_ITEM(args, i)->ob_type->tp_name;
+            }
+        } else {
+            params = args->ob_type->tp_name;
+        }
+    }
+
+    if (!cppOverloads) {
+        msg = "'" + std::string(funcName) + "' called with wrong argument types: " + params;
+    } else {
+        msg = "'" + std::string(funcName) + "' called with wrong argument types:\n  ";
+        msg += funcName;
+        msg += '(';
+        msg += params;
+        msg += ")\n";
+        msg += "Supported signatures:";
+        for (int i = 0; cppOverloads[i]; ++i) {
+            msg += "\n  ";
+            msg += funcName;
+            msg += '(';
+            msg += cppOverloads[i];
+            msg += ')';
+        }
+    }
+    PyErr_SetString(PyExc_TypeError, msg.c_str());
+
+}
 
 } // namespace Shiboken
 
