@@ -35,7 +35,7 @@
 #ifndef OTHERDERIVED_H
 #define OTHERDERIVED_H
 
-#include "libsamplemacros.h"
+#include "libothermacros.h"
 #include "abstract.h"
 #include "derived.h"
 #include "objecttype.h"
@@ -43,7 +43,7 @@
 
 class ObjectType;
 
-class LIBSAMPLE_API OtherDerived : public Abstract
+class LIBOTHER_API OtherDerived : public Abstract
 {
 public:
     OtherDerived(int id = -1);
