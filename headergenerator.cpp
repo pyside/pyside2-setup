@@ -239,8 +239,10 @@ void HeaderGenerator::finishGeneration()
     s_pts << "SBK_"+moduleName()+"_IDX_COUNT";
     s_pts.setFieldWidth(0);
     s_pts << ' ' << idx << endl << endl;
+    s_pts << "// This variable stores all python types exported by this module" << endl;
     s_pts << "extern PyTypeObject** " << cppApiVariableName() << ';' << endl << endl;
 
+    s_pts << "// Useful macros" << endl;
     foreach (const AbstractMetaEnum* cppEnum, globalEnums()) {
         QString incFile = cppEnum->includeFile().split(QDir::separator()).takeLast();
         if (!incFile.isEmpty())
