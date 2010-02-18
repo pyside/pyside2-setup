@@ -1,6 +1,7 @@
 project(libother)
 
 set(libother_SRC
+number.cpp
 otherderived.cpp
 )
 

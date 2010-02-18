@@ -4,5 +4,7 @@
 
     <object-type name="OtherDerived" />
 
+    <value-type name="Number" />
+
 </typesystem>
 
