@@ -32,12 +32,11 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${sample_BINARY_DIR}
                     ${sample_BINARY_DIR}/sample
                     ${libshiboken_SOURCE_DIR})
-add_library(other SHARED ${other_SRC})
+add_library(other MODULE ${other_SRC})
 set_property(TARGET other PROPERTY PREFIX "")
 target_link_libraries(other
                       libother
                       libsample
-                      sample
                       ${PYTHON_LIBRARIES}
                       libshiboken)
 
