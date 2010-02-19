@@ -796,7 +796,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
 
     //DEBUG
 //     if (rfunc->name() == "operator+" && rfunc->ownerClass()->name() == "Str") {
-//         QString dumpFile = QString("/tmp/%1_%2.dot").arg(m_packageName).arg(pythonOperatorFunctionName(rfunc)).toLower();
+//         QString dumpFile = QString("/tmp/%1_%2.dot").arg(moduleName()).arg(pythonOperatorFunctionName(rfunc)).toLower();
 //         overloadData.dumpGraph(dumpFile);
 //     }
     //DEBUG
@@ -1073,18 +1073,28 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const AbstractMetaType* argTyp
 
 void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName)
 {
-    const AbstractMetaType* argType = overloadData->argType();
-
     QSet<const TypeEntry*> numericTypes;
-    foreach (OverloadData* pd, overloadData->overloadDataOnPosition(overloadData->argPos())) {
-        if (!pd->argType()->isPrimitive())
+    int argPos = overloadData->argument(overloadData->referenceFunction())->argumentIndex();
+
+    foreach (const AbstractMetaFunction* func, overloadData->previousOverloadData()->overloads()) {
+        AbstractMetaArgumentList args = func->arguments();
+        if (args.isEmpty())
             continue;
-        if (ShibokenGenerator::isNumber(pd->argType()->typeEntry()))
-            numericTypes << pd->argType()->typeEntry();
+
+        int offset = OverloadData::numberOfRemovedArguments(func, argPos);
+
+        if ((argPos + offset) >= args.size())
+            continue;
+        AbstractMetaArgument* arg = args.at(argPos + offset);
+        if (!arg->type()->isPrimitive())
+            continue;
+        if (ShibokenGenerator::isNumber(arg->type()->typeEntry()))
+            numericTypes << arg->type()->typeEntry();
     }
 
     // This condition trusts that the OverloadData object will arrange for
     // PyInt type to come after the more precise numeric types (e.g. float)
+    const AbstractMetaType* argType = overloadData->argType();
     bool numberType = numericTypes.count() == 1 || ShibokenGenerator::isPyInt(argType);
 
     QString customType = (overloadData->hasArgumentTypeReplace() ? overloadData->argumentTypeReplaced() : "");
