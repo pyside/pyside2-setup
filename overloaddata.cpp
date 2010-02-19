@@ -143,7 +143,7 @@ void OverloadData::sortNextOverloads()
  */
 OverloadData::OverloadData(const AbstractMetaFunctionList overloads, const ShibokenGenerator* generator)
     : m_minArgs(256), m_maxArgs(0), m_argPos(-1), m_argType(0),
-      m_headOverloadData(this), m_generator(generator)
+    m_headOverloadData(this), m_previousOverloadData(0), m_generator(generator)
 {
     foreach (const AbstractMetaFunction* func, overloads) {
         m_overloads.append(func);
@@ -172,7 +172,7 @@ OverloadData::OverloadData(const AbstractMetaFunctionList overloads, const Shibo
 OverloadData::OverloadData(OverloadData* headOverloadData, const AbstractMetaFunction* func,
                                  const AbstractMetaType* argType, int argPos)
     : m_minArgs(256), m_maxArgs(0), m_argPos(argPos), m_argType(argType),
-      m_headOverloadData(headOverloadData)
+      m_headOverloadData(headOverloadData), m_previousOverloadData(0)
 {
     if (func)
         this->addOverload(func);
@@ -226,6 +226,7 @@ OverloadData* OverloadData::addOverloadData(const AbstractMetaFunction* func,
 
     if (!overloadData) {
         overloadData = new OverloadData(m_headOverloadData, func, argType, m_argPos + 1);
+        overloadData->m_previousOverloadData = this;
         overloadData->m_generator = this->m_generator;
         QString typeReplaced = func->typeReplaced(arg->argumentIndex() + 1);
 

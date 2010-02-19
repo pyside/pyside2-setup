@@ -94,6 +94,7 @@ public:
 
     const QList<const AbstractMetaFunction*>& overloads() const { return m_overloads; }
     OverloadDataList nextOverloadData() const { return m_nextOverloadData; }
+    OverloadData* previousOverloadData() const { return m_previousOverloadData; }
 
     QList<int> invalidArgumentLengths() const;
 
@@ -129,6 +130,7 @@ private:
 
     OverloadData* m_headOverloadData;
     OverloadDataList m_nextOverloadData;
+    OverloadData* m_previousOverloadData;
     const ShibokenGenerator* m_generator;
 };
 
