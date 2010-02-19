@@ -623,7 +623,7 @@
                     %RETURN_TYPE retval = %CPPSELF.%FUNCTION_NAME(array);
 
                     if (array)
-                        delete array;
+                        delete[] array;
 
                     %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](retval);
                 }
