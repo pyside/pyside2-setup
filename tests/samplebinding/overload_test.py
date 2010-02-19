@@ -71,6 +71,15 @@ class OverloadTest(unittest.TestCase):
         result = overload.differentReturnTypes(Overload.Param0, 13)
         self.assertEqual(result, 13)
 
+    def testIntOverloads(self):
+        overload = Overload()
+        result = overload.intOverloads(Point(0, 0), 3)
+        self.assertEqual(result, 1)
+        result = overload.intOverloads(2, 3)
+        self.assertEqual(result, 2)
+        result = overload.intOverloads(2, 4.5)
+        self.assertEqual(result, 3)
+
 if __name__ == '__main__':
     unittest.main()
 
