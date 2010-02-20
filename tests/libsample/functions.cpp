@@ -85,6 +85,8 @@ multiplyPair(std::pair<double, double> pair)
 int
 countCharacters(const char* text)
 {
+    if (!text)
+        return -1;
     int count;
     for(count = 0; text[count] != '\0'; count++)
         ;
@@ -176,3 +178,4 @@ acceptDouble(double x)
 {
     return x;
 }
+
