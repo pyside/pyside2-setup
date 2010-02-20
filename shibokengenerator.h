@@ -225,6 +225,7 @@ public:
     static bool isPyInt(const TypeEntry* type);
     static bool isPyInt(const AbstractMetaType* type);
     static bool isCString(const AbstractMetaType* type);
+    static bool isPairContainer(const AbstractMetaType* type);
 
     /// Checks if an argument type should be dereferenced by the Python method wrapper before calling the C++ method.
     static bool shouldDereferenceArgumentPointer(const AbstractMetaArgument* arg);

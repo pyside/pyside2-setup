@@ -559,6 +559,12 @@ bool ShibokenGenerator::isCString(const AbstractMetaType* type)
     return type->isNativePointer() && type->name() == "char";
 }
 
+bool ShibokenGenerator::isPairContainer(const AbstractMetaType* type)
+{
+    return type->isContainer()
+            && ((ContainerTypeEntry*)type->typeEntry())->type() == ContainerTypeEntry::PairContainer;
+}
+
 bool ShibokenGenerator::shouldDereferenceArgumentPointer(const AbstractMetaArgument* arg)
 {
     return shouldDereferenceAbstractMetaTypePointer(arg->type());
