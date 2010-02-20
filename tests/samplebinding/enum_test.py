@@ -26,7 +26,6 @@
 
 '''Test cases for Python representation of C++ enums.'''
 
-import sys
 import unittest
 
 from sample import SampleNamespace
@@ -38,14 +37,22 @@ class EnumTest(unittest.TestCase):
         '''Tries to use an integer in place of an enum argument.'''
         self.assertRaises(TypeError, SampleNamespace.getNumber, 1)
 
-    def testExtendingNonExtensibleEnum(self):
-        '''Tries to create a new enum item for an unextensible enum.'''
-        self.assertRaises(TypeError, SampleNamespace.InValue, 13)
+    def testBuildingEnumFromIntegerValue(self):
+        '''Tries to build the proper enum using an integer.'''
+        SampleNamespace.getNumber(SampleNamespace.Option(1))
 
     def testEnumConversionToAndFromPython(self):
         '''Conversion of enum objects from Python to C++ back again.'''
         enumout = SampleNamespace.enumInEnumOut(SampleNamespace.TwoIn)
         self.assert_(enumout, SampleNamespace.TwoOut)
+
+    def testEnumConstructorWithTooManyParameters(self):
+        '''Calling the constructor of non-extensible enum with the wrong number of parameters.'''
+        self.assertRaises(TypeError, SampleNamespace.InValue, 13, 14)
+
+    def testEnumConstructorWithNonNumberParameter(self):
+        '''Calling the constructor of non-extensible enum with a string.'''
+        self.assertRaises(TypeError, SampleNamespace.InValue, '1')
 
 if __name__ == '__main__':
     unittest.main()

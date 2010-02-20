@@ -2280,6 +2280,27 @@ void CppGenerator::writeFlagsNewMethod(QTextStream& s, const FlagsTypeEntry* cpp
     s << INDENT << "return self;" << endl << '}' << endl;
 }
 
+void CppGenerator::writeEnumNewMethod(QTextStream& s, const AbstractMetaEnum* cppEnum)
+{
+    QString cpythonName = cpythonEnumName(cppEnum);
+    s << "static PyObject*" << endl;
+    s << cpythonName << "_New(PyTypeObject* type, PyObject* args, PyObject* kwds)" << endl;
+    s << '{' << endl;
+    s << INDENT << "int item_value;" << endl;
+    s << INDENT << "if (!PyArg_ParseTuple(args, \"i:__new__\", &item_value))" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "return 0;" << endl;
+    }
+    s << INDENT << "PyObject* self = Shiboken::SbkEnumObject_New(type, item_value);" << endl << endl;
+    s << INDENT << "if (!self)" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "return 0;" << endl;
+    }
+    s << INDENT << "return self;" << endl << '}' << endl;
+}
+
 void CppGenerator::writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* cppEnum)
 {
     QString cpythonName = cpythonEnumName(cppEnum);
@@ -2287,10 +2308,16 @@ void CppGenerator::writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* c
     if (cppEnum->typeEntry()->flags())
         tp_as_number = QString("&%1_as_number").arg(cpythonName);
 
+
     s << "static PyGetSetDef " << cpythonName << "_getsetlist[] = {" << endl;
     s << INDENT << "{const_cast<char*>(\"name\"), (getter)Shiboken::SbkEnumObject_name}," << endl;
     s << INDENT << "{0}  // Sentinel" << endl;
     s << "};" << endl << endl;
+
+    QString newFunc = cpythonName + "_New";
+
+    s << "// forward declaration of new function" << endl;
+    s << "static PyObject* " << newFunc << "(PyTypeObject*, PyObject*, PyObject*);" << endl << endl;
 
     s << "static PyTypeObject " << cpythonName << "_Type = {" << endl;
     s << INDENT << "PyObject_HEAD_INIT(&PyType_Type)" << endl;
@@ -2331,7 +2358,7 @@ void CppGenerator::writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* c
     s << INDENT << "/*tp_dictoffset*/       0," << endl;
     s << INDENT << "/*tp_init*/             0," << endl;
     s << INDENT << "/*tp_alloc*/            0," << endl;
-    s << INDENT << "/*tp_new*/              Shiboken::SbkEnumObject_NonExtensibleNew," << endl;
+    s << INDENT << "/*tp_new*/              " << newFunc << ',' << endl;
     s << INDENT << "/*tp_free*/             0," << endl;
     s << INDENT << "/*tp_is_gc*/            0," << endl;
     s << INDENT << "/*tp_bases*/            0," << endl;
@@ -2340,6 +2367,9 @@ void CppGenerator::writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* c
     s << INDENT << "/*tp_subclasses*/       0," << endl;
     s << INDENT << "/*tp_weaklist*/         0" << endl;
     s << "};" << endl << endl;
+
+    writeEnumNewMethod(s, cppEnum);
+    s << endl;
 }
 
 void CppGenerator::writeFlagsMethods(QTextStream& s, const AbstractMetaEnum* cppEnum)

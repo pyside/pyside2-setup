@@ -134,6 +134,7 @@ private:
     void writeRichCompareFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
     void writeFlagsNewMethod(QTextStream& s, const FlagsTypeEntry* cppFlags);
+    void writeEnumNewMethod(QTextStream& s, const AbstractMetaEnum* cppEnum);
     void writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* metaEnum);
     void writeEnumInitialization(QTextStream& s, const AbstractMetaEnum* metaEnum);
 

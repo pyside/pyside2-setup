@@ -52,7 +52,6 @@ typedef struct {
 
 LIBSHIBOKEN_API PyAPI_FUNC(PyObject*) SbkEnumObject_repr(PyObject* self);
 LIBSHIBOKEN_API PyAPI_FUNC(PyObject*) SbkEnumObject_name(PyObject* self);
-LIBSHIBOKEN_API PyAPI_FUNC(PyObject*) SbkEnumObject_NonExtensibleNew(PyTypeObject* type, PyObject* args, PyObject* kwds);
 
 } // extern "C"
 

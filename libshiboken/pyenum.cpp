@@ -77,14 +77,6 @@ extern "C"
 {
 
 PyObject*
-SbkEnumObject_NonExtensibleNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
-{
-    PyErr_SetString(PyExc_TypeError, "enum is not extensible");
-    return 0;
-}
-
-
-PyObject*
 SbkEnumObject_repr(PyObject* self)
 {
     return PyString_FromFormat("<enum-item %s.%s (%ld)>",
