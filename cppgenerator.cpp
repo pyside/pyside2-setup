@@ -989,7 +989,8 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
             QStringList args;
             foreach(AbstractMetaArgument* arg, f->arguments()) {
                 QString strArg;
-                if (arg->type()->isNativePointer() && arg->type()->name() == "char") {
+                bool isCString = arg->type()->isNativePointer() && arg->type()->name() == "char";
+                if (isCString) {
                     strArg = "str";
                 } else if (arg->type()->isPrimitive()) {
                     const PrimitiveTypeEntry* ptp = reinterpret_cast<const PrimitiveTypeEntry*>(arg->type()->typeEntry());
@@ -1003,7 +1004,11 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                 }
                 if (!arg->defaultValueExpression().isEmpty()) {
                     strArg += " = ";
-                    strArg += arg->defaultValueExpression().replace("::", ".").replace("\"", "\\\"");
+                    if ((isCString || arg->type()->isValuePointer() || arg->type()->typeEntry()->isObject())
+                        && arg->defaultValueExpression() == "0")
+                        strArg += "None";
+                    else
+                        strArg += arg->defaultValueExpression().replace("::", ".").replace("\"", "\\\"");
                 }
                 args << strArg;
             }
