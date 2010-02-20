@@ -379,7 +379,7 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func)
                 result += m_formatUnits[ptype->name()];
             else
                 result += 'O';
-        } else if (arg->type()->isNativePointer() && arg->type()->name() == "char") {
+        } else if (isCString(arg->type())) {
             result += 'z';
         } else {
             ReportHandler::warning("Unknown type used in ShibokenGenerator::getFormatUnitString!");
@@ -391,7 +391,7 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func)
 
 QString ShibokenGenerator::cpythonBaseName(const AbstractMetaType* type)
 {
-    if (type->name() == "char" && type->isNativePointer())
+    if (isCString(type))
         return QString("PyString");
     return cpythonBaseName(type->typeEntry());
 }
@@ -552,6 +552,11 @@ bool ShibokenGenerator::isPyInt(const TypeEntry* type)
 bool ShibokenGenerator::isPyInt(const AbstractMetaType* type)
 {
     return isPyInt(type->typeEntry());
+}
+
+bool ShibokenGenerator::isCString(const AbstractMetaType* type)
+{
+    return type->isNativePointer() && type->name() == "char";
 }
 
 bool ShibokenGenerator::shouldDereferenceArgumentPointer(const AbstractMetaArgument* arg)

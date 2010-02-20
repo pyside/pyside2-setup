@@ -989,22 +989,22 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
             QStringList args;
             foreach(AbstractMetaArgument* arg, f->arguments()) {
                 QString strArg;
-                bool isCString = arg->type()->isNativePointer() && arg->type()->name() == "char";
-                if (isCString) {
+                AbstractMetaType* argType = arg->type();
+                if (isCString(argType)) {
                     strArg = "str";
-                } else if (arg->type()->isPrimitive()) {
-                    const PrimitiveTypeEntry* ptp = reinterpret_cast<const PrimitiveTypeEntry*>(arg->type()->typeEntry());
+                } else if (argType->isPrimitive()) {
+                    const PrimitiveTypeEntry* ptp = reinterpret_cast<const PrimitiveTypeEntry*>(argType->typeEntry());
                     while (ptp->aliasedTypeEntry())
                         ptp = ptp->aliasedTypeEntry();
                     strArg = ptp->name().replace(QRegExp("^signed\\s+"), "");
                     if (strArg == "double")
                         strArg = "float";
                 } else {
-                    strArg = arg->type()->fullName();
+                    strArg = argType->fullName();
                 }
                 if (!arg->defaultValueExpression().isEmpty()) {
                     strArg += " = ";
-                    if ((isCString || arg->type()->isValuePointer() || arg->type()->typeEntry()->isObject())
+                    if ((isCString(argType) || argType->isValuePointer() || argType->typeEntry()->isObject())
                         && arg->defaultValueExpression() == "0")
                         strArg += "None";
                     else
@@ -1126,7 +1126,7 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
 
     if (type->isContainer() || type->isPrimitive()) {
         // If the type is a const char*, we don't remove the "const".
-        if (typeName.startsWith("const ") && !(argType->isNativePointer() && argType->name() == "char"))
+        if (typeName.startsWith("const ") && !(isCString(argType)))
             typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
         if (typeName.endsWith("&"))
             typeName.chop(1);
