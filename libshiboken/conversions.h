@@ -394,7 +394,11 @@ struct Converter_CString
             Py_RETURN_NONE;
         return PyString_FromString(cppobj);
     }
-    static inline CString toCpp(PyObject* pyobj) { return PyString_AsString(pyobj); }
+    static inline CString toCpp(PyObject* pyobj) {
+        if (pyobj == Py_None)
+            return 0;
+        return PyString_AsString(pyobj);
+    }
 };
 
 template <> struct Converter<char*> : Converter_CString<char*> {};
