@@ -75,6 +75,7 @@ void ShibokenGenerator::initPrimitiveTypesCorrespondences()
     m_pythonPrimitiveTypeName["unsigned int"] = "PyInt";
     m_pythonPrimitiveTypeName["short"] = "PyInt";
     m_pythonPrimitiveTypeName["ushort"] = "PyInt";
+    m_pythonPrimitiveTypeName["signed short"] = "PyInt";
     m_pythonPrimitiveTypeName["unsigned short"] = "PyInt";
     m_pythonPrimitiveTypeName["long"] = "PyInt";
 
