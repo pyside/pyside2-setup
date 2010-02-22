@@ -902,7 +902,7 @@
         </add-function>
         <add-function signature="__getitem__" >
             <inject-code class="target" position="beginning">
-                if (_i &lt; 0 || _i >= %CPPSELF.size()) {
+                if (_i &lt; 0 || _i >= static_cast&lt;Py_ssize_t>(%CPPSELF.size())) {
                     PyErr_BadArgument();
                     return 0;
                 } else {
