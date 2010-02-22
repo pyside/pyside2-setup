@@ -226,35 +226,55 @@ struct Converter<bool>
 };
 
 /**
- * Helper template for checking if a value of SourceT overflows when cast to TargetT
+ * Helper template for checking if a value overflows when casted to type T
  */
+template<typename T, bool isSigned = std::numeric_limits<T>::is_signed >
+struct OverFlowChecker;
+
 template<typename T>
-inline bool overflowCheck(const PY_LONG_LONG& value)
+struct OverFlowChecker<T, true>
 {
-    return value < static_cast<PY_LONG_LONG>(std::numeric_limits<T>::min())
-           || value > std::numeric_limits<T>::max();
-}
+    static bool check(const PY_LONG_LONG& value)
+    {
+        return value < std::numeric_limits<T>::min() || value > std::numeric_limits<T>::max();
+    }
+};
 
-// If the type is long, there'll be no overflows
-template<>
-inline bool overflowCheck<PY_LONG_LONG>(const PY_LONG_LONG&)
+template<typename T>
+struct OverFlowChecker<T, false>
 {
-    return false;
-}
-
-// Version for floating point values (without sign check)
-template<typename TargetT>
-inline bool overflowCheck(const double& value)
-{
-    return value < std::numeric_limits<TargetT>::min()
-           || value > std::numeric_limits<TargetT>::max();
-}
+    static bool check(const PY_LONG_LONG& value)
+    {
+        return value < 0 || static_cast<unsigned long long>(value) > std::numeric_limits<T>::max();
+    }
+};
 
 template<>
-inline bool overflowCheck<double>(const double&)
+struct OverFlowChecker<PY_LONG_LONG, true>
 {
-    return false;
-}
+    static bool check(const PY_LONG_LONG& value)
+    {
+        return false;
+    }
+};
+
+template<>
+struct OverFlowChecker<double, true>
+{
+    static bool check(const double& value)
+    {
+        return false;
+    }
+};
+
+template<>
+struct OverFlowChecker<float, true>
+{
+    static bool check(const double& value)
+    {
+        return value < std::numeric_limits<float>::min() || value > std::numeric_limits<float>::max();
+    }
+};
 
 template <typename PyIntEquiv>
 struct Converter_PyInt
@@ -267,12 +287,12 @@ struct Converter_PyInt
         if (PyFloat_Check(pyobj)) {
             double d_result = PyFloat_AS_DOUBLE(pyobj);
             // If cast to long directly it could overflow silently
-            if (overflowCheck<PyIntEquiv>(d_result))
+            if (OverFlowChecker<PyIntEquiv>::check(d_result))
                 PyErr_SetObject(PyExc_OverflowError, 0);
             return static_cast<PyIntEquiv>(d_result);
         } else {
             PY_LONG_LONG result = PyLong_AsLongLong(pyobj);
-            if (overflowCheck<PyIntEquiv>(result))
+            if (OverFlowChecker<PyIntEquiv>::check(result))
                 PyErr_SetObject(PyExc_OverflowError, 0);
             return static_cast<PyIntEquiv>(result);
         }
@@ -304,7 +324,7 @@ struct CharConverter
             return PyString_AS_STRING(pyobj)[0];
         } else {
             PY_LONG_LONG result = PyLong_AsLongLong(pyobj);
-            if (overflowCheck<CharType>(result))
+            if (OverFlowChecker<CharType>::check(result))
                 PyErr_SetObject(PyExc_OverflowError, 0);
             return result;
         }
