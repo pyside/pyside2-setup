@@ -83,7 +83,7 @@ sequenceToIntArray(PyObject* obj, bool zeroTerminated)
 
     size = PySequence_Size(obj);
 
-    array = new int[size + zeroTerminated ? 1 : 0];
+    array = new int[size + (zeroTerminated ? 1 : 0)];
 
     for (i = 0; i < size; i++) {
         PyObject* item = PySequence_GetItem(obj, i);
