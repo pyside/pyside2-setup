@@ -2384,10 +2384,6 @@ void CppGenerator::writeFlagsMethods(QTextStream& s, const AbstractMetaEnum* cpp
     writeFlagsBinaryOperator(s, cppEnum, "or", "|");
     writeFlagsBinaryOperator(s, cppEnum, "xor", "^");
 
-    writeFlagsInplaceOperator(s, cppEnum, "iand", "&=");
-    writeFlagsInplaceOperator(s, cppEnum, "ior", "|=");
-    writeFlagsInplaceOperator(s, cppEnum, "ixor", "^=");
-
     writeFlagsUnaryOperator(s, cppEnum, "invert", "~");
     writeFlagsUnaryOperator(s, cppEnum, "not", "!", true);
     s << endl;
@@ -2429,9 +2425,9 @@ void CppGenerator::writeFlagsNumberMethodsDefinition(QTextStream& s, const Abstr
     s << INDENT << "/*nb_inplace_power*/        0," << endl;
     s << INDENT << "/*nb_inplace_lshift*/       0," << endl;
     s << INDENT << "/*nb_inplace_rshift*/       0," << endl;
-    s << INDENT << "/*nb_inplace_and*/          (binaryfunc)" << cpythonName  << "___iand__" << ',' << endl;
-    s << INDENT << "/*nb_inplace_xor*/          (binaryfunc)" << cpythonName  << "___ixor__" << ',' << endl;
-    s << INDENT << "/*nb_inplace_or*/           (binaryfunc)" << cpythonName  << "___ior__" << ',' << endl;
+    s << INDENT << "/*nb_inplace_and*/          0," << endl;
+    s << INDENT << "/*nb_inplace_xor*/          0," << endl;
+    s << INDENT << "/*nb_inplace_or*/           0," << endl;
     s << INDENT << "/*nb_floor_divide*/         0," << endl;
     s << INDENT << "/*nb_true_divide*/          0," << endl;
     s << INDENT << "/*nb_inplace_floor_divide*/ 0," << endl;
@@ -2522,24 +2518,6 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream& s, const AbstractMetaEn
         s << flagsEntry->originalName() << " >::toCpp(arg)" << endl;
     }
     s << INDENT << ");" << endl;
-    s << '}' << endl << endl;
-}
-
-void CppGenerator::writeFlagsInplaceOperator(QTextStream& s, const AbstractMetaEnum* cppEnum,
-                                             QString pyOpName, QString cppOpName)
-{
-    FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
-    Q_ASSERT(flagsEntry);
-
-    s << "PyObject*" << endl;
-    s << cpythonEnumName(cppEnum) << "___" << pyOpName << "__(PyObject* self, PyObject* arg)" << endl;
-    s << '{' << endl;
-
-    s << INDENT << "((" << flagsEntry->originalName() << ") ((SbkEnumObject*)self)->ob_ival) " << cppOpName << endl;
-    s << INDENT << "Shiboken::Converter< " << flagsEntry->originalName() << " >::toCpp(arg);" << endl;
-
-    s << INDENT << "Py_INCREF(self);" << endl;
-    s << INDENT << "return self;" << endl;
     s << '}' << endl << endl;
 }
 
