@@ -199,17 +199,16 @@ public:
     /// Simpler version of writeBaseConversion, uses only the base name of the type.
     void writeBaseConversion(QTextStream& s, const TypeEntry* type);
     void writeToPythonConversion(QTextStream& s, const AbstractMetaType* type,
-                                 const AbstractMetaClass* context, QString argumentName = QString());
+                                 const AbstractMetaClass* context, const QString& argumentName = QString());
     void writeToCppConversion(QTextStream& s, const AbstractMetaType* type,
-                              const AbstractMetaClass* context, QString argumentName);
-
+                              const AbstractMetaClass* context, const QString& argumentName);
 
     /// Verifies if the class should have a C++ wrapper generated for it, instead of only a Python wrapper.
     static bool shouldGenerateCppWrapper(const AbstractMetaClass* metaClass);
 
     static QString wrapperName(const AbstractMetaClass* metaClass);
 
-    static QString pythonPrimitiveTypeName(QString cppTypeName);
+    static QString pythonPrimitiveTypeName(const QString& cppTypeName);
     static QString pythonPrimitiveTypeName(const PrimitiveTypeEntry* type);
 
     static QString pythonOperatorFunctionName(QString cppOpFuncName);
@@ -280,7 +279,7 @@ public:
     QString getApiExportMacro() const;
 
     /// Returns the file name for the module global header. If no module name is provided the current will be used.
-    QString getModuleHeaderFileName(QString moduleName = QString()) const;
+    QString getModuleHeaderFileName(const QString& moduleName = QString()) const;
 
     QMap< QString, QString > options() const;
 

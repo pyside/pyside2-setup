@@ -336,7 +336,7 @@ void ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaTy
 }
 
 void ShibokenGenerator::writeToPythonConversion(QTextStream& s, const AbstractMetaType* type,
-                                                const AbstractMetaClass* context, QString argumentName)
+                                                const AbstractMetaClass* context, const QString& argumentName)
 {
     if (!type)
         return;
@@ -349,7 +349,7 @@ void ShibokenGenerator::writeToPythonConversion(QTextStream& s, const AbstractMe
 }
 
 void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaType* type,
-                                             const AbstractMetaClass* context, QString argumentName)
+                                             const AbstractMetaClass* context, const QString& argumentName)
 {
     writeBaseConversion(s, type, context);
     s << "toCpp(" << argumentName << ')';
@@ -475,7 +475,7 @@ QString ShibokenGenerator::cpythonOperatorFunctionName(const AbstractMetaFunctio
             + '_' + pythonOperatorFunctionName(func->originalName());
 }
 
-QString ShibokenGenerator::pythonPrimitiveTypeName(QString cppTypeName)
+QString ShibokenGenerator::pythonPrimitiveTypeName(const QString& cppTypeName)
 {
     return ShibokenGenerator::m_pythonPrimitiveTypeName.value(cppTypeName, QString());
 }
@@ -1202,12 +1202,11 @@ QString ShibokenGenerator::getApiExportMacro() const
     return "SHIBOKEN_"+moduleName().toUpper()+"_API"; // a longer name to avoid name clashes
 }
 
-QString ShibokenGenerator::getModuleHeaderFileName(QString modName) const
+QString ShibokenGenerator::getModuleHeaderFileName(const QString& moduleName) const
 {
-    if (modName.isEmpty())
-        modName = packageName();
-    modName.replace(".", "_");
-    return QString("%1_python.h").arg(modName.toLower());
+    QString result = moduleName.isEmpty() ? packageName() : moduleName;
+    result.replace(".", "_");
+    return QString("%1_python.h").arg(result.toLower());
 }
 
 bool ShibokenGenerator::isCopyable(const AbstractMetaClass *metaClass)
