@@ -162,3 +162,13 @@ Str operator+(int number, const Str& str)
     return in.str().c_str();
 }
 
+unsigned int strHash(const Str& str)
+{
+    unsigned int result = 0;
+    const std::string& cppStr = str.m_str;
+    std::string::const_iterator it = cppStr.begin();
+    for (; it != cppStr.end(); ++it)
+        result = 5 * result + *it;
+    return result;
+}
+

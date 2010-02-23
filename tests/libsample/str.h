@@ -70,9 +70,11 @@ private:
     std::string m_str;
 
     friend LIBSAMPLE_API Str operator+(int number, const Str& str);
+    friend LIBSAMPLE_API unsigned int strHash(const Str& str);
 };
 
 LIBSAMPLE_API Str operator+(int number, const Str& str);
+LIBSAMPLE_API unsigned int strHash(const Str& str);
 
 #endif // STR_H
 
