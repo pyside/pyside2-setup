@@ -33,6 +33,13 @@ from sample import SampleNamespace
 class EnumTest(unittest.TestCase):
     '''Test case for Python representation of C++ enums.'''
 
+    def testEnumValuesInsideEnum(self):
+        '''Enum values should be accessible inside the enum as well as outside.'''
+        for value_name in SampleNamespace.Option.values:
+            enum_item1 = getattr(SampleNamespace.Option, value_name)
+            enum_item2 = getattr(SampleNamespace, value_name)
+            self.assertEqual(enum_item1, enum_item2)
+
     def testPassingIntegerOnEnumArgument(self):
         '''Tries to use an integer in place of an enum argument.'''
         self.assertRaises(TypeError, SampleNamespace.getNumber, 1)

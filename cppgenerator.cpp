@@ -2246,6 +2246,12 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
             Indentation indent(INDENT);
             s << INDENT << '"' << enumValue->name() << "\", enum_item);" << endl;
         }
+        s << INDENT << "PyDict_SetItemString(" << cpythonName << "_Type.tp_dict," << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << '"' << enumValue->name() << "\", enum_item);" << endl;
+        }
+
     }
 
     // TypeResolver stuff
