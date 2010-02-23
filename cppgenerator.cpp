@@ -2271,8 +2271,8 @@ void CppGenerator::writeFlagsNewMethod(QTextStream& s, const FlagsTypeEntry* cpp
     s << '{' << endl;
     s << INDENT << "if (!PyType_IsSubtype(type, &" << cpythonName << "_Type))" << endl;
     s << INDENT << INDENT << "return 0;" << endl << endl;
-    s << INDENT << "int item_value;" << endl;
-    s << INDENT << "if (!PyArg_ParseTuple(args, \"i:__new__\", &item_value))" << endl;
+    s << INDENT << "int item_value = 0;" << endl;
+    s << INDENT << "if (!PyArg_ParseTuple(args, \"|i:__new__\", &item_value))" << endl;
     {
         Indentation indent(INDENT);
         s << INDENT << "return 0;" << endl;
@@ -2292,8 +2292,8 @@ void CppGenerator::writeEnumNewMethod(QTextStream& s, const AbstractMetaEnum* cp
     s << "static PyObject*" << endl;
     s << cpythonName << "_New(PyTypeObject* type, PyObject* args, PyObject* kwds)" << endl;
     s << '{' << endl;
-    s << INDENT << "int item_value;" << endl;
-    s << INDENT << "if (!PyArg_ParseTuple(args, \"i:__new__\", &item_value))" << endl;
+    s << INDENT << "int item_value = 0;" << endl;
+    s << INDENT << "if (!PyArg_ParseTuple(args, \"|i:__new__\", &item_value))" << endl;
     {
         Indentation indent(INDENT);
         s << INDENT << "return 0;" << endl;

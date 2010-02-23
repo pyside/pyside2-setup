@@ -48,6 +48,11 @@ class EnumTest(unittest.TestCase):
         '''Tries to build the proper enum using an integer.'''
         SampleNamespace.getNumber(SampleNamespace.Option(1))
 
+    def testBuildingEnumWithDefaultValue(self):
+        '''Enum constructor with default value'''
+        enum = SampleNamespace.Option()
+        self.assertEqual(enum, SampleNamespace.None)
+
     def testEnumConversionToAndFromPython(self):
         '''Conversion of enum objects from Python to C++ back again.'''
         enumout = SampleNamespace.enumInEnumOut(SampleNamespace.TwoIn)
