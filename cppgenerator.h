@@ -171,6 +171,7 @@ private:
 
     /// Returns true if generator should produce getters and setters for the given class.
     bool shouldGenerateGetSetList(const AbstractMetaClass* metaClass);
+    void writeHashFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
     // Maps special function names to function parameters and return types
     // used by CPython API in the sequence protocol.

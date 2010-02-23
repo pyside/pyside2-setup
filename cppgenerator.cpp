@@ -327,6 +327,8 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     }
 
     s << "extern \"C\"" << endl << '{' << endl << endl;
+    if (!metaClass->typeEntry()->hashFunction().isEmpty())
+        writeHashFunction(s, metaClass);
     writeClassDefinition(s, metaClass);
     s << endl;
 
@@ -1696,6 +1698,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     QString tp_dealloc;
     QString tp_as_number('0');
     QString tp_as_sequence('0');
+    QString tp_hash('0');
     QString mi_init('0');
     QString type_name_func('0');
     QString mi_specialcast('0');
@@ -1777,6 +1780,9 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         s << endl;
     }
 
+    if (!metaClass->typeEntry()->hashFunction().isEmpty())
+        tp_hash = '&' + cpythonBaseName(metaClass) + "_HashFunc";
+
     s << "// Class Definition -----------------------------------------------" << endl;
 
     s << "static SbkBaseWrapperType " << className + "_Type" << " = { { {" << endl;
@@ -1794,7 +1800,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_as_number*/        " << tp_as_number << ',' << endl;
     s << INDENT << "/*tp_as_sequence*/      " << tp_as_sequence << ',' << endl;
     s << INDENT << "/*tp_as_mapping*/       0," << endl;
-    s << INDENT << "/*tp_hash*/             0," << endl;
+    s << INDENT << "/*tp_hash*/             " << tp_hash << ',' << endl;
     s << INDENT << "/*tp_call*/             0," << endl;
     s << INDENT << "/*tp_str*/              " << m_tpFuncs["__str__"] << ',' << endl;
     s << INDENT << "/*tp_getattro*/         " << tp_getattro << ',' << endl;
@@ -2932,4 +2938,14 @@ void CppGenerator::writeReturnValueHeuristics(QTextStream& s, const AbstractMeta
 
     if (type->isQObject() || type->isObject() || type->isValuePointer())
         s << INDENT << "Shiboken::setParent(" << self << ", " PYTHON_RETURN_VAR ");" << endl;
+}
+
+void CppGenerator::writeHashFunction(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    s << "static long " << cpythonBaseName(metaClass) << "_HashFunc(PyObject* obj)";
+    s << '{' << endl;
+    s << INDENT << "return " << metaClass->typeEntry()->hashFunction() << '(';
+    writeToCppConversion(s, metaClass, "obj");
+    s << ");" << endl;
+    s << '}' << endl << endl;
 }
