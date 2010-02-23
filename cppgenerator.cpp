@@ -2388,7 +2388,7 @@ void CppGenerator::writeFlagsMethods(QTextStream& s, const AbstractMetaEnum* cpp
     writeFlagsInplaceOperator(s, cppEnum, "ior", "|=");
     writeFlagsInplaceOperator(s, cppEnum, "ixor", "^=");
 
-    writeFlagsUnaryOperator(s, cppEnum, "neg", "~");
+    writeFlagsUnaryOperator(s, cppEnum, "invert", "~");
     writeFlagsUnaryOperator(s, cppEnum, "not", "!", true);
     s << endl;
 }
@@ -2405,11 +2405,11 @@ void CppGenerator::writeFlagsNumberMethodsDefinition(QTextStream& s, const Abstr
     s << INDENT << "/*nb_remainder*/            0," << endl;
     s << INDENT << "/*nb_divmod*/               0," << endl;
     s << INDENT << "/*nb_power*/                0," << endl;
-    s << INDENT << "/*nb_negative*/             (unaryfunc)" << cpythonName << "___neg__," << endl;
+    s << INDENT << "/*nb_negative*/             0," << endl;
     s << INDENT << "/*nb_positive*/             0," << endl;
     s << INDENT << "/*nb_absolute*/             0," << endl;
     s << INDENT << "/*nb_nonzero*/              0," << endl;
-    s << INDENT << "/*nb_invert*/               0," << endl;
+    s << INDENT << "/*nb_invert*/               (unaryfunc)" << cpythonName << "___invert__" << "," << endl;
     s << INDENT << "/*nb_lshift*/               0," << endl;
     s << INDENT << "/*nb_rshift*/               0," << endl;
     s << INDENT << "/*nb_and*/                  (binaryfunc)" << cpythonName  << "___and__" << ',' << endl;
