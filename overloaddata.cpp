@@ -110,8 +110,12 @@ void OverloadData::sortNextOverloads()
     }
 
     // Special case for double(int i) (not tracked by m_generator->implicitConversions
-    if (map.contains("double") && map.contains("int"))
-        deps << qMakePair(map["int"], map["double"]);
+    if (map.contains("int")) {
+        if (map.contains("double"))
+            deps << qMakePair(map["int"], map["double"]);
+        if (map.contains("bool"))
+            deps << qMakePair(map["int"], map["bool"]);
+    }
 
     // sort the overloads topologicaly based on the deps graph.
     typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> Graph;

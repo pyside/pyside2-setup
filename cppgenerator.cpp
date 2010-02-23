@@ -1075,29 +1075,22 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const AbstractMetaType* argTyp
 void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName)
 {
     QSet<const TypeEntry*> numericTypes;
-    int argPos = overloadData->argument(overloadData->referenceFunction())->argumentIndex();
 
-    foreach (const AbstractMetaFunction* func, overloadData->previousOverloadData()->overloads()) {
-        AbstractMetaArgumentList args = func->arguments();
-        if (args.isEmpty())
-            continue;
+    foreach (OverloadData* od, overloadData->previousOverloadData()->nextOverloadData()) {
+        foreach (const AbstractMetaFunction* func, od->overloads()) {
+            const AbstractMetaArgument* arg = od->argument(func);
 
-        int offset = OverloadData::numberOfRemovedArguments(func, argPos);
-
-        if ((argPos + offset) >= args.size())
-            continue;
-        AbstractMetaArgument* arg = args.at(argPos + offset);
-        if (!arg->type()->isPrimitive())
-            continue;
-        if (ShibokenGenerator::isNumber(arg->type()->typeEntry()))
-            numericTypes << arg->type()->typeEntry();
+            if (!arg->type()->isPrimitive())
+                continue;
+            if (ShibokenGenerator::isNumber(arg->type()->typeEntry()))
+                numericTypes << arg->type()->typeEntry();
+        }
     }
 
     // This condition trusts that the OverloadData object will arrange for
-    // PyInt type to come after the more precise numeric types (e.g. float)
+    // PyInt type to come after the more precise numeric types (e.g. float and bool)
     const AbstractMetaType* argType = overloadData->argType();
     bool numberType = numericTypes.count() == 1 || ShibokenGenerator::isPyInt(argType);
-
     QString customType = (overloadData->hasArgumentTypeReplace() ? overloadData->argumentTypeReplaced() : "");
     writeTypeCheck(s, argType, argumentName, numberType, customType);
 }

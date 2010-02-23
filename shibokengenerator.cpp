@@ -481,7 +481,7 @@ QString ShibokenGenerator::pythonPrimitiveTypeName(QString cppTypeName)
 
 QString ShibokenGenerator::pythonPrimitiveTypeName(const PrimitiveTypeEntry* type)
 {
-    if (type->basicAliasedTypeEntry())
+    while (type->basicAliasedTypeEntry())
         type = type->basicAliasedTypeEntry();
     return pythonPrimitiveTypeName(type->name());
 }
@@ -527,7 +527,8 @@ bool ShibokenGenerator::isNumber(QString cpythonApiName)
 {
     return cpythonApiName == "PyInt"
             || cpythonApiName == "PyFloat"
-            || cpythonApiName == "PyLong";
+            || cpythonApiName == "PyLong"
+            || cpythonApiName == "PyBool";
 }
 
 bool ShibokenGenerator::isNumber(const TypeEntry* type)
