@@ -351,6 +351,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     s << endl;
 
     writeClassRegister(s, metaClass);
+
     s << endl << "} // extern \"C\"" << endl << endl;
 
     s << "namespace Shiboken" << endl << '{' << endl;
@@ -1788,7 +1789,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << "static SbkBaseWrapperType " << className + "_Type" << " = { { {" << endl;
     s << INDENT << "PyObject_HEAD_INIT(&Shiboken::SbkBaseWrapperType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
-    s << INDENT << "/*tp_name*/             \"" << cppClassName << "\"," << endl;
+    s << INDENT << "/*tp_name*/             \"" << metaClass->fullName() << "\"," << endl;
     s << INDENT << "/*tp_basicsize*/        sizeof(Shiboken::SbkBaseWrapper)," << endl;
     s << INDENT << "/*tp_itemsize*/         0," << endl;
     s << INDENT << "/*tp_dealloc*/          " << tp_dealloc << ',' << endl;
@@ -2543,6 +2544,14 @@ void CppGenerator::writeFlagsUnaryOperator(QTextStream& s, const AbstractMetaEnu
 
 void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* metaClass)
 {
+    //Inner class register function foward declaration
+    foreach (AbstractMetaClass* innerClass, metaClass->innerClasses()) {
+        if (shouldGenerate(innerClass))
+            s << "PyAPI_FUNC(void)" << endl
+              << "init_" << innerClass->qualifiedCppName().replace("::", "_")
+              << "(PyObject*);" << endl;
+    }
+
     QString pyTypeName = cpythonTypeName(metaClass);
     s << "PyAPI_FUNC(void)" << endl;
     s << "init_" << metaClass->qualifiedCppName().replace("::", "_") << "(PyObject* module)" << endl;
@@ -2574,16 +2583,24 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
 
     s << INDENT << "if (PyType_Ready((PyTypeObject*)&" << pyTypeName << ") < 0)" << endl;
     s << INDENT << INDENT << "return;" << endl << endl;
-    s << INDENT << "Py_INCREF(reinterpret_cast<PyObject*>(&" << pyTypeName << "));" << endl;
-    s << INDENT << "PyModule_AddObject(module, \"" << metaClass->name() << "\"," << endl;
-    s << INDENT << INDENT << "((PyObject*)&" << pyTypeName << "));" << endl << endl;
+
+    if (metaClass->enclosingClass()) {
+        s << INDENT << "PyDict_SetItemString(module,"
+          << "\"" << metaClass->name() << "\", (PyObject*)&" << pyTypeName << ");" << endl;
+    } else {
+        s << INDENT << "Py_INCREF(reinterpret_cast<PyObject*>(&" << pyTypeName << "));" << endl;
+        s << INDENT << "PyModule_AddObject(module, \"" << metaClass->name() << "\"," << endl;
+        s << INDENT << INDENT << "((PyObject*)&" << pyTypeName << "));" << endl << endl;
+    }
 
     if (!metaClass->enums().isEmpty()) {
         s << INDENT << "// Initialize enums" << endl;
         s << INDENT << "PyObject* enum_item;" << endl << endl;
     }
+
     foreach (const AbstractMetaEnum* cppEnum, metaClass->enums())
         writeEnumInitialization(s, cppEnum);
+
 
     // class inject-code target/end
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
@@ -2600,6 +2617,15 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         s << "TypeResolver<" << typeName << " >" << "(\"" << registeredTypeName << "\");\n";
         s << INDENT << "Shiboken::TypeResolver::create" << functionSufix;
         s << "TypeResolver<" << typeName << " >" << "(typeid(" << typeName << ").name());\n";
+    }
+
+    //Inner class
+    foreach (AbstractMetaClass* innerClass, metaClass->innerClasses()) {
+        if (shouldGenerate(innerClass))
+            s << INDENT
+              <<  "init_" << innerClass->qualifiedCppName().replace("::", "_")
+              << "(" << pyTypeName << ".super.ht_type.tp_dict);" << endl;
+
     }
 
     s << '}' << endl << endl;
