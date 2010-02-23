@@ -202,6 +202,7 @@ public:
                                  const AbstractMetaClass* context, const QString& argumentName = QString());
     void writeToCppConversion(QTextStream& s, const AbstractMetaType* type,
                               const AbstractMetaClass* context, const QString& argumentName);
+    void writeToCppConversion(QTextStream& s, const AbstractMetaClass* metaClass, const QString& argumentName);
 
     /// Verifies if the class should have a C++ wrapper generated for it, instead of only a Python wrapper.
     static bool shouldGenerateCppWrapper(const AbstractMetaClass* metaClass);
