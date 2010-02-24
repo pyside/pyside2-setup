@@ -1,0 +1,6 @@
+# - try to find APIEXTRACTOR
+#  APIEXTRACTOR_INCLUDE_DIR   - Directories to include to use APIEXTRACTOR
+#  APIEXTRACTOR_LIBRARIES     - Files to link against to use APIEXTRACTOR
+
+SET(APIEXTRACTOR_INCLUDE_DIR "@CMAKE_INSTALL_PREFIX@/include/apiextractor")
+SET(APIEXTRACTOR_LIBRARY "apiextractor")

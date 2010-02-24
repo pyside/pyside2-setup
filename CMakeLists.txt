@@ -81,9 +81,10 @@ target_link_libraries(apiextractor ${LIBXSLT_LIBRARIES} ${LIBXML2_LIBRARIES} ${Q
 set_target_properties(apiextractor PROPERTIES VERSION ${apiextractor_VERSION} SOVERSION ${apiextractor_MAJOR_VERSION})
 
 # create pkg-config file
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/apiextractor.pc.in
-               ${CMAKE_CURRENT_BINARY_DIR}/apiextractor.pc @ONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/FindApiExtractor.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/FindApiExtractor.cmake @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/apiextractor.pc.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/apiextractor.pc" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ApiExtractorConfig.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/ApiExtractorConfig.cmake" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ApiExtractorVersion.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/ApiExtractorVersion.cmake" @ONLY)
 
 # uninstall target
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake" "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
@@ -110,9 +111,12 @@ enable_testing()
 add_subdirectory(tests)
 
 install(FILES ${root_HEADERS} DESTINATION include/apiextractor)
-install(TARGETS apiextractor LIBRARY DESTINATION ${LIB_INSTALL_DIR}
-                             ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+install(TARGETS apiextractor EXPORT apiextractor
+                             LIBRARY DESTINATION "${LIB_INSTALL_DIR}"
+                             ARCHIVE DESTINATION "${LIB_INSTALL_DIR}"
                              RUNTIME DESTINATION bin)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/apiextractor.pc DESTINATION ${LIB_INSTALL_DIR}/pkgconfig)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FindApiExtractor.cmake
-        DESTINATION "share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/apiextractor.pc" DESTINATION "${LIB_INSTALL_DIR}/pkgconfig")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ApiExtractorConfig.cmake"
+        DESTINATION "${LIB_INSTALL_DIR}/cmake/ApiExtractor-${apiextractor_VERSION}")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ApiExtractorVersion.cmake"
+        DESTINATION "${LIB_INSTALL_DIR}/cmake/ApiExtractor-${apiextractor_VERSION}")
