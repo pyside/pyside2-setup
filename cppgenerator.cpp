@@ -1652,19 +1652,18 @@ void CppGenerator::writeMultipleInheritanceInitializerFunction(QTextStream& s, c
 
 void CppGenerator::writeSpecialCastFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
+    QString className = metaClass->qualifiedCppName();
     s << "static void* " << cpythonSpecialCastFunctionName(metaClass) << "(PyObject* obj, SbkBaseWrapperType* desiredType)\n";
     s << "{\n";
-    s << INDENT << metaClass->qualifiedCppName() << "* me = " << cpythonWrapperCPtr(metaClass, "obj") << ";\n";
+    s << INDENT << className << "* me = (" << className << "*) SbkBaseWrapper_cptr(obj);\n";
     AbstractMetaClassList bases = getBaseClasses(metaClass);
     bool firstClass = true;
-    foreach(const AbstractMetaClass* baseClass, bases) {
+    foreach (const AbstractMetaClass* baseClass, getAllAncestors(metaClass)) {
         s << INDENT << (!firstClass ? "else " : "") << "if (desiredType == reinterpret_cast<SbkBaseWrapperType*>(" << cpythonTypeNameExt(baseClass->typeEntry()) << "))\n";
         Indentation indent(INDENT);
         s << INDENT << "return static_cast<" << baseClass->qualifiedCppName() << "*>(me);\n";
         firstClass = false;
     }
-    s << INDENT << "else\n";
-    Indentation indent(INDENT);
     s << INDENT << "return me;\n";
     s << "}\n\n";
 }
