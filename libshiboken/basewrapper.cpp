@@ -215,6 +215,26 @@ bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr)
 
 // Wrapper metatype and base type ----------------------------------------------------------
 
+static PyObject*
+SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
+{
+    // The meta type creates a new type when the Python programmer extends a wrapped C++ class.
+    SbkBaseWrapperType* newType = reinterpret_cast<SbkBaseWrapperType*>(PyType_Type.tp_new(metatype, args, kwds));
+
+    if (!newType)
+        return 0;
+
+    // This expects that Python classes will inherit from only one C++ wrapped class.
+    SbkBaseWrapperType* parentType = reinterpret_cast<SbkBaseWrapperType*>(PyTuple_GET_ITEM(PyTuple_GET_ITEM(args, 1), 0));
+
+    newType->mi_offsets = parentType->mi_offsets;
+    newType->mi_init = parentType->mi_init;
+    newType->mi_specialcast = parentType->mi_specialcast;
+    newType->type_name_func = parentType->type_name_func;
+
+    return reinterpret_cast<PyObject*>(newType);
+}
+
 extern "C"
 {
 
@@ -259,7 +279,7 @@ PyTypeObject SbkBaseWrapperType_Type = {
     /*tp_dictoffset*/       0,
     /*tp_init*/             0,
     /*tp_alloc*/            0,
-    /*tp_new*/              0,
+    /*tp_new*/              SbkBaseWrapperType_TpNew,
     /*tp_free*/             0,
     /*tp_is_gc*/            0,
     /*tp_bases*/            0,
