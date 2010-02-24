@@ -1,0 +1,5 @@
+#  SHIBOKEN_INCLUDE_DIR   - Directories to include to use SHIBOKEN
+#  SHIBOKEN_LIBRARIES     - Files to link against to use SHIBOKEN
+
+SET(SHIBOKEN_INCLUDE_DIR "@CMAKE_INSTALL_PREFIX@/include/shiboken")
+SET(SHIBOKEN_LIBRARY "shiboken")
