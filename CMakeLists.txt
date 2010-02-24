@@ -48,8 +48,10 @@ target_link_libraries(generatorrunner
 # create pkg-config file
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/generatorrunner.pc.in"
                "${CMAKE_CURRENT_BINARY_DIR}/generatorrunner.pc" @ONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/FindGeneratorRunner.cmake.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/FindGeneratorRunner.cmake" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GeneratorRunnerConfig.cmake.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/GeneratorRunnerConfig.cmake" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GeneratorRunnerVersion.cmake.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/GeneratorRunnerVersion.cmake" @ONLY)
 
 # uninstall target
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
@@ -74,8 +76,10 @@ install(FILES generator.h DESTINATION include/generatorrunner)
 install(FILES generatorrunnermacros.h DESTINATION include/generatorrunner)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/generatorrunner.pc" DESTINATION
         "${LIB_INSTALL_DIR}/pkgconfig")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/FindGeneratorRunner.cmake"
-        DESTINATION "share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GeneratorRunnerConfig.cmake"
+        DESTINATION "${LIB_INSTALL_DIR}/cmake/GeneratorRunner-${generator_VERSION}")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GeneratorRunnerVersion.cmake"
+        DESTINATION "${LIB_INSTALL_DIR}/cmake/GeneratorRunner-${generator_VERSION}")
 
 #FIXME: manpages should be installed only on Linux targets
 file(GLOB manpages "${CMAKE_CURRENT_SOURCE_DIR}/*.1")

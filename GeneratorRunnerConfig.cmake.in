@@ -1,0 +1,7 @@
+#  GENERATORRUNNER_INCLUDE_DIR   - Directories to include to use GENERATORRUNNER
+#  GENERATORRUNNER_LIBRARIES     - Files to link against to use GENERATORRUNNER
+#  GENERATORRUNNER_PLUGIN_DIR    - Where to find/put plugins for generator runner
+
+SET(GENERATORRUNNER_INCLUDE_DIR "@CMAKE_INSTALL_PREFIX@/include/generatorrunner")
+SET(GENERATORRUNNER_LIBRARY "genrunner")
+SET(GENERATORRUNNER_PLUGIN_DIR @generator_plugin_DIR@)
