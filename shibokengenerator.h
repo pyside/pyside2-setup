@@ -189,8 +189,11 @@ public:
     /// Returns a list of methods of the given class where each one is part of a different overload with both static and non-static method.
     AbstractMetaFunctionList getMethodsWithBothStaticAndNonStaticMethods(const AbstractMetaClass* metaClass);
 
-    /// Returns a list of parent classes for a method.
+    /// Returns a list of parent classes for a given class.
     AbstractMetaClassList getBaseClasses(const AbstractMetaClass* metaClass);
+
+    /// Returns a list of all ancestor classes for the given class.
+    AbstractMetaClassList getAllAncestors(const AbstractMetaClass* metaClass);
 
     const AbstractMetaClass* getMultipleInheritingClass(const AbstractMetaClass* metaClass);
 

@@ -1204,6 +1204,17 @@ const AbstractMetaClass* ShibokenGenerator::getMultipleInheritingClass(const Abs
     return getMultipleInheritingClass(metaClass->baseClass());
 }
 
+AbstractMetaClassList ShibokenGenerator::getAllAncestors(const AbstractMetaClass* metaClass)
+{
+    AbstractMetaClassList result;
+    AbstractMetaClassList baseClasses = getBaseClasses(metaClass);
+    foreach (AbstractMetaClass* base, baseClasses) {
+        result.append(base);
+        result.append(getAllAncestors(base));
+    }
+    return result;
+}
+
 QString ShibokenGenerator::getApiExportMacro() const
 {
     return "SHIBOKEN_"+moduleName().toUpper()+"_API"; // a longer name to avoid name clashes
