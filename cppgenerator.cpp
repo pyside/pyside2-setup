@@ -587,8 +587,10 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
     {
         Indentation indentation(INDENT);
         s << INDENT << "PyObject *pySelf = BindingManager::instance().retrieveWrapper(this);\n";
-        s << INDENT << "m_metaObject = new PySide::DynamicQMetaObject(pySelf->ob_type->tp_name, &" << metaClass->qualifiedCppName() << "::staticMetaObject);\n";
-        s << INDENT << "}\n";
+        s << INDENT << "QString className(pySelf->ob_type->tp_name);" << endl;
+        s << INDENT << "className = className.mid(className.lastIndexOf(\".\")+1);" << endl;
+        s << INDENT << "m_metaObject = new PySide::DynamicQMetaObject(className.toAscii(), &" << metaClass->qualifiedCppName() << "::staticMetaObject);\n";
+        s << "}\n";
     }
     s << INDENT << "return m_metaObject;\n";
     s << "}\n\n";
