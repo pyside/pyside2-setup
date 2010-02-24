@@ -36,6 +36,7 @@
 #define DISABLE_VERBOSE_ERROR_MESSAGES "disable-verbose-error-messages"
 
 //static void dumpFunction(AbstractMetaFunctionList lst);
+static QString baseConversionString(QString typeName);
 
 QHash<QString, QString> ShibokenGenerator::m_pythonPrimitiveTypeName = QHash<QString, QString>();
 QHash<QString, QString> ShibokenGenerator::m_pythonOperators = QHash<QString, QString>();
@@ -278,7 +279,7 @@ QString ShibokenGenerator::cpythonWrapperCPtr(const AbstractMetaType* metaType, 
 QString ShibokenGenerator::cpythonWrapperCPtr(const TypeEntry* type, QString argName)
 {
     if (type->isValue() || type->isObject())
-        return QString("%1_cptr(%2)").arg(cpythonBaseName(type)).arg(argName);
+        return baseConversionString(type->qualifiedCppName() + '*') + QString("toCpp((PyObject*)%1)").arg(argName);
     return QString();
 }
 

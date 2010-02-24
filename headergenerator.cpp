@@ -290,8 +290,6 @@ void HeaderGenerator::finishGeneration()
                     writeSbkCopyCppObjectFunction(convDecl, innerClass);
                     s_cin << innerClass->typeEntry()->include().toString() << endl;
                     writeTypeCheckMacro(s_pts, innerClass->typeEntry());
-                    s_pts << "#define " << cpythonWrapperCPtr(innerClass, "pyobj") << " ((";
-                    s_pts << innerClass->qualifiedCppName() << "*)SbkBaseWrapper_cptr(pyobj))" << endl << endl;
                     writeTypeConverterDecl(convDecl, innerClass->typeEntry());
                     writeTypeConverterImpl(convImpl, innerClass->typeEntry());
                     convDecl << endl;
@@ -299,8 +297,6 @@ void HeaderGenerator::finishGeneration()
                 }
             }
             writeTypeCheckMacro(s_pts, classType);
-            s_pts << "#define " << cpythonWrapperCPtr(metaClass, "pyobj") << " ((";
-            s_pts << metaClass->qualifiedCppName() << "*)SbkBaseWrapper_cptr(pyobj))" << endl << endl;
             writeTypeConverterDecl(convDecl, classType);
             writeTypeConverterImpl(convImpl, classType);
             convDecl << endl;
