@@ -25,7 +25,7 @@ set(generator_plugin_DIR ${LIB_INSTALL_DIR}/generatorrunner)
 
 add_definitions(${QT_DEFINITIONS})
 
-configure_file(generatorrunnerconfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/generatorrunnerconfig.h @ONLY)
+configure_file(generatorrunnerconfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/generatorrunnerconfig.h" @ONLY)
 
 set(CMAKE_BUILD_TYPE Debug)
 
@@ -46,10 +46,10 @@ target_link_libraries(generatorrunner
                       ${QT_QTCORE_LIBRARY})
 
 # create pkg-config file
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/generatorrunner.pc.in
-               ${CMAKE_CURRENT_BINARY_DIR}/generatorrunner.pc @ONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/FindGeneratorRunner.cmake.in
-               ${CMAKE_CURRENT_BINARY_DIR}/FindGeneratorRunner.cmake @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/generatorrunner.pc.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/generatorrunner.pc" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/FindGeneratorRunner.cmake.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/FindGeneratorRunner.cmake" @ONLY)
 
 # uninstall target
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
@@ -63,22 +63,22 @@ add_custom_target(uninstall "${CMAKE_COMMAND}"
 set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${generator_VERSION})
 add_custom_target(dist
     COMMAND git archive --prefix=${ARCHIVE_NAME}/ HEAD
-        | bzip2 > ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+        | bzip2 > "${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2"
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 
-install(TARGETS genrunner LIBRARY DESTINATION ${LIB_INSTALL_DIR}
-                          ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+install(TARGETS genrunner LIBRARY DESTINATION "${LIB_INSTALL_DIR}"
+                          ARCHIVE DESTINATION "${LIB_INSTALL_DIR}"
                           RUNTIME DESTINATION bin)
 install(TARGETS generatorrunner DESTINATION bin)
 install(FILES generator.h DESTINATION include/generatorrunner)
 install(FILES generatorrunnermacros.h DESTINATION include/generatorrunner)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generatorrunner.pc DESTINATION
-        ${LIB_INSTALL_DIR}/pkgconfig)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FindGeneratorRunner.cmake
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/generatorrunner.pc" DESTINATION
+        "${LIB_INSTALL_DIR}/pkgconfig")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/FindGeneratorRunner.cmake"
         DESTINATION "share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules")
 
 #FIXME: manpages should be installed only on Linux targets
-file(GLOB manpages ${CMAKE_CURRENT_SOURCE_DIR}/*.1)
+file(GLOB manpages "${CMAKE_CURRENT_SOURCE_DIR}/*.1")
 install(FILES ${manpages} DESTINATION share/man/man1)
 
 enable_testing()
