@@ -1769,13 +1769,9 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     // class or some ancestor has multiple inheritance
     const AbstractMetaClass* miClass = getMultipleInheritingClass(metaClass);
     if (miClass) {
-        mi_init = QString("(Shiboken::MultipleInheritanceInitFunction)%1")
-                            .arg(multipleInheritanceInitializerFunctionName(miClass));
         if (metaClass == miClass) {
+            mi_init = multipleInheritanceInitializerFunctionName(miClass);
             writeMultipleInheritanceInitializerFunction(s, metaClass);
-        } else {
-            s << "extern int* " << multipleInheritanceInitializerFunctionName(miClass);
-            s << "(const void* cptr);" << endl;
         }
         mi_specialcast = '&'+cpythonSpecialCastFunctionName(metaClass);
         writeSpecialCastFunction(s, metaClass);
@@ -2580,6 +2576,13 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
             bases << "(PyTypeObject*)"+cpythonTypeNameExt(base->typeEntry());
         Indentation indent(INDENT);
         s << INDENT << bases.join(", ") << ");" << endl << endl;
+    }
+
+    // Fill multiple inheritance init function, if needed.
+    const AbstractMetaClass* miClass = getMultipleInheritingClass(metaClass);
+    if (miClass && miClass != metaClass) {
+        s << INDENT << cpythonTypeName(metaClass) << ".mi_init = ";
+        s << "reinterpret_cast<SbkBaseWrapperType*>(" + cpythonTypeNameExt(miClass->typeEntry()) + ")->mi_init;" << endl << endl;
     }
 
     s << INDENT << "if (PyType_Ready((PyTypeObject*)&" << pyTypeName << ") < 0)" << endl;
