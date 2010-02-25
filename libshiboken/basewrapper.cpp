@@ -1,7 +1,7 @@
 /*
  * This file is part of the Shiboken Python Bindings Generator project.
  *
- * Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -306,9 +306,6 @@ static PyGetSetDef SbkBaseWrapper_getsetlist[] = {
     {0} // Sentinel
 };
 
-extern "C"
-{
-
 SbkBaseWrapperType SbkBaseWrapper_Type = { { {
     PyObject_HEAD_INIT(&SbkBaseWrapperType_Type)
     /*ob_size*/             0,
@@ -363,7 +360,7 @@ SbkBaseWrapperType SbkBaseWrapper_Type = { { {
     /*type_name_func*/      0
 };
 
-PyAPI_FUNC(void) init_shiboken()
+void initShiboken()
 {
     static bool shibokenAlreadInitialised = false;
     if (shibokenAlreadInitialised)
@@ -383,8 +380,6 @@ PyAPI_FUNC(void) init_shiboken()
 
     shibokenAlreadInitialised = true;
 }
-
-} // extern "C"
 
 void setErrorAboutWrongArguments(PyObject* args, const char* funcName, const char** cppOverloads)
 {

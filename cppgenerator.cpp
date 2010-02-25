@@ -1,7 +1,7 @@
 /*
  * This file is part of the Shiboken Python Bindings Generator project.
  *
- * Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -2831,7 +2831,7 @@ void CppGenerator::finishGeneration()
             s << INDENT << "}" << endl << endl;
         }
 
-        s << INDENT << "Shiboken::init_shiboken();" << endl;
+        s << INDENT << "Shiboken::initShiboken();" << endl;
         s << INDENT << "PyObject* module = Py_InitModule(\""  << moduleName() << "\", ";
         s << moduleName() << "_methods);" << endl << endl;
 
