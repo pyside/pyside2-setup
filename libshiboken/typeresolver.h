@@ -81,13 +81,13 @@ public:
     template<typename T>
     static TypeResolver* createValueTypeResolver(const char* typeName)
     {
-        return new TypeResolver(typeName, &Shiboken::Converter<T>::toPython, &pythonToValueType<T>, &SbkType<T>, &objectDeleter<T>);
+        return new TypeResolver(typeName, &Shiboken::Converter<T>::toPython, &pythonToValueType<T>, SbkType<T>(), &objectDeleter<T>);
     }
 
     template<typename T>
     static TypeResolver* createObjectTypeResolver(const char* typeName)
     {
-        return new TypeResolver(typeName, &objectTypeToPython<T>, &pythonToObjectType<T>, &SbkType<T>);
+        return new TypeResolver(typeName, &objectTypeToPython<T>, &pythonToObjectType<T>, SbkType<T>());
     }
 
     static TypeResolver* get(const char* typeName);
@@ -106,7 +106,7 @@ private:
     TypeResolver(const TypeResolver&);
     TypeResolver& operator=(const TypeResolver&);
 
-    TypeResolver(const char* typeName, CppToPythonFunc cppToPy, PythonToCppFunc pyToCpp, GetPyTypeFunc getPyType, DeleteObjectFunc deleter = 0);
+    TypeResolver(const char* typeName, CppToPythonFunc cppToPy, PythonToCppFunc pyToCpp, PyTypeObject* pyType, DeleteObjectFunc deleter = 0);
 };
 }
 

@@ -48,7 +48,7 @@ struct TypeResolver::TypeResolverPrivate
     CppToPythonFunc cppToPython;
     PythonToCppFunc pythonToCpp;
     DeleteObjectFunc deleteObject;
-    GetPyTypeFunc getPyType;
+    PyTypeObject* pyType;
 };
 
 static void deinitTypeResolver()
@@ -76,14 +76,14 @@ static void registerTypeResolver(TypeResolver* resolver)
     typeResolverMap[resolver->typeName()] = resolver;
 }
 
-TypeResolver::TypeResolver(const char* typeName, TypeResolver::CppToPythonFunc cppToPy, TypeResolver::PythonToCppFunc pyToCpp, GetPyTypeFunc getPyType, TypeResolver::DeleteObjectFunc deleter)
+TypeResolver::TypeResolver(const char* typeName, TypeResolver::CppToPythonFunc cppToPy, TypeResolver::PythonToCppFunc pyToCpp, PyTypeObject* pyType, TypeResolver::DeleteObjectFunc deleter)
 {
     m_d = new TypeResolverPrivate;
     m_d->typeName = typeName;
     m_d->cppToPython = cppToPy;
     m_d->pythonToCpp = pyToCpp;
     m_d->deleteObject = deleter;
-    m_d->getPyType = getPyType;
+    m_d->pyType = pyType;
 
     registerTypeResolver(this);
 }
@@ -127,5 +127,5 @@ void TypeResolver::deleteObject(void* object)
 
 PyTypeObject* TypeResolver::pythonType()
 {
-    return m_d->getPyType();
+    return m_d->pyType;
 }
