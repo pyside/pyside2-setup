@@ -1,7 +1,7 @@
 /*
  * This file is part of the Shiboken Python Bindings Generator project.
  *
- * Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -438,10 +438,9 @@ void HeaderGenerator::writeSbkCopyCppObjectFunction(QTextStream& s, const Abstra
         return;
     QString className = metaClass->qualifiedCppName();
     s << "template <>" << endl;
-    s << "struct CppObjectCopier<" << className << " >" << endl;
+    s << "struct SbkTypeInfo<" << className << " >" << endl;
     s << '{' << endl;
     s << INDENT << "static const bool isCppWrapper = true;" << endl;
-    s << INDENT << "static " << className << "* copy(const " << className << "& cppobj);" << endl;
     s << "};" << endl;
 }
 

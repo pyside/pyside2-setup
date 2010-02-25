@@ -154,11 +154,6 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     QString copyCppObjectImpl;
     QTextStream copyImpl(&copyCppObjectImpl);
 
-    if (!metaClass->isNamespace()) {
-        Indentation indentation(INDENT);
-        writeSbkCopyCppObjectFunction(copyImpl, metaClass);
-    }
-
     QString headerfile = fileNameForClass(metaClass);
     headerfile.replace("cpp", "h");
     s << "#include \"" << headerfile << '"' << endl;
@@ -329,6 +324,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     s << "extern \"C\"" << endl << '{' << endl << endl;
     if (!metaClass->typeEntry()->hashFunction().isEmpty())
         writeHashFunction(s, metaClass);
+    writeObjCopierFunction(s, metaClass);
     writeClassDefinition(s, metaClass);
     s << endl;
 
@@ -1702,6 +1698,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     QString tp_as_sequence('0');
     QString tp_hash('0');
     QString mi_init('0');
+    QString obj_copier('0');
     QString type_name_func('0');
     QString mi_specialcast('0');
     QString cppClassName = metaClass->qualifiedCppName();
@@ -1778,6 +1775,9 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         s << endl;
     }
 
+    if (metaClass->typeEntry()->isValue() && shouldGenerateCppWrapper(metaClass))
+        obj_copier = '&' + cpythonBaseName(metaClass) + "_ObjCopierFunc";
+
     if (!metaClass->typeEntry()->hashFunction().isEmpty())
         tp_hash = '&' + cpythonBaseName(metaClass) + "_HashFunc";
 
@@ -1834,7 +1834,8 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*mi_offsets*/          0," << endl;
     s << INDENT << "/*mi_init*/             " << mi_init << ',' << endl;
     s << INDENT << "/*mi_specialcast*/      " << mi_specialcast << ',' << endl;
-    s << INDENT << "/*type_name_func*/      " << type_name_func << endl;
+    s << INDENT << "/*type_name_func*/      " << type_name_func << ',' << endl;
+    s << INDENT << "/*obj_copier*/          " << obj_copier << endl;
     s << "};" << endl;
 }
 
@@ -2643,17 +2644,6 @@ void CppGenerator::writeTypeNameFunction(QTextStream& s, const AbstractMetaClass
     s << "}\n\n";
 }
 
-void CppGenerator::writeSbkCopyCppObjectFunction(QTextStream& s, const AbstractMetaClass* metaClass)
-{
-    if (!metaClass->typeEntry()->isValue() || !shouldGenerateCppWrapper(metaClass))
-        return;
-    QString className = metaClass->qualifiedCppName();
-    s << className << "* CppObjectCopier<" << className << " >::copy(const " << className << "& cppobj)" << endl;
-    s << '{' << endl;
-    s << INDENT << "return new " << wrapperName(metaClass) << "(cppobj);" << endl;
-    s << '}' << endl;
-}
-
 void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     s << "static PyObject* " << cpythonGetattroFunctionName(metaClass) << "(PyObject* self, PyObject* name)" << endl;
@@ -2956,4 +2946,15 @@ void CppGenerator::writeHashFunction(QTextStream& s, const AbstractMetaClass* me
     writeToCppConversion(s, metaClass, "obj");
     s << ");" << endl;
     s << '}' << endl << endl;
+}
+
+void CppGenerator::writeObjCopierFunction(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    if (!(metaClass->typeEntry()->isValue() && shouldGenerateCppWrapper(metaClass)))
+        return;
+    s << "static void* " << cpythonBaseName(metaClass) << "_ObjCopierFunc(const void* ptr)";
+    s << '{' << endl;
+    s << INDENT << "return new " << wrapperName(metaClass) << "(*reinterpret_cast<const " << metaClass->qualifiedCppName() << "*>(ptr));\n";
+    s << '}' << endl << endl;
+
 }

@@ -1,7 +1,7 @@
 /*
  * This file is part of the Shiboken Python Bindings Generator project.
  *
- * Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -69,8 +69,6 @@ private:
     void writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName);
 
     void writeTypeNameFunction(QTextStream& s, const AbstractMetaClass* metaClass);
-
-    void writeSbkCopyCppObjectFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
     void writeGetattroFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
@@ -170,6 +168,7 @@ private:
     /// Returns true if generator should produce getters and setters for the given class.
     bool shouldGenerateGetSetList(const AbstractMetaClass* metaClass);
     void writeHashFunction(QTextStream& s, const AbstractMetaClass* metaClass);
+    void writeObjCopierFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
     // Maps special function names to function parameters and return types
     // used by CPython API in the sequence protocol.

@@ -1,7 +1,7 @@
 /*
  * This file is part of the Shiboken Python Bindings Generator project.
  *
- * Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -72,19 +72,40 @@ template<> inline PyTypeObject* SbkType<char>() { return &PyInt_Type; }
 template<> inline PyTypeObject* SbkType<signed char>() { return &PyInt_Type; }
 template<> inline PyTypeObject* SbkType<unsigned char>() { return &PyInt_Type; }
 
+template<typename T>
+struct SbkTypeInfo {
+    static const bool isCppWrapper = false;
+};
+
 /**
  *   This struct template is used to copy a C++ object using the proper
  *   constructor, which could be the same type as used on the wrapped library
  *   or a C++ wrapper type provided by the binding.
- *   The "isCppWrapper" constant must be set to 'true' when CppObjectCopier
- *   is reimplemented by the Shiboken generator.
  */
-template <typename T>
+template <typename T, bool hasWrapper = SbkTypeInfo<T>::isCppWrapper>
 struct CppObjectCopier
 {
-    static const bool isCppWrapper = false;
-    static inline T* copy(const T& cppobj) { return new T(cppobj); }
+    static inline T* copy(const T& obj);
 };
+
+template<typename T>
+struct CppObjectCopier<T, false>
+{
+    static inline T* copy(const T& obj)
+    {
+        return new T(*reinterpret_cast<const T*>(&obj));
+    }
+};
+
+template<typename T>
+struct CppObjectCopier<T, true>
+{
+    static inline T* copy(const T& obj)
+    {
+        return reinterpret_cast<T*>(reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>())->obj_copier(&obj));
+    }
+};
+
 
 /**
  * Convenience template to create wrappers using the proper Python type for a given C++ class instance.
@@ -107,7 +128,7 @@ struct ConverterBase
     static inline PyObject* toPython(const T& cppobj)
     {
         PyObject* obj = SbkCreateWrapper<T>(CppObjectCopier<T>::copy(cppobj), true, true);
-        SbkBaseWrapper_setContainsCppWrapper(obj, CppObjectCopier<T>::isCppWrapper);
+        SbkBaseWrapper_setContainsCppWrapper(obj, SbkTypeInfo<T>::isCppWrapper);
         return obj;
     }
     // Classes with implicit conversions are expected to reimplement

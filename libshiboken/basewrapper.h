@@ -77,6 +77,7 @@ struct SbkBaseWrapperType;
 */
 typedef void* (*SpecialCastFunction)(PyObject*, SbkBaseWrapperType*);
 typedef const char* (*TypeNameFunction)(const void*);
+typedef void* (*ObjectCopierFunction)(const void*);
 
 LIBSHIBOKEN_API PyAPI_DATA(PyTypeObject) SbkBaseWrapperType_Type;
 LIBSHIBOKEN_API PyAPI_DATA(SbkBaseWrapperType) SbkBaseWrapper_Type;
@@ -90,6 +91,7 @@ struct LIBSHIBOKEN_API SbkBaseWrapperType
     /// Special cast function, null if this class doesn't have multiple inheritance.
     SpecialCastFunction mi_specialcast;
     TypeNameFunction type_name_func;
+    ObjectCopierFunction obj_copier;
 };
 
 /// Base Python object for all the wrapped C++ classes.
