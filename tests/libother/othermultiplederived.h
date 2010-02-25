@@ -42,6 +42,9 @@ class ObjectType;
 
 class LIBOTHER_API OtherMultipleDerived : public MDerived1
 {
+public:
+    // this will use CppCopier from other module (bug#142)
+    VirtualMethods returnUselessClass() { return VirtualMethods(); }
 };
 
 #endif
