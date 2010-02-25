@@ -111,7 +111,7 @@ struct CppObjectCopier<T, true>
  * Convenience template to create wrappers using the proper Python type for a given C++ class instance.
  */
 template<typename T>
-inline PyObject* SbkCreateWrapper(const T* cppobj, bool hasOwnership = false, bool isExactType = false)
+inline PyObject* createWrapper(const T* cppobj, bool hasOwnership = false, bool isExactType = false)
 {
     return SbkBaseWrapper_New(reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()),
                               cppobj, hasOwnership, isExactType);
@@ -127,7 +127,7 @@ struct ConverterBase
     static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<T*>(cppobj)); }
     static inline PyObject* toPython(const T& cppobj)
     {
-        PyObject* obj = SbkCreateWrapper<T>(CppObjectCopier<T>::copy(cppobj), true, true);
+        PyObject* obj = createWrapper<T>(CppObjectCopier<T>::copy(cppobj), true, true);
         SbkBaseWrapper_setContainsCppWrapper(obj, SbkTypeInfo<T>::isCppWrapper);
         return obj;
     }
@@ -151,7 +151,7 @@ struct ConverterBase<T*> : ConverterBase<T>
         if (pyobj)
             Py_INCREF(pyobj);
         else
-            pyobj = SbkCreateWrapper<T>(cppobj);
+            pyobj = createWrapper<T>(cppobj);
         return pyobj;
     }
     static T* toCpp(PyObject* pyobj)
@@ -180,7 +180,7 @@ struct Converter<T*> : Converter<T>
         if (pyobj)
             Py_INCREF(pyobj);
         else
-            pyobj = SbkCreateWrapper<T>(cppobj);
+            pyobj = createWrapper<T>(cppobj);
         return pyobj;
     }
     static T* toCpp(PyObject* pyobj)
