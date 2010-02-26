@@ -85,6 +85,7 @@ public:
     SomeInnerClass returnMyParameter(const SomeInnerClass& s) { return s; }
 
     static Abstract* triggerImpossibleTypeDiscovery();
+    static Abstract* triggerAnotherImpossibleTypeDiscovery();
 protected:
     const char* getClassName() { return className(); }
     virtual const char* className() { return "Derived"; }

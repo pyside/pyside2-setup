@@ -107,3 +107,11 @@ Abstract* Derived::triggerImpossibleTypeDiscovery()
 {
     return new SecrectClass;
 }
+
+struct AnotherSecretClass : public Derived {
+};
+
+Abstract* Derived::triggerAnotherImpossibleTypeDiscovery()
+{
+    return new AnotherSecretClass;
+}
