@@ -1757,6 +1757,23 @@ public:
         return m_greaterThanEqFunctions;
     }
 
+    /// Returns a list of conversion operators for this class. The conversion operators are defined in other classes of the same module.
+    AbstractMetaFunctionList externalConversionOperators() const
+    {
+        return m_externalConversionOperators;
+    }
+    /// Adds a converter operator for this class.
+    void addExternalConversionOperator(AbstractMetaFunction* conversionOp)
+    {
+        if (!m_externalConversionOperators.contains(conversionOp))
+            m_externalConversionOperators.append(conversionOp);
+    }
+    /// Returns true if this class has any converter operators defined elsewhere.
+    bool hasExternalConversionOperators() const
+    {
+        return !m_externalConversionOperators.isEmpty();
+    }
+
     void sortFunctions();
 
     const AbstractMetaClass *templateBaseClass() const
@@ -1826,6 +1843,8 @@ private:
     AbstractMetaFunctionList m_greaterThanFunctions;
     AbstractMetaFunctionList m_lessThanEqFunctions;
     AbstractMetaFunctionList m_greaterThanEqFunctions;
+
+    AbstractMetaFunctionList m_externalConversionOperators;
 
     QStringList m_baseClassNames;
     QList<TypeEntry *> m_templateArgs;
