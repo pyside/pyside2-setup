@@ -60,6 +60,9 @@ public:
     std::list<ObjectType*> objects();
     std::list<Point*> points();
 
+    void referenceToValuePointer(Point*&) {}
+    void referenceToObjectPointer(ObjectType*&) {}
+
 private:
     ObjectTypeMap m_objects;
     PointMap m_points;

@@ -583,7 +583,9 @@ bool ShibokenGenerator::shouldDereferenceArgumentPointer(const AbstractMetaArgum
 bool ShibokenGenerator::shouldDereferenceAbstractMetaTypePointer(const AbstractMetaType* metaType)
 {
     const TypeEntry* type = metaType->typeEntry();
-    return (type->isValue() || type->isObject()) && (metaType->isValue() || metaType->isReference());
+    bool isPointer = metaType->indirections() > 0;
+    bool isCppClass = type->isValue() || type->isObject();
+    return isCppClass && !isPointer && (metaType->isValue() || metaType->isReference());
 }
 
 static QString checkFunctionName(QString baseName, bool genericNumberType, bool checkExact)
