@@ -1102,12 +1102,15 @@ AbstractMetaFunctionList AbstractMetaClass::nonVirtualShellFunctions() const
 
 AbstractMetaFunctionList AbstractMetaClass::implicitConversions() const
 {
-    AbstractMetaFunctionList list = queryFunctions(Constructors);
+    if (!hasCloneOperator() && !hasExternalConversionOperators())
+        return AbstractMetaFunctionList();
+
     AbstractMetaFunctionList returned;
-    if (!hasCloneOperator())
-        return returned;
+    AbstractMetaFunctionList list = queryFunctions(Constructors);
+    list.append(externalConversionOperators());
+
     foreach (AbstractMetaFunction *f, list) {
-        if ((f->actualMinimumArgumentCount() == 1 || f->arguments().size() == 1)
+        if ((f->actualMinimumArgumentCount() == 1 || f->arguments().size() == 1 || f->isConversionOperator())
             && !f->isExplicit()
             && !f->isCopyConstructor()
             && !f->isModifiedRemoved()

@@ -116,6 +116,38 @@ void TestImplicitConversions::testWithAddedCtor()
     QCOMPARE(implicitConvs.count(), 2);
 }
 
+void TestImplicitConversions::testWithExternalConversionOperator()
+{
+    const char* cppCode ="\
+    class A {};\
+    struct B {\
+        operator A() const;\
+    };\
+    ";
+    const char* xmlCode = "\
+    <typesystem package=\"Foo\">\
+        <value-type name=\"A\"/>\
+        <value-type name=\"B\"/>\
+        </typesystem>";
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.count(), 2);
+    AbstractMetaClass* classA = classes.findClass("A");
+    AbstractMetaClass* classB = classes.findClass("B");
+    AbstractMetaFunctionList implicitConvs = classA->implicitConversions();
+    QCOMPARE(implicitConvs.count(), 1);
+    AbstractMetaFunctionList externalConvOps = classA->externalConversionOperators();
+    QCOMPARE(externalConvOps.count(), 1);
+
+    const AbstractMetaFunction* convOp = 0;
+    foreach(const AbstractMetaFunction* func, classB->functions()) {
+        if (func->isConversionOperator())
+            convOp = func;
+    }
+    QVERIFY(convOp);
+    QCOMPARE(implicitConvs.first(), convOp);
+}
+
 QTEST_APPLESS_MAIN(TestImplicitConversions)
 
 #include "testimplicitconversions.moc"

@@ -1422,7 +1422,7 @@ public:
 
     /**
      *   Retrieves all class' operator overloads that meet
-     *   query crieteria defined with the OperatorQueryOption
+     *   query criteria defined with the OperatorQueryOption
      *   enum.
      *   /param query composition of OperatorQueryOption enum values
      *   /return list of operator overload methods that meet the

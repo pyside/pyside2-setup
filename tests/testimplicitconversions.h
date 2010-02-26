@@ -35,6 +35,7 @@ private slots:
     void testWithPrivateCtors();
     void testWithModifiedVisibility();
     void testWithAddedCtor();
+    void testWithExternalConversionOperator();
 };
 
 #endif
