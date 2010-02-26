@@ -1157,6 +1157,27 @@ void AbstractMetaBuilder::setupFunctionDefaults(AbstractMetaFunction *metaFuncti
     }
 }
 
+void AbstractMetaBuilder::fixReturnTypeOfConversionOperator(AbstractMetaFunction* metaFunction)
+{
+    if (!metaFunction->isConversionOperator()
+        || metaFunction->implementingClass()->typeEntry() != metaFunction->type()->typeEntry())
+        return;
+
+    TypeDatabase* types = TypeDatabase::instance();
+    QString castTo = metaFunction->name().remove(QRegExp("^operator ")).trimmed();
+
+    TypeEntry* retType = types->findType(castTo);
+    if (!retType)
+        return;
+
+    AbstractMetaType* metaType = createMetaType();
+    metaType->setTypeEntry(retType);
+    metaFunction->setType(metaType);
+
+    AbstractMetaClass* metaClass = m_metaClasses.findClass(castTo);
+    metaClass->addExternalConversionOperator(metaFunction);
+}
+
 void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scopeItem, AbstractMetaClass *metaClass)
 {
     foreach (FunctionModelItem function, scopeItem->functions()) {
@@ -1216,6 +1237,9 @@ void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scopeItem, AbstractMe
                                    .arg(metaFunction->name()).arg(metaClass->name());
                     ReportHandler::warning(warn);
                 }
+
+                if (metaFunction->isConversionOperator())
+                    fixReturnTypeOfConversionOperator(metaFunction);
 
                 metaClass->addFunction(metaFunction);
             } else if (metaFunction->isDestructor()) {

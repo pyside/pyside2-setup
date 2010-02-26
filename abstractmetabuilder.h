@@ -112,6 +112,18 @@ public:
     void registerHashFunction(FunctionModelItem functionItem);
     void registerToStringCapability(FunctionModelItem functionItem);
 
+    /**
+     *   A conversion operator function should not have its owner class as
+     *   its return type, but unfortunately it does. This function fixes the
+     *   return type of operator functions of this kind making the return type
+     *   be the same as it is supposed to generate when used in C++.
+     *   If the returned type is a wrapped C++ class, this method also adds the
+     *   conversion operator to the collection of external conversions of the
+     *   said class.
+     *   \param metaFunction conversion operator function to be fixed.
+     */
+    void fixReturnTypeOfConversionOperator(AbstractMetaFunction* metaFunction);
+
     void parseQ_Property(AbstractMetaClass *metaClass, const QStringList &declarations);
     void setupEquals(AbstractMetaClass *metaClass);
     void setupComparable(AbstractMetaClass *metaClass);
