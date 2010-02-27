@@ -128,6 +128,7 @@ public:
     void setupEquals(AbstractMetaClass *metaClass);
     void setupComparable(AbstractMetaClass *metaClass);
     void setupClonable(AbstractMetaClass *cls);
+    void setupExternalConversion(AbstractMetaClass* cls);
     void setupFunctionDefaults(AbstractMetaFunction *metaFunction, AbstractMetaClass *metaClass);
 
     QString fixDefaultValue(ArgumentModelItem item, AbstractMetaType *type,

@@ -473,6 +473,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
 //         setupEquals(cls);
 //         setupComparable(cls);
         setupClonable(cls);
+        setupExternalConversion(cls);
 
         // sort all inner classes topologically
         if (!cls->typeEntry()->codeGeneration() || cls->innerClasses().size() < 2)
@@ -1173,9 +1174,6 @@ void AbstractMetaBuilder::fixReturnTypeOfConversionOperator(AbstractMetaFunction
     AbstractMetaType* metaType = createMetaType();
     metaType->setTypeEntry(retType);
     metaFunction->setType(metaType);
-
-    AbstractMetaClass* metaClass = m_metaClasses.findClass(castTo);
-    metaClass->addExternalConversionOperator(metaFunction);
 }
 
 void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scopeItem, AbstractMetaClass *metaClass)
@@ -2507,6 +2505,18 @@ void AbstractMetaBuilder::setupClonable(AbstractMetaClass *cls)
         }
     }
     cls->setHasCloneOperator(result);
+}
+
+void AbstractMetaBuilder::setupExternalConversion(AbstractMetaClass* cls) {
+    AbstractMetaFunctionList convOps = cls->operatorOverloads(AbstractMetaClass::ConversionOp);
+    foreach (AbstractMetaFunction* func, convOps) {
+        AbstractMetaClass* metaClass = m_metaClasses.findClass(func->type()->typeEntry());
+        if (!metaClass)
+            continue;
+        metaClass->addExternalConversionOperator(func);
+    }
+    foreach (AbstractMetaClass* innerClass, cls->innerClasses())
+        setupExternalConversion(innerClass);
 }
 
 static void writeRejectLogFile(const QString &name,
