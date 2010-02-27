@@ -2510,6 +2510,8 @@ void AbstractMetaBuilder::setupClonable(AbstractMetaClass *cls)
 void AbstractMetaBuilder::setupExternalConversion(AbstractMetaClass* cls) {
     AbstractMetaFunctionList convOps = cls->operatorOverloads(AbstractMetaClass::ConversionOp);
     foreach (AbstractMetaFunction* func, convOps) {
+        if (func->isModifiedRemoved())
+            continue;
         AbstractMetaClass* metaClass = m_metaClasses.findClass(func->type()->typeEntry());
         if (!metaClass)
             continue;

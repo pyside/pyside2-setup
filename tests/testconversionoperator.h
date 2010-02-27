@@ -30,6 +30,8 @@ class TestConversionOperator : public QObject
     Q_OBJECT
 private slots:
     void testConversionOperator();
+    void testConversionOperatorOfDiscardedClass();
+    void testRemovedConversionOperator();
 };
 
 #endif

@@ -28,14 +28,15 @@
 
 void TestConversionOperator::testConversionOperator()
 {
-    const char cppCode[] = "struct A {\
-        };\
-        struct B {\
-            operator A() const;\
-        };\
-        struct C {\
-            operator A() const;\
-        };";
+    const char cppCode[] = "\
+    struct A {\
+    };\
+    struct B {\
+        operator A() const;\
+    };\
+    struct C {\
+        operator A() const;\
+    };";
     const char xmlCode[] = "\
     <typesystem package=\"Foo\">\
         <value-type name='A' />\
@@ -64,6 +65,54 @@ void TestConversionOperator::testConversionOperator()
     QVERIFY(convOp);
     const AbstractMetaFunction* externalConvOp = classA->externalConversionOperators().first();
     QCOMPARE(convOp, externalConvOp);
+}
+
+void TestConversionOperator::testConversionOperatorOfDiscardedClass()
+{
+    const char cppCode[] = "\
+    struct A {\
+    };\
+    struct B {\
+        operator A() const;\
+    };";
+    const char xmlCode[] = "\
+    <typesystem package=\"Foo\">\
+        <value-type name='A' />\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, false);
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* classA = classes.findClass("A");
+    QVERIFY(classA);
+    QCOMPARE(classA->externalConversionOperators().count(), 0);
+}
+
+void TestConversionOperator::testRemovedConversionOperator()
+{
+    const char cppCode[] = "\
+    struct A {\
+    };\
+    struct B {\
+        operator A() const;\
+    };";
+    const char xmlCode[] = "\
+    <typesystem package=\"Foo\">\
+        <value-type name='A' />\
+        <value-type name='B'>\
+            <modify-function signature='operator A() const' remove='all' />\
+        </value-type>\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, false);
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* classA = classes.findClass("A");
+    AbstractMetaClass* classB = classes.findClass("B");
+    QVERIFY(classA);
+    QVERIFY(classB);
+    QCOMPARE(classA->functions().count(), 1);
+    QCOMPARE(classB->functions().count(), 2);
+    QCOMPARE(classA->externalConversionOperators().count(), 0);
+    QCOMPARE(classA->implicitConversions().count(), 0);
 }
 
 QTEST_APPLESS_MAIN(TestConversionOperator)
