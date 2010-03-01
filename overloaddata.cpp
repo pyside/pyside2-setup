@@ -73,7 +73,11 @@ void OverloadData::sortNextOverloads()
     foreach(OverloadData* ov, m_nextOverloadData) {
         const AbstractMetaType* targetType = ov->argType();
         foreach(AbstractMetaFunction* function, m_generator->implicitConversions(ov->argType())) {
-            QString convertibleType = function->arguments().first()->type()->typeEntry()->name();
+            QString convertibleType;
+            if (function->isConversionOperator())
+                convertibleType = function->ownerClass()->typeEntry()->name();
+            else
+                convertibleType = function->arguments().first()->type()->typeEntry()->name();
 
             if (!map.contains(convertibleType))
                 continue;

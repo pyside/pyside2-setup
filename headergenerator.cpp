@@ -471,7 +471,10 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
                 isFirst = false;
             else
                 s << endl << INDENT << " || ";
-            s << cpythonCheckFunction(ctor->arguments().first()->type());
+            if (ctor->isConversionOperator())
+                s << cpythonCheckFunction(ctor->ownerClass()->typeEntry());
+            else
+                s << cpythonCheckFunction(ctor->arguments().first()->type());
             s << "(pyobj)";
         }
         s << ';' << endl;
@@ -496,18 +499,28 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
 
             Indentation indent(INDENT);
             s << INDENT;
-
-            const AbstractMetaType* argType = ctor->arguments().first()->type();
             if (firstImplicitIf)
                 firstImplicitIf = false;
             else
                 s << "else ";
-            s << "if (" << cpythonCheckFunction(argType) << "(pyobj))" << endl;
+
+            QString typeCheck;
+            QString toCppConv;
+            QTextStream tcc(&toCppConv);
+            if (ctor->isConversionOperator()) {
+                const AbstractMetaClass* metaClass = ctor->ownerClass();
+                typeCheck = cpythonCheckFunction(metaClass->typeEntry());
+                writeToCppConversion(tcc, metaClass, "pyobj");
+            } else {
+                const AbstractMetaType* argType = ctor->arguments().first()->type();
+                typeCheck = cpythonCheckFunction(argType);
+                writeToCppConversion(tcc, argType, 0, "pyobj");
+            }
+
+            s << "if (" << typeCheck << "(pyobj))" << endl;
             {
                 Indentation indent(INDENT);
-                s << INDENT << "return " << type->name() << '(';
-                writeToCppConversion(s, argType, 0, "pyobj");
-                s << ");" << endl;
+                s << INDENT << "return " << type->name() << '(' << toCppConv << ");" << endl;
             }
         }
         s << INDENT << '}' << endl;

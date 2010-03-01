@@ -222,8 +222,11 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     foreach (AbstractMetaFunctionList allOverloads, getFunctionGroups(metaClass).values()) {
         AbstractMetaFunctionList overloads;
         foreach (AbstractMetaFunction* func, allOverloads) {
-            if (!func->isAssignmentOperator() && !func->isCastOperator() && !func->isModifiedRemoved() && !func->isPrivate() &&
-                func->ownerClass() == func->implementingClass())
+            if (!func->isAssignmentOperator()
+                && !func->isCastOperator()
+                && !func->isModifiedRemoved()
+                && !func->isPrivate()
+                && func->ownerClass() == func->implementingClass())
                 overloads.append(func);
         }
 
@@ -1028,7 +1031,11 @@ void CppGenerator::writeInvalidCppObjectCheck(QTextStream& s, QString pyArgName,
         QString implicitChecks;
         QTextStream ic(&implicitChecks);
         foreach (const AbstractMetaFunction* ctor, implicitConversions(type)) {
-            const TypeEntry* te = ctor->arguments().first()->type()->typeEntry();
+            const TypeEntry* te;
+            if (ctor->isConversionOperator())
+                te = ctor->ownerClass()->typeEntry();
+            else
+                te = ctor->arguments().first()->type()->typeEntry();
             if (te->isValue() || te->isObject())
                 ic << " || " << cpythonCheckFunction(te) << '(' << pyArgName << ')';
         }
