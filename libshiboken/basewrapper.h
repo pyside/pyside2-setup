@@ -79,6 +79,9 @@ typedef void* (*SpecialCastFunction)(PyObject*, SbkBaseWrapperType*);
 typedef const char* (*TypeNameFunction)(const void*);
 typedef void* (*ObjectCopierFunction)(const void*);
 
+typedef void* (*ExtendedToCppFunc)(PyObject*);
+typedef bool (*ExtendedIsConvertibleFunc)(PyObject*);
+
 LIBSHIBOKEN_API PyAPI_DATA(PyTypeObject) SbkBaseWrapperType_Type;
 LIBSHIBOKEN_API PyAPI_DATA(SbkBaseWrapperType) SbkBaseWrapper_Type;
 
@@ -92,6 +95,10 @@ struct LIBSHIBOKEN_API SbkBaseWrapperType
     SpecialCastFunction mi_specialcast;
     TypeNameFunction type_name_func;
     ObjectCopierFunction obj_copier;
+    /// Extended "isConvertible" function to be used when a conversion operator is defined in another module.
+    ExtendedIsConvertibleFunc ext_isconvertible;
+    /// Extended "toCpp" function to be used when a conversion operator is defined in another module.
+    ExtendedToCppFunc ext_tocpp;
 };
 
 /// Base Python object for all the wrapped C++ classes.

@@ -231,6 +231,8 @@ SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
     newType->mi_init = parentType->mi_init;
     newType->mi_specialcast = parentType->mi_specialcast;
     newType->type_name_func = parentType->type_name_func;
+    newType->ext_isconvertible = parentType->ext_isconvertible;
+    newType->ext_tocpp = parentType->ext_tocpp;
 
     return reinterpret_cast<PyObject*>(newType);
 }
@@ -357,7 +359,9 @@ SbkBaseWrapperType SbkBaseWrapper_Type = { { {
     /*mi_offsets*/          0,
     /*mi_init*/             0,
     /*mi_specialcast*/      0,
-    /*type_name_func*/      0
+    /*type_name_func*/      0,
+    /*ext_isconvertible*/   0,
+    /*ext_tocpp*/           0
 };
 
 void initShiboken()

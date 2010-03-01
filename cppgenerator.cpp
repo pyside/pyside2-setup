@@ -1842,7 +1842,9 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*mi_init*/             " << mi_init << ',' << endl;
     s << INDENT << "/*mi_specialcast*/      " << mi_specialcast << ',' << endl;
     s << INDENT << "/*type_name_func*/      " << type_name_func << ',' << endl;
-    s << INDENT << "/*obj_copier*/          " << obj_copier << endl;
+    s << INDENT << "/*obj_copier*/          " << obj_copier << ',' << endl;
+    s << INDENT << "/*ext_isconvertible*/   0," << endl;
+    s << INDENT << "/*ext_tocpp*/           0" << endl;
     s << "};" << endl;
 }
 
