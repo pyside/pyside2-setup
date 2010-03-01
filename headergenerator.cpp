@@ -459,72 +459,68 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
 
     bool hasImplicitConversions = !implicitConvs.isEmpty();
 
-    if (hasImplicitConversions) {
-        // Write Converter<T>::isConvertible
-        s << "inline bool Shiboken::Converter<" << type->name() << " >::isConvertible(PyObject* pyobj)" << endl;
-        s << '{' << endl;
-        s << INDENT << "return ";
-        bool isFirst = true;
-        foreach (const AbstractMetaFunction* ctor, implicitConvs) {
-            Indentation indent(INDENT);
-            if (isFirst)
-                isFirst = false;
-            else
-                s << endl << INDENT << " || ";
-            if (ctor->isConversionOperator())
-                s << cpythonCheckFunction(ctor->ownerClass()->typeEntry());
-            else
-                s << cpythonCheckFunction(ctor->arguments().first()->type());
-            s << "(pyobj)";
-        }
-        s << ';' << endl;
-        s << '}' << endl << endl;
-    }
-
     // A specialized Converter<T>::toCpp method is only need for
-    // value-types with implicit conversions.
-    if (!type->isValue() || !hasImplicitConversions)
+    // classes with implicit conversions.
+    if (!hasImplicitConversions)
         return;
+
+    // Write Converter<T>::isConvertible
+    s << "inline bool Shiboken::Converter<" << type->name() << " >::isConvertible(PyObject* pyobj)" << endl;
+    s << '{' << endl;
+    s << INDENT << "return ";
+    bool isFirst = true;
+    foreach (const AbstractMetaFunction* ctor, implicitConvs) {
+        Indentation indent(INDENT);
+        if (isFirst)
+            isFirst = false;
+        else
+            s << endl << INDENT << " || ";
+        if (ctor->isConversionOperator())
+            s << cpythonCheckFunction(ctor->ownerClass()->typeEntry());
+        else
+            s << cpythonCheckFunction(ctor->arguments().first()->type());
+        s << "(pyobj)";
+    }
+    s << ';' << endl;
+    s << '}' << endl << endl;
 
     // Write Converter<T>::toCpp function
     s << "inline " << type->name() << " Shiboken::Converter<" << type->name() << " >::toCpp(PyObject* pyobj)" << endl;
     s << '{' << endl;
 
-    if (!implicitConvs.isEmpty()) {
-        s << INDENT << "if (!Shiboken_TypeCheck(pyobj, " << type->name() << ")) {" << endl;
-        bool firstImplicitIf = true;
-        foreach (const AbstractMetaFunction* ctor, implicitConvs) {
-            if (ctor->isModifiedRemoved())
-                continue;
+    s << INDENT << "if (!Shiboken_TypeCheck(pyobj, " << type->name() << ")) {" << endl;
+    bool firstImplicitIf = true;
+    foreach (const AbstractMetaFunction* ctor, implicitConvs) {
+        if (ctor->isModifiedRemoved())
+            continue;
 
-            Indentation indent(INDENT);
-            s << INDENT;
-            if (firstImplicitIf)
-                firstImplicitIf = false;
-            else
-                s << "else ";
+        Indentation indent(INDENT);
+        s << INDENT;
+        if (firstImplicitIf)
+            firstImplicitIf = false;
+        else
+            s << "else ";
 
-            QString typeCheck;
-            QString toCppConv;
-            QTextStream tcc(&toCppConv);
-            if (ctor->isConversionOperator()) {
-                const AbstractMetaClass* metaClass = ctor->ownerClass();
-                typeCheck = cpythonCheckFunction(metaClass->typeEntry());
-                writeToCppConversion(tcc, metaClass, "pyobj");
-            } else {
-                const AbstractMetaType* argType = ctor->arguments().first()->type();
-                typeCheck = cpythonCheckFunction(argType);
-                writeToCppConversion(tcc, argType, 0, "pyobj");
-            }
-
-            s << "if (" << typeCheck << "(pyobj))" << endl;
-            {
-                Indentation indent(INDENT);
-                s << INDENT << "return " << type->name() << '(' << toCppConv << ");" << endl;
-            }
+        QString typeCheck;
+        QString toCppConv;
+        QTextStream tcc(&toCppConv);
+        if (ctor->isConversionOperator()) {
+            const AbstractMetaClass* metaClass = ctor->ownerClass();
+            typeCheck = cpythonCheckFunction(metaClass->typeEntry());
+            writeToCppConversion(tcc, metaClass, "pyobj");
+        } else {
+            const AbstractMetaType* argType = ctor->arguments().first()->type();
+            typeCheck = cpythonCheckFunction(argType);
+            writeToCppConversion(tcc, argType, 0, "pyobj");
         }
-        s << INDENT << '}' << endl;
+
+        s << "if (" << typeCheck << "(pyobj))" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "return " << type->name() << '(' << toCppConv << ");" << endl;
+        }
     }
+    s << INDENT << '}' << endl;
 
     s << INDENT << "return *" << cpythonWrapperCPtr(type, "pyobj") << ';' << endl;
     s << '}' << endl << endl;
