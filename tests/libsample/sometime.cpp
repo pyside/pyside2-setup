@@ -97,3 +97,9 @@ Time::operator!=(const Time& other) const
 {
     return !operator==(other);
 }
+
+Time::operator Str() const
+{
+    return Time::toString();
+}
+

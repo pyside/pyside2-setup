@@ -82,6 +82,9 @@ public:
     bool operator==(const Time& other) const;
     bool operator!=(const Time& other) const;
 
+    // This cast operator must become an implicit conversion of Str.
+    operator Str() const;
+
 private:
     int m_hour;
     int m_minute;
