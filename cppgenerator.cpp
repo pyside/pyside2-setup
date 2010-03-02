@@ -184,9 +184,6 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         s << endl;
     }
 
-    if (metaClass->isPolymorphic())
-        writeTypeNameFunction(s, metaClass);
-
     if (shouldGenerateCppWrapper(metaClass)) {
         s << "// Native ---------------------------------------------------------" << endl;
         s << endl;
@@ -330,6 +327,10 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     writeObjCopierFunction(s, metaClass);
     writeClassDefinition(s, metaClass);
     s << endl;
+
+    if (metaClass->isPolymorphic())
+        writeTypeDiscoveryFunction(s, metaClass);
+
 
     foreach (AbstractMetaEnum* cppEnum, metaClass->enums()) {
         bool hasFlags = cppEnum->typeEntry()->flags();
@@ -1658,9 +1659,9 @@ void CppGenerator::writeMultipleInheritanceInitializerFunction(QTextStream& s, c
 void CppGenerator::writeSpecialCastFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     QString className = metaClass->qualifiedCppName();
-    s << "static void* " << cpythonSpecialCastFunctionName(metaClass) << "(PyObject* obj, SbkBaseWrapperType* desiredType)\n";
+    s << "static void* " << cpythonSpecialCastFunctionName(metaClass) << "(void* obj, SbkBaseWrapperType* desiredType)\n";
     s << "{\n";
-    s << INDENT << className << "* me = (" << className << "*) SbkBaseWrapper_cptr(obj);\n";
+    s << INDENT << className << "* me = reinterpret_cast<" << className << "*>(obj);\n";
     AbstractMetaClassList bases = getBaseClasses(metaClass);
     bool firstClass = true;
     foreach (const AbstractMetaClass* baseClass, getAllAncestors(metaClass)) {
@@ -1706,7 +1707,6 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     QString tp_hash('0');
     QString mi_init('0');
     QString obj_copier('0');
-    QString type_name_func('0');
     QString mi_specialcast('0');
     QString cppClassName = metaClass->qualifiedCppName();
     QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
@@ -1746,9 +1746,6 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
 
     if (classNeedsGetattroFunction(metaClass))
         tp_getattro = cpythonGetattroFunctionName(metaClass);
-
-    if (metaClass->isPolymorphic())
-        type_name_func = cpythonBaseName(metaClass) + "_typeName";
 
     if (metaClass->hasPrivateDestructor())
         tp_new = "0";
@@ -1841,7 +1838,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*mi_offsets*/          0," << endl;
     s << INDENT << "/*mi_init*/             " << mi_init << ',' << endl;
     s << INDENT << "/*mi_specialcast*/      " << mi_specialcast << ',' << endl;
-    s << INDENT << "/*type_name_func*/      " << type_name_func << ',' << endl;
+    s << INDENT << "/*type_discovery*/      0," << endl;
     s << INDENT << "/*obj_copier*/          " << obj_copier << endl;
     s << "};" << endl;
 }
@@ -2593,6 +2590,29 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         s << "reinterpret_cast<SbkBaseWrapperType*>(" + cpythonTypeNameExt(miClass->typeEntry()) + ")->mi_init;" << endl << endl;
     }
 
+    // Set typediscovery struct or fill the struct of another one
+    if (metaClass->isPolymorphic()) {
+        s << INDENT << "// Fill type discovery information"  << endl;
+        if (!metaClass->baseClass()) {
+            s << INDENT << cpythonTypeName(metaClass) << ".type_discovery = new Shiboken::TypeDiscovery;" << endl;
+            s << INDENT << cpythonTypeName(metaClass) << ".type_discovery->addTypeDiscoveryFunction(&";
+            s << cpythonBaseName(metaClass) << "_typeDiscovery);" << endl;
+        } else {
+            // FIXME: What about mi classes?
+            AbstractMetaClass* baseClass = metaClass->baseClass();
+            while (baseClass->baseClass())
+                baseClass = baseClass->baseClass();
+            s << INDENT << cpythonTypeName(metaClass) << ".type_discovery = " ;
+            s << "reinterpret_cast<SbkBaseWrapperType*>(" << cpythonTypeNameExt(baseClass->typeEntry()) << ")->type_discovery;" << endl;
+
+            if (!metaClass->typeEntry()->polymorphicIdValue().isEmpty()) {
+                s << INDENT << cpythonTypeName(metaClass) << ".type_discovery->addTypeDiscoveryFunction(&";
+                s << cpythonBaseName(metaClass) << "_typeDiscovery);" << endl;
+            }
+        }
+        s << endl;
+    }
+
     s << INDENT << "if (PyType_Ready((PyTypeObject*)&" << pyTypeName << ") < 0)" << endl;
     s << INDENT << INDENT << "return;" << endl << endl;
 
@@ -2643,11 +2663,37 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     s << '}' << endl << endl;
 }
 
-void CppGenerator::writeTypeNameFunction(QTextStream& s, const AbstractMetaClass* metaClass)
+void CppGenerator::writeTypeDiscoveryFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
-    Indentation indent(INDENT);
-    s << "static const char* " << cpythonBaseName(metaClass) << "_typeName(const void* cptr)\n{\n";
-    s << INDENT << "return typeid(*reinterpret_cast<const " << metaClass->qualifiedCppName() << "*>(cptr)).name();\n";
+    QString polymorphicExpr = metaClass->typeEntry()->polymorphicIdValue();
+    bool shouldGenerateIt = !polymorphicExpr.isEmpty() || !metaClass->baseClass();
+    if (!shouldGenerateIt)
+        return;
+
+    s << "static SbkBaseWrapperType* " << cpythonBaseName(metaClass) << "_typeDiscovery(void* cptr, SbkBaseWrapperType* instanceType)\n{" << endl;
+    s << INDENT << "if (instanceType->mi_specialcast)" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "cptr = instanceType->mi_specialcast(cptr, &" << cpythonTypeName(metaClass) << ");" << endl;
+    }
+
+    if (!metaClass->baseClass()) {
+        s << INDENT << "TypeResolver* typeResolver = TypeResolver::get(typeid(*reinterpret_cast<"
+          << metaClass->qualifiedCppName() << "*>(cptr)).name());" << endl;
+        s << INDENT << "if (typeResolver)" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "return reinterpret_cast<SbkBaseWrapperType*>(typeResolver->pythonType());" << endl;
+        }
+    } else {
+        polymorphicExpr = polymorphicExpr.replace("%1", " reinterpret_cast<"+metaClass->qualifiedCppName()+"*>(cptr)");
+        s << INDENT << " if (" << polymorphicExpr << ")" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "return &" << cpythonTypeName(metaClass) << ';' << endl;
+        }
+    }
+    s << INDENT << "return 0;" << endl;
     s << "}\n\n";
 }
 

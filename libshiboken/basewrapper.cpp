@@ -125,12 +125,8 @@ PyObject* SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
                              bool isExactType)
 {
     // Try to find the exact type of cptr.
-    if (!isExactType && instanceType->type_name_func) {
-        const char* typeName = instanceType->type_name_func(cptr);
-        TypeResolver* typeResolver = TypeResolver::get(typeName);
-        if (typeResolver)
-            instanceType = reinterpret_cast<SbkBaseWrapperType*>(typeResolver->pythonType());
-    }
+    if (!isExactType && instanceType->type_discovery)
+        instanceType = instanceType->type_discovery->getType(cptr, instanceType);
 
     SbkBaseWrapper* self = reinterpret_cast<SbkBaseWrapper*>(SbkBaseWrapper_TpNew(reinterpret_cast<PyTypeObject*>(instanceType), 0, 0));
     self->cptr = const_cast<void*>(cptr);
@@ -230,15 +226,11 @@ SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
     newType->mi_offsets = parentType->mi_offsets;
     newType->mi_init = parentType->mi_init;
     newType->mi_specialcast = parentType->mi_specialcast;
-    newType->type_name_func = parentType->type_name_func;
+    newType->type_discovery = parentType->type_discovery;
+    newType->obj_copier = parentType->obj_copier;
 
     return reinterpret_cast<PyObject*>(newType);
 }
-
-extern "C"
-{
-
-struct SbkBaseWrapperType_Type;
 
 PyTypeObject SbkBaseWrapperType_Type = {
     PyObject_HEAD_INIT(0)
@@ -288,8 +280,6 @@ PyTypeObject SbkBaseWrapperType_Type = {
     /*tp_subclasses*/       0,
     /*tp_weaklist*/         0
 };
-
-} // extern "C"
 
 static PyObject* SbkBaseWrapper_get_dict(SbkBaseWrapper* obj)
 {
@@ -418,7 +408,22 @@ void setErrorAboutWrongArguments(PyObject* args, const char* funcName, const cha
 
 }
 
-} // namespace Shiboken
+SbkBaseWrapperType* TypeDiscovery::getType(const void* cptr, SbkBaseWrapperType* instanceType) const
+{
+    TypeDiscoveryFuncList::const_reverse_iterator it = m_discoveryFunctions.rbegin();
+    for (; it != m_discoveryFunctions.rend(); ++it) {
+        SbkBaseWrapperType* type = (*it)(const_cast<void*>(cptr), instanceType);
+        if (type)
+            return type;
+    }
+    return instanceType;
+}
 
+void TypeDiscovery::addTypeDiscoveryFunction(Shiboken::TypeDiscoveryFunc func)
+{
+    m_discoveryFunctions.push_back(func);
+}
+
+} // namespace Shiboken
 
 

@@ -64,6 +64,7 @@ public:
     virtual void unpureVirtual();
 
     virtual PrintFormat returnAnEnum() { return Short; }
+    virtual Type type() const { return TpDerived; }
 
     // factory method
     static Abstract* createObject();

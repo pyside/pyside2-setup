@@ -50,6 +50,10 @@ public:
         ClassNameAndId
     };
 
+    enum Type {
+        TpAbstract, TpDerived
+    };
+
     int primitiveField;
     Point valueTypeField;
     ObjectType* objectTypeField;
@@ -76,6 +80,7 @@ public:
     void callUnpureVirtual();
 
     void show(PrintFormat format = Verbose);
+    virtual Type type() const { return TpAbstract; }
 
 protected:
     virtual const char* className() { return "Abstract"; }
