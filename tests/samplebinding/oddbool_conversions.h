@@ -1,13 +1,13 @@
 namespace Shiboken {
 template <>
-struct Converter<OddBool> : public ConverterBase<OddBool>
+struct Converter<OddBool> : public ValueTypeConverter<OddBool>
 {
     static bool isConvertible(const PyObject* pyObj)
     {
         return PyBool_Check(pyObj);
     }
 
-    using ConverterBase<OddBool>::toPython;
+    using ValueTypeConverter<OddBool>::toPython;
 
     static PyObject* toPython(const OddBool& holder)
     {

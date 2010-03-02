@@ -167,10 +167,12 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
 
     s << "struct Converter<" << type->name() << (isAbstractOrObjectType ? "*" : "") << " > : ";
     if (type->isEnum() || type->isFlags())
-        s << "Converter_CppEnum";
+        s << "EnumConverter";
+    else if (isAbstractOrObjectType)
+        s << "ObjectTypeConverter";
     else
-        s << "ConverterBase";
-    s << '<' << type->name() << (isAbstractOrObjectType ? "*" : "") << " >" << endl;
+        s << "ValueTypeConverter";
+    s << '<' << type->name() << " >" << endl;
     s << '{' << endl;
     if (isValueTypeWithImplConversions) {
         s << INDENT << "static " << type->name() << " toCpp(PyObject* pyobj);" << endl;

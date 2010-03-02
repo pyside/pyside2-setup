@@ -118,59 +118,16 @@ inline PyObject* createWrapper(const T* cppobj, bool hasOwnership = false, bool 
 }
 
 // Base Conversions ----------------------------------------------------------
-template <typename T> struct Converter;
-
-template <typename T>
-struct ConverterBase
-{
-    static inline bool isConvertible(PyObject* pyobj) { return pyobj == Py_None; }
-    static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<T*>(cppobj)); }
-    static inline PyObject* toPython(const T& cppobj)
-    {
-        PyObject* obj = createWrapper<T>(CppObjectCopier<T>::copy(cppobj), true, true);
-        SbkBaseWrapper_setContainsCppWrapper(obj, SbkTypeInfo<T>::isCppWrapper);
-        return obj;
-    }
-    // Classes with implicit conversions are expected to reimplement
-    // this to build T from its various implicit constructors.
-    static inline T toCpp(PyObject* pyobj) { return *Converter<T*>::toCpp(pyobj); }
-};
-
-// Specialization meant to be used by abstract classes and object-types
-// (i.e. classes with private copy constructors and = operators).
-// Example: "struct Converter<AbstractClass* > : ConverterBase<AbstractClass* >"
-template <typename T>
-struct ConverterBase<T*> : ConverterBase<T>
-{
-    static inline PyObject* toPython(void* cppobj) { return toPython(reinterpret_cast<T*>(cppobj)); }
-    static PyObject* toPython(const T* cppobj)
-    {
-        if (!cppobj)
-            Py_RETURN_NONE;
-        PyObject* pyobj = BindingManager::instance().retrieveWrapper(cppobj);
-        if (pyobj)
-            Py_INCREF(pyobj);
-        else
-            pyobj = createWrapper<T>(cppobj);
-        return pyobj;
-    }
-    static T* toCpp(PyObject* pyobj)
-    {
-        if (pyobj == Py_None)
-            return 0;
-        SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(pyobj->ob_type);
-        if (shiboType->mi_specialcast)
-            return (T*) shiboType->mi_specialcast(pyobj, reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()));
-        return (T*) SbkBaseWrapper_cptr(pyobj);
-    }
-};
-
-// Pointer Conversions
+// The basic converter must be empty to avoid object types being converted by value.
 template <typename T> struct Converter {};
 
+// Pointer conversion specialization for value types.
 template <typename T>
 struct Converter<T*> : Converter<T>
 {
+    /// Value type pointers should be convertible only to NULL pointers, represented in Python by a 'None' object.
+    static inline bool isConvertible(PyObject* pyobj) { return pyobj == Py_None; }
+    /// Convenience overload that calls "toPython(const T*)" method.
     static inline PyObject* toPython(void* cppobj) { return toPython(reinterpret_cast<T*>(cppobj)); }
     static PyObject* toPython(const T* cppobj)
     {
@@ -194,15 +151,7 @@ struct Converter<T*> : Converter<T>
 };
 template <typename T> struct Converter<const T*> : Converter<T*> {};
 
-// PyObject* specialization to avoid converting what doesn't need to be converted.
-template<>
-struct Converter<PyObject*> : ConverterBase<PyObject*>
-{
-    static inline PyObject* toCpp(PyObject* pyobj) { return pyobj; }
-};
-template <> struct Converter<const PyObject*> : Converter<PyObject*> {};
-
-// Reference Conversions
+// Specialization for reference conversions.
 template <typename T>
 struct Converter<T&> : Converter<T*>
 {
@@ -212,7 +161,7 @@ struct Converter<T&> : Converter<T*>
 };
 template <typename T> struct Converter<const T&> : Converter<T&> {};
 
-// Void pointer conversions
+// Void pointer conversions.
 template<>
 struct Converter<void*>
 {
@@ -235,6 +184,66 @@ struct Converter<void*>
 };
 template <> struct Converter<const void*> : Converter<void*> {};
 
+// Base converter meant to be inherited by converters for classes that could be
+// passed by value.
+// Example: "struct Converter<ValueTypeClass> : ValueTypeConverter<ValueTypeClass>"
+template <typename T>
+struct ValueTypeConverter
+{
+    static inline bool isConvertible(PyObject* pyobj) { return false; }
+    static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<T*>(cppobj)); }
+    static inline PyObject* toPython(const T& cppobj)
+    {
+        PyObject* obj = createWrapper<T>(CppObjectCopier<T>::copy(cppobj), true, true);
+        SbkBaseWrapper_setContainsCppWrapper(obj, SbkTypeInfo<T>::isCppWrapper);
+        return obj;
+    }
+    // Classes with implicit conversions are expected to reimplement
+    // this to build T from its various implicit constructors.
+    static inline T toCpp(PyObject* pyobj) { return *Converter<T*>::toCpp(pyobj); }
+};
+
+// Base converter meant to be inherited by converters for abstract classes and object types
+// (i.e. classes with private copy constructors and = operators).
+// Example: "struct Converter<AbstractClass*> : ObjectTypeConverter<AbstractClass>"
+template <typename T>
+struct ObjectTypeConverter
+{
+    /// Py_None objects are the only objects convertible to an object type (in the form of a NULL pointer).
+    static inline bool isConvertible(PyObject* pyobj) { return pyobj == Py_None; }
+    /// Convenience overload that calls "toPython(const T*)" method.
+    static inline PyObject* toPython(void* cppobj) { return toPython(reinterpret_cast<T*>(cppobj)); }
+    /// Returns a new Python wrapper for the C++ object or an existing one with its reference counter incremented.
+    static PyObject* toPython(const T* cppobj)
+    {
+        if (!cppobj)
+            Py_RETURN_NONE;
+        PyObject* pyobj = BindingManager::instance().retrieveWrapper(cppobj);
+        if (pyobj)
+            Py_INCREF(pyobj);
+        else
+            pyobj = createWrapper<T>(cppobj);
+        return pyobj;
+    }
+    /// Returns the wrapped C++ pointer casted properly, or a NULL pointer if the argument is a Py_None.
+    static T* toCpp(PyObject* pyobj)
+    {
+        if (pyobj == Py_None)
+            return 0;
+        SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(pyobj->ob_type);
+        if (shiboType->mi_specialcast)
+            return (T*) shiboType->mi_specialcast(pyobj, reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()));
+        return (T*) SbkBaseWrapper_cptr(pyobj);
+    }
+};
+
+// PyObject* specialization to avoid converting what doesn't need to be converted.
+template<>
+struct Converter<PyObject*> : ObjectTypeConverter<PyObject*>
+{
+    static inline PyObject* toCpp(PyObject* pyobj) { return pyobj; }
+};
+template <> struct Converter<const PyObject*> : Converter<PyObject*> {};
 
 // Primitive Conversions ------------------------------------------------------
 template <>
@@ -411,7 +420,7 @@ template <> struct Converter<double> : Converter_PyFloat<double> {};
 
 // PyEnum Conversions ---------------------------------------------------------
 template <typename CppEnum>
-struct Converter_CppEnum
+struct EnumConverter
 {
     static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<CppEnum*>(cppobj)); }
     static inline PyObject* toPython(CppEnum cppenum)
