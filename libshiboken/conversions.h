@@ -37,6 +37,7 @@
 
 #include <Python.h>
 #include <limits>
+#include <memory>
 
 #include "pyenum.h"
 #include "basewrapper.h"
@@ -190,7 +191,14 @@ template <> struct Converter<const void*> : Converter<void*> {};
 template <typename T>
 struct ValueTypeConverter
 {
-    static inline bool isConvertible(PyObject* pyobj) { return false; }
+    // The basic version of this method also tries to use the extended 'isConvertible' method.
+    static inline bool isConvertible(PyObject* pyobj)
+    {
+        SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>());
+        if (shiboType->ext_isconvertible)
+            return shiboType->ext_isconvertible(pyobj);
+        return false;
+    }
     static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<T*>(cppobj)); }
     static inline PyObject* toPython(const T& cppobj)
     {
@@ -198,9 +206,21 @@ struct ValueTypeConverter
         SbkBaseWrapper_setContainsCppWrapper(obj, SbkTypeInfo<T>::isCppWrapper);
         return obj;
     }
-    // Classes with implicit conversions are expected to reimplement
-    // this to build T from its various implicit constructors.
-    static inline T toCpp(PyObject* pyobj) { return *Converter<T*>::toCpp(pyobj); }
+    // Classes with implicit conversions are expected to reimplement 'toCpp' to build T from
+    // its various implicit constructors. Even classes without implicit conversions could
+    // get some of those via other modules defining conversion operator for them, thus
+    // the basic Converter for value types checks for extended conversion and tries to
+    // use them if it is the case.
+    static inline T toCpp(PyObject* pyobj)
+    {
+        if (isConvertible(pyobj)) {
+            SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>());
+            T* cptr = reinterpret_cast<T*>(shiboType->ext_tocpp(pyobj));
+            std::auto_ptr<T> cptr_auto_ptr(cptr);
+            return *cptr;
+        }
+        return *reinterpret_cast<T*>(reinterpret_cast<Shiboken::SbkBaseWrapper*>(pyobj)->cptr);
+    }
 };
 
 // Base converter meant to be inherited by converters for abstract classes and object types

@@ -1054,9 +1054,7 @@ void CppGenerator::writeInvalidCppObjectCheck(QTextStream& s, QString pyArgName,
 
 void CppGenerator::writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, bool isNumber, QString customType)
 {
-    bool writeIsConvertibleCheck = !implicitConversions(argType).isEmpty()
-                                    || argType->typeEntry()->isObject()
-                                    || argType->isValuePointer();
+    bool writeIsConvertibleCheck = argType->typeEntry()->isObject() || argType->typeEntry()->isValue();
 
     if (writeIsConvertibleCheck || isCString(argType) || isPairContainer(argType))
         s << '(';
