@@ -469,6 +469,8 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
     // Write Converter<T>::isConvertible
     s << "inline bool Shiboken::Converter<" << type->name() << " >::isConvertible(PyObject* pyobj)" << endl;
     s << '{' << endl;
+    s << INDENT << "SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(SbkType<";
+    s << type->name() << " >());" << endl;
     s << INDENT << "return ";
     bool isFirst = true;
     foreach (const AbstractMetaFunction* ctor, implicitConvs) {
@@ -483,7 +485,11 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
             s << cpythonCheckFunction(ctor->arguments().first()->type());
         s << "(pyobj)";
     }
-    s << ';' << endl;
+    s << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << " || (shiboType->ext_isconvertible && shiboType->ext_isconvertible(pyobj));" << endl;
+    }
     s << '}' << endl << endl;
 
     // Write Converter<T>::toCpp function
@@ -491,6 +497,11 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
     s << '{' << endl;
 
     s << INDENT << "if (!Shiboken_TypeCheck(pyobj, " << type->name() << ")) {" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(SbkType<";
+        s << type->name() << ">());" << endl;
+    }
     bool firstImplicitIf = true;
     foreach (const AbstractMetaFunction* ctor, implicitConvs) {
         if (ctor->isModifiedRemoved())
@@ -522,6 +533,19 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
             s << INDENT << "return " << type->name() << '(' << toCppConv << ");" << endl;
         }
     }
+
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "else if (shiboType->ext_isconvertible && shiboType->ext_tocpp && shiboType->ext_isconvertible(pyobj)) {" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << type->name() << "* cptr = reinterpret_cast<" << type->name() << "*>(shiboType->ext_tocpp(pyobj));" << endl;
+            s << INDENT << "std::auto_ptr<" << type->name() << " > cptr_auto_ptr(cptr);" << endl;
+            s << INDENT << "return *cptr;" << endl;
+        }
+        s << INDENT << '}' << endl;
+    }
+
     s << INDENT << '}' << endl;
 
     s << INDENT << "return *" << cpythonWrapperCPtr(type, "pyobj") << ';' << endl;

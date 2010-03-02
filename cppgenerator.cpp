@@ -2862,6 +2862,16 @@ void CppGenerator::finishGeneration()
 
         s << "// Module initialization ";
         s << "------------------------------------------------------------" << endl;
+        ExtendedConverterData extendedConverters = getExtendedConverters();
+        if (!extendedConverters.isEmpty())
+            s << "// Extended Converters" << endl;
+        foreach (const TypeEntry* externalType, extendedConverters.keys()) {
+            writeExtendedIsConvertibleFunction(s, externalType, extendedConverters[externalType]);
+            writeExtendedToCppFunction(s, externalType, extendedConverters[externalType]);
+            s << endl;
+        }
+        s << endl;
+
         s << "extern \"C\" {" << endl << endl;
 
         s << getApiExportMacro() << " PyMODINIT_FUNC" << endl << "init" << moduleName() << "()" << endl;
@@ -2891,6 +2901,16 @@ void CppGenerator::finishGeneration()
         s << INDENT << "PyModule_AddObject(module, \"_Cpp_Api\", cppApiObject);" << endl << endl;
         s << INDENT << "// Initialize classes in the type system" << endl;
         s << classPythonDefines << endl;
+
+        if (!extendedConverters.isEmpty()) {
+            s << INDENT << "// Initialize extended Converters" << endl;
+            s << INDENT << "Shiboken::SbkBaseWrapperType* shiboType;" << endl << endl;
+        }
+        foreach (const TypeEntry* externalType, extendedConverters.keys()) {
+            writeExtendedConverterInitialization(s, externalType, extendedConverters[externalType]);
+            s << endl;
+        }
+        s << endl;
 
         s << INDENT << "// Initialize namespaces as uninstantiable classes in the type system" << endl;
         s << namespaceDefines << endl;

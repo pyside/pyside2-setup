@@ -5,7 +5,7 @@ add_subdirectory(otherbinding)
 
 file(GLOB TEST_FILES samplebinding/*_test.py otherbinding/*_test.py)
 
-set(test_blacklist "new_ctor_operator")
+set(test_blacklist "")
 
 find_package(PythonInterp REQUIRED)
 
