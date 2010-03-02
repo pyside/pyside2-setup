@@ -5,6 +5,7 @@
     <object-type name="OtherDerived" />
     <object-type name="OtherMultipleDerived" />
 
+    <value-type name="ExtendsNoImplicitConversion" />
     <value-type name="Number" />
 
 </typesystem>

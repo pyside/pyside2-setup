@@ -826,6 +826,7 @@
     <value-type name="MapUser"/>
     <value-type name="PairUser"/>
     <value-type name="ListUser"/>
+    <value-type name="NoImplicitConversion" />
     <value-type name="NonDefaultCtor" />
     <value-type name="OddBoolUser" />
     <value-type name="Overload">
