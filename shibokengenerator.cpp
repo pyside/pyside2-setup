@@ -819,6 +819,27 @@ AbstractMetaFunctionList ShibokenGenerator::filterFunctions(const AbstractMetaCl
     return result;
 }
 
+ShibokenGenerator::ExtendedConverterData ShibokenGenerator::getExtendedConverters() const
+{
+    ExtendedConverterData extConvs;
+    foreach (const AbstractMetaClass* metaClass, classes()) {
+        // Use only the classes for the current module.
+        if (!shouldGenerate(metaClass))
+            continue;
+        foreach (AbstractMetaFunction* convOp, metaClass->operatorOverloads(AbstractMetaClass::ConversionOp)) {
+            // Get only the conversion operators that return a type from another module,
+            // that are value-types and were not removed in the type system.
+            const TypeEntry* convType = convOp->type()->typeEntry();
+            if ((convType->codeGeneration() & TypeEntry::GenerateTargetLang)
+                || !convType->isValue()
+                || convOp->isModifiedRemoved())
+                continue;
+            extConvs[convType].append(convOp->ownerClass());
+        }
+    }
+    return extConvs;
+}
+
 void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                                        const CodeSnipList& codeSnips,
                                        CodeSnip::Position position,
