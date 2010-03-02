@@ -264,7 +264,7 @@ PyTypeObject SbkBaseWrapperType_Type = {
     /*tp_methods*/          0,
     /*tp_members*/          0,
     /*tp_getset*/           0,
-    /*tp_base*/             0,
+    /*tp_base*/             &PyType_Type,
     /*tp_dict*/             0,
     /*tp_descr_get*/        0,
     /*tp_descr_set*/        0,
@@ -359,8 +359,6 @@ void initShiboken()
 #ifdef WITH_THREAD
     PyEval_InitThreads();
 #endif
-
-    SbkBaseWrapperType_Type.tp_base = &PyType_Type;
 
     if (PyType_Ready(&SbkBaseWrapperType_Type) < 0)
         Py_FatalError("[libshiboken] Failed to initialise Shiboken.BaseWrapperType metatype.");
