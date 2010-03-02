@@ -1251,6 +1251,16 @@ QString ShibokenGenerator::getModuleHeaderFileName(const QString& moduleName) co
     return QString("%1_python.h").arg(result.toLower());
 }
 
+QString ShibokenGenerator::extendedIsConvertibleFunctionName(const TypeEntry* targetType) const
+{
+    return QString("ExtendedIsConvertible_%1_%2").arg(targetType->targetLangPackage().replace('.', '_')).arg(targetType->name());
+}
+
+QString ShibokenGenerator::extendedToCppFunctionName(const TypeEntry* targetType) const
+{
+    return QString("ExtendedToCpp_%1_%2").arg(targetType->targetLangPackage().replace('.', '_')).arg(targetType->name());
+}
+
 bool ShibokenGenerator::isCopyable(const AbstractMetaClass *metaClass)
 
 {

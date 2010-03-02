@@ -285,6 +285,9 @@ public:
     /// Returns the file name for the module global header. If no module name is provided the current will be used.
     QString getModuleHeaderFileName(const QString& moduleName = QString()) const;
 
+    QString extendedIsConvertibleFunctionName(const TypeEntry* targetType) const;
+    QString extendedToCppFunctionName(const TypeEntry* targetType) const;
+
     QMap< QString, QString > options() const;
 
     /// Returns true if the user enabled the so called "parent constructor heuristic".
