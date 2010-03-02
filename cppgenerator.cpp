@@ -1673,6 +1673,56 @@ void CppGenerator::writeSpecialCastFunction(QTextStream& s, const AbstractMetaCl
     s << "}\n\n";
 }
 
+void CppGenerator::writeExtendedIsConvertibleFunction(QTextStream& s, const TypeEntry* externalType, const QList<const AbstractMetaClass*>& conversions)
+{
+    s << "static bool " << extendedIsConvertibleFunctionName(externalType) << "(PyObject* pyobj)" << endl;
+    s << '{' << endl;
+    s << INDENT << "return ";
+    bool isFirst = true;
+    foreach (const AbstractMetaClass* metaClass, conversions) {
+        Indentation indent(INDENT);
+        if (isFirst)
+            isFirst = false;
+        else
+            s << endl << INDENT << " || ";
+        s << cpythonCheckFunction(metaClass->typeEntry()) << "(pyobj)";
+    }
+    s << ';' << endl;
+    s << '}' << endl;
+}
+
+void CppGenerator::writeExtendedToCppFunction(QTextStream& s, const TypeEntry* externalType, const QList<const AbstractMetaClass*>& conversions)
+{
+    s << "static void* " << extendedToCppFunctionName(externalType) << "(PyObject* pyobj)" << endl;
+    s << '{' << endl;
+    s << INDENT << "void* cptr = 0;" << endl;
+    bool isFirst = true;
+    foreach (const AbstractMetaClass* metaClass, conversions) {
+        s << INDENT;
+        if (isFirst)
+            isFirst = false;
+        else
+            s << "else ";
+        s << "if (" << cpythonCheckFunction(metaClass->typeEntry()) << "(pyobj))" << endl;
+        Indentation indent(INDENT);
+        s << INDENT << "cptr = new " << externalType->name() << '(';
+        writeToCppConversion(s, metaClass, "pyobj");
+        s << ");" << endl;
+    }
+    s << INDENT << "return cptr;" << endl;
+    s << '}' << endl;
+}
+
+void CppGenerator::writeExtendedConverterInitialization(QTextStream& s, const TypeEntry* externalType, const QList<const AbstractMetaClass*>& conversions)
+{
+    s << INDENT << "// Extended implicit conversions for " << externalType->targetLangPackage() << '.' << externalType->name() << endl;
+    s << INDENT << "shiboType = reinterpret_cast<Shiboken::SbkBaseWrapperType*>(";
+    s << cppApiVariableName(externalType->targetLangPackage()) << '[';
+    s << getTypeIndexVariableName(externalType) << "]);" << endl;
+    s << INDENT << "shiboType->ext_isconvertible = " << extendedIsConvertibleFunctionName(externalType) << ';' << endl;
+    s << INDENT << "shiboType->ext_tocpp = " << extendedToCppFunctionName(externalType) << ';' << endl;
+}
+
 QString CppGenerator::multipleInheritanceInitializerFunctionName(const AbstractMetaClass* metaClass)
 {
     if (!hasMultipleInheritanceInAncestry(metaClass))

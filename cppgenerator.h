@@ -149,6 +149,10 @@ private:
     /// Writes the implementation of special cast functions, used when we need to cast a class with mulltiple inheritance.
     void writeSpecialCastFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
+    void writeExtendedIsConvertibleFunction(QTextStream& s, const TypeEntry* externalType, const QList<const AbstractMetaClass*>& conversions);
+    void writeExtendedToCppFunction(QTextStream& s, const TypeEntry* externalType, const QList<const AbstractMetaClass*>& conversions);
+    void writeExtendedConverterInitialization(QTextStream& s, const TypeEntry* externalType, const QList<const AbstractMetaClass*>& conversions);
+
     void writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func);
     void writeReturnValueHeuristics(QTextStream& s, const AbstractMetaFunction* func, const QString& self = "self");
     /**
