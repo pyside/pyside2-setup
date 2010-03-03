@@ -34,8 +34,13 @@ class TypeDiscoveryTest(unittest.TestCase):
 
     def testPureVirtualsOfImpossibleTypeDiscovery(self):
         a = Derived.triggerImpossibleTypeDiscovery()
+        self.assertEqual(type(a), Abstract)
         # call some pure virtual method
         a.pureVirtual()
+
+    def testAnotherImpossibleTypeDiscovery(self):
+        a = Derived.triggerAnotherImpossibleTypeDiscovery()
+        self.assertEqual(type(a), Derived)
 
 if __name__ == '__main__':
     unittest.main()

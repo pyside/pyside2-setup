@@ -64,6 +64,7 @@ public:
     virtual void unpureVirtual();
 
     virtual PrintFormat returnAnEnum() { return Short; }
+    virtual Type type() const { return TpDerived; }
 
     // factory method
     static Abstract* createObject();
@@ -85,6 +86,7 @@ public:
     SomeInnerClass returnMyParameter(const SomeInnerClass& s) { return s; }
 
     static Abstract* triggerImpossibleTypeDiscovery();
+    static Abstract* triggerAnotherImpossibleTypeDiscovery();
 protected:
     const char* getClassName() { return className(); }
     virtual const char* className() { return "Derived"; }

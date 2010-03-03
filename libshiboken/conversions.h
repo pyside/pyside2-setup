@@ -232,7 +232,7 @@ struct ObjectTypeConverter
             return 0;
         SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(pyobj->ob_type);
         if (shiboType->mi_specialcast)
-            return (T*) shiboType->mi_specialcast(pyobj, reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()));
+            return (T*) shiboType->mi_specialcast(SbkBaseWrapper_cptr(pyobj), reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()));
         return (T*) SbkBaseWrapper_cptr(pyobj);
     }
 };
