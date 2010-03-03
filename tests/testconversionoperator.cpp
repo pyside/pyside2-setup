@@ -57,14 +57,15 @@ void TestConversionOperator::testConversionOperator()
     QCOMPARE(classC->functions().count(), 2);
     QCOMPARE(classA->externalConversionOperators().count(), 2);
 
-    const AbstractMetaFunction* convOp = 0;
-    foreach(const AbstractMetaFunction* func, classB->functions()) {
-        if (func->isConversionOperator())
+    AbstractMetaFunction* convOp = 0;
+    foreach(AbstractMetaFunction* func, classB->functions()) {
+        if (func->isConversionOperator()) {
             convOp = func;
+            break;
+        }
     }
     QVERIFY(convOp);
-    const AbstractMetaFunction* externalConvOp = classA->externalConversionOperators().first();
-    QCOMPARE(convOp, externalConvOp);
+    QVERIFY(classA->externalConversionOperators().contains(convOp));
 }
 
 void TestConversionOperator::testConversionOperatorOfDiscardedClass()
