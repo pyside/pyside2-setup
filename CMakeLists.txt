@@ -2,7 +2,6 @@ project(apiextractor)
 
 cmake_minimum_required(VERSION 2.6)
 
-find_package(Boost COMPONENTS graph REQUIRED)
 find_package(Qt4 4.5.0 REQUIRED)
 
 find_package(LibXml2 2.6.32 REQUIRED)
@@ -37,6 +36,7 @@ docparser.cpp
 doxygenparser.cpp
 qtdocparser.cpp
 fileout.cpp
+graph.cpp
 reporthandler.cpp
 typeparser.cpp
 typesystem.cpp
@@ -71,7 +71,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}/parser
                     ${CMAKE_CURRENT_SOURCE_DIR}/parser/rpp
-                    ${QT_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
+                    ${QT_INCLUDE_DIR}
                     ${LIBXSLT_INCLUDE_DIR}
                     ${LIBXML2_INCLUDE_DIR}
                     )
@@ -100,6 +100,7 @@ set(root_HEADERS
 apiextractormacros.h
 abstractmetalang.h
 apiextractor.h
+graph.h
 reporthandler.h
 typesystem.h
 fileout.h

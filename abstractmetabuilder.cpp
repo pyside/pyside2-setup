@@ -33,22 +33,18 @@
 #include "parser/parser.h"
 #include "parser/tokens.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QTextCodec>
-#include <QtCore/QTextStream>
-#include <QtCore/QVariant>
-#include <QtCore/QTime>
-#include <QtCore/QQueue>
-
-// boost graph library
-#include <boost/graph/topological_sort.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/graph_traits.hpp>
+#include <QDebug>
+#include <QFile>
+#include <QFileInfo>
+#include <QTextCodec>
+#include <QTextStream>
+#include <QVariant>
+#include <QTime>
+#include <QQueue>
+#include <QDir>
 
 #include <cstdio>
-#include <QDir>
+#include "graph.h"
 
 static QString stripTemplateArgs(const QString &name)
 {
@@ -2585,11 +2581,7 @@ void AbstractMetaBuilder::dumpLog()
 
 AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const AbstractMetaClass* cppClass) const
 {
-    using namespace boost;
-
-    AbstractMetaClassList result;
-    QList<int> unmappedResult;
-    QSet<QPair<int, int> > deps;
+    QLinkedList<int> unmappedResult;
     QHash<QString, int> map;
     QHash<int, AbstractMetaClass*> reverseMap;
 
@@ -2598,6 +2590,8 @@ AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const Abstra
         classList = cppClass->innerClasses();
     else
         classList = m_metaClasses;
+
+    Graph graph(classList.count());
 
     int i = 0;
     foreach (AbstractMetaClass* clazz, classList) {
@@ -2620,7 +2614,7 @@ AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const Abstra
                 clazz->baseClass()->enclosingClass() != clazz->enclosingClass()) {
                 baseClassName = clazz->baseClass()->enclosingClass()->name();
             }
-            deps << qMakePair(map[clazz->name()], map[baseClassName]);
+            graph.addEdge(map[baseClassName], map[clazz->name()]);
         }
 
         // interfaces...
@@ -2639,7 +2633,7 @@ AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const Abstra
             }
 
             if (!baseClassName.isNull() && baseClassName != clazz->name() && map.contains(baseClassName))
-                deps << qMakePair(map[clazz->name()], map[baseClassName]);
+                graph.addEdge(map[baseClassName], map[clazz->name()]);
         }
 
         foreach (AbstractMetaFunction* func, clazz->functions()) {
@@ -2654,33 +2648,22 @@ AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const Abstra
                     defaultExpression.replace(regex2, "");
                 }
                 if (!defaultExpression.isEmpty() && defaultExpression != clazz->name() && map.contains(defaultExpression))
-                    deps << qMakePair(map[clazz->name()], map[defaultExpression]);
+                    graph.addEdge(map[defaultExpression], map[clazz->name()]);
             }
         }
     }
 
-    // dot output for debug.
-//     typedef QPair<int, int> ABC;
-//     qDebug() << "digraph G { ";
-//     foreach (ABC p, deps) {
-//         TypeEntry* typeEntry = TypeDatabase::instance()->findType(reverseMap[p.second]->name());
-//         if (typeEntry && !typeEntry->generateCode())
-//             continue;
-//         qDebug() << reverseMap[p.first]->name() << " -> " << reverseMap[p.second]->name();
-//     }
-//     qDebug() << "}";
-
-
-    typedef adjacency_list <vecS, vecS, directedS> Graph;
-    Graph g(deps.begin(), deps.end(), classList.count());
-    topological_sort(g, std::back_inserter(unmappedResult));
-
-    foreach (int i, unmappedResult) {
-        Q_ASSERT(reverseMap.contains(i));
-        if (!reverseMap[i]->isInterface())
-            result << reverseMap[i];
+    AbstractMetaClassList result;
+    unmappedResult = graph.topologicalSort();
+    if (unmappedResult.isEmpty()) {
+        ReportHandler::warning("Cyclic dependency found!");
+    } else {
+        foreach (int i, unmappedResult) {
+            Q_ASSERT(reverseMap.contains(i));
+            if (!reverseMap[i]->isInterface())
+                result << reverseMap[i];
+        }
     }
-
     return result;
 }
 

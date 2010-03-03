@@ -47,6 +47,9 @@ void TestAbstractMetaClass::testClassNameUnderNamespace()
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 2); // 1 namespace + 1 class
+    if (classes.first()->name() != "ClassName")
+        classes.swap(0, 1);
+
     QCOMPARE(classes[0]->name(), QString("ClassName"));
     QCOMPARE(classes[0]->qualifiedCppName(), QString("Namespace::ClassName"));
     QCOMPARE(classes[1]->name(), QString("Namespace"));
