@@ -1264,7 +1264,7 @@ QString ShibokenGenerator::extendedToCppFunctionName(const TypeEntry* targetType
 bool ShibokenGenerator::isCopyable(const AbstractMetaClass *metaClass)
 
 {
-    if (metaClass->isNamespace())
+    if (metaClass->isNamespace() || metaClass->typeEntry()->isObject())
         return false;
     else if (metaClass->typeEntry()->copyable() == ComplexTypeEntry::Unknown)
         return metaClass->hasCloneOperator();
