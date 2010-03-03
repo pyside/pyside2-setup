@@ -44,7 +44,7 @@ void TestConversionOperator::testConversionOperator()
         <value-type name='C' />\
     </typesystem>";
 
-    TestUtil t(cppCode, xmlCode, false);
+    TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass("A");
     AbstractMetaClass* classB = classes.findClass("B");
@@ -80,7 +80,7 @@ void TestConversionOperator::testConversionOperatorOfDiscardedClass()
         <value-type name='A' />\
     </typesystem>";
 
-    TestUtil t(cppCode, xmlCode, false);
+    TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass("A");
     QVERIFY(classA);
@@ -103,7 +103,7 @@ void TestConversionOperator::testRemovedConversionOperator()
         </value-type>\
     </typesystem>";
 
-    TestUtil t(cppCode, xmlCode, false);
+    TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass("A");
     AbstractMetaClass* classB = classes.findClass("B");
