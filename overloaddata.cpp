@@ -22,12 +22,10 @@
  */
 
 #include <QtCore/QFile>
+#include <reporthandler.h>
+#include <graph.h>
 #include "overloaddata.h"
 #include "shibokengenerator.h"
-
-#include <boost/graph/topological_sort.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/graph_traits.hpp>
 
 /**
  * Topologically sort the overloads by implicit convertion order
@@ -69,7 +67,8 @@ void OverloadData::sortNextOverloads()
     }
 
     // Create the graph of type dependencies based on implicity conversions.
-    QSet<QPair<int, int> > deps;
+    Graph graph(reverseMap.count());
+
     foreach(OverloadData* ov, m_nextOverloadData) {
         const AbstractMetaType* targetType = ov->argType();
         foreach(AbstractMetaFunction* function, m_generator->implicitConversions(ov->argType())) {
@@ -87,11 +86,8 @@ void OverloadData::sortNextOverloads()
 
             // If a reverse pair already exists, remove it. Probably due to the
             // container check (This happened to QVariant and QHash)
-            QPair<int, int> reversePair = qMakePair(convertibleTypeId, targetTypeId);
-            if (deps.contains(reversePair))
-                deps.remove(reversePair);
-
-            deps << qMakePair(targetTypeId, convertibleTypeId);
+            graph.removeEdge(targetTypeId, convertibleTypeId);
+            graph.addEdge(convertibleTypeId, targetTypeId);
         }
 
         if (targetType->hasInstantiations()) {
@@ -100,32 +96,42 @@ void OverloadData::sortNextOverloads()
                     int target = map[targetType->typeEntry()->name()];
                     int convertible = map[instantiation->typeEntry()->name()];
 
-                    if (!deps.contains(qMakePair(convertible, target))) // Avoid cyclic dependency.
-                        deps << qMakePair(target, convertible);
+                    if (!graph.containsEdge(target, convertible)) // Avoid cyclic dependency.
+                        graph.addEdge(convertible, target);
                 }
             }
         }
 
         /* Add dependency on PyObject, so its check is the last one (too generic) */
         if (checkPyObject && !targetType->typeEntry()->name().contains("PyObject")) {
-            deps << qMakePair(pyobjectIndex,
-                              map[targetType->typeEntry()->name()]);
+            graph.addEdge(map[targetType->typeEntry()->name()], pyobjectIndex);
         }
     }
 
     // Special case for double(int i) (not tracked by m_generator->implicitConversions
     if (map.contains("int")) {
+        if (map.contains("float"))
+            graph.addEdge(map["float"], map["int"]);
         if (map.contains("double"))
-            deps << qMakePair(map["int"], map["double"]);
+            graph.addEdge(map["double"], map["int"]);
         if (map.contains("bool"))
-            deps << qMakePair(map["int"], map["bool"]);
+            graph.addEdge(map["bool"], map["int"]);
+    }
+
+    if (map.contains("long")) {
+        if (map.contains("float"))
+            graph.addEdge(map["float"], map["long"]);
+        if (map.contains("double"))
+            graph.addEdge(map["double"], map["long"]);
+        if (map.contains("bool"))
+            graph.addEdge(map["bool"], map["long"]);
     }
 
     // sort the overloads topologicaly based on the deps graph.
-    typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> Graph;
-    Graph g(deps.begin(), deps.end(), reverseMap.size());
-    QList<int> unmappedResult;
-    boost::topological_sort(g, std::back_inserter(unmappedResult));
+
+    QLinkedList<int> unmappedResult = graph.topologicalSort();
+    if (unmappedResult.isEmpty())
+        ReportHandler::warning("Cyclic dependency found on overloaddata!");
 
     m_nextOverloadData.clear();
     foreach(int i, unmappedResult)

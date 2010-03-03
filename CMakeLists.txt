@@ -6,7 +6,6 @@ cmake_minimum_required(VERSION 2.6)
 find_package(Qt4 4.5.0 REQUIRED)
 find_package(ApiExtractor REQUIRED)
 find_package(GeneratorRunner REQUIRED)
-find_package(Boost COMPONENTS graph REQUIRED)
 
 add_definitions(${QT_DEFINITIONS})
 
@@ -50,8 +49,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${APIEXTRACTOR_INCLUDE_DIR}
                     ${GENERATORRUNNER_INCLUDE_DIR}
                     ${QT_INCLUDE_DIR}
-                    ${QT_QTCORE_INCLUDE_DIR}
-                    ${Boost_INCLUDE_DIR})
+                    ${QT_QTCORE_INCLUDE_DIR})
 
 add_library(shiboken_generator SHARED ${shiboken_SRC})
 
