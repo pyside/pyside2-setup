@@ -53,6 +53,7 @@
     <enum-type name="Overload::FunctionEnum"/>
     <enum-type name="Overload::ParamEnum"/>
     <enum-type name="Event::EventType"/>
+    <enum-type name="Abstract::Type"/>
 
     <namespace-type name="SampleNamespace"/>
 
@@ -60,7 +61,7 @@
         <modify-function signature="id()" rename="id_"/>
     </object-type>
 
-    <object-type name="Derived"/>
+    <object-type name="Derived" polymorphic-id-expression="%1->type() == Derived::TpDerived" />
     <value-type name="Derived::SomeInnerClass" />
 
     <object-type name="ObjectType">

@@ -56,6 +56,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 add_library(shiboken_generator SHARED ${shiboken_SRC})
 
 target_link_libraries(shiboken_generator
+                      ${APIEXTRACTOR_LIBRARY}
                       ${GENERATORRUNNER_LIBRARY}
                       ${QT_QTCORE_LIBRARY})
 

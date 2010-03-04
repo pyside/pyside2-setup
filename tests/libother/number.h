@@ -47,7 +47,7 @@ public:
     Str toStr() const;
     operator Str() const { return toStr(); }
 
-protected:
+private:
     int m_value;
 };
 #endif // NUMBER_H
