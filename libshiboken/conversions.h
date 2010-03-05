@@ -571,16 +571,11 @@ struct Converter_std_map
         PyObject* value;
         Py_ssize_t pos = 0;
 
-        Py_INCREF(pyobj);
-
         while (PyDict_Next(pyobj, &pos, &key, &value)) {
             result.insert(typename StdMap::value_type(
                     Converter<typename StdMap::key_type>::toCpp(key),
                     Converter<typename StdMap::mapped_type>::toCpp(value)));
         }
-
-        Py_DECREF(pyobj);
-
         return result;
     }
 };
