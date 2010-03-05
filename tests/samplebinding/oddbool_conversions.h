@@ -2,7 +2,7 @@ namespace Shiboken {
 template <>
 struct Converter<OddBool> : public ValueTypeConverter<OddBool>
 {
-    static bool isConvertible(const PyObject* pyObj)
+    static bool isConvertible(PyObject* pyObj)
     {
         return PyBool_Check(pyObj);
     }

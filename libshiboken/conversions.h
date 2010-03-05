@@ -42,10 +42,12 @@
 #include "pyenum.h"
 #include "basewrapper.h"
 #include "bindingmanager.h"
+#include "sbkdbg.h"
 
 // When the user adds a function with an argument unknown for the typesystem, the generator writes type checks as
 // TYPENAME_Check, so this macro allows users to add PyObject arguments to their added functions.
 #define PyObject_Check(X) true
+#include "autodecref.h"
 
 namespace Shiboken
 {
@@ -124,12 +126,13 @@ template <typename T> struct Converter {};
 
 // Pointer conversion specialization for value types.
 template <typename T>
-struct Converter<T*> : Converter<T>
+struct Converter<T*>
 {
-    /// Value type pointers should be convertible only to NULL pointers, represented in Python by a 'None' object.
-    static inline bool isConvertible(PyObject* pyobj) { return pyobj == Py_None; }
-    /// Convenience overload that calls "toPython(const T*)" method.
-    static inline PyObject* toPython(void* cppobj) { return toPython(reinterpret_cast<T*>(cppobj)); }
+    static inline bool isConvertible(PyObject* pyObj)
+    {
+        return pyObj == Py_None || PyObject_TypeCheck(pyObj, SbkType<T>());
+    }
+
     static PyObject* toPython(const T* cppobj)
     {
         if (!cppobj)
@@ -141,6 +144,7 @@ struct Converter<T*> : Converter<T>
             pyobj = createWrapper<T>(cppobj);
         return pyobj;
     }
+
     static T* toCpp(PyObject* pyobj)
     {
         if (Shiboken_TypeCheck(pyobj, T))
@@ -154,19 +158,20 @@ template <typename T> struct Converter<const T*> : Converter<T*> {};
 
 // Specialization for reference conversions.
 template <typename T>
-struct Converter<T&> : Converter<T*>
+struct Converter<T&>
 {
-    static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<T*>(cppobj)); }
+    static inline bool isConvertible(PyObject* pyObj) { return Converter<T>::isConvertible(pyObj); }
     static inline PyObject* toPython(const T& cppobj) { return Converter<T*>::toPython(&cppobj); }
     static inline T& toCpp(PyObject* pyobj) { return *Converter<T*>::toCpp(pyobj); }
 };
+
 template <typename T> struct Converter<const T&> : Converter<T&> {};
 
 // Void pointer conversions.
 template<>
 struct Converter<void*>
 {
-    static inline bool isConvertible(PyObject* pyobj) { return false; }
+    static inline bool isConvertible(PyObject* pyobj) { return true; }
     static PyObject* toPython(const void* cppobj)
     {
         PyObject* pyobj = BindingManager::instance().retrieveWrapper(cppobj);
@@ -194,6 +199,8 @@ struct ValueTypeConverter
     // The basic version of this method also tries to use the extended 'isConvertible' method.
     static inline bool isConvertible(PyObject* pyobj)
     {
+        if (PyObject_TypeCheck(pyobj, SbkType<T>()))
+            return true;
         SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>());
         if (shiboType->ext_isconvertible)
             return shiboType->ext_isconvertible(pyobj);
@@ -213,11 +220,14 @@ struct ValueTypeConverter
     // use them if it is the case.
     static inline T toCpp(PyObject* pyobj)
     {
-        if (isConvertible(pyobj)) {
-            SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>());
-            T* cptr = reinterpret_cast<T*>(shiboType->ext_tocpp(pyobj));
-            std::auto_ptr<T> cptr_auto_ptr(cptr);
-            return *cptr;
+        PyTypeObject* typeObj = SbkType<T>();
+        if (typeObj->ob_type == &Shiboken::SbkBaseWrapperType_Type) {
+            SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(typeObj);
+            if (shiboType->ext_tocpp && isConvertible(pyobj)) {
+                T* cptr = reinterpret_cast<T*>(shiboType->ext_tocpp(pyobj));
+                std::auto_ptr<T> cptr_auto_ptr(cptr);
+                return *cptr;
+            }
         }
         return *reinterpret_cast<T*>(reinterpret_cast<Shiboken::SbkBaseWrapper*>(pyobj)->cptr);
     }
@@ -230,7 +240,7 @@ template <typename T>
 struct ObjectTypeConverter
 {
     /// Py_None objects are the only objects convertible to an object type (in the form of a NULL pointer).
-    static inline bool isConvertible(PyObject* pyobj) { return pyobj == Py_None; }
+    static inline bool isConvertible(PyObject* pyObj) { return pyObj == Py_None || PyObject_TypeCheck(pyObj, SbkType<T>()); }
     /// Convenience overload that calls "toPython(const T*)" method.
     static inline PyObject* toPython(void* cppobj) { return toPython(reinterpret_cast<T*>(cppobj)); }
     /// Returns a new Python wrapper for the C++ object or an existing one with its reference counter incremented.
@@ -425,6 +435,7 @@ struct Converter<unsigned PY_LONG_LONG>
 template <typename PyFloatEquiv>
 struct Converter_PyFloat
 {
+    static inline bool isConvertible(PyObject* obj) { return PyNumber_Check(obj); }
     static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<PyFloatEquiv*>(cppobj)); }
     static inline PyObject* toPython(PyFloatEquiv cppobj) { return PyFloat_FromDouble((double) cppobj); }
     static inline PyFloatEquiv toCpp(PyObject* pyobj)
@@ -442,6 +453,7 @@ template <> struct Converter<double> : Converter_PyFloat<double> {};
 template <typename CppEnum>
 struct EnumConverter
 {
+    static inline bool isConvertible(PyObject* pyObj) { return PyObject_TypeCheck(pyObj, SbkType<CppEnum>()); }
     static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<CppEnum*>(cppobj)); }
     static inline PyObject* toPython(CppEnum cppenum)
     {
@@ -457,6 +469,7 @@ struct EnumConverter
 template <typename CString>
 struct Converter_CString
 {
+    static inline bool isConvertible(PyObject* pyObj) { return pyObj == Py_None || PyString_Check(pyObj); }
     static inline PyObject* toPython(void* cppobj) { return toPython(reinterpret_cast<CString>(cppobj)); }
     static inline PyObject* toPython(CString cppobj)
     {
@@ -488,9 +501,18 @@ template <> struct Converter<const char*> : Converter_CString<const char*> {};
 template <typename StdList>
 struct Converter_std_list
 {
-    static inline bool isConvertible(const PyObject* pyObj)
+    static inline bool isConvertible(PyObject* pyObj)
     {
-        return PySequence_Check(const_cast<PyObject*>(pyObj));
+        if (PyObject_TypeCheck(pyObj, SbkType<StdList>()))
+            return true;
+        if (!PySequence_Check(pyObj))
+            return false;
+        for (int i = 0, max = PySequence_Length(pyObj); i < max; ++i) {
+            AutoDecRef item(PySequence_GetItem(pyObj, i));
+            if (!Converter<typename StdList::value_type>::isConvertible(item))
+                return false;
+        }
+        return true;
     }
     static PyObject* toPython(const StdList& cppobj)
     {
@@ -516,9 +538,21 @@ struct Converter_std_list
 template <typename StdPair>
 struct Converter_std_pair
 {
-    static inline bool isConvertible(const PyObject* pyObj)
+    static inline bool isConvertible(PyObject* pyObj)
     {
-        return PySequence_Check(const_cast<PyObject*>(pyObj));
+        if (PyObject_TypeCheck(pyObj, SbkType<StdPair>()))
+            return true;
+        if (!PySequence_Check(pyObj) || PySequence_Length(pyObj) != 2)
+            return false;
+
+        AutoDecRef item1(PySequence_GetItem(pyObj, 0));
+        AutoDecRef item2(PySequence_GetItem(pyObj, 1));
+
+        if (!Converter<typename StdPair::first_type>::isConvertible(item1)
+            && !Converter<typename StdPair::second_type>::isConvertible(item2)) {
+            return false;
+        }
+        return true;
     }
     static PyObject* toPython(const StdPair& cppobj)
     {
@@ -543,9 +577,24 @@ struct Converter_std_pair
 template <typename StdMap>
 struct Converter_std_map
 {
-    static inline bool isConvertible(const PyObject* pyObj)
+    static inline bool isConvertible(PyObject* pyObj)
     {
-        return PyDict_Check(const_cast<PyObject*>(pyObj));
+        if (PyObject_TypeCheck(pyObj, SbkType<StdMap>()))
+            return true;
+        if (!PyDict_Check(pyObj))
+            return false;
+
+        PyObject* key;
+        PyObject* value;
+        Py_ssize_t pos = 0;
+
+        while (PyDict_Next(pyObj, &pos, &key, &value)) {
+            if (!Converter<typename StdMap::key_type>::isConvertible(key)
+                && !Converter<typename StdMap::mapped_type>::isConvertible(value)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     static PyObject* toPython(const StdMap& cppobj)

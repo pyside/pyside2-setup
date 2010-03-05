@@ -164,19 +164,28 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
             implicitConvs << func;
     }
     bool isValueTypeWithImplConversions = type->isValue() && !implicitConvs.isEmpty();
+    bool hasCustomConversion = type->hasConversionRule();
+    QString typeT = type->name() + (isAbstractOrObjectType ? "*" : "");
 
-    s << "struct Converter<" << type->name() << (isAbstractOrObjectType ? "*" : "") << " > : ";
-    if (type->isEnum() || type->isFlags())
-        s << "EnumConverter";
-    else if (isAbstractOrObjectType)
-        s << "ObjectTypeConverter";
-    else
-        s << "ValueTypeConverter";
-    s << '<' << type->name() << " >" << endl;
-    s << '{' << endl;
-    if (isValueTypeWithImplConversions) {
+    s << "struct Converter<" << typeT << " >";
+    if (!hasCustomConversion) {
+        if (type->isEnum() || type->isFlags())
+            s << " : EnumConverter";
+        else if (isAbstractOrObjectType)
+            s << " : ObjectTypeConverter";
+        else
+            s << " : ValueTypeConverter";
+        s << '<' << type->name() << " >";
+    }
+    s << endl << '{' << endl;
+    if (isValueTypeWithImplConversions || hasCustomConversion) {
         s << INDENT << "static " << type->name() << " toCpp(PyObject* pyobj);" << endl;
         s << INDENT << "static bool isConvertible(PyObject* pyobj);" << endl;
+        if (hasCustomConversion) {
+            s << INDENT << "static inline PyObject* toPython(void* cppObj) { return toPython(*reinterpret_cast<"
+              << type->name() << (isAbstractOrObjectType ? "" : "*") << " >(cppObj)); }" << endl;
+            s << INDENT << "static PyObject* toPython(const " << type->name() << "& cppObj);" << endl;
+        }
     }
     s << "};" << endl;
 }
@@ -469,6 +478,14 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
     // Write Converter<T>::isConvertible
     s << "inline bool Shiboken::Converter<" << type->name() << " >::isConvertible(PyObject* pyobj)" << endl;
     s << '{' << endl;
+
+    if (type->isValue()) {
+        s << INDENT << "if (ValueTypeConverter<" << type->name() << " >::isConvertible(pyobj))" << endl;
+        Indentation indent(INDENT);
+        s << INDENT << "return true;" << endl;
+    }
+
+
     s << INDENT << "SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(SbkType<";
     s << type->name() << " >());" << endl;
     s << INDENT << "return ";
@@ -500,7 +517,7 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
     {
         Indentation indent(INDENT);
         s << INDENT << "SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(SbkType<";
-        s << type->name() << ">());" << endl;
+        s << type->name() << " >());" << endl;
     }
     bool firstImplicitIf = true;
     foreach (const AbstractMetaFunction* ctor, implicitConvs) {

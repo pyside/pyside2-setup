@@ -1,19 +1,28 @@
 namespace Shiboken {
 template<>
-struct Converter<Complex> : public ValueTypeConverter<Complex>
+struct Converter<Complex>
 {
-    static bool isConvertible(const PyObject* pyObj)
+    static inline bool checkType(PyObject* pyObj)
     {
         return PyComplex_Check(pyObj);
     }
 
-    using ValueTypeConverter<Complex>::toPython;
+    static inline bool isConvertible(PyObject* pyObj)
+    {
+        return PyComplex_Check(pyObj);
+    }
 
-    static PyObject* toPython(const Complex& cpx)
+    static inline PyObject* toPython(void* cppobj)
+    {
+        return toPython(*reinterpret_cast<Complex*>(cppobj));
+    }
+
+    static inline PyObject* toPython(const Complex& cpx)
     {
         return PyComplex_FromDoubles(cpx.real(), cpx.imag());
     }
-    static Complex toCpp(PyObject* pyobj)
+
+    static inline Complex toCpp(PyObject* pyobj)
     {
         double real =  PyComplex_RealAsDouble(pyobj);
         double imag =  PyComplex_ImagAsDouble(pyobj);

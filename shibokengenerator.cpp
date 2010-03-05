@@ -590,6 +590,7 @@ bool ShibokenGenerator::shouldDereferenceAbstractMetaTypePointer(const AbstractM
 
 static QString checkFunctionName(QString baseName, bool genericNumberType, bool checkExact)
 {
+    // TODO: Remove checkExact argument.
     return QString("%1_Check%2")
            .arg((genericNumberType && ShibokenGenerator::isNumber(baseName) ? "PyNumber" : baseName))
            .arg((checkExact && !genericNumberType ? "Exact" : ""));
@@ -597,9 +598,18 @@ static QString checkFunctionName(QString baseName, bool genericNumberType, bool 
 
 QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType, bool genericNumberType, bool checkExact)
 {
-    if (metaType->typeEntry()->isCustom())
+    QString baseName = cpythonBaseName(metaType);
+    if (metaType->typeEntry()->isCustom()) {
         return guessCPythonCheckFunction(metaType->typeEntry()->name());
-    return checkFunctionName(cpythonBaseName(metaType), genericNumberType, checkExact);
+    } else if (isNumber(baseName)) {
+        return genericNumberType ? "PyNumber_Check" : baseName+"_Check";
+    } else {
+        QString str;
+        QTextStream s(&str);
+        writeBaseConversion(s, metaType, 0);
+        s.flush();
+        return str + "isConvertible";
+    }
 }
 
 QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool genericNumberType, bool checkExact)

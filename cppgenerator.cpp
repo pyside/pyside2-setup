@@ -1057,11 +1057,6 @@ void CppGenerator::writeInvalidCppObjectCheck(QTextStream& s, QString pyArgName,
 
 void CppGenerator::writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, bool isNumber, QString customType)
 {
-    bool writeIsConvertibleCheck = argType->typeEntry()->isObject() || argType->typeEntry()->isValue();
-
-    if (writeIsConvertibleCheck || isCString(argType) || isPairContainer(argType))
-        s << '(';
-
     if (!customType.isEmpty())
         s << guessCPythonCheckFunction(customType);
     else if (argType->typeEntry()->isFlags())
@@ -1072,13 +1067,6 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const AbstractMetaType* argTyp
         s << cpythonCheckFunction(argType, isNumber);
 
     s << '(' << argumentName << ')';
-
-    if (isPairContainer(argType))
-        s << " && PySequence_Size(" << argumentName << ") == 2)";
-    else if (isCString(argType))
-        s << " || " << argumentName << " == Py_None)";
-    else if (writeIsConvertibleCheck)
-        s << " || " << cpythonIsConvertibleFunction(argType) << '(' << argumentName << "))";
 }
 
 void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName)
