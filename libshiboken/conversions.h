@@ -492,14 +492,14 @@ template <> struct Converter<const char*> : Converter_CString<const char*> {};
 // that are similar to the STL containers of the same name.
 
 // For example to create a converter for a std::list the following code is enough:
-// template<typename T> struct Converter<std::list<T> > : Converter_std_list<std::list<T> > {};
+// template<typename T> struct Converter<std::list<T> > : StdListConverter<std::list<T> > {};
 
 // And this for a std::map:
 // template<typename KT, typename VT>
-// struct Converter<std::map<KT, VT> > : Converter_std_map<std::map<KT, VT> > {};
+// struct Converter<std::map<KT, VT> > : StdMapConverter<std::map<KT, VT> > {};
 
 template <typename StdList>
-struct Converter_std_list
+struct StdListConverter
 {
     static inline bool isConvertible(PyObject* pyObj)
     {
@@ -536,7 +536,7 @@ struct Converter_std_list
 };
 
 template <typename StdPair>
-struct Converter_std_pair
+struct StdPairConverter
 {
     static inline bool isConvertible(PyObject* pyObj)
     {
@@ -575,7 +575,7 @@ struct Converter_std_pair
 };
 
 template <typename StdMap>
-struct Converter_std_map
+struct StdMapConverter
 {
     static inline bool isConvertible(PyObject* pyObj)
     {
