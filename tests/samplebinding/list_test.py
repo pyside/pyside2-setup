@@ -103,6 +103,11 @@ class ListConversionTest(unittest.TestCase):
             self.assertEqual(pt0.x() * mult, pt1.x())
             self.assertEqual(pt0.y() * mult, pt1.y())
 
+    def testConversionOfInvalidLists(self):
+        mult = 3
+        pts = (Point(1.0, 2.0), 3, Point(5, 6))
+        self.assertRaises(TypeError, ListUser.multiplyPointList, pts, mult)
+
 if __name__ == '__main__':
     unittest.main()
 
