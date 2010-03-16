@@ -58,7 +58,10 @@ namespace Shiboken
 *   \see SpecialCastFunction
 */
 template<typename T>
-PyTypeObject* SbkType();
+PyTypeObject* SbkType()
+{
+    return 0;
+}
 
 template<> inline PyTypeObject* SbkType<int>() { return &PyInt_Type; }
 template<> inline PyTypeObject* SbkType<unsigned int>() { return &PyLong_Type; }
