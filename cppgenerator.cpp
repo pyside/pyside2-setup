@@ -1029,30 +1029,9 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
 
 void CppGenerator::writeInvalidCppObjectCheck(QTextStream& s, QString pyArgName, const TypeEntry* type)
 {
-    s << INDENT << "if (";
-    if (type) {
-        QString implicitChecks;
-        QTextStream ic(&implicitChecks);
-        foreach (const AbstractMetaFunction* ctor, implicitConversions(type)) {
-            const TypeEntry* te;
-            if (ctor->isConversionOperator())
-                te = ctor->ownerClass()->typeEntry();
-            else
-                te = ctor->arguments().first()->type()->typeEntry();
-            if (te->isValue() || te->isObject())
-                ic << " || " << cpythonCheckFunction(te) << '(' << pyArgName << ')';
-        }
-        s << (!implicitChecks.isEmpty() ? "(" : "");
-        s << cpythonCheckFunction(type) << '(' << pyArgName << ')';
-        if (!implicitChecks.isEmpty())
-            s << implicitChecks << ')';
-        s << " && ";
-    }
-    s << "Shiboken::cppObjectIsInvalid(" << pyArgName << "))" << endl;
-    {
-        Indentation indent(INDENT);
-        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
-    }
+    s << INDENT << "if (Shiboken::cppObjectIsInvalid(" << pyArgName << "))" << endl;
+    Indentation indent(INDENT);
+    s << INDENT << "return " << m_currentErrorCode << ';' << endl;
 }
 
 void CppGenerator::writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, bool isNumber, QString customType)

@@ -153,9 +153,12 @@ PyObject* SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*)
 
 bool cppObjectIsInvalid(PyObject* wrapper)
 {
-    if (wrapper == Py_None || ((Shiboken::SbkBaseWrapper*)wrapper)->validCppObject)
+    if (wrapper == Py_None
+        || wrapper->ob_type->ob_type != &Shiboken::SbkBaseWrapperType_Type
+        || ((Shiboken::SbkBaseWrapper*)wrapper)->validCppObject) {
         return false;
-    PyErr_SetString(PyExc_RuntimeError, "internal C++ object already deleted.");
+    }
+    PyErr_SetString(PyExc_RuntimeError, "Internal C++ object already deleted.");
     return true;
 }
 
