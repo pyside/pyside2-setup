@@ -172,7 +172,7 @@ inline bool isShibokenType(const PyObject* pyObj)
  */
 #define Shiboken_TypeCheck(pyobj, type) (PyObject_TypeCheck(pyobj, SbkType<type>()))
 
-#define SbkBaseWrapper_Check(op) PyObject_TypeCheck(op, &Shiboken::SbkBaseWrapper_Type)
+#define SbkBaseWrapper_Check(op) PyObject_TypeCheck(op, (PyTypeObject*)&Shiboken::SbkBaseWrapper_Type)
 #define SbkBaseWrapper_CheckExact(op) ((op)->ob_type == &Shiboken::SbkBaseWrapper_Type)
 
 #define SbkBaseWrapper_cptr(pyobj)                   (((Shiboken::SbkBaseWrapper*)pyobj)->cptr)
