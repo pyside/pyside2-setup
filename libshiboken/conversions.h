@@ -606,11 +606,9 @@ struct StdMapConverter
         typename StdMap::const_iterator it = cppobj.begin();
 
         for (; it != cppobj.end(); ++it) {
-            typename StdMap::key_type h_key((*it).first);
-            typename StdMap::mapped_type h_val((*it).second);
             PyDict_SetItem(result,
-                           Converter<typename StdMap::key_type>::toPython(h_key),
-                           Converter<typename StdMap::mapped_type>::toPython(h_val));
+                           Converter<typename StdMap::key_type>::toPython(it->first),
+                           Converter<typename StdMap::mapped_type>::toPython(it->second));
         }
 
         return result;
