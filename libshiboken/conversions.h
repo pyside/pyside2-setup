@@ -508,7 +508,11 @@ struct StdListConverter
     {
         if (PyObject_TypeCheck(pyObj, SbkType<StdList>()))
             return true;
-        if (!PySequence_Check(pyObj))
+        // Sequence conversion are made ONLY for python sequences, not for
+        // binded types implementing sequence protocol, otherwise this will
+        // cause a mess like QBitArray being accepted by someone expecting a
+        // QStringList.
+        if ((SbkType<StdList>() && isShibokenType(pyObj)) || !PySequence_Check(pyObj))
             return false;
         for (int i = 0, max = PySequence_Length(pyObj); i < max; ++i) {
             AutoDecRef item(PySequence_GetItem(pyObj, i));
@@ -545,7 +549,7 @@ struct StdPairConverter
     {
         if (PyObject_TypeCheck(pyObj, SbkType<StdPair>()))
             return true;
-        if (!PySequence_Check(pyObj) || PySequence_Length(pyObj) != 2)
+        if ((SbkType<StdPair>() && isShibokenType(pyObj)) || !PySequence_Check(pyObj) || PySequence_Length(pyObj) != 2)
             return false;
 
         AutoDecRef item1(PySequence_GetItem(pyObj, 0));
@@ -584,7 +588,7 @@ struct StdMapConverter
     {
         if (PyObject_TypeCheck(pyObj, SbkType<StdMap>()))
             return true;
-        if (!PyDict_Check(pyObj))
+        if ((SbkType<StdMap>() && isShibokenType(pyObj)) || !PyDict_Check(pyObj))
             return false;
 
         PyObject* key;
