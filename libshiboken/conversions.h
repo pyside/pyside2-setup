@@ -546,6 +546,9 @@ struct StdListConverter
     }
     static StdList toCpp(PyObject* pyobj)
     {
+        if (PyObject_TypeCheck(pyobj, SbkType<StdList>()))
+            return *reinterpret_cast<StdList*>(SbkBaseWrapper_cptr(pyobj));
+
         StdList result;
         for (int i = 0; i < PySequence_Size(pyobj); i++) {
             PyObject* pyItem = PySequence_GetItem(pyobj, i);
