@@ -98,14 +98,14 @@ Derived::otherOverloaded(int a, double b)
     return OtherOverloadedFunc_id;
 }
 
-struct SecrectClass : public Abstract {
+struct SecretClass : public Abstract {
     virtual void pureVirtual() {}
     virtual PrintFormat returnAnEnum() { return Short; }
 };
 
 Abstract* Derived::triggerImpossibleTypeDiscovery()
 {
-    return new SecrectClass;
+    return new SecretClass;
 }
 
 struct AnotherSecretClass : public Derived {
