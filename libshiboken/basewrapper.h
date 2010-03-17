@@ -159,6 +159,13 @@ LIBSHIBOKEN_API void removeParent(SbkBaseWrapper* child);
 */
 LIBSHIBOKEN_API void destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent = true);
 
+/**
+*   Returns true if the type of \p pyObj was created by the Shiboken generator.
+*/
+inline bool isShibokenType(const PyObject* pyObj)
+{
+    return pyObj->ob_type->ob_type == &Shiboken::SbkBaseWrapperType_Type;
+}
 
 /**
  * Shiboken_TypeCheck macro performs a type check using the values registered with SbkType<>() template.
