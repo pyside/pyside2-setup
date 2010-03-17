@@ -188,6 +188,13 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
         }
     }
     s << "};" << endl;
+
+    // write value-type like converter to object-types
+    if (isAbstractOrObjectType) {
+        s << endl << "template<>" << endl;
+        s << "struct Converter<" << type->name() << "& > : ObjectTypeReferenceConverter<" << type->name() << " >" << endl << '{' << endl;
+        s << "};" << endl << endl;
+    }
 }
 
 void HeaderGenerator::writeTypeIndexDefineLine(QTextStream& s, const TypeEntry* typeEntry, int& idx)

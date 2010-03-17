@@ -270,6 +270,19 @@ struct ObjectTypeConverter
     }
 };
 
+template <typename T>
+struct ObjectTypeReferenceConverter : ObjectTypeConverter<T>
+{
+    static inline bool isConvertible(PyObject* pyObj) { return PyObject_TypeCheck(pyObj, SbkType<T>()); }
+    static inline PyObject* toPython(const T& cppobj) { return Converter<T*>::toPython(&cppobj); }
+    static inline T& toCpp(PyObject* pyobj)
+    {
+        T* t = Converter<T*>::toCpp(pyobj);
+        assert(t);
+        return *t;
+    }
+};
+
 // PyObject* specialization to avoid converting what doesn't need to be converted.
 template<>
 struct Converter<PyObject*> : ObjectTypeConverter<PyObject*>
