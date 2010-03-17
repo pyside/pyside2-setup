@@ -54,6 +54,12 @@ OtherDerived::pureVirtual()
 {
 }
 
+void*
+OtherDerived::pureVirtualReturningVoidPtr()
+{
+    return 0;
+}
+
 void
 OtherDerived::unpureVirtual()
 {

@@ -61,6 +61,7 @@ public:
     Derived(int id = -1);
     virtual ~Derived();
     virtual void pureVirtual();
+    virtual void* pureVirtualReturningVoidPtr();
     virtual void unpureVirtual();
 
     virtual PrintFormat returnAnEnum() { return Short; }

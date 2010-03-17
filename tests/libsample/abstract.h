@@ -70,6 +70,7 @@ public:
     static int getObjectId(Abstract* obj) { return obj->id(); }
 
     virtual void pureVirtual() = 0;
+    virtual void* pureVirtualReturningVoidPtr() = 0;
     virtual void unpureVirtual();
 
     virtual PrintFormat returnAnEnum() = 0;

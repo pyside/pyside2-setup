@@ -435,9 +435,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
             s << func->ownerClass()->name() << '.' << func->name();
             s << "()' not implemented.\");" << endl;
-            s << INDENT << "return";
+            s << INDENT << "return ";
             if (func->type()) {
-                s << ' ';
                 writeMinimalConstructorCallArguments(s, func->type());
             }
         } else {
@@ -783,6 +782,8 @@ void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const Ab
         s << type->name() << "(0)";
     } else if (type->isContainer() || type->isFlags() || type->isEnum()){
         s << metaType->cppSignature() << "()";
+    } else if (metaType->isNativePointer() && type->isVoid()) {
+        s << "0";
     } else {
         // this is slowwwww, FIXME: Fix the API od APIExtractor, these things should be easy!
         foreach (AbstractMetaClass* metaClass, classes()) {

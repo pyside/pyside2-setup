@@ -57,6 +57,12 @@ Derived::pureVirtual()
 {
 }
 
+void*
+Derived::pureVirtualReturningVoidPtr()
+{
+    return 0;
+}
+
 void
 Derived::unpureVirtual()
 {
@@ -100,6 +106,7 @@ Derived::otherOverloaded(int a, double b)
 
 struct SecretClass : public Abstract {
     virtual void pureVirtual() {}
+    virtual void* pureVirtualReturningVoidPtr() { return 0; }
     virtual PrintFormat returnAnEnum() { return Short; }
 };
 

@@ -44,6 +44,9 @@ class Concrete(Abstract):
     def pureVirtual(self):
         self.pure_virtual_called = True
 
+    def pureVirtualReturningVoidPtr(self):
+        return 42
+
     def unpureVirtual(self):
         self.unpure_virtual_called = True
 
@@ -66,6 +69,14 @@ class AbstractTest(unittest.TestCase):
         '''Test if calling a pure virtual method raises the correct exception.'''
         i = Incomplete()
         self.assertRaises(NotImplementedError, i.pureVirtual)
+
+    def testPureVirtualReturningVoidPtrReturnValue(self):
+        '''Test if a pure virtual method returning void ptr can be properly reimplemented'''
+        # Note that the semantics of reimplementing the pure virtual method in
+        # Python and calling it from C++ is undefined until it's decided how to
+        # cast the Python data types to void pointers
+        c = Concrete()
+        self.assertEqual(c.pureVirtualReturningVoidPtr(),42)
 
     def testReimplementedVirtualMethodCall(self):
         '''Test if instanciation of an abstract class raises the correct exception.'''
