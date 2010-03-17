@@ -413,11 +413,12 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     if (func->isAbstract() && func->isModifiedRemoved()) {
         s << INDENT << "#warning Pure virtual method \"" << func->ownerClass()->name() << "::" << func->minimalSignature();
         s << "\" must be implement but was completely removed on typesystem." << endl;
+        s << INDENT << "return";
         if (func->type()) {
-            s << INDENT << "return ";
+            s << ' ';
             writeMinimalConstructorCallArguments(s, func->type());
-            s << ';' << endl;
         }
+        s << ';' << endl;
         s << '}' << endl << endl;
         return;
     }
