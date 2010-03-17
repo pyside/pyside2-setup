@@ -26,10 +26,9 @@
 
 '''Test cases for overload sorting'''
 
-import sys
 import unittest
 
-from sample import SortedOverload, ImplicitBase, ImplicitTarget
+from sample import *
 
 class Dummy(object):
     pass
@@ -75,6 +74,10 @@ class DeepOverloadSorting(unittest.TestCase):
         '''Deep Overload - (int, ImplicitBase *)'''
         self.assertEqual(self.obj.overloadDeep(1, ImplicitBase()), "ImplicitBase")
 
+class EnumOverIntSorting(unittest.TestCase):
+    def testEnumOverInt(self):
+        ic = ImplicitConv(ImplicitConv.CtorTwo)
+        self.assertEquals(ic.ctorEnum(), ImplicitConv.CtorTwo)
 
 if __name__ == '__main__':
     unittest.main()

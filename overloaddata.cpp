@@ -68,6 +68,9 @@ void OverloadData::sortNextOverloads()
 
     // Create the graph of type dependencies based on implicity conversions.
     Graph graph(reverseMap.count());
+    bool haveInt = map.contains("int");
+    bool haveLong = map.contains("long");
+    bool haveBool = map.contains("bool");
 
     foreach(OverloadData* ov, m_nextOverloadData) {
         const AbstractMetaType* targetType = ov->argType();
@@ -106,10 +109,16 @@ void OverloadData::sortNextOverloads()
         if (checkPyObject && !targetType->typeEntry()->name().contains("PyObject")) {
             graph.addEdge(map[targetType->typeEntry()->name()], pyobjectIndex);
         }
+        if (targetType->typeEntry()->isEnum() && haveInt)
+            graph.addEdge(map[targetType->typeEntry()->name()], map["int"]);
+        if (targetType->typeEntry()->isEnum() && haveLong)
+            graph.addEdge(map[targetType->typeEntry()->name()], map["long"]);
+        if (targetType->typeEntry()->isEnum() && haveBool)
+            graph.addEdge(map[targetType->typeEntry()->name()], map["bool"]);
     }
 
     // Special case for double(int i) (not tracked by m_generator->implicitConversions
-    if (map.contains("int")) {
+    if (haveInt) {
         if (map.contains("float"))
             graph.addEdge(map["float"], map["int"]);
         if (map.contains("double"))
@@ -118,7 +127,7 @@ void OverloadData::sortNextOverloads()
             graph.addEdge(map["bool"], map["int"]);
     }
 
-    if (map.contains("long")) {
+    if (haveLong) {
         if (map.contains("float"))
             graph.addEdge(map["float"], map["long"]);
         if (map.contains("double"))
