@@ -861,6 +861,38 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             writeArgumentsInitializer(s, overloadData);
     }
 
+    /*
+     * Make sure reverse <</>> operators defined in other classes (specially from other modules)
+     * are called. A proper and generic solution would require an reengineering in the operator
+     * system like the extended converters.
+     *
+     * Solves #119 - QDataStream <</>> operators not working for QPixmap
+     * http://bugs.openbossa.org/show_bug.cgi?id=119
+     */
+    if (hasReturnValue && !rfunc->isInplaceOperator() && rfunc->isOperatorOverload()) {
+        QString opName = ShibokenGenerator::pythonOperatorFunctionName(rfunc);
+        if (opName == "__rshift__" || opName == "__lshift__") {
+            s << INDENT << "if (!isReverse && SbkBaseWrapper_Check(arg)) {" << endl;
+            {
+                Indentation indent(INDENT);
+                // This PyObject_CallMethod call will emit lots of warnings like
+                // "deprecated conversion from string constant to char *" during compilation
+                // due to the method name argument being declared as "char*" instead of "const char*"
+                // issue 6952 http://bugs.python.org/issue6952
+                s << INDENT << PYTHON_RETURN_VAR << " = PyObject_CallMethod(arg, const_cast<char*>(\"" << opName.insert(2, 'r') << "\"), \"O\", self);" << endl;
+                s << INDENT << "if (PyErr_Occurred() && (PyErr_ExceptionMatches(PyExc_NotImplementedError) ||";
+                                                    s << "PyErr_ExceptionMatches(PyExc_AttributeError))) {" << endl;
+                s << INDENT << INDENT << "PyErr_Clear();" << endl;
+                s << INDENT << "} else {" << endl;
+                s << INDENT << INDENT << "return " << PYTHON_RETURN_VAR << "; // Propagate the error" << endl;
+                s << INDENT << "}" << endl;
+
+            }
+            s << INDENT << "}" << endl;
+        }
+    }
+
+
     writeOverloadedMethodDecisor(s, &overloadData);
 
     s << endl << INDENT << "if (PyErr_Occurred()";
