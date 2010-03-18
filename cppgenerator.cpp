@@ -651,7 +651,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
                 Indentation indentation(INDENT);
                 s << INDENT << "\"'" << metaClass->qualifiedCppName();
             }
-            s << "' represents a C++ abstract class and cannot be instanciated\");" << endl;
+            s << "' represents a C++ abstract class and cannot be instantiated\");" << endl;
             s << INDENT << "return " << m_currentErrorCode << ';' << endl;
         }
         s << INDENT << '}' << endl << endl;
@@ -760,7 +760,7 @@ void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const Ab
     }
 
     if (!ctor) {
-        ReportHandler::warning("Class "+metaClass->name()+" does not have a default ctor.");
+        ReportHandler::warning("Class "+metaClass->name()+" does not have a default constructor.");
         return;
     }
 
@@ -1423,7 +1423,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             if (func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode).isEmpty()) {
                 s << INDENT << "#error No way to call \"" << func->ownerClass()->name();
                 s << "::" << func->minimalSignature();
-                s << "\" with the modifications described on the type system file" << endl;
+                s << "\" with the modifications described in the type system file" << endl;
             }
         } else if (func->isOperatorOverload()) {
             QString firstArg = QString("(*%1)").arg(CPP_SELF_VAR);
