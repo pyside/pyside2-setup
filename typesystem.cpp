@@ -1009,11 +1009,6 @@ bool Handler::startElement(const QString &, const QString &n,
                 return false;
             }
 
-            if (topElement.entry->hasConversionRule()) {
-                m_error = "Types can have only one conversion rule";
-                return false;
-            }
-
             if (topElement.type == StackElement::ModifyArgument) {
                 static QHash<QString, TypeSystem::Language> languageNames;
                 if (languageNames.isEmpty()) {
@@ -1032,6 +1027,10 @@ bool Handler::startElement(const QString &, const QString &n,
                 snip.language = lang;
                 m_functionMods.last().argument_mods.last().conversion_rules.append(snip);
             } else {
+                if (topElement.entry->hasConversionRule()) {
+                    m_error = "Types can have only one conversion rule";
+                    return false;
+                }
 
                 QString sourceFile = attributes["file"];
                 if (sourceFile.isEmpty()) {
