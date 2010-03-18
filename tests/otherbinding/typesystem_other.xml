@@ -2,6 +2,7 @@
 <typesystem package="other">
     <load-typesystem name="typesystem_sample.xml" generate="no" />
 
+    <object-type name="OtherObjectType" />
     <object-type name="OtherDerived" />
     <object-type name="OtherMultipleDerived" />
 

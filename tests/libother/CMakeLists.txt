@@ -3,6 +3,7 @@ project(libother)
 set(libother_SRC
 number.cpp
 otherderived.cpp
+otherobjecttype.cpp
 )
 
 add_definitions("-DLIBOTHER_BUILD")

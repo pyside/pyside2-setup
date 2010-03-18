@@ -9,6 +9,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/other/extendsnoimplicitconversion_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/other/number_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/other/otherderived_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/other/othermultiplederived_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/other/otherobjecttype_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/other/other_module_wrapper.cpp
 )
 
