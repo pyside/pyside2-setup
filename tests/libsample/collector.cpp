@@ -54,6 +54,13 @@ Collector::operator<<(signed int item)
     return *this;
 }
 
+Collector&
+Collector::operator<<(const ObjectType *obj)
+{
+    m_items.push_back(obj->identifier());
+    return *this;
+}
+
 std::list<int>
 Collector::items()
 {

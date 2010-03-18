@@ -3,7 +3,7 @@
 #
 # This file is part of the Shiboken Python Bindings Generator project.
 #
-# Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (C) 2009,2010 Nokia Corporation and/or its subsidiary(-ies).
 #
 # Contact: PySide team <contact@pyside.org>
 #
@@ -29,7 +29,8 @@
 import sys
 import unittest
 
-from sample import Collector, IntWrapper
+from sample import Collector, IntWrapper, ObjectType
+
 
 class CollectorTest(unittest.TestCase):
     '''Test cases for Collector class' shift operators.'''
@@ -57,6 +58,18 @@ class CollectorExternalOperator(unittest.TestCase):
         collector << IntWrapper(5)
         self.assertEqual(collector.size(), 1)
         self.assertEqual(collector.items(), [5])
+
+
+class CollectorObjectType(unittest.TestCase):
+    '''Test cases for Collector ObjectType'''
+
+    def testBasic(self):
+        '''Collector << ObjectType # greedy collector'''
+        collector = Collector()
+        obj = ObjectType()
+        collector << obj
+        self.assertEqual(collector.items()[0], obj.identifier())
+
 
 if __name__ == '__main__':
     unittest.main()

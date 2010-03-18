@@ -38,6 +38,8 @@
 #include <list>
 #include "libsamplemacros.h"
 
+#include "objecttype.h"
+
 class LIBSAMPLE_API Collector
 {
 public:
@@ -48,6 +50,8 @@ public:
 
     Collector& operator<<(unsigned int item);
     Collector& operator<<(signed int item);
+
+    Collector& operator<<(const ObjectType *);
 
     std::list<int> items();
     int size();
