@@ -27,6 +27,17 @@
 #include "overloaddata.h"
 #include "shibokengenerator.h"
 
+static const TypeEntry* getAliasedTypeEntry(const TypeEntry* typeEntry)
+{
+    if (typeEntry->isPrimitive()) {
+        const PrimitiveTypeEntry* pte = reinterpret_cast<const PrimitiveTypeEntry*>(typeEntry);
+        while (pte->aliasedTypeEntry())
+            pte = pte->aliasedTypeEntry();
+        typeEntry = pte;
+    }
+    return typeEntry;
+}
+
 /**
  * Topologically sort the overloads by implicit convertion order
  *
@@ -56,10 +67,11 @@ void OverloadData::sortNextOverloads()
     // sort algorithm, because is easier and faster to work with boost::graph using ints.
     int i = 0;
     foreach(OverloadData* ov, m_nextOverloadData) {
-        map[ov->argType()->typeEntry()->name()] = i;
+        const TypeEntry* typeEntry = getAliasedTypeEntry(ov->argType()->typeEntry());
+        map[typeEntry->name()] = i;
         reverseMap[i] = ov;
 
-        if (!checkPyObject && ov->argType()->typeEntry()->name().contains("PyObject")) {
+        if (!checkPyObject && typeEntry->name().contains("PyObject")) {
             checkPyObject = true;
             pyobjectIndex = i;
         }
@@ -69,11 +81,15 @@ void OverloadData::sortNextOverloads()
     // Create the graph of type dependencies based on implicity conversions.
     Graph graph(reverseMap.count());
     bool haveInt = map.contains("int");
+    bool haveUInt = map.contains("unsigned int");
     bool haveLong = map.contains("long");
+    bool haveULong = map.contains("unsigned long");
     bool haveBool = map.contains("bool");
 
     foreach(OverloadData* ov, m_nextOverloadData) {
         const AbstractMetaType* targetType = ov->argType();
+        const TypeEntry* targetTypeEntry = getAliasedTypeEntry(targetType->typeEntry());
+
         foreach(AbstractMetaFunction* function, m_generator->implicitConversions(ov->argType())) {
             QString convertibleType;
             if (function->isConversionOperator())
@@ -84,7 +100,7 @@ void OverloadData::sortNextOverloads()
             if (!map.contains(convertibleType))
                 continue;
 
-            int targetTypeId = map[targetType->typeEntry()->name()];
+            int targetTypeId = map[targetTypeEntry->name()];
             int convertibleTypeId = map[convertibleType];
 
             // If a reverse pair already exists, remove it. Probably due to the
@@ -96,7 +112,7 @@ void OverloadData::sortNextOverloads()
         if (targetType->hasInstantiations()) {
             foreach(AbstractMetaType *instantiation, targetType->instantiations()) {
                 if (map.contains(instantiation->typeEntry()->name())) {
-                    int target = map[targetType->typeEntry()->name()];
+                    int target = map[targetTypeEntry->name()];
                     int convertible = map[instantiation->typeEntry()->name()];
 
                     if (!graph.containsEdge(target, convertible)) // Avoid cyclic dependency.
@@ -106,15 +122,22 @@ void OverloadData::sortNextOverloads()
         }
 
         /* Add dependency on PyObject, so its check is the last one (too generic) */
-        if (checkPyObject && !targetType->typeEntry()->name().contains("PyObject")) {
-            graph.addEdge(map[targetType->typeEntry()->name()], pyobjectIndex);
+        if (checkPyObject && !targetTypeEntry->name().contains("PyObject")) {
+            graph.addEdge(map[targetTypeEntry->name()], pyobjectIndex);
         }
-        if (targetType->typeEntry()->isEnum() && haveInt)
-            graph.addEdge(map[targetType->typeEntry()->name()], map["int"]);
-        if (targetType->typeEntry()->isEnum() && haveLong)
-            graph.addEdge(map[targetType->typeEntry()->name()], map["long"]);
-        if (targetType->typeEntry()->isEnum() && haveBool)
-            graph.addEdge(map[targetType->typeEntry()->name()], map["bool"]);
+
+        if (targetTypeEntry->isEnum()) {
+            if (haveInt)
+                graph.addEdge(map[targetTypeEntry->name()], map["int"]);
+            if (haveUInt)
+                graph.addEdge(map[targetTypeEntry->name()], map["unsigned int"]);
+            if (haveLong)
+                graph.addEdge(map[targetTypeEntry->name()], map["long"]);
+            if (haveULong)
+                graph.addEdge(map[targetTypeEntry->name()], map["unsigned long"]);
+            if (haveBool)
+                graph.addEdge(map[targetTypeEntry->name()], map["bool"]);
+        }
     }
 
     // Special case for double(int i) (not tracked by m_generator->implicitConversions
