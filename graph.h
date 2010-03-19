@@ -52,7 +52,7 @@ public:
     *   \param nodeNames map used to translate node ids to human readable text.
     *   \param fileName file name where the output should be written.
     */
-    void dumpDot(const QHash<int, QString> nodeNames, const QString& fileName) const;
+    void dumpDot(const QHash<int, QString>& nodeNames, const QString& fileName) const;
 
     /**
     *   Topologically sort this graph.

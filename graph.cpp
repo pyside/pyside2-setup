@@ -114,7 +114,7 @@ void Graph::dump() const
     }
 }
 
-void Graph::dumpDot(const QHash< int, QString > nodeNames, const QString& fileName) const
+void Graph::dumpDot(const QHash< int, QString >& nodeNames, const QString& fileName) const
 {
     QFile output(fileName);
     if (!output.open(QIODevice::WriteOnly))
