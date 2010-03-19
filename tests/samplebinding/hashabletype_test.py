@@ -32,11 +32,17 @@ from sample import *
 
 class HashableTest(unittest.TestCase):
 
-    def testAbstractPureVirtualMethodAvailability(self):
+    def testStrHash(self):
         h = {}
         s = Str("Hi")
         h[s] = 2
         self.assert_(h.get(s), 2)
+
+    def testObjectTypeHash(self):
+        h = {}
+        o = ObjectType()
+        h[o] = 2
+        self.assert_(h.get(o), 2)
 
 if __name__ == '__main__':
     unittest.main()
