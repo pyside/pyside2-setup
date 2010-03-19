@@ -303,7 +303,10 @@ static QString baseConversionString(QString typeName)
 
 void ShibokenGenerator::writeBaseConversion(QTextStream& s, const TypeEntry* type)
 {
-    s << baseConversionString(type->name());
+    QString typeName = type->name();
+    if (type->isObject())
+        typeName.append('*');
+    s << baseConversionString(typeName);
 }
 
 void ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaType* type,

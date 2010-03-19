@@ -221,3 +221,8 @@ ObjectTypeLayout* ObjectType::takeLayout()
     return l;
 }
 
+unsigned int objectTypeHash(const ObjectType* objectType)
+{
+    return reinterpret_cast<std::size_t>(objectType);
+}
+

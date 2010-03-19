@@ -108,5 +108,7 @@ private:
     ObjectTypeLayout* m_layout;
 };
 
+LIBSAMPLE_API unsigned int objectTypeHash(const ObjectType* objectType);
+
 #endif // OBJECTTYPE_H
 

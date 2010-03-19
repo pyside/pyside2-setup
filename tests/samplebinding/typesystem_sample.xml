@@ -64,7 +64,7 @@
     <object-type name="Derived" polymorphic-id-expression="%1->type() == Derived::TpDerived" />
     <value-type name="Derived::SomeInnerClass" />
 
-    <object-type name="ObjectType">
+    <object-type name="ObjectType" hash-function="objectTypeHash">
         <modify-function signature="event(Event*)">
             <modify-argument index="1" invalidate-after-use="yes"/>
         </modify-function>
