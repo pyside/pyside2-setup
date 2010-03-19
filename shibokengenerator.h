@@ -301,6 +301,14 @@ public:
     /// Returns true if the user don't want verbose error messages on the generated bindings.
     bool verboseErrorMessagesDisabled() const;
 
+    /**
+     *   Builds an AbstractMetaType object from a QString.
+     *   Returns NULL if no type could be built from the string.
+     *   \param typeString The string describing the type to be built.
+     *   \return A new AbstractMetaType object that must be deleted by the caller, or a NULL pointer in case of failure.
+     */
+    AbstractMetaType* buildAbstractMetaTypeFromString(QString typeString);
+
 protected:
     bool doSetup(const QMap<QString, QString>& args);
     // verify whether the class is copyable

@@ -624,9 +624,17 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool gene
 
 QString ShibokenGenerator::guessCPythonCheckFunction(const QString& type)
 {
-    if (type == "PyTypeObject")
-        return "PyType_Check";
-    return type+"_Check";
+    QString retval;
+    AbstractMetaType* metaType = buildAbstractMetaTypeFromString(type);
+    if (metaType) {
+        retval = cpythonCheckFunction(metaType);
+        delete metaType;
+    } else if (type == "PyTypeObject") {
+        retval = "PyType_Check";
+    } else {
+        retval = QString("%1_Check").arg(type);
+    }
+    return retval;
 }
 
 QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry* type)
@@ -1285,6 +1293,39 @@ bool ShibokenGenerator::isCopyable(const AbstractMetaClass *metaClass)
         return (metaClass->typeEntry()->copyable() == ComplexTypeEntry::CopyableSet);
 
     return false;
+}
+
+AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromString(QString typeString)
+{
+    typeString = typeString.trimmed();
+    bool isConst = typeString.startsWith("const ");
+    if (isConst)
+        typeString.remove(0, sizeof("const ") / sizeof(char) - 1);
+
+    int indirections = typeString.count("*");
+    while (typeString.endsWith("*")) {
+        typeString.chop(1);
+        typeString = typeString.trimmed();
+    }
+
+    bool isReference = typeString.endsWith("&");
+    if (isReference) {
+        typeString.chop(1);
+        typeString = typeString.trimmed();
+    }
+
+    TypeEntry* typeEntry = TypeDatabase::instance()->findType(typeString);
+    AbstractMetaType* metaType = 0;
+    if (typeEntry) {
+        metaType = new AbstractMetaType();
+        metaType->setTypeEntry(typeEntry);
+        metaType->setIndirections(indirections);
+        metaType->setReference(isReference);
+        metaType->setConstant(isConst);
+        if (metaType->name() == "char" && metaType->indirections() == 1)
+            metaType->setTypeUsagePattern(AbstractMetaType::NativePointerPattern);
+    }
+    return metaType;
 }
 
 /*
