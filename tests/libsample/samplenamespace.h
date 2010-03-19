@@ -66,6 +66,8 @@ LIBSAMPLE_API inline double powerOfTwo(double num) {
     return num * num;
 }
 
+LIBSAMPLE_API void doSomethingWithArray(const unsigned char* data, unsigned int size, const char* format = 0);
+
 } // namespace SampleNamespace
 
 #endif // SAMPLENAMESPACE_H

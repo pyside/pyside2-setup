@@ -79,4 +79,13 @@ getNumber(Option opt)
     return retval;
 }
 
+void
+doSomethingWithArray(const unsigned char* data, unsigned int size, const char* format)
+{
+    // This function does nothing in fact.
+    // It is here as a dummy copy of QPixmap.loadFromData method
+    // to check compilation issues, i.e. if it compiles, it's ok.
+}
+
 } // namespace SampleNamespace
+

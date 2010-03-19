@@ -7,6 +7,7 @@
     <primitive-type name="unsigned int" />
     <primitive-type name="signed int" />
     <primitive-type name="char"/>
+    <primitive-type name="unsigned char"/>
     <primitive-type name="long"/>
     <primitive-type name="unsigned long"/>
 
@@ -55,7 +56,22 @@
     <enum-type name="Event::EventType"/>
     <enum-type name="Abstract::Type"/>
 
-    <namespace-type name="SampleNamespace"/>
+    <namespace-type name="SampleNamespace">
+        <modify-function signature="doSomethingWithArray(const unsigned char*, unsigned int, const char*)">
+            <modify-argument index="1">
+                <replace-type modified-type="const char*"/>
+                <conversion-rule class="native">
+                    unsigned char* %out = reinterpret_cast&lt;unsigned char*>(PyString_AS_STRING(%PYARG_1));
+                </conversion-rule>
+            </modify-argument>
+            <modify-argument index="2">
+                <remove-argument/>
+                <conversion-rule class="native">
+                    unsigned int %out = static_cast&lt;unsigned int>(PyString_GET_SIZE(%PYARG_1));
+                </conversion-rule>
+            </modify-argument>
+        </modify-function>
+    </namespace-type>
 
     <object-type name="Abstract">
         <modify-function signature="id()" rename="id_"/>
