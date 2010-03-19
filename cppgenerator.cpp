@@ -1234,12 +1234,20 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
 
             writeTypeCheck(tck, od, pyArgName);
 
+            const AbstractMetaType* argType = 0;
+            if (od->argumentTypeReplaced().isEmpty())
+                argType = od->argType();
+            else
+                argType = buildAbstractMetaTypeFromString(od->argumentTypeReplaced());
+
             Indentation indent(INDENT);
-            if (od->argumentTypeReplaced().isEmpty()) {
-                writeArgumentConversion(tcv, od->argType(),
+            if (argType) {
+                writeArgumentConversion(tcv, argType,
                                         QString("cpp_arg%1").arg(od->argPos()),
                                         pyArgName,
                                         refFunc->implementingClass());
+                if (argType != od->argType())
+                    delete argType;
             }
 
             if (od->nextOverloadData().isEmpty()
@@ -1321,6 +1329,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     const AbstractMetaArgument* lastArg = 0;
 
     CodeSnipList snips;
+
     if (func->hasInjectedCode()) {
         snips = func->injectedCodeSnips();
 
@@ -1330,7 +1339,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         if (maxArgs > 0 && maxArgs < func->arguments().size() - OverloadData::numberOfRemovedArguments(func)) {
             int removedArgs = 0;
             for (int i = 0; i < maxArgs + removedArgs; i++) {
-                lastArg = func->arguments()[i];
+                lastArg = func->arguments().at(i);
                 if (func->argumentRemoved(i + 1))
                     removedArgs++;
             }
@@ -1352,7 +1361,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         if (!func->isCopyConstructor()) {
             int removedArgs = 0;
             for (int i = 0; i < maxArgs + removedArgs; i++) {
-                const AbstractMetaArgument* arg = func->arguments()[i];
+                const AbstractMetaArgument* arg = func->arguments().at(i);
                 if (func->argumentRemoved(i + 1)) {
 
                     // If some argument with default value is removed from a
@@ -1389,26 +1398,29 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             // If any argument's default value was modified the method must be called
             // with this new value whenever the user doesn't pass an explicit value to it.
             // Also, any unmodified default value coming after the last user specified
-            // argument and before the modified argument must be splicitly stated.
+            // argument and before the modified argument must be explicitly stated.
             QStringList otherArgs;
-            bool defaultModified = false;
+            bool otherArgsModified = false;
             bool argsClear = true;
             for (int i = func->arguments().size() - 1; i >= maxArgs + removedArgs; i--) {
                 const AbstractMetaArgument* arg = func->arguments().at(i);
                 bool defValModified = arg->defaultValueExpression() != arg->originalDefaultValueExpression();
-                if (argsClear && !defValModified)
+                bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, arg->argumentIndex() + 1).isEmpty();
+                if (argsClear && !defValModified && !hasConversionRule)
                     continue;
                 else
                     argsClear = false;
 
-                defaultModified |=  defValModified || func->argumentRemoved(i + 1);
+                otherArgsModified |= defValModified || hasConversionRule || func->argumentRemoved(i + 1);
 
-                if (arg->defaultValueExpression().isEmpty())
-                    badModifications = true;
-                else
+                if (!arg->defaultValueExpression().isEmpty())
                     otherArgs.prepend(arg->defaultValueExpression());
+                else if (hasConversionRule)
+                    otherArgs.prepend(arg->argumentName() + "_out");
+                else
+                    badModifications = true;
             }
-            if (defaultModified)
+            if (otherArgsModified)
                 userArgs << otherArgs;
         }
 
