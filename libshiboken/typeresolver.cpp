@@ -36,6 +36,7 @@
 #include "google/dense_hash_map"
 #include "sbkdbg.h"
 #include <cstdlib>
+#include <string>
 
 using namespace Shiboken;
 
