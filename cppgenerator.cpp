@@ -1006,6 +1006,18 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                     strArg = ptp->name().replace(QRegExp("^signed\\s+"), "");
                     if (strArg == "double")
                         strArg = "float";
+                } else if (argType->typeEntry()->isContainer()) {
+                    strArg = argType->fullName();
+                    if (strArg == "QList" || strArg == "QVector"
+                        || strArg == "QLinkedList" || strArg == "QStack"
+                        || strArg == "QQueue") {
+                        strArg = "list";
+                    } else if (strArg == "QMap" || strArg == "QHash"
+                               || strArg == "QMultiMap" || strArg == "QMultiHash") {
+                        strArg = "dict";
+                    } else if (strArg == "QPair") {
+                        strArg == "2-tuple";
+                    }
                 } else {
                     strArg = argType->fullName();
                 }
