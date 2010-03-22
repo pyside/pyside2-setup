@@ -156,11 +156,12 @@ public:
 
     /**
      *   Verifies if any of the function's code injections attributes values to
-     *   the return variable (%0).
-     *   \param func the function to check
-     *   \return true if the function's code attributes values to "%0"
+     *   the return variable (%0 or %PYARG_0).
+     *   \param func        the function to check
+     *   \param language    the kind of code snip
+     *   \return true if the function's code attributes values to "%0" or "%PYARG_0"
      */
-    bool injectedCodeHasReturnValueAttribution(const AbstractMetaFunction* func);
+    bool injectedCodeHasReturnValueAttribution(const AbstractMetaFunction* func, TypeSystem::Language language = TypeSystem::TargetLangCode);
 
     /**
      *   Function which parse the metafunction information

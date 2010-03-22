@@ -1142,13 +1142,19 @@ bool ShibokenGenerator::injectedCodeCallsPythonOverride(const AbstractMetaFuncti
     return false;
 }
 
-bool ShibokenGenerator::injectedCodeHasReturnValueAttribution(const AbstractMetaFunction* func)
+bool ShibokenGenerator::injectedCodeHasReturnValueAttribution(const AbstractMetaFunction* func, TypeSystem::Language language)
 {
-    static QRegExp retValAttributionRegexCheck("%PYARG_0\\s*=[^=]\\s*.+");
-    CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
+    static QRegExp retValAttributionRegexCheck_native("%0\\s*=[^=]\\s*.+");
+    static QRegExp retValAttributionRegexCheck_target("%PYARG_0\\s*=[^=]\\s*.+");
+    CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, language);
     foreach (CodeSnip snip, snips) {
-        if (retValAttributionRegexCheck.indexIn(snip.code()) != -1)
-            return true;
+        if (language == TypeSystem::TargetLangCode) {
+            if (retValAttributionRegexCheck_target.indexIn(snip.code()) != -1)
+                return true;
+        } else {
+            if (retValAttributionRegexCheck_native.indexIn(snip.code()) != -1)
+                return true;
+        }
     }
     return false;
 }
