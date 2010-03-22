@@ -1,7 +1,7 @@
 /*
  * This file is part of the Shiboken Python Binding Generator project.
  *
- * Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2009,2010 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -32,47 +32,24 @@
  * 02110-1301 USA
  */
 
-#ifndef COLLECTOR_H
-#define COLLECTOR_H
+#ifndef OTHEROBJECTTYPE_H
+#define OTHEROBJECTTYPE_H
 
 #include <list>
-#include "libsamplemacros.h"
+#include "str.h"
 
+#include "libothermacros.h"
 #include "objecttype.h"
+#include "collector.h"
 
-class LIBSAMPLE_API Collector
+class LIBOTHER_API OtherObjectType : public ObjectType
 {
 public:
-    Collector() {}
-    virtual ~Collector() {}
 
-    void clear();
-
-    Collector& operator<<(unsigned int item);
-    Collector& operator<<(signed int item);
-
-    Collector& operator<<(const ObjectType *);
-
-    std::list<int> items();
-    int size();
-
-private:
-    std::list<int> m_items;
-
-    Collector(const Collector&);
-    Collector& operator=(const Collector&);
 };
 
-/* Helper for testing external operators */
-class LIBSAMPLE_API IntWrapper
-{
-public:
-    IntWrapper(int x=0):value(x){}
 
-    int value;
-};
+LIBOTHER_API Collector& operator<<(Collector&, OtherObjectType&);
 
-LIBSAMPLE_API Collector &operator<<(Collector&, const IntWrapper&);
-
-#endif // COLLECTOR_H
+#endif // OTHEROBJECTTYPE_H
 

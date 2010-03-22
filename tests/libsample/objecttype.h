@@ -81,6 +81,8 @@ public:
     Str objectName() const;
     void setObjectName(const Str& name);
 
+    unsigned long identifier() const { return reinterpret_cast<unsigned long>(this); }
+
     bool causeEvent(Event::EventType eventType);
 
     // Returns true if the event is processed.
