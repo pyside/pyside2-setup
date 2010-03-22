@@ -546,11 +546,17 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             s << INDENT << INDENT << ";" << endl;
             s << INDENT << "}" << endl;
 
-            s << INDENT;
-            s << translateTypeForWrapperMethod(func->type(), func->implementingClass()) << ' ' << CPP_RETURN_VAR << "(";
-            writeToCppConversion(s, func->type(), func->implementingClass(), PYTHON_RETURN_VAR);
-            s << ')';
-            s << ';' << endl;
+            bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, 0).isEmpty();
+            if (hasConversionRule) {
+                CodeSnipList convRule = getReturnConversionRule(TypeSystem::NativeCode, func, "", CPP_RETURN_VAR);
+                writeCodeSnips(s, convRule, CodeSnip::Any, TypeSystem::NativeCode, func);
+            } else if (!injectedCodeHasReturnValueAttribution(func, TypeSystem::NativeCode)) {
+                s << INDENT;
+                s << translateTypeForWrapperMethod(func->type(), func->implementingClass()) << ' ' << CPP_RETURN_VAR << "(";
+                writeToCppConversion(s, func->type(), func->implementingClass(), PYTHON_RETURN_VAR);
+                s << ')';
+                s << ';' << endl;
+            }
         }
     }
 
