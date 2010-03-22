@@ -748,7 +748,7 @@ void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const Ab
 
         bool allPrimitives = true;
         foreach (const AbstractMetaArgument* arg, candidate->arguments()) {
-            if (!arg->type()->isPrimitive()) {
+            if (!arg->type()->isPrimitive() && arg->defaultValueExpression().isEmpty()) {
                 allPrimitives = false;
                 break;
             }
@@ -766,8 +766,10 @@ void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const Ab
 
     QStringList argValues;
     AbstractMetaArgumentList args = ctor->arguments();
-    for (int i = 0; i < args.size(); i++)
-        argValues << args[i]->type()->name()+"(0)";
+    for (int i = 0; i < args.size(); i++) {
+        if (args[i]->defaultValueExpression().isEmpty())
+            argValues << args[i]->type()->name()+"(0)";
+    }
     s << metaClass->qualifiedCppName() << '(' << argValues.join(QLatin1String(", ")) << ')';
 }
 
