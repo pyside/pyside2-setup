@@ -1,7 +1,7 @@
 /*
  * This file is part of the PySide project.
  *
- * Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -112,8 +112,8 @@ int main(int argc, char *argv[])
     GeneratorList generators;
 
     if (args.contains("version")) {
-        std::cout << "generator v" GENERATORRUNNER_VERSION << std::endl;
-        std::cout << "Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies)" << std::endl;
+        std::cout << "generatorrunner v" GENERATORRUNNER_VERSION << std::endl;
+        std::cout << "Copyright (C) 2009-2010 Nokia Corporation and/or its subsidiary(-ies)" << std::endl;
         return EXIT_SUCCESS;
     }
 
