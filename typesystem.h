@@ -1057,13 +1057,6 @@ public:
      */
     PrimitiveTypeEntry* basicAliasedTypeEntry() const;
 
-    QString javaObjectFullName() const
-    {
-        return javaObjectPackage() + "." + javaObjectName();
-    }
-    QString javaObjectName() const;
-    QString javaObjectPackage() const;
-
     virtual bool preferredConversion() const
     {
         return m_preferredConversion;

@@ -27,9 +27,7 @@
 
 static QString strings_Object = QLatin1String("Object");
 static QString strings_String = QLatin1String("String");
-static QString strings_Thread = QLatin1String("Thread");
 static QString strings_char = QLatin1String("char");
-static QString stringsJavaLang = QLatin1String("java.lang");
 static QString strings_jchar = QLatin1String("jchar");
 static QString strings_jobject = QLatin1String("jobject");
 
@@ -1744,23 +1742,6 @@ bool TypeDatabase::parseFile(QIODevice* device, bool generate)
     return reader.parse(&source, false);
 }
 
-QString PrimitiveTypeEntry::javaObjectName() const
-{
-    static QHash<QString, QString> table;
-    if (table.isEmpty()) {
-        table["boolean"] = "Boolean";
-        table["byte"] = "Byte";
-        table["char"] = "Character";
-        table["short"] = "Short";
-        table["int"] = "Integer";
-        table["long"] = "Long";
-        table["float"] = "Float";
-        table["double"] = "Double";
-    }
-    Q_ASSERT(table.contains(targetLangName()));
-    return table[targetLangName()];
-}
-
 PrimitiveTypeEntry* PrimitiveTypeEntry::basicAliasedTypeEntry() const
 {
     if (!m_aliasedTypeEntry)
@@ -1857,9 +1838,7 @@ FieldModification ComplexTypeEntry::fieldModification(const QString &name) const
 
 QString ContainerTypeEntry::targetLangPackage() const
 {
-    if (m_type == PairContainer)
-        return "com.trolltech.qt";
-    return "java.util";
+    return QString();
 }
 
 QString ContainerTypeEntry::targetLangName() const
@@ -1868,15 +1847,15 @@ QString ContainerTypeEntry::targetLangName() const
     switch (m_type) {
     case StringListContainer: return "QStringList";
     case ListContainer: return "QList";
-    case LinkedListContainer: return "LinkedList";
+    case LinkedListContainer: return "QLinkedList";
     case VectorContainer: return "QVector";
     case StackContainer: return "QStack";
     case QueueContainer: return "QQueue";
     case SetContainer: return "QSet";
     case MapContainer: return "QMap";
     case MultiMapContainer: return "QMultiMap";
-    case HashContainer: return "QHashMap";
-    //case MultiHashCollectio: return "MultiHash";
+    case HashContainer: return "QHash";
+    case MultiHashContainer: return "QMultiHash";
     case PairContainer: return "QPair";
     default:
         qWarning("bad type... %d", m_type);
@@ -2190,11 +2169,6 @@ AddedFunction::AddedFunction(QString signature, QString returnType) : m_access(P
     }
 }
 
-QString PrimitiveTypeEntry::javaObjectPackage() const
-{
-    return stringsJavaLang;
-}
-
 QString ComplexTypeEntry::targetLangApiName() const
 {
     return strings_jobject;
@@ -2209,7 +2183,7 @@ QString StringTypeEntry::targetLangName() const
 }
 QString StringTypeEntry::targetLangPackage() const
 {
-    return stringsJavaLang;
+    return QString();
 }
 QString CharTypeEntry::targetLangApiName() const
 {
@@ -2229,7 +2203,7 @@ QString VariantTypeEntry::targetLangName() const
 }
 QString VariantTypeEntry::targetLangPackage() const
 {
-    return stringsJavaLang;
+    return QString();
 }
 
 /*
