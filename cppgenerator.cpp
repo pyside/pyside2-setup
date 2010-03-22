@@ -530,7 +530,12 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             s << INDENT << '}' << endl;
 
             s << INDENT << "// Check return type" << endl;
-            s << INDENT << "bool typeIsValid = " << cpythonCheckFunction(func->type()) << "(" << PYTHON_RETURN_VAR << ");" << endl;
+            s << INDENT << "bool typeIsValid = ";
+            if (func->typeReplaced(0).isEmpty())
+                s << cpythonCheckFunction(func->type());
+            else
+                s << guessCPythonCheckFunction(func->typeReplaced(0));
+            s << "(" << PYTHON_RETURN_VAR << ");" << endl;
             if (func->type()->isQObject() || func->type()->isObject() || func->type()->isValuePointer()) {
                 s << INDENT << "typeIsValid = typeIsValid || (" << PYTHON_RETURN_VAR << " == Py_None);" << endl;
             }
