@@ -2119,10 +2119,10 @@ QString AbstractMetaType::minimalSignature() const
         minimalSignature += " >";
     }
 
-    if (isReference())
-        minimalSignature += "&";
     for (int j = 0; j < indirections(); ++j)
         minimalSignature += "*";
+    if (isReference())
+        minimalSignature += "&";
 
     return minimalSignature;
 }
