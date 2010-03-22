@@ -584,6 +584,50 @@
                 PyObject_Call(%PYTHON_METHOD_OVERRIDE, %PYTHON_ARGUMENTS, NULL);
             </inject-code>
         </modify-function>
+        <modify-function signature="createStr(const char*, Str*&amp;)">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PySequence"/>
+                <conversion-rule class="native">
+                    AutoDecRef _py_ok_(PySequence_GetItem(%PYARG_0, 0));
+                    AutoDecRef _py_ret_(PySequence_GetItem(%PYARG_0, 1));
+                    %RETURN_TYPE %out = %CONVERTTOCPP[%RETURN_TYPE](_py_ok_);
+                    %2 = %CONVERTTOCPP[Str*](_py_ret_);
+                </conversion-rule>
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+                Str* _str_arg_ = 0;
+                %RETURN_TYPE %0 = %CPPSELF.%TYPE::%FUNCTION_NAME(%1, _str_arg_);
+            </inject-code>
+            <inject-code class="target" position="end">
+                %PYARG_0 = PyTuple_New(2);
+                PyObject* _item_ = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+                PyTuple_SET_ITEM(%PYARG_0, 0, _item_);
+                _item_ = %CONVERTTOPYTHON[Str*](_str_arg_);
+                PyTuple_SET_ITEM(%PYARG_0, 1, _item_);
+            </inject-code>
+        </modify-function>
+        <modify-function signature="callCreateStr(const char*, Str*&amp;)">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PySequence"/>
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+                Str* _str_arg_ = 0;
+                %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(%1, _str_arg_);
+            </inject-code>
+            <inject-code class="target" position="end">
+                %PYARG_0 = PyTuple_New(2);
+                PyObject* _item_ = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+                PyTuple_SET_ITEM(%PYARG_0, 0, _item_);
+                _item_ = %CONVERTTOPYTHON[Str*](_str_arg_);
+                PyTuple_SET_ITEM(%PYARG_0, 1, _item_);
+            </inject-code>
+        </modify-function>
     </value-type>
     <value-type name="VirtualDaughter" />
 

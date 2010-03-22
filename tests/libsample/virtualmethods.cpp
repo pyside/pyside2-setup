@@ -42,3 +42,15 @@ VirtualMethods::virtualMethod0(Point pt, int val, Complex cpx, bool b)
     return (pt.x() * pt.y() * val) + cpx.imag() + ((int) b);
 }
 
+bool
+VirtualMethods::createStr(const char* text, Str*& ret)
+{
+    if (!text) {
+        ret = 0;
+        return false;
+    }
+
+    ret = new Str(text);
+    return true;
+}
+

@@ -84,6 +84,10 @@ public:
     virtual void callMe() {}
     void callCallMe() { callMe(); }
 
+    // Passing reference to pointers.
+    virtual bool createStr(const char* text, Str*& ret);
+    bool callCreateStr(const char* text, Str*& ret) { return createStr(text, ret); }
+
 private:
     Str m_name;
 };
