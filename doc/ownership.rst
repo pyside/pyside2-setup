@@ -108,8 +108,18 @@ Parentship heuristics
     type system when binding Qt libraries. For Qt, this heuristic works in all cases,
     but be aware that it might not when binding your own libraries.
 
-    To activate this heuristic, use the :ref:`--enable-parent-ctor-heuristic <option-heuristic>`
+    To activate this heuristic, use the :ref:`--enable-parent-ctor-heuristic <parent-heuristic>`
     command line switch.
+
+.. _return-value-heuristics:
+
+Return value heuristics
+-----------------------
+
+    When enabled, object returned as pointer in C++ will become child of the object on which the method
+    was called.
+
+    To activate this heuristic, use the :ref:`--enable-return-value-heuristic <return-heuristic>`
 
 Common pitfalls
 ===============

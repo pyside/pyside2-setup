@@ -11,6 +11,8 @@ General
 What is Shiboken?
 -----------------
 
+Shiboken is a GeneratorRunner plugin that outputs C++ code for CPython extensions.
+
 Here the name generator refers actually to a program composed of a set of
 *generator classes* that output different resources based on information
 contained inside C++ header files.
@@ -20,6 +22,9 @@ Creating bindings
 
 Can I wrap non-Qt libraries?
 ----------------------------
+
+Yes. Check Shiboken source code for an example (libsample).
+
 
 Is there any runtime dependency on the generated binding?
 ---------------------------------------------------------
