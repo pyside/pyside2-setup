@@ -2625,7 +2625,7 @@ void CppGenerator::writeFlagsUnaryOperator(QTextStream& s, const AbstractMetaEnu
     {
         Indentation indent(INDENT);
         s << INDENT << cppOpName << " Shiboken::Converter< ";
-        s << flagsEntry->originalName() << " >::toCpp(arg)" << endl;
+        s << flagsEntry->originalName() << " >::toCpp(self)" << endl;
     }
     s << INDENT << ");" << endl;
     s << '}' << endl << endl;
