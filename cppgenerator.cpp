@@ -2476,7 +2476,6 @@ void CppGenerator::writeFlagsMethods(QTextStream& s, const AbstractMetaEnum* cpp
     writeFlagsBinaryOperator(s, cppEnum, "xor", "^");
 
     writeFlagsUnaryOperator(s, cppEnum, "invert", "~");
-    writeFlagsUnaryOperator(s, cppEnum, "not", "!", true);
     s << endl;
 }
 
