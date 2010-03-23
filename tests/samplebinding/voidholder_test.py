@@ -45,6 +45,12 @@ class VoidHolderTest(unittest.TestCase):
         voidholder = VoidHolder(obj)
         self.assertEquals(obj, voidholder.voidPointer())
 
+    def testGetNoneObjectFromVoidHolder(self):
+        '''A VoidHolder created without parameters returns a NULL pointer
+           that should be converted to a Python None.'''
+        voidholder = VoidHolder()
+        self.assertEquals(voidholder.voidPointer(), None)
+
 if __name__ == '__main__':
     unittest.main()
 

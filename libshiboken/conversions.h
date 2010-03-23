@@ -179,6 +179,8 @@ struct Converter<void*>
     static inline bool isConvertible(PyObject* pyobj) { return true; }
     static PyObject* toPython(const void* cppobj)
     {
+        if (!cppobj)
+            Py_RETURN_NONE;
         PyObject* pyobj = BindingManager::instance().retrieveWrapper(cppobj);
         if (pyobj)
             Py_INCREF(pyobj);
