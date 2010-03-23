@@ -35,7 +35,10 @@ endif()
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
 set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
 
-set(shiboken_VERSION 0.1)
+set(shiboken_MAJOR_VERSION "0")
+set(shiboken_MINOR_VERSION "2")
+set(shiboken_MICRO_VERSION "0")
+set(shiboken_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
 
 set(shiboken_SRC
 cppgenerator.cpp

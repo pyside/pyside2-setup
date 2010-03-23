@@ -2,9 +2,9 @@ project(libshiboken)
 
 find_package(PythonLibs REQUIRED)
 
-set(libshiboken_MAJOR_VERSION "0")
-set(libshiboken_MINOR_VERSION "1")
-set(libshiboken_MICRO_VERSION "0")
+set(libshiboken_MAJOR_VERSION ${shiboken_MAJOR_VERSION})
+set(libshiboken_MINOR_VERSION ${shiboken_MINOR_VERSION})
+set(libshiboken_MICRO_VERSION ${shiboken_MICRO_VERSION})
 set(libshiboken_VERSION "${libshiboken_MAJOR_VERSION}.${libshiboken_MINOR_VERSION}.${libshiboken_MICRO_VERSION}")
 
 
