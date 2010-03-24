@@ -26,7 +26,6 @@
 
 '''Test cases for operator overloads on Size class'''
 
-import sys
 import unittest
 
 from sample import Size
@@ -41,6 +40,14 @@ class PointTest(unittest.TestCase):
         self.assertEqual(size.width(), width)
         self.assertEqual(size.height(), height)
         self.assertEqual(size.calculateArea(), width * height)
+
+    def testCopyConstructor(self):
+        '''Test Size class copy constructor.'''
+        width, height = (5.0, 2.3)
+        s1 = Size(width, height)
+        s2 = Size(s1)
+        self.assertFalse(s1 is s2)
+        self.assertEqual(s1, s2)
 
     def testPlusOperator(self):
         '''Test Size class + operator.'''
