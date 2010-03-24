@@ -7,12 +7,16 @@ find_package(Qt4 4.5.0 REQUIRED)
 find_package(LibXml2 2.6.32 REQUIRED)
 find_package(LibXslt 1.1.19 REQUIRED)
 
+option(BUILD_TESTS "Build tests." TRUE)
+
 if (MSVC)
     set(CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /w /EHsc- /GS- /GR- /DAPIEXTRACTOR_ENABLE_DUPLICATE_ENUM_VALUES /DAPIEXTRACTOR_BUILD -D_SCL_SECURE_NO_WARNINGS")
 else (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -DAPIEXTRACTOR_ENABLE_DUPLICATE_ENUM_VALUES -fvisibility=hidden")
 endif(MSVC)
-set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/tests)
+if (BUILD_TESTS)
+    set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/tests)
+endif()
 
 set(apiextractor_MAJOR_VERSION 0)
 set(apiextractor_MINOR_VERSION 4)
@@ -112,8 +116,10 @@ docparser.h
 qtdocparser.h
 )
 
-enable_testing()
-add_subdirectory(tests)
+if (BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
 
 install(FILES ${root_HEADERS} DESTINATION include/apiextractor)
 install(TARGETS apiextractor EXPORT apiextractor
