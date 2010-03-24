@@ -60,8 +60,9 @@ void setParent(PyObject* parent, PyObject* child)
 
     //Recursive for sequence protocol
     if (PySequence_Check(child)) {
-        for (int i = 0, max = PySequence_Size(child); i < max; ++i)
-            setParent(parent, PySequence_Fast_GET_ITEM(child, i));
+        Shiboken::AutoDecRef seq(PySequence_Fast(child, 0));
+        for (int i = 0, max = PySequence_Size(seq); i < max; ++i)
+            setParent(parent, PySequence_Fast_GET_ITEM(seq.object(), i));
         return;
     }
 
