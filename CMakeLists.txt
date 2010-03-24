@@ -5,6 +5,8 @@ cmake_minimum_required(VERSION 2.6)
 find_package(Qt4 4.5.0 REQUIRED)
 find_package(ApiExtractor REQUIRED)
 
+option(BUILD_TESTS "Build tests." TRUE)
+
 if (MSVC)
     set(CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /w /EHsc- /GS- /GR- /DGENRUNNER_BUILD -D_SCL_SECURE_NO_WARNINGS")
 else (MSVC)
@@ -89,8 +91,13 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GeneratorRunnerVersion.cmake"
 file(GLOB manpages "${CMAKE_CURRENT_SOURCE_DIR}/*.1")
 install(FILES ${manpages} DESTINATION share/man/man1)
 
-enable_testing()
+if (BUILD_TESTS)
+    enable_testing()
+endif()
 
 add_subdirectory(generators)
-add_subdirectory(tests)
+
+if (BUILD_TESTS)
+    add_subdirectory(tests)
+endif()
 
