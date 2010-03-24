@@ -64,7 +64,7 @@ void OverloadData::sortNextOverloads()
         return;
 
     // Creates the map and reverseMap, to map type names to ids, these ids will be used by the topological
-    // sort algorithm, because is easier and faster to work with boost::graph using ints.
+    // sort algorithm, because is easier and faster to work with graph sorting using integers.
     int i = 0;
     foreach(OverloadData* ov, m_nextOverloadData) {
         const TypeEntry* typeEntry = getAliasedTypeEntry(ov->argType()->typeEntry());
@@ -78,7 +78,7 @@ void OverloadData::sortNextOverloads()
         i++;
     }
 
-    // Create the graph of type dependencies based on implicity conversions.
+    // Create the graph of type dependencies based on implicit conversions.
     Graph graph(reverseMap.count());
     bool haveInt = map.contains("int");
     bool haveUInt = map.contains("unsigned int");
@@ -162,8 +162,12 @@ void OverloadData::sortNextOverloads()
     // sort the overloads topologicaly based on the deps graph.
 
     QLinkedList<int> unmappedResult = graph.topologicalSort();
-    if (unmappedResult.isEmpty())
-        ReportHandler::warning("Cyclic dependency found on overloaddata!");
+    if (unmappedResult.isEmpty()) {
+        QString funcName = referenceFunction()->name();
+        if (referenceFunction()->ownerClass())
+            funcName.prepend(referenceFunction()->ownerClass()->name() + '.');
+        ReportHandler::warning(QString("Cyclic dependency found on overloaddata for '%1' method!").arg(qPrintable(funcName)));
+    }
 
     m_nextOverloadData.clear();
     foreach(int i, unmappedResult)
