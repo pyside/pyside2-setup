@@ -10,6 +10,7 @@ find_package(GeneratorRunner REQUIRED)
 add_definitions(${QT_DEFINITIONS})
 
 option(AVOID_PROTECTED_HACK "Avoid protected hack on generated bindings." FALSE)
+option(BUILD_TESTS "Build tests." TRUE)
 
 if (NOT CMAKE_BUILD_TYPE)
     message("No build type provided. Setting to Debug by default")
@@ -71,10 +72,15 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
 add_custom_target(uninstall "${CMAKE_COMMAND}"
                   -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 
-enable_testing()
+if (BUILD_TESTS)
+    enable_testing()
+endif()
 
 add_subdirectory(libshiboken)
-add_subdirectory(tests)
+
+if (BUILD_TESTS)
+    add_subdirectory(tests)
+endif()
 
 set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${shiboken_VERSION})
 add_custom_target(dist
