@@ -30,6 +30,7 @@ add_library(libshiboken SHARED ${libshiboken_SRC})
 set_property(TARGET libshiboken PROPERTY PREFIX "")
 target_link_libraries(libshiboken
                       ${PYTHON_LIBRARIES})
+set_target_properties(libshiboken PROPERTIES VERSION ${libshiboken_VERSION} SOVERSION ${libshiboken_MAJOR_VERSION})
 
 install(DIRECTORY . DESTINATION include/shiboken
         FILES_MATCHING PATTERN "*.h"
