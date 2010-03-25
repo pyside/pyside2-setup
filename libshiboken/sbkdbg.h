@@ -35,6 +35,7 @@
 #ifndef SBKDBG_H
 #define SBKDBG_H
 
+#include <Python.h>
 #include <iostream>
 
 #ifndef NOCOLOR
@@ -76,6 +77,18 @@ private:
     const char* m_function;
     const char* m_context;
 };
+
+inline std::ostream& operator<<(std::ostream& out, PyObject* obj)
+{
+    PyObject* repr = PyObject_Repr(obj);
+    if (repr) {
+        out << PyString_AS_STRING(repr);
+        Py_DECREF(repr);
+    } else {
+        out << reinterpret_cast<void*>(obj);
+    }
+    return out;
+}
 
 class _SbkDbg : public BaseLogger
 {
