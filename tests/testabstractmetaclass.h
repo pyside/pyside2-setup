@@ -37,6 +37,7 @@ private slots:
     void testVirtualMethods();
     void testDefaultValues();
     void testModifiedDefaultValues();
+    void testInnerClassOfAPolymorphicOne();
 };
 
 #endif // TESTABSTRACTMETACLASS_H

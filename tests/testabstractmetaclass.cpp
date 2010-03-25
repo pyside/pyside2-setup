@@ -197,6 +197,29 @@ void TestAbstractMetaClass::testModifiedDefaultValues()
     QCOMPARE(arg->originalDefaultValueExpression(), QString("A::B()"));
 }
 
+void TestAbstractMetaClass::testInnerClassOfAPolymorphicOne()
+{
+    const char* cppCode ="\
+    struct A {\
+        class B {};\
+        virtual void method();\
+    };\
+    ";
+    const char* xmlCode = "\
+    <typesystem package=\"Foo\"> \
+        <object-type name='A' /> \
+        <value-type name='A::B' /> \
+    </typesystem>";
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.count(), 2);
+    AbstractMetaClass* classA = classes.findClass("A");
+    QVERIFY(classA);
+    QVERIFY(classA->isPolymorphic());
+    AbstractMetaClass* classB = classes.findClass("A::B");
+    QVERIFY(classB);
+    QVERIFY(!classB->isPolymorphic());
+}
 
 QTEST_APPLESS_MAIN(TestAbstractMetaClass)
 
