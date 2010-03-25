@@ -1270,8 +1270,8 @@ void AbstractMetaClass::setFunctions(const AbstractMetaFunctionList &functions)
         f->setOwnerClass(this);
 
         m_hasVirtualSlots = m_hasVirtualSlots || f->isVirtualSlot();
-        m_hasVirtuals = m_hasVirtuals || !f->isFinal() || f->isVirtualSlot();
-        m_isPolymorphic = m_isPolymorphic || m_hasVirtuals || hasVirtualDestructor();
+        m_hasVirtuals = m_hasVirtuals || !f->isFinal() || f->isVirtualSlot() || hasVirtualDestructor();
+        m_isPolymorphic = m_isPolymorphic || m_hasVirtuals;
         m_hasNonpublic = m_hasNonpublic || !f->isPublic();
 
         // If we have non-virtual overloads of a virtual function, we have to implement
@@ -1327,7 +1327,7 @@ void AbstractMetaClass::addFunction(AbstractMetaFunction *function)
         m_functions << function;
 
     m_hasVirtualSlots |= function->isVirtualSlot();
-    m_hasVirtuals |= !function->isFinal() || function->isVirtualSlot();
+    m_hasVirtuals |= !function->isFinal() || function->isVirtualSlot() || hasVirtualDestructor();
     m_isPolymorphic |= m_hasVirtuals;
     m_hasNonpublic |= !function->isPublic();
 }
@@ -1563,6 +1563,7 @@ void AbstractMetaClass::addDefaultConstructor()
 
     uint attr = AbstractMetaAttributes::Native;
     attr |= AbstractMetaAttributes::Public;
+    attr |= AbstractMetaAttributes::Final;
     f->setAttributes(attr);
     f->setImplementingClass(this);
     f->setOriginalAttributes(f->attributes());
