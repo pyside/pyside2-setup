@@ -1248,10 +1248,13 @@ void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scopeItem, AbstractMe
     // Add the functions added by the typesystem
     foreach (AddedFunction addedFunc, metaClass->typeEntry()->addedFunctions()) {
         AbstractMetaFunction* func = traverseFunction(addedFunc);
-        if (func->name() == metaClass->name())
+        if (func->name() == metaClass->name()) {
             func->setFunctionType(AbstractMetaFunction::ConstructorFunction);
-        else
+            if (func->arguments().size() == 1 && func->arguments().first()->type()->typeEntry()->isCustom())
+                func->setExplicit(true);
+        } else {
             func->setFunctionType(AbstractMetaFunction::NormalFunction);
+        }
         func->setDeclaringClass(metaClass);
         func->setImplementingClass(metaClass);
         metaClass->addFunction(func);
