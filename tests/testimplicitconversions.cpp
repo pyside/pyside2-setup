@@ -105,15 +105,23 @@ void TestImplicitConversions::testWithAddedCtor()
         <value-type name=\"A\">\
             <add-function signature='A(const C&amp;)' />\
         </value-type>\
-        <value-type name=\"B\"/>\
+        <value-type name=\"B\">\
+            <add-function signature='B(TARGETLANGTYPE*)' />\
+        </value-type>\
         <value-type name=\"C\"/>\
         </typesystem>";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 3);
+
     AbstractMetaClass* classA = classes.findClass("A");
     AbstractMetaFunctionList implicitConvs = classA->implicitConversions();
     QCOMPARE(implicitConvs.count(), 2);
+
+    // Added constructors with custom types should never result in implicit converters.
+    AbstractMetaClass* classB = classes.findClass("B");
+    implicitConvs = classB->implicitConversions();
+    QCOMPARE(implicitConvs.count(), 0);
 }
 
 void TestImplicitConversions::testWithExternalConversionOperator()
