@@ -38,6 +38,10 @@ private slots:
     void testDefaultValues();
     void testModifiedDefaultValues();
     void testInnerClassOfAPolymorphicOne();
+    void testClassDefaultConstructors();
+    void testClassInheritedDefaultConstructors();
+    void testAbstractClassDefaultConstructors();
+    void testObjectTypesMustNotHaveCopyConstructors();
 };
 
 #endif // TESTABSTRACTMETACLASS_H

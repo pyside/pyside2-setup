@@ -57,14 +57,22 @@ void TestAbstractMetaClass::testClassNameUnderNamespace()
 
     // Check ctors info
     QVERIFY(classes[0]->hasConstructors());
-    QCOMPARE(classes[0]->functions().size(), 1);
-    AbstractMetaFunctionList ctors = classes[0]->queryFunctions(AbstractMetaClass::Constructors);
-    QCOMPARE(ctors.size(), 1);
-    QCOMPARE(ctors[0]->arguments().size(), 0);
-    QVERIFY(!classes[0]->hasPrivateDestructor());
+    QCOMPARE(classes[0]->functions().size(), 2); // default ctor + copy ctor
 
-    QVERIFY(classes[0]->hasCloneOperator()); // implicity default copy ctor
+    AbstractMetaFunctionList ctors = classes[0]->queryFunctions(AbstractMetaClass::Constructors);
+    QCOMPARE(ctors.size(), 2);
+    if (ctors.first()->minimalSignature() != "ClassName()")
+        ctors.swap(0, 1);
+
+    QCOMPARE(ctors[0]->arguments().size(), 0);
+    QCOMPARE(ctors[0]->minimalSignature(), QString("ClassName()"));
+    QCOMPARE(ctors[1]->arguments().size(), 1);
+    QCOMPARE(ctors[1]->minimalSignature(), QString("ClassName(Namespace::ClassName)"));
+
+    QVERIFY(!classes[0]->hasPrivateDestructor());
+    QVERIFY(classes[0]->hasCloneOperator()); // implicit default copy ctor
     QVERIFY(!classes[0]->hasHashFunction());
+
     // This method is buggy and nobody wants to fix it or needs it fixed :-/
     // QVERIFY(classes[0]->hasNonPrivateConstructor());
 }
@@ -102,7 +110,7 @@ void TestAbstractMetaClass::testVirtualMethods()
     QCOMPARE(b->baseClass(), a);
     QCOMPARE(c->baseClass(), b);
 
-    QCOMPARE(a->functions().size(), 2); // implicity ctor + the pv method
+    QCOMPARE(a->functions().size(), 2); // default ctor + the pure virtual method
     QCOMPARE(b->functions().size(), 2);
     QCOMPARE(c->functions().size(), 2);
 
@@ -220,6 +228,186 @@ void TestAbstractMetaClass::testInnerClassOfAPolymorphicOne()
     QVERIFY(classB);
     QVERIFY(!classB->isPolymorphic());
 }
+
+void TestAbstractMetaClass::testClassDefaultConstructors()
+{
+    const char* cppCode ="\
+    struct A {};\
+    \
+    struct B {\
+        B();\
+    private: \
+        B(const B&);\
+    };\
+    \
+    struct C {\
+        C(const C&);\
+    };\
+    \
+    struct D {\
+    private: \
+        D(const D&);\
+    };\
+    \
+    struct E {\
+    private: \
+        ~E();\
+    };\
+    \
+    struct F {\
+        F(int, int);\
+    };\
+    ";
+    const char* xmlCode = "\
+    <typesystem package='Foo'> \
+        <primitive-type name='int' />\
+        <value-type name='A' /> \
+        <object-type name='B' /> \
+        <value-type name='C' /> \
+        <object-type name='D' /> \
+        <object-type name='E' /> \
+        <value-type name='F' /> \
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.count(), 6);
+
+    AbstractMetaClass* classA = classes.findClass("A");
+    QVERIFY(classA);
+    QCOMPARE(classA->functions().size(), 2);
+
+    AbstractMetaFunctionList ctors = classA->queryFunctions(AbstractMetaClass::Constructors);
+    QCOMPARE(ctors.size(), 2);
+    if (ctors.first()->minimalSignature() != "A()")
+        ctors.swap(0, 1);
+
+    QCOMPARE(ctors[0]->arguments().size(), 0);
+    QCOMPARE(ctors[0]->minimalSignature(), QString("A()"));
+    QCOMPARE(ctors[1]->arguments().size(), 1);
+    QCOMPARE(ctors[1]->minimalSignature(), QString("A(A)"));
+
+    AbstractMetaClass* classB = classes.findClass("B");
+    QVERIFY(classB);
+    QCOMPARE(classB->functions().size(), 2);
+    QCOMPARE(classB->functions().first()->minimalSignature(), QString("B()"));
+
+    AbstractMetaClass* classC = classes.findClass("C");
+    QVERIFY(classC);
+    QCOMPARE(classC->functions().size(), 1);
+    QCOMPARE(classC->functions().first()->minimalSignature(), QString("C(C)"));
+
+    AbstractMetaClass* classD = classes.findClass("D");
+    QVERIFY(classD);
+    QCOMPARE(classD->functions().size(), 1);
+    QCOMPARE(classD->functions().first()->minimalSignature(), QString("D(D)"));
+    QVERIFY(classD->functions().first()->isPrivate());
+
+    AbstractMetaClass* classE = classes.findClass("E");
+    QVERIFY(classE);
+    QVERIFY(classE->hasPrivateDestructor());
+    QCOMPARE(classE->functions().size(), 0);
+
+    AbstractMetaClass* classF = classes.findClass("F");
+    QVERIFY(classF);
+
+    ctors = classF->queryFunctions(AbstractMetaClass::Constructors);
+    QCOMPARE(ctors.size(), 2);
+    if (ctors.first()->minimalSignature() != "F(int,int)")
+        ctors.swap(0, 1);
+
+    QCOMPARE(ctors[0]->arguments().size(), 2);
+    QCOMPARE(ctors[0]->minimalSignature(), QString("F(int,int)"));
+    QCOMPARE(ctors[1]->arguments().size(), 1);
+    QCOMPARE(ctors[1]->minimalSignature(), QString("F(F)"));
+}
+
+void TestAbstractMetaClass::testClassInheritedDefaultConstructors()
+{
+    const char* cppCode ="\
+    struct A {\
+        A();\
+    private: \
+        A(const A&);\
+    };\
+    struct B : public A {};\
+    ";
+    const char* xmlCode = "\
+    <typesystem package='Foo'> \
+        <object-type name='A' /> \
+        <object-type name='B' /> \
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.count(), 2);
+    AbstractMetaClass* classA = classes.findClass("A");
+    QVERIFY(classA);
+
+    AbstractMetaFunctionList ctors = classA->queryFunctions(AbstractMetaClass::Constructors);
+    QCOMPARE(ctors.size(), 2);
+    if (ctors.first()->minimalSignature() != "A()")
+        ctors.swap(0, 1);
+
+    QCOMPARE(ctors[0]->arguments().size(), 0);
+    QCOMPARE(ctors[0]->minimalSignature(), QString("A()"));
+    QCOMPARE(ctors[1]->arguments().size(), 1);
+    QCOMPARE(ctors[1]->minimalSignature(), QString("A(A)"));
+    QVERIFY(ctors[1]->isPrivate());
+
+    AbstractMetaClass* classB = classes.findClass("B");
+    QVERIFY(classB);
+
+    ctors = classB->queryFunctions(AbstractMetaClass::Constructors);
+    QCOMPARE(ctors.size(), 1);
+    QCOMPARE(ctors.first()->arguments().size(), 0);
+    QCOMPARE(ctors.first()->minimalSignature(), QString("B()"));
+}
+
+void TestAbstractMetaClass::testAbstractClassDefaultConstructors()
+{
+    const char* cppCode ="\
+    struct A {\
+        virtual method() = 0;\
+    };\
+    ";
+    const char* xmlCode = "\
+    <typesystem package='Foo'> \
+        <object-type name='A' /> \
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.count(), 1);
+    AbstractMetaClass* classA = classes.findClass("A");
+    QVERIFY(classA);
+
+    AbstractMetaFunctionList ctors = classA->queryFunctions(AbstractMetaClass::Constructors);
+    QCOMPARE(ctors.size(), 1);
+    QCOMPARE(ctors.first()->arguments().size(), 0);
+    QCOMPARE(ctors.first()->minimalSignature(), QString("A()"));
+}
+
+void TestAbstractMetaClass::testObjectTypesMustNotHaveCopyConstructors()
+{
+    const char* cppCode ="struct A {};";
+    const char* xmlCode = "\
+    <typesystem package='Foo'> \
+        <object-type name='A' /> \
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.count(), 1);
+    AbstractMetaClass* classA = classes.findClass("A");
+    QVERIFY(classA);
+
+    AbstractMetaFunctionList ctors = classA->queryFunctions(AbstractMetaClass::Constructors);
+    QCOMPARE(ctors.size(), 1);
+    QCOMPARE(ctors.first()->arguments().size(), 0);
+    QCOMPARE(ctors.first()->minimalSignature(), QString("A()"));
+}
+
 
 QTEST_APPLESS_MAIN(TestAbstractMetaClass)
 

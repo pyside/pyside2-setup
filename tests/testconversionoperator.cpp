@@ -52,9 +52,9 @@ void TestConversionOperator::testConversionOperator()
     QVERIFY(classA);
     QVERIFY(classB);
     QVERIFY(classC);
-    QCOMPARE(classA->functions().count(), 1);
-    QCOMPARE(classB->functions().count(), 2);
-    QCOMPARE(classC->functions().count(), 2);
+    QCOMPARE(classA->functions().count(), 2);
+    QCOMPARE(classB->functions().count(), 3);
+    QCOMPARE(classC->functions().count(), 3);
     QCOMPARE(classA->externalConversionOperators().count(), 2);
 
     AbstractMetaFunction* convOp = 0;
@@ -110,8 +110,8 @@ void TestConversionOperator::testRemovedConversionOperator()
     AbstractMetaClass* classB = classes.findClass("B");
     QVERIFY(classA);
     QVERIFY(classB);
-    QCOMPARE(classA->functions().count(), 1);
-    QCOMPARE(classB->functions().count(), 2);
+    QCOMPARE(classA->functions().count(), 2);
+    QCOMPARE(classB->functions().count(), 3);
     QCOMPARE(classA->externalConversionOperators().count(), 0);
     QCOMPARE(classA->implicitConversions().count(), 0);
 }

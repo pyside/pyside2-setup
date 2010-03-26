@@ -42,7 +42,7 @@ void TestReverseOperators::testReverseSum()
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass("A");
     QVERIFY(classA);
-    QCOMPARE(classA->functions().count(), 3);
+    QCOMPARE(classA->functions().count(), 4);
 
     const AbstractMetaFunction* reverseOp = 0;
     const AbstractMetaFunction* normalOp = 0;

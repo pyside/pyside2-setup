@@ -81,7 +81,7 @@ void TestAddFunction::testAddFunction()
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass("A");
     QVERIFY(classA);
-    QCOMPARE(classA->functions().count(), 3); // default ctor, func a() and the added function
+    QCOMPARE(classA->functions().count(), 4); // default ctor, default copy ctor, func a() and the added function
 
     AbstractMetaFunction* addedFunc = classA->functions().last();
     QCOMPARE(addedFunc->visibility(), uint(AbstractMetaFunction::Protected));
@@ -117,7 +117,7 @@ void TestAddFunction::testAddFunctionConstructor()
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass("A");
     QVERIFY(classA);
-    QCOMPARE(classA->functions().count(), 2); // default and added ctors
+    QCOMPARE(classA->functions().count(), 3); // default and added ctors
     AbstractMetaFunction* addedFunc = classA->functions().last();
     QCOMPARE(addedFunc->visibility(), uint(AbstractMetaFunction::Public));
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::ConstructorFunction);
@@ -139,7 +139,7 @@ void TestAddFunction::testAddFunctionTagDefaultValues()
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass("A");
     QVERIFY(classA);
-    QCOMPARE(classA->functions().count(), 2); // default ctor and the added function
+    QCOMPARE(classA->functions().count(), 3); // default ctor, default copy ctor and the added function
     AbstractMetaFunction* addedFunc = classA->functions().last();
     QCOMPARE(addedFunc->visibility(), uint(AbstractMetaFunction::Public));
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::NormalFunction);
