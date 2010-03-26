@@ -1363,8 +1363,11 @@ public:
     bool hasSignal(const AbstractMetaFunction *f) const;
 
     bool hasConstructors() const;
+    bool hasCopyConstructor() const;
+    bool hasPrivateCopyConstructor() const;
 
     void addDefaultConstructor();
+    void addDefaultCopyConstructor(bool isPrivate = false);
 
     bool hasNonPrivateConstructor() const
     {

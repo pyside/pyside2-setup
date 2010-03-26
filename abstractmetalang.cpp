@@ -1552,6 +1552,24 @@ bool AbstractMetaClass::hasConstructors() const
     return queryFunctions(Constructors).size();
 }
 
+bool AbstractMetaClass::hasCopyConstructor() const
+{
+    foreach (const AbstractMetaFunction* ctor, queryFunctions(Constructors)) {
+        if (ctor->isCopyConstructor())
+            return true;
+    }
+    return false;
+}
+
+bool AbstractMetaClass::hasPrivateCopyConstructor() const
+{
+    foreach (const AbstractMetaFunction* ctor, queryFunctions(Constructors)) {
+        if (ctor->isCopyConstructor() && ctor->isPrivate())
+            return true;
+    }
+    return false;
+}
+
 void AbstractMetaClass::addDefaultConstructor()
 {
     AbstractMetaFunction *f = new AbstractMetaFunction;
@@ -1564,6 +1582,38 @@ void AbstractMetaClass::addDefaultConstructor()
     uint attr = AbstractMetaAttributes::Native;
     attr |= AbstractMetaAttributes::Public;
     attr |= AbstractMetaAttributes::Final;
+    f->setAttributes(attr);
+    f->setImplementingClass(this);
+    f->setOriginalAttributes(f->attributes());
+
+    addFunction(f);
+}
+
+void AbstractMetaClass::addDefaultCopyConstructor(bool isPrivate)
+{
+    AbstractMetaFunction* f = new AbstractMetaFunction;
+    f->setName(name());
+    f->setOwnerClass(this);
+    f->setFunctionType(AbstractMetaFunction::ConstructorFunction);
+    f->setDeclaringClass(this);
+
+    AbstractMetaType* argType = new AbstractMetaType;
+    argType->setTypeEntry(typeEntry());
+    argType->setReference(true);
+    argType->setConstant(true);
+    argType->setTypeUsagePattern(AbstractMetaType::ValuePattern);
+
+    AbstractMetaArgument* arg = new AbstractMetaArgument;
+    arg->setType(argType);
+    arg->setName(name());
+    f->addArgument(arg);
+
+    uint attr = AbstractMetaAttributes::Native;
+    attr |= AbstractMetaAttributes::Final;
+    if (isPrivate)
+        attr |= AbstractMetaAttributes::Private;
+    else
+        attr |= AbstractMetaAttributes::Public;
     f->setAttributes(attr);
     f->setImplementingClass(this);
     f->setOriginalAttributes(f->attributes());
