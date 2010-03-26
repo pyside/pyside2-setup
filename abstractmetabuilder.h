@@ -149,6 +149,9 @@ public:
         return m_globalEnums;
     }
 
+    AbstractMetaClassList getBaseClasses(const AbstractMetaClass* metaClass) const;
+    bool ancestorHasPrivateCopyConstructor(const AbstractMetaClass* metaClass) const;
+
     bool inheritTemplate(AbstractMetaClass *subclass,
                          const AbstractMetaClass *templateClass,
                          const TypeParser::Info &info);

@@ -377,8 +377,13 @@ bool AbstractMetaBuilder::build(QIODevice* input)
             ReportHandler::warning(QString("class '%1' does not have an entry in the type system")
                                    .arg(cls->name()));
         } else {
-            if (!cls->hasConstructors() && !cls->isFinalInCpp() && !cls->isInterface() && !cls->isNamespace())
-                cls->addDefaultConstructor();
+            bool couldAddDefaultCtors = !cls->isFinalInCpp() && !cls->isInterface() && !cls->isNamespace();
+            if (couldAddDefaultCtors) {
+                if (!cls->hasConstructors())
+                    cls->addDefaultConstructor();
+                if (cls->typeEntry()->isValue() && !cls->isAbstract() && !cls->hasCopyConstructor())
+                    cls->addDefaultCopyConstructor(ancestorHasPrivateCopyConstructor(cls));
+            }
         }
 
         if (cls->isAbstract() && !cls->isInterface())
@@ -1197,10 +1202,19 @@ void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scopeItem, AbstractMe
                 metaFunction->setPropertySpec(reset);
             }
 
+            // Can not use metaFunction->isCopyConstructor() because
+            // the function wasn't assigned to its owner class yet.
+            bool isCopyCtor = false;
+            if (metaFunction->isConstructor() && metaFunction->arguments().size() == 1) {
+                const AbstractMetaType* argType = metaFunction->arguments().first()->type();
+                isCopyCtor = argType->isConstant()
+                             && argType->isReference()
+                             && argType->typeEntry()->name() == metaFunction->name();
+            }
 
             bool isInvalidDestructor = metaFunction->isDestructor() && metaFunction->isPrivate();
             bool isInvalidConstructor = metaFunction->isConstructor()
-                                        && (metaFunction->isPrivate() || metaFunction->isInvalid());
+                                        && ((metaFunction->isPrivate() && !isCopyCtor) || metaFunction->isInvalid());
             if ((isInvalidDestructor || isInvalidConstructor)
                 && !metaClass->hasNonPrivateConstructor()) {
                 *metaClass += AbstractMetaAttributes::Final;
@@ -1216,7 +1230,7 @@ void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scopeItem, AbstractMe
 
             if (!metaFunction->isDestructor()
                 && !metaFunction->isInvalid()
-                && (!metaFunction->isConstructor() || !metaFunction->isPrivate())) {
+                && !(metaFunction->isPrivate() && metaFunction->isConstructor() && !isCopyCtor)) {
 
                 setupFunctionDefaults(metaFunction, metaClass);
 
@@ -2096,6 +2110,28 @@ bool AbstractMetaBuilder::isEnum(const QStringList &qualified_name)
 {
     CodeModelItem item = m_dom->model()->findItem(qualified_name, m_dom->toItem());
     return item && item->kind() == _EnumModelItem::__node_kind;
+}
+
+AbstractMetaClassList AbstractMetaBuilder::getBaseClasses(const AbstractMetaClass* metaClass) const
+{
+    AbstractMetaClassList baseClasses;
+    foreach (const QString& parent, metaClass->baseClassNames()) {
+        AbstractMetaClass* cls = m_metaClasses.findClass(parent);
+        if (cls)
+            baseClasses << cls;
+    }
+    return baseClasses;
+}
+
+bool AbstractMetaBuilder::ancestorHasPrivateCopyConstructor(const AbstractMetaClass* metaClass) const
+{
+    if (metaClass->hasPrivateCopyConstructor())
+        return true;
+    foreach (const AbstractMetaClass* cls, getBaseClasses(metaClass)) {
+        if (ancestorHasPrivateCopyConstructor(cls))
+            return true;
+    }
+    return false;
 }
 
 AbstractMetaType *AbstractMetaBuilder::inheritTemplateType(const QList<AbstractMetaType *> &templateTypes,
