@@ -1518,12 +1518,17 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         } else if (!injectedCodeCallsCppFunction(func)) {
             if (func->isConstructor() || func->isCopyConstructor()) {
                 isCtor = true;
-                mc << "new " << wrapperName(func->ownerClass());
-                mc << '(';
-                if (func->isCopyConstructor() && maxArgs == 1)
-                    mc << "*cpp_arg0";
-                else
+                QString className = wrapperName(func->ownerClass());
+                mc << "new " << className << '(';
+                if (func->isCopyConstructor() && maxArgs == 1) {
+                    mc << '*';
+                    QString arg("cpp_arg0");
+                    if (shouldGenerateCppWrapper(func->ownerClass()))
+                        arg = QString("reinterpret_cast<%1*>(%2)").arg(className).arg(arg);
+                    mc << arg;
+                } else {
                     mc << userArgs.join(", ");
+                }
                 mc << ')';
             } else {
                 if (func->ownerClass()) {
