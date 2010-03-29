@@ -134,6 +134,22 @@ inline std::list<SbkBaseWrapperType*> getCppBaseClasses(PyTypeObject* baseType)
     return visitor.bases();
 }
 
+struct SbkBaseWrapper;
+
+/// Linked list of SbkBaseWrapper pointers
+typedef std::list<SbkBaseWrapper*> ChildrenList;
+
+/// Struct used to store information about object parent and children.
+struct ParentInfo
+{
+    /// Default ctor.
+    ParentInfo() : parent(0) {}
+    /// Pointer to parent object.
+    SbkBaseWrapper* parent;
+    /// List of object children.
+    ChildrenList children;
+};
+
 }
 
 #endif

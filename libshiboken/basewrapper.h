@@ -44,22 +44,6 @@
 namespace Shiboken
 {
 
-struct SbkBaseWrapper;
-
-/// Linked list of SbkBaseWrapper pointers
-typedef std::list<SbkBaseWrapper*> ChildrenList;
-
-/// Struct used to store information about object parent and children.
-struct LIBSHIBOKEN_API ParentInfo
-{
-    /// Default ctor.
-    ParentInfo() : parent(0) {}
-    /// Pointer to parent object.
-    SbkBaseWrapper* parent;
-    /// List of object children.
-    ChildrenList children;
-};
-
 /**
  * This mapping associates a method and argument of an wrapper object with the wrapper of
  * said argument when it needs the binding to help manage its reference counting.
@@ -114,6 +98,8 @@ struct LIBSHIBOKEN_API SbkBaseWrapperType
     /// True if this type holds two or more C++ instances, e.g.: a Python class which inherits from two C++ classes.
     int is_multicpp:1;
 };
+
+struct ParentInfo;
 
 /// Base Python object for all the wrapped C++ classes.
 struct LIBSHIBOKEN_API SbkBaseWrapper
