@@ -412,7 +412,7 @@ void setErrorAboutWrongArguments(PyObject* args, const char* funcName, const cha
     std::string params;
     if (args) {
         if (PyTuple_Check(args)) {
-            for (int i = 0, max = PyTuple_Size(args); i < max; ++i) {
+            for (int i = 0, max = PyTuple_GET_SIZE(args); i < max; ++i) {
                 if (i)
                     params += ", ";
                 params += PyTuple_GET_ITEM(args, i)->ob_type->tp_name;
