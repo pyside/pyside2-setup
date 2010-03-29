@@ -226,7 +226,7 @@ void SbkBaseWrapper_Dealloc_PrivateDtor(PyObject* self)
         PyObject_ClearWeakRefs(self);
 
     BindingManager::instance().releaseWrapper(self);
-    SbkBaseWrapper_clearReferences(reinterpret_cast<SbkBaseWrapper*>(self));
+    clearReferences(reinterpret_cast<SbkBaseWrapper*>(self));
     Py_TYPE(reinterpret_cast<SbkBaseWrapper*>(self))->tp_free(self);
 }
 
@@ -242,7 +242,7 @@ void keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObje
     refCountMap[key] = referredObject;
 }
 
-void SbkBaseWrapper_clearReferences(SbkBaseWrapper* self)
+void clearReferences(SbkBaseWrapper* self)
 {
     if (!self->referredObjects)
         return;
@@ -299,7 +299,7 @@ static void deallocPythonTypes(PyObject* pyObj)
 
     if (SbkBaseWrapper_hasParentInfo(sbkObj))
         destroyParentInfo(sbkObj);
-    SbkBaseWrapper_clearReferences(sbkObj);
+    clearReferences(sbkObj);
 
     delete[] sbkObj->cptr;
     sbkObj->cptr = 0;
@@ -321,7 +321,7 @@ void deallocWrapper(PyObject* pyObj)
 
     if (SbkBaseWrapper_hasParentInfo(pyObj))
         destroyParentInfo(sbkObj);
-    SbkBaseWrapper_clearReferences(sbkObj);
+    clearReferences(sbkObj);
 
     delete[] sbkObj->cptr;
     sbkObj->cptr = 0;

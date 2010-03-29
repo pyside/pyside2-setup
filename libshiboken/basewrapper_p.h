@@ -150,6 +150,12 @@ struct ParentInfo
     ChildrenList children;
 };
 
+/**
+*   Decrements the reference counters of every object referred by self.
+*   \param self    the wrapper instance that keeps references to other objects.
+*/
+void clearReferences(SbkBaseWrapper* self);
+
 }
 
 #endif

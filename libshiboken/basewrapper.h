@@ -209,12 +209,6 @@ SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*);
  */
 LIBSHIBOKEN_API void keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObject);
 
-/**
- *   Decrements the reference counters of every object referred by self.
- *   \param self    the wrapper instance that keeps references to other objects.
- */
-LIBSHIBOKEN_API void SbkBaseWrapper_clearReferences(SbkBaseWrapper* self);
-
 /// Returns true and sets a Python RuntimeError if the Python wrapper is not marked as valid.
 LIBSHIBOKEN_API bool cppObjectIsInvalid(PyObject* wrapper);
 
