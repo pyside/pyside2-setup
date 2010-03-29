@@ -58,8 +58,15 @@ void setParent(PyObject* parent, PyObject* child)
     if (!child || child == Py_None || child == parent)
         return;
 
-    //Recursive for sequence protocol
-    if (PySequence_Check(child)) {
+    /*
+     *  setParent is recursive when the child is a native Python sequence, i.e. objects not binded by Shiboken
+     *  like tuple and list.
+     *
+     *  This "limitation" exists to fix the following problem: A class multiple inherits QObject and QString,
+     *  so if you pass this class to someone that takes the ownership, we CAN'T enter in this if, but hey! QString
+     *  follows the sequence protocol.
+     */
+    if (PySequence_Check(child) && !isShibokenType(child)) {
         Shiboken::AutoDecRef seq(PySequence_Fast(child, 0));
         for (int i = 0, max = PySequence_Size(seq); i < max; ++i)
             setParent(parent, PySequence_Fast_GET_ITEM(seq.object(), i));
