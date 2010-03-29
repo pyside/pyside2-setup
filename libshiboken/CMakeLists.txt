@@ -32,10 +32,21 @@ target_link_libraries(libshiboken
                       ${PYTHON_LIBRARIES})
 set_target_properties(libshiboken PROPERTIES VERSION ${libshiboken_VERSION} SOVERSION ${libshiboken_MAJOR_VERSION})
 
-install(DIRECTORY . DESTINATION include/shiboken
-        FILES_MATCHING PATTERN "*.h"
-        PATTERN ".git" EXCLUDE
-        )
+install(FILES
+        autodecref.h
+        basewrapper.h
+        bindingmanager.h
+        conversions.h
+        gilstate.h
+        helper.h
+        pyenum.h
+        python25compat.h
+        sbkdbg.h
+        shiboken.h
+        shibokenmacros.h
+        threadstatesaver.h
+        typeresolver.h
+        DESTINATION include/shiboken)
 install(TARGETS libshiboken DESTINATION "${LIB_INSTALL_DIR}")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ShibokenConfig.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken-${libshiboken_VERSION}")
