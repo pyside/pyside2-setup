@@ -170,7 +170,8 @@ void AbstractMetaBuilder::traverseOperatorFunction(FunctionModelItem item)
     baseoperandClass = argumentToClass(arguments.at(0));
     if (arguments.size() == 1) {
         unaryOperator = true;
-    } else if (!baseoperandClass) {
+    } else if (!baseoperandClass
+               || !(baseoperandClass->typeEntry()->codeGeneration() & TypeEntry::GenerateTargetLang)) {
         baseoperandClass = argumentToClass(arguments.at(1));
         firstArgumentIsSelf = false;
     }
@@ -190,7 +191,7 @@ void AbstractMetaBuilder::traverseOperatorFunction(FunctionModelItem item)
                 // not of the same type of its owning class we suppose that it
                 // must be an reverse operator (e.g. CLASS::operator(TYPE, CLASS)).
                 // All operator overloads that operate over a class are already
-                // beign added as member functions of that class by the API Extractor.
+                // being added as member functions of that class by the API Extractor.
                 arguments.pop_back();
                 metaFunction->setArguments(arguments);
                 metaFunction->setReverseOperator(true);
