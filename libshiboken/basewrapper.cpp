@@ -128,7 +128,7 @@ void destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent)
 }
 
 PyObject* SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
-                             const void* cptr,
+                             void* cptr,
                              bool hasOwnership,
                              bool isExactType)
 {

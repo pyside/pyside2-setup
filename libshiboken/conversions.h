@@ -120,7 +120,7 @@ template<typename T>
 inline PyObject* createWrapper(const T* cppobj, bool hasOwnership = false, bool isExactType = false)
 {
     return SbkBaseWrapper_New(reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()),
-                              cppobj, hasOwnership, isExactType);
+                              const_cast<T*>(cppobj), hasOwnership, isExactType);
 }
 
 // Base Conversions ----------------------------------------------------------
@@ -177,7 +177,7 @@ template<>
 struct Converter<void*>
 {
     static inline bool isConvertible(PyObject* pyobj) { return true; }
-    static PyObject* toPython(const void* cppobj)
+    static PyObject* toPython(void* cppobj)
     {
         if (!cppobj)
             Py_RETURN_NONE;

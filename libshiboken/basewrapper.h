@@ -239,7 +239,7 @@ typedef struct {
 
 LIBSHIBOKEN_API PyAPI_FUNC(PyObject*)
 SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
-                   const void* cptr,
+                   void* cptr,
                    bool hasOwnership = true,
                    bool isExactType = false);
 
