@@ -230,7 +230,7 @@ void SbkBaseWrapper_Dealloc_PrivateDtor(PyObject* self)
     Py_TYPE(reinterpret_cast<SbkBaseWrapper*>(self))->tp_free(self);
 }
 
-void SbkBaseWrapper_keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObject)
+void keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObject)
 {
     if (!self->referredObjects)
         return;

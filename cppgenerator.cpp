@@ -1635,7 +1635,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 s << "#error Invalid reference count modification for argument " << arg_mod.index << endl << endl;
                 break;
             }
-            s << INDENT << "Shiboken::SbkBaseWrapper_keepReference(reinterpret_cast<SbkBaseWrapper*>(self), \"";
+            s << INDENT << "Shiboken::keepReference(reinterpret_cast<SbkBaseWrapper*>(self), \"";
             s << func->minimalSignature() << arg_mod.index << "\", " << pyArgName << ");" << endl;
         }
     }
@@ -2118,7 +2118,7 @@ void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* 
     bool pythonWrapperRefCounting = metaField->type()->typeEntry()->isObject()
                                     || metaField->type()->isValuePointer();
     if (pythonWrapperRefCounting) {
-        s << INDENT << "Shiboken::SbkBaseWrapper_keepReference(reinterpret_cast<SbkBaseWrapper*>(self), \"";
+        s << INDENT << "Shiboken::keepReference(reinterpret_cast<SbkBaseWrapper*>(self), \"";
         s << metaField->name() << "\", value);" << endl;
         //s << INDENT << "Py_XDECREF(oldvalue);" << endl;
         s << endl;

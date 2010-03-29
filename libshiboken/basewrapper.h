@@ -207,7 +207,7 @@ SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*);
  *   \param key             a key that identifies the C++ method signature and argument where the referredObject came from.
  *   \parem referredObject  the object whose reference is used by the self object.
  */
-LIBSHIBOKEN_API void SbkBaseWrapper_keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObject);
+LIBSHIBOKEN_API void keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObject);
 
 /**
  *   Decrements the reference counters of every object referred by self.
