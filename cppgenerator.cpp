@@ -646,7 +646,6 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     if (overloadData.hasAllowThread())
         s << INDENT << "Shiboken::ThreadStateSaver " << THREAD_STATE_SAVER_VAR << ';' << endl;
     s << INDENT << "SbkBaseWrapper* sbkSelf = reinterpret_cast<SbkBaseWrapper*>(self);" << endl;
-    s << INDENT << "assert(!sbkSelf->cptr);\n"; // FIXME: object reinitialization not supported
 
     if (metaClass->isAbstract() || metaClass->baseClassNames().size() > 1) {
         s << INDENT << "SbkBaseWrapperType* type = reinterpret_cast<SbkBaseWrapperType*>(self->ob_type);" << endl;
@@ -690,19 +689,18 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     writeOverloadedMethodDecisor(s, &overloadData);
     s << endl;
 
+    s << INDENT << "if (PyErr_Occurred() || !Shiboken::setCppPointer(sbkSelf, Shiboken::SbkType<" << metaClass->qualifiedCppName() << " >(), cptr)) {" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "delete cptr;" << endl;
+        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+    }
+    s << INDENT << '}' << endl;
     if (overloadData.maxArgs() > 0) {
-        s << INDENT << "if (PyErr_Occurred()) {" << endl;
-        {
-            Indentation indent(INDENT);
-            s << INDENT << "delete cptr;" << endl;
-            s << INDENT << "return " << m_currentErrorCode << ';' << endl;
-        }
-        s << INDENT << '}' << endl;
         s << INDENT << "if (!cptr) goto " << cpythonFunctionName(rfunc) << "_TypeError;" << endl;
         s << endl;
     }
 
-    s << INDENT << "sbkSelf->cptr = cptr;" << endl;
     s << INDENT << "sbkSelf->validCppObject = 1;" << endl;
     // If the created C++ object has a C++ wrapper the ownership is assigned to Python
     // (first "1") and the flag indicating that the Python wrapper holds an C++ wrapper
@@ -712,7 +710,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
         s << INDENT << "sbkSelf->containsCppWrapper = 1;" << endl;
     if (needsReferenceCountControl(metaClass))
         s << INDENT << "sbkSelf->referredObjects = new Shiboken::RefCountMap;" << endl;
-    s << INDENT << "BindingManager::instance().registerWrapper(sbkSelf);" << endl;
+    s << INDENT << "BindingManager::instance().registerWrapper(sbkSelf, cptr);" << endl;
 
     // Constructor code injections, position=end
     if (hasCodeInjectionsAtEnd) {
@@ -1935,7 +1933,8 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*obj_copier*/          " << obj_copier << ',' << endl;
     s << INDENT << "/*ext_isconvertible*/   0," << endl;
     s << INDENT << "/*ext_tocpp*/           0," << endl;
-    s << INDENT << "/*cpp_dtor*/            " << cpp_dtor << endl;
+    s << INDENT << "/*cpp_dtor*/            " << cpp_dtor << ',' << endl;
+    s << INDENT << "/*is_multicpp*/         0" << endl;
     s << "};" << endl;
 }
 

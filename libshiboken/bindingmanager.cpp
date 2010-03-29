@@ -33,8 +33,10 @@
  */
 
 #include "basewrapper.h"
+#include "basewrapper_p.h"
 #include "bindingmanager.h"
 #include "google/dense_hash_map"
+#include <cstddef>
 
 namespace Shiboken
 {
@@ -85,10 +87,9 @@ bool BindingManager::hasWrapper(const void* cptr)
 {
     return m_d->wrapperMapper.count(cptr);
 }
-void BindingManager::registerWrapper(SbkBaseWrapper* pyobj)
+void BindingManager::registerWrapper(SbkBaseWrapper* pyobj, void* cptr)
 {
     SbkBaseWrapperType* instanceType = reinterpret_cast<SbkBaseWrapperType*>(pyobj->ob_type);
-    void* cptr = pyobj->cptr;
 
     if (instanceType->mi_init && !instanceType->mi_offsets)
         instanceType->mi_offsets = instanceType->mi_init(cptr);
@@ -105,14 +106,20 @@ void BindingManager::registerWrapper(SbkBaseWrapper* pyobj)
 
 void BindingManager::releaseWrapper(PyObject* wrapper)
 {
-    void* cptr = SbkBaseWrapper_cptr(wrapper);
-    m_d->releaseWrapper(cptr);
-    if (((SbkBaseWrapperType*) wrapper->ob_type)->mi_offsets) {
-        int* offset = ((SbkBaseWrapperType*) wrapper->ob_type)->mi_offsets;
-        while (*offset != -1) {
-            if (*offset > 0)
-                m_d->releaseWrapper((void*) ((size_t) cptr + (*offset)));
-            offset++;
+    SbkBaseWrapperType* sbkType = reinterpret_cast<SbkBaseWrapperType*>(wrapper->ob_type);
+    int numBases = sbkType->is_multicpp ? getNumberOfCppBaseClasses(wrapper->ob_type) : 1;
+
+    void** cptrs = reinterpret_cast<SbkBaseWrapper*>(wrapper)->cptr;
+    for (int i = 0; i < numBases; ++i) {
+        void* cptr = cptrs[i];
+        m_d->releaseWrapper(cptr);
+        if (sbkType->mi_offsets) {
+            int* offset = sbkType->mi_offsets;
+            while (*offset != -1) {
+                if (*offset > 0)
+                    m_d->releaseWrapper((void*) ((std::size_t) cptr + (*offset)));
+                offset++;
+            }
         }
     }
 }

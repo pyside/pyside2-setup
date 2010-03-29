@@ -111,6 +111,8 @@ struct LIBSHIBOKEN_API SbkBaseWrapperType
     ExtendedToCppFunc ext_tocpp;
     /// Pointer to a function responsible for deletetion of the C++ instance calling the proper destructor.
     void (*cpp_dtor)(void*);
+    /// True if this type holds two or more C++ instances, e.g.: a Python class which inherits from two C++ classes.
+    int is_multicpp:1;
 };
 
 /// Base Python object for all the wrapped C++ classes.
@@ -118,7 +120,7 @@ struct LIBSHIBOKEN_API SbkBaseWrapper
 {
     PyObject_HEAD
     /// Pointer to the C++ class.
-    void* cptr;
+    void** cptr;
     /// Instance dictionary.
     PyObject* ob_dict;
     /// True when Python is responsible for freeing the used memory.
@@ -171,6 +173,16 @@ inline bool isShibokenType(const PyObject* pyObj)
 }
 
 /**
+*   Get the C++ pointer of type \p desiredType from a Python object.
+*/
+LIBSHIBOKEN_API void* getCppPointer(PyObject* wrapper, PyTypeObject* desiredType);
+
+/**
+*   Set the C++ pointer of type \p desiredType of a Python object.
+*/
+LIBSHIBOKEN_API bool setCppPointer(SbkBaseWrapper* wrapper, PyTypeObject* desiredType, void* cptr);
+
+/**
  * Shiboken_TypeCheck macro performs a type check using the values registered with SbkType<>() template.
  */
 #define Shiboken_TypeCheck(pyobj, type) (PyObject_TypeCheck(pyobj, SbkType<type>()))
@@ -178,8 +190,6 @@ inline bool isShibokenType(const PyObject* pyObj)
 #define SbkBaseWrapper_Check(op) PyObject_TypeCheck(op, (PyTypeObject*)&Shiboken::SbkBaseWrapper_Type)
 #define SbkBaseWrapper_CheckExact(op) ((op)->ob_type == &Shiboken::SbkBaseWrapper_Type)
 
-#define SbkBaseWrapper_cptr(pyobj)                   (((Shiboken::SbkBaseWrapper*)pyobj)->cptr)
-#define SbkBaseWrapper_setCptr(pyobj,c)              (((Shiboken::SbkBaseWrapper*)pyobj)->cptr = c)
 #define SbkBaseWrapper_instanceDict(pyobj)           (((Shiboken::SbkBaseWrapper*)pyobj)->ob_dict)
 #define SbkBaseWrapper_setInstanceDict(pyobj,d)      (((Shiboken::SbkBaseWrapper*)pyobj)->ob_dict = d)
 #define SbkBaseWrapper_hasOwnership(pyobj)           (((Shiboken::SbkBaseWrapper*)pyobj)->hasOwnership)
@@ -222,8 +232,10 @@ LIBSHIBOKEN_API void SbkBaseWrapper_clearReferences(SbkBaseWrapper* self);
 /// Returns true and sets a Python RuntimeError if the Python wrapper is not marked as valid.
 LIBSHIBOKEN_API bool cppObjectIsInvalid(PyObject* wrapper);
 
+/// Dealloc the python object \p pyObj and the C++ object represented by it.
 LIBSHIBOKEN_API void deallocWrapper(PyObject* pyObj);
 
+/// Delete the class T allocated on \p cptr.
 template<typename T>
 void callCppDestructor(void* cptr)
 {

@@ -153,7 +153,7 @@ struct Converter<T*>
         if (pyobj == Py_None)
             return 0;
         else if (Shiboken_TypeCheck(pyobj, T))
-            return (T*) SbkBaseWrapper_cptr(pyobj);
+            return (T*) getCppPointer(pyobj, SbkType<T>());
         else if (Converter<T>::isConvertible(pyobj))
             return CppObjectCopier<T>::copy(Converter<T>::toCpp(pyobj));
         return 0;
@@ -192,7 +192,8 @@ struct Converter<void*>
     {
         if (pyobj == Py_None)
             return 0;
-        return SbkBaseWrapper_cptr(pyobj);
+        // When someone request a void pointer, just give to him the first C++ object in the class hierarchy
+        return reinterpret_cast<SbkBaseWrapper*>(pyobj)->cptr[0];
     }
 };
 template <> struct Converter<const void*> : Converter<void*> {};
@@ -236,7 +237,7 @@ struct ValueTypeConverter
                 return *cptr;
             }
         }
-        return *reinterpret_cast<T*>(reinterpret_cast<Shiboken::SbkBaseWrapper*>(pyobj)->cptr);
+        return *reinterpret_cast<T*>(getCppPointer(pyobj, SbkType<T>()));
     }
 };
 
@@ -269,8 +270,8 @@ struct ObjectTypeConverter
             return 0;
         SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(pyobj->ob_type);
         if (shiboType->mi_specialcast)
-            return (T*) shiboType->mi_specialcast(SbkBaseWrapper_cptr(pyobj), reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()));
-        return (T*) SbkBaseWrapper_cptr(pyobj);
+            return (T*) shiboType->mi_specialcast(getCppPointer(pyobj, SbkType<T>()), reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()));
+        return (T*) getCppPointer(pyobj, SbkType<T>());
     }
 };
 
@@ -551,7 +552,7 @@ struct StdListConverter
     static StdList toCpp(PyObject* pyobj)
     {
         if (PyObject_TypeCheck(pyobj, SbkType<StdList>()))
-            return *reinterpret_cast<StdList*>(SbkBaseWrapper_cptr(pyobj));
+            return *reinterpret_cast<StdList*>(getCppPointer(pyobj, SbkType<StdList>()));
 
         StdList result;
         for (int i = 0; i < PySequence_Size(pyobj); i++) {
