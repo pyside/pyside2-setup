@@ -220,7 +220,7 @@ bool cppObjectIsInvalid(PyObject* wrapper)
     return true;
 }
 
-void SbkBaseWrapper_Dealloc_PrivateDtor(PyObject* self)
+void deallocWrapperWithPrivateDtor(PyObject* self)
 {
     if (((SbkBaseWrapper *)self)->weakreflist)
         PyObject_ClearWeakRefs(self);

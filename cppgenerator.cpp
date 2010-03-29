@@ -1818,7 +1818,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
         tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES";
         tp_dealloc = metaClass->hasPrivateDestructor() ?
-                     "Shiboken::SbkBaseWrapper_Dealloc_PrivateDtor" : "0";
+                     "Shiboken::deallocWrapperWithPrivateDtor" : "0";
         tp_init = "0";
     } else {
         tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES";//|Py_TPFLAGS_HAVE_GC";

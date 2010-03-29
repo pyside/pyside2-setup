@@ -222,7 +222,7 @@ void callCppDestructor(void* cptr)
     delete reinterpret_cast<T*>(cptr);
 }
 
-LIBSHIBOKEN_API PyAPI_FUNC(void) SbkBaseWrapper_Dealloc_PrivateDtor(PyObject* self);
+LIBSHIBOKEN_API PyAPI_FUNC(void) deallocWrapperWithPrivateDtor(PyObject* self);
 LIBSHIBOKEN_API bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr);
 LIBSHIBOKEN_API void setErrorAboutWrongArguments(PyObject* args, const char* funcName, const char** cppOverloads);
 
