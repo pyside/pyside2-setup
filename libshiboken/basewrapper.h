@@ -47,17 +47,17 @@ namespace Shiboken
 struct SbkBaseWrapper;
 
 /// Linked list of SbkBaseWrapper pointers
-typedef std::list<SbkBaseWrapper*> ShiboChildrenList;
+typedef std::list<SbkBaseWrapper*> ChildrenList;
 
 /// Struct used to store information about object parent and children.
-struct LIBSHIBOKEN_API ShiboParentInfo
+struct LIBSHIBOKEN_API ParentInfo
 {
     /// Default ctor.
-    ShiboParentInfo() : parent(0) {}
+    ParentInfo() : parent(0) {}
     /// Pointer to parent object.
     SbkBaseWrapper* parent;
     /// List of object children.
-    ShiboChildrenList children;
+    ChildrenList children;
 };
 
 /**
@@ -128,7 +128,7 @@ struct LIBSHIBOKEN_API SbkBaseWrapper
     /// Marked as false when the object is lost to C++ and the binding can not know if it was deleted or not.
     unsigned int validCppObject : 1;
     /// Information about the object parents and children, can be null.
-    ShiboParentInfo* parentInfo;
+    ParentInfo* parentInfo;
     /// List of weak references
     PyObject* weakreflist;
     /// Manage reference counting of objects that are referred but not owned.

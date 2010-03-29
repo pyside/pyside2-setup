@@ -47,7 +47,7 @@ void removeParent(SbkBaseWrapper* child)
     if (!child->parentInfo->parent)
         return;
 
-    ShiboChildrenList& oldBrothers = child->parentInfo->parent->parentInfo->children;
+    ChildrenList& oldBrothers = child->parentInfo->parent->parentInfo->children;
     oldBrothers.remove(child);
     child->parentInfo->parent = 0;
     Py_DECREF(child);
@@ -77,13 +77,13 @@ void setParent(PyObject* parent, PyObject* child)
     SbkBaseWrapper* parent_ = reinterpret_cast<SbkBaseWrapper*>(parent);
     SbkBaseWrapper* child_ = reinterpret_cast<SbkBaseWrapper*>(child);
     if (!child_->parentInfo)
-        child_->parentInfo = new ShiboParentInfo;
+        child_->parentInfo = new ParentInfo;
 
     if (!parentIsNull) {
         if (!parent_->parentInfo)
-            parent_->parentInfo = new ShiboParentInfo;
+            parent_->parentInfo = new ParentInfo;
         // do not re-add a child
-        ShiboChildrenList& children = parent_->parentInfo->children;
+        ChildrenList& children = parent_->parentInfo->children;
         if (std::find(children.begin(), children.end(), child_) != children.end())
             return;
     }
@@ -111,7 +111,7 @@ static void _destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent)
 {
     if (removeFromParent && obj->parentInfo->parent)
         removeParent(obj);
-    ShiboChildrenList::iterator it = obj->parentInfo->children.begin();
+    ChildrenList::iterator it = obj->parentInfo->children.begin();
     for (; it != obj->parentInfo->children.end(); ++it) {
         SbkBaseWrapper*& child = *it;
         _destroyParentInfo(child, false);

@@ -173,7 +173,7 @@ void BindingManager::invalidateWrapper(SbkBaseWrapper* wrapper)
     SbkBaseWrapper_setOwnership(wrapper, false);
     // If it is a parent invalidate all children.
     if (SbkBaseWrapper_hasParentInfo(wrapper)) {
-        ShiboChildrenList::iterator it = wrapper->parentInfo->children.begin();
+        ChildrenList::iterator it = wrapper->parentInfo->children.begin();
         for (; it != wrapper->parentInfo->children.end(); ++it)
             invalidateWrapper(*it);
     }
