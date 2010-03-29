@@ -1793,6 +1793,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     QString tp_new;
     QString tp_getattro('0');
     QString tp_dealloc;
+    QString cpp_dtor('0');
     QString tp_as_number('0');
     QString tp_as_sequence('0');
     QString tp_hash('0');
@@ -1829,7 +1830,8 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
             deallocClassName = wrapperName(metaClass);
         else
             deallocClassName = cppClassName;
-        tp_dealloc = QString("&Shiboken::SbkBaseWrapper_Dealloc< %1 >").arg(deallocClassName);
+        tp_dealloc = "&Shiboken::deallocWrapper";
+        cpp_dtor = "&Shiboken::callCppDestructor<" + metaClass->qualifiedCppName() + " >";
 
         AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
         tp_init = ctors.isEmpty() ? "0" : cpythonFunctionName(ctors.first());
@@ -1932,7 +1934,8 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*type_discovery*/      0," << endl;
     s << INDENT << "/*obj_copier*/          " << obj_copier << ',' << endl;
     s << INDENT << "/*ext_isconvertible*/   0," << endl;
-    s << INDENT << "/*ext_tocpp*/           0" << endl;
+    s << INDENT << "/*ext_tocpp*/           0," << endl;
+    s << INDENT << "/*cpp_dtor*/            " << cpp_dtor << endl;
     s << "};" << endl;
 }
 

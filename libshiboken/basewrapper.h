@@ -108,6 +108,8 @@ struct LIBSHIBOKEN_API SbkBaseWrapperType
     ExtendedIsConvertibleFunc ext_isconvertible;
     /// Extended "toCpp" function to be used when a conversion operator is defined in another module.
     ExtendedToCppFunc ext_tocpp;
+    /// Pointer to a function responsible for deletetion of the C++ instance calling the proper destructor.
+    void (*cpp_dtor)(void*);
 };
 
 /// Base Python object for all the wrapped C++ classes.
@@ -267,20 +269,12 @@ LIBSHIBOKEN_API void SbkBaseWrapper_clearReferences(SbkBaseWrapper* self);
 /// Returns true and sets a Python RuntimeError if the Python wrapper is not marked as valid.
 LIBSHIBOKEN_API bool cppObjectIsInvalid(PyObject* wrapper);
 
-template <typename T>
-void SbkBaseWrapper_Dealloc(PyObject* self)
+LIBSHIBOKEN_API void deallocWrapper(PyObject* pyObj);
+
+template<typename T>
+void callCppDestructor(void* cptr)
 {
-    if (((SbkBaseWrapper *)self)->weakreflist)
-        PyObject_ClearWeakRefs(self);
-
-    BindingManager::instance().releaseWrapper(self);
-    if (SbkBaseWrapper_hasOwnership(self))
-        delete (reinterpret_cast<T*>(SbkBaseWrapper_cptr(self)));
-    if (SbkBaseWrapper_hasParentInfo(self))
-        destroyParentInfo(reinterpret_cast<SbkBaseWrapper*>(self));
-    SbkBaseWrapper_clearReferences(reinterpret_cast<SbkBaseWrapper*>(self));
-
-    Py_TYPE(self)->tp_free(self);
+    delete reinterpret_cast<T*>(cptr);
 }
 
 LIBSHIBOKEN_API PyAPI_FUNC(void) SbkBaseWrapper_Dealloc_PrivateDtor(PyObject* self);

@@ -222,6 +222,28 @@ bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr)
 
 // Wrapper metatype and base type ----------------------------------------------------------
 
+void deallocWrapper(PyObject* pyObj)
+{
+    SbkBaseWrapper* sbkObj = reinterpret_cast<SbkBaseWrapper*>(pyObj);
+    if (sbkObj->weakreflist)
+        PyObject_ClearWeakRefs(pyObj);
+
+    BindingManager::instance().releaseWrapper(pyObj);
+    if (SbkBaseWrapper_hasOwnership(pyObj)) {
+        SbkBaseWrapperType* sbkType = reinterpret_cast<SbkBaseWrapperType*>(pyObj->ob_type);
+        assert(!sbkType->is_python_type);
+        sbkType->cpp_dtor(sbkObj->cptr);
+    }
+
+    if (SbkBaseWrapper_hasParentInfo(pyObj))
+        destroyParentInfo(sbkObj);
+    SbkBaseWrapper_clearReferences(sbkObj);
+
+    delete sbkObj->cptr;
+    sbkObj->cptr = 0;
+    Py_TYPE(pyObj)->tp_free(pyObj);
+}
+
 static PyObject*
 SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
 {
