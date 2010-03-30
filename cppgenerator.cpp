@@ -836,7 +836,6 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
 
         if (rfunc->isOperatorOverload() && rfunc->isBinaryOperator()) {
             QString checkFunc = cpythonCheckFunction(rfunc->ownerClass()->typeEntry());
-            s << INDENT << "// FIXME: Optimize this: Only do this when there is a reverse operator in this function group\n";
             s << INDENT << "bool isReverse = " << checkFunc << "(arg) && !" << checkFunc << "(self);\n"
                 << INDENT << "if (isReverse)\n"
                 << INDENT << INDENT << "std::swap(self, arg);\n\n";
@@ -880,31 +879,48 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
      * Solves #119 - QDataStream <</>> operators not working for QPixmap
      * http://bugs.openbossa.org/show_bug.cgi?id=119
      */
-    if (hasReturnValue && !rfunc->isInplaceOperator() && rfunc->isOperatorOverload()) {
-        QString opName = ShibokenGenerator::pythonOperatorFunctionName(rfunc);
-        if (opName == "__rshift__" || opName == "__lshift__") {
-            s << INDENT << "if (!isReverse && SbkBaseWrapper_Check(arg)) {" << endl;
+    bool callExtendedReverseOperator = hasReturnValue && !rfunc->isInplaceOperator() && rfunc->isOperatorOverload();
+    if (callExtendedReverseOperator) {
+        QString revOpName = ShibokenGenerator::pythonOperatorFunctionName(rfunc).insert(2, 'r');
+        if (rfunc->isBinaryOperator()) {
+            s << INDENT << "if (!isReverse" << endl;
             {
                 Indentation indent(INDENT);
+                s << INDENT << "&& SbkBaseWrapper_Check(arg)" << endl;
+                s << INDENT << "&& !PyObject_TypeCheck(arg, self->ob_type)" << endl;
+                s << INDENT << "&& PyObject_HasAttrString(arg, const_cast<char*>(\"" << revOpName << "\"))) {" << endl;
                 // This PyObject_CallMethod call will emit lots of warnings like
                 // "deprecated conversion from string constant to char *" during compilation
                 // due to the method name argument being declared as "char*" instead of "const char*"
                 // issue 6952 http://bugs.python.org/issue6952
-                s << INDENT << PYTHON_RETURN_VAR << " = PyObject_CallMethod(arg, const_cast<char*>(\"" << opName.insert(2, 'r') << "\"), \"O\", self);" << endl;
-                s << INDENT << "if (PyErr_Occurred() && (PyErr_ExceptionMatches(PyExc_NotImplementedError) ||";
-                                                    s << "PyErr_ExceptionMatches(PyExc_AttributeError))) {" << endl;
-                s << INDENT << INDENT << "PyErr_Clear();" << endl;
-                s << INDENT << "} else {" << endl;
-                s << INDENT << INDENT << "return " << PYTHON_RETURN_VAR << "; // Propagate the error" << endl;
+                s << INDENT << "PyObject* revOpMethod = PyObject_GetAttrString(arg, const_cast<char*>(\"" << revOpName << "\"));" << endl;
+                s << INDENT << "if (revOpMethod && PyCallable_Check(revOpMethod)) {" << endl;
+                {
+                    Indentation indent(INDENT);
+                    s << INDENT << PYTHON_RETURN_VAR << " = PyObject_CallFunction(revOpMethod, \"O\", self);" << endl;
+                    s << INDENT << "if (PyErr_Occurred() && (PyErr_ExceptionMatches(PyExc_NotImplementedError)";
+                    s << " || PyErr_ExceptionMatches(PyExc_AttributeError))) {" << endl;
+                    {
+                        Indentation indent(INDENT);
+                        s << INDENT << "PyErr_Clear();" << endl;
+                        s << INDENT << "Py_XDECREF(py_result);" << endl;
+                        s << INDENT << "py_result = 0;" << endl;
+                    }
+                    s << INDENT << '}' << endl;
+                }
                 s << INDENT << "}" << endl;
-
+                s << INDENT << "Py_XDECREF(revOpMethod);" << endl << endl;
             }
             s << INDENT << "}" << endl;
         }
+        s << INDENT << "// Do not enter here if other object has implemented a reverse operator." << endl;
+        s << INDENT << "if (!" << PYTHON_RETURN_VAR << ") {" << endl << endl;
     }
 
-
     writeOverloadedMethodDecisor(s, &overloadData);
+
+    if (callExtendedReverseOperator)
+        s << endl << INDENT << "} // End of \"if (!" << PYTHON_RETURN_VAR << ")\"" << endl << endl;
 
     s << endl << INDENT << "if (PyErr_Occurred()";
     if (hasReturnValue && !rfunc->isInplaceOperator())
