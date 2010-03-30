@@ -46,3 +46,9 @@ Number::toStr() const
     return in.str().c_str();
 }
 
+Point
+operator*(const Point& p, const Number& n)
+{
+    return Point(p.x() * n.value(), p.y() * n.value());
+}
+

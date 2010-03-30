@@ -37,18 +37,24 @@
 
 #include "libothermacros.h"
 #include "str.h"
+#include "point.h"
 
 class LIBOTHER_API Number
 {
 public:
     explicit Number(int value) : m_value(value) {};
-    int value() { return m_value; }
+    int value() const { return m_value; }
 
     Str toStr() const;
     operator Str() const { return toStr(); }
 
+    friend LIBOTHER_API Point operator*(const Point&, const Number&);
+
 private:
     int m_value;
 };
+
+LIBOTHER_API Point operator*(const Point&, const Number&);
+
 #endif // NUMBER_H
 
