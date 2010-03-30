@@ -25,7 +25,6 @@
 #include <QtTest/QTest>
 #include "testutil.h"
 
-
 void TestReverseOperators::testReverseSum()
 {
     const char cppCode[] = "struct A {\
@@ -62,6 +61,54 @@ void TestReverseOperators::testReverseSum()
     QVERIFY(reverseOp->isReverseOperator());
     QCOMPARE(reverseOp->arguments().count(), 1);
 }
+
+void TestReverseOperators::testReverseSumWithAmbiguity()
+{
+    const char cppCode[] = "\
+    struct A { A operator+(int); };\
+    A operator+(int, const A&);\
+    struct B {};\
+    B operator+(const A&, const B&);\
+    B operator+(const B&, const A&);\
+    ";
+    const char xmlCode[] = "\
+    <typesystem package=\"Foo\">\
+        <primitive-type name='int' />\
+        <value-type name='A' />\
+        <value-type name='B' />\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, false);
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* classA = classes.findClass("A");
+    QVERIFY(classA);
+    QCOMPARE(classA->functions().count(), 4);
+
+    AbstractMetaClass* classB = classes.findClass("B");
+    QVERIFY(classB);
+    QCOMPARE(classB->functions().count(), 4);
+
+    const AbstractMetaFunction* reverseOp = 0;
+    const AbstractMetaFunction* normalOp = 0;
+    foreach(const AbstractMetaFunction* func, classB->functions()) {
+        if (func->name() == "operator+") {
+            if (func->isReverseOperator())
+                reverseOp = func;
+            else
+                normalOp = func;
+        }
+    }
+    QVERIFY(normalOp);
+    QVERIFY(!normalOp->isReverseOperator());
+    QCOMPARE(normalOp->arguments().count(), 1);
+    QCOMPARE(normalOp->minimalSignature(), QString("operator+(B,A)"));
+    QVERIFY(reverseOp);
+    QVERIFY(reverseOp->isReverseOperator());
+    QCOMPARE(reverseOp->arguments().count(), 1);
+    QCOMPARE(reverseOp->minimalSignature(), QString("operator+(A,B)"));
+}
+
+
 
 QTEST_APPLESS_MAIN(TestReverseOperators)
 

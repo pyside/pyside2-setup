@@ -30,6 +30,7 @@ class TestReverseOperators : public QObject
     Q_OBJECT
 private slots:
     void testReverseSum();
+    void testReverseSumWithAmbiguity();
 };
 
 #endif

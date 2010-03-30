@@ -168,12 +168,25 @@ void AbstractMetaBuilder::traverseOperatorFunction(FunctionModelItem item)
     bool unaryOperator = false;
 
     baseoperandClass = argumentToClass(arguments.at(0));
+
     if (arguments.size() == 1) {
         unaryOperator = true;
     } else if (!baseoperandClass
                || !(baseoperandClass->typeEntry()->codeGeneration() & TypeEntry::GenerateTargetLang)) {
         baseoperandClass = argumentToClass(arguments.at(1));
         firstArgumentIsSelf = false;
+    } else {
+        bool ok;
+        AbstractMetaType* type = translateType(item->type(), &ok);
+        const TypeEntry* retType = ok ? type->typeEntry() : 0;
+        AbstractMetaClass* otherArgClass = argumentToClass(arguments.at(1));
+        if (otherArgClass && retType
+            && (retType->isValue() || retType->isObject())
+            && retType != baseoperandClass->typeEntry()
+            && retType == otherArgClass->typeEntry()) {
+            baseoperandClass = m_metaClasses.findClass(retType);
+            firstArgumentIsSelf = false;
+        }
     }
 
     if (baseoperandClass) {
