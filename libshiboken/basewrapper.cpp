@@ -362,6 +362,7 @@ SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
         newType->cpp_dtor = 0;
         newType->is_multicpp = 1;
     }
+    newType->is_user_type = 1;
     return reinterpret_cast<PyObject*>(newType);
 }
 

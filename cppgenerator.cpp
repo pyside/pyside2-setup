@@ -1950,7 +1950,8 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*ext_isconvertible*/   0," << endl;
     s << INDENT << "/*ext_tocpp*/           0," << endl;
     s << INDENT << "/*cpp_dtor*/            " << cpp_dtor << ',' << endl;
-    s << INDENT << "/*is_multicpp*/         0" << endl;
+    s << INDENT << "/*is_multicpp*/         0," << endl;
+    s << INDENT << "/*is_user_type*/        0" << endl;
     s << "};" << endl;
 }
 

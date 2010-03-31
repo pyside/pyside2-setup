@@ -97,6 +97,8 @@ struct LIBSHIBOKEN_API SbkBaseWrapperType
     void (*cpp_dtor)(void*);
     /// True if this type holds two or more C++ instances, e.g.: a Python class which inherits from two C++ classes.
     int is_multicpp:1;
+    /// True if this type was definied by the user.
+    int is_user_type:1;
 };
 
 struct ParentInfo;
@@ -151,11 +153,19 @@ LIBSHIBOKEN_API void removeParent(SbkBaseWrapper* child);
 LIBSHIBOKEN_API void destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent = true);
 
 /**
-*   Returns true if the type of \p pyObj was created by the Shiboken generator.
+*   Returns true if the object is an instance of a type created by the Shiboken generator.
 */
-inline bool isShibokenType(const PyObject* pyObj)
+inline bool isShibokenType(PyObject*& pyObj)
 {
-    return pyObj->ob_type->ob_type == &Shiboken::SbkBaseWrapperType_Type;
+    return pyObj->ob_type->ob_type == &SbkBaseWrapperType_Type;
+}
+
+/**
+*   Returns true if this object is an instance of an user defined type derived from an Shiboken type.
+*/
+inline bool isUserType(PyObject*& pyObj)
+{
+    return isShibokenType(pyObj) && reinterpret_cast<SbkBaseWrapperType*>(pyObj->ob_type)->is_user_type;
 }
 
 /**
