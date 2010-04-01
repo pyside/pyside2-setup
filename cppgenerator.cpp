@@ -2441,7 +2441,7 @@ void CppGenerator::writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* c
     s << "static PyObject* " << newFunc << "(PyTypeObject*, PyObject*, PyObject*);" << endl << endl;
 
     s << "static PyTypeObject " << cpythonName << "_Type = {" << endl;
-    s << INDENT << "PyObject_HEAD_INIT(&PyType_Type)" << endl;
+    s << INDENT << "PyObject_HEAD_INIT(&Shiboken::SbkEnumType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
     s << INDENT << "/*tp_name*/             \"" << cppEnum->name() << "\"," << endl;
     s << INDENT << "/*tp_basicsize*/        sizeof(Shiboken::SbkEnumObject)," << endl;

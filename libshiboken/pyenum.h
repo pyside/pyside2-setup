@@ -50,10 +50,17 @@ typedef struct {
     PyObject* ob_name;
 } SbkEnumObject;
 
+LIBSHIBOKEN_API PyAPI_DATA(PyTypeObject) SbkEnumType_Type;
+
 LIBSHIBOKEN_API PyAPI_FUNC(PyObject*) SbkEnumObject_repr(PyObject* self);
 LIBSHIBOKEN_API PyAPI_FUNC(PyObject*) SbkEnumObject_name(PyObject* self);
 
 } // extern "C"
+
+inline bool isShibokenEnum(PyObject* pyObj)
+{
+    return pyObj->ob_type->ob_type == &SbkEnumType_Type;
+}
 
 LIBSHIBOKEN_API PyObject* SbkEnumObject_New(PyTypeObject *instanceType,
                            long item_value,

@@ -496,6 +496,9 @@ void initShiboken()
     PyEval_InitThreads();
 #endif
 
+    if (PyType_Ready(&SbkEnumType_Type) < 0)
+        Py_FatalError("[libshiboken] Failed to initialise Shiboken.SbkEnumType metatype.");
+
     if (PyType_Ready(&SbkBaseWrapperType_Type) < 0)
         Py_FatalError("[libshiboken] Failed to initialise Shiboken.BaseWrapperType metatype.");
 
