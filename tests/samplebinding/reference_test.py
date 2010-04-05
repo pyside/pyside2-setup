@@ -29,7 +29,7 @@
 import sys
 import unittest
 
-from sample import Reference
+from sample import *
 
 class ExtendedReference(Reference):
     def __init__(self):
@@ -60,6 +60,11 @@ class ReferenceTest(unittest.TestCase):
         objId = 123
         r = Reference(objId)
         self.assertEqual(Reference.usesReference(r), objId)
+
+    def testCantSegFaultWhenReceiveNone(self):
+        '''do not segfault when receiving None as argument.'''
+        s = Str()
+        self.assertEqual(None, s)
 
     def testMethodThatReceivesConstReference(self):
         '''Test a method that receives a const reference to an object as argument.'''
