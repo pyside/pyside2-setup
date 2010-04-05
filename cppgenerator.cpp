@@ -2199,9 +2199,10 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                 s << "if (" << cpythonCheckFunction(type, numberType) << "(other)) {" << endl;
                 {
                     Indentation indent(INDENT);
+                    s << INDENT << "// " << func->signature() << endl;
                     s << INDENT;
+                    AbstractMetaClass* clz = classes().findClass(type->typeEntry());
                     if (type->typeEntry()->isValue()) {
-                        AbstractMetaClass* clz = classes().findClass(type->typeEntry());
                         Q_ASSERT(clz);
                         s << clz->qualifiedCppName() << '*';
                     } else
@@ -2212,7 +2213,15 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                     else
                         writeToCppConversion(s, type, metaClass, "other");
                     s << ';' << endl;
-                    s << INDENT << "result = (cpp_self " << op << ' ' << (type->typeEntry()->isValue() ? "(*" : "");
+
+                    s << INDENT << "result = ";
+                    // It's a value type and the conversion for a pointer returned null.
+                    if (type->typeEntry()->isValue()) {
+                        s << "!cpp_other ? cpp_self == ";
+                        writeToCppConversion(s, type, metaClass, "other", ExcludeReference);
+                        s << " : ";
+                    }
+                    s << "(cpp_self " << op << ' ' << (type->typeEntry()->isValue() ? "(*" : "");
                     s << "cpp_other" << (type->typeEntry()->isValue() ? ")" : "") << ");" << endl;
                 }
                 s << INDENT << '}';
