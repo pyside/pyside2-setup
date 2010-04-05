@@ -822,7 +822,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
     int minArgs = overloadData.minArgs();
     int maxArgs = overloadData.maxArgs();
 
-    s << "static PyObject*" << endl;
+    s << "static PyObject* ";
     s << cpythonFunctionName(rfunc) << "(PyObject* self";
     if (maxArgs > 0) {
         s << ", PyObject* arg";
@@ -934,7 +934,6 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
     }
     s << INDENT << '}' << endl;
 
-    s << INDENT;
     if (hasReturnValue) {
         if (rfunc->isInplaceOperator()) {
             s << INDENT << "Py_INCREF(self);\n";
@@ -943,9 +942,8 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             s << INDENT << "return " << PYTHON_RETURN_VAR << ";\n";
         }
     } else {
-        s << "Py_RETURN_NONE";
+        s << INDENT << "Py_RETURN_NONE;" << endl;
     }
-    s << ';' << endl;
 
     if (maxArgs > 0)
         writeErrorSection(s, overloadData);
@@ -2148,7 +2146,7 @@ void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* 
 void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     QString baseName = cpythonBaseName(metaClass);
-    s << "static PyObject*" << endl;
+    s << "static PyObject* ";
     s << baseName << "_richcompare(PyObject* self, PyObject* other, int op)" << endl;
     s << '{' << endl;
     QList<AbstractMetaFunctionList> cmpOverloads = filterGroupedOperatorFunctions(metaClass, AbstractMetaClass::ComparisonOp);
@@ -2386,7 +2384,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
 void CppGenerator::writeFlagsNewMethod(QTextStream& s, const FlagsTypeEntry* cppFlags)
 {
     QString cpythonName = cpythonFlagsName(cppFlags);
-    s << "static PyObject*" << endl;
+    s << "static PyObject* ";
     s << cpythonName << "_New(PyTypeObject* type, PyObject* args, PyObject* kwds)" << endl;
     s << '{' << endl;
     s << INDENT << "if (!PyType_IsSubtype(type, &" << cpythonName << "_Type))" << endl;
@@ -2409,7 +2407,7 @@ void CppGenerator::writeFlagsNewMethod(QTextStream& s, const FlagsTypeEntry* cpp
 void CppGenerator::writeEnumNewMethod(QTextStream& s, const AbstractMetaEnum* cppEnum)
 {
     QString cpythonName = cpythonEnumName(cppEnum);
-    s << "static PyObject*" << endl;
+    s << "static PyObject* ";
     s << cpythonName << "_New(PyTypeObject* type, PyObject* args, PyObject* kwds)" << endl;
     s << '{' << endl;
     s << INDENT << "int item_value = 0;" << endl;
