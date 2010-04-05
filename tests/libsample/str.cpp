@@ -59,7 +59,8 @@ Str::Str(const char* cstr)
 void
 Str::init(const char* cstr)
 {
-    m_str = cstr;
+    if (cstr)
+        m_str = cstr;
 }
 
 Str::~Str()
