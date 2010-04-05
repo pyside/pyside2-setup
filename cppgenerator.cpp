@@ -2152,7 +2152,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
     s << baseName << "_richcompare(PyObject* self, PyObject* other, int op)" << endl;
     s << '{' << endl;
     QList<AbstractMetaFunctionList> cmpOverloads = filterGroupedOperatorFunctions(metaClass, AbstractMetaClass::ComparisonOp);
-    s << INDENT << "bool result;" << endl;
+    s << INDENT << "bool result = false;" << endl;
     s << INDENT << metaClass->qualifiedCppName() << "& cpp_self = *" << cpythonWrapperCPtr(metaClass) << ';' << endl;
     s << endl;
 
@@ -2254,12 +2254,8 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
         Indentation indent(INDENT);
         s << INDENT << "Py_RETURN_TRUE;" << endl;
     }
-    s << INDENT << "Py_RETURN_FALSE;" << endl << endl;
     s << INDENT << baseName << "_RichComparison_TypeError:" << endl;
-    {
-        Indentation indent(INDENT);
-        s << INDENT << "Py_RETURN_FALSE;" << endl;
-    }
+    s << INDENT << "Py_RETURN_FALSE;" << endl << endl;
     s << '}' << endl << endl;
 }
 
