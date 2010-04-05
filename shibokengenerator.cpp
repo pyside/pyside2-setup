@@ -310,7 +310,7 @@ void ShibokenGenerator::writeBaseConversion(QTextStream& s, const TypeEntry* typ
 }
 
 void ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaType* type,
-                                            const AbstractMetaClass* context)
+                                            const AbstractMetaClass* context, Options options)
 {
     QString typeName;
     if (type->isPrimitive()) {
@@ -333,7 +333,7 @@ void ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaTy
     if (typeName.startsWith("const ") && type->name() != "char")
         typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
 
-    if (typeName.endsWith("&") && (tentry->isPrimitive() || tentry->isContainer()))
+    if ((options & ExcludeReference || tentry->isPrimitive() || tentry->isContainer()) && typeName.endsWith('&'))
         typeName.chop(1);
 
     s << baseConversionString(typeName);
@@ -360,9 +360,10 @@ void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaC
 }
 
 void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaType* type,
-                                             const AbstractMetaClass* context, const QString& argumentName)
+                                             const AbstractMetaClass* context, const QString& argumentName,
+                                             Options options)
 {
-    writeBaseConversion(s, type, context);
+    writeBaseConversion(s, type, context, options);
     s << "toCpp(" << argumentName << ')';
 }
 
