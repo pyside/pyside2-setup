@@ -29,7 +29,7 @@
 import sys
 import unittest
 
-from sample import VirtualMethods, VirtualDaughter, Point, Str
+from sample import *
 
 class ExtendedVirtualMethods(VirtualMethods):
     def __init__(self):
@@ -39,6 +39,10 @@ class ExtendedVirtualMethods(VirtualMethods):
     def virtualMethod0(self, pt, val, cpx, b):
         self.virtual_method0_called = True
         return VirtualMethods.virtualMethod0(self, pt, val, cpx, b) * -1.0
+
+    def strListToStdList(self, arg):
+        # returnning wrong type for test purporses.
+        return True
 
 class ExtendedVirtualDaughter(VirtualDaughter):
     def __init__(self, name):
@@ -107,6 +111,10 @@ class VirtualMethodsTest(unittest.TestCase):
         self.assert_(eevd.grand_grand_daughter_name_called)
         self.assertEqual(eevd.name().prepend(self.prefix_from_codeinjection), name)
 
+class PrettyErrorMessageTest(unittest.TestCase):
+    def testIt(self):
+        obj = ExtendedVirtualMethods()
+        self.assertRaises(TypeError, obj.callStrListToStdList, StrList())
 
 if __name__ == '__main__':
     unittest.main()

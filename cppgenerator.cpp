@@ -529,22 +529,34 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             }
             s << INDENT << '}' << endl;
 
-            s << INDENT << "// Check return type" << endl;
-            s << INDENT << "bool typeIsValid = ";
-            if (func->typeReplaced(0).isEmpty())
-                s << cpythonCheckFunction(func->type());
-            else
-                s << guessCPythonCheckFunction(func->typeReplaced(0));
-            s << "(" << PYTHON_RETURN_VAR << ");" << endl;
-            if (func->type()->isQObject() || func->type()->isObject() || func->type()->isValuePointer()) {
-                s << INDENT << "typeIsValid = typeIsValid || (" << PYTHON_RETURN_VAR << " == Py_None);" << endl;
+            if (func->type()) {
+                s << INDENT << "// Check return type" << endl;
+                s << INDENT << "bool typeIsValid = ";
+                QString desiredType;
+                if (func->typeReplaced(0).isEmpty()) {
+                    s << cpythonCheckFunction(func->type());
+                    // SbkType would return null when the type is a container.
+                    if (func->type()->typeEntry()->isContainer())
+                        desiredType = '"' + reinterpret_cast<const ContainerTypeEntry*>(func->type()->typeEntry())->typeName() + '"';
+                    else
+                        desiredType = "SbkType<" + func->type()->cppSignature() + " >()->tp_name";
+                } else {
+                    s << guessCPythonCheckFunction(func->typeReplaced(0));
+                    desiredType =  '"' + func->typeReplaced(0) + '"';
+                }
+                s << "(" << PYTHON_RETURN_VAR << ");" << endl;
+                if (func->type()->isQObject() || func->type()->isObject() || func->type()->isValuePointer())
+                    s << INDENT << "typeIsValid = typeIsValid || (" << PYTHON_RETURN_VAR << " == Py_None);" << endl;
+
+                s << INDENT << "if (!typeIsValid) {" << endl;
+                s << INDENT << INDENT << "PyErr_Format(PyExc_TypeError, \"Invalid return value in function %s, expected %s, got %s.\", \""
+                  << func->ownerClass()->name() << '.' << func->name() << "\", " << desiredType << ", "
+                  << PYTHON_RETURN_VAR << "->ob_type->tp_name);" << endl;
+                s << INDENT << INDENT << "return ";
+                writeMinimalConstructorCallArguments(s, func->type());
+                s << INDENT << INDENT << ";" << endl;
+                s << INDENT << "}" << endl;
             }
-            s << INDENT << "if (!typeIsValid) {" << endl;
-            s << INDENT << INDENT << "PyErr_SetString(PyExc_TypeError, \"Invalid return value in function " << func->ownerClass()->name() << "." << func->name() << "\");" << endl;
-            s << INDENT << INDENT << "return ";
-            writeMinimalConstructorCallArguments(s, func->type());
-            s << INDENT << INDENT << ";" << endl;
-            s << INDENT << "}" << endl;
 
             bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, 0).isEmpty();
             if (hasConversionRule) {

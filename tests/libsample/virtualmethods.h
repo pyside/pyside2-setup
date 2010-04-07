@@ -40,6 +40,7 @@
 #include "str.h"
 
 #include "libsamplemacros.h"
+#include "strlist.h"
 
 class LIBSAMPLE_API VirtualMethods
 {
@@ -87,6 +88,11 @@ public:
     // Passing reference to pointers.
     virtual bool createStr(const char* text, Str*& ret);
     bool callCreateStr(const char* text, Str*& ret) { return createStr(text, ret); }
+
+    // Return a non-binded method
+    std::list<Str> callStrListToStdList(const StrList& strList) { return strListToStdList(strList); }
+    virtual std::list<Str> strListToStdList(const StrList& strList ) { return strList; }
+
 
 private:
     Str m_name;
