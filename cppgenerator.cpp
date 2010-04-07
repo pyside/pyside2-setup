@@ -554,7 +554,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                   << PYTHON_RETURN_VAR << "->ob_type->tp_name);" << endl;
                 s << INDENT << INDENT << "return ";
                 writeMinimalConstructorCallArguments(s, func->type());
-                s << INDENT << INDENT << ";" << endl;
+                s << ';' << endl;
                 s << INDENT << "}" << endl;
             }
 
