@@ -36,11 +36,21 @@ class SimpleUseCase(ObjectType, Str):
         ObjectType.__init__(self)
         Str.__init__(self, name)
 
+class SimpleUseCaseReverse(Str, ObjectType):
+    def __init__(self, name):
+        ObjectType.__init__(self)
+        Str.__init__(self, name)
+
 class SimpleUseCase2(SimpleUseCase):
     def __init__(self, name):
         SimpleUseCase.__init__(self, name)
 
 class ComplexUseCase(SimpleUseCase2, Point):
+    def __init__(self, name):
+        SimpleUseCase2.__init__(self, name)
+        Point.__init__(self)
+
+class ComplexUseCaseReverse(Point, SimpleUseCase2):
     def __init__(self, name):
         SimpleUseCase2.__init__(self, name)
         Point.__init__(self)
@@ -65,6 +75,26 @@ class MultipleCppDerivedTest(unittest.TestCase):
         self.assertEqual(c.objectName(), "Hi")
         c.setX(2);
         self.assertEqual(c.x(), 2)
+
+class MultipleCppDerivedReverseTest(unittest.TestCase):
+    def testInstanciation(self):
+        s = SimpleUseCaseReverse("Hi")
+        self.assertEqual(s, "Hi")
+        s.setObjectName(s)
+        self.assertEqual(s.objectName(), "Hi")
+
+    def testInstanciation2(self):
+        s = SimpleUseCase2("Hi")
+        self.assertEqual(s, "Hi")
+        s.setObjectName(s)
+        self.assertEqual(s.objectName(), "Hi")
+
+    def testComplexInstanciation(self):
+        c = ComplexUseCaseReverse("Hi")
+        c.setObjectName(c)
+        self.assertEqual(c.objectName(), "Hi")
+        c.setX(2);
+        self.assertEqual(c, Point(2, 0))
 
 if __name__ == '__main__':
     unittest.main()
