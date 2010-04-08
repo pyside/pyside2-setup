@@ -909,7 +909,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
                 s << INDENT << "if (revOpMethod && PyCallable_Check(revOpMethod)) {" << endl;
                 {
                     Indentation indent(INDENT);
-                    s << INDENT << PYTHON_RETURN_VAR << " = PyObject_CallFunction(revOpMethod, \"O\", self);" << endl;
+                    s << INDENT << PYTHON_RETURN_VAR << " = PyObject_CallFunction(revOpMethod, const_cast<char*>(\"O\"), self);" << endl;
                     s << INDENT << "if (PyErr_Occurred() && (PyErr_ExceptionMatches(PyExc_NotImplementedError)";
                     s << " || PyErr_ExceptionMatches(PyExc_AttributeError))) {" << endl;
                     {

@@ -426,7 +426,7 @@ static PyObject* SbkBaseWrapper_get_dict(SbkBaseWrapper* obj)
 }
 
 static PyGetSetDef SbkBaseWrapper_getsetlist[] = {
-    {"__dict__", (getter)SbkBaseWrapper_get_dict, 0},
+    {const_cast<char*>("__dict__"), (getter)SbkBaseWrapper_get_dict, 0},
     {0} // Sentinel
 };
 

@@ -880,7 +880,7 @@
                 %0 = new %TYPE();
             </inject-code>
             <inject-code class="target" position="end">
-                Shiboken::AutoDecRef result(PyObject_CallMethod(%PYSELF, "setHeight", "i", 2));
+                Shiboken::AutoDecRef result(PyObject_CallMethod(%PYSELF, const_cast&lt;char*>("setHeight"), const_cast&lt;char*>("i"), 2));
             </inject-code>
         </add-function>
     </value-type>
