@@ -1577,6 +1577,8 @@ public:
     {
         return m_type;
     }
+
+    QString typeName() const;
     QString targetLangName() const;
     QString targetLangPackage() const;
     QString qualifiedCppName() const;

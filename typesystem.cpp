@@ -2206,6 +2206,39 @@ QString VariantTypeEntry::targetLangPackage() const
     return QString();
 }
 
+QString ContainerTypeEntry::typeName() const
+{
+    switch(m_type) {
+        case LinkedListContainer:
+            return "linked-list";
+        case ListContainer:
+            return "list";
+        case StringListContainer:
+            return "string-list";
+        case VectorContainer:
+            return "vector";
+        case StackContainer:
+            return "stack";
+        case QueueContainer:
+            return "queue";
+        case SetContainer:
+            return "set";
+        case MapContainer:
+            return "map";
+        case MultiMapContainer:
+            return "multi-map";
+        case HashContainer:
+            return "hash";
+        case MultiHashContainer:
+            return "multi-hash";
+        case PairContainer:
+            return "pair";
+        case NoContainer:
+        default:
+            return "?";
+    }
+}
+
 /*
 static void injectCode(ComplexTypeEntry *e,
                        const char *signature,
