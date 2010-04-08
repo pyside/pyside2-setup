@@ -29,8 +29,16 @@
 import sys
 import unittest
 
-from sample import Abstract
-from other import OtherDerived
+from sample import Abstract, Derived
+from other import OtherDerived, Number
+
+class Multiple(Derived, Number):
+    def __init__(self):
+        Derived.__init__(self, 42)
+        Number.__init__(self, 42)
+
+    def testCall(self):
+        return True
 
 class OtherDeviant(OtherDerived):
     def __init__(self):
@@ -46,6 +54,22 @@ class OtherDeviant(OtherDerived):
 
     def className(self):
         return 'OtherDeviant'
+
+class MultipleTest(unittest.TestCase):
+    '''Test case for Multiple derived class'''
+
+    def testConstructor(self):
+        o = Multiple()
+        self.assert_(isinstance(o, Multiple))
+        self.assert_(isinstance(o, Number))
+        self.assert_(isinstance(o, Derived))
+        del o
+
+    def testMethodCall(self):
+        o = Multiple()
+        self.assert_(o.id_(), 42)
+        self.assert_(o.value(), 42)
+        self.assert_(o.testCall())
 
 class OtherDerivedTest(unittest.TestCase):
     '''Test case for OtherDerived class'''
