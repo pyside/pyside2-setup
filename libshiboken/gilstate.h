@@ -40,7 +40,7 @@
 namespace Shiboken
 {
 
-class LIBSHIBOKEN_API GilState
+class GilState
 {
 public:
     GilState() { m_gstate = PyGILState_Ensure(); }

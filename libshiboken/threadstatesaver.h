@@ -40,7 +40,7 @@
 namespace Shiboken
 {
 
-class LIBSHIBOKEN_API ThreadStateSaver
+class ThreadStateSaver
 {
 public:
     ThreadStateSaver() : m_threadState(0) {}
