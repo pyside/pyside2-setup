@@ -1194,7 +1194,7 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
     s << "Shiboken::Converter<" << typeName << " >::toCpp(" << pyArgName << ");" << endl;
 
     if (hasImplicitConversions) {
-        s << INDENT << "if (!" << cpythonCheckFunction(argType) << '(' << pyArgName << "))";
+        s << INDENT << "if (!" << cpythonCheckFunction(argType->typeEntry()) << '(' << pyArgName << "))";
         s << endl;
         Indentation indent(INDENT);
         s << INDENT << argName << "_auto_ptr = std::auto_ptr<" << baseTypeName;
