@@ -2239,6 +2239,18 @@ QString ContainerTypeEntry::typeName() const
     }
 }
 
+uint qHash(const Include& inc)
+{
+    return qHash(inc.name);
+}
+
+QTextStream& operator<<(QTextStream& out, const Include& include)
+{
+    if (include.isValid())
+        out << include.toString() << endl;
+    return out;
+}
+
 /*
 static void injectCode(ComplexTypeEntry *e,
                        const char *signature,

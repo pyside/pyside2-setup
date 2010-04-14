@@ -60,11 +60,20 @@ struct APIEXTRACTOR_API Include
 
     QString toString() const;
 
-    bool operator<(const Include &other) const
+    bool operator<(const Include& other) const
     {
         return name < other.name;
     }
+
+    bool operator==(const Include& other) const
+    {
+        return type == other.type && name == other.name;
+    }
 };
+
+APIEXTRACTOR_API uint qHash(const Include& inc);
+APIEXTRACTOR_API QTextStream& operator<<(QTextStream& out, const Include& include);
+
 typedef QList<Include> IncludeList;
 
 typedef QMap<int, QString> ArgumentMap;
