@@ -758,7 +758,8 @@ public:
     };
 
     AbstractMetaFunction()
-            : m_functionType(NormalFunction),
+            : m_typeEntry(0),
+            m_functionType(NormalFunction),
             m_type(0),
             m_class(0),
             m_implementingClass(0),
@@ -1089,14 +1090,9 @@ public:
         return m_propertySpec;
     }
 
-    Include includeFile() const
+    FunctionTypeEntry* typeEntry() const
     {
-        return m_includeFile;
-    }
-
-    void setIncludeFile(const Include& include)
-    {
-        m_includeFile = include;
+        return m_typeEntry;
     }
 private:
     QString m_name;
@@ -1104,7 +1100,7 @@ private:
     mutable QString m_cachedMinimalSignature;
     mutable QString m_cachedModifiedName;
 
-    Include m_includeFile;
+    FunctionTypeEntry* m_typeEntry;
     FunctionType m_functionType;
     AbstractMetaType *m_type;
     const AbstractMetaClass *m_class;

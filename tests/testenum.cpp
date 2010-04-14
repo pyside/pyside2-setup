@@ -41,12 +41,13 @@ void TestEnum::testEnumCppSignature()
         <value-type name='A'/> \
         <enum-type name='GlobalEnum' />\
         <enum-type name='A::ClassEnum' />\
+        <function signature='func(A::ClassEnum)' />\
     </typesystem>";
 
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 1);
-    
+
     AbstractMetaEnumList globalEnums = t.builder()->globalEnums();
     QCOMPARE(globalEnums.count(), 1);
     QCOMPARE(globalEnums.first()->name(), QString("GlobalEnum"));
@@ -56,7 +57,7 @@ void TestEnum::testEnumCppSignature()
     QCOMPARE(functions.count(), 1);
     QCOMPARE(functions.first()->arguments().count(), 1);
     QCOMPARE(functions.first()->arguments().first()->type()->cppSignature(), QString("A::ClassEnum"));
-    
+
     // enum as parameter of a method
     AbstractMetaClass* classA = classes.findClass("A");
     QCOMPARE(classA->enums().count(), 1);
@@ -72,8 +73,6 @@ void TestEnum::testEnumCppSignature()
 
     AbstractMetaEnumList classEnums = classA->enums();
     QCOMPARE(classEnums.first()->name(), QString("ClassEnum"));
-    
-    
 }
 
 QTEST_APPLESS_MAIN(TestEnum)

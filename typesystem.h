@@ -583,7 +583,8 @@ public:
         ArrayType,
         TypeSystemType,
         CustomType,
-        TargetLangType
+        TargetLangType,
+        FunctionType
     };
 
     enum CodeGeneration {
@@ -1699,6 +1700,32 @@ private:
 };
 
 
+class APIEXTRACTOR_API FunctionTypeEntry : public TypeEntry
+{
+public:
+    FunctionTypeEntry(const QString& name, const QString& signature)
+            : TypeEntry(name, FunctionType)
+    {
+        addSignature(signature);
+    }
+    void addSignature(const QString& signature)
+    {
+        m_signatures << signature;
+    }
+
+    QStringList signatures()
+    {
+        return m_signatures;
+    }
+
+    inline bool hasSignature(const QString& signature)
+    {
+        return m_signatures.contains(signature);
+    }
+private:
+    QStringList m_signatures;
+};
+
 class APIEXTRACTOR_API ObjectTypeEntry : public ComplexTypeEntry
 {
 public:
@@ -1779,6 +1806,7 @@ public:
     inline ObjectTypeEntry *findObjectType(const QString &name);
     inline NamespaceTypeEntry *findNamespaceType(const QString &name);
     ContainerTypeEntry *findContainerType(const QString &name);
+    FunctionTypeEntry* findFunctionType(const QString& name);
 
     TypeEntry *findType(const QString &name) const
     {

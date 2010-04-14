@@ -48,6 +48,7 @@ public:
         PrimitiveTypeEntry   = 0x8,
         EnumTypeEntry        = 0x9,
         ContainerTypeEntry   = 0xa,
+        FunctionTypeEntry    = 0xb,
         TypeEntryMask        = 0xf,
 
         // Documentation tags
@@ -130,6 +131,7 @@ public:
         tagNames["interface-type"] = StackElement::InterfaceTypeEntry;
         tagNames["namespace-type"] = StackElement::NamespaceTypeEntry;
         tagNames["enum-type"] = StackElement::EnumTypeEntry;
+        tagNames["function"] = StackElement::FunctionTypeEntry;
         tagNames["extra-includes"] = StackElement::ExtraIncludes;
         tagNames["include"] = StackElement::Include;
         tagNames["inject-code"] = StackElement::InjectCode;
@@ -519,6 +521,9 @@ bool Handler::startElement(const QString &, const QString &n,
             attributes["target-type"] = QString();
             attributes["generic-class"] = QString("no");
             break;
+        case StackElement::FunctionTypeEntry:
+            attributes["signature"] = QString();
+            break;
         default:
             { } // nada
         };
@@ -526,11 +531,18 @@ bool Handler::startElement(const QString &, const QString &n,
         fetchAttributeValues(tagName, atts, &attributes);
 
         QString name = attributes["name"];
+        // The top level tag 'function' has only the 'signature' tag
+        // and we should extract the 'name' value from it.
+        if (element->type == StackElement::FunctionTypeEntry) {
+            QString signature = attributes["signature"];
+            name = signature.left(signature.indexOf('(')).trimmed();
+        }
 
         // We need to be able to have duplicate primitive type entries,
         // or it's not possible to cover all primitive target language
         // types (which we need to do in order to support fake meta objects)
-        if (element->type != StackElement::PrimitiveTypeEntry) {
+        if (element->type != StackElement::PrimitiveTypeEntry
+            && element->type != StackElement::FunctionTypeEntry) {
             TypeEntry *tmp = m_database->findType(name);
             if (tmp)
                 ReportHandler::warning(QString("Duplicate type entry: '%1'").arg(name));
@@ -726,6 +738,22 @@ bool Handler::startElement(const QString &, const QString &n,
             if (ctype)
                 ctype->setTargetLangPackage(attributes["package"]);
 
+        }
+        break;
+        case StackElement::FunctionTypeEntry: {
+            QString signature = attributes["signature"];
+            signature = TypeDatabase::normalizedSignature(signature.toLatin1().constData());
+            element->entry = m_database->findType(name);
+            if (element->entry) {
+                if (element->entry->type() == TypeEntry::FunctionType) {
+                    reinterpret_cast<FunctionTypeEntry*>(element->entry)->addSignature(signature);
+                } else {
+                    m_error = QString("%1 expected to be a function, but isn't! Maybe it was already declared as a class or something else.").arg(name);
+                    return false;
+                }
+            } else {
+                element->entry = new FunctionTypeEntry(name, signature);
+            }
         }
         break;
         default:
@@ -1767,6 +1795,15 @@ ContainerTypeEntry *TypeDatabase::findContainerType(const QString &name)
         return static_cast<ContainerTypeEntry *>(type_entry);
     return 0;
 }
+
+FunctionTypeEntry* TypeDatabase::findFunctionType(const QString& name)
+{
+    TypeEntry* entry = findType(name);
+    if (entry && entry->type() == TypeEntry::FunctionType)
+        return static_cast<FunctionTypeEntry*>(entry);
+    return 0;
+}
+
 
 PrimitiveTypeEntry *TypeDatabase::findTargetLangPrimitiveType(const QString &targetLangName)
 {

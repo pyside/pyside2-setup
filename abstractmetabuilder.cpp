@@ -503,16 +503,27 @@ bool AbstractMetaBuilder::build(QIODevice* input)
 
     m_currentClass = 0;
 
+    // Global functions
     foreach (FunctionModelItem func, m_dom->functions()) {
         if (func->accessPolicy() != CodeModel::Public || func->name().startsWith("operator"))
             continue;
 
+        FunctionTypeEntry* funcEntry = types->findFunctionType(func->name());
+        if (!funcEntry)
+            continue;
+
         AbstractMetaFunction* metaFunc = traverseFunction(func);
-        if (metaFunc) {
-            QFileInfo info(func->fileName());
-            metaFunc->setIncludeFile(Include(Include::IncludePath, info.fileName()));
-            m_globalFunctions << metaFunc;
+        if (!metaFunc)
+            continue;
+
+        if (!funcEntry->hasSignature(metaFunc->minimalSignature())) {
+            delete metaFunc;
+            continue;
         }
+
+        QFileInfo info(func->fileName());
+        funcEntry->setInclude(Include(Include::IncludePath, info.fileName()));
+        m_globalFunctions << metaFunc;
     }
 
     // Functions added to the module on the type system.

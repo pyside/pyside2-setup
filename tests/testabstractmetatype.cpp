@@ -30,6 +30,7 @@ void TestAbstractMetaType::testConstCharPtrType()
     const char* cppCode ="const char* justAtest();";
     const char* xmlCode = "<typesystem package=\"Foo\">\
         <primitive-type name='char'/>\
+        <function signature='justAtest()' />\
     </typesystem>";
     TestUtil t(cppCode, xmlCode);
     QCOMPARE(t.builder()->globalFunctions().size(), 1);
@@ -57,6 +58,7 @@ void TestAbstractMetaType::testCharType()
     const char* xmlCode = "<typesystem package=\"Foo\">\
     <primitive-type name='char'/>\
     <value-type name='A' />\
+    <function signature='justAtest()' />\
     </typesystem>";
     TestUtil t(cppCode, xmlCode);
 
@@ -118,6 +120,7 @@ void TestAbstractMetaType::testTypedefWithTemplates()
     const char* xmlCode = "<typesystem package=\"Foo\">\
     <container-type name='A' type='list'/>\
     <value-type name='B' />\
+    <function signature='func(A&lt;B&gt;)' />\
     </typesystem>";
     TestUtil t(cppCode, xmlCode);
 
