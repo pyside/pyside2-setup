@@ -274,18 +274,6 @@ public:
         return m_originalAttributes & Friendly;
     }
 
-    // valid only for global components
-    // (e.g.: functions, enums, flags)
-    QString includeFile() const
-    {
-        return m_includeFile;
-    }
-
-    void setIncludeFile(const QString& file)
-    {
-        m_includeFile = file;
-    }
-
     void setDocumentation(const Documentation& doc)
     {
         m_doc = doc;
@@ -299,7 +287,6 @@ public:
 private:
     uint m_attributes;
     uint m_originalAttributes;
-    QString m_includeFile;
     Documentation m_doc;
 };
 
@@ -1102,12 +1089,22 @@ public:
         return m_propertySpec;
     }
 
+    Include includeFile() const
+    {
+        return m_includeFile;
+    }
+
+    void setIncludeFile(const Include& include)
+    {
+        m_includeFile = include;
+    }
 private:
     QString m_name;
     QString m_originalName;
     mutable QString m_cachedMinimalSignature;
     mutable QString m_cachedModifiedName;
 
+    Include m_includeFile;
     FunctionType m_functionType;
     AbstractMetaType *m_type;
     const AbstractMetaClass *m_class;

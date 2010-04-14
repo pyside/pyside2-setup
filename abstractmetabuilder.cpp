@@ -509,7 +509,8 @@ bool AbstractMetaBuilder::build(QIODevice* input)
 
         AbstractMetaFunction* metaFunc = traverseFunction(func);
         if (metaFunc) {
-            metaFunc->setIncludeFile(func->fileName());
+            QFileInfo info(func->fileName());
+            metaFunc->setIncludeFile(Include(Include::IncludePath, info.fileName()));
             m_globalFunctions << metaFunc;
         }
     }
@@ -902,8 +903,6 @@ AbstractMetaEnum *AbstractMetaBuilder::traverseEnum(EnumModelItem enumItem, Abst
 //     case CodeModel::Private: *meta_enum += AbstractMetaAttributes::Private; break;
     default: break;
     }
-
-    metaEnum->setIncludeFile(enumItem->fileName());
 
     ReportHandler::debugMedium(QString(" - traversing enum %1").arg(metaEnum->fullName()));
 
