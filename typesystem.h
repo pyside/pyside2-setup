@@ -50,7 +50,7 @@ struct APIEXTRACTOR_API Include
     Include() : type(IncludePath) {}
     Include(IncludeType t, const QString &nam) : type(t), name(nam) {};
 
-    bool isValid()
+    bool isValid() const
     {
         return !name.isEmpty();
     }
