@@ -22,6 +22,7 @@
  */
 
 #include "headergenerator.h"
+#include <typedatabase.h>
 #include <reporthandler.h>
 
 #include <QtCore/QDir>
@@ -65,8 +66,7 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
     s << "#include <shiboken.h>" << endl << endl;
 
     //Includes
-    if (metaClass->typeEntry()->include().isValid())
-        s << metaClass->typeEntry()->include().toString() << endl << endl;
+    s << metaClass->typeEntry()->include() << endl;
 
     if (shouldGenerateCppWrapper(metaClass)) {
 
@@ -232,9 +232,7 @@ void HeaderGenerator::finishGeneration()
     // Generate the main header for this module.
     // This header should be included by binding modules
     // extendind on top of this one.
-    QString classIncludes;
-    QTextStream s_cin(&classIncludes);
-    QSet<QString> enumIncludes;
+    QSet<Include> includes;
     QString pythonTypeStuff;
     QTextStream s_pts(&pythonTypeStuff);
     QString convertersDecl;
@@ -262,9 +260,7 @@ void HeaderGenerator::finishGeneration()
 
     s_pts << "// Useful macros" << endl;
     foreach (const AbstractMetaEnum* cppEnum, globalEnums()) {
-        QString incFile = cppEnum->includeFile().split(QDir::separator()).takeLast();
-        if (!incFile.isEmpty())
-            enumIncludes << cppEnum->includeFile();
+        includes << cppEnum->typeEntry()->include();
         writeTypeCheckMacro(s_pts, cppEnum->typeEntry());
         FlagsTypeEntry* flags = cppEnum->typeEntry()->flags();
         if (flags)
@@ -282,10 +278,10 @@ void HeaderGenerator::finishGeneration()
             continue;
 
         //Includes
-        if (metaClass->typeEntry()->include().isValid())
-            s_cin << metaClass->typeEntry()->include().toString() << endl;
+        includes << metaClass->typeEntry()->include();
 
         foreach (const AbstractMetaEnum* cppEnum, metaClass->enums()) {
+            includes << cppEnum->typeEntry()->include();
             writeTypeCheckMacro(s_pts, cppEnum->typeEntry());
             writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
             FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
@@ -300,13 +296,12 @@ void HeaderGenerator::finishGeneration()
 
         if (!metaClass->isNamespace()) {
             writeSbkTypeFunction(typeFunctions, metaClass);
-
             writeSbkCopyCppObjectFunction(convDecl, metaClass);
 
             foreach (AbstractMetaClass* innerClass, metaClass->innerClasses()) {
                 if (shouldGenerate(innerClass)) {
+                    includes << innerClass->typeEntry()->include();
                     writeSbkCopyCppObjectFunction(convDecl, innerClass);
-                    s_cin << innerClass->typeEntry()->include().toString() << endl;
                     writeTypeCheckMacro(s_pts, innerClass->typeEntry());
                     writeTypeConverterDecl(convDecl, innerClass->typeEntry());
                     writeTypeConverterImpl(convImpl, innerClass->typeEntry());
@@ -358,31 +353,21 @@ void HeaderGenerator::finishGeneration()
             s << endl;
         }
 
-        s << "// Class Includes" << endl;
-        s << classIncludes << endl;
-
-        if (!enumIncludes.isEmpty()) {
-            s << "// Enum Includes" << endl;
-            foreach (const QString& include, enumIncludes)
-              s << "#include <" << include << ">" << endl;
-            s << endl;
-        }
+        s << "// Binded library includes" << endl;
+        foreach (const Include& include, includes)
+            s << include;
 
         if (!primitiveTypes().isEmpty()) {
             s << "// Conversion Includes - Primitive Types" << endl;
-            foreach (const PrimitiveTypeEntry* ptype, primitiveTypes()) {
-                if (ptype->include().isValid())
-                    s << ptype->include().toString() << endl;
-            }
+            foreach (const PrimitiveTypeEntry* ptype, primitiveTypes())
+                s << ptype->include();
             s << endl;
         }
 
         if (!containerTypes().isEmpty()) {
             s << "// Conversion Includes - Container Types" << endl;
-            foreach (const ContainerTypeEntry* ctype, containerTypes()) {
-                if (ctype->include().isValid())
-                    s << ctype->include().toString() << endl;
-            }
+            foreach (const ContainerTypeEntry* ctype, containerTypes())
+                s << ctype->include();
             s << endl;
         }
 

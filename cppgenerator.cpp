@@ -23,6 +23,7 @@
 
 #include "cppgenerator.h"
 #include <reporthandler.h>
+#include <typedatabase.h>
 
 #include <QtCore/QDir>
 #include <QtCore/QTextStream>
@@ -2862,7 +2863,7 @@ void CppGenerator::finishGeneration()
     QString namespaceDefines;
     QTextStream s_namespaceDefines(&namespaceDefines);
 
-    QSet<QString> includes;
+    QSet<Include> includes;
     QString globalFunctionImpl;
     QTextStream s_globalFunctionImpl(&globalFunctionImpl);
     QString globalFunctionDecl;
@@ -2873,16 +2874,6 @@ void CppGenerator::finishGeneration()
     foreach (AbstractMetaFunctionList globalOverloads, getFunctionGroups().values()) {
         AbstractMetaFunctionList overloads;
         foreach (AbstractMetaFunction* func, globalOverloads) {
-            // TODO: this is an ugly hack to avoid binding global
-            // functions from outside the library beign processed.
-            // The decent solution is to expand API Extractor so
-            // that it support global function declarations on
-            // type system files.
-            QString incFile = func->includeFile();
-            QRegExp regex("\\b(?:lib)?" + moduleName() + "\\b");
-            if (!func->isUserAdded() && regex.indexIn(incFile) == -1)
-                continue;
-
             if (!func->isModifiedRemoved())
                 overloads.append(func);
         }
@@ -2890,9 +2881,8 @@ void CppGenerator::finishGeneration()
         if (overloads.isEmpty())
             continue;
 
-        QString includeFile = overloads.first()->includeFile();
-        if (!includeFile.isEmpty())
-            includes << includeFile;
+        if (overloads.first()->typeEntry())
+            includes << overloads.first()->typeEntry()->include();
 
         writeMethodWrapper(s_globalFunctionImpl, overloads);
         writeMethodDefinition(s_globalFunctionDef, overloads);
@@ -2928,8 +2918,8 @@ void CppGenerator::finishGeneration()
         s << "#include <Python.h>" << endl;
         s << "#include <shiboken.h>" << endl;
         s << "#include \"" << getModuleHeaderFileName() << '"' << endl << endl;
-        foreach (const QString& include, includes)
-            s << "#include \"" << include << '\"' << endl;
+        foreach (const Include& include, includes)
+            s << include;
         s << endl;
 
         TypeSystemTypeEntry* moduleEntry = reinterpret_cast<TypeSystemTypeEntry*>(TypeDatabase::instance()->findType(packageName()));

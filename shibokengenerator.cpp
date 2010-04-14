@@ -24,6 +24,7 @@
 #include "shibokengenerator.h"
 #include "overloaddata.h"
 #include <reporthandler.h>
+#include <typedatabase.h>
 
 #include <QtCore/QDir>
 #include <QtCore/QDebug>
