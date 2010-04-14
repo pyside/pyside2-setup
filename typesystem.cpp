@@ -1792,18 +1792,6 @@ IncludeList TypeDatabase::extraIncludes(const QString &className)
         return IncludeList();
 }
 
-
-
-QString Include::toString() const
-{
-    if (type == IncludePath)
-        return "#include <" + name + '>';
-    else if (type == LocalPath)
-        return "#include \"" + name + "\"";
-    else
-        return "import " + name + ";";
-}
-
 QString Modification::accessModifierString() const
 {
     if (isPrivate()) return "private";
@@ -2237,18 +2225,6 @@ QString ContainerTypeEntry::typeName() const
         default:
             return "?";
     }
-}
-
-uint qHash(const Include& inc)
-{
-    return qHash(inc.name);
-}
-
-QTextStream& operator<<(QTextStream& out, const Include& include)
-{
-    if (include.isValid())
-        out << include.toString() << endl;
-    return out;
 }
 
 /*

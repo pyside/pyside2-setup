@@ -30,6 +30,7 @@
 #include <QtCore/QMap>
 #include <QtCore/QDebug>
 #include "apiextractormacros.h"
+#include "include.h"
 
 class Indentor;
 
@@ -38,43 +39,6 @@ class QTextStream;
 
 class EnumTypeEntry;
 class FlagsTypeEntry;
-
-struct APIEXTRACTOR_API Include
-{
-    enum IncludeType {
-        IncludePath,
-        LocalPath,
-        TargetLangImport
-    };
-
-    Include() : type(IncludePath) {}
-    Include(IncludeType t, const QString &nam) : type(t), name(nam) {};
-
-    bool isValid() const
-    {
-        return !name.isEmpty();
-    }
-
-    IncludeType type;
-    QString name;
-
-    QString toString() const;
-
-    bool operator<(const Include& other) const
-    {
-        return name < other.name;
-    }
-
-    bool operator==(const Include& other) const
-    {
-        return type == other.type && name == other.name;
-    }
-};
-
-APIEXTRACTOR_API uint qHash(const Include& inc);
-APIEXTRACTOR_API QTextStream& operator<<(QTextStream& out, const Include& include);
-
-typedef QList<Include> IncludeList;
 
 typedef QMap<int, QString> ArgumentMap;
 
@@ -883,9 +847,9 @@ public:
     }
     void addExtraInclude(const Include &include)
     {
-        if (!m_includesUsed.value(include.name, false)) {
+        if (!m_includesUsed.value(include.name(), false)) {
             m_extraIncludes << include;
-            m_includesUsed[include.name] = true;
+            m_includesUsed[include.name()] = true;
         }
     }
 

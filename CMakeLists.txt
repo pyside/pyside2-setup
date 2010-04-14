@@ -44,6 +44,7 @@ graph.cpp
 reporthandler.cpp
 typeparser.cpp
 typesystem.cpp
+include.cpp
 parser/ast.cpp
 parser/binder.cpp
 parser/class_compiler.cpp
@@ -114,6 +115,7 @@ typesystem.h
 fileout.h
 docparser.h
 qtdocparser.h
+include.h
 )
 
 if (BUILD_TESTS)
