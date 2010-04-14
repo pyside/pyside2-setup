@@ -928,6 +928,12 @@ AbstractMetaEnum *AbstractMetaBuilder::traverseEnum(EnumModelItem enumItem, Abst
 
     m_enums << metaEnum;
 
+    if (!metaEnum->typeEntry()->include().isValid()) {
+        QFileInfo info(enumItem->fileName());
+        metaEnum->typeEntry()->setInclude(Include(Include::IncludePath, info.fileName()));
+    }
+    metaEnum->setOriginalAttributes(metaEnum->attributes());
+
     return metaEnum;
 }
 
@@ -1433,12 +1439,11 @@ bool AbstractMetaBuilder::setupInheritance(AbstractMetaClass *metaClass)
 void AbstractMetaBuilder::traverseEnums(ScopeModelItem scopeItem, AbstractMetaClass *metaClass, const QStringList &enumsDeclarations)
 {
     EnumList enums = scopeItem->enums();
-    foreach (EnumModelItem enum_item, enums) {
-        AbstractMetaEnum *meta_enum = traverseEnum(enum_item, metaClass, QSet<QString>::fromList(enumsDeclarations));
-        if (meta_enum) {
-            meta_enum->setOriginalAttributes(meta_enum->attributes());
-            metaClass->addEnum(meta_enum);
-            meta_enum->setEnclosingClass(metaClass);
+    foreach (EnumModelItem enumItem, enums) {
+        AbstractMetaEnum *metaEnum = traverseEnum(enumItem, metaClass, QSet<QString>::fromList(enumsDeclarations));
+        if (metaEnum) {
+            metaClass->addEnum(metaEnum);
+            metaEnum->setEnclosingClass(metaClass);
         }
     }
 }
