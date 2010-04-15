@@ -26,6 +26,7 @@
 #include <QtCore/QBuffer>
 #include "abstractmetabuilder.h"
 #include "reporthandler.h"
+#include "typedatabase.h"
 
 class TestUtil
 {

@@ -23,6 +23,7 @@
 
 #include "reporthandler.h"
 #include "typesystem.h"
+#include "typedatabase.h"
 #include <QtCore/QSet>
 #include <cstring>
 #include <cstdarg>

@@ -23,6 +23,7 @@
 
 #include "abstractmetalang.h"
 #include "reporthandler.h"
+#include "typedatabase.h"
 
 /*******************************************************************************
  * AbstractMetaType

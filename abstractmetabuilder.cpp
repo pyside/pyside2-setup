@@ -23,6 +23,7 @@
 
 #include "abstractmetabuilder.h"
 #include "reporthandler.h"
+#include "typedatabase.h"
 
 #include "parser/ast.h"
 #include "parser/binder.h"

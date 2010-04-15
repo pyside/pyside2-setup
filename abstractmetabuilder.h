@@ -31,6 +31,8 @@
 
 #include <QtCore/QSet>
 
+class TypeDatabase;
+
 class APIEXTRACTOR_API AbstractMetaBuilder
 {
 public:
@@ -160,8 +162,7 @@ public:
     bool isQObject(const QString &qualifiedName);
     bool isEnum(const QStringList &qualifiedName);
 
-    void fixQObjectForScope(TypeDatabase *types,
-                            NamespaceModelItem item);
+    void fixQObjectForScope(TypeDatabase* types, NamespaceModelItem item);
 
     // QtScript
     QSet<QString> qtMetaTypeDeclaredTypeNames() const

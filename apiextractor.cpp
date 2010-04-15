@@ -33,6 +33,7 @@
 #include "parser/rpp/pp.h"
 #include "abstractmetabuilder.h"
 #include "apiextractorversion.h"
+#include "typedatabase.h"
 
 static bool preprocess(const QString& sourceFile,
                        QFile& targetFile,

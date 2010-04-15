@@ -22,6 +22,8 @@
  */
 
 #include "typesystem.h"
+#include "typesystem_p.h"
+#include "typedatabase.h"
 #include "reporthandler.h"
 #include <QtXml>
 
@@ -31,179 +33,53 @@ static QString strings_char = QLatin1String("char");
 static QString strings_jchar = QLatin1String("jchar");
 static QString strings_jobject = QLatin1String("jobject");
 
-class StackElement
-{
-public:
-    enum ElementType {
-        None = 0x0,
-
-        // Type tags (0x1, ... , 0xff)
-        ObjectTypeEntry      = 0x1,
-        ValueTypeEntry       = 0x2,
-        InterfaceTypeEntry   = 0x3,
-        NamespaceTypeEntry   = 0x4,
-        ComplexTypeEntryMask = 0x7,
-
-        // Non-complex type tags (0x8, 0x9, ... , 0xf)
-        PrimitiveTypeEntry   = 0x8,
-        EnumTypeEntry        = 0x9,
-        ContainerTypeEntry   = 0xa,
-        FunctionTypeEntry    = 0xb,
-        TypeEntryMask        = 0xf,
-
-        // Documentation tags
-        InjectDocumentation = 0x10,
-        ModifyDocumentation = 0x20,
-        DocumentationMask = 0xf0,
-
-        // Simple tags (0x100, 0x200, ... , 0xf00)
-        ExtraIncludes               = 0x0100,
-        Include                     = 0x0200,
-        ModifyFunction              = 0x0300,
-        ModifyField                 = 0x0400,
-        Root                        = 0x0500,
-        CustomMetaConstructor       = 0x0600,
-        CustomMetaDestructor        = 0x0700,
-        ArgumentMap                 = 0x0800,
-        SuppressedWarning           = 0x0900,
-        Rejection                   = 0x0a00,
-        LoadTypesystem              = 0x0b00,
-        RejectEnumValue             = 0x0c00,
-        Template                    = 0x0d00,
-        TemplateInstanceEnum        = 0x0e00,
-        Replace                     = 0x0f00,
-        AddFunction                 = 0x1000,
-        SimpleMask                  = 0x3f00,
-
-        // Code snip tags (0x1000, 0x2000, ... , 0xf000)
-        InjectCode =           0x4000,
-        InjectCodeInFunction = 0x8000,
-        CodeSnipMask =         0xc000,
-
-        // Function modifier tags (0x010000, 0x020000, ... , 0xf00000)
-        Access                   = 0x010000,
-        Removal                  = 0x020000,
-        Rename                   = 0x040000,
-        ModifyArgument           = 0x080000,
-        Thread                   = 0x100000,
-        FunctionModifiers        = 0xff0000,
-
-        // Argument modifier tags (0x01000000 ... 0xf0000000)
-        ConversionRule           = 0x01000000,
-        ReplaceType              = 0x02000000,
-        ReplaceDefaultExpression = 0x04000000,
-        RemoveArgument           = 0x08000000,
-        DefineOwnership          = 0x10000000,
-        RemoveDefaultExpression  = 0x20000000,
-        NoNullPointers           = 0x40000000,
-        ReferenceCount           = 0x80000000,
-        ParentOwner              = 0x90000000,
-        ArgumentModifiers        = 0xff000000
-    };
-
-    StackElement(StackElement *p) : entry(0), type(None), parent(p) { }
-
-    TypeEntry *entry;
-    ElementType type;
-    StackElement *parent;
-
-    union {
-        TemplateInstance *templateInstance;
-        TemplateEntry *templateEntry;
-        CustomFunction *customFunction;
-    } value;
-};
-
-class Handler : public QXmlDefaultHandler
-{
-public:
-    Handler(TypeDatabase *database, bool generate)
+Handler::Handler(TypeDatabase* database, bool generate)
             : m_database(database), m_generate(generate ? TypeEntry::GenerateAll : TypeEntry::GenerateForSubclass)
-    {
-        m_currentEnum = 0;
-        m_current = 0;
+{
+    m_currentEnum = 0;
+    m_current = 0;
 
-        tagNames["rejection"] = StackElement::Rejection;
-        tagNames["primitive-type"] = StackElement::PrimitiveTypeEntry;
-        tagNames["container-type"] = StackElement::ContainerTypeEntry;
-        tagNames["object-type"] = StackElement::ObjectTypeEntry;
-        tagNames["value-type"] = StackElement::ValueTypeEntry;
-        tagNames["interface-type"] = StackElement::InterfaceTypeEntry;
-        tagNames["namespace-type"] = StackElement::NamespaceTypeEntry;
-        tagNames["enum-type"] = StackElement::EnumTypeEntry;
-        tagNames["function"] = StackElement::FunctionTypeEntry;
-        tagNames["extra-includes"] = StackElement::ExtraIncludes;
-        tagNames["include"] = StackElement::Include;
-        tagNames["inject-code"] = StackElement::InjectCode;
-        tagNames["modify-function"] = StackElement::ModifyFunction;
-        tagNames["modify-field"] = StackElement::ModifyField;
-        tagNames["access"] = StackElement::Access;
-        tagNames["remove"] = StackElement::Removal;
-        tagNames["rename"] = StackElement::Rename;
-        tagNames["typesystem"] = StackElement::Root;
-        tagNames["custom-constructor"] = StackElement::CustomMetaConstructor;
-        tagNames["custom-destructor"] = StackElement::CustomMetaDestructor;
-        tagNames["argument-map"] = StackElement::ArgumentMap;
-        tagNames["suppress-warning"] = StackElement::SuppressedWarning;
-        tagNames["load-typesystem"] = StackElement::LoadTypesystem;
-        tagNames["define-ownership"] = StackElement::DefineOwnership;
-        tagNames["replace-default-expression"] = StackElement::ReplaceDefaultExpression;
-        tagNames["reject-enum-value"] = StackElement::RejectEnumValue;
-        tagNames["replace-type"] = StackElement::ReplaceType;
-        tagNames["conversion-rule"] = StackElement::ConversionRule;
-        tagNames["modify-argument"] = StackElement::ModifyArgument;
-        tagNames["remove-argument"] = StackElement::RemoveArgument;
-        tagNames["remove-default-expression"] = StackElement::RemoveDefaultExpression;
-        tagNames["template"] = StackElement::Template;
-        tagNames["insert-template"] = StackElement::TemplateInstanceEnum;
-        tagNames["replace"] = StackElement::Replace;
-        tagNames["no-null-pointer"] = StackElement::NoNullPointers;
-        tagNames["reference-count"] = StackElement::ReferenceCount;
-        tagNames["parent"] = StackElement::ParentOwner;
-        tagNames["inject-documentation"] = StackElement::InjectDocumentation;
-        tagNames["modify-documentation"] = StackElement::ModifyDocumentation;
-        tagNames["add-function"] = StackElement::AddFunction;
-    }
-
-    bool startElement(const QString &namespaceURI, const QString &localName,
-                      const QString &qName, const QXmlAttributes &atts);
-    bool endElement(const QString &namespaceURI, const QString &localName, const QString &qName);
-
-    QString errorString() const
-    {
-        return m_error;
-    }
-    bool error(const QXmlParseException &exception);
-    bool fatalError(const QXmlParseException &exception);
-    bool warning(const QXmlParseException &exception);
-
-    bool characters(const QString &ch);
-
-private:
-    void fetchAttributeValues(const QString &name, const QXmlAttributes &atts,
-                              QHash<QString, QString> *acceptedAttributes);
-
-    bool importFileElement(const QXmlAttributes &atts);
-    bool convertBoolean(const QString &, const QString &, bool);
-
-    TypeDatabase *m_database;
-    StackElement* m_current;
-    QString m_defaultPackage;
-    QString m_defaultSuperclass;
-    QString m_error;
-    TypeEntry::CodeGeneration m_generate;
-
-    EnumTypeEntry *m_currentEnum;
-
-    CodeSnipList m_codeSnips;
-    AddedFunctionList m_addedFunctions;
-    FunctionModificationList m_functionMods;
-    FieldModificationList m_fieldMods;
-    DocModificationList m_docModifications;
-
-    QHash<QString, StackElement::ElementType> tagNames;
-    QString m_currentSignature;
-};
+    tagNames["rejection"] = StackElement::Rejection;
+    tagNames["primitive-type"] = StackElement::PrimitiveTypeEntry;
+    tagNames["container-type"] = StackElement::ContainerTypeEntry;
+    tagNames["object-type"] = StackElement::ObjectTypeEntry;
+    tagNames["value-type"] = StackElement::ValueTypeEntry;
+    tagNames["interface-type"] = StackElement::InterfaceTypeEntry;
+    tagNames["namespace-type"] = StackElement::NamespaceTypeEntry;
+    tagNames["enum-type"] = StackElement::EnumTypeEntry;
+    tagNames["function"] = StackElement::FunctionTypeEntry;
+    tagNames["extra-includes"] = StackElement::ExtraIncludes;
+    tagNames["include"] = StackElement::Include;
+    tagNames["inject-code"] = StackElement::InjectCode;
+    tagNames["modify-function"] = StackElement::ModifyFunction;
+    tagNames["modify-field"] = StackElement::ModifyField;
+    tagNames["access"] = StackElement::Access;
+    tagNames["remove"] = StackElement::Removal;
+    tagNames["rename"] = StackElement::Rename;
+    tagNames["typesystem"] = StackElement::Root;
+    tagNames["custom-constructor"] = StackElement::CustomMetaConstructor;
+    tagNames["custom-destructor"] = StackElement::CustomMetaDestructor;
+    tagNames["argument-map"] = StackElement::ArgumentMap;
+    tagNames["suppress-warning"] = StackElement::SuppressedWarning;
+    tagNames["load-typesystem"] = StackElement::LoadTypesystem;
+    tagNames["define-ownership"] = StackElement::DefineOwnership;
+    tagNames["replace-default-expression"] = StackElement::ReplaceDefaultExpression;
+    tagNames["reject-enum-value"] = StackElement::RejectEnumValue;
+    tagNames["replace-type"] = StackElement::ReplaceType;
+    tagNames["conversion-rule"] = StackElement::ConversionRule;
+    tagNames["modify-argument"] = StackElement::ModifyArgument;
+    tagNames["remove-argument"] = StackElement::RemoveArgument;
+    tagNames["remove-default-expression"] = StackElement::RemoveDefaultExpression;
+    tagNames["template"] = StackElement::Template;
+    tagNames["insert-template"] = StackElement::TemplateInstanceEnum;
+    tagNames["replace"] = StackElement::Replace;
+    tagNames["no-null-pointer"] = StackElement::NoNullPointers;
+    tagNames["reference-count"] = StackElement::ReferenceCount;
+    tagNames["parent"] = StackElement::ParentOwner;
+    tagNames["inject-documentation"] = StackElement::InjectDocumentation;
+    tagNames["modify-documentation"] = StackElement::ModifyDocumentation;
+    tagNames["add-function"] = StackElement::AddFunction;
+}
 
 bool Handler::error(const QXmlParseException &e)
 {
@@ -1682,94 +1558,6 @@ bool Handler::startElement(const QString &, const QString &n,
     return true;
 }
 
-TypeDatabase *TypeDatabase::instance(bool newInstance)
-{
-    static TypeDatabase *db = 0;
-    if (!db || newInstance) {
-        if (db)
-            delete db;
-        db = new TypeDatabase;
-    }
-    return db;
-}
-
-QString TypeDatabase::normalizedSignature(const char* signature)
-{
-    QString normalized = QMetaObject::normalizedSignature(signature);
-
-    if (!instance() || !QString(signature).contains("unsigned"))
-        return normalized;
-
-    QStringList types;
-    types << "char" << "short" << "int" << "long";
-    foreach (const QString& type, types) {
-        if (instance()->findType(QString("u%1").arg(type)))
-            continue;
-        normalized.replace(QRegExp(QString("\\bu%1\\b").arg(type)), QString("unsigned %1").arg(type));
-    }
-
-    return normalized;
-}
-
-TypeDatabase::TypeDatabase() : m_suppressWarnings(true)
-{
-    StringTypeEntry*  e = new StringTypeEntry("QXmlStreamStringRef");
-    e->setPreferredConversion(false);
-    addType(e);
-
-    addType(new VoidTypeEntry());
-    addType(new VarargsTypeEntry());
-}
-
-QString TypeDatabase::modifiedTypesystemFilepath(const QString &ts_file)
-{
-    if (!QFile::exists(ts_file)) {
-        int idx = ts_file.lastIndexOf('/');
-        QString fileName = idx >= 0 ? ts_file.right(ts_file.length() - idx - 1) : ts_file;
-        foreach (const QString &path, m_typesystemPaths) {
-            QString filepath(path + '/' + fileName);
-            if (QFile::exists(filepath))
-                return filepath;
-        }
-    }
-    return ts_file;
-}
-
-bool TypeDatabase::parseFile(const QString &filename, bool generate)
-{
-    QString filepath = modifiedTypesystemFilepath(filename);
-    if (m_parsedTypesystemFiles.contains(filepath))
-        return m_parsedTypesystemFiles[filepath];
-
-    QFile file(filepath);
-    if (!file.exists()) {
-        ReportHandler::warning("Can't find " + filename+", typesystem paths: "+m_typesystemPaths.join(", "));
-        return false;
-    }
-
-    int count = m_entries.size();
-    bool ok = parseFile(&file, generate);
-    m_parsedTypesystemFiles[filepath] = ok;
-    int newCount = m_entries.size();
-
-    ReportHandler::debugSparse(QString::fromLatin1("Parsed: '%1', %2 new entries")
-                               .arg(filename)
-                               .arg(newCount - count));
-    return ok;
-}
-
-bool TypeDatabase::parseFile(QIODevice* device, bool generate)
-{
-    QXmlInputSource source(device);
-    QXmlSimpleReader reader;
-    Handler handler(this, generate);
-
-    reader.setContentHandler(&handler);
-    reader.setErrorHandler(&handler);
-
-    return reader.parse(&source, false);
-}
-
 PrimitiveTypeEntry* PrimitiveTypeEntry::basicAliasedTypeEntry() const
 {
     if (!m_aliasedTypeEntry)
@@ -1780,53 +1568,6 @@ PrimitiveTypeEntry* PrimitiveTypeEntry::basicAliasedTypeEntry() const
         return baseAliasTypeEntry;
     else
         return m_aliasedTypeEntry;
-}
-
-ContainerTypeEntry *TypeDatabase::findContainerType(const QString &name)
-{
-    QString template_name = name;
-
-    int pos = name.indexOf('<');
-    if (pos > 0)
-        template_name = name.left(pos);
-
-    TypeEntry *type_entry = findType(template_name);
-    if (type_entry && type_entry->isContainer())
-        return static_cast<ContainerTypeEntry *>(type_entry);
-    return 0;
-}
-
-FunctionTypeEntry* TypeDatabase::findFunctionType(const QString& name)
-{
-    TypeEntry* entry = findType(name);
-    if (entry && entry->type() == TypeEntry::FunctionType)
-        return static_cast<FunctionTypeEntry*>(entry);
-    return 0;
-}
-
-
-PrimitiveTypeEntry *TypeDatabase::findTargetLangPrimitiveType(const QString &targetLangName)
-{
-    foreach (QList<TypeEntry *> entries, m_entries.values()) {
-        foreach (TypeEntry *e, entries) {
-            if (e && e->isPrimitive()) {
-                PrimitiveTypeEntry *pe = static_cast<PrimitiveTypeEntry *>(e);
-                if (pe->targetLangName() == targetLangName && pe->preferredConversion())
-                    return pe;
-            }
-        }
-    }
-
-    return 0;
-}
-
-IncludeList TypeDatabase::extraIncludes(const QString &className)
-{
-    ComplexTypeEntry *typeEntry = findComplexType(className);
-    if (typeEntry)
-        return typeEntry->extraIncludes();
-    else
-        return IncludeList();
 }
 
 QString Modification::accessModifierString() const
@@ -1932,97 +1673,6 @@ QString FlagsTypeEntry::qualifiedTargetLangName() const
 {
     return targetLangPackage() + "." + m_enum->targetLangQualifier() + "." + targetLangName();
 }
-
-
-void TypeDatabase::addRejection(const QString &class_name, const QString &function_name,
-                                const QString &field_name, const QString &enum_name)
-{
-    TypeRejection r;
-    r.class_name = class_name;
-    r.function_name = function_name;
-    r.field_name = field_name;
-    r.enum_name = enum_name;
-
-    m_rejections << r;
-}
-
-bool TypeDatabase::isClassRejected(const QString &class_name)
-{
-    if (!m_rebuildClasses.isEmpty())
-        return !m_rebuildClasses.contains(class_name);
-
-    foreach (const TypeRejection &r, m_rejections)
-    if (r.class_name == class_name && r.function_name == "*" && r.field_name == "*" && r.enum_name == "*")
-        return true;
-
-    return false;
-}
-
-bool TypeDatabase::isEnumRejected(const QString &class_name, const QString &enum_name)
-{
-    foreach (const TypeRejection &r, m_rejections) {
-        if (r.enum_name == enum_name
-            && (r.class_name == class_name || r.class_name == "*")) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool TypeDatabase::isFunctionRejected(const QString &class_name, const QString &function_name)
-{
-    foreach (const TypeRejection &r, m_rejections)
-    if (r.function_name == function_name &&
-        (r.class_name == class_name || r.class_name == "*"))
-        return true;
-    return false;
-}
-
-
-bool TypeDatabase::isFieldRejected(const QString &class_name, const QString &field_name)
-{
-    foreach (const TypeRejection &r, m_rejections)
-    if (r.field_name == field_name &&
-        (r.class_name == class_name || r.class_name == "*"))
-        return true;
-    return false;
-}
-
-FlagsTypeEntry *TypeDatabase::findFlagsType(const QString &name) const
-{
-    FlagsTypeEntry *fte = (FlagsTypeEntry *) findType(name);
-    return fte ? fte : (FlagsTypeEntry *) m_flagsEntries.value(name);
-}
-
-AddedFunctionList TypeDatabase::findGlobalUserFunctions(const QString& name) const
-{
-    AddedFunctionList addedFunctions;
-    foreach (AddedFunction func, m_globalUserFunctions) {
-        if (func.name() == name)
-            addedFunctions.append(func);
-    }
-    return addedFunctions;
-}
-
-
-QString TypeDatabase::globalNamespaceClassName(const TypeEntry * /*entry*/)
-{
-    return QLatin1String("Global");
-}
-
-FunctionModificationList TypeDatabase::functionModifications(const QString& signature) const
-{
-    FunctionModificationList lst;
-    for (int i = 0; i < m_functionMods.count(); ++i) {
-        const FunctionModification& mod = m_functionMods.at(i);
-        if (mod.signature == signature)
-            lst << mod;
-    }
-
-    return lst;
-}
-
 
 /*!
  * The Visual Studio 2002 compiler doesn't support these symbols,
