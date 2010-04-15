@@ -68,7 +68,7 @@ QString TypeDatabase::normalizedSignature(const char* signature)
     return normalized;
 }
 
-QStringList TypeDatabase::requiredTargetImports()
+QStringList TypeDatabase::requiredTargetImports() const
 {
     return m_requiredTargetImports;
 }
@@ -89,7 +89,7 @@ void TypeDatabase::addTypesystemPath(const QString& typesystem_paths)
     m_typesystemPaths += typesystem_paths.split(path_splitter);
 }
 
-IncludeList TypeDatabase::extraIncludes(const QString& className)
+IncludeList TypeDatabase::extraIncludes(const QString& className) const
 {
     ComplexTypeEntry* typeEntry = findComplexType(className);
     if (typeEntry)
@@ -98,7 +98,7 @@ IncludeList TypeDatabase::extraIncludes(const QString& className)
         return IncludeList();
 }
 
-ContainerTypeEntry* TypeDatabase::findContainerType(const QString &name)
+ContainerTypeEntry* TypeDatabase::findContainerType(const QString &name) const
 {
     QString template_name = name;
 
@@ -112,7 +112,7 @@ ContainerTypeEntry* TypeDatabase::findContainerType(const QString &name)
     return 0;
 }
 
-FunctionTypeEntry* TypeDatabase::findFunctionType(const QString& name)
+FunctionTypeEntry* TypeDatabase::findFunctionType(const QString& name) const
 {
     TypeEntry* entry = findType(name);
     if (entry && entry->type() == TypeEntry::FunctionType)
@@ -121,7 +121,7 @@ FunctionTypeEntry* TypeDatabase::findFunctionType(const QString& name)
 }
 
 
-PrimitiveTypeEntry* TypeDatabase::findTargetLangPrimitiveType(const QString& targetLangName)
+PrimitiveTypeEntry* TypeDatabase::findTargetLangPrimitiveType(const QString& targetLangName) const
 {
     foreach (QList<TypeEntry*> entries, m_entries.values()) {
         foreach (TypeEntry* e, entries) {
@@ -148,7 +148,7 @@ TypeEntry* TypeDatabase::findType(const QString& name) const
     return 0;
 }
 
-SingleTypeEntryHash TypeDatabase::entries()
+SingleTypeEntryHash TypeDatabase::entries() const
 {
     TypeEntryHash entries = allEntries();
 
@@ -161,7 +161,7 @@ SingleTypeEntryHash TypeDatabase::entries()
     return returned;
 }
 
-QList<const PrimitiveTypeEntry*> TypeDatabase::primitiveTypes()
+QList<const PrimitiveTypeEntry*> TypeDatabase::primitiveTypes() const
 {
     TypeEntryHash entries = allEntries();
     QList<const PrimitiveTypeEntry*> returned;
@@ -174,7 +174,7 @@ QList<const PrimitiveTypeEntry*> TypeDatabase::primitiveTypes()
     return returned;
 }
 
-QList<const ContainerTypeEntry*> TypeDatabase::containerTypes()
+QList<const ContainerTypeEntry*> TypeDatabase::containerTypes() const
 {
     TypeEntryHash entries = allEntries();
     QList<const ContainerTypeEntry*> returned;
@@ -198,7 +198,7 @@ void TypeDatabase::addRejection(const QString& className, const QString& functio
     m_rejections << r;
 }
 
-bool TypeDatabase::isClassRejected(const QString& className)
+bool TypeDatabase::isClassRejected(const QString& className) const
 {
     if (!m_rebuildClasses.isEmpty())
         return !m_rebuildClasses.contains(className);
@@ -210,7 +210,7 @@ bool TypeDatabase::isClassRejected(const QString& className)
     return false;
 }
 
-bool TypeDatabase::isEnumRejected(const QString& className, const QString& enumName)
+bool TypeDatabase::isEnumRejected(const QString& className, const QString& enumName) const
 {
     foreach (const TypeRejection& r, m_rejections) {
         if (r.enum_name == enumName
@@ -222,7 +222,7 @@ bool TypeDatabase::isEnumRejected(const QString& className, const QString& enumN
     return false;
 }
 
-bool TypeDatabase::isFunctionRejected(const QString& className, const QString& functionName)
+bool TypeDatabase::isFunctionRejected(const QString& className, const QString& functionName) const
 {
     foreach (const TypeRejection& r, m_rejections)
     if (r.function_name == functionName &&
@@ -232,7 +232,7 @@ bool TypeDatabase::isFunctionRejected(const QString& className, const QString& f
 }
 
 
-bool TypeDatabase::isFieldRejected(const QString& className, const QString& fieldName)
+bool TypeDatabase::isFieldRejected(const QString& className, const QString& fieldName) const
 {
     foreach (const TypeRejection& r, m_rejections)
     if (r.field_name == fieldName &&
@@ -275,7 +275,7 @@ FunctionModificationList TypeDatabase::functionModifications(const QString& sign
     return lst;
 }
 
-bool TypeDatabase::isSuppressedWarning(const QString& s)
+bool TypeDatabase::isSuppressedWarning(const QString& s) const
 {
     if (!m_suppressWarnings)
         return false;
@@ -300,7 +300,7 @@ bool TypeDatabase::isSuppressedWarning(const QString& s)
     return false;
 }
 
-QString TypeDatabase::modifiedTypesystemFilepath(const QString& tsFile)
+QString TypeDatabase::modifiedTypesystemFilepath(const QString& tsFile) const
 {
     if (!QFile::exists(tsFile)) {
         int idx = tsFile.lastIndexOf('/');
@@ -349,7 +349,7 @@ bool TypeDatabase::parseFile(QIODevice* device, bool generate)
     return reader.parse(&source, false);
 }
 
-PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name)
+PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name) const
 {
     QList<TypeEntry*> entries = findTypes(name);
 
@@ -361,7 +361,7 @@ PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name)
     return 0;
 }
 
-ComplexTypeEntry* TypeDatabase::findComplexType(const QString& name)
+ComplexTypeEntry* TypeDatabase::findComplexType(const QString& name) const
 {
     TypeEntry* entry = findType(name);
     if (entry && entry->isComplex())
@@ -370,7 +370,7 @@ ComplexTypeEntry* TypeDatabase::findComplexType(const QString& name)
         return 0;
 }
 
-ObjectTypeEntry* TypeDatabase::findObjectType(const QString& name)
+ObjectTypeEntry* TypeDatabase::findObjectType(const QString& name) const
 {
     TypeEntry* entry = findType(name);
     if (entry && entry->isObject())
@@ -379,7 +379,7 @@ ObjectTypeEntry* TypeDatabase::findObjectType(const QString& name)
         return 0;
 }
 
-NamespaceTypeEntry* TypeDatabase::findNamespaceType(const QString& name)
+NamespaceTypeEntry* TypeDatabase::findNamespaceType(const QString& name) const
 {
     TypeEntry* entry = findType(name);
     if (entry && entry->isNamespace())

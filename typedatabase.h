@@ -45,25 +45,25 @@ public:
 
     static QString normalizedSignature(const char* signature);
 
-    QStringList requiredTargetImports();
+    QStringList requiredTargetImports() const;
 
     void addRequiredTargetImport(const QString& moduleName);
 
-    QStringList typesystemPaths()
+    QStringList typesystemPaths() const
     {
         return m_typesystemPaths;
     }
 
     void addTypesystemPath(const QString& typesystem_paths);
 
-    IncludeList extraIncludes(const QString& className);
+    IncludeList extraIncludes(const QString& className) const;
 
-    PrimitiveTypeEntry* findPrimitiveType(const QString& name);
-    ComplexTypeEntry* findComplexType(const QString& name);
-    ObjectTypeEntry* findObjectType(const QString& name);
-    NamespaceTypeEntry* findNamespaceType(const QString& name);
-    ContainerTypeEntry* findContainerType(const QString& name);
-    FunctionTypeEntry* findFunctionType(const QString& name);
+    PrimitiveTypeEntry* findPrimitiveType(const QString& name) const;
+    ComplexTypeEntry* findComplexType(const QString& name) const;
+    ObjectTypeEntry* findObjectType(const QString& name) const;
+    NamespaceTypeEntry* findNamespaceType(const QString& name) const;
+    ContainerTypeEntry* findContainerType(const QString& name) const;
+    FunctionTypeEntry* findFunctionType(const QString& name) const;
 
     TypeEntry* findType(const QString& name) const;
 
@@ -72,25 +72,25 @@ public:
         return m_entries.value(name);
     }
 
-    TypeEntryHash allEntries()
+    TypeEntryHash allEntries() const
     {
         return m_entries;
     }
 
-    SingleTypeEntryHash entries();
+    SingleTypeEntryHash entries() const;
 
-    PrimitiveTypeEntry *findTargetLangPrimitiveType(const QString &targetLangName);
+    PrimitiveTypeEntry* findTargetLangPrimitiveType(const QString& targetLangName) const;
 
-    QList<const PrimitiveTypeEntry*> primitiveTypes();
+    QList<const PrimitiveTypeEntry*> primitiveTypes() const;
 
-    QList<const ContainerTypeEntry*> containerTypes();
+    QList<const ContainerTypeEntry*> containerTypes() const;
 
     void addRejection(const QString& className, const QString& functionName,
                         const QString& fieldName, const QString& enumName);
-    bool isClassRejected(const QString& className);
-    bool isFunctionRejected(const QString& className, const QString& functionName);
-    bool isFieldRejected(const QString& className, const QString& fieldName);
-    bool isEnumRejected(const QString& className, const QString& enumName);
+    bool isClassRejected(const QString& className) const;
+    bool isFunctionRejected(const QString& className, const QString& functionName) const;
+    bool isFieldRejected(const QString& className, const QString& fieldName) const;
+    bool isEnumRejected(const QString& className, const QString& enumName) const;
 
     void addType(TypeEntry* e)
     {
@@ -107,7 +107,7 @@ public:
         m_flagsEntries[fte->originalName()] = fte;
     }
 
-    TemplateEntry* findTemplate(const QString& name)
+    TemplateEntry* findTemplate(const QString& name) const
     {
         return m_templates[name];
     }
@@ -151,7 +151,7 @@ public:
         m_suppressedWarnings.append(s);
     }
 
-    bool isSuppressedWarning(const QString& s);
+    bool isSuppressedWarning(const QString& s) const;
 
     void setRebuildClasses(const QStringList &cls)
     {
@@ -164,7 +164,7 @@ public:
         return "typesystem.txt";
     }
 
-    QString modifiedTypesystemFilepath(const QString& tsFile);
+    QString modifiedTypesystemFilepath(const QString& tsFile) const;
     bool parseFile(const QString &filename, bool generate = true);
     bool parseFile(QIODevice* device, bool generate = true);
 
