@@ -24,6 +24,7 @@
 #include "qtdocgenerator.h"
 #include <reporthandler.h>
 #include <qtdocparser.h>
+#include <typedatabase.h>
 #include <algorithm>
 #include <QtCore/QStack>
 #include <QtCore/QTextStream>
