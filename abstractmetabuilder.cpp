@@ -522,8 +522,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
             continue;
         }
 
-        QFileInfo info(func->fileName());
-        funcEntry->setInclude(Include(Include::IncludePath, info.fileName()));
+        setInclude(funcEntry, func->fileName());
         m_globalFunctions << metaFunc;
     }
 
@@ -634,10 +633,8 @@ AbstractMetaClass *AbstractMetaBuilder::traverseNamespace(NamespaceModelItem nam
     popScope();
     m_namespacePrefix = currentScope()->qualifiedName().join("::");
 
-    if (!type->include().isValid()) {
-        QFileInfo info(namespaceItem->fileName());
-        type->setInclude(Include(Include::IncludePath, info.fileName()));
-    }
+    if (!type->include().isValid())
+        setInclude(type, namespaceItem->fileName());
 
     return metaClass;
 }
@@ -939,10 +936,9 @@ AbstractMetaEnum *AbstractMetaBuilder::traverseEnum(EnumModelItem enumItem, Abst
 
     m_enums << metaEnum;
 
-    if (!metaEnum->typeEntry()->include().isValid()) {
-        QFileInfo info(enumItem->fileName());
-        metaEnum->typeEntry()->setInclude(Include(Include::IncludePath, info.fileName()));
-    }
+    if (!metaEnum->typeEntry()->include().isValid())
+        setInclude(metaEnum->typeEntry(), enumItem->fileName());
+
     metaEnum->setOriginalAttributes(metaEnum->attributes());
 
     return metaEnum;
@@ -985,10 +981,8 @@ AbstractMetaClass* AbstractMetaBuilder::traverseTypeAlias(TypeAliasModelItem typ
     *metaClass += AbstractMetaAttributes::Public;
 
     // Set the default include file name
-    if (!type->include().isValid()) {
-        QFileInfo info(typeAlias->fileName());
-        type->setInclude(Include(Include::IncludePath, info.fileName()));
-    }
+    if (!type->include().isValid())
+        setInclude(type, typeAlias->fileName());
 
     return metaClass;
 }
@@ -1098,10 +1092,8 @@ AbstractMetaClass *AbstractMetaBuilder::traverseClass(ClassModelItem classItem)
     m_currentClass = oldCurrentClass;
 
     // Set the default include file name
-    if (!type->include().isValid()) {
-        QFileInfo info(classItem->fileName());
-        type->setInclude(Include(Include::IncludePath, info.fileName()));
-    }
+    if (!type->include().isValid())
+        setInclude(type, classItem->fileName());
 
     return metaClass;
 }
@@ -2748,4 +2740,17 @@ AbstractMetaArgumentList AbstractMetaBuilder::reverseList(const AbstractMetaArgu
     }
 
     return ret;
+}
+
+void AbstractMetaBuilder::setGlobalHeader(const QString& globalHeader)
+{
+    m_globalHeader = QFileInfo(globalHeader);
+}
+
+void AbstractMetaBuilder::setInclude(TypeEntry* te, const QString& fileName) const
+{
+
+    QFileInfo info(fileName);
+    if (info.exists() && m_globalHeader != info)
+        te->setInclude(Include(Include::IncludePath, info.fileName()));
 }

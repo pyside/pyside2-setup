@@ -166,6 +166,7 @@ bool ApiExtractor::run()
     ppFile.seek(0);
     m_builder = new AbstractMetaBuilder;
     m_builder->setLogDirectory(m_logDirectory);
+    m_builder->setGlobalHeader(m_cppFileName);
     m_builder->build(&ppFile);
 
     return true;

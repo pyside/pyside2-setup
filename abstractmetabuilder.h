@@ -29,7 +29,8 @@
 #include "typesystem.h"
 #include "typeparser.h"
 
-#include <QtCore/QSet>
+#include <QSet>
+#include <QFileInfo>
 
 class TypeDatabase;
 
@@ -170,6 +171,13 @@ public:
         return m_qmetatypeDeclaredTypenames;
     }
 
+    /**
+    *   AbstractMetaBuilder should know what's the global header being used,
+    *   so any class declared under this header wont have the include file
+    *   filled.
+    */
+    void setGlobalHeader(const QString& globalHeader);
+
 protected:
     AbstractMetaClass *argumentToClass(ArgumentModelItem);
 
@@ -213,6 +221,7 @@ protected:
 private:
     void sortLists();
     AbstractMetaArgumentList reverseList(const AbstractMetaArgumentList& list);
+    void setInclude(TypeEntry* te, const QString& fileName) const;
 
     AbstractMetaClassList m_metaClasses;
     AbstractMetaClassList m_templates;
@@ -242,6 +251,7 @@ private:
     QSet<QString> m_qmetatypeDeclaredTypenames;
 
     QString m_logDirectory;
+    QFileInfo m_globalHeader;
 };
 
 #endif // ABSTRACTMETBUILDER_H
