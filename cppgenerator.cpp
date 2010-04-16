@@ -150,11 +150,6 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     s << "#include \"" << getModuleHeaderFileName() << '"' << endl << endl;
 
-    QString converterImpl;
-    QTextStream convImpl(&converterImpl);
-    QString copyCppObjectImpl;
-    QTextStream copyImpl(&copyCppObjectImpl);
-
     QString headerfile = fileNameForClass(metaClass);
     headerfile.replace("cpp", "h");
     s << "#include \"" << headerfile << '"' << endl;
@@ -354,13 +349,6 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     writeClassRegister(s, metaClass);
 
     s << endl << "} // extern \"C\"" << endl << endl;
-
-    s << "namespace Shiboken" << endl << '{' << endl;
-    s << "// Copy C++ object implementation" << endl;
-    s << copyCppObjectImpl;
-    s << "// Converter implementations" << endl;
-    s << converterImpl;
-    s << "} // namespace Shiboken" << endl << endl;
 
     // class inject-code native/end
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
