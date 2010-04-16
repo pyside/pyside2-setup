@@ -34,6 +34,30 @@
         <include file-name="map" location="global"/>
     </container-type>
 
+    <function signature="sumComplexPair(std::pair&lt;Complex, Complex>)" />
+    <function signature="gimmeComplexList()" />
+    <function signature="transmuteComplexIntoPoint(const Complex&amp;)" />
+    <function signature="transmutePointIntoComplex(const Point&amp;)" />
+    <function signature="sumComplexPair(std::pair&lt;Complex, Complex>)" />
+    <function signature="doubleUnsignedInt(unsigned int)" />
+    <function signature="doubleShort(short)" />
+    <function signature="returnNullPrimitivePointer()" />
+    <function signature="returnNullValueTypePointer()" />
+    <function signature="returnNullObjectTypePointer()" />
+    <function signature="acceptInt(int)" />
+    <function signature="acceptUInt(unsigned int)" />
+    <function signature="acceptLong(long)" />
+    <function signature="acceptULong(unsigned long)" />
+    <function signature="acceptDouble(double)" />
+    <function signature="countCharacters(const char*)" />
+    <function signature="gimmeInt()" />
+    <function signature="gimmeDouble()" />
+    <function signature="makeCString()" />
+    <function signature="multiplyPair(std::pair&lt;double, double>)" />
+    <function signature="returnCString()" />
+    <function signature="overloadedFunc(double)" />
+    <function signature="overloadedFunc(int)" />
+
     <enum-type name="Abstract::PrintFormat"/>
     <enum-type name="OverloadedFuncEnum"/>
     <enum-type name="Derived::OtherOverloadedFuncEnum"/>
@@ -1036,9 +1060,6 @@
     <rejection class="ListUser" function-name="sumList(std::list&lt;int&gt;)"/>
     <rejection class="ListUser" function-name="sumList(std::list&lt;double&gt;)"/>
 
-    <rejection class="" function-name="gimmeComplexList()"/>
-    <rejection class="" function-name="makeCString()"/>
-    <rejection class="" function-name="returnCString()"/>
 
     <suppress-warning text="::*" />
     <suppress-warning text="horribly broken type '__off64_t'" />
