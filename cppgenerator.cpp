@@ -2655,17 +2655,8 @@ void CppGenerator::writeFlagsUnaryOperator(QTextStream& s, const AbstractMetaEnu
 
 void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* metaClass)
 {
-    //Inner class register function foward declaration
-    foreach (AbstractMetaClass* innerClass, metaClass->innerClasses()) {
-        if (shouldGenerate(innerClass))
-            s << "PyAPI_FUNC(void)" << endl
-              << "init_" << innerClass->qualifiedCppName().replace("::", "_")
-              << "(PyObject*);" << endl;
-    }
-
     QString pyTypeName = cpythonTypeName(metaClass);
-    s << "PyAPI_FUNC(void)" << endl;
-    s << "init_" << metaClass->qualifiedCppName().replace("::", "_") << "(PyObject* module)" << endl;
+    s << "PyAPI_FUNC(void) init_" << metaClass->qualifiedCppName().replace("::", "_") << "(PyObject* module)" << endl;
     s << '{' << endl;
     s << INDENT << cpythonTypeNameExt(metaClass->typeEntry()) << " = reinterpret_cast<PyTypeObject*>(&" << cpythonTypeName(metaClass->typeEntry()) << ");" << endl << endl;
 
@@ -2758,15 +2749,6 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         s << "TypeResolver<" << typeName << " >" << "(typeid(" << typeName << ").name());\n";
     }
 
-    //Inner class
-    foreach (AbstractMetaClass* innerClass, metaClass->innerClasses()) {
-        if (shouldGenerate(innerClass))
-            s << INDENT
-              <<  "init_" << innerClass->qualifiedCppName().replace("::", "_")
-              << "(" << pyTypeName << ".super.ht_type.tp_dict);" << endl;
-
-    }
-
     s << '}' << endl << endl;
 }
 
@@ -2843,8 +2825,6 @@ void CppGenerator::finishGeneration()
     QTextStream s_classInitDecl(&classInitDecl);
     QString classPythonDefines;
     QTextStream s_classPythonDefines(&classPythonDefines);
-    QString namespaceDefines;
-    QTextStream s_namespaceDefines(&namespaceDefines);
 
     QSet<Include> includes;
     QString globalFunctionImpl;
@@ -2871,18 +2851,20 @@ void CppGenerator::finishGeneration()
         writeMethodDefinition(s_globalFunctionDef, overloads);
     }
 
-    foreach (const AbstractMetaClass *cls, classes()) {
-        if (!shouldGenerate(cls) || cls->enclosingClass())
+    foreach (const AbstractMetaClass* cls, classes()) {
+        if (!shouldGenerate(cls))
             continue;
 
         s_classInitDecl << "extern \"C\" PyAPI_FUNC(void) init_"
                         << cls->qualifiedCppName().replace("::", "_") << "(PyObject* module);" << endl;
 
-        QString defineStr = "init_" + cls->qualifiedCppName().replace("::", "_") + "(module);";
-        if (cls->isNamespace())
-            s_namespaceDefines << INDENT << defineStr << endl;
+        QString defineStr = "init_" + cls->qualifiedCppName().replace("::", "_");
+
+        if (cls->enclosingClass())
+            defineStr += "(" + cpythonTypeNameExt(cls->enclosingClass()->typeEntry()) +"->tp_dict);";
         else
-            s_classPythonDefines << INDENT << defineStr << endl;
+            defineStr += "(module);";
+        s_classPythonDefines << INDENT << defineStr << endl;
     }
 
     QString moduleFileName(outputDirectory() + "/" + subDirectoryForPackage(packageName()));
@@ -2990,7 +2972,7 @@ void CppGenerator::finishGeneration()
         s << INDENT << "PyObject* cppApiObject = PyCObject_FromVoidPtr(reinterpret_cast<void*>(cppApi), 0);" << endl;
         s << INDENT << "PyModule_AddObject(module, \"_Cpp_Api\", cppApiObject);" << endl << endl;
         s << INDENT << "// Initialize classes in the type system" << endl;
-        s << classPythonDefines << endl;
+        s << classPythonDefines;
 
         if (!extendedConverters.isEmpty()) {
             s << INDENT << "// Initialize extended Converters" << endl;
@@ -3001,9 +2983,6 @@ void CppGenerator::finishGeneration()
             s << endl;
         }
         s << endl;
-
-        s << INDENT << "// Initialize namespaces as uninstantiable classes in the type system" << endl;
-        s << namespaceDefines << endl;
 
         if (!globalEnums().isEmpty()) {
             s << INDENT << "// Initialize enums" << endl;
