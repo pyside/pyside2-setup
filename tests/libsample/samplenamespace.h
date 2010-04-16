@@ -77,11 +77,21 @@ public:
         class OkThisIsRecursiveEnough
         {
         public:
+            ~OkThisIsRecursiveEnough() {}
             enum NiceEnum {
                 NiceValue1, NiceValue2
             };
+
+            int someMethod(SomeInnerClass*) { return 0; }
+            virtual OkThisIsRecursiveEnough* someVirtualMethod(OkThisIsRecursiveEnough* arg) { return arg; }
         };
     };
+};
+
+class DerivedFromNamespace : public SomeClass::SomeInnerClass::OkThisIsRecursiveEnough
+{
+public:
+    virtual OkThisIsRecursiveEnough* someVirtualMethod(OkThisIsRecursiveEnough* arg) { return arg; }
 };
 
 } // namespace SampleNamespace

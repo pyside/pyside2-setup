@@ -1554,7 +1554,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                     if (!func->isStatic())
                         mc << CPP_SELF_VAR << "->";
                     if (!func->isAbstract())
-                        mc << func->ownerClass()->name() << "::";
+                        mc << func->ownerClass()->qualifiedCppName() << "::";
                     mc << func->originalName();
 #else
                     if (!func->isStatic()) {
@@ -1563,7 +1563,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                         mc << CPP_SELF_VAR << (func->isProtected() ? ")" : "") << "->";
                     }
                     if (!func->isAbstract())
-                        mc << (func->isProtected() ? wrapperName(func->ownerClass()) : func->ownerClass()->name()) << "::";
+                        mc << (func->isProtected() ? wrapperName(func->ownerClass()) : func->ownerClass()->qualifiedCppName()) << "::";
                     mc << func->originalName() << (func->isProtected() ? "_protected" : "");
 #endif
                 } else {
