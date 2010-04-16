@@ -217,8 +217,7 @@ void HeaderGenerator::writeTypeIndexDefine(QTextStream& s, const AbstractMetaCla
 {
     if (!metaClass->typeEntry()->generateCode())
         return;
-    if (!metaClass->isNamespace())
-        writeTypeIndexDefineLine(s, metaClass->typeEntry(), idx);
+    writeTypeIndexDefineLine(s, metaClass->typeEntry(), idx);
     foreach (const AbstractMetaEnum* metaEnum, metaClass->enums())
         writeTypeIndexDefineLine(s, metaEnum->typeEntry(), idx);
 }
