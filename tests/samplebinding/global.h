@@ -35,4 +35,3 @@
 #include "sometime.h"
 #include "virtualmethods.h"
 #include "voidholder.h"
-

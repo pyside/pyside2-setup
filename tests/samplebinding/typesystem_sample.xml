@@ -97,6 +97,10 @@
         </modify-function>
     </namespace-type>
 
+    <value-type name="SampleNamespace::SomeClass" />
+    <value-type name="SampleNamespace::SomeClass::SomeInnerClass" />
+    <value-type name="SampleNamespace::SomeClass::SomeInnerClass::OkThisIsRecursiveEnough" />
+
     <object-type name="Abstract">
         <modify-function signature="id()" rename="id_"/>
     </object-type>
@@ -1059,7 +1063,6 @@
     <rejection class="ListUser" function-name="createComplexList(Complex, Complex)"/>
     <rejection class="ListUser" function-name="sumList(std::list&lt;int&gt;)"/>
     <rejection class="ListUser" function-name="sumList(std::list&lt;double&gt;)"/>
-
 
     <suppress-warning text="::*" />
     <suppress-warning text="horribly broken type '__off64_t'" />

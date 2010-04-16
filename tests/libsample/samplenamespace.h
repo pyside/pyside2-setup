@@ -68,6 +68,18 @@ LIBSAMPLE_API inline double powerOfTwo(double num) {
 
 LIBSAMPLE_API void doSomethingWithArray(const unsigned char* data, unsigned int size, const char* format = 0);
 
+class SomeClass
+{
+public:
+    class SomeInnerClass
+    {
+    public:
+        class OkThisIsRecursiveEnough
+        {
+        };
+    };
+};
+
 } // namespace SampleNamespace
 
 #endif // SAMPLENAMESPACE_H
