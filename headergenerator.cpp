@@ -24,6 +24,7 @@
 #include "headergenerator.h"
 #include <typedatabase.h>
 #include <reporthandler.h>
+#include <fileout.h>
 
 #include <QtCore/QDir>
 #include <QtCore/QTextStream>
@@ -147,8 +148,6 @@ void HeaderGenerator::writeTypeCheckMacro(QTextStream& s, const TypeEntry* type)
     QString checkFunction = cpythonCheckFunction(type);
     s << "#define " << checkFunction << "(op) PyObject_TypeCheck(op, (PyTypeObject*)";
     s << pyTypeName << ')' << endl;
-    s << "#define " << checkFunction << "Exact(op) ((op)->ob_type == (PyTypeObject*)";
-    s << pyTypeName << ')' << endl;
 }
 
 void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* type)
@@ -193,7 +192,7 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
     if (isAbstractOrObjectType) {
         s << endl << "template<>" << endl;
         s << "struct Converter<" << type->name() << "& > : ObjectTypeReferenceConverter<" << type->name() << " >" << endl << '{' << endl;
-        s << "};" << endl << endl;
+        s << "};" << endl;
     }
 }
 
@@ -233,8 +232,8 @@ void HeaderGenerator::finishGeneration()
     // This header should be included by binding modules
     // extendind on top of this one.
     QSet<Include> includes;
-    QString pythonTypeStuff;
-    QTextStream s_pts(&pythonTypeStuff);
+    QString macros;
+    QTextStream macrosStream(&macros);
     QString convertersDecl;
     QTextStream convDecl(&convertersDecl);
     QString sbkTypeFunctions;
@@ -244,28 +243,27 @@ void HeaderGenerator::finishGeneration()
 
     Indentation indent(INDENT);
 
-    s_pts << "// Type indices" << endl;
+    macrosStream << "// Type indices" << endl;
     int idx = 0;
     foreach (const AbstractMetaClass* metaClass, classes())
-        writeTypeIndexDefine(s_pts, metaClass, idx);
+        writeTypeIndexDefine(macrosStream, metaClass, idx);
     foreach (const AbstractMetaEnum* metaEnum, globalEnums())
-        writeTypeIndexDefineLine(s_pts, metaEnum->typeEntry(), idx);
-    s_pts << "#define ";
-    s_pts.setFieldWidth(60);
-    s_pts << "SBK_"+moduleName()+"_IDX_COUNT";
-    s_pts.setFieldWidth(0);
-    s_pts << ' ' << idx << endl << endl;
-    s_pts << "// This variable stores all python types exported by this module" << endl;
-    s_pts << "extern PyTypeObject** " << cppApiVariableName() << ';' << endl << endl;
+        writeTypeIndexDefineLine(macrosStream, metaEnum->typeEntry(), idx);
+    macrosStream << "#define ";
+    macrosStream.setFieldWidth(60);
+    macrosStream << "SBK_"+moduleName()+"_IDX_COUNT";
+    macrosStream.setFieldWidth(0);
+    macrosStream << ' ' << idx << endl << endl;
+    macrosStream << "// This variable stores all python types exported by this module" << endl;
+    macrosStream << "extern PyTypeObject** " << cppApiVariableName() << ';' << endl << endl;
 
-    s_pts << "// Useful macros" << endl;
+    macrosStream << "// Macros for type check" << endl;
     foreach (const AbstractMetaEnum* cppEnum, globalEnums()) {
         includes << cppEnum->typeEntry()->include();
-        writeTypeCheckMacro(s_pts, cppEnum->typeEntry());
+        writeTypeCheckMacro(macrosStream, cppEnum->typeEntry());
         FlagsTypeEntry* flags = cppEnum->typeEntry()->flags();
         if (flags)
-            writeTypeCheckMacro(s_pts, flags);
-        s_pts << endl;
+            writeTypeCheckMacro(macrosStream, flags);
         writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
         convDecl << endl;
         writeSbkTypeFunction(typeFunctions, cppEnum);
@@ -282,14 +280,13 @@ void HeaderGenerator::finishGeneration()
 
         foreach (const AbstractMetaEnum* cppEnum, metaClass->enums()) {
             includes << cppEnum->typeEntry()->include();
-            writeTypeCheckMacro(s_pts, cppEnum->typeEntry());
+            writeTypeCheckMacro(macrosStream, cppEnum->typeEntry());
             writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
             FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
             if (flagsEntry) {
-                writeTypeCheckMacro(s_pts, flagsEntry);
+                writeTypeCheckMacro(macrosStream, flagsEntry);
                 writeTypeConverterDecl(convDecl, flagsEntry);
             }
-            s_pts << endl;
             convDecl << endl;
             writeSbkTypeFunction(typeFunctions, cppEnum);
         }
@@ -302,14 +299,14 @@ void HeaderGenerator::finishGeneration()
                 if (shouldGenerate(innerClass)) {
                     includes << innerClass->typeEntry()->include();
                     writeSbkCopyCppObjectFunction(convDecl, innerClass);
-                    writeTypeCheckMacro(s_pts, innerClass->typeEntry());
+                    writeTypeCheckMacro(macrosStream, innerClass->typeEntry());
                     writeTypeConverterDecl(convDecl, innerClass->typeEntry());
                     writeTypeConverterImpl(convImpl, innerClass->typeEntry());
                     convDecl << endl;
                     writeSbkTypeFunction(typeFunctions, innerClass);
                 }
             }
-            writeTypeCheckMacro(s_pts, classType);
+            writeTypeCheckMacro(macrosStream, classType);
             writeTypeConverterDecl(convDecl, classType);
             writeTypeConverterImpl(convImpl, classType);
             convDecl << endl;
@@ -322,79 +319,73 @@ void HeaderGenerator::finishGeneration()
 
     QString includeShield("SBK_" + moduleName().toUpper() + "_PYTHON_H");
 
-    QFile file(moduleHeaderFileName);
-    if (file.open(QFile::WriteOnly)) {
-        QTextStream s(&file);
+    FileOut file(moduleHeaderFileName);
+    QTextStream& s = file.stream;
+    // write license comment
+    s << licenseComment() << endl << endl;
 
-        // write license comment
-        s << licenseComment() << endl << endl;
+    s << "#ifndef " << includeShield << endl;
+    s << "#define " << includeShield << endl<< endl;
+    #ifndef AVOID_PROTECTED_HACK
+    s << "//workaround to access protected functions" << endl;
+    s << "#define protected public" << endl << endl;
+    #endif
 
-        s << "#ifndef " << includeShield << endl;
-        s << "#define " << includeShield << endl<< endl;
-        #ifndef AVOID_PROTECTED_HACK
-        s << "//workaround to access protected functions" << endl;
-        s << "#define protected public" << endl << endl;
-        #endif
+    s << "#include <Python.h>" << endl;
+    s << "#include <conversions.h>" << endl;
+    s << "#include <pyenum.h>" << endl;
+    s << "#include <basewrapper.h>" << endl;
+    s << "#include <bindingmanager.h>" << endl;
+    s << "#include <memory>" << endl << endl;
+    writeExportMacros(s);
 
-        s << "#include <Python.h>" << endl;
-        s << "#include <conversions.h>" << endl;
-        s << "#include <pyenum.h>" << endl;
-        s << "#include <basewrapper.h>" << endl;
-        s << "#include <bindingmanager.h>" << endl << endl;
-
-        s << "#include <memory>" << endl << endl;
-        writeExportMacros(s);
-
-        QStringList requiredTargetImports = TypeDatabase::instance()->requiredTargetImports();
-        if (!requiredTargetImports.isEmpty()) {
-            s << "// Module Includes" << endl;
-            foreach (const QString& requiredModule, requiredTargetImports)
-                s << "#include <" << getModuleHeaderFileName(requiredModule) << ">" << endl;
-            s << endl;
-        }
-
-        s << "// Binded library includes" << endl;
-        foreach (const Include& include, includes)
-            s << include;
-
-        if (!primitiveTypes().isEmpty()) {
-            s << "// Conversion Includes - Primitive Types" << endl;
-            foreach (const PrimitiveTypeEntry* ptype, primitiveTypes())
-                s << ptype->include();
-            s << endl;
-        }
-
-        if (!containerTypes().isEmpty()) {
-            s << "// Conversion Includes - Container Types" << endl;
-            foreach (const ContainerTypeEntry* ctype, containerTypes())
-                s << ctype->include();
-            s << endl;
-        }
-
-        s << "extern \"C\"" << endl << '{' << endl << endl;
-        s << pythonTypeStuff << endl;
-        s << "} // extern \"C\"" << endl << endl;
-
-        s << "namespace Shiboken" << endl << '{' << endl << endl;
-
-        s << "// PyType functions, to get the PyObjectType for a type T\n";
-        s << sbkTypeFunctions << endl;
-        s << "// Generated converters declarations ----------------------------------" << endl << endl;
-        s << convertersDecl << endl;
-        s << "} // namespace Shiboken" << endl << endl;
-
-        s << "// User defined converters --------------------------------------------" << endl;
-        foreach (TypeEntry* typeEntry, TypeDatabase::instance()->entries()) {
-            if (typeEntry->hasConversionRule()) {
-                s << "// Conversion rule for: " << typeEntry->name() << endl;
-                s << typeEntry->conversionRule();
-            }
-        }
-        s << "// Generated converters implemantations -------------------------------" << endl << endl;
-        s << converterImpl << endl;
-
-        s << "#endif // " << includeShield << endl << endl;
+    QStringList requiredTargetImports = TypeDatabase::instance()->requiredTargetImports();
+    if (!requiredTargetImports.isEmpty()) {
+        s << "// Module Includes" << endl;
+        foreach (const QString& requiredModule, requiredTargetImports)
+            s << "#include <" << getModuleHeaderFileName(requiredModule) << ">" << endl;
+        s << endl;
     }
+
+    s << "// Binded library includes" << endl;
+    foreach (const Include& include, includes)
+        s << include;
+
+    if (!primitiveTypes().isEmpty()) {
+        s << "// Conversion Includes - Primitive Types" << endl;
+        foreach (const PrimitiveTypeEntry* ptype, primitiveTypes())
+            s << ptype->include();
+        s << endl;
+    }
+
+    if (!containerTypes().isEmpty()) {
+        s << "// Conversion Includes - Container Types" << endl;
+        foreach (const ContainerTypeEntry* ctype, containerTypes())
+            s << ctype->include();
+        s << endl;
+    }
+
+    s << macros << endl;
+
+    s << "namespace Shiboken" << endl << '{' << endl << endl;
+
+    s << "// PyType functions, to get the PyObjectType for a type T\n";
+    s << sbkTypeFunctions << endl;
+    s << "// Generated converters declarations ----------------------------------" << endl << endl;
+    s << convertersDecl;
+    s << "} // namespace Shiboken" << endl << endl;
+
+    s << "// User defined converters --------------------------------------------" << endl;
+    foreach (TypeEntry* typeEntry, TypeDatabase::instance()->entries()) {
+        if (typeEntry->hasConversionRule()) {
+            s << "// Conversion rule for: " << typeEntry->name() << endl;
+            s << typeEntry->conversionRule();
+        }
+    }
+    s << "// Generated converters implemantations -------------------------------" << endl << endl;
+    s << converterImpl << endl;
+
+    s << "#endif // " << includeShield << endl << endl;
 }
 
 
@@ -419,19 +410,19 @@ void HeaderGenerator::writeSbkTypeFunction(QTextStream& s, const AbstractMetaEnu
     QString enumPrefix;
     if (cppEnum->enclosingClass())
         enumPrefix = cppEnum->enclosingClass()->qualifiedCppName() + "::";
-    s <<  "template<>\ninline PyTypeObject* SbkType<" << enumPrefix << cppEnum->name() << " >() "
+    s <<  "template<> inline PyTypeObject* SbkType<" << enumPrefix << cppEnum->name() << " >() "
       << "{ return " << cpythonTypeNameExt(cppEnum->typeEntry()) << "; }\n";
 
     FlagsTypeEntry* flag = cppEnum->typeEntry()->flags();
     if (flag) {
-        s <<  "template<>\ninline PyTypeObject* SbkType<" << flag->name() << " >() "
+        s <<  "template<> inline PyTypeObject* SbkType<" << flag->name() << " >() "
           << "{ return " << cpythonTypeNameExt(flag) << "; }\n";
     }
 }
 
 void HeaderGenerator::writeSbkTypeFunction(QTextStream& s, const AbstractMetaClass* cppClass)
 {
-    s <<  "template<>\ninline PyTypeObject* SbkType<" << cppClass->qualifiedCppName() << " >() "
+    s <<  "template<> inline PyTypeObject* SbkType<" << cppClass->qualifiedCppName() << " >() "
       <<  "{ return reinterpret_cast<PyTypeObject*>(" << cpythonTypeNameExt(cppClass->typeEntry()) << "); }\n";
 }
 
