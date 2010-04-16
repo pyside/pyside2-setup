@@ -34,6 +34,7 @@ class TestClassesUnderNamespace(unittest.TestCase):
         c1 = SampleNamespace.SomeClass()
         c2 = SampleNamespace.SomeClass.SomeInnerClass()
         c3 = SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough()
+        e3 = SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum()
 
 if __name__ == '__main__':
     unittest.main()

@@ -76,6 +76,10 @@ public:
     public:
         class OkThisIsRecursiveEnough
         {
+        public:
+            enum NiceEnum {
+                NiceValue1, NiceValue2
+            };
         };
     };
 };

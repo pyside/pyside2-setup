@@ -100,6 +100,7 @@
     <value-type name="SampleNamespace::SomeClass" />
     <value-type name="SampleNamespace::SomeClass::SomeInnerClass" />
     <value-type name="SampleNamespace::SomeClass::SomeInnerClass::OkThisIsRecursiveEnough" />
+    <enum-type name="SampleNamespace::SomeClass::SomeInnerClass::OkThisIsRecursiveEnough::NiceEnum" />
 
     <object-type name="Abstract">
         <modify-function signature="id()" rename="id_"/>

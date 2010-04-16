@@ -2318,13 +2318,10 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
 {
     QString cpythonName = cpythonEnumName(cppEnum);
     QString addFunction;
-    if (cppEnum->enclosingClass()) {
-        addFunction = QString("PyDict_SetItemString(Sbk")
-                      + cppEnum->enclosingClass()->name()
-                      + "_Type.super.ht_type.tp_dict,";
-    } else {
+    if (cppEnum->enclosingClass())
+        addFunction = "PyDict_SetItemString(" + cpythonTypeName(cppEnum->enclosingClass()) + ".super.ht_type.tp_dict,";
+    else
         addFunction = "PyModule_AddObject(module,";
-    }
 
     s << INDENT << "// init enum class: " << cppEnum->name() << endl;
     s << INDENT << cpythonTypeNameExt(cppEnum->typeEntry()) << " = &" << cpythonTypeName(cppEnum->typeEntry()) << ';' << endl;
