@@ -124,7 +124,7 @@ void Graph::dumpDot(const QHash< int, QString >& nodeNames, const QString& fileN
     for (int i = 0; i < m_d->edges.size(); ++i) {
         GraphPrivate::EdgeIterator it = m_d->edges[i].begin();
         for (;it != m_d->edges[i].end(); ++it)
-            s << nodeNames[i] << " -> " << nodeNames[*it] << '\n';
+            s << '"' << nodeNames[i] << "\" -> \"" << nodeNames[*it] << "\"\n";
     }
     s << "}\n";
 }
