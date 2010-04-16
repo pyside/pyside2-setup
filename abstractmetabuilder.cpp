@@ -2668,34 +2668,11 @@ AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const Abstra
         if (clazz->isInterface() || !clazz->typeEntry()->generateCode())
             continue;
 
-        // check base class dep.
-        QString baseClassName(clazz->baseClassName());
-        if (!baseClassName.isNull() && baseClassName != clazz->name() && map.contains(baseClassName)) {
-            if (clazz->baseClass()->enclosingClass() &&
-                clazz->baseClass()->enclosingClass() != clazz->enclosingClass()) {
-                baseClassName = clazz->baseClass()->enclosingClass()->name();
-            }
-            graph.addEdge(map[baseClassName], map[clazz->name()]);
-        }
+        if (clazz->enclosingClass())
+            graph.addEdge(map[clazz->enclosingClass()->name()], map[clazz->name()]);
 
-        // interfaces...
-        foreach (AbstractMetaClass* interface, clazz->interfaces()) {
-            if (!interface->typeEntry()->generateCode())
-                continue;
-
-            if (interface->isInterface())
-                interface = interface->primaryInterfaceImplementor();
-
-            if (interface->enclosingClass() &&
-                interface->enclosingClass() != clazz->enclosingClass()) {
-                baseClassName = interface->enclosingClass()->name();
-            } else {
-                baseClassName = interface->name();
-            }
-
-            if (!baseClassName.isNull() && baseClassName != clazz->name() && map.contains(baseClassName))
-                graph.addEdge(map[baseClassName], map[clazz->name()]);
-        }
+        foreach(AbstractMetaClass* baseClass, getBaseClasses(clazz))
+            graph.addEdge(map[baseClass->name()], map[clazz->name()]);
 
         foreach (AbstractMetaFunction* func, clazz->functions()) {
             foreach (AbstractMetaArgument* arg, func->arguments()) {
