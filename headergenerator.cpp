@@ -270,19 +270,19 @@ void HeaderGenerator::finishGeneration()
     }
 
     foreach (AbstractMetaClass* metaClass, classes()) {
-        const TypeEntry* classType = metaClass->typeEntry();
-        if (!shouldGenerate(metaClass) || metaClass->enclosingClass() ||
-            !(classType->isObject() || classType->isValue() || classType->isNamespace()))
+        if (!shouldGenerate(metaClass))
             continue;
 
         //Includes
-        includes << metaClass->typeEntry()->include();
+        const TypeEntry* classType = metaClass->typeEntry();
+        includes << classType->include();
 
         foreach (const AbstractMetaEnum* cppEnum, metaClass->enums()) {
-            includes << cppEnum->typeEntry()->include();
-            writeTypeCheckMacro(macrosStream, cppEnum->typeEntry());
-            writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
-            FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
+            EnumTypeEntry* enumType = cppEnum->typeEntry();
+            includes << enumType->include();
+            writeTypeCheckMacro(macrosStream, enumType);
+            writeTypeConverterDecl(convDecl, enumType);
+            FlagsTypeEntry* flagsEntry = enumType->flags();
             if (flagsEntry) {
                 writeTypeCheckMacro(macrosStream, flagsEntry);
                 writeTypeConverterDecl(convDecl, flagsEntry);
@@ -294,18 +294,6 @@ void HeaderGenerator::finishGeneration()
         if (!metaClass->isNamespace()) {
             writeSbkTypeFunction(typeFunctions, metaClass);
             writeSbkCopyCppObjectFunction(convDecl, metaClass);
-
-            foreach (AbstractMetaClass* innerClass, metaClass->innerClasses()) {
-                if (shouldGenerate(innerClass)) {
-                    includes << innerClass->typeEntry()->include();
-                    writeSbkCopyCppObjectFunction(convDecl, innerClass);
-                    writeTypeCheckMacro(macrosStream, innerClass->typeEntry());
-                    writeTypeConverterDecl(convDecl, innerClass->typeEntry());
-                    writeTypeConverterImpl(convImpl, innerClass->typeEntry());
-                    convDecl << endl;
-                    writeSbkTypeFunction(typeFunctions, innerClass);
-                }
-            }
             writeTypeCheckMacro(macrosStream, classType);
             writeTypeConverterDecl(convDecl, classType);
             writeTypeConverterImpl(convImpl, classType);
