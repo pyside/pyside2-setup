@@ -31,10 +31,6 @@
 
 TypeDatabase::TypeDatabase() : m_suppressWarnings(true)
 {
-    StringTypeEntry*  e = new StringTypeEntry("QXmlStreamStringRef");
-    e->setPreferredConversion(false);
-    addType(e);
-
     addType(new VoidTypeEntry());
     addType(new VarargsTypeEntry());
 }
