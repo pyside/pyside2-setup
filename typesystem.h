@@ -1713,12 +1713,12 @@ public:
         m_signatures << signature;
     }
 
-    QStringList signatures()
+    QStringList signatures() const
     {
         return m_signatures;
     }
 
-    inline bool hasSignature(const QString& signature)
+    bool hasSignature(const QString& signature) const
     {
         return m_signatures.contains(signature);
     }
