@@ -380,6 +380,27 @@ bool AbstractMetaBuilder::build(QIODevice* input)
         addAbstractMetaClass(cls);
     }
 
+    // Global functions
+    foreach (FunctionModelItem func, m_dom->functions()) {
+        if (func->accessPolicy() != CodeModel::Public || func->name().startsWith("operator"))
+            continue;
+        FunctionTypeEntry* funcEntry = types->findFunctionType(func->name());
+        if (!funcEntry)
+            continue;
+
+        AbstractMetaFunction* metaFunc = traverseFunction(func);
+        if (!metaFunc)
+            continue;
+
+        if (!funcEntry->hasSignature(metaFunc->minimalSignature())) {
+            delete metaFunc;
+            continue;
+        }
+
+        setInclude(funcEntry, func->fileName());
+        m_globalFunctions << metaFunc;
+    }
+
     ReportHandler::setProgressReference(m_metaClasses);
     foreach (AbstractMetaClass *cls, m_metaClasses) {
         ReportHandler::progress("Fixing class inheritance...");
@@ -426,9 +447,22 @@ bool AbstractMetaBuilder::build(QIODevice* input)
             && !m_metaClasses.findClass(entry->qualifiedCppName())) {
             ReportHandler::warning(QString("type '%1' is specified in typesystem, but not defined. This could potentially lead to compilation errors.")
                                    .arg(entry->qualifiedCppName()));
-        }
-
-        if (entry->isEnum()) {
+        } else if (entry->type() == TypeEntry::FunctionType) {
+            const FunctionTypeEntry* fte = static_cast<const FunctionTypeEntry*>(entry);
+            foreach (QString signature, fte->signatures()) {
+                bool ok = false;
+                foreach (AbstractMetaFunction* func, m_globalFunctions) {
+                    if (signature == func->minimalSignature()) {
+                        ok = true;
+                        break;
+                    }
+                }
+                if (!ok) {
+                    ReportHandler::warning(QString("Global function '%1' is specified in typesystem, but not defined. This could potentially lead to compilation errors.")
+                    .arg(signature));
+                }
+            }
+        } else if (entry->isEnum()) {
             QString pkg = entry->targetLangPackage();
             QString name = (pkg.isEmpty() ? QString() : pkg + ".")
                            + ((EnumTypeEntry *) entry)->targetLangQualifier();
@@ -507,28 +541,6 @@ bool AbstractMetaBuilder::build(QIODevice* input)
     sortLists();
 
     m_currentClass = 0;
-
-    // Global functions
-    foreach (FunctionModelItem func, m_dom->functions()) {
-        if (func->accessPolicy() != CodeModel::Public || func->name().startsWith("operator"))
-            continue;
-
-        FunctionTypeEntry* funcEntry = types->findFunctionType(func->name());
-        if (!funcEntry)
-            continue;
-
-        AbstractMetaFunction* metaFunc = traverseFunction(func);
-        if (!metaFunc)
-            continue;
-
-        if (!funcEntry->hasSignature(metaFunc->minimalSignature())) {
-            delete metaFunc;
-            continue;
-        }
-
-        setInclude(funcEntry, func->fileName());
-        m_globalFunctions << metaFunc;
-    }
 
     // Functions added to the module on the type system.
     foreach (AddedFunction addedFunc, types->globalUserFunctions()) {
