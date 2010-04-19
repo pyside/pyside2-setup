@@ -45,6 +45,7 @@
 #include <QDir>
 
 #include <cstdio>
+#include <algorithm>
 #include "graph.h"
 
 static QString stripTemplateArgs(const QString &name)
@@ -334,7 +335,10 @@ bool AbstractMetaBuilder::build(QIODevice* input)
     fixQObjectForScope(types, model_dynamic_cast<NamespaceModelItem>(m_dom));
 
     // Start the generation...
-    QList<ClassModelItem > typeValues = typeMap.values();
+    ClassList typeValues = typeMap.values();
+    ClassList::iterator it = std::unique(typeValues.begin(), typeValues.end());
+    typeValues.erase(it, typeValues.end());
+
     ReportHandler::setProgressReference(typeValues);
     foreach (ClassModelItem item, typeValues) {
         ReportHandler::progress("Generating class model for %s", qPrintable(item->name()));

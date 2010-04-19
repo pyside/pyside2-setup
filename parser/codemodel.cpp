@@ -24,6 +24,7 @@
 
 
 #include "codemodel.h"
+#include <algorithm>
 
 // ---------------------------------------------------------------------------
 CodeModel::CodeModel()
@@ -371,7 +372,10 @@ FunctionModelItem _ScopeModelItem::declaredFunction(FunctionModelItem item)
 
 ClassList _ScopeModelItem::classes() const
 {
-    return _M_classes.values();
+    ClassList result = _M_classes.values();
+    ClassList::iterator it = std::unique(result.begin(), result.end());
+    result.erase(it, result.end());
+    return result;
 }
 
 TypeAliasList _ScopeModelItem::typeAliases() const
