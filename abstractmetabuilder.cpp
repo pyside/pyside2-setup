@@ -1624,6 +1624,14 @@ AbstractMetaFunction *AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
     }
 
     ArgumentList arguments = functionItem->arguments();
+
+    if (arguments.size() == 1) {
+        ArgumentModelItem arg = arguments.at(0);
+        TypeInfo type = arg->type();
+        if (type.qualifiedName().first() == "void" && type.indirections() == 0)
+            arguments.removeFirst();
+    }
+
     AbstractMetaArgumentList metaArguments;
 
     int firstDefaultArgument = 0;
