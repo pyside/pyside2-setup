@@ -587,16 +587,9 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::NativeCode, func, lastArg);
     }
 
-    // write ownership rules
-    TypeSystem::Ownership ownership = func->ownership(func->ownerClass(), TypeSystem::TargetLangCode, 0);
-    if (ownership == TypeSystem::CppOwnership) {
-        s << INDENT << "// Return value ownership transference" << endl;
-        s << INDENT << "SbkBaseWrapper_setOwnership("PYTHON_RETURN_VAR".object(), 0);" << endl;
-    } else
-        writeReturnValueHeuristics(s, func, "BindingManager::instance().retrieveWrapper(this)");
-
     if (type)
         s << INDENT << "return "CPP_RETURN_VAR";" << endl;
+
     s << '}' << endl << endl;
 }
 
@@ -1606,7 +1599,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::TargetLangCode, func, lastArg);
     }
 
-    writeParentChildManagement(s, func);
+    bool hasReturnPolicy = false;
 
     // Ownership transference between C++ and Python.
     QList<ArgumentModification> ownership_mods;
@@ -1630,6 +1623,9 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 s << "#error Invalid ownership modification for argument " << arg_mod.index << endl << endl;
                 break;
             }
+
+            if (arg_mod.index == 0)
+                hasReturnPolicy = true;
 
             // The default ownership does nothing. This is useful to avoid automatic heuristically
             // based generation of code defining parenting.
@@ -1665,6 +1661,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             s << func->minimalSignature() << arg_mod.index << "\", " << pyArgName << ");" << endl;
         }
     }
+    writeParentChildManagement(s, func, !hasReturnPolicy);
 }
 
 QStringList CppGenerator::getAncestorMultipleInheritance(const AbstractMetaClass* metaClass)
@@ -3067,58 +3064,78 @@ void CppGenerator::finishGeneration()
     }
 }
 
-void CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func)
+bool CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func, int argIndex, bool useHeuristicPolicy)
 {
     const int numArgs = func->arguments().count();
     const AbstractMetaClass* cppClass = func->ownerClass();
-    bool ctorHeuristicEnabled = func->isConstructor() && useCtorHeuristic();
+    const AbstractMetaClass* dClass = func->declaringClass();
+    bool ctorHeuristicEnabled = func->isConstructor() && useCtorHeuristic() && useHeuristicPolicy;
 
-    // -1   = return value
-    //  0    = self
-    //  1..n = func. args.
-    for (int i = -1; i <= numArgs; ++i) {
-        QString parentVariable;
-        QString childVariable;
-        ArgumentOwner argOwner = func->argumentOwner(cppClass, i);
-        bool usePyArgs = getMinMaxArguments(func).second > 1 || func->isConstructor();
+    QString parentVariable;
+    QString childVariable;
+    ArgumentOwner argOwner = func->argumentOwner(cppClass, argIndex);
 
-        ArgumentOwner::Action action = argOwner.action;
-        int parentIndex = argOwner.index;
-        int childIndex = i;
-        if (ctorHeuristicEnabled && i > 0 && numArgs) {
-            AbstractMetaArgument* arg = func->arguments().at(i-1);
-            if (arg->argumentName() == "parent" && (arg->type()->isObject() || arg->type()->isQObject())) {
-                action = ArgumentOwner::Add;
-                parentIndex = i;
-                childIndex = -1;
-            }
+    if (argOwner.index == -2)  //invalid
+        argOwner = func->argumentOwner(dClass, argIndex);
+
+    bool usePyArgs = getMinMaxArguments(func).second > 1 || func->isConstructor();
+
+    ArgumentOwner::Action action = argOwner.action;
+    int parentIndex = argOwner.index;
+    int childIndex = argIndex;
+    if (ctorHeuristicEnabled && argIndex > 0 && numArgs) {
+        AbstractMetaArgument* arg = func->arguments().at(argIndex-1);
+        if (arg->argumentName() == "parent" && (arg->type()->isObject() || arg->type()->isQObject())) {
+            action = ArgumentOwner::Add;
+            parentIndex = argIndex;
+            childIndex = -1;
         }
+    }
 
-        if (action != ArgumentOwner::Invalid) {
-            if (!usePyArgs && i > 1)
-                ReportHandler::warning("Argument index for parent tag out of bounds: "+func->signature());
+    if (action != ArgumentOwner::Invalid) {
+        if (!usePyArgs && argIndex > 1)
+            ReportHandler::warning("Argument index for parent tag out of bounds: "+func->signature());
 
+        if (action == ArgumentOwner::Remove) {
+            parentVariable = "Py_None";
+        } else {
             if (parentIndex == 0)
                 parentVariable = PYTHON_RETURN_VAR;
             else if (parentIndex == -1)
                 parentVariable = "self";
             else
                 parentVariable = usePyArgs ? "pyargs["+QString::number(parentIndex-1)+"]" : "arg";
-
-            if (argOwner.action == ArgumentOwner::Remove)
-                childVariable = "0";
-            else if (childIndex == 0)
-                childVariable = PYTHON_RETURN_VAR;
-            else if (childIndex == -1)
-                childVariable = "self";
-            else
-                childVariable = usePyArgs ? "pyargs["+QString::number(childIndex-1)+"]" : "arg";
-
-            s << INDENT << "Shiboken::setParent(" << parentVariable << ", " << childVariable << ");\n";
-
         }
+
+        if (childIndex == 0)
+            childVariable = PYTHON_RETURN_VAR;
+        else if (childIndex == -1)
+            childVariable = "self";
+        else
+            childVariable = usePyArgs ? "pyargs["+QString::number(childIndex-1)+"]" : "arg";
+
+        s << INDENT << "Shiboken::setParent(" << parentVariable << ", " << childVariable << ");\n";
+
+        return true;
     }
-    writeReturnValueHeuristics(s, func);
+
+    if (argIndex == 0 && useHeuristicPolicy)
+        writeReturnValueHeuristics(s, func);
+
+    return false;
+}
+
+void CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func, bool useHeuristicForReturn)
+{
+    const int numArgs = func->arguments().count();
+    s << INDENT << "//CppGenerator::writeParentChildManagement" << endl;
+
+    // -1   = return value
+    //  0    = self
+    //  1..n = func. args.
+    for (int i = -1; i <= numArgs; ++i)  {
+        writeParentChildManagement(s, func, i, i == 0 ? useHeuristicForReturn : true);
+    }
 }
 
 void CppGenerator::writeReturnValueHeuristics(QTextStream& s, const AbstractMetaFunction* func, const QString& self)
@@ -3126,7 +3143,6 @@ void CppGenerator::writeReturnValueHeuristics(QTextStream& s, const AbstractMeta
     AbstractMetaType *type = func->type();
     if (!useReturnValueHeuristic()
         || !func->ownerClass()
-        || func->ownership(func->ownerClass(), TypeSystem::TargetLangCode, 0) != TypeSystem::InvalidOwnership
         || !type
         || func->isStatic()
         || !func->typeReplaced(0).isEmpty()) {

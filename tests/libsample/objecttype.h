@@ -75,7 +75,7 @@ public:
     void killChild(const Str& name);
     void removeChild(ObjectType* child);
     ObjectType* takeChild(ObjectType* child);
-    ObjectType* takeChild(const Str& name);
+    virtual ObjectType* takeChild(const Str& name);
     ObjectType* findChild(const Str& name);
 
     Str objectName() const;

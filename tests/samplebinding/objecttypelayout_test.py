@@ -35,6 +35,17 @@ from sample import *
 class ObjectTypeLayoutTest(unittest.TestCase):
     '''Test cases for ObjectTypeLayout class.'''
 
+    def testOwnershipOverride(self):
+        l = ObjectTypeLayout()
+
+        o1 = ObjectType(l)
+        o1.setObjectName('o1')
+
+        self.assertEqual(sys.getrefcount(o1), 3)
+        l.takeChild('o1')
+        self.assertEqual(sys.getrefcount(o1), 2)
+
+
     def testSetNullLayout(self):
         '''ObjectType.setLayout(0).'''
         o2 = ObjectType()
@@ -280,7 +291,6 @@ class ObjectTypeLayoutTest(unittest.TestCase):
         self.assertRaises(RuntimeError, c4.objectName)
         self.assertRaises(RuntimeError, l1.objectName)
         self.assertRaises(RuntimeError, l2.objectName)
-
 
 if __name__ == '__main__':
     unittest.main()
