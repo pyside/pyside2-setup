@@ -60,8 +60,7 @@ rejection
     *optional* **function-name** or **field-name** attributes to reject a particular
     function or field. Note that the **field-name** and **function-name** cannot
     be specified at the same time. To remove all occurrences of a given field or
-    function, set the class attribute to \*. You can use an empty class field
-    to denote a global function.
+    function, set the class attribute to \*.
 
 .. _primitive-type:
 
@@ -254,4 +253,20 @@ container-type
     container. It can be: *list*, *string-list*, *linked-list*, *vector*, *stack*,
     *queue*, *set*, *map*, *multi-map*, *hash*, *multi-hash* or *pair*.
 
+.. _function:
 
+function
+^^^^^^^^
+
+    The function node indicates that the given C++ global function is mapped onto
+    the target language.
+
+    .. code-block:: xml
+
+        <typesystem>
+            <function signature="..." />
+        </typesystem>
+
+    This tag has some limitations, it doesn't support function modifications, besides you
+    can't add a function overload using :ref:`add-function` tag to an existent function.
+    These limitation will be addressed in future versions of ApiExtractor.
