@@ -2837,15 +2837,15 @@ void CppGenerator::finishGeneration()
     foreach (AbstractMetaFunctionList globalOverloads, getFunctionGroups().values()) {
         AbstractMetaFunctionList overloads;
         foreach (AbstractMetaFunction* func, globalOverloads) {
-            if (!func->isModifiedRemoved())
+            if (!func->isModifiedRemoved()) {
                 overloads.append(func);
+                if (func->typeEntry())
+                    includes << func->typeEntry()->include();
+            }
         }
 
         if (overloads.isEmpty())
             continue;
-
-        if (overloads.first()->typeEntry())
-            includes << overloads.first()->typeEntry()->include();
 
         writeMethodWrapper(s_globalFunctionImpl, overloads);
         writeMethodDefinition(s_globalFunctionDef, overloads);
