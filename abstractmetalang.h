@@ -1094,6 +1094,11 @@ public:
     {
         return m_typeEntry;
     }
+
+    void setTypeEntry(FunctionTypeEntry* typeEntry)
+    {
+        m_typeEntry = typeEntry;
+    }
 private:
     QString m_name;
     QString m_originalName;

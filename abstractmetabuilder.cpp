@@ -398,6 +398,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
         }
 
         setInclude(funcEntry, func->fileName());
+        metaFunc->setTypeEntry(funcEntry);
         m_globalFunctions << metaFunc;
     }
 
