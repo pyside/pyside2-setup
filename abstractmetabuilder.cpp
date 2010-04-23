@@ -803,55 +803,6 @@ void AbstractMetaBuilder::figureOutEnumValuesForClass(AbstractMetaClass *metaCla
             lst.at(i)->setValue(value);
             value++;
         }
-
-#ifndef APIEXTRACTOR_ENABLE_DUPLICATE_ENUM_VALUES
-        // Check for duplicate values...
-        EnumTypeEntry *ete = e->typeEntry();
-        if (!ete->forceInteger()) {
-            QHash<int, AbstractMetaEnumValue *> entries;
-            foreach (AbstractMetaEnumValue *v, lst) {
-
-                bool vRejected = ete->isEnumValueRejected(v->name());
-
-                AbstractMetaEnumValue *current = entries.value(v->value());
-                if (current) {
-                    bool currentRejected = ete->isEnumValueRejected(current->name());
-                    if (!currentRejected && !vRejected) {
-                        ReportHandler::warning(
-                            QString("duplicate enum values: %1::%2, %3 and %4 are %5, already rejected: (%6)")
-                            .arg(metaClass->name())
-                            .arg(e->name())
-                            .arg(v->name())
-                            .arg(entries[v->value()]->name())
-                            .arg(v->value())
-                            .arg(ete->enumValueRejections().join(", ")));
-                        continue;
-                    }
-                }
-
-                if (!vRejected)
-                    entries[v->value()] = v;
-            }
-
-            // Entries now contain all the original entries, no
-            // rejected ones... Use this to generate the enumValueRedirection table.
-            foreach (AbstractMetaEnumValue *reject, lst) {
-                if (!ete->isEnumValueRejected(reject->name()))
-                    continue;
-
-                AbstractMetaEnumValue *used = entries.value(reject->value());
-                if (!used) {
-                    ReportHandler::warning(
-                        QString::fromLatin1("Rejected enum has no alternative...: %1::%2\n")
-                        .arg(metaClass->name())
-                        .arg(reject->name()));
-                    continue;
-                }
-                ete->addEnumValueRedirection(reject->name(), used->name());
-            }
-
-        }
-#endif
     }
 
     *classes += metaClass;
