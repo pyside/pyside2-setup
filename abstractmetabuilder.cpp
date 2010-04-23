@@ -385,7 +385,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
         if (func->accessPolicy() != CodeModel::Public || func->name().startsWith("operator"))
             continue;
         FunctionTypeEntry* funcEntry = types->findFunctionType(func->name());
-        if (!funcEntry)
+        if (!funcEntry || !funcEntry->generateCode())
             continue;
 
         AbstractMetaFunction* metaFunc = traverseFunction(func);
@@ -448,7 +448,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
             && !m_metaClasses.findClass(entry->qualifiedCppName())) {
             ReportHandler::warning(QString("type '%1' is specified in typesystem, but not defined. This could potentially lead to compilation errors.")
                                    .arg(entry->qualifiedCppName()));
-        } else if (entry->type() == TypeEntry::FunctionType) {
+        } else if (entry->generateCode() && entry->type() == TypeEntry::FunctionType) {
             const FunctionTypeEntry* fte = static_cast<const FunctionTypeEntry*>(entry);
             foreach (QString signature, fte->signatures()) {
                 bool ok = false;

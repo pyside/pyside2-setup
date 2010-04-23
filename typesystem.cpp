@@ -629,6 +629,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 }
             } else {
                 element->entry = new FunctionTypeEntry(name, signature);
+                element->entry->setCodeGeneration(m_generate);
             }
         }
         break;
