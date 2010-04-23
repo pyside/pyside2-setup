@@ -1018,6 +1018,7 @@
 
     <value-type name="VoidHolder"/>
 
+    <object-type name="PrivateCtor" />
     <object-type name="PrivateDtor" />
 
     <object-type name="Base1"/>

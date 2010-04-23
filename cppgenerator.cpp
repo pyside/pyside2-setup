@@ -1813,6 +1813,8 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     QString cppClassName = metaClass->qualifiedCppName();
     QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
     QString baseClassName('0');
+    AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
+    bool onlyPrivCtor = !metaClass->hasNonPrivateConstructor();
 
     if (metaClass->hasArithmeticOperatorOverload()
         || metaClass->hasLogicalOperatorOverload()
@@ -1833,7 +1835,10 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
                      "Shiboken::deallocWrapperWithPrivateDtor" : "0";
         tp_init = "0";
     } else {
-        tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES";//|Py_TPFLAGS_HAVE_GC";
+        if (onlyPrivCtor)
+            tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES";
+        else
+            tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES";
 
         QString deallocClassName;
         if (shouldGenerateCppWrapper(metaClass))
@@ -1843,14 +1848,13 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         tp_dealloc = "&Shiboken::deallocWrapper";
         cpp_dtor = "&Shiboken::callCppDestructor<" + metaClass->qualifiedCppName() + " >";
 
-        AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
-        tp_init = ctors.isEmpty() ? "0" : cpythonFunctionName(ctors.first());
+        tp_init = onlyPrivCtor ? "0" : cpythonFunctionName(ctors.first());
     }
 
     if (classNeedsGetattroFunction(metaClass))
         tp_getattro = cpythonGetattroFunctionName(metaClass);
 
-    if (metaClass->hasPrivateDestructor())
+    if (metaClass->hasPrivateDestructor() || onlyPrivCtor)
         tp_new = "0";
     else
         tp_new = "Shiboken::SbkBaseWrapper_TpNew";
