@@ -1588,6 +1588,7 @@ void AbstractMetaClass::addDefaultConstructor()
     f->setOriginalAttributes(f->attributes());
 
     addFunction(f);
+    this->setHasNonPrivateConstructor(true);
 }
 
 void AbstractMetaClass::addDefaultCopyConstructor(bool isPrivate)
