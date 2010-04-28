@@ -1827,17 +1827,7 @@ AbstractMetaType *AbstractMetaBuilder::translateType(const TypeInfo &_typei, boo
         TypeInfo info = typei;
         bool subclassesDone = false;
         while (!contexts.isEmpty() && !type) {
-            //type = TypeDatabase::instance()->findType(contexts.at(0) + "::" + qualified_name);
-
-            bool ok;
-            info.setQualifiedName(QStringList() << contexts.at(0) << qualifiedName);
-            AbstractMetaType *t = translateType(info, &ok, true, false);
-            if (t && ok)
-                return t;
-
-            ClassModelItem item = m_dom->findClass(contexts.at(0));
-            if (item)
-                contexts += item->baseClasses();
+            type = TypeDatabase::instance()->findType(contexts.at(0) + "::" + qualifiedName);
             contexts.pop_front();
 
             // 10. Last resort: Special cased prefix of Qt namespace since the meta object implicitly inherits this, so
@@ -1869,45 +1859,22 @@ AbstractMetaType *AbstractMetaBuilder::translateType(const TypeInfo &_typei, boo
     metaType->setOriginalTypeDescription(_typei.toString());
     decideUsagePattern(metaType);
 
-    if (metaType->typeEntry()->isContainer()) {
-        ContainerTypeEntry::Type container_type = static_cast<const ContainerTypeEntry *>(type)->type();
+    foreach (const TypeParser::Info &ta, typeInfo.template_instantiations) {
+        TypeInfo info;
+        info.setConstant(ta.is_constant);
+        info.setReference(ta.is_reference);
+        info.setIndirections(ta.indirections);
 
-        if (container_type == ContainerTypeEntry::StringListContainer) {
-            TypeInfo info;
-            info.setQualifiedName(QStringList() << "QString");
-            AbstractMetaType *targType = translateType(info, ok);
+        info.setFunctionPointer(false);
+        info.setQualifiedName(ta.instantiationName().split("::"));
 
-            Q_ASSERT(*ok);
-            Q_ASSERT(targType);
-
-            metaType->addInstantiation(targType);
-            metaType->setInstantiationInCpp(false);
-
-        } else {
-            foreach (const TypeParser::Info &ta, typeInfo.template_instantiations) {
-                TypeInfo info;
-                info.setConstant(ta.is_constant);
-                info.setReference(ta.is_reference);
-                info.setIndirections(ta.indirections);
-
-                info.setFunctionPointer(false);
-                info.setQualifiedName(ta.instantiationName().split("::"));
-
-                AbstractMetaType *targType = translateType(info, ok);
-                if (!(*ok)) {
-                    delete metaType;
-                    return 0;
-                }
-
-                metaType->addInstantiation(targType);
-            }
+        AbstractMetaType *targType = translateType(info, ok);
+        if (!(*ok)) {
+            delete metaType;
+            return 0;
         }
 
-        if (container_type == ContainerTypeEntry::ListContainer
-            || container_type == ContainerTypeEntry::VectorContainer
-            || container_type == ContainerTypeEntry::StringListContainer) {
-            Q_ASSERT(metaType->instantiations().size() == 1);
-        }
+        metaType->addInstantiation(targType);
     }
 
     return metaType;
@@ -2199,7 +2166,24 @@ bool AbstractMetaBuilder::inheritTemplate(AbstractMetaClass *subclass,
 
     QList<AbstractMetaType *> templateTypes;
     foreach (const TypeParser::Info &i, targs) {
-        TypeEntry *t = TypeDatabase::instance()->findType(i.qualified_name.join("::"));
+        QString typeName = i.qualified_name.join("::");
+        QStringList possibleNames;
+        possibleNames << subclass->qualifiedCppName() + "::" + typeName;
+        possibleNames << templateClass->qualifiedCppName() + "::" + typeName;
+        if (subclass->enclosingClass())
+            possibleNames << subclass->enclosingClass()->qualifiedCppName() + "::" + typeName;
+        possibleNames << typeName;
+
+        TypeDatabase* typeDb = TypeDatabase::instance();
+        TypeEntry* t;
+        QString templateParamName;
+        foreach (QString possibleName, possibleNames) {
+            t = typeDb->findType(possibleName);
+            if (t) {
+                QString templateParamName = possibleName;
+                break;
+            }
+        }
 
         if (t) {
             AbstractMetaType *temporaryType = createMetaType();
@@ -2208,6 +2192,8 @@ bool AbstractMetaBuilder::inheritTemplate(AbstractMetaClass *subclass,
             temporaryType->setReference(i.is_reference);
             temporaryType->setIndirections(i.indirections);
             templateTypes << temporaryType;
+        } else {
+            ReportHandler::warning("Ignoring template parameter "+templateParamName+" from "+info.instantiationName()+", because I dont known what's it.");
         }
     }
 
