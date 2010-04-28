@@ -2657,7 +2657,7 @@ AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const Abstra
         if (clazz->isInterface() || !clazz->typeEntry()->generateCode())
             continue;
 
-        if (clazz->enclosingClass())
+        if (clazz->enclosingClass() && map.contains(clazz->enclosingClass()->name()))
             graph.addEdge(map[clazz->enclosingClass()->name()], map[clazz->name()]);
 
         foreach(AbstractMetaClass* baseClass, getBaseClasses(clazz))
