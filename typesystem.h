@@ -569,6 +569,7 @@ public:
         VarargsType,
         FlagsType,
         EnumType,
+        EnumValue,
         TemplateArgumentType,
         ThreadType,
         BasicValueType,
@@ -687,6 +688,14 @@ public:
     bool isTypeSystem() const
     {
         return m_type == TypeSystemType;
+    }
+    bool isFunction() const
+    {
+        return m_type == FunctionType;
+    }
+    bool isEnumValue() const
+    {
+        return m_type == EnumValue;
     }
 
     virtual bool preferredConversion() const
@@ -1209,6 +1218,21 @@ private:
 
     bool m_extensible;
     bool m_forceInteger;
+};
+
+class APIEXTRACTOR_API EnumValueTypeEntry : public TypeEntry
+{
+public:
+    EnumValueTypeEntry(const QString& name, const QString& value, const EnumTypeEntry* enclosingEnum)
+        : TypeEntry(name, TypeEntry::EnumValue), m_value(value), m_enclosingEnum(enclosingEnum)
+    {
+    }
+
+    QString value() const { return m_value; }
+    const EnumTypeEntry* enclosingEnum() const { return m_enclosingEnum; }
+private:
+    QString m_value;
+    const EnumTypeEntry* m_enclosingEnum;
 };
 
 class APIEXTRACTOR_API FlagsTypeEntry : public TypeEntry

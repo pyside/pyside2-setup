@@ -909,6 +909,19 @@ AbstractMetaEnum *AbstractMetaBuilder::traverseEnum(EnumModelItem enumItem, Abst
 
     metaEnum->setOriginalAttributes(metaEnum->attributes());
 
+    // Register all enum values on Type database
+    TypeDatabase* typeDb = TypeDatabase::instance();
+    foreach(EnumeratorModelItem e, enumItem->enumerators()) {
+        QString name;
+        if (enclosing) {
+            name += enclosing->name();
+            name += "::";
+        }
+        name += e->name();
+        EnumValueTypeEntry* enumValue = new EnumValueTypeEntry(name, e->value(), static_cast<EnumTypeEntry*>(typeEntry));
+        typeDb->addType(enumValue);
+    }
+
     return metaEnum;
 }
 
