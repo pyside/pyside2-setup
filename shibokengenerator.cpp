@@ -158,17 +158,10 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType*
     QString result;
     const TypeEntry* tentry = cType->typeEntry();
 
-    if (tentry->isValue() || tentry->isObject() || (cType->isReference() && !cType->isContainer())) {
-        result = tentry->qualifiedCppName();
-        if (cType->isReference())
-            result.append('&');
-        else if (tentry->isObject() || cType->isValuePointer())
-            result.append('*');
-    } else if (cType->isArray()) {
+    if (cType->isArray())
         result = translateTypeForWrapperMethod(cType->arrayElementType(), context) + "[]";
-    } else {
+    else
         result = translateType(cType, context);
-    }
 
     return result;
 }
