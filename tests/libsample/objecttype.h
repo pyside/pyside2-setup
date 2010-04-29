@@ -97,6 +97,9 @@ public:
     // This method should be reimplemented by ObjectTypeLayout.
     virtual bool isLayoutType() { return false; }
 
+    unsigned char callWithEnum(const Str& prefix, Event::EventType type, unsigned char value=80);
+    unsigned char callWithEnum(const Str& prefix, unsigned char value=0);
+
 private:
     ObjectType(const ObjectType&);
     ObjectType& operator=(const ObjectType&);

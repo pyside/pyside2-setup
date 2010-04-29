@@ -28,7 +28,7 @@
 
 import unittest
 
-from sample import SampleNamespace
+from sample import SampleNamespace, ObjectType, Event
 
 class EnumTest(unittest.TestCase):
     '''Test case for Python representation of C++ enums.'''
@@ -65,6 +65,18 @@ class EnumTest(unittest.TestCase):
     def testEnumConstructorWithNonNumberParameter(self):
         '''Calling the constructor of non-extensible enum with a string.'''
         self.assertRaises(TypeError, SampleNamespace.InValue, '1')
+
+
+class EnumOverloadTest(unittest.TestCase):
+    '''Test case for overloads involving enums'''
+
+    def testWithInt(self):
+        '''Overload with Enums and ints with default value'''
+        o = ObjectType()
+
+        self.assertEqual(o.callWithEnum('', Event.ANY_EVENT, 9), 81)
+        self.assertEqual(o.callWithEnum('', 9), 9)
+
 
 if __name__ == '__main__':
     unittest.main()

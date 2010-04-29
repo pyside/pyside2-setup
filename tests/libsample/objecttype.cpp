@@ -226,3 +226,10 @@ unsigned int objectTypeHash(const ObjectType* objectType)
     return reinterpret_cast<std::size_t>(objectType);
 }
 
+unsigned char ObjectType::callWithEnum(const Str& prefix, Event::EventType type, unsigned char value){
+    return value*value;
+}
+
+unsigned char ObjectType::callWithEnum(const Str& prefix, unsigned char value) {
+    return value;
+}
