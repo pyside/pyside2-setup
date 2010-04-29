@@ -1656,13 +1656,14 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 QStringList CppGenerator::getAncestorMultipleInheritance(const AbstractMetaClass* metaClass)
 {
     QStringList result;
-    if (!metaClass->baseClassNames().isEmpty()) {
-        foreach (QString base, metaClass->baseClassNames()) {
-            result.append(QString("((size_t) static_cast<const %1*>(class_ptr)) - base").arg(base));
-            result.append(QString("((size_t) static_cast<const %1*>((%2*)((void*)class_ptr))) - base").arg(base).arg(metaClass->name()));
+    AbstractMetaClassList baseClases = getBaseClasses(metaClass);
+    if (!baseClases.isEmpty()) {
+        foreach (const AbstractMetaClass* baseClass, baseClases) {
+            result.append(QString("((size_t) static_cast<const %1*>(class_ptr)) - base").arg(baseClass->qualifiedCppName()));
+            result.append(QString("((size_t) static_cast<const %1*>((%2*)((void*)class_ptr))) - base").arg(baseClass->qualifiedCppName()).arg(metaClass->qualifiedCppName()));
         }
-        foreach (const AbstractMetaClass* pClass, getBaseClasses(metaClass))
-            result.append(getAncestorMultipleInheritance(pClass));
+        foreach (const AbstractMetaClass* baseClass, baseClases)
+            result.append(getAncestorMultipleInheritance(baseClass));
     }
     return result;
 }
