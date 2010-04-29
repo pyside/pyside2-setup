@@ -278,7 +278,7 @@ public:
     QString cpythonSpecialCastFunctionName(const AbstractMetaClass* metaClass);
 
     QString getFunctionReturnType(const AbstractMetaFunction* func, Options options = NoOption) const;
-    QString getFormatUnitString(const AbstractMetaFunction* func) const;
+    QString getFormatUnitString(const AbstractMetaFunction* func, bool incRef = false) const;
 
     /// Returns the name of the macro used to export symbols
     QString getApiExportMacro() const;

@@ -368,15 +368,16 @@ void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaT
     s << "toCpp(" << argumentName << ')';
 }
 
-QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func) const
+QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func, bool incRef) const
 {
     QString result;
+    const char objType = (incRef ? 'O' : 'S');
     foreach (const AbstractMetaArgument* arg, func->arguments()) {
         if (func->argumentRemoved(arg->argumentIndex() + 1))
             continue;
 
         if (!func->typeReplaced(arg->argumentIndex() + 1).isEmpty()) {
-            result += 'O';
+            result += objType;
         } else if (arg->type()->isQObject()
             || arg->type()->isObject()
             || arg->type()->isValue()
@@ -384,7 +385,7 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func)
             || arg->type()->isEnum()
             || arg->type()->isFlags()
             || arg->type()->isReference()) {
-            result += 'O';
+            result += objType;
         } else if (arg->type()->isPrimitive()) {
             const PrimitiveTypeEntry* ptype = (const PrimitiveTypeEntry*) arg->type()->typeEntry();
             if (ptype->basicAliasedTypeEntry())
@@ -392,7 +393,7 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func)
             if (m_formatUnits.contains(ptype->name()))
                 result += m_formatUnits[ptype->name()];
             else
-                result += 'O';
+                result += objType;
         } else if (isCString(arg->type())) {
             result += 'z';
         } else {
