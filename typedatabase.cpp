@@ -240,7 +240,19 @@ bool TypeDatabase::isFieldRejected(const QString& className, const QString& fiel
 FlagsTypeEntry* TypeDatabase::findFlagsType(const QString &name) const
 {
     FlagsTypeEntry* fte = (FlagsTypeEntry*) findType(name);
-    return fte ? fte : (FlagsTypeEntry*) m_flagsEntries.value(name);
+    if (!fte) {
+        fte = (FlagsTypeEntry*) m_flagsEntries.value(name);
+        if (!fte) {
+            //last hope, search for flag without scope  inside of flags hash
+            foreach(QString key, m_flagsEntries.keys()) {
+                if (key.endsWith(name)) {
+                    fte = (FlagsTypeEntry*) m_flagsEntries.value(key);
+                    break;
+                }
+            }
+        }
+    }
+    return fte;
 }
 
 AddedFunctionList TypeDatabase::findGlobalUserFunctions(const QString& name) const
