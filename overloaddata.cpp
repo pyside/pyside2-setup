@@ -80,11 +80,27 @@ void OverloadData::sortNextOverloads()
 
     // Create the graph of type dependencies based on implicit conversions.
     Graph graph(reverseMap.count());
-    bool haveInt = map.contains("int");
-    bool haveUInt = map.contains("unsigned int");
-    bool haveLong = map.contains("long");
-    bool haveULong = map.contains("unsigned long");
-    bool haveBool = map.contains("bool");
+    // All C++ primitive types, add any forgotten type AT THE END OF THIS LIST!
+    const char* primitiveTypes[] = {"int",
+                                    "unsigned int",
+                                    "long",
+                                    "unsigned long",
+                                    "short",
+                                    "unsigned short",
+                                    "bool",
+                                    "unsigned char",
+                                    "char",
+                                    "float",
+                                    "double"
+                                    };
+    const int numPrimitives = sizeof(primitiveTypes)/sizeof(const char*);
+    bool hasPrimitive[numPrimitives];
+    for (int i = 0; i < numPrimitives; ++i)
+        hasPrimitive[i] = map.contains(primitiveTypes[i]);
+    // just some alias
+    bool haveInt = hasPrimitive[0];
+    bool haveLong = hasPrimitive[2];
+    bool haveShort = hasPrimitive[4];
 
     foreach(OverloadData* ov, m_nextOverloadData) {
         const AbstractMetaType* targetType = ov->argType();
@@ -127,16 +143,10 @@ void OverloadData::sortNextOverloads()
         }
 
         if (targetTypeEntry->isEnum()) {
-            if (haveInt)
-                graph.addEdge(map[targetTypeEntry->name()], map["int"]);
-            if (haveUInt)
-                graph.addEdge(map[targetTypeEntry->name()], map["unsigned int"]);
-            if (haveLong)
-                graph.addEdge(map[targetTypeEntry->name()], map["long"]);
-            if (haveULong)
-                graph.addEdge(map[targetTypeEntry->name()], map["unsigned long"]);
-            if (haveBool)
-                graph.addEdge(map[targetTypeEntry->name()], map["bool"]);
+            for (int i = 0; i < numPrimitives; ++i) {
+                if (hasPrimitive[i])
+                    graph.addEdge(map[targetTypeEntry->name()], map[primitiveTypes[i]]);
+            }
         }
     }
 
@@ -148,6 +158,15 @@ void OverloadData::sortNextOverloads()
             graph.addEdge(map["double"], map["int"]);
         if (map.contains("bool"))
             graph.addEdge(map["bool"], map["int"]);
+    }
+
+    if (haveShort) {
+        if (map.contains("float"))
+            graph.addEdge(map["float"], map["short"]);
+        if (map.contains("double"))
+            graph.addEdge(map["double"], map["short"]);
+        if (map.contains("bool"))
+            graph.addEdge(map["bool"], map["short"]);
     }
 
     if (haveLong) {
