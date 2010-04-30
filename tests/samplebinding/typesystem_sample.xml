@@ -95,6 +95,11 @@
                 </conversion-rule>
             </modify-argument>
         </modify-function>
+        <add-function signature="ImInsideANamespace(int, int)" return-type="int">
+            <inject-code class="target">
+                %PYARG_0 = %CONVERTTOPYTHON[int](%1 + %2);
+            </inject-code>
+        </add-function>
     </namespace-type>
 
     <value-type name="SampleNamespace::SomeClass" />
