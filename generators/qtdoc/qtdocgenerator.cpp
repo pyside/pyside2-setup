@@ -769,7 +769,7 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
         s << INDENT << '+';
         for (int col = 0, max = colWidths.count(); col < max; ++col) {
             char c;
-            if (row[col].rowSpan == -1)
+            if (col >= row.length() || row[col].rowSpan == -1)
                 c = ' ';
             else if (i == 1 && table.hasHeader())
                 c = '=';
