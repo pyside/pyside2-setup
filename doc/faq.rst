@@ -11,11 +11,17 @@ General
 What is Shiboken?
 -----------------
 
-Shiboken is a GeneratorRunner plugin that outputs C++ code for CPython extensions.
+Shiboken is a `GeneratorRunner <http://www.pyside.org/home-binding/binding-generator>`_
+plugin that outputs C++ code for CPython extensions. The first version of PySide
+had source code based on Boost templates. It was easier to produce code but a
+paradigm change was needed, as the next question explains.
 
-Here the name generator refers actually to a program composed of a set of
-*generator classes* that output different resources based on information
-contained inside C++ header files.
+Why did you switch from Boost.Python to Shiboken?
+-------------------------------------------------
+
+The main reason was the size reduction. Boost.Python makes excessive use of templates
+resulting in a significant increase of the binaries size. On the other hand, as Shiboken
+generates CPython code, the resulting binaries are smaller.
 
 Creating bindings
 =================
@@ -38,10 +44,10 @@ What do I have to do to create my bindings?
 .. todo: put link to typesystem documentation
 
 Most of the work is already done by the API Extractor. The developer creates
-a typesystem file with any customization wanted in the generated code, like
-removing classes or changing method signatures. The generator will output
-the .h and .cpp files with the CPython code that will wrap the target
-library for python.
+a `typesystem <http://www.pyside.org/docs/apiextractor/typesystem.html>`_ file
+with any customization wanted in the generated code, like removing classes or
+changing method signatures. The generator will output the .h and .cpp files
+with the CPython code that will wrap the target library for python.
 
 Is there any recommended build system?
 --------------------------------------

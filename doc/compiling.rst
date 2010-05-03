@@ -18,5 +18,5 @@ Building and installing
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 To build and install just follow the generic cmake instructions in
-section cmake-primer.
+section `cmake-primer <http://www.pyside.org/docs/pyside/howto-build/cmake-primer.html>`_.
 
