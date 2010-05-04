@@ -6,6 +6,7 @@ set(libshiboken_MAJOR_VERSION ${shiboken_MAJOR_VERSION})
 set(libshiboken_MINOR_VERSION ${shiboken_MINOR_VERSION})
 set(libshiboken_MICRO_VERSION ${shiboken_MICRO_VERSION})
 set(libshiboken_VERSION "${libshiboken_MAJOR_VERSION}.${libshiboken_MINOR_VERSION}.${libshiboken_MICRO_VERSION}")
+set(libshiboken_SOVERSION "${libshiboken_MAJOR_VERSION}.${libshiboken_MINOR_VERSION}")
 
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ShibokenConfig.cmake.in"
@@ -30,7 +31,7 @@ add_library(libshiboken SHARED ${libshiboken_SRC})
 set_property(TARGET libshiboken PROPERTY PREFIX "")
 target_link_libraries(libshiboken
                       ${PYTHON_LIBRARIES})
-set_target_properties(libshiboken PROPERTIES VERSION ${libshiboken_VERSION} SOVERSION ${libshiboken_MAJOR_VERSION})
+set_target_properties(libshiboken PROPERTIES VERSION ${libshiboken_VERSION} SOVERSION ${libshiboken_SOVERSION})
 
 install(FILES
         autodecref.h
