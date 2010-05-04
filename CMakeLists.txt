@@ -22,6 +22,7 @@ set(generator_MAJOR_VERSION "0")
 set(generator_MINOR_VERSION "4")
 set(generator_MICRO_VERSION "2")
 set(generator_VERSION "${generator_MAJOR_VERSION}.${generator_MINOR_VERSION}.${generator_MICRO_VERSION}")
+set(generator_SOVERSION "${generator_MAJOR_VERSION}.${generator_MINOR_VERSION}")
 
 set(generator_plugin_DIR ${LIB_INSTALL_DIR}/generatorrunner)
 
@@ -40,6 +41,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 add_library(genrunner SHARED generator.cpp)
 set_target_properties(genrunner PROPERTIES VERSION ${generator_VERSION})
 target_link_libraries(genrunner ${QT_QTCORE_LIBRARY} ${APIEXTRACTOR_LIBRARY})
+set_target_properties(genrunner PROPERTIES VERSION ${generator_VERSION} SOVERSION ${generator_SOVERSION})
 
 add_executable(generatorrunner main.cpp)
 target_link_libraries(generatorrunner
