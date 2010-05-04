@@ -23,6 +23,7 @@ set(apiextractor_MINOR_VERSION 5)
 set(apiextractor_MICRO_VERSION 1)
 set(apiextractor_VERSION "${apiextractor_MAJOR_VERSION}.${apiextractor_MINOR_VERSION}.${apiextractor_MICRO_VERSION}")
 configure_file(apiextractorversion.h.in ${CMAKE_CURRENT_BINARY_DIR}/apiextractorversion.h @ONLY)
+set(apiextractor_SOVERSION ${apiextractor_MAJOR_VERSION}.${apiextractor_MINOR_VERSION})
 set(QT_USE_QTCORE 1)
 set(QT_USE_QTXML 1)
 include(${QT_USE_FILE})
@@ -84,7 +85,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 
 add_library(apiextractor SHARED ${apiextractor_SRC} ${apiextractor_RCCS_SRC})
 target_link_libraries(apiextractor ${LIBXSLT_LIBRARIES} ${LIBXML2_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTXMLPATTERNS_LIBRARY} ${QT_QTXML_LIBRARY})
-set_target_properties(apiextractor PROPERTIES VERSION ${apiextractor_VERSION} SOVERSION ${apiextractor_MAJOR_VERSION})
+set_target_properties(apiextractor PROPERTIES VERSION ${apiextractor_VERSION} SOVERSION ${apiextractor_SOVERSION})
 
 # create pkg-config file
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/apiextractor.pc.in"
