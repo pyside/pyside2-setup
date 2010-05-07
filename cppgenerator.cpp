@@ -2747,10 +2747,12 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     if (!metaClass->isNamespace()) {
         bool isObjectType = metaClass->typeEntry()->isObject();
         QString typeName = metaClass->qualifiedCppName();
-        QString registeredTypeName = typeName + (isObjectType ? "*" : "");
-        QString functionSufix = isObjectType ? "Object" : "Value";
-        s << INDENT << "Shiboken::TypeResolver::create" << functionSufix;
-        s << "TypeResolver<" << typeName << " >" << "(\"" << registeredTypeName << "\");\n";
+        if (!isObjectType)
+            s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<" << typeName << " >" << "(\"" << typeName << "\");\n";
+
+        s << INDENT << "Shiboken::TypeResolver::createObjectTypeResolver<" << typeName << " >" << "(\"" << typeName << "*\");\n";
+
+        QString functionSufix = (isObjectType ? "Object" : "Value");
         s << INDENT << "Shiboken::TypeResolver::create" << functionSufix;
         s << "TypeResolver<" << typeName << " >" << "(typeid(" << typeName << ").name());\n";
     }
