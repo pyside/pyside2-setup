@@ -69,7 +69,7 @@ public:
         return m_type == other.m_type && m_name == other.m_name;
     }
 
-    friend uint qHash(const Include&);
+    friend APIEXTRACTOR_API uint qHash(const Include&);
     private:
         IncludeType m_type;
         QString m_name;
