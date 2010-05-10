@@ -68,6 +68,9 @@ typedef std::list<TypeDiscoveryFunc> TypeDiscoveryFuncList;
 typedef void* (*ExtendedToCppFunc)(PyObject*);
 typedef bool (*ExtendedIsConvertibleFunc)(PyObject*);
 
+// Used in userdata dealloc function
+typedef void (*DeleteUserDataFunc)(void*);
+
 LIBSHIBOKEN_API PyAPI_DATA(PyTypeObject) SbkBaseWrapperType_Type;
 LIBSHIBOKEN_API PyAPI_DATA(SbkBaseWrapperType) SbkBaseWrapper_Type;
 
@@ -99,6 +102,9 @@ struct LIBSHIBOKEN_API SbkBaseWrapperType
     int is_multicpp:1;
     /// True if this type was definied by the user.
     int is_user_type:1;
+    /// Type user data
+    void *user_data;
+    DeleteUserDataFunc d_func;
 };
 
 struct ParentInfo;
@@ -177,6 +183,13 @@ LIBSHIBOKEN_API void* getCppPointer(PyObject* wrapper, PyTypeObject* desiredType
 *   Set the C++ pointer of type \p desiredType of a Python object.
 */
 LIBSHIBOKEN_API bool setCppPointer(SbkBaseWrapper* wrapper, PyTypeObject* desiredType, void* cptr);
+
+/**
+ *   Get/Set Userdata in type class
+ */
+LIBSHIBOKEN_API void setTypeUserData(SbkBaseWrapper* wrapper, void* user_data, DeleteUserDataFunc d_func);
+LIBSHIBOKEN_API void* getTypeUserData(SbkBaseWrapper* wrapper);
+
 
 /**
  * Shiboken_TypeCheck macro performs a type check using the values registered with SbkType<>() template.

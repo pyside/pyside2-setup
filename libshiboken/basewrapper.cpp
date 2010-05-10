@@ -220,6 +220,21 @@ bool cppObjectIsInvalid(PyObject* wrapper)
     return true;
 }
 
+void setTypeUserData(SbkBaseWrapper* wrapper, void *user_data, DeleteUserDataFunc d_func)
+{
+    SbkBaseWrapperType* ob_type = reinterpret_cast<SbkBaseWrapperType*>(wrapper->ob_type);
+    if (ob_type->user_data)
+        ob_type->d_func(ob_type->user_data);
+
+    ob_type->d_func = d_func;
+    ob_type->user_data = user_data;
+}
+
+void* getTypeUserData(SbkBaseWrapper* wrapper)
+{
+    return reinterpret_cast<SbkBaseWrapperType*>(wrapper->ob_type)->user_data;
+}
+
 void deallocWrapperWithPrivateDtor(PyObject* self)
 {
     if (((SbkBaseWrapper *)self)->weakreflist)
@@ -303,7 +318,9 @@ static void deallocPythonTypes(PyObject* pyObj)
 
     delete[] sbkObj->cptr;
     sbkObj->cptr = 0;
+
     Py_TYPE(pyObj)->tp_free(pyObj);
+
 }
 
 void deallocWrapper(PyObject* pyObj)
@@ -326,6 +343,16 @@ void deallocWrapper(PyObject* pyObj)
     delete[] sbkObj->cptr;
     sbkObj->cptr = 0;
     Py_TYPE(pyObj)->tp_free(pyObj);
+}
+
+void SbkBaseWrapperType_dealloc(PyObject* pyObj)
+{
+    SbkBaseWrapperType *sbkType = reinterpret_cast<SbkBaseWrapperType*>(pyObj->ob_type);
+
+    if(sbkType->user_data && sbkType->d_func) {
+        sbkType->d_func(sbkType->user_data);
+        sbkType->user_data = 0;
+    }
 }
 
 static PyObject*
@@ -362,9 +389,13 @@ SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
         newType->cpp_dtor = 0;
         newType->is_multicpp = 1;
     }
+    newType->user_data = 0;
+    newType->d_func = 0;
     newType->is_user_type = 1;
     return reinterpret_cast<PyObject*>(newType);
 }
+
+
 
 PyTypeObject SbkBaseWrapperType_Type = {
     PyObject_HEAD_INIT(0)
@@ -372,7 +403,7 @@ PyTypeObject SbkBaseWrapperType_Type = {
     /*tp_name*/             "Shiboken.BaseWrapperType",
     /*tp_basicsize*/        sizeof(SbkBaseWrapperType),
     /*tp_itemsize*/         0,
-    /*tp_dealloc*/          0,
+    /*tp_dealloc*/          SbkBaseWrapperType_dealloc,
     /*tp_print*/            0,
     /*tp_getattr*/          0,
     /*tp_setattr*/          0,

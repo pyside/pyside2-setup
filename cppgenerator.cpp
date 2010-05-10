@@ -366,6 +366,7 @@ void CppGenerator::writeConstructorNative(QTextStream& s, const AbstractMetaFunc
     writeFunctionCall(s, func);
     if (usePySideExtensions() && func->ownerClass()->isQObject())
         s << ", m_metaObject(0)";
+
     s << " {" << endl;
     const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().last();
     writeCodeSnips(s, func->injectedCodeSnips(), CodeSnip::Beginning, TypeSystem::NativeCode, func, lastArg);
@@ -379,8 +380,6 @@ void CppGenerator::writeDestructorNative(QTextStream &s, const AbstractMetaClass
     Indentation indentation(INDENT);
     s << wrapperName(metaClass) << "::~" << wrapperName(metaClass) << "()" << endl << '{' << endl;
     s << INDENT << "BindingManager::instance().invalidateWrapper(this);" << endl;
-    if (usePySideExtensions() && metaClass->isQObject())
-        s << INDENT << "delete m_metaObject;\n";
     s << '}' << endl;
 }
 
@@ -592,12 +591,25 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
     s << INDENT << "if (!m_metaObject) {\n";
     {
         Indentation indentation(INDENT);
-        s << INDENT << "PyObject *pySelf = BindingManager::instance().retrieveWrapper(this);\n";
-        s << INDENT << "QString className(pySelf->ob_type->tp_name);" << endl;
-        s << INDENT << "className = className.mid(className.lastIndexOf(\".\")+1);" << endl;
-        s << INDENT << "m_metaObject = new PySide::DynamicQMetaObject(className.toAscii(), &" << metaClass->qualifiedCppName() << "::staticMetaObject);\n";
-        s << "}\n";
+        s << INDENT << "PyObject *pySelf = BindingManager::instance().retrieveWrapper(this);\n"
+          << INDENT << "void *typeData = Shiboken::getTypeUserData(reinterpret_cast<Shiboken::SbkBaseWrapper*>(pySelf));" << endl
+          << INDENT << "if (!typeData) {" << endl;
+        {
+            Indentation indentation2(INDENT);
+            s << INDENT << "QString className(pySelf->ob_type->tp_name);" << endl
+              << INDENT << "className = className.mid(className.lastIndexOf(\".\")+1);" << endl
+              << INDENT << "m_metaObject = new PySide::DynamicQMetaObject(className.toAscii(), &"
+                        << metaClass->qualifiedCppName() << "::staticMetaObject);" << endl
+              << INDENT << "Shiboken::setTypeUserData(reinterpret_cast<Shiboken::SbkBaseWrapper*>(pySelf), m_metaObject, PySide::deleteDynamicQMetaObject);" << endl;
+        }
+        s << INDENT << "} else {" << endl;
+        {
+            Indentation indentation2(INDENT);
+            s << INDENT << "m_metaObject = reinterpret_cast<PySide::DynamicQMetaObject*>(typeData);" << endl;
+        }
+        s << INDENT << "}" << endl;
     }
+    s << INDENT << "}" << endl;
     s << INDENT << "return m_metaObject;\n";
     s << "}\n\n";
 
