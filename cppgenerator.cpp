@@ -134,6 +134,9 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     // headers
     s << "// default includes" << endl;
     s << "#include <shiboken.h>" << endl;
+    if (usePySideExtensions())
+        s << "#include <qsignal.h>" << endl;
+
     s << "#include <typeresolver.h>\n";
     s << "#include <typeinfo>\n";
     if (usePySideExtensions()) {
@@ -596,7 +599,7 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
           << INDENT << "if (!typeData) {" << endl;
         {
             Indentation indentation2(INDENT);
-            s << INDENT << "m_metaObject = PySide::DynamicQMetaObject::createBasedOn(pySelf->ob_type, &"
+            s << INDENT << "m_metaObject = PySide::DynamicQMetaObject::createBasedOn(pySelf, pySelf->ob_type, &"
                         << metaClass->qualifiedCppName() << "::staticMetaObject);" << endl
               << INDENT << "Shiboken::setTypeUserData(reinterpret_cast<Shiboken::SbkBaseWrapper*>(pySelf), m_metaObject, PySide::deleteDynamicQMetaObject);" << endl;
         }
@@ -739,6 +742,13 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
         s << '}' << endl;
     }
 
+    s << endl;
+
+    if (metaClass->isQObject()) {
+        s << INDENT << "cptr->metaObject();" << endl;
+        if (usePySideExtensions())
+            s << INDENT << "PySide::signal_update_source(self);" << endl;
+    }
     s << endl << INDENT << "return 1;" << endl;
     if (overloadData.maxArgs() > 0)
         writeErrorSection(s, overloadData);
