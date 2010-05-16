@@ -3116,7 +3116,7 @@ void CppGenerator::writeFlagsUnaryOperator(QTextStream& s, const AbstractMetaEnu
 void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     QString pyTypeName = cpythonTypeName(metaClass);
-    s << "PyAPI_FUNC(void) init_" << metaClass->qualifiedCppName().replace("::", "_") << "(PyObject* module)" << endl;
+    s << "void init_" << metaClass->qualifiedCppName().replace("::", "_") << "(PyObject* module)" << endl;
     s << '{' << endl;
     s << INDENT << cpythonTypeNameExt(metaClass->typeEntry()) << " = reinterpret_cast<PyTypeObject*>(&" << cpythonTypeName(metaClass->typeEntry()) << ");" << endl << endl;
 
