@@ -47,6 +47,7 @@
 #include <cstdio>
 #include <algorithm>
 #include "graph.h"
+#include <QTemporaryFile>
 
 static QString stripTemplateArgs(const QString &name)
 {
@@ -2667,7 +2668,15 @@ AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const Abstra
     AbstractMetaClassList result;
     unmappedResult = graph.topologicalSort();
     if (unmappedResult.isEmpty()) {
-        ReportHandler::warning("Cyclic dependency found!");
+        QTemporaryFile tempFile;
+        tempFile.setAutoRemove(false);
+        tempFile.open();
+        QHash<int, QString> hash;
+        QHash<QString, int>::iterator it = map.begin();
+        for (; it != map.end(); ++it)
+            hash[it.value()] = it.key();
+        graph.dumpDot(hash, tempFile.fileName());
+        ReportHandler::warning("Cyclic dependency found! Graph can be found at "+tempFile.fileName());
     } else {
         foreach (int i, unmappedResult) {
             Q_ASSERT(reverseMap.contains(i));
