@@ -2623,11 +2623,7 @@ AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const Abstra
     QHash<QString, int> map;
     QHash<int, AbstractMetaClass*> reverseMap;
 
-    AbstractMetaClassList classList;
-    if (cppClass)
-        classList = cppClass->innerClasses();
-    else
-        classList = m_metaClasses;
+    const AbstractMetaClassList& classList = cppClass ? cppClass->innerClasses() : m_metaClasses;
 
     Graph graph(classList.count());
 
