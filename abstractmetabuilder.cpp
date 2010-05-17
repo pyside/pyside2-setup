@@ -2645,8 +2645,10 @@ AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const Abstra
         if (clazz->enclosingClass() && map.contains(clazz->enclosingClass()->name()))
             graph.addEdge(map[clazz->enclosingClass()->name()], map[clazz->name()]);
 
-        foreach(AbstractMetaClass* baseClass, getBaseClasses(clazz))
-            graph.addEdge(map[baseClass->name()], map[clazz->name()]);
+        foreach(AbstractMetaClass* baseClass, getBaseClasses(clazz)) {
+            if (map.contains(baseClass->name()))
+                graph.addEdge(map[baseClass->name()], map[clazz->name()]);
+        }
 
         foreach (AbstractMetaFunction* func, clazz->functions()) {
             foreach (AbstractMetaArgument* arg, func->arguments()) {
