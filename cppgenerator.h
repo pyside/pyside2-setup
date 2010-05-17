@@ -134,6 +134,8 @@ private:
     void writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* metaEnum);
     void writeEnumInitialization(QTextStream& s, const AbstractMetaEnum* metaEnum);
 
+    void writeSignalInitialization(QTextStream& s, const AbstractMetaClass* metaClass);
+
     void writeFlagsDefinition(QTextStream& s, const AbstractMetaEnum* cppEnum);
     void writeFlagsMethods(QTextStream& s, const AbstractMetaEnum* cppEnum);
     void writeFlagsNumberMethodsDefinition(QTextStream& s, const AbstractMetaEnum* cppEnum);

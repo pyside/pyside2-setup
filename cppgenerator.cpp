@@ -745,9 +745,10 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     s << endl;
 
     if (metaClass->isQObject()) {
-        s << INDENT << "cptr->metaObject();" << endl;
         if (usePySideExtensions())
-            s << INDENT << "PySide::signal_update_source(self);" << endl;
+            s << INDENT << "PySide::signalUpdateSource(self);" << endl;
+
+        s << INDENT << "cptr->metaObject();" << endl;
     }
     s << endl << INDENT << "return 1;" << endl;
     if (overloadData.maxArgs() > 0)
@@ -2402,6 +2403,45 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
     s << endl;
 }
 
+void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    QHash<QString, QStringList> signatures;
+
+    foreach (const AbstractMetaFunction* cppSignal, metaClass->cppSignalFunctions()) {
+        QString signature;
+        if (cppSignal->declaringClass() == metaClass) {
+            if (cppSignal->arguments().count()) {
+                for (int i = 0; i < cppSignal->arguments().count(); ++i) {
+                    if (i > 0)
+                        signature += ", ";
+                    AbstractMetaArgument *a = cppSignal->arguments().at(i);
+                    signature += a->type()->cppSignature();
+                }
+            } else {
+                signature = "void";
+            }
+            signatures[cppSignal->name()].append(QMetaObject::normalizedSignature(signature.toAscii()));
+        }
+    }
+
+    if (signatures.size() == 0)
+        return;
+
+    s << INDENT << "// Initialize signals" << endl;
+    s << INDENT << "PyObject* signal_item;" << endl << endl;
+
+    foreach(QString funcName, signatures.keys()) {
+        s << INDENT << "signal_item = PySide::signalNew(\"" << funcName <<"\"";
+        foreach(QString signature, signatures[funcName])
+            s << ", \"" + signature << "\"";
+        s << ", NULL);" << endl;
+        s << INDENT << "PyDict_SetItemString(" + cpythonTypeName(metaClass) + ".super.ht_type.tp_dict";
+        s << ", \"" << funcName << "\", signal_item);" << endl;
+        s << INDENT << "Py_DECREF(signal_item);" << endl;
+    }
+    s << endl;
+}
+
 void CppGenerator::writeFlagsNewMethod(QTextStream& s, const FlagsTypeEntry* cppFlags)
 {
     QString cpythonName = cpythonFlagsName(cppFlags);
@@ -2757,6 +2797,8 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     foreach (const AbstractMetaEnum* cppEnum, metaClass->enums())
         writeEnumInitialization(s, cppEnum);
 
+    if (metaClass->hasSignals())
+        writeSignalInitialization(s, metaClass);
 
     // class inject-code target/end
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
