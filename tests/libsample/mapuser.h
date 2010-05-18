@@ -46,7 +46,7 @@ class LIBSAMPLE_API MapUser
 {
 public:
     MapUser() {}
-    ~MapUser() {}
+    virtual ~MapUser() {}
 
     virtual std::map<const char*, std::pair<Complex, int> > createMap();
     std::map<const char*, std::pair<Complex, int> > callCreateMap();

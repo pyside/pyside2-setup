@@ -34,6 +34,7 @@
 
 #include "basewrapper.h"
 #include "basewrapper_p.h"
+#include "pyenum.h"
 #include <cstddef>
 #include <algorithm>
 #include "autodecref.h"
@@ -43,6 +44,134 @@
 
 namespace Shiboken
 {
+
+static void SbkBaseWrapperType_dealloc(PyObject* pyObj);
+static PyObject* SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
+
+extern "C"
+{
+
+PyTypeObject SbkBaseWrapperType_Type = {
+    PyObject_HEAD_INIT(0)
+    /*ob_size*/             0,
+    /*tp_name*/             "Shiboken.BaseWrapperType",
+    /*tp_basicsize*/        sizeof(SbkBaseWrapperType),
+    /*tp_itemsize*/         0,
+    /*tp_dealloc*/          SbkBaseWrapperType_dealloc,
+    /*tp_print*/            0,
+    /*tp_getattr*/          0,
+    /*tp_setattr*/          0,
+    /*tp_compare*/          0,
+    /*tp_repr*/             0,
+    /*tp_as_number*/        0,
+    /*tp_as_sequence*/      0,
+    /*tp_as_mapping*/       0,
+    /*tp_hash*/             0,
+    /*tp_call*/             0,
+    /*tp_str*/              0,
+    /*tp_getattro*/         0,
+    /*tp_setattro*/         0,
+    /*tp_as_buffer*/        0,
+    /*tp_flags*/            Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
+    /*tp_doc*/              0,
+    /*tp_traverse*/         0,
+    /*tp_clear*/            0,
+    /*tp_richcompare*/      0,
+    /*tp_weaklistoffset*/   0,
+    /*tp_iter*/             0,
+    /*tp_iternext*/         0,
+    /*tp_methods*/          0,
+    /*tp_members*/          0,
+    /*tp_getset*/           0,
+    /*tp_base*/             &PyType_Type,
+    /*tp_dict*/             0,
+    /*tp_descr_get*/        0,
+    /*tp_descr_set*/        0,
+    /*tp_dictoffset*/       0,
+    /*tp_init*/             0,
+    /*tp_alloc*/            0,
+    /*tp_new*/              SbkBaseWrapperType_TpNew,
+    /*tp_free*/             0,
+    /*tp_is_gc*/            0,
+    /*tp_bases*/            0,
+    /*tp_mro*/              0,
+    /*tp_cache*/            0,
+    /*tp_subclasses*/       0,
+    /*tp_weaklist*/         0
+};
+
+static PyObject* SbkBaseWrapper_get_dict(SbkBaseWrapper* obj)
+{
+    if (!obj->ob_dict)
+        obj->ob_dict = PyDict_New();
+    if (!obj->ob_dict)
+        return 0;
+    Py_INCREF(obj->ob_dict);
+    return obj->ob_dict;
+}
+
+static PyGetSetDef SbkBaseWrapper_getsetlist[] = {
+    {const_cast<char*>("__dict__"), (getter)SbkBaseWrapper_get_dict, 0},
+    {0} // Sentinel
+};
+
+SbkBaseWrapperType SbkBaseWrapper_Type = { { {
+    PyObject_HEAD_INIT(&SbkBaseWrapperType_Type)
+    /*ob_size*/             0,
+    /*tp_name*/             "Shiboken.BaseWrapper",
+    /*tp_basicsize*/        sizeof(SbkBaseWrapper),
+    /*tp_itemsize*/         0,
+    /*tp_dealloc*/          0,
+    /*tp_print*/            0,
+    /*tp_getattr*/          0,
+    /*tp_setattr*/          0,
+    /*tp_compare*/          0,
+    /*tp_repr*/             0,
+    /*tp_as_number*/        0,
+    /*tp_as_sequence*/      0,
+    /*tp_as_mapping*/       0,
+    /*tp_hash*/             0,
+    /*tp_call*/             0,
+    /*tp_str*/              0,
+    /*tp_getattro*/         0,
+    /*tp_setattro*/         0,
+    /*tp_as_buffer*/        0,
+    /*tp_flags*/            Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
+    /*tp_doc*/              0,
+    /*tp_traverse*/         0,
+    /*tp_clear*/            0,
+    /*tp_richcompare*/      0,
+    /*tp_weaklistoffset*/   offsetof(SbkBaseWrapper, weakreflist),
+    /*tp_iter*/             0,
+    /*tp_iternext*/         0,
+    /*tp_methods*/          0,
+    /*tp_members*/          0,
+    /*tp_getset*/           SbkBaseWrapper_getsetlist,
+    /*tp_base*/             0,
+    /*tp_dict*/             0,
+    /*tp_descr_get*/        0,
+    /*tp_descr_set*/        0,
+    /*tp_dictoffset*/       offsetof(SbkBaseWrapper, ob_dict),
+    /*tp_init*/             0,
+    /*tp_alloc*/            0,
+    /*tp_new*/              0,
+    /*tp_free*/             0,
+    /*tp_is_gc*/            0,
+    /*tp_bases*/            0,
+    /*tp_mro*/              0,
+    /*tp_cache*/            0,
+    /*tp_subclasses*/       0,
+    /*tp_weaklist*/         0
+}, },
+    /*mi_offsets*/          0,
+    /*mi_init*/             0,
+    /*mi_specialcast*/      0,
+    /*type_name_func*/      0,
+    /*ext_isconvertible*/   0,
+    /*ext_tocpp*/           0
+};
+
+} //extern "C"
 
 void removeParent(SbkBaseWrapper* child)
 {
@@ -355,8 +484,7 @@ void SbkBaseWrapperType_dealloc(PyObject* pyObj)
     }
 }
 
-static PyObject*
-SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
+PyObject* SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
 {
     // The meta type creates a new type when the Python programmer extends a wrapped C++ class.
     SbkBaseWrapperType* newType = reinterpret_cast<SbkBaseWrapperType*>(PyType_Type.tp_new(metatype, args, kwds));
@@ -397,125 +525,6 @@ SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
 
 
 
-PyTypeObject SbkBaseWrapperType_Type = {
-    PyObject_HEAD_INIT(0)
-    /*ob_size*/             0,
-    /*tp_name*/             "Shiboken.BaseWrapperType",
-    /*tp_basicsize*/        sizeof(SbkBaseWrapperType),
-    /*tp_itemsize*/         0,
-    /*tp_dealloc*/          SbkBaseWrapperType_dealloc,
-    /*tp_print*/            0,
-    /*tp_getattr*/          0,
-    /*tp_setattr*/          0,
-    /*tp_compare*/          0,
-    /*tp_repr*/             0,
-    /*tp_as_number*/        0,
-    /*tp_as_sequence*/      0,
-    /*tp_as_mapping*/       0,
-    /*tp_hash*/             0,
-    /*tp_call*/             0,
-    /*tp_str*/              0,
-    /*tp_getattro*/         0,
-    /*tp_setattro*/         0,
-    /*tp_as_buffer*/        0,
-    /*tp_flags*/            Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
-    /*tp_doc*/              0,
-    /*tp_traverse*/         0,
-    /*tp_clear*/            0,
-    /*tp_richcompare*/      0,
-    /*tp_weaklistoffset*/   0,
-    /*tp_iter*/             0,
-    /*tp_iternext*/         0,
-    /*tp_methods*/          0,
-    /*tp_members*/          0,
-    /*tp_getset*/           0,
-    /*tp_base*/             &PyType_Type,
-    /*tp_dict*/             0,
-    /*tp_descr_get*/        0,
-    /*tp_descr_set*/        0,
-    /*tp_dictoffset*/       0,
-    /*tp_init*/             0,
-    /*tp_alloc*/            0,
-    /*tp_new*/              SbkBaseWrapperType_TpNew,
-    /*tp_free*/             0,
-    /*tp_is_gc*/            0,
-    /*tp_bases*/            0,
-    /*tp_mro*/              0,
-    /*tp_cache*/            0,
-    /*tp_subclasses*/       0,
-    /*tp_weaklist*/         0
-};
-
-static PyObject* SbkBaseWrapper_get_dict(SbkBaseWrapper* obj)
-{
-    if (!obj->ob_dict)
-        obj->ob_dict = PyDict_New();
-    if (!obj->ob_dict)
-        return 0;
-    Py_INCREF(obj->ob_dict);
-    return obj->ob_dict;
-}
-
-static PyGetSetDef SbkBaseWrapper_getsetlist[] = {
-    {const_cast<char*>("__dict__"), (getter)SbkBaseWrapper_get_dict, 0},
-    {0} // Sentinel
-};
-
-SbkBaseWrapperType SbkBaseWrapper_Type = { { {
-    PyObject_HEAD_INIT(&SbkBaseWrapperType_Type)
-    /*ob_size*/             0,
-    /*tp_name*/             "Shiboken.BaseWrapper",
-    /*tp_basicsize*/        sizeof(SbkBaseWrapper),
-    /*tp_itemsize*/         0,
-    /*tp_dealloc*/          0,
-    /*tp_print*/            0,
-    /*tp_getattr*/          0,
-    /*tp_setattr*/          0,
-    /*tp_compare*/          0,
-    /*tp_repr*/             0,
-    /*tp_as_number*/        0,
-    /*tp_as_sequence*/      0,
-    /*tp_as_mapping*/       0,
-    /*tp_hash*/             0,
-    /*tp_call*/             0,
-    /*tp_str*/              0,
-    /*tp_getattro*/         0,
-    /*tp_setattro*/         0,
-    /*tp_as_buffer*/        0,
-    /*tp_flags*/            Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
-    /*tp_doc*/              0,
-    /*tp_traverse*/         0,
-    /*tp_clear*/            0,
-    /*tp_richcompare*/      0,
-    /*tp_weaklistoffset*/   offsetof(SbkBaseWrapper, weakreflist),
-    /*tp_iter*/             0,
-    /*tp_iternext*/         0,
-    /*tp_methods*/          0,
-    /*tp_members*/          0,
-    /*tp_getset*/           SbkBaseWrapper_getsetlist,
-    /*tp_base*/             0,
-    /*tp_dict*/             0,
-    /*tp_descr_get*/        0,
-    /*tp_descr_set*/        0,
-    /*tp_dictoffset*/       offsetof(SbkBaseWrapper, ob_dict),
-    /*tp_init*/             0,
-    /*tp_alloc*/            0,
-    /*tp_new*/              0,
-    /*tp_free*/             0,
-    /*tp_is_gc*/            0,
-    /*tp_bases*/            0,
-    /*tp_mro*/              0,
-    /*tp_cache*/            0,
-    /*tp_subclasses*/       0,
-    /*tp_weaklist*/         0
-}, },
-    /*mi_offsets*/          0,
-    /*mi_init*/             0,
-    /*mi_specialcast*/      0,
-    /*type_name_func*/      0,
-    /*ext_isconvertible*/   0,
-    /*ext_tocpp*/           0
-};
 
 void initShiboken()
 {

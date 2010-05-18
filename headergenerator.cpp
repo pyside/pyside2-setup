@@ -83,11 +83,15 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
         if (isCopyable(metaClass))
             writeCopyCtor(s, metaClass);
 
-        foreach (AbstractMetaFunction *func, filterFunctions(metaClass))
+        bool hasVirtualFunction = false;
+        foreach (AbstractMetaFunction *func, filterFunctions(metaClass)) {
+            if (func->isVirtual())
+                hasVirtualFunction = true;
             writeFunction(s, func);
+        }
 
         //destructor
-        s << INDENT << (metaClass->hasVirtualDestructor() ? "virtual " : "") << "~" << wrapperName << "();" << endl;
+        s << INDENT << (metaClass->hasVirtualDestructor() || hasVirtualFunction ? "virtual " : "") << "~" << wrapperName << "();" << endl;
 
         writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Declaration, TypeSystem::NativeCode);
 

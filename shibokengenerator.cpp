@@ -156,7 +156,6 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType*
                                                          const AbstractMetaClass* context) const
 {
     QString result;
-    const TypeEntry* tentry = cType->typeEntry();
 
     if (cType->isArray())
         result = translateTypeForWrapperMethod(cType->arrayElementType(), context) + "[]";

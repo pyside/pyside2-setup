@@ -41,7 +41,7 @@ class LIBSAMPLE_API Base1
 {
 public:
     Base1() : m_value(1) {}
-    ~Base1() {}
+    virtual ~Base1() {}
     virtual int base1Method() { return m_value; }
 private:
     int m_value;
@@ -51,7 +51,7 @@ class LIBSAMPLE_API Base2
 {
 public:
     Base2() : m_value(2) {}
-    ~Base2() {}
+    virtual ~Base2() {}
     virtual int base2Method() { return m_value; }
 private:
     int m_value;
@@ -114,7 +114,7 @@ class LIBSAMPLE_API Base5
 {
 public:
     Base5() : m_value(5) {}
-    ~Base5() {}
+    virtual ~Base5() {}
     virtual int base5Method() { return m_value; }
 private:
     int m_value;
@@ -124,7 +124,7 @@ class LIBSAMPLE_API Base6
 {
 public:
     Base6() : m_value(6) {}
-    ~Base6() {}
+    virtual ~Base6() {}
     virtual int base6Method() { return m_value; }
 private:
     int m_value;
@@ -184,7 +184,7 @@ class LIBSAMPLE_API MDerived5 : public Base3, public Base4
 {
 public:
     MDerived5();
-    ~MDerived5() {}
+    virtual ~MDerived5() {}
 
     virtual int mderived5Method() { return 0; }
 

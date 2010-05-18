@@ -43,7 +43,7 @@ class LIBSAMPLE_API Modifications
 {
 public:
     Modifications() {}
-    ~Modifications() {}
+    virtual ~Modifications() {}
 
     enum OverloadedModFunc {
         OverloadedNone,
@@ -111,7 +111,7 @@ class LIBSAMPLE_API AbstractModifications : public Modifications
 {
 public:
     AbstractModifications() {}
-    ~AbstractModifications() {}
+    virtual ~AbstractModifications() {}
 
     bool invert(bool value) { return !value; }
 

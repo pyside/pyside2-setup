@@ -40,19 +40,19 @@
 namespace SampleNamespace
 {
 
-enum LIBSAMPLE_API Option {
+enum Option {
     None,
     RandomNumber,
     UnixTime
 };
 
-enum LIBSAMPLE_API InValue {
+enum InValue {
     ZeroIn,
     OneIn,
     TwoIn
 };
 
-enum LIBSAMPLE_API OutValue {
+enum OutValue {
     ZeroOut,
     OneOut,
     TwoOut
@@ -77,7 +77,7 @@ public:
         class OkThisIsRecursiveEnough
         {
         public:
-            ~OkThisIsRecursiveEnough() {}
+            virtual ~OkThisIsRecursiveEnough() {}
             enum NiceEnum {
                 NiceValue1, NiceValue2
             };

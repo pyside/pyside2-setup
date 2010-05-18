@@ -46,7 +46,7 @@ class LIBSAMPLE_API VirtualMethods
 {
 public:
     VirtualMethods(Str name = "VirtualMethods") : m_name(name) {}
-    ~VirtualMethods() {}
+    virtual ~VirtualMethods() {}
 
     virtual double virtualMethod0(Point pt, int val, Complex cpx, bool b);
     double callVirtualMethod0(Point pt, int val, Complex cpx, bool b)

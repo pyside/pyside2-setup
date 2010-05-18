@@ -38,7 +38,7 @@
 #include "libsamplemacros.h"
 #include "abstract.h"
 
-enum LIBSAMPLE_API OverloadedFuncEnum {
+enum OverloadedFuncEnum {
     OverloadedFunc_ii,
     OverloadedFunc_d
 };

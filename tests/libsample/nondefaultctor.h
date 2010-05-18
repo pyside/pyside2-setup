@@ -74,6 +74,8 @@ public:
     {
         return returnMyselfVirtual();
     }
+
+    virtual ~NonDefaultCtor() {}
 };
 
 #endif

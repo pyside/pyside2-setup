@@ -42,7 +42,7 @@ class LIBSAMPLE_API Reference
 public:
     explicit Reference(int objId = -1)
             : m_objId(objId) {}
-    ~Reference() {}
+    virtual ~Reference() {}
 
     int objId() { return m_objId; }
     void setObjId(int objId) { m_objId = objId; }

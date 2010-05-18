@@ -32,8 +32,8 @@
  * 02110-1301 USA
  */
 
-#ifndef PYENUM_H
-#define PYENUM_H
+#ifndef SBK_PYENUM_H
+#define SBK_PYENUM_H
 
 #include <Python.h>
 #include "shibokenmacros.h"
@@ -71,5 +71,5 @@ LIBSHIBOKEN_API PyObject* SbkEnumObject_New(PyTypeObject *instanceType,
 
 } // namespace Shiboken
 
-#endif // PYENUM_H
+#endif // SKB_PYENUM_H
 

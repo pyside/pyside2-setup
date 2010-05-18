@@ -37,6 +37,9 @@
 namespace Shiboken
 {
 
+extern "C"
+{
+
 PyTypeObject SbkEnumType_Type = {
     PyObject_HEAD_INIT(0)
     /*ob_size*/             0,
@@ -85,6 +88,8 @@ PyTypeObject SbkEnumType_Type = {
     /*tp_subclasses*/       0,
     /*tp_weaklist*/         0
 };
+
+}
 
 PyObject*
 SbkEnumObject_New(PyTypeObject *type, long item_value, PyObject* item_name)

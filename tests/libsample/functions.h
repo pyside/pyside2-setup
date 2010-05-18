@@ -41,14 +41,14 @@
 #include "complex.h"
 #include "objecttype.h"
 
-enum LIBSAMPLE_API GlobalEnum {
+enum GlobalEnum {
     NoThing,
     FirstThing,
     SecondThing,
     ThirdThing
 };
 
-enum LIBSAMPLE_API GlobalOverloadFuncEnum {
+enum GlobalOverloadFuncEnum {
     GlobalOverloadFunc_i,
     GlobalOverloadFunc_d
 };

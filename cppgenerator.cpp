@@ -1916,7 +1916,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         tp_hash = '&' + cpythonBaseName(metaClass) + "_HashFunc";
 
     s << "// Class Definition -----------------------------------------------" << endl;
-
+    s << "extern \"C\" {" << endl;
     s << "static SbkBaseWrapperType " << className + "_Type" << " = { { {" << endl;
     s << INDENT << "PyObject_HEAD_INIT(&Shiboken::SbkBaseWrapperType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
@@ -1976,6 +1976,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*is_multicpp*/         0," << endl;
     s << INDENT << "/*is_user_type*/        0" << endl;
     s << "};" << endl;
+    s << "} //extern"  << endl;
 }
 
 

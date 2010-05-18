@@ -44,7 +44,7 @@ class LIBSAMPLE_API PairUser
 {
 public:
     PairUser() {}
-    ~PairUser() {}
+    virtual ~PairUser() {}
 
     virtual std::pair<int, int> createPair();
     std::pair<int, int> callCreatePair();
