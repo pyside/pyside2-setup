@@ -720,6 +720,15 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
         s << INDENT << "sbkSelf->referredObjects = new Shiboken::RefCountMap;" << endl;
     s << INDENT << "BindingManager::instance().registerWrapper(sbkSelf, cptr);" << endl;
 
+    // Create metaObject and register signal/slot
+    if (metaClass->isQObject()) {
+        if (usePySideExtensions())
+            s << INDENT << "PySide::signalUpdateSource(self);" << endl;
+
+        s << INDENT << "cptr->metaObject();" << endl;
+    }
+
+
     // Constructor code injections, position=end
     if (hasCodeInjectionsAtEnd) {
         // FIXME: C++ arguments are not available in code injection on constructor when position = end.
@@ -743,13 +752,6 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     }
 
     s << endl;
-
-    if (metaClass->isQObject()) {
-        if (usePySideExtensions())
-            s << INDENT << "PySide::signalUpdateSource(self);" << endl;
-
-        s << INDENT << "cptr->metaObject();" << endl;
-    }
     s << endl << INDENT << "return 1;" << endl;
     if (overloadData.maxArgs() > 0)
         writeErrorSection(s, overloadData);
