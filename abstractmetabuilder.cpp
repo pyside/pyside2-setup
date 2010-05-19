@@ -2157,6 +2157,16 @@ bool AbstractMetaBuilder::inheritTemplate(AbstractMetaClass *subclass,
     QList<TypeParser::Info> targs = info.template_instantiations;
 
     QList<AbstractMetaType *> templateTypes;
+    if (subclass->isTypeAlias()) {
+        subclass->setHasCloneOperator(templateClass->hasCloneOperator());
+        subclass->setHasEqualsOperator(templateClass->hasEqualsOperator());
+        subclass->setHasHashFunction(templateClass->hasHashFunction());
+        subclass->setHasNonPrivateConstructor(templateClass->hasNonPrivateConstructor());
+        subclass->setHasPrivateDestructor(templateClass->hasPrivateDestructor());
+        subclass->setHasProtectedDestructor(templateClass->hasProtectedDestructor());
+        subclass->setHasVirtualDestructor(templateClass->hasVirtualDestructor());
+    }
+
     foreach (const TypeParser::Info &i, targs) {
         QString typeName = i.qualified_name.join("::");
         QStringList possibleNames;
