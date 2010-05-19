@@ -2243,6 +2243,7 @@ bool AbstractMetaBuilder::inheritTemplate(AbstractMetaClass *subclass,
 
         if (f->isConstructor() && subclass->isTypeAlias()) {
             f->setName(subclass->name());
+            f->setOriginalName(subclass->name());
         } else if (f->isConstructor()) {
             delete f;
             continue;
