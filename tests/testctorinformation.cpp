@@ -28,9 +28,9 @@
 
 void TestCtorInformation::testCtorIsPrivate()
 {
-    const char* cppCode ="class Control { public: Control() {} };\
-                          class Subject { private: Subject() {} };\
-                          class CtorLess { };";
+    const char* cppCode = "class Control { public: Control() {} };\
+                           class Subject { private: Subject() {} };\
+                           class CtorLess { };";
     const char* xmlCode = "<typesystem package='Foo'>\
                                 <value-type name='Control'/>\
                                 <object-type name='Subject'/>\
@@ -42,6 +42,27 @@ void TestCtorInformation::testCtorIsPrivate()
     QCOMPARE(classes.findClass("Control")->hasNonPrivateConstructor(), true);
     QCOMPARE(classes.findClass("Subject")->hasNonPrivateConstructor(), false);
     QCOMPARE(classes.findClass("CtorLess")->hasNonPrivateConstructor(), true);
+}
+
+void TestCtorInformation::testHasNonPrivateCtor()
+{
+    const char* cppCode = "template<typename T>\
+                           struct Base { Base(double) {} };\
+                           typedef Base<int> Derived;\
+                          ";
+    const char* xmlCode = "<typesystem package='Foo'>\
+                                <primitive-type name='int' />\
+                                <primitive-type name='double' />\
+                                <object-type name='Base' generate='no'/>\
+                                <object-type name='Derived'/>\
+                           </typesystem>";
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.count(), 2);
+    AbstractMetaClass* base = classes.findClass("Base");
+    QCOMPARE(base->hasNonPrivateConstructor(), true);
+    AbstractMetaClass* derived = classes.findClass("Derived");
+    QCOMPARE(derived->hasNonPrivateConstructor(), true);
 }
 
 QTEST_APPLESS_MAIN(TestCtorInformation)

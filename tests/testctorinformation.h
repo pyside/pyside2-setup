@@ -33,6 +33,7 @@ class TestCtorInformation: public QObject
     Q_OBJECT
 private slots:
     void testCtorIsPrivate();
+    void testHasNonPrivateCtor();
 };
 
 #endif // TESTCTORINFORMATION_H
