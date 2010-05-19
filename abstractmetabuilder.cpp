@@ -1510,9 +1510,6 @@ AbstractMetaFunction *AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
     if (functionItem->isFriend())
         return 0;
 
-
-    QString cast_type;
-
     AbstractMetaFunction *metaFunction = createMetaFunction();
     metaFunction->setConstant(functionItem->isConstant());
 
@@ -1562,15 +1559,7 @@ AbstractMetaFunction *AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
         metaFunction->setName(m_currentClass->name());
     } else {
         bool ok;
-        AbstractMetaType *type = 0;
-
-        if (!cast_type.isEmpty()) {
-            TypeInfo info;
-            info.setQualifiedName(QStringList(cast_type));
-            type = translateType(info, &ok);
-        } else {
-            type = translateType(functionType, &ok);
-        }
+        AbstractMetaType* type = translateType(functionType, &ok);
 
         if (!ok) {
             ReportHandler::warning(QString("skipping function '%1::%2', unmatched return type '%3'")
