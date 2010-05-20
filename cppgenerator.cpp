@@ -134,8 +134,10 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     // headers
     s << "// default includes" << endl;
     s << "#include <shiboken.h>" << endl;
-    if (usePySideExtensions())
+    if (usePySideExtensions()) {
         s << "#include <qsignal.h>" << endl;
+        s << "#include <pyside.h>" << endl;
+    }
 
     s << "#include <typeresolver.h>\n";
     s << "#include <typeinfo>\n";
@@ -2820,6 +2822,12 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         QString functionSufix = (isObjectType ? "Object" : "Value");
         s << INDENT << "Shiboken::TypeResolver::create" << functionSufix;
         s << "TypeResolver<" << typeName << " >" << "(typeid(" << typeName << ").name());\n";
+    }
+
+    if (usePySideExtensions() && !metaClass->isNamespace()) {
+        // Qt metatypes are registered only on their first use, so we do this now.
+        const char* star = metaClass->typeEntry()->isObject() ? "*" : "";
+        s << INDENT << "PySide::initQtMetaType<" << metaClass->qualifiedCppName() << star << " >();" << endl;
     }
 
     s << '}' << endl << endl;
