@@ -434,8 +434,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             }
         } else {
             if (func->allowThread()) {
-                s << INDENT << "Shiboken::ThreadStateSaver " << THREAD_STATE_SAVER_VAR << ';' << endl;
-                s << INDENT << THREAD_STATE_SAVER_VAR << ".save();" << endl;
+                s << INDENT << "Shiboken::ThreadStateSaver " THREAD_STATE_SAVER_VAR ";" << endl;
+                s << INDENT << THREAD_STATE_SAVER_VAR ".save();" << endl;
             }
 
             s << INDENT << "return this->" << func->implementingClass()->qualifiedCppName() << "::";
@@ -538,17 +538,20 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                     s << guessCPythonCheckFunction(func->typeReplaced(0));
                     desiredType =  '"' + func->typeReplaced(0) + '"';
                 }
-                s << "(" << PYTHON_RETURN_VAR << ");" << endl;
+                s << "(" PYTHON_RETURN_VAR ");" << endl;
                 if (func->type()->isQObject() || func->type()->isObject() || func->type()->isValuePointer())
-                    s << INDENT << "typeIsValid = typeIsValid || (" << PYTHON_RETURN_VAR << " == Py_None);" << endl;
+                    s << INDENT << "typeIsValid = typeIsValid || (" PYTHON_RETURN_VAR " == Py_None);" << endl;
 
                 s << INDENT << "if (!typeIsValid) {" << endl;
-                s << INDENT << INDENT << "PyErr_Format(PyExc_TypeError, \"Invalid return value in function %s, expected %s, got %s.\", \""
-                  << func->ownerClass()->name() << '.' << func->name() << "\", " << desiredType << ", "
-                  << PYTHON_RETURN_VAR << "->ob_type->tp_name);" << endl;
-                s << INDENT << INDENT << "return ";
-                writeMinimalConstructorCallArguments(s, func->type());
-                s << ';' << endl;
+                {
+                    Indentation indent(INDENT);
+                    s << INDENT << "PyErr_Format(PyExc_TypeError, \"Invalid return value in function %s, expected %s, got %s.\", \""
+                    << func->ownerClass()->name() << '.' << func->name() << "\", " << desiredType
+                    << ", " PYTHON_RETURN_VAR "->ob_type->tp_name);" << endl;
+                    s << INDENT << "return ";
+                    writeMinimalConstructorCallArguments(s, func->type());
+                    s << ';' << endl;
+                }
                 s << INDENT << "}" << endl;
             }
 
@@ -558,7 +561,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 writeCodeSnips(s, convRule, CodeSnip::Any, TypeSystem::NativeCode, func);
             } else if (!injectedCodeHasReturnValueAttribution(func, TypeSystem::NativeCode)) {
                 s << INDENT;
-                s << translateTypeForWrapperMethod(func->type(), func->implementingClass()) << ' ' << CPP_RETURN_VAR << "(";
+                s << translateTypeForWrapperMethod(func->type(), func->implementingClass()) << " " CPP_RETURN_VAR "(";
                 writeToCppConversion(s, func->type(), func->implementingClass(), PYTHON_RETURN_VAR);
                 s << ')';
                 s << ';' << endl;
@@ -582,7 +585,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     }
 
     if (type)
-        s << INDENT << "return "CPP_RETURN_VAR";" << endl;
+        s << INDENT << "return " CPP_RETURN_VAR ";" << endl;
 
     s << '}' << endl << endl;
 }
@@ -654,7 +657,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
         s << INDENT << "int overloadId = -1;" << endl;
 
     if (overloadData.hasAllowThread())
-        s << INDENT << "Shiboken::ThreadStateSaver " << THREAD_STATE_SAVER_VAR << ';' << endl;
+        s << INDENT << "Shiboken::ThreadStateSaver " THREAD_STATE_SAVER_VAR ";" << endl;
     s << INDENT << "SbkBaseWrapper* sbkSelf = reinterpret_cast<SbkBaseWrapper*>(self);" << endl;
 
     if (metaClass->isAbstract() || metaClass->baseClassNames().size() > 1) {
@@ -857,8 +860,9 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         if (rfunc->isOperatorOverload() && rfunc->isBinaryOperator()) {
             QString checkFunc = cpythonCheckFunction(rfunc->ownerClass()->typeEntry());
             s << INDENT << "bool isReverse = " << checkFunc << "(arg) && !" << checkFunc << "(self);\n"
-                << INDENT << "if (isReverse)\n"
-                << INDENT << INDENT << "std::swap(self, arg);\n\n";
+              << INDENT << "if (isReverse)\n";
+            Indentation indent(INDENT);
+            s << INDENT << "std::swap(self, arg);\n\n";
         }
 
         // Checks if the underlying C++ object is valid.
@@ -878,9 +882,9 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
     bool hasReturnValue = overloadData.hasNonVoidReturnType();
 
     if (hasReturnValue && !rfunc->isInplaceOperator())
-        s << INDENT << "PyObject* " << PYTHON_RETURN_VAR << " = 0;" << endl;
+        s << INDENT << "PyObject* " PYTHON_RETURN_VAR " = 0;" << endl;
     if (overloadData.hasAllowThread())
-        s << INDENT << "Shiboken::ThreadStateSaver " << THREAD_STATE_SAVER_VAR << ';' << endl;
+        s << INDENT << "Shiboken::ThreadStateSaver " THREAD_STATE_SAVER_VAR ";" << endl;
     s << endl;
 
     if (minArgs != maxArgs || maxArgs > 1) {
@@ -917,14 +921,14 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
                 s << INDENT << "if (revOpMethod && PyCallable_Check(revOpMethod)) {" << endl;
                 {
                     Indentation indent(INDENT);
-                    s << INDENT << PYTHON_RETURN_VAR << " = PyObject_CallFunction(revOpMethod, const_cast<char*>(\"O\"), self);" << endl;
+                    s << INDENT << PYTHON_RETURN_VAR " = PyObject_CallFunction(revOpMethod, const_cast<char*>(\"O\"), self);" << endl;
                     s << INDENT << "if (PyErr_Occurred() && (PyErr_ExceptionMatches(PyExc_NotImplementedError)";
                     s << " || PyErr_ExceptionMatches(PyExc_AttributeError))) {" << endl;
                     {
                         Indentation indent(INDENT);
                         s << INDENT << "PyErr_Clear();" << endl;
-                        s << INDENT << "Py_XDECREF(py_result);" << endl;
-                        s << INDENT << "py_result = 0;" << endl;
+                        s << INDENT << "Py_XDECREF(" PYTHON_RETURN_VAR ");" << endl;
+                        s << INDENT << PYTHON_RETURN_VAR " = 0;" << endl;
                     }
                     s << INDENT << '}' << endl;
                 }
@@ -934,22 +938,22 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             s << INDENT << "}" << endl;
         }
         s << INDENT << "// Do not enter here if other object has implemented a reverse operator." << endl;
-        s << INDENT << "if (!" << PYTHON_RETURN_VAR << ") {" << endl << endl;
+        s << INDENT << "if (!" PYTHON_RETURN_VAR ") {" << endl << endl;
     }
 
     writeOverloadedMethodDecisor(s, &overloadData);
 
     if (callExtendedReverseOperator)
-        s << endl << INDENT << "} // End of \"if (!" << PYTHON_RETURN_VAR << ")\"" << endl << endl;
+        s << endl << INDENT << "} // End of \"if (!" PYTHON_RETURN_VAR ")\"" << endl << endl;
 
     s << endl << INDENT << "if (PyErr_Occurred()";
     if (hasReturnValue && !rfunc->isInplaceOperator())
-        s << " || !" << PYTHON_RETURN_VAR;
+        s << " || !" PYTHON_RETURN_VAR;
     s << ") {" << endl;
     {
         Indentation indent(INDENT);
         if (hasReturnValue  && !rfunc->isInplaceOperator())
-            s << INDENT << "Py_XDECREF(" << PYTHON_RETURN_VAR << ");" << endl;
+            s << INDENT << "Py_XDECREF(" PYTHON_RETURN_VAR ");" << endl;
         s << INDENT << "return " << m_currentErrorCode << ';' << endl;
     }
     s << INDENT << '}' << endl;
@@ -959,7 +963,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             s << INDENT << "Py_INCREF(self);\n";
             s << INDENT << "return self;\n";
         } else {
-            s << INDENT << "return " << PYTHON_RETURN_VAR << ";\n";
+            s << INDENT << "return " PYTHON_RETURN_VAR ";\n";
         }
     } else {
         s << INDENT << "Py_RETURN_NONE;" << endl;
@@ -1009,7 +1013,8 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
             invArgsLen << QString("numArgs == %1").arg(i);
         s << INDENT << "// invalid argument lengths" << endl;
         s << INDENT << "if (" << invArgsLen.join(" || ") << ")" << endl;
-        s << INDENT << INDENT << "goto " << cpythonFunctionName(rfunc) << "_TypeError;" << endl << endl;
+        Indentation indent(INDENT);
+        s << INDENT << "goto " << cpythonFunctionName(rfunc) << "_TypeError;" << endl << endl;
     }
 
     QString funcName;
@@ -1036,14 +1041,14 @@ void CppGenerator::writeCppSelfDefinition(QTextStream& s, const AbstractMetaFunc
 #ifdef AVOID_PROTECTED_HACK
     bool hasProtectedFunctions = func->ownerClass()->hasProtectedFunctions();
     QString _wrapperName = wrapperName(func->ownerClass());
-    s << (hasProtectedFunctions ? _wrapperName : func->ownerClass()->qualifiedCppName()) << "* " << CPP_SELF_VAR << " = ";
+    s << (hasProtectedFunctions ? _wrapperName : func->ownerClass()->qualifiedCppName()) << "* " CPP_SELF_VAR " = ";
     s << (hasProtectedFunctions ? QString("(%1*)").arg(_wrapperName) : "");
 #else
-    s << func->ownerClass()->qualifiedCppName() << "* " << CPP_SELF_VAR << " = ";
+    s << func->ownerClass()->qualifiedCppName() << "* " CPP_SELF_VAR " = ";
 #endif
     s << cpythonWrapperCPtr(func->ownerClass(), "self") << ';' << endl;
     if (func->isUserAdded())
-        s << INDENT << "(void)" << CPP_SELF_VAR << "; // avoid warnings about unused variables" << endl;
+        s << INDENT << "(void)" CPP_SELF_VAR "; // avoid warnings about unused variables" << endl;
 }
 
 void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
@@ -1213,7 +1218,7 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
 void CppGenerator::writeNoneReturn(QTextStream& s, const AbstractMetaFunction* func, bool thereIsReturnValue)
 {
     if (thereIsReturnValue && (!func->type() || func->argumentRemoved(0)) && !injectedCodeHasReturnValueAttribution(func)) {
-        s << INDENT << PYTHON_RETURN_VAR << " = Py_None;" << endl;
+        s << INDENT << PYTHON_RETURN_VAR " = Py_None;" << endl;
         s << INDENT << "Py_INCREF(Py_None);" << endl;
     }
 }
@@ -1527,7 +1532,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 s << "\" with the modifications described in the type system file" << endl;
             }
         } else if (func->isOperatorOverload()) {
-            QString firstArg = QString("(*%1)").arg(CPP_SELF_VAR);
+            QString firstArg("(*" CPP_SELF_VAR ")");
             QString secondArg("cpp_arg0");
             if (!func->isUnaryOperator() && shouldDereferenceArgumentPointer(func->arguments().first())) {
                 secondArg.prepend("(*");
@@ -1566,7 +1571,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 if (func->ownerClass()) {
 #ifndef AVOID_PROTECTED_HACK
                     if (!func->isStatic())
-                        mc << CPP_SELF_VAR << "->";
+                        mc << CPP_SELF_VAR "->";
                     if (!func->isAbstract())
                         mc << func->ownerClass()->qualifiedCppName() << "::";
                     mc << func->originalName();
@@ -1590,18 +1595,18 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         if (!badModifications) {
             if (!injectedCodeCallsCppFunction(func)) {
                 if (func->allowThread())
-                    s << INDENT << THREAD_STATE_SAVER_VAR << ".save();" << endl;
+                    s << INDENT << THREAD_STATE_SAVER_VAR ".save();" << endl;
                 s << INDENT;
                 if (isCtor)
                     s << "cptr = ";
                 else if (func->type() && !func->isInplaceOperator())
-                    s << func->type()->cppSignature() << ' ' << CPP_RETURN_VAR << " = ";
+                    s << func->type()->cppSignature() << " " CPP_RETURN_VAR " = ";
                 s << methodCall << ';' << endl;
                 if (func->allowThread())
-                    s << INDENT << THREAD_STATE_SAVER_VAR << ".restore();" << endl;
+                    s << INDENT << THREAD_STATE_SAVER_VAR ".restore();" << endl;
 
                 if (!isCtor && !func->isInplaceOperator() && func->type()) {
-                    s << INDENT << PYTHON_RETURN_VAR << " = ";
+                    s << INDENT << PYTHON_RETURN_VAR " = ";
                     writeToPythonConversion(s, func->type(), func->ownerClass(), CPP_RETURN_VAR);
                     s << ';' << endl;
                 }
@@ -1652,7 +1657,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 s << "SbkBaseWrapper_setOwnership(" << pyArgName << ", true);";
             } else if (wrappedClass->hasVirtualDestructor()) {
                 if (arg_mod.index == 0) {
-                    s << "SbkBaseWrapper_setOwnership(" << PYTHON_RETURN_VAR << ", 0);";
+                    s << "SbkBaseWrapper_setOwnership(" PYTHON_RETURN_VAR ", 0);";
                 } else {
                     s << "BindingManager::instance().transferOwnershipToCpp(" << pyArgName << ");";
                 }
@@ -2791,7 +2796,8 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     } else {
         s << INDENT << "Py_INCREF(reinterpret_cast<PyObject*>(&" << pyTypeName << "));" << endl;
         s << INDENT << "PyModule_AddObject(module, \"" << metaClass->name() << "\"," << endl;
-        s << INDENT << INDENT << "((PyObject*)&" << pyTypeName << "));" << endl << endl;
+        Indentation indent(INDENT);
+        s << INDENT << "((PyObject*)&" << pyTypeName << "));" << endl << endl;
     }
 
     if (!metaClass->enums().isEmpty()) {

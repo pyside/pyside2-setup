@@ -24,9 +24,9 @@
 #ifndef SHIBOKENGENERATOR_H
 #define SHIBOKENGENERATOR_H
 
-#define PYTHON_RETURN_VAR         "py_result"
-#define CPP_RETURN_VAR            "cpp_result"
-#define THREAD_STATE_SAVER_VAR    "thread_state_saver"
+#define PYTHON_RETURN_VAR         "pyResult"
+#define CPP_RETURN_VAR            "cppResult"
+#define THREAD_STATE_SAVER_VAR    "threadStateSaver"
 #define CPP_SELF_VAR              "cppSelf"
 
 #include <generator.h>
