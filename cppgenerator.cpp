@@ -1380,8 +1380,12 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction* func, in
         pyArgName = QString("self");
         *wrappedClass = func->implementingClass();
     } else if (argIndex == 0) {
-        pyArgName = PYTHON_RETURN_VAR;
-        *wrappedClass = classes().findClass(func->type()->typeEntry()->name());
+        if (func->type()) {
+            pyArgName = PYTHON_RETURN_VAR;
+            *wrappedClass = classes().findClass(func->type()->typeEntry()->name());
+        } else {
+            ReportHandler::warning("Invalid Argument index on function modification: " + func->name());
+        }
     } else {
         int real_index = OverloadData::numberOfRemovedArguments(func, argIndex - 1);
         *wrappedClass = classes().findClass(func->arguments().at(real_index)->type()->typeEntry()->name());
