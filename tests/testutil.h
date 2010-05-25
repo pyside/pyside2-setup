@@ -31,10 +31,11 @@
 class TestUtil
 {
 public:
-    TestUtil(const char* cppCode, const char* xmlCode, bool silent = true) : m_builder(0)
+    TestUtil(const char* cppCode, const char* xmlCode, bool silent = true, double apiVersion = 0) : m_builder(0)
     {
         ReportHandler::setSilent(silent);
         m_builder = new AbstractMetaBuilder;
+        TypeDatabase::instance()->setApiVersion(apiVersion);
         QBuffer buffer;
         // parse typesystem
         buffer.setData(xmlCode);

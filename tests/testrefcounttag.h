@@ -31,6 +31,7 @@ class TestRefCountTag : public QObject
     Q_OBJECT
     private slots:
         void testReferenceCountTag();
+        void testWithApiVersion();
 };
 
 #endif

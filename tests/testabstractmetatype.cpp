@@ -52,6 +52,41 @@ void TestAbstractMetaType::testConstCharPtrType()
     QVERIFY(!rtype->isValuePointer());
 }
 
+void TestAbstractMetaType::testApiVersionSupported()
+{
+    const char* cppCode ="class foo {}; class foo2 {};\
+                          void justAtest(); void justAtest3();";
+    const char* xmlCode = "<typesystem package='Foo'>\
+        <value-type name='foo' since='0.1'/>\
+        <value-type name='foo2' since='1.0'/>\
+        <value-type name='foo3' since='1.1'/>\
+        <function signature='justAtest()' since='0.1'/>\
+        <function signature='justAtest2()' since='1.1'/>\
+        <function signature='justAtest3()'/>\
+    </typesystem>";
+    TestUtil t(cppCode, xmlCode, false, 1.0);
+
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.size(), 2);
+
+
+    AbstractMetaFunctionList functions = t.builder()->globalFunctions();
+    QCOMPARE(functions.size(), 2);
+}
+
+
+void TestAbstractMetaType::testApiVersionNotSupported()
+{
+    const char* cppCode ="class object {};";
+    const char* xmlCode = "<typesystem package='Foo'>\
+        <value-type name='object' since='0.1'/>\
+    </typesystem>";
+    TestUtil t(cppCode, xmlCode, true, 0.1);
+
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.size(), 1);
+}
+
 void TestAbstractMetaType::testCharType()
 {
     const char* cppCode ="char justAtest(); class A {};";

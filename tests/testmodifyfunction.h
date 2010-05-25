@@ -31,6 +31,7 @@ class TestModifyFunction : public QObject
     Q_OBJECT
     private slots:
         void testOwnershipTransfer();
+        void testWithApiVersion();
 };
 
 #endif

@@ -34,6 +34,8 @@ private slots:
     void testCharType();
     void testTypedef();
     void testTypedefWithTemplates();
+    void testApiVersionSupported();
+    void testApiVersionNotSupported();
 };
 
 #endif

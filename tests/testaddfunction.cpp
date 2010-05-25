@@ -30,7 +30,7 @@ void TestAddFunction::testParsingFuncNameAndConstness()
 {
     // generic test...
     const char sig1[] = "func(type1, const type2, const type3* const)";
-    AddedFunction f1(sig1, "void");
+    AddedFunction f1(sig1, "void", 0);
     QCOMPARE(f1.name(), QString("func"));
     QCOMPARE(f1.arguments().count(), 3);
     AddedFunction::TypeInfo retval = f1.returnType();
@@ -41,7 +41,7 @@ void TestAddFunction::testParsingFuncNameAndConstness()
 
     // test with a ugly template as argument and other ugly stuff
     const char sig2[] = "    _fu__nc_       (  type1, const type2, const Abc<int& , C<char*> *   >  * *, const type3* const    )   const ";
-    AddedFunction f2(sig2, "const Abc<int& , C<char*> *   >  * *");
+    AddedFunction f2(sig2, "const Abc<int& , C<char*> *   >  * *", 0);
     QCOMPARE(f2.name(), QString("_fu__nc_"));
     QList< AddedFunction::TypeInfo > args = f2.arguments();
     QCOMPARE(args.count(), 4);
@@ -58,7 +58,7 @@ void TestAddFunction::testParsingFuncNameAndConstness()
 
     // function with no args.
     const char sig3[] = "func()";
-    AddedFunction f3(sig3, "void");
+    AddedFunction f3(sig3, "void", 0);
     QCOMPARE(f3.name(), QString("func"));
     QCOMPARE(f3.arguments().count(), 0);
 }
@@ -170,7 +170,7 @@ void TestAddFunction::testAddFunctionCodeSnippets()
 void TestAddFunction::testAddFunctionWithoutParenteses()
 {
     const char sig1[] = "func";
-    AddedFunction f1(sig1, "void");
+    AddedFunction f1(sig1, "void", 0);
 
     QCOMPARE(f1.name(), QString("func"));
     QCOMPARE(f1.arguments().count(), 0);
@@ -199,7 +199,7 @@ void TestAddFunction::testAddFunctionWithoutParenteses()
 void TestAddFunction::testAddFunctionWithDefaultArgs()
 {
     const char sig1[] = "func";
-    AddedFunction f1(sig1, "void");
+    AddedFunction f1(sig1, "void", 0);
 
     QCOMPARE(f1.name(), QString("func"));
     QCOMPARE(f1.arguments().count(), 0);
@@ -262,7 +262,7 @@ void TestAddFunction::testAddFunctionAtModuleLevel()
 void TestAddFunction::testAddFunctionWithVarargs()
 {
     const char sig1[] = "func(int,char,...)";
-    AddedFunction f1(sig1, "void");
+    AddedFunction f1(sig1, "void", 0);
 
     QCOMPARE(f1.name(), QString("func"));
     QCOMPARE(f1.arguments().count(), 3);
@@ -333,6 +333,25 @@ void TestAddFunction::testAddGlobalFunction()
     QVERIFY(!globalFuncs[0]->injectedCodeSnips().isEmpty());
     QVERIFY(!globalFuncs[1]->injectedCodeSnips().isEmpty());
 }
+
+void TestAddFunction::testAddFunctionWithApiVersion()
+{
+    const char cppCode[] = "";
+    const char xmlCode[] = "\
+    <typesystem package='Foo'>\
+        <primitive-type name='int'/> \
+        <add-function signature='globalFunc(int, int)' static='yes' since='1.3'>\
+            <inject-code class='target' position='beginning'>custom_code();</inject-code>\
+        </add-function>\
+        <add-function signature='globalFunc2(int, int)' static='yes' since='0.1'>\
+            <inject-code class='target' position='beginning'>custom_code();</inject-code>\
+        </add-function>\
+    </typesystem>";
+    TestUtil t(cppCode, xmlCode, true, 0.1);
+    AbstractMetaFunctionList globalFuncs = t.builder()->globalFunctions();
+    QCOMPARE(globalFuncs.count(), 1);
+}
+
 
 QTEST_APPLESS_MAIN(TestAddFunction)
 

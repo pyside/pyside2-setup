@@ -33,6 +33,8 @@ class TestCodeInjections : public QObject
     Q_OBJECT
 private slots:
     void testReadFileUtf8();
+    void testInjectWithValidApiVersion();
+    void testInjectWithInvalidApiVersion();
 };
 
 #endif

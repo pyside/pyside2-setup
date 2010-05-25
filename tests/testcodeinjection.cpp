@@ -50,6 +50,46 @@ void TestCodeInjections::testReadFileUtf8()
     QVERIFY(code.indexOf(utf8Data) != -1);
 }
 
+void TestCodeInjections::testInjectWithValidApiVersion()
+{
+    const char* cppCode ="struct A {};";
+    const char* xmlCode = "\
+    <typesystem package='Foo'> \
+        <value-type name='A'> \
+            <inject-code class='target' since='1.0'>\
+                test Inject code\
+            </inject-code>\
+        </value-type>\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, true, 1.0);
+
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* classA = classes.findClass("A");
+    QCOMPARE(classA->typeEntry()->codeSnips().count(), 1);
+}
+
+void TestCodeInjections::testInjectWithInvalidApiVersion()
+{
+    const char* cppCode ="struct A {};";
+    const char* xmlCode  = "\
+    <typesystem package=\"Foo\"> \
+        <value-type name='A'> \
+            <inject-code class='target' since='1.0'>\
+                test Inject code\
+            </inject-code>\
+        </value-type>\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, true, 0.1);
+
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* classA = classes.findClass("A");
+    QCOMPARE(classA->typeEntry()->codeSnips().count(), 0);
+}
+
+
+
 QTEST_APPLESS_MAIN(TestCodeInjections)
 
 #include "testcodeinjection.moc"

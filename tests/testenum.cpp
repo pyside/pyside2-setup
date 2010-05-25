@@ -75,6 +75,28 @@ void TestEnum::testEnumCppSignature()
     QCOMPARE(classEnums.first()->name(), QString("ClassEnum"));
 }
 
+void TestEnum::testEnumWithApiVersion()
+{
+    const char* cppCode ="\
+    struct A {\
+        enum ClassEnum { EnumA, EnumB };\
+        enum ClassEnum2 { EnumC, EnumD };\
+    };\
+    ";
+    const char* xmlCode = "\
+    <typesystem package=\"Foo\"> \
+        <value-type name='A'/> \
+        <enum-type name='A::ClassEnum' since='0.1'/>\
+        <enum-type name='A::ClassEnum2' since='0.2'/>\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, true, 0.1);
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.count(), 1);
+    QCOMPARE(classes[0]->enums().count(), 1);
+}
+
+
 QTEST_APPLESS_MAIN(TestEnum)
 
 #include "testenum.moc"

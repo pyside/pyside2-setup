@@ -52,6 +52,43 @@ void TestModifyFunction::testOwnershipTransfer()
     QCOMPARE(func->ownership(func->ownerClass(), TypeSystem::TargetLangCode, 0), TypeSystem::CppOwnership);
 }
 
+void TestModifyFunction::testWithApiVersion()
+{
+    const char* cppCode ="\
+    struct A {};\
+    struct B {\
+        virtual A* method();\
+        virtual B* methodB();\
+    };\
+    ";
+    const char* xmlCode = "\
+    <typesystem package='Foo'> \
+        <object-type name='A' /> \
+        <object-type name='B'> \
+        <modify-function signature='method()' since='0.1'>\
+            <modify-argument index='return'>\
+                <define-ownership owner='c++' /> \
+            </modify-argument>\
+        </modify-function>\
+        <modify-function signature='methodB()' since='0.2'>\
+            <modify-argument index='return'>\
+                <define-ownership owner='c++' /> \
+            </modify-argument>\
+        </modify-function>\
+        </object-type>\
+    </typesystem>";
+    TestUtil t(cppCode, xmlCode, false, 0.1);
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* classB = classes.findClass("B");
+    const AbstractMetaFunction* func = classB->findFunction("method");
+
+    QCOMPARE(func->ownership(func->ownerClass(), TypeSystem::TargetLangCode, 0), TypeSystem::CppOwnership);
+
+    func = classB->findFunction("methodB");
+    QVERIFY(func->ownership(func->ownerClass(), TypeSystem::TargetLangCode, 0) != TypeSystem::CppOwnership);
+}
+
+
 QTEST_APPLESS_MAIN(TestModifyFunction)
 
 #include "testmodifyfunction.moc"

@@ -53,6 +53,41 @@ void TestRefCountTag::testReferenceCountTag()
     QCOMPARE(refCount.action, ReferenceCount::Add);
 }
 
+void TestRefCountTag::testWithApiVersion()
+{
+    const char* cppCode ="\
+    struct A {};\
+    struct B {\
+        void keepObject(B*, B*);\
+    };\
+    ";
+    const char* xmlCode = "\
+    <typesystem package=\"Foo\"> \
+        <object-type name='A' /> \
+        <object-type name='B'> \
+        <modify-function signature='keepObject(B*, B*)'>\
+            <modify-argument index='1' since='0.1'>\
+                <reference-count action='add' /> \
+            </modify-argument>\
+            <modify-argument index='2' since='0.2'>\
+                <reference-count action='add' /> \
+            </modify-argument>\
+        </modify-function>\
+        </object-type>\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, false, 0.1);
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* classB = classes.findClass("B");
+    const AbstractMetaFunction* func = classB->findFunction("keepObject");
+
+    ReferenceCount refCount = func->modifications().first().argument_mods.first().referenceCounts.first();
+    QCOMPARE(refCount.action, ReferenceCount::Add);
+
+    QCOMPARE(func->modifications().size(), 1);
+}
+
+
 QTEST_APPLESS_MAIN(TestRefCountTag)
 
 #include "testrefcounttag.moc"
