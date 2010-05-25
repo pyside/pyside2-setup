@@ -36,7 +36,7 @@ inline CodeSnipList getConversionRule(TypeSystem::Language lang, const AbstractM
     foreach(AbstractMetaArgument *arg, function->arguments()) {
         QString convRule = function->conversionRule(lang, arg->argumentIndex() + 1);
         if (!convRule.isEmpty()) {
-            CodeSnip snip(TypeSystem::TargetLangCode);
+            CodeSnip snip(0, TypeSystem::TargetLangCode);
             snip.position = CodeSnip::Beginning;
 
             convRule.replace("%in", arg->argumentName());
@@ -60,7 +60,7 @@ inline CodeSnipList getReturnConversionRule(TypeSystem::Language lang,
 
     QString convRule = function->conversionRule(lang, 0);
     if (!convRule.isEmpty()) {
-        CodeSnip snip(lang);
+        CodeSnip snip(0, lang);
         snip.position = CodeSnip::Beginning;
 
         convRule.replace("%in", inputName);
