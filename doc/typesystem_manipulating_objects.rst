@@ -15,7 +15,7 @@ inject-code
 
          <value-type>
              <inject-code class="native | target | target-declaration"
-                 position="beginning | end">
+                 position="beginning | end" since="...">
                  // the code
              </inject-code>
          </value-type>
@@ -32,6 +32,8 @@ inject-code
     If the ``position`` attribute is set to *beginning* (the default), the code
     is inserted at the beginning of the function. If it is set to *end*, the code
     is inserted at the end of the function.
+
+    The ``since`` attribute specify the API version where this code was injected.
 
 modify-field
 ^^^^^^^^^^^^
@@ -66,6 +68,7 @@ modify-function
 
          <object-type>
              <modify-function signature="..."
+                              since="..."
                               remove="all | c++"
                               access="public | private | protected"
                               rename="..." />
@@ -73,6 +76,8 @@ modify-function
 
     The ``signature`` attribute is a normalized C++ signature, excluding return
     values but including potential const declarations.
+
+    The ``since`` attribute specify the API version when this function was modified.
 
     The ``remove``, ``access`` and ``rename`` attributes are *optional* attributes
     for added convenience; they serve the same purpose as the deprecated tags :ref:`remove`, :ref:`access` and :ref:`rename`.
@@ -93,10 +98,12 @@ add-function
     .. code-block:: xml
 
          <object-type>
-             <add-function signature="..." return-type="..." access="public | protected" static="yes | no" />
+             <add-function signature="..." return-type="..." access="public | protected" static="yes | no" since="..."/>
          </object-type>
 
     The ``return-type`` attribute defaults to *void*, the ``access`` to *public* and the ``static`` one to *no*.
+
+    The ``since`` attribute specify the API version when this function was added.
 
 .. _conversion-rule-on-types:
 
@@ -113,8 +120,10 @@ conversion-rule
     .. code-block:: xml
 
         <value-type name="Foo">
-            <convertion-rule file="my_converter_implementation.h" />
+            <convertion-rule file="my_converter_implementation.h" since="..."/>
         </value-type>
+
+    The ``since`` attribute specify the API version when this conversion rule became valid.
 
     .. note:: You can also use the conversion-rule node to specify :ref:`how the conversion of a single function argument should be done in a function <conversion-rule>`.
 

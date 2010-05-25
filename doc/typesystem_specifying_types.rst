@@ -75,20 +75,24 @@ primitive-type
 
         <typesystem>
             <primitive-type name="..."
+                since="..."
                 target-name="..."
                 preferred-conversion="yes | no" />
         </typesystem>
 
-    The **name** attribute is the name of the primitive in C++, the optimal
+    The **name** attribute is the name of the primitive in C++, the optional,
     **target-name** attribute is the name of the primitive type in the target
     language. If the later two attributes are not specified their default value
     will be the same as the **name** attribute.
+
+    The *optional*  **since** value is used to specify the API version of this type.
 
     If the *optional* **preferred-conversion** attribute is set to *no*, it
     indicates that this version of the primitive type is not the preferred C++
     equivalent of the target language type. For example, in Python both "qint64"
     and "long long" become "long" but we should prefer the "qint64" version. For
     this reason we mark "long long" with preferred-conversion="no".
+
 
 .. _namespace:
 
@@ -109,6 +113,8 @@ namespace-type
     The **name** attribute is the name of the namespace, e.g., "Qt". The **package**
     attribute can be used to override the package of the type system.
 
+    The *optional*  **since** value is used to specify the API version of this type.
+
 enum-type
 ^^^^^^^^^
 
@@ -120,6 +126,7 @@ enum-type
 
         <typesystem>
             <enum-type name="..."
+                since="..."
                 flags="yes | no"
                 lower-bound="..."
                 upper-bound="..."
@@ -138,6 +145,9 @@ enum-type
     use the target language integers instead of enums. And finally, the
     **extensible** attribute specifies whether the given enum can be extended
     with user values (the default is *no*).
+
+    The *optional*  **since** value is used to specify the API version of this type.
+
 
 
 reject-enum-value
@@ -167,7 +177,7 @@ value-type
     .. code-block:: xml
 
         <typesystem>
-            <value-type  name="..."
+            <value-type  name="..." since="..."
              copyable="yes | no"
              hash-function="..."
              stream="yes | no" />
@@ -181,6 +191,8 @@ value-type
     The *optional* attribute **stream** specifies whether this type will be able to
     use externally defined operators, like QDataStream << and >>. If equals to **yes**,
     these operators will be called as normal methods within the current class.
+
+    The *optional*  **since** value is used to specify the API version of this type.
 
 
 .. _object-type:
@@ -196,6 +208,7 @@ object-type
 
         <typesystem>
             <object-type name="..."
+             since="..."
              copyable="yes | no"
              hash-function="..."
              stream="yes | no" />
@@ -211,6 +224,8 @@ object-type
     use externally defined operators, like QDataStream << and >>. If equals to **yes**,
     these operators will be called as normal methods within the current class.
 
+    The *optional*  **since** value is used to specify the API version of this type.
+
 
 interface-type
 ^^^^^^^^^^^^^^
@@ -223,6 +238,7 @@ interface-type
 
         <typesystem>
             <interface-type name="..."
+                since="..."
                 package ="..."
                 default-superclass ="..." />
         </typesystem>
@@ -232,6 +248,8 @@ interface-type
     If there is no C++ base class, the *optional* **default-superclass** attribute
     can be used to specify a superclass in the generated target language API, for
     the given class.
+
+    The *optional*  **since** value is used to specify the API version of this interface.
 
 .. _container-type:
 
@@ -245,6 +263,7 @@ container-type
 
         <typesystem>
             <container-type name="..."
+                since="..."
                 type ="..." />
         </typesystem>
 
@@ -252,6 +271,8 @@ container-type
     attribute is used to indicate what conversion rule will be applied to the
     container. It can be: *list*, *string-list*, *linked-list*, *vector*, *stack*,
     *queue*, *set*, *map*, *multi-map*, *hash*, *multi-hash* or *pair*.
+
+    The *optional*  **since** value is used to specify the API version of this container.
 
 .. _function:
 
@@ -264,9 +285,11 @@ function
     .. code-block:: xml
 
         <typesystem>
-            <function signature="..." />
+            <function signature="..." since="..."/>
         </typesystem>
 
     This tag has some limitations, it doesn't support function modifications, besides you
     can't add a function overload using :ref:`add-function` tag to an existent function.
     These limitation will be addressed in future versions of ApiExtractor.
+
+    The *optional*  **since** value is used to specify the API version of this function.
