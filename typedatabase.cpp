@@ -396,3 +396,8 @@ NamespaceTypeEntry* TypeDatabase::findNamespaceType(const QString& name) const
         return 0;
 }
 
+bool TypeDatabase::supportedApiVersion(double version) const
+{
+    return version <= m_apiVersion;
+}
+

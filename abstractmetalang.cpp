@@ -712,7 +712,7 @@ CodeSnipList AbstractMetaFunction::injectedCodeSnips(CodeSnip::Position position
 {
     CodeSnipList result;
     foreach (const FunctionModification mod, modifications(ownerClass())) {
-        if (mod.isCodeInjection()) {
+        if (mod.isCodeInjection() && TypeDatabase::instance()->supportedApiVersion(mod.version())) {
             QList<CodeSnip>::const_iterator it = mod.snips.constBegin();
             for (;it != mod.snips.constEnd(); ++it) {
                 if ((it->language & language) && (it->position == position || position == CodeSnip::Any))

@@ -43,6 +43,7 @@ public:
         RedefinedToNotClass,
         UnmatchedArgumentType,
         UnmatchedReturnType,
+        ApiIncompatible,
         NoReason
     };
 
@@ -137,7 +138,7 @@ public:
     QString fixDefaultValue(ArgumentModelItem item, AbstractMetaType *type,
                                   AbstractMetaFunction *fnc, AbstractMetaClass *,
                                   int argumentIndex);
-    AbstractMetaType* translateType(const AddedFunction::TypeInfo& typeInfo);
+    AbstractMetaType* translateType(double vr, const AddedFunction::TypeInfo& typeInfo);
     AbstractMetaType *translateType(const TypeInfo &type, bool *ok, bool resolveType = true, bool resolveScope = true);
 
     void decideUsagePattern(AbstractMetaType *type);

@@ -385,9 +385,15 @@ bool AbstractMetaBuilder::build(QIODevice* input)
     foreach (FunctionModelItem func, m_dom->functions()) {
         if (func->accessPolicy() != CodeModel::Public || func->name().startsWith("operator"))
             continue;
+
         FunctionTypeEntry* funcEntry = types->findFunctionType(func->name());
         if (!funcEntry || !funcEntry->generateCode())
             continue;
+
+        if (!types->supportedApiVersion(funcEntry->version())) {
+            m_rejectedFunctions.insert(func->name(), ApiIncompatible);
+            continue;
+        }
 
         AbstractMetaFunction* metaFunc = traverseFunction(func);
         if (!metaFunc)
@@ -432,13 +438,18 @@ bool AbstractMetaBuilder::build(QIODevice* input)
             cls->typeEntry()->setLookupName(cls->typeEntry()->targetLangName() + "$ConcreteWrapper");
     }
 
-    QList<TypeEntry*> entries = TypeDatabase::instance()->entries().values();
+    QList<TypeEntry*> entries = types->entries().values();
     ReportHandler::setProgressReference(entries);
     foreach (const TypeEntry *entry, entries) {
         ReportHandler::progress("Detecting inconsistencies in typesystem for %s", qPrintable(entry->name()));
 
         if (entry->isPrimitive())
             continue;
+
+        if (!types->supportedApiVersion(entry->version())) {
+            m_rejectedClasses.insert(entry->name(), ApiIncompatible);
+            continue;
+        }
 
         if ((entry->isValue() || entry->isObject())
             && !entry->isString()
@@ -546,6 +557,10 @@ bool AbstractMetaBuilder::build(QIODevice* input)
 
     // Functions added to the module on the type system.
     foreach (AddedFunction addedFunc, types->globalUserFunctions()) {
+        if (!types->supportedApiVersion(addedFunc.version())) {
+            m_rejectedFunctions.insert(addedFunc.name(), ApiIncompatible);
+            continue;
+        }
         AbstractMetaFunction* metaFunc = traverseFunction(addedFunc);
         metaFunc->setFunctionType(AbstractMetaFunction::NormalFunction);
         m_globalFunctions << metaFunc;
@@ -868,6 +883,12 @@ AbstractMetaEnum* AbstractMetaBuilder::traverseEnum(EnumModelItem enumItem, Abst
         return 0;
     }
 
+    // Skipping api incompatible
+    if (!TypeDatabase::instance()->supportedApiVersion(typeEntry->version())) {
+        m_rejectedEnums.insert(qualifiedName, ApiIncompatible);
+        return 0;
+    }
+
     AbstractMetaEnum* metaEnum = createMetaEnum();
     if (enumsDeclarations.contains(qualifiedName)
         || enumsDeclarations.contains(enumName)) {
@@ -919,7 +940,7 @@ AbstractMetaEnum* AbstractMetaBuilder::traverseEnum(EnumModelItem enumItem, Abst
             name += "::";
         }
         name += e->name();
-        EnumValueTypeEntry* enumValue = new EnumValueTypeEntry(name, e->value(), static_cast<EnumTypeEntry*>(typeEntry));
+        EnumValueTypeEntry* enumValue = new EnumValueTypeEntry(name, e->value(), static_cast<EnumTypeEntry*>(typeEntry), typeEntry->version());
         typeDb->addType(enumValue);
     }
 
@@ -947,6 +968,7 @@ AbstractMetaClass* AbstractMetaBuilder::traverseTypeAlias(TypeAliasModelItem typ
         ptype->setAliasedTypeEntry(types->findPrimitiveType(typeAliasName));
         return 0;
     }
+
 
     // If we haven't specified anything for the typedef, then we don't care
     ComplexTypeEntry* type = types->findComplexType(fullClassName);
@@ -1004,7 +1026,6 @@ AbstractMetaClass* AbstractMetaBuilder::traverseClass(ClassModelItem classItem)
     } else if (type->codeGeneration() == TypeEntry::GenerateNothing) {
         reason = GenerationDisabled;
     }
-
     if (reason != NoReason) {
         m_rejectedClasses.insert(fullClassName, reason);
         return 0;
@@ -1033,7 +1054,7 @@ AbstractMetaClass* AbstractMetaBuilder::traverseClass(ClassModelItem classItem)
     template_args.clear();
     for (int i = 0; i < template_parameters.size(); ++i) {
         const TemplateParameterModelItem &param = template_parameters.at(i);
-        TemplateArgumentEntry *param_type = new TemplateArgumentEntry(param->name());
+        TemplateArgumentEntry *param_type = new TemplateArgumentEntry(param->name(), type->version());
         param_type->setOrdinal(i);
         template_args.append(param_type);
     }
@@ -1447,7 +1468,7 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(const AddedFunction&
     metaFunction->setUserAdded(true);
     AbstractMetaAttributes::Attribute isStatic = addedFunc.isStatic() ? AbstractMetaFunction::Static : AbstractMetaFunction::None;
     metaFunction->setAttributes(metaFunction->attributes() | AbstractMetaAttributes::Final | isStatic);
-    metaFunction->setType(translateType(addedFunc.returnType()));
+    metaFunction->setType(translateType(addedFunc.version(), addedFunc.returnType()));
 
     QList<AddedFunction::TypeInfo> args = addedFunc.arguments();
     AbstractMetaArgumentList metaArguments;
@@ -1455,7 +1476,7 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(const AddedFunction&
     for (int i = 0; i < args.count(); ++i) {
         AddedFunction::TypeInfo& typeInfo = args[i];
         AbstractMetaArgument* metaArg = createMetaArgument();
-        AbstractMetaType* type = translateType(typeInfo);
+        AbstractMetaType* type = translateType(addedFunc.version(), typeInfo);
         decideUsagePattern(type);
         metaArg->setType(type);
         metaArg->setArgumentIndex(i);
@@ -1503,6 +1524,7 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
         m_rejectedFunctions.insert(className + "::" + functionName, GenerationDisabled);
         return 0;
     }
+
 
     Q_ASSERT(functionItem->functionType() == CodeModel::Normal
              || functionItem->functionType() == CodeModel::Signal
@@ -1572,6 +1594,7 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
             metaFunction->setInvalid(true);
             return metaFunction;
         }
+
         metaFunction->setType(type);
 
         if (functionItem->functionType() == CodeModel::Signal)
@@ -1661,7 +1684,7 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
     return metaFunction;
 }
 
-AbstractMetaType* AbstractMetaBuilder::translateType(const AddedFunction::TypeInfo& typeInfo)
+AbstractMetaType* AbstractMetaBuilder::translateType(double vr, const AddedFunction::TypeInfo& typeInfo)
 {
     Q_ASSERT(!typeInfo.name.isEmpty());
     AbstractMetaType* metaType = createMetaType();
@@ -1673,7 +1696,7 @@ AbstractMetaType* AbstractMetaBuilder::translateType(const AddedFunction::TypeIn
 
     type = typeDb->findType(typeInfo.name);
     if (!type)
-        type = new TypeEntry(typeInfo.name, TypeEntry::CustomType);
+        type = new TypeEntry(typeInfo.name, TypeEntry::CustomType, vr);
 
     metaType->setTypeEntry(type);
     metaType->setIndirections(typeInfo.indirections);
@@ -1757,7 +1780,7 @@ AbstractMetaType* AbstractMetaBuilder::translateType(const TypeInfo& _typei, boo
                 AbstractMetaType* arrayType = createMetaType();
                 arrayType->setArrayElementCount(elems);
                 arrayType->setArrayElementType(elementType);
-                arrayType->setTypeEntry(new ArrayTypeEntry(elementType->typeEntry()));
+                arrayType->setTypeEntry(new ArrayTypeEntry(elementType->typeEntry() , elementType->typeEntry()->version()));
                 decideUsagePattern(arrayType);
 
                 elementType = arrayType;
@@ -2443,6 +2466,10 @@ static void writeRejectLogFile(const QString &name,
 
         case AbstractMetaBuilder::UnmatchedArgumentType:
             s << "Unmatched argument type";
+            break;
+
+        case AbstractMetaBuilder::ApiIncompatible:
+            s << "Incompatible API";
             break;
 
         default:

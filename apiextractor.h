@@ -47,8 +47,8 @@ public:
     void addTypesystemSearchPath(const QStringList& paths);
     void addIncludePath(const QString& path);
     void addIncludePath(const QStringList& paths);
-
     void setLogDirectory(const QString& logDir);
+    void setApiVersion(double version);
 
     AbstractMetaEnumList globalEnums() const;
     AbstractMetaFunctionList globalFunctions() const;

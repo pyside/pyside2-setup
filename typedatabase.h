@@ -168,6 +168,18 @@ public:
     bool parseFile(const QString &filename, bool generate = true);
     bool parseFile(QIODevice* device, bool generate = true);
 
+    double apiVersion() const
+    {
+        return m_apiVersion;
+    }
+
+    void setApiVersion(double version)
+    {
+        m_apiVersion = version;
+    }
+
+    bool supportedApiVersion(double version) const;
+
 private:
     bool m_suppressWarnings;
     TypeEntryHash m_entries;
@@ -185,6 +197,8 @@ private:
 
     QList<TypeRejection> m_rejections;
     QStringList m_rebuildClasses;
+
+    double m_apiVersion;
 };
 
 #endif

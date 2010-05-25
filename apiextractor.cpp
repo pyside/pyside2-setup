@@ -104,6 +104,11 @@ void ApiExtractor::setSilent ( bool value )
     ReportHandler::setSilent(value);
 }
 
+void ApiExtractor::setApiVersion(double version)
+{
+    TypeDatabase::instance()->setApiVersion(version);
+}
+
 AbstractMetaEnumList ApiExtractor::globalEnums() const
 {
     Q_ASSERT(m_builder);
