@@ -86,6 +86,7 @@ void printUsage(const GeneratorList& generators)
     generalOptions.insert("license-file=[licensefile]", "File used for copyright headers of generated files");
     generalOptions.insert("version", "Output version information and exit");
     generalOptions.insert("generatorSet", "generatorSet to be used. e.g. qtdoc");
+    generalOptions.insert("api-version", "Specify the supported api version used to generate the bindings");
     printOptions(s, generalOptions);
 
     foreach (Generator* generator, generators) {
@@ -178,6 +179,9 @@ int main(int argc, char *argv[])
     }
     if (args.contains("no-suppress-warnings"))
         extractor.setSuppressWarnings(false);
+
+    if (args.contains("api-version"))
+        extractor.setApiVersion(args["api-version"].toDouble());
 
     if (args.contains("typesystem-paths"))
         extractor.addTypesystemSearchPath(args.value("typesystem-paths").split(PATH_SPLITTER));
