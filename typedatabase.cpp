@@ -29,7 +29,7 @@
 #include <QXmlInputSource>
 #include "reporthandler.h"
 
-TypeDatabase::TypeDatabase() : m_suppressWarnings(true)
+TypeDatabase::TypeDatabase() : m_suppressWarnings(true), m_apiVersion(0)
 {
     addType(new VoidTypeEntry());
     addType(new VarargsTypeEntry());
