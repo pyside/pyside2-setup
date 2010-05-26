@@ -38,29 +38,16 @@
 #include "libsamplemacros.h"
 #include <stdio.h>
 
+class SimpleFile_p;
+
 class LIBSAMPLE_API SimpleFile
 {
 public:
-    explicit SimpleFile(const char* filename)
-        : m_filename(filename), m_descriptor(0), m_size(0)
-    {
-    }
+    explicit SimpleFile(const char* filename);
+    ~SimpleFile();
 
-    ~SimpleFile()
-    {
-        this->close();
-    }
-
-    const char* filename()
-    {
-        return m_filename;
-    }
-
-    long size()
-    {
-        return m_size;
-    }
-
+    const char* filename();
+    long size();
     bool open();
     void close();
 
@@ -68,9 +55,7 @@ public:
     static bool exists(const char* filename);
 
 private:
-    const char* m_filename;
-    FILE* m_descriptor;
-    long m_size;
+    SimpleFile_p *p;
 };
 
 #endif // SIMPLEFILE_H
