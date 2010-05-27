@@ -35,11 +35,12 @@ public:
     {
         ReportHandler::setSilent(silent);
         m_builder = new AbstractMetaBuilder;
-        TypeDatabase::instance()->setApiVersion(apiVersion);
+        TypeDatabase* td = TypeDatabase::instance(true);
+        td->setApiVersion(apiVersion);
         QBuffer buffer;
         // parse typesystem
         buffer.setData(xmlCode);
-        TypeDatabase::instance(true)->parseFile(&buffer);
+        td->parseFile(&buffer);
         buffer.close();
         // parse C++ code
         buffer.setData(cppCode);
