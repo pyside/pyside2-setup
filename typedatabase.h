@@ -38,7 +38,7 @@ public:
 
     /**
     * Return the type system instance.
-    * \param newInstance This parameter is usefull just for unit testing, because singletons causes
+    * \param newInstance This parameter is useful just for unit testing, because singletons causes
     *                    too many side effects on unit testing.
     */
     static TypeDatabase* instance(bool newInstance = false);
