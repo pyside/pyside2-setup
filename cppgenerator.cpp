@@ -1882,7 +1882,13 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         else
             deallocClassName = cppClassName;
         tp_dealloc = "&Shiboken::deallocWrapper";
-        cpp_dtor = "&Shiboken::callCppDestructor<" + metaClass->qualifiedCppName() + " >";
+
+        QString dtorClassName = metaClass->qualifiedCppName();
+#ifdef AVOID_PROTECTED_HACK
+        if (metaClass->hasProtectedDestructor())
+            dtorClassName = wrapperName(metaClass);
+#endif
+        cpp_dtor = "&Shiboken::callCppDestructor<" + dtorClassName + " >";
 
         tp_init = onlyPrivCtor ? "0" : cpythonFunctionName(ctors.first());
     }
