@@ -2200,7 +2200,7 @@ bool AbstractMetaBuilder::inheritTemplate(AbstractMetaClass* subclass,
         possibleNames << typeName;
 
         TypeDatabase* typeDb = TypeDatabase::instance();
-        TypeEntry* t;
+        TypeEntry* t = 0;
         QString templateParamName;
         foreach (QString possibleName, possibleNames) {
             t = typeDb->findType(possibleName);
