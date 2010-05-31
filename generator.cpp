@@ -97,6 +97,26 @@ QList<const ContainerTypeEntry*> Generator::containerTypes() const
     return m_d->apiextractor->containerTypes();
 }
 
+const AbstractMetaEnum* Generator::findAbstractMetaEnum(const EnumTypeEntry* typeEntry) const
+{
+    return m_d->apiextractor->findAbstractMetaEnum(typeEntry);
+}
+
+const AbstractMetaEnum* Generator::findAbstractMetaEnum(const TypeEntry* typeEntry) const
+{
+    return m_d->apiextractor->findAbstractMetaEnum(typeEntry);
+}
+
+const AbstractMetaEnum* Generator::findAbstractMetaEnum(const FlagsTypeEntry* typeEntry) const
+{
+    return m_d->apiextractor->findAbstractMetaEnum(typeEntry);
+}
+
+const AbstractMetaEnum* Generator::findAbstractMetaEnum(const AbstractMetaType* metaType) const
+{
+    return m_d->apiextractor->findAbstractMetaEnum(metaType);
+}
+
 QSet< QString > Generator::qtMetaTypeDeclaredTypeNames() const
 {
     return m_d->apiextractor->qtMetaTypeDeclaredTypeNames();
