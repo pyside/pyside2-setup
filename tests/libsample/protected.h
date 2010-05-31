@@ -111,6 +111,10 @@ class LIBSAMPLE_API ProtectedEnumClass
 public:
     ProtectedEnumClass() {}
     virtual ~ProtectedEnumClass() {}
+    enum PublicEnum {
+        PublicItem0,
+        PublicItem1
+    };
 protected:
     enum ProtectedEnum {
         ProtectedItem0,
@@ -118,6 +122,8 @@ protected:
     };
     ProtectedEnum callProtectedEnumMethod(ProtectedEnum in) { return protectedEnumMethod(in); }
     virtual ProtectedEnum protectedEnumMethod(ProtectedEnum in) { return in; }
+    PublicEnum callPublicEnumMethod(PublicEnum in) { return publicEnumMethod(in); }
+    virtual PublicEnum publicEnumMethod(PublicEnum in) { return in; }
 };
 
 #endif // PROTECTED_H

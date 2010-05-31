@@ -185,12 +185,16 @@ class ExtendedProtectedEnumClass(ProtectedEnumClass):
         if value == ProtectedEnumClass.ProtectedItem0:
             return ProtectedEnumClass.ProtectedItem1
         return ProtectedEnumClass.ProtectedItem0
+    def publicEnumMethod(self, value):
+        if value == ProtectedEnumClass.PublicItem0:
+            return ProtectedEnumClass.PublicItem1
+        return ProtectedEnumClass.PublicItem0
 
 class ProtectedEnumTest(unittest.TestCase):
     '''Test cases for protected enum.'''
 
-    def testProtectedEnum(self):
-        '''Original protected method is being called.'''
+    def testProtectedMethodWithProtectedEnumArgument(self):
+        '''Calls protected method with protected enum argument.'''
         obj = ProtectedEnumClass()
 
         self.assertEqual(type(ProtectedEnumClass.ProtectedItem0), ProtectedEnumClass.ProtectedEnum)
@@ -201,8 +205,18 @@ class ProtectedEnumTest(unittest.TestCase):
         self.assertEqual(obj.callProtectedEnumMethod(ProtectedEnumClass.ProtectedItem0), ProtectedEnumClass.ProtectedItem0)
         self.assertEqual(obj.callProtectedEnumMethod(ProtectedEnumClass.ProtectedItem1), ProtectedEnumClass.ProtectedItem1)
 
-    def testProtectedEnumWithMethodOverride(self):
-        '''Overridden protected method is being called.'''
+    def testProtectedMethodWithPublicEnumArgument(self):
+        '''Calls protected method with public enum argument.'''
+        obj = ProtectedEnumClass()
+
+        self.assertEqual(obj.publicEnumMethod(ProtectedEnumClass.PublicItem0), ProtectedEnumClass.PublicItem0)
+        self.assertEqual(obj.publicEnumMethod(ProtectedEnumClass.PublicItem1), ProtectedEnumClass.PublicItem1)
+
+        self.assertEqual(obj.callPublicEnumMethod(ProtectedEnumClass.PublicItem0), ProtectedEnumClass.PublicItem0)
+        self.assertEqual(obj.callPublicEnumMethod(ProtectedEnumClass.PublicItem1), ProtectedEnumClass.PublicItem1)
+
+    def testOverriddenProtectedMethodWithProtectedEnumArgument(self):
+        '''Calls overridden protected method with protected enum argument.'''
         obj = ExtendedProtectedEnumClass()
 
         self.assertEqual(obj.protectedEnumMethod(ProtectedEnumClass.ProtectedItem0), ProtectedEnumClass.ProtectedItem1)
@@ -213,6 +227,20 @@ class ProtectedEnumTest(unittest.TestCase):
 
         self.assertEqual(obj.callProtectedEnumMethod(ProtectedEnumClass.ProtectedItem0), ProtectedEnumClass.ProtectedItem1)
         self.assertEqual(obj.callProtectedEnumMethod(ProtectedEnumClass.ProtectedItem1), ProtectedEnumClass.ProtectedItem0)
+
+    def testOverriddenProtectedMethodWithPublicEnumArgument(self):
+        '''Calls overridden protected method with public enum argument.'''
+        obj = ExtendedProtectedEnumClass()
+
+        self.assertEqual(obj.publicEnumMethod(ProtectedEnumClass.PublicItem0), ProtectedEnumClass.PublicItem1)
+        self.assertEqual(obj.publicEnumMethod(ProtectedEnumClass.PublicItem1), ProtectedEnumClass.PublicItem0)
+
+        self.assertEqual(ProtectedEnumClass.publicEnumMethod(obj, ProtectedEnumClass.PublicItem0), ProtectedEnumClass.PublicItem0)
+        self.assertEqual(ProtectedEnumClass.publicEnumMethod(obj, ProtectedEnumClass.PublicItem1), ProtectedEnumClass.PublicItem1)
+
+        self.assertEqual(obj.callPublicEnumMethod(ProtectedEnumClass.PublicItem0), ProtectedEnumClass.PublicItem1)
+        self.assertEqual(obj.callPublicEnumMethod(ProtectedEnumClass.PublicItem1), ProtectedEnumClass.PublicItem0)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -120,9 +120,22 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
 #ifdef AVOID_PROTECTED_HACK
     if (func->isProtected() && !func->isConstructor()) {
         s << INDENT << "inline " << (func->isStatic() ? "static " : "");
-        s << functionSignature(func, "", "_protected") << " { ";
+        s << functionSignature(func, "", "_protected", Generator::EnumAsInts|Generator::OriginalTypeDescription) << " { ";
         s << (func->type() ? "return " : "") << func->ownerClass()->qualifiedCppName() << "::";
-        writeFunctionCall(s, func);
+        s << func->originalName() << '(';
+        QStringList args;
+        foreach (const AbstractMetaArgument* arg, func->arguments()) {
+            QString argName = arg->argumentName();
+            const TypeEntry* enumTypeEntry = 0;
+            if (arg->type()->isFlags())
+                enumTypeEntry = reinterpret_cast<const FlagsTypeEntry*>(arg->type()->typeEntry())->originator();
+            else if (arg->type()->isEnum())
+                enumTypeEntry = arg->type()->typeEntry();
+            if (enumTypeEntry)
+                argName = QString("%1(%2)").arg(arg->type()->cppSignature()).arg(argName);
+            args << argName;
+        }
+        s << args.join(", ") << ')';
         s << "; }" << endl;
     }
 #endif
@@ -169,6 +182,15 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
     bool isValueTypeWithImplConversions = type->isValue() && !implicitConvs.isEmpty();
     bool hasCustomConversion = type->hasConversionRule();
     QString typeT = type->name() + (isAbstractOrObjectType ? "*" : "");
+    QString typeName = type->name();
+
+#ifdef AVOID_PROTECTED_HACK
+    const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(type);
+    if (metaEnum && metaEnum->isProtected()) {
+        typeT = protectedEnumSurrogateName(metaEnum);
+        typeName = typeT;
+    }
+#endif
 
     s << "struct Converter<" << typeT << " >";
     if (!hasCustomConversion) {
@@ -178,7 +200,7 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
             s << " : ObjectTypeConverter";
         else
             s << " : ValueTypeConverter";
-        s << '<' << type->name() << " >";
+        s << '<' << typeName << " >";
     }
     s << endl << '{' << endl;
     if (isValueTypeWithImplConversions || hasCustomConversion) {
@@ -398,11 +420,18 @@ void HeaderGenerator::writeExportMacros(QTextStream& s)
 
 void HeaderGenerator::writeSbkTypeFunction(QTextStream& s, const AbstractMetaEnum* cppEnum)
 {
-    QString enumPrefix;
+    QString enumName = cppEnum->name();
     if (cppEnum->enclosingClass())
-        enumPrefix = cppEnum->enclosingClass()->qualifiedCppName() + "::";
-    s <<  "template<> inline PyTypeObject* SbkType<" << enumPrefix << cppEnum->name() << " >() "
-      << "{ return " << cpythonTypeNameExt(cppEnum->typeEntry()) << "; }\n";
+        enumName = cppEnum->enclosingClass()->qualifiedCppName() + "::" + enumName;
+#ifdef AVOID_PROTECTED_HACK
+    if (cppEnum->isProtected()) {
+        enumName = protectedEnumSurrogateName(cppEnum);
+        s << "enum " << enumName << " {};" << endl;
+    }
+#endif
+
+    s << "template<> inline PyTypeObject* SbkType<" << enumName << " >() ";
+    s << "{ return " << cpythonTypeNameExt(cppEnum->typeEntry()) << "; }\n";
 
     FlagsTypeEntry* flag = cppEnum->typeEntry()->flags();
     if (flag) {

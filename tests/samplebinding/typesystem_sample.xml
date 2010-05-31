@@ -280,9 +280,9 @@
     </object-type>
 
 
-    // Receives and returns the same protected enum item.
     <object-type name="ProtectedEnumClass" />
     <enum-type name="ProtectedEnumClass::ProtectedEnum" />
+    <enum-type name="ProtectedEnumClass::PublicEnum" />
 
     <template name="boolptr_at_end_fix_beginning">
         bool __ok__;

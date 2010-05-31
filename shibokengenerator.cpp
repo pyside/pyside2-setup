@@ -157,10 +157,19 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType*
 {
     QString result;
 
-    if (cType->isArray())
+    if (cType->isArray()) {
         result = translateTypeForWrapperMethod(cType->arrayElementType(), context) + "[]";
-    else
-        result = translateType(cType, context);
+    } else {
+#ifdef AVOID_PROTECTED_HACK
+        if (cType->isEnum()) {
+            const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(cType);
+            if (metaEnum && metaEnum->isProtected())
+                result = protectedEnumSurrogateName(metaEnum);
+        }
+        if (result.isEmpty())
+#endif
+            result = translateType(cType, context);
+    }
 
     return result;
 }
@@ -186,6 +195,11 @@ QString ShibokenGenerator::wrapperName(const AbstractMetaClass* metaClass)
     } else {
         return metaClass->qualifiedCppName();
     }
+}
+
+QString ShibokenGenerator::protectedEnumSurrogateName(const AbstractMetaEnum* metaEnum)
+{
+    return metaEnum->fullName().replace(".", "_") + "_Surrogate";
 }
 
 QString ShibokenGenerator::cpythonFunctionName(const AbstractMetaFunction* func)
@@ -299,6 +313,13 @@ void ShibokenGenerator::writeBaseConversion(QTextStream& s, const TypeEntry* typ
     QString typeName = type->name();
     if (type->isObject())
         typeName.append('*');
+#ifdef AVOID_PROTECTED_HACK
+    if (type->isEnum()) {
+        const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(type);
+        if (metaEnum && metaEnum->isProtected())
+            typeName = protectedEnumSurrogateName(metaEnum);
+    }
+#endif
     s << baseConversionString(typeName);
 }
 

@@ -477,15 +477,22 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
             Indentation indentation(INDENT);
             ac << INDENT;
-            if (convert && !hasConversionRule) {
+            if (convert && !hasConversionRule)
                 writeToPythonConversion(ac, arg->type(), func->ownerClass());
-                ac << '(';
-            }
 
-            if (hasConversionRule)
+            if (hasConversionRule) {
                 ac << arg->argumentName() << "_out";
-            else
-                ac << arg->argumentName() << (convert ? ")" : "");
+            } else {
+                QString argName = arg->argumentName();
+#ifdef AVOID_PROTECTED_HACK
+                const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(arg->type());
+                if (metaEnum && metaEnum->isProtected()) {
+                    argName.prepend(protectedEnumSurrogateName(metaEnum) + '(');
+                    argName.append(')');
+                }
+#endif
+                ac << (convert ? "(" : "") << argName << (convert ? ")" : "");
+            }
 
             argConversions << argConv;
         }
@@ -530,10 +537,17 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 if (func->typeReplaced(0).isEmpty()) {
                     s << cpythonCheckFunction(func->type());
                     // SbkType would return null when the type is a container.
-                    if (func->type()->typeEntry()->isContainer())
+                    if (func->type()->typeEntry()->isContainer()) {
                         desiredType = '"' + reinterpret_cast<const ContainerTypeEntry*>(func->type()->typeEntry())->typeName() + '"';
-                    else
-                        desiredType = "SbkType<" + func->type()->cppSignature() + " >()->tp_name";
+                    } else {
+                        QString typeName = func->type()->cppSignature();
+#ifdef AVOID_PROTECTED_HACK
+                        const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(func->type());
+                        if (metaEnum && metaEnum->isProtected())
+                            typeName = protectedEnumSurrogateName(metaEnum);
+#endif
+                        desiredType = "SbkType<" + typeName + " >()->tp_name";
+                    }
                 } else {
                     s << guessCPythonCheckFunction(func->typeReplaced(0));
                     desiredType =  '"' + func->typeReplaced(0) + '"';
@@ -561,8 +575,28 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 writeCodeSnips(s, convRule, CodeSnip::Any, TypeSystem::NativeCode, func);
             } else if (!injectedCodeHasReturnValueAttribution(func, TypeSystem::NativeCode)) {
                 s << INDENT;
-                s << translateTypeForWrapperMethod(func->type(), func->implementingClass()) << " " CPP_RETURN_VAR "(";
+#ifdef AVOID_PROTECTED_HACK
+                QString enumName;
+                const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(func->type());
+                bool isProtectedEnum = metaEnum && metaEnum->isProtected();
+                if (isProtectedEnum) {
+                    enumName = metaEnum->name();
+                    if (metaEnum->enclosingClass())
+                        enumName = metaEnum->enclosingClass()->qualifiedCppName() + "::" + enumName;
+                    s << enumName;
+                } else
+#endif
+                    s << translateTypeForWrapperMethod(func->type(), func->implementingClass());
+                s << " " CPP_RETURN_VAR "(";
+#ifdef AVOID_PROTECTED_HACK
+                if (isProtectedEnum)
+                    s << enumName << '(';
+#endif
                 writeToCppConversion(s, func->type(), func->implementingClass(), PYTHON_RETURN_VAR);
+#ifdef AVOID_PROTECTED_HACK
+                if (isProtectedEnum)
+                    s << ')';
+#endif
                 s << ')';
                 s << ';' << endl;
             }
@@ -1601,10 +1635,25 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 if (func->allowThread())
                     s << INDENT << THREAD_STATE_SAVER_VAR ".save();" << endl;
                 s << INDENT;
-                if (isCtor)
+                if (isCtor) {
                     s << "cptr = ";
-                else if (func->type() && !func->isInplaceOperator())
-                    s << func->type()->cppSignature() << " " CPP_RETURN_VAR " = ";
+                } else if (func->type() && !func->isInplaceOperator()) {
+#ifdef AVOID_PROTECTED_HACK
+                    QString enumName;
+                    const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(func->type());
+                    if (metaEnum) {
+                        if (metaEnum->isProtected())
+                            enumName = protectedEnumSurrogateName(metaEnum);
+                        else
+                            enumName = func->type()->cppSignature();
+                        methodCall.prepend(enumName + '(');
+                        methodCall.append(')');
+                        s << enumName;
+                    } else
+#endif
+                        s << func->type()->cppSignature();
+                    s << " " CPP_RETURN_VAR " = ";
+                }
                 s << methodCall << ';' << endl;
                 if (func->allowThread())
                     s << INDENT << THREAD_STATE_SAVER_VAR ".restore();" << endl;
@@ -2394,10 +2443,20 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
         s << cpythonName << "_Type," << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << "(long) ";
-            if (cppEnum->enclosingClass())
-                s << cppEnum->enclosingClass()->qualifiedCppName() << "::";
-            s << enumValue->name() << ", \"" << enumValue->name() << "\");" << endl;
+            s << INDENT;
+#ifdef AVOID_PROTECTED_HACK
+            if (!cppEnum->isProtected()) {
+#endif
+                s << "(long) ";
+                if (cppEnum->enclosingClass())
+                    s << cppEnum->enclosingClass()->qualifiedCppName() << "::";
+                s << enumValue->name();
+#ifdef AVOID_PROTECTED_HACK
+            } else {
+                s << enumValue->value();
+            }
+#endif
+            s << ", \"" << enumValue->name() << "\");" << endl;
         }
 
         s << INDENT << addFunction << endl;
