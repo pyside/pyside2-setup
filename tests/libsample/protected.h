@@ -106,5 +106,19 @@ private:
     static int dtor_called;
 };
 
+class LIBSAMPLE_API ProtectedEnumClass
+{
+public:
+    ProtectedEnumClass() {}
+    virtual ~ProtectedEnumClass() {}
+protected:
+    enum ProtectedEnum {
+        ProtectedItem0,
+        ProtectedItem1
+    };
+    ProtectedEnum callProtectedEnumMethod(ProtectedEnum in) { return protectedEnumMethod(in); }
+    virtual ProtectedEnum protectedEnumMethod(ProtectedEnum in) { return in; }
+};
+
 #endif // PROTECTED_H
 

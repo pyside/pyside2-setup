@@ -26,11 +26,11 @@
 
 '''Test cases for protected methods.'''
 
-import os
 import unittest
 
 from sample import ProtectedNonPolymorphic, ProtectedVirtualDestructor
 from sample import ProtectedPolymorphic, ProtectedPolymorphicDaughter, ProtectedPolymorphicGrandDaughter
+from sample import ProtectedEnumClass
 from sample import Point
 
 class ExtendedProtectedPolymorphic(ProtectedPolymorphic):
@@ -177,6 +177,42 @@ class ProtectedVirtualDtorTest(unittest.TestCase):
             del pvd
             self.assertEqual(ExtendedProtectedVirtualDestructor.dtorCalled(), dtor_called + i)
 
+
+class ExtendedProtectedEnumClass(ProtectedEnumClass):
+    def __init__(self):
+        ProtectedEnumClass.__init__(self)
+    def protectedEnumMethod(self, value):
+        if value == ProtectedEnumClass.ProtectedItem0:
+            return ProtectedEnumClass.ProtectedItem1
+        return ProtectedEnumClass.ProtectedItem0
+
+class ProtectedEnumTest(unittest.TestCase):
+    '''Test cases for protected enum.'''
+
+    def testProtectedEnum(self):
+        '''Original protected method is being called.'''
+        obj = ProtectedEnumClass()
+
+        self.assertEqual(type(ProtectedEnumClass.ProtectedItem0), ProtectedEnumClass.ProtectedEnum)
+
+        self.assertEqual(obj.protectedEnumMethod(ProtectedEnumClass.ProtectedItem0), ProtectedEnumClass.ProtectedItem0)
+        self.assertEqual(obj.protectedEnumMethod(ProtectedEnumClass.ProtectedItem1), ProtectedEnumClass.ProtectedItem1)
+
+        self.assertEqual(obj.callProtectedEnumMethod(ProtectedEnumClass.ProtectedItem0), ProtectedEnumClass.ProtectedItem0)
+        self.assertEqual(obj.callProtectedEnumMethod(ProtectedEnumClass.ProtectedItem1), ProtectedEnumClass.ProtectedItem1)
+
+    def testProtectedEnumWithMethodOverride(self):
+        '''Overridden protected method is being called.'''
+        obj = ExtendedProtectedEnumClass()
+
+        self.assertEqual(obj.protectedEnumMethod(ProtectedEnumClass.ProtectedItem0), ProtectedEnumClass.ProtectedItem1)
+        self.assertEqual(obj.protectedEnumMethod(ProtectedEnumClass.ProtectedItem1), ProtectedEnumClass.ProtectedItem0)
+
+        self.assertEqual(ProtectedEnumClass.protectedEnumMethod(obj, ProtectedEnumClass.ProtectedItem0), ProtectedEnumClass.ProtectedItem0)
+        self.assertEqual(ProtectedEnumClass.protectedEnumMethod(obj, ProtectedEnumClass.ProtectedItem1), ProtectedEnumClass.ProtectedItem1)
+
+        self.assertEqual(obj.callProtectedEnumMethod(ProtectedEnumClass.ProtectedItem0), ProtectedEnumClass.ProtectedItem1)
+        self.assertEqual(obj.callProtectedEnumMethod(ProtectedEnumClass.ProtectedItem1), ProtectedEnumClass.ProtectedItem0)
 
 if __name__ == '__main__':
     unittest.main()

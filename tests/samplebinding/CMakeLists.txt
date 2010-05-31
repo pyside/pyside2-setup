@@ -47,6 +47,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/pointerholder_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/polygon_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/privatector_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/privatedtor_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/protectedenumclass_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/protectednonpolymorphic_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/protectedpolymorphic_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/protectedpolymorphicdaughter_wrapper.cpp
