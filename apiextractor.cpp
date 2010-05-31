@@ -143,6 +143,59 @@ QSet<QString> ApiExtractor::qtMetaTypeDeclaredTypeNames() const
     return m_builder->qtMetaTypeDeclaredTypeNames();
 }
 
+static const AbstractMetaEnum* findEnumOnClasses(AbstractMetaClassList metaClasses, const EnumTypeEntry* typeEntry)
+{
+    const AbstractMetaEnum* result = 0;
+    foreach (const AbstractMetaClass* metaClass, metaClasses) {
+        foreach (const AbstractMetaEnum* metaEnum, metaClass->enums()) {
+            if (metaEnum->typeEntry() == typeEntry) {
+                result = metaEnum;
+                break;
+            }
+        }
+        if (result)
+            break;
+        result = findEnumOnClasses(metaClass->innerClasses(), typeEntry);
+    }
+    return result;
+}
+
+const AbstractMetaEnum* ApiExtractor::findAbstractMetaEnum(const EnumTypeEntry* typeEntry) const
+{
+    if (!typeEntry)
+        return 0;
+    foreach (AbstractMetaEnum* metaEnum, m_builder->globalEnums()) {
+        if (metaEnum->typeEntry() == typeEntry)
+            return metaEnum;
+    }
+    return findEnumOnClasses(m_builder->classes(), typeEntry);
+}
+
+const AbstractMetaEnum* ApiExtractor::findAbstractMetaEnum(const TypeEntry* typeEntry) const
+{
+    if (!typeEntry)
+        return 0;
+    if (typeEntry->isFlags())
+        return findAbstractMetaEnum(reinterpret_cast<const FlagsTypeEntry*>(typeEntry));
+    if (typeEntry->isEnum())
+        return findAbstractMetaEnum(reinterpret_cast<const EnumTypeEntry*>(typeEntry));
+    return 0;
+}
+
+const AbstractMetaEnum* ApiExtractor::findAbstractMetaEnum(const FlagsTypeEntry* typeEntry) const
+{
+    if (!typeEntry)
+        return 0;
+    return findAbstractMetaEnum(typeEntry->originator());
+}
+
+const AbstractMetaEnum* ApiExtractor::findAbstractMetaEnum(const AbstractMetaType* metaType) const
+{
+    if (!metaType)
+        return 0;
+    return findAbstractMetaEnum(metaType->typeEntry());
+}
+
 int ApiExtractor::classCount() const
 {
     Q_ASSERT(m_builder);

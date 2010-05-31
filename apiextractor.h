@@ -57,6 +57,11 @@ public:
     ContainerTypeEntryList containerTypes() const;
     QSet<QString> qtMetaTypeDeclaredTypeNames() const;
 
+    const AbstractMetaEnum* findAbstractMetaEnum(const EnumTypeEntry* typeEntry) const;
+    const AbstractMetaEnum* findAbstractMetaEnum(const TypeEntry* typeEntry) const;
+    const AbstractMetaEnum* findAbstractMetaEnum(const FlagsTypeEntry* typeEntry) const;
+    const AbstractMetaEnum* findAbstractMetaEnum(const AbstractMetaType* metaType) const;
+
     int classCount() const;
 
     bool run();
