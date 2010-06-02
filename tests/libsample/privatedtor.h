@@ -52,6 +52,9 @@ public:
         return m_instanciations;
     }
 
+protected:
+    int protectedInstanceCalls() { return m_instanciations; }
+
 private:
     int m_instanciations;
 

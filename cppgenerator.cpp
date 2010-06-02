@@ -194,14 +194,26 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
                 continue;
             if (func->isConstructor() && !func->isCopyConstructor() && !func->isUserAdded())
                 writeConstructorNative(s, func);
+#ifdef AVOID_PROTECTED_HACK
+            else if (!metaClass->hasPrivateDestructor() && (func->isVirtual() || func->isAbstract()))
+#else
             else if (func->isVirtual() || func->isAbstract())
+#endif
                 writeVirtualMethodNative(s, func);
         }
+
+#ifdef AVOID_PROTECTED_HACK
+        if (!metaClass->hasPrivateDestructor()) {
+#endif
 
         if (usePySideExtensions() && metaClass->isQObject())
             writeMetaObjectMethod(s, metaClass);
 
         writeDestructorNative(s, metaClass);
+
+#ifdef AVOID_PROTECTED_HACK
+        }
+#endif
 
         s << endl << "// Target ---------------------------------------------------------" << endl;
         s << endl;
@@ -390,7 +402,7 @@ void CppGenerator::writeDestructorNative(QTextStream &s, const AbstractMetaClass
 
 void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFunction* func)
 {
-    //skip metaObject function, this will be write manually ahead
+    //skip metaObject function, this will be written manually ahead
     if (usePySideExtensions() && func->ownerClass() && func->ownerClass()->isQObject() &&
         ((func->name() == "metaObject") || (func->name() == "qt_metacall")))
         return;

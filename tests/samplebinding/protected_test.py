@@ -31,6 +31,7 @@ import unittest
 from sample import ProtectedNonPolymorphic, ProtectedVirtualDestructor
 from sample import ProtectedPolymorphic, ProtectedPolymorphicDaughter, ProtectedPolymorphicGrandDaughter
 from sample import ProtectedEnumClass
+from sample import PrivateDtor
 from sample import Point
 
 class ExtendedProtectedPolymorphic(ProtectedPolymorphic):
@@ -240,6 +241,22 @@ class ProtectedEnumTest(unittest.TestCase):
 
         self.assertEqual(obj.callPublicEnumMethod(ProtectedEnumClass.PublicItem0), ProtectedEnumClass.PublicItem1)
         self.assertEqual(obj.callPublicEnumMethod(ProtectedEnumClass.PublicItem1), ProtectedEnumClass.PublicItem0)
+
+
+class PrivateDtorProtectedMethodTest(unittest.TestCase):
+    '''Test cases for classes with private destructors and protected methods.'''
+
+    def testProtectedMethod(self):
+        '''Calls protected method of a class with a private destructor.'''
+        obj = PrivateDtor.instance()
+
+        self.assertEqual(type(obj), PrivateDtor)
+        self.assertEqual(obj.instanceCalls(), 1)
+        self.assertEqual(obj.instanceCalls(), obj.protectedInstanceCalls())
+
+        obj = PrivateDtor.instance()
+        self.assertEqual(obj.instanceCalls(), 2)
+        self.assertEqual(obj.instanceCalls(), obj.protectedInstanceCalls())
 
 
 if __name__ == '__main__':

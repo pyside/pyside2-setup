@@ -178,9 +178,24 @@ bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClass* metaCl
 {
     bool result = metaClass->isPolymorphic() || metaClass->hasVirtualDestructor();
 #ifdef AVOID_PROTECTED_HACK
-    result = result || metaClass->hasProtectedFunctions() || metaClass->hasProtectedDestructor();
+    result = result || metaClass->hasProtectedFields() || metaClass->hasProtectedDestructor();
+    if (!result && metaClass->hasProtectedFunctions()) {
+        int protectedFunctions = 0;
+        int protectedOperators = 0;
+        foreach (const AbstractMetaFunction* func, metaClass->functions()) {
+            if (!func->isProtected() || func->isSignal() || func->isModifiedRemoved())
+                continue;
+            else if (func->isOperatorOverload())
+                protectedOperators++;
+            else
+                protectedFunctions++;
+        }
+        result = result || (protectedFunctions > protectedOperators);
+    }
+#else
+    result = result && !metaClass->hasPrivateDestructor();
 #endif
-    return result && !metaClass->isNamespace() && !metaClass->hasPrivateDestructor();
+    return result && !metaClass->isNamespace();
 }
 
 QString ShibokenGenerator::wrapperName(const AbstractMetaClass* metaClass)

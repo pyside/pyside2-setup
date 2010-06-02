@@ -91,9 +91,16 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
         }
 
         //destructor
-        s << INDENT << (metaClass->hasVirtualDestructor() || hasVirtualFunction ? "virtual " : "") << "~" << wrapperName << "();" << endl;
+#ifdef AVOID_PROTECTED_HACK
+        if (!metaClass->hasPrivateDestructor())
+#endif
+            s << INDENT << (metaClass->hasVirtualDestructor() || hasVirtualFunction ? "virtual " : "") << "~" << wrapperName << "();" << endl;
 
         writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Declaration, TypeSystem::NativeCode);
+
+#ifdef AVOID_PROTECTED_HACK
+        if (!metaClass->hasPrivateDestructor()) {
+#endif
 
         if (usePySideExtensions() && metaClass->isQObject()) {
             s << "public:\n";
@@ -101,6 +108,10 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
             s << "private:\n";
             s << INDENT << "mutable PySide::DynamicQMetaObject* m_metaObject;\n";
         }
+
+#ifdef AVOID_PROTECTED_HACK
+        }
+#endif
 
         s << "};" << endl << endl;
     }
@@ -118,10 +129,12 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
         return;
 
 #ifdef AVOID_PROTECTED_HACK
-    if (func->isProtected() && !func->isConstructor()) {
+    if (func->isProtected() && !func->isConstructor() && !func->isOperatorOverload()) {
         s << INDENT << "inline " << (func->isStatic() ? "static " : "");
         s << functionSignature(func, "", "_protected", Generator::EnumAsInts|Generator::OriginalTypeDescription) << " { ";
-        s << (func->type() ? "return " : "") << func->ownerClass()->qualifiedCppName() << "::";
+        s << (func->type() ? "return " : "");
+        if (!func->isAbstract())
+            s << func->ownerClass()->qualifiedCppName() << "::";
         s << func->originalName() << '(';
         QStringList args;
         foreach (const AbstractMetaArgument* arg, func->arguments()) {
@@ -143,6 +156,11 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
     // pure virtual functions need a default implementation
     if (func->isPrivate() || (func->isModifiedRemoved() && !func->isAbstract()))
         return;
+
+#ifdef AVOID_PROTECTED_HACK
+    if (func->ownerClass()->hasPrivateDestructor() && (func->isAbstract() || func->isVirtual()))
+        return;
+#endif
 
     if (func->isConstructor() || func->isAbstract() || func->isVirtual()) {
         s << INDENT;
