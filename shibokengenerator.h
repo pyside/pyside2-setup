@@ -338,7 +338,7 @@ protected:
                            const AbstractMetaFunction* metaFunc,
                            Options options = NoOption) const;
 
-    AbstractMetaFunctionList filterFunctions(const AbstractMetaClass* metaClass);
+    static AbstractMetaFunctionList filterFunctions(const AbstractMetaClass* metaClass);
 
     // All data about extended converters: the type entries of the target type, and a
     // list of AbstractMetaClasses accepted as argument for the conversion.
