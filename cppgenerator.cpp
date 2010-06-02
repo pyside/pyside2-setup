@@ -1085,10 +1085,10 @@ void CppGenerator::writeCppSelfDefinition(QTextStream& s, const AbstractMetaFunc
 
     s << INDENT;
 #ifdef AVOID_PROTECTED_HACK
-    bool hasProtectedFunctions = func->ownerClass()->hasProtectedFunctions();
     QString _wrapperName = wrapperName(func->ownerClass());
-    s << (hasProtectedFunctions ? _wrapperName : func->ownerClass()->qualifiedCppName()) << "* " CPP_SELF_VAR " = ";
-    s << (hasProtectedFunctions ? QString("(%1*)").arg(_wrapperName) : "");
+    bool hasProtectedMembers = func->ownerClass()->hasProtectedMembers();
+    s << (hasProtectedMembers ? _wrapperName : func->ownerClass()->qualifiedCppName()) << "* " CPP_SELF_VAR " = ";
+    s << (hasProtectedMembers ? QString("(%1*)").arg(_wrapperName) : "");
 #else
     s << func->ownerClass()->qualifiedCppName() << "* " CPP_SELF_VAR " = ";
 #endif
@@ -2198,7 +2198,14 @@ void CppGenerator::writeGetterFunction(QTextStream& s, const AbstractMetaField* 
     s << "static PyObject* " << cpythonGetterFunctionName(metaField) << "(SbkBaseWrapper* self)" << endl;
     s << '{' << endl;
     s << INDENT << "return ";
-    QString cppField= QString("%1->%2").arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self")).arg(metaField->name());
+
+    QString cppField;
+#ifdef AVOID_PROTECTED_HACK
+    if (metaField->isProtected())
+        cppField = QString("((%1*)%2)->%3()").arg(wrapperName(metaField->enclosingClass())).arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self")).arg(protectedFieldGetterName(metaField));
+    else
+#endif
+        cppField= QString("%1->%2").arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self")).arg(metaField->name());
     writeToPythonConversion(s, metaField->type(), metaField->enclosingClass(), cppField);
     s << ';' << endl;
     s << '}' << endl;
@@ -2229,12 +2236,23 @@ void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* 
     }
     s << INDENT << '}' << endl << endl;
 
-    QString fieldStr = QString("%1->%2").arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self")).arg(metaField->name());
-
-
-    s << INDENT << fieldStr << " = ";
-    writeToCppConversion(s, metaField->type(), metaField->enclosingClass(), "value");
+    s << INDENT;
+#ifdef AVOID_PROTECTED_HACK
+    if (metaField->isProtected()) {
+        QString fieldStr = QString("((%1*)%2)->%3").arg(wrapperName(metaField->enclosingClass())).arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self")).arg(protectedFieldSetterName(metaField));
+        s << fieldStr << '(';
+        writeToCppConversion(s, metaField->type(), metaField->enclosingClass(), "value");
+        s << ')';
+    } else {
+#endif
+        QString fieldStr = QString("%1->%2").arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self")).arg(metaField->name());
+        s << fieldStr << " = ";
+        writeToCppConversion(s, metaField->type(), metaField->enclosingClass(), "value");
+#ifdef AVOID_PROTECTED_HACK
+    }
+#endif
     s << ';' << endl << endl;
+
 
     bool pythonWrapperRefCounting = metaField->type()->typeEntry()->isObject()
                                     || metaField->type()->isValuePointer();

@@ -217,6 +217,16 @@ QString ShibokenGenerator::protectedEnumSurrogateName(const AbstractMetaEnum* me
     return metaEnum->fullName().replace(".", "_") + "_Surrogate";
 }
 
+QString ShibokenGenerator::protectedFieldGetterName(const AbstractMetaField* field)
+{
+    return QString("protected_%1_getter").arg(field->name());
+}
+
+QString ShibokenGenerator::protectedFieldSetterName(const AbstractMetaField* field)
+{
+    return QString("protected_%1_setter").arg(field->name());
+}
+
 QString ShibokenGenerator::cpythonFunctionName(const AbstractMetaFunction* func)
 {
     QString result;

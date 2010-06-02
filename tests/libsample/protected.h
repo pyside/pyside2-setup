@@ -126,5 +126,14 @@ protected:
     virtual PublicEnum publicEnumMethod(PublicEnum in) { return in; }
 };
 
+
+class LIBSAMPLE_API ProtectedProperty
+{
+public:
+    ProtectedProperty() : protectedProperty(0) {}
+protected:
+    int protectedProperty;
+};
+
 #endif // PROTECTED_H
 

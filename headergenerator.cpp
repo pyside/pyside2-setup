@@ -45,6 +45,17 @@ void HeaderGenerator::writeCopyCtor(QTextStream& s, const AbstractMetaClass* met
     s << INDENT << "}" << endl << endl;
 }
 
+void HeaderGenerator::writeProtectedFieldAccessors(QTextStream& s, const AbstractMetaField* field) const
+{
+    QString fieldType = field->type()->cppSignature();
+    QString fieldName = field->enclosingClass()->qualifiedCppName() + "::" + field->name();
+
+    s << INDENT << "inline " << fieldType << ' ' << protectedFieldGetterName(field) << "()";
+    s << " { return " << fieldName << "; }" << endl;
+    s << INDENT << "inline void " << protectedFieldSetterName(field) << '(' << fieldType << " value)";
+    s << " { " << fieldName << " = value; }" << endl;
+}
+
 void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     ReportHandler::debugSparse("Generating header for " + metaClass->fullName());
@@ -89,6 +100,16 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
                 hasVirtualFunction = true;
             writeFunction(s, func);
         }
+
+#ifdef AVOID_PROTECTED_HACK
+        if (metaClass->hasProtectedFields()) {
+            foreach (AbstractMetaField* field, metaClass->fields()) {
+                if (!field->isProtected())
+                    continue;
+                writeProtectedFieldAccessors(s, field);
+            }
+        }
+#endif
 
         //destructor
 #ifdef AVOID_PROTECTED_HACK

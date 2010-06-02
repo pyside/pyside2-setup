@@ -38,6 +38,7 @@ protected:
 
 private:
     void writeCopyCtor(QTextStream &s, const AbstractMetaClass* metaClass) const;
+    void writeProtectedFieldAccessors(QTextStream& s, const AbstractMetaField* field) const;
     void writeFunction(QTextStream& s, const AbstractMetaFunction* func) const;
     void writePureVirtualEmptyImpl(QTextStream& , const AbstractMetaFunction* func) const;
     void writeDefaultImplementation(QTextStream& s, const AbstractMetaFunction* func) const;

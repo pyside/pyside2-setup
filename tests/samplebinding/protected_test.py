@@ -30,7 +30,7 @@ import unittest
 
 from sample import ProtectedNonPolymorphic, ProtectedVirtualDestructor
 from sample import ProtectedPolymorphic, ProtectedPolymorphicDaughter, ProtectedPolymorphicGrandDaughter
-from sample import ProtectedEnumClass
+from sample import ProtectedProperty, ProtectedEnumClass
 from sample import PrivateDtor
 from sample import Point
 
@@ -241,6 +241,17 @@ class ProtectedEnumTest(unittest.TestCase):
 
         self.assertEqual(obj.callPublicEnumMethod(ProtectedEnumClass.PublicItem0), ProtectedEnumClass.PublicItem1)
         self.assertEqual(obj.callPublicEnumMethod(ProtectedEnumClass.PublicItem1), ProtectedEnumClass.PublicItem0)
+
+
+class ProtectedPropertyTest(unittest.TestCase):
+    '''Test cases for a class with a protected property (or field in C++).'''
+
+    def testProtectedProperty(self):
+        '''Writes and reads a protected property.'''
+        obj = ProtectedProperty()
+
+        obj.protectedProperty = 3
+        self.assertEqual(obj.protectedProperty, 3)
 
 
 class PrivateDtorProtectedMethodTest(unittest.TestCase):

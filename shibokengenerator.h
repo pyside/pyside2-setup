@@ -214,6 +214,8 @@ public:
     static QString wrapperName(const AbstractMetaClass* metaClass);
 
     static QString protectedEnumSurrogateName(const AbstractMetaEnum* metaEnum);
+    static QString protectedFieldGetterName(const AbstractMetaField* field);
+    static QString protectedFieldSetterName(const AbstractMetaField* field);
 
     static QString pythonPrimitiveTypeName(const QString& cppTypeName);
     static QString pythonPrimitiveTypeName(const PrimitiveTypeEntry* type);

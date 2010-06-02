@@ -284,6 +284,8 @@
     <enum-type name="ProtectedEnumClass::ProtectedEnum" />
     <enum-type name="ProtectedEnumClass::PublicEnum" />
 
+    <value-type name="ProtectedProperty" />
+
     <template name="boolptr_at_end_fix_beginning">
         bool __ok__;
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](
