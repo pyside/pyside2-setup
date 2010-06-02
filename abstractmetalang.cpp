@@ -1373,11 +1373,6 @@ const AbstractMetaFunction* AbstractMetaClass::findFunction(const QString& funct
     return 0;
 }
 
-/* Returns true if this class has one or more functions that are
-   protected. If a class has protected members we need to generate a
-   shell class with public accessors to the protected functions, so
-   they can be called from the native functions.
-*/
 bool AbstractMetaClass::hasProtectedFunctions() const
 {
     foreach (AbstractMetaFunction *func, m_functions) {
@@ -1385,6 +1380,20 @@ bool AbstractMetaClass::hasProtectedFunctions() const
             return true;
     }
     return false;
+}
+
+bool AbstractMetaClass::hasProtectedFields() const
+{
+    foreach (const AbstractMetaField *field, fields()) {
+        if (field->isProtected())
+            return true;
+    }
+    return false;
+}
+
+bool AbstractMetaClass::hasProtectedMembers() const
+{
+    return hasProtectedFields() || hasProtectedFunctions();
 }
 
 bool AbstractMetaClass::generateShellClass() const

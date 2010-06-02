@@ -1590,7 +1590,25 @@ public:
     {
         return m_isPolymorphic;
     }
+
+    /**
+     * Tells if this class has one or more functions that are protected.
+     * \return true if the class has protected functions.
+     */
     bool hasProtectedFunctions() const;
+
+    /**
+     * Tells if this class has one or more fields (member variables) that are protected.
+     * \return true if the class has protected fields.
+     */
+    bool hasProtectedFields() const;
+
+    /**
+     * Tells if this class has one or more members (functions or fields) that are protected.
+     * \return true if the class has protected members.
+     */
+    bool hasProtectedMembers() const;
+
 
     QList<TypeEntry *> templateArguments() const
     {
