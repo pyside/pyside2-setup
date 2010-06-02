@@ -3074,7 +3074,9 @@ void CppGenerator::finishGeneration()
         s << endl;
 
         TypeSystemTypeEntry* moduleEntry = reinterpret_cast<TypeSystemTypeEntry*>(TypeDatabase::instance()->findType(packageName()));
-        CodeSnipList snips = moduleEntry->codeSnips();
+        CodeSnipList snips;
+        if (moduleEntry)
+            snips = moduleEntry->codeSnips();
 
         // module inject-code native/beginning
         if (!snips.isEmpty()) {
