@@ -2512,7 +2512,7 @@ AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const Abstra
 
     int i = 0;
     foreach (AbstractMetaClass* clazz, classList) {
-        map[clazz->name()] = i;
+        map[clazz->qualifiedCppName()] = i;
         reverseMap[i] = clazz;
         i++;
     }
@@ -2524,12 +2524,13 @@ AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const Abstra
         if (clazz->isInterface() || !clazz->typeEntry()->generateCode())
             continue;
 
-        if (clazz->enclosingClass() && map.contains(clazz->enclosingClass()->name()))
-            graph.addEdge(map[clazz->enclosingClass()->name()], map[clazz->name()]);
+        if (clazz->enclosingClass() && map.contains(clazz->enclosingClass()->qualifiedCppName()))
+            graph.addEdge(map[clazz->enclosingClass()->qualifiedCppName()], map[clazz->qualifiedCppName()]);
 
-        foreach(AbstractMetaClass* baseClass, getBaseClasses(clazz)) {
-            if (map.contains(baseClass->name()))
-                graph.addEdge(map[baseClass->name()], map[clazz->name()]);
+        AbstractMetaClassList bases = getBaseClasses(clazz);
+        foreach(AbstractMetaClass* baseClass, bases) {
+            if (map.contains(baseClass->qualifiedCppName()))
+                graph.addEdge(map[baseClass->qualifiedCppName()], map[clazz->qualifiedCppName()]);
         }
 
         foreach (AbstractMetaFunction* func, clazz->functions()) {
@@ -2543,8 +2544,27 @@ AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const Abstra
                     defaultExpression.replace(regex1, "");
                     defaultExpression.replace(regex2, "");
                 }
-                if (!defaultExpression.isEmpty() && defaultExpression != clazz->name() && map.contains(defaultExpression))
-                    graph.addEdge(map[defaultExpression], map[clazz->name()]);
+                if (!defaultExpression.isEmpty()) {
+                    QString exprClassName = clazz->qualifiedCppName() + "::" + defaultExpression;
+                    if (!map.contains(exprClassName)) {
+                        bool found = false;
+                        foreach(AbstractMetaClass* baseClass, bases) {
+                            exprClassName = baseClass->qualifiedCppName() + "::" + defaultExpression;
+                            if (map.contains(exprClassName)) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            if (map.contains(defaultExpression))
+                                exprClassName = defaultExpression;
+                            else
+                                exprClassName.clear();
+                        }
+                    }
+                    if (!exprClassName.isEmpty() && exprClassName != clazz->qualifiedCppName())
+                        graph.addEdge(map[exprClassName], map[clazz->qualifiedCppName()]);
+                }
             }
         }
     }
