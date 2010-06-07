@@ -34,7 +34,7 @@ set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The s
 # lib generator version
 set(generator_MAJOR_VERSION "0")
 set(generator_MINOR_VERSION "5")
-set(generator_MICRO_VERSION "0")
+set(generator_MICRO_VERSION "1")
 set(generator_VERSION "${generator_MAJOR_VERSION}.${generator_MINOR_VERSION}.${generator_MICRO_VERSION}")
 set(generator_SOVERSION "${generator_MAJOR_VERSION}.${generator_MINOR_VERSION}")
 
