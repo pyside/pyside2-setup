@@ -1054,6 +1054,19 @@ public:
         m_targetLangApiName = targetLangApiName;
     }
 
+    QString defaultConstructor() const
+    {
+        return m_defaultConstructor;
+    }
+    void setDefaultConstructor(const QString& defaultConstructor)
+    {
+        m_defaultConstructor = defaultConstructor;
+    }
+    bool hasDefaultConstructor() const
+    {
+        return !m_defaultConstructor.isEmpty();
+    }
+
     /**
      *   The PrimitiveTypeEntry pointed by this type entry if it
      *   represents an alias (i.e. a typedef).
@@ -1100,6 +1113,7 @@ public:
 private:
     QString m_targetLangName;
     QString m_targetLangApiName;
+    QString m_defaultConstructor;
     uint m_preferredConversion : 1;
     uint m_preferredTargetLangType : 1;
     PrimitiveTypeEntry* m_aliasedTypeEntry;

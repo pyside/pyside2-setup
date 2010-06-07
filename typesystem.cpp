@@ -361,6 +361,7 @@ bool Handler::startElement(const QString &, const QString &n,
             attributes["target-lang-api-name"] = QString();
             attributes["preferred-conversion"] = "yes";
             attributes["preferred-target-lang-type"] = "yes";
+            attributes["default-constructor"] = QString();
             break;
         case StackElement::ContainerTypeEntry:
             attributes["type"] = QString();
@@ -434,6 +435,7 @@ bool Handler::startElement(const QString &, const QString &n,
             QString targetLangApiName = attributes["target-lang-api-name"];
             QString preferredConversion = attributes["preferred-conversion"].toLower();
             QString preferredTargetLangType = attributes["preferred-target-lang-type"].toLower();
+            QString defaultConstructor = attributes["default-constructor"];
 
             if (targetLangName.isEmpty())
                 targetLangName = name;
@@ -444,6 +446,7 @@ bool Handler::startElement(const QString &, const QString &n,
             type->setCodeGeneration(m_generate);
             type->setTargetLangName(targetLangName);
             type->setTargetLangApiName(targetLangApiName);
+            type->setDefaultConstructor(defaultConstructor);
 
             bool preferred;
             preferred = convertBoolean(preferredConversion, "preferred-conversion", true);

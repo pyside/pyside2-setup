@@ -77,6 +77,7 @@ primitive-type
             <primitive-type name="..."
                 since="..."
                 target-name="..."
+                default-constructor="..."
                 preferred-conversion="yes | no" />
         </typesystem>
 
@@ -92,6 +93,13 @@ primitive-type
     equivalent of the target language type. For example, in Python both "qint64"
     and "long long" become "long" but we should prefer the "qint64" version. For
     this reason we mark "long long" with preferred-conversion="no".
+
+    The *optional* **preferred-conversion** attribute tells how to build a default
+    instance of the primitive type. It should be a constructor call capable of
+    creating a instance of the primitive type. Example: a class "Foo" could have
+    a **preferred-conversion** value set to "Foo()". Usually this attribute is
+    used only for classes declared as primitive types and not for primitive C++
+    types, but that depends on the application using *ApiExtractor*.
 
 
 .. _namespace:
