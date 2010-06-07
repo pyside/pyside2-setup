@@ -246,6 +246,7 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
         s << INDENT << "static " << type->name() << " toCpp(PyObject* pyobj);" << endl;
         s << INDENT << "static bool isConvertible(PyObject* pyobj);" << endl;
         if (hasCustomConversion) {
+            s << INDENT << "static bool checkType(PyObject* pyobj);" << endl;
             s << INDENT << "static inline PyObject* toPython(void* cppObj) { return toPython(*reinterpret_cast<"
               << type->name() << (isAbstractOrObjectType ? "" : "*") << " >(cppObj)); }" << endl;
             s << INDENT << "static PyObject* toPython(const " << type->name() << "& cppObj);" << endl;

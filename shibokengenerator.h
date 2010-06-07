@@ -247,13 +247,15 @@ public:
     QString cpythonTypeName(const TypeEntry* type);
     QString cpythonTypeNameExt(const TypeEntry* type);
     QString cpythonCheckFunction(const TypeEntry* type, bool genericNumberType = false, bool checkExact = false);
-    QString cpythonCheckFunction(const AbstractMetaType* metaType, bool genericNumberType = false, bool checkExact = false);
+    QString cpythonCheckFunction(const AbstractMetaType* metaType, bool genericNumberType = false);
     QString guessCPythonCheckFunction(const QString& type);
-    QString cpythonIsConvertibleFunction(const TypeEntry* type);
-    QString cpythonIsConvertibleFunction(const AbstractMetaType* metaType);
-    QString cpythonIsConvertibleFunction(const AbstractMetaArgument* metaArg) {
-        return cpythonIsConvertibleFunction(metaArg->type());
+    QString cpythonIsConvertibleFunction(const TypeEntry* type, bool genericNumberType = false, bool checkExact = false);
+    QString cpythonIsConvertibleFunction(const AbstractMetaType* metaType, bool genericNumberType = false);
+    QString cpythonIsConvertibleFunction(const AbstractMetaArgument* metaArg, bool genericNumberType = false)
+    {
+        return cpythonIsConvertibleFunction(metaArg->type(), genericNumberType);
     }
+    QString guessCPythonIsConvertible(const QString& type);
     QString cpythonFunctionName(const AbstractMetaFunction* func);
     QString cpythonMethodDefinitionName(const AbstractMetaFunction* func);
     QString cpythonGettersSettersDefinitionName(const AbstractMetaClass* metaClass);

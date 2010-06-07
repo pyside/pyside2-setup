@@ -1183,11 +1183,11 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const AbstractMetaType* argTyp
     if (!customType.isEmpty())
         s << guessCPythonCheckFunction(customType);
     else if (argType->typeEntry()->isFlags())
-        s << cpythonCheckFunction(((FlagsTypeEntry*) argType->typeEntry())->originator(), true);
+        s << cpythonIsConvertibleFunction(((FlagsTypeEntry*) argType->typeEntry())->originator(), true);
     else if (argType->isEnum())
-        s << cpythonCheckFunction(argType, false, true);
+        s << cpythonIsConvertibleFunction(argType, false);
     else
-        s << cpythonCheckFunction(argType, isNumber);
+        s << cpythonIsConvertibleFunction(argType, isNumber);
 
     s << '(' << argumentName << ')';
 }
@@ -1240,6 +1240,7 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
         if (typeName.endsWith("&"))
             typeName.chop(1);
     }
+    typeName = typeName.trimmed();
 
     bool hasImplicitConversions = !implicitConversions(argType).isEmpty();
 
@@ -1253,8 +1254,13 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
         s << argName << "_auto_ptr;" << endl;
     }
 
-    s << INDENT << typeName << ' ' << argName << " = ";
-    s << "Shiboken::Converter<" << typeName << " >::toCpp(" << pyArgName << ");" << endl;
+    if (usePySideExtensions() && typeName == "QStringRef") {
+        s << INDENT << "QString  " << argName << "_qstring = Shiboken::Converter<QString>::toCpp(" << pyArgName << ");" << endl;
+        s << INDENT << "QStringRef " << argName << "(&" << argName << "_qstring);" << endl;
+    } else {
+        s << INDENT << typeName << ' ' << argName << " = ";
+        s << "Shiboken::Converter<" << typeName << " >::toCpp(" << pyArgName << ");" << endl;
+    }
 
     if (hasImplicitConversions) {
         s << INDENT << "if (!" << cpythonCheckFunction(argType->typeEntry()) << '(' << pyArgName << "))";
@@ -1437,8 +1443,8 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction* func, in
             ReportHandler::warning("Invalid Argument index on function modification: " + func->name());
         }
     } else {
-        int real_index = OverloadData::numberOfRemovedArguments(func, argIndex - 1);
-        *wrappedClass = classes().findClass(func->arguments().at(real_index)->type()->typeEntry()->name());
+        int realIndex = argIndex - 1 - OverloadData::numberOfRemovedArguments(func, argIndex - 1);
+        *wrappedClass = classes().findClass(func->arguments().at(realIndex)->type()->typeEntry()->name());
         if ((argIndex == 1)
             && OverloadData::isSingleArgument(getFunctionGroups(func->implementingClass())[func->name()]))
             pyArgName = QString("arg");
@@ -1709,7 +1715,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             const AbstractMetaClass* wrappedClass = 0;
             QString pyArgName = argumentNameFromIndex(func, arg_mod.index, &wrappedClass);
             if (!wrappedClass) {
-                s << "#error Invalid ownership modification for argument " << arg_mod.index << endl << endl;
+                s << "#error Invalid ownership modification for argument " << arg_mod.index << '(' << pyArgName << ')' << endl << endl;
                 break;
             }
 
@@ -1838,7 +1844,7 @@ void CppGenerator::writeExtendedIsConvertibleFunction(QTextStream& s, const Type
             isFirst = false;
         else
             s << endl << INDENT << " || ";
-        s << cpythonCheckFunction(metaClass->typeEntry()) << "(pyobj)";
+        s << cpythonIsConvertibleFunction(metaClass->typeEntry()) << "(pyobj)";
     }
     s << ';' << endl;
     s << '}' << endl;
@@ -1856,7 +1862,7 @@ void CppGenerator::writeExtendedToCppFunction(QTextStream& s, const TypeEntry* e
             isFirst = false;
         else
             s << "else ";
-        s << "if (" << cpythonCheckFunction(metaClass->typeEntry()) << "(pyobj))" << endl;
+        s << "if (" << cpythonIsConvertibleFunction(metaClass->typeEntry()) << "(pyobj))" << endl;
         Indentation indent(INDENT);
         s << INDENT << "cptr = new " << externalType->name() << '(';
         writeToCppConversion(s, metaClass, "pyobj");
@@ -2322,7 +2328,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                     s << INDENT;
                 }
 
-                s << "if (" << cpythonCheckFunction(type, numberType) << "(other)) {" << endl;
+                s << "if (" << cpythonIsConvertibleFunction(type, numberType) << "(other)) {" << endl;
                 {
                     Indentation indent(INDENT);
                     s << INDENT << "// " << func->signature() << endl;
