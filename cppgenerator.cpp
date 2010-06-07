@@ -859,7 +859,11 @@ void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const Ab
     if (type->isObject()) {
         s << "0";
     } else if (type->isPrimitive()) {
-        s << type->name() << "(0)";
+        const PrimitiveTypeEntry* primitiveTypeEntry = reinterpret_cast<const PrimitiveTypeEntry*>(type);
+        if (primitiveTypeEntry->hasDefaultConstructor())
+            s << primitiveTypeEntry->defaultConstructor();
+        else
+            s << type->name() << "(0)";
     } else if (type->isContainer() || type->isFlags() || type->isEnum()){
         s << metaType->cppSignature() << "()";
     } else if (metaType->isNativePointer() && type->isVoid()) {
