@@ -50,11 +50,13 @@ static QSet<QString> m_reportedWarnings;
 static QString m_progressBuffer;
 static int m_step_size = 0;
 static int m_step = -1;
+static int m_step_warning = 0;
 
 static void printProgress()
 {
     std::printf("%s", m_progressBuffer.toAscii().data());
     std::fflush(stdout);
+    m_progressBuffer.clear();
 }
 
 ReportHandler::DebugLevel ReportHandler::debugLevel()
@@ -105,15 +107,14 @@ void ReportHandler::warning(const QString &text)
 
 // Context is useless!
 //     QString warningText = QString("\r" COLOR_YELLOW "WARNING(%1)" COLOR_END " :: %2").arg(m_context).arg(text);
-    QString warningText = QString("\033[1K\r" COLOR_YELLOW "WARNING" COLOR_END " :: %2").arg(text);
-
     TypeDatabase *db = TypeDatabase::instance();
     if (db && db->isSuppressedWarning(text)) {
         ++m_suppressedCount;
     } else if (!m_reportedWarnings.contains(text)) {
-        std::puts(qPrintable(warningText));
+        m_progressBuffer = (m_step_warning == 0 ? "[" COLOR_YELLOW "WARNING" COLOR_END "]\n" : "")  +  text + "\n";
         printProgress();
         ++m_warningCount;
+        ++m_step_warning;
 
         m_reportedWarnings.insert(text);
     }
@@ -130,13 +131,15 @@ void ReportHandler::progress(const QString& str, ...)
         buf.setFieldAlignment(QTextStream::AlignLeft);
         buf << str;
         printProgress();
-        m_step = 1;
-    } else {
-        m_step++;
-        if (m_step == m_step_size) {
-            m_progressBuffer = "[OK]\n";
-            m_step = -1;
+        m_step = 0;
+    }
+    m_step++;
+    if (m_step >= m_step_size) {
+        if (m_step_warning == 0) {
+            m_progressBuffer = "[" COLOR_GREEN "OK" COLOR_END "]\n";
+            printProgress();
         }
+        m_step_warning = 0;
     }
 }
 
