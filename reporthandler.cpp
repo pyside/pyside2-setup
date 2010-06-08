@@ -41,66 +41,19 @@
 #define COLOR_GREEN ""
 #endif
 
-class ProgressAnimation
-{
-    public:
-        ProgressAnimation()
-        {
-            anim_data = "|/-\\";
-            anim_frame = anim_data;
-            std::strcpy(anim_string, "[ ]");
-            m_current = m_max = 0;
-        }
-        const char* toString()
-        {
-            step();
-            return anim_string;
-        }
-
-        void reset(int max)
-        {
-            m_current = 1;
-            m_max = max;
-        }
-
-        int current() const
-        {
-            return m_current;
-        }
-        int max() const
-        {
-            return m_max;
-        }
-
-    private:
-        const char* anim_data;
-        char anim_string[4];
-        const char* anim_frame;
-        int m_max;
-        int m_current;
-
-        void step()
-        {
-            if (!*(++anim_frame))
-                anim_frame = anim_data;
-            anim_string[1] = *anim_frame;
-            m_current++;
-        }
-};
-
-
 static bool m_silent = false;
 static int m_warningCount = 0;
 static int m_suppressedCount = 0;
 static QString m_context;
 static ReportHandler::DebugLevel m_debugLevel = ReportHandler::NoDebug;
 static QSet<QString> m_reportedWarnings;
-static char m_progressBuffer[1024] = {0};
-static ProgressAnimation m_anim;
+static QString m_progressBuffer;
+static int m_step_size = 0;
+static int m_step = -1;
 
 static void printProgress()
 {
-    std::printf("%s", m_progressBuffer);
+    std::printf("%s", m_progressBuffer.toAscii().data());
     std::fflush(stdout);
 }
 
@@ -131,7 +84,8 @@ int ReportHandler::warningCount()
 
 void ReportHandler::setProgressReference(int max)
 {
-    m_anim.reset(max);
+    m_step_size = max;
+    m_step = -1;
 }
 
 bool ReportHandler::isSilent()
@@ -169,12 +123,21 @@ void ReportHandler::progress(const QString& str, ...)
 {
     if (m_silent)
         return;
-    QString msg = QString("\033[1K\r" COLOR_WHITE "%1 (%2/%3) " COLOR_END).arg(m_anim.toString()).arg(m_anim.current()).arg(m_anim.max()) + str;
-    std::va_list argp;
-    va_start(argp, str);
-    vsnprintf(m_progressBuffer, sizeof(m_progressBuffer), msg.toLocal8Bit().constData(), argp);
-    va_end(argp);
-    printProgress();
+
+    if (m_step == -1) {
+        QTextStream buf(&m_progressBuffer);
+        buf.setFieldWidth(45);
+        buf.setFieldAlignment(QTextStream::AlignLeft);
+        buf << str;
+        printProgress();
+        m_step = 1;
+    } else {
+        m_step++;
+        if (m_step == m_step_size) {
+            m_progressBuffer = "[OK]\n";
+            m_step = -1;
+        }
+    }
 }
 
 void ReportHandler::debug(DebugLevel level, const QString &text)

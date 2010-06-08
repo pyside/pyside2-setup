@@ -342,7 +342,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
 
     ReportHandler::setProgressReference(typeValues);
     foreach (ClassModelItem item, typeValues) {
-        ReportHandler::progress("Generating class model for %s", qPrintable(item->name()));
+        ReportHandler::progress("Generating class model...");
         AbstractMetaClass *cls = traverseClass(item);
         if (!cls)
             continue;
@@ -354,7 +354,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
     QHash<QString, EnumModelItem> enumMap = m_dom->enumMap();
     ReportHandler::setProgressReference(enumMap);
     foreach (EnumModelItem item, enumMap) {
-        ReportHandler::progress("Generating enum model for %s", qPrintable(item->name()));
+        ReportHandler::progress("Generating enum model...");
         AbstractMetaEnum *metaEnum = traverseEnum(item, 0, QSet<QString>());
         if (metaEnum) {
             if (metaEnum->typeEntry()->generateCode())
@@ -365,7 +365,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
     QHash<QString, NamespaceModelItem> namespaceMap = m_dom->namespaceMap();
     ReportHandler::setProgressReference(namespaceMap);
     foreach (NamespaceModelItem item, namespaceMap.values()) {
-        ReportHandler::progress("Generating namespace model for %s", qPrintable(item->name()));
+        ReportHandler::progress("Generating namespace model...");
         AbstractMetaClass *metaClass = traverseNamespace(item);
         if (metaClass)
             m_metaClasses << metaClass;
@@ -418,7 +418,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
 
     ReportHandler::setProgressReference(m_metaClasses);
     foreach (AbstractMetaClass* cls, m_metaClasses) {
-        ReportHandler::progress("Detecting inconsistencies in class model for %s", qPrintable(cls->qualifiedCppName()));
+        ReportHandler::progress("Detecting inconsistencies in class model...");
         cls->fixFunctions();
 
         if (!cls->typeEntry()) {
@@ -441,7 +441,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
     QList<TypeEntry*> entries = types->entries().values();
     ReportHandler::setProgressReference(entries);
     foreach (const TypeEntry *entry, entries) {
-        ReportHandler::progress("Detecting inconsistencies in typesystem for %s", qPrintable(entry->name()));
+        ReportHandler::progress("Detecting inconsistencies in typesystem...");
 
         if (entry->isPrimitive())
             continue;
