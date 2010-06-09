@@ -699,6 +699,24 @@ bool AbstractMetaFunction::hasModifications(const AbstractMetaClass *implementor
     return !modifications(implementor).isEmpty();
 }
 
+QString AbstractMetaFunction::argumentName(int index, bool create, const AbstractMetaClass *implementor) const
+{
+    foreach (FunctionModification mod, modifications(implementor)) {
+        foreach (ArgumentModification argMod, mod.argument_mods) {
+            if ((argMod.index == index) && !argMod.renamed_to.isEmpty())
+                return argMod.renamed_to;
+        }
+    }
+
+    AbstractMetaArgumentList args = arguments();
+    if ((index > 0) && (args.size() > index)) {
+        if (create || args[index]->hasName())
+            return args[index]->argumentName();
+    }
+
+    return QString();
+}
+
 bool AbstractMetaFunction::hasInjectedCode() const
 {
     foreach (const FunctionModification mod, modifications(ownerClass())) {

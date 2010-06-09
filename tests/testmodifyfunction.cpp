@@ -49,12 +49,7 @@ void TestModifyFunction::testRenameArgument()
     const AbstractMetaFunction* func = classA->findFunction("method");
     Q_ASSERT(func);
 
-    FunctionModificationList modList = func->modifications(classA);
-    QVERIFY(modList.size() == 1);
-    FunctionModification mod = modList.at(0);
-    QVERIFY(mod.argument_mods.size() == 1);
-
-    QCOMPARE(mod.argument_mods.at(0).renamed_to, QString("otherArg"));
+    QCOMPARE(func->argumentName(1), QString("otherArg"));
 }
 
 void TestModifyFunction::testOwnershipTransfer()

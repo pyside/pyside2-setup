@@ -687,6 +687,11 @@ public:
 
     AbstractMetaArgument *copy() const;
 
+    bool hasName() const
+    {
+        return !AbstractMetaVariable::name().isEmpty();
+    }
+
 private:
     // Just to force people to call argumentName() And indexedName();
     QString name() const;
@@ -694,6 +699,8 @@ private:
     QString m_expression;
     QString m_originalExpression;
     int m_argumentIndex;
+
+    friend class AbstractMetaClass;
 };
 
 
@@ -1067,6 +1074,11 @@ public:
     */
     bool hasSignatureModifications() const;
     FunctionModificationList modifications(const AbstractMetaClass* implementor = 0) const;
+
+    /**
+     * Return the argument name if there is a modification the renamed value will be returned
+     */
+    QString argumentName(int index, bool create = true, const AbstractMetaClass *cl = 0) const;
 
     // If this function stems from an interface, this returns the
     // interface that declares it.

@@ -1633,6 +1633,10 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
         }
         AbstractMetaArgument* metaArgument = createMetaArgument();
         metaArgument->setType(metaType);
+
+        if (arg->name().isEmpty() && metaFunction->argumentName(i).isEmpty())
+            ReportHandler::warning(QString("Argument %1 on function '%2::%3' declared without name.").arg(i).arg(className).arg(functionItem->name()));
+
         metaArgument->setName(arg->name());
         metaArgument->setArgumentIndex(i);
         metaArguments << metaArgument;
