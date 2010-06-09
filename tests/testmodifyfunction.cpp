@@ -25,6 +25,38 @@
 #include <QtTest/QTest>
 #include "testutil.h"
 
+void TestModifyFunction::testRenameArgument()
+{
+    const char* cppCode ="\
+    struct A {\
+        void method(int myarg);\
+    };\
+    ";
+    const char* xmlCode = "\
+    <typesystem package='Foo'> \
+        <primitive-type name='int'/>\
+        <object-type name='A'> \
+        <modify-function signature='method(int)'>\
+            <modify-argument index='1'>\
+                <rename to='otherArg' />\
+            </modify-argument>\
+        </modify-function>\
+        </object-type>\
+    </typesystem>";
+    TestUtil t(cppCode, xmlCode, false);
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* classA = classes.findClass("A");
+    const AbstractMetaFunction* func = classA->findFunction("method");
+    Q_ASSERT(func);
+
+    FunctionModificationList modList = func->modifications(classA);
+    QVERIFY(modList.size() == 1);
+    FunctionModification mod = modList.at(0);
+    QVERIFY(mod.argument_mods.size() == 1);
+
+    QCOMPARE(mod.argument_mods.at(0).renamed_to, QString("otherArg"));
+}
+
 void TestModifyFunction::testOwnershipTransfer()
 {
     const char* cppCode ="\

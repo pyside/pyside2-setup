@@ -1120,15 +1120,16 @@ bool Handler::startElement(const QString &, const QString &n,
         case StackElement::Rename:
         case StackElement::Access: {
             if (topElement.type != StackElement::ModifyField
-                && topElement.type != StackElement::ModifyFunction) {
-                m_error = "Function or field modification parent required";
+                && topElement.type != StackElement::ModifyFunction
+                && topElement.type != StackElement::ModifyArgument) {
+                m_error = "Function, field  or argument modification parent required";
                 return false;
             }
 
             Modification *mod = 0;
             if (topElement.type == StackElement::ModifyFunction)
                 mod = &m_functionMods.last();
-            else
+            else if (topElement.type == StackElement::ModifyField)
                 mod = &m_fieldMods.last();
 
             QString modifier;
@@ -1142,8 +1143,10 @@ bool Handler::startElement(const QString &, const QString &n,
 
                 if (topElement.type == StackElement::ModifyFunction)
                     mod->setRenamedTo(renamed_to);
-                else
+                else if (topElement.type == StackElement::ModifyField)
                     mod->setRenamedTo(renamed_to);
+                else
+                    m_functionMods.last().argument_mods.last().renamed_to = renamed_to;
             } else
                 modifier = attributes["modifier"].toLower();
 
@@ -1169,7 +1172,8 @@ bool Handler::startElement(const QString &, const QString &n,
                 return false;
             }
 
-            mod->modifiers |= modifierNames[modifier];
+            if (mod)
+                mod->modifiers |= modifierNames[modifier];
         }
         break;
         case StackElement::RemoveArgument:

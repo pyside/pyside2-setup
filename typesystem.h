@@ -277,6 +277,9 @@ struct ArgumentModification
 
     //Api version
     double version;
+
+    //New name
+    QString renamed_to;
 };
 
 struct APIEXTRACTOR_API Modification
