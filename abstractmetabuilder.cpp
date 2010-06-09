@@ -349,6 +349,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
 
         addAbstractMetaClass(cls);
     }
+    ReportHandler::flush();
 
     // We need to know all global enums
     QHash<QString, EnumModelItem> enumMap = m_dom->enumMap();
@@ -361,6 +362,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
                 m_globalEnums << metaEnum;
         }
     }
+    ReportHandler::flush();
 
     QHash<QString, NamespaceModelItem> namespaceMap = m_dom->namespaceMap();
     ReportHandler::setProgressReference(namespaceMap);
@@ -370,6 +372,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
         if (metaClass)
             m_metaClasses << metaClass;
     }
+    ReportHandler::flush();
 
     // Go through all typedefs to see if we have defined any
     // specific typedefs to be used as classes.
@@ -380,6 +383,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
         AbstractMetaClass* cls = traverseTypeAlias(typeAlias);
         addAbstractMetaClass(cls);
     }
+    ReportHandler::flush();
 
     // Global functions
     foreach (FunctionModelItem func, m_dom->functions()) {
@@ -415,6 +419,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
         if (!cls->isInterface() && !cls->isNamespace())
             setupInheritance(cls);
     }
+    ReportHandler::flush();
 
     ReportHandler::setProgressReference(m_metaClasses);
     foreach (AbstractMetaClass* cls, m_metaClasses) {
@@ -437,6 +442,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
         if (cls->isAbstract() && !cls->isInterface())
             cls->typeEntry()->setLookupName(cls->typeEntry()->targetLangName() + "$ConcreteWrapper");
     }
+    ReportHandler::flush();
 
     QList<TypeEntry*> entries = types->entries().values();
     ReportHandler::setProgressReference(entries);
@@ -490,6 +496,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
             }
         }
     }
+    ReportHandler::flush();
 
     {
         FunctionList hashFunctions = m_dom->findFunctions("qHash");
@@ -1613,8 +1620,8 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
     }
 
     AbstractMetaArgumentList metaArguments;
-
     int firstDefaultArgument = 0;
+
     for (int i = 0; i < arguments.size(); ++i) {
         ArgumentModelItem arg = arguments.at(i);
 
@@ -1632,11 +1639,8 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
             return metaFunction;
         }
         AbstractMetaArgument* metaArgument = createMetaArgument();
+
         metaArgument->setType(metaType);
-
-        if (arg->name().isEmpty() && metaFunction->argumentName(i).isEmpty())
-            ReportHandler::warning(QString("Argument %1 on function '%2::%3' declared without name.").arg(i).arg(className).arg(functionItem->name()));
-
         metaArgument->setName(arg->name());
         metaArgument->setArgumentIndex(i);
         metaArguments << metaArgument;
@@ -1672,6 +1676,11 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
             if (metaArg->type()->isEnum() || metaArg->type()->isFlags())
                 m_enumDefaultArguments << QPair<AbstractMetaArgument *, AbstractMetaFunction *>(metaArg, metaFunction);
         }
+
+        //Check for missing argument name
+        if (!metaArg->hasName() && !metaFunction->isOperatorOverload() && metaFunction->argumentName(i, false, m_currentClass).isEmpty())
+            ReportHandler::warning(QString("Argument %1 on function '%2::%3' declared without name.").arg(i).arg(className).arg(functionItem->name()));
+
     }
 
 #if 0

@@ -69,6 +69,7 @@ public:
 
     static bool isSilent();
     static void setSilent(bool silent);
+    static void flush();
 };
 
 #endif // REPORTHANDLER_H

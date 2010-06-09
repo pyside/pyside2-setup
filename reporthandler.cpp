@@ -59,6 +59,18 @@ static void printProgress()
     m_progressBuffer.clear();
 }
 
+static void printWarnings()
+{
+    if (m_reportedWarnings.size() > 0) {
+        m_progressBuffer += "\t";
+        foreach(QString msg, m_reportedWarnings)
+            m_progressBuffer += msg + "\n\t";
+        m_progressBuffer += "\n\n";
+        m_reportedWarnings.clear();
+        printProgress();
+    }
+}
+
 ReportHandler::DebugLevel ReportHandler::debugLevel()
 {
     return m_debugLevel;
@@ -111,12 +123,9 @@ void ReportHandler::warning(const QString &text)
     if (db && db->isSuppressedWarning(text)) {
         ++m_suppressedCount;
     } else if (!m_reportedWarnings.contains(text)) {
-        m_progressBuffer = (m_step_warning == 0 ? "[" COLOR_YELLOW "WARNING" COLOR_END "]\n" : "")  +  text + "\n";
-        printProgress();
         ++m_warningCount;
         ++m_step_warning;
-
-        m_reportedWarnings.insert(text);
+        m_reportedWarnings << text;
     }
 }
 
@@ -137,10 +146,18 @@ void ReportHandler::progress(const QString& str, ...)
     if (m_step >= m_step_size) {
         if (m_step_warning == 0) {
             m_progressBuffer = "[" COLOR_GREEN "OK" COLOR_END "]\n";
-            printProgress();
+        } else {
+            m_progressBuffer = "[" COLOR_YELLOW "WARNING" COLOR_END "]\n";
         }
+        printProgress();
         m_step_warning = 0;
     }
+}
+
+void ReportHandler::flush()
+{
+    if (!m_silent)
+        printWarnings();
 }
 
 void ReportHandler::debug(DebugLevel level, const QString &text)
