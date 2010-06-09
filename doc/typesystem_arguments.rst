@@ -48,6 +48,18 @@ remove-argument
          <remove-argument />
      </modify-argument>
 
+rename to
+^^^^^^^^^
+
+    The 'rename to' node is used to rename a argument and use this new name in the generated code.
+
+    .. code-block:: xml
+
+     <modify-argument>
+         <rename to='...' />
+     </modify-argument>
+
+
 remove-default-expression
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
