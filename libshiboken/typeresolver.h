@@ -68,6 +68,12 @@ inline PyObject* objectTypeToPython(void* cptr)
     return Shiboken::Converter<T*>::toPython(*reinterpret_cast<T**>(cptr));
 }
 
+/**
+*   \internal This function is not part of the public API.
+*   Initialize the TypeResource internal cache.
+*/
+void initTypeResolver();
+
 class LIBSHIBOKEN_API TypeResolver
 {
 public:

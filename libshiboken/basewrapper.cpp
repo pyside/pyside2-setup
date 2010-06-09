@@ -523,15 +523,13 @@ PyObject* SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObj
     return reinterpret_cast<PyObject*>(newType);
 }
 
-
-
-
 void initShiboken()
 {
     static bool shibokenAlreadInitialised = false;
     if (shibokenAlreadInitialised)
         return;
 
+    initTypeResolver();
 #ifdef WITH_THREAD
     PyEval_InitThreads();
 #endif

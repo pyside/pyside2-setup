@@ -3190,19 +3190,27 @@ void CppGenerator::finishGeneration()
         foreach (const AbstractMetaEnum* cppEnum, globalEnums())
            writeEnumInitialization(s, cppEnum);
 
-        // module inject-code target/end
-        if (!snips.isEmpty()) {
-            writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::TargetLangCode);
-            s << endl;
+        // Register primitive types on TypeResolver
+        s << INDENT << "// Register primitive types on TypeResolver" << endl;
+        foreach(const PrimitiveTypeEntry* pte, primitiveTypes()) {
+            if (pte->generateCode())
+                s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<" << pte->name() << " >(\"" << pte->name() << "\");" << endl;
         }
 
-        s << INDENT << "if (PyErr_Occurred()) {" << endl;
+        s << endl << INDENT << "if (PyErr_Occurred()) {" << endl;
         {
             Indentation indentation(INDENT);
             s << INDENT << "PyErr_Print();" << endl;
             s << INDENT << "Py_FatalError(\"can't initialize module " << moduleName() << "\");" << endl;
         }
         s << INDENT << '}' << endl;
+
+        // module inject-code target/end
+        if (!snips.isEmpty()) {
+            writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::TargetLangCode);
+            s << endl;
+        }
+
         s << '}' << endl << endl;
         s << "} // extern \"C\"" << endl << endl;
 

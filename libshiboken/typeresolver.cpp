@@ -59,20 +59,16 @@ static void deinitTypeResolver()
     typeResolverMap.clear();
 }
 
+void Shiboken::initTypeResolver()
+{
+    assert(typeResolverMap.empty());
+    typeResolverMap.set_empty_key("");
+    typeResolverMap.set_deleted_key("?");
+    std::atexit(deinitTypeResolver);
+}
+
 static void registerTypeResolver(TypeResolver* resolver)
 {
-    static bool initied = false;
-    if (!initied) {
-        assert(typeResolverMap.empty());
-        typeResolverMap.set_empty_key("");
-        typeResolverMap.set_deleted_key("?");
-        initied = true;
-        std::atexit(deinitTypeResolver);
-        TypeResolver::createValueTypeResolver<double>("double");
-        TypeResolver::createValueTypeResolver<float>("float");
-        TypeResolver::createValueTypeResolver<bool>("bool");
-        TypeResolver::createValueTypeResolver<int>("int");
-    }
     assert(typeResolverMap.find(resolver->typeName()) == typeResolverMap.end());
     typeResolverMap[resolver->typeName()] = resolver;
 }
