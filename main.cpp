@@ -213,6 +213,7 @@ int main(int argc, char *argv[])
     }
     qDeleteAll(generators);
 
+    ReportHandler::flush();
     std::cout << "Done, " << ReportHandler::warningCount();
     std::cout << " warnings (" << ReportHandler::suppressedCount() << " known issues)";
     std::cout << std::endl;
