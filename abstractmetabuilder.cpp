@@ -1681,7 +1681,7 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
         }
 
         //Check for missing argument name
-        if (hasDefaultValue && !metaArg->hasName() && !metaFunction->isOperatorOverload() && metaFunction->argumentName(i+1, false, m_currentClass).isEmpty()) {
+        if (hasDefaultValue && !metaArg->hasName() && !metaFunction->isOperatorOverload() && !metaFunction->isSignal() && metaFunction->argumentName(i+1, false, m_currentClass).isEmpty()) {
             ReportHandler::warning(QString("Argument %1 on function '%2::%3' has default expressiont but does not have name.").arg(i+1).arg(className).arg(metaFunction->minimalSignature()));
         }
 
