@@ -29,7 +29,7 @@ void TestModifyFunction::testRenameArgument()
 {
     const char* cppCode ="\
     struct A {\
-        void method(int myarg);\
+        void method(int=0);\
     };\
     ";
     const char* xmlCode = "\

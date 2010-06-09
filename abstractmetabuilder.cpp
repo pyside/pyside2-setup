@@ -1658,6 +1658,7 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
         if (m_currentClass)
             replacedExpression = metaFunction->replacedDefaultExpression(m_currentClass, i + 1);
 
+        bool hasDefaultValue = false;
         if (arg->defaultValue() || !replacedExpression.isEmpty()) {
             QString expr = arg->defaultValueExpression();
             expr = fixDefaultValue(arg, metaArg->type(), metaFunction, m_currentClass, i);
@@ -1675,24 +1676,16 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
 
             if (metaArg->type()->isEnum() || metaArg->type()->isFlags())
                 m_enumDefaultArguments << QPair<AbstractMetaArgument *, AbstractMetaFunction *>(metaArg, metaFunction);
+
+            hasDefaultValue = !expr.isEmpty();
         }
 
         //Check for missing argument name
-        if (!metaArg->hasName() && !metaFunction->isOperatorOverload() && metaFunction->argumentName(i, false, m_currentClass).isEmpty())
-            ReportHandler::warning(QString("Argument %1 on function '%2::%3' declared without name.").arg(i).arg(className).arg(functionItem->name()));
+        if (hasDefaultValue && !metaArg->hasName() && !metaFunction->isOperatorOverload() && metaFunction->argumentName(i+1, false, m_currentClass).isEmpty()) {
+            ReportHandler::warning(QString("Argument %1 on function '%2::%3' has default expressiont but does not have name.").arg(i+1).arg(className).arg(functionItem->name()));
+        }
 
     }
-
-#if 0
-    // If we where not able to translate the default argument make it
-    // reset all default arguments before this one too.
-    for (int i = 0; i < first_default_argument; ++i)
-        meta_arguments[i]->setDefaultValueExpression("<x>" + QString());
-
-    if (ReportHandler::debugLevel() == ReportHandler::FullDebug)
-        foreach (AbstractMetaArgument *arg, meta_arguments)
-        ReportHandler::debugFull("   - " + arg->toString());
-#endif
 
     return metaFunction;
 }

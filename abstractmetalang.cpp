@@ -703,8 +703,9 @@ QString AbstractMetaFunction::argumentName(int index, bool create, const Abstrac
 {
     foreach (FunctionModification mod, modifications(implementor)) {
         foreach (ArgumentModification argMod, mod.argument_mods) {
-            if ((argMod.index == index) && !argMod.renamed_to.isEmpty())
+            if ((argMod.index == index) && !argMod.renamed_to.isEmpty()) {
                 return argMod.renamed_to;
+            }
         }
     }
 
