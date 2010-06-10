@@ -100,6 +100,12 @@ public:
     unsigned char callWithEnum(const Str& prefix, Event::EventType type, unsigned char value=80);
     unsigned char callWithEnum(const Str& prefix, unsigned char value=0);
 
+    //Functions used in test with named arguments
+    void setObjectSplittedName(const char*, const Str& prefix = Str("<unk"), const Str& suffix = Str("nown>"));
+    void setObjectNameWithSize(const char*, int size=9, const Str& name = Str("<unknown>"));
+    void setObjectNameWithSize(const Str& name = Str("<unknown>"), int size=9);
+
+
 private:
     ObjectType(const ObjectType&);
     ObjectType& operator=(const ObjectType&);

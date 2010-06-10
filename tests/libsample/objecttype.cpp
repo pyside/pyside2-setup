@@ -36,6 +36,7 @@
 #include "objecttypelayout.h"
 #include <algorithm>
 #include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -177,7 +178,8 @@ ObjectType::processEvent(ObjectTypeList objects, Event *event)
 
 }
 
-void ObjectType::setLayout(ObjectTypeLayout* l)
+void
+ObjectType::setLayout(ObjectTypeLayout* l)
 {
     if (!l) {
         cerr << "[WARNING] ObjectType::setLayout: Cannot set layout to 0." << endl;
@@ -221,15 +223,40 @@ ObjectTypeLayout* ObjectType::takeLayout()
     return l;
 }
 
-unsigned int objectTypeHash(const ObjectType* objectType)
+unsigned int
+objectTypeHash(const ObjectType* objectType)
 {
     return reinterpret_cast<std::size_t>(objectType);
 }
 
-unsigned char ObjectType::callWithEnum(const Str& prefix, Event::EventType type, unsigned char value){
+unsigned char
+ObjectType::callWithEnum(const Str& prefix, Event::EventType type, unsigned char value){
     return value*value;
 }
 
-unsigned char ObjectType::callWithEnum(const Str& prefix, unsigned char value) {
+unsigned char
+ObjectType::callWithEnum(const Str& prefix, unsigned char value) {
     return value;
 }
+
+void
+ObjectType::setObjectSplittedName(const char*, const Str& prefix, const Str& suffix)
+{
+    std::string result(prefix.cstring());
+    result += suffix.cstring();
+    m_objectName = result.c_str();
+}
+
+void
+ObjectType::setObjectNameWithSize(const char*, int size, const Str& name)
+{
+    std::string result(name.cstring(), size);
+    m_objectName = result.c_str();
+}
+
+void
+ObjectType::setObjectNameWithSize(const Str& name, int size)
+{
+    setObjectNameWithSize("", size, name);
+}
+
