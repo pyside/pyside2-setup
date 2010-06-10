@@ -373,7 +373,7 @@ struct OverFlowChecker<float, true>
 template <typename PyIntEquiv>
 struct Converter_PyInt
 {
-    static inline bool checkType(PyObject* pyobj) { return PyNumber_Check(pyobj); }
+    static inline bool checkType(PyObject* pyobj) { return PyInt_Check(pyobj); }
     static inline bool isConvertible(PyObject* pyobj) { return PyNumber_Check(pyobj); }
     static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<PyIntEquiv*>(cppobj)); }
     static inline PyObject* toPython(const PyIntEquiv& cppobj) { return PyInt_FromLong((long) cppobj); }
@@ -471,7 +471,7 @@ struct Converter<unsigned PY_LONG_LONG>
 template <typename PyFloatEquiv>
 struct Converter_PyFloat
 {
-    static inline bool checkType(PyObject* obj) { return PyNumber_Check(obj); }
+    static inline bool checkType(PyObject* obj) { return PyFloat_Check(obj); }
     static inline bool isConvertible(PyObject* obj) { return PyNumber_Check(obj); }
     static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<PyFloatEquiv*>(cppobj)); }
     static inline PyObject* toPython(PyFloatEquiv cppobj) { return PyFloat_FromDouble((double) cppobj); }
