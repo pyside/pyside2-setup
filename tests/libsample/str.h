@@ -64,6 +64,7 @@ public:
     // nonsense operator just to test reverse operators
     Str operator+(int number) const;
     bool operator==(const Str& other) const;
+    bool operator<(const Str& other) const;
 
 private:
     void init(const char* cstr);

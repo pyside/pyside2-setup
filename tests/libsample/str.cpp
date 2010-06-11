@@ -163,6 +163,11 @@ Str operator+(int number, const Str& str)
     return in.str().c_str();
 }
 
+bool Str::operator<(const Str& other) const
+{
+    return m_str < other.m_str;
+}
+
 unsigned int strHash(const Str& str)
 {
     unsigned int result = 0;
