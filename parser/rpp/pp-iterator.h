@@ -62,6 +62,12 @@ public:
     explicit pp_output_iterator(std::string &__result):
             _M_result(__result) {}
 
+    inline pp_output_iterator<_Container>& operator=(const pp_output_iterator<_Container>& other)
+    {
+        _M_result = other._M_result;
+        return *this;
+    }
+
     inline pp_output_iterator &operator=(typename _Container::const_reference __v) {
         if (_M_result.capacity() == _M_result.size())
             _M_result.reserve(_M_result.capacity() << 2);
