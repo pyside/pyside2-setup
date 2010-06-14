@@ -49,7 +49,7 @@ public:
 };
 
 
-LIBOTHER_API Collector& operator<<(Collector&, OtherObjectType&);
+LIBOTHER_API Collector& operator<<(Collector&, const OtherObjectType&);
 
 #endif // OTHEROBJECTTYPE_H
 

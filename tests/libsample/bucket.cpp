@@ -37,6 +37,10 @@
 
 using namespace std;
 
+Bucket::Bucket() : m_locked(false)
+{
+}
+
 void Bucket::push(int x)
 {
     m_data.push_back(x);

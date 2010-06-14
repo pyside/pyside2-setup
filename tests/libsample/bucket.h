@@ -41,9 +41,10 @@
 
 class ObjectType;
 
-class LIBSAMPLE_API Bucket: public ObjectType
+class LIBSAMPLE_API Bucket : public ObjectType
 {
 public:
+    Bucket();
     void push(int);
     int pop();
     bool empty();

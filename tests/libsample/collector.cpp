@@ -34,41 +34,29 @@
 
 #include "collector.h"
 
-void
-Collector::clear()
+void Collector::clear()
 {
     m_items.clear();
 }
 
-Collector&
-Collector::operator<<(unsigned int item)
+Collector& Collector::operator<<(unsigned long item)
 {
     m_items.push_back(item);
     return *this;
 }
 
-Collector&
-Collector::operator<<(signed int item)
-{
-    m_items.push_back(item);
-    return *this;
-}
-
-Collector&
-Collector::operator<<(const ObjectType *obj)
+Collector& Collector::operator<<(const ObjectType *obj)
 {
     m_items.push_back(obj->identifier());
     return *this;
 }
 
-std::list<int>
-Collector::items()
+std::list<unsigned long> Collector::items()
 {
     return m_items;
 }
 
-int
-Collector::size()
+int Collector::size()
 {
     return (int) m_items.size();
 }

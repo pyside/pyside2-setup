@@ -37,12 +37,18 @@
 
 #include "libsamplemacros.h"
 
+class ObjectType;
+
 class LIBSAMPLE_API Echo
 {
 public:
     Echo(){}
     ~Echo(){}
 
+    // These method are here just for compilation test purposes
+    Echo& operator<<(unsigned int item) { return *this; }
+    Echo& operator<<(signed int item) { return *this; }
+    Echo& operator<<(const ObjectType* item) { return *this; }
 };
 
 #endif

@@ -35,8 +35,8 @@
 #include "otherobjecttype.h"
 
 Collector&
-operator<<(Collector& collector, OtherObjectType& obj)
+operator<<(Collector& collector, const OtherObjectType& obj)
 {
-    collector << static_cast<int>(obj.identifier()*2);
+    collector << obj.identifier()*2;
     return collector;
 }
