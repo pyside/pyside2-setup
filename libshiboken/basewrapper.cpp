@@ -340,7 +340,7 @@ bool setCppPointer(SbkBaseWrapper* wrapper, PyTypeObject* desiredType, void* cpt
 
 bool cppObjectIsInvalid(PyObject* wrapper)
 {
-    if (wrapper == Py_None
+    if (!wrapper || wrapper == Py_None
         || wrapper->ob_type->ob_type != &Shiboken::SbkBaseWrapperType_Type
         || ((Shiboken::SbkBaseWrapper*)wrapper)->validCppObject) {
         return false;
