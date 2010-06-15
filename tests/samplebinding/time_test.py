@@ -112,6 +112,12 @@ class TimeTest(unittest.TestCase):
         result = time.somethingCompletelyDifferent(1, 2)
         self.assertEqual(result, Time.TwoArgs)
 
+    def testMethodWithThreeParamersAndImplicitConversion(self):
+        '''Method with 3 parameters, the last one triggers an implicit conversion.'''
+        time = Time()
+        result = time.somethingCompletelyDifferent(1, 2, ImplicitConv.CtorOne)
+        self.assertEqual(result, Time.ThreeArgs)
+
 if __name__ == '__main__':
     unittest.main()
 
