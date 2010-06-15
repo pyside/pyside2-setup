@@ -66,6 +66,12 @@ class EnumTest(unittest.TestCase):
         '''Calling the constructor of non-extensible enum with a string.'''
         self.assertRaises(TypeError, SampleNamespace.InValue, '1')
 
+    def testEnumItemAsDefaultValueToIntArgument(self):
+        '''Calls function with an enum item as default value to an int argument.'''
+        self.assertEqual(SampleNamespace.enumItemAsDefaultValueToIntArgument(), SampleNamespace.ZeroIn)
+        self.assertEqual(SampleNamespace.enumItemAsDefaultValueToIntArgument(SampleNamespace.ZeroOut), SampleNamespace.ZeroOut)
+        self.assertEqual(SampleNamespace.enumItemAsDefaultValueToIntArgument(123), 123)
+
 
 class EnumOverloadTest(unittest.TestCase):
     '''Test case for overloads involving enums'''

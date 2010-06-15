@@ -68,6 +68,8 @@ LIBSAMPLE_API inline double powerOfTwo(double num) {
 
 LIBSAMPLE_API void doSomethingWithArray(const unsigned char* data, unsigned int size, const char* format = 0);
 
+LIBSAMPLE_API int enumItemAsDefaultValueToIntArgument(int value = ZeroIn);
+
 class SomeClass
 {
 public:

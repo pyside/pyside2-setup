@@ -87,5 +87,11 @@ doSomethingWithArray(const unsigned char* data, unsigned int size, const char* f
     // to check compilation issues, i.e. if it compiles, it's ok.
 }
 
+int
+enumItemAsDefaultValueToIntArgument(int value)
+{
+    return value;
+}
+
 } // namespace SampleNamespace
 
