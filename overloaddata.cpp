@@ -470,6 +470,22 @@ bool OverloadData::isFinalOccurrence(const AbstractMetaFunction* func) const
     return true;
 }
 
+QList<const AbstractMetaFunction*> OverloadData::overloadsWithoutRepetition() const
+{
+    QList<const AbstractMetaFunction*> overloads = m_overloads;
+    foreach (const AbstractMetaFunction* func, m_overloads) {
+        if (func->minimalSignature().endsWith("const"))
+            continue;
+        foreach (const AbstractMetaFunction* f, overloads) {
+            if ((func->minimalSignature() + "const") == f->minimalSignature()) {
+                overloads.removeOne(f);
+                break;
+            }
+        }
+    }
+    return overloads;
+}
+
 const AbstractMetaFunction* OverloadData::getFunctionWithDefaultValue() const
 {
     foreach (const AbstractMetaFunction* func, m_overloads) {

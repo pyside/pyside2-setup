@@ -92,6 +92,8 @@ public:
     OverloadData* findNextArgWithDefault();
     bool isFinalOccurrence(const AbstractMetaFunction* func) const;
 
+    /// Returns the list of overloads removing repeated constant functions (ex.: "foo()" and "foo()const", the second is removed).
+    QList<const AbstractMetaFunction*> overloadsWithoutRepetition() const;
     const QList<const AbstractMetaFunction*>& overloads() const { return m_overloads; }
     OverloadDataList nextOverloadData() const { return m_nextOverloadData; }
     OverloadData* previousOverloadData() const { return m_previousOverloadData; }
