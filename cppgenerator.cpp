@@ -1146,18 +1146,7 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
     s << endl << INDENT << cpythonFunctionName(rfunc) << "_TypeError:" << endl;
     Indentation indentation(INDENT);
-    QString funcName;
-    if (rfunc->isOperatorOverload())
-        funcName = ShibokenGenerator::pythonOperatorFunctionName(rfunc);
-    else
-        funcName = rfunc->name();
-    if (rfunc->ownerClass()) {
-        QString fullName = rfunc->ownerClass()->fullName();
-        if (rfunc->isConstructor())
-            funcName = fullName;
-        else
-            funcName.prepend(fullName + '.');
-    }
+    QString funcName = fullPythonFunctionName(rfunc);
 
     QString argsVar = !rfunc->isConstructor() && overloadData.maxArgs() == 1 ? "arg" : "args";
     if (verboseErrorMessagesDisabled()) {
@@ -3422,7 +3411,7 @@ void CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
 {
     const int numArgs = func->arguments().count();
 
-    // -1   = return value
+    // -1    = return value
     //  0    = self
     //  1..n = func. args.
     for (int i = -1; i <= numArgs; ++i)

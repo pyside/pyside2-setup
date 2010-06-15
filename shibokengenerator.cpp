@@ -212,6 +212,23 @@ QString ShibokenGenerator::wrapperName(const AbstractMetaClass* metaClass)
     }
 }
 
+QString ShibokenGenerator::fullPythonFunctionName(const AbstractMetaFunction* func)
+{
+    QString funcName;
+    if (func->isOperatorOverload())
+        funcName = ShibokenGenerator::pythonOperatorFunctionName(func);
+    else
+       funcName = func->name();
+    if (func->ownerClass()) {
+        QString fullName = func->ownerClass()->fullName();
+        if (func->isConstructor())
+            funcName = fullName;
+        else
+            funcName.prepend(fullName + '.');
+    }
+    return funcName;
+}
+
 QString ShibokenGenerator::protectedEnumSurrogateName(const AbstractMetaEnum* metaEnum)
 {
     return metaEnum->fullName().replace(".", "_") + "_Surrogate";

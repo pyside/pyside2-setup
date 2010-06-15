@@ -213,6 +213,7 @@ public:
 
     static QString wrapperName(const AbstractMetaClass* metaClass);
 
+    static QString fullPythonFunctionName(const AbstractMetaFunction* func);
     static QString protectedEnumSurrogateName(const AbstractMetaEnum* metaEnum);
     static QString protectedFieldGetterName(const AbstractMetaField* field);
     static QString protectedFieldSetterName(const AbstractMetaField* field);
