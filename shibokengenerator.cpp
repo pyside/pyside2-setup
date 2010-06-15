@@ -283,6 +283,112 @@ static QString cpythonEnumFlagsName(QString moduleName, QString qualifiedCppName
     return result;
 }
 
+static QString searchForEnumScope(const AbstractMetaClass* metaClass, const QString& value)
+{
+    QString enumValueName = value.trimmed();
+
+    if (!metaClass)
+        return QString();
+
+    foreach (const AbstractMetaEnum* metaEnum, metaClass->enums()) {
+        foreach (const AbstractMetaEnumValue* enumValue, metaEnum->values()) {
+            if (enumValueName == enumValue->name())
+                return metaClass->qualifiedCppName();
+        }
+    }
+
+    return searchForEnumScope(metaClass->enclosingClass(), enumValueName);
+}
+
+/*
+ * This function uses some heuristics to find out the scope for a given
+ * argument default value. New situations may arise in the future and
+ * this method should be updated, do it with care.
+ */
+QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction* func, const AbstractMetaArgument* arg)
+{
+    if (arg->defaultValueExpression().isEmpty())
+        return QString();
+
+    static QRegExp enumValueRegEx("^([A-Za-z_]\\w*)?$");
+    QString value = arg->defaultValueExpression();
+    QString prefix;
+    QString suffix;
+
+    if (arg->type()->isEnum()) {
+        const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(arg->type());
+        if (metaEnum->enclosingClass()) {
+            prefix = metaEnum->enclosingClass()->qualifiedCppName() + "::";
+            if (value.startsWith(prefix))
+                prefix = QString();
+        }
+    } else if (arg->type()->isFlags()) {
+        static QRegExp numberRegEx("^\\d+$"); // Numbers to flags
+        if (numberRegEx.exactMatch(value)) {
+            QString typeName = translateTypeForWrapperMethod(arg->type(), func->implementingClass());
+            if (arg->type()->isConstant())
+                typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
+            if (arg->type()->isReference())
+                typeName.chop(1);
+            prefix = typeName + '(';
+            suffix = ')';
+        }
+
+        static QRegExp enumCombinationRegEx("^([A-Za-z_][\\w:]*)\\(([^,\\(\\)]*)\\)$"); // FlagName(EnumItem|EnumItem|...)
+        if (prefix.isEmpty() && enumCombinationRegEx.indexIn(value) != -1) {
+            QString flagName = enumCombinationRegEx.cap(1);
+            QStringList enumItems = enumCombinationRegEx.cap(2).split("|");
+            QString scope = searchForEnumScope(func->implementingClass(), enumItems.first());
+            if (!scope.isEmpty())
+                scope.append("::");
+
+            QStringList fixedEnumItems;
+            foreach (const QString& enumItem, enumItems)
+                fixedEnumItems << QString(scope + enumItem);
+
+            if (!fixedEnumItems.isEmpty()) {
+                prefix = flagName + '(';
+                value = fixedEnumItems.join("|");
+                suffix = ')';
+            }
+        }
+    } else if (arg->type()->typeEntry()->isValue()) {
+        const AbstractMetaClass* metaClass = classes().findClass(arg->type()->typeEntry());
+        if (enumValueRegEx.exactMatch(value))
+            prefix = metaClass->qualifiedCppName() + "::";
+        if (value.startsWith(prefix))
+            prefix = QString();
+    } else if (arg->type()->isPrimitive() && arg->type()->name() == "int") {
+        if (enumValueRegEx.exactMatch(value) && func->implementingClass()) {
+            prefix = func->implementingClass()->qualifiedCppName() + "::";
+            if (value.startsWith(prefix))
+                prefix = QString();
+        }
+    } else if(arg->type()->isPrimitive()) {
+        static QRegExp unknowArgumentRegEx("^(?:[A-Za-z_][\\w:]*\\()?([A-Za-z_]\\w*)(?:\\))?$"); // [PrimitiveType(] DESIREDNAME [)]
+        if (unknowArgumentRegEx.indexIn(value) != -1 && func->implementingClass()) {
+            foreach (const AbstractMetaField* field, func->implementingClass()->fields()) {
+                if (unknowArgumentRegEx.cap(1).trimmed() == field->name()) {
+                    QString fieldName = field->name();
+                    if (field->isStatic())
+                        fieldName.prepend(func->implementingClass()->qualifiedCppName() + "::");
+                    else
+                        fieldName.prepend(CPP_SELF_VAR "->");
+                    value.replace(unknowArgumentRegEx.cap(1), fieldName);
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!prefix.isEmpty())
+        value.prepend(prefix);
+    if (!suffix.isEmpty())
+        value.append(suffix);
+
+    return value;
+}
+
 QString ShibokenGenerator::cpythonEnumName(const EnumTypeEntry* enumEntry)
 {
     return cpythonEnumFlagsName(enumEntry->targetLangPackage().replace(".", "_"), enumEntry->qualifiedCppName());
