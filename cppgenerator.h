@@ -76,20 +76,22 @@ private:
      *   code to deallocate a possible new instance is also generated.
      *   \param s text stream to write
      *   \param metatype a pointer to the argument type to be converted
-     *   \param context the current meta class
      *   \param argName C++ argument name
-     *   \param argName Python argument name
+     *   \param pyArgName Python argument name
+     *   \param context the current meta class
+     *   \param defaultValue an optional default value to be used instead of the conversion result
      */
     void writeArgumentConversion(QTextStream& s, const AbstractMetaType* argType,
                                  QString argName, QString pyArgName,
-                                 const AbstractMetaClass* context = 0);
-    /// Convenience method to call writeArgumentConversion with an AbstractMetaArgument
-    /// instead of an AbstractMetaType.
+                                 const AbstractMetaClass* context = 0,
+                                 QString defaultValue = QString());
+    /// Convenience method to call writeArgumentConversion with an AbstractMetaArgument instead of an AbstractMetaType.
     void writeArgumentConversion(QTextStream& s, const AbstractMetaArgument* arg,
                                  QString argName, QString pyArgName,
-                                 const AbstractMetaClass* context = 0)
+                                 const AbstractMetaClass* context = 0,
+                                 QString defaultValue = QString())
     {
-        writeArgumentConversion(s, arg->type(), argName, pyArgName, context);
+        writeArgumentConversion(s, arg->type(), argName, pyArgName, context, defaultValue);
     }
 
     /**
@@ -104,12 +106,21 @@ private:
     void writeNoneReturn(QTextStream& s, const AbstractMetaFunction* func, bool thereIsReturnValue);
 
     /**
-     *   Writes the Python method wrapper overload decisor that selects which C++
+     *   Writes the Python function wrapper overload decisor that selects which C++
      *   method/function to call with the received Python arguments.
      *   \param s text stream to write
-     *   \param parentOverloadData a pointer to overload data describing the argument being evaluated
+     *   \param overloadData the overload data describing all the possible overloads for the function/method
      */
-    void writeOverloadedMethodDecisor(QTextStream& s, OverloadData* parentOverloadData);
+    void writeOverloadedFunctionDecisor(QTextStream& s, const OverloadData& overloadData);
+    /// Recursive auxiliar method to the other writeOverloadedFunctionDecisor.
+    void writeOverloadedFunctionDecisor(QTextStream& s, const OverloadData* parentOverloadData);
+
+    /// Writes calls to all the possible method/function overloads.
+    void writeFunctionCalls(QTextStream& s, const OverloadData& overloadData);
+
+    /// Writes the call to a single function usually from a collection of overloads.
+    void writeSingleFunctionCall(QTextStream& s, const OverloadData& overloadData, const AbstractMetaFunction* func = 0);
+
     /// Returns a string containing the name of an argument for the given function and argument index.
     QString argumentNameFromIndex(const AbstractMetaFunction* func, int argIndex, const AbstractMetaClass** wrappedClass);
     void writeMethodCall(QTextStream& s, const AbstractMetaFunction* func, int maxArgs = 0);

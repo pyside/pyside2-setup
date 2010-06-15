@@ -675,9 +675,11 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
 void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFunctionList overloads)
 {
     OverloadData overloadData(overloads, this);
+
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
     const AbstractMetaClass* metaClass = rfunc->ownerClass();
     QString className = cpythonTypeName(metaClass);
+
     m_currentErrorCode = -1;
 
     s << "static int" << endl;
@@ -689,17 +691,8 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     s << (hasCppWrapper ? wrapperName(metaClass) : metaClass->qualifiedCppName());
     s << "* cptr = 0;" << endl;
 
-
-    bool hasCodeInjectionsAtEnd = false;
-    foreach(AbstractMetaFunction* func, overloads) {
-        foreach (CodeSnip cs, func->injectedCodeSnips()) {
-            if (cs.position == CodeSnip::End) {
-                hasCodeInjectionsAtEnd = true;
-                break;
-            }
-        }
-    }
-    if (hasCodeInjectionsAtEnd)
+    bool needsOverloadId = overloadData.maxArgs() > 0;
+    if (needsOverloadId)
         s << INDENT << "int overloadId = -1;" << endl;
 
     if (overloadData.hasAllowThread())
@@ -745,7 +738,10 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
         writeArgumentsInitializer(s, overloadData);
     }
 
-    writeOverloadedMethodDecisor(s, &overloadData);
+    if (needsOverloadId)
+        writeOverloadedFunctionDecisor(s, &overloadData);
+
+    writeFunctionCalls(s, overloadData);
     s << endl;
 
     s << INDENT << "if (PyErr_Occurred() || !Shiboken::setCppPointer(sbkSelf, Shiboken::SbkType<" << metaClass->qualifiedCppName() << " >(), cptr)) {" << endl;
@@ -781,6 +777,15 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
 
 
     // Constructor code injections, position=end
+    bool hasCodeInjectionsAtEnd = false;
+    foreach(AbstractMetaFunction* func, overloads) {
+        foreach (CodeSnip cs, func->injectedCodeSnips()) {
+            if (cs.position == CodeSnip::End) {
+                hasCodeInjectionsAtEnd = true;
+                break;
+            }
+        }
+    }
     if (hasCodeInjectionsAtEnd) {
         // FIXME: C++ arguments are not available in code injection on constructor when position = end.
         s << INDENT << "switch(overloadId) {" << endl;
@@ -905,7 +910,17 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
     s << ')' << endl << '{' << endl;
 
     if (rfunc->implementingClass() &&
-        (!rfunc->implementingClass()->isNamespace() && !rfunc->isStatic())) {
+        (!rfunc->implementingClass()->isNamespace() && overloadData.hasInstanceFunction())) {
+
+        s << INDENT;
+#ifdef AVOID_PROTECTED_HACK
+        QString _wrapperName = wrapperName(rfunc->ownerClass());
+        bool hasProtectedMembers = rfunc->ownerClass()->hasProtectedMembers();
+        s << (hasProtectedMembers ? _wrapperName : rfunc->ownerClass()->qualifiedCppName());
+#else
+        s << rfunc->ownerClass()->qualifiedCppName();
+#endif
+        s << "* " CPP_SELF_VAR " = 0;" << endl;
 
         if (rfunc->isOperatorOverload() && rfunc->isBinaryOperator()) {
             QString checkFunc = cpythonCheckFunction(rfunc->ownerClass()->typeEntry());
@@ -915,16 +930,25 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             s << INDENT << "std::swap(self, arg);\n\n";
         }
 
+        // Sets the C++ "self" (the "this" for the object) if it has one.
+        QString cppSelfAttribution = CPP_SELF_VAR " = ";
+#ifdef AVOID_PROTECTED_HACK
+        cppSelfAttribution += (hasProtectedMembers ? QString("(%1*)").arg(_wrapperName) : "");
+#endif
+        cppSelfAttribution += cpythonWrapperCPtr(rfunc->ownerClass(), "self");
+
         // Checks if the underlying C++ object is valid.
-        if (OverloadData::hasStaticAndInstanceFunctions(overloads)) {
+        if (overloadData.hasStaticFunction()) {
             s << INDENT << "if (self) {" << endl;
             {
                 Indentation indent(INDENT);
                 writeInvalidCppObjectCheck(s);
+                s << INDENT << cppSelfAttribution << ';' << endl;
             }
             s << INDENT << '}' << endl;
         } else {
             writeInvalidCppObjectCheck(s);
+            s << INDENT << cppSelfAttribution << ';' << endl;
         }
         s << endl;
     }
@@ -933,9 +957,13 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
 
     if (hasReturnValue && !rfunc->isInplaceOperator())
         s << INDENT << "PyObject* " PYTHON_RETURN_VAR " = 0;" << endl;
+
+    bool needsOverloadId = overloadData.maxArgs() > 0;
+    if (needsOverloadId)
+        s << INDENT << "int overloadId = -1;" << endl;
+
     if (overloadData.hasAllowThread())
         s << INDENT << "Shiboken::ThreadStateSaver " THREAD_STATE_SAVER_VAR ";" << endl;
-    s << endl;
 
     if (minArgs != maxArgs || maxArgs > 1) {
         s << INDENT << "int numArgs = ";
@@ -944,6 +972,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         else
             writeArgumentsInitializer(s, overloadData);
     }
+    s << endl;
 
     /*
      * Make sure reverse <</>> operators defined in other classes (specially from other modules)
@@ -991,7 +1020,11 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         s << INDENT << "if (!" PYTHON_RETURN_VAR ") {" << endl << endl;
     }
 
-    writeOverloadedMethodDecisor(s, &overloadData);
+    if (needsOverloadId)
+        writeOverloadedFunctionDecisor(s, overloadData);
+
+    writeFunctionCalls(s, overloadData);
+    s << endl;
 
     if (callExtendedReverseOperator)
         s << endl << INDENT << "} // End of \"if (!" PYTHON_RETURN_VAR ")\"" << endl << endl;
@@ -1218,7 +1251,8 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadDa
 void CppGenerator::writeArgumentConversion(QTextStream& s,
                                            const AbstractMetaType* argType,
                                            QString argName, QString pyArgName,
-                                           const AbstractMetaClass* context)
+                                           const AbstractMetaClass* context,
+                                           QString defaultValue)
 {
     const TypeEntry* type = argType->typeEntry();
 
@@ -1245,25 +1279,47 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
     bool hasImplicitConversions = !implicitConversions(argType).isEmpty();
 
     if (isWrappedCppClass) {
-        const TypeEntry* type = (hasImplicitConversions ? argType->typeEntry() : 0);
+        const TypeEntry* type = (hasImplicitConversions ? type : 0);
         writeInvalidCppObjectCheck(s, pyArgName, type);
     }
 
-    if (hasImplicitConversions) {
-        s << INDENT << "std::auto_ptr<" << baseTypeName << " > ";
-        s << argName << "_auto_ptr;" << endl;
-    }
+    // Auto pointer to dealloc new objects created because to satisfy implicit conversion.
+    if (hasImplicitConversions)
+        s << INDENT << "std::auto_ptr<" << baseTypeName << " > " << argName << "_auto_ptr;" << endl;
+
+    // Value type that has default value.
+    if (argType->isValue() && !defaultValue.isEmpty())
+        s << INDENT << baseTypeName << ' ' << argName << "_tmp = " << defaultValue << ';' << endl;
 
     if (usePySideExtensions() && typeName == "QStringRef") {
-        s << INDENT << "QString  " << argName << "_qstring = Shiboken::Converter<QString>::toCpp(" << pyArgName << ");" << endl;
+        s << INDENT << "QString  " << argName << "_qstring = ";
+        if (!defaultValue.isEmpty())
+            s << pyArgName << " ? ";
+        s << "Shiboken::Converter<QString>::toCpp(" << pyArgName << ')' << endl;
+        if (!defaultValue.isEmpty())
+            s << " : " << defaultValue;
+                s << ';' << endl;
         s << INDENT << "QStringRef " << argName << "(&" << argName << "_qstring);" << endl;
     } else {
         s << INDENT << typeName << ' ' << argName << " = ";
-        s << "Shiboken::Converter<" << typeName << " >::toCpp(" << pyArgName << ");" << endl;
+        if (!defaultValue.isEmpty())
+            s << pyArgName << " ? ";
+        s << "Shiboken::Converter<" << typeName << " >::toCpp(" << pyArgName << ')';
+        if (!defaultValue.isEmpty()) {
+            s << " : ";
+            if (argType->isValue())
+                s << '&' << argName << "_tmp";
+            else
+                s << defaultValue;
+        }
+        s << ';' << endl;
     }
 
     if (hasImplicitConversions) {
-        s << INDENT << "if (!" << cpythonCheckFunction(argType->typeEntry()) << '(' << pyArgName << "))";
+        s << INDENT << "if (";
+        if (!defaultValue.isEmpty())
+            s << pyArgName << " && ";
+        s << '!' << cpythonCheckFunction(type) << '(' << pyArgName << "))";
         s << endl;
         Indentation indent(INDENT);
         s << INDENT << argName << "_auto_ptr = std::auto_ptr<" << baseTypeName;
@@ -1279,7 +1335,21 @@ void CppGenerator::writeNoneReturn(QTextStream& s, const AbstractMetaFunction* f
     }
 }
 
-void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* parentOverloadData)
+void CppGenerator::writeOverloadedFunctionDecisor(QTextStream& s, const OverloadData& overloadData)
+{
+    s << INDENT << "// Overloaded function decisor" << endl;
+    QList<const AbstractMetaFunction*> functionOverloads = overloadData.overloadsWithoutRepetition();
+    for (int i = 0; i < functionOverloads.count(); i++)
+        s << INDENT << "// " << i << ": " << functionOverloads.at(i)->minimalSignature() << endl;
+    writeOverloadedFunctionDecisor(s, &overloadData);
+    s << endl;
+
+    s << INDENT << "// Function signature not found." << endl;
+    s << INDENT << "if (overloadId == -1) goto " << cpythonFunctionName(overloadData.referenceFunction()) << "_TypeError;" << endl;
+    s << endl;
+}
+
+void CppGenerator::writeOverloadedFunctionDecisor(QTextStream& s, const OverloadData* parentOverloadData)
 {
     bool hasDefaultCall = parentOverloadData->nextArgumentHasDefaultValue();
     const AbstractMetaFunction* referenceFunction = parentOverloadData->referenceFunction();
@@ -1287,7 +1357,7 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
     // If the next argument has not an argument with a default value, it is still possible
     // that one of the overloads for the current overload data has its final occurrence here.
     // If found, the final occurrence of a method is attributed to the referenceFunction
-    // variable to be used further on this method on the conditional that writes default
+    // variable to be used further on this method on the conditional that identifies default
     // method calls.
     if (!hasDefaultCall) {
         foreach (const AbstractMetaFunction* func, parentOverloadData->overloads()) {
@@ -1303,9 +1373,10 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
     // Python constructors always receive multiple arguments.
     bool manyArgs = maxArgs > 1 || referenceFunction->isConstructor();
 
-    // Functions without arguments are written right away.
+    // Functions without arguments are identified right away.
     if (maxArgs == 0) {
-        writeMethodCall(s, referenceFunction);
+        s << INDENT << "overloadId = " << parentOverloadData->headOverloadData()->overloads().indexOf(referenceFunction);
+        s << "; // " << referenceFunction->minimalSignature() << endl;
         return;
 
     // To decide if a method call is possible at this point the current overload
@@ -1316,25 +1387,24 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
         bool signatureFound = parentOverloadData->overloads().size() == 1;
 
         // The current overload data describes the last argument of a signature,
-        // so the method can be called right now.
+        // so the method can be identified right now.
         if (isLastArgument || (signatureFound && !hasDefaultCall)) {
             const AbstractMetaFunction* func = parentOverloadData->referenceFunction();
-            int numRemovedArgs = OverloadData::numberOfRemovedArguments(func);
-            writeMethodCall(s, func, func->arguments().size() - numRemovedArgs);
-            if (!func->isConstructor())
-                writeNoneReturn(s, func, parentOverloadData->headOverloadData()->hasNonVoidReturnType());
+            s << INDENT << "overloadId = " << parentOverloadData->headOverloadData()->overloads().indexOf(func);
+            s << "; // " << func->minimalSignature() << endl;
             return;
         }
     }
 
-    s << INDENT;
+    bool isFirst = true;
 
     // If the next argument has a default value the decisor can perform a method call;
     // it just need to check if the number of arguments received from Python are equal
     // to the number of parameters preceding the argument with the default value.
     if (hasDefaultCall) {
+        isFirst = false;
         int numArgs = parentOverloadData->argPos() + 1;
-        s << "if (numArgs == " << numArgs << ") {" << endl;
+        s << INDENT << "if (numArgs == " << numArgs << ") {" << endl;
         {
             Indentation indent(INDENT);
             const AbstractMetaFunction* func = referenceFunction;
@@ -1345,11 +1415,10 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
                     break;
                 }
             }
-            writeMethodCall(s, func, numArgs);
-            if (!func->isConstructor())
-                writeNoneReturn(s, func, parentOverloadData->headOverloadData()->hasNonVoidReturnType());
+            s << INDENT << "overloadId = " << parentOverloadData->headOverloadData()->overloads().indexOf(func);
+            s << "; // " << func->minimalSignature() << endl;
         }
-        s << INDENT << "} else ";
+        s << INDENT << '}';
     }
 
     foreach (OverloadData* overloadData, parentOverloadData->nextOverloadData()) {
@@ -1358,6 +1427,13 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
                                 && !overloadData->findNextArgWithDefault();
 
         const AbstractMetaFunction* refFunc = overloadData->referenceFunction();
+
+        if (isFirst) {
+            isFirst = false;
+            s << INDENT;
+        } else {
+            s << " else ";
+        }
 
         s << "if (";
         if (manyArgs && signatureFound) {
@@ -1384,22 +1460,6 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
 
             writeTypeCheck(tck, od, pyArgName);
 
-            const AbstractMetaType* argType = 0;
-            if (od->argumentTypeReplaced().isEmpty())
-                argType = od->argType();
-            else
-                argType = buildAbstractMetaTypeFromString(od->argumentTypeReplaced());
-
-            Indentation indent(INDENT);
-            if (argType) {
-                writeArgumentConversion(tcv, argType,
-                                        QString("cpp_arg%1").arg(od->argPos()),
-                                        pyArgName,
-                                        refFunc->implementingClass());
-                if (argType != od->argType())
-                    delete argType;
-            }
-
             if (od->nextOverloadData().isEmpty()
                 || od->nextArgumentHasDefaultValue()
                 || od->nextOverloadData().size() != 1
@@ -1418,14 +1478,84 @@ void CppGenerator::writeOverloadedMethodDecisor(QTextStream& s, OverloadData* pa
 
         {
             Indentation indent(INDENT);
-            writeOverloadedMethodDecisor(s, overloadData);
+            writeOverloadedFunctionDecisor(s, overloadData);
         }
 
-        s << INDENT << "} else ";
+        s << INDENT << "}";
+    }
+    s << endl;
+}
+
+void CppGenerator::writeFunctionCalls(QTextStream& s, const OverloadData& overloadData)
+{
+    QList<const AbstractMetaFunction*> overloads = overloadData.overloadsWithoutRepetition();
+
+    s << INDENT << "// Call function/method" << endl;
+    s << INDENT << (overloads.count() > 1 ? "switch (overloadId) " : "") << '{' << endl;
+    {
+        Indentation indent(INDENT);
+        if (overloads.count() == 1) {
+            writeSingleFunctionCall(s, overloadData, overloads.first());
+        } else {
+            for (int i = 0; i < overloads.count(); i++) {
+                const AbstractMetaFunction* func = overloads.at(i);
+                s << INDENT << "case " << i << ": // " << func->minimalSignature() << endl;
+                s << INDENT << '{' << endl;
+                {
+                    Indentation indent(INDENT);
+                    writeSingleFunctionCall(s, overloadData, func);
+                    s << INDENT << "break;" << endl;
+                }
+                s << INDENT << '}' << endl;
+            }
+        }
+    }
+    s << INDENT << '}' << endl;
+}
+
+void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& overloadData, const AbstractMetaFunction* func)
+{
+    const AbstractMetaClass* implementingClass = overloadData.referenceFunction()->implementingClass();
+    bool multipleArguments = overloadData.maxArgs() > 1 || overloadData.referenceFunction()->isConstructor();
+
+    int removedArgs = 0;
+    for (int i = 0; i < func->arguments().count(); i++) {
+        if (func->argumentRemoved(i + 1)) {
+            removedArgs++;
+            continue;
+        }
+
+        if (!func->conversionRule(TypeSystem::NativeCode, i + 1).isEmpty())
+            continue;
+
+        const AbstractMetaArgument* arg = func->arguments().at(i);
+
+        QString typeReplaced = func->typeReplaced(arg->argumentIndex() + 1);
+        const AbstractMetaType* argType = 0;
+        if (typeReplaced.isEmpty())
+            argType = arg->type();
+        else
+            argType = buildAbstractMetaTypeFromString(typeReplaced);
+
+        if (argType) {
+            QString argName = QString("cpp_arg%1").arg(i - removedArgs);
+            QString pyArgName = multipleArguments ? QString("pyargs[%1]").arg(i - removedArgs) : "arg";
+            QString defaultValue = guessScopeForDefaultValue(func, arg);
+
+            writeArgumentConversion(s, argType, argName, pyArgName, implementingClass, defaultValue);
+
+            // Free a custom type created by buildAbstractMetaTypeFromString.
+            if (argType != arg->type())
+                delete argType;
+        }
     }
 
-    if (maxArgs > 0)
-        s << "goto " << cpythonFunctionName(referenceFunction) << "_TypeError;" << endl;
+    s << endl;
+
+    int numRemovedArgs = OverloadData::numberOfRemovedArguments(func);
+    writeMethodCall(s, func, func->arguments().size() - numRemovedArgs);
+    if (!func->isConstructor())
+        writeNoneReturn(s, func, overloadData.hasNonVoidReturnType());
 }
 
 QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction* func, int argIndex, const AbstractMetaClass** wrappedClass)
@@ -1476,8 +1606,6 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         }
         s << INDENT << "}\n";
     }
-
-    writeCppSelfDefinition(s, func);
 
     // Used to provide contextual information to custom code writer function.
     const AbstractMetaArgument* lastArg = 0;
@@ -1531,7 +1659,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                        if (arg->defaultValueExpression().isEmpty())
                            badModifications = true;
                        else
-                           userArgs << arg->defaultValueExpression();
+                           userArgs << guessScopeForDefaultValue(func, arg);
                     }
                 } else {
                     int idx = arg->argumentIndex() - removedArgs;
@@ -1568,7 +1696,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 otherArgsModified |= defValModified || hasConversionRule || func->argumentRemoved(i + 1);
 
                 if (!arg->defaultValueExpression().isEmpty())
-                    otherArgs.prepend(arg->defaultValueExpression());
+                    otherArgs.prepend(guessScopeForDefaultValue(func, arg));
                 else if (hasConversionRule)
                     otherArgs.prepend(arg->argumentName() + "_out");
                 else
@@ -3286,14 +3414,12 @@ bool CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
 void CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func, bool useHeuristicForReturn)
 {
     const int numArgs = func->arguments().count();
-    s << INDENT << "//CppGenerator::writeParentChildManagement" << endl;
 
     // -1   = return value
     //  0    = self
     //  1..n = func. args.
-    for (int i = -1; i <= numArgs; ++i)  {
+    for (int i = -1; i <= numArgs; ++i)
         writeParentChildManagement(s, func, i, i == 0 ? useHeuristicForReturn : true);
-    }
 }
 
 void CppGenerator::writeReturnValueHeuristics(QTextStream& s, const AbstractMetaFunction* func, const QString& self)
