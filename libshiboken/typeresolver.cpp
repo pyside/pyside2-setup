@@ -126,3 +126,25 @@ PyTypeObject* TypeResolver::pythonType()
 {
     return m_d->pyType;
 }
+
+TypeResolver::Type TypeResolver::getType(const char* name)
+{
+    std::string typeName(name);
+    int len = typeName.size() - 1;
+    if (len > 1) {
+        if (typeName[len] == '*')
+            typeName.erase(len, 1);
+
+        TypeResolver *resolver = TypeResolver::get(typeName.c_str());
+        if (resolver)
+            return TypeResolver::ValueType;
+
+        typeName += '*';
+        resolver = TypeResolver::get(typeName.c_str());
+        if (resolver)
+            return TypeResolver::ObjectType;
+    }
+
+    return TypeResolver::UnknownType;
+}
+

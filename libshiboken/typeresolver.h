@@ -77,6 +77,13 @@ void initTypeResolver();
 class LIBSHIBOKEN_API TypeResolver
 {
 public:
+    enum Type
+    {
+        ObjectType,
+        ValueType,
+        UnknownType
+    };
+
     typedef PyObject* (*CppToPythonFunc)(void*);
     typedef void* (*PythonToCppFunc)(PyObject*);
     typedef void (*DeleteObjectFunc)(void*);
@@ -96,6 +103,7 @@ public:
         return new TypeResolver(typeName, &objectTypeToPython<T>, &pythonToObjectType<T>, SbkType<T>());
     }
 
+    static Type getType(const char* name);
     static TypeResolver* get(const char* typeName);
 
     const char* typeName() const;
