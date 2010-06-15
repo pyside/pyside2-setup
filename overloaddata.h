@@ -111,6 +111,13 @@ public:
     bool hasArgumentTypeReplace() const;
     QString argumentTypeReplaced() const;
 
+    bool hasArgumentWithDefaultValue() const;
+    static bool hasArgumentWithDefaultValue(const AbstractMetaFunctionList& overloads);
+    static bool hasArgumentWithDefaultValue(const AbstractMetaFunction* func);
+
+    /// Returns a list of function arguments which have default values and were not removed.
+    static AbstractMetaArgumentList getArgumentsWithDefaultValues(const AbstractMetaFunction* func);
+
 private:
     OverloadData(OverloadData* headOverloadData, const AbstractMetaFunction* func,
                  const AbstractMetaType* argType, int argPos);

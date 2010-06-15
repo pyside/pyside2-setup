@@ -741,3 +741,48 @@ QString OverloadData::argumentTypeReplaced() const
     return m_argTypeReplaced;
 }
 
+bool OverloadData::hasArgumentWithDefaultValue(const AbstractMetaFunctionList& overloads)
+{
+    if (OverloadData::getMinMaxArguments(overloads).second == 0)
+        return false;
+    foreach (const AbstractMetaFunction* func, overloads) {
+        if (hasArgumentWithDefaultValue(func))
+            return true;
+    }
+    return false;
+}
+
+bool OverloadData::hasArgumentWithDefaultValue() const
+{
+    if (maxArgs() == 0)
+        return false;
+    foreach (const AbstractMetaFunction* func, overloads()) {
+        if (hasArgumentWithDefaultValue(func))
+            return true;
+    }
+    return false;
+}
+
+bool OverloadData::hasArgumentWithDefaultValue(const AbstractMetaFunction* func)
+{
+    foreach (const AbstractMetaArgument* arg, func->arguments()) {
+        if (func->argumentRemoved(arg->argumentIndex() + 1))
+            continue;
+        if (!arg->defaultValueExpression().isEmpty())
+            return true;
+    }
+    return false;
+}
+
+AbstractMetaArgumentList OverloadData::getArgumentsWithDefaultValues(const AbstractMetaFunction* func)
+{
+    AbstractMetaArgumentList args;
+    foreach (AbstractMetaArgument* arg, func->arguments()) {
+        if (arg->defaultValueExpression().isEmpty()
+            || func->argumentRemoved(arg->argumentIndex() + 1))
+            continue;
+        args << arg;
+    }
+    return args;
+}
+
