@@ -286,7 +286,7 @@ void walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visi
             continue;
         } else {
             SbkBaseWrapperType* sbkType = reinterpret_cast<SbkBaseWrapperType*>(type);
-            if (sbkType->is_multicpp)
+            if (sbkType->is_user_type)
                 walkThroughClassHierarchy(type, visitor);
             else
                 visitor->visit(sbkType);
@@ -598,6 +598,36 @@ void TypeDiscovery::addTypeDiscoveryFunction(Shiboken::TypeDiscoveryFunc func)
 {
     m_discoveryFunctions.push_back(func);
 }
+
+class FindBaseTypeVisitor : public HierarchyVisitor
+{
+    public:
+        FindBaseTypeVisitor(PyTypeObject* typeToFind) : m_found(false), m_typeToFind(typeToFind) {}
+        virtual void visit(SbkBaseWrapperType* node)
+        {
+            if (reinterpret_cast<PyTypeObject*>(node) == m_typeToFind) {
+                m_found = true;
+                finish();
+            }
+        }
+        bool found() const { return m_found; }
+
+    private:
+        bool m_found;
+        PyTypeObject* m_typeToFind;
+};
+
+bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctorType)
+{
+    FindBaseTypeVisitor visitor(ctorType);
+    walkThroughClassHierarchy(myType, &visitor);
+    if (!visitor.found()) {
+        PyErr_Format(PyExc_TypeError, "%s isn't a direct base class of %s", ctorType->tp_name, myType->tp_name);
+        return false;
+    }
+    return true;
+}
+
 
 } // namespace Shiboken
 

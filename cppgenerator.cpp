@@ -686,6 +686,13 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     s << cpythonFunctionName(rfunc) << "(PyObject* self, PyObject* args, PyObject* kwds)" << endl;
     s << '{' << endl;
 
+    // Check if the right constructor was called.
+    if (!metaClass->hasPrivateDestructor()) {
+        s << INDENT << "if (Shiboken::isUserType(self) && !Shiboken::canCallConstructor(self->ob_type, Shiboken::SbkType<" << metaClass->qualifiedCppName() << " >()))" << endl;
+        Indentation indent(INDENT);
+        s << INDENT << "return " << m_currentErrorCode << ';' << endl << endl;
+    }
+
     s << INDENT;
     bool hasCppWrapper = shouldGenerateCppWrapper(metaClass);
     s << (hasCppWrapper ? wrapperName(metaClass) : metaClass->qualifiedCppName());

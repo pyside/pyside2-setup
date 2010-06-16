@@ -190,6 +190,11 @@ LIBSHIBOKEN_API bool setCppPointer(SbkBaseWrapper* wrapper, PyTypeObject* desire
 LIBSHIBOKEN_API void setTypeUserData(SbkBaseWrapper* wrapper, void* user_data, DeleteUserDataFunc d_func);
 LIBSHIBOKEN_API void* getTypeUserData(SbkBaseWrapper* wrapper);
 
+/**
+*   Returns true if the constructor of \p ctorType can be called for a instance of type \p myType.
+*   \note This function set a python error when returning false.
+*/
+LIBSHIBOKEN_API bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctorType);
 
 /**
  * Shiboken_TypeCheck macro performs a type check using the values registered with SbkType<>() template.
