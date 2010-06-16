@@ -75,7 +75,7 @@ private:
      *   If implicit conversions, and thus new object allocation, are needed,
      *   code to deallocate a possible new instance is also generated.
      *   \param s text stream to write
-     *   \param metatype a pointer to the argument type to be converted
+     *   \param argType a pointer to the argument type to be converted
      *   \param argName C++ argument name
      *   \param pyArgName Python argument name
      *   \param context the current meta class
@@ -183,6 +183,10 @@ private:
 
     /// Returns true if generator should produce getters and setters for the given class.
     bool shouldGenerateGetSetList(const AbstractMetaClass* metaClass);
+
+    /// Returns true if the Python wrapper for the received OverloadData must accept a list of arguments.
+    static bool pythonFunctionWrapperUsesListOfArguments(const OverloadData& overloadData);
+
     void writeHashFunction(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeObjCopierFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 

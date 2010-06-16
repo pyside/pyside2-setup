@@ -2027,6 +2027,14 @@ bool CppGenerator::shouldGenerateGetSetList(const AbstractMetaClass* metaClass)
     return !metaClass->fields().isEmpty();
 }
 
+bool CppGenerator::pythonFunctionWrapperUsesListOfArguments(const OverloadData& overloadData)
+{
+    bool usePyArgs = overloadData.maxArgs() > 1
+                     || overloadData.referenceFunction()->isConstructor()
+                     || overloadData.hasArgumentWithDefaultValue();
+    return usePyArgs;
+}
+
 void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     QString tp_flags;
