@@ -2008,8 +2008,6 @@ QString AbstractMetaBuilder::fixDefaultValue(ArgumentModelItem item, AbstractMet
                     else
                         expr = "false";
                 }
-            } else if (expr == "QVariant::Invalid") {
-                expr = QString::number(QVariant::Invalid);
             } else {
                 // This can be an enum or flag so I need to delay the
                 // translation untill all namespaces are completly
