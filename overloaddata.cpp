@@ -210,7 +210,7 @@ void OverloadData::sortNextOverloads()
  *                    \- int
  *
  */
-OverloadData::OverloadData(const AbstractMetaFunctionList overloads, const ShibokenGenerator* generator)
+OverloadData::OverloadData(const AbstractMetaFunctionList& overloads, const ShibokenGenerator* generator)
     : m_minArgs(256), m_maxArgs(0), m_argPos(-1), m_argType(0),
     m_headOverloadData(this), m_previousOverloadData(0), m_generator(generator)
 {
@@ -544,7 +544,7 @@ int OverloadData::numberOfRemovedArguments(const AbstractMetaFunction* func, int
     return removed;
 }
 
-QPair<int, int> OverloadData::getMinMaxArguments(const AbstractMetaFunctionList overloads)
+QPair<int, int> OverloadData::getMinMaxArguments(const AbstractMetaFunctionList& overloads)
 {
     int minArgs = 10000;
     int maxArgs = 0;
@@ -568,7 +568,7 @@ QPair<int, int> OverloadData::getMinMaxArguments(const AbstractMetaFunctionList 
     return QPair<int, int>(minArgs, maxArgs);
 }
 
-bool OverloadData::isSingleArgument(const AbstractMetaFunctionList overloads)
+bool OverloadData::isSingleArgument(const AbstractMetaFunctionList& overloads)
 {
     bool singleArgument = true;
     foreach (const AbstractMetaFunction* func, overloads) {
