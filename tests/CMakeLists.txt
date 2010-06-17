@@ -14,7 +14,7 @@ foreach(test_file ${TEST_FILES})
     list(FIND test_blacklist ${CMAKE_MATCH_1} expect_fail)
     add_test("${CMAKE_MATCH_1}" sh
              "${CMAKE_CURRENT_SOURCE_DIR}/run_test.sh"
-             "${libsample_BINARY_DIR}:${libshiboken_BINARY_DIR}"
+             "${libsample_BINARY_DIR}:${libother_BINARY_DIR}:${libshiboken_BINARY_DIR}"
              "${sample_BINARY_DIR}:${other_BINARY_DIR}"
              "${PYTHON_EXECUTABLE}"
              "${test_file}")
