@@ -1275,8 +1275,8 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
     bool hasImplicitConversions = !implicitConversions(argType).isEmpty();
 
     if (isWrappedCppClass) {
-        const TypeEntry* type = (hasImplicitConversions ? type : 0);
-        writeInvalidCppObjectCheck(s, pyArgName, type);
+        const TypeEntry* typeEntry = (hasImplicitConversions ? type : 0);
+        writeInvalidCppObjectCheck(s, pyArgName, typeEntry);
     }
 
     // Auto pointer to dealloc new objects created because to satisfy implicit conversion.
