@@ -1071,9 +1071,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 argsRemoved++;
         }
         numArgs = func->arguments().size() - argsRemoved;
-
-        usePyArgs = getMinMaxArguments(func).second > 1 || func->isConstructor();
-
+        usePyArgs = getMinMaxArguments(func).second > 1;
     }
 
     foreach (CodeSnip snip, codeSnips) {

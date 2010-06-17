@@ -53,6 +53,7 @@ private:
     void writeMinimalConstructorCallArguments(QTextStream& s, const AbstractMetaType* type);
     void writeMethodWrapper(QTextStream &s, const AbstractMetaFunctionList overloads);
     void writeArgumentsInitializer(QTextStream& s, OverloadData& overloadData);
+    void writeNamedArgumentsCheck(QTextStream& s, OverloadData& overloadData);
     void writeCppSelfDefinition(QTextStream& s, const AbstractMetaFunction* func);
 
     void writeErrorSection(QTextStream& s, OverloadData& overloadData);
@@ -120,6 +121,7 @@ private:
 
     /// Writes the call to a single function usually from a collection of overloads.
     void writeSingleFunctionCall(QTextStream& s, const OverloadData& overloadData, const AbstractMetaFunction* func = 0);
+    void writeNamedArgumentResolution(QTextStream& s, const AbstractMetaFunction* func, bool usePyArgs);
 
     /// Returns a string containing the name of an argument for the given function and argument index.
     QString argumentNameFromIndex(const AbstractMetaFunction* func, int argIndex, const AbstractMetaClass** wrappedClass);

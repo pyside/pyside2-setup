@@ -134,6 +134,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     // headers
     s << "// default includes" << endl;
     s << "#include <shiboken.h>" << endl;
+    s << "#include <algorithm>" << endl;
     if (usePySideExtensions()) {
         s << "#include <qsignal.h>" << endl;
         s << "#include <pyside.h>" << endl;
@@ -740,6 +741,13 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
             s << INDENT << '}' << endl << endl;
     }
 
+    s << endl;
+
+    if (overloadData.hasArgumentWithDefaultValue()) {
+        // Check usage of unknown named arguments
+        writeNamedArgumentsCheck(s, overloadData);
+        s << INDENT << "int numNamedArgs = (kwds ? PyDict_Size(kwds) : 0);" << endl;
+    }
     if (overloadData.maxArgs() > 0) {
         s  << endl << INDENT << "int numArgs = ";
         writeArgumentsInitializer(s, overloadData);
@@ -906,13 +914,17 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
 
     int minArgs = overloadData.minArgs();
     int maxArgs = overloadData.maxArgs();
+    bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(overloadData);
+    bool usesNamedArguments = overloadData.hasArgumentWithDefaultValue();
 
     s << "static PyObject* ";
     s << cpythonFunctionName(rfunc) << "(PyObject* self";
     if (maxArgs > 0) {
         s << ", PyObject* arg";
-        if (maxArgs > 1)
+        if (usePyArgs)
             s << 's';
+        if (usesNamedArguments)
+            s << ", PyObject* kwds";
     }
     s << ')' << endl << '{' << endl;
 
@@ -971,10 +983,17 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
 
     if (overloadData.hasAllowThread())
         s << INDENT << "Shiboken::ThreadStateSaver " THREAD_STATE_SAVER_VAR ";" << endl;
+    s << endl;
+
+    if (usesNamedArguments) {
+        // Check usage of unknown named arguments
+        writeNamedArgumentsCheck(s, overloadData);
+        s << INDENT << "int numNamedArgs = (kwds ? PyDict_Size(kwds) : 0);" << endl;
+    }
 
     if (minArgs != maxArgs || maxArgs > 1) {
         s << INDENT << "int numArgs = ";
-        if (minArgs == 0 && maxArgs == 1)
+        if (minArgs == 0 && maxArgs == 1 && !usePyArgs)
             s << "(arg == 0 ? 0 : 1);" << endl;
         else
             writeArgumentsInitializer(s, overloadData);
@@ -1065,6 +1084,47 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
     s << '}' << endl << endl;
 }
 
+void CppGenerator::writeNamedArgumentsCheck(QTextStream& s, OverloadData& overloadData)
+{
+    // Check usage of unknown named arguments
+    QSet<QString> argNamesSet;
+    foreach (const AbstractMetaFunction* func, overloadData.overloads()) {
+        foreach (const AbstractMetaArgument* arg, func->arguments()) {
+            if (arg->defaultValueExpression().isEmpty()
+                || func->argumentRemoved(arg->argumentIndex() + 1))
+                continue;
+            argNamesSet << QString("\"%1\"").arg(arg->argumentName());
+        }
+    }
+    QStringList argNamesList = argNamesSet.toList();
+    qSort(argNamesList.begin(), argNamesList.end());
+
+    s << INDENT << "// Check existence of named argument." << endl;
+    s << INDENT << "if (kwds) {" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "std::string argNames[] = { " << argNamesList.join(", ") << " };" << endl;
+        s << INDENT << "PyObject* keys = PyDict_Keys(kwds);" << endl;
+        s << INDENT << "Shiboken::AutoDecRef auto_keys(keys);" << endl;
+        s << INDENT << "for (int i = 0; i < PyList_GET_SIZE(keys); ++i) {" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "PyObject* argName = PyList_GET_ITEM(keys, i);" << endl;
+            s << INDENT << "if (!std::binary_search(argNames, argNames + " << argNamesList.count();
+            s << ", std::string(PyString_AS_STRING(argName)))) {" << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "PyErr_Format(PyExc_TypeError, \"" << fullPythonFunctionName(overloadData.referenceFunction());
+                s << "(): got an unexpected keyword argument '%s'\", PyString_AS_STRING(argName));" << endl;
+                s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+            }
+            s << INDENT << '}' << endl;
+        }
+        s << INDENT << '}' << endl;
+    }
+    s << INDENT << '}' << endl;
+}
+
 void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overloadData)
 {
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
@@ -1073,17 +1133,26 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
     int minArgs = overloadData.minArgs();
     int maxArgs = overloadData.maxArgs();
 
-    s << INDENT << "PyObject* pyargs[] = {";
-    s << QString(maxArgs, '0').split("", QString::SkipEmptyParts).join(", ");
-    s << "};" << endl << endl;
+    QStringList palist;
+
+    s << INDENT << "PyObject* ";
+    if (maxArgs == 1) {
+        s << "arg = 0";
+        palist << "&arg";
+    } else {
+        s << "pyargs[] = {" << QString(maxArgs, '0').split("", QString::SkipEmptyParts).join(", ") << '}';
+        for (int i = 0; i < maxArgs; i++)
+            palist << QString("&(pyargs[%1])").arg(i);
+    }
+    s << ';' << endl << endl;
+
+    QString pyargs = palist.join(", ");
 
     if (overloadData.hasVarargs()) {
         maxArgs--;
         if (minArgs > maxArgs)
             minArgs = maxArgs;
-    }
 
-    if (overloadData.hasVarargs()) {
         s << INDENT << "PyObject* nonvarargs = PyTuple_GetSlice(args, 0, " << maxArgs << ");" << endl;
         s << INDENT << "Shiboken::AutoDecRef auto_nonvarargs(nonvarargs);" << endl;
         s << INDENT << "pyargs[" << maxArgs << "] = PyTuple_GetSlice(args, " << maxArgs << ", numArgs);" << endl;
@@ -1091,21 +1160,39 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
         s << endl;
     }
 
-    QStringList palist;
-    for (int i = 0; i < maxArgs; i++)
-        palist << QString("&(pyargs[%1])").arg(i);
-    QString pyargs = palist.join(", ");
+    bool usesNamedArguments = overloadData.hasArgumentWithDefaultValue();
 
+    s << INDENT << "// invalid argument lengths" << endl;
+    if (usesNamedArguments) {
+        s << INDENT << "if (numArgs" << (overloadData.hasArgumentWithDefaultValue() ? " + numNamedArgs" : "") << " > " << maxArgs << ") {" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "PyErr_SetString(PyExc_TypeError, \"" << fullPythonFunctionName(rfunc) << "(): too many arguments\");" << endl;
+            s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+        }
+        s << INDENT << '}';
+        if (minArgs > 0) {
+            s << " else if (numArgs < " << minArgs << ") {" << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "PyErr_SetString(PyExc_TypeError, \"" << fullPythonFunctionName(rfunc) << "(): not enough arguments\");" << endl;
+                s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+            }
+            s << INDENT << '}';
+        }
+    }
     QList<int> invalidArgsLength = overloadData.invalidArgumentLengths();
     if (!invalidArgsLength.isEmpty()) {
         QStringList invArgsLen;
         foreach (int i, invalidArgsLength)
             invArgsLen << QString("numArgs == %1").arg(i);
-        s << INDENT << "// invalid argument lengths" << endl;
-        s << INDENT << "if (" << invArgsLen.join(" || ") << ")" << endl;
+        if (usesNamedArguments)
+            s << " else ";
+        s << "if (" << invArgsLen.join(" || ") << ")" << endl;
         Indentation indent(INDENT);
-        s << INDENT << "goto " << cpythonFunctionName(rfunc) << "_TypeError;" << endl << endl;
+        s << INDENT << "goto " << cpythonFunctionName(rfunc) << "_TypeError;";
     }
+    s << endl << endl;
 
     QString funcName;
     if (rfunc->isOperatorOverload())
@@ -1113,8 +1200,13 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
     else
         funcName = rfunc->name();
 
-    s << INDENT << "if (!PyArg_UnpackTuple(" << (overloadData.hasVarargs() ?  "nonvarargs" : "args");
-    s << ", \"" << funcName << "\", " << minArgs << ", " << maxArgs  << ", " << pyargs << "))" << endl;
+    if (usesNamedArguments) {
+        s << INDENT << "if (!PyArg_ParseTuple(" << (overloadData.hasVarargs() ?  "nonvarargs" : "args");
+        s << ", \"|" << QByteArray(maxArgs, 'O') << ':' << funcName << "\", " << pyargs << "))" << endl;
+    } else {
+        s << INDENT << "if (!PyArg_UnpackTuple(" << (overloadData.hasVarargs() ?  "nonvarargs" : "args");
+        s << ", \"" << funcName << "\", " << minArgs << ", " << maxArgs  << ", " << pyargs << "))" << endl;
+    }
     {
         Indentation indent(INDENT);
         s << INDENT << "return " << m_currentErrorCode << ';' << endl;
@@ -1367,7 +1459,7 @@ void CppGenerator::writeOverloadedFunctionDecisor(QTextStream& s, const Overload
 
     int maxArgs = parentOverloadData->maxArgs();
     // Python constructors always receive multiple arguments.
-    bool manyArgs = maxArgs > 1 || referenceFunction->isConstructor();
+    bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(*parentOverloadData);
 
     // Functions without arguments are identified right away.
     if (maxArgs == 0) {
@@ -1432,7 +1524,7 @@ void CppGenerator::writeOverloadedFunctionDecisor(QTextStream& s, const Overload
         }
 
         s << "if (";
-        if (manyArgs && signatureFound) {
+        if (usePyArgs && signatureFound) {
             AbstractMetaArgumentList args = refFunc->arguments();
             int lastArgIsVarargs = (int) (args.size() > 1 && args.last()->type()->isVarargs());
             int numArgs = args.size() - OverloadData::numberOfRemovedArguments(refFunc) - lastArgIsVarargs;
@@ -1447,11 +1539,11 @@ void CppGenerator::writeOverloadedFunctionDecisor(QTextStream& s, const Overload
         QString typeConversions;
         QTextStream tcv(&typeConversions);
 
-        QString pyArgName = manyArgs ? QString("pyargs[%1]").arg(overloadData->argPos()) : "arg";
+        QString pyArgName = (usePyArgs && maxArgs > 1) ? QString("pyargs[%1]").arg(overloadData->argPos()) : "arg";
 
         OverloadData* od = overloadData;
         while (od && !od->argType()->isVarargs()) {
-            if (manyArgs)
+            if (usePyArgs && maxArgs > 1)
                 pyArgName = QString("pyargs[%1]").arg(od->argPos());
 
             writeTypeCheck(tck, od, pyArgName);
@@ -1512,7 +1604,10 @@ void CppGenerator::writeFunctionCalls(QTextStream& s, const OverloadData& overlo
 void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& overloadData, const AbstractMetaFunction* func)
 {
     const AbstractMetaClass* implementingClass = overloadData.referenceFunction()->implementingClass();
-    bool multipleArguments = overloadData.maxArgs() > 1 || overloadData.referenceFunction()->isConstructor();
+    bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(overloadData) && overloadData.maxArgs() > 1;
+
+    // Handle named arguments.
+    writeNamedArgumentResolution(s, func, usePyArgs);
 
     int removedArgs = 0;
     for (int i = 0; i < func->arguments().count(); i++) {
@@ -1535,7 +1630,7 @@ void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& o
 
         if (argType) {
             QString argName = QString("cpp_arg%1").arg(i - removedArgs);
-            QString pyArgName = multipleArguments ? QString("pyargs[%1]").arg(i - removedArgs) : "arg";
+            QString pyArgName = usePyArgs ? QString("pyargs[%1]").arg(i - removedArgs) : "arg";
             QString defaultValue = guessScopeForDefaultValue(func, arg);
 
             writeArgumentConversion(s, argType, argName, pyArgName, implementingClass, defaultValue);
@@ -1552,6 +1647,50 @@ void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& o
     writeMethodCall(s, func, func->arguments().size() - numRemovedArgs);
     if (!func->isConstructor())
         writeNoneReturn(s, func, overloadData.hasNonVoidReturnType());
+}
+
+void CppGenerator::writeNamedArgumentResolution(QTextStream& s, const AbstractMetaFunction* func, bool usePyArgs)
+{
+    AbstractMetaArgumentList args = OverloadData::getArgumentsWithDefaultValues(func);
+    if (!args.isEmpty()) {
+        s << INDENT << "if (kwds) {" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "const char* errorArgName = 0;" << endl;
+            s << INDENT << "PyObject* ";
+            foreach (const AbstractMetaArgument* arg, args) {
+                int pyArgIndex = arg->argumentIndex() - OverloadData::numberOfRemovedArguments(func, arg->argumentIndex());
+                QString pyArgName = usePyArgs ? QString("pyargs[%1]").arg(pyArgIndex) : "arg";
+                s << "value = PyDict_GetItemString(kwds, \"" << arg->argumentName() << "\");" << endl;
+                s << INDENT << "if (value) {" << endl;
+                {
+                    Indentation indent(INDENT);
+                    s << INDENT << "if (" << pyArgName << ")" << endl;
+                    {
+                        Indentation indent(INDENT);
+                        s << INDENT << "errorArgName = \"" << arg->argumentName() << "\";" << endl;
+                    }
+                    s << INDENT << "else" << endl;
+                    {
+                        Indentation indent(INDENT);
+                        s << INDENT << pyArgName << " = value;" << endl;
+                    }
+                }
+                s << INDENT << '}' << endl;
+                s << INDENT;
+            }
+            s << "if (errorArgName) {" << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "PyErr_Format(PyExc_TypeError, \"" << fullPythonFunctionName(func);
+                s << "(): got multiple values for keyword argument '%s'\", errorArgName);" << endl;
+                s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+            }
+            s << INDENT << '}' << endl;
+
+        }
+        s << INDENT << '}' << endl;
+    }
 }
 
 QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction* func, int argIndex, const AbstractMetaClass** wrappedClass)
@@ -1571,7 +1710,7 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction* func, in
     } else {
         int realIndex = argIndex - 1 - OverloadData::numberOfRemovedArguments(func, argIndex - 1);
         *wrappedClass = classes().findClass(func->arguments().at(realIndex)->type()->typeEntry()->name());
-        if ((argIndex == 1)
+        if (argIndex == 1
             && OverloadData::isSingleArgument(getFunctionGroups(func->implementingClass())[func->name()]))
             pyArgName = QString("arg");
         else
@@ -2535,20 +2674,24 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
 void CppGenerator::writeMethodDefinitionEntry(QTextStream& s, const AbstractMetaFunctionList overloads)
 {
     Q_ASSERT(!overloads.isEmpty());
-    QPair<int, int> minMax = OverloadData::getMinMaxArguments(overloads);
-    const AbstractMetaFunction* func = overloads.first();
+    OverloadData overloadData(overloads, this);
+    bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(overloadData);
+    const AbstractMetaFunction* func = overloadData.referenceFunction();
+
     s << '"' << func->name() << "\", (PyCFunction)" << cpythonFunctionName(func) << ", ";
-    if (minMax.second < 2) {
-        if (minMax.first == 0)
-            s << "METH_NOARGS";
-        if (minMax.first != minMax.second)
-            s << '|';
-        if (minMax.second == 1)
+    if (overloadData.maxArgs() < 2 && !usePyArgs) {
+        bool minZero = overloadData.minArgs() == 0;
+        bool maxOne = overloadData.maxArgs() == 1;
+        if (minZero)
+            s << "METH_NOARGS" << (maxOne ? "|" : "");
+        if (maxOne)
             s << "METH_O";
     } else {
         s << "METH_VARARGS";
+        if (overloadData.hasArgumentWithDefaultValue())
+            s << "|METH_KEYWORDS";
     }
-    if (func->ownerClass() && OverloadData::hasStaticFunction(overloads))
+    if (func->ownerClass() && overloadData.hasStaticFunction())
         s << "|METH_STATIC";
 }
 
@@ -3210,6 +3353,7 @@ void CppGenerator::finishGeneration()
 
         s << "#include <Python.h>" << endl;
         s << "#include <shiboken.h>" << endl;
+        s << "#include <algorithm>" << endl;
         s << "#include \"" << getModuleHeaderFileName() << '"' << endl << endl;
         foreach (const Include& include, includes)
             s << include;
@@ -3368,7 +3512,7 @@ bool CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
     if (argOwner.index == -2)  //invalid
         argOwner = func->argumentOwner(dClass, argIndex);
 
-    bool usePyArgs = getMinMaxArguments(func).second > 1 || func->isConstructor();
+    bool usePyArgs = OverloadData(getFunctionGroups(func->implementingClass())[func->name()], this).maxArgs() > 1;
 
     ArgumentOwner::Action action = argOwner.action;
     int parentIndex = argOwner.index;
