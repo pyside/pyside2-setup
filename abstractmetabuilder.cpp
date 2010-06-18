@@ -2222,7 +2222,7 @@ bool AbstractMetaBuilder::inheritTemplate(AbstractMetaClass* subclass,
             temporaryType->setIndirections(i.indirections);
             templateTypes << temporaryType;
         } else {
-            ReportHandler::warning("Ignoring template parameter "+templateParamName+" from "+info.instantiationName()+", because I dont known what's it.");
+            ReportHandler::warning("Ignoring template parameter " + templateParamName + " from " + info.instantiationName() + ", because I don't know what it is.");
         }
     }
 
