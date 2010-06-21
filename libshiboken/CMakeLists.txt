@@ -1,6 +1,7 @@
 project(libshiboken)
 
 find_package(PythonLibs REQUIRED)
+find_package(PythonInterp REQUIRED)
 
 #Find installed sparsehash
 find_path(SPARSEHASH_INCLUDE_PATH sparseconfig.h PATH_SUFFIXES "/google/sparsehash")
@@ -22,6 +23,16 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ShibokenVersion.cmake.in"
                "${CMAKE_CURRENT_BINARY_DIR}/ShibokenVersion.cmake" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shiboken.pc.in"
                "${CMAKE_CURRENT_BINARY_DIR}/shiboken.pc" @ONLY)
+
+# Detect if the python libs were compiled in debug mode
+execute_process(
+    COMMAND ${PYTHON_EXECUTABLE} -c "from distutils import sysconfig; \\
+        print sysconfig.get_config_var('Py_DEBUG')"
+    OUTPUT_VARIABLE PY_DEBUG
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+if (PY_DEBUG)
+    add_definitions("-DPy_DEBUG")
+endif()
 
 set(libshiboken_SRC
 basewrapper.cpp
