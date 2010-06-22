@@ -3174,7 +3174,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     s << INDENT << "if (PyType_Ready((PyTypeObject*)&" << pyTypeName << ") < 0)" << endl;
     s << INDENT << INDENT << "return;" << endl << endl;
 
-    if (metaClass->enclosingClass()) {
+    if (metaClass->enclosingClass() && (metaClass->enclosingClass()->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass) ) {
         s << INDENT << "PyDict_SetItemString(module,"
           << "\"" << metaClass->name() << "\", (PyObject*)&" << pyTypeName << ");" << endl;
     } else {
@@ -3331,7 +3331,7 @@ void CppGenerator::finishGeneration()
 
         QString defineStr = "init_" + cls->qualifiedCppName().replace("::", "_");
 
-        if (cls->enclosingClass())
+        if (cls->enclosingClass() && (cls->enclosingClass()->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass))
             defineStr += "(" + cpythonTypeNameExt(cls->enclosingClass()->typeEntry()) +"->tp_dict);";
         else
             defineStr += "(module);";
