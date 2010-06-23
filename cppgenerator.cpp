@@ -215,9 +215,6 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 #ifdef AVOID_PROTECTED_HACK
         }
 #endif
-
-        s << endl << "// Target ---------------------------------------------------------" << endl;
-        s << endl;
     }
 
     Indentation indentation(INDENT);
@@ -230,6 +227,8 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     bool hasComparisonOperator = metaClass->hasComparisonOperatorOverload();
     bool typeAsNumber = metaClass->hasArithmeticOperatorOverload() || metaClass->hasLogicalOperatorOverload() || metaClass->hasBitwiseOperatorOverload();
 
+    s << endl << "// Target ---------------------------------------------------------" << endl << endl;
+    s << "extern \"C\" {" << endl;
     foreach (AbstractMetaFunctionList allOverloads, getFunctionGroups(metaClass).values()) {
         AbstractMetaFunctionList overloads;
         foreach (AbstractMetaFunction* func, allOverloads) {
@@ -335,7 +334,8 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         s << "};" << endl << endl;
     }
 
-    s << "extern \"C\"" << endl << '{' << endl << endl;
+    s << "} // extern \"C\"" << endl << endl;
+
     if (!metaClass->typeEntry()->hashFunction().isEmpty())
         writeHashFunction(s, metaClass);
     writeObjCopierFunction(s, metaClass);
@@ -365,8 +365,6 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     s << endl;
 
     writeClassRegister(s, metaClass);
-
-    s << endl << "} // extern \"C\"" << endl << endl;
 
     // class inject-code native/end
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
@@ -3326,8 +3324,7 @@ void CppGenerator::finishGeneration()
         if (!shouldGenerate(cls))
             continue;
 
-        s_classInitDecl << "extern \"C\" PyAPI_FUNC(void) init_"
-                        << cls->qualifiedCppName().replace("::", "_") << "(PyObject* module);" << endl;
+        s_classInitDecl << "void init_" << cls->qualifiedCppName().replace("::", "_") << "(PyObject* module);" << endl;
 
         QString defineStr = "init_" + cls->qualifiedCppName().replace("::", "_");
 
