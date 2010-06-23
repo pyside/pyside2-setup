@@ -3,7 +3,7 @@ project(generatorrunner)
 cmake_minimum_required(VERSION 2.6)
 
 find_package(Qt4 4.5.0 REQUIRED)
-find_package(ApiExtractor REQUIRED)
+find_package(ApiExtractor 0.6 REQUIRED)
 
 option(BUILD_TESTS "Build tests." TRUE)
 
@@ -68,8 +68,8 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/generatorrunner.pc.in"
                "${CMAKE_CURRENT_BINARY_DIR}/generatorrunner.pc" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GeneratorRunnerConfig.cmake.in"
                "${CMAKE_CURRENT_BINARY_DIR}/GeneratorRunnerConfig.cmake" @ONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GeneratorRunnerVersion.cmake.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/GeneratorRunnerVersion.cmake" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GeneratorRunnerConfigVersion.cmake.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/GeneratorRunnerConfigVersion.cmake" @ONLY)
 
 # uninstall target
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
@@ -100,7 +100,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/generatorrunner.pc" DESTINATION
         "${LIB_INSTALL_DIR}/pkgconfig")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GeneratorRunnerConfig.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/GeneratorRunner-${generator_VERSION}")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GeneratorRunnerVersion.cmake"
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GeneratorRunnerConfigVersion.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/GeneratorRunner-${generator_VERSION}")
 
 #FIXME: manpages should be installed only on Linux targets
