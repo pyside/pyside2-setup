@@ -108,7 +108,7 @@ set_target_properties(apiextractor PROPERTIES VERSION ${apiextractor_VERSION} SO
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/apiextractor.pc.in"
                "${CMAKE_CURRENT_BINARY_DIR}/apiextractor.pc" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ApiExtractorConfig.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/ApiExtractorConfig.cmake" @ONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ApiExtractorVersion.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/ApiExtractorVersion.cmake" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ApiExtractorConfigVersion.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/ApiExtractorConfigVersion.cmake" @ONLY)
 
 # uninstall target
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake" "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
@@ -151,5 +151,5 @@ install(TARGETS apiextractor EXPORT apiextractor
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/apiextractor.pc" DESTINATION "${LIB_INSTALL_DIR}/pkgconfig")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ApiExtractorConfig.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/ApiExtractor-${apiextractor_VERSION}")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ApiExtractorVersion.cmake"
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ApiExtractorConfigVersion.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/ApiExtractor-${apiextractor_VERSION}")
