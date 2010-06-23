@@ -19,8 +19,8 @@ set(libshiboken_SOVERSION "${libshiboken_MAJOR_VERSION}.${libshiboken_MINOR_VERS
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ShibokenConfig.cmake.in"
                "${CMAKE_CURRENT_BINARY_DIR}/ShibokenConfig.cmake" @ONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ShibokenVersion.cmake.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/ShibokenVersion.cmake" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ShibokenConfigVersion.cmake.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/ShibokenConfigVersion.cmake" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shiboken.pc.in"
                "${CMAKE_CURRENT_BINARY_DIR}/shiboken.pc" @ONLY)
 
@@ -69,7 +69,7 @@ install(FILES
 install(TARGETS libshiboken DESTINATION "${LIB_INSTALL_DIR}")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ShibokenConfig.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken-${libshiboken_VERSION}")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ShibokenVersion.cmake"
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ShibokenConfigVersion.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken-${libshiboken_VERSION}")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/shiboken.pc"
         DESTINATION "${LIB_INSTALL_DIR}/pkgconfig")
