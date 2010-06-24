@@ -1816,8 +1816,21 @@ AbstractMetaType* AbstractMetaBuilder::translateType(const TypeInfo& _typei, boo
     if (qualifiedName == "QFlags")
         qualifiedName = typeInfo.toString();
 
+    const TypeEntry *type = 0;
     // 5. Try to find the type
-    const TypeEntry *type = TypeDatabase::instance()->findType(qualifiedName);
+
+    // 5.1 - Try first using the current scope
+    if (m_currentClass) {
+        QStringList context = m_currentClass->qualifiedCppName().split("::");
+        while(!type && (context.size() > 0) ) {
+            type = TypeDatabase::instance()->findType(context.join("::") + "::" + qualifiedName);
+            context.removeLast();
+        }
+    }
+
+    // 5.2 - Try without scope
+    if (!type)
+        type = TypeDatabase::instance()->findType(qualifiedName);
 
     // 6. No? Try looking it up as a flags type
     if (!type)
