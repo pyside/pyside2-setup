@@ -31,6 +31,7 @@ class TestTemplates : public QObject
     Q_OBJECT
 private slots:
     void testTemplateOnContainers();
+    void testTemplateWithNamespace();
 };
 
 #endif

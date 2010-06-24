@@ -23,7 +23,50 @@
 
 #include "testtemplates.h"
 #include <QtTest/QTest>
+#include <QTemporaryFile>
 #include "testutil.h"
+
+void TestTemplates::testTemplateWithNamespace()
+{
+    const char cppCode[] = "\
+    struct Url {\
+      void name();\
+    };\
+    namespace Internet {\
+        struct Url{};\
+        struct Bookmarks {\
+            QList<Url> list();\
+        };\
+    }";
+    const char xmlCode0[] = "\
+    <typesystem package='Pakcage.Network'>\
+        <value-type name='Url' />\
+    </typesystem>";
+
+    QTemporaryFile file;
+    QVERIFY(file.open());
+    file.write(xmlCode0);
+    file.close();
+
+    QString xmlCode1 = QString("\
+    <typesystem package='Package.Internet'>\
+        <load-typesystem name='%1' generate='no'/>\
+        <container-type name='QList' type='list'/> \
+        <namespace-type name='Internet' generate='no' />\
+        <value-type name='Internet::Url'/>\
+        <value-type name='Internet::Bookmarks'/>\
+    </typesystem>").arg(file.fileName());
+
+    TestUtil t(cppCode, qPrintable(xmlCode1), false);
+    AbstractMetaClassList classes = t.builder()->classes();
+
+    AbstractMetaClass* classB = classes.findClass("Bookmarks");
+    QVERIFY(classB);
+    const AbstractMetaFunction* func = classB->findFunction("list");
+    AbstractMetaType* funcType = func->type();
+    QVERIFY(funcType);
+    QCOMPARE(funcType->cppSignature(), QString("QList<Internet::Url >"));
+}
 
 void TestTemplates::testTemplateOnContainers()
 {
