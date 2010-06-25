@@ -114,7 +114,7 @@ private:
      */
     void writeOverloadedFunctionDecisor(QTextStream& s, const OverloadData& overloadData);
     /// Recursive auxiliar method to the other writeOverloadedFunctionDecisor.
-    void writeOverloadedFunctionDecisor(QTextStream& s, const OverloadData* parentOverloadData);
+    void writeOverloadedFunctionDecisorEngine(QTextStream& s, const OverloadData* parentOverloadData);
 
     /// Writes calls to all the possible method/function overloads.
     void writeFunctionCalls(QTextStream& s, const OverloadData& overloadData);

@@ -764,7 +764,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     }
 
     if (needsOverloadId)
-        writeOverloadedFunctionDecisor(s, &overloadData);
+        writeOverloadedFunctionDecisor(s, overloadData);
 
     writeFunctionCalls(s, overloadData);
     s << endl;
@@ -1439,7 +1439,7 @@ void CppGenerator::writeOverloadedFunctionDecisor(QTextStream& s, const Overload
     QList<const AbstractMetaFunction*> functionOverloads = overloadData.overloadsWithoutRepetition();
     for (int i = 0; i < functionOverloads.count(); i++)
         s << INDENT << "// " << i << ": " << functionOverloads.at(i)->minimalSignature() << endl;
-    writeOverloadedFunctionDecisor(s, &overloadData);
+    writeOverloadedFunctionDecisorEngine(s, &overloadData);
     s << endl;
 
     s << INDENT << "// Function signature not found." << endl;
@@ -1447,7 +1447,7 @@ void CppGenerator::writeOverloadedFunctionDecisor(QTextStream& s, const Overload
     s << endl;
 }
 
-void CppGenerator::writeOverloadedFunctionDecisor(QTextStream& s, const OverloadData* parentOverloadData)
+void CppGenerator::writeOverloadedFunctionDecisorEngine(QTextStream& s, const OverloadData* parentOverloadData)
 {
     bool hasDefaultCall = parentOverloadData->nextArgumentHasDefaultValue();
     const AbstractMetaFunction* referenceFunction = parentOverloadData->referenceFunction();
@@ -1576,7 +1576,7 @@ void CppGenerator::writeOverloadedFunctionDecisor(QTextStream& s, const Overload
 
         {
             Indentation indent(INDENT);
-            writeOverloadedFunctionDecisor(s, overloadData);
+            writeOverloadedFunctionDecisorEngine(s, overloadData);
         }
 
         s << INDENT << "}";
