@@ -178,7 +178,19 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     if (metaClass->typeEntry()->typeFlags() & ComplexTypeEntry::Deprecated)
         s << "#Deprecated" << endl;
 
-    s << "using namespace Shiboken;" << endl << endl;
+    s << "using namespace Shiboken;" << endl;
+
+    //Use class base namespace
+    const AbstractMetaClass *context = metaClass->enclosingClass();
+    while(context) {
+        if (context->isNamespace() && !context->enclosingClass()) {
+            s << "using namespace " << context->qualifiedCppName() << ";" << endl;
+            break;
+        }
+        context = context->enclosingClass();
+    }
+
+    s << endl;
 
     // class inject-code native/beginning
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {

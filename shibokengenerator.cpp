@@ -44,6 +44,25 @@ QHash<QString, QString> ShibokenGenerator::m_pythonOperators = QHash<QString, QS
 QHash<QString, QString> ShibokenGenerator::m_formatUnits = QHash<QString, QString>();
 QHash<QString, QString> ShibokenGenerator::m_tpFuncs = QHash<QString, QString>();
 
+
+static QString resolveScopePrefix(const AbstractMetaClass* scope, const QString& value)
+{
+    if (!scope)
+        return QString();
+
+    QString name;
+    QString scopePrefix = scope->qualifiedCppName() + "::";
+    QStringList parts = scopePrefix.split("::", QString::SkipEmptyParts);
+    for(int i = (parts.size() - 1) ; i >= 0; i--){
+
+        if (!value.startsWith(parts[i] + "::"))
+            name = parts[i] + "::" + name;
+        else
+            name = "";
+    }
+
+    return name;
+}
 ShibokenGenerator::ShibokenGenerator() : Generator()
 {
     if (m_pythonPrimitiveTypeName.isEmpty())
@@ -334,11 +353,7 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction*
 
     if (arg->type()->isEnum()) {
         const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(arg->type());
-        if (metaEnum->enclosingClass()) {
-            prefix = metaEnum->enclosingClass()->qualifiedCppName() + "::";
-            if (value.startsWith(prefix))
-                prefix = QString();
-        }
+        prefix = resolveScopePrefix(metaEnum->enclosingClass(), value);
     } else if (arg->type()->isFlags()) {
         static QRegExp numberRegEx("^\\d+$"); // Numbers to flags
         if (numberRegEx.exactMatch(value)) {
@@ -372,25 +387,23 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction*
     } else if (arg->type()->typeEntry()->isValue()) {
         const AbstractMetaClass* metaClass = classes().findClass(arg->type()->typeEntry());
         if (enumValueRegEx.exactMatch(value))
-            prefix = metaClass->qualifiedCppName() + "::";
-        if (value.startsWith(prefix))
-            prefix = QString();
+            prefix = resolveScopePrefix(metaClass, value);
     } else if (arg->type()->isPrimitive() && arg->type()->name() == "int") {
-        if (enumValueRegEx.exactMatch(value) && func->implementingClass()) {
-            prefix = func->implementingClass()->qualifiedCppName() + "::";
-            if (value.startsWith(prefix))
-                prefix = QString();
-        }
+        if (enumValueRegEx.exactMatch(value) && func->implementingClass())
+            prefix = resolveScopePrefix(func->implementingClass(), value);
     } else if(arg->type()->isPrimitive()) {
         static QRegExp unknowArgumentRegEx("^(?:[A-Za-z_][\\w:]*\\()?([A-Za-z_]\\w*)(?:\\))?$"); // [PrimitiveType(] DESIREDNAME [)]
         if (unknowArgumentRegEx.indexIn(value) != -1 && func->implementingClass()) {
             foreach (const AbstractMetaField* field, func->implementingClass()->fields()) {
                 if (unknowArgumentRegEx.cap(1).trimmed() == field->name()) {
                     QString fieldName = field->name();
-                    if (field->isStatic())
-                        fieldName.prepend(func->implementingClass()->qualifiedCppName() + "::");
-                    else
+                    if (field->isStatic()) {
+                        prefix = resolveScopePrefix(func->implementingClass()->enclosingClass(), value);
+                        fieldName.prepend(prefix);
+                        prefix= "";
+                    } else {
                         fieldName.prepend(CPP_SELF_VAR "->");
+                    }
                     value.replace(unknowArgumentRegEx.cap(1), fieldName);
                     break;
                 }
