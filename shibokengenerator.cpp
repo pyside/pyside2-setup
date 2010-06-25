@@ -51,10 +51,8 @@ static QString resolveScopePrefix(const AbstractMetaClass* scope, const QString&
         return QString();
 
     QString name;
-    QString scopePrefix = scope->qualifiedCppName() + "::";
-    QStringList parts = scopePrefix.split("::", QString::SkipEmptyParts);
-    for(int i = (parts.size() - 1) ; i >= 0; i--){
-
+    QStringList parts = scope->qualifiedCppName().split("::", QString::SkipEmptyParts);
+    for(int i = (parts.size() - 1) ; i >= 0; i--) {
         if (!value.startsWith(parts[i] + "::"))
             name = parts[i] + "::" + name;
         else
@@ -398,7 +396,7 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction*
                 if (unknowArgumentRegEx.cap(1).trimmed() == field->name()) {
                     QString fieldName = field->name();
                     if (field->isStatic()) {
-                        prefix = resolveScopePrefix(func->implementingClass()->enclosingClass(), value);
+                        prefix = resolveScopePrefix(func->implementingClass(), value);
                         fieldName.prepend(prefix);
                         prefix= "";
                     } else {
