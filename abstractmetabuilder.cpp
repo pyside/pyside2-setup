@@ -337,6 +337,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
 
     // Start the generation...
     ClassList typeValues = typeMap.values();
+    qSort(typeValues);
     ClassList::iterator it = std::unique(typeValues.begin(), typeValues.end());
     typeValues.erase(it, typeValues.end());
 

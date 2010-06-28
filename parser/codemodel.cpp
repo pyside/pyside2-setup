@@ -373,6 +373,7 @@ FunctionModelItem _ScopeModelItem::declaredFunction(FunctionModelItem item)
 ClassList _ScopeModelItem::classes() const
 {
     ClassList result = _M_classes.values();
+    qSort(result);
     ClassList::iterator it = std::unique(result.begin(), result.end());
     result.erase(it, result.end());
     return result;
