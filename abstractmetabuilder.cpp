@@ -1711,6 +1711,17 @@ AbstractMetaType* AbstractMetaBuilder::translateType(double vr, const AddedFunct
     return metaType;
 }
 
+static const TypeEntry* findTypeEntryUsingContext(const AbstractMetaClass* metaClass, const QString& qualifiedName)
+{
+    const TypeEntry* type = 0;
+    QStringList context = metaClass->qualifiedCppName().split("::");
+    while(!type && (context.size() > 0) ) {
+        type = TypeDatabase::instance()->findType(context.join("::") + "::" + qualifiedName);
+        context.removeLast();
+    }
+    return type;
+}
+
 AbstractMetaType* AbstractMetaBuilder::translateType(const TypeInfo& _typei, bool *ok, bool resolveType, bool resolveScope)
 {
     Q_ASSERT(ok);
@@ -1821,10 +1832,15 @@ AbstractMetaType* AbstractMetaBuilder::translateType(const TypeInfo& _typei, boo
 
     // 5.1 - Try first using the current scope
     if (m_currentClass) {
-        QStringList context = m_currentClass->qualifiedCppName().split("::");
-        while(!type && (context.size() > 0) ) {
-            type = TypeDatabase::instance()->findType(context.join("::") + "::" + qualifiedName);
-            context.removeLast();
+        type = findTypeEntryUsingContext(m_currentClass, qualifiedName);
+
+        // 5.1.1 - Try using the class parents' scopes
+        if (!type && !m_currentClass->baseClassNames().isEmpty()) {
+            foreach (const AbstractMetaClass* cls, getBaseClasses(m_currentClass)) {
+                type = findTypeEntryUsingContext(cls, qualifiedName);
+                if (type)
+                    break;
+            }
         }
     }
 
