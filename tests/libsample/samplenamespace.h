@@ -94,6 +94,7 @@ class DerivedFromNamespace : public SomeClass::SomeInnerClass::OkThisIsRecursive
 {
 public:
     virtual OkThisIsRecursiveEnough* someVirtualMethod(OkThisIsRecursiveEnough* arg) { return arg; }
+    OkThisIsRecursiveEnough* methodReturningTypeFromParentScope() { return 0; }
 };
 
 } // namespace SampleNamespace
