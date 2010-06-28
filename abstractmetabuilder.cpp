@@ -385,6 +385,11 @@ bool AbstractMetaBuilder::build(QIODevice* input)
     }
     ReportHandler::flush();
 
+    foreach (ClassModelItem item, typeValues)
+        traverseClassMembers(model_dynamic_cast<ScopeModelItem>(item));
+    foreach (NamespaceModelItem namespaceItem, namespaceMap.values())
+        traverseClassMembers(model_dynamic_cast<ScopeModelItem>(namespaceItem));
+
     // Global functions
     foreach (FunctionModelItem func, m_dom->functions()) {
         if (func->accessPolicy() != CodeModel::Public || func->name().startsWith("operator"))
@@ -629,8 +634,6 @@ AbstractMetaClass* AbstractMetaBuilder::traverseNamespace(NamespaceModelItem nam
                                .arg(namespaceItem->name()));
 
     traverseEnums(model_dynamic_cast<ScopeModelItem>(namespaceItem), metaClass, namespaceItem->enumsDeclarations());
-    traverseFunctions(model_dynamic_cast<ScopeModelItem>(namespaceItem), metaClass);
-//     traverseClasses(model_dynamic_cast<ScopeModelItem>(namespace_item));
 
     pushScope(model_dynamic_cast<ScopeModelItem>(namespaceItem));
     m_namespacePrefix = currentScope()->qualifiedName().join("::");
@@ -1070,8 +1073,6 @@ AbstractMetaClass* AbstractMetaBuilder::traverseClass(ClassModelItem classItem)
     parseQ_Property(metaClass, classItem->propertyDeclarations());
 
     traverseEnums(model_dynamic_cast<ScopeModelItem>(classItem), metaClass, classItem->enumsDeclarations());
-    traverseFields(model_dynamic_cast<ScopeModelItem>(classItem), metaClass);
-    traverseFunctions(model_dynamic_cast<ScopeModelItem>(classItem), metaClass);
 
     // Inner classes
     {
@@ -1106,6 +1107,34 @@ AbstractMetaClass* AbstractMetaBuilder::traverseClass(ClassModelItem classItem)
         setInclude(type, classItem->fileName());
 
     return metaClass;
+}
+
+void AbstractMetaBuilder::traverseClassMembers(ScopeModelItem scopeItem)
+{
+    QString className = stripTemplateArgs(scopeItem->name());
+    QString fullClassName = className;
+
+    // This is an inner class
+    if (m_currentClass)
+        fullClassName = stripTemplateArgs(m_currentClass->typeEntry()->qualifiedCppName()) + "::" + fullClassName;
+
+    AbstractMetaClass* metaClass = m_metaClasses.findClass(fullClassName);
+    if (!metaClass)
+        return;
+
+    AbstractMetaClass* oldCurrentClass = m_currentClass;
+    m_currentClass = metaClass;
+
+    traverseFields(scopeItem, metaClass);
+    traverseFunctions(scopeItem, metaClass);
+
+    {
+        QList<ClassModelItem> innerClasses = scopeItem->classMap().values();
+        foreach (const ClassModelItem& ci, innerClasses)
+            traverseClassMembers(model_dynamic_cast<ScopeModelItem>(ci));
+    }
+
+    m_currentClass = oldCurrentClass;
 }
 
 AbstractMetaField* AbstractMetaBuilder::traverseField(VariableModelItem field, const AbstractMetaClass *cls)
