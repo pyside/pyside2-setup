@@ -100,7 +100,10 @@ public:
     void addAbstractMetaClass(AbstractMetaClass *cls);
     AbstractMetaClass *traverseTypeAlias(TypeAliasModelItem item);
     AbstractMetaClass *traverseClass(ClassModelItem item);
-    void traverseClassMembers(ScopeModelItem scopeItem);
+    AbstractMetaClass* currentTraversedClass(ScopeModelItem item);
+    void traverseScopeMembers(ScopeModelItem item, AbstractMetaClass* metaClass);
+    void traverseClassMembers(ClassModelItem scopeItem);
+    void traverseNamespaceMembers(NamespaceModelItem scopeItem);
     bool setupInheritance(AbstractMetaClass *metaClass);
     AbstractMetaClass *traverseNamespace(NamespaceModelItem item);
     AbstractMetaEnum *traverseEnum(EnumModelItem item, AbstractMetaClass *enclosing, const QSet<QString> &enumsDeclarations);

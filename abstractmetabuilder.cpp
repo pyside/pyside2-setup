@@ -392,9 +392,9 @@ bool AbstractMetaBuilder::build(QIODevice* input)
     ReportHandler::flush();
 
     foreach (ClassModelItem item, typeValues)
-        traverseClassMembers(model_dynamic_cast<ScopeModelItem>(item));
-    foreach (NamespaceModelItem namespaceItem, namespaceMap.values())
-        traverseClassMembers(model_dynamic_cast<ScopeModelItem>(namespaceItem));
+        traverseClassMembers(item);
+    foreach (NamespaceModelItem item, namespaceTypeValues)
+        traverseNamespaceMembers(item);
 
     // Global functions
     foreach (FunctionModelItem func, m_dom->functions()) {
@@ -667,7 +667,10 @@ AbstractMetaClass* AbstractMetaBuilder::traverseNamespace(NamespaceModelItem nam
     }
 
     // Traverse namespaces recursively
-    QList<NamespaceModelItem> innerNamespaces = namespaceItem->namespaceMap().values();
+    NamespaceList innerNamespaces = namespaceItem->namespaceMap().values();
+    qSort(innerNamespaces);
+    NamespaceList::iterator it = std::unique(innerNamespaces.begin(), innerNamespaces.end());
+    innerNamespaces.erase(it, innerNamespaces.end());
     foreach (const NamespaceModelItem &ni, innerNamespaces) {
         AbstractMetaClass* mjc = traverseNamespace(ni);
         if (mjc) {
@@ -1115,9 +1118,24 @@ AbstractMetaClass* AbstractMetaBuilder::traverseClass(ClassModelItem classItem)
     return metaClass;
 }
 
-void AbstractMetaBuilder::traverseClassMembers(ScopeModelItem scopeItem)
+void AbstractMetaBuilder::traverseScopeMembers(ScopeModelItem item, AbstractMetaClass* metaClass)
 {
-    QString className = stripTemplateArgs(scopeItem->name());
+    // Classes/Namespace members
+    traverseFields(item, metaClass);
+    traverseFunctions(item, metaClass);
+
+    // Inner classes
+    ClassList innerClasses = item->classMap().values();
+    qSort(innerClasses);
+    ClassList::iterator it = std::unique(innerClasses.begin(), innerClasses.end());
+    innerClasses.erase(it, innerClasses.end());
+    foreach (const ClassModelItem& ci, innerClasses)
+        traverseClassMembers(ci);
+}
+
+AbstractMetaClass* AbstractMetaBuilder::currentTraversedClass(ScopeModelItem item)
+{
+    QString className = stripTemplateArgs(item->name());
     QString fullClassName = className;
 
     // This is an inner class
@@ -1126,22 +1144,44 @@ void AbstractMetaBuilder::traverseClassMembers(ScopeModelItem scopeItem)
 
     AbstractMetaClass* metaClass = m_metaClasses.findClass(fullClassName);
     if (!metaClass)
+        metaClass = m_templates.findClass(fullClassName);
+    return metaClass;
+}
+
+void AbstractMetaBuilder::traverseClassMembers(ClassModelItem item)
+{
+    AbstractMetaClass* metaClass = currentTraversedClass(model_dynamic_cast<ScopeModelItem>(item));
+    if (!metaClass)
         return;
 
     AbstractMetaClass* oldCurrentClass = m_currentClass;
     m_currentClass = metaClass;
 
-    traverseFields(scopeItem, metaClass);
-    traverseFunctions(scopeItem, metaClass);
+    // Class members
+    traverseScopeMembers(model_dynamic_cast<ScopeModelItem>(item), metaClass);
 
-    {
-        ClassList innerClasses = scopeItem->classMap().values();
-        qSort(innerClasses);
-        ClassList::iterator it = std::unique(innerClasses.begin(), innerClasses.end());
-        innerClasses.erase(it, innerClasses.end());
-        foreach (const ClassModelItem& ci, innerClasses)
-            traverseClassMembers(model_dynamic_cast<ScopeModelItem>(ci));
-    }
+    m_currentClass = oldCurrentClass;
+}
+
+void AbstractMetaBuilder::traverseNamespaceMembers(NamespaceModelItem item)
+{
+    AbstractMetaClass* metaClass = currentTraversedClass(model_dynamic_cast<ScopeModelItem>(item));
+    if (!metaClass)
+        return;
+
+    AbstractMetaClass* oldCurrentClass = m_currentClass;
+    m_currentClass = metaClass;
+
+    // Namespace members
+    traverseScopeMembers(model_dynamic_cast<ScopeModelItem>(item), metaClass);
+
+    // Inner namespaces
+    NamespaceList innerNamespaces = item->namespaceMap().values();
+    qSort(innerNamespaces);
+    NamespaceList::iterator it = std::unique(innerNamespaces.begin(), innerNamespaces.end());
+    innerNamespaces.erase(it, innerNamespaces.end());
+    foreach (const NamespaceModelItem &ni, innerNamespaces)
+        traverseNamespaceMembers(ni);
 
     m_currentClass = oldCurrentClass;
 }
