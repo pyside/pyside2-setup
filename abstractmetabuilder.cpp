@@ -366,8 +366,13 @@ bool AbstractMetaBuilder::build(QIODevice* input)
     ReportHandler::flush();
 
     QHash<QString, NamespaceModelItem> namespaceMap = m_dom->namespaceMap();
+    NamespaceList namespaceTypeValues = namespaceMap.values();
+    qSort(namespaceTypeValues);
+    NamespaceList::iterator nsit = std::unique(namespaceTypeValues.begin(), namespaceTypeValues.end());
+    namespaceTypeValues.erase(nsit, namespaceTypeValues.end());
+
     ReportHandler::setProgressReference(namespaceMap);
-    foreach (NamespaceModelItem item, namespaceMap.values()) {
+    foreach (NamespaceModelItem item, namespaceTypeValues) {
         ReportHandler::progress("Generating namespace model...");
         AbstractMetaClass *metaClass = traverseNamespace(item);
         if (metaClass)
@@ -1130,7 +1135,10 @@ void AbstractMetaBuilder::traverseClassMembers(ScopeModelItem scopeItem)
     traverseFunctions(scopeItem, metaClass);
 
     {
-        QList<ClassModelItem> innerClasses = scopeItem->classMap().values();
+        ClassList innerClasses = scopeItem->classMap().values();
+        qSort(innerClasses);
+        ClassList::iterator it = std::unique(innerClasses.begin(), innerClasses.end());
+        innerClasses.erase(it, innerClasses.end());
         foreach (const ClassModelItem& ci, innerClasses)
             traverseClassMembers(model_dynamic_cast<ScopeModelItem>(ci));
     }
