@@ -31,6 +31,7 @@ class TestNamespace : public QObject
     Q_OBJECT
     private slots:
         void testNamespaceMembers();
+        void testNamespaceInnerClassMembers();
 };
 
 #endif

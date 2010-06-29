@@ -51,6 +51,35 @@ void TestNamespace::testNamespaceMembers()
     QVERIFY(func);
 }
 
+void TestNamespace::testNamespaceInnerClassMembers()
+{
+    const char* cppCode = "\
+    namespace OuterNamespace\
+    {\
+        namespace InnerNamespace {\
+            struct SomeClass {\
+                void method();\
+            };\
+        };\
+    };";
+    const char* xmlCode = "\
+    <typesystem package='Foo'> \
+        <namespace-type name='OuterNamespace' />\
+        <namespace-type name='OuterNamespace::InnerNamespace' />\
+        <value-type name='OuterNamespace::InnerNamespace::SomeClass' /> \
+    </typesystem>";
+    TestUtil t(cppCode, xmlCode, false);
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* ons = classes.findClass("OuterNamespace");
+    QVERIFY(ons);
+    AbstractMetaClass* ins = classes.findClass("OuterNamespace::InnerNamespace");
+    QVERIFY(ins);
+    AbstractMetaClass* sc = classes.findClass("OuterNamespace::InnerNamespace::SomeClass");
+    QVERIFY(sc);
+    const AbstractMetaFunction* meth = sc->findFunction("method");
+    QVERIFY(meth);
+}
+
 QTEST_APPLESS_MAIN(TestNamespace)
 
 #include "testnamespace.moc"
