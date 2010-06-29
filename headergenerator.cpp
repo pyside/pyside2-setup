@@ -390,6 +390,8 @@ void HeaderGenerator::finishGeneration()
     s << "#include <basewrapper.h>" << endl;
     s << "#include <bindingmanager.h>" << endl;
     s << "#include <memory>" << endl << endl;
+    if (usePySideExtensions())
+        s << "#include <qsignal.h>" << endl;
     writeExportMacros(s);
 
     QStringList requiredTargetImports = TypeDatabase::instance()->requiredTargetImports();
@@ -424,6 +426,25 @@ void HeaderGenerator::finishGeneration()
 
     s << "// PyType functions, to get the PyObjectType for a type T\n";
     s << sbkTypeFunctions << endl;
+
+    if (usePySideExtensions()) {
+        foreach (AbstractMetaClass* metaClass, classes()) {
+            if (!metaClass->isQObject() || !metaClass->typeEntry()->generateCode())
+                continue;
+
+            s << "template<>" << endl;
+            s << "inline PyObject* createWrapper<" << metaClass->qualifiedCppName() << " >(const ";
+            s << metaClass->qualifiedCppName() << "* cppobj, bool hasOwnership, bool isExactType)" << endl;
+            s << '{' << endl;
+            s << INDENT << "PyObject* pyObj = Shiboken::SbkBaseWrapper_New(reinterpret_cast<SbkBaseWrapperType*>(SbkType<" << metaClass->qualifiedCppName() << " >()),"
+            << "const_cast<" << metaClass->qualifiedCppName() << "*>(cppobj), hasOwnership, isExactType);" << endl;
+            s << INDENT << "PySide::signalUpdateSource(pyObj);" << endl;
+            s << INDENT << "return pyObj;" << endl;
+            s << '}' << endl;
+
+        }
+    }
+
     s << "// Generated converters declarations ----------------------------------" << endl << endl;
     s << convertersDecl;
     s << "} // namespace Shiboken" << endl << endl;
