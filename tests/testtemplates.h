@@ -33,6 +33,7 @@ private slots:
     void testTemplateOnContainers();
     void testTemplateWithNamespace();
     void testTemplateInheritanceMixedWithForwardDeclaration();
+    void testTemplateInheritanceMixedWithNamespaceAndForwardDeclaration();
 };
 
 #endif

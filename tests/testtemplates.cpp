@@ -142,6 +142,41 @@ void TestTemplates::testTemplateInheritanceMixedWithForwardDeclaration()
     QCOMPARE(classB->functions().count(), 3);
 }
 
+void TestTemplates::testTemplateInheritanceMixedWithNamespaceAndForwardDeclaration()
+{
+    const char cppCode[] = "\
+    namespace Namespace {\
+    enum SomeEnum { E1, E2 };\
+    template<SomeEnum type> struct Future;\
+    template<SomeEnum type>\
+    struct A {\
+        A();\
+        void method();\
+        friend struct Future<type>;\
+    };\
+    typedef A<E1> B;\
+    template<SomeEnum type> struct Future {};\
+    };\
+    ";
+    const char xmlCode[] = "\
+    <typesystem package='Package'>\
+        <namespace-type name='Namespace' />\
+        <enum-type name='Namespace::SomeEnum' />\
+        <value-type name='Namespace::A' generate='no' />\
+        <value-type name='Namespace::B' />\
+        <value-type name='Namespace::Future' generate='no' />\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, false);
+    AbstractMetaClassList classes = t.builder()->classes();
+
+    AbstractMetaClass* classB = classes.findClass("Namespace::B");
+    QVERIFY(!classB->baseClass());
+    QVERIFY(classB->baseClassName().isNull());
+    // 3 functions: simple constructor, copy constructor and "method()".
+    QCOMPARE(classB->functions().count(), 3);
+}
+
 QTEST_APPLESS_MAIN(TestTemplates)
 
 #include "testtemplates.moc"
