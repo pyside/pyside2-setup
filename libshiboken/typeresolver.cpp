@@ -69,7 +69,6 @@ void Shiboken::initTypeResolver()
 
 static void registerTypeResolver(TypeResolver* resolver)
 {
-    assert(typeResolverMap.find(resolver->typeName()) == typeResolverMap.end());
     typeResolverMap[resolver->typeName()] = resolver;
 }
 

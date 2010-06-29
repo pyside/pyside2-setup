@@ -562,6 +562,7 @@ struct StdListConverter
         }
         return true;
     }
+    static PyObject* toPython(void* cppObj) { return toPython(*reinterpret_cast<StdList*>(cppObj)); }
     static PyObject* toPython(const StdList& cppobj)
     {
         PyObject* result = PyList_New((int) cppobj.size());
@@ -610,6 +611,7 @@ struct StdPairConverter
         }
         return true;
     }
+    static PyObject* toPython(void* cppObj) { return toPython(*reinterpret_cast<StdPair*>(cppObj)); }
     static PyObject* toPython(const StdPair& cppobj)
     {
         typename StdPair::first_type first(cppobj.first);
@@ -658,6 +660,7 @@ struct StdMapConverter
         return true;
     }
 
+    static PyObject* toPython(void* cppObj) { return toPython(*reinterpret_cast<StdMap*>(cppObj)); }
     static PyObject* toPython(const StdMap& cppobj)
     {
         PyObject* result = PyDict_New();

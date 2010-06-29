@@ -3481,6 +3481,24 @@ void CppGenerator::finishGeneration()
             if (pte->generateCode())
                 s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<" << pte->name() << " >(\"" << pte->name() << "\");" << endl;
         }
+        // Register type resolver for all containers found in signals.
+        QSet<QString> typeResolvers;
+        foreach (AbstractMetaClass* metaClass, classes()) {
+            if (!metaClass->isQObject() || !metaClass->typeEntry()->generateCode())
+                continue;
+            foreach (AbstractMetaFunction* func, metaClass->functions()) {
+                if (func->isSignal()) {
+                    foreach (AbstractMetaArgument* arg, func->arguments()) {
+                        if (arg->type()->isContainer()) {
+                            QString value = translateType(arg->type(), metaClass);
+                            typeResolvers << QMetaObject::normalizedType(value.toAscii().constData());
+                        }
+                    }
+                }
+            }
+        }
+        foreach (QString type, typeResolvers)
+            s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<" << type << " >(\"" << type << "\");" << endl;
 
         s << endl << INDENT << "if (PyErr_Occurred()) {" << endl;
         {
