@@ -110,6 +110,42 @@ void TestTemplates::testTemplateOnContainers()
     QCOMPARE(instance2->typeEntry()->qualifiedCppName(), QString("Namespace::E1"));
 }
 
+void TestTemplates::testInheritanceFromContainterTemplate()
+{
+    const char cppCode[] = "\
+    template<typename T>\
+    struct ListContainer {\
+        inline void push_front(const T& t);\
+        inline T& front();\
+    };\
+    struct FooBar {};\
+    struct FooBars : public ListContainer<FooBar> {};\
+    ";
+
+    const char xmlCode[] = "\
+    <typesystem package='Package'>\
+        <container-type name='ListContainer' type='list' /> \
+        <value-type name='FooBar' />\
+        <value-type name='FooBars'>\
+            <modify-function signature='push_front(FooBar)' remove='all' />\
+            <modify-function signature='front()' remove='all' />\
+        </value-type>\
+    </typesystem>\
+    ";
+
+    TestUtil t(cppCode, xmlCode, false);
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClassList templates = t.builder()->templates();
+    QCOMPARE(classes.count(), 2);
+    QCOMPARE(templates.count(), 1);
+
+    const AbstractMetaClass* foobars = classes.findClass("FooBars");
+    QCOMPARE(foobars->functions().count(), 4);
+
+    const AbstractMetaClass* lc = templates.first();
+    QCOMPARE(lc->functions().count(), 2);
+}
+
 void TestTemplates::testTemplateInheritanceMixedWithForwardDeclaration()
 {
     const char cppCode[] = "\
