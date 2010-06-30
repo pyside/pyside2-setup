@@ -54,6 +54,10 @@ public:
     {
         return m_metaClasses;
     }
+    AbstractMetaClassList templates() const
+    {
+        return m_templates;
+    }
     /**
     *   Sorts a list of classes topologically, if an AbstractMetaClass object
     *   is passed the list of classes will be its inner classes, otherwise
