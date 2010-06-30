@@ -53,7 +53,19 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     if (!metaClass)
         return;
 
+    QString scope = metaClass->name();
+    const AbstractMetaClass* context = metaClass->enclosingClass();
+    while(context) {
+        if (context->enclosingClass() == 0)
+            break;
+        context = context->enclosingClass();
+    }
+
     QString filename = metaClass->qualifiedCppName().toLower().replace("::", "-");
+    // Remove namespace
+    if (context && context->isNamespace() && filename.startsWith(context->name(), Qt::CaseInsensitive)) {
+        filename = filename.remove(0, context->name().size() + 1);
+    }
     QString sourceFile = documentationDataDirectory() + '/' + filename + ".xml";
     if (metaClass->enclosingClass())
         sourceFile.replace("::", "-");
