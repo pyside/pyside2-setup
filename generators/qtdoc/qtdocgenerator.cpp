@@ -522,7 +522,8 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
             QStringList rawlinklist = l_linkref.split(".");
             if (rawlinklist.size() == 1 || rawlinklist.first() == m_context) {
                 QString context = resolveContextForMethod(rawlinklist.last());
-                l_linkref.prepend(context + '.');
+                if (!l_linkref.startsWith(context))
+                    l_linkref.prepend(context + '.');
             }
         } else if (l_type == "function" && m_context.isEmpty()) {
             l_linktag = " :func:`";
@@ -804,8 +805,20 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
     return s;
 }
 
-static QString getClassName(const AbstractMetaClass *cppClass) {
-    return QString(cppClass->typeEntry()->qualifiedCppName()).replace("::", ".");
+static QString getClassName(const AbstractMetaClass *cppClass)
+{
+    if (!cppClass)
+        return QString();
+
+    QString scope = cppClass->name();
+    const AbstractMetaClass *context = cppClass->enclosingClass();
+    while (context) {
+        if (!context->isNamespace())
+            scope = context->name() + "." + context->name();
+        context = context->enclosingClass();
+    }
+
+    return scope;
 }
 
 static QString getFuncName(const AbstractMetaFunction *cppFunc) {
@@ -951,19 +964,15 @@ QString QtDocGenerator::parseFunctionDeclaration(const QString &doc, const Abstr
         return QString();
 
     data = data.mid(markup.size()); //remove .. method::
-    data = data.mid(data.indexOf(".") + 1); //remove class name
+    data = data.mid(data.lastIndexOf(".") + 1); //remove class name
 
     QString methName = data.mid(0, data.indexOf("("));
     QString methArgs = data.mid(data.indexOf("("));
 
-    QString scope = cppClass->name();
-    QStringList splittedMethName = methName.split(".");
-
-    if (splittedMethName.first() == scope) {
-        splittedMethName.removeFirst();
-        methName = splittedMethName.join(".");
-    }
-    scope.append(".");
+    QString scope = getClassName(cppClass);
+    scope += ".";
+    if (methName.startsWith(scope))
+        methName.remove(scope);
 
     data = QString("def :meth:`%1<%2%3>` %4")
         .arg(methName)
@@ -1233,11 +1242,17 @@ void QtDocGenerator::writeInjectDocumentation(QTextStream &s,
 
 void QtDocGenerator::writeFunctionSignature(QTextStream& s, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func)
 {
+    QString className;
     if (!func->isConstructor())
-        s << getClassName(cppClass) << '.';
+        className =  getClassName(cppClass) + '.';
     else if (func->implementingClass() && func->implementingClass()->enclosingClass())
-        s << func->implementingClass()->enclosingClass()->name() << '.';
-    s << getFuncName(func) << "(" << parseArgDocStyle(cppClass, func) << ")";
+        className =  getClassName(func->implementingClass()->enclosingClass()) + '.';
+
+    QString funcName = getFuncName(func);
+    if (!funcName.startsWith(className))
+        funcName = className + funcName;
+
+    s << funcName << "(" << parseArgDocStyle(cppClass, func) << ")";
 }
 
 QString QtDocGenerator::translateToPythonType(const AbstractMetaType *type, const AbstractMetaClass *cppClass)
