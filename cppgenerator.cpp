@@ -330,16 +330,18 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     if (shouldGenerateGetSetList(metaClass)) {
         foreach (const AbstractMetaField* metaField, metaClass->fields()) {
             writeGetterFunction(s, metaField);
-            writeSetterFunction(s, metaField);
+            if (!metaField->type()->isConstant())
+                writeSetterFunction(s, metaField);
             s << endl;
         }
 
         s << "// Getters and Setters for " << metaClass->name() << endl;
         s << "static PyGetSetDef " << cpythonGettersSettersDefinitionName(metaClass) << "[] = {" << endl;
         foreach (const AbstractMetaField* metaField, metaClass->fields()) {
+            bool hasSetter = !metaField->type()->isConstant();
             s << INDENT << "{const_cast<char*>(\"" << metaField->name() << "\"), ";
-            s << "(getter)" << cpythonGetterFunctionName(metaField);
-            s << ", (setter)" << cpythonSetterFunctionName(metaField);
+            s << cpythonGetterFunctionName(metaField);
+            s << ", " << (hasSetter ? cpythonSetterFunctionName(metaField) : "0");
             s << "}," << endl;
         }
         s << INDENT << "{0}  // Sentinel" << endl;
@@ -2486,7 +2488,7 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
 
 void CppGenerator::writeGetterFunction(QTextStream& s, const AbstractMetaField* metaField)
 {
-    s << "static PyObject* " << cpythonGetterFunctionName(metaField) << "(SbkBaseWrapper* self)" << endl;
+    s << "static PyObject* " << cpythonGetterFunctionName(metaField) << "(PyObject* self, void*)" << endl;
     s << '{' << endl;
     s << INDENT << "return ";
 
@@ -2504,7 +2506,7 @@ void CppGenerator::writeGetterFunction(QTextStream& s, const AbstractMetaField* 
 
 void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* metaField)
 {
-    s << "static int " << cpythonSetterFunctionName(metaField) << "(SbkBaseWrapper* self, PyObject* value)" << endl;
+    s << "static int " << cpythonSetterFunctionName(metaField) << "(PyObject* self, PyObject* value, void*)" << endl;
     s << '{' << endl;
 
     s << INDENT << "if (value == 0) {" << endl;

@@ -445,7 +445,7 @@ QString ShibokenGenerator::cpythonWrapperCPtr(const AbstractMetaType* metaType, 
 QString ShibokenGenerator::cpythonWrapperCPtr(const TypeEntry* type, QString argName)
 {
     if (type->isValue() || type->isObject())
-        return baseConversionString(type->qualifiedCppName() + '*') + QString("toCpp((PyObject*)%1)").arg(argName);
+        return baseConversionString(type->qualifiedCppName() + '*') + "toCpp(" + argName + ')';
     return QString();
 }
 
