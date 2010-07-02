@@ -102,6 +102,8 @@ struct LIBSHIBOKEN_API SbkBaseWrapperType
     int is_multicpp:1;
     /// True if this type was definied by the user.
     int is_user_type:1;
+    /// C++ name
+    const char* original_name;
     /// Type user data
     void *user_data;
     DeleteUserDataFunc d_func;
