@@ -117,6 +117,9 @@ class TestAccessingCppFields(unittest.TestCase):
         del d
         self.assertEqual(getrefcount(o), refcount)
 
+    def testStaticField(self):
+        self.assertEqual(Derived.staticPrimitiveField, 0)
+
 if __name__ == '__main__':
     unittest.main()
 

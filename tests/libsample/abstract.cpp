@@ -38,6 +38,8 @@
 
 using namespace std;
 
+const int Abstract::staticPrimitiveField = 0;
+
 Abstract::Abstract(int id) : m_id(id)
 {
     primitiveField = 123;

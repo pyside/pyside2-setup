@@ -54,6 +54,7 @@ public:
         TpAbstract, TpDerived
     };
 
+    static const int staticPrimitiveField;
     int primitiveField;
     Point valueTypeField;
     ObjectType* objectTypeField;

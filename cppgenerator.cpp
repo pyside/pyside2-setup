@@ -329,6 +329,8 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     if (shouldGenerateGetSetList(metaClass)) {
         foreach (const AbstractMetaField* metaField, metaClass->fields()) {
+            if (metaField->isStatic())
+                continue;
             writeGetterFunction(s, metaField);
             if (!metaField->type()->isConstant())
                 writeSetterFunction(s, metaField);
@@ -338,6 +340,9 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         s << "// Getters and Setters for " << metaClass->name() << endl;
         s << "static PyGetSetDef " << cpythonGettersSettersDefinitionName(metaClass) << "[] = {" << endl;
         foreach (const AbstractMetaField* metaField, metaClass->fields()) {
+            if (metaField->isStatic())
+                continue;
+
             bool hasSetter = !metaField->type()->isConstant();
             s << INDENT << "{const_cast<char*>(\"" << metaField->name() << "\"), ";
             s << cpythonGetterFunctionName(metaField);
@@ -2175,7 +2180,11 @@ bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass* metaClass)
 
 bool CppGenerator::shouldGenerateGetSetList(const AbstractMetaClass* metaClass)
 {
-    return !metaClass->fields().isEmpty();
+    foreach (AbstractMetaField* f, metaClass->fields()) {
+        if (!f->isStatic())
+            return true;
+    }
+    return false;
 }
 
 bool CppGenerator::pythonFunctionWrapperUsesListOfArguments(const OverloadData& overloadData)
@@ -3206,6 +3215,17 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
 
     if (metaClass->hasSignals())
         writeSignalInitialization(s, metaClass);
+
+    // Write static fields
+    foreach (const AbstractMetaField* field, metaClass->fields()) {
+        if (!field->isStatic())
+            continue;
+        s << INDENT << "PyDict_SetItemString(" + cpythonTypeName(metaClass) + ".super.ht_type.tp_dict, \"";
+        s << field->name() << "\", ";
+        writeToPythonConversion(s, field->type(), metaClass, metaClass->qualifiedCppName() + "::" + field->name());
+        s << ");" << endl;
+    }
+    s << endl;
 
     // class inject-code target/end
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
