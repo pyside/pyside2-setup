@@ -316,7 +316,7 @@ struct Converter<bool>
     static inline bool isConvertible(PyObject* pyobj) { return PyInt_Check(pyobj); }
     static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<bool*>(cppobj)); }
     static inline PyObject* toPython(bool cppobj) { return PyBool_FromLong(cppobj); }
-    static inline bool toCpp(PyObject* pyobj) { return pyobj == Py_True; }
+    static inline bool toCpp(PyObject* pyobj) { return PyInt_AS_LONG(pyobj); }
 };
 
 /**
