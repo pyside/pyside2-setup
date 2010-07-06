@@ -2041,7 +2041,7 @@ void AbstractMetaClass::fixFunctions()
                             // Private overrides of abstract functions have to go into the class or
                             // the subclasses will not compile as non-abstract classes.
                             // But they don't need to be implemented, since they can never be called.
-                            if (f->isPrivate() && sf->isAbstract()) {
+                            if (f->isPrivate()) {
                                 f->setFunctionType(AbstractMetaFunction::EmptyFunction);
 //                                 f->setVisibility(sf->visibility());
                                 *f += AbstractMetaAttributes::FinalInTargetLang;
