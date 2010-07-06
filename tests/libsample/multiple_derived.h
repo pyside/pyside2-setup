@@ -43,6 +43,8 @@ public:
     Base1() : m_value(1) {}
     virtual ~Base1() {}
     virtual int base1Method() { return m_value; }
+
+    virtual void publicMethod() {};
 private:
     int m_value;
 };
@@ -74,6 +76,7 @@ public:
     static MDerived1* transformFromBase2(Base2 *self);
 
 private:
+    virtual void publicMethod() {}
     int m_value;
 };
 

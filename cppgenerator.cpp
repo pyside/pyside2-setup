@@ -247,7 +247,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
             if (!func->isAssignmentOperator()
                 && !func->isCastOperator()
                 && !func->isModifiedRemoved()
-                && !func->isPrivate()
+                && (!func->isPrivate() || func->functionType() == AbstractMetaFunction::EmptyFunction)
                 && func->ownerClass() == func->implementingClass())
                 overloads.append(func);
         }
@@ -1620,6 +1620,12 @@ void CppGenerator::writeFunctionCalls(QTextStream& s, const OverloadData& overlo
 
 void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& overloadData, const AbstractMetaFunction* func)
 {
+    if (func->functionType() == AbstractMetaFunction::EmptyFunction) {
+        s << INDENT << "PyErr_Format(PyExc_TypeError, \"%s is a private method.\", \"" << func->signature().replace("::", ".") << "\");" << endl;
+        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+        return;
+    }
+
     const AbstractMetaClass* implementingClass = overloadData.referenceFunction()->implementingClass();
     bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(overloadData) && overloadData.maxArgs() > 1;
 
