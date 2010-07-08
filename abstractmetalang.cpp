@@ -1469,7 +1469,7 @@ AbstractMetaField::~AbstractMetaField()
     delete m_setter;
     delete m_getter;
 }
-ushort        painters;                        // refcount
+
 AbstractMetaField *AbstractMetaField::copy() const
 {
     AbstractMetaField *returned = new AbstractMetaField;
@@ -1493,8 +1493,6 @@ static QString upCaseFirst(const QString &str)
 static AbstractMetaFunction *createXetter(const AbstractMetaField *g, const QString &name, uint type)
 {
     AbstractMetaFunction *f = new AbstractMetaFunction;
-
-
 
     f->setName(name);
     f->setOriginalName(name);
