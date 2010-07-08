@@ -352,6 +352,33 @@ void TestAddFunction::testAddFunctionWithApiVersion()
     QCOMPARE(globalFuncs.count(), 1);
 }
 
+void TestAddFunction::testModifyAddedFunction()
+{
+    const char cppCode[] = "class Foo { };";
+    const char xmlCode[] = "\
+    <typesystem package='Package'>\
+        <primitive-type name='float'/>\
+        <primitive-type name='int'/>\
+        <value-type name='Foo'>\
+            <add-function signature='method(float, int)'>\
+                <inject-code class='target' position='beginning'>custom_code();</inject-code>\
+                <modify-argument index='2'>\
+                    <replace-default-expression with='0' />\
+                    <rename to='varName' />\
+                </modify-argument>\
+            </add-function>\
+        </value-type>\
+    </typesystem>";
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* foo = classes.findClass("Foo");
+    const AbstractMetaFunction* method = foo->findFunction("method");
+    QCOMPARE(method->arguments().size(), 2);
+    AbstractMetaArgument* arg = method->arguments().at(1);
+    QCOMPARE(arg->defaultValueExpression(), QString("0"));
+    QCOMPARE(arg->name(), QString("varName"));
+    QCOMPARE(method->argumentName(2), QString("varName"));
+}
 
 QTEST_APPLESS_MAIN(TestAddFunction)
 

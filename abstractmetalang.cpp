@@ -83,40 +83,10 @@ QString AbstractMetaType::cppSignature() const
  */
 AbstractMetaArgument *AbstractMetaArgument::copy() const
 {
-    AbstractMetaArgument *cpy = new AbstractMetaArgument;
-    cpy->setName(AbstractMetaVariable::name());
-    cpy->setDefaultValueExpression(defaultValueExpression());
-    cpy->setOriginalDefaultValueExpression(originalDefaultValueExpression());
+    AbstractMetaArgument* cpy = new AbstractMetaArgument(*this);
     cpy->setType(type()->copy());
-    cpy->setArgumentIndex(argumentIndex());
-
     return cpy;
 }
-
-
-QString AbstractMetaArgument::argumentName() const
-{
-    QString n = AbstractMetaVariable::name();
-    if (n.isEmpty())
-        return QString("arg__%2").arg(m_argumentIndex + 1);
-    return n;
-}
-
-
-QString AbstractMetaArgument::indexedName() const
-{
-    QString n = AbstractMetaVariable::name();
-    if (n.isEmpty())
-        return argumentName();
-    return QString("%1%2").arg(n).arg(m_argumentIndex);
-}
-
-QString AbstractMetaArgument::name() const
-{
-    Q_ASSERT_X(0, "AbstractMetaArgument::name()", "use argumentName() or indexedName() instead");
-    return QString();
-}
-
 
 /*******************************************************************************
  * AbstractMetaFunction
@@ -335,7 +305,7 @@ QString AbstractMetaFunction::signature() const
 
         // We need to have the argument names in the qdoc files
         s += " ";
-        s += a->argumentName();
+        s += a->name();
     }
     s += ")";
 
@@ -701,21 +671,7 @@ bool AbstractMetaFunction::hasModifications(const AbstractMetaClass *implementor
 
 QString AbstractMetaFunction::argumentName(int index, bool create, const AbstractMetaClass *implementor) const
 {
-    foreach (FunctionModification mod, modifications(implementor)) {
-        foreach (ArgumentModification argMod, mod.argument_mods) {
-            if ((argMod.index == index) && !argMod.renamed_to.isEmpty()) {
-                return argMod.renamed_to;
-            }
-        }
-    }
-
-    AbstractMetaArgumentList args = arguments();
-    if ((index > 0) && (args.size() > index)) {
-        if (create || args[index]->hasName())
-            return args[index]->argumentName();
-    }
-
-    return QString();
+    return m_arguments[--index]->name();
 }
 
 bool AbstractMetaFunction::hasInjectedCode() const
@@ -951,7 +907,7 @@ QString AbstractMetaFunction::targetLangSignature(bool minimal) const
 
         if (!minimal) {
             s += " ";
-            s += m_arguments.at(i)->argumentName();
+            s += m_arguments.at(i)->name();
         }
         ++j;
     }

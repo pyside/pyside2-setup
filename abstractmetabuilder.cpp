@@ -1565,7 +1565,6 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(const AddedFunction&
         decideUsagePattern(type);
         metaArg->setType(type);
         metaArg->setArgumentIndex(i);
-        metaArg->setName(typeInfo.name);
         metaArg->setDefaultValueExpression(typeInfo.defaultValue);
         metaArg->setOriginalDefaultValueExpression(typeInfo.defaultValue);
         metaArguments.append(metaArg);
@@ -1595,7 +1594,30 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(const AddedFunction&
     }
 
     metaFunction->setOriginalAttributes(metaFunction->attributes());
+    fixArgumentNames(metaFunction);
     return metaFunction;
+}
+
+void AbstractMetaBuilder::fixArgumentNames(AbstractMetaFunction* func)
+{
+    if (func->arguments().isEmpty())
+        return;
+    foreach (FunctionModification mod, func->modifications(m_currentClass)) {
+        foreach (ArgumentModification argMod, mod.argument_mods) {
+            if (!argMod.renamed_to.isEmpty()) {
+                AbstractMetaArgument* arg = func->arguments().at(argMod.index - 1);
+                arg->setOriginalName(arg->name());
+                arg->setName(argMod.renamed_to, false);
+            }
+        }
+    }
+
+    int i = 1;
+    foreach (AbstractMetaArgument* arg, func->arguments()) {
+        if (arg->name().isEmpty())
+            arg->setName("arg__" + QString::number(i), false);
+        ++i;
+    }
 }
 
 AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem functionItem)
@@ -1759,12 +1781,17 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
         }
 
         //Check for missing argument name
-        if (hasDefaultValue && !metaArg->hasName() && !metaFunction->isOperatorOverload() && !metaFunction->isSignal() && metaFunction->argumentName(i+1, false, m_currentClass).isEmpty()) {
+        if (hasDefaultValue
+            && !metaArg->hasName()
+            && !metaFunction->isOperatorOverload()
+            && !metaFunction->isSignal()
+            && metaFunction->argumentName(i+1, false, m_currentClass).isEmpty()) {
             ReportHandler::warning(QString("Argument %1 on function '%2::%3' has default expressiont but does not have name.").arg(i+1).arg(className).arg(metaFunction->minimalSignature()));
         }
 
     }
 
+    fixArgumentNames(metaFunction);
     return metaFunction;
 }
 

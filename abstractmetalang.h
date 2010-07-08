@@ -606,7 +606,7 @@ private:
 class APIEXTRACTOR_API AbstractMetaVariable
 {
 public:
-    AbstractMetaVariable() : m_type(0) {}
+    AbstractMetaVariable() : m_type(0), m_hasName(false) {}
 
     AbstractMetaType *type() const
     {
@@ -621,11 +621,23 @@ public:
     {
         return m_name;
     }
-    void setName(const QString &name)
+    void setName(const QString &name, bool realName = true)
     {
         m_name = name;
+        m_hasName = realName;
     }
-
+    bool hasName() const
+    {
+        return m_hasName;
+    }
+    QString originalName() const
+    {
+        return m_originalName;
+    }
+    void setOriginalName(const QString& name)
+    {
+        m_originalName = name;
+    }
     void setDocumentation(const Documentation& doc)
     {
         m_doc = doc;
@@ -636,8 +648,10 @@ public:
     }
 
 private:
+    QString m_originalName;
     QString m_name;
     AbstractMetaType *m_type;
+    bool m_hasName;
 
     Documentation m_doc;
 };
@@ -682,20 +696,8 @@ public:
         m_argumentIndex = argIndex;
     }
 
-    QString argumentName() const;
-    QString indexedName() const;
-
     AbstractMetaArgument *copy() const;
-
-    bool hasName() const
-    {
-        return !AbstractMetaVariable::name().isEmpty();
-    }
-
 private:
-    // Just to force people to call argumentName() And indexedName();
-    QString name() const;
-
     QString m_expression;
     QString m_originalExpression;
     int m_argumentIndex;
