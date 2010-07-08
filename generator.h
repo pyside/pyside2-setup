@@ -254,36 +254,6 @@ protected:
     */
     virtual QString subDirectoryForPackage(QString packageName = QString()) const;
 
-    /**
-    *   @deprecated This function doesn't belongs to the generator world and will sooner be moved to APIExtractor
-    */
-    static FunctionModificationList functionModifications(const AbstractMetaFunction *meta_function) GENRUNNER_DEPRECATED;
-    /**
-    *   @deprecated This function doesn't belongs to the generator world and will sooner be moved to APIExtractor
-    */
-    AbstractMetaFunctionList filterFunctions(const AbstractMetaClass *cppClass) GENRUNNER_DEPRECATED;
-    /**
-    *   @deprecated This function doesn't belongs to the generator world and will sooner be moved to APIExtractor
-    */
-    AbstractMetaFunctionList queryFunctions(const AbstractMetaClass *cpp_class, bool all_function = false) GENRUNNER_DEPRECATED;
-    /**
-    *   @deprecated This function doesn't belongs to the generator world and will sooner be moved to APIExtractor
-    */
-    AbstractMetaFunctionList queryGlobalOperators(const AbstractMetaClass *cpp_class) GENRUNNER_DEPRECATED;
-    /**
-    *   @deprecated This function doesn't belongs to the generator world and will sooner be moved to APIExtractor
-    */
-    AbstractMetaFunctionList sortConstructor(AbstractMetaFunctionList list) GENRUNNER_DEPRECATED;
-    /**
-    *   Returns the code snips of a function
-    *   \deprecated Use AbstractMetaFunction::injectedCodeSnips() instead.
-    */
-    CodeSnipList getCodeSnips(const AbstractMetaFunction *func) const GENRUNNER_DEPRECATED;
-    /**
-    *   @deprecated This function doesn't belongs to the generator world and will sooner be moved to APIExtractor
-    */
-    bool hasDefaultConstructor(const AbstractMetaType *type) GENRUNNER_DEPRECATED;
-
 private:
     struct GeneratorPrivate;
     GeneratorPrivate* m_d;

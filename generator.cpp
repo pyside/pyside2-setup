@@ -199,24 +199,6 @@ void verifyDirectoryFor(const QFile &file)
     }
 }
 
-bool Generator::hasDefaultConstructor(const AbstractMetaType *type)
-{
-    QString full_name = type->typeEntry()->qualifiedTargetLangName();
-    QString class_name = type->typeEntry()->targetLangName();
-
-    foreach (const AbstractMetaClass *cls, m_d->apiextractor->classes()) {
-        if (cls->typeEntry()->qualifiedTargetLangName() == full_name) {
-            AbstractMetaFunctionList functions = cls->functions();
-            foreach (const AbstractMetaFunction *function, functions) {
-                if (function->arguments().isEmpty() && function->name() == class_name)
-                    return true;
-            }
-            return false;
-        }
-    }
-    return false;
-}
-
 void Generator::replaceTemplateVariables(QString &code, const AbstractMetaFunction *func)
 {
     const AbstractMetaClass *cpp_class = func->ownerClass();
@@ -243,122 +225,6 @@ void Generator::replaceTemplateVariables(QString &code, const AbstractMetaFuncti
         writeFunctionArguments(aux_stream, func, Options(SkipDefaultValues) | SkipRemovedArguments);
         code.replace("%ARGUMENTS", str);
     }
-}
-
-AbstractMetaFunctionList Generator::queryFunctions(const AbstractMetaClass *cppClass, bool allFunctions)
-{
-    AbstractMetaFunctionList result;
-
-    if (allFunctions) {
-        int default_flags = AbstractMetaClass::NormalFunctions |  AbstractMetaClass::Visible;
-        default_flags |= cppClass->isInterface() ? 0 :  AbstractMetaClass::ClassImplements;
-
-        // Constructors
-        result = cppClass->queryFunctions(AbstractMetaClass::Constructors |
-        default_flags);
-
-        // put enum constructor first to avoid conflict with int contructor
-        result = sortConstructor(result);
-
-        // Final functions
-        result += cppClass->queryFunctions(AbstractMetaClass::FinalInTargetLangFunctions |
-        AbstractMetaClass::NonStaticFunctions |
-        default_flags);
-
-        //virtual
-        result += cppClass->queryFunctions(AbstractMetaClass::VirtualInTargetLangFunctions |
-        AbstractMetaClass::NonStaticFunctions |
-        default_flags);
-
-        // Static functions
-        result += cppClass->queryFunctions(AbstractMetaClass::StaticFunctions | default_flags);
-
-        // Empty, private functions, since they aren't caught by the other ones
-        result += cppClass->queryFunctions(AbstractMetaClass::Empty |
-        AbstractMetaClass::Invisible | default_flags);
-        // Signals
-        result += cppClass->queryFunctions(AbstractMetaClass::Signals | default_flags);
-    } else {
-        result = cppClass->functionsInTargetLang();
-    }
-
-    return result;
-}
-
-AbstractMetaFunctionList Generator::filterFunctions(const AbstractMetaClass *cppClass)
-{
-    AbstractMetaFunctionList lst = queryFunctions(cppClass, true);
-    foreach (AbstractMetaFunction *func, lst) {
-        //skip signals
-        if (func->isSignal() ||
-            func->isDestructor() ||
-            (func->isModifiedRemoved() && !func->isAbstract())) {
-            lst.removeOne(func);
-        }
-    }
-
-    //virtual not implemented in current class
-    AbstractMetaFunctionList virtual_lst = cppClass->queryFunctions(AbstractMetaClass::VirtualFunctions);
-    foreach (AbstractMetaFunction *func, virtual_lst) {
-        if ((func->implementingClass() != cppClass) &&
-            !lst.contains(func)) {
-            lst.append(func);
-        }
-    }
-
-    //append global operators
-    foreach (AbstractMetaFunction *func , queryGlobalOperators(cppClass)) {
-        if (!lst.contains(func))
-            lst.append(func);
-    }
-
-    return lst;
-    //return cpp_class->functions();
-}
-
-AbstractMetaFunctionList Generator::queryGlobalOperators(const AbstractMetaClass *cppClass)
-{
-    AbstractMetaFunctionList result;
-
-    foreach (AbstractMetaFunction *func, cppClass->functions()) {
-        if (func->isInGlobalScope() && func->isOperatorOverload())
-            result.append(func);
-    }
-    return result;
-}
-
-AbstractMetaFunctionList Generator::sortConstructor(AbstractMetaFunctionList list)
-{
-    AbstractMetaFunctionList result;
-
-    foreach (AbstractMetaFunction *func, list) {
-        bool inserted = false;
-        foreach (AbstractMetaArgument *arg, func->arguments()) {
-            if (arg->type()->isFlags() || arg->type()->isEnum()) {
-                result.push_back(func);
-                inserted = true;
-                break;
-            }
-        }
-        if (!inserted)
-            result.push_front(func);
-    }
-
-    return result;
-}
-
-FunctionModificationList Generator::functionModifications(const AbstractMetaFunction *metaFunction)
-{
-    FunctionModificationList mods;
-    const AbstractMetaClass *cls = metaFunction->implementingClass();
-    while (cls) {
-        mods += metaFunction->modifications(cls);
-
-        if (cls == cls->baseClass())
-            break;
-        cls = cls->baseClass();
-    }
-    return mods;
 }
 
 QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
@@ -388,24 +254,6 @@ QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
         s << indentor << line.remove(0, limit) << endl;
     }
     return s;
-}
-
-CodeSnipList Generator::getCodeSnips(const AbstractMetaFunction *func) const
-{
-    CodeSnipList result;
-    const AbstractMetaClass *cppClass = func->implementingClass();
-    while (cppClass) {
-        foreach (FunctionModification mod, func->modifications(cppClass)) {
-            if (mod.isCodeInjection())
-                result << mod.snips;
-        }
-
-        if (cppClass == cppClass->baseClass())
-            break;
-        cppClass = cppClass->baseClass();
-    }
-
-    return result;
 }
 
 AbstractMetaFunctionList Generator::implicitConversions(const TypeEntry* type) const

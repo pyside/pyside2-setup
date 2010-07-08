@@ -911,7 +911,7 @@ void QtDocGenerator::generateClass(QTextStream &s, const AbstractMetaClass *cppC
       << "    :parts: 2" << endl << endl; // TODO: This would be a parameter in the future...
 
     //Function list
-    AbstractMetaFunctionList functionList = filterFunctions(cppClass);
+    AbstractMetaFunctionList functionList = cppClass->functions();
     qSort(functionList.begin(), functionList.end(), functionSort);
 
     doc_s << "Detailed Description\n"
@@ -1230,7 +1230,7 @@ void QtDocGenerator::writeInjectDocumentation(QTextStream &s,
     s << endl;
 
     if (func) {
-        writeDocSnips(s, getCodeSnips(func),
+        writeDocSnips(s, func->injectedCodeSnips(),
                        (mode == DocModification::Prepend ? CodeSnip::Beginning : CodeSnip::End),
                        TypeSystem::TargetLangCode);
     } else {
