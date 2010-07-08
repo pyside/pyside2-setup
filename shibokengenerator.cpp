@@ -991,18 +991,7 @@ void ShibokenGenerator::writeArgumentNames(QTextStream &s,
 
         if (argCount > 0)
             s << ", ";
-
-        if ((options & Generator::BoxedPrimitive) &&
-            !arguments.at(j)->type()->isReference() &&
-            (arguments.at(j)->type()->isQObject() ||
-             arguments.at(j)->type()->isObject())) {
-            //s << "brian::wrapper_manager::instance()->retrieve( " << arguments.at(j)->argumentName() << " )";
-            // TODO: replace boost thing
-            Q_ASSERT(false);
-            s << "python::ptr( " << arguments.at(j)->argumentName() << " )";
-        } else {
-            s << arguments.at(j)->argumentName();
-        }
+        s << arguments.at(j)->name();
 
         if (((options & Generator::VirtualCall) == 0) &&
             (!func->conversionRule(TypeSystem::NativeCode, arguments.at(j)->argumentIndex() + 1).isEmpty() ||
