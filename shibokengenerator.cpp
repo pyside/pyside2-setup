@@ -882,7 +882,7 @@ QString ShibokenGenerator::argumentString(const AbstractMetaFunction *func,
 
     if (!(options & Generator::SkipName)) {
         arg += " ";
-        arg += argument->argumentName();
+        arg += argument->name();
     }
 
     QList<ReferenceCount> referenceCounts;
@@ -1215,7 +1215,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                         }
                     }
                 } else {
-                    argReplacement = arg->argumentName();
+                    argReplacement = arg->name();
                 }
                 code.replace("%" + QString::number(i+1), argReplacement);
             }
@@ -1242,7 +1242,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                     }
                     argumentNames << argName;
                 } else {
-                    argumentNames << arg->argumentName();
+                    argumentNames << arg->name();
                 }
             }
             code.replace("%ARGUMENT_NAMES", argumentNames.join(", "));

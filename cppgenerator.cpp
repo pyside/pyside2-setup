@@ -39,8 +39,8 @@ inline CodeSnipList getConversionRule(TypeSystem::Language lang, const AbstractM
             CodeSnip snip(0, TypeSystem::TargetLangCode);
             snip.position = CodeSnip::Beginning;
 
-            convRule.replace("%in", arg->argumentName());
-            convRule.replace("%out", arg->argumentName() + "_out");
+            convRule.replace("%in", arg->name());
+            convRule.replace("%out", arg->name() + "_out");
 
             snip.addCode(convRule);
             list << snip;
@@ -517,9 +517,9 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 writeToPythonConversion(ac, arg->type(), func->ownerClass());
 
             if (hasConversionRule) {
-                ac << arg->argumentName() << "_out";
+                ac << arg->name() << "_out";
             } else {
-                QString argName = arg->argumentName();
+                QString argName = arg->name();
 #ifdef AVOID_PROTECTED_HACK
                 const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(arg->type());
                 if (metaEnum && metaEnum->isProtected()) {
@@ -1116,7 +1116,7 @@ void CppGenerator::writeNamedArgumentsCheck(QTextStream& s, OverloadData& overlo
             if (arg->defaultValueExpression().isEmpty()
                 || func->argumentRemoved(arg->argumentIndex() + 1))
                 continue;
-            argNamesSet << QString("\"%1\"").arg(arg->argumentName());
+            argNamesSet << QString("\"%1\"").arg(arg->name());
         }
     }
     QStringList argNamesList = argNamesSet.toList();
@@ -1690,14 +1690,14 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream& s, const AbstractMe
             foreach (const AbstractMetaArgument* arg, args) {
                 int pyArgIndex = arg->argumentIndex() - OverloadData::numberOfRemovedArguments(func, arg->argumentIndex());
                 QString pyArgName = usePyArgs ? QString("pyargs[%1]").arg(pyArgIndex) : "arg";
-                s << "value = PyDict_GetItemString(kwds, \"" << arg->argumentName() << "\");" << endl;
+                s << "value = PyDict_GetItemString(kwds, \"" << arg->name() << "\");" << endl;
                 s << INDENT << "if (value) {" << endl;
                 {
                     Indentation indent(INDENT);
                     s << INDENT << "if (" << pyArgName << ")" << endl;
                     {
                         Indentation indent(INDENT);
-                        s << INDENT << "errorArgName = \"" << arg->argumentName() << "\";" << endl;
+                        s << INDENT << "errorArgName = \"" << arg->name() << "\";" << endl;
                     }
                     s << INDENT << "else" << endl;
                     {
@@ -1818,7 +1818,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                     // If have conversion rules I will use this for removed args
                     bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, arg->argumentIndex() + 1).isEmpty();
                     if (hasConversionRule) {
-                        userArgs << arg->argumentName() + "_out";
+                        userArgs << arg->name() + "_out";
                     } else {
                        if (arg->defaultValueExpression().isEmpty())
                            badModifications = true;
@@ -1831,7 +1831,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
                     bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, arg->argumentIndex() + 1).isEmpty();
                     if (hasConversionRule) {
-                        argName = arg->argumentName() + "_out";
+                        argName = arg->name() + "_out";
                     } else {
                         argName = QString("cpp_arg%1").arg(idx);
                         if (shouldDereferenceArgumentPointer(arg))
@@ -1862,7 +1862,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 if (!arg->defaultValueExpression().isEmpty())
                     otherArgs.prepend(guessScopeForDefaultValue(func, arg));
                 else if (hasConversionRule)
-                    otherArgs.prepend(arg->argumentName() + "_out");
+                    otherArgs.prepend(arg->name() + "_out");
                 else
                     badModifications = true;
             }
@@ -3615,7 +3615,7 @@ bool CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
     int childIndex = argIndex;
     if (ctorHeuristicEnabled && argIndex > 0 && numArgs) {
         AbstractMetaArgument* arg = func->arguments().at(argIndex-1);
-        if (arg->argumentName() == "parent" && (arg->type()->isObject() || arg->type()->isQObject())) {
+        if (arg->name() == "parent" && (arg->type()->isObject() || arg->type()->isQObject())) {
             action = ArgumentOwner::Add;
             parentIndex = argIndex;
             childIndex = -1;
