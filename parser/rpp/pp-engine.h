@@ -35,6 +35,8 @@ namespace rpp
 {
 
 struct Value {
+    Value() : kind(Kind_Long), l(0) {}
+
     enum Kind {
         Kind_Long,
         Kind_ULong,
