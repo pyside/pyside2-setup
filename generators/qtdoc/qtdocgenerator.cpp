@@ -1085,8 +1085,8 @@ void QtDocGenerator::writeConstructors(QTextStream &s, const AbstractMetaClass *
         writeFunction(s, false, cppClass, func);
         foreach(AbstractMetaArgument *arg, func->arguments())
         {
-            if (!arg_map.contains(arg->argumentName())) {
-                arg_map.insert(arg->argumentName(), arg);
+            if (!arg_map.contains(arg->name())) {
+                arg_map.insert(arg->name(), arg);
             }
         }
     }
@@ -1123,7 +1123,7 @@ QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass *cppClass, cons
             optional = true;
         }
 
-        ret += arg->argumentName();
+        ret += arg->name();
 
         if (optional)
             ret += "=" + arg->defaultValueExpression();
@@ -1290,7 +1290,7 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType *type, cons
 
 void QtDocGenerator::writeParamerteType(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaArgument *arg)
 {
-    s << INDENT << ":param " << arg->argumentName() << ": "
+    s << INDENT << ":param " << arg->name() << ": "
       << translateToPythonType(arg->type(), cppClass) << endl;
 }
 

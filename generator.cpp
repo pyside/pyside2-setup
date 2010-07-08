@@ -224,7 +224,7 @@ void Generator::replaceTemplateVariables(QString &code, const AbstractMetaFuncti
         code.replace("%TYPE", cpp_class->name());
 
     foreach (AbstractMetaArgument *arg, func->arguments())
-        code.replace("%" + QString::number(arg->argumentIndex() + 1), arg->argumentName());
+        code.replace("%" + QString::number(arg->argumentIndex() + 1), arg->name());
 
     //template values
     code.replace("%RETURN_TYPE", translateType(func->type(), cpp_class));
