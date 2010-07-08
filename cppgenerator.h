@@ -69,6 +69,7 @@ private:
 
     void writeTypeDiscoveryFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
+    void writeSetattroFunction(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeGetattroFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
     /**

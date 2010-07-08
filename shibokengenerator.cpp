@@ -295,6 +295,12 @@ QString ShibokenGenerator::cpythonGettersSettersDefinitionName(const AbstractMet
     return QString("%1_getsetlist").arg(cpythonBaseName(metaClass));
 }
 
+QString ShibokenGenerator::cpythonSetattroFunctionName(const AbstractMetaClass* metaClass)
+{
+    return QString("%1_setattro").arg(cpythonBaseName(metaClass));
+}
+
+
 QString ShibokenGenerator::cpythonGetattroFunctionName(const AbstractMetaClass* metaClass)
 {
     return QString("%1_getattro").arg(cpythonBaseName(metaClass));

@@ -137,6 +137,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     s << "#include <algorithm>" << endl;
     if (usePySideExtensions()) {
         s << "#include <qsignal.h>" << endl;
+        s << "#include <qproperty.h>" << endl;
         s << "#include <pyside.h>" << endl;
     }
 
@@ -286,7 +287,12 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     s << "};" << endl << endl;
 
     // Write tp_getattro function
-    if (classNeedsGetattroFunction(metaClass)) {
+    if (usePySideExtensions() && metaClass->qualifiedCppName() == "QObject") {
+        writeGetattroFunction(s, metaClass);
+        s << endl;
+        writeSetattroFunction(s, metaClass);
+        s << endl;
+    } else if (classNeedsGetattroFunction(metaClass)) {
         writeGetattroFunction(s, metaClass);
         s << endl;
     }
@@ -2206,7 +2212,6 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     QString tp_flags;
     QString tp_init;
     QString tp_new;
-    QString tp_getattro('0');
     QString tp_dealloc;
     QString cpp_dtor('0');
     QString tp_as_number('0');
@@ -2262,8 +2267,14 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         tp_init = onlyPrivCtor ? "0" : cpythonFunctionName(ctors.first());
     }
 
-    if (classNeedsGetattroFunction(metaClass))
+    QString tp_getattro('0');
+    QString tp_setattro('0');
+    if (usePySideExtensions() && (metaClass->qualifiedCppName() == "QObject")) {
         tp_getattro = cpythonGetattroFunctionName(metaClass);
+        tp_setattro = cpythonSetattroFunctionName(metaClass);
+    } else if (classNeedsGetattroFunction(metaClass)) {
+        tp_getattro = cpythonGetattroFunctionName(metaClass);
+    }
 
     if (metaClass->hasPrivateDestructor() || onlyPrivCtor)
         tp_new = "0";
@@ -2324,7 +2335,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_call*/             0," << endl;
     s << INDENT << "/*tp_str*/              " << m_tpFuncs["__str__"] << ',' << endl;
     s << INDENT << "/*tp_getattro*/         " << tp_getattro << ',' << endl;
-    s << INDENT << "/*tp_setattro*/         0," << endl;
+    s << INDENT << "/*tp_setattro*/         " << tp_setattro << ',' << endl;
     s << INDENT << "/*tp_as_buffer*/        0," << endl;
     s << INDENT << "/*tp_flags*/            " << tp_flags << ',' << endl;
     s << INDENT << "/*tp_doc*/              0," << endl;
@@ -3297,35 +3308,63 @@ void CppGenerator::writeTypeDiscoveryFunction(QTextStream& s, const AbstractMeta
     s << "}\n\n";
 }
 
+void CppGenerator::writeSetattroFunction(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    s << "static int " << cpythonSetattroFunctionName(metaClass) << "(PyObject* self, PyObject* name, PyObject* value)" << endl;
+    s << '{' << endl;
+    if (usePySideExtensions()) {
+        s << INDENT << "Shiboken::AutoDecRef pp(PySide::qproperty_get_object(self, name));" << endl;
+        s << INDENT << "if (!pp.isNull())" << endl;
+        Indentation indent(INDENT);
+        s << INDENT << INDENT << "return PySide::qproperty_set(pp, self, value);" << endl;
+    }
+    s << INDENT << "return PyObject_GenericSetAttr(self, name, value);" << endl;
+    s << '}' << endl;
+}
+
 void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     s << "static PyObject* " << cpythonGetattroFunctionName(metaClass) << "(PyObject* self, PyObject* name)" << endl;
     s << '{' << endl;
-    s << INDENT << "if (self) {" << endl;
-    {
-        Indentation indent(INDENT);
-        s << INDENT << "if (SbkBaseWrapper_instanceDict(self)) {" << endl;
+    if (classNeedsGetattroFunction(metaClass)) {
+        s << INDENT << "if (self) {" << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << "PyObject* meth = PyDict_GetItem(SbkBaseWrapper_instanceDict(self), name);" << endl;
-            s << INDENT << "if (meth) {" << endl;
+            s << INDENT << "if (SbkBaseWrapper_instanceDict(self)) {" << endl;
             {
                 Indentation indent(INDENT);
-                s << INDENT << "Py_INCREF(meth);" << endl;
-                s << INDENT << "return meth;" << endl;
+                s << INDENT << "PyObject* meth = PyDict_GetItem(SbkBaseWrapper_instanceDict(self), name);" << endl;
+                s << INDENT << "if (meth) {" << endl;
+                {
+                    Indentation indent(INDENT);
+                    s << INDENT << "Py_INCREF(meth);" << endl;
+                    s << INDENT << "return meth;" << endl;
+                }
+                s << INDENT << '}' << endl;
             }
             s << INDENT << '}' << endl;
+            s << INDENT << "const char* cname = PyString_AS_STRING(name);" << endl;
+            foreach (const AbstractMetaFunction* func, getMethodsWithBothStaticAndNonStaticMethods(metaClass)) {
+                s << INDENT << "if (strcmp(cname, \"" << func->name() << "\") == 0)" << endl;
+                Indentation indent(INDENT);
+                s << INDENT << "return PyCFunction_NewEx(&" << cpythonMethodDefinitionName(func) << ", self, 0);" << endl;
+            }
         }
         s << INDENT << '}' << endl;
-        s << INDENT << "const char* cname = PyString_AS_STRING(name);" << endl;
-        foreach (const AbstractMetaFunction* func, getMethodsWithBothStaticAndNonStaticMethods(metaClass)) {
-            s << INDENT << "if (strcmp(cname, \"" << func->name() << "\") == 0)" << endl;
-            Indentation indent(INDENT);
-            s << INDENT << "return PyCFunction_NewEx(&" << cpythonMethodDefinitionName(func) << ", self, 0);" << endl;
-        }
     }
-    s << INDENT << '}' << endl;
-    s << INDENT << "return PyObject_GenericGetAttr(self, name);" << endl;
+    s << INDENT << "PyObject* attr = PyObject_GenericGetAttr(self, name);" << endl;
+    if (usePySideExtensions()) {
+        s << INDENT << "if (attr && PySide::isQPropertyType(attr)) {" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "PyObject *value = PySide::qproperty_get(attr, self);" << endl;
+            s << INDENT << "Py_DECREF(attr);" << endl;
+            s << INDENT << "Py_INCREF(value);" << endl;
+            s << INDENT << "attr = value;" << endl;
+        }
+        s << INDENT << "}" << endl;
+    }
+    s << INDENT << "return attr;" << endl;
     s << '}' << endl;
 }
 

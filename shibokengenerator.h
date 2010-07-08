@@ -261,6 +261,7 @@ public:
     QString cpythonMethodDefinitionName(const AbstractMetaFunction* func);
     QString cpythonGettersSettersDefinitionName(const AbstractMetaClass* metaClass);
     QString cpythonGetattroFunctionName(const AbstractMetaClass* metaClass);
+    QString cpythonSetattroFunctionName(const AbstractMetaClass* metaClass);
     QString cpythonGetterFunctionName(const AbstractMetaField* metaField);
     QString cpythonSetterFunctionName(const AbstractMetaField* metaField);
     QString cpythonWrapperCPtr(const AbstractMetaClass* metaClass, QString argName = "self");
