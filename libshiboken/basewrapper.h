@@ -40,6 +40,7 @@
 #include "bindingmanager.h"
 #include <list>
 #include <map>
+#include <string>
 
 namespace Shiboken
 {
@@ -48,7 +49,7 @@ namespace Shiboken
  * This mapping associates a method and argument of an wrapper object with the wrapper of
  * said argument when it needs the binding to help manage its reference counting.
  */
-typedef std::map<const char*, PyObject*> RefCountMap;
+typedef std::map<std::string, std::list<PyObject*> > RefCountMap;
 
 extern "C"
 {
@@ -237,7 +238,7 @@ SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*);
  *   \param key             a key that identifies the C++ method signature and argument where the referredObject came from.
  *   \parem referredObject  the object whose reference is used by the self object.
  */
-LIBSHIBOKEN_API void keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObject);
+LIBSHIBOKEN_API void keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObject, bool append=false);
 
 /// Returns true and sets a Python RuntimeError if the Python wrapper is not marked as valid.
 LIBSHIBOKEN_API bool cppObjectIsInvalid(PyObject* wrapper);

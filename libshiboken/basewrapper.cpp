@@ -47,6 +47,9 @@ namespace Shiboken
 
 static void SbkBaseWrapperType_dealloc(PyObject* pyObj);
 static PyObject* SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
+static std::list<PyObject*> splitPyObject(PyObject* pyObj);
+static void incRefPyObject(PyObject* pyObj);
+static void decRefPyObjectlist(const std::list<PyObject*> &pyObj);
 
 extern "C"
 {
@@ -374,7 +377,7 @@ void deallocWrapperWithPrivateDtor(PyObject* self)
     Py_TYPE(reinterpret_cast<SbkBaseWrapper*>(self))->tp_free(self);
 }
 
-void keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObject)
+void keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObject, bool append)
 {
     bool isNone = (!referredObject || (referredObject == Py_None));
     if (!self->referredObjects)
@@ -382,16 +385,21 @@ void keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObje
 
     RefCountMap& refCountMap = *(self->referredObjects);
     if (!isNone)
-        Py_INCREF(referredObject);
+        incRefPyObject(referredObject);
 
     RefCountMap::iterator iter = refCountMap.find(key);
-    if (iter != refCountMap.end()){
-        Py_DECREF(iter->second);
+    if (!append && (iter != refCountMap.end())) {
+        decRefPyObjectlist(iter->second);
         refCountMap.erase(iter);
     }
 
-    if (!isNone)
-        refCountMap[key] = referredObject;
+    if (!isNone) {
+        std::list<PyObject*> values = splitPyObject(referredObject);
+        if (append && (iter != refCountMap.end()))
+            refCountMap[key].assign(values.begin(), values.end());
+        else
+            refCountMap[key] = values;
+    }
 }
 
 void clearReferences(SbkBaseWrapper* self)
@@ -402,7 +410,7 @@ void clearReferences(SbkBaseWrapper* self)
     RefCountMap& refCountMap = *(self->referredObjects);
     RefCountMap::iterator iter;
     for (iter = refCountMap.begin(); iter != refCountMap.end(); ++iter)
-        Py_DECREF(iter->second);
+        decRefPyObjectlist(iter->second);
     delete self->referredObjects;
     self->referredObjects = 0;
 }
@@ -637,6 +645,40 @@ bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctorType)
         return false;
     }
     return true;
+}
+
+static std::list<PyObject*> splitPyObject(PyObject* pyObj)
+{
+    std::list<PyObject*> result;
+    if (PySequence_Check(pyObj)) {
+        AutoDecRef lst(PySequence_Fast(pyObj, "Invalid keep reference object."));
+        for(int i = 0, i_max = PySequence_Fast_GET_SIZE(lst.object()); i < i_max; i++) {
+            result.push_back(PySequence_Fast_GET_ITEM(lst.object(), i));
+        }
+    } else {
+        result.push_back(pyObj);
+    }
+    return result;
+}
+
+static void incRefPyObject(PyObject* pyObj)
+{
+    if (PySequence_Check(pyObj)) {
+        for(int i = 0, i_max = PySequence_Size(pyObj); i < i_max; i++) {
+            PySequence_GetItem(pyObj, i);
+        }
+    } else {
+        Py_INCREF(pyObj);
+    }
+}
+
+static void decRefPyObjectlist(const std::list<PyObject*> &lst)
+{
+    std::list<PyObject*>::const_iterator iter = lst.begin();
+    while(iter != lst.end()) {
+        Py_DECREF(*iter);
+        iter++;
+    }
 }
 
 
