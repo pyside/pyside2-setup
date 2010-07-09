@@ -580,7 +580,7 @@ struct StdListConverter
 
         StdList result;
         for (int i = 0; i < PySequence_Size(pyobj); i++) {
-            PyObject* pyItem = PySequence_GetItem(pyobj, i);
+            AutoDecRef pyItem(PySequence_GetItem(pyobj, i));
             result.push_back(Converter<typename StdList::value_type>::toCpp(pyItem));
         }
         return result;
