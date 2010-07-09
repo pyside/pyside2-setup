@@ -376,25 +376,35 @@ void deallocWrapperWithPrivateDtor(PyObject* self)
 
 void keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObject)
 {
+    bool isNone = (!referredObject || (referredObject == Py_None));
     if (!self->referredObjects)
-        return;
+        self->referredObjects = new Shiboken::RefCountMap;
+
     RefCountMap& refCountMap = *(self->referredObjects);
-    Py_INCREF(referredObject);
+    if (!isNone)
+        Py_INCREF(referredObject);
+
     RefCountMap::iterator iter = refCountMap.find(key);
-    if (iter != refCountMap.end())
+    if (iter != refCountMap.end()){
         Py_DECREF(iter->second);
-    refCountMap[key] = referredObject;
+        refCountMap.erase(iter);
+    }
+
+    if (!isNone)
+        refCountMap[key] = referredObject;
 }
 
 void clearReferences(SbkBaseWrapper* self)
 {
     if (!self->referredObjects)
         return;
+
     RefCountMap& refCountMap = *(self->referredObjects);
     RefCountMap::iterator iter;
     for (iter = refCountMap.begin(); iter != refCountMap.end(); ++iter)
         Py_DECREF(iter->second);
     delete self->referredObjects;
+    self->referredObjects = 0;
 }
 
 bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr)

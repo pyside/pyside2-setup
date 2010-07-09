@@ -533,7 +533,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             argConversions << argConv;
         }
 
-        s << "Py_BuildValue(\"(" << getFormatUnitString(func) << ")\"," << endl;
+        s << "Py_BuildValue(\"(" << getFormatUnitString(func, false) << ")\"," << endl;
         s << argConversions.join(",\n") << endl;
         s << INDENT << "));" << endl;
     }
@@ -801,8 +801,6 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     // Python owns it and C++ wrapper is false.
     if (shouldGenerateCppWrapper(overloads.first()->ownerClass()))
         s << INDENT << "sbkSelf->containsCppWrapper = 1;" << endl;
-    if (needsReferenceCountControl(metaClass))
-        s << INDENT << "sbkSelf->referredObjects = new Shiboken::RefCountMap;" << endl;
     s << INDENT << "BindingManager::instance().registerWrapper(sbkSelf, cptr);" << endl;
 
     // Create metaObject and register signal/slot
@@ -2040,12 +2038,20 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 continue;
             const AbstractMetaClass* wrappedClass = 0;
             QString pyArgName = argumentNameFromIndex(func, arg_mod.index, &wrappedClass);
-            if (!wrappedClass) {
+            if (pyArgName.isEmpty()) {
                 s << "#error Invalid reference count modification for argument " << arg_mod.index << endl << endl;
                 break;
             }
+
             s << INDENT << "Shiboken::keepReference(reinterpret_cast<SbkBaseWrapper*>(self), \"";
-            s << func->minimalSignature() << arg_mod.index << "\", " << pyArgName << ");" << endl;
+            QString varName = arg_mod.referenceCounts.first().varName;
+            if (varName.isEmpty())
+                varName = func->minimalSignature() + QString().number(arg_mod.index);
+
+            s << varName << "\", " << pyArgName << ");" << endl;
+
+            if (arg_mod.index == 0)
+                hasReturnPolicy = true;
         }
     }
     writeParentChildManagement(s, func, !hasReturnPolicy);
