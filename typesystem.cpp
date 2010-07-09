@@ -840,6 +840,7 @@ bool Handler::startElement(const QString &, const QString &n,
             break;
         case StackElement::ReferenceCount:
             attributes["action"] = QString();
+            attributes["variable-name"] = QString();
             break;
         case StackElement::ParentOwner:
             attributes["index"] = QString();
@@ -1350,6 +1351,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 actions["ignore"] = ReferenceCount::Ignore;
             }
             rc.action = actions.value(attributes["action"].toLower(), ReferenceCount::Invalid);
+            rc.varName = attributes["variable-name"];
 
             if (rc.action == ReferenceCount::Invalid) {
                 m_error = "unrecognized value for action attribute. supported actions:";

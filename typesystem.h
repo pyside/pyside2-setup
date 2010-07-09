@@ -95,6 +95,7 @@ struct ReferenceCount
     };
 
     Action action;
+    QString varName;
 };
 
 struct ArgumentOwner
