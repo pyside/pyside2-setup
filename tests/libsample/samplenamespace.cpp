@@ -93,5 +93,25 @@ enumItemAsDefaultValueToIntArgument(int value)
     return value;
 }
 
+void
+forceDecisorSideA(ObjectType* object)
+{
+}
+
+void
+forceDecisorSideA(const Point& pt, const Str& text, ObjectType* object)
+{
+}
+
+void
+forceDecisorSideB(int a, ObjectType* object)
+{
+}
+
+void
+forceDecisorSideB(int a, const Point& pt, const Str& text, ObjectType* object)
+{
+}
+
 } // namespace SampleNamespace
 

@@ -36,6 +36,10 @@
 #define SAMPLENAMESPACE_H
 
 #include "libsamplemacros.h"
+#include "str.h"
+#include "point.h"
+
+class ObjectType;
 
 namespace SampleNamespace
 {
@@ -96,6 +100,17 @@ public:
     virtual OkThisIsRecursiveEnough* someVirtualMethod(OkThisIsRecursiveEnough* arg) { return arg; }
     OkThisIsRecursiveEnough* methodReturningTypeFromParentScope() { return 0; }
 };
+
+// The combination of the following two overloaded methods could trigger a
+// problematic behaviour on the overload decisor, if it isn't working properly.
+LIBSAMPLE_API void forceDecisorSideA(ObjectType* object = 0);
+LIBSAMPLE_API void forceDecisorSideA(const Point& pt, const Str& text, ObjectType* object = 0);
+
+// The combination of the following two overloaded methods could trigger a
+// problematic behaviour on the overload decisor, if it isn't working properly.
+// This is a variation of forceDecisorSideB.
+LIBSAMPLE_API void forceDecisorSideB(int a, ObjectType* object = 0);
+LIBSAMPLE_API void forceDecisorSideB(int a, const Point& pt, const Str& text, ObjectType* object = 0);
 
 } // namespace SampleNamespace
 

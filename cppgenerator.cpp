@@ -1544,17 +1544,6 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(QTextStream& s, const Ov
             s << " else ";
         }
 
-        s << "if (";
-        if (usePyArgs && signatureFound) {
-            AbstractMetaArgumentList args = refFunc->arguments();
-            int lastArgIsVarargs = (int) (args.size() > 1 && args.last()->type()->isVarargs());
-            int numArgs = args.size() - OverloadData::numberOfRemovedArguments(refFunc) - lastArgIsVarargs;
-            s << "numArgs " << (lastArgIsVarargs ? ">=" : "==") << " " << numArgs << " && ";
-        }
-
-        if (refFunc->isOperatorOverload())
-            s << (refFunc->isReverseOperator() ? "" : "!") << "isReverse && ";
-
         QString typeChecks;
         QTextStream tck(&typeChecks);
         QString typeConversions;
@@ -1563,11 +1552,14 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(QTextStream& s, const Ov
         QString pyArgName = (usePyArgs && maxArgs > 1) ? QString("pyargs[%1]").arg(overloadData->argPos()) : "arg";
 
         OverloadData* od = overloadData;
+        int startArg = od->argPos();
+        int sequenceArgCount = 0;
         while (od && !od->argType()->isVarargs()) {
             if (usePyArgs && maxArgs > 1)
                 pyArgName = QString("pyargs[%1]").arg(od->argPos());
 
             writeTypeCheck(tck, od, pyArgName);
+            sequenceArgCount++;
 
             if (od->nextOverloadData().isEmpty()
                 || od->nextArgumentHasDefaultValue()
@@ -1581,6 +1573,19 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(QTextStream& s, const Ov
                     tck << " && ";
             }
         }
+
+        s << "if (";
+        if (usePyArgs && signatureFound) {
+            AbstractMetaArgumentList args = refFunc->arguments();
+            int lastArgIsVarargs = (int) (args.size() > 1 && args.last()->type()->isVarargs());
+            int numArgs = args.size() - OverloadData::numberOfRemovedArguments(refFunc) - lastArgIsVarargs;
+            s << "numArgs " << (lastArgIsVarargs ? ">=" : "==") << " " << numArgs << " && ";
+        } else if (sequenceArgCount > 1) {
+            s << "numArgs >= " << (startArg + sequenceArgCount) << " && ";
+        }
+
+        if (refFunc->isOperatorOverload())
+            s << (refFunc->isReverseOperator() ? "" : "!") << "isReverse && ";
 
         s << typeChecks << ") {" << endl;
         s << typeConversions;
