@@ -8,6 +8,9 @@ file(GLOB TEST_FILES samplebinding/*_test.py otherbinding/*_test.py)
 set(test_blacklist "")
 
 find_package(PythonInterp REQUIRED)
+if(NOT CTEST_TESTING_TIMEOUT)
+    set(CTEST_TESTING_TIMEOUT 60)
+endif()
 
 foreach(test_file ${TEST_FILES})
     string(REGEX MATCH "/([^/]+)_test.py" test_name ${test_file})
@@ -18,7 +21,7 @@ foreach(test_file ${TEST_FILES})
              "${sample_BINARY_DIR}:${other_BINARY_DIR}"
              "${PYTHON_EXECUTABLE}"
              "${test_file}")
-    set_tests_properties(${CMAKE_MATCH_1} PROPERTIES TIMEOUT 5)
+    set_tests_properties(${CMAKE_MATCH_1} PROPERTIES TIMEOUT ${CTEST_TESTING_TIMEOUT})
     if (${expect_fail} GREATER -1)
         set_tests_properties(${CMAKE_MATCH_1} PROPERTIES WILL_FAIL TRUE)
     endif(${expect_fail} GREATER -1)
