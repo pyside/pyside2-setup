@@ -502,6 +502,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                             || arg->type()->isQObject()
                             || arg->type()->isValue()
                             || arg->type()->isValuePointer()
+                            || arg->type()->isNativePointer()
                             || arg->type()->isFlags()
                             || arg->type()->isEnum()
                             || arg->type()->isContainer()

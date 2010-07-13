@@ -549,7 +549,7 @@ void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaT
 QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func, bool incRef) const
 {
     QString result;
-    const char objType = (incRef ? 'O' : 'S');
+    const char objType = (incRef ? 'O' : 'N');
     foreach (const AbstractMetaArgument* arg, func->arguments()) {
         if (func->argumentRemoved(arg->argumentIndex() + 1))
             continue;
@@ -560,6 +560,7 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func,
             || arg->type()->isObject()
             || arg->type()->isValue()
             || arg->type()->isValuePointer()
+            || arg->type()->isNativePointer()
             || arg->type()->isEnum()
             || arg->type()->isFlags()
             || arg->type()->isContainer()
@@ -576,7 +577,12 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func,
         } else if (isCString(arg->type())) {
             result += 'z';
         } else {
-            ReportHandler::warning("Unknown type used in ShibokenGenerator::getFormatUnitString!");
+            QString report;
+            QTextStream(&report) << "Method: " << func->ownerClass()->qualifiedCppName()
+                                 << "::" << func->signature() << " => Arg:"
+                                 << arg->name() << "index: " << arg->argumentIndex()
+                                 << " - cannot be handled properly. Use an inject-code to fix it!";
+            ReportHandler::warning(report);
             result += '?';
         }
     }
