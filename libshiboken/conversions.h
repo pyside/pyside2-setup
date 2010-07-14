@@ -201,7 +201,7 @@ struct Converter<void*>
         if (pyobj == Py_None)
             return 0;
         // When someone request a void pointer, just give to him the first C++ object in the class hierarchy
-        return reinterpret_cast<SbkBaseWrapper*>(pyobj)->cptr[0];
+        return reinterpret_cast<SbkBaseWrapper*>(pyobj)->cptr;
     }
 };
 template <> struct Converter<const void*> : Converter<void*> {};
