@@ -1402,7 +1402,8 @@ bool Handler::startElement(const QString &, const QString &n,
 
 
         case StackElement::InjectCode: {
-            if (((!topElement.type & StackElement::ComplexTypeEntryMask))
+            if (!(topElement.type & StackElement::ComplexTypeEntryMask)
+                && (topElement.type != StackElement::AddFunction)
                 && (topElement.type != StackElement::ModifyFunction)
                 && (topElement.type != StackElement::Root)) {
                 m_error = "wrong parent type for code injection";
