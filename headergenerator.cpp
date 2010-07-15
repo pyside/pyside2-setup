@@ -159,7 +159,7 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
         s << func->originalName() << '(';
         QStringList args;
         foreach (const AbstractMetaArgument* arg, func->arguments()) {
-            QString argName = arg->argumentName();
+            QString argName = arg->name();
             const TypeEntry* enumTypeEntry = 0;
             if (arg->type()->isFlags())
                 enumTypeEntry = reinterpret_cast<const FlagsTypeEntry*>(arg->type()->typeEntry())->originator();
