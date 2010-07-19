@@ -472,6 +472,9 @@ static void deallocPythonTypes(PyObject* pyObj)
 
 void deallocWrapper(PyObject* pyObj)
 {
+    if (Py_TYPE(pyObj)->tp_del)
+        Py_TYPE(pyObj)->tp_del(pyObj);
+
     SbkBaseWrapper* sbkObj = reinterpret_cast<SbkBaseWrapper*>(pyObj);
     if (sbkObj->weakreflist)
         PyObject_ClearWeakRefs(pyObj);
@@ -490,6 +493,7 @@ void deallocWrapper(PyObject* pyObj)
     delete[] sbkObj->cptr;
     sbkObj->cptr = 0;
     Py_TYPE(pyObj)->tp_free(pyObj);
+
 }
 
 void SbkBaseWrapperType_dealloc(PyObject* pyObj)
