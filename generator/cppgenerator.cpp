@@ -320,12 +320,18 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
 
+    if (metaClass->typeEntry()->isValue())
+        writeCopyFunction(s, metaClass);
+
     // Write single method definitions
     s << singleMethodDefinitions;
 
     // Write methods definition
     s << "static PyMethodDef " << className << "_methods[] = {" << endl;
-    s << methodsDefinitions << INDENT << "{0} // Sentinel" << endl;
+    s << methodsDefinitions << endl;
+    if (metaClass->typeEntry()->isValue())
+        s << INDENT << "{\"__copy__\", (PyCFunction)" << className << "___copy__" << ", METH_NOARGS}," << endl;
+    s << INDENT << "{0} // Sentinel" << endl;
     s << "};" << endl << endl;
 
     // Write tp_getattro function
@@ -2653,6 +2659,47 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
     s << INDENT << "/*nb_inplace_true_divide*/  0," << endl;
     s << INDENT << "/*nb_index*/                0" << endl;
     s << "};" << endl << endl;
+}
+
+void CppGenerator::writeCopyFunction(QTextStream& s, const AbstractMetaClass *metaClass)
+{
+        QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
+
+        Indentation indent(INDENT);
+
+        s << "static PyObject *" << className << "___copy__(PyObject *self)" << endl;
+        s << "{" << endl;
+        s << INDENT << metaClass->qualifiedCppName() << "* " CPP_SELF_VAR " = 0;" << endl;
+        s << INDENT << "if (Shiboken::cppObjectIsInvalid(self))" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "return 0;" << endl;
+        }
+
+        s << INDENT << "cppSelf = Shiboken::Converter<" << metaClass->qualifiedCppName() << "*>::toCpp(self);" << endl;
+        s << INDENT << "PyObject* " PYTHON_RETURN_VAR " = 0;" << endl;
+
+        s << INDENT << metaClass->qualifiedCppName() << "* copy = new " << metaClass->qualifiedCppName();
+                    s << "(*cppSelf);" << endl;
+        s << INDENT << PYTHON_RETURN_VAR " = Shiboken::Converter<" << metaClass->qualifiedCppName();
+                    s << "*>::toPython(copy);" << endl;
+
+        s << INDENT << "SbkBaseWrapper_setOwnership(" PYTHON_RETURN_VAR ", true);" << endl;
+
+        s << endl;
+
+        s << INDENT << "if (PyErr_Occurred() || !" PYTHON_RETURN_VAR ") {" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "Py_XDECREF(" PYTHON_RETURN_VAR ");" << endl;
+            s << INDENT << "return 0;" << endl;
+        }
+
+        s << INDENT << "}" << endl;
+
+        s << INDENT << "return " PYTHON_RETURN_VAR ";" << endl;
+        s << "}" << endl;
+        s << endl;
 }
 
 void CppGenerator::writeGetterFunction(QTextStream& s, const AbstractMetaField* metaField)
