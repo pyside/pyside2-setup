@@ -116,13 +116,12 @@ int main(int argc, char *argv[])
     // Try to load a generator
     QString generatorSet = args.value("generatorSet");
     if (!generatorSet.isEmpty()) {
-        QString generatorFile;
-        if (generatorSet.contains(QDir::separator()))
-            generatorFile = generatorSet;
-        else
-            generatorFile = QString(GENERATORRUNNER_PLUGIN_DIR) + "/lib" + generatorSet + "_generator";
+        QFileInfo generatorFile(generatorSet);
 
-        QLibrary plugin(generatorFile);
+        if (generatorFile.baseName() == generatorSet)
+            generatorFile.setFile(QDir(GENERATORRUNNER_PLUGIN_DIR), generatorSet + "_generator");
+
+        QLibrary plugin(generatorFile.filePath());
         getGeneratorsFunc getGenerators = (getGeneratorsFunc)plugin.resolve("getGenerators");
         if (getGenerators)
             getGenerators(&generators);

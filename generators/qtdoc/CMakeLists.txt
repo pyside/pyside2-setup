@@ -9,6 +9,7 @@ target_link_libraries(docgenerator ${QT_QTCORE_LIBRARY})
 
 add_library(qtdoc_generator SHARED ${qtdoc_generator_SRC})
 target_link_libraries(qtdoc_generator ${APIEXTRACTOR_LIBRARY} ${QT_QTCORE_LIBRARY} genrunner)
+set_property(TARGET qtdoc_generator PROPERTY PREFIX "")
 
 install(TARGETS qtdoc_generator DESTINATION ${generator_plugin_DIR})
 install(TARGETS docgenerator DESTINATION bin)
