@@ -40,7 +40,7 @@ set_property(TARGET other PROPERTY PREFIX "")
 target_link_libraries(other
                       libother
                       libsample
-                      ${PYTHON_LIBRARIES}
+                      ${SBK_PYTHON_LIBRARIES}
                       libshiboken)
 
 add_dependencies(other sample shiboken_generator)

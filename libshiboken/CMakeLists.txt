@@ -24,16 +24,6 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ShibokenConfigVersion.cmake.in"
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shiboken.pc.in"
                "${CMAKE_CURRENT_BINARY_DIR}/shiboken.pc" @ONLY)
 
-# Detect if the python libs were compiled in debug mode
-execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "from distutils import sysconfig; \\
-        print sysconfig.get_config_var('Py_DEBUG')"
-    OUTPUT_VARIABLE PY_DEBUG
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-if (PY_DEBUG)
-    add_definitions("-DPy_DEBUG")
-endif()
-
 set(libshiboken_SRC
 basewrapper.cpp
 helper.cpp
@@ -47,8 +37,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${SPARSEHASH_INCLUDE_PATH})
 add_library(libshiboken SHARED ${libshiboken_SRC})
 set_property(TARGET libshiboken PROPERTY PREFIX "")
-target_link_libraries(libshiboken
-                      ${PYTHON_LIBRARIES})
+target_link_libraries(libshiboken ${SBK_PYTHON_LIBRARIES})
 set_target_properties(libshiboken PROPERTIES VERSION ${libshiboken_VERSION} SOVERSION ${libshiboken_SOVERSION})
 
 install(FILES

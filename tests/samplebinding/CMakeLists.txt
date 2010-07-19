@@ -95,7 +95,7 @@ add_library(sample MODULE ${sample_SRC})
 set_property(TARGET sample PROPERTY PREFIX "")
 target_link_libraries(sample
                       libsample
-                      ${PYTHON_LIBRARIES}
+                      ${SBK_PYTHON_LIBRARIES}
                       libshiboken)
 
 add_dependencies(sample shiboken_generator)
