@@ -1,8 +1,5 @@
 project(libshiboken)
 
-find_package(PythonLibs REQUIRED)
-find_package(PythonInterp REQUIRED)
-
 #Find installed sparsehash
 find_path(SPARSEHASH_INCLUDE_PATH sparseconfig.h PATH_SUFFIXES "/google/sparsehash")
 if(SPARSEHASH_INCLUDE_PATH)
