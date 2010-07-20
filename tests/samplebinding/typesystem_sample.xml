@@ -951,6 +951,17 @@
             %PYARG_0 = PyString_FromFormat("&lt;Point object at %p: (%d.%d, %d.%d)&gt;", %CPPSELF, x1, x2, y1, y2);
             </inject-code>
         </add-function>
+
+        <add-function signature="__reduce__" return-type="PyObject*">
+            <inject-code class="target" position="beginning">
+            PyObject *type = PyObject_Type(%PYSELF);
+            PyObject *args = NULL;
+
+            args = Py_BuildValue("(dd)", %CPPSELF.x(), %CPPSELF.y());
+
+            %PYARG_0 = Py_BuildValue("(OO)", type, args);
+            </inject-code>
+        </add-function>
     </value-type>
 
     <value-type name="Polygon">
