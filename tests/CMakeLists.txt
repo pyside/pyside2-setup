@@ -12,22 +12,32 @@ if(NOT CTEST_TESTING_TIMEOUT)
     set(CTEST_TESTING_TIMEOUT 60)
 endif()
 
-foreach(test_file ${TEST_FILES})
-    string(REGEX MATCH "/([^/]+)_test.py" test_name ${test_file})
-    list(FIND test_blacklist ${CMAKE_MATCH_1} expect_fail)
-    add_test("${CMAKE_MATCH_1}" sh
-             "${CMAKE_CURRENT_SOURCE_DIR}/run_test.sh"
-             "${libsample_BINARY_DIR}:${libother_BINARY_DIR}:${libshiboken_BINARY_DIR}"
-             "${sample_BINARY_DIR}:${other_BINARY_DIR}"
-             "${PYTHON_EXECUTABLE}"
-             "${test_file}")
-    set_tests_properties(${CMAKE_MATCH_1} PROPERTIES TIMEOUT ${CTEST_TESTING_TIMEOUT})
-    if (${expect_fail} GREATER -1)
-        set_tests_properties(${CMAKE_MATCH_1} PROPERTIES WILL_FAIL TRUE)
-    endif(${expect_fail} GREATER -1)
+if(CMAKE_VERSION VERSION_LESS 2.8)
+    message("CMake version greater than 2.8 necessary to run tests")
+else()
+    if(WIN32)
+        set(TEST_PYTHONPATH     "${sample_BINARY_DIR};${other_BINARY_DIR}")
+        set(TEST_LIBRARY_PATH   "$ENV{PATH};${libsample_BINARY_DIR};${libother_BINARY_DIR};${libshiboken_BINARY_DIR}")
+        set(LIBRARY_PATH_VAR    "PATH")
+	    string(REPLACE "\\" "/" TEST_PYTHONPATH "${TEST_PYTHONPATH}")
+	    string(REPLACE "\\" "/" TEST_LIBRARY_PATH "${TEST_LIBRARY_PATH}")
 
-# Should set python path here
-# Looks like it's fixed in 2.8:
-# http://www.vtk.org/Bug/print_bug_page.php?bug_id=7885
-endforeach(test_file ${TEST_FILES})
+	    string(REPLACE ";" "\\;" TEST_PYTHONPATH "${TEST_PYTHONPATH}")
+	    string(REPLACE ";" "\\;" TEST_LIBRARY_PATH "${TEST_LIBRARY_PATH}")
+    else()
+        set(TEST_PYTHONPATH     "$PYTHONPATH:${sample_BINARY_DIR}:${other_BINARY_DIR}")
+        set(TEST_LIBRARY_PATH   "$LD_LIBRARY_PATH:${libsample_BINARY_DIR}:${libother_BINARY_DIR}:${libshiboken_BINARY_DIR}")
+        set(LIBRARY_PATH_VAR    "LD_LIBRARY_PATH")
+    endif()
 
+    foreach(test_file ${TEST_FILES})
+        string(REGEX MATCH "/([^/]+)_test.py" test_name ${test_file})
+        list(FIND test_blacklist ${CMAKE_MATCH_1} expect_fail)
+        add_test(${CMAKE_MATCH_1} ${PYTHON_EXECUTABLE} ${test_file})
+        set_tests_properties(${CMAKE_MATCH_1} PROPERTIES ENVIRONMENT "PYTHONPATH=${TEST_PYTHONPATH};${LIBRARY_PATH_VAR}=${TEST_LIBRARY_PATH}")
+        set_tests_properties(${CMAKE_MATCH_1} PROPERTIES TIMEOUT ${CTEST_TESTING_TIMEOUT})
+        if (${expect_fail} GREATER -1)
+            set_tests_properties(${CMAKE_MATCH_1} PROPERTIES WILL_FAIL TRUE)
+        endif()
+    endforeach()
+endif()
