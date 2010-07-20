@@ -3,11 +3,14 @@ project(shiboken)
 
 cmake_minimum_required(VERSION 2.6)
 
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/
+                      ${CMAKE_MODULE_PATH})
+
 find_package(Qt4 4.5.0 REQUIRED)
 find_package(ApiExtractor 0.7 REQUIRED)
 find_package(GeneratorRunner 0.6 REQUIRED)
 find_package(PythonLibs REQUIRED)
-find_package(PythonInterp REQUIRED)
+find_package(PythonInterpWithDebug REQUIRED)
 
 add_definitions(${QT_DEFINITIONS})
 
