@@ -37,23 +37,23 @@
 
 #include "libsamplemacros.h"
 
-class LIBSAMPLE_API PrivateDtor
+class PrivateDtor
 {
 public:
-    static PrivateDtor* instance()
+    inline static PrivateDtor* instance()
     {
         static PrivateDtor self;
         self.m_instanciations++;
         return &self;
     }
 
-    int instanceCalls()
+    inline int instanceCalls()
     {
         return m_instanciations;
     }
 
 protected:
-    int protectedInstanceCalls() { return m_instanciations; }
+    inline int protectedInstanceCalls() { return m_instanciations; }
 
 private:
     int m_instanciations;

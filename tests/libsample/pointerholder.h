@@ -37,12 +37,12 @@
 
 #include "libsamplemacros.h"
 
-class LIBSAMPLE_API PointerHolder
+class PointerHolder
 {
 public:
     explicit PointerHolder(void* ptr) : m_pointer(ptr) {}
     ~PointerHolder() {}
-    void* pointer() const { return m_pointer; }
+    inline void* pointer() const { return m_pointer; }
 private:
     void* m_pointer;
 };

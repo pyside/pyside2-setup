@@ -44,11 +44,11 @@ public:
             : m_objId(objId) {}
     virtual ~Reference() {}
 
-    int objId() { return m_objId; }
-    void setObjId(int objId) { m_objId = objId; }
+    inline int objId() { return m_objId; }
+    inline void setObjId(int objId) { m_objId = objId; }
 
-    static int usesReference(Reference& r) { return r.m_objId; }
-    static int usesConstReference(const Reference& r) { return r.m_objId; }
+    inline static int usesReference(Reference& r) { return r.m_objId; }
+    inline static int usesConstReference(const Reference& r) { return r.m_objId; }
 
     virtual int usesReferenceVirtual(Reference& r, int inc);
     virtual int usesConstReferenceVirtual(const Reference& r, int inc);
@@ -61,7 +61,7 @@ public:
 
     void show() const;
 
-    static int multiplier() { return 10; }
+    inline static int multiplier() { return 10; }
 
 private:
     int m_objId;

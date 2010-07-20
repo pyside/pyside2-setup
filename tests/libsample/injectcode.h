@@ -54,7 +54,7 @@ public:
     const char* overloadedMethod(int arg0, bool arg1);
 
     virtual int arrayMethod(int count, int* values) const;
-    int callArrayMethod(int count, int *values) const { return arrayMethod(count, values); }
+    inline int callArrayMethod(int count, int *values) const { return arrayMethod(count, values); }
     virtual const char* virtualMethod(int arg);
     int sumArrayAndLength(int* values) const;
 private:

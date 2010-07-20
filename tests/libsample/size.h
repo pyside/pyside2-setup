@@ -43,12 +43,12 @@ public:
     Size(double width = 0.0, double height = 0.0) : m_width(width), m_height(height) {}
     ~Size() {}
 
-    double width() { return m_width; }
-    void setWidth(double width) { m_width = width; }
-    double height() { return m_height; }
-    void setHeight(double height) { m_height = height; }
+    inline double width() { return m_width; }
+    inline void setWidth(double width) { m_width = width; }
+    inline double height() { return m_height; }
+    inline void setHeight(double height) { m_height = height; }
 
-    double calculateArea() const { return m_width * m_height; }
+    inline double calculateArea() const { return m_width * m_height; }
 
     // Comparison Operators
     inline bool operator==(const Size& other)
@@ -92,28 +92,28 @@ public:
     inline bool operator>=(double area) { return calculateArea() >= area; }
 
     // Arithmetic Operators
-    Size& operator+=(const Size& s)
+    inline Size& operator+=(const Size& s)
     {
         m_width += s.m_width;
         m_height += s.m_height;
         return *this;
     }
 
-    Size& operator-=(const Size& s)
+    inline Size& operator-=(const Size& s)
     {
         m_width -= s.m_width;
         m_height -= s.m_height;
         return *this;
     }
 
-    Size& operator*=(double mult)
+    inline Size& operator*=(double mult)
     {
         m_width *= mult;
         m_height *= mult;
         return *this;
     }
 
-    Size& operator/=(double div)
+    inline Size& operator/=(double div)
     {
         m_width /= div;
         m_height /= div;

@@ -37,7 +37,7 @@
 
 #include "libsamplemacros.h"
 
-class LIBSAMPLE_API NonDefaultCtor
+class NonDefaultCtor
 {
     int m_value;
 public:
@@ -45,22 +45,22 @@ public:
     {
     }
 
-    int value()
+    inline  int value()
     {
         return m_value;
     }
 
-    NonDefaultCtor returnMyself()
+    inline NonDefaultCtor returnMyself()
     {
         return *this;
     }
 
-    NonDefaultCtor returnMyself(int)
+    inline NonDefaultCtor returnMyself(int)
     {
         return *this;
     }
 
-    NonDefaultCtor returnMyself(int, NonDefaultCtor)
+    inline NonDefaultCtor returnMyself(int, NonDefaultCtor)
     {
         return *this;
     }
@@ -70,7 +70,7 @@ public:
         return *this;
     }
 
-    NonDefaultCtor callReturnMyselfVirtual()
+    inline NonDefaultCtor callReturnMyselfVirtual()
     {
         return returnMyselfVirtual();
     }

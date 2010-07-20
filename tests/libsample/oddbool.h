@@ -37,7 +37,7 @@
 
 #include "libsamplemacros.h"
 
-class LIBSAMPLE_API OddBool
+class OddBool
 {
 
 public:
@@ -57,21 +57,21 @@ inline bool operator!=(OddBool b1, bool b2) { return !b1 != !b2; }
 inline bool operator!=(bool b1, OddBool b2) { return !b1 != !b2; }
 inline bool operator!=(OddBool b1, OddBool b2) { return !b1 != !b2; }
 
-class LIBSAMPLE_API OddBoolUser
+class OddBoolUser
 {
 public:
     OddBoolUser() : m_oddbool(OddBool(false)) {}
     virtual ~OddBoolUser() {}
 
-    OddBool oddBool() { return m_oddbool; }
-    void setOddBool(OddBool oddBool) { m_oddbool = oddBool; }
+    inline OddBool oddBool() { return m_oddbool; }
+    inline void setOddBool(OddBool oddBool) { m_oddbool = oddBool; }
 
     virtual OddBool invertedOddBool()
     {
         return !m_oddbool;
     }
 
-    OddBool callInvertedOddBool()
+    inline OddBool callInvertedOddBool()
     {
         return invertedOddBool();
     }

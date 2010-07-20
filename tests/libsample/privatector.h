@@ -37,17 +37,17 @@
 
 #include "libsamplemacros.h"
 
-class LIBSAMPLE_API PrivateCtor
+class PrivateCtor
 {
 public:
-    static PrivateCtor* instance()
+    inline static PrivateCtor* instance()
     {
         static PrivateCtor self;
         self.m_instanciations++;
         return &self;
     }
 
-    int instanceCalls()
+    inline int instanceCalls()
     {
         return m_instanciations;
     }

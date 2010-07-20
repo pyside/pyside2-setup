@@ -41,7 +41,7 @@
 
 #include "libsamplemacros.h"
 
-struct LIBSAMPLE_API Event
+struct Event
 {
     enum EventType {
         NO_EVENT,
@@ -67,12 +67,12 @@ public:
     virtual ~ObjectType();
 
     // factory method
-    static ObjectType* create() { return new ObjectType(); }
+    inline static ObjectType* create() { return new ObjectType(); }
     static ObjectType* createWithChild();
 
     void setParent(ObjectType* parent);
-    ObjectType* parent() const { return m_parent; }
-    const ObjectTypeList& children() const { return m_children; }
+    inline ObjectType* parent() const { return m_parent; }
+    inline const ObjectTypeList& children() const { return m_children; }
     void killChild(const Str& name);
     void removeChild(ObjectType* child);
     ObjectType* takeChild(ObjectType* child);
@@ -82,7 +82,7 @@ public:
     Str objectName() const;
     void setObjectName(const Str& name);
 
-    unsigned long identifier() const { return reinterpret_cast<unsigned long>(this); }
+    inline unsigned long identifier() const { return reinterpret_cast<unsigned long>(this); }
 
     bool causeEvent(Event::EventType eventType);
 
@@ -93,7 +93,7 @@ public:
     // This nonsense method emulate QWidget.setLayout method
     // All layout objects will became children of this object.
     void setLayout(ObjectTypeLayout* layout);
-    ObjectTypeLayout* layout() const { return m_layout; }
+    inline ObjectTypeLayout* layout() const { return m_layout; }
 
     // This method should be reimplemented by ObjectTypeLayout.
     virtual bool isLayoutType() { return false; }

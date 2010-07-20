@@ -48,7 +48,7 @@ public:
     inline StrList(const StrList& lst) : std::list<Str>(lst) { }
     inline StrList(const std::list<Str>& lst) : std::list<Str>(lst) { }
 
-    void append(Str str) { push_back(str); }
+    inline void append(Str str) { push_back(str); }
     Str join(const Str& sep) const;
 
     bool operator==(const std::list<Str>& other) const;

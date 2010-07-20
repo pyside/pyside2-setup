@@ -42,7 +42,7 @@
 #include "objecttype.h"
 #include "collector.h"
 
-class LIBOTHER_API OtherObjectType : public ObjectType
+class OtherObjectType : public ObjectType
 {
 public:
 

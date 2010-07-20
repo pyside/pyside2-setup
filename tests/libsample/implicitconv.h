@@ -64,9 +64,9 @@ public:
     ImplicitConv(double value, bool=true) : m_ctorEnum(CtorNone), m_value(value) {}
     ~ImplicitConv() {}
 
-    CtorEnum ctorEnum() { return m_ctorEnum; }
-    int objId() { return m_objId; }
-    double value() { return m_value; }
+    inline CtorEnum ctorEnum() { return m_ctorEnum; }
+    inline int objId() { return m_objId; }
+    inline double value() { return m_value; }
 
     static ImplicitConv implicitConvCommon(ImplicitConv implicit);
 

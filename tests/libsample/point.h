@@ -47,16 +47,16 @@ public:
     Point(double x, double y);
     ~Point() {}
 
-    double x() const { return m_x; }
-    double y() const { return m_y; }
+    inline double x() const { return m_x; }
+    inline double y() const { return m_y; }
 
-    void setX(double x) { m_x = x; }
-    void setY(double y) { m_y = y; }
+    inline void setX(double x) { m_x = x; }
+    inline void setY(double y) { m_y = y; }
 
     Point* copy() const;
 
-    const Point& getConstReferenceToSelf() const { return *this; }
-    const Point* getSelf() const { return this; }
+    inline const Point& getConstReferenceToSelf() const { return *this; }
+    inline const Point* getSelf() const { return this; }
 
     // The != operator is not implemented for the purpose of testing
     // for the absense of the __ne__ method in the Python binding.

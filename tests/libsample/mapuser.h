@@ -54,8 +54,8 @@ public:
 
     void showMap(std::map<std::string, int> mapping);
 
-    void setMap(std::map<std::string, std::list<int> > map) { m_map = map; }
-    std::map<std::string, std::list<int> > getMap() { return m_map; }
+    inline void setMap(std::map<std::string, std::list<int> > map) { m_map = map; }
+    inline std::map<std::string, std::list<int> > getMap() { return m_map; }
 
 private:
     std::map<std::string, std::list<int> > m_map;

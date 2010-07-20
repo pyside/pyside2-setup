@@ -47,8 +47,8 @@ public:
         : ObjectType(parent), m_model(model)
     {}
 
-    void setModel(ObjectType* model) { m_model = model; }
-    ObjectType* model() const { return m_model; }
+    inline void setModel(ObjectType* model) { m_model = model; }
+    inline ObjectType* model() const { return m_model; }
 
     Str displayModelData();
     void modifyModelData(Str& data);

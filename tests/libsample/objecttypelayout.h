@@ -48,7 +48,7 @@ public:
     std::list<ObjectType*> objects() const;
 
     virtual bool isLayoutType() { return true; }
-    static ObjectTypeLayout* create() { return new ObjectTypeLayout(); }
+    inline static ObjectTypeLayout* create() { return new ObjectTypeLayout(); }
 
     virtual ObjectType* takeChild(const Str& name) { return ObjectType::takeChild(name); }
 private:

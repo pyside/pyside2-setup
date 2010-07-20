@@ -53,7 +53,7 @@ public:
 
     void addPoint(Point point);
 
-    const PointList& points() const { return m_points; }
+    inline const PointList& points() const { return m_points; }
 
     // This method intentionally receives and returns copies of a Polygon object.
     static Polygon doublePolygonScale(Polygon polygon);

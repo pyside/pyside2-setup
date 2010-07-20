@@ -37,7 +37,7 @@
 
 #include "libsamplemacros.h"
 
-class LIBSAMPLE_API Base1
+class Base1
 {
 public:
     Base1() : m_value(1) {}
@@ -49,7 +49,7 @@ private:
     int m_value;
 };
 
-class LIBSAMPLE_API Base2
+class Base2
 {
 public:
     Base2() : m_value(2) {}
@@ -69,8 +69,8 @@ public:
     virtual int base1Method() { return Base1::base1Method() * 10; }
     virtual int base2Method() { return Base2::base2Method() * 10; }
 
-    Base1* castToBase1() { return (Base1*) this; }
-    Base2* castToBase2() { return (Base2*) this; }
+    inline Base1* castToBase1() { return (Base1*) this; }
+    inline Base2* castToBase2() { return (Base2*) this; }
 
     static MDerived1* transformFromBase1(Base1 *self);
     static MDerived1* transformFromBase2(Base2 *self);
@@ -80,20 +80,20 @@ private:
     int m_value;
 };
 
-class LIBSAMPLE_API SonOfMDerived1 : public MDerived1
+class SonOfMDerived1 : public MDerived1
 {
 public:
     SonOfMDerived1() : m_value(0) {}
     ~SonOfMDerived1() {}
 
-    MDerived1* castToMDerived1() { return (MDerived1*) this; }
+    inline MDerived1* castToMDerived1() { return (MDerived1*) this; }
 
     int sonOfMDerived1Method() { return m_value; }
 private:
     int m_value;
 };
 
-class LIBSAMPLE_API Base3
+class Base3
 {
 public:
     explicit Base3(int val = 3) : m_value(val) {}
@@ -103,7 +103,7 @@ private:
     int m_value;
 };
 
-class LIBSAMPLE_API Base4
+class Base4
 {
 public:
     Base4() : m_value(4) {}
@@ -113,7 +113,7 @@ private:
     int m_value;
 };
 
-class LIBSAMPLE_API Base5
+class Base5
 {
 public:
     Base5() : m_value(5) {}
@@ -123,7 +123,7 @@ private:
     int m_value;
 };
 
-class LIBSAMPLE_API Base6
+class Base6
 {
 public:
     Base6() : m_value(6) {}
@@ -140,13 +140,13 @@ public:
     MDerived2();
     virtual ~MDerived2() {}
 
-    int base4Method() { return Base3::base3Method() * 10; }
-    int mderived2Method() { return m_value; }
+    inline int base4Method() { return Base3::base3Method() * 10; }
+    inline int mderived2Method() { return m_value; }
 
-    Base3* castToBase3() { return (Base3*) this; }
-    Base4* castToBase4() { return (Base4*) this; }
-    Base5* castToBase5() { return (Base5*) this; }
-    Base6* castToBase6() { return (Base6*) this; }
+    inline Base3* castToBase3() { return (Base3*) this; }
+    inline Base4* castToBase4() { return (Base4*) this; }
+    inline Base5* castToBase5() { return (Base5*) this; }
+    inline Base6* castToBase6() { return (Base6*) this; }
 
 private:
     int m_value;
@@ -158,12 +158,12 @@ public:
     MDerived3();
     virtual ~MDerived3() {}
 
-    virtual int mderived3Method() { return m_value; }
+    inline virtual int mderived3Method() { return m_value; }
 
-    MDerived1* castToMDerived1() { return (MDerived1*) this; }
-    MDerived2* castToMDerived2() { return (MDerived2*) this; }
+    inline MDerived1* castToMDerived1() { return (MDerived1*) this; }
+    inline MDerived2* castToMDerived2() { return (MDerived2*) this; }
 
-    Base3* castToBase3() { return (Base3*) this; }
+    inline Base3* castToBase3() { return (Base3*) this; }
 
 private:
     int m_value;
@@ -175,10 +175,10 @@ public:
     MDerived4();
     ~MDerived4() {}
 
-    int mderived4Method() { return 0; }
+    inline int mderived4Method() { return 0; }
 
-    Base3* castToBase3() { return (Base3*) this; }
-    Base4* castToBase4() { return (Base4*) this; }
+    inline Base3* castToBase3() { return (Base3*) this; }
+    inline Base4* castToBase4() { return (Base4*) this; }
 private:
     int m_value;
 };
@@ -191,8 +191,8 @@ public:
 
     virtual int mderived5Method() { return 0; }
 
-    Base3* castToBase3() { return (Base3*) this; }
-    Base4* castToBase4() { return (Base4*) this; }
+    inline Base3* castToBase3() { return (Base3*) this; }
+    inline Base4* castToBase4() { return (Base4*) this; }
 };
 
 #endif // MDERIVED_H

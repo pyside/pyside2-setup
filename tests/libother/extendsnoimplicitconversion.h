@@ -38,12 +38,12 @@
 #include "libothermacros.h"
 #include "noimplicitconversion.h"
 
-class LIBOTHER_API ExtendsNoImplicitConversion
+class ExtendsNoImplicitConversion
 {
 public:
     explicit ExtendsNoImplicitConversion(int objId) : m_objId(objId) {};
-    int objId() const { return m_objId; }
-    operator NoImplicitConversion() const { return NoImplicitConversion(m_objId); }
+    inline int objId() const { return m_objId; }
+    inline operator NoImplicitConversion() const { return NoImplicitConversion(m_objId); }
 private:
     int m_objId;
 };

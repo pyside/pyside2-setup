@@ -38,22 +38,21 @@
 #include "libsamplemacros.h"
 #include <string>
 
-class LIBSAMPLE_API ProtectedNonPolymorphic
+class ProtectedNonPolymorphic
 {
 public:
     explicit ProtectedNonPolymorphic(const char *name) : m_name(name) {}
     ~ProtectedNonPolymorphic() {}
 
-    const char* publicName() { return m_name.c_str(); }
+    inline const char* publicName() { return m_name.c_str(); }
 
-    static ProtectedNonPolymorphic* create() { return new ProtectedNonPolymorphic("created"); }
+    inline static ProtectedNonPolymorphic* create() { return new ProtectedNonPolymorphic("created"); }
 
 protected:
-    const char* protectedName() { return m_name.c_str(); }
-    int protectedSum(int a0, int a1) { return a0 + a1; }
-    int modifiedProtectedSum(int a0, int a1) { return a0 + a1; }
-    static const char* protectedStatic() { return "protectedStatic"; }
-
+    inline const char* protectedName() { return m_name.c_str(); }
+    inline int protectedSum(int a0, int a1) { return a0 + a1; }
+    inline int modifiedProtectedSum(int a0, int a1) { return a0 + a1; }
+    inline static const char* protectedStatic() { return "protectedStatic"; }
     inline const char* dataTypeName(void *data = 0) const { return "pointer"; }
     inline const char* dataTypeName(int data) const { return "integer"; }
 
@@ -61,17 +60,15 @@ private:
     std::string m_name;
 };
 
-class LIBSAMPLE_API ProtectedPolymorphic
+class ProtectedPolymorphic
 {
 public:
     explicit ProtectedPolymorphic(const char *name) : m_name(name) {}
     virtual ~ProtectedPolymorphic() {}
 
-    const char* publicName() { return m_name.c_str(); }
-
-    static ProtectedPolymorphic* create() { return new ProtectedPolymorphic("created"); }
-
-    const char* callProtectedName() { return protectedName(); }
+    inline static ProtectedPolymorphic* create() { return new ProtectedPolymorphic("created"); }
+    inline const char* publicName() { return m_name.c_str(); }
+    inline const char* callProtectedName() { return protectedName(); }
 
 protected:
     virtual const char* protectedName() { return m_name.c_str(); }
@@ -80,34 +77,34 @@ private:
     std::string m_name;
 };
 
-class LIBSAMPLE_API ProtectedPolymorphicDaughter : public ProtectedPolymorphic
+class ProtectedPolymorphicDaughter : public ProtectedPolymorphic
 {
 public:
     explicit ProtectedPolymorphicDaughter(const char *name) : ProtectedPolymorphic(name) {}
-    static ProtectedPolymorphicDaughter* create() { return new ProtectedPolymorphicDaughter("created"); }
+    inline static ProtectedPolymorphicDaughter* create() { return new ProtectedPolymorphicDaughter("created"); }
 };
 
-class LIBSAMPLE_API ProtectedPolymorphicGrandDaughter: public ProtectedPolymorphicDaughter
+class ProtectedPolymorphicGrandDaughter: public ProtectedPolymorphicDaughter
 {
 public:
     explicit ProtectedPolymorphicGrandDaughter(const char *name) : ProtectedPolymorphicDaughter(name) {}
-    static ProtectedPolymorphicGrandDaughter* create() { return new ProtectedPolymorphicGrandDaughter("created"); }
+    inline static ProtectedPolymorphicGrandDaughter* create() { return new ProtectedPolymorphicGrandDaughter("created"); }
 };
 
 class LIBSAMPLE_API ProtectedVirtualDestructor
 {
 public:
     ProtectedVirtualDestructor() {}
-    static ProtectedVirtualDestructor* create() { return new ProtectedVirtualDestructor(); }
-    static int dtorCalled() { return dtor_called; }
-    static void resetDtorCounter() { dtor_called = 0; }
+    inline static ProtectedVirtualDestructor* create() { return new ProtectedVirtualDestructor(); }
+    inline static int dtorCalled() { return dtor_called; }
+    inline static void resetDtorCounter() { dtor_called = 0; }
 protected:
     virtual ~ProtectedVirtualDestructor() { dtor_called++; }
 private:
     static int dtor_called;
 };
 
-class LIBSAMPLE_API ProtectedEnumClass
+class ProtectedEnumClass
 {
 public:
     ProtectedEnumClass() {}
@@ -122,13 +119,14 @@ protected:
         ProtectedItem1
     };
     ProtectedEnum callProtectedEnumMethod(ProtectedEnum in) { return protectedEnumMethod(in); }
+    inline PublicEnum callPublicEnumMethod(PublicEnum in) { return publicEnumMethod(in); }
+
     virtual ProtectedEnum protectedEnumMethod(ProtectedEnum in) { return in; }
-    PublicEnum callPublicEnumMethod(PublicEnum in) { return publicEnumMethod(in); }
     virtual PublicEnum publicEnumMethod(PublicEnum in) { return in; }
 };
 
 
-class LIBSAMPLE_API ProtectedProperty
+class ProtectedProperty
 {
 public:
     ProtectedProperty() : protectedProperty(0) {}

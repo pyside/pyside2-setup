@@ -37,13 +37,13 @@
 
 #include "libsamplemacros.h"
 
-class LIBSAMPLE_API VoidHolder
+class VoidHolder
 {
 public:
     explicit VoidHolder(void* ptr = 0) : m_ptr(ptr) {}
     ~VoidHolder() {}
-    void* voidPointer() { return m_ptr; }
-    static void* gimmeMeSomeVoidPointer()
+    inline void* voidPointer() { return m_ptr; }
+    inline static void* gimmeMeSomeVoidPointer()
     {
         static void* pointerToSomething = new VoidHolder();
         return pointerToSomething;

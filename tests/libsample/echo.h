@@ -39,7 +39,7 @@
 
 class ObjectType;
 
-class LIBSAMPLE_API Echo
+class Echo
 {
 public:
     Echo(){}

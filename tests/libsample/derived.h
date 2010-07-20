@@ -84,7 +84,7 @@ public:
     OtherOverloadedFuncEnum otherOverloaded(int a, int b, bool c, double d);
     OtherOverloadedFuncEnum otherOverloaded(int a, double b);
 
-    SomeInnerClass returnMyParameter(const SomeInnerClass& s) { return s; }
+    inline SomeInnerClass returnMyParameter(const SomeInnerClass& s) { return s; }
 
     static Abstract* triggerImpossibleTypeDiscovery();
     static Abstract* triggerAnotherImpossibleTypeDiscovery();

@@ -63,12 +63,12 @@ public:
     FunctionEnum overloaded(Point* point, ParamEnum param);
     FunctionEnum overloaded(const Point& point);
 
-    void differentReturnTypes(ParamEnum param = Param0) {}
-    int differentReturnTypes(ParamEnum param, int val) { return val; }
+    inline void differentReturnTypes(ParamEnum param = Param0) {}
+    inline int differentReturnTypes(ParamEnum param, int val) { return val; }
 
-    int intOverloads(const Point& p, double d) { return 1; }
-    int intOverloads(int i, int i2) { return 2; }
-    int intOverloads(int i, int removedArg, double d) { return 3; }
+    inline int intOverloads(const Point& p, double d) { return 1; }
+    inline int intOverloads(int i, int i2) { return 2; }
+    inline int intOverloads(int i, int removedArg, double d) { return 3; }
 };
 #endif // OVERLOAD_H
 

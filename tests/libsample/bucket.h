@@ -49,11 +49,11 @@ public:
     int pop();
     bool empty();
     void lock();
-    bool locked() { return m_locked; }
+    inline bool locked() { return m_locked; }
     void unlock();
 
     virtual bool virtualBlockerMethod();
-    bool callVirtualBlockerMethodButYouDontKnowThis() { return virtualBlockerMethod(); }
+    inline bool callVirtualBlockerMethodButYouDontKnowThis() { return virtualBlockerMethod(); }
 
 private:
     std::list<int> m_data;

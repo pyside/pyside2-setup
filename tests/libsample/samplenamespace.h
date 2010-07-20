@@ -74,7 +74,7 @@ LIBSAMPLE_API void doSomethingWithArray(const unsigned char* data, unsigned int 
 
 LIBSAMPLE_API int enumItemAsDefaultValueToIntArgument(int value = ZeroIn);
 
-class SomeClass
+class LIBSAMPLE_API SomeClass
 {
 public:
     class SomeInnerClass
@@ -88,17 +88,17 @@ public:
                 NiceValue1, NiceValue2
             };
 
-            int someMethod(SomeInnerClass*) { return 0; }
+            inline int someMethod(SomeInnerClass*) { return 0; }
             virtual OkThisIsRecursiveEnough* someVirtualMethod(OkThisIsRecursiveEnough* arg) { return arg; }
         };
     };
 };
 
-class DerivedFromNamespace : public SomeClass::SomeInnerClass::OkThisIsRecursiveEnough
+class LIBSAMPLE_API DerivedFromNamespace : public SomeClass::SomeInnerClass::OkThisIsRecursiveEnough
 {
 public:
     virtual OkThisIsRecursiveEnough* someVirtualMethod(OkThisIsRecursiveEnough* arg) { return arg; }
-    OkThisIsRecursiveEnough* methodReturningTypeFromParentScope() { return 0; }
+    inline OkThisIsRecursiveEnough* methodReturningTypeFromParentScope() { return 0; }
 };
 
 // The combination of the following two overloaded methods could trigger a

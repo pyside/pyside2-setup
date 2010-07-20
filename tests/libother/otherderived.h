@@ -53,16 +53,16 @@ public:
     virtual void unpureVirtual();
     virtual PrintFormat returnAnEnum() { return Short; }
 
-    void useObjectTypeFromOtherModule(ObjectType*) {}
-    Event useValueTypeFromOtherModule(const Event& e) { return e; }
-    Complex useValueTypeFromOtherModule(const Complex& c) { return c; }
-    void useEnumTypeFromOtherModule(OverloadedFuncEnum) {}
+    inline void useObjectTypeFromOtherModule(ObjectType*) {}
+    inline Event useValueTypeFromOtherModule(const Event& e) { return e; }
+    inline Complex useValueTypeFromOtherModule(const Complex& c) { return c; }
+    inline void useEnumTypeFromOtherModule(OverloadedFuncEnum) {}
 
     // factory method
     static Abstract* createObject();
 
 protected:
-    const char* getClassName() { return className(); }
+    inline const char* getClassName() { return className(); }
     virtual const char* className() { return "OtherDerived"; }
 };
 #endif // OTHERDERIVED_H

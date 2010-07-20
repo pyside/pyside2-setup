@@ -39,48 +39,48 @@
 
 #include <list>
 
-class LIBSAMPLE_API ImplicitTarget
+class ImplicitTarget
 {
 public:
     ImplicitTarget(){}
 };
 
-class LIBSAMPLE_API ImplicitBase
+class ImplicitBase
 {
 public:
     ImplicitBase(){}
     ImplicitBase(const ImplicitTarget &b){}
 };
 
-class LIBSAMPLE_API SortedOverload
+class SortedOverload
 {
 public:
 
-    const char *overload(int x) {
+    inline const char *overload(int x) {
         return "int";
     }
 
-    const char *overload(double x) {
+    inline const char *overload(double x) {
         return "double";
     }
 
-    const char *overload(ImplicitBase x) {
+    inline const char *overload(ImplicitBase x) {
         return "ImplicitBase";
     }
 
-    const char *overload(ImplicitTarget x) {
+    inline const char *overload(ImplicitTarget x) {
         return "ImplicitTarget";
     }
 
-    const char *overload(const std::list<ImplicitBase> &x) {
+    inline const char *overload(const std::list<ImplicitBase> &x) {
         return "list(ImplicitBase)";
     }
 
-    int implicit_overload(const ImplicitBase &x) {
+    inline int implicit_overload(const ImplicitBase &x) {
         return 1;
     }
 
-    const char *overloadDeep(int x, ImplicitBase &y) {
+    inline const char *overloadDeep(int x, ImplicitBase &y) {
         return "ImplicitBase";
     }
 };

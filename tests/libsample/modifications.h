@@ -56,26 +56,26 @@ public:
 
     // those overloaded methods should be heavily modified
     // to push the overload decisor to its limits
-    OverloadedModFunc overloaded(int a0, bool b0, int c0, double d0) { return Overloaded_ibid; }
-    OverloadedModFunc overloaded(int a1, bool b1, int c1, bool d1) { return Overloaded_ibib; }
-    OverloadedModFunc overloaded(int a2, bool b2, int c2, Point d2) { return Overloaded_ibiP; }
-    OverloadedModFunc overloaded(int a3, bool b3, int c3 = 123, int d3 = 456) { return Overloaded_ibii; }
-    OverloadedModFunc overloaded(int a4, bool b4, Point c4, Point d4) { return Overloaded_ibPP; }
+    inline OverloadedModFunc overloaded(int a0, bool b0, int c0, double d0) { return Overloaded_ibid; }
+    inline OverloadedModFunc overloaded(int a1, bool b1, int c1, bool d1) { return Overloaded_ibib; }
+    inline OverloadedModFunc overloaded(int a2, bool b2, int c2, Point d2) { return Overloaded_ibiP; }
+    inline OverloadedModFunc overloaded(int a3, bool b3, int c3 = 123, int d3 = 456) { return Overloaded_ibii; }
+    inline OverloadedModFunc overloaded(int a4, bool b4, Point c4, Point d4) { return Overloaded_ibPP; }
 
-    void argRemoval0(int a0, bool a1, int a2 = 123, int a3 = 456) {}
-    void argRemoval0(int a0, bool a1, int a2, bool a3) {}
+    inline void argRemoval0(int a0, bool a1, int a2 = 123, int a3 = 456) {}
+    inline void argRemoval0(int a0, bool a1, int a2, bool a3) {}
 
-    void argRemoval1(int a0, bool a1, Point a2 = Point(1, 2), Point a3 = Point(3, 4), int a4 = 333) {}
-    void argRemoval1(int a0, bool a1, int a2, bool a3) {}
+    inline void argRemoval1(int a0, bool a1, Point a2 = Point(1, 2), Point a3 = Point(3, 4), int a4 = 333) {}
+    inline void argRemoval1(int a0, bool a1, int a2, bool a3) {}
 
-    void argRemoval2(int a0, bool a1, Point a2 = Point(1, 2), Point a3 = Point(3, 4), int a4 = 333) {}
+    inline void argRemoval2(int a0, bool a1, Point a2 = Point(1, 2), Point a3 = Point(3, 4), int a4 = 333) {}
 
-    void argRemoval3(int a0, Point a1 = Point(1, 2), bool a2 = true, Point a3 = Point(3, 4), int a4 = 333) {}
+    inline void argRemoval3(int a0, Point a1 = Point(1, 2), bool a2 = true, Point a3 = Point(3, 4), int a4 = 333) {}
 
-    void argRemoval4(int a0, Point a1, bool a2, Point a3 = Point(3, 4), int a4 = 333) {}
+    inline void argRemoval4(int a0, Point a1, bool a2, Point a3 = Point(3, 4), int a4 = 333) {}
 
-    void argRemoval5(int a0, bool a1, Point a2 = Point(1, 2), Point a3 = Point(3, 4), int a4 = 333) {}
-    void argRemoval5(int a0, bool a1, int a2, bool a3) {}
+    inline void argRemoval5(int a0, bool a1, Point a2 = Point(1, 2), Point a3 = Point(3, 4), int a4 = 333) {}
+    inline void argRemoval5(int a0, bool a1, int a2, bool a3) {}
 
     // 'ok' must be removed and the return value will be changed
     // to a tuple (PyObject*) containing the expected result plus
@@ -113,7 +113,7 @@ public:
     AbstractModifications() {}
     virtual ~AbstractModifications() {}
 
-    bool invert(bool value) { return !value; }
+    inline bool invert(bool value) { return !value; }
 
     // completely remove this method in Python
     virtual void pointlessPureVirtualMethod() = 0;

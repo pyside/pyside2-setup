@@ -63,7 +63,7 @@ private:
 };
 
 /* Helper for testing external operators */
-class LIBSAMPLE_API IntWrapper
+class IntWrapper
 {
 public:
     IntWrapper(int x=0):value(x){}

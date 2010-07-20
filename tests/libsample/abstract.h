@@ -62,13 +62,13 @@ public:
     Abstract(int id = -1);
     virtual ~Abstract();
 
-    int id() { return m_id; }
+    inline int id() { return m_id; }
 
     // factory method
-    static Abstract* createObject() { return 0; }
+    inline static Abstract* createObject() { return 0; }
 
     // method that receives an Object Type
-    static int getObjectId(Abstract* obj) { return obj->id(); }
+    inline static int getObjectId(Abstract* obj) { return obj->id(); }
 
     virtual void pureVirtual() = 0;
     virtual void* pureVirtualReturningVoidPtr() = 0;

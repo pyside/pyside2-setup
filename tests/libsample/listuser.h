@@ -60,8 +60,8 @@ public:
 
     static void multiplyPointList(PointList& points, double multiplier);
 
-    void setList(std::list<int> lst) { m_lst = lst; }
-    std::list<int> getList() { return m_lst; }
+    inline void setList(std::list<int> lst) { m_lst = lst; }
+    inline std::list<int> getList() { return m_lst; }
 
 private:
     std::list<int> m_lst;

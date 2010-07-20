@@ -59,12 +59,12 @@ public:
 
     ~Time() {}
 
-    bool isNull() const { return m_is_null; }
+    inline bool isNull() const { return m_is_null; }
 
-    int hour() const { return m_hour; }
-    int minute() const { return m_minute; }
-    int second() const { return m_second; }
-    int msec() const { return m_msec; }
+    inline int hour() const { return m_hour; }
+    inline int minute() const { return m_minute; }
+    inline int second() const { return m_second; }
+    inline int msec() const { return m_msec; }
 
     void setTime();
     void setTime(int h, int m, int s = 0, int ms = 0);

@@ -757,7 +757,7 @@
 
               <conversion-rule class="native">
                 int numItems = PySequence_Size(%PYARG_1);
-                int %out[numItems];
+                int *%out = new int[numItems]; //memory leak
                 for (int i=0; i &lt; numItems; i++) {
                     %out[i] = %CONVERTTOCPP[int](PySequence_GetItem(%PYARG_1, i));
                 }

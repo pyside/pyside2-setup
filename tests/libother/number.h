@@ -43,10 +43,10 @@ class LIBOTHER_API Number
 {
 public:
     explicit Number(int value) : m_value(value) {};
-    int value() const { return m_value; }
+    inline int value() const { return m_value; }
 
     Str toStr() const;
-    operator Str() const { return toStr(); }
+    inline operator Str() const { return toStr(); }
 
     friend LIBOTHER_API Point operator*(const Point&, const Number&);
 

@@ -39,14 +39,14 @@
 
 // This class must not have implicit conversions AND
 // no conversion operators should be defined in its own module.
-class LIBSAMPLE_API NoImplicitConversion
+class NoImplicitConversion
 {
 public:
     explicit NoImplicitConversion(int objId) : m_objId(objId) {}
-    int objId() const { return m_objId; }
-    static int receivesNoImplicitConversionByValue(NoImplicitConversion arg) { return arg.m_objId; }
-    static int receivesNoImplicitConversionByPointer(NoImplicitConversion* arg) { return arg->m_objId; }
-    static int receivesNoImplicitConversionByReference(NoImplicitConversion& arg) { return arg.m_objId; }
+    inline int objId() const { return m_objId; }
+    inline static int receivesNoImplicitConversionByValue(NoImplicitConversion arg) { return arg.m_objId; }
+    inline static int receivesNoImplicitConversionByPointer(NoImplicitConversion* arg) { return arg->m_objId; }
+    inline static int receivesNoImplicitConversionByReference(NoImplicitConversion& arg) { return arg.m_objId; }
 private:
     int m_objId;
 };
