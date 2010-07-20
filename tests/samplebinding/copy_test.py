@@ -29,6 +29,12 @@
 import copy
 import unittest
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
+
 from sample import Point
 
 
@@ -53,6 +59,21 @@ class DeepCopy(unittest.TestCase):
 
         self.assert_(point is not new_point)
         self.assertEqual(point, new_point)
+
+
+class PicklingTest(unittest.TestCase):
+    '''Support pickling'''
+
+    def testSimple(self):
+        '''Simple pickling and unpickling'''
+
+        point = Point(10.2, 43.5)
+
+        data = pickle.dumps(point)
+        new_point = pickle.loads(data)
+
+        self.assertEqual(point, new_point)
+        self.assert_(point is not new_point)
 
 
 if __name__ == '__main__':
