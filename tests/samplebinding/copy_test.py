@@ -43,6 +43,18 @@ class SimpleCopy(unittest.TestCase):
         self.assertEqual(point, new_point)
 
 
+class DeepCopy(unittest.TestCase):
+    '''Deep copy with shiboken objects'''
+
+    def testDeepCopy(self):
+        '''Deep copy of value types'''
+        point = Point(3.1, 4.2)
+        new_point = copy.deepcopy([point])[0]
+
+        self.assert_(point is not new_point)
+        self.assertEqual(point, new_point)
+
+
 if __name__ == '__main__':
     unittest.main()
 
