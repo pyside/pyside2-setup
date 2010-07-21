@@ -583,7 +583,10 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                         if (metaEnum && metaEnum->isProtected())
                             typeName = protectedEnumSurrogateName(metaEnum);
 #endif
-                        desiredType = "SbkType<" + typeName + " >()->tp_name";
+                        if (func->type()->isPrimitive())
+                            desiredType = "\"" + func->type()->name() + "\"";
+                        else
+                            desiredType = "SbkType<" + typeName + " >()->tp_name";
                     }
                 } else {
                     s << guessCPythonCheckFunction(func->typeReplaced(0));
