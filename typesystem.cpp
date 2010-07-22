@@ -1735,8 +1735,8 @@ QString TemplateInstance::expandCode() const
 QString CodeSnipAbstract::code() const
 {
     QString res;
-    foreach (CodeSnipFragment *codeFrag, codeList)
-        res.append(codeFrag->code());
+    foreach (CodeSnipFragment codeFrag, codeList)
+        res.append(codeFrag.code());
 
     return res;
 }

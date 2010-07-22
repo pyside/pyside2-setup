@@ -26,8 +26,42 @@
 #include "typedatabase.h"
 
 /*******************************************************************************
+ * AbstractMetaVariable
+ */
+
+AbstractMetaVariable::AbstractMetaVariable(const AbstractMetaVariable &other)
+{
+    m_originalName = other.m_originalName;
+    m_name = other.m_name;
+    m_type = other.m_type->copy();
+    m_hasName = other.m_hasName;
+    m_doc = other.m_doc;
+}
+
+/*******************************************************************************
  * AbstractMetaType
  */
+
+AbstractMetaType::AbstractMetaType()
+    :m_typeEntry(0),
+    m_arrayElementCount(0),
+    m_arrayElementType(0),
+    m_originalTemplateType(0),
+    m_pattern(InvalidPattern),
+    m_constant(false),
+    m_reference(false),
+    m_cppInstantiation(true),
+    m_indirections(0),
+    m_reserved(0)
+{
+}
+
+AbstractMetaType::~AbstractMetaType()
+{
+    qDeleteAll(m_children);
+    m_instantiations.clear();
+}
+
 AbstractMetaType *AbstractMetaType::copy() const
 {
     AbstractMetaType *cpy = new AbstractMetaType;
@@ -58,12 +92,12 @@ QString AbstractMetaType::cppSignature() const
     s += typeEntry()->qualifiedCppName();
 
     if (hasInstantiationInCpp()) {
-        QList<AbstractMetaType *> types = instantiations();
+        AbstractMetaTypeList types = instantiations();
         s += "<";
         for (int i = 0; i < types.count(); ++i) {
             if (i > 0)
                 s += ", ";
-            s += types.at(i)->cppSignature();
+            s += types[i]->cppSignature();
         }
         s += " >";
     }
@@ -78,14 +112,13 @@ QString AbstractMetaType::cppSignature() const
     return s;
 }
 
+
 /*******************************************************************************
  * AbstractMetaArgument
  */
 AbstractMetaArgument *AbstractMetaArgument::copy() const
 {
-    AbstractMetaArgument* cpy = new AbstractMetaArgument(*this);
-    cpy->setType(type()->copy());
-    return cpy;
+    return new AbstractMetaArgument(*this);
 }
 
 /*******************************************************************************
@@ -930,6 +963,8 @@ AbstractMetaClass::~AbstractMetaClass()
 {
     qDeleteAll(m_functions);
     qDeleteAll(m_fields);
+    qDeleteAll(m_enums);
+    qDeleteAll(m_orphanInterfaces);
 }
 
 /*******************************************************************************
@@ -984,6 +1019,7 @@ AbstractMetaClass *AbstractMetaClass::extractInterface()
 
         m_extractedInterface = iface;
         addInterface(iface);
+        m_orphanInterfaces << iface;
     }
 
     return m_extractedInterface;
@@ -1301,6 +1337,8 @@ void AbstractMetaClass::addFunction(AbstractMetaFunction *function)
 
     if (!function->isDestructor())
         m_functions << function;
+    else
+        Q_ASSERT(false); //memory leak
 
     m_hasVirtualSlots |= function->isVirtualSlot();
     m_hasVirtuals |= !function->isFinal() || function->isVirtualSlot() || hasVirtualDestructor();
@@ -1717,8 +1755,6 @@ AbstractMetaFunctionList AbstractMetaClass::queryFunctions(uint query) const
         functions << f;
     }
 
-//    qDebug() << "queried" << m_typeEntry->qualifiedCppName() << "got" << functions.size() << "out of" << m_functions.size();
-
     return functions;
 }
 
@@ -1865,9 +1901,9 @@ static void addExtraIncludeForType(AbstractMetaClass *metaClass, const AbstractM
     }
 
     if (type->hasInstantiations()) {
-        QList<AbstractMetaType *> instantiations = type->instantiations();
-        foreach (AbstractMetaType *instantiation, instantiations)
-        addExtraIncludeForType(metaClass, instantiation);
+        AbstractMetaTypeList instantiations = type->instantiations();
+        foreach (const AbstractMetaType *instantiation, instantiations)
+            addExtraIncludeForType(metaClass, instantiation);
     }
 }
 
@@ -1892,14 +1928,10 @@ void AbstractMetaClass::fixFunctions()
     AbstractMetaClass *superClass = baseClass();
     AbstractMetaFunctionList funcs = functions();
 
-//     printf("fix functions for %s\n", qPrintable(name()));
-
     if (superClass)
         superClass->fixFunctions();
     int iface_idx = 0;
     while (superClass || iface_idx < interfaces().size()) {
-//         printf(" - base: %s\n", qPrintable(super_class->name()));
-
         // Since we always traverse the complete hierarchy we are only
         // interrested in what each super class implements, not what
         // we may have propagated from their base classes again.
@@ -1937,35 +1969,16 @@ void AbstractMetaClass::fixFunctions()
                 uint cmp = f->compareTo(sf);
 
                 if (cmp & AbstractMetaFunction::EqualModifiedName) {
-//                     printf("   - %s::%s similar to %s::%s %x vs %x\n",
-//                            qPrintable(sf->implementingClass()->typeEntry()->qualifiedCppName()),
-//                            qPrintable(sf->name()),
-//                            qPrintable(f->implementingClass()->typeEntry()->qualifiedCppName()),
-//                            qPrintable(f->name()),
-//                            sf->attributes(),
-//                            f->attributes());
-
                     add = false;
                     if (cmp & AbstractMetaFunction::EqualArguments) {
-
-//                         if (!(cmp & AbstractMetaFunction::EqualReturnType)) {
-//                             ReportHandler::warning(QString("%1::%2 and %3::%4 differ in retur type")
-//                                                    .arg(sf->implementingClass()->name())
-//                                                    .arg(sf->name())
-//                                                    .arg(f->implementingClass()->name())
-//                                                    .arg(f->name()));
-//                         }
-
                         // Same function, propegate virtual...
                         if (!(cmp & AbstractMetaFunction::EqualAttributes)) {
                             if (!f->isEmptyFunction()) {
                                 if (!sf->isFinalInCpp() && f->isFinalInCpp()) {
                                     *f -= AbstractMetaAttributes::FinalInCpp;
-                                    //                                 printf("   --- inherit virtual\n");
                                 }
                                 if (!sf->isFinalInTargetLang() && f->isFinalInTargetLang()) {
                                     *f -= AbstractMetaAttributes::FinalInTargetLang;
-                                    //                                 printf("   --- inherit virtual\n");
                                 }
 #if 0
                                 if (!f->isFinalInTargetLang() && f->isPrivate()) {
@@ -1997,7 +2010,6 @@ void AbstractMetaClass::fixFunctions()
                             // But they don't need to be implemented, since they can never be called.
                             if (f->isPrivate()) {
                                 f->setFunctionType(AbstractMetaFunction::EmptyFunction);
-//                                 f->setVisibility(sf->visibility());
                                 *f += AbstractMetaAttributes::FinalInTargetLang;
                                 *f += AbstractMetaAttributes::FinalInCpp;
                             }
@@ -2078,8 +2090,6 @@ void AbstractMetaClass::fixFunctions()
         FunctionModificationList mods = func->modifications(this);
         foreach (const FunctionModification &mod, mods) {
             if (mod.isRenameModifier()) {
-//                 qDebug() << name() << func->originalName() << func << " from "
-//                          << func->implementingClass()->name() << "renamed to" << mod.renamedTo();
                 func->setName(mod.renamedTo());
             }
         }
@@ -2118,16 +2128,6 @@ void AbstractMetaClass::fixFunctions()
                     && !f1->isFinalInCpp()
                     && f2->isFinalInCpp()) {
                     *f2 += AbstractMetaAttributes::FinalOverload;
-//                     qDebug() << f2 << f2->implementingClass()->name() << "::" << f2->name() << f2->arguments().size() << " vs " << f1 << f1->implementingClass()->name() << "::" << f1->name() << f1->arguments().size();
-//                     qDebug() << "    " << f2;
-//                     AbstractMetaArgumentList f2Args = f2->arguments();
-//                     foreach (AbstractMetaArgument *a, f2Args)
-//                         qDebug() << "        " << a->type()->name() << a->name();
-//                     qDebug() << "    " << f1;
-//                     AbstractMetaArgumentList f1Args = f1->arguments();
-//                     foreach (AbstractMetaArgument *a, f1Args)
-//                         qDebug() << "        " << a->type()->name() << a->name();
-
                 }
             }
         }
@@ -2144,12 +2144,12 @@ QString AbstractMetaType::minimalSignature() const
         minimalSignature += "const ";
     minimalSignature += typeEntry()->qualifiedCppName();
     if (hasInstantiations()) {
-        QList<AbstractMetaType *> instantiations = this->instantiations();
+        AbstractMetaTypeList instantiations = this->instantiations();
         minimalSignature += "< ";
         for (int i = 0; i < instantiations.size(); ++i) {
             if (i > 0)
                 minimalSignature += ",";
-            minimalSignature += instantiations.at(i)->minimalSignature();
+            minimalSignature += instantiations[i]->minimalSignature();
         }
         minimalSignature += " >";
     }

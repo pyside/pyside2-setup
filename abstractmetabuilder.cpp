@@ -61,7 +61,10 @@ AbstractMetaBuilder::AbstractMetaBuilder() : m_currentClass(0), m_logDirectory(Q
 
 AbstractMetaBuilder::~AbstractMetaBuilder()
 {
+    qDeleteAll(m_globalEnums);
     qDeleteAll(m_globalFunctions);
+    qDeleteAll(m_templates);
+    qDeleteAll(m_metaClasses);
 }
 
 void AbstractMetaBuilder::checkFunctionModifications()
@@ -190,6 +193,7 @@ void AbstractMetaBuilder::traverseOperatorFunction(FunctionModelItem item)
             baseoperandClass = m_metaClasses.findClass(retType);
             firstArgumentIsSelf = false;
         }
+        delete type;
     }
 
     if (baseoperandClass) {
@@ -200,7 +204,8 @@ void AbstractMetaBuilder::traverseOperatorFunction(FunctionModelItem item)
             // Strip away first argument, since that is the containing object
             AbstractMetaArgumentList arguments = metaFunction->arguments();
             if (firstArgumentIsSelf || unaryOperator) {
-                arguments.pop_front();
+                AbstractMetaArgument *first = arguments.takeFirst();
+                delete first;
                 metaFunction->setArguments(arguments);
             } else {
                 // If the operator method is not unary and the first operator is
@@ -208,7 +213,9 @@ void AbstractMetaBuilder::traverseOperatorFunction(FunctionModelItem item)
                 // must be an reverse operator (e.g. CLASS::operator(TYPE, CLASS)).
                 // All operator overloads that operate over a class are already
                 // being added as member functions of that class by the API Extractor.
-                arguments.pop_back();
+                AbstractMetaArgument *last = arguments.takeLast();
+                delete last;
+
                 metaFunction->setArguments(arguments);
                 metaFunction->setReverseOperator(true);
             }
@@ -244,9 +251,9 @@ void AbstractMetaBuilder::traverseStreamOperator(FunctionModelItem item)
                 // Strip first argument, since that is the containing object
                 AbstractMetaArgumentList arguments = streamFunction->arguments();
                 if (!streamClass->typeEntry()->generateCode())
-                    arguments.pop_back();
+                    delete arguments.takeLast();
                 else
-                    arguments.pop_front();
+                    delete arguments.takeFirst();
 
                 streamFunction->setArguments(arguments);
 
@@ -275,7 +282,10 @@ void AbstractMetaBuilder::traverseStreamOperator(FunctionModelItem item)
                     funcClass->typeEntry()->addExtraInclude(streamClass->typeEntry()->include());
 
                 m_currentClass = oldCurrentClass;
+            } else if (streamFunction) {
+                delete streamFunction;
             }
+
         }
     }
 }
@@ -420,6 +430,9 @@ bool AbstractMetaBuilder::build(QIODevice* input)
         }
 
         setInclude(funcEntry, func->fileName());
+        if (metaFunc->typeEntry())
+            delete metaFunc->typeEntry();
+
         metaFunc->setTypeEntry(funcEntry);
         m_globalFunctions << metaFunc;
     }
@@ -1285,7 +1298,7 @@ void AbstractMetaBuilder::fixReturnTypeOfConversionOperator(AbstractMetaFunction
 
     AbstractMetaType* metaType = createMetaType();
     metaType->setTypeEntry(retType);
-    metaFunction->setType(metaType);
+    metaFunction->replaceType(metaType);
 }
 
 void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scopeItem, AbstractMetaClass* metaClass)
@@ -1362,12 +1375,16 @@ void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scopeItem, AbstractMe
                     fixReturnTypeOfConversionOperator(metaFunction);
 
                 metaClass->addFunction(metaFunction);
+                applyFunctionModifications(metaFunction);
             } else if (metaFunction->isDestructor()) {
                 metaClass->setHasPrivateDestructor(metaFunction->isPrivate());
                 metaClass->setHasProtectedDestructor(metaFunction->isProtected());
                 metaClass->setHasVirtualDestructor(metaFunction->isVirtual());
             }
-            applyFunctionModifications(metaFunction);
+            if (!metaFunction->ownerClass()) {
+                delete metaFunction;
+                metaFunction = 0;
+            }
         }
     }
 
@@ -1387,7 +1404,6 @@ void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scopeItem, AbstractMe
         func->setImplementingClass(metaClass);
         metaClass->addFunction(func);
     }
-
 }
 
 void AbstractMetaBuilder::applyFunctionModifications(AbstractMetaFunction* func)
@@ -1692,6 +1708,7 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
         AbstractMetaType* type = translateType(functionType, &ok);
 
         if (!ok) {
+            Q_ASSERT(type == 0);
             ReportHandler::warning(QString("skipping function '%1::%2', unmatched return type '%3'")
                                    .arg(className)
                                    .arg(functionItem->name())
@@ -1716,7 +1733,7 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
         ArgumentModelItem arg = arguments.at(0);
         TypeInfo type = arg->type();
         if (type.qualifiedName().first() == "void" && type.indirections() == 0)
-            arguments.removeFirst();
+            delete arguments.takeFirst();
     }
 
     AbstractMetaArgumentList metaArguments;
@@ -1727,7 +1744,8 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
 
         bool ok;
         AbstractMetaType* metaType = translateType(arg->type(), &ok);
-        if (!metaType || !ok) {
+        if (!ok) {
+            Q_ASSERT(metaType == 0);
             ReportHandler::warning(QString("skipping function '%1::%2', "
                                            "unmatched parameter type '%3'")
                                    .arg(className)
@@ -1806,8 +1824,10 @@ AbstractMetaType* AbstractMetaBuilder::translateType(double vr, const AddedFunct
         return 0;
 
     type = typeDb->findType(typeInfo.name);
-    if (!type)
+    if (!type) {
         type = new TypeEntry(typeInfo.name, TypeEntry::CustomType, vr);
+        typeDb->addType(type);
+    }
 
     metaType->setTypeEntry(type);
     metaType->setIndirections(typeInfo.indirections);
@@ -1840,6 +1860,7 @@ AbstractMetaType* AbstractMetaBuilder::translateType(const TypeInfo& _typei, boo
         AbstractMetaType* t = translateType(_typei, &ok, false, resolveScope);
         if (t && ok)
             return t;
+        Q_ASSERT(t == 0);
     }
 
     if (!resolveType) {
@@ -2029,7 +2050,7 @@ AbstractMetaType* AbstractMetaBuilder::translateType(const TypeInfo& _typei, boo
             return 0;
         }
 
-        metaType->addInstantiation(targType);
+        metaType->addInstantiation(targType, true);
     }
 
     return metaType;
@@ -2266,7 +2287,7 @@ bool AbstractMetaBuilder::ancestorHasPrivateCopyConstructor(const AbstractMetaCl
 }
 
 AbstractMetaType* AbstractMetaBuilder::inheritTemplateType(const QList<AbstractMetaType*>& templateTypes,
-                                                           AbstractMetaType* metaType, bool* ok)
+                                                           const AbstractMetaType* metaType, bool* ok)
 {
     if (ok)
         *ok = true;
@@ -2299,13 +2320,14 @@ AbstractMetaType* AbstractMetaBuilder::inheritTemplateType(const QList<AbstractM
     }
 
     if (returned->hasInstantiations()) {
-        QList<AbstractMetaType*> instantiations = returned->instantiations();
+        AbstractMetaTypeList instantiations = returned->instantiations();
         for (int i = 0; i < instantiations.count(); ++i) {
-            instantiations[i] = inheritTemplateType(templateTypes, instantiations.at(i), ok);
+            AbstractMetaType *type = instantiations[i];
+            instantiations[i] = inheritTemplateType(templateTypes, type, ok);
             if (ok && !(*ok))
                 return 0;
         }
-        returned->setInstantiations(instantiations);
+        returned->setInstantiations(instantiations, true);
     }
 
     return returned;
@@ -2370,7 +2392,7 @@ bool AbstractMetaBuilder::inheritTemplate(AbstractMetaClass* subclass,
 
         bool ok = true;
         AbstractMetaType *ftype = function->type();
-        f->setType(inheritTemplateType(templateTypes, ftype, &ok));
+        f->replaceType(inheritTemplateType(templateTypes, ftype, &ok));
         if (!ok) {
             delete f;
             continue;
@@ -2380,7 +2402,7 @@ bool AbstractMetaBuilder::inheritTemplate(AbstractMetaClass* subclass,
             AbstractMetaType* atype = argument->type();
 
             AbstractMetaArgument *arg = argument->copy();
-            arg->setType(inheritTemplateType(templateTypes, atype, &ok));
+            arg->replaceType(inheritTemplateType(templateTypes, atype, &ok));
             if (!ok)
                 break;
             f->addArgument(arg);
@@ -2726,6 +2748,7 @@ AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const Abstra
                 result << reverseMap[i];
         }
     }
+
     return result;
 }
 

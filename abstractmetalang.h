@@ -29,6 +29,7 @@
 #include <QtCore/QSet>
 #include <QtCore/QStringList>
 #include <QtCore/QTextStream>
+#include <QSharedPointer>
 
 
 class AbstractMeta;
@@ -290,10 +291,11 @@ private:
     Documentation m_doc;
 };
 
-
+typedef QList<AbstractMetaType*> AbstractMetaTypeList;
 class APIEXTRACTOR_API AbstractMetaType
 {
 public:
+
     enum TypeUsagePattern {
         InvalidPattern,
         PrimitivePattern,
@@ -314,18 +316,8 @@ public:
         ThreadPattern
     };
 
-    AbstractMetaType() :
-            m_typeEntry(0),
-            m_arrayElementCount(0),
-            m_arrayElementType(0),
-            m_originalTemplateType(0),
-            m_pattern(InvalidPattern),
-            m_constant(false),
-            m_reference(false),
-            m_cppInstantiation(true),
-            m_indirections(0),
-            m_reserved(0)
-    {}
+    AbstractMetaType();
+    ~AbstractMetaType();
 
     QString package() const
     {
@@ -354,18 +346,28 @@ public:
     {
         return !m_instantiations.isEmpty();
     }
-    void addInstantiation(AbstractMetaType *inst)
+
+    void addInstantiation(AbstractMetaType* inst, bool owner = false)
     {
+        if (owner)
+            m_children << inst;
         m_instantiations << inst;
     }
-    void setInstantiations(const QList<AbstractMetaType *> &insts)
+
+    void setInstantiations(const AbstractMetaTypeList  &insts, bool owner = false)
     {
         m_instantiations = insts;
+        if (owner) {
+            m_children.clear();
+            m_children = insts;
+        }
     }
-    QList<AbstractMetaType *> instantiations() const
+
+    AbstractMetaTypeList instantiations() const
     {
         return m_instantiations;
     }
+
     void setInstantiationInCpp(bool incpp)
     {
         m_cppInstantiation = incpp;
@@ -545,11 +547,11 @@ public:
         return m_arrayElementCount;
     }
 
-    AbstractMetaType *arrayElementType() const
+    const AbstractMetaType *arrayElementType() const
     {
         return m_arrayElementType;
     }
-    void setArrayElementType(AbstractMetaType *t)
+    void setArrayElementType(const AbstractMetaType *t)
     {
         m_arrayElementType = t;
     }
@@ -587,12 +589,12 @@ public:
 
 private:
     const TypeEntry *m_typeEntry;
-    QList <AbstractMetaType *> m_instantiations;
+    AbstractMetaTypeList m_instantiations;
     QString m_package;
     QString m_originalTypeDescription;
 
     int m_arrayElementCount;
-    AbstractMetaType *m_arrayElementType;
+    const AbstractMetaType *m_arrayElementType;
     const AbstractMetaType *m_originalTemplateType;
 
     TypeUsagePattern m_pattern;
@@ -601,12 +603,21 @@ private:
     uint m_cppInstantiation : 1;
     int m_indirections : 4;
     uint m_reserved : 25; // unused
+    AbstractMetaTypeList m_children;
+
+    Q_DISABLE_COPY(AbstractMetaType);
 };
 
 class APIEXTRACTOR_API AbstractMetaVariable
 {
 public:
     AbstractMetaVariable() : m_type(0), m_hasName(false) {}
+    AbstractMetaVariable(const AbstractMetaVariable &other);
+
+    virtual ~AbstractMetaVariable()
+    {
+        delete m_type;
+    }
 
     AbstractMetaType *type() const
     {
@@ -614,6 +625,13 @@ public:
     }
     void setType(AbstractMetaType *type)
     {
+        Q_ASSERT(m_type == 0);
+        m_type = type;
+    }
+    void replaceType(AbstractMetaType *type)
+    {
+        if (m_type)
+            delete m_type;
         m_type = type;
     }
 
@@ -891,6 +909,14 @@ public:
     }
     void setType(AbstractMetaType *type)
     {
+        Q_ASSERT(m_type == 0);
+        m_type = type;
+    }
+
+    void replaceType(AbstractMetaType *type)
+    {
+        if (m_type)
+            delete m_type;
         m_type = type;
     }
 
@@ -1211,6 +1237,10 @@ class AbstractMetaEnum : public AbstractMetaAttributes
 {
 public:
     AbstractMetaEnum() : m_typeEntry(0), m_class(0), m_hasQenumsDeclaration(false) {}
+    ~AbstractMetaEnum()
+    {
+        qDeleteAll(m_enumValues);
+    }
 
     AbstractMetaEnumValueList values() const
     {
@@ -1355,7 +1385,8 @@ public:
               m_typeEntry(0),
               //m_qDebugStreamFunction(0)
               m_stream(false)
-    {}
+    {
+    }
 
     virtual ~AbstractMetaClass();
 
@@ -1865,6 +1896,7 @@ private:
     AbstractMetaFieldList m_fields;
     AbstractMetaEnumList m_enums;
     AbstractMetaClassList m_interfaces;
+    AbstractMetaClassList m_orphanInterfaces;
     AbstractMetaClass *m_extractedInterface;
     AbstractMetaClass *m_primaryInterfaceImplementor;
     QList<QPropertySpec *> m_propertySpecs;
@@ -1885,6 +1917,7 @@ private:
 //     FunctionModelItem m_qDebugStreamFunction;
 
     bool m_stream;
+    static int m_count;
 };
 
 class QPropertySpec

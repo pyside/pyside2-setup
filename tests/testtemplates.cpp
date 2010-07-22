@@ -101,11 +101,11 @@ void TestTemplates::testTemplateOnContainers()
     QCOMPARE(argType->instantiations().count(), 1);
     QCOMPARE(argType->typeEntry()->qualifiedCppName(), QString("QList"));
 
-    AbstractMetaType* instance1 = argType->instantiations().first();
+    const AbstractMetaType* instance1 = argType->instantiations().first();
     QCOMPARE(instance1->instantiations().count(), 1);
     QCOMPARE(instance1->typeEntry()->qualifiedCppName(), QString("Namespace::A"));
 
-    AbstractMetaType* instance2 = instance1->instantiations().first();
+    const AbstractMetaType* instance2 = instance1->instantiations().first();
     QCOMPARE(instance2->instantiations().count(), 0);
     QCOMPARE(instance2->typeEntry()->qualifiedCppName(), QString("Namespace::E1"));
 }

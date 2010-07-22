@@ -114,7 +114,7 @@ struct ArgumentOwner
 class APIEXTRACTOR_API CodeSnipFragment
 {
 private:
-    const QString m_code;
+    QString m_code;
     TemplateInstance *m_instance;
 
 public:
@@ -135,15 +135,15 @@ public:
 
     void addCode(const QString &code)
     {
-        codeList.append(new CodeSnipFragment(code));
+        codeList.append(CodeSnipFragment(code));
     }
 
     void addTemplateInstance(TemplateInstance *ti)
     {
-        codeList.append(new CodeSnipFragment(ti));
+        codeList.append(CodeSnipFragment(ti));
     }
 
-    QList<CodeSnipFragment*> codeList;
+    QList<CodeSnipFragment> codeList;
 };
 
 class CustomFunction : public CodeSnipAbstract
