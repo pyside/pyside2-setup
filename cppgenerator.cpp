@@ -567,7 +567,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             }
             s << INDENT << '}' << endl;
 
-            if (func->type()) {
+            if (func->type() && (!usePySideExtensions() || (func->type()->name() != "QVariant"))) {
                 s << INDENT << "// Check return type" << endl;
                 s << INDENT << "bool typeIsValid = ";
                 QString desiredType;
