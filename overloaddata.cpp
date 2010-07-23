@@ -126,7 +126,7 @@ void OverloadData::sortNextOverloads()
         }
 
         if (targetType->hasInstantiations()) {
-            foreach(AbstractMetaType *instantiation, targetType->instantiations()) {
+            foreach(const AbstractMetaType *instantiation, targetType->instantiations()) {
                 if (map.contains(instantiation->typeEntry()->name())) {
                     int target = map[targetTypeEntry->name()];
                     int convertible = map[instantiation->typeEntry()->name()];

@@ -814,14 +814,17 @@ QString ShibokenGenerator::guessCPythonCheckFunction(const QString& type)
 {
     QString retval;
     AbstractMetaType* metaType = buildAbstractMetaTypeFromString(type);
-    if (metaType) {
+    if (metaType && (metaType->name() != type)) {
         retval = cpythonCheckFunction(metaType);
         delete metaType;
+        metaType = 0;
     } else if (type == "PyTypeObject") {
         retval = "PyType_Check";
     } else {
         retval = QString("%1_Check").arg(type);
     }
+    if(metaType)
+        delete metaType;
     return retval;
 }
 
