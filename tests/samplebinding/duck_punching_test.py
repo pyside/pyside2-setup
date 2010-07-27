@@ -68,6 +68,13 @@ class DuckPunchingTest(unittest.TestCase):
         self.assertEqual(result1, result2)
         self.assertEqual(result1, VirtualMethods.virtualMethod0(vm, pt, val, cpx, b) * self.multiplier)
 
+        # This is done to decrease the refcount of the vm object
+        # allowing the object wrapper to be deleted before the
+        # BindingManager. This is useful when compiling Shiboken
+        # for debug, since the BindingManager destructor has an
+        # assert that checks if the wrapper mapper is empty.
+        vm.virtualMethod0 = None
+
     def testMonkeyPatchOnVirtualMethodWithInheritance(self):
         '''Injects new 'virtualMethod0' on an object that inherits from VirtualMethods and makes C++ call it.'''
         duck = Duck()
@@ -89,6 +96,8 @@ class DuckPunchingTest(unittest.TestCase):
         result2 = duck.virtualMethod0(pt, val, cpx, b)
         self.assertEqual(result1, result2)
         self.assertEqual(result1, VirtualMethods.virtualMethod0(duck, pt, val, cpx, b) * self.multiplier)
+
+        duck.virtualMethod0 = None
 
     def testMonkeyPatchOnMethodWithStaticAndNonStaticOverloads(self):
         '''Injects new 'exists' on a SimpleFile instance and makes C++ call it.'''
@@ -112,6 +121,8 @@ class DuckPunchingTest(unittest.TestCase):
         simplefile.exists()
         self.assert_(self.duck_method_called)
 
+        simplefile.exists = None
+
     def testMonkeyPatchOnMethodWithStaticAndNonStaticOverloadsWithInheritance(self):
         '''Injects new 'exists' on an object that inherits from SimpleFile and makes C++ call it.'''
         monkey = Monkey('foobar')
@@ -133,6 +144,8 @@ class DuckPunchingTest(unittest.TestCase):
         # Monkey patched exists
         monkey.exists()
         self.assert_(self.duck_method_called)
+
+        monkey.exists = None
 
 if __name__ == '__main__':
     unittest.main()
