@@ -36,19 +36,20 @@
 #define PROTECTED_H
 
 #include "libsamplemacros.h"
+#include <string>
 
 class LIBSAMPLE_API ProtectedNonPolymorphic
 {
 public:
-    explicit ProtectedNonPolymorphic(const char* name) : m_name(name) {}
+    explicit ProtectedNonPolymorphic(const char *name) : m_name(name) {}
     ~ProtectedNonPolymorphic() {}
 
-    const char* publicName() { return m_name; }
+    const char* publicName() { return m_name.c_str(); }
 
     static ProtectedNonPolymorphic* create() { return new ProtectedNonPolymorphic("created"); }
 
 protected:
-    const char* protectedName() { return m_name; }
+    const char* protectedName() { return m_name.c_str(); }
     int protectedSum(int a0, int a1) { return a0 + a1; }
     int modifiedProtectedSum(int a0, int a1) { return a0 + a1; }
     static const char* protectedStatic() { return "protectedStatic"; }
@@ -57,39 +58,39 @@ protected:
     inline const char* dataTypeName(int data) const { return "integer"; }
 
 private:
-    const char* m_name;
+    std::string m_name;
 };
 
 class LIBSAMPLE_API ProtectedPolymorphic
 {
 public:
-    explicit ProtectedPolymorphic(const char* name) : m_name(name) {}
+    explicit ProtectedPolymorphic(const char *name) : m_name(name) {}
     virtual ~ProtectedPolymorphic() {}
 
-    const char* publicName() { return m_name; }
+    const char* publicName() { return m_name.c_str(); }
 
     static ProtectedPolymorphic* create() { return new ProtectedPolymorphic("created"); }
 
     const char* callProtectedName() { return protectedName(); }
 
 protected:
-    virtual const char* protectedName() { return m_name; }
+    virtual const char* protectedName() { return m_name.c_str(); }
 
 private:
-    const char* m_name;
+    std::string m_name;
 };
 
 class LIBSAMPLE_API ProtectedPolymorphicDaughter : public ProtectedPolymorphic
 {
 public:
-    explicit ProtectedPolymorphicDaughter(const char* name) : ProtectedPolymorphic(name) {}
+    explicit ProtectedPolymorphicDaughter(const char *name) : ProtectedPolymorphic(name) {}
     static ProtectedPolymorphicDaughter* create() { return new ProtectedPolymorphicDaughter("created"); }
 };
 
 class LIBSAMPLE_API ProtectedPolymorphicGrandDaughter: public ProtectedPolymorphicDaughter
 {
 public:
-    explicit ProtectedPolymorphicGrandDaughter(const char* name) : ProtectedPolymorphicDaughter(name) {}
+    explicit ProtectedPolymorphicGrandDaughter(const char *name) : ProtectedPolymorphicDaughter(name) {}
     static ProtectedPolymorphicGrandDaughter* create() { return new ProtectedPolymorphicGrandDaughter("created"); }
 };
 

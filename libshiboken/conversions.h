@@ -523,8 +523,32 @@ struct Converter_CString
     }
 };
 
-template <> struct Converter<char*> : Converter_CString<char*> {};
 template <> struct Converter<const char*> : Converter_CString<const char*> {};
+template <> struct Converter<char*> : Converter_CString<char*>
+{
+    static inline char* toCpp(PyObject* pyobj)
+    {
+        if (pyobj == Py_None)
+            return 0;
+        return strdup(PyString_AsString(pyobj));
+    }
+};
+
+template <> struct Converter<std::string> : Converter_CString<std::string>
+{
+    static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<std::string*>(cppobj)); }
+    static inline PyObject* toPython(std::string cppObj)
+    {
+        return PyString_FromString(cppObj.c_str());
+    }
+
+    static inline std::string toCpp(PyObject* pyobj)
+    {
+        if (pyobj == Py_None)
+            return 0;
+        return std::string(PyString_AsString(pyobj));
+    }
+};
 
 // C++ containers -------------------------------------------------------------
 // The following container converters are meant to be used for pairs, lists and maps

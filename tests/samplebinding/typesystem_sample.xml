@@ -10,6 +10,7 @@
     <primitive-type name="unsigned char"/>
     <primitive-type name="long"/>
     <primitive-type name="unsigned long"/>
+    <primitive-type name="std::string"/>
 
     <primitive-type name="Complex" target-lang-api-name="PyComplex">
         <conversion-rule file="complex_conversions.h"/>
@@ -754,11 +755,10 @@
               </conversion-rule>
 
               <conversion-rule class="target">
-                Shiboken::AutoDecRef __object__(PyList_New(count));
+                PyObject *%out = PyList_New(count);
                 for (int i=0; i &lt; count; i++) {
-                    PyList_SET_ITEM(__object__.object(), i, %CONVERTTOPYTHON[int](%in[i]));
+                    PyList_SET_ITEM(%out, i, %CONVERTTOPYTHON[int](%in[i]));
                 }
-                PyObject *%out = __object__.object();
               </conversion-rule>
           </modify-argument>
 

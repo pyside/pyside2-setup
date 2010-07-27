@@ -643,12 +643,15 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         }
     }
 
+    bool transferReturnToCpp = false;
     foreach (FunctionModification func_mod, func->modifications()) {
         foreach (ArgumentModification arg_mod, func_mod.argument_mods) {
-            if (!arg_mod.resetAfterUse)
-                continue;
-            s << INDENT << "BindingManager::instance().invalidateWrapper(PyTuple_GET_ITEM(pyargs, ";
-            s << (arg_mod.index - 1) << "));" << endl;
+            if (arg_mod.resetAfterUse) {
+                s << INDENT << "BindingManager::instance().invalidateWrapper(PyTuple_GET_ITEM(pyargs, ";
+                s << (arg_mod.index - 1) << "));" << endl;
+            } else if ((arg_mod.index == 0)  && (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::TargetLangOwnership)) {
+                transferReturnToCpp = true;
+            }
         }
     }
 
@@ -658,8 +661,20 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::NativeCode, func, lastArg);
     }
 
-    if (type)
+    if (type) {
+        if (!transferReturnToCpp && (func->type()->isObject() || func->type()->isValuePointer()) ) {
+            s << INDENT << "if (" << PYTHON_RETURN_VAR << "->ob_refcnt < 2) {" << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "PyErr_SetString(PyExc_ReferenceError, \"Returning last python reference on virutal function: " 
+                  << func->ownerClass()->name() << "." << func->name() << "\");" << endl;
+                s << INDENT << "PyErr_Print();" << endl;
+                s << INDENT << "assert(false);" << endl;
+            }
+            s << INDENT << "}" << endl;
+        }
         s << INDENT << "return " CPP_RETURN_VAR ";" << endl;
+    }
 
     s << '}' << endl << endl;
 }

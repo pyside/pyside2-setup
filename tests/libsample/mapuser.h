@@ -38,6 +38,7 @@
 #include <map>
 #include <list>
 #include <utility>
+#include <string>
 #include "complex.h"
 
 #include "libsamplemacros.h"
@@ -48,16 +49,16 @@ public:
     MapUser() {}
     virtual ~MapUser() {}
 
-    virtual std::map<const char*, std::pair<Complex, int> > createMap();
-    std::map<const char*, std::pair<Complex, int> > callCreateMap();
+    virtual std::map<std::string, std::pair<Complex, int> > createMap();
+    std::map<std::string, std::pair<Complex, int> > callCreateMap();
 
-    void showMap(std::map<const char*, int> mapping);
+    void showMap(std::map<std::string, int> mapping);
 
-    void setMap(std::map<const char*, std::list<int> > map) { m_map = map; }
-    std::map<const char*, std::list<int> > getMap() { return m_map; }
+    void setMap(std::map<std::string, std::list<int> > map) { m_map = map; }
+    std::map<std::string, std::list<int> > getMap() { return m_map; }
 
 private:
-    std::map<const char*, std::list<int> > m_map;
+    std::map<std::string, std::list<int> > m_map;
 };
 
 #endif // MAPUSER_H

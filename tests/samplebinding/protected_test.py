@@ -40,7 +40,8 @@ class ExtendedProtectedPolymorphic(ProtectedPolymorphic):
         self.protectedName_called = False
     def protectedName(self):
         self.protectedName_called = True
-        return 'Extended' + ProtectedPolymorphic.protectedName(self)
+        self._name = 'Extended' + ProtectedPolymorphic.protectedName(self)
+        return self._name
 
 class ExtendedProtectedPolymorphicDaughter(ProtectedPolymorphicDaughter):
     def __init__(self, name):
@@ -48,7 +49,8 @@ class ExtendedProtectedPolymorphicDaughter(ProtectedPolymorphicDaughter):
         ProtectedPolymorphicDaughter.__init__(self, name)
     def protectedName(self):
         self.protectedName_called = True
-        return 'ExtendedDaughter' + ProtectedPolymorphicDaughter.protectedName(self)
+        self._name = 'ExtendedDaughter' + ProtectedPolymorphicDaughter.protectedName(self)
+        return self._name
 
 class ExtendedProtectedPolymorphicGrandDaughter(ProtectedPolymorphicGrandDaughter):
     def __init__(self, name):
@@ -56,7 +58,8 @@ class ExtendedProtectedPolymorphicGrandDaughter(ProtectedPolymorphicGrandDaughte
         ProtectedPolymorphicGrandDaughter.__init__(self, name)
     def protectedName(self):
         self.protectedName_called = True
-        return 'ExtendedGrandDaughter' + ProtectedPolymorphicGrandDaughter.protectedName(self)
+        self._name = 'ExtendedGrandDaughter' + ProtectedPolymorphicGrandDaughter.protectedName(self)
+        return self._name
 
 class ExtendedProtectedVirtualDestructor(ProtectedVirtualDestructor):
     def __init__(self):
@@ -125,6 +128,7 @@ class ProtectedPolymorphicDaugherTest(unittest.TestCase):
         original_name = 'Poly'
         p = ExtendedProtectedPolymorphicDaughter(original_name)
         name = p.callProtectedName()
+        print "MyName:", name
         self.assert_(p.protectedName_called)
         self.assertEqual(p.protectedName(), name)
         self.assertEqual(ProtectedPolymorphicDaughter.protectedName(p), original_name)
