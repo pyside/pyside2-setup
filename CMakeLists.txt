@@ -97,6 +97,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(SBK_PYTHON_LIBRARIES ${PYTHON_DEBUG_LIBRARIES})
 else()
     set(SBK_PYTHON_LIBRARIES ${PYTHON_LIBRARIES})
+    add_definitions("-DNDEBUG")
 endif()
 
 if (BUILD_TESTS)
