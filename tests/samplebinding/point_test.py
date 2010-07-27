@@ -78,15 +78,6 @@ class PointTest(unittest.TestCase):
         self.assertEqual(sys.getrefcount(pt1), refcount1 + 1)
         self.assertEqual(sys.getrefcount(pt1), sys.getrefcount(pt2))
 
-    def testReturnConstReference(self):
-        '''Point returns a const reference for itself.'''
-        pt1 = Point(5.0, 2.3)
-        refcount1 = sys.getrefcount(pt1)
-        pt2 = pt1.getConstReferenceToSelf()
-        self.assertEqual(pt1, pt2)
-        self.assertEqual(sys.getrefcount(pt1), refcount1 + 1)
-        self.assertEqual(sys.getrefcount(pt1), sys.getrefcount(pt2))
-
 if __name__ == '__main__':
     unittest.main()
 

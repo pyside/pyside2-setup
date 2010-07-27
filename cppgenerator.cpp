@@ -2691,7 +2691,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                     // It's a value type and the conversion for a pointer returned null.
                     if (type->typeEntry()->isValue()) {
                         s << "!cpp_other ? cpp_self == ";
-                        writeToCppConversion(s, type, metaClass, "other", ExcludeReference);
+                        writeToCppConversion(s, type, metaClass, "other", ExcludeReference | ExcludeConst);
                         s << " : ";
                     }
                     s << "(cpp_self " << op << ' ' << (type->typeEntry()->isValue() ? "(*" : "");

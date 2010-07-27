@@ -170,12 +170,13 @@ void ShibokenGenerator::initPrimitiveTypesCorrespondences()
 }
 
 QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType* cType,
-                                                         const AbstractMetaClass* context) const
+                                                         const AbstractMetaClass* context,
+                                                         Options options) const
 {
     QString result;
 
     if (cType->isArray()) {
-        result = translateTypeForWrapperMethod(cType->arrayElementType(), context) + "[]";
+        result = translateTypeForWrapperMethod(cType->arrayElementType(), context, options) + "[]";
     } else {
 #ifdef AVOID_PROTECTED_HACK
         if (cType->isEnum()) {
@@ -185,7 +186,7 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType*
         }
         if (result.isEmpty())
 #endif
-            result = translateType(cType, context);
+            result = translateType(cType, context, options);
     }
 
     return result;
@@ -497,23 +498,13 @@ void ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaTy
         if (ptype->basicAliasedTypeEntry())
             ptype = ptype->basicAliasedTypeEntry();
         typeName = ptype->name();
-    } else {
-        typeName = translateTypeForWrapperMethod(type, context);
+    } else { 
+        if (type->isObject() || (type->isValue() && !type->isReference()))
+            options |= Generator::ExcludeConst;
+	if (type->isContainer() )
+            options |= Generator::ExcludeReference | Generator::ExcludeConst;
+        typeName = translateTypeForWrapperMethod(type, context, options);
     }
-
-    const TypeEntry* tentry = type->typeEntry();
-
-    // If the type is an Object (and a pointer) remove its constness since it
-    // is already declared as const in the signature of the generated converter.
-    if (tentry->isObject() && typeName.startsWith("const "))
-        typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
-
-    // Remove the constness, if any
-    if (typeName.startsWith("const ") && type->name() != "char")
-        typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
-
-    if ((options & ExcludeReference || tentry->isPrimitive() || tentry->isContainer()) && typeName.endsWith('&'))
-        typeName.chop(1);
 
     s << baseConversionString(typeName);
 }

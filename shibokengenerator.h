@@ -43,7 +43,7 @@ public:
     ShibokenGenerator();
 
     QString translateTypeForWrapperMethod(const AbstractMetaType* cType,
-                                          const AbstractMetaClass* context) const;
+                                          const AbstractMetaClass* context, Options opt = NoOption) const;
 
     /**
     *   Returns a map with all functions grouped, the function name is used as key.
