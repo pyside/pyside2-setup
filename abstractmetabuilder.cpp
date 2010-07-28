@@ -2668,14 +2668,16 @@ AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const Abstra
 
     const AbstractMetaClassList& classList = cppClass ? cppClass->innerClasses() : m_metaClasses;
 
-    Graph graph(classList.count());
-
     int i = 0;
     foreach (AbstractMetaClass* clazz, classList) {
+        if (map.contains(clazz->qualifiedCppName()))
+            continue;
         map[clazz->qualifiedCppName()] = i;
         reverseMap[i] = clazz;
         i++;
     }
+
+    Graph graph(map.count());
 
     // TODO choose a better name to these regexs
     QRegExp regex1("\\(.*\\)");
