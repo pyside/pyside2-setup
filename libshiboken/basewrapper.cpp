@@ -490,6 +490,7 @@ void deallocWrapper(PyObject* pyObj)
         destroyParentInfo(sbkObj);
     clearReferences(sbkObj);
 
+    Py_XDECREF(sbkObj->ob_dict);
     delete[] sbkObj->cptr;
     sbkObj->cptr = 0;
     Py_TYPE(pyObj)->tp_free(pyObj);
