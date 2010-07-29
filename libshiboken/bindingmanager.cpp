@@ -43,6 +43,8 @@ namespace Shiboken
 
 typedef google::dense_hash_map<const void*, PyObject*> WrapperMap;
 
+
+#ifndef NDEBUG
 static void showWrapperMap(const WrapperMap& wrapperMap)
 {
     printf("-------------------------------\n");
@@ -52,6 +54,7 @@ static void showWrapperMap(const WrapperMap& wrapperMap)
         printf("key: %p, value: %p (%s)\n", iter->first, iter->second, iter->second->ob_type->tp_name);
     printf("-------------------------------\n");
 }
+#endif
 
 struct BindingManager::BindingManagerPrivate {
     WrapperMap wrapperMapper;
@@ -85,6 +88,9 @@ BindingManager::BindingManager()
 
 BindingManager::~BindingManager()
 {
+#ifndef NDEBUG
+    showWrapperMap(m_d->wrapperMapper);
+#endif
     assert(m_d->wrapperMapper.size() == 0);
     delete m_d;
 }
