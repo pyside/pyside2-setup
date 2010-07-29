@@ -92,6 +92,14 @@ BindingManager::~BindingManager()
     showWrapperMap(m_d->wrapperMapper);
 #endif
     assert(m_d->wrapperMapper.size() == 0);
+
+    /* Cleanup hanging references. We just invalidate them as when
+     * the BindingManager is being destroyed the interpreter is alredy
+     * shutting down. */
+    WrapperMap::iterator iter = m_d->wrapperMapper.begin();
+    for (;iter != m_d->wrapperMapper.end(); ++iter)
+        invalidateWrapper(iter->second);
+
     delete m_d;
 }
 
