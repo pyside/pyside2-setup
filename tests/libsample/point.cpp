@@ -86,6 +86,12 @@ Point::operator+=(Point &other)
     return *this;
 }
 
+bool
+Point::operator!=(const Point &other)
+{
+    return (m_x != other.m_x) || (m_y != other.m_y);
+}
+
 Point&
 Point::operator-=(Point &other)
 {
