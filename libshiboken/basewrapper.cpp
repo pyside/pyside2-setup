@@ -379,7 +379,9 @@ void deallocWrapperWithPrivateDtor(PyObject* self)
 
 void keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObject, bool append)
 {
+
     bool isNone = (!referredObject || (referredObject == Py_None));
+
     if (!self->referredObjects)
         self->referredObjects = new Shiboken::RefCountMap;
 
@@ -396,7 +398,7 @@ void keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObje
     if (!isNone) {
         std::list<PyObject*> values = splitPyObject(referredObject);
         if (append && (iter != refCountMap.end()))
-            refCountMap[key].assign(values.begin(), values.end());
+            refCountMap[key].insert(refCountMap[key].end(), values.begin(), values.end());
         else
             refCountMap[key] = values;
     }
