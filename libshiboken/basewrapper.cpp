@@ -124,7 +124,7 @@ SbkBaseWrapperType SbkBaseWrapper_Type = { { {
     /*tp_name*/             "Shiboken.BaseWrapper",
     /*tp_basicsize*/        sizeof(SbkBaseWrapper),
     /*tp_itemsize*/         0,
-    /*tp_dealloc*/          0,
+    /*tp_dealloc*/          deallocWrapperWithPrivateDtor,
     /*tp_print*/            0,
     /*tp_getattr*/          0,
     /*tp_setattr*/          0,
