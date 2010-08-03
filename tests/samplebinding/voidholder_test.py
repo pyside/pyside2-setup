@@ -40,7 +40,7 @@ class VoidHolderTest(unittest.TestCase):
         self.assertEquals(voidptr, voidholder.voidPointer())
 
     def testPutRandomObjectInsideVoidHolder(self):
-        '''Passes a C++ pointer for an object created in Python to be kept VoidHolder.'''
+        '''Passes a C++ pointer for an object created in Python to be kept by VoidHolder.'''
         obj = Point(1, 2)
         voidholder = VoidHolder(obj)
         self.assertEquals(obj, voidholder.voidPointer())
@@ -50,6 +50,14 @@ class VoidHolderTest(unittest.TestCase):
            that should be converted to a Python None.'''
         voidholder = VoidHolder()
         self.assertEquals(voidholder.voidPointer(), None)
+
+    def testPutPythonObjectInsideVoidHolder(self):
+        '''Passes a native Python object to be kept by VoidHolder.'''
+        obj = 'Foo'
+        voidholder = VoidHolder(obj)
+        self.assertEquals(obj, voidholder.voidPointer())
+
+
 
 if __name__ == '__main__':
     unittest.main()
