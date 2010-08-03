@@ -44,7 +44,7 @@ set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The s
 
 set(shiboken_MAJOR_VERSION "0")
 set(shiboken_MINOR_VERSION "4")
-set(shiboken_MICRO_VERSION "0")
+set(shiboken_MICRO_VERSION "1")
 set(shiboken_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
 
 set(shiboken_SRC
