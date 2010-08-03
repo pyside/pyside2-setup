@@ -64,7 +64,7 @@ class TestAccessingCppFields(unittest.TestCase):
         new_value = Point(-10, 537)
         d.valueTypeField = new_value
         self.assertEqual(d.valueTypeField, new_value)
-        self.assertNotEqual(d.valueTypeField, old_value)
+        self.assert_(not d.valueTypeField == old_value)
 
         # attribution with invalid type
         self.assertRaises(TypeError, lambda : setattr(d, 'valueTypeField', 123))

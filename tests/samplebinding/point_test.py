@@ -67,7 +67,7 @@ class PointTest(unittest.TestCase):
         pt2 = pt1.copy()
         self.assertEqual(pt1, pt2)
         pt2 += pt1
-        self.assertNotEqual(pt1, pt2)
+        self.assert_(not pt1 == pt2)
 
     def testReturnConstPointer(self):
         '''Point returns a const pointer for itself.'''
