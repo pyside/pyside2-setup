@@ -74,7 +74,6 @@ public:
 
     Point& operator+=(Point &other);
     Point& operator-=(Point &other);
-    bool operator!=(const Point &other);
 
     void show();
 
