@@ -186,7 +186,7 @@ struct Converter<const T&> : Converter<T&>
     static inline PyObject* toPython(const T& cppobj)
     {
         T* cpy = CppObjectCopier<T>::copy(cppobj);
-        return createWrapper<T>(cpy); 
+        return createWrapper<T>(cpy);
     }
 };
 
@@ -200,20 +200,11 @@ struct Converter<void*>
     {
         if (!cppobj)
             Py_RETURN_NONE;
-        PyObject* pyobj = BindingManager::instance().retrieveWrapper(cppobj);
-        if (pyobj)
-            Py_INCREF(pyobj);
-        else
-            pyobj = SbkBaseWrapper_New(&SbkBaseWrapper_Type, cppobj, false, false);
-        return pyobj;
+        PyObject* result = (PyObject*) cppobj;
+        Py_INCREF(result);
+        return result;
     }
-    static void* toCpp(PyObject* pyobj)
-    {
-        if (pyobj == Py_None)
-            return 0;
-        // When someone request a void pointer, just give to him the first C++ object in the class hierarchy
-        return reinterpret_cast<SbkBaseWrapper*>(pyobj)->cptr;
-    }
+    static void* toCpp(PyObject* pyobj) { return pyobj; }
 };
 template <> struct Converter<const void*> : Converter<void*> {};
 
