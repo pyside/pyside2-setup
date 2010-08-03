@@ -1029,7 +1029,17 @@
         </modify-function>
     </value-type>
 
-    <value-type name="VoidHolder"/>
+    <value-type name="VoidHolder">
+        <modify-function signature="gimmeMeSomeVoidPointer()">
+            <modify-argument index="return">
+                <replace-type modified-type="PyObject*"/>
+            </modify-argument>
+            <inject-code class="target" position="end">
+                %RETURN_TYPE %0 = %TYPE::%FUNCTION_NAME();
+                %PYARG_0 = SbkBaseWrapper_New(&amp;SbkBaseWrapper_Type, %0, false, false);
+            </inject-code>
+        </modify-function>
+    </value-type>
 
     <object-type name="PrivateCtor" />
     <object-type name="PrivateDtor" />
