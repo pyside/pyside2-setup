@@ -175,7 +175,8 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
 #endif
 
     // pure virtual functions need a default implementation
-    if (func->isPrivate() || (func->isModifiedRemoved() && !func->isAbstract()))
+    if ((func->isPrivate() && !visibilityModifiedToPrivate(func))
+        || (func->isModifiedRemoved() && !func->isAbstract()))
         return;
 
 #ifdef AVOID_PROTECTED_HACK

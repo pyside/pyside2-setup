@@ -204,7 +204,8 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         s << endl;
 
         foreach (const AbstractMetaFunction* func, filterFunctions(metaClass)) {
-            if (func->isPrivate() || (func->isModifiedRemoved() && !func->isAbstract()))
+            if ((func->isPrivate() && !visibilityModifiedToPrivate(func))
+                || (func->isModifiedRemoved() && !func->isAbstract()))
                 continue;
             if (func->isConstructor() && !func->isCopyConstructor() && !func->isUserAdded())
                 writeConstructorNative(s, func);
@@ -666,7 +667,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             s << INDENT << "if (" << PYTHON_RETURN_VAR << "->ob_refcnt < 2) {" << endl;
             {
                 Indentation indent(INDENT);
-                s << INDENT << "PyErr_SetString(PyExc_ReferenceError, \"Returning last python reference on virutal function: " 
+                s << INDENT << "PyErr_SetString(PyExc_ReferenceError, \"Returning last python reference on virutal function: "
                   << func->ownerClass()->name() << "." << func->name() << "\");" << endl;
                 s << INDENT << "PyErr_Print();" << endl;
                 s << INDENT << "assert(false);" << endl;
