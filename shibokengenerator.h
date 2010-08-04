@@ -235,6 +235,8 @@ public:
     /// Checks if a meta type should be dereferenced by the Python method wrapper passing it to C++.
     static bool shouldDereferenceAbstractMetaTypePointer(const AbstractMetaType* metaType);
 
+    static bool visibilityModifiedToPrivate(const AbstractMetaFunction* func);
+
     QString cpythonBaseName(const AbstractMetaClass* metaClass);
     QString cpythonBaseName(const TypeEntry* type);
     QString cpythonBaseName(const AbstractMetaType* type);

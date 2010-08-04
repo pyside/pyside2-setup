@@ -498,7 +498,7 @@ void ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaTy
         if (ptype->basicAliasedTypeEntry())
             ptype = ptype->basicAliasedTypeEntry();
         typeName = ptype->name();
-    } else { 
+    } else {
         if (type->isObject() || (type->isValue() && !type->isReference()))
             options |= Generator::ExcludeConst;
 	if (type->isContainer() )
@@ -768,6 +768,15 @@ bool ShibokenGenerator::shouldDereferenceAbstractMetaTypePointer(const AbstractM
     bool isPointer = metaType->indirections() > 0;
     bool isCppClass = type->isValue() || type->isObject();
     return isCppClass && !isPointer && (metaType->isValue() || metaType->isReference());
+}
+
+bool ShibokenGenerator::visibilityModifiedToPrivate(const AbstractMetaFunction* func)
+{
+    foreach (FunctionModification mod, func->modifications()) {
+        if (mod.modifiers & Modification::Private)
+            return true;
+    }
+    return false;
 }
 
 static QString checkFunctionName(QString baseName, bool genericNumberType, bool checkExact)
