@@ -917,7 +917,7 @@ void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const Ab
     Q_ASSERT(metaType);
     const TypeEntry* type = metaType->typeEntry();
 
-    if (type->isObject()) {
+    if (type->isObject() || metaType->isValuePointer()) {
         s << "0";
     } else if (type->isPrimitive()) {
         const PrimitiveTypeEntry* primitiveTypeEntry = reinterpret_cast<const PrimitiveTypeEntry*>(type);
