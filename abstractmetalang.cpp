@@ -1135,7 +1135,7 @@ AbstractMetaFunctionList AbstractMetaClass::implicitConversions() const
 
 AbstractMetaFunctionList AbstractMetaClass::operatorOverloads(uint query) const
 {
-    AbstractMetaFunctionList list = queryFunctions(OperatorOverloads);
+    AbstractMetaFunctionList list = queryFunctions(OperatorOverloads | Visible);
     AbstractMetaFunctionList returned;
     foreach (AbstractMetaFunction *f, list) {
         if (((query & ArithmeticOp) && f->isArithmeticOperator())
@@ -1155,7 +1155,7 @@ AbstractMetaFunctionList AbstractMetaClass::operatorOverloads(uint query) const
 bool AbstractMetaClass::hasOperatorOverload() const
 {
     foreach (const AbstractMetaFunction *f, m_functions) {
-        if (f->ownerClass() == f->implementingClass() && f->isOperatorOverload())
+        if (f->ownerClass() == f->implementingClass() && f->isOperatorOverload() && !f->isPrivate())
             return true;
     }
     return false;
@@ -1164,7 +1164,7 @@ bool AbstractMetaClass::hasOperatorOverload() const
 bool AbstractMetaClass::hasArithmeticOperatorOverload() const
 {
     foreach (const AbstractMetaFunction *f, m_functions) {
-        if (f->ownerClass() == f->implementingClass() && f->isArithmeticOperator())
+        if (f->ownerClass() == f->implementingClass() && f->isArithmeticOperator() && !f->isPrivate())
             return true;
     }
     return false;
@@ -1173,7 +1173,7 @@ bool AbstractMetaClass::hasArithmeticOperatorOverload() const
 bool AbstractMetaClass::hasBitwiseOperatorOverload() const
 {
     foreach (const AbstractMetaFunction *f, m_functions) {
-        if (f->ownerClass() == f->implementingClass() && f->isBitwiseOperator())
+        if (f->ownerClass() == f->implementingClass() && f->isBitwiseOperator() && !f->isPrivate())
             return true;
     }
     return false;
@@ -1182,7 +1182,7 @@ bool AbstractMetaClass::hasBitwiseOperatorOverload() const
 bool AbstractMetaClass::hasComparisonOperatorOverload() const
 {
     foreach (const AbstractMetaFunction *f, m_functions) {
-        if (f->ownerClass() == f->implementingClass() && f->isComparisonOperator())
+        if (f->ownerClass() == f->implementingClass() && f->isComparisonOperator() && !f->isPrivate())
             return true;
     }
     return false;
@@ -1191,7 +1191,7 @@ bool AbstractMetaClass::hasComparisonOperatorOverload() const
 bool AbstractMetaClass::hasLogicalOperatorOverload() const
 {
     foreach (const AbstractMetaFunction *f, m_functions) {
-        if (f->ownerClass() == f->implementingClass() && f->isLogicalOperator())
+        if (f->ownerClass() == f->implementingClass() && f->isLogicalOperator() && !f->isPrivate())
             return true;
     }
     return false;
@@ -1200,7 +1200,7 @@ bool AbstractMetaClass::hasLogicalOperatorOverload() const
 bool AbstractMetaClass::hasSubscriptOperatorOverload() const
 {
     foreach (const AbstractMetaFunction *f, m_functions) {
-        if (f->ownerClass() == f->implementingClass() && f->isSubscriptOperator())
+        if (f->ownerClass() == f->implementingClass() && f->isSubscriptOperator() && !f->isPrivate())
             return true;
     }
     return false;
@@ -1209,7 +1209,7 @@ bool AbstractMetaClass::hasSubscriptOperatorOverload() const
 bool AbstractMetaClass::hasAssignmentOperatorOverload() const
 {
     foreach (const AbstractMetaFunction *f, m_functions) {
-        if (f->ownerClass() == f->implementingClass() && f->isAssignmentOperator())
+        if (f->ownerClass() == f->implementingClass() && f->isAssignmentOperator() && !f->isPrivate())
             return true;
     }
     return false;
@@ -1218,7 +1218,7 @@ bool AbstractMetaClass::hasAssignmentOperatorOverload() const
 bool AbstractMetaClass::hasConversionOperatorOverload() const
 {
     foreach (const AbstractMetaFunction *f, m_functions) {
-        if (f->ownerClass() == f->implementingClass() && f->isConversionOperator())
+        if (f->ownerClass() == f->implementingClass() && f->isConversionOperator() && !f->isPrivate())
             return true;
     }
     return false;
