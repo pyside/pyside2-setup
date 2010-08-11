@@ -789,7 +789,8 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     if (overloadData.hasArgumentWithDefaultValue()) {
         // Check usage of unknown named arguments
         writeNamedArgumentsCheck(s, overloadData);
-        s << INDENT << "int numNamedArgs = (kwds ? PyDict_Size(kwds) : 0);" << endl;
+        if (!metaClass->isQObject())
+            s << INDENT << "int numNamedArgs = (kwds ? PyDict_Size(kwds) : 0);" << endl;
     }
     if (overloadData.maxArgs() > 0) {
         s  << endl << INDENT << "int numArgs = ";
@@ -829,8 +830,26 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
             s << INDENT << "PySide::signalUpdateSource(self);" << endl;
 
         s << INDENT << "cptr->metaObject();" << endl;
-    }
 
+        if (metaClass->isQObject() && overloadData.hasArgumentWithDefaultValue()) {
+            s << INDENT << "for (std::vector<PyObject*>::size_type i = 0; i < propertyKeys.size(); i++) {" << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "const char* propName = PyString_AS_STRING(propertyKeys[i]);" << endl;
+                s << INDENT << "if (cptr->metaObject()->indexOfProperty(propName) == -1) {" << endl;
+                {
+                    Indentation indent(INDENT);
+                    s << INDENT << "delete cptr;" << endl;
+                    s << INDENT << "PyErr_Format(PyExc_AttributeError, \"'%s' is not a Qt property\", propName);" << endl;
+                    s << INDENT << "return -1;" << endl;
+                }
+                s << INDENT << '}' << endl;
+                s << INDENT << "cptr->setProperty(propName, ";
+                s << "Shiboken::Converter<QVariant>::toCpp(PyDict_GetItem(kwds, propertyKeys[i])));" << endl;
+            }
+            s << INDENT << '}' << endl;
+        }
+    }
 
     // Constructor code injections, position=end
     bool hasCodeInjectionsAtEnd = false;
@@ -1140,6 +1159,11 @@ void CppGenerator::writeNamedArgumentsCheck(QTextStream& s, OverloadData& overlo
     QStringList argNamesList = argNamesSet.toList();
     qSort(argNamesList.begin(), argNamesList.end());
 
+    const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
+    bool ownerClassIsQObject = rfunc->ownerClass() && rfunc->ownerClass()->isQObject() && rfunc->isConstructor();
+    if (ownerClassIsQObject)
+        s << INDENT << "std::vector<PyObject*> propertyKeys;" << endl << endl;
+
     s << INDENT << "// Check existence of named argument." << endl;
     s << INDENT << "if (kwds) {" << endl;
     {
@@ -1152,14 +1176,17 @@ void CppGenerator::writeNamedArgumentsCheck(QTextStream& s, OverloadData& overlo
             Indentation indent(INDENT);
             s << INDENT << "PyObject* argName = PyList_GET_ITEM(keys, i);" << endl;
             s << INDENT << "if (!std::binary_search(argNames, argNames + " << argNamesList.count();
-            s << ", std::string(PyString_AS_STRING(argName)))) {" << endl;
+            s << ", std::string(PyString_AS_STRING(argName))))" << endl;
             {
                 Indentation indent(INDENT);
-                s << INDENT << "PyErr_Format(PyExc_TypeError, \"" << fullPythonFunctionName(overloadData.referenceFunction());
-                s << "(): got an unexpected keyword argument '%s'\", PyString_AS_STRING(argName));" << endl;
-                s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+                if (ownerClassIsQObject) {
+                     s << INDENT << "propertyKeys.push_back(argName);" << endl;
+                } else {
+                    s << INDENT << "PyErr_Format(PyExc_TypeError, \"" << fullPythonFunctionName(overloadData.referenceFunction());
+                    s << "(): got an unexpected keyword argument '%s'\", PyString_AS_STRING(argName));" << endl;
+                    s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+                }
             }
-            s << INDENT << '}' << endl;
         }
         s << INDENT << '}' << endl;
     }
@@ -1204,16 +1231,23 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
     bool usesNamedArguments = overloadData.hasArgumentWithDefaultValue();
 
     s << INDENT << "// invalid argument lengths" << endl;
+    bool ownerClassIsQObject = rfunc->ownerClass() && rfunc->ownerClass()->isQObject() && rfunc->isConstructor();
     if (usesNamedArguments) {
-        s << INDENT << "if (numArgs" << (overloadData.hasArgumentWithDefaultValue() ? " + numNamedArgs" : "") << " > " << maxArgs << ") {" << endl;
-        {
-            Indentation indent(INDENT);
-            s << INDENT << "PyErr_SetString(PyExc_TypeError, \"" << fullPythonFunctionName(rfunc) << "(): too many arguments\");" << endl;
-            s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+        if (!ownerClassIsQObject) {
+            s << INDENT << "if (numArgs" << (overloadData.hasArgumentWithDefaultValue() ? " + numNamedArgs" : "") << " > " << maxArgs << ") {" << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "PyErr_SetString(PyExc_TypeError, \"" << fullPythonFunctionName(rfunc) << "(): too many arguments\");" << endl;
+                s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+            }
+            s << INDENT << '}';
         }
-        s << INDENT << '}';
         if (minArgs > 0) {
-            s << " else if (numArgs < " << minArgs << ") {" << endl;
+            if (ownerClassIsQObject)
+                s << INDENT;
+            else
+                s << " else ";
+            s << "if (numArgs < " << minArgs << ") {" << endl;
             {
                 Indentation indent(INDENT);
                 s << INDENT << "PyErr_SetString(PyExc_TypeError, \"" << fullPythonFunctionName(rfunc) << "(): not enough arguments\");" << endl;
@@ -1227,8 +1261,10 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
         QStringList invArgsLen;
         foreach (int i, invalidArgsLength)
             invArgsLen << QString("numArgs == %1").arg(i);
-        if (usesNamedArguments)
+        if (usesNamedArguments && (!ownerClassIsQObject || minArgs > 0))
             s << " else ";
+        else
+            s << INDENT;
         s << "if (" << invArgsLen.join(" || ") << ")" << endl;
         Indentation indent(INDENT);
         s << INDENT << "goto " << cpythonFunctionName(rfunc) << "_TypeError;";
