@@ -294,10 +294,16 @@ QString Generator::translateType(const AbstractMetaType *cType,
             s = cType->cppSignature();
     } else {
         s = cType->cppSignature();
-        if (cType->isConstant() && (options & Generator::ExcludeConst))
-            s.replace("const", "");
-        if (cType->isReference() && (options & Generator::ExcludeReference))
-            s.replace("&", "");
+        if (cType->isConstant() && (options & Generator::ExcludeConst)) {
+            // Remove just the first ‘const’, avoiding removal of template attr.
+            int pos = s.indexOf("const");
+            s.remove(pos, 5); //remove strlen(const)
+        }
+        if (cType->isReference() && (options & Generator::ExcludeReference)) {
+            // Remove just the first ‘&’, avoiding removal of template references.
+            int pos = s.indexOf("&");
+            s.remove(pos, 1); //remove strlen(const)
+        }
     }
 
     return s;
