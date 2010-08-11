@@ -1090,6 +1090,7 @@
     <rejection class="ListUser" function-name="sumList(std::list&lt;int&gt;)"/>
     <rejection class="ListUser" function-name="sumList(std::list&lt;double&gt;)"/>
 
+    <value-type name="ValueAndVirtual" />
     <suppress-warning text="::*" />
     <suppress-warning text="horribly broken type '__off64_t'" />
     <suppress-warning text="enum '__codecvt_result' does not have a type entry or is not an enum" />
