@@ -761,6 +761,7 @@ bool AbstractMetaFunction::isOperatorOverload(QString funcName)
     QRegExp opRegEx("^operator([+\\-\\*/%=&\\|\\^\\<>!][=]?"
                     "|\\+\\+|\\-\\-|&&|\\|\\||<<[=]?|>>[=]?|~"
                     "|\\[\\]|\\s+delete\\[?\\]?"
+                    "|\\(\\)"
                     "|\\s+new\\[?\\]?)$");
     return opRegEx.indexIn(funcName) > -1;
 }
