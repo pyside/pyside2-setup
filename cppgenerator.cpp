@@ -3294,6 +3294,10 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         QString functionSufix = (isObjectType ? "Object" : "Value");
         s << INDENT << "Shiboken::TypeResolver::create" << functionSufix;
         s << "TypeResolver<" << typeName << " >" << "(typeid(" << typeName << ").name());\n";
+        if (shouldGenerateCppWrapper(metaClass)) {
+            s << INDENT << "Shiboken::TypeResolver::create" << functionSufix;
+            s << "TypeResolver<" << typeName << " >" << "(typeid(" << wrapperName(metaClass) << ").name());\n";
+        }
     }
 
     if (usePySideExtensions() && !metaClass->isNamespace()) {
