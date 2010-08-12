@@ -55,6 +55,13 @@ class ObjectTypeTest(unittest.TestCase):
         o.setObjectName('object name')
         self.assertEqual(str(o.objectName()), 'object name')
 
+    def testNullOverload(self):
+        o = ObjectType()
+        o.setObject(None)
+        self.assertEqual(o.callId(), 0)
+        o.setNullObject(None)
+        self.assertEqual(o.callId(), 1)
+
 if __name__ == '__main__':
     unittest.main()
 

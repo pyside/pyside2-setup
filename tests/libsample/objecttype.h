@@ -37,6 +37,7 @@
 
 #include <list>
 #include "str.h"
+#include "null.h"
 
 #include "libsamplemacros.h"
 
@@ -105,6 +106,11 @@ public:
     void setObjectNameWithSize(const char*, int size=9, const Str& name = Str("<unknown>"));
     void setObjectNameWithSize(const Str& name = Str("<unknown>"), int size=9);
 
+    //Function used to comfuse the generator when two values accept Null as arg
+    void setObject(ObjectType *);
+    void setObject(const Null&);
+    int callId() const;
+
 
 private:
     ObjectType(const ObjectType&);
@@ -117,6 +123,10 @@ private:
     ObjectTypeList m_children;
 
     ObjectTypeLayout* m_layout;
+
+
+    //used on overload null test
+    int m_call_id;
 };
 
 LIBSAMPLE_API unsigned int objectTypeHash(const ObjectType* objectType);

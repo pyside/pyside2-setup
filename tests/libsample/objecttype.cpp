@@ -40,7 +40,7 @@
 
 using namespace std;
 
-ObjectType::ObjectType(ObjectType* parent) : m_parent(0), m_layout(0)
+ObjectType::ObjectType(ObjectType* parent) : m_parent(0), m_layout(0), m_call_id(-1)
 {
     setParent(parent);
 }
@@ -258,5 +258,20 @@ void
 ObjectType::setObjectNameWithSize(const Str& name, int size)
 {
     setObjectNameWithSize("", size, name);
+}
+
+void ObjectType::setObject(ObjectType *)
+{
+    m_call_id = 0;
+}
+
+void ObjectType::setObject(const Null&)
+{
+    m_call_id = 1;
+}
+
+int ObjectType::callId() const
+{
+    return m_call_id;
 }
 

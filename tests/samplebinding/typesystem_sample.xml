@@ -17,6 +17,11 @@
         <include file-name="complex.h" location="global"/>
     </primitive-type>
 
+    <primitive-type name="Null">
+        <conversion-rule file="null_conversions.h"/>
+        <include file-name="null.h" location="global"/>
+    </primitive-type>
+
     <primitive-type name="OddBool" target-lang-api-name="PyBool">
         <conversion-rule file="oddbool_conversions.h"/>
         <include file-name="oddbool.h" location="global"/>
@@ -117,6 +122,9 @@
     <value-type name="Derived::SomeInnerClass" />
 
     <object-type name="ObjectType" hash-function="objectTypeHash">
+        <!-- rename function to avoid Python signature conflit -->
+        <modify-function signature="setObject(const Null&amp;)" rename="setNullObject" />
+
         <modify-function signature="event(Event*)">
             <modify-argument index="1" invalidate-after-use="yes"/>
         </modify-function>
@@ -198,6 +206,7 @@
             </modify-argument>
         </modify-function>
     </object-type>
+
 
     <value-type name="Event"/>
 
