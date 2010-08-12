@@ -91,7 +91,7 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
 
         s << endl << '{' << endl << "public:" << endl;
 
-        if (isCopyable(metaClass))
+        if (metaClass->typeEntry()->isValue())
             writeCopyCtor(s, metaClass);
 
         bool hasVirtualFunction = false;
