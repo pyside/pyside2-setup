@@ -786,7 +786,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
 
     s << endl;
 
-    if (overloadData.hasArgumentWithDefaultValue()) {
+    if (metaClass->isQObject() || overloadData.hasArgumentWithDefaultValue()) {
         // Check usage of unknown named arguments
         writeNamedArgumentsCheck(s, overloadData);
         if (!metaClass->isQObject())
@@ -831,21 +831,38 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
 
         s << INDENT << "cptr->metaObject();" << endl;
 
-        if (metaClass->isQObject() && overloadData.hasArgumentWithDefaultValue()) {
+        if (metaClass->isQObject()) {
             s << INDENT << "for (std::vector<PyObject*>::size_type i = 0; i < propertyKeys.size(); i++) {" << endl;
             {
                 Indentation indent(INDENT);
                 s << INDENT << "const char* propName = PyString_AS_STRING(propertyKeys[i]);" << endl;
-                s << INDENT << "if (cptr->metaObject()->indexOfProperty(propName) == -1) {" << endl;
+                s << INDENT << "const QMetaObject* mo = cptr->metaObject();" << endl;
+                s << INDENT << "if (mo->indexOfProperty(propName) != -1) {" << endl;
                 {
                     Indentation indent(INDENT);
-                    s << INDENT << "delete cptr;" << endl;
-                    s << INDENT << "PyErr_Format(PyExc_AttributeError, \"'%s' is not a Qt property\", propName);" << endl;
-                    s << INDENT << "return -1;" << endl;
+                    s << INDENT << "cptr->setProperty(propName, ";
+                    s << "Shiboken::Converter<QVariant>::toCpp(PyDict_GetItem(kwds, propertyKeys[i])));" << endl;
                 }
-                s << INDENT << '}' << endl;
-                s << INDENT << "cptr->setProperty(propName, ";
-                s << "Shiboken::Converter<QVariant>::toCpp(PyDict_GetItem(kwds, propertyKeys[i])));" << endl;
+                s << INDENT << "} else {" << endl;
+                {
+                    Indentation indent(INDENT);
+                    s << INDENT << "QString signalSignature = QString(\"%1()\").arg(propName);" << endl;
+                    s << INDENT << "if (mo->indexOfSignal(qPrintable(signalSignature)) != -1) {" << endl;
+                    {
+                        Indentation indent(INDENT);
+                        s << INDENT << "signalSignature = '2' + signalSignature;" << endl;
+                        s << INDENT << "PySide::signal_connect(self, qPrintable(signalSignature), PyDict_GetItem(kwds, propertyKeys[i]));" << endl;
+                    }
+                    s << INDENT << "} else {" << endl;
+                    {
+                        Indentation indent(INDENT);
+                        s << INDENT << "delete cptr;" << endl;
+                        s << INDENT << "PyErr_Format(PyExc_AttributeError, \"'%s' is not a Qt property or a signal\", propName);" << endl;
+                        s << INDENT << "return -1;" << endl;
+                    }
+                    s << INDENT << "};" << endl;
+                }
+                s << INDENT << "}" << endl;
             }
             s << INDENT << '}' << endl;
         }
