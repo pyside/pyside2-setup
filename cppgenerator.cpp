@@ -568,12 +568,12 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             }
             s << INDENT << '}' << endl;
 
-            if (func->type() && (!usePySideExtensions() || (func->type()->name() != "QVariant"))) {
+            if (func->type()) {
                 s << INDENT << "// Check return type" << endl;
                 s << INDENT << "bool typeIsValid = ";
                 QString desiredType;
                 if (func->typeReplaced(0).isEmpty()) {
-                    s << cpythonCheckFunction(func->type());
+                    s << cpythonIsConvertibleFunction(func->type());
                     // SbkType would return null when the type is a container.
                     if (func->type()->typeEntry()->isContainer()) {
                         desiredType = '"' + reinterpret_cast<const ContainerTypeEntry*>(func->type()->typeEntry())->typeName() + '"';

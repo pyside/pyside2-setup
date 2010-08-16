@@ -234,8 +234,10 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
 
     s << "struct Converter<" << typeT << " >";
     if (!hasCustomConversion) {
-        if (type->isEnum() || type->isFlags())
+        if (type->isEnum())
             s << " : EnumConverter";
+        else if (type->isFlags())
+            s << " : QFlagsConverter";
         else if (isAbstractOrObjectType)
             s << " : ObjectTypeConverter";
         else
