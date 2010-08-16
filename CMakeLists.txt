@@ -4,10 +4,18 @@ cmake_minimum_required(VERSION 2.6)
 
 find_package(Qt4 4.5.0 REQUIRED)
 
-find_package(LibXml2 2.6.32 REQUIRED)
-find_package(LibXslt 1.1.19 REQUIRED)
+find_package(LibXml2 2.6.32)
+find_package(LibXslt 1.1.19)
 
+option(DISABLE_DOCSTRINGS "Disable documentation extraction." FALSE)
 option(BUILD_TESTS "Build tests." TRUE)
+
+if (NOT DISABLE_DOCSTRINGS)
+    if (NOT LIBXSLT_FOUND OR NOT LIBXML2_FOUND)
+        set(DISABLE_DOCSTRINGS TRUE)
+        message(WARNING "libxslt and/or libxml not found, disabling support to doc strings!")
+    endif()
+endif()
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /w /EHsc- /GS- /GR- /DAPIEXTRACTOR_BUILD -D_SCL_SECURE_NO_WARNINGS")
@@ -54,9 +62,6 @@ apiextractor.cpp
 abstractmetabuilder.cpp
 abstractmetalang.cpp
 asttoxml.cpp
-docparser.cpp
-doxygenparser.cpp
-qtdocparser.cpp
 fileout.cpp
 graph.cpp
 reporthandler.cpp
@@ -86,6 +91,20 @@ parser/rpp/builtin-macros.cpp
 parser/rpp/preprocessor.cpp
 )
 
+if (NOT DISABLE_DOCSTRINGS)
+    set(apiextractor_SRC
+        ${apiextractor_SRC}
+        docparser.cpp
+        doxygenparser.cpp
+        qtdocparser.cpp
+    )
+    set(APIEXTRACTOR_EXTRA_INCLUDES ${LIBXSLT_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
+    set(APIEXTRACTOR_EXTRA_LIBRARIES ${LIBXSLT_LIBRARIES} ${LIBXML2_LIBRARIES})
+else()
+    set(APIEXTRACTOR_EXTRA_INCLUDES "")
+    set(APIEXTRACTOR_EXTRA_LIBRARIES "")
+endif()
+
 set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
 
 qt4_add_resources(apiextractor_RCCS_SRC generator.qrc)
@@ -96,12 +115,11 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}/parser
                     ${CMAKE_CURRENT_SOURCE_DIR}/parser/rpp
                     ${QT_INCLUDE_DIR}
-                    ${LIBXSLT_INCLUDE_DIR}
-                    ${LIBXML2_INCLUDE_DIR}
+                    ${APIEXTRACTOR_EXTRA_INCLUDES}
                     )
 
 add_library(apiextractor SHARED ${apiextractor_SRC} ${apiextractor_RCCS_SRC})
-target_link_libraries(apiextractor ${LIBXSLT_LIBRARIES} ${LIBXML2_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTXMLPATTERNS_LIBRARY} ${QT_QTXML_LIBRARY})
+target_link_libraries(apiextractor ${APIEXTRACTOR_EXTRA_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTXMLPATTERNS_LIBRARY} ${QT_QTXML_LIBRARY})
 set_target_properties(apiextractor PROPERTIES VERSION ${apiextractor_VERSION} SOVERSION ${apiextractor_SOVERSION})
 
 # create pkg-config file
