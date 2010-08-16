@@ -1,1 +1,3 @@
-add_subdirectory(qtdoc)
+if (NOT APIEXTRACTOR_DOCSTRINGS_DISABLED)
+    add_subdirectory(qtdoc)
+endif()
