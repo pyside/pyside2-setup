@@ -1317,7 +1317,8 @@ void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scopeItem, AbstractMe
                     metaFunction->setPropertySpec(read);
                 }
             } else if (QPropertySpec* write = metaClass->propertySpecForWrite(metaFunction->name())) {
-                if (write->type() == metaFunction->arguments().at(0)->type()->typeEntry()) {
+                // make sure the function was created with all aguments, some argument can be missing during the pareser because of errors on typesystem
+                if ((metaFunction->arguments().size() == 1) && (write->type() == metaFunction->arguments().at(0)->type()->typeEntry())) {
                     *metaFunction += AbstractMetaAttributes::PropertyWriter;
                     metaFunction->setPropertySpec(write);
                 }
