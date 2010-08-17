@@ -1193,7 +1193,7 @@ void CppGenerator::writeNamedArgumentsCheck(QTextStream& s, OverloadData& overlo
             Indentation indent(INDENT);
             s << INDENT << "PyObject* argName = PyList_GET_ITEM(keys, i);" << endl;
             s << INDENT << "if (!std::binary_search(argNames, argNames + " << argNamesList.count();
-            s << ", std::string(PyString_AS_STRING(argName))))" << endl;
+            s << ", std::string(PyString_AS_STRING(argName)))) {" << endl;
             {
                 Indentation indent(INDENT);
                 if (ownerClassIsQObject) {
@@ -1204,6 +1204,7 @@ void CppGenerator::writeNamedArgumentsCheck(QTextStream& s, OverloadData& overlo
                     s << INDENT << "return " << m_currentErrorCode << ';' << endl;
                 }
             }
+            s << INDENT << '}' << endl;
         }
         s << INDENT << '}' << endl;
     }
