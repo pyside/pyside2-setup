@@ -6,7 +6,7 @@
 /* Namespace for Google classes */
 #define GOOGLE_NAMESPACE ::google
 
-#ifdef _WIN32
+#ifdef MSVC
     /* the location of the header defining hash functions */
     #define HASH_FUN_H <hash_map>
     /* the namespace of the hash<> function */
