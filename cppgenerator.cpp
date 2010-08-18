@@ -3588,7 +3588,7 @@ void CppGenerator::finishGeneration()
 
         s << "extern \"C\" {" << endl << endl;
 
-        s << getApiExportMacro() << " PyMODINIT_FUNC" << endl << "init" << moduleName() << "()" << endl;
+        s << "PyMODINIT_FUNC " << getApiExportMacro() << endl << "init" << moduleName() << "()" << endl;
         s << '{' << endl;
 
         // module inject-code target/beginning
