@@ -18,7 +18,7 @@ if (NOT DISABLE_DOCSTRINGS)
 endif()
 
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "-/Zc:wchar_t- /GR /EHsc /DNOCOLOR /DWIN32 /D_WINDOWS /DAPIEXTRACTOR_BUILD /D_SCL_SECURE_NO_WARNINGS")
+    set(CMAKE_CXX_FLAGS "/Zc:wchar_t- /GR /EHsc /DNOCOLOR /DWIN32 /D_WINDOWS /D_SCL_SECURE_NO_WARNINGS")
 elseif(CMAKE_HOST_UNIX)
     option(ENABLE_GCC_OPTIMIZATION "Enable specific GCC flags to optimize library size and performance. Only available on Release Mode" 0)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fvisibility=hidden")
@@ -120,7 +120,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 
 add_library(apiextractor SHARED ${apiextractor_SRC} ${apiextractor_RCCS_SRC})
 target_link_libraries(apiextractor ${APIEXTRACTOR_EXTRA_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTXMLPATTERNS_LIBRARY} ${QT_QTXML_LIBRARY})
-set_target_properties(apiextractor PROPERTIES VERSION ${apiextractor_VERSION} SOVERSION ${apiextractor_SOVERSION})
+set_target_properties(apiextractor PROPERTIES VERSION ${apiextractor_VERSION} SOVERSION ${apiextractor_SOVERSION} DEFINE_SYMBOL APIEXTRACTOR_EXPORTS)
 
 # create pkg-config file
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/apiextractor.pc.in"

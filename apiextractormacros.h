@@ -4,10 +4,10 @@
 
 // APIEXTRACTOR_API is used for the public API symbols.
 #if defined _WIN32 || defined __CYGWIN__
-    #if APIEXTRACTOR_BUILD
+    #if APIEXTRACTOR_EXPORTS
         #define APIEXTRACTOR_API __declspec(dllexport)
     #else
-        #define APIEXTRACTOR_API __declspec(dllimport)
+        #define APIEXTRACTOR_API
     #endif
 #else
     #if __GNUC__ >= 4
