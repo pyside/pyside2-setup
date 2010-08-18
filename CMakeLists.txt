@@ -8,7 +8,7 @@ find_package(ApiExtractor 0.7 REQUIRED)
 option(BUILD_TESTS "Build tests." TRUE)
 
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /w /EHsc- /GS- /GR- /DGENRUNNER_BUILD -D_SCL_SECURE_NO_WARNINGS")
+    set(CMAKE_CXX_FLAGS "/Zc:wchar_t- /EHsc /DWIN32 /D_WINDOWS /DGENRUNNER_BUILD -D_SCL_SECURE_NO_WARNINGS")
 elseif(CMAKE_HOST_UNIX)
     option(ENABLE_GCC_OPTIMIZATION "Enable specific GCC flags to optimize library size and performance. Only available on Release Mode" 0)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fvisibility=hidden")
