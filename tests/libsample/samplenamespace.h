@@ -66,7 +66,7 @@ LIBSAMPLE_API OutValue enumInEnumOut(InValue in);
 
 LIBSAMPLE_API int getNumber(Option opt);
 
-LIBSAMPLE_API inline double powerOfTwo(double num) {
+inline double powerOfTwo(double num) {
     return num * num;
 }
 
@@ -74,7 +74,7 @@ LIBSAMPLE_API void doSomethingWithArray(const unsigned char* data, unsigned int 
 
 LIBSAMPLE_API int enumItemAsDefaultValueToIntArgument(int value = ZeroIn);
 
-class LIBSAMPLE_API SomeClass
+class SomeClass
 {
 public:
     class SomeInnerClass
@@ -94,7 +94,7 @@ public:
     };
 };
 
-class LIBSAMPLE_API DerivedFromNamespace : public SomeClass::SomeInnerClass::OkThisIsRecursiveEnough
+class DerivedFromNamespace : public SomeClass::SomeInnerClass::OkThisIsRecursiveEnough
 {
 public:
     virtual OkThisIsRecursiveEnough* someVirtualMethod(OkThisIsRecursiveEnough* arg) { return arg; }
