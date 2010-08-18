@@ -3515,12 +3515,13 @@ void CppGenerator::finishGeneration()
         // write license comment
         s << licenseComment() << endl;
 
-        s << "#ifndef PyMODINIT_FUNC  /* declarations for DLL import/export */" << endl;
-        s << "#define PyMODINIT_FUNC void" << endl << "#endif" << endl << endl;
-
         s << "#include <Python.h>" << endl;
         s << "#include <shiboken.h>" << endl;
         s << "#include <algorithm>" << endl;
+
+        s << "#ifndef PyMODINIT_FUNC  /* declarations for DLL import/export */" << endl;
+        s << "#define PyMODINIT_FUNC void" << endl << "#endif" << endl << endl;
+
         s << "#include \"" << getModuleHeaderFileName() << '"' << endl << endl;
         foreach (const Include& include, includes)
             s << include;
