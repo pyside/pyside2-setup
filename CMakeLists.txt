@@ -18,7 +18,7 @@ option(AVOID_PROTECTED_HACK "Avoid protected hack on generated bindings." FALSE)
 option(BUILD_TESTS "Build tests." TRUE)
 
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /w /EHsc- /GS- /GR- -D_SCL_SECURE_NO_WARNINGS")
+    set(CMAKE_CXX_FLAGS "/Zc:wchar_t- /GR /EHsc /DNOCOLOR /DWIN32 /D_WINDOWS /D_SCL_SECURE_NO_WARNINGS")
 else()
     if(CMAKE_HOST_UNIX)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fvisibility=hidden")
