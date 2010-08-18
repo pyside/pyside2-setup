@@ -39,10 +39,10 @@
 // LIBSHIBOKEN_LOCAL is used for non-api symbols, i.e. internal functions and classes.
 // Generic helper definitions for shared library support
 #if defined _WIN32 || defined __CYGWIN__
-    #if LIBSHIBOKEN_BUILD
+    #if LIBSHIBOKEN_EXPORTS
         #define LIBSHIBOKEN_API __declspec(dllexport)
     #else
-        #define LIBSHIBOKEN_API __declspec(dllimport)
+        #define LIBSHIBOKEN_API
     #endif
 #else
 #if __GNUC__ >= 4

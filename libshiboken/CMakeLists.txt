@@ -35,7 +35,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 add_library(libshiboken SHARED ${libshiboken_SRC})
 set_property(TARGET libshiboken PROPERTY PREFIX "")
 target_link_libraries(libshiboken ${SBK_PYTHON_LIBRARIES})
-set_target_properties(libshiboken PROPERTIES VERSION ${libshiboken_VERSION} SOVERSION ${libshiboken_SOVERSION})
+set_target_properties(libshiboken PROPERTIES VERSION ${libshiboken_VERSION} SOVERSION ${libshiboken_SOVERSION} DEFINE_SYMBOL LIBSHIBOKEN_EXPORTS)
 
 install(FILES
         autodecref.h
