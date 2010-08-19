@@ -18,7 +18,7 @@ if (NOT DISABLE_DOCSTRINGS)
 endif()
 
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "/Zc:wchar_t- /GR /EHsc /DNOCOLOR /DWIN32 /D_WINDOWS /D_SCL_SECURE_NO_WARNINGS")
+    set(CMAKE_CXX_FLAGS "/Zc:wchar_t- /GR /EHsc /DWIN32 /D_WINDOWS /D_SCL_SECURE_NO_WARNINGS")
 elseif(CMAKE_HOST_UNIX)
     option(ENABLE_GCC_OPTIMIZATION "Enable specific GCC flags to optimize library size and performance. Only available on Release Mode" 0)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fvisibility=hidden")

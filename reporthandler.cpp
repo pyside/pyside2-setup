@@ -29,16 +29,16 @@
 #include <cstdarg>
 #include <cstdio>
 
-#ifndef NOCOLOR
-#define COLOR_END "\033[0m"
-#define COLOR_WHITE "\033[1;37m"
-#define COLOR_YELLOW "\033[1;33m"
-#define COLOR_GREEN "\033[0;32m"
+#if _WINDOWS || NOCOLOR
+    #define COLOR_END ""
+    #define COLOR_WHITE ""
+    #define COLOR_YELLOW ""
+    #define COLOR_GREEN ""
 #else
-#define COLOR_END ""
-#define COLOR_WHITE ""
-#define COLOR_YELLOW ""
-#define COLOR_GREEN ""
+    #define COLOR_END "\033[0m"
+    #define COLOR_WHITE "\033[1;37m"
+    #define COLOR_YELLOW "\033[1;33m"
+    #define COLOR_GREEN "\033[0;32m"
 #endif
 
 static bool m_silent = false;
