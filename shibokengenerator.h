@@ -287,9 +287,6 @@ public:
     QString getFunctionReturnType(const AbstractMetaFunction* func, Options options = NoOption) const;
     QString getFormatUnitString(const AbstractMetaFunction* func, bool incRef = false) const;
 
-    /// Returns the name of the macro used to export symbols
-    QString getApiExportMacro() const;
-
     /// Returns the file name for the module global header. If no module name is provided the current will be used.
     QString getModuleHeaderFileName(const QString& moduleName = QString()) const;
 

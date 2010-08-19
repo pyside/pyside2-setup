@@ -1442,11 +1442,6 @@ AbstractMetaClassList ShibokenGenerator::getAllAncestors(const AbstractMetaClass
     return result;
 }
 
-QString ShibokenGenerator::getApiExportMacro() const
-{
-    return "SHIBOKEN_"+moduleName().toUpper()+"_API"; // a longer name to avoid name clashes
-}
-
 QString ShibokenGenerator::getModuleHeaderFileName(const QString& moduleName) const
 {
     QString result = moduleName.isEmpty() ? packageName() : moduleName;

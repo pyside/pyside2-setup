@@ -3519,9 +3519,6 @@ void CppGenerator::finishGeneration()
         s << "#include <shiboken.h>" << endl;
         s << "#include <algorithm>" << endl;
 
-        s << "#ifndef PyMODINIT_FUNC  /* declarations for DLL import/export */" << endl;
-        s << "#define PyMODINIT_FUNC void" << endl << "#endif" << endl << endl;
-
         s << "#include \"" << getModuleHeaderFileName() << '"' << endl << endl;
         foreach (const Include& include, includes)
             s << include;
@@ -3586,9 +3583,16 @@ void CppGenerator::finishGeneration()
         }
         s << endl;
 
-        s << "extern \"C\" {" << endl << endl;
 
-        s << "PyMODINIT_FUNC " << getApiExportMacro() << endl << "init" << moduleName() << "()" << endl;
+        s << "#if defined _WIN32 || defined __CYGWIN__" << endl;
+        s << "    #define SBK_EXPORT_MODULE __declspec(dllexport)" << endl;
+        s << "#elif __GNUC__ >= 4" << endl;
+        s << "    #define SBK_EXPORT_MODULE __attribute__ ((visibility(\"default\")))" << endl;
+        s << "#else" << endl;
+        s << "    #define SBK_EXPORT_MODULE" << endl;
+        s << "#endif" << endl << endl;
+
+        s << "extern \"C\" SBK_EXPORT_MODULE void init" << moduleName() << "()" << endl;
         s << '{' << endl;
 
         // module inject-code target/beginning
@@ -3674,7 +3678,6 @@ void CppGenerator::finishGeneration()
         }
 
         s << '}' << endl << endl;
-        s << "} // extern \"C\"" << endl << endl;
 
         // module inject-code native/end
         if (!snips.isEmpty()) {

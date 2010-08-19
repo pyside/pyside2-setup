@@ -395,7 +395,6 @@ void HeaderGenerator::finishGeneration()
     s << "#include <memory>" << endl << endl;
     if (usePySideExtensions())
         s << "#include <qsignal.h>" << endl;
-    writeExportMacros(s);
 
     QStringList requiredTargetImports = TypeDatabase::instance()->requiredTargetImports();
     if (!requiredTargetImports.isEmpty()) {
@@ -463,23 +462,6 @@ void HeaderGenerator::finishGeneration()
     s << converterImpl << endl;
 
     s << "#endif // " << includeShield << endl << endl;
-}
-
-
-void HeaderGenerator::writeExportMacros(QTextStream& s)
-{
-    QString macro = getApiExportMacro();
-    s << "\
-#if defined _WIN32 || defined __CYGWIN__\n\
-    #define " << macro << " __declspec(dllexport)\n\
-#else\n\
-#if __GNUC__ >= 4\n\
-    #define " << macro << " __attribute__ ((visibility(\"default\")))\n\
-#else\n\
-    #define " << macro << "\n\
-#endif\n\
-#endif\n\
-\n";
 }
 
 void HeaderGenerator::writeSbkTypeFunction(QTextStream& s, const AbstractMetaEnum* cppEnum)
