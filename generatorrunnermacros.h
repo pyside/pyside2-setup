@@ -1,7 +1,7 @@
 /*
 * This file is part of the API Extractor project.
 *
-* Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (C) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 *
 * Contact: PySide team <contact@pyside.org>
 *
@@ -26,22 +26,16 @@
 
 // GENRUNNER_API is used for the public API symbols.
 #if defined _WIN32 || defined __CYGWIN__
-	#define GENRUNNER_EXPORT __declspec(dllexport)
+    #define GENRUNNER_EXPORT __declspec(dllexport)
     #if GENRUNNER_EXPORTS
         #define GENRUNNER_API GENRUNNER_EXPORT
-    #else
-        #define GENRUNNER_API
     #endif
-	// dont worry about deprecated functions under windows
-	#define GENRUNNER_DEPRECATED
-#else
-	#define GENRUNNER_EXPORT __attribute__ ((visibility("default")))
-    #if __GNUC__ >= 4
-        #define GENRUNNER_API GENRUNNER_EXPORT
-    #else
-        #define GENRUNNER_API
-    #endif
-	#define GENRUNNER_DEPRECATED __attribute__ ((deprecated))
+#elif __GNUC__ >= 4
+    #define GENRUNNER_EXPORT __attribute__ ((visibility("default")))
+    #define GENRUNNER_API GENRUNNER_EXPORT
 #endif
 
+#ifndef GENRUNNER_API
+    #define GENRUNNER_API
+#endif
 #endif
