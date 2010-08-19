@@ -50,10 +50,10 @@ typedef struct {
     PyObject* ob_name;
 } SbkEnumObject;
 
-LIBSHIBOKEN_API PyAPI_DATA(PyTypeObject) SbkEnumType_Type;
+extern LIBSHIBOKEN_API PyTypeObject SbkEnumType_Type;
 
-LIBSHIBOKEN_API PyAPI_FUNC(PyObject*) SbkEnumObject_repr(PyObject* self);
-LIBSHIBOKEN_API PyAPI_FUNC(PyObject*) SbkEnumObject_name(PyObject* self);
+LIBSHIBOKEN_API PyObject* SbkEnumObject_repr(PyObject* self);
+LIBSHIBOKEN_API PyObject* SbkEnumObject_name(PyObject* self);
 
 } // extern "C"
 

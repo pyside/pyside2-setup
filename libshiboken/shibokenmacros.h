@@ -1,7 +1,7 @@
 /*
 * This file is part of the Shiboken Python Bindings Generator project.
 *
-* Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (C) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 *
 * Contact: PySide team <contact@pyside.org>
 *
@@ -35,21 +35,20 @@
 #ifndef SHIBOKENMACROS_H
 #define SHIBOKENMACROS_H
 
-// LIBSHIBOKEN_API is used for the public API symbols.
-// LIBSHIBOKEN_LOCAL is used for non-api symbols, i.e. internal functions and classes.
-// Generic helper definitions for shared library support
+// LIBSHIBOKEN_API macro is used for the public API symbols.
 #if defined _WIN32 || defined __CYGWIN__
     #if LIBSHIBOKEN_EXPORTS
         #define LIBSHIBOKEN_API __declspec(dllexport)
     #else
-        #define LIBSHIBOKEN_API
+        #ifdef _MSC_VER
+            #define LIBSHIBOKEN_API __declspec(dllimport)
+        #endif
     #endif
-#else
-#if __GNUC__ >= 4
+#elif __GNUC__ >= 4
     #define LIBSHIBOKEN_API __attribute__ ((visibility("default")))
-#else
-    #define LIBSHIBOKEN_API
-#endif
 #endif
 
+#ifndef LIBSHIBOKEN_API
+    #define LIBSHIBOKEN_API
+#endif
 #endif

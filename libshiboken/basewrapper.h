@@ -72,8 +72,8 @@ typedef bool (*ExtendedIsConvertibleFunc)(PyObject*);
 // Used in userdata dealloc function
 typedef void (*DeleteUserDataFunc)(void*);
 
-LIBSHIBOKEN_API PyAPI_DATA(PyTypeObject) SbkBaseWrapperType_Type;
-LIBSHIBOKEN_API PyAPI_DATA(SbkBaseWrapperType) SbkBaseWrapper_Type;
+extern LIBSHIBOKEN_API PyTypeObject SbkBaseWrapperType_Type;
+extern LIBSHIBOKEN_API SbkBaseWrapperType SbkBaseWrapper_Type;
 
 class LIBSHIBOKEN_API TypeDiscovery {
 public:
@@ -217,13 +217,13 @@ LIBSHIBOKEN_API bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctor
 #define SbkBaseWrapper_validCppObject(pyobj)         (((Shiboken::SbkBaseWrapper*)pyobj)->validCppObject)
 #define SbkBaseWrapper_setValidCppObject(pyobj,v)    (((Shiboken::SbkBaseWrapper*)pyobj)->validCppObject = v)
 
-LIBSHIBOKEN_API PyAPI_FUNC(PyObject*)
+LIBSHIBOKEN_API PyObject*
 SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
                    void* cptr,
                    bool hasOwnership = true,
                    bool isExactType = false);
 
-LIBSHIBOKEN_API PyAPI_FUNC(PyObject*)
+LIBSHIBOKEN_API PyObject*
 SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*);
 
 /**
@@ -253,7 +253,7 @@ void callCppDestructor(void* cptr)
     delete reinterpret_cast<T*>(cptr);
 }
 
-LIBSHIBOKEN_API PyAPI_FUNC(void) deallocWrapperWithPrivateDtor(PyObject* self);
+LIBSHIBOKEN_API void deallocWrapperWithPrivateDtor(PyObject* self);
 LIBSHIBOKEN_API bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr);
 LIBSHIBOKEN_API void setErrorAboutWrongArguments(PyObject* args, const char* funcName, const char** cppOverloads);
 
