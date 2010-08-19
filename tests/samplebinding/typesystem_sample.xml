@@ -744,6 +744,19 @@
 
         </modify-function>
 
+        <inject-code class="native" position="beginning">
+            // simple class to avoid mem leak inside conversion rule used in arrayMethod
+            template&lt;typename T>
+            struct ArrayDeleter {
+                ArrayDeleter(T* ptr) : m_ptr(ptr) {}
+                ~ArrayDeleter() { delete[] m_ptr; }
+                operator T*() { return m_ptr; }
+            private:
+                T* m_ptr;
+                ArrayDeleter(const ArrayDeleter&amp;);
+                ArrayDeleter&amp; operator=(ArrayDeleter&amp;);
+            };
+        </inject-code>
         <modify-function signature="arrayMethod(int, int*) const">
             <modify-argument index="1">
                 <remove-argument/>
@@ -757,17 +770,15 @@
 
               <conversion-rule class="native">
                 int numItems = PySequence_Size(%PYARG_1);
-                int *%out = new int[numItems]; //memory leak
-                for (int i=0; i &lt; numItems; i++) {
+                ArrayDeleter&lt;int> %out(new int[numItems]);
+                for (int i=0; i &lt; numItems; i++)
                     %out[i] = %CONVERTTOCPP[int](PySequence_GetItem(%PYARG_1, i));
-                }
               </conversion-rule>
 
               <conversion-rule class="target">
                 PyObject *%out = PyList_New(count);
-                for (int i=0; i &lt; count; i++) {
+                for (int i=0; i &lt; count; i++)
                     PyList_SET_ITEM(%out, i, %CONVERTTOPYTHON[int](%in[i]));
-                }
               </conversion-rule>
           </modify-argument>
 
