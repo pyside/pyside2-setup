@@ -37,6 +37,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${libshiboken_SOURCE_DIR})
 add_library(other MODULE ${other_SRC})
 set_property(TARGET other PROPERTY PREFIX "")
+if(WIN32)
+    set_property(TARGET other PROPERTY SUFFIX ".pyd")
+endif()
 target_link_libraries(other
                       libother
                       libsample
