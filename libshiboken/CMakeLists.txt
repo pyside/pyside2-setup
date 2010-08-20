@@ -52,7 +52,10 @@ install(FILES
         threadstatesaver.h
         typeresolver.h
         DESTINATION include/shiboken)
-install(TARGETS libshiboken DESTINATION "${LIB_INSTALL_DIR}")
+install(TARGETS libshiboken EXPORT shiboken
+                            LIBRARY DESTINATION "${LIB_INSTALL_DIR}"
+                            ARCHIVE DESTINATION "${LIB_INSTALL_DIR}"
+                            RUNTIME DESTINATION bin)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ShibokenConfig.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken-${libshiboken_VERSION}")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ShibokenConfigVersion.cmake"
