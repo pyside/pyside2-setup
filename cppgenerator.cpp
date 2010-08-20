@@ -1178,35 +1178,39 @@ void CppGenerator::writeNamedArgumentsCheck(QTextStream& s, OverloadData& overlo
 
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
     bool ownerClassIsQObject = rfunc->ownerClass() && rfunc->ownerClass()->isQObject() && rfunc->isConstructor();
-    if (ownerClassIsQObject)
+    if (overloadData.hasArgumentWithDefaultValue() || (ownerClassIsQObject && rfunc->isConstructor())) {
         s << INDENT << "std::vector<PyObject*> propertyKeys;" << endl << endl;
-
-    s << INDENT << "// Check existence of named argument." << endl;
-    s << INDENT << "if (kwds) {" << endl;
-    {
-        Indentation indent(INDENT);
-        s << INDENT << "std::string argNames[] = { " << argNamesList.join(", ") << " };" << endl;
-        s << INDENT << "PyObject* keys = PyDict_Keys(kwds);" << endl;
-        s << INDENT << "Shiboken::AutoDecRef auto_keys(keys);" << endl;
-        s << INDENT << "for (int i = 0; i < PyList_GET_SIZE(keys); ++i) {" << endl;
+        s << INDENT << "// Check existence of named argument." << endl;
+        s << INDENT << "if (kwds) {" << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << "PyObject* argName = PyList_GET_ITEM(keys, i);" << endl;
-            s << INDENT << "if (!std::binary_search(argNames, argNames + " << argNamesList.count();
-            s << ", std::string(PyString_AS_STRING(argName)))) {" << endl;
+            if (argNamesList.size() > 0)
+                s << INDENT << "std::string argNames[] = { " << argNamesList.join(", ") << " };" << endl;
+            s << INDENT << "PyObject* keys = PyDict_Keys(kwds);" << endl;
+            s << INDENT << "Shiboken::AutoDecRef auto_keys(keys);" << endl;
+            s << INDENT << "for (int i = 0; i < PyList_GET_SIZE(keys); ++i) {" << endl;
             {
                 Indentation indent(INDENT);
-                if (ownerClassIsQObject) {
-                     s << INDENT << "propertyKeys.push_back(argName);" << endl;
-                } else {
-                    s << INDENT << "PyErr_Format(PyExc_TypeError, \"" << fullPythonFunctionName(overloadData.referenceFunction());
-                    s << "(): got an unexpected keyword argument '%s'\", PyString_AS_STRING(argName));" << endl;
-                    s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+                s << INDENT << "PyObject* argName = PyList_GET_ITEM(keys, i);" << endl;
+                if (argNamesList.size() > 0) {
+                    s << INDENT << "if (!std::binary_search(argNames, argNames + " << argNamesList.count();
+                    s << ", std::string(PyString_AS_STRING(argName)))) {" << endl;
                 }
+                {
+                    Indentation indent(INDENT);
+                    if (ownerClassIsQObject) {
+                         s << INDENT << "propertyKeys.push_back(argName);" << endl;
+                    } else {
+                        s << INDENT << "PyErr_Format(PyExc_TypeError, \"" << fullPythonFunctionName(overloadData.referenceFunction());
+                        s << "(): got an unexpected keyword argument '%s'\", PyString_AS_STRING(argName));" << endl;
+                        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+                    }
+                }
+                if (argNamesList.size() > 0)
+                    s << INDENT << '}' << endl;
             }
             s << INDENT << '}' << endl;
         }
-        s << INDENT << '}' << endl;
     }
     s << INDENT << '}' << endl;
 }
