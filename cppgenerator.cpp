@@ -441,8 +441,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     Indentation indentation(INDENT);
 
     if (func->isAbstract() && func->isModifiedRemoved()) {
-        s << INDENT << "#warning Pure virtual method \"" << func->ownerClass()->name() << "::" << func->minimalSignature();
-        s << "\" must be implement but was completely removed on typesystem." << endl;
+        ReportHandler::warning("Pure virtual method \"" + func->ownerClass()->name() + "::" + func->minimalSignature() + "\" must be implement but was completely removed on typesystem.");
         s << INDENT << "return";
         if (func->type()) {
             s << ' ';
