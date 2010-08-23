@@ -134,6 +134,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     // headers
     s << "// default includes" << endl;
     s << "#include <shiboken.h>" << endl;
+    s << "#include <vector>" << endl;
     s << "#include <algorithm>" << endl;
     if (usePySideExtensions()) {
         s << "#include <qsignal.h>" << endl;
