@@ -199,7 +199,7 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
 
 void BindingManager::invalidateWrapper(SbkBaseWrapper* wrapper)
 {
-    if (!SbkBaseWrapper_validCppObject(wrapper))
+    if (!wrapper || ((PyObject*)wrapper == Py_None) || !SbkBaseWrapper_validCppObject(wrapper))
         return;
     SbkBaseWrapper_setValidCppObject(wrapper, false);
     SbkBaseWrapper_setOwnership(wrapper, false);
