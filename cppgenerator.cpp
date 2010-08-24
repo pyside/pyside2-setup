@@ -1355,9 +1355,16 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                     const PrimitiveTypeEntry* ptp = reinterpret_cast<const PrimitiveTypeEntry*>(argType->typeEntry());
                     while (ptp->aliasedTypeEntry())
                         ptp = ptp->aliasedTypeEntry();
-                    strArg = ptp->name().replace(QRegExp("^signed\\s+"), "");
-                    if (strArg == "double")
-                        strArg = "float";
+
+                    if (strArg == "QString") {
+                        strArg = "unicode";
+                    } else if (strArg == "QChar") {
+                        strArg = "1-unicode";
+                    } else {
+                        strArg = ptp->name().replace(QRegExp("^signed\\s+"), "");
+                        if (strArg == "double")
+                            strArg = "float";
+                    }
                 } else if (argType->typeEntry()->isContainer()) {
                     strArg = argType->fullName();
                     if (strArg == "QList" || strArg == "QVector"
