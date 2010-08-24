@@ -32,25 +32,23 @@
  * 02110-1301 USA
  */
 
-#ifndef GILSTATE_H
-#define GILSTATE_H
-
-#include <shibokenmacros.h>
-#include <Python.h>
+#include "gilstate.h"
 
 namespace Shiboken
 {
 
-class LIBSHIBOKEN_API GilState
+GilState::GilState()
 {
-public:
-    GilState();
-    ~GilState();
-private:
-    PyGILState_STATE m_gstate;
-};
+    if(Py_IsInitialized())
+        m_gstate = PyGILState_Ensure(); 
+}
+
+GilState::~GilState() 
+{
+    if(Py_IsInitialized())
+        PyGILState_Release(m_gstate);
+}
 
 } // namespace Shiboken
 
-#endif // GILSTATE_H
 

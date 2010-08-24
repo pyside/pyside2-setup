@@ -23,6 +23,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shiboken.pc.in"
 
 set(libshiboken_SRC
 basewrapper.cpp
+gilstate.cpp
 helper.cpp
 pyenum.cpp
 bindingmanager.cpp
