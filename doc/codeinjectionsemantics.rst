@@ -65,7 +65,7 @@ The following table describes the semantics of ``inject-code`` tag as used on
     |               |      |         |initializer function (``init_CLASS(PyObject *module)``). The  |
     |               |      |         |code here will be executed after all the wrapped class        |
     |               |      |         |components have been initialized.                             |
-    +---------------+------+---------+--------------------------------------------------------------+
+   +---------------+------+---------+--------------------------------------------------------------+
     |modify-function|native|beginning|Code here is put on the virtual method override of a C++      |
     |               |      |         |wrapper class (the one responsible for passing C++ calls to a |
     |               |      |         |Python override, if there is any), right after the C++        |
@@ -84,6 +84,12 @@ The following table describes the semantics of ``inject-code`` tag as used on
     |               |      |         |(``PyCLASS_METHOD(...)``), right after the C++ method call,   |
     |               |      |         |but still inside the scope created by the overload for each   |
     |               |      |         |signature.                                                    |
+    |               +------+---------+--------------------------------------------------------------+
+    |               |shell |beginning|Used only for virtual functions. The code is injected when the|
+    |               |      |         |function does not has a pyhton implementation, then the code  |
+    |               |      |         |is inserted before c++ call                                   |
+    |               |      +---------+--------------------------------------------------------------+
+    |               |      |end      |Same as above, but the code is inserted after c++ call        |
     +---------------+------+---------+--------------------------------------------------------------+
     |typesystem     |native|beginning|Write code to the beginning of the module ``.cpp`` file, right|
     |               |      |         |after the ``#include`` clauses. This position has a similar   |
