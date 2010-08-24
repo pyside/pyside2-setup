@@ -32,27 +32,33 @@
  * 02110-1301 USA
  */
 
-#ifndef THREADSTATESAVER_H
-#define THREADSTATESAVER_H
-
-#include <Python.h>
-#include <shibokenmacros.h>
+#include "threadstatesaver.h"
 
 namespace Shiboken
 {
 
-class LIBSHIBOKEN_API ThreadStateSaver
+ThreadStateSaver::ThreadStateSaver() 
+        : m_threadState(0)
+    {}
+
+ThreadStateSaver::~ThreadStateSaver()
 {
-public:
-    ThreadStateSaver();
-    ~ThreadStateSaver();
-    void save();
-    void restore();
-private:
-    PyThreadState* m_threadState;
-};
+    restore();
+}
+
+void ThreadStateSaver::save()
+{
+    if (PyEval_ThreadsInitialized())
+        m_threadState = PyEval_SaveThread();
+}
+
+void ThreadStateSaver::restore()
+{
+    if (m_threadState) {
+        PyEval_RestoreThread(m_threadState);
+        m_threadState = 0;
+    }
+}
 
 } // namespace Shiboken
-
-#endif // THREADSTATESAVER_H
 

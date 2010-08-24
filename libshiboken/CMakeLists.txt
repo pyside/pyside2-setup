@@ -1,5 +1,4 @@
 project(libshiboken)
-
 #Find installed sparsehash
 find_path(SPARSEHASH_INCLUDE_PATH sparseconfig.h PATH_SUFFIXES "/google/sparsehash")
 if(SPARSEHASH_INCLUDE_PATH)
@@ -8,6 +7,7 @@ else()
     set(SPARSEHASH_INCLUDE_PATH ${CMAKE_SOURCE_DIR}/ext/sparsehash)
 endif()
 
+add_definitions(-DWITH_THREAD)
 set(libshiboken_MAJOR_VERSION ${shiboken_MAJOR_VERSION})
 set(libshiboken_MINOR_VERSION ${shiboken_MINOR_VERSION})
 set(libshiboken_MICRO_VERSION ${shiboken_MICRO_VERSION})
@@ -26,6 +26,7 @@ basewrapper.cpp
 helper.cpp
 pyenum.cpp
 bindingmanager.cpp
+threadstatesaver.cpp
 typeresolver.cpp
 )
 
