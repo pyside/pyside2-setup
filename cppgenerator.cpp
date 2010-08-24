@@ -461,6 +461,15 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     s << INDENT << "if (py_override.isNull()) {" << endl;
     {
         Indentation indentation(INDENT);
+
+        CodeSnipList snips;
+        if (func->hasInjectedCode()) {
+            snips = func->injectedCodeSnips();
+            const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().last();
+            writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::ShellCode, func, lastArg);
+            s << endl;
+        }
+
         if (func->isAbstract()) {
             s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
             s << func->ownerClass()->name() << '.' << func->name();
