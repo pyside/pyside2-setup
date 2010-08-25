@@ -216,6 +216,9 @@ bool ApiExtractor::run()
     }
 
     QTemporaryFile ppFile;
+#ifndef NDEBUG
+    ppFile.setAutoRemove(false);
+#endif
     // run rpp pre-processor
     if (!preprocess(m_cppFileName, ppFile, m_includePaths)) {
         std::cerr << "Preprocessor failed on file: " << qPrintable(m_cppFileName);
