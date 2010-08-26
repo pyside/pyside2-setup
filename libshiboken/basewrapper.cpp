@@ -304,7 +304,8 @@ PyObject* SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*)
     Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
     SbkBaseWrapper* self = reinterpret_cast<SbkBaseWrapper*>(PyBaseObject_Type.tp_new(subtype, emptyTuple, 0));
 
-    int numBases = reinterpret_cast<SbkBaseWrapperType*>(subtype)->is_multicpp ? getNumberOfCppBaseClasses(subtype) : 1;
+    SbkBaseWrapperType* sbkType = reinterpret_cast<SbkBaseWrapperType*>(subtype);
+    int numBases = sbkType->is_multicpp ? getNumberOfCppBaseClasses(subtype) : 1;
     self->cptr = new void*[numBases];
     std::memset(self->cptr, 0, sizeof(void*)*numBases);
     self->hasOwnership = 1;
@@ -542,7 +543,10 @@ PyObject* SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObj
         newType->cpp_dtor = 0;
         newType->is_multicpp = 1;
     }
-    newType->original_name = "";
+    if (bases.size() == 1)
+        newType->original_name = bases.front()->original_name;
+    else
+        newType->original_name = "object";
     newType->user_data = 0;
     newType->d_func = 0;
     newType->is_user_type = 1;
