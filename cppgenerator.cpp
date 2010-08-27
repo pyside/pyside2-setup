@@ -755,8 +755,6 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     if (needsOverloadId)
         s << INDENT << "int overloadId = -1;" << endl;
 
-    if (overloadData.hasAllowThread())
-        s << INDENT << "Shiboken::ThreadStateSaver " THREAD_STATE_SAVER_VAR ";" << endl;
     s << INDENT << "SbkBaseWrapper* sbkSelf = reinterpret_cast<SbkBaseWrapper*>(self);" << endl;
 
     if (metaClass->isAbstract() || metaClass->baseClassNames().size() > 1) {
@@ -1066,10 +1064,6 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
     bool needsOverloadId = overloadData.maxArgs() > 0;
     if (needsOverloadId)
         s << INDENT << "int overloadId = -1;" << endl;
-
-    if (overloadData.hasAllowThread())
-        s << INDENT << "Shiboken::ThreadStateSaver " THREAD_STATE_SAVER_VAR ";" << endl;
-    s << endl;
 
     if (usesNamedArguments) {
         // Check usage of unknown named arguments
@@ -1697,28 +1691,34 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(QTextStream& s, const Ov
 void CppGenerator::writeFunctionCalls(QTextStream& s, const OverloadData& overloadData)
 {
     QList<const AbstractMetaFunction*> overloads = overloadData.overloadsWithoutRepetition();
-
     s << INDENT << "// Call function/method" << endl;
-    s << INDENT << (overloads.count() > 1 ? "switch (overloadId) " : "") << '{' << endl;
+    s << INDENT << "{" << endl;
     {
         Indentation indent(INDENT);
-        if (overloads.count() == 1) {
-            writeSingleFunctionCall(s, overloadData, overloads.first());
-        } else {
-            for (int i = 0; i < overloads.count(); i++) {
-                const AbstractMetaFunction* func = overloads.at(i);
-                s << INDENT << "case " << i << ": // " << func->minimalSignature() << endl;
-                s << INDENT << '{' << endl;
-                {
-                    Indentation indent(INDENT);
-                    writeSingleFunctionCall(s, overloadData, func);
-                    s << INDENT << "break;" << endl;
+        if (overloadData.hasAllowThread())
+            s << INDENT << "Shiboken::ThreadStateSaver " THREAD_STATE_SAVER_VAR ";" << endl;
+
+        s << INDENT << (overloads.count() > 1 ? "switch (overloadId) " : "") << '{' << endl;
+        {    
+            Indentation indent(INDENT);
+            if (overloads.count() == 1) {
+                writeSingleFunctionCall(s, overloadData, overloads.first());
+            } else {
+                for (int i = 0; i < overloads.count(); i++) {
+                    const AbstractMetaFunction* func = overloads.at(i);
+                    s << INDENT << "case " << i << ": // " << func->minimalSignature() << endl;
+                    s << INDENT << '{' << endl;
+                    {
+                        Indentation indent(INDENT);
+                        writeSingleFunctionCall(s, overloadData, func);
+                        s << INDENT << "break;" << endl;
+                    }
+                    s << INDENT << '}' << endl;
                 }
-                s << INDENT << '}' << endl;
             }
         }
+        s << INDENT << '}' << endl << INDENT << "}";
     }
-    s << INDENT << '}' << endl;
 }
 
 void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& overloadData, const AbstractMetaFunction* func)
@@ -1728,6 +1728,8 @@ void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& o
         s << INDENT << "return " << m_currentErrorCode << ';' << endl;
         return;
     }
+
+
 
     const AbstractMetaClass* implementingClass = overloadData.referenceFunction()->implementingClass();
     bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(overloadData) && overloadData.maxArgs() > 1;
@@ -1770,6 +1772,7 @@ void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& o
     s << endl;
 
     int numRemovedArgs = OverloadData::numberOfRemovedArguments(func);
+
     writeMethodCall(s, func, func->arguments().size() - numRemovedArgs);
     if (!func->isConstructor())
         writeNoneReturn(s, func, overloadData.hasNonVoidReturnType());
@@ -1871,8 +1874,10 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     // Used to provide contextual information to custom code writer function.
     const AbstractMetaArgument* lastArg = 0;
 
-    CodeSnipList snips;
+    if (func->allowThread())
+        s << INDENT << THREAD_STATE_SAVER_VAR ".save();" << endl;
 
+    CodeSnipList snips;
     if (func->hasInjectedCode()) {
         snips = func->injectedCodeSnips();
 
@@ -2043,9 +2048,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
         if (!badModifications) {
             if (!injectedCodeCallsCppFunction(func)) {
-                if (func->allowThread())
-                    s << INDENT << THREAD_STATE_SAVER_VAR ".save();" << endl;
-                s << INDENT;
+               s << INDENT;
                 if (isCtor) {
                     s << "cptr = ";
                 } else if (func->type() && !func->isInplaceOperator()) {
@@ -2066,9 +2069,6 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                     s << " " CPP_RETURN_VAR " = ";
                 }
                 s << methodCall << ';' << endl;
-                if (func->allowThread())
-                    s << INDENT << THREAD_STATE_SAVER_VAR ".restore();" << endl;
-
                 if (!isCtor && !func->isInplaceOperator() && func->type()) {
                     s << INDENT << PYTHON_RETURN_VAR " = ";
                     writeToPythonConversion(s, func->type(), func->ownerClass(), CPP_RETURN_VAR);
@@ -2154,6 +2154,9 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         }
     }
     writeParentChildManagement(s, func, !hasReturnPolicy);
+
+    if (func->allowThread())
+        s << INDENT << THREAD_STATE_SAVER_VAR ".restore();" << endl;
 }
 
 QStringList CppGenerator::getAncestorMultipleInheritance(const AbstractMetaClass* metaClass)
