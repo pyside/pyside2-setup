@@ -2294,6 +2294,11 @@ bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass* metaClass)
         if (metaClass->hasFunction(funcName))
             return true;
     }
+
+    const ComplexTypeEntry* baseType = metaClass->typeEntry()->baseContainerType();
+    if (baseType && (reinterpret_cast<const ContainerTypeEntry*>(baseType)->type() == ContainerTypeEntry::ListContainer))
+        return true;
+
     return false;
 }
 
@@ -2493,13 +2498,16 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
 
 void CppGenerator::writeSequenceMethods(QTextStream& s, const AbstractMetaClass* metaClass)
 {
+
     QMap<QString, QString> funcs;
+    bool injectedCode = false;
 
     QHash< QString, QPair< QString, QString > >::const_iterator it = m_sequenceProtocol.begin();
     for (; it != m_sequenceProtocol.end(); ++it) {
         const AbstractMetaFunction* func = metaClass->findFunction(it.key());
         if (!func)
             continue;
+        injectedCode = true;
         QString funcName = cpythonFunctionName(func);
         QString funcArgs = it.value().first;
         QString funcRetVal = it.value().second;
@@ -2514,6 +2522,9 @@ void CppGenerator::writeSequenceMethods(QTextStream& s, const AbstractMetaClass*
         writeCodeSnips(s, snips,CodeSnip::Any, TypeSystem::TargetLangCode, func, lastArg);
         s << '}' << endl << endl;
     }
+
+    if (!injectedCode)
+        writeStdListWrapperMethods(s, metaClass);
 }
 
 void CppGenerator::writeTypeAsSequenceDefinition(QTextStream& s, const AbstractMetaClass* metaClass)
@@ -2521,9 +2532,20 @@ void CppGenerator::writeTypeAsSequenceDefinition(QTextStream& s, const AbstractM
     QString className = metaClass->qualifiedCppName();
     QMap<QString, QString> funcs;
 
+    bool hasFunctions = false;
     foreach(QString funcName, m_sequenceProtocol.keys()) {
         const AbstractMetaFunction* func = metaClass->findFunction(funcName);
         funcs[funcName] = func ? cpythonFunctionName(func).prepend("&") : "0";
+        if (!hasFunctions && func)
+            hasFunctions = true;
+    }
+
+    //use default implementation
+    if (!hasFunctions) {
+        QString baseName = cpythonBaseName(metaClass->typeEntry());
+        funcs["__len__"] = baseName + "__len__";
+        funcs["__getitem__"] = baseName + "__getitem__";
+        funcs["__setitem__"] = baseName + "__setitem__";
     }
 
     s << "static PySequenceMethods Py" << className << "_as_sequence = {\n"
@@ -3819,3 +3841,45 @@ void CppGenerator::writeObjCopierFunction(QTextStream& s, const AbstractMetaClas
     s << '}' << endl << endl;
 
 }
+
+void CppGenerator::writeStdListWrapperMethods(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    //len
+    s << "Py_ssize_t " << cpythonBaseName(metaClass->typeEntry()) << "__len__" << "(PyObject* self)" << endl << '{' << endl;
+    s << INDENT << "if (Shiboken::cppObjectIsInvalid(self))" << endl;
+    s << INDENT << INDENT << "return 0;" << endl << endl;
+    s << INDENT << metaClass->qualifiedCppName() << " &cppSelf = Shiboken::Converter<" << metaClass->qualifiedCppName() <<"& >::toCpp(self);" << endl;
+    s << INDENT << "return cppSelf.size();" << endl;
+    s << "}" << endl;
+    
+    //getitem
+    s << "PyObject* " << cpythonBaseName(metaClass->typeEntry()) << "__getitem__" << "(PyObject* self, Py_ssize_t _i)" << endl << '{' << endl;
+    s << INDENT << "if (Shiboken::cppObjectIsInvalid(self))" << endl;
+    s << INDENT << INDENT << "return 0;" << endl << endl;
+    s << INDENT << metaClass->qualifiedCppName() << " &cppSelf = Shiboken::Converter<" << metaClass->qualifiedCppName() <<"& >::toCpp(self);" << endl;
+    s << INDENT << "if (_i < 0 || _i >= (Py_ssize_t) cppSelf.size()) {" << endl;
+    s << INDENT << INDENT <<  "PyErr_SetString(PyExc_IndexError, \"index out of bounds\");" << endl;
+    s << INDENT << INDENT << "return 0;" << endl << INDENT << "}" << endl;
+    s << INDENT << metaClass->qualifiedCppName() << "::iterator _item = cppSelf.begin();" << endl;
+    s << INDENT << "for(Py_ssize_t pos=0; pos < _i; pos++) _item++;" << endl;
+    s << INDENT << "return Shiboken::Converter<" << metaClass->qualifiedCppName() << "::value_type>::toPython(*_item);" << endl;
+    s << "}" << endl;
+
+    //setitem
+    s << "int " << cpythonBaseName(metaClass->typeEntry()) << "__setitem__" << "(PyObject* self, Py_ssize_t _i, PyObject* _value)" << endl << '{' << endl;
+    s << INDENT << "if (Shiboken::cppObjectIsInvalid(self))" << endl;
+    s << INDENT << INDENT << "return -1;" << endl;
+    s << INDENT << metaClass->qualifiedCppName() << " &cppSelf = Shiboken::Converter<" << metaClass->qualifiedCppName() <<"& >::toCpp(self);" << endl;
+    s << INDENT << "if (_i < 0 || _i >= (Py_ssize_t) cppSelf.size()) {" << endl;
+    s << INDENT << INDENT << "PyErr_SetString(PyExc_IndexError, \"list assignment index out of range\");" << endl;
+    s << INDENT << INDENT << "return -1;" << endl << INDENT << "}" << endl;
+    s << INDENT << metaClass->qualifiedCppName() << "::iterator _item = cppSelf.begin();" << endl;
+    s << INDENT << "for(Py_ssize_t pos=0; pos < _i; pos++) _item++;" << endl;
+
+    s << INDENT << metaClass->qualifiedCppName() << "::value_type cppValue = Shiboken::Converter<" <<  metaClass->qualifiedCppName() << "::value_type>::toCpp(_value);" << endl;
+    s << INDENT << "*_item = cppValue;" << endl;
+    s << INDENT << "return 0;";
+    s << endl << "}" << endl;
+}
+
+

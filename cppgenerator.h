@@ -193,6 +193,9 @@ private:
     void writeHashFunction(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeObjCopierFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
+    // Write default implementations for sequence protocol
+    void writeStdListWrapperMethods(QTextStream& s, const AbstractMetaClass* metaClass); 
+
     // Maps special function names to function parameters and return types
     // used by CPython API in the sequence protocol.
     QHash<QString, QPair<QString, QString> > m_sequenceProtocol;

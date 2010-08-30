@@ -39,6 +39,7 @@
         <conversion-rule file="map_conversions.h"/>
         <include file-name="map" location="global"/>
     </container-type>
+    <container-type name="List" type="list" />
 
     <function signature="sumComplexPair(std::pair&lt;Complex, Complex>)" />
     <function signature="gimmeComplexList()" />
@@ -108,6 +109,7 @@
         </add-function>
     </namespace-type>
 
+    <value-type name="IntList" />
     <value-type name="SampleNamespace::SomeClass" />
     <value-type name="SampleNamespace::SomeClass::SomeInnerClass" />
     <object-type name="SampleNamespace::SomeClass::SomeInnerClass::OkThisIsRecursiveEnough" />
