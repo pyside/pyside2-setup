@@ -408,6 +408,38 @@ void TestAbstractMetaClass::testObjectTypesMustNotHaveCopyConstructors()
     QCOMPARE(ctors.first()->minimalSignature(), QString("A()"));
 }
 
+void TestAbstractMetaClass::testIsPolymorphic()
+{
+    const char* cppCode = "\
+    class A\
+    {\
+    public:\
+        A();\
+        inline bool abc() const {}\
+    };\
+    \
+    class B : public A\
+    {\
+    public:\
+        B();\
+        inline bool abc() const {}\
+    };";
+    const char* xmlCode = "\
+    <typesystem package='Foo'>\
+        <primitive-type name='bool' />\
+        <value-type name='A' />\
+        <value-type name='B' />\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.count(), 2);
+    AbstractMetaClass* b = classes.findClass("A");
+
+    QVERIFY(!b->isPolymorphic());
+    AbstractMetaClass* a = classes.findClass("B");
+    QVERIFY(!a->isPolymorphic());
+}
 
 QTEST_APPLESS_MAIN(TestAbstractMetaClass)
 

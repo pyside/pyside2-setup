@@ -1283,7 +1283,7 @@ void AbstractMetaClass::setFunctions(const AbstractMetaFunctionList &functions)
         f->setOwnerClass(this);
 
         m_hasVirtualSlots = m_hasVirtualSlots || f->isVirtualSlot();
-        m_hasVirtuals = m_hasVirtuals || !f->isFinal() || f->isVirtualSlot() || hasVirtualDestructor();
+        m_hasVirtuals = m_hasVirtuals || f->isVirtualSlot() || hasVirtualDestructor();
         m_isPolymorphic = m_isPolymorphic || m_hasVirtuals;
         m_hasNonpublic = m_hasNonpublic || !f->isPublic();
 

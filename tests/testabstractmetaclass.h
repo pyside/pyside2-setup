@@ -42,6 +42,7 @@ private slots:
     void testClassInheritedDefaultConstructors();
     void testAbstractClassDefaultConstructors();
     void testObjectTypesMustNotHaveCopyConstructors();
+    void testIsPolymorphic();
 };
 
 #endif // TESTABSTRACTMETACLASS_H
