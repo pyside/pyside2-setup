@@ -932,6 +932,7 @@ public:
         return m_version;
     }
 
+
 private:
     QString m_name;
     Type m_type;
@@ -1378,7 +1379,8 @@ public:
             m_genericClass(false),
             m_typeFlags(0),
             m_copyableFlag(Unknown),
-            m_hashFunction("")
+            m_hashFunction(""),
+            m_baseContainerType(0)
     {
     }
 
@@ -1399,6 +1401,7 @@ public:
         centry->setDefaultSuperclass(defaultSuperclass());
         centry->setCodeSnips(codeSnips());
         centry->setTargetLangPackage(targetLangPackage());
+        centry->setBaseContainerType(baseContainerType());
 
         return centry;
     }
@@ -1579,6 +1582,16 @@ public:
         m_hashFunction = hashFunction;
     }
 
+    void setBaseContainerType(const ComplexTypeEntry *baseContainer)
+    {
+        m_baseContainerType = baseContainer;
+    }
+
+    const ComplexTypeEntry* baseContainerType() const
+    {
+        return m_baseContainerType;
+    }
+
 
 private:
     AddedFunctionList m_addedFunctions;
@@ -1601,6 +1614,8 @@ private:
     TypeFlags m_typeFlags;
     CopyableFlag m_copyableFlag;
     QString m_hashFunction;
+
+    const ComplexTypeEntry* m_baseContainerType;
 };
 
 class APIEXTRACTOR_API ContainerTypeEntry : public ComplexTypeEntry

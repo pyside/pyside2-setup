@@ -1475,6 +1475,7 @@ bool AbstractMetaBuilder::setupInheritance(AbstractMetaClass *metaClass)
             if (templ) {
                 setupInheritance(templ);
                 inheritTemplate(metaClass, templ, info);
+                metaClass->typeEntry()->setBaseContainerType(templ->typeEntry());
                 return true;
             }
         }
