@@ -33,15 +33,70 @@
  */
 
 #include "basewrapper.h"
+#include <cstddef>
+#include <fstream>
 #include "basewrapper_p.h"
 #include "bindingmanager.h"
 #include "google/dense_hash_map"
-#include <cstddef>
+#include "sbkdbg.h"
 
 namespace Shiboken
 {
 
 typedef google::dense_hash_map<const void*, PyObject*> WrapperMap;
+
+class Graph
+{
+public:
+    typedef std::list<SbkBaseWrapperType*> NodeList;
+    typedef google::dense_hash_map<SbkBaseWrapperType*, NodeList> Edges;
+
+    Edges m_edges;
+
+    Graph()
+    {
+        m_edges.set_empty_key(0);
+    }
+
+    void addEdge(SbkBaseWrapperType* from, SbkBaseWrapperType* to)
+    {
+        m_edges[from].push_back(to);
+    }
+
+#ifndef NDEBUG
+    void dumpDotGraph()
+    {
+        std::ofstream file("/tmp/shiboken_graph.dot");
+
+        file << "digraph D {\n";
+
+        Edges::const_iterator i = m_edges.begin();
+        for (; i != m_edges.end(); ++i) {
+            SbkBaseWrapperType* node1 = i->first;
+            const NodeList& nodeList = i->second;
+            NodeList::const_iterator j = nodeList.begin();
+            for (; j != nodeList.end(); ++j)
+                file << '"' << (*j)->super.ht_type.tp_name << "\" -> \"" << node1->super.ht_type.tp_name << "\"\n";
+        }
+        file << "}\n";
+    }
+#endif
+
+    SbkBaseWrapperType* identifyType(void* cptr, SbkBaseWrapperType* type, SbkBaseWrapperType* baseType) const
+    {
+        Edges::const_iterator edgesIt = m_edges.find(type);
+        if (edgesIt != m_edges.end()) {
+            const NodeList& adjNodes = m_edges.find(type)->second;
+            NodeList::const_iterator i = adjNodes.begin();
+            for (; i != adjNodes.end(); ++i) {
+                SbkBaseWrapperType* newType = identifyType(cptr, *i, baseType);
+                if (newType)
+                    return newType;
+            }
+        }
+        return type->type_discovery ? type->type_discovery(cptr, baseType) : 0;
+    }
+};
 
 
 #ifndef NDEBUG
@@ -58,6 +113,7 @@ static void showWrapperMap(const WrapperMap& wrapperMap)
 
 struct BindingManager::BindingManagerPrivate {
     WrapperMap wrapperMapper;
+    Graph classHierarchy;
     void releaseWrapper(void* cptr);
     void assignWrapper(PyObject* wrapper, const void* cptr);
 };
@@ -228,6 +284,17 @@ void BindingManager::transferOwnershipToCpp(SbkBaseWrapper* wrapper)
         SbkBaseWrapper_setOwnership(wrapper, false);
     else
         invalidateWrapper(wrapper);
+}
+
+void BindingManager::addClassInheritance(Shiboken::SbkBaseWrapperType* parent, Shiboken::SbkBaseWrapperType* child)
+{
+    m_d->classHierarchy.addEdge(parent, child);
+}
+
+SbkBaseWrapperType* BindingManager::resolveType(void* cptr, Shiboken::SbkBaseWrapperType* type)
+{
+    SbkBaseWrapperType* identifiedType = m_d->classHierarchy.identifyType(cptr, type, type);
+    return identifiedType ? identifiedType : type;
 }
 
 } // namespace Shiboken

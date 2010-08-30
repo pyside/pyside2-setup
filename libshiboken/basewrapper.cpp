@@ -264,11 +264,19 @@ void destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent)
 PyObject* SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
                              void* cptr,
                              bool hasOwnership,
-                             bool isExactType)
+                             bool isExactType, const char* typeName)
 {
     // Try to find the exact type of cptr.
-    if (!isExactType && instanceType->type_discovery)
-        instanceType = instanceType->type_discovery->getType(cptr, instanceType);
+    if (!isExactType) {
+        TypeResolver* tr = 0;
+        if (typeName) {
+            tr = TypeResolver::get(typeName);
+            if (tr)
+                instanceType = reinterpret_cast<SbkBaseWrapperType*>(tr->pythonType());
+        }
+        if (!tr)
+            instanceType = BindingManager::instance().resolveType(cptr, instanceType);
+    }
 
     SbkBaseWrapper* self = reinterpret_cast<SbkBaseWrapper*>(SbkBaseWrapper_TpNew(reinterpret_cast<PyTypeObject*>(instanceType), 0, 0));
     self->cptr[0] = cptr;
@@ -611,22 +619,6 @@ void setErrorAboutWrongArguments(PyObject* args, const char* funcName, const cha
     }
     PyErr_SetString(PyExc_TypeError, msg.c_str());
 
-}
-
-SbkBaseWrapperType* TypeDiscovery::getType(const void* cptr, SbkBaseWrapperType* instanceType) const
-{
-    TypeDiscoveryFuncList::const_reverse_iterator it = m_discoveryFunctions.rbegin();
-    for (; it != m_discoveryFunctions.rend(); ++it) {
-        SbkBaseWrapperType* type = (*it)(const_cast<void*>(cptr), instanceType);
-        if (type)
-            return type;
-    }
-    return instanceType;
-}
-
-void TypeDiscovery::addTypeDiscoveryFunction(Shiboken::TypeDiscoveryFunc func)
-{
-    m_discoveryFunctions.push_back(func);
 }
 
 class FindBaseTypeVisitor : public HierarchyVisitor

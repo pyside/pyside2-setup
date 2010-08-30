@@ -32,21 +32,25 @@
  * 02110-1301 USA
  */
 
-#ifndef OTHERMULTIPLEDERIVED_H
-#define OTHERMULTIPLEDERIVED_H
+#include "othermultiplederived.h"
 
-#include "libothermacros.h"
-#include "multiple_derived.h"
-#include "virtualmethods.h"
-
-class ObjectType;
-
-class LIBOTHER_API OtherMultipleDerived : public MDerived1
+VirtualMethods OtherMultipleDerived::returnUselessClass()
 {
-public:
-    // this will use CppCopier from other module (bug#142)
-    VirtualMethods returnUselessClass();
-    static Base1* createObject(const std::string& objName);
-};
+    return VirtualMethods();
+}
 
-#endif
+Base1* OtherMultipleDerived::createObject(const std::string& objName)
+{
+    if (objName == "Base1")
+        return new Base1;
+    else if (objName == "MDerived1")
+        return new MDerived1;
+    else if (objName == "SonOfMDerived1")
+        return new SonOfMDerived1;
+    else if (objName == "MDerived3")
+        return new MDerived3;
+    else if (objName == "OtherMultipleDerived")
+        return new OtherMultipleDerived;
+    return 0;
+}
+

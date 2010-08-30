@@ -4,6 +4,7 @@ set(libother_SRC
 number.cpp
 otherderived.cpp
 otherobjecttype.cpp
+othermultiplederived.cpp
 )
 
 add_definitions("-DLIBOTHER_BUILD")

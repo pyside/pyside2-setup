@@ -29,6 +29,7 @@
 import unittest
 
 from sample import *
+from other import *
 
 class TypeDiscoveryTest(unittest.TestCase):
 
@@ -41,6 +42,18 @@ class TypeDiscoveryTest(unittest.TestCase):
     def testAnotherImpossibleTypeDiscovery(self):
         a = Derived.triggerAnotherImpossibleTypeDiscovery()
         self.assertEqual(type(a), Derived)
+
+    def testMultipleInheritance(self):
+        obj = OtherMultipleDerived.createObject("Base1");
+        self.assertEqual(type(obj), Base1)
+        obj = OtherMultipleDerived.createObject("MDerived1");
+        self.assertEqual(type(obj), MDerived1)
+        obj = OtherMultipleDerived.createObject("SonOfMDerived1");
+        self.assertEqual(type(obj), SonOfMDerived1)
+        obj = OtherMultipleDerived.createObject("MDerived3");
+        self.assertEqual(type(obj), MDerived3)
+        obj = OtherMultipleDerived.createObject("OtherMultipleDerived");
+        self.assertEqual(type(obj), OtherMultipleDerived)
 
 if __name__ == '__main__':
     unittest.main()

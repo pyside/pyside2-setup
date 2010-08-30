@@ -56,6 +56,7 @@ extern "C"
 /// Function signature for the multiple inheritance information initializers that should be provided by classes with multiple inheritance.
 typedef int* (*MultipleInheritanceInitFunction)(const void*);
 struct SbkBaseWrapperType;
+
 /**
 *   Special cast function is used to correctly cast an object when it's
 *   part of a multiple inheritance hierarchy.
@@ -64,7 +65,6 @@ struct SbkBaseWrapperType;
 typedef void* (*SpecialCastFunction)(void*, SbkBaseWrapperType*);
 typedef void* (*ObjectCopierFunction)(const void*);
 typedef SbkBaseWrapperType* (*TypeDiscoveryFunc)(void*, SbkBaseWrapperType*);
-typedef std::list<TypeDiscoveryFunc> TypeDiscoveryFuncList;
 
 typedef void* (*ExtendedToCppFunc)(PyObject*);
 typedef bool (*ExtendedIsConvertibleFunc)(PyObject*);
@@ -75,14 +75,6 @@ typedef void (*DeleteUserDataFunc)(void*);
 extern LIBSHIBOKEN_API PyTypeObject SbkBaseWrapperType_Type;
 extern LIBSHIBOKEN_API SbkBaseWrapperType SbkBaseWrapper_Type;
 
-class LIBSHIBOKEN_API TypeDiscovery {
-public:
-    SbkBaseWrapperType* getType(const void* cptr, SbkBaseWrapperType* instanceType) const;
-    void addTypeDiscoveryFunction(TypeDiscoveryFunc func);
-private:
-    TypeDiscoveryFuncList m_discoveryFunctions;
-};
-
 /// PyTypeObject extended with C++ multiple inheritance information.
 struct LIBSHIBOKEN_API SbkBaseWrapperType
 {
@@ -91,7 +83,7 @@ struct LIBSHIBOKEN_API SbkBaseWrapperType
     MultipleInheritanceInitFunction mi_init;
     /// Special cast function, null if this class doesn't have multiple inheritance.
     SpecialCastFunction mi_specialcast;
-    TypeDiscovery* type_discovery;
+    TypeDiscoveryFunc type_discovery;
     ObjectCopierFunction obj_copier;
     /// Extended "isConvertible" function to be used when a conversion operator is defined in another module.
     ExtendedIsConvertibleFunc ext_isconvertible;
@@ -221,7 +213,8 @@ LIBSHIBOKEN_API PyObject*
 SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
                    void* cptr,
                    bool hasOwnership = true,
-                   bool isExactType = false);
+                   bool isExactType = false,
+                   const char* typeName = 0);
 
 LIBSHIBOKEN_API PyObject*
 SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*);

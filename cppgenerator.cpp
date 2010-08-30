@@ -369,7 +369,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     writeClassDefinition(s, metaClass);
     s << endl;
 
-    if (metaClass->isPolymorphic())
+    if (metaClass->isPolymorphic() && metaClass->baseClass())
         writeTypeDiscoveryFunction(s, metaClass);
 
 
@@ -2217,7 +2217,6 @@ void CppGenerator::writeSpecialCastFunction(QTextStream& s, const AbstractMetaCl
     s << "static void* " << cpythonSpecialCastFunctionName(metaClass) << "(void* obj, SbkBaseWrapperType* desiredType)\n";
     s << "{\n";
     s << INDENT << className << "* me = reinterpret_cast<" << className << "*>(obj);\n";
-    AbstractMetaClassList bases = getBaseClasses(metaClass);
     bool firstClass = true;
     foreach (const AbstractMetaClass* baseClass, getAllAncestors(metaClass)) {
         s << INDENT << (!firstClass ? "else " : "") << "if (desiredType == reinterpret_cast<SbkBaseWrapperType*>(" << cpythonTypeNameExt(baseClass->typeEntry()) << "))\n";
@@ -3277,8 +3276,8 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     if (metaClass->baseClass())
         s << INDENT << pyTypeName << ".super.ht_type.tp_base = " << cpythonTypeNameExt(metaClass->baseClass()->typeEntry()) << ';' << endl;
     // Multiple inheritance
+    const AbstractMetaClassList baseClasses = getBaseClasses(metaClass);
     if (metaClass->baseClassNames().size() > 1) {
-        AbstractMetaClassList baseClasses = getBaseClasses(metaClass);
         s << INDENT << pyTypeName << ".super.ht_type.tp_bases = PyTuple_Pack(";
         s << baseClasses.size();
         s << ',' << endl;
@@ -3299,21 +3298,11 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     // Set typediscovery struct or fill the struct of another one
     if (metaClass->isPolymorphic()) {
         s << INDENT << "// Fill type discovery information"  << endl;
-        if (!metaClass->baseClass()) {
-            s << INDENT << cpythonTypeName(metaClass) << ".type_discovery = new Shiboken::TypeDiscovery;" << endl;
-            s << INDENT << cpythonTypeName(metaClass) << ".type_discovery->addTypeDiscoveryFunction(&";
-            s << cpythonBaseName(metaClass) << "_typeDiscovery);" << endl;
-        } else {
-            // FIXME: What about mi classes?
-            AbstractMetaClass* baseClass = metaClass->baseClass();
-            while (baseClass->baseClass())
-                baseClass = baseClass->baseClass();
-            s << INDENT << cpythonTypeName(metaClass) << ".type_discovery = " ;
-            s << "reinterpret_cast<SbkBaseWrapperType*>(" << cpythonTypeNameExt(baseClass->typeEntry()) << ")->type_discovery;" << endl;
-
-            if (!metaClass->typeEntry()->polymorphicIdValue().isEmpty()) {
-                s << INDENT << cpythonTypeName(metaClass) << ".type_discovery->addTypeDiscoveryFunction(&";
-                s << cpythonBaseName(metaClass) << "_typeDiscovery);" << endl;
+        if (metaClass->baseClass()) {
+            s << INDENT << cpythonTypeName(metaClass) << ".type_discovery = &" << cpythonBaseName(metaClass) << "_typeDiscovery;" << endl;
+            s << INDENT << "Shiboken::BindingManager& bm = Shiboken::BindingManager::instance();" << endl;
+            foreach (const AbstractMetaClass* base, baseClasses) {
+                s << INDENT << "bm.addClassInheritance(reinterpret_cast<SbkBaseWrapperType*>(" << cpythonTypeNameExt(base->typeEntry()) << "), &" << cpythonTypeName(metaClass) << ");" << endl;
             }
         }
         s << endl;
@@ -3389,16 +3378,8 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
 void CppGenerator::writeTypeDiscoveryFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     QString polymorphicExpr = metaClass->typeEntry()->polymorphicIdValue();
-    bool shouldGenerateIt = !polymorphicExpr.isEmpty() || !metaClass->baseClass();
-    if (!shouldGenerateIt)
-        return;
 
     s << "static SbkBaseWrapperType* " << cpythonBaseName(metaClass) << "_typeDiscovery(void* cptr, SbkBaseWrapperType* instanceType)\n{" << endl;
-    s << INDENT << "if (instanceType->mi_specialcast)" << endl;
-    {
-        Indentation indent(INDENT);
-        s << INDENT << "cptr = instanceType->mi_specialcast(cptr, &" << cpythonTypeName(metaClass) << ");" << endl;
-    }
 
     if (!metaClass->baseClass()) {
         s << INDENT << "TypeResolver* typeResolver = TypeResolver::get(typeid(*reinterpret_cast<"
@@ -3408,12 +3389,30 @@ void CppGenerator::writeTypeDiscoveryFunction(QTextStream& s, const AbstractMeta
             Indentation indent(INDENT);
             s << INDENT << "return reinterpret_cast<SbkBaseWrapperType*>(typeResolver->pythonType());" << endl;
         }
-    } else {
+    } else if (!polymorphicExpr.isEmpty()) {
         polymorphicExpr = polymorphicExpr.replace("%1", " reinterpret_cast<"+metaClass->qualifiedCppName()+"*>(cptr)");
         s << INDENT << " if (" << polymorphicExpr << ")" << endl;
         {
             Indentation indent(INDENT);
             s << INDENT << "return &" << cpythonTypeName(metaClass) << ';' << endl;
+        }
+    } else if (metaClass->isPolymorphic()) {
+        AbstractMetaClassList ancestors = getAllAncestors(metaClass);
+        foreach (AbstractMetaClass* ancestor, ancestors) {
+            if (ancestor->baseClass())
+                continue;
+            if (ancestor->isPolymorphic()) {
+                s << INDENT << "if (instanceType == reinterpret_cast<Shiboken::SbkBaseWrapperType*>(Shiboken::SbkType<"
+                            << ancestor->qualifiedCppName() << " >()) && dynamic_cast<" << metaClass->qualifiedCppName()
+                            << "*>(reinterpret_cast<"<< ancestor->qualifiedCppName() << "*>(cptr)))" << endl;
+                Indentation indent(INDENT);
+                s << INDENT << "return &" << cpythonTypeName(metaClass) << ';' << endl;
+            } else {
+                ReportHandler::warning(metaClass->qualifiedCppName() + " inherits from a non polymorphic type ("
+                                       + ancestor->qualifiedCppName() + "), type discovery based on RTTI is "
+                                       "impossible, write a polymorphic-id-expresison for this type.");
+            }
+
         }
     }
     s << INDENT << "return 0;" << endl;

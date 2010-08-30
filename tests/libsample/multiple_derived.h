@@ -36,6 +36,7 @@
 #define MDERIVED_H
 
 #include "libsamplemacros.h"
+#include <string>
 
 class Base1
 {
@@ -97,7 +98,7 @@ class Base3
 {
 public:
     explicit Base3(int val = 3) : m_value(val) {}
-    ~Base3() {}
+    virtual ~Base3() {}
     int base3Method() { return m_value; }
 private:
     int m_value;
@@ -107,7 +108,7 @@ class Base4
 {
 public:
     Base4() : m_value(4) {}
-    ~Base4() {}
+    virtual ~Base4() {}
     int base4Method() { return m_value; }
 private:
     int m_value;

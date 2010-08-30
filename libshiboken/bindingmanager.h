@@ -42,6 +42,7 @@ namespace Shiboken
 {
 
 struct SbkBaseWrapper;
+struct SbkBaseWrapperType;
 
 class LIBSHIBOKEN_API BindingManager
 {
@@ -73,6 +74,8 @@ public:
         transferOwnershipToCpp(reinterpret_cast<SbkBaseWrapper*>(wrapper));
     }
 
+    void addClassInheritance(SbkBaseWrapperType* parent, SbkBaseWrapperType* child);
+    SbkBaseWrapperType* resolveType(void* cptr, SbkBaseWrapperType* type);
 private:
     ~BindingManager();
     // disable copy

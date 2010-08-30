@@ -38,6 +38,7 @@
 #include <Python.h>
 #include <limits>
 #include <memory>
+#include <typeinfo>
 
 #include "pyenum.h"
 #include "basewrapper.h"
@@ -119,8 +120,11 @@ struct CppObjectCopier<T, true>
 template<typename T>
 inline PyObject* createWrapper(const T* cppobj, bool hasOwnership = false, bool isExactType = false)
 {
+    const char* typeName = 0;
+    if (!isExactType)
+        typeName = typeid(*const_cast<T*>(cppobj)).name();
     return SbkBaseWrapper_New(reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()),
-                              const_cast<T*>(cppobj), hasOwnership, isExactType);
+                              const_cast<T*>(cppobj), hasOwnership, isExactType, typeName);
 }
 
 // Base Conversions ----------------------------------------------------------
