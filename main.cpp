@@ -29,7 +29,11 @@
 #include "generatorrunnerconfig.h"
 #include "generator.h"
 
-#define PATH_SPLITTER ":"
+#ifdef _WINDOWS
+    #define PATH_SPLITTER ";"
+#else
+    #define PATH_SPLITTER ":"
+#endif
 
 static void printOptions(QTextStream& s, const QMap<QString, QString>& options) {
     QMap<QString, QString>::const_iterator it = options.constBegin();
