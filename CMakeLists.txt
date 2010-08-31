@@ -34,6 +34,12 @@ else()
     endif()
 endif()
 
+if (WIN32)
+    set(PATH_SEP "\;")
+else()
+    set(PATH_SEP ":")
+endif()
+
 if(WIN32 OR AVOID_PROTECTED_HACK)
     message(STATUS "Avoiding protected hack!")
     add_definitions("-DAVOID_PROTECTED_HACK")
