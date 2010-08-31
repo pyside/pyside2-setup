@@ -39,14 +39,14 @@
 #include "libsamplemacros.h"
 
 template<class T>
-class LIBSAMPLE_API List : public std::list<T>
+class List : public std::list<T>
 {
 };
 
-class LIBSAMPLE_API IntList : public List<int>
+class IntList : public List<int>
 {
-    public:
-        void append(int v) { insert(end(), v); }
+public:
+    inline void append(int v) { insert(end(), v); }
 };
 
 #endif // LIST_H
