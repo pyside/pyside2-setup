@@ -1783,6 +1783,37 @@ QString FunctionModification::toString() const
     return str;
 }
 
+bool FunctionModification::operator!=(const FunctionModification& other) const
+{
+    return !(*this == other);
+}
+
+bool FunctionModification::operator==(const FunctionModification& other) const
+{
+    if (signature != other.signature)
+        return false;
+
+    if (association != other.association)
+        return false;
+
+    if (modifiers != other.modifiers)
+        return false;
+
+    if (removal != other.removal)
+        return false;
+
+    if (m_thread != other.m_thread)
+        return false;
+
+    if (m_allowThread != other.m_allowThread)
+        return false;
+
+    if (m_version != other.m_version)
+        return false;
+
+    return true;
+}
+
 static AddedFunction::TypeInfo parseType(const QString& signature, int startPos = 0, int* endPos = 0)
 {
     AddedFunction::TypeInfo result;

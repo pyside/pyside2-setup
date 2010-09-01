@@ -33,6 +33,7 @@ class TestModifyFunction : public QObject
         void testOwnershipTransfer();
         void testWithApiVersion();
         void testRenameArgument();
+        void invalidateAfterUse();
 };
 
 #endif

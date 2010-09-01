@@ -690,8 +690,9 @@ FunctionModificationList AbstractMetaFunction::modifications(const AbstractMetaC
     FunctionModificationList mods;
     while (implementor) {
         mods += implementor->typeEntry()->functionModifications(minimalSignature());
-        if (implementor == implementor->baseClass() || implementor == implementingClass())
-            break;
+        if ((implementor == implementor->baseClass()) ||
+            (implementor == implementingClass() && (mods.size() > 0)))
+                break;
         implementor = implementor->baseClass();
     }
     return mods;

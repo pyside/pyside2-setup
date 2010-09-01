@@ -79,6 +79,92 @@ void TestModifyFunction::testOwnershipTransfer()
     QCOMPARE(func->ownership(func->ownerClass(), TypeSystem::TargetLangCode, 0), TypeSystem::CppOwnership);
 }
 
+
+void TestModifyFunction::invalidateAfterUse()
+{
+    const char* cppCode ="\
+    struct A {\
+        virtual void call(int *a);\
+    };\
+    struct B : A {\
+    };\
+    struct C : B {\
+        virtual void call2(int *a);\
+    };\
+    struct D : C {\
+        virtual void call2(int *a);\
+    };\
+    struct E : D {\
+    };\
+    ";
+    const char* xmlCode = "\
+    <typesystem package='Foo'> \
+        <primitive-type name='int'/>\
+        <object-type name='A'> \
+        <modify-function signature='call(int*)'>\
+          <modify-argument index='1' invalidate-after-use='true'/>\
+        </modify-function>\
+        </object-type>\
+        <object-type name='B' /> \
+        <object-type name='C'> \
+        <modify-function signature='call2(int*)'>\
+          <modify-argument index='1' invalidate-after-use='true'/>\
+        </modify-function>\
+        </object-type>\
+        <object-type name='D'> \
+        <modify-function signature='call2(int*)'>\
+          <modify-argument index='1' invalidate-after-use='true'/>\
+        </modify-function>\
+        </object-type>\
+        <object-type name='E' /> \
+    </typesystem>";
+    TestUtil t(cppCode, xmlCode, false, 0.1);
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* classB = classes.findClass("B");
+    const AbstractMetaFunction* func = classB->findFunction("call");
+    QCOMPARE(func->modifications().size(), 1);
+    QCOMPARE(func->modifications().at(0).argument_mods.size(), 1);
+    QVERIFY(func->modifications().at(0).argument_mods.at(0).resetAfterUse);
+
+    AbstractMetaClass* classC = classes.findClass("C");
+    QVERIFY(classC);
+    func = classC->findFunction("call");
+    QCOMPARE(func->modifications().size(), 1);
+    QCOMPARE(func->modifications().at(0).argument_mods.size(), 1);
+    QVERIFY(func->modifications().at(0).argument_mods.at(0).resetAfterUse);
+
+    func = classC->findFunction("call2");
+    QCOMPARE(func->modifications().size(), 1);
+    QCOMPARE(func->modifications().at(0).argument_mods.size(), 1);
+    QVERIFY(func->modifications().at(0).argument_mods.at(0).resetAfterUse);
+
+    AbstractMetaClass* classD =  classes.findClass("D");
+    QVERIFY(classD);
+    func = classD->findFunction("call");
+    QCOMPARE(func->modifications().size(), 1);
+    QCOMPARE(func->modifications().at(0).argument_mods.size(), 1);
+    QVERIFY(func->modifications().at(0).argument_mods.at(0).resetAfterUse);
+
+    func = classD->findFunction("call2");
+    QCOMPARE(func->modifications().size(), 1);
+    QCOMPARE(func->modifications().at(0).argument_mods.size(), 1);
+    QVERIFY(func->modifications().at(0).argument_mods.at(0).resetAfterUse);
+
+    AbstractMetaClass* classE = classes.findClass("E");
+    QVERIFY(classE);
+    func = classE->findFunction("call");
+    QVERIFY(func);
+    QCOMPARE(func->modifications().size(), 1);
+    QCOMPARE(func->modifications().at(0).argument_mods.size(), 1);
+    QVERIFY(func->modifications().at(0).argument_mods.at(0).resetAfterUse);
+
+    func = classE->findFunction("call2");
+    QVERIFY(func);
+    QCOMPARE(func->modifications().size(), 1);
+    QCOMPARE(func->modifications().at(0).argument_mods.size(), 1);
+    QVERIFY(func->modifications().at(0).argument_mods.at(0).resetAfterUse);
+}
+
 void TestModifyFunction::testWithApiVersion()
 {
     const char* cppCode ="\

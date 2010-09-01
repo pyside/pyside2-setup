@@ -401,6 +401,10 @@ struct APIEXTRACTOR_API FunctionModification: public Modification
         return m_version;
     }
 
+    bool operator!=(const FunctionModification& other) const;
+    bool operator==(const FunctionModification& other) const;
+
+
     QString toString() const;
 
     QString signature;
