@@ -199,14 +199,6 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
     }
 }
 
-void HeaderGenerator::writeTypeCheckMacro(QTextStream& s, const TypeEntry* type)
-{
-    QString pyTypeName = cppApiVariableName() + '[' + getTypeIndexVariableName(type) + ']';
-    QString checkFunction = cpythonCheckFunction(type);
-    s << "#define " << checkFunction << "(op) PyObject_TypeCheck(op, (PyTypeObject*)";
-    s << pyTypeName << ')' << endl;
-}
-
 void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* type)
 {
     s << "template<>" << endl;
@@ -328,10 +320,6 @@ void HeaderGenerator::finishGeneration()
     macrosStream << "// Macros for type check" << endl;
     foreach (const AbstractMetaEnum* cppEnum, globalEnums()) {
         includes << cppEnum->typeEntry()->include();
-        writeTypeCheckMacro(macrosStream, cppEnum->typeEntry());
-        FlagsTypeEntry* flags = cppEnum->typeEntry()->flags();
-        if (flags)
-            writeTypeCheckMacro(macrosStream, flags);
         writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
         convDecl << endl;
         writeSbkTypeFunction(typeFunctions, cppEnum);
@@ -348,13 +336,10 @@ void HeaderGenerator::finishGeneration()
         foreach (const AbstractMetaEnum* cppEnum, metaClass->enums()) {
             EnumTypeEntry* enumType = cppEnum->typeEntry();
             includes << enumType->include();
-            writeTypeCheckMacro(macrosStream, enumType);
             writeTypeConverterDecl(convDecl, enumType);
             FlagsTypeEntry* flagsEntry = enumType->flags();
-            if (flagsEntry) {
-                writeTypeCheckMacro(macrosStream, flagsEntry);
+            if (flagsEntry)
                 writeTypeConverterDecl(convDecl, flagsEntry);
-            }
             convDecl << endl;
             writeSbkTypeFunction(typeFunctions, cppEnum);
         }
@@ -362,7 +347,6 @@ void HeaderGenerator::finishGeneration()
         if (!metaClass->isNamespace()) {
             writeSbkTypeFunction(typeFunctions, metaClass);
             writeSbkCopyCppObjectFunction(convDecl, metaClass);
-            writeTypeCheckMacro(macrosStream, classType);
             writeTypeConverterDecl(convDecl, classType);
             writeTypeConverterImpl(convImpl, classType);
             convDecl << endl;

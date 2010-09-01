@@ -50,6 +50,8 @@
 #define PyObject_Check(X) true
 #include "autodecref.h"
 
+#define SbkNumber_Check(X) (PyInt_Check(X) || PyFloat_Check(X) || PyLong_Check(X))
+
 namespace Shiboken
 {
 /**
@@ -380,7 +382,7 @@ template <typename PyIntEquiv>
 struct Converter_PyInt
 {
     static inline bool checkType(PyObject* pyobj) { return PyInt_Check(pyobj); }
-    static inline bool isConvertible(PyObject* pyobj) { return PyNumber_Check(pyobj); }
+    static inline bool isConvertible(PyObject* pyobj) { return SbkNumber_Check(pyobj); }
     static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<PyIntEquiv*>(cppobj)); }
     static inline PyObject* toPython(const PyIntEquiv& cppobj) { return PyInt_FromLong((long) cppobj); }
     static PyIntEquiv toCpp(PyObject* pyobj)
@@ -409,7 +411,7 @@ struct Converter_PyULongInt : Converter_PyInt<T>
 
 
 /// Check if we can treat the pyobj as a char, i.e. it's a number or a string with just one character.
-#define SbkChar_Check(pyobj) (PyNumber_Check(pyobj) || (PyString_Check(pyobj) && PyString_Size(pyobj) == 1))
+#define SbkChar_Check(pyobj) (SbkNumber_Check(pyobj) || (PyString_Check(pyobj) && PyString_Size(pyobj) == 1))
 
 /// Specialization to convert char and unsigned char, it accepts Python numbers and strings with just one character.
 template <typename CharType>
@@ -478,7 +480,7 @@ template <typename PyFloatEquiv>
 struct Converter_PyFloat
 {
     static inline bool checkType(PyObject* obj) { return PyFloat_Check(obj); }
-    static inline bool isConvertible(PyObject* obj) { return PyNumber_Check(obj); }
+    static inline bool isConvertible(PyObject* obj) { return SbkNumber_Check(obj); }
     static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<PyFloatEquiv*>(cppobj)); }
     static inline PyObject* toPython(PyFloatEquiv cppobj) { return PyFloat_FromDouble((double) cppobj); }
     static inline PyFloatEquiv toCpp(PyObject* pyobj)

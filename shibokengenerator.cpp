@@ -779,21 +779,13 @@ bool ShibokenGenerator::visibilityModifiedToPrivate(const AbstractMetaFunction* 
     return false;
 }
 
-static QString checkFunctionName(QString baseName, bool genericNumberType, bool checkExact)
-{
-    // TODO: Remove checkExact argument.
-    return QString("%1_Check%2")
-           .arg((genericNumberType && ShibokenGenerator::isNumber(baseName) ? "PyNumber" : baseName))
-           .arg((checkExact && !genericNumberType ? "Exact" : ""));
-}
-
 QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType, bool genericNumberType)
 {
     QString baseName = cpythonBaseName(metaType);
     if (metaType->typeEntry()->isCustom()) {
         return guessCPythonCheckFunction(metaType->typeEntry()->name());
     } else if (isNumber(baseName)) {
-        return genericNumberType ? "PyNumber_Check" : baseName+"_Check";
+        return genericNumberType ? "SbkNumber_Check" : baseName+"_Check";
     } else {
         QString str;
         QTextStream s(&str);
@@ -803,11 +795,20 @@ QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType
     }
 }
 
-QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool genericNumberType, bool checkExact)
+QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool genericNumberType)
 {
-    if (type->isCustom())
+    QString baseName = cpythonBaseName(type);
+    if (type->isCustom()) {
         return guessCPythonCheckFunction(type->name());
-    return checkFunctionName(cpythonBaseName(type), genericNumberType, checkExact);
+    } else if (isNumber(baseName)) {
+        return genericNumberType ? "SbkNumber_Check" : baseName+"_Check";
+    } else {
+        QString str;
+        QTextStream s(&str);
+        writeBaseConversion(s, type);
+        s.flush();
+        return str + "checkType";
+    }
 }
 
 QString ShibokenGenerator::guessCPythonCheckFunction(const QString& type)
@@ -846,7 +847,7 @@ QString ShibokenGenerator::guessCPythonIsConvertible(const QString& type)
 QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry* type, bool genericNumberType, bool checkExact)
 {
     if (checkExact)
-        return cpythonCheckFunction(type, genericNumberType, checkExact);
+        return cpythonCheckFunction(type, genericNumberType);
     if (type->isCustom())
         return guessCPythonIsConvertible(type->name());
     QString baseName;
@@ -864,7 +865,7 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* 
     if (metaType->typeEntry()->isCustom()) {
         return guessCPythonCheckFunction(metaType->typeEntry()->name());
     } else if (isNumber(baseName)) {
-        return genericNumberType ? "PyNumber_Check" : baseName+"_Check";
+        return genericNumberType ? "SbkNumber_Check" : baseName+"_Check";
     } else {
         QString str;
         QTextStream s(&str);

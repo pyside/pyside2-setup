@@ -42,7 +42,6 @@ private:
     void writeFunction(QTextStream& s, const AbstractMetaFunction* func) const;
     void writePureVirtualEmptyImpl(QTextStream& , const AbstractMetaFunction* func) const;
     void writeDefaultImplementation(QTextStream& s, const AbstractMetaFunction* func) const;
-    void writeTypeCheckMacro(QTextStream& s, const TypeEntry* type);
     void writeTypeConverterDecl(QTextStream& s, const TypeEntry* type);
     void writeSbkTypeFunction(QTextStream& s, const AbstractMetaEnum* cppEnum);
     void writeSbkTypeFunction(QTextStream& s, const AbstractMetaClass* cppClass);
