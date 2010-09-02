@@ -24,6 +24,18 @@
 #include <string.h>
 #include <memory>
 
+// Stride calculation
+template <typename T>
+struct Tchar {
+  T t;
+  char c;
+};
+
+#define strideof(T)                            \
+  ((sizeof(Tchar<T>) > sizeof(T)) ?            \
+  sizeof(Tchar<T>)-sizeof(T) : sizeof(T))
+
+
 /**The allocator which uses fixed size blocks for allocation of its elements.
 Block size is currently 64k, allocated space is not reclaimed,
 if the size of the element being allocated extends the amount of free
@@ -91,6 +103,12 @@ public:
     _M_current_index += bytes;
 
     return p;
+  }
+
+  pointer allocate(size_type __n, size_type stride, const void* = 0) {
+    if (reinterpret_cast<size_type>(_M_current_block + _M_current_index) % stride > 0)
+      _M_current_index += stride - reinterpret_cast<size_type>(_M_current_block + _M_current_index) % stride;
+    return allocate(__n);
   }
 
   /**Deallocate does nothing in this implementation.*/

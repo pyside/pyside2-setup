@@ -39,6 +39,11 @@ class pp_symbol
         static rxx_allocator<char>__allocator;
         return __allocator;
     }
+    static rxx_allocator<pp_fast_string> &ppfs_allocator_instance ()
+    {
+        static rxx_allocator<pp_fast_string>__ppfs_allocator;
+        return __ppfs_allocator;
+    }
 
 public:
     static int &N() {
@@ -52,7 +57,7 @@ public:
         memcpy(data, __data, __size);
         data[__size] = '\0';
 
-        char *where = allocator_instance().allocate(sizeof(pp_fast_string));
+        pp_fast_string *where = ppfs_allocator_instance ().allocate (sizeof (pp_fast_string));
         return new(where) pp_fast_string(data, __size);
     }
 
@@ -71,7 +76,7 @@ public:
         std::copy(__first, __last, data);
         data[__size] = '\0';
 
-        char *where = allocator_instance().allocate(sizeof(pp_fast_string));
+        pp_fast_string *where = ppfs_allocator_instance ().allocate (sizeof (pp_fast_string));
         return new(where) pp_fast_string(data, __size);
     }
 

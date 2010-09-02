@@ -35,11 +35,17 @@ class pool
 
 public:
     inline void *allocate(std::size_t __size);
+    inline void *allocate(std::size_t __size, std::size_t __stride);
 };
 
 inline void *pool::allocate(std::size_t __size)
 {
     return __alloc.allocate(__size);
+}
+
+inline void *pool::allocate(std::size_t __size, std::size_t __stride)
+{
+  return __alloc.allocate(__size, __stride);
 }
 
 #endif

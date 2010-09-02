@@ -862,7 +862,7 @@ struct QEnumsAST : public DeclarationAST
 template <class _Tp>
 _Tp *CreateNode(pool *memory_pool)
 {
-    _Tp *node = reinterpret_cast<_Tp*>(memory_pool->allocate(sizeof(_Tp)));
+    _Tp *node = reinterpret_cast<_Tp*>(memory_pool->allocate(sizeof(_Tp), strideof(_Tp)));
     node->kind = _Tp::__node_kind;
     return node;
 }

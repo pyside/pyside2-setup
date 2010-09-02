@@ -35,7 +35,7 @@ struct ListNode {
     mutable const ListNode<Tp> *next;
 
     static ListNode *create(const Tp &element, pool *p) {
-        ListNode<Tp> *node = new(p->allocate(sizeof(ListNode))) ListNode();
+        ListNode<Tp> *node = new(p->allocate(sizeof(ListNode), strideof(ListNode))) ListNode();
         node->element = element;
         node->index = 0;
         node->next = node;
