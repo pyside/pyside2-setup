@@ -659,7 +659,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             if (arg_mod.resetAfterUse) {
                 s << INDENT << "BindingManager::instance().invalidateWrapper(PyTuple_GET_ITEM(pyargs, ";
                 s << (arg_mod.index - 1) << "));" << endl;
-            } else if ((arg_mod.index == 0)  && (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::TargetLangOwnership)) {
+            } else if ((arg_mod.index == 0)  && (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::CppOwnership)) {
+                s << INDENT << "BindingManager::instance().invalidateWrapper(" << PYTHON_RETURN_VAR  ".object());" << endl;
                 transferReturnToCpp = true;
             }
         }
