@@ -52,6 +52,8 @@ public:
 
     inline void setX(double x) { m_x = x; }
     inline void setY(double y) { m_y = y; }
+    inline void setXAsUint(unsigned int x) { m_x = x; }
+    inline void setYAsUint(unsigned int y) { m_y = y; }
 
     Point* copy() const;
 

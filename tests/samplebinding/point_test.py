@@ -78,6 +78,11 @@ class PointTest(unittest.TestCase):
         self.assertEqual(sys.getrefcount(pt1), refcount1 + 1)
         self.assertEqual(sys.getrefcount(pt1), sys.getrefcount(pt2))
 
+    def testUintOverflow(self):
+        pt1 = Point(0.0, 0.0)
+        self.assertRaises(OverflowError, pt1.setXAsUint, 840835495615213080)
+        self.assertEqual(pt1.x(), 0.0)
+
 if __name__ == '__main__':
     unittest.main()
 

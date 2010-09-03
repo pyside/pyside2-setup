@@ -1769,9 +1769,11 @@ void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& o
 
     int numRemovedArgs = OverloadData::numberOfRemovedArguments(func);
 
+    s << INDENT << "if(!PyErr_Occurred()) {" << endl;
     writeMethodCall(s, func, func->arguments().size() - numRemovedArgs);
     if (!func->isConstructor())
         writeNoneReturn(s, func, overloadData.hasNonVoidReturnType());
+    s << INDENT << "}"  << endl;
 }
 
 void CppGenerator::writeNamedArgumentResolution(QTextStream& s, const AbstractMetaFunction* func, bool usePyArgs)
