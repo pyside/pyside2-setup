@@ -1901,9 +1901,13 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     if (convRules.size())
         writeCodeSnips(s, convRules, CodeSnip::Beginning, TypeSystem::TargetLangCode, func);
 
+    // Code to restore the threadSaver has been written?
+    bool threadRestored = false;
+
     if (!func->isUserAdded()) {
         bool badModifications = false;
         QStringList userArgs;
+
         if (!func->isCopyConstructor()) {
             int removedArgs = 0;
             for (int i = 0; i < maxArgs + removedArgs; i++) {
@@ -1979,9 +1983,9 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             // means of calling the method is provided (as with code injection)
             // the generator must write a compiler error line stating the situation.
             if (func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode).isEmpty()) {
-                s << INDENT << "#error No way to call \"" << func->ownerClass()->name();
-                s << "::" << func->minimalSignature();
-                s << "\" with the modifications described in the type system file" << endl;
+                qFatal(qPrintable("No way to call \"" + func->ownerClass()->name()
+                         + "::" + func->minimalSignature()
+                         +"\" with the modifications described in the type system file"));
             }
         } else if (func->isOperatorOverload()) {
             QString firstArg("(*" CPP_SELF_VAR ")");
@@ -2044,37 +2048,44 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             }
         }
 
-        if (!badModifications) {
-            if (!injectedCodeCallsCppFunction(func)) {
-               s << INDENT;
-                if (isCtor) {
-                    s << "cptr = ";
-                } else if (func->type() && !func->isInplaceOperator()) {
+        if (!injectedCodeCallsCppFunction(func)) {
+            s << INDENT;
+            if (isCtor) {
+                s << "cptr = ";
+            } else if (func->type() && !func->isInplaceOperator()) {
 #ifdef AVOID_PROTECTED_HACK
-                    QString enumName;
-                    const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(func->type());
-                    if (metaEnum) {
-                        if (metaEnum->isProtected())
-                            enumName = protectedEnumSurrogateName(metaEnum);
-                        else
-                            enumName = func->type()->cppSignature();
-                        methodCall.prepend(enumName + '(');
-                        methodCall.append(')');
-                        s << enumName;
-                    } else
+                QString enumName;
+                const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(func->type());
+                if (metaEnum) {
+                    if (metaEnum->isProtected())
+                        enumName = protectedEnumSurrogateName(metaEnum);
+                    else
+                        enumName = func->type()->cppSignature();
+                    methodCall.prepend(enumName + '(');
+                    methodCall.append(')');
+                    s << enumName;
+                } else
 #endif
-                        s << func->type()->cppSignature();
-                    s << " " CPP_RETURN_VAR " = ";
-                }
-                s << methodCall << ';' << endl;
-                if (!isCtor && !func->isInplaceOperator() && func->type()) {
-                    s << INDENT << PYTHON_RETURN_VAR " = ";
-                    writeToPythonConversion(s, func->type(), func->ownerClass(), CPP_RETURN_VAR);
-                    s << ';' << endl;
-                }
+                    s << func->type()->cppSignature();
+                s << " " CPP_RETURN_VAR " = ";
+            }
+            s << methodCall << ';' << endl;
+
+            if (func->allowThread()) {
+                s << INDENT << THREAD_STATE_SAVER_VAR ".restore();" << endl;
+                threadRestored = true;
+            }
+
+            if (!isCtor && !func->isInplaceOperator() && func->type()) {
+                s << INDENT << PYTHON_RETURN_VAR " = ";
+                writeToPythonConversion(s, func->type(), func->ownerClass(), CPP_RETURN_VAR);
+                s << ';' << endl;
             }
         }
     }
+
+    if (!threadRestored && func->allowThread())
+        s << INDENT << THREAD_STATE_SAVER_VAR ".restore();" << endl;
 
     if (func->hasInjectedCode() && !func->isConstructor()) {
         s << endl;
@@ -2152,9 +2163,6 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         }
     }
     writeParentChildManagement(s, func, !hasReturnPolicy);
-
-    if (func->allowThread())
-        s << INDENT << THREAD_STATE_SAVER_VAR ".restore();" << endl;
 }
 
 QStringList CppGenerator::getAncestorMultipleInheritance(const AbstractMetaClass* metaClass)
