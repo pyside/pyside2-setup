@@ -10,6 +10,7 @@ find_package(LibXslt 1.1.19)
 
 option(DISABLE_DOCSTRINGS "Disable documentation extraction." FALSE)
 option(BUILD_TESTS "Build tests." TRUE)
+option(ENABLE_VERSION_SUFFIX "Used to use current version in suffix to generated files. This is used to allow multiples versions installed simultaneous." FALSE)
 
 if (NOT DISABLE_DOCSTRINGS)
     if (NOT LIBXSLT_FOUND OR NOT LIBXML2_FOUND)
@@ -57,6 +58,12 @@ add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 add_definitions(-DRXX_ALLOCATOR_INIT_0)
+
+if(ENABLE_VERSION_SUFFIX)
+    set(apiextractor_SUFFIX "-${apiextractor_MAJOR_VERSION}.${apiextractor_MINOR_VERSION}")
+else()
+    set(apiextractor_SUFFIX "")
+endif()
 
 set(apiextractor_SRC
 apiextractor.cpp
@@ -121,13 +128,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 
 add_library(apiextractor SHARED ${apiextractor_SRC} ${apiextractor_RCCS_SRC})
 target_link_libraries(apiextractor ${APIEXTRACTOR_EXTRA_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTXMLPATTERNS_LIBRARY} ${QT_QTXML_LIBRARY})
-set_target_properties(apiextractor PROPERTIES VERSION ${apiextractor_VERSION} SOVERSION ${apiextractor_SOVERSION} DEFINE_SYMBOL APIEXTRACTOR_EXPORTS)
-
-# create pkg-config file
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/apiextractor.pc.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/apiextractor.pc" @ONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ApiExtractorConfig.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/ApiExtractorConfig.cmake" @ONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ApiExtractorConfigVersion.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/ApiExtractorConfigVersion.cmake" @ONLY)
+set_target_properties(apiextractor PROPERTIES VERSION ${apiextractor_VERSION}
+                                              SOVERSION ${apiextractor_SOVERSION} 
+                                              OUTPUT_NAME "apiextractor${apiextractor_SUFFIX}"
+                                              DEFINE_SYMBOL APIEXTRACTOR_EXPORTS)
 
 # uninstall target
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake" "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
@@ -161,14 +165,10 @@ if (BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
+add_subdirectory(data)
 
-install(FILES ${root_HEADERS} DESTINATION include/apiextractor)
+install(FILES ${root_HEADERS} DESTINATION include/apiextractor${apiextractor_SUFFIX})
 install(TARGETS apiextractor EXPORT apiextractor
                              LIBRARY DESTINATION "${LIB_INSTALL_DIR}"
                              ARCHIVE DESTINATION "${LIB_INSTALL_DIR}"
                              RUNTIME DESTINATION bin)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/apiextractor.pc" DESTINATION "${LIB_INSTALL_DIR}/pkgconfig")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ApiExtractorConfig.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/ApiExtractor-${apiextractor_VERSION}")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ApiExtractorConfigVersion.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/ApiExtractor-${apiextractor_VERSION}")

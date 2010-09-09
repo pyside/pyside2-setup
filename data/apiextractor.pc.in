@@ -7,5 +7,5 @@ Name: apiextractor
 Description: Qt4 Binding Generator library
 Requires: QtCore
 Version: @apiextractor_VERSION@
-Libs: -L${libdir} -lapiextractor
-Cflags: -I${includedir}/apiextractor
+Libs: -L${libdir} -lapiextractor@apiextractor_SUFFIX@
+Cflags: -I${includedir}/apiextractor@apiextractor_SUFFIX@
