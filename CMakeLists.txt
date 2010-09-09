@@ -7,8 +7,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/
                       ${CMAKE_MODULE_PATH})
 
 find_package(Qt4 4.5.0 REQUIRED)
-find_package(ApiExtractor 0.7 REQUIRED)
-find_package(GeneratorRunner 0.6 REQUIRED)
+find_package(ApiExtractor 0.8 REQUIRED)
+find_package(GeneratorRunner 0.6.1 REQUIRED)
 find_package(PythonLibs REQUIRED)
 find_package(PythonInterpWithDebug REQUIRED)
 
