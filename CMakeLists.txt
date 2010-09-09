@@ -6,6 +6,7 @@ find_package(Qt4 4.5.0 REQUIRED)
 find_package(ApiExtractor 0.8 REQUIRED)
 
 option(BUILD_TESTS "Build tests." TRUE)
+option(ENABLE_VERSION_SUFFIX "Used to use current version in suffix to generated files. This is used to allow multiples versions installed simultaneous." FALSE)
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "/Zc:wchar_t- /EHsc /DWIN32 /D_WINDOWS /D_SCL_SECURE_NO_WARNINGS")
@@ -39,8 +40,14 @@ set(generator_MINOR_VERSION "6")
 set(generator_MICRO_VERSION "1")
 set(generator_VERSION "${generator_MAJOR_VERSION}.${generator_MINOR_VERSION}.${generator_MICRO_VERSION}")
 set(generator_SOVERSION "${generator_MAJOR_VERSION}.${generator_MINOR_VERSION}")
+set(USE_GENERATOR_VERSION_SUFFIX FALSE CACHE BOOL "This suffix allow to have various generator version installed simultaneous.")
+if (ENABLE_VERSION_SUFFIX)
+    set(generator_SUFFIX "-${generator_MAJOR_VERSION}.${generator_MINOR_VERSION}")
+else()
+    set(generator_SUFFIX "")
+endif()
 
-set(generator_plugin_DIR ${LIB_INSTALL_DIR}/generatorrunner)
+set(generator_plugin_DIR ${LIB_INSTALL_DIR}/generatorrunner${generator_SUFFIX})
 
 add_definitions(${QT_DEFINITIONS})
 
@@ -55,21 +62,16 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 add_library(genrunner SHARED generator.cpp)
 set_target_properties(genrunner PROPERTIES VERSION ${generator_VERSION} DEFINE_SYMBOL GENRUNNER_EXPORTS)
 target_link_libraries(genrunner ${QT_QTCORE_LIBRARY} ${APIEXTRACTOR_LIBRARY})
-set_target_properties(genrunner PROPERTIES VERSION ${generator_VERSION} SOVERSION ${generator_SOVERSION})
+set_target_properties(genrunner PROPERTIES VERSION ${generator_VERSION}
+                                SOVERSION ${generator_SOVERSION}
+                                OUTPUT_NAME genrunner${generator_SUFFIX})
 
 add_executable(generatorrunner main.cpp)
+set_target_properties(generatorrunner PROPERTIES OUTPUT_NAME generatorrunner${generator_SUFFIX})
 target_link_libraries(generatorrunner
                       genrunner
                       ${APIEXTRACTOR_LIBRARY}
                       ${QT_QTCORE_LIBRARY})
-
-# create pkg-config file
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/generatorrunner.pc.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/generatorrunner.pc" @ONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GeneratorRunnerConfig.cmake.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/GeneratorRunnerConfig.cmake" @ONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GeneratorRunnerConfigVersion.cmake.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/GeneratorRunnerConfigVersion.cmake" @ONLY)
 
 # uninstall target
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
@@ -90,22 +92,14 @@ add_custom_target(dist
             echo "Source package created at ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2.\n"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+
+set(GENERATORRUNNER_INC_DIR "generatorrunner${generator_SUFFIX}")
 install(TARGETS genrunner LIBRARY DESTINATION "${LIB_INSTALL_DIR}"
                           ARCHIVE DESTINATION "${LIB_INSTALL_DIR}"
                           RUNTIME DESTINATION bin)
 install(TARGETS generatorrunner DESTINATION bin)
-install(FILES generator.h DESTINATION include/generatorrunner)
-install(FILES generatorrunnermacros.h DESTINATION include/generatorrunner)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/generatorrunner.pc" DESTINATION
-        "${LIB_INSTALL_DIR}/pkgconfig")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GeneratorRunnerConfig.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/GeneratorRunner-${generator_VERSION}")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GeneratorRunnerConfigVersion.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/GeneratorRunner-${generator_VERSION}")
-
-#FIXME: manpages should be installed only on Linux targets
-file(GLOB manpages "${CMAKE_CURRENT_SOURCE_DIR}/*.1")
-install(FILES ${manpages} DESTINATION share/man/man1)
+install(FILES generator.h DESTINATION include/${GENERATORRUNNER_INC_DIR})
+install(FILES generatorrunnermacros.h DESTINATION include/${GENERATORRUNNER_INC_DIR})
 
 if (BUILD_TESTS)
     enable_testing()
@@ -116,4 +110,4 @@ add_subdirectory(generators)
 if (BUILD_TESTS)
     add_subdirectory(tests)
 endif()
-
+add_subdirectory(data)

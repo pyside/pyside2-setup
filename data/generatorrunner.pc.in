@@ -4,10 +4,10 @@ libdir=@LIB_INSTALL_DIR@
 includedir=@CMAKE_INSTALL_PREFIX@/include
 
 
-Name: generatorrunner
+Name: generatorrunner@generator_SUFFIX@
 Description: Generator Runner loads and calls binding generator front-ends.
 Requires: apiextractor
 Version: @generatorrunner_VERSION@
-Libs: -L${libdir} -lgenrunner
-Cflags: -I${includedir}
+Libs: -L${libdir} -lgenrunner@generator_SUFFIX@
+Cflags: -I${includedir}@generator_SUFFIX@
 

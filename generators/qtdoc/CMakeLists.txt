@@ -5,6 +5,8 @@ qtdocgenerator.cpp
 )
 
 add_executable(docgenerator main.cpp)
+set_target_properties(docgenerator PROPERTIES OUTPUT_NAME docgenerator${generator_SUFFIX})
+
 target_link_libraries(docgenerator ${QT_QTCORE_LIBRARY})
 
 add_library(qtdoc_generator SHARED ${qtdoc_generator_SRC})
