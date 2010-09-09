@@ -3,7 +3,7 @@ project(generatorrunner)
 cmake_minimum_required(VERSION 2.6)
 
 find_package(Qt4 4.5.0 REQUIRED)
-find_package(ApiExtractor 0.7 REQUIRED)
+find_package(ApiExtractor 0.8 REQUIRED)
 
 option(BUILD_TESTS "Build tests." TRUE)
 
