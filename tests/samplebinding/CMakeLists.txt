@@ -75,10 +75,8 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/voidholder_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/valueandvirtual_wrapper.cpp
 )
 
-find_program(GENERATOR generatorrunner REQUIRED)
-
 add_custom_command(OUTPUT ${sample_SRC}
-COMMAND ${GENERATOR} --generatorSet=${shiboken_BINARY_DIR}/shiboken_generator${CMAKE_RELEASE_POSTFIX}${CMAKE_DEBUG_POSTFIX} --enable-parent-ctor-heuristic
+COMMAND ${GENERATORRUNNER_BINARY} --generatorSet=${shiboken_BINARY_DIR}/shiboken_generator${CMAKE_RELEASE_POSTFIX}${CMAKE_DEBUG_POSTFIX} --enable-parent-ctor-heuristic
         ${CMAKE_CURRENT_SOURCE_DIR}/global.h
         --include-paths=${libsample_SOURCE_DIR}
         --typesystem-paths=${CMAKE_CURRENT_SOURCE_DIR}

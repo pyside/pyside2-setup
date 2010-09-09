@@ -16,6 +16,7 @@ add_definitions(${QT_DEFINITIONS})
 
 option(AVOID_PROTECTED_HACK "Avoid protected hack on generated bindings." FALSE)
 option(BUILD_TESTS "Build tests." TRUE)
+option(ENABLE_VERSION_SUFFIX "Used to use current version in suffix to generated files. This is used to allow multiples versions installed simultaneous." FALSE)
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "/Zc:wchar_t- /GR /EHsc /DWIN32 /D_WINDOWS /D_SCL_SECURE_NO_WARNINGS")
@@ -54,6 +55,11 @@ set(shiboken_MAJOR_VERSION "0")
 set(shiboken_MINOR_VERSION "5")
 set(shiboken_MICRO_VERSION "0")
 set(shiboken_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
+if(ENABLE_VERSION_SUFFIX)
+    set(shiboken_SUFFIX "-${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}")
+else()
+    set(shiboken_SUFFIX "")
+endif()
 
 set(shiboken_SRC
 cppgenerator.cpp
@@ -78,6 +84,7 @@ target_link_libraries(shiboken_generator
                       ${QT_QTCORE_LIBRARY})
 
 add_executable(shiboken main.cpp)
+set_target_properties(shiboken PROPERTIES OUTPUT_NAME shiboken${shiboken_SUFFIX})
 target_link_libraries(shiboken ${QT_QTCORE_LIBRARY})
 
 # uninstall target
@@ -118,6 +125,7 @@ add_subdirectory(libshiboken)
 if (BUILD_TESTS)
     add_subdirectory(tests)
 endif()
+add_subdirectory(data)
 
 set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${shiboken_VERSION})
 add_custom_target(dist

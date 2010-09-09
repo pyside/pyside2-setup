@@ -14,13 +14,6 @@ set(libshiboken_MICRO_VERSION ${shiboken_MICRO_VERSION})
 set(libshiboken_VERSION "${libshiboken_MAJOR_VERSION}.${libshiboken_MINOR_VERSION}.${libshiboken_MICRO_VERSION}")
 set(libshiboken_SOVERSION "${libshiboken_MAJOR_VERSION}.${libshiboken_MINOR_VERSION}")
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ShibokenConfig.cmake.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/ShibokenConfig.cmake" @ONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ShibokenConfigVersion.cmake.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/ShibokenConfigVersion.cmake" @ONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shiboken.pc.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/shiboken.pc" @ONLY)
-
 set(libshiboken_SRC
 basewrapper.cpp
 gilstate.cpp
@@ -36,7 +29,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${SPARSEHASH_INCLUDE_PATH})
 add_library(libshiboken SHARED ${libshiboken_SRC})
 target_link_libraries(libshiboken ${SBK_PYTHON_LIBRARIES})
-set_target_properties(libshiboken PROPERTIES OUTPUT_NAME "shiboken"
+set_target_properties(libshiboken PROPERTIES OUTPUT_NAME "shiboken${shiboken_SUFFIX}"
                                              VERSION ${libshiboken_VERSION}
                                              SOVERSION ${libshiboken_SOVERSION}
                                              DEFINE_SYMBOL LIBSHIBOKEN_EXPORTS)
@@ -55,15 +48,8 @@ install(FILES
         shibokenmacros.h
         threadstatesaver.h
         typeresolver.h
-        DESTINATION include/shiboken)
+        DESTINATION include/shiboken${shiboken_SUFFIX})
 install(TARGETS libshiboken EXPORT shiboken
                             LIBRARY DESTINATION "${LIB_INSTALL_DIR}"
                             ARCHIVE DESTINATION "${LIB_INSTALL_DIR}"
                             RUNTIME DESTINATION bin)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ShibokenConfig.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken-${libshiboken_VERSION}")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ShibokenConfigVersion.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken-${libshiboken_VERSION}")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/shiboken.pc"
-        DESTINATION "${LIB_INSTALL_DIR}/pkgconfig")
-
