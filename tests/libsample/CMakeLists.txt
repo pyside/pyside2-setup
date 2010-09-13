@@ -14,6 +14,7 @@ injectcode.cpp
 listuser.cpp
 modifications.cpp
 mapuser.cpp
+modified_constructor.cpp
 multiple_derived.cpp
 objecttype.cpp
 objecttypelayout.cpp

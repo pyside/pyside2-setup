@@ -13,6 +13,7 @@
 #include "listuser.h"
 #include "mapuser.h"
 #include "modifications.h"
+#include "modified_constructor.h"
 #include "multiple_derived.h"
 #include "noimplicitconversion.h"
 #include "nondefaultctor.h"
