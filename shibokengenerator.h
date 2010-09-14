@@ -32,6 +32,8 @@
 #include <generator.h>
 #include <QtCore/QTextStream>
 
+#include "overloaddata.h"
+
 class DocParser;
 
 /**
@@ -345,6 +347,9 @@ protected:
     typedef QHash<const TypeEntry*, QList<const AbstractMetaClass*> > ExtendedConverterData;
     /// Returns all extended conversions for the current module.
     ExtendedConverterData getExtendedConverters() const;
+
+    /// Returns true if the Python wrapper for the received OverloadData must accept a list of arguments.
+    static bool pythonFunctionWrapperUsesListOfArguments(const OverloadData& overloadData);
 
     Indentor INDENT;
 private:

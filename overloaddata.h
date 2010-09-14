@@ -28,7 +28,7 @@
 #include <QtCore/QList>
 #include <QtCore/QBitArray>
 
-#include "shibokengenerator.h"
+class ShibokenGenerator;
 
 class OverloadData;
 typedef QList<OverloadData*> OverloadDataList;

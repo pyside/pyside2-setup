@@ -1087,7 +1087,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 argsRemoved++;
         }
         numArgs = func->arguments().size() - argsRemoved;
-        usePyArgs = getMinMaxArguments(func).second > 1;
+        usePyArgs = pythonFunctionWrapperUsesListOfArguments(OverloadData(getFunctionGroups(func->implementingClass())[func->name()], this));
     }
 
     foreach (CodeSnip snip, codeSnips) {
@@ -1114,7 +1114,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             // replace %PYARG_# variables
             code.replace("%PYARG_0", PYTHON_RETURN_VAR);
             if (snip.language == TypeSystem::TargetLangCode) {
-                if (numArgs > 1) {
+                if (usePyArgs) {
                     code.replace(pyArgsRegex, "pyargs[\\1-1]");
                 } else {
                     static QRegExp pyArgsRegexCheck("%PYARG_([2-9]+)");
@@ -1635,5 +1635,17 @@ QString ShibokenGenerator::getTypeIndexVariableName(const TypeEntry* metaType)
 bool ShibokenGenerator::verboseErrorMessagesDisabled() const
 {
     return m_verboseErrorMessagesDisabled;
+}
+
+
+bool ShibokenGenerator::pythonFunctionWrapperUsesListOfArguments(const OverloadData& overloadData)
+{
+    int maxArgs = overloadData.maxArgs();
+    int minArgs = overloadData.minArgs();
+    bool usePyArgs = (minArgs != maxArgs)
+                     || (maxArgs > 1)
+                     || overloadData.referenceFunction()->isConstructor()
+                     || overloadData.hasArgumentWithDefaultValue();
+    return usePyArgs;
 }
 

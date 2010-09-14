@@ -186,9 +186,6 @@ private:
     /// Returns true if generator should produce getters and setters for the given class.
     bool shouldGenerateGetSetList(const AbstractMetaClass* metaClass);
 
-    /// Returns true if the Python wrapper for the received OverloadData must accept a list of arguments.
-    static bool pythonFunctionWrapperUsesListOfArguments(const OverloadData& overloadData);
-
     void writeHashFunction(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeObjCopierFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 

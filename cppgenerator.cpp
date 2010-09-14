@@ -473,7 +473,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         if (func->isAbstract()) {
             s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
             s << func->ownerClass()->name() << '.' << func->name();
-            s << "()' not implemented.\");" << endl;
+        s << "()' not implemented.\");" << endl;
             s << INDENT << "return ";
             if (func->type()) {
                 writeMinimalConstructorCallArguments(s, func->type());
@@ -1230,7 +1230,7 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
     QStringList palist;
 
     s << INDENT << "PyObject* ";
-    if (maxArgs == 1) {
+    if (!pythonFunctionWrapperUsesListOfArguments(overloadData)) {
         s << "arg = 0";
         palist << "&arg";
     } else {
@@ -1343,7 +1343,7 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
     Indentation indentation(INDENT);
     QString funcName = fullPythonFunctionName(rfunc);
 
-    QString argsVar = !rfunc->isConstructor() && overloadData.maxArgs() == 1 ? "arg" : "args";
+    QString argsVar = pythonFunctionWrapperUsesListOfArguments(overloadData) ? "args" : "arg";;
     if (verboseErrorMessagesDisabled()) {
         s << INDENT << "Shiboken::setErrorAboutWrongArguments(" << argsVar << ", \"" << funcName << "\", 0);" << endl;
     } else {
@@ -1640,7 +1640,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(QTextStream& s, const Ov
         int startArg = od->argPos();
         int sequenceArgCount = 0;
         while (od && !od->argType()->isVarargs()) {
-            if (usePyArgs && maxArgs > 1)
+            if (usePyArgs)
                 pyArgName = QString("pyargs[%1]").arg(od->argPos());
 
             writeTypeCheck(tck, od, pyArgName);
@@ -1728,7 +1728,7 @@ void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& o
 
 
     const AbstractMetaClass* implementingClass = overloadData.referenceFunction()->implementingClass();
-    bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(overloadData) && overloadData.maxArgs() > 1;
+    bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(overloadData);
 
     // Handle named arguments.
     writeNamedArgumentResolution(s, func, usePyArgs);
@@ -2317,14 +2317,6 @@ bool CppGenerator::shouldGenerateGetSetList(const AbstractMetaClass* metaClass)
     return false;
 }
 
-bool CppGenerator::pythonFunctionWrapperUsesListOfArguments(const OverloadData& overloadData)
-{
-    bool usePyArgs = overloadData.maxArgs() > 1
-                     || overloadData.referenceFunction()->isConstructor()
-                     || overloadData.hasArgumentWithDefaultValue();
-    return usePyArgs;
-}
-
 void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     QString tp_flags;
@@ -2855,14 +2847,14 @@ void CppGenerator::writeMethodDefinitionEntry(QTextStream& s, const AbstractMeta
     OverloadData overloadData(overloads, this);
     bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(overloadData);
     const AbstractMetaFunction* func = overloadData.referenceFunction();
+    int min = overloadData.minArgs();
+    int max = overloadData.maxArgs();
 
     s << '"' << func->name() << "\", (PyCFunction)" << cpythonFunctionName(func) << ", ";
-    if (overloadData.maxArgs() < 2 && !usePyArgs) {
-        bool minZero = overloadData.minArgs() == 0;
-        bool maxOne = overloadData.maxArgs() == 1;
-        if (minZero)
-            s << "METH_NOARGS" << (maxOne ? "|" : "");
-        if (maxOne)
+    if ((min == max) && (max < 2) && !usePyArgs) {
+        if (max == 0)
+            s << "METH_NOARGS";
+        else
             s << "METH_O";
     } else {
         s << "METH_VARARGS";
@@ -3738,7 +3730,7 @@ bool CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
     if (argOwner.index == -2)  //invalid
         argOwner = func->argumentOwner(dClass, argIndex);
 
-    bool usePyArgs = OverloadData(getFunctionGroups(func->implementingClass())[func->name()], this).maxArgs() > 1;
+    bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(OverloadData(getFunctionGroups(func->implementingClass())[func->name()], this));
 
     ArgumentOwner::Action action = argOwner.action;
     int parentIndex = argOwner.index;
