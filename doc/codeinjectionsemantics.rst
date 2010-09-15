@@ -65,7 +65,7 @@ The following table describes the semantics of ``inject-code`` tag as used on
     |               |      |         |initializer function (``init_CLASS(PyObject *module)``). The  |
     |               |      |         |code here will be executed after all the wrapped class        |
     |               |      |         |components have been initialized.                             |
-   +---------------+------+---------+--------------------------------------------------------------+
+    +---------------+------+---------+--------------------------------------------------------------+
     |modify-function|native|beginning|Code here is put on the virtual method override of a C++      |
     |               |      |         |wrapper class (the one responsible for passing C++ calls to a |
     |               |      |         |Python override, if there is any), right after the C++        |
