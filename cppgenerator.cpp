@@ -756,6 +756,26 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     if (needsOverloadId)
         s << INDENT << "int overloadId = -1;" << endl;
 
+    QSet<QString> argNamesSet;
+    if (usePySideExtensions() && metaClass->isQObject()) {
+        // Write argNames variable with all known argument names.
+        foreach (const AbstractMetaFunction* func, overloadData.overloads()) {
+            foreach (const AbstractMetaArgument* arg, func->arguments()) {
+                if (arg->defaultValueExpression().isEmpty() || func->argumentRemoved(arg->argumentIndex() + 1))
+                    continue;
+                argNamesSet << arg->name();
+            }
+        }
+        QStringList argNamesList = argNamesSet.toList();
+        qSort(argNamesList.begin(), argNamesList.end());
+        if (argNamesList.isEmpty())
+            s << INDENT << "const char** argNames = 0;" << endl;
+        else
+            s << INDENT << "const char* argNames[] = {\"" << argNamesList.join("\", \"") << "\"};" << endl;
+        s << INDENT << "const QMetaObject* metaObject;" << endl;
+    }
+
+
     s << INDENT << "SbkBaseWrapper* sbkSelf = reinterpret_cast<SbkBaseWrapper*>(self);" << endl;
 
     if (metaClass->isAbstract() || metaClass->baseClassNames().size() > 1) {
@@ -794,12 +814,8 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
 
     s << endl;
 
-    if (metaClass->isQObject() || overloadData.hasArgumentWithDefaultValue()) {
-        // Check usage of unknown named arguments
-        writeNamedArgumentsCheck(s, overloadData);
-        if (!metaClass->isQObject())
-            s << INDENT << "int numNamedArgs = (kwds ? PyDict_Size(kwds) : 0);" << endl;
-    }
+    if (!metaClass->isQObject() && overloadData.hasArgumentWithDefaultValue())
+        s << INDENT << "int numNamedArgs = (kwds ? PyDict_Size(kwds) : 0);" << endl;
     if (overloadData.maxArgs() > 0) {
         s  << endl << INDENT << "int numArgs = ";
         writeArgumentsInitializer(s, overloadData);
@@ -833,46 +849,14 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     s << INDENT << "BindingManager::instance().registerWrapper(sbkSelf, cptr);" << endl;
 
     // Create metaObject and register signal/slot
-    if (metaClass->isQObject()) {
-        if (usePySideExtensions())
-            s << INDENT << "PySide::signalUpdateSource(self);" << endl;
-
-        s << INDENT << "cptr->metaObject();" << endl;
-
-        if (metaClass->isQObject()) {
-            s << INDENT << "for (std::vector<PyObject*>::size_type i = 0; i < propertyKeys.size(); i++) {" << endl;
-            {
-                Indentation indent(INDENT);
-                s << INDENT << "const char* propName = PyString_AS_STRING(propertyKeys[i]);" << endl;
-                s << INDENT << "const QMetaObject* mo = cptr->metaObject();" << endl;
-                s << INDENT << "if (mo->indexOfProperty(propName) != -1) {" << endl;
-                {
-                    Indentation indent(INDENT);
-                    s << INDENT << "cptr->setProperty(propName, ";
-                    s << "Shiboken::Converter<QVariant>::toCpp(PyDict_GetItem(kwds, propertyKeys[i])));" << endl;
-                }
-                s << INDENT << "} else {" << endl;
-                {
-                    Indentation indent(INDENT);
-                    s << INDENT << "QString signalSignature = QString(\"%1()\").arg(propName);" << endl;
-                    s << INDENT << "if (mo->indexOfSignal(qPrintable(signalSignature)) != -1) {" << endl;
-                    {
-                        Indentation indent(INDENT);
-                        s << INDENT << "signalSignature = '2' + signalSignature;" << endl;
-                        s << INDENT << "PySide::signal_connect(self, qPrintable(signalSignature), PyDict_GetItem(kwds, propertyKeys[i]));" << endl;
-                    }
-                    s << INDENT << "} else {" << endl;
-                    {
-                        Indentation indent(INDENT);
-                        s << INDENT << "delete cptr;" << endl;
-                        s << INDENT << "PyErr_Format(PyExc_AttributeError, \"'%s' is not a Qt property or a signal\", propName);" << endl;
-                        s << INDENT << "return -1;" << endl;
-                    }
-                    s << INDENT << "};" << endl;
-                }
-                s << INDENT << "}" << endl;
-            }
-            s << INDENT << '}' << endl;
+    if (metaClass->isQObject() && usePySideExtensions()) {
+        s << endl << INDENT << "// QObject setup" << endl;
+        s << INDENT << "PySide::signalUpdateSource(self);" << endl;
+        s << INDENT << "metaObject = cptr->metaObject(); // <- init python qt properties" << endl;
+        s << INDENT << "if (kwds && !PySide::fillQtProperties(self, metaObject, kwds, argNames, " << argNamesSet.count() << "))" << endl;
+        {
+            Indentation indentation(INDENT);
+            s << INDENT << "return " << m_currentErrorCode << ';' << endl;
         }
     }
 
@@ -1067,8 +1051,6 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         s << INDENT << "int overloadId = -1;" << endl;
 
     if (usesNamedArguments) {
-        // Check usage of unknown named arguments
-        writeNamedArgumentsCheck(s, overloadData);
         s << INDENT << "int numNamedArgs = (kwds ? PyDict_Size(kwds) : 0);" << endl;
     }
 
@@ -1163,60 +1145,6 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         writeErrorSection(s, overloadData);
 
     s << '}' << endl << endl;
-}
-
-void CppGenerator::writeNamedArgumentsCheck(QTextStream& s, OverloadData& overloadData)
-{
-    // Check usage of unknown named arguments
-    QSet<QString> argNamesSet;
-    foreach (const AbstractMetaFunction* func, overloadData.overloads()) {
-        foreach (const AbstractMetaArgument* arg, func->arguments()) {
-            if (arg->defaultValueExpression().isEmpty()
-                || func->argumentRemoved(arg->argumentIndex() + 1))
-                continue;
-            argNamesSet << QString("\"%1\"").arg(arg->name());
-        }
-    }
-    QStringList argNamesList = argNamesSet.toList();
-    qSort(argNamesList.begin(), argNamesList.end());
-
-    const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
-    bool ownerClassIsQObject = rfunc->ownerClass() && rfunc->ownerClass()->isQObject() && rfunc->isConstructor();
-    if (overloadData.hasArgumentWithDefaultValue() || (ownerClassIsQObject && rfunc->isConstructor())) {
-        s << INDENT << "std::vector<PyObject*> propertyKeys;" << endl << endl;
-        s << INDENT << "// Check existence of named argument." << endl;
-        s << INDENT << "if (kwds) {" << endl;
-        {
-            Indentation indent(INDENT);
-            if (argNamesList.size() > 0)
-                s << INDENT << "std::string argNames[] = { " << argNamesList.join(", ") << " };" << endl;
-            s << INDENT << "PyObject* keys = PyDict_Keys(kwds);" << endl;
-            s << INDENT << "Shiboken::AutoDecRef auto_keys(keys);" << endl;
-            s << INDENT << "for (int i = 0; i < PyList_GET_SIZE(keys); ++i) {" << endl;
-            {
-                Indentation indent(INDENT);
-                s << INDENT << "PyObject* argName = PyList_GET_ITEM(keys, i);" << endl;
-                if (argNamesList.size() > 0) {
-                    s << INDENT << "if (!std::binary_search(argNames, argNames + " << argNamesList.count();
-                    s << ", std::string(PyString_AS_STRING(argName)))) {" << endl;
-                }
-                {
-                    Indentation indent(INDENT);
-                    if (ownerClassIsQObject) {
-                         s << INDENT << "propertyKeys.push_back(argName);" << endl;
-                    } else {
-                        s << INDENT << "PyErr_Format(PyExc_TypeError, \"" << fullPythonFunctionName(overloadData.referenceFunction());
-                        s << "(): got an unexpected keyword argument '%s'\", PyString_AS_STRING(argName));" << endl;
-                        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
-                    }
-                }
-                if (argNamesList.size() > 0)
-                    s << INDENT << '}' << endl;
-            }
-            s << INDENT << '}' << endl;
-        }
-    }
-    s << INDENT << '}' << endl;
 }
 
 void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overloadData)
@@ -3471,11 +3399,16 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
         s << INDENT << '}' << endl;
     }
     s << INDENT << "PyObject* attr = PyObject_GenericGetAttr(self, name);" << endl;
-    if (usePySideExtensions()) {
+    if (usePySideExtensions() && metaClass->isQObject()) {
         s << INDENT << "if (attr && PySide::isQPropertyType(attr)) {" << endl;
         {
             Indentation indent(INDENT);
             s << INDENT << "PyObject *value = PySide::qproperty_get(attr, self);" << endl;
+            s << INDENT << "if (!value)" << endl;
+            {
+                Indentation indentation(INDENT);
+                s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+            }
             s << INDENT << "Py_DECREF(attr);" << endl;
             s << INDENT << "Py_INCREF(value);" << endl;
             s << INDENT << "attr = value;" << endl;

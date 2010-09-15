@@ -53,7 +53,6 @@ private:
     void writeMinimalConstructorCallArguments(QTextStream& s, const AbstractMetaType* type);
     void writeMethodWrapper(QTextStream &s, const AbstractMetaFunctionList overloads);
     void writeArgumentsInitializer(QTextStream& s, OverloadData& overloadData);
-    void writeNamedArgumentsCheck(QTextStream& s, OverloadData& overloadData);
     void writeCppSelfDefinition(QTextStream& s, const AbstractMetaFunction* func);
 
     void writeErrorSection(QTextStream& s, OverloadData& overloadData);
