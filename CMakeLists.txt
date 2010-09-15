@@ -166,6 +166,7 @@ if (BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 add_subdirectory(data)
+add_subdirectory(doc)
 
 install(FILES ${root_HEADERS} DESTINATION include/apiextractor${apiextractor_SUFFIX})
 install(TARGETS apiextractor EXPORT apiextractor
