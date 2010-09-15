@@ -10,9 +10,9 @@ Build requirements
 ^^^^^^^^^^^^^^^^^^
 
 + CMake >= 2.6.0
-+ Python 2.5 (2.6 recommended)
++ Python >= 2.5, but < 3.0
 + Qt4 libraries and development headers >= 4.5 (4.6 recommended)
-+ api-extractor + generator runner >= 0.4
++ api-extractor + generator runner
 
 Building and installing
 ^^^^^^^^^^^^^^^^^^^^^^^
