@@ -22,7 +22,6 @@ Build requirements
 ==================
 
 * Qt4.5 development headers and libraries >= 4.5.0
-* libboost-graph >= 1.38.0
 * cmake >= 2.6.0
 
 Building and installing
@@ -40,7 +39,6 @@ following packages are installed:
 * debhelper (>= 5)
 * cdbs
 * cmake (>= 2.6.0)
-* libboost-graph1.38-dev (>= 1.38.0)
 * libqt4-dev (>= 4.5)
 
 And then you can build the package using::
