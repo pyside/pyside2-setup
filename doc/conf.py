@@ -42,7 +42,7 @@ source_encoding = 'utf-8'
 
 # General information about the project.
 project = u'Shiboken'
-copyright = u'2009, Nokia Corporation'
+copyright = u'2009-2010, Nokia Corporation'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
