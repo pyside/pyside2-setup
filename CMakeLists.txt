@@ -106,6 +106,7 @@ if (BUILD_TESTS)
 endif()
 
 add_subdirectory(generators)
+add_subdirectory(doc)
 
 if (BUILD_TESTS)
     add_subdirectory(tests)
