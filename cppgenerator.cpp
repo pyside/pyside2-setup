@@ -134,8 +134,6 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     // headers
     s << "// default includes" << endl;
     s << "#include <shiboken.h>" << endl;
-    s << "#include <vector>" << endl;
-    s << "#include <algorithm>" << endl;
     if (usePySideExtensions()) {
         s << "#include <qsignal.h>" << endl;
         s << "#include <qproperty.h>" << endl;
@@ -1641,8 +1639,9 @@ void CppGenerator::writeFunctionCalls(QTextStream& s, const OverloadData& overlo
                 }
             }
         }
-        s << INDENT << '}' << endl << INDENT << "}";
+        s << INDENT << '}' << endl;
     }
+    s << INDENT << '}' << endl;
 }
 
 void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& overloadData, const AbstractMetaFunction* func)
@@ -1652,8 +1651,6 @@ void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& o
         s << INDENT << "return " << m_currentErrorCode << ';' << endl;
         return;
     }
-
-
 
     const AbstractMetaClass* implementingClass = overloadData.referenceFunction()->implementingClass();
     bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(overloadData);
@@ -1698,9 +1695,12 @@ void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& o
     int numRemovedArgs = OverloadData::numberOfRemovedArguments(func);
 
     s << INDENT << "if(!PyErr_Occurred()) {" << endl;
-    writeMethodCall(s, func, func->arguments().size() - numRemovedArgs);
-    if (!func->isConstructor())
-        writeNoneReturn(s, func, overloadData.hasNonVoidReturnType());
+    {
+        Indentation indentation(INDENT);
+        writeMethodCall(s, func, func->arguments().size() - numRemovedArgs);
+        if (!func->isConstructor())
+            writeNoneReturn(s, func, overloadData.hasNonVoidReturnType());
+    }
     s << INDENT << "}"  << endl;
 }
 
