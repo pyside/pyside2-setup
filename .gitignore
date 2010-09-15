@@ -7,4 +7,3 @@ build
 .preprocessed.tmp
 .*.swp
 *.kdev4
-doc/_build
