@@ -167,6 +167,12 @@ ObjectType::processEvent(ObjectTypeList objects, Event *event)
 }
 
 void
+ObjectType::callInvalidateEvent(Event* event)
+{
+    invalidateEvent(event);
+}
+
+void
 ObjectType::setLayout(ObjectTypeLayout* l)
 {
     if (!l) {

@@ -78,6 +78,9 @@ public:
     virtual bool event(Event* event);
     static int processEvent(ObjectTypeList objects, Event *event);
 
+    void callInvalidateEvent(Event* event);
+    virtual void invalidateEvent(Event* event) {}
+
     // This nonsense method emulate QWidget.setLayout method
     // All layout objects will became children of this object.
     void setLayout(ObjectTypeLayout* layout);
@@ -98,7 +101,6 @@ public:
     void setObject(ObjectType *);
     void setObject(const Null&);
     int callId() const;
-
 
 private:
     ObjectType(const ObjectType&);

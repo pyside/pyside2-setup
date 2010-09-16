@@ -546,6 +546,16 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         s << argConversions.join(",\n") << endl;
         s << INDENT << "));" << endl;
     }
+
+    bool invalidateReturn = false;
+    foreach (FunctionModification funcMod, func->modifications()) {
+        foreach (ArgumentModification argMod, funcMod.argument_mods) {
+            if (argMod.resetAfterUse)
+                s << INDENT << "bool invalidadeArg" << argMod.index << " = PyTuple_GET_ITEM(pyargs, " << argMod.index - 1 << ")->ob_refcnt == 1;" << endl;
+            else if (argMod.index == 0  && argMod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::CppOwnership)
+                invalidateReturn = true;
+        }
+    }
     s << endl;
 
     CodeSnipList snips;
@@ -564,6 +574,9 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         s << INDENT;
         s << "Shiboken::AutoDecRef " PYTHON_RETURN_VAR "(PyObject_Call(py_override, pyargs, NULL));" << endl;
         if (type) {
+            if (invalidateReturn)
+                s << INDENT << "bool invalidadeArg0 = " PYTHON_RETURN_VAR "->ob_refcnt == 1;" << endl;
+
             s << INDENT << "// An error happened in python code!" << endl;
             s << INDENT << "if (" PYTHON_RETURN_VAR ".isNull()) {" << endl;
             {
@@ -651,15 +664,19 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         }
     }
 
-    bool transferReturnToCpp = false;
-    foreach (FunctionModification func_mod, func->modifications()) {
-        foreach (ArgumentModification arg_mod, func_mod.argument_mods) {
-            if (arg_mod.resetAfterUse) {
+    if (invalidateReturn) {
+        s << INDENT << "if (invalidadeArg0)" << endl;
+        Indentation indentation(INDENT);
+        s << INDENT << "BindingManager::instance().invalidateWrapper(" << PYTHON_RETURN_VAR  ".object());" << endl;
+    }
+
+    foreach (FunctionModification funcMod, func->modifications()) {
+        foreach (ArgumentModification argMod, funcMod.argument_mods) {
+            if (argMod.resetAfterUse) {
+                s << INDENT << "if (invalidadeArg" << argMod.index << ")" << endl;
+                Indentation indentation(INDENT);
                 s << INDENT << "BindingManager::instance().invalidateWrapper(PyTuple_GET_ITEM(pyargs, ";
-                s << (arg_mod.index - 1) << "));" << endl;
-            } else if ((arg_mod.index == 0)  && (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::CppOwnership)) {
-                s << INDENT << "BindingManager::instance().invalidateWrapper(" << PYTHON_RETURN_VAR  ".object());" << endl;
-                transferReturnToCpp = true;
+                s << (argMod.index - 1) << "));" << endl;
             }
         }
     }
@@ -671,7 +688,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     }
 
     if (type) {
-        if (!transferReturnToCpp && (func->type()->isObject() || func->type()->isValuePointer()) ) {
+        if (!invalidateReturn && (func->type()->isObject() || func->type()->isValuePointer()) ) {
             s << INDENT << "if (" << PYTHON_RETURN_VAR << "->ob_refcnt < 2) {" << endl;
             {
                 Indentation indent(INDENT);

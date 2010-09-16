@@ -42,6 +42,22 @@ class ExtObjectType(ObjectType):
         self.type_of_last_event = event.eventType()
         return True
 
+class MyObjectType (ObjectType):
+    def __init__(self):
+        super(MyObjectType, self).__init__()
+        self.fail = False
+
+    def event(self, ev):
+        self.callInvalidateEvent(ev)
+        try:
+            ev.eventType()
+        except:
+            self.fail = True
+            raise
+        return True
+
+    def invalidateEvent(self, ev):
+        pass
 
 class OwnershipInvalidateAfterUseTest(unittest.TestCase):
     '''Ownership tests for cases of invalidation of Python wrapper after use.'''
@@ -60,6 +76,11 @@ class OwnershipInvalidateAfterUseTest(unittest.TestCase):
         eot.causeEvent(Event.ANY_EVENT)
         self.assertEqual(eot.type_of_last_event, Event.ANY_EVENT)
         self.assertRaises(RuntimeError, ot.event, eot.last_event)
+
+    def testit(self):
+        obj = MyObjectType()
+        obj.causeEvent(Event.BASIC_EVENT)
+        self.assertFalse(obj.fail)
 
 if __name__ == '__main__':
     unittest.main()
