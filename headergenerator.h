@@ -31,6 +31,8 @@
  */
 class HeaderGenerator : public ShibokenGenerator
 {
+public:
+    QMap<QString, QString> options() const { return QMap<QString, QString>(); }
 protected:
     QString fileNameForClass(const AbstractMetaClass* metaClass) const;
     void generateClass(QTextStream& s, const AbstractMetaClass* metaClass);
