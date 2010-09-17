@@ -572,7 +572,7 @@ bool OverloadData::isSingleArgument(const AbstractMetaFunctionList& overloads)
 {
     bool singleArgument = true;
     foreach (const AbstractMetaFunction* func, overloads) {
-        if (func->arguments().size() - numberOfRemovedArguments(func) > 1) {
+        if (func->arguments().size() - numberOfRemovedArguments(func) != 1) {
             singleArgument = false;
             break;
         }

@@ -978,6 +978,11 @@
                 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%CPPSELF.%FUNCTION_NAME(%1, 2, %3));
             </inject-code>
         </modify-function>
+        <modify-function signature="singleOverload(Point*)">
+            <modify-argument index="1">
+                <define-ownership owner="c++"/>
+            </modify-argument>
+        </modify-function>
     </value-type>
     <object-type name="Collector" stream="yes"/>
 

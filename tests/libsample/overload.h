@@ -57,6 +57,9 @@ public:
     inline int intOverloads(const Point& p, double d) { return 1; }
     inline int intOverloads(int i, int i2) { return 2; }
     inline int intOverloads(int i, int removedArg, double d) { return 3; }
+
+    void singleOverload(Point* x) {}
+    Point* singleOverload() {return new Point();}
 };
 #endif // OVERLOAD_H
 
