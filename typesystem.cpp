@@ -372,6 +372,7 @@ bool Handler::startElement(const QString &, const QString &n,
             attributes["lower-bound"] = QString();
             attributes["force-integer"] = "no";
             attributes["extensible"] = "no";
+            attributes["identified-by-value"] = QString();
             break;
         case StackElement::ObjectTypeEntry:
         case StackElement::ValueTypeEntry:
@@ -423,6 +424,15 @@ bool Handler::startElement(const QString &, const QString &n,
             TypeEntry *tmp = m_database->findType(name);
             if (tmp)
                 ReportHandler::warning(QString("Duplicate type entry: '%1'").arg(name));
+        }
+
+        if (element->type == StackElement::EnumTypeEntry) {
+            if (name.isEmpty()) {
+                name = attributes["identified-by-value"];
+            } else if (!attributes["identified-by-value"].isEmpty()) {
+                m_error = "can't specify both 'name' and 'identified-by-value' attributes";
+                return false;
+            }
         }
 
         if (name.isEmpty()) {
@@ -485,6 +495,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 m_currentEnum =
                     new EnumTypeEntry(QStringList(names.mid(0, names.size() - 1)).join("::"),
                                       names.last(), since);
+            m_currentEnum->setAnonymous(!attributes["identified-by-value"].isEmpty());
             element->entry = m_currentEnum;
             m_currentEnum->setCodeGeneration(m_generate);
             m_currentEnum->setTargetLangPackage(m_defaultPackage);

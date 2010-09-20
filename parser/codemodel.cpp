@@ -727,6 +727,16 @@ void _EnumModelItem::removeEnumerator(EnumeratorModelItem item)
     _M_enumerators.removeAt(_M_enumerators.indexOf(item));
 }
 
+bool _EnumModelItem::isAnonymous() const
+{
+    return _M_anonymous;
+}
+
+void _EnumModelItem::setAnonymous(bool anonymous)
+{
+    _M_anonymous = anonymous;
+}
+
 // ---------------------------------------------------------------------------
 QString _EnumeratorModelItem::value() const
 {

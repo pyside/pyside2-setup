@@ -1303,6 +1303,11 @@ public:
         m_class = c;
     }
 
+    bool isAnonymous() const
+    {
+        return m_typeEntry->isAnonymous();
+    }
+
 private:
     AbstractMetaEnumValueList m_enumValues;
     EnumTypeEntry *m_typeEntry;

@@ -736,6 +736,8 @@ public:
     EnumeratorList enumerators() const;
     void addEnumerator(EnumeratorModelItem item);
     void removeEnumerator(EnumeratorModelItem item);
+    bool isAnonymous() const;
+    void setAnonymous(bool anonymous);
 
 protected:
     _EnumModelItem(CodeModel *model, int kind = __node_kind)
@@ -745,6 +747,7 @@ protected:
 private:
     CodeModel::AccessPolicy _M_accessPolicy;
     EnumeratorList _M_enumerators;
+    bool _M_anonymous;
 
 private:
     _EnumModelItem(const _EnumModelItem &other);

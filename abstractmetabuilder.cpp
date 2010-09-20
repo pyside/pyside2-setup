@@ -895,7 +895,21 @@ AbstractMetaEnum* AbstractMetaBuilder::traverseEnum(EnumModelItem enumItem, Abst
 
     QString qualifiedName = enumItem->qualifiedName().join("::");
 
-    TypeEntry* typeEntry = TypeDatabase::instance()->findType(qualifiedName);
+    TypeEntry* typeEntry = 0;
+    if (!enumItem->isAnonymous()) {
+        typeEntry = TypeDatabase::instance()->findType(qualifiedName);
+    } else {
+        QStringList tmpQualifiedName = enumItem->qualifiedName();
+        foreach (const EnumeratorModelItem& enumValue, enumItem->enumerators()) {
+            tmpQualifiedName.removeLast();
+            tmpQualifiedName << enumValue->name();
+            qualifiedName = tmpQualifiedName.join("::");
+            typeEntry = TypeDatabase::instance()->findType(qualifiedName);
+            if (typeEntry)
+                break;
+        }
+    }
+
     QString enumName = enumItem->name();
 
     QString className;

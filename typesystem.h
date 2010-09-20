@@ -1265,6 +1265,15 @@ public:
         m_forceInteger = force;
     }
 
+    bool isAnonymous() const
+    {
+        return m_anonymous;
+    }
+    void setAnonymous(bool anonymous)
+    {
+        m_anonymous = anonymous;
+    }
+
 private:
     QString m_packageName;
     QString m_qualifier;
@@ -1280,6 +1289,7 @@ private:
 
     bool m_extensible;
     bool m_forceInteger;
+    bool m_anonymous;
 };
 
 class APIEXTRACTOR_API EnumValueTypeEntry : public TypeEntry
