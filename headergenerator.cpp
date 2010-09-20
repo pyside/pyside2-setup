@@ -321,6 +321,8 @@ void HeaderGenerator::finishGeneration()
 
     macrosStream << "// Macros for type check" << endl;
     foreach (const AbstractMetaEnum* cppEnum, globalEnums()) {
+        if (cppEnum->isAnonymous())
+            continue;
         includes << cppEnum->typeEntry()->include();
         writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
         convDecl << endl;
@@ -336,6 +338,8 @@ void HeaderGenerator::finishGeneration()
         includes << classType->include();
 
         foreach (const AbstractMetaEnum* cppEnum, metaClass->enums()) {
+            if (cppEnum->isAnonymous())
+                continue;
             EnumTypeEntry* enumType = cppEnum->typeEntry();
             includes << enumType->include();
             writeTypeConverterDecl(convDecl, enumType);

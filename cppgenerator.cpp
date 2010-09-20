@@ -372,6 +372,9 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
 
     foreach (AbstractMetaEnum* cppEnum, metaClass->enums()) {
+        if (cppEnum->isAnonymous())
+            continue;
+
         bool hasFlags = cppEnum->typeEntry()->flags();
         if (hasFlags) {
             writeFlagsMethods(s, cppEnum);
@@ -2834,34 +2837,44 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
     QString addFunction;
     if (cppEnum->enclosingClass())
         addFunction = "PyDict_SetItemString(" + cpythonTypeName(cppEnum->enclosingClass()) + ".super.ht_type.tp_dict,";
+    else if (cppEnum->isAnonymous())
+        addFunction = "PyModule_AddIntConstant(module,";
     else
         addFunction = "PyModule_AddObject(module,";
 
-    s << INDENT << "// init enum class: " << cppEnum->name() << endl;
-    s << INDENT << cpythonTypeNameExt(cppEnum->typeEntry()) << " = &" << cpythonTypeName(cppEnum->typeEntry()) << ';' << endl;
-    s << INDENT << "if (PyType_Ready((PyTypeObject*)&" << cpythonName << "_Type) < 0)" << endl;
-    s << INDENT << INDENT << "return;" << endl;
+    s << INDENT << "// init ";
+    if (cppEnum->isAnonymous())
+        s << "anonymous enum identified by enum value: ";
+    else
+        s << "enum: ";
+    s << cppEnum->name() << endl;
 
-    s << INDENT << "Py_INCREF(&" << cpythonName << "_Type);" << endl;
-
-    s << INDENT << addFunction << endl;
-    s << INDENT << INDENT << INDENT << '\"' << cppEnum->name() << "\",";
-    s << "((PyObject*)&" << cpythonName << "_Type));" << endl << endl;
-
-    FlagsTypeEntry* flags = cppEnum->typeEntry()->flags();
-    if (flags) {
-        QString flagsName = cpythonFlagsName(flags);
-        s << INDENT << "// init flags class: " << flags->name() << endl;
-        s << INDENT << cpythonTypeNameExt(flags) << " = &" << cpythonTypeName(flags) << ';' << endl;
-
-        s << INDENT << "if (PyType_Ready((PyTypeObject*)&" << flagsName << "_Type) < 0)" << endl;
+    if (!cppEnum->isAnonymous()) {
+        s << INDENT << cpythonTypeNameExt(cppEnum->typeEntry()) << " = &" << cpythonTypeName(cppEnum->typeEntry()) << ';' << endl;
+        s << INDENT << "if (PyType_Ready((PyTypeObject*)&" << cpythonName << "_Type) < 0)" << endl;
         s << INDENT << INDENT << "return;" << endl;
 
-        s << INDENT << "Py_INCREF(&" << flagsName << "_Type);" << endl;
+        s << INDENT << "Py_INCREF(&" << cpythonName << "_Type);" << endl;
 
         s << INDENT << addFunction << endl;
-        s << INDENT << INDENT << INDENT << '\"' << flags->flagsName() << "\",";
-        s << "((PyObject*)&" << flagsName << "_Type));" << endl << endl;
+        s << INDENT << INDENT << INDENT << '\"' << cppEnum->name() << "\",";
+        s << "((PyObject*)&" << cpythonName << "_Type));" << endl << endl;
+
+        FlagsTypeEntry* flags = cppEnum->typeEntry()->flags();
+        if (flags) {
+            QString flagsName = cpythonFlagsName(flags);
+            s << INDENT << "// init flags class: " << flags->name() << endl;
+            s << INDENT << cpythonTypeNameExt(flags) << " = &" << cpythonTypeName(flags) << ';' << endl;
+
+            s << INDENT << "if (PyType_Ready((PyTypeObject*)&" << flagsName << "_Type) < 0)" << endl;
+            s << INDENT << INDENT << "return;" << endl;
+
+            s << INDENT << "Py_INCREF(&" << flagsName << "_Type);" << endl;
+
+            s << INDENT << addFunction << endl;
+            s << INDENT << INDENT << INDENT << '\"' << flags->flagsName() << "\",";
+            s << "((PyObject*)&" << flagsName << "_Type));" << endl << endl;
+        }
     }
 
 
@@ -2869,44 +2882,61 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
         if (cppEnum->typeEntry()->isEnumValueRejected(enumValue->name()))
             continue;
 
-        s << INDENT << "enum_item = Shiboken::SbkEnumObject_New(&";
-        s << cpythonName << "_Type," << endl;
-        {
-            Indentation indent(INDENT);
-            s << INDENT;
+        QString enumValueText;
 #ifdef AVOID_PROTECTED_HACK
-            if (!cppEnum->isProtected()) {
+        if (!cppEnum->isProtected()) {
 #endif
-                s << "(long) ";
-                if (cppEnum->enclosingClass())
-                    s << cppEnum->enclosingClass()->qualifiedCppName() << "::";
-                s << enumValue->name();
+            enumValueText = "(long) ";
+            if (cppEnum->enclosingClass())
+                enumValueText += cppEnum->enclosingClass()->qualifiedCppName() + "::";
+            enumValueText += enumValue->name();
 #ifdef AVOID_PROTECTED_HACK
-            } else {
-                s << enumValue->value();
+        } else {
+            enumValueText += enumValue->value();
+        }
+#endif
+
+        bool shouldDecrefNumber = false;
+        QString enumItemText = "enum_item";
+        if (!cppEnum->isAnonymous()) {
+            s << INDENT << "enum_item = Shiboken::SbkEnumObject_New(&";
+            s << cpythonName << "_Type," << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << enumValueText << ", \"" << enumValue->name() << "\");" << endl;
             }
-#endif
-            s << ", \"" << enumValue->name() << "\");" << endl;
+        } else if (cppEnum->enclosingClass()) {
+            s << INDENT << "enum_item = PyInt_FromLong(" << enumValueText << ");" << endl;
+            shouldDecrefNumber = true;
+        } else {
+            enumItemText = enumValueText;
         }
 
         s << INDENT << addFunction << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << '"' << enumValue->name() << "\", enum_item);" << endl;
+            s << INDENT << '"' << enumValue->name() << "\", " << enumItemText << ");" << endl;
         }
-        s << INDENT << "PyDict_SetItemString(" << cpythonName << "_Type.tp_dict," << endl;
-        {
-            Indentation indent(INDENT);
-            s << INDENT << '"' << enumValue->name() << "\", enum_item);" << endl;
+        if (shouldDecrefNumber)
+            s << INDENT << "Py_DECREF(enum_item);" << endl;
+
+        if (!cppEnum->isAnonymous()) {
+            s << INDENT << "PyDict_SetItemString(" << cpythonName << "_Type.tp_dict," << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << '"' << enumValue->name() << "\", enum_item);" << endl;
+            }
         }
 
     }
 
-    // TypeResolver stuff
-    s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<int>(\"";
-    if (cppEnum->enclosingClass())
-        s << cppEnum->enclosingClass()->qualifiedCppName() << "::";
-    s << cppEnum->name() << "\");\n";
+    if (!cppEnum->isAnonymous()) {
+        // TypeResolver stuff
+        s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<int>(\"";
+        if (cppEnum->enclosingClass())
+            s << cppEnum->enclosingClass()->qualifiedCppName() << "::";
+        s << cppEnum->name() << "\");\n";
+    }
 
 
     s << endl;
@@ -3533,6 +3563,8 @@ void CppGenerator::finishGeneration()
             s << "// Enum definitions ";
             s << "------------------------------------------------------------" << endl;
             foreach (const AbstractMetaEnum* cppEnum, globalEnums()) {
+                if (cppEnum->isAnonymous())
+                    continue;
                 writeEnumDefinition(s, cppEnum);
                 s << endl;
             }
