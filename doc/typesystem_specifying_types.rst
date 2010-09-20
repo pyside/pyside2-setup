@@ -134,6 +134,7 @@ enum-type
 
         <typesystem>
             <enum-type name="..."
+                identified-by-value="..."
                 since="..."
                 flags="yes | no"
                 lower-bound="..."
@@ -155,6 +156,11 @@ enum-type
     with user values (the default is *no*).
 
     The *optional*  **since** value is used to specify the API version of this type.
+
+    The attribute **identified-by-value** helps to specify anonymous enums using the
+    name of one of their values, which is unique for the anonymous enum scope.
+    Notice that the **enum-type** tag can either have **name** or **identified-by-value**
+    but not both.
 
 
 
