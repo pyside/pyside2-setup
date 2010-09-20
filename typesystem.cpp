@@ -131,14 +131,10 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
         return true;
 
     switch (m_current->type) {
-    case StackElement::AddFunction:
-        if (m_generate == TypeEntry::GenerateAll
-            && m_current->parent
-            && m_current->parent->type == StackElement::Root) { // Global function
-            TypeDatabase::instance()->addGlobalUserFunctions(m_addedFunctions);
-            TypeDatabase::instance()->addGlobalUserFunctionModifications(m_functionMods);
-            m_addedFunctions.clear();
-            m_functionMods.clear();
+    case StackElement::Root:
+        if (m_generate == TypeEntry::GenerateAll) {
+            TypeDatabase::instance()->addGlobalUserFunctions(m_contextStack.top()->addedFunctions);
+            TypeDatabase::instance()->addGlobalUserFunctionModifications(m_contextStack.top()->functionMods);
         }
         break;
     case StackElement::ObjectTypeEntry:
@@ -146,21 +142,16 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
     case StackElement::InterfaceTypeEntry:
     case StackElement::NamespaceTypeEntry: {
         ComplexTypeEntry *centry = static_cast<ComplexTypeEntry *>(m_current->entry);
-        centry->setAddedFunctions(m_addedFunctions);
-        centry->setFunctionModifications(m_functionMods);
-        centry->setFieldModifications(m_fieldMods);
-        centry->setCodeSnips(m_codeSnips);
-        centry->setDocModification(m_docModifications);
+        centry->setAddedFunctions(m_contextStack.top()->addedFunctions);
+        centry->setFunctionModifications(m_contextStack.top()->functionMods);
+        centry->setFieldModifications(m_contextStack.top()->fieldMods);
+        centry->setCodeSnips(m_contextStack.top()->codeSnips);
+        centry->setDocModification(m_contextStack.top()->docModifications);
 
         if (centry->designatedInterface()) {
-            centry->designatedInterface()->setCodeSnips(m_codeSnips);
-            centry->designatedInterface()->setFunctionModifications(m_functionMods);
+            centry->designatedInterface()->setCodeSnips(m_contextStack.top()->codeSnips);
+            centry->designatedInterface()->setFunctionModifications(m_contextStack.top()->functionMods);
         }
-        m_codeSnips = CodeSnipList();
-        m_addedFunctions = AddedFunctionList();
-        m_functionMods = FunctionModificationList();
-        m_fieldMods = FieldModificationList();
-        m_docModifications = DocModificationList();
     }
     break;
     case StackElement::CustomMetaConstructor: {
@@ -174,8 +165,8 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
     }
     break;
     case StackElement::EnumTypeEntry:
-        m_current->entry->setDocModification(m_docModifications);
-        m_docModifications = DocModificationList();
+        m_current->entry->setDocModification(m_contextStack.top()->docModifications);
+        m_contextStack.top()->docModifications = DocModificationList();
         m_currentEnum = 0;
         break;
     case StackElement::Template:
@@ -183,20 +174,29 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
         break;
     case StackElement::TemplateInstanceEnum:
         if (m_current->parent->type == StackElement::InjectCode)
-            m_codeSnips.last().addTemplateInstance(m_current->value.templateInstance);
+            m_contextStack.top()->codeSnips.last().addTemplateInstance(m_current->value.templateInstance);
          else if (m_current->parent->type == StackElement::Template)
             m_current->parent->value.templateEntry->addTemplateInstance(m_current->value.templateInstance);
          else if (m_current->parent->type == StackElement::CustomMetaConstructor
                   || m_current->parent->type == StackElement::CustomMetaConstructor)
             m_current->parent->value.customFunction->addTemplateInstance(m_current->value.templateInstance);
          else if (m_current->parent->type == StackElement::ConversionRule)
-            m_functionMods.last().argument_mods.last().conversion_rules.last().addTemplateInstance(m_current->value.templateInstance);
+            m_contextStack.top()->functionMods.last().argument_mods.last().conversion_rules.last().addTemplateInstance(m_current->value.templateInstance);
          else if (m_current->parent->type == StackElement::InjectCodeInFunction)
-            m_functionMods.last().snips.last().addTemplateInstance(m_current->value.templateInstance);
+            m_contextStack.top()->functionMods.last().snips.last().addTemplateInstance(m_current->value.templateInstance);
 
         break;
     default:
         break;
+    }
+
+    if (m_current->type == StackElement::Root
+        || m_current->type == StackElement::NamespaceTypeEntry
+        || m_current->type == StackElement::InterfaceTypeEntry
+        || m_current->type == StackElement::ObjectTypeEntry
+        || m_current->type == StackElement::ValueTypeEntry) {
+        StackElementContext* context = m_contextStack.pop();
+        delete context;
     }
 
     StackElement *child = m_current;
@@ -220,7 +220,7 @@ bool Handler::characters(const QString &ch)
 
     if (m_current->type == StackElement::ConversionRule
         && m_current->parent->type == StackElement::ModifyArgument) {
-        m_functionMods.last().argument_mods.last().conversion_rules.last().addCode(ch);
+        m_contextStack.top()->functionMods.last().argument_mods.last().conversion_rules.last().addCode(ch);
         return true;
     }
 
@@ -235,14 +235,14 @@ bool Handler::characters(const QString &ch)
                 break;
             case StackElement::ModifyFunction:
             case StackElement::AddFunction:
-                m_functionMods.last().snips.last().addCode(ch);
-                m_functionMods.last().modifiers |= FunctionModification::CodeInjection;
+                m_contextStack.top()->functionMods.last().snips.last().addCode(ch);
+                m_contextStack.top()->functionMods.last().modifiers |= FunctionModification::CodeInjection;
                 break;
             case StackElement::NamespaceTypeEntry:
             case StackElement::ObjectTypeEntry:
             case StackElement::ValueTypeEntry:
             case StackElement::InterfaceTypeEntry:
-                m_codeSnips.last().addCode(ch);
+                m_contextStack.top()->codeSnips.last().addCode(ch);
                 break;
             default:
                 Q_ASSERT(false);
@@ -252,7 +252,7 @@ bool Handler::characters(const QString &ch)
     }
 
     if (m_current->type & StackElement::DocumentationMask)
-        m_docModifications.last().setCode(ch);
+        m_contextStack.top()->docModifications.last().setCode(ch);
 
     return true;
 }
@@ -336,21 +336,23 @@ bool Handler::startElement(const QString &, const QString &n,
     if (tagName == "import-file")
         return importFileElement(atts);
 
-
-    StackElement *element = new StackElement(m_current);
-
     if (!tagNames.contains(tagName)) {
         m_error = QString("Unknown tag name: '%1'").arg(tagName);
         return false;
     }
 
+    StackElement* element = new StackElement(m_current);
     element->type = tagNames[tagName];
-    if (element->type & StackElement::TypeEntryMask) {
-        if (m_current->type != StackElement::Root) {
-            m_error = "Nested types not supported";
-            return false;
-        }
 
+    if (element->type == StackElement::Root
+        || element->type == StackElement::NamespaceTypeEntry
+        || element->type == StackElement::InterfaceTypeEntry
+        || element->type == StackElement::ObjectTypeEntry
+        || element->type == StackElement::ValueTypeEntry) {
+        m_contextStack.push(new StackElementContext());
+    }
+
+    if (element->type & StackElement::TypeEntryMask) {
         QHash<QString, QString> attributes;
         attributes["name"] = QString();
         attributes["since"] = QString("0");
@@ -435,6 +437,13 @@ bool Handler::startElement(const QString &, const QString &n,
             }
         }
 
+        // Fix type entry name using nesting information.
+        if (element->type & StackElement::TypeEntryMask
+            && element->parent && element->parent->type != StackElement::Root) {
+            name = element->parent->entry->name() + "::" + name;
+        }
+
+
         if (name.isEmpty()) {
             m_error = "no 'name' attribute specified";
             return false;
@@ -488,7 +497,6 @@ bool Handler::startElement(const QString &, const QString &n,
             break;
         case StackElement::EnumTypeEntry: {
             QStringList names = name.split(QLatin1String("::"));
-
             if (names.size() == 1)
                 m_currentEnum = new EnumTypeEntry(QString(), name, since);
              else
@@ -699,7 +707,7 @@ bool Handler::startElement(const QString &, const QString &n,
             QString signature = m_current->type & StackElement::TypeEntryMask ? QString() : m_currentSignature;
             DocModification mod(mode, signature, since);
             mod.format = lang;
-            m_docModifications << mod;
+            m_contextStack.top()->docModifications << mod;
         } else {
             m_error = "inject-documentation must be inside modify-function, "
                       "modify-field or other tags that creates a type";
@@ -718,7 +726,7 @@ bool Handler::startElement(const QString &, const QString &n,
                                 | StackElement::ModifyField;
         if (m_current->parent && m_current->parent->type & validParent) {
             QString signature = (m_current->type & StackElement::TypeEntryMask) ? QString() : m_currentSignature;
-            m_docModifications << DocModification(attributes["xpath"], signature, since);
+            m_contextStack.top()->docModifications << DocModification(attributes["xpath"], signature, since);
         } else {
             m_error = "modify-documentation must be inside modify-function, "
                       "modify-field or other tags that creates a type";
@@ -922,7 +930,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 return false;
             }
 
-            m_functionMods.last().argument_mods.last().modified_type = attributes["modified-type"];
+            m_contextStack.top()->functionMods.last().argument_mods.last().modified_type = attributes["modified-type"];
         }
         break;
         case StackElement::ConversionRule: {
@@ -952,7 +960,7 @@ bool Handler::startElement(const QString &, const QString &n,
 
                 CodeSnip snip(since);
                 snip.language = lang;
-                m_functionMods.last().argument_mods.last().conversion_rules.append(snip);
+                m_contextStack.top()->functionMods.last().argument_mods.last().conversion_rules.append(snip);
             } else {
                 if (topElement.entry->hasConversionRule()) {
                     m_error = "Types can have only one conversion rule";
@@ -1016,7 +1024,7 @@ bool Handler::startElement(const QString &, const QString &n,
             ArgumentModification argumentModification = ArgumentModification(idx, since);
             argumentModification.replace_value = replace_value;
             argumentModification.resetAfterUse = convertBoolean(attributes["invalidate-after-use"], "invalidate-after-use", false);
-            m_functionMods.last().argument_mods.append(argumentModification);
+            m_contextStack.top()->functionMods.last().argument_mods.append(argumentModification);
         }
         break;
         case StackElement::NoNullPointers: {
@@ -1025,9 +1033,9 @@ bool Handler::startElement(const QString &, const QString &n,
                 return false;
             }
 
-            m_functionMods.last().argument_mods.last().noNullPointers = true;
-            if (!m_functionMods.last().argument_mods.last().index)
-                m_functionMods.last().argument_mods.last().nullPointerDefaultValue = attributes["default-value"];
+            m_contextStack.top()->functionMods.last().argument_mods.last().noNullPointers = true;
+            if (!m_contextStack.top()->functionMods.last().argument_mods.last().index)
+                m_contextStack.top()->functionMods.last().argument_mods.last().nullPointerDefaultValue = attributes["default-value"];
              else if (!attributes["default-value"].isEmpty())
                 ReportHandler::warning("default values for null pointer guards are only effective for return values");
 
@@ -1066,7 +1074,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 return false;
             }
 
-            m_functionMods.last().argument_mods.last().ownerships[lang] = owner;
+            m_contextStack.top()->functionMods.last().argument_mods.last().ownerships[lang] = owner;
         }
         break;
         case StackElement::SuppressedWarning:
@@ -1100,7 +1108,7 @@ bool Handler::startElement(const QString &, const QString &n,
 
 
             if (topElement.type == StackElement::InjectCodeInFunction)
-                m_functionMods.last().snips.last().argumentMap[pos] = meta_name;
+                m_contextStack.top()->functionMods.last().snips.last().argumentMap[pos] = meta_name;
              else {
                 ReportHandler::warning("Argument maps are only useful for injection of code "
                                        "into functions.");
@@ -1126,7 +1134,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 return false;
             }
 
-            m_functionMods.last().removal = lang;
+            m_contextStack.top()->functionMods.last().removal = lang;
         }
         break;
         case StackElement::Rename:
@@ -1140,9 +1148,9 @@ bool Handler::startElement(const QString &, const QString &n,
 
             Modification *mod = 0;
             if (topElement.type == StackElement::ModifyFunction)
-                mod = &m_functionMods.last();
+                mod = &m_contextStack.top()->functionMods.last();
             else if (topElement.type == StackElement::ModifyField)
-                mod = &m_fieldMods.last();
+                mod = &m_contextStack.top()->fieldMods.last();
 
             QString modifier;
             if (element->type == StackElement::Rename) {
@@ -1158,7 +1166,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 else if (topElement.type == StackElement::ModifyField)
                     mod->setRenamedTo(renamed_to);
                 else
-                    m_functionMods.last().argument_mods.last().renamed_to = renamed_to;
+                    m_contextStack.top()->functionMods.last().argument_mods.last().renamed_to = renamed_to;
             } else
                 modifier = attributes["modifier"].toLower();
 
@@ -1194,7 +1202,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 return false;
             }
 
-            m_functionMods.last().argument_mods.last().removed = true;
+            m_contextStack.top()->functionMods.last().argument_mods.last().removed = true;
             break;
 
         case StackElement::ModifyField: {
@@ -1211,7 +1219,7 @@ bool Handler::startElement(const QString &, const QString &n,
             if (read == "true") fm.modifiers |= FieldModification::Readable;
             if (write == "true") fm.modifiers |= FieldModification::Writable;
 
-            m_fieldMods << fm;
+            m_contextStack.top()->fieldMods << fm;
         }
         break;
         case StackElement::AddFunction: {
@@ -1246,11 +1254,11 @@ bool Handler::startElement(const QString &, const QString &n,
                 }
             }
 
-            m_addedFunctions << func;
+            m_contextStack.top()->addedFunctions << func;
 
             FunctionModification mod(since);
             mod.signature = m_currentSignature;
-            m_functionMods << mod;
+            m_contextStack.top()->functionMods << mod;
         }
         break;
         case StackElement::ModifyFunction: {
@@ -1319,7 +1327,7 @@ bool Handler::startElement(const QString &, const QString &n,
 
             mod.modifiers |= (convertBoolean(attributes["virtual-slot"], "virtual-slot", false) ? Modification::VirtualSlot : 0);
 
-            m_functionMods << mod;
+            m_contextStack.top()->functionMods << mod;
         }
         break;
         case StackElement::ReplaceDefaultExpression:
@@ -1333,10 +1341,10 @@ bool Handler::startElement(const QString &, const QString &n,
                 return false;
             }
 
-            m_functionMods.last().argument_mods.last().replacedDefaultExpression = attributes["with"];
+            m_contextStack.top()->functionMods.last().argument_mods.last().replacedDefaultExpression = attributes["with"];
             break;
         case StackElement::RemoveDefaultExpression:
-            m_functionMods.last().argument_mods.last().removedDefaultExpression = true;
+            m_contextStack.top()->functionMods.last().argument_mods.last().removedDefaultExpression = true;
             break;
         case StackElement::CustomMetaConstructor:
         case StackElement::CustomMetaDestructor: {
@@ -1370,7 +1378,7 @@ bool Handler::startElement(const QString &, const QString &n,
                     m_error += " " + action;
             }
 
-            m_functionMods.last().argument_mods.last().referenceCounts.append(rc);
+            m_contextStack.top()->functionMods.last().argument_mods.last().referenceCounts.append(rc);
         }
         break;
 
@@ -1407,7 +1415,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 return false;
             }
             ao.index = idx;
-            m_functionMods.last().argument_mods.last().owner = ao;
+            m_contextStack.top()->functionMods.last().argument_mods.last().owner = ao;
         }
         break;
 
@@ -1490,20 +1498,20 @@ bool Handler::startElement(const QString &, const QString &n,
             }
 
             if (topElement.type == StackElement::ModifyFunction || topElement.type == StackElement::AddFunction) {
-                FunctionModification mod = m_functionMods.last();
+                FunctionModification mod = m_contextStack.top()->functionMods.last();
                 if (snip.language == TypeSystem::ShellDeclaration) {
                     m_error = "no function implementation in shell declaration in which to inject code";
                     return false;
                 }
 
-                m_functionMods.last().snips << snip;
+                m_contextStack.top()->functionMods.last().snips << snip;
                 if (in_file)
-                    m_functionMods.last().modifiers |= FunctionModification::CodeInjection;
+                    m_contextStack.top()->functionMods.last().modifiers |= FunctionModification::CodeInjection;
                 element->type = StackElement::InjectCodeInFunction;
             } else if (topElement.type == StackElement::Root) {
                 element->entry->addCodeSnip(snip);
             } else if (topElement.type != StackElement::Root) {
-                m_codeSnips << snip;
+                m_contextStack.top()->codeSnips << snip;
             }
 
         }

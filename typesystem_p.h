@@ -23,6 +23,7 @@
 #ifndef TYPESYSTEM_P_H
 #define TYPESYSTEM_P_H
 
+#include <QStack>
 #include <QXmlDefaultHandler>
 #include "typesystem.h"
 
@@ -110,6 +111,15 @@ class StackElement
         } value;
 };
 
+struct StackElementContext
+{
+    CodeSnipList codeSnips;
+    AddedFunctionList addedFunctions;
+    FunctionModificationList functionMods;
+    FieldModificationList fieldMods;
+    DocModificationList docModifications;
+};
+
 class Handler : public QXmlDefaultHandler
 {
 public:
@@ -137,7 +147,7 @@ private:
     bool importFileElement(const QXmlAttributes &atts);
     bool convertBoolean(const QString &, const QString &, bool);
 
-    TypeDatabase *m_database;
+    TypeDatabase* m_database;
     StackElement* m_current;
     QString m_defaultPackage;
     QString m_defaultSuperclass;
@@ -145,12 +155,7 @@ private:
     TypeEntry::CodeGeneration m_generate;
 
     EnumTypeEntry* m_currentEnum;
-
-    CodeSnipList m_codeSnips;
-    AddedFunctionList m_addedFunctions;
-    FunctionModificationList m_functionMods;
-    FieldModificationList m_fieldMods;
-    DocModificationList m_docModifications;
+    QStack<StackElementContext*> m_contextStack;
 
     QHash<QString, StackElement::ElementType> tagNames;
     QString m_currentSignature;
