@@ -1,3 +1,9 @@
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(LIBRARY_OUTPUT_SUFFIX ${CMAKE_DEBUG_POSTFIX})
+else()
+    set(LIBRARY_OUTPUT_SUFFIX ${CMAKE_RELEASE_POSTFIX})
+endif()
+
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ShibokenConfig.cmake.in"
                "${CMAKE_CURRENT_BINARY_DIR}/ShibokenConfig.cmake" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ShibokenConfigVersion.cmake.in"
