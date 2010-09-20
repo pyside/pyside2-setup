@@ -87,6 +87,9 @@
     <enum-type name="Event::EventType"/>
     <enum-type name="Abstract::Type"/>
 
+    <enum-type identified-by-value="AnonymousGlobalEnum_Value0"/>
+    <enum-type identified-by-value="SampleNamespace::AnonymousClassEnum_Value1"/>
+
     <namespace-type name="SampleNamespace">
         <modify-function signature="doSomethingWithArray(const unsigned char*, unsigned int, const char*)">
             <modify-argument index="1">

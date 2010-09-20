@@ -29,6 +29,12 @@
 
 class ObjectType;
 
+// Anonymous global enum
+enum {
+    AnonymousGlobalEnum_Value0,
+    AnonymousGlobalEnum_Value1
+};
+
 namespace SampleNamespace
 {
 
@@ -48,6 +54,14 @@ enum OutValue {
     ZeroOut,
     OneOut,
     TwoOut
+};
+
+// Anonymous non-global enum.
+// This counts as a class enum, since C++ namespaces
+// are represented as classes in Python.
+enum {
+    AnonymousClassEnum_Value0,
+    AnonymousClassEnum_Value1
 };
 
 LIBSAMPLE_API OutValue enumInEnumOut(InValue in);

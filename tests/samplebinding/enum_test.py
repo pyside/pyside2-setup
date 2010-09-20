@@ -28,6 +28,7 @@
 
 import unittest
 
+import sample
 from sample import SampleNamespace, ObjectType, Event
 
 class EnumTest(unittest.TestCase):
@@ -71,6 +72,16 @@ class EnumTest(unittest.TestCase):
         self.assertEqual(SampleNamespace.enumItemAsDefaultValueToIntArgument(), SampleNamespace.ZeroIn)
         self.assertEqual(SampleNamespace.enumItemAsDefaultValueToIntArgument(SampleNamespace.ZeroOut), SampleNamespace.ZeroOut)
         self.assertEqual(SampleNamespace.enumItemAsDefaultValueToIntArgument(123), 123)
+
+    def testAnonymousGlobalEnums(self):
+        '''Checks availability of anonymous global enum items.'''
+        self.assertEqual(sample.AnonymousGlobalEnum_Value0, 0)
+        self.assertEqual(sample.AnonymousGlobalEnum_Value1, 1)
+
+    def testAnonymousClassEnums(self):
+        '''Checks availability of anonymous class enum items.'''
+        self.assertEqual(SampleNamespace.AnonymousClassEnum_Value0, 0)
+        self.assertEqual(SampleNamespace.AnonymousClassEnum_Value1, 1)
 
 
 class EnumOverloadTest(unittest.TestCase):
