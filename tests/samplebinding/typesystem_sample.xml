@@ -65,32 +65,32 @@
     <function signature="overloadedFunc(double)" />
     <function signature="overloadedFunc(int)" />
 
-    <enum-type name="Abstract::PrintFormat"/>
     <enum-type name="OverloadedFuncEnum"/>
-    <enum-type name="Derived::OtherOverloadedFuncEnum"/>
-    <enum-type name="Modifications::OverloadedModFunc"/>
-    <enum-type name="ImplicitConv::CtorEnum"/>
-    <enum-type name="Time::NumArgs"/>
     <!-- BUG:
     renaming the ICOverloadedFuncEnum to the same name
     of a global enum causes the generator to confuse the
     two types.
     -->
-    <enum-type name="ImplicitConv::ICOverloadedFuncEnum"/>
-    <enum-type name="SampleNamespace::Option"/>
-    <enum-type name="SampleNamespace::InValue"/>
-    <enum-type name="SampleNamespace::OutValue"/>
     <enum-type name="GlobalEnum"/>
     <enum-type name="GlobalOverloadFuncEnum"/>
-    <enum-type name="Overload::FunctionEnum"/>
-    <enum-type name="Overload::ParamEnum"/>
-    <enum-type name="Event::EventType"/>
-    <enum-type name="Abstract::Type"/>
 
     <enum-type identified-by-value="AnonymousGlobalEnum_Value0"/>
-    <enum-type identified-by-value="SampleNamespace::AnonymousClassEnum_Value1"/>
 
     <namespace-type name="SampleNamespace">
+        <enum-type name="Option"/>
+        <enum-type name="InValue"/>
+        <enum-type name="OutValue"/>
+        <enum-type identified-by-value="AnonymousClassEnum_Value1"/>
+
+        <object-type name="DerivedFromNamespace" />
+        <value-type name="SomeClass">
+            <value-type name="SomeInnerClass">
+                <object-type name="OkThisIsRecursiveEnough">
+                    <enum-type name="NiceEnum" />
+                </object-type>
+            </value-type>
+        </value-type>
+
         <modify-function signature="doSomethingWithArray(const unsigned char*, unsigned int, const char*)">
             <modify-argument index="1">
                 <replace-type modified-type="const char*"/>
@@ -113,18 +113,17 @@
     </namespace-type>
 
     <value-type name="IntList" />
-    <value-type name="SampleNamespace::SomeClass" />
-    <value-type name="SampleNamespace::SomeClass::SomeInnerClass" />
-    <object-type name="SampleNamespace::SomeClass::SomeInnerClass::OkThisIsRecursiveEnough" />
-    <enum-type name="SampleNamespace::SomeClass::SomeInnerClass::OkThisIsRecursiveEnough::NiceEnum" />
-    <object-type name="SampleNamespace::DerivedFromNamespace" />
 
     <object-type name="Abstract">
+        <enum-type name="Type"/>
+        <enum-type name="PrintFormat"/>
         <modify-function signature="id()" rename="id_"/>
     </object-type>
 
-    <object-type name="Derived" polymorphic-id-expression="%1->type() == Derived::TpDerived" />
-    <value-type name="Derived::SomeInnerClass" />
+    <object-type name="Derived" polymorphic-id-expression="%1->type() == Derived::TpDerived">
+        <enum-type name="OtherOverloadedFuncEnum"/>
+        <value-type name="SomeInnerClass" />
+    </object-type>
 
     <object-type name="ModifiedConstructor">
         <modify-function signature="ModifiedConstructor(int)">
@@ -227,7 +226,9 @@
     </object-type>
 
 
-    <value-type name="Event"/>
+    <value-type name="Event">
+        <enum-type name="EventType"/>
+    </value-type>
 
     <value-type name="BlackBox">
         <modify-function signature="keepObjectType(ObjectType*)">
@@ -309,9 +310,10 @@
     </object-type>
 
 
-    <object-type name="ProtectedEnumClass" />
-    <enum-type name="ProtectedEnumClass::ProtectedEnum" />
-    <enum-type name="ProtectedEnumClass::PublicEnum" />
+    <object-type name="ProtectedEnumClass">
+        <enum-type name="ProtectedEnum" />
+        <enum-type name="PublicEnum" />
+    </object-type>
 
     <value-type name="ProtectedProperty" />
 
@@ -367,6 +369,7 @@
     </template>
 
     <object-type name="Modifications">
+        <enum-type name="OverloadedModFunc"/>
 
         <modify-function signature="overloaded(int, bool, int, double)">
             <modify-argument index="2">
@@ -609,7 +612,10 @@
     </object-type>
 
     <value-type name="Reference"/>
-    <value-type name="ImplicitConv"/>
+    <value-type name="ImplicitConv">
+        <enum-type name="CtorEnum"/>
+        <enum-type name="ICOverloadedFuncEnum"/>
+    </value-type>
 
     <value-type name="VirtualMethods">
         <modify-function signature="sum0(int, int, int)" rename="sumThree"/>
@@ -955,7 +961,9 @@
         </modify-function>
     </value-type>
 
-    <value-type name="Time"/>
+    <value-type name="Time">
+        <enum-type name="NumArgs"/>
+    </value-type>
     <value-type name="Size">
         <add-function signature="Size(const char*)">
             <inject-code class="target" position="beginning">
@@ -973,6 +981,8 @@
     <value-type name="NonDefaultCtor" />
     <value-type name="OddBoolUser" />
     <value-type name="Overload">
+        <enum-type name="FunctionEnum"/>
+        <enum-type name="ParamEnum"/>
         <modify-function signature="intOverloads(int, int, double)">
             <modify-argument index="2">
                 <remove-argument />
