@@ -96,6 +96,36 @@ void TestEnum::testEnumWithApiVersion()
     QCOMPARE(classes[0]->enums().count(), 1);
 }
 
+void TestEnum::testAnonymousEnum()
+{
+    const char* cppCode ="\
+    enum { Global0, Global1 }; \
+    struct A {\
+        enum { A0, A1 };\
+    };\
+    ";
+    const char* xmlCode = "\
+    <typesystem package=\"Foo\"> \
+        <value-type name='A'/> \
+        <!-- Uses the first value of the enum to identify it. -->\
+        <enum-type identified-by-value='Global0'/>\
+        <!-- Uses the second value of the enum to identify it. -->\
+        <enum-type identified-by-value='A::A1'/>\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, false);
+
+    AbstractMetaEnumList globalEnums = t.builder()->globalEnums();
+    QCOMPARE(globalEnums.count(), 1);
+    QCOMPARE(globalEnums.first()->typeEntry()->qualifiedCppName(), QString("Global0"));
+    QVERIFY(globalEnums.first()->isAnonymous());
+
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.count(), 1);
+    QCOMPARE(classes[0]->enums().count(), 1);
+    QCOMPARE(classes[0]->enums().first()->typeEntry()->qualifiedCppName(), QString("A::A1"));
+    QVERIFY(classes[0]->enums().first()->isAnonymous());
+}
 
 QTEST_APPLESS_MAIN(TestEnum)
 

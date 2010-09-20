@@ -31,6 +31,7 @@ class TestEnum : public QObject
 private slots:
     void testEnumCppSignature();
     void testEnumWithApiVersion();
+    void testAnonymousEnum();
 };
 
 #endif
