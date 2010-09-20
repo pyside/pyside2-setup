@@ -1,4 +1,12 @@
 project(libshiboken)
+
+option(ENABLE_VERSION_SUFFIX "Used to use current version in suffix to generated files. This is used to allow multiples versions installed simultaneous." FALSE)
+if(ENABLE_VERSION_SUFFIX)
+    set(shiboken_SUFFIX "-${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}")
+else()
+    set(shiboken_SUFFIX "")
+endif()
+
 #Find installed sparsehash
 find_path(SPARSEHASH_INCLUDE_PATH sparseconfig.h PATH_SUFFIXES "/google/sparsehash")
 if(SPARSEHASH_INCLUDE_PATH)
