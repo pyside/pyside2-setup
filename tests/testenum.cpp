@@ -38,9 +38,10 @@ void TestEnum::testEnumCppSignature()
     ";
     const char* xmlCode = "\
     <typesystem package=\"Foo\"> \
-        <value-type name='A'/> \
         <enum-type name='GlobalEnum' />\
-        <enum-type name='A::ClassEnum' />\
+        <value-type name='A'> \
+            <enum-type name='ClassEnum' />\
+        </value-type> \
         <function signature='func(A::ClassEnum)' />\
     </typesystem>";
 
@@ -85,9 +86,10 @@ void TestEnum::testEnumWithApiVersion()
     ";
     const char* xmlCode = "\
     <typesystem package=\"Foo\"> \
-        <value-type name='A'/> \
-        <enum-type name='A::ClassEnum' since='0.1'/>\
-        <enum-type name='A::ClassEnum2' since='0.2'/>\
+        <value-type name='A'> \
+            <enum-type name='ClassEnum' since='0.1'/>\
+            <enum-type name='ClassEnum2' since='0.2'/>\
+        </value-type> \
     </typesystem>";
 
     TestUtil t(cppCode, xmlCode, true, 0.1);
@@ -106,11 +108,12 @@ void TestEnum::testAnonymousEnum()
     ";
     const char* xmlCode = "\
     <typesystem package=\"Foo\"> \
-        <value-type name='A'/> \
         <!-- Uses the first value of the enum to identify it. -->\
         <enum-type identified-by-value='Global0'/>\
-        <!-- Uses the second value of the enum to identify it. -->\
-        <enum-type identified-by-value='A::A1'/>\
+        <value-type name='A'> \
+            <!-- Uses the second value of the enum to identify it. -->\
+            <enum-type identified-by-value='A1'/>\
+        </value-type> \
     </typesystem>";
 
     TestUtil t(cppCode, xmlCode, false);

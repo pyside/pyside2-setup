@@ -38,8 +38,9 @@ void TestNamespace::testNamespaceMembers()
     };";
     const char* xmlCode = "\
     <typesystem package='Foo'> \
-        <namespace-type name='Namespace' />\
-        <enum-type name='Namespace::Option' /> \
+        <namespace-type name='Namespace'>\
+            <enum-type name='Option' /> \
+        </namespace-type>\
     </typesystem>";
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
@@ -64,9 +65,11 @@ void TestNamespace::testNamespaceInnerClassMembers()
     };";
     const char* xmlCode = "\
     <typesystem package='Foo'> \
-        <namespace-type name='OuterNamespace' />\
-        <namespace-type name='OuterNamespace::InnerNamespace' />\
-        <value-type name='OuterNamespace::InnerNamespace::SomeClass' /> \
+        <namespace-type name='OuterNamespace'>\
+            <namespace-type name='InnerNamespace'>\
+                <value-type name='SomeClass' /> \
+            </namespace-type>\
+        </namespace-type>\
     </typesystem>";
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
