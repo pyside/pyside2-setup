@@ -170,6 +170,8 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     //Extra includes
     s << endl << "// Extra includes" << endl;
     QList<Include> includes = metaClass->typeEntry()->extraIncludes();
+    foreach (AbstractMetaEnum* cppEnum, metaClass->enums())
+        includes.append(cppEnum->typeEntry()->extraIncludes());
     qSort(includes.begin(), includes.end());
     foreach (Include inc, includes)
         s << inc.toString() << endl;
@@ -3531,6 +3533,16 @@ void CppGenerator::finishGeneration()
         s << "#include \"" << getModuleHeaderFileName() << '"' << endl << endl;
         foreach (const Include& include, includes)
             s << include;
+        s << endl;
+
+        //Extra includes
+        s << endl << "// Extra includes" << endl;
+        QList<Include> includes;
+        foreach (AbstractMetaEnum* cppEnum, globalEnums())
+            includes.append(cppEnum->typeEntry()->extraIncludes());
+        qSort(includes.begin(), includes.end());
+        foreach (Include inc, includes)
+            s << inc.toString() << endl;
         s << endl;
 
         TypeSystemTypeEntry* moduleEntry = reinterpret_cast<TypeSystemTypeEntry*>(TypeDatabase::instance()->findType(packageName()));
