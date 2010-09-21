@@ -428,8 +428,12 @@ void HeaderGenerator::finishGeneration()
             s << "inline PyObject* createWrapper<" << metaClass->qualifiedCppName() << " >(const ";
             s << metaClass->qualifiedCppName() << "* cppobj, bool hasOwnership, bool isExactType)" << endl;
             s << '{' << endl;
+            s << INDENT << "const char* typeName = 0;" << endl;
+            s << INDENT << metaClass->qualifiedCppName() << "* value = const_cast<" << metaClass->qualifiedCppName() << "* >(cppobj);" << endl;
+            s << INDENT << "if (!isExactType)" << endl;
+            s << INDENT << INDENT << "typeName = typeid(*value).name();" << endl;
             s << INDENT << "PyObject* pyObj = Shiboken::SbkBaseWrapper_New(reinterpret_cast<SbkBaseWrapperType*>(SbkType<" << metaClass->qualifiedCppName() << " >()),"
-            << "const_cast<" << metaClass->qualifiedCppName() << "*>(cppobj), hasOwnership, isExactType);" << endl;
+            << "value, hasOwnership, isExactType, typeName);" << endl;
             s << INDENT << "PySide::signalUpdateSource(pyObj);" << endl;
             s << INDENT << "return pyObj;" << endl;
             s << '}' << endl;
