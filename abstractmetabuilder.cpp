@@ -401,6 +401,8 @@ bool AbstractMetaBuilder::build(QIODevice* input)
     }
     ReportHandler::flush();
 
+    figureOutEnumValues();
+
     foreach (ClassModelItem item, typeValues)
         traverseClassMembers(item);
     foreach (NamespaceModelItem item, namespaceTypeValues)
@@ -560,7 +562,6 @@ bool AbstractMetaBuilder::build(QIODevice* input)
             traverseStreamOperator(item);
     }
 
-    figureOutEnumValues();
     figureOutDefaultEnumArguments();
     checkFunctionModifications();
 
@@ -1943,8 +1944,25 @@ AbstractMetaType* AbstractMetaBuilder::translateType(const TypeInfo& _typei, boo
                 bool ok;
 
                 int elems = s.toInt(&ok);
-                if (!ok)
-                    return 0;
+                if (!ok) {
+                    AbstractMetaEnumValue* enumValue = m_metaClasses.findEnumValue(s);
+                    if (!enumValue) {
+                        foreach (AbstractMetaEnum* metaEnum, m_globalEnums) {
+                            foreach (AbstractMetaEnumValue* ev, metaEnum->values()) {
+                                if (ev->name() == s) {
+                                    enumValue = ev;
+                                    break;
+                                }
+                            }
+                            if (enumValue)
+                                break;
+                        }
+                    }
+
+                    if (!enumValue)
+                        return 0;
+                    elems = enumValue->value();
+                }
 
                 AbstractMetaType* arrayType = createMetaType();
                 arrayType->setArrayElementCount(elems);
