@@ -2216,15 +2216,22 @@ AbstractMetaEnumValue *AbstractMetaClassList::findEnumValue(const QString &name)
 {
     QStringList lst = name.split(QLatin1String("::"));
 
-    Q_ASSERT_X(lst.size() == 2, "AbstractMetaClassList::findEnumValue()", "Expected qualified enum");
+    if (lst.size() > 1) {
+        QString prefixName = lst.at(0);
+        QString enumName = lst.at(1);
 
+        AbstractMetaClass* cl = findClass(prefixName);
+        if (cl)
+            return cl->findEnumValue(enumName, 0);
+    }
 
-    QString prefixName = lst.at(0);
-    QString enumName = lst.at(1);
-
-    AbstractMetaClass *cl = findClass(prefixName);
-    if (cl)
-        return cl->findEnumValue(enumName, 0);
+    foreach(AbstractMetaClass* metaClass, *this) {
+        foreach(AbstractMetaEnum* metaEnum, metaClass->enums()) {
+            AbstractMetaEnumValue* enumValue = metaClass->findEnumValue(name, metaEnum);
+            if (enumValue)
+                return enumValue;
+        }
+    }
 
     ReportHandler::warning(QString("no matching enum '%1'").arg(name));
     return 0;
