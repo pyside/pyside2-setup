@@ -36,15 +36,20 @@ EXPORT_GENERATOR_PLUGIN(new QtDocGenerator)
 
 static Indentor INDENT;
 
-namespace
+static bool shouldSkip(const AbstractMetaFunction* func)
 {
+    return func->isConstructor()
+           || func->isModifiedRemoved()
+           || func->declaringClass() != func->ownerClass()
+           || func->name() == "operator=";
+}
 
 static bool functionSort(const AbstractMetaFunction *func1, const AbstractMetaFunction *func2)
 {
     return func1->name() < func2->name();
 }
 
-QString createRepeatedChar(int i, char c)
+static QString createRepeatedChar(int i, char c)
 {
     QString out;
     for (int j = 0; j < i; ++j)
@@ -53,19 +58,17 @@ QString createRepeatedChar(int i, char c)
     return out;
 }
 
-QString escape(QString& str)
+static QString escape(QString& str)
 {
     return str
             .replace("*", "\\*")
             .replace("_", "\\_");
 }
 
-QString escape(const QStringRef& strref)
+static QString escape(const QStringRef& strref)
 {
     QString str = strref.toString();
     return escape(str);
-}
-
 }
 
 QtXmlToSphinx::QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, const QString& context)
@@ -881,24 +884,8 @@ void QtDocGenerator::writeFormatedText(QTextStream& s, const Documentation& doc,
     s << endl;
 }
 
-void QtDocGenerator::writeFunctionBrief(QTextStream &s,
-                                      const AbstractMetaClass *cppClass,
-                                      const AbstractMetaFunction *cppFunction)
-{
-    s << INDENT << "def :meth:`"
-      << cppFunction->name() << "<";
-    if (cppClass && cppClass->name() != cppFunction->name())
-        s << getClassName(cppClass) << '.';
-
-    s << cppFunction->name() << ">`"
-      << " (" << parseArgDocStyle(cppClass, cppFunction) << "):";
-}
-
 void QtDocGenerator::generateClass(QTextStream &s, const AbstractMetaClass *cppClass)
 {
-    QString doc;
-    QTextStream  doc_s(&doc);
-
     ReportHandler::debugSparse("Generating Documentation for " + cppClass->fullName());
     s << ".. module:: " << packageName() << endl;
     QString className = getClassName(cppClass);
@@ -910,98 +897,73 @@ void QtDocGenerator::generateClass(QTextStream &s, const AbstractMetaClass *cppC
     s << ".. inheritance-diagram:: " << className << endl
       << "    :parts: 2" << endl << endl; // TODO: This would be a parameter in the future...
 
+    writeFunctionList(s, cppClass);
+
     //Function list
     AbstractMetaFunctionList functionList = cppClass->functions();
     qSort(functionList.begin(), functionList.end(), functionSort);
 
-    doc_s << "Detailed Description\n"
-             "--------------------\n\n";
+    s << "Detailed Description\n"
+         "--------------------\n\n";
 
-    writeInjectDocumentation(doc_s, DocModification::Prepend, cppClass, 0);
-    writeFormatedText(doc_s, cppClass->documentation(), cppClass);
+    writeInjectDocumentation(s, DocModification::Prepend, cppClass, 0);
+    writeFormatedText(s, cppClass->documentation(), cppClass);
 
 
-    if (!cppClass->isNamespace()) {
+    if (!cppClass->isNamespace())
+        writeConstructors(s, cppClass);
+    writeEnums(s, cppClass);
+    if (!cppClass->isNamespace())
+        writeFields(s, cppClass);
 
-        writeConstructors(doc_s, cppClass);
-        writeEnums(doc_s, cppClass);
-        writeFields(doc_s, cppClass);
 
-        foreach (AbstractMetaFunction *func, functionList) {
-            if ((func->isConstructor() || func->isModifiedRemoved()) ||
-                (func->declaringClass() != cppClass))
-                continue;
+    foreach (AbstractMetaFunction* func, functionList) {
+        if (shouldSkip(func))
+            continue;
 
-            if (func->isStatic())
-                doc_s <<  ".. staticmethod:: ";
-            else
-                doc_s <<  ".. method:: ";
+        if (func->isStatic())
+            s <<  ".. staticmethod:: ";
+        else
+            s <<  ".. method:: ";
 
-            writeFunction(doc_s, true, cppClass, func);
-        }
+        writeFunction(s, true, cppClass, func);
     }
 
-    writeInjectDocumentation(doc_s, DocModification::Append, cppClass, 0);
-
-    writeFunctionList(s, doc, cppClass);
-
-    s << doc;
+    writeInjectDocumentation(s, DocModification::Append, cppClass, 0);
 }
 
-QString QtDocGenerator::parseFunctionDeclaration(const QString &doc, const AbstractMetaClass *cppClass)
-{
-    //.. method:: QObject.childEvent(arg__1)
-    //def :meth:`removeEventFilter<QObject.removeEventFilter>` (arg__1):
-
-    QString data = doc;
-    QString markup;
-
-    if (data.startsWith(".. method::"))
-        markup = ".. method::";
-    else if (data.startsWith(".. staticmethod::"))
-        markup = ".. staticmethod::";
-    else
-        return QString();
-
-    data = data.mid(markup.size()); //remove .. method::
-    data = data.mid(data.lastIndexOf(".") + 1); //remove class name
-
-    QString methName = data.mid(0, data.indexOf("("));
-    QString methArgs = data.mid(data.indexOf("("));
-
-    QString scope = getClassName(cppClass);
-    scope += ".";
-    if (methName.startsWith(scope))
-        methName.remove(scope);
-
-    data = QString("def :meth:`%1<%2%3>` %4")
-        .arg(methName)
-        .arg(scope)
-        .arg(methName)
-        .arg(methArgs);
-
-    return data;
-}
-
-
-void QtDocGenerator::writeFunctionList(QTextStream &s, const QString &content, const AbstractMetaClass *cppClass)
+void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* cppClass)
 {
     QStringList functionList;
     QStringList staticFunctionList;
 
-    QStringList lst = content.split("\n");
-    foreach(QString row, lst) {
-        QString data = row.trimmed();
-        if (data.startsWith(".. method::")) {
-            functionList << parseFunctionDeclaration(data, cppClass);
-        }
-        else if (data.startsWith(".. staticmethod::")) {
-            staticFunctionList << parseFunctionDeclaration(data, cppClass);
-        }
+    foreach (AbstractMetaFunction* func, cppClass->functions()) {
+        if (shouldSkip(func))
+            continue;
+
+        QString className;
+        if (!func->isConstructor())
+            className =  getClassName(cppClass) + '.';
+        else if (func->implementingClass() && func->implementingClass()->enclosingClass())
+            className =  getClassName(func->implementingClass()->enclosingClass()) + '.';
+        QString funcName = getFuncName(func);
+
+        QStringList& list = func->isStatic() ? staticFunctionList : functionList;
+        QString str("def :meth:`");
+
+        str += funcName;
+        str += '<';
+        if (!funcName.startsWith(className))
+            str += className;
+        str += funcName;
+        str += ">` (";
+        str += parseArgDocStyle(cppClass, func);
+        str += ')';
+
+        list << str;
     }
 
-    if ((functionList.size() > 0) || (staticFunctionList.size() > 0))
-    {
+    if ((functionList.size() > 0) || (staticFunctionList.size() > 0)) {
         QtXmlToSphinx::Table functionTable;
         QtXmlToSphinx::TableRow row;
 
@@ -1108,30 +1070,34 @@ void QtDocGenerator::writeConstructors(QTextStream &s, const AbstractMetaClass *
 QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass *cppClass, const AbstractMetaFunction *func)
 {
     QString ret;
-    bool optional = false;
+    int optArgs = 0;
 
-    foreach (AbstractMetaArgument *arg, func->arguments()) {
+    foreach (AbstractMetaArgument* arg, func->arguments()) {
 
         if (func->argumentRemoved(arg->argumentIndex() + 1))
             continue;
 
-        if (arg->argumentIndex() > 0)
-            ret += ",";
-
-        if (!arg->defaultValueExpression().isEmpty() && (!optional)) {
-            ret += "[";
-            optional = true;
+        bool thisIsoptional = !arg->defaultValueExpression().isEmpty();
+        if (optArgs || thisIsoptional) {
+            ret += '[';
+            optArgs++;
         }
+
+        if (arg->argumentIndex() > 0)
+            ret += ", ";
 
         ret += arg->name();
 
-        if (optional)
-            ret += "=" + arg->defaultValueExpression();
+        if (thisIsoptional) {
+            QString defValue = arg->defaultValueExpression();
+            defValue.replace("::", ".");
+            if (defValue == "0" && (arg->type()->isQObject() || arg->type()->isObject()))
+                defValue = "None";
+            ret += "=" + defValue;
+        }
     }
 
-    if (optional)
-        ret += "]";
-
+    ret += QString(']').repeated(optArgs);
     return ret;
 }
 
@@ -1257,35 +1223,38 @@ void QtDocGenerator::writeFunctionSignature(QTextStream& s, const AbstractMetaCl
 
 QString QtDocGenerator::translateToPythonType(const AbstractMetaType *type, const AbstractMetaClass *cppClass)
 {
-    QString originalType = translateType(type, cppClass, Options(ExcludeConst) | ExcludeReference);
-    QString strType = originalType;
-
-    //remove "*"
-    strType.remove("*");
-    TypeEntry *te = TypeDatabase::instance()->findType(originalType.trimmed());
-    if (te) {
-        return te->targetLangName();
-    } else {
-        //remove <, >
+    QString strType;
+    if (type->name() == "QString") {
+        strType = "unicode";
+    } else if (type->name() == "QStringList") {
+        strType = "list of strings";
+    } else if (type->isConstant() && type->name() == "char" && type->indirections() == 1) {
+        strType = "str";
+    } else if (type->isContainer()) {
+        QString strType = translateType(type, cppClass, Options(ExcludeConst) | ExcludeReference);
+        strType.remove("*");
         strType.remove(">");
         strType.remove("<");
-
-        //replace ::
         strType.replace("::", ".");
-
-        //Translate ContainerType
         if (strType.contains("QList") || strType.contains("QVector")) {
-            strType.replace("QList", "List of ");
-            strType.replace("QVector", "List of ");
+            strType.replace("QList", "list of ");
+            strType.replace("QVector", "list of ");
         } else if (strType.contains("QHash") || strType.contains("QMap")) {
             strType.remove("QHash");
             strType.remove("QMap");
             QStringList types = strType.split(",");
             strType = QString("Dictionary with keys of type %1 and values of type %2.")
-                .arg(types[0]).arg(types[1]);
+            .arg(types[0]).arg(types[1]);
         }
-        return strType;
+    } else {
+        QString refTag;
+        if (type->isEnum())
+            refTag = "attr";
+        else
+            refTag = "class";
+        strType = ':' + refTag + ":`" + type->fullName() + '`';
     }
+    return strType;
 }
 
 void QtDocGenerator::writeParamerteType(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaArgument *arg)
@@ -1308,7 +1277,21 @@ void QtDocGenerator::writeFunctionParametersType(QTextStream &s, const AbstractM
     }
 
     if (!func->isConstructor() && func->type()) {
-        s << INDENT << ":rtype: " << translateToPythonType(func->type(), cppClass) << endl;
+
+        QString retType;
+        // check if the return type was modified
+        foreach (FunctionModification mod, func->modifications()) {
+            foreach (ArgumentModification argMod, mod.argument_mods) {
+                if (argMod.index == 0) {
+                    retType = argMod.modified_type;
+                    break;
+                }
+            }
+        }
+
+        if (retType.isEmpty())
+            retType = translateToPythonType(func->type(), cppClass);
+        s << INDENT << ":rtype: " << retType << endl;
     }
     s << endl;
 }
@@ -1375,7 +1358,6 @@ void QtDocGenerator::finishGeneration()
 bool QtDocGenerator::doSetup(const QMap<QString, QString>& args)
 {
     m_libSourceDir = args.value("library-source-dir");
-    setOutputDirectory(args.value("documentation-out-dir"));
     m_docDataDir = args.value("documentation-data-dir");
     m_codeSnippetDir = args.value("documentation-code-snippets-dir", m_libSourceDir);
 
@@ -1401,7 +1383,6 @@ QMap<QString, QString> QtDocGenerator::options() const
 {
     QMap<QString, QString> options;
     options.insert("library-source-dir", "Directory where library source code is located");
-    options.insert("documentation-out-dir", "The directory where the generated documentation files will be written");
     options.insert("documentation-data-dir", "Directory with XML files generated by documentation tool (qdoc3 or Doxygen)");
     options.insert("documentation-code-snippets-dir", "Directory used to search code snippets used by the documentation");
     return options;

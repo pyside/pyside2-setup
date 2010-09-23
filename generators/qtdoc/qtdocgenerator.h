@@ -191,11 +191,10 @@ private:
 
     void writeFields(QTextStream &s, const AbstractMetaClass *cppClass);
     void writeArguments(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaFunction *func);
-    void writeFunctionBrief(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaFunction *cppFunction);
     void writeFunctionSignature(QTextStream& s, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
     void writeFunction(QTextStream& s, bool writeDoc, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
     void writeFunctionParametersType(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaFunction* func);
-    void writeFunctionList(QTextStream &se, const QString &content, const AbstractMetaClass *cppClass);
+    void writeFunctionList(QTextStream& s, const AbstractMetaClass* cppClass);
     void writeParamerteType(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaArgument *arg);
 
     void writeConstructors(QTextStream &s, const AbstractMetaClass *cppClass);
@@ -205,7 +204,6 @@ private:
 
 
     QString parseArgDocStyle(const AbstractMetaClass *cppClass, const AbstractMetaFunction *func);
-    QString parseFunctionDeclaration(const QString &data, const AbstractMetaClass *cppClass);
     QString translateToPythonType(const AbstractMetaType *type, const AbstractMetaClass *cppClass);
 
     QString m_docDataDir;
