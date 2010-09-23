@@ -1845,7 +1845,7 @@ AbstractMetaEnum *AbstractMetaClass::findEnum(const QString &enumName)
 AbstractMetaEnumValue *AbstractMetaClass::findEnumValue(const QString &enumValueName, AbstractMetaEnum *meta_enum)
 {
     foreach (AbstractMetaEnum *e, m_enums) {
-        if (e == meta_enum)
+        if (e != meta_enum)
             continue;
         foreach (AbstractMetaEnumValue *v, e->values()) {
             if (v->name() == enumValueName)
