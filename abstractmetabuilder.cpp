@@ -864,6 +864,16 @@ void AbstractMetaBuilder::figureOutEnumValues()
     QSet<AbstractMetaClass*> classes;
     foreach (AbstractMetaClass *c, m_metaClasses)
         figureOutEnumValuesForClass(c, &classes);
+
+    foreach (AbstractMetaEnum* metaEnum, m_globalEnums) {
+        AbstractMetaEnumValueList enumValues = metaEnum->values();
+        int value = 0;
+        for (int i = 0; i < enumValues.size(); ++i) {
+            value = figureOutEnumValue(enumValues.at(i)->stringValue(), value, metaEnum);
+            enumValues.at(i)->setValue(value);
+            value++;
+        }
+    }
 }
 
 void AbstractMetaBuilder::figureOutDefaultEnumArguments()
