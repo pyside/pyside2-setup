@@ -32,6 +32,7 @@ private slots:
     void testEnumCppSignature();
     void testEnumWithApiVersion();
     void testAnonymousEnum();
+    void testGlobalEnums();
 };
 
 #endif

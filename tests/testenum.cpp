@@ -130,6 +130,43 @@ void TestEnum::testAnonymousEnum()
     QVERIFY(classes[0]->enums().first()->isAnonymous());
 }
 
+void TestEnum::testGlobalEnums()
+{
+    const char* cppCode ="\
+    enum EnumA { A0, A1 }; \
+    enum EnumB { B0 = 2, B1 = 4 }; \
+    ";
+    const char* xmlCode = "\
+    <typesystem package=\"Foo\"> \
+        <enum-type name='EnumA'/>\
+        <enum-type name='EnumB'/>\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, false);
+
+    AbstractMetaEnumList globalEnums = t.builder()->globalEnums();
+    QCOMPARE(globalEnums.count(), 2);
+
+    AbstractMetaEnum* enumA = globalEnums.first();
+    QCOMPARE(enumA->typeEntry()->qualifiedCppName(), QString("EnumA"));
+    AbstractMetaEnumValue* enumValueA0 = enumA->values().first();
+    QCOMPARE(enumValueA0->name(), QString("A0"));
+    QCOMPARE(enumValueA0->value(), 0);
+    AbstractMetaEnumValue* enumValueA1 = enumA->values().last();
+    QCOMPARE(enumValueA1->name(), QString("A1"));
+    QCOMPARE(enumValueA1->value(), 1);
+
+    AbstractMetaEnum* enumB = globalEnums.last();
+    QCOMPARE(enumB->typeEntry()->qualifiedCppName(), QString("EnumB"));
+
+    AbstractMetaEnumValue* enumValueB0 = enumB->values().first();
+    QCOMPARE(enumValueB0->name(), QString("B0"));
+    QCOMPARE(enumValueB0->value(), 2);
+    AbstractMetaEnumValue* enumValueB1 = enumB->values().last();
+    QCOMPARE(enumValueB1->name(), QString("B1"));
+    QCOMPARE(enumValueB1->value(), 4);
+}
+
 QTEST_APPLESS_MAIN(TestEnum)
 
 #include "testenum.moc"
