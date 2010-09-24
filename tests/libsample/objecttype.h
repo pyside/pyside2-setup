@@ -102,6 +102,11 @@ public:
     void setObject(const Null&);
     int callId() const;
 
+    //Function used to create a parent from C++
+    virtual bool isPython() { return false; }
+    void callVirtualCreateChild();
+    virtual ObjectType* createChild(ObjectType* parent);
+
 private:
     ObjectType(const ObjectType&);
     ObjectType& operator=(const ObjectType&);

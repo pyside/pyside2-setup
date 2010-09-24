@@ -38,19 +38,24 @@ class InvalidateParentTest(unittest.TestCase):
         '''Invalidate parent should invalidate children'''
         parent = ObjectType.create()
         child1 = ObjectType(parent)
+        child1.setObjectName("child1")
         child2 = ObjectType.create()
+        child2.setObjectName("child2")
         child2.setParent(parent)
         grandchild1 = ObjectType(child1)
+        grandchild1.setObjectName("grandchild1")
         grandchild2 = ObjectType.create()
+        grandchild2.setObjectName("grandchild2")
         grandchild2.setParent(child2)
         bbox = BlackBox()
 
         bbox.keepObjectType(parent) # Should invalidate the parent
 
         self.assertRaises(RuntimeError, parent.objectName)
-        self.assertRaises(RuntimeError, child1.objectName)
+        # some children still valid they are wrapper classes
+        self.assertEqual(child1.objectName(), "child1")
         self.assertRaises(RuntimeError, child2.objectName)
-        self.assertRaises(RuntimeError, grandchild1.objectName)
+        self.assertEqual(grandchild1.objectName(), "grandchild1")
         self.assertRaises(RuntimeError, grandchild2.objectName)
 
 if __name__ == '__main__':

@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <iostream>
 #include <string>
+#include <assert.h>
 
 using namespace std;
 
@@ -269,3 +270,16 @@ int ObjectType::callId() const
     return m_call_id;
 }
 
+
+void ObjectType::callVirtualCreateChild()
+{
+    ObjectType* fake_parent = new ObjectType();
+    ObjectType* fake_child = createChild(fake_parent);
+    assert(fake_child->isPython());
+    delete fake_parent;
+}
+
+ObjectType* ObjectType::createChild(ObjectType* parent)
+{
+    return new ObjectType(parent);
+}
