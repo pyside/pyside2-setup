@@ -28,24 +28,7 @@
 
 Documentation QtDocParser::retrieveModuleDocumentation()
 {
-    // TODO: This method of acquiring the module name supposes that the target language uses
-    // dots as module separators in package names. Improve this.
-    QString moduleName = QString(packageName()).remove(0, packageName().lastIndexOf('.') + 1);
-    QString sourceFile = documentationDataDirectory() + '/' + moduleName.toLower() + ".xml";
-
-    if (!QFile::exists(sourceFile)) {
-        ReportHandler::warning("Can't find qdoc3 file for module "
-                               + packageName() + ", tried: "
-                               + sourceFile);
-        return Documentation();
-    }
-
-    QXmlQuery xquery;
-    xquery.setFocus(QUrl(sourceFile));
-
-    // Module documentation
-    QString query = "/WebXML/document/page[@name=\"" + moduleName + "\"]/description";
-    return Documentation(getDocumentation(xquery, query, DocModificationList()));
+    return retrieveModuleDocumentation(packageName());
 }
 
 void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
@@ -163,4 +146,26 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
         doc.setValue(getDocumentation(xquery, query, DocModificationList()));
         meta_enum->setDocumentation(doc);
     }
+}
+
+Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
+{
+    // TODO: This method of acquiring the module name supposes that the target language uses
+    // dots as module separators in package names. Improve this.
+    QString moduleName = QString(name).remove(0, name.lastIndexOf('.') + 1);
+    QString sourceFile = documentationDataDirectory() + '/' + moduleName.toLower() + ".xml";
+
+    if (!QFile::exists(sourceFile)) {
+        ReportHandler::warning("Can't find qdoc3 file for module "
+                               + name + ", tried: "
+                                                 + sourceFile);
+        return Documentation();
+    }
+
+    QXmlQuery xquery;
+    xquery.setFocus(QUrl(sourceFile));
+
+    // Module documentation
+    QString query = "/WebXML/document/page[@name=\"" + moduleName + "\"]/description";
+    return Documentation(getDocumentation(xquery, query, DocModificationList()));
 }

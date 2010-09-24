@@ -91,6 +91,15 @@ public:
         return m_packageName;
     }
 
+    /**
+    *   Process and retrieves documentation concerning the entire
+    *   module or library.
+    *   \param name module name
+    *   \return object containing module/library documentation information
+    *   \todo Merge with retrieveModuleDocumentation() on next ABI change.
+    */
+    virtual Documentation retrieveModuleDocumentation(const QString& name) = 0;
+
 protected:
     QString getDocumentation(QXmlQuery& xquery, const QString& query,
                              const DocModificationList& mods) const;

@@ -32,6 +32,7 @@ public:
     QtDocParser() {}
     virtual void fillDocumentation(AbstractMetaClass* metaClass);
     virtual Documentation retrieveModuleDocumentation();
+    virtual Documentation retrieveModuleDocumentation(const QString& name);
 };
 
 #endif // QTDOCPARSER_H
