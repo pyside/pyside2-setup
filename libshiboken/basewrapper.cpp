@@ -166,12 +166,13 @@ SbkBaseWrapperType SbkBaseWrapper_Type = { { {
 
 void removeParent(SbkBaseWrapper* child)
 {
-    if (!child->parentInfo->parent)
+    ParentInfo* pInfo = child->parentInfo;
+    if (!pInfo || !pInfo->parent)
         return;
 
-    ChildrenList& oldBrothers = child->parentInfo->parent->parentInfo->children;
+    ChildrenList& oldBrothers = pInfo->parent->parentInfo->children;
     oldBrothers.remove(child);
-    child->parentInfo->parent = 0;
+    pInfo->parent = 0;
     Py_DECREF(child);
 }
 
@@ -198,8 +199,6 @@ void setParent(PyObject* parent, PyObject* child)
     bool parentIsNull = !parent || parent == Py_None;
     SbkBaseWrapper* parent_ = reinterpret_cast<SbkBaseWrapper*>(parent);
     SbkBaseWrapper* child_ = reinterpret_cast<SbkBaseWrapper*>(child);
-    if (!child_->parentInfo)
-        child_->parentInfo = new ParentInfo;
 
     if (!parentIsNull) {
         if (!parent_->parentInfo)
@@ -210,7 +209,8 @@ void setParent(PyObject* parent, PyObject* child)
             return;
     }
 
-    bool hasAnotherParent = child_->parentInfo->parent && child_->parentInfo->parent != parent_;
+    ParentInfo* pInfo = child_->parentInfo;
+    bool hasAnotherParent = pInfo && pInfo->parent && pInfo->parent != parent_;
 
     //Avoid destroy child during reparent operation
     Py_INCREF(child);
@@ -221,7 +221,9 @@ void setParent(PyObject* parent, PyObject* child)
 
     // Add the child to the new parent
     if (!parentIsNull) {
-        child_->parentInfo->parent = parent_;
+        if (!pInfo)
+            pInfo = child_->parentInfo = new ParentInfo;
+        pInfo->parent = parent_;
         parent_->parentInfo->children.push_back(child_);
         Py_INCREF(child_);
     }
@@ -231,15 +233,16 @@ void setParent(PyObject* parent, PyObject* child)
 
 static void _destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent)
 {
-    if (removeFromParent && obj->parentInfo->parent)
+    ParentInfo* pInfo = obj->parentInfo;
+    if (removeFromParent && pInfo && pInfo->parent)
         removeParent(obj);
-    ChildrenList::iterator it = obj->parentInfo->children.begin();
-    for (; it != obj->parentInfo->children.end(); ++it) {
+    ChildrenList::iterator it = pInfo->children.begin();
+    for (; it != pInfo->children.end(); ++it) {
         SbkBaseWrapper*& child = *it;
         _destroyParentInfo(child, false);
         Py_DECREF(child);
     }
-    delete obj->parentInfo;
+    delete pInfo;
     obj->parentInfo = 0;
 }
 
