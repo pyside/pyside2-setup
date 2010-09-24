@@ -102,8 +102,12 @@ static void showWrapperMap(const WrapperMap& wrapperMap)
 struct BindingManager::BindingManagerPrivate {
     WrapperMap wrapperMapper;
     Graph classHierarchy;
+    bool destroying;
+
+    BindingManagerPrivate() : destroying(false) {}
     void releaseWrapper(void* cptr);
     void assignWrapper(PyObject* wrapper, const void* cptr);
+
 };
 
 void BindingManager::BindingManagerPrivate::releaseWrapper(void* cptr)
@@ -245,14 +249,32 @@ void BindingManager::invalidateWrapper(SbkBaseWrapper* wrapper)
 {
     if (!wrapper || ((PyObject*)wrapper == Py_None) || !SbkBaseWrapper_validCppObject(wrapper))
         return;
+
+    // skip this if the object is a wrapper class and this is not a destructor call
+    if (SbkBaseWrapper_containsCppWrapper(wrapper) && !m_d->destroying) {
+        ParentInfo* pInfo = wrapper->parentInfo;
+        // this meaning the object has a extra ref and we will remove this now
+        if (pInfo && pInfo->hasWrapperRef) {
+            delete pInfo;
+            wrapper->parentInfo = 0;
+            Py_XDECREF((PyObject*) wrapper);
+        }
+        return;
+    }
+
     SbkBaseWrapper_setValidCppObject(wrapper, false);
     SbkBaseWrapper_setOwnership(wrapper, false);
+
     // If it is a parent invalidate all children.
     if (SbkBaseWrapper_hasParentInfo(wrapper)) {
         ChildrenList::iterator it = wrapper->parentInfo->children.begin();
+        bool parentDestroying = m_d->destroying;
+        m_d->destroying  = false;
         for (; it != wrapper->parentInfo->children.end(); ++it)
             invalidateWrapper(*it);
+        m_d->destroying = parentDestroying;
     }
+
     releaseWrapper(reinterpret_cast<PyObject*>(wrapper));
 }
 
@@ -262,6 +284,24 @@ void BindingManager::invalidateWrapper(const void* cptr)
     if (iter != m_d->wrapperMapper.end())
         invalidateWrapper(iter->second);
 }
+
+void BindingManager::destroyWrapper(const void* cptr)
+{
+    WrapperMap::iterator iter = m_d->wrapperMapper.find(cptr);
+    if (iter != m_d->wrapperMapper.end()) {
+        m_d->destroying = true;
+        invalidateWrapper(iter->second);
+        m_d->destroying = false;
+    }
+}
+
+void BindingManager::destroyWrapper(SbkBaseWrapper* wrapper)
+{
+    m_d->destroying = true;
+    invalidateWrapper(wrapper);
+    m_d->destroying = false;
+}
+
 
 void BindingManager::transferOwnershipToCpp(SbkBaseWrapper* wrapper)
 {

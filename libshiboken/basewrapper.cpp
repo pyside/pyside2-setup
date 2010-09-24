@@ -173,6 +173,11 @@ void removeParent(SbkBaseWrapper* child)
     ChildrenList& oldBrothers = pInfo->parent->parentInfo->children;
     oldBrothers.remove(child);
     pInfo->parent = 0;
+
+    if (pInfo->hasWrapperRef) {
+        Py_DECREF(child);
+        pInfo->hasWrapperRef = false;
+    }
     Py_DECREF(child);
 }
 
@@ -220,6 +225,7 @@ void setParent(PyObject* parent, PyObject* child)
         removeParent(child_);
 
     // Add the child to the new parent
+    pInfo = child_->parentInfo;
     if (!parentIsNull) {
         if (!pInfo)
             pInfo = child_->parentInfo = new ParentInfo;
@@ -236,11 +242,22 @@ static void _destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent)
     ParentInfo* pInfo = obj->parentInfo;
     if (removeFromParent && pInfo && pInfo->parent)
         removeParent(obj);
+
     ChildrenList::iterator it = pInfo->children.begin();
     for (; it != pInfo->children.end(); ++it) {
         SbkBaseWrapper*& child = *it;
-        _destroyParentInfo(child, false);
-        Py_DECREF(child);
+
+        // keep this, the wrapper still alive 
+        if (!SbkBaseWrapper_containsCppWrapper(obj) &&
+            SbkBaseWrapper_containsCppWrapper(child) &&
+            child->parentInfo) {
+            child->parentInfo->parent = 0;
+            child->parentInfo->hasWrapperRef = true;
+            SbkBaseWrapper_setOwnership(child, false);
+        } else {
+            _destroyParentInfo(child, false);
+            Py_DECREF(child);
+        }
     }
     delete pInfo;
     obj->parentInfo = 0;
@@ -248,7 +265,7 @@ static void _destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent)
 
 void destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent)
 {
-    BindingManager::instance().invalidateWrapper(obj);
+    BindingManager::instance().destroyWrapper(obj);
     _destroyParentInfo(obj, removeFromParent);
 }
 
@@ -490,6 +507,7 @@ void deallocWrapper(PyObject* pyObj)
 
     if (SbkBaseWrapper_hasParentInfo(pyObj))
         destroyParentInfo(sbkObj);
+
     clearReferences(sbkObj);
 
     Py_XDECREF(sbkObj->ob_dict);

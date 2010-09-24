@@ -425,7 +425,7 @@ void CppGenerator::writeDestructorNative(QTextStream &s, const AbstractMetaClass
 {
     Indentation indentation(INDENT);
     s << wrapperName(metaClass) << "::~" << wrapperName(metaClass) << "()" << endl << '{' << endl;
-    s << INDENT << "BindingManager::instance().invalidateWrapper(this);" << endl;
+    s << INDENT << "BindingManager::instance().destroyWrapper(this);" << endl;
     s << '}' << endl;
 }
 

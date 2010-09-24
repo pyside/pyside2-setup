@@ -131,11 +131,13 @@ typedef std::list<SbkBaseWrapper*> ChildrenList;
 struct ParentInfo
 {
     /// Default ctor.
-    ParentInfo() : parent(0) {}
+    ParentInfo() : parent(0), hasWrapperRef(false) {}
     /// Pointer to parent object.
     SbkBaseWrapper* parent;
     /// List of object children.
     ChildrenList children;
+    /// has internal ref
+    bool hasWrapperRef;
 };
 
 /**

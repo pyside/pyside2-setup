@@ -64,6 +64,10 @@ public:
 
     void addClassInheritance(SbkBaseWrapperType* parent, SbkBaseWrapperType* child);
     SbkBaseWrapperType* resolveType(void* cptr, SbkBaseWrapperType* type);
+
+    /// Called by wrapper destructor
+    void destroyWrapper(const void* cptr);
+    void destroyWrapper(SbkBaseWrapper* wrapper);
 private:
     ~BindingManager();
     // disable copy
