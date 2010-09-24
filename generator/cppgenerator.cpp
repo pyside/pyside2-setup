@@ -2894,7 +2894,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
             enumValueText += enumValue->name();
 #ifdef AVOID_PROTECTED_HACK
         } else {
-            enumValueText += enumValue->value();
+            enumValueText += QString::number(enumValue->value());
         }
 #endif
 
