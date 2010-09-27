@@ -1110,6 +1110,8 @@ QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass *cppClass, cons
                 defValue = "\"\"";
             } else if (defValue == "QStringList()" || defValue.startsWith("QVector") || defValue.startsWith("QList")) {
                 defValue = "list()";
+            } else if (defValue == "QVariant()") {
+                defValue = "None";
             } else {
                 defValue.replace("::", ".");
                 if (defValue == "0" && (arg->type()->isQObject() || arg->type()->isObject()))
@@ -1248,6 +1250,8 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType *type, cons
     QString strType;
     if (type->name() == "QString") {
         strType = "unicode";
+    } else if (type->name() == "QVariant") {
+        strType = "object";
     } else if (type->name() == "QStringList") {
         strType = "list of strings";
     } else if (type->isConstant() && type->name() == "char" && type->indirections() == 1) {
