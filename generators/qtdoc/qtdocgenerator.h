@@ -30,6 +30,7 @@
 #include <abstractmetalang.h>
 #include "generator.h"
 
+class QtDocParser;
 class AbstractMetaFunction;
 class AbstractMetaClass;
 class QXmlStreamReader;
@@ -159,6 +160,9 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table);
 class GENRUNNER_API QtDocGenerator : public Generator
 {
 public:
+    QtDocGenerator();
+    ~QtDocGenerator();
+
     QString libSourceDir() const
     {
         return m_libSourceDir;
@@ -180,7 +184,7 @@ public:
 
 protected:
     QString fileNameForClass(const AbstractMetaClass* cppClass) const;
-    void generateClass(QTextStream& s, const AbstractMetaClass* cppClass);
+    void generateClass(QTextStream& s, const AbstractMetaClass* metaClass);
     void finishGeneration();
 
     void writeFunctionArguments(QTextStream&, const AbstractMetaFunction*, Options) const {}
@@ -210,7 +214,8 @@ private:
     QString m_libSourceDir;
     QString m_codeSnippetDir;
     QStringList m_functionList;
-    Documentation m_moduleDoc;
+    QMap<QString, QStringList> m_packages;
+    QtDocParser* m_docParser;
 };
 
 #endif // DOCGENERATOR_H

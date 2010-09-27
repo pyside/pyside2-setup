@@ -31,6 +31,7 @@
 #include <QtCore/QXmlStreamReader>
 #include <QtCore/QFile>
 #include <QtCore/QDir>
+#include <fileout.h>
 
 EXPORT_GENERATOR_PLUGIN(new QtDocGenerator)
 
@@ -862,6 +863,15 @@ static QString getFuncName(const AbstractMetaFunction *cppFunc) {
     return result.replace("::", ".");
 }
 
+QtDocGenerator::QtDocGenerator() : m_docParser(new QtDocParser)
+{
+}
+
+QtDocGenerator::~QtDocGenerator()
+{
+    delete m_docParser;
+}
+
 QString QtDocGenerator::fileNameForClass(const AbstractMetaClass *cppClass) const
 {
     return QString("%1.rst").arg(getClassName(cppClass));
@@ -884,11 +894,17 @@ void QtDocGenerator::writeFormatedText(QTextStream& s, const Documentation& doc,
     s << endl;
 }
 
-void QtDocGenerator::generateClass(QTextStream &s, const AbstractMetaClass *cppClass)
+void QtDocGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaClass)
 {
-    ReportHandler::debugSparse("Generating Documentation for " + cppClass->fullName());
-    s << ".. module:: " << packageName() << endl;
-    QString className = getClassName(cppClass);
+    ReportHandler::debugSparse("Generating Documentation for " + metaClass->fullName());
+
+    m_packages[metaClass->package()] << fileNameForClass(metaClass);
+
+    m_docParser->setPackageName(metaClass->package());
+    m_docParser->fillDocumentation(const_cast<AbstractMetaClass*>(metaClass));
+
+    s << ".. module:: " << metaClass->package() << endl;
+    QString className = getClassName(metaClass);
     s << ".. _" << className << ":" << endl << endl;
 
     s << className << endl;
@@ -897,24 +913,24 @@ void QtDocGenerator::generateClass(QTextStream &s, const AbstractMetaClass *cppC
     s << ".. inheritance-diagram:: " << className << endl
       << "    :parts: 2" << endl << endl; // TODO: This would be a parameter in the future...
 
-    writeFunctionList(s, cppClass);
+    writeFunctionList(s, metaClass);
 
     //Function list
-    AbstractMetaFunctionList functionList = cppClass->functions();
+    AbstractMetaFunctionList functionList = metaClass->functions();
     qSort(functionList.begin(), functionList.end(), functionSort);
 
     s << "Detailed Description\n"
          "--------------------\n\n";
 
-    writeInjectDocumentation(s, DocModification::Prepend, cppClass, 0);
-    writeFormatedText(s, cppClass->documentation(), cppClass);
+    writeInjectDocumentation(s, DocModification::Prepend, metaClass, 0);
+    writeFormatedText(s, metaClass->documentation(), metaClass);
 
 
-    if (!cppClass->isNamespace())
-        writeConstructors(s, cppClass);
-    writeEnums(s, cppClass);
-    if (!cppClass->isNamespace())
-        writeFields(s, cppClass);
+    if (!metaClass->isNamespace())
+        writeConstructors(s, metaClass);
+    writeEnums(s, metaClass);
+    if (!metaClass->isNamespace())
+        writeFields(s, metaClass);
 
 
     foreach (AbstractMetaFunction* func, functionList) {
@@ -926,10 +942,10 @@ void QtDocGenerator::generateClass(QTextStream &s, const AbstractMetaClass *cppC
         else
             s <<  ".. method:: ";
 
-        writeFunction(s, true, cppClass, func);
+        writeFunction(s, true, metaClass, func);
     }
 
-    writeInjectDocumentation(s, DocModification::Append, cppClass, 0);
+    writeInjectDocumentation(s, DocModification::Append, metaClass, 0);
 }
 
 void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* cppClass)
@@ -1090,9 +1106,15 @@ QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass *cppClass, cons
 
         if (thisIsoptional) {
             QString defValue = arg->defaultValueExpression();
-            defValue.replace("::", ".");
-            if (defValue == "0" && (arg->type()->isQObject() || arg->type()->isObject()))
-                defValue = "None";
+            if (defValue == "QString()") {
+                defValue = "\"\"";
+            } else if (defValue == "QStringList()" || defValue.startsWith("QVector") || defValue.startsWith("QList")) {
+                defValue = "list()";
+            } else {
+                defValue.replace("::", ".");
+                if (defValue == "0" && (arg->type()->isQObject() || arg->type()->isObject()))
+                    defValue = "None";
+            }
             ret += "=" + defValue;
         }
     }
@@ -1316,42 +1338,38 @@ void QtDocGenerator::finishGeneration()
     if (classes().isEmpty())
         return;
 
-    QFile input(outputDirectory() + '/' + subDirectoryForPackage(packageName()) + "/index.rst");
-    input.open(QIODevice::WriteOnly);
-    QTextStream s(&input);
+    QMap<QString, QStringList>::iterator it = m_packages.begin();
+    for (; it != m_packages.end(); ++it) {
+        FileOut output(outputDirectory() + '/' + QString(it.key()).replace(".", "/") + "/index.rst");
+        QTextStream& s = output.stream;
 
-    s << ".. module:: " << packageName() << endl << endl;
+        s << ".. module:: " << it.key() << endl << endl;
 
-    QString title = packageName() + " contents";
-    s << title << endl;
-    s << createRepeatedChar(title.length(), '*') << endl << endl;
-    s << ".. toctree::" << endl;
+        QString title = packageName() + " contents";
+        s << title << endl;
+        s << createRepeatedChar(title.length(), '*') << endl << endl;
+        s << ".. toctree::" << endl;
 
-    /* Avoid showing "Detailed Description for *every* class in toc tree */
-    Indentation indentation(INDENT);
-    s << INDENT << ":maxdepth: 1" << endl << endl;
+        /* Avoid showing "Detailed Description for *every* class in toc tree */
+        Indentation indentation(INDENT);
+        s << INDENT << ":maxdepth: 1" << endl << endl;
 
-    QStringList classList;
-    foreach (AbstractMetaClass *cls, classes()) {
-        if (!shouldGenerate(cls))
-            continue;
-        classList << getClassName(cls);
-    }
-    classList.sort();
+        qSort(it.value());
+        foreach (QString className, it.value()) {
+            s << INDENT << className << endl;
+        }
+        s << endl << endl;
 
-    foreach (QString clazz, classList)
-        s << INDENT << clazz << endl;
+        s << "Detailed Description" << endl;
+        s << "--------------------" << endl << endl;
 
-    s << endl << endl;
-
-    s << "Detailed Description" << endl;
-    s << "--------------------" << endl << endl;
-
-    if (m_moduleDoc.format() == Documentation::Native) {
-        QtXmlToSphinx x(this, m_moduleDoc.value(), moduleName());
-        s << x;
-    } else {
-        s << m_moduleDoc.value();
+        Documentation moduleDoc = m_docParser->retrieveModuleDocumentation(it.key());
+        if (moduleDoc.format() == Documentation::Native) {
+            QtXmlToSphinx x(this, moduleDoc.value(), QString(it.key()).remove(0, it.key().lastIndexOf('.') + 1));
+            s << x;
+        } else {
+            s << moduleDoc.value();
+        }
     }
 }
 
@@ -1366,16 +1384,10 @@ bool QtDocGenerator::doSetup(const QMap<QString, QString>& args)
                                "documentation will not be extracted from Qt sources.");
         return false;
     } else {
-        QtDocParser docParser;
-        docParser.setPackageName(packageName());
-        docParser.setDocumentationDataDirectory(m_docDataDir);
-        docParser.setLibrarySourceDirectory(m_libSourceDir);
-        foreach(AbstractMetaClass* cppClass, classes()) {
-            docParser.fillDocumentation(cppClass);
-        }
-        m_moduleDoc = docParser.retrieveModuleDocumentation();
-        return true;
+        m_docParser->setDocumentationDataDirectory(m_docDataDir);
+        m_docParser->setLibrarySourceDirectory(m_libSourceDir);
     }
+    return true;
 }
 
 
