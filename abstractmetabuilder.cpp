@@ -788,23 +788,23 @@ int AbstractMetaBuilder::figureOutEnumValue(const QString &stringValue,
             matched = true;
 
         } else {
-            AbstractMetaEnumValue *ev = 0;
+            AbstractMetaEnumValue* ev = 0;
+            AbstractMetaClass* enumEnclosingClass = metaEnum ? metaEnum->enclosingClass() : 0;
 
-            if (metaEnum && (ev = metaEnum->values().find(s))) {
-                v = ev->value();
-                matched = true;
-
-            } else if (metaEnum && (ev = metaEnum->enclosingClass()->findEnumValue(s, metaEnum))) {
-                v = ev->value();
-                matched = true;
-
-            } else {
-                if (metaEnum)
+            if (metaEnum) {
+                if (ev = metaEnum->values().find(s)) {
+                    v = ev->value();
+                    matched = true;
+                } else if (enumEnclosingClass && (ev = enumEnclosingClass->findEnumValue(s, metaEnum))) {
+                    v = ev->value();
+                    matched = true;
+                } else {
                     ReportHandler::warning("unhandled enum value: " + s + " in "
-                                           + metaEnum->enclosingClass()->name() + "::"
+                                           + (enumEnclosingClass ? QString("%1::").arg(enumEnclosingClass->name()) : QString())
                                            + metaEnum->name());
-                else
-                    ReportHandler::warning("unhandled enum value: Unknown enum");
+                }
+            } else {
+                ReportHandler::warning("unhandled enum value: Unknown enum");
             }
         }
 
