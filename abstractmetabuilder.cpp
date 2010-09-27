@@ -792,7 +792,7 @@ int AbstractMetaBuilder::figureOutEnumValue(const QString &stringValue,
             AbstractMetaClass* enumEnclosingClass = metaEnum ? metaEnum->enclosingClass() : 0;
 
             if (metaEnum) {
-                if (ev = metaEnum->values().find(s)) {
+                if ((ev = metaEnum->values().find(s))) {
                     v = ev->value();
                     matched = true;
                 } else if (enumEnclosingClass && (ev = enumEnclosingClass->findEnumValue(s, metaEnum))) {
