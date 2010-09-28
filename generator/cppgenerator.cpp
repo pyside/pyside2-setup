@@ -2268,7 +2268,7 @@ bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass* metaClass)
     }
 
     const ComplexTypeEntry* baseType = metaClass->typeEntry()->baseContainerType();
-    if (baseType && (reinterpret_cast<const ContainerTypeEntry*>(baseType)->type() == ContainerTypeEntry::ListContainer))
+    if (baseType && baseType->isContainer())
         return true;
 
     return false;
