@@ -792,16 +792,19 @@ int AbstractMetaBuilder::figureOutEnumValue(const QString &stringValue,
             AbstractMetaClass* enumEnclosingClass = metaEnum ? metaEnum->enclosingClass() : 0;
 
             if (metaEnum) {
-                if ((ev = metaEnum->values().find(s))) {
+                matched = true;
+                if (s == "true" || s == "false") {
+                    v = (s == "true");
+                } else if ((ev = metaEnum->values().find(s))) {
                     v = ev->value();
-                    matched = true;
                 } else if (enumEnclosingClass && (ev = enumEnclosingClass->findEnumValue(s, metaEnum))) {
                     v = ev->value();
-                    matched = true;
                 } else {
+                    matched = false;
                     ReportHandler::warning("unhandled enum value: " + s + " in "
                                            + (enumEnclosingClass ? QString("%1::").arg(enumEnclosingClass->name()) : QString())
-                                           + metaEnum->name());
+                                           + metaEnum->name()
+                                           + " from header '" + metaEnum->typeEntry()->include().name() + "'");
                 }
             } else {
                 ReportHandler::warning("unhandled enum value: Unknown enum");
@@ -820,6 +823,7 @@ int AbstractMetaBuilder::figureOutEnumValue(const QString &stringValue,
                     .arg(metaFunction->name())
                     .arg(metaFunction->implementingClass()->name());
         }
+        warn += " from header '" + metaEnum->typeEntry()->include().name() + "'";
 
         ReportHandler::warning(warn);
         returnValue = oldValuevalue;
@@ -1945,23 +1949,27 @@ AbstractMetaType* AbstractMetaBuilder::translateType(const TypeInfo& _typei, boo
 
                 int elems = s.toInt(&ok);
                 if (!ok) {
-                    AbstractMetaEnumValue* enumValue = m_metaClasses.findEnumValue(s);
-                    if (!enumValue) {
-                        foreach (AbstractMetaEnum* metaEnum, m_globalEnums) {
-                            foreach (AbstractMetaEnumValue* ev, metaEnum->values()) {
-                                if (ev->name() == s) {
-                                    enumValue = ev;
-                                    break;
+                    if (s == "true" or s == "false") {
+                        elems = (s == "true");
+                    } else {
+                        AbstractMetaEnumValue* enumValue = m_metaClasses.findEnumValue(s);
+                        if (!enumValue) {
+                            foreach (AbstractMetaEnum* metaEnum, m_globalEnums) {
+                                foreach (AbstractMetaEnumValue* ev, metaEnum->values()) {
+                                    if (ev->name() == s) {
+                                        enumValue = ev;
+                                        break;
+                                    }
                                 }
+                                if (enumValue)
+                                    break;
                             }
-                            if (enumValue)
-                                break;
                         }
-                    }
 
-                    if (!enumValue)
-                        return 0;
-                    elems = enumValue->value();
+                        if (!enumValue)
+                            return 0;
+                        elems = enumValue->value();
+                    }
                 }
 
                 AbstractMetaType* arrayType = createMetaType();
