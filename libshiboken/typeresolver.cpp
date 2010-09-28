@@ -116,22 +116,25 @@ PyTypeObject* TypeResolver::pythonType()
 
 TypeResolver::Type TypeResolver::getType(const char* name)
 {
-    std::string typeName(name);
-    int len = typeName.size() - 1;
-    if (len > 1) {
-        if (typeName[len] == '*')
-            typeName.erase(len, 1);
+    int len = strlen(name);
+    bool isObjTypeName = name[len - 1] == '*';
+    if (TypeResolver::get(name)) {
+        // great, we found the type in our first attempt!
+        return isObjTypeName ? ObjectType : ValueType;
+    } else {
+        // Type not found... let's copy the string.
+        std::string typeName;
+        typeName.reserve(len + 2);
+        if (isObjTypeName)
+            typeName.erase(len - 1, 1);
+        else
+            typeName += '*';
+        isObjTypeName = !isObjTypeName;
 
-        TypeResolver *resolver = TypeResolver::get(typeName.c_str());
-        if (resolver)
-            return TypeResolver::ValueType;
-
-        typeName += '*';
-        resolver = TypeResolver::get(typeName.c_str());
-        if (resolver)
-            return TypeResolver::ObjectType;
+        if (TypeResolver::get(typeName.c_str()))
+            return isObjTypeName ? ObjectType : ValueType;
+        else
+            return UnknownType;
     }
-
-    return TypeResolver::UnknownType;
 }
 
