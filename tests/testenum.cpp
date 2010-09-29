@@ -164,7 +164,7 @@ void TestEnum::testGlobalEnums()
 {
     const char* cppCode ="\
     enum EnumA { A0, A1 }; \
-    enum EnumB { B0 = 2, B1 = 4 }; \
+    enum EnumB { B0 = 2, B1 = 0x4 }; \
     ";
     const char* xmlCode = "\
     <typesystem package=\"Foo\"> \
@@ -201,7 +201,58 @@ void TestEnum::testGlobalEnums()
     AbstractMetaEnumValue* enumValueB1 = enumB->values().last();
     QCOMPARE(enumValueB1->name(), QString("B1"));
     QCOMPARE(enumValueB1->value(), 4);
-    QCOMPARE(enumValueB1->stringValue(), QString("4"));
+    QCOMPARE(enumValueB1->stringValue(), QString("0x4"));
+}
+
+void TestEnum::testEnumValueFromNeighbourEnum()
+{
+    const char* cppCode ="\
+    namespace A {\
+        enum EnumA { ValueA0, ValueA1 };\
+        enum EnumB { ValueB0 = A::ValueA1, ValueB1 = ValueA0 };\
+    };\
+    ";
+    const char* xmlCode = "\
+    <typesystem package=\"Foo\"> \
+        <namespace-type name='A'> \
+            <enum-type name='EnumA'/>\
+            <enum-type name='EnumB'/>\
+        </namespace-type> \
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, false);
+
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.count(), 1);
+    QCOMPARE(classes[0]->enums().count(), 2);
+
+    AbstractMetaEnum* enumA = classes[0]->findEnum("EnumA");
+    QVERIFY(enumA);
+    QCOMPARE(enumA->typeEntry()->qualifiedCppName(), QString("A::EnumA"));
+
+    AbstractMetaEnumValue* enumValueA0 = enumA->values().first();
+    QCOMPARE(enumValueA0->name(), QString("ValueA0"));
+    QCOMPARE(enumValueA0->value(), 0);
+    QCOMPARE(enumValueA0->stringValue(), QString(""));
+
+    AbstractMetaEnumValue* enumValueA1 = enumA->values().last();
+    QCOMPARE(enumValueA1->name(), QString("ValueA1"));
+    QCOMPARE(enumValueA1->value(), 1);
+    QCOMPARE(enumValueA1->stringValue(), QString(""));
+
+    AbstractMetaEnum* enumB = classes[0]->findEnum("EnumB");
+    QVERIFY(enumB);
+    QCOMPARE(enumB->typeEntry()->qualifiedCppName(), QString("A::EnumB"));
+
+    AbstractMetaEnumValue* enumValueB0 = enumB->values().first();
+    QCOMPARE(enumValueB0->name(), QString("ValueB0"));
+    QCOMPARE(enumValueB0->value(), 1);
+    QCOMPARE(enumValueB0->stringValue(), QString("A::ValueA1"));
+
+    AbstractMetaEnumValue* enumValueB1 = enumB->values().last();
+    QCOMPARE(enumValueB1->name(), QString("ValueB1"));
+    QCOMPARE(enumValueB1->value(), 0);
+    QCOMPARE(enumValueB1->stringValue(), QString("ValueA0"));
 }
 
 QTEST_APPLESS_MAIN(TestEnum)

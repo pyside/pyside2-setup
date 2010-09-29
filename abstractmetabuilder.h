@@ -149,6 +149,8 @@ public:
     AbstractMetaType* translateType(double vr, const AddedFunction::TypeInfo& typeInfo);
     AbstractMetaType *translateType(const TypeInfo &type, bool *ok, bool resolveType = true, bool resolveScope = true);
 
+    int findOutValueFromString(const QString& stringValue, bool& ok);
+
     void decideUsagePattern(AbstractMetaType *type);
 
     const AbstractMetaFunctionList globalFunctions() const

@@ -33,6 +33,7 @@ private slots:
     void testEnumWithApiVersion();
     void testAnonymousEnum();
     void testGlobalEnums();
+    void testEnumValueFromNeighbourEnum();
 };
 
 #endif
