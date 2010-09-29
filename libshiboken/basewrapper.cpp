@@ -35,7 +35,6 @@ namespace Shiboken
 
 static void SbkBaseWrapperType_dealloc(PyObject* pyObj);
 static PyObject* SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
-static std::list<PyObject*> splitPyObject(PyObject* pyObj);
 static void incRefPyObject(PyObject* pyObj);
 static void decRefPyObjectlist(const std::list<PyObject*> &pyObj);
 
@@ -659,7 +658,7 @@ bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctorType)
     return true;
 }
 
-static std::list<PyObject*> splitPyObject(PyObject* pyObj)
+std::list<PyObject*> splitPyObject(PyObject* pyObj)
 {
     std::list<PyObject*> result;
     if (PySequence_Check(pyObj)) {
@@ -691,6 +690,19 @@ static void decRefPyObjectlist(const std::list<PyObject*> &lst)
         Py_DECREF(*iter);
         iter++;
     }
+}
+
+void SbkBaseWrapper_setOwnership(SbkBaseWrapper* pyobj, bool owner)
+{
+    pyobj->hasOwnership = owner;
+}
+
+void SbkBaseWrapper_setOwnership(PyObject* pyobj, bool owner)
+{
+    std::list<PyObject*> objs = splitPyObject(pyobj);
+    std::list<PyObject*>::const_iterator it;
+    for(it=objs.begin(); it != objs.end(); it++)
+        SbkBaseWrapper_setOwnership(reinterpret_cast<SbkBaseWrapper*>(*it), owner);
 }
 
 

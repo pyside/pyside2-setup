@@ -29,6 +29,7 @@
 #include <QtCore/QTextStream>
 #include <QtCore/QDebug>
 
+// utiliy functions
 inline CodeSnipList getConversionRule(TypeSystem::Language lang, const AbstractMetaFunction *function)
 {
     CodeSnipList list;
@@ -50,7 +51,6 @@ inline CodeSnipList getConversionRule(TypeSystem::Language lang, const AbstractM
     return list;
 }
 
-// utiliy functions
 inline CodeSnipList getReturnConversionRule(TypeSystem::Language lang,
                                             const AbstractMetaFunction *function,
                                             const QString& inputName,
@@ -71,6 +71,17 @@ inline CodeSnipList getReturnConversionRule(TypeSystem::Language lang,
     }
 
     return list;
+}
+
+inline AbstractMetaType* getTypeWithoutContainer(AbstractMetaType* arg)
+{
+    if (arg && arg->typeEntry()->isContainer()) {
+        AbstractMetaTypeList lst = arg->instantiations();
+        // only support containers with 1 type
+        if (lst.size() == 1)
+            return lst[0];
+    }
+    return arg;
 }
 
 
@@ -1778,20 +1789,25 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction* func, in
         pyArgName = QString("self");
         *wrappedClass = func->implementingClass();
     } else if (argIndex == 0) {
-        if (func->type()) {
+        AbstractMetaType* returnType = getTypeWithoutContainer(func->type());
+        if (returnType) {
             pyArgName = PYTHON_RETURN_VAR;
-            *wrappedClass = classes().findClass(func->type()->typeEntry()->name());
+            *wrappedClass = classes().findClass(returnType->typeEntry()->name());
         } else {
             ReportHandler::warning("Invalid Argument index on function modification: " + func->name());
         }
     } else {
         int realIndex = argIndex - 1 - OverloadData::numberOfRemovedArguments(func, argIndex - 1);
-        *wrappedClass = classes().findClass(func->arguments().at(realIndex)->type()->typeEntry()->name());
-        if (argIndex == 1
-            && OverloadData::isSingleArgument(getFunctionGroups(func->implementingClass())[func->name()]))
-            pyArgName = QString("arg");
-        else
-            pyArgName = QString("pyargs[%1]").arg(argIndex - 1);
+        AbstractMetaType* argType = getTypeWithoutContainer(func->arguments().at(realIndex)->type());
+
+        if (argType) {
+            *wrappedClass = classes().findClass(argType->typeEntry()->name());
+            if (argIndex == 1
+                && OverloadData::isSingleArgument(getFunctionGroups(func->implementingClass())[func->name()]))
+                pyArgName = QString("arg");
+            else
+                pyArgName = QString("pyargs[%1]").arg(argIndex - 1);
+        }
     }
     return pyArgName;
 }

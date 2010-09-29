@@ -245,6 +245,15 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
     return 0;
 }
 
+
+void BindingManager::invalidateWrapper(PyObject* pyobj)
+{
+    std::list<PyObject*> objs = splitPyObject(pyobj);
+    std::list<PyObject*>::const_iterator it;
+    for(it=objs.begin(); it != objs.end(); it++)
+        invalidateWrapper(reinterpret_cast<SbkBaseWrapper*>(*it));
+}
+
 void BindingManager::invalidateWrapper(SbkBaseWrapper* wrapper)
 {
     if (!wrapper || ((PyObject*)wrapper == Py_None) || !SbkBaseWrapper_validCppObject(wrapper))
@@ -302,6 +311,13 @@ void BindingManager::destroyWrapper(SbkBaseWrapper* wrapper)
     m_d->destroying = false;
 }
 
+void BindingManager::transferOwnershipToCpp(PyObject* wrapper)
+{
+    std::list<PyObject*> objs = splitPyObject(wrapper);
+    std::list<PyObject*>::const_iterator it;
+    for(it=objs.begin(); it != objs.end(); it++)
+        transferOwnershipToCpp(reinterpret_cast<SbkBaseWrapper*>(*it));
+}
 
 void BindingManager::transferOwnershipToCpp(SbkBaseWrapper* wrapper)
 {

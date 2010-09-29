@@ -47,21 +47,14 @@ public:
     /// Invalidate the Python wrapper and removes the relations from C++ pointers to the Python wrapper.
     void invalidateWrapper(SbkBaseWrapper* wrapper);
     /// Convenience method to call invalidateWrapper with a properly cast SbkBaseWrapper.
-    inline void invalidateWrapper(PyObject* wrapper)
-    {
-        invalidateWrapper(reinterpret_cast<SbkBaseWrapper*>(wrapper));
-    }
+    void invalidateWrapper(PyObject* wrapper);
     /// Convenience method to invalidate the Python wrapper for a C++ wrapped object. Do nothing if C++ pointer has no Python wrapper.
     void invalidateWrapper(const void* cptr);
 
     /// Transfers the ownership of a Python wrapper to C++.
     void transferOwnershipToCpp(SbkBaseWrapper* wrapper);
     /// Convenience method to call transferOwnershipToCpp with a properly cast SbkBaseWrapper.
-    inline void transferOwnershipToCpp(PyObject* wrapper)
-    {
-        transferOwnershipToCpp(reinterpret_cast<SbkBaseWrapper*>(wrapper));
-    }
-
+    void transferOwnershipToCpp(PyObject* wrapper);
     void addClassInheritance(SbkBaseWrapperType* parent, SbkBaseWrapperType* child);
     SbkBaseWrapperType* resolveType(void* cptr, SbkBaseWrapperType* type);
 

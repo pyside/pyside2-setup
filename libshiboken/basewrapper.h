@@ -190,7 +190,6 @@ LIBSHIBOKEN_API bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctor
 #define SbkBaseWrapper_instanceDict(pyobj)           (((Shiboken::SbkBaseWrapper*)pyobj)->ob_dict)
 #define SbkBaseWrapper_setInstanceDict(pyobj,d)      (((Shiboken::SbkBaseWrapper*)pyobj)->ob_dict = d)
 #define SbkBaseWrapper_hasOwnership(pyobj)           (((Shiboken::SbkBaseWrapper*)pyobj)->hasOwnership)
-#define SbkBaseWrapper_setOwnership(pyobj,o)         (((Shiboken::SbkBaseWrapper*)pyobj)->hasOwnership = o)
 #define SbkBaseWrapper_hasParentInfo(pyobj)          (((Shiboken::SbkBaseWrapper*)pyobj)->parentInfo)
 #define SbkBaseWrapper_containsCppWrapper(pyobj)     (((Shiboken::SbkBaseWrapper*)pyobj)->containsCppWrapper)
 #define SbkBaseWrapper_setContainsCppWrapper(pyobj,o)(((Shiboken::SbkBaseWrapper*)pyobj)->containsCppWrapper = o)
@@ -237,6 +236,10 @@ void callCppDestructor(void* cptr)
 LIBSHIBOKEN_API void deallocWrapperWithPrivateDtor(PyObject* self);
 LIBSHIBOKEN_API bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr);
 LIBSHIBOKEN_API void setErrorAboutWrongArguments(PyObject* args, const char* funcName, const char** cppOverloads);
+
+/// Support sequence protocol
+LIBSHIBOKEN_API void SbkBaseWrapper_setOwnership(PyObject* pyobj, bool owner);
+LIBSHIBOKEN_API void SbkBaseWrapper_setOwnership(SbkBaseWrapper* pyobj, bool owner);
 
 } // namespace Shiboken
 

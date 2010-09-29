@@ -28,6 +28,10 @@
 
 namespace Shiboken
 {
+/**
+ * Utility function uset to transform PyObject which suppot sequence protocol in a std::list 
+ **/
+std::list<PyObject*> splitPyObject(PyObject* pyObj);
 
 struct SbkBaseWrapperType;
 
