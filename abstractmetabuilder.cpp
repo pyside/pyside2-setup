@@ -2827,8 +2827,7 @@ void AbstractMetaBuilder::setGlobalHeader(const QString& globalHeader)
 
 void AbstractMetaBuilder::setInclude(TypeEntry* te, const QString& fileName) const
 {
-
     QFileInfo info(fileName);
-    if (info.exists() && m_globalHeader != info)
+    if (m_globalHeader.fileName() != info.fileName())
         te->setInclude(Include(Include::IncludePath, info.fileName()));
 }
