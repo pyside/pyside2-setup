@@ -1382,13 +1382,13 @@ public:
               m_hasEqualsOperator(false),
               m_hasCloneOperator(false),
               m_isTypeAlias(false),
+              m_hasToStringCapability(false),
               m_enclosingClass(0),
               m_baseClass(0),
               m_templateBaseClass(0),
               m_extractedInterface(0),
               m_primaryInterfaceImplementor(0),
               m_typeEntry(0),
-              //m_qDebugStreamFunction(0)
               m_stream(false)
     {
     }
@@ -1717,17 +1717,6 @@ public:
     {
         return m_hasHashFunction;
     }
-#if 0
-    void setToStringCapability(FunctionModelItem fun)
-    {
-        m_qDebugStreamFunction = fun;
-    }
-
-    FunctionModelItem hasToStringCapability() const
-    {
-        return m_qDebugStreamFunction;
-    }
-#endif
     virtual bool hasDefaultToStringFunction() const;
 
     void setHasEqualsOperator(bool on)
@@ -1875,6 +1864,15 @@ public:
         return m_stream;
     }
 
+    void setToStringCapability(bool value)
+    {
+        m_hasToStringCapability = value;
+    }
+
+    bool hasToStringCapability() const
+    {
+        return m_hasToStringCapability;
+    }
 private:
     uint m_namespace : 1;
     uint m_qobject : 1;
@@ -1892,7 +1890,8 @@ private:
     uint m_hasEqualsOperator : 1;
     uint m_hasCloneOperator : 1;
     uint m_isTypeAlias : 1;
-    uint m_reserved : 18;
+    uint m_hasToStringCapability : 1;
+    uint m_reserved : 17;
 
     const AbstractMetaClass *m_enclosingClass;
     AbstractMetaClass *m_baseClass;

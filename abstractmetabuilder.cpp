@@ -148,19 +148,16 @@ void AbstractMetaBuilder::registerHashFunction(FunctionModelItem function_item)
 
 void AbstractMetaBuilder::registerToStringCapability(FunctionModelItem function_item)
 {
-    // TODO This must set an AbstractMetaFunction, not a FunctionModelItem!
-    #if 0
     ArgumentList arguments = function_item->arguments();
     if (arguments.size() == 2) {
         if (arguments.at(0)->type().toString() == "QDebug") {
             ArgumentModelItem arg = arguments.at(1);
             if (AbstractMetaClass *cls = argumentToClass(arg)) {
                 if (arg->type().indirections() < 2)
-                    cls->setToStringCapability(function_item);
+                    cls->setToStringCapability(true);
             }
         }
     }
-    #endif
 }
 
 void AbstractMetaBuilder::traverseOperatorFunction(FunctionModelItem item)
