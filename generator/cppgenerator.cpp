@@ -2371,6 +2371,10 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         if (m_tpFuncs.contains(func->name()))
             m_tpFuncs[func->name()] = cpythonFunctionName(func);
     }
+    if (m_tpFuncs["__repr__"] == "0"
+        && metaClass->hasToStringCapability()) {
+        m_tpFuncs["__repr__"] = writeReprFunction(s, metaClass);
+    }
 
     // class or some ancestor has multiple inheritance
     const AbstractMetaClass* miClass = getMultipleInheritingClass(metaClass);
@@ -3880,4 +3884,23 @@ void CppGenerator::writeStdListWrapperMethods(QTextStream& s, const AbstractMeta
     s << endl << "}" << endl;
 }
 
+QString CppGenerator::writeReprFunction(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    QString funcName = cpythonBaseName(metaClass) + "__repr__";
+    s << "extern \"C\"" << endl;
+    s << '{' << endl;
+    s << "static PyObject* " << funcName << "(PyObject* pyObj)" << endl;
+    s << '{' << endl;
+    s << INDENT << "QBuffer buffer;" << endl;
+    s << INDENT << "buffer.open(QBuffer::ReadWrite);" << endl;
+    s << INDENT << "QDebug dbg(&buffer);" << endl;
+    s << INDENT << "dbg << ";
+    writeToCppConversion(s, metaClass, "pyObj");
+    s << ';' << endl;
+    s << INDENT << "buffer.close();" << endl;
+    s << INDENT << "return PyString_FromFormat(\"<" << metaClass->package() << ".%s at %p>\", buffer.data().constData(), pyObj);" << endl;
+    s << '}' << endl;
+    s << "} // extern C" << endl << endl;;
+    return funcName;
+}
 

@@ -190,6 +190,7 @@ private:
 
     // Write default implementations for sequence protocol
     void writeStdListWrapperMethods(QTextStream& s, const AbstractMetaClass* metaClass);
+    QString writeReprFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
     // Maps special function names to function parameters and return types
     // used by CPython API in the sequence protocol.
