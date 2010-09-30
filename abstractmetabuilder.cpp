@@ -894,14 +894,18 @@ void AbstractMetaBuilder::figureOutDefaultEnumArguments()
 
 AbstractMetaEnum* AbstractMetaBuilder::traverseEnum(EnumModelItem enumItem, AbstractMetaClass* enclosing, const QSet<QString> &enumsDeclarations)
 {
-    // Skipping private enums.
-    if (enumItem->accessPolicy() == CodeModel::Private)
-        return 0;
-
     QString qualifiedName = enumItem->qualifiedName().join("::");
 
     TypeEntry* typeEntry = 0;
-    if (!enumItem->isAnonymous()) {
+    if (enumItem->accessPolicy() == CodeModel::Private) {
+        QStringList names = enumItem->qualifiedName();
+        QString enumName = names.last();
+        QString nspace;
+        if (names.size() > 1)
+            nspace = QStringList(names.mid(0, names.size() - 1)).join("::");
+        typeEntry = new EnumTypeEntry(nspace, enumName, 0);
+        TypeDatabase::instance()->addType(typeEntry);
+    } else if (!enumItem->isAnonymous()) {
         typeEntry = TypeDatabase::instance()->findType(qualifiedName);
     } else {
         QStringList tmpQualifiedName = enumItem->qualifiedName();
@@ -950,7 +954,7 @@ AbstractMetaEnum* AbstractMetaBuilder::traverseEnum(EnumModelItem enumItem, Abst
     switch (enumItem->accessPolicy()) {
     case CodeModel::Public: *metaEnum += AbstractMetaAttributes::Public; break;
     case CodeModel::Protected: *metaEnum += AbstractMetaAttributes::Protected; break;
-//     case CodeModel::Private: *meta_enum += AbstractMetaAttributes::Private; break;
+    case CodeModel::Private: *metaEnum += AbstractMetaAttributes::Private; break;
     default: break;
     }
 
@@ -983,7 +987,6 @@ AbstractMetaEnum* AbstractMetaBuilder::traverseEnum(EnumModelItem enumItem, Abst
     metaEnum->setOriginalAttributes(metaEnum->attributes());
 
     // Register all enum values on Type database
-    TypeDatabase* typeDb = TypeDatabase::instance();
     foreach(EnumeratorModelItem e, enumItem->enumerators()) {
         QString name;
         if (enclosing) {
@@ -992,7 +995,7 @@ AbstractMetaEnum* AbstractMetaBuilder::traverseEnum(EnumModelItem enumItem, Abst
         }
         name += e->name();
         EnumValueTypeEntry* enumValue = new EnumValueTypeEntry(name, e->value(), static_cast<EnumTypeEntry*>(typeEntry), typeEntry->version());
-        typeDb->addType(enumValue);
+        TypeDatabase::instance()->addType(enumValue);
     }
 
     return metaEnum;

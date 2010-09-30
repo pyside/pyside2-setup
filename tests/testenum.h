@@ -34,6 +34,7 @@ private slots:
     void testAnonymousEnum();
     void testGlobalEnums();
     void testEnumValueFromNeighbourEnum();
+    void testPrivateEnum();
 };
 
 #endif

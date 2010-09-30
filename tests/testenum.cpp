@@ -255,6 +255,49 @@ void TestEnum::testEnumValueFromNeighbourEnum()
     QCOMPARE(enumValueB1->stringValue(), QString("ValueA0"));
 }
 
+void TestEnum::testPrivateEnum()
+{
+    const char* cppCode ="\
+    class A {\
+    private:\
+        enum PrivateEnum { Priv0 = 0x0f, Priv1 = 0xf0 };\
+    public:\
+        enum PublicEnum { Pub0 = Priv0, Pub1 = A::Priv1 };\
+    };\
+    ";
+    const char* xmlCode = "\
+    <typesystem package=\"Foo\"> \
+        <value-type name='A'> \
+            <enum-type name='PublicEnum'/>\
+        </value-type> \
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, false);
+
+    AbstractMetaClass* classA = t.builder()->classes().findClass("A");
+    QVERIFY(classA);
+    QCOMPARE(classA->enums().count(), 2);
+
+    AbstractMetaEnum* privateEnum = classA->findEnum("PrivateEnum");
+    QVERIFY(privateEnum);
+    QVERIFY(privateEnum->isPrivate());
+    QCOMPARE(privateEnum->typeEntry()->qualifiedCppName(), QString("A::PrivateEnum"));
+
+    AbstractMetaEnum* publicEnum = classA->findEnum("PublicEnum");
+    QVERIFY(publicEnum);
+    QCOMPARE(publicEnum->typeEntry()->qualifiedCppName(), QString("A::PublicEnum"));
+
+    AbstractMetaEnumValue* pub0 = publicEnum->values().first();
+    QCOMPARE(pub0->name(), QString("Pub0"));
+    QCOMPARE(pub0->value(), 0x0f);
+    QCOMPARE(pub0->stringValue(), QString("Priv0"));
+
+    AbstractMetaEnumValue* pub1 = publicEnum->values().last();
+    QCOMPARE(pub1->name(), QString("Pub1"));
+    QCOMPARE(pub1->value(), 0xf0);
+    QCOMPARE(pub1->stringValue(), QString("A::Priv1"));
+}
+
 QTEST_APPLESS_MAIN(TestEnum)
 
 #include "testenum.moc"
