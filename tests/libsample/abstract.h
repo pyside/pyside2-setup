@@ -30,12 +30,20 @@ class ObjectType;
 
 class LIBSAMPLE_API Abstract
 {
+private:
+    enum PrivateEnum {
+        PrivValue0,
+        PrivValue1,
+        PrivValue2 = PrivValue1 + 2
+    };
 public:
     enum PrintFormat {
         Short,
         Verbose,
         OnlyId,
-        ClassNameAndId
+        ClassNameAndId,
+        DummyItemToTestPrivateEnum1 = Abstract::PrivValue1,
+        DummyItemToTestPrivateEnum2 = PrivValue2,
     };
 
     enum Type {

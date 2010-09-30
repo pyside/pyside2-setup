@@ -385,7 +385,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
 
     foreach (AbstractMetaEnum* cppEnum, metaClass->enums()) {
-        if (cppEnum->isAnonymous())
+        if (cppEnum->isAnonymous() || cppEnum->isPrivate())
             continue;
 
         bool hasFlags = cppEnum->typeEntry()->flags();
@@ -3326,8 +3326,11 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         s << INDENT << "PyObject* enum_item;" << endl << endl;
     }
 
-    foreach (const AbstractMetaEnum* cppEnum, metaClass->enums())
+    foreach (const AbstractMetaEnum* cppEnum, metaClass->enums()) {
+        if (cppEnum->isPrivate())
+            continue;
         writeEnumInitialization(s, cppEnum);
+    }
 
     if (metaClass->hasSignals())
         writeSignalInitialization(s, metaClass);
@@ -3591,7 +3594,7 @@ void CppGenerator::finishGeneration()
             s << "// Enum definitions ";
             s << "------------------------------------------------------------" << endl;
             foreach (const AbstractMetaEnum* cppEnum, globalEnums()) {
-                if (cppEnum->isAnonymous())
+                if (cppEnum->isAnonymous() || cppEnum->isPrivate())
                     continue;
                 writeEnumDefinition(s, cppEnum);
                 s << endl;
@@ -3674,8 +3677,11 @@ void CppGenerator::finishGeneration()
             s << INDENT << "PyObject* enum_item;" << endl << endl;
         }
 
-        foreach (const AbstractMetaEnum* cppEnum, globalEnums())
-           writeEnumInitialization(s, cppEnum);
+        foreach (const AbstractMetaEnum* cppEnum, globalEnums()) {
+            if (cppEnum->isPrivate())
+                continue;
+            writeEnumInitialization(s, cppEnum);
+        }
 
         // Register primitive types on TypeResolver
         s << INDENT << "// Register primitive types on TypeResolver" << endl;

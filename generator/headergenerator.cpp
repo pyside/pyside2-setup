@@ -281,8 +281,11 @@ void HeaderGenerator::writeTypeIndexDefine(QTextStream& s, const AbstractMetaCla
     if (!metaClass->typeEntry()->generateCode())
         return;
     writeTypeIndexDefineLine(s, metaClass->typeEntry(), idx);
-    foreach (const AbstractMetaEnum* metaEnum, metaClass->enums())
+    foreach (const AbstractMetaEnum* metaEnum, metaClass->enums()) {
+        if (metaEnum->isPrivate())
+            continue;
         writeTypeIndexDefineLine(s, metaEnum->typeEntry(), idx);
+    }
 }
 
 void HeaderGenerator::finishGeneration()
@@ -321,7 +324,7 @@ void HeaderGenerator::finishGeneration()
 
     macrosStream << "// Macros for type check" << endl;
     foreach (const AbstractMetaEnum* cppEnum, globalEnums()) {
-        if (cppEnum->isAnonymous())
+        if (cppEnum->isAnonymous() || cppEnum->isPrivate())
             continue;
         includes << cppEnum->typeEntry()->include();
         writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
@@ -338,7 +341,7 @@ void HeaderGenerator::finishGeneration()
         includes << classType->include();
 
         foreach (const AbstractMetaEnum* cppEnum, metaClass->enums()) {
-            if (cppEnum->isAnonymous())
+            if (cppEnum->isAnonymous() || cppEnum->isPrivate())
                 continue;
             EnumTypeEntry* enumType = cppEnum->typeEntry();
             includes << enumType->include();
