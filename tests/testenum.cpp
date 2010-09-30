@@ -255,6 +255,79 @@ void TestEnum::testEnumValueFromNeighbourEnum()
     QCOMPARE(enumValueB1->stringValue(), QString("ValueA0"));
 }
 
+void TestEnum::testEnumValueFromExpression()
+{
+    const char* cppCode ="\
+    struct A {\
+        enum EnumA {\
+            ValueA0 = 3u,\
+            ValueA1 = ~3u,\
+            ValueA2 = ~3,\
+            ValueA3 = 0xf0,\
+            ValueA4 = 8 |ValueA3,\
+            ValueA5 = ValueA3|32,\
+            ValueA6 = ValueA3 >> 1,\
+            ValueA7 = ValueA3 << 1\
+        };\
+    };\
+    ";
+    const char* xmlCode = "\
+    <typesystem package=\"Foo\"> \
+        <value-type name='A'> \
+            <enum-type name='EnumA'/>\
+        </value-type> \
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, false);
+
+    AbstractMetaClass* classA = t.builder()->classes().findClass("A");
+    QVERIFY(classA);
+
+    AbstractMetaEnum* enumA = classA->findEnum("EnumA");
+    QVERIFY(enumA);
+    QCOMPARE(enumA->typeEntry()->qualifiedCppName(), QString("A::EnumA"));
+
+    AbstractMetaEnumValue* valueA0 = enumA->values().at(0);
+    QCOMPARE(valueA0->name(), QString("ValueA0"));
+    QCOMPARE(valueA0->stringValue(), QString("3u"));
+    QCOMPARE(valueA0->value(), (int) 3u);
+
+    AbstractMetaEnumValue* valueA1 = enumA->values().at(1);
+    QCOMPARE(valueA1->name(), QString("ValueA1"));
+    QCOMPARE(valueA1->stringValue(), QString("~3u"));
+    QCOMPARE(valueA1->value(), (int) ~3u);
+
+    AbstractMetaEnumValue* valueA2 = enumA->values().at(2);
+    QCOMPARE(valueA2->name(), QString("ValueA2"));
+    QCOMPARE(valueA2->stringValue(), QString("~3"));
+    QCOMPARE(valueA2->value(), ~3);
+
+    AbstractMetaEnumValue* valueA3 = enumA->values().at(3);
+    QCOMPARE(valueA3->name(), QString("ValueA3"));
+    QCOMPARE(valueA3->stringValue(), QString("0xf0"));
+    QCOMPARE(valueA3->value(), 0xf0);
+
+    AbstractMetaEnumValue* valueA4 = enumA->values().at(4);
+    QCOMPARE(valueA4->name(), QString("ValueA4"));
+    QCOMPARE(valueA4->stringValue(), QString("8|ValueA3"));
+    QCOMPARE(valueA4->value(), 8|0xf0);
+
+    AbstractMetaEnumValue* valueA5 = enumA->values().at(5);
+    QCOMPARE(valueA5->name(), QString("ValueA5"));
+    QCOMPARE(valueA5->stringValue(), QString("ValueA3|32"));
+    QCOMPARE(valueA5->value(), 0xf0|32);
+
+    AbstractMetaEnumValue* valueA6 = enumA->values().at(6);
+    QCOMPARE(valueA6->name(), QString("ValueA6"));
+    QCOMPARE(valueA6->stringValue(), QString("ValueA3>>1"));
+    QCOMPARE(valueA6->value(), 0xf0 >> 1);
+
+    AbstractMetaEnumValue* valueA7 = enumA->values().at(7);
+    QCOMPARE(valueA7->name(), QString("ValueA7"));
+    QCOMPARE(valueA7->stringValue(), QString("ValueA3<<1"));
+    QCOMPARE(valueA7->value(), 0xf0 << 1);
+}
+
 void TestEnum::testPrivateEnum()
 {
     const char* cppCode ="\

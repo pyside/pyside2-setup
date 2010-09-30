@@ -707,14 +707,16 @@ AbstractMetaClass* AbstractMetaBuilder::traverseNamespace(NamespaceModelItem nam
 
 struct Operator
 {
-    enum Type { Plus, ShiftLeft, None };
+    enum Type { Complement, Plus, ShiftRight, ShiftLeft, None };
 
     Operator() : type(None) {}
 
     int calculate(int x)
     {
         switch (type) {
+        case Complement: return ~value;
         case Plus: return x + value;
+        case ShiftRight: return x >> value;
         case ShiftLeft: return x << value;
         case None: return x;
         }
@@ -730,7 +732,9 @@ struct Operator
 Operator findOperator(QString* s)
 {
     const char *names[] = {
+        "~",
         "+",
+        ">>",
         "<<"
     };
 
@@ -738,14 +742,21 @@ Operator findOperator(QString* s)
         QString name = QLatin1String(names[i]);
         QString str = *s;
         int splitPoint = str.indexOf(name);
-        if (splitPoint > 0) {
+        if (splitPoint > -1) {
             bool ok;
             QString right = str.mid(splitPoint + name.length());
             Operator op;
+
             op.value = right.toInt(&ok);
+            if (!ok && right.length() > 0 && right.at(right.length() - 1).toLower() == QLatin1Char('u'))
+                op.value = right.left(right.length() - 1).toUInt(&ok, 0);
+
             if (ok) {
                 op.type = Operator::Type(i);
-                *s = str.left(splitPoint).trimmed();
+                if (splitPoint > 0)
+                    *s = str.left(splitPoint).trimmed();
+                else
+                    *s = QString();
                 return op;
             }
         }
@@ -777,16 +788,16 @@ int AbstractMetaBuilder::figureOutEnumValue(const QString &stringValue,
 
         if (s.length() > 0 && s.at(0) == QLatin1Char('0'))
             v = s.toUInt(&ok, 0);
+        else if (s.length() > 0 && s.at(s.length() - 1).toLower() == QLatin1Char('u'))
+            v = s.left(s.length() - 1).toUInt(&ok, 0);
         else
             v = s.toInt(&ok);
 
-        if (ok) {
+        if (ok || s.isEmpty()) {
             matched = true;
-
         } else if (m_enumValues.contains(s)) {
             v = m_enumValues[s]->value();
             matched = true;
-
         } else {
             if (metaEnum) {
                 v = findOutValueFromString(s, matched);
@@ -2087,6 +2098,14 @@ int AbstractMetaBuilder::findOutValueFromString(const QString& stringValue, bool
     if (stringValue == "true" or stringValue == "false") {
         ok = true;
         return (stringValue == "true");
+    }
+
+    // This is a very lame way to handle expression evaluation,
+    // but it is not critical and will do for the time being.
+    static QRegExp variableNameRegExp("^[a-zA-Z_][a-zA-Z0-9_]*$");
+    if (!variableNameRegExp.exactMatch(stringValue)) {
+        ok = true;
+        return 0;
     }
 
     AbstractMetaEnumValue* enumValue = m_metaClasses.findEnumValue(stringValue);
