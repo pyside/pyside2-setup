@@ -125,7 +125,7 @@ QList<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(con
 
 void CppGenerator::writeToPythonFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
-    s << "PyObject* SbkToPythonFunc(PyObject* self)" << endl;
+    s << "static PyObject* " << cpythonBaseName(metaClass) << "_ToPythonFunc(PyObject* self)" << endl;
     s << "{" << endl;
     s << INDENT << metaClass->qualifiedCppName() << "* cppSelf = Shiboken::Converter<" << metaClass->qualifiedCppName() << "* >::toCpp(self);" << endl;
     s << INDENT << "PyObject* pyResult = Shiboken::PythonConverter<" << metaClass->qualifiedCppName() << " >::transformToPython(cppSelf);" << endl;
@@ -315,7 +315,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     //ToPython used by Python Conversion
     if (metaClass->typeEntry()->hasTargetConversionRule()) {
         writeToPythonFunction(s, metaClass);
-        md << INDENT << "{\"toPython\", (PyCFunction)SbkToPythonFunc, METH_NOARGS}," << endl;
+        md << INDENT << "{\"toPython\", (PyCFunction)" << cpythonBaseName(metaClass) << "_ToPythonFunc, METH_NOARGS}," << endl;
     }
 
     QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
