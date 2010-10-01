@@ -27,6 +27,7 @@
 #include "bindingmanager.h"
 #include "google/dense_hash_map"
 #include "sbkdbg.h"
+#include "gilstate.h"
 
 namespace Shiboken
 {
@@ -259,6 +260,8 @@ void BindingManager::invalidateWrapper(SbkBaseWrapper* wrapper)
     if (!wrapper || ((PyObject*)wrapper == Py_None) || !SbkBaseWrapper_validCppObject(wrapper))
         return;
 
+    GilState gil; // lock the gil to assure no one is changing the value of m_d->destroying
+
     // skip this if the object is a wrapper class and this is not a destructor call
     if (SbkBaseWrapper_containsCppWrapper(wrapper) && !m_d->destroying) {
         ParentInfo* pInfo = wrapper->parentInfo;
@@ -278,7 +281,7 @@ void BindingManager::invalidateWrapper(SbkBaseWrapper* wrapper)
     if (SbkBaseWrapper_hasParentInfo(wrapper)) {
         ChildrenList::iterator it = wrapper->parentInfo->children.begin();
         bool parentDestroying = m_d->destroying;
-        m_d->destroying  = false;
+        m_d->destroying = false;
         for (; it != wrapper->parentInfo->children.end(); ++it)
             invalidateWrapper(*it);
         m_d->destroying = parentDestroying;
@@ -297,15 +300,13 @@ void BindingManager::invalidateWrapper(const void* cptr)
 void BindingManager::destroyWrapper(const void* cptr)
 {
     WrapperMap::iterator iter = m_d->wrapperMapper.find(cptr);
-    if (iter != m_d->wrapperMapper.end()) {
-        m_d->destroying = true;
-        invalidateWrapper(iter->second);
-        m_d->destroying = false;
-    }
+    if (iter != m_d->wrapperMapper.end())
+        destroyWrapper(reinterpret_cast<SbkBaseWrapper*>(iter->second));
 }
 
 void BindingManager::destroyWrapper(SbkBaseWrapper* wrapper)
 {
+    GilState gil;
     m_d->destroying = true;
     invalidateWrapper(wrapper);
     m_d->destroying = false;
