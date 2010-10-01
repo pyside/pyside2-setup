@@ -214,7 +214,7 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
             implicitConvs << func;
     }
     bool isValueTypeWithImplConversions = type->isValue() && !implicitConvs.isEmpty();
-    bool hasCustomConversion = type->hasConversionRule();
+    bool hasCustomConversion = type->hasNativeConversionRule();
     QString typeT = type->name() + (isAbstractOrObjectType ? "*" : "");
     QString typeName = type->name();
 
@@ -450,7 +450,7 @@ void HeaderGenerator::finishGeneration()
 
     s << "// User defined converters --------------------------------------------" << endl;
     foreach (TypeEntry* typeEntry, TypeDatabase::instance()->entries()) {
-        if (typeEntry->hasConversionRule()) {
+        if (typeEntry->hasNativeConversionRule()) {
             s << "// Conversion rule for: " << typeEntry->name() << endl;
             s << typeEntry->conversionRule();
         }
@@ -503,7 +503,7 @@ void HeaderGenerator::writeSbkCopyCppObjectFunction(QTextStream& s, const Abstra
 
 void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
 {
-    if (type->hasConversionRule())
+    if (type->hasNativeConversionRule())
         return;
 
     QString pyTypeName = cpythonTypeName(type);

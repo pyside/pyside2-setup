@@ -711,6 +711,10 @@ struct StdMapConverter
     }
 };
 
+
+// class used to translate python objects to another type
+template <typename T> struct PythonConverter {};
+
 } // namespace Shiboken
 
 #endif // CONVERSIONS_H

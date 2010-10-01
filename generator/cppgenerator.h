@@ -141,6 +141,7 @@ private:
     void writeSetterFunction(QTextStream& s, const AbstractMetaField* metaField);
 
     void writeRichCompareFunction(QTextStream& s, const AbstractMetaClass* metaClass);
+    void writeToPythonFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
     void writeEnumNewMethod(QTextStream& s, const AbstractMetaEnum* cppEnum);
     void writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* metaEnum);

@@ -123,6 +123,23 @@ QList<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(con
     return results.values();
 }
 
+void CppGenerator::writeToPythonFunction(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    s << "PyObject* SbkToPythonFunc(PyObject* self)" << endl;
+    s << "{" << endl;
+    s << INDENT << metaClass->qualifiedCppName() << "* cppSelf = Shiboken::Converter<" << metaClass->qualifiedCppName() << "* >::toCpp(self);" << endl;
+    s << INDENT << "PyObject* pyResult = Shiboken::PythonConverter<" << metaClass->qualifiedCppName() << " >::transformToPython(cppSelf);" << endl;
+    s << INDENT << "if (PyErr_Occurred() || !pyResult) {" << endl;
+    {
+        Indentation indentation(INDENT);
+        s << INDENT << INDENT << "Py_XDECREF(pyResult);" << endl;
+        s << INDENT << INDENT << "return 0;" << endl;
+    }
+    s << INDENT << "}" << endl;
+    s << INDENT << "return pyResult;" << endl;
+    s << "}" << endl;
+}
+
 /*!
     Function used to write the class generated binding code on the buffer
     \param s the output buffer
@@ -211,6 +228,12 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         s << endl;
     }
 
+    // python conversion rules
+    if (metaClass->typeEntry()->hasTargetConversionRule()) {
+        s << "// Python Conversion" << endl;
+        s << metaClass->typeEntry()->conversionRule() << endl;
+    }
+
     if (shouldGenerateCppWrapper(metaClass)) {
         s << "// Native ---------------------------------------------------------" << endl;
         s << endl;
@@ -287,6 +310,12 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
             }
             writeMethodDefinition(md, overloads);
         }
+    }
+
+    //ToPython used by Python Conversion
+    if (metaClass->typeEntry()->hasTargetConversionRule()) {
+        writeToPythonFunction(s, metaClass);
+        md << INDENT << "{\"toPython\", (PyCFunction)SbkToPythonFunc, METH_NOARGS}," << endl;
     }
 
     QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
@@ -806,7 +835,6 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
         s << INDENT << "const QMetaObject* metaObject;" << endl;
     }
 
-
     s << INDENT << "SbkBaseWrapper* sbkSelf = reinterpret_cast<SbkBaseWrapper*>(self);" << endl;
 
     if (metaClass->isAbstract() || metaClass->baseClassNames().size() > 1) {
@@ -852,11 +880,21 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
         writeArgumentsInitializer(s, overloadData);
     }
 
+    bool hasPythonConvertion = metaClass->typeEntry()->hasTargetConversionRule();
+    if (hasPythonConvertion) {
+        s << INDENT << "// Try python conversion rules" << endl;
+        s << INDENT << "cptr = Shiboken::PythonConverter< " << metaClass->qualifiedCppName() << " >::transformFromPython(pyargs[0]);" << endl; 
+        s << INDENT << "if (!cptr) {" << endl;
+    }
+
     if (needsOverloadId)
         writeOverloadedFunctionDecisor(s, overloadData);
 
     writeFunctionCalls(s, overloadData);
     s << endl;
+
+    if (hasPythonConvertion)
+        s << INDENT << "}" << endl;
 
     s << INDENT << "if (PyErr_Occurred() || !Shiboken::setCppPointer(sbkSelf, Shiboken::SbkType<" << metaClass->qualifiedCppName() << " >(), cptr)) {" << endl;
     {
@@ -3523,6 +3561,7 @@ void CppGenerator::finishGeneration()
         writeMethodWrapper(s_globalFunctionImpl, overloads);
         writeMethodDefinition(s_globalFunctionDef, overloads);
     }
+
 
     foreach (const AbstractMetaClass* cls, classes()) {
         if (!shouldGenerate(cls))
