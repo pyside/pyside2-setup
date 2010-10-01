@@ -944,16 +944,17 @@ bool Handler::startElement(const QString &, const QString &n,
                 return false;
             }
 
-            if (topElement.type == StackElement::ModifyArgument) {
-                static QHash<QString, TypeSystem::Language> languageNames;
-                if (languageNames.isEmpty()) {
-                    languageNames["target"] = TypeSystem::TargetLangCode;
-                    languageNames["native"] = TypeSystem::NativeCode;
-                }
+            static QHash<QString, TypeSystem::Language> languageNames;
+            if (languageNames.isEmpty()) {
+                languageNames["target"] = TypeSystem::TargetLangCode;
+                languageNames["native"] = TypeSystem::NativeCode;
+            }
 
-                QString languageAttribute = attributes["class"].toLower();
-                TypeSystem::Language lang = languageNames.value(languageAttribute, TypeSystem::NoLanguage);
-                if (lang == TypeSystem::NoLanguage) {
+            QString languageAttribute = attributes["class"].toLower();
+            TypeSystem::Language lang = languageNames.value(languageAttribute, TypeSystem::NoLanguage);
+
+            if (topElement.type == StackElement::ModifyArgument) {
+               if (lang == TypeSystem::NoLanguage) {
                     m_error = QString("unsupported class attribute: '%1'").arg(lang);
                     return false;
                 }
@@ -977,9 +978,14 @@ bool Handler::startElement(const QString &, const QString &n,
                 //Handler constructor....
                 if (m_generate != TypeEntry::GenerateForSubclass
                     && m_generate != TypeEntry::GenerateNothing) {
+
+                    const char* conversionFlag = NATIVE_CONVERSION_RULE_FLAG;
+                    if (lang == TypeSystem::TargetLangCode)
+                        conversionFlag = TARGET_CONVERSION_RULE_FLAG;
+ 
                     QFile conversionSource(sourceFile);
                     if (conversionSource.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                        topElement.entry->setConversionRule(QString::fromUtf8(conversionSource.readAll()));
+                        topElement.entry->setConversionRule(conversionFlag + QString::fromUtf8(conversionSource.readAll()));
                     } else {
                         ReportHandler::warning("File containing conversion code for "
                                                + topElement.entry->name()

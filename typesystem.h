@@ -32,6 +32,10 @@
 #include "apiextractormacros.h"
 #include "include.h"
 
+//Used to identify the conversion rule to avoid break API
+#define TARGET_CONVERSION_RULE_FLAG "0"
+#define NATIVE_CONVERSION_RULE_FLAG "1"
+
 class Indentor;
 
 class AbstractMetaType;
@@ -913,6 +917,7 @@ public:
         m_include = inc;
     }
 
+    // Replace conversionRule arg to CodeSnip in future version
     /// Set the type convertion rule
     void setConversionRule(const QString& conversionRule)
     {
@@ -922,7 +927,8 @@ public:
     /// Returns the type convertion rule
     QString conversionRule() const
     {
-        return m_conversionRule;
+        //skip conversions flag
+        return m_conversionRule.mid(1);
     }
 
     /// Returns true if there are any conversiton rule for this type, false otherwise.
@@ -934,6 +940,16 @@ public:
     double version() const
     {
         return m_version;
+    }
+
+    bool hasNativeConversionRule() const
+    {
+        return m_conversionRule.startsWith(NATIVE_CONVERSION_RULE_FLAG);
+    }
+
+    bool hasTargetConversionRule() const
+    {
+        return m_conversionRule.startsWith(TARGET_CONVERSION_RULE_FLAG);
     }
 
 
