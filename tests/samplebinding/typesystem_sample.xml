@@ -1143,6 +1143,13 @@
         </inject-code>
     </add-function>
 
+    <value-type name="SbkDate">
+        <extra-includes>
+            <include file-name="datetime.h" location="global"/>
+        </extra-includes>
+        <conversion-rule class="target" file="date_conversions.h"/>
+    </value-type>
+
     <rejection class="ListUser" function-name="createList()"/>
     <rejection class="ListUser" function-name="callCreateList()"/>
     <rejection class="ListUser" function-name="createComplexList(Complex, Complex)"/>
