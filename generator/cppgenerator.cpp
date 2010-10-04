@@ -1991,7 +1991,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             if (func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode).isEmpty()) {
                 qFatal(qPrintable("No way to call \"" + func->ownerClass()->name()
                          + "::" + func->minimalSignature()
-                         +"\" with the modifications described in the type system file"));
+                         + "\" with the modifications described in the type system file"));
             }
         } else if (func->isOperatorOverload()) {
             QString firstArg("(*" CPP_SELF_VAR ")");
@@ -3008,6 +3008,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
 void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     QHash<QString, QStringList> signatures;
+    QStringList knowTypes;
 
     foreach (const AbstractMetaFunction* cppSignal, metaClass->cppSignalFunctions()) {
         QString signature;
@@ -3017,7 +3018,23 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
                     if (i > 0)
                         signature += ", ";
                     AbstractMetaArgument *a = cppSignal->arguments().at(i);
-                    signature += a->type()->cppSignature();
+                    AbstractMetaType* type = a->type();
+                    QString cppSignature = translateType(type, metaClass, Generator::ExcludeConst | Generator::ExcludeReference).trimmed();
+                    QString originalSignature = translateType(type, metaClass, Generator::OriginalName | Generator::ExcludeConst | Generator::ExcludeReference).trimmed();
+                    if (cppSignature.contains("*"))
+                        cppSignature = cppSignature.replace("*", "").trimmed();
+
+                    if (originalSignature.contains("*"))
+                        originalSignature = originalSignature.replace("*", "").trimmed();
+
+
+                    if ((cppSignature != originalSignature) && !knowTypes.contains(originalSignature)) {
+                        knowTypes << originalSignature;
+                        s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<" 
+                          << cppSignature << " >"
+                          << "(\"" << originalSignature << "\");\n";
+                    }
+                    signature += type->originalTypeDescription();
                 }
             } else {
                 signature = "void";
@@ -3404,7 +3421,6 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
             s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<" << typeName << " >" << "(\"" << typeName << "\");\n";
 
         s << INDENT << "Shiboken::TypeResolver::createObjectTypeResolver<" << typeName << " >" << "(\"" << typeName << "*\");\n";
-
         QString functionSufix = (isObjectType ? "Object" : "Value");
         s << INDENT << "Shiboken::TypeResolver::create" << functionSufix;
         s << "TypeResolver<" << typeName << " >" << "(typeid(" << typeName << ").name());\n";
