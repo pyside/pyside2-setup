@@ -883,7 +883,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     bool hasPythonConvertion = metaClass->typeEntry()->hasTargetConversionRule();
     if (hasPythonConvertion) {
         s << INDENT << "// Try python conversion rules" << endl;
-        s << INDENT << "cptr = Shiboken::PythonConverter< " << metaClass->qualifiedCppName() << " >::transformFromPython(pyargs[0]);" << endl; 
+        s << INDENT << "cptr = Shiboken::PythonConverter< " << metaClass->qualifiedCppName() << " >::transformFromPython(pyargs[0]);" << endl;
         s << INDENT << "if (!cptr) {" << endl;
     }
 
