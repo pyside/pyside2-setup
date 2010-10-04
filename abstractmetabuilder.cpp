@@ -2092,7 +2092,7 @@ int AbstractMetaBuilder::findOutValueFromString(const QString& stringValue, bool
     if (ok)
         return value;
 
-    if (stringValue == "true" or stringValue == "false") {
+    if (stringValue == "true" || stringValue == "false") {
         ok = true;
         return (stringValue == "true");
     }
