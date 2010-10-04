@@ -2410,6 +2410,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
             m_tpFuncs[func->name()] = cpythonFunctionName(func);
     }
     if (m_tpFuncs["__repr__"] == "0"
+        && !metaClass->isQObject()
         && metaClass->hasToStringCapability()) {
         m_tpFuncs["__repr__"] = writeReprFunction(s, metaClass);
     }
