@@ -1349,7 +1349,7 @@ void QtDocGenerator::finishGeneration()
 
         s << ".. module:: " << it.key() << endl << endl;
 
-        QString title = packageName() + " contents";
+        QString title = it.key() + " contents";
         s << title << endl;
         s << createRepeatedChar(title.length(), '*') << endl << endl;
         s << ".. toctree::" << endl;
