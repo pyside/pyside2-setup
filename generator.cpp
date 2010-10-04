@@ -293,7 +293,10 @@ QString Generator::translateType(const AbstractMetaType *cType,
         else
             s = cType->cppSignature();
     } else {
-        s = cType->cppSignature();
+        if (options & Generator::OriginalName)
+            s = cType->originalTypeDescription();
+        else
+            s = cType->cppSignature();
         if (cType->isConstant() && (options & Generator::ExcludeConst)) {
             // Remove just the first ‘const’, avoiding removal of template attr.
             int pos = s.indexOf("const");
