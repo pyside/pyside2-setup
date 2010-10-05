@@ -618,20 +618,22 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     if (!injectedCodeCallsPythonOverride(func)) {
         s << INDENT;
         s << "Shiboken::AutoDecRef " PYTHON_RETURN_VAR "(PyObject_Call(py_override, pyargs, NULL));" << endl;
+
+        s << INDENT << "// An error happened in python code!" << endl;
+        s << INDENT << "if (" PYTHON_RETURN_VAR ".isNull()) {" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "PyErr_Print();" << endl;
+            s << INDENT << "return ";
+            if (type)
+                writeMinimalConstructorCallArguments(s, func->type());
+            s << ';' << endl;
+        }
+        s << INDENT << '}' << endl;
+
         if (type) {
             if (invalidateReturn)
                 s << INDENT << "bool invalidadeArg0 = " PYTHON_RETURN_VAR "->ob_refcnt == 1;" << endl;
-
-            s << INDENT << "// An error happened in python code!" << endl;
-            s << INDENT << "if (" PYTHON_RETURN_VAR ".isNull()) {" << endl;
-            {
-                Indentation indent(INDENT);
-                s << INDENT << "PyErr_Print();" << endl;
-                s << INDENT << "return ";
-                writeMinimalConstructorCallArguments(s, func->type());
-                s << ';' << endl;
-            }
-            s << INDENT << '}' << endl;
 
             if (func->type()) {
                 s << INDENT << "// Check return type" << endl;
