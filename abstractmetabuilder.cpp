@@ -1341,20 +1341,26 @@ void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scopeItem, AbstractMe
             if (metaClass->isNamespace())
                 *metaFunction += AbstractMetaAttributes::Static;
 
-            if (QPropertySpec* read = metaClass->propertySpecForRead(metaFunction->name())) {
-                if (read->type() == metaFunction->type()->typeEntry()) {
+            QPropertySpec *read = 0;
+            if (!metaFunction->isSignal() && (read = metaClass->propertySpecForRead(metaFunction->name()))) {
+                // Property reader must be in the form "<type> name()"
+                if (metaFunction->type() && (read->type() == metaFunction->type()->typeEntry()) && (metaFunction->arguments().size() == 0)) {
                     *metaFunction += AbstractMetaAttributes::PropertyReader;
                     metaFunction->setPropertySpec(read);
                 }
             } else if (QPropertySpec* write = metaClass->propertySpecForWrite(metaFunction->name())) {
+                // Property setter must be in the form "void name(<type>)"
                 // make sure the function was created with all aguments, some argument can be missing during the pareser because of errors on typesystem
-                if ((metaFunction->arguments().size() == 1) && (write->type() == metaFunction->arguments().at(0)->type()->typeEntry())) {
+                if ((!metaFunction->type()) && (metaFunction->arguments().size() == 1) && (write->type() == metaFunction->arguments().at(0)->type()->typeEntry())) {
                     *metaFunction += AbstractMetaAttributes::PropertyWriter;
                     metaFunction->setPropertySpec(write);
                 }
             } else if (QPropertySpec* reset = metaClass->propertySpecForReset(metaFunction->name())) {
-                *metaFunction += AbstractMetaAttributes::PropertyResetter;
-                metaFunction->setPropertySpec(reset);
+                // Property resetter must be in the form "void name()"
+                if ((!metaFunction->type()) && (metaFunction->arguments().size() == 0)) {
+                    *metaFunction += AbstractMetaAttributes::PropertyResetter;
+                    metaFunction->setPropertySpec(reset);
+                }
             }
 
             // Can not use metaFunction->isCopyConstructor() because
