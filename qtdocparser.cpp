@@ -45,10 +45,6 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     }
 
     QString filename = metaClass->qualifiedCppName().toLower().replace("::", "-");
-    // Remove namespace
-    if (context && context->isNamespace() && filename.startsWith(context->name(), Qt::CaseInsensitive)) {
-        filename = filename.remove(0, context->name().size() + 1);
-    }
     QString sourceFile = documentationDataDirectory() + '/' + filename + ".xml";
     if (metaClass->enclosingClass())
         sourceFile.replace("::", "-");
@@ -67,7 +63,7 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
 
     // Class/Namespace documentation
     QString type = metaClass->isNamespace() ? QLatin1String("namespace") : QLatin1String("class");
-    QString query = "/WebXML/document/" + type + "[@" + "name" + "=\"" + className + "\"]/description";
+    QString query = "/WebXML/document/" + type + "[@name=\"" + className + "\"]/description";
 
     DocModificationList signedModifs, classModifs;
     foreach (DocModification docModif, metaClass->typeEntry()->docModifications()) {
