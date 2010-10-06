@@ -3488,10 +3488,10 @@ void CppGenerator::writeSetattroFunction(QTextStream& s, const AbstractMetaClass
     s << "static int " << cpythonSetattroFunctionName(metaClass) << "(PyObject* self, PyObject* name, PyObject* value)" << endl;
     s << '{' << endl;
     if (usePySideExtensions()) {
-        s << INDENT << "Shiboken::AutoDecRef pp(PySide::qproperty_get_object(self, name));" << endl;
+        s << INDENT << "Shiboken::AutoDecRef pp(PySide::qpropertyGetObject(self, name));" << endl;
         s << INDENT << "if (!pp.isNull())" << endl;
         Indentation indent(INDENT);
-        s << INDENT << INDENT << "return PySide::qproperty_set(pp, self, value);" << endl;
+        s << INDENT << INDENT << "return PySide::qpropertySet(pp, self, value);" << endl;
     }
     s << INDENT << "return PyObject_GenericSetAttr(self, name, value);" << endl;
     s << '}' << endl;
@@ -3532,7 +3532,7 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
         s << INDENT << "if (attr && PySide::isQPropertyType(attr)) {" << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << "PyObject *value = PySide::qproperty_get(attr, self);" << endl;
+            s << INDENT << "PyObject *value = PySide::qpropertyGet(attr, self);" << endl;
             s << INDENT << "if (!value)" << endl;
             {
                 Indentation indentation(INDENT);
