@@ -3280,17 +3280,6 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream& s, const AbstractMetaEn
     s << "PyObject* " << cpythonEnumName(cppEnum) << "___" << pyOpName << "__(PyObject* self, PyObject* arg)" << endl;
     s << '{' << endl;
 
-    // We need to check the type of self because self and arg can be swapped
-    s << INDENT << "if (" << converter << "checkType(self) && " << converter << "checkType(arg))" << endl;
-    s << INDENT << '{' << endl;
-    {
-        Indentation indent(INDENT);
-        s << INDENT << "PyErr_Format(PyExc_TypeError, \"unsupported operand type(s) for %s: '%s' and '%s'\", \""
-                    << cppOpName << "\", self->ob_type->tp_name, arg->ob_type->tp_name);" << endl;
-        s << INDENT << "return 0;" << endl;
-    }
-    s << INDENT << '}' << endl << endl;
-
     s << INDENT << "return Shiboken::Converter< " << flagsEntry->originalName() << " >::toPython(" << endl;
     {
         Indentation indent(INDENT);
