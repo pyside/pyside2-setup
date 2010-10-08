@@ -234,6 +234,7 @@ private:
     AbstractMetaArgumentList reverseList(const AbstractMetaArgumentList& list);
     void setInclude(TypeEntry* te, const QString& fileName) const;
     void fixArgumentNames(AbstractMetaFunction* func);
+    void fillAddedFunctions(AbstractMetaClass* metaClass);
 
     AbstractMetaClassList m_metaClasses;
     AbstractMetaClassList m_templates;

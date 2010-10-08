@@ -1335,6 +1335,7 @@ bool AbstractMetaClass::hasDefaultToStringFunction() const
 
 void AbstractMetaClass::addFunction(AbstractMetaFunction *function)
 {
+    Q_ASSERT(!function->signature().startsWith("("));
     function->setOwnerClass(this);
 
     if (!function->isDestructor())
@@ -1596,6 +1597,7 @@ bool AbstractMetaClass::hasPrivateCopyConstructor() const
 void AbstractMetaClass::addDefaultConstructor()
 {
     AbstractMetaFunction *f = new AbstractMetaFunction;
+    f->setOriginalName(name());
     f->setName(name());
     f->setOwnerClass(this);
     f->setFunctionType(AbstractMetaFunction::ConstructorFunction);
@@ -1616,6 +1618,7 @@ void AbstractMetaClass::addDefaultConstructor()
 void AbstractMetaClass::addDefaultCopyConstructor(bool isPrivate)
 {
     AbstractMetaFunction* f = new AbstractMetaFunction;
+    f->setOriginalName(name());
     f->setName(name());
     f->setOwnerClass(this);
     f->setFunctionType(AbstractMetaFunction::ConstructorFunction);

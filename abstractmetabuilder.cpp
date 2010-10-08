@@ -402,6 +402,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
 
     foreach (ClassModelItem item, typeValues)
         traverseClassMembers(item);
+
     foreach (NamespaceModelItem item, namespaceTypeValues)
         traverseNamespaceMembers(item);
 
@@ -1050,6 +1051,8 @@ AbstractMetaClass* AbstractMetaBuilder::traverseTypeAlias(TypeAliasModelItem typ
     if (!type->include().isValid())
         setInclude(type, typeAlias->fileName());
 
+    fillAddedFunctions(metaClass);
+
     return metaClass;
 }
 
@@ -1425,6 +1428,11 @@ void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scopeItem, AbstractMe
         }
     }
 
+    fillAddedFunctions(metaClass);
+}
+
+void AbstractMetaBuilder::fillAddedFunctions(AbstractMetaClass* metaClass)
+{
     // Add the functions added by the typesystem
     foreach (AddedFunction addedFunc, metaClass->typeEntry()->addedFunctions()) {
         AbstractMetaFunction* func = traverseFunction(addedFunc);
@@ -1440,6 +1448,7 @@ void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scopeItem, AbstractMe
         func->setDeclaringClass(metaClass);
         func->setImplementingClass(metaClass);
         metaClass->addFunction(func);
+        metaClass->setHasNonPrivateConstructor(true);
     }
 }
 

@@ -42,6 +42,7 @@ private slots:
     void testAddGlobalFunction();
     void testAddFunctionWithApiVersion();
     void testModifyAddedFunction();
+    void testAddFunctionOnTypedef();
 };
 
 #endif

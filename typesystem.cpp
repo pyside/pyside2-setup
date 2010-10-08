@@ -982,7 +982,7 @@ bool Handler::startElement(const QString &, const QString &n,
                     const char* conversionFlag = NATIVE_CONVERSION_RULE_FLAG;
                     if (lang == TypeSystem::TargetLangCode)
                         conversionFlag = TARGET_CONVERSION_RULE_FLAG;
- 
+
                     QFile conversionSource(sourceFile);
                     if (conversionSource.open(QIODevice::ReadOnly | QIODevice::Text)) {
                         topElement.entry->setConversionRule(conversionFlag + QString::fromUtf8(conversionSource.readAll()));

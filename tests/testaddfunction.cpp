@@ -380,6 +380,33 @@ void TestAddFunction::testModifyAddedFunction()
     QCOMPARE(method->argumentName(2), QString("varName"));
 }
 
+void TestAddFunction::testAddFunctionOnTypedef()
+{
+    const char cppCode[] = "template<class T> class Foo { }; typedef Foo<int> FooInt;";
+    const char xmlCode[] = "\
+    <typesystem package='Package'>\
+        <primitive-type name='int'/>\
+        <value-type name='FooInt'>\
+            <add-function signature='FooInt(PySequence*)'>\
+                <inject-code class='target' position='beginning'>custom_code();</inject-code>\
+            </add-function>\
+            <add-function signature='method()'>\
+                <inject-code class='target' position='beginning'>custom_code();</inject-code>\
+            </add-function>\
+        </value-type>\
+    </typesystem>";
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* foo = classes.findClass("FooInt");
+    QVERIFY(foo->hasNonPrivateConstructor());
+    AbstractMetaFunctionList lst = foo->queryFunctions(AbstractMetaClass::Constructors);
+    foreach(AbstractMetaFunction* f, lst)
+        QVERIFY(f->signature().startsWith(f->name()));
+    QCOMPARE(lst.size(), 2);
+    const AbstractMetaFunction* method = foo->findFunction("method");
+    QVERIFY(method);
+}
+
 QTEST_APPLESS_MAIN(TestAddFunction)
 
 #include "testaddfunction.moc"
