@@ -5,4 +5,3 @@ Table of contents
     :maxdepth: 3
 
     overview.rst
-    compiling/compiling.rst
