@@ -94,8 +94,12 @@ static void showWrapperMap(const WrapperMap& wrapperMap)
     printf("-------------------------------\n");
     printf("WrapperMap: %p (size: %d)\n", &wrapperMap, (int) wrapperMap.size());
     WrapperMap::const_iterator iter;
-    for (iter = wrapperMap.begin(); iter != wrapperMap.end(); ++iter)
-        printf("key: %p, value: %p (%s)\n", iter->first, iter->second, iter->second->ob_type->tp_name);
+    for (iter = wrapperMap.begin(); iter != wrapperMap.end(); ++iter) {
+        printf("key: %p, value: %p (%s, refcnt: %d)\n", iter->first,
+                                                        iter->second,
+                                                        iter->second->ob_type->tp_name,
+                                                        (int) iter->second->ob_refcnt);
+    }
     printf("-------------------------------\n");
 }
 #endif
