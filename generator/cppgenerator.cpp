@@ -3054,8 +3054,8 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
         foreach(QString signature, signatures[funcName])
             s << ", \"" + signature << "\"";
         s << ", NULL);" << endl;
-        s << INDENT << "PyDict_SetItemString(" + cpythonTypeName(metaClass) + ".super.ht_type.tp_dict";
-        s << ", \"" << funcName << "\", signal_item);" << endl;
+        s << INDENT << "PySide::addSignalToWrapper(&" + cpythonTypeName(metaClass) + ", \"";
+        s << funcName << "\", signal_item);" << endl;
         s << INDENT << "Py_DECREF(signal_item);" << endl;
     }
     s << endl;
