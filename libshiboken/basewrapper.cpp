@@ -576,7 +576,11 @@ void setErrorAboutWrongArguments(PyObject* args, const char* funcName, const cha
             for (int i = 0, max = PyTuple_GET_SIZE(args); i < max; ++i) {
                 if (i)
                     params += ", ";
-                params += PyTuple_GET_ITEM(args, i)->ob_type->tp_name;
+                PyObject* arg = PyTuple_GET_ITEM(args, i);
+                if (PyCObject_Check(arg))
+                    params += "pointer";
+                else
+                    params += arg->ob_type->tp_name;
             }
         } else {
             params = args->ob_type->tp_name;

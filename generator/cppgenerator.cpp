@@ -533,7 +533,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 s << INDENT << THREAD_STATE_SAVER_VAR ".save();" << endl;
             }
 
-            s << INDENT << "return this->" << func->implementingClass()->qualifiedCppName() << "::";
+            s << INDENT << "return this->::" << func->implementingClass()->qualifiedCppName() << "::";
             writeFunctionCall(s, func, Generator::VirtualCall);
         }
     }
@@ -2041,7 +2041,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                     if (!func->isStatic())
                         mc << CPP_SELF_VAR "->";
                     if (!func->isAbstract())
-                        mc << func->ownerClass()->qualifiedCppName() << "::";
+                        mc << "::" << func->ownerClass()->qualifiedCppName() << "::";
                     mc << func->originalName();
 #else
                     if (!func->isStatic()) {
@@ -2050,7 +2050,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                         mc << CPP_SELF_VAR << (func->isProtected() ? ")" : "") << "->";
                     }
                     if (!func->isAbstract())
-                        mc << (func->isProtected() ? wrapperName(func->ownerClass()) : func->ownerClass()->qualifiedCppName()) << "::";
+                        mc << (func->isProtected() ? wrapperName(func->ownerClass()) : "::" + func->ownerClass()->qualifiedCppName()) << "::";
                     mc << func->originalName() << (func->isProtected() ? "_protected" : "");
 #endif
                 } else {
@@ -3077,7 +3077,7 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
 
                     if ((cppSignature != originalSignature) && !knowTypes.contains(originalSignature)) {
                         knowTypes << originalSignature;
-                        s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<" 
+                        s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<"
                           << cppSignature << " >"
                           << "(\"" << originalSignature << "\");\n";
                     }

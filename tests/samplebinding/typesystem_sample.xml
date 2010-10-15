@@ -87,7 +87,9 @@
         <enum-type name="OutValue"/>
         <enum-type identified-by-value="AnonymousClassEnum_Value1"/>
 
-        <object-type name="DerivedFromNamespace" />
+        <object-type name="DerivedFromNamespace">
+            <enum-type name="SampleNamespace"/>
+        </object-type>
         <value-type name="SomeClass">
             <value-type name="SomeInnerClass">
                 <object-type name="OkThisIsRecursiveEnough">

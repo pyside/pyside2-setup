@@ -99,6 +99,9 @@ public:
 class DerivedFromNamespace : public SomeClass::SomeInnerClass::OkThisIsRecursiveEnough
 {
 public:
+    //only cause namespace confusion
+    enum SampleNamespace {
+    };
     virtual OkThisIsRecursiveEnough* someVirtualMethod(OkThisIsRecursiveEnough* arg) { return arg; }
     inline OkThisIsRecursiveEnough* methodReturningTypeFromParentScope() { return 0; }
 };
