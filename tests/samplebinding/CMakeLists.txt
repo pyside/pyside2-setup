@@ -47,6 +47,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/oddbooluser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/overload_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pairuser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/point_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/pointf_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pointerholder_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/polygon_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/privatector_wrapper.cpp

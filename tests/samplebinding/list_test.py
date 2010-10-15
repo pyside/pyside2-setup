@@ -26,10 +26,9 @@
 
 '''Test cases for std::list container conversions'''
 
-import sys
 import unittest
 
-from sample import ListUser, Point
+from sample import ListUser, Point, PointF
 
 class ExtendedListUser(ListUser):
     def __init__(self):
@@ -107,6 +106,10 @@ class ListConversionTest(unittest.TestCase):
         mult = 3
         pts = (Point(1.0, 2.0), 3, Point(5, 6))
         self.assertRaises(TypeError, ListUser.multiplyPointList, pts, mult)
+
+    def testOverloadMethodReceivingRelatedContainerTypes(self):
+        self.assertEqual(ListUser.ListOfPointF, ListUser.listOfPoints([PointF()]))
+        self.assertEqual(ListUser.ListOfPoint, ListUser.listOfPoints([Point()]))
 
 if __name__ == '__main__':
     unittest.main()

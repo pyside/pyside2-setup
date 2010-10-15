@@ -26,6 +26,7 @@
 #include <list>
 #include "complex.h"
 #include "point.h"
+#include "pointf.h"
 
 #include "libsamplemacros.h"
 
@@ -33,6 +34,11 @@ class LIBSAMPLE_API ListUser
 {
 public:
     typedef std::list<Point*> PointList;
+
+    enum ListOfSomething {
+        ListOfPoint,
+        ListOfPointF
+    };
 
     ListUser() {}
     ListUser(const ListUser& other) : m_lst(other.m_lst) {}
@@ -45,6 +51,9 @@ public:
 
     double sumList(std::list<int> vallist);
     double sumList(std::list<double> vallist);
+
+    static ListOfSomething listOfPoints(const std::list<Point>& pointlist);
+    static ListOfSomething listOfPoints(const std::list<PointF>& pointlist);
 
     static void multiplyPointList(PointList& points, double multiplier);
 

@@ -62,6 +62,18 @@ ListUser::sumList(std::list<double> vallist)
     return std::accumulate(vallist.begin(), vallist.end(), 0.0);
 }
 
+ListUser::ListOfSomething
+ListUser::listOfPoints(const std::list<Point>& pointlist)
+{
+    return ListOfPoint;
+}
+
+ListUser::ListOfSomething
+ListUser::listOfPoints(const std::list<PointF>& pointlist)
+{
+    return ListOfPointF;
+}
+
 void
 ListUser::multiplyPointList(PointList& points, double multiplier)
 {

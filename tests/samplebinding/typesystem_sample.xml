@@ -969,6 +969,38 @@
         </add-function>
     </value-type>
 
+    <value-type name="PointF">
+        <add-function signature="__str__" return-type="PyObject*">
+            <inject-code class="target" position="beginning">
+            int x1 = (int) %CPPSELF.x();
+            int x2 = ((int) (%CPPSELF.x() * 100)) - (x1 * 100);
+            int y1 = (int) %CPPSELF.y();
+            int y2 = ((int) (%CPPSELF.y() * 100)) - (y1 * 100);
+            %PYARG_0 = PyString_FromFormat("PointF(%d.%d, %d.%d)", x1, x2, y1, y2);
+            </inject-code>
+        </add-function>
+        <add-function signature="__repr__" return-type="PyObject*">
+            <inject-code class="target" position="beginning">
+            int x1 = (int) %CPPSELF.x();
+            int x2 = ((int) (%CPPSELF.x() * 10)) - (x1 * 10);
+            int y1 = (int) %CPPSELF.y();
+            int y2 = ((int) (%CPPSELF.y() * 10)) - (y1 * 10);
+            %PYARG_0 = PyString_FromFormat("&lt;PointF object at %p: (%d.%d, %d.%d)&gt;", %CPPSELF, x1, x2, y1, y2);
+            </inject-code>
+        </add-function>
+
+        <add-function signature="__reduce__" return-type="PyObject*">
+            <inject-code class="target" position="beginning">
+            PyObject *type = PyObject_Type(%PYSELF);
+            PyObject *args = NULL;
+
+            args = Py_BuildValue("(dd)", %CPPSELF.x(), %CPPSELF.y());
+
+            %PYARG_0 = Py_BuildValue("(OO)", type, args);
+            </inject-code>
+        </add-function>
+    </value-type>
+
     <value-type name="Polygon">
         <modify-function signature="stealOwnershipFromPython(Point*)">
             <modify-argument index="1">
@@ -997,7 +1029,9 @@
     </value-type>
     <value-type name="MapUser"/>
     <value-type name="PairUser"/>
-    <value-type name="ListUser"/>
+    <value-type name="ListUser">
+        <enum-type name="ListOfSomething"/>
+    </value-type>
     <value-type name="NoImplicitConversion" />
     <value-type name="NonDefaultCtor" />
     <value-type name="OddBoolUser" />

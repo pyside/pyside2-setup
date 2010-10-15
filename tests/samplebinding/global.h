@@ -26,6 +26,7 @@
 #include "overload.h"
 #include "pairuser.h"
 #include "point.h"
+#include "pointf.h"
 #include "pointerholder.h"
 #include "polygon.h"
 #include "privatector.h"

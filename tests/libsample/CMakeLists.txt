@@ -23,6 +23,7 @@ overload.cpp
 overloadsort.cpp
 pairuser.cpp
 point.cpp
+pointf.cpp
 polygon.cpp
 protected.cpp
 reference.cpp
