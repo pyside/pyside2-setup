@@ -21,6 +21,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/derived_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/derived_someinnerclass_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/echo_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/event_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/handleholder_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/implicitconv_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/implicitbase_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/implicittarget_wrapper.cpp

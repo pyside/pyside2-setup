@@ -22,6 +22,11 @@
         <include file-name="null.h" location="global"/>
     </primitive-type>
 
+    <primitive-type name="HANDLE">
+        <conversion-rule file="handle_conversions.h"/>
+        <include file-name="handle.h" location="local"/>
+    </primitive-type>
+
     <primitive-type name="OddBool" target-lang-api-name="PyBool">
         <conversion-rule file="oddbool_conversions.h"/>
         <include file-name="oddbool.h" location="global"/>
@@ -1160,6 +1165,8 @@
         </extra-includes>
         <conversion-rule class="target" file="date_conversions.h"/>
     </value-type>
+
+    <object-type name="HandleHolder" />
 
     <rejection class="ListUser" function-name="createList()"/>
     <rejection class="ListUser" function-name="callCreateList()"/>

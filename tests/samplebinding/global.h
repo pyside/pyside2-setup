@@ -9,6 +9,7 @@
 #include "functions.h"
 #include "implicitconv.h"
 #include "overloadsort.h"
+#include "handle.h"
 #include "injectcode.h"
 #include "list.h"
 #include "listuser.h"
