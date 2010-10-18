@@ -28,6 +28,11 @@
 
 class ObjectType;
 
+// this class is not exported to python
+class HideType
+{
+};
+
 class LIBSAMPLE_API Abstract
 {
 private:
@@ -79,6 +84,8 @@ public:
 
     void show(PrintFormat format = Verbose);
     virtual Type type() const { return TpAbstract; }
+
+    virtual void hideFunction(HideType* arg) = 0;
 
 protected:
     virtual const char* className() { return "Abstract"; }

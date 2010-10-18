@@ -76,6 +76,8 @@ public:
 
     static Abstract* triggerImpossibleTypeDiscovery();
     static Abstract* triggerAnotherImpossibleTypeDiscovery();
+
+    void hideFunction(HideType*) {}
 protected:
     const char* getClassName() { return className(); }
     virtual const char* className() { return "Derived"; }

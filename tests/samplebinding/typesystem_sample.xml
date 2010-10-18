@@ -125,6 +125,7 @@
         <enum-type name="Type"/>
         <enum-type name="PrintFormat"/>
         <modify-function signature="id()" rename="id_"/>
+        <modify-function signature="hideFunction(HideType*)" remove="all"/>
     </object-type>
 
     <object-type name="Derived" polymorphic-id-expression="%1->type() == Derived::TpDerived">
@@ -1231,6 +1232,9 @@
     </value-type>
 
     <object-type name="HandleHolder" />
+
+    <!-- type used in abstract method -->
+    <object-type name="HideType" generate="no" />
 
     <rejection class="ListUser" function-name="createList()"/>
     <rejection class="ListUser" function-name="callCreateList()"/>

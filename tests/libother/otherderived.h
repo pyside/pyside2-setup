@@ -49,6 +49,8 @@ public:
     // factory method
     static Abstract* createObject();
 
+    void hideFunction(HideType*) {} ;
+
 protected:
     inline const char* getClassName() { return className(); }
     virtual const char* className() { return "OtherDerived"; }
