@@ -38,6 +38,100 @@ static const TypeEntry* getAliasedTypeEntry(const TypeEntry* typeEntry)
     return typeEntry;
 }
 
+static QString getTypeName(const AbstractMetaType* type)
+{
+    const TypeEntry* typeEntry = getAliasedTypeEntry(type->typeEntry());
+    QString typeName = typeEntry->name();
+    if (typeEntry->isContainer()) {
+        QStringList types;
+        foreach (const AbstractMetaType* cType, type->instantiations()) {
+            const TypeEntry* typeEntry = getAliasedTypeEntry(cType->typeEntry());
+            types << typeEntry->name();
+        }
+        typeName += QString("<%1 >").arg(types.join(","));
+    }
+    return typeName;
+}
+
+static bool typesAreEqual(const AbstractMetaType* typeA, const AbstractMetaType* typeB)
+{
+
+    bool equal = typeA->typeEntry() == typeB->typeEntry();
+    if (equal && typeA->isContainer()) {
+        if (typeA->instantiations().size() != typeB->instantiations().size())
+            return false;
+        for (int i = 0; i < typeA->instantiations().size(); ++i) {
+            if (!typesAreEqual(typeA->instantiations().at(i), typeB->instantiations().at(i)))
+                return false;
+        }
+    }
+    return equal;
+}
+
+/**
+ * OverloadSortData just helps writing clearer code in the
+ * OverloadData::sortNextOverloads method.
+ */
+struct OverloadSortData
+{
+    OverloadSortData() : counter(0) {};
+
+    /**
+     * Adds a typeName into the type map without associating it with
+     * a OverloadData. This is done to express type dependencies that could
+     * or could not appear in overloaded signatures not processed yet.
+     */
+    void mapType(const QString& typeName)
+    {
+        if (map.contains(typeName))
+            return;
+        map[typeName] = counter;
+        if (!reverseMap.contains(counter))
+            reverseMap[counter] = 0;
+        counter++;
+    }
+
+    void mapType(OverloadData* overloadData)
+    {
+        QString typeName = getTypeName(overloadData->argType());
+        map[typeName] = counter;
+        reverseMap[counter] = overloadData;
+        counter++;
+    }
+
+    int lastProcessedItemId() { return counter - 1; }
+
+    int counter;
+    QHash<QString, int> map;                // typeName -> id
+    QHash<int, OverloadData*> reverseMap;   // id -> OverloadData;
+};
+
+/**
+ * Helper function that returns the name of a container get from containerType argument and
+ * an instantiation taken either from an implicit conversion expressed by the function argument,
+ * or from the string argument implicitConvTypeName.
+ */
+static QString getImplicitConversionTypeName(const AbstractMetaType* containerType,
+                                             const AbstractMetaType* instantiation,
+                                             const AbstractMetaFunction* function,
+                                             const QString& implicitConvTypeName = QString())
+{
+    QString impConv;
+    if (!implicitConvTypeName.isEmpty())
+        impConv = implicitConvTypeName;
+    else if (function->isConversionOperator())
+        impConv = function->ownerClass()->typeEntry()->name();
+    else
+        impConv = getTypeName(function->arguments().first()->type());
+
+    QStringList types;
+    foreach (const AbstractMetaType* otherType, containerType->instantiations())
+        types << (otherType == instantiation ? impConv : getTypeName(otherType));
+
+    const ContainerTypeEntry* containerTypeEntry = reinterpret_cast<const ContainerTypeEntry*>(containerType->typeEntry());
+    return containerTypeEntry->qualifiedCppName() + '<' + types.join(", ") + " >";
+}
+
 /**
  * Topologically sort the overloads by implicit convertion order
  *
@@ -50,36 +144,59 @@ static const TypeEntry* getAliasedTypeEntry(const TypeEntry* typeEntry)
  */
 void OverloadData::sortNextOverloads()
 {
-    QHash<QString, int> map; // type_name -> id
-    QHash<int, OverloadData*> reverseMap; // id -> type_name
+    OverloadSortData sortData;
     bool checkPyObject = false;
     int pyobjectIndex = 0;
 
+    // Primitive types that are not int, long, short,
+    // char and their respective unsigned counterparts.
+    QStringList nonIntegerPrimitives;
+    nonIntegerPrimitives << "float" << "double" << "bool";
+
+    // Signed integer primitive types.
+    QStringList signedIntegerPrimitives;
+    signedIntegerPrimitives << "int" << "short" << "long";
+
     // sort the children overloads
-    foreach(OverloadData *ov, m_nextOverloadData) {
+    foreach(OverloadData *ov, m_nextOverloadData)
         ov->sortNextOverloads();
-    }
 
     if (m_nextOverloadData.size() <= 1)
         return;
 
-    // Creates the map and reverseMap, to map type names to ids, these ids will be used by the topological
-    // sort algorithm, because is easier and faster to work with graph sorting using integers.
-    int i = 0;
+    // Populates the OverloadSortData object containing map and reverseMap, to map type names to ids,
+    // these ids will be used by the topological sort algorithm, because is easier and faster to work
+    // with graph sorting using integers.
     foreach(OverloadData* ov, m_nextOverloadData) {
-        const TypeEntry* typeEntry = getAliasedTypeEntry(ov->argType()->typeEntry());
-        map[typeEntry->name()] = i;
-        reverseMap[i] = ov;
-
-        if (!checkPyObject && typeEntry->name().contains("PyObject")) {
+        sortData.mapType(ov);
+        if (!checkPyObject && getTypeName(ov->argType()).contains("PyObject")) {
             checkPyObject = true;
-            pyobjectIndex = i;
+            pyobjectIndex = sortData.lastProcessedItemId();
         }
-        i++;
+
+        foreach (const AbstractMetaType* instantiation, ov->argType()->instantiations()) {
+            // Add dependencies for type instantiation of container.
+            QString typeName = getTypeName(instantiation);
+            sortData.mapType(typeName);
+
+            // Build dependency for implicit conversion types instantiations for base container.
+            // For example, considering signatures "method(list<PointF>)" and "method(list<Point>)",
+            // and being PointF implicitly convertible from Point, an list<T> instantiation with T
+            // as Point must come before the PointF instantiation, or else list<Point> will never
+            // be called. In the case of primitive types, list<double> must come before list<int>.
+            if (instantiation->isPrimitive() && (signedIntegerPrimitives.contains(instantiation->name()))) {
+                foreach (const QString& primitive, nonIntegerPrimitives)
+                    sortData.mapType(getImplicitConversionTypeName(ov->argType(), instantiation, 0, primitive));
+            } else {
+                foreach (const AbstractMetaFunction* function, m_generator->implicitConversions(instantiation))
+                    sortData.mapType(getImplicitConversionTypeName(ov->argType(), instantiation, function));
+            }
+        }
     }
 
+
     // Create the graph of type dependencies based on implicit conversions.
-    Graph graph(reverseMap.count());
+    Graph graph(sortData.reverseMap.count());
     // All C++ primitive types, add any forgotten type AT THE END OF THIS LIST!
     const char* primitiveTypes[] = {"int",
                                     "unsigned int",
@@ -96,28 +213,25 @@ void OverloadData::sortNextOverloads()
     const int numPrimitives = sizeof(primitiveTypes)/sizeof(const char*);
     bool hasPrimitive[numPrimitives];
     for (int i = 0; i < numPrimitives; ++i)
-        hasPrimitive[i] = map.contains(primitiveTypes[i]);
-    // just some alias
-    bool haveInt = hasPrimitive[0];
-    bool haveLong = hasPrimitive[2];
-    bool haveShort = hasPrimitive[4];
+        hasPrimitive[i] = sortData.map.contains(primitiveTypes[i]);
 
     foreach(OverloadData* ov, m_nextOverloadData) {
         const AbstractMetaType* targetType = ov->argType();
         const TypeEntry* targetTypeEntry = getAliasedTypeEntry(targetType->typeEntry());
+        QString targetTypeEntryName = getTypeName(targetType);
 
-        foreach(AbstractMetaFunction* function, m_generator->implicitConversions(ov->argType())) {
+        foreach(AbstractMetaFunction* function, m_generator->implicitConversions(targetType)) {
             QString convertibleType;
             if (function->isConversionOperator())
                 convertibleType = function->ownerClass()->typeEntry()->name();
             else
-                convertibleType = function->arguments().first()->type()->typeEntry()->name();
+                convertibleType = getTypeName(function->arguments().first()->type());
 
-            if (!map.contains(convertibleType))
+            if (!sortData.map.contains(convertibleType))
                 continue;
 
-            int targetTypeId = map[targetTypeEntry->name()];
-            int convertibleTypeId = map[convertibleType];
+            int targetTypeId = sortData.map[targetTypeEntryName];
+            int convertibleTypeId = sortData.map[convertibleType];
 
             // If a reverse pair already exists, remove it. Probably due to the
             // container check (This happened to QVariant and QHash)
@@ -125,61 +239,54 @@ void OverloadData::sortNextOverloads()
             graph.addEdge(convertibleTypeId, targetTypeId);
         }
 
-        if (targetType->hasInstantiations()) {
-            foreach(const AbstractMetaType *instantiation, targetType->instantiations()) {
-                if (map.contains(instantiation->typeEntry()->name())) {
-                    int target = map[targetTypeEntry->name()];
-                    int convertible = map[instantiation->typeEntry()->name()];
+        foreach (const AbstractMetaType* instantiation, targetType->instantiations()) {
+            if (sortData.map.contains(getTypeName(instantiation))) {
+                int target = sortData.map[targetTypeEntryName];
+                int convertible = sortData.map[getTypeName(instantiation)];
 
-                    if (!graph.containsEdge(target, convertible)) // Avoid cyclic dependency.
-                        graph.addEdge(convertible, target);
+                if (!graph.containsEdge(target, convertible)) // Avoid cyclic dependency.
+                    graph.addEdge(convertible, target);
+
+                if (instantiation->isPrimitive() && (signedIntegerPrimitives.contains(instantiation->name()))) {
+                    foreach (const QString& primitive, nonIntegerPrimitives) {
+                        QString convertibleTypeName = getImplicitConversionTypeName(ov->argType(), instantiation, 0, primitive);
+                        if (!graph.containsEdge(target, sortData.map[convertibleTypeName])) // Avoid cyclic dependency.
+                            graph.addEdge(sortData.map[convertibleTypeName], target);
+                    }
+
+                } else {
+                    foreach (const AbstractMetaFunction* function, m_generator->implicitConversions(instantiation)) {
+                        QString convertibleTypeName = getImplicitConversionTypeName(ov->argType(), instantiation, function);
+                        if (!graph.containsEdge(target, sortData.map[convertibleTypeName])) // Avoid cyclic dependency.
+                            graph.addEdge(sortData.map[convertibleTypeName], target);
+                    }
                 }
             }
         }
 
         /* Add dependency on PyObject, so its check is the last one (too generic) */
-        if (checkPyObject && !targetTypeEntry->name().contains("PyObject")) {
-            graph.addEdge(map[targetTypeEntry->name()], pyobjectIndex);
-        }
+        if (checkPyObject && !targetTypeEntryName.contains("PyObject"))
+            graph.addEdge(sortData.map[targetTypeEntryName], pyobjectIndex);
 
         if (targetTypeEntry->isEnum()) {
             for (int i = 0; i < numPrimitives; ++i) {
                 if (hasPrimitive[i])
-                    graph.addEdge(map[targetTypeEntry->name()], map[primitiveTypes[i]]);
+                    graph.addEdge(sortData.map[targetTypeEntryName], sortData.map[primitiveTypes[i]]);
             }
         }
     }
 
     // Special case for double(int i) (not tracked by m_generator->implicitConversions
-    if (haveInt) {
-        if (map.contains("float"))
-            graph.addEdge(map["float"], map["int"]);
-        if (map.contains("double"))
-            graph.addEdge(map["double"], map["int"]);
-        if (map.contains("bool"))
-            graph.addEdge(map["bool"], map["int"]);
+    foreach (const QString& signedIntegerName, signedIntegerPrimitives) {
+        if (sortData.map.contains(signedIntegerName)) {
+            foreach (const QString& nonIntegerName, nonIntegerPrimitives) {
+                if (sortData.map.contains(nonIntegerName))
+                    graph.addEdge(sortData.map[nonIntegerName], sortData.map[signedIntegerName]);
+            }
+        }
     }
 
-    if (haveShort) {
-        if (map.contains("float"))
-            graph.addEdge(map["float"], map["short"]);
-        if (map.contains("double"))
-            graph.addEdge(map["double"], map["short"]);
-        if (map.contains("bool"))
-            graph.addEdge(map["bool"], map["short"]);
-    }
-
-    if (haveLong) {
-        if (map.contains("float"))
-            graph.addEdge(map["float"], map["long"]);
-        if (map.contains("double"))
-            graph.addEdge(map["double"], map["long"]);
-        if (map.contains("bool"))
-            graph.addEdge(map["bool"], map["long"]);
-    }
-
-    // sort the overloads topologicaly based on the deps graph.
-
+    // sort the overloads topologically based on the dependency graph.
     QLinkedList<int> unmappedResult = graph.topologicalSort();
     if (unmappedResult.isEmpty()) {
         QString funcName = referenceFunction()->name();
@@ -189,8 +296,11 @@ void OverloadData::sortNextOverloads()
     }
 
     m_nextOverloadData.clear();
-    foreach(int i, unmappedResult)
-        m_nextOverloadData << reverseMap[i];
+    foreach(int i, unmappedResult) {
+        if (!sortData.reverseMap[i])
+            continue;
+        m_nextOverloadData << sortData.reverseMap[i];
+    }
 }
 
 /**
@@ -285,7 +395,7 @@ OverloadData* OverloadData::addOverloadData(const AbstractMetaFunction* func,
             // for it, unless the next argument also have a identical type replacement.
             QString replacedArg = func->typeReplaced(tmp->m_argPos + 1);
             bool argsReplaced = !replacedArg.isEmpty() || !tmp->m_argTypeReplaced.isEmpty();
-            if ((!argsReplaced && tmp->m_argType->typeEntry() == argType->typeEntry())
+            if ((!argsReplaced && typesAreEqual(tmp->m_argType, argType))
                 || (argsReplaced && replacedArg == tmp->argumentTypeReplaced())) {
                 tmp->addOverload(func);
                 overloadData = tmp;
