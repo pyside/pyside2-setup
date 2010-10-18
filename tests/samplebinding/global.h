@@ -21,6 +21,7 @@
 #include "nondefaultctor.h"
 #include "objecttype.h"
 #include "objecttypelayout.h"
+#include "objecttypereference.h"
 #include "objectview.h"
 #include "oddbool.h"
 #include "overload.h"

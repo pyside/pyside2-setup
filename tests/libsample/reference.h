@@ -51,8 +51,19 @@ public:
 
     inline static int multiplier() { return 10; }
 
+    virtual Reference& returnMyFirstArg(Reference& ref) { return ref; }
+    virtual Reference& returnMySecondArg(int a, Reference& ref) { return ref; }
 private:
     int m_objId;
+};
+
+class LIBSAMPLE_API ObjTypeReference
+{
+public:
+    virtual ~ObjTypeReference();
+    virtual ObjTypeReference& returnMyFirstArg(ObjTypeReference& ref) { return ref; }
+    virtual ObjTypeReference& returnMySecondArg(int a, ObjTypeReference& ref) { return ref; }
+    virtual ObjTypeReference& justAPureVirtualFunc(ObjTypeReference& ref) = 0;
 };
 
 #endif // REFERENCE_H

@@ -67,3 +67,6 @@ Reference::callAlterReferenceIdVirtual(Reference& r)
     alterReferenceIdVirtual(r);
 }
 
+ObjTypeReference::~ObjTypeReference()
+{
+}

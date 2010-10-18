@@ -623,7 +623,35 @@
         -->
     </object-type>
 
-    <value-type name="Reference"/>
+    <value-type name="Reference">
+        <modify-function signature="returnMyFirstArg(Reference&amp;)">
+            <modify-argument index="return">
+                <replace-default-expression with="%1"/>
+            </modify-argument>
+        </modify-function>
+        <modify-function signature="returnMySecondArg(int, Reference&amp;)">
+            <modify-argument index="return">
+                <replace-default-expression with="%2"/>
+            </modify-argument>
+        </modify-function>
+    </value-type>
+    <object-type name="ObjTypeReference">
+        <modify-function signature="returnMyFirstArg(ObjTypeReference&amp;)">
+            <modify-argument index="return">
+                <replace-default-expression with="%1"/>
+            </modify-argument>
+        </modify-function>
+        <modify-function signature="returnMySecondArg(int, ObjTypeReference&amp;)">
+            <modify-argument index="return">
+                <replace-default-expression with="%2"/>
+            </modify-argument>
+        </modify-function>
+        <modify-function signature="justAPureVirtualFunc(ObjTypeReference&amp;)">
+            <modify-argument index="return">
+                <replace-default-expression with="%1"/>
+            </modify-argument>
+        </modify-function>
+    </object-type>
     <value-type name="ImplicitConv">
         <enum-type name="CtorEnum"/>
         <enum-type name="ICOverloadedFuncEnum"/>

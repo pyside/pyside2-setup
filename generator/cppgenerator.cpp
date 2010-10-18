@@ -490,14 +490,36 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
     Indentation indentation(INDENT);
 
+    QString defaultReturnExpr;
+    if (func->type()) {
+        foreach (FunctionModification mod, func->modifications()) {
+            foreach (ArgumentModification argMod, mod.argument_mods) {
+                if (argMod.index == 0 && !argMod.replacedDefaultExpression.isEmpty()) {
+                    QRegExp regex("%(\\d+)");
+                    defaultReturnExpr = argMod.replacedDefaultExpression;
+                    int offset = 0;
+                    while ((offset = regex.indexIn(defaultReturnExpr, offset)) != -1) {
+                        int argId = regex.cap(1).toInt() - 1;
+                        if (argId < 0 || argId > func->arguments().count()) {
+                            ReportHandler::warning("The expression used in return value contains an invalid index.");
+                            break;
+                        }
+                        defaultReturnExpr.replace(regex.cap(0), func->arguments()[argId]->name());
+                    }
+                }
+            }
+        }
+        if (defaultReturnExpr.isEmpty()) {
+            QTextStream s(&defaultReturnExpr);
+            writeMinimalConstructorCallArguments(s, func->type());
+        }
+    }
+
     if (func->isAbstract() && func->isModifiedRemoved()) {
         ReportHandler::warning("Pure virtual method \"" + func->ownerClass()->name() + "::" + func->minimalSignature() + "\" must be implement but was completely removed on typesystem.");
         s << INDENT << "return";
-        if (func->type()) {
-            s << ' ';
-            writeMinimalConstructorCallArguments(s, func->type());
-        }
-        s << ';' << endl;
+
+        s << ' ' << defaultReturnExpr << ';' << endl;
         s << '}' << endl << endl;
         return;
     }
@@ -525,7 +547,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         s << "()' not implemented.\");" << endl;
             s << INDENT << "return ";
             if (func->type()) {
-                writeMinimalConstructorCallArguments(s, func->type());
+                s << defaultReturnExpr;
             }
         } else {
             if (func->allowThread()) {
@@ -630,10 +652,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         {
             Indentation indent(INDENT);
             s << INDENT << "PyErr_Print();" << endl;
-            s << INDENT << "return ";
-            if (type)
-                writeMinimalConstructorCallArguments(s, func->type());
-            s << ';' << endl;
+            s << INDENT << "return " << defaultReturnExpr << ';' << endl;
         }
         s << INDENT << '}' << endl;
 
@@ -676,9 +695,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                     s << INDENT << "PyErr_Format(PyExc_TypeError, \"Invalid return value in function %s, expected %s, got %s.\", \""
                     << func->ownerClass()->name() << '.' << func->name() << "\", " << desiredType
                     << ", " PYTHON_RETURN_VAR "->ob_type->tp_name);" << endl;
-                    s << INDENT << "return ";
-                    writeMinimalConstructorCallArguments(s, func->type());
-                    s << ';' << endl;
+                    s << INDENT << "return " << defaultReturnExpr << ';' << endl;
                 }
                 s << INDENT << "}" << endl;
             }
