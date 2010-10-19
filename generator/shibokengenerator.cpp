@@ -815,7 +815,7 @@ QString ShibokenGenerator::guessCPythonCheckFunction(const QString& type)
 {
     QString retval;
     AbstractMetaType* metaType = buildAbstractMetaTypeFromString(type);
-    if (metaType && (metaType->name() != type)) {
+    if (metaType && !metaType->typeEntry()->isCustom()) {
         retval = cpythonCheckFunction(metaType);
         delete metaType;
         metaType = 0;
