@@ -276,6 +276,7 @@ QString Generator::translateType(const AbstractMetaType *cType,
                                  Options options) const
 {
     QString s;
+    static int constLen = strlen("const");
 
     if (context && cType &&
         context->typeEntry()->isGenericClass() &&
@@ -293,19 +294,29 @@ QString Generator::translateType(const AbstractMetaType *cType,
         else
             s = cType->cppSignature();
     } else {
-        if (options & Generator::OriginalName)
-            s = cType->originalTypeDescription();
-        else
-            s = cType->cppSignature();
-        if (cType->isConstant() && (options & Generator::ExcludeConst)) {
-            // Remove just the first ‘const’, avoiding removal of template attr.
-            int pos = s.indexOf("const");
-            s.remove(pos, 5); //remove strlen(const)
-        }
-        if (cType->isReference() && (options & Generator::ExcludeReference)) {
-            // Remove just the first ‘&’, avoiding removal of template references.
-            int pos = s.indexOf("&");
-            s.remove(pos, 1); //remove strlen(const)
+        if (options & Generator::OriginalName) {
+            s = cType->originalTypeDescription().trimmed();
+            if ((options & Generator::ExcludeReference) && s.endsWith("&"))
+                s = s.left(s.size()-1);
+
+            // remove only the last const (avoid remove template const)
+            if (options & Generator::ExcludeConst) {
+                int index = s.lastIndexOf("const");
+
+                if (index >= (s.size() - (constLen + 1))) // (VarType const)  or (VarType const[*|&])
+                    s = s.remove(index, constLen);
+            }
+        } else {
+            AbstractMetaType *copyType = cType->copy();
+
+            if (options & Generator::ExcludeConst)
+                copyType->setConstant(false);
+
+            if (options & Generator::ExcludeReference)
+                copyType->setReference(false);
+
+            s = copyType->cppSignature();
+            delete copyType;
         }
     }
 
