@@ -682,7 +682,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                             desiredType = "SbkType<" + typeName + " >()->tp_name";
                     }
                 } else {
-                    s << guessCPythonCheckFunction(func->typeReplaced(0));
+                    s << guessCPythonIsConvertible(func->typeReplaced(0));
                     desiredType =  '"' + func->typeReplaced(0) + '"';
                 }
                 s << "(" PYTHON_RETURN_VAR ");" << endl;
