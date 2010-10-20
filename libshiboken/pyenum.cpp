@@ -84,7 +84,7 @@ SbkEnumObject_New(PyTypeObject *type, long item_value, PyObject* item_name)
 {
     if (!item_name)
         item_name = PyString_FromString("");
-    SbkEnumObject* enum_obj = (SbkEnumObject*) type->tp_alloc(type, 0);
+    SbkEnumObject* enum_obj = PyObject_New(SbkEnumObject, type);
     enum_obj->ob_name = item_name;
     enum_obj->ob_ival = item_value;
     return (PyObject*) enum_obj;
