@@ -49,7 +49,7 @@ public:
     // factory method
     static Abstract* createObject();
 
-    void hideFunction(HideType*) {} ;
+    void hideFunction(HideType*) {}
 
 protected:
     inline const char* getClassName() { return className(); }

@@ -3083,20 +3083,14 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
                         signature += ", ";
                     AbstractMetaArgument *a = cppSignal->arguments().at(i);
                     AbstractMetaType* type = a->type();
-                    QString cppSignature = translateType(type, metaClass, Generator::ExcludeConst | Generator::ExcludeReference).trimmed();
-                    QString originalSignature = translateType(type, metaClass, Generator::OriginalName | Generator::ExcludeConst | Generator::ExcludeReference).trimmed();
-                    if (cppSignature.contains("*"))
-                        cppSignature = cppSignature.replace("*", "").trimmed();
-
-                    if (originalSignature.contains("*"))
-                        originalSignature = originalSignature.replace("*", "").trimmed();
-
+                    QString cppSignature =  QMetaObject::normalizedType(qPrintable(type->cppSignature()));
+                    QString originalSignature = QMetaObject::normalizedType(qPrintable(type->originalTypeDescription()));
 
                     if ((cppSignature != originalSignature) && !knowTypes.contains(originalSignature)) {
                         knowTypes << originalSignature;
                         s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<"
                           << cppSignature << " >"
-                          << "(\"" << originalSignature << "\");\n";
+                          << "(\"" << originalSignature << "\"); // " << type->cppSignature() << "\n";
                     }
                     signature += type->originalTypeDescription();
                 }
