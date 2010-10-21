@@ -108,6 +108,7 @@ SbkEnumObject_New(PyTypeObject *type, long item_value, const char* item_name)
         if (!values) {
             values = PyDict_New();
             PyDict_SetItemString(type->tp_dict, const_cast<char*>("values"), values);
+            Py_DECREF(values); // ^ values still alive, because setitemstring incref it
         }
         PyDict_SetItemString(values, item_name, enum_obj);
     }
