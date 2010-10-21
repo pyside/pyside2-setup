@@ -520,15 +520,6 @@ struct Converter_CString
 };
 
 template <> struct Converter<const char*> : Converter_CString<const char*> {};
-template <> struct Converter<char*> : Converter_CString<char*>
-{
-    static inline char* toCpp(PyObject* pyobj)
-    {
-        if (pyobj == Py_None)
-            return 0;
-        return strdup(PyString_AsString(pyobj));
-    }
-};
 
 template <> struct Converter<std::string> : Converter_CString<std::string>
 {
