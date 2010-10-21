@@ -57,7 +57,11 @@ void Shiboken::initTypeResolver()
 
 static void registerTypeResolver(TypeResolver* resolver)
 {
-    typeResolverMap[resolver->typeName()] = resolver;
+    TypeResolver*& v = typeResolverMap[resolver->typeName()];
+    if (!v)
+        v = resolver;
+    else
+        delete resolver; // Discard type resolvers already registered
 }
 
 TypeResolver::TypeResolver(const char* typeName, TypeResolver::CppToPythonFunc cppToPy, TypeResolver::PythonToCppFunc pyToCpp, PyTypeObject* pyType, TypeResolver::DeleteObjectFunc deleter)
