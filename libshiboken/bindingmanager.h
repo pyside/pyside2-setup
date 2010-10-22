@@ -24,6 +24,7 @@
 #define BINDINGMANAGER_H
 
 #include <Python.h>
+#include <set>
 #include "shibokenmacros.h"
 
 namespace Shiboken
@@ -61,6 +62,7 @@ public:
     /// Called by wrapper destructor
     void destroyWrapper(const void* cptr);
     void destroyWrapper(SbkBaseWrapper* wrapper);
+    std::set<PyObject*> getAllPyObjects();
 private:
     ~BindingManager();
     // disable copy

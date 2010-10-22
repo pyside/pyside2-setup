@@ -144,15 +144,12 @@ BindingManager::~BindingManager()
 #ifndef NDEBUG
     showWrapperMap(m_d->wrapperMapper);
 #endif
-    assert(m_d->wrapperMapper.size() == 0);
-
     /* Cleanup hanging references. We just invalidate them as when
      * the BindingManager is being destroyed the interpreter is alredy
      * shutting down. */
-    WrapperMap::iterator iter = m_d->wrapperMapper.begin();
-    for (;iter != m_d->wrapperMapper.end(); ++iter)
-        invalidateWrapper(iter->second);
-
+    while (!m_d->wrapperMapper.empty())
+        invalidateWrapper(m_d->wrapperMapper.begin()->second);
+    assert(m_d->wrapperMapper.size() == 0);
     delete m_d;
 }
 
@@ -344,6 +341,17 @@ SbkBaseWrapperType* BindingManager::resolveType(void* cptr, Shiboken::SbkBaseWra
 {
     SbkBaseWrapperType* identifiedType = m_d->classHierarchy.identifyType(cptr, type, type);
     return identifiedType ? identifiedType : type;
+}
+
+std::set< PyObject* > BindingManager::getAllPyObjects()
+{
+    std::set<PyObject*> pyObjects;
+    const WrapperMap& wrappersMap = m_d->wrapperMapper;
+    WrapperMap::const_iterator it = wrappersMap.begin();
+    for (; it != wrappersMap.end(); ++it)
+        pyObjects.insert(it->second);
+
+    return pyObjects;
 }
 
 } // namespace Shiboken
