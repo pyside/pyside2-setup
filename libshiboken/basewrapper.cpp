@@ -242,24 +242,26 @@ static void _destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent)
     if (removeFromParent && pInfo && pInfo->parent)
         removeParent(obj);
 
-    ChildrenList::iterator it = pInfo->children.begin();
-    for (; it != pInfo->children.end(); ++it) {
-        SbkBaseWrapper*& child = *it;
+    if (pInfo) {
+        ChildrenList::iterator it = pInfo->children.begin();
+        for (; it != pInfo->children.end(); ++it) {
+            SbkBaseWrapper*& child = *it;
 
-        // keep this, the wrapper still alive
-        if (!SbkBaseWrapper_containsCppWrapper(obj) &&
-            SbkBaseWrapper_containsCppWrapper(child) &&
-            child->parentInfo) {
-            child->parentInfo->parent = 0;
-            child->parentInfo->hasWrapperRef = true;
-            SbkBaseWrapper_setOwnership(child, false);
-        } else {
-            _destroyParentInfo(child, false);
-            Py_DECREF(child);
+            // keep this, the wrapper still alive
+            if (!SbkBaseWrapper_containsCppWrapper(obj) &&
+                SbkBaseWrapper_containsCppWrapper(child) &&
+                child->parentInfo) {
+                child->parentInfo->parent = 0;
+                child->parentInfo->hasWrapperRef = true;
+                SbkBaseWrapper_setOwnership(child, false);
+            } else {
+                _destroyParentInfo(child, false);
+                Py_DECREF(child);
+            }
         }
+        delete pInfo;
+        obj->parentInfo = 0;
     }
-    delete pInfo;
-    obj->parentInfo = 0;
 }
 
 void destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent)
