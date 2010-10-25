@@ -1,5 +1,8 @@
-#  SHIBOKEN_INCLUDE_DIR   - Directories to include to use SHIBOKEN
-#  SHIBOKEN_LIBRARIES     - Files to link against to use SHIBOKEN
+#  SHIBOKEN_INCLUDE_DIR        - Directories to include to use SHIBOKEN
+#  SHIBOKEN_LIBRARIES          - Files to link against to use SHIBOKEN
+#  SHIBOKEN_BUILD_TYPE         - Tells if Shiboken was compiled in Release or Debug mode.
+#  SHIBOKEN_PYTHON_INTERPRETER - Python interpreter (regular or debug) to be used with the bindings.
+#  SHIBOKEN_PYTHON_LIBRARIES   - Python libraries (regular or debug) Shiboken is linked against.
 
 SET(SHIBOKEN_INCLUDE_DIR "@CMAKE_INSTALL_PREFIX@/include/shiboken@shiboken_SUFFIX@")
 if(MSVC)
@@ -9,3 +12,6 @@ elseif(WIN32)
 else()
     SET(SHIBOKEN_LIBRARY "@LIB_INSTALL_DIR@/@CMAKE_SHARED_LIBRARY_PREFIX@shiboken@shiboken_SUFFIX@@LIBRARY_OUTPUT_SUFFIX@@CMAKE_SHARED_LIBRARY_SUFFIX@")
 endif()
+SET(SHIBOKEN_BUILD_TYPE "@SHIBOKEN_BUILD_TYPE@")
+SET(SHIBOKEN_PYTHON_INTERPRETER "@PYTHON_EXECUTABLE@")
+SET(SHIBOKEN_PYTHON_LIBRARIES "@SBK_PYTHON_LIBRARIES@")
