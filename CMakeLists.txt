@@ -78,6 +78,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         message(WARNING "Compiling shiboken with debug enabled, but the python executable was not compiled with debug support.")
     else()
         add_definitions("-DPy_DEBUG")
+        set(SBK_ADD_PY_DEBUG_DEFINITION "add_definitions(\"-DPy_DEBUG\")")
+        set(SBK_PKG_CONFIG_PY_DEBUG_DEFINITION " -DPy_DEBUG")
     endif()
     set(SBK_PYTHON_LIBRARIES ${PYTHON_DEBUG_LIBRARIES})
     set(SHIBOKEN_BUILD_TYPE "Debug")
@@ -88,6 +90,7 @@ endif()
 if(APPLE)
     set(SBK_PYTHON_LIBRARIES "-undefined dynamic_lookup")
 endif()
+
 
 
 if (BUILD_TESTS)
