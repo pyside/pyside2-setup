@@ -90,7 +90,7 @@ struct CppObjectCopier<T, false>
 {
     static inline T* copy(const T& obj)
     {
-        return new T(*reinterpret_cast<const T*>(&obj));
+        return new T(obj);
     }
 };
 
