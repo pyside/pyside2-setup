@@ -15,5 +15,11 @@ endif()
 SET(SHIBOKEN_PYTHON_INTERPRETER "@PYTHON_EXECUTABLE@")
 SET(SHIBOKEN_PYTHON_LIBRARIES "@SBK_PYTHON_LIBRARIES@")
 SET(SHIBOKEN_BUILD_TYPE "@SHIBOKEN_BUILD_TYPE@")
-message("libshiboken built for @SHIBOKEN_BUILD_TYPE@")
+message(STATUS "libshiboken built for @SHIBOKEN_BUILD_TYPE@")
 @SBK_ADD_PY_DEBUG_DEFINITION@
+
+option(AVOID_PROTECTED_HACK "Avoid protected hack on generated bindings." FALSE)
+if(AVOID_PROTECTED_HACK OR WIN32)
+    add_definitions(-DAVOID_PROTECTED_HACK)
+    message(STATUS "Avoiding protected hack!")
+endif()
