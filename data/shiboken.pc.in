@@ -4,6 +4,7 @@ libdir=@LIB_INSTALL_DIR@
 includedir=@CMAKE_INSTALL_PREFIX@/include/shiboken
 generator_location=@CMAKE_INSTALL_PREFIX@/bin/shiboken
 python_interpreter=@PYTHON_EXECUTABLE@
+python_include_dir=@PYTHON_INCLUDE_DIR@
 
 Name: shiboken
 Description: Support library for Python bindings created with Shiboken generator.
