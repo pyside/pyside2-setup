@@ -33,10 +33,14 @@ GilState::GilState()
 
 GilState::~GilState()
 {
-    if(Py_IsInitialized())
-        PyGILState_Release(m_gstate);
+    release();
 }
 
+void GilState::release()
+{
+    if(Py_IsInitialized() && m_gstate)
+        PyGILState_Release(m_gstate);
+}
 } // namespace Shiboken
 
 

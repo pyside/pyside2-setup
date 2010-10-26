@@ -34,6 +34,7 @@ class LIBSHIBOKEN_API GilState
 public:
     GilState();
     ~GilState();
+    void release();
 private:
     PyGILState_STATE m_gstate;
 };
