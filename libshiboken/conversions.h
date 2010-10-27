@@ -234,14 +234,14 @@ struct ValueTypeConverter
     // use them if it is the case.
     static inline T toCpp(PyObject* pyobj)
     {
-        PyTypeObject* typeObj = SbkType<T>();
-        if (typeObj->ob_type == &Shiboken::SbkBaseWrapperType_Type) {
-            SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(typeObj);
+        if (!PyObject_TypeCheck(pyobj, SbkType<T>())) {
+            SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>());
             if (shiboType->ext_tocpp && isConvertible(pyobj)) {
                 T* cptr = reinterpret_cast<T*>(shiboType->ext_tocpp(pyobj));
                 std::auto_ptr<T> cptr_auto_ptr(cptr);
                 return *cptr;
             }
+            assert(false);
         }
         return *reinterpret_cast<T*>(getCppPointer(pyobj, SbkType<T>()));
     }

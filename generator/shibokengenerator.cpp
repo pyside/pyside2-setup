@@ -1209,8 +1209,6 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                             argReplacement = usePyArgs ? QString("pyargs[%1]").arg(i - removed) : "arg";
                         } else {
                             argReplacement = QString("cpp_arg%1").arg(i - removed);
-                            if (shouldDereferenceArgumentPointer(arg))
-                                argReplacement.prepend("(*").append(')');
                         }
                     }
                 } else {
@@ -1236,8 +1234,6 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                         argName = arg->defaultValueExpression();
                     } else {
                         argName = QString("cpp_arg%1").arg(arg->argumentIndex() - removed);
-                        if (shouldDereferenceArgumentPointer(arg))
-                            argName.prepend('*');
                     }
                     argumentNames << argName;
                 } else {

@@ -1463,9 +1463,9 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadDa
 
 void CppGenerator::writeArgumentConversion(QTextStream& s,
                                            const AbstractMetaType* argType,
-                                           QString argName, QString pyArgName,
+                                           const QString& argName, const QString& pyArgName,
                                            const AbstractMetaClass* context,
-                                           QString defaultValue)
+                                           const QString& defaultValue)
 {
     const TypeEntry* type = argType->typeEntry();
 
@@ -1475,69 +1475,38 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
     QString typeName;
     QString baseTypeName = type->name();
     bool isWrappedCppClass = type->isValue() || type->isObject();
+
+    // exclude const on Objects
+    Options flags;
+    bool isCStr = isCString(argType);
+    if (argType->indirections() && !isCStr)
+        flags = ExcludeConst;
+    else if (type->isPrimitive() && !isCStr)
+        flags = ExcludeConst | ExcludeReference;
+    else if (type->isValue() && argType->isConstant() && argType->isReference())
+        flags = ExcludeConst | ExcludeReference; // const refs become just the value, but pure refs must remain pure.
+
+    typeName = translateTypeForWrapperMethod(argType, context, flags).trimmed();
+
     if (isWrappedCppClass)
-        typeName = baseTypeName + '*';
-    else
-        typeName = translateTypeForWrapperMethod(argType, context);
-
-    if (type->isContainer() || type->isPrimitive()) {
-        // If the type is a const char*, we don't remove the "const".
-        if (typeName.startsWith("const ") && !(isCString(argType)))
-            typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
-        if (typeName.endsWith("&"))
-            typeName.chop(1);
-    }
-    typeName = typeName.trimmed();
-
-    bool hasImplicitConversions = !implicitConversions(argType).isEmpty();
-
-    if (isWrappedCppClass) {
-        const TypeEntry* typeEntry = (hasImplicitConversions ? type : 0);
-        writeInvalidCppObjectCheck(s, pyArgName, typeEntry);
-    }
-
-    // Auto pointer to dealloc new objects created because to satisfy implicit conversion.
-    if (hasImplicitConversions)
-        s << INDENT << "std::auto_ptr<" << baseTypeName << " > " << argName << "_auto_ptr;" << endl;
+        writeInvalidCppObjectCheck(s, pyArgName, 0);
 
     // Value type that has default value.
     if (argType->isValue() && !defaultValue.isEmpty())
         s << INDENT << baseTypeName << ' ' << argName << "_tmp = " << defaultValue << ';' << endl;
 
-    if (usePySideExtensions() && typeName == "QStringRef") {
-        s << INDENT << "QString  " << argName << "_qstring = ";
-        if (!defaultValue.isEmpty())
-            s << pyArgName << " ? ";
-        s << "Shiboken::Converter<QString>::toCpp(" << pyArgName << ')' << endl;
-        if (!defaultValue.isEmpty())
-            s << " : " << defaultValue;
-                s << ';' << endl;
-        s << INDENT << "QStringRef " << argName << "(&" << argName << "_qstring);" << endl;
-    } else {
-        s << INDENT << typeName << ' ' << argName << " = ";
-        if (!defaultValue.isEmpty())
-            s << pyArgName << " ? ";
-        s << "Shiboken::Converter<" << typeName << " >::toCpp(" << pyArgName << ')';
-        if (!defaultValue.isEmpty()) {
-            s << " : ";
-            if (argType->isValue())
-                s << '&' << argName << "_tmp";
-            else
-                s << defaultValue;
-        }
-        s << ';' << endl;
+    s << INDENT << typeName << ' ' << argName << " = ";
+    if (!defaultValue.isEmpty())
+        s << pyArgName << " ? ";
+    s << "Shiboken::Converter<" << typeName << " >::toCpp(" << pyArgName << ')';
+    if (!defaultValue.isEmpty()) {
+        s << " : ";
+        if (argType->isValue())
+            s << argName << "_tmp";
+        else
+            s << defaultValue;
     }
-
-    if (hasImplicitConversions) {
-        s << INDENT << "if (";
-        if (!defaultValue.isEmpty())
-            s << pyArgName << " && ";
-        s << '!' << cpythonCheckFunction(type) << '(' << pyArgName << "))";
-        s << endl;
-        Indentation indent(INDENT);
-        s << INDENT << argName << "_auto_ptr = std::auto_ptr<" << baseTypeName;
-        s << " >(" << argName << ");" << endl;
-    }
+    s << ';' << endl;
 }
 
 void CppGenerator::writeNoneReturn(QTextStream& s, const AbstractMetaFunction* func, bool thereIsReturnValue)
@@ -1962,8 +1931,6 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                         argName = arg->name() + "_out";
                     } else {
                         argName = QString("cpp_arg%1").arg(idx);
-                        if (shouldDereferenceArgumentPointer(arg))
-                            argName.prepend('*');
                     }
                     userArgs << argName;
                 }
@@ -2015,7 +1982,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             QString firstArg("(*" CPP_SELF_VAR ")");
             QString secondArg("cpp_arg0");
             if (!func->isUnaryOperator() && shouldDereferenceArgumentPointer(func->arguments().first())) {
-                secondArg.prepend("(*");
+                secondArg.prepend('(');
                 secondArg.append(')');
             }
 
@@ -2038,11 +2005,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 QString className = wrapperName(func->ownerClass());
                 mc << "new " << className << '(';
                 if (func->isCopyConstructor() && maxArgs == 1) {
-                    mc << '*';
-                    QString arg("cpp_arg0");
-                    if (shouldGenerateCppWrapper(func->ownerClass()))
-                        arg = QString("reinterpret_cast<%1*>(%2)").arg(className).arg(arg);
-                    mc << arg;
+                    mc << "cpp_arg0";
                 } else {
                     mc << userArgs.join(", ");
                 }
@@ -2844,28 +2807,11 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                     Indentation indent(INDENT);
                     s << INDENT << "// " << func->signature() << endl;
                     s << INDENT;
-                    AbstractMetaClass* clz = classes().findClass(type->typeEntry());
-                    if (type->typeEntry()->isValue()) {
-                        Q_ASSERT(clz);
-                        s << clz->qualifiedCppName() << '*';
-                    } else
-                        s << translateTypeForWrapperMethod(type, metaClass);
+                    s << translateTypeForWrapperMethod(type, metaClass, ExcludeReference | ExcludeConst);
                     s << " cpp_other = ";
-                    if (type->typeEntry()->isValue())
-                        s << cpythonWrapperCPtr(type, "other");
-                    else
-                        writeToCppConversion(s, type, metaClass, "other");
+                    writeToCppConversion(s, type, metaClass, "other", ExcludeReference | ExcludeConst);
                     s << ';' << endl;
-
-                    s << INDENT << "result = ";
-                    // It's a value type and the conversion for a pointer returned null.
-                    if (type->typeEntry()->isValue()) {
-                        s << "!cpp_other ? cpp_self == ";
-                        writeToCppConversion(s, type, metaClass, "other", ExcludeReference | ExcludeConst);
-                        s << " : ";
-                    }
-                    s << "(cpp_self " << op << ' ' << (type->typeEntry()->isValue() ? "(*" : "");
-                    s << "cpp_other" << (type->typeEntry()->isValue() ? ")" : "") << ");" << endl;
+                    s << INDENT << "result = (cpp_self " << op << " cpp_other);" << endl;
                 }
                 s << INDENT << '}';
             }
@@ -2874,7 +2820,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
             if (comparesWithSameType && !metaClass->implicitConversions().isEmpty()) {
                 AbstractMetaType temporaryType;
                 temporaryType.setTypeEntry(metaClass->typeEntry());
-                temporaryType.setConstant(true);
+                temporaryType.setConstant(false);
                 temporaryType.setReference(false);
                 temporaryType.setTypeUsagePattern(AbstractMetaType::ValuePattern);
                 s << " else if (" << cpythonIsConvertibleFunction(metaClass->typeEntry());
@@ -2882,7 +2828,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                 {
                     Indentation indent(INDENT);
                     writeArgumentConversion(s, &temporaryType, "cpp_other", "other", metaClass);
-                    s << INDENT << "result = (cpp_self " << op << " (*cpp_other));" << endl;
+                    s << INDENT << "result = (cpp_self " << op << " cpp_other);" << endl;
                 }
                 s << INDENT << '}';
             }

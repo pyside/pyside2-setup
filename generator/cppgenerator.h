@@ -83,14 +83,14 @@ private:
      *   \param defaultValue an optional default value to be used instead of the conversion result
      */
     void writeArgumentConversion(QTextStream& s, const AbstractMetaType* argType,
-                                 QString argName, QString pyArgName,
+                                 const QString& argName, const QString& pyArgName,
                                  const AbstractMetaClass* context = 0,
-                                 QString defaultValue = QString());
+                                 const QString& defaultValue = QString());
     /// Convenience method to call writeArgumentConversion with an AbstractMetaArgument instead of an AbstractMetaType.
     void writeArgumentConversion(QTextStream& s, const AbstractMetaArgument* arg,
-                                 QString argName, QString pyArgName,
+                                 const QString& argName, const QString& pyArgName,
                                  const AbstractMetaClass* context = 0,
-                                 QString defaultValue = QString())
+                                 const QString& defaultValue = QString())
     {
         writeArgumentConversion(s, arg->type(), argName, pyArgName, context, defaultValue);
     }

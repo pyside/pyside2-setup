@@ -33,6 +33,8 @@ public:
     Echo(){}
     ~Echo(){}
 
+    void doNothingWithConstBool(const bool hi) {}
+
     // These method are here just for compilation test purposes
     Echo& operator<<(unsigned int item) { return *this; }
     Echo& operator<<(signed int item) { return *this; }
