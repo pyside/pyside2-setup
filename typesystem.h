@@ -952,7 +952,7 @@ public:
         return m_conversionRule.startsWith(TARGET_CONVERSION_RULE_FLAG);
     }
 
-
+    bool isCppPrimitive() const;
 private:
     QString m_name;
     Type m_type;

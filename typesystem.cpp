@@ -2001,6 +2001,22 @@ QString ContainerTypeEntry::typeName() const
     }
 }
 
+static bool strLess(const char* a, const char* b)
+{
+    return ::strcmp(a, b) < 0;
+}
+
+bool TypeEntry::isCppPrimitive() const
+{
+    if (m_name.contains(' '))
+        return true;
+    // Keep this sorted!!
+    static const char* cppTypes[] = { "bool", "char", "double", "float", "int", "long", "short", "wchar_t"};
+    const int N = sizeof(cppTypes)/sizeof(char*);
+
+    const char** res = qBinaryFind(&cppTypes[0], &cppTypes[N], m_name.toAscii().constData(), strLess);
+    return res != &cppTypes[N];
+}
 
 /*
 static void injectCode(ComplexTypeEntry *e,
