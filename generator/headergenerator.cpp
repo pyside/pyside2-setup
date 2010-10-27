@@ -91,9 +91,6 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
 
         s << endl << '{' << endl << "public:" << endl;
 
-        if (metaClass->typeEntry()->isValue())
-            writeCopyCtor(s, metaClass);
-
         bool hasVirtualFunction = false;
         foreach (AbstractMetaFunction *func, filterFunctions(metaClass)) {
             if (func->isVirtual())
@@ -142,11 +139,13 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
 
 void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* func) const
 {
-    // do not write copy ctors here.
-    if (func->isCopyConstructor())
-        return;
 
-    if (func->isConstructor() && func->isUserAdded())
+    // do not write copy ctors here.
+    if (!func->isPrivate() && func->isCopyConstructor()) {
+        writeCopyCtor(s, func->ownerClass());
+        return;
+    }
+    if (func->isUserAdded())
         return;
 
 #ifdef AVOID_PROTECTED_HACK

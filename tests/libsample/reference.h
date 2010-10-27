@@ -60,6 +60,8 @@ private:
 class LIBSAMPLE_API ObjTypeReference
 {
 public:
+    ObjTypeReference() {}
+    ObjTypeReference(const ObjTypeReference&) {}
     virtual ~ObjTypeReference();
     virtual ObjTypeReference& returnMyFirstArg(ObjTypeReference& ref) { return ref; }
     virtual ObjTypeReference& returnMySecondArg(int a, ObjTypeReference& ref) { return ref; }
