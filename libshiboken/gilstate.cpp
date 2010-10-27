@@ -27,8 +27,10 @@ namespace Shiboken
 
 GilState::GilState()
 {
-    if(Py_IsInitialized())
+    if(Py_IsInitialized()) {
         m_gstate = PyGILState_Ensure();
+        m_locked = true;
+    }
 }
 
 GilState::~GilState()
@@ -38,8 +40,10 @@ GilState::~GilState()
 
 void GilState::release()
 {
-    if(Py_IsInitialized() && m_gstate)
+    if(m_locked && Py_IsInitialized()) {
         PyGILState_Release(m_gstate);
+        m_locked = false;
+    }
 }
 } // namespace Shiboken
 

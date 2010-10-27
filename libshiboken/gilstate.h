@@ -37,6 +37,7 @@ public:
     void release();
 private:
     PyGILState_STATE m_gstate;
+    bool m_locked;
 };
 
 } // namespace Shiboken

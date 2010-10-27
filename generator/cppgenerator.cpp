@@ -532,8 +532,6 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     s << INDENT << "if (py_override.isNull()) {" << endl;
     {
         Indentation indentation(INDENT);
-        s << INDENT << "gil.release();" << endl;
-
         CodeSnipList snips;
         if (func->hasInjectedCode()) {
             snips = func->injectedCodeSnips();
@@ -551,11 +549,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 s << defaultReturnExpr;
             }
         } else {
-            if (func->allowThread()) {
-                s << INDENT << "Shiboken::ThreadStateSaver " THREAD_STATE_SAVER_VAR ";" << endl;
-                s << INDENT << THREAD_STATE_SAVER_VAR ".save();" << endl;
-            }
-            s << "return this->::" << func->implementingClass()->qualifiedCppName() << "::";
+            s << INDENT << "gil.release();" << endl;
+            s << INDENT << "return this->::" << func->implementingClass()->qualifiedCppName() << "::";
             writeFunctionCall(s, func, Generator::VirtualCall);
         }
     }
