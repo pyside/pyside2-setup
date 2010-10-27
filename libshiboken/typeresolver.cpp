@@ -97,20 +97,20 @@ const char* TypeResolver::typeName() const
     return m_d->typeName;
 }
 
-void* TypeResolver::toCpp(PyObject* pyObj)
+void* TypeResolver::toCpp(PyObject* pyObj, void** place, bool alloc)
 {
-    return m_d->pythonToCpp(pyObj);
-}
-
-PyObject* TypeResolver::toPython(void* cppObj)
-{
-    return m_d->cppToPython(cppObj);
+    return m_d->pythonToCpp(pyObj, place, alloc);
 }
 
 void TypeResolver::deleteObject(void* object)
 {
     if (m_d->deleteObject)
         m_d->deleteObject(object);
+}
+
+PyObject* TypeResolver::toPython(void* cppObj)
+{
+    return m_d->cppToPython(cppObj);
 }
 
 PyTypeObject* TypeResolver::pythonType()

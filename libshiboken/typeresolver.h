@@ -33,15 +33,20 @@ class SbkBaseWrapperType;
 
 /* To C++ convertion functions. */
 template <typename T>
-inline void* pythonToValueType(PyObject* pyobj)
+inline void* pythonToValueType(PyObject* pyobj, void** data, bool alloc)
 {
-    return Shiboken::CppObjectCopier<T>::copy(Shiboken::Converter<T>::toCpp(pyobj));
+    if (alloc)
+        *data = Shiboken::CppObjectCopier<T>::copy(Shiboken::Converter<T>::toCpp(pyobj));
+
+    *reinterpret_cast< T*>(*data) = Shiboken::Converter<T>::toCpp(pyobj);
+    return *data;
 }
 
 template <typename T>
-inline void* pythonToObjectType(PyObject* pyobj)
+inline void* pythonToObjectType(PyObject* pyobj, void** data, bool)
 {
-    return Shiboken::Converter<T*>::toCpp(pyobj);
+    *data = Shiboken::Converter<T*>::toCpp(pyobj);
+    return *data;
 }
 
 template <typename T>
@@ -73,9 +78,8 @@ public:
     };
 
     typedef PyObject* (*CppToPythonFunc)(void*);
-    typedef void* (*PythonToCppFunc)(PyObject*);
+    typedef void* (*PythonToCppFunc)(PyObject*, void**, bool);
     typedef void (*DeleteObjectFunc)(void*);
-    typedef PyTypeObject* (*GetPyTypeFunc)();
 
     ~TypeResolver();
 
@@ -96,7 +100,7 @@ public:
 
     const char* typeName() const;
     PyObject* toPython(void* cppObj);
-    void* toCpp(PyObject* pyObj);
+    void* toCpp(PyObject* pyObj, void** place, bool alloc=false);
     void deleteObject(void* object);
     PyTypeObject* pythonType();
 
