@@ -2759,7 +2759,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
     s << '{' << endl;
     QList<AbstractMetaFunctionList> cmpOverloads = filterGroupedOperatorFunctions(metaClass, AbstractMetaClass::ComparisonOp);
     s << INDENT << "bool result = false;" << endl;
-    s << INDENT << metaClass->qualifiedCppName() << "& cpp_self = *" << cpythonWrapperCPtr(metaClass) << ';' << endl;
+    s << INDENT << metaClass->qualifiedCppName() << "& " CPP_SELF_VAR " = *" << cpythonWrapperCPtr(metaClass) << ';' << endl;
     s << endl;
 
     s << INDENT << "switch (op) {" << endl;
@@ -2808,10 +2808,10 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                     s << INDENT << "// " << func->signature() << endl;
                     s << INDENT;
                     s << translateTypeForWrapperMethod(type, metaClass, ExcludeReference | ExcludeConst);
-                    s << " cpp_other = ";
+                    s << " cppOther = ";
                     writeToCppConversion(s, type, metaClass, "other", ExcludeReference | ExcludeConst);
                     s << ';' << endl;
-                    s << INDENT << "result = (cpp_self " << op << " cpp_other);" << endl;
+                    s << INDENT << "result = (" CPP_SELF_VAR " " << op << " cppOther);" << endl;
                 }
                 s << INDENT << '}';
             }
@@ -2827,8 +2827,8 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                 s << "(other)) {" << endl;
                 {
                     Indentation indent(INDENT);
-                    writeArgumentConversion(s, &temporaryType, "cpp_other", "other", metaClass);
-                    s << INDENT << "result = (cpp_self " << op << " cpp_other);" << endl;
+                    writeArgumentConversion(s, &temporaryType, "cppOther", "other", metaClass);
+                    s << INDENT << "result = (" CPP_SELF_VAR " " << op << " cppOther);" << endl;
                 }
                 s << INDENT << '}';
             }
