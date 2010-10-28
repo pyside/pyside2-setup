@@ -1738,7 +1738,7 @@ void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& o
             argType = buildAbstractMetaTypeFromString(typeReplaced);
 
         if (argType) {
-            QString argName = QString("cpp_arg%1").arg(i - removedArgs);
+            QString argName = QString(CPP_ARG"%1").arg(i - removedArgs);
             QString pyArgName = usePyArgs ? QString("pyargs[%1]").arg(i - removedArgs) : "arg";
             QString defaultValue = guessScopeForDefaultValue(func, arg);
 
@@ -1930,7 +1930,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                     if (hasConversionRule) {
                         argName = arg->name() + "_out";
                     } else {
-                        argName = QString("cpp_arg%1").arg(idx);
+                        argName = QString(CPP_ARG"%1").arg(idx);
                     }
                     userArgs << argName;
                 }
@@ -1980,7 +1980,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             }
         } else if (func->isOperatorOverload()) {
             QString firstArg("(*" CPP_SELF_VAR ")");
-            QString secondArg("cpp_arg0");
+            QString secondArg(CPP_ARG0);
             if (!func->isUnaryOperator() && shouldDereferenceArgumentPointer(func->arguments().first())) {
                 secondArg.prepend('(');
                 secondArg.append(')');
@@ -2005,7 +2005,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 QString className = wrapperName(func->ownerClass());
                 mc << "new " << className << '(';
                 if (func->isCopyConstructor() && maxArgs == 1) {
-                    mc << "cpp_arg0";
+                    mc << CPP_ARG0;
                 } else {
                     mc << userArgs.join(", ");
                 }

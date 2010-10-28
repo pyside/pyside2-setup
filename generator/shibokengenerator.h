@@ -28,6 +28,8 @@
 #define CPP_RETURN_VAR            "cppResult"
 #define THREAD_STATE_SAVER_VAR    "threadStateSaver"
 #define CPP_SELF_VAR              "cppSelf"
+#define CPP_ARG                   "cppArg"
+#define CPP_ARG0                  (CPP_ARG "0")
 
 #include <generator.h>
 #include <QtCore/QTextStream>

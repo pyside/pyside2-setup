@@ -1208,7 +1208,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                         if (arg->type()->typeEntry()->isCustom()) {
                             argReplacement = usePyArgs ? QString("pyargs[%1]").arg(i - removed) : "arg";
                         } else {
-                            argReplacement = QString("cpp_arg%1").arg(i - removed);
+                            argReplacement = QString(CPP_ARG"%1").arg(i - removed);
                         }
                     }
                 } else {
@@ -1233,7 +1233,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                     if (lastArg && arg->argumentIndex() > lastArg->argumentIndex()) {
                         argName = arg->defaultValueExpression();
                     } else {
-                        argName = QString("cpp_arg%1").arg(arg->argumentIndex() - removed);
+                        argName = QString(CPP_ARG"%1").arg(arg->argumentIndex() - removed);
                     }
                     argumentNames << argName;
                 } else {
