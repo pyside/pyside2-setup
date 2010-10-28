@@ -3556,7 +3556,7 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
         s << INDENT << '}' << endl;
     }
     s << INDENT << "PyObject* attr = PyObject_GenericGetAttr(self, name);" << endl;
-    if (usePySideExtensions() && metaClass->isQObject()) {
+    if (usePySideExtensions() && (metaClass->qualifiedCppName() == "QObject")) {
         s << INDENT << "if (attr && PySide::isQPropertyType(attr)) {" << endl;
         {
             Indentation indent(INDENT);
@@ -3571,7 +3571,39 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
             s << INDENT << "attr = value;" << endl;
         }
         s << INDENT << "}" << endl;
+
+        s << INDENT << "//search on metaobject (avoid internal attributes started with '__')" << endl
+          << INDENT << "if (!attr && !QString(PyString_AS_STRING(name)).startsWith(\"__\")) {" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "QObject* cppSelf = Converter<QObject*>::toCpp(self);" << endl
+              << INDENT << "const QMetaObject* metaObject = cppSelf->metaObject();" << endl
+              << INDENT << "QByteArray cname(PyString_AS_STRING(name));" << endl
+              << INDENT << "cname += '(';" << endl
+              << INDENT << "//signal" << endl
+              << INDENT << "QList<QMetaMethod> signalList;" << endl
+              << INDENT << "for(int i=0, i_max = metaObject->methodCount(); i < i_max; i++) {" << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "QMetaMethod method = metaObject->method(i);" << endl
+                  << INDENT << "if ((method.methodType() == QMetaMethod::Signal) &&" << endl
+                  << INDENT << "QString(method.signature()).startsWith(cname))" << endl
+                  << INDENT << "signalList.append(method);" << endl;
+            }
+            s << INDENT << "}" << endl
+              << INDENT << "if (signalList.size() > 0) {" << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "PyObject* pySignal = PySide::signalNewFromMethod(self, signalList);" << endl
+                  << INDENT << "PyObject_SetAttr(self, name, pySignal);" << endl
+                  << INDENT << "PyObject_GenericSetAttr(self, name, pySignal);" << endl
+                  << INDENT << "return pySignal;" << endl;
+            }
+            s << INDENT << "}" << endl;
+        }
+        s << INDENT << "}" << endl;
     }
+
     s << INDENT << "return attr;" << endl;
     s << '}' << endl;
 }
