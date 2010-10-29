@@ -52,6 +52,12 @@ public:
     inline operator PyTupleObject*() { return reinterpret_cast<PyTupleObject*>(m_pyobj); }
     inline operator bool() const { return m_pyobj; }
     inline PyObject* operator->() { return m_pyobj; }
+
+    template<typename T>
+    T cast()
+    {
+        return reinterpret_cast<T>(m_pyobj);
+    }
 private:
     PyObject* m_pyobj;
     AutoDecRef(const AutoDecRef&);
