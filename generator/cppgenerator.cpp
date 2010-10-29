@@ -163,8 +163,8 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     s << "// default includes" << endl;
     s << "#include <shiboken.h>" << endl;
     if (usePySideExtensions()) {
-        s << "#include <qsignal.h>" << endl;
-        s << "#include <qproperty.h>" << endl;
+        s << "#include <pysidesignal.h>" << endl;
+        s << "#include <pysideproperty.h>" << endl;
         s << "#include <pyside.h>" << endl;
     }
 
@@ -3454,10 +3454,10 @@ void CppGenerator::writeSetattroFunction(QTextStream& s, const AbstractMetaClass
     s << "static int " << cpythonSetattroFunctionName(metaClass) << "(PyObject* self, PyObject* name, PyObject* value)" << endl;
     s << '{' << endl;
     if (usePySideExtensions()) {
-        s << INDENT << "Shiboken::AutoDecRef pp(reinterpret_cast<PyObject*>(PySide::qpropertyGetObject(self, name)));" << endl;
+        s << INDENT << "Shiboken::AutoDecRef pp(reinterpret_cast<PyObject*>(PySide::Property::getObject(self, name)));" << endl;
         s << INDENT << "if (!pp.isNull())" << endl;
         Indentation indent(INDENT);
-        s << INDENT << "return PySide::qpropertySet(reinterpret_cast<PySideQProperty*>(pp.object()), self, value);" << endl;
+        s << INDENT << "return PySide::Property::setValue(reinterpret_cast<PySideProperty*>(pp.object()), self, value);" << endl;
     }
     s << INDENT << "return PyObject_GenericSetAttr(self, name, value);" << endl;
     s << '}' << endl;
@@ -3495,10 +3495,10 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
     }
     s << INDENT << "PyObject* attr = PyObject_GenericGetAttr(self, name);" << endl;
     if (usePySideExtensions() && (metaClass->qualifiedCppName() == "QObject")) {
-        s << INDENT << "if (attr && PySide::isQPropertyType(attr)) {" << endl;
+        s << INDENT << "if (attr && PySide::Property::isPropertyType(attr)) {" << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << "PyObject *value = PySide::qpropertyGet(reinterpret_cast<PySideQProperty*>(attr), self);" << endl;
+            s << INDENT << "PyObject *value = PySide::Property::getValue(reinterpret_cast<PySideProperty*>(attr), self);" << endl;
             s << INDENT << "if (!value)" << endl;
             {
                 Indentation indentation(INDENT);

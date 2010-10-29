@@ -386,7 +386,7 @@ void HeaderGenerator::finishGeneration()
     s << "#include <bindingmanager.h>" << endl;
     s << "#include <memory>" << endl << endl;
     if (usePySideExtensions())
-        s << "#include <qsignal.h>" << endl;
+        s << "#include <pysidesignal.h>" << endl;
 
     QStringList requiredTargetImports = TypeDatabase::instance()->requiredTargetImports();
     if (!requiredTargetImports.isEmpty()) {
