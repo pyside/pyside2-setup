@@ -7,8 +7,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/
                       ${CMAKE_MODULE_PATH})
 
 find_package(Qt4 4.5.0)
-find_package(ApiExtractor 0.8)
-find_package(GeneratorRunner 0.6.1)
+find_package(ApiExtractor 0.8.2)
+find_package(GeneratorRunner 0.6.3)
 find_package(PythonLibs)
 find_package(PythonInterpWithDebug)
 
@@ -16,7 +16,7 @@ add_definitions(${QT_DEFINITIONS})
 
 set(shiboken_MAJOR_VERSION "0")
 set(shiboken_MINOR_VERSION "5")
-set(shiboken_MICRO_VERSION "1")
+set(shiboken_MICRO_VERSION "2")
 set(shiboken_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
 
 option(AVOID_PROTECTED_HACK "Avoid protected hack on generated bindings." FALSE)
