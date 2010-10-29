@@ -318,6 +318,11 @@ public:
      */
     AbstractMetaType* buildAbstractMetaTypeFromString(QString typeString);
 
+    /**
+     *  Helper function to return the flags to be used by a meta type when
+     * it needs to write some converter code.
+     */
+    static Options getConverterOptions(const AbstractMetaType* metaType);
 protected:
     bool doSetup(const QMap<QString, QString>& args);
     // verify whether the class is copyable

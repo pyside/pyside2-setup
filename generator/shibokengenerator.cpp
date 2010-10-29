@@ -515,7 +515,10 @@ void ShibokenGenerator::writeToPythonConversion(QTextStream& s, const AbstractMe
     if (!type)
         return;
 
-    writeBaseConversion(s, type, context);
+    // exclude const on Objects
+    const TypeEntry* typeEntry = type->typeEntry();
+    Options flags = getConverterOptions(type);
+    writeBaseConversion(s, type, context, flags);
     s << "toPython";
 
     if (!argumentName.isEmpty())
@@ -789,7 +792,10 @@ QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType
     } else {
         QString str;
         QTextStream s(&str);
-        writeBaseConversion(s, metaType, 0);
+        // exclude const on Objects
+        const TypeEntry* typeEntry = metaType->typeEntry();
+        Options flags = getConverterOptions(metaType);
+        writeBaseConversion(s, metaType, 0, flags);
         s.flush();
         return str + "checkType";
     }
@@ -1643,5 +1649,20 @@ bool ShibokenGenerator::pythonFunctionWrapperUsesListOfArguments(const OverloadD
                      || overloadData.referenceFunction()->isConstructor()
                      || overloadData.hasArgumentWithDefaultValue();
     return usePyArgs;
+}
+
+Generator::Options ShibokenGenerator::getConverterOptions(const AbstractMetaType* metaType)
+{
+    // exclude const on Objects
+    Options flags;
+    const TypeEntry* type = metaType->typeEntry();
+    bool isCStr = isCString(metaType);
+    if (metaType->indirections() && !isCStr)
+        flags = ExcludeConst;
+    else if (type->isPrimitive() && !isCStr)
+        flags = ExcludeConst | ExcludeReference;
+    else if (type->isValue() && metaType->isConstant() && metaType->isReference())
+        flags = ExcludeConst | ExcludeReference; // const refs become just the value, but pure refs must remain pure.
+    return flags;
 }
 

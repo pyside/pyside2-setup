@@ -1477,15 +1477,7 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
     bool isWrappedCppClass = type->isValue() || type->isObject();
 
     // exclude const on Objects
-    Options flags;
-    bool isCStr = isCString(argType);
-    if (argType->indirections() && !isCStr)
-        flags = ExcludeConst;
-    else if (type->isPrimitive() && !isCStr)
-        flags = ExcludeConst | ExcludeReference;
-    else if (type->isValue() && argType->isConstant() && argType->isReference())
-        flags = ExcludeConst | ExcludeReference; // const refs become just the value, but pure refs must remain pure.
-
+    Options flags = getConverterOptions(argType);
     typeName = translateTypeForWrapperMethod(argType, context, flags).trimmed();
 
     if (isWrappedCppClass)
