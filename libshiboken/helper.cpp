@@ -28,32 +28,45 @@ namespace Shiboken
 bool
 PySequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defaultAppName)
 {
+    return sequenceToArgcArgv(argList, argc, argv, defaultAppName);
+}
+
+bool
+sequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defaultAppName)
+{
     if (!PySequence_Check(argList))
         return false;
 
+    if (!defaultAppName)
+        defaultAppName = "PySideApplication";
+
     // Check all items
-    int numArgs = PySequence_Size(argList);
-    for (int i = 0; i < numArgs; ++i)
-        if (!PyString_Check(PySequence_GetItem(argList, i)))
+    Shiboken::AutoDecRef args(PySequence_Fast(argList, 0));
+    int numArgs = PySequence_Fast_GET_SIZE(argList);
+    for (int i = 0; i < numArgs; ++i) {
+        PyObject* item = PySequence_Fast_GET_ITEM(args.object(), i);
+        if (!PyString_Check(item) && !PyUnicode_Check(item))
             return false;
+    }
 
-    bool addAppName = !numArgs && defaultAppName;
-    *argc = addAppName ? 1 : numArgs;
-
+    *argc = numArgs + 1;
     *argv = new char*[*argc];
     for (int i = 0; i < numArgs; ++i) {
-        PyObject* item = PySequence_GetItem(argList, i);
-        char* string = PyString_AS_STRING(item);
-        int size = strlen(string);
-        (*argv)[i] = new char[size+1];
-        (*argv)[i] = strcpy((*argv)[i], string);
-        Py_DECREF(item);
+        PyObject* item = PySequence_Fast_GET_ITEM(args.object(), i);
+        char* string;
+        if (PyUnicode_Check(item)) {
+            Shiboken::AutoDecRef utf8(PyUnicode_AsUTF8String(item));
+            string = strdup(PyString_AS_STRING(utf8.object()));
+        } else {
+            string = strdup(PyString_AS_STRING(item));
+        }
+        (*argv)[i+1] = string;
     }
 
-    if (addAppName) {
-        (*argv)[0] = new char[strlen(defaultAppName)+1];
-        (*argv)[0] = strcpy((*argv)[0], defaultAppName);
-    }
+    // Try to get the script name
+    PyObject* globals = PyEval_GetGlobals();
+    PyObject* appName = PyDict_GetItemString(globals, "__file__");
+    (*argv)[0] = strdup(appName ? PyString_AS_STRING(appName) : defaultAppName);
     return true;
 }
 

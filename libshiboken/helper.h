@@ -67,12 +67,20 @@ inline PyObject* makeTuple(const A& a, const B& b, const C& c, const D& d, const
 
 /**
 * It transforms a python sequence into two C variables, argc and argv.
-* If the sequence is empty and defaultAppName was provided, argc will be 1 and
-* argv will have a copy of defaultAppName.
+* This function tries to find the application (script) name and put it into argv[0], if
+* the application name can't be guessed, defaultAppName will be used.
 *
-* \note argc and argv *should* be deleted by the user.
+* No memory is allocated is an error occur.
+*
+* \note argc must be a valid address.
+* \note The argv array is allocated using new operator and each item is allocated using malloc.
 * \returns True on sucess, false otherwise.
 */
+LIBSHIBOKEN_API bool sequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defaultAppName = 0);
+
+/**
+ * \deprecated Use sequenceToArgcArgv instead.
+ */
 LIBSHIBOKEN_API bool PySequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defaultAppName = 0);
 
 /**
