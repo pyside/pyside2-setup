@@ -54,7 +54,7 @@ const char* InjectCode::simpleMethod2()
 
 const char* InjectCode::simpleMethod3(int argc, char** argv)
 {
-    for (int i = 0; i < argc; ++i)
+    for (int i = 1; i < argc; ++i)
         m_valueHolder += argv[i];
     return m_valueHolder.c_str();
 }

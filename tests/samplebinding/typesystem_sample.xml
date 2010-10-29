@@ -914,7 +914,7 @@
             <inject-code class="target" position="beginning">
                 int argc;
                 char** argv;
-                if (!PySequenceToArgcArgv(%PYARG_1, &amp;argc, &amp;argv)) {
+                if (!sequenceToArgcArgv(%PYARG_1, &amp;argc, &amp;argv)) {
                     PyErr_SetString(PyExc_TypeError, "error");
                     return 0;
                 }
@@ -922,7 +922,7 @@
                 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](foo);
 
                 for (int i = 0; i &lt; argc; ++i)
-                    delete[] argv[i];
+                    free(argv[i]);
                 delete[] argv;
             </inject-code>
         </modify-function>
@@ -938,7 +938,7 @@
             <inject-code class="target" position="beginning">
                 int argc;
                 char** argv;
-                if (!PySequenceToArgcArgv(%PYARG_1, &amp;argc, &amp;argv)) {
+                if (!sequenceToArgcArgv(%PYARG_1, &amp;argc, &amp;argv)) {
                     PyErr_SetString(PyExc_TypeError, "error");
                     return 0;
                 }
@@ -946,7 +946,7 @@
                 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](foo);
 
                 for (int i = 0; i &lt; argc; ++i)
-                    delete[] argv[i];
+                    free(argv[i]);
                 delete[] argv;
             </inject-code>
         </modify-function>
