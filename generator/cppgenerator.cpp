@@ -940,7 +940,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     // Create metaObject and register signal/slot
     if (metaClass->isQObject() && usePySideExtensions()) {
         s << endl << INDENT << "// QObject setup" << endl;
-        s << INDENT << "PySide::signalUpdateSource(self);" << endl;
+        s << INDENT << "PySide::Signal::updateSourceObject(self);" << endl;
         s << INDENT << "metaObject = cptr->metaObject(); // <- init python qt properties" << endl;
         s << INDENT << "if (kwds && !PySide::fillQtProperties(self, metaObject, kwds, argNames, " << argNamesSet.count() << "))" << endl;
         {
@@ -3025,14 +3025,14 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
         return;
 
     s << INDENT << "// Initialize signals" << endl;
-    s << INDENT << "PyObject* signal_item;" << endl << endl;
+    s << INDENT << "PySideSignal* signal_item;" << endl << endl;
 
     foreach(QString funcName, signatures.keys()) {
-        s << INDENT << "signal_item = PySide::signalNew(\"" << funcName <<"\"";
+        s << INDENT << "signal_item = PySide::Signal::newObject(\"" << funcName <<"\"";
         foreach(QString signature, signatures[funcName])
             s << ", \"" + signature << "\"";
         s << ", NULL);" << endl;
-        s << INDENT << "PySide::addSignalToWrapper(&" + cpythonTypeName(metaClass) + ", \"";
+        s << INDENT << "PySide::Signal::addSignalToWrapper(&" + cpythonTypeName(metaClass) + ", \"";
         s << funcName << "\", signal_item);" << endl;
         s << INDENT << "Py_DECREF(signal_item);" << endl;
     }
@@ -3514,8 +3514,8 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
         s << INDENT << "if (attr && PyObject_TypeCheck(attr, &PySideSignalType)) {" << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << "PyObject* signal = reinterpret_cast<PyObject*>(PySide::signalInitialize(attr, name, self));" << endl
-              << INDENT << "PyObject_SetAttr(self, name, signal);" << endl
+            s << INDENT << "PyObject* signal = reinterpret_cast<PyObject*>(PySide::Signal::initialize(reinterpret_cast<PySideSignal*>(attr), name, self));" << endl
+              << INDENT << "PyObject_SetAttr(self, name, reinterpret_cast<PyObject*>(signal));" << endl
               << INDENT << "return signal;" << endl;
         }
         s << INDENT << "}" << endl;
@@ -3542,9 +3542,8 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
               << INDENT << "if (signalList.size() > 0) {" << endl;
             {
                 Indentation indent(INDENT);
-                s << INDENT << "PyObject* pySignal = PySide::signalNewFromMethod(self, signalList);" << endl
+                s << INDENT << "PyObject* pySignal = reinterpret_cast<PyObject*>(PySide::Signal::newObjectFromMethod(self, signalList));" << endl
                   << INDENT << "PyObject_SetAttr(self, name, pySignal);" << endl
-                  << INDENT << "PyObject_GenericSetAttr(self, name, pySignal);" << endl
                   << INDENT << "return pySignal;" << endl;
             }
             s << INDENT << "}" << endl;

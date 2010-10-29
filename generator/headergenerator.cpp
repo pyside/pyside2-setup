@@ -436,7 +436,7 @@ void HeaderGenerator::finishGeneration()
             s << INDENT << INDENT << "typeName = typeid(*value).name();" << endl;
             s << INDENT << "PyObject* pyObj = Shiboken::SbkBaseWrapper_New(reinterpret_cast<SbkBaseWrapperType*>(SbkType<" << metaClass->qualifiedCppName() << " >()),"
             << "value, hasOwnership, isExactType, typeName);" << endl;
-            s << INDENT << "PySide::signalUpdateSource(pyObj);" << endl;
+            s << INDENT << "PySide::Signal::updateSourceObject(pyObj);" << endl;
             s << INDENT << "return pyObj;" << endl;
             s << '}' << endl;
 
