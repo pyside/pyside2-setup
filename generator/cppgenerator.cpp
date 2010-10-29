@@ -3518,8 +3518,18 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
         }
         s << INDENT << "}" << endl;
 
-        s << INDENT << "//search on metaobject (avoid internal attributes started with '__')" << endl
-          << INDENT << "if (!attr && !QString(PyString_AS_STRING(name)).startsWith(\"__\")) {" << endl;
+        //mutate native signals to signal instance type
+        s << INDENT << "if (attr && PyObject_TypeCheck(attr, &PySideSignalType)) {" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "PyObject* signal = reinterpret_cast<PyObject*>(PySide::signalInitialize(attr, name, self));" << endl
+              << INDENT << "PyObject_SetAttr(self, name, signal);" << endl
+              << INDENT << "return signal;" << endl;
+        }
+        s << INDENT << "}" << endl;
+
+        //search on metaobject (avoid internal attributes started with '__')";
+        s << INDENT << "if (!attr && !QString(PyString_AS_STRING(name)).startsWith(\"__\")) {" << endl;
         {
             Indentation indent(INDENT);
             s << INDENT << "QObject* cppSelf = Converter<QObject*>::toCpp(self);" << endl
