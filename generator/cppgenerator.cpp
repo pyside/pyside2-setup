@@ -2005,25 +2005,41 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             } else {
                 if (func->ownerClass()) {
 #ifndef AVOID_PROTECTED_HACK
-                    if (!func->isStatic())
+                    if (func->isStatic())
+                        mc << func->ownerClass()->qualifiedCppName() << "::";
+                    else
                         mc << CPP_SELF_VAR "->";
-                    if (!func->isAbstract())
-                        mc << "::" << func->ownerClass()->qualifiedCppName() << "::";
+
+                    if (!func->isAbstract() && func->isVirtual())
+                        mc << "::%CLASS_NAME::";
+
                     mc << func->originalName();
 #else
-                    if (!func->isStatic()) {
+                    if (func->isStatic())
+                        mc << func->ownerClass()->qualifiedCppName() << "::";
+                    else {
                         if (func->isProtected())
                             mc << "((" << wrapperName(func->ownerClass()) << "*) ";
                         mc << CPP_SELF_VAR << (func->isProtected() ? ")" : "") << "->";
                     }
-                    if (!func->isAbstract())
-                        mc << (func->isProtected() ? wrapperName(func->ownerClass()) : "::" + func->ownerClass()->qualifiedCppName()) << "::";
+                    if (!func->isAbstract() && func->isVirtual())
+                        mc << (func->isProtected() ? wrapperName(func->ownerClass()) : "::%CLASS_NAME::");
                     mc << func->originalName() << (func->isProtected() ? "_protected" : "");
 #endif
                 } else {
                     mc << func->originalName();
                 }
                 mc << '(' << userArgs.join(", ") << ')';
+                if (!func->isAbstract() && func->isVirtual()) {
+                    mc.flush();
+                    QString virtualCall(methodCall);
+                    QString normalCall(methodCall);
+
+                    virtualCall = virtualCall.replace("%CLASS_NAME", func->ownerClass()->qualifiedCppName());
+                    normalCall = normalCall.replace("::%CLASS_NAME::", "");
+                    methodCall = "";
+                    mc << "(Shiboken::isUserType(self) ? " << virtualCall << ":" <<  normalCall << ")";
+                }
             }
         }
 
