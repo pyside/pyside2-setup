@@ -516,7 +516,6 @@ void ShibokenGenerator::writeToPythonConversion(QTextStream& s, const AbstractMe
         return;
 
     // exclude const on Objects
-    const TypeEntry* typeEntry = type->typeEntry();
     Options flags = getConverterOptions(type);
     writeBaseConversion(s, type, context, flags);
     s << "toPython";
@@ -793,7 +792,6 @@ QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType
         QString str;
         QTextStream s(&str);
         // exclude const on Objects
-        const TypeEntry* typeEntry = metaType->typeEntry();
         Options flags = getConverterOptions(metaType);
         writeBaseConversion(s, metaType, 0, flags);
         s.flush();
