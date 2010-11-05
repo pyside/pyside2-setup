@@ -168,12 +168,13 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         s << "#include <pyside.h>" << endl;
     }
 
-    s << "#include <typeresolver.h>\n";
-    s << "#include <typeinfo>\n";
+    s << "#include <typeresolver.h>" << endl;
+    s << "#include <typeinfo>" << endl;
     if (usePySideExtensions()) {
         if (metaClass->isQObject()) {
-            s << "#include <signalmanager.h>\n";
-            s << "#include <dynamicqmetaobject.h>\n";
+            s << "#include <signalmanager.h>" << endl;
+            s << "#include <dynamicqmetaobject.h>" << endl;
+            s << "#include <pysidemetafunction.h>" << endl;
         }
     }
 
@@ -3550,9 +3551,30 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
             {
                 Indentation indent(INDENT);
                 s << INDENT << "QMetaMethod method = metaObject->method(i);" << endl
-                  << INDENT << "if ((method.methodType() == QMetaMethod::Signal) &&" << endl
-                  << INDENT << "QString(method.signature()).startsWith(cname))" << endl
-                  << INDENT << "signalList.append(method);" << endl;
+                  << INDENT << "if (QString(method.signature()).startsWith(cname)) {" << endl;
+                {
+                    Indentation indent(INDENT);
+                    s << INDENT << "if (method.methodType() == QMetaMethod::Signal) {" << endl;
+                    {
+                        Indentation indent(INDENT);
+                        s << INDENT << "signalList.append(method);" << endl;
+                    }
+                    s << INDENT << "} else {" << endl;
+                    {
+                        Indentation indent(INDENT);
+                        s << INDENT << "PySideMetaFunction* func = PySide::MetaFunction::newObject(cppSelf, i);" << endl
+                          << INDENT << "if (func) {" << endl;
+                        {
+                            Indentation indent(INDENT);
+                            s << INDENT << "PyObject_SetAttr(self, name, (PyObject*)func);" << endl
+                              << INDENT << "return (PyObject*)func;" << endl;
+                        }
+                        s << INDENT << "}" << endl;
+                    }
+                    s << INDENT << "}" << endl;
+                }
+                s << INDENT << "}" << endl;
+
             }
             s << INDENT << "}" << endl
               << INDENT << "if (signalList.size() > 0) {" << endl;
