@@ -381,7 +381,7 @@ void HeaderGenerator::finishGeneration()
 
     s << "#include <Python.h>" << endl;
     s << "#include <conversions.h>" << endl;
-    s << "#include <pyenum.h>" << endl;
+    s << "#include <sbkenum.h>" << endl;
     s << "#include <basewrapper.h>" << endl;
     s << "#include <bindingmanager.h>" << endl;
     s << "#include <memory>" << endl << endl;

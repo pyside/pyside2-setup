@@ -28,7 +28,7 @@
 #include <memory>
 #include <typeinfo>
 
-#include "pyenum.h"
+#include "sbkenum.h"
 #include "basewrapper.h"
 #include "bindingmanager.h"
 #include "sbkdbg.h"

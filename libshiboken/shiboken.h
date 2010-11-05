@@ -31,7 +31,7 @@
 #include "gilstate.h"
 #include "threadstatesaver.h"
 #include "helper.h"
-#include "pyenum.h"
+#include "sbkenum.h"
 #include "shibokenmacros.h"
 #include "typeresolver.h"
 

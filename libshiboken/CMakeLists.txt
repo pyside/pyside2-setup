@@ -26,7 +26,7 @@ set(libshiboken_SRC
 basewrapper.cpp
 gilstate.cpp
 helper.cpp
-pyenum.cpp
+sbkenum.cpp
 bindingmanager.cpp
 threadstatesaver.cpp
 typeresolver.cpp
@@ -49,7 +49,7 @@ install(FILES
         conversions.h
         gilstate.h
         helper.h
-        pyenum.h
+        sbkenum.h
         python25compat.h
         sbkdbg.h
         shiboken.h

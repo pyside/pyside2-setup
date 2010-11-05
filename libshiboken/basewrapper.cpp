@@ -22,7 +22,7 @@
 
 #include "basewrapper.h"
 #include "basewrapper_p.h"
-#include "pyenum.h"
+#include "sbkenum.h"
 #include <cstddef>
 #include <algorithm>
 #include "autodecref.h"
