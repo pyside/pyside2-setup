@@ -431,8 +431,6 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
             s << endl;
         }
 
-        writeEnumDefinition(s, cppEnum);
-
         if (hasFlags) {
             // Write Enum as Flags definition (at the moment used only by QFlags<enum>)
             writeFlagsDefinition(s, cppEnum);
@@ -2927,13 +2925,18 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
     s << cppEnum->name() << endl;
 
     if (!cppEnum->isAnonymous()) {
-        s << INDENT << cpythonTypeNameExt(cppEnum->typeEntry()) << " = &" << cpythonTypeName(cppEnum->typeEntry()) << ';' << endl;
-        s << INDENT << "if (PyType_Ready((PyTypeObject*)&" << cpythonName << "_Type) < 0)" << endl;
+        s << INDENT << "PyTypeObject* " << cpythonName << " = Shiboken::Enum::newType(\"" << cppEnum->name() << "\");" << endl;
+
+        if (cppEnum->typeEntry()->flags())
+            s << INDENT << cpythonName << "->tp_as_number = &" << cpythonName << "_as_number;" << endl;
+
+        s << INDENT << cpythonTypeNameExt(cppEnum->typeEntry()) << " = " << cpythonName << ';' << endl;
+        s << INDENT << "if (PyType_Ready(" << cpythonName << ") < 0)" << endl;
         s << INDENT << INDENT << "return;" << endl;
 
         s << INDENT << addFunction << endl;
         s << INDENT << INDENT << INDENT << '\"' << cppEnum->name() << "\",";
-        s << "((PyObject*)&" << cpythonName << "_Type));" << endl << endl;
+        s << "((PyObject*)" << cpythonName << "));" << endl << endl;
 
         FlagsTypeEntry* flags = cppEnum->typeEntry()->flags();
         if (flags) {
@@ -2970,13 +2973,12 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
 #endif
 
         bool shouldDecrefNumber = false;
-        QString enumItemText = "enum_item";
+        QString enumItemText = "enumItem";
         if (!cppEnum->isAnonymous()) {
-            s << INDENT << "enum_item = Shiboken::SbkEnumObject_New(&";
-            s << cpythonName << "_Type," << enumValueText << ", \"";
-            s << enumValue->name() << "\");" << endl;
+            s << INDENT << "enumItem = Shiboken::Enum::newItem(" << cpythonName << "," << enumValueText;
+            s << ", \"" << enumValue->name() << "\");" << endl;
         } else if (cppEnum->enclosingClass()) {
-            s << INDENT << "enum_item = PyInt_FromLong(" << enumValueText << ");" << endl;
+            s << INDENT << "enumItem = PyInt_FromLong(" << enumValueText << ");" << endl;
             shouldDecrefNumber = true;
         } else {
             enumItemText = enumValueText;
@@ -2984,13 +2986,13 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
 
         s << INDENT << addFunction << '"' << enumValue->name() << "\", " << enumItemText << ");" << endl;
         if (shouldDecrefNumber)
-            s << INDENT << "Py_DECREF(enum_item);" << endl;
+            s << INDENT << "Py_DECREF(enumItem);" << endl;
 
         if (!cppEnum->isAnonymous()) {
-            s << INDENT << "Py_DECREF(enum_item);" << endl;
-            s << INDENT << "PyDict_SetItemString(" << cpythonName << "_Type.tp_dict,";
-            s << '"' << enumValue->name() << "\", enum_item);" << endl;
-            s << INDENT << "Py_DECREF(enum_item);" << endl;
+            s << INDENT << "Py_DECREF(enumItem);" << endl;
+            s << INDENT << "PyDict_SetItemString(" << cpythonName << "->tp_dict,";
+            s << '"' << enumValue->name() << "\", enumItem);" << endl;
+            s << INDENT << "Py_DECREF(enumItem);" << endl;
         }
     }
 
@@ -3003,7 +3005,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
     }
 
 
-    s << endl;
+    s << INDENT << "// end of enum " << cppEnum->name() << endl << endl;
 }
 
 void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaClass* metaClass)
@@ -3053,98 +3055,6 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
         s << funcName << "\", signal_item);" << endl;
         s << INDENT << "Py_DECREF(signal_item);" << endl;
     }
-    s << endl;
-}
-
-void CppGenerator::writeEnumNewMethod(QTextStream& s, const AbstractMetaEnum* cppEnum)
-{
-    QString cpythonName = cpythonEnumName(cppEnum);
-    s << "static PyObject* ";
-    s << cpythonName << "_New(PyTypeObject* type, PyObject* args, PyObject* kwds)" << endl;
-    s << '{' << endl;
-    s << INDENT << "int item_value = 0;" << endl;
-    s << INDENT << "if (!PyArg_ParseTuple(args, \"|i:__new__\", &item_value))" << endl;
-    {
-        Indentation indent(INDENT);
-        s << INDENT << "return 0;" << endl;
-    }
-    s << INDENT << "PyObject* self = Shiboken::SbkEnumObject_New(type, item_value);" << endl << endl;
-    s << INDENT << "if (!self)" << endl;
-    {
-        Indentation indent(INDENT);
-        s << INDENT << "return 0;" << endl;
-    }
-    s << INDENT << "return self;" << endl << '}' << endl;
-}
-
-void CppGenerator::writeEnumDefinition(QTextStream& s, const AbstractMetaEnum* cppEnum)
-{
-    QString cpythonName = cpythonEnumName(cppEnum);
-    QString tp_as_number("0");
-    if (cppEnum->typeEntry()->flags())
-        tp_as_number = QString("&%1_as_number").arg(cpythonName);
-
-
-    s << "static PyGetSetDef " << cpythonName << "_getsetlist[] = {" << endl;
-    s << INDENT << "{const_cast<char*>(\"name\"), (getter)Shiboken::SbkEnumObject_name}," << endl;
-    s << INDENT << "{0}  // Sentinel" << endl;
-    s << "};" << endl << endl;
-
-    QString newFunc = cpythonName + "_New";
-
-    s << "// forward declaration of new function" << endl;
-    s << "static PyObject* " << newFunc << "(PyTypeObject*, PyObject*, PyObject*);" << endl << endl;
-
-    s << "static PyTypeObject " << cpythonName << "_Type = {" << endl;
-    s << INDENT << "PyObject_HEAD_INIT(&Shiboken::SbkEnumType_Type)" << endl;
-    s << INDENT << "/*ob_size*/             0," << endl;
-    s << INDENT << "/*tp_name*/             \"" << cppEnum->name() << "\"," << endl;
-    s << INDENT << "/*tp_basicsize*/        sizeof(Shiboken::SbkEnumObject)," << endl;
-    s << INDENT << "/*tp_itemsize*/         0," << endl;
-    s << INDENT << "/*tp_dealloc*/          0," << endl;
-    s << INDENT << "/*tp_print*/            0," << endl;
-    s << INDENT << "/*tp_getattr*/          0," << endl;
-    s << INDENT << "/*tp_setattr*/          0," << endl;
-    s << INDENT << "/*tp_compare*/          0," << endl;
-    s << INDENT << "/*tp_repr*/             Shiboken::SbkEnumObject_repr," << endl;
-    s << INDENT << "/*tp_as_number*/        " << tp_as_number << ',' << endl;
-    s << INDENT << "/*tp_as_sequence*/      0," << endl;
-    s << INDENT << "/*tp_as_mapping*/       0," << endl;
-    s << INDENT << "/*tp_hash*/             0," << endl;
-    s << INDENT << "/*tp_call*/             0," << endl;
-    s << INDENT << "/*tp_str*/              Shiboken::SbkEnumObject_repr," << endl;
-    s << INDENT << "/*tp_getattro*/         0," << endl;
-    s << INDENT << "/*tp_setattro*/         0," << endl;
-    s << INDENT << "/*tp_as_buffer*/        0," << endl;
-    s << INDENT << "/*tp_flags*/            Py_TPFLAGS_DEFAULT," << endl;
-    s << INDENT << "/*tp_doc*/              0," << endl;
-    s << INDENT << "/*tp_traverse*/         0," << endl;
-    s << INDENT << "/*tp_clear*/            0," << endl;
-    s << INDENT << "/*tp_richcompare*/      0," << endl;
-    s << INDENT << "/*tp_weaklistoffset*/   0," << endl;
-    s << INDENT << "/*tp_iter*/             0," << endl;
-    s << INDENT << "/*tp_iternext*/         0," << endl;
-    s << INDENT << "/*tp_methods*/          0," << endl;
-    s << INDENT << "/*tp_members*/          0," << endl;
-    s << INDENT << "/*tp_getset*/           " << cpythonName << "_getsetlist," << endl;
-    s << INDENT << "/*tp_base*/             &PyInt_Type," << endl;
-    s << INDENT << "/*tp_dict*/             0," << endl;
-    s << INDENT << "/*tp_descr_get*/        0," << endl;
-    s << INDENT << "/*tp_descr_set*/        0," << endl;
-    s << INDENT << "/*tp_dictoffset*/       0," << endl;
-    s << INDENT << "/*tp_init*/             0," << endl;
-    s << INDENT << "/*tp_alloc*/            0," << endl;
-    s << INDENT << "/*tp_new*/              " << newFunc << ',' << endl;
-    s << INDENT << "/*tp_free*/             0," << endl;
-    s << INDENT << "/*tp_is_gc*/            0," << endl;
-    s << INDENT << "/*tp_bases*/            0," << endl;
-    s << INDENT << "/*tp_mro*/              0," << endl;
-    s << INDENT << "/*tp_cache*/            0," << endl;
-    s << INDENT << "/*tp_subclasses*/       0," << endl;
-    s << INDENT << "/*tp_weaklist*/         0" << endl;
-    s << "};" << endl << endl;
-
-    writeEnumNewMethod(s, cppEnum);
     s << endl;
 }
 
@@ -3226,7 +3136,7 @@ void CppGenerator::writeFlagsDefinition(QTextStream& s, const AbstractMetaEnum* 
     s << INDENT << "/*tp_setattr*/          0," << endl;
     s << INDENT << "/*tp_compare*/          0," << endl;
     s << INDENT << "/*tp_repr*/             0," << endl;
-    s << INDENT << "/*tp_as_number*/        " << enumName << "_Type.tp_as_number," << endl;
+    s << INDENT << "/*tp_as_number*/        &" << enumName << "_as_number," << endl;
     s << INDENT << "/*tp_as_sequence*/      0," << endl;
     s << INDENT << "/*tp_as_mapping*/       0," << endl;
     s << INDENT << "/*tp_hash*/             0," << endl;
@@ -3368,7 +3278,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
 
     if (!metaClass->enums().isEmpty()) {
         s << INDENT << "// Initialize enums" << endl;
-        s << INDENT << "PyObject* enum_item;" << endl << endl;
+        s << INDENT << "PyObject* enumItem;" << endl << endl;
     }
 
     foreach (const AbstractMetaEnum* cppEnum, metaClass->enums()) {
@@ -3703,7 +3613,6 @@ void CppGenerator::finishGeneration()
             foreach (const AbstractMetaEnum* cppEnum, globalEnums()) {
                 if (cppEnum->isAnonymous() || cppEnum->isPrivate())
                     continue;
-                writeEnumDefinition(s, cppEnum);
                 s << endl;
             }
 
@@ -3781,7 +3690,7 @@ void CppGenerator::finishGeneration()
 
         if (!globalEnums().isEmpty()) {
             s << INDENT << "// Initialize enums" << endl;
-            s << INDENT << "PyObject* enum_item;" << endl << endl;
+            s << INDENT << "PyObject* enumItem;" << endl << endl;
         }
 
         foreach (const AbstractMetaEnum* cppEnum, globalEnums()) {

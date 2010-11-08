@@ -26,36 +26,27 @@
 #include <Python.h>
 #include "shibokenmacros.h"
 
-namespace Shiboken
-{
-
 extern "C"
 {
 
-typedef struct {
-    PyObject_HEAD
-    long ob_ival;
-    PyObject* ob_name;
-} SbkEnumObject;
-
 extern LIBSHIBOKEN_API PyTypeObject SbkEnumType_Type;
 
-LIBSHIBOKEN_API PyObject* SbkEnumObject_repr(PyObject* self);
-LIBSHIBOKEN_API PyObject* SbkEnumObject_name(PyObject* self);
-
 } // extern "C"
+
+namespace Shiboken
+{
 
 inline bool isShibokenEnum(PyObject* pyObj)
 {
     return pyObj->ob_type->ob_type == &SbkEnumType_Type;
 }
 
-LIBSHIBOKEN_API PyObject* SbkEnumObject_New(PyTypeObject *instanceType,
-                           long item_value,
-                           const char* item_name);
-LIBSHIBOKEN_API PyObject* SbkEnumObject_New(PyTypeObject *instanceType,
-                           long item_value,
-                           PyObject* item_name = 0);
+namespace Enum
+{
+    LIBSHIBOKEN_API PyObject* newItem(PyTypeObject* enumType, long itemValue, const char* itemName = 0);
+    LIBSHIBOKEN_API PyTypeObject* newType(const char* name);
+    LIBSHIBOKEN_API long getValue(PyObject* enumItem);
+}
 
 } // namespace Shiboken
 

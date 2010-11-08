@@ -21,12 +21,52 @@
  */
 
 #include "sbkenum.h"
-
-namespace Shiboken
-{
+#include <cstring>
+#include <list>
+#include "sbkdbg.h"
+#include "autodecref.h"
 
 extern "C"
 {
+
+struct SbkEnumObject
+{
+    PyObject_HEAD
+    long ob_ival;
+    PyObject* ob_name;
+};
+
+static PyObject* SbkEnumObject_repr(PyObject* self)
+{
+    return PyString_FromFormat("<enum-item %s.%s (%ld)>",
+                               self->ob_type->tp_name,
+                               PyString_AS_STRING(((SbkEnumObject*)self)->ob_name),
+                               ((SbkEnumObject*)self)->ob_ival);
+}
+
+static PyObject* SbkEnumObject_name(PyObject* self, void*)
+{
+    Py_INCREF(((SbkEnumObject*)self)->ob_name);
+    return ((SbkEnumObject*)self)->ob_name;
+}
+
+static PyObject* SbkEnum_tp_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
+{
+    int itemValue = 0;
+    if (!PyArg_ParseTuple(args, "|i:__new__", &itemValue))
+        return 0;
+
+    SbkEnumObject* self = PyObject_New(SbkEnumObject, type);
+    if (!self)
+        return 0;
+    self->ob_ival = itemValue;
+    return reinterpret_cast<PyObject*>(self);
+}
+
+static PyGetSetDef SbkEnumGetSetList[] = {
+    {const_cast<char*>("name"), &SbkEnumObject_name},
+    {0}  // Sentinel
+};
 
 PyTypeObject SbkEnumType_Type = {
     PyObject_HEAD_INIT(0)
@@ -77,65 +117,98 @@ PyTypeObject SbkEnumType_Type = {
     /*tp_weaklist*/         0
 };
 
-}
+} // extern "C"
 
-PyObject*
-SbkEnumObject_New(PyTypeObject *type, long item_value, PyObject* item_name)
+namespace Shiboken {
+
+class DeclaredEnumTypes
 {
-    if (!item_name)
-        item_name = PyString_FromString("");
-    SbkEnumObject* enum_obj = PyObject_New(SbkEnumObject, type);
-    enum_obj->ob_name = item_name;
-    enum_obj->ob_ival = item_value;
-    return (PyObject*) enum_obj;
-}
+public:
+    DeclaredEnumTypes();
+    ~DeclaredEnumTypes();
+    static DeclaredEnumTypes& instance();
+    void addEnumType(PyTypeObject* type);
+private:
+    DeclaredEnumTypes(const DeclaredEnumTypes&);
+    DeclaredEnumTypes& operator=(const DeclaredEnumTypes&);
+    std::list<PyTypeObject*> m_enumTypes;
+};
 
-PyObject*
-SbkEnumObject_New(PyTypeObject *type, long item_value, const char* item_name)
+namespace Enum {
+
+PyObject* newItem(PyTypeObject* enumType, long itemValue, const char* itemName)
 {
-    PyObject* py_item_name = 0;
-    if (item_name)
-        py_item_name = PyString_FromString(item_name);
+    if (!itemName)
+        itemName = "";
+    PyObject* pyItemName = PyString_FromString(itemName);
 
-    PyObject* enum_obj = SbkEnumObject_New(type, item_value, py_item_name);
-    if (!enum_obj) {
-        Py_XDECREF(py_item_name);
+    SbkEnumObject* enumObj = PyObject_New(SbkEnumObject, enumType);
+    if (!enumObj) {
+        Py_XDECREF(pyItemName);
         return 0;
     }
 
-    if (item_name) {
-        PyObject* values = PyDict_GetItemString(type->tp_dict, const_cast<char*>("values"));
+    enumObj->ob_name = pyItemName;
+    enumObj->ob_ival = itemValue;
+    if (itemName) {
+        PyObject* values = PyDict_GetItemString(enumType->tp_dict, const_cast<char*>("values"));
         if (!values) {
             values = PyDict_New();
-            PyDict_SetItemString(type->tp_dict, const_cast<char*>("values"), values);
+            PyDict_SetItemString(enumType->tp_dict, const_cast<char*>("values"), values);
             Py_DECREF(values); // ^ values still alive, because setitemstring incref it
         }
-        PyDict_SetItemString(values, item_name, enum_obj);
+        PyDict_SetItemString(values, itemName, reinterpret_cast<PyObject*>(enumObj));
     }
 
-    return enum_obj;
+    return reinterpret_cast<PyObject*>(enumObj);
 }
 
-extern "C"
+PyTypeObject* newType(const char* name)
 {
+    PyTypeObject* type = new PyTypeObject;
+    ::memset(type, 0, sizeof(PyTypeObject));
+    type->ob_type = &SbkEnumType_Type;
+    type->tp_basicsize = sizeof(SbkEnumObject);
+    type->tp_repr = &SbkEnumObject_repr;
+    type->tp_str = &SbkEnumObject_repr;
+    type->tp_flags = Py_TPFLAGS_DEFAULT;
+    type->tp_base = &PyInt_Type;
+    type->tp_name = name;
+    type->tp_getset = SbkEnumGetSetList;
+    type->tp_new = SbkEnum_tp_new;
 
-PyObject*
-SbkEnumObject_repr(PyObject* self)
-{
-    return PyString_FromFormat("<enum-item %s.%s (%ld)>",
-                               self->ob_type->tp_name,
-                               PyString_AS_STRING(((SbkEnumObject*)self)->ob_name),
-                               ((SbkEnumObject*)self)->ob_ival);
+    DeclaredEnumTypes::instance().addEnumType(type);
+    return type;
 }
 
-PyObject*
-SbkEnumObject_name(PyObject* self)
+long int getValue(PyObject* enumItem)
 {
-    Py_INCREF(((SbkEnumObject*)self)->ob_name);
-    return ((SbkEnumObject*)self)->ob_name;
+    return reinterpret_cast<SbkEnumObject*>(enumItem)->ob_ival;
 }
 
-} // extern "C"
+} // namespace Enum
 
-} // namespace Shiboken
+DeclaredEnumTypes& DeclaredEnumTypes::instance()
+{
+    static DeclaredEnumTypes me;
+    return me;
+}
 
+DeclaredEnumTypes::DeclaredEnumTypes()
+{
+}
+
+DeclaredEnumTypes::~DeclaredEnumTypes()
+{
+    std::list<PyTypeObject*>::const_iterator it = m_enumTypes.begin();
+    for (; it != m_enumTypes.end(); ++it)
+        delete *it;
+    m_enumTypes.clear();
+}
+
+void DeclaredEnumTypes::addEnumType(PyTypeObject* type)
+{
+    m_enumTypes.push_back(type);
+}
+
+}

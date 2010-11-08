@@ -491,11 +491,11 @@ struct EnumConverter
     static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<CppEnum*>(cppobj)); }
     static inline PyObject* toPython(CppEnum cppenum)
     {
-        return SbkEnumObject_New(SbkType<CppEnum>(), (long) cppenum);
+        return Shiboken::Enum::newItem(Shiboken::SbkType<CppEnum>(), (long) cppenum);
     }
-    static inline CppEnum toCpp(PyObject* pyobj)
+    static inline CppEnum toCpp(PyObject* pyObj)
     {
-        return (CppEnum) reinterpret_cast<SbkEnumObject*>(pyobj)->ob_ival;
+        return (CppEnum) Shiboken::Enum::getValue(pyObj);;
     }
 };
 
