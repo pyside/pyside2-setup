@@ -79,11 +79,6 @@ inline PyObject* makeTuple(const A& a, const B& b, const C& c, const D& d, const
 LIBSHIBOKEN_API bool sequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defaultAppName = 0);
 
 /**
- * \deprecated Use sequenceToArgcArgv instead.
- */
-LIBSHIBOKEN_API bool PySequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defaultAppName = 0);
-
-/**
  * Convert a python sequence into a heap-allocated array of ints.
  *
  * \returns The newly allocated array or NULL in case of error or empty sequence. Check with PyErr_Occurred

@@ -25,14 +25,7 @@
 namespace Shiboken
 {
 
-bool
-PySequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defaultAppName)
-{
-    return sequenceToArgcArgv(argList, argc, argv, defaultAppName);
-}
-
-bool
-sequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defaultAppName)
+bool sequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defaultAppName)
 {
     if (!PySequence_Check(argList))
         return false;
