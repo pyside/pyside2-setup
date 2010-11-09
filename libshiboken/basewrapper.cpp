@@ -388,9 +388,9 @@ void deallocWrapperWithPrivateDtor(PyObject* self)
     if (((SbkObject *)self)->weakreflist)
         PyObject_ClearWeakRefs(self);
 
-    BindingManager::instance().releaseWrapper(self);
+    BindingManager::instance().releaseWrapper(reinterpret_cast<SbkObject*>(self));
     clearReferences(reinterpret_cast<SbkObject*>(self));
-    Py_TYPE(reinterpret_cast<SbkObject*>(self))->tp_free(self);
+    self->ob_type->tp_free(self);
 }
 
 void keepReference(SbkObject* self, const char* key, PyObject* referredObject, bool append)
@@ -471,7 +471,7 @@ void deallocWrapper(PyObject* pyObj)
     if (sbkObj->weakreflist)
         PyObject_ClearWeakRefs(pyObj);
 
-    BindingManager::instance().releaseWrapper(pyObj);
+    BindingManager::instance().releaseWrapper(sbkObj);
     if (sbkObj->d->hasOwnership) {
         SbkBaseWrapperType* sbkType = reinterpret_cast<SbkBaseWrapperType*>(pyObj->ob_type);
         if (sbkType->is_multicpp) {

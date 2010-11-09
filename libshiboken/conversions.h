@@ -139,7 +139,7 @@ struct Converter<T*>
     {
         if (!cppobj)
             Py_RETURN_NONE;
-        PyObject* pyobj = BindingManager::instance().retrieveWrapper(cppobj);
+        PyObject* pyobj = reinterpret_cast<PyObject*>(BindingManager::instance().retrieveWrapper(cppobj));
         if (pyobj)
             Py_INCREF(pyobj);
         else
@@ -263,7 +263,7 @@ struct ObjectTypeConverter
     {
         if (!cppobj)
             Py_RETURN_NONE;
-        PyObject* pyobj = BindingManager::instance().retrieveWrapper(cppobj);
+        PyObject* pyobj = reinterpret_cast<PyObject*>(BindingManager::instance().retrieveWrapper(cppobj));
         if (pyobj)
             Py_INCREF(pyobj);
         else

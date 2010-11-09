@@ -41,9 +41,9 @@ public:
 
     bool hasWrapper(const void *cptr);
 
-    void registerWrapper(SbkObject* pyobj, void* cptr);
-    void releaseWrapper(PyObject* wrapper);
-    PyObject* retrieveWrapper(const void* cptr);
+    void registerWrapper(SbkObject* pyObj, void* cptr);
+    void releaseWrapper(SbkObject* wrapper);
+    SbkObject* retrieveWrapper(const void* cptr);
     PyObject* getOverride(const void* cptr, const char* methodName);
 
     /// Invalidate the Python wrapper and removes the relations from C++ pointers to the Python wrapper.
@@ -63,7 +63,7 @@ public:
     /// Called by wrapper destructor
     void destroyWrapper(const void* cptr);
     void destroyWrapper(SbkObject* wrapper);
-    std::set<PyObject*> getAllPyObjects();
+    std::set<SbkObject*> getAllPyObjects();
 private:
     ~BindingManager();
     // disable copy

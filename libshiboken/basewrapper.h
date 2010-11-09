@@ -175,9 +175,6 @@ LIBSHIBOKEN_API bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctor
 #define SbkBaseWrapper_Check(op) PyObject_TypeCheck(op, (PyTypeObject*)&Shiboken::SbkBaseWrapper_Type)
 #define SbkBaseWrapper_CheckExact(op) ((op)->ob_type == &Shiboken::SbkBaseWrapper_Type)
 
-#define SbkBaseWrapper_instanceDict(pyobj)           (((SbkObject*)pyobj)->ob_dict)
-#define SbkBaseWrapper_setInstanceDict(pyobj,d)      (((SbkObject*)pyobj)->ob_dict = d)
-
 LIBSHIBOKEN_API PyObject*
 SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
                    void* cptr,

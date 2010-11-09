@@ -32,7 +32,7 @@
 namespace Shiboken
 {
 
-typedef google::dense_hash_map<const void*, PyObject*> WrapperMap;
+typedef google::dense_hash_map<const void*, SbkObject*> WrapperMap;
 
 class Graph
 {
@@ -111,7 +111,7 @@ struct BindingManager::BindingManagerPrivate {
 
     BindingManagerPrivate() : destroying(false) {}
     void releaseWrapper(void* cptr);
-    void assignWrapper(PyObject* wrapper, const void* cptr);
+    void assignWrapper(SbkObject* wrapper, const void* cptr);
 
 };
 
@@ -122,7 +122,7 @@ void BindingManager::BindingManagerPrivate::releaseWrapper(void* cptr)
         wrapperMapper.erase(iter);
 }
 
-void BindingManager::BindingManagerPrivate::assignWrapper(PyObject* wrapper, const void* cptr)
+void BindingManager::BindingManagerPrivate::assignWrapper(SbkObject* wrapper, const void* cptr)
 {
     assert(cptr);
     WrapperMap::iterator iter = wrapperMapper.find(cptr);
@@ -162,29 +162,29 @@ bool BindingManager::hasWrapper(const void* cptr)
 {
     return m_d->wrapperMapper.count(cptr);
 }
-void BindingManager::registerWrapper(SbkObject* pyobj, void* cptr)
+void BindingManager::registerWrapper(SbkObject* pyObj, void* cptr)
 {
-    SbkBaseWrapperType* instanceType = reinterpret_cast<SbkBaseWrapperType*>(pyobj->ob_type);
+    SbkBaseWrapperType* instanceType = reinterpret_cast<SbkBaseWrapperType*>(pyObj->ob_type);
 
     if (instanceType->mi_init && !instanceType->mi_offsets)
         instanceType->mi_offsets = instanceType->mi_init(cptr);
-    m_d->assignWrapper(reinterpret_cast<PyObject*>(pyobj), cptr);
+    m_d->assignWrapper(pyObj, cptr);
     if (instanceType->mi_offsets) {
         int* offset = instanceType->mi_offsets;
         while (*offset != -1) {
             if (*offset > 0)
-                m_d->assignWrapper(reinterpret_cast<PyObject*>(pyobj), reinterpret_cast<void*>((std::size_t) cptr + (*offset)));
+                m_d->assignWrapper(pyObj, reinterpret_cast<void*>((std::size_t) cptr + (*offset)));
             offset++;
         }
     }
 }
 
-void BindingManager::releaseWrapper(PyObject* wrapper)
+void BindingManager::releaseWrapper(SbkObject* sbkObj)
 {
-    SbkBaseWrapperType* sbkType = reinterpret_cast<SbkBaseWrapperType*>(wrapper->ob_type);
-    int numBases = sbkType->is_multicpp ? getNumberOfCppBaseClasses(wrapper->ob_type) : 1;
+    SbkBaseWrapperType* sbkType = reinterpret_cast<SbkBaseWrapperType*>(sbkObj->ob_type);
+    int numBases = sbkType->is_multicpp ? getNumberOfCppBaseClasses(sbkObj->ob_type) : 1;
 
-    void** cptrs = reinterpret_cast<SbkObject*>(wrapper)->d->cptr;
+    void** cptrs = reinterpret_cast<SbkObject*>(sbkObj)->d->cptr;
     for (int i = 0; i < numBases; ++i) {
         void* cptr = cptrs[i];
         m_d->releaseWrapper(cptr);
@@ -199,7 +199,7 @@ void BindingManager::releaseWrapper(PyObject* wrapper)
     }
 }
 
-PyObject* BindingManager::retrieveWrapper(const void* cptr)
+SbkObject* BindingManager::retrieveWrapper(const void* cptr)
 {
     WrapperMap::iterator iter = m_d->wrapperMapper.find(cptr);
     if (iter == m_d->wrapperMapper.end())
@@ -209,22 +209,23 @@ PyObject* BindingManager::retrieveWrapper(const void* cptr)
 
 PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
 {
-    PyObject* wrapper = retrieveWrapper(cptr);
+    SbkObject* wrapper = retrieveWrapper(cptr);
     if (!wrapper)
         return 0;
 
-    if (SbkBaseWrapper_instanceDict(wrapper)) {
-        PyObject* method = PyDict_GetItemString(SbkBaseWrapper_instanceDict(wrapper), methodName);
+    if (wrapper->ob_dict) {
+        PyObject* method = PyDict_GetItemString(wrapper->ob_dict, methodName);
         if (method) {
-            Py_INCREF(method);
+            Py_INCREF((PyObject*)method);
             return method;
         }
     }
 
     PyObject* pyMethodName = PyString_FromString(methodName);
-    PyObject* method = PyObject_GetAttr(wrapper, pyMethodName);
+    PyObject* method = PyObject_GetAttr((PyObject*)wrapper, pyMethodName);
 
-    if (method && PyMethod_Check(method) && reinterpret_cast<PyMethodObject*>(method)->im_self == wrapper) {
+    if (method && PyMethod_Check(method)
+        && reinterpret_cast<PyMethodObject*>(method)->im_self == reinterpret_cast<PyObject*>(wrapper)) {
         PyObject* defaultMethod;
         PyObject* mro = wrapper->ob_type->tp_mro;
 
@@ -288,7 +289,7 @@ void BindingManager::invalidateWrapper(SbkObject* wrapper)
         m_d->destroying = parentDestroying;
     }
 
-    releaseWrapper(reinterpret_cast<PyObject*>(wrapper));
+    releaseWrapper(wrapper);
 }
 
 void BindingManager::invalidateWrapper(const void* cptr)
@@ -343,9 +344,9 @@ SbkBaseWrapperType* BindingManager::resolveType(void* cptr, Shiboken::SbkBaseWra
     return identifiedType ? identifiedType : type;
 }
 
-std::set< PyObject* > BindingManager::getAllPyObjects()
+std::set<SbkObject*> BindingManager::getAllPyObjects()
 {
-    std::set<PyObject*> pyObjects;
+    std::set<SbkObject*> pyObjects;
     const WrapperMap& wrappersMap = m_d->wrapperMapper;
     WrapperMap::const_iterator it = wrappersMap.begin();
     for (; it != wrappersMap.end(); ++it)
