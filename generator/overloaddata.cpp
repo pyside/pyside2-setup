@@ -178,12 +178,8 @@ void OverloadData::sortNextOverloads()
         } else if (!checkQString && getTypeName(ov->argType()) == "QString") {
             checkQString = true;
             qstringIndex = sortData.lastProcessedItemId();
-            if (referenceFunction()->name() == "QListWidgetItem")
-                qDebug() << ov->argType()->minimalSignature() << " checkQString: " << checkQString;
         } else if (!hasObjectPointer && (ov->argType()->isValuePointer() || ov->argType()->typeEntry()->isObject() )) {
             hasObjectPointer = true;
-            if (referenceFunction()->name() == "QListWidgetItem")
-                qDebug() << ov->argType()->minimalSignature() << " hasObjectPointer: " << hasObjectPointer;
         }
 
         foreach (const AbstractMetaType* instantiation, ov->argType()->instantiations()) {
