@@ -250,10 +250,10 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
 
 void BindingManager::invalidateWrapper(PyObject* pyobj)
 {
-    std::list<PyObject*> objs = splitPyObject(pyobj);
-    std::list<PyObject*>::const_iterator it;
-    for(it=objs.begin(); it != objs.end(); it++)
-        invalidateWrapper(reinterpret_cast<SbkBaseWrapper*>(*it));
+    std::list<SbkBaseWrapper*> objs = splitPyObject(pyobj);
+    std::list<SbkBaseWrapper*>::const_iterator it = objs.begin();
+    for(; it != objs.end(); it++)
+        invalidateWrapper(*it);
 }
 
 void BindingManager::invalidateWrapper(SbkBaseWrapper* wrapper)
@@ -315,10 +315,10 @@ void BindingManager::destroyWrapper(SbkBaseWrapper* wrapper)
 
 void BindingManager::transferOwnershipToCpp(PyObject* wrapper)
 {
-    std::list<PyObject*> objs = splitPyObject(wrapper);
-    std::list<PyObject*>::const_iterator it;
-    for(it=objs.begin(); it != objs.end(); it++)
-        transferOwnershipToCpp(reinterpret_cast<SbkBaseWrapper*>(*it));
+    std::list<SbkBaseWrapper*> objs = splitPyObject(wrapper);
+    std::list<SbkBaseWrapper*>::const_iterator it = objs.begin();
+    for(; it != objs.end(); it++)
+        transferOwnershipToCpp(*it);
 }
 
 void BindingManager::transferOwnershipToCpp(SbkBaseWrapper* wrapper)
@@ -327,7 +327,7 @@ void BindingManager::transferOwnershipToCpp(SbkBaseWrapper* wrapper)
         Shiboken::removeParent(wrapper);
 
     if (wrapper->d->containsCppWrapper)
-        SbkBaseWrapper_setOwnership(wrapper, false);
+        wrapper->d->hasOwnership = false;
     else
         invalidateWrapper(wrapper);
 }

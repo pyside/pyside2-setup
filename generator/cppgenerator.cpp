@@ -2121,10 +2121,10 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
             s << INDENT;
             if (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::TargetLangOwnership) {
-                s << "SbkBaseWrapper_setOwnership(" << pyArgName << ", true);";
+                s << "Shiboken::Wrapper::getOwnership(" << pyArgName << ");";
             } else if (wrappedClass->hasVirtualDestructor()) {
                 if (arg_mod.index == 0) {
-                    s << "SbkBaseWrapper_setOwnership(" PYTHON_RETURN_VAR ", 0);";
+                    s << "Shiboken::Wrapper::releaseOwnership(" PYTHON_RETURN_VAR ");";
                 } else {
                     s << "BindingManager::instance().transferOwnershipToCpp(" << pyArgName << ");";
                 }
@@ -2666,7 +2666,7 @@ void CppGenerator::writeCopyFunction(QTextStream& s, const AbstractMetaClass *me
         s << INDENT << PYTHON_RETURN_VAR " = Shiboken::Converter<" << metaClass->qualifiedCppName();
                     s << "*>::toPython(copy);" << endl;
 
-        s << INDENT << "SbkBaseWrapper_setOwnership(" PYTHON_RETURN_VAR ", true);" << endl;
+        s << INDENT << "Shiboken::Wrapper::getOwnership(" PYTHON_RETURN_VAR ");" << endl;
 
         s << endl;
 

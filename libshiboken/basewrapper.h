@@ -219,15 +219,16 @@ LIBSHIBOKEN_API void deallocWrapperWithPrivateDtor(PyObject* self);
 LIBSHIBOKEN_API bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr);
 LIBSHIBOKEN_API void setErrorAboutWrongArguments(PyObject* args, const char* funcName, const char** cppOverloads);
 
-/// Support sequence protocol
-LIBSHIBOKEN_API void SbkBaseWrapper_setOwnership(PyObject* pyobj, bool owner);
-LIBSHIBOKEN_API void SbkBaseWrapper_setOwnership(SbkBaseWrapper* pyobj, bool owner);
-
 namespace Wrapper {
 
 LIBSHIBOKEN_API void setValidCpp(SbkBaseWrapper* pyObj, bool value);
 LIBSHIBOKEN_API void setHasCppWrapper(SbkBaseWrapper* pyObj, bool value);
 LIBSHIBOKEN_API bool hasCppWrapper(SbkBaseWrapper* pyObj);
+
+LIBSHIBOKEN_API void getOwnership(PyObject* pyobj);
+LIBSHIBOKEN_API void getOwnership(SbkBaseWrapper* pyobj);
+LIBSHIBOKEN_API void releaseOwnership(PyObject* pyobj);
+LIBSHIBOKEN_API void releaseOwnership(SbkBaseWrapper* pyobj);
 
 } // namespace Wrapper
 

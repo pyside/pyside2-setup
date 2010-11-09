@@ -36,7 +36,7 @@ namespace Shiboken
 static void SbkBaseWrapperType_dealloc(PyObject* pyObj);
 static PyObject* SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
 static void incRefPyObject(PyObject* pyObj);
-static void decRefPyObjectlist(const std::list<PyObject*> &pyObj);
+static void decRefPyObjectlist(const std::list<SbkBaseWrapper*> &pyObj);
 
 extern "C"
 {
@@ -251,7 +251,7 @@ static void _destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent)
             if (!obj->d->containsCppWrapper && child->d->containsCppWrapper && child->d->parentInfo) {
                 child->d->parentInfo->parent = 0;
                 child->d->parentInfo->hasWrapperRef = true;
-                SbkBaseWrapper_setOwnership(child, false);
+                child->d->hasOwnership = false;
             } else {
                 _destroyParentInfo(child, false);
                 Py_DECREF(child);
@@ -412,7 +412,7 @@ void keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObje
     }
 
     if (!isNone) {
-        std::list<PyObject*> values = splitPyObject(referredObject);
+        std::list<SbkBaseWrapper*> values = splitPyObject(referredObject);
         if (append && (iter != refCountMap.end()))
             refCountMap[key].insert(refCountMap[key].end(), values.begin(), values.end());
         else
@@ -639,18 +639,20 @@ bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctorType)
     return true;
 }
 
-std::list<PyObject*> splitPyObject(PyObject* pyObj)
+std::list<SbkBaseWrapper*> splitPyObject(PyObject* pyObj)
 {
-    std::list<PyObject*> result;
+    std::list<SbkBaseWrapper*> result;
     if (PySequence_Check(pyObj)) {
         AutoDecRef lst(PySequence_Fast(pyObj, "Invalid keep reference object."));
-        for(int i = 0, i_max = PySequence_Fast_GET_SIZE(lst.object()); i < i_max; i++) {
-            PyObject* item = PySequence_Fast_GET_ITEM(lst.object(), i);
-            if (isShibokenType(item))
-                result.push_back(item);
+        if (!lst.isNull()) {
+            for(int i = 0, i_max = PySequence_Fast_GET_SIZE(lst.object()); i < i_max; i++) {
+                PyObject* item = PySequence_Fast_GET_ITEM(lst.object(), i);
+                if (isShibokenType(item))
+                    result.push_back(reinterpret_cast<SbkBaseWrapper*>(item));
+            }
         }
     } else {
-        result.push_back(pyObj);
+        result.push_back(reinterpret_cast<SbkBaseWrapper*>(pyObj));
     }
     return result;
 }
@@ -666,29 +668,24 @@ static void incRefPyObject(PyObject* pyObj)
     }
 }
 
-static void decRefPyObjectlist(const std::list<PyObject*> &lst)
+static void decRefPyObjectlist(const std::list<SbkBaseWrapper*> &lst)
 {
-    std::list<PyObject*>::const_iterator iter = lst.begin();
+    std::list<SbkBaseWrapper*>::const_iterator iter = lst.begin();
     while(iter != lst.end()) {
         Py_DECREF(*iter);
-        iter++;
+        ++iter;
     }
 }
 
-void SbkBaseWrapper_setOwnership(SbkBaseWrapper* pyobj, bool owner)
+static void setSequenceOwnership(PyObject* pyObj, bool owner)
 {
-    pyobj->d->hasOwnership = owner;
-}
-
-void SbkBaseWrapper_setOwnership(PyObject* pyobj, bool owner)
-{
-    if (PySequence_Check(pyobj)) {
-        std::list<PyObject*> objs = splitPyObject(pyobj);
-        std::list<PyObject*>::const_iterator it;
-        for(it=objs.begin(); it != objs.end(); it++)
-            SbkBaseWrapper_setOwnership(reinterpret_cast<SbkBaseWrapper*>(*it), owner);
-    } else if (isShibokenType(pyobj)) {
-        SbkBaseWrapper_setOwnership(reinterpret_cast<SbkBaseWrapper*>(pyobj), owner);
+    if (PySequence_Check(pyObj)) {
+        std::list<SbkBaseWrapper*> objs = splitPyObject(pyObj);
+        std::list<SbkBaseWrapper*>::const_iterator it = objs.begin();
+        for(; it != objs.end(); ++it)
+            (*it)->d->hasOwnership = owner;
+    } else if (isShibokenType(pyObj)) {
+        reinterpret_cast<SbkBaseWrapper*>(pyObj)->d->hasOwnership = owner;
     }
 }
 
@@ -708,6 +705,26 @@ void setHasCppWrapper(SbkBaseWrapper* pyObj, bool value)
 bool hasCppWrapper(SbkBaseWrapper* pyObj)
 {
     return pyObj->d->containsCppWrapper;
+}
+
+void getOwnership(SbkBaseWrapper* pyObj)
+{
+    pyObj->d->hasOwnership = true;
+}
+
+void getOwnership(PyObject* pyObj)
+{
+    setSequenceOwnership(pyObj, true);
+}
+
+void releaseOwnership(SbkBaseWrapper* pyObj)
+{
+    pyObj->d->hasOwnership = false;
+}
+
+void releaseOwnership(PyObject* pyObj)
+{
+    setSequenceOwnership(pyObj, false);
 }
 
 } // namespace Wrapper

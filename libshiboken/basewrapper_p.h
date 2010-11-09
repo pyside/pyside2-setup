@@ -35,7 +35,7 @@ namespace Shiboken
     * This mapping associates a method and argument of an wrapper object with the wrapper of
     * said argument when it needs the binding to help manage its reference counting.
     */
-typedef std::map<std::string, std::list<PyObject*> > RefCountMap;
+typedef std::map<std::string, std::list<SbkBaseWrapper*> > RefCountMap;
 
 
 /// Linked list of SbkBaseWrapper pointers
@@ -86,7 +86,7 @@ namespace Shiboken
 /**
  * Utility function uset to transform PyObject which suppot sequence protocol in a std::list
  **/
-std::list<PyObject*> splitPyObject(PyObject* pyObj);
+std::list<SbkBaseWrapper*> splitPyObject(PyObject* pyObj);
 
 struct SbkBaseWrapperType;
 
