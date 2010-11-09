@@ -36,7 +36,7 @@ namespace Shiboken
 static void SbkBaseWrapperType_dealloc(PyObject* pyObj);
 static PyObject* SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
 static void incRefPyObject(PyObject* pyObj);
-static void decRefPyObjectlist(const std::list<SbkObject*> &pyObj);
+static void decRefPyObjectList(const std::list<SbkObject*> &pyObj);
 
 extern "C"
 {
@@ -372,7 +372,7 @@ void keepReference(SbkObject* self, const char* key, PyObject* referredObject, b
 
     RefCountMap::iterator iter = refCountMap.find(key);
     if (!append && (iter != refCountMap.end())) {
-        decRefPyObjectlist(iter->second);
+        decRefPyObjectList(iter->second);
         refCountMap.erase(iter);
     }
 
@@ -393,7 +393,7 @@ void clearReferences(SbkObject* self)
     RefCountMap& refCountMap = *(self->d->referredObjects);
     RefCountMap::iterator iter;
     for (iter = refCountMap.begin(); iter != refCountMap.end(); ++iter)
-        decRefPyObjectlist(iter->second);
+        decRefPyObjectList(iter->second);
     delete self->d->referredObjects;
     self->d->referredObjects = 0;
 }
@@ -633,7 +633,7 @@ static void incRefPyObject(PyObject* pyObj)
     }
 }
 
-static void decRefPyObjectlist(const std::list<SbkObject*> &lst)
+static void decRefPyObjectList(const std::list<SbkObject*>& lst)
 {
     std::list<SbkObject*>::const_iterator iter = lst.begin();
     while(iter != lst.end()) {
