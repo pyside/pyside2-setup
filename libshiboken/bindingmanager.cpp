@@ -162,7 +162,7 @@ bool BindingManager::hasWrapper(const void* cptr)
 {
     return m_d->wrapperMapper.count(cptr);
 }
-void BindingManager::registerWrapper(SbkBaseWrapper* pyobj, void* cptr)
+void BindingManager::registerWrapper(SbkObject* pyobj, void* cptr)
 {
     SbkBaseWrapperType* instanceType = reinterpret_cast<SbkBaseWrapperType*>(pyobj->ob_type);
 
@@ -184,7 +184,7 @@ void BindingManager::releaseWrapper(PyObject* wrapper)
     SbkBaseWrapperType* sbkType = reinterpret_cast<SbkBaseWrapperType*>(wrapper->ob_type);
     int numBases = sbkType->is_multicpp ? getNumberOfCppBaseClasses(wrapper->ob_type) : 1;
 
-    void** cptrs = reinterpret_cast<SbkBaseWrapper*>(wrapper)->d->cptr;
+    void** cptrs = reinterpret_cast<SbkObject*>(wrapper)->d->cptr;
     for (int i = 0; i < numBases; ++i) {
         void* cptr = cptrs[i];
         m_d->releaseWrapper(cptr);
@@ -250,13 +250,13 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
 
 void BindingManager::invalidateWrapper(PyObject* pyobj)
 {
-    std::list<SbkBaseWrapper*> objs = splitPyObject(pyobj);
-    std::list<SbkBaseWrapper*>::const_iterator it = objs.begin();
+    std::list<SbkObject*> objs = splitPyObject(pyobj);
+    std::list<SbkObject*>::const_iterator it = objs.begin();
     for(; it != objs.end(); it++)
         invalidateWrapper(*it);
 }
 
-void BindingManager::invalidateWrapper(SbkBaseWrapper* wrapper)
+void BindingManager::invalidateWrapper(SbkObject* wrapper)
 {
     if (!wrapper || ((PyObject*)wrapper == Py_None) || !wrapper->d->validCppObject)
         return;
@@ -302,10 +302,10 @@ void BindingManager::destroyWrapper(const void* cptr)
 {
     WrapperMap::iterator iter = m_d->wrapperMapper.find(cptr);
     if (iter != m_d->wrapperMapper.end())
-        destroyWrapper(reinterpret_cast<SbkBaseWrapper*>(iter->second));
+        destroyWrapper(reinterpret_cast<SbkObject*>(iter->second));
 }
 
-void BindingManager::destroyWrapper(SbkBaseWrapper* wrapper)
+void BindingManager::destroyWrapper(SbkObject* wrapper)
 {
     GilState gil;
     m_d->destroying = true;
@@ -315,13 +315,13 @@ void BindingManager::destroyWrapper(SbkBaseWrapper* wrapper)
 
 void BindingManager::transferOwnershipToCpp(PyObject* wrapper)
 {
-    std::list<SbkBaseWrapper*> objs = splitPyObject(wrapper);
-    std::list<SbkBaseWrapper*>::const_iterator it = objs.begin();
+    std::list<SbkObject*> objs = splitPyObject(wrapper);
+    std::list<SbkObject*>::const_iterator it = objs.begin();
     for(; it != objs.end(); it++)
         transferOwnershipToCpp(*it);
 }
 
-void BindingManager::transferOwnershipToCpp(SbkBaseWrapper* wrapper)
+void BindingManager::transferOwnershipToCpp(SbkObject* wrapper)
 {
     if (wrapper->d->parentInfo)
         Shiboken::removeParent(wrapper);

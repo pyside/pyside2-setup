@@ -36,7 +36,7 @@ extern "C"
 struct SbkBaseWrapperPrivate;
 
 /// Base Python object for all the wrapped C++ classes.
-struct LIBSHIBOKEN_API SbkBaseWrapper
+struct LIBSHIBOKEN_API SbkObject
 {
     PyObject_HEAD
     /// Instance dictionary.
@@ -121,13 +121,13 @@ LIBSHIBOKEN_API void setParent(PyObject* parent, PyObject* child);
 *   Remove this child from their parent, if any.
 *   \param child the child.
 */
-LIBSHIBOKEN_API void removeParent(SbkBaseWrapper* child);
+LIBSHIBOKEN_API void removeParent(SbkObject* child);
 
 /**
 * \internal This is an internal function called by SbkBaseWrapper_Dealloc, it's exported just for techinical reasons.
 * \note Do not call this function inside your bindings.
 */
-LIBSHIBOKEN_API void destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent = true);
+LIBSHIBOKEN_API void destroyParentInfo(SbkObject* obj, bool removeFromParent = true);
 
 /**
 *   Returns true if the object is an instance of a type created by the Shiboken generator.
@@ -153,13 +153,13 @@ LIBSHIBOKEN_API void* getCppPointer(PyObject* wrapper, PyTypeObject* desiredType
 /**
 *   Set the C++ pointer of type \p desiredType of a Python object.
 */
-LIBSHIBOKEN_API bool setCppPointer(SbkBaseWrapper* wrapper, PyTypeObject* desiredType, void* cptr);
+LIBSHIBOKEN_API bool setCppPointer(SbkObject* wrapper, PyTypeObject* desiredType, void* cptr);
 
 /**
  *   Get/Set Userdata in type class
  */
-LIBSHIBOKEN_API void setTypeUserData(SbkBaseWrapper* wrapper, void* user_data, DeleteUserDataFunc d_func);
-LIBSHIBOKEN_API void* getTypeUserData(SbkBaseWrapper* wrapper);
+LIBSHIBOKEN_API void setTypeUserData(SbkObject* wrapper, void* user_data, DeleteUserDataFunc d_func);
+LIBSHIBOKEN_API void* getTypeUserData(SbkObject* wrapper);
 
 /**
 *   Returns true if the constructor of \p ctorType can be called for a instance of type \p myType.
@@ -175,8 +175,8 @@ LIBSHIBOKEN_API bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctor
 #define SbkBaseWrapper_Check(op) PyObject_TypeCheck(op, (PyTypeObject*)&Shiboken::SbkBaseWrapper_Type)
 #define SbkBaseWrapper_CheckExact(op) ((op)->ob_type == &Shiboken::SbkBaseWrapper_Type)
 
-#define SbkBaseWrapper_instanceDict(pyobj)           (((SbkBaseWrapper*)pyobj)->ob_dict)
-#define SbkBaseWrapper_setInstanceDict(pyobj,d)      (((SbkBaseWrapper*)pyobj)->ob_dict = d)
+#define SbkBaseWrapper_instanceDict(pyobj)           (((SbkObject*)pyobj)->ob_dict)
+#define SbkBaseWrapper_setInstanceDict(pyobj,d)      (((SbkObject*)pyobj)->ob_dict = d)
 
 LIBSHIBOKEN_API PyObject*
 SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
@@ -200,7 +200,7 @@ SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*);
  *   \param key             a key that identifies the C++ method signature and argument where the referredObject came from.
  *   \parem referredObject  the object whose reference is used by the self object.
  */
-LIBSHIBOKEN_API void keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObject, bool append=false);
+LIBSHIBOKEN_API void keepReference(SbkObject* self, const char* key, PyObject* referredObject, bool append=false);
 
 /// Returns true and sets a Python RuntimeError if the Python wrapper is not marked as valid.
 LIBSHIBOKEN_API bool cppObjectIsInvalid(PyObject* wrapper);
@@ -221,14 +221,14 @@ LIBSHIBOKEN_API void setErrorAboutWrongArguments(PyObject* args, const char* fun
 
 namespace Wrapper {
 
-LIBSHIBOKEN_API void setValidCpp(SbkBaseWrapper* pyObj, bool value);
-LIBSHIBOKEN_API void setHasCppWrapper(SbkBaseWrapper* pyObj, bool value);
-LIBSHIBOKEN_API bool hasCppWrapper(SbkBaseWrapper* pyObj);
+LIBSHIBOKEN_API void setValidCpp(SbkObject* pyObj, bool value);
+LIBSHIBOKEN_API void setHasCppWrapper(SbkObject* pyObj, bool value);
+LIBSHIBOKEN_API bool hasCppWrapper(SbkObject* pyObj);
 
-LIBSHIBOKEN_API void getOwnership(PyObject* pyobj);
-LIBSHIBOKEN_API void getOwnership(SbkBaseWrapper* pyobj);
-LIBSHIBOKEN_API void releaseOwnership(PyObject* pyobj);
-LIBSHIBOKEN_API void releaseOwnership(SbkBaseWrapper* pyobj);
+LIBSHIBOKEN_API void getOwnership(PyObject* pyObj);
+LIBSHIBOKEN_API void getOwnership(SbkObject* pyObj);
+LIBSHIBOKEN_API void releaseOwnership(PyObject* pyObj);
+LIBSHIBOKEN_API void releaseOwnership(SbkObject* pyObj);
 
 } // namespace Wrapper
 

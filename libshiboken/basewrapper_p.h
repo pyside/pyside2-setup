@@ -27,7 +27,7 @@
 #include <list>
 #include <map>
 
-struct SbkBaseWrapper;
+struct SbkObject;
 
 namespace Shiboken
 {
@@ -35,11 +35,11 @@ namespace Shiboken
     * This mapping associates a method and argument of an wrapper object with the wrapper of
     * said argument when it needs the binding to help manage its reference counting.
     */
-typedef std::map<std::string, std::list<SbkBaseWrapper*> > RefCountMap;
+typedef std::map<std::string, std::list<SbkObject*> > RefCountMap;
 
 
 /// Linked list of SbkBaseWrapper pointers
-typedef std::list<SbkBaseWrapper*> ChildrenList;
+typedef std::list<SbkObject*> ChildrenList;
 
 /// Struct used to store information about object parent and children.
 struct ParentInfo
@@ -47,7 +47,7 @@ struct ParentInfo
     /// Default ctor.
     ParentInfo() : parent(0), hasWrapperRef(false) {}
     /// Pointer to parent object.
-    SbkBaseWrapper* parent;
+    SbkObject* parent;
     /// List of object children.
     ChildrenList children;
     /// has internal ref
@@ -86,7 +86,7 @@ namespace Shiboken
 /**
  * Utility function uset to transform PyObject which suppot sequence protocol in a std::list
  **/
-std::list<SbkBaseWrapper*> splitPyObject(PyObject* pyObj);
+std::list<SbkObject*> splitPyObject(PyObject* pyObj);
 
 struct SbkBaseWrapperType;
 
@@ -185,7 +185,7 @@ inline std::list<SbkBaseWrapperType*> getCppBaseClasses(PyTypeObject* baseType)
 *   Decrements the reference counters of every object referred by self.
 *   \param self    the wrapper instance that keeps references to other objects.
 */
-void clearReferences(SbkBaseWrapper* self);
+void clearReferences(SbkObject* self);
 
 } // namespace Shiboken
 

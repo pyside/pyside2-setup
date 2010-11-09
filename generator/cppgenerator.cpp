@@ -779,13 +779,13 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
     {
         Indentation indentation(INDENT);
         s << INDENT << "PyObject *pySelf = BindingManager::instance().retrieveWrapper(this);\n"
-          << INDENT << "void *typeData = Shiboken::getTypeUserData(reinterpret_cast<SbkBaseWrapper*>(pySelf));" << endl
+          << INDENT << "void *typeData = Shiboken::getTypeUserData(reinterpret_cast<SbkObject*>(pySelf));" << endl
           << INDENT << "if (!typeData) {" << endl;
         {
             Indentation indentation2(INDENT);
             s << INDENT << "m_metaObject = PySide::DynamicQMetaObject::createBasedOn(pySelf, pySelf->ob_type, &"
                         << metaClass->qualifiedCppName() << "::staticMetaObject);" << endl
-              << INDENT << "Shiboken::setTypeUserData(reinterpret_cast<SbkBaseWrapper*>(pySelf), m_metaObject, PySide::deleteDynamicQMetaObject);" << endl;
+              << INDENT << "Shiboken::setTypeUserData(reinterpret_cast<SbkObject*>(pySelf), m_metaObject, PySide::deleteDynamicQMetaObject);" << endl;
         }
         s << INDENT << "} else {" << endl;
         {
@@ -854,7 +854,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
         s << INDENT << "const QMetaObject* metaObject;" << endl;
     }
 
-    s << INDENT << "SbkBaseWrapper* sbkSelf = reinterpret_cast<SbkBaseWrapper*>(self);" << endl;
+    s << INDENT << "SbkObject* sbkSelf = reinterpret_cast<SbkObject*>(self);" << endl;
 
     if (metaClass->isAbstract() || metaClass->baseClassNames().size() > 1) {
         s << INDENT << "SbkBaseWrapperType* type = reinterpret_cast<SbkBaseWrapperType*>(self->ob_type);" << endl;
@@ -1843,7 +1843,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     }
 
     if (func->isAbstract()) {
-        s << INDENT << "if (Shiboken::Wrapper::hasCppWrapper(reinterpret_cast<SbkBaseWrapper*>(self))) {\n";
+        s << INDENT << "if (Shiboken::Wrapper::hasCppWrapper(reinterpret_cast<SbkObject*>(self))) {\n";
         {
             Indentation indent(INDENT);
             s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
@@ -2145,7 +2145,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 break;
             }
 
-            s << INDENT << "Shiboken::keepReference(reinterpret_cast<SbkBaseWrapper*>(self), \"";
+            s << INDENT << "Shiboken::keepReference(reinterpret_cast<SbkObject*>(self), \"";
             QString varName = arg_mod.referenceCounts.first().varName;
             if (varName.isEmpty())
                 varName = func->minimalSignature() + QString().number(arg_mod.index);
@@ -2429,7 +2429,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "PyObject_HEAD_INIT(&Shiboken::SbkBaseWrapperType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
     s << INDENT << "/*tp_name*/             \"" << metaClass->fullName() << "\"," << endl;
-    s << INDENT << "/*tp_basicsize*/        sizeof(SbkBaseWrapper)," << endl;
+    s << INDENT << "/*tp_basicsize*/        sizeof(SbkObject)," << endl;
     s << INDENT << "/*tp_itemsize*/         0," << endl;
     s << INDENT << "/*tp_dealloc*/          " << tp_dealloc << ',' << endl;
     s << INDENT << "/*tp_print*/            0," << endl;
@@ -2748,7 +2748,7 @@ void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* 
     bool pythonWrapperRefCounting = metaField->type()->typeEntry()->isObject()
                                     || metaField->type()->isValuePointer();
     if (pythonWrapperRefCounting) {
-        s << INDENT << "Shiboken::keepReference(reinterpret_cast<SbkBaseWrapper*>(self), \"";
+        s << INDENT << "Shiboken::keepReference(reinterpret_cast<SbkObject*>(self), \"";
         s << metaField->name() << "\", value);" << endl;
         //s << INDENT << "Py_XDECREF(oldvalue);" << endl;
         s << endl;
