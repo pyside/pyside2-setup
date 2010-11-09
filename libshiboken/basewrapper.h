@@ -30,14 +30,26 @@
 #include <map>
 #include <string>
 
-namespace Shiboken
+extern "C"
 {
 
-/**
- * This mapping associates a method and argument of an wrapper object with the wrapper of
- * said argument when it needs the binding to help manage its reference counting.
- */
-typedef std::map<std::string, std::list<PyObject*> > RefCountMap;
+struct SbkBaseWrapperPrivate;
+
+/// Base Python object for all the wrapped C++ classes.
+struct LIBSHIBOKEN_API SbkBaseWrapper
+{
+    PyObject_HEAD
+    /// Instance dictionary.
+    PyObject* ob_dict;
+    /// List of weak references
+    PyObject* weakreflist;
+    SbkBaseWrapperPrivate* d;
+};
+
+}
+
+namespace Shiboken
+{
 
 extern "C"
 {
@@ -88,30 +100,6 @@ struct LIBSHIBOKEN_API SbkBaseWrapperType
     /// Type user data
     void *user_data;
     DeleteUserDataFunc d_func;
-};
-
-struct ParentInfo;
-
-/// Base Python object for all the wrapped C++ classes.
-struct LIBSHIBOKEN_API SbkBaseWrapper
-{
-    PyObject_HEAD
-    /// Pointer to the C++ class.
-    void** cptr;
-    /// Instance dictionary.
-    PyObject* ob_dict;
-    /// True when Python is responsible for freeing the used memory.
-    unsigned int hasOwnership : 1;
-    /// Is true when the C++ class of the wrapped object has a virtual destructor AND was created by Python.
-    unsigned int containsCppWrapper : 1;
-    /// Marked as false when the object is lost to C++ and the binding can not know if it was deleted or not.
-    unsigned int validCppObject : 1;
-    /// Information about the object parents and children, can be null.
-    ParentInfo* parentInfo;
-    /// List of weak references
-    PyObject* weakreflist;
-    /// Manage reference counting of objects that are referred but not owned.
-    RefCountMap* referredObjects;
 };
 
 } // extern "C"
@@ -187,14 +175,8 @@ LIBSHIBOKEN_API bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctor
 #define SbkBaseWrapper_Check(op) PyObject_TypeCheck(op, (PyTypeObject*)&Shiboken::SbkBaseWrapper_Type)
 #define SbkBaseWrapper_CheckExact(op) ((op)->ob_type == &Shiboken::SbkBaseWrapper_Type)
 
-#define SbkBaseWrapper_instanceDict(pyobj)           (((Shiboken::SbkBaseWrapper*)pyobj)->ob_dict)
-#define SbkBaseWrapper_setInstanceDict(pyobj,d)      (((Shiboken::SbkBaseWrapper*)pyobj)->ob_dict = d)
-#define SbkBaseWrapper_hasOwnership(pyobj)           (((Shiboken::SbkBaseWrapper*)pyobj)->hasOwnership)
-#define SbkBaseWrapper_hasParentInfo(pyobj)          (((Shiboken::SbkBaseWrapper*)pyobj)->parentInfo)
-#define SbkBaseWrapper_containsCppWrapper(pyobj)     (((Shiboken::SbkBaseWrapper*)pyobj)->containsCppWrapper)
-#define SbkBaseWrapper_setContainsCppWrapper(pyobj,o)(((Shiboken::SbkBaseWrapper*)pyobj)->containsCppWrapper = o)
-#define SbkBaseWrapper_validCppObject(pyobj)         (((Shiboken::SbkBaseWrapper*)pyobj)->validCppObject)
-#define SbkBaseWrapper_setValidCppObject(pyobj,v)    (((Shiboken::SbkBaseWrapper*)pyobj)->validCppObject = v)
+#define SbkBaseWrapper_instanceDict(pyobj)           (((SbkBaseWrapper*)pyobj)->ob_dict)
+#define SbkBaseWrapper_setInstanceDict(pyobj,d)      (((SbkBaseWrapper*)pyobj)->ob_dict = d)
 
 LIBSHIBOKEN_API PyObject*
 SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
@@ -240,6 +222,14 @@ LIBSHIBOKEN_API void setErrorAboutWrongArguments(PyObject* args, const char* fun
 /// Support sequence protocol
 LIBSHIBOKEN_API void SbkBaseWrapper_setOwnership(PyObject* pyobj, bool owner);
 LIBSHIBOKEN_API void SbkBaseWrapper_setOwnership(SbkBaseWrapper* pyobj, bool owner);
+
+namespace Wrapper {
+
+LIBSHIBOKEN_API void setValidCpp(SbkBaseWrapper* pyObj, bool value);
+LIBSHIBOKEN_API void setHasCppWrapper(SbkBaseWrapper* pyObj, bool value);
+LIBSHIBOKEN_API bool hasCppWrapper(SbkBaseWrapper* pyObj);
+
+} // namespace Wrapper
 
 } // namespace Shiboken
 

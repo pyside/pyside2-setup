@@ -165,11 +165,11 @@ SbkBaseWrapperType SbkBaseWrapper_Type = { { {
 
 void removeParent(SbkBaseWrapper* child)
 {
-    ParentInfo* pInfo = child->parentInfo;
+    ParentInfo* pInfo = child->d->parentInfo;
     if (!pInfo || !pInfo->parent)
         return;
 
-    ChildrenList& oldBrothers = pInfo->parent->parentInfo->children;
+    ChildrenList& oldBrothers = pInfo->parent->d->parentInfo->children;
     oldBrothers.remove(child);
     pInfo->parent = 0;
 
@@ -205,15 +205,15 @@ void setParent(PyObject* parent, PyObject* child)
     SbkBaseWrapper* child_ = reinterpret_cast<SbkBaseWrapper*>(child);
 
     if (!parentIsNull) {
-        if (!parent_->parentInfo)
-            parent_->parentInfo = new ParentInfo;
+        if (!parent_->d->parentInfo)
+            parent_->d->parentInfo = new ParentInfo;
         // do not re-add a child
-        ChildrenList& children = parent_->parentInfo->children;
+        ChildrenList& children = parent_->d->parentInfo->children;
         if (std::find(children.begin(), children.end(), child_) != children.end())
             return;
     }
 
-    ParentInfo* pInfo = child_->parentInfo;
+    ParentInfo* pInfo = child_->d->parentInfo;
     bool hasAnotherParent = pInfo && pInfo->parent && pInfo->parent != parent_;
 
     //Avoid destroy child during reparent operation
@@ -224,12 +224,12 @@ void setParent(PyObject* parent, PyObject* child)
         removeParent(child_);
 
     // Add the child to the new parent
-    pInfo = child_->parentInfo;
+    pInfo = child_->d->parentInfo;
     if (!parentIsNull) {
         if (!pInfo)
-            pInfo = child_->parentInfo = new ParentInfo;
+            pInfo = child_->d->parentInfo = new ParentInfo;
         pInfo->parent = parent_;
-        parent_->parentInfo->children.push_back(child_);
+        parent_->d->parentInfo->children.push_back(child_);
         Py_INCREF(child_);
     }
 
@@ -238,7 +238,7 @@ void setParent(PyObject* parent, PyObject* child)
 
 static void _destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent)
 {
-    ParentInfo* pInfo = obj->parentInfo;
+    ParentInfo* pInfo = obj->d->parentInfo;
     if (removeFromParent && pInfo && pInfo->parent)
         removeParent(obj);
 
@@ -248,11 +248,9 @@ static void _destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent)
             SbkBaseWrapper*& child = *it;
 
             // keep this, the wrapper still alive
-            if (!SbkBaseWrapper_containsCppWrapper(obj) &&
-                SbkBaseWrapper_containsCppWrapper(child) &&
-                child->parentInfo) {
-                child->parentInfo->parent = 0;
-                child->parentInfo->hasWrapperRef = true;
+            if (!obj->d->containsCppWrapper && child->d->containsCppWrapper && child->d->parentInfo) {
+                child->d->parentInfo->parent = 0;
+                child->d->parentInfo->hasWrapperRef = true;
                 SbkBaseWrapper_setOwnership(child, false);
             } else {
                 _destroyParentInfo(child, false);
@@ -260,7 +258,7 @@ static void _destroyParentInfo(SbkBaseWrapper* obj, bool removeFromParent)
             }
         }
         delete pInfo;
-        obj->parentInfo = 0;
+        obj->d->parentInfo = 0;
     }
 }
 
@@ -288,9 +286,9 @@ PyObject* SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
     }
 
     SbkBaseWrapper* self = reinterpret_cast<SbkBaseWrapper*>(SbkBaseWrapper_TpNew(reinterpret_cast<PyTypeObject*>(instanceType), 0, 0));
-    self->cptr[0] = cptr;
-    self->hasOwnership = hasOwnership;
-    self->validCppObject = 1;
+    self->d->cptr[0] = cptr;
+    self->d->hasOwnership = hasOwnership;
+    self->d->validCppObject = 1;
     BindingManager::instance().registerWrapper(self, cptr);
     return reinterpret_cast<PyObject*>(self);
 }
@@ -319,18 +317,19 @@ void walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visi
 PyObject* SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*)
 {
     SbkBaseWrapper* self = reinterpret_cast<SbkBaseWrapper*>(subtype->tp_alloc(subtype, 0));
+    self->d = new SbkBaseWrapperPrivate;
 
     SbkBaseWrapperType* sbkType = reinterpret_cast<SbkBaseWrapperType*>(subtype);
     int numBases = sbkType->is_multicpp ? getNumberOfCppBaseClasses(subtype) : 1;
-    self->cptr = new void*[numBases];
-    std::memset(self->cptr, 0, sizeof(void*)*numBases);
-    self->hasOwnership = 1;
-    self->containsCppWrapper = 0;
-    self->validCppObject = 0;
-    self->parentInfo = 0;
+    self->d->cptr = new void*[numBases];
+    std::memset(self->d->cptr, 0, sizeof(void*)*numBases);
+    self->d->hasOwnership = 1;
+    self->d->containsCppWrapper = 0;
+    self->d->validCppObject = 0;
+    self->d->parentInfo = 0;
     self->ob_dict = 0;
     self->weakreflist = 0;
-    self->referredObjects = 0;
+    self->d->referredObjects = 0;
     return reinterpret_cast<PyObject*>(self);
 }
 
@@ -340,7 +339,7 @@ void* getCppPointer(PyObject* wrapper, PyTypeObject* desiredType)
     int idx = 0;
     if (reinterpret_cast<SbkBaseWrapperType*>(type)->is_multicpp)
         idx = getTypeIndexOnHierarchy(type, desiredType);
-    return reinterpret_cast<Shiboken::SbkBaseWrapper*>(wrapper)->cptr[idx];
+    return reinterpret_cast<SbkBaseWrapper*>(wrapper)->d->cptr[idx];
 }
 
 bool setCppPointer(SbkBaseWrapper* wrapper, PyTypeObject* desiredType, void* cptr)
@@ -349,11 +348,11 @@ bool setCppPointer(SbkBaseWrapper* wrapper, PyTypeObject* desiredType, void* cpt
     if (reinterpret_cast<SbkBaseWrapperType*>(wrapper->ob_type)->is_multicpp)
         idx = getTypeIndexOnHierarchy(wrapper->ob_type, desiredType);
 
-    bool alreadyInitialized = wrapper->cptr[idx];
+    bool alreadyInitialized = wrapper->d->cptr[idx];
     if (alreadyInitialized)
         PyErr_SetString(PyExc_RuntimeError, "You can't initialize an object twice!");
     else
-        wrapper->cptr[idx] = cptr;
+        wrapper->d->cptr[idx] = cptr;
 
     return !alreadyInitialized;
 }
@@ -362,7 +361,7 @@ bool cppObjectIsInvalid(PyObject* wrapper)
 {
     if (!wrapper || wrapper == Py_None
         || wrapper->ob_type->ob_type != &Shiboken::SbkBaseWrapperType_Type
-        || ((Shiboken::SbkBaseWrapper*)wrapper)->validCppObject) {
+        || ((SbkBaseWrapper*)wrapper)->d->validCppObject) {
         return false;
     }
     PyErr_SetString(PyExc_RuntimeError, "Internal C++ object already deleted.");
@@ -399,10 +398,10 @@ void keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObje
 
     bool isNone = (!referredObject || (referredObject == Py_None));
 
-    if (!self->referredObjects)
-        self->referredObjects = new Shiboken::RefCountMap;
+    if (!self->d->referredObjects)
+        self->d->referredObjects = new Shiboken::RefCountMap;
 
-    RefCountMap& refCountMap = *(self->referredObjects);
+    RefCountMap& refCountMap = *(self->d->referredObjects);
     if (!isNone)
         incRefPyObject(referredObject);
 
@@ -423,15 +422,15 @@ void keepReference(SbkBaseWrapper* self, const char* key, PyObject* referredObje
 
 void clearReferences(SbkBaseWrapper* self)
 {
-    if (!self->referredObjects)
+    if (!self->d->referredObjects)
         return;
 
-    RefCountMap& refCountMap = *(self->referredObjects);
+    RefCountMap& refCountMap = *(self->d->referredObjects);
     RefCountMap::iterator iter;
     for (iter = refCountMap.begin(); iter != refCountMap.end(); ++iter)
         decRefPyObjectlist(iter->second);
-    delete self->referredObjects;
-    self->referredObjects = 0;
+    delete self->d->referredObjects;
+    self->d->referredObjects = 0;
 }
 
 bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr)
@@ -458,7 +457,7 @@ public:
     DtorCallerVisitor(SbkBaseWrapper* pyObj) : m_count(0), m_pyObj(pyObj) {}
     virtual void visit(SbkBaseWrapperType* node)
     {
-        node->cpp_dtor(m_pyObj->cptr[m_count]);
+        node->cpp_dtor(m_pyObj->d->cptr[m_count]);
         m_count++;
     }
 private:
@@ -473,24 +472,25 @@ void deallocWrapper(PyObject* pyObj)
         PyObject_ClearWeakRefs(pyObj);
 
     BindingManager::instance().releaseWrapper(pyObj);
-    if (SbkBaseWrapper_hasOwnership(pyObj)) {
+    if (sbkObj->d->hasOwnership) {
         SbkBaseWrapperType* sbkType = reinterpret_cast<SbkBaseWrapperType*>(pyObj->ob_type);
         if (sbkType->is_multicpp) {
             DtorCallerVisitor visitor(sbkObj);
             walkThroughClassHierarchy(pyObj->ob_type, &visitor);
         } else {
-            sbkType->cpp_dtor(sbkObj->cptr[0]);
+            sbkType->cpp_dtor(sbkObj->d->cptr[0]);
         }
     }
 
-    if (SbkBaseWrapper_hasParentInfo(pyObj))
+    if (sbkObj->d->parentInfo)
         destroyParentInfo(sbkObj);
 
     clearReferences(sbkObj);
 
     Py_XDECREF(sbkObj->ob_dict);
-    delete[] sbkObj->cptr;
-    sbkObj->cptr = 0;
+    delete[] sbkObj->d->cptr;
+    sbkObj->d->cptr = 0;
+    delete sbkObj->d;
     Py_TYPE(pyObj)->tp_free(pyObj);
 
 }
@@ -645,7 +645,9 @@ std::list<PyObject*> splitPyObject(PyObject* pyObj)
     if (PySequence_Check(pyObj)) {
         AutoDecRef lst(PySequence_Fast(pyObj, "Invalid keep reference object."));
         for(int i = 0, i_max = PySequence_Fast_GET_SIZE(lst.object()); i < i_max; i++) {
-            result.push_back(PySequence_Fast_GET_ITEM(lst.object(), i));
+            PyObject* item = PySequence_Fast_GET_ITEM(lst.object(), i);
+            if (isShibokenType(item))
+                result.push_back(item);
         }
     } else {
         result.push_back(pyObj);
@@ -675,17 +677,40 @@ static void decRefPyObjectlist(const std::list<PyObject*> &lst)
 
 void SbkBaseWrapper_setOwnership(SbkBaseWrapper* pyobj, bool owner)
 {
-    pyobj->hasOwnership = owner;
+    pyobj->d->hasOwnership = owner;
 }
 
 void SbkBaseWrapper_setOwnership(PyObject* pyobj, bool owner)
 {
-    std::list<PyObject*> objs = splitPyObject(pyobj);
-    std::list<PyObject*>::const_iterator it;
-    for(it=objs.begin(); it != objs.end(); it++)
-        SbkBaseWrapper_setOwnership(reinterpret_cast<SbkBaseWrapper*>(*it), owner);
+    if (PySequence_Check(pyobj)) {
+        std::list<PyObject*> objs = splitPyObject(pyobj);
+        std::list<PyObject*>::const_iterator it;
+        for(it=objs.begin(); it != objs.end(); it++)
+            SbkBaseWrapper_setOwnership(reinterpret_cast<SbkBaseWrapper*>(*it), owner);
+    } else if (isShibokenType(pyobj)) {
+        SbkBaseWrapper_setOwnership(reinterpret_cast<SbkBaseWrapper*>(pyobj), owner);
+    }
 }
 
+namespace Wrapper
+{
+
+void setValidCpp(SbkBaseWrapper* pyObj, bool value)
+{
+    pyObj->d->validCppObject = value;
+}
+
+void setHasCppWrapper(SbkBaseWrapper* pyObj, bool value)
+{
+    pyObj->d->containsCppWrapper = value;
+}
+
+bool hasCppWrapper(SbkBaseWrapper* pyObj)
+{
+    return pyObj->d->containsCppWrapper;
+}
+
+} // namespace Wrapper
 
 } // namespace Shiboken
 

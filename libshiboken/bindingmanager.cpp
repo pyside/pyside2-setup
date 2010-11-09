@@ -184,7 +184,7 @@ void BindingManager::releaseWrapper(PyObject* wrapper)
     SbkBaseWrapperType* sbkType = reinterpret_cast<SbkBaseWrapperType*>(wrapper->ob_type);
     int numBases = sbkType->is_multicpp ? getNumberOfCppBaseClasses(wrapper->ob_type) : 1;
 
-    void** cptrs = reinterpret_cast<SbkBaseWrapper*>(wrapper)->cptr;
+    void** cptrs = reinterpret_cast<SbkBaseWrapper*>(wrapper)->d->cptr;
     for (int i = 0; i < numBases; ++i) {
         void* cptr = cptrs[i];
         m_d->releaseWrapper(cptr);
@@ -258,32 +258,32 @@ void BindingManager::invalidateWrapper(PyObject* pyobj)
 
 void BindingManager::invalidateWrapper(SbkBaseWrapper* wrapper)
 {
-    if (!wrapper || ((PyObject*)wrapper == Py_None) || !SbkBaseWrapper_validCppObject(wrapper))
+    if (!wrapper || ((PyObject*)wrapper == Py_None) || !wrapper->d->validCppObject)
         return;
 
     GilState gil; // lock the gil to assure no one is changing the value of m_d->destroying
 
     // skip this if the object is a wrapper class and this is not a destructor call
-    if (SbkBaseWrapper_containsCppWrapper(wrapper) && !m_d->destroying) {
-        ParentInfo* pInfo = wrapper->parentInfo;
+    if (wrapper->d->containsCppWrapper && !m_d->destroying) {
+        ParentInfo* pInfo = wrapper->d->parentInfo;
         // this meaning the object has a extra ref and we will remove this now
         if (pInfo && pInfo->hasWrapperRef) {
             delete pInfo;
-            wrapper->parentInfo = 0;
+            wrapper->d->parentInfo = 0;
             Py_XDECREF((PyObject*) wrapper);
         }
         return;
     }
 
-    SbkBaseWrapper_setValidCppObject(wrapper, false);
-    SbkBaseWrapper_setOwnership(wrapper, false);
+    wrapper->d->validCppObject = false;
+    wrapper->d->hasOwnership = false;
 
     // If it is a parent invalidate all children.
-    if (SbkBaseWrapper_hasParentInfo(wrapper)) {
-        ChildrenList::iterator it = wrapper->parentInfo->children.begin();
+    if (wrapper->d->parentInfo) {
+        ChildrenList::iterator it = wrapper->d->parentInfo->children.begin();
         bool parentDestroying = m_d->destroying;
         m_d->destroying = false;
-        for (; it != wrapper->parentInfo->children.end(); ++it)
+        for (; it != wrapper->d->parentInfo->children.end(); ++it)
             invalidateWrapper(*it);
         m_d->destroying = parentDestroying;
     }
@@ -323,10 +323,10 @@ void BindingManager::transferOwnershipToCpp(PyObject* wrapper)
 
 void BindingManager::transferOwnershipToCpp(SbkBaseWrapper* wrapper)
 {
-    if (wrapper->parentInfo)
+    if (wrapper->d->parentInfo)
         Shiboken::removeParent(wrapper);
 
-    if (SbkBaseWrapper_containsCppWrapper(wrapper))
+    if (wrapper->d->containsCppWrapper)
         SbkBaseWrapper_setOwnership(wrapper, false);
     else
         invalidateWrapper(wrapper);

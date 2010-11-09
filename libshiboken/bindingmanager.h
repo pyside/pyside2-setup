@@ -27,10 +27,11 @@
 #include <set>
 #include "shibokenmacros.h"
 
+struct SbkBaseWrapper;
+
 namespace Shiboken
 {
 
-struct SbkBaseWrapper;
 struct SbkBaseWrapperType;
 
 class LIBSHIBOKEN_API BindingManager
@@ -40,7 +41,7 @@ public:
 
     bool hasWrapper(const void *cptr);
 
-    void registerWrapper( Shiboken::SbkBaseWrapper* pyobj, void* cptr);
+    void registerWrapper(SbkBaseWrapper* pyobj, void* cptr);
     void releaseWrapper(PyObject* wrapper);
     PyObject* retrieveWrapper(const void* cptr);
     PyObject* getOverride(const void* cptr, const char* methodName);

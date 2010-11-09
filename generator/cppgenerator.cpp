@@ -779,13 +779,13 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
     {
         Indentation indentation(INDENT);
         s << INDENT << "PyObject *pySelf = BindingManager::instance().retrieveWrapper(this);\n"
-          << INDENT << "void *typeData = Shiboken::getTypeUserData(reinterpret_cast<Shiboken::SbkBaseWrapper*>(pySelf));" << endl
+          << INDENT << "void *typeData = Shiboken::getTypeUserData(reinterpret_cast<SbkBaseWrapper*>(pySelf));" << endl
           << INDENT << "if (!typeData) {" << endl;
         {
             Indentation indentation2(INDENT);
             s << INDENT << "m_metaObject = PySide::DynamicQMetaObject::createBasedOn(pySelf, pySelf->ob_type, &"
                         << metaClass->qualifiedCppName() << "::staticMetaObject);" << endl
-              << INDENT << "Shiboken::setTypeUserData(reinterpret_cast<Shiboken::SbkBaseWrapper*>(pySelf), m_metaObject, PySide::deleteDynamicQMetaObject);" << endl;
+              << INDENT << "Shiboken::setTypeUserData(reinterpret_cast<SbkBaseWrapper*>(pySelf), m_metaObject, PySide::deleteDynamicQMetaObject);" << endl;
         }
         s << INDENT << "} else {" << endl;
         {
@@ -927,13 +927,13 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
         s << endl;
     }
 
-    s << INDENT << "sbkSelf->validCppObject = 1;" << endl;
+    s << INDENT << "Shiboken::Wrapper::setValidCpp(sbkSelf, true);" << endl;
     // If the created C++ object has a C++ wrapper the ownership is assigned to Python
     // (first "1") and the flag indicating that the Python wrapper holds an C++ wrapper
     // is marked as true (the second "1"). Otherwise the default values apply:
     // Python owns it and C++ wrapper is false.
     if (shouldGenerateCppWrapper(overloads.first()->ownerClass()))
-        s << INDENT << "sbkSelf->containsCppWrapper = 1;" << endl;
+        s << INDENT << "Shiboken::Wrapper::setHasCppWrapper(sbkSelf, true);" << endl;
     s << INDENT << "BindingManager::instance().registerWrapper(sbkSelf, cptr);" << endl;
 
     // Create metaObject and register signal/slot
@@ -1843,7 +1843,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     }
 
     if (func->isAbstract()) {
-        s << INDENT << "if (SbkBaseWrapper_containsCppWrapper(self)) {\n";
+        s << INDENT << "if (Shiboken::Wrapper::hasCppWrapper(reinterpret_cast<SbkBaseWrapper*>(self))) {\n";
         {
             Indentation indent(INDENT);
             s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
@@ -2429,7 +2429,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "PyObject_HEAD_INIT(&Shiboken::SbkBaseWrapperType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
     s << INDENT << "/*tp_name*/             \"" << metaClass->fullName() << "\"," << endl;
-    s << INDENT << "/*tp_basicsize*/        sizeof(Shiboken::SbkBaseWrapper)," << endl;
+    s << INDENT << "/*tp_basicsize*/        sizeof(SbkBaseWrapper)," << endl;
     s << INDENT << "/*tp_itemsize*/         0," << endl;
     s << INDENT << "/*tp_dealloc*/          " << tp_dealloc << ',' << endl;
     s << INDENT << "/*tp_print*/            0," << endl;

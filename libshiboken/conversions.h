@@ -223,8 +223,8 @@ struct ValueTypeConverter
     static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<T*>(cppobj)); }
     static inline PyObject* toPython(const T& cppobj)
     {
-        PyObject* obj = createWrapper<T>(CppObjectCopier<T>::copy(cppobj), true, true);
-        SbkBaseWrapper_setContainsCppWrapper(obj, SbkTypeInfo<T>::isCppWrapper);
+        PyObject* obj = createWrapper<T>(new T(cppobj), true, true);
+//         SbkBaseWrapper_setContainsCppWrapper(obj, SbkTypeInfo<T>::isCppWrapper);
         return obj;
     }
     // Classes with implicit conversions are expected to reimplement 'toCpp' to build T from

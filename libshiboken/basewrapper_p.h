@@ -25,11 +25,66 @@
 
 #include <Python.h>
 #include <list>
+#include <map>
+
+struct SbkBaseWrapper;
 
 namespace Shiboken
 {
 /**
- * Utility function uset to transform PyObject which suppot sequence protocol in a std::list 
+    * This mapping associates a method and argument of an wrapper object with the wrapper of
+    * said argument when it needs the binding to help manage its reference counting.
+    */
+typedef std::map<std::string, std::list<PyObject*> > RefCountMap;
+
+
+/// Linked list of SbkBaseWrapper pointers
+typedef std::list<SbkBaseWrapper*> ChildrenList;
+
+/// Struct used to store information about object parent and children.
+struct ParentInfo
+{
+    /// Default ctor.
+    ParentInfo() : parent(0), hasWrapperRef(false) {}
+    /// Pointer to parent object.
+    SbkBaseWrapper* parent;
+    /// List of object children.
+    ChildrenList children;
+    /// has internal ref
+    bool hasWrapperRef;
+};
+
+} // namespace Shiboken
+
+extern "C"
+{
+
+/**
+ * \internal
+ * Private data for SbkBaseWrapper
+ */
+struct SbkBaseWrapperPrivate
+{
+    /// Pointer to the C++ class.
+    void** cptr;
+    /// True when Python is responsible for freeing the used memory.
+    unsigned int hasOwnership : 1;
+    /// Is true when the C++ class of the wrapped object has a virtual destructor AND was created by Python.
+    unsigned int containsCppWrapper : 1;
+    /// Marked as false when the object is lost to C++ and the binding can not know if it was deleted or not.
+    unsigned int validCppObject : 1;
+    /// Information about the object parents and children, can be null.
+    Shiboken::ParentInfo* parentInfo;
+    /// Manage reference counting of objects that are referred but not owned.
+    Shiboken::RefCountMap* referredObjects;
+};
+
+} // extern "C"
+
+namespace Shiboken
+{
+/**
+ * Utility function uset to transform PyObject which suppot sequence protocol in a std::list
  **/
 std::list<PyObject*> splitPyObject(PyObject* pyObj);
 
@@ -126,30 +181,12 @@ inline std::list<SbkBaseWrapperType*> getCppBaseClasses(PyTypeObject* baseType)
     return visitor.bases();
 }
 
-struct SbkBaseWrapper;
-
-/// Linked list of SbkBaseWrapper pointers
-typedef std::list<SbkBaseWrapper*> ChildrenList;
-
-/// Struct used to store information about object parent and children.
-struct ParentInfo
-{
-    /// Default ctor.
-    ParentInfo() : parent(0), hasWrapperRef(false) {}
-    /// Pointer to parent object.
-    SbkBaseWrapper* parent;
-    /// List of object children.
-    ChildrenList children;
-    /// has internal ref
-    bool hasWrapperRef;
-};
-
 /**
 *   Decrements the reference counters of every object referred by self.
 *   \param self    the wrapper instance that keeps references to other objects.
 */
 void clearReferences(SbkBaseWrapper* self);
 
-}
+} // namespace Shiboken
 
 #endif
