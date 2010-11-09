@@ -150,7 +150,7 @@ struct Converter<T*>
     static T* toCpp(PyObject* pyobj)
     {
         if (Shiboken_TypeCheck(pyobj, T))
-            return (T*) getCppPointer(pyobj, SbkType<T>());
+            return (T*) Wrapper::cppPointer(pyobj, SbkType<T>());
 
         else if (Converter<T>::isConvertible(pyobj))
             return CppObjectCopier<T>::copy(Converter<T>::toCpp(pyobj));
@@ -243,7 +243,7 @@ struct ValueTypeConverter
             }
             assert(false);
         }
-        return *reinterpret_cast<T*>(getCppPointer(pyobj, SbkType<T>()));
+        return *reinterpret_cast<T*>(Wrapper::cppPointer(pyobj, SbkType<T>()));
     }
 };
 
@@ -277,8 +277,8 @@ struct ObjectTypeConverter
             return 0;
         SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(pyobj->ob_type);
         if (shiboType->mi_specialcast)
-            return (T*) shiboType->mi_specialcast(getCppPointer(pyobj, SbkType<T>()), reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()));
-        return (T*) getCppPointer(pyobj, SbkType<T>());
+            return (T*) shiboType->mi_specialcast(Wrapper::cppPointer(pyobj, SbkType<T>()), reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()));
+        return (T*) Wrapper::cppPointer(pyobj, SbkType<T>());
     }
 };
 
@@ -587,7 +587,7 @@ struct StdListConverter
     static StdList toCpp(PyObject* pyobj)
     {
         if (PyObject_TypeCheck(pyobj, SbkType<StdList>()))
-            return *reinterpret_cast<StdList*>(getCppPointer(pyobj, SbkType<StdList>()));
+            return *reinterpret_cast<StdList*>(Wrapper::cppPointer(pyobj, SbkType<StdList>()));
 
         StdList result;
         for (int i = 0; i < PySequence_Size(pyobj); i++) {

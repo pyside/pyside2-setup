@@ -146,16 +146,6 @@ inline bool isUserType(PyObject*& pyObj)
 }
 
 /**
-*   Get the C++ pointer of type \p desiredType from a Python object.
-*/
-LIBSHIBOKEN_API void* getCppPointer(PyObject* wrapper, PyTypeObject* desiredType);
-
-/**
-*   Set the C++ pointer of type \p desiredType of a Python object.
-*/
-LIBSHIBOKEN_API bool setCppPointer(SbkObject* wrapper, PyTypeObject* desiredType, void* cptr);
-
-/**
  *   Get/Set Userdata in type class
  */
 LIBSHIBOKEN_API void setTypeUserData(SbkObject* wrapper, void* user_data, DeleteUserDataFunc d_func);
@@ -226,6 +216,16 @@ LIBSHIBOKEN_API void getOwnership(PyObject* pyObj);
 LIBSHIBOKEN_API void getOwnership(SbkObject* pyObj);
 LIBSHIBOKEN_API void releaseOwnership(PyObject* pyObj);
 LIBSHIBOKEN_API void releaseOwnership(SbkObject* pyObj);
+
+/**
+ *   Get the C++ pointer of type \p desiredType from a Python object.
+ */
+LIBSHIBOKEN_API void* cppPointer(PyObject* pyObj, PyTypeObject* desiredType);
+
+/**
+ *   Set the C++ pointer of type \p desiredType of a Python object.
+ */
+LIBSHIBOKEN_API bool setCppPointer(SbkObject* sbkObj, PyTypeObject* desiredType, void* cptr);
 
 } // namespace Wrapper
 

@@ -915,7 +915,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     if (hasPythonConvertion)
         s << INDENT << "}" << endl;
 
-    s << INDENT << "if (PyErr_Occurred() || !Shiboken::setCppPointer(sbkSelf, Shiboken::SbkType<" << metaClass->qualifiedCppName() << " >(), cptr)) {" << endl;
+    s << INDENT << "if (PyErr_Occurred() || !Shiboken::Wrapper::setCppPointer(sbkSelf, Shiboken::SbkType<" << metaClass->qualifiedCppName() << " >(), cptr)) {" << endl;
     {
         Indentation indent(INDENT);
         s << INDENT << "delete cptr;" << endl;

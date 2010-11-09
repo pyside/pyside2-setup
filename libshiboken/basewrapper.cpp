@@ -333,30 +333,6 @@ PyObject* SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*)
     return reinterpret_cast<PyObject*>(self);
 }
 
-void* getCppPointer(PyObject* wrapper, PyTypeObject* desiredType)
-{
-    PyTypeObject* type = wrapper->ob_type;
-    int idx = 0;
-    if (reinterpret_cast<SbkBaseWrapperType*>(type)->is_multicpp)
-        idx = getTypeIndexOnHierarchy(type, desiredType);
-    return reinterpret_cast<SbkObject*>(wrapper)->d->cptr[idx];
-}
-
-bool setCppPointer(SbkObject* wrapper, PyTypeObject* desiredType, void* cptr)
-{
-    int idx = 0;
-    if (reinterpret_cast<SbkBaseWrapperType*>(wrapper->ob_type)->is_multicpp)
-        idx = getTypeIndexOnHierarchy(wrapper->ob_type, desiredType);
-
-    bool alreadyInitialized = wrapper->d->cptr[idx];
-    if (alreadyInitialized)
-        PyErr_SetString(PyExc_RuntimeError, "You can't initialize an object twice!");
-    else
-        wrapper->d->cptr[idx] = cptr;
-
-    return !alreadyInitialized;
-}
-
 bool cppObjectIsInvalid(PyObject* wrapper)
 {
     if (!wrapper || wrapper == Py_None
@@ -726,6 +702,32 @@ void releaseOwnership(PyObject* pyObj)
 {
     setSequenceOwnership(pyObj, false);
 }
+
+void* cppPointer(PyObject* pyObj, PyTypeObject* desiredType)
+{
+    assert(isShibokenType(pyObj));
+    PyTypeObject* type = pyObj->ob_type;
+    int idx = 0;
+    if (reinterpret_cast<SbkBaseWrapperType*>(type)->is_multicpp)
+        idx = getTypeIndexOnHierarchy(type, desiredType);
+    return reinterpret_cast<SbkObject*>(pyObj)->d->cptr[idx];
+}
+
+bool setCppPointer(SbkObject* sbkObj, PyTypeObject* desiredType, void* cptr)
+{
+    int idx = 0;
+    if (reinterpret_cast<SbkBaseWrapperType*>(sbkObj->ob_type)->is_multicpp)
+        idx = getTypeIndexOnHierarchy(sbkObj->ob_type, desiredType);
+
+    bool alreadyInitialized = sbkObj->d->cptr[idx];
+    if (alreadyInitialized)
+        PyErr_SetString(PyExc_RuntimeError, "You can't initialize an object twice!");
+    else
+        sbkObj->d->cptr[idx] = cptr;
+
+    return !alreadyInitialized;
+}
+
 
 } // namespace Wrapper
 
