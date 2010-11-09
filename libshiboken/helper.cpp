@@ -63,41 +63,30 @@ bool sequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* 
     return true;
 }
 
-int*
-sequenceToIntArray(PyObject* obj, bool zeroTerminated)
+int* sequenceToIntArray(PyObject* obj, bool zeroTerminated)
 {
-    int* array = NULL;
-    int i;
-    int size;
+    AutoDecRef seq(PySequence_Fast(obj, "Sequence of ints expected"));
+    if (seq.isNull())
+        return 0;
 
-    if (!PySequence_Check(obj)) {
-        PyErr_SetString(PyExc_TypeError, "Sequence of ints expected");
-        return NULL;
-    }
+    Py_ssize_t size = PySequence_Fast_GET_SIZE(seq.object());
+    int* array = new int[size + (zeroTerminated ? 1 : 0)];
 
-    size = PySequence_Size(obj);
-
-    array = new int[size + (zeroTerminated ? 1 : 0)];
-
-    for (i = 0; i < size; i++) {
-        PyObject* item = PySequence_GetItem(obj, i);
+    for (int i = 0; i < size; i++) {
+        PyObject* item = PySequence_Fast_GET_ITEM(seq.object(), i);
         if (!PyInt_Check(item)) {
             PyErr_SetString(PyExc_TypeError, "Sequence of ints expected");
-            Py_DECREF(item);
-            if (array)
-                delete[] array;
-            return NULL;
+            delete[] array;
+            return 0;
         } else {
             array[i] = PyInt_AsLong(item);
-            Py_DECREF(item);
         }
     }
 
     if (zeroTerminated)
-        array[i] = 0;
+        array[size] = 0;
 
     return array;
 }
-
 
 } // namespace Shiboken
