@@ -333,17 +333,6 @@ PyObject* SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*)
     return reinterpret_cast<PyObject*>(self);
 }
 
-bool cppObjectIsInvalid(PyObject* wrapper)
-{
-    if (!wrapper || wrapper == Py_None
-        || wrapper->ob_type->ob_type != &Shiboken::SbkBaseWrapperType_Type
-        || ((SbkObject*)wrapper)->d->validCppObject) {
-        return false;
-    }
-    PyErr_SetString(PyExc_RuntimeError, "Internal C++ object already deleted.");
-    return true;
-}
-
 void setTypeUserData(SbkObject* wrapper, void *user_data, DeleteUserDataFunc d_func)
 {
     SbkBaseWrapperType* ob_type = reinterpret_cast<SbkBaseWrapperType*>(wrapper->ob_type);
@@ -728,6 +717,16 @@ bool setCppPointer(SbkObject* sbkObj, PyTypeObject* desiredType, void* cptr)
     return !alreadyInitialized;
 }
 
+bool isValid(PyObject* pyObj)
+{
+    if (!pyObj || pyObj == Py_None
+        || pyObj->ob_type->ob_type != &Shiboken::SbkBaseWrapperType_Type
+        || ((SbkObject*)pyObj)->d->validCppObject) {
+        return true;
+    }
+    PyErr_Format(PyExc_RuntimeError, "Internal C++ object (%s) already deleted.", pyObj->ob_type->tp_name);
+    return false;
+}
 
 } // namespace Wrapper
 

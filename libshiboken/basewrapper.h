@@ -189,9 +189,6 @@ SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*);
  */
 LIBSHIBOKEN_API void keepReference(SbkObject* self, const char* key, PyObject* referredObject, bool append=false);
 
-/// Returns true and sets a Python RuntimeError if the Python wrapper is not marked as valid.
-LIBSHIBOKEN_API bool cppObjectIsInvalid(PyObject* wrapper);
-
 /// Dealloc the python object \p pyObj and the C++ object represented by it.
 LIBSHIBOKEN_API void deallocWrapper(PyObject* pyObj);
 
@@ -226,6 +223,10 @@ LIBSHIBOKEN_API void* cppPointer(PyObject* pyObj, PyTypeObject* desiredType);
  *   Set the C++ pointer of type \p desiredType of a Python object.
  */
 LIBSHIBOKEN_API bool setCppPointer(SbkObject* sbkObj, PyTypeObject* desiredType, void* cptr);
+
+/// Returns false and sets a Python RuntimeError if the Python wrapper is not marked as valid.
+LIBSHIBOKEN_API bool isValid(PyObject* wrapper);
+
 
 } // namespace Wrapper
 
