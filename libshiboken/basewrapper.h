@@ -203,6 +203,8 @@ LIBSHIBOKEN_API void getOwnership(SbkObject* pyObj);
 LIBSHIBOKEN_API void releaseOwnership(PyObject* pyObj);
 LIBSHIBOKEN_API void releaseOwnership(SbkObject* pyObj);
 
+LIBSHIBOKEN_API bool hasParentInfo(SbkObject* pyObj);
+
 /**
  *   Get the C++ pointer of type \p desiredType from a Python object.
  */

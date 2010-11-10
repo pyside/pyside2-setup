@@ -666,6 +666,11 @@ void releaseOwnership(PyObject* pyObj)
     setSequenceOwnership(pyObj, false);
 }
 
+bool hasParentInfo(SbkObject* pyObj)
+{
+    return pyObj->d->parentInfo;
+}
+
 void* cppPointer(SbkObject* pyObj, PyTypeObject* desiredType)
 {
     PyTypeObject* type = pyObj->ob_type;
