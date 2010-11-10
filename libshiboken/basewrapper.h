@@ -166,9 +166,6 @@ LIBSHIBOKEN_API bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctor
  */
 #define Shiboken_TypeCheck(pyobj, type) (PyObject_TypeCheck(pyobj, SbkType<type>()))
 
-#define SbkBaseWrapper_Check(op) PyObject_TypeCheck(op, (PyTypeObject*)&SbkObject_Type)
-#define SbkBaseWrapper_CheckExact(op) ((op)->ob_type == &SbkObject_Type)
-
 /**
  *   Increments the reference count of the referred Python object.
  *   A previous Python object in the same position identified by the 'key' parameter

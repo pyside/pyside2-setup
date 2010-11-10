@@ -1166,7 +1166,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             s << INDENT << "if (!isReverse" << endl;
             {
                 Indentation indent(INDENT);
-                s << INDENT << "&& SbkBaseWrapper_Check(arg)" << endl;
+                s << INDENT << "&& Shiboken::isShibokenType(arg)" << endl;
                 s << INDENT << "&& !PyObject_TypeCheck(arg, self->ob_type)" << endl;
                 s << INDENT << "&& PyObject_HasAttrString(arg, const_cast<char*>(\"" << revOpName << "\"))) {" << endl;
                 // This PyObject_CallMethod call will emit lots of warnings like
