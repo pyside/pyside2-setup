@@ -147,11 +147,6 @@ void OverloadData::sortNextOverloads()
     OverloadSortData sortData;
     bool checkPyObject = false;
     int pyobjectIndex = 0;
-    bool checkQString = false;
-    int qstringIndex = 0;
-    bool checkQVariant = false;
-    int qvariantIndex = 0;
-    bool hasObjectPointer = false;
 
     // Primitive types that are not int, long, short,
     // char and their respective unsigned counterparts.
@@ -177,14 +172,6 @@ void OverloadData::sortNextOverloads()
         if (!checkPyObject && getTypeName(ov->argType()).contains("PyObject")) {
             checkPyObject = true;
             pyobjectIndex = sortData.lastProcessedItemId();
-        } else if (!checkQVariant && getTypeName(ov->argType()) == "QVariant") {
-            checkQVariant = true;
-            qvariantIndex = sortData.lastProcessedItemId();
-        } else if (!checkQString && getTypeName(ov->argType()) == "QString") {
-            checkQString = true;
-            qstringIndex = sortData.lastProcessedItemId();
-        } else if (!hasObjectPointer && (ov->argType()->isValuePointer() || ov->argType()->typeEntry()->isObject() )) {
-            hasObjectPointer = true;
         }
 
         foreach (const AbstractMetaType* instantiation, ov->argType()->instantiations()) {
@@ -280,10 +267,6 @@ void OverloadData::sortNextOverloads()
         /* Add dependency on PyObject, so its check is the last one (too generic) */
         if (checkPyObject && !targetTypeEntryName.contains("PyObject"))
             graph.addEdge(sortData.map[targetTypeEntryName], pyobjectIndex);
-        else if (checkQVariant && targetTypeEntryName != "QVariant")
-            graph.addEdge(sortData.map[targetTypeEntryName], qvariantIndex);
-        else if (checkQString && hasObjectPointer && targetTypeEntryName != "QString")
-            graph.addEdge(sortData.map[targetTypeEntryName], qstringIndex);
 
         if (targetTypeEntry->isEnum()) {
             for (int i = 0; i < numPrimitives; ++i) {
