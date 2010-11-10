@@ -33,7 +33,7 @@
 extern "C"
 {
 
-struct SbkBaseWrapperPrivate;
+struct SbkObjectPrivate;
 
 /// Base Python object for all the wrapped C++ classes.
 struct LIBSHIBOKEN_API SbkObject
@@ -43,7 +43,7 @@ struct LIBSHIBOKEN_API SbkObject
     PyObject* ob_dict;
     /// List of weak references
     PyObject* weakreflist;
-    SbkBaseWrapperPrivate* d;
+    SbkObjectPrivate* d;
 };
 
 

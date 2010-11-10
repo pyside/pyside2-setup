@@ -250,7 +250,7 @@ PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* k
 PyObject* SbkObjectTpNew(PyTypeObject* subtype, PyObject*, PyObject*)
 {
     SbkObject* self = reinterpret_cast<SbkObject*>(subtype->tp_alloc(subtype, 0));
-    self->d = new SbkBaseWrapperPrivate;
+    self->d = new SbkObjectPrivate;
 
     SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(subtype);
     int numBases = sbkType->is_multicpp ? Shiboken::getNumberOfCppBaseClasses(subtype) : 1;

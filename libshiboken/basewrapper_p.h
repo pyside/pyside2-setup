@@ -64,7 +64,7 @@ extern "C"
  * \internal
  * Private data for SbkBaseWrapper
  */
-struct SbkBaseWrapperPrivate
+struct SbkObjectPrivate
 {
     /// Pointer to the C++ class.
     void** cptr;
