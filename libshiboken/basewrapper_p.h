@@ -28,7 +28,7 @@
 #include <map>
 
 struct SbkObject;
-struct SbkBaseWrapperType;
+struct SbkObjectType;
 
 namespace Shiboken
 {
@@ -97,7 +97,7 @@ class HierarchyVisitor
 public:
     HierarchyVisitor() : m_wasFinished(false) {}
     virtual ~HierarchyVisitor() {}
-    virtual void visit(SbkBaseWrapperType* node) = 0;
+    virtual void visit(SbkObjectType* node) = 0;
     void finish() { m_wasFinished = true; };
     bool wasFinished() const { return m_wasFinished; }
 private:
@@ -109,7 +109,7 @@ class BaseCountVisitor : public HierarchyVisitor
 public:
     BaseCountVisitor() : m_count(0) {}
 
-    void visit(SbkBaseWrapperType*)
+    void visit(SbkObjectType*)
     {
         m_count++;
     }
@@ -124,21 +124,21 @@ class BaseAccumulatorVisitor : public HierarchyVisitor
 public:
     BaseAccumulatorVisitor() {}
 
-    void visit(SbkBaseWrapperType* node)
+    void visit(SbkObjectType* node)
     {
         m_bases.push_back(node);
     }
 
-    std::list<SbkBaseWrapperType*> bases() const { return m_bases; }
+    std::list<SbkObjectType*> bases() const { return m_bases; }
 private:
-    std::list<SbkBaseWrapperType*> m_bases;
+    std::list<SbkObjectType*> m_bases;
 };
 
 class GetIndexVisitor : public HierarchyVisitor
 {
 public:
     GetIndexVisitor(PyTypeObject* desiredType) : m_index(-1), m_desiredType(desiredType) {}
-    virtual void visit(SbkBaseWrapperType* node)
+    virtual void visit(SbkObjectType* node)
     {
         m_index++;
         if (PyType_IsSubtype(reinterpret_cast<PyTypeObject*>(node), m_desiredType))
@@ -155,7 +155,7 @@ class DtorCallerVisitor : public HierarchyVisitor
 {
 public:
     DtorCallerVisitor(SbkObject* pyObj) : m_count(0), m_pyObj(pyObj) {}
-    void visit(SbkBaseWrapperType* node);
+    void visit(SbkObjectType* node);
 private:
     int m_count;
     SbkObject* m_pyObj;
@@ -183,7 +183,7 @@ inline int getNumberOfCppBaseClasses(PyTypeObject* baseType)
     return visitor.count();
 }
 
-inline std::list<SbkBaseWrapperType*> getCppBaseClasses(PyTypeObject* baseType)
+inline std::list<SbkObjectType*> getCppBaseClasses(PyTypeObject* baseType)
 {
     BaseAccumulatorVisitor visitor;
     walkThroughClassHierarchy(baseType, &visitor);

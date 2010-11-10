@@ -28,7 +28,7 @@
 #include "shibokenmacros.h"
 
 struct SbkObject;
-struct SbkBaseWrapperType;
+struct SbkObjectType;
 
 namespace Shiboken
 {
@@ -56,8 +56,8 @@ public:
     void transferOwnershipToCpp(SbkObject* wrapper);
     /// Convenience method to call transferOwnershipToCpp with a properly cast SbkBaseWrapper.
     void transferOwnershipToCpp(PyObject* wrapper);
-    void addClassInheritance(SbkBaseWrapperType* parent, SbkBaseWrapperType* child);
-    SbkBaseWrapperType* resolveType(void* cptr, SbkBaseWrapperType* type);
+    void addClassInheritance(SbkObjectType* parent, SbkObjectType* child);
+    SbkObjectType* resolveType(void* cptr, SbkObjectType* type);
 
     /// Called by wrapper destructor
     void destroyWrapper(const void* cptr);

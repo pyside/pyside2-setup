@@ -99,7 +99,7 @@ struct CppObjectCopier<T, true>
 {
     static inline T* copy(const T& obj)
     {
-        return reinterpret_cast<T*>(reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>())->obj_copier(&obj));
+        return reinterpret_cast<T*>(reinterpret_cast<SbkObjectType*>(SbkType<T>())->obj_copier(&obj));
     }
 };
 
@@ -113,7 +113,7 @@ inline PyObject* createWrapper(const T* cppobj, bool hasOwnership = false, bool 
     const char* typeName = 0;
     if (!isExactType)
         typeName = typeid(*const_cast<T*>(cppobj)).name();
-    return Wrapper::newObject(reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()),
+    return Wrapper::newObject(reinterpret_cast<SbkObjectType*>(SbkType<T>()),
                               const_cast<T*>(cppobj), hasOwnership, isExactType, typeName);
 }
 
@@ -215,7 +215,7 @@ struct ValueTypeConverter
     {
         if (PyObject_TypeCheck(pyobj, SbkType<T>()))
             return true;
-        SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>());
+        SbkObjectType* shiboType = reinterpret_cast<SbkObjectType*>(SbkType<T>());
         if (shiboType->ext_isconvertible)
             return shiboType->ext_isconvertible(pyobj);
         return false;
@@ -235,7 +235,7 @@ struct ValueTypeConverter
     static inline T toCpp(PyObject* pyobj)
     {
         if (!PyObject_TypeCheck(pyobj, SbkType<T>())) {
-            SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>());
+            SbkObjectType* shiboType = reinterpret_cast<SbkObjectType*>(SbkType<T>());
             if (shiboType->ext_tocpp && isConvertible(pyobj)) {
                 T* cptr = reinterpret_cast<T*>(shiboType->ext_tocpp(pyobj));
                 std::auto_ptr<T> cptr_auto_ptr(cptr);
@@ -275,9 +275,9 @@ struct ObjectTypeConverter
     {
         if (pyobj == Py_None)
             return 0;
-        SbkBaseWrapperType* shiboType = reinterpret_cast<SbkBaseWrapperType*>(pyobj->ob_type);
+        SbkObjectType* shiboType = reinterpret_cast<SbkObjectType*>(pyobj->ob_type);
         if (shiboType->mi_specialcast)
-            return (T*) shiboType->mi_specialcast(Wrapper::cppPointer(pyobj, SbkType<T>()), reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()));
+            return (T*) shiboType->mi_specialcast(Wrapper::cppPointer(pyobj, SbkType<T>()), reinterpret_cast<SbkObjectType*>(SbkType<T>()));
         return (T*) Wrapper::cppPointer(pyobj, SbkType<T>());
     }
 };
