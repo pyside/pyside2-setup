@@ -2274,7 +2274,7 @@ void CppGenerator::writeExtendedToCppFunction(QTextStream& s, const TypeEntry* e
 void CppGenerator::writeExtendedConverterInitialization(QTextStream& s, const TypeEntry* externalType, const QList<const AbstractMetaClass*>& conversions)
 {
     s << INDENT << "// Extended implicit conversions for " << externalType->targetLangPackage() << '.' << externalType->name() << endl;
-    s << INDENT << "shiboType = reinterpret_cast<Shiboken::SbkBaseWrapperType*>(";
+    s << INDENT << "shiboType = reinterpret_cast<SbkBaseWrapperType*>(";
     s << cppApiVariableName(externalType->targetLangPackage()) << '[';
     s << getTypeIndexVariableName(externalType) << "]);" << endl;
     s << INDENT << "shiboType->ext_isconvertible = " << extendedIsConvertibleFunctionName(externalType) << ';' << endl;
@@ -2341,12 +2341,12 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         tp_as_sequence = QString("&Py%1_as_sequence").arg(cppClassName);
 
     if (!metaClass->baseClass())
-        baseClassName = "reinterpret_cast<PyTypeObject*>(&Shiboken::SbkBaseWrapper_Type)";
+        baseClassName = "reinterpret_cast<PyTypeObject*>(&SbkBaseWrapper_Type)";
 
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
         tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES";
         tp_dealloc = metaClass->hasPrivateDestructor() ?
-                     "Shiboken::deallocWrapperWithPrivateDtor" : "0";
+                     "SbkDeallocWrapperWithPrivateDtor" : "0";
         tp_init = "0";
     } else {
         if (onlyPrivCtor)
@@ -2359,7 +2359,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
             deallocClassName = wrapperName(metaClass);
         else
             deallocClassName = cppClassName;
-        tp_dealloc = "&Shiboken::deallocWrapper";
+        tp_dealloc = "&SbkDeallocWrapper";
 
         QString dtorClassName = metaClass->qualifiedCppName();
 #ifdef AVOID_PROTECTED_HACK
@@ -2383,7 +2383,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     if (metaClass->hasPrivateDestructor() || onlyPrivCtor)
         tp_new = "0";
     else
-        tp_new = "Shiboken::SbkBaseWrapper_TpNew";
+        tp_new = "SbkBaseWrapper_TpNew";
 
     QString tp_richcompare = QString('0');
     if (metaClass->hasComparisonOperatorOverload())
@@ -2426,7 +2426,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << "// Class Definition -----------------------------------------------" << endl;
     s << "extern \"C\" {" << endl;
     s << "static SbkBaseWrapperType " << className + "_Type" << " = { { {" << endl;
-    s << INDENT << "PyObject_HEAD_INIT(&Shiboken::SbkBaseWrapperType_Type)" << endl;
+    s << INDENT << "PyObject_HEAD_INIT(&SbkBaseWrapperType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
     s << INDENT << "/*tp_name*/             \"" << metaClass->fullName() << "\"," << endl;
     s << INDENT << "/*tp_basicsize*/        sizeof(SbkObject)," << endl;
@@ -3359,7 +3359,7 @@ void CppGenerator::writeTypeDiscoveryFunction(QTextStream& s, const AbstractMeta
             if (ancestor->baseClass())
                 continue;
             if (ancestor->isPolymorphic()) {
-                s << INDENT << "if (instanceType == reinterpret_cast<Shiboken::SbkBaseWrapperType*>(Shiboken::SbkType<"
+                s << INDENT << "if (instanceType == reinterpret_cast<SbkBaseWrapperType*>(Shiboken::SbkType<"
                             << ancestor->qualifiedCppName() << " >()) && dynamic_cast<" << metaClass->qualifiedCppName()
                             << "*>(reinterpret_cast<"<< ancestor->qualifiedCppName() << "*>(cptr)))" << endl;
                 Indentation indent(INDENT);
@@ -3680,7 +3680,7 @@ void CppGenerator::finishGeneration()
 
         if (!extendedConverters.isEmpty()) {
             s << INDENT << "// Initialize extended Converters" << endl;
-            s << INDENT << "Shiboken::SbkBaseWrapperType* shiboType;" << endl << endl;
+            s << INDENT << "SbkBaseWrapperType* shiboType;" << endl << endl;
         }
         foreach (const TypeEntry* externalType, extendedConverters.keys()) {
             writeExtendedConverterInitialization(s, externalType, extendedConverters[externalType]);

@@ -26,10 +26,10 @@
 #include "shibokenmacros.h"
 #include "conversions.h"
 
+class SbkBaseWrapperType;
+
 namespace Shiboken
 {
-
-class SbkBaseWrapperType;
 
 /* To C++ convertion functions. */
 template <typename T>

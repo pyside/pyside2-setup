@@ -30,16 +30,11 @@
 #include <string>
 #include <cstring>
 
-namespace Shiboken
+extern "C"
 {
 
 static void SbkBaseWrapperType_dealloc(PyObject* pyObj);
 static PyObject* SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
-static void incRefPyObject(PyObject* pyObj);
-static void decRefPyObjectList(const std::list<SbkObject*> &pyObj);
-
-extern "C"
-{
 
 PyTypeObject SbkBaseWrapperType_Type = {
     PyObject_HEAD_INIT(0)
@@ -111,7 +106,7 @@ SbkBaseWrapperType SbkBaseWrapper_Type = { { {
     /*tp_name*/             "Shiboken.BaseWrapper",
     /*tp_basicsize*/        sizeof(SbkObject),
     /*tp_itemsize*/         0,
-    /*tp_dealloc*/          deallocWrapperWithPrivateDtor,
+    /*tp_dealloc*/          SbkDeallocWrapperWithPrivateDtor,
     /*tp_print*/            0,
     /*tp_getattr*/          0,
     /*tp_setattr*/          0,
@@ -161,7 +156,104 @@ SbkBaseWrapperType SbkBaseWrapper_Type = { { {
     /*ext_tocpp*/           0
 };
 
+
+void SbkDeallocWrapper(PyObject* pyObj)
+{
+    SbkObject* sbkObj = reinterpret_cast<SbkObject*>(pyObj);
+    if (sbkObj->weakreflist)
+        PyObject_ClearWeakRefs(pyObj);
+
+    Shiboken::BindingManager::instance().releaseWrapper(sbkObj);
+    if (sbkObj->d->hasOwnership) {
+        SbkBaseWrapperType* sbkType = reinterpret_cast<SbkBaseWrapperType*>(pyObj->ob_type);
+        if (sbkType->is_multicpp) {
+            Shiboken::DtorCallerVisitor visitor(sbkObj);
+            Shiboken::walkThroughClassHierarchy(pyObj->ob_type, &visitor);
+        } else {
+            sbkType->cpp_dtor(sbkObj->d->cptr[0]);
+        }
+    }
+
+    if (sbkObj->d->parentInfo)
+        Shiboken::destroyParentInfo(sbkObj);
+
+    Shiboken::clearReferences(sbkObj);
+
+    Py_XDECREF(sbkObj->ob_dict);
+    delete[] sbkObj->d->cptr;
+    sbkObj->d->cptr = 0;
+    delete sbkObj->d;
+    Py_TYPE(pyObj)->tp_free(pyObj);
+}
+
+void SbkDeallocWrapperWithPrivateDtor(PyObject* self)
+{
+    if (((SbkObject *)self)->weakreflist)
+        PyObject_ClearWeakRefs(self);
+
+    Shiboken::BindingManager::instance().releaseWrapper(reinterpret_cast<SbkObject*>(self));
+    Shiboken::clearReferences(reinterpret_cast<SbkObject*>(self));
+    self->ob_type->tp_free(self);
+}
+
+void SbkBaseWrapperType_dealloc(PyObject* pyObj)
+{
+    SbkBaseWrapperType *sbkType = reinterpret_cast<SbkBaseWrapperType*>(pyObj->ob_type);
+
+    if(sbkType->user_data && sbkType->d_func) {
+        sbkType->d_func(sbkType->user_data);
+        sbkType->user_data = 0;
+    }
+}
+
+PyObject* SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
+{
+    // The meta type creates a new type when the Python programmer extends a wrapped C++ class.
+    SbkBaseWrapperType* newType = reinterpret_cast<SbkBaseWrapperType*>(PyType_Type.tp_new(metatype, args, kwds));
+
+    if (!newType)
+        return 0;
+
+    std::list<SbkBaseWrapperType*> bases = Shiboken::getCppBaseClasses(reinterpret_cast<PyTypeObject*>(newType));
+    if (bases.size() == 1) {
+        SbkBaseWrapperType* parentType = bases.front();
+        newType->mi_offsets = parentType->mi_offsets;
+        newType->mi_init = parentType->mi_init;
+        newType->mi_specialcast = parentType->mi_specialcast;
+        newType->ext_isconvertible = parentType->ext_isconvertible;
+        newType->ext_tocpp = parentType->ext_tocpp;
+        newType->type_discovery = parentType->type_discovery;
+        newType->obj_copier = parentType->obj_copier;
+        newType->cpp_dtor = parentType->cpp_dtor;
+        newType->is_multicpp = 0;
+    } else {
+        newType->mi_offsets = 0;
+        newType->mi_init = 0;
+        newType->mi_specialcast = 0;
+        newType->ext_isconvertible = 0;
+        newType->ext_tocpp = 0;
+        newType->type_discovery = 0;
+        newType->obj_copier = 0;
+        newType->cpp_dtor = 0;
+        newType->is_multicpp = 1;
+    }
+    if (bases.size() == 1)
+        newType->original_name = bases.front()->original_name;
+    else
+        newType->original_name = "object";
+    newType->user_data = 0;
+    newType->d_func = 0;
+    newType->is_user_type = 1;
+    return reinterpret_cast<PyObject*>(newType);
+}
+
 } //extern "C"
+
+namespace Shiboken
+{
+
+static void incRefPyObject(PyObject* pyObj);
+static void decRefPyObjectList(const std::list<SbkObject*> &pyObj);
 
 void removeParent(SbkObject* child)
 {
@@ -268,31 +360,6 @@ void destroyParentInfo(SbkObject* obj, bool removeFromParent)
     _destroyParentInfo(obj, removeFromParent);
 }
 
-PyObject* SbkBaseWrapper_New(SbkBaseWrapperType* instanceType,
-                             void* cptr,
-                             bool hasOwnership,
-                             bool isExactType, const char* typeName)
-{
-    // Try to find the exact type of cptr.
-    if (!isExactType) {
-        TypeResolver* tr = 0;
-        if (typeName) {
-            tr = TypeResolver::get(typeName);
-            if (tr)
-                instanceType = reinterpret_cast<SbkBaseWrapperType*>(tr->pythonType());
-        }
-        if (!tr)
-            instanceType = BindingManager::instance().resolveType(cptr, instanceType);
-    }
-
-    SbkObject* self = reinterpret_cast<SbkObject*>(SbkBaseWrapper_TpNew(reinterpret_cast<PyTypeObject*>(instanceType), 0, 0));
-    self->d->cptr[0] = cptr;
-    self->d->hasOwnership = hasOwnership;
-    self->d->validCppObject = 1;
-    BindingManager::instance().registerWrapper(self, cptr);
-    return reinterpret_cast<PyObject*>(self);
-}
-
 void walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visitor)
 {
     PyObject* bases = currentType->tp_bases;
@@ -300,7 +367,7 @@ void walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visi
     for (int i = 0; i < numBases; ++i) {
         PyTypeObject* type = reinterpret_cast<PyTypeObject*>(PyTuple_GET_ITEM(bases, i));
 
-        if (type->ob_type != &Shiboken::SbkBaseWrapperType_Type) {
+        if (type->ob_type != &SbkBaseWrapperType_Type) {
             continue;
         } else {
             SbkBaseWrapperType* sbkType = reinterpret_cast<SbkBaseWrapperType*>(type);
@@ -346,16 +413,6 @@ void setTypeUserData(SbkObject* wrapper, void *user_data, DeleteUserDataFunc d_f
 void* getTypeUserData(SbkObject* wrapper)
 {
     return reinterpret_cast<SbkBaseWrapperType*>(wrapper->ob_type)->user_data;
-}
-
-void deallocWrapperWithPrivateDtor(PyObject* self)
-{
-    if (((SbkObject *)self)->weakreflist)
-        PyObject_ClearWeakRefs(self);
-
-    BindingManager::instance().releaseWrapper(reinterpret_cast<SbkObject*>(self));
-    clearReferences(reinterpret_cast<SbkObject*>(self));
-    self->ob_type->tp_free(self);
 }
 
 void keepReference(SbkObject* self, const char* key, PyObject* referredObject, bool append)
@@ -416,99 +473,10 @@ bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr)
 
 // Wrapper metatype and base type ----------------------------------------------------------
 
-class DtorCallerVisitor : public HierarchyVisitor
+void DtorCallerVisitor::visit(SbkBaseWrapperType* node)
 {
-public:
-    DtorCallerVisitor(SbkObject* pyObj) : m_count(0), m_pyObj(pyObj) {}
-    virtual void visit(SbkBaseWrapperType* node)
-    {
-        node->cpp_dtor(m_pyObj->d->cptr[m_count]);
-        m_count++;
-    }
-private:
-    int m_count;
-    SbkObject* m_pyObj;
-};
-
-void deallocWrapper(PyObject* pyObj)
-{
-    SbkObject* sbkObj = reinterpret_cast<SbkObject*>(pyObj);
-    if (sbkObj->weakreflist)
-        PyObject_ClearWeakRefs(pyObj);
-
-    BindingManager::instance().releaseWrapper(sbkObj);
-    if (sbkObj->d->hasOwnership) {
-        SbkBaseWrapperType* sbkType = reinterpret_cast<SbkBaseWrapperType*>(pyObj->ob_type);
-        if (sbkType->is_multicpp) {
-            DtorCallerVisitor visitor(sbkObj);
-            walkThroughClassHierarchy(pyObj->ob_type, &visitor);
-        } else {
-            sbkType->cpp_dtor(sbkObj->d->cptr[0]);
-        }
-    }
-
-    if (sbkObj->d->parentInfo)
-        destroyParentInfo(sbkObj);
-
-    clearReferences(sbkObj);
-
-    Py_XDECREF(sbkObj->ob_dict);
-    delete[] sbkObj->d->cptr;
-    sbkObj->d->cptr = 0;
-    delete sbkObj->d;
-    Py_TYPE(pyObj)->tp_free(pyObj);
-
-}
-
-void SbkBaseWrapperType_dealloc(PyObject* pyObj)
-{
-    SbkBaseWrapperType *sbkType = reinterpret_cast<SbkBaseWrapperType*>(pyObj->ob_type);
-
-    if(sbkType->user_data && sbkType->d_func) {
-        sbkType->d_func(sbkType->user_data);
-        sbkType->user_data = 0;
-    }
-}
-
-PyObject* SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
-{
-    // The meta type creates a new type when the Python programmer extends a wrapped C++ class.
-    SbkBaseWrapperType* newType = reinterpret_cast<SbkBaseWrapperType*>(PyType_Type.tp_new(metatype, args, kwds));
-
-    if (!newType)
-        return 0;
-
-    std::list<SbkBaseWrapperType*> bases = getCppBaseClasses(reinterpret_cast<PyTypeObject*>(newType));
-    if (bases.size() == 1) {
-        SbkBaseWrapperType* parentType = bases.front();
-        newType->mi_offsets = parentType->mi_offsets;
-        newType->mi_init = parentType->mi_init;
-        newType->mi_specialcast = parentType->mi_specialcast;
-        newType->ext_isconvertible = parentType->ext_isconvertible;
-        newType->ext_tocpp = parentType->ext_tocpp;
-        newType->type_discovery = parentType->type_discovery;
-        newType->obj_copier = parentType->obj_copier;
-        newType->cpp_dtor = parentType->cpp_dtor;
-        newType->is_multicpp = 0;
-    } else {
-        newType->mi_offsets = 0;
-        newType->mi_init = 0;
-        newType->mi_specialcast = 0;
-        newType->ext_isconvertible = 0;
-        newType->ext_tocpp = 0;
-        newType->type_discovery = 0;
-        newType->obj_copier = 0;
-        newType->cpp_dtor = 0;
-        newType->is_multicpp = 1;
-    }
-    if (bases.size() == 1)
-        newType->original_name = bases.front()->original_name;
-    else
-        newType->original_name = "object";
-    newType->user_data = 0;
-    newType->d_func = 0;
-    newType->is_user_type = 1;
-    return reinterpret_cast<PyObject*>(newType);
+    node->cpp_dtor(m_pyObj->d->cptr[m_count]);
+    m_count++;
 }
 
 void initShiboken()
@@ -720,12 +688,38 @@ bool setCppPointer(SbkObject* sbkObj, PyTypeObject* desiredType, void* cptr)
 bool isValid(PyObject* pyObj)
 {
     if (!pyObj || pyObj == Py_None
-        || pyObj->ob_type->ob_type != &Shiboken::SbkBaseWrapperType_Type
+        || pyObj->ob_type->ob_type != &SbkBaseWrapperType_Type
         || ((SbkObject*)pyObj)->d->validCppObject) {
         return true;
     }
     PyErr_Format(PyExc_RuntimeError, "Internal C++ object (%s) already deleted.", pyObj->ob_type->tp_name);
     return false;
+}
+
+PyObject* newObject(SbkBaseWrapperType* instanceType,
+                    void* cptr,
+                    bool hasOwnership,
+                    bool isExactType,
+                    const char* typeName)
+{
+    // Try to find the exact type of cptr.
+    if (!isExactType) {
+        TypeResolver* tr = 0;
+        if (typeName) {
+            tr = TypeResolver::get(typeName);
+            if (tr)
+                instanceType = reinterpret_cast<SbkBaseWrapperType*>(tr->pythonType());
+        }
+        if (!tr)
+            instanceType = BindingManager::instance().resolveType(cptr, instanceType);
+    }
+
+    SbkObject* self = reinterpret_cast<SbkObject*>(SbkBaseWrapper_TpNew(reinterpret_cast<PyTypeObject*>(instanceType), 0, 0));
+    self->d->cptr[0] = cptr;
+    self->d->hasOwnership = hasOwnership;
+    self->d->validCppObject = 1;
+    BindingManager::instance().registerWrapper(self, cptr);
+    return reinterpret_cast<PyObject*>(self);
 }
 
 } // namespace Wrapper

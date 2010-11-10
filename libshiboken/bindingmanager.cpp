@@ -333,12 +333,12 @@ void BindingManager::transferOwnershipToCpp(SbkObject* wrapper)
         invalidateWrapper(wrapper);
 }
 
-void BindingManager::addClassInheritance(Shiboken::SbkBaseWrapperType* parent, Shiboken::SbkBaseWrapperType* child)
+void BindingManager::addClassInheritance(SbkBaseWrapperType* parent, SbkBaseWrapperType* child)
 {
     m_d->classHierarchy.addEdge(parent, child);
 }
 
-SbkBaseWrapperType* BindingManager::resolveType(void* cptr, Shiboken::SbkBaseWrapperType* type)
+SbkBaseWrapperType* BindingManager::resolveType(void* cptr, SbkBaseWrapperType* type)
 {
     SbkBaseWrapperType* identifiedType = m_d->classHierarchy.identifyType(cptr, type, type);
     return identifiedType ? identifiedType : type;

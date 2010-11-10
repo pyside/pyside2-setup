@@ -113,7 +113,7 @@ inline PyObject* createWrapper(const T* cppobj, bool hasOwnership = false, bool 
     const char* typeName = 0;
     if (!isExactType)
         typeName = typeid(*const_cast<T*>(cppobj)).name();
-    return SbkBaseWrapper_New(reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()),
+    return Wrapper::newObject(reinterpret_cast<SbkBaseWrapperType*>(SbkType<T>()),
                               const_cast<T*>(cppobj), hasOwnership, isExactType, typeName);
 }
 

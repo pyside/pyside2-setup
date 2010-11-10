@@ -28,11 +28,10 @@
 #include "shibokenmacros.h"
 
 struct SbkObject;
+struct SbkBaseWrapperType;
 
 namespace Shiboken
 {
-
-struct SbkBaseWrapperType;
 
 class LIBSHIBOKEN_API BindingManager
 {

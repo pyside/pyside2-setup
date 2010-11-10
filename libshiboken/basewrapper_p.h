@@ -28,6 +28,7 @@
 #include <map>
 
 struct SbkObject;
+struct SbkBaseWrapperType;
 
 namespace Shiboken
 {
@@ -87,8 +88,6 @@ namespace Shiboken
  * Utility function uset to transform PyObject which suppot sequence protocol in a std::list
  **/
 std::list<SbkObject*> splitPyObject(PyObject* pyObj);
-
-struct SbkBaseWrapperType;
 
 /**
 *   Visitor class used by walkOnClassHierarchy function.
@@ -150,6 +149,16 @@ public:
 private:
     int m_index;
     PyTypeObject* m_desiredType;
+};
+
+class DtorCallerVisitor : public HierarchyVisitor
+{
+public:
+    DtorCallerVisitor(SbkObject* pyObj) : m_count(0), m_pyObj(pyObj) {}
+    void visit(SbkBaseWrapperType* node);
+private:
+    int m_count;
+    SbkObject* m_pyObj;
 };
 
 /// \internal Internal function used to walk on classes inheritance trees.
