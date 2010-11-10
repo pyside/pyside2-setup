@@ -666,14 +666,13 @@ void releaseOwnership(PyObject* pyObj)
     setSequenceOwnership(pyObj, false);
 }
 
-void* cppPointer(PyObject* pyObj, PyTypeObject* desiredType)
+void* cppPointer(SbkObject* pyObj, PyTypeObject* desiredType)
 {
-    assert(isShibokenType(pyObj));
     PyTypeObject* type = pyObj->ob_type;
     int idx = 0;
     if (reinterpret_cast<SbkObjectType*>(type)->is_multicpp)
         idx = getTypeIndexOnHierarchy(type, desiredType);
-    return reinterpret_cast<SbkObject*>(pyObj)->d->cptr[idx];
+    return pyObj->d->cptr[idx];
 }
 
 bool setCppPointer(SbkObject* sbkObj, PyTypeObject* desiredType, void* cptr)

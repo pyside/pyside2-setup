@@ -150,7 +150,7 @@ struct Converter<T*>
     static T* toCpp(PyObject* pyobj)
     {
         if (PyObject_TypeCheck(pyobj, SbkType<T>()))
-            return (T*) Wrapper::cppPointer(pyobj, SbkType<T>());
+            return (T*) Wrapper::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<T>());
         else if (Converter<T>::isConvertible(pyobj))
             return CppObjectCopier<T>::copy(Converter<T>::toCpp(pyobj));
         else if (pyobj == Py_None)
@@ -241,7 +241,7 @@ struct ValueTypeConverter
             }
             assert(false);
         }
-        return *reinterpret_cast<T*>(Wrapper::cppPointer(pyobj, SbkType<T>()));
+        return *reinterpret_cast<T*>(Wrapper::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<T>()));
     }
 };
 
@@ -275,8 +275,8 @@ struct ObjectTypeConverter
             return 0;
         SbkObjectType* shiboType = reinterpret_cast<SbkObjectType*>(pyobj->ob_type);
         if (shiboType->mi_specialcast)
-            return (T*) shiboType->mi_specialcast(Wrapper::cppPointer(pyobj, SbkType<T>()), reinterpret_cast<SbkObjectType*>(SbkType<T>()));
-        return (T*) Wrapper::cppPointer(pyobj, SbkType<T>());
+            return (T*) shiboType->mi_specialcast(Wrapper::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<T>()), reinterpret_cast<SbkObjectType*>(SbkType<T>()));
+        return (T*) Wrapper::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<T>());
     }
 };
 
@@ -585,7 +585,7 @@ struct StdListConverter
     static StdList toCpp(PyObject* pyobj)
     {
         if (PyObject_TypeCheck(pyobj, SbkType<StdList>()))
-            return *reinterpret_cast<StdList*>(Wrapper::cppPointer(pyobj, SbkType<StdList>()));
+            return *reinterpret_cast<StdList*>(Wrapper::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<StdList>()));
 
         StdList result;
         for (int i = 0; i < PySequence_Size(pyobj); i++) {
