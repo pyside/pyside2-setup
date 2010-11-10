@@ -275,7 +275,9 @@ struct ObjectTypeConverter
             return 0;
         SbkObjectType* shiboType = reinterpret_cast<SbkObjectType*>(pyobj->ob_type);
         if (shiboType->mi_specialcast)
-            return (T*) shiboType->mi_specialcast(Wrapper::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<T>()), reinterpret_cast<SbkObjectType*>(SbkType<T>()));
+            return (T*) shiboType->mi_specialcast(
+                                    Wrapper::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<T>()),
+                                    reinterpret_cast<SbkObjectType*>(SbkType<T>()));
         return (T*) Wrapper::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<T>());
     }
 };

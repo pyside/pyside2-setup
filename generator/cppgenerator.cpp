@@ -778,14 +778,14 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
     s << INDENT << "if (!m_metaObject) {\n";
     {
         Indentation indentation(INDENT);
-        s << INDENT << "PyObject *pySelf = BindingManager::instance().retrieveWrapper(this);\n"
-          << INDENT << "void *typeData = Shiboken::getTypeUserData(reinterpret_cast<SbkObject*>(pySelf));" << endl
+        s << INDENT << "SbkObject* pySelf = BindingManager::instance().retrieveWrapper(this);\n"
+          << INDENT << "void* typeData = Shiboken::getTypeUserData(pySelf);" << endl
           << INDENT << "if (!typeData) {" << endl;
         {
             Indentation indentation2(INDENT);
-            s << INDENT << "m_metaObject = PySide::DynamicQMetaObject::createBasedOn(pySelf, pySelf->ob_type, &"
+            s << INDENT << "m_metaObject = PySide::DynamicQMetaObject::createBasedOn((PyObject*)pySelf, pySelf->ob_type, &"
                         << metaClass->qualifiedCppName() << "::staticMetaObject);" << endl
-              << INDENT << "Shiboken::setTypeUserData(reinterpret_cast<SbkObject*>(pySelf), m_metaObject, PySide::deleteDynamicQMetaObject);" << endl;
+              << INDENT << "Shiboken::setTypeUserData(pySelf, m_metaObject, PySide::deleteDynamicQMetaObject);" << endl;
         }
         s << INDENT << "} else {" << endl;
         {
