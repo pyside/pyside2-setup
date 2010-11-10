@@ -641,6 +641,11 @@ bool hasCppWrapper(SbkObject* pyObj)
     return pyObj->d->containsCppWrapper;
 }
 
+bool hasOwnership(SbkObject* pyObj)
+{
+    return pyObj->d->hasOwnership;
+}
+
 void getOwnership(SbkObject* pyObj)
 {
     pyObj->d->hasOwnership = true;

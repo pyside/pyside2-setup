@@ -197,6 +197,7 @@ LIBSHIBOKEN_API void setValidCpp(SbkObject* pyObj, bool value);
 LIBSHIBOKEN_API void setHasCppWrapper(SbkObject* pyObj, bool value);
 LIBSHIBOKEN_API bool hasCppWrapper(SbkObject* pyObj);
 
+LIBSHIBOKEN_API bool hasOwnership(SbkObject* pyObj);
 LIBSHIBOKEN_API void getOwnership(PyObject* pyObj);
 LIBSHIBOKEN_API void getOwnership(SbkObject* pyObj);
 LIBSHIBOKEN_API void releaseOwnership(PyObject* pyObj);
