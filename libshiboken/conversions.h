@@ -149,12 +149,10 @@ struct Converter<T*>
 
     static T* toCpp(PyObject* pyobj)
     {
-        if (Shiboken_TypeCheck(pyobj, T))
+        if (PyObject_TypeCheck(pyobj, SbkType<T>()))
             return (T*) Wrapper::cppPointer(pyobj, SbkType<T>());
-
         else if (Converter<T>::isConvertible(pyobj))
             return CppObjectCopier<T>::copy(Converter<T>::toCpp(pyobj));
-
         else if (pyobj == Py_None)
             return 0;
 

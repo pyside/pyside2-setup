@@ -558,23 +558,17 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
     s << "inline " << type->name() << " Shiboken::Converter<" << type->name() << " >::toCpp(PyObject* pyobj)" << endl;
     s << '{' << endl;
 
-    s << INDENT << "if (!Shiboken_TypeCheck(pyobj, " << type->name() << ")) {" << endl;
+    s << INDENT << "if (PyObject_TypeCheck(pyobj, SbkType<" << type->qualifiedCppName() << ">()))" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "SbkObjectType* shiboType = reinterpret_cast<SbkObjectType*>(SbkType<";
-        s << type->name() << " >());" << endl;
+        s << INDENT << "return *" << cpythonWrapperCPtr(type, "pyobj") << ';' << endl;
     }
-    bool firstImplicitIf = true;
+
     foreach (const AbstractMetaFunction* ctor, implicitConvs) {
         if (ctor->isModifiedRemoved())
             continue;
 
-        Indentation indent(INDENT);
-        s << INDENT;
-        if (firstImplicitIf)
-            firstImplicitIf = false;
-        else
-            s << "else ";
+        s << INDENT << "else ";
 
         QString typeCheck;
         QString toCppConv;
@@ -597,20 +591,12 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
     }
 
     {
-        Indentation indent(INDENT);
-        s << INDENT << "else if (shiboType->ext_isconvertible && shiboType->ext_tocpp && shiboType->ext_isconvertible(pyobj)) {" << endl;
+        s << INDENT << "else" << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << type->name() << "* cptr = reinterpret_cast<" << type->name() << "*>(shiboType->ext_tocpp(pyobj));" << endl;
-            s << INDENT << "std::auto_ptr<" << type->name() << " > cptr_auto_ptr(cptr);" << endl;
-            s << INDENT << "return *cptr;" << endl;
+            s << INDENT << "return Shiboken::ValueTypeConverter<" << type->qualifiedCppName() << " >::toCpp(pyobj);" << endl;
         }
-        s << INDENT << '}' << endl;
     }
-
-    s << INDENT << '}' << endl;
-
-    s << INDENT << "return *" << cpythonWrapperCPtr(type, "pyobj") << ';' << endl;
     s << '}' << endl << endl;
 }
 

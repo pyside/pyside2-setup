@@ -162,11 +162,6 @@ LIBSHIBOKEN_API void* getTypeUserData(SbkObject* wrapper);
 LIBSHIBOKEN_API bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctorType);
 
 /**
- * Shiboken_TypeCheck macro performs a type check using the values registered with SbkType<>() template.
- */
-#define Shiboken_TypeCheck(pyobj, type) (PyObject_TypeCheck(pyobj, SbkType<type>()))
-
-/**
  *   Increments the reference count of the referred Python object.
  *   A previous Python object in the same position identified by the 'key' parameter
  *   will have its reference counter decremented automatically when replaced.
