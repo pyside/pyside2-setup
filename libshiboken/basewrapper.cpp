@@ -33,8 +33,8 @@
 extern "C"
 {
 
-static void SbkBaseWrapperType_dealloc(PyObject* pyObj);
-static PyObject* SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
+static void SbkObjectTypeDealloc(PyObject* pyObj);
+static PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
 
 PyTypeObject SbkBaseWrapperType_Type = {
     PyObject_HEAD_INIT(0)
@@ -42,7 +42,7 @@ PyTypeObject SbkBaseWrapperType_Type = {
     /*tp_name*/             "Shiboken.ObjectType",
     /*tp_basicsize*/        sizeof(SbkObjectType),
     /*tp_itemsize*/         0,
-    /*tp_dealloc*/          SbkBaseWrapperType_dealloc,
+    /*tp_dealloc*/          SbkObjectTypeDealloc,
     /*tp_print*/            0,
     /*tp_getattr*/          0,
     /*tp_setattr*/          0,
@@ -75,7 +75,7 @@ PyTypeObject SbkBaseWrapperType_Type = {
     /*tp_dictoffset*/       0,
     /*tp_init*/             0,
     /*tp_alloc*/            0,
-    /*tp_new*/              SbkBaseWrapperType_TpNew,
+    /*tp_new*/              SbkObjectTypeTpNew,
     /*tp_free*/             0,
     /*tp_is_gc*/            0,
     /*tp_bases*/            0,
@@ -85,7 +85,7 @@ PyTypeObject SbkBaseWrapperType_Type = {
     /*tp_weaklist*/         0
 };
 
-static PyObject* SbkBaseWrapper_get_dict(SbkObject* obj)
+static PyObject* SbkObjectGetDict(SbkObject* obj)
 {
     if (!obj->ob_dict)
         obj->ob_dict = PyDict_New();
@@ -95,8 +95,8 @@ static PyObject* SbkBaseWrapper_get_dict(SbkObject* obj)
     return obj->ob_dict;
 }
 
-static PyGetSetDef SbkBaseWrapper_getsetlist[] = {
-    {const_cast<char*>("__dict__"), (getter)SbkBaseWrapper_get_dict, 0},
+static PyGetSetDef SbkObjectGetSetList[] = {
+    {const_cast<char*>("__dict__"), (getter)SbkObjectGetDict, 0},
     {0} // Sentinel
 };
 
@@ -131,7 +131,7 @@ SbkObjectType SbkBaseWrapper_Type = { { {
     /*tp_iternext*/         0,
     /*tp_methods*/          0,
     /*tp_members*/          0,
-    /*tp_getset*/           SbkBaseWrapper_getsetlist,
+    /*tp_getset*/           SbkObjectGetSetList,
     /*tp_base*/             0,
     /*tp_dict*/             0,
     /*tp_descr_get*/        0,
@@ -196,7 +196,7 @@ void SbkDeallocWrapperWithPrivateDtor(PyObject* self)
     self->ob_type->tp_free(self);
 }
 
-void SbkBaseWrapperType_dealloc(PyObject* pyObj)
+void SbkObjectTypeDealloc(PyObject* pyObj)
 {
     SbkObjectType *sbkType = reinterpret_cast<SbkObjectType*>(pyObj->ob_type);
 
@@ -206,7 +206,7 @@ void SbkBaseWrapperType_dealloc(PyObject* pyObj)
     }
 }
 
-PyObject* SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
+PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
 {
     // The meta type creates a new type when the Python programmer extends a wrapped C++ class.
     SbkObjectType* newType = reinterpret_cast<SbkObjectType*>(PyType_Type.tp_new(metatype, args, kwds));
