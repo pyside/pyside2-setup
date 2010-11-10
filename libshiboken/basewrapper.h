@@ -72,7 +72,7 @@ typedef bool (*ExtendedIsConvertibleFunc)(PyObject*);
 typedef void (*DeleteUserDataFunc)(void*);
 
 extern LIBSHIBOKEN_API PyTypeObject SbkBaseWrapperType_Type;
-extern LIBSHIBOKEN_API SbkObjectType SbkBaseWrapper_Type;
+extern LIBSHIBOKEN_API SbkObjectType SbkObject_Type;
 
 /// PyTypeObject extended with C++ multiple inheritance information.
 struct LIBSHIBOKEN_API SbkObjectType
@@ -166,8 +166,8 @@ LIBSHIBOKEN_API bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctor
  */
 #define Shiboken_TypeCheck(pyobj, type) (PyObject_TypeCheck(pyobj, SbkType<type>()))
 
-#define SbkBaseWrapper_Check(op) PyObject_TypeCheck(op, (PyTypeObject*)&SbkBaseWrapper_Type)
-#define SbkBaseWrapper_CheckExact(op) ((op)->ob_type == &SbkBaseWrapper_Type)
+#define SbkBaseWrapper_Check(op) PyObject_TypeCheck(op, (PyTypeObject*)&SbkObject_Type)
+#define SbkBaseWrapper_CheckExact(op) ((op)->ob_type == &SbkObject_Type)
 
 /**
  *   Increments the reference count of the referred Python object.

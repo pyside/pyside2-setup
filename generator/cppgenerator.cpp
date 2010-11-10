@@ -2341,7 +2341,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         tp_as_sequence = QString("&Py%1_as_sequence").arg(cppClassName);
 
     if (!metaClass->baseClass())
-        baseClassName = "reinterpret_cast<PyTypeObject*>(&SbkBaseWrapper_Type)";
+        baseClassName = "reinterpret_cast<PyTypeObject*>(&SbkObject_Type)";
 
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
         tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES";

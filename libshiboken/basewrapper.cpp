@@ -100,7 +100,7 @@ static PyGetSetDef SbkObjectGetSetList[] = {
     {0} // Sentinel
 };
 
-SbkObjectType SbkBaseWrapper_Type = { { {
+SbkObjectType SbkObject_Type = { { {
     PyObject_HEAD_INIT(&SbkBaseWrapperType_Type)
     /*ob_size*/             0,
     /*tp_name*/             "Shiboken.Object",
@@ -497,7 +497,7 @@ void initShiboken()
     if (PyType_Ready(&SbkBaseWrapperType_Type) < 0)
         Py_FatalError("[libshiboken] Failed to initialise Shiboken.BaseWrapperType metatype.");
 
-    if (PyType_Ready((PyTypeObject *)&SbkBaseWrapper_Type) < 0)
+    if (PyType_Ready((PyTypeObject *)&SbkObject_Type) < 0)
         Py_FatalError("[libshiboken] Failed to initialise Shiboken.BaseWrapper type.");
 
     shibokenAlreadInitialised = true;
