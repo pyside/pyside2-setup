@@ -598,7 +598,7 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry* type)
 {
     QString baseName;
     if ((type->isObject() || type->isValue() || type->isNamespace())) { // && !type->isReference()) {
-        baseName = QString("Sbk") + type->name();
+        baseName = "Sbk_" + type->name();
     } else if (type->isPrimitive()) {
         const PrimitiveTypeEntry* ptype = (const PrimitiveTypeEntry*) type;
         while (ptype->basicAliasedTypeEntry())

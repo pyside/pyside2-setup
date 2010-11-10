@@ -71,7 +71,7 @@ typedef bool (*ExtendedIsConvertibleFunc)(PyObject*);
 // Used in userdata dealloc function
 typedef void (*DeleteUserDataFunc)(void*);
 
-extern LIBSHIBOKEN_API PyTypeObject SbkBaseWrapperType_Type;
+extern LIBSHIBOKEN_API PyTypeObject SbkObjectType_Type;
 extern LIBSHIBOKEN_API SbkObjectType SbkObject_Type;
 
 /// PyTypeObject extended with C++ multiple inheritance information.
@@ -138,7 +138,7 @@ LIBSHIBOKEN_API void destroyParentInfo(SbkObject* obj, bool removeFromParent = t
 */
 inline bool isShibokenType(PyObject*& pyObj)
 {
-    return pyObj->ob_type->ob_type == &SbkBaseWrapperType_Type;
+    return pyObj->ob_type->ob_type == &SbkObjectType_Type;
 }
 
 /**

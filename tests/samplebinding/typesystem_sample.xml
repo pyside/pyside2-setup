@@ -1114,7 +1114,7 @@
         <add-function signature="__setitem__" >
             <inject-code class="target" position="beginning">
                 PyObject* args = Py_BuildValue("(iO)", _i, _value);
-                PyObject* result = SbkStrFunc_set_char(self, args);
+                PyObject* result = Sbk_StrFunc_set_char(self, args);
                 Py_DECREF(args);
                 int ok = result == Py_True;
                 if (result) {
