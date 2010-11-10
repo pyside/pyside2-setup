@@ -247,6 +247,26 @@ PyObject* SbkBaseWrapperType_TpNew(PyTypeObject* metatype, PyObject* args, PyObj
     return reinterpret_cast<PyObject*>(newType);
 }
 
+PyObject* SbkObjectTpNew(PyTypeObject* subtype, PyObject*, PyObject*)
+{
+    SbkObject* self = reinterpret_cast<SbkObject*>(subtype->tp_alloc(subtype, 0));
+    self->d = new SbkBaseWrapperPrivate;
+
+    SbkBaseWrapperType* sbkType = reinterpret_cast<SbkBaseWrapperType*>(subtype);
+    int numBases = sbkType->is_multicpp ? Shiboken::getNumberOfCppBaseClasses(subtype) : 1;
+    self->d->cptr = new void*[numBases];
+    std::memset(self->d->cptr, 0, sizeof(void*)*numBases);
+    self->d->hasOwnership = 1;
+    self->d->containsCppWrapper = 0;
+    self->d->validCppObject = 0;
+    self->d->parentInfo = 0;
+    self->ob_dict = 0;
+    self->weakreflist = 0;
+    self->d->referredObjects = 0;
+    return reinterpret_cast<PyObject*>(self);
+}
+
+
 } //extern "C"
 
 namespace Shiboken
@@ -379,25 +399,6 @@ void walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visi
         if (visitor->wasFinished())
             return;
     }
-}
-
-PyObject* SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*)
-{
-    SbkObject* self = reinterpret_cast<SbkObject*>(subtype->tp_alloc(subtype, 0));
-    self->d = new SbkBaseWrapperPrivate;
-
-    SbkBaseWrapperType* sbkType = reinterpret_cast<SbkBaseWrapperType*>(subtype);
-    int numBases = sbkType->is_multicpp ? getNumberOfCppBaseClasses(subtype) : 1;
-    self->d->cptr = new void*[numBases];
-    std::memset(self->d->cptr, 0, sizeof(void*)*numBases);
-    self->d->hasOwnership = 1;
-    self->d->containsCppWrapper = 0;
-    self->d->validCppObject = 0;
-    self->d->parentInfo = 0;
-    self->ob_dict = 0;
-    self->weakreflist = 0;
-    self->d->referredObjects = 0;
-    return reinterpret_cast<PyObject*>(self);
 }
 
 void setTypeUserData(SbkObject* wrapper, void *user_data, DeleteUserDataFunc d_func)
@@ -714,7 +715,7 @@ PyObject* newObject(SbkBaseWrapperType* instanceType,
             instanceType = BindingManager::instance().resolveType(cptr, instanceType);
     }
 
-    SbkObject* self = reinterpret_cast<SbkObject*>(SbkBaseWrapper_TpNew(reinterpret_cast<PyTypeObject*>(instanceType), 0, 0));
+    SbkObject* self = reinterpret_cast<SbkObject*>(SbkObjectTpNew(reinterpret_cast<PyTypeObject*>(instanceType), 0, 0));
     self->d->cptr[0] = cptr;
     self->d->hasOwnership = hasOwnership;
     self->d->validCppObject = 1;

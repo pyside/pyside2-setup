@@ -101,6 +101,8 @@ struct LIBSHIBOKEN_API SbkBaseWrapperType
     DeleteUserDataFunc d_func;
 };
 
+LIBSHIBOKEN_API PyObject* SbkObjectTpNew(PyTypeObject* subtype, PyObject*, PyObject*);
+
 } // extern "C"
 
 namespace Shiboken
@@ -166,9 +168,6 @@ LIBSHIBOKEN_API bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctor
 
 #define SbkBaseWrapper_Check(op) PyObject_TypeCheck(op, (PyTypeObject*)&SbkBaseWrapper_Type)
 #define SbkBaseWrapper_CheckExact(op) ((op)->ob_type == &SbkBaseWrapper_Type)
-
-LIBSHIBOKEN_API PyObject*
-SbkBaseWrapper_TpNew(PyTypeObject* subtype, PyObject*, PyObject*);
 
 /**
  *   Increments the reference count of the referred Python object.

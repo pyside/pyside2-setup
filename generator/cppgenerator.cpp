@@ -2383,7 +2383,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     if (metaClass->hasPrivateDestructor() || onlyPrivCtor)
         tp_new = "0";
     else
-        tp_new = "SbkBaseWrapper_TpNew";
+        tp_new = "SbkObjectTpNew";
 
     QString tp_richcompare = QString('0');
     if (metaClass->hasComparisonOperatorOverload())
