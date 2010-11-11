@@ -654,7 +654,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             if (invalidateReturn)
                 s << INDENT << "bool invalidadeArg0 = " PYTHON_RETURN_VAR "->ob_refcnt == 1;" << endl;
 
-            if (func->type()) {
+            if (func->type() && func->typeReplaced(0) != "PyObject") {
                 s << INDENT << "// Check return type" << endl;
                 s << INDENT << "bool typeIsValid = ";
                 QString desiredType;
