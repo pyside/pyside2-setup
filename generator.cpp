@@ -293,12 +293,6 @@ QString Generator::translateType(const AbstractMetaType *cType,
             s = "int";
         else
             s = cType->cppSignature();
-    } else if (cType->typeEntry()->isPrimitive()) {
-        s = cType->cppSignature();
-        if ((options & Generator::ExcludeConst) && cType->isConstant())
-            s.remove(0, 5);
-        if ((options & Generator::ExcludeReference) && cType->isReference())
-            s.chop(1);
     } else {
         if (options & Generator::OriginalName) {
             s = cType->originalTypeDescription().trimmed();
