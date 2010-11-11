@@ -37,33 +37,54 @@ class LIBSHIBOKEN_API AutoDecRef
 public:
     /**
      * AutoDecRef constructor.
-     * /param pyobj A borrowed reference to a Python object
+     * \param pyobj A borrowed reference to a Python object
      */
-    explicit AutoDecRef(PyObject* pyobj) : m_pyobj(pyobj) {}
+    explicit AutoDecRef(PyObject* pyObj) : m_pyObj(pyObj) {}
 
-    ~AutoDecRef() {
-        Py_XDECREF(m_pyobj);
+    /// Decref the borrowed python reference
+    ~AutoDecRef()
+    {
+        Py_XDECREF(m_pyObj);
     }
 
-    inline bool isNull() const { return m_pyobj == 0; }
+    inline bool isNull() const { return m_pyObj == 0; }
     /// Returns the pointer of the Python object being held.
-    inline PyObject* object() { return m_pyobj; }
-    inline operator PyObject*() { return m_pyobj; }
-    inline operator PyTupleObject*() { return reinterpret_cast<PyTupleObject*>(m_pyobj); }
-    inline operator bool() const { return m_pyobj; }
-    inline PyObject* operator->() { return m_pyobj; }
+    inline PyObject* object() { return m_pyObj; }
+    inline operator PyObject*() { return m_pyObj; }
+    inline operator PyTupleObject*() { return reinterpret_cast<PyTupleObject*>(m_pyObj); }
+    inline operator bool() const { return m_pyObj; }
+    inline PyObject* operator->() { return m_pyObj; }
 
     template<typename T>
     T cast()
     {
-        return reinterpret_cast<T>(m_pyobj);
+        return reinterpret_cast<T>(m_pyObj);
+    }
+
+    /**
+     * Decref the current borrowed python reference and take the reference
+     * borrowed by \p other, so other.isNull() will return true.
+     */
+    void operator=(AutoDecRef& other)
+    {
+        Py_XDECREF(m_pyObj);
+        m_pyObj = other.m_pyObj;
+        other.m_pyObj = 0;
+    }
+
+    /**
+     * Decref the current borrowed python reference and borrow \p other.
+     */
+    void operator=(PyObject* other)
+    {
+        Py_XDECREF(m_pyObj);
+        m_pyObj = other;
     }
 private:
-    PyObject* m_pyobj;
+    PyObject* m_pyObj;
     AutoDecRef(const AutoDecRef&);
     AutoDecRef& operator=(const AutoDecRef&);
 };
-
 
 } // namespace Shiboken
 
