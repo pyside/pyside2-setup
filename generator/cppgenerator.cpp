@@ -785,7 +785,7 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
             Indentation indentation2(INDENT);
             s << INDENT << "m_metaObject = PySide::DynamicQMetaObject::createBasedOn((PyObject*)pySelf, pySelf->ob_type, &"
                         << metaClass->qualifiedCppName() << "::staticMetaObject);" << endl
-              << INDENT << "Shiboken::setTypeUserData(pySelf, m_metaObject, PySide::deleteDynamicQMetaObject);" << endl;
+                        << INDENT << "Shiboken::setTypeUserData(pySelf, m_metaObject, &Shiboken::callCppDestructor<PySide::DynamicQMetaObject>);" << endl;
         }
         s << INDENT << "} else {" << endl;
         {
