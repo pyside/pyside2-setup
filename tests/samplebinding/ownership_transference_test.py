@@ -48,8 +48,8 @@ class BlackBoxTest(unittest.TestCase):
         self.assertEqual(set(bb.objects()), set([o1, o2]))
         self.assertEqual(str(o1.objectName()), 'object1')
         self.assertEqual(str(o2.objectName()), 'object2')
-        self.assertEqual(sys.getrefcount(o1), o1_refcnt)
-        self.assertEqual(sys.getrefcount(o2), o2_refcnt)
+        self.assertEqual(sys.getrefcount(o1), o1_refcnt + 1) # PySide give +1 ref to object with c++ ownership
+        self.assertEqual(sys.getrefcount(o2), o2_refcnt + 1)
         o2 = bb.retrieveObjectType(o2_ticket)
         self.assertEqual(sys.getrefcount(o2), o2_refcnt)
         del bb

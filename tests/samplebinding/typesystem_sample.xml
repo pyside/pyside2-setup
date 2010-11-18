@@ -178,9 +178,9 @@
                     if ((*it)->isLayoutType()) {
                         ObjectTypeLayout* l = reinterpret_cast&lt;ObjectTypeLayout*>(*it);
                         reparent_layout_items(parent, %CONVERTTOPYTHON[ObjectTypeLayout*](l));
-                        Shiboken::setParent(layout, %CONVERTTOPYTHON[ObjectTypeLayout*](l));
+                        Wrapper::setParent(layout, %CONVERTTOPYTHON[ObjectTypeLayout*](l));
                     } else {
-                        Shiboken::setParent(parent, %CONVERTTOPYTHON[ObjectType*](*it));
+                        Wrapper::setParent(parent, %CONVERTTOPYTHON[ObjectType*](*it));
                     }
                 }
             }
