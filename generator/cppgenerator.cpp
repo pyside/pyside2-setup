@@ -470,7 +470,8 @@ void CppGenerator::writeDestructorNative(QTextStream &s, const AbstractMetaClass
 {
     Indentation indentation(INDENT);
     s << wrapperName(metaClass) << "::~" << wrapperName(metaClass) << "()" << endl << '{' << endl;
-    s << INDENT << "BindingManager::instance().destroyWrapper(this);" << endl;
+    s << INDENT << "SbkObject* wrapper = BindingManager::instance().retrieveWrapper(this);" << endl;
+    s << INDENT << "Wrapper::destroy(wrapper);" << endl;
     s << '}' << endl;
 }
 
@@ -523,6 +524,14 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         return;
     }
 
+    //Write declaration/native injected code
+    if (func->hasInjectedCode()) {
+        CodeSnipList snips = func->injectedCodeSnips();
+        const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().last();
+        writeCodeSnips(s, snips, CodeSnip::Declaration, TypeSystem::NativeCode, func, lastArg);
+        s << endl;
+    }
+
     s << INDENT << "Shiboken::GilState gil;" << endl;
 
     s << INDENT << "Shiboken::AutoDecRef py_override(BindingManager::instance().getOverride(this, \"";
@@ -542,7 +551,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         if (func->isAbstract()) {
             s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
             s << func->ownerClass()->name() << '.' << func->name();
-        s << "()' not implemented.\");" << endl;
+            s << "()' not implemented.\");" << endl;
             s << INDENT << "return ";
             if (func->type()) {
                 s << defaultReturnExpr;
@@ -731,7 +740,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     if (invalidateReturn) {
         s << INDENT << "if (invalidadeArg0)" << endl;
         Indentation indentation(INDENT);
-        s << INDENT << "BindingManager::instance().invalidateWrapper(" << PYTHON_RETURN_VAR  ".object());" << endl;
+        s << INDENT << "Wrapper::invalidate(" << PYTHON_RETURN_VAR  ".object());" << endl;
     }
 
     foreach (FunctionModification funcMod, func->modifications()) {
@@ -739,7 +748,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             if (argMod.resetAfterUse) {
                 s << INDENT << "if (invalidadeArg" << argMod.index << ")" << endl;
                 Indentation indentation(INDENT);
-                s << INDENT << "BindingManager::instance().invalidateWrapper(PyTuple_GET_ITEM(pyargs, ";
+                s << INDENT << "Wrapper::invalidate(PyTuple_GET_ITEM(pyargs, ";
                 s << (argMod.index - 1) << "));" << endl;
             }
         }
@@ -2121,15 +2130,15 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
             s << INDENT;
             if (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::TargetLangOwnership) {
-                s << "Shiboken::Wrapper::getOwnership(" << pyArgName << ");";
+                s << "Wrapper::getOwnership(" << pyArgName << ");";
             } else if (wrappedClass->hasVirtualDestructor()) {
                 if (arg_mod.index == 0) {
-                    s << "Shiboken::Wrapper::releaseOwnership(" PYTHON_RETURN_VAR ");";
+                    s << "Wrapper::releaseOwnership(" PYTHON_RETURN_VAR ");";
                 } else {
-                    s << "BindingManager::instance().transferOwnershipToCpp(" << pyArgName << ");";
+                    s << "Wrapper::releaseOwnership(" << pyArgName << ");";
                 }
             } else {
-                s << "BindingManager::instance().invalidateWrapper(" << pyArgName << ");";
+                s << "Wrapper::invalidate(" << pyArgName << ");";
             }
             s << endl;
         }
@@ -3798,7 +3807,7 @@ bool CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
         else
             childVariable = usePyArgs ? "pyargs["+QString::number(childIndex-1)+"]" : "arg";
 
-        s << INDENT << "Shiboken::setParent(" << parentVariable << ", " << childVariable << ");\n";
+        s << INDENT << "Wrapper::setParent(" << parentVariable << ", " << childVariable << ");\n";
 
         return true;
     }
@@ -3832,7 +3841,7 @@ void CppGenerator::writeReturnValueHeuristics(QTextStream& s, const AbstractMeta
     }
 
     if (type->isQObject() || type->isObject() || type->isValuePointer())
-        s << INDENT << "Shiboken::setParent(" << self << ", " PYTHON_RETURN_VAR ");" << endl;
+        s << INDENT << "Wrapper::setParent(" << self << ", " PYTHON_RETURN_VAR ");" << endl;
 }
 
 void CppGenerator::writeHashFunction(QTextStream& s, const AbstractMetaClass* metaClass)

@@ -23,12 +23,13 @@
 #include "basewrapper.h"
 #include "basewrapper_p.h"
 #include "sbkenum.h"
-#include <cstddef>
-#include <algorithm>
 #include "autodecref.h"
 #include "typeresolver.h"
+#include "gilstate.h"
 #include <string>
 #include <cstring>
+#include <cstddef>
+#include <algorithm>
 
 extern "C"
 {
@@ -163,8 +164,8 @@ void SbkDeallocWrapper(PyObject* pyObj)
     if (sbkObj->weakreflist)
         PyObject_ClearWeakRefs(pyObj);
 
-    Shiboken::BindingManager::instance().releaseWrapper(sbkObj);
-    if (sbkObj->d->hasOwnership) {
+    // If I have ownership and is valid delete C++ pointer
+    if (sbkObj->d->hasOwnership && sbkObj->d->validCppObject) {
         SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(pyObj->ob_type);
         if (sbkType->is_multicpp) {
             Shiboken::DtorCallerVisitor visitor(sbkObj);
@@ -174,26 +175,17 @@ void SbkDeallocWrapper(PyObject* pyObj)
         }
     }
 
-    if (sbkObj->d->parentInfo)
-        Shiboken::destroyParentInfo(sbkObj);
-
-    Shiboken::clearReferences(sbkObj);
-
-    Py_XDECREF(sbkObj->ob_dict);
-    delete[] sbkObj->d->cptr;
-    sbkObj->d->cptr = 0;
-    delete sbkObj->d;
-    Py_TYPE(pyObj)->tp_free(pyObj);
+    Shiboken::Wrapper::deallocData(sbkObj);
 }
 
 void SbkDeallocWrapperWithPrivateDtor(PyObject* self)
 {
-    if (((SbkObject *)self)->weakreflist)
+    SbkObject* sbkObj = reinterpret_cast<SbkObject*>(self);
+    if (sbkObj->weakreflist)
         PyObject_ClearWeakRefs(self);
 
-    Shiboken::BindingManager::instance().releaseWrapper(reinterpret_cast<SbkObject*>(self));
-    Shiboken::clearReferences(reinterpret_cast<SbkObject*>(self));
-    self->ob_type->tp_free(self);
+    Shiboken::BindingManager::instance().releaseWrapper(sbkObj);
+    Shiboken::Wrapper::deallocData(sbkObj);
 }
 
 void SbkObjectTypeDealloc(PyObject* pyObj)
@@ -274,111 +266,6 @@ namespace Shiboken
 
 static void incRefPyObject(PyObject* pyObj);
 static void decRefPyObjectList(const std::list<SbkObject*> &pyObj);
-
-void removeParent(SbkObject* child)
-{
-    ParentInfo* pInfo = child->d->parentInfo;
-    if (!pInfo || !pInfo->parent)
-        return;
-
-    ChildrenList& oldBrothers = pInfo->parent->d->parentInfo->children;
-    oldBrothers.remove(child);
-    pInfo->parent = 0;
-
-    if (pInfo->hasWrapperRef) {
-        Py_DECREF(child);
-        pInfo->hasWrapperRef = false;
-    }
-    Py_DECREF(child);
-}
-
-void setParent(PyObject* parent, PyObject* child)
-{
-    if (!child || child == Py_None || child == parent)
-        return;
-
-    /*
-     *  setParent is recursive when the child is a native Python sequence, i.e. objects not binded by Shiboken
-     *  like tuple and list.
-     *
-     *  This "limitation" exists to fix the following problem: A class multiple inherits QObject and QString,
-     *  so if you pass this class to someone that takes the ownership, we CAN'T enter in this if, but hey! QString
-     *  follows the sequence protocol.
-     */
-    if (PySequence_Check(child) && !isShibokenType(child)) {
-        Shiboken::AutoDecRef seq(PySequence_Fast(child, 0));
-        for (int i = 0, max = PySequence_Size(seq); i < max; ++i)
-            setParent(parent, PySequence_Fast_GET_ITEM(seq.object(), i));
-        return;
-    }
-
-    bool parentIsNull = !parent || parent == Py_None;
-    SbkObject* parent_ = reinterpret_cast<SbkObject*>(parent);
-    SbkObject* child_ = reinterpret_cast<SbkObject*>(child);
-
-    if (!parentIsNull) {
-        if (!parent_->d->parentInfo)
-            parent_->d->parentInfo = new ParentInfo;
-        // do not re-add a child
-        ChildrenList& children = parent_->d->parentInfo->children;
-        if (std::find(children.begin(), children.end(), child_) != children.end())
-            return;
-    }
-
-    ParentInfo* pInfo = child_->d->parentInfo;
-    bool hasAnotherParent = pInfo && pInfo->parent && pInfo->parent != parent_;
-
-    //Avoid destroy child during reparent operation
-    Py_INCREF(child);
-
-    // check if we need to remove this child from the old parent
-    if (parentIsNull || hasAnotherParent)
-        removeParent(child_);
-
-    // Add the child to the new parent
-    pInfo = child_->d->parentInfo;
-    if (!parentIsNull) {
-        if (!pInfo)
-            pInfo = child_->d->parentInfo = new ParentInfo;
-        pInfo->parent = parent_;
-        parent_->d->parentInfo->children.push_back(child_);
-        Py_INCREF(child_);
-    }
-
-    Py_DECREF(child);
-}
-
-static void _destroyParentInfo(SbkObject* obj, bool removeFromParent)
-{
-    ParentInfo* pInfo = obj->d->parentInfo;
-    if (removeFromParent && pInfo && pInfo->parent)
-        removeParent(obj);
-
-    if (pInfo) {
-        ChildrenList::iterator it = pInfo->children.begin();
-        for (; it != pInfo->children.end(); ++it) {
-            SbkObject*& child = *it;
-
-            // keep this, the wrapper still alive
-            if (!obj->d->containsCppWrapper && child->d->containsCppWrapper && child->d->parentInfo) {
-                child->d->parentInfo->parent = 0;
-                child->d->parentInfo->hasWrapperRef = true;
-                child->d->hasOwnership = false;
-            } else {
-                _destroyParentInfo(child, false);
-                Py_DECREF(child);
-            }
-        }
-        delete pInfo;
-        obj->d->parentInfo = 0;
-    }
-}
-
-void destroyParentInfo(SbkObject* obj, bool removeFromParent)
-{
-    BindingManager::instance().destroyWrapper(obj);
-    _destroyParentInfo(obj, removeFromParent);
-}
 
 void walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visitor)
 {
@@ -611,20 +498,45 @@ static void decRefPyObjectList(const std::list<SbkObject*>& lst)
     }
 }
 
+namespace Wrapper
+{
+
 static void setSequenceOwnership(PyObject* pyObj, bool owner)
 {
     if (PySequence_Check(pyObj)) {
         std::list<SbkObject*> objs = splitPyObject(pyObj);
         std::list<SbkObject*>::const_iterator it = objs.begin();
-        for(; it != objs.end(); ++it)
-            (*it)->d->hasOwnership = owner;
+        for(; it != objs.end(); ++it) {
+            if (owner)
+                getOwnership(*it);
+            else
+                releaseOwnership(*it);
+        }
     } else if (isShibokenType(pyObj)) {
-        reinterpret_cast<SbkObject*>(pyObj)->d->hasOwnership = owner;
+        if (owner)
+            getOwnership(reinterpret_cast<SbkObject*>(pyObj));
+        else
+            releaseOwnership(reinterpret_cast<SbkObject*>(pyObj));
     }
 }
 
-namespace Wrapper
+
+static void _destroyParentInfo(SbkObject* obj, bool keepReference)
 {
+    ParentInfo* pInfo = obj->d->parentInfo;
+    if (pInfo) {
+        while(!pInfo->children.empty()) {
+            SbkObject* first = pInfo->children.front();
+            // Mark child as invalid
+            Shiboken::Wrapper::invalidate(first);
+            removeParent(first, false, keepReference);
+       }
+       removeParent(obj, false);
+       delete pInfo;
+       obj->d->parentInfo = 0;
+    }
+}
+
 
 void setValidCpp(SbkObject* pyObj, bool value)
 {
@@ -646,9 +558,23 @@ bool hasOwnership(SbkObject* pyObj)
     return pyObj->d->hasOwnership;
 }
 
-void getOwnership(SbkObject* pyObj)
+void getOwnership(SbkObject* self)
 {
-    pyObj->d->hasOwnership = true;
+    // skip if already have the ownership
+    if (self->d->hasOwnership)
+        return;
+
+    // skip if this object has parent
+    if (self->d->parentInfo && self->d->parentInfo->parent)
+        return;
+
+    // Get back the ownership
+    self->d->hasOwnership = true;
+
+    if (self->d->containsCppWrapper)
+        Py_DECREF((PyObject*) self); // Remove extra ref
+    else
+        makeValid(self); // Make the object valid again
 }
 
 void getOwnership(PyObject* pyObj)
@@ -656,14 +582,78 @@ void getOwnership(PyObject* pyObj)
     setSequenceOwnership(pyObj, true);
 }
 
-void releaseOwnership(SbkObject* pyObj)
+void releaseOwnership(SbkObject* self)
 {
-    pyObj->d->hasOwnership = false;
+    // skip if the ownership have already moved to c++
+    if (!self->d->hasOwnership)
+        return;
+
+    // remove object ownership
+    self->d->hasOwnership = false;
+
+    // If We have control over object life
+    if (self->d->containsCppWrapper)
+        Py_INCREF((PyObject*) self); // keep the python object alive until the wrapper destructor call
+    else
+        invalidate(self); // If I do not know when this object will die We need to invalidate this to avoid use after
 }
 
-void releaseOwnership(PyObject* pyObj)
+void releaseOwnership(PyObject* self)
 {
-    setSequenceOwnership(pyObj, false);
+    setSequenceOwnership(self, false);
+}
+
+void invalidate(PyObject* pyobj)
+{
+    std::list<SbkObject*> objs = splitPyObject(pyobj);
+    std::list<SbkObject*>::const_iterator it = objs.begin();
+    for(; it != objs.end(); it++)
+        invalidate(*it);
+}
+
+void invalidate(SbkObject* self)
+{
+    // Skip if this object not is a valid object
+    if (!self || ((PyObject*)self == Py_None))
+        return;
+
+    if (!self->d->containsCppWrapper) {
+        self->d->validCppObject = false; // Mark object as invalid only if this is not a wrapper class
+        BindingManager::instance().releaseWrapper(self);
+    }
+
+    // If it is a parent invalidate all children.
+    if (self->d->parentInfo) {
+        // Create a copy because this list can be changed during the process
+        ChildrenList copy = self->d->parentInfo->children;
+        ChildrenList::iterator it = copy.begin();
+
+        for (; it != copy.end(); ++it) {
+            // invalidate the child
+            invalidate(*it);
+
+            // if the parent not is a wrapper class, then remove children from him, because We do not know when this object will be destroyed
+            if (!self->d->validCppObject)
+                removeParent(*it, true, true);
+        }
+    }
+}
+
+void makeValid(SbkObject* self)
+{
+    // Skip if this object not is a valid object
+    if (!self || ((PyObject*)self == Py_None))
+        return;
+
+    // Mark object as invalid only if this is not a wrapper class
+    self->d->validCppObject = true;
+
+    // If it is a parent make  all children valid
+    if (self->d->parentInfo) {
+        ChildrenList::iterator it = self->d->parentInfo->children.begin();
+        for (; it != self->d->parentInfo->children.end(); ++it)
+            makeValid(*it);
+    }
 }
 
 bool hasParentInfo(SbkObject* pyObj)
@@ -730,6 +720,158 @@ PyObject* newObject(SbkObjectType* instanceType,
     self->d->validCppObject = 1;
     BindingManager::instance().registerWrapper(self, cptr);
     return reinterpret_cast<PyObject*>(self);
+}
+
+void destroy(SbkObject* self)
+{
+    // Skip if this is called with NULL pointer this can happen in derived classes
+    if (!self)
+        return;
+
+    // This can be called in c++ side
+    Shiboken::GilState gil;
+
+    // We will marks this object as invalid because this function will be called from wrapper destructor
+    // If The object has ownership and this was destroyed then is necessary invalidate to avoid future used by Python
+    self->d->validCppObject = false;
+
+    // Remove all references attached to this object
+    clearReferences(self);
+
+    // Remove from BindinManager
+    Shiboken::BindingManager::instance().releaseWrapper(self);
+
+    // Remove the object from parent control
+
+    // Verify if this object has parent
+    bool hasParent = (self->d->parentInfo && self->d->parentInfo->parent);
+
+    if (self->d->parentInfo) {
+        // Check for children information and make all invalid if they exists
+        _destroyParentInfo(self, true);
+        // If this object has parent then the pyobject can be invalid now, because we remove the last ref after remove from parent
+    }
+
+    //if !hasParent this object could still alive
+    if (!hasParent && self->d->containsCppWrapper && !self->d->hasOwnership) {
+        // Remove extra ref used by c++ object this will case the pyobject destruction
+        // This can cause the object death
+        Py_DECREF((PyObject*)self);
+    }
+    // After this point the object can be death do not use the self pointer bellow
+}
+
+void removeParent(SbkObject* child, bool giveOwnershipBack, bool keepReference)
+{
+    ParentInfo* pInfo = child->d->parentInfo;
+    if (!pInfo || !pInfo->parent) {
+        return;
+    }
+
+    ChildrenList& oldBrothers = pInfo->parent->d->parentInfo->children;
+    // Verify if this child is part of parent list
+    ChildrenList::iterator iChild = std::find(oldBrothers.begin(), oldBrothers.end(), child);
+    if (iChild == oldBrothers.end())
+        return;
+
+    oldBrothers.erase(iChild);
+
+    pInfo->parent = 0;
+
+    // This will keep the wrapper reference, will wait for wrapper destruction to remove that
+    if (keepReference && child->d->containsCppWrapper)
+        return;
+
+    // Transfer ownership back to Python
+    child->d->hasOwnership = giveOwnershipBack;
+
+    // Remove parent ref
+    Py_DECREF(child);
+}
+
+void setParent(PyObject* parent, PyObject* child)
+{
+    if (!child || child == Py_None || child == parent)
+        return;
+
+    /*
+     *  setParent is recursive when the child is a native Python sequence, i.e. objects not binded by Shiboken
+     *  like tuple and list.
+     *
+     *  This "limitation" exists to fix the following problem: A class multiple inherits QObject and QString,
+     *  so if you pass this class to someone that takes the ownership, we CAN'T enter in this if, but hey! QString
+     *  follows the sequence protocol.
+     */
+    if (PySequence_Check(child) && !isShibokenType(child)) {
+        Shiboken::AutoDecRef seq(PySequence_Fast(child, 0));
+        for (int i = 0, max = PySequence_Size(seq); i < max; ++i)
+            setParent(parent, PySequence_Fast_GET_ITEM(seq.object(), i));
+        return;
+    }
+
+    bool parentIsNull = !parent || parent == Py_None;
+    SbkObject* parent_ = reinterpret_cast<SbkObject*>(parent);
+    SbkObject* child_ = reinterpret_cast<SbkObject*>(child);
+
+    if (!parentIsNull) {
+        if (!parent_->d->parentInfo)
+            parent_->d->parentInfo = new ParentInfo;
+        // do not re-add a child
+        ChildrenList& children = parent_->d->parentInfo->children;
+        if (std::find(children.begin(), children.end(), child_) != children.end())
+            return;
+    }
+
+    ParentInfo* pInfo = child_->d->parentInfo;
+    bool hasAnotherParent = pInfo && pInfo->parent && pInfo->parent != parent_;
+
+    //Avoid destroy child during reparent operation
+    Py_INCREF(child);
+
+    // check if we need to remove this child from the old parent
+    if (parentIsNull || hasAnotherParent)
+        removeParent(child_);
+
+    // Add the child to the new parent
+    pInfo = child_->d->parentInfo;
+    if (!parentIsNull) {
+        if (!pInfo)
+            pInfo = child_->d->parentInfo = new ParentInfo;
+
+        pInfo->parent = parent_;
+        parent_->d->parentInfo->children.push_back(child_);
+
+        // Add Parent ref
+        Py_INCREF(child_);
+
+        // Remove ownership
+        child_->d->hasOwnership = false;
+    }
+
+    // Remove previous safe ref
+    Py_DECREF(child);
+}
+
+void deallocData(SbkObject* self)
+{
+    // Make cleanup if this is not a wrapper otherwise this will be done on wrapper destructor
+    if(!self->d->containsCppWrapper) {
+        removeParent(self);
+
+        if (self->d->parentInfo)
+            _destroyParentInfo(self, true);
+
+        clearReferences(self);
+
+        // Remove from BindinManager
+        Shiboken::BindingManager::instance().releaseWrapper(self);
+    }
+
+    Py_XDECREF(self->ob_dict);
+    delete[] self->d->cptr;
+    self->d->cptr = 0;
+    delete self->d;
+    Py_TYPE(self)->tp_free(self);
 }
 
 } // namespace Wrapper

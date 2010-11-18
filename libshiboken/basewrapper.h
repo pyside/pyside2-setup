@@ -114,26 +114,6 @@ namespace Shiboken
 LIBSHIBOKEN_API void initShiboken();
 
 /**
-*   Set the parent of \p child to \p parent.
-*   When an object dies, all their children, granchildren, etc, are tagged as invalid.
-*   \param parent the parent object, if null, the child will have no parents.
-*   \param child the child.
-*/
-LIBSHIBOKEN_API void setParent(PyObject* parent, PyObject* child);
-
-/**
-*   Remove this child from their parent, if any.
-*   \param child the child.
-*/
-LIBSHIBOKEN_API void removeParent(SbkObject* child);
-
-/**
-* \internal This is an internal function called by SbkBaseWrapper_Dealloc, it's exported just for techinical reasons.
-* \note Do not call this function inside your bindings.
-*/
-LIBSHIBOKEN_API void destroyParentInfo(SbkObject* obj, bool removeFromParent = true);
-
-/**
 *   Returns true if the object is an instance of a type created by the Shiboken generator.
 */
 inline bool isShibokenType(PyObject*& pyObj)
@@ -215,9 +195,50 @@ LIBSHIBOKEN_API void* cppPointer(SbkObject* pyObj, PyTypeObject* desiredType);
  */
 LIBSHIBOKEN_API bool setCppPointer(SbkObject* sbkObj, PyTypeObject* desiredType, void* cptr);
 
-/// Returns false and sets a Python RuntimeError if the Python wrapper is not marked as valid.
+/**
+ * Returns false and sets a Python RuntimeError if the Python wrapper is not marked as valid.
+ */
 LIBSHIBOKEN_API bool isValid(PyObject* wrapper);
 
+/**
+*   Set the parent of \p child to \p parent.
+*   When an object dies, all their children, granchildren, etc, are tagged as invalid.
+*   \param parent the parent object, if null, the child will have no parents.
+*   \param child the child.
+*/
+LIBSHIBOKEN_API void setParent(PyObject* parent, PyObject* child);
+
+/**
+*   Remove this child from their parent, if any.
+*   \param child the child.
+*/
+LIBSHIBOKEN_API void removeParent(SbkObject* child, bool giveOwnershipBack = true, bool keepReferenc = false);
+
+/**
+* \internal This is an internal function called by SbkBaseWrapper_Dealloc, it's exported just for techinical reasons.
+* \note Do not call this function inside your bindings.
+*/
+LIBSHIBOKEN_API void destroyParentInfo(SbkObject* obj, bool removeFromParent = true);
+
+/**
+ * Mark the object as invalid
+ */
+LIBSHIBOKEN_API void invalidate(SbkObject* self);
+
+/**
+ * Help function can be used to invalida a sequence of object
+ **/
+LIBSHIBOKEN_API void invalidate(PyObject* pyobj);
+
+/**
+ * Make the object valid again
+ */
+LIBSHIBOKEN_API void makeValid(SbkObject* self);
+
+/**
+ * Destroy any data in Shiboken structure and c++ pointer if the pyboject has the ownership
+ **/
+LIBSHIBOKEN_API void destroy(SbkObject* self);
 
 } // namespace Wrapper
 

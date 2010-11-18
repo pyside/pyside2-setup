@@ -147,8 +147,9 @@ BindingManager::~BindingManager()
     /* Cleanup hanging references. We just invalidate them as when
      * the BindingManager is being destroyed the interpreter is alredy
      * shutting down. */
-    while (!m_d->wrapperMapper.empty())
-        invalidateWrapper(m_d->wrapperMapper.begin()->second);
+    while (!m_d->wrapperMapper.empty()) {
+        Wrapper::destroy(m_d->wrapperMapper.begin()->second);
+    }
     assert(m_d->wrapperMapper.size() == 0);
     delete m_d;
 }
@@ -162,6 +163,7 @@ bool BindingManager::hasWrapper(const void* cptr)
 {
     return m_d->wrapperMapper.count(cptr);
 }
+
 void BindingManager::registerWrapper(SbkObject* pyObj, void* cptr)
 {
     SbkObjectType* instanceType = reinterpret_cast<SbkObjectType*>(pyObj->ob_type);
@@ -246,91 +248,6 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
     Py_XDECREF(method);
     Py_DECREF(pyMethodName);
     return 0;
-}
-
-
-void BindingManager::invalidateWrapper(PyObject* pyobj)
-{
-    std::list<SbkObject*> objs = splitPyObject(pyobj);
-    std::list<SbkObject*>::const_iterator it = objs.begin();
-    for(; it != objs.end(); it++)
-        invalidateWrapper(*it);
-}
-
-void BindingManager::invalidateWrapper(SbkObject* wrapper)
-{
-    if (!wrapper || ((PyObject*)wrapper == Py_None) || !wrapper->d->validCppObject)
-        return;
-
-    GilState gil; // lock the gil to assure no one is changing the value of m_d->destroying
-
-    // skip this if the object is a wrapper class and this is not a destructor call
-    if (wrapper->d->containsCppWrapper && !m_d->destroying) {
-        ParentInfo* pInfo = wrapper->d->parentInfo;
-        // this meaning the object has a extra ref and we will remove this now
-        if (pInfo && pInfo->hasWrapperRef) {
-            delete pInfo;
-            wrapper->d->parentInfo = 0;
-            Py_XDECREF((PyObject*) wrapper);
-        }
-        return;
-    }
-
-    wrapper->d->validCppObject = false;
-    wrapper->d->hasOwnership = false;
-
-    // If it is a parent invalidate all children.
-    if (wrapper->d->parentInfo) {
-        ChildrenList::iterator it = wrapper->d->parentInfo->children.begin();
-        bool parentDestroying = m_d->destroying;
-        m_d->destroying = false;
-        for (; it != wrapper->d->parentInfo->children.end(); ++it)
-            invalidateWrapper(*it);
-        m_d->destroying = parentDestroying;
-    }
-
-    releaseWrapper(wrapper);
-}
-
-void BindingManager::invalidateWrapper(const void* cptr)
-{
-    WrapperMap::iterator iter = m_d->wrapperMapper.find(cptr);
-    if (iter != m_d->wrapperMapper.end())
-        invalidateWrapper(iter->second);
-}
-
-void BindingManager::destroyWrapper(const void* cptr)
-{
-    WrapperMap::iterator iter = m_d->wrapperMapper.find(cptr);
-    if (iter != m_d->wrapperMapper.end())
-        destroyWrapper(reinterpret_cast<SbkObject*>(iter->second));
-}
-
-void BindingManager::destroyWrapper(SbkObject* wrapper)
-{
-    GilState gil;
-    m_d->destroying = true;
-    invalidateWrapper(wrapper);
-    m_d->destroying = false;
-}
-
-void BindingManager::transferOwnershipToCpp(PyObject* wrapper)
-{
-    std::list<SbkObject*> objs = splitPyObject(wrapper);
-    std::list<SbkObject*>::const_iterator it = objs.begin();
-    for(; it != objs.end(); it++)
-        transferOwnershipToCpp(*it);
-}
-
-void BindingManager::transferOwnershipToCpp(SbkObject* wrapper)
-{
-    if (wrapper->d->parentInfo)
-        Shiboken::removeParent(wrapper);
-
-    if (wrapper->d->containsCppWrapper)
-        wrapper->d->hasOwnership = false;
-    else
-        invalidateWrapper(wrapper);
 }
 
 void BindingManager::addClassInheritance(SbkObjectType* parent, SbkObjectType* child)

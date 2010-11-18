@@ -42,26 +42,13 @@ public:
 
     void registerWrapper(SbkObject* pyObj, void* cptr);
     void releaseWrapper(SbkObject* wrapper);
+
     SbkObject* retrieveWrapper(const void* cptr);
     PyObject* getOverride(const void* cptr, const char* methodName);
 
-    /// Invalidate the Python wrapper and removes the relations from C++ pointers to the Python wrapper.
-    void invalidateWrapper(SbkObject* wrapper);
-    /// Convenience method to call invalidateWrapper with a properly cast SbkBaseWrapper.
-    void invalidateWrapper(PyObject* wrapper);
-    /// Convenience method to invalidate the Python wrapper for a C++ wrapped object. Do nothing if C++ pointer has no Python wrapper.
-    void invalidateWrapper(const void* cptr);
-
-    /// Transfers the ownership of a Python wrapper to C++.
-    void transferOwnershipToCpp(SbkObject* wrapper);
-    /// Convenience method to call transferOwnershipToCpp with a properly cast SbkBaseWrapper.
-    void transferOwnershipToCpp(PyObject* wrapper);
     void addClassInheritance(SbkObjectType* parent, SbkObjectType* child);
     SbkObjectType* resolveType(void* cptr, SbkObjectType* type);
 
-    /// Called by wrapper destructor
-    void destroyWrapper(const void* cptr);
-    void destroyWrapper(SbkObject* wrapper);
     std::set<SbkObject*> getAllPyObjects();
 private:
     ~BindingManager();

@@ -196,6 +196,14 @@ inline std::list<SbkObjectType*> getCppBaseClasses(PyTypeObject* baseType)
 */
 void clearReferences(SbkObject* self);
 
+namespace Wrapper
+{
+/**
+ * Destroy internal data
+ **/
+void deallocData(SbkObject* self);
+} // namespace Wrapper
+
 } // namespace Shiboken
 
 #endif
