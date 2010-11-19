@@ -28,7 +28,7 @@
 #include <map>
 
 struct SbkObject;
-struct SbkObjectType;
+struct SbkBaseType;
 
 namespace Shiboken
 {
@@ -80,6 +80,34 @@ struct SbkObjectPrivate
     Shiboken::RefCountMap* referredObjects;
 };
 
+
+struct SbkBaseTypePrivate
+{
+    int* mi_offsets;
+    MultipleInheritanceInitFunction mi_init;
+
+    /// Special cast function, null if this class doesn't have multiple inheritance.
+    SpecialCastFunction mi_specialcast;
+    TypeDiscoveryFunc type_discovery;
+    ObjectCopierFunction obj_copier;
+    /// Extended "isConvertible" function to be used when a conversion operator is defined in another module.
+    ExtendedIsConvertibleFunc ext_isconvertible;
+    /// Extended "toCpp" function to be used when a conversion operator is defined in another module.
+    ExtendedToCppFunc ext_tocpp;
+    /// Pointer to a function responsible for deletetion of the C++ instance calling the proper destructor.
+    ObjectDestructor cpp_dtor;
+    /// True if this type holds two or more C++ instances, e.g.: a Python class which inherits from two C++ classes.
+    int is_multicpp:1;
+    /// True if this type was definied by the user.
+    int is_user_type:1;
+    /// C++ name
+    char* original_name;
+    /// Type user data
+    void *user_data;
+    DeleteUserDataFunc d_func;
+};
+
+
 } // extern "C"
 
 namespace Shiboken
@@ -97,7 +125,7 @@ class HierarchyVisitor
 public:
     HierarchyVisitor() : m_wasFinished(false) {}
     virtual ~HierarchyVisitor() {}
-    virtual void visit(SbkObjectType* node) = 0;
+    virtual void visit(SbkBaseType* node) = 0;
     void finish() { m_wasFinished = true; };
     bool wasFinished() const { return m_wasFinished; }
 private:
@@ -109,7 +137,7 @@ class BaseCountVisitor : public HierarchyVisitor
 public:
     BaseCountVisitor() : m_count(0) {}
 
-    void visit(SbkObjectType*)
+    void visit(SbkBaseType*)
     {
         m_count++;
     }
@@ -124,21 +152,21 @@ class BaseAccumulatorVisitor : public HierarchyVisitor
 public:
     BaseAccumulatorVisitor() {}
 
-    void visit(SbkObjectType* node)
+    void visit(SbkBaseType* node)
     {
         m_bases.push_back(node);
     }
 
-    std::list<SbkObjectType*> bases() const { return m_bases; }
+    std::list<SbkBaseType*> bases() const { return m_bases; }
 private:
-    std::list<SbkObjectType*> m_bases;
+    std::list<SbkBaseType*> m_bases;
 };
 
 class GetIndexVisitor : public HierarchyVisitor
 {
 public:
     GetIndexVisitor(PyTypeObject* desiredType) : m_index(-1), m_desiredType(desiredType) {}
-    virtual void visit(SbkObjectType* node)
+    virtual void visit(SbkBaseType* node)
     {
         m_index++;
         if (PyType_IsSubtype(reinterpret_cast<PyTypeObject*>(node), m_desiredType))
@@ -155,7 +183,7 @@ class DtorCallerVisitor : public HierarchyVisitor
 {
 public:
     DtorCallerVisitor(SbkObject* pyObj) : m_count(0), m_pyObj(pyObj) {}
-    void visit(SbkObjectType* node);
+    void visit(SbkBaseType* node);
 private:
     int m_count;
     SbkObject* m_pyObj;
@@ -183,21 +211,21 @@ inline int getNumberOfCppBaseClasses(PyTypeObject* baseType)
     return visitor.count();
 }
 
-inline std::list<SbkObjectType*> getCppBaseClasses(PyTypeObject* baseType)
+inline std::list<SbkBaseType*> getCppBaseClasses(PyTypeObject* baseType)
 {
     BaseAccumulatorVisitor visitor;
     walkThroughClassHierarchy(baseType, &visitor);
     return visitor.bases();
 }
 
+namespace Wrapper
+{
 /**
 *   Decrements the reference counters of every object referred by self.
 *   \param self    the wrapper instance that keeps references to other objects.
 */
 void clearReferences(SbkObject* self);
 
-namespace Wrapper
-{
 /**
  * Destroy internal data
  **/

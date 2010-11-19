@@ -26,8 +26,6 @@
 #include "shibokenmacros.h"
 #include "conversions.h"
 
-class SbkObjectType;
-
 namespace Shiboken
 {
 

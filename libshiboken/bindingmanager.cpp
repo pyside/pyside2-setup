@@ -37,8 +37,8 @@ typedef google::dense_hash_map<const void*, SbkObject*> WrapperMap;
 class Graph
 {
 public:
-    typedef std::list<SbkObjectType*> NodeList;
-    typedef google::dense_hash_map<SbkObjectType*, NodeList> Edges;
+    typedef std::list<SbkBaseType*> NodeList;
+    typedef google::dense_hash_map<SbkBaseType*, NodeList> Edges;
 
     Edges m_edges;
 
@@ -47,7 +47,7 @@ public:
         m_edges.set_empty_key(0);
     }
 
-    void addEdge(SbkObjectType* from, SbkObjectType* to)
+    void addEdge(SbkBaseType* from, SbkBaseType* to)
     {
         m_edges[from].push_back(to);
     }
@@ -61,7 +61,7 @@ public:
 
         Edges::const_iterator i = m_edges.begin();
         for (; i != m_edges.end(); ++i) {
-            SbkObjectType* node1 = i->first;
+            SbkBaseType* node1 = i->first;
             const NodeList& nodeList = i->second;
             NodeList::const_iterator j = nodeList.begin();
             for (; j != nodeList.end(); ++j)
@@ -71,19 +71,19 @@ public:
     }
 #endif
 
-    SbkObjectType* identifyType(void* cptr, SbkObjectType* type, SbkObjectType* baseType) const
+    SbkBaseType* identifyType(void* cptr, SbkBaseType* type, SbkBaseType* baseType) const
     {
         Edges::const_iterator edgesIt = m_edges.find(type);
         if (edgesIt != m_edges.end()) {
             const NodeList& adjNodes = m_edges.find(type)->second;
             NodeList::const_iterator i = adjNodes.begin();
             for (; i != adjNodes.end(); ++i) {
-                SbkObjectType* newType = identifyType(cptr, *i, baseType);
+                SbkBaseType* newType = identifyType(cptr, *i, baseType);
                 if (newType)
                     return newType;
             }
         }
-        return type->type_discovery ? type->type_discovery(cptr, baseType) : 0;
+        return ((type->d && type->d->type_discovery) ? type->d->type_discovery(cptr, baseType) : 0);
     }
 };
 
@@ -166,13 +166,17 @@ bool BindingManager::hasWrapper(const void* cptr)
 
 void BindingManager::registerWrapper(SbkObject* pyObj, void* cptr)
 {
-    SbkObjectType* instanceType = reinterpret_cast<SbkObjectType*>(pyObj->ob_type);
+    SbkBaseType* instanceType = reinterpret_cast<SbkBaseType*>(pyObj->ob_type);
+    SbkBaseTypePrivate* d = instanceType->d;
 
-    if (instanceType->mi_init && !instanceType->mi_offsets)
-        instanceType->mi_offsets = instanceType->mi_init(cptr);
+    if (!d)
+        return;
+
+    if (d->mi_init && !d->mi_offsets)
+        d->mi_offsets = d->mi_init(cptr);
     m_d->assignWrapper(pyObj, cptr);
-    if (instanceType->mi_offsets) {
-        int* offset = instanceType->mi_offsets;
+    if (d->mi_offsets) {
+        int* offset = d->mi_offsets;
         while (*offset != -1) {
             if (*offset > 0)
                 m_d->assignWrapper(pyObj, reinterpret_cast<void*>((std::size_t) cptr + (*offset)));
@@ -183,15 +187,16 @@ void BindingManager::registerWrapper(SbkObject* pyObj, void* cptr)
 
 void BindingManager::releaseWrapper(SbkObject* sbkObj)
 {
-    SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(sbkObj->ob_type);
-    int numBases = sbkType->is_multicpp ? getNumberOfCppBaseClasses(sbkObj->ob_type) : 1;
+    SbkBaseType* sbkType = reinterpret_cast<SbkBaseType*>(sbkObj->ob_type);
+    SbkBaseTypePrivate* d = sbkType->d;
+    int numBases = ((d && d->is_multicpp) ? getNumberOfCppBaseClasses(sbkObj->ob_type) : 1);
 
     void** cptrs = reinterpret_cast<SbkObject*>(sbkObj)->d->cptr;
     for (int i = 0; i < numBases; ++i) {
         void* cptr = cptrs[i];
         m_d->releaseWrapper(cptr);
-        if (sbkType->mi_offsets) {
-            int* offset = sbkType->mi_offsets;
+        if (d && d->mi_offsets) {
+            int* offset = d->mi_offsets;
             while (*offset != -1) {
                 if (*offset > 0)
                     m_d->releaseWrapper((void*) ((std::size_t) cptr + (*offset)));
@@ -250,14 +255,14 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
     return 0;
 }
 
-void BindingManager::addClassInheritance(SbkObjectType* parent, SbkObjectType* child)
+void BindingManager::addClassInheritance(SbkBaseType* parent, SbkBaseType* child)
 {
     m_d->classHierarchy.addEdge(parent, child);
 }
 
-SbkObjectType* BindingManager::resolveType(void* cptr, SbkObjectType* type)
+SbkBaseType* BindingManager::resolveType(void* cptr, SbkBaseType* type)
 {
-    SbkObjectType* identifiedType = m_d->classHierarchy.identifyType(cptr, type, type);
+    SbkBaseType* identifiedType = m_d->classHierarchy.identifyType(cptr, type, type);
     return identifiedType ? identifiedType : type;
 }
 

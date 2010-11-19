@@ -28,7 +28,7 @@
 #include "shibokenmacros.h"
 
 struct SbkObject;
-struct SbkObjectType;
+struct SbkBaseType;
 
 namespace Shiboken
 {
@@ -46,8 +46,8 @@ public:
     SbkObject* retrieveWrapper(const void* cptr);
     PyObject* getOverride(const void* cptr, const char* methodName);
 
-    void addClassInheritance(SbkObjectType* parent, SbkObjectType* child);
-    SbkObjectType* resolveType(void* cptr, SbkObjectType* type);
+    void addClassInheritance(SbkBaseType* parent, SbkBaseType* child);
+    SbkBaseType* resolveType(void* cptr, SbkBaseType* type);
 
     std::set<SbkObject*> getAllPyObjects();
 private:
