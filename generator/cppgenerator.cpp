@@ -866,8 +866,8 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     s << INDENT << "SbkObject* sbkSelf = reinterpret_cast<SbkObject*>(self);" << endl;
 
     if (metaClass->isAbstract() || metaClass->baseClassNames().size() > 1) {
-        s << INDENT << "SbkBaseType* type = reinterpret_cast<SbkBaseType*>(self->ob_type);" << endl;
-        s << INDENT << "SbkBaseType* myType = reinterpret_cast<SbkBaseType*>(" << cpythonTypeNameExt(metaClass->typeEntry()) << ");" << endl;
+        s << INDENT << "SbkObjectType* type = reinterpret_cast<SbkObjectType*>(self->ob_type);" << endl;
+        s << INDENT << "SbkObjectType* myType = reinterpret_cast<SbkObjectType*>(" << cpythonTypeNameExt(metaClass->typeEntry()) << ");" << endl;
     }
 
     if (metaClass->isAbstract()) {
@@ -2224,12 +2224,12 @@ void CppGenerator::writeMultipleInheritanceInitializerFunction(QTextStream& s, c
 void CppGenerator::writeSpecialCastFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     QString className = metaClass->qualifiedCppName();
-    s << "static void* " << cpythonSpecialCastFunctionName(metaClass) << "(void* obj, SbkBaseType* desiredType)\n";
+    s << "static void* " << cpythonSpecialCastFunctionName(metaClass) << "(void* obj, SbkObjectType* desiredType)\n";
     s << "{\n";
     s << INDENT << className << "* me = reinterpret_cast<" << className << "*>(obj);\n";
     bool firstClass = true;
     foreach (const AbstractMetaClass* baseClass, getAllAncestors(metaClass)) {
-        s << INDENT << (!firstClass ? "else " : "") << "if (desiredType == reinterpret_cast<SbkBaseType*>(" << cpythonTypeNameExt(baseClass->typeEntry()) << "))\n";
+        s << INDENT << (!firstClass ? "else " : "") << "if (desiredType == reinterpret_cast<SbkObjectType*>(" << cpythonTypeNameExt(baseClass->typeEntry()) << "))\n";
         Indentation indent(INDENT);
         s << INDENT << "return static_cast<" << baseClass->qualifiedCppName() << "*>(me);\n";
         firstClass = false;
@@ -2281,7 +2281,7 @@ void CppGenerator::writeExtendedToCppFunction(QTextStream& s, const TypeEntry* e
 void CppGenerator::writeExtendedConverterInitialization(QTextStream& s, const TypeEntry* externalType, const QList<const AbstractMetaClass*>& conversions)
 {
     s << INDENT << "// Extended implicit conversions for " << externalType->targetLangPackage() << '.' << externalType->name() << endl;
-    s << INDENT << "shiboType = reinterpret_cast<SbkBaseType*>(";
+    s << INDENT << "shiboType = reinterpret_cast<SbkObjectType*>(";
     s << cppApiVariableName(externalType->targetLangPackage()) << '[';
     s << getTypeIndexVariableName(externalType) << "]);" << endl;
     s << INDENT << "Shiboken::BaseType::setExternalIsConvertibleFunction(shiboType, " << extendedIsConvertibleFunctionName(externalType) << ");" << endl;
@@ -2414,7 +2414,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
 
     s << "// Class Definition -----------------------------------------------" << endl;
     s << "extern \"C\" {" << endl;
-    s << "static SbkBaseType " << className + "_Type" << " = { { {" << endl;
+    s << "static SbkObjectType " << className + "_Type" << " = { { {" << endl;
     s << INDENT << "PyObject_HEAD_INIT(&SbkBaseType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
     s << INDENT << "/*tp_name*/             \"" << metaClass->fullName() << "\"," << endl;
@@ -3234,7 +3234,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         if (miClass == metaClass)
             s << INDENT << "func = " << multipleInheritanceInitializerFunctionName(miClass) << ";" << endl;
         else
-            s << INDENT << "func = Shiboken::BaseType::getMultipleIheritanceFunction(reinterpret_cast<SbkBaseType*>(" << cpythonTypeNameExt(miClass->typeEntry()) << "));" << endl;
+            s << INDENT << "func = Shiboken::BaseType::getMultipleIheritanceFunction(reinterpret_cast<SbkObjectType*>(" << cpythonTypeNameExt(miClass->typeEntry()) << "));" << endl;
 
         s << INDENT << "Shiboken::BaseType::setMultipleIheritanceFunction(&" << cpythonTypeName(metaClass) << ", func);" << endl;
         s << INDENT << "Shiboken::BaseType::setCastFunction(&" << cpythonTypeName(metaClass) << ", &" << cpythonSpecialCastFunctionName(metaClass) << ");" << endl;
@@ -3264,7 +3264,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
             s << INDENT << "Shiboken::BaseType::setTypeDiscoveryFunction(&" << cpythonTypeName(metaClass) << ", &" << cpythonBaseName(metaClass) << "_typeDiscovery);" << endl;
             s << INDENT << "Shiboken::BindingManager& bm = Shiboken::BindingManager::instance();" << endl;
             foreach (const AbstractMetaClass* base, baseClasses) {
-                s << INDENT << "bm.addClassInheritance(reinterpret_cast<SbkBaseType*>(" << cpythonTypeNameExt(base->typeEntry()) << "), &" << cpythonTypeName(metaClass) << ");" << endl;
+                s << INDENT << "bm.addClassInheritance(reinterpret_cast<SbkObjectType*>(" << cpythonTypeNameExt(base->typeEntry()) << "), &" << cpythonTypeName(metaClass) << ");" << endl;
             }
         }
         s << endl;
@@ -3345,7 +3345,7 @@ void CppGenerator::writeTypeDiscoveryFunction(QTextStream& s, const AbstractMeta
 {
     QString polymorphicExpr = metaClass->typeEntry()->polymorphicIdValue();
 
-    s << "static SbkBaseType* " << cpythonBaseName(metaClass) << "_typeDiscovery(void* cptr, SbkBaseType* instanceType)\n{" << endl;
+    s << "static SbkObjectType* " << cpythonBaseName(metaClass) << "_typeDiscovery(void* cptr, SbkObjectType* instanceType)\n{" << endl;
 
     if (!metaClass->baseClass()) {
         s << INDENT << "TypeResolver* typeResolver = TypeResolver::get(typeid(*reinterpret_cast<"
@@ -3353,7 +3353,7 @@ void CppGenerator::writeTypeDiscoveryFunction(QTextStream& s, const AbstractMeta
         s << INDENT << "if (typeResolver)" << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << "return reinterpret_cast<SbkBaseType*>(typeResolver->pythonType());" << endl;
+            s << INDENT << "return reinterpret_cast<SbkObjectType*>(typeResolver->pythonType());" << endl;
         }
     } else if (!polymorphicExpr.isEmpty()) {
         polymorphicExpr = polymorphicExpr.replace("%1", " reinterpret_cast<"+metaClass->qualifiedCppName()+"*>(cptr)");
@@ -3368,7 +3368,7 @@ void CppGenerator::writeTypeDiscoveryFunction(QTextStream& s, const AbstractMeta
             if (ancestor->baseClass())
                 continue;
             if (ancestor->isPolymorphic()) {
-                s << INDENT << "if (instanceType == reinterpret_cast<SbkBaseType*>(Shiboken::SbkType<"
+                s << INDENT << "if (instanceType == reinterpret_cast<SbkObjectType*>(Shiboken::SbkType<"
                             << ancestor->qualifiedCppName() << " >()) && dynamic_cast<" << metaClass->qualifiedCppName()
                             << "*>(reinterpret_cast<"<< ancestor->qualifiedCppName() << "*>(cptr)))" << endl;
                 Indentation indent(INDENT);
@@ -3689,7 +3689,7 @@ void CppGenerator::finishGeneration()
 
         if (!extendedConverters.isEmpty()) {
             s << INDENT << "// Initialize extended Converters" << endl;
-            s << INDENT << "SbkBaseType* shiboType;" << endl << endl;
+            s << INDENT << "SbkObjectType* shiboType;" << endl << endl;
         }
         foreach (const TypeEntry* externalType, extendedConverters.keys()) {
             writeExtendedConverterInitialization(s, externalType, extendedConverters[externalType]);

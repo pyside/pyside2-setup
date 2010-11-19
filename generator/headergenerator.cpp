@@ -434,7 +434,7 @@ void HeaderGenerator::finishGeneration()
             s << INDENT << metaClass->qualifiedCppName() << "* value = const_cast<" << metaClass->qualifiedCppName() << "* >(cppobj);" << endl;
             s << INDENT << "if (!isExactType)" << endl;
             s << INDENT << INDENT << "typeName = typeid(*value).name();" << endl;
-            s << INDENT << "PyObject* pyObj = Shiboken::Wrapper::newObject(reinterpret_cast<SbkBaseType*>(SbkType<" << metaClass->qualifiedCppName() << " >()),"
+            s << INDENT << "PyObject* pyObj = Shiboken::Wrapper::newObject(reinterpret_cast<SbkObjectType*>(SbkType<" << metaClass->qualifiedCppName() << " >()),"
             << "value, hasOwnership, isExactType, typeName);" << endl;
             s << INDENT << "PySide::Signal::updateSourceObject(pyObj);" << endl;
             s << INDENT << "return pyObj;" << endl;
@@ -531,7 +531,7 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
     }
 
 
-    s << INDENT << "SbkBaseType* shiboType = reinterpret_cast<SbkBaseType*>(SbkType<";
+    s << INDENT << "SbkObjectType* shiboType = reinterpret_cast<SbkObjectType*>(SbkType<";
     s << type->name() << " >());" << endl;
     s << INDENT << "return ";
     bool isFirst = true;

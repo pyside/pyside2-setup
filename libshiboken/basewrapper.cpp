@@ -41,7 +41,7 @@ PyTypeObject SbkBaseType_Type = {
     PyObject_HEAD_INIT(0)
     /*ob_size*/             0,
     /*tp_name*/             "Shiboken.ObjectType",
-    /*tp_basicsize*/        sizeof(SbkBaseType),
+    /*tp_basicsize*/        sizeof(SbkObjectType),
     /*tp_itemsize*/         0,
     /*tp_dealloc*/          SbkBaseTypeDealloc,
     /*tp_print*/            0,
@@ -101,7 +101,7 @@ static PyGetSetDef SbkObjectGetSetList[] = {
     {0} // Sentinel
 };
 
-SbkBaseType SbkObject_Type = { { {
+SbkObjectType SbkObject_Type = { { {
     PyObject_HEAD_INIT(&SbkBaseType_Type)
     /*ob_size*/             0,
     /*tp_name*/             "Shiboken.Object",
@@ -161,7 +161,7 @@ void SbkDeallocWrapper(PyObject* pyObj)
 
     // If I have ownership and is valid delete C++ pointer
     if (sbkObj->d->hasOwnership && sbkObj->d->validCppObject) {
-        SbkBaseType* sbkType = reinterpret_cast<SbkBaseType*>(pyObj->ob_type);
+        SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(pyObj->ob_type);
         if (sbkType->d->is_multicpp) {
             Shiboken::DtorCallerVisitor visitor(sbkObj);
             Shiboken::walkThroughClassHierarchy(pyObj->ob_type, &visitor);
@@ -185,7 +185,7 @@ void SbkDeallocWrapperWithPrivateDtor(PyObject* self)
 
 void SbkBaseTypeDealloc(PyObject* pyObj)
 {
-    SbkBaseType *sbkType = reinterpret_cast<SbkBaseType*>(pyObj->ob_type);
+    SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(pyObj->ob_type);
     if (!sbkType->d)
         return;
 
@@ -202,7 +202,7 @@ void SbkBaseTypeDealloc(PyObject* pyObj)
 PyObject* SbkBaseTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
 {
     // The meta type creates a new type when the Python programmer extends a wrapped C++ class.
-    SbkBaseType* newType = reinterpret_cast<SbkBaseType*>(PyType_Type.tp_new(metatype, args, kwds));
+    SbkObjectType* newType = reinterpret_cast<SbkObjectType*>(PyType_Type.tp_new(metatype, args, kwds));
 
     if (!newType)
         return 0;
@@ -210,7 +210,7 @@ PyObject* SbkBaseTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwd
     SbkBaseTypePrivate* d = new SbkBaseTypePrivate;
     memset(d, 0, sizeof(SbkBaseTypePrivate));
 
-    std::list<SbkBaseType*> bases = Shiboken::getCppBaseClasses(reinterpret_cast<PyTypeObject*>(newType));
+    std::list<SbkObjectType*> bases = Shiboken::getCppBaseClasses(reinterpret_cast<PyTypeObject*>(newType));
     if (bases.size() == 1) {
         SbkBaseTypePrivate* parentType = bases.front()->d;
         d->mi_offsets = parentType->mi_offsets;
@@ -249,7 +249,7 @@ PyObject* SbkObjectTpNew(PyTypeObject* subtype, PyObject*, PyObject*)
     SbkObject* self = reinterpret_cast<SbkObject*>(subtype->tp_alloc(subtype, 0));
     self->d = new SbkObjectPrivate;
 
-    SbkBaseType* sbkType = reinterpret_cast<SbkBaseType*>(subtype);
+    SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(subtype);
     int numBases = ((sbkType->d && sbkType->d->is_multicpp) ? Shiboken::getNumberOfCppBaseClasses(subtype) : 1);
     self->d->cptr = new void*[numBases];
     std::memset(self->d->cptr, 0, sizeof(void*)*numBases);
@@ -282,7 +282,7 @@ void walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visi
         if (type->ob_type != &SbkBaseType_Type) {
             continue;
         } else {
-            SbkBaseType* sbkType = reinterpret_cast<SbkBaseType*>(type);
+            SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(type);
             if (sbkType->d->is_user_type)
                 walkThroughClassHierarchy(type, visitor);
             else
@@ -311,7 +311,7 @@ bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr)
 
 // Wrapper metatype and base type ----------------------------------------------------------
 
-void DtorCallerVisitor::visit(SbkBaseType* node)
+void DtorCallerVisitor::visit(SbkObjectType* node)
 {
     node->d->cpp_dtor(m_pyObj->d->cptr[m_count]);
     m_count++;
@@ -385,7 +385,7 @@ class FindBaseTypeVisitor : public HierarchyVisitor
 {
     public:
         FindBaseTypeVisitor(PyTypeObject* typeToFind) : m_found(false), m_typeToFind(typeToFind) {}
-        virtual void visit(SbkBaseType* node)
+        virtual void visit(SbkObjectType* node)
         {
             if (reinterpret_cast<PyTypeObject*>(node) == m_typeToFind) {
                 m_found = true;
@@ -447,7 +447,7 @@ bool checkType(PyTypeObject* type)
 
 bool isUserType(PyTypeObject* type)
 {
-    return BaseType::checkType(type) && reinterpret_cast<SbkBaseType*>(type)->d->is_user_type;
+    return BaseType::checkType(type) && reinterpret_cast<SbkObjectType*>(type)->d->is_user_type;
 }
 
 bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctorType)
@@ -461,101 +461,101 @@ bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctorType)
     return true;
 }
 
-void* copy(SbkBaseType* self, const void* obj)
+void* copy(SbkObjectType* self, const void* obj)
 {
     return self->d->obj_copier(obj);
 }
 
-void setCopyFunction(SbkBaseType* self, ObjectCopierFunction func)
+void setCopyFunction(SbkObjectType* self, ObjectCopierFunction func)
 {
     self->d->obj_copier = func;
 }
 
-bool hasExternalCppConversions(SbkBaseType* self)
+bool hasExternalCppConversions(SbkObjectType* self)
 {
     return self->d->ext_tocpp;
 }
 
-void* callExternalCppConversion(SbkBaseType* self, PyObject* obj)
+void* callExternalCppConversion(SbkObjectType* self, PyObject* obj)
 {
     return self->d->ext_tocpp(obj);
 }
 
-void setExternalCppConversionFunction(SbkBaseType* self, ExtendedToCppFunc func)
+void setExternalCppConversionFunction(SbkObjectType* self, ExtendedToCppFunc func)
 {
     self->d->ext_tocpp = func;
 }
 
-void setExternalIsConvertibleFunction(SbkBaseType* self, ExtendedIsConvertibleFunc func)
+void setExternalIsConvertibleFunction(SbkObjectType* self, ExtendedIsConvertibleFunc func)
 {
     self->d->ext_isconvertible = func;
 }
 
-bool isExternalConvertible(SbkBaseType* self, PyObject* obj)
+bool isExternalConvertible(SbkObjectType* self, PyObject* obj)
 {
     return self->d->ext_isconvertible && self->d->ext_isconvertible(obj);
 }
 
-bool hasCast(SbkBaseType* self)
+bool hasCast(SbkObjectType* self)
 {
     return self->d->mi_specialcast;
 }
 
-void* cast(SbkBaseType* self, SbkObject* obj, PyTypeObject *target)
+void* cast(SbkObjectType* self, SbkObject* obj, PyTypeObject *target)
 {
-    return self->d->mi_specialcast(Wrapper::cppPointer(obj, target), reinterpret_cast<SbkBaseType*>(target));
+    return self->d->mi_specialcast(Wrapper::cppPointer(obj, target), reinterpret_cast<SbkObjectType*>(target));
 }
 
-void setCastFunction(SbkBaseType* self, SpecialCastFunction func)
+void setCastFunction(SbkObjectType* self, SpecialCastFunction func)
 {
     self->d->mi_specialcast = func;
 }
 
-void setOriginalName(SbkBaseType* self, const char* name)
+void setOriginalName(SbkObjectType* self, const char* name)
 {
     if (self->d->original_name)
         free(self->d->original_name);
     self->d->original_name = strdup(name);
 }
 
-const char* getOriginalName(SbkBaseType* self)
+const char* getOriginalName(SbkObjectType* self)
 {
     return self->d->original_name;
 }
 
-void setTypeDiscoveryFunction(SbkBaseType* self, TypeDiscoveryFunc func)
+void setTypeDiscoveryFunction(SbkObjectType* self, TypeDiscoveryFunc func)
 {
     self->d->type_discovery = func;
 }
 
-TypeDiscoveryFunc getTypeDiscoveryFunction(SbkBaseType* self)
+TypeDiscoveryFunc getTypeDiscoveryFunction(SbkObjectType* self)
 {
     return self->d->type_discovery;
 }
 
-void copyMultimpleheritance(SbkBaseType* self, SbkBaseType* other)
+void copyMultimpleheritance(SbkObjectType* self, SbkObjectType* other)
 {
     self->d->mi_init = other->d->mi_init;
     self->d->mi_offsets = other->d->mi_offsets;
     self->d->mi_specialcast = other->d->mi_specialcast;
 }
 
-void setMultipleIheritanceFunction(SbkBaseType* self, MultipleInheritanceInitFunction function)
+void setMultipleIheritanceFunction(SbkObjectType* self, MultipleInheritanceInitFunction function)
 {
     self->d->mi_init = function;
 }
 
-MultipleInheritanceInitFunction getMultipleIheritanceFunction(SbkBaseType* self)
+MultipleInheritanceInitFunction getMultipleIheritanceFunction(SbkObjectType* self)
 {
     return self->d->mi_init;
 }
 
-void setDestructorFunction(SbkBaseType* self, ObjectDestructor func)
+void setDestructorFunction(SbkObjectType* self, ObjectDestructor func)
 {
     self->d->cpp_dtor = func;
 }
 
-void initPrivateData(SbkBaseType* self)
+void initPrivateData(SbkObjectType* self)
 {
     self->d = new SbkBaseTypePrivate;
     memset(self->d, 0, sizeof(SbkBaseTypePrivate));
@@ -740,7 +740,7 @@ void* cppPointer(SbkObject* pyObj, PyTypeObject* desiredType)
 {
     PyTypeObject* type = pyObj->ob_type;
     int idx = 0;
-    if (reinterpret_cast<SbkBaseType*>(type)->d->is_multicpp)
+    if (reinterpret_cast<SbkObjectType*>(type)->d->is_multicpp)
         idx = getTypeIndexOnHierarchy(type, desiredType);
     return pyObj->d->cptr[idx];
 }
@@ -748,7 +748,7 @@ void* cppPointer(SbkObject* pyObj, PyTypeObject* desiredType)
 bool setCppPointer(SbkObject* sbkObj, PyTypeObject* desiredType, void* cptr)
 {
     int idx = 0;
-    if (reinterpret_cast<SbkBaseType*>(sbkObj->ob_type)->d->is_multicpp)
+    if (reinterpret_cast<SbkObjectType*>(sbkObj->ob_type)->d->is_multicpp)
         idx = getTypeIndexOnHierarchy(sbkObj->ob_type, desiredType);
 
     bool alreadyInitialized = sbkObj->d->cptr[idx];
@@ -771,7 +771,7 @@ bool isValid(PyObject* pyObj)
     return false;
 }
 
-PyObject* newObject(SbkBaseType* instanceType,
+PyObject* newObject(SbkObjectType* instanceType,
                     void* cptr,
                     bool hasOwnership,
                     bool isExactType,
@@ -783,7 +783,7 @@ PyObject* newObject(SbkBaseType* instanceType,
         if (typeName) {
             tr = TypeResolver::get(typeName);
             if (tr)
-                instanceType = reinterpret_cast<SbkBaseType*>(tr->pythonType());
+                instanceType = reinterpret_cast<SbkObjectType*>(tr->pythonType());
         }
         if (!tr)
             instanceType = BindingManager::instance().resolveType(cptr, instanceType);
@@ -951,7 +951,7 @@ void deallocData(SbkObject* self)
 
 void setTypeUserData(SbkObject* wrapper, void *user_data, DeleteUserDataFunc d_func)
 {
-    SbkBaseType* ob_type = reinterpret_cast<SbkBaseType*>(wrapper->ob_type);
+    SbkObjectType* ob_type = reinterpret_cast<SbkObjectType*>(wrapper->ob_type);
     if (ob_type->d->user_data)
         ob_type->d->d_func(ob_type->d->user_data);
 
@@ -961,7 +961,7 @@ void setTypeUserData(SbkObject* wrapper, void *user_data, DeleteUserDataFunc d_f
 
 void* getTypeUserData(SbkObject* wrapper)
 {
-    return reinterpret_cast<SbkBaseType*>(wrapper->ob_type)->d->user_data;
+    return reinterpret_cast<SbkObjectType*>(wrapper->ob_type)->d->user_data;
 }
 
 void keepReference(SbkObject* self, const char* key, PyObject* referredObject, bool append)
