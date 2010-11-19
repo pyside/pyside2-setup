@@ -91,8 +91,6 @@ if(APPLE)
     set(SBK_PYTHON_LIBRARIES "-undefined dynamic_lookup")
 endif()
 
-
-
 if (BUILD_TESTS)
     enable_testing()
 endif()
@@ -109,6 +107,12 @@ if (QT4_FOUND AND ApiExtractor_FOUND AND GeneratorRunner_FOUND AND PYTHONLIBS_FO
     endif()
 else()
     message("!! Some dependencies were not found, shiboken generator compilation disabled!")
+endif()
+
+if(CMAKE_VERSION VERSION_LESS 2.8)
+    set(SBK_PYTHON_INCLUDE_DIR ${PYTHON_INCLUDE_PATH})
+else()
+    set(SBK_PYTHON_INCLUDE_DIR ${PYTHON_INCLUDE_DIRS})
 endif()
 add_subdirectory(data)
 
