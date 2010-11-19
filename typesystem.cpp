@@ -2008,7 +2008,7 @@ static bool strLess(const char* a, const char* b)
 
 bool TypeEntry::isCppPrimitive() const
 {
-    if (m_name.contains(' '))
+    if (m_name.contains(' ') || m_type == VoidType)
         return true;
     // Keep this sorted!!
     static const char* cppTypes[] = { "bool", "char", "double", "float", "int", "long", "short", "wchar_t"};
