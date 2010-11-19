@@ -437,7 +437,7 @@ static void decRefPyObjectList(const std::list<SbkObject*>& lst)
     }
 }
 
-namespace BaseType
+namespace ObjectType
 {
 
 bool checkType(PyTypeObject* type)
@@ -447,7 +447,7 @@ bool checkType(PyTypeObject* type)
 
 bool isUserType(PyTypeObject* type)
 {
-    return BaseType::checkType(type) && reinterpret_cast<SbkObjectType*>(type)->d->is_user_type;
+    return checkType(type) && reinterpret_cast<SbkObjectType*>(type)->d->is_user_type;
 }
 
 bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctorType)
@@ -561,19 +561,19 @@ void initPrivateData(SbkObjectType* self)
     memset(self->d, 0, sizeof(SbkBaseTypePrivate));
 }
 
-} // namespace BaseType
+} // namespace ObjectType
 
 namespace Wrapper
 {
 
 bool checkType(PyObject* pyObj)
 {
-    return BaseType::checkType(pyObj->ob_type);
+    return ObjectType::checkType(pyObj->ob_type);
 }
 
 bool isUserType(PyObject* pyObj)
 {
-    return BaseType::isUserType(pyObj->ob_type);
+    return ObjectType::isUserType(pyObj->ob_type);
 }
 
 static void setSequenceOwnership(PyObject* pyObj, bool owner)

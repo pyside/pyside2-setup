@@ -471,12 +471,14 @@ QString ShibokenGenerator::getFunctionReturnType(const AbstractMetaFunction* fun
 
 static QString baseConversionString(QString typeName)
 {
-    return QString("Shiboken::Converter<%1 >::").arg(typeName);
+    return QString("Shiboken::Converter< %1 >::").arg(typeName);
 }
 
 void ShibokenGenerator::writeBaseConversion(QTextStream& s, const TypeEntry* type)
 {
-    QString typeName = type->name();
+    QString typeName = type->qualifiedCppName();
+    if (!type->isCppPrimitive())
+        typeName.prepend("::");
     if (type->isObject())
         typeName.append('*');
 #ifdef AVOID_PROTECTED_HACK
@@ -501,9 +503,11 @@ void ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaTy
     } else {
         if (type->isObject() || (type->isValue() && !type->isReference()))
             options |= Generator::ExcludeConst;
-	if (type->isContainer() )
+        if (type->isContainer() || (type->isConstant() && type->isReference()))
             options |= Generator::ExcludeReference | Generator::ExcludeConst;
         typeName = translateTypeForWrapperMethod(type, context, options);
+        if (!type->typeEntry()->isCppPrimitive())
+            typeName.prepend("::");
     }
 
     s << baseConversionString(typeName);

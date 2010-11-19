@@ -209,8 +209,6 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     if (metaClass->typeEntry()->typeFlags() & ComplexTypeEntry::Deprecated)
         s << "#Deprecated" << endl;
 
-    s << "using namespace Shiboken;" << endl;
-
     //Use class base namespace
     const AbstractMetaClass *context = metaClass->enclosingClass();
     while(context) {
@@ -470,8 +468,8 @@ void CppGenerator::writeDestructorNative(QTextStream &s, const AbstractMetaClass
 {
     Indentation indentation(INDENT);
     s << wrapperName(metaClass) << "::~" << wrapperName(metaClass) << "()" << endl << '{' << endl;
-    s << INDENT << "SbkObject* wrapper = BindingManager::instance().retrieveWrapper(this);" << endl;
-    s << INDENT << "Wrapper::destroy(wrapper);" << endl;
+    s << INDENT << "SbkObject* wrapper = Shiboken::BindingManager::instance().retrieveWrapper(this);" << endl;
+    s << INDENT << "Shiboken::Wrapper::destroy(wrapper);" << endl;
     s << '}' << endl;
 }
 
@@ -534,7 +532,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
     s << INDENT << "Shiboken::GilState gil;" << endl;
 
-    s << INDENT << "Shiboken::AutoDecRef py_override(BindingManager::instance().getOverride(this, \"";
+    s << INDENT << "Shiboken::AutoDecRef py_override(Shiboken::BindingManager::instance().getOverride(this, \"";
     s << func->name() << "\"));" << endl;
 
     s << INDENT << "if (py_override.isNull()) {" << endl;
@@ -682,7 +680,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                         if (func->type()->isPrimitive())
                             desiredType = "\"" + func->type()->name() + "\"";
                         else
-                            desiredType = "SbkType<" + typeName + " >()->tp_name";
+                            desiredType = "Shiboken::SbkType<" + typeName + " >()->tp_name";
                     }
                 } else {
                     s << guessCPythonIsConvertible(func->typeReplaced(0));
@@ -740,7 +738,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     if (invalidateReturn) {
         s << INDENT << "if (invalidadeArg0)" << endl;
         Indentation indentation(INDENT);
-        s << INDENT << "Wrapper::invalidate(" << PYTHON_RETURN_VAR  ".object());" << endl;
+        s << INDENT << "Shiboken::Wrapper::invalidate(" << PYTHON_RETURN_VAR  ".object());" << endl;
     }
 
     foreach (FunctionModification funcMod, func->modifications()) {
@@ -748,7 +746,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             if (argMod.resetAfterUse) {
                 s << INDENT << "if (invalidadeArg" << argMod.index << ")" << endl;
                 Indentation indentation(INDENT);
-                s << INDENT << "Wrapper::invalidate(PyTuple_GET_ITEM(pyargs, ";
+                s << INDENT << "Shiboken::Wrapper::invalidate(PyTuple_GET_ITEM(pyargs, ";
                 s << (argMod.index - 1) << "));" << endl;
             }
         }
@@ -787,14 +785,14 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
     s << INDENT << "if (!m_metaObject) {\n";
     {
         Indentation indentation(INDENT);
-        s << INDENT << "SbkObject* pySelf = BindingManager::instance().retrieveWrapper(this);\n"
+        s << INDENT << "SbkObject* pySelf = Shiboken::BindingManager::instance().retrieveWrapper(this);\n"
           << INDENT << "void* typeData = Shiboken::Wrapper::getTypeUserData(pySelf);" << endl
           << INDENT << "if (!typeData) {" << endl;
         {
             Indentation indentation2(INDENT);
             s << INDENT << "m_metaObject = PySide::DynamicQMetaObject::createBasedOn((PyObject*)pySelf, pySelf->ob_type, &"
                         << metaClass->qualifiedCppName() << "::staticMetaObject);" << endl
-              << INDENT << "Shiboken::Wrapper::setTypeUserData(pySelf, m_metaObject, PySide::deleteDynamicQMetaObject);" << endl;
+                        << INDENT << "Shiboken::Object::setTypeUserData(pySelf, m_metaObject, Shiboken::callCppDestructor<PySide::DynamicQMetaObject>);" << endl;
         }
         s << INDENT << "} else {" << endl;
         {
@@ -830,7 +828,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
 
     // Check if the right constructor was called.
     if (!metaClass->hasPrivateDestructor()) {
-        s << INDENT << "if (Shiboken::Wrapper::isUserType(self) && !Shiboken::BaseType::canCallConstructor(self->ob_type, Shiboken::SbkType<" << metaClass->qualifiedCppName() << " >()))" << endl;
+        s << INDENT << "if (Shiboken::Wrapper::isUserType(self) && !Shiboken::ObjectType::canCallConstructor(self->ob_type, Shiboken::SbkType<" << metaClass->qualifiedCppName() << " >()))" << endl;
         Indentation indent(INDENT);
         s << INDENT << "return " << m_currentErrorCode << ';' << endl << endl;
     }
@@ -891,7 +889,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
         }
         {
             Indentation indentation(INDENT);
-            s << INDENT << "Shiboken::BaseType::copyMultimpleheritance(type, myType);" << endl;
+            s << INDENT << "Shiboken::ObjectType::copyMultimpleheritance(type, myType);" << endl;
         }
         if (!metaClass->isAbstract())
             s << INDENT << '}' << endl << endl;
@@ -941,7 +939,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     // Python owns it and C++ wrapper is false.
     if (shouldGenerateCppWrapper(overloads.first()->ownerClass()))
         s << INDENT << "Shiboken::Wrapper::setHasCppWrapper(sbkSelf, true);" << endl;
-    s << INDENT << "BindingManager::instance().registerWrapper(sbkSelf, cptr);" << endl;
+    s << INDENT << "Shiboken::BindingManager::instance().registerWrapper(sbkSelf, cptr);" << endl;
 
     // Create metaObject and register signal/slot
     if (metaClass->isQObject() && usePySideExtensions()) {
@@ -2128,15 +2126,15 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
             s << INDENT;
             if (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::TargetLangOwnership) {
-                s << "Wrapper::getOwnership(" << pyArgName << ");";
+                s << "Shiboken::Wrapper::getOwnership(" << pyArgName << ");";
             } else if (wrappedClass->hasVirtualDestructor()) {
                 if (arg_mod.index == 0) {
-                    s << "Wrapper::releaseOwnership(" PYTHON_RETURN_VAR ");";
+                    s << "Shiboken::Wrapper::releaseOwnership(" PYTHON_RETURN_VAR ");";
                 } else {
-                    s << "Wrapper::releaseOwnership(" << pyArgName << ");";
+                    s << "Shiboken::Wrapper::releaseOwnership(" << pyArgName << ");";
                 }
             } else {
-                s << "Wrapper::invalidate(" << pyArgName << ");";
+                s << "Shiboken::Wrapper::invalidate(" << pyArgName << ");";
             }
             s << endl;
         }
@@ -2284,8 +2282,8 @@ void CppGenerator::writeExtendedConverterInitialization(QTextStream& s, const Ty
     s << INDENT << "shiboType = reinterpret_cast<SbkObjectType*>(";
     s << cppApiVariableName(externalType->targetLangPackage()) << '[';
     s << getTypeIndexVariableName(externalType) << "]);" << endl;
-    s << INDENT << "Shiboken::BaseType::setExternalIsConvertibleFunction(shiboType, " << extendedIsConvertibleFunctionName(externalType) << ");" << endl;
-    s << INDENT << "Shiboken::BaseType::setExternalCppConversionFunction(shiboType, " << extendedToCppFunctionName(externalType) << ");" << endl;
+    s << INDENT << "Shiboken::ObjectType::setExternalIsConvertibleFunction(shiboType, " << extendedIsConvertibleFunctionName(externalType) << ");" << endl;
+    s << INDENT << "Shiboken::ObjectType::setExternalCppConversionFunction(shiboType, " << extendedToCppFunctionName(externalType) << ");" << endl;
 }
 
 QString CppGenerator::multipleInheritanceInitializerFunctionName(const AbstractMetaClass* metaClass)
@@ -3202,7 +3200,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     s << INDENT << cpythonTypeNameExt(metaClass->typeEntry()) << " = reinterpret_cast<PyTypeObject*>(&" << cpythonTypeName(metaClass->typeEntry()) << ");" << endl << endl;
 
     // alloc private data
-    s << INDENT << "Shiboken::BaseType::initPrivateData(&" << cpythonTypeName(metaClass->typeEntry()) << ");" << endl;
+    s << INDENT << "Shiboken::ObjectType::initPrivateData(&" << cpythonTypeName(metaClass->typeEntry()) << ");" << endl;
 
     // class inject-code target/beginning
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
@@ -3234,10 +3232,10 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         if (miClass == metaClass)
             s << INDENT << "func = " << multipleInheritanceInitializerFunctionName(miClass) << ";" << endl;
         else
-            s << INDENT << "func = Shiboken::BaseType::getMultipleIheritanceFunction(reinterpret_cast<SbkObjectType*>(" << cpythonTypeNameExt(miClass->typeEntry()) << "));" << endl;
+            s << INDENT << "func = Shiboken::ObjectType::getMultipleIheritanceFunction(reinterpret_cast<SbkObjectType*>(" << cpythonTypeNameExt(miClass->typeEntry()) << "));" << endl;
 
-        s << INDENT << "Shiboken::BaseType::setMultipleIheritanceFunction(&" << cpythonTypeName(metaClass) << ", func);" << endl;
-        s << INDENT << "Shiboken::BaseType::setCastFunction(&" << cpythonTypeName(metaClass) << ", &" << cpythonSpecialCastFunctionName(metaClass) << ");" << endl;
+        s << INDENT << "Shiboken::ObjectType::setMultipleIheritanceFunction(&" << cpythonTypeName(metaClass) << ", func);" << endl;
+        s << INDENT << "Shiboken::ObjectType::setCastFunction(&" << cpythonTypeName(metaClass) << ", &" << cpythonSpecialCastFunctionName(metaClass) << ");" << endl;
     }
 
     // Fill destrutor
@@ -3247,12 +3245,12 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         if (metaClass->hasProtectedDestructor())
             dtorClassName = wrapperName(metaClass);
 #endif
-        s << INDENT << "Shiboken::BaseType::setDestructorFunction(&" << cpythonTypeName(metaClass) << ", &Shiboken::callCppDestructor<" << dtorClassName << " >);" << endl;
+        s << INDENT << "Shiboken::ObjectType::setDestructorFunction(&" << cpythonTypeName(metaClass) << ", &Shiboken::callCppDestructor<" << dtorClassName << " >);" << endl;
     }
 
     // Fill copy function
     if (metaClass->typeEntry()->isValue() && shouldGenerateCppWrapper(metaClass))
-        s << INDENT << "Shiboken::BaseType::setCopyFunction(&" << cpythonTypeName(metaClass) << ", &" <<  cpythonBaseName(metaClass) + "_ObjCopierFunc);" << endl;
+        s << INDENT << "Shiboken::ObjectType::setCopyFunction(&" << cpythonTypeName(metaClass) << ", &" <<  cpythonBaseName(metaClass) + "_ObjCopierFunc);" << endl;
 
     s << INDENT << "if (PyType_Ready((PyTypeObject*)&" << pyTypeName << ") < 0)" << endl;
     s << INDENT << INDENT << "return;" << endl << endl;
@@ -3261,7 +3259,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     if (metaClass->isPolymorphic()) {
         s << INDENT << "// Fill type discovery information"  << endl;
         if (metaClass->baseClass()) {
-            s << INDENT << "Shiboken::BaseType::setTypeDiscoveryFunction(&" << cpythonTypeName(metaClass) << ", &" << cpythonBaseName(metaClass) << "_typeDiscovery);" << endl;
+            s << INDENT << "Shiboken::ObjectType::setTypeDiscoveryFunction(&" << cpythonTypeName(metaClass) << ", &" << cpythonBaseName(metaClass) << "_typeDiscovery);" << endl;
             s << INDENT << "Shiboken::BindingManager& bm = Shiboken::BindingManager::instance();" << endl;
             foreach (const AbstractMetaClass* base, baseClasses) {
                 s << INDENT << "bm.addClassInheritance(reinterpret_cast<SbkObjectType*>(" << cpythonTypeNameExt(base->typeEntry()) << "), &" << cpythonTypeName(metaClass) << ");" << endl;
@@ -3274,7 +3272,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     QByteArray suffix;
     if (metaClass->typeEntry()->isObject() || metaClass->typeEntry()->isQObject())
         suffix = "*";
-    s << INDENT << "Shiboken::BaseType::setOriginalName(&" << pyTypeName << ", \"" << metaClass->qualifiedCppName() << suffix << "\");" << endl;
+    s << INDENT << "Shiboken::ObjectType::setOriginalName(&" << pyTypeName << ", \"" << metaClass->qualifiedCppName() << suffix << "\");" << endl;
 
     if (metaClass->enclosingClass() && (metaClass->enclosingClass()->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass) ) {
         s << INDENT << "PyDict_SetItemString(module,"
@@ -3460,7 +3458,7 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
         s << INDENT << "if (!attr && !QString(PyString_AS_STRING(name)).startsWith(\"__\")) {" << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << "QObject* cppSelf = Converter<QObject*>::toCpp(self);" << endl
+            s << INDENT << "QObject* cppSelf = Shiboken::Converter<QObject*>::toCpp(self);" << endl
               << INDENT << "const QMetaObject* metaObject = cppSelf->metaObject();" << endl
               << INDENT << "QByteArray cname(PyString_AS_STRING(name));" << endl
               << INDENT << "cname += '(';" << endl
@@ -3807,7 +3805,7 @@ bool CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
         else
             childVariable = usePyArgs ? "pyargs["+QString::number(childIndex-1)+"]" : "arg";
 
-        s << INDENT << "Wrapper::setParent(" << parentVariable << ", " << childVariable << ");\n";
+        s << INDENT << "Shiboken::Wrapper::setParent(" << parentVariable << ", " << childVariable << ");\n";
 
         return true;
     }
@@ -3841,7 +3839,7 @@ void CppGenerator::writeReturnValueHeuristics(QTextStream& s, const AbstractMeta
     }
 
     if (type->isQObject() || type->isObject() || type->isValuePointer())
-        s << INDENT << "Wrapper::setParent(" << self << ", " PYTHON_RETURN_VAR ");" << endl;
+        s << INDENT << "Shiboken::Wrapper::setParent(" << self << ", " PYTHON_RETURN_VAR ");" << endl;
 }
 
 void CppGenerator::writeHashFunction(QTextStream& s, const AbstractMetaClass* metaClass)

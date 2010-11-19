@@ -99,7 +99,7 @@ struct CppObjectCopier<T, true>
 {
     static inline T* copy(const T& obj)
     {
-        return reinterpret_cast<T*>(BaseType::copy(reinterpret_cast<SbkObjectType*>(SbkType<T>()), &obj));
+        return reinterpret_cast<T*>(ObjectType::copy(reinterpret_cast<SbkObjectType*>(SbkType<T>()), &obj));
     }
 };
 
@@ -214,7 +214,7 @@ struct ValueTypeConverter
         if (PyObject_TypeCheck(pyobj, SbkType<T>()))
             return true;
         SbkObjectType* shiboType = reinterpret_cast<SbkObjectType*>(SbkType<T>());
-        return BaseType::isExternalConvertible(shiboType, pyobj);
+        return ObjectType::isExternalConvertible(shiboType, pyobj);
     }
     static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<T*>(cppobj)); }
     static inline PyObject* toPython(const T& cppobj)
@@ -232,8 +232,8 @@ struct ValueTypeConverter
     {
         if (!PyObject_TypeCheck(pyobj, SbkType<T>())) {
             SbkObjectType* shiboType = reinterpret_cast<SbkObjectType*>(SbkType<T>());
-            if (BaseType::hasExternalCppConversions(shiboType) && isConvertible(pyobj)) {
-                T* cptr = reinterpret_cast<T*>(BaseType::callExternalCppConversion(shiboType, pyobj));
+            if (ObjectType::hasExternalCppConversions(shiboType) && isConvertible(pyobj)) {
+                T* cptr = reinterpret_cast<T*>(ObjectType::callExternalCppConversion(shiboType, pyobj));
                 std::auto_ptr<T> cptr_auto_ptr(cptr);
                 return *cptr;
             }
@@ -272,8 +272,8 @@ struct ObjectTypeConverter
         if (pyobj == Py_None)
             return 0;
         SbkObjectType* shiboType = reinterpret_cast<SbkObjectType*>(pyobj->ob_type);
-        if (BaseType::hasCast(shiboType))
-            return reinterpret_cast<T*>(BaseType::cast(shiboType, reinterpret_cast<SbkObject*>(pyobj), SbkType<T>()));
+        if (ObjectType::hasCast(shiboType))
+            return reinterpret_cast<T*>(ObjectType::cast(shiboType, reinterpret_cast<SbkObject*>(pyobj), SbkType<T>()));
         return (T*) Wrapper::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<T>());
     }
 };

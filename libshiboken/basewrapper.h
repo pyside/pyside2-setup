@@ -108,7 +108,7 @@ void callCppDestructor(void* cptr)
 LIBSHIBOKEN_API bool        importModule(const char* moduleName, PyTypeObject*** cppApiPtr);
 LIBSHIBOKEN_API void        setErrorAboutWrongArguments(PyObject* args, const char* funcName, const char** cppOverloads);
 
-namespace BaseType {
+namespace ObjectType {
 
 /**
 *   Returns true if the object is an instance of a type created by the Shiboken generator.
