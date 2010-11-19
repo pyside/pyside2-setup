@@ -73,7 +73,7 @@ typedef void (*DeleteUserDataFunc)(void*);
 
 typedef void (*ObjectDestructor)(void*);
 
-extern LIBSHIBOKEN_API PyTypeObject SbkBaseType_Type;
+extern LIBSHIBOKEN_API PyTypeObject SbkObjectType_Type;
 extern LIBSHIBOKEN_API SbkObjectType SbkObject_Type;
 
 

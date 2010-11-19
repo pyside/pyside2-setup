@@ -37,7 +37,7 @@ extern "C"
 static void SbkObjectTypeDealloc(PyObject* pyObj);
 static PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
 
-PyTypeObject SbkBaseType_Type = {
+PyTypeObject SbkObjectType_Type = {
     PyObject_HEAD_INIT(0)
     /*ob_size*/             0,
     /*tp_name*/             "Shiboken.ObjectType",
@@ -102,7 +102,7 @@ static PyGetSetDef SbkObjectGetSetList[] = {
 };
 
 SbkObjectType SbkObject_Type = { { {
-    PyObject_HEAD_INIT(&SbkBaseType_Type)
+    PyObject_HEAD_INIT(&SbkObjectType_Type)
     /*ob_size*/             0,
     /*tp_name*/             "Shiboken.Object",
     /*tp_basicsize*/        sizeof(SbkObject),
@@ -279,7 +279,7 @@ void walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visi
     for (int i = 0; i < numBases; ++i) {
         PyTypeObject* type = reinterpret_cast<PyTypeObject*>(PyTuple_GET_ITEM(bases, i));
 
-        if (type->ob_type != &SbkBaseType_Type) {
+        if (type->ob_type != &SbkObjectType_Type) {
             continue;
         } else {
             SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(type);
@@ -331,7 +331,7 @@ void init()
     if (PyType_Ready(&SbkEnumType_Type) < 0)
         Py_FatalError("[libshiboken] Failed to initialise Shiboken.SbkEnumType metatype.");
 
-    if (PyType_Ready(&SbkBaseType_Type) < 0)
+    if (PyType_Ready(&SbkObjectType_Type) < 0)
         Py_FatalError("[libshiboken] Failed to initialise Shiboken.BaseWrapperType metatype.");
 
     if (PyType_Ready((PyTypeObject *)&SbkObject_Type) < 0)
@@ -442,7 +442,7 @@ namespace ObjectType
 
 bool checkType(PyTypeObject* type)
 {
-    return type->ob_type == &SbkBaseType_Type;
+    return type->ob_type == &SbkObjectType_Type;
 }
 
 bool isUserType(PyTypeObject* type)
@@ -763,7 +763,7 @@ bool setCppPointer(SbkObject* sbkObj, PyTypeObject* desiredType, void* cptr)
 bool isValid(PyObject* pyObj)
 {
     if (!pyObj || pyObj == Py_None
-        || pyObj->ob_type->ob_type != &SbkBaseType_Type
+        || pyObj->ob_type->ob_type != &SbkObjectType_Type
         || ((SbkObject*)pyObj)->d->validCppObject) {
         return true;
     }
