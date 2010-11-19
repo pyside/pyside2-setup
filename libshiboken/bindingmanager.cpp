@@ -167,7 +167,7 @@ bool BindingManager::hasWrapper(const void* cptr)
 void BindingManager::registerWrapper(SbkObject* pyObj, void* cptr)
 {
     SbkObjectType* instanceType = reinterpret_cast<SbkObjectType*>(pyObj->ob_type);
-    SbkBaseTypePrivate* d = instanceType->d;
+    SbkObjectTypePrivate* d = instanceType->d;
 
     if (!d)
         return;
@@ -188,7 +188,7 @@ void BindingManager::registerWrapper(SbkObject* pyObj, void* cptr)
 void BindingManager::releaseWrapper(SbkObject* sbkObj)
 {
     SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(sbkObj->ob_type);
-    SbkBaseTypePrivate* d = sbkType->d;
+    SbkObjectTypePrivate* d = sbkType->d;
     int numBases = ((d && d->is_multicpp) ? getNumberOfCppBaseClasses(sbkObj->ob_type) : 1);
 
     void** cptrs = reinterpret_cast<SbkObject*>(sbkObj)->d->cptr;

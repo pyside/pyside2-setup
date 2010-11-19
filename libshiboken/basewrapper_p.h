@@ -81,7 +81,7 @@ struct SbkObjectPrivate
 };
 
 
-struct SbkBaseTypePrivate
+struct SbkObjectTypePrivate
 {
     int* mi_offsets;
     MultipleInheritanceInitFunction mi_init;

@@ -34,8 +34,8 @@
 extern "C"
 {
 
-static void SbkBaseTypeDealloc(PyObject* pyObj);
-static PyObject* SbkBaseTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
+static void SbkObjectTypeDealloc(PyObject* pyObj);
+static PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
 
 PyTypeObject SbkBaseType_Type = {
     PyObject_HEAD_INIT(0)
@@ -43,7 +43,7 @@ PyTypeObject SbkBaseType_Type = {
     /*tp_name*/             "Shiboken.ObjectType",
     /*tp_basicsize*/        sizeof(SbkObjectType),
     /*tp_itemsize*/         0,
-    /*tp_dealloc*/          SbkBaseTypeDealloc,
+    /*tp_dealloc*/          SbkObjectTypeDealloc,
     /*tp_print*/            0,
     /*tp_getattr*/          0,
     /*tp_setattr*/          0,
@@ -76,7 +76,7 @@ PyTypeObject SbkBaseType_Type = {
     /*tp_dictoffset*/       0,
     /*tp_init*/             0,
     /*tp_alloc*/            0,
-    /*tp_new*/              SbkBaseTypeTpNew,
+    /*tp_new*/              SbkObjectTypeTpNew,
     /*tp_free*/             0,
     /*tp_is_gc*/            0,
     /*tp_bases*/            0,
@@ -183,7 +183,7 @@ void SbkDeallocWrapperWithPrivateDtor(PyObject* self)
     Shiboken::Object::deallocData(sbkObj);
 }
 
-void SbkBaseTypeDealloc(PyObject* pyObj)
+void SbkObjectTypeDealloc(PyObject* pyObj)
 {
     SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(pyObj->ob_type);
     if (!sbkType->d)
@@ -199,7 +199,7 @@ void SbkBaseTypeDealloc(PyObject* pyObj)
     sbkType->d = 0;
 }
 
-PyObject* SbkBaseTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
+PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
 {
     // The meta type creates a new type when the Python programmer extends a wrapped C++ class.
     SbkObjectType* newType = reinterpret_cast<SbkObjectType*>(PyType_Type.tp_new(metatype, args, kwds));
@@ -207,12 +207,12 @@ PyObject* SbkBaseTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwd
     if (!newType)
         return 0;
 
-    SbkBaseTypePrivate* d = new SbkBaseTypePrivate;
-    memset(d, 0, sizeof(SbkBaseTypePrivate));
+    SbkObjectTypePrivate* d = new SbkObjectTypePrivate;
+    memset(d, 0, sizeof(SbkObjectTypePrivate));
 
     std::list<SbkObjectType*> bases = Shiboken::getCppBaseClasses(reinterpret_cast<PyTypeObject*>(newType));
     if (bases.size() == 1) {
-        SbkBaseTypePrivate* parentType = bases.front()->d;
+        SbkObjectTypePrivate* parentType = bases.front()->d;
         d->mi_offsets = parentType->mi_offsets;
         d->mi_init = parentType->mi_init;
         d->mi_specialcast = parentType->mi_specialcast;
@@ -557,8 +557,8 @@ void setDestructorFunction(SbkObjectType* self, ObjectDestructor func)
 
 void initPrivateData(SbkObjectType* self)
 {
-    self->d = new SbkBaseTypePrivate;
-    memset(self->d, 0, sizeof(SbkBaseTypePrivate));
+    self->d = new SbkObjectTypePrivate;
+    memset(self->d, 0, sizeof(SbkObjectTypePrivate));
 }
 
 } // namespace ObjectType

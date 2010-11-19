@@ -77,12 +77,12 @@ extern LIBSHIBOKEN_API PyTypeObject SbkBaseType_Type;
 extern LIBSHIBOKEN_API SbkObjectType SbkObject_Type;
 
 
-struct SbkBaseTypePrivate;
+struct SbkObjectTypePrivate;
 /// PyTypeObject extended with C++ multiple inheritance information.
 struct LIBSHIBOKEN_API SbkObjectType
 {
     PyHeapTypeObject super;
-    SbkBaseTypePrivate* d;
+    SbkObjectTypePrivate* d;
 };
 
 LIBSHIBOKEN_API PyObject* SbkObjectTpNew(PyTypeObject* subtype, PyObject*, PyObject*);
