@@ -113,7 +113,7 @@ inline PyObject* createWrapper(const T* cppobj, bool hasOwnership = false, bool 
     const char* typeName = 0;
     if (!isExactType)
         typeName = typeid(*const_cast<T*>(cppobj)).name();
-    return Wrapper::newObject(reinterpret_cast<SbkObjectType*>(SbkType<T>()),
+    return Object::newObject(reinterpret_cast<SbkObjectType*>(SbkType<T>()),
                               const_cast<T*>(cppobj), hasOwnership, isExactType, typeName);
 }
 
@@ -150,7 +150,7 @@ struct Converter<T*>
     static T* toCpp(PyObject* pyobj)
     {
         if (PyObject_TypeCheck(pyobj, SbkType<T>()))
-            return (T*) Wrapper::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<T>());
+            return (T*) Object::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<T>());
         else if (Converter<T>::isConvertible(pyobj))
             return CppObjectCopier<T>::copy(Converter<T>::toCpp(pyobj));
         else if (pyobj == Py_None)
@@ -239,7 +239,7 @@ struct ValueTypeConverter
             }
             assert(false);
         }
-        return *reinterpret_cast<T*>(Wrapper::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<T>()));
+        return *reinterpret_cast<T*>(Object::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<T>()));
     }
 };
 
@@ -274,7 +274,7 @@ struct ObjectTypeConverter
         SbkObjectType* shiboType = reinterpret_cast<SbkObjectType*>(pyobj->ob_type);
         if (ObjectType::hasCast(shiboType))
             return reinterpret_cast<T*>(ObjectType::cast(shiboType, reinterpret_cast<SbkObject*>(pyobj), SbkType<T>()));
-        return (T*) Wrapper::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<T>());
+        return (T*) Object::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<T>());
     }
 };
 
@@ -560,7 +560,7 @@ struct StdListConverter
         // binded types implementing sequence protocol, otherwise this will
         // cause a mess like QBitArray being accepted by someone expecting a
         // QStringList.
-        if ((SbkType<StdList>() && Wrapper::checkType(pyObj)) || !PySequence_Check(pyObj))
+        if ((SbkType<StdList>() && Object::checkType(pyObj)) || !PySequence_Check(pyObj))
             return false;
         for (int i = 0, max = PySequence_Length(pyObj); i < max; ++i) {
             AutoDecRef item(PySequence_GetItem(pyObj, i));
@@ -583,7 +583,7 @@ struct StdListConverter
     static StdList toCpp(PyObject* pyobj)
     {
         if (PyObject_TypeCheck(pyobj, SbkType<StdList>()))
-            return *reinterpret_cast<StdList*>(Wrapper::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<StdList>()));
+            return *reinterpret_cast<StdList*>(Object::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<StdList>()));
 
         StdList result;
         for (int i = 0; i < PySequence_Size(pyobj); i++) {
@@ -606,7 +606,7 @@ struct StdPairConverter
     {
         if (PyObject_TypeCheck(pyObj, SbkType<StdPair>()))
             return true;
-        if ((SbkType<StdPair>() && Wrapper::checkType(pyObj)) || !PySequence_Check(pyObj) || PySequence_Length(pyObj) != 2)
+        if ((SbkType<StdPair>() && Object::checkType(pyObj)) || !PySequence_Check(pyObj) || PySequence_Length(pyObj) != 2)
             return false;
 
         AutoDecRef item1(PySequence_GetItem(pyObj, 0));
@@ -651,7 +651,7 @@ struct StdMapConverter
     {
         if (PyObject_TypeCheck(pyObj, SbkType<StdMap>()))
             return true;
-        if ((SbkType<StdMap>() && Wrapper::checkType(pyObj)) || !PyDict_Check(pyObj))
+        if ((SbkType<StdMap>() && Object::checkType(pyObj)) || !PyDict_Check(pyObj))
             return false;
 
         PyObject* key;

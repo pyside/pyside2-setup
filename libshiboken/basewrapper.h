@@ -129,7 +129,7 @@ LIBSHIBOKEN_API bool        canCallConstructor(PyTypeObject* myType, PyTypeObjec
 /**
  * Call copy function for the object type
  **/
-LIBSHIBOKEN_API void*       copy(SbkObjectType* self, const void *obj);
+LIBSHIBOKEN_API void*       copy(SbkObjectType* self, const void* obj);
 LIBSHIBOKEN_API void        setCopyFunction(SbkObjectType* self, ObjectCopierFunction func);
 
 LIBSHIBOKEN_API void        setExternalCppConversionFunction(SbkObjectType* self, ExtendedToCppFunc func);
@@ -157,7 +157,7 @@ LIBSHIBOKEN_API void        setDestructorFunction(SbkObjectType* self, ObjectDes
 LIBSHIBOKEN_API void        initPrivateData(SbkObjectType* self);
 }
 
-namespace Wrapper {
+namespace Object {
 
 /**
 *   Returns true if the object is an instance of a type created by the Shiboken generator.
@@ -242,7 +242,7 @@ LIBSHIBOKEN_API void        destroy(SbkObject* self);
 /**
  *   Get/Set Userdata in type class
  */
-LIBSHIBOKEN_API void        setTypeUserData(SbkObject* wrapper, void* user_data, DeleteUserDataFunc d_func);
+LIBSHIBOKEN_API void        setTypeUserData(SbkObject* wrapper, void* userData, DeleteUserDataFunc d_func);
 LIBSHIBOKEN_API void*       getTypeUserData(SbkObject* wrapper);
 
 /**
@@ -257,9 +257,9 @@ LIBSHIBOKEN_API void*       getTypeUserData(SbkObject* wrapper);
  *   \param key             a key that identifies the C++ method signature and argument where the referredObject came from.
  *   \parem referredObject  the object whose reference is used by the self object.
  */
-LIBSHIBOKEN_API void        keepReference(SbkObject* self, const char* key, PyObject* referredObject, bool append=false);
+LIBSHIBOKEN_API void        keepReference(SbkObject* self, const char* key, PyObject* referredObject, bool append = false);
 
-} // namespace Wrapper
+} // namespace Object
 
 } // namespace Shiboken
 

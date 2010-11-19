@@ -148,7 +148,7 @@ BindingManager::~BindingManager()
      * the BindingManager is being destroyed the interpreter is alredy
      * shutting down. */
     while (!m_d->wrapperMapper.empty()) {
-        Wrapper::destroy(m_d->wrapperMapper.begin()->second);
+        Object::destroy(m_d->wrapperMapper.begin()->second);
     }
     assert(m_d->wrapperMapper.size() == 0);
     delete m_d;

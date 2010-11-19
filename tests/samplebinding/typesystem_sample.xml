@@ -178,9 +178,9 @@
                     if ((*it)->isLayoutType()) {
                         ObjectTypeLayout* l = reinterpret_cast&lt;ObjectTypeLayout*>(*it);
                         reparent_layout_items(parent, %CONVERTTOPYTHON[ObjectTypeLayout*](l));
-                        Shiboken::Wrapper::setParent(layout, %CONVERTTOPYTHON[ObjectTypeLayout*](l));
+                        Shiboken::Object::setParent(layout, %CONVERTTOPYTHON[ObjectTypeLayout*](l));
                     } else {
-                        Shiboken::Wrapper::setParent(parent, %CONVERTTOPYTHON[ObjectType*](*it));
+                        Shiboken::Object::setParent(parent, %CONVERTTOPYTHON[ObjectType*](*it));
                     }
                 }
             }
@@ -1176,7 +1176,7 @@
             </modify-argument>
             <inject-code class="target" position="end">
                 %RETURN_TYPE %0 = %TYPE::%FUNCTION_NAME();
-                %PYARG_0 = Shiboken::Wrapper::newObject(&amp;SbkObject_Type, %0, false, false);
+                %PYARG_0 = Shiboken::Object::newObject(&amp;SbkObject_Type, %0, false, false);
             </inject-code>
         </modify-function>
     </value-type>

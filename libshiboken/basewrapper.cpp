@@ -170,7 +170,7 @@ void SbkDeallocWrapper(PyObject* pyObj)
         }
     }
 
-    Shiboken::Wrapper::deallocData(sbkObj);
+    Shiboken::Object::deallocData(sbkObj);
 }
 
 void SbkDeallocWrapperWithPrivateDtor(PyObject* self)
@@ -180,7 +180,7 @@ void SbkDeallocWrapperWithPrivateDtor(PyObject* self)
         PyObject_ClearWeakRefs(self);
 
     Shiboken::BindingManager::instance().releaseWrapper(sbkObj);
-    Shiboken::Wrapper::deallocData(sbkObj);
+    Shiboken::Object::deallocData(sbkObj);
 }
 
 void SbkBaseTypeDealloc(PyObject* pyObj)
@@ -407,7 +407,7 @@ std::list<SbkObject*> splitPyObject(PyObject* pyObj)
         if (!lst.isNull()) {
             for(int i = 0, i_max = PySequence_Fast_GET_SIZE(lst.object()); i < i_max; i++) {
                 PyObject* item = PySequence_Fast_GET_ITEM(lst.object(), i);
-                if (Wrapper::checkType(item))
+                if (Object::checkType(item))
                     result.push_back(reinterpret_cast<SbkObject*>(item));
             }
         }
@@ -503,7 +503,7 @@ bool hasCast(SbkObjectType* self)
 
 void* cast(SbkObjectType* self, SbkObject* obj, PyTypeObject *target)
 {
-    return self->d->mi_specialcast(Wrapper::cppPointer(obj, target), reinterpret_cast<SbkObjectType*>(target));
+    return self->d->mi_specialcast(Object::cppPointer(obj, target), reinterpret_cast<SbkObjectType*>(target));
 }
 
 void setCastFunction(SbkObjectType* self, SpecialCastFunction func)
@@ -563,7 +563,7 @@ void initPrivateData(SbkObjectType* self)
 
 } // namespace ObjectType
 
-namespace Wrapper
+namespace Object
 {
 
 bool checkType(PyObject* pyObj)
@@ -587,7 +587,7 @@ static void setSequenceOwnership(PyObject* pyObj, bool owner)
             else
                 releaseOwnership(*it);
         }
-    } else if (Wrapper::checkType(pyObj)) {
+    } else if (Object::checkType(pyObj)) {
         if (owner)
             getOwnership(reinterpret_cast<SbkObject*>(pyObj));
         else
@@ -603,7 +603,7 @@ static void _destroyParentInfo(SbkObject* obj, bool keepReference)
         while(!pInfo->children.empty()) {
             SbkObject* first = pInfo->children.front();
             // Mark child as invalid
-            Shiboken::Wrapper::invalidate(first);
+            Shiboken::Object::invalidate(first);
             removeParent(first, false, keepReference);
        }
        removeParent(obj, false);
@@ -877,7 +877,7 @@ void setParent(PyObject* parent, PyObject* child)
      *  so if you pass this class to someone that takes the ownership, we CAN'T enter in this if, but hey! QString
      *  follows the sequence protocol.
      */
-    if (PySequence_Check(child) && !Wrapper::checkType(child)) {
+    if (PySequence_Check(child) && !Object::checkType(child)) {
         Shiboken::AutoDecRef seq(PySequence_Fast(child, 0));
         for (int i = 0, max = PySequence_Size(seq); i < max; ++i)
             setParent(parent, PySequence_Fast_GET_ITEM(seq.object(), i));
@@ -949,14 +949,14 @@ void deallocData(SbkObject* self)
     Py_TYPE(self)->tp_free(self);
 }
 
-void setTypeUserData(SbkObject* wrapper, void *user_data, DeleteUserDataFunc d_func)
+void setTypeUserData(SbkObject* wrapper, void* userData, DeleteUserDataFunc d_func)
 {
     SbkObjectType* ob_type = reinterpret_cast<SbkObjectType*>(wrapper->ob_type);
     if (ob_type->d->user_data)
         ob_type->d->d_func(ob_type->d->user_data);
 
     ob_type->d->d_func = d_func;
-    ob_type->d->user_data = user_data;
+    ob_type->d->user_data = userData;
 }
 
 void* getTypeUserData(SbkObject* wrapper)

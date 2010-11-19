@@ -218,7 +218,7 @@ inline std::list<SbkObjectType*> getCppBaseClasses(PyTypeObject* baseType)
     return visitor.bases();
 }
 
-namespace Wrapper
+namespace Object
 {
 /**
 *   Decrements the reference counters of every object referred by self.
@@ -230,7 +230,7 @@ void clearReferences(SbkObject* self);
  * Destroy internal data
  **/
 void deallocData(SbkObject* self);
-} // namespace Wrapper
+} // namespace Object
 
 } // namespace Shiboken
 

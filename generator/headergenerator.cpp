@@ -434,7 +434,7 @@ void HeaderGenerator::finishGeneration()
             s << INDENT << metaClass->qualifiedCppName() << "* value = const_cast<" << metaClass->qualifiedCppName() << "* >(cppobj);" << endl;
             s << INDENT << "if (!isExactType)" << endl;
             s << INDENT << INDENT << "typeName = typeid(*value).name();" << endl;
-            s << INDENT << "PyObject* pyObj = Shiboken::Wrapper::newObject(reinterpret_cast<SbkObjectType*>(SbkType< ::" << metaClass->qualifiedCppName() << " >()),"
+            s << INDENT << "PyObject* pyObj = Shiboken::Object::newObject(reinterpret_cast<SbkObjectType*>(SbkType< ::" << metaClass->qualifiedCppName() << " >()),"
             << "value, hasOwnership, isExactType, typeName);" << endl;
             s << INDENT << "PySide::Signal::updateSourceObject(pyObj);" << endl;
             s << INDENT << "return pyObj;" << endl;
