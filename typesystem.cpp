@@ -989,7 +989,7 @@ bool Handler::startElement(const QString &, const QString &n,
                     } else {
                         ReportHandler::warning("File containing conversion code for "
                                                + topElement.entry->name()
-                                               + " type does not exist or is not redable: "
+                                               + " type does not exist or is not readable: "
                                                + sourceFile);
                     }
                 }
