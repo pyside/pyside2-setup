@@ -1290,7 +1290,7 @@ void AbstractMetaBuilder::traverseFields(ScopeModelItem scope_item, AbstractMeta
     foreach (VariableModelItem field, scope_item->variables()) {
         AbstractMetaField* metaField = traverseField(field, metaClass);
 
-        if (metaField) {
+        if (metaField && !metaField->isModifiedRemoved()) {
             metaField->setOriginalAttributes(metaField->attributes());
             metaClass->addField(metaField);
         }
