@@ -329,6 +329,22 @@ bool Handler::convertBoolean(const QString &_value, const QString &attributeName
     }
 }
 
+static bool convertRemovalAttribute(const QString& removalAttribute, Modification& mod, QString& errorMsg)
+{
+    QString remove = removalAttribute.toLower();
+    if (!remove.isEmpty()) {
+        if (remove == QLatin1String("all")) {
+            mod.removal = TypeSystem::All;
+        } else if (remove == QLatin1String("target")) {
+            mod.removal = TypeSystem::TargetLangAndNativeCode;
+        } else {
+            errorMsg = QString::fromLatin1("Bad removal type '%1'").arg(remove);
+            return false;
+        }
+    }
+    return true;
+}
+
 bool Handler::startElement(const QString &, const QString &n,
                            const QString &, const QXmlAttributes &atts)
 {
@@ -800,6 +816,7 @@ bool Handler::startElement(const QString &, const QString &n,
             attributes["name"] = QString();
             attributes["write"] = "true";
             attributes["read"] = "true";
+            attributes["remove"] = QString();
             break;
         case StackElement::Access:
             attributes["modifier"] = QString();
@@ -1219,6 +1236,9 @@ bool Handler::startElement(const QString &, const QString &n,
             fm.name = name;
             fm.modifiers = 0;
 
+            if (!convertRemovalAttribute(attributes["remove"], fm, m_error))
+                return false;
+
             QString read = attributes["read"];
             QString write = attributes["write"];
 
@@ -1305,18 +1325,8 @@ bool Handler::startElement(const QString &, const QString &n,
             if (convertBoolean(attributes["deprecated"], "deprecated", false))
                 mod.modifiers |= Modification::Deprecated;
 
-
-            QString remove = attributes["remove"].toLower();
-            if (!remove.isEmpty()) {
-                if (remove == QLatin1String("all"))
-                    mod.removal = TypeSystem::All;
-                else if (remove == QLatin1String("target"))
-                    mod.removal = TypeSystem::TargetLangAndNativeCode;
-                else {
-                    m_error = QString::fromLatin1("Bad removal type '%1'").arg(remove);
-                    return false;
-                }
-            }
+            if (!convertRemovalAttribute(attributes["remove"], mod, m_error))
+                return false;
 
             QString rename = attributes["rename"];
             if (!rename.isEmpty()) {
