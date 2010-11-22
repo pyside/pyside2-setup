@@ -310,7 +310,7 @@ struct APIEXTRACTOR_API Modification
         VirtualSlot =          0x10000 | NonFinal
     };
 
-    Modification() : modifiers(0) { }
+    Modification() : modifiers(0), removal(TypeSystem::NoLanguage) { }
 
     bool isAccessModifier() const
     {
@@ -368,21 +368,23 @@ struct APIEXTRACTOR_API Modification
         return modifiers & Rename;
     }
 
+    bool isRemoveModifier() const
+    {
+        return removal != TypeSystem::NoLanguage;
+    }
+
     uint modifiers;
     QString renamedToName;
+    TypeSystem::Language removal;
 };
 
 struct APIEXTRACTOR_API FunctionModification: public Modification
 {
-    FunctionModification(double vr) : removal(TypeSystem::NoLanguage), m_thread(false), m_allowThread(false), m_version(vr) {}
+    FunctionModification(double vr) : m_thread(false), m_allowThread(false), m_version(vr) {}
 
     bool isCodeInjection() const
     {
         return modifiers & CodeInjection;
-    }
-    bool isRemoveModifier() const
-    {
-        return removal != TypeSystem::NoLanguage;
     }
     void setIsThread(bool flag)
     {
@@ -414,7 +416,6 @@ struct APIEXTRACTOR_API FunctionModification: public Modification
     QString signature;
     QString association;
     CodeSnipList snips;
-    TypeSystem::Language removal;
 
     QList<ArgumentModification> argument_mods;
 
