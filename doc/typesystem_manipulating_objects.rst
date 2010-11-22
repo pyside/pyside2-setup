@@ -53,6 +53,9 @@ modify-field
     The ``name`` attribute is the name of the field, the *optional* ``write``
     and ``read`` attributes specify the field's access privileges in the target
     language API (both are set to true by default).
+    The ``remove`` attribute is an *optional* attribute, which can mark the field
+    to be discarded on generation; it has the same purpose of the deprecated tag
+    :ref:`remove`.
 
 .. _modify-function:
 
