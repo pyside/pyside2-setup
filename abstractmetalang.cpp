@@ -1479,6 +1479,23 @@ AbstractMetaField *AbstractMetaField::copy() const
     return returned;
 }
 
+/*******************************************************************************
+ * Indicates that this field has a modification that removes it
+ */
+bool AbstractMetaField::isModifiedRemoved(int types) const
+{
+    FieldModificationList mods = modifications();
+    foreach (FieldModification mod, mods) {
+        if (!mod.isRemoveModifier())
+            continue;
+
+        if ((mod.removal & types) == types)
+            return true;
+    }
+
+    return false;
+}
+
 static QString upCaseFirst(const QString &str)
 {
     Q_ASSERT(!str.isEmpty());

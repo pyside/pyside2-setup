@@ -744,6 +744,8 @@ public:
 
     FieldModificationList modifications() const;
 
+    bool isModifiedRemoved(int types = TypeSystem::All) const;
+
     using AbstractMetaVariable::setDocumentation;
     using AbstractMetaVariable::documentation;
 
