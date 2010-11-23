@@ -288,11 +288,8 @@ QString Generator::translateType(const AbstractMetaType *cType,
         s = "void";
     } else if (cType->isArray()) {
         s = translateType(cType->arrayElementType(), context, options) + "[]";
-    } else if (cType->isEnum() || cType->isFlags()) {
-        if (options & Generator::EnumAsInts)
-            s = "int";
-        else
-            s = cType->cppSignature();
+    } else if (options & Generator::EnumAsInts && (cType->isEnum() || cType->isFlags())) {
+        s = "int";
     } else {
         if (options & Generator::OriginalName) {
             s = cType->originalTypeDescription().trimmed();
@@ -306,8 +303,8 @@ QString Generator::translateType(const AbstractMetaType *cType,
                 if (index >= (s.size() - (constLen + 1))) // (VarType const)  or (VarType const[*|&])
                     s = s.remove(index, constLen);
             }
-        } else {
-            AbstractMetaType *copyType = cType->copy();
+        } else if (options & Generator::ExcludeConst || options & Generator::ExcludeReference) {
+            AbstractMetaType* copyType = cType->copy();
 
             if (options & Generator::ExcludeConst)
                 copyType->setConstant(false);
@@ -317,6 +314,8 @@ QString Generator::translateType(const AbstractMetaType *cType,
 
             s = copyType->cppSignature();
             delete copyType;
+        } else {
+            s = cType->cppSignature();
         }
     }
 
