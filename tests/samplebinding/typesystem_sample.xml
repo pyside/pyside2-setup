@@ -183,9 +183,9 @@
                     if ((*it)->isLayoutType()) {
                         ObjectTypeLayout* l = reinterpret_cast&lt;ObjectTypeLayout*>(*it);
                         reparent_layout_items(parent, %CONVERTTOPYTHON[ObjectTypeLayout*](l));
-                        Wrapper::setParent(layout, %CONVERTTOPYTHON[ObjectTypeLayout*](l));
+                        Shiboken::Object::setParent(layout, %CONVERTTOPYTHON[ObjectTypeLayout*](l));
                     } else {
-                        Wrapper::setParent(parent, %CONVERTTOPYTHON[ObjectType*](*it));
+                        Shiboken::Object::setParent(parent, %CONVERTTOPYTHON[ObjectType*](*it));
                     }
                 }
             }
@@ -714,8 +714,8 @@
             <modify-argument index="return">
                 <replace-type modified-type="PySequence"/>
                 <conversion-rule class="native">
-                    AutoDecRef _py_ok_(PySequence_GetItem(%PYARG_0, 0));
-                    AutoDecRef _py_ret_(PySequence_GetItem(%PYARG_0, 1));
+                    Shiboken::AutoDecRef _py_ok_(PySequence_GetItem(%PYARG_0, 0));
+                    Shiboken::AutoDecRef _py_ret_(PySequence_GetItem(%PYARG_0, 1));
                     %RETURN_TYPE %out = %CONVERTTOCPP[%RETURN_TYPE](_py_ok_);
                     %2 = %CONVERTTOCPP[Str*](_py_ret_);
                 </conversion-rule>
@@ -919,7 +919,7 @@
             <inject-code class="target" position="beginning">
                 int argc;
                 char** argv;
-                if (!sequenceToArgcArgv(%PYARG_1, &amp;argc, &amp;argv)) {
+                if (!Shiboken::sequenceToArgcArgv(%PYARG_1, &amp;argc, &amp;argv)) {
                     PyErr_SetString(PyExc_TypeError, "error");
                     return 0;
                 }
@@ -943,7 +943,7 @@
             <inject-code class="target" position="beginning">
                 int argc;
                 char** argv;
-                if (!sequenceToArgcArgv(%PYARG_1, &amp;argc, &amp;argv)) {
+                if (!Shiboken::sequenceToArgcArgv(%PYARG_1, &amp;argc, &amp;argv)) {
                     PyErr_SetString(PyExc_TypeError, "error");
                     return 0;
                 }
@@ -1181,7 +1181,7 @@
             </modify-argument>
             <inject-code class="target" position="end">
                 %RETURN_TYPE %0 = %TYPE::%FUNCTION_NAME();
-                %PYARG_0 = Shiboken::Wrapper::newObject(&amp;SbkObject_Type, %0, false, false);
+                %PYARG_0 = Shiboken::Object::newObject(&amp;SbkObject_Type, %0, false, false);
             </inject-code>
         </modify-function>
     </value-type>

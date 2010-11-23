@@ -37,8 +37,8 @@ typedef google::dense_hash_map<const void*, SbkObject*> WrapperMap;
 class Graph
 {
 public:
-    typedef std::list<SbkBaseType*> NodeList;
-    typedef google::dense_hash_map<SbkBaseType*, NodeList> Edges;
+    typedef std::list<SbkObjectType*> NodeList;
+    typedef google::dense_hash_map<SbkObjectType*, NodeList> Edges;
 
     Edges m_edges;
 
@@ -47,7 +47,7 @@ public:
         m_edges.set_empty_key(0);
     }
 
-    void addEdge(SbkBaseType* from, SbkBaseType* to)
+    void addEdge(SbkObjectType* from, SbkObjectType* to)
     {
         m_edges[from].push_back(to);
     }
@@ -61,7 +61,7 @@ public:
 
         Edges::const_iterator i = m_edges.begin();
         for (; i != m_edges.end(); ++i) {
-            SbkBaseType* node1 = i->first;
+            SbkObjectType* node1 = i->first;
             const NodeList& nodeList = i->second;
             NodeList::const_iterator j = nodeList.begin();
             for (; j != nodeList.end(); ++j)
@@ -71,14 +71,14 @@ public:
     }
 #endif
 
-    SbkBaseType* identifyType(void* cptr, SbkBaseType* type, SbkBaseType* baseType) const
+    SbkObjectType* identifyType(void* cptr, SbkObjectType* type, SbkObjectType* baseType) const
     {
         Edges::const_iterator edgesIt = m_edges.find(type);
         if (edgesIt != m_edges.end()) {
             const NodeList& adjNodes = m_edges.find(type)->second;
             NodeList::const_iterator i = adjNodes.begin();
             for (; i != adjNodes.end(); ++i) {
-                SbkBaseType* newType = identifyType(cptr, *i, baseType);
+                SbkObjectType* newType = identifyType(cptr, *i, baseType);
                 if (newType)
                     return newType;
             }
@@ -148,7 +148,7 @@ BindingManager::~BindingManager()
      * the BindingManager is being destroyed the interpreter is alredy
      * shutting down. */
     while (!m_d->wrapperMapper.empty()) {
-        Wrapper::destroy(m_d->wrapperMapper.begin()->second);
+        Object::destroy(m_d->wrapperMapper.begin()->second);
     }
     assert(m_d->wrapperMapper.size() == 0);
     delete m_d;
@@ -166,8 +166,8 @@ bool BindingManager::hasWrapper(const void* cptr)
 
 void BindingManager::registerWrapper(SbkObject* pyObj, void* cptr)
 {
-    SbkBaseType* instanceType = reinterpret_cast<SbkBaseType*>(pyObj->ob_type);
-    SbkBaseTypePrivate* d = instanceType->d;
+    SbkObjectType* instanceType = reinterpret_cast<SbkObjectType*>(pyObj->ob_type);
+    SbkObjectTypePrivate* d = instanceType->d;
 
     if (!d)
         return;
@@ -187,8 +187,8 @@ void BindingManager::registerWrapper(SbkObject* pyObj, void* cptr)
 
 void BindingManager::releaseWrapper(SbkObject* sbkObj)
 {
-    SbkBaseType* sbkType = reinterpret_cast<SbkBaseType*>(sbkObj->ob_type);
-    SbkBaseTypePrivate* d = sbkType->d;
+    SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(sbkObj->ob_type);
+    SbkObjectTypePrivate* d = sbkType->d;
     int numBases = ((d && d->is_multicpp) ? getNumberOfCppBaseClasses(sbkObj->ob_type) : 1);
 
     void** cptrs = reinterpret_cast<SbkObject*>(sbkObj)->d->cptr;
@@ -255,14 +255,14 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
     return 0;
 }
 
-void BindingManager::addClassInheritance(SbkBaseType* parent, SbkBaseType* child)
+void BindingManager::addClassInheritance(SbkObjectType* parent, SbkObjectType* child)
 {
     m_d->classHierarchy.addEdge(parent, child);
 }
 
-SbkBaseType* BindingManager::resolveType(void* cptr, SbkBaseType* type)
+SbkObjectType* BindingManager::resolveType(void* cptr, SbkObjectType* type)
 {
-    SbkBaseType* identifiedType = m_d->classHierarchy.identifyType(cptr, type, type);
+    SbkObjectType* identifiedType = m_d->classHierarchy.identifyType(cptr, type, type);
     return identifiedType ? identifiedType : type;
 }
 
