@@ -45,6 +45,11 @@
         <include file-name="map" location="global"/>
     </container-type>
     <container-type name="List" type="list" />
+    <add-function signature="cacheSize()" return-type="int">
+        <inject-code class="target">
+            %PYARG_0 = %CONVERTTOPYTHON[int](Shiboken::BindingManager::instance().getAllPyObjects().size());
+        </inject-code>
+    </add-function>
 
     <function signature="sumComplexPair(std::pair&lt;Complex, Complex>)" />
     <function signature="gimmeComplexList()" />

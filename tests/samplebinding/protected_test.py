@@ -27,7 +27,9 @@
 '''Test cases for protected methods.'''
 
 import unittest
+import sys
 
+from sample import cacheSize
 from sample import ProtectedNonPolymorphic, ProtectedVirtualDestructor
 from sample import ProtectedPolymorphic, ProtectedPolymorphicDaughter, ProtectedPolymorphicGrandDaughter
 from sample import ProtectedProperty, ProtectedEnumClass
@@ -68,6 +70,9 @@ class ExtendedProtectedVirtualDestructor(ProtectedVirtualDestructor):
 class ProtectedNonPolymorphicTest(unittest.TestCase):
     '''Test cases for protected method in a class without virtual methods.'''
 
+    def tearDown(self):
+        self.assertEqual(cacheSize(), 0)
+
     def testProtectedCall(self):
         '''Calls a non-virtual protected method.'''
         p = ProtectedNonPolymorphic('NonPoly')
@@ -92,6 +97,9 @@ class ProtectedNonPolymorphicTest(unittest.TestCase):
 class ProtectedPolymorphicTest(unittest.TestCase):
     '''Test cases for protected method in a class with virtual methods.'''
 
+    def tearDown(self):
+        self.assertEqual(cacheSize(), 0)
+
     def testProtectedCall(self):
         '''Calls a virtual protected method.'''
         p = ProtectedNonPolymorphic('Poly')
@@ -113,7 +121,6 @@ class ProtectedPolymorphicTest(unittest.TestCase):
         self.assert_(p.protectedName_called)
         self.assertEqual(p.protectedName(), name)
         self.assertEqual(ProtectedPolymorphic.protectedName(p), original_name)
-
 class ProtectedPolymorphicDaugherTest(unittest.TestCase):
     '''Test cases for protected method in a class inheriting for a class with virtual methods.'''
 
@@ -128,14 +135,17 @@ class ProtectedPolymorphicDaugherTest(unittest.TestCase):
         original_name = 'Poly'
         p = ExtendedProtectedPolymorphicDaughter(original_name)
         name = p.callProtectedName()
-        print "MyName:", name
         self.assert_(p.protectedName_called)
         self.assertEqual(p.protectedName(), name)
         self.assertEqual(ProtectedPolymorphicDaughter.protectedName(p), original_name)
 
+
 class ProtectedPolymorphicGrandDaugherTest(unittest.TestCase):
     '''Test cases for protected method in a class inheriting for a class that inherits from
     another with protected virtual methods.'''
+
+    def tearDown(self):
+        self.assertEqual(cacheSize(), 0)
 
     def testProtectedCallWithInstanceCreatedOnCpp(self):
         '''Calls a virtual protected method from parent class on an instance created in C++.'''
@@ -157,6 +167,9 @@ class ProtectedVirtualDtorTest(unittest.TestCase):
 
     def setUp(self):
         ProtectedVirtualDestructor.resetDtorCounter()
+
+    def tearDown(self):
+        self.assertEqual(cacheSize(), 0)
 
     def testVirtualProtectedDtor(self):
         '''Original protected virtual destructor is being called.'''
@@ -197,6 +210,9 @@ class ExtendedProtectedEnumClass(ProtectedEnumClass):
 
 class ProtectedEnumTest(unittest.TestCase):
     '''Test cases for protected enum.'''
+
+    def tearDown(self):
+        self.assertEqual(cacheSize(), 0)
 
     def testProtectedMethodWithProtectedEnumArgument(self):
         '''Calls protected method with protected enum argument.'''
@@ -250,6 +266,9 @@ class ProtectedEnumTest(unittest.TestCase):
 class ProtectedPropertyTest(unittest.TestCase):
     '''Test cases for a class with a protected property (or field in C++).'''
 
+    def tearDown(self):
+        self.assertEqual(cacheSize(), 0)
+
     def testProtectedProperty(self):
         '''Writes and reads a protected property.'''
         obj = ProtectedProperty()
@@ -257,9 +276,11 @@ class ProtectedPropertyTest(unittest.TestCase):
         obj.protectedProperty = 3
         self.assertEqual(obj.protectedProperty, 3)
 
-
 class PrivateDtorProtectedMethodTest(unittest.TestCase):
     '''Test cases for classes with private destructors and protected methods.'''
+
+    def tearDown(self):
+        self.assertEqual(cacheSize(), 0)
 
     def testProtectedMethod(self):
         '''Calls protected method of a class with a private destructor.'''
@@ -268,11 +289,9 @@ class PrivateDtorProtectedMethodTest(unittest.TestCase):
         self.assertEqual(type(obj), PrivateDtor)
         self.assertEqual(obj.instanceCalls(), 1)
         self.assertEqual(obj.instanceCalls(), obj.protectedInstanceCalls())
-
         obj = PrivateDtor.instance()
         self.assertEqual(obj.instanceCalls(), 2)
         self.assertEqual(obj.instanceCalls(), obj.protectedInstanceCalls())
-
 
 if __name__ == '__main__':
     unittest.main()
