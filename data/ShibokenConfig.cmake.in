@@ -21,7 +21,8 @@ message(STATUS "libshiboken built for @SHIBOKEN_BUILD_TYPE@")
 
 # We don't use just "if (@AVOID_PROTECTED_HACK@)" to avoid require all users to turn on the cmake policy CMP0012
 # for more info type: cmake --help-policy CMP0012
-if ("@AVOID_PROTECTED_HACK@" STREQUAL "TRUE")
+set(SHIBOKEN_AVOID_PROTECTED_HACK @AVOID_PROTECTED_HACK@)
+if (SHIBOKEN_AVOID_PROTECTED_HACK)
     add_definitions(-DAVOID_PROTECTED_HACK)
     message(STATUS "Avoiding protected hack!")
 endif()
