@@ -2025,7 +2025,6 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                         if (!func->isAbstract() && func->isVirtual())
                             mc << "::%CLASS_NAME::";
 
-
                         mc << func->originalName();
 
 #ifdef AVOID_PROTECTED_HACK
@@ -2044,7 +2043,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 mc << '(' << userArgs.join(", ") << ')';
                 if (!func->isAbstract() && func->isVirtual()) {
                     mc.flush();
-#ifndef AVOID_PROTECTED_HACK
+#ifdef AVOID_PROTECTED_HACK
                     if (!func->isProtected())
 #endif
                     {
