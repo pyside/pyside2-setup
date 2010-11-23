@@ -51,6 +51,7 @@ private:
     void writeTypeIndexDefineLine(QTextStream& s, const TypeEntry* typeEntry, int& idx);
     void writeTypeIndexDefine(QTextStream& s, const AbstractMetaClass* metaClass, int& idx);
     void writeTypeConverterImpl(QTextStream& s, const TypeEntry* type);
+    void writeProtectedEnumSurrogate(QTextStream& s, const AbstractMetaEnum* cppEnum);
 
 };
 

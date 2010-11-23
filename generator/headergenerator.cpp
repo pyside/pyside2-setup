@@ -214,8 +214,8 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
     }
     bool isValueTypeWithImplConversions = type->isValue() && !implicitConvs.isEmpty();
     bool hasCustomConversion = type->hasNativeConversionRule();
-    QString typeT = "::" + type->qualifiedCppName() + (isAbstractOrObjectType ? "*" : "");
-    QString typeName = "::" + type->qualifiedCppName();
+    QString typeT = type->qualifiedCppName() + (isAbstractOrObjectType ? "*" : "");
+    QString typeName = type->qualifiedCppName();
 
 #ifdef AVOID_PROTECTED_HACK
     const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(type);
@@ -224,6 +224,8 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
         typeName = typeT;
     }
 #endif
+    typeT.prepend("::");
+    typeName.prepend("::");
 
     s << "struct Converter< " << typeT << " >";
     if (!hasCustomConversion) {
@@ -304,6 +306,8 @@ void HeaderGenerator::finishGeneration()
     QTextStream typeFunctions(&sbkTypeFunctions);
     QString converterImpl;
     QTextStream convImpl(&converterImpl);
+    QString protectedEnumSurrogates;
+    QTextStream protEnumsSurrogates(&protectedEnumSurrogates);
 
     Indentation indent(INDENT);
 
@@ -328,6 +332,7 @@ void HeaderGenerator::finishGeneration()
         includes << cppEnum->typeEntry()->include();
         writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
         convDecl << endl;
+        writeProtectedEnumSurrogate(protEnumsSurrogates, cppEnum);
         writeSbkTypeFunction(typeFunctions, cppEnum);
     }
 
@@ -349,6 +354,7 @@ void HeaderGenerator::finishGeneration()
             if (flagsEntry)
                 writeTypeConverterDecl(convDecl, flagsEntry);
             convDecl << endl;
+            writeProtectedEnumSurrogate(protEnumsSurrogates, cppEnum);
             writeSbkTypeFunction(typeFunctions, cppEnum);
         }
 
@@ -416,6 +422,11 @@ void HeaderGenerator::finishGeneration()
 
     s << macros << endl;
 
+    if (!protectedEnumSurrogates.isEmpty()) {
+        s << "// Protected enum surrogates" << endl;
+        s << protectedEnumSurrogates << endl;
+    }
+
     s << "namespace Shiboken" << endl << '{' << endl << endl;
 
     s << "// PyType functions, to get the PyObjectType for a type T\n";
@@ -460,16 +471,22 @@ void HeaderGenerator::finishGeneration()
     s << "#endif // " << includeShield << endl << endl;
 }
 
+void HeaderGenerator::writeProtectedEnumSurrogate(QTextStream& s, const AbstractMetaEnum* cppEnum)
+{
+#ifdef AVOID_PROTECTED_HACK
+    if (cppEnum->isProtected())
+        s << "enum " << protectedEnumSurrogateName(cppEnum) << " {};" << endl;
+#endif
+}
+
 void HeaderGenerator::writeSbkTypeFunction(QTextStream& s, const AbstractMetaEnum* cppEnum)
 {
     QString enumName = cppEnum->name();
     if (cppEnum->enclosingClass())
         enumName = cppEnum->enclosingClass()->qualifiedCppName() + "::" + enumName;
 #ifdef AVOID_PROTECTED_HACK
-    if (cppEnum->isProtected()) {
+    if (cppEnum->isProtected())
         enumName = protectedEnumSurrogateName(cppEnum);
-        s << "enum " << enumName << " {};" << endl;
-    }
 #endif
 
     s << "template<> inline PyTypeObject* SbkType< ::" << enumName << " >() ";
