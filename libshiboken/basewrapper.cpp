@@ -170,7 +170,7 @@ void SbkDeallocWrapper(PyObject* pyObj)
         }
     }
 
-    Shiboken::Wrapper::deallocData(sbkObj);
+    Shiboken::Wrapper::deallocData(sbkObj, !sbkObj->d->containsCppWrapper);
 }
 
 void SbkDeallocWrapperWithPrivateDtor(PyObject* self)
@@ -179,8 +179,7 @@ void SbkDeallocWrapperWithPrivateDtor(PyObject* self)
     if (sbkObj->weakreflist)
         PyObject_ClearWeakRefs(self);
 
-    Shiboken::BindingManager::instance().releaseWrapper(sbkObj);
-    Shiboken::Wrapper::deallocData(sbkObj);
+    Shiboken::Wrapper::deallocData(sbkObj, true);
 }
 
 void SbkBaseTypeDealloc(PyObject* pyObj)
@@ -927,10 +926,10 @@ void setParent(PyObject* parent, PyObject* child)
     Py_DECREF(child);
 }
 
-void deallocData(SbkObject* self)
+void deallocData(SbkObject* self, bool cleanup)
 {
     // Make cleanup if this is not a wrapper otherwise this will be done on wrapper destructor
-    if(!self->d->containsCppWrapper) {
+    if(cleanup) {
         removeParent(self);
 
         if (self->d->parentInfo)

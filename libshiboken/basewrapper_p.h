@@ -229,7 +229,7 @@ void clearReferences(SbkObject* self);
 /**
  * Destroy internal data
  **/
-void deallocData(SbkObject* self);
+void deallocData(SbkObject* self, bool doCleanup);
 } // namespace Wrapper
 
 } // namespace Shiboken

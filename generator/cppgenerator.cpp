@@ -2010,27 +2010,35 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 mc << ')';
             } else {
                 if (func->ownerClass()) {
-#ifndef AVOID_PROTECTED_HACK
-                    if (func->isStatic())
-                        mc << func->ownerClass()->qualifiedCppName() << "::";
-                    else
-                        mc << CPP_SELF_VAR "->";
+#ifdef AVOID_PROTECTED_HACK
+                    if (!func->isProtected()) {
+#endif
+                        if (func->isStatic())
+                            mc << func->ownerClass()->qualifiedCppName() << "::";
+                        else {
+#ifdef AVOID_PROTECTED_HACK
+                            if (!func->isVirtual() && func->ownerClass()->hasProtectedMembers())
+                                mc << "((" << func->ownerClass()->qualifiedCppName() << "*)" << CPP_SELF_VAR << ")->";
+                            else
+#endif
+                                mc << CPP_SELF_VAR "->";
+                        }
 
-                    if (!func->isAbstract() && func->isVirtual())
-                        mc << "::%CLASS_NAME::";
+                        if (!func->isAbstract() && func->isVirtual())
+                            mc << "::%CLASS_NAME::";
 
-                    mc << func->originalName();
-#else
-                    if (func->isStatic())
-                        mc << func->ownerClass()->qualifiedCppName() << "::";
-                    else {
-                        if (func->isProtected())
-                            mc << "((" << wrapperName(func->ownerClass()) << "*) ";
-                        mc << CPP_SELF_VAR << (func->isProtected() ? ")" : "") << "->";
+
+                        mc << func->originalName();
+
+#ifdef AVOID_PROTECTED_HACK
+                    } else {
+                        if (!func->isStatic())
+                            mc << "((" << wrapperName(func->ownerClass()) << "*) " << CPP_SELF_VAR << ")->";
+
+                        if (!func->isAbstract())
+                            mc << (func->isProtected() ? wrapperName(func->ownerClass()) : "::" + func->ownerClass()->qualifiedCppName()) << "::";
+                        mc << func->originalName() << "_protected";
                     }
-                    if (!func->isAbstract() && func->isVirtual())
-                        mc << (func->isProtected() ? wrapperName(func->ownerClass()) : "::%CLASS_NAME::");
-                    mc << func->originalName() << (func->isProtected() ? "_protected" : "");
 #endif
                 } else {
                     mc << func->originalName();
@@ -2038,13 +2046,19 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 mc << '(' << userArgs.join(", ") << ')';
                 if (!func->isAbstract() && func->isVirtual()) {
                     mc.flush();
-                    QString virtualCall(methodCall);
-                    QString normalCall(methodCall);
+#ifndef AVOID_PROTECTED_HACK
+                    if (!func->isProtected())
+#endif
+                    {
+                        QString virtualCall(methodCall);
+                        QString normalCall(methodCall);
 
-                    virtualCall = virtualCall.replace("%CLASS_NAME", func->ownerClass()->qualifiedCppName());
-                    normalCall = normalCall.replace("::%CLASS_NAME::", "");
-                    methodCall = "";
-                    mc << "(Shiboken::Wrapper::isUserType(self) ? " << virtualCall << ":" <<  normalCall << ")";
+                        virtualCall = virtualCall.replace("%CLASS_NAME", func->ownerClass()->qualifiedCppName());
+                        normalCall = normalCall.replace("::%CLASS_NAME::", "");
+                        methodCall = "";
+
+                        mc << "(Shiboken::Wrapper::isUserType(self) ? " << virtualCall << ":" <<  normalCall << ")";
+                    }
                 }
             }
         }
@@ -3247,6 +3261,10 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         if (metaClass->hasProtectedDestructor())
             dtorClassName = wrapperName(metaClass);
 #endif
+        // call the real destructor
+        if (metaClass->typeEntry()->isValue())
+            dtorClassName = wrapperName(metaClass);
+
         s << INDENT << "Shiboken::BaseType::setDestructorFunction(&" << cpythonTypeName(metaClass) << ", &Shiboken::callCppDestructor<" << dtorClassName << " >);" << endl;
     }
 
