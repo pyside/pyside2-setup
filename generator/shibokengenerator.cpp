@@ -476,7 +476,7 @@ static QString baseConversionString(QString typeName)
 
 void ShibokenGenerator::writeBaseConversion(QTextStream& s, const TypeEntry* type)
 {
-    QString typeName = type->qualifiedCppName();
+    QString typeName = type->qualifiedCppName().trimmed();
     if (!type->isCppPrimitive())
         typeName.prepend("::");
     if (type->isObject())
@@ -501,11 +501,11 @@ void ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaTy
             ptype = ptype->basicAliasedTypeEntry();
         typeName = ptype->name();
     } else {
-        if (type->isObject() || (type->isValue() && !type->isReference()))
+        if (!isCString(type)) // not "const char*"
             options |= Generator::ExcludeConst;
-        if (type->isContainer() || (type->isConstant() && type->isReference()))
-            options |= Generator::ExcludeReference | Generator::ExcludeConst;
-        typeName = translateTypeForWrapperMethod(type, context, options);
+        if (type->isContainer() || type->isFlags() || type->isEnum() || (type->isConstant() && type->isReference()))
+            options |= Generator::ExcludeReference;
+        typeName = translateTypeForWrapperMethod(type, context, options).trimmed();
         if (!type->typeEntry()->isCppPrimitive())
             typeName.prepend("::");
     }
