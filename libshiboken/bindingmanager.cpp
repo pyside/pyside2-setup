@@ -161,7 +161,7 @@ BindingManager& BindingManager::instance() {
 
 bool BindingManager::hasWrapper(const void* cptr)
 {
-    return m_d->wrapperMapper.count(cptr);
+    return m_d->wrapperMapper.find(cptr) != m_d->wrapperMapper.end();
 }
 
 void BindingManager::registerWrapper(SbkObject* pyObj, void* cptr)
