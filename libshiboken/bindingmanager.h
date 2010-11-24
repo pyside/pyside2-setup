@@ -33,6 +33,8 @@ struct SbkObjectType;
 namespace Shiboken
 {
 
+typedef void (*ObjectVisitor)(SbkObject*, void*);
+
 class LIBSHIBOKEN_API BindingManager
 {
 public:
@@ -50,6 +52,16 @@ public:
     SbkObjectType* resolveType(void* cptr, SbkObjectType* type);
 
     std::set<SbkObject*> getAllPyObjects();
+
+    /**
+     * Calls the function \p visitor for each object registered on binding manager.
+     * \note As various C++ pointers can point to the same PyObject due to multiple inheritance
+     *       a PyObject can be called more than one time for each PyObject.
+     * \param visitor function called for each object.
+     * \param data user data passed as second argument to the visitor function.
+     */
+    void visitAllPyObjects(ObjectVisitor visitor, void* data);
+
 private:
     ~BindingManager();
     // disable copy

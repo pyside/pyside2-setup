@@ -277,5 +277,14 @@ std::set<SbkObject*> BindingManager::getAllPyObjects()
     return pyObjects;
 }
 
+void BindingManager::visitAllPyObjects(ObjectVisitor visitor, void* data)
+{
+    WrapperMap copy = m_d->wrapperMapper;
+    for (WrapperMap::iterator it = copy.begin(); it != copy.end(); ++it) {
+        if (hasWrapper(it->first))
+            visitor(it->second, data);
+    }
+}
+
 } // namespace Shiboken
 
