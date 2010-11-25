@@ -99,11 +99,10 @@ public:
 class DerivedFromNamespace : public SomeClass::SomeInnerClass::OkThisIsRecursiveEnough
 {
 public:
-#ifndef _MSC_VER
-    //only cause namespace confusion
-    enum SampleNamespace {
-    };
-#endif
+    // FIXME Uncomment this when the fix for MSVC is available
+    // only to cause namespace confusion
+//    enum SampleNamespace {
+//    };
     virtual OkThisIsRecursiveEnough* someVirtualMethod(OkThisIsRecursiveEnough* arg) { return arg; }
     inline OkThisIsRecursiveEnough* methodReturningTypeFromParentScope() { return 0; }
 };
