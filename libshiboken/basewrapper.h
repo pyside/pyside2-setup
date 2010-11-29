@@ -157,7 +157,7 @@ LIBSHIBOKEN_API void        setDestructorFunction(SbkObjectType* self, ObjectDes
 LIBSHIBOKEN_API void        initPrivateData(SbkObjectType* self);
 
 /**
- *  Get the user data previously setted by Shiboken::Object::setTypeUserData
+ *  Get the user data previously set by Shiboken::Object::setTypeUserData
  */
 LIBSHIBOKEN_API void*       getTypeUserData(SbkObjectType* type);
 }
@@ -168,25 +168,71 @@ namespace Object {
 *   Returns true if the object is an instance of a type created by the Shiboken generator.
 */
 LIBSHIBOKEN_API bool        checkType(PyObject* pyObj);
+/**
+ *  Returns true if this object type is an instance of an user defined type derived from an Shiboken type.
+ *  \see Shiboken::ObjectType::isUserType
+ */
 LIBSHIBOKEN_API bool        isUserType(PyObject* pyObj);
 
-
+/**
+ *  Bind a C++ object to Python.
+ * \param instanceType equivalent Python type for the C++ object.
+ * \param hasOwnership if true, Python will try to delete the underlying C++ object when there's no more refs.
+ * \param isExactType if false, Shiboken will use some heuristics to detect the correct Python type of this C++
+ *                    object, in any case you must provide \p instanceType, it'll be used as search starting point
+ *                    and as fallback.
+ * \param typeName    If non-null, this will be used as helper to find the correct Python type for this object.
+ */
 LIBSHIBOKEN_API PyObject*   newObject(SbkObjectType* instanceType,
                                       void* cptr,
                                       bool hasOwnership = true,
                                       bool isExactType = false,
                                       const char* typeName = 0);
 
+/**
+ *  Changes the valid flag of a PyObject, invalid objects will raise an exception when someone tries to access it.
+ */
 LIBSHIBOKEN_API void        setValidCpp(SbkObject* pyObj, bool value);
+/**
+ *  Tells shiboken the Python object \p pyObj has a C++ wrapper used to intercept virtual method calls.
+ */
 LIBSHIBOKEN_API void        setHasCppWrapper(SbkObject* pyObj, bool value);
+/**
+ *  Return true if the Python object \p pyObj has a C++ wrapper used to intercept virtual method calls.
+ */
 LIBSHIBOKEN_API bool        hasCppWrapper(SbkObject* pyObj);
 
+/**
+ *  Return true if the Python is responsible for deleting the underlying C++ object.
+ */
 LIBSHIBOKEN_API bool        hasOwnership(SbkObject* pyObj);
+/**
+ *  Sets python as responsible to delete the underlying C++ object.
+ *  \note You this overload only when the PyObject can be a sequence and you want to
+ *  call this function for every item in the sequence.
+ *  \see getOwnership(SbkObject*)
+ */
 LIBSHIBOKEN_API void        getOwnership(PyObject* pyObj);
+/**
+ *  Sets python as responsible to delete the underlying C++ object.
+ */
 LIBSHIBOKEN_API void        getOwnership(SbkObject* pyObj);
+
+/**
+ *  Release the ownership, so Python will not delete the underlying C++ object.
+ *  \note You this overload only when the PyObject can be a sequence and you want to
+ *  call this function for every item in the sequence.
+ *  \see releaseOwnership(SbkObject*)
+ */
 LIBSHIBOKEN_API void        releaseOwnership(PyObject* pyObj);
+/**
+ *  Release the ownership, so Python will not delete the underlying C++ object.
+ */
 LIBSHIBOKEN_API void        releaseOwnership(SbkObject* pyObj);
 
+/**
+ *  Returns true if the pyObj holds information about their parents.
+ */
 LIBSHIBOKEN_API bool        hasParentInfo(SbkObject* pyObj);
 
 /**
@@ -206,7 +252,7 @@ LIBSHIBOKEN_API bool        isValid(PyObject* wrapper);
 
 /**
 *   Set the parent of \p child to \p parent.
-*   When an object dies, all their children, granchildren, etc, are tagged as invalid.
+*   When an object dies, all their children, grandchildren, etc, are tagged as invalid.
 *   \param parent the parent object, if null, the child will have no parents.
 *   \param child the child.
 */
@@ -219,7 +265,7 @@ LIBSHIBOKEN_API void        setParent(PyObject* parent, PyObject* child);
 LIBSHIBOKEN_API void        removeParent(SbkObject* child, bool giveOwnershipBack = true, bool keepReferenc = false);
 
 /**
-* \internal This is an internal function called by SbkBaseWrapper_Dealloc, it's exported just for techinical reasons.
+* \internal This is an internal function called by tp_dealloc, it's exported just for technical reasons.
 * \note Do not call this function inside your bindings.
 */
 LIBSHIBOKEN_API void        destroyParentInfo(SbkObject* obj, bool removeFromParent = true);
@@ -230,7 +276,7 @@ LIBSHIBOKEN_API void        destroyParentInfo(SbkObject* obj, bool removeFromPar
 LIBSHIBOKEN_API void        invalidate(SbkObject* self);
 
 /**
- * Help function can be used to invalida a sequence of object
+ * Help function can be used to invalidate a sequence of object
  **/
 LIBSHIBOKEN_API void        invalidate(PyObject* pyobj);
 
@@ -245,9 +291,15 @@ LIBSHIBOKEN_API void        makeValid(SbkObject* self);
 LIBSHIBOKEN_API void        destroy(SbkObject* self);
 
 /**
- *   Get/Set Userdata in type class
+ *  Set user data on type of \p wrapper.
+ *  \param wrapper instance object, the user data will be set on his type
+ *  \param userData the user data
+ *  \param d_func a function used to delete the user data
  */
 LIBSHIBOKEN_API void        setTypeUserData(SbkObject* wrapper, void* userData, DeleteUserDataFunc d_func);
+/**
+ *  Get the user data previously set by Shiboken::Object::setTypeUserData
+ */
 LIBSHIBOKEN_API void*       getTypeUserData(SbkObject* wrapper);
 
 /**
@@ -259,8 +311,8 @@ LIBSHIBOKEN_API void*       getTypeUserData(SbkObject* wrapper);
  *   No checking is done for any of the passed arguments, since it is meant to be used
  *   by generated code it is supposed that the generator is correct.
  *   \param self            the wrapper instance that keeps references to other objects.
- *   \param key             a key that identifies the C++ method signature and argument where the referredObject came from.
- *   \parem referredObject  the object whose reference is used by the self object.
+ *   \param key             a key that identifies the C++ method signature and argument where the referred Object came from.
+ *   \param referredObject  the object whose reference is used by the self object.
  */
 LIBSHIBOKEN_API void        keepReference(SbkObject* self, const char* key, PyObject* referredObject, bool append = false);
 
