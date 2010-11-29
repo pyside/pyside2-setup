@@ -155,6 +155,11 @@ LIBSHIBOKEN_API MultipleInheritanceInitFunction getMultipleIheritanceFunction(Sb
 LIBSHIBOKEN_API void        setDestructorFunction(SbkObjectType* self, ObjectDestructor func);
 
 LIBSHIBOKEN_API void        initPrivateData(SbkObjectType* self);
+
+/**
+ *  Get the user data previously setted by Shiboken::Object::setTypeUserData
+ */
+LIBSHIBOKEN_API void*       getTypeUserData(SbkObjectType* type);
 }
 
 namespace Object {

@@ -561,6 +561,11 @@ void initPrivateData(SbkObjectType* self)
     memset(self->d, 0, sizeof(SbkObjectTypePrivate));
 }
 
+void* getTypeUserData(SbkObjectType* type)
+{
+    return type->d->user_data;
+}
+
 } // namespace ObjectType
 
 namespace Object
