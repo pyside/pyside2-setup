@@ -66,40 +66,38 @@ public:
 
     typedef PyObject* (*CppToPythonFunc)(void*);
     typedef void (*PythonToCppFunc)(PyObject*, void**);
-    typedef void (*DeleteObjectFunc)(void*);
 
     ~TypeResolver();
 
     template<typename T>
     static TypeResolver* createValueTypeResolver(const char* typeName)
     {
-        return new TypeResolver(typeName, &Shiboken::Converter<T>::toPython, &pythonToValueType<T>, SbkType<T>(), &callCppDestructor<T>);
+        return createTypeResolver(typeName, &Shiboken::Converter<T>::toPython, &pythonToValueType<T>, SbkType<T>());
     }
 
     template<typename T>
     static TypeResolver* createObjectTypeResolver(const char* typeName)
     {
-        return new TypeResolver(typeName, &objectTypeToPython<T>, &pythonToObjectType<T>, SbkType<T>());
+        return createTypeResolver(typeName, &objectTypeToPython<T>, &pythonToObjectType<T>, SbkType<T>());
     }
 
     static Type getType(const char* name);
     static TypeResolver* get(const char* typeName);
 
-    const char* typeName() const;
     PyObject* toPython(void* cppObj);
     void toCpp(PyObject* pyObj, void** place);
-    void deleteObject(void* object);
     PyTypeObject* pythonType();
 
 private:
     struct TypeResolverPrivate;
     TypeResolverPrivate* m_d;
 
+    TypeResolver();
     // disable object copy
     TypeResolver(const TypeResolver&);
     TypeResolver& operator=(const TypeResolver&);
 
-    TypeResolver(const char* typeName, CppToPythonFunc cppToPy, PythonToCppFunc pyToCpp, PyTypeObject* pyType, DeleteObjectFunc deleter = 0);
+    static TypeResolver* createTypeResolver(const char* typeName, CppToPythonFunc cppToPy, PythonToCppFunc pyToCpp, PyTypeObject* pyType);
 };
 }
 

@@ -33,10 +33,8 @@ static TypeResolverMap typeResolverMap;
 
 struct TypeResolver::TypeResolverPrivate
 {
-    const char* typeName; // maybe this is not needed anymore
     CppToPythonFunc cppToPython;
     PythonToCppFunc pythonToCpp;
-    DeleteObjectFunc deleteObject;
     PyTypeObject* pyType;
 };
 
@@ -55,25 +53,23 @@ void Shiboken::initTypeResolver()
     std::atexit(deinitTypeResolver);
 }
 
-static void registerTypeResolver(TypeResolver* resolver)
+TypeResolver::TypeResolver() : m_d(new TypeResolverPrivate)
 {
-    TypeResolver*& v = typeResolverMap[resolver->typeName()];
-    if (!v)
-        v = resolver;
-    else
-        delete resolver; // Discard type resolvers already registered
 }
 
-TypeResolver::TypeResolver(const char* typeName, TypeResolver::CppToPythonFunc cppToPy, TypeResolver::PythonToCppFunc pyToCpp, PyTypeObject* pyType, TypeResolver::DeleteObjectFunc deleter)
+TypeResolver* TypeResolver::createTypeResolver(const char* typeName,
+                                               CppToPythonFunc cppToPy,
+                                               PythonToCppFunc pyToCpp,
+                                               PyTypeObject* pyType)
 {
-    m_d = new TypeResolverPrivate;
-    m_d->typeName = typeName;
-    m_d->cppToPython = cppToPy;
-    m_d->pythonToCpp = pyToCpp;
-    m_d->deleteObject = deleter;
-    m_d->pyType = pyType;
-
-    registerTypeResolver(this);
+    TypeResolver*& tr = typeResolverMap[typeName];
+    if (!tr) {
+        tr = new TypeResolver;
+        tr->m_d->cppToPython = cppToPy;
+        tr->m_d->pythonToCpp = pyToCpp;
+        tr->m_d->pyType = pyType;
+    }
+    return tr;
 }
 
 TypeResolver::~TypeResolver()
@@ -92,20 +88,9 @@ TypeResolver* TypeResolver::get(const char* typeName)
     }
 }
 
-const char* TypeResolver::typeName() const
-{
-    return m_d->typeName;
-}
-
 void TypeResolver::toCpp(PyObject* pyObj, void** place)
 {
     m_d->pythonToCpp(pyObj, place);
-}
-
-void TypeResolver::deleteObject(void* object)
-{
-    if (m_d->deleteObject)
-        m_d->deleteObject(object);
 }
 
 PyObject* TypeResolver::toPython(void* cppObj)
