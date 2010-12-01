@@ -48,12 +48,6 @@ inline void* pythonToObjectType(PyObject* pyobj, void** data, bool)
 }
 
 template <typename T>
-inline void objectDeleter(void* data)
-{
-    delete reinterpret_cast<T*>(data);
-}
-
-template <typename T>
 inline PyObject* objectTypeToPython(void* cptr)
 {
     return Shiboken::Converter<T*>::toPython(*reinterpret_cast<T**>(cptr));
@@ -84,7 +78,7 @@ public:
     template<typename T>
     static TypeResolver* createValueTypeResolver(const char* typeName)
     {
-        return new TypeResolver(typeName, &Shiboken::Converter<T>::toPython, &pythonToValueType<T>, SbkType<T>(), &objectDeleter<T>);
+        return new TypeResolver(typeName, &Shiboken::Converter<T>::toPython, &pythonToValueType<T>, SbkType<T>(), &callCppDestructor<T>);
     }
 
     template<typename T>
