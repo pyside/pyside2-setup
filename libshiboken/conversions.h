@@ -172,16 +172,6 @@ struct Converter<T&>
     static inline T& toCpp(PyObject* pyobj) { return *Converter<T*>::toCpp(pyobj); }
 };
 
-template <typename T>
-struct Converter<const T&> : Converter<T&>
-{
-    static inline PyObject* toPython(const T& cppobj)
-    {
-        T* cpy = CppObjectCopier<T>::copy(cppobj);
-        return createWrapper<T>(cpy);
-    }
-};
-
 // Void pointer conversions.
 template<>
 struct Converter<void*>
@@ -198,7 +188,6 @@ struct Converter<void*>
     }
     static void* toCpp(PyObject* pyobj) { return pyobj; }
 };
-template <> struct Converter<const void*> : Converter<void*> {};
 
 // Base converter meant to be inherited by converters for classes that could be
 // passed by value.
@@ -298,7 +287,6 @@ struct Converter<PyObject*> : ObjectTypeConverter<PyObject*>
 {
     static inline PyObject* toCpp(PyObject* pyobj) { return pyobj; }
 };
-template <> struct Converter<const PyObject*> : Converter<PyObject*> {};
 
 // Primitive Conversions ------------------------------------------------------
 template <>
