@@ -219,7 +219,6 @@ PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* k
         d->ext_isconvertible = parentType->ext_isconvertible;
         d->ext_tocpp = parentType->ext_tocpp;
         d->type_discovery = parentType->type_discovery;
-        d->obj_copier = parentType->obj_copier;
         d->cpp_dtor = parentType->cpp_dtor;
         d->is_multicpp = 0;
     } else {
@@ -229,7 +228,6 @@ PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* k
         d->ext_isconvertible = 0;
         d->ext_tocpp = 0;
         d->type_discovery = 0;
-        d->obj_copier = 0;
         d->cpp_dtor = 0;
         d->is_multicpp = 1;
     }
@@ -459,16 +457,6 @@ bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctorType)
         return false;
     }
     return true;
-}
-
-void* copy(SbkObjectType* self, const void* obj)
-{
-    return self->d->obj_copier(obj);
-}
-
-void setCopyFunction(SbkObjectType* self, ObjectCopierFunction func)
-{
-    self->d->obj_copier = func;
 }
 
 bool hasExternalCppConversions(SbkObjectType* self)

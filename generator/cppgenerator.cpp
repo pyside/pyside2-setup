@@ -410,7 +410,6 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     if (!metaClass->typeEntry()->hashFunction().isEmpty())
         writeHashFunction(s, metaClass);
-    writeObjCopierFunction(s, metaClass);
     writeClassDefinition(s, metaClass);
     s << endl;
 
@@ -3263,10 +3262,6 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         s << INDENT << "Shiboken::ObjectType::setDestructorFunction(&" << cpythonTypeName(metaClass) << ", &Shiboken::callCppDestructor<" << dtorClassName << " >);" << endl;
     }
 
-    // Fill copy function
-    if (metaClass->typeEntry()->isValue() && shouldGenerateCppWrapper(metaClass))
-        s << INDENT << "Shiboken::ObjectType::setCopyFunction(&" << cpythonTypeName(metaClass) << ", &" <<  cpythonBaseName(metaClass) + "_ObjCopierFunc);" << endl;
-
     s << INDENT << "if (PyType_Ready((PyTypeObject*)&" << pyTypeName << ") < 0)" << endl;
     s << INDENT << INDENT << "return;" << endl << endl;
 
@@ -3865,17 +3860,6 @@ void CppGenerator::writeHashFunction(QTextStream& s, const AbstractMetaClass* me
     writeToCppConversion(s, metaClass, "obj");
     s << ");" << endl;
     s << '}' << endl << endl;
-}
-
-void CppGenerator::writeObjCopierFunction(QTextStream& s, const AbstractMetaClass* metaClass)
-{
-    if (!(metaClass->typeEntry()->isValue() && shouldGenerateCppWrapper(metaClass)))
-        return;
-    s << "static void* " << cpythonBaseName(metaClass) << "_ObjCopierFunc(const void* ptr)";
-    s << '{' << endl;
-    s << INDENT << "return new " << wrapperName(metaClass) << "(*reinterpret_cast<const " << metaClass->qualifiedCppName() << "*>(ptr));\n";
-    s << '}' << endl << endl;
-
 }
 
 void CppGenerator::writeStdListWrapperMethods(QTextStream& s, const AbstractMetaClass* metaClass)

@@ -89,7 +89,6 @@ struct SbkObjectTypePrivate
     /// Special cast function, null if this class doesn't have multiple inheritance.
     SpecialCastFunction mi_specialcast;
     TypeDiscoveryFunc type_discovery;
-    ObjectCopierFunction obj_copier;
     /// Extended "isConvertible" function to be used when a conversion operator is defined in another module.
     ExtendedIsConvertibleFunc ext_isconvertible;
     /// Extended "toCpp" function to be used when a conversion operator is defined in another module.

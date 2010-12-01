@@ -187,7 +187,6 @@ private:
     bool shouldGenerateGetSetList(const AbstractMetaClass* metaClass);
 
     void writeHashFunction(QTextStream& s, const AbstractMetaClass* metaClass);
-    void writeObjCopierFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
     // Write default implementations for sequence protocol
     void writeStdListWrapperMethods(QTextStream& s, const AbstractMetaClass* metaClass);
