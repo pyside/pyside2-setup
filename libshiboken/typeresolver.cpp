@@ -97,9 +97,9 @@ const char* TypeResolver::typeName() const
     return m_d->typeName;
 }
 
-void* TypeResolver::toCpp(PyObject* pyObj, void** place, bool alloc)
+void TypeResolver::toCpp(PyObject* pyObj, void** place)
 {
-    return m_d->pythonToCpp(pyObj, place, alloc);
+    m_d->pythonToCpp(pyObj, place);
 }
 
 void TypeResolver::deleteObject(void* object)

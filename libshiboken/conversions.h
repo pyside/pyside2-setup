@@ -69,41 +69,6 @@ template<> inline PyTypeObject* SbkType<char>() { return &PyInt_Type; }
 template<> inline PyTypeObject* SbkType<signed char>() { return &PyInt_Type; }
 template<> inline PyTypeObject* SbkType<unsigned char>() { return &PyInt_Type; }
 
-template<typename T>
-struct SbkTypeInfo {
-    static const bool isCppWrapper = false;
-};
-
-/**
- *   This struct template is used to copy a C++ object using the proper
- *   constructor, which could be the same type as used on the wrapped library
- *   or a C++ wrapper type provided by the binding.
- */
-template <typename T, bool hasWrapper = SbkTypeInfo<T>::isCppWrapper>
-struct CppObjectCopier
-{
-    static inline T* copy(const T& obj);
-};
-
-template<typename T>
-struct CppObjectCopier<T, false>
-{
-    static inline T* copy(const T& obj)
-    {
-        return new T(obj);
-    }
-};
-
-template<typename T>
-struct CppObjectCopier<T, true>
-{
-    static inline T* copy(const T& obj)
-    {
-        return reinterpret_cast<T*>(ObjectType::copy(reinterpret_cast<SbkObjectType*>(SbkType<T>()), &obj));
-    }
-};
-
-
 /**
  * Convenience template to create wrappers using the proper Python type for a given C++ class instance.
  */
@@ -152,7 +117,7 @@ struct Converter<T*>
         if (PyObject_TypeCheck(pyobj, SbkType<T>()))
             return (T*) Object::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<T>());
         else if (Converter<T>::isConvertible(pyobj))
-            return CppObjectCopier<T>::copy(Converter<T>::toCpp(pyobj));
+            return new T(Converter<T>::toCpp(pyobj));
         else if (pyobj == Py_None)
             return 0;
 

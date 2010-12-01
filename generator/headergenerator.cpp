@@ -360,7 +360,6 @@ void HeaderGenerator::finishGeneration()
 
         if (!metaClass->isNamespace()) {
             writeSbkTypeFunction(typeFunctions, metaClass);
-            writeSbkCopyCppObjectFunction(convDecl, metaClass);
             writeTypeConverterDecl(convDecl, classType);
             writeTypeConverterImpl(convImpl, classType);
             convDecl << endl;
@@ -503,18 +502,6 @@ void HeaderGenerator::writeSbkTypeFunction(QTextStream& s, const AbstractMetaCla
 {
     s <<  "template<> inline PyTypeObject* SbkType< ::" << cppClass->qualifiedCppName() << " >() "
       <<  "{ return reinterpret_cast<PyTypeObject*>(" << cpythonTypeNameExt(cppClass->typeEntry()) << "); }\n";
-}
-
-void HeaderGenerator::writeSbkCopyCppObjectFunction(QTextStream& s, const AbstractMetaClass* metaClass)
-{
-    if (!metaClass->typeEntry()->isValue() || !shouldGenerateCppWrapper(metaClass))
-        return;
-    QString className = metaClass->qualifiedCppName();
-    s << "template <>" << endl;
-    s << "struct SbkTypeInfo<" << className << " >" << endl;
-    s << '{' << endl;
-    s << INDENT << "static const bool isCppWrapper = true;" << endl;
-    s << "};" << endl;
 }
 
 void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
