@@ -115,11 +115,16 @@ namespace-type
 
         <typesystem>
             <namespace-type name="..."
+                generate="yes | no"
                 package="..." />
         </typesystem>
 
-    The **name** attribute is the name of the namespace, e.g., "Qt". The **package**
-    attribute can be used to override the package of the type system.
+    The **name** attribute is the name of the namespace, e.g., "Qt".
+
+    The *optional* **generate** attribute is used to inform if you need to prepend
+    the given namespace into each generated class. Its default value is **yes**.
+
+    The **package** attribute can be used to override the package of the type system.
 
     The *optional*  **since** value is used to specify the API version of this type.
 
