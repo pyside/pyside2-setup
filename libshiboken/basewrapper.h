@@ -72,6 +72,8 @@ typedef void (*DeleteUserDataFunc)(void*);
 
 typedef void (*ObjectDestructor)(void*);
 
+typedef void (*SubTypeInitHook)(SbkObjectType*, PyObject*, PyObject*);
+
 extern LIBSHIBOKEN_API PyTypeObject SbkObjectType_Type;
 extern LIBSHIBOKEN_API SbkObjectType SbkObject_Type;
 
@@ -150,9 +152,19 @@ LIBSHIBOKEN_API void        setDestructorFunction(SbkObjectType* self, ObjectDes
 LIBSHIBOKEN_API void        initPrivateData(SbkObjectType* self);
 
 /**
+ *  Set the subtype init hook for a type.
+ *
+ *  This hook will be invoked every time the user creates a sub-type inherited from a Shiboken based type.
+ *  The hook gets 3 params, they are: The new type being created, args and kwds. The last two are the very
+ *  same got from tp_new.
+ */
+LIBSHIBOKEN_API void        setSubTypeInitHook(SbkObjectType* self, SubTypeInitHook func);
+
+/**
  *  Get the user data previously set by Shiboken::Object::setTypeUserData
  */
-LIBSHIBOKEN_API void*       getTypeUserData(SbkObjectType* type);
+LIBSHIBOKEN_API void*       getTypeUserData(SbkObjectType* self);
+LIBSHIBOKEN_API void        setTypeUserData(SbkObjectType* self, void* userData, DeleteUserDataFunc d_func);
 }
 
 namespace Object {

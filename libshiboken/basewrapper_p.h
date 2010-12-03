@@ -104,6 +104,7 @@ struct SbkObjectTypePrivate
     /// Type user data
     void *user_data;
     DeleteUserDataFunc d_func;
+    void (*subtype_init)(SbkObjectType*, PyObject*, PyObject*);
 };
 
 

@@ -239,6 +239,13 @@ PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* k
     d->d_func = 0;
     d->is_user_type = 1;
     newType->d = d;
+
+    std::list<SbkObjectType*>::const_iterator it = bases.begin();
+    for (; it != bases.end(); ++it) {
+        if ((*it)->d->subtype_init)
+            (*it)->d->subtype_init(newType, args, kwds);
+    }
+
     return reinterpret_cast<PyObject*>(newType);
 }
 
@@ -549,9 +556,20 @@ void initPrivateData(SbkObjectType* self)
     memset(self->d, 0, sizeof(SbkObjectTypePrivate));
 }
 
-void* getTypeUserData(SbkObjectType* type)
+void setSubTypeInitHook(SbkObjectType* self, SubTypeInitHook func)
 {
-    return type->d->user_data;
+    self->d->subtype_init = func;
+}
+
+void* getTypeUserData(SbkObjectType* self)
+{
+    return self->d->user_data;
+}
+
+void setTypeUserData(SbkObjectType* self, void* userData, DeleteUserDataFunc d_func)
+{
+    self->d->user_data = userData;
+    self->d->d_func = d_func;
 }
 
 } // namespace ObjectType
