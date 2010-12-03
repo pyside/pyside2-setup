@@ -123,8 +123,6 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
         if (usePySideExtensions() && metaClass->isQObject()) {
             s << "public:\n";
             s << INDENT << "virtual int qt_metacall(QMetaObject::Call call, int id, void** args);\n";
-            s << "private:\n";
-            s << INDENT << "mutable PySide::DynamicQMetaObject* m_metaObject;\n";
         }
 
 #ifdef AVOID_PROTECTED_HACK

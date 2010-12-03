@@ -173,7 +173,6 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     if (usePySideExtensions()) {
         if (metaClass->isQObject()) {
             s << "#include <signalmanager.h>" << endl;
-            s << "#include <dynamicqmetaobject.h>" << endl;
             s << "#include <pysidemetafunction.h>" << endl;
         }
     }
@@ -452,9 +451,6 @@ void CppGenerator::writeConstructorNative(QTextStream& s, const AbstractMetaFunc
                            OriginalTypeDescription | SkipDefaultValues);
     s << " : ";
     writeFunctionCall(s, func);
-    if (usePySideExtensions() && func->ownerClass()->isQObject())
-        s << ", m_metaObject(0)";
-
     s << " {" << endl;
     const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().last();
     writeCodeSnips(s, func->injectedCodeSnips(), CodeSnip::Beginning, TypeSystem::NativeCode, func, lastArg);
@@ -779,31 +775,13 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
 {
     Indentation indentation(INDENT);
     QString wrapperClassName = wrapperName(metaClass);
-    QString prefix = wrapperClassName + "::";
-    s << "const QMetaObject* " << wrapperClassName << "::metaObject() const\n{\n";
-    s << INDENT << "if (!m_metaObject) {\n";
-    {
-        Indentation indentation(INDENT);
-        s << INDENT << "SbkObject* pySelf = Shiboken::BindingManager::instance().retrieveWrapper(this);\n"
-          << INDENT << "void* typeData = Shiboken::Object::getTypeUserData(pySelf);" << endl
-          << INDENT << "if (!typeData) {" << endl;
-        {
-            Indentation indentation2(INDENT);
-            s << INDENT << "m_metaObject = PySide::DynamicQMetaObject::createBasedOn((PyObject*)pySelf, pySelf->ob_type, &"
-                        << metaClass->qualifiedCppName() << "::staticMetaObject);" << endl
-                        << INDENT << "Shiboken::Object::setTypeUserData(pySelf, m_metaObject, Shiboken::callCppDestructor<PySide::DynamicQMetaObject>);" << endl;
-        }
-        s << INDENT << "} else {" << endl;
-        {
-            Indentation indentation2(INDENT);
-            s << INDENT << "m_metaObject = reinterpret_cast<PySide::DynamicQMetaObject*>(typeData);" << endl;
-        }
-        s << INDENT << "}" << endl;
-    }
-    s << INDENT << "}" << endl;
-    s << INDENT << "return m_metaObject;\n";
-    s << "}\n\n";
+    s << "const QMetaObject* " << wrapperClassName << "::metaObject() const" << endl;
+    s << '{' << endl;
+    s << INDENT << "SbkObject* pySelf = Shiboken::BindingManager::instance().retrieveWrapper(this);" << endl;
+    s << INDENT << "return reinterpret_cast<QMetaObject*>(Shiboken::Object::getTypeUserData(pySelf));" << endl;
+    s << '}' << endl << endl;
 
+    // qt_metacall function
     s << "int " << wrapperClassName << "::qt_metacall(QMetaObject::Call call, int id, void** args)\n";
     s << "{\n";
     s << INDENT << "int result = " << metaClass->qualifiedCppName() << "::qt_metacall(call, id, args);\n";
@@ -3215,6 +3193,11 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
 
     // alloc private data
     s << INDENT << "Shiboken::ObjectType::initPrivateData(&" << cpythonTypeName(metaClass->typeEntry()) << ");" << endl;
+
+    if (usePySideExtensions() && metaClass->isQObject()) {
+        s << INDENT << "Shiboken::ObjectType::setSubTypeInitHook(&" << cpythonTypeName(metaClass->typeEntry()) << ", &PySide::initQObjectSubType);" << endl;
+        s << INDENT << "PySide::initDynamicMetaObject(&" << cpythonTypeName(metaClass->typeEntry()) << ", &" << metaClass->qualifiedCppName() << "::staticMetaObject);";
+    }
 
     // class inject-code target/beginning
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
