@@ -1013,7 +1013,8 @@ void ShibokenGenerator::writeArgumentNames(QTextStream &s,
 
         if (((options & Generator::VirtualCall) == 0) &&
             (!func->conversionRule(TypeSystem::NativeCode, arguments.at(j)->argumentIndex() + 1).isEmpty() ||
-             !func->conversionRule(TypeSystem::TargetLangCode, arguments.at(j)->argumentIndex() + 1).isEmpty())
+             !func->conversionRule(TypeSystem::TargetLangCode, arguments.at(j)->argumentIndex() + 1).isEmpty()) &&
+            !func->isConstructor()
            )
            s << "_out";
 
