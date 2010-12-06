@@ -1216,6 +1216,19 @@
         </add-function>
     </value-type>
 
+    <value-type name="CtorConvRule">
+        <modify-function signature="CtorConvRule(long)">
+            <modify-argument index="1">
+                <!--<replace-type modified-type="long"/>-->
+                <conversion-rule class="native">
+                    // Does nothing really, just test the code generation
+                    // of constructors whose arguments where
+                    long %out = PyInt_AS_LONG(%PYARG_1) + 1;
+                </conversion-rule>
+            </modify-argument>
+        </modify-function>
+    </value-type>
+
     <add-function signature="multiplyString(PyString*, unsigned int)" return-type="const char*">
         <inject-code class="target" position="beginning">
             %PYARG_0 = PyString_FromString("");
