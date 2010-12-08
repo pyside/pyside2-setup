@@ -1,7 +1,7 @@
 /*
  * This file is part of the Shiboken Python Bindings Generator project.
  *
- * Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -30,6 +30,12 @@
 
 namespace Shiboken
 {
+
+template<typename A>
+inline PyObject* makeTuple(const A& a)
+{
+    return PyTuple_Pack(1, AutoDecRef(Converter<A>::toPython(a)).object());
+}
 
 template<typename A, typename B>
 inline PyObject* makeTuple(const A& a, const B& b)
