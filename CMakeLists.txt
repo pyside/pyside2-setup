@@ -10,6 +10,7 @@ find_package(LibXslt 1.1.19)
 
 option(DISABLE_DOCSTRINGS "Disable documentation extraction." FALSE)
 option(BUILD_TESTS "Build tests." TRUE)
+option(INSTALL_TESTS "Install tests" FALSE)
 option(ENABLE_VERSION_SUFFIX "Used to use current version in suffix to generated files. This is used to allow multiples versions installed simultaneous." FALSE)
 
 if (NOT DISABLE_DOCSTRINGS)
