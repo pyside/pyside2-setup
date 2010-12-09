@@ -30,6 +30,7 @@
 #include <cstring>
 #include <cstddef>
 #include <algorithm>
+#include "threadstatesaver.h"
 
 extern "C"
 {
@@ -166,10 +167,11 @@ void SbkDeallocWrapper(PyObject* pyObj)
             Shiboken::DtorCallerVisitor visitor(sbkObj);
             Shiboken::walkThroughClassHierarchy(pyObj->ob_type, &visitor);
         } else {
+            Shiboken::ThreadStateSaver threadSaver;
+            threadSaver.save();
             sbkType->d->cpp_dtor(sbkObj->d->cptr[0]);
         }
     }
-
     Shiboken::Object::deallocData(sbkObj, !sbkObj->d->containsCppWrapper);
 }
 
@@ -318,6 +320,8 @@ bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr)
 
 void DtorCallerVisitor::visit(SbkObjectType* node)
 {
+    Shiboken::ThreadStateSaver threadSaver;
+    threadSaver.save();
     node->d->cpp_dtor(m_pyObj->d->cptr[m_count]);
     m_count++;
 }
