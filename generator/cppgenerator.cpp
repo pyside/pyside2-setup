@@ -2993,6 +2993,13 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
                     QString cppSignature =  QMetaObject::normalizedType(qPrintable(type->cppSignature()));
                     QString originalSignature = QMetaObject::normalizedType(qPrintable(type->originalTypeDescription()));
 
+                    if (!a->defaultValueExpression().isEmpty()) {
+                        QString sig = QMetaObject::normalizedSignature(signature.toAscii());
+                        if (sig.isEmpty())
+                            sig = "void";
+                        signatures[cppSignal->name()].append(sig);
+                    }
+
                     if ((cppSignature != originalSignature) && !knowTypes.contains(originalSignature)) {
                         knowTypes << originalSignature;
                         s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<"
