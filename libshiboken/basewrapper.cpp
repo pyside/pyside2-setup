@@ -30,7 +30,6 @@
 #include <cstring>
 #include <cstddef>
 #include <algorithm>
-#include "threadstatesaver.h"
 
 extern "C"
 {
@@ -160,8 +159,6 @@ void SbkDeallocWrapper(PyObject* pyObj)
     if (sbkObj->weakreflist)
         PyObject_ClearWeakRefs(pyObj);
 
-    Shiboken::ThreadStateSaver threadSaver;
-    threadSaver.save();
     // If I have ownership and is valid delete C++ pointer
     if (sbkObj->d->hasOwnership && sbkObj->d->validCppObject) {
         SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(pyObj->ob_type);
@@ -172,7 +169,7 @@ void SbkDeallocWrapper(PyObject* pyObj)
             sbkType->d->cpp_dtor(sbkObj->d->cptr[0]);
         }
     }
-    threadSaver.restore();
+
     Shiboken::Object::deallocData(sbkObj, !sbkObj->d->containsCppWrapper);
 }
 
