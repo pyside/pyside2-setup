@@ -6,7 +6,7 @@ macro(declare_test testname)
     target_link_libraries(${testname} ${QT_QTTEST_LIBRARY} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} apiextractor)
     add_test(${testname} ${testname})
     if (INSTALL_TESTS)
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${testname} DESTINATION share/apiextractor${apiextractor_SUFFIX}/tests)
+        install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${testname} DESTINATION share/apiextractor${apiextractor_SUFFIX}/tests)
     endif()
 endmacro(declare_test testname)
 
