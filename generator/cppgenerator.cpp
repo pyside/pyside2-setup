@@ -29,7 +29,7 @@
 #include <QtCore/QTextStream>
 #include <QtCore/QDebug>
 
-// utiliy functions
+// utility functions
 inline CodeSnipList getConversionRule(TypeSystem::Language lang, const AbstractMetaFunction *function)
 {
     CodeSnipList list;
@@ -2733,7 +2733,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
     s << baseName << "_richcompare(PyObject* self, PyObject* other, int op)" << endl;
     s << '{' << endl;
     QList<AbstractMetaFunctionList> cmpOverloads = filterGroupedOperatorFunctions(metaClass, AbstractMetaClass::ComparisonOp);
-    s << INDENT << "bool result = false;" << endl;
+    s << INDENT << "PyObject* result = 0;" << endl;
     s << INDENT << metaClass->qualifiedCppName() << "& " CPP_SELF_VAR " = *" << cpythonWrapperCPtr(metaClass) << ';' << endl;
     s << endl;
 
@@ -2786,24 +2786,10 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                     s << " cppOther = ";
                     writeToCppConversion(s, type, metaClass, "other", ExcludeReference | ExcludeConst);
                     s << ';' << endl;
-                    s << INDENT << "result = (" CPP_SELF_VAR " " << op << " cppOther);" << endl;
-                }
-                s << INDENT << '}';
-            }
 
-            // Compares with implicit conversions
-            if (comparesWithSameType && !metaClass->implicitConversions().isEmpty()) {
-                AbstractMetaType temporaryType;
-                temporaryType.setTypeEntry(metaClass->typeEntry());
-                temporaryType.setConstant(false);
-                temporaryType.setReference(false);
-                temporaryType.setTypeUsagePattern(AbstractMetaType::ValuePattern);
-                s << " else if (" << cpythonIsConvertibleFunction(metaClass->typeEntry());
-                s << "(other)) {" << endl;
-                {
-                    Indentation indent(INDENT);
-                    writeArgumentConversion(s, &temporaryType, "cppOther", "other", metaClass);
-                    s << INDENT << "result = (" CPP_SELF_VAR " " << op << " cppOther);" << endl;
+                    s << INDENT << "result = ";
+                    writeToPythonConversion(s, func->type(), metaClass, CPP_SELF_VAR " " + op + " cppOther");
+                    s << ';' << endl;
                 }
                 s << INDENT << '}';
             }
@@ -2816,19 +2802,19 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
         s << INDENT << "default:" << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"operator not implemented.\");" << endl;
-            s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+            s << INDENT << "goto " << baseName << "_RichComparison_TypeError;" << endl;
         }
     }
     s << INDENT << '}' << endl << endl;
 
-    s << INDENT << "if (result)" << endl;
+    s << INDENT << "if (result && !PyErr_Occurred())" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "Py_RETURN_TRUE;" << endl;
+        s << INDENT << "return result;" << endl;
     }
     s << INDENT << baseName << "_RichComparison_TypeError:" << endl;
-    s << INDENT << "Py_RETURN_FALSE;" << endl << endl;
+    s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"operator not implemented.\");" << endl;
+    s << INDENT << "return " << m_currentErrorCode << ';' << endl << endl;
     s << '}' << endl << endl;
 }
 

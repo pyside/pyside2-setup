@@ -1255,6 +1255,8 @@
     <!-- type used in abstract method -->
     <object-type name="HideType" generate="no" />
 
+    <value-type name="Expression" />
+
     <rejection class="ListUser" function-name="createList()"/>
     <rejection class="ListUser" function-name="callCreateList()"/>
     <rejection class="ListUser" function-name="createComplexList(Complex, Complex)"/>

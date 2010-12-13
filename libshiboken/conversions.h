@@ -203,7 +203,7 @@ struct ValueTypeConverter
 template <typename T>
 struct ObjectTypeConverter
 {
-    static inline bool checkType(PyObject* pyObj) { return PyObject_TypeCheck(pyObj, SbkType<T>()); }
+    static inline bool checkType(PyObject* pyObj) { return pyObj == Py_None || PyObject_TypeCheck(pyObj, SbkType<T>()); }
     /// Py_None objects are the only objects convertible to an object type (in the form of a NULL pointer).
     static inline bool isConvertible(PyObject* pyObj) { return pyObj == Py_None || PyObject_TypeCheck(pyObj, SbkType<T>()); }
     /// Convenience overload that calls "toPython(const T*)" method.
@@ -452,7 +452,8 @@ struct EnumConverter
 template <typename CString>
 struct Converter_CString
 {
-    static inline bool checkType(PyObject* pyObj) { return PyString_Check(pyObj); }
+    // Note: 0 is also a const char* in C++, so None is accepted in checkType
+    static inline bool checkType(PyObject* pyObj) { return pyObj == Py_None || PyString_Check(pyObj); }
     static inline bool isConvertible(PyObject* pyObj) { return pyObj == Py_None || PyString_Check(pyObj); }
     static inline PyObject* toPython(void* cppobj) { return toPython(reinterpret_cast<CString>(cppobj)); }
     static inline PyObject* toPython(CString cppobj)

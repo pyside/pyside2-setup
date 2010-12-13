@@ -64,7 +64,7 @@ class ReferenceTest(unittest.TestCase):
     def testCantSegFaultWhenReceiveNone(self):
         '''do not segfault when receiving None as argument.'''
         s = Str()
-        self.assert_(not None == s)
+        self.assertTrue(None == s)
 
     def testMethodThatReceivesConstReference(self):
         '''Test a method that receives a const reference to an object as argument.'''

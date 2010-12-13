@@ -44,3 +44,4 @@
 #include "virtualmethods.h"
 #include "voidholder.h"
 #include "valueandvirtual.h"
+#include "expression.h"

@@ -34,6 +34,7 @@ sometime.cpp
 str.cpp
 strlist.cpp
 virtualmethods.cpp
+expression.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
