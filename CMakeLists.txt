@@ -6,6 +6,8 @@ find_package(Qt4 4.5.0 REQUIRED)
 find_package(ApiExtractor 0.9.0 REQUIRED)
 
 option(BUILD_TESTS "Build tests." TRUE)
+option(INSTALL_TESTS "Install tests" FALSE)
+option(TEST_INSTALL_DIR "Test install directory" FALSE)
 option(ENABLE_VERSION_SUFFIX "Used to use current version in suffix to generated files. This is used to allow multiples versions installed simultaneous." FALSE)
 
 if(MSVC)
@@ -102,6 +104,9 @@ install(FILES generator.h DESTINATION include/${GENERATORRUNNER_INC_DIR})
 install(FILES generatorrunnermacros.h DESTINATION include/${GENERATORRUNNER_INC_DIR})
 
 if (BUILD_TESTS)
+    if (NOT TEST_INSTALL_DIR)
+        set(TEST_INSTALL_DIR "share/generatorrunner/tests")
+    endif()
     enable_testing()
 endif()
 

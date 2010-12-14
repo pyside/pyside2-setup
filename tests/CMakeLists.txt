@@ -19,4 +19,7 @@ if (NOT APIEXTRACTOR_DOCSTRINGS_DISABLED)
                         genrunner)
 
     add_test("sphinxtable" sphinxtabletest)
+    if (INSTALL_TESTS)
+        install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/sphinxtabletest DESTINATION ${TEST_INSTALL_DIR})
+    endif()
 endif()
