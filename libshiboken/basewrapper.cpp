@@ -814,6 +814,11 @@ PyObject* newObject(SbkObjectType* instanceType,
 
 void destroy(SbkObject* self)
 {
+    destroy(self, 0);
+}
+
+void destroy(SbkObject* self, void* cppData)
+{
     // Skip if this is called with NULL pointer this can happen in derived classes
     if (!self)
         return;
@@ -821,15 +826,8 @@ void destroy(SbkObject* self)
     // This can be called in c++ side
     Shiboken::GilState gil;
 
-    // We will marks this object as invalid because this function will be called from wrapper destructor
-    // If The object has ownership and this was destroyed then is necessary invalidate to avoid future used by Python
-    self->d->validCppObject = false;
-
     // Remove all references attached to this object
     clearReferences(self);
-
-    // Remove from BindinManager
-    Shiboken::BindingManager::instance().releaseWrapper(self);
 
     // Remove the object from parent control
 
@@ -848,6 +846,13 @@ void destroy(SbkObject* self)
         // This can cause the object death
         Py_DECREF((PyObject*)self);
     }
+
+    //Python Object is not destroyed yet
+    if (cppData && Shiboken::BindingManager::instance().hasWrapper(cppData)) {
+        // Remove from BindinManager
+        Shiboken::BindingManager::instance().releaseWrapper(self);
+    }
+
     // After this point the object can be death do not use the self pointer bellow
 }
 
@@ -876,7 +881,7 @@ void removeParent(SbkObject* child, bool giveOwnershipBack, bool keepReference)
     child->d->hasOwnership = giveOwnershipBack;
 
     // Remove parent ref
-    Py_DECREF(child);
+    Py_CLEAR(child);
 }
 
 void setParent(PyObject* parent, PyObject* child)
@@ -952,10 +957,10 @@ void deallocData(SbkObject* self, bool cleanup)
             _destroyParentInfo(self, true);
 
         clearReferences(self);
-
-        // Remove from BindinManager
-        Shiboken::BindingManager::instance().releaseWrapper(self);
     }
+
+    // Remove from BindinManager
+    Shiboken::BindingManager::instance().releaseWrapper(self);
 
     Py_XDECREF(self->ob_dict);
     delete[] self->d->cptr;
