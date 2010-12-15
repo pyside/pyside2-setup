@@ -758,7 +758,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             s << INDENT << "if (" << PYTHON_RETURN_VAR << "->ob_refcnt < 2) {" << endl;
             {
                 Indentation indent(INDENT);
-                s << INDENT << "PyErr_SetString(PyExc_ReferenceError, \"Returning last python reference on virutal function: "
+                s << INDENT << "PyErr_SetString(PyExc_ReferenceError, \"Returning last python reference on virtual function: "
                   << func->ownerClass()->name() << "." << func->name() << "\");" << endl;
                 s << INDENT << "PyErr_Print();" << endl;
                 s << INDENT << "assert(false);" << endl;
