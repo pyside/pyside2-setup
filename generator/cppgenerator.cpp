@@ -3413,86 +3413,10 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
         }
         s << INDENT << '}' << endl;
     }
-    s << INDENT << "PyObject* attr = PyObject_GenericGetAttr(self, name);" << endl;
-    if (usePySideExtensions() && (metaClass->qualifiedCppName() == "QObject")) {
-        s << INDENT << "if (attr && PySide::Property::isPropertyType(attr)) {" << endl;
-        {
-            Indentation indent(INDENT);
-            s << INDENT << "PyObject *value = PySide::Property::getValue(reinterpret_cast<PySideProperty*>(attr), self);" << endl;
-            s << INDENT << "if (!value)" << endl;
-            {
-                Indentation indentation(INDENT);
-                s << INDENT << "return " << m_currentErrorCode << ';' << endl;
-            }
-            s << INDENT << "Py_DECREF(attr);" << endl;
-            s << INDENT << "Py_INCREF(value);" << endl;
-            s << INDENT << "attr = value;" << endl;
-        }
-        s << INDENT << "}" << endl;
-
-        //mutate native signals to signal instance type
-        s << INDENT << "if (attr && PyObject_TypeCheck(attr, &PySideSignalType)) {" << endl;
-        {
-            Indentation indent(INDENT);
-            s << INDENT << "PyObject* signal = reinterpret_cast<PyObject*>(PySide::Signal::initialize(reinterpret_cast<PySideSignal*>(attr), name, self));" << endl
-              << INDENT << "PyObject_SetAttr(self, name, reinterpret_cast<PyObject*>(signal));" << endl
-              << INDENT << "return signal;" << endl;
-        }
-        s << INDENT << "}" << endl;
-
-        //search on metaobject (avoid internal attributes started with '__')";
-        s << INDENT << "if (!attr && !QString(PyString_AS_STRING(name)).startsWith(\"__\")) {" << endl;
-        {
-            Indentation indent(INDENT);
-            s << INDENT << "QObject* cppSelf = Shiboken::Converter<QObject*>::toCpp(self);" << endl
-              << INDENT << "const QMetaObject* metaObject = cppSelf->metaObject();" << endl
-              << INDENT << "QByteArray cname(PyString_AS_STRING(name));" << endl
-              << INDENT << "cname += '(';" << endl
-              << INDENT << "//signal" << endl
-              << INDENT << "QList<QMetaMethod> signalList;" << endl
-              << INDENT << "for(int i=0, i_max = metaObject->methodCount(); i < i_max; i++) {" << endl;
-            {
-                Indentation indent(INDENT);
-                s << INDENT << "QMetaMethod method = metaObject->method(i);" << endl
-                  << INDENT << "if (QString(method.signature()).startsWith(cname)) {" << endl;
-                {
-                    Indentation indent(INDENT);
-                    s << INDENT << "if (method.methodType() == QMetaMethod::Signal) {" << endl;
-                    {
-                        Indentation indent(INDENT);
-                        s << INDENT << "signalList.append(method);" << endl;
-                    }
-                    s << INDENT << "} else {" << endl;
-                    {
-                        Indentation indent(INDENT);
-                        s << INDENT << "PySideMetaFunction* func = PySide::MetaFunction::newObject(cppSelf, i);" << endl
-                          << INDENT << "if (func) {" << endl;
-                        {
-                            Indentation indent(INDENT);
-                            s << INDENT << "PyObject_SetAttr(self, name, (PyObject*)func);" << endl
-                              << INDENT << "return (PyObject*)func;" << endl;
-                        }
-                        s << INDENT << "}" << endl;
-                    }
-                    s << INDENT << "}" << endl;
-                }
-                s << INDENT << "}" << endl;
-
-            }
-            s << INDENT << "}" << endl
-              << INDENT << "if (signalList.size() > 0) {" << endl;
-            {
-                Indentation indent(INDENT);
-                s << INDENT << "PyObject* pySignal = reinterpret_cast<PyObject*>(PySide::Signal::newObjectFromMethod(self, signalList));" << endl
-                  << INDENT << "PyObject_SetAttr(self, name, pySignal);" << endl
-                  << INDENT << "return pySignal;" << endl;
-            }
-            s << INDENT << "}" << endl;
-        }
-        s << INDENT << "}" << endl;
-    }
-
-    s << INDENT << "return attr;" << endl;
+    if (usePySideExtensions() && metaClass->isQObject())
+        s << INDENT << "return PySide::getMetaDataFromQObject(Shiboken::Converter<QObject*>::toCpp(self), self, name);" << endl;
+    else
+        s << INDENT << "return PyObject_GenericGetAttr(self, name);" << endl;
     s << '}' << endl;
 }
 
