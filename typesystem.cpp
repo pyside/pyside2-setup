@@ -1073,7 +1073,7 @@ bool Handler::startElement(const QString &, const QString &n,
             static QHash<QString, TypeSystem::Language> languageNames;
             if (languageNames.isEmpty()) {
                 languageNames["target"] = TypeSystem::TargetLangCode;
-                languageNames["shell"] = TypeSystem::ShellCode;
+                languageNames["native"] = TypeSystem::NativeCode;
             }
 
             QString classAttribute = attributes["class"].toLower();

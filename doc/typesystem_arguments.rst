@@ -122,7 +122,7 @@ define-ownership
     .. code-block:: xml
 
         <modify-argument>
-              <define-ownership class="target | shell"
+              <define-ownership class="target | native"
                                 owner="target | c++ | default" />
         </modify-argument>
 
