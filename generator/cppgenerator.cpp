@@ -84,6 +84,14 @@ inline AbstractMetaType* getTypeWithoutContainer(AbstractMetaType* arg)
     return arg;
 }
 
+static QString reduceTypeName(const AbstractMetaClass* metaClass)
+{
+    QString qualifiedCppName = metaClass->typeEntry()->qualifiedCppName();
+    QString lookupName =  metaClass->typeEntry()->lookupName();
+    if (lookupName != qualifiedCppName)
+        return lookupName;
+    return QString();
+}
 
 CppGenerator::CppGenerator() : m_currentErrorCode(0)
 {
@@ -121,6 +129,47 @@ QList<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(con
         results[op].append(func);
     }
     return results.values();
+}
+
+void CppGenerator::writeRegisterType(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    QString typeName = metaClass->qualifiedCppName();
+    QString reducedName = reduceTypeName(metaClass);
+
+    bool isObjectType = metaClass->typeEntry()->isObject();
+    if (!isObjectType) {
+        s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<" << typeName << " >" << "(\"" << typeName << "\");\n";
+        if (!reducedName.isEmpty())
+            s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<" << typeName << " >" << "(\"" << reducedName << "\");\n";
+    }
+
+    s << INDENT << "Shiboken::TypeResolver::createObjectTypeResolver<" << typeName << " >" << "(\"" << typeName << "*\");\n";
+    if (!reducedName.isEmpty())
+        s << INDENT << "Shiboken::TypeResolver::createObjectTypeResolver<" << typeName << " >" << "(\"" << reducedName << "*\");\n";
+    QString functionSufix = (isObjectType ? "Object" : "Value");
+    s << INDENT << "Shiboken::TypeResolver::create" << functionSufix;
+    s << "TypeResolver<" << typeName << " >" << "(typeid(" << typeName << ").name());\n";
+    if (shouldGenerateCppWrapper(metaClass)) {
+        s << INDENT << "Shiboken::TypeResolver::create" << functionSufix;
+        s << "TypeResolver<" << typeName << " >" << "(typeid(" << wrapperName(metaClass) << ").name());\n";
+    }
+}
+
+void CppGenerator::writeRegisterType(QTextStream& s, const AbstractMetaEnum* metaEnum)
+{
+    QString fullName;
+    QString shortName;
+    if (metaEnum->enclosingClass()) {
+        QString suffix = "::" + metaEnum->name();
+        fullName = metaEnum->enclosingClass()->qualifiedCppName() + suffix;
+        shortName = reduceTypeName(metaEnum->enclosingClass()) + suffix;
+    } else  {
+        fullName = metaEnum->name();
+    }
+    s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<int>(\"" << fullName << "\");\n";
+    if (!shortName.isEmpty())
+        s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<int>(\"" << shortName << "\");\n";
+
 }
 
 void CppGenerator::writeToPythonFunction(QTextStream& s, const AbstractMetaClass* metaClass)
@@ -2962,14 +3011,24 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
 
     if (!cppEnum->isAnonymous()) {
         // TypeResolver stuff
-        s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<int>(\"";
-        if (cppEnum->enclosingClass())
-            s << cppEnum->enclosingClass()->qualifiedCppName() << "::";
-        s << cppEnum->name() << "\");\n";
+        writeRegisterType(s, cppEnum);
     }
 
 
     s << INDENT << "// end of enum " << cppEnum->name() << endl << endl;
+}
+
+static QString skipNamespace(const QString& typeName)
+{
+    QString namespaceName = typeName.split("::").first();
+    if (namespaceName.isEmpty())
+        return typeName;
+
+    NamespaceTypeEntry* entry = TypeDatabase::instance()->findNamespaceType(namespaceName);
+    if (entry && !entry->generateCode())
+        return QString(typeName).replace(namespaceName + "::", "");
+
+    return typeName;
 }
 
 void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaClass* metaClass)
@@ -2984,6 +3043,7 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
                 for (int i = 0; i < cppSignal->arguments().count(); ++i) {
                     if (i > 0)
                         signature += ", ";
+
                     AbstractMetaArgument *a = cppSignal->arguments().at(i);
                     AbstractMetaType* type = a->type();
                     QString cppSignature =  QMetaObject::normalizedType(qPrintable(type->cppSignature()));
@@ -3000,9 +3060,9 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
                         knowTypes << originalSignature;
                         s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<"
                           << cppSignature << " >"
-                          << "(\"" << originalSignature << "\"); // " << type->cppSignature() << "\n";
+                          << "(\"" << skipNamespace(originalSignature) << "\"); // " << type->cppSignature() << "\n";
                     }
-                    signature += type->originalTypeDescription();
+                    signature += skipNamespace(type->originalTypeDescription());
                 }
             } else {
                 signature = "void";
@@ -3310,21 +3370,8 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::End, TypeSystem::TargetLangCode, 0, 0, metaClass);
     }
 
-    if (!metaClass->isNamespace()) {
-        bool isObjectType = metaClass->typeEntry()->isObject();
-        QString typeName = metaClass->qualifiedCppName();
-        if (!isObjectType)
-            s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<" << typeName << " >" << "(\"" << typeName << "\");\n";
-
-        s << INDENT << "Shiboken::TypeResolver::createObjectTypeResolver<" << typeName << " >" << "(\"" << typeName << "*\");\n";
-        QString functionSufix = (isObjectType ? "Object" : "Value");
-        s << INDENT << "Shiboken::TypeResolver::create" << functionSufix;
-        s << "TypeResolver<" << typeName << " >" << "(typeid(" << typeName << ").name());\n";
-        if (shouldGenerateCppWrapper(metaClass)) {
-            s << INDENT << "Shiboken::TypeResolver::create" << functionSufix;
-            s << "TypeResolver<" << typeName << " >" << "(typeid(" << wrapperName(metaClass) << ").name());\n";
-        }
-    }
+    if (!metaClass->isNamespace())
+        writeRegisterType(s, metaClass);
 
     if (usePySideExtensions() && !metaClass->isNamespace()) {
         // Qt metatypes are registered only on their first use, so we do this now.

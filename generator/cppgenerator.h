@@ -192,10 +192,14 @@ private:
     void writeStdListWrapperMethods(QTextStream& s, const AbstractMetaClass* metaClass);
     QString writeReprFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
+    void writeRegisterType(QTextStream& s, const AbstractMetaClass* metaClass);
+    void writeRegisterType(QTextStream& s, const AbstractMetaEnum* metaEnum);
+
     // Maps special function names to function parameters and return types
     // used by CPython API in the sequence protocol.
     QHash<QString, QPair<QString, QString> > m_sequenceProtocol;
     int m_currentErrorCode;
+
 };
 
 #endif // CPPGENERATOR_H
