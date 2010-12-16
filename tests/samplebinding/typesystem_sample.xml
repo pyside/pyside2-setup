@@ -236,13 +236,20 @@
     </object-type>
 
     <object-type name="ObjectView">
-        <modify-function signature="setModel(ObjectType*)">
+        <modify-function signature="setModel(ObjectModel*)">
             <modify-argument index="1">
                 <reference-count action="add"/>
             </modify-argument>
         </modify-function>
     </object-type>
 
+    <object-type name="ObjectModel">
+        <modify-function signature="data() const">
+            <modify-argument index="return">
+                <define-ownership class="native" owner="c++"/>
+            </modify-argument>
+        </modify-function>
+    </object-type>
 
     <value-type name="Event">
         <enum-type name="EventType"/>

@@ -20,33 +20,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef OBJECTVIEW_H
-#define OBJECTVIEW_H
+#ifndef OBJECTMODEL_H
+#define OBJECTMODEL_H
 
 #include "objecttype.h"
 #include "libsamplemacros.h"
 
-class Str;
-class ObjectModel;
-
-class LIBSAMPLE_API ObjectView : public ObjectType
+class LIBSAMPLE_API ObjectModel : public ObjectType
 {
 public:
-    ObjectView(ObjectModel* model = 0, ObjectType* parent = 0)
-        : ObjectType(parent), m_model(model)
+    ObjectModel(ObjectType* parent = 0)
+        : ObjectType(parent), m_data(0)
     {}
 
-    inline void setModel(ObjectModel* model) { m_model = model; }
-    inline ObjectModel* model() const { return m_model; }
-
-    Str displayModelData();
-    void modifyModelData(Str& data);
-
-    ObjectType* getRawModelData();
+    void setData(ObjectType* data);
+    virtual ObjectType* data() const;
 
 private:
-    ObjectModel* m_model;
+    // The model holds only one piece of data.
+    // (This is just a test after all.)
+    ObjectType* m_data;
 };
 
-#endif // OBJECTVIEW_H
+#endif // OBJECTMODEL_H
 

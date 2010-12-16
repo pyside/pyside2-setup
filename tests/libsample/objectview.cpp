@@ -21,7 +21,7 @@
  */
 
 #include "objectview.h"
-#include "objecttype.h"
+#include "objectmodel.h"
 #include "str.h"
 
 Str
@@ -39,4 +39,10 @@ ObjectView::modifyModelData(Str& data)
         m_model->setObjectName(data);
 }
 
+
+ObjectType*
+ObjectView::getRawModelData()
+{
+    return m_model->data();
+}
 

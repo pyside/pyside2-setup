@@ -16,6 +16,7 @@ modifications.cpp
 mapuser.cpp
 modified_constructor.cpp
 multiple_derived.cpp
+objectmodel.cpp
 objecttype.cpp
 objecttypelayout.cpp
 objectview.cpp

@@ -20,6 +20,7 @@
 #include "multiple_derived.h"
 #include "noimplicitconversion.h"
 #include "nondefaultctor.h"
+#include "objectmodel.h"
 #include "objecttype.h"
 #include "objecttypelayout.h"
 #include "objecttypereference.h"

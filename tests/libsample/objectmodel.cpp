@@ -20,33 +20,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef OBJECTVIEW_H
-#define OBJECTVIEW_H
+#include "objectmodel.h"
 
-#include "objecttype.h"
-#include "libsamplemacros.h"
-
-class Str;
-class ObjectModel;
-
-class LIBSAMPLE_API ObjectView : public ObjectType
+void
+ObjectModel::setData(ObjectType* data)
 {
-public:
-    ObjectView(ObjectModel* model = 0, ObjectType* parent = 0)
-        : ObjectType(parent), m_model(model)
-    {}
+    m_data = data;
+}
 
-    inline void setModel(ObjectModel* model) { m_model = model; }
-    inline ObjectModel* model() const { return m_model; }
-
-    Str displayModelData();
-    void modifyModelData(Str& data);
-
-    ObjectType* getRawModelData();
-
-private:
-    ObjectModel* m_model;
-};
-
-#endif // OBJECTVIEW_H
+ObjectType*
+ObjectModel::data() const
+{
+    return m_data;
+}
 
