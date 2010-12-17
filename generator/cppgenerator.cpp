@@ -810,20 +810,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::NativeCode, func, lastArg);
     }
 
-    if (type) {
-        if (!invalidateReturn && (func->type()->isObject() || func->type()->isValuePointer()) ) {
-            s << INDENT << "if (" << PYTHON_RETURN_VAR << "->ob_refcnt < 2) {" << endl;
-            {
-                Indentation indent(INDENT);
-                s << INDENT << "PyErr_SetString(PyExc_ReferenceError, \"Returning last python reference on virtual function: "
-                  << func->ownerClass()->name() << "." << func->name() << "\");" << endl;
-                s << INDENT << "PyErr_Print();" << endl;
-                s << INDENT << "assert(false);" << endl;
-            }
-            s << INDENT << "}" << endl;
-        }
+    if (type)
         s << INDENT << "return " CPP_RETURN_VAR ";" << endl;
-    }
 
     s << '}' << endl << endl;
 }
