@@ -794,13 +794,11 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 s << (argMod.index - 1) << "));" << endl;
             } else if (argMod.ownerships.contains(TypeSystem::NativeCode)) {
                 if (argMod.index == 0 && argMod.ownerships[TypeSystem::NativeCode] == TypeSystem::CppOwnership) {
-                    s << INDENT << "if (Shiboken::Object::checkType(" PYTHON_RETURN_VAR ")) {" << endl;
+                    s << INDENT << "if (Shiboken::Object::checkType(" PYTHON_RETURN_VAR "))" << endl;
                     {
                         Indentation indent(INDENT);
                         s << INDENT << "Shiboken::Object::releaseOwnership(" PYTHON_RETURN_VAR ");" << endl;
-                        s << INDENT << "Py_DECREF((PyObject*) " PYTHON_RETURN_VAR ");" << endl;
                     }
-                    s << INDENT << '}' << endl;
                 }
             }
         }

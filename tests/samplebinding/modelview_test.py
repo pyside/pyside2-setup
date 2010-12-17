@@ -57,7 +57,7 @@ class ModelViewTest(unittest.TestCase):
         model = ListModelDoesntKeepsReference()
         view = ObjectView(model)
         obj = view.getRawModelData()
-        self.assertEqual(type(obj), ObjectType)
+        self.assertEqual(type(obj), MyObject)
         self.assertEqual(obj.objectName(), object_name)
 
     def testListModelKeepsReference(self):
