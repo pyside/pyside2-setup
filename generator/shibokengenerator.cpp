@@ -1660,12 +1660,14 @@ Generator::Options ShibokenGenerator::getConverterOptions(const AbstractMetaType
     Options flags;
     const TypeEntry* type = metaType->typeEntry();
     bool isCStr = isCString(metaType);
-    if (metaType->indirections() && !isCStr)
+    if (metaType->indirections() && !isCStr) {
         flags = ExcludeConst;
-    else if (type->isPrimitive() && !isCStr)
+    } else if (metaType->isContainer()
+        || (type->isPrimitive() && !isCStr)
+        // const refs become just the value, but pure refs must remain pure.
+        || (type->isValue() && metaType->isConstant() && metaType->isReference())) {
         flags = ExcludeConst | ExcludeReference;
-    else if (type->isValue() && metaType->isConstant() && metaType->isReference())
-        flags = ExcludeConst | ExcludeReference; // const refs become just the value, but pure refs must remain pure.
+    }
     return flags;
 }
 
