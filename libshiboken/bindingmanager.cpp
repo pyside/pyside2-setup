@@ -91,16 +91,16 @@ public:
 #ifndef NDEBUG
 static void showWrapperMap(const WrapperMap& wrapperMap)
 {
-    printf("-------------------------------\n");
-    printf("WrapperMap: %p (size: %d)\n", &wrapperMap, (int) wrapperMap.size());
+    fprintf(stderr, "-------------------------------\n");
+    fprintf(stderr, "WrapperMap: %p (size: %d)\n", &wrapperMap, (int) wrapperMap.size());
     WrapperMap::const_iterator iter;
     for (iter = wrapperMap.begin(); iter != wrapperMap.end(); ++iter) {
-        printf("key: %p, value: %p (%s, refcnt: %d)\n", iter->first,
+        fprintf(stderr, "key: %p, value: %p (%s, refcnt: %d)\n", iter->first,
                                                         iter->second,
                                                         iter->second->ob_type->tp_name,
                                                         (int) iter->second->ob_refcnt);
     }
-    printf("-------------------------------\n");
+    fprintf(stderr, "-------------------------------\n");
 }
 #endif
 
