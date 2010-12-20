@@ -38,6 +38,9 @@ public:
     void restore();
 private:
     PyThreadState* m_threadState;
+
+    ThreadStateSaver(const ThreadStateSaver&);
+    ThreadStateSaver& operator=(const ThreadStateSaver&);
 };
 
 } // namespace Shiboken
