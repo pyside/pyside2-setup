@@ -624,19 +624,25 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
             QString argConv;
             QTextStream ac(&argConv);
-            bool convert = arg->type()->isObject()
+            const PrimitiveTypeEntry* argType = (const PrimitiveTypeEntry*) arg->type()->typeEntry();
+            bool convert = argType->isObject()
                             || arg->type()->isQObject()
-                            || arg->type()->isValue()
+                            || argType->isValue()
                             || arg->type()->isValuePointer()
                             || arg->type()->isNativePointer()
-                            || arg->type()->isFlags()
-                            || arg->type()->isEnum()
-                            || arg->type()->isContainer()
+                            || argType->isFlags()
+                            || argType->isEnum()
+                            || argType->isContainer()
                             || arg->type()->isReference();
 
-            //leave the conversion to python
-            if (arg->type()->isPrimitive() && (m_formatUnits.contains(arg->type()->typeEntry()->name()) || m_formatUnits.contains(arg->type()->typeEntry()->qualifiedCppName())))
-                convert = false;
+            if (!convert && argType->isPrimitive()) {
+                if (argType->basicAliasedTypeEntry())
+                    argType = argType->basicAliasedTypeEntry();
+                if (m_formatUnits.contains(argType->name()))
+                    convert = false;
+                else
+                    convert = true;
+            }
 
             bool hasConversionRule = !func->conversionRule(TypeSystem::TargetLangCode, arg->argumentIndex() + 1).isEmpty();
 
