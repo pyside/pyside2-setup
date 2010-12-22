@@ -209,6 +209,11 @@ public:
     /// Verifies if the class should have a C++ wrapper generated for it, instead of only a Python wrapper.
     static bool shouldGenerateCppWrapper(const AbstractMetaClass* metaClass);
 
+    /// Adds enums eligible for generation from classes/namespaces marked not to be generated.
+    static void lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumList& enumList, const AbstractMetaClass* metaClass);
+    /// Returns the enclosing class for an enum, or NULL if it should be global.
+    const AbstractMetaClass* getProperEnclosingClassForEnum(const AbstractMetaEnum* metaEnum);
+
     static QString wrapperName(const AbstractMetaClass* metaClass);
 
     static QString fullPythonFunctionName(const AbstractMetaFunction* func);

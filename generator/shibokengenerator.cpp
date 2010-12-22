@@ -216,6 +216,38 @@ bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClass* metaCl
     return result && !metaClass->isNamespace();
 }
 
+void ShibokenGenerator::lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumList& enumList, const AbstractMetaClass* metaClass)
+{
+    if (!metaClass)
+        return;
+
+    if (metaClass->typeEntry()->codeGeneration() == TypeEntry::GenerateForSubclass) {
+        foreach (const AbstractMetaEnum* metaEnum, metaClass->enums()) {
+            if (metaEnum->isPrivate() || metaEnum->typeEntry()->codeGeneration() == TypeEntry::GenerateForSubclass)
+                continue;
+            if (!enumList.contains(const_cast<AbstractMetaEnum*>(metaEnum)))
+                enumList.append(const_cast<AbstractMetaEnum*>(metaEnum));
+        }
+        lookForEnumsInClassesNotToBeGenerated(enumList, metaClass->enclosingClass());
+    }
+}
+
+static const AbstractMetaClass* getProperEnclosingClass(const AbstractMetaClass* metaClass)
+{
+    if (!metaClass)
+        return 0;
+
+    if (metaClass->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass)
+        return metaClass;
+
+    return getProperEnclosingClass(metaClass->enclosingClass());
+}
+
+const AbstractMetaClass* ShibokenGenerator::getProperEnclosingClassForEnum(const AbstractMetaEnum* metaEnum)
+{
+    return getProperEnclosingClass(metaEnum->enclosingClass());
+}
+
 QString ShibokenGenerator::wrapperName(const AbstractMetaClass* metaClass)
 {
     if (shouldGenerateCppWrapper(metaClass)) {

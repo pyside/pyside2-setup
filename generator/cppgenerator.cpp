@@ -244,10 +244,14 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         }
     }
 
+    AbstractMetaEnumList classEnums = metaClass->enums();
+    foreach (AbstractMetaClass* innerClass, metaClass->innerClasses())
+        lookForEnumsInClassesNotToBeGenerated(classEnums, innerClass);
+
     //Extra includes
     s << endl << "// Extra includes" << endl;
     QList<Include> includes = metaClass->typeEntry()->extraIncludes();
-    foreach (AbstractMetaEnum* cppEnum, metaClass->enums())
+    foreach (AbstractMetaEnum* cppEnum, classEnums)
         includes.append(cppEnum->typeEntry()->extraIncludes());
     qSort(includes.begin(), includes.end());
     foreach (Include inc, includes)
@@ -465,7 +469,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         writeTypeDiscoveryFunction(s, metaClass);
 
 
-    foreach (AbstractMetaEnum* cppEnum, metaClass->enums()) {
+    foreach (AbstractMetaEnum* cppEnum, classEnums) {
         if (cppEnum->isAnonymous() || cppEnum->isPrivate())
             continue;
 
@@ -2915,10 +2919,11 @@ void CppGenerator::writeMethodDefinition(QTextStream& s, const AbstractMetaFunct
 
 void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnum* cppEnum)
 {
+    const AbstractMetaClass* enclosingClass = getProperEnclosingClassForEnum(cppEnum);
     QString cpythonName = cpythonEnumName(cppEnum);
     QString addFunction;
-    if (cppEnum->enclosingClass())
-        addFunction = "PyDict_SetItemString(" + cpythonTypeName(cppEnum->enclosingClass()) + ".super.ht_type.tp_dict,";
+    if (enclosingClass)
+        addFunction = "PyDict_SetItemString(" + cpythonTypeName(enclosingClass) + ".super.ht_type.tp_dict,";
     else if (cppEnum->isAnonymous())
         addFunction = "PyModule_AddIntConstant(module,";
     else
@@ -2984,7 +2989,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
         if (!cppEnum->isAnonymous()) {
             s << INDENT << "enumItem = Shiboken::Enum::newItem(" << cpythonName << "," << enumValueText;
             s << ", \"" << enumValue->name() << "\");" << endl;
-        } else if (cppEnum->enclosingClass()) {
+        } else if (enclosingClass) {
             s << INDENT << "enumItem = PyInt_FromLong(" << enumValueText << ");" << endl;
             shouldDecrefNumber = true;
         } else {
@@ -3336,12 +3341,16 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         s << INDENT << "((PyObject*)&" << pyTypeName << "));" << endl << endl;
     }
 
-    if (!metaClass->enums().isEmpty()) {
+    AbstractMetaEnumList classEnums = metaClass->enums();
+    foreach (AbstractMetaClass* innerClass, metaClass->innerClasses())
+        lookForEnumsInClassesNotToBeGenerated(classEnums, innerClass);
+
+    if (!classEnums.isEmpty()) {
         s << INDENT << "// Initialize enums" << endl;
         s << INDENT << "PyObject* enumItem;" << endl << endl;
     }
 
-    foreach (const AbstractMetaEnum* cppEnum, metaClass->enums()) {
+    foreach (const AbstractMetaEnum* cppEnum, classEnums) {
         if (cppEnum->isPrivate())
             continue;
         writeEnumInitialization(s, cppEnum);
@@ -3542,10 +3551,19 @@ void CppGenerator::finishGeneration()
             s << include;
         s << endl;
 
+        // Global enums
+        AbstractMetaEnumList globalEnums = this->globalEnums();
+        foreach (const AbstractMetaClass* metaClass, classes()) {
+            const AbstractMetaClass* encClass = metaClass->enclosingClass();
+            if (encClass && encClass->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass)
+                continue;
+            lookForEnumsInClassesNotToBeGenerated(globalEnums, metaClass);
+        }
+
         //Extra includes
         s << endl << "// Extra includes" << endl;
         QList<Include> includes;
-        foreach (AbstractMetaEnum* cppEnum, globalEnums())
+        foreach (AbstractMetaEnum* cppEnum, globalEnums)
             includes.append(cppEnum->typeEntry()->extraIncludes());
         qSort(includes.begin(), includes.end());
         foreach (Include inc, includes)
@@ -3575,13 +3593,13 @@ void CppGenerator::finishGeneration()
         s << "------------------------------------------------------------" << endl;
         s << classInitDecl << endl;
 
-        if (!globalEnums().isEmpty()) {
+        if (!globalEnums.isEmpty()) {
             QString converterImpl;
             QTextStream convImpl(&converterImpl);
 
             s << "// Enum definitions ";
             s << "------------------------------------------------------------" << endl;
-            foreach (const AbstractMetaEnum* cppEnum, globalEnums()) {
+            foreach (const AbstractMetaEnum* cppEnum, globalEnums) {
                 if (cppEnum->isAnonymous() || cppEnum->isPrivate())
                     continue;
                 s << endl;
@@ -3659,12 +3677,12 @@ void CppGenerator::finishGeneration()
         }
         s << endl;
 
-        if (!globalEnums().isEmpty()) {
+        if (!globalEnums.isEmpty()) {
             s << INDENT << "// Initialize enums" << endl;
             s << INDENT << "PyObject* enumItem;" << endl << endl;
         }
 
-        foreach (const AbstractMetaEnum* cppEnum, globalEnums()) {
+        foreach (const AbstractMetaEnum* cppEnum, globalEnums) {
             if (cppEnum->isPrivate())
                 continue;
             writeEnumInitialization(s, cppEnum);

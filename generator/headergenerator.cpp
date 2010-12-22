@@ -311,9 +311,12 @@ void HeaderGenerator::finishGeneration()
 
     macrosStream << "// Type indices" << endl;
     int idx = 0;
-    foreach (const AbstractMetaClass* metaClass, classes())
+    AbstractMetaEnumList globalEnums = this->globalEnums();
+    foreach (const AbstractMetaClass* metaClass, classes()) {
         writeTypeIndexDefine(macrosStream, metaClass, idx);
-    foreach (const AbstractMetaEnum* metaEnum, globalEnums())
+        lookForEnumsInClassesNotToBeGenerated(globalEnums, metaClass);
+    }
+    foreach (const AbstractMetaEnum* metaEnum, globalEnums)
         writeTypeIndexDefineLine(macrosStream, metaEnum->typeEntry(), idx);
     macrosStream << "#define ";
     macrosStream.setFieldWidth(60);
@@ -324,7 +327,7 @@ void HeaderGenerator::finishGeneration()
     macrosStream << "extern PyTypeObject** " << cppApiVariableName() << ';' << endl << endl;
 
     macrosStream << "// Macros for type check" << endl;
-    foreach (const AbstractMetaEnum* cppEnum, globalEnums()) {
+    foreach (const AbstractMetaEnum* cppEnum, globalEnums) {
         if (cppEnum->isAnonymous() || cppEnum->isPrivate())
             continue;
         includes << cppEnum->typeEntry()->include();
