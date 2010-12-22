@@ -66,7 +66,7 @@ add_custom_target(uninstall "${CMAKE_COMMAND}"
 # Detect if the python libs were compiled in debug mode
 execute_process(
     COMMAND ${PYTHON_EXECUTABLE} -c "from distutils import sysconfig; \\
-        print sysconfig.get_config_var('Py_DEBUG')"
+        print bool(sysconfig.get_config_var('Py_DEBUG'))"
     OUTPUT_VARIABLE PY_DEBUG
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
