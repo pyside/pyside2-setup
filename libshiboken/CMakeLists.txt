@@ -15,7 +15,6 @@ else()
     set(SPARSEHASH_INCLUDE_PATH ${CMAKE_SOURCE_DIR}/ext/sparsehash)
 endif()
 
-add_definitions(-DWITH_THREAD)
 set(libshiboken_MAJOR_VERSION ${shiboken_MAJOR_VERSION})
 set(libshiboken_MINOR_VERSION ${shiboken_MINOR_VERSION})
 set(libshiboken_MICRO_VERSION ${shiboken_MICRO_VERSION})
