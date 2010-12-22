@@ -92,10 +92,6 @@ if(APPLE)
     set(SBK_PYTHON_LIBRARIES "-undefined dynamic_lookup")
 endif()
 
-if (BUILD_TESTS)
-    enable_testing()
-endif()
-
 add_subdirectory(libshiboken)
 add_subdirectory(doc)
 
@@ -104,10 +100,11 @@ if (QT4_FOUND AND ApiExtractor_FOUND AND GeneratorRunner_FOUND AND PYTHONLIBS_FO
     add_subdirectory(generator)
 
     if (BUILD_TESTS)
+        enable_testing()
         add_subdirectory(tests)
     endif()
 else()
-    message("!! Some dependencies were not found, shiboken generator compilation disabled!")
+    message(WARNING "Some dependencies were not found, shiboken generator compilation disabled!")
 endif()
 
 if(CMAKE_VERSION VERSION_LESS 2.8)
@@ -115,8 +112,10 @@ if(CMAKE_VERSION VERSION_LESS 2.8)
 else()
     set(SBK_PYTHON_INCLUDE_DIR ${PYTHON_INCLUDE_DIRS})
 endif()
+
 add_subdirectory(data)
 
+# dist target
 set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${shiboken_VERSION})
 add_custom_target(dist
     COMMAND mkdir -p "${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}" &&
