@@ -3052,8 +3052,11 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
 
                     if ((cppSignature != originalSignature) && !knowTypes.contains(originalSignature)) {
                         knowTypes << originalSignature;
+                        Options opt = NoOption;
+                        if (type->isContainer())
+                            opt = ExcludeConst;
                         s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<"
-                          << cppSignature << " >"
+                          << translateType(type, metaClass, opt) << " >"
                           << "(\"" << skipNamespace(originalSignature) << "\"); // " << type->cppSignature() << "\n";
                     }
                     signature += skipNamespace(type->originalTypeDescription());
@@ -3682,7 +3685,7 @@ void CppGenerator::finishGeneration()
                 if (func->isSignal()) {
                     foreach (AbstractMetaArgument* arg, func->arguments()) {
                         if (arg->type()->isContainer()) {
-                            QString value = translateType(arg->type(), metaClass);
+                            QString value = translateType(arg->type(), metaClass, ExcludeConst);
                             typeResolvers << QMetaObject::normalizedType(value.toAscii().constData());
                         }
                     }
