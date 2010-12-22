@@ -632,9 +632,11 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                             || arg->type()->isFlags()
                             || arg->type()->isEnum()
                             || arg->type()->isContainer()
-                            || arg->type()->isReference()
-                            || (arg->type()->isPrimitive()
-                                && !m_formatUnits.contains(arg->type()->typeEntry()->name()));
+                            || arg->type()->isReference();
+
+            //leave the conversion to python
+            if (arg->type()->isPrimitive() && (m_formatUnits.contains(arg->type()->typeEntry()->name()) || m_formatUnits.contains(arg->type()->typeEntry()->qualifiedCppName())))
+                convert = false;
 
             bool hasConversionRule = !func->conversionRule(TypeSystem::TargetLangCode, arg->argumentIndex() + 1).isEmpty();
 
