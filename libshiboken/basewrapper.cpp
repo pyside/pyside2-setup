@@ -187,7 +187,7 @@ void SbkDeallocWrapperWithPrivateDtor(PyObject* self)
 
 void SbkObjectTypeDealloc(PyObject* pyObj)
 {
-    SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(pyObj->ob_type);
+    SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(pyObj);
     if (!sbkType->d)
         return;
 
@@ -209,8 +209,8 @@ PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* k
     if (!newType)
         return 0;
 
-    SbkObjectTypePrivate* d = new SbkObjectTypePrivate;
-    memset(d, 0, sizeof(SbkObjectTypePrivate));
+    Shiboken::ObjectType::initPrivateData(newType);
+    SbkObjectTypePrivate* d = newType->d;
 
     std::list<SbkObjectType*> bases = Shiboken::getCppBaseClasses(reinterpret_cast<PyTypeObject*>(newType));
     if (bases.size() == 1) {
@@ -240,7 +240,6 @@ PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* k
     d->user_data = 0;
     d->d_func = 0;
     d->is_user_type = 1;
-    newType->d = d;
 
     std::list<SbkObjectType*>::const_iterator it = bases.begin();
     for (; it != bases.end(); ++it) {
