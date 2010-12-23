@@ -22,6 +22,7 @@
  */
 
 #include "cppgenerator.h"
+#include "shibokennormalize_p.h"
 #include <reporthandler.h>
 #include <typedatabase.h>
 
@@ -3045,11 +3046,11 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
 
                     AbstractMetaArgument *a = cppSignal->arguments().at(i);
                     AbstractMetaType* type = a->type();
-                    QString cppSignature =  QMetaObject::normalizedType(qPrintable(type->cppSignature()));
-                    QString originalSignature = QMetaObject::normalizedType(qPrintable(type->originalTypeDescription()));
+                    QString cppSignature =  SBK_NORMALIZED_TYPE(qPrintable(type->cppSignature()));
+                    QString originalSignature = SBK_NORMALIZED_TYPE(qPrintable(type->originalTypeDescription()));
 
                     if (!a->defaultValueExpression().isEmpty()) {
-                        QString sig = QMetaObject::normalizedSignature(signature.toAscii());
+                        QString sig = SBK_NORMALIZED_SIGNATURE(signature.toAscii());
                         if (sig.isEmpty())
                             sig = "void";
                         signatures[cppSignal->name()].append(sig);
@@ -3064,12 +3065,12 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
                           << translateType(type, metaClass, opt) << " >"
                           << "(\"" << skipNamespace(originalSignature) << "\"); // " << type->cppSignature() << "\n";
                     }
-                    signature += skipNamespace(type->originalTypeDescription());
+                    signature += SBK_NORMALIZED_TYPE(skipNamespace(type->originalTypeDescription()).toAscii());
                 }
             } else {
                 signature = "void";
             }
-            signatures[cppSignal->name()].append(QMetaObject::normalizedSignature(signature.toAscii()));
+            signatures[cppSignal->name()].append(SBK_NORMALIZED_SIGNATURE(signature.toAscii()));
         }
     }
 
@@ -3704,7 +3705,7 @@ void CppGenerator::finishGeneration()
                     foreach (AbstractMetaArgument* arg, func->arguments()) {
                         if (arg->type()->isContainer()) {
                             QString value = translateType(arg->type(), metaClass, ExcludeConst | ExcludeReference);
-                            typeResolvers << QMetaObject::normalizedType(value.toAscii().constData());
+                            typeResolvers << SBK_NORMALIZED_TYPE(value.toAscii().constData());
                         }
                     }
                 }

@@ -6,6 +6,7 @@ headergenerator.cpp
 overloaddata.cpp
 shiboken.cpp
 shibokengenerator.cpp
+shibokennormalize.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
