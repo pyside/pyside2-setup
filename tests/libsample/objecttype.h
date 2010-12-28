@@ -97,7 +97,7 @@ public:
     void setObjectNameWithSize(const char*, int size=9, const Str& name = Str("<unknown>"));
     void setObjectNameWithSize(const Str& name = Str("<unknown>"), int size=9);
 
-    //Function used to comfuse the generator when two values accept Null as arg
+    //Function used to confuse the generator when two values accept Null as arg
     void setObject(ObjectType *);
     void setObject(const Null&);
     int callId() const;
