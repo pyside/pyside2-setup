@@ -19,6 +19,7 @@ multiple_derived.cpp
 objectmodel.cpp
 objecttype.cpp
 objecttypelayout.cpp
+objecttypeoperators.cpp
 objectview.cpp
 overload.cpp
 overloadsort.cpp

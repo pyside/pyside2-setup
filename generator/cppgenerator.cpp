@@ -531,6 +531,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
     const TypeEntry* type = func->type() ? func->type()->typeEntry() : 0;
 
+    const QString funcName = func->isOperatorOverload() ? pythonOperatorFunctionName(func) : func->name();
+
     QString prefix = wrapperName(func->ownerClass()) + "::";
     s << functionSignature(func, prefix, "", Generator::SkipDefaultValues|Generator::OriginalTypeDescription) << endl;
     s << "{" << endl;
@@ -582,7 +584,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     s << INDENT << "Shiboken::GilState gil;" << endl;
 
     s << INDENT << "Shiboken::AutoDecRef py_override(Shiboken::BindingManager::instance().getOverride(this, \"";
-    s << func->name() << "\"));" << endl;
+    s << funcName << "\"));" << endl;
 
     s << INDENT << "if (py_override.isNull()) {" << endl;
     {
@@ -597,7 +599,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
         if (func->isAbstract()) {
             s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
-            s << func->ownerClass()->name() << '.' << func->name();
+            s << func->ownerClass()->name() << '.' << funcName;
             s << "()' not implemented.\");" << endl;
             s << INDENT << "return ";
             if (func->type()) {
@@ -751,7 +753,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 {
                     Indentation indent(INDENT);
                     s << INDENT << "PyErr_Format(PyExc_TypeError, \"Invalid return value in function %s, expected %s, got %s.\", \""
-                    << func->ownerClass()->name() << '.' << func->name() << "\", " << desiredType
+                    << func->ownerClass()->name() << '.' << funcName << "\", " << desiredType
                     << ", " PYTHON_RETURN_VAR "->ob_type->tp_name);" << endl;
                     s << INDENT << "return " << defaultReturnExpr << ';' << endl;
                 }
@@ -2840,14 +2842,22 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                     Indentation indent(INDENT);
                     s << INDENT << "// " << func->signature() << endl;
                     s << INDENT;
-                    s << translateTypeForWrapperMethod(type, metaClass, ExcludeReference | ExcludeConst);
+                    s << translateTypeForWrapperMethod(type, 0, ExcludeReference | ExcludeConst);
+                    if (type->isObject() || type->isQObject())
+                        s << '&';
                     s << " cppOther = ";
-                    writeToCppConversion(s, type, metaClass, "other", ExcludeReference | ExcludeConst);
+                    writeToCppConversion(s, type, 0, "other", ExcludeReference | ExcludeConst);
                     s << ';' << endl;
 
                     s << INDENT << "result = ";
-                    writeToPythonConversion(s, func->type(), metaClass, CPP_SELF_VAR " " + op + " cppOther");
-                    s << ';' << endl;
+                    if (!func->type()) {
+                        s << "Py_None;" << endl;
+                        s << INDENT << "Py_INCREF(Py_None);" << endl;
+                        s << INDENT << CPP_SELF_VAR " " << op << " cppOther; // this op return void" << endl;
+                    } else {
+                        writeToPythonConversion(s, func->type(), metaClass, CPP_SELF_VAR " " + op + " cppOther");
+                        s << ';' << endl;
+                    }
                 }
                 s << INDENT << '}';
             }
