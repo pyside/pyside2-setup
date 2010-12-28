@@ -118,6 +118,9 @@ std::string Expression::toString() const
         case GreaterThan:
             op = '<';
             break;
+        case None: // just to avoid the compiler warning
+        default:
+            break;
     }
     result += op;
     result += m_operand2->toString();
