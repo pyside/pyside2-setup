@@ -70,6 +70,8 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
     struct B {};\
     B operator+(const A&, const B&);\
     B operator+(const B&, const A&);\
+    int operator-(int, const A*);\
+    int operator/(const A*, int);\
     ";
     const char xmlCode[] = "\
     <typesystem package=\"Foo\">\
@@ -82,7 +84,7 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass("A");
     QVERIFY(classA);
-    QCOMPARE(classA->functions().count(), 4);
+    QCOMPARE(classA->functions().count(), 6);
 
     AbstractMetaClass* classB = classes.findClass("B");
     QVERIFY(classB);
@@ -106,6 +108,19 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
     QVERIFY(reverseOp->isReverseOperator());
     QCOMPARE(reverseOp->arguments().count(), 1);
     QCOMPARE(reverseOp->minimalSignature(), QString("operator+(A,B)"));
+
+    reverseOp = classA->findFunction("operator-");
+    QVERIFY(reverseOp);
+    QCOMPARE(reverseOp->arguments().count(), 1);
+    QVERIFY(reverseOp->isPointerOperator());
+    QVERIFY(reverseOp->isReverseOperator());
+
+    normalOp = classA->findFunction("operator/");
+    QVERIFY(normalOp);
+    QCOMPARE(normalOp->arguments().count(), 1);
+    QVERIFY(normalOp->isPointerOperator());
+    QVERIFY(!normalOp->isReverseOperator());
+
 }
 
 

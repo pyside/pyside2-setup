@@ -799,7 +799,8 @@ public:
             m_invalid(false),
             m_reverse(false),
             m_userAdded(false),
-            m_explicit(false)
+            m_explicit(false),
+            m_pointerOperator(false)
     {
     }
 
@@ -833,6 +834,20 @@ public:
     bool isReverseOperator() const
     {
         return m_reverse;
+    }
+
+    /**
+     *  Returns true if this is a operator and the "self" operand is a pointer.
+     *  e.g. class Foo {}; operator+(SomeEnum, Foo*);
+     */
+    bool isPointerOperator() const
+    {
+        return m_pointerOperator;
+    }
+
+    void setPointerOperator(bool value)
+    {
+        m_pointerOperator = value;
     }
 
     void setExplicit(bool isExplicit)
@@ -1161,6 +1176,7 @@ private:
     uint m_reverse                  : 1;
     uint m_userAdded                : 1;
     uint m_explicit                 : 1;
+    uint m_pointerOperator          : 1;
 };
 
 

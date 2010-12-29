@@ -201,7 +201,9 @@ void AbstractMetaBuilder::traverseOperatorFunction(FunctionModelItem item)
             // Strip away first argument, since that is the containing object
             AbstractMetaArgumentList arguments = metaFunction->arguments();
             if (firstArgumentIsSelf || unaryOperator) {
-                AbstractMetaArgument *first = arguments.takeFirst();
+                AbstractMetaArgument* first = arguments.takeFirst();
+                if (!unaryOperator && first->type()->indirections())
+                    metaFunction->setPointerOperator(true);
                 delete first;
                 metaFunction->setArguments(arguments);
             } else {
@@ -210,7 +212,9 @@ void AbstractMetaBuilder::traverseOperatorFunction(FunctionModelItem item)
                 // must be an reverse operator (e.g. CLASS::operator(TYPE, CLASS)).
                 // All operator overloads that operate over a class are already
                 // being added as member functions of that class by the API Extractor.
-                AbstractMetaArgument *last = arguments.takeLast();
+                AbstractMetaArgument* last = arguments.takeLast();
+                if (last->type()->indirections())
+                    metaFunction->setPointerOperator(true);
                 delete last;
 
                 metaFunction->setArguments(arguments);
