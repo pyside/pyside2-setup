@@ -3068,11 +3068,8 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
 
                     if ((cppSignature != originalSignature) && !knowTypes.contains(originalSignature)) {
                         knowTypes << originalSignature;
-                        Options opt = ExcludeReference;
-                        if (type->isContainer())
-                            opt |= ExcludeConst;
                         s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<"
-                          << translateType(type, metaClass, opt) << " >"
+                          << translateType(type, metaClass, ExcludeReference | ExcludeConst) << " >"
                           << "(\"" << skipNamespace(originalSignature) << "\"); // " << type->cppSignature() << "\n";
                     }
                     signature += SBK_NORMALIZED_TYPE(skipNamespace(type->originalTypeDescription()).toAscii());
