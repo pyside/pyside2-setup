@@ -1218,6 +1218,11 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 } else {
                     cppSelf = "cppSelf";
                 }
+
+                // on comparison operator cppSelf is always a reference.
+                if (func->isComparisonOperator())
+                    replacement = "%1.";
+
                 code.replace("%CPPSELF.", replacement.arg(cppSelf));
                 code.replace("%CPPSELF", cppSelf);
 

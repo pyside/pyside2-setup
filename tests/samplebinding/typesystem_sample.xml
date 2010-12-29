@@ -1274,7 +1274,13 @@
 
     <object-type name="HandleHolder" />
 
-    <object-type name="ObjectTypeOperators" />
+    <object-type name="ObjectTypeOperators">
+        <add-function signature="operator!=(std::string)" return-type="bool">
+            <inject-code class="target">
+                %PYARG_0 = %CONVERTTOPYTHON[bool](%CPPSELF.key() != %1);
+            </inject-code>
+        </add-function>
+    </object-type>
 
     <!-- type used in abstract method -->
     <object-type name="HideType" generate="no" />

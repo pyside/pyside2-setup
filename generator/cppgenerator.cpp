@@ -2793,10 +2793,10 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
 {
     QString baseName = cpythonBaseName(metaClass);
     s << "static PyObject* ";
-    s << baseName << "_richcompare(PyObject* self, PyObject* other, int op)" << endl;
+    s << baseName << "_richcompare(PyObject* self, PyObject* arg, int op)" << endl;
     s << '{' << endl;
     QList<AbstractMetaFunctionList> cmpOverloads = filterGroupedOperatorFunctions(metaClass, AbstractMetaClass::ComparisonOp);
-    s << INDENT << "PyObject* result = 0;" << endl;
+    s << INDENT << "PyObject* " PYTHON_RETURN_VAR " = 0;" << endl;
     s << INDENT << metaClass->qualifiedCppName() << "& " CPP_SELF_VAR " = *" << cpythonWrapperCPtr(metaClass) << ';' << endl;
     s << endl;
 
@@ -2840,7 +2840,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                     s << INDENT;
                 }
 
-                s << "if (" << cpythonIsConvertibleFunction(type, numberType) << "(other)) {" << endl;
+                s << "if (" << cpythonIsConvertibleFunction(type, numberType) << "(arg)) {" << endl;
                 {
                     Indentation indent(INDENT);
                     s << INDENT << "// " << func->signature() << endl;
@@ -2848,21 +2848,27 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                     s << translateTypeForWrapperMethod(type, 0, ExcludeReference | ExcludeConst);
                     if (type->isObject() || type->isQObject())
                         s << '&';
-                    s << " cppOther = ";
-                    writeToCppConversion(s, type, 0, "other", ExcludeReference | ExcludeConst);
+                    s << " cppArg0 = ";
+                    writeToCppConversion(s, type, 0, "arg", ExcludeReference | ExcludeConst);
                     s << ';' << endl;
 
-                    s << INDENT << "result = ";
-                    if (!func->type()) {
-                        s << "Py_None;" << endl;
-                        s << INDENT << "Py_INCREF(Py_None);" << endl;
-                        s << INDENT << CPP_SELF_VAR " " << op << " cppOther; // this op return void" << endl;
+                    // If the function is user added, use the inject code
+                    if (func->isUserAdded()) {
+                        CodeSnipList snips = func->injectedCodeSnips();
+                        writeCodeSnips(s, snips, CodeSnip::Any, TypeSystem::TargetLangCode, func, func->arguments().last());
                     } else {
-                        QByteArray self(CPP_SELF_VAR);
-                        if (func->isPointerOperator())
-                            self.prepend('&');
-                        writeToPythonConversion(s, func->type(), metaClass, self + ' ' + op + " cppOther");
-                        s << ';' << endl;
+                        s << INDENT << PYTHON_RETURN_VAR " = ";
+                        if (!func->type()) {
+                            s << "Py_None;" << endl;
+                            s << INDENT << "Py_INCREF(Py_None);" << endl;
+                            s << INDENT << CPP_SELF_VAR " " << op << " cppArg0; // this op return void" << endl;
+                        } else {
+                            QByteArray self(CPP_SELF_VAR);
+                            if (func->isPointerOperator())
+                                self.prepend('&');
+                            writeToPythonConversion(s, func->type(), metaClass, self + ' ' + op + " cppArg0");
+                            s << ';' << endl;
+                        }
                     }
                 }
                 s << INDENT << '}';
@@ -2881,10 +2887,10 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
     }
     s << INDENT << '}' << endl << endl;
 
-    s << INDENT << "if (result && !PyErr_Occurred())" << endl;
+    s << INDENT << "if (" PYTHON_RETURN_VAR " && !PyErr_Occurred())" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "return result;" << endl;
+        s << INDENT << "return " PYTHON_RETURN_VAR ";" << endl;
     }
     s << INDENT << baseName << "_RichComparison_TypeError:" << endl;
     s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"operator not implemented.\");" << endl;

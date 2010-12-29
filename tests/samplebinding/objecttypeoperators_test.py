@@ -47,6 +47,9 @@ class ObjectTypeOperatorsTest(unittest.TestCase):
         self.assertEqual("a", a)
         self.assertEqual(a, "a")
 
+    def testOperatorInjection(self):
+        a = ObjectTypeOperators("a")
+        self.assertNotEqual(a, "b")
 
 if __name__ == '__main__':
     unittest.main()
