@@ -42,24 +42,32 @@ bool sequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* 
             return false;
     }
 
-    *argc = numArgs + 1;
+    bool hasEmptyArgList = numArgs == 0;
+    if (hasEmptyArgList)
+        numArgs = 1;
+
+    *argc = numArgs;
     *argv = new char*[*argc];
-    for (int i = 0; i < numArgs; ++i) {
-        PyObject* item = PySequence_Fast_GET_ITEM(args.object(), i);
-        char* string;
-        if (PyUnicode_Check(item)) {
-            Shiboken::AutoDecRef utf8(PyUnicode_AsUTF8String(item));
-            string = strdup(PyString_AS_STRING(utf8.object()));
-        } else {
-            string = strdup(PyString_AS_STRING(item));
+
+    if (hasEmptyArgList) {
+        // Try to get the script name
+        PyObject* globals = PyEval_GetGlobals();
+        PyObject* appName = PyDict_GetItemString(globals, "__file__");
+        (*argv)[0] = strdup(appName ? PyString_AS_STRING(appName) : defaultAppName);
+    } else {
+        for (int i = 0; i < numArgs; ++i) {
+            PyObject* item = PySequence_Fast_GET_ITEM(args.object(), i);
+            char* string;
+            if (PyUnicode_Check(item)) {
+                Shiboken::AutoDecRef utf8(PyUnicode_AsUTF8String(item));
+                string = strdup(PyString_AS_STRING(utf8.object()));
+            } else {
+                string = strdup(PyString_AS_STRING(item));
+            }
+            (*argv)[i] = string;
         }
-        (*argv)[i+1] = string;
     }
 
-    // Try to get the script name
-    PyObject* globals = PyEval_GetGlobals();
-    PyObject* appName = PyDict_GetItemString(globals, "__file__");
-    (*argv)[0] = strdup(appName ? PyString_AS_STRING(appName) : defaultAppName);
     return true;
 }
 
