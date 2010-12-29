@@ -2012,11 +2012,11 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                          + "\" with the modifications described in the type system file"), NULL);
             }
         } else if (func->isOperatorOverload()) {
-            QString firstArg("(*" CPP_SELF_VAR ")");
+            QByteArray firstArg("(*" CPP_SELF_VAR ")");
             if (func->isPointerOperator())
                 firstArg.remove(1, 1); // remove the de-reference operator
 
-            QString secondArg(CPP_ARG0);
+            QByteArray secondArg(CPP_ARG0);
             if (!func->isUnaryOperator() && shouldDereferenceArgumentPointer(func->arguments().first())) {
                 secondArg.prepend('(');
                 secondArg.append(')');
