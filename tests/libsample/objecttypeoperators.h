@@ -29,10 +29,9 @@
 class LIBSAMPLE_API ObjectTypeOperators
 {
 public:
-    ObjectTypeOperators(const std::string key);
+    explicit ObjectTypeOperators(const std::string key);
 
     bool operator==(const ObjectTypeOperators& other) const;
-    bool operator==(const std::string& other) const;
     const ObjectTypeOperators& operator<(const ObjectTypeOperators& other) const;
 
     // chaos!
@@ -46,5 +45,10 @@ private:
     ObjectTypeOperators(ObjectTypeOperators&);
     ObjectTypeOperators& operator=(ObjectTypeOperators&);
 };
+
+LIBSAMPLE_API bool operator==(const ObjectTypeOperators* obj, const std::string& str);
+LIBSAMPLE_API bool operator==(const std::string& str, const ObjectTypeOperators* obj);
+LIBSAMPLE_API std::string operator+(const ObjectTypeOperators* obj, const std::string& str);
+LIBSAMPLE_API std::string operator+(const std::string& str, const ObjectTypeOperators* obj);
 
 #endif // OBJECTTYPEOPERATORS_H

@@ -39,5 +39,14 @@ class ObjectTypeOperatorsTest(unittest.TestCase):
         self.assertEqual(None, a > b)
         self.assertEqual(a.key(), "aoperator>")
 
+    def testPointerOpeators(self):
+        a = ObjectTypeOperators("a")
+        b = ObjectTypeOperators("b")
+        self.assertEqual(a + "bc", "abc")
+        self.assertEqual("bc" + a, "bca")
+        self.assertEqual("a", a)
+        self.assertEqual(a, "a")
+
+
 if __name__ == '__main__':
     unittest.main()

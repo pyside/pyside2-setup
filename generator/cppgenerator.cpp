@@ -2013,6 +2013,9 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             }
         } else if (func->isOperatorOverload()) {
             QString firstArg("(*" CPP_SELF_VAR ")");
+            if (func->isPointerOperator())
+                firstArg.remove(1, 1); // remove the de-reference operator
+
             QString secondArg(CPP_ARG0);
             if (!func->isUnaryOperator() && shouldDereferenceArgumentPointer(func->arguments().first())) {
                 secondArg.prepend('(');
@@ -2855,7 +2858,10 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                         s << INDENT << "Py_INCREF(Py_None);" << endl;
                         s << INDENT << CPP_SELF_VAR " " << op << " cppOther; // this op return void" << endl;
                     } else {
-                        writeToPythonConversion(s, func->type(), metaClass, CPP_SELF_VAR " " + op + " cppOther");
+                        QByteArray self(CPP_SELF_VAR);
+                        if (func->isPointerOperator())
+                            self.prepend('&');
+                        writeToPythonConversion(s, func->type(), metaClass, self + ' ' + op + " cppOther");
                         s << ';' << endl;
                     }
                 }
