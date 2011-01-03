@@ -8,3 +8,8 @@ if (SPHINX)
 else()
     message("-- sphinx-build - not found! doc target disabled")
 endif()
+
+if (NOT win32)
+    file(GLOB manpages "${CMAKE_CURRENT_SOURCE_DIR}/*.1")
+    install(FILES ${manpages} DESTINATION share/man/man1)
+endif()
