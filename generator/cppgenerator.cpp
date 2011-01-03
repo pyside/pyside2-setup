@@ -1818,10 +1818,17 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream& s, const AbstractMe
                         Indentation indent(INDENT);
                         s << INDENT << "errorArgName = \"" << arg->name() << "\";" << endl;
                     }
-                    s << INDENT << "else" << endl;
+                    s << INDENT << "else if (";
+                    writeTypeCheck(s, arg->type(), "value", isNumber(arg->type()->typeEntry()));
+                    s << ')' << endl;
                     {
                         Indentation indent(INDENT);
                         s << INDENT << pyArgName << " = value;" << endl;
+                    }
+                    s << "else" << endl;
+                    {
+                        Indentation indent(INDENT);
+                        s << INDENT << "goto " << cpythonFunctionName(func) << "_TypeError;" << endl;
                     }
                 }
                 s << INDENT << '}' << endl;
