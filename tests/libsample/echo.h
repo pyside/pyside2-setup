@@ -24,6 +24,7 @@
 #define ECHO_H
 
 #include "libsamplemacros.h"
+#include "str.h"
 
 class ObjectType;
 
@@ -34,6 +35,7 @@ public:
     ~Echo(){}
 
     void doNothingWithConstBool(const bool hi) {}
+    void methodWithNamedArg(const Str& string = Str("")) {}
 
     // These method are here just for compilation test purposes
     Echo& operator<<(unsigned int item) { return *this; }
