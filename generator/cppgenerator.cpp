@@ -1710,8 +1710,6 @@ void CppGenerator::writeFunctionCalls(QTextStream& s, const OverloadData& overlo
     s << INDENT << "{" << endl;
     {
         Indentation indent(INDENT);
-        if (overloadData.hasAllowThread())
-            s << INDENT << "Shiboken::ThreadStateSaver " THREAD_STATE_SAVER_VAR ";" << endl;
 
         s << INDENT << (overloads.count() > 1 ? "switch (overloadId) " : "") << '{' << endl;
         {
@@ -1905,9 +1903,6 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     // Used to provide contextual information to custom code writer function.
     const AbstractMetaArgument* lastArg = 0;
 
-    if (func->allowThread())
-        s << INDENT << THREAD_STATE_SAVER_VAR ".save();" << endl;
-
     CodeSnipList snips;
     if (func->hasInjectedCode()) {
         snips = func->injectedCodeSnips();
@@ -1933,9 +1928,6 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     CodeSnipList convRules = getConversionRule(TypeSystem::NativeCode, func);
     if (convRules.size())
         writeCodeSnips(s, convRules, CodeSnip::Beginning, TypeSystem::TargetLangCode, func);
-
-    // Code to restore the threadSaver has been written?
-    bool threadRestored = false;
 
     if (!func->isUserAdded()) {
         bool badModifications = false;
@@ -2110,7 +2102,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         }
 
         if (!injectedCodeCallsCppFunction(func)) {
-            s << INDENT;
+            s << INDENT << "PyThreadState* _save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS" << endl << INDENT;
             if (isCtor) {
                 s << "cptr = ";
             } else if (func->type() && !func->isInplaceOperator()) {
@@ -2131,11 +2123,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 s << " " CPP_RETURN_VAR " = ";
             }
             s << methodCall << ';' << endl;
-
-            if (func->allowThread()) {
-                s << INDENT << THREAD_STATE_SAVER_VAR ".restore();" << endl;
-                threadRestored = true;
-            }
+            s << INDENT << "PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS" << endl;
 
             if (!isCtor && !func->isInplaceOperator() && func->type()) {
                 s << INDENT << PYTHON_RETURN_VAR " = ";
@@ -2144,9 +2132,6 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             }
         }
     }
-
-    if (!threadRestored && func->allowThread())
-        s << INDENT << THREAD_STATE_SAVER_VAR ".restore();" << endl;
 
     if (func->hasInjectedCode() && !func->isConstructor()) {
         s << endl;
