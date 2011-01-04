@@ -325,7 +325,9 @@ public:
     }
     QString name() const
     {
-        return QString(m_typeEntry->targetLangName()).split("::").last();
+        if (m_name.isNull())
+            m_name = m_typeEntry->targetLangName().split("::").last();
+        return m_name;
     }
     QString fullName() const
     {
@@ -591,6 +593,7 @@ private:
     const TypeEntry *m_typeEntry;
     AbstractMetaTypeList m_instantiations;
     QString m_package;
+    mutable QString m_name;
     QString m_originalTypeDescription;
 
     int m_arrayElementCount;
