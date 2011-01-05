@@ -2778,6 +2778,10 @@ AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const Abstra
 
         AbstractMetaClassList bases = getBaseClasses(clazz);
         foreach(AbstractMetaClass* baseClass, bases) {
+            // Fix polymorphic expression
+            if (clazz->baseClass() == baseClass)
+                clazz->setBaseClass(baseClass);
+
             if (map.contains(baseClass->qualifiedCppName()))
                 graph.addEdge(map[baseClass->qualifiedCppName()], map[clazz->qualifiedCppName()]);
         }
