@@ -23,6 +23,15 @@
 #include "bucket.h"
 #include <iostream>
 
+#ifdef _WIN32 // _WIN32 is defined by all Windows 32 and 64 bit compilers, but not by others.
+#include <windows.h>
+#define SLEEP(x) Sleep(x)
+#else
+#include <unistd.h>
+#define SLEEP(x) usleep(x)
+#endif
+
+
 using namespace std;
 
 Bucket::Bucket() : m_locked(false)
@@ -54,7 +63,7 @@ bool Bucket::empty()
 void Bucket::lock()
 {
     m_locked = true;
-    while (m_locked);
+    while (m_locked) { SLEEP(300); }
 }
 
 void Bucket::unlock()
