@@ -22,7 +22,7 @@ inject-documentation
     occur and it accepts the following values:
 
         * native: Before XML<->Backend transformation occur, so the injected code *must* be a valid XML.
-        * target: Before XML<->Backend transformation occur, so the injected code *must* be a valid backend format.
+        * target: After XML<->Backend transformation occur, so the injected code *must* be a valid backend format.
 
     At the moment the only supported backend is Sphinx.
 
