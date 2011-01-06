@@ -42,6 +42,7 @@ static bool shouldSkip(const AbstractMetaFunction* func)
     return func->isConstructor()
            || func->isModifiedRemoved()
            || func->declaringClass() != func->ownerClass()
+           || func->isCastOperator()
            || func->name() == "operator=";
 }
 
