@@ -213,6 +213,7 @@ private:
     QString m_docDataDir;
     QString m_libSourceDir;
     QString m_codeSnippetDir;
+    QString m_extraSectionDir;
     QStringList m_functionList;
     QMap<QString, QStringList> m_packages;
     QtDocParser* m_docParser;
