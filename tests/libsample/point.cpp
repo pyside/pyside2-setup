@@ -118,6 +118,12 @@ operator!(const Point& pt)
     return (pt.m_x == 0.0 && pt.m_y == 0.0);
 }
 
+Point
+Point::operator/(int operand)
+{
+    return Point(m_x/operand, m_y/operand);
+}
+
 Complex
 transmutePointIntoComplex(const Point& point)
 {

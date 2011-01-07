@@ -2659,7 +2659,7 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
     s << INDENT << "/*nb_inplace_xor*/          (binaryfunc)" << nb["__ixor__"] << ',' << endl;
     s << INDENT << "/*nb_inplace_or*/           (binaryfunc)" << nb["__ior__"] << ',' << endl;
     s << INDENT << "/*nb_floor_divide*/         0," << endl;
-    s << INDENT << "/*nb_true_divide*/          0," << endl;
+    s << INDENT << "/*nb_true_divide*/          (binaryfunc)" << nb["__div__"] << ',' << endl;
     s << INDENT << "/*nb_inplace_floor_divide*/ 0," << endl;
     s << INDENT << "/*nb_inplace_true_divide*/  0," << endl;
     s << INDENT << "/*nb_index*/                0" << endl;

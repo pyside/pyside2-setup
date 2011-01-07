@@ -54,6 +54,7 @@ public:
 
     Point operator+(const Point& other);
     Point operator-(const Point& other);
+    Point operator/(int operand);
 
     friend LIBSAMPLE_API Point operator*(const Point& pt, double mult);
     friend LIBSAMPLE_API Point operator*(const Point& pt, int mult);
