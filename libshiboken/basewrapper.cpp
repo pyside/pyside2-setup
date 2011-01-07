@@ -334,6 +334,9 @@ void init()
     initTypeResolver();
     PyEval_InitThreads();
 
+    //Init private data
+    Shiboken::ObjectType::initPrivateData(&SbkObject_Type);
+
     if (PyType_Ready(&SbkEnumType_Type) < 0)
         Py_FatalError("[libshiboken] Failed to initialise Shiboken.SbkEnumType metatype.");
 
