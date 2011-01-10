@@ -730,7 +730,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                     if (func->type()->typeEntry()->isContainer()) {
                         desiredType = '"' + reinterpret_cast<const ContainerTypeEntry*>(func->type()->typeEntry())->typeName() + '"';
                     } else {
-                        QString typeName = func->type()->cppSignature();
+                        QString typeName = func->type()->typeEntry()->qualifiedCppName();
 #ifdef AVOID_PROTECTED_HACK
                         const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(func->type());
                         if (metaEnum && metaEnum->isProtected())
