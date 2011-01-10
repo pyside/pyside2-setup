@@ -24,6 +24,7 @@
 #include <QCoreApplication>
 #include <QLinkedList>
 #include <QLibrary>
+#include <QDomDocument>
 #include <iostream>
 #include <apiextractor.h>
 #include "generatorrunnerconfig.h"
@@ -49,12 +50,95 @@ static void printOptions(QTextStream& s, const QMap<QString, QString>& options) 
 
 typedef void (*getGeneratorsFunc)(QLinkedList<Generator*>*);
 
-QMap<QString, QString> getCommandLineArgs(int argc, char** argv)
+static QString getPathString(const QDomElement& element)
+{
+    QStringList path;
+    QDomNode n = element.firstChild();
+    while (!n.isNull()) {
+        QDomElement e = n.toElement(); // try to convert the node to an element.
+        if (e.tagName() == "path")
+            path << QDir::toNativeSeparators(e.attribute("location"));
+        n = n.nextSibling();
+    }
+    return path.join(PATH_SPLITTER);
+}
+
+static QMap<QString, QString> getInitializedArguments()
 {
     QMap<QString, QString> args;
+    QStringList arguments = QCoreApplication::arguments();
+    QString appName = arguments.first();
+    arguments.removeFirst();
+
+    QString projectFileName;
+    foreach (const QString& arg, arguments) {
+        if (arg.startsWith("--project-file")) {
+            int split = arg.indexOf("=");
+            if (split > 0)
+                projectFileName = arg.mid(split + 1).trimmed();
+            break;
+        }
+    }
+
+    if (projectFileName.isNull())
+        return args;
+
+    if (!QFile::exists(projectFileName)) {
+        std::cerr << qPrintable(appName) << ": Project file \"" << qPrintable(projectFileName) << "\" not found." << std::endl;
+        return args;
+    }
+
+    QFile projectFile(projectFileName);
+    if (!projectFile.open(QIODevice::ReadOnly))
+        return args;
+
+    QDomDocument doc("project-file");
+    if (!doc.setContent(&projectFile)) {
+        projectFile.close();
+        return args;
+    }
+    projectFile.close();
+
+    QDomElement docElem = doc.documentElement();
+    QDomNode n = docElem.firstChild();
+    while (!n.isNull()) {
+        QDomElement e = n.toElement(); // try to convert the node to an element.
+        if (!e.isNull()) {
+            QString tag = e.tagName();
+            if (tag == "generator-set")
+                args[tag] = e.attribute("generator");
+            else if (tag == "output-directory" || tag == "license-file")
+                args[tag] = e.attribute("location");
+            else if (tag == "api-version")
+                args[tag] = e.attribute("version");
+            else if (tag == "debug")
+                args[tag] = e.attribute("level");
+            else if (tag == "documentation-only" || tag == "no-suppress-warnings" || tag == "silent")
+                args[tag] = QString();
+            else if (tag == "include-paths" || tag == "typesystem-paths")
+                args[tag] = getPathString(e);
+            else if (tag == "header-file")
+                args["arg-1"] = e.attribute("location");
+            else if (tag == "typesystem-file")
+                args["arg-2"] = e.attribute("location");
+            else
+                args[tag] = e.attribute("value");
+        }
+        n = n.nextSibling();
+    }
+
+    return args;
+}
+
+static QMap<QString, QString> getCommandLineArgs()
+{
+    QMap<QString, QString> args = getInitializedArguments();
+
+    QStringList arguments = QCoreApplication::arguments();
+    arguments.removeFirst();
+
     int argNum = 0;
-    for (int i = 1; i < argc; ++i) {
-        QString arg(argv[i]);
+    foreach (QString arg, arguments) {
         arg = arg.trimmed();
         if (arg.startsWith("--")) {
             int split = arg.indexOf("=");
@@ -79,6 +163,7 @@ void printUsage(const GeneratorList& generators)
     << "generator [options] header-file typesystem-file\n\n"
     "General options:\n";
     QMap<QString, QString> generalOptions;
+    generalOptions.insert("project-file=[file]", "XML file containing a description of the binding project. Replaces and overrides command line arguments");
     generalOptions.insert("debug-level=[sparse|medium|full]", "Set the debug level");
     generalOptions.insert("silent", "Avoid printing any message");
     generalOptions.insert("help", "Display this help and exit");
@@ -108,7 +193,7 @@ int main(int argc, char *argv[])
     QCoreApplication app(argc, argv);
 
     // Store command arguments in a map
-    QMap<QString, QString> args = getCommandLineArgs(argc, argv);
+    QMap<QString, QString> args = getCommandLineArgs();
     GeneratorList generators;
 
     if (args.contains("version")) {

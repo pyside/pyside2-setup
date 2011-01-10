@@ -59,7 +59,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
                     ${APIEXTRACTOR_INCLUDE_DIR}
                     ${QT_INCLUDE_DIR}
-                    ${QT_QTCORE_INCLUDE_DIR})
+                    ${QT_QTCORE_INCLUDE_DIR}
+                    ${QT_QTXML_INCLUDE_DIR})
 
 add_library(genrunner SHARED generator.cpp)
 set_target_properties(genrunner PROPERTIES VERSION ${generator_VERSION} DEFINE_SYMBOL GENRUNNER_EXPORTS)
@@ -73,7 +74,8 @@ set_target_properties(generatorrunner PROPERTIES OUTPUT_NAME generatorrunner${ge
 target_link_libraries(generatorrunner
                       genrunner
                       ${APIEXTRACTOR_LIBRARY}
-                      ${QT_QTCORE_LIBRARY})
+                      ${QT_QTCORE_LIBRARY}
+                      ${QT_QTXML_LIBRARY})
 
 # uninstall target
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
