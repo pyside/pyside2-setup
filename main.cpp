@@ -87,9 +87,9 @@ void printUsage(const GeneratorList& generators)
     generalOptions.insert("include-paths=<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]", "Include paths used by the C++ parser");
     generalOptions.insert("typesystem-paths=<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]", "Paths used when searching for typesystems");
     generalOptions.insert("documentation-only", "Do not generates any code, just the documentation");
-    generalOptions.insert("license-file=[licensefile]", "File used for copyright headers of generated files");
+    generalOptions.insert("license-file=[license-file]", "File used for copyright headers of generated files");
     generalOptions.insert("version", "Output version information and exit");
-    generalOptions.insert("generatorSet", "generatorSet to be used. e.g. qtdoc");
+    generalOptions.insert("generator-set", "generator-set to be used. e.g. qtdoc");
     generalOptions.insert("api-version", "Specify the supported api version used to generate the bindings");
     printOptions(s, generalOptions);
 
@@ -118,7 +118,12 @@ int main(int argc, char *argv[])
     }
 
     // Try to load a generator
-    QString generatorSet = args.value("generatorSet");
+    QString generatorSet = args.value("generator-set");
+
+    // Also check "generatorSet" command line argument for backward compatibility.
+    if (generatorSet.isEmpty())
+        generatorSet = args.value("generatorSet");
+
     if (!generatorSet.isEmpty()) {
         QFileInfo generatorFile(generatorSet);
 
@@ -134,7 +139,7 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
     } else if (!args.contains("help")) {
-        std::cerr << argv[0] << ": You need to specify a generator with --generatorSet=GENERATOR_NAME" << std::endl;
+        std::cerr << argv[0] << ": You need to specify a generator with --generator-set=GENERATOR_NAME" << std::endl;
         return EXIT_FAILURE;
     }
 
