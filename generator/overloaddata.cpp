@@ -225,17 +225,23 @@ void OverloadData::sortNextOverloads()
     for (int i = 0; i < numPrimitives; ++i)
         hasPrimitive[i] = sortData.map.contains(primitiveTypes[i]);
 
+    QStringList classesWithIntegerImplicitConversion;
+
     foreach(OverloadData* ov, m_nextOverloadData) {
         const AbstractMetaType* targetType = ov->argType();
         const TypeEntry* targetTypeEntry = getAliasedTypeEntry(targetType->typeEntry());
         QString targetTypeEntryName = getTypeName(targetType);
 
+        // Process implicit conversions
         foreach(AbstractMetaFunction* function, m_generator->implicitConversions(targetType)) {
             QString convertibleType;
             if (function->isConversionOperator())
                 convertibleType = function->ownerClass()->typeEntry()->name();
             else
                 convertibleType = getTypeName(function->arguments().first()->type());
+
+            if (convertibleType == "int" || convertibleType == "unsigned int")
+                classesWithIntegerImplicitConversion << targetTypeEntryName;
 
             if (!sortData.map.contains(convertibleType))
                 continue;
@@ -249,6 +255,8 @@ void OverloadData::sortNextOverloads()
             graph.addEdge(convertibleTypeId, targetTypeId);
         }
 
+
+        // Process template instantiations
         foreach (const AbstractMetaType* instantiation, targetType->instantiations()) {
             if (sortData.map.contains(getTypeName(instantiation))) {
                 int target = sortData.map[targetTypeEntryName];
@@ -286,12 +294,27 @@ void OverloadData::sortNextOverloads()
         }
 
         if (targetTypeEntry->isEnum()) {
+            // Enum values must precede primitive types.
             for (int i = 0; i < numPrimitives; ++i) {
                 if (hasPrimitive[i])
                     graph.addEdge(sortData.map[targetTypeEntryName], sortData.map[primitiveTypes[i]]);
             }
         }
     }
+
+    foreach(OverloadData* ov, m_nextOverloadData) {
+        const AbstractMetaType* targetType = ov->argType();
+        if (!targetType->isEnum())
+            continue;
+
+        const TypeEntry* targetTypeEntry = getAliasedTypeEntry(targetType->typeEntry());
+        QString targetTypeEntryName = getTypeName(targetType);
+
+        // Enum values must precede types implicitly convertible from "int" or "unsigned int".
+        foreach (const QString& implicitFromInt, classesWithIntegerImplicitConversion)
+            graph.addEdge(sortData.map[targetTypeEntryName], sortData.map[implicitFromInt]);
+    }
+
 
     // Special case for double(int i) (not tracked by m_generator->implicitConversions
     foreach (const QString& signedIntegerName, signedIntegerPrimitives) {
