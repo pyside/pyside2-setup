@@ -32,6 +32,7 @@
 #include <QtCore/QFile>
 #include <QtCore/QDir>
 #include <fileout.h>
+#include <limits>
 
 EXPORT_GENERATOR_PLUGIN(new QtDocGenerator)
 
@@ -889,7 +890,17 @@ void QtDocGenerator::writeFormatedText(QTextStream& s, const Documentation& doc,
         QtXmlToSphinx x(this, doc.value(), metaClassName);
         s << x;
     } else {
-        s << doc.value();
+        QStringList lines = doc.value().split("\n");
+        QRegExp regex("\\S"); // non-space character
+        int typesystemIndentation = std::numeric_limits<int>().max();
+        // check how many spaces must be removed from the begining of each line
+        foreach (QString line, lines) {
+            int idx = line.indexOf(regex);
+            if (idx >= 0)
+                typesystemIndentation = qMin(typesystemIndentation, idx);
+        }
+        foreach (QString line, lines)
+            s << INDENT << line.remove(0, typesystemIndentation) << endl;
     }
 
     s << endl;
@@ -924,8 +935,8 @@ void QtDocGenerator::generateClass(QTextStream &s, const AbstractMetaClass *meta
          "--------------------\n\n";
 
     writeInjectDocumentation(s, DocModification::Prepend, metaClass, 0);
-    writeFormatedText(s, metaClass->documentation(), metaClass);
-
+    if (!writeInjectDocumentation(s, DocModification::Replace, metaClass, 0))
+        writeFormatedText(s, metaClass->documentation(), metaClass);
 
     if (!metaClass->isNamespace())
         writeConstructors(s, metaClass);
@@ -1189,12 +1200,13 @@ void QtDocGenerator::writeDocSnips(QTextStream &s,
     }
 }
 
-void QtDocGenerator::writeInjectDocumentation(QTextStream &s,
+bool QtDocGenerator::writeInjectDocumentation(QTextStream &s,
                                             DocModification::Mode mode,
                                             const AbstractMetaClass *cppClass,
                                             const AbstractMetaFunction *func)
 {
     Indentation indentation(INDENT);
+    bool didSomething = false;
 
     foreach (DocModification mod, cppClass->typeEntry()->docModifications()) {
         if (mod.mode() == mode) {
@@ -1212,14 +1224,16 @@ void QtDocGenerator::writeInjectDocumentation(QTextStream &s,
                     continue;
 
                 doc.setValue(mod.code() , fmt);
-                s << INDENT;
                 writeFormatedText(s, doc, cppClass);
+                didSomething = true;
             }
         }
     }
 
     s << endl;
 
+    // TODO: Deprecate the use of doc string on glue code.
+    //       This is pre "add-function" and "inject-documentation" tags.
     if (func) {
         writeDocSnips(s, func->injectedCodeSnips(),
                        (mode == DocModification::Prepend ? CodeSnip::Beginning : CodeSnip::End),
@@ -1229,6 +1243,7 @@ void QtDocGenerator::writeInjectDocumentation(QTextStream &s,
                        (mode == DocModification::Prepend ? CodeSnip::Beginning : CodeSnip::End),
                        TypeSystem::TargetLangCode);
     }
+    return didSomething;
 }
 
 void QtDocGenerator::writeFunctionSignature(QTextStream& s, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func)
@@ -1257,6 +1272,10 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType *type, cons
         strType = "list of strings";
     } else if (type->isConstant() && type->name() == "char" && type->indirections() == 1) {
         strType = "str";
+    } else if (type->name().startsWith("unsigned short")) {
+        strType = "int";
+    } else if (type->name().startsWith("unsigned ")) { // uint and ulong
+        strType = "long";
     } else if (type->isContainer()) {
         QString strType = translateType(type, cppClass, Options(ExcludeConst) | ExcludeReference);
         strType.remove("*");
@@ -1333,7 +1352,8 @@ void QtDocGenerator::writeFunction(QTextStream &s, bool writeDoc, const Abstract
         writeFunctionParametersType(s, cppClass, func);
         s << endl;
         writeInjectDocumentation(s, DocModification::Prepend, cppClass, func);
-        writeFormatedText(s, func->documentation(), cppClass);
+        if (!writeInjectDocumentation(s, DocModification::Replace, cppClass, func))
+            writeFormatedText(s, func->documentation(), cppClass);
         writeInjectDocumentation(s, DocModification::Append, cppClass, func);
     }
 }

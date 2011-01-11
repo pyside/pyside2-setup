@@ -203,7 +203,7 @@ private:
 
     void writeConstructors(QTextStream &s, const AbstractMetaClass *cppClass);
     void writeFormatedText(QTextStream& s, const Documentation& doc, const AbstractMetaClass* metaclass = 0);
-    void writeInjectDocumentation(QTextStream &s, DocModification::Mode mode, const AbstractMetaClass *cppClass, const AbstractMetaFunction *func);
+    bool writeInjectDocumentation(QTextStream& s, DocModification::Mode mode, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
     void writeDocSnips(QTextStream &s, const CodeSnipList &codeSnips, CodeSnip::Position position, TypeSystem::Language language);
 
 
