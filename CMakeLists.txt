@@ -70,6 +70,16 @@ execute_process(
     OUTPUT_VARIABLE PY_DEBUG
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+
+execute_process(
+    COMMAND ${PYTHON_EXECUTABLE} -c "import sys; \\
+        from distutils import sysconfig; \\
+        vr = sys.version_info; \\
+        suffix = '-dbg' if bool(sysconfig.get_config_var('Py_DEBUG')) else ''; \\
+        print 'python%d.%d%s' % (vr[0], vr[1], suffix)"
+    OUTPUT_VARIABLE PYTHON_BASENAME
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
 set(SHIBOKEN_BUILD_TYPE "Release")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if(NOT PYTHON_DEBUG_LIBRARIES)
