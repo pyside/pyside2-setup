@@ -16,6 +16,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/base6_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/blackbox_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/bucket_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/collector_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/color_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/ctorconvrule_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/sbkdate_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/derived_wrapper.cpp
@@ -51,6 +52,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/objtypereference_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/oddbooluser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/overload_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pairuser_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/pen_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/point_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pointf_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pointerholder_wrapper.cpp

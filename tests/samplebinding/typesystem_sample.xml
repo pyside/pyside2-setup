@@ -1238,6 +1238,11 @@
         </add-function>
     </value-type>
 
+    <value-type name="Color" />
+    <value-type name="Pen">
+        <enum-type identified-by-value="EnumCtor"/>
+    </value-type>
+
     <value-type name="CtorConvRule">
         <modify-function signature="CtorConvRule(long)">
             <modify-argument index="1">
