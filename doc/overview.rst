@@ -4,7 +4,7 @@
 Generator Overview
 ******************
 
-In a few words, the Generator is a utility that parses a collecion of header and
+In a few words, the Generator is a utility that parses a collection of header and
 typesystem files, generating other files (code, documentation, etc.) as result.
 
 Creating new bindings
