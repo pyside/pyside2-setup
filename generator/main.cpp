@@ -26,7 +26,7 @@
 int main(int argc, char *argv[])
 {
     QStringList args;
-    args.append("--generatorSet=shiboken");
+    args.append("--generator-set=shiboken");
     for (int i = 1; i < argc; i++)
         args.append(argv[i]);
     return QProcess::execute("generatorrunner", args);

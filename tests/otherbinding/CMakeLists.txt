@@ -14,7 +14,8 @@ ${CMAKE_CURRENT_BINARY_DIR}/other/other_module_wrapper.cpp
 )
 
 add_custom_command(OUTPUT ${other_SRC}
-COMMAND ${GENERATORRUNNER_BINARY} --generatorSet=${generators_BINARY_DIR}/shiboken_generator${CMAKE_RELEASE_POSTFIX}${CMAKE_DEBUG_POSTFIX} --enable-parent-ctor-heuristic
+COMMAND ${GENERATORRUNNER_BINARY} --generator-set=${generators_BINARY_DIR}/shiboken_generator${CMAKE_RELEASE_POSTFIX}${CMAKE_DEBUG_POSTFIX}
+        --enable-parent-ctor-heuristic
         ${CMAKE_CURRENT_SOURCE_DIR}/global.h
         --include-paths=${libother_SOURCE_DIR}${PATH_SEP}${libsample_SOURCE_DIR}${PATH_SEP}${libsample_SOURCE_DIR}/..
         --typesystem-paths=${CMAKE_CURRENT_SOURCE_DIR}${PATH_SEP}${sample_SOURCE_DIR}
