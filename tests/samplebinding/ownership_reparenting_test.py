@@ -27,6 +27,7 @@
 '''Tests for object reparenting.'''
 
 import unittest
+import sys
 
 from sample import ObjectType
 
@@ -52,6 +53,15 @@ class ReparentingTest(unittest.TestCase):
         for child in new_parent.children():
             self.assert_(child in object_list)
 
+    def testReparentWithTheSameParent(self):
+        '''Set the same parent twice to check if the ref continue the same'''
+        obj = ObjectType()
+        parent = ObjectType()
+        self.assertEqual(sys.getrefcount(obj), 2)
+        obj.setParent(parent)
+        self.assertEqual(sys.getrefcount(obj), 3)
+        obj.setParent(parent)
+        self.assertEqual(sys.getrefcount(obj), 3)
 
     def testReparentedExtObjectType(self):
         '''Reparent children from one extended parent to another.'''

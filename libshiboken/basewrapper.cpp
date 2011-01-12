@@ -911,9 +911,9 @@ void setParent(PyObject* parent, PyObject* child)
     if (!parentIsNull) {
         if (!parent_->d->parentInfo)
             parent_->d->parentInfo = new ParentInfo;
+
         // do not re-add a child
-        ChildrenList& children = parent_->d->parentInfo->children;
-        if (std::find(children.begin(), children.end(), child_) != children.end())
+        if (child_->d->parentInfo && (child_->d->parentInfo->parent == parent_))
             return;
     }
 
