@@ -10,3 +10,4 @@ Table of contents
     codeinjectionsemantics.rst
     sequenceprotocol.rst
     ownership.rst
+    wordsofadvice.rst
