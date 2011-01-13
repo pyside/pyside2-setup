@@ -2711,18 +2711,40 @@ void CppGenerator::writeGetterFunction(QTextStream& s, const AbstractMetaField* 
 {
     s << "static PyObject* " << cpythonGetterFunctionName(metaField) << "(PyObject* self, void*)" << endl;
     s << '{' << endl;
-    s << INDENT << "return ";
+    s << INDENT << "PyObject* val = ";
 
     QString cppField;
+    AbstractMetaType *metaType = metaField->type();
+    // Force use of pointer to return internal variable memory
+    bool useReference = (!metaType->isConstant() &&
+                         !metaType->isEnum() &&
+                         !metaType->isPrimitive() &&
+                         metaType->indirections() == 0);
+
 #ifdef AVOID_PROTECTED_HACK
     if (metaField->isProtected())
-        cppField = QString("((%1*)%2)->%3()").arg(wrapperName(metaField->enclosingClass())).arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self")).arg(protectedFieldGetterName(metaField));
+        cppField = QString("(%1(%2*)%3)->%4()")
+            .arg(useReference ? '&' : ' ')
+            .arg(wrapperName(metaField->enclosingClass()))
+            .arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self"))
+            .arg(protectedFieldGetterName(metaField));
     else
 #endif
-        cppField= QString("%1->%2").arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self")).arg(metaField->name());
-    writeToPythonConversion(s, metaField->type(), metaField->enclosingClass(), cppField);
-    s << ';' << endl;
-    s << '}' << endl;
+        cppField= QString("%1%2->%3")
+            .arg(useReference ? '&' : ' ')
+            .arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self"))
+            .arg(metaField->name());
+
+    if (useReference) {
+        s << INDENT << "Shiboken::createWrapper(" << cppField << ");" << endl;
+        s << INDENT << "Shiboken::Object::releaseOwnership(val);" << endl;
+    } else {
+        writeToPythonConversion(s,  metaField->type(), metaField->enclosingClass(), cppField);
+        s << ';' << endl;
+    }
+
+    s << INDENT << "return val;" << endl
+      << endl << '}' << endl;
 }
 
 void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* metaField)

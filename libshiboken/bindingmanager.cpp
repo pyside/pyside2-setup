@@ -128,8 +128,6 @@ void BindingManager::BindingManagerPrivate::assignWrapper(SbkObject* wrapper, co
     WrapperMap::iterator iter = wrapperMapper.find(cptr);
     if (iter == wrapperMapper.end())
         wrapperMapper.insert(std::make_pair(cptr, wrapper));
-    else
-        iter->second = wrapper;
 }
 
 BindingManager::BindingManager()
