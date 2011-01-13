@@ -127,15 +127,30 @@ int main(int argc, char *argv[])
     if (!generatorSet.isEmpty()) {
         QFileInfo generatorFile(generatorSet);
 
-        if (generatorFile.baseName() == generatorSet)
-            generatorFile.setFile(QDir(GENERATORRUNNER_PLUGIN_DIR), generatorSet + "_generator");
+        if (!generatorFile.exists()) {
+            QString generatorSetName(generatorSet + "_generator" + MODULE_EXTENSION);
+
+            // More library paths may be added via the QT_PLUGIN_PATH environment variable.
+            QCoreApplication::addLibraryPath(GENERATORRUNNER_PLUGIN_DIR);
+            foreach (const QString& path, QCoreApplication::libraryPaths()) {
+                generatorFile.setFile(QDir(path), generatorSetName);
+                if (generatorFile.exists())
+                    break;
+            }
+        }
+
+        if (!generatorFile.exists()) {
+            std::cerr << argv[0] << ": Error loading generator-set plugin: ";
+            std::cerr << qPrintable(generatorFile.baseName()) << " module not found." << std::endl;
+            return EXIT_FAILURE;
+        }
 
         QLibrary plugin(generatorFile.filePath());
         getGeneratorsFunc getGenerators = (getGeneratorsFunc)plugin.resolve("getGenerators");
-        if (getGenerators)
+        if (getGenerators) {
             getGenerators(&generators);
-        else {
-            std::cerr << argv[0] << ": Error loading generatorset plugin: " << qPrintable(plugin.errorString()) << std::endl;
+        } else {
+            std::cerr << argv[0] << ": Error loading generator-set plugin: " << qPrintable(plugin.errorString()) << std::endl;
             return EXIT_FAILURE;
         }
     } else if (!args.contains("help")) {
