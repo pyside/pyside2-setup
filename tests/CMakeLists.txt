@@ -15,6 +15,8 @@ declare_test(testabstractmetatype)
 declare_test(testaddfunction)
 declare_test(testarrayargument)
 declare_test(testcodeinjection)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/utf8code.txt"
+                "${CMAKE_CURRENT_BINARY_DIR}/utf8code.txt" COPYONLY)
 declare_test(testcontainer)
 declare_test(testconversionoperator)
 declare_test(testconversionruletag)
@@ -39,5 +41,7 @@ declare_test(testtoposort)
 declare_test(testvoidarg)
 if (NOT DISABLE_DOCSTRINGS)
     declare_test(testmodifydocumentation)
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/a.xml"
+                   "${CMAKE_CURRENT_BINARY_DIR}/a.xml" COPYONLY)
 endif()
 

@@ -30,7 +30,10 @@
 void TestCodeInjections::testReadFileUtf8()
 {
     const char* cppCode ="struct A {};";
-    QString filePath = QFileInfo(__FILE__).absoluteDir().absolutePath();
+    int argc = 0;
+    char *argv[] = {NULL};
+    QCoreApplication app(argc, argv);
+    QString filePath = QCoreApplication::applicationDirPath();
     QString xmlCode = "\
     <typesystem package=\"Foo\"> \
         <value-type name='A'> \
