@@ -21,14 +21,22 @@
  *
  */
 
+#include "shibokenconfig.h"
+#include <iostream>
 #include <QtCore>
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     QStringList args;
     args.append("--generator-set=shiboken");
-    for (int i = 1; i < argc; i++)
+    for (int i = 1; i < argc; i++) {
+        if (QString("--version") == argv[i]) {
+            std::cout << "shiboken v" SHIBOKEN_VERSION << std::endl;
+            std::cout << "Copyright (C) 2009-2011 Nokia Corporation and/or its subsidiary(-ies)" << std::endl;
+            return EXIT_SUCCESS;
+        }
         args.append(argv[i]);
-    return QProcess::execute("generatorrunner", args);
+    }
+    return QProcess::execute(GENERATOR_BINARY, args);
 }
 

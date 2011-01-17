@@ -10,6 +10,7 @@ shibokennormalize.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
+                    ${CMAKE_CURRENT_BINARY_DIR}
                     ${APIEXTRACTOR_INCLUDE_DIR}
                     ${GENERATORRUNNER_INCLUDE_DIR}
                     ${QT_INCLUDE_DIR}
@@ -22,6 +23,8 @@ target_link_libraries(shiboken_generator
                       ${APIEXTRACTOR_LIBRARY}
                       ${GENERATORRUNNER_LIBRARY}
                       ${QT_QTCORE_LIBRARY})
+
+configure_file(shibokenconfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/shibokenconfig.h" @ONLY)
 
 add_executable(shiboken main.cpp)
 set_target_properties(shiboken PROPERTIES OUTPUT_NAME shiboken${shiboken_SUFFIX})

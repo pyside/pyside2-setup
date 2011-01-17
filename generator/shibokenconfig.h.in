@@ -1,0 +1,7 @@
+#ifndef SHIBOKENCONFIG_H
+#define SHIBOKENCONFIG_H
+
+#define GENERATOR_BINARY    "@GENERATORRUNNER_BINARY@"
+#define SHIBOKEN_VERSION    "@shiboken_VERSION@"
+
+#endif

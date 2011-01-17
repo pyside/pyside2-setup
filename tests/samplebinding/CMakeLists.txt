@@ -88,7 +88,8 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/valueandvirtual_wrapper.cpp
 )
 
 add_custom_command(OUTPUT ${sample_SRC}
-COMMAND ${GENERATORRUNNER_BINARY} --generator-set=${generators_BINARY_DIR}/shiboken_generator${CMAKE_RELEASE_POSTFIX}${CMAKE_DEBUG_POSTFIX}
+COMMAND ${GENERATORRUNNER_BINARY}
+        --generator-set=${generators_BINARY_DIR}/shiboken_generator${CMAKE_RELEASE_POSTFIX}${CMAKE_DEBUG_POSTFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}
         --enable-parent-ctor-heuristic
         --use-isnull-as-nb_nonzero
         ${CMAKE_CURRENT_SOURCE_DIR}/global.h
