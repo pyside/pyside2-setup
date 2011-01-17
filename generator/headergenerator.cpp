@@ -73,6 +73,7 @@ void HeaderGenerator::writeProtectedFieldAccessors(QTextStream& s, const Abstrac
 void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     ReportHandler::debugSparse("Generating header for " + metaClass->fullName());
+    m_inheritedOverloads.clear();
     Indentation indent(INDENT);
 
     // write license comment
@@ -143,13 +144,18 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
         }
 #endif
 
+        if (m_inheritedOverloads.size()) {
+            s << INDENT << "// Inherited overloads, because the using keyword sux" << endl;
+            writeInheritedOverloads(s);
+        }
+
         s << "};" << endl << endl;
     }
 
     s << "#endif // SBK_" << headerGuard << "_H" << endl << endl;
 }
 
-void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* func) const
+void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* func)
 {
 
     // do not write copy ctors here.
@@ -205,6 +211,20 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
             virtualOption = Generator::NoOption;
 
         s << functionSignature(func, "", "", virtualOption) << ';' << endl;
+
+        // Check if this method hide other methods in base classes
+        foreach (const AbstractMetaFunction* f, func->ownerClass()->functions()) {
+            if (f != func
+                && !f->isConstructor()
+                && !f->isPrivate()
+                && !f->isVirtual()
+                && !f->isAbstract()
+                && !f->isStatic()
+                && f->name() == func->name()) {
+                m_inheritedOverloads << f;
+                break;
+            }
+        }
 
         // TODO: when modified an abstract method ceases to be virtual but stays abstract
         //if (func->isModifiedRemoved() && func->isAbstract()) {
@@ -619,5 +639,29 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
         }
     }
     s << '}' << endl << endl;
+}
+
+void HeaderGenerator::writeInheritedOverloads(QTextStream& s)
+{
+    foreach (const AbstractMetaFunction* func, m_inheritedOverloads) {
+        s << INDENT << "inline ";
+        s << functionSignature(func, "", "", Generator::EnumAsInts|Generator::OriginalTypeDescription) << " { ";
+        s << (func->type() ? "return " : "");
+        s << func->ownerClass()->qualifiedCppName() << "::" << func->originalName() << '(';
+        QStringList args;
+        foreach (const AbstractMetaArgument* arg, func->arguments()) {
+            QString argName = arg->name();
+            const TypeEntry* enumTypeEntry = 0;
+            if (arg->type()->isFlags())
+                enumTypeEntry = reinterpret_cast<const FlagsTypeEntry*>(arg->type()->typeEntry())->originator();
+            else if (arg->type()->isEnum())
+                enumTypeEntry = arg->type()->typeEntry();
+            if (enumTypeEntry)
+                argName = QString("%1(%2)").arg(arg->type()->cppSignature()).arg(argName);
+            args << argName;
+        }
+        s << args.join(", ") << ')';
+        s << "; }" << endl;
+    }
 }
 

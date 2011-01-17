@@ -61,5 +61,23 @@ public:
     void singleOverload(Point* x) {}
     Point* singleOverload() {return new Point();}
 };
+
+class LIBSAMPLE_API Overload2 : public Overload
+{
+public:
+    // test bug#616, public and private method differ only by const
+    void doNothingInPublic() const {}
+    void doNothingInPublic(int) {}
+    virtual void doNothingInPublic3() const {}
+    void doNothingInPublic3(int) const {}
+protected:
+    void doNothingInPublic2() const {}
+    void doNothingInPublic2(int) {}
+private:
+    void doNothingInPublic() {}
+    void doNothingInPublic2() {}
+    void doNothingInPublic3() {}
+};
+
 #endif // OVERLOAD_H
 

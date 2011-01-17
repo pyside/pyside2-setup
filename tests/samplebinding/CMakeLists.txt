@@ -51,6 +51,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/objectview_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objtypereference_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/oddbooluser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/overload_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/overload2_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pairuser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pen_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/point_wrapper.cpp

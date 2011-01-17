@@ -41,9 +41,7 @@ protected:
 private:
     void writeCopyCtor(QTextStream &s, const AbstractMetaClass* metaClass) const;
     void writeProtectedFieldAccessors(QTextStream& s, const AbstractMetaField* field) const;
-    void writeFunction(QTextStream& s, const AbstractMetaFunction* func) const;
-    void writePureVirtualEmptyImpl(QTextStream& , const AbstractMetaFunction* func) const;
-    void writeDefaultImplementation(QTextStream& s, const AbstractMetaFunction* func) const;
+    void writeFunction(QTextStream& s, const AbstractMetaFunction* func);
     void writeTypeConverterDecl(QTextStream& s, const TypeEntry* type);
     void writeSbkTypeFunction(QTextStream& s, const AbstractMetaEnum* cppEnum);
     void writeSbkTypeFunction(QTextStream& s, const AbstractMetaClass* cppClass);
@@ -51,7 +49,9 @@ private:
     void writeTypeIndexDefine(QTextStream& s, const AbstractMetaClass* metaClass, int& idx);
     void writeTypeConverterImpl(QTextStream& s, const TypeEntry* type);
     void writeProtectedEnumSurrogate(QTextStream& s, const AbstractMetaEnum* cppEnum);
+    void writeInheritedOverloads(QTextStream& s);
 
+    QSet<const AbstractMetaFunction*> m_inheritedOverloads;
 };
 
 #endif // HEADERGENERATOR_H

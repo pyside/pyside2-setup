@@ -1101,7 +1101,7 @@
     <value-type name="NoImplicitConversion" />
     <value-type name="NonDefaultCtor" />
     <value-type name="OddBoolUser" />
-    <value-type name="Overload">
+    <object-type name="Overload">
         <enum-type name="FunctionEnum"/>
         <enum-type name="ParamEnum"/>
         <modify-function signature="intOverloads(int, int, double)">
@@ -1117,7 +1117,8 @@
                 <define-ownership owner="c++"/>
             </modify-argument>
         </modify-function>
-    </value-type>
+    </object-type>
+    <object-type name="Overload2" />
     <object-type name="Collector" stream="yes"/>
 
     <value-type name="IntWrapper" />
@@ -1220,11 +1221,11 @@
     <object-type name="PrivateDtor" />
 
     <object-type name="Base1"/>
-    <interface-type name="Base2"/>
+    <object-type name="Base2"/>
     <object-type name="Base3"/>
-    <interface-type name="Base4"/>
-    <interface-type name="Base5"/>
-    <interface-type name="Base6"/>
+    <object-type name="Base4"/>
+    <object-type name="Base5"/>
+    <object-type name="Base6"/>
     <object-type name="MDerived1"/>
     <object-type name="MDerived2"/>
     <object-type name="MDerived3"/>

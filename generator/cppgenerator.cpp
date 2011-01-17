@@ -2092,12 +2092,18 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                         if (func->isStatic())
                             mc << func->ownerClass()->qualifiedCppName() << "::";
                         else {
+                            if (func->isConstant()) {
 #ifdef AVOID_PROTECTED_HACK
-                            if (!func->isVirtual() && func->ownerClass()->hasProtectedMembers())
-                                mc << "((" << func->ownerClass()->qualifiedCppName() << "*)" << CPP_SELF_VAR << ")->";
-                            else
+                                mc << "const_cast<const ";
+                                bool hasProtectedMembers = func->ownerClass()->hasProtectedMembers();
+                                mc << (hasProtectedMembers ? wrapperName(func->ownerClass()) : func->ownerClass()->qualifiedCppName());
+                                mc <<  "*>(" CPP_SELF_VAR ")->";
+#else
+                                mc << "const_cast<const " << func->ownerClass()->qualifiedCppName() <<  "*>(" CPP_SELF_VAR ")->";
 #endif
+                            } else {
                                 mc << CPP_SELF_VAR "->";
+                            }
                         }
 
                         if (!func->isAbstract() && func->isVirtual())
