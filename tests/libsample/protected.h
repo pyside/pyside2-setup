@@ -24,6 +24,8 @@
 #define PROTECTED_H
 
 #include "libsamplemacros.h"
+#include "objecttype.h"
+#include "point.h"
 #include <string>
 
 class ProtectedNonPolymorphic
@@ -117,9 +119,19 @@ protected:
 class ProtectedProperty
 {
 public:
-    ProtectedProperty() : protectedProperty(0) {}
+    ProtectedProperty()
+        : protectedProperty(0),
+          protectedEnumProperty(Event::NO_EVENT),
+          protectedValueTypeProperty(Point(0, 0)),
+          protectedValueTypePointerProperty(0),
+          protectedObjectTypeProperty(0)
+    {}
 protected:
     int protectedProperty;
+    Event::EventType protectedEnumProperty;
+    Point protectedValueTypeProperty;
+    Point* protectedValueTypePointerProperty;
+    ObjectType* protectedObjectTypeProperty;
 };
 
 #endif // PROTECTED_H

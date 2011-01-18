@@ -27,14 +27,13 @@
 '''Test cases for protected methods.'''
 
 import unittest
-import sys
 
 from sample import cacheSize
 from sample import ProtectedNonPolymorphic, ProtectedVirtualDestructor
 from sample import ProtectedPolymorphic, ProtectedPolymorphicDaughter, ProtectedPolymorphicGrandDaughter
 from sample import ProtectedProperty, ProtectedEnumClass
 from sample import PrivateDtor
-from sample import Point
+from sample import Event, ObjectType, Point
 
 class ExtendedProtectedPolymorphic(ProtectedPolymorphic):
     def __init__(self, name):
@@ -266,15 +265,48 @@ class ProtectedEnumTest(unittest.TestCase):
 class ProtectedPropertyTest(unittest.TestCase):
     '''Test cases for a class with a protected property (or field in C++).'''
 
+    def setUp(self):
+        self.obj = ProtectedProperty()
+
     def tearDown(self):
+        del self.obj
         self.assertEqual(cacheSize(), 0)
 
     def testProtectedProperty(self):
-        '''Writes and reads a protected property.'''
-        obj = ProtectedProperty()
+        '''Writes and reads a protected integer property.'''
+        self.obj.protectedProperty = 3
+        self.assertEqual(self.obj.protectedProperty, 3)
 
-        obj.protectedProperty = 3
-        self.assertEqual(obj.protectedProperty, 3)
+    def testProtectedEnumProperty(self):
+        '''Writes and reads a protected enum property.'''
+        self.obj.protectedEnumProperty = Event.SOME_EVENT
+        self.assertEqual(self.obj.protectedEnumProperty, Event.SOME_EVENT)
+
+    def testProtectedValueTypeProperty(self):
+        '''Writes and reads a protected value type property.'''
+        point = Point(12, 34)
+        self.obj.protectedValueTypeProperty = point
+        self.assertEqual(self.obj.protectedValueTypeProperty, point)
+        self.assertFalse(self.obj.protectedValueTypeProperty is point)
+        pointProperty = self.obj.protectedValueTypeProperty
+        self.assertFalse(self.obj.protectedValueTypeProperty is pointProperty)
+
+    def testProtectedValueTypePointerProperty(self):
+        '''Writes and reads a protected value type pointer property.'''
+        pt1 = Point(12, 34)
+        pt2 = Point(12, 34)
+        self.obj.protectedValueTypePointerProperty = pt1
+        self.assertEqual(self.obj.protectedValueTypePointerProperty, pt1)
+        self.assertEqual(self.obj.protectedValueTypePointerProperty, pt2)
+        self.assert_(self.obj.protectedValueTypePointerProperty is pt1)
+        self.assertFalse(self.obj.protectedValueTypePointerProperty is pt2)
+
+    def testProtectedObjectTypeProperty(self):
+        '''Writes and reads a protected object type property.'''
+        obj = ObjectType()
+        self.obj.protectedObjectTypeProperty = obj
+        self.assertEqual(self.obj.protectedObjectTypeProperty, obj)
+
 
 class PrivateDtorProtectedMethodTest(unittest.TestCase):
     '''Test cases for classes with private destructors and protected methods.'''
