@@ -786,6 +786,14 @@ bool isValid(PyObject* pyObj)
     return false;
 }
 
+bool isValid(SbkObject* pyObj, bool throwPyError)
+{
+    bool result = !pyObj || pyObj->d->validCppObject;
+    if (!result && throwPyError)
+        PyErr_Format(PyExc_RuntimeError, "Internal C++ object (%s) already deleted.", pyObj->ob_type->tp_name);
+    return result;
+}
+
 PyObject* newObject(SbkObjectType* instanceType,
                     void* cptr,
                     bool hasOwnership,

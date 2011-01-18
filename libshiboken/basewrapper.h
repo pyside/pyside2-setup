@@ -253,7 +253,14 @@ LIBSHIBOKEN_API bool        setCppPointer(SbkObject* sbkObj, PyTypeObject* desir
 /**
  * Returns false and sets a Python RuntimeError if the Python wrapper is not marked as valid.
  */
-LIBSHIBOKEN_API bool        isValid(PyObject* wrapper);
+LIBSHIBOKEN_API bool        isValid(PyObject* pyObj);
+
+/**
+ * Returns false if the Python wrapper is not marked as valid.
+ * \param pyObj the object.
+ * \param throwPyError sets a Python RuntimeError when the object isn't valid.
+ */
+LIBSHIBOKEN_API bool        isValid(SbkObject* pyObj, bool throwPyError = true);
 
 /**
 *   Set the parent of \p child to \p parent.
