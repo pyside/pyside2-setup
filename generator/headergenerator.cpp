@@ -47,13 +47,27 @@ void HeaderGenerator::writeCopyCtor(QTextStream& s, const AbstractMetaClass* met
 
 void HeaderGenerator::writeProtectedFieldAccessors(QTextStream& s, const AbstractMetaField* field) const
 {
-    QString fieldType = field->type()->cppSignature();
+    AbstractMetaType *metaType = field->type();
+    QString fieldType = metaType->cppSignature();
     QString fieldName = field->enclosingClass()->qualifiedCppName() + "::" + field->name();
 
-    s << INDENT << "inline " << fieldType << ' ' << protectedFieldGetterName(field) << "()";
-    s << " { return " << fieldName << "; }" << endl;
-    s << INDENT << "inline void " << protectedFieldSetterName(field) << '(' << fieldType << " value)";
-    s << " { " << fieldName << " = value; }" << endl;
+    // Force use of pointer to return internal variable memory
+    bool useReference = (!metaType->isConstant() &&
+                         !metaType->isEnum() &&
+                         !metaType->isPrimitive() &&
+                         metaType->indirections() == 0);
+
+
+    // Get function
+    s << INDENT << "inline " << fieldType
+      << (useReference ? '*' : ' ')
+      << ' ' << protectedFieldGetterName(field) << "()"
+      << " { return "
+      << (useReference ? '&' : ' ') << "this->" << fieldName << "; }" << endl;
+
+    // Set function
+    s << INDENT << "inline void " << protectedFieldSetterName(field) << '(' << fieldType << " value)"
+      << " { " << fieldName << " = value; }" << endl;
 }
 
 void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* metaClass)
