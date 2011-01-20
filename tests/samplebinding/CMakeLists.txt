@@ -100,7 +100,7 @@ COMMENT "Running generator for test binding..."
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_SOURCE_DIR}
-                    ${PYTHON_INCLUDE_PATH}
+                    ${SBK_PYTHON_INCLUDE_DIR}
                     ${libsample_SOURCE_DIR}
                     ${libshiboken_SOURCE_DIR})
 add_library(sample MODULE ${sample_SRC})

@@ -26,7 +26,7 @@ COMMENT "Running generator for test binding..."
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_SOURCE_DIR}
-                    ${PYTHON_INCLUDE_PATH}
+                    ${SBK_PYTHON_INCLUDE_DIR}
                     ${libother_SOURCE_DIR}
                     ${libsample_SOURCE_DIR}
                     ${libsample_SOURCE_DIR}/..

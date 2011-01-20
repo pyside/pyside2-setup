@@ -32,7 +32,7 @@ typeresolver.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-                    ${PYTHON_INCLUDE_PATH}
+                    ${SBK_PYTHON_INCLUDE_DIR}
                     ${SPARSEHASH_INCLUDE_PATH})
 add_library(libshiboken SHARED ${libshiboken_SRC})
 target_link_libraries(libshiboken ${SBK_PYTHON_LIBRARIES})
