@@ -26,6 +26,8 @@
 
 '''Test cases for Python representation of C++ enums.'''
 
+import os
+import sys
 import unittest
 
 import sample
@@ -82,6 +84,18 @@ class EnumTest(unittest.TestCase):
         '''Checks availability of anonymous class enum items.'''
         self.assertEqual(SampleNamespace.AnonymousClassEnum_Value0, 0)
         self.assertEqual(SampleNamespace.AnonymousClassEnum_Value1, 1)
+
+    def testEnumTpPrintImplementation(self):
+        '''Without SbkEnum.tp_print 'print' returns the enum represented as an int.'''
+        tmpfile = os.tmpfile()
+        sys.stdout = tmpfile
+        print Event.ANY_EVENT
+        sys.stdout = sys.__stdout__
+        tmpfile.seek(0)
+        text = tmpfile.read().strip()
+        tmpfile.close()
+        self.assertEqual(text, str(Event.ANY_EVENT))
+        self.assertEqual(text, repr(Event.ANY_EVENT))
 
 
 class EnumOverloadTest(unittest.TestCase):

@@ -36,12 +36,25 @@ struct SbkEnumObject
     PyObject* ob_name;
 };
 
+#define SBKENUMOBJECT_REPR_STRING   "<enum-item %s.%s (%ld)>"
+
 static PyObject* SbkEnumObject_repr(PyObject* self)
 {
-    return PyString_FromFormat("<enum-item %s.%s (%ld)>",
+    return PyString_FromFormat(SBKENUMOBJECT_REPR_STRING,
                                self->ob_type->tp_name,
                                PyString_AS_STRING(((SbkEnumObject*)self)->ob_name),
                                ((SbkEnumObject*)self)->ob_ival);
+}
+
+static int SbkEnumObject_print(PyObject* self, FILE* fp, int)
+{
+    Py_BEGIN_ALLOW_THREADS
+    fprintf(fp, SBKENUMOBJECT_REPR_STRING,
+            self->ob_type->tp_name,
+            PyString_AS_STRING(((SbkEnumObject*)self)->ob_name),
+            ((SbkEnumObject*)self)->ob_ival);
+    Py_END_ALLOW_THREADS
+    return 0;
 }
 
 static PyObject* SbkEnumObject_name(PyObject* self, void*)
@@ -169,6 +182,7 @@ PyTypeObject* newType(const char* name)
     ::memset(type, 0, sizeof(PyTypeObject));
     type->ob_type = &SbkEnumType_Type;
     type->tp_basicsize = sizeof(SbkEnumObject);
+    type->tp_print = &SbkEnumObject_print;
     type->tp_repr = &SbkEnumObject_repr;
     type->tp_str = &SbkEnumObject_repr;
     type->tp_flags = Py_TPFLAGS_DEFAULT;
