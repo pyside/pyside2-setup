@@ -4,6 +4,10 @@ else()
     set(LIBRARY_OUTPUT_SUFFIX ${CMAKE_RELEASE_POSTFIX})
 endif()
 
+add_custom_target(data)
+add_dependencies(data shiboken)
+get_target_property(SHIBOKEN_GENERATOR shiboken OUTPUT_NAME)
+
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ShibokenConfig.cmake.in"
                "${CMAKE_CURRENT_BINARY_DIR}/ShibokenConfig.cmake" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ShibokenConfig-spec.cmake.in"
