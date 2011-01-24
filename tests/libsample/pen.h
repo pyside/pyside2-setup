@@ -29,9 +29,13 @@
 class LIBSAMPLE_API Color
 {
 public:
-    Color() {}
-    Color(SampleNamespace::InValue arg) {}
-    Color(unsigned int arg) {}
+    Color() : m_null(true) {}
+    Color(SampleNamespace::InValue arg) : m_null(false) {}
+    Color(unsigned int arg) : m_null(false) {}
+
+    bool isNull() const { return m_null; }
+private:
+    bool m_null;
 };
 
 class LIBSAMPLE_API Pen

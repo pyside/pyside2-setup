@@ -190,6 +190,20 @@ void CppGenerator::writeToPythonFunction(QTextStream& s, const AbstractMetaClass
     s << "}" << endl;
 }
 
+bool CppGenerator::hasBoolCast(const AbstractMetaClass* metaClass) const
+{
+    if (!useIsNullAsNbNonZero())
+        return false;
+    // TODO: This could be configurable someday
+    const AbstractMetaFunction* func = metaClass->findFunction("isNull");
+    if (!func || !func->type() || !func->type()->typeEntry()->isPrimitive() || !func->isPublic())
+        return false;
+    const PrimitiveTypeEntry* pte = static_cast<const PrimitiveTypeEntry*>(func->type()->typeEntry());
+    while (pte->aliasedTypeEntry())
+        pte = pte->aliasedTypeEntry();
+    return func && func->isConstant() && pte->name() == "bool" && func->arguments().isEmpty();
+}
+
 /*!
     Function used to write the class generated binding code on the buffer
     \param s the output buffer
@@ -326,7 +340,8 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     QTextStream smd(&singleMethodDefinitions);
 
     bool hasComparisonOperator = metaClass->hasComparisonOperatorOverload();
-    bool typeAsNumber = metaClass->hasArithmeticOperatorOverload() || metaClass->hasLogicalOperatorOverload() || metaClass->hasBitwiseOperatorOverload();
+    bool hasBoolCast = this->hasBoolCast(metaClass);
+    bool typeAsNumber = metaClass->hasArithmeticOperatorOverload() || metaClass->hasLogicalOperatorOverload() || metaClass->hasBitwiseOperatorOverload() || hasBoolCast;
 
     s << endl << "// Target ---------------------------------------------------------" << endl << endl;
     s << "extern \"C\" {" << endl;
@@ -395,6 +410,23 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     } else if (classNeedsGetattroFunction(metaClass)) {
         writeGetattroFunction(s, metaClass);
         s << endl;
+    }
+
+    if (hasBoolCast) {
+        s << "static int " << cpythonBaseName(metaClass) << "___nb_bool(PyObject* pyObj)\n{\n";
+        s << INDENT << "if (!Shiboken::Object::isValid(pyObj))" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "return -1;" << endl;
+        }
+        s << INDENT << "const ::" << metaClass->qualifiedCppName() << "* cppSelf = ";
+        s << "Shiboken::Converter< ::" << metaClass->qualifiedCppName() << "*>::toCpp(pyObj);" << endl;
+        s << INDENT << "int result;" << endl;
+        s << INDENT << "Py_BEGIN_ALLOW_THREADS" << endl;
+        s << INDENT << "result = !cppSelf->isNull();" << endl;
+        s << INDENT << "Py_END_ALLOW_THREADS" << endl;
+        s << INDENT << "return result;" << endl;
+        s << '}' << endl << endl;
     }
 
     if (typeAsNumber) {
@@ -2380,7 +2412,8 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
 
     if (metaClass->hasArithmeticOperatorOverload()
         || metaClass->hasLogicalOperatorOverload()
-        || metaClass->hasBitwiseOperatorOverload()) {
+        || metaClass->hasBitwiseOperatorOverload()
+        || hasBoolCast(metaClass)) {
         tp_as_number = QString("&%1_as_number").arg(cpythonBaseName(metaClass));
     }
 
@@ -2622,6 +2655,8 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
         nb[opName] = cpythonFunctionName(rfunc);
     }
 
+    nb["bool"] = hasBoolCast(metaClass) ? cpythonBaseName(metaClass) + "___nb_bool" : "0";
+
     s << "static PyNumberMethods " << cpythonBaseName(metaClass);
     s << "_as_number = {" << endl;
     s << INDENT << "/*nb_add*/                  (binaryfunc)" << nb["__add__"] << ',' << endl;
@@ -2634,7 +2669,7 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
     s << INDENT << "/*nb_negative*/             (unaryfunc)" << nb["__neg__"] << ',' << endl;
     s << INDENT << "/*nb_positive*/             (unaryfunc)" << nb["__pos__"] << ',' << endl;
     s << INDENT << "/*nb_absolute*/             0," << endl;
-    s << INDENT << "/*nb_nonzero*/              0," << endl;
+    s << INDENT << "/*nb_nonzero*/              " << nb["bool"] << ',' << endl;
     s << INDENT << "/*nb_invert*/               (unaryfunc)" << nb["__invert__"] << ',' << endl;
     s << INDENT << "/*nb_lshift*/               (binaryfunc)" << nb["__lshift__"] << ',' << endl;
     s << INDENT << "/*nb_rshift*/               (binaryfunc)" << nb["__rshift__"] << ',' << endl;

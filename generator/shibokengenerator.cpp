@@ -35,6 +35,7 @@
 #define RETURN_VALUE_HEURISTIC "enable-return-value-heuristic"
 #define ENABLE_PYSIDE_EXTENSIONS "enable-pyside-extensions"
 #define DISABLE_VERBOSE_ERROR_MESSAGES "disable-verbose-error-messages"
+#define USE_ISNULL_AS_NB_NONZERO "use-isnull-as-nb_nonzero"
 
 //static void dumpFunction(AbstractMetaFunctionList lst);
 static QString baseConversionString(QString typeName);
@@ -1627,6 +1628,7 @@ QMap<QString, QString> ShibokenGenerator::options() const
     opts.insert(RETURN_VALUE_HEURISTIC, "Enable heuristics to detect parent relationship on return values (USE WITH CAUTION!)");
     opts.insert(ENABLE_PYSIDE_EXTENSIONS, "Enable PySide extensions, such as support for signal/slots, use this if you are creating a binding for a Qt-based library.");
     opts.insert(DISABLE_VERBOSE_ERROR_MESSAGES, "Disable verbose error messages. Turn the python code hard to debug but safe few kB on the generated bindings.");
+    opts.insert(USE_ISNULL_AS_NB_NONZERO, "If a class have an isNull()const method, it will be used to compute the value of boolean casts");
     return opts;
 }
 
@@ -1636,6 +1638,7 @@ bool ShibokenGenerator::doSetup(const QMap<QString, QString>& args)
     m_usePySideExtensions = args.contains(ENABLE_PYSIDE_EXTENSIONS);
     m_userReturnValueHeuristic = args.contains(RETURN_VALUE_HEURISTIC);
     m_verboseErrorMessagesDisabled = args.contains(DISABLE_VERBOSE_ERROR_MESSAGES);
+    m_useIsNullAsNbNonZero = args.contains(USE_ISNULL_AS_NB_NONZERO);
     return true;
 }
 
@@ -1652,6 +1655,11 @@ bool ShibokenGenerator::useReturnValueHeuristic() const
 bool ShibokenGenerator::usePySideExtensions() const
 {
     return m_usePySideExtensions;
+}
+
+bool ShibokenGenerator::useIsNullAsNbNonZero() const
+{
+    return m_useIsNullAsNbNonZero;
 }
 
 QString ShibokenGenerator::cppApiVariableName(const QString& moduleName) const

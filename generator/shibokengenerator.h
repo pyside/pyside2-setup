@@ -310,6 +310,8 @@ public:
     bool useReturnValueHeuristic() const;
     /// Returns true if the user enabled PySide extensions.
     bool usePySideExtensions() const;
+    /// Return true if the generator should use the result of isNull()const to compute boolean casts.
+    bool useIsNullAsNbNonZero() const;
     QString cppApiVariableName(const QString& moduleName = QString()) const;
     QString getTypeIndexVariableName(const TypeEntry* metaType);
     /// Returns true if the user don't want verbose error messages on the generated bindings.
@@ -369,6 +371,7 @@ private:
     bool m_userReturnValueHeuristic;
     bool m_usePySideExtensions;
     bool m_verboseErrorMessagesDisabled;
+    bool m_useIsNullAsNbNonZero;
 };
 
 

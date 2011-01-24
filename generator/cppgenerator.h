@@ -194,6 +194,7 @@ private:
 
     void writeRegisterType(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeRegisterType(QTextStream& s, const AbstractMetaEnum* metaEnum);
+    bool hasBoolCast(const AbstractMetaClass* metaClass) const;
 
     // Maps special function names to function parameters and return types
     // used by CPython API in the sequence protocol.
