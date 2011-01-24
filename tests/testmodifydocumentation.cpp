@@ -63,9 +63,6 @@ void TestModifyDocumentation::testModifyDocumentation()
 }
 
 // we need an event loop to run these tests
-int argv = 0;
-const char* argc[] = {""};
-QCoreApplication app(argv, const_cast<char**>(argc));
-QTEST_APPLESS_MAIN(TestModifyDocumentation)
+QTEST_MAIN(TestModifyDocumentation)
 
 #include "testmodifydocumentation.moc"
