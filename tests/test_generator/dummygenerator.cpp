@@ -40,3 +40,25 @@ DummyGenerator::generateClass(QTextStream& s, const AbstractMetaClass* metaClass
     s << "// Generated code for class: " << qPrintable(metaClass->name()) << endl;
 }
 
+bool
+DummyGenerator::doSetup(const QMap<QString, QString>& args)
+{
+    if (args.contains("dump-arguments") && !args["dump-arguments"].isEmpty()) {
+        QFile logFile(args["dump-arguments"]);
+        logFile.open(QIODevice::WriteOnly | QIODevice::Text);
+        QTextStream out(&logFile);
+        foreach (const QString& key, args.keys()) {
+            if (key == "arg-1")
+                out << "header-file";
+            else if (key == "arg-2")
+                out << "typesystem-file";
+            else
+                out << key;
+            if (!args[key].isEmpty())
+                out << " = " << args[key];
+            out << endl;
+        }
+    }
+    return true;
+}
+

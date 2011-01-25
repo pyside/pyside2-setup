@@ -32,10 +32,19 @@ class DummyGenTest : public QObject
 {
     Q_OBJECT
 
+private:
+    QString workDir;
+    QString headerFilePath;
+    QString typesystemFilePath;
+    QString generatedFilePath;
+    QString projectFilePath;
+
 private slots:
+    void initTestCase();
     void testCallGenRunnerWithFullPathToDummyGenModule();
     void testCallGenRunnerWithNameOfDummyGenModule();
     void testCallDummyGeneratorExecutable();
+    void testProjectFileArgumentsReading();
 };
 
 #endif

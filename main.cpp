@@ -50,17 +50,49 @@ static void printOptions(QTextStream& s, const QMap<QString, QString>& options) 
 
 typedef void (*getGeneratorsFunc)(QLinkedList<Generator*>*);
 
-static QString getPathString(const QDomElement& element)
+static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
 {
-    QStringList path;
-    QDomNode n = element.firstChild();
-    while (!n.isNull()) {
-        QDomElement e = n.toElement(); // try to convert the node to an element.
-        if (e.tagName() == "path")
-            path << QDir::toNativeSeparators(e.attribute("location"));
-        n = n.nextSibling();
+    QByteArray line = projectFile.readLine().trimmed();
+    if (line.isEmpty() || line != "[generator-project]")
+        return false;
+
+    QStringList includePaths;
+    QStringList typesystemPaths;
+
+    while (!projectFile.atEnd()) {
+        line = projectFile.readLine().trimmed();
+        if (line.isEmpty())
+            continue;
+
+        int split = line.indexOf("=");
+        QString key;
+        QString value;
+        if (split > 0) {
+            key = line.left(split - 1).trimmed();
+            value = line.mid(split + 1).trimmed();
+        } else {
+            key = line;
+        }
+
+        if (key == "include-path")
+            includePaths << QDir::toNativeSeparators(value);
+        else if (key == "typesystem-path")
+            typesystemPaths << QDir::toNativeSeparators(value);
+        else if (key == "header-file")
+            args["arg-1"] = value;
+        else if (key == "typesystem-file")
+            args["arg-2"] = value;
+        else
+            args[key] = value;
     }
-    return path.join(PATH_SPLITTER);
+
+    if (!includePaths.isEmpty())
+        args["include-paths"] = includePaths.join(PATH_SPLITTER);
+
+    if (!typesystemPaths.isEmpty())
+        args["typesystem-paths"] = typesystemPaths.join(PATH_SPLITTER);
+
+    return true;
 }
 
 static QMap<QString, QString> getInitializedArguments()
@@ -84,7 +116,9 @@ static QMap<QString, QString> getInitializedArguments()
         return args;
 
     if (!QFile::exists(projectFileName)) {
-        std::cerr << qPrintable(appName) << ": Project file \"" << qPrintable(projectFileName) << "\" not found." << std::endl;
+        std::cerr << qPrintable(appName) << ": Project file \"";
+        std::cerr << qPrintable(projectFileName) << "\" not found.";
+        std::cerr << std::endl;
         return args;
     }
 
@@ -92,39 +126,11 @@ static QMap<QString, QString> getInitializedArguments()
     if (!projectFile.open(QIODevice::ReadOnly))
         return args;
 
-    QDomDocument doc("project-file");
-    if (!doc.setContent(&projectFile)) {
-        projectFile.close();
+    if (!processProjectFile(projectFile, args)) {
+        std::cerr << qPrintable(appName) << ": first line of project file \"";
+        std::cerr << qPrintable(projectFileName) << "\" must be the string \"[generator-project]\"";
+        std::cerr << std::endl;
         return args;
-    }
-    projectFile.close();
-
-    QDomElement docElem = doc.documentElement();
-    QDomNode n = docElem.firstChild();
-    while (!n.isNull()) {
-        QDomElement e = n.toElement(); // try to convert the node to an element.
-        if (!e.isNull()) {
-            QString tag = e.tagName();
-            if (tag == "generator-set")
-                args[tag] = e.attribute("generator");
-            else if (tag == "output-directory" || tag == "license-file")
-                args[tag] = e.attribute("location");
-            else if (tag == "api-version")
-                args[tag] = e.attribute("version");
-            else if (tag == "debug")
-                args[tag] = e.attribute("level");
-            else if (tag == "documentation-only" || tag == "no-suppress-warnings" || tag == "silent")
-                args[tag] = QString();
-            else if (tag == "include-paths" || tag == "typesystem-paths")
-                args[tag] = getPathString(e);
-            else if (tag == "header-file")
-                args["arg-1"] = e.attribute("location");
-            else if (tag == "typesystem-file")
-                args["arg-2"] = e.attribute("location");
-            else
-                args[tag] = e.attribute("value");
-        }
-        n = n.nextSibling();
     }
 
     return args;
@@ -133,7 +139,6 @@ static QMap<QString, QString> getInitializedArguments()
 static QMap<QString, QString> getCommandLineArgs()
 {
     QMap<QString, QString> args = getInitializedArguments();
-
     QStringList arguments = QCoreApplication::arguments();
     arguments.removeFirst();
 
@@ -163,19 +168,19 @@ void printUsage(const GeneratorList& generators)
     << "generator [options] header-file typesystem-file\n\n"
     "General options:\n";
     QMap<QString, QString> generalOptions;
-    generalOptions.insert("project-file=[file]", "XML file containing a description of the binding project. Replaces and overrides command line arguments");
+    generalOptions.insert("project-file=<file>", "text file containing a description of the binding project. Replaces and overrides command line arguments");
     generalOptions.insert("debug-level=[sparse|medium|full]", "Set the debug level");
     generalOptions.insert("silent", "Avoid printing any message");
     generalOptions.insert("help", "Display this help and exit");
     generalOptions.insert("no-suppress-warnings", "Show all warnings");
-    generalOptions.insert("output-directory=[dir]", "The directory where the generated files will be written");
+    generalOptions.insert("output-directory=<path>", "The directory where the generated files will be written");
     generalOptions.insert("include-paths=<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]", "Include paths used by the C++ parser");
     generalOptions.insert("typesystem-paths=<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]", "Paths used when searching for typesystems");
     generalOptions.insert("documentation-only", "Do not generates any code, just the documentation");
-    generalOptions.insert("license-file=[license-file]", "File used for copyright headers of generated files");
+    generalOptions.insert("license-file=<license-file>", "File used for copyright headers of generated files");
     generalOptions.insert("version", "Output version information and exit");
-    generalOptions.insert("generator-set", "generator-set to be used. e.g. qtdoc");
-    generalOptions.insert("api-version", "Specify the supported api version used to generate the bindings");
+    generalOptions.insert("generator-set=<\"generator module\">", "generator-set to be used. e.g. qtdoc");
+    generalOptions.insert("api-version=<\"version\">", "Specify the supported api version used to generate the bindings");
     printOptions(s, generalOptions);
 
     foreach (Generator* generator, generators) {

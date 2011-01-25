@@ -40,6 +40,12 @@ macro(declare_test testname)
     set_property(TEST ${testname} PROPERTY ENVIRONMENT "PATH=${ENV_PATH}" "QT_PLUGIN_PATH=${ENV_QT_PLUGIN_PATH}")
 endmacro(declare_test testname)
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/test_global.h"
+               "${CMAKE_CURRENT_BINARY_DIR}/test_global.h" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/test_typesystem.xml"
+               "${CMAKE_CURRENT_BINARY_DIR}/test_typesystem.xml" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/dummygentest-project.txt.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/dummygentest-project.txt" @ONLY)
 declare_test(dummygentest)
 
 add_dependencies(dummygenerator generatorrunner)

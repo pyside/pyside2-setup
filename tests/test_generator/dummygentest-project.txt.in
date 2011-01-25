@@ -1,0 +1,20 @@
+[generator-project]
+
+generator-set = dummy
+header-file = @CMAKE_CURRENT_BINARY_DIR@/test_global.h
+typesystem-file = @CMAKE_CURRENT_BINARY_DIR@/test_typesystem.xml
+output-directory = /tmp/output
+
+dump-arguments = @CMAKE_CURRENT_BINARY_DIR@/dummygen-args.log
+
+include-path = /include/path/location1
+include-path = /include/path/location2
+
+typesystem-path = /typesystem/path/location1
+typesystem-path = /typesystem/path/location2
+
+api-version = 1.2.3
+debug = sparse
+
+no-suppress-warnings
+

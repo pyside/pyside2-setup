@@ -30,7 +30,7 @@ class GENRUNNER_API DummyGenerator : public Generator
 public:
     DummyGenerator() {}
     ~DummyGenerator() {}
-    bool doSetup(const QMap<QString, QString>& args) { return true; }
+    bool doSetup(const QMap<QString, QString>& args);
     const char* name() const { return "DummyGenerator"; }
 
 protected:

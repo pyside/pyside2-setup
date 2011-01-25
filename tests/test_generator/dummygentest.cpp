@@ -28,35 +28,32 @@
 #include <QtTest/QTest>
 #include <QProcess>
 
-#define HEADER_CONTENTS     "struct Dummy {};"
-#define TYPESYSTEM_CONTENTS "<typesystem package='dummy'><value-type name='Dummy'/></typesystem>"
 #define GENERATED_CONTENTS  "// Generated code for class: Dummy"
-#define GENERATED_FILE      "dummy/dummy_generated.txt"
+
+void DummyGenTest::initTestCase()
+{
+    int argc = 0;
+    char* argv[] = {NULL};
+    QCoreApplication app(argc, argv);
+    workDir = QCoreApplication::applicationDirPath();
+
+    headerFilePath = workDir + "/test_global.h";
+    typesystemFilePath = workDir + "/test_typesystem.xml";
+    projectFilePath = workDir + "/dummygentest-project.txt";
+    generatedFilePath = QString("%1/dummy/dummy_generated.txt").arg(QDir::tempPath());
+}
 
 void DummyGenTest::testCallGenRunnerWithFullPathToDummyGenModule()
 {
-    QTemporaryFile headerFile;
-    headerFile.open();
-    QCOMPARE(headerFile.write(HEADER_CONTENTS), qint64(sizeof(HEADER_CONTENTS)-1));
-    headerFile.close();
-
-    QTemporaryFile typesystemFile;
-    typesystemFile.open();
-    QCOMPARE(typesystemFile.write(TYPESYSTEM_CONTENTS), qint64(sizeof(TYPESYSTEM_CONTENTS)-1));
-    typesystemFile.close();
-
-    QString generatedFileName = QString("%1/" GENERATED_FILE).arg(QDir::tempPath());
-    QFile::remove(generatedFileName);
-
     QStringList args;
     args.append("--generator-set=" DUMMYGENERATOR_BINARY_DIR "/dummy_generator" MODULE_EXTENSION);
     args.append(QString("--output-directory=%1").arg(QDir::tempPath()));
-    args.append(headerFile.fileName());
-    args.append(typesystemFile.fileName());
+    args.append(headerFilePath);
+    args.append(typesystemFilePath);
     int result = QProcess::execute("generatorrunner", args);
     QCOMPARE(result, 0);
 
-    QFile generatedFile(generatedFileName);
+    QFile generatedFile(generatedFilePath);
     generatedFile.open(QIODevice::ReadOnly);
     QCOMPARE(generatedFile.readAll().trimmed(), QByteArray(GENERATED_CONTENTS).trimmed());
     generatedFile.close();
@@ -66,28 +63,15 @@ void DummyGenTest::testCallGenRunnerWithFullPathToDummyGenModule()
 
 void DummyGenTest::testCallGenRunnerWithNameOfDummyGenModule()
 {
-    QTemporaryFile headerFile;
-    headerFile.open();
-    QCOMPARE(headerFile.write(HEADER_CONTENTS), qint64(sizeof(HEADER_CONTENTS)-1));
-    headerFile.close();
-
-    QTemporaryFile typesystemFile;
-    typesystemFile.open();
-    QCOMPARE(typesystemFile.write(TYPESYSTEM_CONTENTS), qint64(sizeof(TYPESYSTEM_CONTENTS)-1));
-    typesystemFile.close();
-
-    QString generatedFileName = QString("%1/" GENERATED_FILE).arg(QDir::tempPath());
-    QFile::remove(generatedFileName);
-
     QStringList args;
     args.append("--generator-set=dummy");
     args.append(QString("--output-directory=%1").arg(QDir::tempPath()));
-    args.append(headerFile.fileName());
-    args.append(typesystemFile.fileName());
+    args.append(headerFilePath);
+    args.append(typesystemFilePath);
     int result = QProcess::execute("generatorrunner", args);
     QCOMPARE(result, 0);
 
-    QFile generatedFile(generatedFileName);
+    QFile generatedFile(generatedFilePath);
     generatedFile.open(QIODevice::ReadOnly);
     QCOMPARE(generatedFile.readAll().trimmed(), QByteArray(GENERATED_CONTENTS).trimmed());
     generatedFile.close();
@@ -97,32 +81,48 @@ void DummyGenTest::testCallGenRunnerWithNameOfDummyGenModule()
 
 void DummyGenTest::testCallDummyGeneratorExecutable()
 {
-    QTemporaryFile headerFile;
-    headerFile.open();
-    QCOMPARE(headerFile.write(HEADER_CONTENTS), qint64(sizeof(HEADER_CONTENTS)-1));
-    headerFile.close();
-
-    QTemporaryFile typesystemFile;
-    typesystemFile.open();
-    QCOMPARE(typesystemFile.write(TYPESYSTEM_CONTENTS), qint64(sizeof(TYPESYSTEM_CONTENTS)-1));
-    typesystemFile.close();
-
-    QString generatedFileName = QString("%1/" GENERATED_FILE).arg(QDir::tempPath());
-    QFile::remove(generatedFileName);
-
     QStringList args;
     args.append(QString("--output-directory=%1").arg(QDir::tempPath()));
-    args.append(headerFile.fileName());
-    args.append(typesystemFile.fileName());
+    args.append(headerFilePath);
+    args.append(typesystemFilePath);
     int result = QProcess::execute(DUMMYGENERATOR_BINARY, args);
     QCOMPARE(result, 0);
 
-    QFile generatedFile(generatedFileName);
+    QFile generatedFile(generatedFilePath);
     generatedFile.open(QIODevice::ReadOnly);
     QCOMPARE(generatedFile.readAll().trimmed(), QByteArray(GENERATED_CONTENTS).trimmed());
     generatedFile.close();
 
     QVERIFY(generatedFile.remove());
+}
+
+void DummyGenTest::testProjectFileArgumentsReading()
+{
+    QStringList args(QString("--project-file=%1/dummygentest-project.txt").arg(workDir));
+    int result = QProcess::execute("generatorrunner", args);
+    QCOMPARE(result, 0);
+
+    QFile logFile(workDir + "/dummygen-args.log");
+    logFile.open(QIODevice::ReadOnly);
+    QStringList logContents;
+    while (!logFile.atEnd())
+        logContents << logFile.readLine().trimmed();
+    logContents.sort();
+    QCOMPARE(logContents[0], QString("api-version = 1.2.3"));
+    QCOMPARE(logContents[1], QString("debug = sparse"));
+    QVERIFY(logContents[2].startsWith("dump-arguments = "));
+    QVERIFY(logContents[2].endsWith("dummygen-args.log"));
+    QCOMPARE(logContents[3], QString("generator-set = dummy"));
+    QVERIFY(logContents[4].startsWith("header-file = "));
+    QVERIFY(logContents[4].endsWith("test_global.h"));
+    QCOMPARE(logContents[5], QString("include-paths = /include/path/location1:/include/path/location2"));
+    QCOMPARE(logContents[6], QString("no-suppress-warnings"));
+    QCOMPARE(logContents[7], QString("output-directory = /tmp/output"));
+    QVERIFY(logContents[8].startsWith("project-file = "));
+    QVERIFY(logContents[8].endsWith("dummygentest-project.txt"));
+    QVERIFY(logContents[9].startsWith("typesystem-file = "));
+    QVERIFY(logContents[9].endsWith("test_typesystem.xml"));
+    QCOMPARE(logContents[10], QString("typesystem-paths = /typesystem/path/location1:/typesystem/path/location2"));
 }
 
 QTEST_APPLESS_MAIN(DummyGenTest)

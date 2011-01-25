@@ -9,17 +9,17 @@ generatorrunner - plugin-based binding source code generator
 is a utility that uses the information taken from APIExtractor
 related to the provided C++ headers and typesystem files and execute
 generators using this information. Generators are plugins and you need
-to specify one using the \-\-generatorSet parameter. At the moment there 
+to specify one using the \-\-generatorSet parameter. At the moment there
 are two generators available:
 
 .B qtdoc
-\- Generates Sphinx-based documentation for C++ libraries documented using 
-.B qdoc3 
-documentation syntax, using the XML files created by the documentation tool 
+\- Generates Sphinx-based documentation for C++ libraries documented using
+.B qdoc3
+documentation syntax, using the XML files created by the documentation tool
 .B (qdoc3).
 Can be called supplying
 .B \-\-generatorSet=qtdoc
-to 
+to
 .B generatorrunner
 or by calling the convenience executable
 .B docgenerator.
@@ -40,6 +40,8 @@ Only generates the documentation.
 .TP
 .BI \-\-help \fR,\fP \-h \fR,\fP  -?
 Prints the usage message.
+.IP \-\-project-file=<file>
+Text file containing a description of the binding project. Replaces and overrides command line arguments.
 .IP \-\-include\-paths=\fI<path>[:path:..]\fR
 The directories where the generator will search for the
 headers. Works like gcc's \-I flag.

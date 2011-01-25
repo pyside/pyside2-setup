@@ -5,7 +5,7 @@ Binding Project File
 ********************
 
 Instead of directing the Generator behaviour via command line, the binding developer
-can write a XML project file describing the same information, and avoid the hassle
+can write a text project file describing the same information, and avoid the hassle
 of a long stream of command line arguments.
 
 .. _project-file-structure:
@@ -15,24 +15,18 @@ The project file structure
 
 Here follows a comprehensive example of a generator project file.
 
-    .. code-block:: xml
+    .. code-block:: ini
 
-         <?xml version="1.0"?>
-         <generator-project>
-             <generator-set generator="path/to/generator/CHOICE_GENERATOR" />
-             <header-file location="DIR/global.h" />
-             <typesystem-file location="DIR/typesystem_for_your_binding.xml" />
-             <output-directory location="OUTPUTDIR" />
-             <include-paths>
-                 <path location="path/to/library/being/wrapped/headers/1" />
-                 <path location="path/to/library/being/wrapped/headers/2" />
-             </include-paths>
-             <typesystem-paths>
-                 <path location="path/to/directory/containing/type/system/files/1" />
-                 <path location="path/to/directory/containing/type/system/files/2" />
-             </typesystem-paths>
-             <enable-parent-ctor-heuristic />
-         </generator-project>
+         [generator-project]
+         generator-set = path/to/generator/CHOICE_GENERATOR
+         header-file = DIR/global.h" />
+         typesystem-file = DIR/typesystem_for_your_binding.xml
+         output-directory location="OUTPUTDIR" />
+         include-path = path/to/library/being/wrapped/headers/1
+         include-path = path/to/library/being/wrapped/headers/2
+         typesystem-path = path/to/directory/containing/type/system/files/1
+         typesystem-path = path/to/directory/containing/type/system/files/2
+         enable-parent-ctor-heuristic
 
 
 Project file tags
@@ -52,9 +46,9 @@ For tags without options, just write as an empty tag without any attributes. Exa
 
 becomes
 
-    .. code-block:: xml
+    .. code-block:: ini
 
-         <BOOLEAN-ARGUMENT />
+         BOOLEAN-ARGUMENT
 
 and
 
@@ -64,8 +58,8 @@ and
 
 becomes
 
-    .. code-block:: xml
+    .. code-block:: ini
 
-         <VALUE-ARGUMENT value="VALUE" />
+         VALUE-ARGUMENT = VALUE
 
 
