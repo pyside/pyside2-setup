@@ -14,11 +14,11 @@ ${CMAKE_CURRENT_BINARY_DIR}/other/other_module_wrapper.cpp
 )
 
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/other-binding.xml.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/other-binding.xml" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/other-binding.txt.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/other-binding.txt" @ONLY)
 
 add_custom_command(OUTPUT ${other_SRC}
-COMMAND ${GENERATORRUNNER_BINARY} --project-file=${CMAKE_CURRENT_BINARY_DIR}/other-binding.xml
+COMMAND ${GENERATORRUNNER_BINARY} --project-file=${CMAKE_CURRENT_BINARY_DIR}/other-binding.txt
 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for 'other' test binding..."
 )

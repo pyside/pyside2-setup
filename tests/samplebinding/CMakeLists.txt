@@ -87,11 +87,11 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/voidholder_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/valueandvirtual_wrapper.cpp
 )
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/sample-binding.xml.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/sample-binding.xml" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/sample-binding.txt.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/sample-binding.txt" @ONLY)
 
 add_custom_command(OUTPUT ${sample_SRC}
-COMMAND ${GENERATORRUNNER_BINARY} --project-file=${CMAKE_CURRENT_BINARY_DIR}/sample-binding.xml
+COMMAND ${GENERATORRUNNER_BINARY} --project-file=${CMAKE_CURRENT_BINARY_DIR}/sample-binding.txt
 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for 'sample' test binding..."
 )
