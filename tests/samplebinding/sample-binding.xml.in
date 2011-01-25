@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<generator-project>
+    <generator-set generator="@generators_BINARY_DIR@/shiboken_generator@CMAKE_RELEASE_POSTFIX@@CMAKE_DEBUG_POSTFIX@@CMAKE_SHARED_LIBRARY_SUFFIX@" />
+
+    <header-file location="@CMAKE_CURRENT_SOURCE_DIR@/global.h" />
+    <typesystem-file location="@sample_TYPESYSTEM@" />
+
+    <output-directory location="@CMAKE_CURRENT_BINARY_DIR@" />
+
+    <include-paths>
+        <path location="@libsample_SOURCE_DIR@" />
+    </include-paths>
+    <typesystem-paths>
+        <path location="@CMAKE_CURRENT_SOURCE_DIR@" />
+    </typesystem-paths>
+
+    <enable-parent-ctor-heuristic />
+    <use-isnull-as-nb_nonzero />
+
+</generator-project>
+

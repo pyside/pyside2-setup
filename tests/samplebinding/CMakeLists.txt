@@ -87,18 +87,13 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/voidholder_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/valueandvirtual_wrapper.cpp
 )
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/sample-binding.xml.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/sample-binding.xml" @ONLY)
+
 add_custom_command(OUTPUT ${sample_SRC}
-COMMAND ${GENERATORRUNNER_BINARY}
-        --generator-set=${generators_BINARY_DIR}/shiboken_generator${CMAKE_RELEASE_POSTFIX}${CMAKE_DEBUG_POSTFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}
-        --enable-parent-ctor-heuristic
-        --use-isnull-as-nb_nonzero
-        ${CMAKE_CURRENT_SOURCE_DIR}/global.h
-        --include-paths=${libsample_SOURCE_DIR}
-        --typesystem-paths=${CMAKE_CURRENT_SOURCE_DIR}
-        --output-directory=${CMAKE_CURRENT_BINARY_DIR}
-        ${sample_TYPESYSTEM}
+COMMAND ${GENERATORRUNNER_BINARY} --project-file=${CMAKE_CURRENT_BINARY_DIR}/sample-binding.xml
 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-COMMENT "Running generator for test binding..."
+COMMENT "Running generator for 'sample' test binding..."
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}

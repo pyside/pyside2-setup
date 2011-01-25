@@ -13,17 +13,14 @@ ${CMAKE_CURRENT_BINARY_DIR}/other/otherobjecttype_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/other/other_module_wrapper.cpp
 )
 
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/other-binding.xml.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/other-binding.xml" @ONLY)
+
 add_custom_command(OUTPUT ${other_SRC}
-COMMAND ${GENERATORRUNNER_BINARY}
-        --generator-set=${generators_BINARY_DIR}/shiboken_generator${CMAKE_RELEASE_POSTFIX}${CMAKE_DEBUG_POSTFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}
-        --enable-parent-ctor-heuristic
-        ${CMAKE_CURRENT_SOURCE_DIR}/global.h
-        --include-paths=${libother_SOURCE_DIR}${PATH_SEP}${libsample_SOURCE_DIR}${PATH_SEP}${libsample_SOURCE_DIR}/..
-        --typesystem-paths=${CMAKE_CURRENT_SOURCE_DIR}${PATH_SEP}${sample_SOURCE_DIR}
-        --output-directory=${CMAKE_CURRENT_BINARY_DIR}
-        ${other_TYPESYSTEM}
+COMMAND ${GENERATORRUNNER_BINARY} --project-file=${CMAKE_CURRENT_BINARY_DIR}/other-binding.xml
 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-COMMENT "Running generator for test binding..."
+COMMENT "Running generator for 'other' test binding..."
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
