@@ -2753,6 +2753,7 @@ void CppGenerator::writeGetterFunction(QTextStream& s, const AbstractMetaField* 
     // Force use of pointer to return internal variable memory
     bool useReference = (!metaType->isConstant() &&
                          !metaType->isEnum() &&
+                         !metaType->isFlags() &&
                          !metaType->isPrimitive() &&
                          metaType->indirections() == 0);
 
@@ -2770,15 +2771,15 @@ void CppGenerator::writeGetterFunction(QTextStream& s, const AbstractMetaField* 
             .arg(metaField->name());
 
     if (useReference) {
-        s << INDENT << "Shiboken::createWrapper(" << cppField << ");" << endl;
+        s << "Shiboken::createWrapper(" << cppField << ");" << endl;
         s << INDENT << "Shiboken::Object::releaseOwnership(val);" << endl;
     } else {
         writeToPythonConversion(s,  metaField->type(), metaField->enclosingClass(), cppField);
         s << ';' << endl;
     }
 
-    s << INDENT << "return val;" << endl
-      << endl << '}' << endl;
+    s << INDENT << "return val;" << endl;
+    s << '}' << endl << endl;
 }
 
 void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* metaField)
