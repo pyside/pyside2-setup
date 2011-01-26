@@ -285,7 +285,7 @@ void walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visi
     for (int i = 0; i < numBases; ++i) {
         PyTypeObject* type = reinterpret_cast<PyTypeObject*>(PyTuple_GET_ITEM(bases, i));
 
-        if (type->ob_type != &SbkObjectType_Type) {
+        if (!PyType_IsSubtype(type, reinterpret_cast<PyTypeObject*>(&SbkObject_Type))) {
             continue;
         } else {
             SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(type);
@@ -451,7 +451,7 @@ namespace ObjectType
 
 bool checkType(PyTypeObject* type)
 {
-    return type->ob_type == &SbkObjectType_Type;
+    return PyType_IsSubtype(type, reinterpret_cast<PyTypeObject*>(&SbkObject_Type));
 }
 
 bool isUserType(PyTypeObject* type)
