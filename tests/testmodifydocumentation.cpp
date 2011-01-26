@@ -62,7 +62,14 @@ void TestModifyDocumentation::testModifyDocumentation()
 </description>\n"));
 }
 
-// we need an event loop to run these tests
-QTEST_MAIN(TestModifyDocumentation)
+// We expand QTEST_MAIN macro but using QCoreApplication instead of QApplication
+// because this test needs an event loop but can't use QApplication to avoid a crash
+// on our ARMEL/FRAMANTLE buildbot
+int main(int argc, char** argv)
+{
+    QCoreApplication app(argc, argv);
+    TestModifyDocumentation tc;
+    return QTest::qExec(&tc, argc, argv);
+}
 
 #include "testmodifydocumentation.moc"
