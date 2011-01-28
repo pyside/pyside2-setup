@@ -295,7 +295,7 @@ void OverloadData::sortNextOverloads()
         } else if (checkQVariant && targetTypeEntryName != "QVariant") {
             if (!graph.containsEdge(qvariantIndex, sortData.map[targetTypeEntryName])) // Avoid cyclic dependency.
                 graph.addEdge(sortData.map[targetTypeEntryName], qvariantIndex);
-        } else if (checkQString && ov->argType()->indirections() > 0 && targetTypeEntryName != "QString") {
+        } else if (checkQString && ov->argType()->indirections() > 0 && targetTypeEntryName != "QString" && targetTypeEntryName != "QByteArray") {
             if (!graph.containsEdge(qstringIndex, sortData.map[targetTypeEntryName])) // Avoid cyclic dependency.
                 graph.addEdge(sortData.map[targetTypeEntryName], qstringIndex);
         }
@@ -308,6 +308,10 @@ void OverloadData::sortNextOverloads()
             }
         }
     }
+
+    // QByteArray args need to be checked after QString args
+    if (sortData.map.contains("QString") && sortData.map.contains("QByteArray"))
+        graph.addEdge(sortData.map["QString"], sortData.map["QByteArray"]);
 
     foreach(OverloadData* ov, m_nextOverloadData) {
         const AbstractMetaType* targetType = ov->argType();
