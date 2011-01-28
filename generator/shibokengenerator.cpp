@@ -1145,6 +1145,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             // class context in which the variable is used
             code.replace("%PYTHONTYPEOBJECT", cpythonTypeName(context) + ".super.ht_type");
             code.replace("%TYPE", wrapperName(context));
+            code.replace("%CPPTYPE", context->name());
         }
 
         // replace "toPython "converters
@@ -1324,6 +1325,9 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
 
             if (func->isConstructor() && shouldGenerateCppWrapper(func->ownerClass()))
                 code.replace("%TYPE", wrapperName(func->ownerClass()));
+
+            if (func->ownerClass())
+                code.replace("%CPPTYPE", func->ownerClass()->name());
 
             replaceTemplateVariables(code, func);
         }

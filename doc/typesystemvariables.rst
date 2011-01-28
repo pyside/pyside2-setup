@@ -143,6 +143,18 @@ Variables
   Replaced by the wrapped C++ object instance that owns the method in which the
   code with this variable was inserted.
 
+.. _cpptype:
+
+**%CPPTYPE**
+
+  Replaced by the original name of the C++ class, without any namespace prefix,
+  that owns the method in which the code with this variable was inserted. It will
+  work on class level code injections also. Notice that ``CPPTYPE`` differs from
+  the :ref:`%TYPE <type>` variable, for this latter may be translated to the original
+  C++ class name or to the C++ wrapper class name.
+
+  Namespaces will are treated as classes, so ``CPPTYPE`` will work for them and their
+  enclosed functions as well.
 
 .. _function_name:
 
