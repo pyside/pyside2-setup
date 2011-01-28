@@ -1144,6 +1144,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             // replace template variable for the Python Type object for the
             // class context in which the variable is used
             code.replace("%PYTHONTYPEOBJECT", cpythonTypeName(context) + ".super.ht_type");
+            code.replace("%TYPE", wrapperName(context));
         }
 
         // replace "toPython "converters

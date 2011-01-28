@@ -250,8 +250,8 @@ Variables
 
 **%TYPE**
 
-  Replaced by the name of the class to which a function belongs. Should be used
-  in code injected to methods.
+  Replaced by the name of the class to which a function belongs. May be used
+  in code injected at method or class level.
 
 
 .. _example:
