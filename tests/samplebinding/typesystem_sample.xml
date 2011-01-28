@@ -992,6 +992,14 @@
                 return PyString_FromString("PyObject");
             </inject-code>
         </add-function>
+        <modify-function signature="pyObjOverload(unsigned char*, int)">
+            <modify-argument index="1">
+                <replace-type modified-type="PyObject" />
+            </modify-argument>
+            <inject-code>
+                unsigned char* %1 = 0;
+            </inject-code>
+        </modify-function>
     </value-type>
     <value-type name="ImplicitTarget"/>
 

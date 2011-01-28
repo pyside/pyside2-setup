@@ -60,6 +60,10 @@ class SimpleOverloadSorting(unittest.TestCase):
         '''Passing an implicit convertible object to an overload'''
         self.assert_(self.obj.implicit_overload(ImplicitTarget()))
 
+    def testPyObjectSort(self):
+        self.assertEqual(self.obj.pyObjOverload(1, 2), "int,int")
+        self.assertEqual(self.obj.pyObjOverload(object(), 2), "PyObject,int")
+
 
 class DeepOverloadSorting(unittest.TestCase):
 

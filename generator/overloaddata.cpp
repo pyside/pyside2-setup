@@ -53,6 +53,11 @@ static QString getTypeName(const AbstractMetaType* type)
     return typeName;
 }
 
+static QString getTypeName(const OverloadData* ov)
+{
+    return ov->hasArgumentTypeReplace() ? ov->argumentTypeReplaced() : getTypeName(ov->argType());
+}
+
 static bool typesAreEqual(const AbstractMetaType* typeA, const AbstractMetaType* typeB)
 {
 
@@ -93,7 +98,7 @@ struct OverloadSortData
 
     void mapType(OverloadData* overloadData)
     {
-        QString typeName = getTypeName(overloadData->argType());
+        QString typeName = getTypeName(overloadData);
         map[typeName] = counter;
         reverseMap[counter] = overloadData;
         counter++;
@@ -173,13 +178,16 @@ void OverloadData::sortNextOverloads()
     // with graph sorting using integers.
     foreach(OverloadData* ov, m_nextOverloadData) {
         sortData.mapType(ov);
-        if (!checkPyObject && getTypeName(ov->argType()).contains("PyObject")) {
+
+        const QString typeName(getTypeName(ov));
+
+        if (!checkPyObject && typeName.contains("PyObject")) {
             checkPyObject = true;
             pyobjectIndex = sortData.lastProcessedItemId();
-        } else if (!checkQVariant && getTypeName(ov->argType()) == "QVariant") {
+        } else if (!checkQVariant && typeName == "QVariant") {
             checkQVariant = true;
             qvariantIndex = sortData.lastProcessedItemId();
-        } else if (!checkQString && getTypeName(ov->argType()) == "QString") {
+        } else if (!checkQString && typeName == "QString") {
             checkQString = true;
             qstringIndex = sortData.lastProcessedItemId();
         }
@@ -229,8 +237,7 @@ void OverloadData::sortNextOverloads()
 
     foreach(OverloadData* ov, m_nextOverloadData) {
         const AbstractMetaType* targetType = ov->argType();
-        const TypeEntry* targetTypeEntry = getAliasedTypeEntry(targetType->typeEntry());
-        QString targetTypeEntryName = getTypeName(targetType);
+        const QString targetTypeEntryName(getTypeName(ov));
 
         // Process implicit conversions
         foreach(AbstractMetaFunction* function, m_generator->implicitConversions(targetType)) {
@@ -293,7 +300,7 @@ void OverloadData::sortNextOverloads()
                 graph.addEdge(sortData.map[targetTypeEntryName], qstringIndex);
         }
 
-        if (targetTypeEntry->isEnum()) {
+        if (targetType->isEnum()) {
             // Enum values must precede primitive types.
             for (int i = 0; i < numPrimitives; ++i) {
                 if (hasPrimitive[i])
@@ -307,9 +314,7 @@ void OverloadData::sortNextOverloads()
         if (!targetType->isEnum())
             continue;
 
-        const TypeEntry* targetTypeEntry = getAliasedTypeEntry(targetType->typeEntry());
         QString targetTypeEntryName = getTypeName(targetType);
-
         // Enum values must precede types implicitly convertible from "int" or "unsigned int".
         foreach (const QString& implicitFromInt, classesWithIntegerImplicitConversion)
             graph.addEdge(sortData.map[targetTypeEntryName], sortData.map[implicitFromInt]);

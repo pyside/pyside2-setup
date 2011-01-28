@@ -71,6 +71,11 @@ public:
     inline const char *overloadDeep(int x, ImplicitBase &y) {
         return "ImplicitBase";
     }
+
+
+    inline const char* pyObjOverload(int, int) { return "int,int"; }
+    inline const char* pyObjOverload(unsigned char*, int) { return "PyObject,int"; }
+
 };
 
 #endif // OVERLOADSORT_H
