@@ -149,21 +149,44 @@ private:
 
 namespace Enum {
 
+PyObject* getEnumItemFromValue(PyTypeObject* enumType, long itemValue)
+{
+    PyObject *key, *value;
+    Py_ssize_t pos = 0;
+    PyObject* values = PyDict_GetItemString(enumType->tp_dict, const_cast<char*>("values"));
+
+    while (PyDict_Next(values, &pos, &key, &value)) {
+        SbkEnumObject* obj = (SbkEnumObject*)value;
+        if (obj->ob_ival == itemValue) {
+            Py_INCREF(obj);
+            return reinterpret_cast<PyObject*>(obj);
+        }
+    }
+    return 0;
+}
+
 PyObject* newItem(PyTypeObject* enumType, long itemValue, const char* itemName)
 {
-    if (!itemName)
-        itemName = "";
-    PyObject* pyItemName = PyString_FromString(itemName);
+    bool newValue = true;
+    SbkEnumObject* enumObj;
+    if (!itemName) {
+        enumObj = reinterpret_cast<SbkEnumObject*>(getEnumItemFromValue(enumType, itemValue));
+        if (enumObj)
+            return reinterpret_cast<PyObject*>(enumObj);
 
-    SbkEnumObject* enumObj = PyObject_New(SbkEnumObject, enumType);
-    if (!enumObj) {
-        Py_XDECREF(pyItemName);
-        return 0;
+        newValue = false;
+        if (!enumObj)
+            itemName = "#out of bounds#";
     }
 
-    enumObj->ob_name = pyItemName;
+    enumObj = PyObject_New(SbkEnumObject, enumType);
+    if (!enumObj)
+        return 0;
+
+    enumObj->ob_name = PyString_FromString(itemName);
     enumObj->ob_ival = itemValue;
-    if (itemName) {
+
+    if (newValue) {
         PyObject* values = PyDict_GetItemString(enumType->tp_dict, const_cast<char*>("values"));
         if (!values) {
             values = PyDict_New();

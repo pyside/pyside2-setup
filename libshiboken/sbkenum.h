@@ -46,6 +46,7 @@ namespace Enum
     LIBSHIBOKEN_API PyObject* newItem(PyTypeObject* enumType, long itemValue, const char* itemName = 0);
     LIBSHIBOKEN_API PyTypeObject* newType(const char* name);
     LIBSHIBOKEN_API long getValue(PyObject* enumItem);
+    LIBSHIBOKEN_API PyObject* getEnumItemFromValue(PyTypeObject* enumType, long itemValue);
 }
 
 } // namespace Shiboken
