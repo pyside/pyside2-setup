@@ -60,6 +60,7 @@ class EnumTest(unittest.TestCase):
         '''Conversion of enum objects from Python to C++ back again.'''
         enumout = SampleNamespace.enumInEnumOut(SampleNamespace.TwoIn)
         self.assert_(enumout, SampleNamespace.TwoOut)
+        self.assertEqual(repr(enumout), repr(SampleNamespace.TwoOut))
 
     def testEnumConstructorWithTooManyParameters(self):
         '''Calling the constructor of non-extensible enum with the wrong number of parameters.'''
@@ -97,6 +98,15 @@ class EnumTest(unittest.TestCase):
         self.assertEqual(text, str(Event.ANY_EVENT))
         self.assertEqual(text, repr(Event.ANY_EVENT))
 
+
+class MyEvent(Event):
+    def __init__(self):
+        Event.__init__(self, Event.EventType(999))
+
+class OutOfBoundsTest(unittest.TestCase):
+    def testValue(self):
+        e = MyEvent()
+        self.assertEqual(repr(e.eventType()), '<enum-item EventType.#out of bounds# (999)>')
 
 class EnumOverloadTest(unittest.TestCase):
     '''Test case for overloads involving enums'''
