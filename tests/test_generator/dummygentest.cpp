@@ -115,14 +115,16 @@ void DummyGenTest::testProjectFileArgumentsReading()
     QCOMPARE(logContents[3], QString("generator-set = dummy"));
     QVERIFY(logContents[4].startsWith("header-file = "));
     QVERIFY(logContents[4].endsWith("test_global.h"));
-    QCOMPARE(logContents[5], QString("include-paths = /include/path/location1:/include/path/location2"));
+    QCOMPARE(logContents[5],
+             QDir::toNativeSeparators(QString("include-paths = /include/path/location1%1/include/path/location2").arg(PATH_SPLITTER)));
     QCOMPARE(logContents[6], QString("no-suppress-warnings"));
     QCOMPARE(logContents[7], QString("output-directory = /tmp/output"));
     QVERIFY(logContents[8].startsWith("project-file = "));
     QVERIFY(logContents[8].endsWith("dummygentest-project.txt"));
     QVERIFY(logContents[9].startsWith("typesystem-file = "));
     QVERIFY(logContents[9].endsWith("test_typesystem.xml"));
-    QCOMPARE(logContents[10], QString("typesystem-paths = /typesystem/path/location1:/typesystem/path/location2"));
+    QCOMPARE(logContents[10],
+             QDir::toNativeSeparators(QString("typesystem-paths = /typesystem/path/location1%1/typesystem/path/location2").arg(PATH_SPLITTER)));
 }
 
 QTEST_APPLESS_MAIN(DummyGenTest)
