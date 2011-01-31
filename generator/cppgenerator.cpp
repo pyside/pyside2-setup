@@ -615,6 +615,13 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
     s << INDENT << "Shiboken::GilState gil;" << endl;
 
+    // Get out of virtual method call if someone already threw an error.
+    s << INDENT << "if (PyErr_Occurred())" << endl;
+    {
+        Indentation indentation(INDENT);
+        s << INDENT << "return " << defaultReturnExpr << ';' << endl;
+    }
+
     s << INDENT << "Shiboken::AutoDecRef py_override(Shiboken::BindingManager::instance().getOverride(this, \"";
     s << funcName << "\"));" << endl;
 
@@ -1855,7 +1862,7 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream& s, const AbstractMe
                         Indentation indent(INDENT);
                         s << INDENT << pyArgName << " = value;" << endl;
                     }
-                    s << "else" << endl;
+                    s << INDENT << "else" << endl;
                     {
                         Indentation indent(INDENT);
                         s << INDENT << "goto " << cpythonFunctionName(func) << "_TypeError;" << endl;
