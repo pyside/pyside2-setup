@@ -2198,6 +2198,10 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         }
     }
 
+    // If there's already a setParent(return, me), don't use the return heuristic!
+    if (func->argumentOwner(func->ownerClass(), -1).index == 0)
+        hasReturnPolicy = true;
+
     if (!ownership_mods.isEmpty()) {
         s << endl << INDENT << "// Ownership transferences." << endl;
         foreach (ArgumentModification arg_mod, ownership_mods) {
@@ -2208,7 +2212,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 break;
             }
 
-            if (arg_mod.index == 0)
+            if (arg_mod.index == 0 || arg_mod.owner.index == 0)
                 hasReturnPolicy = true;
 
             // The default ownership does nothing. This is useful to avoid automatic heuristically
@@ -3870,12 +3874,8 @@ bool CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
             childVariable = usePyArgs ? "pyargs["+QString::number(childIndex-1)+"]" : "arg";
 
         s << INDENT << "Shiboken::Object::setParent(" << parentVariable << ", " << childVariable << ");\n";
-
         return true;
     }
-
-    if (argIndex == 0 && useHeuristicPolicy)
-        writeReturnValueHeuristics(s, func);
 
     return false;
 }
@@ -3888,7 +3888,10 @@ void CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
     //  0    = self
     //  1..n = func. args.
     for (int i = -1; i <= numArgs; ++i)
-        writeParentChildManagement(s, func, i, i == 0 ? useHeuristicForReturn : true);
+        writeParentChildManagement(s, func, i, useHeuristicForReturn);
+
+    if (useHeuristicForReturn)
+        writeReturnValueHeuristics(s, func);
 }
 
 void CppGenerator::writeReturnValueHeuristics(QTextStream& s, const AbstractMetaFunction* func, const QString& self)
