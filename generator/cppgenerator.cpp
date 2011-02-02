@@ -3505,7 +3505,7 @@ void CppGenerator::writeTypeDiscoveryFunction(QTextStream& s, const AbstractMeta
             } else {
                 ReportHandler::warning(metaClass->qualifiedCppName() + " inherits from a non polymorphic type ("
                                        + ancestor->qualifiedCppName() + "), type discovery based on RTTI is "
-                                       "impossible, write a polymorphic-id-expresison for this type.");
+                                       "impossible, write a polymorphic-id-expression for this type.");
             }
 
         }
