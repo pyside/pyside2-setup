@@ -40,7 +40,7 @@ typedef std::map<std::string, std::list<SbkObject*> > RefCountMap;
 
 
 /// Linked list of SbkBaseWrapper pointers
-typedef std::list<SbkObject*> ChildrenList;
+typedef std::set<SbkObject*> ChildrenList;
 
 /// Struct used to store information about object parent and children.
 struct ParentInfo

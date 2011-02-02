@@ -616,7 +616,7 @@ static void _destroyParentInfo(SbkObject* obj, bool keepReference)
     ParentInfo* pInfo = obj->d->parentInfo;
     if (pInfo) {
         while(!pInfo->children.empty()) {
-            SbkObject* first = pInfo->children.front();
+            SbkObject* first = *pInfo->children.begin();
             // Mark child as invalid
             Shiboken::Object::invalidate(first);
             removeParent(first, false, keepReference);
@@ -942,7 +942,7 @@ void setParent(PyObject* parent, PyObject* child)
             pInfo = child_->d->parentInfo = new ParentInfo;
 
         pInfo->parent = parent_;
-        parent_->d->parentInfo->children.push_back(child_);
+        parent_->d->parentInfo->children.insert(child_);
 
         // Add Parent ref
         Py_INCREF(child_);
