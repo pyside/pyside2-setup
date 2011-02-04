@@ -249,12 +249,12 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     s << "#include \"" << getModuleHeaderFileName() << '"' << endl << endl;
 
     QString headerfile = fileNameForClass(metaClass);
-    headerfile.replace("cpp", "h");
+    headerfile.replace(".cpp", ".h");
     s << "#include \"" << headerfile << '"' << endl;
     foreach (AbstractMetaClass* innerClass, metaClass->innerClasses()) {
         if (shouldGenerate(innerClass)) {
             QString headerfile = fileNameForClass(innerClass);
-            headerfile.replace("cpp", "h");
+            headerfile.replace(".cpp", ".h");
             s << "#include \"" << headerfile << '"' << endl;
         }
     }
@@ -3134,7 +3134,8 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
 
                     AbstractMetaArgument *a = cppSignal->arguments().at(i);
                     AbstractMetaType* type = a->type();
-                    QString cppSignature =  SBK_NORMALIZED_TYPE(qPrintable(type->cppSignature()));
+
+                    QString cppSignature = SBK_NORMALIZED_TYPE(qPrintable(type->cppSignature()));
                     QString originalSignature = SBK_NORMALIZED_TYPE(qPrintable(type->originalTypeDescription()));
 
                     if (!a->defaultValueExpression().isEmpty()) {
@@ -3144,17 +3145,35 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
                         signatures[cppSignal->name()].append(sig);
                     }
 
-                    if ((cppSignature != originalSignature) && !knowTypes.contains(originalSignature)) {
-                        knowTypes << originalSignature;
-                        s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<"
-                          << translateType(type, metaClass, ExcludeReference | ExcludeConst) << " >"
-                          << "(\"" << skipNamespace(originalSignature) << "\"); // " << type->cppSignature() << "\n";
+                    QString replacedTypeName = cppSignal->typeReplaced(i+1);
+                    QString signalTypeName;
+
+                    if (replacedTypeName.isEmpty())
+                        signalTypeName = skipNamespace(type->originalTypeDescription());
+                    else
+                        signalTypeName = replacedTypeName;
+
+                    if ((!replacedTypeName.isEmpty() ||  //replace type on typessystem
+                        (cppSignature != originalSignature)) && //used a typedef value
+                        !knowTypes.contains(signalTypeName)) {
+
+                        knowTypes << signalTypeName;
+                        QString originalType = translateType(type, metaClass, ExcludeReference | ExcludeConst);
+                        bool isObjectType = originalType.endsWith('*');
+                        if (isObjectType)
+                            originalType = originalType.remove(originalType.size()-1, 1);
+
+                        s << INDENT << "Shiboken::TypeResolver::" << (isObjectType ? "createObjectTypeResolver<" : "createValueTypeResolver<")
+                          << originalType << " >"
+                          << "(\"" << skipNamespace(signalTypeName) << "\");" << endl;
                     }
-                    signature += SBK_NORMALIZED_TYPE(skipNamespace(type->originalTypeDescription()).toAscii());
+
+                    signature += SBK_NORMALIZED_TYPE(signalTypeName.toAscii());
                 }
             } else {
                 signature = "void";
             }
+
             signatures[cppSignal->name()].append(SBK_NORMALIZED_SIGNATURE(signature.toAscii()));
         }
     }
