@@ -1,9 +1,4 @@
-if(CMAKE_VERSION VERSION_LESS 2.8)
-    # Versions lesser than 2.8 can not set environment variables for tests.
-    message("CMake version greater than 2.8 necessary to run certain tests.")
-else()
-    add_subdirectory(test_generator)
-endif()
+add_subdirectory(test_generator)
 
 if (NOT APIEXTRACTOR_DOCSTRINGS_DISABLED)
     project(sphinxtabletest)

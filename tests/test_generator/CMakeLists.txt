@@ -31,13 +31,24 @@ if(WIN32)
     string(REPLACE ";" "\\;" ENV_QT_PLUGIN_PATH "${ENV_QT_PLUGIN_PATH}")
 endif()
 
+macro(m_add_test testname)
+    if(CMAKE_VERSION VERSION_LESS 2.8)
+        add_test(${testname} ${CMAKE_COMMAND} -DTEST=${testname}
+                 -DWORKDIR=${CMAKE_CURRENT_BINARY_DIR}
+                 -DENV_PATH=${ENV_PATH} -DENV_QT_PLUGIN_PATH=${ENV_QT_PLUGIN_PATH}
+                 -P ${CMAKE_CURRENT_SOURCE_DIR}/run_test.cmake)
+    else()
+        add_test(${testname} ${testname})
+        set_property(TEST ${testname} PROPERTY ENVIRONMENT "PATH=${ENV_PATH}" "QT_PLUGIN_PATH=${ENV_QT_PLUGIN_PATH}")
+    endif()
+endmacro()
+
 macro(declare_test testname)
     qt4_automoc("${testname}.cpp")
     add_executable(${testname} "${testname}.cpp")
     include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
     target_link_libraries(${testname} ${QT_QTTEST_LIBRARY} ${QT_QTCORE_LIBRARY})
-    add_test(${testname} ${testname})
-    set_property(TEST ${testname} PROPERTY ENVIRONMENT "PATH=${ENV_PATH}" "QT_PLUGIN_PATH=${ENV_QT_PLUGIN_PATH}")
+    m_add_test(${testname})
 endmacro(declare_test testname)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/test_global.h"
