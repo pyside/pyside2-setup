@@ -31,6 +31,7 @@ class TestFunctionTag : public QObject
 private slots:
     void testFunctionTagForSpecificSignature();
     void testFunctionTagForAllSignatures();
+    void testRenameGlobalFunction();
 };
 
 #endif

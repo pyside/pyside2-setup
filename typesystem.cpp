@@ -418,6 +418,7 @@ bool Handler::startElement(const QString &, const QString &n,
             break;
         case StackElement::FunctionTypeEntry:
             attributes["signature"] = QString();
+            attributes["rename"] = QString();
             break;
         default:
             { } // nada
@@ -432,6 +433,19 @@ bool Handler::startElement(const QString &, const QString &n,
         if (element->type == StackElement::FunctionTypeEntry) {
             QString signature = attributes["signature"];
             name = signature.left(signature.indexOf('(')).trimmed();
+            QString rename = attributes["rename"];
+            if (!rename.isEmpty()) {
+                static QRegExp functionNameRegExp("^[a-zA-Z_][a-zA-Z0-9_]*$");
+                if (!functionNameRegExp.exactMatch(rename)) {
+                    m_error = "can not rename '" + signature + "', '" + rename + "' is not a valid function name";
+                    return false;
+                }
+                FunctionModification mod(since);
+                mod.signature = signature;
+                mod.renamedToName = attributes["rename"];
+                mod.modifiers |= Modification::Rename;
+                m_contextStack.top()->functionMods << mod;
+            }
         }
 
         // We need to be able to have duplicate primitive type entries,

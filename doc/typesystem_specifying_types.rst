@@ -304,11 +304,13 @@ function
     .. code-block:: xml
 
         <typesystem>
-            <function signature="..." since="..."/>
+            <function signature="..." rename="..." since="..."/>
         </typesystem>
 
     This tag has some limitations, it doesn't support function modifications, besides you
     can't add a function overload using :ref:`add-function` tag to an existent function.
     These limitation will be addressed in future versions of ApiExtractor.
 
-    The *optional*  **since** value is used to specify the API version of this function.
+    The function tag has two *optional* attributes: **since**, whose value is used to specify
+    the API version of this function, and **rename**, to modify the function name.
+
