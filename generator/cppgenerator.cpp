@@ -216,12 +216,10 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     // write license comment
     s << licenseComment() << endl;
 
-#ifndef AVOID_PROTECTED_HACK
-    if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
+    if (!avoidProtectedHack() && !metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
         s << "//workaround to access protected functions" << endl;
         s << "#define protected public" << endl << endl;
     }
-#endif
 
     // headers
     s << "// default includes" << endl;
@@ -304,14 +302,12 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         s << "// Native ---------------------------------------------------------" << endl;
         s << endl;
 
-#ifdef AVOID_PROTECTED_HACK
-        if (usePySideExtensions()) {
+        if (avoidProtectedHack() && usePySideExtensions()) {
             s << "void " << wrapperName(metaClass) << "::pysideInitQtMetaTypes()\n{\n";
             Indentation indent(INDENT);
             writeInitQtMetaTypeFunctionBody(s, metaClass);
             s << "}\n\n";
         }
-#endif
 
         foreach (const AbstractMetaFunction* func, filterFunctions(metaClass)) {
             if ((func->isPrivate() && !visibilityModifiedToPrivate(func))
@@ -319,26 +315,16 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
                 continue;
             if (func->isConstructor() && !func->isCopyConstructor() && !func->isUserAdded())
                 writeConstructorNative(s, func);
-#ifdef AVOID_PROTECTED_HACK
-            else if (!metaClass->hasPrivateDestructor() && (func->isVirtual() || func->isAbstract()))
-#else
-            else if (func->isVirtual() || func->isAbstract())
-#endif
+            else if ((!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
+                     && (func->isVirtual() || func->isAbstract()))
                 writeVirtualMethodNative(s, func);
         }
 
-#ifdef AVOID_PROTECTED_HACK
-        if (!metaClass->hasPrivateDestructor()) {
-#endif
-
-        if (usePySideExtensions() && metaClass->isQObject())
-            writeMetaObjectMethod(s, metaClass);
-
-        writeDestructorNative(s, metaClass);
-
-#ifdef AVOID_PROTECTED_HACK
+        if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor()) {
+            if (usePySideExtensions() && metaClass->isQObject())
+                writeMetaObjectMethod(s, metaClass);
+            writeDestructorNative(s, metaClass);
         }
-#endif
     }
 
     Indentation indentation(INDENT);
@@ -710,13 +696,13 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 ac << arg->name() << "_out";
             } else {
                 QString argName = arg->name();
-#ifdef AVOID_PROTECTED_HACK
-                const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(arg->type());
-                if (metaEnum && metaEnum->isProtected()) {
-                    argName.prepend(protectedEnumSurrogateName(metaEnum) + '(');
-                    argName.append(')');
+                if (avoidProtectedHack()) {
+                    const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(arg->type());
+                    if (metaEnum && metaEnum->isProtected()) {
+                        argName.prepend(protectedEnumSurrogateName(metaEnum) + '(');
+                        argName.append(')');
+                    }
                 }
-#endif
                 ac << (convert ? "(" : "") << argName << (convert ? ")" : "");
             }
 
@@ -779,11 +765,12 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                         desiredType = '"' + reinterpret_cast<const ContainerTypeEntry*>(func->type()->typeEntry())->typeName() + '"';
                     } else {
                         QString typeName = func->type()->typeEntry()->qualifiedCppName();
-#ifdef AVOID_PROTECTED_HACK
-                        const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(func->type());
-                        if (metaEnum && metaEnum->isProtected())
-                            typeName = protectedEnumSurrogateName(metaEnum);
-#endif
+                        if (avoidProtectedHack()) {
+                            const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(func->type());
+                            if (metaEnum && metaEnum->isProtected())
+                                typeName = protectedEnumSurrogateName(metaEnum);
+                        }
+
                         if (func->type()->isPrimitive())
                             desiredType = "\"" + func->type()->name() + "\"";
                         else
@@ -814,28 +801,25 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 writeCodeSnips(s, convRule, CodeSnip::Any, TypeSystem::NativeCode, func);
             } else if (!injectedCodeHasReturnValueAttribution(func, TypeSystem::NativeCode)) {
                 s << INDENT;
-#ifdef AVOID_PROTECTED_HACK
-                QString enumName;
-                const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(func->type());
-                bool isProtectedEnum = metaEnum && metaEnum->isProtected();
-                if (isProtectedEnum) {
-                    enumName = metaEnum->name();
-                    if (metaEnum->enclosingClass())
-                        enumName = metaEnum->enclosingClass()->qualifiedCppName() + "::" + enumName;
-                    s << enumName;
-                } else
-#endif
+                QString protectedEnumName;
+                if (avoidProtectedHack()) {
+                    const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(func->type());
+                    bool isProtectedEnum = metaEnum && metaEnum->isProtected();
+                    if (isProtectedEnum) {
+                        protectedEnumName = metaEnum->name();
+                        if (metaEnum->enclosingClass())
+                            protectedEnumName = metaEnum->enclosingClass()->qualifiedCppName() + "::" + protectedEnumName;
+                        s << protectedEnumName;
+                    }
+                }
+                if (protectedEnumName.isEmpty())
                     s << translateTypeForWrapperMethod(func->type(), func->implementingClass());
                 s << " " CPP_RETURN_VAR "(";
-#ifdef AVOID_PROTECTED_HACK
-                if (isProtectedEnum)
-                    s << enumName << '(';
-#endif
+                if (avoidProtectedHack() && !protectedEnumName.isEmpty())
+                    s << protectedEnumName << '(';
                 writeToCppConversion(s, func->type(), func->implementingClass(), PYTHON_RETURN_VAR);
-#ifdef AVOID_PROTECTED_HACK
-                if (isProtectedEnum)
+                if (avoidProtectedHack() && !protectedEnumName.isEmpty())
                     s << ')';
-#endif
                 s << ')';
                 s << ';' << endl;
             }
@@ -1179,13 +1163,13 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         (!rfunc->implementingClass()->isNamespace() && overloadData.hasInstanceFunction())) {
 
         s << INDENT;
-#ifdef AVOID_PROTECTED_HACK
-        QString _wrapperName = wrapperName(rfunc->ownerClass());
-        bool hasProtectedMembers = rfunc->ownerClass()->hasProtectedMembers();
-        s << (hasProtectedMembers ? _wrapperName : rfunc->ownerClass()->qualifiedCppName());
-#else
-        s << rfunc->ownerClass()->qualifiedCppName();
-#endif
+        QString protectedClassWrapperName;
+        if (avoidProtectedHack() && rfunc->ownerClass()->hasProtectedMembers()) {
+            protectedClassWrapperName = wrapperName(rfunc->ownerClass());
+            s << protectedClassWrapperName;
+        } else {
+            s << rfunc->ownerClass()->qualifiedCppName();
+        }
         s << "* " CPP_SELF_VAR " = 0;" << endl;
 
         if (rfunc->isOperatorOverload() && rfunc->isBinaryOperator()) {
@@ -1198,9 +1182,8 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
 
         // Sets the C++ "self" (the "this" for the object) if it has one.
         QString cppSelfAttribution = CPP_SELF_VAR " = ";
-#ifdef AVOID_PROTECTED_HACK
-        cppSelfAttribution += (hasProtectedMembers ? QString("(%1*)").arg(_wrapperName) : "");
-#endif
+        if (avoidProtectedHack() && !protectedClassWrapperName.isEmpty())
+            cppSelfAttribution += QString("(%1*)").arg(protectedClassWrapperName);
         cppSelfAttribution += cpythonWrapperCPtr(rfunc->ownerClass(), "self");
 
         // Checks if the underlying C++ object is valid.
@@ -1429,14 +1412,15 @@ void CppGenerator::writeCppSelfDefinition(QTextStream& s, const AbstractMetaFunc
         return;
 
     s << INDENT;
-#ifdef AVOID_PROTECTED_HACK
-    QString _wrapperName = wrapperName(func->ownerClass());
-    bool hasProtectedMembers = func->ownerClass()->hasProtectedMembers();
-    s << (hasProtectedMembers ? _wrapperName : func->ownerClass()->qualifiedCppName()) << "* " CPP_SELF_VAR " = ";
-    s << (hasProtectedMembers ? QString("(%1*)").arg(_wrapperName) : "");
-#else
-    s << func->ownerClass()->qualifiedCppName() << "* " CPP_SELF_VAR " = ";
-#endif
+    if (avoidProtectedHack()) {
+        QString _wrapperName = wrapperName(func->ownerClass());
+        bool hasProtectedMembers = func->ownerClass()->hasProtectedMembers();
+        s << (hasProtectedMembers ? _wrapperName : func->ownerClass()->qualifiedCppName());
+        s << "* " CPP_SELF_VAR " = ";
+        s << (hasProtectedMembers ? QString("(%1*)").arg(_wrapperName) : "");
+    } else {
+        s << func->ownerClass()->qualifiedCppName() << "* " CPP_SELF_VAR " = ";
+    }
     s << cpythonWrapperCPtr(func->ownerClass(), "self") << ';' << endl;
     if (func->isUserAdded())
         s << INDENT << "(void)" CPP_SELF_VAR "; // avoid warnings about unused variables" << endl;
@@ -2097,21 +2081,22 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 mc << ')';
             } else {
                 if (func->ownerClass()) {
-#ifdef AVOID_PROTECTED_HACK
-                    if (!func->isProtected()) {
-#endif
-                        if (func->isStatic())
+                    if (!avoidProtectedHack() || !func->isProtected()) {
+                        if (func->isStatic()) {
                             mc << func->ownerClass()->qualifiedCppName() << "::";
-                        else {
+                        } else {
                             if (func->isConstant()) {
-#ifdef AVOID_PROTECTED_HACK
-                                mc << "const_cast<const ";
-                                bool hasProtectedMembers = func->ownerClass()->hasProtectedMembers();
-                                mc << (hasProtectedMembers ? wrapperName(func->ownerClass()) : func->ownerClass()->qualifiedCppName());
-                                mc <<  "*>(" CPP_SELF_VAR ")->";
-#else
-                                mc << "const_cast<const " << func->ownerClass()->qualifiedCppName() <<  "*>(" CPP_SELF_VAR ")->";
-#endif
+                                if (avoidProtectedHack()) {
+                                    mc << "const_cast<const ";
+                                    if (func->ownerClass()->hasProtectedMembers())
+                                        mc << wrapperName(func->ownerClass());
+                                    else
+                                        mc << func->ownerClass()->qualifiedCppName();
+                                    mc <<  "*>(" CPP_SELF_VAR ")->";
+                                } else {
+                                    mc << "const_cast<const " << func->ownerClass()->qualifiedCppName();
+                                    mc <<  "*>(" CPP_SELF_VAR ")->";
+                                }
                             } else {
                                 mc << CPP_SELF_VAR "->";
                             }
@@ -2121,8 +2106,6 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                             mc << "::%CLASS_NAME::";
 
                         mc << func->originalName();
-
-#ifdef AVOID_PROTECTED_HACK
                     } else {
                         if (!func->isStatic())
                             mc << "((" << wrapperName(func->ownerClass()) << "*) " << CPP_SELF_VAR << ")->";
@@ -2131,28 +2114,21 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                             mc << (func->isProtected() ? wrapperName(func->ownerClass()) : "::" + func->ownerClass()->qualifiedCppName()) << "::";
                         mc << func->originalName() << "_protected";
                     }
-#endif
                 } else {
                     mc << func->originalName();
                 }
                 mc << '(' << userArgs.join(", ") << ')';
                 if (!func->isAbstract() && func->isVirtual()) {
                     mc.flush();
-#ifdef AVOID_PROTECTED_HACK
-                    if (!func->isProtected())
-#endif
-                    {
+                    if (!avoidProtectedHack() || !func->isProtected()) {
                         QString virtualCall(methodCall);
                         QString normalCall(methodCall);
-
                         virtualCall = virtualCall.replace("%CLASS_NAME", func->ownerClass()->qualifiedCppName());
                         normalCall = normalCall.replace("::%CLASS_NAME::", "");
                         methodCall = "";
-
-                    virtualCall = virtualCall.replace("%CLASS_NAME", func->ownerClass()->qualifiedCppName());
-                    normalCall = normalCall.replace("::%CLASS_NAME::", "");
-                    methodCall = "";
-                    mc << "(Shiboken::Object::isUserType(self) ? " << virtualCall << ":" <<  normalCall << ")";
+                        mc << "(Shiboken::Object::isUserType(self) ? ";
+                        mc << virtualCall << " : " <<  normalCall << ")";
+                    }
                 }
             }
         }
@@ -2162,19 +2138,22 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             if (isCtor) {
                 s << "cptr = ";
             } else if (func->type() && !func->isInplaceOperator()) {
-#ifdef AVOID_PROTECTED_HACK
-                QString enumName;
-                const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(func->type());
-                if (metaEnum) {
-                    if (metaEnum->isProtected())
-                        enumName = protectedEnumSurrogateName(metaEnum);
-                    else
-                        enumName = func->type()->cppSignature();
-                    methodCall.prepend(enumName + '(');
-                    methodCall.append(')');
-                    s << enumName;
-                } else
-#endif
+                bool writeReturnType = true;
+                if (avoidProtectedHack()) {
+                    const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(func->type());
+                    if (metaEnum) {
+                        QString enumName;
+                        if (metaEnum->isProtected())
+                            enumName = protectedEnumSurrogateName(metaEnum);
+                        else
+                            enumName = func->type()->cppSignature();
+                        methodCall.prepend(enumName + '(');
+                        methodCall.append(')');
+                        s << enumName;
+                        writeReturnType = false;
+                    }
+                }
+                if (writeReturnType)
                     s << func->type()->cppSignature();
                 s << " " CPP_RETURN_VAR " = ";
             }
@@ -2795,18 +2774,17 @@ void CppGenerator::writeGetterFunction(QTextStream& s, const AbstractMetaField* 
                          !metaType->isPrimitive() &&
                          metaType->indirections() == 0);
 
-#ifdef AVOID_PROTECTED_HACK
-    if (metaField->isProtected())
+    if (avoidProtectedHack() && metaField->isProtected()) {
         cppField = QString("((%1*)%2)->%3()")
-            .arg(wrapperName(metaField->enclosingClass()))
-            .arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self"))
-            .arg(protectedFieldGetterName(metaField));
-    else
-#endif
-        cppField= QString("%1%2->%3")
-            .arg(useReference ? '&' : ' ')
-            .arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self"))
-            .arg(metaField->name());
+                   .arg(wrapperName(metaField->enclosingClass()))
+                   .arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self"))
+                   .arg(protectedFieldGetterName(metaField));
+    } else {
+        cppField = QString("%1%2->%3")
+                   .arg(useReference ? '&' : ' ')
+                   .arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self"))
+                   .arg(metaField->name());
+    }
 
     if (useReference) {
         s << "Shiboken::createWrapper(" << cppField << ");" << endl;
@@ -2846,20 +2824,21 @@ void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* 
     s << INDENT << '}' << endl << endl;
 
     s << INDENT;
-#ifdef AVOID_PROTECTED_HACK
-    if (metaField->isProtected()) {
-        QString fieldStr = QString("((%1*)%2)->%3").arg(wrapperName(metaField->enclosingClass())).arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self")).arg(protectedFieldSetterName(metaField));
+    if (avoidProtectedHack() && metaField->isProtected()) {
+        QString fieldStr = QString("((%1*)%2)->%3")
+                           .arg(wrapperName(metaField->enclosingClass()))
+                           .arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self"))
+                           .arg(protectedFieldSetterName(metaField));
         s << fieldStr << '(';
         writeToCppConversion(s, metaField->type(), metaField->enclosingClass(), "value");
         s << ')';
     } else {
-#endif
-        QString fieldStr = QString("%1->%2").arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self")).arg(metaField->name());
+        QString fieldStr = QString("%1->%2")
+                           .arg(cpythonWrapperCPtr(metaField->enclosingClass(), "self"))
+                           .arg(metaField->name());
         s << fieldStr << " = ";
         writeToCppConversion(s, metaField->type(), metaField->enclosingClass(), "value");
-#ifdef AVOID_PROTECTED_HACK
     }
-#endif
     s << ';' << endl << endl;
 
 
@@ -3082,18 +3061,14 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
             continue;
 
         QString enumValueText;
-#ifdef AVOID_PROTECTED_HACK
-        if (!cppEnum->isProtected()) {
-#endif
+        if (!avoidProtectedHack() || !cppEnum->isProtected()) {
             enumValueText = "(long) ";
             if (cppEnum->enclosingClass())
                 enumValueText += cppEnum->enclosingClass()->qualifiedCppName() + "::";
             enumValueText += enumValue->name();
-#ifdef AVOID_PROTECTED_HACK
         } else {
             enumValueText += QString::number(enumValue->value());
         }
-#endif
 
         bool shouldDecrefNumber = false;
         QString enumItemText = "enumItem";
@@ -3430,10 +3405,12 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     // Fill destrutor
     QString dtorClassName = metaClass->qualifiedCppName();
     if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
-#ifdef AVOID_PROTECTED_HACK
-        if (metaClass->hasProtectedDestructor())
+        if (avoidProtectedHack() && metaClass->hasProtectedDestructor())
             dtorClassName = wrapperName(metaClass);
-#endif
+        // call the real destructor
+        if (metaClass->typeEntry()->isValue())
+            dtorClassName = wrapperName(metaClass);
+
         s << INDENT << "Shiboken::ObjectType::setDestructorFunction(&" << cpythonTypeName(metaClass) << ", &Shiboken::callCppDestructor<" << dtorClassName << " >);" << endl;
     }
 
@@ -3507,16 +3484,11 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         writeRegisterType(s, metaClass);
 
     if (usePySideExtensions()) {
-#ifdef AVOID_PROTECTED_HACK
-        if (shouldGenerateCppWrapper(metaClass))
+        if (avoidProtectedHack() && shouldGenerateCppWrapper(metaClass))
             s << INDENT << wrapperName(metaClass) << "::pysideInitQtMetaTypes();\n";
         else
             writeInitQtMetaTypeFunctionBody(s, metaClass);
-#else
-        writeInitQtMetaTypeFunctionBody(s, metaClass);
-#endif
     }
-
 
     s << '}' << endl << endl;
 }

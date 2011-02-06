@@ -86,9 +86,8 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
     s << "#ifndef SBK_" << headerGuard << "_H" << endl;
     s << "#define SBK_" << headerGuard << "_H" << endl<< endl;
 
-#ifndef AVOID_PROTECTED_HACK
-    s << "#define protected public" << endl << endl;
-#endif
+    if (!avoidProtectedHack())
+        s << "#define protected public" << endl << endl;
 
     s << "#include <shiboken.h>" << endl << endl;
 
@@ -113,36 +112,29 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
             writeFunction(s, func);
         }
 
-#ifdef AVOID_PROTECTED_HACK
-        if (metaClass->hasProtectedFields()) {
+        if (avoidProtectedHack() && metaClass->hasProtectedFields()) {
             foreach (AbstractMetaField* field, metaClass->fields()) {
                 if (!field->isProtected())
                     continue;
                 writeProtectedFieldAccessors(s, field);
             }
         }
-#endif
 
         //destructor
-#ifdef AVOID_PROTECTED_HACK
-        if (!metaClass->hasPrivateDestructor())
-#endif
-            s << INDENT << (metaClass->hasVirtualDestructor() || hasVirtualFunction ? "virtual " : "") << "~" << wrapperName << "();" << endl;
+        if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor()) {
+            s << INDENT;
+            if (metaClass->hasVirtualDestructor() || hasVirtualFunction)
+                s <<  "virtual ";
+            s << "~" << wrapperName << "();" << endl;
+        }
 
         writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Declaration, TypeSystem::NativeCode);
 
-#ifdef AVOID_PROTECTED_HACK
-        if (!metaClass->hasPrivateDestructor()) {
-#endif
-
-        if (usePySideExtensions() && metaClass->isQObject()) {
+        if ((!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
+            && usePySideExtensions() && metaClass->isQObject()) {
             s << "public:\n";
             s << INDENT << "virtual int qt_metacall(QMetaObject::Call call, int id, void** args);\n";
         }
-
-#ifdef AVOID_PROTECTED_HACK
-        }
-#endif
 
         if (m_inheritedOverloads.size()) {
             s << INDENT << "// Inherited overloads, because the using keyword sux" << endl;
@@ -169,8 +161,7 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
     if (func->isUserAdded())
         return;
 
-#ifdef AVOID_PROTECTED_HACK
-    if (func->isProtected() && !func->isConstructor() && !func->isOperatorOverload()) {
+    if (avoidProtectedHack() && func->isProtected() && !func->isConstructor() && !func->isOperatorOverload()) {
         s << INDENT << "inline " << (func->isStatic() ? "static " : "");
         s << functionSignature(func, "", "_protected", Generator::EnumAsInts|Generator::OriginalTypeDescription) << " { ";
         s << (func->type() ? "return " : "");
@@ -192,17 +183,15 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
         s << args.join(", ") << ')';
         s << "; }" << endl;
     }
-#endif
 
     // pure virtual functions need a default implementation
     if ((func->isPrivate() && !visibilityModifiedToPrivate(func))
         || (func->isModifiedRemoved() && !func->isAbstract()))
         return;
 
-#ifdef AVOID_PROTECTED_HACK
-    if (func->ownerClass()->hasPrivateDestructor() && (func->isAbstract() || func->isVirtual()))
+    if (avoidProtectedHack() && func->ownerClass()->hasPrivateDestructor()
+        && (func->isAbstract() || func->isVirtual()))
         return;
-#endif
 
     if (func->isConstructor() || func->isAbstract() || func->isVirtual()) {
         s << INDENT;
@@ -252,13 +241,14 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
     QString typeT = type->qualifiedCppName() + (isAbstractOrObjectType ? "*" : "");
     QString typeName = type->qualifiedCppName();
 
-#ifdef AVOID_PROTECTED_HACK
-    const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(type);
-    if (metaEnum && metaEnum->isProtected()) {
-        typeT = protectedEnumSurrogateName(metaEnum);
-        typeName = typeT;
+    if (avoidProtectedHack()) {
+        const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(type);
+        if (metaEnum && metaEnum->isProtected()) {
+            typeT = protectedEnumSurrogateName(metaEnum);
+            typeName = typeT;
+        }
     }
-#endif
+
     typeT.prepend("::");
     typeName.prepend("::");
 
@@ -417,10 +407,10 @@ void HeaderGenerator::finishGeneration()
 
     s << "#ifndef " << includeShield << endl;
     s << "#define " << includeShield << endl<< endl;
-    #ifndef AVOID_PROTECTED_HACK
-    s << "//workaround to access protected functions" << endl;
-    s << "#define protected public" << endl << endl;
-    #endif
+    if (!avoidProtectedHack()) {
+        s << "//workaround to access protected functions" << endl;
+        s << "#define protected public" << endl << endl;
+    }
 
     s << "#include <Python.h>" << endl;
     s << "#include <conversions.h>" << endl;
@@ -510,21 +500,20 @@ void HeaderGenerator::finishGeneration()
 
 void HeaderGenerator::writeProtectedEnumSurrogate(QTextStream& s, const AbstractMetaEnum* cppEnum)
 {
-#ifdef AVOID_PROTECTED_HACK
-    if (cppEnum->isProtected())
+    if (avoidProtectedHack() && cppEnum->isProtected())
         s << "enum " << protectedEnumSurrogateName(cppEnum) << " {};" << endl;
-#endif
 }
 
 void HeaderGenerator::writeSbkTypeFunction(QTextStream& s, const AbstractMetaEnum* cppEnum)
 {
-    QString enumName = cppEnum->name();
-    if (cppEnum->enclosingClass())
-        enumName = cppEnum->enclosingClass()->qualifiedCppName() + "::" + enumName;
-#ifdef AVOID_PROTECTED_HACK
-    if (cppEnum->isProtected())
+    QString enumName;
+    if (avoidProtectedHack() && cppEnum->isProtected()) {
         enumName = protectedEnumSurrogateName(cppEnum);
-#endif
+    } else {
+        enumName = cppEnum->name();
+        if (cppEnum->enclosingClass())
+            enumName = cppEnum->enclosingClass()->qualifiedCppName() + "::" + enumName;
+    }
 
     s << "template<> inline PyTypeObject* SbkType< ::" << enumName << " >() ";
     s << "{ return " << cpythonTypeNameExt(cppEnum->typeEntry()) << "; }\n";

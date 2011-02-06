@@ -1,6 +1,13 @@
 add_subdirectory(libsample)
 add_subdirectory(libother)
 
+if(WIN32 OR DEFINED AVOID_PROTECTED_HACK)
+    message(STATUS "Tests will be generated avoiding the protected hack!")
+    set(GENERATOR_EXTRA_FLAGS --avoid-protected-hack)
+else()
+    message(STATUS "Tests will be generated using the protected hack!")
+    set(GENERATOR_EXTRA_FLAGS )
+endif()
 
 add_subdirectory(samplebinding)
 add_subdirectory(otherbinding)

@@ -19,7 +19,6 @@ set(shiboken_MINOR_VERSION "0")
 set(shiboken_MICRO_VERSION "0")
 set(shiboken_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
 
-option(AVOID_PROTECTED_HACK "Avoid protected hack on generated bindings." FALSE)
 option(BUILD_TESTS "Build tests." TRUE)
 
 if(MSVC)
@@ -46,14 +45,6 @@ if (WIN32)
     set(PATH_SEP "\;")
 else()
     set(PATH_SEP ":")
-endif()
-
-if(WIN32 OR AVOID_PROTECTED_HACK)
-    message(STATUS "Avoiding protected hack!")
-    add_definitions("-DAVOID_PROTECTED_HACK")
-    set(AVOID_PROTECTED_HACK ON)
-else()
-    message(STATUS "Using protected hack!")
 endif()
 
 # uninstall target

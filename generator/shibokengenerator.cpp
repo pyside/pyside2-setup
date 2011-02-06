@@ -31,6 +31,7 @@
 #include <limits>
 
 #define NULL_VALUE "NULL"
+#define AVOID_PROTECTED_HACK "avoid-protected-hack"
 #define PARENT_CTOR_HEURISTIC "enable-parent-ctor-heuristic"
 #define RETURN_VALUE_HEURISTIC "enable-return-value-heuristic"
 #define ENABLE_PYSIDE_EXTENSIONS "enable-pyside-extensions"
@@ -176,46 +177,39 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType*
                                                          const AbstractMetaClass* context,
                                                          Options options) const
 {
-    QString result;
+    if (cType->isArray())
+        return translateTypeForWrapperMethod(cType->arrayElementType(), context, options) + "[]";
 
-    if (cType->isArray()) {
-        result = translateTypeForWrapperMethod(cType->arrayElementType(), context, options) + "[]";
-    } else {
-#ifdef AVOID_PROTECTED_HACK
-        if (cType->isEnum()) {
-            const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(cType);
-            if (metaEnum && metaEnum->isProtected())
-                result = protectedEnumSurrogateName(metaEnum);
-        }
-        if (result.isEmpty())
-#endif
-            result = translateType(cType, context, options);
+    if (avoidProtectedHack() && cType->isEnum()) {
+        const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(cType);
+        if (metaEnum && metaEnum->isProtected())
+            return protectedEnumSurrogateName(metaEnum);
     }
 
-    return result;
+    return translateType(cType, context, options);
 }
 
-bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClass* metaClass)
+bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClass* metaClass) const
 {
     bool result = metaClass->isPolymorphic() || metaClass->hasVirtualDestructor();
-#ifdef AVOID_PROTECTED_HACK
-    result = result || metaClass->hasProtectedFields() || metaClass->hasProtectedDestructor();
-    if (!result && metaClass->hasProtectedFunctions()) {
-        int protectedFunctions = 0;
-        int protectedOperators = 0;
-        foreach (const AbstractMetaFunction* func, metaClass->functions()) {
-            if (!func->isProtected() || func->isSignal() || func->isModifiedRemoved())
-                continue;
-            else if (func->isOperatorOverload())
-                protectedOperators++;
-            else
-                protectedFunctions++;
+    if (avoidProtectedHack()) {
+        result = result || metaClass->hasProtectedFields() || metaClass->hasProtectedDestructor();
+        if (!result && metaClass->hasProtectedFunctions()) {
+            int protectedFunctions = 0;
+            int protectedOperators = 0;
+            foreach (const AbstractMetaFunction* func, metaClass->functions()) {
+                if (!func->isProtected() || func->isSignal() || func->isModifiedRemoved())
+                    continue;
+                else if (func->isOperatorOverload())
+                    protectedOperators++;
+                else
+                    protectedFunctions++;
+            }
+            result = result || (protectedFunctions > protectedOperators);
         }
-        result = result || (protectedFunctions > protectedOperators);
+    } else {
+        result = result && !metaClass->hasPrivateDestructor();
     }
-#else
-    result = result && !metaClass->hasPrivateDestructor();
-#endif
     return result && !metaClass->isNamespace();
 }
 
@@ -251,7 +245,7 @@ const AbstractMetaClass* ShibokenGenerator::getProperEnclosingClassForEnum(const
     return getProperEnclosingClass(metaEnum->enclosingClass());
 }
 
-QString ShibokenGenerator::wrapperName(const AbstractMetaClass* metaClass)
+QString ShibokenGenerator::wrapperName(const AbstractMetaClass* metaClass) const
 {
     if (shouldGenerateCppWrapper(metaClass)) {
         QString result = metaClass->name();
@@ -511,18 +505,19 @@ static QString baseConversionString(QString typeName)
 
 void ShibokenGenerator::writeBaseConversion(QTextStream& s, const TypeEntry* type)
 {
-    QString typeName = type->qualifiedCppName().trimmed();
-    if (!type->isCppPrimitive())
-        typeName.prepend("::");
-    if (type->isObject())
-        typeName.append('*');
-#ifdef AVOID_PROTECTED_HACK
-    if (type->isEnum()) {
+    QString typeName;
+
+    if (avoidProtectedHack() && type->isEnum()) {
         const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(type);
         if (metaEnum && metaEnum->isProtected())
             typeName = protectedEnumSurrogateName(metaEnum);
+    } else {
+        typeName = type->qualifiedCppName().trimmed();
+        if (!type->isCppPrimitive())
+            typeName.prepend("::");
+        if (type->isObject())
+            typeName.append('*');
     }
-#endif
     s << baseConversionString(typeName);
 }
 
@@ -1073,15 +1068,10 @@ AbstractMetaFunctionList ShibokenGenerator::filterFunctions(const AbstractMetaCl
     AbstractMetaFunctionList result;
     foreach (AbstractMetaFunction *func, metaClass->functions()) {
         //skip signals
-        if (func->isSignal()
-            || func->isDestructor()
-#ifndef AVOID_PROTECTED_HACK
-            || (func->isModifiedRemoved() && !func->isAbstract())) {
-#else
-            || (func->isModifiedRemoved() && !func->isAbstract() && !func->isProtected())) {
-#endif
+        if (func->isSignal() || func->isDestructor()
+            || (func->isModifiedRemoved() && !func->isAbstract()
+                && (!avoidProtectedHack() || !func->isProtected())))
             continue;
-        }
         result << func;
     }
     return result;
@@ -1304,26 +1294,26 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 code.replace("%PYTHON_METHOD_OVERRIDE", "py_override");
             }
 
-#ifdef AVOID_PROTECTED_HACK
-            // If the function being processed was added by the user via type system,
-            // Shiboken needs to find out if there are other overloads for the same method
-            // name and if any of them is of the protected visibility. This is used to replace
-            // calls to %FUNCTION_NAME on user written custom code for calls to the protected
-            // dispatcher.
-            bool hasProtectedOverload = false;
-            if (func->isUserAdded()) {
-                foreach (const AbstractMetaFunction* f, getFunctionOverloads(func->ownerClass(), func->name()))
-                    hasProtectedOverload |= f->isProtected();
-            }
+            if (avoidProtectedHack()) {
+                // If the function being processed was added by the user via type system,
+                // Shiboken needs to find out if there are other overloads for the same method
+                // name and if any of them is of the protected visibility. This is used to replace
+                // calls to %FUNCTION_NAME on user written custom code for calls to the protected
+                // dispatcher.
+                bool hasProtectedOverload = false;
+                if (func->isUserAdded()) {
+                    foreach (const AbstractMetaFunction* f, getFunctionOverloads(func->ownerClass(), func->name()))
+                        hasProtectedOverload |= f->isProtected();
+                }
 
-            if (func->isProtected() || hasProtectedOverload) {
-                code.replace("%TYPE::%FUNCTION_NAME",
-                             QString("%1::%2_protected")
-                             .arg(wrapperName(func->ownerClass()))
-                             .arg(func->originalName()));
-                code.replace("%FUNCTION_NAME", QString("%1_protected").arg(func->originalName()));
+                if (func->isProtected() || hasProtectedOverload) {
+                    code.replace("%TYPE::%FUNCTION_NAME",
+                                 QString("%1::%2_protected")
+                                 .arg(wrapperName(func->ownerClass()))
+                                 .arg(func->originalName()));
+                    code.replace("%FUNCTION_NAME", QString("%1_protected").arg(func->originalName()));
+                }
             }
-#endif
 
             if (func->isConstructor() && shouldGenerateCppWrapper(func->ownerClass()))
                 code.replace("%TYPE", wrapperName(func->ownerClass()));
@@ -1631,6 +1621,7 @@ QPair< int, int > ShibokenGenerator::getMinMaxArguments(const AbstractMetaFuncti
 QMap<QString, QString> ShibokenGenerator::options() const
 {
     QMap<QString, QString> opts(Generator::options());
+    opts.insert(AVOID_PROTECTED_HACK, "Avoid the use of the '#define protected public' hack.");
     opts.insert(PARENT_CTOR_HEURISTIC, "Enable heuristics to detect parent relationship on constructors.");
     opts.insert(RETURN_VALUE_HEURISTIC, "Enable heuristics to detect parent relationship on return values (USE WITH CAUTION!)");
     opts.insert(ENABLE_PYSIDE_EXTENSIONS, "Enable PySide extensions, such as support for signal/slots, use this if you are creating a binding for a Qt-based library.");
@@ -1646,6 +1637,7 @@ bool ShibokenGenerator::doSetup(const QMap<QString, QString>& args)
     m_userReturnValueHeuristic = args.contains(RETURN_VALUE_HEURISTIC);
     m_verboseErrorMessagesDisabled = args.contains(DISABLE_VERBOSE_ERROR_MESSAGES);
     m_useIsNullAsNbNonZero = args.contains(USE_ISNULL_AS_NB_NONZERO);
+    m_avoidProtectedHack = args.contains(AVOID_PROTECTED_HACK);
     return true;
 }
 
@@ -1667,6 +1659,11 @@ bool ShibokenGenerator::usePySideExtensions() const
 bool ShibokenGenerator::useIsNullAsNbNonZero() const
 {
     return m_useIsNullAsNbNonZero;
+}
+
+bool ShibokenGenerator::avoidProtectedHack() const
+{
+    return m_avoidProtectedHack;
 }
 
 QString ShibokenGenerator::cppApiVariableName(const QString& moduleName) const

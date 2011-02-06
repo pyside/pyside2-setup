@@ -207,14 +207,14 @@ public:
     void writeToCppConversion(QTextStream& s, const AbstractMetaClass* metaClass, const QString& argumentName);
 
     /// Verifies if the class should have a C++ wrapper generated for it, instead of only a Python wrapper.
-    static bool shouldGenerateCppWrapper(const AbstractMetaClass* metaClass);
+    bool shouldGenerateCppWrapper(const AbstractMetaClass* metaClass) const;
 
     /// Adds enums eligible for generation from classes/namespaces marked not to be generated.
     static void lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumList& enumList, const AbstractMetaClass* metaClass);
     /// Returns the enclosing class for an enum, or NULL if it should be global.
     const AbstractMetaClass* getProperEnclosingClassForEnum(const AbstractMetaEnum* metaEnum);
 
-    static QString wrapperName(const AbstractMetaClass* metaClass);
+    QString wrapperName(const AbstractMetaClass* metaClass) const;
 
     static QString fullPythonFunctionName(const AbstractMetaFunction* func);
     static QString protectedEnumSurrogateName(const AbstractMetaEnum* metaEnum);
@@ -310,8 +310,10 @@ public:
     bool useReturnValueHeuristic() const;
     /// Returns true if the user enabled PySide extensions.
     bool usePySideExtensions() const;
-    /// Return true if the generator should use the result of isNull()const to compute boolean casts.
+    /// Returns true if the generator should use the result of isNull()const to compute boolean casts.
     bool useIsNullAsNbNonZero() const;
+    /// Returns true if the generated code should use the "#define protected public" hack.
+    bool avoidProtectedHack() const;
     QString cppApiVariableName(const QString& moduleName = QString()) const;
     QString getTypeIndexVariableName(const TypeEntry* metaType);
     /// Returns true if the user don't want verbose error messages on the generated bindings.
@@ -354,7 +356,7 @@ protected:
                            const AbstractMetaFunction* metaFunc,
                            Options options = NoOption) const;
 
-    static AbstractMetaFunctionList filterFunctions(const AbstractMetaClass* metaClass);
+    AbstractMetaFunctionList filterFunctions(const AbstractMetaClass* metaClass);
 
     // All data about extended converters: the type entries of the target type, and a
     // list of AbstractMetaClasses accepted as argument for the conversion.
@@ -372,6 +374,7 @@ private:
     bool m_usePySideExtensions;
     bool m_verboseErrorMessagesDisabled;
     bool m_useIsNullAsNbNonZero;
+    bool m_avoidProtectedHack;
 };
 
 
