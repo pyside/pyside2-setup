@@ -15,7 +15,10 @@ def increment_module_value():
     modfile.write('MyOtherObjectType.value += 1' + os.linesep)
     modfile.flush()
     modfile.close()
-    os.remove(dst + 'c')
+    try:
+        os.remove(dst + 'c')
+    except:
+        os.remove(dst + 'o')
 
 class TestModuleReloading(unittest.TestCase):
 
