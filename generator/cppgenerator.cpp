@@ -2237,8 +2237,10 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
     } else if (!refcount_mods.isEmpty()) {
         foreach (ArgumentModification arg_mod, refcount_mods) {
-            if (arg_mod.referenceCounts.first().action != ReferenceCount::Add)
+            if (arg_mod.referenceCounts.first().action != ReferenceCount::Set) {
+                ReportHandler::warning("\"set\" is the only value supported by Shiboken for action attribute of reference-count tag.");
                 continue;
+            }
             const AbstractMetaClass* wrappedClass = 0;
             QString pyArgName = argumentNameFromIndex(func, arg_mod.index, &wrappedClass);
             if (pyArgName.isEmpty()) {
