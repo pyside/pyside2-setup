@@ -1394,9 +1394,9 @@ bool Handler::startElement(const QString &, const QString &n,
             static QHash<QString, ReferenceCount::Action> actions;
             if (actions.isEmpty()) {
                 actions["add"] = ReferenceCount::Add;
-                //actions["add-all"] = ReferenceCount::AddAll;
+                actions["add-all"] = ReferenceCount::AddAll;
                 actions["remove"] = ReferenceCount::Remove;
-                //actions["set"] = ReferenceCount::Set;
+                actions["set"] = ReferenceCount::Set;
                 actions["ignore"] = ReferenceCount::Ignore;
             }
             rc.action = actions.value(attributes["action"].toLower(), ReferenceCount::Invalid);
