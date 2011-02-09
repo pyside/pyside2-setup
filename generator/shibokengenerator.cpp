@@ -75,6 +75,8 @@ void ShibokenGenerator::clearTpFuncs()
 {
     m_tpFuncs["__str__"] = QString("0");
     m_tpFuncs["__repr__"] = QString("0");
+    m_tpFuncs["__iter__"] = QString("0");
+    m_tpFuncs["__next__"] = QString("0");
 }
 
 void ShibokenGenerator::initPrimitiveTypesCorrespondences()

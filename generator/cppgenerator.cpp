@@ -2536,8 +2536,8 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_clear*/            0," << endl;
     s << INDENT << "/*tp_richcompare*/      " << tp_richcompare << ',' << endl;
     s << INDENT << "/*tp_weaklistoffset*/   0," << endl;
-    s << INDENT << "/*tp_iter*/             0," << endl;
-    s << INDENT << "/*tp_iternext*/         0," << endl;
+    s << INDENT << "/*tp_iter*/             " << m_tpFuncs["__iter__"] << ',' << endl;
+    s << INDENT << "/*tp_iternext*/         " << m_tpFuncs["__next__"] << ',' << endl;
     s << INDENT << "/*tp_methods*/          " << className << "_methods," << endl;
     s << INDENT << "/*tp_members*/          0," << endl;
     s << INDENT << "/*tp_getset*/           " << tp_getset << ',' << endl;
