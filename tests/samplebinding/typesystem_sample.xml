@@ -259,6 +259,7 @@
     </object-type>
 
     <object-type name="ObjectModel">
+        <enum-type name="MethodCalled" />
         <modify-function signature="data() const">
             <modify-argument index="return">
                 <define-ownership class="native" owner="c++"/>

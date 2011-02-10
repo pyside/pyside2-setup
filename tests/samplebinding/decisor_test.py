@@ -28,7 +28,7 @@
 
 import unittest
 
-from sample import SampleNamespace, Point
+from sample import SampleNamespace, Point, ObjectType, ObjectModel
 
 class DecisorTest(unittest.TestCase):
     '''Test cases for the method overload decisor.'''
@@ -45,6 +45,15 @@ class DecisorTest(unittest.TestCase):
         just to complicate things for the overload method decisor.'''
         pt = Point()
         self.assertRaises(TypeError, SampleNamespace.forceDecisorSideB, 1, pt)
+
+    def testDecideCallWithInheritance(self):
+        '''Call methods overloads that receive parent and inheritor classes' instances.'''
+        objecttype = ObjectType()
+        objectmodel = ObjectModel()
+        self.assertEqual(ObjectModel.receivesObjectTypeFamily(objecttype), ObjectModel.ObjectTypeCalled)
+        self.assertNotEqual(ObjectModel.receivesObjectTypeFamily(objecttype), ObjectModel.ObjectModelCalled)
+        self.assertEqual(ObjectModel.receivesObjectTypeFamily(objectmodel), ObjectModel.ObjectModelCalled)
+        self.assertNotEqual(ObjectModel.receivesObjectTypeFamily(objectmodel), ObjectModel.ObjectTypeCalled)
 
 if __name__ == '__main__':
     unittest.main()
