@@ -3844,22 +3844,22 @@ void CppGenerator::finishGeneration()
     }
 }
 
+static ArgumentOwner getArgumentOwner(const AbstractMetaFunction* func, int argIndex)
+{
+    ArgumentOwner argOwner = func->argumentOwner(func->ownerClass(), argIndex);
+    if (argOwner.index == ArgumentOwner::InvalidIndex)
+        argOwner = func->argumentOwner(func->declaringClass(), argIndex);
+    return argOwner;
+}
+
 bool CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func, int argIndex, bool useHeuristicPolicy)
 {
     const int numArgs = func->arguments().count();
-    const AbstractMetaClass* cppClass = func->ownerClass();
-    const AbstractMetaClass* dClass = func->declaringClass();
     bool ctorHeuristicEnabled = func->isConstructor() && useCtorHeuristic() && useHeuristicPolicy;
-
-    QString parentVariable;
-    QString childVariable;
-    ArgumentOwner argOwner = func->argumentOwner(cppClass, argIndex);
-
-    if (argOwner.index == -2)  //invalid
-        argOwner = func->argumentOwner(dClass, argIndex);
 
     bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(OverloadData(getFunctionGroups(func->implementingClass())[func->name()], this));
 
+    ArgumentOwner argOwner = getArgumentOwner(func, argIndex);
     ArgumentOwner::Action action = argOwner.action;
     int parentIndex = argOwner.index;
     int childIndex = argIndex;
@@ -3872,6 +3872,8 @@ bool CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
         }
     }
 
+    QString parentVariable;
+    QString childVariable;
     if (action != ArgumentOwner::Invalid) {
         if (!usePyArgs && argIndex > 1)
             ReportHandler::warning("Argument index for parent tag out of bounds: "+func->signature());
@@ -3925,6 +3927,9 @@ void CppGenerator::writeReturnValueHeuristics(QTextStream& s, const AbstractMeta
         || !func->typeReplaced(0).isEmpty()) {
         return;
     }
+
+    ArgumentOwner argOwner = getArgumentOwner(func, ArgumentOwner::ReturnIndex);
+    if (argOwner.action == ArgumentOwner::Invalid || argOwner.index != ArgumentOwner::ThisIndex)
 
     if (type->isQObject() || type->isObject() || type->isValuePointer())
         s << INDENT << "Shiboken::Object::setParent(" << self << ", " PYTHON_RETURN_VAR ");" << endl;
