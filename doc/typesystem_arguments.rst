@@ -143,7 +143,9 @@ reference-count
     following values:
 
         * add: increments the argument reference counter.
+        * add-all: increments the reference counter for each item in a collection.
         * remove: decrements the argument reference counter.
+        * set: will assign the argument to the variable containing the reference.
         * ignore: does nothing with the argument reference counter
                   (sounds worthless, but could be used in situations
                    where the reference counter increase is mandatory
@@ -152,8 +154,12 @@ reference-count
     .. code-block:: xml
 
         <modify-argument>
-              <reference-count action="add|remove|ignore" />
+              <reference-count action="add|add-all|remove|set|ignore" variable-name="..." />
         </modify-argument>
+
+
+    The variable-name attribute specifies the name used for the variable that
+    holds the reference(s).
 
 
 replace-value
