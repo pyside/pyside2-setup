@@ -51,7 +51,7 @@ class LIBSAMPLE_API ObjectType
 {
 public:
 
-    ObjectType(ObjectType* parent = 0);
+    explicit ObjectType(ObjectType* parent = 0);
     virtual ~ObjectType();
 
     // factory method
