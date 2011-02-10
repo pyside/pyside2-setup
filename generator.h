@@ -45,6 +45,9 @@ QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
 GENRUNNER_API
 void verifyDirectoryFor(const QFile &file);
 
+GENRUNNER_API QString getClassTargetFullName(const AbstractMetaClass* metaClass, bool includePackageName = true);
+GENRUNNER_API QString getClassTargetFullName(const AbstractMetaEnum* metaEnum, bool includePackageName = true);
+
 /**
  *   Base class for all generators. The default implementations does nothing,
  *   you must subclass this to create your own generators.

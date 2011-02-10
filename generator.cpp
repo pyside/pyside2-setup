@@ -335,3 +335,29 @@ QString Generator::subDirectoryForPackage(QString packageName) const
     return QString(packageName).replace(".", QDir::separator());
 }
 
+template<typename T>
+static QString getClassTargetFullName_(const T* t, bool includePackageName)
+{
+    QString name = t->name();
+    const AbstractMetaClass* context = t->enclosingClass();
+    while (context) {
+        name.prepend('.');
+        name.prepend(context->name());
+        context = context->enclosingClass();
+    }
+    if (includePackageName) {
+        name.prepend('.');
+        name.prepend(t->package());
+    }
+    return name;
+}
+
+QString getClassTargetFullName(const AbstractMetaClass* metaClass, bool includePackageName)
+{
+    return getClassTargetFullName_(metaClass, includePackageName);
+}
+
+QString getClassTargetFullName(const AbstractMetaEnum* metaEnum, bool includePackageName)
+{
+    return getClassTargetFullName_(metaEnum, includePackageName);
+}
