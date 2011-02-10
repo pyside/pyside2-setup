@@ -1462,7 +1462,7 @@ AbstractMetaFunctionList ShibokenGenerator::getMethodsWithBothStaticAndNonStatic
     return methods;
 }
 
-AbstractMetaClassList ShibokenGenerator::getBaseClasses(const AbstractMetaClass* metaClass)
+AbstractMetaClassList ShibokenGenerator::getBaseClasses(const AbstractMetaClass* metaClass) const
 {
     AbstractMetaClassList baseClasses;
     foreach (QString parent, metaClass->baseClassNames()) {
@@ -1482,7 +1482,7 @@ const AbstractMetaClass* ShibokenGenerator::getMultipleInheritingClass(const Abs
     return getMultipleInheritingClass(metaClass->baseClass());
 }
 
-AbstractMetaClassList ShibokenGenerator::getAllAncestors(const AbstractMetaClass* metaClass)
+AbstractMetaClassList ShibokenGenerator::getAllAncestors(const AbstractMetaClass* metaClass) const
 {
     AbstractMetaClassList result;
     AbstractMetaClassList baseClasses = getBaseClasses(metaClass);

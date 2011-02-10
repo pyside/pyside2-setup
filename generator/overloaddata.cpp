@@ -238,6 +238,7 @@ void OverloadData::sortNextOverloads()
     foreach(OverloadData* ov, m_nextOverloadData) {
         const AbstractMetaType* targetType = ov->argType();
         const QString targetTypeEntryName(getTypeName(ov));
+        int targetTypeId = sortData.map[targetTypeEntryName];
 
         // Process implicit conversions
         foreach(AbstractMetaFunction* function, m_generator->implicitConversions(targetType)) {
@@ -253,7 +254,6 @@ void OverloadData::sortNextOverloads()
             if (!sortData.map.contains(convertibleType))
                 continue;
 
-            int targetTypeId = sortData.map[targetTypeEntryName];
             int convertibleTypeId = sortData.map[convertibleType];
 
             // If a reverse pair already exists, remove it. Probably due to the
@@ -262,28 +262,39 @@ void OverloadData::sortNextOverloads()
             graph.addEdge(convertibleTypeId, targetTypeId);
         }
 
+        // Process inheritance relationships
+        if (targetType->isValue() || targetType->isObject()) {
+            const AbstractMetaClass* metaClass = m_generator->classes().findClass(targetType->typeEntry());
+            foreach (const AbstractMetaClass* ancestor, m_generator->getAllAncestors(metaClass)) {
+                QString ancestorTypeName = ancestor->typeEntry()->name();
+                if (!sortData.map.contains(ancestorTypeName))
+                    continue;
+                int ancestorTypeId = sortData.map[ancestorTypeName];
+                graph.removeEdge(ancestorTypeId, targetTypeId);
+                graph.addEdge(targetTypeId, ancestorTypeId);
+            }
+        }
 
         // Process template instantiations
         foreach (const AbstractMetaType* instantiation, targetType->instantiations()) {
             if (sortData.map.contains(getTypeName(instantiation))) {
-                int target = sortData.map[targetTypeEntryName];
                 int convertible = sortData.map[getTypeName(instantiation)];
 
-                if (!graph.containsEdge(target, convertible)) // Avoid cyclic dependency.
-                    graph.addEdge(convertible, target);
+                if (!graph.containsEdge(targetTypeId, convertible)) // Avoid cyclic dependency.
+                    graph.addEdge(convertible, targetTypeId);
 
                 if (instantiation->isPrimitive() && (signedIntegerPrimitives.contains(instantiation->name()))) {
                     foreach (const QString& primitive, nonIntegerPrimitives) {
                         QString convertibleTypeName = getImplicitConversionTypeName(ov->argType(), instantiation, 0, primitive);
-                        if (!graph.containsEdge(target, sortData.map[convertibleTypeName])) // Avoid cyclic dependency.
-                            graph.addEdge(sortData.map[convertibleTypeName], target);
+                        if (!graph.containsEdge(targetTypeId, sortData.map[convertibleTypeName])) // Avoid cyclic dependency.
+                            graph.addEdge(sortData.map[convertibleTypeName], targetTypeId);
                     }
 
                 } else {
                     foreach (const AbstractMetaFunction* function, m_generator->implicitConversions(instantiation)) {
                         QString convertibleTypeName = getImplicitConversionTypeName(ov->argType(), instantiation, function);
-                        if (!graph.containsEdge(target, sortData.map[convertibleTypeName])) // Avoid cyclic dependency.
-                            graph.addEdge(sortData.map[convertibleTypeName], target);
+                        if (!graph.containsEdge(targetTypeId, sortData.map[convertibleTypeName])) // Avoid cyclic dependency.
+                            graph.addEdge(sortData.map[convertibleTypeName], targetTypeId);
                     }
                 }
             }
@@ -291,20 +302,20 @@ void OverloadData::sortNextOverloads()
 
         /* Add dependency on PyObject, so its check is the last one (too generic) */
         if (checkPyObject && !targetTypeEntryName.contains("PyObject")) {
-            graph.addEdge(sortData.map[targetTypeEntryName], pyobjectIndex);
+            graph.addEdge(targetTypeId, pyobjectIndex);
         } else if (checkQVariant && targetTypeEntryName != "QVariant") {
-            if (!graph.containsEdge(qvariantIndex, sortData.map[targetTypeEntryName])) // Avoid cyclic dependency.
-                graph.addEdge(sortData.map[targetTypeEntryName], qvariantIndex);
+            if (!graph.containsEdge(qvariantIndex, targetTypeId)) // Avoid cyclic dependency.
+                graph.addEdge(targetTypeId, qvariantIndex);
         } else if (checkQString && ov->argType()->indirections() > 0 && targetTypeEntryName != "QString" && targetTypeEntryName != "QByteArray") {
-            if (!graph.containsEdge(qstringIndex, sortData.map[targetTypeEntryName])) // Avoid cyclic dependency.
-                graph.addEdge(sortData.map[targetTypeEntryName], qstringIndex);
+            if (!graph.containsEdge(qstringIndex, targetTypeId)) // Avoid cyclic dependency.
+                graph.addEdge(targetTypeId, qstringIndex);
         }
 
         if (targetType->isEnum()) {
             // Enum values must precede primitive types.
             for (int i = 0; i < numPrimitives; ++i) {
                 if (hasPrimitive[i])
-                    graph.addEdge(sortData.map[targetTypeEntryName], sortData.map[primitiveTypes[i]]);
+                    graph.addEdge(targetTypeId, sortData.map[primitiveTypes[i]]);
             }
         }
     }
