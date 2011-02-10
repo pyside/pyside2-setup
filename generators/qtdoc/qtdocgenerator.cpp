@@ -811,22 +811,6 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
     return s;
 }
 
-static QString getClassName(const AbstractMetaClass *cppClass)
-{
-    if (!cppClass)
-        return QString();
-
-    QString scope = cppClass->name();
-    const AbstractMetaClass *context = cppClass->enclosingClass();
-    while (context) {
-        if (!context->isNamespace())
-            scope = context->name() + "." + context->name();
-        context = context->enclosingClass();
-    }
-
-    return scope;
-}
-
 static QString getFuncName(const AbstractMetaFunction *cppFunc) {
     static bool hashInitialized = false;
     static QHash<QString, QString> operatorsHash;
@@ -876,7 +860,7 @@ QtDocGenerator::~QtDocGenerator()
 
 QString QtDocGenerator::fileNameForClass(const AbstractMetaClass *cppClass) const
 {
-    return QString("%1.rst").arg(getClassName(cppClass));
+    return QString("%1.rst").arg(getClassTargetFullName(cppClass, false));
 }
 
 void QtDocGenerator::writeFormatedText(QTextStream& s, const Documentation& doc, const AbstractMetaClass* metaClass)
@@ -884,7 +868,7 @@ void QtDocGenerator::writeFormatedText(QTextStream& s, const Documentation& doc,
     QString metaClassName;
 
     if (metaClass)
-        metaClassName = getClassName(metaClass);
+        metaClassName = getClassTargetFullName(metaClass);
 
     if (doc.format() == Documentation::Native) {
         QtXmlToSphinx x(this, doc.value(), metaClassName);
@@ -916,7 +900,7 @@ void QtDocGenerator::generateClass(QTextStream &s, const AbstractMetaClass *meta
     m_docParser->fillDocumentation(const_cast<AbstractMetaClass*>(metaClass));
 
     s << ".. module:: " << metaClass->package() << endl;
-    QString className = getClassName(metaClass);
+    QString className = getClassTargetFullName(metaClass, false);
     s << ".. _" << className << ":" << endl << endl;
 
     s << className << endl;
@@ -971,9 +955,9 @@ void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* 
 
         QString className;
         if (!func->isConstructor())
-            className =  getClassName(cppClass) + '.';
+            className =  getClassTargetFullName(cppClass) + '.';
         else if (func->implementingClass() && func->implementingClass()->enclosingClass())
-            className =  getClassName(func->implementingClass()->enclosingClass()) + '.';
+            className =  getClassTargetFullName(func->implementingClass()->enclosingClass()) + '.';
         QString funcName = getFuncName(func);
 
         QStringList& list = func->isStatic() ? staticFunctionList : functionList;
@@ -1036,7 +1020,7 @@ void QtDocGenerator::writeEnums(QTextStream& s, const AbstractMetaClass* cppClas
     static const QString section_title(".. attribute:: ");
 
     foreach (AbstractMetaEnum *en, cppClass->enums()) {
-        s << section_title << getClassName(cppClass) << "." << en->name() << endl << endl;
+        s << section_title << getClassTargetFullName(cppClass) << "." << en->name() << endl << endl;
         writeFormatedText(s, en->documentation(), cppClass);
     }
 }
@@ -1046,7 +1030,7 @@ void QtDocGenerator::writeFields(QTextStream &s, const AbstractMetaClass *cppCla
     static const QString section_title(".. attribute:: ");
 
     foreach (AbstractMetaField *field, cppClass->fields()) {
-        s << section_title << getClassName(cppClass) << "." << field->name() << endl << endl;
+        s << section_title << getClassTargetFullName(cppClass) << "." << field->name() << endl << endl;
         //TODO: request for member ‘documentation’ is ambiguous
         writeFormatedText(s, field->AbstractMetaAttributes::documentation(), cppClass);
     }
@@ -1250,9 +1234,9 @@ void QtDocGenerator::writeFunctionSignature(QTextStream& s, const AbstractMetaCl
 {
     QString className;
     if (!func->isConstructor())
-        className =  getClassName(cppClass) + '.';
+        className =  getClassTargetFullName(cppClass) + '.';
     else if (func->implementingClass() && func->implementingClass()->enclosingClass())
-        className =  getClassName(func->implementingClass()->enclosingClass()) + '.';
+        className =  getClassTargetFullName(func->implementingClass()->enclosingClass()) + '.';
 
     QString funcName = getFuncName(func);
     if (!funcName.startsWith(className))
