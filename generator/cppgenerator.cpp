@@ -2514,7 +2514,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << "static SbkObjectType " << className + "_Type" << " = { { {" << endl;
     s << INDENT << "PyObject_HEAD_INIT(&SbkObjectType_Type)" << endl;
     s << INDENT << "/*ob_size*/             0," << endl;
-    s << INDENT << "/*tp_name*/             \"" << metaClass->fullName() << "\"," << endl;
+    s << INDENT << "/*tp_name*/             \"" << getClassTargetFullName(metaClass) << "\"," << endl;
     s << INDENT << "/*tp_basicsize*/        sizeof(SbkObject)," << endl;
     s << INDENT << "/*tp_itemsize*/         0," << endl;
     s << INDENT << "/*tp_dealloc*/          " << tp_dealloc << ',' << endl;
@@ -3028,7 +3028,8 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
     s << cppEnum->name() << endl;
 
     if (!cppEnum->isAnonymous()) {
-        s << INDENT << "PyTypeObject* " << cpythonName << " = Shiboken::Enum::newType(\"" << cppEnum->name() << "\");" << endl;
+
+        s << INDENT << "PyTypeObject* " << cpythonName << " = Shiboken::Enum::newType(\"" << getClassTargetFullName(cppEnum) << "\");" << endl;
 
         if (cppEnum->typeEntry()->flags())
             s << INDENT << cpythonName << "->tp_as_number = &" << cpythonName << "_as_number;" << endl;

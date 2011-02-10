@@ -106,7 +106,7 @@ class MyEvent(Event):
 class OutOfBoundsTest(unittest.TestCase):
     def testValue(self):
         e = MyEvent()
-        self.assertEqual(repr(e.eventType()), '<enum-item EventType.#out of bounds# (999)>')
+        self.assertEqual(repr(e.eventType()), '<enum-item sample.Event.EventType.#out of bounds# (999)>')
 
 class EnumOverloadTest(unittest.TestCase):
     '''Test case for overloads involving enums'''

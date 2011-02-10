@@ -40,5 +40,10 @@ class TestClassesUnderNamespace(unittest.TestCase):
         res = SampleNamespace.ImInsideANamespace(2, 2)
         self.assertEquals(res, 4)
 
+    def testTpNames(self):
+        self.assertEquals(str(SampleNamespace.SomeClass), "<type 'sample.SampleNamespace.SomeClass'>")
+        self.assertEquals(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough), "<type 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough'>")
+        self.assertEquals(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum), "<type 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum'>")
+
 if __name__ == '__main__':
     unittest.main()
