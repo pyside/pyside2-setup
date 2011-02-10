@@ -3930,10 +3930,10 @@ void CppGenerator::writeReturnValueHeuristics(QTextStream& s, const AbstractMeta
     }
 
     ArgumentOwner argOwner = getArgumentOwner(func, ArgumentOwner::ReturnIndex);
-    if (argOwner.action == ArgumentOwner::Invalid || argOwner.index != ArgumentOwner::ThisIndex)
-
-    if (type->isQObject() || type->isObject() || type->isValuePointer())
-        s << INDENT << "Shiboken::Object::setParent(" << self << ", " PYTHON_RETURN_VAR ");" << endl;
+    if (argOwner.action == ArgumentOwner::Invalid || argOwner.index != ArgumentOwner::ThisIndex) {
+        if (type->isQObject() || type->isObject() || type->isValuePointer())
+            s << INDENT << "Shiboken::Object::setParent(" << self << ", " PYTHON_RETURN_VAR ");" << endl;
+    }
 }
 
 void CppGenerator::writeHashFunction(QTextStream& s, const AbstractMetaClass* metaClass)
