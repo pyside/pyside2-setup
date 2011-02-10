@@ -109,7 +109,13 @@ struct ArgumentOwner
         Add         = 0x01,
         Remove      = 0x02
     };
-    ArgumentOwner() : action(ArgumentOwner::Invalid), index(-2) {}
+    enum {
+        InvalidIndex = -2,
+        ThisIndex = -1,
+        ReturnIndex = 0,
+        FirstArgumentIndex = 1
+    };
+    ArgumentOwner() : action(ArgumentOwner::Invalid), index(ArgumentOwner::InvalidIndex) {}
 
     Action action;
     int index;
