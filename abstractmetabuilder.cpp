@@ -1869,7 +1869,6 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
 AbstractMetaType* AbstractMetaBuilder::translateType(double vr, const AddedFunction::TypeInfo& typeInfo)
 {
     Q_ASSERT(!typeInfo.name.isEmpty());
-    AbstractMetaType* metaType = createMetaType();
     TypeDatabase* typeDb = TypeDatabase::instance();
     TypeEntry* type;
 
@@ -1882,6 +1881,7 @@ AbstractMetaType* AbstractMetaBuilder::translateType(double vr, const AddedFunct
         typeDb->addType(type);
     }
 
+    AbstractMetaType* metaType = createMetaType();
     metaType->setTypeEntry(type);
     metaType->setIndirections(typeInfo.indirections);
     metaType->setReference(typeInfo.isReference);
