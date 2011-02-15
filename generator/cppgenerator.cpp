@@ -2246,15 +2246,23 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
     } else if (!refcount_mods.isEmpty()) {
         foreach (ArgumentModification arg_mod, refcount_mods) {
-            if (arg_mod.referenceCounts.first().action != ReferenceCount::Set) {
-                ReportHandler::warning("\"set\" is the only value supported by Shiboken for action attribute of reference-count tag.");
+            ReferenceCount refCount = arg_mod.referenceCounts.first();
+            if (refCount.action != ReferenceCount::Set
+                && refCount.action != ReferenceCount::Remove) {
+                ReportHandler::warning("\"set\" and \"remove\" are the only values supported by Shiboken for action attribute of reference-count tag.");
                 continue;
             }
             const AbstractMetaClass* wrappedClass = 0;
-            QString pyArgName = argumentNameFromIndex(func, arg_mod.index, &wrappedClass);
-            if (pyArgName.isEmpty()) {
-                s << "#error Invalid reference count modification for argument " << arg_mod.index << endl << endl;
-                break;
+
+            QString pyArgName;
+            if (refCount.action == ReferenceCount::Remove) {
+                pyArgName = "Py_None";
+            } else {
+                pyArgName = argumentNameFromIndex(func, arg_mod.index, &wrappedClass);
+                if (pyArgName.isEmpty()) {
+                    s << "#error Invalid reference count modification for argument " << arg_mod.index << endl << endl;
+                    break;
+                }
             }
 
             s << INDENT << "Shiboken::Object::keepReference(reinterpret_cast<SbkObject*>(self), \"";
