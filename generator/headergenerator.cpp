@@ -149,6 +149,9 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
             writeInheritedOverloads(s);
         }
 
+        if (usePySideExtensions())
+            s << INDENT << "static void pysideInitQtMetaTypes();" << endl;
+
         s << "};" << endl << endl;
     }
 

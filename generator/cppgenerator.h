@@ -169,6 +169,8 @@ private:
     void writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func, bool userHeuristicForReturn);
     bool writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func, int argIndex, bool userHeuristicPolicy);
     void writeReturnValueHeuristics(QTextStream& s, const AbstractMetaFunction* func, const QString& self = "self");
+    void writeInitQtMetaTypeFunctionBody(QTextStream& s, const AbstractMetaClass* metaClass) const;
+
     /**
      *   Returns the multiple inheritance initializer function for the given class.
      *   \param metaClass the class for whom the function name must be generated.

@@ -304,6 +304,15 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         s << "// Native ---------------------------------------------------------" << endl;
         s << endl;
 
+#ifdef AVOID_PROTECTED_HACK
+        if (usePySideExtensions()) {
+            s << "void " << wrapperName(metaClass) << "::pysideInitQtMetaTypes()\n{\n";
+            Indentation indent(INDENT);
+            writeInitQtMetaTypeFunctionBody(s, metaClass);
+            s << "}\n\n";
+        }
+#endif
+
         foreach (const AbstractMetaFunction* func, filterFunctions(metaClass)) {
             if ((func->isPrivate() && !visibilityModifiedToPrivate(func))
                 || (func->isModifiedRemoved() && !func->isAbstract()))
@@ -3135,13 +3144,13 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
                     if (i > 0)
                         signature += ", ";
 
-                    AbstractMetaArgument *a = cppSignal->arguments().at(i);
-                    AbstractMetaType* type = a->type();
+                    AbstractMetaArgument* arg = cppSignal->arguments().at(i);
+                    AbstractMetaType* type = arg->type();
 
                     QString cppSignature = SBK_NORMALIZED_TYPE(qPrintable(type->cppSignature()));
                     QString originalSignature = SBK_NORMALIZED_TYPE(qPrintable(type->originalTypeDescription()));
 
-                    if (!a->defaultValueExpression().isEmpty()) {
+                    if (!arg->defaultValueExpression().isEmpty()) {
                         QString sig = SBK_NORMALIZED_SIGNATURE(signature.toAscii());
                         if (sig.isEmpty())
                             sig = "void";
@@ -3487,13 +3496,39 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     if (!metaClass->isNamespace())
         writeRegisterType(s, metaClass);
 
-    if (usePySideExtensions() && !metaClass->isNamespace()) {
-        // Qt metatypes are registered only on their first use, so we do this now.
-        const char* star = metaClass->typeEntry()->isObject() ? "*" : "";
-        s << INDENT << "PySide::initQtMetaType<" << metaClass->qualifiedCppName() << star << " >();" << endl;
+    if (usePySideExtensions()) {
+#ifdef AVOID_PROTECTED_HACK
+        if (shouldGenerateCppWrapper(metaClass))
+            s << INDENT << wrapperName(metaClass) << "::pysideInitQtMetaTypes();\n";
+        else
+            writeInitQtMetaTypeFunctionBody(s, metaClass);
+#else
+        writeInitQtMetaTypeFunctionBody(s, metaClass);
+#endif
     }
 
+
     s << '}' << endl << endl;
+}
+
+void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream& s, const AbstractMetaClass* metaClass) const
+{
+    const QString className = metaClass->qualifiedCppName();
+    if (!metaClass->isNamespace()) {
+        // Qt metatypes are registered only on their first use, so we do this now.
+        const char* star = metaClass->typeEntry()->isObject() ? "*" : "";
+        s << INDENT << "PySide::initQtMetaType< ::" << className << star << " >();" << endl;
+    }
+    foreach (AbstractMetaEnum* metaEnum, metaClass->enums()) {
+        if (!metaEnum->isPrivate() && !metaEnum->isAnonymous()) {
+            QString n = className + "::" + metaEnum->name();
+            s << INDENT << "qRegisterMetaType< ::" << n << " >(\"" << n << "\");" << endl;
+            if (metaEnum->typeEntry()->flags()) {
+                n = metaEnum->typeEntry()->flags()->originalName();
+                s << INDENT << "qRegisterMetaType< ::" << n << " >(\"" << n << "\");" << endl;
+            }
+        }
+    }
 }
 
 void CppGenerator::writeTypeDiscoveryFunction(QTextStream& s, const AbstractMetaClass* metaClass)
@@ -3835,13 +3870,19 @@ void CppGenerator::finishGeneration()
             s << endl;
         }
 
-        s << '}' << endl << endl;
-
         // module inject-code native/end
         if (!snips.isEmpty()) {
             writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::NativeCode);
             s << endl;
         }
+
+        if (usePySideExtensions()) {
+            foreach (AbstractMetaEnum* metaEnum, globalEnums)
+                if (!metaEnum->isAnonymous())
+                    s << INDENT << "qRegisterMetaType< ::" << metaEnum->name() << " >(\"" << metaEnum->name() << "\");" << endl;
+        }
+
+        s << '}' << endl << endl;
     }
 }
 
