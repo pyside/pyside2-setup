@@ -38,6 +38,7 @@ Handler::Handler(TypeDatabase* database, bool generate)
 {
     m_currentEnum = 0;
     m_current = 0;
+    m_currentOptional = 0;
 
     tagNames["rejection"] = StackElement::Rejection;
     tagNames["primitive-type"] = StackElement::PrimitiveTypeEntry;
@@ -123,6 +124,13 @@ void Handler::fetchAttributeValues(const QString &name, const QXmlAttributes &at
 
 bool Handler::endElement(const QString &, const QString &localName, const QString &)
 {
+    if (m_currentOptional) {
+        m_current = m_currentOptional->parent;
+        delete m_currentOptional;
+        m_currentOptional = 0;
+        return true;
+    }
+
     QString tagName = localName.toLower();
     if (tagName == "import-file")
         return true;
@@ -208,6 +216,9 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
 
 bool Handler::characters(const QString &ch)
 {
+    if (m_currentOptional)
+        return true;
+
     if (m_current->type == StackElement::Template) {
         m_current->value.templateEntry->addCode(ch);
         return true;
@@ -345,6 +356,21 @@ static bool convertRemovalAttribute(const QString& removalAttribute, Modificatio
     return true;
 }
 
+static void getNamePrefixRecursive(StackElement* element, QStringList& names)
+{
+    if (!element->parent || !element->parent->entry)
+        return;
+    getNamePrefixRecursive(element->parent, names);
+    names << element->parent->entry->name();
+}
+
+static QString getNamePrefix(StackElement* element)
+{
+    QStringList names;
+    getNamePrefixRecursive(element, names);
+    return names.join(".");
+}
+
 bool Handler::startElement(const QString &, const QString &n,
                            const QString &, const QXmlAttributes &atts)
 {
@@ -356,6 +382,9 @@ bool Handler::startElement(const QString &, const QString &n,
         m_error = QString("Unknown tag name: '%1'").arg(tagName);
         return false;
     }
+
+    if (m_currentOptional)
+        return true;
 
     StackElement* element = new StackElement(m_current);
     element->type = tagNames[tagName];
@@ -427,6 +456,16 @@ bool Handler::startElement(const QString &, const QString &n,
         fetchAttributeValues(tagName, atts, &attributes);
         QString name = attributes["name"];
         double since = attributes["since"].toDouble();
+
+        if (m_database->hasDroppedTypeEntries()) {
+            QString identifier = getNamePrefix(element) + '.';
+            identifier += (element->type == StackElement::FunctionTypeEntry ? attributes["signature"] : name);
+            if (m_database->shouldDropTypeEntry(identifier)) {
+                m_currentOptional = element;
+                ReportHandler::debugSparse(QString("Optional type system entry '%1' was dropped from generation.").arg(identifier));
+                return true;
+            }
+        }
 
         // The top level tag 'function' has only the 'signature' tag
         // and we should extract the 'name' value from it.

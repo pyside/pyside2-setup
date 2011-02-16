@@ -401,3 +401,14 @@ bool TypeDatabase::supportedApiVersion(double version) const
     return version <= m_apiVersion;
 }
 
+bool TypeDatabase::shouldDropTypeEntry(const QString& fullTypeName) const
+{
+    return m_dropTypeEntries.contains(fullTypeName);
+}
+
+void TypeDatabase::setDropTypeEntries(QStringList dropTypeEntries)
+{
+    m_dropTypeEntries = dropTypeEntries;
+    m_dropTypeEntries.sort();
+}
+

@@ -180,6 +180,20 @@ public:
 
     bool supportedApiVersion(double version) const;
 
+    const QStringList& dropTypeEntries() const
+    {
+        return m_dropTypeEntries;
+    }
+
+    bool hasDroppedTypeEntries() const
+    {
+        return !m_dropTypeEntries.isEmpty();
+    }
+
+    bool shouldDropTypeEntry(const QString& fullTypeName) const;
+
+    void setDropTypeEntries(QStringList dropTypeEntries);
+
 private:
     bool m_suppressWarnings;
     TypeEntryHash m_entries;
@@ -199,6 +213,7 @@ private:
     QStringList m_rebuildClasses;
 
     double m_apiVersion;
+    QStringList m_dropTypeEntries;
 };
 
 #endif

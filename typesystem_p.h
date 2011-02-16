@@ -149,6 +149,7 @@ private:
 
     TypeDatabase* m_database;
     StackElement* m_current;
+    StackElement* m_currentOptional;
     QString m_defaultPackage;
     QString m_defaultSuperclass;
     QString m_error;
