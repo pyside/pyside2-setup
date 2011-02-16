@@ -16,7 +16,7 @@ Options
 
 .. _api-version:
 
-``--api-version``
+``--api-version=<version>``
     Specify the supported api version used to generate the bindings.
 
 .. _debug-level:
@@ -28,6 +28,12 @@ Options
 
 ``--documentation-only``
     Do not generate any code, just the documentation.
+
+.. _drop-type-entries:
+
+``--drop-type-entries="<TypeEntry0>[;TypeEntry1;...]"``
+    Semicolon separated list of type system entries (classes, namespaces,
+    global functions and enums) to be dropped from generation.
 
 .. _generation-set:
 

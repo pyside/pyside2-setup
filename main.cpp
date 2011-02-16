@@ -181,6 +181,7 @@ void printUsage(const GeneratorList& generators)
     generalOptions.insert("version", "Output version information and exit");
     generalOptions.insert("generator-set=<\"generator module\">", "generator-set to be used. e.g. qtdoc");
     generalOptions.insert("api-version=<\"version\">", "Specify the supported api version used to generate the bindings");
+    generalOptions.insert("drop-type-entries=\"<TypeEntry0>[;TypeEntry1;...]\"", "Semicolon separated list of type system entries (classes, namespaces, global functions and enums) to be dropped from generation.");
     printOptions(s, generalOptions);
 
     foreach (Generator* generator, generators) {
@@ -295,6 +296,9 @@ int main(int argc, char *argv[])
 
     if (args.contains("api-version"))
         extractor.setApiVersion(args["api-version"].toDouble());
+
+    if (args.contains("drop-type-entries"))
+        extractor.setDropTypeEntries(args["drop-type-entries"]);
 
     if (args.contains("typesystem-paths"))
         extractor.addTypesystemSearchPath(args.value("typesystem-paths").split(PATH_SPLITTER));
