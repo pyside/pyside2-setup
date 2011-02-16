@@ -109,6 +109,13 @@ void ApiExtractor::setApiVersion(double version)
     TypeDatabase::instance()->setApiVersion(version);
 }
 
+void ApiExtractor::setDropTypeEntries(QString dropEntries)
+{
+    dropEntries.remove(' ');
+    QStringList entries = dropEntries.split(';');
+    TypeDatabase::instance()->setDropTypeEntries(entries);
+}
+
 AbstractMetaEnumList ApiExtractor::globalEnums() const
 {
     Q_ASSERT(m_builder);
