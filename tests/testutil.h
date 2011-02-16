@@ -31,12 +31,16 @@
 class TestUtil
 {
 public:
-    TestUtil(const char* cppCode, const char* xmlCode, bool silent = true, double apiVersion = 0) : m_builder(0)
+    TestUtil(const char* cppCode, const char* xmlCode,
+             bool silent = true, double apiVersion = 0,
+             QStringList dropTypeEntries = QStringList())
+        : m_builder(0)
     {
         ReportHandler::setSilent(silent);
         m_builder = new AbstractMetaBuilder;
         TypeDatabase* td = TypeDatabase::instance(true);
         td->setApiVersion(apiVersion);
+        td->setDropTypeEntries(dropTypeEntries);
         QBuffer buffer;
         // parse typesystem
         buffer.setData(xmlCode);
