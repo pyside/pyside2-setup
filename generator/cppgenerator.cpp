@@ -1489,6 +1489,8 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                     }
                 } else {
                     strArg = argType->fullName();
+                    if (strArg == "PyUnicode")
+                        strArg = "unicode";
                 }
                 if (!arg->defaultValueExpression().isEmpty()) {
                     strArg += " = ";
