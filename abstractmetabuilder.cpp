@@ -946,7 +946,6 @@ AbstractMetaEnum* AbstractMetaBuilder::traverseEnum(EnumModelItem enumItem, Abst
     }
 
     if (!typeEntry || !typeEntry->isEnum()) {
-        QString context = m_currentClass ? m_currentClass->name() : QLatin1String("");
         ReportHandler::warning(QString("enum '%1' does not have a type entry or is not an enum")
                                .arg(qualifiedName));
         m_rejectedEnums.insert(qualifiedName, NotInTypeSystem);
