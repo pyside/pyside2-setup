@@ -751,7 +751,7 @@ bool AbstractMetaFunction::hasSignatureModifications() const
 
 bool AbstractMetaFunction::isConversionOperator(QString funcName)
 {
-    QRegExp opRegEx("^operator(?:\\s+(?:const|volatile))?\\s+(\\w+\\s*)&?$");
+    static QRegExp opRegEx("^operator(?:\\s+(?:const|volatile))?\\s+(\\w+\\s*)&?$");
     return opRegEx.indexIn(funcName) > -1;
 }
 
@@ -760,7 +760,7 @@ bool AbstractMetaFunction::isOperatorOverload(QString funcName)
     if (isConversionOperator(funcName))
         return true;
 
-    QRegExp opRegEx("^operator([+\\-\\*/%=&\\|\\^\\<>!][=]?"
+    static QRegExp opRegEx("^operator([+\\-\\*/%=&\\|\\^\\<>!][=]?"
                     "|\\+\\+|\\-\\-|&&|\\|\\||<<[=]?|>>[=]?|~"
                     "|\\[\\]|\\s+delete\\[?\\]?"
                     "|\\(\\)"
