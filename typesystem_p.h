@@ -149,7 +149,8 @@ private:
 
     TypeDatabase* m_database;
     StackElement* m_current;
-    StackElement* m_currentOptional;
+    StackElement* m_currentDroppedEntry;
+    int m_currentDroppedEntryDepth;
     QString m_defaultPackage;
     QString m_defaultSuperclass;
     QString m_error;

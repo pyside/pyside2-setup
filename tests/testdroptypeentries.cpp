@@ -104,6 +104,34 @@ void TestDropTypeEntries::testDontDropEntries()
     QVERIFY(td->findType("funcB"));
 }
 
+static const char* cppCode2 ="\
+    struct ValueA {\
+        void func();\
+    };\
+";
+
+static const char* xmlCode2 = "\
+<typesystem package='Foo'>\
+    <value-type name='ValueA'>\
+        <modify-function signature='func()'>\
+            <remove class='all' />\
+        </modify-function>\
+    </value-type>\
+</typesystem>";
+
+void TestDropTypeEntries::testDropEntryWithChildTags()
+{
+    QStringList droppedEntries("Foo.ValueA");
+    TestUtil t(cppCode2, xmlCode2, false, 0, droppedEntries);
+    QVERIFY(!t.builder()->classes().findClass("ValueA"));
+}
+
+void TestDropTypeEntries::testDontDropEntryWithChildTags()
+{
+    TestUtil t(cppCode2, xmlCode2, false);
+    QVERIFY(t.builder()->classes().findClass("ValueA"));
+}
+
 QTEST_APPLESS_MAIN(TestDropTypeEntries)
 
 #include "testdroptypeentries.moc"

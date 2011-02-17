@@ -38,7 +38,8 @@ Handler::Handler(TypeDatabase* database, bool generate)
 {
     m_currentEnum = 0;
     m_current = 0;
-    m_currentOptional = 0;
+    m_currentDroppedEntry = 0;
+    m_currentDroppedEntryDepth = 0;
 
     tagNames["rejection"] = StackElement::Rejection;
     tagNames["primitive-type"] = StackElement::PrimitiveTypeEntry;
@@ -124,10 +125,15 @@ void Handler::fetchAttributeValues(const QString &name, const QXmlAttributes &at
 
 bool Handler::endElement(const QString &, const QString &localName, const QString &)
 {
-    if (m_currentOptional) {
-        m_current = m_currentOptional->parent;
-        delete m_currentOptional;
-        m_currentOptional = 0;
+    if (m_currentDroppedEntry) {
+        if (m_currentDroppedEntryDepth == 1) {
+            m_current = m_currentDroppedEntry->parent;
+            delete m_currentDroppedEntry;
+            m_currentDroppedEntry = 0;
+            m_currentDroppedEntryDepth = 0;
+        } else {
+            ++m_currentDroppedEntryDepth;
+        }
         return true;
     }
 
@@ -216,7 +222,7 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
 
 bool Handler::characters(const QString &ch)
 {
-    if (m_currentOptional)
+    if (m_currentDroppedEntry)
         return true;
 
     if (m_current->type == StackElement::Template) {
@@ -383,8 +389,10 @@ bool Handler::startElement(const QString &, const QString &n,
         return false;
     }
 
-    if (m_currentOptional)
+    if (m_currentDroppedEntry) {
+        ++m_currentDroppedEntryDepth;
         return true;
+    }
 
     StackElement* element = new StackElement(m_current);
     element->type = tagNames[tagName];
@@ -461,8 +469,9 @@ bool Handler::startElement(const QString &, const QString &n,
             QString identifier = getNamePrefix(element) + '.';
             identifier += (element->type == StackElement::FunctionTypeEntry ? attributes["signature"] : name);
             if (m_database->shouldDropTypeEntry(identifier)) {
-                m_currentOptional = element;
-                ReportHandler::debugSparse(QString("Optional type system entry '%1' was dropped from generation.").arg(identifier));
+                m_currentDroppedEntry = element;
+                m_currentDroppedEntryDepth = 1;
+                ReportHandler::debugSparse(QString("Type system entry '%1' was intentionally dropped from generation.").arg(identifier));
                 return true;
             }
         }

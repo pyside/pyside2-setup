@@ -32,6 +32,8 @@ class TestDropTypeEntries : public QObject
     private slots:
         void testDropEntries();
         void testDontDropEntries();
+        void testDropEntryWithChildTags();
+        void testDontDropEntryWithChildTags();
 };
 
 #endif
