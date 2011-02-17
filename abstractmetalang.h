@@ -594,6 +594,7 @@ private:
     AbstractMetaTypeList m_instantiations;
     QString m_package;
     mutable QString m_name;
+    mutable QString m_cachedCppSignature;
     QString m_originalTypeDescription;
 
     int m_arrayElementCount;
@@ -1163,6 +1164,7 @@ private:
     QString m_name;
     QString m_originalName;
     mutable QString m_cachedMinimalSignature;
+    mutable QString m_cachedSignature;
     mutable QString m_cachedModifiedName;
 
     FunctionTypeEntry* m_typeEntry;

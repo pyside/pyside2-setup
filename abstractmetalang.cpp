@@ -84,32 +84,32 @@ AbstractMetaType *AbstractMetaType::copy() const
 
 QString AbstractMetaType::cppSignature() const
 {
-    QString s;
+    if (m_cachedCppSignature.isEmpty()) {
+        if (isConstant())
+            m_cachedCppSignature += "const ";
 
-    if (isConstant())
-        s += "const ";
+        m_cachedCppSignature += typeEntry()->qualifiedCppName();
 
-    s += typeEntry()->qualifiedCppName();
-
-    if (hasInstantiationInCpp()) {
-        AbstractMetaTypeList types = instantiations();
-        s += "<";
-        for (int i = 0; i < types.count(); ++i) {
-            if (i > 0)
-                s += ", ";
-            s += types[i]->cppSignature();
+        if (hasInstantiationInCpp()) {
+            AbstractMetaTypeList types = instantiations();
+            m_cachedCppSignature += "<";
+            for (int i = 0; i < types.count(); ++i) {
+                if (i > 0)
+                    m_cachedCppSignature += ", ";
+                m_cachedCppSignature += types[i]->cppSignature();
+            }
+            m_cachedCppSignature += " >";
         }
-        s += " >";
-    }
 
-    if (actualIndirections()) {
-        s += ' ';
-        if (indirections())
-            s += QString(indirections(), '*');
-        if (isReference())
-            s += '&';
+        if (actualIndirections()) {
+            m_cachedCppSignature += ' ';
+            if (indirections())
+                m_cachedCppSignature += QString(indirections(), '*');
+            if (isReference())
+                m_cachedCppSignature += '&';
+        }
     }
-    return s;
+    return m_cachedCppSignature;
 }
 
 
@@ -326,26 +326,27 @@ QStringList AbstractMetaFunction::introspectionCompatibleSignatures(const QStrin
 
 QString AbstractMetaFunction::signature() const
 {
-    QString s(m_originalName);
+    if (m_cachedSignature.isEmpty()) {
+        m_cachedSignature = m_originalName;
 
-    s += "(";
+        m_cachedSignature += '(';
 
-    for (int i = 0; i < m_arguments.count(); ++i) {
-        if (i > 0)
-            s += ", ";
-        AbstractMetaArgument *a = m_arguments.at(i);
-        s += a->type()->cppSignature();
+        for (int i = 0; i < m_arguments.count(); ++i) {
+            if (i > 0)
+                m_cachedSignature += ", ";
+            AbstractMetaArgument *a = m_arguments.at(i);
+            m_cachedSignature += a->type()->cppSignature();
 
-        // We need to have the argument names in the qdoc files
-        s += " ";
-        s += a->name();
+            // We need to have the argument names in the qdoc files
+            m_cachedSignature += ' ';
+            m_cachedSignature += a->name();
+        }
+        m_cachedSignature += ")";
+
+        if (isConstant())
+            m_cachedSignature += " const";
     }
-    s += ")";
-
-    if (isConstant())
-        s += " const";
-
-    return s;
+    return m_cachedSignature;
 }
 
 int AbstractMetaFunction::actualMinimumArgumentCount() const
