@@ -242,16 +242,22 @@ QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
         }
     }
 
+    static QRegExp emptyLine("\\s*[\\r]?[\\n]?\\s*");
+
     foreach(QString line, lst) {
-        while (line.end()->isSpace())
-            line.chop(1);
-        int limit = 0;
-        for(int i = 0; i < spacesToRemove; ++i) {
-            if (!line[i].isSpace())
-                break;
-            limit++;
+        if (!line.isEmpty() && !emptyLine.exactMatch(line)) {
+            while (line.end()->isSpace())
+                line.chop(1);
+            int limit = 0;
+            for(int i = 0; i < spacesToRemove; ++i) {
+                if (!line[i].isSpace())
+                    break;
+                limit++;
+            }
+
+            s << indentor << line.remove(0, limit);
         }
-        s << indentor << line.remove(0, limit) << endl;
+        s << endl;
     }
     return s;
 }
