@@ -32,6 +32,9 @@ class TestTemplates : public QObject
 private slots:
     void testTemplateOnContainers();
     void testTemplateWithNamespace();
+    void testTemplateValueAsArgument();
+    void testTemplatePointerAsArgument();
+    void testTemplateReferenceAsArgument();
     void testInheritanceFromContainterTemplate();
     void testTemplateInheritanceMixedWithForwardDeclaration();
     void testTemplateInheritanceMixedWithNamespaceAndForwardDeclaration();

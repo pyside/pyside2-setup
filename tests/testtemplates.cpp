@@ -110,6 +110,78 @@ void TestTemplates::testTemplateOnContainers()
     QCOMPARE(instance2->typeEntry()->qualifiedCppName(), QString("Namespace::E1"));
 }
 
+void TestTemplates::testTemplateValueAsArgument()
+{
+    const char cppCode[] = "\
+    template<typename T> struct List() {};\
+    void func(List<int> arg) {}\
+    ";
+
+    const char xmlCode[] = "\
+    <typesystem package='Package'>\
+        <primitive-type name='int' />\
+        <container-type name='List' type='list' />\
+        <function signature='func(List&lt;int&gt;)' />\
+    </typesystem>\
+    ";
+
+    TestUtil t(cppCode, xmlCode, false);
+    AbstractMetaFunctionList globalFuncs = t.builder()->globalFunctions();
+    QCOMPARE(globalFuncs.count(), 1);
+
+    AbstractMetaFunction* func = globalFuncs.first();
+    QCOMPARE(func->minimalSignature(), QString("func(List<int>)"));
+    QCOMPARE(func->arguments().first()->type()->cppSignature(), QString("List<int >"));
+}
+
+void TestTemplates::testTemplatePointerAsArgument()
+{
+    const char cppCode[] = "\
+    template<typename T> struct List() {};\
+    void func(List<int>* arg) {}\
+    ";
+
+    const char xmlCode[] = "\
+    <typesystem package='Package'>\
+        <primitive-type name='int' />\
+        <container-type name='List' type='list' />\
+        <function signature='func(List&lt;int&gt;*)' />\
+    </typesystem>\
+    ";
+
+    TestUtil t(cppCode, xmlCode, false);
+    AbstractMetaFunctionList globalFuncs = t.builder()->globalFunctions();
+    QCOMPARE(globalFuncs.count(), 1);
+
+    AbstractMetaFunction* func = globalFuncs.first();
+    QCOMPARE(func->minimalSignature(), QString("func(List<int>*)"));
+    QCOMPARE(func->arguments().first()->type()->cppSignature(), QString("List<int > *"));
+}
+
+void TestTemplates::testTemplateReferenceAsArgument()
+{
+    const char cppCode[] = "\
+    template<typename T> struct List() {};\
+    void func(List<int>& arg) {}\
+    ";
+
+    const char xmlCode[] = "\
+    <typesystem package='Package'>\
+        <primitive-type name='int' />\
+        <container-type name='List' type='list' />\
+        <function signature='func(List&lt;int&gt;&amp;)' />\
+    </typesystem>\
+    ";
+
+    TestUtil t(cppCode, xmlCode, false);
+    AbstractMetaFunctionList globalFuncs = t.builder()->globalFunctions();
+    QCOMPARE(globalFuncs.count(), 1);
+
+    AbstractMetaFunction* func = globalFuncs.first();
+    QCOMPARE(func->minimalSignature(), QString("func(List<int>&)"));
+    QCOMPARE(func->arguments().first()->type()->cppSignature(), QString("List<int > &"));
+}
+
 void TestTemplates::testInheritanceFromContainterTemplate()
 {
     const char cppCode[] = "\
