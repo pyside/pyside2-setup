@@ -2082,7 +2082,6 @@ AbstractMetaType* AbstractMetaBuilder::translateType(const TypeInfo& _typei, boo
     metaType->setReference(typeInfo.is_reference);
     metaType->setConstant(typeInfo.is_constant);
     metaType->setOriginalTypeDescription(_typei.toString());
-    decideUsagePattern(metaType);
 
     foreach (const TypeParser::Info &ta, typeInfo.template_instantiations) {
         TypeInfo info;
@@ -2101,6 +2100,12 @@ AbstractMetaType* AbstractMetaBuilder::translateType(const TypeInfo& _typei, boo
 
         metaType->addInstantiation(targType, true);
     }
+
+    // The usage pattern *must* be decided *after* the possible template
+    // instantiations have been determined, or else the absence of
+    // such instantiations will break the caching scheme of
+    // AbstractMetaType::cppSignature().
+    decideUsagePattern(metaType);
 
     return metaType;
 }
