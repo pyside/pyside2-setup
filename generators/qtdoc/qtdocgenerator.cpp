@@ -1412,12 +1412,20 @@ void QtDocGenerator::finishGeneration()
         s << "Detailed Description" << endl;
         s << "--------------------" << endl << endl;
 
-        Documentation moduleDoc = m_docParser->retrieveModuleDocumentation(it.key());
-        if (moduleDoc.format() == Documentation::Native) {
-            QtXmlToSphinx x(this, moduleDoc.value(), QString(it.key()).remove(0, it.key().lastIndexOf('.') + 1));
-            s << x;
+        // module doc is always wrong and C++istic, so go straight to the extra directory!
+        QFile moduleDoc(m_extraSectionDir + '/' + it.key() + ".rst");
+        if (moduleDoc.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            s << moduleDoc.readAll();
+            moduleDoc.close();
         } else {
-            s << moduleDoc.value();
+            // try the normal way
+            Documentation moduleDoc = m_docParser->retrieveModuleDocumentation(it.key());
+            if (moduleDoc.format() == Documentation::Native) {
+                QtXmlToSphinx x(this, moduleDoc.value(), QString(it.key()).remove(0, it.key().lastIndexOf('.') + 1));
+                s << x;
+            } else {
+                s << moduleDoc.value();
+            }
         }
     }
 }
