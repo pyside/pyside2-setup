@@ -34,7 +34,7 @@ Project file tags
 
 The generator project file tags are in direct relation to the
 :ref:`command line arguments <command-line>`. All of the current command line
-options provided by |project| were already seen on the :ref:`<project-file-structure>`,
+options provided by |project| were already seen on the :ref:`project-file-structure`,
 for new command line options provided by additional generator modules (e.g.: qtdoc,
 Shiboken) could also be used in the generator project file following simple conversion rules.
 
