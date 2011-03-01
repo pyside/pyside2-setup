@@ -141,7 +141,8 @@ private:
     QString m_lastTagName;
     QString m_opened_anchor;
 
-    QString readFromLocation(QString& location, QString& identifier);
+    QString readFromLocations(const QStringList& locations, const QString& path, const QString& identifier);
+    QString readFromLocation(const QString& location, const QString& identifier, bool* ok = 0);
     void pushOutputBuffer();
     QString popOutputBuffer();
     void writeTable(Table& table);
@@ -177,9 +178,9 @@ public:
 
     QMap<QString, QString> options() const;
 
-    QString codeSnippetDir() const
+    QStringList codeSnippetDirs() const
     {
-        return m_codeSnippetDir;
+        return m_codeSnippetDirs;
     }
 
 protected:
@@ -212,7 +213,7 @@ private:
 
     QString m_docDataDir;
     QString m_libSourceDir;
-    QString m_codeSnippetDir;
+    QStringList m_codeSnippetDirs;
     QString m_extraSectionDir;
     QStringList m_functionList;
     QMap<QString, QStringList> m_packages;

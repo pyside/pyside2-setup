@@ -213,12 +213,31 @@ QString QtXmlToSphinx::transform(const QString& doc)
     return retval;
 }
 
-QString QtXmlToSphinx::readFromLocation(QString& location, QString& identifier)
+QString QtXmlToSphinx::readFromLocations(const QStringList& locations, const QString& path, const QString& identifier)
+{
+    QString result;
+    bool ok;
+    foreach (QString location, locations) {
+        location.append('/');
+        location.append(path);
+        result = readFromLocation(location, identifier, &ok);
+        if (ok)
+            break;
+    }
+    if (!ok)
+        ReportHandler::warning("Couldn't read code snippet file: {"+ locations.join("|") + '}' + path);
+    return result;
+}
+
+QString QtXmlToSphinx::readFromLocation(const QString& location, const QString& identifier, bool* ok)
 {
     QFile inputFile;
     inputFile.setFileName(location);
     if (!inputFile.open(QIODevice::ReadOnly)) {
-        ReportHandler::warning("Couldn't read code snippet file: "+inputFile.fileName());
+        if (!ok)
+            ReportHandler::warning("Couldn't read code snippet file: "+inputFile.fileName());
+        else
+            *ok = false;
         return QString();
     }
 
@@ -246,6 +265,8 @@ QString QtXmlToSphinx::readFromLocation(QString& location, QString& identifier)
     if (code.isEmpty())
         ReportHandler::warning("Code snippet file found ("+location+"), but snippet "+ identifier +" not found.");
 
+    if (ok)
+        *ok = true;
     return code;
 }
 
@@ -345,8 +366,7 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
         }
         QString location = reader.attributes().value("location").toString();
         QString identifier = reader.attributes().value("identifier").toString();
-        location.prepend(m_generator->codeSnippetDir() + '/');
-        QString code = readFromLocation(location, identifier);
+        QString code = readFromLocations(m_generator->codeSnippetDirs(), location, identifier);
         if (!consecutiveSnippet)
             m_output << INDENT << "::\n\n";
 
@@ -1406,7 +1426,12 @@ bool QtDocGenerator::doSetup(const QMap<QString, QString>& args)
 {
     m_libSourceDir = args.value("library-source-dir");
     m_docDataDir = args.value("documentation-data-dir");
-    m_codeSnippetDir = args.value("documentation-code-snippets-dir", m_libSourceDir);
+#ifdef __WIN32__
+#   define PATH_SEP ";"
+#else
+#   define PATH_SEP ":"
+#endif
+    m_codeSnippetDirs = args.value("documentation-code-snippets-dir", m_libSourceDir).split(PATH_SEP);
     m_extraSectionDir = args.value("documentation-extra-sections-dir");
 
     if (m_libSourceDir.isEmpty() || m_docDataDir.isEmpty()) {
