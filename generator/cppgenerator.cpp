@@ -2458,7 +2458,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         else
             deallocClassName = cppClassName;
         tp_dealloc = "&SbkDeallocWrapper";
-        tp_init = onlyPrivCtor ? "0" : cpythonFunctionName(ctors.first());
+        tp_init = onlyPrivCtor || ctors.isEmpty() ? "0" : cpythonFunctionName(ctors.first());
     }
 
     QString tp_getattro('0');
