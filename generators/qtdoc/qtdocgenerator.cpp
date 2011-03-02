@@ -101,6 +101,7 @@ QtXmlToSphinx::QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, cons
     m_handlerMap.insert("underline", &QtXmlToSphinx::handleItalicTag);
     m_handlerMap.insert("superscript", &QtXmlToSphinx::handleSuperScriptTag);
     m_handlerMap.insert("code", &QtXmlToSphinx::handleCodeTag);
+    m_handlerMap.insert("badcode", &QtXmlToSphinx::handleCodeTag);
     m_handlerMap.insert("legalese", &QtXmlToSphinx::handleCodeTag);
     m_handlerMap.insert("section", &QtXmlToSphinx::handleAnchorTag);
     m_handlerMap.insert("quotefile", &QtXmlToSphinx::handleQuoteFileTag);
