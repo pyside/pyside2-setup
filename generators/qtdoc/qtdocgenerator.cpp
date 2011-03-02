@@ -1388,7 +1388,7 @@ void QtDocGenerator::finishGeneration()
         // Search for extra-sections
         if (!m_extraSectionDir.isEmpty()) {
             QDir extraSectionDir(m_extraSectionDir);
-            QStringList fileList = extraSectionDir.entryList(QStringList() << (it.key() + "*.rst"), QDir::Files);
+            QStringList fileList = extraSectionDir.entryList(QStringList() << (it.key() + "?*.rst"), QDir::Files);
             QStringList::iterator it2 = fileList.begin();
             for (; it2 != fileList.end(); ++it2) {
                 QString origFileName(*it2);
