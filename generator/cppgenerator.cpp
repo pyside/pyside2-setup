@@ -2160,7 +2160,8 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             s << methodCall << ';' << endl;
             s << INDENT << "PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS" << endl;
 
-            if (!isCtor && !func->isInplaceOperator() && func->type()) {
+            if (!isCtor && !func->isInplaceOperator() && func->type()
+                && !injectedCodeHasReturnValueAttribution(func, TypeSystem::TargetLangCode)) {
                 s << INDENT << PYTHON_RETURN_VAR " = ";
                 writeToPythonConversion(s, func->type(), func->ownerClass(), CPP_RETURN_VAR);
                 s << ';' << endl;
