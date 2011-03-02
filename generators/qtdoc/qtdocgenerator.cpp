@@ -263,7 +263,7 @@ QString QtXmlToSphinx::readFromLocation(const QString& location, const QString& 
         }
     }
 
-    if (code.isEmpty())
+    if (!identifierIsEmpty && !getCode)
         ReportHandler::warning("Code snippet file found ("+location+"), but snippet "+ identifier +" not found.");
 
     if (ok)
