@@ -39,6 +39,7 @@ private slots:
     void testColSpan();
     void testComplexTable();
     void testRowSpan2();
+    void testBrokenTable();
 private:
     QtDocGenerator* m_generator;
 
