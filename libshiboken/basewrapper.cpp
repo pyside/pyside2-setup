@@ -212,6 +212,17 @@ PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* k
     Shiboken::ObjectType::initPrivateData(newType);
     SbkObjectTypePrivate* d = newType->d;
 
+    // Check if all objects are python new style
+    PyObject* pyBases = ((PyTypeObject*)newType)->tp_bases;
+    for(int i=0, i_max=PyTuple_GET_SIZE(pyBases); i < i_max; i++) {
+        PyObject* baseType = PyTuple_GET_ITEM(pyBases, i);
+        if (PyClass_Check(baseType)) {
+            PyErr_Format(PyExc_TypeError, "Invalid base class used in type %s. PySide only support multiple inheritance from python new style class.", metatype->tp_name);
+            return 0;
+        }
+    }
+
+
     std::list<SbkObjectType*> bases = Shiboken::getCppBaseClasses(reinterpret_cast<PyTypeObject*>(newType));
     if (bases.size() == 1) {
         SbkObjectTypePrivate* parentType = bases.front()->d;
