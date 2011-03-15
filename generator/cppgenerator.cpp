@@ -3499,8 +3499,18 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream& s, const Abstrac
     const QString className = metaClass->qualifiedCppName();
     if (!metaClass->isNamespace()) {
         // Qt metatypes are registered only on their first use, so we do this now.
-        const char* star = metaClass->typeEntry()->isObject() ? "*" : "";
-        s << INDENT << "PySide::initQtMetaType< ::" << className << star << " >();" << endl;
+        const char* star = "*";
+        if (!metaClass->typeEntry()->isObject()) {
+            // check if there's a empty ctor
+            foreach (AbstractMetaFunction* func, metaClass->functions()) {
+                if (func->isConstructor() && !func->arguments().count()) {
+                    star = "";
+                    break;
+                }
+            }
+        }
+
+        s << INDENT << "qRegisterMetaType< ::" << className << star << " >(\"" << className << star << "\");" << endl;
     }
     foreach (AbstractMetaEnum* metaEnum, metaClass->enums()) {
         if (!metaEnum->isPrivate() && !metaEnum->isAnonymous()) {
