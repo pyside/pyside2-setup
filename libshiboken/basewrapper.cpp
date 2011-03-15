@@ -264,19 +264,21 @@ PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* k
 PyObject* SbkObjectTpNew(PyTypeObject* subtype, PyObject*, PyObject*)
 {
     SbkObject* self = reinterpret_cast<SbkObject*>(subtype->tp_alloc(subtype, 0));
-    self->d = new SbkObjectPrivate;
+    SbkObjectPrivate* d = new SbkObjectPrivate;
 
     SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(subtype);
     int numBases = ((sbkType->d && sbkType->d->is_multicpp) ? Shiboken::getNumberOfCppBaseClasses(subtype) : 1);
-    self->d->cptr = new void*[numBases];
-    std::memset(self->d->cptr, 0, sizeof(void*)*numBases);
-    self->d->hasOwnership = 1;
-    self->d->containsCppWrapper = 0;
-    self->d->validCppObject = 0;
-    self->d->parentInfo = 0;
+    d->cptr = new void*[numBases];
+    std::memset(d->cptr, 0, sizeof(void*)*numBases);
+    d->hasOwnership = 1;
+    d->containsCppWrapper = 0;
+    d->validCppObject = 0;
+    d->parentInfo = 0;
+    d->referredObjects = 0;
+    d->cppObjectCreated = 0;
     self->ob_dict = 0;
     self->weakreflist = 0;
-    self->d->referredObjects = 0;
+    self->d = d;
     return reinterpret_cast<PyObject*>(self);
 }
 
@@ -783,26 +785,51 @@ bool setCppPointer(SbkObject* sbkObj, PyTypeObject* desiredType, void* cptr)
     else
         sbkObj->d->cptr[idx] = cptr;
 
+    sbkObj->d->cppObjectCreated = true;
     return !alreadyInitialized;
 }
 
 bool isValid(PyObject* pyObj)
 {
     if (!pyObj || pyObj == Py_None
-        || pyObj->ob_type->ob_type != &SbkObjectType_Type
-        || ((SbkObject*)pyObj)->d->validCppObject) {
+        || pyObj->ob_type->ob_type != &SbkObjectType_Type) {
         return true;
     }
-    PyErr_Format(PyExc_RuntimeError, "Internal C++ object (%s) already deleted.", pyObj->ob_type->tp_name);
-    return false;
+
+    SbkObjectPrivate* priv = reinterpret_cast<SbkObject*>(pyObj)->d;
+
+    if (!priv->cppObjectCreated && isUserType(pyObj)) {
+        PyErr_Format(PyExc_RuntimeError, "'__init__' method of object's base class (%s) not called.", pyObj->ob_type->tp_name);
+        return false;
+    }
+
+    if (!priv->validCppObject) {
+        PyErr_Format(PyExc_RuntimeError, "Internal C++ object (%s) already deleted.", pyObj->ob_type->tp_name);
+        return false;
+    }
+
+    return true;
 }
 
 bool isValid(SbkObject* pyObj, bool throwPyError)
 {
-    bool result = !pyObj || pyObj->d->validCppObject;
-    if (!result && throwPyError)
-        PyErr_Format(PyExc_RuntimeError, "Internal C++ object (%s) already deleted.", pyObj->ob_type->tp_name);
-    return result;
+    if (!pyObj)
+        return false;
+
+    SbkObjectPrivate* priv = pyObj->d;
+    if (!priv->cppObjectCreated && isUserType(reinterpret_cast<PyObject*>(pyObj))) {
+        if (throwPyError)
+            PyErr_Format(PyExc_RuntimeError, "Base constructor of the object (%s) not called.", pyObj->ob_type->tp_name);
+        return false;
+    }
+
+    if (!priv->validCppObject) {
+        if (throwPyError)
+            PyErr_Format(PyExc_RuntimeError, "Internal C++ object (%s) already deleted.", pyObj->ob_type->tp_name);
+        return false;
+    }
+
+    return true;
 }
 
 PyObject* newObject(SbkObjectType* instanceType,

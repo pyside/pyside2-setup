@@ -74,6 +74,8 @@ struct SbkObjectPrivate
     unsigned int containsCppWrapper : 1;
     /// Marked as false when the object is lost to C++ and the binding can not know if it was deleted or not.
     unsigned int validCppObject : 1;
+    /// Marked when the object constructor was called
+    unsigned int cppObjectCreated : 1;
     /// Information about the object parents and children, can be null.
     Shiboken::ParentInfo* parentInfo;
     /// Manage reference counting of objects that are referred but not owned.
