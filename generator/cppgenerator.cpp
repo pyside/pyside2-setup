@@ -1475,6 +1475,9 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                     strArg = argType->fullName();
                     if (strArg == "PyUnicode")
                         strArg = "unicode";
+                    else if (strArg == "uchar")
+                        strArg = "buffer"; // This depends on an inject code to be true, but if it's not true
+                                           // the function wont work at all, so it must be true.
                 }
                 if (!arg->defaultValueExpression().isEmpty()) {
                     strArg += " = ";
