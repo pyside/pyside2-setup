@@ -3499,6 +3499,16 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
 
 void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream& s, const AbstractMetaClass* metaClass) const
 {
+    // Gets all class name variants used on different possible scopes
+    QStringList nameVariants;
+    nameVariants << metaClass->name();
+    const AbstractMetaClass* enclosingClass = metaClass->enclosingClass();
+    while (enclosingClass) {
+        if (enclosingClass->typeEntry()->generateCode())
+            nameVariants << (enclosingClass->name() + "::" + nameVariants.last());
+        enclosingClass = enclosingClass->enclosingClass();
+    }
+
     const QString className = metaClass->qualifiedCppName();
     if (!metaClass->isNamespace()) {
         // Qt metatypes are registered only on their first use, so we do this now.
@@ -3513,12 +3523,15 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream& s, const Abstrac
             }
         }
 
-        s << INDENT << "qRegisterMetaType< ::" << className << star << " >(\"" << className << star << "\");" << endl;
+        foreach (QString name, nameVariants)
+            s << INDENT << "qRegisterMetaType< ::" << className << star << " >(\"" << name << star << "\");" << endl;
     }
     foreach (AbstractMetaEnum* metaEnum, metaClass->enums()) {
         if (!metaEnum->isPrivate() && !metaEnum->isAnonymous()) {
             QString n = className + "::" + metaEnum->name();
-            s << INDENT << "qRegisterMetaType< ::" << n << " >(\"" << n << "\");" << endl;
+            foreach (QString name, nameVariants)
+                s << INDENT << "qRegisterMetaType< ::" << n << " >(\"" << name << "::" << metaEnum->name() << "\");" << endl;
+
             if (metaEnum->typeEntry()->flags()) {
                 n = metaEnum->typeEntry()->flags()->originalName();
                 s << INDENT << "qRegisterMetaType< ::" << n << " >(\"" << n << "\");" << endl;
