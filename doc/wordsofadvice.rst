@@ -69,3 +69,41 @@ Although duck punching is an interesting Python feature, it don't mix well with 
 C++ virtual methods, specially when you can't tell the origin of every single wrapped
 C++ object. In summary: don't do it!
 
+
+.. _pyside-old-style-class:
+
+Python old style classes and PySide
+===================================
+
+Because of some architectural decisions and deprecated Python types. Since PySide 1.1 old style classes are not supported with multiple inheritance.
+
+Below you can check the examples:
+
+Example with old style class:
+
+    .. code-block:: python
+
+        from PySide import QtCore
+
+        class MyOldStyleObject:
+            pass
+
+        class MyObject(QtCore, MyOldStyleObject):
+            pass
+
+
+this example will raise a 'TypeError' due to the limitation on PySide, to fix this you will need use the new style class:
+
+
+    .. code-block:: python
+
+        from PySide import QtCore
+
+        class MyOldStyleObject(object):
+            pass
+
+        class MyObject(QtCore, MyOldStyleObject):
+            pass
+
+
+All classes used for multiple inheritance with other PySide types need to have 'object' as base class.
