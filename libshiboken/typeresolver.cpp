@@ -25,6 +25,7 @@
 #include "sbkdbg.h"
 #include <cstdlib>
 #include <string>
+#include "basewrapper_p.h"
 
 using namespace Shiboken;
 
@@ -68,6 +69,23 @@ TypeResolver* TypeResolver::createTypeResolver(const char* typeName,
         tr->m_d->cppToPython = cppToPy;
         tr->m_d->pythonToCpp = pyToCpp;
         tr->m_d->pyType = pyType;
+
+        /*
+         * Note:
+         *
+         *     Value types are also registered as object types, but the generator *always* first register the value
+         *     type version in the TypeResolver and it *must* always do it! otherwise this code wont work.
+         *
+         *     All this to not enter in this if several times, running all characters in the typeName string, etc...
+         *     in other words... the nano seconds!!! somebody need to save them!
+         */
+        if (pyType && PyType_IsSubtype(pyType, reinterpret_cast<PyTypeObject*>(&SbkObject_Type))) {
+            SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(pyType);
+            if (!sbkType->d->type_behaviour) {
+                int len = strlen(typeName);
+                sbkType->d->type_behaviour = typeName[len -1] == '*' ? BEHAVIOUR_OBJECTTYPE : BEHAVIOUR_VALUETYPE;
+            }
+        }
     }
     return tr;
 }

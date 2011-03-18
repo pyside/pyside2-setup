@@ -82,6 +82,12 @@ struct SbkObjectPrivate
     Shiboken::RefCountMap* referredObjects;
 };
 
+/// The type behaviour was not defined yet
+#define BEHAVIOUR_UNDEFINED 0
+/// The type is a value type
+#define BEHAVIOUR_VALUETYPE 1
+/// The type is a object type
+#define BEHAVIOUR_OBJECTTYPE 2
 
 struct SbkObjectTypePrivate
 {
@@ -101,6 +107,8 @@ struct SbkObjectTypePrivate
     int is_multicpp:1;
     /// True if this type was definied by the user.
     int is_user_type:1;
+    /// Tells is the type is a value type or an object-type, see BEHAVIOUR_* constants.
+    int type_behaviour:2;
     /// C++ name
     char* original_name;
     /// Type user data

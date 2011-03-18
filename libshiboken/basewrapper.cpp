@@ -688,7 +688,8 @@ void getOwnership(PyObject* pyObj)
 void releaseOwnership(SbkObject* self)
 {
     // skip if the ownership have already moved to c++
-    if (!self->d->hasOwnership)
+    SbkObjectType* selfType = reinterpret_cast<SbkObjectType*>(self->ob_type);
+    if (!self->d->hasOwnership || selfType->d->type_behaviour == BEHAVIOUR_VALUETYPE)
         return;
 
     // remove object ownership
