@@ -112,8 +112,7 @@ TypeResolver::Type TypeResolver::getType(const char* name)
         return isObjTypeName ? ObjectType : ValueType;
     } else {
         // Type not found... let's copy the string.
-        std::string typeName;
-        typeName.reserve(len + 2);
+        std::string typeName(name);
         if (isObjTypeName)
             typeName.erase(len - 1, 1);
         else
