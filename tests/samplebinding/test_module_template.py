@@ -8,3 +8,5 @@ class MyObjectType(ObjectType):
 class MyOtherObjectType(OtherObjectType):
     value = 10
 
+
+obj = MyObjectType()

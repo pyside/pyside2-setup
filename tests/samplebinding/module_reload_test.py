@@ -10,34 +10,18 @@ dst = os.path.join(workdir, 'test_module.py')
 shutil.copyfile(src, dst)
 sys.path.append(workdir)
 
-def increment_module_value():
-    modfile = open(dst, 'a')
-    modfile.write('MyOtherObjectType.value += 1' + os.linesep)
-    modfile.flush()
-    modfile.close()
-    try:
-        os.remove(dst + 'c')
-    except:
-        os.remove(dst + 'o')
-
 class TestModuleReloading(unittest.TestCase):
 
     def testModuleReloading(self):
         '''Test module reloading with on-the-fly modifications.'''
 
         import test_module
-        self.assertEqual(test_module.MyOtherObjectType.value, 10)
 
-        increment_module_value()
-        reload(sys.modules['test_module'])
-        self.assertEqual(test_module.MyOtherObjectType.value, 11)
-
-        reload(sys.modules['test_module'])
-        self.assertEqual(test_module.MyOtherObjectType.value, 11)
-
-        increment_module_value()
-        reload(sys.modules['test_module'])
-        self.assertEqual(test_module.MyOtherObjectType.value, 12)
+	for i in range(3):
+            oldObject = test_module.obj
+            self.assertTrue(oldObject is test_module.obj)
+            reload(test_module)
+            self.assertFalse(oldObject is test_module.obj)
 
 if __name__ == "__main__":
     unittest.main()

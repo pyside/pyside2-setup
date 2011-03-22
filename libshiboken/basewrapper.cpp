@@ -314,11 +314,16 @@ void walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visi
 
 bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr)
 {
-    Shiboken::AutoDecRef module(PyImport_ImportModule(moduleName));
-    if (module.isNull())
-        return false;
+    PyObject* sysModules = PyImport_GetModuleDict();
+    PyObject* module = PyDict_GetItemString(sysModules, moduleName);
+    if (!module)
+        module = PyImport_ImportModule(moduleName);
+    else
+        Py_INCREF(module);
 
     Shiboken::AutoDecRef cppApi(PyObject_GetAttrString(module, "_Cpp_Api"));
+    Py_DECREF(module);
+
     if (cppApi.isNull())
         return false;
 

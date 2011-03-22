@@ -3418,6 +3418,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         s << INDENT << "Shiboken::ObjectType::setDestructorFunction(&" << cpythonTypeName(metaClass) << ", &Shiboken::callCppDestructor<" << dtorClassName << " >);" << endl;
     }
 
+    s << INDENT << "Py_INCREF((PyObject*)&" << pyTypeName << "); //Incref due the 'PyModule_AddObject' steals the reference." << endl; 
     s << INDENT << "if (PyType_Ready((PyTypeObject*)&" << pyTypeName << ") < 0)" << endl;
     s << INDENT << INDENT << "return;" << endl << endl;
 
