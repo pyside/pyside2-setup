@@ -635,8 +635,6 @@ static void _destroyParentInfo(SbkObject* obj, bool keepReference)
             removeParent(first, false, keepReference);
        }
        removeParent(obj, false);
-       delete pInfo;
-       obj->d->parentInfo = 0;
     }
 }
 
@@ -927,6 +925,12 @@ void removeParent(SbkObject* child, bool giveOwnershipBack, bool keepReference)
     // Transfer ownership back to Python
     child->d->hasOwnership = giveOwnershipBack;
 
+    if (pInfo->children.empty()) {
+        // Erase parentInfo data
+        delete pInfo;
+        child->d->parentInfo = 0;
+    }
+
     // Remove parent ref
     Py_CLEAR(child);
 }
@@ -1033,7 +1037,6 @@ void* getTypeUserData(SbkObject* wrapper)
 
 void keepReference(SbkObject* self, const char* key, PyObject* referredObject, bool append)
 {
-
     bool isNone = (!referredObject || (referredObject == Py_None));
 
     if (!self->d->referredObjects)
