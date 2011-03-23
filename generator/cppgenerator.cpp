@@ -2798,6 +2798,7 @@ void CppGenerator::writeGetterFunction(QTextStream& s, const AbstractMetaField* 
     if (useReference) {
         s << "Shiboken::createWrapper(" << cppField << ");" << endl;
         s << INDENT << "Shiboken::Object::releaseOwnership(val);" << endl;
+        s << INDENT << "Shiboken::Object::setParent(self, val);" << endl;
     } else {
         writeToPythonConversion(s,  metaField->type(), metaField->enclosingClass(), cppField);
         s << ';' << endl;
