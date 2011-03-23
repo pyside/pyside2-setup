@@ -2767,6 +2767,11 @@ void CppGenerator::writeGetterFunction(QTextStream& s, const AbstractMetaField* 
 {
     s << "static PyObject* " << cpythonGetterFunctionName(metaField) << "(PyObject* self, void*)" << endl;
     s << '{' << endl;
+    s << INDENT << "if (!Shiboken::Object::isValid(self))\n";
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "return 0;\n";
+    }
     s << INDENT << "PyObject* val = ";
 
     QString cppField;
@@ -2806,6 +2811,11 @@ void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* 
 {
     s << "static int " << cpythonSetterFunctionName(metaField) << "(PyObject* self, PyObject* value, void*)" << endl;
     s << '{' << endl;
+    s << INDENT << "if (!Shiboken::Object::isValid(self))\n";
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "return 0;\n";
+    }
 
     s << INDENT << "if (value == 0) {" << endl;
     {
