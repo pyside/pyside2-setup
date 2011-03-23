@@ -1118,8 +1118,48 @@
                 <define-ownership owner="c++"/>
             </modify-argument>
         </modify-function>
+
+        <template name="buffer_argument">
+            unsigned char* %out;
+            if (PyObject_CheckReadBuffer(%PYARG_1)) {
+                PyBufferProcs* bufferProcs = %PYARG_1->ob_type->tp_as_buffer;
+                void* ptr;
+                bufferProcs->bf_getreadbuffer(%PYARG_1, 0, &amp;ptr);
+                %out = (unsigned char*) ptr;
+            } else {
+                PyErr_SetString(PyExc_TypeError, "The object must support buffer protocol with just one segment.");
+            }
+        </template>
+
+        <modify-function signature="strBufferOverloads(unsigned char*,int)">
+            <modify-argument index="1">
+                <replace-type modified-type="PyObject"/>
+                <conversion-rule class="native">
+                    <insert-template name="buffer_argument" />
+                </conversion-rule>
+            </modify-argument>
+        </modify-function>
+        <!--
+             This added function simulates the solution given to PySide's QImage
+             constructor problem, as seen in PySide/bbba1cc4, and described in
+             bug #489 [http://bugs.pyside.org/show_bug.cgi?id=489].
+             This is not the best solution, just one that works. The proper way
+             to handle it would be to fix the overload decisor.
+        -->
+        <add-function signature="strBufferOverloads(Str&amp;,int)" return-type="Overload::FunctionEnum">
+            <inject-code class="target" position="beginning">
+                <insert-template name="buffer_argument">
+                    <replace from="%out" to="%1_out" />
+                </insert-template>
+                PyThreadState* _save = PyEval_SaveThread();
+                %RETURN_TYPE cppResult = %CPPSELF.%FUNCTION_NAME(%1_out, %2);
+                PyEval_RestoreThread(_save);
+                %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](cppResult);
+            </inject-code>
+        </add-function>
     </object-type>
     <object-type name="Overload2" />
+
     <object-type name="Collector" stream="yes"/>
 
     <value-type name="IntWrapper" />

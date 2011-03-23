@@ -23,6 +23,7 @@
 #ifndef OVERLOAD_H
 #define OVERLOAD_H
 
+#include "str.h"
 #include "size.h"
 #include "point.h"
 
@@ -60,6 +61,11 @@ public:
 
     void singleOverload(Point* x) {}
     Point* singleOverload() {return new Point();}
+
+    // Similar to QImage constructor
+    FunctionEnum strBufferOverloads(const Str& arg0, const char* arg1 = 0, bool arg2 = true) { return Function0; }
+    FunctionEnum strBufferOverloads(unsigned char* arg0, int arg1) { return Function1; }
+    FunctionEnum strBufferOverloads() { return Function2; }
 };
 
 class LIBSAMPLE_API Overload2 : public Overload
