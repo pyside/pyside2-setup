@@ -749,7 +749,7 @@ void invalidate(SbkObject* self)
 void makeValid(SbkObject* self)
 {
     // Skip if this object not is a valid object
-    if (!self || ((PyObject*)self == Py_None))
+    if (!self || ((PyObject*)self == Py_None) || self->d->validCppObject)
         return;
 
     // Mark object as invalid only if this is not a wrapper class
