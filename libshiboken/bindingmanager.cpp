@@ -216,7 +216,9 @@ SbkObject* BindingManager::retrieveWrapper(const void* cptr)
 PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
 {
     SbkObject* wrapper = retrieveWrapper(cptr);
-    if (!wrapper)
+    // The refcount can be 0 if the object is dieing and someone called
+    // a virtual method from the destructor
+    if (!wrapper || ((PyObject*)wrapper)->ob_refcnt == 0)
         return 0;
 
     if (wrapper->ob_dict) {
