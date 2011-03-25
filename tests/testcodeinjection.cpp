@@ -33,7 +33,7 @@ void TestCodeInjections::testReadFileUtf8()
     int argc = 0;
     char *argv[] = {NULL};
     QCoreApplication app(argc, argv);
-    QString filePath = QCoreApplication::applicationDirPath();
+    QString filePath = QDir::currentPath();
     QString xmlCode = "\
     <typesystem package=\"Foo\"> \
         <value-type name='A'> \

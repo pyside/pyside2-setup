@@ -50,7 +50,7 @@ void TestModifyDocumentation::testModifyDocumentation()
     QCOMPARE(docMods[0].code().trimmed(), QString("<para>Some changed contents here</para>"));
     QCOMPARE(docMods[0].signature(), QString(""));
     QtDocParser docParser;
-    docParser.setDocumentationDataDirectory(QCoreApplication::applicationDirPath());
+    docParser.setDocumentationDataDirectory(QDir::currentPath());
     docParser.fillDocumentation(classA);
 
     QVERIFY(!classA->documentation().value().trimmed().isEmpty());
