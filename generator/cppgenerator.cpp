@@ -1590,11 +1590,24 @@ void CppGenerator::writeNoneReturn(QTextStream& s, const AbstractMetaFunction* f
 void CppGenerator::writeOverloadedFunctionDecisor(QTextStream& s, const OverloadData& overloadData)
 {
     s << INDENT << "// Overloaded function decisor" << endl;
+    const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
     QList<const AbstractMetaFunction*> functionOverloads = overloadData.overloadsWithoutRepetition();
     for (int i = 0; i < functionOverloads.count(); i++)
         s << INDENT << "// " << i << ": " << functionOverloads.at(i)->minimalSignature() << endl;
     writeOverloadedFunctionDecisorEngine(s, &overloadData);
     s << endl;
+
+    // Ensure that the direct overload that called this reverse
+    // is called.
+    if (rfunc->isOperatorOverload()) {
+        s << INDENT << "if (isReverse && overloadId == -1) {" << endl;
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"reverse operator not implemented.\");" << endl;
+            s << INDENT << "return 0;" << endl;
+        }
+        s << INDENT << "}" << endl << endl;
+    }
 
     s << INDENT << "// Function signature not found." << endl;
     s << INDENT << "if (overloadId == -1) goto " << cpythonFunctionName(overloadData.referenceFunction()) << "_TypeError;" << endl;
