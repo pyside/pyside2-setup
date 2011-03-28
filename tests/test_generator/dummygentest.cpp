@@ -35,7 +35,7 @@ void DummyGenTest::initTestCase()
     int argc = 0;
     char* argv[] = {NULL};
     QCoreApplication app(argc, argv);
-    workDir = QCoreApplication::applicationDirPath();
+    workDir = QDir::currentPath();
 
     headerFilePath = workDir + "/test_global.h";
     typesystemFilePath = workDir + "/test_typesystem.xml";
