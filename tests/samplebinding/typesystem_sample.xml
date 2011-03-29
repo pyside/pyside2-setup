@@ -1297,6 +1297,26 @@
         </add-function>
     </object-type>
 
+    <value-type name="Filter" />
+    <value-type name="Data">
+        <add-function signature="operator&amp;(const Union&amp;)" return-type="Intersection">
+            <inject-code class="target">
+                Intersection inter = *%CPPSELF &amp; %1;
+                return %CONVERTTOPYTHON[Intersection](inter);
+            </inject-code>
+        </add-function>
+    </value-type>
+    <enum-type name="Data::Field" />
+    <value-type name="Union">
+        <add-function signature="operator&amp;(const Data&amp;)" return-type="Intersection">
+            <inject-code class="target">
+                Intersection inter = *%CPPSELF &amp; %1;
+                return %CONVERTTOPYTHON[Intersection](inter);
+            </inject-code>
+        </add-function>
+    </value-type>
+    <value-type name="Intersection" />
+
     <!-- type used in abstract method -->
     <object-type name="HideType" generate="no" />
 

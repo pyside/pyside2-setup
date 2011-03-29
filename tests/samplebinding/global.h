@@ -49,3 +49,4 @@
 #include "voidholder.h"
 #include "valueandvirtual.h"
 #include "expression.h"
+#include "filter.h"

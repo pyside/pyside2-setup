@@ -37,6 +37,7 @@ str.cpp
 strlist.cpp
 virtualmethods.cpp
 expression.cpp
+filter.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
