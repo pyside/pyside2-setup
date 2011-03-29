@@ -40,11 +40,36 @@ static Indentor INDENT;
 
 static bool shouldSkip(const AbstractMetaFunction* func)
 {
-    return func->isConstructor()
-           || func->isModifiedRemoved()
-           || func->declaringClass() != func->ownerClass()
-           || func->isCastOperator()
-           || func->name() == "operator=";
+    bool skipable =  func->isConstructor()
+                     || func->isModifiedRemoved()
+                     || func->declaringClass() != func->ownerClass()
+                     || func->isCastOperator()
+                     || func->name() == "operator=";
+
+    // Search a const clone
+    if (!skipable && !func->isConstant()) {
+        const AbstractMetaArgumentList funcArgs = func->arguments();
+        foreach (AbstractMetaFunction* f, func->ownerClass()->functions()) {
+            if (f != func
+                && f->isConstant()
+                && f->name() == func->name()
+                && f->arguments().count() == funcArgs.count()) {
+                // Compare each argument
+                bool cloneFound = true;
+
+                const AbstractMetaArgumentList fargs = f->arguments();
+                for (int i = 0, max = funcArgs.count(); i < max; ++i) {
+                    if (funcArgs.at(i)->type()->typeEntry() != fargs.at(i)->type()->typeEntry()) {
+                        cloneFound = false;
+                        break;
+                    }
+                }
+                if (cloneFound)
+                    return true;
+            }
+        }
+    }
+    return skipable;
 }
 
 static bool functionSort(const AbstractMetaFunction *func1, const AbstractMetaFunction *func2)
