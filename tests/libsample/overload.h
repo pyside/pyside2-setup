@@ -23,10 +23,13 @@
 #ifndef OVERLOAD_H
 #define OVERLOAD_H
 
+#include "echo.h"
 #include "str.h"
 #include "size.h"
 #include "point.h"
+#include "pointf.h"
 #include "polygon.h"
+#include "rect.h"
 
 #include "libsamplemacros.h"
 
@@ -37,7 +40,10 @@ public:
         Function0,
         Function1,
         Function2,
-        Function3
+        Function3,
+        Function4,
+        Function5,
+        Function6
     };
 
     enum ParamEnum {
@@ -74,6 +80,15 @@ public:
     FunctionEnum strBufferOverloads(const Str& arg0, const char* arg1 = 0, bool arg2 = true) { return Function0; }
     FunctionEnum strBufferOverloads(unsigned char* arg0, int arg1) { return Function1; }
     FunctionEnum strBufferOverloads() { return Function2; }
+
+    // Similar to QPainter::drawText(...)
+    FunctionEnum drawText(const Point& a0, const Str& a1) { return Function0; }
+    FunctionEnum drawText(const PointF& a0, const Str& a1) { return Function1; }
+    FunctionEnum drawText(const Rect& a0, int a1, const Str& a2) { return Function2; }
+    FunctionEnum drawText(const RectF& a0, int a1, const Str& a2) { return Function3; }
+    FunctionEnum drawText(const RectF& a0, const Str& a1, const Echo& a2 = Echo()) { return Function4; }
+    FunctionEnum drawText(int a0, int a1, const Str& a2) { return Function5; }
+    FunctionEnum drawText(int a0, int a1, int a2, int a3, int a4, const Str& a5) { return Function6; }
 };
 
 class LIBSAMPLE_API Overload2 : public Overload

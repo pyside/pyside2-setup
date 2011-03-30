@@ -45,6 +45,7 @@
         <include file-name="map" location="global"/>
     </container-type>
     <container-type name="List" type="list" />
+
     <add-function signature="cacheSize()" return-type="int">
         <inject-code class="target">
             %PYARG_0 = %CONVERTTOPYTHON[int](Shiboken::BindingManager::instance().getAllPyObjects().size());
@@ -1067,6 +1068,9 @@
             </inject-code>
         </add-function>
     </value-type>
+
+    <value-type name="Rect" />
+    <value-type name="RectF" />
 
     <value-type name="Polygon">
         <modify-function signature="stealOwnershipFromPython(Point*)">

@@ -37,6 +37,7 @@
 #include "privatector.h"
 #include "privatedtor.h"
 #include "protected.h"
+#include "rect.h"
 #include "reference.h"
 #include "removednamespaces.h"
 #include "samplenamespace.h"

@@ -28,7 +28,7 @@
 
 import unittest
 
-from sample import Overload, Point, Polygon, Size
+from sample import Echo, Overload, Point, PointF, Polygon, Rect, RectF, Size, Str
 
 class OverloadTest(unittest.TestCase):
     '''Test case for Overload class'''
@@ -80,6 +80,41 @@ class OverloadTest(unittest.TestCase):
         overload = Overload()
         self.assertEqual(overload.wrapperIntIntOverloads(Point(), 1, 2), Overload.Function0)
         self.assertEqual(overload.wrapperIntIntOverloads(Polygon(), 1, 2), Overload.Function1)
+
+    def testDrawTextPointAndStr(self):
+        overload = Overload()
+        self.assertEqual(overload.drawText(Point(), Str()), Overload.Function0)
+        self.assertEqual(overload.drawText(Point(), ''), Overload.Function0)
+        self.assertEqual(overload.drawText(PointF(), Str()), Overload.Function1)
+        self.assertEqual(overload.drawText(PointF(), ''), Overload.Function1)
+
+    def testDrawTextRectIntStr(self):
+        overload = Overload()
+        self.assertEqual(overload.drawText(Rect(), 1, Str()), Overload.Function2)
+        self.assertEqual(overload.drawText(Rect(), 1, ''), Overload.Function2)
+        self.assertEqual(overload.drawText(RectF(), 1, Str()), Overload.Function3)
+        self.assertEqual(overload.drawText(RectF(), 1, ''), Overload.Function3)
+
+    def testDrawTextRectFStrEcho(self):
+        overload = Overload()
+        self.assertEqual(overload.drawText(RectF(), Str()), Overload.Function4)
+        self.assertEqual(overload.drawText(RectF(), ''), Overload.Function4)
+        self.assertEqual(overload.drawText(RectF(), Str(), Echo()), Overload.Function4)
+        self.assertEqual(overload.drawText(RectF(), '', Echo()), Overload.Function4)
+        self.assertEqual(overload.drawText(Rect(), Str()), Overload.Function4)
+        self.assertEqual(overload.drawText(Rect(), ''), Overload.Function4)
+        self.assertEqual(overload.drawText(Rect(), Str(), Echo()), Overload.Function4)
+        self.assertEqual(overload.drawText(Rect(), '', Echo()), Overload.Function4)
+
+    def testDrawTextIntIntStr(self):
+        overload = Overload()
+        self.assertEqual(overload.drawText(1, 2, Str()), Overload.Function5)
+        self.assertEqual(overload.drawText(1, 2, ''), Overload.Function5)
+
+    def testDrawTextIntIntIntIntStr(self):
+        overload = Overload()
+        self.assertEqual(overload.drawText(1, 2, 3, 4, 5, Str()), Overload.Function6)
+        self.assertEqual(overload.drawText(1, 2, 3, 4, 5, ''), Overload.Function6)
 
 
 if __name__ == '__main__':

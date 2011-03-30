@@ -67,6 +67,8 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/protectedpolymorphicdaughter_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/protectedpolymorphicgranddaughter_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/protectedproperty_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/protectedvirtualdestructor_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/rect_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/rectf_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/reference_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/sample_module_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/samplenamespace_wrapper.cpp
