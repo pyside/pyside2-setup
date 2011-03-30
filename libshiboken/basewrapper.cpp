@@ -203,17 +203,21 @@ void SbkObjectTypeDealloc(PyObject* pyObj)
 
 PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
 {
-    // The meta type creates a new type when the Python programmer extends a wrapped C++ class.
-    SbkObjectType* newType = reinterpret_cast<SbkObjectType*>(PyType_Type.tp_new(metatype, args, kwds));
+    // Check if all bases are new style before calling type.tp_new
+    // Was causing gc assert errors in test_bug704.py when
+    // this check happened after creating the type object.
+    // Argument parsing take from type.tp_new code.
+    PyObject* name;
+    PyObject* pyBases;
+    PyObject* dict;
+    static char* kwlist[] = { "name", "bases", "dict", 0};
 
-    if (!newType)
-        return 0;
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "SO!O!:sbktype", kwlist,
+                                     &name,
+                                     &PyTuple_Type, &pyBases,
+                                     &PyDict_Type, &dict))
+        return NULL;
 
-    Shiboken::ObjectType::initPrivateData(newType);
-    SbkObjectTypePrivate* d = newType->d;
-
-    // Check if all objects are python new style
-    PyObject* pyBases = ((PyTypeObject*)newType)->tp_bases;
     for(int i=0, i_max=PyTuple_GET_SIZE(pyBases); i < i_max; i++) {
         PyObject* baseType = PyTuple_GET_ITEM(pyBases, i);
         if (PyClass_Check(baseType)) {
@@ -222,6 +226,14 @@ PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* k
         }
     }
 
+    // The meta type creates a new type when the Python programmer extends a wrapped C++ class.
+    SbkObjectType* newType = reinterpret_cast<SbkObjectType*>(PyType_Type.tp_new(metatype, args, kwds));
+
+    if (!newType)
+        return 0;
+
+    Shiboken::ObjectType::initPrivateData(newType);
+    SbkObjectTypePrivate* d = newType->d;
 
     std::list<SbkObjectType*> bases = Shiboken::getCppBaseClasses(reinterpret_cast<PyTypeObject*>(newType));
     if (bases.size() == 1) {
