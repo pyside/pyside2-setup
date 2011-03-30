@@ -26,7 +26,6 @@
 
 '''Test cases for Overload class'''
 
-import sys
 import unittest
 
 from sample import Overload, Point, Size
@@ -37,48 +36,38 @@ class OverloadTest(unittest.TestCase):
     def testOverloadMethod0(self):
         '''Check overloaded method call for signature "overloaded()".'''
         overload = Overload()
-        result = overload.overloaded()
-        self.assertEqual(result, Overload.Function0)
+        self.assertEqual(overload.overloaded(), Overload.Function0)
 
     def testOverloadMethod1(self):
         '''Check overloaded method call for signature "overloaded(Size*)".'''
         overload = Overload()
         size = Size()
-        result = overload.overloaded(size)
-        self.assertEqual(result, Overload.Function1)
+        self.assertEqual(overload.overloaded(size), Overload.Function1)
 
     def testOverloadMethod2(self):
         '''Check overloaded method call for signature "overloaded(Point*, ParamEnum)".'''
         overload = Overload()
         point = Point()
-        result = overload.overloaded(point, Overload.Param1)
-        self.assertEqual(result, Overload.Function2)
+        self.assertEqual(overload.overloaded(point, Overload.Param1), Overload.Function2)
 
     def testOverloadMethod3(self):
         '''Check overloaded method call for signature "overloaded(const Point&)".'''
         overload = Overload()
         point = Point()
-        result = overload.overloaded(point)
-        self.assertEqual(result, Overload.Function3)
+        self.assertEqual(overload.overloaded(point), Overload.Function3)
 
     def testDifferentReturnTypes(self):
         '''Check method calls for overloads with different return types.'''
         overload = Overload()
-        result = overload.differentReturnTypes()
-        self.assertEqual(result, None)
-        result = overload.differentReturnTypes(Overload.Param1)
-        self.assertEqual(result, None)
-        result = overload.differentReturnTypes(Overload.Param0, 13)
-        self.assertEqual(result, 13)
+        self.assertEqual(overload.differentReturnTypes(), None)
+        self.assertEqual(overload.differentReturnTypes(Overload.Param1), None)
+        self.assertEqual(overload.differentReturnTypes(Overload.Param0, 13), 13)
 
     def testIntOverloads(self):
         overload = Overload()
-        result = overload.intOverloads(Point(0, 0), 3)
-        self.assertEqual(result, 1)
-        result = overload.intOverloads(2, 3)
-        self.assertEqual(result, 2)
-        result = overload.intOverloads(2, 4.5)
-        self.assertEqual(result, 3)
+        self.assertEqual(overload.intOverloads(2, 3), 2)
+        self.assertEqual(overload.intOverloads(2, 4.5), 3)
+        self.assertEqual(overload.intOverloads(Point(0, 0), 3), 1)
 
 if __name__ == '__main__':
     unittest.main()
