@@ -26,6 +26,7 @@
 #include "str.h"
 #include "size.h"
 #include "point.h"
+#include "polygon.h"
 
 #include "libsamplemacros.h"
 
@@ -59,8 +60,15 @@ public:
     inline int intOverloads(int i, int i2) { return 2; }
     inline int intOverloads(int i, int removedArg, double d) { return 3; }
 
+    inline FunctionEnum intDoubleOverloads(int a0, int a1) const { return Function0; }
+    inline FunctionEnum intDoubleOverloads(double a0, double a1) const { return Function1; }
+
     void singleOverload(Point* x) {}
     Point* singleOverload() {return new Point();}
+
+    // Similar to QImage::trueMatrix(QMatrix,int,int) and QImage::trueMatrix(QTransform,int,int)
+    FunctionEnum wrapperIntIntOverloads(const Point& arg0, int arg1, int arg2) { return Function0; }
+    FunctionEnum wrapperIntIntOverloads(const Polygon& arg0, int arg1, int arg2) { return Function1; }
 
     // Similar to QImage constructor
     FunctionEnum strBufferOverloads(const Str& arg0, const char* arg1 = 0, bool arg2 = true) { return Function0; }

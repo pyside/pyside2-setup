@@ -28,7 +28,7 @@
 
 import unittest
 
-from sample import Overload, Point, Size
+from sample import Overload, Point, Polygon, Size
 
 class OverloadTest(unittest.TestCase):
     '''Test case for Overload class'''
@@ -68,6 +68,19 @@ class OverloadTest(unittest.TestCase):
         self.assertEqual(overload.intOverloads(2, 3), 2)
         self.assertEqual(overload.intOverloads(2, 4.5), 3)
         self.assertEqual(overload.intOverloads(Point(0, 0), 3), 1)
+
+    def testIntDoubleOverloads(self):
+        overload = Overload()
+        self.assertEqual(overload.intDoubleOverloads(1, 2), Overload.Function0)
+        self.assertEqual(overload.intDoubleOverloads(1, 2.0), Overload.Function0)
+        self.assertEqual(overload.intDoubleOverloads(1.0, 2), Overload.Function1)
+        self.assertEqual(overload.intDoubleOverloads(1.0, 2.0), Overload.Function1)
+
+    def testWrapperIntIntOverloads(self):
+        overload = Overload()
+        self.assertEqual(overload.wrapperIntIntOverloads(Point(), 1, 2), Overload.Function0)
+        self.assertEqual(overload.wrapperIntIntOverloads(Polygon(), 1, 2), Overload.Function1)
+
 
 if __name__ == '__main__':
     unittest.main()
