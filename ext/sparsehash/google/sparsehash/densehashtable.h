@@ -146,7 +146,7 @@ struct dense_hashtable_iterator {
 
   typedef STL_NAMESPACE::forward_iterator_tag iterator_category;
   typedef V value_type;
-  typedef ptrdiff_t difference_type;
+  typedef STL_NAMESPACE::ptrdiff_t difference_type;
   typedef size_t size_type;
   typedef V& reference;                // Value
   typedef V* pointer;
@@ -196,7 +196,7 @@ struct dense_hashtable_const_iterator {
 
   typedef STL_NAMESPACE::forward_iterator_tag iterator_category;
   typedef V value_type;
-  typedef ptrdiff_t difference_type;
+  typedef STL_NAMESPACE::ptrdiff_t difference_type;
   typedef size_t size_type;
   typedef const V& reference;                // Value
   typedef const V* pointer;
@@ -250,7 +250,7 @@ class dense_hashtable {
   typedef EqualKey key_equal;
 
   typedef size_t            size_type;
-  typedef ptrdiff_t         difference_type;
+  typedef STL_NAMESPACE::ptrdiff_t         difference_type;
   typedef value_type*       pointer;
   typedef const value_type* const_pointer;
   typedef value_type&       reference;
