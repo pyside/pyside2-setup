@@ -116,6 +116,36 @@ class OverloadTest(unittest.TestCase):
         self.assertEqual(overload.drawText(1, 2, 3, 4, 5, Str()), Overload.Function6)
         self.assertEqual(overload.drawText(1, 2, 3, 4, 5, ''), Overload.Function6)
 
+    def testDrawText2IntIntIntIntStr(self):
+        overload = Overload()
+        self.assertEqual(overload.drawText2(1, 2, 3, 4, 5, Str()), Overload.Function6)
+        self.assertEqual(overload.drawText2(1, 2, 3, 4, 5, ''), Overload.Function6)
+        self.assertEqual(overload.drawText2(1, 2, 3, 4, 5), Overload.Function6)
+        self.assertEqual(overload.drawText2(1, 2, 3, 4), Overload.Function6)
+        self.assertEqual(overload.drawText2(1, 2, 3), Overload.Function6)
+
+    def testDrawText3(self):
+        overload = Overload()
+        self.assertEqual(overload.drawText3(Str(), Str(), Str()), Overload.Function0)
+        self.assertEqual(overload.drawText3('', '', ''), Overload.Function0)
+        self.assertEqual(overload.drawText3(1, 2, 3, 4, 5), Overload.Function1)
+        self.assertEqual(overload.drawText3(1, 2, 3, 4, 5), Overload.Function1)
+
+    def testDrawText3Exception(self):
+        overload = Overload()
+        # NOTE: Using 'try' because assertRaisesRegexp is not available.
+        # to check the error text.
+        try:
+            overload.drawText3(Str(), Str(), Str(), 4, 5)
+        except Exception as err:
+            self.assertEqual(type(err), TypeError)
+            self.assertTrue('called with wrong argument types:' in str(err))
+
+    def testDrawText4(self):
+        overload = Overload()
+        self.assertEqual(overload.drawText4(1, 2, 3), Overload.Function0)
+        self.assertEqual(overload.drawText4(1, 2, 3, 4, 5), Overload.Function1)
+
 
 if __name__ == '__main__':
     unittest.main()

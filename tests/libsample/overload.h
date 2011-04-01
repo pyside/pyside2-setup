@@ -89,6 +89,23 @@ public:
     FunctionEnum drawText(const RectF& a0, const Str& a1, const Echo& a2 = Echo()) { return Function4; }
     FunctionEnum drawText(int a0, int a1, const Str& a2) { return Function5; }
     FunctionEnum drawText(int a0, int a1, int a2, int a3, int a4, const Str& a5) { return Function6; }
+
+    // A variant of the one similar to QPainter::drawText(...)
+    FunctionEnum drawText2(const Point& a0, const Str& a1) { return Function0; }
+    FunctionEnum drawText2(const PointF& a0, const Str& a1) { return Function1; }
+    FunctionEnum drawText2(const Rect& a0, int a1, const Str& a2) { return Function2; }
+    FunctionEnum drawText2(const RectF& a0, int a1, const Str& a2) { return Function3; }
+    FunctionEnum drawText2(const RectF& a0, const Str& a1, const Echo& a2 = Echo()) { return Function4; }
+    FunctionEnum drawText2(int a0, int a1, const Str& a2) { return Function5; }
+    FunctionEnum drawText2(int a0, int a1, int a2, int a3 = 0, int a4 = 0, const Str& a5 = Str()) { return Function6; }
+
+    // A simpler variant of the one similar to QPainter::drawText(...)
+    FunctionEnum drawText3(const Str& a0, const Str& a1, const Str& a2) { return Function0; }
+    FunctionEnum drawText3(int a0, int a1, int a2, int a3, int a4) { return Function1; }
+
+    // Another simpler variant of the one similar to QPainter::drawText(...)
+    FunctionEnum drawText4(int a0, int a1, int a2) { return Function0; }
+    FunctionEnum drawText4(int a0, int a1, int a2, int a3, int a4) { return Function1; }
 };
 
 class LIBSAMPLE_API Overload2 : public Overload
