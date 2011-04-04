@@ -816,6 +816,7 @@ bool Handler::startElement(const QString &, const QString &n,
                         || element->type == StackElement::Rejection
                         || element->type == StackElement::LoadTypesystem
                         || element->type == StackElement::InjectCode
+                        || element->type == StackElement::ExtraIncludes
                         || element->type == StackElement::ConversionRule
                         || element->type == StackElement::AddFunction
                         || element->type == StackElement::Template;
