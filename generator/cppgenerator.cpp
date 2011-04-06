@@ -549,6 +549,17 @@ void CppGenerator::writeDestructorNative(QTextStream &s, const AbstractMetaClass
     s << '}' << endl;
 }
 
+static bool allArgumentsRemoved(const AbstractMetaFunction* func)
+{
+    if (func->arguments().isEmpty())
+        return false;
+    foreach (const AbstractMetaArgument* arg, func->arguments()) {
+        if (!func->argumentRemoved(arg->argumentIndex() + 1))
+            return false;
+    }
+    return true;
+}
+
 void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFunction* func)
 {
     //skip metaObject function, this will be written manually ahead
@@ -654,7 +665,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
     s << INDENT << "Shiboken::AutoDecRef pyargs(";
 
-    if (func->arguments().isEmpty()) {
+    if (func->arguments().isEmpty() || allArgumentsRemoved(func)) {
         s << "PyTuple_New(0));" << endl;
     } else {
         QStringList argConversions;
@@ -3442,7 +3453,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         s << INDENT << "Shiboken::ObjectType::setDestructorFunction(&" << cpythonTypeName(metaClass) << ", &Shiboken::callCppDestructor<" << dtorClassName << " >);" << endl;
     }
 
-    s << INDENT << "Py_INCREF((PyObject*)&" << pyTypeName << "); //Incref due the 'PyModule_AddObject' steals the reference." << endl; 
+    s << INDENT << "Py_INCREF((PyObject*)&" << pyTypeName << "); //Incref due the 'PyModule_AddObject' steals the reference." << endl;
     s << INDENT << "if (PyType_Ready((PyTypeObject*)&" << pyTypeName << ") < 0)" << endl;
     s << INDENT << INDENT << "return;" << endl << endl;
 

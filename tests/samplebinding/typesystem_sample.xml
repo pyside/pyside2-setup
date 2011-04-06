@@ -775,6 +775,74 @@
                 PyTuple_SET_ITEM(%PYARG_0, 1, _item_);
             </inject-code>
         </modify-function>
+        <template name="fix_int*,int*,int*,int*">
+            int a0, a1, a2, a3;
+            PyThreadState* _save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS
+            %CPPSELF->::%TYPE::%FUNCTION_NAME(&amp;a0, &amp;a1, &amp;a2, &amp;a3);
+            PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS
+            %PYARG_0 = Shiboken::makeTuple(a0, a1, a2, a3);
+        </template>
+        <template name="fix_native_return_int*,int*,int*,int*">
+            PyObject* _obj = %PYARG_0.object();
+            if (!PySequence_Check(_obj)
+                || PySequence_Fast_GET_SIZE(_obj) != 4
+                || !SbkNumber_Check(PySequence_Fast_GET_ITEM(_obj, 0))
+                || !SbkNumber_Check(PySequence_Fast_GET_ITEM(_obj, 1))
+                || !SbkNumber_Check(PySequence_Fast_GET_ITEM(_obj, 2))
+                || !SbkNumber_Check(PySequence_Fast_GET_ITEM(_obj, 3))) {
+                PyErr_SetString(PyExc_TypeError, "Sequence of 4 numbers expected");
+            } else {
+                *%1 = %CONVERTTOCPP[int](PySequence_Fast_GET_ITEM(_obj, 0));
+                *%2 = %CONVERTTOCPP[int](PySequence_Fast_GET_ITEM(_obj, 1));
+                *%3 = %CONVERTTOCPP[int](PySequence_Fast_GET_ITEM(_obj, 2));
+                *%4 = %CONVERTTOCPP[int](PySequence_Fast_GET_ITEM(_obj, 3));
+            }
+        </template>
+        <modify-function signature="getMargins(int*,int*,int*,int*)const">
+            <modify-argument index="0">
+                <replace-type modified-type="PyObject" />
+            </modify-argument>
+            <modify-argument index="1">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="4">
+                <remove-argument/>
+                <remove-default-expression/>
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+                <insert-template name="fix_int*,int*,int*,int*"/>
+            </inject-code>
+            <inject-code class="native" position="end">
+                <insert-template name="fix_native_return_int*,int*,int*,int*"/>
+            </inject-code>
+        </modify-function>
+        <modify-function signature="callGetMargins(int*,int*,int*,int*)const">
+            <modify-argument index="0">
+                <replace-type modified-type="PyObject" />
+            </modify-argument>
+            <modify-argument index="1">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="4">
+                <remove-argument/>
+                <remove-default-expression/>
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+                <insert-template name="fix_int*,int*,int*,int*"/>
+            </inject-code>
+        </modify-function>
     </value-type>
     <value-type name="VirtualDaughter" />
 

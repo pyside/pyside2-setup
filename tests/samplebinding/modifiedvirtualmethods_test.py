@@ -26,10 +26,9 @@
 
 '''Test cases for modified virtual methods.'''
 
-import sys
 import unittest
 
-from sample import VirtualMethods, Point, Str
+from sample import VirtualMethods, Str
 
 class ExtendedVirtualMethods(VirtualMethods):
     def __init__(self):
@@ -75,6 +74,9 @@ class ExtendedVirtualMethods(VirtualMethods):
     def callMe(self):
         self.callMe_called += 1
 
+    def getMargins(self):
+        return tuple([m*2 for m in VirtualMethods.getMargins(self)])
+
 
 class VirtualMethodsTest(unittest.TestCase):
     '''Test case for modified virtual methods.'''
@@ -108,7 +110,8 @@ class VirtualMethodsTest(unittest.TestCase):
         self.assertFalse(self.evm.sum0_called)
 
     def testModifiedVirtualMethod1(self):
-        '''Virtual method with three arguments and the last one changed to have the default value set to 1000.'''
+        '''Virtual method with three arguments and the last one
+        changed to have the default value set to 1000.'''
         a0, a1, a2 = 2, 3, 5
         result0 = self.vm.sum1(a0, a1)
         self.assertEqual(result0, a0 + a1 + 1000)
@@ -117,7 +120,8 @@ class VirtualMethodsTest(unittest.TestCase):
         self.assertEqual(result1, result2)
 
     def testReimplementedModifiedVirtualMethod1(self):
-        '''Override of the virtual method with three arguments and the last one changed to have the default value set to 1000.'''
+        '''Override of the virtual method with three arguments and
+        the last one changed to have the default value set to 1000.'''
         a0, a1 = 2, 3
         result0 = self.vm.sum1(a0, a1)
         result1 = self.evm.callSum1(a0, a1, 1000)
@@ -125,7 +129,8 @@ class VirtualMethodsTest(unittest.TestCase):
         self.assert_(self.evm.sum1_called)
 
     def testModifiedVirtualMethod2(self):
-        '''Virtual method originally with three arguments, the last one was removed and the default value set to 2000.'''
+        '''Virtual method originally with three arguments, the last
+        one was removed and the default value set to 2000.'''
         a0, a1 = 1, 2
         result0 = self.vm.sum2(a0, a1)
         self.assertEqual(result0, a0 + a1 + 2000)
@@ -135,7 +140,8 @@ class VirtualMethodsTest(unittest.TestCase):
         self.assertRaises(TypeError, self.vm.sum2, 1, 2, 3)
 
     def testReimplementedModifiedVirtualMethod2(self):
-        '''Override of the virtual method originally with three arguments, the last one was removed and the default value set to 2000.'''
+        '''Override of the virtual method originally with three arguments,
+        the last one was removed and the default value set to 2000.'''
         a0, a1 = 1, 2
         ignored = 54321
         result0 = self.vm.sum2(a0, a1)
@@ -144,8 +150,9 @@ class VirtualMethodsTest(unittest.TestCase):
         self.assert_(self.evm.sum2_called)
 
     def testModifiedVirtualMethod3(self):
-        '''Virtual method originally with three arguments have the second one removed and replaced
-        by custom code that replaces it by the sum of the first and the last arguments.'''
+        '''Virtual method originally with three arguments have the second
+        one removed and replaced by custom code that replaces it by the sum
+        of the first and the last arguments.'''
         a0, a1 = 1, 2
         result0 = self.vm.sum3(a0, a1)
         self.assertEqual(result0, a0 + (a0 + a1) + a1)
@@ -156,8 +163,9 @@ class VirtualMethodsTest(unittest.TestCase):
         self.assertRaises(TypeError, self.vm.sum3, 1, 2, 3)
 
     def testReimplementedModifiedVirtualMethod3(self):
-        '''Override of the virtual method originally with three arguments have the second one removed and replaced
-        by custom code that replaces it by the sum of the first and the last arguments.'''
+        '''Override of the virtual method originally with three arguments
+        have the second one removed and replaced by custom code that
+        replaces it by the sum of the first and the last arguments.'''
         a0, a1 = 1, 2
         ignored = 54321
         result0 = self.vm.sum3(a0, a1)
@@ -166,8 +174,8 @@ class VirtualMethodsTest(unittest.TestCase):
         self.assert_(self.evm.sum3_called)
 
     def testModifiedVirtualMethod4(self):
-        '''Virtual method originally with three arguments, the last one was removed and the default
-        value set to 3000.'''
+        '''Virtual method originally with three arguments, the
+        last one was removed and the default value set to 3000.'''
         a0, a1 = 1, 2
         default_value = 3000
         result0 = self.vm.sum4(a0, a1)
@@ -178,11 +186,13 @@ class VirtualMethodsTest(unittest.TestCase):
         self.assertRaises(TypeError, self.vm.sum4, 1, 2, 3)
 
     def testReimplementedModifiedVirtualMethod4(self):
-        '''Override of the virtual method originally with three arguments, the last one was removed
-        and the default value set to 3000. The method was modified with code injection on the binding
-        override (the one that receives calls from C++ with the original signature and forwards it
-        to Python overrides) that subtracts the value of the second argument (removed in Python)
-        from the value of the first before sending them to Python.'''
+        '''Override of the virtual method originally with three arguments,
+        the last one was removed and the default value set to 3000.
+        The method was modified with code injection on the binding override
+        (the one that receives calls from C++ with the original signature
+        and forwards it to Python overrides) that subtracts the value of the
+        second argument (removed in Python) from the value of the first
+        before sending them to Python.'''
         a0, a1 = 1, 2
         removed_arg_value = 2011
         default_value = 3000
@@ -191,7 +201,8 @@ class VirtualMethodsTest(unittest.TestCase):
         self.assert_(self.evm.sum4_called)
 
     def testOverridenMethodResultModification(self):
-        '''Injected code modifies the result of a call to a virtual method overriden in Python.'''
+        '''Injected code modifies the result of a call to a virtual
+        method overridden in Python.'''
         orig_name = self.vm.callName()
         self.assertEqual(orig_name, 'VirtualMethods')
         name = self.evm.callName()
@@ -204,6 +215,28 @@ class VirtualMethodsTest(unittest.TestCase):
         no code for the method call should be generated.'''
         self.evm.callCallMe()
         self.assertEqual(self.evm.callMe_called, 1)
+
+    def testAllArgumentsRemoved(self):
+        values = (10, 20, 30, 40)
+        self.vm.setMargins(*values)
+        self.assertEquals(self.vm.getMargins(), values)
+
+    def testAllArgumentsRemovedCallVirtual(self):
+        values = (10, 20, 30, 40)
+        self.vm.setMargins(*values)
+        self.assertEquals(self.vm.callGetMargins(), values)
+
+    def testExtendedAllArgumentsRemoved(self):
+        values = (10, 20, 30, 40)
+        self.evm.setMargins(*values)
+        double = tuple([m*2 for m in values])
+        self.assertEquals(self.evm.getMargins(), double)
+
+    def testExtendedAllArgumentsRemovedCallVirtual(self):
+        values = (10, 20, 30, 40)
+        self.evm.setMargins(*values)
+        double = tuple([m*2 for m in values])
+        self.assertEquals(self.evm.callGetMargins(), double)
 
 if __name__ == '__main__':
     unittest.main()

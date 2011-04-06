@@ -33,7 +33,10 @@
 class LIBSAMPLE_API VirtualMethods
 {
 public:
-    VirtualMethods(Str name = "VirtualMethods") : m_name(name) {}
+    VirtualMethods(Str name = "VirtualMethods") : m_name(name)
+    {
+        m_left = m_top = m_right = m_bottom = 0;
+    }
     virtual ~VirtualMethods() {}
 
     virtual double virtualMethod0(Point pt, int val, Complex cpx, bool b);
@@ -81,9 +84,25 @@ public:
     std::list<Str> callStrListToStdList(const StrList& strList) { return strListToStdList(strList); }
     virtual std::list<Str> strListToStdList(const StrList& strList ) { return strList; }
 
+    void setMargins(int left, int top, int right, int bottom)
+    {
+        m_left = left;
+        m_top = top;
+        m_right = right;
+        m_bottom = bottom;
+    }
+    virtual void getMargins(int* left, int* top, int* right, int* bottom) const;
+    void callGetMargins(int* left, int* top, int* right, int* bottom) const
+    {
+        getMargins(left, top, right, bottom);
+    }
 
 private:
     Str m_name;
+    int m_left;
+    int m_top;
+    int m_right;
+    int m_bottom;
 };
 
 class LIBSAMPLE_API VirtualDaughter : public VirtualMethods

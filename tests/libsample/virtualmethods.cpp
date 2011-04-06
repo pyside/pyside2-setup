@@ -42,3 +42,12 @@ VirtualMethods::createStr(const char* text, Str*& ret)
     return true;
 }
 
+void
+VirtualMethods::getMargins(int* left, int* top, int* right, int* bottom) const
+{
+    *left = m_left;
+    *top = m_top;
+    *right = m_right;
+    *bottom = m_bottom;
+}
+
