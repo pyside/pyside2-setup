@@ -128,6 +128,8 @@ void ShibokenGenerator::initPrimitiveTypesCorrespondences()
     // Inplace arithmetic operators
     m_pythonOperators["operator+="] = "iadd";
     m_pythonOperators["operator-="] = "isub";
+    m_pythonOperators["operator++"] = "iadd";
+    m_pythonOperators["operator--"] = "isub";
     m_pythonOperators["operator*="] = "imul";
     m_pythonOperators["operator/="] = "idiv";
     m_pythonOperators["operator%="] = "imod";
