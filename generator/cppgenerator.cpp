@@ -3737,9 +3737,14 @@ void CppGenerator::finishGeneration()
             lookForEnumsInClassesNotToBeGenerated(globalEnums, metaClass);
         }
 
+        TypeDatabase* typeDb = TypeDatabase::instance();
+        TypeSystemTypeEntry* moduleEntry = reinterpret_cast<TypeSystemTypeEntry*>(typeDb->findType(packageName()));
+
         //Extra includes
         s << endl << "// Extra includes" << endl;
         QList<Include> includes;
+        if (moduleEntry)
+            includes = moduleEntry->extraIncludes();
         foreach (AbstractMetaEnum* cppEnum, globalEnums)
             includes.append(cppEnum->typeEntry()->extraIncludes());
         qSort(includes.begin(), includes.end());
@@ -3747,7 +3752,6 @@ void CppGenerator::finishGeneration()
             s << inc.toString() << endl;
         s << endl;
 
-        TypeSystemTypeEntry* moduleEntry = reinterpret_cast<TypeSystemTypeEntry*>(TypeDatabase::instance()->findType(packageName()));
         CodeSnipList snips;
         if (moduleEntry)
             snips = moduleEntry->codeSnips();
@@ -3792,7 +3796,7 @@ void CppGenerator::finishGeneration()
         }
 
         s << "PyTypeObject** " << cppApiVariableName() << ";" << endl << endl;;
-        foreach (const QString& requiredModule, TypeDatabase::instance()->requiredTargetImports())
+        foreach (const QString& requiredModule, typeDb->requiredTargetImports())
             s << "PyTypeObject** " << cppApiVariableName(requiredModule) << ";" << endl << endl;;
 
         s << "// Module initialization ";
@@ -3825,7 +3829,7 @@ void CppGenerator::finishGeneration()
             s << endl;
         }
 
-        foreach (const QString& requiredModule, TypeDatabase::instance()->requiredTargetImports()) {
+        foreach (const QString& requiredModule, typeDb->requiredTargetImports()) {
             s << INDENT << "if (!Shiboken::importModule(\"" << requiredModule << "\", &" << cppApiVariableName(requiredModule) << ")) {" << endl;
             s << INDENT << INDENT << "PyErr_SetString(PyExc_ImportError," << "\"could not import ";
             s << requiredModule << "\");" << endl << INDENT << INDENT << "return;" << endl;
