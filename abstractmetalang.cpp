@@ -1338,7 +1338,7 @@ void AbstractMetaClass::addFunction(AbstractMetaFunction *function)
 {
     Q_ASSERT(!function->signature().startsWith("("));
     function->setOwnerClass(this);
-
+ 
     if (!function->isDestructor())
         m_functions << function;
     else
@@ -1981,6 +1981,10 @@ void AbstractMetaClass::fixFunctions()
             if (sf->isRemovedFromAllLanguages(sf->implementingClass()))
                 continue;
 
+            // skip functions added in base classes
+            if (sf->isUserAdded() && sf->declaringClass() != this)
+                continue;
+
             // we generally don't care about private functions, but we have to get the ones that are
             // virtual in case they override abstract functions.
             bool add = (sf->isNormal() || sf->isSignal() || sf->isEmptyFunction());
@@ -1988,6 +1992,7 @@ void AbstractMetaClass::fixFunctions()
                 AbstractMetaFunction *f = funcs.at(fi);
                 if (f->isRemovedFromAllLanguages(f->implementingClass()))
                     continue;
+
 
                 uint cmp = f->compareTo(sf);
 
