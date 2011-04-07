@@ -251,6 +251,22 @@ Variables
   method or class modification.
 
 
+.. _beginallowthreads:
+
+**%BEGIN_ALLOW_THREADS**
+
+  Replaced by a thread state saving procedure.
+  Must match with a :ref:`%END_ALLOW_THREADS <endallowthreads>` variable.
+
+
+.. _endallowthreads:
+
+**%END_ALLOW_THREADS**
+
+  Replaced by a thread state restoring procedure.
+  Must match with a :ref:`%BEGIN_ALLOW_THREADS <beginallowthreads>` variable.
+
+
 .. _return_type:
 
 **%RETURN_TYPE**

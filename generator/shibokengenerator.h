@@ -30,6 +30,8 @@
 #define CPP_SELF_VAR              "cppSelf"
 #define CPP_ARG                   "cppArg"
 #define CPP_ARG0                  (CPP_ARG "0")
+#define BEGIN_ALLOW_THREADS       "PyThreadState* _save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS"
+#define END_ALLOW_THREADS         "PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS"
 
 #include <generator.h>
 #include <QtCore/QTextStream>

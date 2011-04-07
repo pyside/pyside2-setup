@@ -417,9 +417,9 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         s << INDENT << "const ::" << metaClass->qualifiedCppName() << "* cppSelf = ";
         s << "Shiboken::Converter< ::" << metaClass->qualifiedCppName() << "*>::toCpp(pyObj);" << endl;
         s << INDENT << "int result;" << endl;
-        s << INDENT << "Py_BEGIN_ALLOW_THREADS" << endl;
+        s << INDENT << BEGIN_ALLOW_THREADS << endl;
         s << INDENT << "result = !cppSelf->isNull();" << endl;
-        s << INDENT << "Py_END_ALLOW_THREADS" << endl;
+        s << INDENT << END_ALLOW_THREADS << endl;
         s << INDENT << "return result;" << endl;
         s << '}' << endl << endl;
     }
@@ -2161,7 +2161,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         }
 
         if (!injectedCodeCallsCppFunction(func)) {
-            s << INDENT << "PyThreadState* _save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS" << endl << INDENT;
+            s << INDENT << BEGIN_ALLOW_THREADS << endl << INDENT;
             if (isCtor) {
                 s << "cptr = ";
             } else if (func->type() && !func->isInplaceOperator()) {
@@ -2185,7 +2185,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 s << " " CPP_RETURN_VAR " = ";
             }
             s << methodCall << ';' << endl;
-            s << INDENT << "PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS" << endl;
+            s << INDENT << END_ALLOW_THREADS << endl;
 
             if (!isCtor && !func->isInplaceOperator() && func->type()
                 && !injectedCodeHasReturnValueAttribution(func, TypeSystem::TargetLangCode)) {

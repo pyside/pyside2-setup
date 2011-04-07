@@ -1221,6 +1221,15 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 code.replace("%CPPSELF.", replacement.arg(cppSelf));
                 code.replace("%CPPSELF", cppSelf);
 
+                if (code.indexOf("%BEGIN_ALLOW_THREADS") > -1) {
+                    if (code.count("%BEGIN_ALLOW_THREADS") == code.count("%END_ALLOW_THREADS")) {
+                        code.replace("%BEGIN_ALLOW_THREADS", BEGIN_ALLOW_THREADS);
+                        code.replace("%END_ALLOW_THREADS", END_ALLOW_THREADS);
+                    } else {
+                        ReportHandler::warning("%BEGIN_ALLOW_THREADS and %END_ALLOW_THREADS mismatch");
+                    }
+                }
+
                 // replace template variable for the Python Type object for the
                 // class implementing the method in which the code snip is written
                 if (func->isStatic()) {
