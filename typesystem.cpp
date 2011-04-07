@@ -992,11 +992,8 @@ bool Handler::startElement(const QString &, const QString &n,
             }
             QString name = attributes["name"];
 
-            bool added = false;
-            if (!name.isEmpty() && m_database->supportedApiVersion(since)) {
-                added = true;
+            if (!name.isEmpty() && m_database->supportedApiVersion(since))
                 m_currentEnum->addEnumValueRejection(name);
-            }
 
         } break;
         case StackElement::ReplaceType: {
