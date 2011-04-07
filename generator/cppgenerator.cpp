@@ -2093,7 +2093,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                     std::swap(firstArg, secondArg);
                 
                 if (((op == "++") || (op == "--")) && !func->isReverseOperator())  {
-                    s << endl << INDENT << "for(int i=0; i < " << secondArg << "; i++, " << firstArg << "++);" << endl;
+                    s << endl << INDENT << "for(int i=0; i < " << secondArg << "; i++, " << firstArg << op << ");" << endl;
                     mc << firstArg;
                 } else {
                     mc << firstArg << ' ' << op << ' ' << secondArg;
