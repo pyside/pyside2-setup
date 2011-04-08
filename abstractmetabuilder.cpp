@@ -1334,6 +1334,11 @@ void AbstractMetaBuilder::fixReturnTypeOfConversionOperator(AbstractMetaFunction
     TypeDatabase* types = TypeDatabase::instance();
     QString castTo = metaFunction->name().remove(QRegExp("^operator ")).trimmed();
 
+    if (castTo.endsWith('&'))
+        castTo.chop(1);
+    if (castTo.startsWith("const "))
+        castTo.remove(0, 6);
+
     TypeEntry* retType = types->findType(castTo);
     if (!retType)
         return;

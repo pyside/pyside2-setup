@@ -32,6 +32,8 @@ private slots:
     void testConversionOperator();
     void testConversionOperatorOfDiscardedClass();
     void testRemovedConversionOperator();
+    void testConversionOperatorReturningReference();
+    void testConversionOperatorReturningConstReference();
 };
 
 #endif

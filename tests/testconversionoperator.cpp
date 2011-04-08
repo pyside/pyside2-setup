@@ -116,6 +116,64 @@ void TestConversionOperator::testRemovedConversionOperator()
     QCOMPARE(classA->implicitConversions().count(), 0);
 }
 
+void TestConversionOperator::testConversionOperatorReturningReference()
+{
+    const char cppCode[] = "\
+    struct A {};\
+    struct B {\
+        operator A&() const;\
+    };";
+    const char xmlCode[] = "\
+    <typesystem package='Foo'>\
+        <value-type name='A' />\
+        <value-type name='B' />\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* classA = classes.findClass("A");
+    AbstractMetaClass* classB = classes.findClass("B");
+    QVERIFY(classA);
+    QVERIFY(classB);
+    QCOMPARE(classA->functions().count(), 2);
+    QCOMPARE(classB->functions().count(), 3);
+    QCOMPARE(classA->externalConversionOperators().count(), 1);
+    QCOMPARE(classA->externalConversionOperators().first()->type()->cppSignature(), QString("A"));
+    QCOMPARE(classA->externalConversionOperators().first()->ownerClass()->name(), QString("B"));
+    QCOMPARE(classA->implicitConversions().count(), 1);
+    QCOMPARE(classA->implicitConversions().first()->type()->cppSignature(), QString("A"));
+    QCOMPARE(classA->implicitConversions().first()->ownerClass()->name(), QString("B"));
+}
+
+void TestConversionOperator::testConversionOperatorReturningConstReference()
+{
+    const char cppCode[] = "\
+    struct A {};\
+    struct B {\
+        operator const A&() const;\
+    };";
+    const char xmlCode[] = "\
+    <typesystem package='Foo'>\
+        <value-type name='A' />\
+        <value-type name='B' />\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClass* classA = classes.findClass("A");
+    AbstractMetaClass* classB = classes.findClass("B");
+    QVERIFY(classA);
+    QVERIFY(classB);
+    QCOMPARE(classA->functions().count(), 2);
+    QCOMPARE(classB->functions().count(), 3);
+    QCOMPARE(classA->externalConversionOperators().count(), 1);
+    QCOMPARE(classA->externalConversionOperators().first()->type()->cppSignature(), QString("A"));
+    QCOMPARE(classA->externalConversionOperators().first()->ownerClass()->name(), QString("B"));
+    QCOMPARE(classA->implicitConversions().count(), 1);
+    QCOMPARE(classA->implicitConversions().first()->type()->cppSignature(), QString("A"));
+    QCOMPARE(classA->implicitConversions().first()->ownerClass()->name(), QString("B"));
+}
+
 QTEST_APPLESS_MAIN(TestConversionOperator)
 
 #include "testconversionoperator.moc"
