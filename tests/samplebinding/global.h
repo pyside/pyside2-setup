@@ -15,6 +15,7 @@
 #include "list.h"
 #include "listuser.h"
 #include "mapuser.h"
+#include "modelindex.h"
 #include "modifications.h"
 #include "modified_constructor.h"
 #include "multiple_derived.h"
