@@ -1114,7 +1114,6 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
 
     // detect is we should use pyargs instead of args as variable name for python arguments
     bool usePyArgs = false;
-    int numArgs = 0;
     if (func) {
         // calc num of real arguments.
         int argsRemoved = 0;
@@ -1122,7 +1121,6 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             if (func->argumentRemoved(i+1))
                 argsRemoved++;
         }
-        numArgs = func->arguments().size() - argsRemoved;
         usePyArgs = pythonFunctionWrapperUsesListOfArguments(OverloadData(getFunctionGroups(func->implementingClass())[func->name()], this));
     }
 

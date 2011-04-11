@@ -210,9 +210,9 @@ PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* k
     PyObject* name;
     PyObject* pyBases;
     PyObject* dict;
-    static char* kwlist[] = { "name", "bases", "dict", 0};
+    static const char* kwlist[] = { "name", "bases", "dict", 0};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "SO!O!:sbktype", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "SO!O!:sbktype", (char**)kwlist,
                                      &name,
                                      &PyTuple_Type, &pyBases,
                                      &PyDict_Type, &dict))
