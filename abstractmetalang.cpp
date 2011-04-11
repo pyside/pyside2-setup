@@ -709,6 +709,11 @@ QString AbstractMetaFunction::argumentName(int index, bool create, const Abstrac
     return m_arguments[--index]->name();
 }
 
+bool AbstractMetaFunction::isCallOperator() const
+{
+    return m_name == "operator()";
+}
+
 bool AbstractMetaFunction::hasInjectedCode() const
 {
     foreach (const FunctionModification mod, modifications(ownerClass())) {
@@ -855,7 +860,7 @@ bool AbstractMetaFunction::isOtherOperator() const
 
 int AbstractMetaFunction::arityOfOperator() const
 {
-    if (!isOperatorOverload())
+    if (!isOperatorOverload() || isCallOperator())
         return -1;
 
     int arity = m_arguments.size();

@@ -804,7 +804,8 @@ public:
             m_reverse(false),
             m_userAdded(false),
             m_explicit(false),
-            m_pointerOperator(false)
+            m_pointerOperator(false),
+            m_isCallOperator(false)
     {
     }
 
@@ -1160,6 +1161,8 @@ public:
     {
         m_typeEntry = typeEntry;
     }
+
+    bool isCallOperator() const;
 private:
     QString m_name;
     QString m_originalName;
@@ -1182,6 +1185,7 @@ private:
     uint m_userAdded                : 1;
     uint m_explicit                 : 1;
     uint m_pointerOperator          : 1;
+    uint m_isCallOperator           : 1;
 };
 
 
