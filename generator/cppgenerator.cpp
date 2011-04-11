@@ -3552,7 +3552,7 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream& s, const Abstrac
     }
 
     const QString className = metaClass->qualifiedCppName();
-    if (!metaClass->isNamespace()) {
+    if (!metaClass->isNamespace() && !metaClass->isAbstract()) {
         // Qt metatypes are registered only on their first use, so we do this now.
         const char* star = "*";
         if (!metaClass->typeEntry()->isObject()) {
