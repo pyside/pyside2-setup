@@ -1789,7 +1789,6 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
     }
 
     AbstractMetaArgumentList metaArguments;
-    int firstDefaultArgument = 0;
 
     for (int i = 0; i < arguments.size(); ++i) {
         ArgumentModelItem arg = arguments.at(i);
@@ -1840,9 +1839,6 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
                 expr = replacedExpression;
             }
             metaArg->setDefaultValueExpression(expr);
-
-            if (expr.isEmpty())
-                firstDefaultArgument = i;
 
             if (metaArg->type()->isEnum() || metaArg->type()->isFlags())
                 m_enumDefaultArguments << QPair<AbstractMetaArgument *, AbstractMetaFunction *>(metaArg, metaFunction);
