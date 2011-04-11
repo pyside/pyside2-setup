@@ -37,6 +37,8 @@ public:
     void doNothingWithConstBool(const bool hi) {}
     void methodWithNamedArg(const Str& string = Str("")) {}
 
+    Str operator()(const Str& s, const int i) { return s + i; }
+
     // These method are here just for compilation test purposes
     Echo& operator<<(unsigned int item) { return *this; }
     Echo& operator<<(signed int item) { return *this; }

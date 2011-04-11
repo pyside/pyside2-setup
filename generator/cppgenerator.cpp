@@ -361,6 +361,10 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         if (rfunc->isConstructor())
             writeConstructorWrapper(s, overloads);
 
+        // call operators
+        if (rfunc->name() == "operator()")
+            writeMethodWrapper(s, overloads);
+
         if (!rfunc->isConstructor() && !rfunc->isOperatorOverload()) {
             writeMethodWrapper(s, overloads);
             if (OverloadData::hasStaticAndInstanceFunctions(overloads)) {
@@ -1157,7 +1161,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
     int minArgs = overloadData.minArgs();
     int maxArgs = overloadData.maxArgs();
     bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(overloadData);
-    bool usesNamedArguments = overloadData.hasArgumentWithDefaultValue();
+    bool usesNamedArguments = overloadData.hasArgumentWithDefaultValue() || rfunc->isCallOperator();
 
     s << "static PyObject* ";
     s << cpythonFunctionName(rfunc) << "(PyObject* self";
@@ -1243,7 +1247,10 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
      * Solves #119 - QDataStream <</>> operators not working for QPixmap
      * http://bugs.openbossa.org/show_bug.cgi?id=119
      */
-    bool callExtendedReverseOperator = hasReturnValue && !rfunc->isInplaceOperator() && rfunc->isOperatorOverload();
+    bool callExtendedReverseOperator = hasReturnValue
+                                       && !rfunc->isInplaceOperator()
+                                       && !rfunc->isCallOperator()
+                                       && rfunc->isOperatorOverload();
     if (callExtendedReverseOperator) {
         QString revOpName = ShibokenGenerator::pythonOperatorFunctionName(rfunc).insert(2, 'r');
         if (rfunc->isBinaryOperator()) {
@@ -1610,7 +1617,7 @@ void CppGenerator::writeOverloadedFunctionDecisor(QTextStream& s, const Overload
 
     // Ensure that the direct overload that called this reverse
     // is called.
-    if (rfunc->isOperatorOverload()) {
+    if (rfunc->isOperatorOverload() && !rfunc->isCallOperator()) {
         s << INDENT << "if (isReverse && overloadId == -1) {" << endl;
         {
             Indentation indent(INDENT);
@@ -1749,7 +1756,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(QTextStream& s, const Ov
             s << "numArgs >= " << (startArg + sequenceArgCount) << " && ";
         }
 
-        if (refFunc->isOperatorOverload())
+        if (refFunc->isOperatorOverload() && !refFunc->isCallOperator())
             s << (refFunc->isReverseOperator() ? "" : "!") << "isReverse && ";
 
         s << typeChecks << ") {" << endl;
@@ -2071,7 +2078,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                          + "::" + func->minimalSignature()
                          + "\" with the modifications described in the type system file"), NULL);
             }
-        } else if (func->isOperatorOverload()) {
+        } else if (func->isOperatorOverload() && !func->isCallOperator()) {
             QByteArray firstArg("(*" CPP_SELF_VAR ")");
             if (func->isPointerOperator())
                 firstArg.remove(1, 1); // remove the de-reference operator
@@ -2455,6 +2462,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     QString tp_as_number('0');
     QString tp_as_sequence('0');
     QString tp_hash('0');
+    QString tp_call('0');
     QString cppClassName = metaClass->qualifiedCppName();
     QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
     QString baseClassName('0');
@@ -2541,6 +2549,11 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     if (!metaClass->typeEntry()->hashFunction().isEmpty())
         tp_hash = '&' + cpythonBaseName(metaClass) + "_HashFunc";
 
+    const AbstractMetaFunction* callOp = metaClass->findFunction("operator()");
+    if (callOp && !callOp->isModifiedRemoved())
+        tp_call = '&' + cpythonFunctionName(callOp);
+
+
     s << "// Class Definition -----------------------------------------------" << endl;
     s << "extern \"C\" {" << endl;
     s << "static SbkObjectType " << className + "_Type" << " = { { {" << endl;
@@ -2559,7 +2572,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_as_sequence*/      " << tp_as_sequence << ',' << endl;
     s << INDENT << "/*tp_as_mapping*/       0," << endl;
     s << INDENT << "/*tp_hash*/             " << tp_hash << ',' << endl;
-    s << INDENT << "/*tp_call*/             0," << endl;
+    s << INDENT << "/*tp_call*/             " << tp_call << ',' << endl;
     s << INDENT << "/*tp_str*/              " << m_tpFuncs["__str__"] << ',' << endl;
     s << INDENT << "/*tp_getattro*/         " << tp_getattro << ',' << endl;
     s << INDENT << "/*tp_setattro*/         " << tp_setattro << ',' << endl;

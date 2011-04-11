@@ -40,6 +40,9 @@ class TestEcho(unittest.TestCase):
         y = Echo().echo(x)
         self.assertEqual(x, y)
 
+    def testCallOperator(self):
+        e = Echo()
+        self.assertEqual(e("Hello", 3), "Hello3");
 if __name__ == '__main__':
     unittest.main()
 

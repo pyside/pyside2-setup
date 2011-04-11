@@ -118,6 +118,9 @@ void ShibokenGenerator::initPrimitiveTypesCorrespondences()
     // Python operators
     m_pythonOperators.clear();
 
+    // call operator
+    m_pythonOperators["operator()"] = "call";
+
     // Arithmetic operators
     m_pythonOperators["operator+"] = "add";
     m_pythonOperators["operator-"] = "sub";
