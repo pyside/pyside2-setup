@@ -844,7 +844,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     if (invalidateReturn) {
         s << INDENT << "if (invalidadeArg0)" << endl;
         Indentation indentation(INDENT);
-        s << INDENT << "Shiboken::Object::invalidate(" << PYTHON_RETURN_VAR  ".object());" << endl;
+        s << INDENT << "Shiboken::Object::releaseOwnership(" << PYTHON_RETURN_VAR  ".object());" << endl;
     }
 
     foreach (FunctionModification funcMod, func->modifications()) {
@@ -2098,7 +2098,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             if (func->isBinaryOperator()) {
                 if (func->isReverseOperator())
                     std::swap(firstArg, secondArg);
-                
+
                 if (((op == "++") || (op == "--")) && !func->isReverseOperator())  {
                     s << endl << INDENT << "for(int i=0; i < " << secondArg << "; i++, " << firstArg << op << ");" << endl;
                     mc << firstArg;
