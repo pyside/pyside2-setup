@@ -131,10 +131,15 @@ private:
     void writeClassDefinition(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeMethodDefinitionEntry(QTextStream& s, const AbstractMetaFunctionList overloads);
     void writeMethodDefinition(QTextStream& s, const AbstractMetaFunctionList overloads);
+
     /// Writes the implementation of all methods part of python sequence protocol
     void writeSequenceMethods(QTextStream& s, const AbstractMetaClass* metaClass);
-    /// Writes the struct PySequenceMethods for types thats supports the python sequence protocol
     void writeTypeAsSequenceDefinition(QTextStream& s, const AbstractMetaClass* metaClass);
+
+    /// Writes the struct PyMappingMethods for types thats supports the python mapping protocol
+    void writeTypeAsMappingDefinition(QTextStream& s, const AbstractMetaClass* metaClass);
+    void writeMappingMethods(QTextStream& s, const AbstractMetaClass* metaClass);
+
     void writeTypeAsNumberDefinition(QTextStream& s, const AbstractMetaClass* metaClass);
 
     void writeCopyFunction(QTextStream& s, const AbstractMetaClass *metaClass);
@@ -185,6 +190,9 @@ private:
     /// Returns true if the given class supports the python sequence protocol
     bool supportsSequenceProtocol(const AbstractMetaClass* metaClass);
 
+    /// Returns true if the given class supports the python mapping protocol
+    bool supportsMappingProtocol(const AbstractMetaClass* metaClass);
+
     /// Returns true if generator should produce getters and setters for the given class.
     bool shouldGenerateGetSetList(const AbstractMetaClass* metaClass);
 
@@ -201,6 +209,10 @@ private:
     // Maps special function names to function parameters and return types
     // used by CPython API in the sequence protocol.
     QHash<QString, QPair<QString, QString> > m_sequenceProtocol;
+
+    // Maps special function names to function parameters and return types
+    // used by CPython API in the mapping protocol.
+    QHash<QString, QPair<QString, QString> > m_mappingProtocol;
     int m_currentErrorCode;
 
 };

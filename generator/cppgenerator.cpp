@@ -105,6 +105,11 @@ CppGenerator::CppGenerator() : m_currentErrorCode(0)
     m_sequenceProtocol.insert("__setslice__", StrPair("PyObject* self, Py_ssize_t _i1, Py_ssize_t _i2, PyObject* _value", "int"));
     m_sequenceProtocol.insert("__contains__", StrPair("PyObject* self, PyObject* _value", "int"));
     m_sequenceProtocol.insert("__concat__", StrPair("PyObject* self, PyObject* _other", "PyObject*"));
+
+    // mapping protocol function
+    m_mappingProtocol.insert("__mlen__", StrPair("PyObject* self", "Py_ssize_t"));
+    m_mappingProtocol.insert("__mgetitem__", StrPair("PyObject* self, PyObject* _key", "PyObject*"));
+    m_mappingProtocol.insert("__msetitem__", StrPair("PyObject* self, PyObject* _key, PyObject* _value", "int"));
 }
 
 QString CppGenerator::fileNameForClass(const AbstractMetaClass *metaClass) const
@@ -355,7 +360,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
             continue;
 
         const AbstractMetaFunction* rfunc = overloads.first();
-        if (m_sequenceProtocol.contains(rfunc->name()))
+        if (m_sequenceProtocol.contains(rfunc->name()) || m_mappingProtocol.contains(rfunc->name()))
             continue;
 
         if (rfunc->isConstructor())
@@ -458,6 +463,12 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         writeSequenceMethods(s, metaClass);
         writeTypeAsSequenceDefinition(s, metaClass);
     }
+
+    if (supportsMappingProtocol(metaClass)) {
+        writeMappingMethods(s, metaClass);
+        writeTypeAsMappingDefinition(s, metaClass);
+    }
+
 
     if (hasComparisonOperator) {
         s << "// Rich comparison" << endl;
@@ -2430,6 +2441,16 @@ QString CppGenerator::multipleInheritanceInitializerFunctionName(const AbstractM
     return QString("%1_mi_init").arg(cpythonBaseName(metaClass->typeEntry()));
 }
 
+bool CppGenerator::supportsMappingProtocol(const AbstractMetaClass* metaClass)
+{
+    foreach(QString funcName, m_mappingProtocol.keys()) {
+        if (metaClass->hasFunction(funcName))
+            return true;
+    }
+
+    return false;
+}
+
 bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass* metaClass)
 {
     foreach(QString funcName, m_sequenceProtocol.keys()) {
@@ -2461,6 +2482,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     QString tp_dealloc;
     QString tp_as_number('0');
     QString tp_as_sequence('0');
+    QString tp_as_mapping('0');
     QString tp_hash('0');
     QString tp_call('0');
     QString cppClassName = metaClass->qualifiedCppName();
@@ -2479,6 +2501,9 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     // sequence protocol check
     if (supportsSequenceProtocol(metaClass))
         tp_as_sequence = QString("&Py%1_as_sequence").arg(cppClassName);
+
+    if (supportsMappingProtocol(metaClass))
+        tp_as_mapping = QString("&Py%1_as_mapping").arg(cppClassName);
 
     if (!metaClass->baseClass())
         baseClassName = "reinterpret_cast<PyTypeObject*>(&SbkObject_Type)";
@@ -2570,7 +2595,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_repr*/             " << m_tpFuncs["__repr__"] << "," << endl;
     s << INDENT << "/*tp_as_number*/        " << tp_as_number << ',' << endl;
     s << INDENT << "/*tp_as_sequence*/      " << tp_as_sequence << ',' << endl;
-    s << INDENT << "/*tp_as_mapping*/       0," << endl;
+    s << INDENT << "/*tp_as_mapping*/       " << tp_as_mapping << ',' << endl;
     s << INDENT << "/*tp_hash*/             " << tp_hash << ',' << endl;
     s << INDENT << "/*tp_call*/             " << tp_call << ',' << endl;
     s << INDENT << "/*tp_str*/              " << m_tpFuncs["__str__"] << ',' << endl;
@@ -2612,6 +2637,33 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << "} //extern"  << endl;
 }
 
+void CppGenerator::writeMappingMethods(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+
+    QMap<QString, QString> funcs;
+    bool injectedCode = false;
+
+    QHash< QString, QPair< QString, QString > >::const_iterator it = m_mappingProtocol.begin();
+    for (; it != m_mappingProtocol.end(); ++it) {
+        const AbstractMetaFunction* func = metaClass->findFunction(it.key());
+        if (!func)
+            continue;
+        injectedCode = true;
+        QString funcName = cpythonFunctionName(func);
+        QString funcArgs = it.value().first;
+        QString funcRetVal = it.value().second;
+
+        CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
+        s << funcRetVal << ' ' << funcName << '(' << funcArgs << ')' << endl << '{' << endl;
+        writeInvalidCppObjectCheck(s);
+
+        writeCppSelfDefinition(s, func);
+
+        const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().last();
+        writeCodeSnips(s, snips,CodeSnip::Any, TypeSystem::TargetLangCode, func, lastArg);
+        s << '}' << endl << endl;
+    }
+}
 
 void CppGenerator::writeSequenceMethods(QTextStream& s, const AbstractMetaClass* metaClass)
 {
@@ -2676,6 +2728,34 @@ void CppGenerator::writeTypeAsSequenceDefinition(QTextStream& s, const AbstractM
       << INDENT << "/*sq_contains*/ " << funcs["__contains__"] << ",\n"
       << INDENT << "/*sq_inplace_concat*/ 0,\n"
       << INDENT << "/*sq_inplace_repeat*/ 0\n"
+      << "};\n\n";
+}
+
+void CppGenerator::writeTypeAsMappingDefinition(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    QString className = metaClass->qualifiedCppName();
+    QMap<QString, QString> funcs;
+
+    bool hasFunctions = false;
+    foreach(QString funcName, m_mappingProtocol.keys()) {
+        const AbstractMetaFunction* func = metaClass->findFunction(funcName);
+        funcs[funcName] = func ? cpythonFunctionName(func).prepend("&") : "0";
+        if (!hasFunctions && func)
+            hasFunctions = true;
+    }
+
+    //use default implementation
+    if (!hasFunctions) {
+        QString baseName = cpythonBaseName(metaClass->typeEntry());
+        funcs["__mlen__"] = '0';
+        funcs["__mgetitem__"] = '0';
+        funcs["__msetitem__"] = '0';
+    }
+
+    s << "static PyMappingMethods  Py" << className << "_as_mapping = {\n"
+      << INDENT << "/*mp_length*/ " << funcs["__mlen__"] << ",\n"
+      << INDENT << "/*mp_subscript*/ " << funcs["__mgetitem__"] << ",\n"
+      << INDENT << "/*mp_ass_subscript*/ " << funcs["__msetitem__"] << "\n"
       << "};\n\n";
 }
 
