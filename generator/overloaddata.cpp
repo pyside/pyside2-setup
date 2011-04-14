@@ -60,17 +60,21 @@ static QString getTypeName(const OverloadData* ov)
 
 static bool typesAreEqual(const AbstractMetaType* typeA, const AbstractMetaType* typeB)
 {
-
-    bool equal = typeA->typeEntry() == typeB->typeEntry();
-    if (equal && typeA->isContainer()) {
-        if (typeA->instantiations().size() != typeB->instantiations().size())
-            return false;
-        for (int i = 0; i < typeA->instantiations().size(); ++i) {
-            if (!typesAreEqual(typeA->instantiations().at(i), typeB->instantiations().at(i)))
+    if (typeA->typeEntry() == typeB->typeEntry()) {
+        if (typeA->isContainer()) {
+            if (typeA->instantiations().size() != typeB->instantiations().size())
                 return false;
+
+            for (int i = 0; i < typeA->instantiations().size(); ++i) {
+                if (!typesAreEqual(typeA->instantiations().at(i), typeB->instantiations().at(i)))
+                    return false;
+            }
+            return true;
         }
+
+        return !(ShibokenGenerator::isCString(typeA) ^ ShibokenGenerator::isCString(typeB));
     }
-    return equal;
+    return false;
 }
 
 /**
@@ -226,7 +230,8 @@ void OverloadData::sortNextOverloads()
                                     "unsigned char",
                                     "char",
                                     "float",
-                                    "double"
+                                    "double",
+                                    "const char*"
                                     };
     const int numPrimitives = sizeof(primitiveTypes)/sizeof(const char*);
     bool hasPrimitive[numPrimitives];
