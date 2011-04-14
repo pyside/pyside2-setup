@@ -1103,6 +1103,19 @@
             %PYARG_0 = Py_BuildValue("(OO)", type, args);
             </inject-code>
         </add-function>
+        <add-function signature="operator-(PyUnicode)">
+            <inject-code>
+                %PYARG_0 = arg;
+                Py_INCREF(arg);
+            </inject-code>
+        </add-function>
+        <!-- A reverse operator -->
+        <add-function signature="operator-(PyUnicode, Point)">
+            <inject-code>
+                %PYARG_0 = arg;
+                Py_INCREF(arg);
+            </inject-code>
+        </add-function>
     </value-type>
 
     <value-type name="PointF">

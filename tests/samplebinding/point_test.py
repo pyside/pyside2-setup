@@ -83,6 +83,15 @@ class PointTest(unittest.TestCase):
         self.assertRaises(OverflowError, pt1.setXAsUint, 840835495615213080)
         self.assertEqual(pt1.x(), 0.0)
 
+    def testAddedOperator(self):
+        p = Point(0.0, 0.0)
+        r = p - u'Hi'
+        self.assertEqual(r, u'Hi')
+
+        # now the reverse op.
+        r = u'Hi' - p
+        self.assertEqual(r, u'Hi')
+
 if __name__ == '__main__':
     unittest.main()
 
