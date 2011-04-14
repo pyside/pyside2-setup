@@ -117,7 +117,8 @@ public:
     void traverseFields(ScopeModelItem item, AbstractMetaClass *parent);
     void traverseStreamOperator(FunctionModelItem functionItem);
     void traverseOperatorFunction(FunctionModelItem item);
-    AbstractMetaFunction *traverseFunction(const AddedFunction& addedFunc);
+    AbstractMetaFunction* traverseFunction(const AddedFunction& addedFunc);
+    AbstractMetaFunction* traverseFunction(const AddedFunction& addedFunc, AbstractMetaClass* metaClass);
     AbstractMetaFunction *traverseFunction(FunctionModelItem function);
     AbstractMetaField *traverseField(VariableModelItem field, const AbstractMetaClass *cls);
     void checkFunctionModifications();

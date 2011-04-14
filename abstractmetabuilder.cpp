@@ -1439,22 +1439,8 @@ void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scopeItem, AbstractMe
 void AbstractMetaBuilder::fillAddedFunctions(AbstractMetaClass* metaClass)
 {
     // Add the functions added by the typesystem
-    foreach (AddedFunction addedFunc, metaClass->typeEntry()->addedFunctions()) {
-        AbstractMetaFunction* func = traverseFunction(addedFunc);
-        if (metaClass->isNamespace())
-            *func += AbstractMetaFunction::Static;
-        if (func->name() == metaClass->name()) {
-            func->setFunctionType(AbstractMetaFunction::ConstructorFunction);
-            if (func->arguments().size() == 1 && func->arguments().first()->type()->typeEntry()->isCustom())
-                func->setExplicit(true);
-        } else {
-            func->setFunctionType(AbstractMetaFunction::NormalFunction);
-        }
-        func->setDeclaringClass(metaClass);
-        func->setImplementingClass(metaClass);
-        metaClass->addFunction(func);
-        metaClass->setHasNonPrivateConstructor(true);
-    }
+    foreach (AddedFunction addedFunc, metaClass->typeEntry()->addedFunctions())
+        traverseFunction(addedFunc, metaClass);
 }
 
 void AbstractMetaBuilder::applyFunctionModifications(AbstractMetaFunction* func)
@@ -1612,6 +1598,11 @@ void AbstractMetaBuilder::traverseEnums(ScopeModelItem scopeItem, AbstractMetaCl
 
 AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(const AddedFunction& addedFunc)
 {
+    return traverseFunction(addedFunc, 0);
+}
+
+AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(const AddedFunction& addedFunc, AbstractMetaClass* metaClass)
+{
     AbstractMetaFunction* metaFunction = createMetaFunction();
     metaFunction->setConstant(addedFunc.isConstant());
     metaFunction->setName(addedFunc.name());
@@ -1622,6 +1613,7 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(const AddedFunction&
     AbstractMetaAttributes::Attribute isStatic = addedFunc.isStatic() ? AbstractMetaFunction::Static : AbstractMetaFunction::None;
     metaFunction->setAttributes(metaFunction->attributes() | AbstractMetaAttributes::Final | isStatic);
     metaFunction->setType(translateType(addedFunc.version(), addedFunc.returnType()));
+
 
     QList<AddedFunction::TypeInfo> args = addedFunc.arguments();
     AbstractMetaArgumentList metaArguments;
@@ -1639,6 +1631,25 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(const AddedFunction&
     }
 
     metaFunction->setArguments(metaArguments);
+    if (metaFunction->isOperatorOverload() && !metaFunction->isCallOperator()) {
+        if (metaArguments.size() > 2) {
+            ReportHandler::warning("An operator overload need to have 0, 1 or 2 arguments if it's reverse.");
+        } else if (metaArguments.size() == 2) {
+            // Check if it's a reverse operator
+            if (metaArguments[1]->type()->typeEntry() == metaClass->typeEntry()) {
+                metaFunction->setReverseOperator(true);
+                // we need to call these two function to cache the old signature (with two args)
+                // we do this buggy behaviour to comply with the original apiextractor buggy behaviour.
+                metaFunction->signature();
+                metaFunction->minimalSignature();
+                metaArguments.removeLast();
+                metaFunction->setArguments(metaArguments);
+            } else {
+                ReportHandler::warning("Operator overload can have two arguments only if it's a reverse operator!");
+            }
+        }
+    }
+
 
     // Find the correct default values
     for (int i = 0; i < metaArguments.size(); ++i) {
@@ -1663,6 +1674,25 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(const AddedFunction&
 
     metaFunction->setOriginalAttributes(metaFunction->attributes());
     fixArgumentNames(metaFunction);
+
+    if (metaClass) {
+        const AbstractMetaArgumentList fargs = metaFunction->arguments();
+        if (metaClass->isNamespace())
+            *metaFunction += AbstractMetaFunction::Static;
+        if (metaFunction->name() == metaClass->name()) {
+            metaFunction->setFunctionType(AbstractMetaFunction::ConstructorFunction);
+            if (fargs.size() == 1 && fargs.first()->type()->typeEntry()->isCustom())
+                metaFunction->setExplicit(true);
+        } else {
+            metaFunction->setFunctionType(AbstractMetaFunction::NormalFunction);
+        }
+
+        metaFunction->setDeclaringClass(metaClass);
+        metaFunction->setImplementingClass(metaClass);
+        metaClass->addFunction(metaFunction);
+        metaClass->setHasNonPrivateConstructor(true);
+    }
+
     return metaFunction;
 }
 
