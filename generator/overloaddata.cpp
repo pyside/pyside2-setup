@@ -156,6 +156,8 @@ void OverloadData::sortNextOverloads()
     OverloadSortData sortData;
     bool checkPyObject = false;
     int pyobjectIndex = 0;
+    bool checkPySequence = false;
+    int pySeqIndex = 0;
     bool checkQString = false;
     int qstringIndex = 0;
     bool checkQVariant = false;
@@ -188,6 +190,9 @@ void OverloadData::sortNextOverloads()
         if (!checkPyObject && typeName.contains("PyObject")) {
             checkPyObject = true;
             pyobjectIndex = sortData.lastProcessedItemId();
+        } else if (!checkPySequence && typeName == "PySequence") {
+            checkPySequence = true;
+            pySeqIndex = sortData.lastProcessedItemId();
         } else if (!checkQVariant && typeName == "QVariant") {
             checkQVariant = true;
             qvariantIndex = sortData.lastProcessedItemId();
@@ -237,6 +242,9 @@ void OverloadData::sortNextOverloads()
     bool hasPrimitive[numPrimitives];
     for (int i = 0; i < numPrimitives; ++i)
         hasPrimitive[i] = sortData.map.contains(primitiveTypes[i]);
+
+    if (checkPySequence && checkPyObject)
+        graph.addEdge(pySeqIndex, pyobjectIndex);
 
     QStringList classesWithIntegerImplicitConversion;
 
@@ -305,13 +313,23 @@ void OverloadData::sortNextOverloads()
             }
         }
 
-        /* Add dependency on PyObject, so its check is the last one (too generic) */
-        if (checkPyObject && !targetTypeEntryName.contains("PyObject")) {
-            graph.addEdge(targetTypeId, pyobjectIndex);
+
+        if ((checkPySequence || checkPyObject)
+            && !targetTypeEntryName.contains("PyObject")
+            && !targetTypeEntryName.contains("PySequence")) {
+            if (checkPySequence) {
+                // PySequence will be checked after all more specific types, but before PyObject.
+                graph.addEdge(targetTypeId, pySeqIndex);
+            } else {
+                // Add dependency on PyObject, so its check is the last one (too generic).
+                graph.addEdge(targetTypeId, pyobjectIndex);
+            }
         } else if (checkQVariant && targetTypeEntryName != "QVariant") {
             if (!graph.containsEdge(qvariantIndex, targetTypeId)) // Avoid cyclic dependency.
                 graph.addEdge(targetTypeId, qvariantIndex);
-        } else if (checkQString && ov->argType()->indirections() > 0 && targetTypeEntryName != "QString" && targetTypeEntryName != "QByteArray") {
+        } else if (checkQString && ov->argType()->indirections() > 0
+            && targetTypeEntryName != "QString"
+            && targetTypeEntryName != "QByteArray") {
             if (!graph.containsEdge(qstringIndex, targetTypeId)) // Avoid cyclic dependency.
                 graph.addEdge(targetTypeId, qstringIndex);
         }

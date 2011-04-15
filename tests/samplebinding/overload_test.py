@@ -27,8 +27,22 @@
 '''Test cases for Overload class'''
 
 import unittest
-
 from sample import Echo, Overload, Point, PointF, Polygon, Rect, RectF, Size, Str
+
+
+def raisesWithErrorMessage(func, arguments, errorType, errorMsg):
+    '''NOTE: Using 'try' because assertRaisesRegexp is not available
+       to check the error message.'''
+    try:
+        func(*arguments)
+        return False
+    except Exception as err:
+        if type(err) != TypeError:
+            return False
+        if not errorMsg in str(err):
+            return False
+    return True
+
 
 class OverloadTest(unittest.TestCase):
     '''Test case for Overload class'''
@@ -133,18 +147,56 @@ class OverloadTest(unittest.TestCase):
 
     def testDrawText3Exception(self):
         overload = Overload()
-        # NOTE: Using 'try' because assertRaisesRegexp is not available.
-        # to check the error text.
-        try:
-            overload.drawText3(Str(), Str(), Str(), 4, 5)
-        except Exception as err:
-            self.assertEqual(type(err), TypeError)
-            self.assertTrue('called with wrong argument types:' in str(err))
+        args = (Str(), Str(), Str(), 4, 5)
+        result = raisesWithErrorMessage(overload.drawText3, args,
+                                        TypeError, 'called with wrong argument types:')
+        self.assert_(result)
 
     def testDrawText4(self):
         overload = Overload()
         self.assertEqual(overload.drawText4(1, 2, 3), Overload.Function0)
         self.assertEqual(overload.drawText4(1, 2, 3, 4, 5), Overload.Function1)
+
+    def testAcceptSequence(self):
+        # Overload.acceptSequence()
+        overload = Overload()
+        self.assertEqual(overload.acceptSequence(), Overload.Function0)
+
+    def testAcceptSequenceIntInt(self):
+        # Overload.acceptSequence(int,int)
+        overload = Overload()
+        self.assertEqual(overload.acceptSequence(1, 2), Overload.Function1)
+
+    def testAcceptSequenceStrParamEnum(self):
+        # Overload.acceptSequence(Str,Overload::ParamEnum)
+        overload = Overload()
+        self.assertEqual(overload.acceptSequence(''), Overload.Function2)
+        self.assertEqual(overload.acceptSequence('', Overload.Param0), Overload.Function2)
+        self.assertEqual(overload.acceptSequence(Str('')), Overload.Function2)
+        self.assertEqual(overload.acceptSequence(Str(''), Overload.Param0), Overload.Function2)
+
+    def testAcceptSequenceSize(self):
+        # Overload.acceptSequence(Size)
+        overload = Overload()
+        self.assertEqual(overload.acceptSequence(Size()), Overload.Function3)
+
+    def testAcceptSequenceStringList(self):
+        # Overload.acceptSequence(const char**)
+        overload = Overload()
+        strings = ['line 1', 'line 2']
+        self.assertEqual(overload.acceptSequence(strings), Overload.Function4)
+        args = (['line 1', 2], )
+        result = raisesWithErrorMessage(overload.acceptSequence, args,
+                                        TypeError, 'The argument must be a sequence of strings.')
+        self.assert_(result)
+
+    def testAcceptSequencePyObject(self):
+        # Overload.acceptSequence(void*)
+        overload = Overload()
+        class Foo(object):
+            pass
+        foo = Foo()
+        self.assertEqual(overload.acceptSequence(foo), Overload.Function5)
 
 
 if __name__ == '__main__':

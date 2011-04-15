@@ -106,6 +106,14 @@ public:
     // Another simpler variant of the one similar to QPainter::drawText(...)
     FunctionEnum drawText4(int a0, int a1, int a2) { return Function0; }
     FunctionEnum drawText4(int a0, int a1, int a2, int a3, int a4) { return Function1; }
+
+    FunctionEnum acceptSequence() { return Function0; }
+    FunctionEnum acceptSequence(int a0, int a1) { return Function1; }
+    FunctionEnum acceptSequence(const Str& a0, ParamEnum a1 = Param0) { return Function2; }
+    FunctionEnum acceptSequence(const Size& a0) { return Function3; }
+    // The type must be changed to PySequence.
+    FunctionEnum acceptSequence(const char* const a0[]) { return Function4; }
+    FunctionEnum acceptSequence(void* a0) { return Function5; }
 };
 
 class LIBSAMPLE_API Overload2 : public Overload
