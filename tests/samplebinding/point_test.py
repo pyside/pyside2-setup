@@ -54,6 +54,7 @@ class PointTest(unittest.TestCase):
         self.assertTrue(pt1 == pt1)
         self.assertTrue(pt1 == pt2)
         self.assertFalse(pt1 == pt3)
+        self.assertFalse(pt1 == object())
 
     def testNotEqualOperator(self):
         '''Test Point class != operator.'''

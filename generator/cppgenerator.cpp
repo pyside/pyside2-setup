@@ -3011,7 +3011,8 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
             OverloadData overloadData(overloads, this);
             const AbstractMetaFunction* rfunc = overloads[0];
 
-            s << INDENT << "case " << ShibokenGenerator::pythonRichCompareOperatorId(rfunc) << ':' << endl;
+            QString operatorId = ShibokenGenerator::pythonRichCompareOperatorId(rfunc);
+            s << INDENT << "case " << operatorId << ':' << endl;
 
             Indentation indent(INDENT);
 
@@ -3078,8 +3079,16 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                 s << INDENT << '}';
             }
 
-            s << " else goto " << baseName << "_RichComparison_TypeError;" << endl;
-            s << endl;
+            s << " else {" << endl;
+            if (operatorId == "Py_EQ" || operatorId == "Py_NE") {
+                Indentation indent(INDENT);
+                s << INDENT << PYTHON_RETURN_VAR " = " << (operatorId == "Py_EQ" ? "Py_False" : "Py_True") << ';' << endl;
+                s << INDENT << "Py_INCREF(" PYTHON_RETURN_VAR ");" << endl;
+            } else {
+                Indentation indent(INDENT);
+                s << INDENT << "goto " << baseName << "_RichComparison_TypeError;" << endl;
+            }
+            s << INDENT << '}' << endl << endl;
 
             s << INDENT << "break;" << endl;
         }
