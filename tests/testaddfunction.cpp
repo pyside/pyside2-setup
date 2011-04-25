@@ -407,6 +407,23 @@ void TestAddFunction::testAddFunctionOnTypedef()
     QVERIFY(method);
 }
 
+void TestAddFunction::testAddFunctionWithTemplateArg()
+{
+    const char cppCode[] = "template<class T> class Foo { };";
+    const char xmlCode[] = "\
+    <typesystem package='Package'>\
+        <primitive-type name='int'/>\
+        <container-type name='Foo'  type='list'/>\
+        <add-function signature='func(Foo&lt;int>)' />\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode);
+    QCOMPARE(t.builder()->globalFunctions().size(), 1);
+    AbstractMetaFunction* func = t.builder()->globalFunctions().first();
+    AbstractMetaArgument* arg = func->arguments().first();
+    QCOMPARE(arg->type()->instantiations().count(), 1);
+}
+
 QTEST_APPLESS_MAIN(TestAddFunction)
 
 #include "testaddfunction.moc"

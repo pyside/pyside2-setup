@@ -1897,10 +1897,27 @@ AbstractMetaType* AbstractMetaBuilder::translateType(double vr, const AddedFunct
     TypeDatabase* typeDb = TypeDatabase::instance();
     TypeEntry* type;
 
-    if (typeInfo.name == "void")
+    QString typeName = typeInfo.name;
+
+    if (typeName == "void")
         return 0;
 
-    type = typeDb->findType(typeInfo.name);
+    type = typeDb->findType(typeName);
+
+    // test if the type is a template, like a container
+    bool isTemplate = false;
+    QString templateArg;
+    if (!type) {
+        QRegExp r("(.*)<(.*)>$");
+        if (r.indexIn(typeInfo.name) != -1) {
+            templateArg = r.cap(2);
+            if (templateArg.contains(','))
+                ReportHandler::warning("add-function tag doesn't support container types with more than one argument or template arguments.");
+            else
+                isTemplate = (type = typeDb->findContainerType(r.cap(1)));
+        }
+    }
+
     if (!type) {
         type = new TypeEntry(typeInfo.name, TypeEntry::CustomType, vr);
         typeDb->addType(type);
@@ -1911,6 +1928,16 @@ AbstractMetaType* AbstractMetaBuilder::translateType(double vr, const AddedFunct
     metaType->setIndirections(typeInfo.indirections);
     metaType->setReference(typeInfo.isReference);
     metaType->setConstant(typeInfo.isConstant);
+    if (isTemplate) {
+        type = typeDb->findType(templateArg);
+        if (type) {
+            AbstractMetaType* metaArgType = createMetaType();
+            metaArgType->setTypeEntry(type);
+            metaType->addInstantiation(metaArgType);
+            metaType->setTypeUsagePattern(AbstractMetaType::ContainerPattern);
+        }
+    }
+
     return metaType;
 }
 
