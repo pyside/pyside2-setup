@@ -26,6 +26,7 @@
 #include <graph.h>
 #include "overloaddata.h"
 #include "shibokengenerator.h"
+#include <QTemporaryFile>
 
 static const TypeEntry* getAliasedTypeEntry(const TypeEntry* typeEntry)
 {
@@ -375,7 +376,15 @@ void OverloadData::sortNextOverloads()
         QString funcName = referenceFunction()->name();
         if (referenceFunction()->ownerClass())
             funcName.prepend(referenceFunction()->ownerClass()->name() + '.');
-        ReportHandler::warning(QString("Cyclic dependency found on overloaddata for '%1' method!").arg(qPrintable(funcName)));
+
+        // Dump overload graph
+        QString graphName = QDir::tempPath() + '/' + funcName + ".dot";
+        QHash<QString, int>::const_iterator it = sortData.map.begin();
+        QHash<int, QString> nodeNames;
+        for (; it != sortData.map.end(); ++it)
+            nodeNames.insert(it.value(), it.key());
+        graph.dumpDot(nodeNames, graphName);
+        ReportHandler::warning(QString("Cyclic dependency found on overloaddata for '%1' method! The graph boy saved the graph at %2.").arg(qPrintable(funcName)).arg(qPrintable(graphName)));
     }
 
     m_nextOverloadData.clear();
