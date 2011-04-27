@@ -330,7 +330,8 @@ void OverloadData::sortNextOverloads()
                 graph.addEdge(targetTypeId, qvariantIndex);
         } else if (checkQString && ov->argType()->indirections() > 0
             && targetTypeEntryName != "QString"
-            && targetTypeEntryName != "QByteArray") {
+            && targetTypeEntryName != "QByteArray"
+            && (!checkPyObject || targetTypeId != pyobjectIndex)) {
             if (!graph.containsEdge(qstringIndex, targetTypeId)) // Avoid cyclic dependency.
                 graph.addEdge(targetTypeId, qstringIndex);
         }
