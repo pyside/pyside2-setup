@@ -30,6 +30,10 @@
 #include <QtCore/QTextStream>
 #include <QtCore/QDebug>
 
+QHash<QString, QString> CppGenerator::m_nbFuncs = QHash<QString, QString>();
+QHash<QString, QString> CppGenerator::m_sqFuncs = QHash<QString, QString>();
+QHash<QString, QString> CppGenerator::m_mpFuncs = QHash<QString, QString>();
+
 // utility functions
 inline CodeSnipList getConversionRule(TypeSystem::Language lang, const AbstractMetaFunction *function)
 {
@@ -96,6 +100,32 @@ static QString reduceTypeName(const AbstractMetaClass* metaClass)
 
 CppGenerator::CppGenerator() : m_currentErrorCode(0)
 {
+    // Number protocol structure members names
+    m_nbFuncs["__add__"] = "nb_add";
+    m_nbFuncs["__sub__"] = "nb_subtract";
+    m_nbFuncs["__mul__"] = "nb_multiply";
+    m_nbFuncs["__div__"] = "nb_divide";
+    m_nbFuncs["__mod__"] = "nb_remainder";
+    m_nbFuncs["__neg__"] = "nb_negative";
+    m_nbFuncs["__pos__"] = "nb_positive";
+    m_nbFuncs["__invert__"] = "nb_invert";
+    m_nbFuncs["__lshift__"] = "nb_lshift";
+    m_nbFuncs["__rshift__"] = "nb_rshift";
+    m_nbFuncs["__and__"] = "nb_and";
+    m_nbFuncs["__xor__"] = "nb_xor";
+    m_nbFuncs["__or__"] = "nb_or";
+    m_nbFuncs["__iadd__"] = "nb_inplace_add";
+    m_nbFuncs["__isub__"] = "nb_inplace_subtract";
+    m_nbFuncs["__imul__"] = "nb_multiply";
+    m_nbFuncs["__idiv__"] = "nb_divide";
+    m_nbFuncs["__imod__"] = "nb_remainder";
+    m_nbFuncs["__ilshift__"] = "nb_inplace_lshift";
+    m_nbFuncs["__irshift__"] = "nb_inplace_rshift";
+    m_nbFuncs["__iand__"] = "nb_inplace_and";
+    m_nbFuncs["__ixor__"] = "nb_inplace_xor";
+    m_nbFuncs["__ior__"] = "nb_inplace_or";
+    m_nbFuncs["bool"] = "nb_nonzero";
+
     // sequence protocol functions
     typedef QPair<QString, QString> StrPair;
     m_sequenceProtocol.insert("__len__", StrPair("PyObject* self", "Py_ssize_t"));
@@ -106,10 +136,24 @@ CppGenerator::CppGenerator() : m_currentErrorCode(0)
     m_sequenceProtocol.insert("__contains__", StrPair("PyObject* self, PyObject* _value", "int"));
     m_sequenceProtocol.insert("__concat__", StrPair("PyObject* self, PyObject* _other", "PyObject*"));
 
+    // Sequence protocol structure members names
+    m_sqFuncs["__concat__"] = "sq_concat";
+    m_sqFuncs["__contains__"] = "sq_contains";
+    m_sqFuncs["__getitem__"] = "sq_item";
+    m_sqFuncs["__getslice__"] = "sq_slice";
+    m_sqFuncs["__len__"] = "sq_length";
+    m_sqFuncs["__setitem__"] = "sq_ass_item";
+    m_sqFuncs["__setslice__"] = "sq_ass_slice";
+
     // mapping protocol function
     m_mappingProtocol.insert("__mlen__", StrPair("PyObject* self", "Py_ssize_t"));
     m_mappingProtocol.insert("__mgetitem__", StrPair("PyObject* self, PyObject* _key", "PyObject*"));
     m_mappingProtocol.insert("__msetitem__", StrPair("PyObject* self, PyObject* _key, PyObject* _value", "int"));
+
+    // Sequence protocol structure members names
+    m_mpFuncs["__mlen__"] = "mp_length";
+    m_mpFuncs["__mgetitem__"] = "mp_subscript";
+    m_mpFuncs["__msetitem__"] = "mp_ass_subscript";
 }
 
 QString CppGenerator::fileNameForClass(const AbstractMetaClass *metaClass) const
@@ -339,10 +383,6 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     QString singleMethodDefinitions;
     QTextStream smd(&singleMethodDefinitions);
 
-    bool hasComparisonOperator = metaClass->hasComparisonOperatorOverload();
-    bool hasBoolCast = this->hasBoolCast(metaClass);
-    bool typeAsNumber = metaClass->hasArithmeticOperatorOverload() || metaClass->hasLogicalOperatorOverload() || metaClass->hasBitwiseOperatorOverload() || hasBoolCast;
-
     s << endl << "// Target ---------------------------------------------------------" << endl << endl;
     s << "extern \"C\" {" << endl;
     foreach (AbstractMetaFunctionList allOverloads, getFunctionGroups(metaClass).values()) {
@@ -416,7 +456,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         s << endl;
     }
 
-    if (hasBoolCast) {
+    if (hasBoolCast(metaClass)) {
         s << "static int " << cpythonBaseName(metaClass) << "___nb_bool(PyObject* pyObj)\n{\n";
         s << INDENT << "if (!Shiboken::Object::isValid(pyObj))" << endl;
         {
@@ -433,7 +473,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         s << '}' << endl << endl;
     }
 
-    if (typeAsNumber) {
+    if (supportsNumberProtocol(metaClass)) {
         QList<AbstractMetaFunctionList> opOverloads = filterGroupedOperatorFunctions(
                 metaClass,
                 AbstractMetaClass::ArithmeticOp
@@ -454,23 +494,17 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
             writeMethodWrapper(s, overloads);
         }
-
-        s << "// type has number operators" << endl;
-        writeTypeAsNumberDefinition(s, metaClass);
     }
 
     if (supportsSequenceProtocol(metaClass)) {
         writeSequenceMethods(s, metaClass);
-        writeTypeAsSequenceDefinition(s, metaClass);
     }
 
     if (supportsMappingProtocol(metaClass)) {
         writeMappingMethods(s, metaClass);
-        writeTypeAsMappingDefinition(s, metaClass);
     }
 
-
-    if (hasComparisonOperator) {
+    if (metaClass->hasComparisonOperatorOverload()) {
         s << "// Rich comparison" << endl;
         writeRichCompareFunction(s, metaClass);
     }
@@ -2451,6 +2485,14 @@ bool CppGenerator::supportsMappingProtocol(const AbstractMetaClass* metaClass)
     return false;
 }
 
+bool CppGenerator::supportsNumberProtocol(const AbstractMetaClass* metaClass)
+{
+    return metaClass->hasArithmeticOperatorOverload()
+            || metaClass->hasLogicalOperatorOverload()
+            || metaClass->hasBitwiseOperatorOverload()
+            || hasBoolCast(metaClass);
+}
+
 bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass* metaClass)
 {
     foreach(QString funcName, m_sequenceProtocol.keys()) {
@@ -2480,33 +2522,17 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     QString tp_init;
     QString tp_new;
     QString tp_dealloc;
-    QString tp_as_number('0');
-    QString tp_as_sequence('0');
-    QString tp_as_mapping('0');
     QString tp_hash('0');
     QString tp_call('0');
     QString cppClassName = metaClass->qualifiedCppName();
     QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
     QString baseClassName('0');
     AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
-    bool onlyPrivCtor = !metaClass->hasNonPrivateConstructor();
-
-    if (metaClass->hasArithmeticOperatorOverload()
-        || metaClass->hasLogicalOperatorOverload()
-        || metaClass->hasBitwiseOperatorOverload()
-        || hasBoolCast(metaClass)) {
-        tp_as_number = QString("&%1_as_number").arg(cpythonBaseName(metaClass));
-    }
-
-    // sequence protocol check
-    if (supportsSequenceProtocol(metaClass))
-        tp_as_sequence = QString("&Py%1_as_sequence").arg(cppClassName);
-
-    if (supportsMappingProtocol(metaClass))
-        tp_as_mapping = QString("&Py%1_as_mapping").arg(cppClassName);
 
     if (!metaClass->baseClass())
         baseClassName = "reinterpret_cast<PyTypeObject*>(&SbkObject_Type)";
+
+    bool onlyPrivCtor = !metaClass->hasNonPrivateConstructor();
 
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
         tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES";
@@ -2593,9 +2619,9 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_setattr*/          0," << endl;
     s << INDENT << "/*tp_compare*/          0," << endl;
     s << INDENT << "/*tp_repr*/             " << m_tpFuncs["__repr__"] << "," << endl;
-    s << INDENT << "/*tp_as_number*/        " << tp_as_number << ',' << endl;
-    s << INDENT << "/*tp_as_sequence*/      " << tp_as_sequence << ',' << endl;
-    s << INDENT << "/*tp_as_mapping*/       " << tp_as_mapping << ',' << endl;
+    s << INDENT << "/*tp_as_number*/        0," << endl;
+    s << INDENT << "/*tp_as_sequence*/      0," << endl;
+    s << INDENT << "/*tp_as_mapping*/       0," << endl;
     s << INDENT << "/*tp_hash*/             " << tp_hash << ',' << endl;
     s << INDENT << "/*tp_call*/             " << tp_call << ',' << endl;
     s << INDENT << "/*tp_str*/              " << m_tpFuncs["__str__"] << ',' << endl;
@@ -2698,45 +2724,36 @@ void CppGenerator::writeSequenceMethods(QTextStream& s, const AbstractMetaClass*
 
 void CppGenerator::writeTypeAsSequenceDefinition(QTextStream& s, const AbstractMetaClass* metaClass)
 {
-    QString className = metaClass->qualifiedCppName();
-    QMap<QString, QString> funcs;
-
     bool hasFunctions = false;
+    QMap<QString, QString> funcs;
     foreach(QString funcName, m_sequenceProtocol.keys()) {
         const AbstractMetaFunction* func = metaClass->findFunction(funcName);
-        funcs[funcName] = func ? cpythonFunctionName(func).prepend("&") : "0";
+        funcs[funcName] = func ? cpythonFunctionName(func).prepend("&") : QString();
         if (!hasFunctions && func)
             hasFunctions = true;
     }
 
+    QString baseName = cpythonBaseName(metaClass);
+
     //use default implementation
     if (!hasFunctions) {
-        QString baseName = cpythonBaseName(metaClass->typeEntry());
         funcs["__len__"] = baseName + "__len__";
         funcs["__getitem__"] = baseName + "__getitem__";
         funcs["__setitem__"] = baseName + "__setitem__";
     }
 
-    s << "static PySequenceMethods Py" << className << "_as_sequence = {\n"
-      << INDENT << "/*sq_length*/ " << funcs["__len__"] << ",\n"
-      << INDENT << "/*sq_concat*/ " << funcs["__concat__"] << ",\n"
-      << INDENT << "/*sq_repeat*/ 0,\n"
-      << INDENT << "/*sq_item*/ " << funcs["__getitem__"] << ",\n"
-      << INDENT << "/*sq_slice*/ " << funcs["__getslice__"] << ",\n"
-      << INDENT << "/*sq_ass_item*/ " << funcs["__setitem__"] << ",\n"
-      << INDENT << "/*sq_ass_slice*/ " << funcs["__setslice__"] << ",\n"
-      << INDENT << "/*sq_contains*/ " << funcs["__contains__"] << ",\n"
-      << INDENT << "/*sq_inplace_concat*/ 0,\n"
-      << INDENT << "/*sq_inplace_repeat*/ 0\n"
-      << "};\n\n";
+    s << INDENT << "memset(&" << baseName << "_Type.super.as_sequence, 0, sizeof(PySequenceMethods));" << endl;
+    foreach (const QString& sqName, m_sqFuncs.keys()) {
+        if (funcs[sqName].isEmpty())
+            continue;
+        s << INDENT << baseName << "_Type.super.as_sequence." << m_sqFuncs[sqName] << " = " << funcs[sqName] << ';' << endl;
+    }
 }
 
 void CppGenerator::writeTypeAsMappingDefinition(QTextStream& s, const AbstractMetaClass* metaClass)
 {
-    QString className = metaClass->qualifiedCppName();
-    QMap<QString, QString> funcs;
-
     bool hasFunctions = false;
+    QMap<QString, QString> funcs;
     foreach(QString funcName, m_mappingProtocol.keys()) {
         const AbstractMetaFunction* func = metaClass->findFunction(funcName);
         funcs[funcName] = func ? cpythonFunctionName(func).prepend("&") : "0";
@@ -2746,46 +2763,47 @@ void CppGenerator::writeTypeAsMappingDefinition(QTextStream& s, const AbstractMe
 
     //use default implementation
     if (!hasFunctions) {
-        QString baseName = cpythonBaseName(metaClass->typeEntry());
-        funcs["__mlen__"] = '0';
-        funcs["__mgetitem__"] = '0';
-        funcs["__msetitem__"] = '0';
+        funcs["__mlen__"] = QString();
+        funcs["__mgetitem__"] = QString();
+        funcs["__msetitem__"] = QString();
     }
 
-    s << "static PyMappingMethods  Py" << className << "_as_mapping = {\n"
-      << INDENT << "/*mp_length*/ " << funcs["__mlen__"] << ",\n"
-      << INDENT << "/*mp_subscript*/ " << funcs["__mgetitem__"] << ",\n"
-      << INDENT << "/*mp_ass_subscript*/ " << funcs["__msetitem__"] << "\n"
-      << "};\n\n";
+    QString baseName = cpythonBaseName(metaClass);
+    s << INDENT << "memset(&" << baseName << "_Type.super.as_mapping, 0, sizeof(PyMappingMethods));" << endl;
+    foreach (const QString& mpName, m_mpFuncs.keys()) {
+        if (funcs[mpName].isEmpty())
+            continue;
+        s << INDENT << baseName << "_Type.super.as_mapping." << m_mpFuncs[mpName] << " = " << funcs[mpName] << ';' << endl;
+    }
 }
 
 void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     QMap<QString, QString> nb;
 
-    nb["__add__"] = QString('0');
-    nb["__sub__"] = QString('0');
-    nb["__mul__"] = QString('0');
-    nb["__div__"] = QString('0');
-    nb["__mod__"] = QString('0');
-    nb["__neg__"] = QString('0');
-    nb["__pos__"] = QString('0');
-    nb["__invert__"] = QString('0');
-    nb["__lshift__"] = QString('0');
-    nb["__rshift__"] = QString('0');
-    nb["__and__"] = QString('0');
-    nb["__xor__"] = QString('0');
-    nb["__or__"] = QString('0');
-    nb["__iadd__"] = QString('0');
-    nb["__isub__"] = QString('0');
-    nb["__imul__"] = QString('0');
-    nb["__idiv__"] = QString('0');
-    nb["__imod__"] = QString('0');
-    nb["__ilshift__"] = QString('0');
-    nb["__irshift__"] = QString('0');
-    nb["__iand__"] = QString('0');
-    nb["__ixor__"] = QString('0');
-    nb["__ior__"] = QString('0');
+    nb["__add__"] = QString();
+    nb["__sub__"] = QString();
+    nb["__mul__"] = QString();
+    nb["__div__"] = QString();
+    nb["__mod__"] = QString();
+    nb["__neg__"] = QString();
+    nb["__pos__"] = QString();
+    nb["__invert__"] = QString();
+    nb["__lshift__"] = QString();
+    nb["__rshift__"] = QString();
+    nb["__and__"] = QString();
+    nb["__xor__"] = QString();
+    nb["__or__"] = QString();
+    nb["__iadd__"] = QString();
+    nb["__isub__"] = QString();
+    nb["__imul__"] = QString();
+    nb["__idiv__"] = QString();
+    nb["__imod__"] = QString();
+    nb["__ilshift__"] = QString();
+    nb["__irshift__"] = QString();
+    nb["__iand__"] = QString();
+    nb["__ixor__"] = QString();
+    nb["__ior__"] = QString();
 
     QList<AbstractMetaFunctionList> opOverloads =
             filterGroupedOperatorFunctions(metaClass,
@@ -2799,50 +2817,18 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
         nb[opName] = cpythonFunctionName(rfunc);
     }
 
-    nb["bool"] = hasBoolCast(metaClass) ? cpythonBaseName(metaClass) + "___nb_bool" : "0";
+    QString baseName = cpythonBaseName(metaClass);
 
-    s << "static PyNumberMethods " << cpythonBaseName(metaClass);
-    s << "_as_number = {" << endl;
-    s << INDENT << "/*nb_add*/                  (binaryfunc)" << nb["__add__"] << ',' << endl;
-    s << INDENT << "/*nb_subtract*/             (binaryfunc)" << nb["__sub__"] << ',' << endl;
-    s << INDENT << "/*nb_multiply*/             (binaryfunc)" << nb["__mul__"] << ',' << endl;
-    s << INDENT << "/*nb_divide*/               (binaryfunc)" << nb["__div__"] << ',' << endl;
-    s << INDENT << "/*nb_remainder*/            (binaryfunc)" << nb["__mod__"] << ',' << endl;
-    s << INDENT << "/*nb_divmod*/               0," << endl;
-    s << INDENT << "/*nb_power*/                0," << endl;
-    s << INDENT << "/*nb_negative*/             (unaryfunc)" << nb["__neg__"] << ',' << endl;
-    s << INDENT << "/*nb_positive*/             (unaryfunc)" << nb["__pos__"] << ',' << endl;
-    s << INDENT << "/*nb_absolute*/             0," << endl;
-    s << INDENT << "/*nb_nonzero*/              " << nb["bool"] << ',' << endl;
-    s << INDENT << "/*nb_invert*/               (unaryfunc)" << nb["__invert__"] << ',' << endl;
-    s << INDENT << "/*nb_lshift*/               (binaryfunc)" << nb["__lshift__"] << ',' << endl;
-    s << INDENT << "/*nb_rshift*/               (binaryfunc)" << nb["__rshift__"] << ',' << endl;
-    s << INDENT << "/*nb_and*/                  (binaryfunc)" << nb["__and__"] << ',' << endl;
-    s << INDENT << "/*nb_xor*/                  (binaryfunc)" << nb["__xor__"] << ',' << endl;
-    s << INDENT << "/*nb_or*/                   (binaryfunc)" << nb["__or__"] << ',' << endl;
-    s << INDENT << "/*nb_coerce*/               0," << endl;
-    s << INDENT << "/*nb_int*/                  0," << endl;
-    s << INDENT << "/*nb_long*/                 0," << endl;
-    s << INDENT << "/*nb_float*/                0," << endl;
-    s << INDENT << "/*nb_oct*/                  0," << endl;
-    s << INDENT << "/*nb_hex*/                  0," << endl;
-    s << INDENT << "/*nb_inplace_add*/          (binaryfunc)" << nb["__iadd__"] << ',' << endl;
-    s << INDENT << "/*nb_inplace_subtract*/     (binaryfunc)" << nb["__isub__"] << ',' << endl;
-    s << INDENT << "/*nb_inplace_multiply*/     (binaryfunc)" << nb["__imul__"] << ',' << endl;
-    s << INDENT << "/*nb_inplace_divide*/       (binaryfunc)" << nb["__idiv__"] << ',' << endl;
-    s << INDENT << "/*nb_inplace_remainder*/    (binaryfunc)" << nb["__imod__"] << ',' << endl;
-    s << INDENT << "/*nb_inplace_power*/        0," << endl;
-    s << INDENT << "/*nb_inplace_lshift*/       (binaryfunc)" << nb["__ilshift__"] << ',' << endl;
-    s << INDENT << "/*nb_inplace_rshift*/       (binaryfunc)" << nb["__irshift__"] << ',' << endl;
-    s << INDENT << "/*nb_inplace_and*/          (binaryfunc)" << nb["__iand__"] << ',' << endl;
-    s << INDENT << "/*nb_inplace_xor*/          (binaryfunc)" << nb["__ixor__"] << ',' << endl;
-    s << INDENT << "/*nb_inplace_or*/           (binaryfunc)" << nb["__ior__"] << ',' << endl;
-    s << INDENT << "/*nb_floor_divide*/         0," << endl;
-    s << INDENT << "/*nb_true_divide*/          (binaryfunc)" << nb["__div__"] << ',' << endl;
-    s << INDENT << "/*nb_inplace_floor_divide*/ 0," << endl;
-    s << INDENT << "/*nb_inplace_true_divide*/  0," << endl;
-    s << INDENT << "/*nb_index*/                0" << endl;
-    s << "};" << endl << endl;
+    nb["bool"] = hasBoolCast(metaClass) ? baseName + "___nb_bool" : "0";
+
+    s << INDENT << "memset(&" << baseName << "_Type.super.as_number, 0, sizeof(PyNumberMethods));" << endl;
+    foreach (const QString& nbName, m_nbFuncs.keys()) {
+        if (nb[nbName].isEmpty())
+            continue;
+        s << INDENT << baseName << "_Type.super.as_number." << m_nbFuncs[nbName] << " = " << nb[nbName] << ';' << endl;
+    }
+    if (!nb["__div__"].isEmpty())
+        s << INDENT << baseName << "_Type.super.as_number.nb_true_divide = " << nb["__div__"] << ';' << endl;
 }
 
 void CppGenerator::writeCopyFunction(QTextStream& s, const AbstractMetaClass *metaClass)
@@ -3503,14 +3489,38 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     QString pyTypeName = cpythonTypeName(metaClass);
     s << "void init_" << metaClass->qualifiedCppName().replace("::", "_") << "(PyObject* module)" << endl;
     s << '{' << endl;
-    s << INDENT << cpythonTypeNameExt(metaClass->typeEntry()) << " = reinterpret_cast<PyTypeObject*>(&" << cpythonTypeName(metaClass->typeEntry()) << ");" << endl << endl;
+
+    if (supportsNumberProtocol(metaClass)) {
+        s << INDENT << "// type has number operators" << endl;
+        writeTypeAsNumberDefinition(s, metaClass);
+        s << INDENT << pyTypeName << ".super.ht_type.tp_as_number = &" << pyTypeName << ".super.as_number;" << endl;
+        s << endl;
+    }
+
+    if (supportsSequenceProtocol(metaClass)) {
+        s << INDENT << "// type supports sequence protocol" << endl;
+        writeTypeAsSequenceDefinition(s, metaClass);
+        s << INDENT << pyTypeName << ".super.ht_type.tp_as_sequence = &" << pyTypeName << ".super.as_sequence;" << endl;
+        s << endl;
+    }
+
+    if (supportsMappingProtocol(metaClass)) {
+        s << INDENT << "// type supports mapping protocol" << endl;
+        writeTypeAsMappingDefinition(s, metaClass);
+        s << INDENT << pyTypeName << ".super.ht_type.tp_as_mapping = &" << pyTypeName << ".super.as_mapping;" << endl;
+        s << endl;
+    }
+
+    s << INDENT << cpythonTypeNameExt(metaClass->typeEntry());
+    s << " = reinterpret_cast<PyTypeObject*>(&" << pyTypeName << ");" << endl;
+    s << endl;
 
     // alloc private data
-    s << INDENT << "Shiboken::ObjectType::initPrivateData(&" << cpythonTypeName(metaClass->typeEntry()) << ");" << endl;
+    s << INDENT << "Shiboken::ObjectType::initPrivateData(&" << pyTypeName << ");" << endl;
 
     if (usePySideExtensions() && metaClass->isQObject()) {
-        s << INDENT << "Shiboken::ObjectType::setSubTypeInitHook(&" << cpythonTypeName(metaClass->typeEntry()) << ", &PySide::initQObjectSubType);" << endl;
-        s << INDENT << "PySide::initDynamicMetaObject(&" << cpythonTypeName(metaClass->typeEntry()) << ", &" << metaClass->qualifiedCppName() << "::staticMetaObject);";
+        s << INDENT << "Shiboken::ObjectType::setSubTypeInitHook(&" << pyTypeName << ", &PySide::initQObjectSubType);" << endl;
+        s << INDENT << "PySide::initDynamicMetaObject(&" << pyTypeName << ", &" << metaClass->qualifiedCppName() << "::staticMetaObject);";
     }
 
     // class inject-code target/beginning

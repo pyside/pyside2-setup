@@ -187,6 +187,9 @@ private:
     /// Returns a list of all classes to which the given class could be casted.
     QStringList getAncestorMultipleInheritance(const AbstractMetaClass* metaClass);
 
+    /// Returns true if the given class supports the python number protocol
+    bool supportsNumberProtocol(const AbstractMetaClass* metaClass);
+
     /// Returns true if the given class supports the python sequence protocol
     bool supportsSequenceProtocol(const AbstractMetaClass* metaClass);
 
@@ -198,7 +201,7 @@ private:
 
     void writeHashFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
-    // Write default implementations for sequence protocol
+    /// Write default implementations for sequence protocol
     void writeStdListWrapperMethods(QTextStream& s, const AbstractMetaClass* metaClass);
     QString writeReprFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
@@ -206,13 +209,21 @@ private:
     void writeRegisterType(QTextStream& s, const AbstractMetaEnum* metaEnum);
     bool hasBoolCast(const AbstractMetaClass* metaClass) const;
 
+    // Number protocol structure members names.
+    static QHash<QString, QString> m_nbFuncs;
+
     // Maps special function names to function parameters and return types
     // used by CPython API in the sequence protocol.
     QHash<QString, QPair<QString, QString> > m_sequenceProtocol;
+    // Sequence protocol structure members names.
+    static QHash<QString, QString> m_sqFuncs;
 
     // Maps special function names to function parameters and return types
     // used by CPython API in the mapping protocol.
     QHash<QString, QPair<QString, QString> > m_mappingProtocol;
+    // Mapping protocol structure members names.
+    static QHash<QString, QString> m_mpFuncs;
+
     int m_currentErrorCode;
 
 };
