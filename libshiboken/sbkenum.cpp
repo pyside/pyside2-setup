@@ -36,23 +36,23 @@ struct SbkEnumObject
     PyObject* ob_name;
 };
 
-#define SBKENUMOBJECT_REPR_STRING   "<enum-item %s.%s (%ld)>"
-
 static PyObject* SbkEnumObject_repr(PyObject* self)
 {
-    return PyString_FromFormat(SBKENUMOBJECT_REPR_STRING,
-                               self->ob_type->tp_name,
-                               PyString_AS_STRING(((SbkEnumObject*)self)->ob_name),
-                               ((SbkEnumObject*)self)->ob_ival);
+    PyObject* enumName = ((SbkEnumObject*)self)->ob_name;
+    if (enumName)
+        return PyString_FromFormat("%s.%s", self->ob_type->tp_name, PyString_AS_STRING(enumName));
+    else
+        return PyString_FromFormat("%s(%ld)", self->ob_type->tp_name, ((SbkEnumObject*)self)->ob_ival);
 }
 
 static int SbkEnumObject_print(PyObject* self, FILE* fp, int)
 {
     Py_BEGIN_ALLOW_THREADS
-    fprintf(fp, SBKENUMOBJECT_REPR_STRING,
-            self->ob_type->tp_name,
-            PyString_AS_STRING(((SbkEnumObject*)self)->ob_name),
-            ((SbkEnumObject*)self)->ob_ival);
+    PyObject* enumName = ((SbkEnumObject*)self)->ob_name;
+    if (enumName)
+        fprintf(fp, "%s.%s", self->ob_type->tp_name, PyString_AS_STRING(enumName));
+    else
+        fprintf(fp, "%s(%ld)", self->ob_type->tp_name, ((SbkEnumObject*)self)->ob_ival);
     Py_END_ALLOW_THREADS
     return 0;
 }
@@ -73,6 +73,13 @@ static PyObject* SbkEnum_tp_new(PyTypeObject* type, PyObject* args, PyObject* kw
     if (!self)
         return 0;
     self->ob_ival = itemValue;
+    PyObject* item = Shiboken::Enum::getEnumItemFromValue(type, itemValue);
+    if (item) {
+        self->ob_name = SbkEnumObject_name(item, 0);
+        Py_XDECREF(item);
+    } else {
+        self->ob_name = 0;
+    }
     return reinterpret_cast<PyObject*>(self);
 }
 
@@ -175,15 +182,13 @@ PyObject* newItem(PyTypeObject* enumType, long itemValue, const char* itemName)
             return reinterpret_cast<PyObject*>(enumObj);
 
         newValue = false;
-        if (!enumObj)
-            itemName = "#out of bounds#";
     }
 
     enumObj = PyObject_New(SbkEnumObject, enumType);
     if (!enumObj)
         return 0;
 
-    enumObj->ob_name = PyString_FromString(itemName);
+    enumObj->ob_name = itemName ? PyString_FromString(itemName) : 0;
     enumObj->ob_ival = itemValue;
 
     if (newValue) {
