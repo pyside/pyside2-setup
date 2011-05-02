@@ -36,6 +36,14 @@ from sample import SampleNamespace, ObjectType, Event
 class EnumTest(unittest.TestCase):
     '''Test case for Python representation of C++ enums.'''
 
+    def testEnumRepr(self):
+        enum = SampleNamespace.Option(1)
+        self.assertEqual(eval(repr(enum)), enum)
+
+        enum = SampleNamespace.Option(999)
+        self.assertEqual(eval(repr(enum)), enum)
+
+
     def testEnumValuesInsideEnum(self):
         '''Enum values should be accessible inside the enum as well as outside.'''
         for value_name in SampleNamespace.Option.values:
@@ -106,7 +114,7 @@ class MyEvent(Event):
 class OutOfBoundsTest(unittest.TestCase):
     def testValue(self):
         e = MyEvent()
-        self.assertEqual(repr(e.eventType()), '<enum-item sample.Event.EventType.#out of bounds# (999)>')
+        self.assertEqual(repr(e.eventType()), 'sample.Event.EventType(999)')
 
 class EnumOverloadTest(unittest.TestCase):
     '''Test case for overloads involving enums'''
