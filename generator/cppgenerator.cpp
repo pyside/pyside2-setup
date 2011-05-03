@@ -2820,7 +2820,7 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
 
     QString baseName = cpythonBaseName(metaClass);
 
-    nb["bool"] = hasBoolCast(metaClass) ? baseName + "___nb_bool" : "0";
+    nb["bool"] = hasBoolCast(metaClass) ? baseName + "___nb_bool" : QString();
 
     s << INDENT << "memset(&" << baseName << "_Type.super.as_number, 0, sizeof(PyNumberMethods));" << endl;
     foreach (const QString& nbName, m_nbFuncs.keys()) {
