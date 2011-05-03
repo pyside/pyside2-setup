@@ -540,6 +540,11 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     if (!metaClass->typeEntry()->hashFunction().isEmpty())
         writeHashFunction(s, metaClass);
+
+    // Write tp_traverse and tp_clear functions.
+    writeTpTraverseFunction(s, metaClass);
+    writeTpClearFunction(s, metaClass);
+
     writeClassDefinition(s, metaClass);
     s << endl;
 
@@ -2540,15 +2545,15 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     bool onlyPrivCtor = !metaClass->hasNonPrivateConstructor();
 
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
-        tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES";
+        tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_GC";
         tp_dealloc = metaClass->hasPrivateDestructor() ?
                      "SbkDeallocWrapperWithPrivateDtor" : "0";
         tp_init = "0";
     } else {
         if (onlyPrivCtor)
-            tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES";
+            tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_GC";
         else
-            tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES";
+            tp_flags = "Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_GC";
 
         QString deallocClassName;
         if (shouldGenerateCppWrapper(metaClass))
@@ -2635,8 +2640,8 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*tp_as_buffer*/        0," << endl;
     s << INDENT << "/*tp_flags*/            " << tp_flags << ',' << endl;
     s << INDENT << "/*tp_doc*/              0," << endl;
-    s << INDENT << "/*tp_traverse*/         0," << endl;
-    s << INDENT << "/*tp_clear*/            0," << endl;
+    s << INDENT << "/*tp_traverse*/         " << className << "_traverse," << endl;
+    s << INDENT << "/*tp_clear*/            " << className << "_clear," << endl;
     s << INDENT << "/*tp_richcompare*/      " << tp_richcompare << ',' << endl;
     s << INDENT << "/*tp_weaklistoffset*/   0," << endl;
     s << INDENT << "/*tp_iter*/             " << m_tpFuncs["__iter__"] << ',' << endl;
@@ -2834,6 +2839,26 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
     }
     if (!nb["__div__"].isEmpty())
         s << INDENT << baseName << "_Type.super.as_number.nb_true_divide = " << nb["__div__"] << ';' << endl;
+}
+
+void CppGenerator::writeTpTraverseFunction(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    QString baseName = cpythonBaseName(metaClass);
+    s << "static int ";
+    s << baseName << "_traverse(PyObject* self, visitproc visit, void* arg)" << endl;
+    s << '{' << endl;
+    s << INDENT << "return reinterpret_cast<PyTypeObject*>(&SbkObject_Type)->tp_traverse(self, visit, arg);" << endl;
+    s << '}' << endl;
+}
+
+void CppGenerator::writeTpClearFunction(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    QString baseName = cpythonBaseName(metaClass);
+    s << "static int ";
+    s << baseName << "_clear(PyObject* self)" << endl;
+    s << '{' << endl;
+    s << INDENT << "return reinterpret_cast<PyTypeObject*>(&SbkObject_Type)->tp_clear(self);" << endl;
+    s << '}' << endl;
 }
 
 void CppGenerator::writeCopyFunction(QTextStream& s, const AbstractMetaClass *metaClass)

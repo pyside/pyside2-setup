@@ -76,9 +76,9 @@ PyTypeObject SbkObjectType_Type = {
     /*tp_descr_set*/        0,
     /*tp_dictoffset*/       0,
     /*tp_init*/             0,
-    /*tp_alloc*/            0,
+    /*tp_alloc*/            PyType_GenericAlloc,
     /*tp_new*/              SbkObjectTypeTpNew,
-    /*tp_free*/             0,
+    /*tp_free*/             PyObject_GC_Del,
     /*tp_is_gc*/            0,
     /*tp_bases*/            0,
     /*tp_mro*/              0,
@@ -102,6 +102,22 @@ static PyGetSetDef SbkObjectGetSetList[] = {
     {0} // Sentinel
 };
 
+static int SbkObject_traverse(PyObject* self, visitproc visit, void* arg)
+{
+    SbkObject* sbkSelf = reinterpret_cast<SbkObject*>(self);
+    if (sbkSelf->ob_dict)
+        Py_VISIT(sbkSelf->ob_dict);
+    return 0;
+}
+
+static int SbkObject_clear(PyObject* self)
+{
+    SbkObject* sbkSelf = reinterpret_cast<SbkObject*>(self);
+    if (sbkSelf->ob_dict)
+        Py_CLEAR(sbkSelf->ob_dict);
+    return 0;
+}
+
 SbkObjectType SbkObject_Type = { { {
     PyObject_HEAD_INIT(&SbkObjectType_Type)
     /*ob_size*/             0,
@@ -123,10 +139,10 @@ SbkObjectType SbkObject_Type = { { {
     /*tp_getattro*/         0,
     /*tp_setattro*/         0,
     /*tp_as_buffer*/        0,
-    /*tp_flags*/            Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
+    /*tp_flags*/            Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC,
     /*tp_doc*/              0,
-    /*tp_traverse*/         0,
-    /*tp_clear*/            0,
+    /*tp_traverse*/         SbkObject_traverse,
+    /*tp_clear*/            SbkObject_clear,
     /*tp_richcompare*/      0,
     /*tp_weaklistoffset*/   offsetof(SbkObject, weakreflist),
     /*tp_iter*/             0,
@@ -188,9 +204,9 @@ void SbkDeallocWrapperWithPrivateDtor(PyObject* self)
 void SbkObjectTypeDealloc(PyObject* pyObj)
 {
     SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(pyObj);
-    if (!sbkType->d)
-        return;
 
+    PyObject_GC_UnTrack(pyObj);
+    Py_TRASHCAN_SAFE_BEGIN(pyObj);
     if(sbkType->d->user_data && sbkType->d->d_func) {
         sbkType->d->d_func(sbkType->d->user_data);
         sbkType->d->user_data = 0;
@@ -199,6 +215,7 @@ void SbkObjectTypeDealloc(PyObject* pyObj)
     sbkType->d->original_name = 0;
     delete sbkType->d;
     sbkType->d = 0;
+    Py_TRASHCAN_SAFE_END(pyObj);
 }
 
 PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
@@ -275,7 +292,8 @@ PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* k
 
 PyObject* SbkObjectTpNew(PyTypeObject* subtype, PyObject*, PyObject*)
 {
-    SbkObject* self = reinterpret_cast<SbkObject*>(subtype->tp_alloc(subtype, 0));
+    SbkObject* self = PyObject_GC_New(SbkObject, subtype);
+    Py_INCREF(reinterpret_cast<PyObject*>(subtype));
     SbkObjectPrivate* d = new SbkObjectPrivate;
 
     SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(subtype);
@@ -291,6 +309,7 @@ PyObject* SbkObjectTpNew(PyTypeObject* subtype, PyObject*, PyObject*)
     self->ob_dict = 0;
     self->weakreflist = 0;
     self->d = d;
+    PyObject_GC_Track(reinterpret_cast<PyObject*>(self));
     return reinterpret_cast<PyObject*>(self);
 }
 

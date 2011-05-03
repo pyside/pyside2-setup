@@ -142,6 +142,9 @@ private:
 
     void writeTypeAsNumberDefinition(QTextStream& s, const AbstractMetaClass* metaClass);
 
+    void writeTpTraverseFunction(QTextStream& s, const AbstractMetaClass* metaClass);
+    void writeTpClearFunction(QTextStream& s, const AbstractMetaClass* metaClass);
+
     void writeCopyFunction(QTextStream& s, const AbstractMetaClass *metaClass);
 
     void writeGetterFunction(QTextStream& s, const AbstractMetaField* metaField);
