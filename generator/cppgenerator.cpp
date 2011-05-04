@@ -3018,7 +3018,19 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                 if (func->isStatic())
                     continue;
 
-                const AbstractMetaType* type = func->arguments()[0]->type();
+                QString typeReplaced = func->typeReplaced(1);
+                const AbstractMetaType* type = 0;
+                if (typeReplaced.isEmpty())
+                    type = func->arguments()[0]->type();
+                else
+                    type = buildAbstractMetaTypeFromString(typeReplaced);
+
+                if (!type) {
+                    ReportHandler::warning("Unknown type (" + typeReplaced + ") used in type replacement in function "
+                                           + func->signature() + ", the generated code will be broken !!!");
+                    continue;
+                }
+
                 bool numberType = alternativeNumericTypes == 1 || ShibokenGenerator::isPyInt(type);
 
                 if (!comparesWithSameType)
