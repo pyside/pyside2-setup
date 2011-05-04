@@ -3768,10 +3768,18 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
 {
     s << "static PyObject* " << cpythonGetattroFunctionName(metaClass) << "(PyObject* self, PyObject* name)" << endl;
     s << '{' << endl;
+
+    QString getattrFunc;
+    if (usePySideExtensions() && metaClass->isQObject())
+        getattrFunc = "PySide::getMetaDataFromQObject(Shiboken::Converter<QObject*>::toCpp(self), self, name)";
+    else
+        getattrFunc = "PyObject_GenericGetAttr(self, name)";
+
     if (classNeedsGetattroFunction(metaClass)) {
         s << INDENT << "if (self) {" << endl;
         {
             Indentation indent(INDENT);
+            s << INDENT << "// Search the method in the instance dict" << endl;
             s << INDENT << "if (reinterpret_cast<SbkObject*>(self)->ob_dict) {" << endl;
             {
                 Indentation indent(INDENT);
@@ -3785,6 +3793,19 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
                 s << INDENT << '}' << endl;
             }
             s << INDENT << '}' << endl;
+            s << INDENT << "// Search the method in the type dict" << endl;
+            s << INDENT << "if (Shiboken::Object::isUserType(self)) {" << endl;
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "PyObject* meth = PyDict_GetItem(self->ob_type->tp_dict, name);" << endl;
+                s << INDENT << "if (meth)" << endl;
+                {
+                    Indentation indent(INDENT);
+                    s << INDENT << "return PyFunction_Check(meth) ? PyMethod_New(meth, self, (PyObject*)self->ob_type) : " << getattrFunc << ';' << endl;
+                }
+            }
+            s << INDENT << '}' << endl;
+
             s << INDENT << "const char* cname = PyString_AS_STRING(name);" << endl;
             foreach (const AbstractMetaFunction* func, getMethodsWithBothStaticAndNonStaticMethods(metaClass)) {
                 s << INDENT << "if (strcmp(cname, \"" << func->name() << "\") == 0)" << endl;
@@ -3794,10 +3815,7 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
         }
         s << INDENT << '}' << endl;
     }
-    if (usePySideExtensions() && metaClass->isQObject())
-        s << INDENT << "return PySide::getMetaDataFromQObject(Shiboken::Converter<QObject*>::toCpp(self), self, name);" << endl;
-    else
-        s << INDENT << "return PyObject_GenericGetAttr(self, name);" << endl;
+    s << INDENT << "return " << getattrFunc << ';' << endl;
     s << '}' << endl;
 }
 

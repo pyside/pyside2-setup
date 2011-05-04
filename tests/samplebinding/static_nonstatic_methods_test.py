@@ -31,6 +31,16 @@ import unittest
 
 from sample import SimpleFile
 
+class SimpleFile2 (SimpleFile):
+    def exists(self):
+        return "Mooo"
+
+class SimpleFile3 (SimpleFile):
+    pass
+
+class SimpleFile4 (SimpleFile):
+    exists = 5
+
 class StaticNonStaticMethodsTest(unittest.TestCase):
     '''Test cases for overloads involving static and non-static versions of a method.'''
 
@@ -73,6 +83,21 @@ class StaticNonStaticMethodsTest(unittest.TestCase):
         self.assertFalse(f1.exists())
         f2 = SimpleFile(self.existing_filename)
         self.assert_(f2.exists())
+
+    def testOverridingStaticNonStaticMethod(self):
+        f = SimpleFile2(self.existing_filename)
+        self.assertEqual(f.exists(), "Mooo")
+
+        f = SimpleFile3(self.existing_filename)
+        self.assertTrue(f.exists())
+
+        f = SimpleFile4(self.existing_filename)
+        self.assertEqual(f.exists, 5)
+
+    def testDuckPunchingStaticNonStaticMethod(self):
+        f = SimpleFile(self.existing_filename)
+        f.exists = lambda : "Meee"
+        self.assertEqual(f.exists(), "Meee")
 
 if __name__ == '__main__':
     unittest.main()
