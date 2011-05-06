@@ -29,6 +29,7 @@
 #include <QtCore/QDir>
 #include <QtCore/QTextStream>
 #include <QtCore/QDebug>
+#include <QMetaType>
 
 QHash<QString, QString> CppGenerator::m_nbFuncs = QHash<QString, QString>();
 QHash<QString, QString> CppGenerator::m_sqFuncs = QHash<QString, QString>();
@@ -3676,21 +3677,23 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream& s, const Abstrac
     }
 
     const QString className = metaClass->qualifiedCppName();
-    if (!metaClass->isNamespace() && !metaClass->isAbstract()) {
+    if (!metaClass->isNamespace() && !metaClass->isAbstract())  {
         // Qt metatypes are registered only on their first use, so we do this now.
-        const char* star = "*";
+        bool canBeValue = false;
         if (!metaClass->typeEntry()->isObject()) {
             // check if there's a empty ctor
             foreach (AbstractMetaFunction* func, metaClass->functions()) {
                 if (func->isConstructor() && !func->arguments().count()) {
-                    star = "";
+                    canBeValue = true;
                     break;
                 }
             }
         }
 
-        foreach (QString name, nameVariants)
-            s << INDENT << "qRegisterMetaType< ::" << className << star << " >(\"" << name << star << "\");" << endl;
+        if (canBeValue) {
+            foreach (QString name, nameVariants)
+                s << INDENT << "qRegisterMetaType< ::" << className << " >(\"" << name << "\");" << endl;
+        }
     }
     foreach (AbstractMetaEnum* metaEnum, metaClass->enums()) {
         if (!metaEnum->isPrivate() && !metaEnum->isAnonymous()) {
