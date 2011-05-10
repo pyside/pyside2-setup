@@ -422,7 +422,7 @@ bool Handler::startElement(const QString &, const QString &n,
             attributes["type"] = QString();
             break;
         case StackElement::EnumTypeEntry:
-            attributes["flags"] = "no";
+            attributes["flags"] = QString();
             attributes["upper-bound"] = QString();
             attributes["lower-bound"] = QString();
             attributes["force-integer"] = "no";
@@ -591,10 +591,19 @@ bool Handler::startElement(const QString &, const QString &n,
             m_currentEnum->setExtensible(convertBoolean(attributes["extensible"], "extensible", false));
 
             // put in the flags parallel...
-            if (!attributes["flags"].isEmpty() && attributes["flags"].toLower() != "no") {
+            QString flagName = attributes["flags"];
+            if (!flagName.isEmpty()) {
                 FlagsTypeEntry *ftype = new FlagsTypeEntry("QFlags<" + name + ">", since);
                 ftype->setOriginator(m_currentEnum);
-                ftype->setOriginalName(attributes["flags"]);
+                // Try to get the guess the qualified flag name
+                if (!flagName.contains("::") && names.count() > 1) {
+                    QStringList cpy(names);
+                    cpy.removeLast();
+                    cpy.append(flagName);
+                    flagName = cpy.join("::");
+                }
+
+                ftype->setOriginalName(flagName);
                 ftype->setCodeGeneration(m_generate);
                 QString n = ftype->originalName();
 
