@@ -2528,7 +2528,11 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     QString cppClassName = metaClass->qualifiedCppName();
     QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
     QString baseClassName('0');
-    AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
+    AbstractMetaFunctionList ctors;
+    foreach (AbstractMetaFunction* f, metaClass->queryFunctions(AbstractMetaClass::Constructors)) {
+        if (!f->isPrivate() && !f->isModifiedRemoved())
+            ctors.append(f);
+    }
 
     if (!metaClass->baseClass())
         baseClassName = "reinterpret_cast<PyTypeObject*>(&SbkObject_Type)";
