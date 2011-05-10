@@ -263,6 +263,13 @@ LIBSHIBOKEN_API bool        isValid(PyObject* pyObj);
 LIBSHIBOKEN_API bool        isValid(SbkObject* pyObj, bool throwPyError = true);
 
 /**
+ * Returns false if the Python wrapper is not marked as valid.
+ * \param pyObj the object.
+ * \param throwPyError sets a Python RuntimeError when the object isn't valid.
+ */
+LIBSHIBOKEN_API bool        isValid(PyObject* pyObj, bool throwPyError);
+
+/**
 *   Set the parent of \p child to \p parent.
 *   When an object dies, all their children, grandchildren, etc, are tagged as invalid.
 *   \param parent the parent object, if null, the child will have no parents.

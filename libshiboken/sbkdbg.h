@@ -24,6 +24,7 @@
 #define SBKDBG_H
 
 #include <Python.h>
+#include "basewrapper.h"
 #include <iostream>
 
 #ifndef NOCOLOR
@@ -68,7 +69,7 @@ private:
 
 inline std::ostream& operator<<(std::ostream& out, PyObject* obj)
 {
-    PyObject* repr = PyObject_Repr(obj);
+    PyObject* repr = Shiboken::Object::isValid(obj, false) ? PyObject_Repr(obj) : 0;
     if (repr) {
         out << PyString_AS_STRING(repr);
         Py_DECREF(repr);

@@ -848,6 +848,15 @@ bool isValid(SbkObject* pyObj, bool throwPyError)
     return true;
 }
 
+bool isValid(PyObject* pyObj, bool throwPyError)
+{
+    if (!pyObj || pyObj == Py_None ||
+        !PyType_IsSubtype(pyObj->ob_type, reinterpret_cast<PyTypeObject*>(&SbkObject_Type))) {
+        return true;
+    }
+    return isValid(reinterpret_cast<SbkObject*>(pyObj), throwPyError);
+}
+
 PyObject* newObject(SbkObjectType* instanceType,
                     void* cptr,
                     bool hasOwnership,
@@ -1091,7 +1100,7 @@ void clearReferences(SbkObject* self)
     self->d->referredObjects = 0;
 }
 
-} // namespace Wrapper
+} // namespace Object
 
 } // namespace Shiboken
 
