@@ -2212,8 +2212,8 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                         virtualCall = virtualCall.replace("%CLASS_NAME", func->ownerClass()->qualifiedCppName());
                         normalCall = normalCall.replace("::%CLASS_NAME::", "");
                         methodCall = "";
-                        mc << "(Shiboken::Object::isUserType(self) ? ";
-                        mc << virtualCall << " : " <<  normalCall << ")";
+                        mc << "Shiboken::Object::hasCppWrapper(reinterpret_cast<SbkObject*>(self)) ? ";
+                        mc << virtualCall << " : " <<  normalCall;
                     }
                 }
             }

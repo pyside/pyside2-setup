@@ -45,6 +45,7 @@ class DuckPunchingTest(unittest.TestCase):
     def setUp(self):
         self.multiplier = 2.0
         self.duck_method_called = False
+        self.call_counter = 0
 
     def testMonkeyPatchOnVirtualMethod(self):
         '''Injects new 'virtualMethod0' on a VirtualMethods instance and makes C++ call it.'''
@@ -146,6 +147,17 @@ class DuckPunchingTest(unittest.TestCase):
         self.assert_(self.duck_method_called)
 
         monkey.exists = None
+
+    def testForInfiniteRecursion(self):
+        def myVirtualMethod0(obj, pt, val, cpx, b):
+            self.call_counter += 1
+            return VirtualMethods.virtualMethod0(obj, pt, val, cpx, b)
+        vm = VirtualMethods()
+        vm.virtualMethod0 = types.MethodType(myVirtualMethod0, vm, VirtualMethods)
+        pt, val, cpx, b = Point(1.1, 2.2), 4, complex(3.3, 4.4), True
+        vm.virtualMethod0(pt, val, cpx, b)
+        self.assertEqual(self.call_counter, 1)
+
 
 if __name__ == '__main__':
     unittest.main()
