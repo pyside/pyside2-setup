@@ -72,6 +72,8 @@ void AbstractMetaBuilder::checkFunctionModifications()
     TypeDatabase *types = TypeDatabase::instance();
     SingleTypeEntryHash entryHash = types->entries();
     QList<TypeEntry*> entries = entryHash.values();
+    double apiVersion = TypeDatabase::instance()->apiVersion();
+
     foreach (TypeEntry* entry, entries) {
         if (!entry)
             continue;
@@ -82,6 +84,8 @@ void AbstractMetaBuilder::checkFunctionModifications()
         FunctionModificationList modifications = centry->functionModifications();
 
         foreach (FunctionModification modification, modifications) {
+            if (modification.version() > apiVersion)
+                continue;
             QString signature = modification.signature;
 
             QString name = signature.trimmed();
