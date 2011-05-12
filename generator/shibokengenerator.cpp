@@ -392,7 +392,8 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction*
 
     if (arg->type()->isEnum()) {
         const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(arg->type());
-        prefix = resolveScopePrefix(metaEnum->enclosingClass(), value);
+        if (metaEnum)
+            prefix = resolveScopePrefix(metaEnum->enclosingClass(), value);
     } else if (arg->type()->isFlags()) {
         static QRegExp numberRegEx("^\\d+$"); // Numbers to flags
         if (numberRegEx.exactMatch(value)) {
@@ -1467,10 +1468,12 @@ AbstractMetaFunctionList ShibokenGenerator::getMethodsWithBothStaticAndNonStatic
 AbstractMetaClassList ShibokenGenerator::getBaseClasses(const AbstractMetaClass* metaClass) const
 {
     AbstractMetaClassList baseClasses;
-    foreach (QString parent, metaClass->baseClassNames()) {
-        AbstractMetaClass* clazz = classes().findClass(parent);
-        if (clazz)
-            baseClasses << clazz;
+    if (metaClass) {
+        foreach (QString parent, metaClass->baseClassNames()) {
+            AbstractMetaClass* clazz = classes().findClass(parent);
+            if (clazz)
+                baseClasses << clazz;
+        }
     }
     return baseClasses;
 }
@@ -1487,10 +1490,12 @@ const AbstractMetaClass* ShibokenGenerator::getMultipleInheritingClass(const Abs
 AbstractMetaClassList ShibokenGenerator::getAllAncestors(const AbstractMetaClass* metaClass) const
 {
     AbstractMetaClassList result;
-    AbstractMetaClassList baseClasses = getBaseClasses(metaClass);
-    foreach (AbstractMetaClass* base, baseClasses) {
-        result.append(base);
-        result.append(getAllAncestors(base));
+    if (metaClass) {
+        AbstractMetaClassList baseClasses = getBaseClasses(metaClass);
+        foreach (AbstractMetaClass* base, baseClasses) {
+            result.append(base);
+            result.append(getAllAncestors(base));
+        }
     }
     return result;
 }
