@@ -39,6 +39,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/mderived2_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/mderived3_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/mderived4_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/mderived5_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/modelindex_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/modifications_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/modifiedconstructor_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/noimplicitconversion_wrapper.cpp
@@ -54,6 +55,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/overload_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/overload2_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pairuser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pen_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/persistentmodelindex_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/point_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pointf_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pointerholder_wrapper.cpp
@@ -70,6 +72,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/protectedvirtualdestructor_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/rect_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/rectf_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/reference_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/referentmodelindex_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/sample_module_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/samplenamespace_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/samplenamespace_someclass_someinnerclass_okthisisrecursiveenough_wrapper.cpp

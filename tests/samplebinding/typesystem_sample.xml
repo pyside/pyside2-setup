@@ -1473,6 +1473,16 @@
 
     <value-type name="Expression" />
 
+    <value-type name="ModelIndex" />
+    <value-type name="ReferentModelIndex">
+        <modify-function signature="operator const ModelIndex&amp;()const">
+            <modify-argument index="return">
+                <define-ownership owner="c++"/>
+            </modify-argument>
+        </modify-function>
+    </value-type>
+    <value-type name="PersistentModelIndex" />
+
     <rejection class="ListUser" function-name="createList()"/>
     <rejection class="ListUser" function-name="callCreateList()"/>
     <rejection class="ListUser" function-name="createComplexList(Complex, Complex)"/>
