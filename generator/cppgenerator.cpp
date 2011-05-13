@@ -2319,8 +2319,9 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         foreach (ArgumentModification arg_mod, refcount_mods) {
             ReferenceCount refCount = arg_mod.referenceCounts.first();
             if (refCount.action != ReferenceCount::Set
-                && refCount.action != ReferenceCount::Remove) {
-                ReportHandler::warning("\"set\" and \"remove\" are the only values supported by Shiboken for action attribute of reference-count tag.");
+                && refCount.action != ReferenceCount::Remove 
+                && refCount.action != ReferenceCount::Add) {
+                ReportHandler::warning("\"set\", \"add\" and \"remove\" are the only values supported by Shiboken for action attribute of reference-count tag.");
                 continue;
             }
             const AbstractMetaClass* wrappedClass = 0;
@@ -2341,7 +2342,9 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             if (varName.isEmpty())
                 varName = func->minimalSignature() + QString().number(arg_mod.index);
 
-            s << varName << "\", " << pyArgName << ");" << endl;
+            s << varName << "\", " << pyArgName << ", "
+              << (refCount.action == ReferenceCount::Add ? "true" : "false")
+              << ");" << endl;
 
             if (arg_mod.index == 0)
                 hasReturnPolicy = true;
