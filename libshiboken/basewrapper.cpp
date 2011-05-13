@@ -1089,7 +1089,7 @@ void keepReference(SbkObject* self, const char* key, PyObject* referredObject, b
 
     RefCountMap& refCountMap = *(self->d->referredObjects);
     if (!isNone)
-        incRefPyObject(referredObject);
+        Py_INCREF(referredObject);
 
     RefCountMap::iterator iter = refCountMap.find(key);
     if (!append && (iter != refCountMap.end())) {
@@ -1098,11 +1098,13 @@ void keepReference(SbkObject* self, const char* key, PyObject* referredObject, b
     }
 
     if (!isNone) {
-        std::list<SbkObject*> values = splitPyObject(referredObject);
-        if (append && (iter != refCountMap.end()))
-            refCountMap[key].insert(refCountMap[key].end(), values.begin(), values.end());
-        else
-            refCountMap[key] = values;
+        if (append && (iter != refCountMap.end())) {
+            refCountMap[key].push_back(reinterpret_cast<SbkObject*>(referredObject));
+        } else {
+            std::list<SbkObject*> new_list;
+            new_list.push_back(reinterpret_cast<SbkObject*>(referredObject));
+            refCountMap[key] = new_list;;
+        }
     }
 }
 
