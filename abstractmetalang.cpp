@@ -784,6 +784,11 @@ bool AbstractMetaFunction::isArithmeticOperator() const
         return false;
 
     QString name = originalName();
+
+    // It's a dereference operator!
+    if (name == "operator*" && m_arguments.isEmpty())
+        return false;
+
     return name == "operator+" || name == "operator+="
             || name == "operator-" || name == "operator-="
             || name == "operator*" || name == "operator*="
@@ -1343,7 +1348,7 @@ void AbstractMetaClass::addFunction(AbstractMetaFunction *function)
 {
     Q_ASSERT(!function->signature().startsWith("("));
     function->setOwnerClass(this);
- 
+
     if (!function->isDestructor())
         m_functions << function;
     else
