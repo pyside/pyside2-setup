@@ -406,12 +406,10 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
         if (rfunc->isConstructor())
             writeConstructorWrapper(s, overloads);
-
         // call operators
-        if (rfunc->name() == "operator()")
+        else if (rfunc->name() == "operator()")
             writeMethodWrapper(s, overloads);
-
-        if (!rfunc->isConstructor() && !rfunc->isOperatorOverload()) {
+        else if (!rfunc->isOperatorOverload()) {
             writeMethodWrapper(s, overloads);
             if (OverloadData::hasStaticAndInstanceFunctions(overloads)) {
                 QString methDefName = cpythonMethodDefinitionName(rfunc);
