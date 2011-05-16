@@ -1,3 +1,4 @@
+add_subdirectory(libminimal)
 add_subdirectory(libsample)
 add_subdirectory(libother)
 
@@ -9,10 +10,13 @@ else()
     set(GENERATOR_EXTRA_FLAGS )
 endif()
 
+add_subdirectory(minimalbinding)
 add_subdirectory(samplebinding)
 add_subdirectory(otherbinding)
 
-file(GLOB TEST_FILES samplebinding/*_test.py otherbinding/*_test.py)
+file(GLOB TEST_FILES minimalbinding/*_test.py
+                     samplebinding/*_test.py
+                     otherbinding/*_test.py)
 
 set(test_blacklist "")
 
@@ -25,16 +29,16 @@ if(CMAKE_VERSION VERSION_LESS 2.8)
     message("CMake version greater than 2.8 necessary to run tests")
 else()
     if(WIN32)
-        set(TEST_PYTHONPATH     "${sample_BINARY_DIR};${other_BINARY_DIR}")
-        set(TEST_LIBRARY_PATH   "$ENV{PATH};${libsample_BINARY_DIR};${libother_BINARY_DIR};${libshiboken_BINARY_DIR}")
+        set(TEST_PYTHONPATH     "${minimal_BINARY_DIR};${sample_BINARY_DIR};${other_BINARY_DIR}")
+        set(TEST_LIBRARY_PATH   "$ENV{PATH};${libminimal_BINARY_DIR};${libsample_BINARY_DIR};${libother_BINARY_DIR};${libshiboken_BINARY_DIR}")
         set(LIBRARY_PATH_VAR    "PATH")
         string(REPLACE "\\" "/" TEST_PYTHONPATH "${TEST_PYTHONPATH}")
         string(REPLACE "\\" "/" TEST_LIBRARY_PATH "${TEST_LIBRARY_PATH}")
         string(REPLACE ";" "\\;" TEST_PYTHONPATH "${TEST_PYTHONPATH}")
         string(REPLACE ";" "\\;" TEST_LIBRARY_PATH "${TEST_LIBRARY_PATH}")
     else()
-        set(TEST_PYTHONPATH     "${sample_BINARY_DIR}:${other_BINARY_DIR}")
-        set(TEST_LIBRARY_PATH   "$ENV{LD_LIBRARY_PATH}:${libsample_BINARY_DIR}:${libother_BINARY_DIR}:${libshiboken_BINARY_DIR}")
+        set(TEST_PYTHONPATH     "${minimal_BINARY_DIR}:${sample_BINARY_DIR}:${other_BINARY_DIR}")
+        set(TEST_LIBRARY_PATH   "$ENV{LD_LIBRARY_PATH}:${libminimal_BINARY_DIR}:${libsample_BINARY_DIR}:${libother_BINARY_DIR}:${libshiboken_BINARY_DIR}")
         set(LIBRARY_PATH_VAR    "LD_LIBRARY_PATH")
     endif()
 

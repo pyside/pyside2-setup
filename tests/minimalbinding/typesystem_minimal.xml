@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<typesystem package="minimal">
+    <primitive-type name="bool"/>
+    <primitive-type name="int"/>
+    <object-type name="Obj"/>
+    <value-type name="Val"/>
+</typesystem>
+
