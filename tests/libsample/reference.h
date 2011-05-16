@@ -53,6 +53,9 @@ public:
 
     virtual Reference& returnMyFirstArg(Reference& ref) { return ref; }
     virtual Reference& returnMySecondArg(int a, Reference& ref) { return ref; }
+
+    // nonsense operator to test if Shiboken is ignoring dereference operators.
+    int operator*() { return m_objId; }
 private:
     int m_objId;
 };
