@@ -2320,7 +2320,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         foreach (ArgumentModification arg_mod, refcount_mods) {
             ReferenceCount refCount = arg_mod.referenceCounts.first();
             if (refCount.action != ReferenceCount::Set
-                && refCount.action != ReferenceCount::Remove 
+                && refCount.action != ReferenceCount::Remove
                 && refCount.action != ReferenceCount::Add) {
                 ReportHandler::warning("\"set\", \"add\" and \"remove\" are the only values supported by Shiboken for action attribute of reference-count tag.");
                 continue;
