@@ -2679,14 +2679,12 @@ void CppGenerator::writeMappingMethods(QTextStream& s, const AbstractMetaClass* 
 {
 
     QMap<QString, QString> funcs;
-    bool injectedCode = false;
 
     QHash< QString, QPair< QString, QString > >::const_iterator it = m_mappingProtocol.begin();
     for (; it != m_mappingProtocol.end(); ++it) {
         const AbstractMetaFunction* func = metaClass->findFunction(it.key());
         if (!func)
             continue;
-        injectedCode = true;
         QString funcName = cpythonFunctionName(func);
         QString funcArgs = it.value().first;
         QString funcRetVal = it.value().second;

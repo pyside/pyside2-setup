@@ -319,7 +319,6 @@ PyObject* SbkObjectTpNew(PyTypeObject* subtype, PyObject*, PyObject*)
 namespace Shiboken
 {
 
-static void incRefPyObject(PyObject* pyObj);
 static void decRefPyObjectList(const std::list<SbkObject*> &pyObj);
 
 void walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visitor)
@@ -473,17 +472,6 @@ std::list<SbkObject*> splitPyObject(PyObject* pyObj)
         result.push_back(reinterpret_cast<SbkObject*>(pyObj));
     }
     return result;
-}
-
-static void incRefPyObject(PyObject* pyObj)
-{
-    if (PySequence_Check(pyObj)) {
-        for(int i = 0, i_max = PySequence_Size(pyObj); i < i_max; i++) {
-            PySequence_GetItem(pyObj, i);
-        }
-    } else {
-        Py_INCREF(pyObj);
-    }
 }
 
 static void decRefPyObjectList(const std::list<SbkObject*>& lst)
