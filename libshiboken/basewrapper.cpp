@@ -57,7 +57,7 @@ PyTypeObject SbkObjectType_Type = {
     /*tp_call*/             0,
     /*tp_str*/              0,
     /*tp_getattro*/         0,
-    /*tp_setattro*/         0,
+    /*tp_setattro*/         PyObject_GenericSetAttr,
     /*tp_as_buffer*/        0,
     /*tp_flags*/            Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
     /*tp_doc*/              0,
