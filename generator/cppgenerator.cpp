@@ -1985,6 +1985,7 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction* func, in
         if (argType) {
             *wrappedClass = classes().findClass(argType->typeEntry()->name());
             if (argIndex == 1
+                && !func->isConstructor()
                 && OverloadData::isSingleArgument(getFunctionGroups(func->implementingClass())[func->name()]))
                 pyArgName = QString("arg");
             else
