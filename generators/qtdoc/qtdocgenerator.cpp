@@ -72,7 +72,7 @@ static bool shouldSkip(const AbstractMetaFunction* func)
     return skipable;
 }
 
-static bool functionSort(const AbstractMetaFunction *func1, const AbstractMetaFunction *func2)
+static bool functionSort(const AbstractMetaFunction* func1, const AbstractMetaFunction* func2)
 {
     return func1->name() < func2->name();
 }
@@ -863,7 +863,7 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
     return s;
 }
 
-static QString getFuncName(const AbstractMetaFunction *cppFunc) {
+static QString getFuncName(const AbstractMetaFunction* cppFunc) {
     static bool hashInitialized = false;
     static QHash<QString, QString> operatorsHash;
     if (!hashInitialized) {
@@ -910,7 +910,7 @@ QtDocGenerator::~QtDocGenerator()
     delete m_docParser;
 }
 
-QString QtDocGenerator::fileNameForClass(const AbstractMetaClass *cppClass) const
+QString QtDocGenerator::fileNameForClass(const AbstractMetaClass* cppClass) const
 {
     return QString("%1.rst").arg(getClassTargetFullName(cppClass, false));
 }
@@ -942,7 +942,7 @@ void QtDocGenerator::writeFormatedText(QTextStream& s, const Documentation& doc,
     s << endl;
 }
 
-void QtDocGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaClass)
+void QtDocGenerator::generateClass(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     ReportHandler::debugSparse("Generating Documentation for " + metaClass->fullName());
 
@@ -1071,24 +1071,24 @@ void QtDocGenerator::writeEnums(QTextStream& s, const AbstractMetaClass* cppClas
 {
     static const QString section_title(".. attribute:: ");
 
-    foreach (AbstractMetaEnum *en, cppClass->enums()) {
+    foreach (AbstractMetaEnum* en, cppClass->enums()) {
         s << section_title << getClassTargetFullName(cppClass) << "." << en->name() << endl << endl;
         writeFormatedText(s, en->documentation(), cppClass);
     }
 }
 
-void QtDocGenerator::writeFields(QTextStream &s, const AbstractMetaClass *cppClass)
+void QtDocGenerator::writeFields(QTextStream& s, const AbstractMetaClass* cppClass)
 {
     static const QString section_title(".. attribute:: ");
 
-    foreach (AbstractMetaField *field, cppClass->fields()) {
+    foreach (AbstractMetaField* field, cppClass->fields()) {
         s << section_title << getClassTargetFullName(cppClass) << "." << field->name() << endl << endl;
         //TODO: request for member ‘documentation’ is ambiguous
         writeFormatedText(s, field->AbstractMetaAttributes::documentation(), cppClass);
     }
 }
 
-void QtDocGenerator::writeConstructors(QTextStream &s, const AbstractMetaClass *cppClass)
+void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* cppClass)
 {
     static const QString sectionTitle = ".. class:: ";
     static const QString sectionTitleSpace = QString(sectionTitle.size(), ' ');
@@ -1096,9 +1096,9 @@ void QtDocGenerator::writeConstructors(QTextStream &s, const AbstractMetaClass *
     AbstractMetaFunctionList lst = cppClass->queryFunctions(AbstractMetaClass::Constructors | AbstractMetaClass::Visible);
 
     bool first = true;
-    QHash<QString, AbstractMetaArgument *> arg_map;
+    QHash<QString, AbstractMetaArgument*> arg_map;
 
-    foreach(AbstractMetaFunction *func, lst) {
+    foreach(AbstractMetaFunction* func, lst) {
         if (func->isModifiedRemoved())
             continue;
 
@@ -1109,7 +1109,7 @@ void QtDocGenerator::writeConstructors(QTextStream &s, const AbstractMetaClass *
             s << sectionTitleSpace;
         }
         writeFunction(s, false, cppClass, func);
-        foreach(AbstractMetaArgument *arg, func->arguments())
+        foreach(AbstractMetaArgument* arg, func->arguments())
         {
             if (!arg_map.contains(arg->name())) {
                 arg_map.insert(arg->name(), arg);
@@ -1119,19 +1119,19 @@ void QtDocGenerator::writeConstructors(QTextStream &s, const AbstractMetaClass *
 
     s << endl;
 
-    foreach (AbstractMetaArgument *arg, arg_map.values()) {
+    foreach (AbstractMetaArgument* arg, arg_map.values()) {
         Indentation indentation(INDENT);
         writeParamerteType(s, cppClass, arg);
     }
 
     s << endl;
 
-    foreach (AbstractMetaFunction *func, lst) {
+    foreach (AbstractMetaFunction* func, lst) {
         writeFormatedText(s, func->documentation(), cppClass);
     }
 }
 
-QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass *cppClass, const AbstractMetaFunction *func)
+QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* cppClass, const AbstractMetaFunction* func)
 {
     QString ret;
     int optArgs = 0;
@@ -1236,10 +1236,10 @@ void QtDocGenerator::writeDocSnips(QTextStream &s,
     }
 }
 
-bool QtDocGenerator::writeInjectDocumentation(QTextStream &s,
+bool QtDocGenerator::writeInjectDocumentation(QTextStream& s,
                                             DocModification::Mode mode,
-                                            const AbstractMetaClass *cppClass,
-                                            const AbstractMetaFunction *func)
+                                            const AbstractMetaClass* cppClass,
+                                            const AbstractMetaFunction* func)
 {
     Indentation indentation(INDENT);
     bool didSomething = false;
@@ -1297,7 +1297,7 @@ void QtDocGenerator::writeFunctionSignature(QTextStream& s, const AbstractMetaCl
     s << funcName << "(" << parseArgDocStyle(cppClass, func) << ")";
 }
 
-QString QtDocGenerator::translateToPythonType(const AbstractMetaType *type, const AbstractMetaClass *cppClass)
+QString QtDocGenerator::translateToPythonType(const AbstractMetaType* type, const AbstractMetaClass* cppClass)
 {
     QString strType;
     if (type->name() == "QString") {
@@ -1339,18 +1339,18 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType *type, cons
     return strType;
 }
 
-void QtDocGenerator::writeParamerteType(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaArgument *arg)
+void QtDocGenerator::writeParamerteType(QTextStream& s, const AbstractMetaClass* cppClass, const AbstractMetaArgument* arg)
 {
     s << INDENT << ":param " << arg->name() << ": "
       << translateToPythonType(arg->type(), cppClass) << endl;
 }
 
-void QtDocGenerator::writeFunctionParametersType(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaFunction* func)
+void QtDocGenerator::writeFunctionParametersType(QTextStream& s, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func)
 {
     Indentation indentation(INDENT);
 
     s << endl;
-    foreach (AbstractMetaArgument *arg, func->arguments()) {
+    foreach (AbstractMetaArgument* arg, func->arguments()) {
 
         if (func->argumentRemoved(arg->argumentIndex() + 1))
             continue;
@@ -1378,7 +1378,7 @@ void QtDocGenerator::writeFunctionParametersType(QTextStream &s, const AbstractM
     s << endl;
 }
 
-void QtDocGenerator::writeFunction(QTextStream &s, bool writeDoc, const AbstractMetaClass *cppClass, const AbstractMetaFunction* func)
+void QtDocGenerator::writeFunction(QTextStream& s, bool writeDoc, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func)
 {
     writeFunctionSignature(s, cppClass, func);
     s << endl;
