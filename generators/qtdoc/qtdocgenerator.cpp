@@ -581,11 +581,16 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
             l_linktag = " :func:`";
         } else if (l_type == "class") {
             l_linktag = " :class:`";
-            QStringList rawlinklist = l_linkref.split(".");
-            QStringList splittedContext = m_context.split(".");
-            if (rawlinklist.size() == 1 || rawlinklist.first() == splittedContext.last()) {
-                splittedContext.removeLast();
-                l_linkref.prepend('~' + splittedContext.join(".") + '.');
+            TypeEntry* type = TypeDatabase::instance()->findType(l_linkref);
+            if (type) {
+                l_linkref = type->qualifiedTargetLangName();
+            } else { // fall back to the old heuristic if the type wasn't found.
+                QStringList rawlinklist = l_linkref.split(".");
+                QStringList splittedContext = m_context.split(".");
+                if (rawlinklist.size() == 1 || rawlinklist.first() == splittedContext.last()) {
+                    splittedContext.removeLast();
+                    l_linkref.prepend('~' + splittedContext.join(".") + '.');
+                }
             }
         } else if (l_type == "enum") {
             l_linktag = " :attr:`";
