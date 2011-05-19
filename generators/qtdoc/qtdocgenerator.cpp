@@ -966,6 +966,9 @@ void QtDocGenerator::generateClass(QTextStream& s, const AbstractMetaClass* meta
     s << ".. inheritance-diagram:: " << className << endl
       << "    :parts: 2" << endl << endl; // TODO: This would be a parameter in the future...
 
+    if (metaClass->typeEntry() && (metaClass->typeEntry()->version() != 0))
+        s << ".. note:: This class was introduced in Qt " << metaClass->typeEntry()->version() << endl;
+
     writeFunctionList(s, metaClass);
 
     //Function list
@@ -1079,7 +1082,11 @@ void QtDocGenerator::writeEnums(QTextStream& s, const AbstractMetaClass* cppClas
     foreach (AbstractMetaEnum* en, cppClass->enums()) {
         s << section_title << getClassTargetFullName(cppClass) << "." << en->name() << endl << endl;
         writeFormatedText(s, en->documentation(), cppClass);
+
+        if (en->typeEntry() && (en->typeEntry()->version() != 0))
+            s << ".. note:: This enum was introduced or modified in Qt " << en->typeEntry()->version() << endl;
     }
+
 }
 
 void QtDocGenerator::writeFields(QTextStream& s, const AbstractMetaClass* cppClass)
@@ -1387,6 +1394,9 @@ void QtDocGenerator::writeFunction(QTextStream& s, bool writeDoc, const Abstract
 {
     writeFunctionSignature(s, cppClass, func);
     s << endl;
+
+    if (func->typeEntry() && (func->typeEntry()->version() != 0))
+        s << ".. note:: This method was introduced in Qt " << func->typeEntry()->version() << endl;
 
     if (writeDoc) {
         s << endl;
