@@ -188,7 +188,8 @@ void SbkDeallocWrapper(PyObject* pyObj)
             sbkType->d->cpp_dtor(sbkObj->d->cptr[0]);
         }
     }
-    Shiboken::Object::deallocData(sbkObj, !sbkObj->d->containsCppWrapper);
+    //Always destroy object data during the python object destruction
+    Shiboken::Object::deallocData(sbkObj, true);
 }
 
 void SbkDeallocWrapperWithPrivateDtor(PyObject* self)
@@ -940,7 +941,6 @@ void removeParent(SbkObject* child, bool giveOwnershipBack, bool keepReference)
     if (!pInfo || !pInfo->parent) {
         return;
     }
-
     ChildrenList& oldBrothers = pInfo->parent->d->parentInfo->children;
     // Verify if this child is part of parent list
     ChildrenList::iterator iChild = std::find(oldBrothers.begin(), oldBrothers.end(), child);

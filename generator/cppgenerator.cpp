@@ -278,6 +278,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         s << "#include <pysidesignal.h>" << endl;
         s << "#include <pysideproperty.h>" << endl;
         s << "#include <pyside.h>" << endl;
+        s << "#include <destroylistener.h>" << endl;
     }
 
     s << "#include <typeresolver.h>" << endl;
@@ -597,8 +598,13 @@ void CppGenerator::writeDestructorNative(QTextStream &s, const AbstractMetaClass
 {
     Indentation indentation(INDENT);
     s << wrapperName(metaClass) << "::~" << wrapperName(metaClass) << "()" << endl << '{' << endl;
-    s << INDENT << "SbkObject* wrapper = Shiboken::BindingManager::instance().retrieveWrapper(this);" << endl;
-    s << INDENT << "Shiboken::Object::destroy(wrapper, this);" << endl;
+    // kill pyobject
+    if (usePySideExtensions() && metaClass->isQObject()) {
+        s << INDENT << "PySide::DestroyListener::instance()->listen(this);" << endl;
+    } else {
+        s << INDENT << "SbkObject* wrapper = Shiboken::BindingManager::instance().retrieveWrapper(this);" << endl;
+        s << INDENT << "Shiboken::Object::destroy(wrapper, this);" << endl;
+    }
     s << '}' << endl;
 }
 
