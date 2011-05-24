@@ -58,6 +58,7 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
 
     QStringList includePaths;
     QStringList typesystemPaths;
+    QStringList apiVersions;
 
     while (!projectFile.atEnd()) {
         line = projectFile.readLine().trimmed();
@@ -78,6 +79,8 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
             includePaths << QDir::toNativeSeparators(value);
         else if (key == "typesystem-path")
             typesystemPaths << QDir::toNativeSeparators(value);
+        else if (key == "api-version")
+            apiVersions << value;
         else if (key == "header-file")
             args["arg-1"] = value;
         else if (key == "typesystem-file")
@@ -91,7 +94,8 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
 
     if (!typesystemPaths.isEmpty())
         args["typesystem-paths"] = typesystemPaths.join(PATH_SPLITTER);
-
+    if (!apiVersions.isEmpty())
+        args["api-version"] = apiVersions.join("|");
     return true;
 }
 
@@ -180,7 +184,7 @@ void printUsage(const GeneratorList& generators)
     generalOptions.insert("license-file=<license-file>", "File used for copyright headers of generated files");
     generalOptions.insert("version", "Output version information and exit");
     generalOptions.insert("generator-set=<\"generator module\">", "generator-set to be used. e.g. qtdoc");
-    generalOptions.insert("api-version=<\"version\">", "Specify the supported api version used to generate the bindings");
+    generalOptions.insert("api-version=<\"package mask\">,<\"version\">", "Specify the supported api version used to generate the bindings");
     generalOptions.insert("drop-type-entries=\"<TypeEntry0>[;TypeEntry1;...]\"", "Semicolon separated list of type system entries (classes, namespaces, global functions and enums) to be dropped from generation.");
     printOptions(s, generalOptions);
 
@@ -294,8 +298,17 @@ int main(int argc, char *argv[])
     if (args.contains("no-suppress-warnings"))
         extractor.setSuppressWarnings(false);
 
-    if (args.contains("api-version"))
-        extractor.setApiVersion(args["api-version"].toDouble());
+    if (args.contains("api-version")) {
+        QStringList versions = args["api-version"].split("|");
+        foreach (QString fullVersion, versions) {
+            QStringList parts = fullVersion.split(",");
+            QString package;
+            QString version;
+            package = parts.count() == 1 ? "*" : parts.first();
+            version = parts.last();
+            extractor.setApiVersion(package, version.toAscii());
+        }
+    }
 
     if (args.contains("drop-type-entries"))
         extractor.setDropTypeEntries(args["drop-type-entries"]);
