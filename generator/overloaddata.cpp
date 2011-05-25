@@ -163,6 +163,8 @@ void OverloadData::sortNextOverloads()
     int qstringIndex = 0;
     bool checkQVariant = false;
     int qvariantIndex = 0;
+    bool checkPyBuffer = false;
+    int pyBufferIndex = 0;
 
     // Primitive types that are not int, long, short,
     // char and their respective unsigned counterparts.
@@ -194,6 +196,9 @@ void OverloadData::sortNextOverloads()
         } else if (!checkPySequence && typeName == "PySequence") {
             checkPySequence = true;
             pySeqIndex = sortData.lastProcessedItemId();
+        } else if (!checkPyBuffer && typeName == "PyBuffer") {
+            checkPyBuffer = true;
+            pyBufferIndex = sortData.lastProcessedItemId();
         } else if (!checkQVariant && typeName == "QVariant") {
             checkQVariant = true;
             qvariantIndex = sortData.lastProcessedItemId();
@@ -315,12 +320,16 @@ void OverloadData::sortNextOverloads()
         }
 
 
-        if ((checkPySequence || checkPyObject)
+        if ((checkPySequence || checkPyObject || checkPyBuffer)
             && !targetTypeEntryName.contains("PyObject")
+            && !targetTypeEntryName.contains("PyBuffer")
             && !targetTypeEntryName.contains("PySequence")) {
             if (checkPySequence) {
                 // PySequence will be checked after all more specific types, but before PyObject.
                 graph.addEdge(targetTypeId, pySeqIndex);
+            } else if (checkPyBuffer) {
+                // PySequence will be checked after all more specific types, but before PyObject.
+                graph.addEdge(targetTypeId, pyBufferIndex);
             } else {
                 // Add dependency on PyObject, so its check is the last one (too generic).
                 graph.addEdge(targetTypeId, pyobjectIndex);

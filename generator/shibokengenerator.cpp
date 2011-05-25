@@ -865,6 +865,8 @@ QString ShibokenGenerator::guessCPythonCheckFunction(const QString& type)
         metaType = 0;
     } else if (type == "PyTypeObject") {
         retval = "PyType_Check";
+    } else if (type == "PyBuffer") {
+        retval = "Shiboken::Buffer::checkType";
     } else {
         retval = QString("%1_Check").arg(type);
     }

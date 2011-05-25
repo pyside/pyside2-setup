@@ -29,6 +29,7 @@ sbkenum.cpp
 bindingmanager.cpp
 threadstatesaver.cpp
 typeresolver.cpp
+shibokenbuffer.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
@@ -55,6 +56,7 @@ install(FILES
         shibokenmacros.h
         threadstatesaver.h
         typeresolver.h
+        shibokenbuffer.h
         DESTINATION include/shiboken${shiboken_SUFFIX})
 install(TARGETS libshiboken EXPORT shiboken
                             LIBRARY DESTINATION "${LIB_INSTALL_DIR}"

@@ -34,6 +34,7 @@
 #include "sbkenum.h"
 #include "shibokenmacros.h"
 #include "typeresolver.h"
+#include "shibokenbuffer.h"
 
 #endif // SHIBOKEN_H
 

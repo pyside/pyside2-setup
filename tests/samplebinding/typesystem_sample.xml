@@ -1231,20 +1231,12 @@
         </modify-function>
 
         <template name="buffer_argument">
-            unsigned char* %out;
-            if (PyObject_CheckReadBuffer(%PYARG_1)) {
-                PyBufferProcs* bufferProcs = %PYARG_1->ob_type->tp_as_buffer;
-                void* ptr;
-                bufferProcs->bf_getreadbuffer(%PYARG_1, 0, &amp;ptr);
-                %out = (unsigned char*) ptr;
-            } else {
-                PyErr_SetString(PyExc_TypeError, "The object must support buffer protocol with just one segment.");
-            }
+            unsigned char* %out = (unsigned char*) Shiboken::Buffer::getPointer(%PYARG_1);
         </template>
 
         <modify-function signature="strBufferOverloads(unsigned char*,int)">
             <modify-argument index="1">
-                <replace-type modified-type="PyObject"/>
+                <replace-type modified-type="PyBuffer"/>
                 <conversion-rule class="native">
                     <insert-template name="buffer_argument" />
                 </conversion-rule>
