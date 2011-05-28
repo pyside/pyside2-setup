@@ -29,8 +29,20 @@ class LIBMINIMAL_API Val
 {
 public:
     explicit Val(int valId) : m_valId(valId) {}
+    virtual ~Val() {}
+
     int valId() { return m_valId; }
     void setValId(int valId) { m_valId = valId; }
+
+    virtual Val passValueType(Val val) { return val; }
+    Val callPassValueType(Val val) { return passValueType(val); }
+
+    virtual Val* passValueTypePointer(Val* val) { return val; }
+    Val* callPassValueTypePointer(Val* val) { return passValueTypePointer(val); }
+
+    virtual Val* passValueTypeReference(Val& val) { return &val; }
+    Val* callPassValueTypeReference(Val& val) { return passValueTypeReference(val); }
+
 private:
     int m_valId;
 };

@@ -36,6 +36,14 @@ class ExtObj(Obj):
         self.virtual_method_called = True
         return not Obj.virtualMethod(self, val)
 
+    def passObjectType(self, obj):
+        obj.setObjId(obj.objId() + 1)
+        return obj
+
+    def passObjectTypeReference(self, obj):
+        obj.setObjId(obj.objId() + 1)
+        return obj
+
 
 class ObjTest(unittest.TestCase):
 
@@ -44,21 +52,52 @@ class ObjTest(unittest.TestCase):
         obj = Obj(objId)
         self.assertEqual(obj.objId(), objId)
 
-    def testVirtualMethod(self):
-        obj = Obj(0)
-        even_number = 8
-        self.assertEqual(obj.virtualMethod(even_number), obj.callVirtualMethod(even_number))
-
     def testNormalMethodFromExtendedClass(self):
         objId = 123
         obj = ExtObj(objId)
         self.assertEqual(obj.objId(), objId)
+
+    def testVirtualMethod(self):
+        obj = Obj(0)
+        even_number = 8
+        self.assertEqual(obj.virtualMethod(even_number), obj.callVirtualMethod(even_number))
 
     def testVirtualMethodFromExtendedClass(self):
         obj = ExtObj(0)
         even_number = 8
         self.assertEqual(obj.virtualMethod(even_number), obj.callVirtualMethod(even_number))
         self.assert_(obj.virtual_method_called)
+
+    def testPassObjectType(self):
+        obj = Obj(0)
+        self.assertEqual(obj, obj.passObjectType(obj))
+        self.assertEqual(obj, obj.callPassObjectType(obj))
+
+    def testPassObjectTypeReference(self):
+        obj = Obj(0)
+        self.assertEqual(obj, obj.passObjectTypeReference(obj))
+        self.assertEqual(obj, obj.callPassObjectTypeReference(obj))
+
+    def testPassObjectTypeFromExtendedClass(self):
+        obj = ExtObj(0)
+        self.assertEqual(obj.objId(), 0)
+        sameObj = obj.passObjectType(obj)
+        self.assertEqual(obj, sameObj)
+        self.assertEqual(sameObj.objId(), 1)
+        sameObj = obj.callPassObjectType(obj)
+        self.assertEqual(obj, sameObj)
+        self.assertEqual(sameObj.objId(), 2)
+
+    def testPassObjectTypeReferenceFromExtendedClass(self):
+        obj = ExtObj(0)
+        self.assertEqual(obj.objId(), 0)
+        sameObj = obj.passObjectTypeReference(obj)
+        self.assertEqual(obj, sameObj)
+        self.assertEqual(sameObj.objId(), 1)
+        sameObj = obj.callPassObjectTypeReference(obj)
+        self.assertEqual(obj, sameObj)
+        self.assertEqual(sameObj.objId(), 2)
+
 
 if __name__ == '__main__':
     unittest.main()

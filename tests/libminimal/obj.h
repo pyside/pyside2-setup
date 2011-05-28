@@ -36,6 +36,13 @@ public:
 
     virtual bool virtualMethod(int val);
     bool callVirtualMethod(int val) { return virtualMethod(val); }
+
+    virtual Obj* passObjectType(Obj* obj) { return obj; }
+    Obj* callPassObjectType(Obj* obj) { return passObjectType(obj); }
+
+    virtual Obj* passObjectTypeReference(Obj& obj) { return &obj; }
+    Obj* callPassObjectTypeReference(Obj& obj) { return passObjectTypeReference(obj); }
+
 private:
     Obj(const Obj&);
     Obj& operator=(const Obj&);
