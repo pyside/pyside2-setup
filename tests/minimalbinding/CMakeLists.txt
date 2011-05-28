@@ -8,6 +8,7 @@ set(minimal_SRC
 ${CMAKE_CURRENT_BINARY_DIR}/minimal/minimal_module_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/minimal/obj_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/minimal/val_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/minimal/minbooluser_wrapper.cpp
 )
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/minimal-binding.txt.in"

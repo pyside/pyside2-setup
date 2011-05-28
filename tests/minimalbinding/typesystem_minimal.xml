@@ -2,7 +2,14 @@
 <typesystem package="minimal">
     <primitive-type name="bool"/>
     <primitive-type name="int"/>
+
+    <primitive-type name="MinBool" target-lang-api-name="PyBool">
+        <conversion-rule file="minbool_conversions.h"/>
+        <include file-name="minbool.h" location="global"/>
+    </primitive-type>
+
     <object-type name="Obj"/>
     <value-type name="Val"/>
+    <value-type name="MinBoolUser"/>
 </typesystem>
 
