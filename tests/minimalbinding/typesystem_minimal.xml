@@ -8,8 +8,14 @@
         <include file-name="minbool.h" location="global"/>
     </primitive-type>
 
+    <container-type name="std::list" type="list">
+        <conversion-rule file="list_conversions.h"/>
+        <include file-name="list" location="global"/>
+    </container-type>
+
     <object-type name="Obj"/>
     <value-type name="Val"/>
+    <value-type name="ListUser"/>
     <value-type name="MinBoolUser"/>
 </typesystem>
 
