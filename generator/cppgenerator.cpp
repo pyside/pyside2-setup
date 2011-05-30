@@ -1522,7 +1522,7 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                     const PrimitiveTypeEntry* ptp = reinterpret_cast<const PrimitiveTypeEntry*>(argType->typeEntry());
                     while (ptp->aliasedTypeEntry())
                         ptp = ptp->aliasedTypeEntry();
-
+                    strArg = ptp->name();
                     if (strArg == "QString") {
                         strArg = "unicode";
                     } else if (strArg == "QChar") {
