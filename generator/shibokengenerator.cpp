@@ -1102,6 +1102,34 @@ ShibokenGenerator::ExtendedConverterData ShibokenGenerator::getExtendedConverter
     return extConvs;
 }
 
+static QString getArgumentsFromMethodCall(const QString& str)
+{
+    // It would be way nicer to be able to use a Perl like
+    // regular expression that accepts temporary variables
+    // to count the parenthesis.
+    // For more information check this:
+    // http://perl.plover.com/yak/regex/samples/slide083.html
+    static QString funcCall("%CPPSELF.%FUNCTION_NAME");
+    int pos = str.indexOf(funcCall);
+    if (pos == -1)
+        return QString();
+    pos = pos + funcCall.count();
+    while (str.at(pos) == ' ' || str.at(pos) == '\t')
+        ++pos;
+    if (str.at(pos) == '(')
+        ++pos;
+    int begin = pos;
+    int counter = 1;
+    while (counter != 0) {
+        if (str.at(pos) == '(')
+            ++counter;
+        else if (str.at(pos) == ')')
+            --counter;
+        ++pos;
+    }
+    return str.mid(begin, pos-begin-1);
+}
+
 void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                                        const CodeSnipList& codeSnips,
                                        CodeSnip::Position position,
@@ -1219,6 +1247,16 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 // on comparison operator cppSelf is always a reference.
                 if (func->isComparisonOperator())
                     replacement = "%1.";
+
+                if (func->isVirtual() && !func->isAbstract() && (!avoidProtectedHack() || !func->isProtected())) {
+                    QString methodCallArgs = getArgumentsFromMethodCall(code);
+                    if (!methodCallArgs.isNull()) {
+                        code.replace(QString("%CPPSELF.%FUNCTION_NAME(%1)").arg(methodCallArgs),
+                                     QString("(Shiboken::Object::hasCppWrapper(reinterpret_cast<SbkObject*>(%1))"
+                                             " ? %CPPSELF->::%TYPE::%FUNCTION_NAME(%2)"
+                                             " : %CPPSELF.%FUNCTION_NAME(%2))").arg(pySelf).arg(methodCallArgs));
+                    }
+                }
 
                 code.replace("%CPPSELF.", replacement.arg(cppSelf));
                 code.replace("%CPPSELF", cppSelf);

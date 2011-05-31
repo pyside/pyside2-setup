@@ -44,8 +44,12 @@ class ExtendedVirtualMethods(VirtualMethods):
         return VirtualMethods.virtualMethod0(self, pt, val, cpx, b) * -1.0
 
     def strListToStdList(self, arg):
-        # returnning wrong type for test purporses.
+        # returning wrong type for test purposes.
         return True
+
+    def recursionOnModifiedVirtual(self, arg):
+        # check if recursion is caused by injected code that calls C++.
+        return VirtualMethods.recursionOnModifiedVirtual(self, arg) + 10
 
 class ExtendedVirtualDaughter(VirtualDaughter):
     def __init__(self, name):
@@ -85,6 +89,11 @@ class VirtualMethodsTest(unittest.TestCase):
         result0 = vm.callVirtualMethod0(pt, val, cpx, b)
         result1 = evm.callVirtualMethod0(pt, val, cpx, b)
         self.assertEqual(result0 * -1.0, result1)
+
+    def testRecursionOnModifiedVirtual(self):
+        evm = ExtendedVirtualMethods()
+        self.assertEqual(evm.recursionOnModifiedVirtual(''), 10)
+        self.assertEqual(evm.callRecursionOnModifiedVirtual(''), 10)
 
     def testReimplementedVirtualMethodInheritedFromGrandParent(self):
         '''Test Python override of a virtual method inherited from a grand parent.'''

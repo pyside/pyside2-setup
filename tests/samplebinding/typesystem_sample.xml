@@ -847,6 +847,15 @@
                 <insert-template name="fix_int*,int*,int*,int*"/>
             </inject-code>
         </modify-function>
+        <modify-function signature="recursionOnModifiedVirtual(Str)const">
+            <inject-code class="target" position="beginning">
+            %BEGIN_ALLOW_THREADS
+            // It's important for test purposes to use a constructor with parenthesis as argument.
+            %RETURN_TYPE retval_ = %RETURN_TYPE(%CPPSELF.%FUNCTION_NAME(Str(%1)));
+            %END_ALLOW_THREADS
+            %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](retval_);
+            </inject-code>
+        </modify-function>
     </value-type>
     <value-type name="VirtualDaughter" />
 
@@ -867,10 +876,10 @@
         </add-function>
         <modify-function signature="pointer() const">
             <inject-code class="target" position="beginning">
-                %PYARG_0 = (PyObject*)%CPPSELF.%FUNCTION_NAME();
+                %PYARG_0 = reinterpret_cast&lt;PyObject*>(%CPPSELF.%FUNCTION_NAME());
                 if (!%PYARG_0)
                     %PYARG_0 = Py_None;
-                Py_XINCREF(%PYARG_0);
+                Py_INCREF(%PYARG_0);
             </inject-code>
         </modify-function>
     </value-type>

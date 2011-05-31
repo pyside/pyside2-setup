@@ -97,6 +97,9 @@ public:
         getMargins(left, top, right, bottom);
     }
 
+    virtual int recursionOnModifiedVirtual(Str arg) const { return 0; }
+    int callRecursionOnModifiedVirtual(Str arg) const { return recursionOnModifiedVirtual(arg); }
+
 private:
     Str m_name;
     int m_left;
