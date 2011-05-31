@@ -2344,13 +2344,18 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 }
             }
 
-            s << INDENT << "Shiboken::Object::keepReference(reinterpret_cast<SbkObject*>(self), \"";
+            if (refCount.action == ReferenceCount::Add || refCount.action == ReferenceCount::Set)
+                s << INDENT << "Shiboken::Object::keepReference(";
+            else
+                s << INDENT << "Shiboken::Object::removeReference(";
+
+            s << "reinterpret_cast<SbkObject*>(self), \"";
             QString varName = arg_mod.referenceCounts.first().varName;
             if (varName.isEmpty())
                 varName = func->minimalSignature() + QString().number(arg_mod.index);
 
-            s << varName << "\", " << pyArgName << ", "
-              << (refCount.action == ReferenceCount::Add ? "true" : "false")
+            s << varName << "\", " << pyArgName
+              << (refCount.action == ReferenceCount::Add ? ", true" : "")
               << ");" << endl;
 
             if (arg_mod.index == 0)
