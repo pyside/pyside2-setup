@@ -1096,6 +1096,22 @@ void keepReference(SbkObject* self, const char* key, PyObject* referredObject, b
     }
 }
 
+void removeReference(SbkObject* self, const char* key, PyObject* referredObject)
+{
+    if (!referredObject || (referredObject == Py_None))
+        return;
+
+    if (!self->d->referredObjects)
+        return;
+
+    RefCountMap& refCountMap = *(self->d->referredObjects);
+    RefCountMap::iterator iter = refCountMap.find(key);
+    if (iter != refCountMap.end()) {
+        decRefPyObjectList(iter->second);
+        refCountMap.erase(iter);
+    }
+}
+
 void clearReferences(SbkObject* self)
 {
     if (!self->d->referredObjects)
