@@ -36,7 +36,7 @@ namespace Shiboken
     * This mapping associates a method and argument of an wrapper object with the wrapper of
     * said argument when it needs the binding to help manage its reference counting.
     */
-typedef std::map<std::string, std::list<SbkObject*> > RefCountMap;
+typedef std::map<std::string, std::list<PyObject*> > RefCountMap;
 
 
 /// Linked list of SbkBaseWrapper pointers

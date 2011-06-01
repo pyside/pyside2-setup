@@ -320,7 +320,7 @@ PyObject* SbkObjectTpNew(PyTypeObject* subtype, PyObject*, PyObject*)
 namespace Shiboken
 {
 
-static void decRefPyObjectList(const std::list<SbkObject*> &pyObj);
+static void decRefPyObjectList(const std::list<PyObject*> &pyObj, PyObject* skip = 0);
 
 void walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visitor)
 {
@@ -475,11 +475,12 @@ std::list<SbkObject*> splitPyObject(PyObject* pyObj)
     return result;
 }
 
-static void decRefPyObjectList(const std::list<SbkObject*>& lst)
+static void decRefPyObjectList(const std::list<PyObject*>& lst, PyObject *skip)
 {
-    std::list<SbkObject*>::const_iterator iter = lst.begin();
+    std::list<PyObject*>::const_iterator iter = lst.begin();
     while(iter != lst.end()) {
-        Py_DECREF(*iter);
+        if (*iter != skip)
+            Py_DECREF(*iter);
         ++iter;
     }
 }
@@ -1076,22 +1077,31 @@ void keepReference(SbkObject* self, const char* key, PyObject* referredObject, b
         self->d->referredObjects = new Shiboken::RefCountMap;
 
     RefCountMap& refCountMap = *(self->d->referredObjects);
-    if (!isNone)
-        Py_INCREF(referredObject);
-
     RefCountMap::iterator iter = refCountMap.find(key);
-    if (!append && (iter != refCountMap.end())) {
-        decRefPyObjectList(iter->second);
-        refCountMap.erase(iter);
+    std::list<PyObject*> objects;
+    if (iter != refCountMap.end()) {
+        objects = (*iter).second;
+        std::list<PyObject*>::const_iterator found = std::find(objects.begin(), objects.end(), referredObject);
+
+        // skip if objects already exists
+        if (found != objects.end())
+            return;
     }
 
-    if (!isNone) {
-        if (append && (iter != refCountMap.end())) {
-            refCountMap[key].push_back(reinterpret_cast<SbkObject*>(referredObject));
+    if (append && !isNone) {
+        refCountMap[key].push_back(referredObject);
+        Py_INCREF(referredObject);
+    } else if (!append) {
+        if (objects.size() > 0)
+            decRefPyObjectList(objects, isNone ? 0 : referredObject);
+        if (isNone) {
+            if (iter != refCountMap.end())
+                refCountMap.erase(iter);
         } else {
-            std::list<SbkObject*> new_list;
-            new_list.push_back(reinterpret_cast<SbkObject*>(referredObject));
-            refCountMap[key] = new_list;;
+            objects.clear();
+            objects.push_back(referredObject);
+            refCountMap[key] = objects;
+            Py_INCREF(referredObject);
         }
     }
 }
