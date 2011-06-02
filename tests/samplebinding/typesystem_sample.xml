@@ -1389,6 +1389,13 @@
                 %PYARG_0 = PyString_FromString(%1);
             </inject-code>
         </add-function>
+        <add-function signature="operator>(int)">
+            <inject-code>
+                // This should test if code injections works inside rich comparison operators
+                Py_INCREF(Py_True);
+                %PYARG_0 = Py_True;
+            </inject-code>
+        </add-function>
     </value-type>
 
     <value-type name="Color" />
