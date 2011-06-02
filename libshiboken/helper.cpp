@@ -21,6 +21,7 @@
  */
 
 #include "helper.h"
+#include <stdarg.h>
 
 namespace Shiboken
 {
@@ -95,6 +96,34 @@ int* sequenceToIntArray(PyObject* obj, bool zeroTerminated)
         array[size] = 0;
 
     return array;
+}
+
+
+int warning(PyObject *category, int stacklevel, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+#if _WIN32
+    va_list args2 = args;
+#else
+    va_list args2;
+    va_copy(args2, args);
+#endif
+
+    // check the necessary memmory
+    int result = vsnprintf(NULL, 0, format, args);
+    char *message = (char*) malloc(result);
+    if (message) {
+        // format the message
+        vsnprintf(message, result, format, args2);
+        result = PyErr_WarnEx(category, message, stacklevel);
+        free(message);
+    } else {
+        result = 0;
+    }
+    va_end(args2);
+    va_end(args);
+    return result;
 }
 
 } // namespace Shiboken
