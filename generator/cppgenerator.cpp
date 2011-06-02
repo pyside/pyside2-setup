@@ -857,10 +857,10 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 s << INDENT << "if (!typeIsValid) {" << endl;
                 {
                     Indentation indent(INDENT);
-                    s << INDENT << "PyErr_Format(PyExc_TypeError, \"Invalid return value in function %s, expected %s, got %s.\", \""
+                    s << INDENT << "Shiboken::warning(PyExc_RuntimeWarning, 2, \"Invalid return value in function %s, expected %s, got %s.\", \""
                     << func->ownerClass()->name() << '.' << funcName << "\", " << desiredType
-                    << ", " PYTHON_RETURN_VAR "->ob_type->tp_name);" << endl;
-                    s << INDENT << "return " << defaultReturnExpr << ';' << endl;
+                    << ", " PYTHON_RETURN_VAR "->ob_type->tp_name);" << endl
+                    << INDENT << "return " << defaultReturnExpr << ';' << endl;
                 }
                 s << INDENT << "}" << endl;
             }
