@@ -31,6 +31,9 @@ import unittest
 
 from sample import *
 
+import warnings
+warnings.simplefilter('error')
+
 class ExtendedVirtualMethods(VirtualMethods):
     def __init__(self):
         VirtualMethods.__init__(self)
@@ -114,7 +117,7 @@ class VirtualMethodsTest(unittest.TestCase):
 class PrettyErrorMessageTest(unittest.TestCase):
     def testIt(self):
         obj = ExtendedVirtualMethods()
-        self.assertRaises(TypeError, obj.callStrListToStdList, StrList())
+        self.assertRaises(RuntimeWarning, obj.callStrListToStdList, StrList())
 
 if __name__ == '__main__':
     unittest.main()

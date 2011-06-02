@@ -29,6 +29,9 @@
 import unittest
 from sample import ObjectModel, ObjectType, ObjectView
 
+import warnings
+warnings.simplefilter('error')
+
 
 class MyObject(ObjectType):
     pass
@@ -50,7 +53,7 @@ class ModelWrongReturnTest(unittest.TestCase):
     def testWrongTypeReturn(self):
         model = ListModelWrong()
         view = ObjectView(model)
-        self.assertRaises(TypeError, view.getRawModelData) # calls model.data()
+        self.assertRaises(RuntimeWarning, view.getRawModelData) # calls model.data()
 
 
 if __name__ == '__main__':
