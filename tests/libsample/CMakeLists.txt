@@ -29,6 +29,7 @@ pointf.cpp
 polygon.cpp
 protected.cpp
 reference.cpp
+sample.cpp
 samplenamespace.cpp
 simplefile.cpp
 size.cpp

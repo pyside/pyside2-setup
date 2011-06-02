@@ -52,6 +52,10 @@
         </inject-code>
     </add-function>
 
+    <namespace-type name="sample">
+        <value-type name="sample" />
+    </namespace-type>
+
     <function signature="sumComplexPair(std::pair&lt;Complex, Complex>)" />
     <function signature="gimmeComplexList()" />
     <function signature="transmuteComplexIntoPoint(const Complex&amp;)" />

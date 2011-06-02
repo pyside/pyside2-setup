@@ -41,6 +41,7 @@
 #include "rect.h"
 #include "reference.h"
 #include "removednamespaces.h"
+#include "sample.h"
 #include "samplenamespace.h"
 #include "simplefile.h"
 #include "size.h"
