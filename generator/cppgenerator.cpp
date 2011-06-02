@@ -4281,7 +4281,26 @@ QString CppGenerator::writeReprFunction(QTextStream& s, const AbstractMetaClass*
     writeToCppConversion(s, metaClass, "pyObj");
     s << ';' << endl;
     s << INDENT << "buffer.close();" << endl;
-    s << INDENT << "return PyString_FromFormat(\"<" << metaClass->package() << ".%s at %p>\", buffer.data().constData(), pyObj);" << endl;
+    s << INDENT << "QByteArray str = buffer.data();" << endl;
+    s << INDENT << "int idx = str.indexOf('(');" << endl;
+    s << INDENT << "if (idx >= 0)" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "str.replace(0, idx, Py_TYPE(pyObj)->tp_name);" << endl;
+    }
+
+    s << INDENT << "PyObject* mod = PyDict_GetItemString(Py_TYPE(pyObj)->tp_dict, \"__module__\");" << endl;
+    s << INDENT << "if (mod)" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "return PyString_FromFormat(\"<%s.%s at %p>\", PyString_AS_STRING(mod), str.constData(), pyObj);" << endl;
+    }
+    s << INDENT << "else" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "return PyString_FromFormat(\"<%s at %p>\", str.constData(), pyObj);" << endl;
+    }
+
     s << '}' << endl;
     s << "} // extern C" << endl << endl;;
     return funcName;
