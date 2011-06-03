@@ -371,29 +371,32 @@ PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name) const
 
 ComplexTypeEntry* TypeDatabase::findComplexType(const QString& name) const
 {
-    TypeEntry* entry = findType(name);
-    if (entry && entry->isComplex())
-        return static_cast<ComplexTypeEntry*>(entry);
-    else
-        return 0;
+    QList<TypeEntry*> entries = findTypes(name);
+    foreach (TypeEntry* entry, entries) {
+        if (entry && entry->isComplex())
+            return static_cast<ComplexTypeEntry*>(entry);
+    }
+    return 0;
 }
 
 ObjectTypeEntry* TypeDatabase::findObjectType(const QString& name) const
 {
-    TypeEntry* entry = findType(name);
-    if (entry && entry->isObject())
-        return static_cast<ObjectTypeEntry*>(entry);
-    else
-        return 0;
+    QList<TypeEntry*> entries = findTypes(name);
+    foreach (TypeEntry* entry, entries) {
+        if (entry && entry->isObject())
+            return static_cast<ObjectTypeEntry*>(entry);
+    }
+    return 0;
 }
 
 NamespaceTypeEntry* TypeDatabase::findNamespaceType(const QString& name) const
 {
-    TypeEntry* entry = findType(name);
-    if (entry && entry->isNamespace())
-        return static_cast<NamespaceTypeEntry*>(entry);
-    else
-        return 0;
+    QList<TypeEntry*> entries = findTypes(name);
+    foreach (TypeEntry* entry, entries) {
+        if (entry && entry->isNamespace())
+            return static_cast<NamespaceTypeEntry*>(entry);
+    }
+    return 0;
 }
 
 bool TypeDatabase::supportedApiVersion(double version) const
