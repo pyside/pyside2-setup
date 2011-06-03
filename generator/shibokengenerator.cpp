@@ -487,7 +487,7 @@ QString ShibokenGenerator::cpythonWrapperCPtr(const AbstractMetaType* metaType, 
 QString ShibokenGenerator::cpythonWrapperCPtr(const TypeEntry* type, QString argName)
 {
     if (type->isValue() || type->isObject())
-        return baseConversionString(type->qualifiedCppName() + '*') + "toCpp(" + argName + ')';
+        return baseConversionString( "::" + type->qualifiedCppName() + '*') + "toCpp(" + argName + ')';
     return QString();
 }
 
@@ -519,8 +519,6 @@ void ShibokenGenerator::writeBaseConversion(QTextStream& s, const TypeEntry* typ
             typeName = protectedEnumSurrogateName(metaEnum);
     } else {
         typeName = type->qualifiedCppName().trimmed();
-        if (!type->isCppPrimitive())
-            typeName.prepend("::");
         if (type->isObject())
             typeName.append('*');
     }
@@ -542,8 +540,6 @@ void ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaTy
         if (type->isContainer() || type->isFlags() || type->isEnum() || (type->isConstant() && type->isReference()))
             options |= Generator::ExcludeReference;
         typeName = translateTypeForWrapperMethod(type, context, options).trimmed();
-        if (!type->typeEntry()->isCppPrimitive())
-            typeName.prepend("::");
     }
 
     s << baseConversionString(typeName);
