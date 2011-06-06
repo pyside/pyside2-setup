@@ -3035,7 +3035,6 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
     {
         Indentation indent(INDENT);
         foreach (AbstractMetaFunctionList overloads, cmpOverloads) {
-            OverloadData overloadData(overloads, this);
             const AbstractMetaFunction* rfunc = overloads[0];
 
             QString operatorId = ShibokenGenerator::pythonRichCompareOperatorId(rfunc);
@@ -3055,7 +3054,9 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
 
             bool first = true;
             bool comparesWithSameType = false;
-            foreach (const AbstractMetaFunction* func, overloads) {
+            OverloadData overloadData(overloads, this);
+            foreach (OverloadData* data, overloadData.nextOverloadData()) {
+                const AbstractMetaFunction* func = data->referenceFunction();
                 if (func->isStatic())
                     continue;
 
@@ -3088,13 +3089,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                 {
                     Indentation indent(INDENT);
                     s << INDENT << "// " << func->signature() << endl;
-                    s << INDENT;
-                    s << translateTypeForWrapperMethod(type, 0, ExcludeReference | ExcludeConst);
-                    if (type->isObject() || type->isQObject())
-                        s << '&';
-                    s << " cppArg0 = ";
-                    writeToCppConversion(s, type, 0, "arg", ExcludeReference | ExcludeConst);
-                    s << ';' << endl;
+                    writeArgumentConversion(s, type, "cppArg0", "arg", metaClass);
 
                     // If the function is user added, use the inject code
                     if (func->isUserAdded()) {
