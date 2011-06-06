@@ -1171,7 +1171,45 @@
     </value-type>
 
     <value-type name="Time">
+        <extra-includes>
+          <include file-name="datetime.h" location="global"/>
+        </extra-includes>
         <enum-type name="NumArgs"/>
+        <add-function signature="operator!=(const PyObject*)" return-type="PyObject">
+          <inject-code>
+            if (!PyDateTimeAPI)
+                PyDateTime_IMPORT;
+            if (PyTime_Check(%1)) {
+                int pyH = PyDateTime_TIME_GET_HOUR(%1);
+                int pyM = PyDateTime_TIME_GET_MINUTE(%1);
+                int pyS = PyDateTime_TIME_GET_SECOND(%1);
+                if ((pyH == %CPPSELF.hour()) &amp;&ampl;
+                    (pyM == %CPPSELF.minute()) &amp;&amp;
+                    (pyS == %CPPSELF.second()))
+                    %PYARG_0 = Py_False;
+                else
+                    %PYARG_0 = Py_True;
+            }
+          </inject-code>
+        </add-function>
+        <add-function signature="operator==(const PyObject*)" return-type="PyObject">
+          <inject-code>
+            if (!PyDateTimeAPI)
+                PyDateTime_IMPORT;
+            if (PyTime_Check(%1)) {
+                int pyH = PyDateTime_TIME_GET_HOUR(%1);
+                int pyM = PyDateTime_TIME_GET_MINUTE(%1);
+                int pyS = PyDateTime_TIME_GET_SECOND(%1);
+                if ((pyH == %CPPSELF.hour()) &amp;&ampl;
+                    (pyM == %CPPSELF.minute()) &amp;&amp;
+                    (pyS == %CPPSELF.second()))
+                    %PYARG_0 = Py_True;
+                else
+                    %PYARG_0 = Py_False;
+            }
+          </inject-code>
+        </add-function>
+
     </value-type>
     <value-type name="Size">
         <add-function signature="Size(const char*)">

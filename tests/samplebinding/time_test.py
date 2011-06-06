@@ -28,6 +28,7 @@
 
 import sys
 import unittest
+import datetime
 
 from sample import Time, ImplicitConv, ObjectType, Str
 
@@ -117,6 +118,16 @@ class TimeTest(unittest.TestCase):
         time = Time()
         result = time.somethingCompletelyDifferent(1, 2, ImplicitConv.CtorOne)
         self.assertEqual(result, Time.ThreeArgs)
+
+    def testCompareWithPythonTime(self):
+        time = Time(12, 32, 05)
+        py = datetime.time(12, 32, 05)
+        self.assertEqual(time, py)
+
+    def testNotEqual(self):
+        time = Time(12, 32, 06)
+        py = datetime.time(12, 32, 05)
+        self.assertNotEqual(time, py)
 
 if __name__ == '__main__':
     unittest.main()
