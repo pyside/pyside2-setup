@@ -120,6 +120,7 @@ std::string Expression::toString() const
             break;
         case None: // just to avoid the compiler warning
         default:
+            op = '?';
             break;
     }
     result += op;
