@@ -1251,10 +1251,19 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 if (func->isVirtual() && !func->isAbstract() && (!avoidProtectedHack() || !func->isProtected())) {
                     QString methodCallArgs = getArgumentsFromMethodCall(code);
                     if (!methodCallArgs.isNull()) {
-                        code.replace(QString("%CPPSELF.%FUNCTION_NAME(%1)").arg(methodCallArgs),
-                                     QString("(Shiboken::Object::hasCppWrapper(reinterpret_cast<SbkObject*>(%1))"
-                                             " ? %CPPSELF->::%TYPE::%FUNCTION_NAME(%2)"
-                                             " : %CPPSELF.%FUNCTION_NAME(%2))").arg(pySelf).arg(methodCallArgs));
+                        if (func->name() == "metaObject") {
+                            QString wrapperClassName = wrapperName(func->ownerClass());
+                            QString cppSelfVar = avoidProtectedHack() ? QString("%CPPSELF") : QString("reinterpret_cast<%1*>(%CPPSELF)").arg(wrapperClassName);
+                            code.replace(QString("%CPPSELF.%FUNCTION_NAME(%1)").arg(methodCallArgs),
+                                         QString("(Shiboken::Object::hasCppWrapper(reinterpret_cast<SbkObject*>(%1))"
+                                                 " ? %2->::%3::%FUNCTION_NAME(%4)"
+                                                 " : %CPPSELF.%FUNCTION_NAME(%4))").arg(pySelf).arg(cppSelfVar).arg(wrapperClassName).arg(methodCallArgs));
+                        } else {
+                            code.replace(QString("%CPPSELF.%FUNCTION_NAME(%1)").arg(methodCallArgs),
+                                         QString("(Shiboken::Object::hasCppWrapper(reinterpret_cast<SbkObject*>(%1))"
+                                                 " ? %CPPSELF->::%TYPE::%FUNCTION_NAME(%2)"
+                                                 " : %CPPSELF.%FUNCTION_NAME(%2))").arg(pySelf).arg(methodCallArgs));
+                        }
                     }
                 }
 
