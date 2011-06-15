@@ -136,6 +136,23 @@ Variables
   type indicated by ``CPPTYPE`` to the proper Python object.
 
 
+.. _isconvertible:
+
+**%ISCONVERTIBLE[CPPTYPE]**
+
+  Replaced by a |project| "isConvertible" call that checks if a Python
+  variable is convertible (via an implicit conversion or cast operator call)
+  to a C++ variable of the type indicated by ``CPPTYPE``.
+
+
+.. _checktype:
+
+**%CHECKTYPE[CPPTYPE]**
+
+  Replaced by a |project| "checkType" call that verifies if a Python
+  if of the type indicated by ``CPPTYPE``.
+
+
 .. _cppself:
 
 **%CPPSELF**

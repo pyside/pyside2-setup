@@ -1140,6 +1140,8 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
 {
     static QRegExp toPythonRegex("%CONVERTTOPYTHON\\[([^\\[]*)\\]");
     static QRegExp toCppRegex("%CONVERTTOCPP\\[([^\\[]*)\\]");
+    static QRegExp isConvertibleRegex("%ISCONVERTIBLE\\[([^\\[]*)\\]");
+    static QRegExp checkTypeRegex("%CHECKTYPE\\[([^\\[]*)\\]");
     static QRegExp pyArgsRegex("%PYARG_(\\d+)");
 
     // detect is we should use pyargs instead of args as variable name for python arguments
@@ -1170,11 +1172,17 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             code.replace("%CPPTYPE", context->name());
         }
 
-        // replace "toPython "converters
+        // replace "toPython" converters
         code.replace(toPythonRegex, "Shiboken::Converter<\\1 >::toPython");
 
-        // replace "toCpp "converters
+        // replace "toCpp" converters
         code.replace(toCppRegex, "Shiboken::Converter<\\1 >::toCpp");
+
+        // replace "isConvertible" check
+        code.replace(isConvertibleRegex, "Shiboken::Converter<\\1 >::isConvertible");
+
+        // replace "checkType" check
+        code.replace(checkTypeRegex, "Shiboken::Converter<\\1 >::checkType");
 
         if (func) {
             // replace %PYARG_# variables
