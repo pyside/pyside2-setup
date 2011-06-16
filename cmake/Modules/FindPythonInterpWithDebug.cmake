@@ -1,11 +1,7 @@
 INCLUDE(FindPythonInterp)
+INCLUDE(FindPythonLibs)
 
 find_package(PythonInterp REQUIRED)
-
-#Fix missing variable on UNIX env
-if(NOT PYTHON_DEBUG_LIBRARIES AND UNIX)
-    set(PYTHON_DEBUG_LIBRARIES "${PYTHON_LIBRARIES}")
-endif()
 
 if(PYTHONINTERP_FOUND AND UNIX AND CMAKE_BUILD_TYPE STREQUAL "Debug")
     # This is for Debian
@@ -18,4 +14,32 @@ if(PYTHONINTERP_FOUND AND UNIX AND CMAKE_BUILD_TYPE STREQUAL "Debug")
 
     set(PYTHON_EXECUTABLE "${PYTHON_EXECUTABLE_TMP}")
 endif()
+
+# Detect if the python libs were compiled in debug mode
+execute_process(
+    COMMAND ${PYTHON_EXECUTABLE} -c "from distutils import sysconfig; \\
+        print bool(sysconfig.get_config_var('Py_DEBUG'))"
+    OUTPUT_VARIABLE PYTHON_WITH_DEBUG
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+execute_process(
+    COMMAND ${PYTHON_EXECUTABLE} -c "import sys; \\
+        from distutils import sysconfig; \\
+        vr = sys.version_info; \\
+        suffix = '-dbg' if bool(sysconfig.get_config_var('Py_DEBUG')) else ''; \\
+        print 'python%d.%d%s' % (vr[0], vr[1], suffix)"
+    OUTPUT_VARIABLE PYTHON_BASENAME
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+#Fix missing variable on UNIX env
+if(NOT PYTHON_DEBUG_LIBRARIES AND UNIX)
+    string(REPLACE "-dbg" "" PYTHON_NAME ${PYTHON_BASENAME})
+    find_library(LIBRARY_FOUND ${PYTHON_NAME}_d)
+    if (LIBRARY_FOUND)
+        set(PYTHON_DEBUG_LIBRARIES "${LIBRARY_FOUND}")
+    else()
+        set(PYTHON_DEBUG_LIBRARIES "${PYTHON_LIBRARIES}")
+    endif()
+endif()
+
 

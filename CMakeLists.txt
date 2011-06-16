@@ -54,29 +54,12 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
 add_custom_target(uninstall "${CMAKE_COMMAND}"
                   -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 
-# Detect if the python libs were compiled in debug mode
-execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "from distutils import sysconfig; \\
-        print bool(sysconfig.get_config_var('Py_DEBUG'))"
-    OUTPUT_VARIABLE PY_DEBUG
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-
-execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "import sys; \\
-        from distutils import sysconfig; \\
-        vr = sys.version_info; \\
-        suffix = '-dbg' if bool(sysconfig.get_config_var('Py_DEBUG')) else ''; \\
-        print 'python%d.%d%s' % (vr[0], vr[1], suffix)"
-    OUTPUT_VARIABLE PYTHON_BASENAME
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
 set(SHIBOKEN_BUILD_TYPE "Release")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if(NOT PYTHON_DEBUG_LIBRARIES)
         message(FATAL_ERROR "Python debug library not found. Try compile shiboken with -DCMAKE_BUILD_TYPE=Release")
     endif()
-    if(NOT PY_DEBUG)
+    if(NOT PYTHON_WITH_DEBUG)
         message(WARNING "Compiling shiboken with debug enabled, but the python executable was not compiled with debug support.")
     else()
         add_definitions("-DPy_DEBUG")
