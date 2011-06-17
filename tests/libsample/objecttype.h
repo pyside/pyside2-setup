@@ -107,6 +107,20 @@ public:
     void callVirtualCreateChild();
     virtual ObjectType* createChild(ObjectType* parent);
 
+    //return a parent from C++
+    ObjectType* getCppParent() {
+        if (!m_parent) {
+            ObjectType* parent = new ObjectType();
+            setParent(parent);
+        }
+        return m_parent;
+    }
+
+    void destroyCppParent() {
+        delete m_parent;
+        m_parent = 0;
+    }
+
 private:
     ObjectType(const ObjectType&);
     ObjectType& operator=(const ObjectType&);

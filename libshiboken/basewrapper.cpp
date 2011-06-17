@@ -960,6 +960,11 @@ void removeParent(SbkObject* child, bool giveOwnershipBack, bool keepReference)
 {
     ParentInfo* pInfo = child->d->parentInfo;
     if (!pInfo || !pInfo->parent) {
+        if (pInfo && pInfo->hasWrapperRef) {
+            pInfo->hasWrapperRef = false;
+            delete pInfo;
+            child->d->parentInfo = 0;
+        }
         return;
     }
     ChildrenList& oldBrothers = pInfo->parent->d->parentInfo->children;
@@ -973,8 +978,15 @@ void removeParent(SbkObject* child, bool giveOwnershipBack, bool keepReference)
     pInfo->parent = 0;
 
     // This will keep the wrapper reference, will wait for wrapper destruction to remove that
-    if (keepReference && child->d->containsCppWrapper)
+    if (keepReference &&
+        child->d->containsCppWrapper) {
+        //If have already a extra ref remove this one
+        if (pInfo->hasWrapperRef)
+            Py_CLEAR(child);
+        else
+            pInfo->hasWrapperRef = true;
         return;
+    }
 
     // Transfer ownership back to Python
     child->d->hasOwnership = giveOwnershipBack;

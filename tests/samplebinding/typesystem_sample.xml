@@ -173,6 +173,15 @@
         <!-- rename function to avoid Python signature conflit -->
         <modify-function signature="setObject(const Null&amp;)" rename="setNullObject" />
 
+        <modify-function signature="getCppParent()">
+            <modify-argument index="this">
+                <parent index="return" action="add" />
+            </modify-argument>
+            <modify-argument index="return">
+                <define-ownership class="target" owner="default"/>
+            </modify-argument>
+        </modify-function>
+
         <modify-function signature="event(Event*)">
             <modify-argument index="1" invalidate-after-use="yes"/>
         </modify-function>
