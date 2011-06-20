@@ -949,6 +949,23 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
     s << INDENT << "int result = " << metaClass->qualifiedCppName() << "::qt_metacall(call, id, args);\n";
     s << INDENT << "return result < 0 ? result : PySide::SignalManager::qt_metacall(this, call, id, args);\n";
     s << "}\n\n";
+
+    // qt_metacast function
+    writeMetaCast(s, metaClass);
+}
+
+void CppGenerator::writeMetaCast(QTextStream& s, const AbstractMetaClass* metaClass)
+{
+    Indentation indentation(INDENT);
+    QString wrapperClassName = wrapperName(metaClass);
+    s << "void* " << wrapperClassName << "::qt_metacast(const char* _clname)" << endl;
+    s << '{' << endl;
+    s << INDENT << "if (!_clname) return 0;" << endl;
+    s << INDENT << "SbkObject* pySelf = Shiboken::BindingManager::instance().retrieveWrapper(this);" << endl;
+    s << INDENT << "if (pySelf && PySide::inherits(pySelf->ob_type, _clname))" << endl;
+    s << INDENT << INDENT << "return static_cast<void*>(const_cast< " << wrapperClassName << "* >(this));" << endl;
+    s << INDENT << "return " << metaClass->qualifiedCppName() << "::qt_metacast(_clname);" << endl;
+    s << "}" << endl << endl;
 }
 
 void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFunctionList overloads)
