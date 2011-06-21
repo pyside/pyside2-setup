@@ -75,9 +75,6 @@ TypeResolver* TypeResolver::createTypeResolver(const char* typeName,
          *
          *     Value types are also registered as object types, but the generator *always* first register the value
          *     type version in the TypeResolver and it *must* always do it! otherwise this code wont work.
-         *
-         *     All this to not enter in this if several times, running all characters in the typeName string, etc...
-         *     in other words... the nano seconds!!! somebody need to save them!
          */
         if (pyType && PyType_IsSubtype(pyType, reinterpret_cast<PyTypeObject*>(&SbkObject_Type))) {
             SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(pyType);
