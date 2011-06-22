@@ -183,13 +183,16 @@ void SbkDeallocWrapper(PyObject* pyObj)
             Shiboken::DtorCallerVisitor visitor(sbkObj);
             Shiboken::walkThroughClassHierarchy(pyObj->ob_type, &visitor);
         } else {
+            void* cptr = sbkObj->d->cptr[0];
+            Shiboken::Object::deallocData(sbkObj, true);
+
             Shiboken::ThreadStateSaver threadSaver;
             threadSaver.save();
-            sbkType->d->cpp_dtor(sbkObj->d->cptr[0]);
+            sbkType->d->cpp_dtor(cptr);
         }
+    } else {
+        Shiboken::Object::deallocData(sbkObj, true);
     }
-    //Always destroy object data during the python object destruction
-    Shiboken::Object::deallocData(sbkObj, true);
 }
 
 void SbkDeallocWrapperWithPrivateDtor(PyObject* self)
@@ -322,7 +325,7 @@ namespace Shiboken
 
 static void decRefPyObjectList(const std::list<PyObject*> &pyObj, PyObject* skip = 0);
 
-void walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visitor)
+static void _walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visitor)
 {
     PyObject* bases = currentType->tp_bases;
     Py_ssize_t numBases = PyTuple_GET_SIZE(bases);
@@ -334,14 +337,21 @@ void walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visi
         } else {
             SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(type);
             if (sbkType->d->is_user_type)
-                walkThroughClassHierarchy(type, visitor);
+                _walkThroughClassHierarchy(type, visitor);
             else
                 visitor->visit(sbkType);
         }
         if (visitor->wasFinished())
-            return;
+            break;
     }
 }
+
+void walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visitor)
+{
+    _walkThroughClassHierarchy(currentType, visitor);
+    visitor->done();
+}
+
 
 bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr)
 {
@@ -368,10 +378,19 @@ bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr)
 
 void DtorCallerVisitor::visit(SbkObjectType* node)
 {
-    Shiboken::ThreadStateSaver threadSaver;
-    threadSaver.save();
-    node->d->cpp_dtor(m_pyObj->d->cptr[m_count]);
-    m_count++;
+    m_ptrs.push_back(std::make_pair(m_pyObj->d->cptr[m_ptrs.size()], node));
+}
+
+void DtorCallerVisitor::done()
+{
+    Shiboken::Object::deallocData(m_pyObj, true);
+
+    std::list<std::pair<void*, SbkObjectType*> >::const_iterator it = m_ptrs.begin();
+    for (; it != m_ptrs.end(); ++it) {
+        Shiboken::ThreadStateSaver threadSaver;
+        threadSaver.save();
+        it->second->d->cpp_dtor(it->first);
+    }
 }
 
 void init()

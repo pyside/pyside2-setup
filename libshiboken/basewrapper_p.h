@@ -136,6 +136,7 @@ public:
     HierarchyVisitor() : m_wasFinished(false) {}
     virtual ~HierarchyVisitor() {}
     virtual void visit(SbkObjectType* node) = 0;
+    virtual void done() {}
     void finish() { m_wasFinished = true; };
     bool wasFinished() const { return m_wasFinished; }
 private:
@@ -192,10 +193,11 @@ private:
 class DtorCallerVisitor : public HierarchyVisitor
 {
 public:
-    DtorCallerVisitor(SbkObject* pyObj) : m_count(0), m_pyObj(pyObj) {}
+    DtorCallerVisitor(SbkObject* pyObj) : m_pyObj(pyObj) {}
     void visit(SbkObjectType* node);
+    void done();
 private:
-    int m_count;
+    std::list<std::pair<void*, SbkObjectType*> > m_ptrs;
     SbkObject* m_pyObj;
 };
 

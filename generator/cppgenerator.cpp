@@ -599,12 +599,8 @@ void CppGenerator::writeDestructorNative(QTextStream &s, const AbstractMetaClass
     Indentation indentation(INDENT);
     s << wrapperName(metaClass) << "::~" << wrapperName(metaClass) << "()" << endl << '{' << endl;
     // kill pyobject
-    if (usePySideExtensions() && metaClass->isQObject()) {
-        s << INDENT << "PySide::DestroyListener::instance()->listen(this);" << endl;
-    } else {
-        s << INDENT << "SbkObject* wrapper = Shiboken::BindingManager::instance().retrieveWrapper(this);" << endl;
-        s << INDENT << "Shiboken::Object::destroy(wrapper, this);" << endl;
-    }
+    s << INDENT << "SbkObject* wrapper = Shiboken::BindingManager::instance().retrieveWrapper(this);" << endl;
+    s << INDENT << "Shiboken::Object::destroy(wrapper, this);" << endl;
     s << '}' << endl;
 }
 
