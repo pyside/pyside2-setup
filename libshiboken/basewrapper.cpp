@@ -211,14 +211,16 @@ void SbkObjectTypeDealloc(PyObject* pyObj)
 
     PyObject_GC_UnTrack(pyObj);
     Py_TRASHCAN_SAFE_BEGIN(pyObj);
-    if(sbkType->d->user_data && sbkType->d->d_func) {
-        sbkType->d->d_func(sbkType->d->user_data);
-        sbkType->d->user_data = 0;
+    if (sbkType->d) {
+        if(sbkType->d->user_data && sbkType->d->d_func) {
+            sbkType->d->d_func(sbkType->d->user_data);
+            sbkType->d->user_data = 0;
+        }
+        free(sbkType->d->original_name);
+        sbkType->d->original_name = 0;
+        delete sbkType->d;
+        sbkType->d = 0;
     }
-    free(sbkType->d->original_name);
-    sbkType->d->original_name = 0;
-    delete sbkType->d;
-    sbkType->d = 0;
     Py_TRASHCAN_SAFE_END(pyObj);
 }
 
@@ -249,7 +251,6 @@ PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* k
 
     // The meta type creates a new type when the Python programmer extends a wrapped C++ class.
     SbkObjectType* newType = reinterpret_cast<SbkObjectType*>(PyType_Type.tp_new(metatype, args, kwds));
-
     if (!newType)
         return 0;
 
