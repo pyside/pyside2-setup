@@ -815,7 +815,9 @@ void* cppPointer(SbkObject* pyObj, PyTypeObject* desiredType)
     int idx = 0;
     if (reinterpret_cast<SbkObjectType*>(type)->d->is_multicpp)
         idx = getTypeIndexOnHierarchy(type, desiredType);
-    return pyObj->d->cptr[idx];
+    if (pyObj->d->cptr)
+        return pyObj->d->cptr[idx];
+    return 0;
 }
 
 bool setCppPointer(SbkObject* sbkObj, PyTypeObject* desiredType, void* cptr)
@@ -951,6 +953,11 @@ void destroy(SbkObject* self, void* cppData)
     if (cppData && Shiboken::BindingManager::instance().hasWrapper(cppData)) {
         // Remove from BindingManager
         Shiboken::BindingManager::instance().releaseWrapper(self);
+        self->d->hasOwnership = false;
+
+        // the cpp object instance was deleted
+        delete[] self->d->cptr;
+        self->d->cptr = 0;
     }
 
     // After this point the object can be death do not use the self pointer bellow
@@ -1076,13 +1083,14 @@ void deallocData(SbkObject* self, bool cleanup)
         clearReferences(self);
     }
 
-    // Remove from BindingManager
-    Shiboken::BindingManager::instance().releaseWrapper(self);
-
+    if (self->d->cptr) {
+        // Remove from BindingManager
+        Shiboken::BindingManager::instance().releaseWrapper(self);
+        delete[] self->d->cptr;
+        self->d->cptr = 0;
+        delete self->d;
+    }
     Py_XDECREF(self->ob_dict);
-    delete[] self->d->cptr;
-    self->d->cptr = 0;
-    delete self->d;
     Py_TYPE(self)->tp_free(self);
 }
 
