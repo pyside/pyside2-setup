@@ -3233,7 +3233,8 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
 
     if (!cppEnum->isAnonymous()) {
 
-        s << INDENT << "PyTypeObject* " << cpythonName << " = Shiboken::Enum::newType(\"" << getClassTargetFullName(cppEnum) << "\");" << endl;
+        s << INDENT << "PyTypeObject* " << cpythonName << " = Shiboken::Enum::newTypeWithName(\"" << getClassTargetFullName(cppEnum) << "\", \"" 
+          << (cppEnum->enclosingClass() ? cppEnum->enclosingClass()->qualifiedCppName() + "::" : "") << cppEnum->name() << "\");" << endl;
 
         if (cppEnum->typeEntry()->flags())
             s << INDENT << cpythonName << "->tp_as_number = &" << cpythonName << "_as_number;" << endl;
@@ -3332,9 +3333,6 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
         if (cppSignal->declaringClass() == metaClass) {
             if (cppSignal->arguments().count()) {
                 for (int i = 0; i < cppSignal->arguments().count(); ++i) {
-                    if (i > 0)
-                        signature += ", ";
-
                     AbstractMetaArgument* arg = cppSignal->arguments().at(i);
                     AbstractMetaType* type = arg->type();
 
@@ -3370,7 +3368,8 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
                           << originalType << " >"
                           << "(\"" << skipNamespace(signalTypeName) << "\");" << endl;
                     }
-
+                    if (i>0)
+                        signature += ", ";
                     signature += SBK_NORMALIZED_TYPE(signalTypeName.toAscii());
                 }
             } else {
@@ -3390,7 +3389,7 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
     foreach(QString funcName, signatures.keys()) {
         s << INDENT << "signal_item = PySide::Signal::newObject(\"" << funcName <<"\"";
         foreach(QString signature, signatures[funcName])
-            s << ", \"" + signature << "\"";
+            s << ", \"" << signature << "\"";
         s << ", NULL);" << endl;
         s << INDENT << "PySide::Signal::addSignalToWrapper(&" + cpythonTypeName(metaClass) + ", \"";
         s << funcName << "\", signal_item);" << endl;
