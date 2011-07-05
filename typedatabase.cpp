@@ -415,3 +415,17 @@ void TypeDatabase::setDropTypeEntries(QStringList dropTypeEntries)
     m_dropTypeEntries.sort();
 }
 
+typedef QHash<TypeEntry*, int> TypeRevisionMap;
+Q_GLOBAL_STATIC(TypeRevisionMap, typeRevisions);
+
+int getTypeRevision(TypeEntry* typeEntry)
+{
+    return typeRevisions()->value(typeEntry);
+}
+
+void setTypeRevision(TypeEntry* typeEntry, int revision)
+{
+    typeRevisions()->insert(typeEntry, revision);
+}
+
+

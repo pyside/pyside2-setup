@@ -409,6 +409,7 @@ bool Handler::startElement(const QString &, const QString &n,
         QHash<QString, QString> attributes;
         attributes["name"] = QString();
         attributes["since"] = QString("0");
+        attributes["revision"] = QString("0");
 
         switch (element->type) {
         case StackElement::PrimitiveTypeEntry:
@@ -423,6 +424,7 @@ bool Handler::startElement(const QString &, const QString &n,
             break;
         case StackElement::EnumTypeEntry:
             attributes["flags"] = QString();
+            attributes["flags-revision"] = QString();
             attributes["upper-bound"] = QString();
             attributes["lower-bound"] = QString();
             attributes["force-integer"] = "no";
@@ -526,6 +528,7 @@ bool Handler::startElement(const QString &, const QString &n,
             m_error = "no 'name' attribute specified";
             return false;
         }
+
         switch (element->type) {
         case StackElement::PrimitiveTypeEntry: {
             QString targetLangName = attributes["target-lang-name"];
@@ -619,6 +622,9 @@ bool Handler::startElement(const QString &, const QString &n,
 
                 m_database->addFlagsType(ftype);
                 m_database->addType(ftype);
+
+                QString revision = attributes["flags-revision"].isEmpty() ? attributes["revision"] : attributes["flags-revision"];
+                setTypeRevision(ftype, revision.toInt());
             }
         }
         break;
@@ -746,10 +752,12 @@ bool Handler::startElement(const QString &, const QString &n,
             Q_ASSERT(false);
         };
 
-        if (element->entry)
+        if (element->entry) {
             m_database->addType(element->entry);
-        else
+            setTypeRevision(element->entry, attributes["revision"].toInt());
+        } else {
             ReportHandler::warning(QString("Type: %1 was rejected by typesystem").arg(name));
+        }
 
     } else if (element->type == StackElement::InjectDocumentation) {
         // check the XML tag attributes

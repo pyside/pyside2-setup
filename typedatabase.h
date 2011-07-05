@@ -27,6 +27,9 @@
 #include <QStringList>
 #include "typesystem.h"
 
+APIEXTRACTOR_API void setTypeRevision(TypeEntry* typeEntry, int revision);
+APIEXTRACTOR_API int getTypeRevision(TypeEntry* typeEntry);
+
 class ContainerTypeEntry;
 class PrimitiveTypeEntry;
 class APIEXTRACTOR_API TypeDatabase

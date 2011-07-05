@@ -41,6 +41,7 @@ declare_test(testreverseoperators)
 declare_test(testtemplates)
 declare_test(testtoposort)
 declare_test(testvoidarg)
+declare_test(testtyperevision)
 if (NOT DISABLE_DOCSTRINGS)
     declare_test(testmodifydocumentation)
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/a.xml"
