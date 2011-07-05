@@ -91,6 +91,10 @@
 
     <enum-type identified-by-value="AnonymousGlobalEnum_Value0"/>
 
+    <namespace-type name="Invisible" generate="no">
+        <enum-type name="EnumOnNamespace" />
+    </namespace-type>
+
     <namespace-type name="SampleNamespace">
         <enum-type name="Option"/>
         <enum-type name="InValue"/>

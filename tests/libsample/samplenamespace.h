@@ -35,6 +35,18 @@ enum {
     AnonymousGlobalEnum_Value1
 };
 
+// Invisible namespace
+namespace Invisible
+{
+
+enum EnumOnNamespace {
+    Option1     = 1,
+    Option2     = 2,
+    Option3     = 3
+};
+
+};
+
 namespace SampleNamespace
 {
 

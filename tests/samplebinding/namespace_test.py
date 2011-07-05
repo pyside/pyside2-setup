@@ -29,6 +29,11 @@
 import unittest
 from sample import *
 
+class TestEnumUnderNamespace(unittest.TestCase):
+    def testInvisibleNamespace(self):
+        o1 = EnumOnNamespace.Option1
+        self.assertEquals(o1, 1)
+
 class TestClassesUnderNamespace(unittest.TestCase):
     def testIt(self):
         c1 = SampleNamespace.SomeClass()
