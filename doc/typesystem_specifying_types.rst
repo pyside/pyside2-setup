@@ -116,7 +116,9 @@ namespace-type
         <typesystem>
             <namespace-type name="..."
                 generate="yes | no"
-                package="..." />
+                package="..."
+                since="..."
+                revision="..." />
         </typesystem>
 
     The **name** attribute is the name of the namespace, e.g., "Qt".
@@ -127,6 +129,9 @@ namespace-type
     The **package** attribute can be used to override the package of the type system.
 
     The *optional*  **since** value is used to specify the API version of this type.
+
+    The **revision** attribute can be used to specify a revision for each type, easing the
+    production of ABI compatible bindings.
 
 enum-type
 ^^^^^^^^^
@@ -142,10 +147,12 @@ enum-type
                 identified-by-value="..."
                 since="..."
                 flags="yes | no"
+                flags-revision="..."
                 lower-bound="..."
                 upper-bound="..."
                 force-integer="yes | no"
-                extensible="yes | no" />
+                extensible="yes | no"
+                revision="..." />
         </typesystem>
 
     The **name** attribute is the fully qualified C++ name of the enum
@@ -167,6 +174,11 @@ enum-type
     Notice that the **enum-type** tag can either have **name** or **identified-by-value**
     but not both.
 
+    The **revision** attribute can be used to specify a revision for each type, easing the
+    production of ABI compatible bindings.
+
+    The **flags-revision** attribute has the same purposes of **revision** attribute but
+    is used for the QFlag related to this enum.
 
 
 reject-enum-value
@@ -199,7 +211,8 @@ value-type
             <value-type  name="..." since="..."
              copyable="yes | no"
              hash-function="..."
-             stream="yes | no" />
+             stream="yes | no"
+             revision="..." />
         </typesystem>
 
     The **name** attribute is the fully qualified C++ class name, such as
@@ -213,6 +226,8 @@ value-type
 
     The *optional*  **since** value is used to specify the API version of this type.
 
+    The **revision** attribute can be used to specify a revision for each type, easing the
+    production of ABI compatible bindings.
 
 .. _object-type:
 
@@ -230,7 +245,8 @@ object-type
              since="..."
              copyable="yes | no"
              hash-function="..."
-             stream="yes | no" />
+             stream="yes | no"
+             revision="..." />
         </typesystem>
 
     The **name** attribute is the fully qualified C++ class name. If there is no
@@ -245,6 +261,8 @@ object-type
 
     The *optional*  **since** value is used to specify the API version of this type.
 
+    The **revision** attribute can be used to specify a revision for each type, easing the
+    production of ABI compatible bindings.
 
 interface-type
 ^^^^^^^^^^^^^^
@@ -259,7 +277,8 @@ interface-type
             <interface-type name="..."
                 since="..."
                 package ="..."
-                default-superclass ="..." />
+                default-superclass ="..."
+                revision="..." />
         </typesystem>
 
     The **name** attribute is the fully qualified C++ class name. The *optional*
@@ -269,6 +288,9 @@ interface-type
     the given class.
 
     The *optional*  **since** value is used to specify the API version of this interface.
+
+    The **revision** attribute can be used to specify a revision for each type, easing the
+    production of ABI compatible bindings.
 
 .. _container-type:
 
