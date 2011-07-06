@@ -3590,11 +3590,6 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     // alloc private data
     s << INDENT << "Shiboken::ObjectType::initPrivateData(&" << pyTypeName << ");" << endl;
 
-    if (usePySideExtensions() && metaClass->isQObject()) {
-        s << INDENT << "Shiboken::ObjectType::setSubTypeInitHook(&" << pyTypeName << ", &PySide::initQObjectSubType);" << endl;
-        s << INDENT << "PySide::initDynamicMetaObject(&" << pyTypeName << ", &" << metaClass->qualifiedCppName() << "::staticMetaObject);";
-    }
-
     // class inject-code target/beginning
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
         writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Beginning, TypeSystem::TargetLangCode, 0, 0, metaClass);
@@ -3718,6 +3713,11 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
             s << INDENT << wrapperName(metaClass) << "::pysideInitQtMetaTypes();\n";
         else
             writeInitQtMetaTypeFunctionBody(s, metaClass);
+    }
+
+    if (usePySideExtensions() && metaClass->isQObject()) {
+        s << INDENT << "Shiboken::ObjectType::setSubTypeInitHook(&" << pyTypeName << ", &PySide::initQObjectSubType);" << endl;
+        s << INDENT << "PySide::initDynamicMetaObject(&" << pyTypeName << ", &" << metaClass->qualifiedCppName() << "::staticMetaObject);";
     }
 
     s << '}' << endl << endl;
