@@ -28,7 +28,9 @@
 #include "typesystem.h"
 
 APIEXTRACTOR_API void setTypeRevision(TypeEntry* typeEntry, int revision);
-APIEXTRACTOR_API int getTypeRevision(TypeEntry* typeEntry);
+APIEXTRACTOR_API int getTypeRevision(const TypeEntry* typeEntry);
+APIEXTRACTOR_API int getTypeIndex(const TypeEntry* typeEntry);
+APIEXTRACTOR_API int getMaxTypeIndex();
 
 class ContainerTypeEntry;
 class PrimitiveTypeEntry;

@@ -478,55 +478,64 @@ bool AbstractMetaBuilder::build(QIODevice* input)
     }
     ReportHandler::flush();
 
-    QList<TypeEntry*> entries = types->entries().values();
-    ReportHandler::setProgressReference(entries);
-    foreach (const TypeEntry *entry, entries) {
-        ReportHandler::progress("Detecting inconsistencies in typesystem...");
+    TypeEntryHash allEntries = types->allEntries();
+    ReportHandler::progress("Detecting inconsistencies in typesystem...");
+    foreach (QList<TypeEntry*> entries, allEntries) {
+        foreach (TypeEntry* entry, entries) {
 
-        if (entry->isPrimitive())
-            continue;
+            if (entry->isPrimitive())
+                continue;
 
-        if (!types->supportedApiVersion(entry->version())) {
-            m_rejectedClasses.insert(entry->name(), ApiIncompatible);
-            continue;
-        }
+            if (!types->supportedApiVersion(entry->version())) {
+                m_rejectedClasses.insert(entry->name(), ApiIncompatible);
+                continue;
+            }
 
-        if ((entry->isValue() || entry->isObject())
-            && !entry->isString()
-            && !entry->isChar()
-            && !entry->isContainer()
-            && !entry->isCustom()
-            && !entry->isVariant()
-            && !m_metaClasses.findClass(entry->qualifiedCppName())) {
-            ReportHandler::warning(QString("type '%1' is specified in typesystem, but not defined. This could potentially lead to compilation errors.")
-                                   .arg(entry->qualifiedCppName()));
-        } else if (entry->generateCode() && entry->type() == TypeEntry::FunctionType) {
-            const FunctionTypeEntry* fte = static_cast<const FunctionTypeEntry*>(entry);
-            foreach (QString signature, fte->signatures()) {
-                bool ok = false;
-                foreach (AbstractMetaFunction* func, m_globalFunctions) {
-                    if (signature == func->minimalSignature()) {
-                        ok = true;
-                        break;
+            if ((entry->isValue() || entry->isObject())
+                && !entry->isString()
+                && !entry->isChar()
+                && !entry->isContainer()
+                && !entry->isCustom()
+                && !entry->isVariant()
+                && !m_metaClasses.findClass(entry->qualifiedCppName())) {
+                ReportHandler::warning(QString("type '%1' is specified in typesystem, but not defined. This could potentially lead to compilation errors.")
+                                    .arg(entry->qualifiedCppName()));
+            } else if (entry->generateCode() && entry->type() == TypeEntry::FunctionType) {
+                const FunctionTypeEntry* fte = static_cast<const FunctionTypeEntry*>(entry);
+                foreach (QString signature, fte->signatures()) {
+                    bool ok = false;
+                    foreach (AbstractMetaFunction* func, m_globalFunctions) {
+                        if (signature == func->minimalSignature()) {
+                            ok = true;
+                            break;
+                        }
+                    }
+                    if (!ok) {
+                        ReportHandler::warning(QString("Global function '%1' is specified in typesystem, but not defined. This could potentially lead to compilation errors.")
+                        .arg(signature));
                     }
                 }
-                if (!ok) {
-                    ReportHandler::warning(QString("Global function '%1' is specified in typesystem, but not defined. This could potentially lead to compilation errors.")
-                    .arg(signature));
-                }
-            }
-        } else if (entry->isEnum()) {
-            QString pkg = entry->targetLangPackage();
-            QString name = (pkg.isEmpty() ? QString() : pkg + ".")
-                           + ((EnumTypeEntry*) entry)->targetLangQualifier();
-            AbstractMetaClass* cls = m_metaClasses.findClass(name);
+            } else if (entry->isEnum()) {
+                const QString name = ((EnumTypeEntry*) entry)->targetLangQualifier();
+                AbstractMetaClass* cls = m_metaClasses.findClass(name);
 
-            if (cls) {
-                AbstractMetaEnum* e = cls->findEnum(entry->targetLangName());
-                if (!e)
-                    ReportHandler::warning(QString("enum '%1' is specified in typesystem, "
-                                                   "but not declared")
+                bool enumFound = false;
+                if (cls) {
+                    enumFound = cls->findEnum(entry->targetLangName());
+                } else { // Global enum
+                    foreach (AbstractMetaEnum* metaEnum, m_enums) {
+                        if (metaEnum->typeEntry() == entry) {
+                            enumFound = true;
+                            break;
+                        }
+                    }
+                }
+                if (!enumFound) {
+                    entry->setCodeGeneration(TypeEntry::GenerateNothing);
+                    ReportHandler::warning(QString("enum '%1' is specified in typesystem, but not declared")
                                            .arg(entry->qualifiedCppName()));
+                }
+
             }
         }
     }
@@ -945,6 +954,7 @@ AbstractMetaEnum* AbstractMetaBuilder::traverseEnum(EnumModelItem enumItem, Abst
         className = m_currentClass->typeEntry()->qualifiedCppName();
 
     if (TypeDatabase::instance()->isEnumRejected(className, enumName)) {
+        typeEntry->setCodeGeneration(TypeEntry::GenerateNothing);
         m_rejectedEnums.insert(qualifiedName, GenerationDisabled);
         return 0;
     }
@@ -958,6 +968,7 @@ AbstractMetaEnum* AbstractMetaBuilder::traverseEnum(EnumModelItem enumItem, Abst
 
     // Skipping api incompatible
     if (!TypeDatabase::instance()->supportedApiVersion(typeEntry->version())) {
+        typeEntry->setCodeGeneration(TypeEntry::GenerateNothing);
         m_rejectedEnums.insert(qualifiedName, ApiIncompatible);
         return 0;
     }
@@ -970,10 +981,18 @@ AbstractMetaEnum* AbstractMetaBuilder::traverseEnum(EnumModelItem enumItem, Abst
 
     metaEnum->setTypeEntry((EnumTypeEntry*) typeEntry);
     switch (enumItem->accessPolicy()) {
-    case CodeModel::Public: *metaEnum += AbstractMetaAttributes::Public; break;
-    case CodeModel::Protected: *metaEnum += AbstractMetaAttributes::Protected; break;
-    case CodeModel::Private: *metaEnum += AbstractMetaAttributes::Private; break;
-    default: break;
+    case CodeModel::Public:
+        *metaEnum += AbstractMetaAttributes::Public;
+        break;
+    case CodeModel::Protected:
+        *metaEnum += AbstractMetaAttributes::Protected;
+        break;
+    case CodeModel::Private:
+        *metaEnum += AbstractMetaAttributes::Private;
+        typeEntry->setCodeGeneration(TypeEntry::GenerateNothing);
+        break;
+    default:
+        break;
     }
 
     ReportHandler::debugMedium(QString(" - traversing enum %1").arg(metaEnum->fullName()));
