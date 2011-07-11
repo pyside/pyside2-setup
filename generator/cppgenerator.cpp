@@ -3754,14 +3754,14 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream& s, const Abstrac
                 s << INDENT << "qRegisterMetaType< ::" << className << " >(\"" << name << "\");" << endl;
         }
     }
+
     foreach (AbstractMetaEnum* metaEnum, metaClass->enums()) {
         if (!metaEnum->isPrivate() && !metaEnum->isAnonymous()) {
-            QString n = className + "::" + metaEnum->name();
             foreach (QString name, nameVariants)
-                s << INDENT << "qRegisterMetaType< ::" << n << " >(\"" << name << "::" << metaEnum->name() << "\");" << endl;
+                s << INDENT << "qRegisterMetaType< ::" << metaEnum->typeEntry()->qualifiedCppName() << " >(\"" << name << "::" << metaEnum->name() << "\");" << endl;
 
             if (metaEnum->typeEntry()->flags()) {
-                n = metaEnum->typeEntry()->flags()->originalName();
+                QString n = metaEnum->typeEntry()->flags()->originalName();
                 s << INDENT << "qRegisterMetaType< ::" << n << " >(\"" << n << "\");" << endl;
             }
         }
@@ -4168,8 +4168,9 @@ void CppGenerator::finishGeneration()
 
         if (usePySideExtensions()) {
             foreach (AbstractMetaEnum* metaEnum, globalEnums)
-                if (!metaEnum->isAnonymous())
-                    s << INDENT << "qRegisterMetaType< ::" << metaEnum->name() << " >(\"" << metaEnum->name() << "\");" << endl;
+                if (!metaEnum->isAnonymous()) {
+                    s << INDENT << "qRegisterMetaType< ::" << metaEnum->typeEntry()->qualifiedCppName() << " >(\"" << metaEnum->name() << "\");" << endl;
+                }
 
             // cleanup staticMetaObject attribute
             s << INDENT << "PySide::registerCleanupFunction(cleanTypesAttributes);" << endl;
