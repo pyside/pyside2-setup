@@ -45,8 +45,8 @@ private:
     void writeTypeConverterDecl(QTextStream& s, const TypeEntry* type);
     void writeSbkTypeFunction(QTextStream& s, const AbstractMetaEnum* cppEnum);
     void writeSbkTypeFunction(QTextStream& s, const AbstractMetaClass* cppClass);
-    void writeTypeIndexDefineLine(QTextStream& s, const TypeEntry* typeEntry, int& idx);
-    void writeTypeIndexDefine(QTextStream& s, const AbstractMetaClass* metaClass, int& idx);
+    void writeTypeIndexDefineLine(QTextStream& s, const TypeEntry* typeEntry);
+    void writeTypeIndexDefine(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeTypeConverterImpl(QTextStream& s, const TypeEntry* type);
     void writeProtectedEnumSurrogate(QTextStream& s, const AbstractMetaEnum* cppEnum);
     void writeInheritedOverloads(QTextStream& s);

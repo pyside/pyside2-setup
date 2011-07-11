@@ -286,7 +286,7 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
     }
 }
 
-void HeaderGenerator::writeTypeIndexDefineLine(QTextStream& s, const TypeEntry* typeEntry, int& idx)
+void HeaderGenerator::writeTypeIndexDefineLine(QTextStream& s, const TypeEntry* typeEntry)
 {
     if (!typeEntry || !typeEntry->generateCode())
         return;
@@ -295,23 +295,23 @@ void HeaderGenerator::writeTypeIndexDefineLine(QTextStream& s, const TypeEntry* 
     s.setFieldWidth(60);
     s << getTypeIndexVariableName(typeEntry);
     s.setFieldWidth(0);
-    s << ' ' << (idx++) << endl;
+    s << ' ' << getTypeIndex(typeEntry) << endl;
     if (typeEntry->isEnum()) {
         const EnumTypeEntry* ete = reinterpret_cast<const EnumTypeEntry*>(typeEntry);
         if (ete->flags())
-            writeTypeIndexDefineLine(s, ete->flags(), idx);
+            writeTypeIndexDefineLine(s, ete->flags());
     }
 }
 
-void HeaderGenerator::writeTypeIndexDefine(QTextStream& s, const AbstractMetaClass* metaClass, int& idx)
+void HeaderGenerator::writeTypeIndexDefine(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     if (!metaClass->typeEntry()->generateCode())
         return;
-    writeTypeIndexDefineLine(s, metaClass->typeEntry(), idx);
+    writeTypeIndexDefineLine(s, metaClass->typeEntry());
     foreach (const AbstractMetaEnum* metaEnum, metaClass->enums()) {
         if (metaEnum->isPrivate())
             continue;
-        writeTypeIndexDefineLine(s, metaEnum->typeEntry(), idx);
+        writeTypeIndexDefineLine(s, metaEnum->typeEntry());
     }
 }
 
@@ -338,19 +338,18 @@ void HeaderGenerator::finishGeneration()
     Indentation indent(INDENT);
 
     macrosStream << "// Type indices" << endl;
-    int idx = 0;
     AbstractMetaEnumList globalEnums = this->globalEnums();
     foreach (const AbstractMetaClass* metaClass, classes()) {
-        writeTypeIndexDefine(macrosStream, metaClass, idx);
+        writeTypeIndexDefine(macrosStream, metaClass);
         lookForEnumsInClassesNotToBeGenerated(globalEnums, metaClass);
     }
     foreach (const AbstractMetaEnum* metaEnum, globalEnums)
-        writeTypeIndexDefineLine(macrosStream, metaEnum->typeEntry(), idx);
+        writeTypeIndexDefineLine(macrosStream, metaEnum->typeEntry());
     macrosStream << "#define ";
     macrosStream.setFieldWidth(60);
     macrosStream << "SBK_"+moduleName()+"_IDX_COUNT";
     macrosStream.setFieldWidth(0);
-    macrosStream << ' ' << idx << endl << endl;
+    macrosStream << ' ' << getMaxTypeIndex() << endl << endl;
     macrosStream << "// This variable stores all python types exported by this module" << endl;
     macrosStream << "extern PyTypeObject** " << cppApiVariableName() << ';' << endl << endl;
 
