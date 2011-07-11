@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
 <typesystem package="sample">
+    <suppress-warning text="Duplicate type entry: 'sample'" />
+    <suppress-warning text="Duplicate type entry: 'SampleNamespace'" />
+
     <primitive-type name="bool"/>
     <primitive-type name="double"/>
     <primitive-type name="int"/>
@@ -1553,8 +1556,20 @@
     <rejection class="ListUser" function-name="sumList(std::list&lt;double&gt;)"/>
 
     <value-type name="ValueAndVirtual" />
-    <suppress-warning text="::*" />
     <suppress-warning text="horribly broken type '__off64_t'" />
     <suppress-warning text="enum '__codecvt_result' does not have a type entry or is not an enum" />
+    <suppress-warning text="Pure virtual method &quot;Abstract::hideFunction(HideType*)&quot; must be implement but was completely removed on typesystem." />
+    <suppress-warning text="hiding of function 'takeChild' in class 'ObjectType'" />
+    <suppress-warning text="Shadowing: MDerived2::castToBase3() and MDerived3::castToBase3()" />
+    <suppress-warning text="hiding of function 'takeChild' in class 'Bucket'" />
+    <suppress-warning text="visibility of function 'publicMethod' modified in class 'MDerived1'" />
+    <suppress-warning text="hiding of function 'doNothingInPublic3' in class 'Overload2'" />
+    <suppress-warning text="hiding of function 'takeChild' in class 'ObjectModel'" />
+    <suppress-warning text="hiding of function 'takeChild' in class 'ObjectView'" />
+    <suppress-warning text="visibility of function 'publicMethod' modified in class 'MDerived3'" />
+    <suppress-warning text="skipping function 'InjectCode::toStr', unmatched parameter type 'T const&amp;'" />
+    <suppress-warning text="template baseclass 'std::list&lt;T>' of 'QList' is not known" />
+    <suppress-warning text="template baseclass 'std::list&lt;Str>' of 'StrList' is not known" />
+
 </typesystem>
 
