@@ -954,7 +954,8 @@ AbstractMetaEnum* AbstractMetaBuilder::traverseEnum(EnumModelItem enumItem, Abst
         className = m_currentClass->typeEntry()->qualifiedCppName();
 
     if (TypeDatabase::instance()->isEnumRejected(className, enumName)) {
-        typeEntry->setCodeGeneration(TypeEntry::GenerateNothing);
+        if (typeEntry)
+            typeEntry->setCodeGeneration(TypeEntry::GenerateNothing);
         m_rejectedEnums.insert(qualifiedName, GenerationDisabled);
         return 0;
     }
