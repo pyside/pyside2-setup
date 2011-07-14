@@ -382,11 +382,11 @@ static QString searchForEnumScope(const AbstractMetaClass* metaClass, const QStr
  */
 QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction* func, const AbstractMetaArgument* arg)
 {
-    if (arg->defaultValueExpression().isEmpty())
+    QString value = getDefaultValue(func, arg);
+    if (value.isEmpty())
         return QString();
 
     static QRegExp enumValueRegEx("^([A-Za-z_]\\w*)?$");
-    QString value = arg->defaultValueExpression();
     QString prefix;
     QString suffix;
 
@@ -1789,4 +1789,20 @@ Generator::Options ShibokenGenerator::getConverterOptions(const AbstractMetaType
     }
     return flags;
 }
+
+QString  ShibokenGenerator::getDefaultValue(const AbstractMetaFunction* func, const AbstractMetaArgument* arg)
+{
+    if (!arg->defaultValueExpression().isEmpty())
+        return arg->defaultValueExpression();
+
+    //Check modifications
+    foreach(FunctionModification  m, func->modifications()) {
+        foreach(ArgumentModification am, m.argument_mods) {
+            if (am.index == (arg->argumentIndex() + 1))
+                return am.replacedDefaultExpression;
+        }
+    }
+    return QString();
+}
+
 

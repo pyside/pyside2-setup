@@ -78,6 +78,7 @@ static bool typesAreEqual(const AbstractMetaType* typeA, const AbstractMetaType*
     return false;
 }
 
+
 /**
  * OverloadSortData just helps writing clearer code in the
  * OverloadData::sortNextOverloads method.
@@ -474,7 +475,7 @@ void OverloadData::addOverload(const AbstractMetaFunction* func)
     for (int i = 0; m_headOverloadData->m_minArgs > 0 && i < origNumArgs; i++) {
         if (func->argumentRemoved(i + 1))
             continue;
-        if (!func->arguments()[i]->defaultValueExpression().isEmpty()) {
+        if (!ShibokenGenerator::getDefaultValue(func, func->arguments()[i]).isEmpty()) {
             int fixedArgIndex = i - removed;
             if (fixedArgIndex < m_headOverloadData->m_minArgs)
                 m_headOverloadData->m_minArgs = fixedArgIndex;
@@ -706,7 +707,7 @@ const AbstractMetaFunction* OverloadData::getFunctionWithDefaultValue() const
             if (func->argumentRemoved(i + 1))
                 removedArgs++;
         }
-        if (!func->arguments()[m_argPos + removedArgs]->defaultValueExpression().isEmpty())
+        if (!ShibokenGenerator::getDefaultValue(func, func->arguments()[m_argPos + removedArgs]).isEmpty())
             return func;
     }
     return 0;
@@ -723,7 +724,7 @@ QList<int> OverloadData::invalidArgumentLengths() const
             if (func->argumentRemoved(i+1)) {
                 offset++;
             } else {
-                if (!args[i]->defaultValueExpression().isEmpty())
+                if (!ShibokenGenerator::getDefaultValue(func, args[i]).isEmpty())
                     validArgLengths << i-offset;
             }
         }
@@ -773,7 +774,7 @@ QPair<int, int> OverloadData::getMinMaxArguments(const AbstractMetaFunctionList&
             if (func->argumentRemoved(j + 1))
                 continue;
             int fixedArgIndex = j - removed;
-            if (fixedArgIndex < minArgs && !func->arguments()[j]->defaultValueExpression().isEmpty())
+            if (fixedArgIndex < minArgs && !ShibokenGenerator::getDefaultValue(func, func->arguments()[j]).isEmpty())
                 minArgs = fixedArgIndex;
         }
     }
@@ -911,13 +912,14 @@ QString OverloadData::dumpGraph() const
             const AbstractMetaArgument* arg = argument(func);
             if (!arg)
                 continue;
-            if (!arg->defaultValueExpression().isEmpty() ||
-                arg->defaultValueExpression() != arg->originalDefaultValueExpression()) {
+            QString argDefault = ShibokenGenerator::getDefaultValue(func, arg);
+            if (!argDefault.isEmpty() ||
+                argDefault != arg->originalDefaultValueExpression()) {
                 s << "<tr><td bgcolor=\"gray\" align=\"right\">f" << functionNumber(func);
                 s << "-default</td><td bgcolor=\"gray\" align=\"left\">";
-                s << arg->defaultValueExpression() << "</td></tr>";
+                s << argDefault << "</td></tr>";
             }
-            if (arg->defaultValueExpression() != arg->originalDefaultValueExpression()) {
+            if (argDefault != arg->originalDefaultValueExpression()) {
                 s << "<tr><td bgcolor=\"gray\" align=\"right\">f" << functionNumber(func);
                 s << "-orig-default</td><td bgcolor=\"gray\" align=\"left\">";
                 s << arg->originalDefaultValueExpression() << "</td></tr>";
@@ -980,7 +982,7 @@ bool OverloadData::hasArgumentWithDefaultValue(const AbstractMetaFunction* func)
     foreach (const AbstractMetaArgument* arg, func->arguments()) {
         if (func->argumentRemoved(arg->argumentIndex() + 1))
             continue;
-        if (!arg->defaultValueExpression().isEmpty())
+        if (!ShibokenGenerator::getDefaultValue(func, arg).isEmpty())
             return true;
     }
     return false;
@@ -990,7 +992,7 @@ AbstractMetaArgumentList OverloadData::getArgumentsWithDefaultValues(const Abstr
 {
     AbstractMetaArgumentList args;
     foreach (AbstractMetaArgument* arg, func->arguments()) {
-        if (arg->defaultValueExpression().isEmpty()
+        if (ShibokenGenerator::getDefaultValue(func, arg).isEmpty()
             || func->argumentRemoved(arg->argumentIndex() + 1))
             continue;
         args << arg;

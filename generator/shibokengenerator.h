@@ -334,6 +334,11 @@ public:
      * it needs to write some converter code.
      */
     static Options getConverterOptions(const AbstractMetaType* metaType);
+
+    /** 
+     * Helper function to find for argument default value
+     */
+    static QString getDefaultValue(const AbstractMetaFunction* func, const AbstractMetaArgument* arg);
 protected:
     bool doSetup(const QMap<QString, QString>& args);
     // verify whether the class is copyable
