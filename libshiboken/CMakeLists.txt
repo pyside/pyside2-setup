@@ -26,6 +26,7 @@ basewrapper.cpp
 gilstate.cpp
 helper.cpp
 sbkenum.cpp
+sbkmodule.cpp
 bindingmanager.cpp
 threadstatesaver.cpp
 typeresolver.cpp
@@ -50,6 +51,7 @@ install(FILES
         gilstate.h
         helper.h
         sbkenum.h
+        sbkmodule.h
         python25compat.h
         sbkdbg.h
         shiboken.h

@@ -106,6 +106,9 @@ void callCppDestructor(void* cptr)
     delete reinterpret_cast<T*>(cptr);
 }
 
+/**
+ *  Shiboken::importModule is DEPRECATED. Use Shiboken::Module::import() instead.
+ */
 LIBSHIBOKEN_API bool        importModule(const char* moduleName, PyTypeObject*** cppApiPtr);
 LIBSHIBOKEN_API void        setErrorAboutWrongArguments(PyObject* args, const char* funcName, const char** cppOverloads);
 

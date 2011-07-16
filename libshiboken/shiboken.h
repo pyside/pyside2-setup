@@ -32,6 +32,7 @@
 #include "threadstatesaver.h"
 #include "helper.h"
 #include "sbkenum.h"
+#include "sbkmodule.h"
 #include "shibokenmacros.h"
 #include "typeresolver.h"
 #include "shibokenbuffer.h"

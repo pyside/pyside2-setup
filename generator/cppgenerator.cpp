@@ -3909,9 +3909,12 @@ void CppGenerator::finishGeneration()
             }
         }
 
-        s << "PyTypeObject** " << cppApiVariableName() << ";" << endl << endl;;
+        s << "// Current module's type array." << endl;
+        s << "PyTypeObject** " << cppApiVariableName() << ';' << endl;
+        s << "// Required modules' type arrays." << endl;
         foreach (const QString& requiredModule, typeDb->requiredTargetImports())
-            s << "PyTypeObject** " << cppApiVariableName(requiredModule) << ";" << endl << endl;;
+            s << "PyTypeObject** " << cppApiVariableName(requiredModule) << ';' << endl;
+        s << endl;
 
         s << "// Module initialization ";
         s << "------------------------------------------------------------" << endl;
@@ -3944,21 +3947,27 @@ void CppGenerator::finishGeneration()
         }
 
         foreach (const QString& requiredModule, typeDb->requiredTargetImports()) {
-            s << INDENT << "if (!Shiboken::importModule(\"" << requiredModule << "\", &" << cppApiVariableName(requiredModule) << ")) {" << endl;
-            s << INDENT << INDENT << "PyErr_SetString(PyExc_ImportError," << "\"could not import ";
-            s << requiredModule << "\");" << endl << INDENT << INDENT << "return;" << endl;
+            s << INDENT << "{" << endl;
+            {
+                Indentation indentation(INDENT);
+                s << INDENT << "Shiboken::AutoDecRef requiredModule(Shiboken::Module::import(\"" << requiredModule << "\"));" << endl;
+                s << INDENT << "if (requiredModule.isNull())" << endl;
+                {
+                    Indentation indentation(INDENT);
+                    s << INDENT << "return;" << endl;
+                }
+                s << INDENT << cppApiVariableName(requiredModule) << " = Shiboken::Module::getTypes(requiredModule);" << endl;
+            }
             s << INDENT << "}" << endl << endl;
         }
 
-        s << INDENT << "Shiboken::init();" << endl;
-        s << INDENT << "PyObject* module = Py_InitModule(\""  << moduleName() << "\", ";
+        s << INDENT << "// Create an array of wrapper types for the current module." << endl;
+        s << INDENT << "static PyTypeObject* cppApi[" << "SBK_" << moduleName() << "_IDX_COUNT" << "];" << endl;
+        s << INDENT << cppApiVariableName() << " = cppApi;" << endl << endl;
+
+        s << INDENT << "PyObject* module = Shiboken::Module::create(\""  << moduleName() << "\", ";
         s << moduleName() << "_methods);" << endl << endl;
 
-        s << INDENT << "// Create a CObject containing the API pointer array's address" << endl;
-        s << INDENT << "static PyTypeObject* cppApi[" << "SBK_" << moduleName() << "_IDX_COUNT" << "];" << endl;
-        s << INDENT << cppApiVariableName() << " = cppApi;" << endl;
-        s << INDENT << "PyObject* cppApiObject = PyCObject_FromVoidPtr(reinterpret_cast<void*>(cppApi), 0);" << endl;
-        s << INDENT << "PyModule_AddObject(module, \"_Cpp_Api\", cppApiObject);" << endl << endl;
         s << INDENT << "// Initialize classes in the type system" << endl;
         s << classPythonDefines;
 
@@ -4009,6 +4018,8 @@ void CppGenerator::finishGeneration()
         }
         foreach (QByteArray type, typeResolvers)
             s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver< ::" << type << " >(\"" << type << "\");" << endl;
+
+        s << endl << INDENT << "Shiboken::Module::registerTypes(module, " << cppApiVariableName() << ");" << endl;
 
         s << endl << INDENT << "if (PyErr_Occurred()) {" << endl;
         {
