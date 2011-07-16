@@ -101,11 +101,11 @@ struct SbkObjectTypePrivate
     ExtendedIsConvertibleFunc ext_isconvertible;
     /// Extended "toCpp" function to be used when a conversion operator is defined in another module.
     ExtendedToCppFunc ext_tocpp;
-    /// Pointer to a function responsible for deletetion of the C++ instance calling the proper destructor.
+    /// Pointer to a function responsible for deletion of the C++ instance calling the proper destructor.
     ObjectDestructor cpp_dtor;
     /// True if this type holds two or more C++ instances, e.g.: a Python class which inherits from two C++ classes.
     int is_multicpp:1;
-    /// True if this type was definied by the user.
+    /// True if this type was defined by the user.
     int is_user_type:1;
     /// Tells is the type is a value type or an object-type, see BEHAVIOUR_* constants.
     int type_behaviour:2;
@@ -123,7 +123,7 @@ struct SbkObjectTypePrivate
 namespace Shiboken
 {
 /**
- * Utility function uset to transform PyObject which suppot sequence protocol in a std::list
+ * Utility function used to transform a PyObject that implements sequence protocol in a std::list.
  **/
 std::list<SbkObject*> splitPyObject(PyObject* pyObj);
 

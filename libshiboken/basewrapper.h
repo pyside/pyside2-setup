@@ -339,7 +339,7 @@ LIBSHIBOKEN_API void        keepReference(SbkObject* self, const char* key, PyOb
 /**
  *   Removes any reference previously added by keepReference function
  *   \param self            the wrapper instance that keeps references to other objects.
- *   \param key             a key that identifies the C++ method signature and argument from where the referred Object came 
+ *   \param key             a key that identifies the C++ method signature and argument from where the referred Object came.
  *   \param referredObject  the object whose reference is used by the self object.
  */
 LIBSHIBOKEN_API void        removeReference(SbkObject* self, const char* key, PyObject* referredObject);

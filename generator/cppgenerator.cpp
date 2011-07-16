@@ -3233,7 +3233,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
 
     if (!cppEnum->isAnonymous()) {
 
-        s << INDENT << "PyTypeObject* " << cpythonName << " = Shiboken::Enum::newTypeWithName(\"" << getClassTargetFullName(cppEnum) << "\", \"" 
+        s << INDENT << "PyTypeObject* " << cpythonName << " = Shiboken::Enum::newTypeWithName(\"" << getClassTargetFullName(cppEnum) << "\", \""
           << (cppEnum->enclosingClass() ? cppEnum->enclosingClass()->qualifiedCppName() + "::" : "") << cppEnum->name() << "\");" << endl;
 
         if (cppEnum->typeEntry()->flags())
