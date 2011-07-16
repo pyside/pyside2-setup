@@ -168,6 +168,29 @@ LIBSHIBOKEN_API void        setDestructorFunction(SbkObjectType* self, ObjectDes
 LIBSHIBOKEN_API void        initPrivateData(SbkObjectType* self);
 
 /**
+ *  Initializes a Shiboken wrapper type and adds it to the module,
+ *  or to the enclosing class if the type is an inner class.
+ *  This function also calls initPrivateData and setDestructorFunction.
+ *  \param enclosingObject  The module or enclosing class to where the new \p type will be added.
+ *  \param typeName         Name by which the type will be known in Python.
+ *  \param originalName     Original C++ name of the type.
+ *  \param type             The new type to be initialized and added to the module.
+ *  \param cppObjDtor       Memory deallocation function for the C++ object held by \p type.
+ *                          Should not be used if the underlying C++ class has a private destructor.
+ *  \param baseType         Base type from whom the new \p type inherits.
+ *  \param baseTypes        Other base types from whom the new \p type inherits.
+ *  \param isInnerClass     Tells if the new \p type is an inner class (the default is that it isn't).
+ *                          If false then the \p enclosingObject is a module, otherwise it is another
+ *                          wrapper type.
+ *  \returns                true if the initialization went fine, false otherwise.
+ */
+LIBSHIBOKEN_API bool        introduceWrapperType(PyObject* enclosingObject,
+                                                 const char* typeName, const char* originalName,
+                                                 SbkObjectType* type, ObjectDestructor cppObjDtor = 0,
+                                                 SbkObjectType* baseType = 0, PyObject* baseTypes = 0,
+                                                 bool isInnerClass = false);
+
+/**
  *  Set the subtype init hook for a type.
  *
  *  This hook will be invoked every time the user creates a sub-type inherited from a Shiboken based type.
@@ -365,4 +388,3 @@ LIBSHIBOKEN_API void        removeReference(SbkObject* self, const char* key, Py
 } // namespace Shiboken
 
 #endif // BASEWRAPPER_H
-

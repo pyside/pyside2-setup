@@ -3421,8 +3421,15 @@ void CppGenerator::writeFlagsUnaryOperator(QTextStream& s, const AbstractMetaEnu
 
 void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* metaClass)
 {
+    const ComplexTypeEntry* classTypeEntry = metaClass->typeEntry();
+
+    const AbstractMetaClass* enc = metaClass->enclosingClass();
+    bool hasEnclosingClass = enc && enc->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass;
+    QString enclosingObjectVariable = hasEnclosingClass ? "enclosingClass" : "module";
+
     QString pyTypeName = cpythonTypeName(metaClass);
-    s << "void init_" << metaClass->qualifiedCppName().replace("::", "_") << "(PyObject* module)" << endl;
+    s << "void init_" << metaClass->qualifiedCppName().replace("::", "_");
+    s << "(PyObject* " << enclosingObjectVariable << ")" << endl;
     s << '{' << endl;
 
     if (supportsNumberProtocol(metaClass)) {
@@ -3446,91 +3453,89 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         s << endl;
     }
 
-    s << INDENT << cpythonTypeNameExt(metaClass->typeEntry());
+    s << INDENT << cpythonTypeNameExt(classTypeEntry);
     s << " = reinterpret_cast<PyTypeObject*>(&" << pyTypeName << ");" << endl;
     s << endl;
 
-    // alloc private data
-    s << INDENT << "Shiboken::ObjectType::initPrivateData(&" << pyTypeName << ");" << endl;
-
-    // class inject-code target/beginning
-    if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
-        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Beginning, TypeSystem::TargetLangCode, 0, 0, metaClass);
-        s << endl;
-    }
-
-    if (metaClass->baseClass())
-        s << INDENT << pyTypeName << ".super.ht_type.tp_base = " << cpythonTypeNameExt(metaClass->baseClass()->typeEntry()) << ';' << endl;
-
     // Multiple inheritance
+    QString pyTypeBasesVariable = QString("%1_bases").arg(pyTypeName);
     const AbstractMetaClassList baseClasses = getBaseClasses(metaClass);
     if (metaClass->baseClassNames().size() > 1) {
-        s << INDENT << pyTypeName << ".super.ht_type.tp_bases = PyTuple_Pack(";
-        s << baseClasses.size();
-        s << ',' << endl;
+        s << INDENT << "PyObject* " << pyTypeBasesVariable << " = PyTuple_Pack(" << baseClasses.size() << ',' << endl;
         QStringList bases;
         foreach (const AbstractMetaClass* base, baseClasses)
-            bases << "(PyTypeObject*)"+cpythonTypeNameExt(base->typeEntry());
+            bases << "(PyObject*)" + cpythonTypeNameExt(base->typeEntry());
         Indentation indent(INDENT);
-        s << INDENT << bases.join(", ") << ");" << endl << endl;
+        QString separator;
+        QTextStream sep(&separator);
+        sep << "," << endl << INDENT;
+        s << INDENT << bases.join(separator) << ");" << endl << endl;
+    }
+
+    // Create type and insert it in the module or enclosing class.
+    s << INDENT << "if (!Shiboken::ObjectType::introduceWrapperType(" << enclosingObjectVariable;
+    s << ", \"" << metaClass->name() << "\", \"";
+    // Original name
+    s << metaClass->qualifiedCppName() << (ShibokenGenerator::isObjectType(classTypeEntry) ?  "*" : "");
+    s << "\"," << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "&" << pyTypeName;
+
+        // Set destructor function
+        if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
+            QString dtorClassName = metaClass->qualifiedCppName();
+            if ((avoidProtectedHack() && metaClass->hasProtectedDestructor()) || classTypeEntry->isValue())
+                dtorClassName = wrapperName(metaClass);
+            s << ", &Shiboken::callCppDestructor< ::" << dtorClassName << " >";
+        } else if (metaClass->baseClass() || hasEnclosingClass) {
+            s << ", 0";
+        }
+
+        // Base type
+        if (metaClass->baseClass()) {
+            s << ", (SbkObjectType*)" << cpythonTypeNameExt(metaClass->baseClass()->typeEntry());
+            // The other base types
+            if (metaClass->baseClassNames().size() > 1)
+                s << ", " << pyTypeBasesVariable;
+            else if (hasEnclosingClass)
+                s << ", 0";
+        } else if (hasEnclosingClass) {
+            s << ", 0, 0";
+        }
+        if (hasEnclosingClass)
+            s << ", true";
+        s << ")) {" << endl;
+        s << INDENT << "return;" << endl;
+    }
+    s << INDENT << '}' << endl << endl;
+
+    // class inject-code target/beginning
+    if (!classTypeEntry->codeSnips().isEmpty()) {
+        writeCodeSnips(s, classTypeEntry->codeSnips(), CodeSnip::Beginning, TypeSystem::TargetLangCode, 0, 0, metaClass);
+        s << endl;
     }
 
     // Fill multiple inheritance data, if needed.
     const AbstractMetaClass* miClass = getMultipleInheritingClass(metaClass);
     if (miClass) {
-        s << INDENT << "MultipleInheritanceInitFunction func;" << endl;
-
-        if (miClass == metaClass)
-            s << INDENT << "func = " << multipleInheritanceInitializerFunctionName(miClass) << ";" << endl;
-        else
-            s << INDENT << "func = Shiboken::ObjectType::getMultipleIheritanceFunction(reinterpret_cast<SbkObjectType*>(" << cpythonTypeNameExt(miClass->typeEntry()) << "));" << endl;
-
-        s << INDENT << "Shiboken::ObjectType::setMultipleIheritanceFunction(&" << cpythonTypeName(metaClass) << ", func);" << endl;
-        s << INDENT << "Shiboken::ObjectType::setCastFunction(&" << cpythonTypeName(metaClass) << ", &" << cpythonSpecialCastFunctionName(metaClass) << ");" << endl;
+        s << INDENT << "MultipleInheritanceInitFunction func = ";
+        if (miClass == metaClass) {
+            s << multipleInheritanceInitializerFunctionName(miClass) << ";" << endl;
+        } else {
+            s << "Shiboken::ObjectType::getMultipleIheritanceFunction(reinterpret_cast<SbkObjectType*>(";
+            s << cpythonTypeNameExt(miClass->typeEntry()) << "));" << endl;
+        }
+        s << INDENT << "Shiboken::ObjectType::setMultipleIheritanceFunction(&";
+        s << cpythonTypeName(metaClass) << ", func);" << endl;
+        s << INDENT << "Shiboken::ObjectType::setCastFunction(&" << cpythonTypeName(metaClass);
+        s << ", &" << cpythonSpecialCastFunctionName(metaClass) << ");" << endl;
     }
-
-    // Fill destrutor
-    QString dtorClassName = metaClass->qualifiedCppName();
-    if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
-        if (avoidProtectedHack() && metaClass->hasProtectedDestructor())
-            dtorClassName = wrapperName(metaClass);
-        // call the real destructor
-        if (metaClass->typeEntry()->isValue())
-            dtorClassName = wrapperName(metaClass);
-
-        s << INDENT << "Shiboken::ObjectType::setDestructorFunction(&" << cpythonTypeName(metaClass) << ", &Shiboken::callCppDestructor< ::" << dtorClassName << " >);" << endl;
-    }
-
-    s << INDENT << "Py_INCREF((PyObject*)&" << pyTypeName << "); //Incref due the 'PyModule_AddObject' steals the reference." << endl;
-    s << INDENT << "if (PyType_Ready((PyTypeObject*)&" << pyTypeName << ") < 0)" << endl;
-    s << INDENT << INDENT << "return;" << endl << endl;
 
     // Set typediscovery struct or fill the struct of another one
-    if (metaClass->isPolymorphic()) {
-        s << INDENT << "// Fill type discovery information"  << endl;
-        if (metaClass->baseClass()) {
-            s << INDENT << "Shiboken::ObjectType::setTypeDiscoveryFunction(&" << cpythonTypeName(metaClass) << ", &" << cpythonBaseName(metaClass) << "_typeDiscovery);" << endl;
-            s << INDENT << "Shiboken::BindingManager& bm = Shiboken::BindingManager::instance();" << endl;
-            foreach (const AbstractMetaClass* base, baseClasses) {
-                s << INDENT << "bm.addClassInheritance(reinterpret_cast<SbkObjectType*>(" << cpythonTypeNameExt(base->typeEntry()) << "), &" << cpythonTypeName(metaClass) << ");" << endl;
-            }
-        }
-        s << endl;
-    }
-
-    // Set OriginalName
-    QByteArray suffix;
-    if (isObjectType(metaClass))
-        suffix = "*";
-    s << INDENT << "Shiboken::ObjectType::setOriginalName(&" << pyTypeName << ", \"" << metaClass->qualifiedCppName() << suffix << "\");" << endl;
-
-    if (metaClass->enclosingClass() && (metaClass->enclosingClass()->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass) ) {
-        s << INDENT << "PyDict_SetItemString(module,"
-          << "\"" << metaClass->name() << "\", (PyObject*)&" << pyTypeName << ");" << endl;
-    } else {
-        s << INDENT << "PyModule_AddObject(module, \"" << metaClass->name() << "\"," << endl;
-        Indentation indent(INDENT);
-        s << INDENT << "((PyObject*)&" << pyTypeName << "));" << endl << endl;
+    if (metaClass->isPolymorphic() && metaClass->baseClass()) {
+        s << INDENT << "Shiboken::ObjectType::setTypeDiscoveryFunction(&" << cpythonTypeName(metaClass);
+        s << ", &" << cpythonBaseName(metaClass) << "_typeDiscovery);" << endl << endl;
     }
 
     AbstractMetaEnumList classEnums = metaClass->enums();
@@ -3563,9 +3568,9 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     s << endl;
 
     // class inject-code target/end
-    if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
+    if (!classTypeEntry->codeSnips().isEmpty()) {
         s << endl;
-        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::End, TypeSystem::TargetLangCode, 0, 0, metaClass);
+        writeCodeSnips(s, classTypeEntry->codeSnips(), CodeSnip::End, TypeSystem::TargetLangCode, 0, 0, metaClass);
     }
 
     if (!metaClass->isNamespace())
@@ -3584,7 +3589,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
           << "::staticMetaObject, sizeof(::" << metaClass->qualifiedCppName() << "));" << endl;
     }
 
-    s << '}' << endl << endl;
+    s << '}' << endl;
 }
 
 void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream& s, const AbstractMetaClass* metaClass) const
