@@ -283,11 +283,9 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     s << "#include <typeresolver.h>" << endl;
     s << "#include <typeinfo>" << endl;
-    if (usePySideExtensions()) {
-        if (metaClass->isQObject()) {
-            s << "#include <signalmanager.h>" << endl;
-            s << "#include <pysidemetafunction.h>" << endl;
-        }
+    if (usePySideExtensions() && metaClass->isQObject()) {
+        s << "#include <signalmanager.h>" << endl;
+        s << "#include <pysidemetafunction.h>" << endl;
     }
 
     // The multiple inheritance initialization function
@@ -847,7 +845,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                     desiredType =  '"' + func->typeReplaced(0) + '"';
                 }
                 s << "(" PYTHON_RETURN_VAR ");" << endl;
-                if (func->type()->isQObject() || func->type()->isObject() || func->type()->isValuePointer())
+                if (ShibokenGenerator::isPointerToWrapperType(func->type()))
                     s << INDENT << "typeIsValid = typeIsValid || (" PYTHON_RETURN_VAR " == Py_None);" << endl;
 
                 s << INDENT << "if (!typeIsValid) {" << endl;
@@ -2706,7 +2704,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*priv_data*/           0" << endl;
     s << "};" << endl;
     QString suffix;
-    if (metaClass->typeEntry()->isObject() || metaClass->typeEntry()->isQObject())
+    if (ShibokenGenerator::isObjectType(metaClass))
         suffix = "*";
     s << "} //extern"  << endl;
 }
@@ -3657,7 +3655,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
 
     // Set OriginalName
     QByteArray suffix;
-    if (metaClass->typeEntry()->isObject() || metaClass->typeEntry()->isQObject())
+    if (ShibokenGenerator::isObjectType(metaClass))
         suffix = "*";
     s << INDENT << "Shiboken::ObjectType::setOriginalName(&" << pyTypeName << ", \"" << metaClass->qualifiedCppName() << suffix << "\");" << endl;
 
@@ -4203,7 +4201,7 @@ bool CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
     int childIndex = argIndex;
     if (ctorHeuristicEnabled && argIndex > 0 && numArgs) {
         AbstractMetaArgument* arg = func->arguments().at(argIndex-1);
-        if (arg->name() == "parent" && (arg->type()->isObject() || arg->type()->isQObject())) {
+        if (arg->name() == "parent" && ShibokenGenerator::isObjectType(arg->type())) {
             action = ArgumentOwner::Add;
             parentIndex = argIndex;
             childIndex = -1;
@@ -4268,7 +4266,7 @@ void CppGenerator::writeReturnValueHeuristics(QTextStream& s, const AbstractMeta
 
     ArgumentOwner argOwner = getArgumentOwner(func, ArgumentOwner::ReturnIndex);
     if (argOwner.action == ArgumentOwner::Invalid || argOwner.index != ArgumentOwner::ThisIndex) {
-        if (type->isQObject() || type->isObject() || type->isValuePointer())
+        if (ShibokenGenerator::isPointerToWrapperType(type))
             s << INDENT << "Shiboken::Object::setParent(" << self << ", " PYTHON_RETURN_VAR ");" << endl;
     }
 }

@@ -241,6 +241,17 @@ public:
     static bool isCString(const AbstractMetaType* type);
     static bool isPairContainer(const AbstractMetaType* type);
 
+    /// Tells if the type or class is an Object (or QObject) Type.
+    static bool isObjectType(const ComplexTypeEntry* type);
+    static bool isObjectType(const AbstractMetaType* metaType);
+    static bool isObjectType(const AbstractMetaClass* metaClass);
+
+    /**
+     *  Checks if the type is an Object/QObject or pointer to Value Type.
+     *  In other words, tells if the type is "T*" and T has a Python wrapper.
+     */
+    static bool isPointerToWrapperType(const AbstractMetaType* type);
+
     /// Checks if an argument type should be dereferenced by the Python method wrapper before calling the C++ method.
     static bool shouldDereferenceArgumentPointer(const AbstractMetaArgument* arg);
     /// Checks if a meta type should be dereferenced by the Python method wrapper passing it to C++.
@@ -335,7 +346,7 @@ public:
      */
     static Options getConverterOptions(const AbstractMetaType* metaType);
 
-    /** 
+    /**
      * Helper function to find for argument default value
      */
     static QString getDefaultValue(const AbstractMetaFunction* func, const AbstractMetaArgument* arg);
