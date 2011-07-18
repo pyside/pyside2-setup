@@ -554,19 +554,19 @@ bool isExternalConvertible(SbkObjectType* self, PyObject* obj)
     return self->d->ext_isconvertible && self->d->ext_isconvertible(obj);
 }
 
-bool hasCast(SbkObjectType* self)
+bool hasCast(SbkObjectType* type)
 {
-    return self->d->mi_specialcast;
+    return type->d->mi_specialcast;
 }
 
-void* cast(SbkObjectType* self, SbkObject* obj, PyTypeObject *target)
+void* cast(SbkObjectType* sourceType, SbkObject* obj, PyTypeObject* targetType)
 {
-    return self->d->mi_specialcast(Object::cppPointer(obj, target), reinterpret_cast<SbkObjectType*>(target));
+    return sourceType->d->mi_specialcast(Object::cppPointer(obj, targetType), reinterpret_cast<SbkObjectType*>(targetType));
 }
 
-void setCastFunction(SbkObjectType* self, SpecialCastFunction func)
+void setCastFunction(SbkObjectType* type, SpecialCastFunction func)
 {
-    self->d->mi_specialcast = func;
+    type->d->mi_specialcast = func;
 }
 
 void setOriginalName(SbkObjectType* self, const char* name)

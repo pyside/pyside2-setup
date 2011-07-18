@@ -133,9 +133,22 @@ LIBSHIBOKEN_API bool        hasExternalCppConversions(SbkObjectType* self);
 LIBSHIBOKEN_API bool        isExternalConvertible(SbkObjectType* self, PyObject* obj);
 LIBSHIBOKEN_API void*       callExternalCppConversion(SbkObjectType* self, PyObject* obj);
 
-LIBSHIBOKEN_API bool        hasCast(SbkObjectType* self);
-LIBSHIBOKEN_API void*       cast(SbkObjectType* self, SbkObject* obj, PyTypeObject* target);
-LIBSHIBOKEN_API void        setCastFunction(SbkObjectType* self, SpecialCastFunction func);
+/**
+ *  Tells if the \p type represents an object of a class with multiple inheritance in C++.
+ *  When this occurs, the C++ pointer held by the Python wrapper will need to be cast when
+ *  passed as a parameter that expects a type of its ancestry.
+ *  \returns    true if a call to ObjectType::cast() is needed to obtain the correct
+ *              C++ pointer for Python objects of type \p type.
+ */
+LIBSHIBOKEN_API bool        hasCast(SbkObjectType* type);
+/**
+ *  Cast the C++ pointer held by a Python object \p obj of type \p sourceType,
+ *  to a C++ pointer of a C++ class indicated by type \p targetType.
+ *  \returns    The cast C++ pointer.
+ */
+LIBSHIBOKEN_API void*       cast(SbkObjectType* sourceType, SbkObject* obj, PyTypeObject* targetType);
+/// Set the C++ cast function for \p type.
+LIBSHIBOKEN_API void        setCastFunction(SbkObjectType* type, SpecialCastFunction func);
 
 LIBSHIBOKEN_API void        setOriginalName(SbkObjectType* self, const char* name);
 LIBSHIBOKEN_API const char* getOriginalName(SbkObjectType* self);
