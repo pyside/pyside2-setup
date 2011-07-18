@@ -187,8 +187,7 @@ void CppGenerator::writeRegisterType(QTextStream& s, const AbstractMetaClass* me
     QString typeName = metaClass->qualifiedCppName();
     QString reducedName = reduceTypeName(metaClass);
 
-    bool isObjectType = metaClass->typeEntry()->isObject();
-    if (!isObjectType) {
+    if (!ShibokenGenerator::isObjectType(metaClass)) {
         s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver< ::" << typeName << " >" << "(\"" << typeName << "\");\n";
         if (!reducedName.isEmpty())
             s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver< ::" << typeName << " >" << "(\"" << reducedName << "\");\n";
@@ -197,7 +196,7 @@ void CppGenerator::writeRegisterType(QTextStream& s, const AbstractMetaClass* me
     s << INDENT << "Shiboken::TypeResolver::createObjectTypeResolver< ::" << typeName << " >" << "(\"" << typeName << "*\");\n";
     if (!reducedName.isEmpty())
         s << INDENT << "Shiboken::TypeResolver::createObjectTypeResolver< ::" << typeName << " >" << "(\"" << reducedName << "*\");\n";
-    QString functionSufix = (isObjectType ? "Object" : "Value");
+    QString functionSufix = (ShibokenGenerator::isObjectType(metaClass) ? "Object" : "Value");
     s << INDENT << "Shiboken::TypeResolver::create" << functionSufix;
     s << "TypeResolver< ::" << typeName << " >" << "(typeid(::" << typeName << ").name());\n";
     if (shouldGenerateCppWrapper(metaClass)) {
@@ -1188,7 +1187,7 @@ void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const Ab
     Q_ASSERT(metaType);
     const TypeEntry* type = metaType->typeEntry();
 
-    if (type->isObject() || metaType->isValuePointer()) {
+    if (ShibokenGenerator::isPointerToWrapperType(metaType)) {
         s << "0";
     } else if (type->isPrimitive()) {
         const PrimitiveTypeEntry* primitiveTypeEntry = reinterpret_cast<const PrimitiveTypeEntry*>(type);
@@ -1577,11 +1576,12 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                 }
                 if (!arg->defaultValueExpression().isEmpty()) {
                     strArg += " = ";
-                    if ((isCString(argType) || argType->isValuePointer() || argType->typeEntry()->isObject())
-                        && arg->defaultValueExpression() == "0")
+                    if ((isCString(argType) || ShibokenGenerator::isPointerToWrapperType(argType))
+                        && arg->defaultValueExpression() == "0") {
                         strArg += "None";
-                    else
+                    } else {
                         strArg += arg->defaultValueExpression().replace("::", ".").replace("\"", "\\\"");
+                    }
                 }
                 args << strArg;
             }
@@ -1648,13 +1648,12 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
 
     QString typeName;
     QString baseTypeName = type->name();
-    bool isWrappedCppClass = type->isValue() || type->isObject();
 
     // exclude const on Objects
     Options flags = getConverterOptions(argType);
     typeName = translateTypeForWrapperMethod(argType, context, flags).trimmed();
 
-    if (isWrappedCppClass)
+    if (ShibokenGenerator::isWrapperType(type))
         writeInvalidCppObjectCheck(s, pyArgName, 0);
 
     // Value type that has default value.
@@ -3029,10 +3028,7 @@ void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* 
     }
     s << ';' << endl << endl;
 
-
-    bool pythonWrapperRefCounting = metaField->type()->typeEntry()->isObject()
-                                    || metaField->type()->isValuePointer();
-    if (pythonWrapperRefCounting) {
+    if (ShibokenGenerator::isPointerToWrapperType(metaField->type())) {
         s << INDENT << "Shiboken::Object::keepReference(reinterpret_cast<SbkObject*>(self), \"";
         s << metaField->name() << "\", value);" << endl;
         //s << INDENT << "Py_XDECREF(oldvalue);" << endl;
@@ -3737,7 +3733,7 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream& s, const Abstrac
     if (!metaClass->isNamespace() && !metaClass->isAbstract())  {
         // Qt metatypes are registered only on their first use, so we do this now.
         bool canBeValue = false;
-        if (!metaClass->typeEntry()->isObject()) {
+        if (!ShibokenGenerator::isObjectType(metaClass)) {
             // check if there's a empty ctor
             foreach (AbstractMetaFunction* func, metaClass->functions()) {
                 if (func->isConstructor() && !func->arguments().count()) {

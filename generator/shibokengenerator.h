@@ -242,15 +242,27 @@ public:
     static bool isPairContainer(const AbstractMetaType* type);
 
     /// Tells if the type or class is an Object (or QObject) Type.
+    static bool isObjectType(const TypeEntry* type);
     static bool isObjectType(const ComplexTypeEntry* type);
     static bool isObjectType(const AbstractMetaType* metaType);
     static bool isObjectType(const AbstractMetaClass* metaClass);
+
+    /**
+     *  Returns true if the type passed has a Python wrapper for it.
+     *  Although namespace has a Python wrapper, it's not considered a type.
+     */
+    static bool isWrapperType(const TypeEntry* type);
+    static bool isWrapperType(const ComplexTypeEntry* type);
+    static bool isWrapperType(const AbstractMetaType* metaType);
 
     /**
      *  Checks if the type is an Object/QObject or pointer to Value Type.
      *  In other words, tells if the type is "T*" and T has a Python wrapper.
      */
     static bool isPointerToWrapperType(const AbstractMetaType* type);
+
+    /// Check if type is a pointer.
+    static bool isPointer(const AbstractMetaType* type);
 
     /// Checks if an argument type should be dereferenced by the Python method wrapper before calling the C++ method.
     static bool shouldDereferenceArgumentPointer(const AbstractMetaArgument* arg);

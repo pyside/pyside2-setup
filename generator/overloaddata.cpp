@@ -338,7 +338,7 @@ void OverloadData::sortNextOverloads()
         } else if (checkQVariant && targetTypeEntryName != "QVariant") {
             if (!graph.containsEdge(qvariantIndex, targetTypeId)) // Avoid cyclic dependency.
                 graph.addEdge(targetTypeId, qvariantIndex);
-        } else if (checkQString && ov->argType()->indirections() > 0
+        } else if (checkQString && ShibokenGenerator::isPointer(ov->argType())
             && targetTypeEntryName != "QString"
             && targetTypeEntryName != "QByteArray"
             && (!checkPyObject || targetTypeId != pyobjectIndex)) {

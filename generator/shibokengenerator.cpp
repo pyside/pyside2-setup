@@ -486,7 +486,7 @@ QString ShibokenGenerator::cpythonWrapperCPtr(const AbstractMetaType* metaType, 
 
 QString ShibokenGenerator::cpythonWrapperCPtr(const TypeEntry* type, QString argName)
 {
-    if (type->isValue() || type->isObject())
+    if (ShibokenGenerator::isWrapperType(type))
         return baseConversionString( "::" + type->qualifiedCppName() + '*') + "toCpp(" + argName + ')';
     return QString();
 }
@@ -519,7 +519,7 @@ void ShibokenGenerator::writeBaseConversion(QTextStream& s, const TypeEntry* typ
             typeName = protectedEnumSurrogateName(metaEnum);
     } else {
         typeName = type->qualifiedCppName().trimmed();
-        if (type->isObject())
+        if (ShibokenGenerator::isObjectType(type))
             typeName.append('*');
     }
     s << baseConversionString(typeName);
@@ -633,7 +633,7 @@ QString ShibokenGenerator::cpythonBaseName(const AbstractMetaClass* metaClass)
 QString ShibokenGenerator::cpythonBaseName(const TypeEntry* type)
 {
     QString baseName;
-    if ((type->isObject() || type->isValue() || type->isNamespace())) { // && !type->isReference()) {
+    if (ShibokenGenerator::isWrapperType(type) || type->isNamespace()) { // && !type->isReference()) {
         baseName = "Sbk_" + type->name();
     } else if (type->isPrimitive()) {
         const PrimitiveTypeEntry* ptype = (const PrimitiveTypeEntry*) type;
@@ -795,6 +795,12 @@ bool ShibokenGenerator::isPairContainer(const AbstractMetaType* type)
             && ((ContainerTypeEntry*)type->typeEntry())->type() == ContainerTypeEntry::PairContainer;
 }
 
+bool ShibokenGenerator::isObjectType(const TypeEntry* type)
+{
+    if (type->isComplex())
+        return ShibokenGenerator::isObjectType((const ComplexTypeEntry*)type);
+    return type->isObject();
+}
 bool ShibokenGenerator::isObjectType(const ComplexTypeEntry* type)
 {
     return type->isObject() || type->isQObject();
@@ -806,6 +812,27 @@ bool ShibokenGenerator::isObjectType(const AbstractMetaClass* metaClass)
 bool ShibokenGenerator::isObjectType(const AbstractMetaType* metaType)
 {
     return metaType->isObject() || metaType->isQObject();
+}
+
+bool ShibokenGenerator::isWrapperType(const TypeEntry* type)
+{
+    if (type->isComplex())
+        return ShibokenGenerator::isWrapperType((const ComplexTypeEntry*)type);
+    return type->isObject() || type->isValue();
+}
+bool ShibokenGenerator::isWrapperType(const ComplexTypeEntry* type)
+{
+    return ShibokenGenerator::isObjectType(type) || type->isValue();
+}
+bool ShibokenGenerator::isWrapperType(const AbstractMetaType* metaType)
+{
+    return ShibokenGenerator::isObjectType(metaType)
+            || metaType->typeEntry()->isValue();
+}
+
+bool ShibokenGenerator::isPointer(const AbstractMetaType* type)
+{
+    return type->indirections() > 0;
 }
 
 bool ShibokenGenerator::isPointerToWrapperType(const AbstractMetaType* type)
@@ -820,10 +847,9 @@ bool ShibokenGenerator::shouldDereferenceArgumentPointer(const AbstractMetaArgum
 
 bool ShibokenGenerator::shouldDereferenceAbstractMetaTypePointer(const AbstractMetaType* metaType)
 {
-    const TypeEntry* type = metaType->typeEntry();
-    bool isPointer = metaType->indirections() > 0;
-    bool isCppClass = type->isValue() || type->isObject();
-    return isCppClass && !isPointer && (metaType->isValue() || metaType->isReference());
+    return ShibokenGenerator::isWrapperType(metaType)
+            && !ShibokenGenerator::isPointer(metaType)
+            && (metaType->isValue() || metaType->isReference());
 }
 
 bool ShibokenGenerator::visibilityModifiedToPrivate(const AbstractMetaFunction* func)
@@ -1243,8 +1269,8 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 code.replace("%0.", QString("%1->").arg("cptr"));
                 code.replace("%0", "cptr");
             } else if (func->type()) {
-                QString returnValueOp = ShibokenGenerator::isObjectType(func->type()) ? "%1->" : "%1.";
-                if (func->type()->typeEntry()->isValue() || func->type()->typeEntry()->isObject())
+                QString returnValueOp = ShibokenGenerator::isPointerToWrapperType(func->type()) ? "%1->" : "%1.";
+                if (ShibokenGenerator::isWrapperType(func->type()))
                     code.replace("%0.", returnValueOp.arg(CPP_RETURN_VAR));
                 code.replace("%0", CPP_RETURN_VAR);
             }
@@ -1591,7 +1617,7 @@ QString ShibokenGenerator::extendedToCppFunctionName(const TypeEntry* targetType
 bool ShibokenGenerator::isCopyable(const AbstractMetaClass *metaClass)
 
 {
-    if (metaClass->isNamespace() || metaClass->typeEntry()->isObject())
+    if (metaClass->isNamespace() || ShibokenGenerator::isObjectType(metaClass))
         return false;
     else if (metaClass->typeEntry()->copyable() == ComplexTypeEntry::Unknown)
         return metaClass->hasCloneOperator();
