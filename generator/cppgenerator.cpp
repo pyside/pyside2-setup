@@ -784,7 +784,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     foreach (FunctionModification funcMod, func->modifications()) {
         foreach (ArgumentModification argMod, funcMod.argument_mods) {
             if (argMod.resetAfterUse)
-                s << INDENT << "bool invalidadeArg" << argMod.index << " = PyTuple_GET_ITEM(pyargs, " << argMod.index - 1 << ")->ob_refcnt == 1;" << endl;
+                s << INDENT << "bool invalidateArg" << argMod.index << " = PyTuple_GET_ITEM(pyargs, " << argMod.index - 1 << ")->ob_refcnt == 1;" << endl;
             else if (argMod.index == 0  && argMod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::CppOwnership)
                 invalidateReturn = true;
         }
@@ -818,7 +818,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
         if (type) {
             if (invalidateReturn)
-                s << INDENT << "bool invalidadeArg0 = " PYTHON_RETURN_VAR "->ob_refcnt == 1;" << endl;
+                s << INDENT << "bool invalidateArg0 = " PYTHON_RETURN_VAR "->ob_refcnt == 1;" << endl;
 
             if (func->type() && func->typeReplaced(0) != "PyObject") {
                 s << INDENT << "// Check return type" << endl;
@@ -893,7 +893,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     }
 
     if (invalidateReturn) {
-        s << INDENT << "if (invalidadeArg0)" << endl;
+        s << INDENT << "if (invalidateArg0)" << endl;
         Indentation indentation(INDENT);
         s << INDENT << "Shiboken::Object::releaseOwnership(" << PYTHON_RETURN_VAR  ".object());" << endl;
     }
@@ -901,7 +901,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     foreach (FunctionModification funcMod, func->modifications()) {
         foreach (ArgumentModification argMod, funcMod.argument_mods) {
             if (argMod.resetAfterUse) {
-                s << INDENT << "if (invalidadeArg" << argMod.index << ")" << endl;
+                s << INDENT << "if (invalidateArg" << argMod.index << ")" << endl;
                 Indentation indentation(INDENT);
                 s << INDENT << "Shiboken::Object::invalidate(PyTuple_GET_ITEM(pyargs, ";
                 s << (argMod.index - 1) << "));" << endl;
