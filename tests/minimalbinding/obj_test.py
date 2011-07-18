@@ -73,6 +73,11 @@ class ObjTest(unittest.TestCase):
         self.assertEqual(obj, obj.passObjectType(obj))
         self.assertEqual(obj, obj.callPassObjectType(obj))
 
+    def testPassObjectTypeNone(self):
+        obj = Obj(0)
+        self.assertEqual(None, obj.passObjectType(None))
+        self.assertEqual(None, obj.callPassObjectType(None))
+
     def testPassObjectTypeReference(self):
         obj = Obj(0)
         self.assertEqual(obj, obj.passObjectTypeReference(obj))
