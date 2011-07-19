@@ -933,7 +933,7 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
     s << "const QMetaObject* " << wrapperClassName << "::metaObject() const" << endl;
     s << '{' << endl;
     s << INDENT << "SbkObject* pySelf = Shiboken::BindingManager::instance().retrieveWrapper(this);" << endl;
-    s << INDENT << "return reinterpret_cast<QMetaObject*>(Shiboken::Object::getTypeUserData(pySelf));" << endl;
+    s << INDENT << "return PySide::SignalManager::retriveMetaObject(reinterpret_cast<PyObject*>(pySelf));" << endl;
     s << '}' << endl << endl;
 
     // qt_metacall function
