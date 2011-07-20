@@ -94,6 +94,11 @@ primitive-type
     and "long long" become "long" but we should prefer the "qint64" version. For
     this reason we mark "long long" with preferred-conversion="no".
 
+    The *optional* **default-constructor** specifies the minimal constructor
+    call to build one value of the primitive-type. This is not needed when the
+    primitive-type may be built with a default constructor (the one without
+    arguments).
+
     The *optional* **preferred-conversion** attribute tells how to build a default
     instance of the primitive type. It should be a constructor call capable of
     creating a instance of the primitive type. Example: a class "Foo" could have
@@ -212,6 +217,7 @@ value-type
              copyable="yes | no"
              hash-function="..."
              stream="yes | no"
+             default-constructor="..."
              revision="..." />
         </typesystem>
 
@@ -225,6 +231,13 @@ value-type
     these operators will be called as normal methods within the current class.
 
     The *optional*  **since** value is used to specify the API version of this type.
+
+    The *optional* **default-constructor** specifies the minimal constructor
+    call to build one instance of the value-type. This is not needed when the
+    value-type may be built with a default constructor (the one without arguments).
+    Usually a code generator may guess a minimal constructor for a value-type based
+    on its constructor signatures, thus **default-constructor** is used only in
+    very odd cases.
 
     The **revision** attribute can be used to specify a revision for each type, easing the
     production of ABI compatible bindings.

@@ -1439,6 +1439,7 @@ public:
         centry->setCodeSnips(codeSnips());
         centry->setTargetLangPackage(targetLangPackage());
         centry->setBaseContainerType(baseContainerType());
+        centry->setDefaultConstructor(defaultConstructor());
 
         return centry;
     }
@@ -1629,6 +1630,9 @@ public:
         return m_baseContainerType;
     }
 
+    QString defaultConstructor() const;
+    void setDefaultConstructor(const QString& defaultConstructor);
+    bool hasDefaultConstructor() const;
 
 private:
     AddedFunctionList m_addedFunctions;

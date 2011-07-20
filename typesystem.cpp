@@ -431,8 +431,10 @@ bool Handler::startElement(const QString &, const QString &n,
             attributes["extensible"] = "no";
             attributes["identified-by-value"] = QString();
             break;
-        case StackElement::ObjectTypeEntry:
         case StackElement::ValueTypeEntry:
+            attributes["default-constructor"] = QString();
+            // fall throooough
+        case StackElement::ObjectTypeEntry:
             attributes["force-abstract"] = QString("no");
             attributes["deprecated"] = QString("no");
             attributes["hash-function"] = QString("");
@@ -646,19 +648,24 @@ bool Handler::startElement(const QString &, const QString &n,
             element->entry = otype;
         }
         // fall through
+        case StackElement::ValueTypeEntry: {
+            if (!element->entry) {
+                ValueTypeEntry* typeEntry = new ValueTypeEntry(name, since);
+                QString defaultConstructor = attributes["default-constructor"];
+                if (!defaultConstructor.isEmpty())
+                    typeEntry->setDefaultConstructor(defaultConstructor);
+                element->entry = typeEntry;
+            }
+
+        // fall through
         case StackElement::NamespaceTypeEntry:
             if (!element->entry)
                 element->entry = new NamespaceTypeEntry(name, since);
 
-            // fall through
+        // fall through
         case StackElement::ObjectTypeEntry:
             if (!element->entry)
                 element->entry = new ObjectTypeEntry(name, since);
-
-            // fall through
-        case StackElement::ValueTypeEntry: {
-            if (!element->entry)
-                element->entry = new ValueTypeEntry(name, since);
 
             element->entry->setStream(attributes["stream"] == QString("yes"));
 
@@ -1743,6 +1750,26 @@ FieldModification ComplexTypeEntry::fieldModification(const QString &name) const
     mod.name = name;
     mod.modifiers = FieldModification::Readable | FieldModification::Writable;
     return mod;
+}
+
+// The things we do not to break the ABI...
+typedef QHash<const ComplexTypeEntry*, QString> ComplexTypeEntryDefaultConstructorMap;
+Q_GLOBAL_STATIC(ComplexTypeEntryDefaultConstructorMap, complexTypeEntryDefaultConstructors);
+
+void ComplexTypeEntry::setDefaultConstructor(const QString& defaultConstructor)
+{
+    if (!defaultConstructor.isEmpty())
+        complexTypeEntryDefaultConstructors()->insert(this, defaultConstructor);
+}
+QString ComplexTypeEntry::defaultConstructor() const
+{
+    if (!complexTypeEntryDefaultConstructors()->contains(this))
+        return QString();
+    return complexTypeEntryDefaultConstructors()->value(this);
+}
+bool ComplexTypeEntry::hasDefaultConstructor() const
+{
+    return complexTypeEntryDefaultConstructors()->contains(this);
 }
 
 QString ContainerTypeEntry::targetLangPackage() const
