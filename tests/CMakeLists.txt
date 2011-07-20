@@ -1,6 +1,8 @@
 add_subdirectory(libminimal)
-add_subdirectory(libsample)
-add_subdirectory(libother)
+if(NOT DEFINED MINIMAL_TESTS)
+    add_subdirectory(libsample)
+    add_subdirectory(libother)
+endif()
 
 if(WIN32 OR DEFINED AVOID_PROTECTED_HACK)
     message(STATUS "Tests will be generated avoiding the protected hack!")
@@ -11,12 +13,18 @@ else()
 endif()
 
 add_subdirectory(minimalbinding)
-add_subdirectory(samplebinding)
-add_subdirectory(otherbinding)
+if(NOT DEFINED MINIMAL_TESTS)
+    add_subdirectory(samplebinding)
+    add_subdirectory(otherbinding)
+endif()
 
-file(GLOB TEST_FILES minimalbinding/*_test.py
-                     samplebinding/*_test.py
-                     otherbinding/*_test.py)
+if(DEFINED MINIMAL_TESTS)
+    file(GLOB TEST_FILES minimalbinding/*_test.py)
+else()
+    file(GLOB TEST_FILES minimalbinding/*_test.py
+                         samplebinding/*_test.py
+                         otherbinding/*_test.py)
+endif()
 
 set(test_blacklist "")
 
