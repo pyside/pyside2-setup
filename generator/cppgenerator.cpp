@@ -2190,13 +2190,19 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             if (func->isConstructor() || func->isCopyConstructor()) {
                 isCtor = true;
                 QString className = wrapperName(func->ownerClass());
-                mc << "new ::" << className << '(';
+
                 if (func->isCopyConstructor() && maxArgs == 1) {
-                    mc << CPP_ARG0;
+                    mc << "new ::" << className << '(' << CPP_ARG0 << ')';
                 } else {
-                    mc << userArgs.join(", ");
+                    QString ctorCall = className + '(' + userArgs.join(", ") + ')';
+                    if (usePySideExtensions() && func->ownerClass()->isQObject()) {
+                        s << INDENT << "void* addr = PySide::nextQObjectMemoryAddr();" << endl;
+                        mc << "addr ? new (addr) ::" << ctorCall << " : new ::" << ctorCall;
+                    } else {
+                        mc << "new ::" << ctorCall;
+                    }
                 }
-                mc << ')';
+
             } else {
                 if (func->ownerClass()) {
                     if (!avoidProtectedHack() || !func->isProtected()) {
@@ -3711,7 +3717,8 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
 
     if (usePySideExtensions() && metaClass->isQObject()) {
         s << INDENT << "Shiboken::ObjectType::setSubTypeInitHook(&" << pyTypeName << ", &PySide::initQObjectSubType);" << endl;
-        s << INDENT << "PySide::initDynamicMetaObject(&" << pyTypeName << ", &" << metaClass->qualifiedCppName() << "::staticMetaObject);" << endl;
+        s << INDENT << "PySide::initDynamicMetaObject(&" << pyTypeName << ", &::" << metaClass->qualifiedCppName()
+          << "::staticMetaObject, sizeof(::" << metaClass->qualifiedCppName() << "));" << endl;
     }
 
     s << '}' << endl << endl;
