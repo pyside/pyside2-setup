@@ -21,6 +21,8 @@
  *
  */
 
+#include <memory>
+
 #include "cppgenerator.h"
 #include "shibokennormalize_p.h"
 #include <reporthandler.h>
@@ -1908,10 +1910,13 @@ void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& o
 
         QString typeReplaced = func->typeReplaced(arg->argumentIndex() + 1);
         const AbstractMetaType* argType = 0;
-        if (typeReplaced.isEmpty())
+        std::auto_ptr<const AbstractMetaType> argType_autoptr;
+        if (typeReplaced.isEmpty()) {
             argType = arg->type();
-        else
+        } else {
             argType = buildAbstractMetaTypeFromString(typeReplaced);
+            argType_autoptr = std::auto_ptr<const AbstractMetaType>(argType);
+        }
 
         if (argType) {
             QString argName = QString(CPP_ARG"%1").arg(i - removedArgs);
@@ -1919,10 +1924,6 @@ void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& o
             QString defaultValue = guessScopeForDefaultValue(func, arg);
 
             writeArgumentConversion(s, argType, argName, pyArgName, implementingClass, defaultValue);
-
-            // Free a custom type created by buildAbstractMetaTypeFromString.
-            if (argType != arg->type())
-                delete argType;
         }
     }
 
