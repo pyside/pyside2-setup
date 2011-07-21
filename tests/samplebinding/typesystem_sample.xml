@@ -30,7 +30,7 @@
         <include file-name="handle.h" location="local"/>
     </primitive-type>
 
-    <primitive-type name="OddBool" target-lang-api-name="PyBool">
+    <primitive-type name="OddBool" target-lang-api-name="PyBool" default-constructor="OddBool(false)">
         <conversion-rule file="oddbool_conversions.h"/>
         <include file-name="oddbool.h" location="global"/>
     </primitive-type>

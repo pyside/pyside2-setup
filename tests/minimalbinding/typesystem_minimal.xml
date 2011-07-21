@@ -3,7 +3,7 @@
     <primitive-type name="bool"/>
     <primitive-type name="int"/>
 
-    <primitive-type name="MinBool" target-lang-api-name="PyBool">
+    <primitive-type name="MinBool" target-lang-api-name="PyBool" default-constructor="MinBool(false)">
         <conversion-rule file="minbool_conversions.h"/>
         <include file-name="minbool.h" location="global"/>
     </primitive-type>

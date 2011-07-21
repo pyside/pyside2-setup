@@ -651,8 +651,9 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             }
         }
         if (defaultReturnExpr.isEmpty()) {
-            QTextStream s(&defaultReturnExpr);
-            writeMinimalConstructorCallArguments(s, func->type());
+            defaultReturnExpr = minimalConstructor(func->type());
+            if (defaultReturnExpr.isEmpty())
+                ReportHandler::warning(QString("Could not find a default constructor for '%1' type.").arg(func->type()->cppSignature()));
         }
     }
 
@@ -1141,76 +1142,6 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
         writeErrorSection(s, overloadData);
     s << '}' << endl << endl;
     m_currentErrorCode = 0;
-}
-
-void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const AbstractMetaClass* metaClass)
-{
-    if (!metaClass)
-        return;
-
-    AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
-    const AbstractMetaFunction* ctor = 0;
-
-    foreach (const AbstractMetaFunction* candidate, ctors) {
-        if (candidate->arguments().size() == 0) {
-            ctor = candidate;
-            break;
-        }
-
-        bool allPrimitives = true;
-        foreach (const AbstractMetaArgument* arg, candidate->arguments()) {
-            if (!arg->type()->isPrimitive() && arg->defaultValueExpression().isEmpty()) {
-                allPrimitives = false;
-                break;
-            }
-        }
-        if (allPrimitives) {
-            if (!ctor || candidate->arguments().size() < ctor->arguments().size())
-                ctor = candidate;
-        }
-    }
-
-    if (!ctor) {
-        ReportHandler::warning("Class "+metaClass->name()+" does not have a default constructor.");
-        return;
-    }
-
-    QStringList argValues;
-    AbstractMetaArgumentList args = ctor->arguments();
-    for (int i = 0; i < args.size(); i++) {
-        if (args[i]->defaultValueExpression().isEmpty())
-            argValues << args[i]->type()->name()+"(0)";
-    }
-    s << metaClass->qualifiedCppName() << '(' << argValues.join(QLatin1String(", ")) << ')';
-}
-
-void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const AbstractMetaType* metaType)
-{
-    Q_ASSERT(metaType);
-    const TypeEntry* type = metaType->typeEntry();
-
-    if (isPointerToWrapperType(metaType)) {
-        s << "0";
-    } else if (type->isPrimitive()) {
-        const PrimitiveTypeEntry* primitiveTypeEntry = reinterpret_cast<const PrimitiveTypeEntry*>(type);
-        if (primitiveTypeEntry->hasDefaultConstructor())
-            s << primitiveTypeEntry->defaultConstructor();
-        else
-            s << type->name() << "(0)";
-    } else if (type->isContainer() || type->isFlags() || type->isEnum()){
-        s << metaType->cppSignature() << "()";
-    } else if (metaType->isNativePointer() && type->isVoid()) {
-        s << "0";
-    } else {
-        // this is slowwwww, FIXME: Fix the API od APIExtractor, these things should be easy!
-        foreach (AbstractMetaClass* metaClass, classes()) {
-            if (metaClass->typeEntry() == type) {
-                writeMinimalConstructorCallArguments(s, metaClass);
-                return;
-            }
-        }
-        ReportHandler::warning("Could not find a AbstractMetaClass for type "+metaType->name());
-    }
 }
 
 void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunctionList overloads)
