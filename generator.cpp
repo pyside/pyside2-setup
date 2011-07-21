@@ -277,6 +277,192 @@ AbstractMetaFunctionList Generator::implicitConversions(const AbstractMetaType* 
     return implicitConversions(metaType->typeEntry());
 }
 
+bool Generator::isObjectType(const TypeEntry* type)
+{
+    if (type->isComplex())
+        return Generator::isObjectType((const ComplexTypeEntry*)type);
+    return type->isObject();
+}
+bool Generator::isObjectType(const ComplexTypeEntry* type)
+{
+    return type->isObject() || type->isQObject();
+}
+bool Generator::isObjectType(const AbstractMetaClass* metaClass)
+{
+    return Generator::isObjectType(metaClass->typeEntry());
+}
+bool Generator::isObjectType(const AbstractMetaType* metaType)
+{
+    return metaType->isObject() || metaType->isQObject();
+}
+
+bool Generator::isPointer(const AbstractMetaType* type)
+{
+    return type->indirections() > 0
+            || type->isNativePointer()
+            || type->isValuePointer();
+}
+
+QString Generator::minimalConstructor(const AbstractMetaType* type) const
+{
+    if (!type || (type->isReference() && Generator::isObjectType(type)))
+        return QString();
+
+    if (type->isContainer()) {
+        QString ctor = type->cppSignature();
+        if (ctor.endsWith("*"))
+            return QString("0");
+        if (ctor.startsWith("const "))
+            ctor.remove(0, sizeof("const ") / sizeof(char) - 1);
+        if (ctor.endsWith("&")) {
+            ctor.chop(1);
+            ctor = ctor.trimmed();
+        }
+        return QString("::%1()").arg(ctor);
+    }
+
+    if (type->isNativePointer())
+        return QString("((%1*)0)").arg(type->typeEntry()->qualifiedCppName());
+
+    if (Generator::isPointer(type))
+        return QString("((::%1*)0)").arg(type->typeEntry()->qualifiedCppName());
+
+    if (type->typeEntry()->isComplex()) {
+        const ComplexTypeEntry* cType = reinterpret_cast<const ComplexTypeEntry*>(type->typeEntry());
+        QString ctor = cType->defaultConstructor();
+        return (ctor.isEmpty()) ? minimalConstructor(classes().findClass(cType)) : ctor;
+    }
+
+    return minimalConstructor(type->typeEntry());
+}
+
+QString Generator::minimalConstructor(const TypeEntry* type) const
+{
+    if (!type)
+        return QString();
+
+    if (type->isCppPrimitive())
+        return QString("((%1)0)").arg(type->qualifiedCppName());
+
+    if (type->isEnum() || type->isFlags())
+        return QString("((::%1)0)").arg(type->qualifiedCppName());
+
+    if (type->isPrimitive()) {
+        QString ctor = reinterpret_cast<const PrimitiveTypeEntry*>(type)->defaultConstructor();
+        // If a non-C++ (i.e. defined by the user) primitive type does not have
+        // a default constructor defined by the user, the empty constructor is
+        // heuristically returned. If this is wrong the build of the generated
+        // bindings will tell.
+        return (ctor.isEmpty()) ? QString("::%1()").arg(type->qualifiedCppName()) : ctor;
+    }
+
+    return QString();
+}
+
+QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
+{
+    if (!metaClass)
+        return QString();
+
+    const ComplexTypeEntry* cType = reinterpret_cast<const ComplexTypeEntry*>(metaClass->typeEntry());
+    if (cType->hasDefaultConstructor())
+        return cType->defaultConstructor();
+
+    AbstractMetaFunctionList constructors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
+    int maxArgs = 0;
+    foreach (const AbstractMetaFunction* ctor, constructors) {
+        if (ctor->isUserAdded() || ctor->isPrivate() || ctor->isCopyConstructor())
+            continue;
+        int numArgs = ctor->arguments().size();
+        if (numArgs == 0) {
+            maxArgs = 0;
+            break;
+        }
+        if (numArgs > maxArgs)
+            maxArgs = numArgs;
+    }
+
+    // Empty constructor.
+    if (maxArgs == 0)
+        return QString("::%1()").arg(metaClass->qualifiedCppName());
+
+    QList<const AbstractMetaFunction*> candidates;
+
+    // Constructors with C++ primitive types, enums or pointers only.
+    // Start with the ones with fewer arguments.
+    for (int i = 1; i <= maxArgs; ++i) {
+        foreach (const AbstractMetaFunction* ctor, constructors) {
+            if (ctor->isUserAdded() || ctor->isPrivate() || ctor->isCopyConstructor())
+                continue;
+
+            AbstractMetaArgumentList arguments = ctor->arguments();
+            if (arguments.size() != i)
+                continue;
+
+            QStringList args;
+            foreach (const AbstractMetaArgument* arg, arguments) {
+                const TypeEntry* type = arg->type()->typeEntry();
+                if (type == metaClass->typeEntry()) {
+                    args.clear();
+                    break;
+                }
+
+                if (!arg->originalDefaultValueExpression().isEmpty()) {
+                    if (!arg->defaultValueExpression().isEmpty()
+                        && arg->defaultValueExpression() != arg->originalDefaultValueExpression()) {
+                        args << arg->defaultValueExpression();
+                    }
+                    break;
+                }
+
+                if (type->isCppPrimitive() || type->isEnum() || isPointer(arg->type())) {
+                    QString argValue = minimalConstructor(arg->type());
+                    if (argValue.isEmpty()) {
+                        args.clear();
+                        break;
+                    }
+                    args << argValue;
+                } else {
+                    args.clear();
+                    break;
+                }
+            }
+
+            if (!args.isEmpty()) {
+                return QString("::%1(%2)").arg(metaClass->qualifiedCppName())
+                                          .arg(args.join(", "));
+            }
+
+            candidates << ctor;
+        }
+    }
+
+    // Constructors with C++ primitive types, enums, pointers, value types,
+    // and user defined primitive types.
+    // Builds the minimal constructor recursively.
+    foreach (const AbstractMetaFunction* ctor, candidates) {
+        QStringList args;
+        foreach (const AbstractMetaArgument* arg, ctor->arguments()) {
+            if (arg->type()->typeEntry() == metaClass->typeEntry()) {
+                args.clear();
+                break;
+            }
+            QString argValue = minimalConstructor(arg->type());
+            if (argValue.isEmpty()) {
+                args.clear();
+                break;
+            }
+            args << argValue;
+        }
+        if (!args.isEmpty()) {
+            return QString("::%1(%2)").arg(metaClass->qualifiedCppName())
+                                      .arg(args.join(", "));
+        }
+    }
+
+    return QString();
+}
+
 QString Generator::translateType(const AbstractMetaType *cType,
                                  const AbstractMetaClass *context,
                                  Options options) const

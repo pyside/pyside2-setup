@@ -225,6 +225,23 @@ public:
     /// Convenience function for implicitConversions(const TypeEntry* type).
     AbstractMetaFunctionList implicitConversions(const AbstractMetaType* metaType) const;
 
+    /// Check if type is a pointer.
+    static bool isPointer(const AbstractMetaType* type);
+
+    /// Tells if the type or class is an Object (or QObject) Type.
+    static bool isObjectType(const TypeEntry* type);
+    static bool isObjectType(const ComplexTypeEntry* type);
+    static bool isObjectType(const AbstractMetaType* metaType);
+    static bool isObjectType(const AbstractMetaClass* metaClass);
+
+    /**
+     *   Tries to build a minimal constructor for the type.
+     *   It will check first for a user defined default constructor.
+     *   Returns a null string if it fails.
+     */
+    QString minimalConstructor(const TypeEntry* type) const;
+    QString minimalConstructor(const AbstractMetaType* type) const;
+    QString minimalConstructor(const AbstractMetaClass* metaClass) const;
 protected:
     /**
      *   Returns the file name used to write the binding code of an AbstractMetaClass.
