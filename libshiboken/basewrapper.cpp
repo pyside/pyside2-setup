@@ -358,10 +358,13 @@ bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr)
 {
     PyObject* sysModules = PyImport_GetModuleDict();
     PyObject* module = PyDict_GetItemString(sysModules, moduleName);
-    if (!module)
+    if (!module) {
         module = PyImport_ImportModule(moduleName);
-    else
+        if (!module)
+            return false;
+    } else {
         Py_INCREF(module);
+    }
 
     Shiboken::AutoDecRef cppApi(PyObject_GetAttrString(module, "_Cpp_Api"));
     Py_DECREF(module);
