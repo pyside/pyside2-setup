@@ -189,7 +189,7 @@ void CppGenerator::writeRegisterType(QTextStream& s, const AbstractMetaClass* me
     QString typeName = metaClass->qualifiedCppName();
     QString reducedName = reduceTypeName(metaClass);
 
-    if (!ShibokenGenerator::isObjectType(metaClass)) {
+    if (!isObjectType(metaClass)) {
         s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver< ::" << typeName << " >" << "(\"" << typeName << "\");\n";
         if (!reducedName.isEmpty())
             s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver< ::" << typeName << " >" << "(\"" << reducedName << "\");\n";
@@ -198,7 +198,7 @@ void CppGenerator::writeRegisterType(QTextStream& s, const AbstractMetaClass* me
     s << INDENT << "Shiboken::TypeResolver::createObjectTypeResolver< ::" << typeName << " >" << "(\"" << typeName << "*\");\n";
     if (!reducedName.isEmpty())
         s << INDENT << "Shiboken::TypeResolver::createObjectTypeResolver< ::" << typeName << " >" << "(\"" << reducedName << "*\");\n";
-    QString functionSufix = (ShibokenGenerator::isObjectType(metaClass) ? "Object" : "Value");
+    QString functionSufix = (isObjectType(metaClass) ? "Object" : "Value");
     s << INDENT << "Shiboken::TypeResolver::create" << functionSufix;
     s << "TypeResolver< ::" << typeName << " >" << "(typeid(::" << typeName << ").name());\n";
     if (shouldGenerateCppWrapper(metaClass)) {
@@ -846,7 +846,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                     desiredType =  '"' + func->typeReplaced(0) + '"';
                 }
                 s << "(" PYTHON_RETURN_VAR ");" << endl;
-                if (ShibokenGenerator::isPointerToWrapperType(func->type()))
+                if (isPointerToWrapperType(func->type()))
                     s << INDENT << "typeIsValid = typeIsValid || (" PYTHON_RETURN_VAR " == Py_None);" << endl;
 
                 s << INDENT << "if (!typeIsValid) {" << endl;
@@ -1189,7 +1189,7 @@ void CppGenerator::writeMinimalConstructorCallArguments(QTextStream& s, const Ab
     Q_ASSERT(metaType);
     const TypeEntry* type = metaType->typeEntry();
 
-    if (ShibokenGenerator::isPointerToWrapperType(metaType)) {
+    if (isPointerToWrapperType(metaType)) {
         s << "0";
     } else if (type->isPrimitive()) {
         const PrimitiveTypeEntry* primitiveTypeEntry = reinterpret_cast<const PrimitiveTypeEntry*>(type);
@@ -1578,7 +1578,7 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                 }
                 if (!arg->defaultValueExpression().isEmpty()) {
                     strArg += " = ";
-                    if ((isCString(argType) || ShibokenGenerator::isPointerToWrapperType(argType))
+                    if ((isCString(argType) || isPointerToWrapperType(argType))
                         && arg->defaultValueExpression() == "0") {
                         strArg += "None";
                     } else {
@@ -2710,7 +2710,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "/*priv_data*/           0" << endl;
     s << "};" << endl;
     QString suffix;
-    if (ShibokenGenerator::isObjectType(metaClass))
+    if (isObjectType(metaClass))
         suffix = "*";
     s << "} //extern"  << endl;
 }
@@ -3035,7 +3035,7 @@ void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* 
     }
     s << ';' << endl << endl;
 
-    if (ShibokenGenerator::isPointerToWrapperType(metaField->type())) {
+    if (isPointerToWrapperType(metaField->type())) {
         s << INDENT << "Shiboken::Object::keepReference(reinterpret_cast<SbkObject*>(self), \"";
         s << metaField->name() << "\", value);" << endl;
         //s << INDENT << "Py_XDECREF(oldvalue);" << endl;
@@ -3589,7 +3589,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
 
     // Set OriginalName
     QByteArray suffix;
-    if (ShibokenGenerator::isObjectType(metaClass))
+    if (isObjectType(metaClass))
         suffix = "*";
     s << INDENT << "Shiboken::ObjectType::setOriginalName(&" << pyTypeName << ", \"" << metaClass->qualifiedCppName() << suffix << "\");" << endl;
 
@@ -3672,7 +3672,7 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream& s, const Abstrac
     if (!metaClass->isNamespace() && !metaClass->isAbstract())  {
         // Qt metatypes are registered only on their first use, so we do this now.
         bool canBeValue = false;
-        if (!ShibokenGenerator::isObjectType(metaClass)) {
+        if (!isObjectType(metaClass)) {
             // check if there's a empty ctor
             foreach (AbstractMetaFunction* func, metaClass->functions()) {
                 if (func->isConstructor() && !func->arguments().count()) {
@@ -4136,7 +4136,7 @@ bool CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
     int childIndex = argIndex;
     if (ctorHeuristicEnabled && argIndex > 0 && numArgs) {
         AbstractMetaArgument* arg = func->arguments().at(argIndex-1);
-        if (arg->name() == "parent" && ShibokenGenerator::isObjectType(arg->type())) {
+        if (arg->name() == "parent" && isObjectType(arg->type())) {
             action = ArgumentOwner::Add;
             parentIndex = argIndex;
             childIndex = -1;
@@ -4201,7 +4201,7 @@ void CppGenerator::writeReturnValueHeuristics(QTextStream& s, const AbstractMeta
 
     ArgumentOwner argOwner = getArgumentOwner(func, ArgumentOwner::ReturnIndex);
     if (argOwner.action == ArgumentOwner::Invalid || argOwner.index != ArgumentOwner::ThisIndex) {
-        if (ShibokenGenerator::isPointerToWrapperType(type))
+        if (isPointerToWrapperType(type))
             s << INDENT << "Shiboken::Object::setParent(" << self << ", " PYTHON_RETURN_VAR ");" << endl;
     }
 }
