@@ -30,6 +30,7 @@ extern "C"
 {
 
 extern LIBSHIBOKEN_API PyTypeObject SbkEnumType_Type;
+struct SbkObjectType;
 
 } // extern "C"
 
@@ -43,6 +44,40 @@ inline bool isShibokenEnum(PyObject* pyObj)
 
 namespace Enum
 {
+    /**
+     *  Creates a new enum type (and its flags type, if any is given)
+     *  and registers it to Python and adds it to \p module.
+     *  \param module       Module to where the new enum type will be added.
+     *  \param name         Name of the enum.
+     *  \param fullName     Name of the enum that includes all scope information (e.g.: "module.Enum").
+     *  \param cppName      Full qualified C++ name of the enum.
+     *  \param flagsType    Optional Python type for the flags associated with the enum.
+     *  \return The new enum type or NULL if it fails.
+     */
+    LIBSHIBOKEN_API PyTypeObject* createGlobalEnum(PyObject* module,
+                                                   const char* name,
+                                                   const char* fullName,
+                                                   const char* cppName,
+                                                   PyTypeObject* flagsType = 0);
+    /// This function does the same as createGlobalEnum, but adds the enum to a Shiboken type or namespace.
+    LIBSHIBOKEN_API PyTypeObject* createScopedEnum(SbkObjectType* scope,
+                                                   const char* name,
+                                                   const char* fullName,
+                                                   const char* cppName,
+                                                   PyTypeObject* flagsType = 0);
+
+    /**
+     *  Creates a new enum item for a given enum type and adds it to \p module.
+     *  \param enumType  Enum type to where the new enum item will be added.
+     *  \param module    Module to where the enum type of the new enum item belongs.
+     *  \param itemName  Name of the enum item.
+     *  \param itemValue Numerical value of the enum item.
+     *  \return true if everything goes fine, false if it fails.
+     */
+    LIBSHIBOKEN_API bool createGlobalEnumItem(PyTypeObject* enumType, PyObject* module, const char* itemName, long itemValue);
+    /// This function does the same as createGlobalEnumItem, but adds the enum to a Shiboken type or namespace.
+    LIBSHIBOKEN_API bool createScopedEnumItem(PyTypeObject* enumType, SbkObjectType* scope, const char* itemName, long itemValue);
+
     LIBSHIBOKEN_API PyObject* newItem(PyTypeObject* enumType, long itemValue, const char* itemName = 0);
 
     LIBSHIBOKEN_API PyTypeObject* newType(const char* name); //Deprecated use 'newTypeWithName'
