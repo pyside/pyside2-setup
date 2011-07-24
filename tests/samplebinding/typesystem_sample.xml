@@ -1516,6 +1516,7 @@
 
     <value-type name="Filter" />
     <value-type name="Data">
+        <enum-type name="Field" />
         <add-function signature="operator&amp;(const Union&amp;)" return-type="Intersection">
             <inject-code class="target">
                 Intersection inter = *%CPPSELF &amp; %1;
@@ -1523,7 +1524,6 @@
             </inject-code>
         </add-function>
     </value-type>
-    <enum-type name="Data::Field" />
     <value-type name="Union">
         <add-function signature="operator&amp;(const Data&amp;)" return-type="Intersection">
             <inject-code class="target">
