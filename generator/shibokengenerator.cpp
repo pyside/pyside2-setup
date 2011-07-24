@@ -786,7 +786,9 @@ bool ShibokenGenerator::isPyInt(const AbstractMetaType* type)
 
 bool ShibokenGenerator::isCString(const AbstractMetaType* type)
 {
-    return type->isNativePointer() && type->name() == "char";
+    return type->isNativePointer()
+            && type->indirections() == 1
+            && type->name() == "char";
 }
 
 bool ShibokenGenerator::isPairContainer(const AbstractMetaType* type)
