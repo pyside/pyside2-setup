@@ -83,6 +83,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/samplenamespace_someclass_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/samplenamespace_derivedfromnamespace_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/simplefile_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/size_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/sizef_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/sonofmderived1_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/str_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/strlist_wrapper.cpp

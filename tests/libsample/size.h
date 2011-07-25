@@ -182,5 +182,17 @@ inline const Size operator/(const Size& s, double div)
     return Size(s.m_width / div, s.m_height / div);
 }
 
+typedef double real;
+class LIBSAMPLE_API SizeF
+{
+public:
+    SizeF(real width, real height) : m_width(width), m_height(height) {}
+    real width() { return m_width; }
+    real height() { return m_height; }
+private:
+    real m_width;
+    real m_height;
+};
+
 #endif // SIZE_H
 

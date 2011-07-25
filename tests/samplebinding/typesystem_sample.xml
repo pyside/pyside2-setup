@@ -5,6 +5,7 @@
 
     <primitive-type name="bool"/>
     <primitive-type name="double"/>
+    <primitive-type name="real"/>
     <primitive-type name="int"/>
     <primitive-type name="short"/>
     <primitive-type name="unsigned int" />
@@ -1246,6 +1247,7 @@
             </inject-code>
         </add-function>
     </value-type>
+    <value-type name="SizeF"/>
     <value-type name="MapUser"/>
     <value-type name="PairUser"/>
     <value-type name="ListUser">
