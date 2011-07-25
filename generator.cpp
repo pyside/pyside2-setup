@@ -505,7 +505,7 @@ QString Generator::translateType(const AbstractMetaType *cType,
                 copyType->setReference(false);
 
             s = copyType->cppSignature();
-            if (!copyType->typeEntry()->isCppPrimitive())
+            if (!copyType->typeEntry()->isVoid() && !copyType->typeEntry()->isCppPrimitive())
                 s.prepend("::");
             delete copyType;
         } else {
