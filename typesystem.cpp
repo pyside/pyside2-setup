@@ -2095,13 +2095,18 @@ static bool strLess(const char* a, const char* b)
 
 bool TypeEntry::isCppPrimitive() const
 {
+    if (!isPrimitive())
+        return false;
     if (m_name.contains(' ') || m_type == VoidType)
         return true;
     // Keep this sorted!!
-    static const char* cppTypes[] = { "bool", "char", "double", "float", "int", "long", "short", "wchar_t"};
+    static const char* cppTypes[] = { "bool", "char", "double", "float", "int", "long", "long long", "short", "wchar_t"};
     const int N = sizeof(cppTypes)/sizeof(char*);
 
-    const char** res = qBinaryFind(&cppTypes[0], &cppTypes[N], m_name.toAscii().constData(), strLess);
+    PrimitiveTypeEntry* aliasedType = ((PrimitiveTypeEntry*)this)->basicAliasedTypeEntry();
+    QString typeName = aliasedType ? aliasedType->name() : m_name;
+
+    const char** res = qBinaryFind(&cppTypes[0], &cppTypes[N], typeName.toAscii().constData(), strLess);
     return res != &cppTypes[N];
 }
 
