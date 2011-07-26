@@ -29,7 +29,10 @@ class TestConversionRuleTag : public QObject
 {
     Q_OBJECT
 private slots:
-    void testConversionRuleTag();
+    void testConversionRuleTagWithFile();
+    void testConversionRuleTagReplace();
+    void testConversionRuleTagAdd();
+    void testConversionRuleTagWithInsertTemplate();
 };
 
 #endif

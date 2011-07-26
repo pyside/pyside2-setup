@@ -82,7 +82,7 @@ enum Ownership {
 };
 };
 
-struct ReferenceCount
+struct APIEXTRACTOR_API ReferenceCount
 {
     ReferenceCount()  {}
     enum Action { // 0x01 - 0xff
@@ -102,7 +102,7 @@ struct ReferenceCount
     QString varName;
 };
 
-struct ArgumentOwner
+struct APIEXTRACTOR_API ArgumentOwner
 {
     enum Action {
         Invalid     = 0x00,
@@ -156,7 +156,7 @@ public:
     QList<CodeSnipFragment> codeList;
 };
 
-class CustomFunction : public CodeSnipAbstract
+class APIEXTRACTOR_API CustomFunction : public CodeSnipAbstract
 {
 public:
     CustomFunction(const QString &n = QString()) : name(n) { }
@@ -165,7 +165,7 @@ public:
     QString paramName;
 };
 
-class TemplateEntry : public CodeSnipAbstract
+class APIEXTRACTOR_API TemplateEntry : public CodeSnipAbstract
 {
 public:
     TemplateEntry(const QString &name, double vr)
@@ -190,7 +190,7 @@ private:
 
 typedef QHash<QString, TemplateEntry *> TemplateEntryHash;
 
-class TemplateInstance
+class APIEXTRACTOR_API TemplateInstance
 {
 public:
     TemplateInstance(const QString &name, double vr)
@@ -245,7 +245,7 @@ public:
 };
 typedef QList<CodeSnip> CodeSnipList;
 
-struct ArgumentModification
+struct APIEXTRACTOR_API ArgumentModification
 {
     ArgumentModification(int idx, double vr)
             : removedDefaultExpression(false), removed(false),
@@ -436,7 +436,7 @@ private:
 };
 typedef QList<FunctionModification> FunctionModificationList;
 
-struct FieldModification: public Modification
+struct APIEXTRACTOR_API FieldModification: public Modification
 {
     bool isReadable() const
     {
@@ -547,7 +547,7 @@ private:
 };
 typedef QList<AddedFunction> AddedFunctionList;
 
-struct ExpensePolicy
+struct APIEXTRACTOR_API ExpensePolicy
 {
     ExpensePolicy() : limit(-1) {}
     int limit;
@@ -561,7 +561,7 @@ struct ExpensePolicy
 class InterfaceTypeEntry;
 class ObjectTypeEntry;
 
-class DocModification
+class APIEXTRACTOR_API DocModification
 {
 public:
     enum Mode {
@@ -614,6 +614,8 @@ private:
 
 typedef QList<DocModification> DocModificationList;
 
+class CustomConversion;
+
 class APIEXTRACTOR_API TypeEntry
 {
 public:
@@ -662,7 +664,7 @@ public:
     {
     };
 
-    virtual ~TypeEntry() { }
+    virtual ~TypeEntry();
 
     Type type() const
     {
@@ -949,17 +951,23 @@ public:
         return m_version;
     }
 
+    /// TODO-CONVERTER: mark as deprecated
     bool hasNativeConversionRule() const
     {
         return m_conversionRule.startsWith(NATIVE_CONVERSION_RULE_FLAG);
     }
 
+    /// TODO-CONVERTER: mark as deprecated
     bool hasTargetConversionRule() const
     {
         return m_conversionRule.startsWith(TARGET_CONVERSION_RULE_FLAG);
     }
 
     bool isCppPrimitive() const;
+
+    bool hasCustomConversion() const;
+    void setCustomConversion(CustomConversion* customConversion);
+    CustomConversion* customConversion() const;
 private:
     QString m_name;
     Type m_type;
@@ -1155,7 +1163,7 @@ private:
 
 typedef QList<const PrimitiveTypeEntry*> PrimitiveTypeEntryList;
 
-struct EnumValueRedirection
+struct APIEXTRACTOR_API EnumValueRedirection
 {
     EnumValueRedirection(const QString &rej, const QString &us)
             : rejected(rej),
@@ -1729,7 +1737,7 @@ public:
 };
 
 
-class ValueTypeEntry : public ComplexTypeEntry
+class APIEXTRACTOR_API ValueTypeEntry : public ComplexTypeEntry
 {
 public:
     ValueTypeEntry(const QString &name, double vr) : ComplexTypeEntry(name, BasicValueType, vr) { }
@@ -1749,7 +1757,7 @@ protected:
 };
 
 
-class StringTypeEntry : public ValueTypeEntry
+class APIEXTRACTOR_API StringTypeEntry : public ValueTypeEntry
 {
 public:
     StringTypeEntry(const QString &name, double vr)
@@ -1768,7 +1776,7 @@ public:
     }
 };
 
-class CharTypeEntry : public ValueTypeEntry
+class APIEXTRACTOR_API CharTypeEntry : public ValueTypeEntry
 {
 public:
     CharTypeEntry(const QString &name, double vr) : ValueTypeEntry(name, CharType, vr)
@@ -1789,7 +1797,7 @@ public:
     }
 };
 
-class VariantTypeEntry: public ValueTypeEntry
+class APIEXTRACTOR_API VariantTypeEntry: public ValueTypeEntry
 {
 public:
     VariantTypeEntry(const QString &name, double vr) : ValueTypeEntry(name, VariantType, vr) { }
@@ -1889,7 +1897,7 @@ private:
     InterfaceTypeEntry *m_interface;
 };
 
-struct TypeRejection
+struct APIEXTRACTOR_API TypeRejection
 {
     QString class_name;
     QString function_name;
@@ -1897,6 +1905,56 @@ struct TypeRejection
     QString enum_name;
 };
 
-QString fixCppTypeName(const QString &name);
+APIEXTRACTOR_API QString fixCppTypeName(const QString &name);
+
+class APIEXTRACTOR_API CustomConversion
+{
+public:
+    CustomConversion(TypeEntry* ownerType);
+    ~CustomConversion();
+
+    const TypeEntry* ownerType() const;
+    QString nativeToTargetConversion() const;
+    void setNativeToTargetConversion(const QString& nativeToTargetConversion);
+
+    class APIEXTRACTOR_API TargetToNativeConversion
+    {
+    public:
+        TargetToNativeConversion(const QString& sourceTypeName,
+                                 const QString& sourceTypeCheck,
+                                 const QString& conversion = QString());
+        ~TargetToNativeConversion();
+
+        const TypeEntry* sourceType() const;
+        void setSourceType(const TypeEntry* sourceType);
+        bool isCustomType() const;
+        QString sourceTypeName() const;
+        QString sourceTypeCheck() const;
+        QString conversion() const;
+        void setConversion(const QString& conversion);
+    private:
+        struct TargetToNativeConversionPrivate;
+        TargetToNativeConversionPrivate* m_d;
+    };
+
+    /**
+     *  Returns true if the target to C++ custom conversions should
+     *  replace the original existing ones, and false if the custom
+     *  conversions should be added to the original.
+     */
+    bool replaceOriginalTargetToNativeConversions() const;
+    void setReplaceOriginalTargetToNativeConversions(bool replaceOriginalTargetToNativeConversions);
+
+    typedef QList<TargetToNativeConversion*> TargetToNativeConversions;
+    bool hasTargetToNativeConversions() const;
+    TargetToNativeConversions& targetToNativeConversions();
+    const TargetToNativeConversions& targetToNativeConversions() const;
+    void addTargetToNativeConversion(const QString& sourceTypeName,
+                                     const QString& sourceTypeCheck,
+                                     const QString& conversion = QString());
+private:
+    struct CustomConversionPrivate;
+    CustomConversionPrivate* m_d;
+};
 
 #endif // TYPESYSTEM_H

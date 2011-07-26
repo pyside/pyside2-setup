@@ -33,6 +33,8 @@ static QString strings_char = QLatin1String("char");
 static QString strings_jchar = QLatin1String("jchar");
 static QString strings_jobject = QLatin1String("jobject");
 
+static QList<CustomConversion*> customConversionsForReview = QList<CustomConversion*>();
+
 Handler::Handler(TypeDatabase* database, bool generate)
             : m_database(database), m_generate(generate ? TypeEntry::GenerateAll : TypeEntry::GenerateForSubclass)
 {
@@ -70,6 +72,9 @@ Handler::Handler(TypeDatabase* database, bool generate)
     tagNames["reject-enum-value"] = StackElement::RejectEnumValue;
     tagNames["replace-type"] = StackElement::ReplaceType;
     tagNames["conversion-rule"] = StackElement::ConversionRule;
+    tagNames["native-to-target"] = StackElement::NativeToTarget;
+    tagNames["target-to-native"] = StackElement::TargetToNative;
+    tagNames["add-conversion"] = StackElement::AddConversion;
     tagNames["modify-argument"] = StackElement::ModifyArgument;
     tagNames["remove-argument"] = StackElement::RemoveArgument;
     tagNames["remove-default-expression"] = StackElement::RemoveDefaultExpression;
@@ -155,6 +160,10 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
         if (m_generate == TypeEntry::GenerateAll) {
             TypeDatabase::instance()->addGlobalUserFunctions(m_contextStack.top()->addedFunctions);
             TypeDatabase::instance()->addGlobalUserFunctionModifications(m_contextStack.top()->functionMods);
+            foreach (CustomConversion* customConversion, customConversionsForReview) {
+                foreach (CustomConversion::TargetToNativeConversion* toNative, customConversion->targetToNativeConversions())
+                    toNative->setSourceType(m_database->findType(toNative->sourceTypeName()));
+            }
         }
         break;
     case StackElement::ObjectTypeEntry:
@@ -171,6 +180,26 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
         if (centry->designatedInterface()) {
             centry->designatedInterface()->setCodeSnips(m_contextStack.top()->codeSnips);
             centry->designatedInterface()->setFunctionModifications(m_contextStack.top()->functionMods);
+        }
+    }
+    break;
+    case StackElement::NativeToTarget:
+    case StackElement::AddConversion: {
+        CustomConversion* customConversion = static_cast<TypeEntry*>(m_current->entry)->customConversion();
+        if (!customConversion) {
+            m_error = "CustomConversion object is missing.";
+            return false;
+        }
+
+        QString code = m_contextStack.top()->codeSnips.takeLast().code();
+        if (m_current->type == StackElement::AddConversion) {
+            if (customConversion->targetToNativeConversions().isEmpty()) {
+                m_error = "CustomConversion's target to native conversions missing.";
+                return false;
+            }
+            customConversion->targetToNativeConversions().last()->setConversion(code);
+        } else {
+            customConversion->setNativeToTargetConversion(code);
         }
     }
     break;
@@ -193,18 +222,28 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
         m_database->addTemplate(m_current->value.templateEntry);
         break;
     case StackElement::TemplateInstanceEnum:
-        if (m_current->parent->type == StackElement::InjectCode)
+        switch (m_current->parent->type) {
+        case StackElement::InjectCode:
+        case StackElement::NativeToTarget:
+        case StackElement::AddConversion:
             m_contextStack.top()->codeSnips.last().addTemplateInstance(m_current->value.templateInstance);
-         else if (m_current->parent->type == StackElement::Template)
+            break;
+        case StackElement::Template:
             m_current->parent->value.templateEntry->addTemplateInstance(m_current->value.templateInstance);
-         else if (m_current->parent->type == StackElement::CustomMetaConstructor
-                  || m_current->parent->type == StackElement::CustomMetaConstructor)
+            break;
+        case StackElement::CustomMetaConstructor:
+        case StackElement::CustomMetaDestructor:
             m_current->parent->value.customFunction->addTemplateInstance(m_current->value.templateInstance);
-         else if (m_current->parent->type == StackElement::ConversionRule)
+            break;
+        case StackElement::ConversionRule:
             m_contextStack.top()->functionMods.last().argument_mods.last().conversion_rules.last().addTemplateInstance(m_current->value.templateInstance);
-         else if (m_current->parent->type == StackElement::InjectCodeInFunction)
+            break;
+        case StackElement::InjectCodeInFunction:
             m_contextStack.top()->functionMods.last().snips.last().addTemplateInstance(m_current->value.templateInstance);
-
+            break;
+        default:
+            break; // nada
+        };
         break;
     default:
         break;
@@ -214,7 +253,8 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
         || m_current->type == StackElement::NamespaceTypeEntry
         || m_current->type == StackElement::InterfaceTypeEntry
         || m_current->type == StackElement::ObjectTypeEntry
-        || m_current->type == StackElement::ValueTypeEntry) {
+        || m_current->type == StackElement::ValueTypeEntry
+        || m_current->type == StackElement::PrimitiveTypeEntry) {
         StackElementContext* context = m_contextStack.pop();
         delete context;
     }
@@ -245,6 +285,11 @@ bool Handler::characters(const QString &ch)
         && m_current->parent->type == StackElement::ModifyArgument) {
         m_contextStack.top()->functionMods.last().argument_mods.last().conversion_rules.last().addCode(ch);
         return true;
+    }
+
+    if (m_current->type == StackElement::NativeToTarget || m_current->type == StackElement::AddConversion) {
+       m_contextStack.top()->codeSnips.last().addCode(ch);
+       return true;
     }
 
     if (m_current->parent) {
@@ -417,11 +462,15 @@ bool Handler::startElement(const QString &, const QString &n,
     StackElement* element = new StackElement(m_current);
     element->type = tagNames[tagName];
 
+    if (element->type == StackElement::Root && m_generate == TypeEntry::GenerateAll)
+        customConversionsForReview.clear();
+
     if (element->type == StackElement::Root
         || element->type == StackElement::NamespaceTypeEntry
         || element->type == StackElement::InterfaceTypeEntry
         || element->type == StackElement::ObjectTypeEntry
-        || element->type == StackElement::ValueTypeEntry) {
+        || element->type == StackElement::ValueTypeEntry
+        || element->type == StackElement::PrimitiveTypeEntry) {
         m_contextStack.push(new StackElementContext());
     }
 
@@ -953,6 +1002,13 @@ bool Handler::startElement(const QString &, const QString &n,
             attributes["class"] = QString();
             attributes["file"] = QString();
             break;
+        case StackElement::TargetToNative:
+            attributes["replace"] = QString("yes");
+            break;
+        case StackElement::AddConversion:
+            attributes["type"] = QString();
+            attributes["check"] = QString();
+            break;
         case StackElement::RejectEnumValue:
             attributes["name"] = "";
             break;
@@ -1055,11 +1111,10 @@ bool Handler::startElement(const QString &, const QString &n,
         case StackElement::ConversionRule: {
             if (topElement.type != StackElement::ModifyArgument
                 && topElement.type != StackElement::ValueTypeEntry
-                && topElement.type != StackElement::ObjectTypeEntry
                 && topElement.type != StackElement::PrimitiveTypeEntry
                 && topElement.type != StackElement::ContainerTypeEntry) {
                 m_error = "Conversion rules can only be specified for argument modification, "
-                          "value-type, object-type, primitive-type or container-type conversion.";
+                          "value-type, primitive-type or container-type conversion.";
                 return false;
             }
 
@@ -1082,40 +1137,70 @@ bool Handler::startElement(const QString &, const QString &n,
                 snip.language = lang;
                 m_contextStack.top()->functionMods.last().argument_mods.last().conversion_rules.append(snip);
             } else {
-                if (topElement.entry->hasConversionRule()) {
+                if (topElement.entry->hasConversionRule() || topElement.entry->hasCustomConversion()) {
                     m_error = "Types can have only one conversion rule";
                     return false;
                 }
 
+                // The old conversion rule tag that uses a file containing the conversion
+                // will be kept temporarily for compatibility reasons.
                 QString sourceFile = attributes["file"];
-                if (sourceFile.isEmpty()) {
-                    m_error = QString("'file' attribute required; the source file containing the"
-                                      " containing the conversion functions must be provided");
-                    return false;
-                }
+                if (!sourceFile.isEmpty()) {
+                    if (m_generate != TypeEntry::GenerateForSubclass
+                        && m_generate != TypeEntry::GenerateNothing) {
 
-                //Handler constructor....
-                if (m_generate != TypeEntry::GenerateForSubclass
-                    && m_generate != TypeEntry::GenerateNothing) {
+                        const char* conversionFlag = NATIVE_CONVERSION_RULE_FLAG;
+                        if (lang == TypeSystem::TargetLangCode)
+                            conversionFlag = TARGET_CONVERSION_RULE_FLAG;
 
-                    const char* conversionFlag = NATIVE_CONVERSION_RULE_FLAG;
-                    if (lang == TypeSystem::TargetLangCode)
-                        conversionFlag = TARGET_CONVERSION_RULE_FLAG;
-
-                    QFile conversionSource(sourceFile);
-                    if (conversionSource.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                        topElement.entry->setConversionRule(conversionFlag + QString::fromUtf8(conversionSource.readAll()));
-                    } else {
-                        ReportHandler::warning("File containing conversion code for "
-                                               + topElement.entry->name()
-                                               + " type does not exist or is not readable: "
-                                               + sourceFile);
+                        QFile conversionSource(sourceFile);
+                        if (conversionSource.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                            topElement.entry->setConversionRule(conversionFlag + QString::fromUtf8(conversionSource.readAll()));
+                        } else {
+                            ReportHandler::warning("File containing conversion code for "
+                                                   + topElement.entry->name()
+                                                   + " type does not exist or is not readable: "
+                                                   + sourceFile);
+                        }
                     }
                 }
 
+                CustomConversion* customConversion = new CustomConversion(static_cast<TypeEntry*>(m_current->entry));
+                customConversionsForReview.append(customConversion);
             }
         }
-
+        break;
+        case StackElement::NativeToTarget: {
+            if (topElement.type != StackElement::ConversionRule) {
+                m_error = "Native to Target conversion code can only be specified for custom conversion rules.";
+                return false;
+            }
+            m_contextStack.top()->codeSnips << CodeSnip(0);
+        }
+        break;
+        case StackElement::TargetToNative: {
+            if (topElement.type != StackElement::ConversionRule) {
+                m_error = "Target to Native conversions can only be specified for custom conversion rules.";
+                return false;
+            }
+            bool replace = attributes["replace"] == "yes";
+            static_cast<TypeEntry*>(m_current->entry)->customConversion()->setReplaceOriginalTargetToNativeConversions(replace);
+        }
+        break;
+        case StackElement::AddConversion: {
+            if (topElement.type != StackElement::TargetToNative) {
+                m_error = "Target to Native conversions can only be added inside 'target-to-native' tags.";
+                return false;
+            }
+            QString sourceTypeName = attributes["type"];
+            if (sourceTypeName.isEmpty()) {
+                m_error = "Target to Native conversions must specify the input type with the 'type' attribute.";
+                return false;
+            }
+            QString typeCheck = attributes["check"];
+            static_cast<TypeEntry*>(m_current->entry)->customConversion()->addTargetToNativeConversion(sourceTypeName, typeCheck);
+            m_contextStack.top()->codeSnips << CodeSnip(0);
+        }
         break;
         case StackElement::ModifyArgument: {
             if (topElement.type != StackElement::ModifyFunction
@@ -1692,8 +1777,11 @@ bool Handler::startElement(const QString &, const QString &n,
                 (topElement.type != StackElement::Template) &&
                 (topElement.type != StackElement::CustomMetaConstructor) &&
                 (topElement.type != StackElement::CustomMetaDestructor) &&
+                (topElement.type != StackElement::NativeToTarget) &&
+                (topElement.type != StackElement::AddConversion) &&
                 (topElement.type != StackElement::ConversionRule)) {
-                m_error = "Can only insert templates into code snippets, templates, custom-constructors, custom-destructors or conversion-rule.";
+                m_error = "Can only insert templates into code snippets, templates, custom-constructors, "\
+                          "custom-destructors, conversion-rule, native-to-target or add-conversion tags.";
                 return false;
             }
             element->value.templateInstance = new TemplateInstance(attributes["name"], since);
@@ -2161,4 +2249,190 @@ bool TypeEntry::isCppPrimitive() const
     const char** res = qBinaryFind(&cppTypes[0], &cppTypes[N], typeName.constData(), strLess);
 
     return res != &cppTypes[N];
+}
+
+// Again, stuff to avoid ABI breakage.
+typedef QHash<const TypeEntry*, CustomConversion*> TypeEntryCustomConversionMap;
+Q_GLOBAL_STATIC(TypeEntryCustomConversionMap, typeEntryCustomConversionMap);
+
+TypeEntry::~TypeEntry()
+{
+    if (typeEntryCustomConversionMap()->contains(this)) {
+        CustomConversion* customConversion = typeEntryCustomConversionMap()->value(this);
+        typeEntryCustomConversionMap()->remove(this);
+        delete customConversion;
+    }
+}
+
+bool TypeEntry::hasCustomConversion() const
+{
+    return typeEntryCustomConversionMap()->contains(this);
+}
+void TypeEntry::setCustomConversion(CustomConversion* customConversion)
+{
+    if (customConversion)
+        typeEntryCustomConversionMap()->insert(this, customConversion);
+    else if (typeEntryCustomConversionMap()->contains(this))
+        typeEntryCustomConversionMap()->remove(this);
+}
+CustomConversion* TypeEntry::customConversion() const
+{
+    if (typeEntryCustomConversionMap()->contains(this))
+        return typeEntryCustomConversionMap()->value(this);
+    return 0;
+}
+
+/*
+static void injectCode(ComplexTypeEntry *e,
+                       const char *signature,
+                       const QByteArray &code,
+                       const ArgumentMap &args)
+{
+    CodeSnip snip;
+    snip.language = TypeSystem::NativeCode;
+    snip.position = CodeSnip::Beginning;
+    snip.addCode(QString::fromLatin1(code));
+    snip.argumentMap = args;
+
+    FunctionModification mod;
+    mod.signature = QMetaObject::normalizedSignature(signature);
+    mod.snips << snip;
+    mod.modifiers = Modification::CodeInjection;
+}
+*/
+
+struct CustomConversion::CustomConversionPrivate
+{
+    CustomConversionPrivate(const TypeEntry* ownerType)
+        : ownerType(ownerType), replaceOriginalTargetToNativeConversions(false)
+    {
+    }
+    const TypeEntry* ownerType;
+    QString nativeToTargetConversion;
+    bool replaceOriginalTargetToNativeConversions;
+    TargetToNativeConversions targetToNativeConversions;
+};
+
+struct CustomConversion::TargetToNativeConversion::TargetToNativeConversionPrivate
+{
+    TargetToNativeConversionPrivate()
+        : sourceType(0)
+    {
+    }
+    const TypeEntry* sourceType;
+    QString sourceTypeName;
+    QString sourceTypeCheck;
+    QString conversion;
+};
+
+CustomConversion::CustomConversion(TypeEntry* ownerType)
+{
+    m_d = new CustomConversionPrivate(ownerType);
+    if (ownerType)
+        ownerType->setCustomConversion(this);
+}
+
+CustomConversion::~CustomConversion()
+{
+    foreach (TargetToNativeConversion* targetToNativeConversion, m_d->targetToNativeConversions)
+        delete targetToNativeConversion;
+    m_d->targetToNativeConversions.clear();
+    delete m_d;
+}
+
+const TypeEntry* CustomConversion::ownerType() const
+{
+    return m_d->ownerType;
+}
+
+QString CustomConversion::nativeToTargetConversion() const
+{
+    return m_d->nativeToTargetConversion;
+}
+
+void CustomConversion::setNativeToTargetConversion(const QString& nativeToTargetConversion)
+{
+    m_d->nativeToTargetConversion = nativeToTargetConversion;
+}
+
+bool CustomConversion::replaceOriginalTargetToNativeConversions() const
+{
+    return m_d->replaceOriginalTargetToNativeConversions;
+}
+
+void CustomConversion::setReplaceOriginalTargetToNativeConversions(bool replaceOriginalTargetToNativeConversions)
+{
+    m_d->replaceOriginalTargetToNativeConversions = replaceOriginalTargetToNativeConversions;
+}
+
+bool CustomConversion::hasTargetToNativeConversions() const
+{
+    return !(m_d->targetToNativeConversions.isEmpty());
+}
+
+CustomConversion::TargetToNativeConversions& CustomConversion::targetToNativeConversions()
+{
+    return m_d->targetToNativeConversions;
+}
+
+const CustomConversion::TargetToNativeConversions& CustomConversion::targetToNativeConversions() const
+{
+    return m_d->targetToNativeConversions;
+}
+
+void CustomConversion::addTargetToNativeConversion(const QString& sourceTypeName,
+                                                   const QString& sourceTypeCheck,
+                                                   const QString& conversion)
+{
+    m_d->targetToNativeConversions.append(new TargetToNativeConversion(sourceTypeName, sourceTypeCheck, conversion));
+}
+
+CustomConversion::TargetToNativeConversion::TargetToNativeConversion(const QString& sourceTypeName,
+                                                                     const QString& sourceTypeCheck,
+                                                                     const QString& conversion)
+{
+    m_d = new TargetToNativeConversionPrivate;
+    m_d->sourceTypeName = sourceTypeName;
+    m_d->sourceTypeCheck = sourceTypeCheck;
+    m_d->conversion = conversion;
+}
+
+CustomConversion::TargetToNativeConversion::~TargetToNativeConversion()
+{
+    delete m_d;
+}
+
+const TypeEntry* CustomConversion::TargetToNativeConversion::sourceType() const
+{
+    return m_d->sourceType;
+}
+
+void CustomConversion::TargetToNativeConversion::setSourceType(const TypeEntry* sourceType)
+{
+    m_d->sourceType = sourceType;
+}
+
+bool CustomConversion::TargetToNativeConversion::isCustomType() const
+{
+    return !(m_d->sourceType);
+}
+
+QString CustomConversion::TargetToNativeConversion::sourceTypeName() const
+{
+    return m_d->sourceTypeName;
+}
+
+QString CustomConversion::TargetToNativeConversion::sourceTypeCheck() const
+{
+    return m_d->sourceTypeCheck;
+}
+
+QString CustomConversion::TargetToNativeConversion::conversion() const
+{
+    return m_d->conversion;
+}
+
+void CustomConversion::TargetToNativeConversion::setConversion(const QString& conversion)
+{
+    m_d->conversion = conversion;
 }

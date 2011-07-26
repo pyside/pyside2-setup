@@ -23,6 +23,7 @@ can be found in the PySide/<QT_MODULE_NAME> directory of the PySide package.
     typesystem_arguments
     typesystem_solving_compilation
     typesystem_templates
+    typesystem_conversionrule
     typesystem_documentation
 
 

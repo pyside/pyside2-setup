@@ -35,23 +35,23 @@ class StackElement
             None = 0x0,
 
             // Type tags (0x1, ... , 0xff)
-            ObjectTypeEntry      = 0x1,
-            ValueTypeEntry       = 0x2,
-            InterfaceTypeEntry   = 0x3,
-            NamespaceTypeEntry   = 0x4,
-            ComplexTypeEntryMask = 0x7,
+            ObjectTypeEntry             = 0x1,
+            ValueTypeEntry              = 0x2,
+            InterfaceTypeEntry          = 0x3,
+            NamespaceTypeEntry          = 0x4,
+            ComplexTypeEntryMask        = 0x7,
 
             // Non-complex type tags (0x8, 0x9, ... , 0xf)
-            PrimitiveTypeEntry   = 0x8,
-            EnumTypeEntry        = 0x9,
-            ContainerTypeEntry   = 0xa,
-            FunctionTypeEntry    = 0xb,
-            TypeEntryMask        = 0xf,
+            PrimitiveTypeEntry          = 0x8,
+            EnumTypeEntry               = 0x9,
+            ContainerTypeEntry          = 0xa,
+            FunctionTypeEntry           = 0xb,
+            TypeEntryMask               = 0xf,
 
             // Documentation tags
-            InjectDocumentation = 0x10,
-            ModifyDocumentation = 0x20,
-            DocumentationMask = 0xf0,
+            InjectDocumentation         = 0x10,
+            ModifyDocumentation         = 0x20,
+            DocumentationMask           = 0xf0,
 
             // Simple tags (0x100, 0x200, ... , 0xf00)
             ExtraIncludes               = 0x0100,
@@ -70,32 +70,35 @@ class StackElement
             TemplateInstanceEnum        = 0x0e00,
             Replace                     = 0x0f00,
             AddFunction                 = 0x1000,
+            NativeToTarget              = 0x1100,
+            TargetToNative              = 0x1200,
+            AddConversion               = 0x1300,
             SimpleMask                  = 0x3f00,
 
             // Code snip tags (0x1000, 0x2000, ... , 0xf000)
-            InjectCode =           0x4000,
-            InjectCodeInFunction = 0x8000,
-            CodeSnipMask =         0xc000,
+            InjectCode                  = 0x4000,
+            InjectCodeInFunction        = 0x8000,
+            CodeSnipMask                = 0xc000,
 
             // Function modifier tags (0x010000, 0x020000, ... , 0xf00000)
-            Access                   = 0x010000,
-            Removal                  = 0x020000,
-            Rename                   = 0x040000,
-            ModifyArgument           = 0x080000,
-            Thread                   = 0x100000,
-            FunctionModifiers        = 0xff0000,
+            Access                      = 0x010000,
+            Removal                     = 0x020000,
+            Rename                      = 0x040000,
+            ModifyArgument              = 0x080000,
+            Thread                      = 0x100000,
+            FunctionModifiers           = 0xff0000,
 
             // Argument modifier tags (0x01000000 ... 0xf0000000)
-            ConversionRule           = 0x01000000,
-            ReplaceType              = 0x02000000,
-            ReplaceDefaultExpression = 0x04000000,
-            RemoveArgument           = 0x08000000,
-            DefineOwnership          = 0x10000000,
-            RemoveDefaultExpression  = 0x20000000,
-            NoNullPointers           = 0x40000000,
-            ReferenceCount           = 0x80000000,
-            ParentOwner              = 0x90000000,
-            ArgumentModifiers        = 0xff000000
+            ConversionRule              = 0x01000000,
+            ReplaceType                 = 0x02000000,
+            ReplaceDefaultExpression    = 0x04000000,
+            RemoveArgument              = 0x08000000,
+            DefineOwnership             = 0x10000000,
+            RemoveDefaultExpression     = 0x20000000,
+            NoNullPointers              = 0x40000000,
+            ReferenceCount              = 0x80000000,
+            ParentOwner                 = 0x90000000,
+            ArgumentModifiers           = 0xff000000
         };
 
         StackElement(StackElement *p) : entry(0), type(None), parent(p) { }
