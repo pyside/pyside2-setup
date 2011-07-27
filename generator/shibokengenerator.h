@@ -126,6 +126,18 @@ public:
                         const AbstractMetaArgument* lastArg = 0,
                         const AbstractMetaClass* context = 0);
 
+    /// Replaces the %CONVERTTOPYTHON type system variable.
+    void replaceConvertToPythonTypeSystemVariable(QString& code);
+
+    /// Replaces the %CONVERTTOCPP type system variable.
+    void replaceConvertToCppTypeSystemVariable(QString& code);
+
+    /// Replaces the %ISCONVERTIBLE type system variable.
+    void replaceConvertibleToCppTypeSystemVariable(QString& code);
+
+    /// Replaces the %CHECKTYPE type system variable.
+    void replaceTypeCheckTypeSystemVariable(QString& code);
+
     /**
      *   Verifies if any of the function's code injections of the "target"
      *   type needs the type system variable "%CPPSELF".

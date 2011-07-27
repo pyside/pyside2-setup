@@ -1182,10 +1182,6 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                                        const AbstractMetaArgument* lastArg,
                                        const AbstractMetaClass* context)
 {
-    static QRegExp toPythonRegex("%CONVERTTOPYTHON\\[([^\\[]*)\\]");
-    static QRegExp toCppRegex("%CONVERTTOCPP\\[([^\\[]*)\\]");
-    static QRegExp isConvertibleRegex("%ISCONVERTIBLE\\[([^\\[]*)\\]");
-    static QRegExp checkTypeRegex("%CHECKTYPE\\[([^\\[]*)\\]");
     static QRegExp pyArgsRegex("%PYARG_(\\d+)");
 
     // detect is we should use pyargs instead of args as variable name for python arguments
@@ -1215,18 +1211,6 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             code.replace("%TYPE", wrapperName(context));
             code.replace("%CPPTYPE", context->name());
         }
-
-        // replace "toPython" converters
-        code.replace(toPythonRegex, "Shiboken::Converter<\\1 >::toPython");
-
-        // replace "toCpp" converters
-        code.replace(toCppRegex, "Shiboken::Converter<\\1 >::toCpp");
-
-        // replace "isConvertible" check
-        code.replace(isConvertibleRegex, "Shiboken::Converter<\\1 >::isConvertible");
-
-        // replace "checkType" check
-        code.replace(checkTypeRegex, "Shiboken::Converter<\\1 >::checkType");
 
         if (func) {
             // replace %PYARG_# variables
@@ -1434,12 +1418,48 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             replaceTemplateVariables(code, func);
         }
 
+        // replace "toPython" converters
+        replaceConvertToPythonTypeSystemVariable(code);
+
+        // replace "toCpp" converters
+        replaceConvertToCppTypeSystemVariable(code);
+
+        // replace "isConvertible" check
+        replaceConvertibleToCppTypeSystemVariable(code);
+
+        // replace "checkType" check
+        replaceTypeCheckTypeSystemVariable(code);
+
         if (!code.isEmpty()) {
             s << INDENT << "// Begin code injection" << endl;
             s << code;
             s << INDENT << "// End of code injection" << endl;
         }
     }
+}
+
+void ShibokenGenerator::replaceConvertToPythonTypeSystemVariable(QString& code)
+{
+    static QRegExp toPythonRegex("%CONVERTTOPYTHON\\[([^\\[]*)\\]");
+    code.replace(toPythonRegex, "Shiboken::Converter<\\1 >::toPython");
+}
+
+void ShibokenGenerator::replaceConvertToCppTypeSystemVariable(QString& code)
+{
+    static QRegExp toCppRegex("%CONVERTTOCPP\\[([^\\[]*)\\]");
+    code.replace(toCppRegex, "Shiboken::Converter<\\1 >::toCpp");
+}
+
+void ShibokenGenerator::replaceConvertibleToCppTypeSystemVariable(QString& code)
+{
+    static QRegExp isConvertibleRegex("%ISCONVERTIBLE\\[([^\\[]*)\\]");
+    code.replace(isConvertibleRegex, "Shiboken::Converter<\\1 >::isConvertible");
+}
+
+void ShibokenGenerator::replaceTypeCheckTypeSystemVariable(QString& code)
+{
+    static QRegExp checkTypeRegex("%CHECKTYPE\\[([^\\[]*)\\]");
+    code.replace(checkTypeRegex, "Shiboken::Converter<\\1 >::checkType");
 }
 
 bool ShibokenGenerator::injectedCodeUsesCppSelf(const AbstractMetaFunction* func)
