@@ -112,6 +112,93 @@ QString AbstractMetaType::cppSignature() const
     return m_cachedCppSignature;
 }
 
+void AbstractMetaType::decideUsagePattern()
+{
+    const TypeEntry* type = typeEntry();
+
+    if (type->isPrimitive() && (!actualIndirections()
+        || (isConstant() && isReference() && !indirections()))) {
+        setTypeUsagePattern(AbstractMetaType::PrimitivePattern);
+
+    } else if (type->isVoid()) {
+        setTypeUsagePattern(AbstractMetaType::NativePointerPattern);
+
+    } else if (type->isVarargs()) {
+        setTypeUsagePattern(AbstractMetaType::VarargsPattern);
+
+    } else if (type->isString()
+               && indirections() == 0
+               && (isConstant() == isReference()
+                   || isConstant())) {
+        setTypeUsagePattern(AbstractMetaType::StringPattern);
+
+    } else if (type->isChar()
+               && !indirections()
+               && isConstant() == isReference()) {
+        setTypeUsagePattern(AbstractMetaType::CharPattern);
+
+    } else if (type->isJObjectWrapper()
+               && !indirections()
+               && isConstant() == isReference()) {
+        setTypeUsagePattern(AbstractMetaType::JObjectWrapperPattern);
+
+    } else if (type->isVariant()
+               && !indirections()
+               && isConstant() == isReference()) {
+        setTypeUsagePattern(AbstractMetaType::VariantPattern);
+
+    } else if (type->isEnum() && !actualIndirections()) {
+        setTypeUsagePattern(AbstractMetaType::EnumPattern);
+
+    } else if (type->isObject()
+               && indirections() == 0
+               && isReference()) {
+        if (((ComplexTypeEntry*) type)->isQObject())
+            setTypeUsagePattern(AbstractMetaType::QObjectPattern);
+        else
+            setTypeUsagePattern(AbstractMetaType::ObjectPattern);
+
+    } else if (type->isObject()
+               && indirections() == 1) {
+        if (((ComplexTypeEntry*) type)->isQObject())
+            setTypeUsagePattern(AbstractMetaType::QObjectPattern);
+        else
+            setTypeUsagePattern(AbstractMetaType::ObjectPattern);
+
+        // const-references to pointers can be passed as pointers
+        if (isReference() && isConstant()) {
+            setReference(false);
+            setConstant(false);
+        }
+
+    } else if (type->isContainer() && !indirections()) {
+        setTypeUsagePattern(AbstractMetaType::ContainerPattern);
+
+    } else if (type->isTemplateArgument()) {
+
+    } else if (type->isFlags()
+               && !indirections()
+               && (isConstant() == isReference())) {
+        setTypeUsagePattern(AbstractMetaType::FlagsPattern);
+
+    } else if (type->isArray()) {
+        setTypeUsagePattern(AbstractMetaType::ArrayPattern);
+
+    } else if (type->isThread()) {
+        Q_ASSERT(indirections() == 1);
+        setTypeUsagePattern(AbstractMetaType::ThreadPattern);
+    } else if (type->isValue()) {
+        if (indirections() == 1) {
+            setTypeUsagePattern(AbstractMetaType::ValuePointerPattern);
+        } else {
+            setTypeUsagePattern(AbstractMetaType::ValuePattern);
+        }
+    } else {
+        setTypeUsagePattern(AbstractMetaType::NativePointerPattern);
+        ReportHandler::debugFull(QString("native pointer pattern for '%1'")
+                                 .arg(cppSignature()));
+    }
+}
 
 /*******************************************************************************
  * AbstractMetaArgument
