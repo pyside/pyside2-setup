@@ -212,7 +212,7 @@ void CppGenerator::writeRegisterType(QTextStream& s, const AbstractMetaEnum* met
     if (metaEnum->enclosingClass()) {
         QString suffix = "::" + metaEnum->name();
         fullName = metaEnum->enclosingClass()->qualifiedCppName() + suffix;
-        shortName = reduceTypeName(metaEnum->enclosingClass()) + suffix;
+        shortName = reduceTypeName(metaEnum->enclosingClass()) + metaEnum->name();
     } else  {
         fullName = metaEnum->name();
     }
@@ -3310,92 +3310,23 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
     s << INDENT << "// end of enum " << cppEnum->name() << endl << endl;
 }
 
-static QString skipNamespace(const QString& typeName)
-{
-    QString namespaceName = typeName.split("::").first();
-    if (namespaceName.isEmpty())
-        return typeName;
-
-    NamespaceTypeEntry* entry = TypeDatabase::instance()->findNamespaceType(namespaceName);
-    if (entry && !entry->generateCode())
-        return QString(typeName).replace(namespaceName + "::", "");
-
-    return typeName;
-}
-
 void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaClass* metaClass)
 {
-    QHash<QString, QStringList> signatures;
-    QStringList knowTypes;
-
+    // Try to check something and print some warnings
     foreach (const AbstractMetaFunction* cppSignal, metaClass->cppSignalFunctions()) {
-        QString signature;
-        if (cppSignal->declaringClass() == metaClass) {
-            if (cppSignal->arguments().count()) {
-                for (int i = 0; i < cppSignal->arguments().count(); ++i) {
-                    AbstractMetaArgument* arg = cppSignal->arguments().at(i);
-                    AbstractMetaType* type = arg->type();
-
-                    QString cppSignature = SBK_NORMALIZED_TYPE(qPrintable(type->cppSignature()));
-                    QString originalSignature = SBK_NORMALIZED_TYPE(qPrintable(type->originalTypeDescription()));
-
-                    if (!arg->defaultValueExpression().isEmpty()) {
-                        QString sig = SBK_NORMALIZED_SIGNATURE(signature.toAscii());
-                        if (sig.isEmpty())
-                            sig = "void";
-                        signatures[cppSignal->name()].append(sig);
-                    }
-
-                    QString replacedTypeName = cppSignal->typeReplaced(i+1);
-                    QString signalTypeName;
-
-                    if (replacedTypeName.isEmpty())
-                        signalTypeName = skipNamespace(type->originalTypeDescription());
-                    else
-                        signalTypeName = replacedTypeName;
-
-                    if ((!replacedTypeName.isEmpty() ||  //replace type on typessystem
-                        (cppSignature != originalSignature)) && //used a typedef value
-                        !knowTypes.contains(signalTypeName)) {
-
-                        knowTypes << signalTypeName;
-                        QString originalType = translateType(type, metaClass, ExcludeReference | ExcludeConst);
-                        bool isObjectType = originalType.endsWith('*');
-                        if (isObjectType)
-                            originalType = originalType.remove(originalType.size()-1, 1);
-
-                        s << INDENT << "Shiboken::TypeResolver::" << (isObjectType ? "createObjectTypeResolver< " : "createValueTypeResolver< ")
-                          << originalType << " >"
-                          << "(\"" << skipNamespace(signalTypeName) << "\");" << endl;
-                    }
-                    if (i>0)
-                        signature += ", ";
-                    signature += SBK_NORMALIZED_TYPE(signalTypeName.toAscii());
-                }
-            } else {
-                signature = "void";
-            }
-
-            signatures[cppSignal->name()].append(SBK_NORMALIZED_SIGNATURE(signature.toAscii()));
+        if (cppSignal->declaringClass() != metaClass)
+            continue;
+        foreach (AbstractMetaArgument* arg, cppSignal->arguments()) {
+            AbstractMetaType* metaType = arg->type();
+            QByteArray origType = SBK_NORMALIZED_TYPE(qPrintable(metaType->originalTypeDescription()));
+            QByteArray cppSig = SBK_NORMALIZED_TYPE(qPrintable(metaType->cppSignature()));
+            if (origType != cppSig)
+                ReportHandler::warning("Typedef used on signal " + metaClass->qualifiedCppName() + "::" + cppSignal->signature());
         }
     }
 
-    if (signatures.size() == 0)
-        return;
-
-    s << INDENT << "// Initialize signals" << endl;
-    s << INDENT << "PySideSignal* signal_item;" << endl << endl;
-
-    foreach(QString funcName, signatures.keys()) {
-        s << INDENT << "signal_item = PySide::Signal::newObject(\"" << funcName <<"\"";
-        foreach(QString signature, signatures[funcName])
-            s << ", \"" << signature << "\"";
-        s << ", NULL);" << endl;
-        s << INDENT << "PySide::Signal::addSignalToWrapper(&" + cpythonTypeName(metaClass) + ", \"";
-        s << funcName << "\", signal_item);" << endl;
-        s << INDENT << "Py_DECREF((PyObject*) signal_item);" << endl;
-    }
-    s << endl;
+    s << INDENT << "PySide::Signal::registerSignals(&" << cpythonTypeName(metaClass) << ", &::"
+                << metaClass->qualifiedCppName() << "::staticMetaObject);" << endl;
 }
 
 void CppGenerator::writeFlagsMethods(QTextStream& s, const AbstractMetaEnum* cppEnum)
