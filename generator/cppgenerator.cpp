@@ -862,28 +862,24 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 CodeSnipList convRule = getReturnConversionRule(TypeSystem::NativeCode, func, "", CPP_RETURN_VAR);
                 writeCodeSnips(s, convRule, CodeSnip::Any, TypeSystem::NativeCode, func);
             } else if (!injectedCodeHasReturnValueAttribution(func, TypeSystem::NativeCode)) {
-                s << INDENT;
-                QString protectedEnumName;
-                if (avoidProtectedHack()) {
+                QString conversion;
+                QTextStream c(&conversion);
+                writeToCppConversion(c, func->type(), func->implementingClass(), PYTHON_RETURN_VAR);
+                QString typeName;
+                if (avoidProtectedHack() && func->type()->isEnum()) {
                     const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(func->type());
                     bool isProtectedEnum = metaEnum && metaEnum->isProtected();
                     if (isProtectedEnum) {
-                        protectedEnumName = metaEnum->name();
                         if (metaEnum->enclosingClass())
-                            protectedEnumName = metaEnum->enclosingClass()->qualifiedCppName() + "::" + protectedEnumName;
-                        s << protectedEnumName;
+                            typeName = QString("%1::").arg(metaEnum->enclosingClass()->qualifiedCppName());
+                        typeName += metaEnum->name();
+                        conversion.prepend(typeName+'(');
+                        conversion.append(')');
                     }
                 }
-                if (protectedEnumName.isEmpty())
-                    s << translateTypeForWrapperMethod(func->type(), func->implementingClass());
-                s << " " CPP_RETURN_VAR "(";
-                if (avoidProtectedHack() && !protectedEnumName.isEmpty())
-                    s << protectedEnumName << '(';
-                writeToCppConversion(s, func->type(), func->implementingClass(), PYTHON_RETURN_VAR);
-                if (avoidProtectedHack() && !protectedEnumName.isEmpty())
-                    s << ')';
-                s << ')';
-                s << ';' << endl;
+                if (typeName.isEmpty())
+                    typeName = translateTypeForWrapperMethod(func->type(), func->implementingClass());
+                s << INDENT << typeName << " " CPP_RETURN_VAR " = " << conversion << ';' << endl;
             }
         }
     }
