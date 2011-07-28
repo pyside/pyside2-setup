@@ -1174,45 +1174,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
 
     if (rfunc->implementingClass() &&
         (!rfunc->implementingClass()->isNamespace() && overloadData.hasInstanceFunction())) {
-
-        s << INDENT;
-        QString protectedClassWrapperName;
-        if (avoidProtectedHack() && rfunc->ownerClass()->hasProtectedMembers()) {
-            protectedClassWrapperName = wrapperName(rfunc->ownerClass());
-            s << protectedClassWrapperName;
-        } else {
-            s << "::" << rfunc->ownerClass()->qualifiedCppName();
-        }
-        s << "* " CPP_SELF_VAR " = 0;" << endl;
-
-        if (rfunc->isOperatorOverload() && rfunc->isBinaryOperator()) {
-            QString checkFunc = cpythonCheckFunction(rfunc->ownerClass()->typeEntry());
-            s << INDENT << "bool isReverse = " << checkFunc << "(arg) && !" << checkFunc << "(self);\n"
-              << INDENT << "if (isReverse)\n";
-            Indentation indent(INDENT);
-            s << INDENT << "std::swap(self, arg);\n\n";
-        }
-
-        // Sets the C++ "self" (the "this" for the object) if it has one.
-        QString cppSelfAttribution = CPP_SELF_VAR " = ";
-        if (avoidProtectedHack() && !protectedClassWrapperName.isEmpty())
-            cppSelfAttribution += QString("(%1*)").arg(protectedClassWrapperName);
-        cppSelfAttribution += cpythonWrapperCPtr(rfunc->ownerClass(), "self");
-
-        // Checks if the underlying C++ object is valid.
-        if (overloadData.hasStaticFunction()) {
-            s << INDENT << "if (self) {" << endl;
-            {
-                Indentation indent(INDENT);
-                writeInvalidCppObjectCheck(s, "self");
-                s << INDENT << cppSelfAttribution << ';' << endl;
-            }
-            s << INDENT << '}' << endl;
-        } else {
-            writeInvalidCppObjectCheck(s, "self");
-            s << INDENT << cppSelfAttribution << ';' << endl;
-        }
-        s << endl;
+        writeCppSelfDefinition(s, rfunc, overloadData.hasStaticFunction());
     }
 
     bool hasReturnValue = overloadData.hasNonVoidReturnType();
@@ -1422,22 +1384,57 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
     s << endl;
 }
 
-void CppGenerator::writeCppSelfDefinition(QTextStream& s, const AbstractMetaFunction* func)
+void CppGenerator::writeCppSelfDefinition(QTextStream& s, const AbstractMetaClass* metaClass, bool hasStaticOverload)
 {
-    if (!func->ownerClass() || func->isStatic() || func->isConstructor())
+    QString className;
+    if (avoidProtectedHack() && metaClass->hasProtectedMembers())
+        className = wrapperName(metaClass);
+    else
+        className = QString("::%1").arg(metaClass->qualifiedCppName());
+    s << INDENT << className << "* " CPP_SELF_VAR " = 0;" << endl;
+
+    QString cppSelfAttribution = CPP_SELF_VAR" = ";
+    if (avoidProtectedHack() && metaClass->hasProtectedMembers())
+        cppSelfAttribution += QString("(%1*)").arg(className);
+    cppSelfAttribution += cpythonWrapperCPtr(metaClass, "self");
+
+    // Checks if the underlying C++ object is valid.
+    if (hasStaticOverload) {
+        s << INDENT << "if (self) {" << endl;
+        {
+            Indentation indent(INDENT);
+            writeInvalidCppObjectCheck(s, "self");
+            s << INDENT << cppSelfAttribution << ';' << endl;
+        }
+        s << INDENT << '}' << endl;
+    } else {
+        writeInvalidCppObjectCheck(s, "self");
+        s << INDENT << cppSelfAttribution << ';' << endl;
+    }
+}
+
+void CppGenerator::writeCppSelfDefinition(QTextStream& s, const AbstractMetaFunction* func, bool hasStaticOverload)
+{
+    if (!func->ownerClass() || func->isConstructor())
         return;
 
-    s << INDENT;
-    if (avoidProtectedHack()) {
-        QString _wrapperName = wrapperName(func->ownerClass());
-        bool hasProtectedMembers = func->ownerClass()->hasProtectedMembers();
-        s << "::" << (hasProtectedMembers ? _wrapperName : func->ownerClass()->qualifiedCppName());
-        s << "* " CPP_SELF_VAR " = ";
-        s << (hasProtectedMembers ? QString("(%1*)").arg(_wrapperName) : "");
-    } else {
-        s << func->ownerClass()->qualifiedCppName() << "* " CPP_SELF_VAR " = ";
+    if (func->isOperatorOverload() && func->isBinaryOperator()) {
+        QString checkFunc = cpythonCheckFunction(func->ownerClass()->typeEntry());
+        s << INDENT << "bool isReverse = " << checkFunc << "(arg)" << endl;
+        {
+            Indentation indent1(INDENT);
+            Indentation indent2(INDENT);
+            Indentation indent3(INDENT);
+            Indentation indent4(INDENT);
+            s << INDENT << "&& !" << checkFunc << "(self);" << endl;
+        }
+        s << INDENT << "if (isReverse)" << endl;
+        Indentation indent(INDENT);
+        s << INDENT << "std::swap(self, arg);" << endl;
     }
-    s << cpythonWrapperCPtr(func->ownerClass(), "self") << ';' << endl;
+
+    writeCppSelfDefinition(s, func->ownerClass(), hasStaticOverload);
+
     if (func->isUserAdded())
         s << INDENT << "(void)" CPP_SELF_VAR "; // avoid warnings about unused variables" << endl;
 }

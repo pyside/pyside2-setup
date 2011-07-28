@@ -52,7 +52,8 @@ private:
     void writeDestructorWrapper(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeMethodWrapper(QTextStream &s, const AbstractMetaFunctionList overloads);
     void writeArgumentsInitializer(QTextStream& s, OverloadData& overloadData);
-    void writeCppSelfDefinition(QTextStream& s, const AbstractMetaFunction* func);
+    void writeCppSelfDefinition(QTextStream& s, const AbstractMetaFunction* func, bool hasStaticOverload = false);
+    void writeCppSelfDefinition(QTextStream& s, const AbstractMetaClass* metaClass, bool hasStaticOverload = false);
 
     void writeErrorSection(QTextStream& s, OverloadData& overloadData);
     /**
