@@ -75,6 +75,8 @@
     <function signature="acceptLong(long)" />
     <function signature="acceptULong(unsigned long)" />
     <function signature="acceptDouble(double)" />
+    <function signature="acceptIntReference(int&amp;)" />
+    <function signature="acceptOddBoolReference(OddBool&amp;)" />
     <function signature="countCharacters(const char*)" />
     <function signature="gimmeInt()" />
     <function signature="gimmeDouble()" />

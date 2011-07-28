@@ -535,10 +535,16 @@ void ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaTy
             ptype = ptype->basicAliasedTypeEntry();
         typeName = ptype->name();
     } else {
-        if (!isCString(type)) // not "const char*"
+        if (!isCString(type)) {
             options |= Generator::ExcludeConst;
-        if (type->isContainer() || type->isFlags() || type->isEnum() || (type->isConstant() && type->isReference()))
-            options |= Generator::ExcludeReference;
+            if (type->typeEntry()->isPrimitive()
+                || type->isContainer()
+                || type->isFlags()
+                || type->isEnum()
+                || (type->isConstant() && type->isReference())) {
+                options |= Generator::ExcludeReference;
+            }
+        }
         typeName = translateTypeForWrapperMethod(type, context, options).trimmed();
     }
 

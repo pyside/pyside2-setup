@@ -167,3 +167,14 @@ acceptDouble(double x)
     return x;
 }
 
+int
+acceptIntReference(int& x)
+{
+    return x;
+}
+
+OddBool
+acceptOddBoolReference(OddBool& x)
+{
+    return x;
+}

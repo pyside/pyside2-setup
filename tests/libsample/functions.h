@@ -26,6 +26,7 @@
 #include "libsamplemacros.h"
 #include <list>
 #include <utility>
+#include "oddbool.h"
 #include "complex.h"
 #include "objecttype.h"
 
@@ -69,5 +70,7 @@ LIBSAMPLE_API long acceptLong(long x);
 LIBSAMPLE_API unsigned long acceptULong(unsigned long x);
 LIBSAMPLE_API double acceptDouble(double x);
 
-#endif // FUNCTIONS_H
+LIBSAMPLE_API int acceptIntReference(int& x);
+LIBSAMPLE_API OddBool acceptOddBoolReference(OddBool& x);
 
+#endif // FUNCTIONS_H
