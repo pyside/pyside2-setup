@@ -1007,6 +1007,9 @@ void QtDocGenerator::generateClass(QTextStream& s, const AbstractMetaClass* meta
 void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* cppClass)
 {
     QStringList functionList;
+    QStringList virtualList;
+    QStringList signalList;
+    QStringList slotList;
     QStringList staticFunctionList;
 
     foreach (AbstractMetaFunction* func, cppClass->functions()) {
@@ -1020,7 +1023,6 @@ void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* 
             className =  getClassTargetFullName(func->implementingClass()->enclosingClass()) + '.';
         QString funcName = getFuncName(func);
 
-        QStringList& list = func->isStatic() ? staticFunctionList : functionList;
         QString str("def :meth:`");
 
         str += funcName;
@@ -1032,7 +1034,16 @@ void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* 
         str += parseArgDocStyle(cppClass, func);
         str += ')';
 
-        list << str;
+        if (func->isStatic())
+            staticFunctionList << str;
+        else if (func->isVirtual())
+            virtualList << str;
+        else if (func->isSignal())
+            signalList << str;
+        else if (func->isSlot())
+            slotList << str;
+        else
+            functionList << str;
     }
 
     if ((functionList.size() > 0) || (staticFunctionList.size() > 0)) {
@@ -1042,36 +1053,28 @@ void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* 
         s << "Synopsis" << endl
           << "--------" << endl << endl;
 
-        if (functionList.size() > 0) {
-            s << "Functions" << endl
-              << "^^^^^^^^^" << endl << endl;
+        writeFunctionBlock(s, "Functions", functionList);
+        writeFunctionBlock(s, "Virtual functions", virtualList);
+        writeFunctionBlock(s, "Slots", slotList);
+        writeFunctionBlock(s, "Signals", signalList);
+        writeFunctionBlock(s, "Static functions", staticFunctionList);
+    }
+}
 
-            qSort(functionList);
-            foreach (QString func, functionList) {
-                row << func;
-                functionTable << row;
-                row.clear();
-            }
+void QtDocGenerator::writeFunctionBlock(QTextStream& s, const QString& title, QStringList& functions)
+{
+    if (functions.size() > 0) {
+        s << title << endl
+          << QString('^').repeated(title.size()) << endl;
 
-            functionTable.normalize();
-            s << functionTable << endl;
-            functionTable.clear();
-        }
+        qSort(functions);
 
-        if (staticFunctionList.size() > 0) {
-            s << "Static functions" << endl
-              << "^^^^^^^^^^^^^^^^" << endl;
+        s << ".. container:: function_list" << endl << endl;
+        Indentation indentation(INDENT);
+        foreach (QString func, functions)
+            s << '*' << INDENT << func << endl;
 
-            qSort(staticFunctionList);
-            foreach (QString func, staticFunctionList) {
-                row << func;
-                functionTable << row;
-                row.clear();
-            }
-
-            functionTable.normalize();
-            s << functionTable << endl;
-        }
+        s << endl << endl;
     }
 }
 
