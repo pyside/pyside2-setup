@@ -94,6 +94,13 @@ private:
         writeArgumentConversion(s, arg->type(), argName, pyArgName, context, defaultValue);
     }
 
+    void writePythonToCppTypeConversion(QTextStream& s,
+                                        const AbstractMetaType* type,
+                                        const QString& pyIn,
+                                        const QString& cppOut,
+                                        const AbstractMetaClass* context = 0,
+                                        const QString& defaultValue = QString());
+
     /**
      *   Set the Python method wrapper return value variable to Py_None if
      *   there are return types different from void in any of the other overloads

@@ -862,24 +862,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 CodeSnipList convRule = getReturnConversionRule(TypeSystem::NativeCode, func, "", CPP_RETURN_VAR);
                 writeCodeSnips(s, convRule, CodeSnip::Any, TypeSystem::NativeCode, func);
             } else if (!injectedCodeHasReturnValueAttribution(func, TypeSystem::NativeCode)) {
-                QString conversion;
-                QTextStream c(&conversion);
-                writeToCppConversion(c, func->type(), func->implementingClass(), PYTHON_RETURN_VAR);
-                QString typeName;
-                if (avoidProtectedHack() && func->type()->isEnum()) {
-                    const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(func->type());
-                    bool isProtectedEnum = metaEnum && metaEnum->isProtected();
-                    if (isProtectedEnum) {
-                        if (metaEnum->enclosingClass())
-                            typeName = QString("%1::").arg(metaEnum->enclosingClass()->qualifiedCppName());
-                        typeName += metaEnum->name();
-                        conversion.prepend(typeName+'(');
-                        conversion.append(')');
-                    }
-                }
-                if (typeName.isEmpty())
-                    typeName = translateTypeForWrapperMethod(func->type(), func->implementingClass());
-                s << INDENT << typeName << " " CPP_RETURN_VAR " = " << conversion << ';' << endl;
+                writePythonToCppTypeConversion(s, func->type(), PYTHON_RETURN_VAR, CPP_RETURN_VAR, func->implementingClass());
             }
         }
     }
@@ -915,8 +898,22 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::NativeCode, func, lastArg);
     }
 
-    if (type)
-        s << INDENT << "return " CPP_RETURN_VAR ";" << endl;
+    if (type) {
+        s << INDENT << "return ";
+        // TODO-IMPROVEMENTS: try to put this on writePythonToCppTypeConversion.
+        if (avoidProtectedHack() && type->isEnum()) {
+            const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(type);
+            bool isProtectedEnum = metaEnum && metaEnum->isProtected();
+            if (isProtectedEnum) {
+                QString typeCast = "(";
+                if (metaEnum->enclosingClass())
+                    typeCast += QString("::%1").arg(metaEnum->enclosingClass()->qualifiedCppName());
+                typeCast += QString("::%1)").arg(metaEnum->name());
+                s << typeCast;
+            }
+        }
+        s << CPP_RETURN_VAR ";" << endl;
+    }
 
     s << '}' << endl << endl;
 }
@@ -1571,37 +1568,46 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
                                            const AbstractMetaClass* context,
                                            const QString& defaultValue)
 {
-    const TypeEntry* type = argType->typeEntry();
+    if (argType->typeEntry()->isCustom() || argType->typeEntry()->isVarargs())
+        return;
+    if (isWrapperType(argType))
+        writeInvalidPyObjectCheck(s, pyArgName);
+    writePythonToCppTypeConversion(s, argType, pyArgName, argName, context, defaultValue);
+}
 
-    if (type->isCustom() || type->isVarargs())
+void CppGenerator::writePythonToCppTypeConversion(QTextStream& s,
+                                                  const AbstractMetaType* type,
+                                                  const QString& pyIn,
+                                                  const QString& cppOut,
+                                                  const AbstractMetaClass* context,
+                                                  const QString& defaultValue)
+{
+    if (type->typeEntry()->isCustom() || type->typeEntry()->isVarargs())
         return;
 
+    QString conversion;
+    QTextStream c(&conversion);
+    writeToCppConversion(c, type, context, pyIn);
+
     QString typeName;
-    QString baseTypeName = type->name();
-
-    // exclude const on Objects
-    Options flags = getConverterOptions(argType);
-    typeName = translateTypeForWrapperMethod(argType, context, flags).trimmed();
-
-    if (isWrapperType(type))
-        writeInvalidPyObjectCheck(s, pyArgName);
+    QString cppOutAux = QString("%1_tmp").arg(cppOut);
 
     // Value type that has default value.
-    if (argType->isValue() && !defaultValue.isEmpty())
-        s << INDENT << baseTypeName << ' ' << argName << "_tmp = " << defaultValue << ';' << endl;
+    if (type->isValue() && !defaultValue.isEmpty())
+        s << INDENT << type->typeEntry()->name() << ' ' << cppOutAux << " = " << defaultValue << ';' << endl;
 
-    s << INDENT << typeName << ' ' << argName << " = ";
-    if (!defaultValue.isEmpty())
-        s << pyArgName << " ? ";
-    s << "Shiboken::Converter< " << typeName << " >::toCpp(" << pyArgName << ')';
-    if (!defaultValue.isEmpty()) {
-        s << " : ";
-        if (argType->isValue())
-            s << argName << "_tmp";
-        else
-            s << defaultValue;
+    if (typeName.isEmpty()) {
+        // exclude const on Objects
+        Options flags = getConverterOptions(type);
+        typeName = translateTypeForWrapperMethod(type, context, flags).trimmed();
     }
-    s << ';' << endl;
+
+    if (!defaultValue.isEmpty()) {
+        conversion.prepend(QString("%1 ? ").arg(pyIn));
+        conversion.append(QString(" : %1").arg(type->isValue() ? cppOutAux : defaultValue));
+    }
+
+    s << INDENT << typeName << " " << cppOut << " = " << conversion << ';' << endl;
 }
 
 void CppGenerator::writeNoneReturn(QTextStream& s, const AbstractMetaFunction* func, bool thereIsReturnValue)
