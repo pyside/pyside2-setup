@@ -343,7 +343,7 @@ public:
     /// Returns true if the generated code should use the "#define protected public" hack.
     bool avoidProtectedHack() const;
     QString cppApiVariableName(const QString& moduleName = QString()) const;
-    QString getTypeIndexVariableName(const TypeEntry* metaType);
+    QString getTypeIndexVariableName(const TypeEntry* type);
     /// Returns true if the user don't want verbose error messages on the generated bindings.
     bool verboseErrorMessagesDisabled() const;
 

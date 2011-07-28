@@ -1792,10 +1792,10 @@ QString ShibokenGenerator::cppApiVariableName(const QString& moduleName) const
     return result;
 }
 
-QString ShibokenGenerator::getTypeIndexVariableName(const TypeEntry* metaType)
+QString ShibokenGenerator::getTypeIndexVariableName(const TypeEntry* type)
 {
     QString res("SBK_");
-    res += metaType->qualifiedCppName();
+    res += type->qualifiedCppName();
     res.replace("::", "_");
     res.replace("<", "_");
     res.replace(">", "_");
@@ -1851,5 +1851,3 @@ QString  ShibokenGenerator::getDefaultValue(const AbstractMetaFunction* func, co
     }
     return QString();
 }
-
-
