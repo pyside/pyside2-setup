@@ -56,13 +56,12 @@ private:
     void writeCppSelfDefinition(QTextStream& s, const AbstractMetaClass* metaClass, bool hasStaticOverload = false);
 
     void writeErrorSection(QTextStream& s, OverloadData& overloadData);
-    /**
-     *   Writes the check section for the validity of wrapped C++ objects.
-     *   \param s text stream to write
-     *   \param argName Python argument name
-     *   \param type the TypeEntry passed when the validity check must confirm the type of the Python wrapper to be checked
-     */
-    void writeInvalidCppObjectCheck(QTextStream& s, const QString& pyArgName);
+
+    /// Writes the check section for the validity of wrapped C++ objects.
+    void writeInvalidPyObjectCheck(QTextStream& s, const QString& pyObj);
+    void writeInvalidPyObjectCheck(QTextStream& s, const QString& pyObj, int errorCode);
+    void writeInvalidPyObjectCheck(QTextStream& s, const QString& pyObj, QString returnValue);
+
     void writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, bool isNumber = false, QString customType = "");
     void writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName);
 

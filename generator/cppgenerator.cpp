@@ -457,11 +457,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     if (hasBoolCast(metaClass)) {
         s << "static int " << cpythonBaseName(metaClass) << "___nb_bool(PyObject* pyObj)\n{\n";
-        s << INDENT << "if (!Shiboken::Object::isValid(pyObj))" << endl;
-        {
-            Indentation indent(INDENT);
-            s << INDENT << "return -1;" << endl;
-        }
+        writeInvalidPyObjectCheck(s, "pyObj", -1);
         s << INDENT << "const ::" << metaClass->qualifiedCppName() << "* cppSelf = ";
         s << "Shiboken::Converter< ::" << metaClass->qualifiedCppName() << "*>::toCpp(pyObj);" << endl;
         s << INDENT << "int result;" << endl;
@@ -1403,12 +1399,12 @@ void CppGenerator::writeCppSelfDefinition(QTextStream& s, const AbstractMetaClas
         s << INDENT << "if (self) {" << endl;
         {
             Indentation indent(INDENT);
-            writeInvalidCppObjectCheck(s, "self");
+            writeInvalidPyObjectCheck(s, "self");
             s << INDENT << cppSelfAttribution << ';' << endl;
         }
         s << INDENT << '}' << endl;
     } else {
-        writeInvalidCppObjectCheck(s, "self");
+        writeInvalidPyObjectCheck(s, "self");
         s << INDENT << cppSelfAttribution << ';' << endl;
     }
 }
@@ -1523,11 +1519,19 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
     s << INDENT << "return " << m_currentErrorCode << ';' << endl;
 }
 
-void CppGenerator::writeInvalidCppObjectCheck(QTextStream& s, const QString& pyArgName)
+void CppGenerator::writeInvalidPyObjectCheck(QTextStream& s, const QString& pyObj)
 {
-    s << INDENT << "if (!Shiboken::Object::isValid(" << pyArgName << "))" << endl;
+    writeInvalidPyObjectCheck(s, pyObj, m_currentErrorCode);
+}
+void CppGenerator::writeInvalidPyObjectCheck(QTextStream& s, const QString& pyObj, int errorCode)
+{
+    writeInvalidPyObjectCheck(s, pyObj, QString::number(errorCode));
+}
+void CppGenerator::writeInvalidPyObjectCheck(QTextStream& s, const QString& pyObj, QString returnValue)
+{
+    s << INDENT << "if (!Shiboken::Object::isValid(" << pyObj << "))" << endl;
     Indentation indent(INDENT);
-    s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+    s << INDENT << "return " << returnValue << ';' << endl;
 }
 
 void CppGenerator::writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, bool isNumber, QString customType)
@@ -1584,7 +1588,7 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
     typeName = translateTypeForWrapperMethod(argType, context, flags).trimmed();
 
     if (isWrapperType(type))
-        writeInvalidCppObjectCheck(s, pyArgName);
+        writeInvalidPyObjectCheck(s, pyArgName);
 
     // Value type that has default value.
     if (argType->isValue() && !defaultValue.isEmpty())
@@ -2659,7 +2663,7 @@ void CppGenerator::writeMappingMethods(QTextStream& s, const AbstractMetaClass* 
 
         CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
         s << funcRetVal << ' ' << funcName << '(' << funcArgs << ')' << endl << '{' << endl;
-        writeInvalidCppObjectCheck(s, "self");
+        writeInvalidPyObjectCheck(s, "self");
 
         writeCppSelfDefinition(s, func);
 
@@ -2687,7 +2691,7 @@ void CppGenerator::writeSequenceMethods(QTextStream& s, const AbstractMetaClass*
 
         CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
         s << funcRetVal << ' ' << funcName << '(' << funcArgs << ')' << endl << '{' << endl;
-        writeInvalidCppObjectCheck(s, "self");
+        writeInvalidPyObjectCheck(s, "self");
 
         writeCppSelfDefinition(s, func);
 
@@ -2860,11 +2864,9 @@ void CppGenerator::writeGetterFunction(QTextStream& s, const AbstractMetaField* 
 {
     s << "static PyObject* " << cpythonGetterFunctionName(metaField) << "(PyObject* self, void*)" << endl;
     s << '{' << endl;
-    s << INDENT << "if (!Shiboken::Object::isValid(self))\n";
-    {
-        Indentation indent(INDENT);
-        s << INDENT << "return 0;\n";
-    }
+
+    writeInvalidPyObjectCheck(s, "self", 0);
+
     s << INDENT << "PyObject* val = ";
 
     QString cppField;
@@ -2905,11 +2907,8 @@ void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* 
 {
     s << "static int " << cpythonSetterFunctionName(metaField) << "(PyObject* self, PyObject* value, void*)" << endl;
     s << '{' << endl;
-    s << INDENT << "if (!Shiboken::Object::isValid(self))\n";
-    {
-        Indentation indent(INDENT);
-        s << INDENT << "return 0;\n";
-    }
+
+    writeInvalidPyObjectCheck(s, "self", 0);
 
     s << INDENT << "if (value == 0) {" << endl;
     {
@@ -4150,16 +4149,20 @@ void CppGenerator::writeStdListWrapperMethods(QTextStream& s, const AbstractMeta
 {
     //len
     s << "Py_ssize_t " << cpythonBaseName(metaClass->typeEntry()) << "__len__" << "(PyObject* self)" << endl << '{' << endl;
-    s << INDENT << "if (!Shiboken::Object::isValid(self))" << endl;
-    s << INDENT << INDENT << "return 0;" << endl << endl;
-    s << INDENT << metaClass->qualifiedCppName() << " &cppSelf = Shiboken::Converter< ::" << metaClass->qualifiedCppName() <<"& >::toCpp(self);" << endl;
+
+    writeInvalidPyObjectCheck(s, "self", 0);
+    s << endl;
+
+    s << INDENT << metaClass->qualifiedCppName() << "& cppSelf = Shiboken::Converter< ::" << metaClass->qualifiedCppName() <<"& >::toCpp(self);" << endl;
     s << INDENT << "return cppSelf.size();" << endl;
     s << "}" << endl;
 
     //getitem
     s << "PyObject* " << cpythonBaseName(metaClass->typeEntry()) << "__getitem__" << "(PyObject* self, Py_ssize_t _i)" << endl << '{' << endl;
-    s << INDENT << "if (!Shiboken::Object::isValid(self))" << endl;
-    s << INDENT << INDENT << "return 0;" << endl << endl;
+
+    writeInvalidPyObjectCheck(s, "self", 0);
+    s << endl;
+
     s << INDENT << metaClass->qualifiedCppName() << " &cppSelf = Shiboken::Converter< ::" << metaClass->qualifiedCppName() <<"& >::toCpp(self);" << endl;
     s << INDENT << "if (_i < 0 || _i >= (Py_ssize_t) cppSelf.size()) {" << endl;
     s << INDENT << INDENT <<  "PyErr_SetString(PyExc_IndexError, \"index out of bounds\");" << endl;
@@ -4171,8 +4174,9 @@ void CppGenerator::writeStdListWrapperMethods(QTextStream& s, const AbstractMeta
 
     //setitem
     s << "int " << cpythonBaseName(metaClass->typeEntry()) << "__setitem__" << "(PyObject* self, Py_ssize_t _i, PyObject* _value)" << endl << '{' << endl;
-    s << INDENT << "if (!Shiboken::Object::isValid(self))" << endl;
-    s << INDENT << INDENT << "return -1;" << endl;
+
+    writeInvalidPyObjectCheck(s, "self", -1);
+    s << endl;
     s << INDENT << metaClass->qualifiedCppName() << " &cppSelf = Shiboken::Converter< ::" << metaClass->qualifiedCppName() <<"& >::toCpp(self);" << endl;
     s << INDENT << "if (_i < 0 || _i >= (Py_ssize_t) cppSelf.size()) {" << endl;
     s << INDENT << INDENT << "PyErr_SetString(PyExc_IndexError, \"list assignment index out of range\");" << endl;
@@ -4224,4 +4228,3 @@ QString CppGenerator::writeReprFunction(QTextStream& s, const AbstractMetaClass*
     s << "} // extern C" << endl << endl;;
     return funcName;
 }
-
