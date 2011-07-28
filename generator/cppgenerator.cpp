@@ -1204,12 +1204,12 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
             s << INDENT << "if (self) {" << endl;
             {
                 Indentation indent(INDENT);
-                writeInvalidCppObjectCheck(s);
+                writeInvalidCppObjectCheck(s, "self");
                 s << INDENT << cppSelfAttribution << ';' << endl;
             }
             s << INDENT << '}' << endl;
         } else {
-            writeInvalidCppObjectCheck(s);
+            writeInvalidCppObjectCheck(s, "self");
             s << INDENT << cppSelfAttribution << ';' << endl;
         }
         s << endl;
@@ -1526,7 +1526,7 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
     s << INDENT << "return " << m_currentErrorCode << ';' << endl;
 }
 
-void CppGenerator::writeInvalidCppObjectCheck(QTextStream& s, QString pyArgName, const TypeEntry* type)
+void CppGenerator::writeInvalidCppObjectCheck(QTextStream& s, const QString& pyArgName)
 {
     s << INDENT << "if (!Shiboken::Object::isValid(" << pyArgName << "))" << endl;
     Indentation indent(INDENT);
@@ -1586,8 +1586,8 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
     Options flags = getConverterOptions(argType);
     typeName = translateTypeForWrapperMethod(argType, context, flags).trimmed();
 
-    if (ShibokenGenerator::isWrapperType(type))
-        writeInvalidCppObjectCheck(s, pyArgName, 0);
+    if (isWrapperType(type))
+        writeInvalidCppObjectCheck(s, pyArgName);
 
     // Value type that has default value.
     if (argType->isValue() && !defaultValue.isEmpty())
@@ -2662,7 +2662,7 @@ void CppGenerator::writeMappingMethods(QTextStream& s, const AbstractMetaClass* 
 
         CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
         s << funcRetVal << ' ' << funcName << '(' << funcArgs << ')' << endl << '{' << endl;
-        writeInvalidCppObjectCheck(s);
+        writeInvalidCppObjectCheck(s, "self");
 
         writeCppSelfDefinition(s, func);
 
@@ -2690,7 +2690,7 @@ void CppGenerator::writeSequenceMethods(QTextStream& s, const AbstractMetaClass*
 
         CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
         s << funcRetVal << ' ' << funcName << '(' << funcArgs << ')' << endl << '{' << endl;
-        writeInvalidCppObjectCheck(s);
+        writeInvalidCppObjectCheck(s, "self");
 
         writeCppSelfDefinition(s, func);
 

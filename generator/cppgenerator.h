@@ -63,7 +63,7 @@ private:
      *   \param argName Python argument name
      *   \param type the TypeEntry passed when the validity check must confirm the type of the Python wrapper to be checked
      */
-    void writeInvalidCppObjectCheck(QTextStream& s, QString pyArgName = "self", const TypeEntry* type = 0);
+    void writeInvalidCppObjectCheck(QTextStream& s, const QString& pyArgName);
     void writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, bool isNumber = false, QString customType = "");
     void writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName);
 
