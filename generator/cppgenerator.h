@@ -160,6 +160,7 @@ private:
     void writeRichCompareFunction(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeToPythonFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
+    void writeEnumsInitialization(QTextStream& s, AbstractMetaEnumList& enums);
     void writeEnumInitialization(QTextStream& s, const AbstractMetaEnum* metaEnum);
 
     void writeSignalInitialization(QTextStream& s, const AbstractMetaClass* metaClass);

@@ -3129,6 +3129,19 @@ void CppGenerator::writeMethodDefinition(QTextStream& s, const AbstractMetaFunct
     s << ',' << endl;
 }
 
+void CppGenerator::writeEnumsInitialization(QTextStream& s, AbstractMetaEnumList& enums)
+{
+    if (enums.isEmpty())
+        return;
+    s << INDENT << "// Initialization of enums." << endl;
+    s << INDENT << "PyObject* enumItem;" << endl << endl;
+    foreach (const AbstractMetaEnum* cppEnum, enums) {
+        if (cppEnum->isPrivate())
+            continue;
+        writeEnumInitialization(s, cppEnum);
+    }
+}
+
 void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnum* cppEnum)
 {
     const AbstractMetaClass* enclosingClass = getProperEnclosingClassForEnum(cppEnum);
@@ -3527,16 +3540,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     foreach (AbstractMetaClass* innerClass, metaClass->innerClasses())
         lookForEnumsInClassesNotToBeGenerated(classEnums, innerClass);
 
-    if (!classEnums.isEmpty()) {
-        s << INDENT << "// Initialize enums" << endl;
-        s << INDENT << "PyObject* enumItem;" << endl << endl;
-    }
-
-    foreach (const AbstractMetaEnum* cppEnum, classEnums) {
-        if (cppEnum->isPrivate())
-            continue;
-        writeEnumInitialization(s, cppEnum);
-    }
+    writeEnumsInitialization(s, classEnums);
 
     if (metaClass->hasSignals())
         writeSignalInitialization(s, metaClass);
@@ -3971,16 +3975,7 @@ void CppGenerator::finishGeneration()
         }
         s << endl;
 
-        if (!globalEnums.isEmpty()) {
-            s << INDENT << "// Initialize enums" << endl;
-            s << INDENT << "PyObject* enumItem;" << endl << endl;
-        }
-
-        foreach (const AbstractMetaEnum* cppEnum, globalEnums) {
-            if (cppEnum->isPrivate())
-                continue;
-            writeEnumInitialization(s, cppEnum);
-        }
+        writeEnumsInitialization(s, globalEnums);
 
         // Register primitive types on TypeResolver
         s << INDENT << "// Register primitive types on TypeResolver" << endl;
