@@ -953,35 +953,72 @@ void CppGenerator::writeMetaCast(QTextStream& s, const AbstractMetaClass* metaCl
     s << "}" << endl << endl;
 }
 
+void CppGenerator::writeMethodWrapperPreamble(QTextStream& s, OverloadData& overloadData)
+{
+    const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
+    const AbstractMetaClass* ownerClass = rfunc->ownerClass();
+    int minArgs = overloadData.minArgs();
+    int maxArgs = overloadData.maxArgs();
+    bool initPythonArguments;
+    bool usesNamedArguments;
+
+    // If method is a constructor...
+    if (rfunc->isConstructor()) {
+        // Check if the right constructor was called.
+        if (!ownerClass->hasPrivateDestructor()) {
+            s << INDENT << "if (Shiboken::Object::isUserType(self) && !Shiboken::ObjectType::canCallConstructor(self->ob_type, Shiboken::SbkType< ::";
+            s << ownerClass->qualifiedCppName() << " >()))" << endl;
+            Indentation indent(INDENT);
+            s << INDENT << "return " << m_currentErrorCode << ';' << endl << endl;
+        }
+        // Declare pointer for the underlying C++ object.
+        s << INDENT << "::";
+        s << (shouldGenerateCppWrapper(ownerClass) ? wrapperName(ownerClass) : ownerClass->qualifiedCppName());
+        s << "* cptr = 0;" << endl;
+
+        initPythonArguments = maxArgs > 0;
+        usesNamedArguments = !ownerClass->isQObject() && overloadData.hasArgumentWithDefaultValue();
+
+    } else {
+        if (rfunc->implementingClass() &&
+            (!rfunc->implementingClass()->isNamespace() && overloadData.hasInstanceFunction())) {
+            writeCppSelfDefinition(s, rfunc, overloadData.hasStaticFunction());
+        }
+        if (!rfunc->isInplaceOperator() && overloadData.hasNonVoidReturnType())
+            s << INDENT << "PyObject* " PYTHON_RETURN_VAR " = 0;" << endl;
+
+        initPythonArguments = minArgs != maxArgs || maxArgs > 1;
+        usesNamedArguments = rfunc->isCallOperator() || overloadData.hasArgumentWithDefaultValue();
+    }
+
+    if (maxArgs > 0)
+        s << INDENT << "int overloadId = -1;" << endl;
+
+    if (usesNamedArguments)
+        s << INDENT << "int numNamedArgs = (kwds ? PyDict_Size(kwds) : 0);" << endl;
+
+    if (initPythonArguments) {
+        s << INDENT << "int numArgs = ";
+        if (minArgs == 0 && maxArgs == 1 && !rfunc->isConstructor() && !pythonFunctionWrapperUsesListOfArguments(overloadData))
+            s << "(arg == 0 ? 0 : 1);" << endl;
+        else
+            writeArgumentsInitializer(s, overloadData);
+    }
+}
+
 void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFunctionList overloads)
 {
     OverloadData overloadData(overloads, this);
 
+    int previousErrorCode = m_currentErrorCode;
+    m_currentErrorCode = -1;
+
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
     const AbstractMetaClass* metaClass = rfunc->ownerClass();
-    QString className = cpythonTypeName(metaClass);
-
-    m_currentErrorCode = -1;
 
     s << "static int" << endl;
     s << cpythonFunctionName(rfunc) << "(PyObject* self, PyObject* args, PyObject* kwds)" << endl;
     s << '{' << endl;
-
-    // Check if the right constructor was called.
-    if (!metaClass->hasPrivateDestructor()) {
-        s << INDENT << "if (Shiboken::Object::isUserType(self) && !Shiboken::ObjectType::canCallConstructor(self->ob_type, Shiboken::SbkType< ::" << metaClass->qualifiedCppName() << " >()))" << endl;
-        Indentation indent(INDENT);
-        s << INDENT << "return " << m_currentErrorCode << ';' << endl << endl;
-    }
-
-    s << INDENT << "::";
-    bool hasCppWrapper = shouldGenerateCppWrapper(metaClass);
-    s << (hasCppWrapper ? wrapperName(metaClass) : metaClass->qualifiedCppName());
-    s << "* cptr = 0;" << endl;
-
-    bool needsOverloadId = overloadData.maxArgs() > 0;
-    if (needsOverloadId)
-        s << INDENT << "int overloadId = -1;" << endl;
 
     QSet<QString> argNamesSet;
     if (usePySideExtensions() && metaClass->isQObject()) {
@@ -1036,14 +1073,9 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
             s << INDENT << '}' << endl << endl;
     }
 
-    s << endl;
+    writeMethodWrapperPreamble(s, overloadData);
 
-    if (!metaClass->isQObject() && overloadData.hasArgumentWithDefaultValue())
-        s << INDENT << "int numNamedArgs = (kwds ? PyDict_Size(kwds) : 0);" << endl;
-    if (overloadData.maxArgs() > 0) {
-        s  << endl << INDENT << "int numArgs = ";
-        writeArgumentsInitializer(s, overloadData);
-    }
+    s << endl;
 
     bool hasPythonConvertion = metaClass->typeEntry()->hasTargetConversionRule();
     if (hasPythonConvertion) {
@@ -1052,7 +1084,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
         s << INDENT << "if (!cptr) {" << endl;
     }
 
-    if (needsOverloadId)
+    if (overloadData.maxArgs() > 0)
         writeOverloadedFunctionDecisor(s, overloadData);
 
     writeFunctionCalls(s, overloadData);
@@ -1130,7 +1162,8 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     if (overloadData.maxArgs() > 0)
         writeErrorSection(s, overloadData);
     s << '}' << endl << endl;
-    m_currentErrorCode = 0;
+
+    m_currentErrorCode = previousErrorCode;
 }
 
 void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunctionList overloads)
@@ -1138,54 +1171,21 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
     OverloadData overloadData(overloads, this);
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
 
-    //DEBUG
-//     if (rfunc->name() == "operator+" && rfunc->ownerClass()->name() == "Str") {
-//         QString dumpFile = QString("/tmp/%1_%2.dot").arg(moduleName()).arg(pythonOperatorFunctionName(rfunc)).toLower();
-//         overloadData.dumpGraph(dumpFile);
-//     }
-    //DEBUG
-
-    int minArgs = overloadData.minArgs();
     int maxArgs = overloadData.maxArgs();
-    bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(overloadData);
-    bool usesNamedArguments = overloadData.hasArgumentWithDefaultValue() || rfunc->isCallOperator();
 
     s << "static PyObject* ";
     s << cpythonFunctionName(rfunc) << "(PyObject* self";
     if (maxArgs > 0) {
         s << ", PyObject* arg";
-        if (usePyArgs)
+        if (pythonFunctionWrapperUsesListOfArguments(overloadData))
             s << 's';
-        if (usesNamedArguments)
+        if (overloadData.hasArgumentWithDefaultValue() || rfunc->isCallOperator())
             s << ", PyObject* kwds";
     }
     s << ')' << endl << '{' << endl;
 
-    if (rfunc->implementingClass() &&
-        (!rfunc->implementingClass()->isNamespace() && overloadData.hasInstanceFunction())) {
-        writeCppSelfDefinition(s, rfunc, overloadData.hasStaticFunction());
-    }
+    writeMethodWrapperPreamble(s, overloadData);
 
-    bool hasReturnValue = overloadData.hasNonVoidReturnType();
-
-    if (hasReturnValue && !rfunc->isInplaceOperator())
-        s << INDENT << "PyObject* " PYTHON_RETURN_VAR " = 0;" << endl;
-
-    bool needsOverloadId = overloadData.maxArgs() > 0;
-    if (needsOverloadId)
-        s << INDENT << "int overloadId = -1;" << endl;
-
-    if (usesNamedArguments) {
-        s << INDENT << "int numNamedArgs = (kwds ? PyDict_Size(kwds) : 0);" << endl;
-    }
-
-    if (minArgs != maxArgs || maxArgs > 1) {
-        s << INDENT << "int numArgs = ";
-        if (minArgs == 0 && maxArgs == 1 && !usePyArgs)
-            s << "(arg == 0 ? 0 : 1);" << endl;
-        else
-            writeArgumentsInitializer(s, overloadData);
-    }
     s << endl;
 
     /*
@@ -1196,6 +1196,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
      * Solves #119 - QDataStream <</>> operators not working for QPixmap
      * http://bugs.openbossa.org/show_bug.cgi?id=119
      */
+    bool hasReturnValue = overloadData.hasNonVoidReturnType();
     bool callExtendedReverseOperator = hasReturnValue
                                        && !rfunc->isInplaceOperator()
                                        && !rfunc->isCallOperator()
@@ -1209,6 +1210,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
                 s << INDENT << "&& Shiboken::Object::checkType(arg)" << endl;
                 s << INDENT << "&& !PyObject_TypeCheck(arg, self->ob_type)" << endl;
                 s << INDENT << "&& PyObject_HasAttrString(arg, const_cast<char*>(\"" << revOpName << "\"))) {" << endl;
+
                 // This PyObject_CallMethod call will emit lots of warnings like
                 // "deprecated conversion from string constant to char *" during compilation
                 // due to the method name argument being declared as "char*" instead of "const char*"
@@ -1237,18 +1239,17 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
         s << INDENT << "if (!" PYTHON_RETURN_VAR ") {" << endl << endl;
     }
 
-    if (needsOverloadId)
+    if (maxArgs > 0)
         writeOverloadedFunctionDecisor(s, overloadData);
 
     writeFunctionCalls(s, overloadData);
-    s << endl;
 
     if (callExtendedReverseOperator)
-        s << endl << INDENT << "} // End of \"if (!" PYTHON_RETURN_VAR ")\"" << endl << endl;
+        s << endl << INDENT << "} // End of \"if (!" PYTHON_RETURN_VAR ")\"" << endl;
 
-    s << endl << INDENT << "if (PyErr_Occurred()";
-    if (hasReturnValue && !rfunc->isInplaceOperator())
-        s << " || !" PYTHON_RETURN_VAR;
+    s << endl;
+
+    s << INDENT << "if (PyErr_Occurred()" << ((hasReturnValue && !rfunc->isInplaceOperator()) ? " || !" PYTHON_RETURN_VAR : "");
     s << ") {" << endl;
     {
         Indentation indent(INDENT);

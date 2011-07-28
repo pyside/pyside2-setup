@@ -48,9 +48,10 @@ private:
     void writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeMetaCast(QTextStream& s, const AbstractMetaClass* metaClass);
 
-    void writeConstructorWrapper(QTextStream &s, const AbstractMetaFunctionList overloads);
+    void writeMethodWrapperPreamble(QTextStream& s, OverloadData& overloadData);
+    void writeConstructorWrapper(QTextStream& s, const AbstractMetaFunctionList overloads);
     void writeDestructorWrapper(QTextStream& s, const AbstractMetaClass* metaClass);
-    void writeMethodWrapper(QTextStream &s, const AbstractMetaFunctionList overloads);
+    void writeMethodWrapper(QTextStream& s, const AbstractMetaFunctionList overloads);
     void writeArgumentsInitializer(QTextStream& s, OverloadData& overloadData);
     void writeCppSelfDefinition(QTextStream& s, const AbstractMetaFunction* func, bool hasStaticOverload = false);
     void writeCppSelfDefinition(QTextStream& s, const AbstractMetaClass* metaClass, bool hasStaticOverload = false);
