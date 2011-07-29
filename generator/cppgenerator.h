@@ -57,6 +57,7 @@ private:
     void writeCppSelfDefinition(QTextStream& s, const AbstractMetaClass* metaClass, bool hasStaticOverload = false);
 
     void writeErrorSection(QTextStream& s, OverloadData& overloadData);
+    void writeFunctionReturnErrorCheckSection(QTextStream& s, bool hasReturnValue = true);
 
     /// Writes the check section for the validity of wrapped C++ objects.
     void writeInvalidPyObjectCheck(QTextStream& s, const QString& pyObj);

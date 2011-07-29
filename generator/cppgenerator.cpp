@@ -235,14 +235,7 @@ void CppGenerator::writeToPythonFunction(QTextStream& s, const AbstractMetaClass
     s << INDENT << "PyObject* " PYTHON_RETURN_VAR " = Shiboken::PythonConverter< ::" << metaClass->qualifiedCppName();
     s << " >::transformToPython(" CPP_SELF_VAR ");" << endl;
 
-    s << INDENT << "if (PyErr_Occurred() || !" PYTHON_RETURN_VAR ") {" << endl;
-    {
-        Indentation indentation(INDENT);
-        s << INDENT << "Py_XDECREF(" PYTHON_RETURN_VAR ");" << endl;
-        s << INDENT << "return 0;" << endl;
-    }
-    s << INDENT << '}' << endl;
-
+    writeFunctionReturnErrorCheckSection(s);
     s << INDENT << "return " PYTHON_RETURN_VAR ";" << endl;
     s << '}' << endl;
     m_currentErrorCode = previousErrorCode;
@@ -1258,15 +1251,7 @@ void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunction
 
     s << endl;
 
-    s << INDENT << "if (PyErr_Occurred()" << ((hasReturnValue && !rfunc->isInplaceOperator()) ? " || !" PYTHON_RETURN_VAR : "");
-    s << ") {" << endl;
-    {
-        Indentation indent(INDENT);
-        if (hasReturnValue  && !rfunc->isInplaceOperator())
-            s << INDENT << "Py_XDECREF(" PYTHON_RETURN_VAR ");" << endl;
-        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
-    }
-    s << INDENT << '}' << endl;
+    writeFunctionReturnErrorCheckSection(s, hasReturnValue && !rfunc->isInplaceOperator());
 
     if (hasReturnValue) {
         if (rfunc->isInplaceOperator()) {
@@ -1520,6 +1505,18 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
         s << INDENT << "Shiboken::setErrorAboutWrongArguments(" << argsVar << ", \"" << funcName << "\", overloads);" << endl;
     }
     s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+}
+
+void CppGenerator::writeFunctionReturnErrorCheckSection(QTextStream& s, bool hasReturnValue)
+{
+    s << INDENT << "if (PyErr_Occurred()" << (hasReturnValue ? " || !" PYTHON_RETURN_VAR : "") << ") {" << endl;
+    {
+        Indentation indent(INDENT);
+        if (hasReturnValue)
+            s << INDENT << "Py_XDECREF(" PYTHON_RETURN_VAR ");" << endl;
+        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+    }
+    s << INDENT << '}' << endl;
 }
 
 void CppGenerator::writeInvalidPyObjectCheck(QTextStream& s, const QString& pyObj)
@@ -2886,17 +2883,8 @@ void CppGenerator::writeCopyFunction(QTextStream& s, const AbstractMetaClass *me
     s << INDENT << "PyObject* " << PYTHON_RETURN_VAR << " = ";
     s << "Shiboken::Converter< ::" << metaClass->qualifiedCppName() << " >::toPython(*";
     s << CPP_SELF_VAR << ");" << endl;
-
     s << endl;
-
-    s << INDENT << "if (PyErr_Occurred() || !" PYTHON_RETURN_VAR ") {" << endl;
-    {
-        Indentation indent(INDENT);
-        s << INDENT << "Py_XDECREF(" PYTHON_RETURN_VAR ");" << endl;
-        s << INDENT << "return 0;" << endl;
-    }
-    s << INDENT << "}" << endl;
-
+    writeFunctionReturnErrorCheckSection(s);
     s << INDENT << "return " PYTHON_RETURN_VAR ";" << endl;
     s << "}" << endl;
     s << endl;
