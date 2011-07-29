@@ -61,8 +61,6 @@ private:
 
     /// Writes the check section for the validity of wrapped C++ objects.
     void writeInvalidPyObjectCheck(QTextStream& s, const QString& pyObj);
-    void writeInvalidPyObjectCheck(QTextStream& s, const QString& pyObj, int errorCode);
-    void writeInvalidPyObjectCheck(QTextStream& s, const QString& pyObj, QString returnValue);
 
     void writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, bool isNumber = false, QString customType = "");
     void writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName);
@@ -244,8 +242,21 @@ private:
     // Mapping protocol structure members names.
     static QHash<QString, QString> m_mpFuncs;
 
-    int m_currentErrorCode;
+    static int m_currentErrorCode;
 
+    /// Helper class to set and restore the current error code.
+    class ErrorCode {
+    public:
+        explicit ErrorCode(int errorCode) {
+            m_savedErrorCode = CppGenerator::m_currentErrorCode;
+            CppGenerator::m_currentErrorCode = errorCode;
+        }
+        ~ErrorCode() {
+            CppGenerator::m_currentErrorCode = m_savedErrorCode;
+        }
+    private:
+        int m_savedErrorCode;
+    };
 };
 
 #endif // CPPGENERATOR_H

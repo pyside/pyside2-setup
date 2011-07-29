@@ -36,6 +36,7 @@
 QHash<QString, QString> CppGenerator::m_nbFuncs = QHash<QString, QString>();
 QHash<QString, QString> CppGenerator::m_sqFuncs = QHash<QString, QString>();
 QHash<QString, QString> CppGenerator::m_mpFuncs = QHash<QString, QString>();
+int CppGenerator::m_currentErrorCode = 0;
 
 // utility functions
 inline CodeSnipList getConversionRule(TypeSystem::Language lang, const AbstractMetaFunction *function)
@@ -101,8 +102,10 @@ static QString reduceTypeName(const AbstractMetaClass* metaClass)
     return QString();
 }
 
-CppGenerator::CppGenerator() : m_currentErrorCode(0)
+CppGenerator::CppGenerator()
 {
+    m_currentErrorCode = 0;
+
     // Number protocol structure members names
     m_nbFuncs["__add__"] = "nb_add";
     m_nbFuncs["__sub__"] = "nb_subtract";
@@ -226,8 +229,7 @@ void CppGenerator::writeRegisterType(QTextStream& s, const AbstractMetaEnum* met
 
 void CppGenerator::writeToPythonFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
-    int previousErrorCode = m_currentErrorCode;
-    m_currentErrorCode = 0;
+    ErrorCode errorCode(0);
     s << "static PyObject* " << cpythonBaseName(metaClass) << "_ToPythonFunc(PyObject* self)" << endl;
     s << '{' << endl;
     writeCppSelfDefinition(s, metaClass);
@@ -238,7 +240,6 @@ void CppGenerator::writeToPythonFunction(QTextStream& s, const AbstractMetaClass
     writeFunctionReturnErrorCheckSection(s);
     s << INDENT << "return " PYTHON_RETURN_VAR ";" << endl;
     s << '}' << endl;
-    m_currentErrorCode = previousErrorCode;
 }
 
 bool CppGenerator::hasBoolCast(const AbstractMetaClass* metaClass) const
@@ -456,8 +457,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     }
 
     if (hasBoolCast(metaClass)) {
-        int previousErrorCode = m_currentErrorCode;
-        m_currentErrorCode = -1;
+        ErrorCode errorCode(-1);
         s << "static int " << cpythonBaseName(metaClass) << "___nb_bool(PyObject* self)" << endl;
         s << '{' << endl;
         writeCppSelfDefinition(s, metaClass);
@@ -467,7 +467,6 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         s << INDENT << END_ALLOW_THREADS << endl;
         s << INDENT << "return result;" << endl;
         s << '}' << endl << endl;
-        m_currentErrorCode = previousErrorCode;
     }
 
     if (supportsNumberProtocol(metaClass)) {
@@ -1010,10 +1009,8 @@ void CppGenerator::writeMethodWrapperPreamble(QTextStream& s, OverloadData& over
 
 void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFunctionList overloads)
 {
+    ErrorCode errorCode(-1);
     OverloadData overloadData(overloads, this);
-
-    int previousErrorCode = m_currentErrorCode;
-    m_currentErrorCode = -1;
 
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
     const AbstractMetaClass* metaClass = rfunc->ownerClass();
@@ -1164,8 +1161,6 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     if (overloadData.maxArgs() > 0)
         writeErrorSection(s, overloadData);
     s << '}' << endl << endl;
-
-    m_currentErrorCode = previousErrorCode;
 }
 
 void CppGenerator::writeMethodWrapper(QTextStream& s, const AbstractMetaFunctionList overloads)
@@ -1521,17 +1516,9 @@ void CppGenerator::writeFunctionReturnErrorCheckSection(QTextStream& s, bool has
 
 void CppGenerator::writeInvalidPyObjectCheck(QTextStream& s, const QString& pyObj)
 {
-    writeInvalidPyObjectCheck(s, pyObj, m_currentErrorCode);
-}
-void CppGenerator::writeInvalidPyObjectCheck(QTextStream& s, const QString& pyObj, int errorCode)
-{
-    writeInvalidPyObjectCheck(s, pyObj, QString::number(errorCode));
-}
-void CppGenerator::writeInvalidPyObjectCheck(QTextStream& s, const QString& pyObj, QString returnValue)
-{
     s << INDENT << "if (!Shiboken::Object::isValid(" << pyObj << "))" << endl;
     Indentation indent(INDENT);
-    s << INDENT << "return " << returnValue << ';' << endl;
+    s << INDENT << "return " << m_currentErrorCode << ';' << endl;
 }
 
 void CppGenerator::writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, bool isNumber, QString customType)
@@ -2892,10 +2879,11 @@ void CppGenerator::writeCopyFunction(QTextStream& s, const AbstractMetaClass *me
 
 void CppGenerator::writeGetterFunction(QTextStream& s, const AbstractMetaField* metaField)
 {
+    ErrorCode errorCode(0);
     s << "static PyObject* " << cpythonGetterFunctionName(metaField) << "(PyObject* self, void*)" << endl;
     s << '{' << endl;
 
-    writeInvalidPyObjectCheck(s, "self", 0);
+    writeInvalidPyObjectCheck(s, "self");
 
     s << INDENT << "PyObject* val = ";
 
@@ -2935,10 +2923,11 @@ void CppGenerator::writeGetterFunction(QTextStream& s, const AbstractMetaField* 
 
 void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* metaField)
 {
+    ErrorCode errorCode(0);
     s << "static int " << cpythonSetterFunctionName(metaField) << "(PyObject* self, PyObject* value, void*)" << endl;
     s << '{' << endl;
 
-    writeInvalidPyObjectCheck(s, "self", 0);
+    writeInvalidPyObjectCheck(s, "self");
 
     s << INDENT << "if (value == 0) {" << endl;
     {
@@ -4165,9 +4154,9 @@ void CppGenerator::writeHashFunction(QTextStream& s, const AbstractMetaClass* me
 
 void CppGenerator::writeStdListWrapperMethods(QTextStream& s, const AbstractMetaClass* metaClass)
 {
-    int previousErrorCode = m_currentErrorCode;
+    ErrorCode errorCode(0);
+
     // __len__
-    m_currentErrorCode = 0;
     s << "Py_ssize_t " << cpythonBaseName(metaClass->typeEntry()) << "__len__(PyObject* self)" << endl;
     s << '{' << endl;
     writeCppSelfDefinition(s, metaClass);
@@ -4196,8 +4185,6 @@ void CppGenerator::writeStdListWrapperMethods(QTextStream& s, const AbstractMeta
     s << INDENT << "*_item = cppValue;" << endl;
     s << INDENT << "return 0;" << endl;
     s << '}' << endl;
-
-    m_currentErrorCode = previousErrorCode;
 }
 void CppGenerator::writeIndexError(QTextStream& s, const QString& errorMsg)
 {
