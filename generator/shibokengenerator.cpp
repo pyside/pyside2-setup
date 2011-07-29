@@ -1657,8 +1657,7 @@ AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromString(QString typ
         metaType->setIndirections(indirections);
         metaType->setReference(isReference);
         metaType->setConstant(isConst);
-        if (metaType->name() == "char" && metaType->indirections() == 1)
-            metaType->setTypeUsagePattern(AbstractMetaType::NativePointerPattern);
+        metaType->decideUsagePattern();
     }
     return metaType;
 }
