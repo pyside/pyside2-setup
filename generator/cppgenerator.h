@@ -219,6 +219,9 @@ private:
 
     /// Write default implementations for sequence protocol
     void writeStdListWrapperMethods(QTextStream& s, const AbstractMetaClass* metaClass);
+    /// Helper function for writeStdListWrapperMethods.
+    void writeIndexError(QTextStream& s, const QString& errorMsg);
+
     QString writeReprFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
     void writeRegisterType(QTextStream& s, const AbstractMetaClass* metaClass);
