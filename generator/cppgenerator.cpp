@@ -1363,22 +1363,29 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
     s << endl;
 }
 
-void CppGenerator::writeCppSelfDefinition(QTextStream& s, const AbstractMetaClass* metaClass, bool hasStaticOverload)
+void CppGenerator::writeCppSelfDefinition(QTextStream& s, const AbstractMetaClass* metaClass, bool hasStaticOverload, bool cppSelfAsReference)
 {
-    QString className;
-    if (avoidProtectedHack() && metaClass->hasProtectedMembers())
-        className = wrapperName(metaClass);
-    else
-        className = QString("::%1").arg(metaClass->qualifiedCppName());
-    s << INDENT << className << "* " CPP_SELF_VAR " = 0;" << endl;
+    bool useWrapperClass = avoidProtectedHack() && metaClass->hasProtectedMembers();
+    QString className = useWrapperClass ? wrapperName(metaClass) : QString("::%1").arg(metaClass->qualifiedCppName());
 
-    QString cppSelfAttribution = CPP_SELF_VAR" = ";
-    if (avoidProtectedHack() && metaClass->hasProtectedMembers())
-        cppSelfAttribution += QString("(%1*)").arg(className);
-    cppSelfAttribution += cpythonWrapperCPtr(metaClass, "self");
+    QString cppSelfAttribution;
+    if (cppSelfAsReference) {
+        QString cast = useWrapperClass ? QString("(%1*)").arg(className) : QString();
+        cppSelfAttribution = QString("%1& %2 = *(%3%4)")
+                                .arg(className)
+                                .arg(CPP_SELF_VAR)
+                                .arg(cast)
+                                .arg(cpythonWrapperCPtr(metaClass, "self"));
+    } else {
+        s << INDENT << className << "* " CPP_SELF_VAR " = 0;" << endl;
+        cppSelfAttribution = QString("%1 = %2%3")
+                                .arg(CPP_SELF_VAR)
+                                .arg(useWrapperClass ? QString("(%1*)").arg(className) : "")
+                                .arg(cpythonWrapperCPtr(metaClass, "self"));
+    }
 
     // Checks if the underlying C++ object is valid.
-    if (hasStaticOverload) {
+    if (hasStaticOverload && !cppSelfAsReference) {
         s << INDENT << "if (self) {" << endl;
         {
             Indentation indent(INDENT);
@@ -1386,10 +1393,11 @@ void CppGenerator::writeCppSelfDefinition(QTextStream& s, const AbstractMetaClas
             s << INDENT << cppSelfAttribution << ';' << endl;
         }
         s << INDENT << '}' << endl;
-    } else {
-        writeInvalidPyObjectCheck(s, "self");
-        s << INDENT << cppSelfAttribution << ';' << endl;
+        return;
     }
+
+    writeInvalidPyObjectCheck(s, "self");
+    s << INDENT << cppSelfAttribution << ';' << endl;
 }
 
 void CppGenerator::writeCppSelfDefinition(QTextStream& s, const AbstractMetaFunction* func, bool hasStaticOverload)
@@ -2984,15 +2992,14 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
     s << "static PyObject* ";
     s << baseName << "_richcompare(PyObject* self, PyObject* arg, int op)" << endl;
     s << '{' << endl;
-    QList<AbstractMetaFunctionList> cmpOverloads = filterGroupedOperatorFunctions(metaClass, AbstractMetaClass::ComparisonOp);
+    writeCppSelfDefinition(s, metaClass, false, true);
     s << INDENT << "PyObject* " PYTHON_RETURN_VAR " = 0;" << endl;
-    s << INDENT << metaClass->qualifiedCppName() << "& " CPP_SELF_VAR " = *" << cpythonWrapperCPtr(metaClass) << ';' << endl;
     s << endl;
 
     s << INDENT << "switch (op) {" << endl;
     {
         Indentation indent(INDENT);
-        foreach (AbstractMetaFunctionList overloads, cmpOverloads) {
+        foreach (AbstractMetaFunctionList overloads, filterGroupedOperatorFunctions(metaClass, AbstractMetaClass::ComparisonOp)) {
             const AbstractMetaFunction* rfunc = overloads[0];
 
             QString operatorId = ShibokenGenerator::pythonRichCompareOperatorId(rfunc);
