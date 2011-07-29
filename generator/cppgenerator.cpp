@@ -1576,6 +1576,32 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
     writePythonToCppTypeConversion(s, argType, pyArgName, argName, context, defaultValue);
 }
 
+const AbstractMetaType* CppGenerator::getArgumentType(const AbstractMetaFunction* func, int argPos, bool* newType)
+{
+    *newType = false;
+
+    if (argPos < 0 || argPos > func->arguments().size()) {
+        ReportHandler::warning(QString("Argument index for function '%1' out of range.").arg(func->signature()));
+        return 0;
+    }
+
+    const AbstractMetaType* argType = 0;
+    QString typeReplaced = func->typeReplaced(argPos);
+    if (typeReplaced.isEmpty()) {
+        argType = (argPos == 0) ? func->type() : func->arguments().at(argPos-1)->type();
+    } else {
+        argType = buildAbstractMetaTypeFromString(typeReplaced);
+        *newType = (bool)argType;
+    }
+    if (!argType && !m_knownPythonTypes.contains(typeReplaced)) {
+        ReportHandler::warning(QString("Unknown type '%1' used as argument type replacement "\
+                                       "in function '%2', the generated code may be broken.")
+                                      .arg(typeReplaced)
+                                      .arg(func->signature()));
+    }
+    return argType;
+}
+
 void CppGenerator::writePythonToCppTypeConversion(QTextStream& s,
                                                   const AbstractMetaType* type,
                                                   const QString& pyIn,
@@ -1838,34 +1864,32 @@ void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& o
     writeNamedArgumentResolution(s, func, usePyArgs);
 
     int removedArgs = 0;
-    for (int i = 0; i < func->arguments().count(); i++) {
-        if (func->argumentRemoved(i + 1)) {
+    for (int argIdx = 0; argIdx < func->arguments().count(); ++argIdx) {
+        if (func->argumentRemoved(argIdx + 1)) {
             removedArgs++;
             continue;
         }
 
-        if (!func->conversionRule(TypeSystem::NativeCode, i + 1).isEmpty())
+        if (!func->conversionRule(TypeSystem::NativeCode, argIdx + 1).isEmpty())
             continue;
 
-        const AbstractMetaArgument* arg = func->arguments().at(i);
+        bool newType;
+        const AbstractMetaType* argType = getArgumentType(func, argIdx + 1, &newType);
 
-        QString typeReplaced = func->typeReplaced(arg->argumentIndex() + 1);
-        const AbstractMetaType* argType = 0;
+        if (!argType)
+            continue;
+
         std::auto_ptr<const AbstractMetaType> argType_autoptr;
-        if (typeReplaced.isEmpty()) {
-            argType = arg->type();
-        } else {
-            argType = buildAbstractMetaTypeFromString(typeReplaced);
+        if (newType)
             argType_autoptr = std::auto_ptr<const AbstractMetaType>(argType);
-        }
 
-        if (argType) {
-            QString argName = QString(CPP_ARG"%1").arg(i - removedArgs);
-            QString pyArgName = usePyArgs ? QString("pyargs[%1]").arg(i - removedArgs) : "arg";
-            QString defaultValue = guessScopeForDefaultValue(func, arg);
+        int argPos = argIdx - removedArgs;
+        QString argName = QString(CPP_ARG"%1").arg(argPos);
+        QString pyArgName = usePyArgs ? QString("pyargs[%1]").arg(argPos) : "arg";
+        const AbstractMetaArgument* arg = func->arguments().at(argIdx);
+        QString defaultValue = guessScopeForDefaultValue(func, arg);
 
-            writeArgumentConversion(s, argType, argName, pyArgName, implementingClass, defaultValue);
-        }
+        writeArgumentConversion(s, argType, argName, pyArgName, implementingClass, defaultValue);
     }
 
     s << endl;
@@ -3001,30 +3025,23 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
             }
 
             bool first = true;
-            bool comparesWithSameType = false;
             OverloadData overloadData(overloads, this);
             foreach (OverloadData* data, overloadData.nextOverloadData()) {
                 const AbstractMetaFunction* func = data->referenceFunction();
                 if (func->isStatic())
                     continue;
 
-                QString typeReplaced = func->typeReplaced(1);
-                const AbstractMetaType* type = 0;
-                if (typeReplaced.isEmpty())
-                    type = func->arguments()[0]->type();
-                else
-                    type = buildAbstractMetaTypeFromString(typeReplaced);
+                bool newType;
+                const AbstractMetaType* argType = getArgumentType(func, 1, &newType);
 
-                if (!type) {
-                    ReportHandler::warning("Unknown type (" + typeReplaced + ") used in type replacement in function "
-                                           + func->signature() + ", the generated code will be broken !!!");
+                if (!argType)
                     continue;
-                }
 
-                bool numberType = alternativeNumericTypes == 1 || ShibokenGenerator::isPyInt(type);
+                std::auto_ptr<const AbstractMetaType> argType_autoptr;
+                if (newType)
+                    argType_autoptr = std::auto_ptr<const AbstractMetaType>(argType);
 
-                if (!comparesWithSameType)
-                    comparesWithSameType = type->typeEntry() == metaClass->typeEntry();
+                bool numberType = alternativeNumericTypes == 1 || ShibokenGenerator::isPyInt(argType);
 
                 if (!first) {
                     s << " else ";
@@ -3033,11 +3050,11 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                     s << INDENT;
                 }
 
-                s << "if (" << cpythonIsConvertibleFunction(type, numberType) << "(arg)) {" << endl;
+                s << "if (" << cpythonIsConvertibleFunction(argType, numberType) << "(arg)) {" << endl;
                 {
                     Indentation indent(INDENT);
                     s << INDENT << "// " << func->signature() << endl;
-                    writeArgumentConversion(s, type, "cppArg0", "arg", metaClass);
+                    writeArgumentConversion(s, argType, "cppArg0", "arg", metaClass);
 
                     // If the function is user added, use the inject code
                     if (func->isUserAdded()) {

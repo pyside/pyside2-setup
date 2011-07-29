@@ -375,15 +375,16 @@ protected:
     static QHash<QString, QString> m_pythonOperators;
     static QHash<QString, QString> m_formatUnits;
     static QHash<QString, QString> m_tpFuncs;
+    static QStringList m_knownPythonTypes;
 
     void clearTpFuncs();
 
     const char* name() const { return "Shiboken"; }
 
-    /**
-     *   Initialize correspondences between primitive and Python types
-     */
+    /// Initializes correspondences between primitive and Python types.
     static void initPrimitiveTypesCorrespondences();
+    /// Initializes a list of Python known type names.
+    static void initKnownPythonTypes();
 
     void writeFunctionCall(QTextStream& s,
                            const AbstractMetaFunction* metaFunc,

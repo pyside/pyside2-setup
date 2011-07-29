@@ -86,14 +86,19 @@ private:
                                  const QString& argName, const QString& pyArgName,
                                  const AbstractMetaClass* context = 0,
                                  const QString& defaultValue = QString());
-    /// Convenience method to call writeArgumentConversion with an AbstractMetaArgument instead of an AbstractMetaType.
-    void writeArgumentConversion(QTextStream& s, const AbstractMetaArgument* arg,
-                                 const QString& argName, const QString& pyArgName,
-                                 const AbstractMetaClass* context = 0,
-                                 const QString& defaultValue = QString())
-    {
-        writeArgumentConversion(s, arg->type(), argName, pyArgName, context, defaultValue);
-    }
+
+    /**
+     *  Returns the AbstractMetaType for a function argument.
+     *  If the argument type was modified in the type system, this method will
+     *  try to build a new type based on the type name defined in the type system.
+     *  \param  func    The function which owns the argument.
+     *  \param  argPos  Argument position in the function signature.
+     *                  Note that the position 0 represents the return value, and the function
+     *                  parameters start counting on 1.
+     *  \param  newType It is set to true if the type returned is a new object that must be deallocated.
+     *  \return The type of the argument indicated by \p argPos.
+     */
+    const AbstractMetaType* getArgumentType(const AbstractMetaFunction* func, int argPos, bool* newType);
 
     void writePythonToCppTypeConversion(QTextStream& s,
                                         const AbstractMetaType* type,
@@ -240,4 +245,3 @@ private:
 };
 
 #endif // CPPGENERATOR_H
-
