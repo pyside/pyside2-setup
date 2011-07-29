@@ -456,16 +456,18 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     }
 
     if (hasBoolCast(metaClass)) {
-        s << "static int " << cpythonBaseName(metaClass) << "___nb_bool(PyObject* pyObj)\n{\n";
-        writeInvalidPyObjectCheck(s, "pyObj", -1);
-        s << INDENT << "const ::" << metaClass->qualifiedCppName() << "* cppSelf = ";
-        s << "Shiboken::Converter< ::" << metaClass->qualifiedCppName() << "*>::toCpp(pyObj);" << endl;
+        int previousErrorCode = m_currentErrorCode;
+        m_currentErrorCode = -1;
+        s << "static int " << cpythonBaseName(metaClass) << "___nb_bool(PyObject* self)" << endl;
+        s << '{' << endl;
+        writeCppSelfDefinition(s, metaClass);
         s << INDENT << "int result;" << endl;
         s << INDENT << BEGIN_ALLOW_THREADS << endl;
-        s << INDENT << "result = !cppSelf->isNull();" << endl;
+        s << INDENT << "result = !" CPP_SELF_VAR "->isNull();" << endl;
         s << INDENT << END_ALLOW_THREADS << endl;
         s << INDENT << "return result;" << endl;
         s << '}' << endl << endl;
+        m_currentErrorCode = previousErrorCode;
     }
 
     if (supportsNumberProtocol(metaClass)) {
