@@ -1725,26 +1725,22 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(QTextStream& s, const Ov
 
         const AbstractMetaFunction* refFunc = overloadData->referenceFunction();
 
-        if (isFirst) {
-            isFirst = false;
-            s << INDENT;
-        } else {
-            s << " else ";
-        }
-
-        QString typeChecks;
-        QTextStream tck(&typeChecks);
-
+        QStringList typeChecks;
         QString pyArgName = (usePyArgs && maxArgs > 1) ? QString("pyargs[%1]").arg(overloadData->argPos()) : "arg";
-
         OverloadData* od = overloadData;
         int startArg = od->argPos();
         int sequenceArgCount = 0;
         while (od && !od->argType()->isVarargs()) {
-            if (usePyArgs)
-                pyArgName = QString("pyargs[%1]").arg(od->argPos());
+            bool typeReplacedByPyObject = od->argumentTypeReplaced() == "PyObject";
+            if (!typeReplacedByPyObject) {
+                if (usePyArgs)
+                    pyArgName = QString("pyargs[%1]").arg(od->argPos());
+                QString typeCheck;
+                QTextStream tck(&typeCheck);
+                writeTypeCheck(tck, od, pyArgName);
+                typeChecks << typeCheck;
+            }
 
-            writeTypeCheck(tck, od, pyArgName);
             sequenceArgCount++;
 
             if (od->nextOverloadData().isEmpty()
@@ -1755,31 +1751,41 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(QTextStream& s, const Ov
                 od = 0;
             } else {
                 od = od->nextOverloadData().first();
-                if (!od->argType()->isVarargs())
-                    tck << " && ";
             }
         }
 
-        s << "if (";
         if (usePyArgs && signatureFound) {
             AbstractMetaArgumentList args = refFunc->arguments();
             int lastArgIsVarargs = (int) (args.size() > 1 && args.last()->type()->isVarargs());
             int numArgs = args.size() - OverloadData::numberOfRemovedArguments(refFunc) - lastArgIsVarargs;
-            s << "numArgs " << (lastArgIsVarargs ? ">=" : "==") << " " << numArgs << " && ";
+            typeChecks.prepend(QString("numArgs %1 %2").arg(lastArgIsVarargs ? ">=" : "==").arg(numArgs));
         } else if (sequenceArgCount > 1) {
-            s << "numArgs >= " << (startArg + sequenceArgCount) << " && ";
+            typeChecks.prepend(QString("numArgs >= %1").arg(startArg + sequenceArgCount));
+        } else if (refFunc->isOperatorOverload() && !refFunc->isCallOperator()) {
+            typeChecks.prepend(QString("%1isReverse").arg(refFunc->isReverseOperator() ? "" : "!"));
         }
 
-        if (refFunc->isOperatorOverload() && !refFunc->isCallOperator())
-            s << (refFunc->isReverseOperator() ? "" : "!") << "isReverse && ";
-
-        s << typeChecks << ") {" << endl;
-
+        if (isFirst) {
+            isFirst = false;
+            s << INDENT;
+        } else {
+            s << " else ";
+        }
+        s << "if (";
+        if (typeChecks.isEmpty()) {
+            s << "true";
+        } else {
+            Indentation indent(INDENT);
+            QString separator;
+            QTextStream sep(&separator);
+            sep << endl << INDENT << "&& ";
+            s << typeChecks.join(separator);
+        }
+        s << ") {" << endl;
         {
             Indentation indent(INDENT);
             writeOverloadedFunctionDecisorEngine(s, overloadData);
         }
-
         s << INDENT << "}";
     }
     s << endl;
@@ -3038,16 +3044,16 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                         CodeSnipList snips = func->injectedCodeSnips();
                         writeCodeSnips(s, snips, CodeSnip::Any, TypeSystem::TargetLangCode, func, func->arguments().last());
                     } else {
+                        QString expression = QString("%1%2 %3 cppArg0")
+                                                .arg(func->isPointerOperator() ? "&" : "")
+                                                .arg(CPP_SELF_VAR).arg(op);
                         s << INDENT << PYTHON_RETURN_VAR " = ";
                         if (!func->type()) {
                             s << "Py_None;" << endl;
                             s << INDENT << "Py_INCREF(Py_None);" << endl;
-                            s << INDENT << CPP_SELF_VAR " " << op << " cppArg0; // this op return void" << endl;
+                            s << INDENT << expression << "; // This operator returns void." << endl;
                         } else {
-                            QByteArray self(CPP_SELF_VAR);
-                            if (func->isPointerOperator())
-                                self.prepend('&');
-                            writeToPythonConversion(s, func->type(), metaClass, self + ' ' + op + " cppArg0");
+                            writeToPythonConversion(s, func->type(), metaClass, expression);
                             s << ';' << endl;
                         }
                     }
