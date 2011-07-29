@@ -226,19 +226,26 @@ void CppGenerator::writeRegisterType(QTextStream& s, const AbstractMetaEnum* met
 
 void CppGenerator::writeToPythonFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
+    int previousErrorCode = m_currentErrorCode;
+    m_currentErrorCode = 0;
     s << "static PyObject* " << cpythonBaseName(metaClass) << "_ToPythonFunc(PyObject* self)" << endl;
-    s << "{" << endl;
-    s << INDENT << metaClass->qualifiedCppName() << "* cppSelf = Shiboken::Converter< ::" << metaClass->qualifiedCppName() << "* >::toCpp(self);" << endl;
-    s << INDENT << "PyObject* pyResult = Shiboken::PythonConverter< ::" << metaClass->qualifiedCppName() << " >::transformToPython(cppSelf);" << endl;
-    s << INDENT << "if (PyErr_Occurred() || !pyResult) {" << endl;
+    s << '{' << endl;
+    writeCppSelfDefinition(s, metaClass);
+
+    s << INDENT << "PyObject* " PYTHON_RETURN_VAR " = Shiboken::PythonConverter< ::" << metaClass->qualifiedCppName();
+    s << " >::transformToPython(" CPP_SELF_VAR ");" << endl;
+
+    s << INDENT << "if (PyErr_Occurred() || !" PYTHON_RETURN_VAR ") {" << endl;
     {
         Indentation indentation(INDENT);
-        s << INDENT << INDENT << "Py_XDECREF(pyResult);" << endl;
-        s << INDENT << INDENT << "return 0;" << endl;
+        s << INDENT << "Py_XDECREF(" PYTHON_RETURN_VAR ");" << endl;
+        s << INDENT << "return 0;" << endl;
     }
-    s << INDENT << "}" << endl;
-    s << INDENT << "return pyResult;" << endl;
-    s << "}" << endl;
+    s << INDENT << '}' << endl;
+
+    s << INDENT << "return " PYTHON_RETURN_VAR ";" << endl;
+    s << '}' << endl;
+    m_currentErrorCode = previousErrorCode;
 }
 
 bool CppGenerator::hasBoolCast(const AbstractMetaClass* metaClass) const
