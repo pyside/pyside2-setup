@@ -182,7 +182,7 @@ private:
 
     /// Writes the function that registers the multiple inheritance information for the classes that need it.
     void writeMultipleInheritanceInitializerFunction(QTextStream& s, const AbstractMetaClass* metaClass);
-    /// Writes the implementation of special cast functions, used when we need to cast a class with mulltiple inheritance.
+    /// Writes the implementation of special cast functions, used when we need to cast a class with multiple inheritance.
     void writeSpecialCastFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
     void writeExtendedIsConvertibleFunction(QTextStream& s, const TypeEntry* externalType, const QList<const AbstractMetaClass*>& conversions);
@@ -191,7 +191,7 @@ private:
 
     void writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func, bool userHeuristicForReturn);
     bool writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func, int argIndex, bool userHeuristicPolicy);
-    void writeReturnValueHeuristics(QTextStream& s, const AbstractMetaFunction* func, const QString& self = "self");
+    void writeReturnValueHeuristics(QTextStream& s, const AbstractMetaFunction* func, const QString& self = PYTHON_SELF_VAR);
     void writeInitQtMetaTypeFunctionBody(QTextStream& s, const AbstractMetaClass* metaClass) const;
 
     /**
@@ -202,7 +202,7 @@ private:
      */
     QString multipleInheritanceInitializerFunctionName(const AbstractMetaClass* metaClass);
 
-    /// Returns a list of all classes to which the given class could be casted.
+    /// Returns a list of all classes to which the given class could be cast.
     QStringList getAncestorMultipleInheritance(const AbstractMetaClass* metaClass);
 
     /// Returns true if the given class supports the python number protocol

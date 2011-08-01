@@ -1127,25 +1127,27 @@
 
         <add-function signature="__reduce__" return-type="PyObject*">
             <inject-code class="target" position="beginning">
-            PyObject *type = PyObject_Type(%PYSELF);
-            PyObject *args = NULL;
+            PyObject* type = PyObject_Type(%PYSELF);
+            PyObject* args = NULL;
 
             args = Py_BuildValue("(dd)", %CPPSELF.x(), %CPPSELF.y());
 
             %PYARG_0 = Py_BuildValue("(OO)", type, args);
             </inject-code>
         </add-function>
+        <template name="return_self">
+            %PYARG_0 = %PYARG_1;
+            Py_INCREF(%PYARG_1);
+        </template>
         <add-function signature="operator-(PyUnicode)">
             <inject-code>
-                %PYARG_0 = arg;
-                Py_INCREF(arg);
+                <insert-template name="return_self" />
             </inject-code>
         </add-function>
         <!-- A reverse operator -->
         <add-function signature="operator-(PyUnicode, Point)">
             <inject-code>
-                %PYARG_0 = arg;
-                Py_INCREF(arg);
+                <insert-template name="return_self" />
             </inject-code>
         </add-function>
     </value-type>

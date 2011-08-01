@@ -1008,7 +1008,7 @@ void ShibokenGenerator::writeFunctionArguments(QTextStream &s,
     if (options & Generator::WriteSelf) {
         s << func->implementingClass()->name() << '&';
         if (!(options & SkipName))
-            s << " self";
+            s << " " PYTHON_SELF_VAR;
     }
 
     int argUsed = 0;
@@ -1184,7 +1184,8 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             if (func->argumentRemoved(i+1))
                 argsRemoved++;
         }
-        usePyArgs = pythonFunctionWrapperUsesListOfArguments(OverloadData(getFunctionGroups(func->implementingClass())[func->name()], this));
+        OverloadData od(getFunctionGroups(func->implementingClass())[func->name()], this);
+        usePyArgs = pythonFunctionWrapperUsesListOfArguments(od);
     }
 
     foreach (CodeSnip snip, codeSnips) {
@@ -1208,21 +1209,21 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             code.replace("%PYARG_0", PYTHON_RETURN_VAR);
             if (snip.language == TypeSystem::TargetLangCode) {
                 if (usePyArgs) {
-                    code.replace(pyArgsRegex, "pyargs[\\1-1]");
+                    code.replace(pyArgsRegex, PYTHON_ARGS"[\\1-1]");
                 } else {
                     static QRegExp pyArgsRegexCheck("%PYARG_([2-9]+)");
-                    if (pyArgsRegexCheck.indexIn(code) != -1)
+                    if (pyArgsRegexCheck.indexIn(code) != -1) {
                         ReportHandler::warning("Wrong index for %PYARG variable ("+pyArgsRegexCheck.cap(1)+") on "+func->signature());
-                    else
-                        code.replace("%PYARG_1", usePyArgs  ? "pyargs[0]" : "arg");
+                        return;
+                    }
+                    code.replace("%PYARG_1", PYTHON_ARG);
                 }
             } else {
                 // Replaces the simplest case of attribution to a Python argument
                 // on the binding virtual method.
                 static QRegExp pyArgsAttributionRegex("%PYARG_(\\d+)\\s*=[^=]\\s*([^;]+)");
-                code.replace(pyArgsAttributionRegex, "PyTuple_SET_ITEM(pyargs, \\1-1, \\2)");
-
-                code.replace(pyArgsRegex, "PyTuple_GET_ITEM(pyargs, \\1-1)");
+                code.replace(pyArgsAttributionRegex, "PyTuple_SET_ITEM(" PYTHON_ARGS ", \\1-1, \\2)");
+                code.replace(pyArgsRegex, "PyTuple_GET_ITEM(" PYTHON_ARGS ", \\1-1)");
             }
 
             // replace %ARG#_TYPE variables
@@ -1251,11 +1252,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             }
 
             // replace template variable for self Python object
-            QString pySelf;
-            if (snip.language == TypeSystem::NativeCode)
-                pySelf = "pySelf";
-            else
-                pySelf = "self";
+            QString pySelf = (snip.language == TypeSystem::NativeCode) ? "pySelf" : PYTHON_SELF_VAR;
             code.replace("%PYSELF", pySelf);
 
             // replace template variable for pointer to C++ this object
@@ -1332,7 +1329,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
 
                     if (argReplacement.isEmpty()) {
                         if (arg->type()->typeEntry()->isCustom()) {
-                            argReplacement = usePyArgs ? QString("pyargs[%1]").arg(i - removed) : "arg";
+                            argReplacement = usePyArgs ? QString(PYTHON_ARGS"[%1]").arg(i - removed) : PYTHON_ARG;
                         } else {
                             argReplacement = QString(CPP_ARG"%1").arg(i - removed);
                         }
@@ -1372,7 +1369,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 // replace template %PYTHON_ARGUMENTS variable for a pointer to the Python tuple
                 // containing the converted virtual method arguments received from C++ to be passed
                 // to the Python override
-                code.replace("%PYTHON_ARGUMENTS", "pyargs");
+                code.replace("%PYTHON_ARGUMENTS", PYTHON_ARGS);
 
                 // replace variable %PYTHON_METHOD_OVERRIDE for a pointer to the Python method
                 // override for the C++ virtual method in which this piece of code was inserted
@@ -1818,13 +1815,16 @@ bool ShibokenGenerator::verboseErrorMessagesDisabled() const
 
 bool ShibokenGenerator::pythonFunctionWrapperUsesListOfArguments(const OverloadData& overloadData)
 {
+    if (overloadData.referenceFunction()->isCallOperator())
+        return true;
+    if (overloadData.referenceFunction()->isOperatorOverload())
+        return false;
     int maxArgs = overloadData.maxArgs();
     int minArgs = overloadData.minArgs();
-    bool usePyArgs = (minArgs != maxArgs)
-                     || (maxArgs > 1)
-                     || overloadData.referenceFunction()->isConstructor()
-                     || overloadData.hasArgumentWithDefaultValue();
-    return usePyArgs;
+    return (minArgs != maxArgs)
+           || (maxArgs > 1)
+           || overloadData.referenceFunction()->isConstructor()
+           || overloadData.hasArgumentWithDefaultValue();
 }
 
 Generator::Options ShibokenGenerator::getConverterOptions(const AbstractMetaType* metaType)
