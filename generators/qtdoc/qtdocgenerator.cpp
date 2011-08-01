@@ -1412,6 +1412,64 @@ void QtDocGenerator::writeFunction(QTextStream& s, bool writeDoc, const Abstract
     }
 }
 
+static void writeFancyToc(QTextStream& s, const QStringList& items, int cols = 4)
+{
+    typedef QMap<QChar, QStringList> TocMap;
+    TocMap tocMap;
+    QChar Q('Q');
+    QChar idx;
+    foreach (QString item, items) {
+        if (item.isEmpty())
+            continue;
+        if (item.startsWith(Q) && item.length() > 1)
+            idx = item[1];
+        item.chop(4); // Remove the .rst extension
+        tocMap[idx] << item;
+    }
+    QtXmlToSphinx::Table table;
+    QtXmlToSphinx::TableRow row;
+
+    int itemsPerCol = (items.size() + tocMap.size()*2) / cols;
+    QString currentColData;
+    int i = 0;
+    QTextStream ss(&currentColData);
+    QMutableMapIterator<QChar, QStringList> it(tocMap);
+    while (it.hasNext()) {
+        it.next();
+        qSort(it.value());
+
+        if (i)
+            ss << endl;
+
+        ss << "**" << it.key() << "**" << endl << endl;
+        i += 2; // a letter title is equivalent to two entries in space
+        foreach (QString item, it.value()) {
+            ss << "* :doc:`" << item << "`" << endl;
+            ++i;
+
+            // end of column detected!
+            if (i > itemsPerCol) {
+                ss.flush();
+                QtXmlToSphinx::TableCell cell(currentColData);
+                row << cell;
+                currentColData.clear();
+                i = 0;
+            }
+        }
+    }
+    if (i) {
+        ss.flush();
+        QtXmlToSphinx::TableCell cell(currentColData);
+        row << cell;
+        currentColData.clear();
+        i = 0;
+    }
+    table << row;
+    table.normalize();
+    s << ".. container:: pysidetoc" << endl << endl;
+    s << table;
+}
+
 void QtDocGenerator::finishGeneration()
 {
     if (classes().isEmpty())
@@ -1428,11 +1486,9 @@ void QtDocGenerator::finishGeneration()
         QString title = it.key() + " contents";
         s << title << endl;
         s << createRepeatedChar(title.length(), '*') << endl << endl;
-        s << ".. toctree::" << endl;
 
         /* Avoid showing "Detailed Description for *every* class in toc tree */
         Indentation indentation(INDENT);
-        s << INDENT << ":maxdepth: 1" << endl << endl;
 
         // Search for extra-sections
         if (!m_extraSectionDir.isEmpty()) {
@@ -1453,11 +1509,18 @@ void QtDocGenerator::finishGeneration()
             it.value().append(fileList);
         }
 
-        qSort(it.value());
-        foreach (QString className, it.value()) {
-            s << INDENT << className << endl;
+        writeFancyToc(s, it.value());
+
+        s << INDENT << ".. container:: hide" << endl << endl;
+        {
+            Indentation indentation(INDENT);
+            s << INDENT << ".. toctree::" << endl;
+            Indentation deeperIndentation(INDENT);
+            s << INDENT << ":maxdepth: 1" << endl << endl;
+            foreach (QString className, it.value())
+                s << INDENT << className << endl;
+            s << endl << endl;
         }
-        s << endl << endl;
 
         s << "Detailed Description" << endl;
         s << "--------------------" << endl << endl;
