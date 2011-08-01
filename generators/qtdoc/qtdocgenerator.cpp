@@ -1483,7 +1483,7 @@ void QtDocGenerator::finishGeneration()
 
         s << ".. module:: " << it.key() << endl << endl;
 
-        QString title = it.key() + " contents";
+        QString title = it.key();
         s << title << endl;
         s << createRepeatedChar(title.length(), '*') << endl << endl;
 
