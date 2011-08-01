@@ -1376,7 +1376,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
 
                 // replace variable %PYTHON_METHOD_OVERRIDE for a pointer to the Python method
                 // override for the C++ virtual method in which this piece of code was inserted
-                code.replace("%PYTHON_METHOD_OVERRIDE", "py_override");
+                code.replace("%PYTHON_METHOD_OVERRIDE", PYTHON_OVERRIDE_VAR);
             }
 
             if (avoidProtectedHack()) {

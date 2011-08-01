@@ -44,7 +44,10 @@ protected:
 private:
     void writeConstructorNative(QTextStream& s, const AbstractMetaFunction* func);
     void writeDestructorNative(QTextStream& s, const AbstractMetaClass* metaClass);
+
+    QString getVirtualFunctionReturnTypeName(const AbstractMetaFunction* func);
     void writeVirtualMethodNative(QTextStream& s, const AbstractMetaFunction* func);
+
     void writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeMetaCast(QTextStream& s, const AbstractMetaClass* metaClass);
 

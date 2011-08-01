@@ -611,7 +611,31 @@ static bool allArgumentsRemoved(const AbstractMetaFunction* func)
     return true;
 }
 
-void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFunction* func)
+QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunction* func)
+{
+    if (!func->type())
+        return QString();
+
+    if (!func->typeReplaced(0).isEmpty())
+        return func->typeReplaced(0);
+
+    // SbkType would return null when the type is a container.
+    if (func->type()->typeEntry()->isContainer())
+        return reinterpret_cast<const ContainerTypeEntry*>(func->type()->typeEntry())->typeName();
+
+    if (avoidProtectedHack()) {
+        const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(func->type());
+        if (metaEnum && metaEnum->isProtected())
+            return protectedEnumSurrogateName(metaEnum);
+    }
+
+    if (func->type()->isPrimitive())
+        return func->type()->name();
+
+    return QString("Shiboken::SbkType< %1 >()->tp_name").arg(func->type()->typeEntry()->qualifiedCppName());
+}
+
+void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFunction* func)
 {
     //skip metaObject function, this will be written manually ahead
     if (usePySideExtensions() && func->ownerClass() && func->ownerClass()->isQObject() &&
@@ -619,12 +643,11 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         return;
 
     const TypeEntry* type = func->type() ? func->type()->typeEntry() : 0;
-
     const QString funcName = func->isOperatorOverload() ? pythonOperatorFunctionName(func) : func->name();
 
-    QString prefix = wrapperName(func->ownerClass()) + "::";
+    QString prefix = QString("%1::").arg(wrapperName(func->ownerClass()));
     s << functionSignature(func, prefix, "", Generator::SkipDefaultValues|Generator::OriginalTypeDescription) << endl;
-    s << "{" << endl;
+    s << '{' << endl;
 
     Indentation indentation(INDENT);
 
@@ -647,18 +670,21 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 }
             }
         }
-        if (defaultReturnExpr.isEmpty()) {
+        if (defaultReturnExpr.isEmpty())
             defaultReturnExpr = minimalConstructor(func->type());
-            if (defaultReturnExpr.isEmpty())
-                ReportHandler::warning(QString("Could not find a default constructor for '%1' type.").arg(func->type()->cppSignature()));
+        if (defaultReturnExpr.isEmpty()) {
+            QString errorMsg = QString(MIN_CTOR_ERROR_MSG).arg(func->type()->cppSignature());
+            ReportHandler::warning(errorMsg);
+            s << endl << INDENT << "#error " << errorMsg << endl;
         }
     }
 
     if (func->isAbstract() && func->isModifiedRemoved()) {
-        ReportHandler::warning("Pure virtual method \"" + func->ownerClass()->name() + "::" + func->minimalSignature() + "\" must be implement but was completely removed on typesystem.");
-        s << INDENT << "return";
-
-        s << ' ' << defaultReturnExpr << ';' << endl;
+        ReportHandler::warning(QString("Pure virtual method '%1::%2' must be implement but was "\
+                                       "completely removed on type system.")
+                                  .arg(func->ownerClass()->name())
+                                  .arg(func->minimalSignature()));
+        s << INDENT << "return " << defaultReturnExpr << ';' << endl;
         s << '}' << endl << endl;
         return;
     }
@@ -680,10 +706,10 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         s << INDENT << "return " << defaultReturnExpr << ';' << endl;
     }
 
-    s << INDENT << "Shiboken::AutoDecRef py_override(Shiboken::BindingManager::instance().getOverride(this, \"";
+    s << INDENT << "Shiboken::AutoDecRef " PYTHON_OVERRIDE_VAR "(Shiboken::BindingManager::instance().getOverride(this, \"";
     s << funcName << "\"));" << endl;
 
-    s << INDENT << "if (py_override.isNull()) {" << endl;
+    s << INDENT << "if (" PYTHON_OVERRIDE_VAR ".isNull()) {" << endl;
     {
         Indentation indentation(INDENT);
         CodeSnipList snips;
@@ -698,10 +724,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
             s << func->ownerClass()->name() << '.' << funcName;
             s << "()' not implemented.\");" << endl;
-            s << INDENT << "return ";
-            if (func->type()) {
-                s << defaultReturnExpr;
-            }
+            s << INDENT << "return " << (func->type() ? defaultReturnExpr : "");
         } else {
             s << INDENT << "gil.release();" << endl;
             s << INDENT << "return this->::" << func->implementingClass()->qualifiedCppName() << "::";
@@ -725,7 +748,6 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             if (func->argumentRemoved(arg->argumentIndex() + 1))
                 continue;
 
-
             QString argConv;
             QTextStream ac(&argConv);
             const PrimitiveTypeEntry* argType = (const PrimitiveTypeEntry*) arg->type()->typeEntry();
@@ -742,17 +764,13 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             if (!convert && argType->isPrimitive()) {
                 if (argType->basicAliasedTypeEntry())
                     argType = argType->basicAliasedTypeEntry();
-                if (m_formatUnits.contains(argType->name()))
-                    convert = false;
-                else
-                    convert = true;
+                convert = !m_formatUnits.contains(argType->name());
             }
-
-            bool hasConversionRule = !func->conversionRule(TypeSystem::TargetLangCode, arg->argumentIndex() + 1).isEmpty();
 
             Indentation indentation(INDENT);
             ac << INDENT;
-            if (hasConversionRule) {
+            if (!func->conversionRule(TypeSystem::TargetLangCode, arg->argumentIndex() + 1).isEmpty()) {
+                // Has conversion rule.
                 ac << arg->name() << "_out";
             } else {
                 QString argName = arg->name();
@@ -780,10 +798,12 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     bool invalidateReturn = false;
     foreach (FunctionModification funcMod, func->modifications()) {
         foreach (ArgumentModification argMod, funcMod.argument_mods) {
-            if (argMod.resetAfterUse)
-                s << INDENT << "bool invalidateArg" << argMod.index << " = PyTuple_GET_ITEM(pyargs, " << argMod.index - 1 << ")->ob_refcnt == 1;" << endl;
-            else if (argMod.index == 0  && argMod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::CppOwnership)
+            if (argMod.resetAfterUse) {
+                s << INDENT << "bool invalidateArg" << argMod.index;
+                s << " = PyTuple_GET_ITEM(pyargs, " << argMod.index - 1 << ")->ob_refcnt == 1;" << endl;
+            } else if (argMod.index == 0 && argMod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::CppOwnership) {
                 invalidateReturn = true;
+            }
         }
     }
     s << endl;
@@ -802,7 +822,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
 
     if (!injectedCodeCallsPythonOverride(func)) {
         s << INDENT;
-        s << "Shiboken::AutoDecRef " PYTHON_RETURN_VAR "(PyObject_Call(py_override, pyargs, NULL));" << endl;
+        s << "Shiboken::AutoDecRef " PYTHON_RETURN_VAR "(PyObject_Call(" PYTHON_OVERRIDE_VAR ", pyargs, NULL));" << endl;
 
         s << INDENT << "// An error happened in python code!" << endl;
         s << INDENT << "if (" PYTHON_RETURN_VAR ".isNull()) {" << endl;
@@ -820,46 +840,25 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             if (func->type() && func->typeReplaced(0) != "PyObject") {
                 s << INDENT << "// Check return type" << endl;
                 s << INDENT << "bool typeIsValid = ";
-                QString desiredType;
-                if (func->typeReplaced(0).isEmpty()) {
-                    s << cpythonIsConvertibleFunction(func->type());
-                    // SbkType would return null when the type is a container.
-                    if (func->type()->typeEntry()->isContainer()) {
-                        desiredType = '"' + reinterpret_cast<const ContainerTypeEntry*>(func->type()->typeEntry())->typeName() + '"';
-                    } else {
-                        QString typeName = func->type()->typeEntry()->qualifiedCppName();
-                        if (avoidProtectedHack()) {
-                            const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(func->type());
-                            if (metaEnum && metaEnum->isProtected())
-                                typeName = protectedEnumSurrogateName(metaEnum);
-                        }
+                writeTypeCheck(s, func->type(), PYTHON_RETURN_VAR, isNumber(func->type()->typeEntry()), func->typeReplaced(0));
+                s << ';' << endl;
 
-                        if (func->type()->isPrimitive())
-                            desiredType = "\"" + func->type()->name() + "\"";
-                        else
-                            desiredType = "Shiboken::SbkType< " + typeName + " >()->tp_name";
-                    }
-                } else {
-                    s << guessCPythonIsConvertible(func->typeReplaced(0));
-                    desiredType =  '"' + func->typeReplaced(0) + '"';
-                }
-                s << "(" PYTHON_RETURN_VAR ");" << endl;
-                if (isPointerToWrapperType(func->type()))
-                    s << INDENT << "typeIsValid = typeIsValid || (" PYTHON_RETURN_VAR " == Py_None);" << endl;
-
-                s << INDENT << "if (!typeIsValid) {" << endl;
+                s << INDENT << "if (!typeIsValid";
+                s << (isPointerToWrapperType(func->type()) ? " && " PYTHON_RETURN_VAR " != Py_None" : "");
+                s << ") {" << endl;
                 {
                     Indentation indent(INDENT);
-                    s << INDENT << "Shiboken::warning(PyExc_RuntimeWarning, 2, \"Invalid return value in function %s, expected %s, got %s.\", \""
-                    << func->ownerClass()->name() << '.' << funcName << "\", " << desiredType
-                    << ", " PYTHON_RETURN_VAR "->ob_type->tp_name);" << endl
-                    << INDENT << "return " << defaultReturnExpr << ';' << endl;
+                    s << INDENT << "Shiboken::warning(PyExc_RuntimeWarning, 2, "\
+                                   "\"Invalid return value in function %s, expected %s, got %s.\", \"";
+                    s << func->ownerClass()->name() << '.' << funcName << "\", \"" << getVirtualFunctionReturnTypeName(func);
+                    s << "\", " PYTHON_RETURN_VAR "->ob_type->tp_name);" << endl;
+                    s << INDENT << "return " << defaultReturnExpr << ';' << endl;
                 }
-                s << INDENT << "}" << endl;
+                s << INDENT << '}' << endl;
             }
 
-            bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, 0).isEmpty();
-            if (hasConversionRule) {
+            if (!func->conversionRule(TypeSystem::NativeCode, 0).isEmpty()) {
+                // Has conversion rule.
                 CodeSnipList convRule = getReturnConversionRule(TypeSystem::NativeCode, func, "", CPP_RETURN_VAR);
                 writeCodeSnips(s, convRule, CodeSnip::Any, TypeSystem::NativeCode, func);
             } else if (!injectedCodeHasReturnValueAttribution(func, TypeSystem::NativeCode)) {
@@ -877,18 +876,15 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
     foreach (FunctionModification funcMod, func->modifications()) {
         foreach (ArgumentModification argMod, funcMod.argument_mods) {
             if (argMod.resetAfterUse) {
-                s << INDENT << "if (invalidateArg" << argMod.index << ")" << endl;
+                s << INDENT << "if (invalidateArg" << argMod.index << ')' << endl;
                 Indentation indentation(INDENT);
                 s << INDENT << "Shiboken::Object::invalidate(PyTuple_GET_ITEM(pyargs, ";
                 s << (argMod.index - 1) << "));" << endl;
-            } else if (argMod.ownerships.contains(TypeSystem::NativeCode)) {
-                if (argMod.index == 0 && argMod.ownerships[TypeSystem::NativeCode] == TypeSystem::CppOwnership) {
-                    s << INDENT << "if (Shiboken::Object::checkType(" PYTHON_RETURN_VAR "))" << endl;
-                    {
-                        Indentation indent(INDENT);
-                        s << INDENT << "Shiboken::Object::releaseOwnership(" PYTHON_RETURN_VAR ");" << endl;
-                    }
-                }
+            } else if (argMod.ownerships.contains(TypeSystem::NativeCode)
+                       && argMod.index == 0 && argMod.ownerships[TypeSystem::NativeCode] == TypeSystem::CppOwnership) {
+                s << INDENT << "if (Shiboken::Object::checkType(" PYTHON_RETURN_VAR "))" << endl;
+                Indentation indent(INDENT);
+                s << INDENT << "Shiboken::Object::releaseOwnership(" PYTHON_RETURN_VAR ");" << endl;
             }
         }
     }
@@ -906,11 +902,11 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
             const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(type);
             bool isProtectedEnum = metaEnum && metaEnum->isProtected();
             if (isProtectedEnum) {
-                QString typeCast = "(";
+                QString typeCast;
                 if (metaEnum->enclosingClass())
                     typeCast += QString("::%1").arg(metaEnum->enclosingClass()->qualifiedCppName());
-                typeCast += QString("::%1)").arg(metaEnum->name());
-                s << typeCast;
+                typeCast += QString("::%1").arg(metaEnum->name());
+                s << '(' << typeCast << ')';
             }
         }
         s << CPP_RETURN_VAR ";" << endl;
