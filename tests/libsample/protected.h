@@ -27,6 +27,7 @@
 #include "objecttype.h"
 #include "point.h"
 #include <string>
+#include <list>
 
 class ProtectedNonPolymorphic
 {
@@ -128,6 +129,7 @@ public:
     {}
 protected:
     int protectedProperty;
+    std::list<int> protectedContainerProperty;
     Event::EventType protectedEnumProperty;
     Point protectedValueTypeProperty;
     Point* protectedValueTypePointerProperty;
@@ -135,4 +137,3 @@ protected:
 };
 
 #endif // PROTECTED_H
-

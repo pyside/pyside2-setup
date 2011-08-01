@@ -2877,42 +2877,37 @@ void CppGenerator::writeGetterFunction(QTextStream& s, const AbstractMetaField* 
     s << "static PyObject* " << cpythonGetterFunctionName(metaField) << "(PyObject* " PYTHON_SELF_VAR ", void*)" << endl;
     s << '{' << endl;
 
-    writeInvalidPyObjectCheck(s, PYTHON_SELF_VAR);
+    writeCppSelfDefinition(s, metaField->enclosingClass());
 
-    s << INDENT << "PyObject* val = ";
+    AbstractMetaType* fieldType = metaField->type();
+    // Force use of pointer to return internal variable memory
+    bool newWrapperSameObject = !fieldType->isConstant() && isWrapperType(fieldType) && !isPointer(fieldType);
 
     QString cppField;
-    AbstractMetaType *metaType = metaField->type();
-    // Force use of pointer to return internal variable memory
-    bool useReference = (!metaType->isConstant() &&
-                         !metaType->isEnum() &&
-                         !metaType->isFlags() &&
-                         !metaType->isPrimitive() &&
-                         metaType->indirections() == 0);
-
     if (avoidProtectedHack() && metaField->isProtected()) {
-        cppField = QString("((%1*)%2)->%3()")
-                   .arg(wrapperName(metaField->enclosingClass()))
-                   .arg(cpythonWrapperCPtr(metaField->enclosingClass(), PYTHON_SELF_VAR))
-                   .arg(protectedFieldGetterName(metaField));
+        cppField = QString("((%1*)%2)->%3()").arg(wrapperName(metaField->enclosingClass()))
+                                             .arg(CPP_SELF_VAR)
+                                             .arg(protectedFieldGetterName(metaField));
     } else {
-        cppField = QString("%1%2->%3")
-                   .arg(useReference ? '&' : ' ')
-                   .arg(cpythonWrapperCPtr(metaField->enclosingClass(), PYTHON_SELF_VAR))
-                   .arg(metaField->name());
+        cppField = QString("%2->%3").arg(CPP_SELF_VAR).arg(metaField->name());
+        if (newWrapperSameObject) {
+            cppField.prepend("&(");
+            cppField.append(')');
+        }
     }
 
-    if (useReference) {
-        s << "Shiboken::createWrapper(" << cppField << ");" << endl;
-        s << INDENT << "Shiboken::Object::releaseOwnership(val);" << endl;
-        s << INDENT << "Shiboken::Object::setParent(" PYTHON_SELF_VAR ", val);" << endl;
+    s << INDENT << "PyObject* value = ";
+    if (newWrapperSameObject) {
+        s << "Shiboken::Object::newObject((SbkObjectType*)" << cpythonTypeNameExt(fieldType->typeEntry());
+        s << ", " << cppField << ", false, true);" << endl;
+        s << INDENT << "Shiboken::Object::setParent(" PYTHON_SELF_VAR ", value)";
     } else {
-        writeToPythonConversion(s,  metaField->type(), metaField->enclosingClass(), cppField);
-        s << ';' << endl;
+        writeToPythonConversion(s, fieldType, metaField->enclosingClass(), cppField);
     }
+    s << ';' << endl;
 
-    s << INDENT << "return val;" << endl;
-    s << '}' << endl << endl;
+    s << INDENT << "return value;" << endl;
+    s << '}' << endl;
 }
 
 void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* metaField)
@@ -2921,7 +2916,7 @@ void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* 
     s << "static int " << cpythonSetterFunctionName(metaField) << "(PyObject* " PYTHON_SELF_VAR ", PyObject* value, void*)" << endl;
     s << '{' << endl;
 
-    writeInvalidPyObjectCheck(s, PYTHON_SELF_VAR);
+    writeCppSelfDefinition(s, metaField->enclosingClass());
 
     s << INDENT << "if (value == 0) {" << endl;
     {
@@ -2932,40 +2927,37 @@ void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* 
     }
     s << INDENT << '}' << endl;
 
+    AbstractMetaType* fieldType = metaField->type();
+
     s << INDENT << "if (!";
-    writeTypeCheck(s, metaField->type(), "value", isNumber(metaField->type()->typeEntry()));
+    writeTypeCheck(s, fieldType, "value", isNumber(fieldType->typeEntry()));
     s << ") {" << endl;
     {
         Indentation indent(INDENT);
         s << INDENT << "PyErr_SetString(PyExc_TypeError, \"wrong type attributed to '";
-        s << metaField->name() << "', '" << metaField->type()->name() << "' or convertible type expected\");" << endl;
+        s << metaField->name() << "', '" << fieldType->name() << "' or convertible type expected\");" << endl;
         s << INDENT << "return -1;" << endl;
     }
     s << INDENT << '}' << endl << endl;
 
-    s << INDENT;
-    if (avoidProtectedHack() && metaField->isProtected()) {
-        QString fieldStr = QString("((%1*)%2)->%3")
-                           .arg(wrapperName(metaField->enclosingClass()))
-                           .arg(cpythonWrapperCPtr(metaField->enclosingClass(), PYTHON_SELF_VAR))
-                           .arg(protectedFieldSetterName(metaField));
-        s << fieldStr << '(';
-        writeToCppConversion(s, metaField->type(), metaField->enclosingClass(), "value");
-        s << ')';
-    } else {
-        QString fieldStr = QString("%1->%2")
-                           .arg(cpythonWrapperCPtr(metaField->enclosingClass(), PYTHON_SELF_VAR))
-                           .arg(metaField->name());
-        s << fieldStr << " = ";
-        writeToCppConversion(s, metaField->type(), metaField->enclosingClass(), "value");
-    }
-    s << ';' << endl << endl;
+    QString conversion;
+    QTextStream c(&conversion);
+    writeToCppConversion(c, fieldType, metaField->enclosingClass(), "value");
 
-    if (isPointerToWrapperType(metaField->type())) {
+    if (avoidProtectedHack() && metaField->isProtected()) {
+        conversion = QString("((%1*)%2)->%3(%4)").arg(wrapperName(metaField->enclosingClass()))
+                                                 .arg(CPP_SELF_VAR)
+                                                 .arg(protectedFieldSetterName(metaField))
+                                                 .arg(conversion);
+    } else {
+        conversion = QString("%1->%2 = %3").arg(CPP_SELF_VAR).arg(metaField->name()).arg(conversion);
+    }
+
+    s << INDENT << conversion << ';' << endl << endl;
+
+    if (isPointerToWrapperType(fieldType)) {
         s << INDENT << "Shiboken::Object::keepReference(reinterpret_cast<SbkObject*>(" PYTHON_SELF_VAR "), \"";
         s << metaField->name() << "\", value);" << endl;
-        //s << INDENT << "Py_XDECREF(oldvalue);" << endl;
-        s << endl;
     }
 
     s << INDENT << "return 0;" << endl;

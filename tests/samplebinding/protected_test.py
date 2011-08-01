@@ -277,6 +277,12 @@ class ProtectedPropertyTest(unittest.TestCase):
         self.obj.protectedProperty = 3
         self.assertEqual(self.obj.protectedProperty, 3)
 
+    def testProtectedContainerProperty(self):
+        '''Writes and reads a protected list of integers property.'''
+        lst = [1, 2, 3, 4]
+        self.obj.protectedContainerProperty = lst
+        self.assertEqual(self.obj.protectedContainerProperty, lst)
+
     def testProtectedEnumProperty(self):
         '''Writes and reads a protected enum property.'''
         self.obj.protectedEnumProperty = Event.SOME_EVENT
