@@ -43,6 +43,7 @@ public:
     Echo& operator<<(unsigned int item) { return *this; }
     Echo& operator<<(signed int item) { return *this; }
     Echo& operator<<(const ObjectType* item) { return *this; }
+    Echo& operator<<(Str str) { return *this; }
 };
 
 #endif
