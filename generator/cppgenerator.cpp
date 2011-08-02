@@ -1808,30 +1808,24 @@ void CppGenerator::writeFunctionCalls(QTextStream& s, const OverloadData& overlo
 {
     QList<const AbstractMetaFunction*> overloads = overloadData.overloadsWithoutRepetition();
     s << INDENT << "// Call function/method" << endl;
-    s << INDENT << "{" << endl;
+    s << INDENT << (overloads.count() > 1 ? "switch (overloadId) " : "") << '{' << endl;
     {
         Indentation indent(INDENT);
-
-        s << INDENT << (overloads.count() > 1 ? "switch (overloadId) " : "") << '{' << endl;
-        {
-            Indentation indent(INDENT);
-            if (overloads.count() == 1) {
-                writeSingleFunctionCall(s, overloadData, overloads.first());
-            } else {
-                for (int i = 0; i < overloads.count(); i++) {
-                    const AbstractMetaFunction* func = overloads.at(i);
-                    s << INDENT << "case " << i << ": // " << func->minimalSignature() << endl;
-                    s << INDENT << '{' << endl;
-                    {
-                        Indentation indent(INDENT);
-                        writeSingleFunctionCall(s, overloadData, func);
-                        s << INDENT << "break;" << endl;
-                    }
-                    s << INDENT << '}' << endl;
+        if (overloads.count() == 1) {
+            writeSingleFunctionCall(s, overloadData, overloads.first());
+        } else {
+            for (int i = 0; i < overloads.count(); i++) {
+                const AbstractMetaFunction* func = overloads.at(i);
+                s << INDENT << "case " << i << ": // " << func->minimalSignature() << endl;
+                s << INDENT << '{' << endl;
+                {
+                    Indentation indent(INDENT);
+                    writeSingleFunctionCall(s, overloadData, func);
+                    s << INDENT << "break;" << endl;
                 }
+                s << INDENT << '}' << endl;
             }
         }
-        s << INDENT << '}' << endl;
     }
     s << INDENT << '}' << endl;
 }
