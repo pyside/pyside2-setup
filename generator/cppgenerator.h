@@ -109,6 +109,11 @@ private:
                                         const AbstractMetaClass* context = 0,
                                         const QString& defaultValue = QString());
 
+    /// Writes the conversion rule for arguments of regular and virtual methods.
+    void writeConversionRule(QTextStream& s, const AbstractMetaFunction* func, TypeSystem::Language language);
+    /// Writes the conversion rule for the return value of a virtual method.
+    void writeConversionRule(QTextStream& s, const AbstractMetaFunction* func, const QString& outputVar);
+
     /**
      *   Set the Python method wrapper return value variable to Py_None if
      *   there are return types different from void in any of the other overloads

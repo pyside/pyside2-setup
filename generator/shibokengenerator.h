@@ -111,26 +111,31 @@ public:
                                 const AbstractMetaFunction* func,
                                 Options options = NoOption) const;
     QString functionReturnType(const AbstractMetaFunction* func, Options options = NoOption) const;
-    /**
-     *   Write a code snip into the buffer \p s.
-     *   CodeSnip are codes inside inject-code tags.
-     *   \param s    the buffer
-     *   \param code_snips   a list of code snips
-     *   \param position     the position to insert the code snip
-     *   \param language     the kind of code snip
-     *   \param func the cpp function
-     *   \param lastArg last argument whose value is available, usually the last;
-     *                  a NULL pointer indicates that no argument will be available,
-     *                  i.e. a call without arguments.
-     *   \param context the class context for the place where the code snip will be written
-     */
-    void writeCodeSnips(QTextStream &s,
-                        const CodeSnipList &code_snips,
+
+    /// Utility function for writeCodeSnips.
+    static QMap<int, QString> getArgumentReplacement(const AbstractMetaFunction* func,
+                                                     bool usePyArgs, TypeSystem::Language language,
+                                                     const AbstractMetaArgument* lastArg);
+
+    /// Write user's custom code snippets at class or module level.
+    void writeCodeSnips(QTextStream& s,
+                        const CodeSnipList& codeSnips,
                         CodeSnip::Position position,
                         TypeSystem::Language language,
-                        const AbstractMetaFunction* func = 0,
-                        const AbstractMetaArgument* lastArg = 0,
                         const AbstractMetaClass* context = 0);
+    /// Write user's custom code snippets at function level.
+    void writeCodeSnips(QTextStream& s,
+                        const CodeSnipList& codeSnips,
+                        CodeSnip::Position position,
+                        TypeSystem::Language language,
+                        const AbstractMetaFunction* func,
+                        const AbstractMetaArgument* lastArg = 0);
+
+    /// Returns a string with the user's custom code snippets that comply with \p position and \p language.
+    QString getCodeSnippets(const CodeSnipList& codeSnips, CodeSnip::Position position, TypeSystem::Language language);
+
+    /// Replaces variables for the user's custom code at global or class level.
+    void processCodeSnip(QString& code, const AbstractMetaClass* context = 0);
 
     /// Replaces the %CONVERTTOPYTHON type system variable.
     void replaceConvertToPythonTypeSystemVariable(QString& code);

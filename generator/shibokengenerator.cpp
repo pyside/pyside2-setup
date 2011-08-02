@@ -1165,265 +1165,269 @@ static QString getArgumentsFromMethodCall(const QString& str)
     return str.mid(begin, pos-begin-1);
 }
 
+QString ShibokenGenerator::getCodeSnippets(const CodeSnipList& codeSnips,
+                                           CodeSnip::Position position,
+                                           TypeSystem::Language language)
+{
+    QString code;
+    QTextStream c(&code);
+    foreach (CodeSnip snip, codeSnips) {
+        if ((position != CodeSnip::Any && snip.position != position) || !(snip.language & language))
+            continue;
+        QString snipCode;
+        QTextStream sc(&snipCode);
+        formatCode(sc, snip.code(), INDENT);
+        c << snipCode;
+    }
+    return code;
+}
+void ShibokenGenerator::processCodeSnip(QString& code, const AbstractMetaClass* context)
+{
+    if (context) {
+        // Replace template variable by the Python Type object
+        // for the class context in which the variable is used.
+        code.replace("%PYTHONTYPEOBJECT", cpythonTypeName(context) + ".super.ht_type");
+        code.replace("%TYPE", wrapperName(context));
+        code.replace("%CPPTYPE", context->name());
+    }
+
+    // replace "toPython" converters
+    replaceConvertToPythonTypeSystemVariable(code);
+
+    // replace "toCpp" converters
+    replaceConvertToCppTypeSystemVariable(code);
+
+    // replace "isConvertible" check
+    replaceConvertibleToCppTypeSystemVariable(code);
+
+    // replace "checkType" check
+    replaceTypeCheckTypeSystemVariable(code);
+}
+
+QMap<int, QString> ShibokenGenerator::getArgumentReplacement(const AbstractMetaFunction* func,
+                                                             bool usePyArgs, TypeSystem::Language language,
+                                                             const AbstractMetaArgument* lastArg)
+{
+    QMap<int, QString> argReplacement;
+    int removed = 0;
+    for (int i = 0; i < func->arguments().size(); ++i) {
+        const AbstractMetaArgument* arg = func->arguments().at(i);
+        QString argValue;
+        if (language == TypeSystem::TargetLangCode) {
+            bool argRemoved = func->argumentRemoved(i+1);
+            removed = removed + (int) argRemoved;
+            if (argRemoved || (lastArg && arg->argumentIndex() > lastArg->argumentIndex()))
+                argValue = arg->defaultValueExpression();
+            if (!argRemoved && argValue.isEmpty()) {
+                if (arg->type()->typeEntry()->isCustom())
+                    argValue = usePyArgs ? QString(PYTHON_ARGS"[%1]").arg(i - removed) : PYTHON_ARG;
+                else
+                    argValue = QString(CPP_ARG"%1").arg(i - removed);
+            }
+        } else {
+            argValue = arg->name();
+        }
+        if (!argValue.isEmpty())
+            argReplacement[i+1] = argValue;
+    }
+    return argReplacement;
+}
+
+void ShibokenGenerator::writeCodeSnips(QTextStream& s,
+                                       const CodeSnipList& codeSnips,
+                                       CodeSnip::Position position,
+                                       TypeSystem::Language language,
+                                       const AbstractMetaClass* context)
+{
+    QString code = getCodeSnippets(codeSnips, position, language);
+    if (code.isEmpty())
+        return;
+    processCodeSnip(code, context);
+    s << INDENT << "// Begin code injection" << endl;
+    s << code;
+    s << INDENT << "// End of code injection" << endl;
+}
+
 void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                                        const CodeSnipList& codeSnips,
                                        CodeSnip::Position position,
                                        TypeSystem::Language language,
                                        const AbstractMetaFunction* func,
-                                       const AbstractMetaArgument* lastArg,
-                                       const AbstractMetaClass* context)
+                                       const AbstractMetaArgument* lastArg)
 {
+    QString code = getCodeSnippets(codeSnips, position, language);
+    if (code.isEmpty())
+        return;
+
+    // Calculate the real number of arguments.
+    int argsRemoved = 0;
+    for (int i = 0; i < func->arguments().size(); i++) {
+        if (func->argumentRemoved(i+1))
+            argsRemoved++;
+    }
+
+    OverloadData od(getFunctionGroups(func->implementingClass())[func->name()], this);
+    bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(od);
+
+    // Replace %PYARG_# variables.
+    code.replace("%PYARG_0", PYTHON_RETURN_VAR);
+
     static QRegExp pyArgsRegex("%PYARG_(\\d+)");
-
-    // detect is we should use pyargs instead of args as variable name for python arguments
-    bool usePyArgs = false;
-    if (func) {
-        // calc num of real arguments.
-        int argsRemoved = 0;
-        for (int i = 0; i < func->arguments().size(); i++) {
-            if (func->argumentRemoved(i+1))
-                argsRemoved++;
+    if (language == TypeSystem::TargetLangCode) {
+        if (usePyArgs) {
+            code.replace(pyArgsRegex, PYTHON_ARGS"[\\1-1]");
+        } else {
+            static QRegExp pyArgsRegexCheck("%PYARG_([2-9]+)");
+            if (pyArgsRegexCheck.indexIn(code) != -1) {
+                ReportHandler::warning("Wrong index for %PYARG variable ("+pyArgsRegexCheck.cap(1)+") on "+func->signature());
+                return;
+            }
+            code.replace("%PYARG_1", PYTHON_ARG);
         }
-        OverloadData od(getFunctionGroups(func->implementingClass())[func->name()], this);
-        usePyArgs = pythonFunctionWrapperUsesListOfArguments(od);
+    } else {
+        // Replaces the simplest case of attribution to a
+        // Python argument on the binding virtual method.
+        static QRegExp pyArgsAttributionRegex("%PYARG_(\\d+)\\s*=[^=]\\s*([^;]+)");
+        code.replace(pyArgsAttributionRegex, "PyTuple_SET_ITEM(" PYTHON_ARGS ", \\1-1, \\2)");
+        code.replace(pyArgsRegex, "PyTuple_GET_ITEM(" PYTHON_ARGS ", \\1-1)");
     }
 
-    foreach (CodeSnip snip, codeSnips) {
-        if ((position != CodeSnip::Any && snip.position != position) || !(snip.language & language))
-            continue;
+    // Replace %ARG#_TYPE variables.
+    foreach (const AbstractMetaArgument* arg, func->arguments()) {
+        QString argTypeVar = QString("%ARG%1_TYPE").arg(arg->argumentIndex() + 1);
+        QString argTypeVal = arg->type()->cppSignature();
+        code.replace(argTypeVar, argTypeVal);
+    }
 
-        QString code;
-        QTextStream tmpStream(&code);
-        formatCode(tmpStream, snip.code(), INDENT);
+    int pos = 0;
+    static QRegExp cppArgTypeRegexCheck("%ARG(\\d+)_TYPE");
+    while ((pos = cppArgTypeRegexCheck.indexIn(code, pos)) != -1) {
+        ReportHandler::warning("Wrong index for %ARG#_TYPE variable ("+cppArgTypeRegexCheck.cap(1)+") on "+func->signature());
+        pos += cppArgTypeRegexCheck.matchedLength();
+    }
 
-        if (context) {
-            // replace template variable for the Python Type object for the
-            // class context in which the variable is used
-            code.replace("%PYTHONTYPEOBJECT", cpythonTypeName(context) + ".super.ht_type");
-            code.replace("%TYPE", wrapperName(context));
-            code.replace("%CPPTYPE", context->name());
+    // Replace template variable for return variable name.
+    if (func->isConstructor()) {
+        code.replace("%0.", QString("%1->").arg("cptr"));
+        code.replace("%0", "cptr");
+    } else if (func->type()) {
+        QString returnValueOp = isPointerToWrapperType(func->type()) ? "%1->" : "%1.";
+        if (ShibokenGenerator::isWrapperType(func->type()))
+            code.replace("%0.", returnValueOp.arg(CPP_RETURN_VAR));
+        code.replace("%0", CPP_RETURN_VAR);
+    }
+
+    // Replace template variable for self Python object.
+    QString pySelf = (language == TypeSystem::NativeCode) ? "pySelf" : PYTHON_SELF_VAR;
+    code.replace("%PYSELF", pySelf);
+
+    // Replace template variable for a pointer to C++ of this object.
+    if (func->implementingClass()) {
+        QString replacement = func->isStatic() ? "%1::" : "%1->";
+        QString cppSelf;
+        if (func->isStatic())
+            cppSelf = func->ownerClass()->qualifiedCppName();
+        else if (language == TypeSystem::NativeCode)
+            cppSelf = "this";
+        else
+            cppSelf = CPP_SELF_VAR;
+
+        // On comparison operator CPP_SELF_VAR is always a reference.
+        if (func->isComparisonOperator())
+            replacement = "%1.";
+
+        if (func->isVirtual() && !func->isAbstract() && (!avoidProtectedHack() || !func->isProtected())) {
+            QString methodCallArgs = getArgumentsFromMethodCall(code);
+            if (!methodCallArgs.isNull()) {
+                if (func->name() == "metaObject") {
+                    QString wrapperClassName = wrapperName(func->ownerClass());
+                    QString cppSelfVar = avoidProtectedHack() ? QString("%CPPSELF") : QString("reinterpret_cast<%1*>(%CPPSELF)").arg(wrapperClassName);
+                    code.replace(QString("%CPPSELF.%FUNCTION_NAME(%1)").arg(methodCallArgs),
+                                 QString("(Shiboken::Object::hasCppWrapper(reinterpret_cast<SbkObject*>(%1))"
+                                         " ? %2->::%3::%FUNCTION_NAME(%4)"
+                                         " : %CPPSELF.%FUNCTION_NAME(%4))").arg(pySelf).arg(cppSelfVar).arg(wrapperClassName).arg(methodCallArgs));
+                } else {
+                    code.replace(QString("%CPPSELF.%FUNCTION_NAME(%1)").arg(methodCallArgs),
+                                 QString("(Shiboken::Object::hasCppWrapper(reinterpret_cast<SbkObject*>(%1))"
+                                         " ? %CPPSELF->::%TYPE::%FUNCTION_NAME(%2)"
+                                         " : %CPPSELF.%FUNCTION_NAME(%2))").arg(pySelf).arg(methodCallArgs));
+                }
+            }
         }
 
-        if (func) {
-            // replace %PYARG_# variables
-            code.replace("%PYARG_0", PYTHON_RETURN_VAR);
-            if (snip.language == TypeSystem::TargetLangCode) {
-                if (usePyArgs) {
-                    code.replace(pyArgsRegex, PYTHON_ARGS"[\\1-1]");
-                } else {
-                    static QRegExp pyArgsRegexCheck("%PYARG_([2-9]+)");
-                    if (pyArgsRegexCheck.indexIn(code) != -1) {
-                        ReportHandler::warning("Wrong index for %PYARG variable ("+pyArgsRegexCheck.cap(1)+") on "+func->signature());
-                        return;
-                    }
-                    code.replace("%PYARG_1", PYTHON_ARG);
-                }
+        code.replace("%CPPSELF.", replacement.arg(cppSelf));
+        code.replace("%CPPSELF", cppSelf);
+
+        if (code.indexOf("%BEGIN_ALLOW_THREADS") > -1) {
+            if (code.count("%BEGIN_ALLOW_THREADS") == code.count("%END_ALLOW_THREADS")) {
+                code.replace("%BEGIN_ALLOW_THREADS", BEGIN_ALLOW_THREADS);
+                code.replace("%END_ALLOW_THREADS", END_ALLOW_THREADS);
             } else {
-                // Replaces the simplest case of attribution to a Python argument
-                // on the binding virtual method.
-                static QRegExp pyArgsAttributionRegex("%PYARG_(\\d+)\\s*=[^=]\\s*([^;]+)");
-                code.replace(pyArgsAttributionRegex, "PyTuple_SET_ITEM(" PYTHON_ARGS ", \\1-1, \\2)");
-                code.replace(pyArgsRegex, "PyTuple_GET_ITEM(" PYTHON_ARGS ", \\1-1)");
+                ReportHandler::warning("%BEGIN_ALLOW_THREADS and %END_ALLOW_THREADS mismatch");
             }
-
-            // replace %ARG#_TYPE variables
-            foreach (const AbstractMetaArgument* arg, func->arguments()) {
-                QString argTypeVar = QString("%ARG%1_TYPE").arg(arg->argumentIndex() + 1);
-                QString argTypeVal = arg->type()->cppSignature();
-                code.replace(argTypeVar, argTypeVal);
-            }
-
-            static QRegExp cppArgTypeRegexCheck("%ARG(\\d+)_TYPE");
-            int pos = 0;
-            while ((pos = cppArgTypeRegexCheck.indexIn(code, pos)) != -1) {
-                ReportHandler::warning("Wrong index for %ARG#_TYPE variable ("+cppArgTypeRegexCheck.cap(1)+") on "+func->signature());
-                pos += cppArgTypeRegexCheck.matchedLength();
-            }
-
-            // replace template variable for return variable name
-            if (func->isConstructor()) {
-                code.replace("%0.", QString("%1->").arg("cptr"));
-                code.replace("%0", "cptr");
-            } else if (func->type()) {
-                QString returnValueOp = isPointerToWrapperType(func->type()) ? "%1->" : "%1.";
-                if (ShibokenGenerator::isWrapperType(func->type()))
-                    code.replace("%0.", returnValueOp.arg(CPP_RETURN_VAR));
-                code.replace("%0", CPP_RETURN_VAR);
-            }
-
-            // replace template variable for self Python object
-            QString pySelf = (snip.language == TypeSystem::NativeCode) ? "pySelf" : PYTHON_SELF_VAR;
-            code.replace("%PYSELF", pySelf);
-
-            // replace template variable for pointer to C++ this object
-            if (func->implementingClass()) {
-                QString cppSelf;
-                QString replacement("%1->");
-                if (func->isStatic()) {
-                    cppSelf = func->ownerClass()->qualifiedCppName();
-                    replacement = "%1::";
-                } else if (snip.language == TypeSystem::NativeCode) {
-                    cppSelf = "this";
-                } else {
-                    cppSelf = "cppSelf";
-                }
-
-                // on comparison operator cppSelf is always a reference.
-                if (func->isComparisonOperator())
-                    replacement = "%1.";
-
-                if (func->isVirtual() && !func->isAbstract() && (!avoidProtectedHack() || !func->isProtected())) {
-                    QString methodCallArgs = getArgumentsFromMethodCall(code);
-                    if (!methodCallArgs.isNull()) {
-                        if (func->name() == "metaObject") {
-                            QString wrapperClassName = wrapperName(func->ownerClass());
-                            QString cppSelfVar = avoidProtectedHack() ? QString("%CPPSELF") : QString("reinterpret_cast<%1*>(%CPPSELF)").arg(wrapperClassName);
-                            code.replace(QString("%CPPSELF.%FUNCTION_NAME(%1)").arg(methodCallArgs),
-                                         QString("(Shiboken::Object::hasCppWrapper(reinterpret_cast<SbkObject*>(%1))"
-                                                 " ? %2->::%3::%FUNCTION_NAME(%4)"
-                                                 " : %CPPSELF.%FUNCTION_NAME(%4))").arg(pySelf).arg(cppSelfVar).arg(wrapperClassName).arg(methodCallArgs));
-                        } else {
-                            code.replace(QString("%CPPSELF.%FUNCTION_NAME(%1)").arg(methodCallArgs),
-                                         QString("(Shiboken::Object::hasCppWrapper(reinterpret_cast<SbkObject*>(%1))"
-                                                 " ? %CPPSELF->::%TYPE::%FUNCTION_NAME(%2)"
-                                                 " : %CPPSELF.%FUNCTION_NAME(%2))").arg(pySelf).arg(methodCallArgs));
-                        }
-                    }
-                }
-
-                code.replace("%CPPSELF.", replacement.arg(cppSelf));
-                code.replace("%CPPSELF", cppSelf);
-
-                if (code.indexOf("%BEGIN_ALLOW_THREADS") > -1) {
-                    if (code.count("%BEGIN_ALLOW_THREADS") == code.count("%END_ALLOW_THREADS")) {
-                        code.replace("%BEGIN_ALLOW_THREADS", BEGIN_ALLOW_THREADS);
-                        code.replace("%END_ALLOW_THREADS", END_ALLOW_THREADS);
-                    } else {
-                        ReportHandler::warning("%BEGIN_ALLOW_THREADS and %END_ALLOW_THREADS mismatch");
-                    }
-                }
-
-                // replace template variable for the Python Type object for the
-                // class implementing the method in which the code snip is written
-                if (func->isStatic()) {
-                    code.replace("%PYTHONTYPEOBJECT", cpythonTypeName(func->implementingClass()) + ".super.ht_type");
-                } else {
-                    code.replace("%PYTHONTYPEOBJECT.", QString("%1->ob_type->").arg(pySelf));
-                    code.replace("%PYTHONTYPEOBJECT", QString("%1->ob_type").arg(pySelf));
-                }
-            }
-
-            // replace template variables %# for individual arguments
-            int removed = 0;
-            for (int i = 0; i < func->arguments().size(); i++) {
-                const AbstractMetaArgument* arg = func->arguments().at(i);
-                QString argReplacement;
-                if (snip.language == TypeSystem::TargetLangCode) {
-                    if (!lastArg || func->argumentRemoved(i+1)) {
-                        if (!arg->defaultValueExpression().isEmpty())
-                            argReplacement = arg->defaultValueExpression();
-                        removed++;
-                    } else if (lastArg && (arg->argumentIndex() > lastArg->argumentIndex())) {
-                        argReplacement = arg->defaultValueExpression();
-                    }
-
-                    if (argReplacement.isEmpty()) {
-                        if (arg->type()->typeEntry()->isCustom()) {
-                            argReplacement = usePyArgs ? QString(PYTHON_ARGS"[%1]").arg(i - removed) : PYTHON_ARG;
-                        } else {
-                            argReplacement = QString(CPP_ARG"%1").arg(i - removed);
-                        }
-                    }
-                } else {
-                    argReplacement = arg->name();
-                }
-                code.replace("%" + QString::number(i+1), argReplacement);
-            }
-
-            // replace template %ARGUMENT_NAMES variable for a list of arguments
-            removed = 0;
-            QStringList argumentNames;
-            foreach (const AbstractMetaArgument* arg, func->arguments()) {
-                if (snip.language == TypeSystem::TargetLangCode) {
-                    if (func->argumentRemoved(arg->argumentIndex() + 1)) {
-                        if (!arg->defaultValueExpression().isEmpty())
-                            argumentNames << arg->defaultValueExpression();
-                        removed++;
-                        continue;
-                    }
-
-                    QString argName;
-                    if (lastArg && arg->argumentIndex() > lastArg->argumentIndex()) {
-                        argName = arg->defaultValueExpression();
-                    } else {
-                        argName = QString(CPP_ARG"%1").arg(arg->argumentIndex() - removed);
-                    }
-                    argumentNames << argName;
-                } else {
-                    argumentNames << arg->name();
-                }
-            }
-            code.replace("%ARGUMENT_NAMES", argumentNames.join(", "));
-
-            if (snip.language == TypeSystem::NativeCode) {
-                // replace template %PYTHON_ARGUMENTS variable for a pointer to the Python tuple
-                // containing the converted virtual method arguments received from C++ to be passed
-                // to the Python override
-                code.replace("%PYTHON_ARGUMENTS", PYTHON_ARGS);
-
-                // replace variable %PYTHON_METHOD_OVERRIDE for a pointer to the Python method
-                // override for the C++ virtual method in which this piece of code was inserted
-                code.replace("%PYTHON_METHOD_OVERRIDE", PYTHON_OVERRIDE_VAR);
-            }
-
-            if (avoidProtectedHack()) {
-                // If the function being processed was added by the user via type system,
-                // Shiboken needs to find out if there are other overloads for the same method
-                // name and if any of them is of the protected visibility. This is used to replace
-                // calls to %FUNCTION_NAME on user written custom code for calls to the protected
-                // dispatcher.
-                bool hasProtectedOverload = false;
-                if (func->isUserAdded()) {
-                    foreach (const AbstractMetaFunction* f, getFunctionOverloads(func->ownerClass(), func->name()))
-                        hasProtectedOverload |= f->isProtected();
-                }
-
-                if (func->isProtected() || hasProtectedOverload) {
-                    code.replace("%TYPE::%FUNCTION_NAME",
-                                 QString("%1::%2_protected")
-                                 .arg(wrapperName(func->ownerClass()))
-                                 .arg(func->originalName()));
-                    code.replace("%FUNCTION_NAME", QString("%1_protected").arg(func->originalName()));
-                }
-            }
-
-            if (func->isConstructor() && shouldGenerateCppWrapper(func->ownerClass()))
-                code.replace("%TYPE", wrapperName(func->ownerClass()));
-
-            if (func->ownerClass())
-                code.replace("%CPPTYPE", func->ownerClass()->name());
-
-            replaceTemplateVariables(code, func);
         }
 
-        // replace "toPython" converters
-        replaceConvertToPythonTypeSystemVariable(code);
-
-        // replace "toCpp" converters
-        replaceConvertToCppTypeSystemVariable(code);
-
-        // replace "isConvertible" check
-        replaceConvertibleToCppTypeSystemVariable(code);
-
-        // replace "checkType" check
-        replaceTypeCheckTypeSystemVariable(code);
-
-        if (!code.isEmpty()) {
-            s << INDENT << "// Begin code injection" << endl;
-            s << code;
-            s << INDENT << "// End of code injection" << endl;
+        // replace template variable for the Python Type object for the
+        // class implementing the method in which the code snip is written
+        if (func->isStatic()) {
+            code.replace("%PYTHONTYPEOBJECT", cpythonTypeName(func->implementingClass()) + ".super.ht_type");
+        } else {
+            code.replace("%PYTHONTYPEOBJECT.", QString("%1->ob_type->").arg(pySelf));
+            code.replace("%PYTHONTYPEOBJECT", QString("%1->ob_type").arg(pySelf));
         }
     }
+
+    // Replaces template %ARGUMENT_NAMES and %# variables by argument variables and values.
+    // Replaces template variables %# for individual arguments.
+    QMap<int, QString> argReplacements = getArgumentReplacement(func, usePyArgs, language, lastArg);
+    code.replace("%ARGUMENT_NAMES", QStringList(argReplacements.values()).join(", "));
+    foreach (int i, argReplacements.keys())
+        code.replace(QString("%%1").arg(i), argReplacements[i]);
+
+    if (language == TypeSystem::NativeCode) {
+        // Replaces template %PYTHON_ARGUMENTS variable with a pointer to the Python tuple
+        // containing the converted virtual method arguments received from C++ to be passed
+        // to the Python override.
+        code.replace("%PYTHON_ARGUMENTS", PYTHON_ARGS);
+
+        // replace variable %PYTHON_METHOD_OVERRIDE for a pointer to the Python method
+        // override for the C++ virtual method in which this piece of code was inserted
+        code.replace("%PYTHON_METHOD_OVERRIDE", PYTHON_OVERRIDE_VAR);
+    }
+
+    if (avoidProtectedHack()) {
+        // If the function being processed was added by the user via type system,
+        // Shiboken needs to find out if there are other overloads for the same method
+        // name and if any of them is of the protected visibility. This is used to replace
+        // calls to %FUNCTION_NAME on user written custom code for calls to the protected
+        // dispatcher.
+        bool hasProtectedOverload = false;
+        if (func->isUserAdded()) {
+            foreach (const AbstractMetaFunction* f, getFunctionOverloads(func->ownerClass(), func->name()))
+                hasProtectedOverload |= f->isProtected();
+        }
+
+        if (func->isProtected() || hasProtectedOverload) {
+            code.replace("%TYPE::%FUNCTION_NAME",
+                         QString("%1::%2_protected")
+                         .arg(wrapperName(func->ownerClass()))
+                         .arg(func->originalName()));
+            code.replace("%FUNCTION_NAME", QString("%1_protected").arg(func->originalName()));
+        }
+    }
+
+    if (func->isConstructor() && shouldGenerateCppWrapper(func->ownerClass()))
+        code.replace("%TYPE", wrapperName(func->ownerClass()));
+
+    if (func->ownerClass())
+        code.replace("%CPPTYPE", func->ownerClass()->name());
+
+    replaceTemplateVariables(code, func);
+
+    processCodeSnip(code);
+    s << INDENT << "// Begin code injection" << endl;
+    s << code;
+    s << INDENT << "// End of code injection" << endl;
 }
 
 void ShibokenGenerator::replaceConvertToPythonTypeSystemVariable(QString& code)
