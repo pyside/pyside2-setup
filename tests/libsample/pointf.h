@@ -41,8 +41,13 @@ public:
     inline void setX(double x) { m_x = x; }
     inline void setY(double y) { m_y = y; }
 
+    // This method could simply return the midpoint,
+    // but the interesting part of the test is to set the
+    // result in the pointer argument.
+    void midpoint(const PointF& other, PointF* midpoint) const;
+
     // The != operator is not implemented for the purpose of testing
-    // for the absense of the __ne__ method in the Python binding.
+    // for the absence of the __ne__ method in the Python binding.
     bool operator==(const PointF& other);
 
     PointF operator+(const PointF& other);
@@ -75,4 +80,3 @@ LIBSAMPLE_API bool operator!(const PointF& pt);
 LIBSAMPLE_API PointF operator*(const PointF& pt, double multiplier);
 
 #endif // POINTF_H
-

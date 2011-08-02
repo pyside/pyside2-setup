@@ -93,6 +93,11 @@ class PointTest(unittest.TestCase):
         r = u'Hi' - p
         self.assertEqual(r, u'Hi')
 
+    def testModifiedMethod(self):
+        pt1 = Point(0.0, 0.0)
+        pt2 = Point(10.0, 10.0)
+        expected = Point((pt1.x() + pt2.x()) / 2.0, (pt1.y() + pt2.y()) / 2.0)
+        self.assertEqual(pt1.midpoint(pt2), expected)
+
 if __name__ == '__main__':
     unittest.main()
-

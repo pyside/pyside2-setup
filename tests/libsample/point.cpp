@@ -33,6 +33,15 @@ Point::Point(double x, double y) : m_x(x), m_y(y)
 {
 }
 
+void
+Point::midpoint(const Point& other, Point* midpoint) const
+{
+    if (!midpoint)
+        return;
+    midpoint->setX((m_x + other.m_x) / 2.0);
+    midpoint->setY((m_y + other.m_y) / 2.0);
+}
+
 Point*
 Point::copy() const
 {

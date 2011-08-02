@@ -1135,6 +1135,22 @@
             %PYARG_0 = Py_BuildValue("(OO)", type, args);
             </inject-code>
         </add-function>
+
+        <modify-function signature="midpoint(const Point&amp;, Point*)const">
+            <modify-argument index="2">
+                <remove-argument />
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="Point" />
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+                Point _midpoint;
+                // The test consists in *NOT* using the ARGUMENT_NAMES type system variable.
+                %CPPSELF.%FUNCTION_NAME(%1, &amp;_midpoint);
+                %PYARG_0 = %CONVERTTOPYTHON[Point](_midpoint);
+            </inject-code>
+        </modify-function>
+
         <template name="return_self">
             %PYARG_0 = %PYARG_1;
             Py_INCREF(%PYARG_1);
@@ -1182,6 +1198,21 @@
             %PYARG_0 = Py_BuildValue("(OO)", type, args);
             </inject-code>
         </add-function>
+
+        <modify-function signature="midpoint(const PointF&amp;, PointF*)const">
+            <modify-argument index="2">
+                <remove-argument />
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PointF" />
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+                PointF _midpoint;
+                // The test consists in using the ARGUMENT_NAMES type system variable.
+                %CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, &amp;_midpoint);
+                %PYARG_0 = %CONVERTTOPYTHON[PointF](_midpoint);
+            </inject-code>
+        </modify-function>
     </value-type>
 
     <value-type name="Rect" />

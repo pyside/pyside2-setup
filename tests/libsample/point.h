@@ -43,6 +43,11 @@ public:
     inline void setXAsUint(unsigned int x) { m_x = x; }
     inline void setYAsUint(unsigned int y) { m_y = y; }
 
+    // This method could simply return the midpoint,
+    // but the interesting part of the test is to set the
+    // result in the pointer argument.
+    void midpoint(const Point& other, Point* midpoint) const;
+
     Point* copy() const;
 
     inline const Point& getConstReferenceToSelf() const { return *this; }
@@ -86,4 +91,3 @@ LIBSAMPLE_API Point transmuteComplexIntoPoint(const Complex& cpx);
 LIBSAMPLE_API Point operator*(const Point& pt, double multiplier);
 
 #endif // POINT_H
-

@@ -54,6 +54,11 @@ class PointFTest(unittest.TestCase):
         self.assertTrue(pt1 == pt2)
         self.assertFalse(pt1 == pt3)
 
+    def testModifiedMethod(self):
+        pt1 = PointF(0.0, 0.0)
+        pt2 = PointF(10.0, 10.0)
+        expected = PointF((pt1.x() + pt2.x()) / 2.0, (pt1.y() + pt2.y()) / 2.0)
+        self.assertEqual(pt1.midpoint(pt2), expected)
+
 if __name__ == '__main__':
     unittest.main()
-

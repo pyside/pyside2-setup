@@ -34,6 +34,15 @@ PointF::PointF(double x, double y) : m_x(x), m_y(y)
 }
 
 void
+PointF::midpoint(const PointF& other, PointF* midpoint) const
+{
+    if (!midpoint)
+        return;
+    midpoint->setX((m_x + other.m_x) / 2.0);
+    midpoint->setY((m_y + other.m_y) / 2.0);
+}
+
+void
 PointF::show()
 {
     cout << "(x: " << m_x << ", y: " << m_y << ")";
