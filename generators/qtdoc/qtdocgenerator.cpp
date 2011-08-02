@@ -947,6 +947,24 @@ void QtDocGenerator::writeFormatedText(QTextStream& s, const Documentation& doc,
     s << endl;
 }
 
+static void writeInheritedByList(QTextStream& s, const AbstractMetaClass* metaClass, const AbstractMetaClassList& allClasses)
+{
+    AbstractMetaClassList res;
+    foreach (AbstractMetaClass* c, allClasses) {
+        if (c != metaClass && c->inheritsFrom(metaClass))
+            res << c;
+    }
+
+    if (res.isEmpty())
+        return;
+
+    s << "**Inherited by:** ";
+    QStringList classes;
+    foreach (AbstractMetaClass* c, res)
+        classes << QString(":ref:`%1`").arg(getClassTargetFullName(c, false));
+    s << classes.join(", ") << endl << endl;
+}
+
 void QtDocGenerator::generateClass(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     ReportHandler::debugSparse("Generating Documentation for " + metaClass->fullName());
@@ -965,6 +983,9 @@ void QtDocGenerator::generateClass(QTextStream& s, const AbstractMetaClass* meta
 
     s << ".. inheritance-diagram:: " << className << endl
       << "    :parts: 2" << endl << endl; // TODO: This would be a parameter in the future...
+
+
+    writeInheritedByList(s, metaClass, classes());
 
     if (metaClass->typeEntry() && (metaClass->typeEntry()->version() != 0))
         s << ".. note:: This class was introduced in Qt " << metaClass->typeEntry()->version() << endl;
