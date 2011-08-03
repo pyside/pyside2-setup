@@ -317,9 +317,6 @@ void HeaderGenerator::writeTypeIndexDefine(QTextStream& s, const AbstractMetaCla
 
 void HeaderGenerator::finishGeneration()
 {
-    if (classes().isEmpty())
-        return;
-
     // Generate the main header for this module.
     // This header should be included by binding modules
     // extendind on top of this one.
