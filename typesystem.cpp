@@ -987,6 +987,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 TypeSystemTypeEntry* moduleEntry = reinterpret_cast<TypeSystemTypeEntry*>(
                         m_database->findType(m_defaultPackage));
                 element->entry = moduleEntry ? moduleEntry : new TypeSystemTypeEntry(m_defaultPackage, since);
+                element->entry->setCodeGeneration(m_generate);
             }
 
             if ((m_generate == TypeEntry::GenerateForSubclass ||
