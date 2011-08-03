@@ -1072,20 +1072,17 @@ void ShibokenGenerator::writeArgumentNames(QTextStream &s,
     int argCount = 0;
     for (int j = 0, max = arguments.size(); j < max; j++) {
 
-        if ((options & Generator::SkipRemovedArguments) &&
-            (func->argumentRemoved(arguments.at(j)->argumentIndex() +1)))
+        if ((options & Generator::SkipRemovedArguments) && (func->argumentRemoved(arguments.at(j)->argumentIndex()+1)))
             continue;
 
-        if (argCount > 0)
-            s << ", ";
-        s << arguments.at(j)->name();
+        s << ((argCount > 0) ? ", " : "") << arguments.at(j)->name();
 
-        if (((options & Generator::VirtualCall) == 0) &&
-            (!func->conversionRule(TypeSystem::NativeCode, arguments.at(j)->argumentIndex() + 1).isEmpty() ||
-             !func->conversionRule(TypeSystem::TargetLangCode, arguments.at(j)->argumentIndex() + 1).isEmpty()) &&
-            !func->isConstructor()
-           )
+        if (((options & Generator::VirtualCall) == 0)
+            && (!func->conversionRule(TypeSystem::NativeCode, arguments.at(j)->argumentIndex() + 1).isEmpty()
+                || !func->conversionRule(TypeSystem::TargetLangCode, arguments.at(j)->argumentIndex() + 1).isEmpty())
+            && !func->isConstructor()) {
            s << "_out";
+        }
 
         argCount++;
     }
