@@ -664,6 +664,23 @@
 
         <!-- change the name of this virtual method -->
         <modify-function signature="className()" rename="name"/>
+
+        <modify-function signature="sumPointArray(int, const Point*)">
+            <modify-argument index="1">
+                <remove-argument/>
+                <conversion-rule class="native">
+                int %out = PySequence_Size(%PYARG_1);
+                </conversion-rule>
+            </modify-argument>
+            <modify-argument index="2">
+                <replace-type modified-type="PySequence" />
+                <conversion-rule class="native">
+                Shiboken::AutoArrayPointer&lt;Point&gt; %out(%1);
+                for (int i = 0; i &lt; %1; ++i)
+                    %out[i] = %CONVERTTOCPP[Point](PySequence_Fast_GET_ITEM(%PYARG_1, i));
+                </conversion-rule>
+            </modify-argument>
+        </modify-function>
     </object-type>
 
     <object-type name="AbstractModifications">
@@ -936,22 +953,8 @@
                     %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](retval);
                 }
             </inject-code>
-
         </modify-function>
 
-        <inject-code class="native" position="beginning">
-            // simple class to avoid mem leak inside conversion rule used in arrayMethod
-            template&lt;typename T>
-            struct ArrayDeleter {
-                ArrayDeleter(T* ptr) : m_ptr(ptr) {}
-                ~ArrayDeleter() { delete[] m_ptr; }
-                operator T*() { return m_ptr; }
-            private:
-                T* m_ptr;
-                ArrayDeleter(const ArrayDeleter&amp;);
-                ArrayDeleter&amp; operator=(ArrayDeleter&amp;);
-            };
-        </inject-code>
         <modify-function signature="arrayMethod(int, int*) const">
             <modify-argument index="1">
                 <remove-argument/>
@@ -959,24 +962,20 @@
                   int %out = PySequence_Size(%PYARG_1);
                 </conversion-rule>
             </modify-argument>
-
             <modify-argument index="2">
-              <replace-type modified-type="PySequence"/>
-
-              <conversion-rule class="native">
+                <replace-type modified-type="PySequence"/>
+                <conversion-rule class="native">
                 int numItems = PySequence_Size(%PYARG_1);
-                ArrayDeleter&lt;int> %out(new int[numItems]);
-                for (int i=0; i &lt; numItems; i++)
-                    %out[i] = %CONVERTTOCPP[int](PySequence_GetItem(%PYARG_1, i));
-              </conversion-rule>
-
-              <conversion-rule class="target">
-                PyObject *%out = PyList_New(count);
-                for (int i=0; i &lt; count; i++)
+                Shiboken::AutoArrayPointer&lt;int&gt; %out(numItems);
+                for (int i = 0; i &lt; numItems; ++i)
+                    %out[i] = %CONVERTTOCPP[int](PySequence_Fast_GET_ITEM(%PYARG_1, i));
+                </conversion-rule>
+                <conversion-rule class="target">
+                PyObject* %out = PyList_New(count);
+                for (int i = 0; i &lt; count; ++i)
                     PyList_SET_ITEM(%out, i, %CONVERTTOPYTHON[int](%in[i]));
-              </conversion-rule>
-          </modify-argument>
-
+                </conversion-rule>
+            </modify-argument>
         </modify-function>
 
         <modify-function signature="callArrayMethod(int, int*) const">
@@ -1356,10 +1355,10 @@
         <add-function signature="strBufferOverloads(Str&amp;,int)" return-type="Overload::FunctionEnum">
             <inject-code class="target" position="beginning">
                 <insert-template name="buffer_argument">
-                    <replace from="%out" to="%1_out" />
+                    <replace from="%out" to="argOut" />
                 </insert-template>
                 PyThreadState* _save = PyEval_SaveThread();
-                %RETURN_TYPE cppResult = %CPPSELF.%FUNCTION_NAME(%1_out, %2);
+                %RETURN_TYPE cppResult = %CPPSELF.%FUNCTION_NAME(argOut, %2);
                 PyEval_RestoreThread(_save);
                 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](cppResult);
             </inject-code>

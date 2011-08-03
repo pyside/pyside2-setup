@@ -93,6 +93,8 @@ public:
 
     // change the name of this virtual method
     virtual const char* className();
+
+    Point sumPointArray(int arraySize, const Point pointArray[]);
 };
 
 class LIBSAMPLE_API AbstractModifications : public Modifications

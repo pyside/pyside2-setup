@@ -24,6 +24,7 @@
 #ifndef SHIBOKENGENERATOR_H
 #define SHIBOKENGENERATOR_H
 
+#define CONV_RULE_OUT_VAR_SUFFIX  "_out"
 #define CPP_ARG                   "cppArg"
 #define CPP_ARG0                  CPP_ARG"0"
 #define CPP_RETURN_VAR            "cppResult"

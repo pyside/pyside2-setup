@@ -24,9 +24,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-'''Test cases for method modifications performed as described on typesystem. '''
+'''Test cases for method modifications performed as described on type system. '''
 
-import sys
 import unittest
 
 from sample import Modifications, Point
@@ -40,7 +39,7 @@ class ExtModifications(Modifications):
 
 
 class ModificationsTest(unittest.TestCase):
-    '''Test cases for method modifications performed as described on typesystem. '''
+    '''Test cases for method modifications performed as described on type system. '''
 
     def setUp(self):
         self.mods = Modifications()
@@ -105,7 +104,7 @@ class ModificationsTest(unittest.TestCase):
         self.assertEqual(self.mods.timesTen(), 100)
 
     def testArgumentRemovalAndReturnTypeModificationWithTypesystemTemplates1(self):
-        '''Test modifications to method signature and return value using typesystem templates (case 1).'''
+        '''Test modifications to method signature and return value using type system templates (case 1).'''
         result, ok = self.mods.pointToPair(Point(2, 5))
         self.assertEqual(type(ok), bool)
         self.assertEqual(type(result), tuple)
@@ -116,7 +115,7 @@ class ModificationsTest(unittest.TestCase):
         self.assertEqual(result[1], 5.0)
 
     def testArgumentRemovalAndReturnTypeModificationWithTypesystemTemplates2(self):
-        '''Test modifications to method signature and return value using typesystem templates (case 2).'''
+        '''Test modifications to method signature and return value using type system templates (case 2).'''
         result, ok = self.mods.multiplyPointCoordsPlusValue(Point(2, 5), 4.1)
         self.assertEqual(type(ok), bool)
         self.assertEqual(type(result), float)
@@ -134,6 +133,10 @@ class ModificationsTest(unittest.TestCase):
         self.assertRaises(TypeError, self.mods.overloaded, 1, True, Point(2, 3), Point(4, 5))
         self.assertEqual(self.mods.over(1, True, Point(2, 3), Point(4, 5)), Modifications.Overloaded_ibPP)
 
+    def testPointArrayModification(self):
+        points = (Point(1, 1), Point(2, 2))
+        summedPoint = Point(1, 1) + Point(2, 2)
+        self.assertEqual(self.mods.sumPointArray(points), summedPoint)
+
 if __name__ == '__main__':
     unittest.main()
-

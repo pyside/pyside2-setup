@@ -88,3 +88,11 @@ Modifications::className()
     return "Modifications";
 }
 
+Point
+Modifications::sumPointArray(int arraySize, const Point pointArray[])
+{
+    Point point;
+    for (int i = 0; i < arraySize; ++i)
+        point = point + pointArray[i];
+    return point;
+}

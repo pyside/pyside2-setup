@@ -726,7 +726,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
             ac << INDENT;
             if (!func->conversionRule(TypeSystem::TargetLangCode, arg->argumentIndex() + 1).isEmpty()) {
                 // Has conversion rule.
-                ac << arg->name() << "_out";
+                ac << QString("%1"CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name());
             } else {
                 QString argName = arg->name();
                 if (avoidProtectedHack()) {
@@ -2021,17 +2021,16 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             int removedArgs = 0;
             for (int i = 0; i < maxArgs + removedArgs; i++) {
                 const AbstractMetaArgument* arg = func->arguments().at(i);
+                bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, arg->argumentIndex() + 1).isEmpty();
                 if (func->argumentRemoved(i + 1)) {
-
                     // If some argument with default value is removed from a
                     // method signature, the said value must be explicitly
                     // added to the method call.
                     removedArgs++;
 
                     // If have conversion rules I will use this for removed args
-                    bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, arg->argumentIndex() + 1).isEmpty();
                     if (hasConversionRule) {
-                        userArgs << arg->name() + "_out";
+                        userArgs << QString("%1"CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name());
                     } else {
                        if (arg->defaultValueExpression().isEmpty())
                            badModifications = true;
@@ -2040,14 +2039,9 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                     }
                 } else {
                     int idx = arg->argumentIndex() - removedArgs;
-                    QString argName;
-
-                    bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, arg->argumentIndex() + 1).isEmpty();
-                    if (hasConversionRule) {
-                        argName = arg->name() + "_out";
-                    } else {
-                        argName = QString(CPP_ARG"%1").arg(idx);
-                    }
+                    QString argName = hasConversionRule
+                                      ? QString("%1"CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name())
+                                      : QString(CPP_ARG"%1").arg(idx);
                     userArgs << argName;
                 }
             }
@@ -2073,7 +2067,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 if (!arg->defaultValueExpression().isEmpty())
                     otherArgs.prepend(guessScopeForDefaultValue(func, arg));
                 else if (hasConversionRule)
-                    otherArgs.prepend(arg->name() + "_out");
+                    otherArgs.prepend(QString("%1"CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name()));
                 else
                     badModifications = true;
             }

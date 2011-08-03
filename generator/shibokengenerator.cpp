@@ -1081,7 +1081,7 @@ void ShibokenGenerator::writeArgumentNames(QTextStream &s,
             && (!func->conversionRule(TypeSystem::NativeCode, arguments.at(j)->argumentIndex() + 1).isEmpty()
                 || !func->conversionRule(TypeSystem::TargetLangCode, arguments.at(j)->argumentIndex() + 1).isEmpty())
             && !func->isConstructor()) {
-           s << "_out";
+           s << CONV_RULE_OUT_VAR_SUFFIX;
         }
 
         argCount++;
@@ -1206,20 +1206,31 @@ QMap<int, QString> ShibokenGenerator::getArgumentReplacement(const AbstractMetaF
                                                              const AbstractMetaArgument* lastArg)
 {
     QMap<int, QString> argReplacement;
+    TypeSystem::Language convLang = (language == TypeSystem::TargetLangCode)
+                                    ? TypeSystem::NativeCode : TypeSystem::TargetLangCode;
     int removed = 0;
     for (int i = 0; i < func->arguments().size(); ++i) {
         const AbstractMetaArgument* arg = func->arguments().at(i);
         QString argValue;
         if (language == TypeSystem::TargetLangCode) {
+            bool hasConversionRule = !func->conversionRule(convLang, i+1).isEmpty();
             bool argRemoved = func->argumentRemoved(i+1);
             removed = removed + (int) argRemoved;
             if (argRemoved || (lastArg && arg->argumentIndex() > lastArg->argumentIndex()))
                 argValue = arg->defaultValueExpression();
+
+            if (argRemoved && hasConversionRule && argValue.isEmpty())
+                argValue = QString("%1"CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name());
+
             if (!argRemoved && argValue.isEmpty()) {
-                if (arg->type()->typeEntry()->isCustom())
-                    argValue = usePyArgs ? QString(PYTHON_ARGS"[%1]").arg(i - removed) : PYTHON_ARG;
-                else
-                    argValue = QString(CPP_ARG"%1").arg(i - removed);
+                int argPos = i - removed;
+                if (arg->type()->typeEntry()->isCustom()) {
+                    argValue = usePyArgs ? QString(PYTHON_ARGS"[%1]").arg(argPos) : PYTHON_ARG;
+                } else {
+                    argValue = hasConversionRule
+                               ? QString("%1"CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name())
+                               : QString(CPP_ARG"%1").arg(argPos);
+                }
             }
         } else {
             argValue = arg->name();

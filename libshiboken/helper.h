@@ -92,6 +92,20 @@ LIBSHIBOKEN_API bool sequenceToArgcArgv(PyObject* argList, int* argc, char*** ar
  */
 LIBSHIBOKEN_API int* sequenceToIntArray(PyObject* obj, bool zeroTerminated = false);
 
+/**
+ *  Creates and automatically deallocates C++ arrays.
+ */
+template<class T>
+class AutoArrayPointer
+{
+    public:
+        AutoArrayPointer(int size) { data = new T[size]; }
+        T& operator[](int pos) { return data[pos]; }
+        operator T*() const { return data; }
+        ~AutoArrayPointer() { delete[] data; }
+    private:
+        T* data;
+};
 
 /**
  * An utility function used to call PyErr_WarnEx with a formatted message.
@@ -101,4 +115,3 @@ LIBSHIBOKEN_API int warning(PyObject *category, int stacklevel, const char *form
 } // namespace Shiboken
 
 #endif // HELPER_H
-
