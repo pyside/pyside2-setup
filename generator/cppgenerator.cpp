@@ -3772,244 +3772,247 @@ void CppGenerator::finishGeneration()
     moduleFileName += "/" + moduleName().toLower() + "_module_wrapper.cpp";
 
     QFile file(moduleFileName);
-    if (file.open(QFile::WriteOnly)) {
-        QTextStream s(&file);
+    if (!file.open(QFile::WriteOnly)) {
+        ReportHandler::warning("Error writing file: " + moduleFileName);
+        return;
+    }
 
-        // write license comment
-        s << licenseComment() << endl;
+    QTextStream s(&file);
 
-        s << "#include <Python.h>" << endl;
-        s << "#include <shiboken.h>" << endl;
-        s << "#include <algorithm>" << endl;
-        if (usePySideExtensions())
-            s << "#include <pyside.h>" << endl;
+    // write license comment
+    s << licenseComment() << endl;
 
-        s << "#include \"" << getModuleHeaderFileName() << '"' << endl << endl;
-        foreach (const Include& include, includes)
-            s << include;
+    s << "#include <Python.h>" << endl;
+    s << "#include <shiboken.h>" << endl;
+    s << "#include <algorithm>" << endl;
+    if (usePySideExtensions())
+        s << "#include <pyside.h>" << endl;
+
+    s << "#include \"" << getModuleHeaderFileName() << '"' << endl << endl;
+    foreach (const Include& include, includes)
+        s << include;
+    s << endl;
+
+    // Global enums
+    AbstractMetaEnumList globalEnums = this->globalEnums();
+    foreach (const AbstractMetaClass* metaClass, classes()) {
+        const AbstractMetaClass* encClass = metaClass->enclosingClass();
+        if (encClass && encClass->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass)
+            continue;
+        lookForEnumsInClassesNotToBeGenerated(globalEnums, metaClass);
+    }
+
+    TypeDatabase* typeDb = TypeDatabase::instance();
+    TypeSystemTypeEntry* moduleEntry = reinterpret_cast<TypeSystemTypeEntry*>(typeDb->findType(packageName()));
+
+    //Extra includes
+    s << endl << "// Extra includes" << endl;
+    QList<Include> extraIncludes;
+    if (moduleEntry)
+        extraIncludes = moduleEntry->extraIncludes();
+    foreach (AbstractMetaEnum* cppEnum, globalEnums)
+        extraIncludes.append(cppEnum->typeEntry()->extraIncludes());
+    qSort(extraIncludes.begin(), extraIncludes.end());
+    foreach (const Include& inc, extraIncludes)
+        s << inc;
+    s << endl;
+
+    CodeSnipList snips;
+    if (moduleEntry)
+        snips = moduleEntry->codeSnips();
+
+    // module inject-code native/beginning
+    if (!snips.isEmpty()) {
+        writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::NativeCode);
         s << endl;
+    }
 
-        // Global enums
-        AbstractMetaEnumList globalEnums = this->globalEnums();
-        foreach (const AbstractMetaClass* metaClass, classes()) {
-            const AbstractMetaClass* encClass = metaClass->enclosingClass();
-            if (encClass && encClass->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass)
-                continue;
-            lookForEnumsInClassesNotToBeGenerated(globalEnums, metaClass);
+    // cleanup staticMetaObject attribute
+    if (usePySideExtensions()) {
+        s << "void cleanTypesAttributes(void) {" << endl;
+        s << INDENT << "for (int i = 0, imax = SBK_" << moduleName() << "_IDX_COUNT; i < imax; i++) {" << endl;
+        {
+            Indentation indentation(INDENT);
+            s << INDENT << "PyObject *pyType = reinterpret_cast<PyObject*>(" << cppApiVariableName() << "[i]);" << endl;
+            s << INDENT << "if (pyType && PyObject_HasAttrString(pyType, \"staticMetaObject\"))"<< endl;
+            {
+                Indentation indentation(INDENT);
+                s << INDENT << "PyObject_SetAttrString(pyType, \"staticMetaObject\", Py_None);" << endl;
+            }
         }
+        s << INDENT << "}" << endl;
+        s << "}" << endl;
+    }
 
-        TypeDatabase* typeDb = TypeDatabase::instance();
-        TypeSystemTypeEntry* moduleEntry = reinterpret_cast<TypeSystemTypeEntry*>(typeDb->findType(packageName()));
+    s << "// Global functions ";
+    s << "------------------------------------------------------------" << endl;
+    s << globalFunctionImpl << endl;
 
-        //Extra includes
-        s << endl << "// Extra includes" << endl;
-        QList<Include> includes;
-        if (moduleEntry)
-            includes = moduleEntry->extraIncludes();
-        foreach (AbstractMetaEnum* cppEnum, globalEnums)
-            includes.append(cppEnum->typeEntry()->extraIncludes());
-        qSort(includes.begin(), includes.end());
-        foreach (Include inc, includes)
-            s << inc.toString() << endl;
-        s << endl;
+    s << "static PyMethodDef " << moduleName() << "_methods[] = {" << endl;
+    s << globalFunctionDecl;
+    s << INDENT << "{0} // Sentinel" << endl << "};" << endl << endl;
 
-        CodeSnipList snips;
-        if (moduleEntry)
-            snips = moduleEntry->codeSnips();
+    s << "// Classes initialization functions ";
+    s << "------------------------------------------------------------" << endl;
+    s << classInitDecl << endl;
 
-        // module inject-code native/beginning
-        if (!snips.isEmpty()) {
-            writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::NativeCode);
+    if (!globalEnums.isEmpty()) {
+        QString converterImpl;
+        QTextStream convImpl(&converterImpl);
+
+        s << "// Enum definitions ";
+        s << "------------------------------------------------------------" << endl;
+        foreach (const AbstractMetaEnum* cppEnum, globalEnums) {
+            if (cppEnum->isAnonymous() || cppEnum->isPrivate())
+                continue;
             s << endl;
         }
 
-        // cleanup staticMetaObject attribute
-        if (usePySideExtensions()) {
-            s << "void cleanTypesAttributes(void) {" << endl;
-            s << INDENT << "for (int i = 0, imax = SBK_" << moduleName() << "_IDX_COUNT; i < imax; i++) {" << endl;
-            {
-                Indentation indentation(INDENT);
-                s << INDENT << "PyObject *pyType = reinterpret_cast<PyObject*>(" << cppApiVariableName() << "[i]);" << endl;
-                s << INDENT << "if (pyType && PyObject_HasAttrString(pyType, \"staticMetaObject\"))"<< endl;
-                {
-                    Indentation indentation(INDENT);
-                    s << INDENT << "PyObject_SetAttrString(pyType, \"staticMetaObject\", Py_None);" << endl;
-                }
-            }
-            s << INDENT << "}" << endl;
-            s << "}" << endl;
-        }
-
-        s << "// Global functions ";
-        s << "------------------------------------------------------------" << endl;
-        s << globalFunctionImpl << endl;
-
-        s << "static PyMethodDef " << moduleName() << "_methods[] = {" << endl;
-        s << globalFunctionDecl;
-        s << INDENT << "{0} // Sentinel" << endl << "};" << endl << endl;
-
-        s << "// Classes initialization functions ";
-        s << "------------------------------------------------------------" << endl;
-        s << classInitDecl << endl;
-
-        if (!globalEnums.isEmpty()) {
-            QString converterImpl;
-            QTextStream convImpl(&converterImpl);
-
-            s << "// Enum definitions ";
+        if (!converterImpl.isEmpty()) {
+            s << "// Enum converters ";
             s << "------------------------------------------------------------" << endl;
-            foreach (const AbstractMetaEnum* cppEnum, globalEnums) {
-                if (cppEnum->isAnonymous() || cppEnum->isPrivate())
-                    continue;
-                s << endl;
-            }
-
-            if (!converterImpl.isEmpty()) {
-                s << "// Enum converters ";
-                s << "------------------------------------------------------------" << endl;
-                s << "namespace Shiboken" << endl << '{' << endl;
-                s << converterImpl << endl;
-                s << "} // namespace Shiboken" << endl << endl;
-            }
+            s << "namespace Shiboken" << endl << '{' << endl;
+            s << converterImpl << endl;
+            s << "} // namespace Shiboken" << endl << endl;
         }
+    }
 
-        s << "// Current module's type array." << endl;
-        s << "PyTypeObject** " << cppApiVariableName() << ';' << endl;
-        s << "// Required modules' type arrays." << endl;
-        foreach (const QString& requiredModule, typeDb->requiredTargetImports())
-            s << "PyTypeObject** " << cppApiVariableName(requiredModule) << ';' << endl;
+    s << "// Current module's type array." << endl;
+    s << "PyTypeObject** " << cppApiVariableName() << ';' << endl;
+    s << "// Required modules' type arrays." << endl;
+    foreach (const QString& requiredModule, typeDb->requiredTargetImports())
+        s << "PyTypeObject** " << cppApiVariableName(requiredModule) << ';' << endl;
+    s << endl;
+
+    s << "// Module initialization ";
+    s << "------------------------------------------------------------" << endl;
+    ExtendedConverterData extendedConverters = getExtendedConverters();
+    if (!extendedConverters.isEmpty())
+        s << "// Extended Converters" << endl;
+    foreach (const TypeEntry* externalType, extendedConverters.keys()) {
+        writeExtendedIsConvertibleFunction(s, externalType, extendedConverters[externalType]);
+        writeExtendedToCppFunction(s, externalType, extendedConverters[externalType]);
         s << endl;
+    }
+    s << endl;
 
-        s << "// Module initialization ";
-        s << "------------------------------------------------------------" << endl;
-        ExtendedConverterData extendedConverters = getExtendedConverters();
-        if (!extendedConverters.isEmpty())
-            s << "// Extended Converters" << endl;
-        foreach (const TypeEntry* externalType, extendedConverters.keys()) {
-            writeExtendedIsConvertibleFunction(s, externalType, extendedConverters[externalType]);
-            writeExtendedToCppFunction(s, externalType, extendedConverters[externalType]);
-            s << endl;
-        }
+
+    s << "#if defined _WIN32 || defined __CYGWIN__" << endl;
+    s << "    #define SBK_EXPORT_MODULE __declspec(dllexport)" << endl;
+    s << "#elif __GNUC__ >= 4" << endl;
+    s << "    #define SBK_EXPORT_MODULE __attribute__ ((visibility(\"default\")))" << endl;
+    s << "#else" << endl;
+    s << "    #define SBK_EXPORT_MODULE" << endl;
+    s << "#endif" << endl << endl;
+
+    s << "extern \"C\" SBK_EXPORT_MODULE void init" << moduleName() << "()" << endl;
+    s << '{' << endl;
+
+    // module inject-code target/beginning
+    if (!snips.isEmpty()) {
+        writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::TargetLangCode);
         s << endl;
+    }
 
-
-        s << "#if defined _WIN32 || defined __CYGWIN__" << endl;
-        s << "    #define SBK_EXPORT_MODULE __declspec(dllexport)" << endl;
-        s << "#elif __GNUC__ >= 4" << endl;
-        s << "    #define SBK_EXPORT_MODULE __attribute__ ((visibility(\"default\")))" << endl;
-        s << "#else" << endl;
-        s << "    #define SBK_EXPORT_MODULE" << endl;
-        s << "#endif" << endl << endl;
-
-        s << "extern \"C\" SBK_EXPORT_MODULE void init" << moduleName() << "()" << endl;
-        s << '{' << endl;
-
-        // module inject-code target/beginning
-        if (!snips.isEmpty()) {
-            writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::TargetLangCode);
-            s << endl;
-        }
-
-        foreach (const QString& requiredModule, typeDb->requiredTargetImports()) {
-            s << INDENT << "{" << endl;
+    foreach (const QString& requiredModule, typeDb->requiredTargetImports()) {
+        s << INDENT << "{" << endl;
+        {
+            Indentation indentation(INDENT);
+            s << INDENT << "Shiboken::AutoDecRef requiredModule(Shiboken::Module::import(\"" << requiredModule << "\"));" << endl;
+            s << INDENT << "if (requiredModule.isNull())" << endl;
             {
                 Indentation indentation(INDENT);
-                s << INDENT << "Shiboken::AutoDecRef requiredModule(Shiboken::Module::import(\"" << requiredModule << "\"));" << endl;
-                s << INDENT << "if (requiredModule.isNull())" << endl;
-                {
-                    Indentation indentation(INDENT);
-                    s << INDENT << "return;" << endl;
-                }
-                s << INDENT << cppApiVariableName(requiredModule) << " = Shiboken::Module::getTypes(requiredModule);" << endl;
+                s << INDENT << "return;" << endl;
             }
-            s << INDENT << "}" << endl << endl;
+            s << INDENT << cppApiVariableName(requiredModule) << " = Shiboken::Module::getTypes(requiredModule);" << endl;
         }
+        s << INDENT << "}" << endl << endl;
+    }
 
-        s << INDENT << "// Create an array of wrapper types for the current module." << endl;
-        s << INDENT << "static PyTypeObject* cppApi[" << "SBK_" << moduleName() << "_IDX_COUNT" << "];" << endl;
-        s << INDENT << cppApiVariableName() << " = cppApi;" << endl << endl;
+    s << INDENT << "// Create an array of wrapper types for the current module." << endl;
+    s << INDENT << "static PyTypeObject* cppApi[" << "SBK_" << moduleName() << "_IDX_COUNT" << "];" << endl;
+    s << INDENT << cppApiVariableName() << " = cppApi;" << endl << endl;
 
-        s << INDENT << "PyObject* module = Shiboken::Module::create(\""  << moduleName() << "\", ";
-        s << moduleName() << "_methods);" << endl << endl;
+    s << INDENT << "PyObject* module = Shiboken::Module::create(\""  << moduleName() << "\", ";
+    s << moduleName() << "_methods);" << endl << endl;
 
-        s << INDENT << "// Initialize classes in the type system" << endl;
-        s << classPythonDefines;
+    s << INDENT << "// Initialize classes in the type system" << endl;
+    s << classPythonDefines;
 
-        if (!extendedConverters.isEmpty()) {
-            s << INDENT << "// Initialize extended Converters" << endl;
-            s << INDENT << "SbkObjectType* shiboType;" << endl << endl;
-        }
-        foreach (const TypeEntry* externalType, extendedConverters.keys()) {
-            writeExtendedConverterInitialization(s, externalType, extendedConverters[externalType]);
-            s << endl;
-        }
+    if (!extendedConverters.isEmpty()) {
+        s << INDENT << "// Initialize extended Converters" << endl;
+        s << INDENT << "SbkObjectType* shiboType;" << endl << endl;
+    }
+    foreach (const TypeEntry* externalType, extendedConverters.keys()) {
+        writeExtendedConverterInitialization(s, externalType, extendedConverters[externalType]);
         s << endl;
+    }
+    s << endl;
 
-        writeEnumsInitialization(s, globalEnums);
+    writeEnumsInitialization(s, globalEnums);
 
-        // Register primitive types on TypeResolver
-        s << INDENT << "// Register primitive types on TypeResolver" << endl;
-        foreach(const PrimitiveTypeEntry* pte, primitiveTypes()) {
-            if (pte->generateCode())
-                s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver< " << pte->name() << " >(\"" << pte->name() << "\");" << endl;
-        }
-        // Register type resolver for all containers found in signals.
-        QSet<QByteArray> typeResolvers;
-        foreach (AbstractMetaClass* metaClass, classes()) {
-            if (!metaClass->isQObject() || !metaClass->typeEntry()->generateCode())
-                continue;
-            foreach (AbstractMetaFunction* func, metaClass->functions()) {
-                if (func->isSignal()) {
-                    foreach (AbstractMetaArgument* arg, func->arguments()) {
-                        if (arg->type()->isContainer()) {
-                            QString value = translateType(arg->type(), metaClass, ExcludeConst | ExcludeReference);
-                            if (value.startsWith("::"))
-                                value.remove(0, 2);
-                            typeResolvers << SBK_NORMALIZED_TYPE(value.toAscii().constData());
-                        }
+    // Register primitive types on TypeResolver
+    s << INDENT << "// Register primitive types on TypeResolver" << endl;
+    foreach(const PrimitiveTypeEntry* pte, primitiveTypes()) {
+        if (pte->generateCode())
+            s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver< " << pte->name() << " >(\"" << pte->name() << "\");" << endl;
+    }
+    // Register type resolver for all containers found in signals.
+    QSet<QByteArray> typeResolvers;
+    foreach (AbstractMetaClass* metaClass, classes()) {
+        if (!metaClass->isQObject() || !metaClass->typeEntry()->generateCode())
+            continue;
+        foreach (AbstractMetaFunction* func, metaClass->functions()) {
+            if (func->isSignal()) {
+                foreach (AbstractMetaArgument* arg, func->arguments()) {
+                    if (arg->type()->isContainer()) {
+                        QString value = translateType(arg->type(), metaClass, ExcludeConst | ExcludeReference);
+                        if (value.startsWith("::"))
+                            value.remove(0, 2);
+                        typeResolvers << SBK_NORMALIZED_TYPE(value.toAscii().constData());
                     }
                 }
             }
         }
-        foreach (QByteArray type, typeResolvers)
-            s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver< ::" << type << " >(\"" << type << "\");" << endl;
-
-        s << endl << INDENT << "Shiboken::Module::registerTypes(module, " << cppApiVariableName() << ");" << endl;
-
-        s << endl << INDENT << "if (PyErr_Occurred()) {" << endl;
-        {
-            Indentation indentation(INDENT);
-            s << INDENT << "PyErr_Print();" << endl;
-            s << INDENT << "Py_FatalError(\"can't initialize module " << moduleName() << "\");" << endl;
-        }
-        s << INDENT << '}' << endl;
-
-        // module inject-code target/end
-        if (!snips.isEmpty()) {
-            writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::TargetLangCode);
-            s << endl;
-        }
-
-        // module inject-code native/end
-        if (!snips.isEmpty()) {
-            writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::NativeCode);
-            s << endl;
-        }
-
-        if (usePySideExtensions()) {
-            foreach (AbstractMetaEnum* metaEnum, globalEnums)
-                if (!metaEnum->isAnonymous()) {
-                    s << INDENT << "qRegisterMetaType< ::" << metaEnum->typeEntry()->qualifiedCppName() << " >(\"" << metaEnum->name() << "\");" << endl;
-                }
-
-            // cleanup staticMetaObject attribute
-            s << INDENT << "PySide::registerCleanupFunction(cleanTypesAttributes);" << endl;
-        }
-
-
-
-        s << '}' << endl << endl;
     }
+    foreach (QByteArray type, typeResolvers)
+        s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver< ::" << type << " >(\"" << type << "\");" << endl;
+
+    s << endl << INDENT << "Shiboken::Module::registerTypes(module, " << cppApiVariableName() << ");" << endl;
+
+    s << endl << INDENT << "if (PyErr_Occurred()) {" << endl;
+    {
+        Indentation indentation(INDENT);
+        s << INDENT << "PyErr_Print();" << endl;
+        s << INDENT << "Py_FatalError(\"can't initialize module " << moduleName() << "\");" << endl;
+    }
+    s << INDENT << '}' << endl;
+
+    // module inject-code target/end
+    if (!snips.isEmpty()) {
+        writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::TargetLangCode);
+        s << endl;
+    }
+
+    // module inject-code native/end
+    if (!snips.isEmpty()) {
+        writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::NativeCode);
+        s << endl;
+    }
+
+    if (usePySideExtensions()) {
+        foreach (AbstractMetaEnum* metaEnum, globalEnums)
+            if (!metaEnum->isAnonymous()) {
+                s << INDENT << "qRegisterMetaType< ::" << metaEnum->typeEntry()->qualifiedCppName() << " >(\"" << metaEnum->name() << "\");" << endl;
+            }
+
+        // cleanup staticMetaObject attribute
+        s << INDENT << "PySide::registerCleanupFunction(cleanTypesAttributes);" << endl;
+    }
+
+
+
+    s << '}' << endl << endl;
 }
 
 static ArgumentOwner getArgumentOwner(const AbstractMetaFunction* func, int argIndex)
