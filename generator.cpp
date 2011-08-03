@@ -30,6 +30,7 @@
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
 #include <QDebug>
+#include <typedatabase.h>
 
 struct Generator::GeneratorPrivate {
     const ApiExtractor* apiextractor;
@@ -55,15 +56,23 @@ Generator::~Generator()
 bool Generator::setup(const ApiExtractor& extractor, const QMap< QString, QString > args)
 {
     m_d->apiextractor = &extractor;
-    // FIXME: Avoid this ugly hack to get the package name.. and... why the name "package"!?
-    foreach (const AbstractMetaClass* cppClass, m_d->apiextractor->classes()) {
-        if (m_d->packageName.isEmpty()
-            && cppClass->typeEntry()->generateCode()
-            && !cppClass->package().isEmpty()) {
-            m_d->packageName = cppClass->package();
-            break;
+    TypeEntryHash allEntries = TypeDatabase::instance()->allEntries();
+    TypeEntry* entryFound = 0;
+    foreach (QList<TypeEntry*> entryList, allEntries.values()) {
+        foreach (TypeEntry* entry, entryList) {
+            if (entry->type() == TypeEntry::TypeSystemType && entry->generateCode()) {
+                entryFound = entry;
+                break;
+            }
         }
+        if (entryFound)
+            break;
     }
+
+    if (entryFound)
+        m_d->packageName = entryFound->name();
+    else
+        ReportHandler::warning("Couldn't find the package name!!");
     return doSetup(args);
 }
 

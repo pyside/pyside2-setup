@@ -317,10 +317,8 @@ int main(int argc, char *argv[])
     if (!extractor.run())
         return EXIT_FAILURE;
 
-    if (!extractor.classCount()) {
-        std::cerr << "No C++ classes found!" << std::endl;
-        return EXIT_FAILURE;
-    }
+    if (!extractor.classCount())
+        ReportHandler::warning("No C++ classes found!");
 
     foreach (Generator* g, generators) {
         g->setOutputDirectory(outputDirectory);
