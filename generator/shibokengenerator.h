@@ -114,9 +114,11 @@ public:
     QString functionReturnType(const AbstractMetaFunction* func, Options options = NoOption) const;
 
     /// Utility function for writeCodeSnips.
-    static QMap<int, QString> getArgumentReplacement(const AbstractMetaFunction* func,
-                                                     bool usePyArgs, TypeSystem::Language language,
-                                                     const AbstractMetaArgument* lastArg);
+    typedef QPair<const AbstractMetaArgument*, QString> ArgumentVarReplacementPair;
+    typedef QList<ArgumentVarReplacementPair> ArgumentVarReplacementList;
+    ArgumentVarReplacementList getArgumentReplacement(const AbstractMetaFunction* func,
+                                                      bool usePyArgs, TypeSystem::Language language,
+                                                      const AbstractMetaArgument* lastArg);
 
     /// Write user's custom code snippets at class or module level.
     void writeCodeSnips(QTextStream& s,

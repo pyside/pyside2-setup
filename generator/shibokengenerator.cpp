@@ -1201,11 +1201,11 @@ void ShibokenGenerator::processCodeSnip(QString& code, const AbstractMetaClass* 
     replaceTypeCheckTypeSystemVariable(code);
 }
 
-QMap<int, QString> ShibokenGenerator::getArgumentReplacement(const AbstractMetaFunction* func,
-                                                             bool usePyArgs, TypeSystem::Language language,
-                                                             const AbstractMetaArgument* lastArg)
+ShibokenGenerator::ArgumentVarReplacementList ShibokenGenerator::getArgumentReplacement(const AbstractMetaFunction* func,
+                                                                                        bool usePyArgs, TypeSystem::Language language,
+                                                                                        const AbstractMetaArgument* lastArg)
 {
-    QMap<int, QString> argReplacement;
+    ArgumentVarReplacementList argReplacements;
     TypeSystem::Language convLang = (language == TypeSystem::TargetLangCode)
                                     ? TypeSystem::NativeCode : TypeSystem::TargetLangCode;
     int removed = 0;
@@ -1236,9 +1236,10 @@ QMap<int, QString> ShibokenGenerator::getArgumentReplacement(const AbstractMetaF
             argValue = arg->name();
         }
         if (!argValue.isEmpty())
-            argReplacement[i+1] = argValue;
+            argReplacements << ArgumentVarReplacementPair(arg, argValue);
+
     }
-    return argReplacement;
+    return argReplacements;
 }
 
 void ShibokenGenerator::writeCodeSnips(QTextStream& s,
@@ -1387,10 +1388,21 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
 
     // Replaces template %ARGUMENT_NAMES and %# variables by argument variables and values.
     // Replaces template variables %# for individual arguments.
-    QMap<int, QString> argReplacements = getArgumentReplacement(func, usePyArgs, language, lastArg);
-    code.replace("%ARGUMENT_NAMES", QStringList(argReplacements.values()).join(", "));
-    foreach (int i, argReplacements.keys())
-        code.replace(QString("%%1").arg(i), argReplacements[i]);
+    ArgumentVarReplacementList argReplacements = getArgumentReplacement(func, usePyArgs, language, lastArg);
+
+    QStringList args;
+    foreach (ArgumentVarReplacementPair pair, argReplacements)
+        args << pair.second;
+    code.replace("%ARGUMENT_NAMES", args.join(", "));
+
+    foreach (ArgumentVarReplacementPair pair, argReplacements) {
+        const AbstractMetaArgument* arg = pair.first;
+        int idx = arg->argumentIndex() + 1;
+        QString replacement = pair.second;
+        if (isWrapperType(arg->type()) && isPointer(arg->type()))
+            code.replace(QString("%%1.").arg(idx), QString("%1->").arg(replacement));
+        code.replace(QString("%%1").arg(idx), replacement);
+    }
 
     if (language == TypeSystem::NativeCode) {
         // Replaces template %PYTHON_ARGUMENTS variable with a pointer to the Python tuple

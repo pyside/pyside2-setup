@@ -101,5 +101,16 @@ forceDecisorSideB(int a, const Point& pt, const Str& text, ObjectType* object)
 {
 }
 
-} // namespace SampleNamespace
+double
+passReferenceToValueType(const Point& point, double multiplier)
+{
+    return (point.x() + point.y()) * multiplier;
+}
 
+int
+passReferenceToObjectType(const ObjectType& obj, int multiplier)
+{
+    return obj.objectName().size() * multiplier;
+}
+
+} // namespace SampleNamespace

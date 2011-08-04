@@ -137,6 +137,22 @@
                 %PYARG_0 = %CONVERTTOPYTHON[int](%1 + %2);
             </inject-code>
         </add-function>
+        <add-function signature="passReferenceToValueType(Point&amp;)" return-type="double">
+            <inject-code>
+            double %0 = %1.x() + %1.y();
+            %PYARG_0 = %CONVERTTOPYTHON[double](%0);
+            </inject-code>
+        </add-function>
+
+        <!-- Do change the argument from pointer to reference to comply with the C++ overload
+             of this function. The generator must be able to deal with this for Object Types. -->
+        <add-function signature="passReferenceToObjectType(ObjectType*)" return-type="int">
+            <inject-code>
+            // The dot in "%1." must be replaced by a "->".
+            double %0 = %1.objectName().size();
+            %PYARG_0 = %CONVERTTOPYTHON[int](%0);
+            </inject-code>
+        </add-function>
     </namespace-type>
 
     <namespace-type name="RemovedNamespace1" generate='no'>
@@ -1711,5 +1727,7 @@
     <suppress-warning text="template baseclass 'std::list&lt;T>' of 'QList' is not known" />
     <suppress-warning text="template baseclass 'std::list&lt;Str>' of 'StrList' is not known" />
 
-</typesystem>
+    <!-- Do not fix this warning, the generator should be able to handle this situation for Object Types. -->
+    <suppress-warning text="Argument in position 1 of added function 'SampleNamespace::passReferenceToObjectType(ObjectType * arg__1)', has a type that is not a reference, while the argument in the corresponding position in C++ function 'SampleNamespace::passReferenceToObjectType(const ObjectType &amp; obj, int multiplier)' is a reference." />
 
+</typesystem>

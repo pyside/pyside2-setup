@@ -26,8 +26,7 @@
 #include "libsamplemacros.h"
 #include "str.h"
 #include "point.h"
-
-class ObjectType;
+#include "objecttype.h"
 
 // Anonymous global enum
 enum {
@@ -129,6 +128,11 @@ LIBSAMPLE_API void forceDecisorSideA(const Point& pt, const Str& text, ObjectTyp
 // This is a variation of forceDecisorSideB.
 LIBSAMPLE_API void forceDecisorSideB(int a, ObjectType* object = 0);
 LIBSAMPLE_API void forceDecisorSideB(int a, const Point& pt, const Str& text, ObjectType* object = 0);
+
+// Add a new signature on type system with only a Point value as parameter.
+LIBSAMPLE_API double passReferenceToValueType(const Point& point, double multiplier);
+// Add a new signature on type system with only a ObjectType pointer as parameter.
+LIBSAMPLE_API int passReferenceToObjectType(const ObjectType& obj, int multiplier);
 
 } // namespace SampleNamespace
 
