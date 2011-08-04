@@ -16,6 +16,7 @@
     <primitive-type name="unsigned char"/>
     <primitive-type name="long"/>
     <primitive-type name="unsigned long"/>
+    <primitive-type name="std::size_t" target-lang-api-name="PyLong"/>
     <primitive-type name="std::string"/>
 
     <primitive-type name="Complex" target-lang-api-name="PyComplex">
@@ -303,6 +304,11 @@
     </object-type>
 
     <object-type name="ObjectView">
+        <modify-function signature="ObjectView(ObjectModel*, ObjectType*)">
+            <modify-argument index="1">
+                <reference-count action="set" variable-name="setModel(ObjectModel*)1"/>
+            </modify-argument>
+        </modify-function>
         <modify-function signature="setModel(ObjectModel*)">
             <modify-argument index="1">
                 <reference-count action="set"/>

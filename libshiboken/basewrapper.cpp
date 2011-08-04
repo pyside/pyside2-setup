@@ -29,6 +29,8 @@
 #include <string>
 #include <cstring>
 #include <cstddef>
+#include <set>
+#include <sstream>
 #include <algorithm>
 #include "threadstatesaver.h"
 
@@ -180,7 +182,7 @@ void SbkDeallocWrapper(PyObject* pyObj)
     if (sbkObj->d->hasOwnership && sbkObj->d->validCppObject) {
         SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(pyObj->ob_type);
         if (sbkType->d->is_multicpp) {
-            Shiboken::DtorCallerVisitor visitor(sbkObj);
+            Shiboken::DeallocVisitor visitor(sbkObj);
             Shiboken::walkThroughClassHierarchy(pyObj->ob_type, &visitor);
         } else {
             void* cptr = sbkObj->d->cptr[0];
@@ -387,14 +389,18 @@ void DtorCallerVisitor::visit(SbkObjectType* node)
 
 void DtorCallerVisitor::done()
 {
-    Shiboken::Object::deallocData(m_pyObj, true);
-
     std::list<std::pair<void*, SbkObjectType*> >::const_iterator it = m_ptrs.begin();
     for (; it != m_ptrs.end(); ++it) {
         Shiboken::ThreadStateSaver threadSaver;
         threadSaver.save();
         it->second->d->cpp_dtor(it->first);
     }
+}
+
+void DeallocVisitor::done()
+{
+    Shiboken::Object::deallocData(m_pyObj, true);
+    DtorCallerVisitor::done();
 }
 
 namespace Module { void init(); }
@@ -739,6 +745,27 @@ bool hasCppWrapper(SbkObject* pyObj)
     return pyObj->d->containsCppWrapper;
 }
 
+bool wasCreatedByPython(SbkObject* pyObj)
+{
+    return pyObj->d->cppObjectCreated;
+}
+
+void callCppDestructors(SbkObject* pyObj)
+{
+    SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(pyObj->ob_type);
+    if (sbkType->d->is_multicpp) {
+        Shiboken::DtorCallerVisitor visitor(pyObj);
+        Shiboken::walkThroughClassHierarchy(pyObj->ob_type, &visitor);
+    } else {
+        Shiboken::ThreadStateSaver threadSaver;
+        threadSaver.save();
+        sbkType->d->cpp_dtor(pyObj->d->cptr[0]);
+    }
+    delete[] pyObj->d->cptr;
+    pyObj->d->cptr = 0;
+    invalidate(pyObj);
+}
+
 bool hasOwnership(SbkObject* pyObj)
 {
     return pyObj->d->hasOwnership;
@@ -859,6 +886,16 @@ void* cppPointer(SbkObject* pyObj, PyTypeObject* desiredType)
         return pyObj->d->cptr[idx];
     return 0;
 }
+
+std::vector<void*> cppPointers(SbkObject* pyObj)
+{
+    int n = getNumberOfCppBaseClasses(Py_TYPE(pyObj));
+    std::vector<void*> ptrs(n);
+    for (int i = 0; i < n; ++i)
+        ptrs[i] = pyObj->d->cptr[i];
+    return ptrs;
+}
+
 
 bool setCppPointer(SbkObject* sbkObj, PyTypeObject* desiredType, void* cptr)
 {
@@ -1213,6 +1250,59 @@ void clearReferences(SbkObject* self)
         decRefPyObjectList(iter->second);
     delete self->d->referredObjects;
     self->d->referredObjects = 0;
+}
+
+std::string info(SbkObject* self)
+{
+    std::ostringstream s;
+    std::list<SbkObjectType*> bases = getCppBaseClasses(self->ob_type);
+
+    s << "C++ address....... ";
+    std::list<SbkObjectType*>::const_iterator it = bases.begin();
+    for (int i = 0; it != bases.end(); ++it, ++i)
+        s << ((PyTypeObject*)*it)->tp_name << "/" << self->d->cptr[i] << ' ';
+    s << "\n";
+
+    s << "hasOwnership...... " << bool(self->d->hasOwnership) << "\n"
+         "containsCppWrapper " << self->d->containsCppWrapper << "\n"
+         "validCppObject.... " << self->d->validCppObject << "\n"
+         "wasCreatedByPython " << self->d->cppObjectCreated << "\n";
+
+
+    if (self->d->parentInfo && self->d->parentInfo->parent) {
+        s << "parent............ ";
+        Shiboken::AutoDecRef parent(PyObject_Str((PyObject*)self->d->parentInfo->parent));
+        s << PyString_AS_STRING(parent.object()) << "\n";
+    }
+
+    if (self->d->parentInfo && self->d->parentInfo->children.size()) {
+        s << "children.......... ";
+        ChildrenList& children = self->d->parentInfo->children;
+        for (ChildrenList::const_iterator it = children.begin(); it != children.end(); ++it) {
+            Shiboken::AutoDecRef child(PyObject_Str((PyObject*)*it));
+            s << PyString_AS_STRING(child.object()) << ' ';
+        }
+        s << '\n';
+    }
+
+    if (self->d->referredObjects && self->d->referredObjects->size()) {
+        Shiboken::RefCountMap& map = *self->d->referredObjects;
+        s << "referred objects.. ";
+        Shiboken::RefCountMap::const_iterator it = map.begin();
+        for (; it != map.end(); ++it) {
+            if (it != map.begin())
+                s << "                   ";
+            s << '"' << it->first << "\" => ";
+            std::list<PyObject*>::const_iterator j = it->second.begin();
+            for (; j != it->second.end(); ++j) {
+                Shiboken::AutoDecRef obj(PyObject_Str(*j));
+                s << PyString_AS_STRING(obj.object()) << ' ';
+            }
+            s << ' ';
+        }
+        s << '\n';
+    }
+    return s.str();
 }
 
 } // namespace Object

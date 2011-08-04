@@ -1,0 +1,73 @@
+<?xml version="1.0" ?>
+<typesystem package="shiboken">
+    <primitive-type name="bool" />
+    <primitive-type name="unsigned long" />
+    <add-function signature="isValid(PyObject*)" return-type="bool">
+        <inject-code>
+            %PYARG_0 = %CONVERTTOPYTHON[bool](Shiboken::Object::isValid(%1, false));
+        </inject-code>
+    </add-function>
+
+    <add-function signature="wrapInstance(unsigned long, PyType)" return-type="PyObject*">
+        <inject-code>
+            if (Shiboken::ObjectType::checkType((PyTypeObject*)%2))
+                %PYARG_0 = Shiboken::Object::newObject((SbkObjectType*)%2, (void*)%1, false, true);
+            else
+                PyErr_SetString(PyExc_TypeError, "You need a shiboken-based type.");
+        </inject-code>
+    </add-function>
+
+   <add-function signature="getCppPointer(PyObject*)" return-type="PyObject*">
+        <inject-code>
+            if (Shiboken::Object::checkType(%1)) {
+                std::vector&lt;void*> ptrs = Shiboken::Object::cppPointers((SbkObject*)%1);
+                %PYARG_0 = PyTuple_New(ptrs.size());
+                for (std::size_t i = 0; i &lt; ptrs.size(); ++i)
+                    PyTuple_SET_ITEM(%PYARG_0, i, PyLong_FromVoidPtr(ptrs[i]));
+            } else {
+                PyErr_SetString(PyExc_TypeError, "You need a shiboken-based type.");
+            }
+        </inject-code>
+   </add-function>
+
+   <add-function signature="delete(PyObject*)">
+        <inject-code>
+            if (Shiboken::Object::checkType(%1)) {
+                Shiboken::Object::callCppDestructors((SbkObject*)%1);
+            } else {
+                PyErr_SetString(PyExc_TypeError, "You need a shiboken-based type.");
+            }
+        </inject-code>
+   </add-function>
+
+    <add-function signature="isOwnedByPython(PyObject*)" return-type="bool">
+        <inject-code>
+            if (Shiboken::Object::checkType(%1)) {
+                %PYARG_0 = %CONVERTTOPYTHON[bool](Shiboken::Object::hasOwnership((SbkObject*)%1));
+            } else {
+                PyErr_SetString(PyExc_TypeError, "You need a shiboken-based type.");
+            }
+        </inject-code>
+    </add-function>
+
+   <add-function signature="wasCreatedByPython(PyObject*)" return-type="bool">
+        <inject-code>
+            if (Shiboken::Object::checkType(%1)) {
+                %PYARG_0 = %CONVERTTOPYTHON[bool](Shiboken::Object::wasCreatedByPython((SbkObject*)%1));
+            } else {
+                PyErr_SetString(PyExc_TypeError, "You need a shiboken-based type.");
+            }
+        </inject-code>
+   </add-function>
+
+    <add-function signature="dump(PyObject*)" return-type="PyObject*">
+        <inject-code>
+            if (!Shiboken::Object::checkType(%1)) {
+                %PYARG_0 = PyString_FromString("Ordinary Python type.");
+            } else {
+                std::string str = Shiboken::Object::info((SbkObject*)%1);
+                %PYARG_0 = PyString_FromString(str.c_str());
+            }
+        </inject-code>
+    </add-function>
+</typesystem>

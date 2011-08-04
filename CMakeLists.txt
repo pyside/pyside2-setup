@@ -88,6 +88,7 @@ add_subdirectory(doc)
 # deps found, compile the generator.
 if (QT4_FOUND AND ApiExtractor_FOUND AND GeneratorRunner_FOUND AND PYTHONLIBS_FOUND AND PYTHONINTERP_FOUND)
     add_subdirectory(generator)
+    add_subdirectory(shibokenmodule)
 
     if (BUILD_TESTS)
         enable_testing()

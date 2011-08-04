@@ -345,22 +345,24 @@ void HeaderGenerator::finishGeneration()
     QTextStream protEnumsSurrogates(&protectedEnumSurrogates);
 
     Indentation indent(INDENT);
-
-    macrosStream << "// Type indices" << endl;
     AbstractMetaEnumList globalEnums = this->globalEnums();
-    foreach (const AbstractMetaClass* metaClass, classes()) {
-        writeTypeIndexDefine(macrosStream, metaClass);
-        lookForEnumsInClassesNotToBeGenerated(globalEnums, metaClass);
+
+    if (getMaxTypeIndex()) {
+        macrosStream << "// Type indices" << endl;
+        foreach (const AbstractMetaClass* metaClass, classes()) {
+            writeTypeIndexDefine(macrosStream, metaClass);
+            lookForEnumsInClassesNotToBeGenerated(globalEnums, metaClass);
+        }
+        foreach (const AbstractMetaEnum* metaEnum, globalEnums)
+            writeTypeIndexDefineLine(macrosStream, metaEnum->typeEntry());
+        macrosStream << "#define ";
+        macrosStream.setFieldWidth(60);
+        macrosStream << "SBK_"+moduleName()+"_IDX_COUNT";
+        macrosStream.setFieldWidth(0);
+        macrosStream << ' ' << getMaxTypeIndex() << endl << endl;
+        macrosStream << "// This variable stores all python types exported by this module" << endl;
+        macrosStream << "extern PyTypeObject** " << cppApiVariableName() << ';' << endl << endl;
     }
-    foreach (const AbstractMetaEnum* metaEnum, globalEnums)
-        writeTypeIndexDefineLine(macrosStream, metaEnum->typeEntry());
-    macrosStream << "#define ";
-    macrosStream.setFieldWidth(60);
-    macrosStream << "SBK_"+moduleName()+"_IDX_COUNT";
-    macrosStream.setFieldWidth(0);
-    macrosStream << ' ' << getMaxTypeIndex() << endl << endl;
-    macrosStream << "// This variable stores all python types exported by this module" << endl;
-    macrosStream << "extern PyTypeObject** " << cppApiVariableName() << ';' << endl << endl;
 
     macrosStream << "// Macros for type check" << endl;
     foreach (const AbstractMetaEnum* cppEnum, globalEnums) {

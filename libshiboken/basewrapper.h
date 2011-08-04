@@ -27,6 +27,7 @@
 #include "python25compat.h"
 #include "bindingmanager.h"
 #include <list>
+#include <vector>
 #include <map>
 #include <string>
 
@@ -209,9 +210,15 @@ LIBSHIBOKEN_API void        setTypeUserData(SbkObjectType* self, void* userData,
 namespace Object {
 
 /**
+ *  Returns a string with information about the internal state of the instance object, useful for debug purposes.
+ */
+LIBSHIBOKEN_API std::string info(SbkObject* self);
+
+/**
 *   Returns true if the object is an instance of a type created by the Shiboken generator.
 */
 LIBSHIBOKEN_API bool        checkType(PyObject* pyObj);
+
 /**
  *  Returns true if this object type is an instance of an user defined type derived from an Shiboken type.
  *  \see Shiboken::ObjectType::isUserType
@@ -247,9 +254,22 @@ LIBSHIBOKEN_API void        setHasCppWrapper(SbkObject* pyObj, bool value);
 LIBSHIBOKEN_API bool        hasCppWrapper(SbkObject* pyObj);
 
 /**
+ *  Return true if the Python object was created by Python, false otherwise.
+ *  \note This function was added to libshiboken only to be used by shiboken.wasCreatedByPython()
+ */
+LIBSHIBOKEN_API bool        wasCreatedByPython(SbkObject* pyObj);
+
+/**
+ *  Call the C++ object destructor and invalidates the Python object.
+ *  \note This function was added to libshiboken only to be used by shiboken.delete()
+ */
+LIBSHIBOKEN_API void        callCppDestructors(SbkObject* pyObj);
+
+/**
  *  Return true if the Python is responsible for deleting the underlying C++ object.
  */
 LIBSHIBOKEN_API bool        hasOwnership(SbkObject* pyObj);
+
 /**
  *  Sets python as responsible to delete the underlying C++ object.
  *  \note You this overload only when the PyObject can be a sequence and you want to
@@ -257,6 +277,7 @@ LIBSHIBOKEN_API bool        hasOwnership(SbkObject* pyObj);
  *  \see getOwnership(SbkObject*)
  */
 LIBSHIBOKEN_API void        getOwnership(PyObject* pyObj);
+
 /**
  *  Sets python as responsible to delete the underlying C++ object.
  */
@@ -283,6 +304,12 @@ LIBSHIBOKEN_API bool        hasParentInfo(SbkObject* pyObj);
  *   Get the C++ pointer of type \p desiredType from a Python object.
  */
 LIBSHIBOKEN_API void*       cppPointer(SbkObject* pyObj, PyTypeObject* desiredType);
+
+/**
+ *   Return a list with all C++ pointers held from a Python object.
+ *   \note This function was added to libshiboken only to be used by shiboken.getCppPointer()
+ */
+LIBSHIBOKEN_API std::vector<void*> cppPointers(SbkObject* pyObj);
 
 /**
  *   Set the C++ pointer of type \p desiredType of a Python object.
