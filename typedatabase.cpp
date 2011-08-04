@@ -441,51 +441,57 @@ static bool compareTypeEntriesByName(const TypeEntry* t1, const TypeEntry* t2)
     return t1->qualifiedCppName() < t2->qualifiedCppName();
 }
 
-int getTypeIndex(const TypeEntry* typeEntry)
+static void _computeTypeIndexes()
 {
-    if (computeTypeIndexes) {
-        TypeDatabase* tdb = TypeDatabase::instance();
-        typedef QMap<int, QList<TypeEntry*> > GroupedTypeEntries;
-        GroupedTypeEntries groupedEntries;
+    TypeDatabase* tdb = TypeDatabase::instance();
+    typedef QMap<int, QList<TypeEntry*> > GroupedTypeEntries;
+    GroupedTypeEntries groupedEntries;
 
-        // Group type entries by revision numbers
-        TypeEntryHash allEntries = tdb->allEntries();
-        foreach (QList<TypeEntry*> entryList, allEntries) {
-            foreach (TypeEntry* entry, entryList) {
-                if (entry->isPrimitive()
-                    || entry->isContainer()
-                    || entry->isFunction()
-                    || !entry->generateCode()
-                    || entry->isEnumValue()
-                    || entry->isVarargs()
-                    || entry->isTypeSystem()
-                    || entry->isVoid()
-                    || entry->isCustom())
-                    continue;
-                groupedEntries[getTypeRevision(entry)] << entry;
-            }
-        }
-
-        maxTypeIndex = 0;
-        GroupedTypeEntries::iterator it = groupedEntries.begin();
-        for (; it != groupedEntries.end(); ++it) {
-            // Remove duplicates
-            QList<TypeEntry*>::iterator newEnd = std::unique(it.value().begin(), it.value().end());
-            it.value().erase(newEnd, it.value().end());
-            // Sort the type entries by name
-            qSort(it.value().begin(), newEnd, compareTypeEntriesByName);
-
-            foreach (TypeEntry* entry, it.value()) {
-                (*typeEntryFields())[entry].second = maxTypeIndex++;
-            }
+    // Group type entries by revision numbers
+    TypeEntryHash allEntries = tdb->allEntries();
+    foreach (QList<TypeEntry*> entryList, allEntries) {
+        foreach (TypeEntry* entry, entryList) {
+            if (entry->isPrimitive()
+                || entry->isContainer()
+                || entry->isFunction()
+                || !entry->generateCode()
+                || entry->isEnumValue()
+                || entry->isVarargs()
+                || entry->isTypeSystem()
+                || entry->isVoid()
+                || entry->isCustom())
+                continue;
+            groupedEntries[getTypeRevision(entry)] << entry;
         }
     }
 
+    maxTypeIndex = 0;
+    GroupedTypeEntries::iterator it = groupedEntries.begin();
+    for (; it != groupedEntries.end(); ++it) {
+        // Remove duplicates
+        QList<TypeEntry*>::iterator newEnd = std::unique(it.value().begin(), it.value().end());
+        it.value().erase(newEnd, it.value().end());
+        // Sort the type entries by name
+        qSort(it.value().begin(), newEnd, compareTypeEntriesByName);
+
+        foreach (TypeEntry* entry, it.value()) {
+            (*typeEntryFields())[entry].second = maxTypeIndex++;
+        }
+    }
+    computeTypeIndexes = false;
+}
+
+int getTypeIndex(const TypeEntry* typeEntry)
+{
+    if (computeTypeIndexes)
+        _computeTypeIndexes();
     return typeEntryFields()->value(typeEntry).second;
 }
 
 int getMaxTypeIndex()
 {
+    if (computeTypeIndexes)
+        _computeTypeIndexes();
     return maxTypeIndex;
 }
 
