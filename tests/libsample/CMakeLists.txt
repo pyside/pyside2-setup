@@ -3,6 +3,7 @@ project(libsample)
 set(libsample_SRC
 abstract.cpp
 blackbox.cpp
+bytearray.cpp
 bucket.cpp
 collector.cpp
 complex.cpp

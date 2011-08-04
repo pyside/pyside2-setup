@@ -9,5 +9,7 @@
     <value-type name="ExtendsNoImplicitConversion" />
     <value-type name="Number" />
 
+    <suppress-warning text="signature 'operator!=(ByteArray,const char*)' for function modification in 'ByteArray' not found." />
+    <suppress-warning text="signature 'operator+(ByteArray,const char*)' for function modification in 'ByteArray' not found." />
+    <suppress-warning text="signature 'operator==(ByteArray,const char*)' for function modification in 'ByteArray' not found." />
 </typesystem>
-
