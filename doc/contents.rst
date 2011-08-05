@@ -11,3 +11,4 @@ Table of contents
     sequenceprotocol.rst
     ownership.rst
     wordsofadvice.rst
+    shibokenmodule.rst

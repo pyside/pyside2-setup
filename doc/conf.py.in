@@ -143,7 +143,7 @@ html_use_smartypants = True
 html_additional_pages = { 'index' : 'index.html'}
 
 # If false, no module index is generated.
-#html_use_modindex = True
+html_use_modindex = False
 
 # If false, no index is generated.
 html_use_index = False
@@ -164,5 +164,3 @@ html_add_permalinks = True
 # If nonempty, this is the file name suffix for HTML files (e.g. ".xhtml").
 #html_file_suffix = ''
 
-# Output file base name for HTML help builder.
-#htmlhelp_basename = 'PyQtBdoc'

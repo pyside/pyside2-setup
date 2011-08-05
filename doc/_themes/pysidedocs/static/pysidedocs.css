@@ -10,7 +10,6 @@ html {
 body {
     margin: 0;
     padding: 0;
-    text-align: center;
     background-color: #EBEBEB;
     height: 100%;
     color: #333;
@@ -93,7 +92,6 @@ h1 {
     padding-bottom: 15px;
     padding-top: 15px;
     border-bottom: 1px solid #c2c2c2;
-    text-transform:uppercase;
     margin-right: -100px;
     position: relative;
     left: -50px;
@@ -137,11 +135,15 @@ pre * {
     font: 100% monospace;
 }
 
+.pre {
+    font: 100% monospace;
+}
+
 .headerlink {
     font-size: 100%;
     color: inherit;
     float: right;
-    visibility: Hidden;
+    visibility: Hidden
 }
 
 h1 .headerlink {
@@ -190,6 +192,11 @@ div.body p.centered {
 div.warning {
     background-color: #ffe4e4;
     border: 1px solid #f66;
+}
+
+div.seealso {
+    background-color: #ffffcc;
+    border: 1px solid #ffff66;
 }
 
 div.note {
@@ -406,4 +413,63 @@ img {
 
 table.footnote {
     margin: 0px;
+}
+
+#synopsis table, table.field-list {
+    margin: 0px;
+}
+
+tt.descname {
+    font-size: 120%;
+    font-weight: bold;
+}
+
+#functions ul, #virtual-functions ul, #slots ul, #signals ul, #static-functions ul {
+    list-style: none;
+    margin: 0px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    background-color: #f4f4f4;
+    -moz-border-radius:10px;
+    -webkit-border-radius:10px;
+    -khtml-border-radius:10px;
+}
+
+#synopsis span.pre {
+    color: #009491;
+    font-weight: bolder;
+}
+
+#detailed-description .class dt, #detailed-description .method dt, #detailed-description .attribute dt, #detailed-description .function dt  {
+    margin: 0px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    background-color: #f4f4f4;
+    -moz-border-radius:10px;
+    -webkit-border-radius:10px;
+    -khtml-border-radius:10px;
+}
+
+.pysidetoc ul {
+    list-style: none;
+    padding: 0px;
+    margin: 0px;
+}
+
+.pysidetoc em {
+    font-style: normal;
+}
+
+.pysidetoc strong {
+    display: block;
+    padding: 5px;
+    border: 1px solid #ddd;
+    background-color: #f4f4f4;
+    -moz-border-radius:6px;
+    -webkit-border-radius:6px;
+    -khtml-border-radius:6px;
+}
+
+.hide {
+    display: none;
 }
