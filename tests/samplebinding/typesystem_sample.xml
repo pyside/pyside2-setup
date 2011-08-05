@@ -697,6 +697,21 @@
                 </conversion-rule>
             </modify-argument>
         </modify-function>
+        <modify-function signature="getSize(const void*,int)">
+            <modify-argument index="1">
+                <replace-type modified-type="ByteArray&amp;"/>
+            </modify-argument>
+            <modify-argument index="2">
+                <replace-default-expression with="-1"/>
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+            int size = (%2 &lt; 0) ? %1.size() : %2;
+            %BEGIN_ALLOW_THREADS
+            %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME((const void*) %1.data(), size);
+            %END_ALLOW_THREADS
+            %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+            </inject-code>
+        </modify-function>
     </object-type>
 
     <object-type name="AbstractModifications">
@@ -833,9 +848,9 @@
         </modify-function>
         <template name="fix_int*,int*,int*,int*">
             int a0, a1, a2, a3;
-            PyThreadState* _save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS
+            %BEGIN_ALLOW_THREADS
             %CPPSELF->::%TYPE::%FUNCTION_NAME(&amp;a0, &amp;a1, &amp;a2, &amp;a3);
-            PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS
+            %END_ALLOW_THREADS
             %PYARG_0 = Shiboken::makeTuple(a0, a1, a2, a3);
         </template>
         <template name="fix_native_return_int*,int*,int*,int*">
@@ -1373,10 +1388,10 @@
                 <insert-template name="buffer_argument">
                     <replace from="%out" to="argOut" />
                 </insert-template>
-                PyThreadState* _save = PyEval_SaveThread();
-                %RETURN_TYPE cppResult = %CPPSELF.%FUNCTION_NAME(argOut, %2);
-                PyEval_RestoreThread(_save);
-                %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](cppResult);
+                %BEGIN_ALLOW_THREADS
+                %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(argOut, %2);
+                %END_ALLOW_THREADS
+                %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
             </inject-code>
         </add-function>
     </object-type>

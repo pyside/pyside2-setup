@@ -860,8 +860,18 @@ bool ShibokenGenerator::visibilityModifiedToPrivate(const AbstractMetaFunction* 
 
 QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType, bool genericNumberType)
 {
-    if (metaType->typeEntry()->isCustom())
-        return guessCPythonCheckFunction(metaType->typeEntry()->name());
+    AbstractMetaType* type;
+    std::auto_ptr<AbstractMetaType> type_autoptr;
+    QString customCheck;
+    if (metaType->typeEntry()->isCustom()) {
+        customCheck = guessCPythonCheckFunction(metaType->typeEntry()->name(), &type);
+        if (type) {
+            type_autoptr = std::auto_ptr<AbstractMetaType>(type);
+            metaType = type;
+        }
+        if (!customCheck.isEmpty())
+            return customCheck;
+    }
 
     QString baseName = cpythonBaseName(metaType);
     if (isNumber(baseName))
@@ -878,8 +888,17 @@ QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType
 
 QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool genericNumberType)
 {
-    if (type->isCustom())
-        return guessCPythonCheckFunction(type->name());
+    AbstractMetaType* metaType;
+    std::auto_ptr<AbstractMetaType> metaType_autoptr;
+    QString customCheck;
+    if (type->isCustom()) {
+        customCheck = guessCPythonCheckFunction(type->name(), &metaType);
+        if (metaType) {
+            metaType_autoptr = std::auto_ptr<AbstractMetaType>(metaType);
+            return cpythonCheckFunction(metaType, genericNumberType);
+        }
+        return customCheck;
+    }
 
     QString baseName = cpythonBaseName(type);
     if (isNumber(baseName))
@@ -892,18 +911,18 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool gene
     return QString("%1checkType").arg(baseName);
 }
 
-QString ShibokenGenerator::guessCPythonCheckFunction(const QString& type)
+QString ShibokenGenerator::guessCPythonCheckFunction(const QString& type, AbstractMetaType** metaType)
 {
+    *metaType = 0;
     if (type == "PyTypeObject")
         return "PyType_Check";
 
     if (type == "PyBuffer")
         return "Shiboken::Buffer::checkType";
 
-    AbstractMetaType* metaType = buildAbstractMetaTypeFromString(type);
-    std::auto_ptr<const AbstractMetaType> metaType_autoptr(metaType);
-    if (metaType && !metaType->typeEntry()->isCustom())
-        return cpythonCheckFunction(metaType);
+    *metaType = buildAbstractMetaTypeFromString(type);
+    if (*metaType && !(*metaType)->typeEntry()->isCustom())
+        return QString();
 
     return QString("%1_Check").arg(type);
 }
@@ -939,8 +958,18 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry* type, b
 
 QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* metaType, bool genericNumberType)
 {
-    if (metaType->typeEntry()->isCustom())
-        return guessCPythonCheckFunction(metaType->typeEntry()->name());
+    AbstractMetaType* type;
+    std::auto_ptr<AbstractMetaType> type_autoptr;
+    QString customCheck;
+    if (metaType->typeEntry()->isCustom()) {
+        customCheck = guessCPythonCheckFunction(metaType->typeEntry()->name(), &type);
+        if (type) {
+            type_autoptr = std::auto_ptr<AbstractMetaType>(type);
+            metaType = type;
+        }
+        if (!customCheck.isEmpty())
+            return customCheck;
+    }
 
     QString baseName = cpythonBaseName(metaType);
     if (isNumber(baseName))

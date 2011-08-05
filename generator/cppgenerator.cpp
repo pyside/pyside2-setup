@@ -1471,12 +1471,21 @@ void CppGenerator::writeInvalidPyObjectCheck(QTextStream& s, const QString& pyOb
 
 void CppGenerator::writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, bool isNumber, QString customType)
 {
-    if (!customType.isEmpty())
-        s << guessCPythonCheckFunction(customType);
-    else if (argType->isEnum())
-        s << cpythonIsConvertibleFunction(argType, false);
+    AbstractMetaType* metaType;
+    std::auto_ptr<AbstractMetaType> metaType_autoptr;
+    QString customCheck;
+    if (!customType.isEmpty()) {
+        customCheck = guessCPythonCheckFunction(customType, &metaType);
+        if (metaType) {
+            metaType_autoptr = std::auto_ptr<AbstractMetaType>(metaType);
+            argType = metaType;
+        }
+    }
+
+    if (customCheck.isEmpty())
+        s << cpythonIsConvertibleFunction(argType, argType->isEnum() ? false : isNumber);
     else
-        s << cpythonIsConvertibleFunction(argType, isNumber);
+        s << customCheck;
 
     s << '(' << argumentName << ')';
 }

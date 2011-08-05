@@ -296,7 +296,17 @@ public:
     QString cpythonTypeNameExt(const TypeEntry* type);
     QString cpythonCheckFunction(const TypeEntry* type, bool genericNumberType = false);
     QString cpythonCheckFunction(const AbstractMetaType* metaType, bool genericNumberType = false);
-    QString guessCPythonCheckFunction(const QString& type);
+    /**
+     *  Receives the argument \p type and tries to find the appropriate AbstractMetaType for it
+     *  or a custom type check.
+     *  \param type     A string representing the type to be discovered.
+     *  \param metaType A pointer to an AbstractMetaType pointer, to where write a new meta type object
+     *                  if one is produced from the \p type string. This object must be deallocated by
+     *                  the caller. It will set the target variable to NULL, is \p type is a Python type.
+     *  \return A custom check if \p type is a custom type, or an empty string if \p metaType
+     *          receives an existing type object.
+     */
+    QString guessCPythonCheckFunction(const QString& type, AbstractMetaType** metaType);
     QString cpythonIsConvertibleFunction(const TypeEntry* type, bool genericNumberType = false, bool checkExact = false);
     QString cpythonIsConvertibleFunction(const AbstractMetaType* metaType, bool genericNumberType = false);
     QString cpythonIsConvertibleFunction(const AbstractMetaArgument* metaArg, bool genericNumberType = false)

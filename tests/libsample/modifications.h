@@ -95,6 +95,9 @@ public:
     virtual const char* className();
 
     Point sumPointArray(int arraySize, const Point pointArray[]);
+
+    // Replace 'const void*' by 'ByteArray&'.
+    int getSize(const void* data, int size);
 };
 
 class LIBSAMPLE_API AbstractModifications : public Modifications
