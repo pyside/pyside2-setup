@@ -298,6 +298,8 @@
         </modify-function>
     </object-type>
 
+    <value-type name="ObjectTypeHolder"/>
+
     <object-type name="ObjectModel">
         <enum-type name="MethodCalled" />
         <modify-function signature="data() const">

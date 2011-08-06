@@ -19,6 +19,7 @@ modified_constructor.cpp
 multiple_derived.cpp
 objectmodel.cpp
 objecttype.cpp
+objecttypeholder.cpp
 objecttypelayout.cpp
 objecttypeoperators.cpp
 objectview.cpp
