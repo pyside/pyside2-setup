@@ -2892,7 +2892,7 @@ void CppGenerator::writeGetterFunction(QTextStream& s, const AbstractMetaField* 
 
     s << INDENT << "PyObject* value = ";
     if (newWrapperSameObject) {
-        s << "Shiboken::Object::newObject((SbkObjectType*)" << cpythonTypeNameExt(fieldType->typeEntry());
+        s << "Shiboken::Object::newObject((SbkObjectType*)" << cpythonTypeNameExt(fieldType);
         s << ", " << cppField << ", false, true);" << endl;
         s << INDENT << "Shiboken::Object::setParent(" PYTHON_SELF_VAR ", value)";
     } else {

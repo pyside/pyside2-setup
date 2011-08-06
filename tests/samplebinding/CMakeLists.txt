@@ -25,6 +25,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/derived_someinnerclass_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/echo_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/event_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/expression_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/friendofonlycopy_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/handleholder_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/implicitconv_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/implicitbase_wrapper.cpp
@@ -53,6 +54,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/objecttypeoperators_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objectview_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objtypereference_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/oddbooluser_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/onlycopy_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/overload_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/overload2_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pairuser_wrapper.cpp

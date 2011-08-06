@@ -7,6 +7,7 @@ bytearray.cpp
 bucket.cpp
 collector.cpp
 complex.cpp
+onlycopy.cpp
 derived.cpp
 echo.cpp
 functions.cpp

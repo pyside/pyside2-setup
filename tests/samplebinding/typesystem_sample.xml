@@ -306,6 +306,8 @@
     </object-type>
 
     <value-type name="ObjectTypeHolder"/>
+    <value-type name="OnlyCopy"/>
+    <value-type name="FriendOfOnlyCopy"/>
 
     <object-type name="ObjectModel">
         <enum-type name="MethodCalled" />
