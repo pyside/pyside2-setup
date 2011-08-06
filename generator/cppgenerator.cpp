@@ -3023,15 +3023,16 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                         QString expression = QString("%1%2 %3 " CPP_ARG0)
                                                 .arg(func->isPointerOperator() ? "&" : "")
                                                 .arg(CPP_SELF_VAR).arg(op);
+                        s << INDENT;
+                        if (func->type())
+                            s << func->type()->cppSignature() << " " CPP_RETURN_VAR " = ";
+                        s << expression << ';' << endl;
                         s << INDENT << PYTHON_RETURN_VAR " = ";
-                        if (!func->type()) {
-                            s << "Py_None;" << endl;
-                            s << INDENT << "Py_INCREF(Py_None);" << endl;
-                            s << INDENT << expression << "; // This operator returns void." << endl;
-                        } else {
-                            writeToPythonConversion(s, func->type(), metaClass, expression);
-                            s << ';' << endl;
-                        }
+                        if (func->type())
+                            writeToPythonConversion(s, func->type(), metaClass, CPP_RETURN_VAR);
+                        else
+                            s << "Py_None;" << endl << INDENT << "Py_INCREF(Py_None)";
+                        s << ';' << endl;
                     }
                 }
                 s << INDENT << '}';
