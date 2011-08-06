@@ -595,6 +595,25 @@ void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaT
     s << "toCpp(" << argumentName << ')';
 }
 
+bool ShibokenGenerator::shouldRejectNullPointerArgument(const AbstractMetaFunction* func, int argIndex)
+{
+    if (argIndex < 0 || argIndex >= func->arguments().count())
+        return false;
+    // Argument type is not a pointer, a None rejection should not be
+    // necessary because the type checking would handle that already.
+    if (!isPointer(func->arguments().at(argIndex)->type()))
+        return false;
+    if (func->argumentRemoved(argIndex + 1))
+        return false;
+    foreach (FunctionModification funcMod, func->modifications()) {
+        foreach (ArgumentModification argMod, funcMod.argument_mods) {
+            if (argMod.index == argIndex + 1 && argMod.noNullPointers)
+                return true;
+        }
+    }
+    return false;
+}
+
 QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func, bool incRef) const
 {
     QString result;

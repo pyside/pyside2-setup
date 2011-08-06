@@ -1469,7 +1469,7 @@ void CppGenerator::writeInvalidPyObjectCheck(QTextStream& s, const QString& pyOb
     s << INDENT << "return " << m_currentErrorCode << ';' << endl;
 }
 
-void CppGenerator::writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, bool isNumber, QString customType)
+void CppGenerator::writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, bool isNumber, QString customType, bool rejectNull)
 {
     AbstractMetaType* metaType;
     std::auto_ptr<AbstractMetaType> metaType_autoptr;
@@ -1482,12 +1482,17 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const AbstractMetaType* argTyp
         }
     }
 
+    QString typeCheck;
     if (customCheck.isEmpty())
-        s << cpythonIsConvertibleFunction(argType, argType->isEnum() ? false : isNumber);
+        typeCheck = cpythonIsConvertibleFunction(argType, argType->isEnum() ? false : isNumber);
     else
-        s << customCheck;
+        typeCheck = customCheck;
+    typeCheck.append(QString("(%1)").arg(argumentName));
 
-    s << '(' << argumentName << ')';
+    if (rejectNull)
+        typeCheck = QString("(%1 != Py_None && %2)").arg(argumentName).arg(typeCheck);
+
+    s << typeCheck;
 }
 
 void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName)
@@ -1510,7 +1515,8 @@ void CppGenerator::writeTypeCheck(QTextStream& s, const OverloadData* overloadDa
     const AbstractMetaType* argType = overloadData->argType();
     bool numberType = numericTypes.count() == 1 || ShibokenGenerator::isPyInt(argType);
     QString customType = (overloadData->hasArgumentTypeReplace() ? overloadData->argumentTypeReplaced() : "");
-    writeTypeCheck(s, argType, argumentName, numberType, customType);
+    bool rejectNull = shouldRejectNullPointerArgument(overloadData->referenceFunction(), overloadData->argPos());
+    writeTypeCheck(s, argType, argumentName, numberType, customType, rejectNull);
 }
 
 void CppGenerator::writeArgumentConversion(QTextStream& s,

@@ -98,6 +98,10 @@ public:
 
     // Replace 'const void*' by 'ByteArray&'.
     int getSize(const void* data, int size);
+
+    // Mark the argument with a <no-null-pointer/> tag;
+    // the test implementation must expect point never to be null.
+    int sumPointCoordinates(const Point* point);
 };
 
 class LIBSAMPLE_API AbstractModifications : public Modifications

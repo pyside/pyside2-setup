@@ -234,6 +234,9 @@ public:
                               const AbstractMetaClass* context, const QString& argumentName, Options options = NoOption);
     void writeToCppConversion(QTextStream& s, const AbstractMetaClass* metaClass, const QString& argumentName);
 
+    /// Returns true if the argument is a pointer that rejects NULL values.
+    static bool shouldRejectNullPointerArgument(const AbstractMetaFunction* func, int argIndex);
+
     /// Verifies if the class should have a C++ wrapper generated for it, instead of only a Python wrapper.
     bool shouldGenerateCppWrapper(const AbstractMetaClass* metaClass) const;
 

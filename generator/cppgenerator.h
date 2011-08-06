@@ -65,7 +65,7 @@ private:
     /// Writes the check section for the validity of wrapped C++ objects.
     void writeInvalidPyObjectCheck(QTextStream& s, const QString& pyObj);
 
-    void writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, bool isNumber = false, QString customType = "");
+    void writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, bool isNumber = false, QString customType = "", bool rejectNull = false);
     void writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName);
 
     void writeTypeDiscoveryFunction(QTextStream& s, const AbstractMetaClass* metaClass);

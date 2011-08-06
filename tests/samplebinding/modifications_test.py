@@ -143,5 +143,10 @@ class ModificationsTest(unittest.TestCase):
         self.assertEqual(self.mods.getSize(ba), len(ba))
         self.assertEqual(self.mods.getSize(ba, 20), 20)
 
+    def testNoNulPointerTag(self):
+        point = Point(12, 34)
+        self.assertEqual(self.mods.sumPointCoordinates(point), 12 + 34)
+        self.assertRaises(TypeError, self.mods.sumPointCoordinates, None)
+
 if __name__ == '__main__':
     unittest.main()

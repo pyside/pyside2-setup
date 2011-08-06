@@ -103,3 +103,9 @@ Modifications::getSize(const void* data, int size)
     (void)data;
     return size;
 }
+
+int
+Modifications::sumPointCoordinates(const Point* point)
+{
+    return point->x() + point->y();
+}

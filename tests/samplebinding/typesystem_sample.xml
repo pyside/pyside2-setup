@@ -714,6 +714,11 @@
             %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
             </inject-code>
         </modify-function>
+        <modify-function signature="sumPointCoordinates(const Point*)">
+            <modify-argument index="1">
+                <no-null-pointer/>
+            </modify-argument>
+        </modify-function>
     </object-type>
 
     <object-type name="AbstractModifications">
