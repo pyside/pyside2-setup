@@ -1874,6 +1874,10 @@ public:
         m_templateBaseClass = cls;
     }
 
+    bool hasTemplateBaseClassInstantiations() const;
+    AbstractMetaTypeList templateBaseClassInstantiations() const;
+    void setTemplateBaseClassInstantiations(AbstractMetaTypeList& instantiations);
+
     void setTypeAlias(bool typeAlias)
     {
         m_isTypeAlias = typeAlias;

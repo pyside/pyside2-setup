@@ -285,7 +285,58 @@ void TestTemplates::testTemplateInheritanceMixedWithNamespaceAndForwardDeclarati
     QCOMPARE(classB->functions().count(), 3);
 }
 
+void TestTemplates::testTypedefOfInstantiationOfTemplateClass()
+{
+    const char cppCode[] = "\
+    namespace NSpace {\
+    enum ClassType {\
+        TypeOne\
+    };\
+    template<ClassType CLASS_TYPE>\
+    struct BaseTemplateClass {\
+        inline ClassType getClassType() const { CLASS_TYPE; }\
+    };\
+    typedef BaseTemplateClass<TypeOne> TypeOneClass;\
+    }\
+    ";
+
+    const char xmlCode[] = "\
+    <typesystem package='Package'>\
+        <namespace-type name='NSpace'>\
+            <enum-type name='ClassType'/>\
+            <object-type name='BaseTemplateClass' generate='no'/>\
+            <object-type name='TypeOneClass'/>\
+        </namespace-type>\
+    </typesystem>\
+    ";
+
+    TestUtil t(cppCode, xmlCode, false);
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.count(), 3);
+
+    const AbstractMetaClass* base = classes.findClass("BaseTemplateClass");
+    QVERIFY(base);
+    const AbstractMetaClass* one = classes.findClass("TypeOneClass");
+    QVERIFY(one);
+    QCOMPARE(one->templateBaseClass(), base);
+    QCOMPARE(one->functions().count(), base->functions().count());
+    QVERIFY(one->isTypeAlias());
+    const ComplexTypeEntry* oneType = one->typeEntry();
+    const ComplexTypeEntry* baseType = base->typeEntry();
+    QCOMPARE(oneType->baseContainerType(), baseType);
+    QCOMPARE(one->baseClassNames(), QStringList("BaseTemplateClass<TypeOne>"));
+
+    QVERIFY(one->hasTemplateBaseClassInstantiations());
+    AbstractMetaTypeList instantiations = one->templateBaseClassInstantiations();
+    QCOMPARE(instantiations.count(), 1);
+    const AbstractMetaType* inst = instantiations.first();
+    QVERIFY(inst);
+    QVERIFY(!inst->isEnum());
+    QVERIFY(!inst->typeEntry()->isEnum());
+    QVERIFY(inst->typeEntry()->isEnumValue());
+    QCOMPARE(inst->cppSignature(), QString("NSpace::TypeOne"));
+}
+
 QTEST_APPLESS_MAIN(TestTemplates)
 
 #include "testtemplates.moc"
-

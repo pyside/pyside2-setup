@@ -1065,6 +1065,10 @@ AbstractMetaClass::~AbstractMetaClass()
     qDeleteAll(m_fields);
     qDeleteAll(m_enums);
     qDeleteAll(m_orphanInterfaces);
+    if (hasTemplateBaseClassInstantiations()) {
+        foreach (AbstractMetaType* inst, templateBaseClassInstantiations())
+            delete inst;
+    }
 }
 
 /*******************************************************************************
@@ -1544,7 +1548,29 @@ QPropertySpec *AbstractMetaClass::propertySpecForReset(const QString &name) cons
     return 0;
 }
 
+typedef QHash<const AbstractMetaClass*, AbstractMetaTypeList> AbstractMetaClassBaseTemplateInstantiationsMap;
+Q_GLOBAL_STATIC(AbstractMetaClassBaseTemplateInstantiationsMap, metaClassBaseTemplateInstantiations);
 
+bool AbstractMetaClass::hasTemplateBaseClassInstantiations() const
+{
+    if (!templateBaseClass())
+        return false;
+    return metaClassBaseTemplateInstantiations()->contains(this);
+}
+
+AbstractMetaTypeList AbstractMetaClass::templateBaseClassInstantiations() const
+{
+    if (!templateBaseClass())
+        return AbstractMetaTypeList();
+    return metaClassBaseTemplateInstantiations()->value(this);
+}
+
+void AbstractMetaClass::setTemplateBaseClassInstantiations(AbstractMetaTypeList& instantiations)
+{
+    if (!templateBaseClass())
+        return;
+    metaClassBaseTemplateInstantiations()->insert(this, instantiations);
+}
 
 static bool functions_contains(const AbstractMetaFunctionList &l, const AbstractMetaFunction *func)
 {

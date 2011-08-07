@@ -38,6 +38,7 @@ private slots:
     void testInheritanceFromContainterTemplate();
     void testTemplateInheritanceMixedWithForwardDeclaration();
     void testTemplateInheritanceMixedWithNamespaceAndForwardDeclaration();
+    void testTypedefOfInstantiationOfTemplateClass();
 };
 
 #endif

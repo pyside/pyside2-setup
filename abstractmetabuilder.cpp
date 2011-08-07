@@ -2564,11 +2564,8 @@ bool AbstractMetaBuilder::inheritTemplate(AbstractMetaClass* subclass,
         subclass->addFunction(f);
     }
 
-    // Clean up
-    foreach (AbstractMetaType *type, templateTypes)
-        delete type;
-
     subclass->setTemplateBaseClass(templateClass);
+    subclass->setTemplateBaseClassInstantiations(templateTypes);
     subclass->setInterfaces(templateClass->interfaces());
     subclass->setBaseClass(templateClass->baseClass());
 
