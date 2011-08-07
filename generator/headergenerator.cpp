@@ -286,16 +286,28 @@ void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* ty
     }
 }
 
+static void _writeTypeIndexDefineLine(QTextStream& s, const QString& variableName, int typeIndex)
+{
+    s << "#define ";
+    s.setFieldWidth(60);
+    s << variableName;
+    s.setFieldWidth(0);
+    s << ' ' << typeIndex << endl;
+}
 void HeaderGenerator::writeTypeIndexDefineLine(QTextStream& s, const TypeEntry* typeEntry)
 {
     if (!typeEntry || !typeEntry->generateCode())
         return;
     s.setFieldAlignment(QTextStream::AlignLeft);
-    s << "#define ";
-    s.setFieldWidth(60);
-    s << getTypeIndexVariableName(typeEntry);
-    s.setFieldWidth(0);
-    s << ' ' << getTypeIndex(typeEntry) << endl;
+    int typeIndex = getTypeIndex(typeEntry);
+    _writeTypeIndexDefineLine(s, getTypeIndexVariableName(typeEntry), typeIndex);
+    if (typeEntry->isComplex()) {
+        const ComplexTypeEntry* cType = reinterpret_cast<const ComplexTypeEntry*>(typeEntry);
+        if (cType->baseContainerType()) {
+            const AbstractMetaClass* metaClass = classes().findClass(cType);
+            _writeTypeIndexDefineLine(s, getTypeIndexVariableName(metaClass, true), typeIndex);
+        }
+    }
     if (typeEntry->isEnum()) {
         const EnumTypeEntry* ete = reinterpret_cast<const EnumTypeEntry*>(typeEntry);
         if (ete->flags())

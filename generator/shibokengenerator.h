@@ -297,6 +297,7 @@ public:
     QString cpythonTypeName(const AbstractMetaClass* metaClass);
     QString cpythonTypeName(const TypeEntry* type);
     QString cpythonTypeNameExt(const TypeEntry* type);
+    QString cpythonTypeNameExt(const AbstractMetaType* type);
     QString cpythonCheckFunction(const TypeEntry* type, bool genericNumberType = false);
     QString cpythonCheckFunction(const AbstractMetaType* metaType, bool genericNumberType = false);
     /**
@@ -370,7 +371,15 @@ public:
     /// Returns true if the generated code should use the "#define protected public" hack.
     bool avoidProtectedHack() const;
     QString cppApiVariableName(const QString& moduleName = QString()) const;
+    /**
+     *  Returns the type index variable name for a given class. If \p alternativeTemplateName is true
+     *  and the class is a typedef for a template class instantiation, it will return an alternative name
+     *  made of the template class and the instantiation values, or an empty string if the class isn't
+     *  derived from a template class at all.
+     */
+    QString getTypeIndexVariableName(const AbstractMetaClass* metaClass, bool alternativeTemplateName = false);
     QString getTypeIndexVariableName(const TypeEntry* type);
+    QString getTypeIndexVariableName(const AbstractMetaType* type);
     /// Returns true if the user don't want verbose error messages on the generated bindings.
     bool verboseErrorMessagesDisabled() const;
 

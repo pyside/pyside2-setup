@@ -734,6 +734,11 @@ QString ShibokenGenerator::cpythonTypeNameExt(const TypeEntry* type)
     return cppApiVariableName(type->targetLangPackage()) + '[' + getTypeIndexVariableName(type) + ']';
 }
 
+QString ShibokenGenerator::cpythonTypeNameExt(const AbstractMetaType* type)
+{
+    return cppApiVariableName(type->typeEntry()->targetLangPackage()) + '[' + getTypeIndexVariableName(type) + ']';
+}
+
 QString ShibokenGenerator::cpythonOperatorFunctionName(const AbstractMetaFunction* func)
 {
     if (!func->isOperatorOverload())
@@ -1868,22 +1873,51 @@ QString ShibokenGenerator::cppApiVariableName(const QString& moduleName) const
     return result;
 }
 
+static QString _fixedCppTypeName(QString typeName)
+{
+    return typeName.replace(" ",  "")
+                   .replace(".",  "_")
+                   .replace("<",  "_")
+                   .replace(">",  "_")
+                   .replace("::", "_")
+                   .replace("*",  "PTR")
+                   .replace("&",  "REF");
+}
+
+static QString processInstantiationsVariableName(const AbstractMetaType* type)
+{
+    QString res = QString("_%1").arg(_fixedCppTypeName(type->typeEntry()->qualifiedCppName()).toUpper());
+    foreach (const AbstractMetaType* instantiation, type->instantiations())
+        res += processInstantiationsVariableName(instantiation);
+    return res;
+}
+QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaClass* metaClass, bool alternativeTemplateName)
+{
+    if (alternativeTemplateName) {
+        const AbstractMetaClass* templateBaseClass = metaClass->templateBaseClass();
+        if (!templateBaseClass)
+            return QString();
+        QString base = _fixedCppTypeName(templateBaseClass->typeEntry()->qualifiedCppName()).toUpper();
+        QString instantiations;
+        foreach (const AbstractMetaType* instantiation, metaClass->templateBaseClassInstantiations())
+            instantiations += processInstantiationsVariableName(instantiation);
+        return QString("SBK_%1%2_IDX").arg(base).arg(instantiations);
+    }
+    return getTypeIndexVariableName(metaClass->typeEntry());
+}
 QString ShibokenGenerator::getTypeIndexVariableName(const TypeEntry* type)
 {
-    QString res("SBK_");
-    res += type->qualifiedCppName();
-    res.replace("::", "_");
-    res.replace("<", "_");
-    res.replace(">", "_");
-    res += "_IDX";
-    return res.toUpper();
+    return QString("SBK_%1_IDX").arg(_fixedCppTypeName(type->qualifiedCppName()).toUpper());
+}
+QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaType* type)
+{
+    return QString("SBK%1_IDX").arg(processInstantiationsVariableName(type));
 }
 
 bool ShibokenGenerator::verboseErrorMessagesDisabled() const
 {
     return m_verboseErrorMessagesDisabled;
 }
-
 
 bool ShibokenGenerator::pythonFunctionWrapperUsesListOfArguments(const OverloadData& overloadData)
 {
