@@ -58,6 +58,9 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/overload2_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pairuser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pen_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/persistentmodelindex_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/photon_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/photon_valueidentity_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/photon_valueduplicator_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/point_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pointf_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pointerholder_wrapper.cpp

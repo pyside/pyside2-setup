@@ -170,6 +170,13 @@
         </namespace-type>
     </namespace-type>
 
+    <namespace-type name="Photon">
+        <enum-type name="ClassType"/>
+        <object-type name="TemplateBase" generate="no"/>
+        <object-type name="ValueIdentity"/>
+        <object-type name="ValueDuplicator"/>
+    </namespace-type>
+
     <value-type name="IntList" />
 
     <object-type name="Abstract">

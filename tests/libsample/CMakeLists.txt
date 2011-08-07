@@ -26,6 +26,7 @@ objectview.cpp
 overload.cpp
 overloadsort.cpp
 pairuser.cpp
+photon.cpp
 point.cpp
 pointf.cpp
 polygon.cpp
