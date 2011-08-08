@@ -1471,15 +1471,12 @@ void CppGenerator::writeInvalidPyObjectCheck(QTextStream& s, const QString& pyOb
 
 void CppGenerator::writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, bool isNumber, QString customType, bool rejectNull)
 {
-    AbstractMetaType* metaType;
-    std::auto_ptr<AbstractMetaType> metaType_autoptr;
     QString customCheck;
     if (!customType.isEmpty()) {
+        AbstractMetaType* metaType;
         customCheck = guessCPythonCheckFunction(customType, &metaType);
-        if (metaType) {
-            metaType_autoptr = std::auto_ptr<AbstractMetaType>(metaType);
+        if (metaType)
             argType = metaType;
-        }
     }
 
     QString typeCheck;
@@ -1532,10 +1529,8 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
     writePythonToCppTypeConversion(s, argType, pyArgName, argName, context, defaultValue);
 }
 
-const AbstractMetaType* CppGenerator::getArgumentType(const AbstractMetaFunction* func, int argPos, bool* newType)
+const AbstractMetaType* CppGenerator::getArgumentType(const AbstractMetaFunction* func, int argPos)
 {
-    *newType = false;
-
     if (argPos < 0 || argPos > func->arguments().size()) {
         ReportHandler::warning(QString("Argument index for function '%1' out of range.").arg(func->signature()));
         return 0;
@@ -1543,12 +1538,10 @@ const AbstractMetaType* CppGenerator::getArgumentType(const AbstractMetaFunction
 
     const AbstractMetaType* argType = 0;
     QString typeReplaced = func->typeReplaced(argPos);
-    if (typeReplaced.isEmpty()) {
+    if (typeReplaced.isEmpty())
         argType = (argPos == 0) ? func->type() : func->arguments().at(argPos-1)->type();
-    } else {
+    else
         argType = buildAbstractMetaTypeFromString(typeReplaced);
-        *newType = (bool)argType;
-    }
     if (!argType && !m_knownPythonTypes.contains(typeReplaced)) {
         ReportHandler::warning(QString("Unknown type '%1' used as argument type replacement "\
                                        "in function '%2', the generated code may be broken.")
@@ -1862,15 +1855,10 @@ void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& o
         if (!func->conversionRule(TypeSystem::NativeCode, argIdx + 1).isEmpty())
             continue;
 
-        bool newType;
-        const AbstractMetaType* argType = getArgumentType(func, argIdx + 1, &newType);
+        const AbstractMetaType* argType = getArgumentType(func, argIdx + 1);
 
         if (!argType)
             continue;
-
-        std::auto_ptr<const AbstractMetaType> argType_autoptr;
-        if (newType)
-            argType_autoptr = std::auto_ptr<const AbstractMetaType>(argType);
 
         int argPos = argIdx - removedArgs;
         QString argName = QString(CPP_ARG"%1").arg(argPos);
@@ -2996,15 +2984,10 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                 if (func->isStatic())
                     continue;
 
-                bool newType;
-                const AbstractMetaType* argType = getArgumentType(func, 1, &newType);
+                const AbstractMetaType* argType = getArgumentType(func, 1);
 
                 if (!argType)
                     continue;
-
-                std::auto_ptr<const AbstractMetaType> argType_autoptr;
-                if (newType)
-                    argType_autoptr = std::auto_ptr<const AbstractMetaType>(argType);
 
                 bool numberType = alternativeNumericTypes == 1 || ShibokenGenerator::isPyInt(argType);
 

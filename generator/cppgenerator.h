@@ -100,7 +100,7 @@ private:
      *  \param  newType It is set to true if the type returned is a new object that must be deallocated.
      *  \return The type of the argument indicated by \p argPos.
      */
-    const AbstractMetaType* getArgumentType(const AbstractMetaFunction* func, int argPos, bool* newType);
+    const AbstractMetaType* getArgumentType(const AbstractMetaFunction* func, int argPos);
 
     void writePythonToCppTypeConversion(QTextStream& s,
                                         const AbstractMetaType* type,

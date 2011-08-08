@@ -54,6 +54,7 @@ class ShibokenGenerator : public Generator
 {
 public:
     ShibokenGenerator();
+    virtual ~ShibokenGenerator();
 
     QString translateTypeForWrapperMethod(const AbstractMetaType* cType,
                                           const AbstractMetaClass* context, Options opt = NoOption) const;
@@ -386,10 +387,10 @@ public:
     /**
      *   Builds an AbstractMetaType object from a QString.
      *   Returns NULL if no type could be built from the string.
-     *   \param typeString The string describing the type to be built.
+     *   \param typeSignature The string describing the type to be built.
      *   \return A new AbstractMetaType object that must be deleted by the caller, or a NULL pointer in case of failure.
      */
-    AbstractMetaType* buildAbstractMetaTypeFromString(QString typeString);
+    AbstractMetaType* buildAbstractMetaTypeFromString(QString typeSignature);
 
     /**
      *  Helper function to return the flags to be used by a meta type when
@@ -445,8 +446,9 @@ private:
     bool m_verboseErrorMessagesDisabled;
     bool m_useIsNullAsNbNonZero;
     bool m_avoidProtectedHack;
+
+    typedef QHash<QString, AbstractMetaType*> AbstractMetaTypeCache;
+    AbstractMetaTypeCache m_metaTypeFromStringCache;
 };
 
-
 #endif // SHIBOKENGENERATOR_H
-
