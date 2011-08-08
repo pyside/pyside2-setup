@@ -40,6 +40,7 @@
 #define END_ALLOW_THREADS         "PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS"
 #define MIN_CTOR_ERROR_MSG        "Could not find a minimal constructor for type '%1'. "\
                                   "This will result in a compilation error."
+#define PYTHON_TO_CPP_VAR         "pythonToCpp"
 
 #include <generator.h>
 #include <QtCore/QTextStream>
@@ -247,11 +248,11 @@ public:
     void writeBaseConversion(QTextStream& s, const TypeEntry* type);
     void writeToPythonConversion(QTextStream& s, const AbstractMetaType* type,
                                  const AbstractMetaClass* context, const QString& argumentName);
-    void writeToCppConversion(QTextStream& s, const AbstractMetaType* type, const AbstractMetaClass* context, const QString& argumentName);
-    void writeToCppConversion(QTextStream& s, const AbstractMetaClass* metaClass, const QString& argumentName);
+    void writeToCppConversion(QTextStream& s, const AbstractMetaType* type, const AbstractMetaClass* context, const QString& inArgName, const QString& outArgName);
+    void writeToCppConversion(QTextStream& s, const AbstractMetaClass* metaClass, const QString& inArgName, const QString& outArgName);
 
     /// Returns true if the argument is a pointer that rejects NULL values.
-    static bool shouldRejectNullPointerArgument(const AbstractMetaFunction* func, int argIndex);
+    bool shouldRejectNullPointerArgument(const AbstractMetaFunction* func, int argIndex);
 
     /// Verifies if the class should have a C++ wrapper generated for it, instead of only a Python wrapper.
     bool shouldGenerateCppWrapper(const AbstractMetaClass* metaClass) const;
@@ -278,6 +279,10 @@ public:
 
     static QString cpythonOperatorFunctionName(const AbstractMetaFunction* func);
 
+    static QString fixedCppTypeName(const CustomConversion::TargetToNativeConversion* toNative);
+    static QString fixedCppTypeName(const AbstractMetaType* type);
+    static QString fixedCppTypeName(const TypeEntry* type, QString typeName = QString());
+
     static bool isNumber(QString cpythonApiName);
     static bool isNumber(const TypeEntry* type);
     static bool isNumber(const AbstractMetaType* type);
@@ -299,6 +304,11 @@ public:
      *  In other words, tells if the type is "T*" and T has a Python wrapper.
      */
     static bool isPointerToWrapperType(const AbstractMetaType* type);
+
+    static bool isValueTypeWithCopyConstructorOnly(const AbstractMetaClass* metaClass);
+    bool isValueTypeWithCopyConstructorOnly(const TypeEntry* type) const;
+    bool isValueTypeWithCopyConstructorOnly(const AbstractMetaType* type) const;
+
 
     /// Checks if an argument type should be dereferenced by the Python method wrapper before calling the C++ method.
     static bool shouldDereferenceArgumentPointer(const AbstractMetaArgument* arg);
@@ -409,6 +419,13 @@ public:
     QString getFullTypeName(const AbstractMetaType* type);
     QString getFullTypeName(const AbstractMetaClass* metaClass);
 
+    /**
+     *  Returns the full qualified C++ name for an AbstractMetaType, but removing modifiers
+     *  as 'const', '&', and '*' (except if the class is not derived from a template).
+     *  This is useful for instantiated templates.
+     */
+    QString getFullTypeNameWithoutModifiers(const AbstractMetaType* type);
+
     /// Returns true if the user don't want verbose error messages on the generated bindings.
     bool verboseErrorMessagesDisabled() const;
 
@@ -419,6 +436,14 @@ public:
      *   \return A new AbstractMetaType object that must be deleted by the caller, or a NULL pointer in case of failure.
      */
     AbstractMetaType* buildAbstractMetaTypeFromString(QString typeSignature);
+
+    /// Creates an AbstractMetaType object from a TypeEntry.
+    AbstractMetaType* buildAbstractMetaTypeFromTypeEntry(const TypeEntry* typeEntry);
+    /// Creates an AbstractMetaType object from an AbstractMetaClass.
+    AbstractMetaType* buildAbstractMetaTypeFromAbstractMetaClass(const AbstractMetaClass* metaClass);
+
+    void writeMinimalConstructorExpression(QTextStream& s, const AbstractMetaType* type, const QString& defaultCtor = QString());
+    void writeMinimalConstructorExpression(QTextStream& s, const TypeEntry* type, const QString& defaultCtor = QString());
 
     /**
      *  Helper function to return the flags to be used by a meta type when

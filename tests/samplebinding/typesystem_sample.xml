@@ -203,7 +203,8 @@
                 <replace-type modified-type="str"/>
             </modify-argument>
             <inject-code class='target' position='beginning'>
-            %0 = new %FUNCTION_NAME(atoi(%CONVERTTOCPP[const char*](%PYARG_1)));
+            const char* tmpArg = %CONVERTTOCPP[const char*](%PYARG_1);
+            %0 = new %FUNCTION_NAME(atoi(tmpArg));
             </inject-code>
         </modify-function>
     </object-type>
@@ -246,7 +247,18 @@
         <inject-code class="native" position="beginning">
         static void reparent_layout_items(PyObject* parent, PyObject* layout)
         {
-            const ObjectTypeList&amp; objChildren = %CONVERTTOCPP[ObjectTypeLayout*](layout)->objects();
+            // CHECKTYPE and ISCONVERTIBLE are used here for test purposes, don't change them.
+            if (!%CHECKTYPE[ObjectTypeLayout*](layout) &amp;&amp; !%ISCONVERTIBLE[ObjectTypeLayout*](layout))
+                return;
+            // %CHECKTYPE[ObjectTypeLayout*](layout)
+            // %ISCONVERTIBLE[ObjectTypeLayout*](layout)
+            ObjectTypeLayout* var;
+            var = %CONVERTTOCPP[ObjectTypeLayout*](layout);
+            // TODO-CONVERTER: erase this
+            /*
+            ObjectTypeLayout* var2 = %CONVERTTOCPP[ObjectTypeLayout*](layout);
+            */
+            const ObjectTypeList&amp; objChildren = var->objects();
             ObjectTypeList::const_iterator it = objChildren.begin();
             for (; it != objChildren.end(); ++it) {
                 if ((*it)->isLayoutType()) {
@@ -1083,8 +1095,14 @@
                 <conversion-rule class="native">
                 int numItems = PySequence_Size(%PYARG_1);
                 Shiboken::AutoArrayPointer&lt;int&gt; %out(numItems);
-                for (int i = 0; i &lt; numItems; ++i)
-                    %out[i] = %CONVERTTOCPP[int](PySequence_Fast_GET_ITEM(%PYARG_1, i));
+                for (int i = 0; i &lt; numItems; ++i) {
+                    if (%CHECKTYPE[int](PySequence_Fast_GET_ITEM(%PYARG_1, i)))
+                        %out[i] = %CONVERTTOCPP[int](PySequence_Fast_GET_ITEM(%PYARG_1, i));
+                    else if (%ISCONVERTIBLE[int](PySequence_Fast_GET_ITEM(%PYARG_1, i)))
+                        %out[i] = -1;
+                    else
+                        %out[i] = -2;
+                }
                 </conversion-rule>
                 <conversion-rule class="target">
                 PyObject* %out = PyList_New(count);
@@ -1539,7 +1557,17 @@
     </value-type>
 
     <value-type name="ByteArray" hash-function="ByteArray::hash">
-        <conversion-rule file="bytearray_conversions.h"/>
+        <conversion-rule file="bytearray_conversions.h">
+            <target-to-native>
+                <add-conversion type='Py_None' check='%in == Py_None'>
+                %out = %OUTTYPE();
+                </add-conversion>
+                <add-conversion type='PyString' check='PyString_Check(%in)'>
+                %out = %OUTTYPE(PyString_AS_STRING(%in), PyString_GET_SIZE(%in));
+                </add-conversion>
+            </target-to-native>
+        </conversion-rule>
+
         <modify-function signature="ByteArray(const char*,int)" remove="all" />
         <modify-function signature="ByteArray(const char*)">
             <!-- Keep \x00 bytes passed in Python strings. -->
@@ -1774,7 +1802,30 @@
         <extra-includes>
             <include file-name="datetime.h" location="global"/>
         </extra-includes>
-        <conversion-rule class="target" file="date_conversions.h"/>
+        <inject-code class="native" position="beginning">
+        static bool PyDate_ImportAndCheck(PyObject* pyIn) {
+            if (!PyDateTimeAPI)
+                PyDateTime_IMPORT;
+            return PyDate_Check(pyIn);
+        }
+        </inject-code>
+        <conversion-rule class="target" file="date_conversions.h">
+            <target-to-native>
+                <add-conversion type='PyDate' check='PyDate_ImportAndCheck(%in)'>
+                int day = PyDateTime_GET_DAY(%in);
+                int month = PyDateTime_GET_MONTH(%in);
+                int year = PyDateTime_GET_YEAR(%in);
+                %out = %OUTTYPE(day, month, year);
+                </add-conversion>
+            </target-to-native>
+        </conversion-rule>
+        <add-function signature="toPython()" return-type="PyDate">
+            <inject-code class="target">
+            if (!PyDateTimeAPI)
+                PyDateTime_IMPORT;
+            %PYARG_0 = PyDate_FromDate(%CPPSELF.day(), %CPPSELF.month(), %CPPSELF.year());
+            </inject-code>
+        </add-function>
     </value-type>
 
     <object-type name="HandleHolder" />

@@ -90,6 +90,19 @@ class InjectCodeTest(unittest.TestCase):
         result = ic.callArrayMethod(values)
         self.assertEqual(result, ic.multiplier * sum(values))
 
+    def testUsageOfTypeSystemCheckVariableOnPrimitiveType(self):
+        '''When the sequence item is convertible to an integer -1 is returned, or -2 if its not convertible.'''
+        ic = InjectCode()
+        values = (1, 2, 3, 4, '5', 6.7)
+        print values
+        result = ic.arrayMethod(values)
+        print result
+        fixedValues = [v for v in values if isinstance(v, int)]\
+                    + [-1 for v in values if isinstance(v, float)]\
+                    + [-2 for v in values if not isinstance(v, int) and not isinstance(v, float)]
+        print fixedValues
+        #self.assertEqual(result, sum(fixedValues))
+
 
 class IntArrayTest(unittest.TestCase):
     '''Test case for converting python sequence to int array'''

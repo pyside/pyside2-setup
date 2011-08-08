@@ -31,6 +31,7 @@
 
 struct SbkObject;
 struct SbkObjectType;
+struct SbkConverter;
 
 namespace Shiboken
 {
@@ -106,10 +107,6 @@ struct SbkObjectTypePrivate
     /// Special cast function, null if this class doesn't have multiple inheritance.
     SpecialCastFunction mi_specialcast;
     TypeDiscoveryFuncV2 type_discovery;
-    /// Extended "isConvertible" function to be used when a conversion operator is defined in another module.
-    ExtendedIsConvertibleFunc ext_isconvertible;
-    /// Extended "toCpp" function to be used when a conversion operator is defined in another module.
-    ExtendedToCppFunc ext_tocpp;
     /// Pointer to a function responsible for deletion of the C++ instance calling the proper destructor.
     ObjectDestructor cpp_dtor;
     /// True if this type holds two or more C++ instances, e.g.: a Python class which inherits from two C++ classes.
@@ -124,6 +121,7 @@ struct SbkObjectTypePrivate
     void* user_data;
     DeleteUserDataFunc d_func;
     void (*subtype_init)(SbkObjectType*, PyObject*, PyObject*);
+    SbkConverter* converter;
 };
 
 

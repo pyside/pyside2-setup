@@ -31,6 +31,7 @@
 #include "gilstate.h"
 #include "threadstatesaver.h"
 #include "helper.h"
+#include "sbkconverter.h"
 #include "sbkenum.h"
 #include "sbkmodule.h"
 #include "sbkstring.h"

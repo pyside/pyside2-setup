@@ -22,6 +22,7 @@
 
 #include "basewrapper.h"
 #include "basewrapper_p.h"
+#include "sbkconverter.h"
 #include "sbkenum.h"
 #include "autodecref.h"
 #include "typeresolver.h"
@@ -251,6 +252,8 @@ void SbkObjectTypeDealloc(PyObject* pyObj)
         }
         free(sbkType->d->original_name);
         sbkType->d->original_name = 0;
+        if (!Shiboken::ObjectType::isUserType(reinterpret_cast<PyTypeObject*>(sbkType)))
+            Shiboken::Conversions::deleteConverter(sbkType->d->converter);
         delete sbkType->d;
         sbkType->d = 0;
     }
@@ -298,20 +301,18 @@ PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* k
         d->mi_offsets = parentType->mi_offsets;
         d->mi_init = parentType->mi_init;
         d->mi_specialcast = parentType->mi_specialcast;
-        d->ext_isconvertible = parentType->ext_isconvertible;
-        d->ext_tocpp = parentType->ext_tocpp;
         d->type_discovery = parentType->type_discovery;
         d->cpp_dtor = parentType->cpp_dtor;
         d->is_multicpp = 0;
+        d->converter = parentType->converter;
     } else {
         d->mi_offsets = 0;
         d->mi_init = 0;
         d->mi_specialcast = 0;
-        d->ext_isconvertible = 0;
-        d->ext_tocpp = 0;
         d->type_discovery = 0;
         d->cpp_dtor = 0;
         d->is_multicpp = 1;
+        d->converter = 0;
     }
     if (bases.size() == 1)
         d->original_name = strdup(bases.front()->d->original_name);
@@ -597,30 +598,13 @@ bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctorType)
     return true;
 }
 
-bool hasExternalCppConversions(SbkObjectType* self)
-{
-    return self->d->ext_tocpp;
-}
 
-void* callExternalCppConversion(SbkObjectType* self, PyObject* obj)
-{
-    return self->d->ext_tocpp(obj);
-}
+bool hasExternalCppConversions(SbkObjectType*) { return false; }                    // DEPRECATED.
+bool isExternalConvertible(SbkObjectType* self, PyObject* obj) { return false; }    // DEPRECATED.
+void setExternalCppConversionFunction(SbkObjectType*, ExtendedToCppFunc) {}         // DEPRECATED.
+void setExternalIsConvertibleFunction(SbkObjectType*, ExtendedIsConvertibleFunc) {} // DEPRECATED.
+void* callExternalCppConversion(SbkObjectType*, PyObject*) { return 0; }            // DEPRECATED.
 
-void setExternalCppConversionFunction(SbkObjectType* self, ExtendedToCppFunc func)
-{
-    self->d->ext_tocpp = func;
-}
-
-void setExternalIsConvertibleFunction(SbkObjectType* self, ExtendedIsConvertibleFunc func)
-{
-    self->d->ext_isconvertible = func;
-}
-
-bool isExternalConvertible(SbkObjectType* self, PyObject* obj)
-{
-    return self->d->ext_isconvertible && self->d->ext_isconvertible(obj);
-}
 
 bool hasCast(SbkObjectType* type)
 {
@@ -740,6 +724,12 @@ void setTypeUserData(SbkObjectType* self, void* userData, DeleteUserDataFunc d_f
 {
     self->d->user_data = userData;
     self->d->d_func = d_func;
+}
+
+
+SbkConverter* getTypeConverter(SbkObjectType* type)
+{
+    return type->d->converter;
 }
 
 } // namespace ObjectType

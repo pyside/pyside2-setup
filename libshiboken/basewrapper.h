@@ -33,6 +33,7 @@
 extern "C"
 {
 
+struct SbkConverter;
 struct SbkObjectPrivate;
 
 /// Base Python object for all the wrapped C++ classes.
@@ -65,8 +66,8 @@ typedef void* (*SpecialCastFunction)(void*, SbkObjectType*);
 typedef SbkObjectType* (*TypeDiscoveryFunc)(void*, SbkObjectType*);
 typedef void* (*TypeDiscoveryFuncV2)(void*, SbkObjectType*);
 
-typedef void* (*ExtendedToCppFunc)(PyObject*);
-typedef bool (*ExtendedIsConvertibleFunc)(PyObject*);
+typedef void* (*ExtendedToCppFunc)(PyObject*);        // DEPRECATED.
+typedef bool (*ExtendedIsConvertibleFunc)(PyObject*); // DEPRECATED.
 
 // Used in userdata dealloc function
 typedef void (*DeleteUserDataFunc)(void*);
@@ -131,11 +132,13 @@ LIBSHIBOKEN_API bool        isUserType(PyTypeObject* pyObj);
 */
 LIBSHIBOKEN_API bool        canCallConstructor(PyTypeObject* myType, PyTypeObject* ctorType);
 
-LIBSHIBOKEN_API void        setExternalCppConversionFunction(SbkObjectType* self, ExtendedToCppFunc func);
-LIBSHIBOKEN_API void        setExternalIsConvertibleFunction(SbkObjectType* self, ExtendedIsConvertibleFunc func);
-LIBSHIBOKEN_API bool        hasExternalCppConversions(SbkObjectType* self);
-LIBSHIBOKEN_API bool        isExternalConvertible(SbkObjectType* self, PyObject* obj);
-LIBSHIBOKEN_API void*       callExternalCppConversion(SbkObjectType* self, PyObject* obj);
+
+LIBSHIBOKEN_API bool        hasExternalCppConversions(SbkObjectType*);                                   // DEPRECATED.
+LIBSHIBOKEN_API bool        isExternalConvertible(SbkObjectType*, PyObject*);                            // DEPRECATED.
+LIBSHIBOKEN_API void        setExternalCppConversionFunction(SbkObjectType*, ExtendedToCppFunc);         // DEPRECATED.
+LIBSHIBOKEN_API void        setExternalIsConvertibleFunction(SbkObjectType*, ExtendedIsConvertibleFunc); // DEPRECATED.
+LIBSHIBOKEN_API void*       callExternalCppConversion(SbkObjectType*, PyObject*);                        // DEPRECATED.
+
 
 /**
  *  Tells if the \p type represents an object of a class with multiple inheritance in C++.
@@ -206,6 +209,10 @@ LIBSHIBOKEN_API void        setSubTypeInitHook(SbkObjectType* self, SubTypeInitH
  */
 LIBSHIBOKEN_API void*       getTypeUserData(SbkObjectType* self);
 LIBSHIBOKEN_API void        setTypeUserData(SbkObjectType* self, void* userData, DeleteUserDataFunc d_func);
+
+/// Returns the converter assigned to the wrapper \p type.
+LIBSHIBOKEN_API SbkConverter* getTypeConverter(SbkObjectType* type);
+
 }
 
 namespace Object {

@@ -51,6 +51,11 @@ private:
     void writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeMetaCast(QTextStream& s, const AbstractMetaClass* metaClass);
 
+    void writeConverterFunctions(QTextStream& s, const AbstractMetaClass* metaClass);
+    void writeCustomConverterFunctions(QTextStream& s, const CustomConversion* customConversion);
+    void writeConverterRegister(QTextStream& s, const AbstractMetaClass* metaClass);
+    void writeCustomConverterRegister(QTextStream& s, const CustomConversion* customConversion, const QString& converterVar);
+
     void writeMethodWrapperPreamble(QTextStream& s, OverloadData& overloadData);
     void writeConstructorWrapper(QTextStream& s, const AbstractMetaFunctionList overloads);
     void writeDestructorWrapper(QTextStream& s, const AbstractMetaClass* metaClass);
@@ -141,7 +146,49 @@ private:
     void writeFunctionCalls(QTextStream& s, const OverloadData& overloadData);
 
     /// Writes the call to a single function usually from a collection of overloads.
-    void writeSingleFunctionCall(QTextStream& s, const OverloadData& overloadData, const AbstractMetaFunction* func = 0);
+    void writeSingleFunctionCall(QTextStream& s, const OverloadData& overloadData, const AbstractMetaFunction* func);
+
+    /// Returns the name of a C++ to Python conversion function.
+    static QString cppToPythonFunctionName(const QString& sourceTypeName, QString targetTypeName = QString());
+
+    /// Returns the name of a Python to C++ conversion function.
+    static QString pythonToCppFunctionName(const QString& sourceTypeName, const QString& targetTypeName);
+    static QString pythonToCppFunctionName(const AbstractMetaType* sourceType, const AbstractMetaType* targetType);
+    static QString pythonToCppFunctionName(const CustomConversion::TargetToNativeConversion* toNative, const TypeEntry* targetType);
+
+    /// Returns the name of a Python to C++ convertible check function.
+    static QString convertibleToCppFunctionName(const QString& sourceTypeName, const QString& targetTypeName);
+    static QString convertibleToCppFunctionName(const AbstractMetaType* sourceType, const AbstractMetaType* targetType);
+    static QString convertibleToCppFunctionName(const CustomConversion::TargetToNativeConversion* toNative, const TypeEntry* targetType);
+
+    /// Writes a C++ to Python conversion function.
+    void writeCppToPythonFunction(QTextStream& s, const QString& code, const QString& sourceTypeName, QString targetTypeName = QString());
+    void writeCppToPythonFunction(QTextStream& s, const CustomConversion* customConversion);
+
+    /// Writes a Python to C++ conversion function.
+    void writePythonToCppFunction(QTextStream& s, const QString& code, const QString& sourceTypeName, const QString& targetTypeName);
+
+    /// Writes a Python to C++ convertible check function.
+    void writeIsPythonConvertibleToCppFunction(QTextStream& s,
+                                               const QString& sourceTypeName,
+                                               const QString& targetTypeName,
+                                               const QString& condition,
+                                               QString pythonToCppFuncName = QString(),
+                                               bool acceptNoneAsCppNull = false);
+
+    /// Writes a pair of Python to C++ conversion and check functions.
+    void writePythonToCppConversionFunctions(QTextStream& s,
+                                             const AbstractMetaType* sourceType,
+                                             const AbstractMetaType* targetType,
+                                             QString typeCheck = QString(),
+                                             QString conversion = QString());
+    /// Writes a pair of Python to C++ conversion and check functions for implicit conversions.
+    void writePythonToCppConversionFunctions(QTextStream& s,
+                                             const CustomConversion::TargetToNativeConversion* toNative,
+                                             const TypeEntry* targetType);
+
+    void writeAddPythonToCppConversion(QTextStream& s, const QString& converterVar, const QString& pythonToCppFunc, const QString& isConvertibleFunc);
+
     void writeNamedArgumentResolution(QTextStream& s, const AbstractMetaFunction* func, bool usePyArgs);
 
     /// Returns a string containing the name of an argument for the given function and argument index.
@@ -157,7 +204,7 @@ private:
     void writeSequenceMethods(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeTypeAsSequenceDefinition(QTextStream& s, const AbstractMetaClass* metaClass);
 
-    /// Writes the struct PyMappingMethods for types thats supports the python mapping protocol
+    /// Writes the PyMappingMethods structure for types that supports the python mapping protocol.
     void writeTypeAsMappingDefinition(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeMappingMethods(QTextStream& s, const AbstractMetaClass* metaClass);
 
@@ -193,8 +240,6 @@ private:
     /// Writes the implementation of special cast functions, used when we need to cast a class with multiple inheritance.
     void writeSpecialCastFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
-    void writeExtendedIsConvertibleFunction(QTextStream& s, const TypeEntry* externalType, const QList<const AbstractMetaClass*>& conversions);
-    void writeExtendedToCppFunction(QTextStream& s, const TypeEntry* externalType, const QList<const AbstractMetaClass*>& conversions);
     void writeExtendedConverterInitialization(QTextStream& s, const TypeEntry* externalType, const QList<const AbstractMetaClass*>& conversions);
 
     void writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func, bool userHeuristicForReturn);
