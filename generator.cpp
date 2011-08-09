@@ -365,6 +365,9 @@ QString Generator::minimalConstructor(const TypeEntry* type) const
         return (ctor.isEmpty()) ? QString("::%1()").arg(type->qualifiedCppName()) : ctor;
     }
 
+    if (type->isComplex())
+        return minimalConstructor(classes().findClass(type));
+
     return QString();
 }
 
