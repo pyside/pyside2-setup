@@ -89,8 +89,7 @@ ShibokenGenerator::ShibokenGenerator() : Generator()
 
 ShibokenGenerator::~ShibokenGenerator()
 {
-    foreach (AbstractMetaType* type, m_metaTypeFromStringCache.values())
-        delete type;
+    qDeleteAll(m_metaTypeFromStringCache.values());
 }
 
 void ShibokenGenerator::clearTpFuncs()
