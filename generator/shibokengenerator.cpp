@@ -48,7 +48,6 @@ QHash<QString, QString> ShibokenGenerator::m_formatUnits = QHash<QString, QStrin
 QHash<QString, QString> ShibokenGenerator::m_tpFuncs = QHash<QString, QString>();
 QStringList ShibokenGenerator::m_knownPythonTypes = QStringList();
 
-
 static QString resolveScopePrefix(const AbstractMetaClass* scope, const QString& value)
 {
     if (!scope)
@@ -77,6 +76,15 @@ ShibokenGenerator::ShibokenGenerator() : Generator()
         ShibokenGenerator::initKnownPythonTypes();
 
     m_metaTypeFromStringCache = AbstractMetaTypeCache();
+
+    m_typeSystemConvName[TypeSystemCheckFunction]         = "checkType";
+    m_typeSystemConvName[TypeSystemIsConvertibleFunction] = "isConvertible";
+    m_typeSystemConvName[TypeSystemToCppFunction]         = "toCpp";
+    m_typeSystemConvName[TypeSystemToPythonFunction]      = "toPython";
+    m_typeSystemConvRegEx[TypeSystemCheckFunction]         = QRegExp("%CHECKTYPE\\[([^\\[]*)\\]");
+    m_typeSystemConvRegEx[TypeSystemIsConvertibleFunction] = QRegExp("%ISCONVERTIBLE\\[([^\\[]*)\\]");
+    m_typeSystemConvRegEx[TypeSystemToCppFunction]         = QRegExp("%CONVERTTOCPP\\[([^\\[]*)\\]");
+    m_typeSystemConvRegEx[TypeSystemToPythonFunction]      = QRegExp("%CONVERTTOPYTHON\\[([^\\[]*)\\]");
 }
 
 ShibokenGenerator::~ShibokenGenerator()
@@ -1253,7 +1261,7 @@ void ShibokenGenerator::processCodeSnip(QString& code, const AbstractMetaClass* 
     replaceConvertToCppTypeSystemVariable(code);
 
     // replace "isConvertible" check
-    replaceConvertibleToCppTypeSystemVariable(code);
+    replaceIsConvertibleToCppTypeSystemVariable(code);
 
     // replace "checkType" check
     replaceTypeCheckTypeSystemVariable(code);
@@ -1508,28 +1516,44 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
     s << INDENT << "// End of code injection" << endl;
 }
 
-void ShibokenGenerator::replaceConvertToPythonTypeSystemVariable(QString& code)
+typedef QPair<QString, QString> StringPair;
+void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVariable converterVariable, QString& code)
 {
-    static QRegExp toPythonRegex("%CONVERTTOPYTHON\\[([^\\[]*)\\]");
-    code.replace(toPythonRegex, "Shiboken::Converter<\\1 >::toPython");
-}
-
-void ShibokenGenerator::replaceConvertToCppTypeSystemVariable(QString& code)
-{
-    static QRegExp toCppRegex("%CONVERTTOCPP\\[([^\\[]*)\\]");
-    code.replace(toCppRegex, "Shiboken::Converter<\\1 >::toCpp");
-}
-
-void ShibokenGenerator::replaceConvertibleToCppTypeSystemVariable(QString& code)
-{
-    static QRegExp isConvertibleRegex("%ISCONVERTIBLE\\[([^\\[]*)\\]");
-    code.replace(isConvertibleRegex, "Shiboken::Converter<\\1 >::isConvertible");
-}
-
-void ShibokenGenerator::replaceTypeCheckTypeSystemVariable(QString& code)
-{
-    static QRegExp checkTypeRegex("%CHECKTYPE\\[([^\\[]*)\\]");
-    code.replace(checkTypeRegex, "Shiboken::Converter<\\1 >::checkType");
+    QRegExp& regex = m_typeSystemConvRegEx[converterVariable];
+    const QString& conversionName = m_typeSystemConvName[converterVariable];
+    int pos = 0;
+    QList<StringPair> replacements;
+    while ((pos = regex.indexIn(code, pos)) != -1) {
+        pos += regex.matchedLength();
+        QStringList list = regex.capturedTexts();
+        QString conversionVar = list.first();
+        QString conversionTypeName = list.last();
+        const AbstractMetaType* conversionType = buildAbstractMetaTypeFromString(conversionTypeName);
+        QString conversion;
+        if (conversionType) {
+            switch (converterVariable) {
+                case TypeSystemCheckFunction:
+                    conversion = cpythonCheckFunction(conversionType);
+                    break;
+                case TypeSystemIsConvertibleFunction:
+                    conversion = cpythonIsConvertibleFunction(conversionType);
+                    break;
+                case TypeSystemToCppFunction:
+                    conversion = cpythonToCppConversionFunction(conversionType);
+                    break;
+                case TypeSystemToPythonFunction:
+                    conversion = cpythonToPythonConversionFunction(conversionType);
+                    break;
+                default:
+                    Q_ASSERT(false);
+            }
+        } else {
+            conversion = QString("Shiboken::Converter< %1 >::%2").arg(conversionTypeName).arg(conversionName);
+        }
+        replacements.append(qMakePair(conversionVar, conversion));
+    }
+    foreach (StringPair rep, replacements)
+        code.replace(rep.first, rep.second);
 }
 
 bool ShibokenGenerator::injectedCodeUsesCppSelf(const AbstractMetaFunction* func)

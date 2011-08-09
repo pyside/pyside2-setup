@@ -142,16 +142,25 @@ public:
     void processCodeSnip(QString& code, const AbstractMetaClass* context = 0);
 
     /// Replaces the %CONVERTTOPYTHON type system variable.
-    void replaceConvertToPythonTypeSystemVariable(QString& code);
-
+    inline void replaceConvertToPythonTypeSystemVariable(QString& code)
+    {
+        replaceConverterTypeSystemVariable(TypeSystemToPythonFunction, code);
+    }
     /// Replaces the %CONVERTTOCPP type system variable.
-    void replaceConvertToCppTypeSystemVariable(QString& code);
-
+    inline void replaceConvertToCppTypeSystemVariable(QString& code)
+    {
+        replaceConverterTypeSystemVariable(TypeSystemToCppFunction, code);
+    }
     /// Replaces the %ISCONVERTIBLE type system variable.
-    void replaceConvertibleToCppTypeSystemVariable(QString& code);
-
+    inline void replaceIsConvertibleToCppTypeSystemVariable(QString& code)
+    {
+        replaceConverterTypeSystemVariable(TypeSystemIsConvertibleFunction, code);
+    }
     /// Replaces the %CHECKTYPE type system variable.
-    void replaceTypeCheckTypeSystemVariable(QString& code);
+    inline void replaceTypeCheckTypeSystemVariable(QString& code)
+    {
+        replaceConverterTypeSystemVariable(TypeSystemCheckFunction, code);
+    }
 
     /**
      *   Verifies if any of the function's code injections of the "target"
@@ -443,6 +452,16 @@ protected:
     static bool pythonFunctionWrapperUsesListOfArguments(const OverloadData& overloadData);
 
     Indentor INDENT;
+
+    enum TypeSystemConverterVariable {
+        TypeSystemCheckFunction = 0,
+        TypeSystemIsConvertibleFunction,
+        TypeSystemToCppFunction,
+        TypeSystemToPythonFunction,
+        TypeSystemConverterVariables
+    };
+    void replaceConverterTypeSystemVariable(TypeSystemConverterVariable converterVariable, QString& code);
+
 private:
     bool m_useCtorHeuristic;
     bool m_userReturnValueHeuristic;
@@ -453,6 +472,10 @@ private:
 
     typedef QHash<QString, AbstractMetaType*> AbstractMetaTypeCache;
     AbstractMetaTypeCache m_metaTypeFromStringCache;
+
+    /// Type system converter variable replacement names and regular expressions.
+    QString m_typeSystemConvName[TypeSystemConverterVariables];
+    QRegExp m_typeSystemConvRegEx[TypeSystemConverterVariables];
 };
 
 #endif // SHIBOKENGENERATOR_H
