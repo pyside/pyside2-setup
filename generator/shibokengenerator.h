@@ -226,13 +226,12 @@ public:
     const AbstractMetaClass* getMultipleInheritingClass(const AbstractMetaClass* metaClass);
 
     void writeBaseConversion(QTextStream& s, const AbstractMetaType* type,
-                             const AbstractMetaClass* context, Options options = NoOption);
+                             const AbstractMetaClass* context = 0, Options options = NoOption);
     /// Simpler version of writeBaseConversion, uses only the base name of the type.
     void writeBaseConversion(QTextStream& s, const TypeEntry* type);
     void writeToPythonConversion(QTextStream& s, const AbstractMetaType* type,
-                                 const AbstractMetaClass* context, const QString& argumentName = QString());
-    void writeToCppConversion(QTextStream& s, const AbstractMetaType* type,
-                              const AbstractMetaClass* context, const QString& argumentName, Options options = NoOption);
+                                 const AbstractMetaClass* context, const QString& argumentName);
+    void writeToCppConversion(QTextStream& s, const AbstractMetaType* type, const AbstractMetaClass* context, const QString& argumentName);
     void writeToCppConversion(QTextStream& s, const AbstractMetaClass* metaClass, const QString& argumentName);
 
     /// Returns true if the argument is a pointer that rejects NULL values.
@@ -319,6 +318,11 @@ public:
         return cpythonIsConvertibleFunction(metaArg->type(), genericNumberType);
     }
     QString guessCPythonIsConvertible(const QString& type);
+
+    QString cpythonToCppConversionFunction(const AbstractMetaClass* metaClass);
+    QString cpythonToCppConversionFunction(const AbstractMetaType* type, const AbstractMetaClass* context = 0);
+    QString cpythonToPythonConversionFunction(const AbstractMetaType* type, const AbstractMetaClass* context = 0);
+
     QString cpythonFunctionName(const AbstractMetaFunction* func);
     QString cpythonMethodDefinitionName(const AbstractMetaFunction* func);
     QString cpythonGettersSettersDefinitionName(const AbstractMetaClass* metaClass);

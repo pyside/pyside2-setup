@@ -576,31 +576,19 @@ void ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaTy
 void ShibokenGenerator::writeToPythonConversion(QTextStream& s, const AbstractMetaType* type,
                                                 const AbstractMetaClass* context, const QString& argumentName)
 {
-    if (!type)
-        return;
-
-    // exclude const on Objects
-    Options flags = getConverterOptions(type);
-    writeBaseConversion(s, type, context, flags);
-    s << "toPython";
-
-    if (!argumentName.isEmpty())
-        s << '(' << argumentName << ')';
+    s << cpythonToPythonConversionFunction(type, context) << '(' << argumentName << ')';
 }
 
 void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaClass* metaClass,
                                              const QString& argumentName)
 {
-    writeBaseConversion(s, metaClass->typeEntry());
-    s << "toCpp(" << argumentName << ')';
+    s << cpythonToCppConversionFunction(metaClass) << '(' << argumentName << ')';
 }
 
 void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaType* type,
-                                             const AbstractMetaClass* context, const QString& argumentName,
-                                             Options options)
+                                             const AbstractMetaClass* context, const QString& argumentName)
 {
-    writeBaseConversion(s, type, context, options);
-    s << "toCpp(" << argumentName << ')';
+    s << cpythonToCppConversionFunction(type, context) << '(' << argumentName << ')';
 }
 
 bool ShibokenGenerator::shouldRejectNullPointerArgument(const AbstractMetaFunction* func, int argIndex)
@@ -907,11 +895,10 @@ QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType
         return genericNumberType ? QString("SbkNumber_Check") : QString("%1_Check").arg(baseName);
 
     baseName.clear();
-    QTextStream s(&baseName);
+    QTextStream b(&baseName);
     // exclude const on Objects
     Options flags = getConverterOptions(metaType);
-    writeBaseConversion(s, metaType, 0, flags);
-    s.flush();
+    writeBaseConversion(b, metaType, 0, flags);
     return QString("%1checkType").arg(baseName);
 }
 
@@ -931,9 +918,8 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool gene
         return genericNumberType ? "SbkNumber_Check" : baseName+"_Check";
 
     baseName.clear();
-    QTextStream s(&baseName);
-    writeBaseConversion(s, type);
-    s.flush();
+    QTextStream b(&baseName);
+    writeBaseConversion(b, type);
     return QString("%1checkType").arg(baseName);
 }
 
@@ -974,13 +960,10 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry* type, b
         return guessCPythonIsConvertible(type->name());
 
     QString baseName;
-    QTextStream s(&baseName);
-    writeBaseConversion(s, type);
-    s << "isConvertible";
-    s.flush();
-    return baseName;
+    QTextStream b(&baseName);
+    writeBaseConversion(b, type);
+    return QString("%1isConvertible").arg(baseName);
 }
-
 QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* metaType, bool genericNumberType)
 {
     QString customCheck;
@@ -998,10 +981,34 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* 
         return genericNumberType ? QString("SbkNumber_Check") : QString("%1_Check").arg(baseName);
 
     baseName.clear();
-    QTextStream s(&baseName);
-    writeBaseConversion(s, metaType, 0);
-    s.flush();
+    QTextStream b(&baseName);
+    writeBaseConversion(b, metaType);
     return QString("%1isConvertible").arg(baseName);
+}
+
+QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaClass* metaClass)
+{
+    QString base;
+    QTextStream b(&base);
+    writeBaseConversion(b, metaClass->typeEntry());
+    return QString("%1toCpp").arg(base);
+}
+QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaType* type, const AbstractMetaClass* context)
+{
+    QString base;
+    QTextStream b(&base);
+    writeBaseConversion(b, type, context);
+    return QString("%1toCpp").arg(base);
+}
+
+QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaType* type, const AbstractMetaClass* context)
+{
+    // exclude const on Objects
+    Options flags = getConverterOptions(type);
+    QString base;
+    QTextStream b(&base);
+    writeBaseConversion(b, type, context, flags);
+    return QString("%1toPython").arg(base);
 }
 
 QString ShibokenGenerator::argumentString(const AbstractMetaFunction *func,
