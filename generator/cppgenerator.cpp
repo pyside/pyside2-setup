@@ -4108,11 +4108,10 @@ void CppGenerator::writeReturnValueHeuristics(QTextStream& s, const AbstractMeta
 
 void CppGenerator::writeHashFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
-    s << "static long " << cpythonBaseName(metaClass) << "_HashFunc(PyObject* obj)";
-    s << '{' << endl;
+    s << "static long " << cpythonBaseName(metaClass) << "_HashFunc(PyObject* self) {" << endl;
+    writeCppSelfDefinition(s, metaClass);
     s << INDENT << "return " << metaClass->typeEntry()->hashFunction() << '(';
-    writeToCppConversion(s, metaClass, "obj");
-    s << ");" << endl;
+    s << (isObjectType(metaClass) ? "" : "*") << CPP_SELF_VAR << ");" << endl;
     s << '}' << endl << endl;
 }
 
