@@ -121,6 +121,9 @@ public:
         m_parent = 0;
     }
 
+    //Deprecated test
+    bool deprecatedFunction() { return true; }
+
 private:
     ObjectType(const ObjectType&);
     ObjectType& operator=(const ObjectType&);
