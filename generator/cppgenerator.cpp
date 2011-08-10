@@ -4159,35 +4159,32 @@ QString CppGenerator::writeReprFunction(QTextStream& s, const AbstractMetaClass*
     QString funcName = cpythonBaseName(metaClass) + "__repr__";
     s << "extern \"C\"" << endl;
     s << '{' << endl;
-    s << "static PyObject* " << funcName << "(PyObject* pyObj)" << endl;
+    s << "static PyObject* " << funcName << "(PyObject* self)" << endl;
     s << '{' << endl;
+    writeCppSelfDefinition(s, metaClass);
     s << INDENT << "QBuffer buffer;" << endl;
     s << INDENT << "buffer.open(QBuffer::ReadWrite);" << endl;
     s << INDENT << "QDebug dbg(&buffer);" << endl;
-    s << INDENT << "dbg << ";
-    writeToCppConversion(s, metaClass, "pyObj");
-    s << ';' << endl;
+    s << INDENT << "dbg << " CPP_SELF_VAR ";" << endl;
     s << INDENT << "buffer.close();" << endl;
     s << INDENT << "QByteArray str = buffer.data();" << endl;
     s << INDENT << "int idx = str.indexOf('(');" << endl;
     s << INDENT << "if (idx >= 0)" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "str.replace(0, idx, Py_TYPE(pyObj)->tp_name);" << endl;
+        s << INDENT << "str.replace(0, idx, Py_TYPE(self)->tp_name);" << endl;
     }
-
-    s << INDENT << "PyObject* mod = PyDict_GetItemString(Py_TYPE(pyObj)->tp_dict, \"__module__\");" << endl;
+    s << INDENT << "PyObject* mod = PyDict_GetItemString(Py_TYPE(self)->tp_dict, \"__module__\");" << endl;
     s << INDENT << "if (mod)" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "return PyString_FromFormat(\"<%s.%s at %p>\", PyString_AS_STRING(mod), str.constData(), pyObj);" << endl;
+        s << INDENT << "return PyString_FromFormat(\"<%s.%s at %p>\", PyString_AS_STRING(mod), str.constData(), self);" << endl;
     }
     s << INDENT << "else" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "return PyString_FromFormat(\"<%s at %p>\", str.constData(), pyObj);" << endl;
+        s << INDENT << "return PyString_FromFormat(\"<%s at %p>\", str.constData(), self);" << endl;
     }
-
     s << '}' << endl;
     s << "} // extern C" << endl << endl;;
     return funcName;
