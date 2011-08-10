@@ -109,7 +109,7 @@ void callCppDestructor(void* cptr)
 /**
  *  Shiboken::importModule is DEPRECATED. Use Shiboken::Module::import() instead.
  */
-LIBSHIBOKEN_API bool        importModule(const char* moduleName, PyTypeObject*** cppApiPtr);
+SBK_DEPRECATED(LIBSHIBOKEN_API bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr));
 LIBSHIBOKEN_API void        setErrorAboutWrongArguments(PyObject* args, const char* funcName, const char** cppOverloads);
 
 namespace ObjectType {
@@ -343,10 +343,12 @@ LIBSHIBOKEN_API void        invalidate(PyObject* pyobj);
  */
 LIBSHIBOKEN_API void        makeValid(SbkObject* self);
 
+/// \deprecated Use destroy(SbkObject*, void*)
+SBK_DEPRECATED(LIBSHIBOKEN_API void destroy(SbkObject* self));
+
 /**
  * Destroy any data in Shiboken structure and c++ pointer if the pyboject has the ownership
- **/
-LIBSHIBOKEN_API void        destroy(SbkObject* self); //DEPRECATED
+ */
 LIBSHIBOKEN_API void        destroy(SbkObject* self, void* cppData);
 
 /**

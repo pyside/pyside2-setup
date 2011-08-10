@@ -32,11 +32,15 @@
             #define LIBSHIBOKEN_API __declspec(dllimport)
         #endif
     #endif
+    #define SBK_DEPRECATED(func) __declspec(deprecated) func
 #elif __GNUC__ >= 4
     #define LIBSHIBOKEN_API __attribute__ ((visibility("default")))
+    #define SBK_DEPRECATED(func) func __attribute__ ((deprecated))
 #endif
 
 #ifndef LIBSHIBOKEN_API
     #define LIBSHIBOKEN_API
+    #define SBK_DEPRECATED(func) func
 #endif
+
 #endif
