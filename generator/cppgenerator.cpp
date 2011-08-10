@@ -1833,6 +1833,13 @@ void CppGenerator::writeFunctionCalls(QTextStream& s, const OverloadData& overlo
 
 void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& overloadData, const AbstractMetaFunction* func)
 {
+    if (func->isDeprecated()) {
+        qDebug() << "DEPRECATED FUNCTION:" << func->signature();
+        s << INDENT << "Shiboken::warning(PyExc_DeprecationWarning, 1, \"Function: '"
+                    << func->signature().replace("::", ".")
+                    << "' is marked as deprecated, please check the documentation for more information.\");" << endl;
+    }
+
     if (func->functionType() == AbstractMetaFunction::EmptyFunction) {
         s << INDENT << "PyErr_Format(PyExc_TypeError, \"%s is a private method.\", \"" << func->signature().replace("::", ".") << "\");" << endl;
         s << INDENT << "return " << m_currentErrorCode << ';' << endl;
