@@ -22,8 +22,20 @@
 
 #include <iostream>
 #include "modifications.h"
+#include "objecttype.h"
 
 using namespace std;
+
+Modifications::Modifications()
+{
+    m_object = new ObjectType();
+    m_object->setObjectName("MyObject");
+}
+
+Modifications::~Modifications()
+{
+    delete m_object;
+}
 
 std::pair<double, double>
 Modifications::pointToPair(Point pt, bool* ok)
@@ -108,4 +120,12 @@ int
 Modifications::sumPointCoordinates(const Point* point)
 {
     return point->x() + point->y();
+}
+
+bool
+Modifications::nonConversionRuleForArgumentWithDefaultValue(ObjectType** object)
+{
+    if (object)
+        *object = m_object;
+    return true;
 }

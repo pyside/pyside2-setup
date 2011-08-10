@@ -728,6 +728,19 @@
                 <no-null-pointer/>
             </modify-argument>
         </modify-function>
+        <modify-function signature="nonConversionRuleForArgumentWithDefaultValue(ObjectType**)">
+          <modify-argument index="1">
+            <remove-argument/>
+          </modify-argument>
+          <modify-argument index="return">
+            <replace-type modified-type="(status, object)"/>
+          </modify-argument>
+          <inject-code class="target" position="beginning">
+          ObjectType* tmpObject = 0;
+          %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(&amp;tmpObject);
+          %PYARG_0 = Shiboken::makeTuple(%0, tmpObject);
+          </inject-code>
+        </modify-function>
     </object-type>
 
     <object-type name="AbstractModifications">

@@ -28,6 +28,8 @@
 #include "conversions.h"
 #include "autodecref.h"
 
+#define SBK_UNUSED(x)   (void)x;
+
 namespace Shiboken
 {
 

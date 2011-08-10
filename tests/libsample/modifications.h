@@ -27,11 +27,13 @@
 #include <utility>
 #include "point.h"
 
+class ObjectType;
+
 class LIBSAMPLE_API Modifications
 {
 public:
-    Modifications() {}
-    virtual ~Modifications() {}
+    Modifications();
+    virtual ~Modifications();
 
     enum OverloadedModFunc {
         OverloadedNone,
@@ -102,6 +104,13 @@ public:
     // Mark the argument with a <no-null-pointer/> tag;
     // the test implementation must expect point never to be null.
     int sumPointCoordinates(const Point* point);
+
+    // Sets an ObjectType in the argument and returns true.
+    bool nonConversionRuleForArgumentWithDefaultValue(ObjectType** object = 0);
+    ObjectType* getObject() const { return m_object; }
+
+private:
+    ObjectType* m_object;
 };
 
 class LIBSAMPLE_API AbstractModifications : public Modifications
@@ -117,4 +126,3 @@ public:
 };
 
 #endif // MODIFICATIONS_H
-

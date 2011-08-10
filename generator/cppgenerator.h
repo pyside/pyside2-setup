@@ -77,17 +77,19 @@ private:
      *   Writes Python to C++ conversions for arguments on Python wrappers.
      *   If implicit conversions, and thus new object allocation, are needed,
      *   code to deallocate a possible new instance is also generated.
-     *   \param s text stream to write
-     *   \param argType a pointer to the argument type to be converted
-     *   \param argName C++ argument name
-     *   \param pyArgName Python argument name
-     *   \param context the current meta class
-     *   \param defaultValue an optional default value to be used instead of the conversion result
+     *   \param s                    text stream to write
+     *   \param argType              a pointer to the argument type to be converted
+     *   \param argName              C++ argument name
+     *   \param pyArgName            Python argument name
+     *   \param context              the current meta class
+     *   \param defaultValue         an optional default value to be used instead of the conversion result
+     *   \param castArgumentAsUnused if true the converted argument is cast as unused to avoid compiler warnings
      */
     void writeArgumentConversion(QTextStream& s, const AbstractMetaType* argType,
                                  const QString& argName, const QString& pyArgName,
                                  const AbstractMetaClass* context = 0,
-                                 const QString& defaultValue = QString());
+                                 const QString& defaultValue = QString(),
+                                 bool castArgumentAsUnused = false);
 
     /**
      *  Returns the AbstractMetaType for a function argument.

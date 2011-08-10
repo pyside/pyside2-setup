@@ -945,7 +945,7 @@ void CppGenerator::writeMethodWrapperPreamble(QTextStream& s, OverloadData& over
     if (maxArgs > 0)
         s << INDENT << "int overloadId = -1;" << endl;
 
-    if (usesNamedArguments)
+    if (usesNamedArguments && !rfunc->isCallOperator())
         s << INDENT << "int numNamedArgs = (kwds ? PyDict_Size(kwds) : 0);" << endl;
 
     if (initPythonArguments) {
@@ -1361,9 +1361,6 @@ void CppGenerator::writeCppSelfDefinition(QTextStream& s, const AbstractMetaFunc
     }
 
     writeCppSelfDefinition(s, func->ownerClass(), hasStaticOverload);
-
-    if (func->isUserAdded())
-        s << INDENT << "(void)" CPP_SELF_VAR "; // avoid warnings about unused variables" << endl;
 }
 
 void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
@@ -1520,13 +1517,16 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
                                            const AbstractMetaType* argType,
                                            const QString& argName, const QString& pyArgName,
                                            const AbstractMetaClass* context,
-                                           const QString& defaultValue)
+                                           const QString& defaultValue,
+                                           bool castArgumentAsUnused)
 {
     if (argType->typeEntry()->isCustom() || argType->typeEntry()->isVarargs())
         return;
     if (isWrapperType(argType))
         writeInvalidPyObjectCheck(s, pyArgName);
     writePythonToCppTypeConversion(s, argType, pyArgName, argName, context, defaultValue);
+    if (castArgumentAsUnused)
+        writeUnusedVariableCast(s, argName);
 }
 
 const AbstractMetaType* CppGenerator::getArgumentType(const AbstractMetaFunction* func, int argPos)
@@ -1845,28 +1845,38 @@ void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& o
     // Handle named arguments.
     writeNamedArgumentResolution(s, func, usePyArgs);
 
+    bool injectCodeCallsFunc = injectedCodeCallsCppFunction(func);
+    bool mayHaveUnunsedArguments = !func->isUserAdded() && func->hasInjectedCode() && injectCodeCallsFunc;
     int removedArgs = 0;
     for (int argIdx = 0; argIdx < func->arguments().count(); ++argIdx) {
+        bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, argIdx + 1).isEmpty();
+        const AbstractMetaArgument* arg = func->arguments().at(argIdx);
         if (func->argumentRemoved(argIdx + 1)) {
+            if (!arg->defaultValueExpression().isEmpty()) {
+                QString cppArgRemoved = QString(CPP_ARG_REMOVED"%1").arg(argIdx);
+                s << INDENT << getFullTypeName(arg->type()) << ' ' << cppArgRemoved;
+                s << " = " << guessScopeForDefaultValue(func, arg) << ';' << endl;
+                writeUnusedVariableCast(s, cppArgRemoved);
+            } else if (!injectCodeCallsFunc && !func->isUserAdded() && !hasConversionRule) {
+                // When an argument is removed from a method signature and no other means of calling
+                // the method are provided (as with code injection) the generator must abort.
+                qFatal(qPrintable(QString("No way to call '%1::%2' with the modifications described in the type system.")
+                                     .arg(func->ownerClass()->name())
+                                     .arg(func->signature())), NULL);
+            }
             removedArgs++;
             continue;
         }
-
-        if (!func->conversionRule(TypeSystem::NativeCode, argIdx + 1).isEmpty())
+        if (hasConversionRule)
             continue;
-
         const AbstractMetaType* argType = getArgumentType(func, argIdx + 1);
-
-        if (!argType)
+        if (!argType || (mayHaveUnunsedArguments && !injectedCodeUsesArgument(func, argIdx)))
             continue;
-
         int argPos = argIdx - removedArgs;
         QString argName = QString(CPP_ARG"%1").arg(argPos);
         QString pyArgName = usePyArgs ? QString(PYTHON_ARGS "[%1]").arg(argPos) : PYTHON_ARG;
-        const AbstractMetaArgument* arg = func->arguments().at(argIdx);
         QString defaultValue = guessScopeForDefaultValue(func, arg);
-
-        writeArgumentConversion(s, argType, argName, pyArgName, implementingClass, defaultValue);
+        writeArgumentConversion(s, argType, argName, pyArgName, implementingClass, defaultValue, func->isUserAdded());
     }
 
     s << endl;
@@ -2017,9 +2027,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     writeConversionRule(s, func, TypeSystem::NativeCode);
 
     if (!func->isUserAdded()) {
-        bool badModifications = false;
         QStringList userArgs;
-
         if (!func->isCopyConstructor()) {
             int removedArgs = 0;
             for (int i = 0; i < maxArgs + removedArgs; i++) {
@@ -2032,14 +2040,10 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                     removedArgs++;
 
                     // If have conversion rules I will use this for removed args
-                    if (hasConversionRule) {
+                    if (hasConversionRule)
                         userArgs << QString("%1"CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name());
-                    } else {
-                       if (arg->defaultValueExpression().isEmpty())
-                           badModifications = true;
-                       else
-                           userArgs << guessScopeForDefaultValue(func, arg);
-                    }
+                    else if (!arg->defaultValueExpression().isEmpty())
+                        userArgs << QString(CPP_ARG_REMOVED"%1").arg(i);
                 } else {
                     int idx = arg->argumentIndex() - removedArgs;
                     QString argName = hasConversionRule
@@ -2064,15 +2068,11 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                     continue;
                 else
                     argsClear = false;
-
                 otherArgsModified |= defValModified || hasConversionRule || func->argumentRemoved(i + 1);
-
-                if (!arg->defaultValueExpression().isEmpty())
-                    otherArgs.prepend(guessScopeForDefaultValue(func, arg));
-                else if (hasConversionRule)
+                if (hasConversionRule)
                     otherArgs.prepend(QString("%1"CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name()));
                 else
-                    badModifications = true;
+                    otherArgs.prepend(QString(CPP_ARG_REMOVED"%1").arg(i));
             }
             if (otherArgsModified)
                 userArgs << otherArgs;
@@ -2082,16 +2082,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         QString methodCall;
         QTextStream mc(&methodCall);
 
-        if (badModifications) {
-            // When an argument is removed from a method signature and no other
-            // means of calling the method is provided (as with code injection)
-            // the generator must write a compiler error line stating the situation.
-            if (func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode).isEmpty()) {
-                qFatal(qPrintable("No way to call \"" + func->ownerClass()->name()
-                         + "::" + func->minimalSignature()
-                         + "\" with the modifications described in the type system file"), NULL);
-            }
-        } else if (func->isOperatorOverload() && !func->isCallOperator()) {
+        if (func->isOperatorOverload() && !func->isCallOperator()) {
             QByteArray firstArg("(*" CPP_SELF_VAR ")");
             if (func->isPointerOperator())
                 firstArg.remove(1, 1); // remove the de-reference operator
@@ -2953,6 +2944,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
     s << baseName << "_richcompare(PyObject* " PYTHON_SELF_VAR ", PyObject* " PYTHON_ARG ", int op)" << endl;
     s << '{' << endl;
     writeCppSelfDefinition(s, metaClass, false, true);
+    writeUnusedVariableCast(s, CPP_SELF_VAR);
     s << INDENT << "PyObject* " PYTHON_RETURN_VAR " = 0;" << endl;
     s << endl;
 
@@ -2983,26 +2975,21 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                 const AbstractMetaFunction* func = data->referenceFunction();
                 if (func->isStatic())
                     continue;
-
                 const AbstractMetaType* argType = getArgumentType(func, 1);
-
                 if (!argType)
                     continue;
-
                 bool numberType = alternativeNumericTypes == 1 || ShibokenGenerator::isPyInt(argType);
-
                 if (!first) {
                     s << " else ";
                 } else {
                     first = false;
                     s << INDENT;
                 }
-
                 s << "if (" << cpythonIsConvertibleFunction(argType, numberType) << "(" PYTHON_ARG ")) {" << endl;
                 {
                     Indentation indent(INDENT);
                     s << INDENT << "// " << func->signature() << endl;
-                    writeArgumentConversion(s, argType, CPP_ARG0, PYTHON_ARG, metaClass);
+                    writeArgumentConversion(s, argType, CPP_ARG0, PYTHON_ARG, metaClass, QString(), func->isUserAdded());
 
                     // If the function is user added, use the inject code
                     if (func->isUserAdded()) {

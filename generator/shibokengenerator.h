@@ -27,6 +27,7 @@
 #define CONV_RULE_OUT_VAR_SUFFIX  "_out"
 #define CPP_ARG                   "cppArg"
 #define CPP_ARG0                  CPP_ARG"0"
+#define CPP_ARG_REMOVED           "removed_"CPP_ARG
 #define CPP_RETURN_VAR            "cppResult"
 #define CPP_SELF_VAR              "cppSelf"
 #define PYTHON_ARG                "pyArg"
@@ -204,6 +205,12 @@ public:
      *   \return true if the function's code attributes values to "%0" or "%PYARG_0"
      */
     bool injectedCodeHasReturnValueAttribution(const AbstractMetaFunction* func, TypeSystem::Language language = TypeSystem::TargetLangCode);
+
+    /**
+     *   Verifies if any of the function's code injections uses the type system variable
+     *   for function arguments of a given index.
+     */
+    bool injectedCodeUsesArgument(const AbstractMetaFunction* func, int argumentIndex);
 
     /**
      *   Function which parse the metafunction information
@@ -394,6 +401,12 @@ public:
     QString getTypeIndexVariableName(const AbstractMetaClass* metaClass, bool alternativeTemplateName = false);
     QString getTypeIndexVariableName(const TypeEntry* type);
     QString getTypeIndexVariableName(const AbstractMetaType* type);
+
+    /// Returns the proper full name for \p type.
+    QString getFullTypeName(const TypeEntry* type);
+    QString getFullTypeName(const AbstractMetaType* type);
+    QString getFullTypeName(const AbstractMetaClass* metaClass);
+
     /// Returns true if the user don't want verbose error messages on the generated bindings.
     bool verboseErrorMessagesDisabled() const;
 
@@ -439,6 +452,8 @@ protected:
     void writeFunctionCall(QTextStream& s,
                            const AbstractMetaFunction* metaFunc,
                            Options options = NoOption) const;
+
+    void writeUnusedVariableCast(QTextStream& s, const QString& variableName);
 
     AbstractMetaFunctionList filterFunctions(const AbstractMetaClass* metaClass);
 

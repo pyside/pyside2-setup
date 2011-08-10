@@ -1164,6 +1164,11 @@ void ShibokenGenerator::writeFunctionCall(QTextStream& s,
     s << ')';
 }
 
+void ShibokenGenerator::writeUnusedVariableCast(QTextStream& s, const QString& variableName)
+{
+    s << INDENT << "SBK_UNUSED(" << variableName<< ')' << endl;
+}
+
 AbstractMetaFunctionList ShibokenGenerator::filterFunctions(const AbstractMetaClass* metaClass)
 {
     AbstractMetaFunctionList result;
@@ -1281,12 +1286,10 @@ ShibokenGenerator::ArgumentVarReplacementList ShibokenGenerator::getArgumentRepl
             bool hasConversionRule = !func->conversionRule(convLang, i+1).isEmpty();
             bool argRemoved = func->argumentRemoved(i+1);
             removed = removed + (int) argRemoved;
-            if (argRemoved || (lastArg && arg->argumentIndex() > lastArg->argumentIndex()))
-                argValue = arg->defaultValueExpression();
-
-            if (argRemoved && hasConversionRule && argValue.isEmpty())
+            if (argRemoved && hasConversionRule)
                 argValue = QString("%1"CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name());
-
+            else if (argRemoved || (lastArg && arg->argumentIndex() > lastArg->argumentIndex()))
+                argValue = QString(CPP_ARG_REMOVED"%1").arg(i);
             if (!argRemoved && argValue.isEmpty()) {
                 int argPos = i - removed;
                 if (arg->type()->typeEntry()->isCustom()) {
@@ -1456,8 +1459,11 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
     ArgumentVarReplacementList argReplacements = getArgumentReplacement(func, usePyArgs, language, lastArg);
 
     QStringList args;
-    foreach (ArgumentVarReplacementPair pair, argReplacements)
+    foreach (ArgumentVarReplacementPair pair, argReplacements) {
+        if (pair.second.startsWith(CPP_ARG_REMOVED))
+            continue;
         args << pair.second;
+    }
     code.replace("%ARGUMENT_NAMES", args.join(", "));
 
     foreach (ArgumentVarReplacementPair pair, argReplacements) {
@@ -1619,6 +1625,19 @@ bool ShibokenGenerator::injectedCodeHasReturnValueAttribution(const AbstractMeta
             if (retValAttributionRegexCheck_native.indexIn(snip.code()) != -1)
                 return true;
         }
+    }
+    return false;
+}
+
+bool ShibokenGenerator::injectedCodeUsesArgument(const AbstractMetaFunction* func, int argumentIndex)
+{
+    CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any);
+    foreach (CodeSnip snip, snips) {
+        QString code = snip.code();
+        if (code.contains("%ARGUMENT_NAMES"))
+            return true;
+        if (code.contains(QString("%%1").arg(argumentIndex + 1)))
+            return true;
     }
     return false;
 }
@@ -1946,6 +1965,21 @@ QString ShibokenGenerator::getTypeIndexVariableName(const TypeEntry* type)
 QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaType* type)
 {
     return QString("SBK%1_IDX").arg(processInstantiationsVariableName(type));
+}
+
+QString ShibokenGenerator::getFullTypeName(const TypeEntry* type)
+{
+    return QString("%1%2").arg(type->isCppPrimitive() ? "" : "::").arg(type->qualifiedCppName());
+}
+QString ShibokenGenerator::getFullTypeName(const AbstractMetaType* type)
+{
+    if (isCString(type))
+        return QString("const char*");
+    return getFullTypeName(type->typeEntry()) + QString("*").repeated(type->indirections());
+}
+QString ShibokenGenerator::getFullTypeName(const AbstractMetaClass* metaClass)
+{
+    return getFullTypeName(metaClass->typeEntry());
 }
 
 bool ShibokenGenerator::verboseErrorMessagesDisabled() const

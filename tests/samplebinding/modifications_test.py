@@ -148,5 +148,11 @@ class ModificationsTest(unittest.TestCase):
         self.assertEqual(self.mods.sumPointCoordinates(point), 12 + 34)
         self.assertRaises(TypeError, self.mods.sumPointCoordinates, None)
 
+    def testNonConversionRuleForArgumentWithDefaultValue(self):
+        status, obj = self.mods.nonConversionRuleForArgumentWithDefaultValue()
+        self.assert_(status)
+        self.assertEqual(obj, self.mods.getObject())
+        self.assertEqual(obj.objectName(), 'MyObject')
+
 if __name__ == '__main__':
     unittest.main()
