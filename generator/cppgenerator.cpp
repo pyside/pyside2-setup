@@ -2833,18 +2833,14 @@ void CppGenerator::writeTpClearFunction(QTextStream& s, const AbstractMetaClass*
     s << '}' << endl;
 }
 
-void CppGenerator::writeCopyFunction(QTextStream& s, const AbstractMetaClass *metaClass)
+void CppGenerator::writeCopyFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     QString className = cpythonTypeName(metaClass).replace(QRegExp("_Type$"), "");
     s << "static PyObject* " << className << "___copy__(PyObject* " PYTHON_SELF_VAR ")" << endl;
     s << "{" << endl;
-
-    writeCppSelfDefinition(s, metaClass);
-
-    s << INDENT << "PyObject* " << PYTHON_RETURN_VAR << " = ";
-    s << "Shiboken::Converter< ::" << metaClass->qualifiedCppName() << " >::toPython(*";
-    s << CPP_SELF_VAR << ");" << endl;
-    s << endl;
+    writeCppSelfDefinition(s, metaClass, false, true);
+    s << INDENT << "PyObject* " << PYTHON_RETURN_VAR << " = " << cpythonToPythonConversionFunction(metaClass);
+    s << "(" CPP_SELF_VAR ");" << endl;
     writeFunctionReturnErrorCheckSection(s);
     s << INDENT << "return " PYTHON_RETURN_VAR ";" << endl;
     s << "}" << endl;

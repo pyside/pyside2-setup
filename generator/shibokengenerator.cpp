@@ -547,7 +547,7 @@ void ShibokenGenerator::writeBaseConversion(QTextStream& s, const TypeEntry* typ
         if (metaEnum && metaEnum->isProtected())
             typeName = protectedEnumSurrogateName(metaEnum);
     } else {
-        typeName = type->qualifiedCppName().trimmed();
+        typeName = getFullTypeName(type).trimmed();
         if (isObjectType(type))
             typeName.append('*');
     }
@@ -563,6 +563,8 @@ void ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaTy
         if (ptype->basicAliasedTypeEntry())
             ptype = ptype->basicAliasedTypeEntry();
         typeName = ptype->name();
+        if (!ptype->isCppPrimitive())
+            typeName.prepend("::");
     } else {
         if (!isCString(type)) {
             options |= Generator::ExcludeConst;
@@ -1015,6 +1017,19 @@ QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaT
     QString base;
     QTextStream b(&base);
     writeBaseConversion(b, type, context, flags);
+    return QString("%1toPython").arg(base);
+}
+
+QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaClass* metaClass)
+{
+    return cpythonToPythonConversionFunction(metaClass->typeEntry());
+}
+
+QString ShibokenGenerator::cpythonToPythonConversionFunction(const TypeEntry* type)
+{
+    QString base;
+    QTextStream b(&base);
+    writeBaseConversion(b, type);
     return QString("%1toPython").arg(base);
 }
 

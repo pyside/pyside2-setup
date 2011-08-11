@@ -338,6 +338,8 @@ public:
     QString cpythonToCppConversionFunction(const AbstractMetaClass* metaClass);
     QString cpythonToCppConversionFunction(const AbstractMetaType* type, const AbstractMetaClass* context = 0);
     QString cpythonToPythonConversionFunction(const AbstractMetaType* type, const AbstractMetaClass* context = 0);
+    QString cpythonToPythonConversionFunction(const AbstractMetaClass* metaClass);
+    QString cpythonToPythonConversionFunction(const TypeEntry* type);
 
     QString cpythonFunctionName(const AbstractMetaFunction* func);
     QString cpythonMethodDefinitionName(const AbstractMetaFunction* func);
