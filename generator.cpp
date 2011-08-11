@@ -193,9 +193,14 @@ void Generator::generate()
     finishGeneration();
 }
 
+bool Generator::shouldGenerateTypeEntry(const TypeEntry* type) const
+{
+    return type->codeGeneration() & TypeEntry::GenerateTargetLang;
+}
+
 bool Generator::shouldGenerate(const AbstractMetaClass* metaClass) const
 {
-    return metaClass->typeEntry()->codeGeneration() & TypeEntry::GenerateTargetLang;
+    return shouldGenerateTypeEntry(metaClass->typeEntry());
 }
 
 void verifyDirectoryFor(const QFile &file)

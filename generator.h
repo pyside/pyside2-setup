@@ -151,7 +151,10 @@ public:
     /// Returns the generator's name. Used for cosmetic purposes.
     virtual const char* name() const = 0;
 
-    /// Returns true if the generator should generate any code for the AbstractMetaClass
+    /// Returns true if the generator should generate any code for the TypeEntry.
+    bool shouldGenerateTypeEntry(const TypeEntry*) const;
+
+    /// Returns true if the generator should generate any code for the AbstractMetaClass.
     virtual bool shouldGenerate(const AbstractMetaClass *) const;
 
     /// Returns the subdirectory used to write the binding code of an AbstractMetaClass.
