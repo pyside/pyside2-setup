@@ -32,14 +32,15 @@ class TestUtil
 {
 public:
     TestUtil(const char* cppCode, const char* xmlCode,
-             bool silent = true, double apiVersion = 0,
+             bool silent = true, const char* apiVersion = 0,
              QStringList dropTypeEntries = QStringList())
         : m_builder(0)
     {
         ReportHandler::setSilent(silent);
         m_builder = new AbstractMetaBuilder;
         TypeDatabase* td = TypeDatabase::instance(true);
-        td->setApiVersion(apiVersion);
+        if (apiVersion)
+            td->setApiVersion("*", apiVersion);
         td->setDropTypeEntries(dropTypeEntries);
         QBuffer buffer;
         // parse typesystem

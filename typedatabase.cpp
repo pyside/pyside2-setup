@@ -31,6 +31,11 @@
 // #include <tr1/tuple>
 #include <algorithm>
 
+// package -> api-version
+typedef QMap<QString, QByteArray> ApiVersionMap;
+
+Q_GLOBAL_STATIC(ApiVersionMap, apiVersions)
+
 TypeDatabase::TypeDatabase() : m_suppressWarnings(true), m_apiVersion(0)
 {
     addType(new VoidTypeEntry());
@@ -349,6 +354,9 @@ bool TypeDatabase::parseFile(const QString &filename, bool generate)
 
 bool TypeDatabase::parseFile(QIODevice* device, bool generate)
 {
+    if (m_apiVersion) // backwards compatibility with deprecated API
+        setApiVersion("*", QByteArray::number(m_apiVersion));
+
     QXmlInputSource source(device);
     QXmlSimpleReader reader;
     Handler handler(this, generate);
@@ -495,3 +503,46 @@ int getMaxTypeIndex()
     return maxTypeIndex;
 }
 
+void TypeDatabase::setApiVersion(const QString& package, const QByteArray& version)
+{
+    (*apiVersions())[package.trimmed()] = version.trimmed();
+}
+
+/**
+ * Returns -1, 0 or 1 if v1 is less, equal or greater than v2
+ */
+static int versionCheck(const QByteArray& v1, const QByteArray& v2)
+{
+    if (v1.isEmpty() || v2.isEmpty())
+        return 0;
+
+    QList<QByteArray> v1Components = v1.split('.');
+    QList<QByteArray> v2Components = v2.split('.');
+    int numComponents = qMax(v1Components.count(), v2Components.count());
+    while (v1Components.count() < numComponents)
+        v1Components.append("0");
+    while (v2Components.count() < numComponents)
+        v2Components.append("0");
+
+    for (int i = 0, max = v1Components.count(); i < max; ++i) {
+        int v1Comp = v1Components[i].toInt();
+        int v2Comp = v2Components[i].toInt();
+        if (v1Comp > v2Comp)
+            return 1;
+        else if (v1Comp < v2Comp)
+            return -1;
+    }
+    return 0;
+}
+
+bool TypeDatabase::checkApiVersion(const QString& package, const QByteArray& version) const
+{
+    ApiVersionMap* vMap = apiVersions();
+    ApiVersionMap::const_iterator it = vMap->begin();
+    for (; it != vMap->end(); ++it) {
+        QRegExp regex(it.key(), Qt::CaseSensitive, QRegExp::Wildcard);
+        if (regex.exactMatch(package))
+            return versionCheck(it.value(), version) >= 0;
+    }
+    return false;
+}

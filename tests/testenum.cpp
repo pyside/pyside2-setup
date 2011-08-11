@@ -92,7 +92,7 @@ void TestEnum::testEnumWithApiVersion()
         </value-type> \
     </typesystem>";
 
-    TestUtil t(cppCode, xmlCode, true, 0.1);
+    TestUtil t(cppCode, xmlCode, true, "0.1");
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 1);
     QCOMPARE(classes[0]->enums().count(), 1);

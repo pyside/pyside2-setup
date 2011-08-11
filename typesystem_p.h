@@ -151,6 +151,7 @@ private:
     StackElement* m_current;
     StackElement* m_currentDroppedEntry;
     int m_currentDroppedEntryDepth;
+    int m_ignoreDepth;
     QString m_defaultPackage;
     QString m_defaultSuperclass;
     QString m_error;

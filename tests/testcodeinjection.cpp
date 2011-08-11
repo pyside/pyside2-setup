@@ -65,7 +65,7 @@ void TestCodeInjections::testInjectWithValidApiVersion()
         </value-type>\
     </typesystem>";
 
-    TestUtil t(cppCode, xmlCode, true, 1.0);
+    TestUtil t(cppCode, xmlCode, true, "1.0");
 
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass("A");
@@ -84,7 +84,7 @@ void TestCodeInjections::testInjectWithInvalidApiVersion()
         </value-type>\
     </typesystem>";
 
-    TestUtil t(cppCode, xmlCode, true, 0.1);
+    TestUtil t(cppCode, xmlCode, true, "0.1");
 
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass("A");

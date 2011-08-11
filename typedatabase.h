@@ -173,17 +173,19 @@ public:
     bool parseFile(const QString &filename, bool generate = true);
     bool parseFile(QIODevice* device, bool generate = true);
 
-    double apiVersion() const
+    APIEXTRACTOR_DEPRECATED(double apiVersion() const)
     {
         return m_apiVersion;
     }
 
-    void setApiVersion(double version)
+    APIEXTRACTOR_DEPRECATED(void setApiVersion(double version))
     {
         m_apiVersion = version;
     }
+    void setApiVersion(const QString& package, const QByteArray& version);
 
-    bool supportedApiVersion(double version) const;
+    APIEXTRACTOR_DEPRECATED(bool supportedApiVersion(double version) const);
+    bool checkApiVersion(const QString& package, const QByteArray& version) const;
 
     const QStringList& dropTypeEntries() const
     {

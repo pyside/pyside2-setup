@@ -118,7 +118,7 @@ void TestModifyFunction::invalidateAfterUse()
         </object-type>\
         <object-type name='E' /> \
     </typesystem>";
-    TestUtil t(cppCode, xmlCode, false, 0.1);
+    TestUtil t(cppCode, xmlCode, false, "0.1");
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classB = classes.findClass("B");
     const AbstractMetaFunction* func = classB->findFunction("call");
@@ -190,7 +190,7 @@ void TestModifyFunction::testWithApiVersion()
         </modify-function>\
         </object-type>\
     </typesystem>";
-    TestUtil t(cppCode, xmlCode, false, 0.1);
+    TestUtil t(cppCode, xmlCode, false, "0.1");
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classB = classes.findClass("B");
     const AbstractMetaFunction* func = classB->findFunction("method");

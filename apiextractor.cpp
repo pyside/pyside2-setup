@@ -106,7 +106,12 @@ void ApiExtractor::setSilent ( bool value )
 
 void ApiExtractor::setApiVersion(double version)
 {
-    TypeDatabase::instance()->setApiVersion(version);
+    TypeDatabase::instance()->setApiVersion("*", QByteArray::number(version));
+}
+
+void ApiExtractor::setApiVersion(const QString& package, const QByteArray& version)
+{
+    TypeDatabase::instance()->setApiVersion(package, version);
 }
 
 void ApiExtractor::setDropTypeEntries(QString dropEntries)

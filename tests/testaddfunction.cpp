@@ -347,7 +347,7 @@ void TestAddFunction::testAddFunctionWithApiVersion()
             <inject-code class='target' position='beginning'>custom_code();</inject-code>\
         </add-function>\
     </typesystem>";
-    TestUtil t(cppCode, xmlCode, true, 0.1);
+    TestUtil t(cppCode, xmlCode, true, "0.1");
     AbstractMetaFunctionList globalFuncs = t.builder()->globalFunctions();
     QCOMPARE(globalFuncs.count(), 1);
 }

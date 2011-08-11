@@ -72,7 +72,6 @@ void AbstractMetaBuilder::checkFunctionModifications()
     TypeDatabase *types = TypeDatabase::instance();
     SingleTypeEntryHash entryHash = types->entries();
     QList<TypeEntry*> entries = entryHash.values();
-    double apiVersion = TypeDatabase::instance()->apiVersion();
 
     foreach (TypeEntry* entry, entries) {
         if (!entry)
@@ -84,8 +83,6 @@ void AbstractMetaBuilder::checkFunctionModifications()
         FunctionModificationList modifications = centry->functionModifications();
 
         foreach (FunctionModification modification, modifications) {
-            if (modification.version() > apiVersion)
-                continue;
             QString signature = modification.signature;
 
             QString name = signature.trimmed();
@@ -423,11 +420,6 @@ bool AbstractMetaBuilder::build(QIODevice* input)
         if (!funcEntry || !funcEntry->generateCode())
             continue;
 
-        if (!types->supportedApiVersion(funcEntry->version())) {
-            m_rejectedFunctions.insert(func->name(), ApiIncompatible);
-            continue;
-        }
-
         AbstractMetaFunction* metaFunc = traverseFunction(func);
         if (!metaFunc)
             continue;
@@ -485,11 +477,6 @@ bool AbstractMetaBuilder::build(QIODevice* input)
 
             if (entry->isPrimitive())
                 continue;
-
-            if (!types->supportedApiVersion(entry->version())) {
-                m_rejectedClasses.insert(entry->name(), ApiIncompatible);
-                continue;
-            }
 
             if ((entry->isValue() || entry->isObject())
                 && !entry->isString()
@@ -606,10 +593,6 @@ bool AbstractMetaBuilder::build(QIODevice* input)
 
     // Functions added to the module on the type system.
     foreach (AddedFunction addedFunc, types->globalUserFunctions()) {
-        if (!types->supportedApiVersion(addedFunc.version())) {
-            m_rejectedFunctions.insert(addedFunc.name(), ApiIncompatible);
-            continue;
-        }
         AbstractMetaFunction* metaFunc = traverseFunction(addedFunc);
         metaFunc->setFunctionType(AbstractMetaFunction::NormalFunction);
         m_globalFunctions << metaFunc;
@@ -964,13 +947,6 @@ AbstractMetaEnum* AbstractMetaBuilder::traverseEnum(EnumModelItem enumItem, Abst
         ReportHandler::warning(QString("enum '%1' does not have a type entry or is not an enum")
                                .arg(qualifiedName));
         m_rejectedEnums.insert(qualifiedName, NotInTypeSystem);
-        return 0;
-    }
-
-    // Skipping api incompatible
-    if (!TypeDatabase::instance()->supportedApiVersion(typeEntry->version())) {
-        typeEntry->setCodeGeneration(TypeEntry::GenerateNothing);
-        m_rejectedEnums.insert(qualifiedName, ApiIncompatible);
         return 0;
     }
 

@@ -76,7 +76,7 @@ void TestRefCountTag::testWithApiVersion()
         </object-type>\
     </typesystem>";
 
-    TestUtil t(cppCode, xmlCode, false, 0.1);
+    TestUtil t(cppCode, xmlCode, false, "0.1");
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classB = classes.findClass("B");
     const AbstractMetaFunction* func = classB->findFunction("keepObject");

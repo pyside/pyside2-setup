@@ -40,6 +40,7 @@ Handler::Handler(TypeDatabase* database, bool generate)
     m_current = 0;
     m_currentDroppedEntry = 0;
     m_currentDroppedEntryDepth = 0;
+    m_ignoreDepth = 0;
 
     tagNames["rejection"] = StackElement::Rejection;
     tagNames["primitive-type"] = StackElement::PrimitiveTypeEntry;
@@ -125,6 +126,11 @@ void Handler::fetchAttributeValues(const QString &name, const QXmlAttributes &at
 
 bool Handler::endElement(const QString &, const QString &localName, const QString &)
 {
+    if (m_ignoreDepth) {
+        --m_ignoreDepth;
+        return true;
+    }
+
     if (m_currentDroppedEntry) {
         if (m_currentDroppedEntryDepth == 1) {
             m_current = m_currentDroppedEntry->parent;
@@ -222,7 +228,7 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
 
 bool Handler::characters(const QString &ch)
 {
-    if (m_currentDroppedEntry)
+    if (m_currentDroppedEntry || m_ignoreDepth)
         return true;
 
     if (m_current->type == StackElement::Template) {
@@ -380,6 +386,20 @@ static QString getNamePrefix(StackElement* element)
 bool Handler::startElement(const QString &, const QString &n,
                            const QString &, const QXmlAttributes &atts)
 {
+    if (m_ignoreDepth) {
+        ++m_ignoreDepth;
+        return true;
+    }
+
+    if (!m_defaultPackage.isEmpty() && atts.index("since") != -1) {
+        TypeDatabase* td = TypeDatabase::instance();
+        if (!td->checkApiVersion(m_defaultPackage, atts.value("since").toAscii())) {
+            ++m_ignoreDepth;
+            return true;
+        }
+    }
+
+
     QString tagName = n.toLower();
     if (tagName == "import-file")
         return importFileElement(atts);
@@ -1016,10 +1036,6 @@ bool Handler::startElement(const QString &, const QString &n,
                 return false;
             }
             QString name = attributes["name"];
-
-            if (!name.isEmpty() && m_database->supportedApiVersion(since))
-                m_currentEnum->addEnumValueRejection(name);
-
         } break;
         case StackElement::ReplaceType: {
             if (topElement.type != StackElement::ModifyArgument) {
@@ -1711,13 +1727,7 @@ PrimitiveTypeEntry* PrimitiveTypeEntry::basicAliasedTypeEntry() const
 
 CodeSnipList TypeEntry::codeSnips() const
 {
-    CodeSnipList lst;
-    TypeDatabase *td = TypeDatabase::instance();
-    foreach(CodeSnip cs, m_codeSnips) {
-        if (td->supportedApiVersion(cs.version))
-            lst.append(cs);
-    }
-    return lst;
+    return m_codeSnips;
 }
 
 QString Modification::accessModifierString() const
@@ -1735,7 +1745,7 @@ FunctionModificationList ComplexTypeEntry::functionModifications(const QString &
     TypeDatabase *td = TypeDatabase::instance();
     for (int i = 0; i < m_functionMods.count(); ++i) {
         const FunctionModification &mod = m_functionMods.at(i);
-        if ((mod.signature == signature) && (td->supportedApiVersion(mod.version())))
+        if (mod.signature == signature)
             lst << mod;
     }
 

@@ -64,7 +64,7 @@ void TestAbstractMetaType::testApiVersionSupported()
         <function signature='justAtest2()' since='1.1'/>\
         <function signature='justAtest3()'/>\
     </typesystem>";
-    TestUtil t(cppCode, xmlCode, false, 1.0);
+    TestUtil t(cppCode, xmlCode, false, "1.0");
 
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.size(), 2);
@@ -81,7 +81,7 @@ void TestAbstractMetaType::testApiVersionNotSupported()
     const char* xmlCode = "<typesystem package='Foo'>\
         <value-type name='object' since='0.1'/>\
     </typesystem>";
-    TestUtil t(cppCode, xmlCode, true, 0.1);
+    TestUtil t(cppCode, xmlCode, true, "0.1");
 
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.size(), 1);
