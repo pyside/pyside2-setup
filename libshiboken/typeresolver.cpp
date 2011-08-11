@@ -98,7 +98,8 @@ TypeResolver* TypeResolver::get(const char* typeName)
     if (it != typeResolverMap.end()) {
         return it->second;
     } else {
-        SbkDbg() << "Can't find type resolver for " << typeName;
+        if (Py_VerboseFlag > 0)
+            SbkDbg() << "Can't find type resolver for " << typeName;
         return 0;
     }
 }
