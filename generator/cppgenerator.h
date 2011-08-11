@@ -181,7 +181,8 @@ private:
                                              const AbstractMetaType* sourceType,
                                              const AbstractMetaType* targetType,
                                              QString typeCheck = QString(),
-                                             QString conversion = QString());
+                                             QString conversion = QString(),
+                                             QString preConversion = QString());
     /// Writes a pair of Python to C++ conversion and check functions for implicit conversions.
     void writePythonToCppConversionFunctions(QTextStream& s,
                                              const CustomConversion::TargetToNativeConversion* toNative,
@@ -240,6 +241,7 @@ private:
     /// Writes the implementation of special cast functions, used when we need to cast a class with multiple inheritance.
     void writeSpecialCastFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
+    void writePrimitiveConverterInitialization(QTextStream& s, const CustomConversion* customConversion);
     void writeExtendedConverterInitialization(QTextStream& s, const TypeEntry* externalType, const QList<const AbstractMetaClass*>& conversions);
 
     void writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func, bool userHeuristicForReturn);

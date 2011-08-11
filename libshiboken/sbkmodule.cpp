@@ -32,8 +32,12 @@
 /// This hash maps module objects to arrays of Python types.
 typedef google::dense_hash_map<PyObject*, PyTypeObject**> ModuleTypesMap;
 
+/// This hash maps module objects to arrays of converters.
+typedef google::dense_hash_map<PyObject*, SbkConverter**> ModuleConvertersMap;
+
 /// All types produced in imported modules are mapped here.
 static ModuleTypesMap moduleTypes;
+static ModuleConvertersMap moduleConverters;
 
 namespace Shiboken
 {
@@ -45,6 +49,8 @@ void init()
     // Initializes type registry for modules.
     moduleTypes.set_empty_key((ModuleTypesMap::key_type)0);
     moduleTypes.set_deleted_key((ModuleTypesMap::key_type)1);
+    moduleConverters.set_empty_key((ModuleConvertersMap::key_type)0);
+    moduleConverters.set_deleted_key((ModuleConvertersMap::key_type)1);
 }
 
 PyObject* import(const char* moduleName)
@@ -83,6 +89,19 @@ PyTypeObject** getTypes(PyObject* module)
 {
     ModuleTypesMap::iterator iter = moduleTypes.find(module);
     return (iter == moduleTypes.end()) ? 0 : iter->second;
+}
+
+void registerTypeConverters(PyObject* module, SbkConverter** converters)
+{
+    ModuleConvertersMap::iterator iter = moduleConverters.find(module);
+    if (iter == moduleConverters.end())
+        moduleConverters.insert(std::make_pair(module, converters));
+}
+
+SbkConverter** getTypeConverters(PyObject* module)
+{
+    ModuleConvertersMap::iterator iter = moduleConverters.find(module);
+    return (iter == moduleConverters.end()) ? 0 : iter->second;
 }
 
 } } // namespace Shiboken::Module

@@ -19,25 +19,85 @@
     <primitive-type name="std::string"/>
 
     <primitive-type name="std::size_t" target-lang-api-name="PyLong">
+        <conversion-rule>
+            <native-to-target>
+            return PyLong_FromSize_t(%in);
+            </native-to-target>
+            <target-to-native>
+                <add-conversion type="PyLong">
+                %out = %OUTTYPE(PyLong_AsSsize_t(%in));
+                </add-conversion>
+            </target-to-native>
+        </conversion-rule>
     </primitive-type>
+
     <primitive-type name="Complex" target-lang-api-name="PyComplex">
-        <conversion-rule file="complex_conversions.h"/>
         <include file-name="complex.h" location="global"/>
+        <conversion-rule file="complex_conversions.h">
+            <native-to-target>
+            return PyComplex_FromDoubles(%in.real(), %in.imag());
+            </native-to-target>
+            <target-to-native>
+                <!-- The 'check' attribute can be derived from the 'type' attribute,
+                     it is defined here to test the CHECKTYPE type system variable. -->
+                <add-conversion type="PyComplex" check="%CHECKTYPE[Complex](%in)">
+                double real = PyComplex_RealAsDouble(%in);
+                double imag = PyComplex_ImagAsDouble(%in);
+                %out = %OUTTYPE(real, imag);
+                </add-conversion>
+            </target-to-native>
+        </conversion-rule>
     </primitive-type>
 
     <primitive-type name="Null">
-        <conversion-rule file="null_conversions.h"/>
         <include file-name="null.h" location="global"/>
+        <conversion-rule file="null_conversions.h">
+            <native-to-target>
+            SBK_UNUSED(%in);
+            Py_RETURN_NONE;
+            </native-to-target>
+            <target-to-native>
+                <add-conversion type="PyObject" check="%in == 0 || %in == Py_None">
+                %out = %OUTTYPE(%in == 0);
+                </add-conversion>
+            </target-to-native>
+        </conversion-rule>
     </primitive-type>
 
-    <primitive-type name="HANDLE">
-        <conversion-rule file="handle_conversions.h"/>
+    <primitive-type name="HANDLE" target-lang-api-name="PyComplex">
         <include file-name="handle.h" location="local"/>
+        <conversion-rule file="handle_conversions.h">
+            <native-to-target>
+            return PyCObject_FromVoidPtr(%in, 0);
+            </native-to-target>
+            <target-to-native>
+                <add-conversion type="PyCObject">
+                %out = (%OUTTYPE)PyCObject_AsVoidPtr(%in);
+                </add-conversion>
+            </target-to-native>
+        </conversion-rule>
     </primitive-type>
 
     <primitive-type name="OddBool" target-lang-api-name="PyBool" default-constructor="OddBool(false)">
-        <conversion-rule file="oddbool_conversions.h"/>
         <include file-name="oddbool.h" location="global"/>
+        <include file-name="complex.h" location="global"/>
+        <conversion-rule file="oddbool_conversions.h">
+            <native-to-target>
+            return PyBool_FromLong(%in.value());
+            </native-to-target>
+            <target-to-native>
+                <add-conversion type="PyBool">
+                // Tests CONVERTTOCPP macro with C++ primitive type.
+                bool b = %CONVERTTOCPP[bool](%in);
+                %out = %OUTTYPE(b);
+                </add-conversion>
+                <add-conversion type="PyComplex">
+                // Tests CONVERTTOCPP macro with user's primitive type.
+                Complex cpx = %CONVERTTOCPP[Complex](%in);
+                %out = %OUTTYPE(cpx.real() != 0.0 || cpx.imag() != 0.0);
+                </add-conversion>
+            </target-to-native>
+        </conversion-rule>
     </primitive-type>
 
     <container-type name="std::pair" type="pair">
@@ -1559,10 +1619,10 @@
     <value-type name="ByteArray" hash-function="ByteArray::hash">
         <conversion-rule file="bytearray_conversions.h">
             <target-to-native>
-                <add-conversion type='Py_None' check='%in == Py_None'>
+                <add-conversion type="Py_None">
                 %out = %OUTTYPE();
                 </add-conversion>
-                <add-conversion type='PyString' check='PyString_Check(%in)'>
+                <add-conversion type="PyString">
                 %out = %OUTTYPE(PyString_AS_STRING(%in), PyString_GET_SIZE(%in));
                 </add-conversion>
             </target-to-native>
@@ -1811,7 +1871,7 @@
         </inject-code>
         <conversion-rule class="target" file="date_conversions.h">
             <target-to-native>
-                <add-conversion type='PyDate' check='PyDate_ImportAndCheck(%in)'>
+                <add-conversion type="PyDate" check="PyDate_ImportAndCheck(%in)">
                 int day = PyDateTime_GET_DAY(%in);
                 int month = PyDateTime_GET_MONTH(%in);
                 int year = PyDateTime_GET_YEAR(%in);

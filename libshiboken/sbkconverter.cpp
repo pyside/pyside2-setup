@@ -41,7 +41,8 @@ static SbkConverter* createConverterObject(PyTypeObject* type,
     converter->pointerToPython = pointerToPythonFunc;
     converter->copyToPython = copyToPythonFunc;
 
-    converter->toCppPointerConversion = std::make_pair(toCppPointerCheckFunc, toCppPointerConvFunc);
+    if (toCppPointerCheckFunc && toCppPointerConvFunc)
+        converter->toCppPointerConversion = std::make_pair(toCppPointerCheckFunc, toCppPointerConvFunc);
     converter->toCppConversions.clear();
 
     return converter;
@@ -58,6 +59,11 @@ SbkConverter* createConverter(SbkObjectType* type,
                                                     pointerToPythonFunc, copyToPythonFunc);
     type->d->converter = converter;
     return converter;
+}
+
+SbkConverter* createConverter(PyTypeObject* type, CppToPythonFunc toPythonFunc)
+{
+    return createConverterObject(type, 0, 0, 0, toPythonFunc);
 }
 
 void deleteConverter(SbkConverter* converter)
@@ -178,14 +184,25 @@ void pythonToCppPointer(SbkObjectType* type, PyObject* pyIn, void* cppOut)
     *((void**)cppOut) = (pyIn == Py_None) ? 0 : cppPointer((PyTypeObject*)type, (SbkObject*)pyIn);
 }
 
+static void _pythonToCppCopy(SbkConverter* converter, PyObject* pyIn, void* cppOut)
+{
+    assert(converter);
+    assert(pyIn);
+    assert(cppOut);
+    PythonToCppFunc toCpp = IsPythonToCppConvertible(converter, pyIn);
+    if (toCpp)
+        toCpp(pyIn, cppOut);
+}
+
 void pythonToCppCopy(SbkObjectType* type, PyObject* pyIn, void* cppOut)
 {
     assert(type);
-    assert(pyIn);
-    assert(cppOut);
-    PythonToCppFunc toCpp = IsPythonToCppConvertible(type->d->converter, pyIn);
-    if (toCpp)
-        toCpp(pyIn, cppOut);
+    _pythonToCppCopy(type->d->converter, pyIn, cppOut);
+}
+
+void pythonToCpp(SbkConverter* converter, PyObject* pyIn, void* cppOut)
+{
+    _pythonToCppCopy(converter, pyIn, cppOut);
 }
 
 bool isImplicitConversion(SbkObjectType* type, PythonToCppFunc toCppFunc)

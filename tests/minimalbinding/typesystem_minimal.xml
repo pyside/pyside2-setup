@@ -4,8 +4,17 @@
     <primitive-type name="int"/>
 
     <primitive-type name="MinBool" target-lang-api-name="PyBool" default-constructor="MinBool(false)">
-        <conversion-rule file="minbool_conversions.h"/>
         <include file-name="minbool.h" location="global"/>
+        <conversion-rule file="minbool_conversions.h">
+            <native-to-target>
+            return PyBool_FromLong(%in.value());
+            </native-to-target>
+            <target-to-native>
+                <add-conversion type="PyBool" check="PyBool_Check(%in)">
+                %out = %OUTTYPE(%in == Py_True);
+                </add-conversion>
+            </target-to-native>
+        </conversion-rule>
     </primitive-type>
 
     <container-type name="std::list" type="list">
@@ -20,4 +29,3 @@
     <value-type name="ListUser"/>
     <value-type name="MinBoolUser"/>
 </typesystem>
-

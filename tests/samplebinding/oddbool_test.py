@@ -62,6 +62,12 @@ class OddBoolTest(unittest.TestCase):
         self.assertTrue(obu.oddBool())
         obu = OddBoolUser(False)
         self.assertFalse(obu.oddBool())
+        cpx = complex(1.0, 0.0)
+        obu = OddBoolUser(cpx)
+        self.assertTrue(obu.oddBool())
+        cpx = complex(0.0, 0.0)
+        obu = OddBoolUser(cpx)
+        self.assertFalse(obu.oddBool())
 
 if __name__ == '__main__':
     unittest.main()

@@ -309,6 +309,9 @@ public:
     bool isValueTypeWithCopyConstructorOnly(const TypeEntry* type) const;
     bool isValueTypeWithCopyConstructorOnly(const AbstractMetaType* type) const;
 
+    /// Returns true if the type is a primitive but not a C++ primitive.
+    static bool isUserPrimitive(const TypeEntry* type);
+    static bool isUserPrimitive(const AbstractMetaType* type);
 
     /// Checks if an argument type should be dereferenced by the Python method wrapper before calling the C++ method.
     static bool shouldDereferenceArgumentPointer(const AbstractMetaArgument* arg);
@@ -316,6 +319,9 @@ public:
     static bool shouldDereferenceAbstractMetaTypePointer(const AbstractMetaType* metaType);
 
     static bool visibilityModifiedToPrivate(const AbstractMetaFunction* func);
+
+    QString converterObject(const AbstractMetaType* type);
+    QString converterObject(const TypeEntry* type);
 
     QString cpythonBaseName(const AbstractMetaClass* metaClass);
     QString cpythonBaseName(const TypeEntry* type);
@@ -404,6 +410,7 @@ public:
     /// Returns true if the generated code should use the "#define protected public" hack.
     bool avoidProtectedHack() const;
     QString cppApiVariableName(const QString& moduleName = QString()) const;
+    QString convertersVariableName(const QString& moduleName = QString()) const;
     /**
      *  Returns the type index variable name for a given class. If \p alternativeTemplateName is true
      *  and the class is a typedef for a template class instantiation, it will return an alternative name
@@ -489,6 +496,9 @@ protected:
     typedef QHash<const TypeEntry*, QList<const AbstractMetaClass*> > ExtendedConverterData;
     /// Returns all extended conversions for the current module.
     ExtendedConverterData getExtendedConverters() const;
+
+    /// Returns a list of converters for the non wrapper types of the current module.
+    QList<const CustomConversion*> getNonWrapperCustomConversions();
 
     /// Returns true if the Python wrapper for the received OverloadData must accept a list of arguments.
     static bool pythonFunctionWrapperUsesListOfArguments(const OverloadData& overloadData);

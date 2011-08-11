@@ -360,8 +360,28 @@ void HeaderGenerator::finishGeneration()
     macrosStream << "SBK_"+moduleName()+"_IDX_COUNT";
     macrosStream.setFieldWidth(0);
     macrosStream << ' ' << getMaxTypeIndex() << endl << endl;
-    macrosStream << "// This variable stores all python types exported by this module" << endl;
+    macrosStream << "// This variable stores all Python types exported by this module." << endl;
     macrosStream << "extern PyTypeObject** " << cppApiVariableName() << ';' << endl << endl;
+    macrosStream << "// This variable stores all type converters exported by this module." << endl;
+    macrosStream << "extern SbkConverter** " << convertersVariableName() << ';' << endl << endl;;
+
+    // TODO-CONVERTER ------------------------------------------------------------------------------
+    // Using a counter would not do, a fix must be made to APIExtractor's getTypeIndex().
+    macrosStream << "// Converter indices" << endl;
+    QList<const PrimitiveTypeEntry*> primitives = primitiveTypes();
+    int pCount = 0;
+    foreach (const PrimitiveTypeEntry* ptype, primitives) {
+        if (!ptype->generateCode() || !isUserPrimitive(ptype))
+            continue;
+        _writeTypeIndexDefineLine(macrosStream, getTypeIndexVariableName(ptype), pCount);
+        pCount++;
+    }
+    // Because on win32 the compiler will not accept a zero length array.
+    if (pCount == 0)
+        pCount++;
+    _writeTypeIndexDefineLine(macrosStream, QString("SBK_%1_CONVERTERS_IDX_COUNT").arg(moduleName()), pCount);
+    macrosStream << endl;
+    // TODO-CONVERTER ------------------------------------------------------------------------------
 
     macrosStream << "// Macros for type check" << endl;
     foreach (const AbstractMetaEnum* cppEnum, globalEnums) {

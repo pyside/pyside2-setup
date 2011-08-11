@@ -102,6 +102,14 @@ LIBSHIBOKEN_API SbkConverter* createConverter(SbkObjectType* type,
                                               CppToPythonFunc pointerToPythonFunc,
                                               CppToPythonFunc copyToPythonFunc = 0);
 
+/**
+ *  Creates a converter for a non wrapper type (primitive or container type).
+ *  \param type         Python type representing to the new converter.
+ *  \param toPythonFunc Function to convert a C++ object to a Python \p type.
+ *  \returns            A new type converter.
+ */
+LIBSHIBOKEN_API SbkConverter* createConverter(PyTypeObject* type, CppToPythonFunc toPythonFunc);
+
 LIBSHIBOKEN_API void deleteConverter(SbkConverter* converter);
 
 /**
@@ -186,6 +194,9 @@ LIBSHIBOKEN_API void pythonToCppPointer(SbkObjectType* type, PyObject* pyIn, voi
 
 /// Converts a Python object \p pyIn to C++ and copies the result in the C++ variable passed in \p cppOut.
 LIBSHIBOKEN_API void pythonToCppCopy(SbkObjectType* type, PyObject* pyIn, void* cppOut);
+
+/// Converts a Python object \p pyIn to C++, copying the result in the C++ variable passed in \p cppOut.
+LIBSHIBOKEN_API void pythonToCpp(SbkConverter* converter, PyObject* pyIn, void* cppOut);
 
 /**
  *  Helper function returned by generated convertible checking functions
