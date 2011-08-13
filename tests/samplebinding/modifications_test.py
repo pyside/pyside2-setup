@@ -154,5 +154,9 @@ class ModificationsTest(unittest.TestCase):
         self.assertEqual(obj, self.mods.getObject())
         self.assertEqual(obj.objectName(), 'MyObject')
 
+    def testInjectCodeWithConversionVariableForUserPrimitive(self):
+        self.assertTrue(Modifications.invertBoolean(False))
+        self.assertFalse(Modifications.invertBoolean(True))
+
 if __name__ == '__main__':
     unittest.main()

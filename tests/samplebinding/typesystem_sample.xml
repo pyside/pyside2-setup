@@ -742,6 +742,12 @@
           %PYARG_0 = Shiboken::makeTuple(%0, tmpObject);
           </inject-code>
         </modify-function>
+        <modify-function signature="passOddBool(OddBool)" rename="invertBoolean">
+          <inject-code class="target" position="beginning">
+          %RETURN_TYPE %0 = !%CPPSELF.%FUNCTION_NAME(%1);
+          %PYARG_0 = %CONVERTTOPYTHON[OddBool](%0);
+          </inject-code>
+        </modify-function>
     </object-type>
 
     <object-type name="AbstractModifications">

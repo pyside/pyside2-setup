@@ -26,6 +26,7 @@
 #include "libsamplemacros.h"
 #include <utility>
 #include "point.h"
+#include "oddbool.h"
 
 class ObjectType;
 
@@ -108,6 +109,9 @@ public:
     // Sets an ObjectType in the argument and returns true.
     bool nonConversionRuleForArgumentWithDefaultValue(ObjectType** object = 0);
     ObjectType* getObject() const { return m_object; }
+
+    // Inject code with a %CONVERTTOPYTHON that receives an user's primitive type.
+    static inline OddBool passOddBool(OddBool ob) { return ob; }
 
 private:
     ObjectType* m_object;
