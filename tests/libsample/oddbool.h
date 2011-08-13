@@ -49,6 +49,7 @@ class OddBoolUser
 {
 public:
     OddBoolUser() : m_oddbool(OddBool(false)) {}
+    OddBoolUser(const OddBool& oddBool) : m_oddbool(oddBool) {}
     virtual ~OddBoolUser() {}
 
     inline OddBool oddBool() { return m_oddbool; }
@@ -62,6 +63,11 @@ public:
     inline OddBool callInvertedOddBool()
     {
         return invertedOddBool();
+    }
+
+    static inline OddBool getOddBool(const OddBoolUser& oddBoolUser)
+    {
+        return oddBoolUser.m_oddbool;
     }
 
 private:

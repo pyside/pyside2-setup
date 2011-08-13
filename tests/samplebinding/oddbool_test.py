@@ -3,7 +3,7 @@
 #
 # This file is part of the Shiboken Python Bindings Generator project.
 #
-# Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (C) 2009-2011 Nokia Corporation and/or its subsidiary(-ies).
 #
 # Contact: PySide team <contact@pyside.org>
 #
@@ -24,9 +24,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-'''Test cases for ...'''
+'''Test cases for OddBool user's primitive type conversion.'''
 
-import sys
 import unittest
 
 from sample import OddBoolUser
@@ -58,6 +57,11 @@ class OddBoolTest(unittest.TestCase):
         dobu = DerivedOddBoolUser()
         self.assertEqual(dobu.invertedOddBool(), True)
 
+    def testImplicitConversionWithUsersPrimitiveType(self):
+        obu = OddBoolUser(True)
+        self.assertTrue(obu.oddBool())
+        obu = OddBoolUser(False)
+        self.assertFalse(obu.oddBool())
+
 if __name__ == '__main__':
     unittest.main()
-
