@@ -183,12 +183,14 @@ inline const Size operator/(const Size& s, double div)
 }
 
 typedef double real;
+typedef unsigned short ushort;
 class LIBSAMPLE_API SizeF
 {
 public:
     SizeF(real width, real height) : m_width(width), m_height(height) {}
     real width() { return m_width; }
     real height() { return m_height; }
+    static inline ushort passTypedefOfUnsignedShort(ushort value) { return value; }
 private:
     real m_width;
     real m_height;

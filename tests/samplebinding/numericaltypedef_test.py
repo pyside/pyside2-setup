@@ -42,5 +42,10 @@ class NumericalTypedefTest(unittest.TestCase):
         self.assertEqual(size.width(), float(width))
         self.assertEqual(size.height(), float(height))
 
+    def testNumericalTypedefOfUnsignedShort(self):
+        self.assertEqual(SizeF.passTypedefOfUnsignedShort(123), 123)
+        self.assertEqual(SizeF.passTypedefOfUnsignedShort(321), 321)
+        self.assertNotEqual(SizeF.passTypedefOfUnsignedShort(123), 0)
+
 if __name__ == '__main__':
     unittest.main()

@@ -8,6 +8,8 @@
     <primitive-type name="real"/>
     <primitive-type name="int"/>
     <primitive-type name="short"/>
+    <primitive-type name="unsigned short"/>
+    <primitive-type name="ushort"/>
     <primitive-type name="unsigned int" />
     <primitive-type name="signed int" />
     <primitive-type name="char"/>
