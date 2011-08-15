@@ -2138,7 +2138,9 @@ bool TypeEntry::isCppPrimitive() const
     if (m_name.contains(' ') || m_type == VoidType)
         return true;
     // Keep this sorted!!
-    static const char* cppTypes[] = { "bool", "char", "double", "float", "int", "long", "long long", "short", "wchar_t"};
+    static const char* cppTypes[] = { "bool", "char", "double", "float", "int", "long", "long long", "short",
+                                      "unsigned char", "unsigned double", "unsigned float", "unsigned int",
+                                      "unsigned long", "unsigned long long", "unsigned short", "wchar_t" };
     const int N = sizeof(cppTypes)/sizeof(char*);
 
     PrimitiveTypeEntry* aliasedType = ((PrimitiveTypeEntry*)this)->basicAliasedTypeEntry();

@@ -31,6 +31,7 @@ class TestNumericalTypedef : public QObject
     Q_OBJECT
     private slots:
         void testNumericalTypedef();
+        void testUnsignedNumericalTypedef();
 };
 
 #endif
