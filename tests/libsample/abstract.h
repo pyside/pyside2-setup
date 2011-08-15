@@ -25,6 +25,7 @@
 
 #include "libsamplemacros.h"
 #include "point.h"
+#include "complex.h"
 
 class ObjectType;
 
@@ -57,6 +58,7 @@ public:
 
     static const int staticPrimitiveField;
     int primitiveField;
+    Complex userPrimitiveField;
     Point valueTypeField;
     ObjectType* objectTypeField;
 

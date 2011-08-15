@@ -54,6 +54,21 @@ class TestAccessingCppFields(unittest.TestCase):
         # attribution with invalid type
         self.assertRaises(TypeError, lambda : setattr(d, 'primitiveField', None))
 
+    def testAccessingUsersPrimitiveTypeField(self):
+        '''Reads and writes an user's primitive type (in this case an 'Complex') field.'''
+        d = Derived()
+        self.assertEqual(type(d.userPrimitiveField), complex)
+
+        # attribution
+        old_value = d.userPrimitiveField
+        new_value = complex(1.1, 2.2)
+        d.userPrimitiveField = new_value
+        self.assertEqual(d.userPrimitiveField, new_value)
+        self.assertNotEqual(d.userPrimitiveField, old_value)
+
+        # attribution with invalid type
+        self.assertRaises(TypeError, lambda : setattr(d, 'userPrimitiveField', None))
+
     def testAccessingValueTypeField(self):
         '''Reads and writes a value type (in this case a 'Point') field.'''
         d = Derived()
@@ -70,8 +85,6 @@ class TestAccessingCppFields(unittest.TestCase):
         d.valueTypeField.setY(20)
         self.assertEqual(d.valueTypeField.x(), 10)
         self.assertEqual(d.valueTypeField.y(), 20)
-
-
 
         # attribution with invalid type
         self.assertRaises(TypeError, lambda : setattr(d, 'valueTypeField', 123))
@@ -129,4 +142,3 @@ class TestAccessingCppFields(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
