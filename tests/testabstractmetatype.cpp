@@ -38,7 +38,7 @@ void TestAbstractMetaType::testConstCharPtrType()
     AbstractMetaType* rtype = func->type();
     // Test properties of const char*
     QVERIFY(rtype);
-    QCOMPARE(rtype->package(), QString());
+    QCOMPARE(rtype->package(), QString("Foo"));
     QCOMPARE(rtype->name(), QString("char"));
     QVERIFY(rtype->isConstant());
     QVERIFY(!rtype->isArray());
@@ -107,7 +107,7 @@ void TestAbstractMetaType::testCharType()
     AbstractMetaType* rtype = func->type();
     // Test properties of const char*
     QVERIFY(rtype);
-    QCOMPARE(rtype->package(), QString());
+    QCOMPARE(rtype->package(), QString("Foo"));
     QCOMPARE(rtype->name(), QString("char"));
     QVERIFY(!rtype->isConstant());
     QVERIFY(!rtype->isArray());

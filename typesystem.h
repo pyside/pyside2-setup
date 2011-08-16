@@ -1142,6 +1142,8 @@ public:
         m_preferredTargetLangType = b;
     }
 
+    void setTargetLangPackage(const QString& package);
+    QString targetLangPackage() const;
 private:
     QString m_targetLangName;
     QString m_targetLangApiName;

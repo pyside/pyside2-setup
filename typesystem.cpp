@@ -568,6 +568,7 @@ bool Handler::startElement(const QString &, const QString &n,
             type->setCodeGeneration(m_generate);
             type->setTargetLangName(targetLangName);
             type->setTargetLangApiName(targetLangApiName);
+            type->setTargetLangPackage(m_defaultPackage);
             type->setDefaultConstructor(defaultConstructor);
 
             bool preferred;
@@ -1725,6 +1726,20 @@ PrimitiveTypeEntry* PrimitiveTypeEntry::basicAliasedTypeEntry() const
         return m_aliasedTypeEntry;
 }
 
+typedef QHash<const PrimitiveTypeEntry*, QString> PrimitiveTypeEntryTargetLangPackageMap;
+Q_GLOBAL_STATIC(PrimitiveTypeEntryTargetLangPackageMap, primitiveTypeEntryTargetLangPackages);
+
+void PrimitiveTypeEntry::setTargetLangPackage(const QString& package)
+{
+    primitiveTypeEntryTargetLangPackages()->insert(this, package);
+}
+QString PrimitiveTypeEntry::targetLangPackage() const
+{
+    if (!primitiveTypeEntryTargetLangPackages()->contains(this))
+        return this->::TypeEntry::targetLangPackage();
+    return primitiveTypeEntryTargetLangPackages()->value(this);
+}
+
 CodeSnipList TypeEntry::codeSnips() const
 {
     return m_codeSnips;
@@ -1742,13 +1757,11 @@ QString Modification::accessModifierString() const
 FunctionModificationList ComplexTypeEntry::functionModifications(const QString &signature) const
 {
     FunctionModificationList lst;
-    TypeDatabase *td = TypeDatabase::instance();
     for (int i = 0; i < m_functionMods.count(); ++i) {
         const FunctionModification &mod = m_functionMods.at(i);
         if (mod.signature == signature)
             lst << mod;
     }
-
     return lst;
 }
 
