@@ -153,7 +153,7 @@
         <add-function signature="passReferenceToObjectType(ObjectType*)" return-type="int">
             <inject-code>
             // The dot in "%1." must be replaced with a "->" by the generator.
-            double %0 = %1.objectName().size();
+            %RETURN_TYPE %0 = %1.objectName().size();
             %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
             </inject-code>
         </add-function>

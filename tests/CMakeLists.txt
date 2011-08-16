@@ -25,6 +25,7 @@ else()
                          samplebinding/*_test.py
                          otherbinding/*_test.py)
 endif()
+list(SORT TEST_FILES)
 
 set(test_blacklist "")
 

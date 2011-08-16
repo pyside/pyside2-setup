@@ -40,3 +40,14 @@ operator*(const Point& p, const Number& n)
     return Point(p.x() * n.value(), p.y() * n.value());
 }
 
+Complex
+Number::toComplex() const
+{
+    return Complex(m_value);
+}
+
+Number
+Number::fromComplex(Complex cpx)
+{
+    return Number(cpx.real());
+}

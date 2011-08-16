@@ -26,6 +26,7 @@
 #include "libothermacros.h"
 #include "str.h"
 #include "point.h"
+#include "complex.h"
 
 class LIBOTHER_API Number
 {
@@ -38,6 +39,9 @@ public:
 
     friend LIBOTHER_API Point operator*(const Point&, const Number&);
 
+    Complex toComplex() const;
+    static Number fromComplex(Complex cpx);
+
 private:
     int m_value;
 };
@@ -45,4 +49,3 @@ private:
 LIBOTHER_API Point operator*(const Point&, const Number&);
 
 #endif // NUMBER_H
-
