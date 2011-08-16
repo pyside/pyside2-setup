@@ -26,8 +26,34 @@
 
 #include "sbkdbg.h"
 
+static SbkConverter** PrimitiveTypeConverters;
+
 namespace Shiboken {
 namespace Conversions {
+
+void init()
+{
+    static SbkConverter* primitiveTypeConverters[] = {
+        Primitive<PY_LONG_LONG>::createConverter(),
+        Primitive<bool>::createConverter(),
+        Primitive<char>::createConverter(),
+        Primitive<const char*>::createConverter(),
+        Primitive<double>::createConverter(),
+        Primitive<float>::createConverter(),
+        Primitive<int>::createConverter(),
+        Primitive<long>::createConverter(),
+        Primitive<short>::createConverter(),
+        Primitive<signed char>::createConverter(),
+        Primitive<std::string>::createConverter(),
+        Primitive<unsigned PY_LONG_LONG>::createConverter(),
+        Primitive<unsigned char>::createConverter(),
+        Primitive<unsigned int>::createConverter(),
+        Primitive<unsigned long>::createConverter(),
+        Primitive<unsigned short>::createConverter(),
+        Primitive<void*>::createConverter()
+    };
+    PrimitiveTypeConverters = primitiveTypeConverters;
+}
 
 static SbkConverter* createConverterObject(PyTypeObject* type,
                                            PythonToCppFunc toCppPointerConvFunc,
@@ -113,7 +139,6 @@ PyObject* referenceToPython(SbkObjectType* type, const void* cppIn)
 
 static inline PyObject* CopyCppToPython(SbkConverter* converter, const void* cppIn)
 {
-    assert(cppIn);
     return converter->copyToPython(cppIn);
 }
 PyObject* copyToPython(SbkObjectType* type, const void* cppIn)
@@ -226,6 +251,11 @@ bool isImplicitConversion(SbkObjectType* type, PythonToCppFunc toCppFunc)
     // caller knows what he's doing.
     ToCppConversionList::iterator conv = type->d->converter->toCppConversions.begin();
     return toCppFunc != (*conv).second;
+}
+
+SbkConverter* primitiveTypeConverter(int index)
+{
+    return PrimitiveTypeConverters[index];
 }
 
 } } // namespace Shiboken::Conversions

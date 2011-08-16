@@ -595,7 +595,7 @@ void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* ty
     s << '{' << endl;
     s << INDENT << "PythonToCppFunc toCpp = Shiboken::Conversions::isPythonToCppValueConvertible((SbkObjectType*)";
     s << cpythonTypeNameExt(type) << ", pyIn);" << endl;
-    s << INDENT << typeName << " cppOut = ";
+    s << INDENT << typeName << " cppOut";
     writeMinimalConstructorExpression(s, type);
     s << ';' << endl;
     s << INDENT << "toCpp(pyIn, &cppOut);" << endl;

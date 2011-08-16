@@ -36,6 +36,8 @@
 #define SbkObject_TypeCheck(tp, ob) \
         (Py_TYPE(ob) == (tp) || PyType_IsSubtype(Py_TYPE(ob), (tp)))
 
+#define SbkString_Check(pyObj) (pyObj == Py_None || PyString_Check(pyObj))
+
 extern "C"
 {
 
@@ -82,7 +84,6 @@ typedef void (*PythonToCppFunc)(PyObject*,void*);
 typedef PythonToCppFunc (*IsConvertibleToCppFunc)(PyObject*);
 
 } // extern "C"
-
 
 namespace Shiboken {
 namespace Conversions {
@@ -210,6 +211,47 @@ LIBSHIBOKEN_API void nonePythonToCppNullPtr(PyObject*, void* cppOut);
  *  from Python, or another created through implicit conversion.
  */
 LIBSHIBOKEN_API bool isImplicitConversion(SbkObjectType* type, PythonToCppFunc toCpp);
+
+/// Returns the converter for a primitive type.
+LIBSHIBOKEN_API SbkConverter* primitiveTypeConverter(int index);
+
+#define SBK_PY_LONG_LONG_IDX            0
+#define SBK_BOOL_IDX                    1
+#define SBK_CHAR_IDX                    2
+#define SBK_CONSTCHARPTR_IDX            3
+#define SBK_DOUBLE_IDX                  4
+#define SBK_FLOAT_IDX                   5
+#define SBK_INT_IDX                     6
+#define SBK_SIGNEDINT_IDX               6
+#define SBK_LONG_IDX                    7
+#define SBK_SHORT_IDX                   8
+#define SBK_SIGNEDCHAR_IDX              9
+#define SBK_STD_STRING_IDX             10
+#define SBK_UNSIGNEDPY_LONG_LONG_IDX   11
+#define SBK_UNSIGNEDCHAR_IDX           12
+#define SBK_UNSIGNEDINT_IDX            13
+#define SBK_UNSIGNEDLONG_IDX           14
+#define SBK_UNSIGNEDSHORT_IDX          15
+#define SBK_VOIDPTR_IDX                16
+
+template<typename T> SbkConverter* PrimitiveTypeConverter() { return 0; }
+template<> inline SbkConverter* PrimitiveTypeConverter<PY_LONG_LONG>() { return primitiveTypeConverter(SBK_PY_LONG_LONG_IDX); }
+template<> inline SbkConverter* PrimitiveTypeConverter<bool>() { return primitiveTypeConverter(SBK_BOOL_IDX); }
+template<> inline SbkConverter* PrimitiveTypeConverter<char>() { return primitiveTypeConverter(SBK_CHAR_IDX); }
+template<> inline SbkConverter* PrimitiveTypeConverter<const char*>() { return primitiveTypeConverter(SBK_CONSTCHARPTR_IDX); }
+template<> inline SbkConverter* PrimitiveTypeConverter<double>() { return primitiveTypeConverter(SBK_DOUBLE_IDX); }
+template<> inline SbkConverter* PrimitiveTypeConverter<float>() { return primitiveTypeConverter(SBK_FLOAT_IDX); }
+template<> inline SbkConverter* PrimitiveTypeConverter<int>() { return primitiveTypeConverter(SBK_INT_IDX); }
+template<> inline SbkConverter* PrimitiveTypeConverter<long>() { return primitiveTypeConverter(SBK_LONG_IDX); }
+template<> inline SbkConverter* PrimitiveTypeConverter<short>() { return primitiveTypeConverter(SBK_SHORT_IDX); }
+template<> inline SbkConverter* PrimitiveTypeConverter<signed char>() { return primitiveTypeConverter(SBK_SIGNEDCHAR_IDX); }
+template<> inline SbkConverter* PrimitiveTypeConverter<std::string>() { return primitiveTypeConverter(SBK_STD_STRING_IDX); }
+template<> inline SbkConverter* PrimitiveTypeConverter<unsigned PY_LONG_LONG>() { return primitiveTypeConverter(SBK_UNSIGNEDPY_LONG_LONG_IDX); }
+template<> inline SbkConverter* PrimitiveTypeConverter<unsigned char>() { return primitiveTypeConverter(SBK_UNSIGNEDCHAR_IDX); }
+template<> inline SbkConverter* PrimitiveTypeConverter<unsigned int>() { return primitiveTypeConverter(SBK_UNSIGNEDINT_IDX); }
+template<> inline SbkConverter* PrimitiveTypeConverter<unsigned long>() { return primitiveTypeConverter(SBK_UNSIGNEDLONG_IDX); }
+template<> inline SbkConverter* PrimitiveTypeConverter<unsigned short>() { return primitiveTypeConverter(SBK_UNSIGNEDSHORT_IDX); }
+template<> inline SbkConverter* PrimitiveTypeConverter<void*>() { return primitiveTypeConverter(SBK_VOIDPTR_IDX); }
 
 } } // namespace Shiboken::Conversions
 

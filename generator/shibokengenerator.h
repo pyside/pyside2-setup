@@ -289,6 +289,7 @@ public:
     static bool isPyInt(const TypeEntry* type);
     static bool isPyInt(const AbstractMetaType* type);
     static bool isCString(const AbstractMetaType* type);
+    static bool isVoidPointer(const AbstractMetaType* type);
     static bool isPairContainer(const AbstractMetaType* type);
 
     /**
@@ -312,6 +313,14 @@ public:
     /// Returns true if the type is a primitive but not a C++ primitive.
     static bool isUserPrimitive(const TypeEntry* type);
     static bool isUserPrimitive(const AbstractMetaType* type);
+
+    /// Returns true if the type is a C++ primitive, a void*, a const char*, or a std::string.
+    static bool isCppPrimitive(const TypeEntry* type);
+    static bool isCppPrimitive(const AbstractMetaType* type);
+
+    /// Returns true if the type is a C++ integral primitive, i.e. bool, char, int, long, and their unsigned counterparts.
+    static bool isCppIntegralPrimitive(const TypeEntry* type);
+    static bool isCppIntegralPrimitive(const AbstractMetaType* type);
 
     /// Checks if an argument type should be dereferenced by the Python method wrapper before calling the C++ method.
     static bool shouldDereferenceArgumentPointer(const AbstractMetaArgument* arg);
