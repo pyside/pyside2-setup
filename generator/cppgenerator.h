@@ -113,8 +113,8 @@ private:
 
     /// Writes the conversion rule for arguments of regular and virtual methods.
     void writeConversionRule(QTextStream& s, const AbstractMetaFunction* func, TypeSystem::Language language);
-    /// Writes the conversion rule for the return value of a virtual method.
-    void writeConversionRule(QTextStream& s, const AbstractMetaFunction* func, const QString& outputVar);
+    /// Writes the conversion rule for the return value of a method.
+    void writeConversionRule(QTextStream& s, const AbstractMetaFunction* func, TypeSystem::Language language, const QString& outputVar);
 
     /**
      *   Set the Python method wrapper return value variable to Py_None if

@@ -33,9 +33,15 @@ from sample import Modifications, Point, ByteArray
 class ExtModifications(Modifications):
     def __init__(self):
         Modifications.__init__(self)
+        self.multiplier = 3.0
+        self.increment = 10.0
 
     def name(self):
         return 'ExtModifications'
+
+    def differenceOfPointCoordinates(self, point):
+        ok, res = Modifications.differenceOfPointCoordinates(self, point)
+        return ok, res * self.multiplier + self.increment
 
 
 class ModificationsTest(unittest.TestCase):
@@ -157,6 +163,57 @@ class ModificationsTest(unittest.TestCase):
     def testInjectCodeWithConversionVariableForUserPrimitive(self):
         self.assertTrue(Modifications.invertBoolean(False))
         self.assertFalse(Modifications.invertBoolean(True))
+
+    def testConversionRuleForReturnType(self):
+        x, y = 11, 2
+        diff = float(abs(x - y))
+        point = Point(x, y)
+
+        ok, res = self.mods.differenceOfPointCoordinates(point)
+        self.assertTrue(isinstance(ok, bool))
+        self.assertTrue(isinstance(res, float))
+        self.assertEqual(res, diff)
+
+        ok, res = self.mods.callDifferenceOfPointCoordinates(point)
+        self.assertTrue(isinstance(ok, bool))
+        self.assertTrue(isinstance(res, float))
+        self.assertEqual(res, diff)
+
+        ok, res = self.mods.differenceOfPointCoordinates(None)
+        self.assertTrue(isinstance(ok, bool))
+        self.assertTrue(isinstance(res, float))
+        self.assertEqual(res, 0.0)
+
+        ok, res = self.mods.callDifferenceOfPointCoordinates(None)
+        self.assertTrue(isinstance(ok, bool))
+        self.assertTrue(isinstance(res, float))
+        self.assertEqual(res, 0.0)
+
+    def testConversionRuleForReturnTypeOnExtendedClass(self):
+        x, y = 11, 2
+        diff = float(abs(x - y))
+        point = Point(x, y)
+        em = ExtModifications()
+
+        ok, res = em.differenceOfPointCoordinates(point)
+        self.assertTrue(isinstance(ok, bool))
+        self.assertTrue(isinstance(res, float))
+        self.assertEqual(res, diff * em.multiplier + em.increment)
+
+        ok, res = em.callDifferenceOfPointCoordinates(point)
+        self.assertTrue(isinstance(ok, bool))
+        self.assertTrue(isinstance(res, float))
+        self.assertEqual(res, diff * em.multiplier + em.increment)
+
+        ok, res = em.differenceOfPointCoordinates(None)
+        self.assertTrue(isinstance(ok, bool))
+        self.assertTrue(isinstance(res, float))
+        self.assertEqual(res, em.increment)
+
+        ok, res = em.callDifferenceOfPointCoordinates(None)
+        self.assertTrue(isinstance(ok, bool))
+        self.assertTrue(isinstance(res, float))
+        self.assertEqual(res, em.increment)
 
 if __name__ == '__main__':
     unittest.main()

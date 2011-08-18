@@ -122,6 +122,20 @@ Modifications::sumPointCoordinates(const Point* point)
     return point->x() + point->y();
 }
 
+double
+Modifications::differenceOfPointCoordinates(const Point* pt, bool* ok)
+{
+    if (!pt) {
+        *ok = false;
+        return 0.0;
+    }
+    *ok = true;
+    double result = pt->x() - pt->y();
+    if (result < 0)
+        result = result * -1.0;
+    return result;
+}
+
 bool
 Modifications::nonConversionRuleForArgumentWithDefaultValue(ObjectType** object)
 {

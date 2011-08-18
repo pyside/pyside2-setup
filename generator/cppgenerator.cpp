@@ -814,7 +814,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
 
             if (!func->conversionRule(TypeSystem::NativeCode, 0).isEmpty()) {
                 // Has conversion rule.
-                writeConversionRule(s, func, CPP_RETURN_VAR);
+                writeConversionRule(s, func, TypeSystem::NativeCode, CPP_RETURN_VAR);
             } else if (!injectedCodeHasReturnValueAttribution(func, TypeSystem::NativeCode)) {
                 writePythonToCppTypeConversion(s, func->type(), PYTHON_RETURN_VAR, CPP_RETURN_VAR, func->implementingClass());
             }
@@ -1617,12 +1617,12 @@ void CppGenerator::writeConversionRule(QTextStream& s, const AbstractMetaFunctio
     writeCodeSnips(s, snippets, CodeSnip::Beginning, TypeSystem::TargetLangCode, func);
 }
 
-void CppGenerator::writeConversionRule(QTextStream& s, const AbstractMetaFunction* func, const QString& outputVar)
+void CppGenerator::writeConversionRule(QTextStream& s, const AbstractMetaFunction* func, TypeSystem::Language language, const QString& outputVar)
 {
     CodeSnipList snippets;
-    QString rule = func->conversionRule(TypeSystem::NativeCode, 0);
-    addConversionRuleCodeSnippet(snippets, rule, TypeSystem::NativeCode, TypeSystem::NativeCode, outputVar);
-    writeCodeSnips(s, snippets, CodeSnip::Any, TypeSystem::NativeCode, func);
+    QString rule = func->conversionRule(language, 0);
+    addConversionRuleCodeSnippet(snippets, rule, language, language, outputVar);
+    writeCodeSnips(s, snippets, CodeSnip::Any, language, func);
 }
 
 void CppGenerator::writeNoneReturn(QTextStream& s, const AbstractMetaFunction* func, bool thereIsReturnValue)
@@ -2217,7 +2217,9 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             s << methodCall << ';' << endl;
             s << INDENT << END_ALLOW_THREADS << endl;
 
-            if (!isCtor && !func->isInplaceOperator() && func->type()
+            if (!func->conversionRule(TypeSystem::TargetLangCode, 0).isEmpty()) {
+                writeConversionRule(s, func, TypeSystem::TargetLangCode, PYTHON_RETURN_VAR);
+            } else if (!isCtor && !func->isInplaceOperator() && func->type()
                 && !injectedCodeHasReturnValueAttribution(func, TypeSystem::TargetLangCode)) {
                 s << INDENT << PYTHON_RETURN_VAR " = ";
                 writeToPythonConversion(s, func->type(), func->ownerClass(), CPP_RETURN_VAR);

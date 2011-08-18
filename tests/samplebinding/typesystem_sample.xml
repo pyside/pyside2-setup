@@ -731,6 +731,49 @@
                 <no-null-pointer/>
             </modify-argument>
         </modify-function>
+        <template name="differenceOfPointCoordinates_arg2">
+        bool _status;
+        bool* %2 = &amp;_status;
+        </template>
+        <template name="differenceOfPointCoordinates_returnTarget">
+        %PYARG_0 = PyTuple_New(2);
+        PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[bool](*%2));
+        PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
+        </template>
+        <modify-function signature="differenceOfPointCoordinates(const Point*, bool*)">
+            <modify-argument index="2">
+                <remove-argument/>
+                <conversion-rule class="native">
+                    <insert-template name="differenceOfPointCoordinates_arg2"/>
+                </conversion-rule>
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PySequence"/>
+                <conversion-rule class="native">
+                Shiboken::AutoDecRef _py_ok_(PySequence_GetItem(%PYARG_0, 0));
+                Shiboken::AutoDecRef _py_ret_(PySequence_GetItem(%PYARG_0, 1));
+                *%2 = %CONVERTTOCPP[bool](_py_ok_);
+                %RETURN_TYPE %out = %CONVERTTOCPP[%RETURN_TYPE](_py_ret_);
+                </conversion-rule>
+                <conversion-rule class="target">
+                    <insert-template name="differenceOfPointCoordinates_returnTarget"/>
+                </conversion-rule>
+            </modify-argument>
+        </modify-function>
+        <modify-function signature="callDifferenceOfPointCoordinates(const Point*, bool*)">
+            <modify-argument index="2">
+                <remove-argument/>
+                <conversion-rule class="native">
+                    <insert-template name="differenceOfPointCoordinates_arg2"/>
+                </conversion-rule>
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PySequence"/>
+                <conversion-rule class="target">
+                    <insert-template name="differenceOfPointCoordinates_returnTarget"/>
+                </conversion-rule>
+            </modify-argument>
+        </modify-function>
         <modify-function signature="nonConversionRuleForArgumentWithDefaultValue(ObjectType**)">
           <modify-argument index="1">
             <remove-argument/>
