@@ -92,8 +92,10 @@ public:
 protected:
     virtual const char* className() { return "Abstract"; }
 
+    // Protected bit-field structure member.
+    unsigned int bitField: 1;
+
 private:
     int m_id;
 };
 #endif // ABSTRACT_H
-

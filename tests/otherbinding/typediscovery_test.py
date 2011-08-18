@@ -28,8 +28,8 @@
 
 import unittest
 
-from sample import *
-from other import *
+from sample import Abstract, Base1, Derived, MDerived1, MDerived3, SonOfMDerived1
+from other import OtherMultipleDerived
 
 class TypeDiscoveryTest(unittest.TestCase):
 
@@ -57,4 +57,3 @@ class TypeDiscoveryTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

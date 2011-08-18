@@ -14,10 +14,8 @@ class TestModuleReloading(unittest.TestCase):
 
     def testModuleReloading(self):
         '''Test module reloading with on-the-fly modifications.'''
-
         import test_module
-
-	for i in range(3):
+        for i in range(3):
             oldObject = test_module.obj
             self.assertTrue(oldObject is test_module.obj)
             reload(test_module)
@@ -25,5 +23,3 @@ class TestModuleReloading(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-

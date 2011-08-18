@@ -33,6 +33,7 @@ Abstract::Abstract(int id) : m_id(id)
     primitiveField = 123;
     valueTypeField = Point(12, 34);
     objectTypeField = 0;
+    bitField = 0;
 }
 
 Abstract::~Abstract()

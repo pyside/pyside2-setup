@@ -140,5 +140,24 @@ class TestAccessingCppFields(unittest.TestCase):
     def testStaticField(self):
         self.assertEqual(Derived.staticPrimitiveField, 0)
 
+    def testAccessingUnsignedIntBitField(self):
+        d = Derived()
+
+        # attribution
+        old_value = d.bitField
+        new_value = 1
+        d.bitField= new_value
+        self.assertEqual(d.bitField, new_value)
+        self.assertNotEqual(d.bitField, old_value)
+
+        # attribution with a convertible type
+        value = 1.2
+        d.bitField = value
+        self.assertEqual(d.bitField, int(value))
+
+        # attribution with invalid type
+        self.assertRaises(TypeError, lambda : setattr(d, 'bitField', None))
+
+
 if __name__ == '__main__':
     unittest.main()
