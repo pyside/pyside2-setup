@@ -178,10 +178,6 @@ void CppGenerator::writeRegisterType(QTextStream& s, const AbstractMetaEnum* met
     } else  {
         fullName = metaEnum->name();
     }
-    s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<int>(\"" << fullName << "\");\n";
-    if (!shortName.isEmpty())
-        s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver<int>(\"" << shortName << "\");\n";
-
 }
 
 void CppGenerator::writeToPythonFunction(QTextStream& s, const AbstractMetaClass* metaClass)

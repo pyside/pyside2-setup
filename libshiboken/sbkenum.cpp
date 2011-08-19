@@ -27,6 +27,7 @@
 #include <list>
 #include "sbkdbg.h"
 #include "autodecref.h"
+#include "typeresolver.h"
 
 extern "C"
 {
@@ -176,7 +177,7 @@ PyObject* getEnumItemFromValue(PyTypeObject* enumType, long itemValue)
     return 0;
 }
 
-static PyTypeObject* createEnum(const char* fullName, const char* cppName, PyTypeObject* flagsType)
+static PyTypeObject* createEnum(const char* fullName, const char* cppName, const char* shortName, PyTypeObject* flagsType)
 {
     PyTypeObject* enumType = newTypeWithName(fullName, cppName);
     if (flagsType) {
@@ -186,34 +187,31 @@ static PyTypeObject* createEnum(const char* fullName, const char* cppName, PyTyp
     }
     if (PyType_Ready(enumType) < 0)
         return 0;
+    Shiboken::TypeResolver::createValueTypeResolver<int>(cppName);
+    if (shortName)
+        Shiboken::TypeResolver::createValueTypeResolver<int>(shortName);
     return enumType;
 }
 
 PyTypeObject* createGlobalEnum(PyObject* module, const char* name, const char* fullName, const char* cppName, PyTypeObject* flagsType)
 {
-    PyTypeObject* enumType = createEnum(fullName, cppName, flagsType);
-    if (enumType) {
-        if (PyModule_AddObject(module, name, (PyObject*)enumType) < 0)
-            return 0;
-    }
-    if (flagsType) {
-        if (PyModule_AddObject(module, flagsType->tp_name, (PyObject*)flagsType) < 0)
-            return 0;
-    }
+    PyTypeObject* enumType = createEnum(fullName, cppName, name, flagsType);
+    Shiboken::TypeResolver::createValueTypeResolver<int>("Qt::WindowType");
+    Shiboken::TypeResolver::createValueTypeResolver<int>("WindowType");
+    if (enumType && PyModule_AddObject(module, name, (PyObject*)enumType) < 0)
+        return 0;
+    if (flagsType && PyModule_AddObject(module, flagsType->tp_name, (PyObject*)flagsType) < 0)
+        return 0;
     return enumType;
 }
 
 PyTypeObject* createScopedEnum(SbkObjectType* scope, const char* name, const char* fullName, const char* cppName, PyTypeObject* flagsType)
 {
-    PyTypeObject* enumType = createEnum(fullName, cppName, flagsType);
-    if (enumType) {
-        if (PyDict_SetItemString(scope->super.ht_type.tp_dict, name, (PyObject*)enumType) < 0)
-            return 0;
-    }
-    if (flagsType) {
-        if (PyDict_SetItemString(scope->super.ht_type.tp_dict, flagsType->tp_name, (PyObject*)flagsType) < 0)
-            return 0;
-    }
+    PyTypeObject* enumType = createEnum(fullName, cppName, name, flagsType);
+    if (enumType && PyDict_SetItemString(scope->super.ht_type.tp_dict, name, (PyObject*)enumType) < 0)
+       return 0;
+    if (flagsType && PyDict_SetItemString(scope->super.ht_type.tp_dict, flagsType->tp_name, (PyObject*)flagsType) < 0)
+       return 0;
     return enumType;
 }
 
