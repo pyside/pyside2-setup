@@ -144,26 +144,40 @@ QList<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(con
     return results.values();
 }
 
+static QString typeResolverString(const QString& type, QString typeName = QString(), bool isObject = false)
+{
+    if (typeName.isEmpty())
+        typeName = QString("\"%1\"").arg(type);
+    else if (!typeName.startsWith("typeid("))
+        typeName = QString("\"%1\"").arg(typeName);
+    return QString("Shiboken::TypeResolver::create%1TypeResolver< %2 >(%3)")
+              .arg(isObject ? "Object" : "Value")
+              .arg(type)
+              .arg(typeName);
+}
+
 void CppGenerator::writeRegisterType(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     QString typeName = metaClass->qualifiedCppName();
+    QString cppTypeName = QString("::%1").arg(typeName);
     QString reducedName = reduceTypeName(metaClass);
 
     if (!isObjectType(metaClass)) {
-        s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver< ::" << typeName << " >" << "(\"" << typeName << "\");\n";
+        s << INDENT << typeResolverString(cppTypeName, typeName) << ';' << endl;
         if (!reducedName.isEmpty())
-            s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver< ::" << typeName << " >" << "(\"" << reducedName << "\");\n";
+            s << INDENT << typeResolverString(cppTypeName, reducedName) << ';' << endl;
     }
 
-    s << INDENT << "Shiboken::TypeResolver::createObjectTypeResolver< ::" << typeName << " >" << "(\"" << typeName << "*\");\n";
+    s << INDENT << typeResolverString(cppTypeName, typeName+'*', true) << ';' << endl;
     if (!reducedName.isEmpty())
-        s << INDENT << "Shiboken::TypeResolver::createObjectTypeResolver< ::" << typeName << " >" << "(\"" << reducedName << "*\");\n";
-    QString functionSufix = (isObjectType(metaClass) ? "Object" : "Value");
-    s << INDENT << "Shiboken::TypeResolver::create" << functionSufix;
-    s << "TypeResolver< ::" << typeName << " >" << "(typeid(::" << typeName << ").name());\n";
+        s << INDENT << typeResolverString(cppTypeName, reducedName+'*', true) << ';' << endl;
+
+    s << INDENT << typeResolverString(cppTypeName, QString("typeid(::%1).name()").arg(typeName), isObjectType(metaClass)) << ';' << endl;
+
     if (shouldGenerateCppWrapper(metaClass)) {
-        s << INDENT << "Shiboken::TypeResolver::create" << functionSufix;
-        s << "TypeResolver< ::" << typeName << " >" << "(typeid(::" << wrapperName(metaClass) << ").name());\n";
+        s << INDENT;
+        s << typeResolverString(cppTypeName, QString("typeid(::%1).name()").arg(wrapperName(metaClass)), isObjectType(metaClass));
+        s << ';' << endl;
     }
 }
 
@@ -3943,7 +3957,7 @@ void CppGenerator::finishGeneration()
     s << INDENT << "// Register primitive types on TypeResolver" << endl;
     foreach(const PrimitiveTypeEntry* pte, primitiveTypes()) {
         if (pte->generateCode())
-            s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver< " << pte->name() << " >(\"" << pte->name() << "\");" << endl;
+            s << INDENT << typeResolverString(pte->name()) << ';' << endl;
     }
     // Register type resolver for all containers found in signals.
     QSet<QByteArray> typeResolvers;
@@ -3964,7 +3978,7 @@ void CppGenerator::finishGeneration()
         }
     }
     foreach (QByteArray type, typeResolvers)
-        s << INDENT << "Shiboken::TypeResolver::createValueTypeResolver< ::" << type << " >(\"" << type << "\");" << endl;
+        s << INDENT << typeResolverString(type) << ';' << endl;
 
     s << endl << INDENT << "Shiboken::Module::registerTypes(module, " << cppApiVariableName() << ");" << endl;
 
