@@ -3221,7 +3221,7 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
             AbstractMetaType* metaType = arg->type();
             QByteArray origType = SBK_NORMALIZED_TYPE(qPrintable(metaType->originalTypeDescription()));
             QByteArray cppSig = SBK_NORMALIZED_TYPE(qPrintable(metaType->cppSignature()));
-            if (origType != cppSig)
+            if ((origType != cppSig) && (!metaType->isFlags()))
                 ReportHandler::warning("Typedef used on signal " + metaClass->qualifiedCppName() + "::" + cppSignal->signature());
         }
     }
