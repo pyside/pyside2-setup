@@ -23,10 +23,13 @@
 #include "sbkconverter.h"
 #include "sbkconverter_p.h"
 #include "basewrapper_p.h"
-
+#include "google/dense_hash_map"
 #include "sbkdbg.h"
 
 static SbkConverter** PrimitiveTypeConverters;
+
+typedef google::dense_hash_map<std::string, SbkConverter*> ConvertersMap;
+static ConvertersMap converters;
 
 namespace Shiboken {
 namespace Conversions {
@@ -53,6 +56,27 @@ void init()
         Primitive<void*>::createConverter()
     };
     PrimitiveTypeConverters = primitiveTypeConverters;
+
+    assert(converters.empty());
+    converters.set_empty_key("");
+    converters.set_deleted_key("?");
+    converters["PY_LONG_LONG"] = primitiveTypeConverters[SBK_PY_LONG_LONG_IDX];
+    converters["bool"] = primitiveTypeConverters[SBK_BOOL_IDX];
+    converters["char"] = primitiveTypeConverters[SBK_CHAR_IDX];
+    converters["const char *"] = primitiveTypeConverters[SBK_CONSTCHARPTR_IDX];
+    converters["double"] = primitiveTypeConverters[SBK_DOUBLE_IDX];
+    converters["float"] = primitiveTypeConverters[SBK_FLOAT_IDX];
+    converters["int"] = primitiveTypeConverters[SBK_INT_IDX];
+    converters["long"] = primitiveTypeConverters[SBK_LONG_IDX];
+    converters["short"] = primitiveTypeConverters[SBK_SHORT_IDX];
+    converters["signed char"] = primitiveTypeConverters[SBK_SIGNEDCHAR_IDX];
+    converters["std::string"] = primitiveTypeConverters[SBK_STD_STRING_IDX];
+    converters["unsigned PY_LONG_LONG"] = primitiveTypeConverters[SBK_UNSIGNEDPY_LONG_LONG_IDX];
+    converters["unsigned char"] = primitiveTypeConverters[SBK_UNSIGNEDCHAR_IDX];
+    converters["unsigned int"] = primitiveTypeConverters[SBK_UNSIGNEDINT_IDX];
+    converters["unsigned long"] = primitiveTypeConverters[SBK_UNSIGNEDLONG_IDX];
+    converters["unsigned short"] = primitiveTypeConverters[SBK_UNSIGNEDSHORT_IDX];
+    converters["void*"] = primitiveTypeConverters[SBK_VOIDPTR_IDX];
 }
 
 static SbkConverter* createConverterObject(PyTypeObject* type,
@@ -251,6 +275,23 @@ bool isImplicitConversion(SbkObjectType* type, PythonToCppFunc toCppFunc)
     // caller knows what he's doing.
     ToCppConversionList::iterator conv = type->d->converter->toCppConversions.begin();
     return toCppFunc != (*conv).second;
+}
+
+void registerConverterName(SbkConverter* converter , const char* typeName)
+{
+    ConvertersMap::iterator iter = converters.find(typeName);
+    if (iter == converters.end())
+        converters.insert(std::make_pair(typeName, converter));
+}
+
+SbkConverter* getConverter(const char* typeName)
+{
+    ConvertersMap::const_iterator it = converters.find(typeName);
+    if (it != converters.end())
+        return it->second;
+    if (Py_VerboseFlag > 0)
+        SbkDbg() << "Can't find type resolver for type '" << typeName << "'.";
+    return 0;
 }
 
 SbkConverter* primitiveTypeConverter(int index)
