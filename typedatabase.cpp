@@ -430,8 +430,12 @@ void TypeDatabase::setDropTypeEntries(QStringList dropTypeEntries)
 // This global variable exists only because we can't break the ABI
 typedef QHash<const TypeEntry*, std::pair<int, int> > TypeRevisionMap;
 Q_GLOBAL_STATIC(TypeRevisionMap, typeEntryFields);
+// Hash of: packageName -> (max type index found, max primitive type index found)
+typedef QMap<QString, QPair<int, int> > MaxTypeIndexes;
+Q_GLOBAL_STATIC(MaxTypeIndexes, maxTypeIndexes);
 static bool computeTypeIndexes = true;
-static int maxTypeIndex;
+// This is kept for API compatibility issues with previous versions
+int oldMaxTypeIndex;
 
 int getTypeRevision(const TypeEntry* typeEntry)
 {
@@ -453,39 +457,51 @@ static void _computeTypeIndexes()
 {
     TypeDatabase* tdb = TypeDatabase::instance();
     typedef QMap<int, QList<TypeEntry*> > GroupedTypeEntries;
-    GroupedTypeEntries groupedEntries;
+    typedef QHash<QString, GroupedTypeEntries> GroupedPerPackageGroups;
+    GroupedPerPackageGroups groupsPerPackage;
 
     // Group type entries by revision numbers
     TypeEntryHash allEntries = tdb->allEntries();
+    QString pkgName;
+    oldMaxTypeIndex = 0;
     foreach (QList<TypeEntry*> entryList, allEntries) {
         foreach (TypeEntry* entry, entryList) {
-            if (entry->isPrimitive()
+            if (entry->isCppPrimitive()
                 || entry->isContainer()
                 || entry->isFunction()
-                || !entry->generateCode()
                 || entry->isEnumValue()
                 || entry->isVarargs()
                 || entry->isTypeSystem()
                 || entry->isVoid()
                 || entry->isCustom())
                 continue;
-            groupedEntries[getTypeRevision(entry)] << entry;
+
+            if (entry->generateCode() && !entry->isPrimitive())
+                oldMaxTypeIndex++;
+            pkgName = entry->targetLangPackage();
+            groupsPerPackage[pkgName][getTypeRevision(entry)] << entry;
         }
     }
 
-    maxTypeIndex = 0;
-    GroupedTypeEntries::iterator it = groupedEntries.begin();
-    for (; it != groupedEntries.end(); ++it) {
-        // Remove duplicates
-        QList<TypeEntry*>::iterator newEnd = std::unique(it.value().begin(), it.value().end());
-        it.value().erase(newEnd, it.value().end());
-        // Sort the type entries by name
-        qSort(it.value().begin(), newEnd, compareTypeEntriesByName);
 
-        foreach (TypeEntry* entry, it.value()) {
-            (*typeEntryFields())[entry].second = maxTypeIndex++;
+    GroupedPerPackageGroups::iterator pkg = groupsPerPackage.begin();
+    for (; pkg != groupsPerPackage.end() ; ++pkg) {
+        GroupedTypeEntries::iterator it = pkg.value().begin();
+       for (; it != pkg.value().end(); ++it) {
+            // Remove duplicates
+            QList<TypeEntry*>::iterator newEnd = std::unique(it.value().begin(), it.value().end());
+            it.value().erase(newEnd, it.value().end());
+            // Sort the type entries by name
+            qSort(it.value().begin(), newEnd, compareTypeEntriesByName);
+
+            foreach (TypeEntry* entry, it.value()) {
+                QPair<int, int>& pair = (*maxTypeIndexes())[pkg.key()];
+                int value = entry->isPrimitive() ? pair.second++ : pair.first++;
+                (*typeEntryFields())[entry].second = value;
+            }
         }
     }
+
     computeTypeIndexes = false;
 }
 
@@ -500,7 +516,17 @@ int getMaxTypeIndex()
 {
     if (computeTypeIndexes)
         _computeTypeIndexes();
-    return maxTypeIndex;
+    return oldMaxTypeIndex;
+}
+
+int getMaxTypeIndex(const QString& packageName)
+{
+    return maxTypeIndexes()->value(packageName).first - 1;
+}
+
+int getMaxPrimitiveTypeIndex(const QString& packageName)
+{
+    return maxTypeIndexes()->value(packageName).second - 1;
 }
 
 void TypeDatabase::setApiVersion(const QString& package, const QByteArray& version)

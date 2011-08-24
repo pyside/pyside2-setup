@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<typesystem package="Bar">
+    <load-typesystem name="typeindex_2.xml" generate="no" />
+    <primitive-type name="P4" />
+    <primitive-type name="P5" />
+
+    <value-type name="Value3" />
+    <value-type name="Value4" />
+</typesystem>

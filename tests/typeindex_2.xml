@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<typesystem package="Foo">
+    <primitive-type name="unsigned int" />
+    <primitive-type name="bool" />
+    <primitive-type name="P1" />
+    <primitive-type name="P2" />
+    <primitive-type name="P3" revision="1" />
+    <primitive-type name="Pa4" revision="2" />
+
+    <value-type name="Value1" />
+    <value-type name="Value2" />
+</typesystem>
