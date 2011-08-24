@@ -48,7 +48,7 @@ endif ()
 
 set(apiextractor_MAJOR_VERSION 0)
 set(apiextractor_MINOR_VERSION 10)
-set(apiextractor_MICRO_VERSION 6)
+set(apiextractor_MICRO_VERSION 7)
 set(apiextractor_VERSION "${apiextractor_MAJOR_VERSION}.${apiextractor_MINOR_VERSION}.${apiextractor_MICRO_VERSION}")
 configure_file(apiextractorversion.h.in ${CMAKE_CURRENT_BINARY_DIR}/apiextractorversion.h @ONLY)
 set(apiextractor_SOVERSION ${apiextractor_MAJOR_VERSION}.${apiextractor_MINOR_VERSION})
