@@ -32,4 +32,12 @@ int callCalculateForValueDuplicatorReference(ValueDuplicator& value)
 {
     return value.calculate();
 }
+int countValueIdentities(const std::list<ValueIdentity>& values)
+{
+    return values.size();
+}
+int countValueDuplicators(const std::list<TemplateBase<DuplicatorType> >& values)
+{
+    return values.size();
+}
 } // namespace Photon

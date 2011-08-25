@@ -23,6 +23,7 @@
 #ifndef SAMPLENAMESPACE_H
 #define SAMPLENAMESPACE_H
 
+#include <list>
 #include "libsamplemacros.h"
 #include "str.h"
 #include "point.h"
@@ -104,6 +105,9 @@ public:
             inline int someMethod(SomeInnerClass*) { return 0; }
             virtual OkThisIsRecursiveEnough* someVirtualMethod(OkThisIsRecursiveEnough* arg) { return arg; }
         };
+    };
+    struct SomeOtherInnerClass {
+        std::list<SomeInnerClass> someInnerClasses;
     };
 };
 

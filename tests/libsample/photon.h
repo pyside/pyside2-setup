@@ -23,6 +23,7 @@
 #ifndef PHOTON_H
 #define PHOTON_H
 
+#include <list>
 #include "libsamplemacros.h"
 
 // This namespace and classes simulate
@@ -50,10 +51,17 @@ public:
     inline int sumValueUsingPointer(TemplateBase<CLASS_TYPE>* other) const { return m_value + other->m_value; }
     inline int sumValueUsingReference(TemplateBase<CLASS_TYPE>& other) const { return m_value + other.m_value; }
 
+    inline std::list<TemplateBase<CLASS_TYPE> > getListOfThisTemplateBase()
+    {
+        std::list<TemplateBase<CLASS_TYPE> >objs;
+        objs.push_back(*this);
+        objs.push_back(*this);
+        return objs;
+    }
+
+
     static inline TemplateBase<CLASS_TYPE>* passPointerThrough(TemplateBase<CLASS_TYPE>* obj) { return obj; }
 private:
-    TemplateBase(const TemplateBase&);
-    TemplateBase& operator=(const TemplateBase&);
     int m_value;
 };
 
@@ -61,6 +69,8 @@ typedef TemplateBase<IdentityType>   ValueIdentity;
 typedef TemplateBase<DuplicatorType> ValueDuplicator;
 LIBSAMPLE_API int callCalculateForValueDuplicatorPointer(ValueDuplicator* value);
 LIBSAMPLE_API int callCalculateForValueDuplicatorReference(ValueDuplicator& value);
+LIBSAMPLE_API int countValueIdentities(const std::list<ValueIdentity>& values);
+LIBSAMPLE_API int countValueDuplicators(const std::list<TemplateBase<DuplicatorType> >& values);
 
 } // namespace Photon
 

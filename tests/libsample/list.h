@@ -34,8 +34,22 @@ class List : public std::list<T>
 class IntList : public List<int>
 {
 public:
+    enum CtorEnum {
+        NoParamsCtor,
+        IntCtor,
+        CopyCtor,
+        ListOfIntCtor
+    };
+
+    inline IntList() : m_ctorUsed(NoParamsCtor) {}
+    inline explicit IntList(int val) : m_ctorUsed(IntCtor) { push_back(val); }
+    inline IntList(const IntList& lst) : List<int>(lst), m_ctorUsed(CopyCtor) {}
+    inline IntList(const List<int>& lst) : List<int>(lst), m_ctorUsed(ListOfIntCtor) {}
+
     inline void append(int v) { insert(end(), v); }
+    CtorEnum constructorUsed() { return m_ctorUsed; }
+private:
+    CtorEnum m_ctorUsed;
 };
 
 #endif // LIST_H
-

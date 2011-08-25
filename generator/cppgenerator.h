@@ -55,6 +55,9 @@ private:
     void writeCustomConverterFunctions(QTextStream& s, const CustomConversion* customConversion);
     void writeConverterRegister(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeCustomConverterRegister(QTextStream& s, const CustomConversion* customConversion, const QString& converterVar);
+    void writeContainerConverterRegister(QTextStream& s, const AbstractMetaType* container, const QString& converterVar);
+
+    void writeContainerConverterFunctions(QTextStream& s, const AbstractMetaType* containerType);
 
     void writeMethodWrapperPreamble(QTextStream& s, OverloadData& overloadData);
     void writeConstructorWrapper(QTextStream& s, const AbstractMetaFunctionList overloads);
@@ -164,6 +167,7 @@ private:
     /// Writes a C++ to Python conversion function.
     void writeCppToPythonFunction(QTextStream& s, const QString& code, const QString& sourceTypeName, QString targetTypeName = QString());
     void writeCppToPythonFunction(QTextStream& s, const CustomConversion* customConversion);
+    void writeCppToPythonFunction(QTextStream& s, const AbstractMetaType* containerType);
 
     /// Writes a Python to C++ conversion function.
     void writePythonToCppFunction(QTextStream& s, const QString& code, const QString& sourceTypeName, const QString& targetTypeName);
@@ -187,6 +191,9 @@ private:
     void writePythonToCppConversionFunctions(QTextStream& s,
                                              const CustomConversion::TargetToNativeConversion* toNative,
                                              const TypeEntry* targetType);
+
+    /// Writes a pair of Python to C++ conversion and check functions for instantiated container types.
+    void writePythonToCppConversionFunctions(QTextStream& s, const AbstractMetaType* containerType);
 
     void writeAddPythonToCppConversion(QTextStream& s, const QString& converterVar, const QString& pythonToCppFunc, const QString& isConvertibleFunc);
 
@@ -242,6 +249,7 @@ private:
     void writeSpecialCastFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
     void writePrimitiveConverterInitialization(QTextStream& s, const CustomConversion* customConversion);
+    void writeContainerConverterInitialization(QTextStream& s, const AbstractMetaType* type);
     void writeExtendedConverterInitialization(QTextStream& s, const TypeEntry* externalType, const QList<const AbstractMetaClass*>& conversions);
 
     void writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func, bool userHeuristicForReturn);

@@ -24,6 +24,7 @@
 #include "sbkconverter_p.h"
 #include "basewrapper_p.h"
 #include "google/dense_hash_map"
+#include "autodecref.h"
 #include "sbkdbg.h"
 
 static SbkConverter** PrimitiveTypeConverters;
@@ -297,6 +298,127 @@ SbkConverter* getConverter(const char* typeName)
 SbkConverter* primitiveTypeConverter(int index)
 {
     return PrimitiveTypeConverters[index];
+}
+
+bool checkSequenceTypes(PyTypeObject* type, PyObject* pyIn)
+{
+    assert(type);
+    assert(pyIn);
+    if (!PySequence_Check(pyIn))
+        return false;
+    int size = PySequence_Size(pyIn);
+    for (int i = 0; i < size; ++i) {
+        if (!PyObject_TypeCheck(AutoDecRef(PySequence_GetItem(pyIn, i)), type))
+            return false;
+    }
+    return true;
+}
+bool convertibleSequenceTypes(SbkConverter* converter, PyObject* pyIn)
+{
+    assert(converter);
+    assert(pyIn);
+    if (!PySequence_Check(pyIn))
+        return false;
+    int size = PySequence_Size(pyIn);
+    for (int i = 0; i < size; ++i) {
+        if (!isPythonToCppConvertible(converter, AutoDecRef(PySequence_GetItem(pyIn, i))))
+            return false;
+    }
+    return true;
+}
+bool convertibleSequenceTypes(SbkObjectType* type, PyObject* pyIn)
+{
+    assert(type);
+    return convertibleSequenceTypes(type->d->converter, pyIn);
+}
+
+bool checkPairTypes(PyTypeObject* firstType, PyTypeObject* secondType, PyObject* pyIn)
+{
+    assert(firstType);
+    assert(secondType);
+    assert(pyIn);
+    if (!PySequence_Check(pyIn))
+        return false;
+    if (PySequence_Size(pyIn) != 2)
+        return false;
+    if (!PyObject_TypeCheck(AutoDecRef(PySequence_GetItem(pyIn, 0)), firstType))
+        return false;
+    if (!PyObject_TypeCheck(AutoDecRef(PySequence_GetItem(pyIn, 1)), secondType))
+        return false;
+    return true;
+}
+bool convertiblePairTypes(SbkConverter* firstConverter, bool firstCheckExact, SbkConverter* secondConverter, bool secondCheckExact, PyObject* pyIn)
+{
+    assert(firstConverter);
+    assert(secondConverter);
+    assert(pyIn);
+    if (!PySequence_Check(pyIn))
+        return false;
+    if (PySequence_Size(pyIn) != 2)
+        return false;
+    AutoDecRef firstItem(PySequence_GetItem(pyIn, 0));
+    if (firstCheckExact) {
+        if (!PyObject_TypeCheck(firstItem, firstConverter->pythonType))
+            return false;
+    } else if (!isPythonToCppConvertible(firstConverter, firstItem)) {
+        return false;
+    }
+    AutoDecRef secondItem(PySequence_GetItem(pyIn, 1));
+    if (secondCheckExact) {
+        if (!PyObject_TypeCheck(secondItem, secondConverter->pythonType))
+            return false;
+    } else if (!isPythonToCppConvertible(secondConverter, secondItem)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool checkDictTypes(PyTypeObject* keyType, PyTypeObject* valueType, PyObject* pyIn)
+{
+    assert(keyType);
+    assert(valueType);
+    assert(pyIn);
+    if (!PyDict_Check(pyIn))
+        return false;
+
+    PyObject* key;
+    PyObject* value;
+    Py_ssize_t pos = 0;
+    while (PyDict_Next(pyIn, &pos, &key, &value)) {
+        if (!PyObject_TypeCheck(key, keyType))
+            return false;
+        if (!PyObject_TypeCheck(value, valueType))
+            return false;
+    }
+    return true;
+}
+
+bool convertibleDictTypes(SbkConverter* keyConverter, bool keyCheckExact, SbkConverter* valueConverter, bool valueCheckExact, PyObject* pyIn)
+{
+    assert(keyConverter);
+    assert(valueConverter);
+    assert(pyIn);
+    if (!PyDict_Check(pyIn))
+        return false;
+    PyObject* key;
+    PyObject* value;
+    Py_ssize_t pos = 0;
+    while (PyDict_Next(pyIn, &pos, &key, &value)) {
+        if (keyCheckExact) {
+            if (!PyObject_TypeCheck(key, keyConverter->pythonType))
+                return false;
+        } else if (!isPythonToCppConvertible(keyConverter, key)) {
+            return false;
+        }
+        if (valueCheckExact) {
+            if (!PyObject_TypeCheck(value, valueConverter->pythonType))
+                return false;
+        } else if (!isPythonToCppConvertible(valueConverter, value)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 } } // namespace Shiboken::Conversions

@@ -221,6 +221,28 @@ LIBSHIBOKEN_API SbkConverter* getConverter(const char* typeName);
 /// Returns the converter for a primitive type.
 LIBSHIBOKEN_API SbkConverter* primitiveTypeConverter(int index);
 
+/// Returns true if a Python sequence is comprised of objects of the given \p type.
+LIBSHIBOKEN_API bool checkSequenceTypes(PyTypeObject* type, PyObject* pyIn);
+
+/// Returns true if a Python sequence is comprised of objects of a type convertible to the one represented by the given \p converter.
+LIBSHIBOKEN_API bool convertibleSequenceTypes(SbkConverter* converter, PyObject* pyIn);
+
+/// Returns true if a Python sequence is comprised of objects of a type convertible to \p type.
+LIBSHIBOKEN_API bool convertibleSequenceTypes(SbkObjectType* type, PyObject* pyIn);
+
+/// Returns true if a Python sequence can be converted to a C++ pair.
+LIBSHIBOKEN_API bool checkPairTypes(PyTypeObject* firstType, PyTypeObject* secondType, PyObject* pyIn);
+
+/// Returns true if a Python sequence can be converted to a C++ pair.
+LIBSHIBOKEN_API bool convertiblePairTypes(SbkConverter* firstConverter, bool firstCheckExact, SbkConverter* secondConverter, bool secondCheckExact, PyObject* pyIn);
+
+/// Returns true if a Python dictionary can be converted to a C++ hash or map.
+LIBSHIBOKEN_API bool checkDictTypes(PyTypeObject* keyType, PyTypeObject* valueType, PyObject* pyIn);
+
+/// Returns true if a Python dictionary can be converted to a C++ hash or map.
+LIBSHIBOKEN_API bool convertibleDictTypes(SbkConverter* keyConverter, bool keyCheckExact, SbkConverter* valueConverter, bool valueCheckExact, PyObject* pyIn);
+
+
 #define SBK_PY_LONG_LONG_IDX            0
 #define SBK_BOOL_IDX                    1
 #define SBK_CHAR_IDX                    2

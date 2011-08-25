@@ -42,6 +42,12 @@
                                   "This will result in a compilation error."
 #define PYTHON_TO_CPP_VAR         "pythonToCpp"
 
+#define CHECKTYPE_REGEX           "%CHECKTYPE\\[([^\\[]*)\\]\\("
+#define ISCONVERTIBLE_REGEX       "%ISCONVERTIBLE\\[([^\\[]*)\\]\\("
+#define CONVERTTOPYTHON_REGEX     "%CONVERTTOPYTHON\\[([^\\[]*)\\]\\("
+#define CONVERTTOCPP_REGEX        "(\\*?%?[a-zA-Z_][\\w\\.]*(?:\\[[^\\[^<^>]+\\])*)"\
+                                  "(?:\\s+)=(?:\\s+)%CONVERTTOCPP\\[([^\\[]*)\\]\\("
+
 #include <generator.h>
 #include <QtCore/QTextStream>
 
@@ -507,7 +513,7 @@ protected:
     ExtendedConverterData getExtendedConverters() const;
 
     /// Returns a list of converters for the non wrapper types of the current module.
-    QList<const CustomConversion*> getNonWrapperCustomConversions();
+    QList<const CustomConversion*> getPrimitiveCustomConversions();
 
     /// Returns true if the Python wrapper for the received OverloadData must accept a list of arguments.
     static bool pythonFunctionWrapperUsesListOfArguments(const OverloadData& overloadData);

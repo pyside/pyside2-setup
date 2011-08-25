@@ -376,6 +376,20 @@ void HeaderGenerator::finishGeneration()
         _writeTypeIndexDefineLine(macrosStream, getTypeIndexVariableName(ptype), pCount);
         pCount++;
     }
+
+    foreach (const AbstractMetaType* container, instantiatedContainers()) {
+        //_writeTypeIndexDefineLine(macrosStream, getTypeIndexVariableName(container), pCount);
+        // DEBUG
+        QString variableName = getTypeIndexVariableName(container);
+        macrosStream << "#define ";
+        macrosStream.setFieldWidth(60);
+        macrosStream << variableName;
+        macrosStream.setFieldWidth(0);
+        macrosStream << ' ' << pCount << " // " << container->cppSignature() << endl;
+        // DEBUG
+        pCount++;
+    }
+
     // Because on win32 the compiler will not accept a zero length array.
     if (pCount == 0)
         pCount++;

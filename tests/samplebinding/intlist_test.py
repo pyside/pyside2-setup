@@ -24,7 +24,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-import sys
 import unittest
 
 from sample import IntList
@@ -46,8 +45,37 @@ class IntListTest(unittest.TestCase):
         self.assertEqual(lst[2], 30)
         self.assertEqual(len(lst), 3)
 
+    def testIntListCtor_NoParams(self):
+        '''IntList constructor receives no parameter.'''
+        il = IntList()
+        self.assertEqual(len(il), 0)
+        self.assertEqual(il.constructorUsed(), IntList.NoParamsCtor)
 
+    def testIntListCtor_int(self):
+        '''IntList constructor receives an integer.'''
+        value = 123
+        il = IntList(value)
+        self.assertEqual(len(il), 1)
+        self.assertEqual(il[0], value)
+        self.assertEqual(il.constructorUsed(), IntList.IntCtor)
+
+    def testIntListCtor_IntList(self):
+        '''IntList constructor receives an IntList object.'''
+        il1 = IntList(123)
+        il2 = IntList(il1)
+        self.assertEqual(len(il1), len(il2))
+        for i in range(len(il1)):
+            self.assertEqual(il1[i], il2[i])
+        self.assertEqual(il2.constructorUsed(), IntList.CopyCtor)
+
+    def testIntListCtor_ListOfInts(self):
+        '''IntList constructor receives an integer list.'''
+        ints = [123, 456]
+        il = IntList(ints)
+        self.assertEqual(len(il), len(ints))
+        for i in range(len(il)):
+            self.assertEqual(il[i], ints[i])
+        self.assertEqual(il.constructorUsed(), IntList.ListOfIntCtor)
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -18,8 +18,27 @@
     </primitive-type>
 
     <container-type name="std::list" type="list">
-        <conversion-rule file="list_conversions.h"/>
         <include file-name="list" location="global"/>
+        <conversion-rule file="list_conversions.h">
+            <native-to-target>
+            PyObject* %out = PyList_New((int) %in.size());
+            %INTYPE::const_iterator it = %in.begin();
+            for (int idx = 0; it != %in.end(); ++it, ++idx) {
+                %INTYPE_0 cppItem(*it);
+                PyList_SET_ITEM(%out, idx, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
+            }
+            return %out;
+            </native-to-target>
+            <target-to-native>
+                <add-conversion type="PySequence">
+                for (int i = 0; i &lt; PySequence_Fast_GET_SIZE(%in); i++) {
+                    PyObject* pyItem = PySequence_Fast_GET_ITEM(%in, i);
+                    %OUTTYPE_0 cppItem = %CONVERTTOCPP[%OUTTYPE_0](pyItem);
+                    %out.push_back(cppItem);
+                }
+                </add-conversion>
+            </target-to-native>
+        </conversion-rule>
     </container-type>
 
     <object-type name="Obj"/>

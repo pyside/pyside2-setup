@@ -49,4 +49,3 @@ StrList::join(const Str& sep) const
     }
     return result;
 }
-

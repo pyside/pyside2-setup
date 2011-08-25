@@ -86,6 +86,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/sample_sample_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/samplenamespace_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/samplenamespace_someclass_someinnerclass_okthisisrecursiveenough_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/samplenamespace_someclass_someinnerclass_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/samplenamespace_someclass_someotherinnerclass_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/samplenamespace_someclass_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/samplenamespace_derivedfromnamespace_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/simplefile_wrapper.cpp
