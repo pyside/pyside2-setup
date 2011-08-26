@@ -2148,37 +2148,17 @@ bool TypeEntry::isCppPrimitive() const
 {
     if (!isPrimitive())
         return false;
-    if (m_name.contains(' ') || m_type == VoidType)
-        return true;
-    // Keep this sorted!!
-    static const char* cppTypes[] = { "bool", "char", "double", "float", "int", "long", "long long", "short",
-                                      "unsigned char", "unsigned double", "unsigned float", "unsigned int",
-                                      "unsigned long", "unsigned long long", "unsigned short", "wchar_t" };
-    const int N = sizeof(cppTypes)/sizeof(char*);
 
     PrimitiveTypeEntry* aliasedType = ((PrimitiveTypeEntry*)this)->basicAliasedTypeEntry();
-    QString typeName = aliasedType ? aliasedType->name() : m_name;
+    QByteArray typeName = (aliasedType ? aliasedType->name() : m_name).toAscii();
 
-    const char** res = qBinaryFind(&cppTypes[0], &cppTypes[N], typeName.toAscii().constData(), strLess);
+    if (typeName.contains(' ') || m_type == VoidType)
+        return true;
+    // Keep this sorted!!
+    static const char* cppTypes[] = { "bool", "char", "double", "float", "int", "long", "long long", "short", "wchar_t" };
+    const int N = sizeof(cppTypes)/sizeof(char*);
+
+    const char** res = qBinaryFind(&cppTypes[0], &cppTypes[N], typeName.constData(), strLess);
+
     return res != &cppTypes[N];
 }
-
-/*
-static void injectCode(ComplexTypeEntry *e,
-                       const char *signature,
-                       const QByteArray &code,
-                       const ArgumentMap &args)
-{
-    CodeSnip snip;
-    snip.language = TypeSystem::NativeCode;
-    snip.position = CodeSnip::Beginning;
-    snip.addCode(QString::fromLatin1(code));
-    snip.argumentMap = args;
-
-    FunctionModification mod;
-    mod.signature = QMetaObject::normalizedSignature(signature);
-    mod.snips << snip;
-    mod.modifiers = Modification::CodeInjection;
-}
-*/
-
