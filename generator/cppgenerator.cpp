@@ -361,7 +361,8 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
                 && !func->isCastOperator()
                 && !func->isModifiedRemoved()
                 && (!func->isPrivate() || func->functionType() == AbstractMetaFunction::EmptyFunction)
-                && func->ownerClass() == func->implementingClass())
+                && func->ownerClass() == func->implementingClass()
+                && (func->name() != "qt_metacall"))
                 overloads.append(func);
         }
 
@@ -890,11 +891,26 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
     s << '}' << endl << endl;
 
     // qt_metacall function
-    s << "int " << wrapperClassName << "::qt_metacall(QMetaObject::Call call, int id, void** args)\n";
-    s << "{\n";
-    s << INDENT << "int result = " << metaClass->qualifiedCppName() << "::qt_metacall(call, id, args);\n";
-    s << INDENT << "return result < 0 ? result : PySide::SignalManager::qt_metacall(this, call, id, args);\n";
-    s << "}\n\n";
+    s << "int " << wrapperClassName << "::qt_metacall(QMetaObject::Call call, int id, void** args)" << endl;
+    s << "{" << endl;
+
+    AbstractMetaFunction *func = NULL;
+    AbstractMetaFunctionList list = metaClass->queryFunctionsByName("qt_metacall");
+    if (list.size() == 1)
+        func = list[0];
+
+    CodeSnipList snips;
+    if (func) {
+        snips = func->injectedCodeSnips();
+        if (func->isUserAdded()) {
+            CodeSnipList snips = func->injectedCodeSnips();
+            writeCodeSnips(s, snips, CodeSnip::Any, TypeSystem::NativeCode, func);
+        }
+    }
+
+    s << INDENT << "int result = " << metaClass->qualifiedCppName() << "::qt_metacall(call, id, args);" << endl;
+    s << INDENT << "return result < 0 ? result : PySide::SignalManager::qt_metacall(this, call, id, args);" << endl;
+    s << "}" << endl << endl;
 
     // qt_metacast function
     writeMetaCast(s, metaClass);
@@ -1844,7 +1860,6 @@ void CppGenerator::writeFunctionCalls(QTextStream& s, const OverloadData& overlo
 void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& overloadData, const AbstractMetaFunction* func)
 {
     if (func->isDeprecated()) {
-        qDebug() << "DEPRECATED FUNCTION:" << func->signature();
         s << INDENT << "Shiboken::warning(PyExc_DeprecationWarning, 1, \"Function: '"
                     << func->signature().replace("::", ".")
                     << "' is marked as deprecated, please check the documentation for more information.\");" << endl;
