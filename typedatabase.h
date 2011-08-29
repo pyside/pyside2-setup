@@ -30,9 +30,7 @@
 APIEXTRACTOR_API void setTypeRevision(TypeEntry* typeEntry, int revision);
 APIEXTRACTOR_API int getTypeRevision(const TypeEntry* typeEntry);
 APIEXTRACTOR_API int getTypeIndex(const TypeEntry* typeEntry);
-APIEXTRACTOR_API APIEXTRACTOR_DEPRECATED(int getMaxTypeIndex());
-APIEXTRACTOR_API int getMaxTypeIndex(const QString& packageName);
-APIEXTRACTOR_API int getMaxPrimitiveTypeIndex(const QString& packageName);
+APIEXTRACTOR_API int getMaxTypeIndex();
 
 class ContainerTypeEntry;
 class PrimitiveTypeEntry;
