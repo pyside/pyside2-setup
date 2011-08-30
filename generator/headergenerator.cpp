@@ -305,7 +305,8 @@ void HeaderGenerator::writeTypeIndexDefineLine(QTextStream& s, const TypeEntry* 
         const ComplexTypeEntry* cType = reinterpret_cast<const ComplexTypeEntry*>(typeEntry);
         if (cType->baseContainerType()) {
             const AbstractMetaClass* metaClass = classes().findClass(cType);
-            _writeTypeIndexDefineLine(s, getTypeIndexVariableName(metaClass, true), typeIndex);
+            if (metaClass->templateBaseClass())
+                _writeTypeIndexDefineLine(s, getTypeIndexVariableName(metaClass, true), typeIndex);
         }
     }
     if (typeEntry->isEnum()) {
