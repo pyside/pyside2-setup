@@ -4191,7 +4191,7 @@ QString CppGenerator::writeReprFunction(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "QBuffer buffer;" << endl;
     s << INDENT << "buffer.open(QBuffer::ReadWrite);" << endl;
     s << INDENT << "QDebug dbg(&buffer);" << endl;
-    s << INDENT << "dbg << " CPP_SELF_VAR ";" << endl;
+    s << INDENT << "dbg << " << (metaClass->typeEntry()->isValue() ? "*" : "") << CPP_SELF_VAR ";" << endl;
     s << INDENT << "buffer.close();" << endl;
     s << INDENT << "QByteArray str = buffer.data();" << endl;
     s << INDENT << "int idx = str.indexOf('(');" << endl;
