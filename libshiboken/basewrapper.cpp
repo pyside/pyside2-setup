@@ -34,6 +34,10 @@
 #include <algorithm>
 #include "threadstatesaver.h"
 
+namespace {
+    void _destroyParentInfo(SbkObject* obj, bool keepReference);
+}
+
 extern "C"
 {
 
@@ -107,6 +111,26 @@ static PyGetSetDef SbkObjectGetSetList[] = {
 static int SbkObject_traverse(PyObject* self, visitproc visit, void* arg)
 {
     SbkObject* sbkSelf = reinterpret_cast<SbkObject*>(self);
+
+    //Visit children
+    Shiboken::ParentInfo* pInfo = sbkSelf->d->parentInfo;
+    if (pInfo) {
+        std::set<SbkObject*>::const_iterator it = pInfo->children.begin();
+        for(; it != pInfo->children.end(); ++it)
+            Py_VISIT(*it);
+    }
+
+    //Visit refs
+    Shiboken::RefCountMap* rInfo = sbkSelf->d->referredObjects;
+    if (rInfo) {
+        Shiboken::RefCountMap::const_iterator it = rInfo->begin();
+        for (; it != rInfo->end(); ++it) {
+            std::list<PyObject*>::const_iterator ref = it->second.begin();
+            for(; ref != it->second.end(); ++ref)
+                Py_VISIT(*ref);
+        }
+    }
+
     if (sbkSelf->ob_dict)
         Py_VISIT(sbkSelf->ob_dict);
     return 0;
@@ -115,6 +139,14 @@ static int SbkObject_traverse(PyObject* self, visitproc visit, void* arg)
 static int SbkObject_clear(PyObject* self)
 {
     SbkObject* sbkSelf = reinterpret_cast<SbkObject*>(self);
+
+    Shiboken::Object::removeParent(sbkSelf);
+
+    if (sbkSelf->d->parentInfo)
+        _destroyParentInfo(sbkSelf, true);
+
+    Shiboken::Object::clearReferences(sbkSelf);
+
     if (sbkSelf->ob_dict)
         Py_CLEAR(sbkSelf->ob_dict);
     return 0;
@@ -322,6 +354,26 @@ PyObject* SbkObjectTpNew(PyTypeObject* subtype, PyObject*, PyObject*)
 
 
 } //extern "C"
+
+
+namespace
+{
+
+void _destroyParentInfo(SbkObject* obj, bool keepReference)
+{
+    Shiboken::ParentInfo* pInfo = obj->d->parentInfo;
+    if (pInfo) {
+        while(!pInfo->children.empty()) {
+            SbkObject* first = *pInfo->children.begin();
+            // Mark child as invalid
+            Shiboken::Object::invalidate(first);
+            Shiboken::Object::removeParent(first, false, keepReference);
+       }
+        Shiboken::Object::removeParent(obj, false);
+    }
+}
+
+}
 
 namespace Shiboken
 {
@@ -682,6 +734,7 @@ void setTypeUserData(SbkObjectType* self, void* userData, DeleteUserDataFunc d_f
 
 } // namespace ObjectType
 
+
 namespace Object
 {
 
@@ -713,22 +766,6 @@ static void setSequenceOwnership(PyObject* pyObj, bool owner)
             releaseOwnership(reinterpret_cast<SbkObject*>(pyObj));
     }
 }
-
-
-static void _destroyParentInfo(SbkObject* obj, bool keepReference)
-{
-    ParentInfo* pInfo = obj->d->parentInfo;
-    if (pInfo) {
-        while(!pInfo->children.empty()) {
-            SbkObject* first = *pInfo->children.begin();
-            // Mark child as invalid
-            Shiboken::Object::invalidate(first);
-            removeParent(first, false, keepReference);
-       }
-       removeParent(obj, false);
-    }
-}
-
 
 void setValidCpp(SbkObject* pyObj, bool value)
 {
