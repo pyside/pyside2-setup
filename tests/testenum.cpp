@@ -62,7 +62,9 @@ void TestEnum::testEnumCppSignature()
     // enum as parameter of a method
     AbstractMetaClass* classA = classes.findClass("A");
     QCOMPARE(classA->enums().count(), 1);
-    AbstractMetaFunction* method = classA->queryFunctionsByName("method").first();
+    AbstractMetaFunctionList funcs = classA->queryFunctionsByName("method");
+    QVERIFY(!funcs.isEmpty());
+    AbstractMetaFunction* method = funcs.first();
     QVERIFY(method);
     AbstractMetaArgument* arg = method->arguments().first();
     QCOMPARE(arg->type()->name(), QString("ClassEnum"));

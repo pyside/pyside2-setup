@@ -54,8 +54,6 @@ void TestContainer::testContainerType()
     QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(classA->typeEntry()->baseContainerType())->type(), ContainerTypeEntry::ListContainer);
 }
 
-
-
 QTEST_APPLESS_MAIN(TestContainer)
 
 #include "testcontainer.moc"

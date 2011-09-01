@@ -337,6 +337,47 @@ void TestTemplates::testTypedefOfInstantiationOfTemplateClass()
     QCOMPARE(inst->cppSignature(), QString("NSpace::TypeOne"));
 }
 
+void TestTemplates::testContainerTypeIncompleteArgument()
+{
+    const char* cppCode ="\
+    template<typename T>\
+    class Vector {\
+        void method(const Vector& vector);\
+        Vector otherMethod();\
+    };\
+    template <typename T>\
+    void Vector<T>::method(const Vector<T>& vector) {}\
+    Vector Vector<T>::otherMethod() { return Vector<T>(); }\
+    typedef Vector<int> IntVector;\
+    ";
+    const char* xmlCode = "\
+    <typesystem package='Foo'>\
+        <primitive-type name='int'/>\
+        <container-type name='Vector' type='vector'/>\
+        <value-type name='IntVector'/>\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, true);
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.count(), 1);
+
+    AbstractMetaClass* vector = classes.findClass("IntVector");
+    QVERIFY(vector);
+    QVERIFY(vector->typeEntry()->baseContainerType());
+    QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(vector->typeEntry()->baseContainerType())->type(), ContainerTypeEntry::VectorContainer);
+    QCOMPARE(vector->functions().count(), 4);
+
+    const AbstractMetaFunction* method = vector->findFunction("method");
+    QVERIFY(method);
+    QCOMPARE(method->signature(), QString("method(const Vector<int > & vector)"));
+
+    const AbstractMetaFunction* otherMethod = vector->findFunction("otherMethod");
+    QVERIFY(otherMethod);
+    QCOMPARE(otherMethod->signature(), QString("otherMethod()"));
+    QVERIFY(otherMethod->type());
+    QCOMPARE(otherMethod->type()->cppSignature(), QString("Vector<int >"));
+}
+
 QTEST_APPLESS_MAIN(TestTemplates)
 
 #include "testtemplates.moc"

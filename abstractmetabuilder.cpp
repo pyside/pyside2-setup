@@ -1344,97 +1344,180 @@ void AbstractMetaBuilder::fixReturnTypeOfConversionOperator(AbstractMetaFunction
     metaFunction->replaceType(metaType);
 }
 
+static bool _compareAbstractMetaTypes(const AbstractMetaType* type, const AbstractMetaType* other)
+{
+    if (!type && !other)
+        return true;
+    if (!type || !other)
+        return false;
+    return type->typeEntry() == other->typeEntry()
+            && type->isConstant() == other->isConstant()
+            && type->isReference() == other->isReference()
+            && type->indirections() == other->indirections();
+}
+
+static bool _compareAbstractMetaFunctions(const AbstractMetaFunction* func, const AbstractMetaFunction* other)
+{
+    if (!func && !other)
+        return true;
+    if (!func || !other)
+        return false;
+    if (func->arguments().count() != other->arguments().count()
+        || func->isConstant() != other->isConstant()
+        || func->isStatic() != other->isStatic()
+        || !_compareAbstractMetaTypes(func->type(), other->type())) {
+        return false;
+    }
+    for (int i = 0; i < func->arguments().count(); ++i) {
+        if (!_compareAbstractMetaTypes(func->arguments().at(i)->type(), other->arguments().at(i)->type()))
+            return false;
+    }
+    return true;
+}
+
+static bool _fixFunctionModelItemType(TypeInfo& type, const AbstractMetaClass* metaClass)
+{
+    if (metaClass->templateArguments().isEmpty()
+        || type.qualifiedName().isEmpty()
+        || type.qualifiedName().first() != metaClass->typeEntry()->qualifiedCppName()) {
+        return false;
+    }
+    QStringList templateTypes;
+    foreach (TypeEntry* templateType, metaClass->templateArguments())
+        templateTypes << templateType->qualifiedCppName();
+    QString fixedTypeName = QString("%1<%2 >").arg(metaClass->typeEntry()->qualifiedCppName()).arg(templateTypes.join(", "));
+    type.setQualifiedName(QStringList(fixedTypeName));
+    return true;
+}
+
+static bool _fixFunctionModelItemTypes(FunctionModelItem& function, const AbstractMetaClass* metaClass)
+{
+    TypeInfo functionType = function->type();
+    bool templateTypeFixed = _fixFunctionModelItemType(functionType, metaClass);
+    if (templateTypeFixed)
+        function->setType(functionType);
+
+    ArgumentList arguments = function->arguments();
+    for (int i = 0; i < arguments.size(); ++i) {
+        ArgumentModelItem arg = arguments.at(i);
+        TypeInfo type = arg->type();
+        bool tmpTypeFixed = _fixFunctionModelItemType(type, metaClass);
+        if (tmpTypeFixed)
+            arg->setType(type);
+        templateTypeFixed |= tmpTypeFixed;
+    }
+    return templateTypeFixed;
+}
+
 void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scopeItem, AbstractMetaClass* metaClass)
 {
     foreach (FunctionModelItem function, scopeItem->functions()) {
+
+        // This fixes method's arguments and return types that are templates
+        // but the template variable wasn't declared in the C++ header.
+        bool templateTypeFixed = _fixFunctionModelItemTypes(function, metaClass);
+
         AbstractMetaFunction* metaFunction = traverseFunction(function);
 
-        if (metaFunction) {
-            metaFunction->setOriginalAttributes(metaFunction->attributes());
-            if (metaClass->isNamespace())
-                *metaFunction += AbstractMetaAttributes::Static;
+        if (!metaFunction)
+            continue;
 
-            QPropertySpec *read = 0;
-            if (!metaFunction->isSignal() && (read = metaClass->propertySpecForRead(metaFunction->name()))) {
-                // Property reader must be in the form "<type> name()"
-                if (metaFunction->type() && (read->type() == metaFunction->type()->typeEntry()) && (metaFunction->arguments().size() == 0)) {
-                    *metaFunction += AbstractMetaAttributes::PropertyReader;
-                    metaFunction->setPropertySpec(read);
-                }
-            } else if (QPropertySpec* write = metaClass->propertySpecForWrite(metaFunction->name())) {
-                // Property setter must be in the form "void name(<type>)"
-                // make sure the function was created with all aguments, some argument can be missing during the pareser because of errors on typesystem
-                if ((!metaFunction->type()) && (metaFunction->arguments().size() == 1) && (write->type() == metaFunction->arguments().at(0)->type()->typeEntry())) {
-                    *metaFunction += AbstractMetaAttributes::PropertyWriter;
-                    metaFunction->setPropertySpec(write);
-                }
-            } else if (QPropertySpec* reset = metaClass->propertySpecForReset(metaFunction->name())) {
-                // Property resetter must be in the form "void name()"
-                if ((!metaFunction->type()) && (metaFunction->arguments().size() == 0)) {
-                    *metaFunction += AbstractMetaAttributes::PropertyResetter;
-                    metaFunction->setPropertySpec(reset);
+        if (templateTypeFixed) {
+            foreach (AbstractMetaFunction* func, metaClass->queryFunctionsByName(metaFunction->name())) {
+                if (_compareAbstractMetaFunctions(metaFunction, func)) {
+                    delete metaFunction;
+                    metaFunction = 0;
+                    break;
                 }
             }
+            if (!metaFunction)
+                continue;
+        }
 
-            // Can not use metaFunction->isCopyConstructor() because
-            // the function wasn't assigned to its owner class yet.
-            bool isCopyCtor = false;
-            if (metaFunction->isConstructor() && metaFunction->arguments().size() == 1) {
-                const AbstractMetaType* argType = metaFunction->arguments().first()->type();
-                isCopyCtor = argType->isConstant()
-                             && argType->isReference()
-                             && argType->typeEntry()->name() == metaFunction->name();
+        metaFunction->setOriginalAttributes(metaFunction->attributes());
+        if (metaClass->isNamespace())
+            *metaFunction += AbstractMetaAttributes::Static;
+
+        QPropertySpec *read = 0;
+        if (!metaFunction->isSignal() && (read = metaClass->propertySpecForRead(metaFunction->name()))) {
+            // Property reader must be in the form "<type> name()"
+            if (metaFunction->type() && (read->type() == metaFunction->type()->typeEntry()) && (metaFunction->arguments().size() == 0)) {
+                *metaFunction += AbstractMetaAttributes::PropertyReader;
+                metaFunction->setPropertySpec(read);
+            }
+        } else if (QPropertySpec* write = metaClass->propertySpecForWrite(metaFunction->name())) {
+            // Property setter must be in the form "void name(<type>)"
+            // make sure the function was created with all aguments, some argument can be missing during the pareser because of errors on typesystem
+            if ((!metaFunction->type()) && (metaFunction->arguments().size() == 1) && (write->type() == metaFunction->arguments().at(0)->type()->typeEntry())) {
+                *metaFunction += AbstractMetaAttributes::PropertyWriter;
+                metaFunction->setPropertySpec(write);
+            }
+        } else if (QPropertySpec* reset = metaClass->propertySpecForReset(metaFunction->name())) {
+            // Property resetter must be in the form "void name()"
+            if ((!metaFunction->type()) && (metaFunction->arguments().size() == 0)) {
+                *metaFunction += AbstractMetaAttributes::PropertyResetter;
+                metaFunction->setPropertySpec(reset);
+            }
+        }
+
+        // Can not use metaFunction->isCopyConstructor() because
+        // the function wasn't assigned to its owner class yet.
+        bool isCopyCtor = false;
+        if (metaFunction->isConstructor() && metaFunction->arguments().size() == 1) {
+            const AbstractMetaType* argType = metaFunction->arguments().first()->type();
+            isCopyCtor = argType->isConstant()
+                         && argType->isReference()
+                         && argType->typeEntry()->name() == metaFunction->name();
+        }
+
+        bool isInvalidDestructor = metaFunction->isDestructor() && metaFunction->isPrivate();
+        bool isInvalidConstructor = metaFunction->isConstructor()
+                                    && ((metaFunction->isPrivate() && !isCopyCtor) || metaFunction->isInvalid());
+
+        if ((isInvalidDestructor || isInvalidConstructor)
+            && !metaClass->hasNonPrivateConstructor()) {
+            *metaClass += AbstractMetaAttributes::Final;
+        } else if (metaFunction->isConstructor() && !metaFunction->isPrivate()) {
+            *metaClass -= AbstractMetaAttributes::Final;
+            metaClass->setHasNonPrivateConstructor(true);
+        }
+
+        // Classes with virtual destructors should always have a shell class
+        // (since we aren't registering the destructors, we need this extra check)
+        if (metaFunction->isDestructor() && !metaFunction->isFinal())
+            metaClass->setForceShellClass(true);
+
+        if (!metaFunction->isDestructor()
+            && !metaFunction->isInvalid()
+            && !(metaFunction->isPrivate() && metaFunction->isConstructor() && !isCopyCtor)) {
+
+            setupFunctionDefaults(metaFunction, metaClass);
+
+            if (metaFunction->isSignal() && metaClass->hasSignal(metaFunction)) {
+                QString warn = QString("signal '%1' in class '%2' is overloaded.")
+                               .arg(metaFunction->name()).arg(metaClass->name());
+                ReportHandler::warning(warn);
             }
 
-            bool isInvalidDestructor = metaFunction->isDestructor() && metaFunction->isPrivate();
-            bool isInvalidConstructor = metaFunction->isConstructor()
-                                        && ((metaFunction->isPrivate() && !isCopyCtor) || metaFunction->isInvalid());
-
-            if ((isInvalidDestructor || isInvalidConstructor)
-                && !metaClass->hasNonPrivateConstructor()) {
-                *metaClass += AbstractMetaAttributes::Final;
-            } else if (metaFunction->isConstructor() && !metaFunction->isPrivate()) {
-                *metaClass -= AbstractMetaAttributes::Final;
-                metaClass->setHasNonPrivateConstructor(true);
+            if (metaFunction->isSignal() && !metaClass->isQObject()) {
+                QString warn = QString("signal '%1' in non-QObject class '%2'")
+                               .arg(metaFunction->name()).arg(metaClass->name());
+                ReportHandler::warning(warn);
             }
 
-            // Classes with virtual destructors should always have a shell class
-            // (since we aren't registering the destructors, we need this extra check)
-            if (metaFunction->isDestructor() && !metaFunction->isFinal())
-                metaClass->setForceShellClass(true);
+            if (metaFunction->isConversionOperator())
+                fixReturnTypeOfConversionOperator(metaFunction);
 
-            if (!metaFunction->isDestructor()
-                && !metaFunction->isInvalid()
-                && !(metaFunction->isPrivate() && metaFunction->isConstructor() && !isCopyCtor)) {
-
-                setupFunctionDefaults(metaFunction, metaClass);
-
-                if (metaFunction->isSignal() && metaClass->hasSignal(metaFunction)) {
-                    QString warn = QString("signal '%1' in class '%2' is overloaded.")
-                                   .arg(metaFunction->name()).arg(metaClass->name());
-                    ReportHandler::warning(warn);
-                }
-
-                if (metaFunction->isSignal() && !metaClass->isQObject()) {
-                    QString warn = QString("signal '%1' in non-QObject class '%2'")
-                                   .arg(metaFunction->name()).arg(metaClass->name());
-                    ReportHandler::warning(warn);
-                }
-
-                if (metaFunction->isConversionOperator())
-                    fixReturnTypeOfConversionOperator(metaFunction);
-
-                metaClass->addFunction(metaFunction);
-                applyFunctionModifications(metaFunction);
-            } else if (metaFunction->isDestructor()) {
-                metaClass->setHasPrivateDestructor(metaFunction->isPrivate());
-                metaClass->setHasProtectedDestructor(metaFunction->isProtected());
-                metaClass->setHasVirtualDestructor(metaFunction->isVirtual());
-            }
-            if (!metaFunction->ownerClass()) {
-                delete metaFunction;
-                metaFunction = 0;
-            }
+            metaClass->addFunction(metaFunction);
+            applyFunctionModifications(metaFunction);
+        } else if (metaFunction->isDestructor()) {
+            metaClass->setHasPrivateDestructor(metaFunction->isPrivate());
+            metaClass->setHasProtectedDestructor(metaFunction->isProtected());
+            metaClass->setHasVirtualDestructor(metaFunction->isVirtual());
+        }
+        if (!metaFunction->ownerClass()) {
+            delete metaFunction;
+            metaFunction = 0;
         }
     }
 
@@ -1738,7 +1821,6 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
         return 0;
     }
 
-
     Q_ASSERT(functionItem->functionType() == CodeModel::Normal
              || functionItem->functionType() == CodeModel::Signal
              || functionItem->functionType() == CodeModel::Slot);
@@ -1845,6 +1927,7 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
             metaFunction->setInvalid(true);
             return metaFunction;
         }
+
         AbstractMetaArgument* metaArgument = createMetaArgument();
 
         metaArgument->setType(metaType);
