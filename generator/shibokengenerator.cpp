@@ -2383,7 +2383,44 @@ bool ShibokenGenerator::doSetup(const QMap<QString, QString>& args)
     m_verboseErrorMessagesDisabled = args.contains(DISABLE_VERBOSE_ERROR_MESSAGES);
     m_useIsNullAsNbNonZero = args.contains(USE_ISNULL_AS_NB_NONZERO);
     m_avoidProtectedHack = args.contains(AVOID_PROTECTED_HACK);
+
+    TypeDatabase* td = TypeDatabase::instance();
+    CodeSnipList snips;
+    QList<const TypeEntry*> types;
+    foreach (const PrimitiveTypeEntry* type, primitiveTypes())
+        snips.append(type->codeSnips());
+    foreach (const ContainerTypeEntry* type, containerTypes())
+        snips.append(type->codeSnips());
+    foreach (const AbstractMetaClass* metaClass, classes())
+        snips.append(metaClass->typeEntry()->codeSnips());
+    snips.append(reinterpret_cast<TypeSystemTypeEntry*>(td->findType(packageName()))->codeSnips());
+    foreach (AbstractMetaFunctionList globalOverloads, getFunctionGroups().values()) {
+        foreach (AbstractMetaFunction* func, globalOverloads)
+            snips.append(func->injectedCodeSnips());
+    }
+    foreach (const CodeSnip& snip, snips) {
+        QString code = snip.code();
+        collectContainerTypesFromConverterMacros(code, true);
+        collectContainerTypesFromConverterMacros(code, false);
+    }
     return true;
+}
+
+void ShibokenGenerator::collectContainerTypesFromConverterMacros(const QString& code, bool toPythonMacro)
+{
+    QString convMacro = toPythonMacro ? "%CONVERTTOPYTHON[" : "%CONVERTTOCPP[";
+    int offset = toPythonMacro ? sizeof("%CONVERTTOPYTHON") : sizeof("%CONVERTTOCPP");
+    int start = 0;
+    while ((start = code.indexOf(convMacro, start)) != -1) {
+        int end = code.indexOf("]", start);
+        start += offset;
+        if (code.at(start) != '%') {
+            QString typeString = code.mid(start, end - start);
+            AbstractMetaType* type = buildAbstractMetaTypeFromString(typeString);
+            addInstantiatedContainers(type);
+        }
+        start = end;
+    }
 }
 
 bool ShibokenGenerator::useCtorHeuristic() const

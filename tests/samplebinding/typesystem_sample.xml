@@ -100,6 +100,66 @@
         </conversion-rule>
     </primitive-type>
 
+    <primitive-type name="PStr">
+        <include file-name="str.h" location="global"/>
+        <conversion-rule>
+            <native-to-target>
+            return PyString_FromStringAndSize(%in.cstring(), %in.size());
+            </native-to-target>
+            <target-to-native>
+                <add-conversion type="PyString">
+                const char* str = %CONVERTTOCPP[const char*](%in);
+                %out = %OUTTYPE(str);
+                </add-conversion>
+                <add-conversion type="Py_None">
+                %out = %OUTTYPE();
+                </add-conversion>
+            </target-to-native>
+        </conversion-rule>
+    </primitive-type>
+
+    <primitive-type name="PStrList">
+        <include file-name="strlist.h" location="global"/>
+        <conversion-rule>
+            <native-to-target>
+            PyObject* %out = PyList_New((int) %in.size());
+            PStrList::const_iterator it = %in.begin();
+            for (int idx = 0; it != %in.end(); ++it, ++idx) {
+                PStr cppItem(*it);
+                PyList_SET_ITEM(%out, idx, %CONVERTTOPYTHON[PStr](cppItem));
+            }
+            return %out;
+            </native-to-target>
+            <target-to-native>
+                <add-conversion type="PySequence">
+                %OUTTYPE&amp; list = %out;
+                for (int i = 0; i &lt; PySequence_Fast_GET_SIZE(%in); i++) {
+                    PyObject* pyItem = PySequence_Fast_GET_ITEM(%in, i);
+                    PStr cppItem = %CONVERTTOCPP[PStr](pyItem);
+                    list.push_back(cppItem);
+                }
+                </add-conversion>
+            </target-to-native>
+        </conversion-rule>
+    </primitive-type>
+
+    <add-function signature="createPStrList(PStr, PStr)" return-type="PyObject">
+        <inject-code class="target">
+        PStrList %0;
+        %0.push_back(%1);
+        %0.push_back(%2);
+        %PYARG_0 = %CONVERTTOPYTHON[PStrList](%0);
+        </inject-code>
+    </add-function>
+    <add-function signature="createListOfPStr(PStr, PStr)" return-type="PyObject">
+        <inject-code class="target">
+        std::list&lt;PStr&gt; %0;
+        %0.push_back(%1);
+        %0.push_back(%2);
+        %PYARG_0 = %CONVERTTOPYTHON[std::list&lt;PStr&gt;](%0);
+        </inject-code>
+    </add-function>
+
     <container-type name="std::pair" type="pair">
         <include file-name="utility" location="global"/>
         <conversion-rule file="pair_conversions.h">

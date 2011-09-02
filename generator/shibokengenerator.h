@@ -479,6 +479,7 @@ public:
     static QString getDefaultValue(const AbstractMetaFunction* func, const AbstractMetaArgument* arg);
 protected:
     bool doSetup(const QMap<QString, QString>& args);
+    void collectContainerTypesFromConverterMacros(const QString& code, bool toPythonMacro);
     // verify whether the class is copyable
     bool isCopyable(const AbstractMetaClass* metaClass);
 

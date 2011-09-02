@@ -65,5 +65,6 @@ private:
 LIBSAMPLE_API Str operator+(int number, const Str& str);
 LIBSAMPLE_API unsigned int strHash(const Str& str);
 
-#endif // STR_H
+typedef Str PStr;
 
+#endif // STR_H

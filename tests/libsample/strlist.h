@@ -54,4 +54,6 @@ private:
     CtorEnum m_ctorUsed;
 };
 
+typedef StrList PStrList;
+
 #endif // STRLIST_H
