@@ -166,3 +166,14 @@ unsigned int strHash(const Str& str)
     return result;
 }
 
+void changePStr(PStr* pstr, const char* suffix)
+{
+    pstr->append(suffix);
+}
+
+void duplicatePStr(PStr* pstr)
+{
+    if (!pstr)
+        return;
+    pstr->append(*pstr);
+}

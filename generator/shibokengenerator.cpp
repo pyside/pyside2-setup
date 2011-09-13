@@ -1122,7 +1122,9 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool gene
         return QString("%1_Check").arg(pythonPrimitiveTypeName((const PrimitiveTypeEntry*)type));
     } else if (!type->isEnum() && !type->isFlags()) {
         QString typeCheck;
-        if (!type->targetLangApiName().isEmpty())
+        if (type->targetLangApiName() == type->name())
+            typeCheck = cpythonIsConvertibleFunction(type);
+        else
             typeCheck = QString("%1_Check").arg(type->targetLangApiName());
         return typeCheck;
     }
@@ -1965,6 +1967,10 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                 }
                 case TypeSystemCheckFunction:
                     conversion = cpythonCheckFunction(conversionType);
+                    if (conversionType->typeEntry()->isPrimitive() && (conversionType->typeEntry()->name() == "PyObject" || !conversion.endsWith(' '))) {
+                        c << '(';
+                        break;
+                    }
                 case TypeSystemIsConvertibleFunction:
                     if (conversion.isEmpty())
                         conversion = cpythonIsConvertibleFunction(conversionType);
@@ -1988,8 +1994,8 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                         conversion.prepend('(');
                         conversion.replace("%in", arg);
                     } else {
-                        if (conversionType->isPrimitive() && converterVariable == TypeSystemCheckFunction)
-                            conversion.append('(');
+                        //if (conversionType->isPrimitive() && converterVariable == TypeSystemCheckFunction)
+                            //conversion.append('(');
                         c << arg;
                     }
                 }
@@ -2375,6 +2381,31 @@ QMap<QString, QString> ShibokenGenerator::options() const
     return opts;
 }
 
+static void getCode(QStringList& code, const CodeSnipList& codeSnips)
+{
+    foreach (const CodeSnip& snip, codeSnips)
+        code.append(snip.code());
+}
+
+static void getCode(QStringList& code, const TypeEntry* type)
+{
+    getCode(code, type->codeSnips());
+
+    CustomConversion* customConversion = type->customConversion();
+    if (!customConversion)
+        return;
+
+    if (!customConversion->nativeToTargetConversion().isEmpty())
+        code.append(customConversion->nativeToTargetConversion());
+
+    const CustomConversion::TargetToNativeConversions& toCppConversions = customConversion->targetToNativeConversions();
+    if (toCppConversions.isEmpty())
+        return;
+
+    foreach (CustomConversion::TargetToNativeConversion* toNative, toCppConversions)
+        code.append(toNative->conversion());
+}
+
 bool ShibokenGenerator::doSetup(const QMap<QString, QString>& args)
 {
     m_useCtorHeuristic = args.contains(PARENT_CTOR_HEURISTIC);
@@ -2385,24 +2416,24 @@ bool ShibokenGenerator::doSetup(const QMap<QString, QString>& args)
     m_avoidProtectedHack = args.contains(AVOID_PROTECTED_HACK);
 
     TypeDatabase* td = TypeDatabase::instance();
-    CodeSnipList snips;
-    QList<const TypeEntry*> types;
+    QStringList snips;
     foreach (const PrimitiveTypeEntry* type, primitiveTypes())
-        snips.append(type->codeSnips());
+        getCode(snips, type);
     foreach (const ContainerTypeEntry* type, containerTypes())
-        snips.append(type->codeSnips());
+        getCode(snips, type);
     foreach (const AbstractMetaClass* metaClass, classes())
-        snips.append(metaClass->typeEntry()->codeSnips());
-    snips.append(reinterpret_cast<TypeSystemTypeEntry*>(td->findType(packageName()))->codeSnips());
+        getCode(snips, metaClass->typeEntry());
+    getCode(snips, td->findType(packageName()));
     foreach (AbstractMetaFunctionList globalOverloads, getFunctionGroups().values()) {
         foreach (AbstractMetaFunction* func, globalOverloads)
-            snips.append(func->injectedCodeSnips());
+            getCode(snips, func->injectedCodeSnips());
     }
-    foreach (const CodeSnip& snip, snips) {
-        QString code = snip.code();
+
+    foreach (const QString& code, snips) {
         collectContainerTypesFromConverterMacros(code, true);
         collectContainerTypesFromConverterMacros(code, false);
     }
+
     return true;
 }
 

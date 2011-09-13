@@ -118,6 +118,44 @@
         </conversion-rule>
     </primitive-type>
 
+    <function signature="changePStr(PStr*, const char*)">
+        <!--
+             Comment out these modifications and the Shiboken generator
+             will issue a fatal error, because it can't handle a pointer
+             to a primitive type (PStr*) without help from the binding
+             developer.
+        -->
+        <modify-function signature="changePStr(PStr*, const char*)">
+            <modify-argument index="1">
+                <replace-type modified-type="PStr"/>
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PyObject"/>
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+            %FUNCTION_NAME(&amp;%1, %2);
+            %PYARG_0 = %CONVERTTOPYTHON[PStr](%1);
+            </inject-code>
+        </modify-function>
+    </function>
+
+    <function signature="duplicatePStr(PStr*)">
+        <modify-function signature="duplicatePStr(PStr*)">
+            <modify-argument index="return">
+                <replace-type modified-type="PyObject"/>
+            </modify-argument>
+            <modify-argument index="1">
+                <replace-type modified-type="PStr"/>
+                <remove-default-expression/>
+                <replace-default-expression with="PStr()"/>
+            </modify-argument>
+            <inject-code class="target" position="end">
+            %FUNCTION_NAME(&amp;%1);
+            %PYARG_0 = %CONVERTTOPYTHON[PStr](%1);
+            </inject-code>
+        </modify-function>
+    </function>
+
     <primitive-type name="PStrList">
         <include file-name="strlist.h" location="global"/>
         <conversion-rule>
