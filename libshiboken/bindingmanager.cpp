@@ -71,7 +71,7 @@ public:
     }
 #endif
 
-    SbkObjectType* identifyType(void* cptr, SbkObjectType* type, SbkObjectType* baseType) const
+    SbkObjectType* identifyType(void** cptr, SbkObjectType* type, SbkObjectType* baseType) const
     {
         Edges::const_iterator edgesIt = m_edges.find(type);
         if (edgesIt != m_edges.end()) {
@@ -83,7 +83,17 @@ public:
                     return newType;
             }
         }
-        return ((type->d && type->d->type_discovery) ? type->d->type_discovery(cptr, baseType) : 0);
+        void* typeFound = ((type->d && type->d->type_discovery) ? type->d->type_discovery(*cptr, baseType) : 0);
+        if (typeFound) {
+            // This "typeFound != type" is needed for backwards compatibility with old modules using a newer version of
+            // libshiboken because old versions of type_discovery function used to return a SbkObjectType* instead of
+            // a possible variation of the C++ instance pointer (*cptr).
+            if (typeFound != type)
+                *cptr = typeFound;
+            return type;
+        } else {
+            return 0;
+        }
     }
 };
 
@@ -264,6 +274,11 @@ void BindingManager::addClassInheritance(SbkObjectType* parent, SbkObjectType* c
 }
 
 SbkObjectType* BindingManager::resolveType(void* cptr, SbkObjectType* type)
+{
+    return resolveType(&cptr, type);
+}
+
+SbkObjectType* BindingManager::resolveType(void** cptr, SbkObjectType* type)
 {
     SbkObjectType* identifiedType = m_d->classHierarchy.identifyType(cptr, type, type);
     return identifiedType ? identifiedType : type;

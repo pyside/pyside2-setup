@@ -646,14 +646,21 @@ const char* getOriginalName(SbkObjectType* self)
     return self->d->original_name;
 }
 
-void setTypeDiscoveryFunction(SbkObjectType* self, TypeDiscoveryFunc func)
+void setTypeDiscoveryFunctionV2(SbkObjectType* self, TypeDiscoveryFuncV2 func)
 {
     self->d->type_discovery = func;
 }
 
+void setTypeDiscoveryFunction(SbkObjectType* self, TypeDiscoveryFunc func)
+{
+    self->d->type_discovery = (TypeDiscoveryFuncV2)func;
+}
+
 TypeDiscoveryFunc getTypeDiscoveryFunction(SbkObjectType* self)
 {
-    return self->d->type_discovery;
+    // This is an illegal cast because the return value is different,
+    // but nobody ever used this function, so... =]
+    return (TypeDiscoveryFunc)self->d->type_discovery;
 }
 
 void copyMultimpleheritance(SbkObjectType* self, SbkObjectType* other)
@@ -1017,7 +1024,7 @@ PyObject* newObject(SbkObjectType* instanceType,
                 instanceType = reinterpret_cast<SbkObjectType*>(tr->pythonType());
         }
         if (!tr)
-            instanceType = BindingManager::instance().resolveType(cptr, instanceType);
+            instanceType = BindingManager::instance().resolveType(&cptr, instanceType);
     }
 
     SbkObject* self = reinterpret_cast<SbkObject*>(SbkObjectTpNew(reinterpret_cast<PyTypeObject*>(instanceType), 0, 0));

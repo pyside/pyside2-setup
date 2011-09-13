@@ -64,6 +64,7 @@ typedef int* (*MultipleInheritanceInitFunction)(const void*);
  */
 typedef void* (*SpecialCastFunction)(void*, SbkObjectType*);
 typedef SbkObjectType* (*TypeDiscoveryFunc)(void*, SbkObjectType*);
+typedef void* (*TypeDiscoveryFuncV2)(void*, SbkObjectType*);
 
 typedef void* (*ExtendedToCppFunc)(PyObject*);
 typedef bool (*ExtendedIsConvertibleFunc)(PyObject*);
@@ -157,8 +158,9 @@ LIBSHIBOKEN_API void        setCastFunction(SbkObjectType* type, SpecialCastFunc
 LIBSHIBOKEN_API void        setOriginalName(SbkObjectType* self, const char* name);
 LIBSHIBOKEN_API const char* getOriginalName(SbkObjectType* self);
 
-LIBSHIBOKEN_API void        setTypeDiscoveryFunction(SbkObjectType* self, TypeDiscoveryFunc func);
-LIBSHIBOKEN_API TypeDiscoveryFunc getTypeDiscoveryFunction(SbkObjectType* self);
+LIBSHIBOKEN_API void setTypeDiscoveryFunctionV2(SbkObjectType* self, TypeDiscoveryFuncV2 func);
+LIBSHIBOKEN_API SBK_DEPRECATED(void setTypeDiscoveryFunction(SbkObjectType* self, TypeDiscoveryFunc func));
+LIBSHIBOKEN_API SBK_DEPRECATED(TypeDiscoveryFunc getTypeDiscoveryFunction(SbkObjectType* self));
 
 LIBSHIBOKEN_API void        copyMultimpleheritance(SbkObjectType* self, SbkObjectType* other);
 LIBSHIBOKEN_API void        setMultipleIheritanceFunction(SbkObjectType* self, MultipleInheritanceInitFunction func);

@@ -3521,7 +3521,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
 
     // Set typediscovery struct or fill the struct of another one
     if (metaClass->isPolymorphic() && metaClass->baseClass()) {
-        s << INDENT << "Shiboken::ObjectType::setTypeDiscoveryFunction(&" << cpythonTypeName(metaClass);
+        s << INDENT << "Shiboken::ObjectType::setTypeDiscoveryFunctionV2(&" << cpythonTypeName(metaClass);
         s << ", &" << cpythonBaseName(metaClass) << "_typeDiscovery);" << endl << endl;
     }
 
@@ -3619,22 +3619,14 @@ void CppGenerator::writeTypeDiscoveryFunction(QTextStream& s, const AbstractMeta
 {
     QString polymorphicExpr = metaClass->typeEntry()->polymorphicIdValue();
 
-    s << "static SbkObjectType* " << cpythonBaseName(metaClass) << "_typeDiscovery(void* cptr, SbkObjectType* instanceType)\n{" << endl;
+    s << "static void* " << cpythonBaseName(metaClass) << "_typeDiscovery(void* cptr, SbkObjectType* instanceType)\n{" << endl;
 
-    if (!metaClass->baseClass()) {
-        s << INDENT << "TypeResolver* typeResolver = TypeResolver::get(typeid(*reinterpret_cast< ::"
-          << metaClass->qualifiedCppName() << "*>(cptr)).name());" << endl;
-        s << INDENT << "if (typeResolver)" << endl;
-        {
-            Indentation indent(INDENT);
-            s << INDENT << "return reinterpret_cast<SbkObjectType*>(typeResolver->pythonType());" << endl;
-        }
-    } else if (!polymorphicExpr.isEmpty()) {
+    if (!polymorphicExpr.isEmpty()) {
         polymorphicExpr = polymorphicExpr.replace("%1", " reinterpret_cast< ::" + metaClass->qualifiedCppName() + "*>(cptr)");
         s << INDENT << " if (" << polymorphicExpr << ")" << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << "return &" << cpythonTypeName(metaClass) << ';' << endl;
+            s << INDENT << "return cptr;" << endl;
         }
     } else if (metaClass->isPolymorphic()) {
         AbstractMetaClassList ancestors = getAllAncestors(metaClass);
@@ -3643,10 +3635,10 @@ void CppGenerator::writeTypeDiscoveryFunction(QTextStream& s, const AbstractMeta
                 continue;
             if (ancestor->isPolymorphic()) {
                 s << INDENT << "if (instanceType == reinterpret_cast<SbkObjectType*>(Shiboken::SbkType< ::"
-                            << ancestor->qualifiedCppName() << " >()) && dynamic_cast< ::" << metaClass->qualifiedCppName()
-                            << "*>(reinterpret_cast< ::"<< ancestor->qualifiedCppName() << "*>(cptr)))" << endl;
+                            << ancestor->qualifiedCppName() << " >()))" << endl;
                 Indentation indent(INDENT);
-                s << INDENT << "return &" << cpythonTypeName(metaClass) << ';' << endl;
+                s << INDENT << "return dynamic_cast< ::" << metaClass->qualifiedCppName()
+                            << "*>(reinterpret_cast< ::"<< ancestor->qualifiedCppName() << "*>(cptr));" << endl;
             } else {
                 ReportHandler::warning(metaClass->qualifiedCppName() + " inherits from a non polymorphic type ("
                                        + ancestor->qualifiedCppName() + "), type discovery based on RTTI is "

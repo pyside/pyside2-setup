@@ -49,7 +49,20 @@ public:
     PyObject* getOverride(const void* cptr, const char* methodName);
 
     void addClassInheritance(SbkObjectType* parent, SbkObjectType* child);
-    SbkObjectType* resolveType(void* cptr, SbkObjectType* type);
+    /**
+     * \deprecated Use \fn resolveType(void**, SbkObjectType*), this version is broken when used with multiple inheritance
+     *             because the \p cptr pointer of the discovered type may be different of the given \p cptr in case
+     *             of multiple inheritance
+     */
+    SBK_DEPRECATED(SbkObjectType* resolveType(void* cptr, SbkObjectType* type));
+    /**
+     * Try to find the correct type of *cptr knowing that it's at least of type \p type.
+     * In case of multiple inheritance this function may change the contents of cptr.
+     * \param cptr a pointer to a pointer to the instance of type \p type
+     * \param type type of *cptr
+     * \warning This function is slow, use it only as last resort.
+     */
+    SbkObjectType* resolveType(void** cptr, SbkObjectType* type);
 
     std::set<SbkObject*> getAllPyObjects();
 
