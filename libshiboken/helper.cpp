@@ -39,7 +39,7 @@ bool sequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* 
     int numArgs = PySequence_Fast_GET_SIZE(argList);
     for (int i = 0; i < numArgs; ++i) {
         PyObject* item = PySequence_Fast_GET_ITEM(args.object(), i);
-        if (!PyString_Check(item) && !PyUnicode_Check(item))
+        if (!PyBytes_Check(item) && !PyUnicode_Check(item))
             return false;
     }
 
@@ -54,16 +54,16 @@ bool sequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* 
         // Try to get the script name
         PyObject* globals = PyEval_GetGlobals();
         PyObject* appName = PyDict_GetItemString(globals, "__file__");
-        (*argv)[0] = strdup(appName ? PyString_AS_STRING(appName) : defaultAppName);
+        (*argv)[0] = strdup(appName ? PyBytes_AS_STRING(appName) : defaultAppName);
     } else {
         for (int i = 0; i < numArgs; ++i) {
             PyObject* item = PySequence_Fast_GET_ITEM(args.object(), i);
             char* string;
             if (PyUnicode_Check(item)) {
                 Shiboken::AutoDecRef utf8(PyUnicode_AsUTF8String(item));
-                string = strdup(PyString_AS_STRING(utf8.object()));
+                string = strdup(PyBytes_AS_STRING(utf8.object()));
             } else {
-                string = strdup(PyString_AS_STRING(item));
+                string = strdup(PyBytes_AS_STRING(item));
             }
             (*argv)[i] = string;
         }

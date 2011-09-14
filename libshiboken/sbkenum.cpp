@@ -43,9 +43,9 @@ static PyObject* SbkEnumObject_repr(PyObject* self)
 {
     PyObject* enumName = ((SbkEnumObject*)self)->ob_name;
     if (enumName)
-        return PyString_FromFormat("%s.%s", self->ob_type->tp_name, PyString_AS_STRING(enumName));
+        return PyBytes_FromFormat("%s.%s", self->ob_type->tp_name, PyBytes_AS_STRING(enumName));
     else
-        return PyString_FromFormat("%s(%ld)", self->ob_type->tp_name, ((SbkEnumObject*)self)->ob_ival);
+        return PyBytes_FromFormat("%s(%ld)", self->ob_type->tp_name, ((SbkEnumObject*)self)->ob_ival);
 }
 
 static int SbkEnumObject_print(PyObject* self, FILE* fp, int)
@@ -53,7 +53,7 @@ static int SbkEnumObject_print(PyObject* self, FILE* fp, int)
     Py_BEGIN_ALLOW_THREADS
     PyObject* enumName = ((SbkEnumObject*)self)->ob_name;
     if (enumName)
-        fprintf(fp, "%s.%s", self->ob_type->tp_name, PyString_AS_STRING(enumName));
+        fprintf(fp, "%s.%s", self->ob_type->tp_name, PyBytes_AS_STRING(enumName));
     else
         fprintf(fp, "%s(%ld)", self->ob_type->tp_name, ((SbkEnumObject*)self)->ob_ival);
     Py_END_ALLOW_THREADS
@@ -264,7 +264,7 @@ PyObject* newItem(PyTypeObject* enumType, long itemValue, const char* itemName)
     if (!enumObj)
         return 0;
 
-    enumObj->ob_name = itemName ? PyString_FromString(itemName) : 0;
+    enumObj->ob_name = itemName ? PyBytes_FromString(itemName) : 0;
     enumObj->ob_ival = itemValue;
 
     if (newValue) {
