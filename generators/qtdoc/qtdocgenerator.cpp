@@ -99,6 +99,7 @@ static QString escape(const QStringRef& strref)
     return escape(str);
 }
 
+
 QtXmlToSphinx::QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, const QString& context)
         : m_context(context), m_generator(generator), m_insideBold(false), m_insideItalic(false)
 {
@@ -164,6 +165,26 @@ QString QtXmlToSphinx::popOutputBuffer()
     return strcpy;
 }
 
+QString QtXmlToSphinx::expandFunction(const QString& function)
+{
+    QStringList functionSpec = function.split('.');
+    QString className = functionSpec.first();
+    const AbstractMetaClass* metaClass = 0;
+    foreach (const AbstractMetaClass* cls, m_generator->classes()) {
+        if (cls->name() == className) {
+            metaClass = cls;
+            break;
+        }
+    }
+
+    if (metaClass) {
+        functionSpec.removeFirst();
+        return metaClass->typeEntry()->qualifiedTargetLangName() + "." + functionSpec.join(".");
+    } else {
+        return function;
+    }
+}
+
 QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName)
 {
     QString currentClass = m_context.split(".").last();
@@ -191,7 +212,7 @@ QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName)
         }
 
         if (implementingClass)
-            return implementingClass->name();
+            return implementingClass->typeEntry()->qualifiedTargetLangName();
     }
 
     return QLatin1String("~") + m_context;
@@ -576,6 +597,8 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
                 QString context = resolveContextForMethod(rawlinklist.last());
                 if (!l_linkref.startsWith(context))
                     l_linkref.prepend(context + '.');
+            } else {
+                l_linkref = expandFunction(l_linkref);
             }
         } else if (l_type == "function" && m_context.isEmpty()) {
             l_linktag = " :func:`";
