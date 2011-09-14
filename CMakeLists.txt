@@ -9,8 +9,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/
 find_package(Qt4 4.5.0)
 find_package(ApiExtractor 0.10.7 REQUIRED)
 find_package(GeneratorRunner 0.6.13 REQUIRED)
-find_package(PythonLibs)
-find_package(PythonInterpWithDebug)
 
 add_definitions(${QT_DEFINITIONS})
 
@@ -20,6 +18,23 @@ set(shiboken_MICRO_VERSION "7")
 set(shiboken_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
 
 option(BUILD_TESTS "Build tests." TRUE)
+option(USE_PYTHON3 "Use python3 libraries to build shiboken." FALSE)
+
+if (USE_PYTHON3)
+    find_package(Python3Libs)
+    find_package(Python3InterpWithDebug)
+    #use commom vars
+    set(PYTHONLIBS_FOUND ${PYTHON3LIBS_FOUND})
+    set(PYTHON_LIBRARIES ${PYTHON3_LIBRARIES})
+    set(PYTHON_INCLUDE_DIRS ${PYTHON3_INCLUDE_DIRS})
+    set(PYTHON_DEBUG_LIBRARIES ${PYTHON3_DEBUG_LIBRARIES})
+    set(PYTHONINTERP_FOUND ${PYTHON3INTERP_FOUND})
+    set(PYTHON_EXECUTABLE ${PYTHON3_EXECUTABLE})
+else()
+    find_package(PythonLibs 2.6)
+    find_package(PythonInterpWithDebug)
+endif()
+
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "/Zc:wchar_t- /GR /EHsc /DWIN32 /D_WINDOWS /D_SCL_SECURE_NO_WARNINGS")

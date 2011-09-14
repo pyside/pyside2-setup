@@ -9,5 +9,5 @@ python_include_dir=@SBK_PYTHON_INCLUDE_DIR@
 Name: shiboken
 Description: Support library for Python bindings created with Shiboken generator.
 Version: @shiboken_VERSION@
-Libs: @SBK_PYTHON_LIBRARIES@ -L${libdir} -lshiboken${shiboken_SUFFIX}-@PYTHON_BASENAME@@LIBRARY_OUTPUT_SUFFIX@
+Libs: @SBK_PYTHON_LIBRARIES@ -L${libdir} -lshiboken${shiboken_SUFFIX}@PYTHON_SUFFIX@@LIBRARY_OUTPUT_SUFFIX@
 Cflags: -I@SBK_PYTHON_INCLUDE_DIR@ -I${includedir}/${shiboken_SUFFIX}@SBK_PKG_CONFIG_PY_DEBUG_DEFINITION@

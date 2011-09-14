@@ -27,13 +27,14 @@ execute_process(
         from distutils import sysconfig; \\
         vr = sys.version_info; \\
         suffix = '-dbg' if bool(sysconfig.get_config_var('Py_DEBUG')) else ''; \\
-        print 'python%d.%d%s' % (vr[0], vr[1], suffix)"
-    OUTPUT_VARIABLE PYTHON_BASENAME
+        print '-python%d.%d%s' % (vr[0], vr[1], suffix)"
+    OUTPUT_VARIABLE PYTHON_SUFFIX
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 #Fix missing variable on UNIX env
 if(NOT PYTHON_DEBUG_LIBRARIES AND UNIX)
-    string(REPLACE "-dbg" "" PYTHON_NAME ${PYTHON_BASENAME})
+    string(REPLACE "-dbg" "" PYTHON_NAME_TMP ${PYTHON_SUFFIX})
+    string(REPLACE "-python" "python" PYTHON_NAME ${PYTHON_NAME_TMP})
     find_library(LIBRARY_FOUND ${PYTHON_NAME}_d)
     if (LIBRARY_FOUND)
         set(PYTHON_DEBUG_LIBRARIES "${LIBRARY_FOUND}")
