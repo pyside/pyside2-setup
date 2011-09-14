@@ -23,7 +23,7 @@
 #ifndef SHIBOKEN_H
 #define SHIBOKEN_H
 
-#include <Python.h>
+#include "sbkpython.h"
 #include "autodecref.h"
 #include "basewrapper.h"
 #include "bindingmanager.h"

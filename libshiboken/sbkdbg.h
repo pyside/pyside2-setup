@@ -23,7 +23,7 @@
 #ifndef SBKDBG_H
 #define SBKDBG_H
 
-#include <Python.h>
+#include "sbkpython.h"
 #include "basewrapper.h"
 #include <iostream>
 

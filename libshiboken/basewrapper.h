@@ -23,8 +23,7 @@
 #ifndef BASEWRAPPER_H
 #define BASEWRAPPER_H
 
-#include <Python.h>
-#include "python25compat.h"
+#include "sbkpython.h"
 #include "bindingmanager.h"
 #include <list>
 #include <map>

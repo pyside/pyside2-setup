@@ -23,7 +23,7 @@
 #ifndef BASEWRAPPER_P_H
 #define BASEWRAPPER_P_H
 
-#include <Python.h>
+#include "sbkpython.h"
 #include <list>
 #include <map>
 

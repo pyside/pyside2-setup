@@ -23,7 +23,7 @@
 #ifndef HELPER_H
 #define HELPER_H
 
-#include <Python.h>
+#include "sbkpython.h"
 #include "shibokenmacros.h"
 #include "conversions.h"
 #include "autodecref.h"

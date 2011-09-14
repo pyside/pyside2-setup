@@ -422,7 +422,7 @@ void HeaderGenerator::finishGeneration()
         s << "#define protected public" << endl << endl;
     }
 
-    s << "#include <Python.h>" << endl;
+    s << "#include <sbkpython.h>" << endl;
     s << "#include <conversions.h>" << endl;
     s << "#include <sbkenum.h>" << endl;
     s << "#include <basewrapper.h>" << endl;

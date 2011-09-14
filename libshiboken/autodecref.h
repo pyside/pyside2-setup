@@ -23,7 +23,7 @@
 #ifndef AUTODECREF_H
 #define AUTODECREF_H
 
-#include <Python.h>
+#include "sbkpython.h"
 #include "shibokenmacros.h"
 
 namespace Shiboken

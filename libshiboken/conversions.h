@@ -23,7 +23,7 @@
 #ifndef CONVERSIONS_H
 #define CONVERSIONS_H
 
-#include <Python.h>
+#include "sbkpython.h"
 #include <limits>
 #include <memory>
 #include <typeinfo>

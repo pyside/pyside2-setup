@@ -23,7 +23,7 @@
 #ifndef SHIBOKEN_BUFFER_H
 #define SHIBOKEN_BUFFER_H
 
-#include <Python.h>
+#include "sbkpython.h"
 #include "shibokenmacros.h"
 
 namespace Shiboken

@@ -1,7 +1,7 @@
 /*
  * This file is part of the Shiboken Python Bindings Generator project.
  *
- * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2011 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -20,27 +20,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef GILSTATE_H
-#define GILSTATE_H
+#ifndef SBKPYTHON_H
+#define SBKPYTHON_H
 
-#include <shibokenmacros.h>
-#include "sbkpython.h"
+#include "Python.h"
+#include "python25compat.h"
 
-namespace Shiboken
-{
+#if PY_MAJOR_VERSION >= 3
+    #define IS_PY3K
 
-class LIBSHIBOKEN_API GilState
-{
-public:
-    GilState();
-    ~GilState();
-    void release();
-private:
-    PyGILState_STATE m_gstate;
-    bool m_locked;
-};
+    #define PyInt_Type PyLong_Type
+    #define PyInt_Check PyLong_Check
+    #define PyInt_AS_LONG PyLong_AS_LONG
+    #define PyInt_FromLong PyLong_FromLong
+    #define PyInt_AsLong PyLong_AsLong
+    #define SbkNumber_Check PyNumber_Check
+#else
+    // Note: if there wasn't for the old-style classes, only a PyNumber_Check would suffice.
+    #define SbkNumber_Check(X) \
+            (PyNumber_Check(X) && (!PyInstance_Check(X) || PyObject_HasAttrString(X, "__trunc__")))
+#endif
 
-} // namespace Shiboken
-
-#endif // GILSTATE_H
-
+#endif

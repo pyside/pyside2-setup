@@ -23,7 +23,7 @@
 #ifndef BINDINGMANAGER_H
 #define BINDINGMANAGER_H
 
-#include <Python.h>
+#include "sbkpython.h"
 #include <set>
 #include "shibokenmacros.h"
 

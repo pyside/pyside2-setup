@@ -3794,7 +3794,7 @@ void CppGenerator::finishGeneration()
     // write license comment
     s << licenseComment() << endl;
 
-    s << "#include <Python.h>" << endl;
+    s << "#include <sbkpython.h>" << endl;
     s << "#include <shiboken.h>" << endl;
     s << "#include <algorithm>" << endl;
     if (usePySideExtensions())

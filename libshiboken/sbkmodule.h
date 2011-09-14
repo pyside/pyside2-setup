@@ -23,7 +23,7 @@
 #ifndef SBK_MODULE_H
 #define SBK_MODULE_H
 
-#include <Python.h>
+#include "sbkpython.h"
 #include "shibokenmacros.h"
 
 namespace Shiboken {

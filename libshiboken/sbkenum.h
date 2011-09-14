@@ -23,7 +23,7 @@
 #ifndef SBKENUM_H
 #define SBKENUM_H
 
-#include <Python.h>
+#include "sbkpython.h"
 #include "shibokenmacros.h"
 
 extern "C"

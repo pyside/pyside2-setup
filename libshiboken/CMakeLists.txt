@@ -59,6 +59,7 @@ install(FILES
         threadstatesaver.h
         typeresolver.h
         shibokenbuffer.h
+        sbkpython.h
         DESTINATION include/shiboken${shiboken_SUFFIX})
 install(TARGETS libshiboken EXPORT shiboken
                             LIBRARY DESTINATION "${LIB_INSTALL_DIR}"
