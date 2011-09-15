@@ -38,10 +38,6 @@
 #define PyObject_Check(X) true
 #include "autodecref.h"
 
-// Note: if there wasn't for the old-style classes, only a PyNumber_Check would suffice.
-#define SbkNumber_Check(X) \
-        (PyNumber_Check(X) && (!PyInstance_Check(X) || PyObject_HasAttrString(X, "__trunc__")))
-
 namespace Shiboken
 {
 /**

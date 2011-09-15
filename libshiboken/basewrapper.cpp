@@ -258,6 +258,7 @@ void SbkObjectTypeDealloc(PyObject* pyObj)
 
 PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
 {
+#ifndef IS_PY3K
     // Check if all bases are new style before calling type.tp_new
     // Was causing gc assert errors in test_bug704.py when
     // this check happened after creating the type object.
@@ -280,6 +281,7 @@ PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* k
             return 0;
         }
     }
+#endif
 
     // The meta type creates a new type when the Python programmer extends a wrapped C++ class.
     SbkObjectType* newType = reinterpret_cast<SbkObjectType*>(PyType_Type.tp_new(metatype, args, kwds));
@@ -424,9 +426,14 @@ bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr)
     if (cppApi.isNull())
         return false;
 
+#ifdef IS_PY3K
+    if (PyCapsule_CheckExact(cppApi))
+        *cppApiPtr = reinterpret_cast<PyTypeObject**>(PyCapsule_GetPointer(cppApi, 0));
+#else
+    // Python 2.6 doesn't have PyCapsule API, so let's keep usign PyCObject on all Python 2.x
     if (PyCObject_Check(cppApi))
         *cppApiPtr = reinterpret_cast<PyTypeObject**>(PyCObject_AsVoidPtr(cppApi));
-
+#endif
     return true;
 }
 
@@ -487,10 +494,7 @@ void setErrorAboutWrongArguments(PyObject* args, const char* funcName, const cha
                 if (i)
                     params += ", ";
                 PyObject* arg = PyTuple_GET_ITEM(args, i);
-                if (PyCObject_Check(arg))
-                    params += "pointer";
-                else
-                    params += arg->ob_type->tp_name;
+                params += arg->ob_type->tp_name;
             }
         } else {
             params = args->ob_type->tp_name;
@@ -816,7 +820,7 @@ void getOwnership(PyObject* pyObj)
 void releaseOwnership(SbkObject* self)
 {
     // skip if the ownership have already moved to c++
-    SbkObjectType* selfType = reinterpret_cast<SbkObjectType*>(self->ob_type);
+    SbkObjectType* selfType = reinterpret_cast<SbkObjectType*>(Py_TYPE(self));
     if (!self->d->hasOwnership || selfType->d->type_behaviour == BEHAVIOUR_VALUETYPE)
         return;
 
@@ -924,7 +928,7 @@ bool hasParentInfo(SbkObject* pyObj)
 
 void* cppPointer(SbkObject* pyObj, PyTypeObject* desiredType)
 {
-    PyTypeObject* type = pyObj->ob_type;
+    PyTypeObject* type = Py_TYPE(pyObj);
     int idx = 0;
     if (reinterpret_cast<SbkObjectType*>(type)->d->is_multicpp)
         idx = getTypeIndexOnHierarchy(type, desiredType);
@@ -936,8 +940,8 @@ void* cppPointer(SbkObject* pyObj, PyTypeObject* desiredType)
 bool setCppPointer(SbkObject* sbkObj, PyTypeObject* desiredType, void* cptr)
 {
     int idx = 0;
-    if (reinterpret_cast<SbkObjectType*>(sbkObj->ob_type)->d->is_multicpp)
-        idx = getTypeIndexOnHierarchy(sbkObj->ob_type, desiredType);
+    if (reinterpret_cast<SbkObjectType*>(Py_TYPE(sbkObj))->d->is_multicpp)
+        idx = getTypeIndexOnHierarchy(Py_TYPE(sbkObj), desiredType);
 
     bool alreadyInitialized = sbkObj->d->cptr[idx];
     if (alreadyInitialized)
@@ -952,7 +956,7 @@ bool setCppPointer(SbkObject* sbkObj, PyTypeObject* desiredType, void* cptr)
 bool isValid(PyObject* pyObj)
 {
     if (!pyObj || pyObj == Py_None
-        || pyObj->ob_type->ob_type != &SbkObjectType_Type) {
+        || Py_TYPE(pyObj->ob_type) != &SbkObjectType_Type) {
         return true;
     }
 
@@ -979,13 +983,13 @@ bool isValid(SbkObject* pyObj, bool throwPyError)
     SbkObjectPrivate* priv = pyObj->d;
     if (!priv->cppObjectCreated && isUserType(reinterpret_cast<PyObject*>(pyObj))) {
         if (throwPyError)
-            PyErr_Format(PyExc_RuntimeError, "Base constructor of the object (%s) not called.", pyObj->ob_type->tp_name);
+            PyErr_Format(PyExc_RuntimeError, "Base constructor of the object (%s) not called.", Py_TYPE(pyObj)->tp_name);
         return false;
     }
 
     if (!priv->validCppObject) {
         if (throwPyError)
-            PyErr_Format(PyExc_RuntimeError, "Internal C++ object (%s) already deleted.", pyObj->ob_type->tp_name);
+            PyErr_Format(PyExc_RuntimeError, "Internal C++ object (%s) already deleted.", Py_TYPE(pyObj)->tp_name);
         return false;
     }
 
@@ -1209,7 +1213,7 @@ void deallocData(SbkObject* self, bool cleanup)
 
 void setTypeUserData(SbkObject* wrapper, void* userData, DeleteUserDataFunc d_func)
 {
-    SbkObjectType* ob_type = reinterpret_cast<SbkObjectType*>(wrapper->ob_type);
+    SbkObjectType* ob_type = reinterpret_cast<SbkObjectType*>(Py_TYPE(wrapper));
     if (ob_type->d->user_data)
         ob_type->d->d_func(ob_type->d->user_data);
 
@@ -1219,7 +1223,7 @@ void setTypeUserData(SbkObject* wrapper, void* userData, DeleteUserDataFunc d_fu
 
 void* getTypeUserData(SbkObject* wrapper)
 {
-    return reinterpret_cast<SbkObjectType*>(wrapper->ob_type)->d->user_data;
+    return reinterpret_cast<SbkObjectType*>(Py_TYPE(wrapper))->d->user_data;
 }
 
 void keepReference(SbkObject* self, const char* key, PyObject* referredObject, bool append)

@@ -39,7 +39,7 @@ namespace Shiboken
 
 inline bool isShibokenEnum(PyObject* pyObj)
 {
-    return pyObj->ob_type->ob_type == &SbkEnumType_Type;
+    return Py_TYPE(pyObj->ob_type) == &SbkEnumType_Type;
 }
 
 namespace Enum

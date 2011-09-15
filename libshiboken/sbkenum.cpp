@@ -290,7 +290,7 @@ PyTypeObject* newTypeWithName(const char* name, const char* cppName)
 {
     PyTypeObject* type = new PyTypeObject;
     ::memset(type, 0, sizeof(PyTypeObject));
-    type->ob_type = &SbkEnumType_Type;
+    Py_TYPE(type) = &SbkEnumType_Type;
     type->tp_basicsize = sizeof(SbkEnumObject);
     type->tp_print = &SbkEnumObject_print;
     type->tp_repr = &SbkEnumObject_repr;
