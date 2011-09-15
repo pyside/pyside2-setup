@@ -92,8 +92,7 @@ static PyGetSetDef SbkEnumGetSetList[] = {
 };
 
 PyTypeObject SbkEnumType_Type = {
-    PyObject_HEAD_INIT(0)
-    /*ob_size*/             0,
+    PyVarObject_HEAD_INIT(0, 0)
     /*tp_name*/             "Shiboken.EnumType",
     /*tp_basicsize*/        sizeof(PyTypeObject),
     /*tp_itemsize*/         0,

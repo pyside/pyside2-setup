@@ -43,8 +43,7 @@ static void SbkObjectTypeDealloc(PyObject* pyObj);
 static PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
 
 PyTypeObject SbkObjectType_Type = {
-    PyObject_HEAD_INIT(0)
-    /*ob_size*/             0,
+    PyVarObject_HEAD_INIT(0, 0)
     /*tp_name*/             "Shiboken.ObjectType",
     /*tp_basicsize*/        sizeof(SbkObjectType),
     /*tp_itemsize*/         0,
@@ -151,8 +150,7 @@ static int SbkObject_clear(PyObject* self)
 }
 
 SbkObjectType SbkObject_Type = { { {
-    PyObject_HEAD_INIT(&SbkObjectType_Type)
-    /*ob_size*/             0,
+    PyVarObject_HEAD_INIT(&SbkObjectType_Type, 0)
     /*tp_name*/             "Shiboken.Object",
     /*tp_basicsize*/        sizeof(SbkObject),
     /*tp_itemsize*/         0,
