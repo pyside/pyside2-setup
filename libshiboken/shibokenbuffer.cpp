@@ -43,7 +43,19 @@ void* Shiboken::Buffer::getPointer(PyObject* pyObj, Py_ssize_t* size)
 
 PyObject* Shiboken::Buffer::newObject(void* memory, Py_ssize_t size, Type type)
 {
+#ifdef IS_PY3K
+    Py_buffer view;
+    memset(&view, 0, sizeof(view));
+    view.buf = memory;
+    view.len = size;
+    view.readonly = type == Shiboken::Buffer::ReadOnly;
+    view.ndim = 1;
+    Py_ssize_t shape[] = { size };
+    view.shape = shape;
+    return PyMemoryView_FromBuffer(&view);
+#else
     return type == ReadOnly ? PyBuffer_FromMemory(memory, size) : PyBuffer_FromReadWriteMemory(memory, size);
+#endif
 }
 
 PyObject* Shiboken::Buffer::newObject(const void* memory, Py_ssize_t size)
