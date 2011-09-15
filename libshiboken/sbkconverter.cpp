@@ -164,6 +164,8 @@ PyObject* referenceToPython(SbkObjectType* type, const void* cppIn)
 
 static inline PyObject* CopyCppToPython(SbkConverter* converter, const void* cppIn)
 {
+    if (!cppIn)
+        Py_RETURN_NONE;
     return converter->copyToPython(cppIn);
 }
 PyObject* copyToPython(SbkObjectType* type, const void* cppIn)
