@@ -36,7 +36,7 @@
 QHash<QString, QString> CppGenerator::m_nbFuncs = QHash<QString, QString>();
 QHash<QString, QString> CppGenerator::m_sqFuncs = QHash<QString, QString>();
 QHash<QString, QString> CppGenerator::m_mpFuncs = QHash<QString, QString>();
-int CppGenerator::m_currentErrorCode = 0;
+QString CppGenerator::m_currentErrorCode("0");
 
 // utility functions
 inline AbstractMetaType* getTypeWithoutContainer(AbstractMetaType* arg)
@@ -61,8 +61,6 @@ static QString reduceTypeName(const AbstractMetaClass* metaClass)
 
 CppGenerator::CppGenerator()
 {
-    m_currentErrorCode = 0;
-
     // Number protocol structure members names
     m_nbFuncs["__add__"] = "nb_add";
     m_nbFuncs["__sub__"] = "nb_subtract";
@@ -3169,7 +3167,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
         s << INDENT << "if (!" << cpythonTypeNameExt(cppEnum->typeEntry()) << ')' << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << "return;" << endl << endl;
+            s << INDENT << "return " << m_currentErrorCode << ';' << endl << endl;
         }
     }
 
@@ -3197,7 +3195,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
                     s << ")->super.ht_type.tp_dict, \"" << enumValue->name() << "\", anonEnumItem) < 0)" << endl;
                     {
                         Indentation indent(INDENT);
-                        s << INDENT << "return;" << endl;
+                        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
                     }
                     s << INDENT << "Py_DECREF(anonEnumItem);" << endl;
                 }
@@ -3207,7 +3205,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
                 s << enumValueText << ") < 0)" << endl;
                 {
                     Indentation indent(INDENT);
-                    s << INDENT << "return;" << endl;
+                    s << INDENT << "return " << m_currentErrorCode << ';' << endl;
                 }
             }
         } else {
@@ -3217,7 +3215,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
             Indentation indent(INDENT);
             s << INDENT << enclosingObjectVariable << ", \"" << enumValue->name() << "\", ";
             s << enumValueText << "))" << endl;
-            s << INDENT << "return;" << endl;
+            s << INDENT << "return " << m_currentErrorCode << ';' << endl;
         }
     }
 
@@ -3528,6 +3526,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     foreach (AbstractMetaClass* innerClass, metaClass->innerClasses())
         lookForEnumsInClassesNotToBeGenerated(classEnums, innerClass);
 
+    ErrorCode errorCode("");
     writeEnumsInitialization(s, classEnums);
 
     if (metaClass->hasSignals())
@@ -3919,6 +3918,7 @@ void CppGenerator::finishGeneration()
     s << "extern \"C\" SBK_EXPORT_MODULE void init" << moduleName() << "()" << endl;
     s << '{' << endl;
 
+    ErrorCode errorCode("");
     // module inject-code target/beginning
     if (!snips.isEmpty()) {
         writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::TargetLangCode);
@@ -4148,7 +4148,7 @@ void CppGenerator::writeStdListWrapperMethods(QTextStream& s, const AbstractMeta
     s << '}' << endl;
 
     // __setitem__
-    m_currentErrorCode = -1;
+    ErrorCode errorCode2(-1);
     s << "int " << cpythonBaseName(metaClass->typeEntry()) << "__setitem__(PyObject* " PYTHON_SELF_VAR ", Py_ssize_t _i, PyObject* _value)" << endl;
     s << '{' << endl;
     writeCppSelfDefinition(s, metaClass);
