@@ -2836,7 +2836,19 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
     foreach (const QString& nbName, m_nbFuncs.keys()) {
         if (nb[nbName].isEmpty())
             continue;
-        s << INDENT << baseName << "_Type.super.as_number." << m_nbFuncs[nbName] << " = " << nb[nbName] << ';' << endl;
+
+        // bool is special because the field name differs on Python 2 and 3 (nb_nonzero vs nb_bool)
+        // so a shiboken macro is used.
+        if (nbName == "bool") {
+            s << INDENT << "SBK_NB_BOOL(" << baseName << "_Type.super.as_number) = " << nb[nbName] << ';' << endl;
+        } else {
+            bool excludeFromPy3K = nbName == "__div__" || nbName == "__idiv__";
+            if (excludeFromPy3K)
+                s << "#ifndef IS_PY3K" << endl;
+            s << INDENT << baseName << "_Type.super.as_number." << m_nbFuncs[nbName] << " = " << nb[nbName] << ';' << endl;
+            if (excludeFromPy3K)
+                s << "#endif" << endl;
+        }
     }
     if (!nb["__div__"].isEmpty())
         s << INDENT << baseName << "_Type.super.as_number.nb_true_divide = " << nb["__div__"] << ';' << endl;
@@ -3702,7 +3714,7 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
                 s << INDENT << "if (meth)" << endl;
                 {
                     Indentation indent(INDENT);
-                    s << INDENT << "return PyFunction_Check(meth) ? PyMethod_New(meth, " PYTHON_SELF_VAR ", (PyObject*)" PYTHON_SELF_VAR "->ob_type) : " << getattrFunc << ';' << endl;
+                    s << INDENT << "return PyFunction_Check(meth) ? SBK_PyMethod_New(meth, " PYTHON_SELF_VAR ") : " << getattrFunc << ';' << endl;
                 }
             }
             s << INDENT << '}' << endl;
@@ -3917,10 +3929,28 @@ void CppGenerator::finishGeneration()
     s << "    #define SBK_EXPORT_MODULE" << endl;
     s << "#endif" << endl << endl;
 
+    s << "#ifdef IS_PY3K" << endl;
+    s << "static struct PyModuleDef moduledef = {" << endl;
+    s << "    /* m_base     */ PyModuleDef_HEAD_INIT," << endl;
+    s << "    /* m_name     */ \"" << moduleName() << "\"," << endl;
+    s << "    /* m_doc      */ 0," << endl;
+    s << "    /* m_size     */ -1," << endl;
+    s << "    /* m_methods  */ " << moduleName() << "_methods," << endl;
+    s << "    /* m_reload   */ 0," << endl;
+    s << "    /* m_traverse */ 0," << endl;
+    s << "    /* m_clear    */ 0," << endl;
+    s << "    /* m_free     */ 0" << endl;
+    s << "};" << endl << endl;
+    s << "    #define SBK_MODULE_INIT_ERROR 0" << endl;
+    s << "extern \"C\" SBK_EXPORT_MODULE PyObject* PyInit_" << moduleName() << "()" << endl;
+    s << "#else" << endl;
+    s << "    #define SBK_MODULE_INIT_ERROR" << endl;
     s << "extern \"C\" SBK_EXPORT_MODULE void init" << moduleName() << "()" << endl;
+    s << "#endif" << endl;
+
     s << '{' << endl;
 
-    ErrorCode errorCode("");
+    ErrorCode errorCode("SBK_MODULE_INIT_ERROR");
     // module inject-code target/beginning
     if (!snips.isEmpty()) {
         writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::TargetLangCode);
@@ -3935,7 +3965,7 @@ void CppGenerator::finishGeneration()
             s << INDENT << "if (requiredModule.isNull())" << endl;
             {
                 Indentation indentation(INDENT);
-                s << INDENT << "return;" << endl;
+                s << INDENT << "SBK_MODULE_INIT_ERROR;" << endl;
             }
             s << INDENT << cppApiVariableName(requiredModule) << " = Shiboken::Module::getTypes(requiredModule);" << endl;
         }
@@ -3946,8 +3976,12 @@ void CppGenerator::finishGeneration()
     s << INDENT << "static PyTypeObject* cppApi[" << "SBK_" << moduleName() << "_IDX_COUNT" << "];" << endl;
     s << INDENT << cppApiVariableName() << " = cppApi;" << endl << endl;
 
+    s << "#ifdef IS_PY3K" << endl;
+    s << INDENT << "PyObject* module = Shiboken::Module::create(\""  << moduleName() << "\", &moduledef);" << endl;
+    s << "#else" << endl;
     s << INDENT << "PyObject* module = Shiboken::Module::create(\""  << moduleName() << "\", ";
-    s << moduleName() << "_methods);" << endl << endl;
+    s << moduleName() << "_methods);" << endl;
+    s << "#endif" << endl << endl;
 
     s << INDENT << "// Initialize classes in the type system" << endl;
     s << classPythonDefines;
@@ -4023,8 +4057,9 @@ void CppGenerator::finishGeneration()
         s << INDENT << "PySide::registerCleanupFunction(cleanTypesAttributes);" << endl;
     }
 
-
-
+    s << "#ifdef IS_PY3K" << endl;
+    s << INDENT << "return module;" << endl;
+    s << "#endif" << endl;
     s << '}' << endl << endl;
 }
 
