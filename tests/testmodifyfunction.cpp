@@ -201,6 +201,43 @@ void TestModifyFunction::testWithApiVersion()
     QVERIFY(func->ownership(func->ownerClass(), TypeSystem::TargetLangCode, 0) != TypeSystem::CppOwnership);
 }
 
+void TestModifyFunction::testGlobalFunctionModification()
+{
+    const char* cppCode ="\
+    struct A {};\
+    void function(A* a = 0);\
+    ";
+    const char* xmlCode = "\
+    <typesystem package='Foo'> \
+        <primitive-type name='A'/>\
+        <function signature='function(A*)'>\
+            <modify-function signature='function(A*)'>\
+                <modify-argument index='1'>\
+                    <replace-type modified-type='A'/>\
+                    <replace-default-expression with='A()'/>\
+                </modify-argument>\
+            </modify-function>\
+        </function>\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, false);
+    QCOMPARE(t.builder()->globalFunctions().size(), 1);
+
+    FunctionModificationList mods = TypeDatabase::instance()->functionModifications("function(A*)");
+    QCOMPARE(mods.count(), 1);
+    QList<ArgumentModification> argMods = mods.first().argument_mods;
+    QCOMPARE(argMods.count(), 1);
+    ArgumentModification argMod = argMods.first();
+    QCOMPARE(argMod.replacedDefaultExpression, QString("A()"));
+
+    const AbstractMetaFunction* func = t.builder()->globalFunctions().first();
+    QVERIFY(func);
+    QCOMPARE(func->arguments().count(), 1);
+    const AbstractMetaArgument* arg = func->arguments().first();
+    QCOMPARE(arg->type()->cppSignature(), QString("A *"));
+    QCOMPARE(arg->originalDefaultValueExpression(), QString("0"));
+    QCOMPARE(arg->defaultValueExpression(), QString("A()"));
+}
 
 QTEST_APPLESS_MAIN(TestModifyFunction)
 

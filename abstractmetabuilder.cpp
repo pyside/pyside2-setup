@@ -1945,8 +1945,16 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
 
         //use relace-default-expression for set default value
         QString replacedExpression;
-        if (m_currentClass)
+        if (m_currentClass) {
             replacedExpression = metaFunction->replacedDefaultExpression(m_currentClass, i + 1);
+        } else {
+            FunctionModificationList mods = TypeDatabase::instance()->functionModifications(metaFunction->minimalSignature());
+            if (!mods.isEmpty()) {
+                QList<ArgumentModification> argMods = mods.first().argument_mods;
+                if (!argMods.isEmpty())
+                    replacedExpression = argMods.first().replacedDefaultExpression;
+            }
+        }
 
         bool hasDefaultValue = false;
         if (arg->defaultValue() || !replacedExpression.isEmpty()) {

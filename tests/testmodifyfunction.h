@@ -34,6 +34,7 @@ class TestModifyFunction : public QObject
         void testWithApiVersion();
         void testRenameArgument();
         void invalidateAfterUse();
+        void testGlobalFunctionModification();
 };
 
 #endif
