@@ -37,10 +37,12 @@
     #define SbkNumber_Check PyNumber_Check
     #define Py_TPFLAGS_CHECKTYPES  0
 
+    #define SBK_STR_NAME "bytes"
 #else
     // Note: if there wasn't for the old-style classes, only a PyNumber_Check would suffice.
     #define SbkNumber_Check(X) \
             (PyNumber_Check(X) && (!PyInstance_Check(X) || PyObject_HasAttrString(X, "__trunc__")))
+    #define SBK_STR_NAME "str"
 #endif
 
 #endif

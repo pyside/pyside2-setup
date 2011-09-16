@@ -1441,6 +1441,8 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                         strArg = "unicode";
                     else if (strArg == "PyString")
                         strArg = "str";
+                    else if (strArg == "PyBytes")
+                        strArg = "\"SBK_STR_NAME\"";
                     else if (strArg == "PySequece")
                         strArg = "list";
                     else if (strArg == "PyTuple")
@@ -3705,7 +3707,7 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
             }
             s << INDENT << '}' << endl;
 
-            s << INDENT << "const char* cname = PyString_AS_STRING(name);" << endl;
+            s << INDENT << "const char* cname = PyBytes_AS_STRING(name);" << endl;
             foreach (const AbstractMetaFunction* func, getMethodsWithBothStaticAndNonStaticMethods(metaClass)) {
                 s << INDENT << "if (strcmp(cname, \"" << func->name() << "\") == 0)" << endl;
                 Indentation indent(INDENT);
@@ -4195,12 +4197,12 @@ QString CppGenerator::writeReprFunction(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "if (mod)" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "return PyString_FromFormat(\"<%s.%s at %p>\", PyString_AS_STRING(mod), str.constData(), self);" << endl;
+        s << INDENT << "return PyBytes_FromFormat(\"<%s.%s at %p>\", PyBytes_AS_STRING(mod), str.constData(), self);" << endl;
     }
     s << INDENT << "else" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "return PyString_FromFormat(\"<%s at %p>\", str.constData(), self);" << endl;
+        s << INDENT << "return PyBytes_FromFormat(\"<%s at %p>\", str.constData(), self);" << endl;
     }
     s << '}' << endl;
     s << "} // extern C" << endl << endl;;
