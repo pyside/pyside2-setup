@@ -26,8 +26,6 @@
 #include <Python.h>
 #include <list>
 #include <map>
-#include <set>
-#include <string>
 
 struct SbkObject;
 struct SbkObjectType;
@@ -192,24 +190,15 @@ private:
     PyTypeObject* m_desiredType;
 };
 
-/// Call the destructor of each C++ object held by a Python object
 class DtorCallerVisitor : public HierarchyVisitor
 {
 public:
     DtorCallerVisitor(SbkObject* pyObj) : m_pyObj(pyObj) {}
     void visit(SbkObjectType* node);
     void done();
-protected:
+private:
     std::list<std::pair<void*, SbkObjectType*> > m_ptrs;
     SbkObject* m_pyObj;
-};
-
-/// Dealloc of each C++ object held by a Python object, this implies a call to the C++ object destructor
-class DeallocVisitor : public DtorCallerVisitor
-{
-public:
-    DeallocVisitor(SbkObject* pyObj) : DtorCallerVisitor(pyObj) {}
-    void done();
 };
 
 /// \internal Internal function used to walk on classes inheritance trees.

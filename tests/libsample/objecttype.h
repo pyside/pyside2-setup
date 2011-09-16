@@ -106,7 +106,6 @@ public:
     virtual bool isPython() { return false; }
     void callVirtualCreateChild();
     virtual ObjectType* createChild(ObjectType* parent);
-    static std::size_t createObjectType();
 
     //return a parent from C++
     ObjectType* getCppParent() {

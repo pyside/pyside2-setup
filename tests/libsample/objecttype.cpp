@@ -283,9 +283,3 @@ ObjectType* ObjectType::createChild(ObjectType* parent)
 {
     return new ObjectType(parent);
 }
-
-std::size_t ObjectType::createObjectType()
-{
-    void* addr = new ObjectType();
-    return (std::size_t) addr;
-}
