@@ -17,8 +17,8 @@ inline ByteArray Converter<ByteArray>::toCpp(PyObject* pyObj)
         return ByteArray();
     else if (PyObject_TypeCheck(pyObj, SbkType<ByteArray>()))
         return *Converter<ByteArray*>::toCpp(pyObj);
-    else if (PyString_Check(pyObj))
-        return ByteArray(PyString_AS_STRING(pyObj), PyString_GET_SIZE(pyObj));
+    else if (PyBytes_Check(pyObj))
+        return ByteArray(PyBytes_AS_STRING(pyObj), PyBytes_GET_SIZE(pyObj));
     return ValueTypeConverter<ByteArray>::toCpp(pyObj);
 }
 inline PyObject* Converter<ByteArray>::toPython(const ByteArray& cppObj)

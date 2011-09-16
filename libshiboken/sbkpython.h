@@ -35,6 +35,8 @@
     #define PyInt_FromLong PyLong_FromLong
     #define PyInt_AsLong PyLong_AsLong
     #define SbkNumber_Check PyNumber_Check
+    #define Py_TPFLAGS_CHECKTYPES  0
+
 #else
     // Note: if there wasn't for the old-style classes, only a PyNumber_Check would suffice.
     #define SbkNumber_Check(X) \

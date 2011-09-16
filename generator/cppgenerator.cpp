@@ -2622,8 +2622,7 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     s << "// Class Definition -----------------------------------------------" << endl;
     s << "extern \"C\" {" << endl;
     s << "static SbkObjectType " << className + "_Type" << " = { { {" << endl;
-    s << INDENT << "PyObject_HEAD_INIT(&SbkObjectType_Type)" << endl;
-    s << INDENT << "/*ob_size*/             0," << endl;
+    s << INDENT << "PyVarObject_HEAD_INIT(&SbkObjectType_Type, 0)" << endl;
     s << INDENT << "/*tp_name*/             \"" << getClassTargetFullName(metaClass) << "\"," << endl;
     s << INDENT << "/*tp_basicsize*/        sizeof(SbkObject)," << endl;
     s << INDENT << "/*tp_itemsize*/         0," << endl;
