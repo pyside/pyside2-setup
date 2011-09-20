@@ -1219,7 +1219,7 @@
             int x2 = ((int) (%CPPSELF.x() * 100)) - (x1 * 100);
             int y1 = (int) %CPPSELF.y();
             int y2 = ((int) (%CPPSELF.y() * 100)) - (y1 * 100);
-            %PYARG_0 = PyBytes_FromFormat("Point(%d.%d, %d.%d)", x1, x2, y1, y2);
+            %PYARG_0 = SBK_PyString_FromFormat("Point(%d.%d, %d.%d)", x1, x2, y1, y2);
             </inject-code>
         </add-function>
         <add-function signature="__repr__" return-type="PyObject*">
@@ -1228,7 +1228,7 @@
             int x2 = ((int) (%CPPSELF.x() * 10)) - (x1 * 10);
             int y1 = (int) %CPPSELF.y();
             int y2 = ((int) (%CPPSELF.y() * 10)) - (y1 * 10);
-            %PYARG_0 = PyBytes_FromFormat("&lt;Point object at %p: (%d.%d, %d.%d)&gt;", %CPPSELF, x1, x2, y1, y2);
+            %PYARG_0 = SBK_PyString_FromFormat("&lt;Point object at %p: (%d.%d, %d.%d)&gt;", %CPPSELF, x1, x2, y1, y2);
             </inject-code>
         </add-function>
 
@@ -1482,7 +1482,7 @@
     <value-type name="Str" hash-function="strHash">
         <add-function signature="__str__" return-type="PyObject*">
             <inject-code class="target" position="beginning">
-                %PYARG_0 = PyBytes_FromString(%CPPSELF.cstring());
+                %PYARG_0 = SBK_PyString_FromCString(%CPPSELF.cstring());
             </inject-code>
         </add-function>
         <add-function signature="__len__" >

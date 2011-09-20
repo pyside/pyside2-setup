@@ -40,6 +40,8 @@
     #define SBK_NB_BOOL(x) (x).nb_bool
     #define SBK_STR_NAME "bytes"
     #define SBK_PyMethod_New PyMethod_New
+    #define SBK_PyString_FromCString PyUnicode_FromString
+    #define SBK_PyString_FromFormat PyUnicode_FromFormat
 #else
     // Note: if there wasn't for the old-style classes, only a PyNumber_Check would suffice.
     #define SbkNumber_Check(X) \
@@ -47,6 +49,8 @@
     #define SBK_NB_BOOL(x) (x).nb_nonzero
     #define SBK_STR_NAME "str"
     #define SBK_PyMethod_New(X, Y) PyMethod_New(X, Y, (PyObject*)Py_TYPE(Y))
+    #define SBK_PyString_FromCString PyBytes_FromString
+    #define SBK_PyString_FromFormat PyString_FromFormat
 #endif
 
 #endif

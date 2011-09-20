@@ -1408,7 +1408,7 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                 QString strArg;
                 AbstractMetaType* argType = arg->type();
                 if (isCString(argType)) {
-                    strArg = "str";
+                    strArg = "\"SBK_STR_NAME\"";
                 } else if (argType->isPrimitive()) {
                     const PrimitiveTypeEntry* ptp = reinterpret_cast<const PrimitiveTypeEntry*>(argType->typeEntry());
                     while (ptp->aliasedTypeEntry())

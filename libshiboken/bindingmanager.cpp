@@ -241,7 +241,7 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
         }
     }
 
-    PyObject* pyMethodName = PyBytes_FromString(methodName);
+    PyObject* pyMethodName = SBK_PyString_FromCString(methodName);
     PyObject* method = PyObject_GetAttr((PyObject*)wrapper, pyMethodName);
 
     if (method && PyMethod_Check(method)
