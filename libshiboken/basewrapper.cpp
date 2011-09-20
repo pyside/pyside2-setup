@@ -869,6 +869,20 @@ void invalidate(SbkObject* self)
                 removeParent(*it, true, true);
         }
     }
+
+    // If has ref to other objects invalidate all
+    if (self->d->referredObjects) {
+        RefCountMap& refCountMap = *(self->d->referredObjects);
+        RefCountMap::iterator iter;
+        for (iter = refCountMap.begin(); iter != refCountMap.end(); ++iter) {
+            const std::list<PyObject*> lst = iter->second;
+            std::list<PyObject*>::const_iterator it = lst.begin();
+            while(it != lst.end()) {
+                invalidate(*it);
+                ++it;
+            }
+        }
+    }
 }
 
 void makeValid(SbkObject* self)
@@ -885,6 +899,21 @@ void makeValid(SbkObject* self)
         ChildrenList::iterator it = self->d->parentInfo->children.begin();
         for (; it != self->d->parentInfo->children.end(); ++it)
             makeValid(*it);
+    }
+
+    // If has ref to other objects make all valid again
+    if (self->d->referredObjects) {
+        RefCountMap& refCountMap = *(self->d->referredObjects);
+        RefCountMap::iterator iter;
+        for (iter = refCountMap.begin(); iter != refCountMap.end(); ++iter) {
+            const std::list<PyObject*> lst = iter->second;
+            std::list<PyObject*>::const_iterator it = lst.begin();
+            while(it != lst.end()) {
+                if (Shiboken::Object::checkType(*it))
+                    makeValid(reinterpret_cast<SbkObject*>(*it));
+                ++it;
+            }
+        }
     }
 }
 
