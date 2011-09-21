@@ -42,6 +42,7 @@
     #define SBK_PyMethod_New PyMethod_New
     #define SBK_PyString_FromCString PyUnicode_FromString
     #define SBK_PyString_FromFormat PyUnicode_FromFormat
+    #define SBK_PyString_CompareWithASCIIString PyUnicode_CompareWithASCIIString
 #else
     // Note: if there wasn't for the old-style classes, only a PyNumber_Check would suffice.
     #define SbkNumber_Check(X) \
@@ -51,6 +52,7 @@
     #define SBK_PyMethod_New(X, Y) PyMethod_New(X, Y, (PyObject*)Py_TYPE(Y))
     #define SBK_PyString_FromCString PyBytes_FromString
     #define SBK_PyString_FromFormat PyString_FromFormat
+    #define SBK_PyString_CompareWithASCIIString(X, Y) strcmp(PyString_AS_STRING(X), Y)
 #endif
 
 #endif
