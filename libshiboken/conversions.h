@@ -612,7 +612,7 @@ struct StdMapConverter
 
         while (PyDict_Next(pyObj, &pos, &key, &value)) {
             if (!Converter<typename StdMap::key_type>::isConvertible(key)
-                && !Converter<typename StdMap::mapped_type>::isConvertible(value)) {
+                || !Converter<typename StdMap::mapped_type>::isConvertible(value)) {
                 return false;
             }
         }
