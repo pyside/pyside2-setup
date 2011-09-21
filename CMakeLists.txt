@@ -7,8 +7,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/
                       ${CMAKE_MODULE_PATH})
 
 find_package(Qt4 4.5.0)
-find_package(ApiExtractor 0.10.6 REQUIRED)
-find_package(GeneratorRunner 0.6.12 REQUIRED)
+find_package(ApiExtractor 0.10.7 REQUIRED)
+find_package(GeneratorRunner 0.6.13 REQUIRED)
 find_package(PythonLibs)
 find_package(PythonInterpWithDebug)
 
@@ -16,7 +16,7 @@ add_definitions(${QT_DEFINITIONS})
 
 set(shiboken_MAJOR_VERSION "1")
 set(shiboken_MINOR_VERSION "0")
-set(shiboken_MICRO_VERSION "6")
+set(shiboken_MICRO_VERSION "7")
 set(shiboken_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
 
 option(BUILD_TESTS "Build tests." TRUE)
