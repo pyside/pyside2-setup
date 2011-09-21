@@ -580,23 +580,23 @@ static bool allArgumentsRemoved(const AbstractMetaFunction* func)
 QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunction* func)
 {
     if (!func->type())
-        return QString();
+        return "\"\"";
 
     if (!func->typeReplaced(0).isEmpty())
-        return func->typeReplaced(0);
+        return '"' + func->typeReplaced(0) + '"';
 
     // SbkType would return null when the type is a container.
     if (func->type()->typeEntry()->isContainer())
-        return reinterpret_cast<const ContainerTypeEntry*>(func->type()->typeEntry())->typeName();
+        return '"' + reinterpret_cast<const ContainerTypeEntry*>(func->type()->typeEntry())->typeName() + '"';
 
     if (avoidProtectedHack()) {
         const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(func->type());
         if (metaEnum && metaEnum->isProtected())
-            return protectedEnumSurrogateName(metaEnum);
+            return '"' + protectedEnumSurrogateName(metaEnum) + '"';
     }
 
     if (func->type()->isPrimitive())
-        return func->type()->name();
+        return '"' + func->type()->name() + '"';
 
     return QString("Shiboken::SbkType< %1 >()->tp_name").arg(func->type()->typeEntry()->qualifiedCppName());
 }
@@ -814,8 +814,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
                     Indentation indent(INDENT);
                     s << INDENT << "Shiboken::warning(PyExc_RuntimeWarning, 2, "\
                                    "\"Invalid return value in function %s, expected %s, got %s.\", \"";
-                    s << func->ownerClass()->name() << '.' << funcName << "\", \"" << getVirtualFunctionReturnTypeName(func);
-                    s << "\", " PYTHON_RETURN_VAR "->ob_type->tp_name);" << endl;
+                    s << func->ownerClass()->name() << '.' << funcName << "\", " << getVirtualFunctionReturnTypeName(func);
+                    s << ", " PYTHON_RETURN_VAR "->ob_type->tp_name);" << endl;
                     s << INDENT << "return " << defaultReturnExpr << ';' << endl;
                 }
                 s << INDENT << '}' << endl;
