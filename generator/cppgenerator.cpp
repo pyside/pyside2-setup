@@ -1959,7 +1959,7 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream& s,
             s << ' ' << cppOut;
             if (isUserPrimitive(type))
                 writeMinimalConstructorExpression(s, type->typeEntry(), defaultValue);
-            else
+            else if (!type->isContainer())
                 writeMinimalConstructorExpression(s, type, defaultValue);
         }
         s << ';' << endl;
