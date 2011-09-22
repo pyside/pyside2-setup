@@ -286,6 +286,7 @@ private:
     struct GeneratorPrivate;
     GeneratorPrivate* m_d;
     void collectInstantiatedContainers(const AbstractMetaFunction* func);
+    void collectInstantiatedContainers(const AbstractMetaClass* metaClass);
     void collectInstantiatedContainers();
 };
 

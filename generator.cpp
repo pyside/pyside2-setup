@@ -118,14 +118,24 @@ void Generator::collectInstantiatedContainers(const AbstractMetaFunction* func)
         addInstantiatedContainers(arg->type());
 }
 
+void Generator::collectInstantiatedContainers(const AbstractMetaClass* metaClass)
+{
+    if (!metaClass->typeEntry()->generateCode())
+        return;
+    foreach (const AbstractMetaFunction* func, metaClass->functions())
+        collectInstantiatedContainers(func);
+    foreach (const AbstractMetaField* field, metaClass->fields())
+        addInstantiatedContainers(field->type());
+    foreach (AbstractMetaClass* innerClass, metaClass->innerClasses())
+        collectInstantiatedContainers(innerClass);
+}
+
 void Generator::collectInstantiatedContainers()
 {
     foreach (const AbstractMetaFunction* func, globalFunctions())
         collectInstantiatedContainers(func);
-    foreach (const AbstractMetaClass* metaClass, classes()) {
-        foreach (const AbstractMetaFunction* func, metaClass->functions())
-            collectInstantiatedContainers(func);
-    }
+    foreach (const AbstractMetaClass* metaClass, classes())
+        collectInstantiatedContainers(metaClass);
 }
 
 QList<const AbstractMetaType*> Generator::instantiatedContainers() const
