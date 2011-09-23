@@ -294,8 +294,6 @@ public:
     static bool isNumber(const AbstractMetaType* type);
     static bool isPyInt(const TypeEntry* type);
     static bool isPyInt(const AbstractMetaType* type);
-    static bool isCString(const AbstractMetaType* type);
-    static bool isVoidPointer(const AbstractMetaType* type);
     static bool isPairContainer(const AbstractMetaType* type);
 
     /**
@@ -435,18 +433,6 @@ public:
     QString getTypeIndexVariableName(const AbstractMetaClass* metaClass, bool alternativeTemplateName = false);
     QString getTypeIndexVariableName(const TypeEntry* type);
     QString getTypeIndexVariableName(const AbstractMetaType* type);
-
-    /// Returns the proper full name for \p type.
-    QString getFullTypeName(const TypeEntry* type);
-    QString getFullTypeName(const AbstractMetaType* type);
-    QString getFullTypeName(const AbstractMetaClass* metaClass);
-
-    /**
-     *  Returns the full qualified C++ name for an AbstractMetaType, but removing modifiers
-     *  as 'const', '&', and '*' (except if the class is not derived from a template).
-     *  This is useful for instantiated templates.
-     */
-    QString getFullTypeNameWithoutModifiers(const AbstractMetaType* type);
 
     /// Returns true if the user don't want verbose error messages on the generated bindings.
     bool verboseErrorMessagesDisabled() const;

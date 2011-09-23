@@ -906,20 +906,6 @@ bool ShibokenGenerator::isPyInt(const AbstractMetaType* type)
     return isPyInt(type->typeEntry());
 }
 
-bool ShibokenGenerator::isCString(const AbstractMetaType* type)
-{
-    return type->isNativePointer()
-            && type->indirections() == 1
-            && type->name() == "char";
-}
-
-bool ShibokenGenerator::isVoidPointer(const AbstractMetaType* type)
-{
-    return type->isNativePointer()
-            && type->indirections() == 1
-            && type->name() == "void";
-}
-
 bool ShibokenGenerator::isPairContainer(const AbstractMetaType* type)
 {
     return type->isContainer()
@@ -2534,42 +2520,6 @@ QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaType* type
     return QString("SBK%1%2_IDX")
               .arg(type->typeEntry()->isContainer() ? "_"+moduleName().toUpper() : "")
               .arg(processInstantiationsVariableName(type));
-}
-
-QString ShibokenGenerator::getFullTypeName(const TypeEntry* type)
-{
-    return QString("%1%2").arg(type->isCppPrimitive() ? "" : "::").arg(type->qualifiedCppName());
-}
-QString ShibokenGenerator::getFullTypeName(const AbstractMetaType* type)
-{
-    if (isCString(type))
-        return "const char*";
-    if (isVoidPointer(type))
-        return "void*";
-    if (type->typeEntry()->isContainer())
-        return QString("::%1").arg(type->cppSignature());
-    return getFullTypeName(type->typeEntry()) + QString("*").repeated(type->indirections());
-}
-QString ShibokenGenerator::getFullTypeName(const AbstractMetaClass* metaClass)
-{
-    return getFullTypeName(metaClass->typeEntry());
-}
-QString ShibokenGenerator::getFullTypeNameWithoutModifiers(const AbstractMetaType* type)
-{
-    if (isCString(type))
-        return "const char*";
-    if (isVoidPointer(type))
-        return "void*";
-    if (!type->hasInstantiations())
-        return getFullTypeName(type->typeEntry());
-    QString typeName = type->cppSignature();
-    if (type->isConstant())
-        typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
-    if (type->isReference())
-        typeName.chop(1);
-    while (typeName.endsWith('*') || typeName.endsWith(' '))
-        typeName.chop(1);
-    return QString("::%1").arg(typeName);
 }
 
 bool ShibokenGenerator::verboseErrorMessagesDisabled() const
