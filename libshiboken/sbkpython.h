@@ -43,6 +43,15 @@
     #define SBK_PyString_FromCString PyUnicode_FromString
     #define SBK_PyString_FromFormat PyUnicode_FromFormat
     #define SBK_PyString_CompareWithASCIIString PyUnicode_CompareWithASCIIString
+
+    // Module MACROS
+    #define SBK_MODULE_INIT_ERROR 0
+    #define SBK_MODULE_INIT_FUNCTION_BEGIN(ModuleName) \
+        extern "C" SBK_EXPORT_MODULE PyObject* PyInit_##ModuleName() {
+
+    #define SBK_MODULE_INIT_FUNCTION_END \
+        return module; }
+
 #else
     // Note: if there wasn't for the old-style classes, only a PyNumber_Check would suffice.
     #define SbkNumber_Check(X) \
@@ -53,6 +62,15 @@
     #define SBK_PyString_FromCString PyBytes_FromString
     #define SBK_PyString_FromFormat PyString_FromFormat
     #define SBK_PyString_CompareWithASCIIString(X, Y) strcmp(PyString_AS_STRING(X), Y)
+
+    // Module MACROS
+    #define SBK_MODULE_INIT_ERROR
+    #define SBK_MODULE_INIT_FUNCTION_BEGIN(ModuleName) \
+        extern "C" SBK_EXPORT_MODULE void init##ModuleName()
+
+    #define SBK_MODULE_INIT_FUNCTION_END \
+        }
+
 #endif
 
 #endif

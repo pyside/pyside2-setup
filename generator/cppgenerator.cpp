@@ -3940,14 +3940,8 @@ void CppGenerator::finishGeneration()
     s << "    /* m_clear    */ 0," << endl;
     s << "    /* m_free     */ 0" << endl;
     s << "};" << endl << endl;
-    s << "    #define SBK_MODULE_INIT_ERROR 0" << endl;
-    s << "extern \"C\" SBK_EXPORT_MODULE PyObject* PyInit_" << moduleName() << "()" << endl;
-    s << "#else" << endl;
-    s << "    #define SBK_MODULE_INIT_ERROR" << endl;
-    s << "extern \"C\" SBK_EXPORT_MODULE void init" << moduleName() << "()" << endl;
     s << "#endif" << endl;
-
-    s << '{' << endl;
+    s << "SBK_MODULE_INIT_FUNCTION_BEGIN(" << moduleName() << ")" << endl;
 
     ErrorCode errorCode("SBK_MODULE_INIT_ERROR");
     // module inject-code target/beginning
@@ -4056,10 +4050,7 @@ void CppGenerator::finishGeneration()
         s << INDENT << "PySide::registerCleanupFunction(cleanTypesAttributes);" << endl;
     }
 
-    s << "#ifdef IS_PY3K" << endl;
-    s << INDENT << "return module;" << endl;
-    s << "#endif" << endl;
-    s << '}' << endl << endl;
+    s << "SBK_MODULE_INIT_FUNCTION_END" << endl;
 }
 
 static ArgumentOwner getArgumentOwner(const AbstractMetaFunction* func, int argIndex)
