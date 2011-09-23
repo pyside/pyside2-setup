@@ -31,6 +31,12 @@ import unittest
 
 from sample import VirtualMethods, SimpleFile, Point
 
+def MethodTypeCompat(func, instance):
+    if IS_PY3K:
+        return types.MethodType(func, instance)
+    else:
+        return types.MethodType(func, instance, type(instance))
+
 class Duck(VirtualMethods):
     def __init__(self):
         VirtualMethods.__init__(self)
@@ -60,7 +66,7 @@ class DuckPunchingTest(unittest.TestCase):
         def myVirtualMethod0(obj, pt, val, cpx, b):
             self.duck_method_called = True
             return VirtualMethods.virtualMethod0(obj, pt, val, cpx, b) * self.multiplier
-        vm.virtualMethod0 = types.MethodType(myVirtualMethod0, vm, VirtualMethods)
+        vm.virtualMethod0 = MethodTypeCompat(myVirtualMethod0, vm)
 
         result1 = vm.callVirtualMethod0(pt, val, cpx, b)
         self.assert_(self.duck_method_called)
@@ -89,7 +95,7 @@ class DuckPunchingTest(unittest.TestCase):
         def myVirtualMethod0(obj, pt, val, cpx, b):
             self.duck_method_called = True
             return VirtualMethods.virtualMethod0(obj, pt, val, cpx, b) * self.multiplier
-        duck.virtualMethod0 = types.MethodType(myVirtualMethod0, duck, Duck)
+        duck.virtualMethod0 = MethodTypeCompat(myVirtualMethod0, duck)
 
         result1 = duck.callVirtualMethod0(pt, val, cpx, b)
         self.assert_(self.duck_method_called)
@@ -114,7 +120,7 @@ class DuckPunchingTest(unittest.TestCase):
         def myExists(obj):
             self.duck_method_called = True
             return False
-        simplefile.exists = types.MethodType(myExists, simplefile, SimpleFile)
+        simplefile.exists = MethodTypeCompat(myExists, simplefile)
 
         # Static 'exists' was overridden by the monkey patch, which accepts 0 arguments
         self.assertRaises(TypeError, simplefile.exists, 'sbrubbles')
@@ -138,7 +144,7 @@ class DuckPunchingTest(unittest.TestCase):
         def myExists(obj):
             self.duck_method_called = True
             return False
-        monkey.exists = types.MethodType(myExists, monkey, SimpleFile)
+        monkey.exists = MethodTypeCompat(myExists, monkey)
 
         # Static 'exists' was overridden by the monkey patch, which accepts 0 arguments
         self.assertRaises(TypeError, monkey.exists, 'sbrubbles')
@@ -153,7 +159,7 @@ class DuckPunchingTest(unittest.TestCase):
             self.call_counter += 1
             return VirtualMethods.virtualMethod0(obj, pt, val, cpx, b)
         vm = VirtualMethods()
-        vm.virtualMethod0 = types.MethodType(myVirtualMethod0, vm, VirtualMethods)
+        vm.virtualMethod0 = MethodTypeCompat(myVirtualMethod0, vm)
         pt, val, cpx, b = Point(1.1, 2.2), 4, complex(3.3, 4.4), True
         vm.virtualMethod0(pt, val, cpx, b)
         self.assertEqual(self.call_counter, 1)
