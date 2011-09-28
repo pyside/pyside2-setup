@@ -27,6 +27,7 @@ gilstate.cpp
 helper.cpp
 sbkenum.cpp
 sbkmodule.cpp
+sbkstring.cpp
 bindingmanager.cpp
 threadstatesaver.cpp
 typeresolver.cpp
@@ -54,6 +55,7 @@ install(FILES
         sbkmodule.h
         python25compat.h
         sbkdbg.h
+        sbkstring.h
         shiboken.h
         shibokenmacros.h
         threadstatesaver.h

@@ -1,7 +1,7 @@
 /*
  * This file is part of the Shiboken Python Bindings Generator project.
  *
- * Copyright (C) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2011 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -20,23 +20,36 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef SHIBOKEN_H
-#define SHIBOKEN_H
+#ifndef SBKSTRING_H
+#define SBKSTRING_H
 
-#include "sbkpython.h"
-#include "autodecref.h"
-#include "basewrapper.h"
-#include "bindingmanager.h"
-#include "conversions.h"
-#include "gilstate.h"
-#include "threadstatesaver.h"
-#include "helper.h"
-#include "sbkenum.h"
-#include "sbkmodule.h"
-#include "sbkstring.h"
+#include <Python.h>
 #include "shibokenmacros.h"
-#include "typeresolver.h"
-#include "shibokenbuffer.h"
 
-#endif // SHIBOKEN_H
+#if PY_MAJOR_VERSION >= 3
+    #define SBK_STR_NAME "unicode"
+#else
+    #define SBK_STR_NAME "str"
+#endif
+
+namespace Shiboken
+{
+namespace String
+{
+    LIBSHIBOKEN_API bool check(PyObject* obj);
+    LIBSHIBOKEN_API bool convertible(PyObject* obj);
+    LIBSHIBOKEN_API PyObject* fromCString(const char* value);
+    LIBSHIBOKEN_API const char* toCString(PyObject* str);
+    LIBSHIBOKEN_API bool concat(PyObject** val1, PyObject* val2);
+    LIBSHIBOKEN_API PyObject* fromFormat(const char* format, ...);
+    LIBSHIBOKEN_API PyObject* fromStringAndSize(const char* str, Py_ssize_t size);
+    LIBSHIBOKEN_API int compare(PyObject* val1, const char* val2);
+    LIBSHIBOKEN_API Py_ssize_t len(PyObject* str);
+
+} // namespace String
+} // namespace Shiboken
+
+
+#endif
+
 
