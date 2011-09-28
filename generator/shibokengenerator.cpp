@@ -903,11 +903,13 @@ QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType
     if (isNumber(baseName))
         return genericNumberType ? QString("SbkNumber_Check") : QString("%1_Check").arg(baseName);
 
+
     baseName.clear();
     QTextStream b(&baseName);
     // exclude const on Objects
     Options flags = getConverterOptions(metaType);
     writeBaseConversion(b, metaType, 0, flags);
+
     return QString("%1checkType").arg(baseName);
 }
 
@@ -940,6 +942,9 @@ QString ShibokenGenerator::guessCPythonCheckFunction(const QString& type, Abstra
 
     if (type == "PyBuffer")
         return "Shiboken::Buffer::checkType";
+
+    if (type == "str")
+        return "Shiboken::String::check";
 
     *metaType = buildAbstractMetaTypeFromString(type);
     if (*metaType && !(*metaType)->typeEntry()->isCustom())

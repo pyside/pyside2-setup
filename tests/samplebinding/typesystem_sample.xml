@@ -125,13 +125,13 @@
             <modify-argument index="1">
                 <replace-type modified-type="const char*"/>
                 <conversion-rule class="native">
-                    unsigned char* %out = reinterpret_cast&lt;unsigned char*>(PyBytes_AS_STRING(%PYARG_1));
+                    const unsigned char* %out = reinterpret_cast&lt;const unsigned char*>(Shiboken::String::toCString(%PYARG_1));
                 </conversion-rule>
             </modify-argument>
             <modify-argument index="2">
                 <remove-argument/>
                 <conversion-rule class="native">
-                    unsigned int %out = static_cast&lt;unsigned int>(PyBytes_GET_SIZE(%PYARG_1));
+                    unsigned int %out = static_cast&lt;unsigned int>(Shiboken::String::len(%PYARG_1));
                 </conversion-rule>
             </modify-argument>
         </modify-function>
@@ -198,7 +198,7 @@
     <object-type name="ModifiedConstructor">
         <modify-function signature="ModifiedConstructor(int)">
             <modify-argument index="1">
-                <replace-type modified-type="PyBytes"/>
+                <replace-type modified-type="str"/>
             </modify-argument>
             <inject-code class='target' position='beginning'>
             %0 = new %FUNCTION_NAME(atoi(%CONVERTTOCPP[const char*](%PYARG_1)));
@@ -1110,7 +1110,7 @@
             Tested in InjectCodeTest.testTypeNativeBeginning_TypeTargetBeginning:
         -->
         <inject-code class="native" position="beginning">
-        PyObject* InjectCode_tpstr(PyObject*) { return PyBytes_FromString("Hi! I'm the inject code dummy class."); }
+        PyObject* InjectCode_tpstr(PyObject*) { return Shiboken::String::fromCString("Hi! I'm the inject code dummy class."); }
         </inject-code>
         <!--
             Register our tp_str class using another inject code
@@ -1126,8 +1126,8 @@
                 %1 += 1;
             </inject-code>
             <inject-code class="target" position="end">
-                PyObject* tmp = PyBytes_FromString("end");
-                PyBytes_Concat(&amp;%PYARG_0, tmp);
+                PyObject* tmp = Shiboken::String::fromCString("end");
+                Shiboken::String::concat(&amp;%PYARG_0, tmp);
                 Py_DECREF(tmp);
             </inject-code>
         </modify-function>
@@ -1135,8 +1135,8 @@
         <!-- Tested in InjectCodeTest.testFunctionTargetBeginning -->
         <modify-function signature="simpleMethod2()">
             <inject-code class="target" position="end">
-                PyObject* tmp = PyBytes_FromString("end");
-                PyBytes_Concat(&amp;%PYARG_0, tmp);
+                PyObject* tmp = Shiboken::String::fromCString("end");
+                Shiboken::String::concat(&amp;%PYARG_0, tmp);
                 Py_DECREF(tmp);
             </inject-code>
         </modify-function>
@@ -1192,13 +1192,13 @@
     <value-type name="SortedOverload">
         <add-function signature="overload(PyObject *)" return-type="const char *">
             <inject-code class="target" position="beginning">
-                return PyBytes_FromString("PyObject");
+                return Shiboken::String::fromCString("PyObject");
             </inject-code>
         </add-function>
 
         <add-function signature="overloadDeep(int, PyObject *)" return-type="const char *">
             <inject-code class="target" position="beginning">
-                return PyBytes_FromString("PyObject");
+                return Shiboken::String::fromCString("PyObject");
             </inject-code>
         </add-function>
         <modify-function signature="pyObjOverload(unsigned char*, int)">
@@ -1219,7 +1219,7 @@
             int x2 = ((int) (%CPPSELF.x() * 100)) - (x1 * 100);
             int y1 = (int) %CPPSELF.y();
             int y2 = ((int) (%CPPSELF.y() * 100)) - (y1 * 100);
-            %PYARG_0 = SBK_PyString_FromFormat("Point(%d.%d, %d.%d)", x1, x2, y1, y2);
+            %PYARG_0 = Shiboken::String::fromFormat("Point(%d.%d, %d.%d)", x1, x2, y1, y2);
             </inject-code>
         </add-function>
         <add-function signature="__repr__" return-type="PyObject*">
@@ -1228,7 +1228,7 @@
             int x2 = ((int) (%CPPSELF.x() * 10)) - (x1 * 10);
             int y1 = (int) %CPPSELF.y();
             int y2 = ((int) (%CPPSELF.y() * 10)) - (y1 * 10);
-            %PYARG_0 = SBK_PyString_FromFormat("&lt;Point object at %p: (%d.%d, %d.%d)&gt;", %CPPSELF, x1, x2, y1, y2);
+            %PYARG_0 = Shiboken::String::fromFormat("&lt;Point object at %p: (%d.%d, %d.%d)&gt;", %CPPSELF, x1, x2, y1, y2);
             </inject-code>
         </add-function>
 
@@ -1282,7 +1282,7 @@
             int x2 = ((int) (%CPPSELF.x() * 100)) - (x1 * 100);
             int y1 = (int) %CPPSELF.y();
             int y2 = ((int) (%CPPSELF.y() * 100)) - (y1 * 100);
-            %PYARG_0 = PyBytes_FromFormat("PointF(%d.%d, %d.%d)", x1, x2, y1, y2);
+            %PYARG_0 = Shiboken::String::fromFormat("PointF(%d.%d, %d.%d)", x1, x2, y1, y2);
             </inject-code>
         </add-function>
         <add-function signature="__repr__" return-type="PyObject*">
@@ -1291,7 +1291,7 @@
             int x2 = ((int) (%CPPSELF.x() * 10)) - (x1 * 10);
             int y1 = (int) %CPPSELF.y();
             int y2 = ((int) (%CPPSELF.y() * 10)) - (y1 * 10);
-            %PYARG_0 = PyBytes_FromFormat("&lt;PointF object at %p: (%d.%d, %d.%d)&gt;", %CPPSELF, x1, x2, y1, y2);
+            %PYARG_0 = Shiboken::String::fromFormat("&lt;PointF object at %p: (%d.%d, %d.%d)&gt;", %CPPSELF, x1, x2, y1, y2);
             </inject-code>
         </add-function>
 
@@ -1423,7 +1423,7 @@
                     Shiboken::AutoDecRef strList(PySequence_Fast(%PYARG_1, "The argument must be a sequence."));
                     int lineCount = PySequence_Fast_GET_SIZE(strList.object());
                     for (int line = 0; line &lt; lineCount; ++line) {
-                        if (!PyBytes_Check(PySequence_Fast_GET_ITEM(strList.object(), line))) {
+                        if (!Shiboken::String::check(PySequence_Fast_GET_ITEM(strList.object(), line))) {
                             PyErr_SetString(PyExc_TypeError, "The argument must be a sequence of strings.");
                             break;
                         }
@@ -1482,7 +1482,7 @@
     <value-type name="Str" hash-function="strHash">
         <add-function signature="__str__" return-type="PyObject*">
             <inject-code class="target" position="beginning">
-                %PYARG_0 = SBK_PyString_FromCString(%CPPSELF.cstring());
+                %PYARG_0 = Shiboken::String::fromCString(%CPPSELF.cstring());
             </inject-code>
         </add-function>
         <add-function signature="__len__" >
@@ -1499,7 +1499,7 @@
                     char res[2];
                     res[0] = %CPPSELF.get_char(_i);
                     res[1] = 0;
-                    return PyBytes_FromString(res);
+                    return Shiboken::String::fromCString(res);
                 }
             </inject-code>
         </add-function>
@@ -1540,7 +1540,16 @@
                 <replace-type modified-type="PyBytes"/>
             </modify-argument>
             <inject-code class="target" position="beginning">
-            %0 = new %TYPE(PyBytes_AS_STRING(%PYARG_1), PyBytes_GET_SIZE(%PYARG_1));
+            PyObject* data = 0;
+            if (PyUnicode_CheckExact(%PYARG_1)) {
+                data = PyUnicode_AsASCIIString(%PYARG_1);
+            } else {
+                data = %PYARG_1;
+                Py_INCREF(data);
+            }
+
+            %0 = new %TYPE(PyBytes_AsString(data), PyBytes_GET_SIZE(data));
+            Py_DECREF(data);
             </inject-code>
         </modify-function>
 
@@ -1576,7 +1585,7 @@
             Shiboken::AutoDecRef data(PyUnicode_AsASCIIString(%PYARG_1));
             if (!data.isNull()) {
                 ByteArray ba(*%CPPSELF);
-                ba.append(PyBytes_AS_STRING(data.object()), PyBytes_GET_SIZE(data.object()));
+                ba.append(PyBytes_AsString(data.object()), PyBytes_GET_SIZE(data.object()));
                 %PYARG_0 = %CONVERTTOPYTHON[ByteArray](ba);
             }
             </inject-code>
@@ -1585,7 +1594,7 @@
             <inject-code>
             Shiboken::AutoDecRef data(PyUnicode_AsASCIIString(%PYARG_1));
             if (!data.isNull()) {
-                ByteArray ba(PyBytes_AS_STRING(data.object()), PyBytes_GET_SIZE(data.object()));
+                ByteArray ba(PyBytes_AsString(data.object()), PyBytes_GET_SIZE(data.object()));
                 ba.append(*%CPPSELF);
                 %PYARG_0 = %CONVERTTOPYTHON[ByteArray](ba);
             }
@@ -1593,12 +1602,18 @@
         </add-function>
         <add-function signature="operator+(PyBytes,ByteArray)">
             <inject-code>
-            ByteArray ba(PyBytes_AS_STRING(%PYARG_1), PyBytes_GET_SIZE(%PYARG_1));
-            ba = ba + *%CPPSELF;
-            %PYARG_0 = %CONVERTTOPYTHON[ByteArray](ba);
+                ByteArray ba(PyBytes_AsString(%PYARG_1), PyBytes_GET_SIZE(%PYARG_1));
+                ba = ba + *%CPPSELF;
+                %PYARG_0 = %CONVERTTOPYTHON[ByteArray](ba);
             </inject-code>
         </add-function>
-
+        <add-function signature="operator+(PyBytes)">
+            <inject-code>
+                ByteArray ba(PyBytes_AsString(%PYARG_1), PyBytes_GET_SIZE(%PYARG_1));
+                ba.append(*%CPPSELF);
+                %PYARG_0 = %CONVERTTOPYTHON[ByteArray](ba);
+            </inject-code>
+        </add-function>
         <add-function signature="__repr__" return-type="PyObject*">
             <inject-code class="target" position="beginning">
             ByteArray ba(((PyObject*)%PYSELF)->ob_type->tp_name);
@@ -1610,9 +1625,9 @@
             </inject-code>
         </add-function>
 
-        <add-function signature="__str__" return-type="PyBytes">
+        <add-function signature="__str__" return-type="str">
             <inject-code class="target" position="beginning">
-            %PYARG_0 = PyBytes_FromStringAndSize(%CPPSELF.data(), %CPPSELF.size());
+            %PYARG_0 = Shiboken::String::fromStringAndSize(%CPPSELF.data(), %CPPSELF.size());
             </inject-code>
         </add-function>
 
@@ -1703,7 +1718,7 @@
     <value-type name="Echo">
         <add-function signature="echo(const char *)" return-type="PyObject*">
             <inject-code class="target" position="beginning">
-                %PYARG_0 = PyBytes_FromString(%1);
+                %PYARG_0 = Shiboken::String::fromCString(%1);
             </inject-code>
         </add-function>
         <add-function signature="operator>(int)">
@@ -1733,11 +1748,11 @@
         </modify-function>
     </value-type>
 
-    <add-function signature="multiplyString(PyBytes*, unsigned int)" return-type="const char*">
+    <add-function signature="multiplyString(str, unsigned int)" return-type="const char*">
         <inject-code class="target" position="beginning">
-            %PYARG_0 = PyBytes_FromString("");
+            %PYARG_0 = Shiboken::String::fromCString("");
             for (unsigned int i = 0; i &lt; %2; ++i)
-                PyBytes_Concat(&amp;%PYARG_0, %PYARG_1);
+                Shiboken::String::concat(&amp;%PYARG_0, %PYARG_1);
         </inject-code>
     </add-function>
 

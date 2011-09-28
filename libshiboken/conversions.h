@@ -28,6 +28,7 @@
 #include <memory>
 #include <typeinfo>
 
+#include "sbkstring.h"
 #include "sbkenum.h"
 #include "basewrapper.h"
 #include "bindingmanager.h"
@@ -451,19 +452,23 @@ template <typename CString>
 struct Converter_CString
 {
     // Note: 0 is also a const char* in C++, so None is accepted in checkType
-    static inline bool checkType(PyObject* pyObj) { return pyObj == Py_None || PyBytes_Check(pyObj); }
-    static inline bool isConvertible(PyObject* pyObj) { return pyObj == Py_None || PyBytes_Check(pyObj); }
+    static inline bool checkType(PyObject* pyObj) {
+        return Shiboken::String::check(pyObj);
+    }
+    static inline bool isConvertible(PyObject* pyObj) {
+        return Shiboken::String::convertible(pyObj);
+    }
     static inline PyObject* toPython(void* cppobj) { return toPython(reinterpret_cast<CString>(cppobj)); }
     static inline PyObject* toPython(CString cppobj)
     {
         if (!cppobj)
             Py_RETURN_NONE;
-        return PyBytes_FromString(cppobj);
+        return Shiboken::String::fromCString(cppobj);
     }
     static inline CString toCpp(PyObject* pyobj) {
         if (pyobj == Py_None)
             return 0;
-        return PyBytes_AS_STRING(pyobj);
+        return Shiboken::String::toCString(pyobj);
     }
 };
 
@@ -474,14 +479,14 @@ template <> struct Converter<std::string> : Converter_CString<std::string>
     static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<std::string*>(cppobj)); }
     static inline PyObject* toPython(std::string cppObj)
     {
-        return PyBytes_FromString(cppObj.c_str());
+        return Shiboken::String::fromCString(cppObj.c_str());
     }
 
     static inline std::string toCpp(PyObject* pyobj)
     {
         if (pyobj == Py_None)
             return 0;
-        return std::string(PyBytes_AS_STRING(pyobj));
+        return std::string(Shiboken::String::toCString(pyobj));
     }
 };
 

@@ -21,13 +21,16 @@
  */
 
 #include "basewrapper.h"
-#include <cstddef>
-#include <fstream>
 #include "basewrapper_p.h"
 #include "bindingmanager.h"
 #include "google/dense_hash_map"
 #include "sbkdbg.h"
 #include "gilstate.h"
+#include "sbkstring.h"
+
+#include <cstddef>
+#include <fstream>
+
 
 namespace Shiboken
 {
@@ -241,7 +244,7 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
         }
     }
 
-    PyObject* pyMethodName = SBK_PyString_FromCString(methodName);
+    PyObject* pyMethodName = Shiboken::String::fromCString(methodName);
     PyObject* method = PyObject_GetAttr((PyObject*)wrapper, pyMethodName);
 
     if (method && PyMethod_Check(method)

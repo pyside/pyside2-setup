@@ -3720,7 +3720,7 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
             s << INDENT << '}' << endl;
 
             foreach (const AbstractMetaFunction* func, getMethodsWithBothStaticAndNonStaticMethods(metaClass)) {
-                s << INDENT << "if (SBK_PyString_CompareWithASCIIString(name, \"" << func->name() << "\") == 0)" << endl;
+                s << INDENT << "if (Shiboken::String::compare(name, \"" << func->name() << "\") == 0)" << endl;
                 Indentation indent(INDENT);
                 s << INDENT << "return PyCFunction_NewEx(&" << cpythonMethodDefinitionName(func) << ", " PYTHON_SELF_VAR ", 0);" << endl;
             }
