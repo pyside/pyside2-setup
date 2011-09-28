@@ -27,6 +27,7 @@
 import unittest
 from os.path import isdir
 from sample import ByteArray
+from py3kcompat import b
 
 
 class ByteArrayBufferProtocolTest(unittest.TestCase):
@@ -35,7 +36,7 @@ class ByteArrayBufferProtocolTest(unittest.TestCase):
     def testByteArrayBufferProtocol(self):
         # Tests ByteArray implementation of Python buffer protocol using the os.path.isdir
         # function which an unicode object or other object implementing the Python buffer protocol.
-        isdir(ByteArray('/tmp'))
+        isdir(str(ByteArray('/tmp')))
 
 
 class ByteArrayConcatenationOperatorTest(unittest.TestCase):
@@ -90,14 +91,14 @@ class ByteArrayOperatorAt(unittest.TestCase):
         string = 'abcdefgh'
         obj = ByteArray(string)
         for i in range(len(string)):
-            self.assertEqual(obj[i], string[i])
+            self.assertEqual(obj[i], b(string[i]))
 
     def testInRangeReverse(self):
         # ByteArray[x] where x is a valid index (reverse order).
         string = 'abcdefgh'
         obj = ByteArray(string)
         for i in range(len(string)-1, 0, -1):
-            self.assertEqual(obj[i], string[i])
+            self.assertEqual(obj[i], b(string[i]))
 
     def testOutOfRange(self):
         # ByteArray[x] where x is out of index.
@@ -107,8 +108,8 @@ class ByteArrayOperatorAt(unittest.TestCase):
 
     def testNullStrings(self):
         ba = ByteArray('\x00')
-        self.assertEqual(ba.at(0), '\x00')
-        self.assertEqual(ba[0], '\x00')
+        self.assertEqual(ba.at(0), b('\x00'))
+        self.assertEqual(ba[0], b('\x00'))
 
 
 class ByteArrayOperatorLen(unittest.TestCase):
@@ -132,7 +133,7 @@ class ByteArrayAndPythonStr(unittest.TestCase):
         self.assertEqual(ByteArray('aaa').__str__(), 'aaa')
 
     def testPythonStrAndNull(self):
-        s1 = "123\000321"
+        s1 = b('123\000321')
         ba = ByteArray(s1)
         s2 = ba.data()
         self.assertEqual(s1, s2)

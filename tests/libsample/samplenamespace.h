@@ -50,7 +50,7 @@ namespace SampleNamespace
 {
 
 enum Option {
-    None,
+    None_,
     RandomNumber,
     UnixTime
 };

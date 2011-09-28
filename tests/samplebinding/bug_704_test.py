@@ -24,8 +24,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-import sys
 import unittest
+from py3kcompat import IS_PY3K
 
 from sample import ObjectType
 
@@ -53,7 +53,9 @@ class ObjectTypeTest(unittest.TestCase):
         defineNewStyle()
 
     def testObjectTypeOldStype(self):
-        self.assertRaises(TypeError, defineOldStyle)
+        # Py 3k doesn't have old style classes
+        if not IS_PY3K:
+            self.assertRaises(TypeError, defineOldStyle)
 
 
 if __name__ == '__main__':

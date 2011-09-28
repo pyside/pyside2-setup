@@ -39,7 +39,6 @@ class ExtendedVirtualMethods(VirtualMethods):
         ext_text = text
         if text is not None:
             ext_text = self.prefix + text
-        print ext_text
         return VirtualMethods.createStr(self, ext_text)
 
 
@@ -71,7 +70,7 @@ class ReferenceToPointerTest(unittest.TestCase):
         '''Calls createStr method from C++ with a Python string argument.'''
         obj = VirtualMethods()
         ok, string = obj.callCreateStr('foo')
-        self.assert_(ok)
+        self.assertTrue(ok)
         self.assertEqual(string, Str('foo'))
 
     def testCallReimplementedMethodWithNone(self):

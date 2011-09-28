@@ -28,6 +28,7 @@
 
 import types
 import unittest
+from py3kcompat import IS_PY3K
 
 from sample import VirtualMethods, SimpleFile, Point
 

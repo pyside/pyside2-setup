@@ -30,7 +30,6 @@ import unittest
 from sample import ObjectModel, ObjectType, ObjectView
 
 import warnings
-warnings.simplefilter('error')
 
 
 class MyObject(ObjectType):
@@ -44,6 +43,7 @@ class ListModelWrong(ObjectModel):
         self.obj = 0
 
     def data(self):
+        warnings.simplefilter('error')
         # Shouldn't segfault. Must set TypeError
         return self.obj
 

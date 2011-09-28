@@ -29,6 +29,10 @@
 import unittest
 import sys
 import sample
+from py3kcompat import IS_PY3K, l, long
+
+if IS_PY3K:
+    sys.maxint = sys.maxsize
 
 
 class NumericTester(unittest.TestCase):
@@ -107,27 +111,27 @@ class LongImplicitConvert(NumericTester):
 
     def testLongAsInt(self):
         '''Long as Int'''
-        self.check_value(24224l, 24224, sample.acceptInt, int)
+        self.check_value(l(24224), 24224, sample.acceptInt, int)
         self.assertRaises(OverflowError, sample.acceptInt, sys.maxint + 20)
 
     def testLongAsLong(self):
         '''Long as Long'''
-        self.check_value(2405l, 2405, sample.acceptLong, int)
+        self.check_value(l(2405), 2405, sample.acceptLong, int)
         self.assertRaises(OverflowError, sample.acceptLong, sys.maxint + 20)
 
     def testLongAsUInt(self):
         '''Long as unsigned Int'''
-        self.check_value(260l, 260, sample.acceptUInt, long)
+        self.check_value(l(260), 260, sample.acceptUInt, long)
         self.assertRaises(OverflowError, sample.acceptUInt, -42)
 
     def testLongAsULong(self):
         '''Long as unsigned Long'''
-        self.check_value(128l, 128, sample.acceptULong, long)
-        self.assertRaises(OverflowError, sample.acceptULong, -334l)
+        self.check_value(l(128), 128, sample.acceptULong, long)
+        self.assertRaises(OverflowError, sample.acceptULong, l(-334))
 
     def testLongAsDouble(self):
         '''Float as double'''
-        self.check_value(42l, 42, sample.acceptDouble, float)
+        self.check_value(l(42), 42, sample.acceptDouble, float)
 
 
 if __name__ == '__main__':

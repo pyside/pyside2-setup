@@ -26,6 +26,7 @@
 
 import unittest
 import sample
+from py3kcompat import IS_PY3K
 
 class OldStyle:
     pass
@@ -71,6 +72,6 @@ class TestOldStyleClassAsNumber(unittest.TestCase):
         obj = NewStyleNumber(123)
         self.assertEqual(sample.acceptInt(obj), obj.value)
 
-if __name__ == "__main__":
+if __name__ == "__main__" and not IS_PY3K:
     unittest.main()
 

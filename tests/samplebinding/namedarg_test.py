@@ -30,14 +30,23 @@
 import unittest
 
 from sample import Echo
+from py3kcompat import IS_PY3K
 
 class TestNamedArg(unittest.TestCase):
 
     def testRegularCall(self):
+        # Python 3 support unicode as string
+        if IS_PY3K:
+            return
+
         echo = Echo()
         self.assertRaises(TypeError, echo.methodWithNamedArg, unicode('foo'))
 
     def testNamedArgumentCall(self):
+        # Python 3 support unicode as string
+        if IS_PY3K:
+            return
+
         echo = Echo()
         self.assertRaises(TypeError, echo.methodWithNamedArg, string=unicode('foo'))
 

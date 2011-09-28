@@ -51,7 +51,6 @@ class WeakrefBasicTest(unittest.TestCase):
     def testPrivateDtor(self):
         '''PrivateDtor weakref'''
         obj = PrivateDtor.instance()
-        print obj
         ref = weakref.ref(obj, self.cb)
         del obj
         self.assert_(self.called)

@@ -13,6 +13,8 @@ struct Converter<HANDLE>
 
     static inline bool isConvertible(PyObject* pyObj)
     {
+        if (pyObj == Py_None)
+            return true;
 #ifdef IS_PY3K
         return PyCapsule_CheckExact(pyObj);
 #else
@@ -28,6 +30,8 @@ struct Converter<HANDLE>
 
     static inline PyObject* toPython(HANDLE cppobj)
     {
+        if (!cppobj)
+            Py_RETURN_NONE;
 #ifdef IS_PY3K
         return PyCapsule_New(cppobj, 0, 0);
 #else
@@ -37,6 +41,9 @@ struct Converter<HANDLE>
 
     static inline HANDLE toCpp(PyObject* pyobj)
     {
+        if (pyobj == Py_None)
+            return (HANDLE) 0;
+
 #ifdef IS_PY3K
         return (HANDLE) PyCapsule_GetPointer(pyobj, 0);
 #else

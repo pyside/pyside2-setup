@@ -35,13 +35,12 @@ class HandleHolderTest(unittest.TestCase):
     def testCreation(self):
         holder = HandleHolder(HandleHolder.createHandle())
         holder2 = HandleHolder(HandleHolder.createHandle())
-        self.assertEquals(holder.compare(holder2), False)
+        self.assertEqual(holder.compare(holder2), False)
 
     def testTransfer(self):
         holder = HandleHolder()
         holder2 = HandleHolder(holder.get())
-        self.assert_(holder.compare(holder2))
-
+        self.assertTrue(holder.compare(holder2))
 
 if __name__ == '__main__':
     unittest.main()

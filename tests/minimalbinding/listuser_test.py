@@ -26,6 +26,11 @@
 
 import unittest
 from minimal import ListUser, Val, Obj
+from py3kcompat import IS_PY3K
+
+if IS_PY3K:
+    import functools
+    reduce = functools.reduce
 
 
 class ExtListUser(ListUser):
@@ -33,7 +38,7 @@ class ExtListUser(ListUser):
         ListUser.__init__(self)
 
     def createIntList(self, num):
-        return range(0, num * 2, 2)
+        return list(range(0, num * 2, 2))
 
     def sumIntList(self, intList):
         return sum(intList) * 2
@@ -75,13 +80,13 @@ class IntListConversionTest(unittest.TestCase):
         self.assertEqual(len(lst), num)
         for i in lst:
             self.assertEqual(type(i), int)
-        self.assertEqual(lst, range(num))
+        self.assertEqual(lst, list(range(num)))
         lst = lu.callCreateIntList(num)
         self.assertEqual(type(lst), list)
         self.assertEqual(len(lst), num)
         for i in lst:
             self.assertEqual(type(i), int)
-        self.assertEqual(lst, range(num))
+        self.assertEqual(lst, list(range(num)))
 
     def testCreateIntListFromExtendedClass(self):
         lu = ExtListUser()
@@ -91,13 +96,13 @@ class IntListConversionTest(unittest.TestCase):
         self.assertEqual(len(lst), num)
         for i in lst:
             self.assertEqual(type(i), int)
-        self.assertEqual(lst, range(0, num * 2, 2))
+        self.assertEqual(lst, list(range(0, num * 2, 2)))
         lst = lu.callCreateIntList(num)
         self.assertEqual(type(lst), list)
         self.assertEqual(len(lst), num)
         for i in lst:
             self.assertEqual(type(i), int)
-        self.assertEqual(lst, range(0, num * 2, 2))
+        self.assertEqual(lst, list(range(0, num * 2, 2)))
 
     def testSumIntList(self):
         lu = ListUser()
@@ -175,13 +180,13 @@ class ValListConversionTest(unittest.TestCase):
         self.assertEqual(len(lst), num)
         for i in lst:
             self.assertEqual(type(i), Val)
-        self.assertEqual([val.valId() for val in lst], range(num))
+        self.assertEqual([val.valId() for val in lst], list(range(num)))
         lst = lu.callCreateValList(num)
         self.assertEqual(type(lst), list)
         self.assertEqual(len(lst), num)
         for i in lst:
             self.assertEqual(type(i), Val)
-        self.assertEqual([val.valId() for val in lst], range(num))
+        self.assertEqual([val.valId() for val in lst], list(range(num)))
 
     def testCreateValListFromExtendedClass(self):
         lu = ExtListUser()
@@ -191,13 +196,13 @@ class ValListConversionTest(unittest.TestCase):
         self.assertEqual(len(lst), num)
         for i in lst:
             self.assertEqual(type(i), Val)
-        self.assertEqual([val.valId() for val in lst], range(0, num * 2, 2))
+        self.assertEqual([val.valId() for val in lst], list(range(0, num * 2, 2)))
         lst = lu.callCreateValList(num)
         self.assertEqual(type(lst), list)
         self.assertEqual(len(lst), num)
         for i in lst:
             self.assertEqual(type(i), Val)
-        self.assertEqual([val.valId() for val in lst], range(0, num * 2, 2))
+        self.assertEqual([val.valId() for val in lst], list(range(0, num * 2, 2)))
 
     def testSumValList(self):
         lu = ListUser()
@@ -256,13 +261,13 @@ class ObjListConversionTest(unittest.TestCase):
 
     def testSumObjList(self):
         lu = ListUser()
-        lst = [Obj(i) for i in range(4)]
+        lst = [Obj(i) for i in list(range(4))]
         self.assertEqual(lu.sumObjList(lst), sum([obj.objId() for obj in lst]))
         self.assertEqual(lu.callSumObjList(lst), sum([obj.objId() for obj in lst]))
 
     def testSumObjListFromExtendedClass(self):
         lu = ExtListUser()
-        lst = [Obj(i) for i in range(4)]
+        lst = [Obj(i) for i in list(range(4))]
         self.assertEqual(lu.sumObjList(lst), sum([obj.objId() for obj in lst]) * 2)
         self.assertEqual(lu.callSumObjList(lst), sum([obj.objId() for obj in lst]) * 2)
 
@@ -277,10 +282,10 @@ class ListOfIntListConversionTest(unittest.TestCase):
         self.assertEqual(len(lst), num)
         for i in lst:
             self.assertEqual(type(i), list)
-            self.assertEqual(i, range(num))
+            self.assertEqual(i, list(range(num)))
             for j in i:
                 self.assertEqual(type(j), int)
-        self.assertEqual(lst, [range(num)] * 4)
+        self.assertEqual(lst, [list(range(num))] * 4)
 
     def testCreateListOfIntListsFromExtendedClass(self):
         num = 4
@@ -290,10 +295,10 @@ class ListOfIntListConversionTest(unittest.TestCase):
         self.assertEqual(len(lst), num)
         for i in lst:
             self.assertEqual(type(i), list)
-            self.assertEqual(i, range(0, num * 2, 2))
+            self.assertEqual(i, list(range(0, num * 2, 2)))
             for j in i:
                 self.assertEqual(type(j), int)
-        self.assertEqual(lst, [range(0, num * 2, 2)] * 4)
+        self.assertEqual(lst, [list(range(0, num * 2, 2))] * 4)
 
     def testSumListIntLists(self):
         lu = ListUser()

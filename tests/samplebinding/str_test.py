@@ -66,7 +66,7 @@ class StrTest(unittest.TestCase):
         self.assertEqual(s1[-2], "e");
 
         try:
-            print s1[6]
+            print(s1[6])
             self.assertFalse(true);
         except:
             pass

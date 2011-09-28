@@ -30,7 +30,7 @@ import sys
 import unittest
 import datetime
 
-from sample import Time, ImplicitConv, ObjectType, Str
+from sample import Time, ImplicitConv, ObjectType
 
 class TimeTest(unittest.TestCase):
     '''Test cases for constructor and method signature decisor on Time class.
@@ -43,7 +43,7 @@ class TimeTest(unittest.TestCase):
     def testConstructorWithoutParamers(self):
         '''Constructor without parameters: Time()'''
         time = Time()
-        self.assert_(time.isNull())
+        self.assertTrue(time.isNull())
 
     def testConstructorWithAllParamers(self):
         '''Constructor with all parameters: Time(int h, int m, int s = 0, int ms = 0)'''
@@ -64,7 +64,7 @@ class TimeTest(unittest.TestCase):
         '''Constructor without parameters: Time.setTime()'''
         time = Time(1, 2, 3, 4)
         time.setTime()
-        self.assert_(time.isNull())
+        self.assertTrue(time.isNull())
 
     def testSimpleMethodWithAllParamers(self):
         '''Simple method with all parameters: Time.setTime(int h, int m, int s = 0, int ms = 0)'''
@@ -120,13 +120,13 @@ class TimeTest(unittest.TestCase):
         self.assertEqual(result, Time.ThreeArgs)
 
     def testCompareWithPythonTime(self):
-        time = Time(12, 32, 05)
-        py = datetime.time(12, 32, 05)
+        time = Time(12, 32, 5)
+        py = datetime.time(12, 32, 5)
         self.assertEqual(time, py)
 
     def testNotEqual(self):
-        time = Time(12, 32, 06)
-        py = datetime.time(12, 32, 05)
+        time = Time(12, 32, 6)
+        py = datetime.time(12, 32, 5)
         self.assertNotEqual(time, py)
 
 if __name__ == '__main__':

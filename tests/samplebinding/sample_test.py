@@ -44,18 +44,18 @@ class ModuleTest(unittest.TestCase):
                                 'transmutePointIntoComplex', 'sumComplexPair',
                                 'FirstThing', 'SecondThing', 'ThirdThing',
                                 'GlobalEnum', 'NoThing'])
-        self.assert_(expected_members.issubset(dir(sample)))
+        self.assertTrue(expected_members.issubset(dir(sample)))
 
     def testAbstractPrintFormatEnum(self):
         '''Test availability of PrintFormat enum from Abstract class'''
         enum_members = set(['PrintFormat', 'Short', 'Verbose',
                             'OnlyId', 'ClassNameAndId'])
-        self.assert_(enum_members.issubset(dir(sample.Abstract)))
+        self.assertTrue(enum_members.issubset(dir(sample.Abstract)))
 
     def testSampleNamespaceOptionEnum(self):
         '''Test availability of Option enum from SampleNamespace namespace'''
-        enum_members = set(['Option', 'None', 'RandomNumber', 'UnixTime'])
-        self.assert_(enum_members.issubset(dir(sample.SampleNamespace)))
+        enum_members = set(['Option', 'None_', 'RandomNumber', 'UnixTime'])
+        self.assertTrue(enum_members.issubset(dir(sample.SampleNamespace)))
 
     def testAddedFunctionAtModuleLevel(self):
         '''Calls function added to module from type system description.'''

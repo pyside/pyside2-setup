@@ -32,7 +32,6 @@ import unittest
 from sample import *
 
 import warnings
-warnings.simplefilter('error')
 
 class ExtendedVirtualMethods(VirtualMethods):
     def __init__(self):
@@ -44,6 +43,7 @@ class ExtendedVirtualMethods(VirtualMethods):
         return VirtualMethods.virtualMethod0(self, pt, val, cpx, b) * -1.0
 
     def strListToStdList(self, arg):
+        warnings.simplefilter('error')
         # returning wrong type for test purposes.
         return True
 
@@ -105,7 +105,7 @@ class VirtualMethodsTest(unittest.TestCase):
         self.assertFalse(evd.grand_daughter_name_called)
 
         name = evd.callName()
-        self.assert_(evd.grand_daughter_name_called)
+        self.assertTrue(evd.grand_daughter_name_called)
         self.assertEqual(evd.name().prepend(self.prefix_from_codeinjection), name)
 
     def testReimplementedVirtualMethodInheritedFromGrandGrandParent(self):
@@ -119,8 +119,8 @@ class VirtualMethodsTest(unittest.TestCase):
         self.assertFalse(eevd.grand_grand_daughter_name_called)
 
         name = eevd.callName()
-        self.assert_(eevd.grand_daughter_name_called)
-        self.assert_(eevd.grand_grand_daughter_name_called)
+        self.assertTrue(eevd.grand_daughter_name_called)
+        self.assertTrue(eevd.grand_grand_daughter_name_called)
         self.assertEqual(eevd.name().prepend(self.prefix_from_codeinjection), name)
 
 class PrettyErrorMessageTest(unittest.TestCase):

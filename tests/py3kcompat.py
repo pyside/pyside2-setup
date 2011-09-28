@@ -34,8 +34,16 @@ if IS_PY3K:
     def b(s):
         return bytes(s, "UTF8")
 
+    def l(n):
+        return n
+
+    long = int
 else:
     def b(s):
         return s
 
+    def l(n):
+        return long(n)
 
+    unicode = unicode
+    long = long

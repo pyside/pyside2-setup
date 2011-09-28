@@ -30,6 +30,7 @@ import sys
 import unittest
 
 from sample import Point
+from py3kcompat import unicode
 
 class PointTest(unittest.TestCase):
     '''Test case for Point class, including operator overloads.'''
@@ -68,7 +69,7 @@ class PointTest(unittest.TestCase):
         pt2 = pt1.copy()
         self.assertEqual(pt1, pt2)
         pt2 += pt1
-        self.assert_(not pt1 == pt2)
+        self.assertFalse(pt1 == pt2)
 
     def testReturnConstPointer(self):
         '''Point returns a const pointer for itself.'''
@@ -86,12 +87,12 @@ class PointTest(unittest.TestCase):
 
     def testAddedOperator(self):
         p = Point(0.0, 0.0)
-        r = p - u'Hi'
-        self.assertEqual(r, u'Hi')
+        r = p - unicode('Hi')
+        self.assertEqual(r, unicode('Hi'))
 
         # now the reverse op.
-        r = u'Hi' - p
-        self.assertEqual(r, u'Hi')
+        r = unicode('Hi') - p
+        self.assertEqual(r, unicode('Hi'))
 
     def testModifiedMethod(self):
         pt1 = Point(0.0, 0.0)

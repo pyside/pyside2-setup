@@ -28,6 +28,12 @@
 
 import unittest
 from sample import *
+from py3kcompat import IS_PY3K
+
+if IS_PY3K:
+    TYPE_STR = "class"
+else:
+    TYPE_STR = "type"
 
 class TestEnumUnderNamespace(unittest.TestCase):
     def testInvisibleNamespace(self):
@@ -46,9 +52,9 @@ class TestClassesUnderNamespace(unittest.TestCase):
         self.assertEquals(res, 4)
 
     def testTpNames(self):
-        self.assertEquals(str(SampleNamespace.SomeClass), "<type 'sample.SampleNamespace.SomeClass'>")
-        self.assertEquals(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough), "<type 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough'>")
-        self.assertEquals(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum), "<type 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum'>")
+        self.assertEquals(str(SampleNamespace.SomeClass), "<%s 'sample.SampleNamespace.SomeClass'>"%TYPE_STR)
+        self.assertEquals(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough), "<%s 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough'>"%TYPE_STR)
+        self.assertEquals(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum), "<%s 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum'>"%TYPE_STR)
 
 if __name__ == '__main__':
     unittest.main()

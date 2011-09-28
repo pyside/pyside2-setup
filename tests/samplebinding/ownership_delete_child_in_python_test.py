@@ -31,6 +31,10 @@ import random
 import string
 
 from sample import ObjectType
+from py3kcompat import IS_PY3K
+
+if IS_PY3K:
+    string.letters = string.ascii_letters
 
 
 class DeleteChildInPython(unittest.TestCase):
