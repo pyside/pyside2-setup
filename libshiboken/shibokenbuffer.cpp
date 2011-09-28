@@ -34,11 +34,23 @@ void* Shiboken::Buffer::getPointer(PyObject* pyObj, Py_ssize_t* size)
     const void* buffer = 0;
     Py_ssize_t bufferSize = 0;
 
+#ifdef IS_PY3K
+    Py_buffer view;
+    printf("VAI PEGAR O BUFFER\n");
+    if (PyObject_GetBuffer(pyObj, &view, PyBUF_ND) == 0) {
+        printf("PEGOU O BUFFER\n");
+        return view.buf;
+    } else {
+        printf("FALHA TOTAL\n");
+        return 0;
+    }
+#else
     PyObject_AsReadBuffer(pyObj, &buffer, &bufferSize);
 
     if (size)
         *size = bufferSize;
     return const_cast<void*>(buffer);
+#endif
 }
 
 PyObject* Shiboken::Buffer::newObject(void* memory, Py_ssize_t size, Type type)
