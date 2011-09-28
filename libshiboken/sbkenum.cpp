@@ -21,13 +21,18 @@
  */
 
 #include "sbkenum.h"
+#include "sbkstring.h"
 #include "basewrapper.h"
-#include <string.h>
-#include <cstring>
-#include <list>
 #include "sbkdbg.h"
 #include "autodecref.h"
 #include "typeresolver.h"
+
+#include <string.h>
+#include <cstring>
+#include <list>
+
+
+#define SBK_ENUM(ENUM)  reinterpret_cast<SbkEnumObject*>(ENUM)
 
 extern "C"
 {
@@ -35,7 +40,7 @@ extern "C"
 struct SbkEnumObject
 {
     PyObject_HEAD
-    long ob_ival;
+    long ob_value;
     PyObject* ob_name;
 };
 
@@ -43,9 +48,9 @@ static PyObject* SbkEnumObject_repr(PyObject* self)
 {
     PyObject* enumName = ((SbkEnumObject*)self)->ob_name;
     if (enumName)
-        return PyBytes_FromFormat("%s.%s", self->ob_type->tp_name, PyBytes_AS_STRING(enumName));
+        return Shiboken::String::fromFormat("%s.%s", self->ob_type->tp_name, PyBytes_AS_STRING(enumName));
     else
-        return PyBytes_FromFormat("%s(%ld)", self->ob_type->tp_name, ((SbkEnumObject*)self)->ob_ival);
+        return Shiboken::String::fromFormat("%s(%ld)", self->ob_type->tp_name, ((SbkEnumObject*)self)->ob_value);
 }
 
 static int SbkEnumObject_print(PyObject* self, FILE* fp, int)
@@ -55,7 +60,7 @@ static int SbkEnumObject_print(PyObject* self, FILE* fp, int)
     if (enumName)
         fprintf(fp, "%s.%s", self->ob_type->tp_name, PyBytes_AS_STRING(enumName));
     else
-        fprintf(fp, "%s(%ld)", self->ob_type->tp_name, ((SbkEnumObject*)self)->ob_ival);
+        fprintf(fp, "%s(%ld)", self->ob_type->tp_name, ((SbkEnumObject*)self)->ob_value);
     Py_END_ALLOW_THREADS
     return 0;
 }
@@ -68,14 +73,14 @@ static PyObject* SbkEnumObject_name(PyObject* self, void*)
 
 static PyObject* SbkEnum_tp_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
-    int itemValue = 0;
-    if (!PyArg_ParseTuple(args, "|i:__new__", &itemValue))
+    long itemValue = 0;
+    if (!PyArg_ParseTuple(args, "|l:__new__", &itemValue))
         return 0;
 
     SbkEnumObject* self = PyObject_New(SbkEnumObject, type);
     if (!self)
         return 0;
-    self->ob_ival = itemValue;
+    self->ob_value = itemValue;
     PyObject* item = Shiboken::Enum::getEnumItemFromValue(type, itemValue);
     if (item) {
         self->ob_name = SbkEnumObject_name(item, 0);
@@ -86,9 +91,122 @@ static PyObject* SbkEnum_tp_new(PyTypeObject* type, PyObject* args, PyObject* kw
     return reinterpret_cast<PyObject*>(self);
 }
 
+static PyObject* enum_int(PyObject *v)
+{
+#ifdef IS_PY3K
+    return PyLong_FromLong(SBK_ENUM(v)->ob_value);
+#else
+    return PyInt_FromLong(SBK_ENUM(v)->ob_value);
+#endif
+}
+
+static PyObject* enum_bool(PyObject* v)
+{
+    if (SBK_ENUM(v)->ob_value)
+        Py_RETURN_TRUE;
+    else
+        Py_RETURN_FALSE;
+}
+
+static long getNumberValue(PyObject* v)
+{
+    PyObject* number = PyNumber_Long(v);
+    long result = PyLong_AsLong(number);
+    Py_XDECREF(number);
+    return result;
+}
+
+static PyObject *
+enum_richcompare(PyObject *self, PyObject *other, int op)
+{
+    printf("COMPARE\n");
+    int result = 0;
+    if (!PyNumber_Check(other)) {
+        PyErr_BadArgument();
+        return NULL;
+    }
+
+    long valA = SBK_ENUM(self)->ob_value;
+    long valB = getNumberValue(other);
+
+    if (self == other) {
+        result = 1;
+    } else  {
+        switch (op) {
+        case Py_EQ:
+            result = (valA == valB);
+            break;
+        case Py_NE:
+            result = (valA != valB);
+            break;
+        case Py_LE:
+            result = (valA <= valB);
+            break;
+        case Py_GE:
+            result = (valA >= valB);
+            break;
+        case Py_LT:
+            result = (valA < valB);
+            break;
+        case Py_GT:
+            result = (valA > valB);
+            break;
+        default:
+            PyErr_BadArgument();
+            return NULL;
+        }
+    }
+    if (result)
+        Py_RETURN_TRUE;
+    else
+        Py_RETURN_FALSE;
+}
+
+
+
 static PyGetSetDef SbkEnumGetSetList[] = {
     {const_cast<char*>("name"), &SbkEnumObject_name},
     {0}  // Sentinel
+};
+
+static PyNumberMethods enum_as_number = {
+     /* nb_add */                   0,
+     /* nb_subtract */              0,
+     /* nb_multiply */              0,
+     /* nb_remainder */             0,
+     /* nb_divmod */                0,
+     /* nb_power */                 0,
+     /* nb_negative */              0,
+     /* nb_positive */              0,
+     /* nb_absolute */              enum_bool,
+     /* nb_bool */                  0,
+     /* nb_invert */                0,
+     /* nb_lshift */                0,
+     /* nb_rshift */                0,
+     /* nb_and */                   0,
+     /* nb_xor */                   0,
+     /* nb_or */                    0,
+     /* nb_int */                   enum_int,
+     /* nb_reserved */              0,
+     /* nb_float */                 0,
+
+     /* nb_inplace_add */           0,
+     /* nb_inplace_subtract */      0,
+     /* nb_inplace_multiply */      0,
+     /* nb_inplace_remainder */     0,
+     /* nb_inplace_power */         0,
+     /* nb_inplace_lshift */        0,
+     /* nb_inplace_rshift */        0,
+     /* nb_inplace_and */           0,
+     /* nb_inplace_xor */           0,
+     /* nb_inplace_or */            0,
+
+     /* nb_floor_divide */          0,
+     /* nb_true_divide */           0,
+     /* nb_inplace_floor_divide */  0,
+     /* nb_inplace_true_divide */   0,
+
+     /* nb_index */                 0
 };
 
 PyTypeObject SbkEnumType_Type = {
@@ -168,7 +286,7 @@ PyObject* getEnumItemFromValue(PyTypeObject* enumType, long itemValue)
 
     while (PyDict_Next(values, &pos, &key, &value)) {
         SbkEnumObject* obj = (SbkEnumObject*)value;
-        if (obj->ob_ival == itemValue) {
+        if (obj->ob_value == itemValue) {
             Py_INCREF(obj);
             return reinterpret_cast<PyObject*>(obj);
         }
@@ -264,7 +382,7 @@ PyObject* newItem(PyTypeObject* enumType, long itemValue, const char* itemName)
         return 0;
 
     enumObj->ob_name = itemName ? PyBytes_FromString(itemName) : 0;
-    enumObj->ob_ival = itemValue;
+    enumObj->ob_value = itemValue;
 
     if (newValue) {
         PyObject* values = PyDict_GetItemString(enumType->tp_dict, const_cast<char*>("values"));
@@ -295,10 +413,11 @@ PyTypeObject* newTypeWithName(const char* name, const char* cppName)
     type->tp_repr = &SbkEnumObject_repr;
     type->tp_str = &SbkEnumObject_repr;
     type->tp_flags = Py_TPFLAGS_DEFAULT;
-    type->tp_base = &PyInt_Type;
     type->tp_name = name;
     type->tp_getset = SbkEnumGetSetList;
     type->tp_new = SbkEnum_tp_new;
+    type->tp_as_number = &enum_as_number;
+    type->tp_richcompare = &enum_richcompare;
 
     DeclaredEnumTypes::instance().addEnumType(type, cppName);
     return type;
@@ -311,7 +430,7 @@ const char* getCppName(PyTypeObject* enumType)
 
 long int getValue(PyObject* enumItem)
 {
-    return reinterpret_cast<SbkEnumObject*>(enumItem)->ob_ival;
+    return reinterpret_cast<SbkEnumObject*>(enumItem)->ob_value;
 }
 
 } // namespace Enum
