@@ -32,6 +32,14 @@ import unittest
 
 import sample
 from sample import SampleNamespace, ObjectType, Event
+from py3kcompat import IS_PY3K, b
+
+def createTempFile():
+    if IS_PY3K:
+        import tempfile
+        return tempfile.SpooledTemporaryFile(mode='rw')
+    else:
+        return os.tmpfile()
 
 class EnumTest(unittest.TestCase):
     '''Test case for Python representation of C++ enums.'''
@@ -96,10 +104,8 @@ class EnumTest(unittest.TestCase):
 
     def testEnumTpPrintImplementation(self):
         '''Without SbkEnum.tp_print 'print' returns the enum represented as an int.'''
-        tmpfile = os.tmpfile()
-        sys.stdout = tmpfile
-        print Event.ANY_EVENT
-        sys.stdout = sys.__stdout__
+        tmpfile = createTempFile()
+        print(Event.ANY_EVENT, file=tmpfile)
         tmpfile.seek(0)
         text = tmpfile.read().strip()
         tmpfile.close()
