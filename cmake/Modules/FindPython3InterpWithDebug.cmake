@@ -3,9 +3,9 @@ INCLUDE(FindPython3Libs)
 
 find_package(Python3Interp REQUIRED)
 
-if(PYTHON3INTERP_FOUND AND UNIX AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     # This is for Debian
-    set(PYTHON3_EXECUTABLE_TMP "${PYTHON3_EXECUTABLE}-dbg")
+    set(PYTHON3_EXECUTABLE_TMP "${PYTHON3_DBG_EXECUTABLE}")
 
     # Fall back to the standard interpreter.
     if(NOT EXISTS "${PYTHON3_EXECUTABLE_TMP}")
@@ -21,6 +21,8 @@ execute_process(
         print(bool(sysconfig.get_config_var('Py_DEBUG')))"
     OUTPUT_VARIABLE PYTHON_WITH_DEBUG
     OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+message("PYTHON WITH DEBUG: ${PYTHON3_EXECUTABLE}")
 
 execute_process(
     COMMAND ${PYTHON3_EXECUTABLE} -c "import sys; \\

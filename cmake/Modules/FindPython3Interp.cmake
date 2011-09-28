@@ -27,11 +27,22 @@ FIND_PROGRAM(PYTHON3_EXECUTABLE
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\3.0\\InstallPath]
   )
 
+FIND_PROGRAM(PYTHON3_DBG_EXECUTABLE
+  NAMES python3.2dmu python3.2dm python3.2du python3.2d python3.1-dbg python3.0-dbg python3-dbg
+  PATHS
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\3.2\\InstallPath]
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\3.1\\InstallPath]
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\3.0\\InstallPath]
+  )
+
+
 # handle the QUIETLY and REQUIRED arguments and set PYTHONINTERP_FOUND to TRUE if
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Python3Interp DEFAULT_MSG PYTHON3_EXECUTABLE)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Python3InterpDbg DEFAULT_MSG PYTHON3_DBG_EXECUTABLE)
 
 MARK_AS_ADVANCED(PYTHON3_EXECUTABLE)
+MARK_AS_ADVANCED(PYTHON3_DBG_EXECUTABLE)
 
 
