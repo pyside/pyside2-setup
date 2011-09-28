@@ -91,7 +91,7 @@ static PyObject* SbkEnum_tp_new(PyTypeObject* type, PyObject* args, PyObject* kw
     return reinterpret_cast<PyObject*>(self);
 }
 
-static PyObject* enum_int(PyObject *v)
+static PyObject* enum_int(PyObject* v)
 {
 #ifdef IS_PY3K
     return PyLong_FromLong(SBK_ENUM(v)->ob_value);
@@ -100,12 +100,9 @@ static PyObject* enum_int(PyObject *v)
 #endif
 }
 
-static PyObject* enum_bool(PyObject* v)
+static int enum_bool(PyObject* v)
 {
-    if (SBK_ENUM(v)->ob_value)
-        Py_RETURN_TRUE;
-    else
-        Py_RETURN_FALSE;
+    return (SBK_ENUM(v)->ob_value > 0);
 }
 
 static long getNumberValue(PyObject* v)
@@ -173,22 +170,35 @@ static PyNumberMethods enum_as_number = {
      /* nb_add */                   0,
      /* nb_subtract */              0,
      /* nb_multiply */              0,
+#ifndef IS_PY3K
+     /* nb_divide */                0,
+#endif
      /* nb_remainder */             0,
      /* nb_divmod */                0,
      /* nb_power */                 0,
      /* nb_negative */              0,
      /* nb_positive */              0,
-     /* nb_absolute */              enum_bool,
-     /* nb_bool */                  0,
+     /* nb_absolute */              0,
+     /* nb_bool */                  enum_bool,
      /* nb_invert */                0,
      /* nb_lshift */                0,
      /* nb_rshift */                0,
      /* nb_and */                   0,
      /* nb_xor */                   0,
      /* nb_or */                    0,
+#ifndef IS_PY3K
+     /* nb_coerce */                0,
+#endif
      /* nb_int */                   enum_int,
+#ifdef IS_PY3K
      /* nb_reserved */              0,
      /* nb_float */                 0,
+#else
+     /* nb_long */                  enum_int,
+     /* nb_float */                 0,
+     /* nb_oct */                   0,
+     /* nb_hex */                   0,
+#endif
 
      /* nb_inplace_add */           0,
      /* nb_inplace_subtract */      0,

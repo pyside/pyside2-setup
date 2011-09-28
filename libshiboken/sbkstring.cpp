@@ -69,7 +69,8 @@ bool concat(PyObject** val1, PyObject* val2)
     *val1 = result;
     return true;
 #else
-    return false;
+    PyString_Concat(val1, val2);
+    return true;
 #endif
 }
 
@@ -101,7 +102,7 @@ int compare(PyObject* val1, const char* val2)
 #if PY_MAJOR_VERSION >= 3
     return PyUnicode_CompareWithASCIIString(val1, val2);
 #else
-    return strcmp(PyString_AS_STRING(X), Y);
+    return strcmp(PyString_AS_STRING(val1), val2);
 #endif
 }
 
