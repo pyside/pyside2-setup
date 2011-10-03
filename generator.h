@@ -242,6 +242,18 @@ public:
     /// Returns true if the type is a void pointer.
     static bool isVoidPointer(const AbstractMetaType* type);
 
+    // Returns the full name of the type.
+    QString getFullTypeName(const TypeEntry* type) const;
+    QString getFullTypeName(const AbstractMetaType* type) const;
+    QString getFullTypeName(const AbstractMetaClass* metaClass) const;
+
+    /**
+     *  Returns the full qualified C++ name for an AbstractMetaType, but removing modifiers
+     *  as 'const', '&', and '*' (except if the class is not derived from a template).
+     *  This is useful for instantiated templates.
+     */
+    QString getFullTypeNameWithoutModifiers(const AbstractMetaType* type) const;
+
     /**
      *   Tries to build a minimal constructor for the type.
      *   It will check first for a user defined default constructor.

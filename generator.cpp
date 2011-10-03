@@ -398,6 +398,50 @@ bool Generator::isVoidPointer(const AbstractMetaType* type)
             && type->name() == "void";
 }
 
+QString Generator::getFullTypeName(const TypeEntry* type) const
+{
+    return QString("%1%2").arg(type->isCppPrimitive() ? "" : "::").arg(type->qualifiedCppName());
+}
+
+QString Generator::getFullTypeName(const AbstractMetaType* type) const
+{
+    if (isCString(type))
+        return "const char*";
+    if (isVoidPointer(type))
+        return "void*";
+    if (type->typeEntry()->isContainer())
+        return QString("::%1").arg(type->cppSignature());
+    QString typeName;
+    if (type->typeEntry()->isComplex() && type->hasInstantiations())
+        typeName = getFullTypeNameWithoutModifiers(type);
+    else
+        typeName = getFullTypeName(type->typeEntry());
+    return typeName + QString("*").repeated(type->indirections());
+}
+
+QString Generator::getFullTypeName(const AbstractMetaClass* metaClass) const
+{
+    return QString("::%1").arg(metaClass->qualifiedCppName());
+}
+
+QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType* type) const
+{
+    if (isCString(type))
+        return "const char*";
+    if (isVoidPointer(type))
+        return "void*";
+    if (!type->hasInstantiations())
+        return getFullTypeName(type->typeEntry());
+    QString typeName = type->cppSignature();
+    if (type->isConstant())
+        typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
+    if (type->isReference())
+        typeName.chop(1);
+    while (typeName.endsWith('*') || typeName.endsWith(' '))
+        typeName.chop(1);
+    return QString("::%1").arg(typeName);
+}
+
 QString Generator::minimalConstructor(const AbstractMetaType* type) const
 {
     if (!type || (type->isReference() && Generator::isObjectType(type)))
@@ -425,7 +469,12 @@ QString Generator::minimalConstructor(const AbstractMetaType* type) const
     if (type->typeEntry()->isComplex()) {
         const ComplexTypeEntry* cType = reinterpret_cast<const ComplexTypeEntry*>(type->typeEntry());
         QString ctor = cType->defaultConstructor();
-        return (ctor.isEmpty()) ? minimalConstructor(classes().findClass(cType)) : ctor;
+        if (!ctor.isEmpty())
+            return ctor;
+        ctor = minimalConstructor(classes().findClass(cType));
+        if (type->hasInstantiations())
+            ctor = ctor.replace(getFullTypeName(cType), getFullTypeNameWithoutModifiers(type));
+        return ctor;
     }
 
     return minimalConstructor(type->typeEntry());
@@ -480,9 +529,15 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
             maxArgs = numArgs;
     }
 
+    QString qualifiedCppName = metaClass->typeEntry()->qualifiedCppName();
+    QStringList templateTypes;
+    foreach (TypeEntry* templateType, metaClass->templateArguments())
+        templateTypes << templateType->qualifiedCppName();
+    QString fixedTypeName = QString("%1<%2 >").arg(qualifiedCppName).arg(templateTypes.join(", "));
+
     // Empty constructor.
     if (maxArgs == 0)
-        return QString("::%1()").arg(metaClass->qualifiedCppName());
+        return QString("::%1()").arg(qualifiedCppName);
 
     QList<const AbstractMetaFunction*> candidates;
 
@@ -526,10 +581,8 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
                 }
             }
 
-            if (!args.isEmpty()) {
-                return QString("::%1(%2)").arg(metaClass->qualifiedCppName())
-                                          .arg(args.join(", "));
-            }
+            if (!args.isEmpty())
+                return QString("::%1(%2)").arg(qualifiedCppName).arg(args.join(", "));
 
             candidates << ctor;
         }
@@ -553,7 +606,7 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
             args << argValue;
         }
         if (!args.isEmpty()) {
-            return QString("::%1(%2)").arg(metaClass->qualifiedCppName())
+            return QString("::%1(%2)").arg(qualifiedCppName)
                                       .arg(args.join(", "));
         }
     }
