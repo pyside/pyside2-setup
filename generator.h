@@ -237,6 +237,11 @@ public:
     static bool isObjectType(const AbstractMetaType* metaType);
     static bool isObjectType(const AbstractMetaClass* metaClass);
 
+    /// Returns true if the type is a C string (const char*).
+    static bool isCString(const AbstractMetaType* type);
+    /// Returns true if the type is a void pointer.
+    static bool isVoidPointer(const AbstractMetaType* type);
+
     /**
      *   Tries to build a minimal constructor for the type.
      *   It will check first for a user defined default constructor.

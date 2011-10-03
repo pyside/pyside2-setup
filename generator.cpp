@@ -384,6 +384,20 @@ bool Generator::isPointer(const AbstractMetaType* type)
             || type->isValuePointer();
 }
 
+bool Generator::isCString(const AbstractMetaType* type)
+{
+    return type->isNativePointer()
+            && type->indirections() == 1
+            && type->name() == "char";
+}
+
+bool Generator::isVoidPointer(const AbstractMetaType* type)
+{
+    return type->isNativePointer()
+            && type->indirections() == 1
+            && type->name() == "void";
+}
+
 QString Generator::minimalConstructor(const AbstractMetaType* type) const
 {
     if (!type || (type->isReference() && Generator::isObjectType(type)))
