@@ -100,11 +100,6 @@ static PyObject* enum_int(PyObject* v)
 #endif
 }
 
-static int enum_bool(PyObject* v)
-{
-    return (SBK_ENUM(v)->ob_value > 0);
-}
-
 static long getNumberValue(PyObject* v)
 {
     PyObject* number = PyNumber_Long(v);
@@ -113,18 +108,88 @@ static long getNumberValue(PyObject* v)
     return result;
 }
 
+
+static PyObject*
+enum_and(PyObject *self, PyObject *b)
+{
+    if (!PyNumber_Check(b)) {
+        Py_INCREF(Py_NotImplemented);
+        return Py_NotImplemented;
+    }
+
+    long valA = SBK_ENUM(self)->ob_value;
+    long valB = getNumberValue(b);
+    return PyLong_FromLong(valA & valB);
+}
+
+static PyObject*
+enum_or(PyObject *self, PyObject *b)
+{
+    if (!PyNumber_Check(b)) {
+        Py_INCREF(Py_NotImplemented);
+        return Py_NotImplemented;
+    }
+
+    long valA = SBK_ENUM(self)->ob_value;
+    long valB = getNumberValue(b);
+    return PyLong_FromLong(valA | valB);
+}
+
+static PyObject*
+enum_xor(PyObject *self, PyObject *b)
+{
+    if (!PyNumber_Check(b)) {
+        Py_INCREF(Py_NotImplemented);
+        return Py_NotImplemented;
+    }
+
+    long valA = SBK_ENUM(self)->ob_value;
+    long valB = getNumberValue(b);
+    return PyLong_FromLong(valA ^ valB);
+}
+
+
+static int enum_bool(PyObject* v)
+{
+    return (SBK_ENUM(v)->ob_value > 0);
+}
+
+static PyObject* enum_add(PyObject* self, PyObject* v)
+{
+    long valA = SBK_ENUM(self)->ob_value;
+    long valB = getNumberValue(v);
+    return PyLong_FromLong(valA + valB);
+}
+
+static PyObject* enum_subtract(PyObject* self, PyObject* v)
+{
+    long valA = SBK_ENUM(self)->ob_value;
+    long valB = getNumberValue(v);
+    return PyLong_FromLong(valA - valB);
+}
+
+static PyObject* enum_multiply(PyObject* self, PyObject* v)
+{
+    long valA = SBK_ENUM(self)->ob_value;
+    long valB = getNumberValue(v);
+    return PyLong_FromLong(valA * valB);
+}
+
+
 static PyObject *
 enum_richcompare(PyObject *self, PyObject *other, int op)
 {
-    printf("COMPARE\n");
+    printf("enum_richcompare\n");
     int result = 0;
     if (!PyNumber_Check(other)) {
-        PyErr_BadArgument();
-        return NULL;
+        Py_INCREF(Py_NotImplemented);
+        return Py_NotImplemented;
     }
 
     long valA = SBK_ENUM(self)->ob_value;
     long valB = getNumberValue(other);
+
+    printf("enum_richcompare2: %ld/%ld\n", valA, valB);
 
     if (self == other) {
         result = 1;
@@ -167,9 +232,9 @@ static PyGetSetDef SbkEnumGetSetList[] = {
 };
 
 static PyNumberMethods enum_as_number = {
-     /* nb_add */                   0,
-     /* nb_subtract */              0,
-     /* nb_multiply */              0,
+     /* nb_add */                   enum_add,
+     /* nb_subtract */              enum_subtract,
+     /* nb_multiply */              enum_multiply,
 #ifndef IS_PY3K
      /* nb_divide */                0,
 #endif
@@ -177,15 +242,15 @@ static PyNumberMethods enum_as_number = {
      /* nb_divmod */                0,
      /* nb_power */                 0,
      /* nb_negative */              0,
-     /* nb_positive */              0,
+     /* nb_positive */              enum_int,
      /* nb_absolute */              0,
      /* nb_bool */                  enum_bool,
      /* nb_invert */                0,
      /* nb_lshift */                0,
      /* nb_rshift */                0,
-     /* nb_and */                   0,
-     /* nb_xor */                   0,
-     /* nb_or */                    0,
+     /* nb_and */                   enum_and,
+     /* nb_xor */                   enum_xor,
+     /* nb_or */                    enum_or,
 #ifndef IS_PY3K
      /* nb_coerce */                0,
 #endif
@@ -216,7 +281,7 @@ static PyNumberMethods enum_as_number = {
      /* nb_inplace_floor_divide */  0,
      /* nb_inplace_true_divide */   0,
 
-     /* nb_index */                 0
+     /* nb_index */                 enum_int
 };
 
 PyTypeObject SbkEnumType_Type = {
@@ -287,6 +352,11 @@ private:
 };
 
 namespace Enum {
+
+bool check(PyObject* pyObj)
+{
+    return Py_TYPE(pyObj->ob_type) == &SbkEnumType_Type;
+}
 
 PyObject* getEnumItemFromValue(PyTypeObject* enumType, long itemValue)
 {

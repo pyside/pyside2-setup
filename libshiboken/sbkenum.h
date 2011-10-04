@@ -44,6 +44,7 @@ inline bool isShibokenEnum(PyObject* pyObj)
 
 namespace Enum
 {
+    LIBSHIBOKEN_API bool check(PyObject* obj);
     /**
      *  Creates a new enum type (and its flags type, if any is given)
      *  and registers it to Python and adds it to \p module.
