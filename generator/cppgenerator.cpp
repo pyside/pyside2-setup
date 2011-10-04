@@ -925,7 +925,7 @@ void CppGenerator::writeMetaCast(QTextStream& s, const AbstractMetaClass* metaCl
     s << '{' << endl;
     s << INDENT << "if (!_clname) return 0;" << endl;
     s << INDENT << "SbkObject* pySelf = Shiboken::BindingManager::instance().retrieveWrapper(this);" << endl;
-    s << INDENT << "if (pySelf && PySide::inherits(pySelf->ob_type, _clname))" << endl;
+    s << INDENT << "if (pySelf && PySide::inherits(Py_TYPE(pySelf), _clname))" << endl;
     s << INDENT << INDENT << "return static_cast<void*>(const_cast< " << wrapperClassName << "* >(this));" << endl;
     s << INDENT << "return " << metaClass->qualifiedCppName() << "::qt_metacast(_clname);" << endl;
     s << "}" << endl << endl;
@@ -2757,7 +2757,11 @@ void CppGenerator::writeTypeAsSequenceDefinition(QTextStream& s, const AbstractM
     foreach (const QString& sqName, m_sqFuncs.keys()) {
         if (funcs[sqName].isEmpty())
             continue;
+        if (m_sqFuncs[sqName] == "sq_slice")
+            s << "#ifndef IS_PY3K" << endl;
         s << INDENT << baseName << "_Type.super.as_sequence." << m_sqFuncs[sqName] << " = " << funcs[sqName] << ';' << endl;
+        if (m_sqFuncs[sqName] == "sq_slice")
+            s << "#endif" << endl;
     }
 }
 
@@ -3259,6 +3263,30 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
                 << metaClass->qualifiedCppName() << "::staticMetaObject);" << endl;
 }
 
+void CppGenerator::writeFlagsToLong(QTextStream& s, const AbstractMetaEnum* cppEnum)
+{
+    FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
+    if (!flagsEntry)
+        return;
+    s << "static PyObject* " << cpythonEnumName(cppEnum) << "_long(PyObject* v)" << endl
+      << "{" << endl
+      << INDENT << "long val = (long) Shiboken::Converter< ::" << flagsEntry->originalName() << ">::toCpp(v);" << endl
+      << INDENT << "return PyLong_FromLong(val);" << endl
+      << "}" << endl;
+}
+
+void CppGenerator::writeFlagsNonZero(QTextStream& s, const AbstractMetaEnum* cppEnum)
+{
+    FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
+    if (!flagsEntry)
+        return;
+    s << "static int " << cpythonEnumName(cppEnum) << "__nonzero(PyObject* v)" << endl
+      << "{" << endl
+      << INDENT << "long val = (long) Shiboken::Converter< ::" << flagsEntry->originalName() << ">::toCpp(v);" << endl
+      << INDENT << "return val != 0;" << endl
+      << "}" << endl;
+}
+
 void CppGenerator::writeFlagsMethods(QTextStream& s, const AbstractMetaEnum* cppEnum)
 {
     writeFlagsBinaryOperator(s, cppEnum, "and", "&");
@@ -3266,6 +3294,9 @@ void CppGenerator::writeFlagsMethods(QTextStream& s, const AbstractMetaEnum* cpp
     writeFlagsBinaryOperator(s, cppEnum, "xor", "^");
 
     writeFlagsUnaryOperator(s, cppEnum, "invert", "~");
+    writeFlagsToLong(s, cppEnum);
+    writeFlagsNonZero(s, cppEnum);
+
     s << endl;
 }
 
@@ -3277,30 +3308,41 @@ void CppGenerator::writeFlagsNumberMethodsDefinition(QTextStream& s, const Abstr
     s << INDENT << "/*nb_add*/                  0," << endl;
     s << INDENT << "/*nb_subtract*/             0," << endl;
     s << INDENT << "/*nb_multiply*/             0," << endl;
-    s << INDENT << "/*nb_divide*/               0," << endl;
+    s << INDENT << "#ifndef IS_PY3K" << endl;
+    s << INDENT << "/* nb_divide */             0," << endl;
+    s << INDENT << "#endif" << endl;
     s << INDENT << "/*nb_remainder*/            0," << endl;
     s << INDENT << "/*nb_divmod*/               0," << endl;
     s << INDENT << "/*nb_power*/                0," << endl;
     s << INDENT << "/*nb_negative*/             0," << endl;
     s << INDENT << "/*nb_positive*/             0," << endl;
     s << INDENT << "/*nb_absolute*/             0," << endl;
-    s << INDENT << "/*nb_nonzero*/              0," << endl;
-    s << INDENT << "/*nb_invert*/               (unaryfunc)" << cpythonName << "___invert__" << "," << endl;
+    s << INDENT << "/*nb_nonzero*/              " << cpythonName << "__nonzero," << endl;
+    s << INDENT << "/*nb_invert*/               (unaryfunc)" << cpythonName << "___invert__," << endl;
     s << INDENT << "/*nb_lshift*/               0," << endl;
     s << INDENT << "/*nb_rshift*/               0," << endl;
-    s << INDENT << "/*nb_and*/                  (binaryfunc)" << cpythonName  << "___and__" << ',' << endl;
-    s << INDENT << "/*nb_xor*/                  (binaryfunc)" << cpythonName  << "___xor__" << ',' << endl;
-    s << INDENT << "/*nb_or*/                   (binaryfunc)" << cpythonName  << "___or__" << ',' << endl;
-    s << INDENT << "/*nb_coerce*/               0," << endl;
-    s << INDENT << "/*nb_int*/                  0," << endl;
-    s << INDENT << "/*nb_long*/                 0," << endl;
+    s << INDENT << "/*nb_and*/                  (binaryfunc)" << cpythonName  << "___and__," << endl;
+    s << INDENT << "/*nb_xor*/                  (binaryfunc)" << cpythonName  << "___xor__," << endl;
+    s << INDENT << "/*nb_or*/                   (binaryfunc)" << cpythonName  << "___or__," << endl;
+    s << INDENT << "#ifndef IS_PY3K" << endl;
+    s << INDENT << "/* nb_coerce */             0," << endl;
+    s << INDENT << "#endif" << endl;
+    s << INDENT << "/*nb_int*/                  " << cpythonName << "_long," << endl;
+    s << INDENT << "#ifdef IS_PY3K" << endl;
+    s << INDENT << "/*nb_reserved*/             0," << endl;
+    s << INDENT << "/*nb_float*/                0," << endl;
+    s << INDENT << "#else" << endl;
+    s << INDENT << "/*nb_long*/                 " << cpythonName << "_long," << endl;
     s << INDENT << "/*nb_float*/                0," << endl;
     s << INDENT << "/*nb_oct*/                  0," << endl;
     s << INDENT << "/*nb_hex*/                  0," << endl;
+    s << INDENT << "#endif" << endl;
     s << INDENT << "/*nb_inplace_add*/          0," << endl;
     s << INDENT << "/*nb_inplace_subtract*/     0," << endl;
     s << INDENT << "/*nb_inplace_multiply*/     0," << endl;
+    s << INDENT << "#ifndef IS_PY3K" << endl;
     s << INDENT << "/*nb_inplace_divide*/       0," << endl;
+    s << INDENT << "#endif" << endl;
     s << INDENT << "/*nb_inplace_remainder*/    0," << endl;
     s << INDENT << "/*nb_inplace_power*/        0," << endl;
     s << INDENT << "/*nb_inplace_lshift*/       0," << endl;
@@ -3326,10 +3368,9 @@ void CppGenerator::writeFlagsDefinition(QTextStream& s, const AbstractMetaEnum* 
 
     s << "// forward declaration of new function" << endl;
     s << "static PyTypeObject " << cpythonName << "_Type = {" << endl;
-    s << INDENT << "PyObject_HEAD_INIT(&PyType_Type)" << endl;
-    s << INDENT << "/*ob_size*/             0," << endl;
+    s << INDENT << "PyVarObject_HEAD_INIT(&PyType_Type, 0)" << endl;
     s << INDENT << "/*tp_name*/             \"" << flagsEntry->flagsName() << "\"," << endl;
-    s << INDENT << "/*tp_basicsize*/        0," << endl;
+    s << INDENT << "/*tp_basicsize*/        sizeof(PySideQFlagsObject)," << endl;
     s << INDENT << "/*tp_itemsize*/         0," << endl;
     s << INDENT << "/*tp_dealloc*/          0," << endl;
     s << INDENT << "/*tp_print*/            0," << endl;
@@ -3350,21 +3391,21 @@ void CppGenerator::writeFlagsDefinition(QTextStream& s, const AbstractMetaEnum* 
     s << INDENT << "/*tp_doc*/              0," << endl;
     s << INDENT << "/*tp_traverse*/         0," << endl;
     s << INDENT << "/*tp_clear*/            0," << endl;
-    s << INDENT << "/*tp_richcompare*/      0," << endl;
+    s << INDENT << "/*tp_richcompare*/      &PySideQFlagsRichCompare," << endl;
     s << INDENT << "/*tp_weaklistoffset*/   0," << endl;
     s << INDENT << "/*tp_iter*/             0," << endl;
     s << INDENT << "/*tp_iternext*/         0," << endl;
     s << INDENT << "/*tp_methods*/          0," << endl;
     s << INDENT << "/*tp_members*/          0," << endl;
     s << INDENT << "/*tp_getset*/           0," << endl;
-    s << INDENT << "/*tp_base*/             &PyInt_Type," << endl;
+    s << INDENT << "/*tp_base*/             0," << endl;
     s << INDENT << "/*tp_dict*/             0," << endl;
     s << INDENT << "/*tp_descr_get*/        0," << endl;
     s << INDENT << "/*tp_descr_set*/        0," << endl;
     s << INDENT << "/*tp_dictoffset*/       0," << endl;
     s << INDENT << "/*tp_init*/             0," << endl;
     s << INDENT << "/*tp_alloc*/            0," << endl;
-    s << INDENT << "/*tp_new*/              PyInt_Type.tp_new," << endl;
+    s << INDENT << "/*tp_new*/              &PySideQFlagsNew," << endl;
     s << INDENT << "/*tp_free*/             0," << endl;
     s << INDENT << "/*tp_is_gc*/            0," << endl;
     s << INDENT << "/*tp_bases*/            0," << endl;
@@ -3929,6 +3970,14 @@ void CppGenerator::finishGeneration()
     s << "#endif" << endl << endl;
 
     s << "#ifdef IS_PY3K" << endl;
+
+    if (usePySideExtensions()) {
+        s << "static int " << moduleName() << "_moduleShutdown(PyObject*)" << endl
+          << "{" << endl
+          << INDENT << "PySide::runCleanupFunctions();" << endl
+          << "}" << endl << endl;
+    }
+
     s << "static struct PyModuleDef moduledef = {" << endl;
     s << "    /* m_base     */ PyModuleDef_HEAD_INIT," << endl;
     s << "    /* m_name     */ \"" << moduleName() << "\"," << endl;
@@ -3937,7 +3986,12 @@ void CppGenerator::finishGeneration()
     s << "    /* m_methods  */ " << moduleName() << "_methods," << endl;
     s << "    /* m_reload   */ 0," << endl;
     s << "    /* m_traverse */ 0," << endl;
-    s << "    /* m_clear    */ 0," << endl;
+
+    if (usePySideExtensions())
+       s << "    /* m_clear    */ " << moduleName() << "_moduleShutdown," << endl;
+    else
+       s << "    /* m_clear    */ 0," << endl;
+
     s << "    /* m_free     */ 0" << endl;
     s << "};" << endl << endl;
     s << "#endif" << endl;
@@ -4222,12 +4276,12 @@ QString CppGenerator::writeReprFunction(QTextStream& s, const AbstractMetaClass*
     s << INDENT << "if (mod)" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "return PyBytes_FromFormat(\"<%s.%s at %p>\", PyBytes_AS_STRING(mod), str.constData(), self);" << endl;
+        s << INDENT << "return Shiboken::String::fromFormat(\"<%s.%s at %p>\", Shiboken::String::toCString(mod), str.constData(), self);" << endl;
     }
     s << INDENT << "else" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "return PyBytes_FromFormat(\"<%s at %p>\", str.constData(), self);" << endl;
+        s << INDENT << "return Shiboken::String::fromFormat(\"<%s at %p>\", str.constData(), self);" << endl;
     }
     s << '}' << endl;
     s << "} // extern C" << endl << endl;;
