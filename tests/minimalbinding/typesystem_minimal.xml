@@ -14,7 +14,9 @@
     </container-type>
 
     <object-type name="Obj"/>
-    <value-type name="Val"/>
+    <value-type name="Val">
+        <enum-type name="ValEnum"/>
+    </value-type>
     <value-type name="ListUser"/>
     <value-type name="MinBoolUser"/>
 </typesystem>

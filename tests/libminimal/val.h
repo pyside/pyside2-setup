@@ -43,6 +43,8 @@ public:
     virtual Val* passValueTypeReference(Val& val) { return &val; }
     Val* callPassValueTypeReference(Val& val) { return passValueTypeReference(val); }
 
+    enum ValEnum { One, Other };
+    ValEnum oneOrTheOtherEnumValue(ValEnum enumValue) { return enumValue == One ? Other : One; }
 private:
     int m_valId;
 };

@@ -70,6 +70,11 @@ class ValTest(unittest.TestCase):
         self.assertEqual(val, val.passValueTypeReference(val))
         self.assertEqual(val, val.callPassValueTypeReference(val))
 
+    def testPassAndReceiveEnumValue(self):
+        val = Val(0)
+        self.assertEqual(val.oneOrTheOtherEnumValue(Val.One), Val.Other)
+        self.assertEqual(val.oneOrTheOtherEnumValue(Val.Other), Val.One)
+
     def testPassValueTypeFromExtendedClass(self):
         val = ExtVal(0)
         val1 = val.passValueType(val)
