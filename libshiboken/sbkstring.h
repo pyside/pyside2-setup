@@ -37,6 +37,8 @@ namespace Shiboken
 namespace String
 {
     LIBSHIBOKEN_API bool check(PyObject* obj);
+    LIBSHIBOKEN_API bool checkType(PyTypeObject* obj);
+    LIBSHIBOKEN_API bool checkChar(PyObject* obj);
     LIBSHIBOKEN_API bool convertible(PyObject* obj);
     LIBSHIBOKEN_API PyObject* fromCString(const char* value);
     LIBSHIBOKEN_API const char* toCString(PyObject* str);

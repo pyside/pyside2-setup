@@ -28,6 +28,16 @@ namespace Shiboken
 namespace String
 {
 
+bool checkType(PyTypeObject* type)
+{
+#if PY_MAJOR_VERSION >= 3
+    return type == &PyUnicode_Type;
+#else
+    return type == &PyString_Type ||
+           type == &PyUnicode_Type;
+#endif
+}
+
 bool check(PyObject* obj)
 {
     return obj == Py_None ||
@@ -36,6 +46,16 @@ bool check(PyObject* obj)
 #else
         PyString_Check(obj);
 #endif
+}
+
+bool checkChar(PyObject* pyobj)
+{
+    if (PyBytes_Check(pyobj) && (PyBytes_GET_SIZE(pyobj) == 1))
+        return true;
+    if (check(pyobj) && (len(pyobj) == 1))
+        return true;
+
+    return false;
 }
 
 bool convertible(PyObject* obj)
@@ -54,6 +74,8 @@ PyObject* fromCString(const char* value)
 
 const char* toCString(PyObject* str)
 {
+    if (str == Py_None)
+        return NULL;
 #if PY_MAJOR_VERSION >= 3
     return _PyUnicode_AsString(str);
 #else
@@ -108,6 +130,10 @@ int compare(PyObject* val1, const char* val2)
 
 Py_ssize_t len(PyObject* str)
 {
+    printf("TYPE NAME: %s\n", Py_TYPE(str)->tp_name);
+    if (str == Py_None)
+        return 0;
+
 #if PY_MAJOR_VERSION >= 3
     return PyUnicode_GET_SIZE(str);
 #else
