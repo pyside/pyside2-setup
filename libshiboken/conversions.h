@@ -345,9 +345,10 @@ struct Converter_PyULongInt : Converter_PyInt<T>
     static inline PyObject* toPython(const T& cppobj) { return PyLong_FromUnsignedLong(cppobj); }
 };
 
+#define SbkChar_Check(X) \
+    SbkNumber_Check(X) || \
+    Shiboken::String::checkChar(X)
 
-/// Check if we can treat the pyobj as a char, i.e. it's a number or a string with just one character.
-#define SbkChar_Check(pyobj) (SbkNumber_Check(pyobj) || (PyBytes_Check(pyobj) && PyBytes_GET_SIZE(pyobj) == 1))
 
 /// Specialization to convert char and unsigned char, it accepts Python numbers and strings with just one character.
 template <typename CharType>
@@ -362,11 +363,15 @@ struct CharConverter
         if (PyBytes_Check(pyobj)) {
             assert(PyBytes_GET_SIZE(pyobj) == 1); // This check is made on SbkChar_Check
             return PyBytes_AS_STRING(pyobj)[0];
-        } else {
+        } else if (PyLong_Check(pyobj)) {
             PY_LONG_LONG result = PyLong_AsLongLong(pyobj);
             if (OverFlowChecker<CharType>::check(result))
                 PyErr_SetObject(PyExc_OverflowError, 0);
             return result;
+        } else if (Shiboken::String::check(pyobj)) {
+            return Shiboken::String::toCString(pyobj)[0];
+        } else {
+            return 0;
         }
     }
 };
@@ -377,7 +382,7 @@ template <> struct Converter<char> : CharConverter<char> {
     // Should we really return a string?
     using CharConverter<char>::toPython;
     static inline PyObject* toPython(const char& cppObj) {
-        return PyBytes_FromFormat("%c", cppObj);
+        return Shiboken::String::fromFormat("%c", cppObj);
     }
 };
 template <> struct Converter<signed char> : CharConverter<signed char> {};
