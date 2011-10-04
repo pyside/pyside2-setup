@@ -54,16 +54,13 @@ bool sequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* 
         // Try to get the script name
         PyObject* globals = PyEval_GetGlobals();
         PyObject* appName = PyDict_GetItemString(globals, "__file__");
-        (*argv)[0] = strdup(appName ? PyBytes_AS_STRING(appName) : defaultAppName);
+        (*argv)[0] = strdup(appName ? Shiboken::String::toCString(appName) : defaultAppName);
     } else {
         for (int i = 0; i < numArgs; ++i) {
             PyObject* item = PySequence_Fast_GET_ITEM(args.object(), i);
             char* string;
-            if (PyUnicode_Check(item)) {
-                Shiboken::AutoDecRef utf8(PyUnicode_AsUTF8String(item));
-                string = strdup(PyBytes_AS_STRING(utf8.object()));
-            } else {
-                string = strdup(PyBytes_AS_STRING(item));
+            if (Shiboken::String::check(item)) {
+                string = strdup(Shiboken::String::toCString(item));
             }
             (*argv)[i] = string;
         }
