@@ -31,20 +31,18 @@ bool Shiboken::Buffer::checkType(PyObject* pyObj)
 
 void* Shiboken::Buffer::getPointer(PyObject* pyObj, Py_ssize_t* size)
 {
-    const void* buffer = 0;
-    Py_ssize_t bufferSize = 0;
 
 #ifdef IS_PY3K
     Py_buffer view;
-    printf("VAI PEGAR O BUFFER\n");
     if (PyObject_GetBuffer(pyObj, &view, PyBUF_ND) == 0) {
-        printf("PEGOU O BUFFER\n");
         return view.buf;
     } else {
-        printf("FALHA TOTAL\n");
         return 0;
     }
 #else
+    const void* buffer = 0;
+    Py_ssize_t bufferSize = 0;
+
     PyObject_AsReadBuffer(pyObj, &buffer, &bufferSize);
 
     if (size)
@@ -57,11 +55,12 @@ PyObject* Shiboken::Buffer::newObject(void* memory, Py_ssize_t size, Type type)
 {
 #ifdef IS_PY3K
     Py_buffer view;
-    memset(&view, 0, sizeof(view));
+    memset(&view, 0, sizeof(Py_buffer));
     view.buf = memory;
     view.len = size;
     view.readonly = type == Shiboken::Buffer::ReadOnly;
     view.ndim = 1;
+    view.itemsize = sizeof(char);
     Py_ssize_t shape[] = { size };
     view.shape = shape;
     return PyMemoryView_FromBuffer(&view);
