@@ -217,7 +217,8 @@ void SbkDeallocWrapper(PyObject* pyObj)
             Shiboken::Object::deallocData(sbkObj, true);
 
             Shiboken::ThreadStateSaver threadSaver;
-            threadSaver.save();
+            if (Py_IsInitialized())
+                threadSaver.save();
             sbkType->d->cpp_dtor(cptr);
         }
     } else {
