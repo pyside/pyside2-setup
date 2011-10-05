@@ -93,6 +93,7 @@ static PyObject* SbkEnum_tp_new(PyTypeObject* type, PyObject* args, PyObject* kw
 
 static PyObject* enum_int(PyObject* v)
 {
+    printf("ENUM TO INT\n");
 #ifdef IS_PY3K
     return PyLong_FromLong(SBK_ENUM(v)->ob_value);
 #else
@@ -156,6 +157,7 @@ static int enum_bool(PyObject* v)
 
 static PyObject* enum_add(PyObject* self, PyObject* v)
 {
+    printf("ENUM ADDDDDDDDD\n");
     long valA = SBK_ENUM(self)->ob_value;
     long valB = getNumberValue(v);
     return PyLong_FromLong(valA + valB);
@@ -175,11 +177,19 @@ static PyObject* enum_multiply(PyObject* self, PyObject* v)
     return PyLong_FromLong(valA * valB);
 }
 
+#ifndef IS_PY3K
+static PyObject* enum_divide(PyObject* self, PyObject* v)
+{
+    long valA = SBK_ENUM(self)->ob_value;
+    long valB = getNumberValue(v);
+    return PyLong_FromLong(valA / valB);
+}
+#endif
+
 
 static PyObject *
 enum_richcompare(PyObject *self, PyObject *other, int op)
 {
-    printf("enum_richcompare\n");
     int result = 0;
     if (!PyNumber_Check(other)) {
         Py_INCREF(Py_NotImplemented);
@@ -188,8 +198,6 @@ enum_richcompare(PyObject *self, PyObject *other, int op)
 
     long valA = SBK_ENUM(self)->ob_value;
     long valB = getNumberValue(other);
-
-    printf("enum_richcompare2: %ld/%ld\n", valA, valB);
 
     if (self == other) {
         result = 1;
@@ -236,7 +244,7 @@ static PyNumberMethods enum_as_number = {
      /* nb_subtract */              enum_subtract,
      /* nb_multiply */              enum_multiply,
 #ifndef IS_PY3K
-     /* nb_divide */                0,
+     /* nb_divide */                enum_divide,
 #endif
      /* nb_remainder */             0,
      /* nb_divmod */                0,
@@ -244,7 +252,7 @@ static PyNumberMethods enum_as_number = {
      /* nb_negative */              0,
      /* nb_positive */              enum_int,
      /* nb_absolute */              0,
-     /* nb_bool */                  enum_bool,
+     /* nb_bool/nb_nonzero */       enum_bool,
      /* nb_invert */                0,
      /* nb_lshift */                0,
      /* nb_rshift */                0,
@@ -268,6 +276,9 @@ static PyNumberMethods enum_as_number = {
      /* nb_inplace_add */           0,
      /* nb_inplace_subtract */      0,
      /* nb_inplace_multiply */      0,
+#ifndef IS_PY3K
+     /* nb_inplace_div */           0,
+#endif
      /* nb_inplace_remainder */     0,
      /* nb_inplace_power */         0,
      /* nb_inplace_lshift */        0,
@@ -295,7 +306,7 @@ PyTypeObject SbkEnumType_Type = {
     /*tp_setattr*/          0,
     /*tp_compare*/          0,
     /*tp_repr*/             0,
-    /*tp_as_number*/        0,
+    /*tp_as_number*/        &enum_as_number,
     /*tp_as_sequence*/      0,
     /*tp_as_mapping*/       0,
     /*tp_hash*/             0,
@@ -304,7 +315,7 @@ PyTypeObject SbkEnumType_Type = {
     /*tp_getattro*/         0,
     /*tp_setattro*/         0,
     /*tp_as_buffer*/        0,
-    /*tp_flags*/            Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
+    /*tp_flags*/            Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES,
     /*tp_doc*/              0,
     /*tp_traverse*/         0,
     /*tp_clear*/            0,
@@ -492,7 +503,7 @@ PyTypeObject* newTypeWithName(const char* name, const char* cppName)
     type->tp_print = &SbkEnumObject_print;
     type->tp_repr = &SbkEnumObject_repr;
     type->tp_str = &SbkEnumObject_repr;
-    type->tp_flags = Py_TPFLAGS_DEFAULT;
+    type->tp_flags = Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES;
     type->tp_name = name;
     type->tp_getset = SbkEnumGetSetList;
     type->tp_new = SbkEnum_tp_new;
