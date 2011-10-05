@@ -72,10 +72,10 @@ class StrTest(unittest.TestCase):
             pass
 
         # setitem
-        s1[0] = 65
-        s1[1] = 66
-        self.assertEqual(s1[0], "A");
-        self.assertEqual(s1[1], "B");
+        s1[0] = 'A'
+        s1[1] = 'B'
+        self.assertEqual(s1[0], 'A');
+        self.assertEqual(s1[1], 'B');
         try:
             s1[6] = 67
             self.assertFalse(true);
