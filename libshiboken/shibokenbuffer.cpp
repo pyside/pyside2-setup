@@ -35,6 +35,8 @@ void* Shiboken::Buffer::getPointer(PyObject* pyObj, Py_ssize_t* size)
 #ifdef IS_PY3K
     Py_buffer view;
     if (PyObject_GetBuffer(pyObj, &view, PyBUF_ND) == 0) {
+        if (size)
+            *size = view.len;
         return view.buf;
     } else {
         return 0;
@@ -53,6 +55,8 @@ void* Shiboken::Buffer::getPointer(PyObject* pyObj, Py_ssize_t* size)
 
 PyObject* Shiboken::Buffer::newObject(void* memory, Py_ssize_t size, Type type)
 {
+    if (size == 0)
+        Py_RETURN_NONE;
 #ifdef IS_PY3K
     Py_buffer view;
     memset(&view, 0, sizeof(Py_buffer));
