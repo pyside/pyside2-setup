@@ -363,8 +363,8 @@ struct CharConverter
         if (PyBytes_Check(pyobj)) {
             assert(PyBytes_GET_SIZE(pyobj) == 1); // This check is made on SbkChar_Check
             return PyBytes_AS_STRING(pyobj)[0];
-        } else if (PyLong_Check(pyobj)) {
-            PY_LONG_LONG result = PyLong_AsLongLong(pyobj);
+        } else if (PyInt_Check(pyobj)) {
+            PY_LONG_LONG result = PyInt_AsUnsignedLongLongMask(pyobj);
             if (OverFlowChecker<CharType>::check(result))
                 PyErr_SetObject(PyExc_OverflowError, 0);
             return result;
@@ -378,11 +378,37 @@ struct CharConverter
 
 template <> struct Converter<unsigned long> : Converter_PyULongInt<unsigned long> {};
 template <> struct Converter<unsigned int> : Converter_PyULongInt<unsigned int> {};
-template <> struct Converter<char> : CharConverter<char> {
+template <> struct Converter<char> : CharConverter<char>
+{
     // Should we really return a string?
     using CharConverter<char>::toPython;
+    using CharConverter<char>::isConvertible;
+    using CharConverter<char>::toCpp;
+
+
+    static inline bool isConvertible(PyObject* pyobj) {
+        return SbkChar_Check(pyobj);
+    }
+
     static inline PyObject* toPython(const char& cppObj) {
         return Shiboken::String::fromFormat("%c", cppObj);
+    }
+
+    static char toCpp(PyObject* pyobj)
+    {
+        if (PyBytes_Check(pyobj)) {
+            assert(PyBytes_GET_SIZE(pyobj) == 1); // This check is made on SbkChar_Check
+            return PyBytes_AS_STRING(pyobj)[0];
+        } else if (PyInt_Check(pyobj)) {
+            PY_LONG_LONG result = PyInt_AsUnsignedLongLongMask(pyobj);
+            if (OverFlowChecker<char>::check(result))
+                PyErr_SetObject(PyExc_OverflowError, 0);
+            return result;
+        } else if (Shiboken::String::check(pyobj)) {
+            return Shiboken::String::toCString(pyobj)[0];
+        } else {
+            return 0;
+        }
     }
 };
 template <> struct Converter<signed char> : CharConverter<signed char> {};
