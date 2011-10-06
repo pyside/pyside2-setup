@@ -487,7 +487,7 @@ struct Converter_CString
         return Shiboken::String::check(pyObj);
     }
     static inline bool isConvertible(PyObject* pyObj) {
-        return Shiboken::String::convertible(pyObj);
+        return Shiboken::String::isConvertible(pyObj);
     }
     static inline PyObject* toPython(void* cppobj) { return toPython(reinterpret_cast<CString>(cppobj)); }
     static inline PyObject* toPython(CString cppobj)

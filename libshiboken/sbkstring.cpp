@@ -54,7 +54,7 @@ bool checkChar(PyObject* pyobj)
     return false;
 }
 
-bool convertible(PyObject* obj)
+bool isConvertible(PyObject* obj)
 {
     return check(obj);
 }
