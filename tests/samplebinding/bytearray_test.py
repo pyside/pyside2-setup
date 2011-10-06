@@ -108,7 +108,7 @@ class ByteArrayOperatorAt(unittest.TestCase):
 
     def testNullStrings(self):
         ba = ByteArray('\x00')
-        self.assertEqual(ba.at(0), b('\x00'))
+        self.assertEqual(ba.at(0), '\x00')
         self.assertEqual(ba[0], b('\x00'))
 
 
