@@ -1,7 +1,10 @@
-INCLUDE(FindPythonInterp)
-INCLUDE(FindPythonLibs)
+find_program(PYTHON_EXECUTABLE NAMES python2.7 python2.6 python2.5)
 
-find_package(PythonInterp REQUIRED)
+if(NOT PYTHON_EXECUTABLE)
+    find_package(PythonInterp REQUIRED)
+else()
+    set(PYTHONINTERP_FOUND 1)
+endif()
 
 if(PYTHONINTERP_FOUND AND UNIX AND CMAKE_BUILD_TYPE STREQUAL "Debug")
     # This is for Debian
