@@ -58,7 +58,7 @@ bool sequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* 
     } else {
         for (int i = 0; i < numArgs; ++i) {
             PyObject* item = PySequence_Fast_GET_ITEM(args.object(), i);
-            char* string;
+            char* string = 0;
             if (Shiboken::String::check(item)) {
                 string = strdup(Shiboken::String::toCString(item));
             }
