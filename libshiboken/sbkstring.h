@@ -23,7 +23,7 @@
 #ifndef SBKSTRING_H
 #define SBKSTRING_H
 
-#include <Python.h>
+#include "sbkpython.h"
 #include "shibokenmacros.h"
 
 #if PY_MAJOR_VERSION >= 3
