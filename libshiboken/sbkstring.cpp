@@ -73,28 +73,32 @@ const char* toCString(PyObject* str)
     if (str == Py_None)
         return NULL;
 #if PY_MAJOR_VERSION >= 3
-    return _PyUnicode_AsString(str);
+    if (PyUnicode_Check(str))
+        return _PyUnicode_AsString(str);
 #else
-    return PyBytes_AS_STRING(str);
+    if (PyString_Check(str))
+        return PyString_AS_STRING(str);
 #endif
+    if (PyBytes_Check(str))
+        return PyBytes_AsString(str);
 }
 
 bool concat(PyObject** val1, PyObject* val2)
 {
-    if (PyUnicode_Check(val1) && PyUnicode_Check(val2)) {
+    if (PyUnicode_Check(*val1) && PyUnicode_Check(val2)) {
         PyObject* result = PyUnicode_Concat(*val1, val2);
         Py_DECREF(*val1);
         *val1 = result;
         return true;
     }
 
-    if (PyBytes_Check(val1) && PyBytes_Check(val2)) {
+    if (PyBytes_Check(*val1) && PyBytes_Check(val2)) {
         PyBytes_Concat(val1, val2);
         return true;
     }
 
 #if PY_MAJOR_VERSION < 3
-    if (PyString_Check(val1) && PyString_Check(val2)) {
+    if (PyString_Check(*val1) && PyString_Check(val2)) {
         PyString_Concat(val1, val2);
         return true;
     }
