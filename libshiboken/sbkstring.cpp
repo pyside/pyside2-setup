@@ -61,7 +61,7 @@ bool convertible(PyObject* obj)
 
 PyObject* fromCString(const char* value)
 {
-#if PY_MAJOR_VERSION >= 3
+#ifdef IS_PY3K
     return PyUnicode_FromString(value);
 #else
     return PyBytes_FromString(value);
@@ -72,15 +72,13 @@ const char* toCString(PyObject* str)
 {
     if (str == Py_None)
         return NULL;
-#if PY_MAJOR_VERSION >= 3
+#ifdef IS_PY3K
     if (PyUnicode_Check(str))
         return _PyUnicode_AsString(str);
-#else
-    if (PyString_Check(str))
-        return PyString_AS_STRING(str);
 #endif
     if (PyBytes_Check(str))
-        return PyBytes_AsString(str);
+        return PyBytes_AS_STRING(str);
+    return 0;
 }
 
 bool concat(PyObject** val1, PyObject* val2)
@@ -111,7 +109,7 @@ PyObject* fromFormat(const char* format, ...)
     va_list argp;
     va_start(argp, format);
     PyObject* result = 0;
-#if PY_MAJOR_VERSION >= 3
+#ifdef IS_PY3K
     result = PyUnicode_FromFormatV(format, argp);
 #else
     result = PyString_FromFormatV(format, argp);
@@ -122,7 +120,7 @@ PyObject* fromFormat(const char* format, ...)
 
 PyObject* fromStringAndSize(const char* str, Py_ssize_t size)
 {
-#if PY_MAJOR_VERSION >= 3
+#ifdef IS_PY3K
     return PyUnicode_FromStringAndSize(str, size);
 #else
     return PyString_FromStringAndSize(str, size);
@@ -132,11 +130,11 @@ PyObject* fromStringAndSize(const char* str, Py_ssize_t size)
 int compare(PyObject* val1, const char* val2)
 {
     if (PyUnicode_Check(val1))
-#if PY_MAJOR_VERSION >= 3
+#ifdef IS_PY3K
        return PyUnicode_CompareWithASCIIString(val1, val2);
 #else
     {
-        PyObject* uVal2 = PyUnicode_FromFormat("%s", val2);
+        PyObject* uVal2 = PyUnicode_FromString(val2);
         bool result =  PyUnicode_Compare(val1, uVal2);
         Py_XDECREF(uVal2);
         return result;
@@ -158,12 +156,6 @@ Py_ssize_t len(PyObject* str)
 
     if (PyBytes_Check(str))
         return PyBytes_GET_SIZE(str);
-
-#if PY_MAJOR_VERSION < 3
-    if (PyString_Check(str))
-        return PyString_GET_SIZE(str);
-#endif
-
     return 0;
 }
 
