@@ -22,6 +22,8 @@
 
 #ifndef PYTHON25COMPAT_H
 #define PYTHON25COMPAT_H
+#include <Python.h>
+#include <cstring>
 
 /*
  *The #defines below were taken from Cython-generated code to allow shiboken to be used with python2.5.
@@ -61,16 +63,21 @@ typedef struct {
 #define PyBUF_ANY_CONTIGUOUS (0x0080 | PyBUF_STRIDES)
 #define PyBUF_INDIRECT (0x0100 | PyBUF_STRIDES)
 
-#endif
-#if PY_MAJOR_VERSION < 3
-#define __Pyx_BUILTIN_MODULE_NAME "__builtin__"
-#else
-#define __Pyx_BUILTIN_MODULE_NAME "builtins"
-#endif
+#define PyBytes_Check PyString_Check
+#define PyBytes_FromString PyString_FromString
+#define PyBytes_FromFormat PyString_FromFormat
+#define PyBytes_FromStringAndSize PyString_FromStringAndSize
+#define PyBytes_GET_SIZE PyString_GET_SIZE
+#define PyBytes_AS_STRING PyString_AS_STRING
+#define PyBytes_AsString PyString_AsString
+#define PyBytes_Concat PyString_Concat
 
-#if (PY_VERSION_HEX < 0x02060000) || (PY_MAJOR_VERSION >= 3)
-#define Py_TPFLAGS_HAVE_NEWBUFFER 0
-#endif
+inline PyObject* PyUnicode_FromString(const char* s)
+{
+    std::size_t len = std::strlen(s);
+    return PyUnicode_DecodeUTF8(s, len, 0);
+}
 
+#endif
 
 #endif
