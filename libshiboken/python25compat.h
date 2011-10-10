@@ -71,6 +71,7 @@ typedef struct {
 #define PyBytes_AS_STRING PyString_AS_STRING
 #define PyBytes_AsString PyString_AsString
 #define PyBytes_Concat PyString_Concat
+#define PyBytes_Size PyString_Size
 
 inline PyObject* PyUnicode_FromString(const char* s)
 {
