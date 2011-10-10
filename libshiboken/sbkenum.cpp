@@ -93,7 +93,6 @@ static PyObject* SbkEnum_tp_new(PyTypeObject* type, PyObject* args, PyObject* kw
 
 static PyObject* enum_int(PyObject* v)
 {
-    printf("ENUM TO INT\n");
 #ifdef IS_PY3K
     return PyLong_FromLong(SBK_ENUM(v)->ob_value);
 #else
@@ -157,7 +156,6 @@ static int enum_bool(PyObject* v)
 
 static PyObject* enum_add(PyObject* self, PyObject* v)
 {
-    printf("ENUM ADDDDDDDDD\n");
     long valA = SBK_ENUM(self)->ob_value;
     long valB = getNumberValue(v);
     return PyLong_FromLong(valA + valB);

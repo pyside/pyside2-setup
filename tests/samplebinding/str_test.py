@@ -65,22 +65,14 @@ class StrTest(unittest.TestCase):
         self.assertEqual(s1[-1], "f");
         self.assertEqual(s1[-2], "e");
 
-        try:
-            print(s1[6])
-            self.assertFalse(true);
-        except:
-            pass
+        self.assertRaises(TypeError, s1.__getitem__, 6)
 
         # setitem
         s1[0] = 'A'
         s1[1] = 'B'
         self.assertEqual(s1[0], 'A');
         self.assertEqual(s1[1], 'B');
-        try:
-            s1[6] = 67
-            self.assertFalse(true);
-        except:
-            pass
+        self.assertRaises(TypeError, s1.__setitem__(6, 67))
 
     def testReverseOperator(self):
         s1 = Str("hello")
