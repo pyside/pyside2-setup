@@ -53,20 +53,25 @@ public:
 
     inline std::list<TemplateBase<CLASS_TYPE> > getListOfThisTemplateBase()
     {
-        std::list<TemplateBase<CLASS_TYPE> >objs;
+        std::list<TemplateBase<CLASS_TYPE> > objs;
         objs.push_back(*this);
         objs.push_back(*this);
         return objs;
     }
-
 
     static inline TemplateBase<CLASS_TYPE>* passPointerThrough(TemplateBase<CLASS_TYPE>* obj) { return obj; }
 private:
     int m_value;
 };
 
-typedef TemplateBase<IdentityType>   ValueIdentity;
+#if defined _WIN32 || defined __CYGWIN__
+template class LIBSAMPLE_API TemplateBase<IdentityType>;
+template class LIBSAMPLE_API TemplateBase<DuplicatorType>;
+#endif
+
+typedef TemplateBase<IdentityType> ValueIdentity;
 typedef TemplateBase<DuplicatorType> ValueDuplicator;
+
 LIBSAMPLE_API int callCalculateForValueDuplicatorPointer(ValueDuplicator* value);
 LIBSAMPLE_API int callCalculateForValueDuplicatorReference(ValueDuplicator& value);
 LIBSAMPLE_API int countValueIdentities(const std::list<ValueIdentity>& values);
