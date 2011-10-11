@@ -2133,6 +2133,9 @@
     <rejection class="ListUser" function-name="sumList(std::list&lt;double&gt;)"/>
 
     <value-type name="ValueAndVirtual" />
+
+    <object-type name="ObjectTypeByValue" />
+
     <suppress-warning text="horribly broken type '__off64_t'" />
     <suppress-warning text="enum '__codecvt_result' does not have a type entry or is not an enum" />
     <suppress-warning text="Pure virtual method &quot;Abstract::hideFunction(HideType*)&quot; must be implement but was completely removed on typesystem." />

@@ -24,6 +24,7 @@
 #include "nondefaultctor.h"
 #include "objectmodel.h"
 #include "objecttype.h"
+#include "objecttypebyvalue.h"
 #include "objecttypeholder.h"
 #include "objecttypelayout.h"
 #include "objecttypereference.h"
