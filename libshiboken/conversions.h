@@ -37,6 +37,7 @@
 // When the user adds a function with an argument unknown for the typesystem, the generator writes type checks as
 // TYPENAME_Check, so this macro allows users to add PyObject arguments to their added functions.
 #define PyObject_Check(X) true
+#define SbkChar_Check(X) (SbkNumber_Check(X) || Shiboken::String::checkChar(X))
 #include "autodecref.h"
 
 namespace Shiboken
@@ -344,11 +345,6 @@ struct Converter_PyULongInt : Converter_PyInt<T>
     static inline PyObject* toPython(void* cppobj) { return toPython(*reinterpret_cast<T*>(cppobj)); }
     static inline PyObject* toPython(const T& cppobj) { return PyLong_FromUnsignedLong(cppobj); }
 };
-
-#define SbkChar_Check(X) \
-    SbkNumber_Check(X) || \
-    Shiboken::String::checkChar(X)
-
 
 /// Specialization to convert char and unsigned char, it accepts Python numbers and strings with just one character.
 template <typename CharType>
