@@ -3589,8 +3589,7 @@ void CppGenerator::writeGetterFunction(QTextStream& s, const AbstractMetaField* 
         }
     }
     if (isCppIntegralPrimitive(fieldType)) {
-        s << getFullTypeNameWithoutModifiers(fieldType) << " cppOut_local = " << cppField << ';' << endl;
-        s << INDENT;
+        s << INDENT << getFullTypeNameWithoutModifiers(fieldType) << " cppOut_local = " << cppField << ';' << endl;
         cppField = "cppOut_local";
     }
 
@@ -3645,20 +3644,26 @@ void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* 
     s << INDENT;
     if (avoidProtectedHack() && metaField->isProtected()) {
         s << getFullTypeNameWithoutModifiers(fieldType);
-        s << (fieldType->indirections() == 1 ? "*" : "") << " cppOut;" << endl;
-        s << INDENT << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut);" << endl;
+        s << (fieldType->indirections() == 1 ? "*" : "") << " cppOut";
+        if (fieldType->typeEntry()->isEnum() || fieldType->typeEntry()->isFlags()) {
+            s << " = ";
+            writeToCppConversion(s, fieldType, metaField->enclosingClass(), "pyIn", "");
+            s << ';' << endl;
+        } else {
+            s << ';' << endl;
+            s << INDENT << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut);" << endl;
+        }
         s << INDENT << QString("((%1*)%2)->%3(cppOut)").arg(wrapperName(metaField->enclosingClass()))
                                                        .arg(CPP_SELF_VAR)
                                                        .arg(protectedFieldSetterName(metaField));
     } else if (isCppIntegralPrimitive(fieldType)) {
         s << getFullTypeNameWithoutModifiers(fieldType) << " cppOut_local = " << cppField << ';' << endl;
         s << INDENT << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut_local);" << endl;
-        s << INDENT << cppField << " = cppOut_local;" << endl;
+        s << INDENT << cppField << " = cppOut_local";
     } else if (fieldType->typeEntry()->isEnum() || fieldType->typeEntry()->isFlags()) {
         s << cppField << " = ";
         writeToCppConversion(s, fieldType, metaField->enclosingClass(), "pyIn", "");
     } else {
-        //s << PYTHON_TO_CPP_VAR << "(pyIn, &(" << cppField << "))";
         writeToCppConversion(s, fieldType, metaField->enclosingClass(), "pyIn", cppField);
     }
     s << ';' << endl << endl;

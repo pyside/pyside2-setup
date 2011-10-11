@@ -593,7 +593,12 @@ void ShibokenGenerator::writeToPythonConversion(QTextStream& s, const AbstractMe
 {
     // TODO-CONVERTER -----------------------------------------------------------------------
     if (!type->typeEntry()->isEnum() && !type->typeEntry()->isFlags()) {
-        s << cpythonToPythonConversionFunction(type) << argumentName << ')';
+        QString toPythonFunc = cpythonToPythonConversionFunction(type);
+        // Remove final '&' if argument name is a function call.
+        // It is expected that this function call returns a pointer.
+        if (argumentName.endsWith("()"))
+            toPythonFunc.chop(1);
+        s << toPythonFunc << argumentName << ')';
         return;
     }
     // TODO-CONVERTER -----------------------------------------------------------------------
