@@ -79,6 +79,9 @@ inline PyObject* PyUnicode_FromString(const char* s)
     return PyUnicode_DecodeUTF8(s, len, 0);
 }
 
+#define PyLong_FromSize_t _PyLong_FromSize_t
+#define PyLong_AsSsize_t _PyLong_AsSsize_t
+
 #endif
 
 #endif
