@@ -31,7 +31,7 @@ class OBJ
 
 typedef OBJ* HANDLE;
 
-class HandleHolder
+class LIBSAMPLE_API HandleHolder
 {
 public:
     explicit HandleHolder(HANDLE ptr = 0) : m_handle(ptr) {}
@@ -51,5 +51,11 @@ private:
     HANDLE m_handle;
 };
 
-#endif // HANDLE_H
+struct PrimitiveStruct {};
+typedef struct PrimitiveStruct* PrimitiveStructPtr;
+struct LIBSAMPLE_API PrimitiveStructPointerHolder
+{
+    PrimitiveStructPtr primitiveStructPtr;
+};
 
+#endif // HANDLE_H

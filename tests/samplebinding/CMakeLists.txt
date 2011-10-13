@@ -67,6 +67,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/point_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pointf_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pointerholder_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/polygon_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/primitivestructpointerholder_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/privatector_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/privatedtor_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/protectedenumclass_wrapper.cpp

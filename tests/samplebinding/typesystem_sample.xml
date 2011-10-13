@@ -78,6 +78,20 @@
         </conversion-rule>
     </primitive-type>
 
+    <primitive-type name="PrimitiveStructPtr">
+        <include file-name="handle.h" location="local"/>
+        <conversion-rule file="primitivestructpointer_conversions.h">
+            <native-to-target>
+            return PyCObject_FromVoidPtr(&amp;%in, 0);
+            </native-to-target>
+            <target-to-native>
+                <add-conversion type="PyCObject">
+                %out = *((%OUTTYPE*)PyCObject_AsVoidPtr(%in));
+                </add-conversion>
+            </target-to-native>
+        </conversion-rule>
+    </primitive-type>
+
     <primitive-type name="OddBool" target-lang-api-name="PyBool" default-constructor="OddBool(false)">
         <include file-name="oddbool.h" location="global"/>
         <include file-name="complex.h" location="global"/>
@@ -2066,6 +2080,7 @@
     </value-type>
 
     <object-type name="HandleHolder" />
+    <value-type name="PrimitiveStructPointerHolder" />
 
     <object-type name="ObjectTypeOperators">
         <add-function signature="operator!=(std::string)" return-type="bool">
