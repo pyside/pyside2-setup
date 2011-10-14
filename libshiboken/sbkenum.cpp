@@ -22,7 +22,6 @@
 
 #include "sbkenum.h"
 #include "sbkstring.h"
-#include "sbkenum_p.h"
 #include "sbkconverter.h"
 #include "basewrapper.h"
 #include "sbkdbg.h"
@@ -38,6 +37,12 @@
 
 extern "C"
 {
+
+struct SbkEnumType
+{
+    PyHeapTypeObject super;
+    SbkConverter* converter;
+};
 
 struct SbkEnumObject
 {
@@ -349,10 +354,8 @@ void SbkEnumTypeDealloc(PyObject* pyObj)
 
     PyObject_GC_UnTrack(pyObj);
     Py_TRASHCAN_SAFE_BEGIN(pyObj);
-    if (sbkType->d) {
-        Shiboken::Conversions::deleteConverter(sbkType->d->converter);
-        delete sbkType->d;
-        sbkType->d = 0;
+    if (sbkType->converter) {
+        Shiboken::Conversions::deleteConverter(sbkType->converter);
     }
     Py_TRASHCAN_SAFE_END(pyObj);
 }
@@ -362,8 +365,6 @@ PyObject* SbkEnumTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwd
     SbkEnumType* newType = reinterpret_cast<SbkEnumType*>(PyType_Type.tp_new(metatype, args, kwds));
     if (!newType)
         return 0;
-    newType->d = new SbkEnumTypePrivate;
-    memset(newType->d, 0, sizeof(SbkEnumTypePrivate));
     return reinterpret_cast<PyObject*>(newType);
 }
 
@@ -520,8 +521,8 @@ PyTypeObject* newType(const char* name)
 
 PyTypeObject* newTypeWithName(const char* name, const char* cppName)
 {
-    PyTypeObject* type = new PyTypeObject;
-    ::memset(type, 0, sizeof(PyTypeObject));
+    PyTypeObject* type = reinterpret_cast<PyTypeObject*>(new SbkEnumType);
+    ::memset(type, 0, sizeof(SbkEnumType));
     Py_TYPE(type) = &SbkEnumType_Type;
     type->tp_basicsize = sizeof(SbkEnumObject);
     type->tp_print = &SbkEnumObject_print;

@@ -32,13 +32,6 @@ extern "C"
 extern LIBSHIBOKEN_API PyTypeObject SbkEnumType_Type;
 struct SbkObjectType;
 
-struct SbkEnumTypePrivate;
-struct LIBSHIBOKEN_API SbkEnumType
-{
-    PyHeapTypeObject super;
-    SbkEnumTypePrivate* d;
-};
-
 } // extern "C"
 
 namespace Shiboken
