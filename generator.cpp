@@ -374,7 +374,7 @@ bool Generator::isObjectType(const AbstractMetaClass* metaClass)
 }
 bool Generator::isObjectType(const AbstractMetaType* metaType)
 {
-    return metaType->isObject() || metaType->isQObject();
+    return isObjectType(metaType->typeEntry());
 }
 
 bool Generator::isPointer(const AbstractMetaType* type)
