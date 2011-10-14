@@ -49,6 +49,8 @@
     #define SBK_NB_BOOL(x) (x).nb_nonzero
     #define SBK_STR_NAME "str"
     #define SBK_PyMethod_New(X, Y) PyMethod_New(X, Y, (PyObject*)Py_TYPE(Y))
+
+    #define Py_hash_t long
 #endif
 
 #endif

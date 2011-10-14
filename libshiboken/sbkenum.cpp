@@ -230,7 +230,10 @@ enum_richcompare(PyObject *self, PyObject *other, int op)
         Py_RETURN_FALSE;
 }
 
-
+static Py_hash_t enum_hash(PyObject* pyObj)
+{
+    return PyObject_Hash(reinterpret_cast<SbkEnumObject*>(pyObj)->ob_name);
+}
 
 static PyGetSetDef SbkEnumGetSetList[] = {
     {const_cast<char*>("name"), &SbkEnumObject_name},
@@ -507,6 +510,7 @@ PyTypeObject* newTypeWithName(const char* name, const char* cppName)
     type->tp_new = SbkEnum_tp_new;
     type->tp_as_number = &enum_as_number;
     type->tp_richcompare = &enum_richcompare;
+    type->tp_hash = &enum_hash;
 
     DeclaredEnumTypes::instance().addEnumType(type, cppName);
     return type;
