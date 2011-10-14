@@ -2754,6 +2754,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 } else {
                     int idx = arg->argumentIndex() - removedArgs;
                     bool deRef = isValueTypeWithCopyConstructorOnly(arg->type())
+                                 || isObjectTypeUsedAsValueType(arg->type())
                                  || (arg->type()->isReference() && isWrapperType(arg->type()) && !isPointer(arg->type()));
                     QString argName = hasConversionRule
                                       ? QString("%1"CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name())

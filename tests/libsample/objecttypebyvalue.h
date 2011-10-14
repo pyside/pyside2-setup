@@ -28,6 +28,7 @@ class ObjectTypeByValue
 {
 public:
     ObjectTypeByValue returnSomeKindOfMe() { return ObjectTypeByValue(); }
+    void acceptKindOfMeAsValue(ObjectTypeByValue kindOfMe) {}
 
     // prop used to check for segfaults
     ProtectedProperty prop;
