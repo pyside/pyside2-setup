@@ -938,6 +938,11 @@ bool ShibokenGenerator::isPointerToWrapperType(const AbstractMetaType* type)
     return (isObjectType(type) && type->indirections() == 1) || type->isValuePointer();
 }
 
+bool ShibokenGenerator::isObjectTypeUsedAsValueType(const AbstractMetaType* type)
+{
+    return type->typeEntry()->isObject() && !type->isReference() && type->indirections() == 0;
+}
+
 bool ShibokenGenerator::isValueTypeWithCopyConstructorOnly(const AbstractMetaClass* metaClass)
 {
     if (!metaClass || !metaClass->typeEntry()->isValue())

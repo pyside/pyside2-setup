@@ -310,6 +310,11 @@ public:
      */
     static bool isPointerToWrapperType(const AbstractMetaType* type);
 
+    /**
+     *  Returns true if \p type is an Object Type used as a value.
+     */
+    static bool isObjectTypeUsedAsValueType(const AbstractMetaType* type);
+
     static bool isValueTypeWithCopyConstructorOnly(const AbstractMetaClass* metaClass);
     bool isValueTypeWithCopyConstructorOnly(const TypeEntry* type) const;
     bool isValueTypeWithCopyConstructorOnly(const AbstractMetaType* type) const;

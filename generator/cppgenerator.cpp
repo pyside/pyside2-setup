@@ -2913,10 +2913,9 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 }
                 if (writeReturnType) {
                     s << func->type()->cppSignature();
-                    const TypeEntry* retType = func->type()->typeEntry();
-                    if (retType->isObject() && func->type()->indirections() == 0 && !func->type()->isReference()) {
+                    if (isObjectTypeUsedAsValueType(func->type())) {
                         s << '*';
-                        methodCall.prepend(QString("new %1(").arg(retType->qualifiedCppName()));
+                        methodCall.prepend(QString("new %1(").arg(func->type()->typeEntry()->qualifiedCppName()));
                         methodCall.append(')');
                     }
                 }
@@ -2929,10 +2928,9 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 writeConversionRule(s, func, TypeSystem::TargetLangCode, PYTHON_RETURN_VAR);
             } else if (!isCtor && !func->isInplaceOperator() && func->type()
                 && !injectedCodeHasReturnValueAttribution(func, TypeSystem::TargetLangCode)) {
-                const TypeEntry* retType = func->type()->typeEntry();
                 s << INDENT << PYTHON_RETURN_VAR " = ";
-                if (retType->isObject() && func->type()->indirections() == 0 && !func->type()->isReference()) {
-                    s << "Shiboken::Object::newObject((SbkObjectType*)" << cpythonTypeNameExt(retType);
+                if (isObjectTypeUsedAsValueType(func->type())) {
+                    s << "Shiboken::Object::newObject((SbkObjectType*)" << cpythonTypeNameExt(func->type()->typeEntry());
                     s << ", " << CPP_RETURN_VAR << ", true, true)";
                 } else {
                     writeToPythonConversion(s, func->type(), func->ownerClass(), CPP_RETURN_VAR);
