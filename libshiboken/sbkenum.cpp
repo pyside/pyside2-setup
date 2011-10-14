@@ -42,6 +42,7 @@ struct SbkEnumType
 {
     PyHeapTypeObject super;
     SbkConverter* converter;
+    const char* cppName;
 };
 
 struct SbkEnumObject
@@ -378,13 +379,12 @@ public:
     DeclaredEnumTypes();
     ~DeclaredEnumTypes();
     static DeclaredEnumTypes& instance();
-    void addEnumType(PyTypeObject* type, const char* cppName);
-    const char* getCppName(PyTypeObject* type);
+    void addEnumType(PyTypeObject* type);
 
 private:
     DeclaredEnumTypes(const DeclaredEnumTypes&);
     DeclaredEnumTypes& operator=(const DeclaredEnumTypes&);
-    std::map<PyTypeObject*, std::string> m_enumTypes;
+    std::list<PyTypeObject*> m_enumTypes;
 };
 
 namespace Enum {
@@ -533,17 +533,20 @@ PyTypeObject* newTypeWithName(const char* name, const char* cppName)
     type->tp_richcompare = &enum_richcompare;
     type->tp_hash = &enum_hash;
 
-    DeclaredEnumTypes::instance().addEnumType(type, cppName);
+    reinterpret_cast<SbkEnumType*>(type)->cppName = cppName;
+    DeclaredEnumTypes::instance().addEnumType(type);
     return type;
 }
 
 const char* getCppName(PyTypeObject* enumType)
 {
-    return DeclaredEnumTypes::instance().getCppName(enumType);
+    assert(Py_TYPE(enumType) == &SbkEnumType_Type);
+    return reinterpret_cast<SbkEnumType*>(enumType)->cppName;;
 }
 
 long int getValue(PyObject* enumItem)
 {
+    assert(Shiboken::Enum::check(enumItem));
     return reinterpret_cast<SbkEnumObject*>(enumItem)->ob_value;
 }
 
@@ -561,24 +564,15 @@ DeclaredEnumTypes::DeclaredEnumTypes()
 
 DeclaredEnumTypes::~DeclaredEnumTypes()
 {
-    std::map<PyTypeObject*, std::string>::const_iterator it = m_enumTypes.begin();
+    std::list<PyTypeObject*>::const_iterator it = m_enumTypes.begin();
     for (; it != m_enumTypes.end(); ++it)
-        delete (*it).first;
+        delete *it;
     m_enumTypes.clear();
 }
 
-void DeclaredEnumTypes::addEnumType(PyTypeObject* type, const char* cppName)
+void DeclaredEnumTypes::addEnumType(PyTypeObject* type)
 {
-    m_enumTypes[type] = cppName;
-}
-
-const char* DeclaredEnumTypes::getCppName(PyTypeObject* type)
-{
-     std::map<PyTypeObject*, std::string>::const_iterator it = m_enumTypes.find(type);
-     if (it != m_enumTypes.end())
-         return it->second.c_str();
-     else
-         return "";
+    m_enumTypes.push_back(type);
 }
 
 }
