@@ -109,8 +109,7 @@ static long getNumberValue(PyObject* v)
 }
 
 
-static PyObject*
-enum_and(PyObject *self, PyObject *b)
+static PyObject* enum_and(PyObject* self, PyObject* b)
 {
     if (!PyNumber_Check(b)) {
         Py_INCREF(Py_NotImplemented);
@@ -122,8 +121,7 @@ enum_and(PyObject *self, PyObject *b)
     return PyLong_FromLong(valA & valB);
 }
 
-static PyObject*
-enum_or(PyObject *self, PyObject *b)
+static PyObject* enum_or(PyObject* self, PyObject* b)
 {
     if (!PyNumber_Check(b)) {
         Py_INCREF(Py_NotImplemented);
@@ -135,8 +133,7 @@ enum_or(PyObject *self, PyObject *b)
     return PyLong_FromLong(valA | valB);
 }
 
-static PyObject*
-enum_xor(PyObject *self, PyObject *b)
+static PyObject* enum_xor(PyObject* self, PyObject* b)
 {
     if (!PyNumber_Check(b)) {
         Py_INCREF(Py_NotImplemented);
@@ -184,9 +181,7 @@ static PyObject* enum_divide(PyObject* self, PyObject* v)
 }
 #endif
 
-
-static PyObject *
-enum_richcompare(PyObject *self, PyObject *other, int op)
+static PyObject* enum_richcompare(PyObject* self, PyObject* other, int op)
 {
     int result = 0;
     if (!PyNumber_Check(other)) {
