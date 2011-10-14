@@ -413,11 +413,8 @@ PyObject* getEnumItemFromValue(PyTypeObject* enumType, long itemValue)
 static PyTypeObject* createEnum(const char* fullName, const char* cppName, const char* shortName, PyTypeObject* flagsType)
 {
     PyTypeObject* enumType = newTypeWithName(fullName, cppName);
-    if (flagsType) {
-        if (PyType_Ready(flagsType) < 0)
-            return 0;
+    if (flagsType)
         enumType->tp_as_number = flagsType->tp_as_number;
-    }
     if (PyType_Ready(enumType) < 0)
         return 0;
     Shiboken::TypeResolver::createValueTypeResolver<int>(cppName);
