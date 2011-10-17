@@ -26,6 +26,7 @@
 #include "sbkpython.h"
 #include "shibokenmacros.h"
 
+class SbkObject;
 namespace Shiboken
 {
 
@@ -40,6 +41,11 @@ public:
      * \param pyobj A borrowed reference to a Python object
      */
     explicit AutoDecRef(PyObject* pyObj) : m_pyObj(pyObj) {}
+    /**
+     * AutoDecRef constructor.
+     * \param pyobj A borrowed reference to a Python object
+     */
+    explicit AutoDecRef(SbkObject* pyObj) : m_pyObj(reinterpret_cast<PyObject*>(pyObj)) {}
 
     /// Decref the borrowed python reference
     ~AutoDecRef()
