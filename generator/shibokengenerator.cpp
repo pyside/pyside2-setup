@@ -864,7 +864,7 @@ bool ShibokenGenerator::isWrapperType(const AbstractMetaType* metaType)
 
 bool ShibokenGenerator::isPointerToWrapperType(const AbstractMetaType* type)
 {
-    return isObjectType(type) || type->isValuePointer();
+    return (isObjectType(type) && type->indirections() == 1) || type->isValuePointer();
 }
 
 bool ShibokenGenerator::shouldDereferenceArgumentPointer(const AbstractMetaArgument* arg)

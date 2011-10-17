@@ -4187,6 +4187,7 @@ void CppGenerator::writeReturnValueHeuristics(QTextStream& s, const AbstractMeta
         || !func->ownerClass()
         || !type
         || func->isStatic()
+        || func->isConstructor()
         || !func->typeReplaced(0).isEmpty()) {
         return;
     }
