@@ -1,7 +1,7 @@
 /*
  * This file is part of the Shiboken Python Binding Generator project.
  *
- * Copyright (C) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2011 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -20,35 +20,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef HANDLE_H
-#define HANDLE_H
+#include "handle.h"
 
-#include "libsamplemacros.h"
-
-class LIBSAMPLE_API OBJ
+HANDLE HandleHolder::createHandle()
 {
-};
+    return (HANDLE) new OBJ;
+}
 
-typedef OBJ* HANDLE;
-
-class LIBSAMPLE_API HandleHolder
+bool HandleHolder::compare(HandleHolder* other)
 {
-public:
-    explicit HandleHolder(HANDLE ptr = 0) : m_handle(ptr) {}
-    void set(HANDLE ptr) { m_handle = m_handle; }
-    HANDLE get() { return m_handle; }
-
-    static HANDLE createHandle();
-    bool compare(HandleHolder* other);
-private:
-    HANDLE m_handle;
-};
-
-struct LIBSAMPLE_API PrimitiveStruct {};
-typedef struct PrimitiveStruct* PrimitiveStructPtr;
-struct LIBSAMPLE_API PrimitiveStructPointerHolder
-{
-    PrimitiveStructPtr primitiveStructPtr;
-};
-
-#endif // HANDLE_H
+    return other->m_handle == m_handle;
+}

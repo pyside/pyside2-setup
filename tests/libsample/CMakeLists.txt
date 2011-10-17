@@ -11,6 +11,7 @@ onlycopy.cpp
 derived.cpp
 echo.cpp
 functions.cpp
+handle.cpp
 implicitconv.cpp
 injectcode.cpp
 listuser.cpp
