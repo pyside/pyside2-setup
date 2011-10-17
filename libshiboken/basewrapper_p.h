@@ -80,6 +80,14 @@ struct SbkObjectPrivate
     Shiboken::ParentInfo* parentInfo;
     /// Manage reference counting of objects that are referred but not owned.
     Shiboken::RefCountMap* referredObjects;
+
+    ~SbkObjectPrivate()
+    {
+        delete parentInfo;
+        parentInfo = 0;
+        delete referredObjects;
+        referredObjects = 0;
+    }
 };
 
 /// The type behaviour was not defined yet

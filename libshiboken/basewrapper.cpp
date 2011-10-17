@@ -367,7 +367,7 @@ void _destroyParentInfo(SbkObject* obj, bool keepReference)
             // Mark child as invalid
             Shiboken::Object::invalidate(first);
             Shiboken::Object::removeParent(first, false, keepReference);
-       }
+        }
         Shiboken::Object::removeParent(obj, false);
     }
 }
@@ -1085,11 +1085,10 @@ void removeParent(SbkObject* child, bool giveOwnershipBack, bool keepReference)
     if (!pInfo || !pInfo->parent) {
         if (pInfo && pInfo->hasWrapperRef) {
             pInfo->hasWrapperRef = false;
-            delete pInfo;
-            child->d->parentInfo = 0;
         }
         return;
     }
+
     ChildrenList& oldBrothers = pInfo->parent->d->parentInfo->children;
     // Verify if this child is part of parent list
     ChildrenList::iterator iChild = std::find(oldBrothers.begin(), oldBrothers.end(), child);
@@ -1105,7 +1104,7 @@ void removeParent(SbkObject* child, bool giveOwnershipBack, bool keepReference)
         child->d->containsCppWrapper) {
         //If have already a extra ref remove this one
         if (pInfo->hasWrapperRef)
-            Py_CLEAR(child);
+            Py_DECREF(child);
         else
             pInfo->hasWrapperRef = true;
         return;
@@ -1114,14 +1113,8 @@ void removeParent(SbkObject* child, bool giveOwnershipBack, bool keepReference)
     // Transfer ownership back to Python
     child->d->hasOwnership = giveOwnershipBack;
 
-    if (pInfo->children.empty()) {
-        // Erase parentInfo data
-        delete pInfo;
-        child->d->parentInfo = 0;
-    }
-
     // Remove parent ref
-    Py_CLEAR(child);
+    Py_DECREF(child);
 }
 
 void setParent(PyObject* parent, PyObject* child)
@@ -1287,8 +1280,7 @@ void clearReferences(SbkObject* self)
     RefCountMap::iterator iter;
     for (iter = refCountMap.begin(); iter != refCountMap.end(); ++iter)
         decRefPyObjectList(iter->second);
-    delete self->d->referredObjects;
-    self->d->referredObjects = 0;
+    self->d->referredObjects->clear();
 }
 
 } // namespace Object
