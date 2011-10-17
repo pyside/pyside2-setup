@@ -782,7 +782,7 @@ QString ShibokenGenerator::converterObject(const TypeEntry* type)
     if (isCppPrimitive(type))
         return QString("Shiboken::Conversions::PrimitiveTypeConverter<%1>()").arg(type->qualifiedCppName());
     if (isWrapperType(type))
-        return QString("Shiboken::ObjectType::getTypeConverter((SbkObjectType*)%1)").arg(cpythonTypeNameExt(type));
+        return QString("SBK_CONVERTER(%1)").arg(cpythonTypeNameExt(type));
     return QString("%1[%2]").arg(convertersVariableName(type->targetLangPackage())).arg(getTypeIndexVariableName(type));
 }
 

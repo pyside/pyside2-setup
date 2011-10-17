@@ -728,12 +728,6 @@ void setTypeUserData(SbkObjectType* self, void* userData, DeleteUserDataFunc d_f
     self->d->d_func = d_func;
 }
 
-
-SbkConverter* getTypeConverter(SbkObjectType* type)
-{
-    return type->d->converter;
-}
-
 } // namespace ObjectType
 
 

@@ -210,9 +210,6 @@ LIBSHIBOKEN_API void        setSubTypeInitHook(SbkObjectType* self, SubTypeInitH
 LIBSHIBOKEN_API void*       getTypeUserData(SbkObjectType* self);
 LIBSHIBOKEN_API void        setTypeUserData(SbkObjectType* self, void* userData, DeleteUserDataFunc d_func);
 
-/// Returns the converter assigned to the wrapper \p type.
-LIBSHIBOKEN_API SbkConverter* getTypeConverter(SbkObjectType* type);
-
 }
 
 namespace Object {

@@ -242,7 +242,6 @@ LIBSHIBOKEN_API bool checkDictTypes(PyTypeObject* keyType, PyTypeObject* valueTy
 /// Returns true if a Python dictionary can be converted to a C++ hash or map.
 LIBSHIBOKEN_API bool convertibleDictTypes(SbkConverter* keyConverter, bool keyCheckExact, SbkConverter* valueConverter, bool valueCheckExact, PyObject* pyIn);
 
-
 #define SBK_PY_LONG_LONG_IDX            0
 #define SBK_BOOL_IDX                    1
 #define SBK_CHAR_IDX                    2
@@ -282,5 +281,8 @@ template<> inline SbkConverter* PrimitiveTypeConverter<unsigned short>() { retur
 template<> inline SbkConverter* PrimitiveTypeConverter<void*>() { return primitiveTypeConverter(SBK_VOIDPTR_IDX); }
 
 } } // namespace Shiboken::Conversions
+
+struct _SbkGenericType { PyHeapTypeObject super; SbkConverter* converter; };
+#define SBK_CONVERTER(objType) (reinterpret_cast<_SbkGenericType*>(objType)->converter)
 
 #endif // SBK_CONVERTER_H
