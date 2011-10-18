@@ -13,7 +13,7 @@ static Py_ssize_t SbkByteArray_readbufferproc(PyObject* self, Py_ssize_t segment
     if (segment || !Shiboken::Object::isValid(self))
         return -1;
 
-    ByteArray* cppSelf = Shiboken::Converter<ByteArray*>::toCpp(self);
+    ByteArray* cppSelf = %CONVERTTOCPP[ByteArray*](self);
     *ptrptr = reinterpret_cast<void*>(const_cast<char*>(cppSelf->data()));
     return cppSelf->size();
 }
