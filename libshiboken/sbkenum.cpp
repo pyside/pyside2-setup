@@ -550,6 +550,18 @@ long int getValue(PyObject* enumItem)
     return reinterpret_cast<SbkEnumObject*>(enumItem)->ob_value;
 }
 
+void setTypeConverter(PyTypeObject* enumType, SbkConverter* converter)
+{
+    //reinterpret_cast<SbkEnumType*>(enumType)->converter = converter;
+    SBK_CONVERTER(enumType) = converter;
+}
+
+SbkConverter* getTypeConverter(PyTypeObject* enumType)
+{
+    //return reinterpret_cast<SbkEnumType*>(enumType)->converter;
+    return SBK_CONVERTER(enumType);
+}
+
 } // namespace Enum
 
 DeclaredEnumTypes& DeclaredEnumTypes::instance()

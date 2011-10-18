@@ -248,10 +248,6 @@ public:
 
     const AbstractMetaClass* getMultipleInheritingClass(const AbstractMetaClass* metaClass);
 
-    void writeBaseConversion(QTextStream& s, const AbstractMetaType* type,
-                             const AbstractMetaClass* context = 0, Options options = NoOption);
-    /// Simpler version of writeBaseConversion, uses only the base name of the type.
-    void writeBaseConversion(QTextStream& s, const TypeEntry* type);
     void writeToPythonConversion(QTextStream& s, const AbstractMetaType* type,
                                  const AbstractMetaClass* context, const QString& argumentName);
     void writeToCppConversion(QTextStream& s, const AbstractMetaType* type, const AbstractMetaClass* context, const QString& inArgName, const QString& outArgName);

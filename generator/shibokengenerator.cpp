@@ -40,7 +40,6 @@
 #define USE_ISNULL_AS_NB_NONZERO "use-isnull-as-nb_nonzero"
 
 //static void dumpFunction(AbstractMetaFunctionList lst);
-static QString baseConversionString(QString typeName);
 
 QHash<QString, QString> ShibokenGenerator::m_pythonPrimitiveTypeName = QHash<QString, QString>();
 QHash<QString, QString> ShibokenGenerator::m_pythonOperators = QHash<QString, QString>();
@@ -532,77 +531,12 @@ QString ShibokenGenerator::getFunctionReturnType(const AbstractMetaFunction* fun
         return func->ownerClass()->qualifiedCppName() + '*';
 
     return translateTypeForWrapperMethod(func->type(), func->implementingClass());
-
-    //TODO: check these lines
-    //QString modifiedReturnType = QString(func->typeReplaced(0));
-    //return modifiedReturnType.isNull() ?
-    //translateType(func->type(), func->implementingClass()) : modifiedReturnType;
-}
-
-static QString baseConversionString(QString typeName)
-{
-    return QString("Shiboken::Converter< %1 >::").arg(typeName);
-}
-
-void ShibokenGenerator::writeBaseConversion(QTextStream& s, const TypeEntry* type)
-{
-    QString typeName;
-
-    if (avoidProtectedHack() && type->isEnum()) {
-        const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(type);
-        if (metaEnum && metaEnum->isProtected())
-            typeName = protectedEnumSurrogateName(metaEnum);
-    } else {
-        typeName = getFullTypeName(type).trimmed();
-        if (isObjectType(type))
-            typeName.append('*');
-    }
-    s << baseConversionString(typeName);
-}
-
-void ShibokenGenerator::writeBaseConversion(QTextStream& s, const AbstractMetaType* type,
-                                            const AbstractMetaClass* context, Options options)
-{
-    QString typeName;
-    if (type->isPrimitive()) {
-        const PrimitiveTypeEntry* ptype = (const PrimitiveTypeEntry*) type->typeEntry();
-        if (ptype->basicAliasedTypeEntry())
-            ptype = ptype->basicAliasedTypeEntry();
-        typeName = ptype->name();
-        if (!ptype->isCppPrimitive())
-            typeName.prepend("::");
-    } else {
-        if (!isCString(type)) {
-            options |= Generator::ExcludeConst;
-            if (type->typeEntry()->isPrimitive()
-                || type->isContainer()
-                || type->isFlags()
-                || type->isEnum()
-                || (type->isConstant() && type->isReference())) {
-                options |= Generator::ExcludeReference;
-            }
-        }
-        typeName = translateTypeForWrapperMethod(type, context, options).trimmed();
-    }
-
-    s << baseConversionString(typeName);
 }
 
 void ShibokenGenerator::writeToPythonConversion(QTextStream& s, const AbstractMetaType* type,
                                                 const AbstractMetaClass* context, const QString& argumentName)
 {
-    // TODO-CONVERTER -----------------------------------------------------------------------
-    if (!type->typeEntry()->isEnum() && !type->typeEntry()->isFlags()) {
-        QString toPythonFunc = cpythonToPythonConversionFunction(type);
-        // Remove final '&' if argument name is a function call.
-        // It is expected that this function call returns a pointer.
-        if (argumentName.endsWith("()"))
-            toPythonFunc.chop(1);
-        s << toPythonFunc << argumentName << ')';
-        return;
-    }
-    // TODO-CONVERTER -----------------------------------------------------------------------
-    s << cpythonToPythonConversionFunction(type, context) << '(' << argumentName << ')';
+    s << cpythonToPythonConversionFunction(type) << argumentName << ')';
 }
 
 void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaClass* metaClass,
@@ -614,24 +548,18 @@ void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaC
 void ShibokenGenerator::writeToCppConversion(QTextStream& s, const AbstractMetaType* type, const AbstractMetaClass* context,
                                              const QString& inArgName, const QString& outArgName)
 {
-    // TODO-CONVERTER -----------------------------------------------------------------------
-    if (!type->typeEntry()->isEnum() && !type->typeEntry()->isFlags()) {
-        s << cpythonToCppConversionFunction(type, context) << inArgName << ", &" << outArgName << ')';
-        return;
-    }
-    // TODO-CONVERTER -----------------------------------------------------------------------
-    s << cpythonToCppConversionFunction(type, context) << '(' << inArgName << ')';
+    s << cpythonToCppConversionFunction(type, context) << inArgName << ", &" << outArgName << ')';
 }
 
 bool ShibokenGenerator::shouldRejectNullPointerArgument(const AbstractMetaFunction* func, int argIndex)
 {
     if (argIndex < 0 || argIndex >= func->arguments().count())
         return false;
-    // TODO-CONVERTER -----------------------------------------------------------------------
+
     const AbstractMetaArgument* arg = func->arguments().at(argIndex);
     if (isValueTypeWithCopyConstructorOnly(arg->type()))
         return true;
-    // TODO-CONVERTER -----------------------------------------------------------------------
+
     // Argument type is not a pointer, a None rejection should not be
     // necessary because the type checking would handle that already.
     if (!isPointer(arg->type()))
@@ -781,7 +709,7 @@ QString ShibokenGenerator::converterObject(const TypeEntry* type)
 {
     if (isCppPrimitive(type))
         return QString("Shiboken::Conversions::PrimitiveTypeConverter<%1>()").arg(type->qualifiedCppName());
-    if (isWrapperType(type))
+    if (isWrapperType(type) || type->isEnum() || type->isFlags())
         return QString("SBK_CONVERTER(%1)").arg(cpythonTypeNameExt(type));
     return QString("%1[%2]").arg(convertersVariableName(type->targetLangPackage())).arg(getTypeIndexVariableName(type));
 }
@@ -1036,7 +964,6 @@ QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType
             return customCheck;
     }
 
-    // TODO-CONVERTER -----------------------------------------------------------------------
     if (isCppPrimitive(metaType)) {
         if (isCString(metaType))
             return "SbkString_Check";
@@ -1081,23 +1008,8 @@ QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType
             }
         }
         return typeCheck;
-    } else if (!metaType->typeEntry()->isEnum() && !metaType->typeEntry()->isFlags()) {
-        return cpythonCheckFunction(metaType->typeEntry(), genericNumberType);
     }
-    // TODO-CONVERTER -----------------------------------------------------------------------
-
-    QString baseName = cpythonBaseName(metaType);
-    if (isNumber(baseName))
-        return genericNumberType ? QString("SbkNumber_Check") : QString("%1_Check").arg(baseName);
-
-
-    baseName.clear();
-    QTextStream b(&baseName);
-    // exclude const on Objects
-    Options flags = getConverterOptions(metaType);
-    writeBaseConversion(b, metaType, 0, flags);
-
-    return QString("%1checkType").arg(baseName);
+    return cpythonCheckFunction(metaType->typeEntry(), genericNumberType);
 }
 
 QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool genericNumberType)
@@ -1111,35 +1023,16 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool gene
         return customCheck;
     }
 
-    // TODO-CONVERTER -----------------------------------------------------------------------
-    if (isWrapperType(type)) {
+    if (type->isEnum() || type->isFlags() || isWrapperType(type))
         return QString("SbkObject_TypeCheck(%1, ").arg(cpythonTypeNameExt(type));
-    } else if (isCppPrimitive(type)) {
+    else if (isCppPrimitive(type))
         return QString("%1_Check").arg(pythonPrimitiveTypeName((const PrimitiveTypeEntry*)type));
-    } else if (!type->isEnum() && !type->isFlags()) {
-        QString typeCheck;
-        if (type->targetLangApiName() == type->name())
-            typeCheck = cpythonIsConvertibleFunction(type);
-        else
-            typeCheck = QString("%1_Check").arg(type->targetLangApiName());
-        return typeCheck;
-    }
-    // TODO-CONVERTER -----------------------------------------------------------------------
-
     QString typeCheck;
-    if (!type->targetLangApiName().isEmpty())
+    if (type->targetLangApiName() == type->name())
+        typeCheck = cpythonIsConvertibleFunction(type);
+    else
         typeCheck = QString("%1_Check").arg(type->targetLangApiName());
     return typeCheck;
-/*
-    QString baseName = cpythonBaseName(type);
-    if (isNumber(baseName))
-        return genericNumberType ? "SbkNumber_Check" : baseName+"_Check";
-
-    baseName.clear();
-    QTextStream b(&baseName);
-    writeBaseConversion(b, type);
-    return QString("%1checkType").arg(baseName);
-*/
 }
 
 QString ShibokenGenerator::guessCPythonCheckFunction(const QString& type, AbstractMetaType** metaType)
@@ -1175,29 +1068,15 @@ QString ShibokenGenerator::guessCPythonIsConvertible(const QString& type)
 
 QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry* type, bool genericNumberType, bool checkExact)
 {
-    // TODO-CONVERTER -----------------------------------------------------------------------
     if (isWrapperType(type)) {
         QString isConv = (type->isValue() && !isValueTypeWithCopyConstructorOnly(type))
                          ? "isPythonToCppValueConvertible"
                          : "isPythonToCppPointerConvertible";
         return QString("Shiboken::Conversions::%1((SbkObjectType*)%2, ")
                   .arg(isConv).arg(cpythonTypeNameExt(type));
-    } else if (!type->isEnum() && !type->isFlags()) {
-        return QString("Shiboken::Conversions::isPythonToCppConvertible(%1, ")
-                  .arg(converterObject(type));
     }
-    // TODO-CONVERTER -----------------------------------------------------------------------
-
-    if (checkExact)
-        return cpythonCheckFunction(type, genericNumberType);
-
-    if (type->isCustom())
-        return guessCPythonIsConvertible(type->name());
-
-    QString baseName;
-    QTextStream b(&baseName);
-    writeBaseConversion(b, type);
-    return QString("%1isConvertible").arg(baseName);
+    return QString("Shiboken::Conversions::isPythonToCppConvertible(%1, ")
+              .arg(converterObject(type));
 }
 QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* metaType, bool genericNumberType)
 {
@@ -1211,7 +1090,6 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* 
             return customCheck;
     }
 
-    // TODO-CONVERTER -----------------------------------------------------------------------
     if (isWrapperType(metaType)) {
         QString isConv;
         if (isPointer(metaType) || isValueTypeWithCopyConstructorOnly(metaType))
@@ -1222,20 +1100,9 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* 
             isConv = "isPythonToCppValueConvertible";
         return QString("Shiboken::Conversions::%1((SbkObjectType*)%2, ")
                   .arg(isConv).arg(cpythonTypeNameExt(metaType));
-    } else if (!metaType->typeEntry()->isEnum() && !metaType->typeEntry()->isFlags()) {
-        return QString("Shiboken::Conversions::isPythonToCppConvertible(%1, ")
-                  .arg(converterObject(metaType));
     }
-    // TODO-CONVERTER -----------------------------------------------------------------------
-
-    QString baseName = cpythonBaseName(metaType);
-    if (isNumber(baseName))
-        return genericNumberType ? QString("SbkNumber_Check") : QString("%1_Check").arg(baseName);
-
-    baseName.clear();
-    QTextStream b(&baseName);
-    writeBaseConversion(b, metaType);
-    return QString("%1isConvertible").arg(baseName);
+    return QString("Shiboken::Conversions::isPythonToCppConvertible(%1, ")
+              .arg(converterObject(metaType));
 }
 
 QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaClass* metaClass)
@@ -1245,25 +1112,17 @@ QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaClas
 }
 QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaType* type, const AbstractMetaClass* context)
 {
-    // TODO-CONVERTER -----------------------------------------------------------------------
     if (isWrapperType(type)) {
         return QString("Shiboken::Conversions::pythonToCpp%1((SbkObjectType*)%2, ")
                   .arg(isPointer(type) ? "Pointer" : "Copy")
                   .arg(cpythonTypeNameExt(type));
-    } else if (!type->typeEntry()->isEnum() && !type->typeEntry()->isFlags()) {
-        return QString("Shiboken::Conversions::pythonToCpp(%1, ")
-                  .arg(converterObject(type));
     }
-    // TODO-CONVERTER -----------------------------------------------------------------------
-    QString base;
-    QTextStream b(&base);
-    writeBaseConversion(b, type, context);
-    return QString("%1toCpp").arg(base);
+    return QString("Shiboken::Conversions::pythonToCpp(%1, ")
+              .arg(converterObject(type));
 }
 
 QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaType* type, const AbstractMetaClass* context)
 {
-    // TODO-CONVERTER -----------------------------------------------------------------------
     if (isWrapperType(type)) {
         QString conversion;
         if (type->isReference() && !isPointer(type))
@@ -1274,18 +1133,10 @@ QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaT
             conversion = "pointer";
         return QString("Shiboken::Conversions::%1ToPython((SbkObjectType*)%2, %3")
                   .arg(conversion).arg(cpythonTypeNameExt(type)).arg(conversion == "pointer" ? "" : "&");
-    } else if (!type->typeEntry()->isEnum() && !type->typeEntry()->isFlags()) {
-        return QString("Shiboken::Conversions::copyToPython(%1, %2")
-                  .arg(converterObject(type))
-                  .arg((isCString(type) || isVoidPointer(type)) ? "" : "&");
     }
-    // TODO-CONVERTER -----------------------------------------------------------------------
-    // exclude const on Objects
-    Options flags = getConverterOptions(type);
-    QString base;
-    QTextStream b(&base);
-    writeBaseConversion(b, type, context, flags);
-    return QString("%1toPython").arg(base);
+    return QString("Shiboken::Conversions::copyToPython(%1, %2")
+              .arg(converterObject(type))
+              .arg((isCString(type) || isVoidPointer(type)) ? "" : "&");
 }
 
 QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaClass* metaClass)
@@ -1295,7 +1146,6 @@ QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaC
 
 QString ShibokenGenerator::cpythonToPythonConversionFunction(const TypeEntry* type)
 {
-    // TODO-CONVERTER -----------------------------------------------------------------------
     if (isWrapperType(type)) {
         QString conversion;
         if (type->isValue())
@@ -1304,14 +1154,9 @@ QString ShibokenGenerator::cpythonToPythonConversionFunction(const TypeEntry* ty
             conversion = "pointer";
         return QString("Shiboken::Conversions::%1ToPython((SbkObjectType*)%2, %3")
                   .arg(conversion).arg(cpythonTypeNameExt(type)).arg(conversion == "pointer" ? "" : "&");
-    } else if (!type->isEnum() && !type->isFlags()) {
-        return QString("Shiboken::Conversions::copyToPython(%1, &").arg(converterObject(type));
     }
-    // TODO-CONVERTER -----------------------------------------------------------------------
-    QString base;
-    QTextStream b(&base);
-    writeBaseConversion(b, type);
-    return QString("%1toPython").arg(base);
+
+    return QString("Shiboken::Conversions::copyToPython(%1, &").arg(converterObject(type));
 }
 
 QString ShibokenGenerator::argumentString(const AbstractMetaFunction *func,
@@ -1612,12 +1457,10 @@ ShibokenGenerator::ArgumentVarReplacementList ShibokenGenerator::getArgumentRepl
                     argValue = hasConversionRule
                                ? QString("%1"CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name())
                                : QString(CPP_ARG"%1").arg(argPos);
-                    // TODO-CONVERTER -----------------------------------------------------------------------
                     if (isWrapperType(type)) {
                         if (type->isReference() && !isPointer(type))
                             argValue.prepend('*');
                     }
-                    // TODO-CONVERTER -----------------------------------------------------------------------
                 }
             }
         } else {
@@ -1789,7 +1632,6 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
     foreach (ArgumentVarReplacementPair pair, argReplacements) {
         const AbstractMetaArgument* arg = pair.first;
         int idx = arg->argumentIndex() + 1;
-        // TODO-CONVERTER -----------------------------------------------------------------------
         AbstractMetaType* type = arg->type();
         QString typeReplaced = func->typeReplaced(arg->argumentIndex() + 1);
         if (!typeReplaced.isEmpty()) {
@@ -1804,7 +1646,6 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             if (type->isReference() || isPointer(type))
                 code.replace(QString("%%1.").arg(idx), QString("%1->").arg(replacement));
         }
-        // TODO-CONVERTER -----------------------------------------------------------------------
         code.replace(QString("%%1").arg(idx), pair.second);
     }
 
@@ -1932,10 +1773,6 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                     QString varType = code.mid(start, end - start);
                     conversionString = varType + list.first();
                     varType = miniNormalizer(varType);
-                    if (conversionType->typeEntry()->isEnum() || conversionType->typeEntry()->isFlags()) {
-                        c << varType << ' ' << list.at(1) << " = " << cpythonToCppConversionFunction(conversionType) << '(';
-                        break;
-                    }
                     QString varName = list.at(1).trimmed();
                     if (!varType.isEmpty()) {
                         if (varType != conversionType->cppSignature()) {
@@ -1974,12 +1811,6 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                     if (conversion.isEmpty())
                         conversion = cpythonToPythonConversionFunction(conversionType);
                 default: {
-                    // TODO-CONVERTER -----------------------------------------------------------------------
-                    if (conversionType->typeEntry()->isEnum() || conversionType->typeEntry()->isFlags()) {
-                        c << '(';
-                        break;
-                    }
-                    // TODO-CONVERTER -----------------------------------------------------------------------
                     QString arg = getConverterTypeSystemVariableArgument(code, pos);
                     conversionString += arg;
                     if (converterVariable == TypeSystemToPythonFunction && !isVariable(arg)) {
@@ -1990,8 +1821,6 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                         conversion.prepend('(');
                         conversion.replace("%in", arg);
                     } else {
-                        //if (conversionType->isPrimitive() && converterVariable == TypeSystemCheckFunction)
-                            //conversion.append('(');
                         c << arg;
                     }
                 }
