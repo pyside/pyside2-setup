@@ -1835,17 +1835,18 @@ static void checkTypeViability(const AbstractMetaFunction* func, const AbstractM
         || ShibokenGenerator::isCString(type)
         || func->argumentRemoved(argIdx)
         || !func->typeReplaced(argIdx).isEmpty()
-        || !func->conversionRule(TypeSystem::All, argIdx).isEmpty())
+        || !func->conversionRule(TypeSystem::All, argIdx).isEmpty()
+        || func->hasInjectedCode())
         return;
     QString prefix;
     if (func->ownerClass())
         prefix = QString("%1::").arg(func->ownerClass()->qualifiedCppName());
-    qFatal(qPrintable(QString("There's no user provided way (conversion rule, argument removal, custom code, etc) "\
-                              "to handle the primitive %1 type '%2' in function '%3%4'.")
-                         .arg(argIdx == 0 ? "return" : "argument")
-                         .arg(type->cppSignature())
-                         .arg(prefix)
-                         .arg(func->signature())), NULL);
+    ReportHandler::warning(QString("There's no user provided way (conversion rule, argument removal, custom code, etc) "
+                                   "to handle the primitive %1 type '%2' in function '%3%4'.")
+                                    .arg(argIdx == 0 ? "return" : "argument")
+                                    .arg(type->cppSignature())
+                                    .arg(prefix)
+                                    .arg(func->signature()));
 }
 
 static void checkTypeViability(const AbstractMetaFunction* func)
