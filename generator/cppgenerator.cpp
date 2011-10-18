@@ -4934,20 +4934,39 @@ void CppGenerator::writeStdListWrapperMethods(QTextStream& s, const AbstractMeta
     s << '{' << endl;
     writeCppSelfDefinition(s, metaClass);
     writeIndexError(s, "index out of bounds");
+
     s << INDENT << metaClass->qualifiedCppName() << "::iterator _item = " CPP_SELF_VAR "->begin();" << endl;
-    s << INDENT << "for(Py_ssize_t pos=0; pos < _i; pos++) _item++;" << endl;
-    s << INDENT << "return Shiboken::Converter< ::" << metaClass->qualifiedCppName() << "::value_type>::toPython(*_item);" << endl;
+    s << INDENT << "for (Py_ssize_t pos = 0; pos < _i; pos++) _item++;" << endl;
+
+    const AbstractMetaType* itemType = metaClass->templateBaseClassInstantiations().first();
+
+    s << INDENT << "return ";
+    writeToPythonConversion(s, itemType, metaClass, "*_item");
+    s << ';' << endl;
     s << '}' << endl;
 
     // __setitem__
     ErrorCode errorCode2(-1);
-    s << "int " << cpythonBaseName(metaClass->typeEntry()) << "__setitem__(PyObject* " PYTHON_SELF_VAR ", Py_ssize_t _i, PyObject* _value)" << endl;
+    s << "int " << cpythonBaseName(metaClass->typeEntry()) << "__setitem__(PyObject* " PYTHON_SELF_VAR ", Py_ssize_t _i, PyObject* pyArg)" << endl;
     s << '{' << endl;
     writeCppSelfDefinition(s, metaClass);
     writeIndexError(s, "list assignment index out of range");
+
+    s << INDENT << "PythonToCppFunc " << PYTHON_TO_CPP_VAR << ';' << endl;
+    s << INDENT << "if (!";
+    writeTypeCheck(s, itemType, "pyArg", isNumber(itemType->typeEntry()));
+    s << ") {" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "PyErr_SetString(PyExc_TypeError, \"attributed value with wrong type, '";
+        s << itemType->name() << "' or other convertible type expected\");" << endl;
+        s << INDENT << "return -1;" << endl;
+    }
+    s << INDENT << '}' << endl;
+    writeArgumentConversion(s, itemType, "cppValue", "pyArg", metaClass);
+
     s << INDENT << metaClass->qualifiedCppName() << "::iterator _item = " CPP_SELF_VAR "->begin();" << endl;
-    s << INDENT << "for(Py_ssize_t pos=0; pos < _i; pos++) _item++;" << endl;
-    s << INDENT << metaClass->qualifiedCppName() << "::value_type cppValue = Shiboken::Converter< ::" <<  metaClass->qualifiedCppName() << "::value_type>::toCpp(_value);" << endl;
+    s << INDENT << "for (Py_ssize_t pos = 0; pos < _i; pos++) _item++;" << endl;
     s << INDENT << "*_item = cppValue;" << endl;
     s << INDENT << "return 0;" << endl;
     s << '}' << endl;

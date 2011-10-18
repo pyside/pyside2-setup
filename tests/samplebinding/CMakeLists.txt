@@ -51,6 +51,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/objecttype_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objecttypebyvalue_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objecttypeholder_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objecttypelayout_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/objecttypeptrlist_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objecttypeoperators_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objectview_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objtypereference_wrapper.cpp
@@ -65,8 +66,9 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/photon_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/photon_valueidentity_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/photon_valueduplicator_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/point_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/sample/pointf_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pointerholder_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/pointf_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/pointvaluelist_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/polygon_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/primitivestructpointerholder_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/privatector_wrapper.cpp

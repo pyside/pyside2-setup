@@ -434,6 +434,12 @@
     <value-type name="IntList">
         <enum-type name="CtorEnum"/>
     </value-type>
+    <value-type name="PointValueList">
+        <enum-type name="CtorEnum"/>
+    </value-type>
+    <value-type name="ObjectTypePtrList">
+        <enum-type name="CtorEnum"/>
+    </value-type>
 
     <object-type name="Abstract">
         <enum-type name="Type"/>

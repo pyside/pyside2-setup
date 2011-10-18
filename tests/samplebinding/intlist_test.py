@@ -77,5 +77,17 @@ class IntListTest(unittest.TestCase):
             self.assertEqual(il[i], ints[i])
         self.assertEqual(il.constructorUsed(), IntList.ListOfIntCtor)
 
+    def testIntListAttributeTypeCheck(self):
+        '''Attribute values to IntList.'''
+        il = IntList([0, 1, 2])
+        self.assertEqual(len(il), 3)
+        il[0] = 123
+        self.assertEqual(len(il), 3)
+        self.assertEqual(il[0], 123)
+        il[1] = 432.1
+        self.assertEqual(len(il), 3)
+        self.assertEqual(il[1], int(432.1))
+        self.assertRaises(TypeError, il.__setitem__, 2, '78')
+
 if __name__ == '__main__':
     unittest.main()
