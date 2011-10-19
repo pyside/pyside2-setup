@@ -30,6 +30,7 @@ class TestContainer : public QObject
     Q_OBJECT
 private slots:
     void testContainerType();
+    void testListOfValueType();
 };
 
 #endif

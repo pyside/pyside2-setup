@@ -38,7 +38,7 @@ void TestContainer::testContainerType()
     };\
     ";
     const char* xmlCode = "\
-    <typesystem package=\"Foo\"> \
+    <typesystem package='Foo'> \
         <namespace-type name='std' generate='no' /> \
         <container-type name='std::list' type='list' /> \
         <object-type name='A'/> \
@@ -52,6 +52,46 @@ void TestContainer::testContainerType()
     QVERIFY(classA);
     QVERIFY(classA->typeEntry()->baseContainerType());
     QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(classA->typeEntry()->baseContainerType())->type(), ContainerTypeEntry::ListContainer);
+}
+
+void TestContainer::testListOfValueType()
+{
+    const char* cppCode ="\
+    namespace std {\
+    template<class T>\
+    class list { \
+        T get(int x) { return 0; }\
+    };\
+    }\
+    class ValueType {};\
+    class A : public std::list<ValueType> {\
+    };\
+    ";
+    const char* xmlCode = "\
+    <typesystem package='Foo'> \
+        <namespace-type name='std' generate='no' /> \
+        <container-type name='std::list' type='list' /> \
+        <value-type name='ValueType'/> \
+        <value-type name='A'/> \
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, true);
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.count(), 3);
+
+    AbstractMetaClass* classA = classes.findClass("A");
+    QVERIFY(classA);
+    QCOMPARE(classA->templateBaseClassInstantiations().count(), 1);
+    const AbstractMetaType* templateInstanceType = classA->templateBaseClassInstantiations().first();
+    QVERIFY(templateInstanceType);
+
+    QCOMPARE(templateInstanceType->indirections(), 0);
+    QVERIFY(!templateInstanceType->typeEntry()->isObject());
+    QVERIFY(templateInstanceType->typeEntry()->isValue());
+    QVERIFY(!templateInstanceType->isReference());
+    QVERIFY(!templateInstanceType->isObject());
+    QVERIFY(!templateInstanceType->isValuePointer());
+    QVERIFY(templateInstanceType->isValue());
 }
 
 QTEST_APPLESS_MAIN(TestContainer)

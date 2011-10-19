@@ -2538,6 +2538,7 @@ bool AbstractMetaBuilder::inheritTemplate(AbstractMetaClass* subclass,
             temporaryType->setConstant(i.is_constant);
             temporaryType->setReference(i.is_reference);
             temporaryType->setIndirections(i.indirections);
+            temporaryType->decideUsagePattern();
             templateTypes << temporaryType;
         } else {
             ReportHandler::warning("Ignoring template parameter " + templateParamName + " from " + info.instantiationName() + ", because I don't know what it is.");
