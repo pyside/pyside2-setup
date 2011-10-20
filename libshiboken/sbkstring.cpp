@@ -21,6 +21,7 @@
  */
 
 #include "sbkstring.h"
+#include "autodecref.h"
 
 namespace Shiboken
 {
@@ -68,16 +69,36 @@ PyObject* fromCString(const char* value)
 #endif
 }
 
-const char* toCString(PyObject* str)
+PyObject* fromCString(const char* value, int len)
+{
+#ifdef IS_PY3K
+    return PyUnicode_FromStringAndSize(value, len);
+#else
+    return PyBytes_FromStringAndSize(value, len);
+#endif
+}
+
+const char* toCString(PyObject* str, Py_ssize_t* len)
 {
     if (str == Py_None)
         return NULL;
 #ifdef IS_PY3K
-    if (PyUnicode_Check(str))
+    if (PyUnicode_Check(str)) {
+        if (len) {
+            // We need to encode the unicode string into utf8 to know the size of returned char*.
+            Shiboken::AutoDecRef uniStr(PyUnicode_AsUTF8String(str));
+            *len = PyBytes_GET_SIZE(uniStr.object());
+        }
+        // Return unicode from str instead of uniStr, because the lifetime of the returned pointer
+        // depends on the lifetime of str.
         return _PyUnicode_AsString(str);
+    }
 #endif
-    if (PyBytes_Check(str))
+    if (PyBytes_Check(str)) {
+        if (len)
+            *len = PyBytes_GET_SIZE(str);
         return PyBytes_AS_STRING(str);
+    }
     return 0;
 }
 

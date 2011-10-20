@@ -68,25 +68,61 @@
         <include file-name="handle.h" location="local"/>
         <conversion-rule file="handle_conversions.h">
             <native-to-target>
-            return PyCObject_FromVoidPtr(%in, 0);
+                if (!%in)
+                    Py_RETURN_NONE;
+                #ifdef IS_PY3K
+                    return PyCapsule_New(%in, 0, 0);
+                #else
+                    return PyCObject_FromVoidPtr(%in, 0);
+                #endif
             </native-to-target>
             <target-to-native>
-                <add-conversion type="PyCObject">
-                %out = (%OUTTYPE)PyCObject_AsVoidPtr(%in);
+                <add-conversion type="PyNone">
+                    %out = 0;
+                </add-conversion>
+                <add-conversion check="checkPyCapsuleOrPyCObject(%in)" type="PyObject">
+                void* ptr;
+                #ifdef IS_PY3K
+                    ptr = PyCapsule_GetPointer(%in, 0);
+                #else
+                    ptr = PyCObject_AsVoidPtr(%in);
+                #endif
+                %out = *((%OUTTYPE*)ptr);
                 </add-conversion>
             </target-to-native>
         </conversion-rule>
     </primitive-type>
 
+    <inject-code class="native" position="beginning">
+        static bool checkPyCapsuleOrPyCObject(PyObject* pyObj)
+        {
+        #ifdef IS_PY3K
+            return PyCapsule_CheckExact(pyObj);
+        #else
+            return PyCObject_Check(pyObj);
+        #endif
+        }
+    </inject-code>
+
     <primitive-type name="PrimitiveStructPtr">
         <include file-name="handle.h" location="local"/>
         <conversion-rule file="primitivestructpointer_conversions.h">
             <native-to-target>
-            return PyCObject_FromVoidPtr(&amp;%in, 0);
+                #ifdef IS_PY3K
+                    return PyCapsule_New(&amp;%in, 0, 0);
+                #else
+                    return PyCObject_FromVoidPtr(&amp;%in, 0);
+                #endif
             </native-to-target>
             <target-to-native>
-                <add-conversion type="PyCObject">
-                %out = *((%OUTTYPE*)PyCObject_AsVoidPtr(%in));
+                <add-conversion check="checkPyCapsuleOrPyCObject(%in)" type="PyObject">
+                void* ptr;
+                #ifdef IS_PY3K
+                    ptr = PyCapsule_GetPointer(%in, 0);
+                #else
+                    ptr = PyCObject_AsVoidPtr(%in);
+                #endif
+                %out = *((%OUTTYPE*)ptr);
                 </add-conversion>
             </target-to-native>
         </conversion-rule>
@@ -118,10 +154,10 @@
         <include file-name="str.h" location="global"/>
         <conversion-rule>
             <native-to-target>
-            return PyString_FromStringAndSize(%in.cstring(), %in.size());
+                return Shiboken::String::fromCString(%in.cstring(), %in.size());
             </native-to-target>
             <target-to-native>
-                <add-conversion type="PyString">
+                <add-conversion type="PyUnicode" check="Shiboken::String::check(%in)">
                 const char* str = %CONVERTTOCPP[const char*](%in);
                 %out = %OUTTYPE(str);
                 </add-conversion>
@@ -1820,14 +1856,16 @@
                 <add-conversion type="Py_None">
                 %out = %OUTTYPE();
                 </add-conversion>
-                <add-conversion type="PyString">
-                %out = %OUTTYPE(PyString_AS_STRING(%in), PyString_GET_SIZE(%in));
+                <add-conversion type="PyObject" check="Shiboken::String::check(%in) || PyBytes_Check(%in)">
+                    Py_ssize_t len;
+                    const char* str = Shiboken::String::toCString(%in, &amp;len);
+                    %out = %OUTTYPE(str, len);
                 </add-conversion>
             </target-to-native>
         </conversion-rule>
 
         <modify-function signature="ByteArray(const char*,int)" remove="all" />
-        <modify-function signature="ByteArray(const char*)">
+        <modify-function signature="ByteArray(const char*)" remove="all" >
             <!-- Keep \x00 bytes passed in Python strings. -->
             <modify-argument index="1">
                 <replace-type modified-type="PyBytes"/>
@@ -1862,6 +1900,7 @@
         </modify-function>
 
         <modify-function signature="hash(const ByteArray&amp;)" remove="all" />
+        <!-- Functions removed to proper deal with strings containing zeroes -->
         <modify-function signature="append(const char*)" remove="all" />
         <modify-function signature="append(const char*,int)" remove="all" />
         <modify-function signature="operator==(const char*,ByteArray)" remove="all" />
@@ -1909,12 +1948,17 @@
         </add-function>
         <add-function signature="__repr__" return-type="PyObject*">
             <inject-code class="target" position="beginning">
-            ByteArray ba(((PyObject*)%PYSELF)->ob_type->tp_name);
-            ba += '(';
-            Shiboken::AutoDecRef contents(PyObject_Repr(PyBytes_FromStringAndSize(%CPPSELF.data(), %CPPSELF.size())));
-            ba += PyBytes_AS_STRING(contents.object());
-            ba += ")";
-            %PYARG_0 = PyBytes_FromStringAndSize(ba.data(), ba.size());
+            ByteArray b(((PyObject*)%PYSELF)->ob_type->tp_name);
+            PyObject* aux = Shiboken::String::fromStringAndSize(%CPPSELF.data(), %CPPSELF.size());
+            if (PyUnicode_CheckExact(aux)) {
+                PyObject* tmp = PyUnicode_AsASCIIString(aux);
+                Py_DECREF(aux);
+                aux = tmp;
+            }
+            b += "('";
+            b += ByteArray(PyBytes_AS_STRING(aux), PyBytes_GET_SIZE(aux));
+            b += "')";
+            %PYARG_0 = Shiboken::String::fromStringAndSize(b.data(), b.size());
             </inject-code>
         </add-function>
 

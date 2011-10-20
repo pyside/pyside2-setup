@@ -966,7 +966,7 @@ QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType
 
     if (isCppPrimitive(metaType)) {
         if (isCString(metaType))
-            return "SbkString_Check";
+            return "Shiboken::String::check";
         if (isVoidPointer(metaType))
             return "PyObject_Check";
         return cpythonCheckFunction(metaType->typeEntry(), genericNumberType);

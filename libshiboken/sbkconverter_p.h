@@ -23,10 +23,11 @@
 #ifndef SBK_CONVERTER_P_H
 #define SBK_CONVERTER_P_H
 
-#include <Python.h>
+#include "sbkpython.h"
+#include "sbkconverter.h"
+#include "sbkstring.h"
 #include <list>
 #include <limits>
-#include "sbkconverter.h"
 
 #include "sbkdbg.h"
 
@@ -168,10 +169,6 @@ struct TwoPrimitive : OnePrimitive<T>
 };
 
 // Integers --------------------------------------------------------------------------------
-
-// Note: if there wasn't for the old-style classes, a simple PyNumber_Check would suffice.
-#define SbkNumber_Check(X) (PyNumber_Check(X) \
-        && (!PyInstance_Check(X) || PyObject_HasAttrString(X, "__trunc__")))
 
 template <typename INT>
 struct IntPrimitive : TwoPrimitive<INT>
@@ -327,11 +324,12 @@ struct CharPrimitive : IntPrimitive<CHAR>
 {
     static void toCpp(PyObject* pyIn, void* cppOut)
     {
-        *((CHAR*)cppOut) = (CHAR) PyString_AS_STRING(pyIn)[0];
+
+        *((CHAR*)cppOut) = (CHAR) Shiboken::String::toCString(pyIn)[0];
     }
     static PythonToCppFunc isConvertible(PyObject* pyIn)
     {
-        if (PyString_Check(pyIn) && PyString_Size(pyIn) == 1)
+        if (Shiboken::String::checkChar(pyIn))
             return toCpp;
         return 0;
     }
@@ -361,7 +359,7 @@ template <> struct Primitive<unsigned char> : CharPrimitive<unsigned char> {};
 template <> struct Primitive<char> : CharPrimitive<char> {
     using CharPrimitive<char>::toPython;
     static PyObject* toPython(const void* cppIn) {
-        return PyString_FromFormat("%c", *((const char*)cppIn));
+        return Shiboken::String::fromCString((const char*)cppIn, 1);
     }
 };
 
@@ -376,7 +374,7 @@ struct Primitive<const char*> : TwoPrimitive<const char*>
     {
         if (!cppIn)
             Py_RETURN_NONE;
-        return PyString_FromString((const char*)cppIn);
+        return Shiboken::String::fromCString((const char*)cppIn);
     }
     static void toCpp(PyObject* pyIn, void* cppOut)
     {
@@ -390,11 +388,11 @@ struct Primitive<const char*> : TwoPrimitive<const char*>
     }
     static void otherToCpp(PyObject* pyIn, void* cppOut)
     {
-        *((const char**)cppOut) = (const char*) PyString_AsString(pyIn);
+        *((const char**)cppOut) = (const char*) Shiboken::String::toCString(pyIn);
     }
     static PythonToCppFunc isOtherConvertible(PyObject* pyIn)
     {
-        if (PyString_Check(pyIn))
+        if (Shiboken::String::check(pyIn))
             return otherToCpp;
         return 0;
     }
@@ -405,7 +403,7 @@ struct Primitive<std::string> : TwoPrimitive<std::string>
 {
     static PyObject* toPython(const void* cppIn)
     {
-        return PyString_FromString(((std::string*)cppIn)->c_str());
+        return Shiboken::String::fromCString(((std::string*)cppIn)->c_str());
     }
     static void toCpp(PyObject* pyIn, void* cppOut)
     {
@@ -419,11 +417,11 @@ struct Primitive<std::string> : TwoPrimitive<std::string>
     }
     static void otherToCpp(PyObject* pyIn, void* cppOut)
     {
-        *((std::string*)cppOut) = std::string(PyString_AsString(pyIn));
+        *((std::string*)cppOut) = Shiboken::String::toCString(pyIn);
     }
     static PythonToCppFunc isOtherConvertible(PyObject* pyIn)
     {
-        if (PyString_Check(pyIn))
+        if (Shiboken::String::check(pyIn))
             return otherToCpp;
         return 0;
     }

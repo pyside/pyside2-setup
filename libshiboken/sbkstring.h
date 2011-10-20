@@ -41,7 +41,8 @@ namespace String
     LIBSHIBOKEN_API bool checkChar(PyObject* obj);
     LIBSHIBOKEN_API bool isConvertible(PyObject* obj);
     LIBSHIBOKEN_API PyObject* fromCString(const char* value);
-    LIBSHIBOKEN_API const char* toCString(PyObject* str);
+    LIBSHIBOKEN_API PyObject* fromCString(const char* value, int len);
+    LIBSHIBOKEN_API const char* toCString(PyObject* str, Py_ssize_t* len = 0);
     LIBSHIBOKEN_API bool concat(PyObject** val1, PyObject* val2);
     LIBSHIBOKEN_API PyObject* fromFormat(const char* format, ...);
     LIBSHIBOKEN_API PyObject* fromStringAndSize(const char* str, Py_ssize_t size);
