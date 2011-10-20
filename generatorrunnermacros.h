@@ -36,6 +36,7 @@
 #endif
 
 #ifndef GENRUNNER_API
+    #define GENRUNNER_EXPORT
     #define GENRUNNER_API
 #endif
 #endif
