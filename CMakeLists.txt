@@ -14,7 +14,7 @@ add_definitions(${QT_DEFINITIONS})
 
 set(shiboken_MAJOR_VERSION "1")
 set(shiboken_MINOR_VERSION "0")
-set(shiboken_MICRO_VERSION "8")
+set(shiboken_MICRO_VERSION "9")
 set(shiboken_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
 
 option(BUILD_TESTS "Build tests." TRUE)
