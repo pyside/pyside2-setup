@@ -17,7 +17,7 @@
 
 #ifndef APIEXTRACTOR_API
     #define APIEXTRACTOR_API
-    #define APIEXTRACTOR_API(func) func
+    #define APIEXTRACTOR_DEPRECATED(func) func
 #endif
 
 #endif
