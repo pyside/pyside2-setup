@@ -192,32 +192,28 @@ static PyObject* enum_richcompare(PyObject* self, PyObject* other, int op)
     long valA = SBK_ENUM(self)->ob_value;
     long valB = getNumberValue(other);
 
-    if (self == other) {
-        result = 1;
-    } else  {
-        switch (op) {
-        case Py_EQ:
-            result = (valA == valB);
-            break;
-        case Py_NE:
-            result = (valA != valB);
-            break;
-        case Py_LE:
-            result = (valA <= valB);
-            break;
-        case Py_GE:
-            result = (valA >= valB);
-            break;
-        case Py_LT:
-            result = (valA < valB);
-            break;
-        case Py_GT:
-            result = (valA > valB);
-            break;
-        default:
-            PyErr_BadArgument();
-            return NULL;
-        }
+    switch (op) {
+    case Py_EQ:
+        result = (valA == valB);
+        break;
+    case Py_NE:
+        result = (valA != valB);
+        break;
+    case Py_LE:
+        result = (valA <= valB);
+        break;
+    case Py_GE:
+        result = (valA >= valB);
+        break;
+    case Py_LT:
+        result = (valA < valB);
+        break;
+    case Py_GT:
+        result = (valA > valB);
+        break;
+    default:
+        PyErr_BadArgument();
+        return NULL;
     }
     if (result)
         Py_RETURN_TRUE;

@@ -141,6 +141,12 @@ class EnumOverloadTest(unittest.TestCase):
         self.assertEqual(o.callWithEnum('', Event.ANY_EVENT, 9), 81)
         self.assertEqual(o.callWithEnum('', 9), 9)
 
+class EnumOperators(unittest.TestCase):
+    '''Test case for operations on enums'''
+
+    def testInequalitySameObject(self):
+        self.assertFalse(Event.ANY_EVENT != Event.ANY_EVENT)
+
 
 if __name__ == '__main__':
     unittest.main()
