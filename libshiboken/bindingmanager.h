@@ -64,7 +64,7 @@ public:
      */
     SbkObjectType* resolveType(void** cptr, SbkObjectType* type);
 
-    std::set<SbkObject*> getAllPyObjects();
+    std::set<PyObject*> getAllPyObjects();
 
     /**
      * Calls the function \p visitor for each object registered on binding manager.

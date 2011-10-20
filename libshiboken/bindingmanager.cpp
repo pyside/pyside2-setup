@@ -287,13 +287,13 @@ SbkObjectType* BindingManager::resolveType(void** cptr, SbkObjectType* type)
     return identifiedType ? identifiedType : type;
 }
 
-std::set<SbkObject*> BindingManager::getAllPyObjects()
+std::set<PyObject*> BindingManager::getAllPyObjects()
 {
-    std::set<SbkObject*> pyObjects;
+    std::set<PyObject*> pyObjects;
     const WrapperMap& wrappersMap = m_d->wrapperMapper;
     WrapperMap::const_iterator it = wrappersMap.begin();
     for (; it != wrappersMap.end(); ++it)
-        pyObjects.insert(it->second);
+        pyObjects.insert(reinterpret_cast<PyObject*>(it->second));
 
     return pyObjects;
 }
