@@ -28,6 +28,7 @@
 #include <utility>
 #include <string>
 #include "complex.h"
+#include "bytearray.h"
 
 #include "libsamplemacros.h"
 
@@ -44,6 +45,8 @@ public:
 
     inline void setMap(std::map<std::string, std::list<int> > map) { m_map = map; }
     inline std::map<std::string, std::list<int> > getMap() { return m_map; }
+
+    inline const std::map<int, ByteArray>& passMapIntValueType(const std::map<int, ByteArray>& arg) { return arg; }
 
 private:
     std::map<std::string, std::list<int> > m_map;

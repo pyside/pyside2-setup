@@ -26,7 +26,6 @@
 
 '''Test cases for std::map container conversions'''
 
-import sys
 import unittest
 
 from sample import MapUser
@@ -65,6 +64,12 @@ class MapConversionTest(unittest.TestCase):
         result = mu.getMap()
         self.assertEqual(result, map_)
 
+    def testConversionMapIntKeyValueTypeValue(self):
+        '''C++ signature: MapUser::passMapIntValueType(const std::map<int, const ByteArray>&)'''
+        mu = MapUser()
+        map_ = {0 : 'string'}
+        result = mu.passMapIntValueType(map_)
+        self.assertEqual(map_, result)
+
 if __name__ == '__main__':
     unittest.main()
-

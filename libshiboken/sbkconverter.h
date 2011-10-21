@@ -282,7 +282,7 @@ template<> inline SbkConverter* PrimitiveTypeConverter<void*>() { return primiti
 
 } } // namespace Shiboken::Conversions
 
-struct _SbkGenericType { PyHeapTypeObject super; SbkConverter* converter; };
-#define SBK_CONVERTER(objType) (reinterpret_cast<_SbkGenericType*>(objType)->converter)
+struct _SbkGenericType { PyHeapTypeObject super; SbkConverter** converter; };
+#define SBK_CONVERTER(pyType) (*reinterpret_cast<_SbkGenericType*>(pyType)->converter)
 
 #endif // SBK_CONVERTER_H

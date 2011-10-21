@@ -41,6 +41,7 @@ extern "C"
 struct SbkEnumType
 {
     PyHeapTypeObject super;
+    SbkConverter** converterPtr;
     SbkConverter* converter;
     const char* cppName;
 };
@@ -533,7 +534,9 @@ PyTypeObject* newTypeWithName(const char* name, const char* cppName)
     type->tp_richcompare = &enum_richcompare;
     type->tp_hash = &enum_hash;
 
-    reinterpret_cast<SbkEnumType*>(type)->cppName = cppName;
+    SbkEnumType* enumType = reinterpret_cast<SbkEnumType*>(type);
+    enumType->cppName = cppName;
+    enumType->converterPtr = &enumType->converter;
     DeclaredEnumTypes::instance().addEnumType(type);
     return type;
 }
