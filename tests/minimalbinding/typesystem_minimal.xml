@@ -31,8 +31,9 @@
             </native-to-target>
             <target-to-native>
                 <add-conversion type="PySequence">
-                for (int i = 0; i &lt; PySequence_Fast_GET_SIZE(%in); i++) {
-                    PyObject* pyItem = PySequence_Fast_GET_ITEM(%in, i);
+                Shiboken::AutoDecRef seq(PySequence_Fast(%in, 0));
+                for (int i = 0; i &lt; PySequence_Fast_GET_SIZE(seq.object()); i++) {
+                    PyObject* pyItem = PySequence_Fast_GET_ITEM(seq.object(), i);
                     %OUTTYPE_0 cppItem = %CONVERTTOCPP[%OUTTYPE_0](pyItem);
                     %out.push_back(cppItem);
                 }

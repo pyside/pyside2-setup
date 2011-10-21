@@ -185,8 +185,9 @@
             <target-to-native>
                 <add-conversion type="PySequence">
                 %OUTTYPE&amp; list = %out;
-                for (int i = 0; i &lt; PySequence_Fast_GET_SIZE(%in); i++) {
-                    PyObject* pyItem = PySequence_Fast_GET_ITEM(%in, i);
+                Shiboken::AutoDecRef seq(PySequence_Fast(%in, 0));
+                for (int i = 0; i &lt; PySequence_Fast_GET_SIZE(seq.object()); i++) {
+                    PyObject* pyItem = PySequence_Fast_GET_ITEM(seq.object(), i);
                     PStr cppItem = %CONVERTTOCPP[PStr](pyItem);
                     list.push_back(cppItem);
                 }
@@ -239,8 +240,9 @@
     return %out;
     </template>
     <template name="pyseq_to_cpplist_convertion">
-    for (int i = 0; i &lt; PySequence_Fast_GET_SIZE(%in); i++) {
-        PyObject* pyItem = PySequence_Fast_GET_ITEM(%in, i);
+    Shiboken::AutoDecRef seq(PySequence_Fast(%in, 0));
+    for (int i = 0; i &lt; PySequence_Fast_GET_SIZE(seq.object()); i++) {
+        PyObject* pyItem = PySequence_Fast_GET_ITEM(seq.object(), i);
         %OUTTYPE_0 cppItem = %CONVERTTOCPP[%OUTTYPE_0](pyItem);
         %out.push_back(cppItem);
     }
