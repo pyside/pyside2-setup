@@ -29,7 +29,7 @@
 #include <string>
 #include <list>
 
-class ProtectedNonPolymorphic
+class LIBSAMPLE_API ProtectedNonPolymorphic
 {
 public:
     explicit ProtectedNonPolymorphic(const char *name) : m_name(name) {}
@@ -51,7 +51,7 @@ private:
     std::string m_name;
 };
 
-class ProtectedPolymorphic
+class LIBSAMPLE_API ProtectedPolymorphic
 {
 public:
     explicit ProtectedPolymorphic(const char *name) : m_name(name) {}
@@ -68,14 +68,14 @@ private:
     std::string m_name;
 };
 
-class ProtectedPolymorphicDaughter : public ProtectedPolymorphic
+class LIBSAMPLE_API ProtectedPolymorphicDaughter : public ProtectedPolymorphic
 {
 public:
     explicit ProtectedPolymorphicDaughter(const char *name) : ProtectedPolymorphic(name) {}
     inline static ProtectedPolymorphicDaughter* create() { return new ProtectedPolymorphicDaughter("created"); }
 };
 
-class ProtectedPolymorphicGrandDaughter: public ProtectedPolymorphicDaughter
+class LIBSAMPLE_API ProtectedPolymorphicGrandDaughter: public ProtectedPolymorphicDaughter
 {
 public:
     explicit ProtectedPolymorphicGrandDaughter(const char *name) : ProtectedPolymorphicDaughter(name) {}
@@ -95,7 +95,7 @@ private:
     static int dtor_called;
 };
 
-class ProtectedEnumClass
+class LIBSAMPLE_API ProtectedEnumClass
 {
 public:
     ProtectedEnumClass() {}
@@ -117,7 +117,7 @@ protected:
 };
 
 
-class ProtectedProperty
+class LIBSAMPLE_API ProtectedProperty
 {
 public:
     ProtectedProperty()
