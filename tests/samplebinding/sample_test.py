@@ -26,7 +26,6 @@
 
 '''Test cases for libsample bindings module'''
 
-import sys
 import unittest
 
 import sample

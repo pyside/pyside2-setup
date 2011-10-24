@@ -50,6 +50,12 @@ enumInEnumOut(InValue in)
     return retval;
 }
 
+Option
+enumArgumentWithDefaultValue(Option opt)
+{
+    return opt;
+}
+
 int
 getNumber(Option opt)
 {

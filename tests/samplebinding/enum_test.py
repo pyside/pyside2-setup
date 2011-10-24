@@ -121,6 +121,11 @@ class EnumTest(unittest.TestCase):
         self.assertEqual(text, str(Event.ANY_EVENT))
         self.assertEqual(text, repr(Event.ANY_EVENT))
 
+    def testEnumArgumentWithDefaultValue(self):
+        '''Option enumArgumentWithDefaultValue(Option opt = UnixTime);'''
+        self.assertEqual(SampleNamespace.enumArgumentWithDefaultValue(), SampleNamespace.UnixTime)
+        self.assertEqual(SampleNamespace.enumArgumentWithDefaultValue(SampleNamespace.RandomNumber), SampleNamespace.RandomNumber)
+
 
 class MyEvent(Event):
     def __init__(self):

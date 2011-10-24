@@ -712,13 +712,6 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
                 ac << QString("%1"CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name());
             } else {
                 QString argName = arg->name();
-                if (avoidProtectedHack()) {
-                    const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(arg->type());
-                    if (metaEnum && metaEnum->isProtected()) {
-                        argName.prepend(protectedEnumSurrogateName(metaEnum) + '(');
-                        argName.append(')');
-                    }
-                }
                 if (convert)
                     writeToPythonConversion(ac, arg->type(), func->ownerClass(), argName);
                 else
@@ -940,8 +933,13 @@ void CppGenerator::writeEnumConverterFunctions(QTextStream& s, const TypeEntry* 
         return;
     QString enumFlagName = enumType->isFlags() ? "flag" : "enum";
     QString typeName = fixedCppTypeName(enumType);
-    QString cppTypeName = getFullTypeName(enumType).trimmed();
     QString enumPythonType = cpythonTypeNameExt(enumType);
+    QString cppTypeName = getFullTypeName(enumType).trimmed();
+    if (avoidProtectedHack()) {
+        const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(enumType);
+        if (metaEnum && metaEnum->isProtected())
+            cppTypeName = protectedEnumSurrogateName(metaEnum);
+    }
     QString code;
     QTextStream c(&code);
     c << INDENT << "*((" << cppTypeName << "*)cppOut) = ";
@@ -1989,10 +1987,19 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream& s,
                                      && isNotContainerEnumOrFlags
                                      && !(treatAsPointer || isPointerOrObjectType);
     QString typeName = getFullTypeNameWithoutModifiers(type);
+
+    bool isProtectedEnum = false;
+
     if (mayHaveImplicitConversion) {
         s << INDENT << typeName << ' ' << cppOutAux;
         writeMinimalConstructorExpression(s, type, defaultValue);
         s << ';' << endl;
+    } else if (avoidProtectedHack() && type->typeEntry()->isEnum()) {
+        const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(type);
+        if (metaEnum && metaEnum->isProtected()) {
+            typeName = "long";
+            isProtectedEnum = true;
+        }
     }
 
     s << INDENT << typeName;
@@ -2002,10 +2009,17 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream& s,
         s << "* " << cppOut << " = &" << cppOutAux;
     } else {
         s << ' ' << cppOut;
-        if (isUserPrimitive(type) || typeEntry->isEnum() || typeEntry->isFlags())
+        if (isProtectedEnum && avoidProtectedHack()) {
+            s << " = ";
+            if (defaultValue.isEmpty())
+                s << "0";
+            else
+                s << "(long)" << defaultValue;
+        } else if (isUserPrimitive(type) || typeEntry->isEnum() || typeEntry->isFlags()) {
             writeMinimalConstructorExpression(s, typeEntry, defaultValue);
-        else if (!type->isContainer())
+        } else if (!type->isContainer()) {
             writeMinimalConstructorExpression(s, type, defaultValue);
+        }
     }
     s << ';' << endl;
 
@@ -3675,13 +3689,17 @@ void CppGenerator::writeGetterFunction(QTextStream& s, const AbstractMetaField* 
             cppField.append(')');
         }
     }
-    if (isCppIntegralPrimitive(fieldType) || fieldType->isEnum() || fieldType->isFlags()) {
+    if (isCppIntegralPrimitive(fieldType) || fieldType->isEnum()) {
         s << INDENT << getFullTypeNameWithoutModifiers(fieldType) << " cppOut_local = " << cppField << ';' << endl;
         cppField = "cppOut_local";
     } else if (avoidProtectedHack() && metaField->isProtected()) {
         s << INDENT << getFullTypeNameWithoutModifiers(fieldType);
-        if ((!fieldType->isConstant() && !fieldType->isEnum() && !fieldType->isPrimitive()) || fieldType->indirections() == 1)
+        if (fieldType->isContainer() || fieldType->isFlags()) {
+            s << '&';
+            cppField.prepend('*');
+        } else if ((!fieldType->isConstant() && !fieldType->isEnum() && !fieldType->isPrimitive()) || fieldType->indirections() == 1) {
             s << '*';
+        }
         s << " fieldValue = " << cppField << ';' << endl;
         cppField = "fieldValue";
     }
@@ -3735,15 +3753,8 @@ void CppGenerator::writeSetterFunction(QTextStream& s, const AbstractMetaField* 
     s << INDENT;
     if (avoidProtectedHack() && metaField->isProtected()) {
         s << getFullTypeNameWithoutModifiers(fieldType);
-        s << (fieldType->indirections() == 1 ? "*" : "") << " cppOut";
-        if (fieldType->typeEntry()->isEnum() || fieldType->typeEntry()->isFlags()) {
-            s << " = ";
-            writeToCppConversion(s, fieldType, metaField->enclosingClass(), "pyIn", "");
-            s << ';' << endl;
-        } else {
-            s << ';' << endl;
-            s << INDENT << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut);" << endl;
-        }
+        s << (fieldType->indirections() == 1 ? "*" : "") << " cppOut;" << endl;
+        s << INDENT << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut);" << endl;
         s << INDENT << QString("((%1*)%2)->%3(cppOut)").arg(wrapperName(metaField->enclosingClass()))
                                                        .arg(CPP_SELF_VAR)
                                                        .arg(protectedFieldSetterName(metaField));
