@@ -25,7 +25,7 @@
 #define GENERATORRUNNERMACROS_H
 
 // GENRUNNER_API is used for the public API symbols.
-#if defined _WIN32 || defined __CYGWIN__
+#if defined _WIN32
     #define GENRUNNER_EXPORT __declspec(dllexport)
     #if GENRUNNER_EXPORTS
         #define GENRUNNER_API GENRUNNER_EXPORT
