@@ -3,7 +3,7 @@ project(generatorrunner)
 cmake_minimum_required(VERSION 2.6)
 
 find_package(Qt4 4.5.0 REQUIRED)
-find_package(ApiExtractor 0.10.8 REQUIRED)
+find_package(ApiExtractor 0.10.9 REQUIRED)
 
 option(BUILD_TESTS "Build tests." TRUE)
 option(INSTALL_TESTS "Install tests" FALSE)
@@ -39,7 +39,7 @@ set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The s
 # lib generator version
 set(generator_MAJOR_VERSION "0")
 set(generator_MINOR_VERSION "6")
-set(generator_MICRO_VERSION "14")
+set(generator_MICRO_VERSION "15")
 set(generator_VERSION "${generator_MAJOR_VERSION}.${generator_MINOR_VERSION}.${generator_MICRO_VERSION}")
 set(generator_SOVERSION "${generator_MAJOR_VERSION}.${generator_MINOR_VERSION}")
 set(USE_GENERATOR_VERSION_SUFFIX FALSE CACHE BOOL "This suffix allow to have various generator version installed simultaneous.")
