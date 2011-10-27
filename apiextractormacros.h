@@ -3,7 +3,7 @@
 
 
 // APIEXTRACTOR_API is used for the public API symbols.
-#if defined _WIN32 || defined __CYGWIN__
+#if defined _WIN32
     #if APIEXTRACTOR_EXPORTS
         #define APIEXTRACTOR_API __declspec(dllexport)
     #else

@@ -25,6 +25,7 @@
 #include "preprocessor.h"
 
 #include <string>
+#include <cstdio>
 
 // register callback for include hooks
 static void includeFileHook(const std::string &, const std::string &, FILE *);
