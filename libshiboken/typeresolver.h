@@ -48,6 +48,14 @@ inline PyObject* objectTypeToPython(void* cptr)
     return Shiboken::Converter<T*>::toPython(*reinterpret_cast<T**>(cptr));
 }
 
+template <typename T>
+inline PyObject* referenceTypeToPython(void* cptr)
+{
+    // cptr comes the same way it come when we have a value type, but
+    // we deliver a Python object of a reference
+    return Shiboken::Converter<T&>::toPython(*reinterpret_cast<T*>(cptr));
+}
+
 /**
 *   \internal This function is not part of the public API.
 *   Initialize the TypeResource internal cache.
@@ -79,6 +87,16 @@ public:
     static TypeResolver* createObjectTypeResolver(const char* typeName)
     {
         return createTypeResolver(typeName, &objectTypeToPython<T>, &pythonToObjectType<T>, SbkType<T>());
+    }
+
+    /**
+     * This kind of type resolver is used only when we have a signal with a reference in their arguments
+     * like on QSqlTableModel::primeInsert.
+     */
+    template<typename T>
+    static TypeResolver* createReferenceTypeResolver(const char* typeName)
+    {
+        return createTypeResolver(typeName, &referenceTypeToPython<T>, &pythonToValueType<T>, SbkType<T>());
     }
 
     static Type getType(const char* name);
