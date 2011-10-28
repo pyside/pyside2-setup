@@ -223,7 +223,10 @@ static PyObject* enum_richcompare(PyObject* self, PyObject* other, int op)
 
 static Py_hash_t enum_hash(PyObject* pyObj)
 {
-    return PyObject_Hash(reinterpret_cast<SbkEnumObject*>(pyObj)->ob_name);
+    Py_hash_t val = reinterpret_cast<SbkEnumObject*>(pyObj)->ob_value;
+    if (val == -1)
+        val = -2;
+    return val;
 }
 
 static PyGetSetDef SbkEnumGetSetList[] = {

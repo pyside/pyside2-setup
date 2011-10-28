@@ -52,8 +52,8 @@ class EnumTest(unittest.TestCase):
         self.assertEqual(eval(repr(enum)), enum)
 
     def testHashability(self):
-        '''Enums should be hashable and different enums with different values should have different hashes'''
-        self.assertNotEqual(hash(SampleNamespace.TwoIn), hash(SampleNamespace.TwoOut))
+        self.assertEqual(hash(SampleNamespace.TwoIn), hash(SampleNamespace.TwoOut))
+        self.assertNotEqual(hash(SampleNamespace.TwoIn), hash(SampleNamespace.OneIn))
 
     def testEnumValuesInsideEnum(self):
         '''Enum values should be accessible inside the enum as well as outside.'''
