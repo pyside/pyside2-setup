@@ -523,12 +523,6 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
             writeFlagsNumberMethodsDefinition(s, cppEnum);
             s << endl;
         }
-
-        if (hasFlags) {
-            // Write Enum as Flags definition (at the moment used only by QFlags<enum>)
-            writeFlagsDefinition(s, cppEnum);
-            s << endl;
-        }
     }
     s << endl;
 
@@ -3167,8 +3161,11 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
 
     if (!cppEnum->isAnonymous()) {
         FlagsTypeEntry* flags = cppEnum->typeEntry()->flags();
-        if (flags)
-            s << INDENT << cpythonTypeNameExt(flags) << " = &" << cpythonTypeName(flags) << ';' << endl;
+        if (flags) {
+            s << INDENT << cpythonTypeNameExt(flags) << " = PySide::QFlags::create(\"" << flags->flagsName() << "\", &"
+              << cpythonEnumName(cppEnum) << "_as_number);" << endl;
+        }
+
         s << INDENT << cpythonTypeNameExt(cppEnum->typeEntry()) << " = Shiboken::Enum::";
         s << ((enclosingClass || hasUpperEnclosingClass) ? "createScopedEnum" : "createGlobalEnum");
         s << '(' << enclosingObjectVariable << ',' << endl;
@@ -3355,64 +3352,6 @@ void CppGenerator::writeFlagsNumberMethodsDefinition(QTextStream& s, const Abstr
     s << INDENT << "/*nb_inplace_floor_divide*/ 0," << endl;
     s << INDENT << "/*nb_inplace_true_divide*/  0," << endl;
     s << INDENT << "/*nb_index*/                0" << endl;
-    s << "};" << endl << endl;
-}
-
-void CppGenerator::writeFlagsDefinition(QTextStream& s, const AbstractMetaEnum* cppEnum)
-{
-    FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
-    if (!flagsEntry)
-        return;
-    QString cpythonName = cpythonFlagsName(flagsEntry);
-    QString enumName = cpythonEnumName(cppEnum);
-
-    s << "// forward declaration of new function" << endl;
-    s << "static PyTypeObject " << cpythonName << "_Type = {" << endl;
-    s << INDENT << "PyVarObject_HEAD_INIT(&PyType_Type, 0)" << endl;
-    s << INDENT << "/*tp_name*/             \"" << flagsEntry->flagsName() << "\"," << endl;
-    s << INDENT << "/*tp_basicsize*/        sizeof(PySideQFlagsObject)," << endl;
-    s << INDENT << "/*tp_itemsize*/         0," << endl;
-    s << INDENT << "/*tp_dealloc*/          0," << endl;
-    s << INDENT << "/*tp_print*/            0," << endl;
-    s << INDENT << "/*tp_getattr*/          0," << endl;
-    s << INDENT << "/*tp_setattr*/          0," << endl;
-    s << INDENT << "/*tp_compare*/          0," << endl;
-    s << INDENT << "/*tp_repr*/             0," << endl;
-    s << INDENT << "/*tp_as_number*/        &" << enumName << "_as_number," << endl;
-    s << INDENT << "/*tp_as_sequence*/      0," << endl;
-    s << INDENT << "/*tp_as_mapping*/       0," << endl;
-    s << INDENT << "/*tp_hash*/             0," << endl;
-    s << INDENT << "/*tp_call*/             0," << endl;
-    s << INDENT << "/*tp_str*/              0," << endl;
-    s << INDENT << "/*tp_getattro*/         0," << endl;
-    s << INDENT << "/*tp_setattro*/         0," << endl;
-    s << INDENT << "/*tp_as_buffer*/        0," << endl;
-    s << INDENT << "/*tp_flags*/            Py_TPFLAGS_DEFAULT | Py_TPFLAGS_CHECKTYPES," << endl;
-    s << INDENT << "/*tp_doc*/              0," << endl;
-    s << INDENT << "/*tp_traverse*/         0," << endl;
-    s << INDENT << "/*tp_clear*/            0," << endl;
-    s << INDENT << "/*tp_richcompare*/      &PySideQFlagsRichCompare," << endl;
-    s << INDENT << "/*tp_weaklistoffset*/   0," << endl;
-    s << INDENT << "/*tp_iter*/             0," << endl;
-    s << INDENT << "/*tp_iternext*/         0," << endl;
-    s << INDENT << "/*tp_methods*/          0," << endl;
-    s << INDENT << "/*tp_members*/          0," << endl;
-    s << INDENT << "/*tp_getset*/           0," << endl;
-    s << INDENT << "/*tp_base*/             0," << endl;
-    s << INDENT << "/*tp_dict*/             0," << endl;
-    s << INDENT << "/*tp_descr_get*/        0," << endl;
-    s << INDENT << "/*tp_descr_set*/        0," << endl;
-    s << INDENT << "/*tp_dictoffset*/       0," << endl;
-    s << INDENT << "/*tp_init*/             0," << endl;
-    s << INDENT << "/*tp_alloc*/            0," << endl;
-    s << INDENT << "/*tp_new*/              &PySideQFlagsNew," << endl;
-    s << INDENT << "/*tp_free*/             0," << endl;
-    s << INDENT << "/*tp_is_gc*/            0," << endl;
-    s << INDENT << "/*tp_bases*/            0," << endl;
-    s << INDENT << "/*tp_mro*/              0," << endl;
-    s << INDENT << "/*tp_cache*/            0," << endl;
-    s << INDENT << "/*tp_subclasses*/       0," << endl;
-    s << INDENT << "/*tp_weaklist*/         0" << endl;
     s << "};" << endl << endl;
 }
 

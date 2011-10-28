@@ -179,7 +179,6 @@ private:
 
     void writeSignalInitialization(QTextStream& s, const AbstractMetaClass* metaClass);
 
-    void writeFlagsDefinition(QTextStream& s, const AbstractMetaEnum* cppEnum);
     void writeFlagsMethods(QTextStream& s, const AbstractMetaEnum* cppEnum);
     void writeFlagsToLong(QTextStream& s, const AbstractMetaEnum* cppEnum);
     void writeFlagsNonZero(QTextStream& s, const AbstractMetaEnum* cppEnum);
