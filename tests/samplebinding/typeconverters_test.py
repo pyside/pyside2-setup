@@ -64,6 +64,18 @@ class GetPythonTypeByNameTest(unittest.TestCase):
         pyTypedef = sample.getPythonType('real')
         self.assertEqual(pyType, pyTypedef)
 
+    def testPairContainerType(self):
+        pyType = sample.getPythonType('std::pair<Complex, int >')
+        self.assertEqual(pyType, list)
+
+    def testListContainerType(self):
+        pyType = sample.getPythonType('std::list<int >')
+        self.assertEqual(pyType, list)
+
+    def testMapContainerType(self):
+        pyType = sample.getPythonType('std::map<std::string, int >')
+        self.assertEqual(pyType, dict)
+
 
 if __name__ == '__main__':
     unittest.main()

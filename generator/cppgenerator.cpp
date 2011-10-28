@@ -3236,7 +3236,8 @@ void CppGenerator::writeEnumConverterInitialization(QTextStream& s, const TypeEn
 void CppGenerator::writeContainerConverterInitialization(QTextStream& s, const AbstractMetaType* type)
 {
     s << INDENT << "// Register converter for type '" << type->cppSignature() << "'." << endl;
-    s << INDENT << converterObject(type) << " = Shiboken::Conversions::createConverter(";
+    QString converter = converterObject(type);
+    s << INDENT << converter << " = Shiboken::Conversions::createConverter(";
     if (type->typeEntry()->targetLangApiName() == "PyObject") {
         s << "&PyBaseObject_Type";
     } else {
@@ -3249,6 +3250,7 @@ void CppGenerator::writeContainerConverterInitialization(QTextStream& s, const A
     s << ", " << cppToPythonFunctionName(typeName, typeName) << ");" << endl;
     QString toCpp = pythonToCppFunctionName(typeName, typeName);
     QString isConv = convertibleToCppFunctionName(typeName, typeName);
+    s << INDENT << "Shiboken::Conversions::registerConverterName(" << converter << ", \"" << type->cppSignature() << "\");" << endl;
     writeAddPythonToCppConversion(s, converterObject(type), toCpp, isConv);
 }
 
