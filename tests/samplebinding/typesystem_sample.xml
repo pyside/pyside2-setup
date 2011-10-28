@@ -249,6 +249,15 @@
         </inject-code>
     </add-function>
 
+    <add-function signature="getPythonType(const char*)" return-type="PyObject">
+        <inject-code class="target" position="beginning">
+        %PYARG_0 = (PyObject*) Shiboken::Conversions::getPythonTypeObject(%1);
+        if (!%PYARG_0)
+            %PYARG_0 = Py_None;
+        Py_INCREF(%PYARG_0);
+        </inject-code>
+    </add-function>
+
     <container-type name="std::pair" type="pair">
         <include file-name="utility" location="global"/>
         <conversion-rule file="pair_conversions.h">

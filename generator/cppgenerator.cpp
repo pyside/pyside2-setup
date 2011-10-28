@@ -4863,8 +4863,16 @@ void CppGenerator::finishGeneration()
     // Register primitive types on TypeResolver
     s << INDENT << "// Register primitive types on TypeResolver" << endl;
     foreach(const PrimitiveTypeEntry* pte, primitiveTypes()) {
-        if (pte->generateCode())
-            s << INDENT << typeResolverString(pte->name()) << ';' << endl;
+        if (!pte->generateCode())
+            continue;
+        s << INDENT << typeResolverString(pte->name()) << ';' << endl;
+        if (!pte->isCppPrimitive())
+            continue;
+        const TypeEntry* alias = pte->basicAliasedTypeEntry();
+        if (!alias)
+            continue;
+        s << INDENT << "Shiboken::Conversions::registerConverterName(";
+        s << converterObject(alias) << ", \"" << pte->qualifiedCppName() << "\");" << endl;
     }
     // Register type resolver for all containers found in signals.
     QSet<QByteArray> typeResolvers;
