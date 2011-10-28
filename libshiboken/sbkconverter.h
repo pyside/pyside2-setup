@@ -242,6 +242,12 @@ LIBSHIBOKEN_API bool checkDictTypes(PyTypeObject* keyType, PyTypeObject* valueTy
 /// Returns true if a Python dictionary can be converted to a C++ hash or map.
 LIBSHIBOKEN_API bool convertibleDictTypes(SbkConverter* keyConverter, bool keyCheckExact, SbkConverter* valueConverter, bool valueCheckExact, PyObject* pyIn);
 
+/// Returns the Python type object associated with the given \p converter.
+LIBSHIBOKEN_API PyTypeObject* getPythonTypeObject(SbkConverter* converter);
+
+/// Returns the Python type object for the given \p typeName.
+LIBSHIBOKEN_API PyTypeObject* getPythonTypeObject(const char* typeName);
+
 #define SBK_PY_LONG_LONG_IDX            0
 #define SBK_BOOL_IDX                    1
 #define SBK_CHAR_IDX                    2

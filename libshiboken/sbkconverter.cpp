@@ -283,12 +283,15 @@ bool isImplicitConversion(SbkObjectType* type, PythonToCppFunc toCppFunc)
 void registerConverterName(SbkConverter* converter , const char* typeName)
 {
     ConvertersMap::iterator iter = converters.find(typeName);
-    if (iter == converters.end())
+    if (iter == converters.end()) {
+        //SbkDbg() << "Registering " << typeName;
         converters.insert(std::make_pair(typeName, converter));
+    }
 }
 
 SbkConverter* getConverter(const char* typeName)
 {
+    //SbkDbg() << "Looking for converter for type " << typeName;
     ConvertersMap::const_iterator it = converters.find(typeName);
     if (it != converters.end())
         return it->second;
@@ -421,6 +424,18 @@ bool convertibleDictTypes(SbkConverter* keyConverter, bool keyCheckExact, SbkCon
         }
     }
     return true;
+}
+
+PyTypeObject* getPythonTypeObject(SbkConverter* converter)
+{
+    if (converter)
+        return converter->pythonType;
+    return 0;
+}
+
+PyTypeObject* getPythonTypeObject(const char* typeName)
+{
+    return getPythonTypeObject(getConverter(typeName));
 }
 
 } } // namespace Shiboken::Conversions

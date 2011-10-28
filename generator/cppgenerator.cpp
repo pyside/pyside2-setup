@@ -1174,10 +1174,8 @@ void CppGenerator::writeConverterRegister(QTextStream& s, const AbstractMetaClas
     if (metaClass->isNamespace())
         return;
     s << INDENT << "// Register Converter" << endl;
-    s << INDENT;
-    if (!isObjectType(metaClass))
-        s << "SbkConverter* converter = ";
-    s << "Shiboken::Conversions::createConverter(&" << cpythonTypeName(metaClass) << ',' << endl;
+    s << INDENT << "SbkConverter* converter = Shiboken::Conversions::createConverter(&";
+    s << cpythonTypeName(metaClass) << ',' << endl;
     {
         Indentation indent(INDENT);
         QString sourceTypeName = metaClass->name();
@@ -1193,6 +1191,22 @@ void CppGenerator::writeConverterRegister(QTextStream& s, const AbstractMetaClas
         }
     }
     s << ");" << endl;
+
+    s << endl;
+
+    s << INDENT << "Shiboken::Conversions::registerConverterName(converter, \"";
+    s << metaClass->qualifiedCppName() << "\");" << endl;
+    // TODO-CONVERTER: review the need for registering this pointer version of the type name.
+    s << INDENT << "Shiboken::Conversions::registerConverterName(converter, \"";
+    s << metaClass->qualifiedCppName() << "*\");" << endl;
+    s << INDENT << "Shiboken::Conversions::registerConverterName(converter, typeid(::";
+    s << metaClass->qualifiedCppName() << ").name());" << endl;
+    if (shouldGenerateCppWrapper(metaClass)) {
+        s << INDENT << "Shiboken::Conversions::registerConverterName(converter, typeid(::";
+        s << wrapperName(metaClass) << ").name());" << endl;
+    }
+
+    s << endl;
 
     if (!metaClass->typeEntry()->isValue())
         return;
@@ -3150,8 +3164,9 @@ void CppGenerator::writeSpecialCastFunction(QTextStream& s, const AbstractMetaCl
 void CppGenerator::writePrimitiveConverterInitialization(QTextStream& s, const CustomConversion* customConversion)
 {
     const TypeEntry* type = customConversion->ownerType();
+    QString converter = converterObject(type);
     s << INDENT << "// Register converter for type '" << type->qualifiedTargetLangName() << "'." << endl;
-    s << INDENT << converterObject(type) << " = Shiboken::Conversions::createConverter(";
+    s << INDENT << converter << " = Shiboken::Conversions::createConverter(";
     if (type->targetLangApiName() == type->name())
         s << '0';
     else if (type->targetLangApiName() == "PyObject")
@@ -3160,7 +3175,8 @@ void CppGenerator::writePrimitiveConverterInitialization(QTextStream& s, const C
         s << '&' << type->targetLangApiName() << "_Type";
     QString typeName = fixedCppTypeName(type);
     s << ", " << cppToPythonFunctionName(typeName, typeName) << ");" << endl;
-    writeCustomConverterRegister(s, customConversion, converterObject(type));
+    s << INDENT << "Shiboken::Conversions::registerConverterName(" << converter << ", \"" << type->qualifiedCppName() << "\");" << endl;
+    writeCustomConverterRegister(s, customConversion, converter);
 }
 
 void CppGenerator::writeEnumConverterInitialization(QTextStream& s, const AbstractMetaEnum* metaEnum)

@@ -1035,13 +1035,13 @@ PyObject* newObject(SbkObjectType* instanceType,
 {
     // Try to find the exact type of cptr.
     if (!isExactType) {
-        TypeResolver* tr = 0;
+        PyTypeObject* exactType = 0;
         if (typeName) {
-            tr = TypeResolver::get(typeName);
-            if (tr)
-                instanceType = reinterpret_cast<SbkObjectType*>(tr->pythonType());
+            exactType = Shiboken::Conversions::getPythonTypeObject(typeName);
+            if (exactType)
+                instanceType = reinterpret_cast<SbkObjectType*>(exactType);
         }
-        if (!tr)
+        if (!exactType)
             instanceType = BindingManager::instance().resolveType(&cptr, instanceType);
     }
 
