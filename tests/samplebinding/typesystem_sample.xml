@@ -258,6 +258,33 @@
         </inject-code>
     </add-function>
 
+    <template name="cpp_type_is_object_or_value_type">
+    SbkConverter* converter = Shiboken::Conversions::getConverter(%1);
+    if (converter) {
+        if (Shiboken::Conversions::pythonTypeIs$TYPEType(converter))
+            %PYARG_0 = Py_True;
+        else
+            %PYARG_0 = Py_False;
+        Py_INCREF(%PYARG_0);
+    } else {
+        PyErr_Format(PyExc_ValueError, "Type '%s' has no converter associated to it", %1);
+    }
+    </template>
+    <add-function signature="cppTypeIsObjectType(const char*)" return-type="bool">
+        <inject-code class="target" position="beginning">
+            <insert-template name="cpp_type_is_object_or_value_type">
+                <replace from="$TYPE" to="Object" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+    <add-function signature="cppTypeIsValueType(const char*)" return-type="bool">
+        <inject-code class="target" position="beginning">
+            <insert-template name="cpp_type_is_object_or_value_type">
+                <replace from="$TYPE" to="Value" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+
     <container-type name="std::pair" type="pair">
         <include file-name="utility" location="global"/>
         <conversion-rule file="pair_conversions.h">

@@ -78,6 +78,7 @@ TypeResolver* TypeResolver::createTypeResolver(const char* typeName,
          */
         if (pyType && PyType_IsSubtype(pyType, reinterpret_cast<PyTypeObject*>(&SbkObject_Type))) {
             SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(pyType);
+            // TODO-CONVERTERS: to be deprecated
             if (!sbkType->d->type_behaviour) {
                 int len = strlen(typeName);
                 sbkType->d->type_behaviour = typeName[len -1] == '*' ? BEHAVIOUR_OBJECTTYPE : BEHAVIOUR_VALUETYPE;

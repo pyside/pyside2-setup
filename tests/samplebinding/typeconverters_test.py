@@ -77,5 +77,40 @@ class GetPythonTypeByNameTest(unittest.TestCase):
         self.assertEqual(pyType, dict)
 
 
+class CheckValueAndObjectTypeByNameTest(unittest.TestCase):
+
+    '''Uses an added function with inject code that uses the libshiboken
+    functions that check if a type is Object or Value, based on its converter.'''
+
+    def testErrors(self):
+        '''not existent type'''
+        self.assertRaises(ValueError, sample.cppTypeIsValueType, 'NotExistentType')
+        self.assertRaises(ValueError, sample.cppTypeIsObjectType, 'NotExistentType')
+
+    def testObjectType1(self):
+        self.assertTrue(sample.cppTypeIsObjectType('ObjectType'))
+        self.assertFalse(sample.cppTypeIsValueType('ObjectType'))
+
+    def testObjectType2(self):
+        self.assertTrue(sample.cppTypeIsObjectType('ObjectType*'))
+        self.assertFalse(sample.cppTypeIsValueType('ObjectType*'))
+
+    def testValueType1(self):
+        self.assertTrue(sample.cppTypeIsValueType('Point'))
+        self.assertFalse(sample.cppTypeIsObjectType('Point'))
+
+    def testValueType2(self):
+        self.assertTrue(sample.cppTypeIsValueType('Point*'))
+        self.assertFalse(sample.cppTypeIsObjectType('Point*'))
+
+    def testUsersPrimitiveType(self):
+        self.assertFalse(sample.cppTypeIsValueType('Complex'))
+        self.assertFalse(sample.cppTypeIsObjectType('Complex'))
+
+    def testContainerType(self):
+        self.assertFalse(sample.cppTypeIsValueType('std::list<int >'))
+        self.assertFalse(sample.cppTypeIsObjectType('std::list<int >'))
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -438,4 +438,15 @@ PyTypeObject* getPythonTypeObject(const char* typeName)
     return getPythonTypeObject(getConverter(typeName));
 }
 
+bool pythonTypeIsValueType(SbkConverter* converter)
+{
+    assert(converter);
+    return converter->pointerToPython && converter->copyToPython;
+}
+
+bool pythonTypeIsObjectType(SbkConverter* converter)
+{
+    return converter->pointerToPython && !converter->copyToPython;
+}
+
 } } // namespace Shiboken::Conversions

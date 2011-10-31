@@ -833,7 +833,7 @@ void releaseOwnership(SbkObject* self)
 {
     // skip if the ownership have already moved to c++
     SbkObjectType* selfType = reinterpret_cast<SbkObjectType*>(Py_TYPE(self));
-    if (!self->d->hasOwnership || selfType->d->type_behaviour == BEHAVIOUR_VALUETYPE)
+    if (!self->d->hasOwnership || Shiboken::Conversions::pythonTypeIsValueType(selfType->d->converter))
         return;
 
     // remove object ownership

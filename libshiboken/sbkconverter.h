@@ -248,6 +248,12 @@ LIBSHIBOKEN_API PyTypeObject* getPythonTypeObject(SbkConverter* converter);
 /// Returns the Python type object for the given \p typeName.
 LIBSHIBOKEN_API PyTypeObject* getPythonTypeObject(const char* typeName);
 
+/// Returns true if the Python type associated with the converter is a value type.
+LIBSHIBOKEN_API bool pythonTypeIsValueType(SbkConverter* converter);
+
+/// Returns true if the Python type associated with the converter is an object type.
+LIBSHIBOKEN_API bool pythonTypeIsObjectType(SbkConverter* converter);
+
 #define SBK_PY_LONG_LONG_IDX            0
 #define SBK_BOOL_IDX                    1
 #define SBK_CHAR_IDX                    2

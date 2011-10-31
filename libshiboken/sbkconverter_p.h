@@ -44,8 +44,6 @@ typedef std::list<ToCppConversion> ToCppConversionList;
 struct SbkConverter
 {
     /**
-     *  TODO: it certainly will be empty in some cases, like with PyDate.
-     *  TODO: probably a setPythonType(SbkConverter*, PyTypeObject*) function will be required.
      *  Python type associated with this converter. If the type is a Shiboken
      *  wrapper, then it must be a SbkObjectType; otherwise it will be the
      *  Python type to which the C++ value will be converted (note that the
@@ -62,8 +60,8 @@ struct SbkConverter
     CppToPythonFunc         pointerToPython;
     /**
      *  This function converts a C++ object to a Python object of the type
-     *  indicated in pythonType. The identity of the is not kept, because a
-     *  new instance of the C++ object is created.
+     *  indicated in pythonType. The identity of the object is not kept,
+     *  because a new instance of the C++ object is created.
      *  It is used to convert objects passed by value, or reference, if said
      *  reference can't be traced to an object that already has a Python
      *  wrapper assigned for it.

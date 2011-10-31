@@ -92,6 +92,7 @@ struct SbkObjectPrivate
     }
 };
 
+// TODO-CONVERTERS: to be deprecated/removed
 /// The type behaviour was not defined yet
 #define BEHAVIOUR_UNDEFINED 0
 /// The type is a value type
@@ -115,6 +116,7 @@ struct SbkObjectTypePrivate
     /// True if this type was defined by the user.
     int is_user_type : 1;
     /// Tells is the type is a value type or an object-type, see BEHAVIOUR_* constants.
+    // TODO-CONVERTERS: to be deprecated/removed
     int type_behaviour : 2;
     /// C++ name
     char* original_name;
