@@ -76,6 +76,14 @@ class GetPythonTypeByNameTest(unittest.TestCase):
         pyType = sample.getPythonType('std::map<std::string, int >')
         self.assertEqual(pyType, dict)
 
+    def testGlobalEnumType(self):
+        pyType = sample.getPythonType('GlobalEnum')
+        self.assertEqual(pyType, sample.GlobalEnum)
+
+    def testScopedEnumType(self):
+        pyType = sample.getPythonType('Abstract::Type')
+        self.assertEqual(pyType, sample.Abstract.Type)
+
 
 class CheckValueAndObjectTypeByNameTest(unittest.TestCase):
 

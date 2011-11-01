@@ -3226,6 +3226,8 @@ void CppGenerator::writeEnumConverterInitialization(QTextStream& s, const TypeEn
         }
 
         s << INDENT << "Shiboken::Enum::setTypeConverter(" << enumPythonType << ", converter);" << endl;
+        s << INDENT << "Shiboken::Enum::setTypeConverter(" << enumPythonType << ", converter);" << endl;
+        s << INDENT << "Shiboken::Conversions::registerConverterName(converter, \"" << enumType->qualifiedCppName() << "\");" << endl;
     }
     s << INDENT << '}' << endl;
 
