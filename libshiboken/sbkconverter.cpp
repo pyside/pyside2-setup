@@ -165,11 +165,16 @@ PyObject* pointerToPython(SbkConverter* converter, const void* cppIn)
 
 PyObject* referenceToPython(SbkObjectType* type, const void* cppIn)
 {
+    return referenceToPython(type->d->converter, cppIn);
+}
+
+PyObject* referenceToPython(SbkConverter* converter, const void* cppIn)
+{
     assert(cppIn);
 
     // If it is a Object Type, produce a wrapper for it.
-    if (!type->d->converter->copyToPython)
-        return type->d->converter->pointerToPython(cppIn);
+    if (!converter->copyToPython)
+        return converter->pointerToPython(cppIn);
 
     // If it is a Value Type, try to find an existing wrapper, otherwise copy it as value to Python.
     PyObject* pyOut = (PyObject*)BindingManager::instance().retrieveWrapper(cppIn);
@@ -177,7 +182,7 @@ PyObject* referenceToPython(SbkObjectType* type, const void* cppIn)
         Py_INCREF(pyOut);
         return pyOut;
     }
-    return type->d->converter->copyToPython(cppIn);
+    return converter->copyToPython(cppIn);
 }
 
 static inline PyObject* CopyCppToPython(SbkConverter* converter, const void* cppIn)

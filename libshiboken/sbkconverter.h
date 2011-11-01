@@ -154,6 +154,7 @@ LIBSHIBOKEN_API PyObject* pointerToPython(SbkConverter* converter, const void* c
  *      PyObject* pyVar = referenceToPython(SBKTYPE, &var);
  */
 LIBSHIBOKEN_API PyObject* referenceToPython(SbkObjectType* type, const void* cppIn);
+LIBSHIBOKEN_API PyObject* referenceToPython(SbkConverter* converter, const void* cppIn);
 
 /**
  *  Retrieves the Python wrapper object for the given C++ value pointed by \p cppIn.
