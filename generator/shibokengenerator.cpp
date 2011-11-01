@@ -1117,7 +1117,7 @@ QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaType
                   .arg(isPointer(type) ? "Pointer" : "Copy")
                   .arg(cpythonTypeNameExt(type));
     }
-    return QString("Shiboken::Conversions::pythonToCpp(%1, ")
+    return QString("Shiboken::Conversions::pythonToCppCopy(%1, ")
               .arg(converterObject(type));
 }
 

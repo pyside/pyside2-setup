@@ -113,6 +113,14 @@ LIBSHIBOKEN_API SbkConverter* createConverter(PyTypeObject* type, CppToPythonFun
 
 LIBSHIBOKEN_API void deleteConverter(SbkConverter* converter);
 
+/// Sets the Python object to C++ pointer conversion function.
+LIBSHIBOKEN_API void setCppPointerToPythonFunction(SbkConverter* converter, CppToPythonFunc pointerToPythonFunc);
+
+/// Sets the C++ pointer to Python object conversion functions.
+LIBSHIBOKEN_API void setPythonToCppPointerFunctions(SbkConverter* converter,
+                                                    PythonToCppFunc toCppPointerConvFunc,
+                                                    IsConvertibleToCppFunc toCppPointerCheckFunc);
+
 /**
  *  Adds a new conversion of a Python object to a C++ value.
  *  This is used in copy and implicit conversions.
@@ -134,6 +142,7 @@ LIBSHIBOKEN_API void addPythonToCppValueConversion(SbkObjectType* type,
  *      PyObject* pyVar = pointerToPython(SBKTYPE, &var);
  */
 LIBSHIBOKEN_API PyObject* pointerToPython(SbkObjectType* type, const void* cppIn);
+LIBSHIBOKEN_API PyObject* pointerToPython(SbkConverter* converter, const void* cppIn);
 
 /**
  *  For the given \p cppIn C++ reference it returns the Python wrapper object,
@@ -192,12 +201,11 @@ LIBSHIBOKEN_API void* cppPointer(PyTypeObject* desiredType, SbkObject* pyIn);
 
 /// Converts a Python object \p pyIn to C++ and stores the result in the C++ pointer passed in \p cppOut.
 LIBSHIBOKEN_API void pythonToCppPointer(SbkObjectType* type, PyObject* pyIn, void* cppOut);
+LIBSHIBOKEN_API void pythonToCppPointer(SbkConverter* converter, PyObject* pyIn, void* cppOut);
 
-/// Converts a Python object \p pyIn to C++ and copies the result in the C++ variable passed in \p cppOut.
+/// Converts a Python object \p pyIn to C++, and copies the result in the C++ variable passed in \p cppOut.
 LIBSHIBOKEN_API void pythonToCppCopy(SbkObjectType* type, PyObject* pyIn, void* cppOut);
-
-/// Converts a Python object \p pyIn to C++, copying the result in the C++ variable passed in \p cppOut.
-LIBSHIBOKEN_API void pythonToCpp(SbkConverter* converter, PyObject* pyIn, void* cppOut);
+LIBSHIBOKEN_API void pythonToCppCopy(SbkConverter* converter, PyObject* pyIn, void* cppOut);
 
 /**
  *  Helper function returned by generated convertible checking functions
