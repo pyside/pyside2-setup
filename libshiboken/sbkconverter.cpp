@@ -172,17 +172,12 @@ PyObject* referenceToPython(SbkConverter* converter, const void* cppIn)
 {
     assert(cppIn);
 
-    // If it is a Object Type, produce a wrapper for it.
-    if (!converter->copyToPython)
-        return converter->pointerToPython(cppIn);
-
-    // If it is a Value Type, try to find an existing wrapper, otherwise copy it as value to Python.
     PyObject* pyOut = (PyObject*)BindingManager::instance().retrieveWrapper(cppIn);
     if (pyOut) {
         Py_INCREF(pyOut);
         return pyOut;
     }
-    return converter->copyToPython(cppIn);
+    return converter->pointerToPython(cppIn);
 }
 
 static inline PyObject* CopyCppToPython(SbkConverter* converter, const void* cppIn)
@@ -245,6 +240,8 @@ void nonePythonToCppNullPtr(PyObject*, void* cppOut)
 void* cppPointer(PyTypeObject* desiredType, SbkObject* pyIn)
 {
     assert(pyIn);
+    if (!ObjectType::checkType(desiredType))
+        return pyIn;
     SbkObjectType* inType = (SbkObjectType*)Py_TYPE(pyIn);
     if (ObjectType::hasCast(inType))
         return ObjectType::cast(inType, pyIn, desiredType);
@@ -314,15 +311,12 @@ bool isImplicitConversion(SbkObjectType* type, PythonToCppFunc toCppFunc)
 void registerConverterName(SbkConverter* converter , const char* typeName)
 {
     ConvertersMap::iterator iter = converters.find(typeName);
-    if (iter == converters.end()) {
-        //SbkDbg() << "Registering " << typeName;
+    if (iter == converters.end())
         converters.insert(std::make_pair(typeName, converter));
-    }
 }
 
 SbkConverter* getConverter(const char* typeName)
 {
-    //SbkDbg() << "Looking for converter for type " << typeName;
     ConvertersMap::const_iterator it = converters.find(typeName);
     if (it != converters.end())
         return it->second;
@@ -478,6 +472,55 @@ bool pythonTypeIsValueType(SbkConverter* converter)
 bool pythonTypeIsObjectType(SbkConverter* converter)
 {
     return converter->pointerToPython && !converter->copyToPython;
+}
+
+SpecificConverter::SpecificConverter(const char* typeName)
+    : m_type(InvalidConversion)
+{
+    m_converter = getConverter(typeName);
+    if (!m_converter)
+        return;
+    int len = strlen(typeName);
+    char lastChar = typeName[len -1];
+    if (lastChar == '&') {
+        m_type = ReferenceConversion;
+    } else if (lastChar == '*' || pythonTypeIsObjectType(m_converter)) {
+        m_type = PointerConversion;
+    } else {
+        m_type = CopyConversion;
+    }
+}
+
+PyObject* SpecificConverter::toPython(const void* cppIn)
+{
+    switch (m_type) {
+    case CopyConversion:
+        return copyToPython(m_converter, cppIn);
+    case PointerConversion:
+        return pointerToPython(m_converter, *((const void**)cppIn));
+    case ReferenceConversion:
+        return referenceToPython(m_converter, cppIn);
+    default:
+        PyErr_SetString(PyExc_RuntimeError, "tried to use invalid converter in 'C++ to Python' conversion");
+    }
+    return 0;
+}
+
+void SpecificConverter::toCpp(PyObject* pyIn, void* cppOut)
+{
+    switch (m_type) {
+    case CopyConversion:
+        pythonToCppCopy(m_converter, pyIn, cppOut);
+        break;
+    case PointerConversion:
+        pythonToCppPointer(m_converter, pyIn, cppOut);
+        break;
+    case ReferenceConversion:
+        pythonToCppPointer(m_converter, pyIn, &cppOut);
+        break;
+    default:
+        PyErr_SetString(PyExc_RuntimeError, "tried to use invalid converter in 'Python to C++' conversion");
+    }
 }
 
 } } // namespace Shiboken::Conversions

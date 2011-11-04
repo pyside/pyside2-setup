@@ -1030,6 +1030,8 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool gene
     QString typeCheck;
     if (type->targetLangApiName() == type->name())
         typeCheck = cpythonIsConvertibleFunction(type);
+    else if (type->targetLangApiName() == "PyUnicode")
+        typeCheck = "Shiboken::String::check";
     else
         typeCheck = QString("%1_Check").arg(type->targetLangApiName());
     return typeCheck;
@@ -1125,7 +1127,7 @@ QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaT
 {
     if (isWrapperType(type)) {
         QString conversion;
-        if (type->isReference() && !isPointer(type))
+        if (type->isReference() && !(type->isValue() && type->isConstant()) && !isPointer(type))
             conversion = "reference";
         else if (type->isValue())
             conversion = "copy";

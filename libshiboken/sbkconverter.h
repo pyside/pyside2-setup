@@ -36,8 +36,6 @@
 #define SbkObject_TypeCheck(tp, ob) \
         (Py_TYPE(ob) == (tp) || PyType_IsSubtype(Py_TYPE(ob), (tp)))
 
-#define SbkString_Check(pyObj) (pyObj == Py_None || PyString_Check(pyObj))
-
 extern "C"
 {
 
@@ -87,6 +85,36 @@ typedef PythonToCppFunc (*IsConvertibleToCppFunc)(PyObject*);
 
 namespace Shiboken {
 namespace Conversions {
+
+
+class LIBSHIBOKEN_API SpecificConverter
+{
+public:
+    enum Type
+    {
+        InvalidConversion,
+        CopyConversion,
+        PointerConversion,
+        ReferenceConversion
+    };
+
+    explicit SpecificConverter(const char* typeName);
+
+    inline SbkConverter* converter() { return m_converter; }
+    inline operator SbkConverter*() const { return m_converter; }
+
+    inline bool isValid() { return m_type != InvalidConversion; }
+    inline operator bool() const { return m_type != InvalidConversion; }
+
+    inline Type conversionType() { return m_type; }
+
+    PyObject* toPython(const void* cppIn);
+    void toCpp(PyObject* pyIn, void* cppOut);
+private:
+    SbkConverter* m_converter;
+    Type m_type;
+};
+
 
 /**
  *  Creates a converter for a wrapper type.
@@ -305,5 +333,6 @@ template<> inline SbkConverter* PrimitiveTypeConverter<void*>() { return primiti
 
 struct _SbkGenericType { PyHeapTypeObject super; SbkConverter** converter; };
 #define SBK_CONVERTER(pyType) (*reinterpret_cast<_SbkGenericType*>(pyType)->converter)
+
 
 #endif // SBK_CONVERTER_H

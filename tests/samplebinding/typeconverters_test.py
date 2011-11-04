@@ -65,15 +65,15 @@ class GetPythonTypeByNameTest(unittest.TestCase):
         self.assertEqual(pyType, pyTypedef)
 
     def testPairContainerType(self):
-        pyType = sample.getPythonType('std::pair<Complex, int >')
+        pyType = sample.getPythonType('std::pair<Complex,int>')
         self.assertEqual(pyType, list)
 
     def testListContainerType(self):
-        pyType = sample.getPythonType('std::list<int >')
+        pyType = sample.getPythonType('std::list<int>')
         self.assertEqual(pyType, list)
 
     def testMapContainerType(self):
-        pyType = sample.getPythonType('std::map<std::string, int >')
+        pyType = sample.getPythonType('std::map<std::string,int>')
         self.assertEqual(pyType, dict)
 
     def testGlobalEnumType(self):
@@ -116,8 +116,68 @@ class CheckValueAndObjectTypeByNameTest(unittest.TestCase):
         self.assertFalse(sample.cppTypeIsObjectType('Complex'))
 
     def testContainerType(self):
-        self.assertFalse(sample.cppTypeIsValueType('std::list<int >'))
-        self.assertFalse(sample.cppTypeIsObjectType('std::list<int >'))
+        self.assertFalse(sample.cppTypeIsValueType('std::list<int>'))
+        self.assertFalse(sample.cppTypeIsObjectType('std::list<int>'))
+
+
+class SpecificConverterTest(unittest.TestCase):
+
+    '''Uses an added function with inject code that uses the libshiboken
+    adapter class "Shiboken::Conversions::SpecificConverter".'''
+
+    def testNotExistentType(self):
+        conversion = sample.getConversionTypeString('NotExistentType')
+        self.assertEqual(conversion, 'Invalid conversion')
+
+    def testObjectType(self):
+        conversion = sample.getConversionTypeString('ObjectType')
+        self.assertEqual(conversion, 'Pointer conversion')
+        conversion = sample.getConversionTypeString('ObjectType*')
+        self.assertEqual(conversion, 'Pointer conversion')
+        conversion = sample.getConversionTypeString('ObjectType&')
+        self.assertEqual(conversion, 'Reference conversion')
+
+    def testValueType(self):
+        conversion = sample.getConversionTypeString('Point')
+        self.assertEqual(conversion, 'Copy conversion')
+        conversion = sample.getConversionTypeString('Point*')
+        self.assertEqual(conversion, 'Pointer conversion')
+        conversion = sample.getConversionTypeString('Point&')
+        self.assertEqual(conversion, 'Reference conversion')
+
+
+class StringBasedConversionTest(unittest.TestCase):
+
+    def testValueType(self):
+        pts = (sample.Point(1, 1), sample.Point(2, 2), sample.Point(3, 3))
+        result = sample.convertValueTypeToCppAndThenToPython(pts[0], pts[1], pts[2])
+        for orig, new in zip(pts, result):
+            self.assertEqual(orig, new)
+        self.assertFalse(pts[0] is result[0])
+        self.assertTrue(pts[1] is result[1])
+        self.assertTrue(pts[2] is result[2])
+
+    def testObjectType(self):
+        objs = (sample.ObjectType(), sample.ObjectType())
+        objs[0].setObjectName('obj0')
+        objs[1].setObjectName('obj1')
+        result = sample.convertObjectTypeToCppAndThenToPython(objs[0], objs[1])
+        for orig, new in zip(objs, result):
+            self.assertEqual(orig, new)
+            self.assertEqual(orig.objectName(), new.objectName())
+            self.assertTrue(orig is new)
+
+    def testContainerType(self):
+        lst = range(4)
+        result = sample.convertListOfIntegersToCppAndThenToPython(lst)
+        self.assertTrue(len(result), 1)
+        self.assertTrue(lst, result[0])
+
+    def testCppPrimitiveType(self):
+        integers = (12, 34)
+        result = sample.convertIntegersToCppAndThenToPython(integers[0], integers[1])
+        for orig, new in zip(integers, result):
+            self.assertEqual(orig, new)
 
 
 if __name__ == '__main__':

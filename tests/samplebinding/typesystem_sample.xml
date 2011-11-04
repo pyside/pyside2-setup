@@ -285,6 +285,67 @@
         </inject-code>
     </add-function>
 
+    <add-function signature="getConversionTypeString(const char*)" return-type="PyObject">
+        <inject-code class="target" position="beginning">
+        Shiboken::Conversions::SpecificConverter converter(%1);
+        const char* %0 = 0;
+        switch (converter.conversionType()) {
+        case Shiboken::Conversions::SpecificConverter::CopyConversion:
+            %0 = "Copy conversion";
+            break;
+        case Shiboken::Conversions::SpecificConverter::PointerConversion:
+            %0 = "Pointer conversion";
+            break;
+        case Shiboken::Conversions::SpecificConverter::ReferenceConversion:
+            %0 = "Reference conversion";
+            break;
+        default:
+            %0 = "Invalid conversion";
+        }
+        %PYARG_0 = %CONVERTTOPYTHON[const char*](%0);
+        </inject-code>
+    </add-function>
+
+    <inject-code class="native" position="beginning">
+    static PyObject* __convertCppValuesToPython(const char** typeName, void** values, int size)
+    {
+        PyObject* result = PyTuple_New(size);
+        for (int i = 0; i &lt; size; ++i) {
+            Shiboken::Conversions::SpecificConverter converter(typeName[i]);
+            PyTuple_SET_ITEM(result, i, converter.toPython(values[i]));
+        }
+        return result;
+    }
+    </inject-code>
+    <add-function signature="convertValueTypeToCppAndThenToPython(Point,Point*,Point&amp;)" return-type="PyObject">
+        <inject-code class="target" position="beginning">
+        const char* typeNames[] = { "Point", "Point*", "Point&amp;" };
+        void* values[] = { &amp;%1, &amp;%2, &amp;(%3) };
+        %PYARG_0 = __convertCppValuesToPython(typeNames, values, 3);
+        </inject-code>
+    </add-function>
+    <add-function signature="convertObjectTypeToCppAndThenToPython(ObjectType*,ObjectType&amp;)" return-type="PyObject">
+        <inject-code class="target" position="beginning">
+        const char* typeNames[] = { "ObjectType*", "ObjectType&amp;" };
+        void* values[] = { &amp;%1, &amp;(%2) };
+        %PYARG_0 = __convertCppValuesToPython(typeNames, values, 2);
+        </inject-code>
+    </add-function>
+    <add-function signature="convertListOfIntegersToCppAndThenToPython(std::list&lt;int&gt;)" return-type="PyObject">
+        <inject-code class="target" position="beginning">
+        const char* typeNames[] = { "std::list&lt;int&gt;" };
+        void* values[] = { &amp;%1 };
+        %PYARG_0 = __convertCppValuesToPython(typeNames, values, 1);
+        </inject-code>
+    </add-function>
+    <add-function signature="convertIntegersToCppAndThenToPython(int,int)" return-type="PyObject">
+        <inject-code class="target" position="beginning">
+        const char* typeNames[] = { "int", "int" };
+        void* values[] = { &amp;%1, &amp;%2 };
+        %PYARG_0 = __convertCppValuesToPython(typeNames, values, 2);
+        </inject-code>
+    </add-function>
+
     <container-type name="std::pair" type="pair">
         <include file-name="utility" location="global"/>
         <conversion-rule file="pair_conversions.h">
