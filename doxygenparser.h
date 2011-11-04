@@ -26,12 +26,13 @@
 
 #include "docparser.h"
 
-class DoxygenParser : public DocParser
+class APIEXTRACTOR_API DoxygenParser : public DocParser
 {
 public:
     DoxygenParser()  {}
     virtual void fillDocumentation(AbstractMetaClass *metaClass);
-    virtual Documentation retrieveModuleDocumentation() { return Documentation(); }
+    virtual Documentation retrieveModuleDocumentation();
+    virtual Documentation retrieveModuleDocumentation(const QString& name);
 };
 
 #endif // DOXYGENPARSER_H
