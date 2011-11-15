@@ -34,15 +34,14 @@ namespace Shiboken
 {
 /**
     * This mapping associates a method and argument of an wrapper object with the wrapper of
-    * said argument when it needs the binding to help manage its reference counting.
+    * said argument when it needs the binding to help manage its reference count.
     */
 typedef std::map<std::string, std::list<PyObject*> > RefCountMap;
-
 
 /// Linked list of SbkBaseWrapper pointers
 typedef std::set<SbkObject*> ChildrenList;
 
-/// Struct used to store information about object parent and children.
+/// Structure used to store information about object parent and children.
 struct ParentInfo
 {
     /// Default ctor.
@@ -70,15 +69,15 @@ struct SbkObjectPrivate
     void** cptr;
     /// True when Python is responsible for freeing the used memory.
     unsigned int hasOwnership : 1;
-    /// Is true when the C++ class of the wrapped object has a virtual destructor AND was created by Python.
+    /// This is true when the C++ class of the wrapped object has a virtual destructor AND was created by Python.
     unsigned int containsCppWrapper : 1;
     /// Marked as false when the object is lost to C++ and the binding can not know if it was deleted or not.
     unsigned int validCppObject : 1;
-    /// Marked when the object constructor was called
+    /// Marked as true when the object constructor was called
     unsigned int cppObjectCreated : 1;
-    /// Information about the object parents and children, can be null.
+    /// Information about the object parents and children, may be null.
     Shiboken::ParentInfo* parentInfo;
-    /// Manage reference counting of objects that are referred but not owned.
+    /// Manage reference count of objects that are referred to but not owned from.
     Shiboken::RefCountMap* referredObjects;
 
     ~SbkObjectPrivate()
@@ -94,7 +93,7 @@ struct SbkObjectPrivate
 #define BEHAVIOUR_UNDEFINED 0
 /// The type is a value type
 #define BEHAVIOUR_VALUETYPE 1
-/// The type is a object type
+/// The type is an object type
 #define BEHAVIOUR_OBJECTTYPE 2
 
 struct SbkObjectTypePrivate
@@ -112,15 +111,15 @@ struct SbkObjectTypePrivate
     /// Pointer to a function responsible for deletion of the C++ instance calling the proper destructor.
     ObjectDestructor cpp_dtor;
     /// True if this type holds two or more C++ instances, e.g.: a Python class which inherits from two C++ classes.
-    int is_multicpp:1;
+    int is_multicpp : 1;
     /// True if this type was defined by the user.
-    int is_user_type:1;
+    int is_user_type : 1;
     /// Tells is the type is a value type or an object-type, see BEHAVIOUR_* constants.
-    int type_behaviour:2;
+    int type_behaviour : 2;
     /// C++ name
     char* original_name;
     /// Type user data
-    void *user_data;
+    void* user_data;
     DeleteUserDataFunc d_func;
     void (*subtype_init)(SbkObjectType*, PyObject*, PyObject*);
 };
@@ -131,7 +130,7 @@ struct SbkObjectTypePrivate
 namespace Shiboken
 {
 /**
- * Utility function used to transform a PyObject that implements sequence protocol in a std::list.
+ * Utility function used to transform a PyObject that implements sequence protocol into a std::list.
  **/
 std::list<SbkObject*> splitPyObject(PyObject* pyObj);
 
