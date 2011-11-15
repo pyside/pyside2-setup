@@ -474,6 +474,11 @@ bool pythonTypeIsObjectType(SbkConverter* converter)
     return converter->pointerToPython && !converter->copyToPython;
 }
 
+bool pythonTypeIsWrapperType(SbkConverter* converter)
+{
+    return converter->pointerToPython;
+}
+
 SpecificConverter::SpecificConverter(const char* typeName)
     : m_type(InvalidConversion)
 {

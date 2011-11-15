@@ -291,6 +291,9 @@ LIBSHIBOKEN_API bool pythonTypeIsValueType(SbkConverter* converter);
 /// Returns true if the Python type associated with the converter is an object type.
 LIBSHIBOKEN_API bool pythonTypeIsObjectType(SbkConverter* converter);
 
+/// Returns true if the Python type associated with the converter is a wrapper type.
+LIBSHIBOKEN_API bool pythonTypeIsWrapperType(SbkConverter* converter);
+
 #define SBK_PY_LONG_LONG_IDX            0
 #define SBK_BOOL_IDX                    1
 #define SBK_CHAR_IDX                    2
