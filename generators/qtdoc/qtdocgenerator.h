@@ -29,6 +29,7 @@
 #include <QXmlStreamReader>
 #include <abstractmetalang.h>
 #include "generator.h"
+#include "docparser.h"
 
 class QtDocParser;
 class AbstractMetaFunction;
@@ -219,7 +220,7 @@ private:
     QString m_extraSectionDir;
     QStringList m_functionList;
     QMap<QString, QStringList> m_packages;
-    QtDocParser* m_docParser;
+    DocParser* m_docParser;
 };
 
 #endif // DOCGENERATOR_H
