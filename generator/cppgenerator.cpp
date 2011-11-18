@@ -179,19 +179,6 @@ void CppGenerator::writeRegisterType(QTextStream& s, const AbstractMetaClass* me
     }
 }
 
-void CppGenerator::writeRegisterType(QTextStream& s, const AbstractMetaEnum* metaEnum)
-{
-    QString fullName;
-    QString shortName;
-    if (metaEnum->enclosingClass()) {
-        QString suffix = "::" + metaEnum->name();
-        fullName = metaEnum->enclosingClass()->qualifiedCppName() + suffix;
-        shortName = reduceTypeName(metaEnum->enclosingClass()) + metaEnum->name();
-    } else  {
-        fullName = metaEnum->name();
-    }
-}
-
 bool CppGenerator::hasBoolCast(const AbstractMetaClass* metaClass) const
 {
     if (!useIsNullAsNbNonZero())
@@ -4072,10 +4059,6 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
             s << INDENT << "return " << m_currentErrorCode << ';' << endl;
         }
     }
-
-    // TypeResolver stuff
-    if (!cppEnum->isAnonymous())
-        writeRegisterType(s, cppEnum);
 
     writeEnumConverterInitialization(s, cppEnum);
 
