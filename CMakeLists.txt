@@ -162,6 +162,7 @@ docparser.h
 qtdocparser.h
 include.h
 typedatabase.h
+doxygenparser.h
 )
 
 if (BUILD_TESTS)

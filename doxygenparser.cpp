@@ -46,6 +46,11 @@ QString getSectionKindAttr(const AbstractMetaFunction* func)
 
 }
 
+Documentation DoxygenParser::retrieveModuleDocumentation()
+{
+        return retrieveModuleDocumentation(packageName());
+}
+
 void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
 {
     if (!metaClass)
@@ -60,11 +65,12 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
     doxyFileSuffix += ".xml";
 
     const char* prefixes[] = { "class", "struct", "namespace" };
-    const int numPrefixes = sizeof(prefixes);
+    const int numPrefixes = sizeof(prefixes) / sizeof(const char*);
+    bool isProperty = false;
 
     QString doxyFilePath;
     for (int i = 0; i < numPrefixes; ++i) {
-        doxyFilePath = documentationDataDirectory() + "./" + prefixes[i] + doxyFileSuffix;
+        doxyFilePath = documentationDataDirectory() + "/" + prefixes[i] + doxyFileSuffix;
         if (QFile::exists(doxyFilePath))
             break;
         doxyFilePath.clear();
@@ -101,6 +107,7 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
             || func->isPropertyResetter()) {
             query += "[@kind=\"property\"]/memberdef/name[text()=\""
                      + func->propertySpec()->name() + "\"]";
+            isProperty = true;
         } else { // normal methods
             QString kind = getSectionKindAttr(func);
             query += "[@kind=\"" + kind + "-func\"]/memberdef/name[text()=\""
@@ -124,9 +131,15 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
                 }
             }
         }
-        query += "/../detaileddescription";
+        if (!isProperty) {
+            query += "/../detaileddescription";
+        } else {
+            query = "(" + query;
+            query += "/../detaileddescription)[1]";
+        }
         QString doc = getDocumentation(xquery, query, DocModificationList());
         func->setDocumentation(doc);
+        isProperty = false;
     }
 
     //Fields
@@ -144,8 +157,29 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
     //Enums
     AbstractMetaEnumList enums = metaClass->enums();
     foreach (AbstractMetaEnum *meta_enum, enums) {
-        QString query = "/doxygen/compounddef/sectiondef/memberdef[@kind=\"enum\"]/name[text()=\"" + meta_enum->name() + "\"]/../detaileddescription";
+        QString query = "/doxygen/compounddef/sectiondef/memberdef[@kind=\"enum\"]/name[text()=\"" + meta_enum->name() + "\"]/..";
         QString doc = getDocumentation(xquery, query, DocModificationList());
         meta_enum->setDocumentation(doc);
     }
+
 }
+
+Documentation DoxygenParser::retrieveModuleDocumentation(const QString& name){
+
+    QString sourceFile = documentationDataDirectory() + '/' + "indexpage.xml";
+
+    if (!QFile::exists(sourceFile)) {
+        ReportHandler::warning("Can't find doxygen XML file for module "
+                               + name + ", tried: "
+                                                 + sourceFile);
+        return Documentation();
+    }
+
+    QXmlQuery xquery;
+    xquery.setFocus(QUrl(sourceFile));
+
+    // Module documentation
+    QString query = "/doxygen/compounddef/detaileddescription";
+    return Documentation(getDocumentation(xquery, query, DocModificationList()));
+}
+
