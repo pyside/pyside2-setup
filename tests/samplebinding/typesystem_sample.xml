@@ -1193,8 +1193,12 @@
           </modify-argument>
           <inject-code class="target" position="beginning">
           ObjectType* tmpObject = 0;
+          %BEGIN_ALLOW_THREADS
           %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(&amp;tmpObject);
-          %PYARG_0 = Shiboken::makeTuple(%0, tmpObject);
+          %END_ALLOW_THREADS
+          %PYARG_0 = PyTuple_New(2);
+          PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
+          PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[ObjectType*](tmpObject));
           </inject-code>
         </modify-function>
         <modify-function signature="passOddBool(OddBool)" rename="invertBoolean">
@@ -1337,11 +1341,15 @@
             </inject-code>
         </modify-function>
         <template name="fix_int*,int*,int*,int*">
-            int a0, a1, a2, a3;
-            %BEGIN_ALLOW_THREADS
-            %CPPSELF->::%TYPE::%FUNCTION_NAME(&amp;a0, &amp;a1, &amp;a2, &amp;a3);
-            %END_ALLOW_THREADS
-            %PYARG_0 = Shiboken::makeTuple(a0, a1, a2, a3);
+        int a0, a1, a2, a3;
+        %BEGIN_ALLOW_THREADS
+        %CPPSELF->::%TYPE::%FUNCTION_NAME(&amp;a0, &amp;a1, &amp;a2, &amp;a3);
+        %END_ALLOW_THREADS
+        %PYARG_0 = PyTuple_New(4);
+        PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[int](a0));
+        PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[int](a1));
+        PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[int](a2));
+        PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](a3));
         </template>
         <template name="fix_native_return_int*,int*,int*,int*">
             PyObject* _obj = %PYARG_0.object();
