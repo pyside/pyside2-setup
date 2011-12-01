@@ -3914,6 +3914,7 @@ void CppGenerator::finishGeneration()
         s << "static int " << moduleName() << "_moduleTraverse(PyObject*, visitproc, void *)" << endl
           << "{" << endl
           << INDENT << "PySide::runCleanupFunctions();" << endl
+          << INDENT << "return 0;" << endl
           << "}" << endl << endl;
     }
 
