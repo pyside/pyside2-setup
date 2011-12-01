@@ -293,7 +293,6 @@ private:
 
     QString writeReprFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
-    void writeRegisterType(QTextStream& s, const AbstractMetaClass* metaClass);
     bool hasBoolCast(const AbstractMetaClass* metaClass) const;
 
     // Number protocol structure members names.

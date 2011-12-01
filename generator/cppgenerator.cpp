@@ -154,31 +154,6 @@ static QString typeResolverString(const QString& type, QString typeName = QStrin
               .arg(typeName);
 }
 
-void CppGenerator::writeRegisterType(QTextStream& s, const AbstractMetaClass* metaClass)
-{
-    QString typeName = metaClass->qualifiedCppName();
-    QString cppTypeName = QString("::%1").arg(typeName);
-    QString reducedName = reduceTypeName(metaClass);
-
-    if (!isObjectType(metaClass)) {
-        s << INDENT << typeResolverString(cppTypeName, typeName) << ';' << endl;
-        if (!reducedName.isEmpty())
-            s << INDENT << typeResolverString(cppTypeName, reducedName) << ';' << endl;
-    }
-
-    s << INDENT << typeResolverString(cppTypeName, typeName+'*', true) << ';' << endl;
-    if (!reducedName.isEmpty())
-        s << INDENT << typeResolverString(cppTypeName, reducedName+'*', true) << ';' << endl;
-
-    s << INDENT << typeResolverString(cppTypeName, QString("typeid(::%1).name()").arg(typeName), isObjectType(metaClass)) << ';' << endl;
-
-    if (shouldGenerateCppWrapper(metaClass)) {
-        s << INDENT;
-        s << typeResolverString(cppTypeName, QString("typeid(::%1).name()").arg(wrapperName(metaClass)), isObjectType(metaClass));
-        s << ';' << endl;
-    }
-}
-
 bool CppGenerator::hasBoolCast(const AbstractMetaClass* metaClass) const
 {
     if (!useIsNullAsNbNonZero())
@@ -4374,9 +4349,6 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
         writeCodeSnips(s, classTypeEntry->codeSnips(), CodeSnip::End, TypeSystem::TargetLangCode, metaClass);
     }
 
-    if (!metaClass->isNamespace())
-        writeRegisterType(s, metaClass);
-
     if (usePySideExtensions()) {
         if (avoidProtectedHack() && shouldGenerateCppWrapper(metaClass))
             s << INDENT << wrapperName(metaClass) << "::pysideInitQtMetaTypes();\n";
@@ -4864,10 +4836,7 @@ void CppGenerator::finishGeneration()
     // Register primitive types on TypeResolver
     s << INDENT << "// Register primitive types on TypeResolver" << endl;
     foreach(const PrimitiveTypeEntry* pte, primitiveTypes()) {
-        if (!pte->generateCode())
-            continue;
-        s << INDENT << typeResolverString(pte->name()) << ';' << endl;
-        if (!pte->isCppPrimitive())
+        if (!pte->generateCode() || !pte->isCppPrimitive())
             continue;
         const TypeEntry* alias = pte->basicAliasedTypeEntry();
         if (!alias)
@@ -4898,8 +4867,6 @@ void CppGenerator::finishGeneration()
             }
         }
     }
-    foreach (QByteArray type, typeResolvers)
-        s << INDENT << typeResolverString(type) << ';' << endl;
 
     s << endl;
     if (maxTypeIndex)
