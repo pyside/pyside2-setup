@@ -3909,15 +3909,6 @@ void CppGenerator::finishGeneration()
     s << "#endif" << endl << endl;
 
     s << "#ifdef IS_PY3K" << endl;
-
-    if (usePySideExtensions()) {
-        s << "static int " << moduleName() << "_moduleTraverse(PyObject*, visitproc, void *)" << endl
-          << "{" << endl
-          << INDENT << "PySide::runCleanupFunctions();" << endl
-          << INDENT << "return 0;" << endl
-          << "}" << endl << endl;
-    }
-
     s << "static struct PyModuleDef moduledef = {" << endl;
     s << "    /* m_base     */ PyModuleDef_HEAD_INIT," << endl;
     s << "    /* m_name     */ \"" << moduleName() << "\"," << endl;
@@ -3925,12 +3916,7 @@ void CppGenerator::finishGeneration()
     s << "    /* m_size     */ -1," << endl;
     s << "    /* m_methods  */ " << moduleName() << "_methods," << endl;
     s << "    /* m_reload   */ 0," << endl;
-
-    if (usePySideExtensions())
-        s << "    /* m_traverse */ " << moduleName() << "_moduleTraverse," << endl;
-    else
-        s << "    /* m_traverse */ 0," << endl;
-
+    s << "    /* m_traverse */ 0," << endl;
     s << "    /* m_clear    */ 0," << endl;
     s << "    /* m_free     */ 0" << endl;
     s << "};" << endl << endl;
