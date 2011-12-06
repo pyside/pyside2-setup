@@ -2039,6 +2039,8 @@ bool ShibokenGenerator::isCopyable(const AbstractMetaClass *metaClass)
 AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromString(QString typeSignature)
 {
     typeSignature = typeSignature.trimmed();
+    if (typeSignature.startsWith("::"))
+        typeSignature = typeSignature.mid(2);
 
     if (m_metaTypeFromStringCache.contains(typeSignature))
         return m_metaTypeFromStringCache.value(typeSignature);
@@ -2088,6 +2090,7 @@ AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromString(QString typ
     }
 
     TypeEntry* typeEntry = TypeDatabase::instance()->findType(adjustedTypeName);
+
     AbstractMetaType* metaType = 0;
     if (typeEntry) {
         metaType = new AbstractMetaType();
@@ -2095,10 +2098,10 @@ AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromString(QString typ
         metaType->setIndirections(indirections);
         metaType->setReference(isReference);
         metaType->setConstant(isConst);
+        metaType->setTypeUsagePattern(AbstractMetaType::ContainerPattern);
         foreach (const QString& instantiation, instantiatedTypes) {
             AbstractMetaType* tmplArgType = buildAbstractMetaTypeFromString(instantiation);
             metaType->addInstantiation(tmplArgType);
-            metaType->setTypeUsagePattern(AbstractMetaType::ContainerPattern);
         }
         metaType->decideUsagePattern();
         m_metaTypeFromStringCache.insert(typeSignature, metaType);
@@ -2108,15 +2111,18 @@ AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromString(QString typ
 
 AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromTypeEntry(const TypeEntry* typeEntry)
 {
-    if (m_metaTypeFromStringCache.contains(typeEntry->qualifiedCppName()))
-        return m_metaTypeFromStringCache.value(typeEntry->qualifiedCppName());
+    QString typeName = typeEntry->qualifiedCppName();
+    if (typeName.startsWith("::"))
+        typeName = typeName.mid(2);
+    if (m_metaTypeFromStringCache.contains(typeName))
+        return m_metaTypeFromStringCache.value(typeName);
     AbstractMetaType* metaType = new AbstractMetaType;
     metaType->setTypeEntry(typeEntry);
     metaType->setIndirections(0);
     metaType->setReference(false);
     metaType->setConstant(false);
     metaType->decideUsagePattern();
-    m_metaTypeFromStringCache.insert(typeEntry->qualifiedCppName(), metaType);
+    m_metaTypeFromStringCache.insert(typeName, metaType);
     return metaType;
 }
 AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromAbstractMetaClass(const AbstractMetaClass* metaClass)

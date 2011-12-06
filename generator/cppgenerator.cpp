@@ -4710,8 +4710,6 @@ void CppGenerator::finishGeneration()
                 AbstractMetaType* sourceType = buildAbstractMetaTypeFromAbstractMetaClass(sourceClass);
                 AbstractMetaType* targetType = buildAbstractMetaTypeFromTypeEntry(externalType);
                 writePythonToCppConversionFunctions(s, sourceType, targetType);
-                delete sourceType;
-                delete targetType;
             }
         }
     }
