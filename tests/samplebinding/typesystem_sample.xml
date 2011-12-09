@@ -18,6 +18,8 @@
     <primitive-type name="unsigned long"/>
     <primitive-type name="std::string"/>
 
+    <primitive-type name="std::size_t" target-lang-api-name="PyLong">
+    </primitive-type>
     <primitive-type name="Complex" target-lang-api-name="PyComplex">
         <conversion-rule file="complex_conversions.h"/>
         <include file-name="complex.h" location="global"/>

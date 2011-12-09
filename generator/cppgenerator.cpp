@@ -3946,8 +3946,11 @@ void CppGenerator::finishGeneration()
     }
 
     s << INDENT << "// Create an array of wrapper types for the current module." << endl;
-    s << INDENT << "static PyTypeObject* cppApi[" << "SBK_" << moduleName() << "_IDX_COUNT" << "];" << endl;
-    s << INDENT << cppApiVariableName() << " = cppApi;" << endl << endl;
+    int maxTypeIndex = getMaxTypeIndex();
+    if (maxTypeIndex) {
+        s << INDENT << "static PyTypeObject* cppApi[SBK_" << moduleName() << "_IDX_COUNT];" << endl;
+        s << INDENT << cppApiVariableName() << " = cppApi;" << endl << endl;
+    }
 
     s << "#ifdef IS_PY3K" << endl;
     s << INDENT << "PyObject* module = Shiboken::Module::create(\""  << moduleName() << "\", &moduledef);" << endl;
@@ -3998,7 +4001,8 @@ void CppGenerator::finishGeneration()
     foreach (QByteArray type, typeResolvers)
         s << INDENT << typeResolverString(type) << ';' << endl;
 
-    s << endl << INDENT << "Shiboken::Module::registerTypes(module, " << cppApiVariableName() << ");" << endl;
+    if (maxTypeIndex)
+        s << endl << INDENT << "Shiboken::Module::registerTypes(module, " << cppApiVariableName() << ");" << endl;
 
     s << endl << INDENT << "if (PyErr_Occurred()) {" << endl;
     {
