@@ -7,6 +7,8 @@ else()
     set(shiboken_SUFFIX "")
 endif()
 
+configure_file(sbkversion.h.in sbkversion.h @ONLY)
+
 #Find installed sparsehash
 find_path(SPARSEHASH_INCLUDE_PATH sparseconfig.h PATH_SUFFIXES "/google/sparsehash")
 if(SPARSEHASH_INCLUDE_PATH)
@@ -35,6 +37,7 @@ shibokenbuffer.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
+                    ${CMAKE_CURRENT_BINARY_DIR}
                     ${SBK_PYTHON_INCLUDE_DIR}
                     ${SPARSEHASH_INCLUDE_PATH})
 add_library(libshiboken SHARED ${libshiboken_SRC})
@@ -62,6 +65,7 @@ install(FILES
         typeresolver.h
         shibokenbuffer.h
         sbkpython.h
+        "${CMAKE_CURRENT_BINARY_DIR}/sbkversion.h"
         DESTINATION include/shiboken${shiboken_SUFFIX})
 install(TARGETS libshiboken EXPORT shiboken
                             LIBRARY DESTINATION "${LIB_INSTALL_DIR}"
