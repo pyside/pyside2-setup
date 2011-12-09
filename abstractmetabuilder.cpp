@@ -2897,7 +2897,7 @@ AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const Abstra
 
     AbstractMetaClassList result;
     unmappedResult = graph.topologicalSort();
-    if (unmappedResult.isEmpty()) {
+    if (unmappedResult.isEmpty() && graph.nodeCount()) {
         QTemporaryFile tempFile;
         tempFile.setAutoRemove(false);
         tempFile.open();
