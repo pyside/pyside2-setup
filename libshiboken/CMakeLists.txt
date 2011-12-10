@@ -7,7 +7,8 @@ else()
     set(shiboken_SUFFIX "")
 endif()
 
-configure_file(sbkversion.h.in sbkversion.h @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/sbkversion.h.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/sbkversion.h" @ONLY)
 
 #Find installed sparsehash
 find_path(SPARSEHASH_INCLUDE_PATH sparseconfig.h PATH_SUFFIXES "/google/sparsehash")
