@@ -66,7 +66,7 @@
 
     <primitive-type name="HANDLE" target-lang-api-name="PyComplex">
         <include file-name="handle.h" location="local"/>
-        <conversion-rule file="handle_conversions.h">
+        <conversion-rule>
             <native-to-target>
                 if (!%in)
                     Py_RETURN_NONE;
@@ -87,7 +87,7 @@
                 #else
                     ptr = PyCObject_AsVoidPtr(%in);
                 #endif
-                %out = *((%OUTTYPE*)ptr);
+                %out = (%OUTTYPE)ptr;
                 </add-conversion>
             </target-to-native>
         </conversion-rule>
