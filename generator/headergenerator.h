@@ -42,12 +42,10 @@ private:
     void writeCopyCtor(QTextStream &s, const AbstractMetaClass* metaClass) const;
     void writeProtectedFieldAccessors(QTextStream& s, const AbstractMetaField* field) const;
     void writeFunction(QTextStream& s, const AbstractMetaFunction* func);
-    void writeTypeConverterDecl(QTextStream& s, const TypeEntry* type);
     void writeSbkTypeFunction(QTextStream& s, const AbstractMetaEnum* cppEnum);
     void writeSbkTypeFunction(QTextStream& s, const AbstractMetaClass* cppClass);
     void writeTypeIndexDefineLine(QTextStream& s, const TypeEntry* typeEntry);
     void writeTypeIndexDefine(QTextStream& s, const AbstractMetaClass* metaClass);
-    void writeTypeConverterImpl(QTextStream& s, const TypeEntry* type);
     void writeProtectedEnumSurrogate(QTextStream& s, const AbstractMetaEnum* cppEnum);
     void writeInheritedOverloads(QTextStream& s);
 

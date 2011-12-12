@@ -225,67 +225,6 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
     }
 }
 
-void HeaderGenerator::writeTypeConverterDecl(QTextStream& s, const TypeEntry* type)
-{
-    s << "template<>" << endl;
-
-    const AbstractMetaClass* metaClass = classes().findClass(type->name());
-    bool isAbstractOrObjectType = (metaClass &&  metaClass->isAbstract()) || type->isObject();
-
-    AbstractMetaFunctionList implicitConvs;
-    foreach (AbstractMetaFunction* func, implicitConversions(type)) {
-        if (!func->isUserAdded())
-            implicitConvs << func;
-    }
-    bool isValueTypeWithImplConversions = type->isValue() && !implicitConvs.isEmpty();
-    bool hasCustomConversion = type->hasNativeConversionRule();
-    QString typeT = type->qualifiedCppName() + (isAbstractOrObjectType ? "*" : "");
-    QString typeName = type->qualifiedCppName();
-
-    if (avoidProtectedHack()) {
-        const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(type);
-        if (metaEnum && metaEnum->isProtected()) {
-            typeT = protectedEnumSurrogateName(metaEnum);
-            typeName = typeT;
-        }
-    }
-
-    typeT.prepend("::");
-    typeName.prepend("::");
-
-    s << "struct Converter< " << typeT << " >";
-    if (!hasCustomConversion) {
-        if (type->isEnum())
-            s << " : EnumConverter";
-        else if (type->isFlags())
-            s << " : QFlagsConverter";
-        else if (isAbstractOrObjectType)
-            s << " : ObjectTypeConverter";
-        else
-            s << " : ValueTypeConverter";
-        s << "< " << typeName << " >";
-    }
-    s << endl << '{' << endl;
-    if (isValueTypeWithImplConversions || hasCustomConversion) {
-        s << INDENT << "static " << typeName << " toCpp(PyObject* pyobj);" << endl;
-        s << INDENT << "static bool isConvertible(PyObject* pyobj);" << endl;
-        if (hasCustomConversion) {
-            s << INDENT << "static bool checkType(PyObject* pyobj);" << endl;
-            s << INDENT << "static inline PyObject* toPython(void* cppObj) { return toPython(*reinterpret_cast< "
-              << typeName << (isAbstractOrObjectType ? "" : "*") << " >(cppObj)); }" << endl;
-            s << INDENT << "static PyObject* toPython(const " << typeName << "& cppObj);" << endl;
-        }
-    }
-    s << "};" << endl;
-
-    // write value-type like converter to object-types
-    if (isAbstractOrObjectType) {
-        s << endl << "template<>" << endl;
-        s << "struct Converter< " << typeName << " > : ObjectTypeReferenceConverter< " << typeName << " >" << endl << '{' << endl;
-        s << "};" << endl;
-    }
-}
-
 static void _writeTypeIndexDefineLine(QTextStream& s, const QString& variableName, int typeIndex)
 {
     s << "#define ";
@@ -336,12 +275,8 @@ void HeaderGenerator::finishGeneration()
     QSet<Include> includes;
     QString macros;
     QTextStream macrosStream(&macros);
-    QString convertersDecl;
-    QTextStream convDecl(&convertersDecl);
     QString sbkTypeFunctions;
     QTextStream typeFunctions(&sbkTypeFunctions);
-    QString converterImpl;
-    QTextStream convImpl(&converterImpl);
     QString protectedEnumSurrogates;
     QTextStream protEnumsSurrogates(&protectedEnumSurrogates);
 
@@ -402,8 +337,6 @@ void HeaderGenerator::finishGeneration()
         if (cppEnum->isAnonymous() || cppEnum->isPrivate())
             continue;
         includes << cppEnum->typeEntry()->include();
-        writeTypeConverterDecl(convDecl, cppEnum->typeEntry());
-        convDecl << endl;
         writeProtectedEnumSurrogate(protEnumsSurrogates, cppEnum);
         writeSbkTypeFunction(typeFunctions, cppEnum);
     }
@@ -421,21 +354,12 @@ void HeaderGenerator::finishGeneration()
                 continue;
             EnumTypeEntry* enumType = cppEnum->typeEntry();
             includes << enumType->include();
-            writeTypeConverterDecl(convDecl, enumType);
-            FlagsTypeEntry* flagsEntry = enumType->flags();
-            if (flagsEntry)
-                writeTypeConverterDecl(convDecl, flagsEntry);
-            convDecl << endl;
             writeProtectedEnumSurrogate(protEnumsSurrogates, cppEnum);
             writeSbkTypeFunction(typeFunctions, cppEnum);
         }
 
-        if (!metaClass->isNamespace()) {
+        if (!metaClass->isNamespace())
             writeSbkTypeFunction(typeFunctions, metaClass);
-            writeTypeConverterDecl(convDecl, classType);
-            writeTypeConverterImpl(convImpl, classType);
-            convDecl << endl;
-        }
     }
 
     QString moduleHeaderFileName(outputDirectory()
@@ -503,41 +427,7 @@ void HeaderGenerator::finishGeneration()
     s << "// PyType functions, to get the PyObjectType for a type T\n";
     s << sbkTypeFunctions << endl;
 
-    if (usePySideExtensions()) {
-        foreach (AbstractMetaClass* metaClass, classes()) {
-            if (!metaClass->isQObject() || !metaClass->typeEntry()->generateCode())
-                continue;
-
-            s << "template<>" << endl;
-            s << "inline PyObject* createWrapper<" << metaClass->qualifiedCppName() << " >(const ";
-            s << metaClass->qualifiedCppName() << "* cppobj, bool hasOwnership, bool isExactType)" << endl;
-            s << '{' << endl;
-            s << INDENT << "const char* typeName = 0;" << endl;
-            s << INDENT << metaClass->qualifiedCppName() << "* value = const_cast<" << metaClass->qualifiedCppName() << "* >(cppobj);" << endl;
-            s << INDENT << "if (!isExactType)" << endl;
-            s << INDENT << INDENT << "typeName = typeid(*value).name();" << endl;
-            s << INDENT << "PyObject* pyObj = Shiboken::Object::newObject(reinterpret_cast<SbkObjectType*>(SbkType< ::" << metaClass->qualifiedCppName() << " >()),"
-            << "value, hasOwnership, isExactType, typeName);" << endl;
-            s << INDENT << "PySide::Signal::updateSourceObject(pyObj);" << endl;
-            s << INDENT << "return pyObj;" << endl;
-            s << '}' << endl;
-
-        }
-    }
-
-    s << "// Generated converters declarations ----------------------------------" << endl << endl;
-    s << convertersDecl;
     s << "} // namespace Shiboken" << endl << endl;
-
-    s << "// User defined converters --------------------------------------------" << endl;
-    foreach (TypeEntry* typeEntry, TypeDatabase::instance()->entries()) {
-        if (typeEntry->hasNativeConversionRule()) {
-            s << "// Conversion rule for: " << typeEntry->name() << endl;
-            s << typeEntry->conversionRule();
-        }
-    }
-    s << "// Generated converters implemantations -------------------------------" << endl << endl;
-    s << converterImpl << endl;
 
     s << "#endif // " << includeShield << endl << endl;
 }
@@ -573,48 +463,6 @@ void HeaderGenerator::writeSbkTypeFunction(QTextStream& s, const AbstractMetaCla
 {
     s <<  "template<> inline PyTypeObject* SbkType< ::" << cppClass->qualifiedCppName() << " >() "
       <<  "{ return reinterpret_cast<PyTypeObject*>(" << cpythonTypeNameExt(cppClass->typeEntry()) << "); }\n";
-}
-
-void HeaderGenerator::writeTypeConverterImpl(QTextStream& s, const TypeEntry* type)
-{
-    if (type->hasNativeConversionRule())
-        return;
-
-    QString pyTypeName = cpythonTypeName(type);
-
-    AbstractMetaFunctionList implicitConvs;
-    foreach (AbstractMetaFunction* func, implicitConversions(type)) {
-        if (!func->isUserAdded())
-            implicitConvs << func;
-    }
-
-    bool hasImplicitConversions = !implicitConvs.isEmpty();
-
-    // A specialized Converter<T>::toCpp method is only need for
-    // classes with implicit conversions.
-    if (!hasImplicitConversions)
-        return;
-
-    const QString typeName = "::" + type->qualifiedCppName();
-
-    // Write Converter<T>::isConvertible
-    s << "inline bool Shiboken::Converter< " << typeName << " >::isConvertible(PyObject* pyIn)" << endl;
-    s << '{' << endl;
-    s << INDENT << "return (bool)Shiboken::Conversions::isPythonToCppValueConvertible((SbkObjectType*)";
-    s << cpythonTypeNameExt(type) << ", pyIn);" << endl;
-    s << '}' << endl << endl;
-
-    // Write Converter<T>::toCpp function
-    s << "inline " << typeName << " Shiboken::Converter< " << typeName << " >::toCpp(PyObject* pyIn)" << endl;
-    s << '{' << endl;
-    s << INDENT << "PythonToCppFunc toCpp = Shiboken::Conversions::isPythonToCppValueConvertible((SbkObjectType*)";
-    s << cpythonTypeNameExt(type) << ", pyIn);" << endl;
-    s << INDENT << typeName << " cppOut";
-    writeMinimalConstructorExpression(s, type);
-    s << ';' << endl;
-    s << INDENT << "toCpp(pyIn, &cppOut);" << endl;
-    s << INDENT << "return cppOut;" << endl;
-    s << '}' << endl << endl;
 }
 
 void HeaderGenerator::writeInheritedOverloads(QTextStream& s)

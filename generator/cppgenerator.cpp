@@ -50,15 +50,6 @@ inline AbstractMetaType* getTypeWithoutContainer(AbstractMetaType* arg)
     return arg;
 }
 
-static QString reduceTypeName(const AbstractMetaClass* metaClass)
-{
-    QString qualifiedCppName = metaClass->typeEntry()->qualifiedCppName();
-    QString lookupName =  metaClass->typeEntry()->lookupName();
-    if (lookupName != qualifiedCppName)
-        return lookupName;
-    return QString();
-}
-
 CppGenerator::CppGenerator()
 {
     // Number protocol structure members names
@@ -140,18 +131,6 @@ QList<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(con
         results[op].append(func);
     }
     return results.values();
-}
-
-static QString typeResolverString(const QString& type, QString typeName = QString(), bool isObject = false)
-{
-    if (typeName.isEmpty())
-        typeName = QString("\"%1\"").arg(type);
-    else if (!typeName.startsWith("typeid("))
-        typeName = QString("\"%1\"").arg(typeName);
-    return QString("Shiboken::TypeResolver::create%1TypeResolver< %2 >(%3)")
-              .arg(isObject ? "Object" : "Value")
-              .arg(type)
-              .arg(typeName);
 }
 
 bool CppGenerator::hasBoolCast(const AbstractMetaClass* metaClass) const
@@ -1662,6 +1641,7 @@ void CppGenerator::writeCppSelfDefinition(QTextStream& s, const AbstractMetaClas
                                 .arg(cpythonWrapperCPtr(metaClass, PYTHON_SELF_VAR));
     } else {
         s << INDENT << className << "* " CPP_SELF_VAR " = 0;" << endl;
+        writeUnusedVariableCast(s, CPP_SELF_VAR);
         cppSelfAttribution = QString("%1 = %2%3")
                                 .arg(CPP_SELF_VAR)
                                 .arg(useWrapperClass ? QString("(%1*)").arg(className) : "")
@@ -4067,11 +4047,13 @@ void CppGenerator::writeFlagsToLong(QTextStream& s, const AbstractMetaEnum* cppE
     FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
     if (!flagsEntry)
         return;
-    s << "static PyObject* " << cpythonEnumName(cppEnum) << "_long(PyObject* v)" << endl
-      << "{" << endl
-      << INDENT << "long val = (long) Shiboken::Converter< ::" << flagsEntry->originalName() << ">::toCpp(v);" << endl
-      << INDENT << "return PyLong_FromLong(val);" << endl
-      << "}" << endl;
+    s << "static PyObject* " << cpythonEnumName(cppEnum) << "_long(PyObject* " PYTHON_SELF_VAR ")" << endl;
+    s << "{" << endl;
+    s << INDENT << "long val;" << endl;
+    AbstractMetaType* flagsType = buildAbstractMetaTypeFromTypeEntry(flagsEntry);
+    s << INDENT << cpythonToCppConversionFunction(flagsType) << PYTHON_SELF_VAR << ", &val);" << endl;
+    s << INDENT << "return Shiboken::Conversions::copyToPython(Shiboken::Conversions::PrimitiveTypeConverter<int>(), &val);" << endl;
+    s << "}" << endl;
 }
 
 void CppGenerator::writeFlagsNonZero(QTextStream& s, const AbstractMetaEnum* cppEnum)
@@ -4079,11 +4061,14 @@ void CppGenerator::writeFlagsNonZero(QTextStream& s, const AbstractMetaEnum* cpp
     FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
     if (!flagsEntry)
         return;
-    s << "static int " << cpythonEnumName(cppEnum) << "__nonzero(PyObject* v)" << endl
-      << "{" << endl
-      << INDENT << "long val = (long) Shiboken::Converter< ::" << flagsEntry->originalName() << ">::toCpp(v);" << endl
-      << INDENT << "return val != 0;" << endl
-      << "}" << endl;
+    s << "static int " << cpythonEnumName(cppEnum) << "__nonzero(PyObject* " PYTHON_SELF_VAR ")" << endl;
+    s << "{" << endl;
+
+    s << INDENT << "long val;" << endl;
+    AbstractMetaType* flagsType = buildAbstractMetaTypeFromTypeEntry(flagsEntry);
+    s << INDENT << cpythonToCppConversionFunction(flagsType) << PYTHON_SELF_VAR << ", &val);" << endl;
+    s << INDENT << "return val != 0;" << endl;
+    s << "}" << endl;
 }
 
 void CppGenerator::writeFlagsMethods(QTextStream& s, const AbstractMetaEnum* cppEnum)
@@ -4163,19 +4148,17 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream& s, const AbstractMetaEn
     FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
     Q_ASSERT(flagsEntry);
 
-    QString converter = "Shiboken::Converter< ::" + flagsEntry->originalName() + " >::";
-
     s << "PyObject* " << cpythonEnumName(cppEnum) << "___" << pyOpName << "__(PyObject* " PYTHON_SELF_VAR ", PyObject* " PYTHON_ARG ")" << endl;
     s << '{' << endl;
 
-    s << INDENT << "return Shiboken::Converter< ::" << flagsEntry->originalName() << " >::toPython(" << endl;
-    {
-        Indentation indent(INDENT);
-        s << INDENT << "Shiboken::Converter< ::" << flagsEntry->originalName() << ">::toCpp(" PYTHON_SELF_VAR ")" << endl;
-        s << INDENT << cppOpName << " Shiboken::Converter< ::";
-        s << flagsEntry->originalName() << " >::toCpp(" PYTHON_ARG ")" << endl;
-    }
-    s << INDENT << ");" << endl;
+    AbstractMetaType* flagsType = buildAbstractMetaTypeFromTypeEntry(flagsEntry);
+    s << INDENT << "::" << flagsEntry->originalName() << " cppResult, " CPP_SELF_VAR ", cppArg;" << endl;
+    s << INDENT << cpythonToCppConversionFunction(flagsType) << PYTHON_SELF_VAR << ", &" CPP_SELF_VAR ");" << endl;
+    s << INDENT << cpythonToCppConversionFunction(flagsType) << PYTHON_ARG << ", &cppArg);" << endl;
+    s << INDENT << "cppResult = " CPP_SELF_VAR " " << cppOpName << " cppArg;" << endl;
+    s << INDENT << "return ";
+    writeToPythonConversion(s, flagsType, 0, "cppResult");
+    s << ';' << endl;
     s << '}' << endl << endl;
 }
 
@@ -4185,17 +4168,24 @@ void CppGenerator::writeFlagsUnaryOperator(QTextStream& s, const AbstractMetaEnu
     FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
     Q_ASSERT(flagsEntry);
 
-    QString converter = "Shiboken::Converter< ::" + flagsEntry->originalName() + " >::";
-
     s << "PyObject* " << cpythonEnumName(cppEnum) << "___" << pyOpName << "__(PyObject* " PYTHON_SELF_VAR ", PyObject* " PYTHON_ARG ")" << endl;
     s << '{' << endl;
-    s << INDENT << "return Shiboken::Converter< " << (boolResult ? "bool" : flagsEntry->originalName());
-    s << " >::toPython(" << endl;
-    {
-        Indentation indent(INDENT);
-        s << INDENT << cppOpName << converter << "toCpp(" PYTHON_SELF_VAR ")" << endl;
-    }
-    s << INDENT << ");" << endl;
+
+    AbstractMetaType* flagsType = buildAbstractMetaTypeFromTypeEntry(flagsEntry);
+    s << INDENT << "::" << flagsEntry->originalName() << " " CPP_SELF_VAR ";" << endl;
+    s << INDENT << cpythonToCppConversionFunction(flagsType) << PYTHON_SELF_VAR << ", &" CPP_SELF_VAR ");" << endl;
+    s << INDENT;
+    if (boolResult)
+        s << "bool";
+    else
+        s << "::" << flagsEntry->originalName();
+    s << " cppResult = " << cppOpName << CPP_SELF_VAR ";" << endl;
+    s << INDENT << "return ";
+    if (boolResult)
+        s << "PyBool_FromLong(cppResult)";
+    else
+        writeToPythonConversion(s, flagsType, 0, "cppResult");
+    s << ';' << endl;
     s << '}' << endl << endl;
 }
 
@@ -4466,10 +4456,13 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
     s << '{' << endl;
 
     QString getattrFunc;
-    if (usePySideExtensions() && metaClass->isQObject())
-        getattrFunc = "PySide::getMetaDataFromQObject(Shiboken::Converter< ::QObject*>::toCpp(" PYTHON_SELF_VAR "), " PYTHON_SELF_VAR ", name)";
-    else
+    if (usePySideExtensions() && metaClass->isQObject()) {
+        AbstractMetaClass* qobjectClass = classes().findClass("QObject");
+        getattrFunc = QString("PySide::getMetaDataFromQObject(%1, " PYTHON_SELF_VAR ", name)")
+                         .arg(cpythonWrapperCPtr(qobjectClass, PYTHON_SELF_VAR));
+    } else {
         getattrFunc = "PyObject_GenericGetAttr(" PYTHON_SELF_VAR ", name)";
+    }
 
     if (classNeedsGetattroFunction(metaClass)) {
         s << INDENT << "if (" PYTHON_SELF_VAR ") {" << endl;
@@ -4831,8 +4824,7 @@ void CppGenerator::finishGeneration()
 
     writeEnumsInitialization(s, globalEnums);
 
-    // Register primitive types on TypeResolver
-    s << INDENT << "// Register primitive types on TypeResolver" << endl;
+    s << INDENT << "// Register primitive types converters." << endl;
     foreach(const PrimitiveTypeEntry* pte, primitiveTypes()) {
         if (!pte->generateCode() || !pte->isCppPrimitive())
             continue;

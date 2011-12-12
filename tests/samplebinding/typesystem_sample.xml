@@ -33,7 +33,7 @@
 
     <primitive-type name="Complex" target-lang-api-name="PyComplex">
         <include file-name="complex.h" location="global"/>
-        <conversion-rule file="complex_conversions.h">
+        <conversion-rule>
             <native-to-target>
             return PyComplex_FromDoubles(%in.real(), %in.imag());
             </native-to-target>
@@ -51,7 +51,7 @@
 
     <primitive-type name="Null">
         <include file-name="null.h" location="global"/>
-        <conversion-rule file="null_conversions.h">
+        <conversion-rule>
             <native-to-target>
             SBK_UNUSED(%in);
             Py_RETURN_NONE;
@@ -106,7 +106,7 @@
 
     <primitive-type name="PrimitiveStructPtr">
         <include file-name="handle.h" location="local"/>
-        <conversion-rule file="primitivestructpointer_conversions.h">
+        <conversion-rule>
             <native-to-target>
                 #ifdef IS_PY3K
                     return PyCapsule_New(&amp;%in, 0, 0);
@@ -131,7 +131,7 @@
     <primitive-type name="OddBool" target-lang-api-name="PyBool" default-constructor="OddBool(false)">
         <include file-name="oddbool.h" location="global"/>
         <include file-name="complex.h" location="global"/>
-        <conversion-rule file="oddbool_conversions.h">
+        <conversion-rule>
             <native-to-target>
             return PyBool_FromLong(%in.value());
             </native-to-target>
@@ -348,7 +348,7 @@
 
     <container-type name="std::pair" type="pair">
         <include file-name="utility" location="global"/>
-        <conversion-rule file="pair_conversions.h">
+        <conversion-rule>
             <native-to-target>
             PyObject* %out = PyTuple_New(2);
             PyTuple_SET_ITEM(%out, 0, %CONVERTTOPYTHON[%INTYPE_0](%in.first));
@@ -382,7 +382,7 @@
     </template>
     <container-type name="std::list" type="list">
         <include file-name="list" location="global"/>
-        <conversion-rule file="list_conversions.h">
+        <conversion-rule>
             <native-to-target>
                 <insert-template name="cpplist_to_pylist_convertion"/>
             </native-to-target>
@@ -408,7 +408,7 @@
     </container-type>
     <container-type name="std::map" type="map">
         <include file-name="map" location="global"/>
-        <conversion-rule file="map_conversions.h">
+        <conversion-rule>
             <native-to-target>
             PyObject* %out = PyDict_New();
             %INTYPE::const_iterator it = %in.begin();
@@ -1956,7 +1956,7 @@
     </value-type>
 
     <value-type name="ByteArray" hash-function="ByteArray::hash">
-        <conversion-rule file="bytearray_conversions.h">
+        <conversion-rule>
             <target-to-native>
                 <add-conversion type="Py_None">
                 %out = %OUTTYPE();
@@ -2217,7 +2217,7 @@
             return PyDate_Check(pyIn);
         }
         </inject-code>
-        <conversion-rule class="target" file="date_conversions.h">
+        <conversion-rule>
             <target-to-native>
                 <add-conversion type="PyDate" check="PyDate_ImportAndCheck(%in)">
                 int day = PyDateTime_GET_DAY(%in);

@@ -1752,7 +1752,6 @@ typedef QPair<QString, QString> StringPair;
 void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVariable converterVariable, QString& code)
 {
     QRegExp& regex = m_typeSystemConvRegEx[converterVariable];
-    const QString& conversionName = m_typeSystemConvName[converterVariable];
     int pos = 0;
     QList<StringPair> replacements;
     while ((pos = regex.indexIn(code, pos)) != -1) {
@@ -1761,76 +1760,75 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
         QString conversionString = list.first();
         QString conversionTypeName = list.last();
         const AbstractMetaType* conversionType = buildAbstractMetaTypeFromString(conversionTypeName);
+        if (!conversionType) {
+            qFatal(qPrintable(QString("Could not find type '%1' for use in '%2' conversion.")
+                                 .arg(conversionTypeName).arg(m_typeSystemConvName[converterVariable])), NULL);
+
+        }
         QString conversion;
         QTextStream c(&conversion);
-        if (conversionType) {
-            switch (converterVariable) {
-                case TypeSystemToCppFunction: {
-                    int end = pos - list.first().count();
-                    int start = end;
-                    while (start > 0 && code.at(start) != '\n')
-                        --start;
-                    while (code.at(start).isSpace())
-                        ++start;
-                    QString varType = code.mid(start, end - start);
-                    conversionString = varType + list.first();
-                    varType = miniNormalizer(varType);
-                    QString varName = list.at(1).trimmed();
-                    if (!varType.isEmpty()) {
-                        if (varType != conversionType->cppSignature()) {
-                            qFatal(qPrintable(QString("Types of receiver variable ('%1') and %CONVERTTOCPP type system variable ('%2') differ.")
-                                                 .arg(varType).arg(conversionType->cppSignature())), NULL);
-                        }
-                        c << getFullTypeName(conversionType) << ' ' << varName;
-                        writeMinimalConstructorExpression(c, conversionType);
-                        c << ';' << endl;
-                        Indentation indent(INDENT);
-                        c << INDENT;
+        switch (converterVariable) {
+            case TypeSystemToCppFunction: {
+                int end = pos - list.first().count();
+                int start = end;
+                while (start > 0 && code.at(start) != '\n')
+                    --start;
+                while (code.at(start).isSpace())
+                    ++start;
+                QString varType = code.mid(start, end - start);
+                conversionString = varType + list.first();
+                varType = miniNormalizer(varType);
+                QString varName = list.at(1).trimmed();
+                if (!varType.isEmpty()) {
+                    if (varType != conversionType->cppSignature()) {
+                        qFatal(qPrintable(QString("Types of receiver variable ('%1') and %CONVERTTOCPP type system variable ('%2') differ.")
+                                             .arg(varType).arg(conversionType->cppSignature())), NULL);
                     }
-                    c << cpythonToCppConversionFunction(conversionType);
-                    QString prefix;
-                    if (varName.startsWith('*')) {
-                        varName.remove(0, 1);
-                        varName = varName.trimmed();
-                    } else {
-                        prefix = '&';
-                    }
-                    QString arg = getConverterTypeSystemVariableArgument(code, pos);
-                    conversionString += arg;
-                    c << arg << ", " << prefix << '(' << varName << ')';
+                    c << getFullTypeName(conversionType) << ' ' << varName;
+                    writeMinimalConstructorExpression(c, conversionType);
+                    c << ';' << endl;
+                    Indentation indent(INDENT);
+                    c << INDENT;
+                }
+                c << cpythonToCppConversionFunction(conversionType);
+                QString prefix;
+                if (varName.startsWith('*')) {
+                    varName.remove(0, 1);
+                    varName = varName.trimmed();
+                } else {
+                    prefix = '&';
+                }
+                QString arg = getConverterTypeSystemVariableArgument(code, pos);
+                conversionString += arg;
+                c << arg << ", " << prefix << '(' << varName << ')';
+                break;
+            }
+            case TypeSystemCheckFunction:
+                conversion = cpythonCheckFunction(conversionType);
+                if (conversionType->typeEntry()->isPrimitive() && (conversionType->typeEntry()->name() == "PyObject" || !conversion.endsWith(' '))) {
+                    c << '(';
                     break;
                 }
-                case TypeSystemCheckFunction:
-                    conversion = cpythonCheckFunction(conversionType);
-                    if (conversionType->typeEntry()->isPrimitive() && (conversionType->typeEntry()->name() == "PyObject" || !conversion.endsWith(' '))) {
-                        c << '(';
-                        break;
-                    }
-                case TypeSystemIsConvertibleFunction:
-                    if (conversion.isEmpty())
-                        conversion = cpythonIsConvertibleFunction(conversionType);
-                case TypeSystemToPythonFunction:
-                    if (conversion.isEmpty())
-                        conversion = cpythonToPythonConversionFunction(conversionType);
-                default: {
-                    QString arg = getConverterTypeSystemVariableArgument(code, pos);
-                    conversionString += arg;
-                    if (converterVariable == TypeSystemToPythonFunction && !isVariable(arg)) {
-                        qFatal(qPrintable(QString("Only variables are acceptable as argument to %%CONVERTTOPYTHON type system variable on code snippet: '%1'")
-                                             .arg(code)), NULL);
-                    }
-                    if (conversion.contains("%in")) {
-                        conversion.prepend('(');
-                        conversion.replace("%in", arg);
-                    } else {
-                        c << arg;
-                    }
+            case TypeSystemIsConvertibleFunction:
+                if (conversion.isEmpty())
+                    conversion = cpythonIsConvertibleFunction(conversionType);
+            case TypeSystemToPythonFunction:
+                if (conversion.isEmpty())
+                    conversion = cpythonToPythonConversionFunction(conversionType);
+            default: {
+                QString arg = getConverterTypeSystemVariableArgument(code, pos);
+                conversionString += arg;
+                if (converterVariable == TypeSystemToPythonFunction && !isVariable(arg)) {
+                    qFatal(qPrintable(QString("Only variables are acceptable as argument to %%CONVERTTOPYTHON type system variable on code snippet: '%1'")
+                                         .arg(code)), NULL);
+                }
+                if (conversion.contains("%in")) {
+                    conversion.prepend('(');
+                    conversion.replace("%in", arg);
+                } else {
+                    c << arg;
                 }
             }
-        } else {
-            if (list.count() > 3)
-                c << list.at(2) << list.at(3) << " = ";
-            c << QString("Shiboken::Converter< %1 >::%2(").arg(conversionTypeName).arg(conversionName);
         }
         replacements.append(qMakePair(conversionString, conversion));
     }
