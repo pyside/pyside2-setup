@@ -30,20 +30,10 @@ import unittest
 from sample import ObjectType
 
 class TestDeprecatedCall(unittest.TestCase):
-    """
-    def setUp(self):
-        warnings.simplefilter("default")
-
-    def testCallWithoutError(self):
-        o = ObjectType()
-        self.assertTrue(o.deprecatedFunction())
-    """
-
     def testCallWithError(self):
         o = ObjectType()
-        warnings.simplefilter("error")
+        warnings.simplefilter('error')
         self.assertRaises(DeprecationWarning, o.deprecatedFunction)
 
 if __name__ == '__main__':
     unittest.main()
-
