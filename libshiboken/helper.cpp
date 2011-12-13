@@ -96,7 +96,7 @@ int* sequenceToIntArray(PyObject* obj, bool zeroTerminated)
 }
 
 
-int warning(PyObject *category, int stacklevel, const char *format, ...)
+int warning(PyObject* category, int stacklevel, const char* format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -107,16 +107,15 @@ int warning(PyObject *category, int stacklevel, const char *format, ...)
     va_copy(args2, args);
 #endif
 
-    // check the necessary memmory
-    int result = vsnprintf(NULL, 0, format, args);
-    char *message = (char*) malloc(result);
+    // check the necessary memory
+    int size = vsnprintf(NULL, 0, format, args) + 1;
+    char* message = new char[size];
+    int result = 0;
     if (message) {
         // format the message
-        vsnprintf(message, result, format, args2);
+        vsnprintf(message, size, format, args2);
         result = PyErr_WarnEx(category, message, stacklevel);
-        free(message);
-    } else {
-        result = 0;
+        delete message;
     }
     va_end(args2);
     va_end(args);

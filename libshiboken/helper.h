@@ -112,7 +112,7 @@ class AutoArrayPointer
 /**
  * An utility function used to call PyErr_WarnEx with a formatted message.
  */
-LIBSHIBOKEN_API int warning(PyObject *category, int stacklevel, const char *format, ...);
+LIBSHIBOKEN_API int warning(PyObject* category, int stacklevel, const char* format, ...);
 
 } // namespace Shiboken
 
