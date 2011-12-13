@@ -896,7 +896,7 @@ void CppGenerator::writeEnumConverterFunctions(QTextStream& s, const TypeEntry* 
 
     code.clear();
 
-    c << INDENT << "long castCppIn = (long) *((" << cppTypeName << "*)cppIn);" << endl;
+    c << INDENT << "int castCppIn = *((" << cppTypeName << "*)cppIn);" << endl;
     c << INDENT;
     c << "return ";
     if (enumType->isFlags())
