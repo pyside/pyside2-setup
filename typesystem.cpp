@@ -224,6 +224,14 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
     case StackElement::TemplateInstanceEnum:
         switch (m_current->parent->type) {
         case StackElement::InjectCode:
+            if (m_current->parent->parent->type == StackElement::Root) {
+                CodeSnipList snips = m_current->parent->entry->codeSnips();
+                CodeSnip snip = snips.takeLast();
+                snip.addTemplateInstance(m_current->value.templateInstance);
+                snips.append(snip);
+                m_current->parent->entry->setCodeSnips(snips);
+                break;
+            }
         case StackElement::NativeToTarget:
         case StackElement::AddConversion:
             m_contextStack.top()->codeSnips.last().addTemplateInstance(m_current->value.templateInstance);
