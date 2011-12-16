@@ -3176,7 +3176,10 @@ void CppGenerator::writeEnumConverterInitialization(QTextStream& s, const TypeEn
         QStringList cppSignature = enumType->qualifiedCppName().split("::", QString::SkipEmptyParts);
         while (!cppSignature.isEmpty()) {
             QString signature = cppSignature.join("::");
-            s << INDENT << "Shiboken::Conversions::registerConverterName(converter, \"" << signature << "\");" << endl;
+            s << INDENT << "Shiboken::Conversions::registerConverterName(converter, \"";
+            if (flags)
+                s << "QFlags<";
+            s << signature << "\");" << endl;
             cppSignature.removeFirst();
         }
     }
