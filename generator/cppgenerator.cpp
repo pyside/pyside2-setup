@@ -4049,7 +4049,7 @@ void CppGenerator::writeFlagsToLong(QTextStream& s, const AbstractMetaEnum* cppE
         return;
     s << "static PyObject* " << cpythonEnumName(cppEnum) << "_long(PyObject* " PYTHON_SELF_VAR ")" << endl;
     s << "{" << endl;
-    s << INDENT << "long val;" << endl;
+    s << INDENT << "int val;" << endl;
     AbstractMetaType* flagsType = buildAbstractMetaTypeFromTypeEntry(flagsEntry);
     s << INDENT << cpythonToCppConversionFunction(flagsType) << PYTHON_SELF_VAR << ", &val);" << endl;
     s << INDENT << "return Shiboken::Conversions::copyToPython(Shiboken::Conversions::PrimitiveTypeConverter<int>(), &val);" << endl;
@@ -4064,7 +4064,7 @@ void CppGenerator::writeFlagsNonZero(QTextStream& s, const AbstractMetaEnum* cpp
     s << "static int " << cpythonEnumName(cppEnum) << "__nonzero(PyObject* " PYTHON_SELF_VAR ")" << endl;
     s << "{" << endl;
 
-    s << INDENT << "long val;" << endl;
+    s << INDENT << "int val;" << endl;
     AbstractMetaType* flagsType = buildAbstractMetaTypeFromTypeEntry(flagsEntry);
     s << INDENT << cpythonToCppConversionFunction(flagsType) << PYTHON_SELF_VAR << ", &val);" << endl;
     s << INDENT << "return val != 0;" << endl;
