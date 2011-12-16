@@ -4156,8 +4156,13 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream& s, const AbstractMetaEn
 
     AbstractMetaType* flagsType = buildAbstractMetaTypeFromTypeEntry(flagsEntry);
     s << INDENT << "::" << flagsEntry->originalName() << " cppResult, " CPP_SELF_VAR ", cppArg;" << endl;
-    s << INDENT << cpythonToCppConversionFunction(flagsType) << PYTHON_SELF_VAR << ", &" CPP_SELF_VAR ");" << endl;
-    s << INDENT << cpythonToCppConversionFunction(flagsType) << PYTHON_ARG << ", &cppArg);" << endl;
+    s << "#ifdef IS_PY3K" << endl;
+    s << INDENT << CPP_SELF_VAR " = (::" << flagsEntry->originalName() << ")PyLong_AsLong(" PYTHON_SELF_VAR ");" << endl;
+    s << INDENT << "cppArg = (" << flagsEntry->originalName() << ")PyLong_AsLong(" PYTHON_ARG ");" << endl;
+    s << "#else" << endl;
+    s << INDENT << CPP_SELF_VAR " = (::" << flagsEntry->originalName() << ")PyInt_AsLong(" PYTHON_SELF_VAR ");" << endl;
+    s << INDENT << "cppArg = (" << flagsEntry->originalName() << ")PyInt_AsLong(" PYTHON_ARG ");" << endl;
+    s << "#endif" << endl << endl;
     s << INDENT << "cppResult = " CPP_SELF_VAR " " << cppOpName << " cppArg;" << endl;
     s << INDENT << "return ";
     writeToPythonConversion(s, flagsType, 0, "cppResult");
