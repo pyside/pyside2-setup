@@ -22,6 +22,7 @@
 
 #ifndef OBJECTTYPEBYVALUE_H
 #define OBJECTTYPEBYVALUE_H
+#include <list>
 #include "protected.h"
 
 class ObjectTypeByValue
@@ -29,6 +30,8 @@ class ObjectTypeByValue
 public:
     ObjectTypeByValue returnSomeKindOfMe() { return ObjectTypeByValue(); }
     void acceptKindOfMeAsValue(ObjectTypeByValue kindOfMe) {}
+
+    void acceptListOfObjectTypeByValue(std::list<ObjectTypeByValue> listOfMe) {}
 
     // prop used to check for segfaults
     ProtectedProperty prop;
