@@ -171,6 +171,36 @@ void TestAbstractMetaType::testTypedefWithTemplates()
     QCOMPARE(metaType->cppSignature(), QString("A<B >"));
 }
 
+
+void TestAbstractMetaType::testObjectTypeUsedAsValue()
+{
+    const char* cppCode ="\
+    class A {\
+        void method(A);\
+    };\
+    ";
+    const char* xmlCode = "<typesystem package='Foo'>\
+    <object-type name='A' />\
+    </typesystem>";
+    TestUtil t(cppCode, xmlCode);
+
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.size(), 1);
+    AbstractMetaClass* classA = classes.findClass("A");
+    QVERIFY(classA);
+    AbstractMetaFunctionList overloads = classA->queryFunctionsByName("method");
+    QCOMPARE(overloads.count(), 1);
+    AbstractMetaFunction* method = overloads.first();
+    QVERIFY(method);
+    AbstractMetaArgumentList args = method->arguments();
+    QCOMPARE(args.count(), 1);
+    AbstractMetaArgument* arg = args.first();
+    AbstractMetaType* metaType = arg->type();
+    QCOMPARE(metaType->cppSignature(), QString("A"));
+    QVERIFY(metaType->isValue());
+    QVERIFY(metaType->typeEntry()->isObject());
+}
+
 QTEST_APPLESS_MAIN(TestAbstractMetaType)
 
 #include "testabstractmetatype.moc"

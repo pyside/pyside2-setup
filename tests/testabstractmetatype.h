@@ -36,6 +36,7 @@ private slots:
     void testTypedefWithTemplates();
     void testApiVersionSupported();
     void testApiVersionNotSupported();
+    void testObjectTypeUsedAsValue();
 };
 
 #endif

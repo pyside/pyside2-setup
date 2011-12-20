@@ -150,13 +150,15 @@ void AbstractMetaType::decideUsagePattern()
     } else if (type->isEnum() && !actualIndirections()) {
         setTypeUsagePattern(AbstractMetaType::EnumPattern);
 
-    } else if (type->isObject()
-               && indirections() == 0
-               && isReference()) {
-        if (((ComplexTypeEntry*) type)->isQObject())
-            setTypeUsagePattern(AbstractMetaType::QObjectPattern);
-        else
-            setTypeUsagePattern(AbstractMetaType::ObjectPattern);
+    } else if (type->isObject() && indirections() == 0) {
+        if (isReference()) {
+            if (((ComplexTypeEntry*) type)->isQObject())
+                setTypeUsagePattern(AbstractMetaType::QObjectPattern);
+            else
+                setTypeUsagePattern(AbstractMetaType::ObjectPattern);
+        } else {
+            setTypeUsagePattern(AbstractMetaType::ValuePattern);
+        }
 
     } else if (type->isObject()
                && indirections() == 1) {
