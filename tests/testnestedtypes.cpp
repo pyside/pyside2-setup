@@ -82,6 +82,41 @@ void TestNestedTypes::testNestedTypesModifications()
     QVERIFY(removedFunc->isModifiedRemoved());
 }
 
+
+void TestNestedTypes::testDuplicationOfNestedTypes()
+{
+    const char* cppCode ="\
+    namespace Namespace {\
+        class SomeClass {};\
+    };";
+    const char* xmlCode = "\
+    <typesystem package='Foo'> \
+        <namespace-type name='Namespace'>\
+            <value-type name='SomeClass'>\
+                <add-function signature='createSomeClass(SomeClass)'/>\
+            </value-type>\
+        </namespace-type>\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, false);
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.count(), 2);
+    AbstractMetaClass* nspace = classes.findClass("Namespace");
+    QVERIFY(nspace);
+    AbstractMetaClass* cls1 = classes.findClass("SomeClass");
+    QVERIFY(cls1);
+    AbstractMetaClass* cls2 = classes.findClass("Namespace::SomeClass");
+    QVERIFY(cls2);
+    QCOMPARE(cls1, cls2);
+    QCOMPARE(cls1->name(), QString("SomeClass"));
+    QCOMPARE(cls1->qualifiedCppName(), QString("Namespace::SomeClass"));
+
+    TypeEntry* t1 = TypeDatabase::instance()->findType("Namespace::SomeClass");
+    QVERIFY(t1);
+    TypeEntry* t2 = TypeDatabase::instance()->findType("SomeClass");
+    QCOMPARE(t1, t2);
+}
+
 QTEST_APPLESS_MAIN(TestNestedTypes)
 
 #include "testnestedtypes.moc"

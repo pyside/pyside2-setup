@@ -30,6 +30,7 @@ class TestNestedTypes : public QObject
     Q_OBJECT
 private slots:
     void testNestedTypesModifications();
+    void testDuplicationOfNestedTypes();
 };
 
 #endif
