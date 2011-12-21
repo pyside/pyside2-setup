@@ -1761,7 +1761,8 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
         QString conversionTypeName = list.last();
         const AbstractMetaType* conversionType = buildAbstractMetaTypeFromString(conversionTypeName);
         if (!conversionType) {
-            qFatal(qPrintable(QString("Could not find type '%1' for use in '%2' conversion.")
+            qFatal(qPrintable(QString("Could not find type '%1' for use in '%2' conversion. "
+                                      "Make sure to use the full C++ name, e.g. 'Namespace::Class'.")
                                  .arg(conversionTypeName).arg(m_typeSystemConvName[converterVariable])), NULL);
 
         }
