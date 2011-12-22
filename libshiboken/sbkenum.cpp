@@ -27,13 +27,13 @@
 #include "sbkdbg.h"
 #include "autodecref.h"
 #include "typeresolver.h"
+#include "sbkpython.h"
 
 #include <string.h>
 #include <cstring>
 #include <list>
 
-
-#define SBK_ENUM(ENUM)  reinterpret_cast<SbkEnumObject*>(ENUM)
+#define SBK_ENUM(ENUM) reinterpret_cast<SbkEnumObject*>(ENUM)
 
 extern "C"
 {
@@ -100,13 +100,17 @@ static PyObject* SbkEnum_tp_new(PyTypeObject* type, PyObject* args, PyObject* kw
     return reinterpret_cast<PyObject*>(self);
 }
 
+/* Notes:
+ *   On Py3k land we use long type when using integer numbers. However, on older
+ *   versions of Python (version 2) we need to convert it to int type,
+ *   respectively.
+ *
+ *   Thus calling PyInt_FromLong() will result in calling PyLong_FromLong in
+ *   Py3k.
+ */
 static PyObject* enum_int(PyObject* v)
 {
-#ifdef IS_PY3K
-    return PyLong_FromLong(SBK_ENUM(v)->ob_value);
-#else
     return PyInt_FromLong(SBK_ENUM(v)->ob_value);
-#endif
 }
 
 static long getNumberValue(PyObject* v)
@@ -117,7 +121,6 @@ static long getNumberValue(PyObject* v)
     return result;
 }
 
-
 static PyObject* enum_and(PyObject* self, PyObject* b)
 {
     if (!PyNumber_Check(b)) {
@@ -127,7 +130,7 @@ static PyObject* enum_and(PyObject* self, PyObject* b)
 
     long valA = SBK_ENUM(self)->ob_value;
     long valB = getNumberValue(b);
-    return PyLong_FromLong(valA & valB);
+    return PyInt_FromLong(valA & valB);
 }
 
 static PyObject* enum_or(PyObject* self, PyObject* b)
@@ -139,7 +142,7 @@ static PyObject* enum_or(PyObject* self, PyObject* b)
 
     long valA = SBK_ENUM(self)->ob_value;
     long valB = getNumberValue(b);
-    return PyLong_FromLong(valA | valB);
+    return PyInt_FromLong(valA | valB);
 }
 
 static PyObject* enum_xor(PyObject* self, PyObject* b)
@@ -151,9 +154,8 @@ static PyObject* enum_xor(PyObject* self, PyObject* b)
 
     long valA = SBK_ENUM(self)->ob_value;
     long valB = getNumberValue(b);
-    return PyLong_FromLong(valA ^ valB);
+    return PyInt_FromLong(valA ^ valB);
 }
-
 
 static int enum_bool(PyObject* v)
 {
@@ -164,21 +166,21 @@ static PyObject* enum_add(PyObject* self, PyObject* v)
 {
     long valA = SBK_ENUM(self)->ob_value;
     long valB = getNumberValue(v);
-    return PyLong_FromLong(valA + valB);
+    return PyInt_FromLong(valA + valB);
 }
 
 static PyObject* enum_subtract(PyObject* self, PyObject* v)
 {
     long valA = SBK_ENUM(self)->ob_value;
     long valB = getNumberValue(v);
-    return PyLong_FromLong(valA - valB);
+    return PyInt_FromLong(valA - valB);
 }
 
 static PyObject* enum_multiply(PyObject* self, PyObject* v)
 {
     long valA = SBK_ENUM(self)->ob_value;
     long valB = getNumberValue(v);
-    return PyLong_FromLong(valA * valB);
+    return PyInt_FromLong(valA * valB);
 }
 
 #ifndef IS_PY3K
@@ -510,7 +512,6 @@ PyObject* newItem(PyTypeObject* enumType, long itemValue, const char* itemName)
 
     return reinterpret_cast<PyObject*>(enumObj);
 }
-
 
 PyTypeObject* newType(const char* name)
 {
