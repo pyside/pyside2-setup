@@ -436,6 +436,21 @@ static QString getNamePrefix(StackElement* element)
     return names.join(".");
 }
 
+// Returns empty string if there's no error.
+static QString checkSignatureError(const QString& signature, const QString& tag)
+{
+    QString funcName = signature.left(signature.indexOf('(')).trimmed();
+    static QRegExp whiteSpace("\\s");
+    if (!funcName.startsWith("operator ") && funcName.contains(whiteSpace)) {
+        return QString("Error in <%1> tag signature attribute '%2'.\n"
+                       "White spaces aren't allowed in function names, "
+                       "and return types should not be part of the signature.")
+                  .arg(tag)
+                  .arg(signature);
+    }
+    return QString();
+}
+
 bool Handler::startElement(const QString &, const QString &n,
                            const QString &, const QXmlAttributes &atts)
 {
@@ -562,6 +577,11 @@ bool Handler::startElement(const QString &, const QString &n,
         if (element->type == StackElement::FunctionTypeEntry) {
             QString signature = attributes["signature"];
             name = signature.left(signature.indexOf('(')).trimmed();
+            QString errorString = checkSignatureError(signature, "function");
+            if (!errorString.isEmpty()) {
+                m_error = errorString;
+                return false;
+            }
             QString rename = attributes["rename"];
             if (!rename.isEmpty()) {
                 static QRegExp functionNameRegExp("^[a-zA-Z_][a-zA-Z0-9_]*$");
@@ -1457,6 +1477,12 @@ bool Handler::startElement(const QString &, const QString &n,
                 return false;
             }
 
+            QString errorString = checkSignatureError(signature, "add-function");
+            if (!errorString.isEmpty()) {
+                m_error = errorString;
+                return false;
+            }
+
             AddedFunction func(signature, attributes["return-type"], since);
             func.setStatic(attributes["static"] == "yes");
             if (!signature.contains("("))
@@ -1493,6 +1519,12 @@ bool Handler::startElement(const QString &, const QString &n,
             signature = TypeDatabase::normalizedSignature(signature.toLocal8Bit().constData());
             if (signature.isEmpty()) {
                 m_error = "No signature for modified function";
+                return false;
+            }
+
+            QString errorString = checkSignatureError(signature, "modify-function");
+            if (!errorString.isEmpty()) {
+                m_error = errorString;
                 return false;
             }
 
