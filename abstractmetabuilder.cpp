@@ -2018,8 +2018,25 @@ AbstractMetaType* AbstractMetaBuilder::translateType(double vr, const AddedFunct
     }
 
     if (!type) {
-        type = new TypeEntry(typeInfo.name, TypeEntry::CustomType, vr);
-        typeDb->addType(type);
+        QStringList candidates;
+        SingleTypeEntryHash entries = typeDb->entries();
+        foreach (QString candidate, entries.keys()) {
+            // Let's try to find the type in different scopes.
+            if (candidate.endsWith("::"+typeName))
+                candidates << candidate;
+        }
+
+        QString msg = QString("Type '%1' wasn't found in the type database.\n").arg(typeName);
+
+        if (candidates.isEmpty())
+            qFatal(qPrintable(QString(msg + "Declare it in the type system using the proper <*-type> tag.")), NULL);
+
+        msg += "Remember to inform the full qualified name for the type you want to use.\nCandidates are:\n";
+        candidates.sort();
+        foreach (const QString& candidate, candidates) {
+            msg += "    " + candidate + "\n";
+        }
+        qFatal(qPrintable(msg), NULL);
     }
 
     AbstractMetaType* metaType = createMetaType();

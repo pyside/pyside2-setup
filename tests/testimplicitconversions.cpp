@@ -30,22 +30,20 @@ void TestImplicitConversions::testWithPrivateCtors()
     const char* cppCode ="\
     class B;\
     class C;\
-    \
     class A {\
         A(const B&);\
     public:\
         A(const C&);\
     };\
-    \
     class B {};\
     class C {};\
     ";
     const char* xmlCode = "\
-    <typesystem package=\"Foo\"> \
-        <value-type name=\"A\"/> \
-        <value-type name=\"B\"/> \
-        <value-type name=\"C\"/> \
-        </typesystem>";
+    <typesystem package='Foo'> \
+        <value-type name='A'/> \
+        <value-type name='B'/> \
+        <value-type name='C'/> \
+    </typesystem>";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 3);
@@ -65,18 +63,17 @@ void TestImplicitConversions::testWithModifiedVisibility()
     public:\
         A(const B&);\
     };\
-    \
     class B {};\
     ";
     const char* xmlCode = "\
-    <typesystem package=\"Foo\">\
-        <value-type name=\"A\">\
+    <typesystem package='Foo'>\
+        <value-type name='A'>\
             <modify-function signature='A(const B&amp;)'>\
                 <access modifier='private' />\
             </modify-function>\
         </value-type>\
-        <value-type name=\"B\"/>\
-        </typesystem>";
+        <value-type name='B'/>\
+    </typesystem>";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 2);
@@ -96,20 +93,20 @@ void TestImplicitConversions::testWithAddedCtor()
     public:\
         A(const B&);\
     };\
-    \
     class B {};\
     class C {};\
     ";
     const char* xmlCode = "\
-    <typesystem package=\"Foo\">\
-        <value-type name=\"A\">\
+    <typesystem package='Foo'>\
+        <custom-type name='TARGETLANGTYPE' />\
+        <value-type name='A'>\
             <add-function signature='A(const C&amp;)' />\
         </value-type>\
-        <value-type name=\"B\">\
+        <value-type name='B'>\
             <add-function signature='B(TARGETLANGTYPE*)' />\
         </value-type>\
-        <value-type name=\"C\"/>\
-        </typesystem>";
+        <value-type name='C'/>\
+    </typesystem>";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 3);
@@ -133,10 +130,10 @@ void TestImplicitConversions::testWithExternalConversionOperator()
     };\
     ";
     const char* xmlCode = "\
-    <typesystem package=\"Foo\">\
-        <value-type name=\"A\"/>\
-        <value-type name=\"B\"/>\
-        </typesystem>";
+    <typesystem package='Foo'>\
+        <value-type name='A'/>\
+        <value-type name='B'/>\
+    </typesystem>";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 2);
@@ -159,4 +156,3 @@ void TestImplicitConversions::testWithExternalConversionOperator()
 QTEST_APPLESS_MAIN(TestImplicitConversions)
 
 #include "testimplicitconversions.moc"
-

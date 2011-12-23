@@ -141,29 +141,14 @@ PrimitiveTypeEntry* TypeDatabase::findTargetLangPrimitiveType(const QString& tar
 
 TypeEntry* TypeDatabase::findType(const QString& name) const
 {
-    TypeEntry* typeEntry = 0;
-    QList<TypeEntry *> typeEntries = findTypes(name);
-
-    if (typeEntries.isEmpty()) {
-        SingleTypeEntryHash entriesHash = entries();
-        foreach (QString typeName, entriesHash.keys()) {
-            // Let's try to find the type in different scopes.
-            // We will prefer the ones with the least depth.
-            if (typeName.endsWith("::"+name)
-                && (!typeEntry || typeEntry->qualifiedCppName().count("::") < typeName.count("::"))) {
-                typeEntry = entriesHash[typeName];
-            }
-        }
-    }
-
-    foreach (TypeEntry* entry, typeEntries) {
+    QList<TypeEntry *> entries = findTypes(name);
+    foreach (TypeEntry *entry, entries) {
         if (entry &&
             (!entry->isPrimitive() || static_cast<PrimitiveTypeEntry *>(entry)->preferredTargetLangType())) {
-            typeEntry = entry;
-            break;
+            return entry;
         }
     }
-    return typeEntry;
+    return 0;
 }
 
 SingleTypeEntryHash TypeDatabase::entries() const

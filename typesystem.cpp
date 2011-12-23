@@ -45,6 +45,7 @@ Handler::Handler(TypeDatabase* database, bool generate)
     m_ignoreDepth = 0;
 
     tagNames["rejection"] = StackElement::Rejection;
+    tagNames["custom-type"] = StackElement::CustomTypeEntry;
     tagNames["primitive-type"] = StackElement::PrimitiveTypeEntry;
     tagNames["container-type"] = StackElement::ContainerTypeEntry;
     tagNames["object-type"] = StackElement::ObjectTypeEntry;
@@ -629,6 +630,9 @@ bool Handler::startElement(const QString &, const QString &n,
         }
 
         switch (element->type) {
+        case StackElement::CustomTypeEntry:
+            element->entry = new TypeEntry(name, TypeEntry::CustomType, since);
+            break;
         case StackElement::PrimitiveTypeEntry: {
             QString targetLangName = attributes["target-lang-name"];
             QString targetLangApiName = attributes["target-lang-api-name"];

@@ -93,7 +93,7 @@ void TestNestedTypes::testDuplicationOfNestedTypes()
     <typesystem package='Foo'> \
         <namespace-type name='Namespace'>\
             <value-type name='SomeClass'>\
-                <add-function signature='createSomeClass(SomeClass)'/>\
+                <add-function signature='createSomeClass(Namespace::SomeClass)'/>\
             </value-type>\
         </namespace-type>\
     </typesystem>";
@@ -114,7 +114,7 @@ void TestNestedTypes::testDuplicationOfNestedTypes()
     TypeEntry* t1 = TypeDatabase::instance()->findType("Namespace::SomeClass");
     QVERIFY(t1);
     TypeEntry* t2 = TypeDatabase::instance()->findType("SomeClass");
-    QCOMPARE(t1, t2);
+    QVERIFY(!t2);
 }
 
 QTEST_APPLESS_MAIN(TestNestedTypes)

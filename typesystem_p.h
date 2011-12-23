@@ -46,6 +46,7 @@ class StackElement
             EnumTypeEntry               = 0x9,
             ContainerTypeEntry          = 0xa,
             FunctionTypeEntry           = 0xb,
+            CustomTypeEntry             = 0xc,
             TypeEntryMask               = 0xf,
 
             // Documentation tags

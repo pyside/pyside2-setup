@@ -67,7 +67,7 @@ void TestAddFunction::testAddFunction()
 {
     const char cppCode[] = "struct B {}; struct A { void a(int); };";
     const char xmlCode[] = "\
-    <typesystem package=\"Foo\">\
+    <typesystem package='Foo'>\
         <primitive-type name='int' />\
         <primitive-type name='float' />\
         <value-type name='B' />\
@@ -108,7 +108,8 @@ void TestAddFunction::testAddFunctionConstructor()
 {
     const char cppCode[] = "struct A { A() {} };";
     const char xmlCode[] = "\
-    <typesystem package=\"Foo\">\
+    <typesystem package='Foo'>\
+        <primitive-type name='int' />\
         <value-type name='A'>\
             <add-function signature='A(int)' />\
         </value-type>\
@@ -130,7 +131,7 @@ void TestAddFunction::testAddFunctionTagDefaultValues()
 {
     const char cppCode[] = "struct A {};";
     const char xmlCode[] = "\
-    <typesystem package=\"Foo\">\
+    <typesystem package='Foo'>\
         <value-type name='A'>\
             <add-function signature='func()' />\
         </value-type>\
@@ -151,7 +152,7 @@ void TestAddFunction::testAddFunctionCodeSnippets()
 {
     const char cppCode[] = "struct A {};";
     const char xmlCode[] = "\
-    <typesystem package=\"Foo\">\
+    <typesystem package='Foo'>\
         <value-type name='A'>\
             <add-function signature='func()'>\
                 <inject-code class='target' position='end'>Hi!, I am the code.</inject-code>\
@@ -178,7 +179,7 @@ void TestAddFunction::testAddFunctionWithoutParenteses()
 
     const char cppCode[] = "struct A {};";
     const char xmlCode[] = "\
-    <typesystem package=\"Foo\">\
+    <typesystem package='Foo'>\
         <value-type name='A'>\
             <add-function signature='func'>\
                 <inject-code class='target' position='end'>Hi!, I am the code.</inject-code>\
@@ -207,7 +208,7 @@ void TestAddFunction::testAddFunctionWithDefaultArgs()
 
     const char cppCode[] = "struct A { };";
     const char xmlCode[] = "\
-    <typesystem package=\"Foo\">\
+    <typesystem package='Foo'>\
         <primitive-type name='int'/> \
         <value-type name='A'>\
             <add-function signature='func(int, int)'>\
@@ -232,7 +233,7 @@ void TestAddFunction::testAddFunctionAtModuleLevel()
 {
     const char cppCode[] = "struct A { };";
     const char xmlCode[] = "\
-    <typesystem package=\"Foo\">\
+    <typesystem package='Foo'>\
         <primitive-type name='int'/> \
         <value-type name='A'/>\
         <add-function signature='func(int, int)'>\
@@ -270,7 +271,7 @@ void TestAddFunction::testAddFunctionWithVarargs()
 
     const char cppCode[] = "struct A {};";
     const char xmlCode[] = "\
-    <typesystem package=\"Foo\">\
+    <typesystem package='Foo'>\
         <primitive-type name='int'/> \
         <primitive-type name='char'/> \
         <value-type name='A'>\
@@ -293,7 +294,7 @@ void TestAddFunction::testAddStaticFunction()
 {
     const char cppCode[] = "struct A { };";
     const char xmlCode[] = "\
-    <typesystem package=\"Foo\">\
+    <typesystem package='Foo'>\
         <primitive-type name='int'/> \
         <value-type name='A'>\
             <add-function signature='func(int, int)' static='yes'>\
@@ -314,7 +315,7 @@ void TestAddFunction::testAddGlobalFunction()
 {
     const char cppCode[] = "struct A { };struct B {};";
     const char xmlCode[] = "\
-    <typesystem package=\"Foo\">\
+    <typesystem package='Foo'>\
         <primitive-type name='int'/> \
         <value-type name='A' />\
         <add-function signature='globalFunc(int, int)' static='yes'>\
@@ -385,9 +386,10 @@ void TestAddFunction::testAddFunctionOnTypedef()
     const char cppCode[] = "template<class T> class Foo { }; typedef Foo<int> FooInt;";
     const char xmlCode[] = "\
     <typesystem package='Package'>\
+        <custom-type name='PySequence'/>\
         <primitive-type name='int'/>\
         <value-type name='FooInt'>\
-            <add-function signature='FooInt(PySequence*)'>\
+            <add-function signature='FooInt(PySequence)'>\
                 <inject-code class='target' position='beginning'>custom_code();</inject-code>\
             </add-function>\
             <add-function signature='method()'>\

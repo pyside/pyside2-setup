@@ -328,6 +328,26 @@ container-type
 
     The *optional*  **since** value is used to specify the API version of this container.
 
+
+.. _custom-type:
+
+custom-type
+^^^^^^^^^^^
+
+    The custom-type node simply makes the parser aware of the existence of a target
+    language type, thus avoiding errors when trying to find a type used in function
+    signatures and other places. The proper handling of the custom type is meant to
+    be done by a generator using the APIExractor.
+
+    .. code-block:: xml
+
+        <typesystem>
+            <custom-type name="..." />
+        </typesystem>
+
+    The **name** attribute is the name of the custom type, e.g., "PyObject".
+
+
 .. _function:
 
 function
