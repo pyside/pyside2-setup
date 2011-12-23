@@ -3,6 +3,12 @@
     <suppress-warning text="Duplicate type entry: 'sample'" />
     <suppress-warning text="Duplicate type entry: 'SampleNamespace'" />
 
+    <custom-type name="str"/>
+    <custom-type name="PyBytes"/>
+    <custom-type name="PyDate"/>
+    <custom-type name="PyObject"/>
+    <custom-type name="PyUnicode"/>
+
     <primitive-type name="bool"/>
     <primitive-type name="double"/>
     <primitive-type name="real"/>

@@ -1,5 +1,7 @@
 <?xml version="1.0" ?>
 <typesystem package="shiboken">
+    <custom-type name="PyObject" />
+    <custom-type name="PyType" />
     <primitive-type name="bool" />
     <primitive-type name="unsigned long" />
     <add-function signature="isValid(PyObject*)" return-type="bool">
