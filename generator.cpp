@@ -84,7 +84,7 @@ bool Generator::setup(const ApiExtractor& extractor, const QMap< QString, QStrin
 
 QString Generator::getSimplifiedContainerTypeName(const AbstractMetaType* type)
 {
-    if (!type->isContainer())
+    if (!type->typeEntry()->isContainer())
         return type->cppSignature();
     QString typeName = type->cppSignature();
     if (type->isConstant())
