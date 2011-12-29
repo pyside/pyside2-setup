@@ -33,10 +33,11 @@
 #elif __GNUC__ >= 4
     #define GENRUNNER_EXPORT __attribute__ ((visibility("default")))
     #define GENRUNNER_API GENRUNNER_EXPORT
+#elif __GNUC__ < 4
+    #define GENRUNNER_EXPORT
 #endif
 
 #ifndef GENRUNNER_API
-    #define GENRUNNER_EXPORT
     #define GENRUNNER_API
 #endif
 #endif
