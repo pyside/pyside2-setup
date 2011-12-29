@@ -7,6 +7,7 @@ Table of contents
     faq.rst
     commandlineoptions.rst
     typesystemvariables.rst
+    typeconverters.rst
     codeinjectionsemantics.rst
     sequenceprotocol.rst
     ownership.rst

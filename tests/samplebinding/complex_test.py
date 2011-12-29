@@ -61,6 +61,19 @@ class ComplexTest(unittest.TestCase):
         cpx2 = complex(5.6, 7.8)
         self.assertEqual(sample.sumComplexPair((cpx1, cpx2)), cpx1 + cpx2)
 
+    def testUsingTuples(self):
+        cpx1, cpx2 = (1.2, 3.4), (5.6, 7.8)
+        self.assertEqual(sample.sumComplexPair((cpx1, cpx2)), sample.sumComplexPair((complex(*cpx1), complex(*cpx2))))
+        cpx1, cpx2 = (1, 3), (5, 7)
+        self.assertEqual(sample.sumComplexPair((cpx1, cpx2)), sample.sumComplexPair((complex(*cpx1), complex(*cpx2))))
+        cpx1, cpx2 = (1.2, 3), (5.6, 7)
+        self.assertEqual(sample.sumComplexPair((cpx1, cpx2)), sample.sumComplexPair((complex(*cpx1), complex(*cpx2))))
+        cpx1, cpx2 = (1, 2, 3), (4, 5, 7)
+        self.assertRaises(TypeError, sample.sumComplexPair, (cpx1, cpx2))
+        cpx1, cpx2 = ('1', '2'), ('4', '5')
+        self.assertRaises(TypeError, sample.sumComplexPair, (cpx1, cpx2))
+
+
 if __name__ == '__main__':
     unittest.main()
 
