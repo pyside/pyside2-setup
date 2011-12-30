@@ -7,14 +7,14 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/
                       ${CMAKE_MODULE_PATH})
 
 find_package(Qt4 4.5.0)
-find_package(ApiExtractor 0.10.9 REQUIRED)
-find_package(GeneratorRunner 0.6.15 REQUIRED)
+find_package(ApiExtractor 0.10.10 REQUIRED)
+find_package(GeneratorRunner 0.6.16 REQUIRED)
 
 add_definitions(${QT_DEFINITIONS})
 
 set(shiboken_MAJOR_VERSION "1")
-set(shiboken_MINOR_VERSION "0")
-set(shiboken_MICRO_VERSION "10")
+set(shiboken_MINOR_VERSION "1")
+set(shiboken_MICRO_VERSION "0")
 set(shiboken_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
 
 option(BUILD_TESTS "Build tests." TRUE)
