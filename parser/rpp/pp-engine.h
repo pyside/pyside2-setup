@@ -143,6 +143,7 @@ class pp
 
     enum PP_DIRECTIVE_TYPE {
         PP_UNKNOWN_DIRECTIVE,
+        PP_UNNAMED_DIRECTIVE,
         PP_DEFINE,
         PP_INCLUDE,
         PP_INCLUDE_NEXT,

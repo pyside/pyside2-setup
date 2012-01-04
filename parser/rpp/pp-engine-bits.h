@@ -153,6 +153,8 @@ bool pp::find_header_protection(_InputIterator __first, _InputIterator __last, s
 inline pp::PP_DIRECTIVE_TYPE pp::find_directive(char const *__directive, std::size_t __size) const
 {
     switch (__size) {
+    case 0:
+        return PP_UNNAMED_DIRECTIVE;
     case 2:
         if (__directive[0] == 'i'
             && __directive[1] == 'f')
@@ -307,6 +309,14 @@ _InputIterator pp::handle_directive(char const *__directive, std::size_t __size,
 
     PP_DIRECTIVE_TYPE d = find_directive(__directive, __size);
     switch (d) {
+    case PP_UNNAMED_DIRECTIVE:
+        /* There are many boost headers that include the character '#'
+         * at the beginning of any line and just do nothing else with
+         * that unnamed directive. Well, as that's not an error so
+         * we'll just ignore this unnamed directive for now.
+         */
+        ++__last;
+        return ++__first;
     case PP_DEFINE:
         if (! skipping())
             return handle_define(__first, __last);
@@ -358,7 +368,15 @@ _InputIterator pp::handle_include(bool __skip_current_path, _InputIterator __fir
         name.reserve(255);
         expand_include(__first, __last, std::back_inserter(name));
         std::string::iterator it = skip_blanks(name.begin(), name.end());
-        assert(it != name.end() && (*it == '<' || *it == '"'));
+        if (it != name.end() && (*it != '<' || *it != '"')) {
+            std::cerr << "** WARNING APIExtractor does not support the use "
+                         "of #include directives without passing either "
+                         "\"<path/to/header.h>\" or \"./path/to/header.h\", "
+                         "for example. Invalid use at " << env.current_file
+                      << ":" << env.current_line << "." << std::endl;
+            return __last;
+        }
+
         handle_include(__skip_current_path, it, name.end(), __result);
         return __first;
     }
@@ -576,10 +594,36 @@ _InputIterator pp::handle_define(_InputIterator __first, _InputIterator __last)
 
     __first = skip_blanks(__first, __last);
 
+    /* Note: Sometimes one can include a path between brackets (for
+     * e.g., when defining a macro or so) so that we cannot simply
+     * ignore that. The in_path variable will handle this situation.
+     */
+    bool in_path = false;
     while (__first != __last && *__first != '\n') {
+        if ((*__first == '<' || *__first == '"') &&
+            (*(__first + 1) != '*' && *(__first + 1) != '/')) {
+            in_path = true;
+            goto skip_path;
+        }
+
+        if (in_path) {
+            if (*__first == '>' || *__first == '"') {
+                in_path = false;
+                goto skip_path;
+            } else if (*__first == ',' || *__first == ' ' || *__first == '\\') {
+                in_path = false;
+                continue;
+            }
+        }
+
         if (*__first == '/') {
-            __first = skip_comment_or_divop(__first, __last);
-            env.current_line += skip_comment_or_divop.lines;
+            if (*(__first + 1) != '*' && *(__first + 1) != '/') {
+                in_path = true;
+                goto skip_path;
+            } else {
+                __first = skip_comment_or_divop(__first, __last);
+                env.current_line += skip_comment_or_divop.lines;
+            }
         }
 
         if (*__first == '\\') {
@@ -594,6 +638,7 @@ _InputIterator pp::handle_define(_InputIterator __first, _InputIterator __last)
             }
         }
 
+skip_path:
         definition += *__first++;
     }
 
@@ -712,10 +757,13 @@ _InputIterator pp::eval_primary(_InputIterator __first, _InputIterator __last, V
         __first = eval_constant_expression(__first, __last, result);
         next_token(__first, __last, &token);
 
-        if (token != ')')
-            std::cerr << "** WARNING expected ``)'' = " << token << std::endl;
-        else
+        if (token != ')') {
+            std::cerr << "** WARNING expected ``)'' = " << token << " (at "
+                      << env.current_file << ":" << env.current_line
+                      << ")." << std::endl;
+        } else {
             __first = next_token(__first, __last, &token);
+        }
         break;
 
     default:
