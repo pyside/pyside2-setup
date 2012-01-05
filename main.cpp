@@ -165,12 +165,13 @@ static QMap<QString, QString> getCommandLineArgs()
     return args;
 }
 
-void printUsage(const GeneratorList& generators)
+void printUsage(const GeneratorList& generators, const QString& generatorName)
 {
     QTextStream s(stdout);
     s << "Usage:\n  "
-    << "generator [options] header-file typesystem-file\n\n"
-    "General options:\n";
+      << (generatorName.isEmpty() ? "generator" : generatorName)
+      << " [options] header-file typesystem-file\n\n"
+      << "General options:\n";
     QMap<QString, QString> generalOptions;
     generalOptions.insert("project-file=<file>", "text file containing a description of the binding project. Replaces and overrides command line arguments");
     generalOptions.insert("debug-level=[sparse|medium|full]", "Set the debug level");
@@ -221,7 +222,6 @@ int main(int argc, char *argv[])
 
     if (!generatorSet.isEmpty()) {
         QFileInfo generatorFile(generatorSet);
-
         if (!generatorFile.exists()) {
             QString generatorSetName(generatorSet + "_generator" + MODULE_EXTENSION);
 
@@ -253,11 +253,16 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    /* We need alias-name argument for the usage's message being
+     * printed properly when running Generatorrunner from a Shiboken's
+     * process. Don't worry, this "new method of doing IPC between two
+     * processes" is only used here as a workaround, and not our way
+     * out to do IPC. :-)
+     */
     if (args.contains("help")) {
-        printUsage(generators);
+        printUsage(generators, args.value("alias-name"));
         return EXIT_SUCCESS;
     }
-
 
     QString licenseComment;
     if (args.contains("license-file") && !args.value("license-file").isEmpty()) {
