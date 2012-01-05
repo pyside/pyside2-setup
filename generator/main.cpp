@@ -37,6 +37,17 @@ int main(int argc, char* argv[])
         }
         args.append(argv[i]);
     }
+
+    /* This will be necessary when the Generatorrunner calls the printUsage()
+     * function and the message that'll printed on the screen shows "shiboken"
+     * instead of "generator".
+     *
+     * Note: this argument doesn't do anything else other than just to set up
+     * the message that will be printed on the screen when calling printUsage()
+     * from Generatorrunner.
+     */
+    args.append("--alias-name=shiboken");
+
     return QProcess::execute(GENERATOR_BINARY, args);
 }
 
