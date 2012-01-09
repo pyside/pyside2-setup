@@ -1,7 +1,7 @@
 /*
  * This file is part of the Shiboken Python Binding Generator project.
  *
- * Copyright (C) 2011 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2011-2012 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -17,7 +17,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "handle.h"
@@ -30,4 +30,9 @@ HANDLE HandleHolder::createHandle()
 bool HandleHolder::compare(HandleHolder* other)
 {
     return other->m_handle == m_handle;
+}
+
+bool HandleHolder::compare2(HandleHolder* other)
+{
+    return other->m_handle2 == m_handle2;
 }

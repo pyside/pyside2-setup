@@ -1,7 +1,7 @@
 /*
  * This file is part of the Shiboken Python Binding Generator project.
  *
- * Copyright (C) 2010-2011 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2010-2012 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -17,13 +17,18 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef HANDLE_H
 #define HANDLE_H
 
 #include "libsamplemacros.h"
+
+/* See http://bugs.pyside.org/show_bug.cgi?id=1105. */
+namespace Foo {
+    typedef unsigned long HANDLE;
+}
 
 class LIBSAMPLE_API OBJ
 {
@@ -35,13 +40,20 @@ class LIBSAMPLE_API HandleHolder
 {
 public:
     explicit HandleHolder(HANDLE ptr = 0) : m_handle(ptr) {}
-    void set(HANDLE ptr) { m_handle = m_handle; }
-    HANDLE get() { return m_handle; }
+    explicit HandleHolder(Foo::HANDLE val = 0): m_handle2(val) {}
+
+    inline void set(HANDLE ptr) { m_handle = m_handle; }
+    inline void set(const Foo::HANDLE& val) { m_handle2 = val; }
+    inline HANDLE handle() { return m_handle; }
+    inline Foo::HANDLE handle2() { return m_handle2; }
 
     static HANDLE createHandle();
     bool compare(HandleHolder* other);
+    bool compare2(HandleHolder* other);
+
 private:
     HANDLE m_handle;
+    Foo::HANDLE m_handle2;
 };
 
 struct LIBSAMPLE_API PrimitiveStruct {};

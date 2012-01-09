@@ -1,7 +1,7 @@
 /*
  * This file is part of the Shiboken Python Bindings Generator project.
  *
- * Copyright (C) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2009-2012 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -306,10 +306,14 @@ void HeaderGenerator::finishGeneration()
     QList<const PrimitiveTypeEntry*> primitives = primitiveTypes();
     int pCount = 0;
     foreach (const PrimitiveTypeEntry* ptype, primitives) {
-        if (!ptype->generateCode() || !isUserPrimitive(ptype))
+        /* Note: do not generate indices for typedef'd primitive types
+         * as they'll use the primitive type converters instead, so we
+         * don't need to create any other.
+         */
+        if (!ptype->generateCode() || !ptype->customConversion())
             continue;
-        _writeTypeIndexDefineLine(macrosStream, getTypeIndexVariableName(ptype), pCount);
-        pCount++;
+
+        _writeTypeIndexDefineLine(macrosStream, getTypeIndexVariableName(ptype), pCount++);
     }
 
     foreach (const AbstractMetaType* container, instantiatedContainers()) {

@@ -1,7 +1,7 @@
 /*
  * This file is part of the Shiboken Python Bindings Generator project.
  *
- * Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2009-2012 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -359,7 +359,7 @@ public:
     QString guessCPythonCheckFunction(const QString& type, AbstractMetaType** metaType);
     QString cpythonIsConvertibleFunction(const TypeEntry* type, bool genericNumberType = false, bool checkExact = false);
     QString cpythonIsConvertibleFunction(const AbstractMetaType* metaType, bool genericNumberType = false);
-    QString cpythonIsConvertibleFunction(const AbstractMetaArgument* metaArg, bool genericNumberType = false)
+    inline QString cpythonIsConvertibleFunction(const AbstractMetaArgument* metaArg, bool genericNumberType = false)
     {
         return cpythonIsConvertibleFunction(metaArg->type(), genericNumberType);
     }
@@ -386,13 +386,13 @@ public:
     QString guessScopeForDefaultValue(const AbstractMetaFunction* func, const AbstractMetaArgument* arg);
 
     QString cpythonEnumName(const EnumTypeEntry* enumEntry);
-    QString cpythonEnumName(const AbstractMetaEnum* metaEnum)
+    inline QString cpythonEnumName(const AbstractMetaEnum* metaEnum)
     {
         return cpythonEnumName(metaEnum->typeEntry());
     }
 
     QString cpythonFlagsName(const FlagsTypeEntry* flagsEntry);
-    QString cpythonFlagsName(const AbstractMetaEnum* metaEnum)
+    inline QString cpythonFlagsName(const AbstractMetaEnum* metaEnum)
     {
         FlagsTypeEntry* flags = metaEnum->typeEntry()->flags();
         if (!flags)

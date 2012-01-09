@@ -24,6 +24,8 @@
     <primitive-type name="unsigned long"/>
     <primitive-type name="std::string"/>
 
+    <primitive-type name="Foo::HANDLE" target-lang-api-name="PyLong"/>
+
     <primitive-type name="std::size_t" target-lang-api-name="PyLong">
         <conversion-rule>
             <native-to-target>

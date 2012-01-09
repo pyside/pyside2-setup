@@ -1,7 +1,7 @@
 /*
  * This file is part of the Shiboken Python Bindings Generator project.
  *
- * Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2009-2012 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -703,14 +703,24 @@ QString ShibokenGenerator::converterObject(const AbstractMetaType* type)
         return "Shiboken::Conversions::PrimitiveTypeConverter<void*>()";
     if (type->typeEntry()->isContainer())
         return QString("%1[%2]").arg(convertersVariableName(type->typeEntry()->targetLangPackage())).arg(getTypeIndexVariableName(type));
+
     return converterObject(type->typeEntry());
 }
+
 QString ShibokenGenerator::converterObject(const TypeEntry* type)
 {
     if (isCppPrimitive(type))
         return QString("Shiboken::Conversions::PrimitiveTypeConverter<%1>()").arg(type->qualifiedCppName());
     if (isWrapperType(type) || type->isEnum() || type->isFlags())
         return QString("SBK_CONVERTER(%1)").arg(cpythonTypeNameExt(type));
+
+    /* the typedef'd primitive types case */
+    const PrimitiveTypeEntry* pte = reinterpret_cast<const PrimitiveTypeEntry*>(type);
+    if (pte->basicAliasedTypeEntry())
+        pte = pte->basicAliasedTypeEntry();
+    if (pte->isPrimitive() && !pte->isCppPrimitive() && !pte->customConversion())
+        return QString("Shiboken::Conversions::PrimitiveTypeConverter<%1>()").arg(pte->qualifiedCppName());
+
     return QString("%1[%2]").arg(convertersVariableName(type->targetLangPackage())).arg(getTypeIndexVariableName(type));
 }
 
@@ -1353,6 +1363,7 @@ QList<const CustomConversion*> ShibokenGenerator::getPrimitiveCustomConversions(
     foreach (const PrimitiveTypeEntry* type, primitiveTypes()) {
         if (!shouldGenerateTypeEntry(type) || !isUserPrimitive(type) || !type->customConversion())
             continue;
+
         conversions << type->customConversion();
     }
     return conversions;
@@ -2428,6 +2439,7 @@ void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream& s, const 
         qFatal(qPrintable(QString(MIN_CTOR_ERROR_MSG).arg(type->cppSignature())), NULL);
     s << " = " << ctor;
 }
+
 void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream& s, const TypeEntry* type, const QString& defaultCtor)
 {
     if (defaultCtor.isEmpty() && isCppPrimitive(type))
