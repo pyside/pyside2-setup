@@ -1,7 +1,7 @@
 /*
  * This file is part of the Shiboken Python Bindings Generator project.
  *
- * Copyright (C) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2009-2012 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -16,9 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA
- *
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <memory>
@@ -2786,6 +2784,8 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         bool isCtor = false;
         QString methodCall;
         QTextStream mc(&methodCall);
+        QString useVAddr;
+        QTextStream uva(&useVAddr);
         if (func->isOperatorOverload() && !func->isCallOperator()) {
             QString firstArg("(*" CPP_SELF_VAR ")");
             if (func->isPointerOperator())
@@ -2827,12 +2827,28 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                     QString ctorCall = className + '(' + userArgs.join(", ") + ')';
                     if (usePySideExtensions() && func->ownerClass()->isQObject()) {
                         s << INDENT << "void* addr = PySide::nextQObjectMemoryAddr();" << endl;
-                        mc << "addr ? new (addr) ::" << ctorCall << " : new ::" << ctorCall;
+                        uva << "if (addr) {" << endl;
+                        {
+                            Indentation indent(INDENT);
+
+                            uva << INDENT << "cptr = " << "new (addr) ::"
+                                << ctorCall << ';' << endl
+                                << INDENT
+                                << "PySide::setNextQObjectMemoryAddr(0);"
+                                << endl;
+                        }
+                        uva << INDENT << "} else {" << endl;
+                        {
+                            Indentation indent(INDENT);
+
+                            uva << INDENT << "cptr = " << "new ::"
+                                << ctorCall << ';' << endl;
+                        }
+                        uva << INDENT << "}" << endl;
                     } else {
                         mc << "new ::" << ctorCall;
                     }
                 }
-
             } else {
                 if (func->ownerClass()) {
                     if (!avoidProtectedHack() || !func->isProtected()) {
@@ -2890,7 +2906,8 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         if (!injectedCodeCallsCppFunction(func)) {
             s << INDENT << BEGIN_ALLOW_THREADS << endl << INDENT;
             if (isCtor) {
-                s << "cptr = ";
+                s << (useVAddr.isEmpty() ?
+                      QString("cptr = %1;").arg(methodCall) : useVAddr) << endl;
             } else if (func->type() && !func->isInplaceOperator()) {
                 bool writeReturnType = true;
                 if (avoidProtectedHack()) {
@@ -2916,8 +2933,10 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                     }
                 }
                 s << " " CPP_RETURN_VAR " = ";
+                s << methodCall << ';' << endl;
+            } else {
+                s << methodCall << ';' << endl;
             }
-            s << methodCall << ';' << endl;
             s << INDENT << END_ALLOW_THREADS << endl;
 
             if (!func->conversionRule(TypeSystem::TargetLangCode, 0).isEmpty()) {
