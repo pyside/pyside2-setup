@@ -1,17 +1,23 @@
 find_program(PYTHON_EXECUTABLE NAMES python2.7 python2.6 python2.5)
 
-if(NOT PYTHON_EXECUTABLE)
+if (NOT PYTHON_EXECUTABLE)
     find_package(PythonInterp REQUIRED)
 else()
     set(PYTHONINTERP_FOUND 1)
 endif()
 
-if(PYTHONINTERP_FOUND AND UNIX AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+if (PYTHONINTERP_FOUND AND UNIX AND CMAKE_BUILD_TYPE STREQUAL "Debug")
     # This is for Debian
     set(PYTHON_EXECUTABLE_TMP "${PYTHON_EXECUTABLE}-dbg")
 
-    # Fall back to the standard interpreter.
-    if(NOT EXISTS "${PYTHON_EXECUTABLE_TMP}")
+    if (NOT EXISTS "${PYTHON_EXECUTABLE_TMP}")
+        # On Fedora we usually have the suffix as debug. As we didn't
+        # find python interpreter with the suffix dbg we'll fall back
+        # to the suffix as debug.
+        set(PYTHON_EXECUTABLE_TMP "${PYTHON_EXECUTABLE}-debug")
+    endif()
+    # Falling back to the standard interpreter.
+    if (NOT EXISTS "${PYTHON_EXECUTABLE_TMP}")
         set(PYTHON_EXECUTABLE_TMP "${PYTHON_EXECUTABLE}")
     endif()
 
@@ -34,8 +40,8 @@ execute_process(
     OUTPUT_VARIABLE PYTHON_SUFFIX
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-#Fix missing variable on UNIX env
-if(NOT PYTHON_DEBUG_LIBRARIES AND UNIX)
+# Fix missing variable on UNIX env
+if (NOT PYTHON_DEBUG_LIBRARIES AND UNIX)
     string(REPLACE "-dbg" "" PYTHON_NAME_TMP ${PYTHON_SUFFIX})
     string(REPLACE "-python" "python" PYTHON_NAME ${PYTHON_NAME_TMP})
     find_library(LIBRARY_FOUND ${PYTHON_NAME}_d)
@@ -45,5 +51,3 @@ if(NOT PYTHON_DEBUG_LIBRARIES AND UNIX)
         set(PYTHON_DEBUG_LIBRARIES "${PYTHON_LIBRARIES}")
     endif()
 endif()
-
-
