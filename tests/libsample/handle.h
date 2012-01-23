@@ -40,7 +40,7 @@ class LIBSAMPLE_API HandleHolder
 {
 public:
     explicit HandleHolder(HANDLE ptr = 0) : m_handle(ptr) {}
-    explicit HandleHolder(Foo::HANDLE val = 0): m_handle2(val) {}
+    explicit HandleHolder(Foo::HANDLE val): m_handle2(val) {}
 
     inline void set(HANDLE ptr) { m_handle = m_handle; }
     inline void set(const Foo::HANDLE& val) { m_handle2 = val; }
