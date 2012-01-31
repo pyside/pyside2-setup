@@ -1,7 +1,7 @@
 /*
  * This file is part of the PySide project.
  *
- * Copyright (C) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2009-2012 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -36,7 +36,79 @@
     #define PATH_SPLITTER ":"
 #endif
 
-static void printOptions(QTextStream& s, const QMap<QString, QString>& options) {
+namespace {
+
+class ArgsHandler
+{
+public:
+    explicit ArgsHandler(const QMap<QString, QString>& other);
+    virtual ~ArgsHandler();
+
+    inline QMap<QString, QString>& args() const
+    {
+        return *m_args;
+    }
+
+    inline bool argExists(const QString& s) const
+    {
+        return m_args->contains(s);
+    }
+
+    QString removeArg(const QString& s);
+    bool argExistsRemove(const QString& s);
+
+    inline QString argValue(const QString& s) const
+    {
+        return m_args->value(s);
+    }
+
+    inline bool noArgs() const
+    {
+        return m_args->isEmpty();
+    }
+
+private:
+    QMap<QString, QString>* m_args;
+};
+
+ArgsHandler::ArgsHandler(const QMap<QString, QString>& other)
+    : m_args(new QMap<QString, QString>(other))
+{
+}
+
+ArgsHandler::~ArgsHandler()
+{
+    delete m_args;
+}
+
+QString ArgsHandler::removeArg(const QString& s)
+{
+    QString retval;
+
+    if (argExists(s)) {
+        retval = argValue(s);
+        m_args->remove(s);
+    }
+
+    return retval;
+}
+
+bool ArgsHandler::argExistsRemove(const QString& s)
+{
+    bool retval = false;
+
+    if (argExists(s)) {
+        retval = true;
+        m_args->remove(s);
+    }
+
+    return retval;
+}
+
+}
+
+static void printOptions(QTextStream& s, const QMap<QString, QString>& options)
+{
     QMap<QString, QString>::const_iterator it = options.constBegin();
     s.setFieldAlignment(QTextStream::AlignLeft);
     for (; it != options.constEnd(); ++it) {
@@ -198,6 +270,21 @@ void printUsage(const GeneratorList& generators, const QString& generatorName)
     }
 }
 
+static inline void printVerAndBanner()
+{
+    std::cout << "generatorrunner v" GENERATORRUNNER_VERSION << std::endl;
+    std::cout << "Copyright (C) 2009-2012 Nokia Corporation and/or its subsidiary(-ies)" << std::endl;
+}
+
+static inline void errorPrint(const QString& s,
+                              const bool& verAndBanner = false)
+{
+    if (verAndBanner)
+        printVerAndBanner();
+
+    std::cerr << s.toAscii().constData() << std::endl;
+}
+
 int main(int argc, char *argv[])
 {
     // needed by qxmlpatterns
@@ -205,20 +292,23 @@ int main(int argc, char *argv[])
 
     // Store command arguments in a map
     QMap<QString, QString> args = getCommandLineArgs();
+    ArgsHandler argsHandler(args);
     GeneratorList generators;
 
-    if (args.contains("version")) {
-        std::cout << "generatorrunner v" GENERATORRUNNER_VERSION << std::endl;
-        std::cout << "Copyright (C) 2009-2010 Nokia Corporation and/or its subsidiary(-ies)" << std::endl;
+    /* Get alias name (e.g.: shiboken) */
+    const QString aliasName = argsHandler.removeArg("alias-name");
+
+    if (argsHandler.argExistsRemove("version")) {
+        printVerAndBanner();
         return EXIT_SUCCESS;
     }
 
     // Try to load a generator
-    QString generatorSet = args.value("generator-set");
+    QString generatorSet = argsHandler.removeArg("generator-set");
 
     // Also check "generatorSet" command line argument for backward compatibility.
     if (generatorSet.isEmpty())
-        generatorSet = args.value("generatorSet");
+        generatorSet = argsHandler.removeArg("generatorSet");
 
     if (!generatorSet.isEmpty()) {
         QFileInfo generatorFile(generatorSet);
@@ -235,8 +325,9 @@ int main(int argc, char *argv[])
         }
 
         if (!generatorFile.exists()) {
-            std::cerr << argv[0] << ": Error loading generator-set plugin: ";
-            std::cerr << qPrintable(generatorFile.baseName()) << " module not found." << std::endl;
+            errorPrint(QString("%1: Error loading generator-set plugin: %2 module not found.").
+                       arg(aliasName.isEmpty() ? argv[0] : aliasName).
+                       arg(qPrintable(generatorFile.baseName())), true);
             return EXIT_FAILURE;
         }
 
@@ -245,11 +336,14 @@ int main(int argc, char *argv[])
         if (getGenerators) {
             getGenerators(&generators);
         } else {
-            std::cerr << argv[0] << ": Error loading generator-set plugin: " << qPrintable(plugin.errorString()) << std::endl;
+            errorPrint(QString("%1: Error loading generator-set plugin: %2").
+                       arg(aliasName.isEmpty() ? argv[0] : aliasName).
+                       arg(qPrintable(plugin.errorString())), true);
             return EXIT_FAILURE;
         }
-    } else if (!args.contains("help")) {
-        std::cerr << argv[0] << ": You need to specify a generator with --generator-set=GENERATOR_NAME" << std::endl;
+    } else if (!argsHandler.argExists("help")) {
+        errorPrint(QString("%1: You need to specify a generator with --generator-set=GENERATOR_NAME").
+                   arg(aliasName.isEmpty() ? argv[0] : aliasName), true);
         return EXIT_FAILURE;
     }
 
@@ -259,52 +353,58 @@ int main(int argc, char *argv[])
      * processes" is only used here as a workaround, and not our way
      * out to do IPC. :-)
      */
-    if (args.contains("help")) {
-        printUsage(generators, args.value("alias-name"));
+    if (argsHandler.argExistsRemove("help")) {
+        printUsage(generators, aliasName);
         return EXIT_SUCCESS;
     }
 
     QString licenseComment;
-    if (args.contains("license-file") && !args.value("license-file").isEmpty()) {
-        QString licenseFileName = args.value("license-file");
+    QString licenseFileName = argsHandler.removeArg("license-file");
+    if (!licenseFileName.isEmpty()) {
         if (QFile::exists(licenseFileName)) {
             QFile licenseFile(licenseFileName);
             if (licenseFile.open(QIODevice::ReadOnly))
                 licenseComment = licenseFile.readAll();
         } else {
-            std::cerr << "Couldn't find the file containing the license heading: ";
-            std::cerr << qPrintable(licenseFileName) << std::endl;
+            errorPrint(QString("Couldn't find the file containing the license heading: %1").
+                       arg(qPrintable(licenseFileName)));
             return EXIT_FAILURE;
         }
     }
 
-    QString outputDirectory = args.contains("output-directory") ? args["output-directory"] : "out";
+    QString outputDirectory = argsHandler.removeArg("output-directory");
+    if (outputDirectory.isEmpty())
+        outputDirectory = "out";
+
     if (!QDir(outputDirectory).exists()) {
         if (!QDir().mkpath(outputDirectory)) {
             ReportHandler::warning("Can't create output directory: "+outputDirectory);
             return EXIT_FAILURE;
         }
     }
+
     // Create and set-up API Extractor
     ApiExtractor extractor;
     extractor.setLogDirectory(outputDirectory);
 
-    if (args.contains("silent")) {
+    if (argsHandler.argExistsRemove("silent")) {
         extractor.setSilent(true);
-    } else if (args.contains("debug-level")) {
-        QString level = args.value("debug-level");
-        if (level == "sparse")
-            extractor.setDebugLevel(ReportHandler::SparseDebug);
-        else if (level == "medium")
-            extractor.setDebugLevel(ReportHandler::MediumDebug);
-        else if (level == "full")
-            extractor.setDebugLevel(ReportHandler::FullDebug);
+    } else {
+        QString level = argsHandler.removeArg("debug-level");
+        if (!level.isEmpty()) {
+            if (level == "sparse")
+                extractor.setDebugLevel(ReportHandler::SparseDebug);
+            else if (level == "medium")
+                extractor.setDebugLevel(ReportHandler::MediumDebug);
+            else if (level == "full")
+                extractor.setDebugLevel(ReportHandler::FullDebug);
+        }
     }
-    if (args.contains("no-suppress-warnings"))
+    if (argsHandler.argExistsRemove("no-suppress-warnings"))
         extractor.setSuppressWarnings(false);
 
-    if (args.contains("api-version")) {
-        QStringList versions = args["api-version"].split("|");
+    if (argsHandler.argExists("api-version")) {
+        QStringList versions = argsHandler.removeArg("api-version").split("|");
         foreach (QString fullVersion, versions) {
             QStringList parts = fullVersion.split(",");
             QString package;
@@ -315,21 +415,48 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (args.contains("drop-type-entries"))
-        extractor.setDropTypeEntries(args["drop-type-entries"]);
+    if (argsHandler.argExists("drop-type-entries"))
+        extractor.setDropTypeEntries(argsHandler.removeArg("drop-type-entries"));
 
-    if (args.contains("typesystem-paths"))
-        extractor.addTypesystemSearchPath(args.value("typesystem-paths").split(PATH_SPLITTER));
-    if (!args.value("include-paths").isEmpty())
-        extractor.addIncludePath(args.value("include-paths").split(PATH_SPLITTER));
+    QString path = argsHandler.removeArg("typesystem-paths");
+    if (!path.isEmpty())
+        extractor.addTypesystemSearchPath(path.split(PATH_SPLITTER));
 
+    path = argsHandler.removeArg("include-paths");
+    if (!path.isEmpty())
+        extractor.addIncludePath(path.split(PATH_SPLITTER));
 
-    QString cppFileName = args.value("arg-1");
-    QString typeSystemFileName = args.value("arg-2");
-    if (args.contains("arg-3")) {
-        std::cerr << "Too many arguments!" << std::endl;
+    QString cppFileName = argsHandler.removeArg("arg-1");
+    QString typeSystemFileName = argsHandler.removeArg("arg-2");
+
+    /* Make sure to remove the project file's arguments (if any) and
+     * --project-file, also the arguments of each generator before
+     * checking if there isn't any existing arguments in argsHandler.
+     */
+    argsHandler.removeArg("project-file");
+    QMap<QString, QString> projectFileArgs = getInitializedArguments();
+    if (!projectFileArgs.isEmpty()) {
+        QMap<QString, QString>::const_iterator it =
+                                projectFileArgs.constBegin();
+        for ( ; it != projectFileArgs.constEnd(); ++it)
+            argsHandler.removeArg(it.key());
+    }
+    foreach (Generator* generator, generators) {
+        QMap<QString, QString> options = generator->options();
+        if (!options.isEmpty()) {
+            QMap<QString, QString>::const_iterator it = options.constBegin();
+            for ( ; it != options.constEnd(); ++it)
+                argsHandler.removeArg(it.key());
+        }
+    }
+
+    if (!argsHandler.noArgs()) {
+        errorPrint(QString("%1: Called with wrong arguments.").
+                   arg(aliasName.isEmpty() ? argv[0] : aliasName), true);
+        std::cout << "Note: use --help option for more information." << std::endl;
         return EXIT_FAILURE;
     }
+
     extractor.setCppFileName(cppFileName);
     extractor.setTypeSystem(typeSystemFileName);
     if (!extractor.run())
