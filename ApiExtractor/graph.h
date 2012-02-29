@@ -27,10 +27,9 @@
 #include <QLinkedList>
 #include <QHash>
 #include <QString>
-#include "apiextractormacros.h"
 
 /// A graph that can have their nodes topologically sorted.
-class APIEXTRACTOR_API Graph
+class Graph
 {
 public:
     /// Create a new graph with \p numNodes nodes.

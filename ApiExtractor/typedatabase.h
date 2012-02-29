@@ -26,15 +26,16 @@
 
 #include <QStringList>
 #include "typesystem.h"
+#include "apiextractormacros.h"
 
-APIEXTRACTOR_API void setTypeRevision(TypeEntry* typeEntry, int revision);
-APIEXTRACTOR_API int getTypeRevision(const TypeEntry* typeEntry);
-APIEXTRACTOR_API int getTypeIndex(const TypeEntry* typeEntry);
-APIEXTRACTOR_API int getMaxTypeIndex();
+void setTypeRevision(TypeEntry* typeEntry, int revision);
+int getTypeRevision(const TypeEntry* typeEntry);
+int getTypeIndex(const TypeEntry* typeEntry);
+int getMaxTypeIndex();
 
 class ContainerTypeEntry;
 class PrimitiveTypeEntry;
-class APIEXTRACTOR_API TypeDatabase
+class TypeDatabase
 {
     TypeDatabase();
     TypeDatabase(const TypeDatabase&);

@@ -34,7 +34,7 @@
 
 class TypeDatabase;
 
-class APIEXTRACTOR_API AbstractMetaBuilder
+class AbstractMetaBuilder
 {
 public:
     enum RejectReason {

@@ -32,7 +32,7 @@
 class AbstractMetaBuilder;
 class QIODevice;
 
-class APIEXTRACTOR_API ApiExtractor
+class ApiExtractor
 {
 public:
     ApiExtractor();

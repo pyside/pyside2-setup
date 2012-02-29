@@ -24,13 +24,12 @@
 #ifndef INCLUDE_H
 #define INCLUDE_H
 
-#include "apiextractormacros.h"
 #include <QString>
 #include <QList>
 
 class QTextStream;
 
-class APIEXTRACTOR_API Include
+class Include
 {
 public:
     enum IncludeType {
@@ -69,14 +68,14 @@ public:
         return m_type == other.m_type && m_name == other.m_name;
     }
 
-    friend APIEXTRACTOR_API uint qHash(const Include&);
+    friend uint qHash(const Include&);
     private:
         IncludeType m_type;
         QString m_name;
 };
 
-APIEXTRACTOR_API uint qHash(const Include& inc);
-APIEXTRACTOR_API QTextStream& operator<<(QTextStream& out, const Include& include);
+uint qHash(const Include& inc);
+QTextStream& operator<<(QTextStream& out, const Include& include);
 
 typedef QList<Include> IncludeList;
 

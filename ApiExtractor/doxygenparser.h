@@ -26,7 +26,7 @@
 
 #include "docparser.h"
 
-class APIEXTRACTOR_API DoxygenParser : public DocParser
+class DoxygenParser : public DocParser
 {
 public:
     DoxygenParser()  {}

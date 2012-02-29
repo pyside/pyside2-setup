@@ -25,9 +25,8 @@
 #define REPORTHANDLER_H
 
 class QString;
-#include "apiextractormacros.h"
 
-class APIEXTRACTOR_API ReportHandler
+class ReportHandler
 {
 public:
     enum DebugLevel { NoDebug, SparseDebug, MediumDebug, FullDebug };

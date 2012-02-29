@@ -32,7 +32,7 @@ class QDomDocument;
 class QDomNode;
 class QXmlQuery;
 
-class APIEXTRACTOR_API DocParser
+class DocParser
 {
 public:
     DocParser();

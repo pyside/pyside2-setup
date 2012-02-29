@@ -43,7 +43,7 @@ class AbstractMetaEnumValue;
 class AbstractMetaEnum;
 class QPropertySpec;
 
-class APIEXTRACTOR_API Documentation
+class Documentation
 {
 public:
     enum Format {
@@ -81,7 +81,7 @@ private:
 typedef QList<AbstractMetaField *> AbstractMetaFieldList;
 typedef QList<AbstractMetaArgument *> AbstractMetaArgumentList;
 typedef QList<AbstractMetaFunction *> AbstractMetaFunctionList;
-class APIEXTRACTOR_API AbstractMetaClassList : public  QList<AbstractMetaClass *>
+class AbstractMetaClassList : public  QList<AbstractMetaClass *>
 {
 public:
     AbstractMetaClass *findClass(const QString &name) const;
@@ -91,7 +91,7 @@ public:
 
 };
 
-class APIEXTRACTOR_API AbstractMetaAttributes
+class AbstractMetaAttributes
 {
 public:
     AbstractMetaAttributes() : m_attributes(0), m_originalAttributes(0) {};
@@ -292,7 +292,7 @@ private:
 };
 
 typedef QList<AbstractMetaType*> AbstractMetaTypeList;
-class APIEXTRACTOR_API AbstractMetaType
+class AbstractMetaType
 {
 public:
 
@@ -615,7 +615,7 @@ private:
     Q_DISABLE_COPY(AbstractMetaType);
 };
 
-class APIEXTRACTOR_API AbstractMetaVariable
+class AbstractMetaVariable
 {
 public:
     AbstractMetaVariable() : m_type(0), m_hasName(false) {}
@@ -683,7 +683,7 @@ private:
 
 
 
-class APIEXTRACTOR_API AbstractMetaArgument : public AbstractMetaVariable
+class AbstractMetaArgument : public AbstractMetaVariable
 {
 public:
     AbstractMetaArgument() : m_argumentIndex(0) {};
@@ -731,7 +731,7 @@ private:
 };
 
 
-class APIEXTRACTOR_API AbstractMetaField : public AbstractMetaVariable, public AbstractMetaAttributes
+class AbstractMetaField : public AbstractMetaVariable, public AbstractMetaAttributes
 {
 public:
     AbstractMetaField();
@@ -764,7 +764,7 @@ private:
     const AbstractMetaClass *m_class;
 };
 
-class APIEXTRACTOR_API AbstractMetaFunction : public AbstractMetaAttributes
+class AbstractMetaFunction : public AbstractMetaAttributes
 {
 public:
     enum FunctionType {
@@ -1349,7 +1349,7 @@ private:
 
 typedef QList<AbstractMetaEnum *> AbstractMetaEnumList;
 
-class APIEXTRACTOR_API AbstractMetaClass : public AbstractMetaAttributes
+class AbstractMetaClass : public AbstractMetaAttributes
 {
 public:
     enum FunctionQueryOption {

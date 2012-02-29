@@ -29,7 +29,6 @@
 #include <QtCore/QStringList>
 #include <QtCore/QMap>
 #include <QtCore/QDebug>
-#include "apiextractormacros.h"
 #include "include.h"
 
 //Used to identify the conversion rule to avoid break API
@@ -82,7 +81,7 @@ enum Ownership {
 };
 };
 
-struct APIEXTRACTOR_API ReferenceCount
+struct ReferenceCount
 {
     ReferenceCount()  {}
     enum Action { // 0x01 - 0xff
@@ -102,7 +101,7 @@ struct APIEXTRACTOR_API ReferenceCount
     QString varName;
 };
 
-struct APIEXTRACTOR_API ArgumentOwner
+struct ArgumentOwner
 {
     enum Action {
         Invalid     = 0x00,
@@ -121,7 +120,7 @@ struct APIEXTRACTOR_API ArgumentOwner
     int index;
 };
 
-class APIEXTRACTOR_API CodeSnipFragment
+class CodeSnipFragment
 {
 private:
     QString m_code;
@@ -138,7 +137,7 @@ public:
     QString code() const;
 };
 
-class APIEXTRACTOR_API CodeSnipAbstract
+class CodeSnipAbstract
 {
 public:
     QString code() const;
@@ -156,7 +155,7 @@ public:
     QList<CodeSnipFragment> codeList;
 };
 
-class APIEXTRACTOR_API CustomFunction : public CodeSnipAbstract
+class CustomFunction : public CodeSnipAbstract
 {
 public:
     CustomFunction(const QString &n = QString()) : name(n) { }
@@ -165,7 +164,7 @@ public:
     QString paramName;
 };
 
-class APIEXTRACTOR_API TemplateEntry : public CodeSnipAbstract
+class TemplateEntry : public CodeSnipAbstract
 {
 public:
     TemplateEntry(const QString &name, double vr)
@@ -190,7 +189,7 @@ private:
 
 typedef QHash<QString, TemplateEntry *> TemplateEntryHash;
 
-class APIEXTRACTOR_API TemplateInstance
+class TemplateInstance
 {
 public:
     TemplateInstance(const QString &name, double vr)
@@ -220,7 +219,7 @@ private:
 };
 
 
-class APIEXTRACTOR_API CodeSnip : public CodeSnipAbstract
+class CodeSnip : public CodeSnipAbstract
 {
 public:
     enum Position {
@@ -245,7 +244,7 @@ public:
 };
 typedef QList<CodeSnip> CodeSnipList;
 
-struct APIEXTRACTOR_API ArgumentModification
+struct ArgumentModification
 {
     ArgumentModification(int idx, double vr)
             : removedDefaultExpression(false), removed(false),
@@ -293,7 +292,7 @@ struct APIEXTRACTOR_API ArgumentModification
     QString renamed_to;
 };
 
-struct APIEXTRACTOR_API Modification
+struct Modification
 {
     enum Modifiers {
         Private =               0x0001,
@@ -384,7 +383,7 @@ struct APIEXTRACTOR_API Modification
     TypeSystem::Language removal;
 };
 
-struct APIEXTRACTOR_API FunctionModification: public Modification
+struct FunctionModification: public Modification
 {
     FunctionModification(double vr) : m_thread(false), m_allowThread(false), m_version(vr) {}
 
@@ -436,7 +435,7 @@ private:
 };
 typedef QList<FunctionModification> FunctionModificationList;
 
-struct APIEXTRACTOR_API FieldModification: public Modification
+struct FieldModification: public Modification
 {
     bool isReadable() const
     {
@@ -458,7 +457,7 @@ typedef QList<FieldModification> FieldModificationList;
 *   This info will be used later to create a fake AbstractMetaFunction which
 *   will be inserted into the right AbstractMetaClass.
 */
-struct APIEXTRACTOR_API AddedFunction
+struct AddedFunction
 {
     /// Function access types.
     enum Access {
@@ -547,7 +546,7 @@ private:
 };
 typedef QList<AddedFunction> AddedFunctionList;
 
-struct APIEXTRACTOR_API ExpensePolicy
+struct ExpensePolicy
 {
     ExpensePolicy() : limit(-1) {}
     int limit;
@@ -561,7 +560,7 @@ struct APIEXTRACTOR_API ExpensePolicy
 class InterfaceTypeEntry;
 class ObjectTypeEntry;
 
-class APIEXTRACTOR_API DocModification
+class DocModification
 {
 public:
     enum Mode {
@@ -616,7 +615,7 @@ typedef QList<DocModification> DocModificationList;
 
 class CustomConversion;
 
-class APIEXTRACTOR_API TypeEntry
+class TypeEntry
 {
 public:
     enum Type {
@@ -988,7 +987,7 @@ typedef QHash<QString, QList<TypeEntry *> > TypeEntryHash;
 typedef QHash<QString, TypeEntry *> SingleTypeEntryHash;
 
 
-class APIEXTRACTOR_API TypeSystemTypeEntry : public TypeEntry
+class TypeSystemTypeEntry : public TypeEntry
 {
 public:
     TypeSystemTypeEntry(const QString &name, double vr)
@@ -997,19 +996,19 @@ public:
     };
 };
 
-class APIEXTRACTOR_API VoidTypeEntry : public TypeEntry
+class VoidTypeEntry : public TypeEntry
 {
 public:
     VoidTypeEntry() : TypeEntry("void", VoidType, 0) { }
 };
 
-class APIEXTRACTOR_API VarargsTypeEntry : public TypeEntry
+class VarargsTypeEntry : public TypeEntry
 {
 public:
     VarargsTypeEntry() : TypeEntry("...", VarargsType, 0) { }
 };
 
-class APIEXTRACTOR_API TemplateArgumentEntry : public TypeEntry
+class TemplateArgumentEntry : public TypeEntry
 {
 public:
     TemplateArgumentEntry(const QString &name, double vr)
@@ -1030,7 +1029,7 @@ private:
     int m_ordinal;
 };
 
-class APIEXTRACTOR_API ArrayTypeEntry : public TypeEntry
+class ArrayTypeEntry : public TypeEntry
 {
 public:
     ArrayTypeEntry(const TypeEntry *nested_type, double vr)
@@ -1065,7 +1064,7 @@ private:
 };
 
 
-class APIEXTRACTOR_API PrimitiveTypeEntry : public TypeEntry
+class PrimitiveTypeEntry : public TypeEntry
 {
 public:
     PrimitiveTypeEntry(const QString &name, double vr)
@@ -1163,7 +1162,7 @@ private:
 
 typedef QList<const PrimitiveTypeEntry*> PrimitiveTypeEntryList;
 
-struct APIEXTRACTOR_API EnumValueRedirection
+struct EnumValueRedirection
 {
     EnumValueRedirection(const QString &rej, const QString &us)
             : rejected(rej),
@@ -1174,7 +1173,7 @@ struct APIEXTRACTOR_API EnumValueRedirection
     QString used;
 };
 
-class APIEXTRACTOR_API EnumTypeEntry : public TypeEntry
+class EnumTypeEntry : public TypeEntry
 {
 public:
     EnumTypeEntry(const QString &nspace, const QString &enumName, double vr)
@@ -1325,7 +1324,7 @@ private:
     bool m_anonymous;
 };
 
-class APIEXTRACTOR_API EnumValueTypeEntry : public TypeEntry
+class EnumValueTypeEntry : public TypeEntry
 {
 public:
     EnumValueTypeEntry(const QString& name, const QString& value, const EnumTypeEntry* enclosingEnum, double vr)
@@ -1340,7 +1339,7 @@ private:
     const EnumTypeEntry* m_enclosingEnum;
 };
 
-class APIEXTRACTOR_API FlagsTypeEntry : public TypeEntry
+class FlagsTypeEntry : public TypeEntry
 {
 public:
     FlagsTypeEntry(const QString &name, double vr) : TypeEntry(name, FlagsType, vr), m_enum(0)
@@ -1402,7 +1401,7 @@ private:
 };
 
 
-class APIEXTRACTOR_API ComplexTypeEntry : public TypeEntry
+class ComplexTypeEntry : public TypeEntry
 {
 public:
     enum TypeFlag {
@@ -1669,7 +1668,7 @@ private:
     const ComplexTypeEntry* m_baseContainerType;
 };
 
-class APIEXTRACTOR_API ContainerTypeEntry : public ComplexTypeEntry
+class ContainerTypeEntry : public ComplexTypeEntry
 {
 public:
     enum Type {
@@ -1730,14 +1729,14 @@ private:
 
 typedef QList<const ContainerTypeEntry*> ContainerTypeEntryList;
 
-class APIEXTRACTOR_API NamespaceTypeEntry : public ComplexTypeEntry
+class NamespaceTypeEntry : public ComplexTypeEntry
 {
 public:
     NamespaceTypeEntry(const QString &name, double vr) : ComplexTypeEntry(name, NamespaceType, vr) { }
 };
 
 
-class APIEXTRACTOR_API ValueTypeEntry : public ComplexTypeEntry
+class ValueTypeEntry : public ComplexTypeEntry
 {
 public:
     ValueTypeEntry(const QString &name, double vr) : ComplexTypeEntry(name, BasicValueType, vr) { }
@@ -1757,7 +1756,7 @@ protected:
 };
 
 
-class APIEXTRACTOR_API StringTypeEntry : public ValueTypeEntry
+class StringTypeEntry : public ValueTypeEntry
 {
 public:
     StringTypeEntry(const QString &name, double vr)
@@ -1776,7 +1775,7 @@ public:
     }
 };
 
-class APIEXTRACTOR_API CharTypeEntry : public ValueTypeEntry
+class CharTypeEntry : public ValueTypeEntry
 {
 public:
     CharTypeEntry(const QString &name, double vr) : ValueTypeEntry(name, CharType, vr)
@@ -1797,7 +1796,7 @@ public:
     }
 };
 
-class APIEXTRACTOR_API VariantTypeEntry: public ValueTypeEntry
+class VariantTypeEntry: public ValueTypeEntry
 {
 public:
     VariantTypeEntry(const QString &name, double vr) : ValueTypeEntry(name, VariantType, vr) { }
@@ -1813,7 +1812,7 @@ public:
 };
 
 
-class APIEXTRACTOR_API InterfaceTypeEntry : public ComplexTypeEntry
+class InterfaceTypeEntry : public ComplexTypeEntry
 {
 public:
     InterfaceTypeEntry(const QString &name, double vr)
@@ -1847,7 +1846,7 @@ private:
 };
 
 
-class APIEXTRACTOR_API FunctionTypeEntry : public TypeEntry
+class FunctionTypeEntry : public TypeEntry
 {
 public:
     FunctionTypeEntry(const QString& name, const QString& signature, double vr)
@@ -1873,7 +1872,7 @@ private:
     QStringList m_signatures;
 };
 
-class APIEXTRACTOR_API ObjectTypeEntry : public ComplexTypeEntry
+class ObjectTypeEntry : public ComplexTypeEntry
 {
 public:
     ObjectTypeEntry(const QString &name, double vr)
@@ -1897,7 +1896,7 @@ private:
     InterfaceTypeEntry *m_interface;
 };
 
-struct APIEXTRACTOR_API TypeRejection
+struct TypeRejection
 {
     QString class_name;
     QString function_name;
@@ -1905,9 +1904,9 @@ struct APIEXTRACTOR_API TypeRejection
     QString enum_name;
 };
 
-APIEXTRACTOR_API QString fixCppTypeName(const QString &name);
+QString fixCppTypeName(const QString &name);
 
-class APIEXTRACTOR_API CustomConversion
+class CustomConversion
 {
 public:
     CustomConversion(TypeEntry* ownerType);
@@ -1917,7 +1916,7 @@ public:
     QString nativeToTargetConversion() const;
     void setNativeToTargetConversion(const QString& nativeToTargetConversion);
 
-    class APIEXTRACTOR_API TargetToNativeConversion
+    class TargetToNativeConversion
     {
     public:
         TargetToNativeConversion(const QString& sourceTypeName,
