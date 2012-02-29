@@ -32,7 +32,6 @@
 #include "fileout.h"
 #include "parser/rpp/pp.h"
 #include "abstractmetabuilder.h"
-#include "apiextractorversion.h"
 #include "typedatabase.h"
 
 static bool preprocess(const QString& sourceFile,
@@ -41,6 +40,9 @@ static bool preprocess(const QString& sourceFile,
 
 ApiExtractor::ApiExtractor() : m_builder(0)
 {
+    static bool qrcInitialized = false;
+    if (!qrcInitialized)
+        Q_INIT_RESOURCE(generator);
     // Environment TYPESYSTEMPATH
     QString envTypesystemPaths = getenv("TYPESYSTEMPATH");
     if (!envTypesystemPaths.isEmpty())

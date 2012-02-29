@@ -1,4 +1,0 @@
-#ifndef APIEXTRACTORVERSION_H
-#define APIEXTRACTORVERSION_H
-#define APIEXTRACTOR_VERSION "@apiextractor_VERSION@"
-#endif

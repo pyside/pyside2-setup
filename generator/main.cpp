@@ -309,7 +309,12 @@ int main(int argc, char *argv[])
 
     // Pre-defined generator sets.
     if (generatorSet == "qtdoc") {
+#ifndef DOCSTRINGS_ENABLED
+        errorPrint("shiboken: Doc strings extractions was not enabled in this shiboken build.");
+        return EXIT_FAILURE;
+#else
         generators << new QtDocGenerator;
+#endif
     } else if (generatorSet.isEmpty() || generatorSet == "shiboken") {
         generators << new CppGenerator << new HeaderGenerator;
     } else {
