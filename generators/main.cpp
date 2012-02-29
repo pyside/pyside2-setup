@@ -31,6 +31,7 @@
 #include "shibokenconfig.h"
 #include "cppgenerator.h"
 #include "headergenerator.h"
+#include "qtdocgenerator.h"
 
 #ifdef _WINDOWS
     #define PATH_SPLITTER ";"
@@ -301,49 +302,20 @@ int main(int argc, char *argv[])
         return EXIT_SUCCESS;
     }
 
-    // FIXME: This should be choosen by command line!
-    generators << new CppGenerator << new HeaderGenerator;
-#if 0    
-    // Try to load a generator
     QString generatorSet = argsHandler.removeArg("generator-set");
-
     // Also check "generatorSet" command line argument for backward compatibility.
     if (generatorSet.isEmpty())
         generatorSet = argsHandler.removeArg("generatorSet");
 
-    if (!generatorSet.isEmpty()) {
-        QFileInfo generatorFile(generatorSet);
-        if (!generatorFile.exists()) {
-            QString generatorSetName(generatorSet + "_generator");
-
-            // More library paths may be added via the QT_PLUGIN_PATH environment variable.
-            QCoreApplication::addLibraryPath("foobar");
-            foreach (const QString& path, QCoreApplication::libraryPaths()) {
-                generatorFile.setFile(QDir(path), generatorSetName);
-                if (generatorFile.exists())
-                    break;
-            }
-        }
-
-        if (!generatorFile.exists()) {
-            errorPrint(QString("shiboken: Error loading generator-set plugin: %2 module not found.").arg(qPrintable(generatorFile.baseName())), true);
-            return EXIT_FAILURE;
-        }
-
-        QLibrary plugin(generatorFile.filePath());
-        getGeneratorsFunc getGenerators = (getGeneratorsFunc)plugin.resolve("getGenerators");
-        if (getGenerators) {
-            getGenerators(&generators);
-        } else {
-            errorPrint(QString("shiboken: Error loading generator-set plugin: %2").
-                       arg(qPrintable(plugin.errorString())), true);
-            return EXIT_FAILURE;
-        }
-    } else if (!argsHandler.argExists("help")) {
-        errorPrint("shiboken: You need to specify a generator with --generator-set=GENERATOR_NAME");
+    // Pre-defined generator sets.
+    if (generatorSet == "qtdoc") {
+        generators << new QtDocGenerator;
+    } else if (generatorSet.isEmpty() || generatorSet == "shiboken") {
+        generators << new CppGenerator << new HeaderGenerator;
+    } else {
+        errorPrint("shiboken: Unknown generator set, try \"shiboken\" or \"qtdoc\".");
         return EXIT_FAILURE;
     }
-#endif
 
     if (argsHandler.argExistsRemove("help")) {
         printUsage(generators);

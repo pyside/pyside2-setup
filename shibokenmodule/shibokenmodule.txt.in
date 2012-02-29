@@ -1,6 +1,6 @@
 [generator-project]
 
-generator-set = @generators_BINARY_DIR@/shiboken_generator@CMAKE_RELEASE_POSTFIX@@CMAKE_DEBUG_POSTFIX@@CMAKE_SHARED_LIBRARY_SUFFIX@
+generator-set = shiboken
 
 header-file = @CMAKE_CURRENT_SOURCE_DIR@/nothing.h
 typesystem-file = @CMAKE_CURRENT_SOURCE_DIR@/typesystem_shiboken.xml
