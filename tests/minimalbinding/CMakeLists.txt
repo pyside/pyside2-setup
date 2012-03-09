@@ -16,7 +16,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/minimal-binding.txt.in"
                "${CMAKE_CURRENT_BINARY_DIR}/minimal-binding.txt" @ONLY)
 
 add_custom_command(OUTPUT ${minimal_SRC}
-COMMAND ${GENERATORRUNNER_BINARY} --project-file=${CMAKE_CURRENT_BINARY_DIR}/minimal-binding.txt ${GENERATOR_EXTRA_FLAGS}
+COMMAND ${shibokengenerator_BINARY_DIR}/shiboken --project-file=${CMAKE_CURRENT_BINARY_DIR}/minimal-binding.txt ${GENERATOR_EXTRA_FLAGS}
 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for 'minimal' test binding..."
 )
@@ -36,5 +36,5 @@ target_link_libraries(minimal
                       ${SBK_PYTHON_LIBRARIES}
                       libshiboken)
 
-add_dependencies(minimal shiboken_generator)
+add_dependencies(minimal shiboken)
 

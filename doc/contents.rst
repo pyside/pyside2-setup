@@ -5,7 +5,9 @@ Table of contents
     :maxdepth: 3
 
     faq.rst
+    overview.rst
     commandlineoptions.rst
+    projectfile.rst
     typesystemvariables.rst
     typeconverters.rst
     codeinjectionsemantics.rst

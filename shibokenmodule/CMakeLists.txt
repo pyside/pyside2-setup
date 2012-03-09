@@ -9,7 +9,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/shiboken/shiboken_module_wrapper.cpp
 )
 
 add_custom_command(OUTPUT ${sample_SRC}
-COMMAND ${GENERATORRUNNER_BINARY} --project-file=${CMAKE_CURRENT_BINARY_DIR}/shibokenmodule.txt ${GENERATOR_EXTRA_FLAGS}
+COMMAND ${shibokengenerator_BINARY_DIR}/shiboken --project-file=${CMAKE_CURRENT_BINARY_DIR}/shibokenmodule.txt ${GENERATOR_EXTRA_FLAGS}
 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for 'shiboken'..."
 )
@@ -29,5 +29,5 @@ target_link_libraries(shibokenmodule
                       ${SBK_PYTHON_LIBRARIES}
                       libshiboken)
 
-add_dependencies(shibokenmodule shiboken_generator)
+add_dependencies(shibokenmodule shiboken)
 

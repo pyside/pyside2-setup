@@ -116,7 +116,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/sample-binding.txt.in"
                "${CMAKE_CURRENT_BINARY_DIR}/sample-binding.txt" @ONLY)
 
 add_custom_command(OUTPUT ${sample_SRC}
-COMMAND ${GENERATORRUNNER_BINARY} --project-file=${CMAKE_CURRENT_BINARY_DIR}/sample-binding.txt ${GENERATOR_EXTRA_FLAGS}
+COMMAND ${shibokengenerator_BINARY_DIR}/shiboken --project-file=${CMAKE_CURRENT_BINARY_DIR}/sample-binding.txt ${GENERATOR_EXTRA_FLAGS}
 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for 'sample' test binding..."
 )
@@ -136,5 +136,4 @@ target_link_libraries(sample
                       ${SBK_PYTHON_LIBRARIES}
                       libshiboken)
 
-add_dependencies(sample shiboken_generator)
-
+add_dependencies(sample shiboken)

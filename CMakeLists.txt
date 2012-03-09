@@ -8,7 +8,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/
 
 find_package(Qt4 4.5.0)
 find_package(ApiExtractor 0.10.11 REQUIRED)
-find_package(GeneratorRunner 0.6.17 REQUIRED)
 
 add_definitions(${QT_DEFINITIONS})
 
@@ -61,6 +60,7 @@ if (WIN32)
 else()
     set(PATH_SEP ":")
 endif()
+set(generator_plugin_DIR ${LIB_INSTALL_DIR}/generatorrunner${generator_SUFFIX})
 
 # uninstall target
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
@@ -101,8 +101,8 @@ add_subdirectory(libshiboken)
 add_subdirectory(doc)
 
 # deps found, compile the generator.
-if (QT4_FOUND AND ApiExtractor_FOUND AND GeneratorRunner_FOUND AND PYTHONLIBS_FOUND AND PYTHONINTERP_FOUND)
-    add_subdirectory(generator)
+if (QT4_FOUND AND ApiExtractor_FOUND AND PYTHONLIBS_FOUND AND PYTHONINTERP_FOUND)
+    add_subdirectory(generators)
     add_subdirectory(shibokenmodule)
 
     if (BUILD_TESTS)

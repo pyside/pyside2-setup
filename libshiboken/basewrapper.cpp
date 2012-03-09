@@ -235,8 +235,7 @@ void SbkDeallocWrapperWithPrivateDtor(PyObject* self)
     if (sbkObj->weakreflist)
         PyObject_ClearWeakRefs(self);
 
-    Shiboken::BindingManager::instance().releaseWrapper(sbkObj);
-    Shiboken::Object::deallocData(sbkObj);
+    Shiboken::Object::deallocData(sbkObj, true);
 }
 
 void SbkObjectTypeDealloc(PyObject* pyObj)
