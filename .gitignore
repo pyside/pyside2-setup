@@ -4,6 +4,5 @@ build
 *.pyc
 *.o
 *.so
-.preprocessed.tmp
 .*.swp
 *.kdev4

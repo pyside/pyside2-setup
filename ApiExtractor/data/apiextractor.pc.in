@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=@CMAKE_INSTALL_PREFIX@/bin
+libdir=@CMAKE_INSTALL_PREFIX@/lib
+includedir=@CMAKE_INSTALL_PREFIX@/include
+
+Name: apiextractor
+Description: Qt4 Binding Generator library
+Requires: QtCore
+Version: @apiextractor_VERSION@
+Libs: -L${libdir} -lapiextractor@apiextractor_SUFFIX@@LIBRARY_OUTPUT_SUFFIX@
+Cflags: -I${includedir}/apiextractor@apiextractor_SUFFIX@
