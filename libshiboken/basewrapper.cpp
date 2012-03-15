@@ -206,7 +206,10 @@ SbkObjectType SbkObject_Type = { { {
 void SbkDeallocWrapper(PyObject* pyObj)
 {
     SbkObject* sbkObj = reinterpret_cast<SbkObject*>(pyObj);
-    if (sbkObj->weakreflist)
+
+    // Check that Python is still initialized as sometimes this is called by a static destructor
+    // after Python interpeter is shutdown.
+    if (sbkObj->weakreflist && Py_IsInitialized())
         PyObject_ClearWeakRefs(pyObj);
 
     // If I have ownership and is valid delete C++ pointer
@@ -232,7 +235,9 @@ void SbkDeallocWrapper(PyObject* pyObj)
 void SbkDeallocWrapperWithPrivateDtor(PyObject* self)
 {
     SbkObject* sbkObj = reinterpret_cast<SbkObject*>(self);
-    if (sbkObj->weakreflist)
+    // Check that Python is still initialized as sometimes this is called by a static destructor
+    // after Python interpeter is shutdown.
+    if (sbkObj->weakreflist && Py_IsInitialized())
         PyObject_ClearWeakRefs(self);
 
     Shiboken::Object::deallocData(sbkObj, true);
