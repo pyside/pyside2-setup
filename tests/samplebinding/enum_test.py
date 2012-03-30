@@ -35,7 +35,7 @@ from sample import SampleNamespace, ObjectType, Event
 from py3kcompat import IS_PY3K, b
 
 def createTempFile():
-    if IS_PY3K:
+    if sys.version_info >= (2, 6):
         import tempfile
         return tempfile.SpooledTemporaryFile(mode='rw')
     else:
