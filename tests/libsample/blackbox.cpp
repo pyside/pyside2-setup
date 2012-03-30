@@ -53,8 +53,9 @@ BlackBox::retrieveObjectType(int ticket)
 {
     map<int, ObjectType*>::iterator it = m_objects.find(ticket);
     if (it != m_objects.end()) {
+        ObjectType* second = it->second;
         m_objects.erase(it);
-        return it->second;
+        return second;
     }
     return 0;
 }
@@ -82,8 +83,9 @@ BlackBox::retrievePoint(int ticket)
 {
     map<int, Point*>::iterator it = m_points.find(ticket);
     if (it != m_points.end()) {
+        Point* second = it->second;
         m_points.erase(it);
-        return it->second;
+        return second;
     }
     return 0;
 }
