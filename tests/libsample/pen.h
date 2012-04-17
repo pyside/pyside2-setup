@@ -29,11 +29,11 @@
 class LIBSAMPLE_API Color
 {
 public:
-    Color() : m_null(true) {}
-    Color(SampleNamespace::InValue arg) : m_null(false) {}
-    Color(unsigned int arg) : m_null(false) {}
+    Color();
+    Color(SampleNamespace::InValue arg);
+    Color(unsigned int arg);
 
-    bool isNull() const { return m_null; }
+    bool isNull() const;
 private:
     bool m_null;
 };
@@ -43,12 +43,12 @@ class LIBSAMPLE_API Pen
 public:
     enum { EmptyCtor, EnumCtor, ColorCtor, CopyCtor };
 
-    Pen() : m_ctor(EmptyCtor) {}
-    Pen(SampleNamespace::Option option) : m_ctor(EnumCtor) {}
-    Pen(const Color& color) : m_ctor(ColorCtor) {}
-    Pen(const Pen& pen) : m_ctor(CopyCtor) {}
+    Pen();
+    Pen(SampleNamespace::Option option);
+    Pen(const Color& color);
+    Pen(const Pen& pen);
 
-    int ctorType() { return m_ctor; }
+    int ctorType();
 private:
     int m_ctor;
 };

@@ -28,6 +28,7 @@ objectview.cpp
 overload.cpp
 overloadsort.cpp
 pairuser.cpp
+pen.cpp
 photon.cpp
 point.cpp
 pointf.cpp
@@ -36,6 +37,7 @@ protected.cpp
 reference.cpp
 sample.cpp
 samplenamespace.cpp
+sbkdate.cpp
 simplefile.cpp
 size.cpp
 sometime.cpp

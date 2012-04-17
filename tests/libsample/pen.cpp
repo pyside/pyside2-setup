@@ -1,7 +1,7 @@
 /*
  * This file is part of the Shiboken Python Binding Generator project.
  *
- * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2012 Nokia Corporation and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *
@@ -20,25 +20,42 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef SBKDATE_H
-#define SBKDATE_H
+#include "pen.h"
 
-#include "libsamplemacros.h"
-
-class LIBSAMPLE_API SbkDate
+Color::Color() : m_null(true)
 {
-public:
-    SbkDate(int d, int m, int y);
+}
 
-    int day() const;
-    int month() const;
-    int year() const;
+Color::Color(SampleNamespace::InValue arg) : m_null(false)
+{
+}
 
-private:
-    int m_d;
-    int m_m;
-    int m_y;
-};
+Color::Color(unsigned int arg) : m_null(false)
+{
+}
 
-#endif // SBKDATE_H
+bool Color::isNull() const
+{
+    return m_null;
+}
 
+Pen::Pen() : m_ctor(EmptyCtor)
+{
+}
+
+Pen::Pen(SampleNamespace::Option option) : m_ctor(EnumCtor)
+{
+}
+
+Pen::Pen(const Color& color) : m_ctor(ColorCtor)
+{
+}
+
+Pen::Pen(const Pen& pen) : m_ctor(CopyCtor)
+{
+}
+
+int Pen::ctorType()
+{
+    return m_ctor;
+}
