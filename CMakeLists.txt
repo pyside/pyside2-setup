@@ -33,6 +33,18 @@ else()
     find_package(PythonInterpWithDebug)
 endif()
 
+if (NOT PYTHON_SITE_PACKAGES)
+    execute_process(
+        COMMAND ${PYTHON_EXECUTABLE} -c "from distutils import sysconfig; \\
+            print(sysconfig.get_python_lib(1,0,prefix='${CMAKE_INSTALL_PREFIX}'))"
+        OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (NOT PYTHON_SITE_PACKAGES)
+        message(FATAL_ERROR "Could not detect Python module installation directory.")
+    elseif (APPLE)
+        message(STATUS "!!! The generated bindings will be installed on ${PYTHON_SITE_PACKAGES}, is it right!?")
+    endif()
+endif()
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "/Zc:wchar_t- /GR /EHsc /DWIN32 /D_WINDOWS /D_SCL_SECURE_NO_WARNINGS")

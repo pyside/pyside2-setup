@@ -31,3 +31,4 @@ target_link_libraries(shibokenmodule
 
 add_dependencies(shibokenmodule shiboken)
 
+install(TARGETS shibokenmodule DESTINATION ${PYTHON_SITE_PACKAGES})
