@@ -7,8 +7,8 @@ option(DISABLE_DOCSTRINGS "Disable documentation extraction." FALSE)
 
 if (NOT DISABLE_DOCSTRINGS)
     if (NOT LIBXSLT_FOUND OR NOT LIBXML2_FOUND)
-        set(DISABLE_DOCSTRINGS TRUE)
-        message(WARNING "libxslt and/or libxml not found, disabling support to doc strings!")
+        set(DISABLE_DOCSTRINGS TRUE PARENT_SCOPE)
+        message(WARNING "libxslt and/or libxml not found, disabling support for doc strings!")
     endif()
 endif()
 
