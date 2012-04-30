@@ -30,7 +30,7 @@ execute_process(
         vr = sys.version_info; \\
         prefix = '-python%d.%d' % (vr[0], vr[1]); \\
         suffix = prefix + '-dbg' if bool(sysconfig.get_config_var('Py_DEBUG')) else prefix; \\
-        suffix = '.' + sysconfig.get_config_var('SOABI') if (vr.major == 3 and vr.minor >= 2) else suffix; \\
+        suffix = '.' + sysconfig.get_config_var('SOABI') if (vr.major == 3 and vr.minor >= 2 and 'SOABI' in sysconfig.get_config_vars()) else suffix; \\
         print(suffix)"
         OUTPUT_VARIABLE PYTHON_SUFFIX
         OUTPUT_STRIP_TRAILING_WHITESPACE)
