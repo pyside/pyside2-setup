@@ -231,6 +231,11 @@ LIBSHIBOKEN_API bool        checkType(PyObject* pyObj);
 LIBSHIBOKEN_API bool        isUserType(PyObject* pyObj);
 
 /**
+ *  Generic function used to make ObjectType hashable, the C++ pointer is used as hash value.
+ */
+LIBSHIBOKEN_API Py_hash_t   hash(PyObject* pyObj);
+
+/**
  *  Bind a C++ object to Python.
  * \param instanceType equivalent Python type for the C++ object.
  * \param hasOwnership if true, Python will try to delete the underlying C++ object when there's no more refs.

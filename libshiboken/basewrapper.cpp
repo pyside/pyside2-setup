@@ -748,6 +748,12 @@ bool isUserType(PyObject* pyObj)
     return ObjectType::isUserType(pyObj->ob_type);
 }
 
+Py_hash_t hash(PyObject* pyObj)
+{
+    assert(Shiboken::Object::checkType(pyObj));
+    return reinterpret_cast<Py_hash_t>(reinterpret_cast<SbkObject*>(pyObj)->d->cptr[0]);
+}
+
 static void setSequenceOwnership(PyObject* pyObj, bool owner)
 {
     if (PySequence_Check(pyObj)) {

@@ -3385,6 +3385,8 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
 
     if (!metaClass->typeEntry()->hashFunction().isEmpty())
         tp_hash = '&' + cpythonBaseName(metaClass) + "_HashFunc";
+    else if (isObjectType(metaClass))
+        tp_hash = "&Shiboken::Object::hash";
 
     const AbstractMetaFunction* callOp = metaClass->findFunction("operator()");
     if (callOp && !callOp->isModifiedRemoved())
