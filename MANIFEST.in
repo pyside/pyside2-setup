@@ -34,7 +34,7 @@ recursive-include PySide/typesystems **
 recursive-include PySide/examples **
 
 # pysideuic package
-recursive-include pysideuic/ **
+recursive-include pysideuic **
 recursive-include pysideuic/Compiler **
 recursive-include pysideuic/port_v2 **
 recursive-include pysideuic/port_v3 **
