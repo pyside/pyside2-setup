@@ -1,0 +1,41 @@
+#
+# MANIFEST.in
+#
+# Manifest template for creating the PySide source distribution.
+
+include MANIFEST.in
+include setup.py
+include pyside_postinstall.py
+include popenasync.py
+include qtinfo.py
+include utils.py
+
+# sources
+recursive-include sources/patchelf **
+recursive-include sources/shiboken **
+recursive-include sources/pyside **
+recursive-include sources/pyside-tools **
+recursive-include sources/pyside-examples **
+recursive-exclude sources/pyside-examples/examples/hyperui **
+recursive-exclude sources/pyside-examples/mobility **
+# ignore .git
+recursive-exclude sources/shiboken/.git **
+recursive-exclude sources/pyside/.git **
+recursive-exclude sources/pyside-tools/.git **
+recursive-exclude sources/pyside-examples/.git **
+
+# PySide package
+recursive-include PySide **
+recursive-include PySide/plugins **
+recursive-include PySide/imports **
+recursive-include PySide/translations **
+recursive-include PySide/include **
+recursive-include PySide/typesystems **
+recursive-include PySide/examples **
+
+# pysideuic package
+recursive-include pysideuic/ **
+recursive-include pysideuic/Compiler **
+recursive-include pysideuic/port_v2 **
+recursive-include pysideuic/port_v3 **
+recursive-include pysideuic/widget-plugins **

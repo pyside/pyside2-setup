@@ -1,0 +1,11 @@
+/build
+/dist
+/pyside_build
+/pyside_install
+/PySide
+/PySide-*.*.*
+/SciTE.*
+/pysideuic
+*.egg-info
+*.pyc
+patchelf
