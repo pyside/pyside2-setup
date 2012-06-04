@@ -196,6 +196,12 @@ class pyside_build(_build):
         py_version = "%s.%s" % (sys.version_info[0], sys.version_info[1])
         py_include_dir = get_config_var("INCLUDEPY")
         py_libdir = get_config_var("LIBDIR")
+        if py_libdir is None or not os.path.exists(py_libdir):
+            py_prefix = get_config_var("prefix")
+            if sys.platform == "win32":
+                py_libdir = os.path.join(py_prefix, "libs")
+            else:
+                py_libdir = os.path.join(py_prefix, "lib")
         py_executable = sys.executable
         dbgPostfix = ""
         if build_type == "Debug":
