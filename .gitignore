@@ -8,3 +8,5 @@
 /pysideuic
 *.egg-info
 *.pyc
+distribute-*.egg
+distribute-*.tar.gz

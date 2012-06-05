@@ -32,6 +32,9 @@ Building 64bit version is not supported with Visual Studio 2008 Express Edition.
 
 __version__ = "1.1.1"
 
+from distribute_setup import use_setuptools
+use_setuptools()
+
 import os
 import sys
 import platform
