@@ -47,7 +47,6 @@ from distutils.spawn import find_executable
 from distutils.command.build import build as _build
 
 from setuptools import setup
-from setuptools import find_packages
 from setuptools.command.install import install as _install
 from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
 
