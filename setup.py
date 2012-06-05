@@ -18,8 +18,8 @@ Examples:
 
 REQUIREMENTS:
 - Python: 2.6, 2.7 and 3.2 is supported
-- Distribute: http://pypi.python.org/pypi/distribute
 - Cmake: Specify the path to cmake with --cmake option or add cmake to the system path.
+- Qt: 4.6, 4.7 and 4.8 is supported. Specify the path to qmake with --qmake option or add qmake to the system path.
 
 OPTIONAL:
 OpenSSL: You can specify the location of OpenSSL DLLs with option --opnessl=</path/to/openssl/bin>.
