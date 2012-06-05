@@ -32,8 +32,11 @@ Building 64bit version is not supported with Visual Studio 2008 Express Edition.
 
 __version__ = "1.1.1"
 
-from distribute_setup import use_setuptools
-use_setuptools()
+try:
+    import setuptools
+except ImportError:
+    from distribute_setup import use_setuptools
+    use_setuptools()
 
 import os
 import sys
@@ -65,9 +68,9 @@ except NameError:
 this_file = os.path.abspath(this_file)
 if os.path.dirname(this_file):
     os.chdir(os.path.dirname(this_file))
+script_dir = os.getcwd()
 
 # Clean temp build folders
-script_dir = os.getcwd()
 for n in ["build", "PySide.egg-info", "PySide-%s" % __version__,
     "PySide", "pysideuic"]:
     d = os.path.join(script_dir, n)
@@ -79,6 +82,12 @@ for n in ["build", "PySide.egg-info", "PySide-%s" % __version__,
 for pkg in ["PySide", "pysideuic"]:
     pkg_dir = os.path.join(script_dir, pkg)
     os.makedirs(pkg_dir)
+
+# Ensure that git submodules are initialized, if this is the git repo clone
+if os.path.isdir(".git"):
+    git_cmd = ["git", "submodule", "update", "--init"]
+    if run_process(git_cmd) != 0:
+        print("Failed to initialize the git submodules")
 
 def has_option(name):
     try:
