@@ -230,6 +230,6 @@ References
 ==========
 
 - [1] http://qt.gitorious.org/pyside
-- [2] http://bugs.openbossa.org/
+- [2] https://bugreports.qt-project.org/browse/PYSIDE
 - [3] http://www.pyside.org/docs/pseps/psep-0001.html
 - [4] http://developer.qt.nokia.com/wiki/PySideDownloads
