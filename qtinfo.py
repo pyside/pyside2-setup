@@ -18,6 +18,9 @@ class QtInfo(object):
     def getBinsPath(self):
         return self.getProperty("QT_INSTALL_BINS")
 
+    def getLibsPath(self):
+        return self.getProperty("QT_INSTALL_LIBS")
+
     def getPluginsPath(self):
         return self.getProperty("QT_INSTALL_PLUGINS")
 
@@ -45,6 +48,7 @@ class QtInfo(object):
 
     version = property(getVersion)
     bins_dir = property(getBinsPath)
+    libs_dir = property(getLibsPath)
     plugins_dir = property(getPluginsPath)
     qmake_path = property(getQMakePath)
     imports_dir = property(getImportsPath)

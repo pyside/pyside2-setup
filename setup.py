@@ -95,10 +95,6 @@ def has_option(name):
         return True
     except ValueError:
         pass
-    # allow passing all cmd line options also as environment variables
-    env_val = os.getenv(name.upper().replace('-', '_'), 'false').lower()
-    if env_val == "true":
-        return True
     return False
 
 def option_value(name):
@@ -122,6 +118,7 @@ OPTION_QMAKE = option_value("qmake")
 OPTION_CMAKE = option_value("cmake")
 OPTION_OPENSSL = option_value("openssl")
 OPTION_ONLYPACKAGE = has_option("only-package")
+OPTION_STANDALONE = has_option("standalone")
 
 if OPTION_QMAKE is None:
     OPTION_QMAKE = find_executable("qmake")
@@ -404,7 +401,9 @@ class pyside_build(_build):
             "setup_dir": self.script_dir,
             "ssl_libs_dir": OPTION_OPENSSL,
             "py_version": self.py_version,
+            "qt_version": self.qtinfo.version,
             "qt_bin_dir": self.qtinfo.bins_dir,
+            "qt_lib_dir": self.qtinfo.libs_dir,
             "qt_plugins_dir": self.qtinfo.plugins_dir,
             "qt_imports_dir": self.qtinfo.imports_dir,
             "qt_translations_dir": self.qtinfo.translations_dir,
@@ -454,8 +453,8 @@ class pyside_build(_build):
             "${install_dir}/lib/",
             "${setup_dir}/PySide",
             filter=[
-                "libpyside*",
-                "libshiboken*",
+                "libpyside*.so.*",
+                "libshiboken*.so.*",
             ],
             recursive=False, logger=log, vars=vars)
         # <install>/share/PySide/typesystems/* -> <setup>/PySide/typesystems
@@ -473,6 +472,38 @@ class pyside_build(_build):
             "${sources_dir}/pyside-examples/examples",
             "${setup_dir}/PySide/examples",
             force=False, logger=log, vars=vars)
+        # Copy Qt libs to package
+        if OPTION_STANDALONE:
+            # <qt>/bin/* -> <setup>/PySide
+            copydir("${qt_bin_dir}", "${setup_dir}/PySide",
+                filter=[
+                    "designer",
+                    "linguist",
+                    "lrelease",
+                    "lupdate",
+                    "lconvert",
+                ],
+                recursive=False, logger=log, vars=vars)
+            # <qt>/lib/* -> <setup>/PySide
+            copydir("${qt_lib_dir}", "${setup_dir}/PySide",
+                filter=[
+                    "libQt*.so.?",
+                    "libphonon.so.?",
+                ],
+                recursive=False, logger=log, vars=vars)
+            # <qt>/plugins/* -> <setup>/PySide/plugins
+            copydir("${qt_plugins_dir}", "${setup_dir}/PySide/plugins",
+                filter=["*.so"],
+                logger=log, vars=vars)
+            # <qt>/imports/* -> <setup>/PySide/imports
+            if float(vars["qt_version"][:3]) > 4.6:
+                copydir("${qt_imports_dir}", "${setup_dir}/PySide/imports",
+                    filter=["qmldir", "*.so"],
+                    logger=log, vars=vars)
+            # <qt>/translations/* -> <setup>/PySide/translations
+            copydir("${qt_translations_dir}", "${setup_dir}/PySide/translations",
+                filter=["*.qm"],
+                logger=log, vars=vars)
 
     def prepare_packages_win32(self, vars):
         # <install>/lib/site-packages/PySide/* -> <setup>/PySide
@@ -522,6 +553,11 @@ class pyside_build(_build):
             "${install_dir}/include",
             "${setup_dir}/PySide/include",
             logger=log, vars=vars)
+        # <sources>/pyside-examples/examples/* -> <setup>/PySide/examples
+        copydir(
+            "${sources_dir}/pyside-examples/examples",
+            "${setup_dir}/PySide/examples",
+            force=False, logger=log, vars=vars)
         # <ssl_libs>/* -> <setup>/PySide/
         copydir("${ssl_libs_dir}", "${setup_dir}/PySide",
             filter=[
@@ -554,13 +590,8 @@ class pyside_build(_build):
             logger=log, vars=vars)
         # <qt>/translations/* -> <setup>/PySide/translations
         copydir("${qt_translations_dir}", "${setup_dir}/PySide/translations",
-            filter=["*.ts"],
+            filter=["*.qm"],
             logger=log, vars=vars)
-        # <sources>/pyside-examples/examples/* -> <setup>/PySide/examples
-        copydir(
-            "${sources_dir}/pyside-examples/examples",
-            "${setup_dir}/PySide/examples",
-            force=False, logger=log, vars=vars)
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()

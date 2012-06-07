@@ -77,6 +77,12 @@ def copydir(src, dst, logger=None, filter=None, ignore=None, force=True,
     if vars is not None:
         src = subst_vars(src, **vars)
         dst = subst_vars(dst, **vars)
+        if filter is not None:
+            for i in range(len(filter)):
+                filter[i] = subst_vars(filter[i], **vars)
+        if ignore is not None:
+            for i in range(len(ignore)):
+                ignore[i] = subst_vars(ignore[i], **vars)
     
     if not os.path.exists(src) and not force:
         if logger is not None:
