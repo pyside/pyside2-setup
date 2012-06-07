@@ -1,5 +1,8 @@
-============
-About PySide
+======
+PySide
+======
+
+Introduction
 ============
 
 PySide is the Python Qt bindings project, providing access the complete Qt 4.8 framework
@@ -10,20 +13,131 @@ from any modern OSS project such as all code in a git repository [1], an open
 Bugzilla [2] for reporting bugs, and an open design process [3]. We welcome
 any contribution without requiring a transfer of copyright.
 
-=======
+Compatibility
+=============
+
+PySide requires Python 2.6 or later and Qt 4.6 or better.
+
+Installing PySide on a UNIX System (Ubuntu 12.04 LTS)
+=====================================================
+
+#. Install Python 2.7 header files and a static library:
+    
+   .. code-block:: text
+
+      $ sudo apt-get install python2.7-dev
+   
+#. Install Qt 4.8 libraries:
+    
+   .. code-block:: text
+
+      $ sudo apt-get install qt-sdk
+   
+#. Install cmake:
+    
+   .. code-block:: text
+
+      $ sudo apt-get install cmake
+   
+#. Install latest `distribute` distribution into the Python you
+   installed in the first step: download `distribute_setup.py
+   <http://python-distribute.org/distribute_setup.py>`_ and run it using
+   the ``python`` interpreter of your Python 2.7 installation using a
+   command prompt:
+
+   .. code-block:: text
+
+      $ sudo python distribute_setup.py
+
+#. Use that Python's `bin/easy_install` to install `virtualenv`:
+
+   .. code-block:: text
+
+      $ sudo easy_install virtualenv
+
+#. Use that Python's virtualenv to make a workspace:
+
+   .. code-block:: text
+
+      $ virtualenv env
+
+#. Switch to the ``env`` directory:
+
+   .. code-block:: text
+
+      $ cd env
+
+#. Use ``pip`` to get `PySide` installed:
+
+   .. code-block:: text
+
+      $ env/bin/pip install PySide
+
+Installing PySide on a Windows System
+=====================================
+
+#. Install `Python 2.7
+   <http://python.org/download/releases/2.7.3/>`_.
+
+#. Install `Qt 4.8 libraries for Windows (VS 2008)
+   <http://qt-project.org/downloads/>`_.
+
+#. Install `Cmake 2.8
+   <http://www.cmake.org/cmake/resources/software.html>`_.
+
+#. Install `MS Visual Studio Express 2008
+   <http://www.microsoft.com/express/Downloads/>`_.
+    
+#. (Optional) Install `OpenSSL
+   <http://slproweb.com/products/Win32OpenSSL.html>`_.
+
+#. Install latest `distribute` distribution into the Python you
+   installed in the first step: download `distribute_setup.py
+   <http://python-distribute.org/distribute_setup.py>`_ and run it using
+   the ``python`` interpreter of your Python 2.7 installation using a
+   command prompt:
+
+   .. code-block:: text
+
+      c:\> c:\Python27\python distribute_setup.py
+
+#. Use that Python's `bin/easy_install` to install `virtualenv`:
+
+   .. code-block:: text
+
+      c:\> c:\Python27\Scripts\easy_install virtualenv
+
+#. Use that Python's virtualenv to make a workspace:
+
+   .. code-block:: text
+
+      c:\> c:\Python27\Scripts\virtualenv env
+
+#. Switch to the ``env`` directory:
+
+   .. code-block:: text
+
+      c:\> cd env
+
+#. Use ``pip`` to get `PySide` installed:
+
+   .. code-block:: text
+
+      c:\env> Scripts\pip install PySide
+
 Changes
 =======
 
 1.1.1 (2012-04-19)
-==================
+------------------
 
 Major changes
--------------
+~~~~~~~~~~~~~
 
 - Unified toolchain! No more GeneratorRunner and ApiExtractor, now you just need Shiboken to compile PySide.
 
 Bug fixes
----------
+~~~~~~~~~
 
 - 1105 Spyder fails with HEAD
 - 1126 Segfault when exception is raised in signalInstanceDisconnect
@@ -45,15 +159,15 @@ Bug fixes
 - PYSIDE-41 QModelIndex unhashable
 
 1.1.0 (2012-01-02)
-==================
+------------------
 
 Major changes
--------------
+~~~~~~~~~~~~~
 
 - New type converter scheme
 
 Bug fixes
----------
+~~~~~~~~~
 
 - 1010 Shiboken Cygwin patch
 - 1034 Error compiling PySide with Python 3.2.2 32bit on Windows
@@ -74,10 +188,10 @@ Bug fixes
 - 969 viewOptions of QAbstractItemView error
 
 1.0.9 (2011-11-29)
-==================
+------------------
 
 Bug fixes
----------
+~~~~~~~~~
 
 - 1058 Strange code in PySide/QtUiTools/glue/plugins.h
 - 1057 valgrind detected "Conditional jump or move depends on uninitialised value"
@@ -85,7 +199,7 @@ Bug fixes
 - 1048 QGridLayout.itemAtPosition() crashes when it should return None
 - 1037 shiboken fails to build against python 3.2 (both normal and -dbg) on i386 (and others)
 - 1036 Qt.KeyboardModifiers always evaluates to zero
-- 1033 QDialog.DialogCode instances and return value from QDialog.exec_ hash to different values
+- 1033 QDialog.DialogCode instances and return value from \QDialog.exec_ hash to different values
 - 1031 QState.parentState() or QState.machine() causes python crash at exit
 - 1029 qmlRegisterType Fails to Increase the Ref Count
 - 1028 QWidget winId missing
@@ -99,27 +213,26 @@ Bug fixes
 - 891 ApiExtractor doesn't support doxygen as backend to doc generation.
 
 1.0.8 (2011-10-21)
-==================
+------------------
 
 Major changes
--------------
+~~~~~~~~~~~~~
 
 - Experimental Python3.2 support
 - Qt4.8 beta support
-- Bug Fixes
 
 Bug fixes
----------
+~~~~~~~~~
 
 - 1022 RuntimeError: maximum recursion depth exceeded while getting the str of an object
 - 1019 Overriding QWidget.show or QWidget.hide do not work
 - 944 Segfault on QIcon(None).pixmap()
 
 1.0.7 (2011-09-21)
-==================
+------------------
 
 Bug fixes
----------
+~~~~~~~~~
 
 - 996 Missing dependencies for QtWebKit in buildscripts for Fedora
 - 986 Documentation links
@@ -143,17 +256,17 @@ Bug fixes
 - 988 The type supplied with currentChanged signal in QTabWidget has changed in 1.0.6
 
 1.0.6 (2011-08-22)
-==================
+------------------
 
 Major changes
--------------
+~~~~~~~~~~~~~
 
 - New documentation layout;
 - Fixed some regressions from the last release (1.0.5);
 - Optimizations during anonymous connection;
 
 Bug fixes
----------
+~~~~~~~~~
 
 - 972 anchorlayout.py of graphicsview example raised a unwriteable memory exception when exits
 - 953 Segfault when QObject is garbage collected after QTimer.singeShot
@@ -182,17 +295,17 @@ Bug fixes
 - 831 PySide docs would have a "Inherited by" list for each class
 
 1.0.5 (2011-07-22)
-==================
+------------------
 
 Major changes
--------------
+~~~~~~~~~~~~~
 
 - Widgets present on "ui" files are exported in the root widget, check PySide ML thread for more information[1];
 - pyside-uic generate menubars without parent on MacOS plataform;
 - Signal connection optimizations;
 
 Bug fixes
----------
+~~~~~~~~~
 
 - 892 Segfault when destructing QWidget and QApplication has event filter installed
 - 407 Crash while multiple inheriting with QObject and native python class
@@ -225,7 +338,6 @@ Bug fixes
 - 821 Mapping interface for QPixmapCache
 - 909 Deletion of QMainWindow/QApplication leads to segmentation fault
 
-==========
 References
 ==========
 
