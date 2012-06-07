@@ -19,6 +19,7 @@ add_custom_command(OUTPUT ${minimal_SRC}
 COMMAND ${shibokengenerator_BINARY_DIR}/shiboken --project-file=${CMAKE_CURRENT_BINARY_DIR}/minimal-binding.txt ${GENERATOR_EXTRA_FLAGS}
 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for 'minimal' test binding..."
+DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_minimal.xml libminimal
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}

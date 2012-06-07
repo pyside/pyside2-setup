@@ -3,6 +3,7 @@ project(libminimal)
 set(libminimal_SRC
 obj.cpp
 listuser.cpp
+typedef.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
