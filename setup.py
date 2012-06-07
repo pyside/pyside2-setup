@@ -640,6 +640,7 @@ setup(
     author = 'PySide Team',
     author_email = 'contact@pyside.org',
     url = 'http://www.pyside.org',
+    download_url = 'http://releases.qt-project.org/pyside/%s' % __version__,
     license = 'LGPL',
     packages = ['PySide', 'pysideuic'],
     include_package_data = True,
