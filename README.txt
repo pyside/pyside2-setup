@@ -18,63 +18,11 @@ Compatibility
 
 PySide requires Python 2.6 or later and Qt 4.6 or better.
 
-Installing PySide on a UNIX System (Ubuntu 12.04 LTS)
-=====================================================
+Installing PySide from source on a Windows System
+=================================================
 
-#. Install Python 2.7 header files and a static library:
-    
-   .. code-block:: text
-
-      $ sudo apt-get install python2.7-dev
-   
-#. Install Qt 4.8 libraries:
-    
-   .. code-block:: text
-
-      $ sudo apt-get install qt-sdk
-   
-#. Install cmake:
-    
-   .. code-block:: text
-
-      $ sudo apt-get install cmake
-   
-#. Install latest `distribute` distribution into the Python you
-   installed in the first step: download `distribute_setup.py
-   <http://python-distribute.org/distribute_setup.py>`_ and run it using
-   the ``python`` interpreter of your Python 2.7 installation using a
-   command prompt:
-
-   .. code-block:: text
-
-      $ sudo python distribute_setup.py
-
-#. Use that Python's `bin/easy_install` to install `virtualenv`:
-
-   .. code-block:: text
-
-      $ sudo easy_install virtualenv
-
-#. Use that Python's virtualenv to make a workspace:
-
-   .. code-block:: text
-
-      $ virtualenv env
-
-#. Switch to the ``env`` directory:
-
-   .. code-block:: text
-
-      $ cd env
-
-#. Use ``pip`` to get `PySide` installed:
-
-   .. code-block:: text
-
-      $ env/bin/pip install PySide
-
-Installing PySide on a Windows System
-=====================================
+Installing prerequisities
+-------------------------
 
 #. Install `Python 2.7
    <http://python.org/download/releases/2.7.3/>`_.
@@ -87,7 +35,10 @@ Installing PySide on a Windows System
 
 #. Install `MS Visual Studio Express 2008
    <http://www.microsoft.com/express/Downloads/>`_.
-    
+
+#. Install `Git 1.7
+   <http://git-scm.com/download/win>`_.
+
 #. (Optional) Install `OpenSSL
    <http://slproweb.com/products/Win32OpenSSL.html>`_.
 
@@ -119,11 +70,121 @@ Installing PySide on a Windows System
 
       c:\> cd env
 
-#. Use ``pip`` to get `PySide` installed:
+Installing PySide
+-----------------
+
+Use ``pip`` to get `PySide` installed:
+
+.. code-block:: text
+
+   c:\env> Scripts\pip install PySide --install-option="--qmake=c:\\Qt\\4.8.2\\bin\\qmake.exe"
+
+Optionally you can specify the path to OpenSSL libs:
+
+.. code-block:: text
+
+   c:\env> Scripts\pip install PySide --install-option="--openssl=c:\\Alfa\\OpenSSL32bit\\bin" --install-option="--qmake=c:\\Qt\\4.8.2\\bin\\qmake.exe"
+
+Building PySide installer
+-------------------------
+
+#. Clone ``PySide`` from git repository:
 
    .. code-block:: text
 
-      c:\env> Scripts\pip install PySide
+      c:\> git clone https://github.com/PySide/pyside-setup.git pyside-setup
+
+#. Switch to the ``pyside-setup`` directory:
+
+   .. code-block:: text
+
+      c:\> cd pyside-setup
+
+#. Build ``PySide`` windows installer:
+
+   .. code-block:: text
+
+      c:\> c:\Python27\python setup.py bdist_wininst --qmake=c:\Qt\4.8.2\bin\qmake.exe
+
+Installing PySide from source on a UNIX System (Ubuntu 12.04 LTS)
+=================================================================
+
+Installing prerequisities
+-------------------------
+
+#. Install Python 2.7 header files and a static library:
+    
+   .. code-block:: text
+
+      $ sudo apt-get install python2.7-dev
+   
+#. Install Qt 4.8 libraries:
+    
+   .. code-block:: text
+
+      $ sudo apt-get install qt-sdk
+   
+#. Install cmake:
+    
+   .. code-block:: text
+
+      $ sudo apt-get install cmake
+
+#. Install git:
+    
+   .. code-block:: text
+
+      $ sudo apt-get install git
+   
+#. Install latest `distribute` distribution into the Python you
+   installed in the first step: download `distribute_setup.py
+   <http://python-distribute.org/distribute_setup.py>`_ and run it using
+   the ``python`` interpreter of your Python 2.7 installation using a
+   command prompt:
+
+   .. code-block:: text
+
+      $ sudo python distribute_setup.py
+
+#. Use that Python's `bin/easy_install` to install `virtualenv`:
+
+   .. code-block:: text
+
+      $ sudo easy_install virtualenv
+
+#. Use that Python's virtualenv to make a workspace:
+
+   .. code-block:: text
+
+      $ virtualenv env
+
+Installing PySide
+-----------------
+
+Use ``pip`` to get `PySide` installed from PyPI:
+
+.. code-block:: text
+
+   $ env/bin/pip install PySide
+
+Alternatively you can install development version of `PySide` from github repository:
+
+.. code-block:: text
+
+   $ env/bin/pip install git+https://github.com/PySide/pyside-setup.git
+
+You can also specify version of `PySide` when installing from github repository:
+
+.. code-block:: text
+
+   $ env/bin/pip install git+https://github.com/PySide/pyside-setup.git@1.1.1
+
+Feedback and getting involved
+=============================
+
+- Mailing list: http://lists.qt-project.org/mailman/listinfo/pyside
+- Issue tracker: https://bugreports.qt-project.org/browse/PYSIDE
+- Code Repository: http://qt.gitorious.org/pyside
 
 Changes
 =======
