@@ -289,3 +289,17 @@ std::size_t ObjectType::createObjectType()
     void* addr = new ObjectType();
     return (std::size_t) addr;
 }
+
+OtherBase::~OtherBase()
+{
+}
+
+ObjectTypeDerived::~ObjectTypeDerived()
+{
+}
+
+bool
+ObjectTypeDerived::event(Event* event)
+{
+    return true;
+}

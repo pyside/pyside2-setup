@@ -29,7 +29,7 @@
 import sys
 import unittest
 
-from sample import ObjectType, Event
+from sample import ObjectType, ObjectTypeDerived, Event
 
 
 class ExtObjectType(ObjectType):
@@ -59,6 +59,16 @@ class MyObjectType (ObjectType):
     def invalidateEvent(self, ev):
         pass
 
+class ExtObjectTypeDerived(ObjectTypeDerived):
+    def __init__(self):
+        ObjectTypeDerived.__init__(self)
+        self.type_of_last_event = None
+        self.last_event = None
+    def event(self, event):
+        self.last_event = event
+        self.type_of_last_event = event.eventType()
+        return True
+
 class OwnershipInvalidateAfterUseTest(unittest.TestCase):
     '''Ownership tests for cases of invalidation of Python wrapper after use.'''
 
@@ -81,6 +91,14 @@ class OwnershipInvalidateAfterUseTest(unittest.TestCase):
         obj = MyObjectType()
         obj.causeEvent(Event.BASIC_EVENT)
         self.assertFalse(obj.fail)
+
+    def testInvalidateAfterUseInDerived(self):
+        '''Invalidate was failing in a derived C++ class that also inherited
+        other base classes'''
+        eot = ExtObjectTypeDerived()
+        eot.causeEvent(Event.SOME_EVENT)
+        self.assertEqual(eot.type_of_last_event, Event.SOME_EVENT)
+        self.assertRaises(RuntimeError, eot.last_event.eventType)
 
 if __name__ == '__main__':
     unittest.main()

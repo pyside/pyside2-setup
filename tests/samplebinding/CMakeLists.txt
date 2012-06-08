@@ -50,6 +50,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/objectmodel_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objecttype_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objecttypebyvalue_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objecttypeholder_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/objecttypederived_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objecttypelayout_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objecttypeptrlist_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objecttypeoperators_wrapper.cpp
@@ -57,6 +58,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/objectview_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/objtypereference_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/oddbooluser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/onlycopy_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/otherbase_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/overload_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/overload2_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/pairuser_wrapper.cpp

@@ -783,6 +783,9 @@ FunctionModificationList AbstractMetaFunction::modifications(const AbstractMetaC
         if ((implementor == implementor->baseClass()) ||
             (implementor == implementingClass() && (mods.size() > 0)))
                 break;
+        foreach (const AbstractMetaClass* interface, implementor->interfaces()) {
+            mods += this->modifications(interface);
+        }
         implementor = implementor->baseClass();
     }
     return mods;

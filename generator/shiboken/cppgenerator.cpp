@@ -666,9 +666,11 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
     }
 
     bool invalidateReturn = false;
+    QSet<int> invalidateArgs;
     foreach (FunctionModification funcMod, func->modifications()) {
         foreach (ArgumentModification argMod, funcMod.argument_mods) {
-            if (argMod.resetAfterUse) {
+            if (argMod.resetAfterUse && !invalidateArgs.contains(argMod.index)) {
+                invalidateArgs.insert(argMod.index);
                 s << INDENT << "bool invalidateArg" << argMod.index;
                 s << " = PyTuple_GET_ITEM(" PYTHON_ARGS ", " << argMod.index - 1 << ")->ob_refcnt == 1;" << endl;
             } else if (argMod.index == 0 && argMod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::CppOwnership) {
@@ -762,16 +764,18 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
         Indentation indentation(INDENT);
         s << INDENT << "Shiboken::Object::releaseOwnership(" << PYTHON_RETURN_VAR  ".object());" << endl;
     }
+    foreach (int argIndex, invalidateArgs) {
+        s << INDENT << "if (invalidateArg" << argIndex << ')' << endl;
+        Indentation indentation(INDENT);
+        s << INDENT << "Shiboken::Object::invalidate(PyTuple_GET_ITEM(" PYTHON_ARGS ", ";
+        s << (argIndex - 1) << "));" << endl;
+    }
+
 
     foreach (FunctionModification funcMod, func->modifications()) {
         foreach (ArgumentModification argMod, funcMod.argument_mods) {
-            if (argMod.resetAfterUse) {
-                s << INDENT << "if (invalidateArg" << argMod.index << ')' << endl;
-                Indentation indentation(INDENT);
-                s << INDENT << "Shiboken::Object::invalidate(PyTuple_GET_ITEM(" PYTHON_ARGS ", ";
-                s << (argMod.index - 1) << "));" << endl;
-            } else if (argMod.ownerships.contains(TypeSystem::NativeCode)
-                       && argMod.index == 0 && argMod.ownerships[TypeSystem::NativeCode] == TypeSystem::CppOwnership) {
+            if (argMod.ownerships.contains(TypeSystem::NativeCode)
+                && argMod.index == 0 && argMod.ownerships[TypeSystem::NativeCode] == TypeSystem::CppOwnership) {
                 s << INDENT << "if (Shiboken::Object::checkType(" PYTHON_RETURN_VAR "))" << endl;
                 Indentation indent(INDENT);
                 s << INDENT << "Shiboken::Object::releaseOwnership(" PYTHON_RETURN_VAR ");" << endl;

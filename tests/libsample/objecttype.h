@@ -144,5 +144,19 @@ private:
 
 LIBSAMPLE_API unsigned int objectTypeHash(const ObjectType* objectType);
 
+class LIBSAMPLE_API OtherBase {
+public:
+    OtherBase() {};
+    virtual ~OtherBase();
+};
+
+class LIBSAMPLE_API ObjectTypeDerived: public ObjectType, public OtherBase {
+public:
+    ObjectTypeDerived(): ObjectType(), OtherBase() {};
+
+    virtual bool event(Event* event);
+    virtual ~ObjectTypeDerived();
+};
+
 #endif // OBJECTTYPE_H
 

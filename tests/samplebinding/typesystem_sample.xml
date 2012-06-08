@@ -727,6 +727,10 @@
           </modify-argument>
         </modify-function>
     </object-type>
+
+    <object-type name="OtherBase" />
+    <object-type name="ObjectTypeDerived" />
+
     <object-type name="ObjectTypeLayout">
         <modify-function signature="create()">
             <modify-argument index="return">
