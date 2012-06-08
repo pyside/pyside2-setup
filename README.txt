@@ -27,8 +27,9 @@ Installing prerequisities
 #. Install `Python 2.7
    <http://python.org/download/releases/2.7.3/>`_.
 
-#. Install `Qt 4.8 libraries for Windows (VS 2008)
-   <http://qt-project.org/downloads/>`_.
+#. Install `Qt 4.7 libraries for Windows (VS 2008)
+   <ftp://ftp.qt.nokia.com/qt/source/qt-win-opensource-4.7.4-vs2008.exe>`_.
+   `(PySide version 1.1.1 does not support Qt 4.8 on Windows System)`
 
 #. Install `Cmake 2.8
    <http://www.cmake.org/cmake/resources/software.html>`_.
