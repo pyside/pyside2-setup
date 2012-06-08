@@ -84,13 +84,13 @@ Use ``pip`` to get `PySide` installed:
 
 ::
 
-   c:\env> Scripts\pip install PySide --install-option="--qmake=c:\\Qt\\4.8.2\\bin\\qmake.exe"
+   c:\env> Scripts\pip install PySide --install-option="--qmake=c:\\Qt\\4.7.4\\bin\\qmake.exe"
 
 Optionally you can specify the path to OpenSSL libs:
 
 ::
 
-   c:\env> Scripts\pip install PySide --install-option="--openssl=c:\\Alfa\\OpenSSL32bit\\bin" --install-option="--qmake=c:\\Qt\\4.8.2\\bin\\qmake.exe"
+   c:\env> Scripts\pip install PySide --install-option="--openssl=c:\\Alfa\\OpenSSL32bit\\bin" --install-option="--qmake=c:\\Qt\\4.7.4\\bin\\qmake.exe"
 
 Building PySide installer
 -------------------------
@@ -111,7 +111,7 @@ Building PySide installer
 
    ::
 
-      c:\> c:\Python27\python setup.py bdist_wininst --qmake=c:\Qt\4.8.2\bin\qmake.exe
+      c:\> c:\Python27\python setup.py bdist_wininst --qmake=c:\Qt\4.7.4\bin\qmake.exe
 
 Installing PySide from source on a UNIX System (Ubuntu 12.04 LTS)
 =================================================================
