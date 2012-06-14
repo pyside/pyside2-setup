@@ -215,7 +215,6 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
                 && !f->isStatic()
                 && f->name() == func->name()) {
                 m_inheritedOverloads << f;
-                break;
             }
         }
 
