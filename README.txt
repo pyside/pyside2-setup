@@ -2,6 +2,8 @@
 PySide
 ======
 
+.. contents:: **Table of Contents** 
+
 Introduction
 ============
 
