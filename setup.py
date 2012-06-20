@@ -101,6 +101,9 @@ for pkg in ["PySide", "pysideuic"]:
 # Ensure that git submodules are initialized, if this is the git repo clone
 if os.path.isdir(".git"):
     print("Initializing submodules for PySide version %s" % __version__)
+    git_update_cmd = ["git", "submodule", "update", "--init"]
+    if run_process(git_update_cmd) != 0:
+        raise DistutilsSetupError("Failed to initialize the git submodules")
     git_pull_cmd = ["git", "submodule", "foreach", "git", "pull", "origin", "master"]
     if run_process(git_pull_cmd) != 0:
         raise DistutilsSetupError("Failed to initialize the git submodules")
