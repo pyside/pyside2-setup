@@ -30,7 +30,22 @@ On Windows You need to execute this script from Visual Studio 2008 Command Promp
 Building 64bit version is not supported with Visual Studio 2008 Express Edition.
 """
 
-__version__ = "1.1.1"
+__version__ = "1.1.2dev"
+
+submodules = {
+    __version__: [
+        ["shiboken", "master"],
+        ["pyside", "master"],
+        ["pyside-tools", "master"],
+        ["pyside-examples", "master"],
+    ],
+    '1.1.1': [
+        ["shiboken", "1.1.1"],
+        ["pyside", "1.1.1"],
+        ["pyside-tools", "0.2.14"],
+        ["pyside-examples", "master"],
+    ],
+}
 
 try:
     import setuptools
@@ -85,9 +100,21 @@ for pkg in ["PySide", "pysideuic"]:
 
 # Ensure that git submodules are initialized, if this is the git repo clone
 if os.path.isdir(".git"):
-    git_cmd = ["git", "submodule", "update", "--init"]
-    if run_process(git_cmd) != 0:
-        print("Failed to initialize the git submodules")
+    print("Initializing submodules for PySide version %s" % __version__)
+    git_pull_cmd = ["git", "submodule", "foreach", "git", "pull", "origin", "master"]
+    if run_process(git_pull_cmd) != 0:
+        raise DistutilsSetupError("Failed to initialize the git submodules")
+    submodules_dir = os.path.join(script_dir, "sources")
+    for m in submodules[__version__]:
+        module_name = m[0]
+        module_version = m[1]
+        print("Checking out submodule %s to branch %s" % (module_name, module_version))
+        module_dir = os.path.join(submodules_dir, module_name)
+        os.chdir(module_dir)
+        git_checkout_cmd = ["git", "checkout", module_version]
+        if run_process(git_checkout_cmd) != 0:
+            raise DistutilsSetupError("Failed to initialize the git submodule %s" % module_name)
+        os.chdir(script_dir)
 
 def has_option(name):
     try:
