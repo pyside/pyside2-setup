@@ -56,6 +56,12 @@ class TestShiboken(unittest.TestCase):
         shiboken.dump(m)
         self.assertEqual(len(shiboken.getCppPointer(m)), 2)
 
+        # Don't crash even after deleting an object
+        shiboken.invalidate(obj)
+        shiboken.dump(obj)  # deleted
+        shiboken.dump(p)    # child deleted
+        shiboken.dump(obj2) # parent deleted
+
     def testDelete(self):
         obj = ObjectType()
         child = ObjectType(obj)

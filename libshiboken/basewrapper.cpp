@@ -1321,16 +1321,21 @@ std::string info(SbkObject* self)
     std::ostringstream s;
     std::list<SbkObjectType*> bases;
 
-    if (ObjectType::isUserType(Py_TYPE(self)))
-        bases = getCppBaseClasses(Py_TYPE(self));
-    else
-        bases.push_back(reinterpret_cast<SbkObjectType*>(Py_TYPE(self)));
+    if (self->d && self->d->cptr) {
+        if (ObjectType::isUserType(Py_TYPE(self)))
+            bases = getCppBaseClasses(Py_TYPE(self));
+        else
+            bases.push_back(reinterpret_cast<SbkObjectType*>(Py_TYPE(self)));
 
-    s << "C++ address....... ";
-    std::list<SbkObjectType*>::const_iterator it = bases.begin();
-    for (int i = 0; it != bases.end(); ++it, ++i)
-        s << ((PyTypeObject*)*it)->tp_name << "/" << self->d->cptr[i] << ' ';
-    s << "\n";
+        s << "C++ address....... ";
+        std::list<SbkObjectType*>::const_iterator it = bases.begin();
+        for (int i = 0; it != bases.end(); ++it, ++i)
+            s << ((PyTypeObject*)*it)->tp_name << "/" << self->d->cptr[i] << ' ';
+        s << "\n";
+    }
+    else {
+        s << "C++ address....... <<Deleted>>\n";
+    }
 
     s << "hasOwnership...... " << bool(self->d->hasOwnership) << "\n"
          "containsCppWrapper " << self->d->containsCppWrapper << "\n"
