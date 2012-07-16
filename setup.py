@@ -398,7 +398,7 @@ class pyside_build(_build):
         else:
             cmake_cmd.append("-DPYTHON_EXECUTABLE=%s" % self.py_executable)
             cmake_cmd.append("-DPYTHON_INCLUDE_DIR=%s" % self.py_include_dir)
-            cmake_cmd.append("-DPYTHON_LIBRARIES=%s" % self.py_library)
+            cmake_cmd.append("-DPYTHON_LIBRARY=%s" % self.py_library)
             if self.build_type.lower() == 'debug':
                 cmake_cmd.append("-DPYTHON_DEBUG_LIBRARY=%s" % self.py_library)
         if extension.lower() == "shiboken":
