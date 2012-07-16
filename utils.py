@@ -18,17 +18,10 @@ def filter_match(name, patterns):
     return False
 
 
-def subst_vars(input, **vars):
-    if vars is not None:
-        for key in vars:
-            input = input.replace("${%s}" % key, str(vars[key]))
-    return input
-
-
 def copyfile(src, dst, logger=None, force=True, vars=None, subst_content=False):
     if vars is not None:
-        src = subst_vars(src, **vars)
-        dst = subst_vars(dst, **vars)
+        src = src.format(**vars)
+        dst = dst.format(**vars)
     
     if not os.path.exists(src) and not force:
         if logger is not None:
@@ -46,7 +39,7 @@ def copyfile(src, dst, logger=None, force=True, vars=None, subst_content=False):
     f = open(src, "rt")
     content =  f.read()
     f.close()
-    content = subst_vars(content, **vars)
+    content = content.format(**vars)
     f = open(dst, "wt")
     f.write(content)
     f.close()
@@ -55,8 +48,8 @@ def copyfile(src, dst, logger=None, force=True, vars=None, subst_content=False):
 def makefile(dst, content=None, logger=None, vars=None):
     if vars is not None:
         if content is not None:
-            content = subst_vars(content, **vars)
-        dst = subst_vars(dst, **vars)
+            content = content.format(**vars)
+        dst = dst.format(**vars)
     
     if logger is not None:
         logger.info("Making file %s." % (dst))
@@ -75,14 +68,14 @@ def copydir(src, dst, logger=None, filter=None, ignore=None, force=True,
     recursive=True, vars=None, subst_files_content=False):
     
     if vars is not None:
-        src = subst_vars(src, **vars)
-        dst = subst_vars(dst, **vars)
+        src = src.format(**vars)
+        dst = dst.format(**vars)
         if filter is not None:
             for i in range(len(filter)):
-                filter[i] = subst_vars(filter[i], **vars)
+                filter[i] = filter[i].format(**vars)
         if ignore is not None:
             for i in range(len(ignore)):
-                ignore[i] = subst_vars(ignore[i], **vars)
+                ignore[i] = ignore[i].format(**vars)
     
     if not os.path.exists(src) and not force:
         if logger is not None:

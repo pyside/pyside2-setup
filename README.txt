@@ -92,7 +92,7 @@ Optionally you can specify the path to OpenSSL libs:
 
 ::
 
-   c:\env> Scripts\pip install PySide --install-option="--openssl=c:\\Alfa\\OpenSSL32bit\\bin" --install-option="--qmake=c:\\Qt\\4.7.4\\bin\\qmake.exe"
+   c:\env> Scripts\pip install PySide --install-option="--openssl=c:\\OpenSSL32bit\\bin" --install-option="--qmake=c:\\Qt\\4.7.4\\bin\\qmake.exe"
 
 Building PySide installer
 -------------------------
@@ -113,7 +113,7 @@ Building PySide installer
 
    ::
 
-      c:\> c:\Python27\python setup.py bdist_wininst --qmake=c:\Qt\4.7.4\bin\qmake.exe
+      c:\> c:\Python27\python setup.py bdist_wininst --qmake=c:\Qt\4.7.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
 Installing PySide from source on a UNIX System (Ubuntu 12.04 LTS)
 =================================================================
@@ -187,6 +187,33 @@ You can also specify version of `PySide` when installing from github repository:
 ::
 
    $ env/bin/pip install git+https://github.com/PySide/pyside-setup.git@1.1.1
+
+Building PySide distribution egg
+--------------------------------
+
+#. Clone ``PySide`` from git repository:
+
+   ::
+
+      $ git clone https://github.com/PySide/pyside-setup.git pyside-setup
+
+#. Switch to the ``pyside-setup`` directory:
+
+   ::
+
+      $ cd pyside-setup
+
+#. Build ``PySide`` distribution egg:
+
+   ::
+
+      $ env/bin/python setup.py bdist_egg
+
+#. Optionally you can build standalone version of distribution egg with embedded Qt libs:
+
+   ::
+
+      $ env/bin/python setup.py bdist_egg --standalone
 
 Feedback and getting involved
 =============================

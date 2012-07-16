@@ -447,31 +447,31 @@ class pyside_build(_build):
     def prepare_packages_linux(self, vars):
         # patchelf -> PySide/patchelf
         copyfile(
-            "${setup_dir}/patchelf",
-            "${setup_dir}/PySide/patchelf",
+            "{setup_dir}/patchelf",
+            "{setup_dir}/PySide/patchelf",
             logger=log, vars=vars)
         # <install>/lib/site-packages/PySide/* -> <setup>/PySide
         copydir(
-            "${install_dir}/lib/python${py_version}/site-packages/PySide",
-            "${setup_dir}/PySide",
+            "{install_dir}/lib/python{py_version}/site-packages/PySide",
+            "{setup_dir}/PySide",
             logger=log, vars=vars)
         # <install>/lib/site-packages/pysideuic/* -> <setup>/pysideuic
         copydir(
-            "${install_dir}/lib/python${py_version}/site-packages/pysideuic",
-            "${setup_dir}/pysideuic",
+            "{install_dir}/lib/python{py_version}/site-packages/pysideuic",
+            "{setup_dir}/pysideuic",
             force=False, logger=log, vars=vars)
         # <install>/bin/pyside-uic -> PySide/scripts/uic.py
         makefile(
-            "${setup_dir}/PySide/scripts/__init__.py",
+            "{setup_dir}/PySide/scripts/__init__.py",
             logger=log, vars=vars)
         copyfile(
-            "${install_dir}/bin/pyside-uic",
-            "${setup_dir}/PySide/scripts/uic.py",
+            "{install_dir}/bin/pyside-uic",
+            "{setup_dir}/PySide/scripts/uic.py",
             force=False, logger=log, vars=vars)
         # <install>/bin/* -> PySide/
         copydir(
-            "${install_dir}/bin/",
-            "${setup_dir}/PySide",
+            "{install_dir}/bin/",
+            "{setup_dir}/PySide",
             filter=[
                 "pyside-lupdate",
                 "pyside-rcc",
@@ -480,8 +480,8 @@ class pyside_build(_build):
             recursive=False, logger=log, vars=vars)
         # <install>/lib/lib* -> PySide/
         copydir(
-            "${install_dir}/lib/",
-            "${setup_dir}/PySide",
+            "{install_dir}/lib/",
+            "{setup_dir}/PySide",
             filter=[
                 "libpyside*.so.*",
                 "libshiboken*.so.*",
@@ -489,23 +489,23 @@ class pyside_build(_build):
             recursive=False, logger=log, vars=vars)
         # <install>/share/PySide/typesystems/* -> <setup>/PySide/typesystems
         copydir(
-            "${install_dir}/share/PySide/typesystems",
-            "${setup_dir}/PySide/typesystems",
+            "{install_dir}/share/PySide/typesystems",
+            "{setup_dir}/PySide/typesystems",
             logger=log, vars=vars)
         # <install>/include/* -> <setup>/PySide/include
         copydir(
-            "${install_dir}/include",
-            "${setup_dir}/PySide/include",
+            "{install_dir}/include",
+            "{setup_dir}/PySide/include",
             logger=log, vars=vars)
         # <sources>/pyside-examples/examples/* -> <setup>/PySide/examples
         copydir(
-            "${sources_dir}/pyside-examples/examples",
-            "${setup_dir}/PySide/examples",
+            "{sources_dir}/pyside-examples/examples",
+            "{setup_dir}/PySide/examples",
             force=False, logger=log, vars=vars)
         # Copy Qt libs to package
         if OPTION_STANDALONE:
             # <qt>/bin/* -> <setup>/PySide
-            copydir("${qt_bin_dir}", "${setup_dir}/PySide",
+            copydir("{qt_bin_dir}", "{setup_dir}/PySide",
                 filter=[
                     "designer",
                     "linguist",
@@ -515,87 +515,87 @@ class pyside_build(_build):
                 ],
                 recursive=False, logger=log, vars=vars)
             # <qt>/lib/* -> <setup>/PySide
-            copydir("${qt_lib_dir}", "${setup_dir}/PySide",
+            copydir("{qt_lib_dir}", "{setup_dir}/PySide",
                 filter=[
                     "libQt*.so.?",
                     "libphonon.so.?",
                 ],
                 recursive=False, logger=log, vars=vars)
             # <qt>/plugins/* -> <setup>/PySide/plugins
-            copydir("${qt_plugins_dir}", "${setup_dir}/PySide/plugins",
+            copydir("{qt_plugins_dir}", "{setup_dir}/PySide/plugins",
                 filter=["*.so"],
                 logger=log, vars=vars)
             # <qt>/imports/* -> <setup>/PySide/imports
             if float(vars["qt_version"][:3]) > 4.6:
-                copydir("${qt_imports_dir}", "${setup_dir}/PySide/imports",
+                copydir("{qt_imports_dir}", "{setup_dir}/PySide/imports",
                     filter=["qmldir", "*.so"],
                     logger=log, vars=vars)
             # <qt>/translations/* -> <setup>/PySide/translations
-            copydir("${qt_translations_dir}", "${setup_dir}/PySide/translations",
+            copydir("{qt_translations_dir}", "{setup_dir}/PySide/translations",
                 filter=["*.qm"],
                 logger=log, vars=vars)
 
     def prepare_packages_win32(self, vars):
         # <install>/lib/site-packages/PySide/* -> <setup>/PySide
         copydir(
-            "${install_dir}/lib/site-packages/PySide",
-            "${setup_dir}/PySide",
+            "{install_dir}/lib/site-packages/PySide",
+            "{setup_dir}/PySide",
             logger=log, vars=vars)
         if self.debug:
             # <build>/pyside/PySide/*.pdb -> <setup>/PySide
             copydir(
-                "${build_dir}/pyside/PySide",
-                "${setup_dir}/PySide",
+                "{build_dir}/pyside/PySide",
+                "{setup_dir}/PySide",
                 filter=["*.pdb"],
                 recursive=False, logger=log, vars=vars)
         # <install>/lib/site-packages/pysideuic/* -> <setup>/pysideuic
         copydir(
-            "${install_dir}/lib/site-packages/pysideuic",
-            "${setup_dir}/pysideuic",
+            "{install_dir}/lib/site-packages/pysideuic",
+            "{setup_dir}/pysideuic",
             force=False, logger=log, vars=vars)
         # <install>/bin/pyside-uic -> PySide/scripts/uic.py
         makefile(
-            "${setup_dir}/PySide/scripts/__init__.py",
+            "{setup_dir}/PySide/scripts/__init__.py",
             logger=log, vars=vars)
         copyfile(
-            "${install_dir}/bin/pyside-uic",
-            "${setup_dir}/PySide/scripts/uic.py",
+            "{install_dir}/bin/pyside-uic",
+            "{setup_dir}/PySide/scripts/uic.py",
             force=False, logger=log, vars=vars)
         # <install>/bin/*.exe,*.dll -> PySide/
         copydir(
-            "${install_dir}/bin/",
-            "${setup_dir}/PySide",
+            "{install_dir}/bin/",
+            "{setup_dir}/PySide",
             filter=["*.exe", "*.dll"],
             recursive=False, logger=log, vars=vars)
         # <install>/lib/*.lib -> PySide/
         copydir(
-            "${install_dir}/lib/",
-            "${setup_dir}/PySide",
+            "{install_dir}/lib/",
+            "{setup_dir}/PySide",
             filter=["*.lib"],
             recursive=False, logger=log, vars=vars)
         # <install>/share/PySide/typesystems/* -> <setup>/PySide/typesystems
         copydir(
-            "${install_dir}/share/PySide/typesystems",
-            "${setup_dir}/PySide/typesystems",
+            "{install_dir}/share/PySide/typesystems",
+            "{setup_dir}/PySide/typesystems",
             logger=log, vars=vars)
         # <install>/include/* -> <setup>/PySide/include
         copydir(
-            "${install_dir}/include",
-            "${setup_dir}/PySide/include",
+            "{install_dir}/include",
+            "{setup_dir}/PySide/include",
             logger=log, vars=vars)
         # <sources>/pyside-examples/examples/* -> <setup>/PySide/examples
         copydir(
-            "${sources_dir}/pyside-examples/examples",
-            "${setup_dir}/PySide/examples",
+            "{sources_dir}/pyside-examples/examples",
+            "{setup_dir}/PySide/examples",
             force=False, logger=log, vars=vars)
         # <ssl_libs>/* -> <setup>/PySide/
-        copydir("${ssl_libs_dir}", "${setup_dir}/PySide",
+        copydir("{ssl_libs_dir}", "{setup_dir}/PySide",
             filter=[
                 "libeay32.dll",
                 "ssleay32.dll"],
             force=False, logger=log, vars=vars)
         # <qt>/bin/*.dll -> <setup>/PySide
-        copydir("${qt_bin_dir}", "${setup_dir}/PySide",
+        copydir("{qt_bin_dir}", "{setup_dir}/PySide",
             filter=[
                 "*.dll",
                 "designer.exe",
@@ -607,19 +607,19 @@ class pyside_build(_build):
             recursive=False, logger=log, vars=vars)
         if self.debug:
             # <qt>/bin/*d4.dll -> <setup>/PySide
-            copydir("${qt_bin_dir}", "${setup_dir}/PySide",
+            copydir("{qt_bin_dir}", "{setup_dir}/PySide",
                 filter=["*d4.dll"],
                 recursive=False, logger=log, vars=vars)
         # <qt>/plugins/* -> <setup>/PySide/plugins
-        copydir("${qt_plugins_dir}", "${setup_dir}/PySide/plugins",
+        copydir("{qt_plugins_dir}", "{setup_dir}/PySide/plugins",
             filter=["*.dll"],
             logger=log, vars=vars)
         # <qt>/imports/* -> <setup>/PySide/imports
-        copydir("${qt_imports_dir}", "${setup_dir}/PySide/imports",
+        copydir("{qt_imports_dir}", "{setup_dir}/PySide/imports",
             filter=["qmldir", "*.dll"],
             logger=log, vars=vars)
         # <qt>/translations/* -> <setup>/PySide/translations
-        copydir("${qt_translations_dir}", "${setup_dir}/PySide/translations",
+        copydir("{qt_translations_dir}", "{setup_dir}/PySide/translations",
             filter=["*.qm"],
             logger=log, vars=vars)
 
