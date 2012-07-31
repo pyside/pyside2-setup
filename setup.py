@@ -74,6 +74,36 @@ from utils import makefile
 from utils import copyfile
 from utils import copydir
 from utils import run_process
+from utils import has_option
+from utils import option_value
+
+OPTION_DEBUG = has_option("debug")
+OPTION_QMAKE = option_value("qmake")
+OPTION_CMAKE = option_value("cmake")
+OPTION_OPENSSL = option_value("openssl")
+OPTION_ONLYPACKAGE = has_option("only-package")
+OPTION_STANDALONE = has_option("standalone")
+OPTION_VERSION = option_value("version")
+OPTION_LISTVERSIONS = has_option("list-versions")
+
+if OPTION_QMAKE is None:
+    OPTION_QMAKE = find_executable("qmake")
+if OPTION_CMAKE is None:
+    OPTION_CMAKE = find_executable("cmake")
+
+if OPTION_LISTVERSIONS:
+    for v in submodules:
+        print("%s" % (v))
+        for m in submodules[v]:
+            print("  %s %s" % (m[0], m[1]))
+    sys.exit(1)
+
+if OPTION_VERSION:
+    if not OPTION_VERSION in submodules:
+        print("""Invalid version specified %s
+Use --list-versions option to get list of available versions""" % OPTION_VERSION)
+        sys.exit(1)
+    __version__ = OPTION_VERSION
 
 # Change the cwd to our source dir
 try:
@@ -118,42 +148,6 @@ if os.path.isdir(".git"):
         if run_process(git_checkout_cmd) != 0:
             raise DistutilsSetupError("Failed to initialize the git submodule %s" % module_name)
         os.chdir(script_dir)
-
-def has_option(name):
-    try:
-        sys.argv.remove('--%s' % name)
-        return True
-    except ValueError:
-        pass
-    return False
-
-def option_value(name):
-    for index, option in enumerate(sys.argv):
-        if option == '--' + name:
-            if index+1 >= len(sys.argv):
-                raise DistutilsOptionError(
-                    'The option %s requires a value' % option)
-            value = sys.argv[index+1]
-            sys.argv[index:index+2] = []
-            return value
-        if option.startswith('--' + name + '='):
-            value = option[len(name)+3:]
-            sys.argv[index:index+1] = []
-            return value
-    env_val = os.getenv(name.upper().replace('-', '_'))
-    return env_val
-
-OPTION_DEBUG = has_option("debug")
-OPTION_QMAKE = option_value("qmake")
-OPTION_CMAKE = option_value("cmake")
-OPTION_OPENSSL = option_value("openssl")
-OPTION_ONLYPACKAGE = has_option("only-package")
-OPTION_STANDALONE = has_option("standalone")
-
-if OPTION_QMAKE is None:
-    OPTION_QMAKE = find_executable("qmake")
-if OPTION_CMAKE is None:
-    OPTION_CMAKE = find_executable("cmake")
 
 class pyside_install(_install):
     def run(self):

@@ -9,6 +9,32 @@ import popenasync
 import fnmatch
 
 
+def has_option(name):
+    try:
+        sys.argv.remove('--%s' % name)
+        return True
+    except ValueError:
+        pass
+    return False
+
+
+def option_value(name):
+    for index, option in enumerate(sys.argv):
+        if option == '--' + name:
+            if index+1 >= len(sys.argv):
+                raise DistutilsOptionError(
+                    'The option %s requires a value' % option)
+            value = sys.argv[index+1]
+            sys.argv[index:index+2] = []
+            return value
+        if option.startswith('--' + name + '='):
+            value = option[len(name)+3:]
+            sys.argv[index:index+1] = []
+            return value
+    env_val = os.getenv(name.upper().replace('-', '_'))
+    return env_val
+
+
 def filter_match(name, patterns):
     for pattern in patterns:
         if pattern is None:
