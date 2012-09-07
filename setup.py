@@ -224,7 +224,7 @@ class pyside_build(_build):
         
         # Prepare parameters
         build_type = OPTION_DEBUG and "Debug" or "Release"
-        
+        py_executable = sys.executable
         py_version = "%s.%s" % (sys.version_info[0], sys.version_info[1])
         py_include_dir = get_config_var("INCLUDEPY")
         py_libdir = get_config_var("LIBDIR")
@@ -234,17 +234,22 @@ class pyside_build(_build):
                 py_libdir = os.path.join(py_prefix, "libs")
             else:
                 py_libdir = os.path.join(py_prefix, "lib")
-        py_executable = sys.executable
         dbgPostfix = ""
         if build_type == "Debug":
             dbgPostfix = "_d"
-            py_executable = py_executable[:-4] + "_d.exe"
         if sys.platform == "win32":
             py_library = os.path.join(py_libdir, "python%s%s.lib" % \
                 (py_version.replace(".", ""), dbgPostfix))
         else:
-            py_library = os.path.join(py_libdir, "libpython%s%s.so" % \
-                (py_version, dbgPostfix))
+            if sys.version_info[0] > 2:
+                py_abiflags = getattr(sys, 'abiflags', None)
+                py_library = os.path.join(py_libdir, "libpython%s%s.so" % \
+                    (py_version, py_abiflags))
+            else:
+                py_library = os.path.join(py_libdir, "libpython%s%s.so" % \
+                    (py_version, dbgPostfix))
+                if not os.path.exists(py_library):
+                    py_library = py_library + ".1"
         if not os.path.exists(py_library):
             raise DistutilsSetupError(
                 "Failed to locate the Python library %s" % py_library)
@@ -301,6 +306,7 @@ class pyside_build(_build):
         log.info("Python library: %s" % self.py_library)
         log.info("-" * 3)
         log.info("Qt qmake: %s" % self.qmake_path)
+        log.info("Qt version: %s" % qtinfo.version)
         log.info("Qt bins: %s" % qtinfo.bins_dir)
         log.info("Qt plugins: %s" % qtinfo.plugins_dir)
         log.info("-" * 3)
@@ -405,7 +411,7 @@ class pyside_build(_build):
             raise DistutilsSetupError("Error configuring " + extension)
         
         log.info("Compiling module %s..." % extension)
-        if run_process(make_cmd, log) != 0:
+        if run_process([make_cmd], log) != 0:
             raise DistutilsSetupError("Error compiling " + extension)
         
         log.info("Installing module %s..." % extension)

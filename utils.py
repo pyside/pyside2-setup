@@ -5,8 +5,12 @@ import errno
 import time
 import shutil
 import subprocess
-import popenasync
 import fnmatch
+
+from distutils.spawn import spawn
+from distutils.spawn import DistutilsExecError
+
+import popenasync
 
 
 def has_option(name):
@@ -162,6 +166,13 @@ def rmtree(dirname):
 
 
 def run_process(args, logger=None):
+    if sys.platform != "win32":
+        try:
+            spawn(args)
+            return 0
+        except DistutilsExecError:
+            return -1
+
     def log(buffer, checkNewLine):
         endsWithNewLine = False
         if buffer.endswith('\n'):

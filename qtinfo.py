@@ -1,6 +1,6 @@
+import sys
 import subprocess
 from distutils.spawn import find_executable
-from popenasync import Popen
 
 class QtInfo(object):
     def __init__(self, qmake_path=None):
@@ -32,18 +32,13 @@ class QtInfo(object):
 
     def getProperty(self, prop_name):
         cmd = [self._qmake_path, "-query", prop_name]
-        proc = Popen(cmd,
-            stdin = subprocess.PIPE,
-            stdout = subprocess.PIPE, 
-            stderr = subprocess.STDOUT,
-            universal_newlines = 1,
-            shell=False)
-        prop = ''
-        while proc.poll() is None:
-            prop += proc.read_async(wait=0.1, e=0)
+        proc = subprocess.Popen(cmd, stdout = subprocess.PIPE, shell=False)
+        prop = proc.communicate()[0]
         proc.wait()
         if proc.returncode != 0:
             return None
+        if sys.version_info >= (3,):
+            return str(prop, 'ascii').strip()
         return prop.strip()
 
     version = property(getVersion)
