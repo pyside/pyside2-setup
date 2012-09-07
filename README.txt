@@ -29,9 +29,8 @@ Installing prerequisities
 #. Install `Python 2.7
    <http://python.org/download/releases/2.7.3/>`_.
 
-#. Install `Qt 4.7 libraries for Windows (VS 2008)
-   <ftp://ftp.qt.nokia.com/qt/source/qt-win-opensource-4.7.4-vs2008.exe>`_.
-   `(PySide version 1.1.1 does not support Qt 4.8 on Windows System)`
+#. Install `Qt 4.8 libraries for Windows (VS 2008)
+   <http://releases.qt-project.org/qt4/source/qt-win-opensource-4.8.2-vs2008.exe>`_.
 
 #. Install `Cmake 2.8
    <http://www.cmake.org/cmake/resources/software.html>`_.
@@ -86,13 +85,13 @@ Use ``pip`` to get `PySide` installed:
 
 ::
 
-   c:\env> Scripts\pip install PySide --install-option="--qmake=c:\\Qt\\4.7.4\\bin\\qmake.exe"
+   c:\env> Scripts\pip install PySide --install-option="--qmake=c:\\Qt\\4.8.2\\bin\\qmake.exe"
 
 Optionally you can specify the path to OpenSSL libs:
 
 ::
 
-   c:\env> Scripts\pip install PySide --install-option="--openssl=c:\\OpenSSL32bit\\bin" --install-option="--qmake=c:\\Qt\\4.7.4\\bin\\qmake.exe"
+   c:\env> Scripts\pip install PySide --install-option="--openssl=c:\\OpenSSL32bit\\bin" --install-option="--qmake=c:\\Qt\\4.8.2\\bin\\qmake.exe"
 
 Building PySide installer
 -------------------------
@@ -113,7 +112,7 @@ Building PySide installer
 
    ::
 
-      c:\> c:\Python27\python setup.py bdist_wininst --qmake=c:\Qt\4.7.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+      c:\> c:\Python27\python setup.py bdist_wininst --qmake=c:\Qt\4.8.2\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
 Installing PySide from source on a UNIX System (Ubuntu 12.04 LTS)
 =================================================================
@@ -224,6 +223,23 @@ Feedback and getting involved
 
 Changes
 =======
+
+1.1.2 (2012-08-28)
+------------------
+
+Bug fixes
+~~~~~~~~~
+
+- During signal emission don't get return type after callback
+- Invalidate QStandardModel::invisibleRootItem in clear() method
+- QAbstractItemModel has wrong ownership policy for selectionModel()
+- Improved QVector to python conversion
+- Disable docstring generation if tools aren't found.
+- Fixed some issues compiling PySide using VC++
+- Install the shiboken module to site-packages
+- Fix compilation when there is no libxslt installed on the system.
+- Set a default hash function for all ObjectTypes.
+- Fix segfault calling shiboken.dump
 
 1.1.1 (2012-04-19)
 ------------------
