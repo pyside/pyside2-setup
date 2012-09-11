@@ -30,10 +30,16 @@ On Windows You need to execute this script from Visual Studio 2008 Command Promp
 Building 64bit version is not supported with Visual Studio 2008 Express Edition.
 """
 
-__version__ = "1.1.2"
+__version__ = "1.1.3dev"
 
 submodules = {
     __version__: [
+        ["shiboken", "master"],
+        ["pyside", "master"],
+        ["pyside-tools", "master"],
+        ["pyside-examples", "master"],
+    ],
+    '1.1.2': [
         ["shiboken", "1.1.2"],
         ["pyside", "1.1.2"],
         ["pyside-tools", "0.2.14"],
