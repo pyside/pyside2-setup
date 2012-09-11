@@ -107,9 +107,19 @@ public:
             inline int someMethod(SomeInnerClass*) { return 0; }
             virtual OkThisIsRecursiveEnough* someVirtualMethod(OkThisIsRecursiveEnough* arg) { return arg; }
         };
+    protected:
+        enum ProtectedEnum {
+            ProtectedItem0,
+            ProtectedItem1
+        };
     };
     struct SomeOtherInnerClass {
         std::list<SomeInnerClass> someInnerClasses;
+    };
+protected:
+    enum ProtectedEnum {
+        ProtectedItem0,
+        ProtectedItem1
     };
 };
 

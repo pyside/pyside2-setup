@@ -43,7 +43,9 @@ class TestEnumUnderNamespace(unittest.TestCase):
 class TestClassesUnderNamespace(unittest.TestCase):
     def testIt(self):
         c1 = SampleNamespace.SomeClass()
+        e1 = SampleNamespace.SomeClass.ProtectedEnum()
         c2 = SampleNamespace.SomeClass.SomeInnerClass()
+        e2 = SampleNamespace.SomeClass.SomeInnerClass.ProtectedEnum()
         c3 = SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough()
         e3 = SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum()
 
@@ -53,6 +55,8 @@ class TestClassesUnderNamespace(unittest.TestCase):
 
     def testTpNames(self):
         self.assertEquals(str(SampleNamespace.SomeClass), "<%s 'sample.SampleNamespace.SomeClass'>"%TYPE_STR)
+        self.assertEquals(str(SampleNamespace.SomeClass.ProtectedEnum), "<%s 'sample.SampleNamespace.SomeClass.ProtectedEnum'>"%TYPE_STR)
+        self.assertEquals(str(SampleNamespace.SomeClass.SomeInnerClass.ProtectedEnum), "<%s 'sample.SampleNamespace.SomeClass.SomeInnerClass.ProtectedEnum'>"%TYPE_STR)
         self.assertEquals(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough), "<%s 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough'>"%TYPE_STR)
         self.assertEquals(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum), "<%s 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum'>"%TYPE_STR)
 

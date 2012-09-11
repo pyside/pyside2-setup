@@ -530,8 +530,10 @@
                 <object-type name="OkThisIsRecursiveEnough">
                     <enum-type name="NiceEnum" />
                 </object-type>
+                <enum-type name="ProtectedEnum"/>
             </value-type>
             <value-type name="SomeOtherInnerClass"/>
+            <enum-type name="ProtectedEnum"/>
         </value-type>
 
         <modify-function signature="doSomethingWithArray(const unsigned char*, unsigned int, const char*)">

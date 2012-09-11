@@ -314,7 +314,7 @@ QString ShibokenGenerator::fullPythonFunctionName(const AbstractMetaFunction* fu
 
 QString ShibokenGenerator::protectedEnumSurrogateName(const AbstractMetaEnum* metaEnum)
 {
-    return metaEnum->fullName().replace(".", "_") + "_Surrogate";
+    return metaEnum->fullName().replace(".", "_").replace("::", "_") + "_Surrogate";
 }
 
 QString ShibokenGenerator::protectedFieldGetterName(const AbstractMetaField* field)
