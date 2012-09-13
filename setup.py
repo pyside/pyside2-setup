@@ -83,6 +83,7 @@ from utils import run_process
 from utils import has_option
 from utils import option_value
 
+# Declare options
 OPTION_DEBUG = has_option("debug")
 OPTION_QMAKE = option_value("qmake")
 OPTION_CMAKE = option_value("cmake")
@@ -97,19 +98,13 @@ if OPTION_QMAKE is None:
 if OPTION_CMAKE is None:
     OPTION_CMAKE = find_executable("cmake")
 
+# Show available versions
 if OPTION_LISTVERSIONS:
     for v in submodules:
         print("%s" % (v))
         for m in submodules[v]:
             print("  %s %s" % (m[0], m[1]))
     sys.exit(1)
-
-if OPTION_VERSION:
-    if not OPTION_VERSION in submodules:
-        print("""Invalid version specified %s
-Use --list-versions option to get list of available versions""" % OPTION_VERSION)
-        sys.exit(1)
-    __version__ = OPTION_VERSION
 
 # Change the cwd to our source dir
 try:
@@ -121,20 +116,18 @@ if os.path.dirname(this_file):
     os.chdir(os.path.dirname(this_file))
 script_dir = os.getcwd()
 
-# Clean temp build folders
-for n in ["build", "PySide.egg-info", "PySide-%s" % __version__,
-    "PySide", "pysideuic"]:
-    d = os.path.join(script_dir, n)
-    if os.path.isdir(d):
-        print("Removing %s" % d)
-        rmtree(d)
+# Change package version
+if OPTION_VERSION:
+    if not os.path.isdir(".git"):
+        print("Option --version is available only when pyside-setup was cloned from git repository")
+        sys.exit(1)
+    if not OPTION_VERSION in submodules:
+        print("""Invalid version specified %s
+Use --list-versions option to get list of available versions""" % OPTION_VERSION)
+        sys.exit(1)
+    __version__ = OPTION_VERSION
 
-# Create empty package folders
-for pkg in ["PySide", "pysideuic"]:
-    pkg_dir = os.path.join(script_dir, pkg)
-    os.makedirs(pkg_dir)
-
-# Ensure that git submodules are initialized, if this is the git repo clone
+# Initialize, pull and checkout submodules
 if os.path.isdir(".git"):
     print("Initializing submodules for PySide version %s" % __version__)
     git_update_cmd = ["git", "submodule", "update", "--init"]
@@ -154,6 +147,19 @@ if os.path.isdir(".git"):
         if run_process(git_checkout_cmd) != 0:
             raise DistutilsSetupError("Failed to initialize the git submodule %s" % module_name)
         os.chdir(script_dir)
+
+# Clean up temp and package folders
+for n in ["build", "PySide.egg-info", "PySide-%s" % __version__,
+    "PySide", "pysideuic"]:
+    d = os.path.join(script_dir, n)
+    if os.path.isdir(d):
+        print("Removing %s" % d)
+        rmtree(d)
+
+# Prepare package folders
+for pkg in ["PySide", "pysideuic"]:
+    pkg_dir = os.path.join(script_dir, pkg)
+    os.makedirs(pkg_dir)
 
 class pyside_install(_install):
     def run(self):
