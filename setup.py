@@ -92,11 +92,25 @@ OPTION_ONLYPACKAGE = has_option("only-package")
 OPTION_STANDALONE = has_option("standalone")
 OPTION_VERSION = option_value("version")
 OPTION_LISTVERSIONS = has_option("list-versions")
+OPTION_MAKESPEC = option_value("make-spec")
 
 if OPTION_QMAKE is None:
     OPTION_QMAKE = find_executable("qmake")
 if OPTION_CMAKE is None:
     OPTION_CMAKE = find_executable("cmake")
+
+if sys.platform == "win32":
+    if OPTION_MAKESPEC is None:
+        OPTION_MAKESPEC = "msvc"
+    if not OPTION_MAKESPEC in ["msvc", "mingw"]:
+        print("Invalid option --make-spec. Available values are %s" % (["msvc", "mingw"]))
+        sys.exit(1)
+else:
+    if OPTION_MAKESPEC is None:
+        OPTION_MAKESPEC = "make"
+    if not OPTION_MAKESPEC in ["make"]:
+        print("Invalid option --make-spec. Available values are %s" % (["make"]))
+        sys.exit(1)
 
 # Show available versions
 if OPTION_LISTVERSIONS:
@@ -201,6 +215,8 @@ class pyside_build(_build):
 
     def initialize_options(self):
         _build.initialize_options(self)
+        self.make_path = None
+        self.make_generator = None
         self.debug = False
         self.script_dir = None
         self.sources_dir = None
@@ -217,7 +233,18 @@ class pyside_build(_build):
     def run(self):
         # Check env
         if not OPTION_ONLYPACKAGE:
-            make_name = sys.platform == "win32" and "nmake" or "make"
+            if OPTION_MAKESPEC == "make":
+                make_name = "make"
+                make_generator = "Unix Makefiles"
+            elif OPTION_MAKESPEC == "msvc":
+                make_name = "nmake"
+                make_generator = "NMake Makefiles"
+            elif OPTION_MAKESPEC == "mingw":
+                make_name = "mingw32-make"
+                make_generator = "MinGW Makefiles"
+            else:
+                raise DistutilsSetupError(
+                    "Invalid option --make-spec.")
             make_path = find_executable(make_name)
             if make_path is None or not os.path.exists(make_path):
                 raise DistutilsSetupError(
@@ -250,18 +277,31 @@ class pyside_build(_build):
         if build_type == "Debug":
             dbgPostfix = "_d"
         if sys.platform == "win32":
-            py_library = os.path.join(py_libdir, "python%s%s.lib" % \
-                (py_version.replace(".", ""), dbgPostfix))
+            if OPTION_MAKESPEC == "mingw":
+                py_library = os.path.join(py_libdir, "libpython%s%s.a" % \
+                    (py_version.replace(".", ""), dbgPostfix))
+            else:
+                py_library = os.path.join(py_libdir, "python%s%s.lib" % \
+                    (py_version.replace(".", ""), dbgPostfix))
         else:
             if sys.version_info[0] > 2:
                 py_abiflags = getattr(sys, 'abiflags', None)
                 py_library = os.path.join(py_libdir, "libpython%s%s.so" % \
                     (py_version, py_abiflags))
+                # Python was compiled as a static library ?
+                if not os.path.exists(py_library):
+                    log.error("Failed to locate the Python library %s" % py_library)
+                    py_library = py_library[:-3] + ".a"
             else:
                 py_library = os.path.join(py_libdir, "libpython%s%s.so" % \
                     (py_version, dbgPostfix))
                 if not os.path.exists(py_library):
+                    log.error("Failed to locate the Python library %s" % py_library)
                     py_library = py_library + ".1"
+                    # Python was compiled as a static library ?
+                    if not os.path.exists(py_library):
+                        log.error("Failed to locate the Python library %s" % py_library)
+                        py_library = py_library[:-5] + ".a"
         if not os.path.exists(py_library):
             raise DistutilsSetupError(
                 "Failed to locate the Python library %s" % py_library)
@@ -291,6 +331,8 @@ class pyside_build(_build):
         build_dir = os.path.join(script_dir, os.path.join("pyside_build", "%s" % build_name))
         install_dir = os.path.join(script_dir, os.path.join("pyside_install", "%s" % build_name))
         
+        self.make_path = make_path
+        self.make_generator = make_generator
         self.debug = OPTION_DEBUG
         self.script_dir = script_dir
         self.sources_dir = sources_dir
@@ -305,8 +347,11 @@ class pyside_build(_build):
         self.qtinfo = qtinfo
         
         log.info("=" * 30)
-        log.info("Build type: %s" % self.build_type)
         log.info("Package version: %s" % __version__)
+        log.info("Build type: %s" % self.build_type)
+        log.info("-" * 3)
+        log.info("Make path: %s" % self.make_path)
+        log.info("Make generator: %s" % self.make_generator)
         log.info("-" * 3)
         log.info("Script directory: %s" % self.script_dir)
         log.info("Sources directory: %s" % self.sources_dir)
@@ -384,15 +429,9 @@ class pyside_build(_build):
         module_src_dir = os.path.join(self.sources_dir, extension)
         
         # Build module
-        if sys.platform == "win32":
-            cmake_generator = "NMake Makefiles"
-            make_cmd = "nmake"
-        else:
-            cmake_generator = "Unix Makefiles"
-            make_cmd = "make"
         cmake_cmd = [
             "cmake",
-            "-G", cmake_generator,
+            "-G", self.make_generator,
             "-DQT_QMAKE_EXECUTABLE=%s" % self.qmake_path,
             "-DBUILD_TESTS=False",
             "-DDISABLE_DOCSTRINGS=True",
@@ -423,11 +462,11 @@ class pyside_build(_build):
             raise DistutilsSetupError("Error configuring " + extension)
         
         log.info("Compiling module %s..." % extension)
-        if run_process([make_cmd], log) != 0:
+        if run_process([self.make_path], log) != 0:
             raise DistutilsSetupError("Error compiling " + extension)
         
         log.info("Installing module %s..." % extension)
-        if run_process([make_cmd, "install/fast"], log) != 0:
+        if run_process([self.make_path, "install/fast"], log) != 0:
             raise DistutilsSetupError("Error pseudo installing " + extension)
         
         os.chdir(self.script_dir)
