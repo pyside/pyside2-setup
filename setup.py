@@ -232,7 +232,7 @@ class pyside_build(_build):
     
     def run(self):
         # Check env
-        make_name = None
+        make_path = None
         make_generator = None
         if not OPTION_ONLYPACKAGE:
             if OPTION_MAKESPEC == "make":
