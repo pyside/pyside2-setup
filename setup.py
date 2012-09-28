@@ -232,6 +232,8 @@ class pyside_build(_build):
     
     def run(self):
         # Check env
+        make_name = None
+        make_generator = None
         if not OPTION_ONLYPACKAGE:
             if OPTION_MAKESPEC == "make":
                 make_name = "make"
@@ -506,10 +508,10 @@ class pyside_build(_build):
             "{install_dir}/lib/python{py_version}/site-packages/PySide",
             "{setup_dir}/PySide",
             logger=log, vars=vars)
-        # <install>/lib/site-packages/shiboken.so -> <setup>/shiboken.so
+        # <install>/lib/site-packages/shiboken.so -> <setup>/PySide/shiboken.so
         copyfile(
             "{install_dir}/lib/python{py_version}/site-packages/shiboken.so",
-            "{setup_dir}/shiboken.so",
+            "{setup_dir}/PySide/shiboken.so",
             logger=log, vars=vars)
         # <install>/lib/site-packages/pysideuic/* -> <setup>/pysideuic
         copydir(
@@ -604,10 +606,10 @@ class pyside_build(_build):
                 "{setup_dir}/PySide",
                 filter=["*.pdb"],
                 recursive=False, logger=log, vars=vars)
-        # <install>/lib/site-packages/shiboken.pyd -> <setup>/shiboken.pyd
+        # <install>/lib/site-packages/shiboken.pyd -> <setup>/PySide/shiboken.pyd
         copyfile(
             "{install_dir}/lib/site-packages/shiboken.pyd",
-            "{setup_dir}/shiboken.pyd",
+            "{setup_dir}/PySide/shiboken.pyd",
             logger=log, vars=vars)
         # <install>/lib/site-packages/pysideuic/* -> <setup>/pysideuic
         copydir(
