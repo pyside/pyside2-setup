@@ -506,6 +506,11 @@ class pyside_build(_build):
             "{install_dir}/lib/python{py_version}/site-packages/PySide",
             "{setup_dir}/PySide",
             logger=log, vars=vars)
+        # <install>/lib/site-packages/shiboken.so -> <setup>/shiboken.so
+        copyfile(
+            "{install_dir}/lib/python{py_version}/site-packages/shiboken.so",
+            "{setup_dir}/shiboken.so",
+            logger=log, vars=vars)
         # <install>/lib/site-packages/pysideuic/* -> <setup>/pysideuic
         copydir(
             "{install_dir}/lib/python{py_version}/site-packages/pysideuic",
@@ -599,6 +604,11 @@ class pyside_build(_build):
                 "{setup_dir}/PySide",
                 filter=["*.pdb"],
                 recursive=False, logger=log, vars=vars)
+        # <install>/lib/site-packages/shiboken.pyd -> <setup>/shiboken.pyd
+        copyfile(
+            "{install_dir}/lib/site-packages/shiboken.pyd",
+            "{setup_dir}/shiboken.pyd",
+            logger=log, vars=vars)
         # <install>/lib/site-packages/pysideuic/* -> <setup>/pysideuic
         copydir(
             "{install_dir}/lib/site-packages/pysideuic",

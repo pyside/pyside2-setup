@@ -67,7 +67,7 @@ def install_linux():
     for srcname in os.listdir(pyside_path):
         if os.path.isdir(srcname):
             continue
-        if not filter_match(srcname, ["Qt*.so", "phonon.so", "shiboken"]):
+        if not filter_match(srcname, ["Qt*.so", "phonon.so", "shiboken", "shiboken.so"]):
             continue
         srcpath = os.path.join(pyside_path, srcname)
         cmd = [
