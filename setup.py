@@ -314,9 +314,25 @@ class pyside_build(_build):
                     break
                 libs_tried.append(py_library)
             else:
-                raise DistutilsSetupError(
-                    "Failed to locate the Python library with %s" %
-                    ', '.join(libs_tried))
+                py_multiarch = get_config_var("MULTIARCH")
+                if py_multiarch:
+                    try_py_libdir = os.path.join(py_libdir, py_multiarch)
+                    libs_tried = []
+                    for lib_ext in lib_exts:
+                        lib_name = "libpython%s%s%s" % (py_version, lib_suff, lib_ext)
+                        py_library = os.path.join(try_py_libdir, lib_name)
+                        if os.path.exists(py_library):
+                            py_libdir = try_py_libdir
+                            break
+                        libs_tried.append(py_library)
+                    else:
+                        raise DistutilsSetupError(
+                            "Failed to locate the Python library with %s" %
+                            ', '.join(libs_tried))
+                else:
+                    raise DistutilsSetupError(
+                        "Failed to locate the Python library with %s" %
+                        ', '.join(libs_tried))
             if py_library.endswith('.a'):
                 # Python was compiled as a static library
                 log.error("Failed to locate a dynamic Python library, using %s"
