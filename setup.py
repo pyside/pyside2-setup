@@ -112,6 +112,9 @@ else:
         print("Invalid option --make-spec. Available values are %s" % (["make"]))
         sys.exit(1)
 
+if sys.platform == 'darwin' and OPTION_STANDALONE:
+    print("--standalone option does not yet work on OSX")
+
 # Show available versions
 if OPTION_LISTVERSIONS:
     for v in submodules:
@@ -286,28 +289,31 @@ class pyside_build(_build):
                 py_library = os.path.join(py_libdir, "python%s%s.lib" % \
                     (py_version.replace(".", ""), dbgPostfix))
         else:
+            lib_exts = ['.so']
+            if sys.platform == 'darwin':
+                lib_exts.append('.dylib')
             if sys.version_info[0] > 2:
-                py_abiflags = getattr(sys, 'abiflags', None)
-                py_library = os.path.join(py_libdir, "libpython%s%s.so" % \
-                    (py_version, py_abiflags))
-                # Python was compiled as a static library ?
-                if not os.path.exists(py_library):
-                    log.error("Failed to locate the Python library %s" % py_library)
-                    py_library = py_library[:-3] + ".a"
+                lib_suff = getattr(sys, 'abiflags', None)
+            else: # Python 2
+                lib_suff = dbgPostfix
+                lib_exts.append('.so.1')
+            lib_exts.append('.a') # static library as last gasp
+            libs_tried = []
+            for lib_ext in lib_exts:
+                lib_name = "libpython%s%s%s" % (py_version, lib_suff, lib_ext)
+                py_library = os.path.join(py_libdir, lib_name)
+                if os.path.exists(py_library):
+                    break
+                libs_tried.append(py_library)
             else:
-                py_library = os.path.join(py_libdir, "libpython%s%s.so" % \
-                    (py_version, dbgPostfix))
-                if not os.path.exists(py_library):
-                    log.error("Failed to locate the Python library %s" % py_library)
-                    py_library = py_library + ".1"
-                    # Python was compiled as a static library ?
-                    if not os.path.exists(py_library):
-                        log.error("Failed to locate the Python library %s" % py_library)
-                        py_library = py_library[:-5] + ".a"
-        if not os.path.exists(py_library):
-            raise DistutilsSetupError(
-                "Failed to locate the Python library %s" % py_library)
-        
+                raise DistutilsSetupError(
+                    "Failed to locate the Python library with %s" %
+                    ', '.join(libs_tried))
+            if py_library.endswith('.a'):
+                # Python was compiled as a static library
+                log.error("Failed to locate a dynamic Python library, using %s"
+                          % py_library)
+
         qtinfo = QtInfo(OPTION_QMAKE)
         
         # Update os.path
@@ -388,7 +394,7 @@ class pyside_build(_build):
             for ext in ['shiboken', 'pyside', 'pyside-tools']:
                 self.build_extension(ext)
 
-        # Build patchelf
+        # Build patchelf if needed
         self.build_patchelf()
 
         # Prepare packages
@@ -400,18 +406,14 @@ class pyside_build(_build):
     def build_patchelf(self):
         if sys.platform != "linux2":
             return
-        
         log.info("Building patchelf...")
-        
         module_src_dir = os.path.join(self.sources_dir, "patchelf")
-        
         build_cmd = [
             "g++",
             "%s/patchelf.cc" % (module_src_dir),
             "-o",
             "patchelf",
         ]
-        
         if run_process(build_cmd, log) != 0:
             raise DistutilsSetupError("Error building patchelf")
 
@@ -458,7 +460,12 @@ class pyside_build(_build):
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
             if sys.version_info[0] > 2:
                 cmake_cmd.append("-DUSE_PYTHON3=ON")
-        
+        elif sys.platform == 'darwin':
+            # Work round cmake include problem
+            # http://neilweisenfeld.com/wp/120/building-pyside-on-the-mac
+            # https://groups.google.com/forum/#!msg/pyside/xciZZ4Hm2j8/CUmqfJptOwoJ
+            cmake_cmd.append('-DALTERNATIVE_QT_INCLUDE_DIR=/Library/Frameworks')
+
         log.info("Configuring module %s (%s)..." % (extension,  module_src_dir))
         if run_process(cmake_cmd, log) != 0:
             raise DistutilsSetupError("Error configuring " + extension)
@@ -495,14 +502,20 @@ class pyside_build(_build):
         os.chdir(self.script_dir)
         if sys.platform == "win32":
             return self.prepare_packages_win32(vars)
-        return self.prepare_packages_linux(vars)
+        return self.prepare_packages_posix(vars)
 
-    def prepare_packages_linux(self, vars):
-        # patchelf -> PySide/patchelf
-        copyfile(
-            "{setup_dir}/patchelf",
-            "{setup_dir}/PySide/patchelf",
-            logger=log, vars=vars)
+    def prepare_packages_posix(self, vars):
+        if sys.platform == 'linux2':
+            # patchelf -> PySide/patchelf
+            copyfile(
+                "{setup_dir}/patchelf",
+                "{setup_dir}/PySide/patchelf",
+                logger=log, vars=vars)
+            so_ext = '.so'
+            so_star = so_ext + '.*'
+        elif sys.platform == 'darwin':
+            so_ext = '.dylib'
+            so_star = so_ext
         # <install>/lib/site-packages/PySide/* -> <setup>/PySide
         copydir(
             "{install_dir}/lib/python{py_version}/site-packages/PySide",
@@ -541,8 +554,8 @@ class pyside_build(_build):
             "{install_dir}/lib/",
             "{setup_dir}/PySide",
             filter=[
-                "libpyside*.so.*",
-                "libshiboken*.so.*",
+                "libpyside*" + so_star,
+                "libshiboken*" + so_star,
             ],
             recursive=False, logger=log, vars=vars)
         # <install>/share/PySide/typesystems/* -> <setup>/PySide/typesystems
@@ -562,6 +575,8 @@ class pyside_build(_build):
             force=False, logger=log, vars=vars)
         # Copy Qt libs to package
         if OPTION_STANDALONE:
+            if sys.platform == 'darwin':
+                raise RuntimeError('--standalone not yet supported for OSX')
             # <qt>/bin/* -> <setup>/PySide
             copydir("{qt_bin_dir}", "{setup_dir}/PySide",
                 filter=[
