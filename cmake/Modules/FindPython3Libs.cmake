@@ -29,7 +29,7 @@ INCLUDE(CMakeFindFrameworks)
 
 FOREACH(_CURRENT_VERSION 3.2 3.1 3.0)
   IF(_CURRENT_VERSION GREATER 3.1)
-      SET(_32FLAGS "m" "u" "mu" "")
+      SET(_32FLAGS "m" "u" "mu" "dm" "du" "dmu" "")
   ELSE()
       SET(_32FLAGS "")
   ENDIF()
