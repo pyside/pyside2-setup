@@ -26,6 +26,7 @@ set(libshiboken_SOVERSION "${libshiboken_MAJOR_VERSION}.${libshiboken_MINOR_VERS
 
 set(libshiboken_SRC
 basewrapper.cpp
+debugfreehook.cpp
 gilstate.cpp
 helper.cpp
 sbkconverter.cpp

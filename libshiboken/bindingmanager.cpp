@@ -27,10 +27,10 @@
 #include "sbkdbg.h"
 #include "gilstate.h"
 #include "sbkstring.h"
+#include "debugfreehook.h"
 
 #include <cstddef>
 #include <fstream>
-
 
 namespace Shiboken
 {
@@ -150,10 +150,17 @@ BindingManager::BindingManager()
     m_d = new BindingManager::BindingManagerPrivate;
     m_d->wrapperMapper.set_empty_key((WrapperMap::key_type)0);
     m_d->wrapperMapper.set_deleted_key((WrapperMap::key_type)1);
+
+#ifdef SHIBOKEN_INSTALL_FREE_DEBUG_HOOK
+    debugInstallFreeHook();
+#endif
 }
 
 BindingManager::~BindingManager()
 {
+#ifdef SHIBOKEN_INSTALL_FREE_DEBUG_HOOK
+    debugRemoveFreeHook();
+#endif
 #ifndef NDEBUG
     showWrapperMap(m_d->wrapperMapper);
 #endif
