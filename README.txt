@@ -35,8 +35,12 @@ Installing prerequisities
 #. Install `Cmake 2.8
    <http://www.cmake.org/cmake/resources/software.html>`_.
 
-#. Install `MS Visual Studio Express 2008
-   <http://www.microsoft.com/express/Downloads/>`_.
+#. Install `Visual Studio Express 2008
+   <http://www.microsoft.com/express/Downloads/>`_
+   when building against Python 2.6, 2.7 or 3.2.
+   Install `Visual Studio Express 2010
+   <http://www.microsoft.com/visualstudio/eng/products/visual-studio-2010-express>`_
+   when building against Python 3.3.
 
 #. Install `Git 1.7
    <http://git-scm.com/download/win>`_.
