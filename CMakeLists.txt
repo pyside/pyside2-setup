@@ -86,7 +86,7 @@ add_custom_target(uninstall "${CMAKE_COMMAND}"
 set(SHIBOKEN_BUILD_TYPE "Release")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if(NOT PYTHON_DEBUG_LIBRARIES)
-        message(FATAL_ERROR "Python debug library not found. Try compile shiboken with -DCMAKE_BUILD_TYPE=Release")
+        message(WARNING "Python debug shared library not found; assuming python was built with shared library support disabled.")
     endif()
     if(NOT PYTHON_WITH_DEBUG)
         message(WARNING "Compiling shiboken with debug enabled, but the python executable was not compiled with debug support.")
@@ -115,7 +115,7 @@ add_subdirectory(libshiboken)
 add_subdirectory(doc)
 
 # deps found, compile the generator.
-if (QT4_FOUND AND PYTHONLIBS_FOUND AND PYTHONINTERP_FOUND)
+if (QT4_FOUND AND PYTHONINTERP_FOUND)
     add_subdirectory(generator)
     add_subdirectory(shibokenmodule)
 
