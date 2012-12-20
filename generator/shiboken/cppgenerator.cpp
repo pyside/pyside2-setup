@@ -976,17 +976,22 @@ void CppGenerator::writeConverterFunctions(QTextStream& s, const AbstractMetaCla
     // C++ pointer to a Python wrapper, keeping identity.
     s << "// C++ to Python pointer conversion - tries to find the Python wrapper for the C++ object (keeps object identity)." << endl;
     code.clear();
-    c << INDENT << "PyObject* pyOut = (PyObject*)Shiboken::BindingManager::instance().retrieveWrapper(cppIn);" << endl;
-    c << INDENT << "if (pyOut) {" << endl;
+    if (usePySideExtensions() && metaClass->isQObject())
     {
-        Indentation indent(INDENT);
-        c << INDENT << "Py_INCREF(pyOut);" << endl;
-        c << INDENT << "return pyOut;" << endl;
+        c << INDENT << "return PySide::getWrapperForQObject((" << typeName << "*)cppIn, &" << cpythonType << ");" << endl;
+    } else {
+        c << INDENT << "PyObject* pyOut = (PyObject*)Shiboken::BindingManager::instance().retrieveWrapper(cppIn);" << endl;
+        c << INDENT << "if (pyOut) {" << endl;
+        {
+            Indentation indent(INDENT);
+            c << INDENT << "Py_INCREF(pyOut);" << endl;
+            c << INDENT << "return pyOut;" << endl;
+        }
+        c << INDENT << '}' << endl;
+        c << INDENT << "const char* typeName = typeid(*((" << typeName << "*)cppIn)).name();" << endl;
+        c << INDENT << "return Shiboken::Object::newObject(&" << cpythonType;
+        c << ", const_cast<void*>(cppIn), false, false, typeName);";
     }
-    c << INDENT << '}' << endl;
-    c << INDENT << "const char* typeName = typeid(*((" << typeName << "*)cppIn)).name();" << endl;
-    c << INDENT << "return Shiboken::Object::newObject(&" << cpythonType;
-    c << ", const_cast<void*>(cppIn), false, false, typeName);";
     std::swap(targetTypeName, sourceTypeName);
     writeCppToPythonFunction(s, code, sourceTypeName, targetTypeName);
 
@@ -3391,8 +3396,6 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
 
     if (!metaClass->typeEntry()->hashFunction().isEmpty())
         tp_hash = '&' + cpythonBaseName(metaClass) + "_HashFunc";
-    else if (isObjectType(metaClass))
-        tp_hash = "&Shiboken::Object::hash";
 
     const AbstractMetaFunction* callOp = metaClass->findFunction("operator()");
     if (callOp && !callOp->isModifiedRemoved())
