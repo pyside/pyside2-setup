@@ -159,7 +159,7 @@ Use --list-versions option to get list of available versions""" % OPTION_VERSION
     __version__ = OPTION_VERSION
 
 # Initialize, pull and checkout submodules
-if os.path.isdir(".git") and not OPTION_IGNOREGIT:
+if os.path.isdir(".git") and not OPTION_IGNOREGIT and not OPTION_ONLYPACKAGE:
     print("Initializing submodules for PySide version %s" % __version__)
     git_update_cmd = ["git", "submodule", "update", "--init"]
     if run_process(git_update_cmd) != 0:
@@ -769,6 +769,21 @@ class pyside_build(_build):
             copydir("{qt_bin_dir}", "{dist_dir}/PySide",
                 filter=["*d4.dll"],
                 recursive=False, logger=log, vars=vars)
+
+        # I think these are the qt-mobility DLLs, at least some are,
+        # so let's copy them too
+        # <qt>/lib/*.dll -> <setup>/PySide
+        copydir("{qt_lib_dir}", "{setup_dir}/PySide",
+            filter=["*.dll"],
+            ignore=["*d?.dll"],
+            recursive=False, logger=log, vars=vars)
+        if self.debug:
+            # <qt>/lib/*d4.dll -> <setup>/PySide
+            copydir("{qt_lib_dir}", "{setup_dir}/PySide",
+                filter=["*d?.dll"],
+                recursive=False, logger=log, vars=vars)
+
+        
         # <qt>/plugins/* -> <setup>/PySide/plugins
         copydir("{qt_plugins_dir}", "{dist_dir}/PySide/plugins",
             filter=["*.dll"],
