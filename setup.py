@@ -434,7 +434,7 @@ class pyside_build(_build):
         
         # Build module
         cmake_cmd = [
-            "cmake",
+            OPTION_CMAKE,
             "-G", self.make_generator,
             "-DQT_QMAKE_EXECUTABLE=%s" % self.qmake_path,
             "-DBUILD_TESTS=False",
