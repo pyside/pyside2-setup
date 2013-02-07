@@ -521,6 +521,9 @@ class pyside_build(_build):
             cmake_cmd.append("-DPYTHON_LIBRARY=%s" % self.py_library)
             if self.build_type.lower() == 'debug':
                 cmake_cmd.append("-DPYTHON_DEBUG_LIBRARY=%s" % self.py_library)
+            if sys.platform == "win32" and self.build_type.lower() == 'debug':
+                cmake_cmd.append("-DCMAKE_DEBUG_POSTFIX=_d")
+                
         if extension.lower() == "shiboken":
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
             if sys.version_info[0] > 2:
@@ -572,6 +575,7 @@ class pyside_build(_build):
         }
         os.chdir(self.script_dir)
         if sys.platform == "win32":
+            vars['dbgPostfix'] = OPTION_DEBUG and "_d" or ""
             return self.prepare_packages_win32(vars)
         return self.prepare_packages_posix(vars)
 
@@ -704,8 +708,8 @@ class pyside_build(_build):
             force=False, logger=log, vars=vars)
         # <install>/lib/site-packages/shiboken.pyd -> <setup>/PySide/shiboken.pyd
         copyfile(
-            "{install_dir}/lib/site-packages/shiboken.pyd",
-            "{dist_dir}/PySide/shiboken.pyd",
+            "{install_dir}/lib/site-packages/shiboken{dbgPostfix}.pyd",
+            "{dist_dir}/PySide/shiboken{dbgPostfix}.pyd",
             logger=log, vars=vars)
         # <install>/lib/site-packages/pysideuic/* -> <setup>/pysideuic
         copydir(
@@ -753,6 +757,7 @@ class pyside_build(_build):
                 "libeay32.dll",
                 "ssleay32.dll"],
             force=False, logger=log, vars=vars)
+        
         # <qt>/bin/*.dll -> <setup>/PySide
         copydir("{qt_bin_dir}", "{dist_dir}/PySide",
             filter=[
@@ -770,6 +775,11 @@ class pyside_build(_build):
                 filter=["*d4.dll"],
                 recursive=False, logger=log, vars=vars)
 
+            # <qt>/lib/*.pdb -> <setup>/PySide
+            copydir("{qt_lib_dir}", "{setup_dir}/PySide",
+                filter=["*.pdb"],
+                recursive=False, logger=log, vars=vars)
+            
         # I think these are the qt-mobility DLLs, at least some are,
         # so let's copy them too
         # <qt>/lib/*.dll -> <setup>/PySide
