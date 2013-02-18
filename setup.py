@@ -93,6 +93,7 @@ OPTION_STANDALONE = has_option("standalone")
 OPTION_VERSION = option_value("version")
 OPTION_LISTVERSIONS = has_option("list-versions")
 OPTION_MAKESPEC = option_value("make-spec")
+OPTION_IGNOREGIT = has_option("ignore-git")
 
 if OPTION_QMAKE is None:
     OPTION_QMAKE = find_executable("qmake")
@@ -145,7 +146,7 @@ Use --list-versions option to get list of available versions""" % OPTION_VERSION
     __version__ = OPTION_VERSION
 
 # Initialize, pull and checkout submodules
-if os.path.isdir(".git"):
+if os.path.isdir(".git") and not OPTION_IGNOREGIT:
     print("Initializing submodules for PySide version %s" % __version__)
     git_update_cmd = ["git", "submodule", "update", "--init"]
     if run_process(git_update_cmd) != 0:
