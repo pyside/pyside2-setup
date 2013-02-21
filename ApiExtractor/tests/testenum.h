@@ -36,6 +36,7 @@ private slots:
     void testEnumValueFromNeighbourEnum();
     void testEnumValueFromExpression();
     void testPrivateEnum();
+    void testTypedefEnum();
 };
 
 #endif

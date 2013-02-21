@@ -373,6 +373,39 @@ void TestEnum::testPrivateEnum()
     QCOMPARE(pub1->stringValue(), QString("A::Priv1"));
 }
 
+void TestEnum::testTypedefEnum()
+{
+    const char* cppCode ="\
+    typedef enum EnumA { \
+        A0, \
+        A1, \
+    } EnumA ; \
+    ";
+    const char* xmlCode = "\
+    <typesystem package=\"Foo\"> \
+        <enum-type name='EnumA'/>\
+    </typesystem>";
+
+    TestUtil t(cppCode, xmlCode, false);
+
+    AbstractMetaEnumList globalEnums = t.builder()->globalEnums();
+    QEXPECT_FAIL("", "APIExtractor does not handle typedef enum correctly yet", Abort);
+    QCOMPARE(globalEnums.count(), 1);
+
+    AbstractMetaEnum* enumA = globalEnums.first();
+    QCOMPARE(enumA->typeEntry()->qualifiedCppName(), QString("EnumA"));
+
+    AbstractMetaEnumValue* enumValueA0 = enumA->values().first();
+    QCOMPARE(enumValueA0->name(), QString("A0"));
+    QCOMPARE(enumValueA0->value(), 0);
+    QCOMPARE(enumValueA0->stringValue(), QString(""));
+
+    AbstractMetaEnumValue* enumValueA1 = enumA->values().last();
+    QCOMPARE(enumValueA1->name(), QString("A1"));
+    QCOMPARE(enumValueA1->value(), 1);
+    QCOMPARE(enumValueA1->stringValue(), QString(""));
+}
+
 QTEST_APPLESS_MAIN(TestEnum)
 
 #include "testenum.moc"
