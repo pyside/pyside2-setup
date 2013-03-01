@@ -41,6 +41,24 @@ class OverflowTest(unittest.TestCase):
         val *= -1
         self.assertRaises(OverflowError, doubleUnsignedInt, val)
 
+    def testLongLong(self):
+        '''C++ function receives an long long argument and raise OverflowError if the value is negative.'''
+        val = 100
+        self.assertEqual(doubleLongLong(val), 2 * val)
+        val = long(100)
+        self.assertEqual(doubleLongLong(val), 2 * val)
+        val = (2 << 64) + 1
+        self.assertRaises(OverflowError, doubleLongLong, val)
+
+    def testUnsignedLongLong(self):
+        '''C++ function receives an unsigned long long argument and raise OverflowError if the value is negative.'''
+        val = 100
+        self.assertEqual(doubleUnsignedLongLong(val), 2 * val)
+        val = long(100)
+        self.assertEqual(doubleUnsignedLongLong(val), 2 * val)
+        val *= -1
+        self.assertRaises(OverflowError, doubleUnsignedLongLong, val)
+
     def testOverflow(self):
         '''Calls function with unsigned int parameter using an overflowing value.'''
         self.assertRaises(OverflowError, doubleUnsignedInt, 42415335332353253)

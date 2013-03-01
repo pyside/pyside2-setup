@@ -22,6 +22,8 @@
     <primitive-type name="unsigned char"/>
     <primitive-type name="long"/>
     <primitive-type name="unsigned long"/>
+    <primitive-type name="long long"/>
+    <primitive-type name="unsigned long long"/>
     <primitive-type name="std::string"/>
 
     <primitive-type name="Foo::HANDLE" target-lang-api-name="PyLong"/>
@@ -481,6 +483,8 @@
     <function signature="transmutePointIntoComplex(const Point&amp;)" />
     <function signature="sumComplexPair(std::pair&lt;Complex, Complex>)" />
     <function signature="doubleUnsignedInt(unsigned int)" />
+    <function signature="doubleLongLong(long long)" />
+    <function signature="doubleUnsignedLongLong(unsigned long long)" />
     <function signature="doubleShort(short)" />
     <function signature="returnNullPrimitivePointer()" />
     <function signature="returnNullValueTypePointer()" />

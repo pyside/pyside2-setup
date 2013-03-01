@@ -131,6 +131,18 @@ doubleUnsignedInt(unsigned int value)
     return value * 2;
 }
 
+long long
+doubleLongLong(long long value)
+{
+    return value * 2;
+}
+
+unsigned long long
+doubleUnsignedLongLong(unsigned long long value)
+{
+    return value * 2;
+}
+
 short
 doubleShort(short value)
 {

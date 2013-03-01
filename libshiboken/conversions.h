@@ -435,7 +435,19 @@ struct Converter<unsigned PY_LONG_LONG>
     }
     static inline unsigned PY_LONG_LONG toCpp(PyObject* pyobj)
     {
-        return (unsigned PY_LONG_LONG) PyLong_AsUnsignedLongLong(pyobj);
+        if (PyInt_Check(pyobj)) {
+            long result = (unsigned PY_LONG_LONG) PyInt_AsLong(pyobj);
+            if (result < 0) {
+                PyErr_SetObject(PyExc_OverflowError, 0);
+                return 0;
+            } else
+                return (unsigned PY_LONG_LONG) result;
+        } else if (PyLong_Check(pyobj)) {
+            return (unsigned PY_LONG_LONG) PyLong_AsUnsignedLongLong(pyobj);
+        } else {
+            PyErr_SetString(PyExc_TypeError, "Invalid type for unsigned long long conversion");
+            return 0;
+        }
     }
 };
 

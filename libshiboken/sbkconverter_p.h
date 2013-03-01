@@ -251,7 +251,17 @@ struct Primitive<unsigned PY_LONG_LONG> : OnePrimitive<unsigned PY_LONG_LONG>
     }
     static void toCpp(PyObject* pyIn, void* cppOut)
     {
-        *((unsigned PY_LONG_LONG*)cppOut) = (unsigned PY_LONG_LONG) PyLong_AsUnsignedLongLong(pyIn);
+        if (PyInt_Check(pyIn)) {
+            long result = (unsigned PY_LONG_LONG) PyInt_AsLong(pyIn);
+            if (result < 0)
+                PyErr_SetObject(PyExc_OverflowError, 0);
+            else
+                *((unsigned PY_LONG_LONG*)cppOut) = (unsigned PY_LONG_LONG) result;
+        } else if (PyLong_Check(pyIn)) {
+            *((unsigned PY_LONG_LONG*)cppOut) = (unsigned PY_LONG_LONG) PyLong_AsUnsignedLongLong(pyIn);
+        } else {
+            PyErr_SetString(PyExc_TypeError, "Invalid type for unsigned long long conversion");
+        }
     }
     static PythonToCppFunc isConvertible(PyObject* pyIn)
     {
