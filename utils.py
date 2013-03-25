@@ -166,14 +166,7 @@ def rmtree(dirname):
 
 
 def run_process(args, logger=None):
-    if sys.platform != "win32":
-        try:
-            spawn(args)
-            return 0
-        except DistutilsExecError:
-            return -1
-
-    def log(buffer, checkNewLine):
+    def log(buffer, checkNewLine=False):
         endsWithNewLine = False
         if buffer.endswith('\n'):
             endsWithNewLine = True
@@ -191,6 +184,15 @@ def run_process(args, logger=None):
                 print(line.rstrip('\r'))
         return buffer
     
+    log("Running process: {0}".format(" ".join([(" " in x and '"{0}"'.format(x) or x) for x in args])))
+    
+    if sys.platform != "win32":
+        try:
+            spawn(args)
+            return 0
+        except DistutilsExecError:
+            return -1
+
     shell = False
     if sys.platform == "win32":
         shell = True
@@ -205,9 +207,9 @@ def run_process(args, logger=None):
     
     log_buffer = None;
     while proc.poll() is None:
-        log_buffer = log(proc.read_async(wait=0.1, e=0), False)
+        log_buffer = log(proc.read_async(wait=0.1, e=0))
     if log_buffer:
-        log(log_buffer, False)
+        log(log_buffer)
     
     proc.wait()
     return proc.returncode
