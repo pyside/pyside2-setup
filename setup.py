@@ -321,8 +321,8 @@ class pyside_build(_build):
         paths = os.environ['PATH'].lower().split(os.pathsep)
         def updatepath(path):
             if not path.lower() in paths:
-                log.info("Adding path \"%s\" to environment" % path)
-                paths.append(path)
+                log.info("Inserting path \"%s\" to environment" % path)
+                paths.insert(0, path)
         qt_dir = os.path.dirname(OPTION_QMAKE)
         updatepath(qt_dir)
         os.environ['PATH'] = os.pathsep.join(paths)
