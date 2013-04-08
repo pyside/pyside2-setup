@@ -709,7 +709,7 @@ setup(
     name = "PySide",
     version = __version__,
     description = ("Python bindings for the Qt cross-platform application and UI framework"),
-    long_description = read('README.txt'),
+    long_description = read('README.rst'),
     options = {
         "bdist_wininst": {
             "install_script": "pyside_postinstall.py",
