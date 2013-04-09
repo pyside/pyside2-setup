@@ -20,19 +20,19 @@ Compatibility
 
 PySide requires Python 2.6 or later and Qt 4.6 or better.
 
-Installing PySide from source on a Windows System
-=================================================
+Building PySide on a Windows System
+===================================
 
 Installing prerequisities
 -------------------------
 
-#. Install `Python 2.7
-   <http://python.org/download/releases/2.7.3/>`_.
+#. Install `Python
+   <http://www.python.org/download/>`_.
 
 #. Install `Qt 4.8 libraries for Windows (VS 2008)
-   <http://releases.qt-project.org/qt4/source/qt-win-opensource-4.8.2-vs2008.exe>`_.
+   <http://releases.qt-project.org/qt4/source/qt-win-opensource-4.8.4-vs2008.exe>`_.
 
-#. Install `Cmake 2.8
+#. Install `Cmake
    <http://www.cmake.org/cmake/resources/software.html>`_.
 
 #. Install `Visual Studio Express 2008
@@ -42,11 +42,17 @@ Installing prerequisities
    <http://www.microsoft.com/visualstudio/eng/products/visual-studio-2010-express>`_
    when building against Python 3.3.
 
-#. Install `Git 1.7
+#. Install `Git
    <http://git-scm.com/download/win>`_.
 
 #. (Optional) Install `OpenSSL
    <http://slproweb.com/products/Win32OpenSSL.html>`_.
+
+#. Open Visual Studio 2008 Command Prompt:
+
+   ::
+
+      c:\> c:\ProgramData\Microsoft\Windows\Start Menu\Programs\Microsoft Visual Studio 2008\Visual Studio Tools\Visual Studio 2008 Command Prompt.lnk
 
 #. Install latest `distribute` distribution into the Python you
    installed in the first step: download `distribute_setup.py
@@ -58,49 +64,10 @@ Installing prerequisities
 
       c:\> c:\Python27\python distribute_setup.py
 
-#. Use that Python's `bin/easy_install` to install `virtualenv`:
+Building PySide distribution
+----------------------------
 
-   ::
-
-      c:\> c:\Python27\Scripts\easy_install virtualenv
-
-#. Use that Python's virtualenv to make a workspace:
-
-   ::
-
-      c:\> c:\Python27\Scripts\virtualenv env
-
-#. Open Visual Studio 2008 Command Prompt:
-
-   ::
-
-      c:\> c:\ProgramData\Microsoft\Windows\Start Menu\Programs\Microsoft Visual Studio 2008\Visual Studio Tools\Visual Studio 2008 Command Prompt.lnk
-
-#. Switch to the ``env`` directory:
-
-   ::
-
-      c:\> cd env
-
-Installing PySide
------------------
-
-Use ``pip`` to get `PySide` installed:
-
-::
-
-   c:\env> Scripts\pip install PySide --install-option="--qmake=c:\\Qt\\4.8.2\\bin\\qmake.exe"
-
-Optionally you can specify the path to OpenSSL libs:
-
-::
-
-   c:\env> Scripts\pip install PySide --install-option="--openssl=c:\\OpenSSL32bit\\bin" --install-option="--qmake=c:\\Qt\\4.8.2\\bin\\qmake.exe"
-
-Building PySide installer
--------------------------
-
-#. Clone ``PySide`` from git repository:
+#. Clone ``PySide`` setup scripts from git repository:
 
    ::
 
@@ -116,10 +83,16 @@ Building PySide installer
 
    ::
 
-      c:\> c:\Python27\python setup.py bdist_wininst --qmake=c:\Qt\4.8.2\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+      c:\> c:\Python27\python setup.py bdist_wininst --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
-Installing PySide from source on a UNIX System (Ubuntu 12.04 LTS)
-=================================================================
+#. After the successful build, the distribution can be found in sub-folder ``dist``
+   
+   ::
+
+      $ cd dist
+
+Building PySide on a UNIX System (Ubuntu 12.04 LTS)
+===================================================
 
 Installing prerequisities
 -------------------------
@@ -158,43 +131,10 @@ Installing prerequisities
 
       $ sudo python distribute_setup.py
 
-#. Use that Python's `bin/easy_install` to install `virtualenv`:
+Building PySide distribution
+----------------------------
 
-   ::
-
-      $ sudo easy_install virtualenv
-
-#. Use that Python's virtualenv to make a workspace:
-
-   ::
-
-      $ virtualenv env
-
-Installing PySide
------------------
-
-Use ``pip`` to get `PySide` installed from PyPI:
-
-::
-
-   $ env/bin/pip install PySide
-
-Alternatively you can install development version of `PySide` from github repository:
-
-::
-
-   $ env/bin/pip install git+https://github.com/PySide/pyside-setup.git
-
-You can also specify version of `PySide` when installing from github repository:
-
-::
-
-   $ env/bin/pip install git+https://github.com/PySide/pyside-setup.git@1.1.1
-
-Building PySide distribution egg
---------------------------------
-
-#. Clone ``PySide`` from git repository:
+#. Clone ``PySide`` setup scripts from git repository:
 
    ::
 
@@ -206,17 +146,23 @@ Building PySide distribution egg
 
       $ cd pyside-setup
 
-#. Build ``PySide`` distribution egg:
+#. Build ``PySide`` distribution:
 
    ::
 
-      $ env/bin/python setup.py bdist_egg
+      $ python setup.py bdist_egg
 
-#. Optionally you can build standalone version of distribution egg with embedded Qt libs:
+#. Optionally you can build standalone version of distribution with embedded Qt libs:
 
    ::
 
-      $ env/bin/python setup.py bdist_egg --standalone
+      $ python setup.py bdist_egg --standalone
+
+#. After the successful build, the distribution can be found in sub-folder ``dist``
+   
+   ::
+
+      $ cd dist
 
 Feedback and getting involved
 =============================
