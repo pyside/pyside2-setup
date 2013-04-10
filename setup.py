@@ -6,18 +6,18 @@ or
   python setup.py install --qmake=</path/to/qt/bin/qmake> [--cmake=</path/to/cmake>] [--opnessl=</path/to/openssl/bin>]
 to build and install into your current Python installation.
 
-You can use special option --only-package, if you want to create more binary packages (bdist_egg, bdist_wininst, ...)
-without rebuilding entire PySide every time.
+On Linux you can use option --standalone, to embed Qt libraries to PySide distribution
 
-Examples:
+You can use special option --only-package, if you want to create more binary packages (bdist_egg, bdist_wininst, ...)
+without rebuilding entire PySide every time:
   # First time we create bdist_winist with full PySide build
-  python setup.py bdist_winist --qmake=c:\Qt\4.7.4\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --opnessl=c:\libs\OpenSSL32bit\bin
+  python setup.py bdist_winist --qmake=c:\Qt\4.8.4\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --opnessl=c:\libs\OpenSSL32bit\bin
   
   # Then we crate bdist_egg reusing PySide build with option --only-package
-  python setup.py bdist_egg --only-package --qmake=c:\Qt\4.7.4\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --opnessl=c:\libs\OpenSSL32bit\bin
+  python setup.py bdist_egg --only-package --qmake=c:\Qt\4.8.4\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --opnessl=c:\libs\OpenSSL32bit\bin
 
 REQUIREMENTS:
-- Python: 2.6, 2.7 and 3.2 is supported
+- Python: 2.6, 2.7, 3.2 and 3.3 is supported
 - Cmake: Specify the path to cmake with --cmake option or add cmake to the system path.
 - Qt: 4.6, 4.7 and 4.8 is supported. Specify the path to qmake with --qmake option or add qmake to the system path.
 
@@ -726,11 +726,14 @@ setup(
         'Environment :: Console',
         'Environment :: MacOS X',
         'Environment :: X11 Applications :: Qt',
+        'Environment :: Win32 (MS Windows)',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: POSIX',
         'Operating System :: POSIX :: Linux',
+        'Operating System :: Microsoft',
+        'Operating System :: Microsoft :: Windows',
         'Programming Language :: C++',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
@@ -738,6 +741,7 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
         'Topic :: Database',
         'Topic :: Software Development',
         'Topic :: Software Development :: Code Generators',
