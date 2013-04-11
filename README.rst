@@ -89,7 +89,7 @@ Building PySide distribution
    
    ::
 
-      $ cd dist
+      c:\> cd dist
 
 Building PySide on a UNIX System (Ubuntu 12.04 LTS)
 ===================================================
