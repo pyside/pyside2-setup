@@ -136,6 +136,9 @@ script_dir = os.getcwd()
 
 # Change package version
 if OPTION_VERSION:
+    if OPTION_IGNOREGIT:
+        print("Option --version can not be used together with option --ignore-git")
+        sys.exit(1)
     if not os.path.isdir(".git"):
         print("Option --version is available only when pyside-setup was cloned from git repository")
         sys.exit(1)
