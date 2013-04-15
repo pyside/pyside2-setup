@@ -276,8 +276,12 @@ class pyside_build(_build):
         py_version = "%s.%s" % (sys.version_info[0], sys.version_info[1])
         py_include_dir = get_config_var("INCLUDEPY")
         py_libdir = get_config_var("LIBDIR")
+        py_prefix = get_config_var("prefix")
+        if sys.platform == "win32":
+            py_scripts_dir = os.path.join(py_prefix, "Scripts")
+        else:
+            py_scripts_dir = os.path.join(py_prefix, "bin")
         if py_libdir is None or not os.path.exists(py_libdir):
-            py_prefix = get_config_var("prefix")
             if sys.platform == "win32":
                 py_libdir = os.path.join(py_prefix, "libs")
             else:
@@ -319,21 +323,21 @@ class pyside_build(_build):
                           % py_library)
 
         qtinfo = QtInfo(OPTION_QMAKE)
-        
-        # Update os.path
-        paths = os.environ['PATH'].lower().split(os.pathsep)
-        def updatepath(path):
-            if not path.lower() in paths:
-                log.info("Inserting path \"%s\" to environment" % path)
-                paths.insert(0, path)
         qt_dir = os.path.dirname(OPTION_QMAKE)
-        updatepath(qt_dir)
-        os.environ['PATH'] = os.pathsep.join(paths)
-        
         qt_version = qtinfo.version
         if not qt_version:
             log.error("Failed to query the Qt version with qmake %s" % qtinfo.qmake_path)
             sys.exit(1)
+        
+        # Update the PATH environment variable
+        def updatepath(path):
+            paths = os.environ['PATH'].lower().split(os.pathsep)
+            if not path.lower() in paths:
+                log.info("Inserting path \"%s\" to environment" % path)
+                paths.insert(0, path)
+                os.environ['PATH'] = os.pathsep.join(paths)
+        updatepath(py_scripts_dir)
+        updatepath(qt_dir)
         
         build_name = "py%s-qt%s-%s-%s" % \
             (py_version, qt_version, platform.architecture()[0], build_type.lower())
@@ -373,6 +377,8 @@ class pyside_build(_build):
         log.info("Python executable: %s" % self.py_executable)
         log.info("Python includes: %s" % self.py_include_dir)
         log.info("Python library: %s" % self.py_library)
+        log.info("Python prefix: %s" % py_prefix)
+        log.info("Python scripts: %s" % py_scripts_dir)
         log.info("-" * 3)
         log.info("Qt qmake: %s" % self.qmake_path)
         log.info("Qt version: %s" % qtinfo.version)
@@ -477,6 +483,11 @@ class pyside_build(_build):
         log.info("Compiling module %s..." % extension)
         if run_process([self.make_path], log) != 0:
             raise DistutilsSetupError("Error compiling " + extension)
+        
+        if extension.lower() == "shiboken":
+            log.info("Generating Shiboken documentation %s..." % extension)
+            if run_process([self.make_path, "doc"], log) != 0:
+                raise DistutilsSetupError("Error generating documentation " + extension)
         
         log.info("Installing module %s..." % extension)
         if run_process([self.make_path, "install/fast"], log) != 0:
