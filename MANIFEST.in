@@ -27,6 +27,7 @@ recursive-exclude sources/pyside-examples/.git **
 
 # PySide package
 recursive-include PySide **
+recursive-include PySide/docs **
 recursive-include PySide/plugins **
 recursive-include PySide/imports **
 recursive-include PySide/translations **

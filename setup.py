@@ -531,6 +531,11 @@ class pyside_build(_build):
         elif sys.platform == 'darwin':
             so_ext = '.dylib'
             so_star = so_ext
+        # <build>/shiboken/doc/html/* -> <setup>/PySide/docs/shiboken
+        copydir(
+            "{build_dir}/shiboken/doc/html",
+            "{setup_dir}/PySide/docs/shiboken",
+            force=False, logger=log, vars=vars)
         # <install>/lib/site-packages/PySide/* -> <setup>/PySide
         copydir(
             "{install_dir}/lib/python{py_version}/site-packages/PySide",
@@ -636,6 +641,11 @@ class pyside_build(_build):
                 "{setup_dir}/PySide",
                 filter=["*.pdb"],
                 recursive=False, logger=log, vars=vars)
+        # <build>/shiboken/doc/html/* -> <setup>/PySide/docs/shiboken
+        copydir(
+            "{build_dir}/shiboken/doc/html",
+            "{setup_dir}/PySide/docs/shiboken",
+            force=False, logger=log, vars=vars)
         # <install>/lib/site-packages/shiboken.pyd -> <setup>/PySide/shiboken.pyd
         copyfile(
             "{install_dir}/lib/site-packages/shiboken.pyd",
