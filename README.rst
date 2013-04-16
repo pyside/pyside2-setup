@@ -48,12 +48,6 @@ Installing prerequisities
 #. (Optional) Install `OpenSSL
    <http://slproweb.com/products/Win32OpenSSL.html>`_.
 
-#. Open Visual Studio 2008 Command Prompt:
-
-   ::
-
-      c:\> c:\ProgramData\Microsoft\Windows\Start Menu\Programs\Microsoft Visual Studio 2008\Visual Studio Tools\Visual Studio 2008 Command Prompt.lnk
-
 #. Install latest `distribute` distribution into the Python you
    installed in the first step: download `distribute_setup.py
    <http://python-distribute.org/distribute_setup.py>`_ and run it using
@@ -63,6 +57,12 @@ Installing prerequisities
    ::
 
       c:\> c:\Python27\python distribute_setup.py
+
+#. Open Visual Studio 2008 Command Prompt:
+
+   ::
+
+      c:\> c:\ProgramData\Microsoft\Windows\Start Menu\Programs\Microsoft Visual Studio 2008\Visual Studio Tools\Visual Studio 2008 Command Prompt.lnk
 
 Building PySide distribution
 ----------------------------
@@ -163,6 +163,18 @@ Building PySide distribution
    ::
 
       $ cd dist
+
+#. Install ``PySide`` distribution with easy_install:
+   
+   ::
+
+      $ easy_install PySide-1.1.2.egg
+
+#. Run the post-install script:
+   
+   ::
+
+      $ python pyside_postinstall.py -install
 
 Feedback and getting involved
 =============================
