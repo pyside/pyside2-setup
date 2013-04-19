@@ -796,7 +796,8 @@ setup(
     download_url = 'http://releases.qt-project.org/pyside',
     license = 'LGPL',
     packages = ['PySide', 'pysideuic'],
-    package_dir = {'': 'pyside_dist'},
+    package_dir = {'PySide': 'pyside_dist/PySide',
+                   'pysideuic': 'pyside_dist/pysideuic'},
     include_package_data = True,
     zip_safe = False,
     entry_points = {
