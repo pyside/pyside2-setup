@@ -83,7 +83,7 @@ Building PySide distribution
 
    ::
 
-      c:\> c:\Python27\python setup.py bdist_wininst --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+      c:\> c:\Python27\python.exe setup.py bdist_wininst --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
 #. After the successful build, the distribution can be found in sub-folder ``dist``.
    Install the distribution with easy_install and run the post-install script:
@@ -91,7 +91,7 @@ Building PySide distribution
    ::
 
       c:\> c:\Python27\Scripts\easy_install dist\PySide-1.1.2.win32-py2.7.exe
-      c:\> c:\Python27\Scripts\pyside_postinstall.py -install
+      c:\> c:\Python27\python.exe c:\Python27\Scripts\pyside_postinstall.py -install
 
 Building PySide on a UNIX System (Ubuntu 12.04 LTS)
 ===================================================
