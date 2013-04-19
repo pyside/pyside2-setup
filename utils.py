@@ -7,6 +7,11 @@ import shutil
 import subprocess
 import fnmatch
 
+try:
+    WindowsError
+except NameError:
+    WindowsError = None
+
 from distutils.spawn import spawn
 from distutils.spawn import DistutilsExecError
 
