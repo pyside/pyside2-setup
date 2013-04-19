@@ -85,8 +85,8 @@ Building PySide distribution
 
       c:\> c:\Python27\python.exe setup.py bdist_wininst --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
-#. After the successful build, the distribution can be found in sub-folder ``dist``.
-   Install the distribution with easy_install and run the post-install script:
+#. After the successful build, install the distribution with easy_install
+   and run the post-install script:
    
    ::
 
@@ -160,8 +160,8 @@ Building PySide distribution
 
       $ python setup.py bdist_egg --standalone
 
-#. After the successful build, the distribution can be found in sub-folder ``dist``.
-   Install the distribution with easy_install and run the post-install script:
+#. After the successful build, install the distribution with easy_install
+   and run the post-install script:
    
    ::
 
