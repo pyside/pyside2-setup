@@ -1,6 +1,7 @@
 /build
 /dist
 /pyside_build
+/pyside_dist
 /pyside_install
 /PySide
 /PySide-*.*.*
