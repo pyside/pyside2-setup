@@ -119,9 +119,6 @@ def copydir(src, dst, logger=None, filter=None, ignore=None, force=True,
     
     names = os.listdir(src)
     
-    if not os.path.exists(dst):
-        os.makedirs(dst)
-    
     errors = []
     for name in names:
         srcname = os.path.join(src, name)
@@ -135,6 +132,8 @@ def copydir(src, dst, logger=None, filter=None, ignore=None, force=True,
                 if (filter is not None and not filter_match(name, filter)) or \
                     (ignore is not None and filter_match(name, ignore)):
                     continue
+                if not os.path.exists(dst):
+                    os.makedirs(dst)
                 copyfile(srcname, dstname, logger, True, vars, subst_files_content)
         # catch the Error from the recursive copytree so that we can
         # continue with other files
