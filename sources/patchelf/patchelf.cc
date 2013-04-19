@@ -1224,7 +1224,7 @@ int main(int argc, char * * argv)
             return 0;
         }
         else if (arg == "--version") {
-            printf(PACKAGE_STRING "\n");
+            printf("1.0\n");
             return 0;
         }
         else break;
