@@ -165,8 +165,8 @@ Building PySide distribution
    
    ::
 
-      $ easy_install dist/PySide-1.1.2.egg
-      $ python pyside_postinstall.py -install
+      $ sudo easy_install dist/PySide-1.1.2.egg
+      $ sudo python pyside_postinstall.py -install
 
 Feedback and getting involved
 =============================
