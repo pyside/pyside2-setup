@@ -131,7 +131,7 @@ Installing prerequisities
 
    ::
 
-      $ sudo python distribute_setup.py
+      $ sudo python2.7 distribute_setup.py
 
 Building PySide distribution
 ----------------------------
@@ -152,21 +152,21 @@ Building PySide distribution
 
    ::
 
-      $ python setup.py bdist_egg
+      $ python2.7 setup.py bdist_egg
 
 #. Optionally you can build standalone version of distribution with embedded Qt libs:
 
    ::
 
-      $ python setup.py bdist_egg --standalone
+      $ python2.7 setup.py bdist_egg --standalone
 
 #. After the successful build, install the distribution with easy_install
    and run the post-install script:
    
    ::
 
-      $ sudo easy_install dist/PySide-1.1.2.egg
-      $ sudo python pyside_postinstall.py -install
+      $ sudo easy_install-2.7 dist/PySide-1.1.2.egg
+      $ sudo python2.7 pyside_postinstall.py -install
 
 Feedback and getting involved
 =============================
