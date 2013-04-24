@@ -168,6 +168,76 @@ Building PySide distribution
       $ sudo easy_install-2.7 dist/PySide-1.1.2.egg
       $ sudo python2.7 pyside_postinstall.py -install
 
+PySide Setup Script command line options
+========================================
+
+Usage on Windows System
+-----------------------
+
+   ::
+
+      c:\> c:\Python27\python.exe setup.py [distribution_type] [options]
+
+Usage on UNIX System
+--------------------
+
+   ::
+
+      python2.7 setup.py [distribution_type] [options]
+
+Distribution types
+------------------
+
+``bdist_wininst``
+    Create standalone windows installer with embedded Qt libs and development tools.
+    This distribution type can be installed with ``easy_install``.
+   
+``bdist_egg``
+    Create egg binary distribution.
+    This distribution type can be installed with ``easy_install``.
+      
+``sdist``
+    Create full source distribution with included sources of PySide Setup Scripts,
+    PySide, Shiboken, PySide Tools and PySide Examples.
+    Can be used to build binary distribution in offline mode.
+
+Options
+-------
+
+``--qmake``
+    Specify the path to qmake.
+    Useful when the qmake is not in path or more than one Qt versions are installed.
+
+``--cmake``
+    Specify the path to cmake.
+    Useful when the cmake is not in path.
+
+``--openssl``
+    Specify the path to OpenSSL libs.
+
+``--only-package``
+    Create distribution from prebuilt PySide binaries.
+    Before using this option first time, the full distribution build is required.
+
+``--standalone``
+    When enabled, all required Qt libs will be included in PySide distribution.
+    This option is allways enabled on Windows System.
+    On Linux it's disabled by default.
+
+``--version``
+    Specify what version of PySide distribution to build.
+    This option is available only when the setup scripts are cloned from git repository.
+
+``--list-versions``
+    List available versions of PySide distributions.
+
+``--ignore-git``
+    Don't pull sources from git repository.
+
+``--make-spec``
+    Specify the cmake makefile generator type.
+    Available values are ``msvc`` on Windows System and ``make`` on UNIX System.
+
 Feedback and getting involved
 =============================
 
