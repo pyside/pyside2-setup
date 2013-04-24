@@ -20,6 +20,41 @@ Compatibility
 
 PySide requires Python 2.6 or later and Qt 4.6 or better.
 
+Installation
+============
+
+Installing PySide on a Windows System
+-------------------------------------
+
+There are two options to install PySide on Windows:
+
+#. Download and install the packages from the `releases page
+   <http://releases.qt-project.org/pyside/>`.
+
+#. Use setuptools:
+   
+   ::
+
+      c:\> c:\Python27\Scripts\easy_install PySide
+      c:\> c:\Python27\python.exe c:\Python27\Scripts\pyside_postinstall.py -install
+   
+   Note that the post-install procedure is not needed when installing via installer.
+   The installer calls the pyside_postinstall.py script automatically.
+
+Installing PySide on a UNIX System
+----------------------------------
+
+There are no prebuild setuptools distributions available for UNIX System.
+To build and install setuptools compatible distributions for UNIX System,
+please read the instruction in section ``Building PySide on a UNIX System``.
+
+Using pip vs easy_install
+-------------------------
+
+Pip can install only from source (it does not support binary distributions) and allways rebuilds the distribution
+before the distribution is installed to system. For that reason the recommended tool to install the ``PySide``
+is easy_install.
+
 Building PySide on a Windows System
 ===================================
 
