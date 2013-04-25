@@ -245,11 +245,22 @@ class pyside_build(_build):
         self.py_version = None
         self.build_type = "Release"
         self.qtinfo = None
-        self.msvc_env = None
     
     def run(self):
-        # Try to get MSVC env
+        def update_env_path(newpaths):
+            paths = os.environ['PATH'].lower().split(os.pathsep)
+            for path in newpaths:
+                if not path.lower() in paths:
+                    log.info("Inserting path \"%s\" to environment" % path)
+                    paths.insert(0, path)
+                    os.environ['PATH'] = os.pathsep.join(paths)
+
+        platform_arch = platform.architecture()[0]
+        log.info("Python architekture is %s" % platform_arch)
+        
+        # Try to init the MSVC env
         if sys.platform == "win32" and OPTION_MSVCVERSION:
+            # Search for MSVC
             log.info("Searching vcvarsall.bat for MSVC version %s" % OPTION_MSVCVERSION)
             msvc_version = float(OPTION_MSVCVERSION)
             vcvarsall_path = find_vcvarsall(msvc_version)
@@ -257,8 +268,21 @@ class pyside_build(_build):
                 raise DistutilsSetupError(
                     "Failed to find the vcvarsall.bat for MSVC version %s." % OPTION_MSVCVERSION)
             log.info("Found %s" % vcvarsall_path)
-            vcvarsall_cmd = ["call", vcvarsall_path]
-            self.msvc_env = get_environment_from_batch_command(vcvarsall_path)
+            # Get MSVC env
+            msvc_arch = "x86" if platform_arch.startswith("32") else "amd64"
+            log.info("Getting MSVC env for %s architecture" % msvc_arch)
+            vcvarsall_cmd = ["call", vcvarsall_path, msvc_arch]
+            msvc_env = get_environment_from_batch_command(vcvarsall_path)
+            msvc_env_paths = os.pathsep.join([msvc_env[k] for k in msvc_env if k.upper() == 'PATH']).split(os.pathsep)
+            msvc_env_without_paths = dict([(k, msvc_env[k]) for k in msvc_env if k.upper() != 'PATH'])
+            # Extend os.environ with MSVC env
+            log.info("Initializing MSVC env...")
+            update_env_path(msvc_env_paths)
+            for k in msvc_env_without_paths:
+                v = msvc_env_without_paths[k]
+                log.info("Inserting \"%s = %s\" to environment" % (k, v))
+                os.environ[k] = v
+            log.info("Done initializing MSVC env")
         
         # Check env
         make_path = None
@@ -368,14 +392,7 @@ class pyside_build(_build):
             sys.exit(1)
         
         # Update the PATH environment variable
-        def updatepath(path):
-            paths = os.environ['PATH'].lower().split(os.pathsep)
-            if not path.lower() in paths:
-                log.info("Inserting path \"%s\" to environment" % path)
-                paths.insert(0, path)
-                os.environ['PATH'] = os.pathsep.join(paths)
-        updatepath(py_scripts_dir)
-        updatepath(qt_dir)
+        update_env_path([py_scripts_dir, qt_dir])
         
         build_name = "py%s-qt%s-%s-%s" % \
             (py_version, qt_version, platform.architecture()[0], build_type.lower())

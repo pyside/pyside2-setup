@@ -175,7 +175,7 @@ def rmtree(dirname):
     shutil.rmtree(dirname, ignore_errors=False, onerror=handleRemoveReadonly)
 
 
-def run_process(args, logger=None):
+def run_process(args, logger=None, initial_env=None):
     def log(buffer, checkNewLine=False):
         endsWithNewLine = False
         if buffer.endswith('\n'):
@@ -207,13 +207,16 @@ def run_process(args, logger=None):
     if sys.platform == "win32":
         shell = True
     
+    if initial_env is None:
+        initial_env = os.environ
+    
     proc = popenasync.Popen(args,
         stdin = subprocess.PIPE,
         stdout = subprocess.PIPE, 
         stderr = subprocess.STDOUT,
         universal_newlines = 1,
         shell = shell,
-        env = os.environ)
+        env = initial_env)
     
     log_buffer = None;
     while proc.poll() is None:
@@ -263,6 +266,10 @@ def get_environment_from_batch_command(env_cmd, initial=None):
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, env=initial)
     # parse the output sent to stdout
     lines = proc.stdout
+    if sys.version_info[0] > 2:
+        # make sure the lines are strings
+        make_str = lambda s: s.decode()
+        lines = map(make_str, lines)
     # consume whatever output occurs until the tag is reached
     consume(itertools.takewhile(lambda l: tag not in l, lines))
     # define a way to handle each KEY=VALUE line
