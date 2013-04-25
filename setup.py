@@ -82,6 +82,8 @@ from utils import copydir
 from utils import run_process
 from utils import has_option
 from utils import option_value
+from utils import find_vcvarsall
+from utils import get_environment_from_batch_command
 
 # Declare options
 OPTION_DEBUG = has_option("debug")
@@ -94,6 +96,7 @@ OPTION_VERSION = option_value("version")
 OPTION_LISTVERSIONS = has_option("list-versions")
 OPTION_MAKESPEC = option_value("make-spec")
 OPTION_IGNOREGIT = has_option("ignore-git")
+OPTION_MSVCVERSION = option_value("msvc-version")
 
 if OPTION_QMAKE is None:
     OPTION_QMAKE = find_executable("qmake")
@@ -106,6 +109,13 @@ if sys.platform == "win32":
     if not OPTION_MAKESPEC in ["msvc", "mingw"]:
         print("Invalid option --make-spec. Available values are %s" % (["msvc", "mingw"]))
         sys.exit(1)
+    if OPTION_MSVCVERSION:
+        if OPTION_MAKESPEC != "msvc":
+            print("Option --msvc-version can be used only with option --make-spec=msvc")
+            sys.exit(1)
+        if not OPTION_MSVCVERSION in ["9.0", "10.0", "11.0"]:
+            print("Invalid option --msvc-version. Available values are %s" % (["9.0", "10.0", "11.0"]))
+            sys.exit(1)
 else:
     if OPTION_MAKESPEC is None:
         OPTION_MAKESPEC = "make"
@@ -235,8 +245,21 @@ class pyside_build(_build):
         self.py_version = None
         self.build_type = "Release"
         self.qtinfo = None
+        self.msvc_env = None
     
     def run(self):
+        # Try to get MSVC env
+        if sys.platform == "win32" and OPTION_MSVCVERSION:
+            log.info("Searching vcvarsall.bat for MSVC version %s" % OPTION_MSVCVERSION)
+            msvc_version = float(OPTION_MSVCVERSION)
+            vcvarsall_path = find_vcvarsall(msvc_version)
+            if not vcvarsall_path:
+                raise DistutilsSetupError(
+                    "Failed to find the vcvarsall.bat for MSVC version %s." % OPTION_MSVCVERSION)
+            log.info("Found %s" % vcvarsall_path)
+            vcvarsall_cmd = ["call", vcvarsall_path]
+            self.msvc_env = get_environment_from_batch_command(vcvarsall_path)
+        
         # Check env
         make_path = None
         make_generator = None
