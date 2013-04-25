@@ -93,12 +93,6 @@ Installing prerequisities
 
       c:\> c:\Python27\python distribute_setup.py
 
-#. Open Visual Studio 2008 Command Prompt:
-
-   ::
-
-      c:\> c:\ProgramData\Microsoft\Windows\Start Menu\Programs\Microsoft Visual Studio 2008\Visual Studio Tools\Visual Studio 2008 Command Prompt.lnk
-
 Building PySide distribution
 ----------------------------
 
@@ -118,7 +112,7 @@ Building PySide distribution
 
    ::
 
-      c:\> c:\Python27\python.exe setup.py bdist_wininst --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+      c:\> c:\Python27\python.exe setup.py bdist_wininst --msvc-version=9.0 --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
 #. After the successful build, install the distribution with easy_install
    and run the post-install script:
@@ -246,6 +240,12 @@ Options
 ``--cmake``
     Specify the path to cmake.
     Useful when the cmake is not in path.
+
+``--msvc-version``
+    Specify the Visual C++ compiler version. 
+    Supported values are ``9.0``, ``10.0``, ``11.0``.
+    This option adds support for building windows binaries outside the Visual Studio Command Prompt.
+    The MSVC environment is properly initialized by setup script.
 
 ``--openssl``
     Specify the path to OpenSSL libs.
