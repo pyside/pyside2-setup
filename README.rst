@@ -29,7 +29,7 @@ Installing PySide on a Windows System
 There are two options to install PySide on Windows:
 
 #. Download and install the packages from the `releases page
-   <http://releases.qt-project.org/pyside/>`.
+   <http://releases.qt-project.org/pyside/>`_.
 
 #. Use setuptools:
    
@@ -46,7 +46,7 @@ Installing PySide on a UNIX System
 
 There are no prebuild setuptools distributions available for UNIX System.
 To build and install setuptools compatible distributions for UNIX System,
-please read the instruction in section ``Building PySide on a UNIX System``.
+please read the instructions in section ``Building PySide on a UNIX System``.
 
 Using pip vs easy_install
 -------------------------
