@@ -721,7 +721,7 @@ class pyside_build(_build):
         if self.debug or self.build_type == 'RelWithDebInfo':
             copyfile(
                 "{build_dir}/shiboken/shibokenmodule/shiboken{dbgPostfix}.pdb",
-                "{setup_dir}/PySide/shiboken{dbgPostfix}.pdb",
+                "{dist_dir}/PySide/shiboken{dbgPostfix}.pdb",
                 logger=log, vars=vars)        
         # <install>/lib/site-packages/pysideuic/* -> <setup>/pysideuic
         copydir(
@@ -789,25 +789,25 @@ class pyside_build(_build):
 
         if self.debug  or self.build_type == 'RelWithDebInfo':
             # <qt>/lib/*.pdb -> <setup>/PySide
-            copydir("{qt_lib_dir}", "{setup_dir}/PySide",
+            copydir("{qt_lib_dir}", "{dist_dir}/PySide",
                 filter=["*.pdb"],
                 recursive=False, logger=log, vars=vars)
             
         # I think these are the qt-mobility DLLs, at least some are,
         # so let's copy them too
         # <qt>/lib/*.dll -> <setup>/PySide
-        copydir("{qt_lib_dir}", "{setup_dir}/PySide",
+        copydir("{qt_lib_dir}", "{dist_dir}/PySide",
             filter=["*.dll"],
             ignore=["*d?.dll"],
             recursive=False, logger=log, vars=vars)
         if self.debug:
             # <qt>/lib/*d4.dll -> <setup>/PySide
-            copydir("{qt_lib_dir}", "{setup_dir}/PySide",
+            copydir("{qt_lib_dir}", "{dist_dir}/PySide",
                 filter=["*d?.dll"],
                 recursive=False, logger=log, vars=vars)
         if self.debug  or self.build_type == 'RelWithDebInfo':
             # <qt>/lib/*pdb -> <setup>/PySide
-            copydir("{qt_lib_dir}", "{setup_dir}/PySide",
+            copydir("{qt_lib_dir}", "{dist_dir}/PySide",
                 filter=pdbs,
                 recursive=False, logger=log, vars=vars)
         
