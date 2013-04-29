@@ -70,7 +70,7 @@ from distutils.sysconfig import get_config_var
 from distutils.spawn import find_executable
 from distutils.command.build import build as _build
 
-from setuptools import setup
+from setuptools import setup, Extension
 from setuptools.command.install import install as _install
 from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
 
@@ -875,4 +875,12 @@ setup(
         'bdist_egg': pyside_bdist_egg,
         'install': pyside_install,
     },
+    
+    # Add a bogus extension module (will never be built here since we are
+    # overriding the build command to do it using cmake) so things like
+    # bdist_egg will know that there are extension modules and will name the
+    # dist with the full platform info.
+    ext_modules = [Extension('QtCore', [])],
+    ext_package = 'PySide',
+      
 )
