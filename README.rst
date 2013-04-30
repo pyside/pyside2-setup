@@ -116,7 +116,7 @@ Building PySide distribution
 
 #. Optionally you can specify the msvc compiler version:
 
-    ::
+   ::
 
       c:\> c:\Python27\python.exe setup.py bdist_wininst --msvc-version=10.0 --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
@@ -208,14 +208,14 @@ PySide Setup Script command line options
 
 Usage on Windows System
 -----------------------
-
+    
    ::
 
       c:\> c:\Python27\python.exe setup.py [distribution_type] [options]
 
 Usage on UNIX System
 --------------------
-
+    
    ::
 
       python2.7 setup.py [distribution_type] [options]
