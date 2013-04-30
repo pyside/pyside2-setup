@@ -336,7 +336,7 @@ class pyside_build(_build):
                 lib_suff = getattr(sys, 'abiflags', None)
             else: # Python 2
                 lib_suff = dbgPostfix
-                lib_exts.append('.so.1')
+            lib_exts.append('.so.1')
             lib_exts.append('.a') # static library as last gasp
             libs_tried = []
             for lib_ext in lib_exts:
