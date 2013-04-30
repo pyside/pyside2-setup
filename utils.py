@@ -53,10 +53,66 @@ def filter_match(name, patterns):
     return False
 
 
+def update_env_path(newpaths, logger):
+    paths = os.environ['PATH'].lower().split(os.pathsep)
+    for path in newpaths:
+        if not path.lower() in paths:
+            logger.info("Inserting path \"%s\" to environment" % path)
+            paths.insert(0, path)
+            os.environ['PATH'] = os.pathsep.join(paths)
+
+
 def find_vcvarsall(version):
     from distutils import msvc9compiler
     vcvarsall_path = msvc9compiler.find_vcvarsall(version)
     return vcvarsall_path
+
+
+def find_vcvarsall_paths(versions):
+    vcvarsall_paths = []
+    for version in versions:
+        vcvarsall_paths.append([version, find_vcvarsall(version)])
+    return vcvarsall_paths
+
+
+def init_msvc_env(default_msvc_version, platform_arch, logger):
+    logger.info("Searching vcvarsall.bat")
+    all_vcvarsall_paths = find_vcvarsall_paths([9.0, 10.0, 11.0])
+    if len(all_vcvarsall_paths) == 0:
+        raise DistutilsSetupError(
+            "Failed to find the MSVC compiler on your system.")
+    for v in all_vcvarsall_paths:
+        logger.info("Found MSVC %s in %s" % (v[0], v[1]))
+    
+    if default_msvc_version:
+        msvc_version = float(default_msvc_version)
+        vcvarsall_path_tmp = [p for p in all_vcvarsall_paths if p[0] == msvc_version]
+        vcvarsall_path = vcvarsall_path_tmp[0][1] if len(vcvarsall_path_tmp) > 0 else None
+        if not vcvarsall_path:
+            raise DistutilsSetupError(
+                "Failed to find the vcvarsall.bat for MSVC version %s." % msvc_version)
+    else:
+        # By default use first MSVC compiler found in system
+        msvc_version = all_vcvarsall_paths[0][0]
+        vcvarsall_path = all_vcvarsall_paths[0][1]
+    
+    # Get MSVC env
+    logger.info("Using MSVC %s in %s" % (msvc_version, vcvarsall_path))
+    msvc_arch = "x86" if platform_arch.startswith("32") else "amd64"
+    logger.info("Getting MSVC env for %s architecture" % msvc_arch)
+    vcvarsall_cmd = [vcvarsall_path, msvc_arch]
+    msvc_env = get_environment_from_batch_command(vcvarsall_cmd)
+    msvc_env_paths = os.pathsep.join([msvc_env[k] for k in msvc_env if k.upper() == 'PATH']).split(os.pathsep)
+    msvc_env_without_paths = dict([(k, msvc_env[k]) for k in msvc_env if k.upper() != 'PATH'])
+    
+    # Extend os.environ with MSVC env
+    logger.info("Initializing MSVC env...")
+    update_env_path(msvc_env_paths, logger)
+    for k in sorted(msvc_env_without_paths):
+        v = msvc_env_without_paths[k]
+        logger.info("Inserting \"%s = %s\" to environment" % (k, v))
+        os.environ[k] = v
+    logger.info("Done initializing MSVC env")
 
 
 def copyfile(src, dst, logger=None, force=True, vars=None, subst_content=False):

@@ -26,18 +26,18 @@ recursive-exclude sources/pyside-tools/.git **
 recursive-exclude sources/pyside-examples/.git **
 
 # PySide package
-recursive-include pyside_dist/PySide **
-recursive-include pyside_dist/PySide/docs **
-recursive-include pyside_dist/PySide/plugins **
-recursive-include pyside_dist/PySide/imports **
-recursive-include pyside_dist/PySide/translations **
-recursive-include pyside_dist/PySide/include **
-recursive-include pyside_dist/PySide/typesystems **
-recursive-include pyside_dist/PySide/examples **
+recursive-include pyside_package/PySide **
+recursive-include pyside_package/PySide/docs **
+recursive-include pyside_package/PySide/plugins **
+recursive-include pyside_package/PySide/imports **
+recursive-include pyside_package/PySide/translations **
+recursive-include pyside_package/PySide/include **
+recursive-include pyside_package/PySide/typesystems **
+recursive-include pyside_package/PySide/examples **
 
 # pysideuic package
-recursive-include pyside_dist/pysideuic **
-recursive-include pyside_dist/pysideuic/Compiler **
-recursive-include pyside_dist/pysideuic/port_v2 **
-recursive-include pyside_dist/pysideuic/port_v3 **
-recursive-include pyside_dist/pysideuic/widget-plugins **
+recursive-include pyside_package/pysideuic **
+recursive-include pyside_package/pysideuic/Compiler **
+recursive-include pyside_package/pysideuic/port_v2 **
+recursive-include pyside_package/pysideuic/port_v3 **
+recursive-include pyside_package/pysideuic/widget-plugins **

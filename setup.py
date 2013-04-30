@@ -73,6 +73,7 @@ from distutils.command.build import build as _build
 from setuptools import setup, Extension
 from setuptools.command.install import install as _install
 from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
+from setuptools.command.develop import develop as _develop
 
 from qtinfo import QtInfo
 from utils import rmtree
@@ -82,8 +83,8 @@ from utils import copydir
 from utils import run_process
 from utils import has_option
 from utils import option_value
-from utils import find_vcvarsall
-from utils import get_environment_from_batch_command
+from utils import update_env_path
+from utils import init_msvc_env
 
 # Declare options
 OPTION_DEBUG = has_option("debug")
@@ -184,14 +185,14 @@ if os.path.isdir(".git") and not OPTION_IGNOREGIT and not OPTION_ONLYPACKAGE:
         os.chdir(script_dir)
 
 # Clean up temp and package folders
-for n in ["pyside_dist", "build", "PySide.egg-info", "PySide-%s" % __version__]:
+for n in ["pyside_package", "build", "PySide-%s" % __version__]:
     d = os.path.join(script_dir, n)
     if os.path.isdir(d):
         print("Removing %s" % d)
         rmtree(d)
 
 # Prepare package folders
-for pkg in ["pyside_dist/PySide", "pyside_dist/pysideuic"]:
+for pkg in ["pyside_package/PySide", "pyside_package/pysideuic"]:
     pkg_dir = os.path.join(script_dir, pkg)
     os.makedirs(pkg_dir)
 
@@ -218,6 +219,15 @@ class pyside_install(_install):
                 "-install"
             ]
             run_process(cmd)
+
+class pyside_develop(_develop):
+
+    def __init__(self, *args, **kwargs):
+        _develop.__init__(self, *args, **kwargs)
+
+    def run(self):
+        self.run_command("build")
+        _develop.run(self)
 
 class pyside_bdist_egg(_bdist_egg):
 
@@ -251,42 +261,12 @@ class pyside_build(_build):
         self.qtinfo = None
     
     def run(self):
-        def update_env_path(newpaths):
-            paths = os.environ['PATH'].lower().split(os.pathsep)
-            for path in newpaths:
-                if not path.lower() in paths:
-                    log.info("Inserting path \"%s\" to environment" % path)
-                    paths.insert(0, path)
-                    os.environ['PATH'] = os.pathsep.join(paths)
-
         platform_arch = platform.architecture()[0]
         log.info("Python architecture is %s" % platform_arch)
         
-        # Try to init the MSVC env
-        if sys.platform == "win32" and OPTION_MSVCVERSION:
-            # Search for MSVC
-            log.info("Searching vcvarsall.bat for MSVC version %s" % OPTION_MSVCVERSION)
-            msvc_version = float(OPTION_MSVCVERSION)
-            vcvarsall_path = find_vcvarsall(msvc_version)
-            if not vcvarsall_path:
-                raise DistutilsSetupError(
-                    "Failed to find the vcvarsall.bat for MSVC version %s." % OPTION_MSVCVERSION)
-            log.info("Found %s" % vcvarsall_path)
-            # Get MSVC env
-            msvc_arch = "x86" if platform_arch.startswith("32") else "amd64"
-            log.info("Getting MSVC env for %s architecture" % msvc_arch)
-            vcvarsall_cmd = ["call", vcvarsall_path, msvc_arch]
-            msvc_env = get_environment_from_batch_command(vcvarsall_path)
-            msvc_env_paths = os.pathsep.join([msvc_env[k] for k in msvc_env if k.upper() == 'PATH']).split(os.pathsep)
-            msvc_env_without_paths = dict([(k, msvc_env[k]) for k in msvc_env if k.upper() != 'PATH'])
-            # Extend os.environ with MSVC env
-            log.info("Initializing MSVC env...")
-            update_env_path(msvc_env_paths)
-            for k in msvc_env_without_paths:
-                v = msvc_env_without_paths[k]
-                log.info("Inserting \"%s = %s\" to environment" % (k, v))
-                os.environ[k] = v
-            log.info("Done initializing MSVC env")
+        # Try to init the MSVC environment
+        if sys.platform == "win32" and OPTION_MAKESPEC == "msvc":
+            init_msvc_env(OPTION_MSVCVERSION, platform_arch, log)
         
         # Check env
         make_path = None
@@ -398,7 +378,7 @@ class pyside_build(_build):
             sys.exit(1)
         
         # Update the PATH environment variable
-        update_env_path([py_scripts_dir, qt_dir])
+        update_env_path([py_scripts_dir, qt_dir], log)
         
         build_name = "py%s-qt%s-%s-%s" % \
             (py_version, qt_version, platform.architecture()[0], build_type.lower())
@@ -568,7 +548,7 @@ class pyside_build(_build):
             "install_dir": self.install_dir,
             "build_dir": self.build_dir,
             "script_dir": self.script_dir,
-            "dist_dir": os.path.join(self.script_dir, 'pyside_dist'),
+            "dist_dir": os.path.join(self.script_dir, 'pyside_package'),
             "ssl_libs_dir": OPTION_OPENSSL,
             "py_version": self.py_version,
             "qt_version": self.qtinfo.version,
@@ -878,8 +858,7 @@ setup(
     download_url = 'http://releases.qt-project.org/pyside',
     license = 'LGPL',
     packages = ['PySide', 'pysideuic'],
-    package_dir = {'PySide': 'pyside_dist/PySide',
-                   'pysideuic': 'pyside_dist/pysideuic'},
+    package_dir = {'': 'pyside_package'},
     include_package_data = True,
     zip_safe = False,
     entry_points = {
@@ -890,6 +869,7 @@ setup(
     cmdclass = {
         'build': pyside_build,
         'bdist_egg': pyside_bdist_egg,
+        'develop': pyside_develop,
         'install': pyside_install,
     },
     
@@ -897,7 +877,6 @@ setup(
     # overriding the build command to do it using cmake) so things like
     # bdist_egg will know that there are extension modules and will name the
     # dist with the full platform info.
-    ext_modules = [Extension('QtCore', [])],
+    #ext_modules = [Extension('QtCore', [])],
     ext_package = 'PySide',
-      
 )

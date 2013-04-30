@@ -112,7 +112,13 @@ Building PySide distribution
 
    ::
 
-      c:\> c:\Python27\python.exe setup.py bdist_wininst --msvc-version=9.0 --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+      c:\> c:\Python27\python.exe setup.py bdist_wininst --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+
+#. Optionally you can specify the msvc compiler version:
+
+    ::
+
+      c:\> c:\Python27\python.exe setup.py bdist_wininst --msvc-version=10.0 --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
 #. After the successful build, install the distribution with easy_install
    and run the post-install script:
@@ -220,11 +226,18 @@ Distribution types
 ``bdist_wininst``
     Create standalone windows installer with embedded Qt libs and development tools.
     This distribution type can be installed with ``easy_install``.
-   
+
 ``bdist_egg``
     Create egg binary distribution.
     This distribution type can be installed with ``easy_install``.
-      
+
+``install``
+    Install package to site packages folder.
+
+``develop``
+    Install package in ``development mode``, such that it's available on
+    ``sys.path``, yet can still be edited directly from its source folder.
+
 ``sdist``
     Create full source distribution with included sources of PySide Setup Scripts,
     PySide, Shiboken, PySide Tools and PySide Examples.
@@ -237,22 +250,20 @@ Options
     Specify the path to qmake.
     Useful when the qmake is not in path or more than one Qt versions are installed.
 
+``--openssl``
+    Specify the path to OpenSSL libs.
+
+``--only-package``
+    Skip rebuilding everything and create distribution from prebuilt binaries.
+    Before using this option first time, the full distribution build is required.
+
 ``--cmake``
     Specify the path to cmake.
     Useful when the cmake is not in path.
 
 ``--msvc-version``
     Specify the Visual C++ compiler version. 
-    Supported values are ``9.0``, ``10.0``, ``11.0``.
-    This option adds support for building windows binaries outside the Visual Studio Command Prompt.
-    The MSVC environment is properly initialized by setup script.
-
-``--openssl``
-    Specify the path to OpenSSL libs.
-
-``--only-package``
-    Create distribution from prebuilt PySide binaries.
-    Before using this option first time, the full distribution build is required.
+    Supported values are ``9.0`` (for VS 2008), ``10.0`` (for VS 2010), ``11.0`` (for VS 2012).
 
 ``--standalone``
     When enabled, all required Qt libs will be included in PySide distribution.
