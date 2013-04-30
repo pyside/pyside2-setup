@@ -256,7 +256,7 @@ class pyside_build(_build):
                     os.environ['PATH'] = os.pathsep.join(paths)
 
         platform_arch = platform.architecture()[0]
-        log.info("Python architekture is %s" % platform_arch)
+        log.info("Python architecture is %s" % platform_arch)
         
         # Try to init the MSVC env
         if sys.platform == "win32" and OPTION_MSVCVERSION:
