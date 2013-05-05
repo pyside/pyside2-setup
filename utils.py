@@ -71,7 +71,9 @@ def find_vcvarsall(version):
 def find_vcvarsall_paths(versions):
     vcvarsall_paths = []
     for version in versions:
-        vcvarsall_paths.append([version, find_vcvarsall(version)])
+        vcvarsall_path = find_vcvarsall(version)
+        if vcvarsall_path:
+            vcvarsall_paths.append([version, vcvarsall_path])
     return vcvarsall_paths
 
 
