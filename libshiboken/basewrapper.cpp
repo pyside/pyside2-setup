@@ -207,6 +207,14 @@ void SbkDeallocWrapper(PyObject* pyObj)
 {
     SbkObject* sbkObj = reinterpret_cast<SbkObject*>(pyObj);
 
+    // Ensure that the GC is no longer tracking this object to avoid a
+    // possible reentrancy problem.  Since there are multiple steps involved
+    // in deallocating a SbkObject it is possible for the garbage collector to
+    // be invoked and it trying to delete this object while it is still in
+    // progress from the first time around, resulting in a double delete and a
+    // crash.
+    PyObject_GC_UnTrack(pyObj);
+
     // Check that Python is still initialized as sometimes this is called by a static destructor
     // after Python interpeter is shutdown.
     if (sbkObj->weakreflist && Py_IsInitialized())
@@ -235,6 +243,15 @@ void SbkDeallocWrapper(PyObject* pyObj)
 void SbkDeallocWrapperWithPrivateDtor(PyObject* self)
 {
     SbkObject* sbkObj = reinterpret_cast<SbkObject*>(self);
+
+    // Ensure that the GC is no longer tracking this object to avoid a
+    // possible reentrancy problem.  Since there are multiple steps involved
+    // in deallocating a SbkObject it is possible for the garbage collector to
+    // be invoked and it trying to delete this object while it is still in
+    // progress from the first time around, resulting in a double delete and a
+    // crash.
+    PyObject_GC_UnTrack(self);
+
     // Check that Python is still initialized as sometimes this is called by a static destructor
     // after Python interpeter is shutdown.
     if (sbkObj->weakreflist && Py_IsInitialized())
