@@ -167,10 +167,12 @@ BindingManager::~BindingManager()
     /* Cleanup hanging references. We just invalidate them as when
      * the BindingManager is being destroyed the interpreter is alredy
      * shutting down. */
-    while (!m_d->wrapperMapper.empty()) {
-        Object::destroy(m_d->wrapperMapper.begin()->second, const_cast<void*>(m_d->wrapperMapper.begin()->first));
+    if (Py_IsInitialized()) {  // ensure the interpreter is still valid
+        while (!m_d->wrapperMapper.empty()) {
+            Object::destroy(m_d->wrapperMapper.begin()->second, const_cast<void*>(m_d->wrapperMapper.begin()->first));
+        }
+        assert(m_d->wrapperMapper.size() == 0);
     }
-    assert(m_d->wrapperMapper.size() == 0);
     delete m_d;
 }
 
