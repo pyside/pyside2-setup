@@ -130,7 +130,6 @@ Building PySide distribution
       
       # After successfull install, the post-install script should print the following information to the console:
       
-      c:\> Generating file c:\Python27\qt.conf...
       c:\> The PySide extensions were successfully installed.
 
 Building PySide on a UNIX System (Ubuntu 12.04 LTS)
@@ -210,8 +209,7 @@ Building PySide distribution
       
       # After successfull install, the post-install script should print the following information to the console:
       
-      $ Generating file qt.conf...
-      $ The PySide extensions were successfully installed.
+      $ PySide package successfully installed in...
 
 PySide Setup Script command line options
 ========================================
