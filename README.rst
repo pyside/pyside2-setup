@@ -23,6 +23,13 @@ PySide requires Python 2.6 or later and Qt 4.6 or better.
 Installation
 ============
 
+Installing prerequisities
+-------------------------
+
+Install latest `distribute` distribution: download `distribute_setup.py
+<http://python-distribute.org/distribute_setup.py>`_ and run it using
+the ``python`` interpreter.
+
 Installing PySide on a Windows System
 -------------------------------------
 
