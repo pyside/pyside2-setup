@@ -743,8 +743,8 @@ class pyside_build(_build):
             "{sources_dir}/pyside-examples/examples",
             "{dist_dir}/PySide/examples",
             force=False, logger=log, vars=vars)
-        # <ssl_libs>/* -> <setup>/PySide/
-        copydir("{ssl_libs_dir}", "{dist_dir}/PySide",
+        # <ssl_libs>/* -> <setup>/PySide/openssl
+        copydir("{ssl_libs_dir}", "{dist_dir}/PySide/openssl",
             filter=[
                 "libeay32.dll",
                 "ssleay32.dll"],
