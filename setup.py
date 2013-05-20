@@ -67,6 +67,7 @@ from distutils import log
 from distutils.errors import DistutilsOptionError
 from distutils.errors import DistutilsSetupError
 from distutils.sysconfig import get_config_var
+from distutils.sysconfig import get_python_lib
 from distutils.spawn import find_executable
 from distutils.command.build import build as _build
 
@@ -402,6 +403,7 @@ class pyside_build(_build):
         self.py_version = py_version
         self.build_type = build_type
         self.qtinfo = qtinfo
+        self.site_packages_dir = get_python_lib(1, 0, prefix=install_dir)
         
         log.info("=" * 30)
         log.info("Package version: %s" % __version__)
@@ -414,6 +416,7 @@ class pyside_build(_build):
         log.info("Sources directory: %s" % self.sources_dir)
         log.info("Build directory: %s" % self.build_dir)
         log.info("Install directory: %s" % self.install_dir)
+        log.info("Python site-packages install directory: %s" % self.site_packages_dir)
         log.info("-" * 3)
         log.info("Python executable: %s" % self.py_executable)
         log.info("Python includes: %s" % self.py_include_dir)
@@ -544,6 +547,7 @@ class pyside_build(_build):
         version_str = "%sqt%s%s" % (__version__, self.qtinfo.version.replace(".", "")[0:3],
             self.debug and "dbg" or "")
         vars = {
+            "site_packages_dir": self.site_packages_dir,
             "sources_dir": self.sources_dir,
             "install_dir": self.install_dir,
             "build_dir": self.build_dir,
@@ -584,17 +588,17 @@ class pyside_build(_build):
             force=False, logger=log, vars=vars)
         # <install>/lib/site-packages/PySide/* -> <setup>/PySide
         copydir(
-            "{install_dir}/lib/python{py_version}/site-packages/PySide",
+            "{site_packages_dir}/PySide",
             "{dist_dir}/PySide",
             logger=log, vars=vars)
         # <install>/lib/site-packages/shiboken.so -> <setup>/PySide/shiboken.so
         copyfile(
-            "{install_dir}/lib/python{py_version}/site-packages/shiboken.so",
+            "{site_packages_dir}/shiboken.so",
             "{dist_dir}/PySide/shiboken.so",
             logger=log, vars=vars)
         # <install>/lib/site-packages/pysideuic/* -> <setup>/pysideuic
         copydir(
-            "{install_dir}/lib/python{py_version}/site-packages/pysideuic",
+            "{site_packages_dir}/pysideuic",
             "{dist_dir}/pysideuic",
             force=False, logger=log, vars=vars)
         # <install>/bin/pyside-uic -> PySide/scripts/uic.py
@@ -678,7 +682,7 @@ class pyside_build(_build):
         pdbs = ['*.pdb'] if self.debug or self.build_type == 'RelWithDebInfo' else []       
         # <install>/lib/site-packages/PySide/* -> <setup>/PySide
         copydir(
-            "{install_dir}/lib/site-packages/PySide",
+            "{site_packages_dir}/PySide",
             "{dist_dir}/PySide",
             logger=log, vars=vars)
         if self.debug or self.build_type == 'RelWithDebInfo':
@@ -695,7 +699,7 @@ class pyside_build(_build):
             force=False, logger=log, vars=vars)
         # <install>/lib/site-packages/shiboken.pyd -> <setup>/PySide/shiboken.pyd
         copyfile(
-            "{install_dir}/lib/site-packages/shiboken{dbgPostfix}.pyd",
+            "{site_packages_dir}/shiboken{dbgPostfix}.pyd",
             "{dist_dir}/PySide/shiboken{dbgPostfix}.pyd",
             logger=log, vars=vars)
         if self.debug or self.build_type == 'RelWithDebInfo':
@@ -705,7 +709,7 @@ class pyside_build(_build):
                 logger=log, vars=vars)        
         # <install>/lib/site-packages/pysideuic/* -> <setup>/pysideuic
         copydir(
-            "{install_dir}/lib/site-packages/pysideuic",
+            "{site_packages_dir}/pysideuic",
             "{dist_dir}/pysideuic",
             force=False, logger=log, vars=vars)
         # <install>/bin/pyside-uic -> PySide/scripts/uic.py
