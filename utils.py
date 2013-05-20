@@ -117,7 +117,7 @@ def init_msvc_env(default_msvc_version, platform_arch, logger):
     logger.info("Done initializing MSVC env")
 
 
-def copyfile(src, dst, logger=None, force=True, vars=None, subst_content=False):
+def copyfile(src, dst, logger=None, force=True, vars=None):
     if vars is not None:
         src = src.format(**vars)
         dst = dst.format(**vars)
@@ -130,18 +130,7 @@ def copyfile(src, dst, logger=None, force=True, vars=None, subst_content=False):
     if logger is not None:
         logger.info("Copying file %s to %s." % (src, dst))
     
-    if vars is None or not subst_content:
-        shutil.copy2(src, dst)
-        return
-    
-    print ("copyfile " + src)
-    f = open(src, "rt")
-    content =  f.read()
-    f.close()
-    content = content.format(**vars)
-    f = open(dst, "wt")
-    f.write(content)
-    f.close()
+    shutil.copy2(src, dst)
 
 
 def makefile(dst, content=None, logger=None, vars=None):
@@ -164,7 +153,7 @@ def makefile(dst, content=None, logger=None, vars=None):
 
 
 def copydir(src, dst, logger=None, filter=None, ignore=None, force=True,
-    recursive=True, vars=None, subst_files_content=False):
+    recursive=True, vars=None):
     
     if vars is not None:
         src = src.format(**vars)
@@ -195,15 +184,14 @@ def copydir(src, dst, logger=None, filter=None, ignore=None, force=True,
         try:
             if os.path.isdir(srcname):
                 if recursive:
-                    copydir(srcname, dstname, logger, filter, ignore, force, recursive,
-                        vars, subst_files_content)
+                    copydir(srcname, dstname, logger, filter, ignore, force, recursive, vars)
             else:
                 if (filter is not None and not filter_match(name, filter)) or \
                     (ignore is not None and filter_match(name, ignore)):
                     continue
                 if not os.path.exists(dst):
                     os.makedirs(dst)
-                copyfile(srcname, dstname, logger, True, vars, subst_files_content)
+                copyfile(srcname, dstname, logger, True, vars)
         # catch the Error from the recursive copytree so that we can
         # continue with other files
         except shutil.Error as err:
