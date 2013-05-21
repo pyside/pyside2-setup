@@ -192,7 +192,7 @@ def install_posix():
     print("PySide package found in %s..." % pyside_path)
 
     executables = ['shiboken']
-    if sys.platform == 'linux2':
+    if sys.platform.startswith('linux'):
         executables.append('patchelf')
         patchelf_path = os.path.join(pyside_path, "patchelf")
         from distutils.spawn import spawn

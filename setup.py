@@ -458,7 +458,7 @@ class pyside_build(_build):
         _build.run(self)
 
     def build_patchelf(self):
-        if sys.platform != "linux2":
+        if not sys.platform.startswith('linux'):
             return
         log.info("Building patchelf...")
         module_src_dir = os.path.join(self.sources_dir, "patchelf")
@@ -570,7 +570,7 @@ class pyside_build(_build):
         return self.prepare_packages_posix(vars)
 
     def prepare_packages_posix(self, vars):
-        if sys.platform == 'linux2':
+        if sys.platform.startswith('linux'):
             # patchelf -> PySide/patchelf
             copyfile(
                 "{script_dir}/patchelf",
