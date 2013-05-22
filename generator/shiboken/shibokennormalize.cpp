@@ -2,7 +2,7 @@
  * This file is part of the PySide project.
  * This code was extracted from qmetaobject_p.h present on Qt4.7.
  *
- * Copyright (C) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
  *
  * Contact: PySide team <contact@pyside.org>
  *

@@ -1,7 +1,7 @@
 /*
 * This file is part of the API Extractor project.
 *
-* Copyright (C) 2011 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 *
 * Contact: PySide team <contact@pyside.org>
 *
