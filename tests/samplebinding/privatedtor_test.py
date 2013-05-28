@@ -30,6 +30,7 @@ import gc
 import sys
 import unittest
 
+import shiboken
 from sample import PrivateDtor
 
 
@@ -73,6 +74,20 @@ class PrivateDtorTest(unittest.TestCase):
         self.assertEqual(type(pd3), PrivateDtor)
         self.assertEqual(pd3.instanceCalls(), calls + 2)
         self.assertEqual(sys.getrefcount(pd3), refcnt)
+
+    def testClassDecref(self):
+        # Bug was that class PyTypeObject wasn't decrefed when instance
+        # was invalidated
+
+        before = sys.getrefcount(PrivateDtor)
+
+        for i in range(1000):
+            obj = PrivateDtor.instance()
+            shiboken.invalidate(obj)
+
+        after = sys.getrefcount(PrivateDtor)
+
+        self.assertLess(abs(before - after), 5)
 
 if __name__ == '__main__':
     unittest.main()

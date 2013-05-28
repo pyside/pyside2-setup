@@ -203,9 +203,16 @@ SbkObjectType SbkObject_Type = { { {
 };
 
 
-void SbkDeallocWrapper(PyObject* pyObj)
+static void SbkDeallocWrapperCommon(PyObject* pyObj, bool canDelete)
 {
     SbkObject* sbkObj = reinterpret_cast<SbkObject*>(pyObj);
+    PyTypeObject* pyType = Py_TYPE(pyObj);
+
+    // Need to decref the type if this is the dealloc func; if type
+    // is subclassed, that dealloc func will decref (see subtype_dealloc
+    // in typeobject.c in the python sources)
+    bool needTypeDecref = (pyType->tp_dealloc == SbkDeallocWrapper
+                           || pyType->tp_dealloc == SbkDeallocWrapperWithPrivateDtor);
 
     // Ensure that the GC is no longer tracking this object to avoid a
     // possible reentrancy problem.  Since there are multiple steps involved
@@ -221,8 +228,8 @@ void SbkDeallocWrapper(PyObject* pyObj)
         PyObject_ClearWeakRefs(pyObj);
 
     // If I have ownership and is valid delete C++ pointer
-    if (sbkObj->d->hasOwnership && sbkObj->d->validCppObject) {
-        SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(pyObj->ob_type);
+    if (canDelete && sbkObj->d->hasOwnership && sbkObj->d->validCppObject) {
+        SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(pyType);
         if (sbkType->d->is_multicpp) {
             Shiboken::DeallocVisitor visitor(sbkObj);
             Shiboken::walkThroughClassHierarchy(pyObj->ob_type, &visitor);
@@ -238,26 +245,19 @@ void SbkDeallocWrapper(PyObject* pyObj)
     } else {
         Shiboken::Object::deallocData(sbkObj, true);
     }
+
+    if (needTypeDecref)
+        Py_DECREF(pyType);
+}
+
+void SbkDeallocWrapper(PyObject* pyObj)
+{
+    SbkDeallocWrapperCommon(pyObj, true);
 }
 
 void SbkDeallocWrapperWithPrivateDtor(PyObject* self)
 {
-    SbkObject* sbkObj = reinterpret_cast<SbkObject*>(self);
-
-    // Ensure that the GC is no longer tracking this object to avoid a
-    // possible reentrancy problem.  Since there are multiple steps involved
-    // in deallocating a SbkObject it is possible for the garbage collector to
-    // be invoked and it trying to delete this object while it is still in
-    // progress from the first time around, resulting in a double delete and a
-    // crash.
-    PyObject_GC_UnTrack(self);
-
-    // Check that Python is still initialized as sometimes this is called by a static destructor
-    // after Python interpeter is shutdown.
-    if (sbkObj->weakreflist && Py_IsInitialized())
-        PyObject_ClearWeakRefs(self);
-
-    Shiboken::Object::deallocData(sbkObj, true);
+    SbkDeallocWrapperCommon(self, false);
 }
 
 void SbkObjectTypeDealloc(PyObject* pyObj)

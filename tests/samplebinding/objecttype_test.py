@@ -101,5 +101,17 @@ class ObjectTypeTest(unittest.TestCase):
 
         shiboken.invalidate(parents)
 
+    def testClassDecref(self):
+        # Bug was that class PyTypeObject wasn't decrefed when instance died
+        before = sys.getrefcount(ObjectType)
+
+        for i in range(1000):
+            obj = ObjectType()
+            shiboken.delete(obj)
+
+        after = sys.getrefcount(ObjectType)
+
+        self.assertLess(abs(before - after), 5)
+
 if __name__ == '__main__':
     unittest.main()
