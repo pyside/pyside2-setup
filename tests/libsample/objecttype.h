@@ -125,6 +125,10 @@ public:
     //Deprecated test
     bool deprecatedFunction() { return true; }
 
+    // nextInFocusChain simply returns the parent to test object cycles; the parent
+    // may be returned by the QWidget's implementation but isn't always returned
+    ObjectType* nextInFocusChain() { return m_parent; }
+
 private:
     ObjectType(const ObjectType&);
     ObjectType& operator=(const ObjectType&);

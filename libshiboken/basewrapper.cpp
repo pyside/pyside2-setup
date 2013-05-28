@@ -755,6 +755,8 @@ void setTypeUserData(SbkObjectType* self, void* userData, DeleteUserDataFunc d_f
 namespace Object
 {
 
+static void recursive_invalidate(SbkObject* self, std::set<SbkObject*>& seen);
+
 bool checkType(PyObject* pyObj)
 {
     return ObjectType::checkType(pyObj->ob_type);
@@ -882,15 +884,23 @@ void invalidate(PyObject* pyobj)
 {
     std::list<SbkObject*> objs = splitPyObject(pyobj);
     std::list<SbkObject*>::const_iterator it = objs.begin();
+    std::set<SbkObject*> seen;
     for(; it != objs.end(); it++)
-        invalidate(*it);
+        recursive_invalidate(*it, seen);
 }
 
 void invalidate(SbkObject* self)
 {
-    // Skip if this object not is a valid object
-    if (!self || ((PyObject*)self == Py_None))
+    std::set<SbkObject*> seen;
+    recursive_invalidate(self, seen);
+}
+
+static void recursive_invalidate(SbkObject* self, std::set<SbkObject*>& seen)
+{
+    // Skip if this object not is a valid object or if it's already been seen
+    if (!self || ((PyObject*)self == Py_None) || seen.find(self) != seen.end())
         return;
+    seen.insert(self);
 
     if (!self->d->containsCppWrapper) {
         self->d->validCppObject = false; // Mark object as invalid only if this is not a wrapper class
@@ -905,7 +915,7 @@ void invalidate(SbkObject* self)
 
         for (; it != copy.end(); ++it) {
             // invalidate the child
-            invalidate(*it);
+            recursive_invalidate(*it, seen);
 
             // if the parent not is a wrapper class, then remove children from him, because We do not know when this object will be destroyed
             if (!self->d->validCppObject)
@@ -921,7 +931,7 @@ void invalidate(SbkObject* self)
             const std::list<PyObject*> lst = iter->second;
             std::list<PyObject*>::const_iterator it = lst.begin();
             while(it != lst.end()) {
-                invalidate(*it);
+                recursive_invalidate((SbkObject*)*it, seen);
                 ++it;
             }
         }

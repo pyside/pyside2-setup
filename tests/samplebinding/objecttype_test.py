@@ -30,6 +30,7 @@ import unittest
 import sys
 
 from sample import ObjectType, Str
+import shiboken
 
 
 class ObjectTypeTest(unittest.TestCase):
@@ -77,6 +78,13 @@ class ObjectTypeTest(unittest.TestCase):
         self.assertEqual(sys.getrefcount(o), 3)
         o.destroyCppParent()
         self.assertEqual(sys.getrefcount(o), 2)
+
+    def testNextInFocusChainCycle(self):
+        parent = ObjectType()
+        child = ObjectType(parent)
+        next_focus = child.nextInFocusChain()
+
+        shiboken.invalidate(parent)
 
 if __name__ == '__main__':
     unittest.main()
