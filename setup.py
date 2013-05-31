@@ -559,7 +559,7 @@ class pyside_build(_build):
             raise DistutilsSetupError("Error configuring " + extension)
         
         log.info("Compiling module %s..." % extension)
-        if run_process([self.make_path], log) != 0:
+        if run_process([self.make_path, OPTION_JOBS], log) != 0:
             raise DistutilsSetupError("Error compiling " + extension)
         
         if extension.lower() == "shiboken":
