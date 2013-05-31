@@ -100,7 +100,9 @@ OPTION_LISTVERSIONS = has_option("list-versions")
 OPTION_MAKESPEC = option_value("make-spec")
 OPTION_IGNOREGIT = has_option("ignore-git")
 OPTION_MSVCVERSION = option_value("msvc-version")
-OPTION_NOEXAMPLES = has_option("no-examples")
+OPTION_NOEXAMPLES = has_option("no-examples")     # don't include pyside-examples
+OPTION_JOBS = option_value('jobs')                # number of parallel build jobs
+OPTION_JOM = has_option('jom')                    # use jom instead of nmake with msvc
 
 if OPTION_QMAKE is None:
     OPTION_QMAKE = find_executable("qmake")
@@ -127,8 +129,24 @@ else:
         print("Invalid option --make-spec. Available values are %s" % (["make"]))
         sys.exit(1)
 
+if OPTION_JOM:
+    if OPTION_MAKESPEC != "msvc":
+        print("Option --jom can only be used with msvc")
+        sys.exit(1)
+
+if OPTION_JOBS:
+    if sys.platform == 'win32' and not OPTION_JOM:
+        print("Option --jobs can only be used with --jom on Windows.")
+        sys.exit(1)
+    else:
+        if not OPTION_JOBS.startswith('-j'):
+            OPTION_JOBS = '-j' + OPTION_JOBS
+else:
+    OPTION_JOBS = ''
+
 if sys.platform == 'darwin' and OPTION_STANDALONE:
     print("--standalone option does not yet work on OSX")
+
 
 # Show available versions
 if OPTION_LISTVERSIONS:
@@ -285,8 +303,12 @@ class pyside_build(_build):
                 make_name = "make"
                 make_generator = "Unix Makefiles"
             elif OPTION_MAKESPEC == "msvc":
-                make_name = "nmake"
-                make_generator = "NMake Makefiles"
+                if OPTION_JOM:
+                    make_name = "jom"
+                    make_generator = "NMake Makefiles JOM"
+                else:
+                    make_name = "nmake"
+                    make_generator = "NMake Makefiles"
             elif OPTION_MAKESPEC == "mingw":
                 make_name = "mingw32-make"
                 make_generator = "MinGW Makefiles"
@@ -419,6 +441,7 @@ class pyside_build(_build):
         log.info("-" * 3)
         log.info("Make path: %s" % self.make_path)
         log.info("Make generator: %s" % self.make_generator)
+        log.info("Make jobs: %s" % OPTION_JOBS)
         log.info("-" * 3)
         log.info("Script directory: %s" % self.script_dir)
         log.info("Sources directory: %s" % self.sources_dir)
