@@ -59,7 +59,7 @@ def update_env_path(newpaths, logger):
         if not path.lower() in paths:
             logger.info("Inserting path \"%s\" to environment" % path)
             paths.insert(0, path)
-            os.environ['PATH'] = os.pathsep.join(paths)
+            os.environ['PATH'] = path + os.pathsep + os.environ['PATH']
 
 
 def find_vcvarsall(version):
