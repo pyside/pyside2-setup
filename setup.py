@@ -100,6 +100,9 @@ OPTION_LISTVERSIONS = has_option("list-versions")
 OPTION_MAKESPEC = option_value("make-spec")
 OPTION_IGNOREGIT = has_option("ignore-git")
 OPTION_MSVCVERSION = option_value("msvc-version")
+OPTION_NOEXAMPLES = has_option("no-examples")     # don't include pyside-examples
+OPTION_JOBS = option_value('jobs')                # number of parallel build jobs
+OPTION_JOM = has_option('jom')                    # use jom instead of nmake with msvc
 
 if OPTION_QMAKE is None:
     OPTION_QMAKE = find_executable("qmake")
@@ -126,8 +129,24 @@ else:
         print("Invalid option --make-spec. Available values are %s" % (["make"]))
         sys.exit(1)
 
+if OPTION_JOM:
+    if OPTION_MAKESPEC != "msvc":
+        print("Option --jom can only be used with msvc")
+        sys.exit(1)
+
+if OPTION_JOBS:
+    if sys.platform == 'win32' and not OPTION_JOM:
+        print("Option --jobs can only be used with --jom on Windows.")
+        sys.exit(1)
+    else:
+        if not OPTION_JOBS.startswith('-j'):
+            OPTION_JOBS = '-j' + OPTION_JOBS
+else:
+    OPTION_JOBS = ''
+
 if sys.platform == 'darwin' and OPTION_STANDALONE:
     print("--standalone option does not yet work on OSX")
+
 
 # Show available versions
 if OPTION_LISTVERSIONS:
@@ -161,6 +180,13 @@ Use --list-versions option to get list of available versions""" % OPTION_VERSION
         sys.exit(1)
     __version__ = OPTION_VERSION
 
+if OPTION_NOEXAMPLES:
+    # remove pyside-exampes from submodules so they will not be included
+    for idx, item in enumerate(submodules[__version__]):
+        if item[0] == 'pyside-examples':
+            del submodules[__version__][idx]
+    
+    
 # Initialize, pull and checkout submodules
 if os.path.isdir(".git") and not OPTION_IGNOREGIT and not OPTION_ONLYPACKAGE:
     print("Initializing submodules for PySide version %s" % __version__)
@@ -277,8 +303,12 @@ class pyside_build(_build):
                 make_name = "make"
                 make_generator = "Unix Makefiles"
             elif OPTION_MAKESPEC == "msvc":
-                make_name = "nmake"
-                make_generator = "NMake Makefiles"
+                if OPTION_JOM:
+                    make_name = "jom"
+                    make_generator = "NMake Makefiles JOM"
+                else:
+                    make_name = "nmake"
+                    make_generator = "NMake Makefiles"
             elif OPTION_MAKESPEC == "mingw":
                 make_name = "mingw32-make"
                 make_generator = "MinGW Makefiles"
@@ -411,6 +441,7 @@ class pyside_build(_build):
         log.info("-" * 3)
         log.info("Make path: %s" % self.make_path)
         log.info("Make generator: %s" % self.make_generator)
+        log.info("Make jobs: %s" % OPTION_JOBS)
         log.info("-" * 3)
         log.info("Script directory: %s" % self.script_dir)
         log.info("Sources directory: %s" % self.sources_dir)
@@ -528,7 +559,7 @@ class pyside_build(_build):
             raise DistutilsSetupError("Error configuring " + extension)
         
         log.info("Compiling module %s..." % extension)
-        if run_process([self.make_path], log) != 0:
+        if run_process([self.make_path, OPTION_JOBS], log) != 0:
             raise DistutilsSetupError("Error compiling " + extension)
         
         if extension.lower() == "shiboken":
@@ -638,11 +669,12 @@ class pyside_build(_build):
             "{install_dir}/include",
             "{dist_dir}/PySide/include",
             logger=log, vars=vars)
-        # <sources>/pyside-examples/examples/* -> <setup>/PySide/examples
-        copydir(
-            "{sources_dir}/pyside-examples/examples",
-            "{dist_dir}/PySide/examples",
-            force=False, logger=log, vars=vars)
+        if not OPTION_NOEXAMPLES:
+            # <sources>/pyside-examples/examples/* -> <setup>/PySide/examples
+            copydir(
+                "{sources_dir}/pyside-examples/examples",
+                "{dist_dir}/PySide/examples",
+                force=False, logger=log, vars=vars)
         # Copy Qt libs to package
         if OPTION_STANDALONE:
             if sys.platform == 'darwin':
@@ -742,11 +774,12 @@ class pyside_build(_build):
             "{install_dir}/include",
             "{dist_dir}/PySide/include",
             logger=log, vars=vars)
-        # <sources>/pyside-examples/examples/* -> <setup>/PySide/examples
-        copydir(
-            "{sources_dir}/pyside-examples/examples",
-            "{dist_dir}/PySide/examples",
-            force=False, logger=log, vars=vars)
+        if not OPTION_NOEXAMPLES:
+            # <sources>/pyside-examples/examples/* -> <setup>/PySide/examples
+            copydir(
+                "{sources_dir}/pyside-examples/examples",
+                "{dist_dir}/PySide/examples",
+                force=False, logger=log, vars=vars)
         # <ssl_libs>/* -> <setup>/PySide/openssl
         copydir("{ssl_libs_dir}", "{dist_dir}/PySide/openssl",
             filter=[
