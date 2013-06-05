@@ -299,6 +299,15 @@ Options
     Specify the cmake makefile generator type.
     Available values are ``msvc`` on Windows System and ``make`` on UNIX System.
 
+``--no-examples``
+    Don't include PySide examples in PySide distribution
+
+``--jobs``
+    Specify the number of parallel build jobs
+
+``--jom``
+    Use jom instead of nmake with msvc
+
 Feedback and getting involved
 =============================
 
