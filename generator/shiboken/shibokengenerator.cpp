@@ -1452,9 +1452,9 @@ ShibokenGenerator::ArgumentVarReplacementList ShibokenGenerator::getArgumentRepl
             bool argRemoved = func->argumentRemoved(i+1);
             removed = removed + (int) argRemoved;
             if (argRemoved && hasConversionRule)
-                argValue = QString("%1"CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name());
+                argValue = QString("%1" CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name());
             else if (argRemoved || (lastArg && arg->argumentIndex() > lastArg->argumentIndex()))
-                argValue = QString(CPP_ARG_REMOVED"%1").arg(i);
+                argValue = QString(CPP_ARG_REMOVED "%1").arg(i);
             if (!argRemoved && argValue.isEmpty()) {
                 int argPos = i - removed;
                 const AbstractMetaType* type = arg->type();
@@ -1465,11 +1465,11 @@ ShibokenGenerator::ArgumentVarReplacementList ShibokenGenerator::getArgumentRepl
                         type = builtType;
                 }
                 if (type->typeEntry()->isCustom()) {
-                    argValue = usePyArgs ? QString(PYTHON_ARGS"[%1]").arg(argPos) : PYTHON_ARG;
+                    argValue = usePyArgs ? QString(PYTHON_ARGS "[%1]").arg(argPos) : PYTHON_ARG;
                 } else {
                     argValue = hasConversionRule
-                               ? QString("%1"CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name())
-                               : QString(CPP_ARG"%1").arg(argPos);
+                               ? QString("%1" CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name())
+                               : QString(CPP_ARG "%1").arg(argPos);
                     if (isWrapperType(type)) {
                         if (type->isReference() && !isPointer(type))
                             argValue.prepend('*');

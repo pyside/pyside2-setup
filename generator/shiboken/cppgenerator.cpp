@@ -648,7 +648,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
             ac << INDENT;
             if (!func->conversionRule(TypeSystem::TargetLangCode, arg->argumentIndex() + 1).isEmpty()) {
                 // Has conversion rule.
-                ac << QString("%1"CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name());
+                ac << QString("%1" CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name());
             } else {
                 QString argName = arg->name();
                 if (convert)
@@ -1714,7 +1714,7 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                 QString strArg;
                 AbstractMetaType* argType = arg->type();
                 if (isCString(argType)) {
-                    strArg = "\"SBK_STR_NAME\"";
+                    strArg = "\" SBK_STR_NAME \"";
                 } else if (argType->isPrimitive()) {
                     const PrimitiveTypeEntry* ptp = reinterpret_cast<const PrimitiveTypeEntry*>(argType->typeEntry());
                     while (ptp->aliasedTypeEntry())
@@ -1748,7 +1748,7 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                     else if (strArg == "PyString")
                         strArg = "str";
                     else if (strArg == "PyBytes")
-                        strArg = "\"SBK_STR_NAME\"";
+                        strArg = "\" SBK_STR_NAME \"";
                     else if (strArg == "PySequece")
                         strArg = "list";
                     else if (strArg == "PyTuple")
@@ -2307,7 +2307,7 @@ void CppGenerator::writeSingleFunctionCall(QTextStream& s, const OverloadData& o
         const AbstractMetaArgument* arg = func->arguments().at(argIdx);
         if (func->argumentRemoved(argIdx + 1)) {
             if (!arg->defaultValueExpression().isEmpty()) {
-                QString cppArgRemoved = QString(CPP_ARG_REMOVED"%1").arg(argIdx);
+                QString cppArgRemoved = QString(CPP_ARG_REMOVED "%1").arg(argIdx);
                 s << INDENT << getFullTypeName(arg->type()) << ' ' << cppArgRemoved;
                 s << " = " << guessScopeForDefaultValue(func, arg) << ';' << endl;
                 writeUnusedVariableCast(s, cppArgRemoved);
@@ -2752,17 +2752,17 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
                     // If have conversion rules I will use this for removed args
                     if (hasConversionRule)
-                        userArgs << QString("%1"CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name());
+                        userArgs << QString("%1" CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name());
                     else if (!arg->defaultValueExpression().isEmpty())
-                        userArgs << QString(CPP_ARG_REMOVED"%1").arg(i);
+                        userArgs << QString(CPP_ARG_REMOVED "%1").arg(i);
                 } else {
                     int idx = arg->argumentIndex() - removedArgs;
                     bool deRef = isValueTypeWithCopyConstructorOnly(arg->type())
                                  || isObjectTypeUsedAsValueType(arg->type())
                                  || (arg->type()->isReference() && isWrapperType(arg->type()) && !isPointer(arg->type()));
                     QString argName = hasConversionRule
-                                      ? QString("%1"CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name())
-                                      : QString("%1"CPP_ARG"%2").arg(deRef ? "*" : "").arg(idx);
+                                      ? QString("%1" CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name())
+                                      : QString("%1" CPP_ARG "%2").arg(deRef ? "*" : "").arg(idx);
                     userArgs << argName;
                 }
             }
@@ -2784,9 +2784,9 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                     argsClear = false;
                 otherArgsModified |= defValModified || hasConversionRule || func->argumentRemoved(i + 1);
                 if (hasConversionRule)
-                    otherArgs.prepend(QString("%1"CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name()));
+                    otherArgs.prepend(QString("%1" CONV_RULE_OUT_VAR_SUFFIX).arg(arg->name()));
                 else
-                    otherArgs.prepend(QString(CPP_ARG_REMOVED"%1").arg(i));
+                    otherArgs.prepend(QString(CPP_ARG_REMOVED "%1").arg(i));
             }
             if (otherArgsModified)
                 userArgs << otherArgs;

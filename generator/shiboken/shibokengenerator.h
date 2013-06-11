@@ -27,11 +27,11 @@
 #define CONV_RULE_OUT_VAR_SUFFIX  "_out"
 #define CPP_ARG                   "cppArg"
 #define CPP_ARG0                  CPP_ARG"0"
-#define CPP_ARG_REMOVED           "removed_"CPP_ARG
+#define CPP_ARG_REMOVED           "removed_" CPP_ARG
 #define CPP_RETURN_VAR            "cppResult"
 #define CPP_SELF_VAR              "cppSelf"
 #define PYTHON_ARG                "pyArg"
-#define PYTHON_ARGS               PYTHON_ARG"s"
+#define PYTHON_ARGS               PYTHON_ARG "s"
 #define PYTHON_OVERRIDE_VAR       "pyOverride"
 #define PYTHON_RETURN_VAR         "pyResult"
 #define PYTHON_SELF_VAR           "self"
