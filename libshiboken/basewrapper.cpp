@@ -823,9 +823,19 @@ void callCppDestructors(SbkObject* pyObj)
         threadSaver.save();
         sbkType->d->cpp_dtor(pyObj->d->cptr[0]);
     }
+
+    /* invalidate needs to be called before deleting pointer array because
+       it needs to delete entries for them from the BindingManager hash table;
+       also release wrapper explicitly if object contains C++ wrapper because
+       invalidate doesn't */
+    invalidate(pyObj);
+    if (pyObj->d->validCppObject && pyObj->d->containsCppWrapper) {
+      BindingManager::instance().releaseWrapper(pyObj);
+    }
+
     delete[] pyObj->d->cptr;
     pyObj->d->cptr = 0;
-    invalidate(pyObj);
+    pyObj->d->validCppObject = false;
 }
 
 bool hasOwnership(SbkObject* pyObj)
