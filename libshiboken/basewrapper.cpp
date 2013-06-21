@@ -880,19 +880,28 @@ void releaseOwnership(PyObject* self)
     setSequenceOwnership(self, false);
 }
 
+/* Needed forward declarations */
+static void recursive_invalidate(PyObject* pyobj, std::set<SbkObject*>& seen);
+static void recursive_invalidate(SbkObject* self, std::set<SbkObject*>& seen);
+
 void invalidate(PyObject* pyobj)
 {
-    std::list<SbkObject*> objs = splitPyObject(pyobj);
-    std::list<SbkObject*>::const_iterator it = objs.begin();
     std::set<SbkObject*> seen;
-    for(; it != objs.end(); it++)
-        recursive_invalidate(*it, seen);
+    recursive_invalidate(pyobj, seen);
 }
 
 void invalidate(SbkObject* self)
 {
     std::set<SbkObject*> seen;
     recursive_invalidate(self, seen);
+}
+
+static void recursive_invalidate(PyObject* pyobj, std::set<SbkObject*>& seen)
+{
+    std::list<SbkObject*> objs = splitPyObject(pyobj);
+    std::list<SbkObject*>::const_iterator it = objs.begin();
+    for (; it != objs.end(); it++)
+        recursive_invalidate(*it, seen);
 }
 
 static void recursive_invalidate(SbkObject* self, std::set<SbkObject*>& seen)
@@ -931,7 +940,7 @@ static void recursive_invalidate(SbkObject* self, std::set<SbkObject*>& seen)
             const std::list<PyObject*> lst = iter->second;
             std::list<PyObject*>::const_iterator it = lst.begin();
             while(it != lst.end()) {
-                recursive_invalidate((SbkObject*)*it, seen);
+                recursive_invalidate(*it, seen);
                 ++it;
             }
         }

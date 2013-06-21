@@ -86,6 +86,20 @@ class ObjectTypeTest(unittest.TestCase):
 
         shiboken.invalidate(parent)
 
+    def testNextInFocusChainCycleList(self):
+        '''As above but in for a list of objects'''
+        parents = []
+        children = []
+        focus_chains = []
+        for i in range(10):
+            parent = ObjectType()
+            child = ObjectType(parent)
+            next_focus = child.nextInFocusChain()
+            parents.append(parent)
+            children.append(child)
+            focus_chains.append(next_focus)
+
+        shiboken.invalidate(parents)
+
 if __name__ == '__main__':
     unittest.main()
-
