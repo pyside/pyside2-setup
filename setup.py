@@ -863,6 +863,18 @@ class pyside_build(_build):
             filter=["*.qm"],
             logger=log, vars=vars)
 
+        # pdb files for libshiboken and libpyside
+        if self.debug or self.build_type == 'RelWithDebInfo':
+            copyfile(
+                "{build_dir}/shiboken/libshiboken/shiboken-python{py_version}{dbgPostfix}.pdb",
+                "{dist_dir}/PySide/shiboken-python{py_version}{dbgPostfix}.pdb",
+                logger=log, vars=vars)
+            copyfile(
+                "{build_dir}/pyside/libpyside/pyside-python{py_version}{dbgPostfix}.pdb",
+                "{dist_dir}/PySide/pyside-python{py_version}{dbgPostfix}.pdb",
+                logger=log, vars=vars)
+
+
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
