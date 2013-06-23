@@ -4534,9 +4534,19 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
             s << INDENT << '}' << endl;
 
             foreach (const AbstractMetaFunction* func, getMethodsWithBothStaticAndNonStaticMethods(metaClass)) {
+                QString defName = cpythonMethodDefinitionName(func);
+                s << INDENT << "static PyMethodDef non_static_" << defName << " = {" << endl;
+                {
+                    Indentation indent(INDENT);
+                    s << INDENT << defName << ".ml_name," << endl;
+                    s << INDENT << defName << ".ml_meth," << endl;
+                    s << INDENT << defName << ".ml_flags & (~METH_STATIC)," << endl;
+                    s << INDENT << defName << ".ml_doc," << endl;
+                }
+                s << INDENT << "};" << endl;
                 s << INDENT << "if (Shiboken::String::compare(name, \"" << func->name() << "\") == 0)" << endl;
                 Indentation indent(INDENT);
-                s << INDENT << "return PyCFunction_NewEx(&" << cpythonMethodDefinitionName(func) << ", " PYTHON_SELF_VAR ", 0);" << endl;
+                s << INDENT << "return PyCFunction_NewEx(&non_static_" << defName << ", " PYTHON_SELF_VAR ", 0);" << endl;
             }
         }
         s << INDENT << '}' << endl;
