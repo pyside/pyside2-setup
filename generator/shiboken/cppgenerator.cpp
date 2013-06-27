@@ -4814,7 +4814,7 @@ void CppGenerator::finishGeneration()
             s << INDENT << "if (requiredModule.isNull())" << endl;
             {
                 Indentation indentation(INDENT);
-                s << INDENT << "SBK_MODULE_INIT_ERROR;" << endl;
+                s << INDENT << "return SBK_MODULE_INIT_ERROR;" << endl;
             }
             s << INDENT << cppApiVariableName(requiredModule) << " = Shiboken::Module::getTypes(requiredModule);" << endl;
             s << INDENT << convertersVariableName(requiredModule) << " = Shiboken::Module::getTypeConverters(requiredModule);" << endl;
