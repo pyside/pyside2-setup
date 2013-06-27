@@ -29,6 +29,7 @@ class CtorConvRule
 {
 public:
     explicit CtorConvRule(long value) : m_value(value) {}
+    virtual ~CtorConvRule() {}
     virtual void dummyVirtualMethod() {}
     long value() { return m_value; }
 private:

@@ -30,6 +30,7 @@ class LIBSAMPLE_API ObjectTypeOperators
 {
 public:
     explicit ObjectTypeOperators(const std::string key);
+    virtual ~ObjectTypeOperators() {}
 
     bool operator==(const ObjectTypeOperators& other) const;
     const ObjectTypeOperators& operator<(const ObjectTypeOperators& other) const;
