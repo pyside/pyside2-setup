@@ -27,7 +27,12 @@
 import unittest
 from minimal import *
 from py3kcompat import IS_PY3K
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError, e:
+    np = None
+
 
 if IS_PY3K:
     import functools
@@ -101,4 +106,5 @@ class TypedefTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    if np != None:
+        unittest.main()
