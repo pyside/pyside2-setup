@@ -308,6 +308,9 @@ Options
 ``--jom``
     Use jom instead of nmake with msvc
 
+``--build-tests``
+    Enable building the tests
+
 Feedback and getting involved
 =============================
 
