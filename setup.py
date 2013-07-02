@@ -26,17 +26,16 @@ OpenSSL: You can specify the location of OpenSSL DLLs with option --opnessl=</pa
     You can download OpenSSL for windows here: http://slproweb.com/products/Win32OpenSSL.html
 
 NOTES:
-On Windows You need to execute this script from Visual Studio 2008 Command Prompt.
 Building 64bit version is not supported with Visual Studio 2008 Express Edition.
 """
 
-__version__ = "1.1.3dev"
+__version__ = "1.2.0"
 
 submodules = {
     __version__: [
-        ["shiboken", "master"],
-        ["pyside", "master"],
-        ["pyside-tools", "master"],
+        ["shiboken", "1.2.0"],
+        ["pyside", "1.2.0"],
+        ["pyside-tools", "0.2.14"],
         ["pyside-examples", "master"],
     ],
     '1.1.2': [

@@ -132,7 +132,7 @@ Building PySide distribution
    
    ::
 
-      c:\> c:\Python27\Scripts\easy_install dist\PySide-1.1.2.win32-py2.7.exe
+      c:\> c:\Python27\Scripts\easy_install dist\PySide-1.2.0.win32-py2.7.exe
       c:\> c:\Python27\python.exe c:\Python27\Scripts\pyside_postinstall.py -install
       
       # After successfull install, the post-install script should print the following information to the console:
@@ -211,7 +211,7 @@ Building PySide distribution
    
    ::
 
-      $ sudo easy_install-2.7 dist/PySide-1.1.2.egg
+      $ sudo easy_install-2.7 dist/PySide-1.2.0.egg
       $ sudo python2.7 pyside_postinstall.py -install
       
       # After successfull install, the post-install script should print the following information to the console:
@@ -320,6 +320,105 @@ Feedback and getting involved
 
 Changes
 =======
+
+1.2.0 (2013-07-02)
+------------------
+
+Major changes
+~~~~~~~~~~~~~
+
+PySide
+******
+
+- Fix multiple segfaults and better track the life time of Qt objects
+- Fix multiple memory leaks
+
+Shiboken
+********
+
+- Install the shiboken module to site-packages
+- Fix multiple segfaults
+
+PySide-setup
+************
+
+- Support for building windows binaries outside of Visual Studio command prompt
+- Build and package the shiboken docs when sphinx is installed
+- Documentation updates and multiple bug fixes
+
+Complete list of changes and bug fixes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+PySide
+******
+
+- Set up PYTHONPATH for tests correctly
+- Fix potential segfault at shutdown
+- Fix PYSIDE-61
+- Tell Qt to look for qml imports in the PySide package
+- fix build in C++11 mode
+- Fix QByteArray memory leak
+- Ignore QtCore import errors when initializing plugins folder
+- Preload OpenSSL DLLs on Windows.
+- Look first in the PySide package for Qt's plugins folder, instead of just in Qt's install or build folder
+- Add explicit type conversion to fix mingw compile error
+- Use QObject property to invalidate wrapper before deletion
+- Invalidate metaObject wrapper before deletion
+- Fix reference leak on convertion from a C++ map type to Python dict
+- Change the order of pysitetest and signals directories because signals/disconnect_test.py depends on pysidetest module
+
+Shiboken
+********
+
+- Removed old logos from html docs
+- Add missing return on module init error
+- Don't break -Werror=non-virtual-dtor
+- Fixing shiboken test for minimal binding test
+- Decref reference to type object
+- Fix segfault when using shiboken.delete
+- Use non-static method def for instance methods
+- Fix bug introduced when recursive_invalidate was added
+- fix build in C++11 mode
+- Prevent infinite recursion in invalidate
+- Fix possible conflict with garbage collector
+- Fix possible crash at exit
+- Fix handling of unsigned long long and provide unittests
+- Add test to illustrate issue on typedef enum
+- Use getWrapperForQObject to convert if generating for PySide
+- Allow compilation without a python shared library
+- Use parent class's metaObject if wrapper is NULL
+- Optionally assert on free'd pointer with a valid wrapper
+- Find python3 libraries when built with pydebug enabled
+- Fix PYSIDE-108 bug and add example
+- PYSIDE-83 Fix segfault calling shiboken.dump
+- Fix and test case for bug PYSIDE-72
+- Override all functions with the same name, not just one
+- Update vector conversion
+- Add typedef examples to minimal
+- Add test files back to cmake
+- Don't use it->second after erasing it
+- Find function modifications defined in the 2nd+ base class. Fixes bug PYSIDE-54.
+- Set a default hash function for all ObjectTypes. Fix bug PYSIDE-42.
+- Fix compilation when there is no libxslt installed on the system.
+- Fixed resolving of SOABI. SOABI is implemented on Linux, but not on Windows
+- Don't use inline methods in dllexported classes to keep VC++ happy
+- Use SpooledTemporaryFile in 2.6+ os.tmpfile() fails on win32 if process doesn't have admin permissions
+
+PySide-setup
+************
+
+- Support for building windows binaries outside of Visual Studio command prompt
+- Build and package the shiboken docs when sphinx is installed
+- Support Ubuntu 13.04 and Fedora 18
+- Fixed "develop" setuptools command
+- Documentation updates
+- Add --build-tests option to enable building the tests
+- Add --jom and --jobs options
+- Add --no-examples option to exclude the examples
+- Add --relwithdebinfo option to enable a release-with-debug-info build mode
+- Add --msvc-version option to specify version of MSVC compiler
+- Add --ignore-git option
+- Add --make-spec option to specify make generator
 
 1.1.2 (2012-08-28)
 ------------------
