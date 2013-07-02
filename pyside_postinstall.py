@@ -248,6 +248,11 @@ def install_win32():
     pyside_path = pyside_path.replace("lib/site-packages", "Lib/site-packages")
     print("PySide package found in %s..." % pyside_path)
 
+    # Since version 1.2.0 there is no need to run post install procedure on win32
+    from PySide import __version_info__ as pyside_version_info
+    if pyside_version_info >= (1,2,0):
+        return
+
     if is_bdist_wininst:
         # Run from inside the bdist_wininst installer
         import distutils.sysconfig

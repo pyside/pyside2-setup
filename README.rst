@@ -43,10 +43,6 @@ There are two options to install PySide on Windows:
    ::
 
       c:\> c:\Python27\Scripts\easy_install PySide
-      c:\> c:\Python27\python.exe c:\Python27\Scripts\pyside_postinstall.py -install
-   
-   Note that the post-install procedure is not needed when installing via installer.
-   The installer calls the pyside_postinstall.py script automatically.
 
 Installing PySide on a UNIX System
 ----------------------------------
@@ -100,8 +96,8 @@ Installing prerequisities
 
       c:\> c:\Python27\python distribute_setup.py
 
-Building PySide distribution
-----------------------------
+Building and installing PySide distribution
+-------------------------------------------
 
 #. Clone ``PySide`` setup scripts from git repository:
 
@@ -127,17 +123,11 @@ Building PySide distribution
 
       c:\> c:\Python27\python.exe setup.py bdist_wininst --msvc-version=10.0 --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
-#. After the successful build, install the distribution with easy_install
-   and run the post-install script:
+#. After the successful build, install the distribution with easy_install:
    
    ::
 
       c:\> c:\Python27\Scripts\easy_install dist\PySide-1.2.0.win32-py2.7.exe
-      c:\> c:\Python27\python.exe c:\Python27\Scripts\pyside_postinstall.py -install
-      
-      # After successfull install, the post-install script should print the following information to the console:
-      
-      c:\> The PySide extensions were successfully installed.
 
 Building PySide on a UNIX System (Ubuntu 12.04 LTS)
 ===================================================
@@ -179,8 +169,8 @@ Installing prerequisities
 
       $ sudo python2.7 distribute_setup.py
 
-Building PySide distribution
-----------------------------
+Building and installing PySide distribution
+-------------------------------------------
 
 #. Clone ``PySide`` setup scripts from git repository:
 
@@ -212,11 +202,13 @@ Building PySide distribution
    ::
 
       $ sudo easy_install-2.7 dist/PySide-1.2.0.egg
+
+#. If installing package that was built with --standalone option,
+   run the post-install script:
+   
+   ::
+
       $ sudo python2.7 pyside_postinstall.py -install
-      
-      # After successfull install, the post-install script should print the following information to the console:
-      
-      $ PySide package successfully installed in...
 
 PySide Setup Script command line options
 ========================================
@@ -332,6 +324,10 @@ PySide
 
 - Fix multiple segfaults and better track the life time of Qt objects
 - Fix multiple memory leaks
+- Configure Qt library at import time - there is no more need to call
+  post-install script when installing PySide via easy_install.
+  *Note that post-install is still required on POSIX platform
+  when installing package that was built with --standalone option*.
 
 Shiboken
 ********
