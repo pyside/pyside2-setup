@@ -201,13 +201,14 @@ Building and installing PySide distribution
    
    ::
 
-      $ sudo easy_install-2.7 dist/PySide-1.2.0.egg
+      $ sudo easy_install-2.7 dist/PySide-1.2.0-py2.7.egg
 
-#. If installing package that was built with --standalone option,
-   run the post-install script:
+#. After the successful build, install the distribution with easy_install
+   and run the post-install script:
    
    ::
 
+      $ sudo easy_install-2.7 dist/PySide-1.2.0-py2.7.egg
       $ sudo python2.7 pyside_postinstall.py -install
 
 PySide Setup Script command line options
@@ -324,10 +325,6 @@ PySide
 
 - Fix multiple segfaults and better track the life time of Qt objects
 - Fix multiple memory leaks
-- Configure Qt library at import time - there is no more need to call
-  post-install script when installing PySide via easy_install.
-  *Note that post-install is still required on POSIX platform
-  when installing package that was built with --standalone option*.
 
 Shiboken
 ********
@@ -338,9 +335,10 @@ Shiboken
 PySide-setup
 ************
 
+- On Windows system, when installing PySide binary distribution via easy_install,
+  there is mo more need to call the post-install script
 - Support for building windows binaries outside of Visual Studio command prompt
 - Build and package the shiboken docs when sphinx is installed
-- Documentation updates and multiple bug fixes
 
 Complete list of changes and bug fixes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
