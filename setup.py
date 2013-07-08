@@ -377,9 +377,17 @@ class pyside_build(_build):
             if sys.version_info[0] > 2:
                 lib_suff = getattr(sys, 'abiflags', None)
             else: # Python 2
-                lib_suff = dbgPostfix
+                lib_suff = ''
             lib_exts.append('.so.1')
             lib_exts.append('.a') # static library as last gasp
+
+            if sys.version_info[0] == 2 and dbgPostfix:
+                # For Python2 add a duplicate set of extensions combined with
+                # the dbgPostfix, so we test for both the debug version of
+                # the lib and the normal one. This allows a debug PySide to
+                # be built with a non-debug Python.
+                lib_exts = [dbgPostfix + e for e in lib_exts] + lib_exts
+                
             libs_tried = []
             for lib_ext in lib_exts:
                 lib_name = "libpython%s%s%s" % (py_version, lib_suff, lib_ext)
