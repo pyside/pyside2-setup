@@ -347,7 +347,7 @@ PySide-setup
 ************
 
 - On Windows system, when installing PySide binary distribution via easy_install,
-  there is mo more need to call the post-install script
+  there is no more need to call the post-install script
 - Support for building windows binaries outside of Visual Studio command prompt
 - Build and package the shiboken docs when sphinx is installed
 
