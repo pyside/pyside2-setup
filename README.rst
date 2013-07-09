@@ -36,7 +36,7 @@ Installing PySide on a Windows System
 There are two options to install PySide on Windows:
 
 #. Download and install the packages from the `releases page
-   <http://releases.qt-project.org/pyside/>`_.
+   <http://download.qt-project.org/official_releases/pyside/>`_.
 
 #. Use setuptools:
    
@@ -68,7 +68,7 @@ Installing prerequisities
    <http://www.python.org/download/>`_.
 
 #. Install `Qt 4.8 libraries for Windows (VS 2008)
-   <http://releases.qt-project.org/qt4/source/qt-win-opensource-4.8.4-vs2008.exe>`_.
+   <http://download.qt-project.org/official_releases/qt/4.8/4.8.4/qt-win-opensource-4.8.4-vs2008.exe>`_.
 
 #. Install `Cmake
    <http://www.cmake.org/cmake/resources/software.html>`_.
