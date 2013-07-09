@@ -96,8 +96,8 @@ Installing prerequisities
 
       c:\> c:\Python27\python distribute_setup.py
 
-Building and installing PySide distribution
--------------------------------------------
+Building PySide distribution
+----------------------------
 
 #. Clone ``PySide`` setup scripts from git repository:
 
@@ -115,13 +115,22 @@ Building and installing PySide distribution
 
    ::
 
-      c:\> c:\Python27\python.exe setup.py bdist_wininst --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+      c:\> c:\Python27\python.exe setup.py bdist_wininst --version=1.2.0 --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
 #. Optionally you can specify the msvc compiler version:
 
    ::
 
-      c:\> c:\Python27\python.exe setup.py bdist_wininst --msvc-version=10.0 --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+      c:\> c:\Python27\python.exe setup.py bdist_wininst --msvc-version=10.0 --version=1.2.0 --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+
+#. To build the development version of ``PySide`` windows installer, ignore the --version parameter:
+
+   ::
+
+      c:\> c:\Python27\python.exe setup.py bdist_wininst --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+
+Installing PySide distribution
+------------------------------
 
 #. After the successful build, install the distribution with easy_install:
    
@@ -169,8 +178,8 @@ Installing prerequisities
 
       $ sudo python2.7 distribute_setup.py
 
-Building and installing PySide distribution
--------------------------------------------
+Building PySide distribution
+----------------------------
 
 #. Clone ``PySide`` setup scripts from git repository:
 
@@ -188,20 +197,22 @@ Building and installing PySide distribution
 
    ::
 
-      $ python2.7 setup.py bdist_egg
+      $ python2.7 setup.py bdist_egg --version=1.2.0
 
 #. Optionally you can build standalone version of distribution with embedded Qt libs:
 
    ::
 
-      $ python2.7 setup.py bdist_egg --standalone
+      $ python2.7 setup.py bdist_egg --standalone --version=1.2.0
 
-#. After the successful build, install the distribution with easy_install
-   and run the post-install script:
-   
+#. To build the development version of ``PySide`` distribution, ignore the --version parameter:
+
    ::
 
-      $ sudo easy_install-2.7 dist/PySide-1.2.0-py2.7.egg
+      $ python2.7 setup.py bdist_egg
+
+Installing PySide distribution
+------------------------------
 
 #. After the successful build, install the distribution with easy_install
    and run the post-install script:
