@@ -76,8 +76,13 @@ static int SbkEnumObject_print(PyObject* self, FILE* fp, int)
 
 static PyObject* SbkEnumObject_name(PyObject* self, void*)
 {
-    Py_INCREF(((SbkEnumObject*)self)->ob_name);
-    return ((SbkEnumObject*)self)->ob_name;
+    SbkEnumObject* enum_self = (SbkEnumObject*)self;
+
+    if (enum_self->ob_name == NULL)
+        Py_RETURN_NONE;
+
+    Py_INCREF(enum_self->ob_name);
+    return enum_self->ob_name;
 }
 
 static PyObject* SbkEnum_tp_new(PyTypeObject* type, PyObject* args, PyObject* kwds)

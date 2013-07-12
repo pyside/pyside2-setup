@@ -136,6 +136,11 @@ class OutOfBoundsTest(unittest.TestCase):
         e = MyEvent()
         self.assertEqual(repr(e.eventType()), 'sample.Event.EventType(999)')
 
+    def testNoneName(self):
+        e = MyEvent()
+        t = e.eventType()
+        self.assertEqual(t.name, None)
+
 class EnumOverloadTest(unittest.TestCase):
     '''Test case for overloads involving enums'''
 
