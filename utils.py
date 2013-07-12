@@ -9,6 +9,7 @@ import fnmatch
 import itertools
 import popenasync
 
+from distutils.errors import DistutilsOptionError
 from distutils.spawn import spawn
 from distutils.spawn import DistutilsExecError
 
