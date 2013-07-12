@@ -67,17 +67,21 @@ Installing prerequisities
 #. Install `Python
    <http://www.python.org/download/>`_.
 
-#. Install `Qt 4.8 libraries for Windows (VS 2008)
-   <http://download.qt-project.org/official_releases/qt/4.8/4.8.4/qt-win-opensource-4.8.4-vs2008.exe>`_.
+#. Install `Qt 4.8 libraries for Windows VS 2008 edition
+   <http://download.qt-project.org/official_releases/qt/4.8/4.8.4/qt-win-opensource-4.8.4-vs2008.exe>`_
+   when building against Python 2.6, 2.7 or 3.2.
+   Install `Qt 4.8 libraries for Windows VS 2010 edition
+   <http://download.qt-project.org/official_releases/qt/4.8/4.8.4/qt-win-opensource-4.8.4-vs2010.exe>`_
+   when building against Python 3.3.
 
 #. Install `Cmake
    <http://www.cmake.org/cmake/resources/software.html>`_.
 
-#. Install `Visual Studio Express 2008
-   <http://www.microsoft.com/express/Downloads/>`_
+#. Install `Windows SDK v6.1
+   <http://www.microsoft.com/en-us/download/details.aspx?id=11310>`_
    when building against Python 2.6, 2.7 or 3.2.
-   Install `Visual Studio Express 2010
-   <http://www.microsoft.com/visualstudio/eng/products/visual-studio-2010-express>`_
+   Install `Windows SDK v7.1
+   <http://www.microsoft.com/en-us/download/details.aspx?id=8279>`_
    when building against Python 3.3.
 
 #. Install `Git
@@ -324,6 +328,23 @@ Feedback and getting involved
 
 Changes
 =======
+
+1.2.1 (2013-07-??)
+------------------
+
+Major changes
+~~~~~~~~~~~~~
+
+PySide
+******
+
+Shiboken
+********
+
+PySide-setup
+************
+
+- Support for building windows binaries with only Windows SDK installed (Visual Studio is no more required)
 
 1.2.0 (2013-07-02)
 ------------------

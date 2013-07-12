@@ -24,9 +24,6 @@ REQUIREMENTS:
 OPTIONAL:
 OpenSSL: You can specify the location of OpenSSL DLLs with option --opnessl=</path/to/openssl/bin>.
     You can download OpenSSL for windows here: http://slproweb.com/products/Win32OpenSSL.html
-
-NOTES:
-Building 64bit version is not supported with Visual Studio 2008 Express Edition.
 """
 
 __version__ = "1.3.0dev"

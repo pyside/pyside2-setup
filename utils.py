@@ -10,6 +10,7 @@ import itertools
 import popenasync
 
 from distutils.errors import DistutilsOptionError
+from distutils.errors import DistutilsSetupError
 from distutils.spawn import spawn
 from distutils.spawn import DistutilsExecError
 
@@ -63,42 +64,99 @@ def update_env_path(newpaths, logger):
             os.environ['PATH'] = path + os.pathsep + os.environ['PATH']
 
 
-def find_vcvarsall(version):
-    from distutils import msvc9compiler
-    vcvarsall_path = msvc9compiler.find_vcvarsall(version)
-    return vcvarsall_path
+def find_vcdir(version):
+    """
+    This is the customized version of distutils.msvc9compiler.find_vcvarsall method
+    """
+    from distutils.msvc9compiler import VS_BASE
+    from distutils.msvc9compiler import Reg
+    from distutils import log
+    vsbase = VS_BASE % version
+    try:
+        productdir = Reg.get_value(r"%s\Setup\VC" % vsbase,
+                                   "productdir")
+    except KeyError:
+        productdir = None
+
+    # trying Express edition
+    if productdir is None:
+        try:
+            from distutils.msvc9compiler import VSEXPRESS_BASE
+        except ImportError:
+            pass
+        else:
+            vsbase = VSEXPRESS_BASE % version
+            try:
+                productdir = Reg.get_value(r"%s\Setup\VC" % vsbase,
+                                           "productdir")
+            except KeyError:
+                productdir = None
+                log.debug("Unable to find productdir in registry")
+
+    if not productdir or not os.path.isdir(productdir):
+        toolskey = "VS%0.f0COMNTOOLS" % version
+        toolsdir = os.environ.get(toolskey, None)
+
+        if toolsdir and os.path.isdir(toolsdir):
+            productdir = os.path.join(toolsdir, os.pardir, os.pardir, "VC")
+            productdir = os.path.abspath(productdir)
+            if not os.path.isdir(productdir):
+                log.debug("%s is not a valid directory" % productdir)
+                return None
+        else:
+            log.debug("Env var %s is not set or invalid" % toolskey)
+    if not productdir:
+        log.debug("No productdir found")
+        return None
+    return productdir
 
 
-def find_vcvarsall_paths(versions):
-    vcvarsall_paths = []
+def find_vcdirs(versions):
+    paths = []
     for version in versions:
-        vcvarsall_path = find_vcvarsall(version)
-        if vcvarsall_path:
-            vcvarsall_paths.append([version, vcvarsall_path])
-    return vcvarsall_paths
+        vcdir_path = find_vcdir(version)
+        if vcdir_path:
+            paths.append([version, vcdir_path])
+    return paths
 
 
 def init_msvc_env(default_msvc_version, platform_arch, logger):
-    logger.info("Searching vcvarsall.bat")
-    all_vcvarsall_paths = find_vcvarsall_paths([9.0, 10.0, 11.0])
-    if len(all_vcvarsall_paths) == 0:
+    logger.info("Searching vcvars.bat")
+
+    all_vcdirs = find_vcdirs([9.0, 10.0, 11.0])
+    if len(all_vcdirs) == 0:
         raise DistutilsSetupError(
             "Failed to find the MSVC compiler on your system.")
-    for v in all_vcvarsall_paths:
-        logger.info("Found MSVC %s in %s" % (v[0], v[1]))
-    
+
+    all_vcvars = []
+    for v in all_vcdirs:
+        if platform_arch.startswith("32"):
+            vcvars_path = os.path.join(v[1], "bin", "vcvars32.bat")
+        else:
+            vcvars_path = os.path.join(v[1], "bin", "vcvars64.bat")
+            if not os.path.exists(vcvars_path):
+                vcvars_path = os.path.join(v[1], "bin", "amd64", "vcvars64.bat")
+        if os.path.exists(vcvars_path):
+            all_vcvars.append([v[0], vcvars_path])
+
+    if len(all_vcvars) == 0:
+        raise DistutilsSetupError(
+            "Failed to find the MSVC compiler on your system.")
+    for v in all_vcvars:
+        logger.info("Found %s" % v[1])
+
     if default_msvc_version:
         msvc_version = float(default_msvc_version)
-        vcvarsall_path_tmp = [p for p in all_vcvarsall_paths if p[0] == msvc_version]
+        vcvarsall_path_tmp = [p for p in all_vcvars if p[0] == msvc_version]
         vcvarsall_path = vcvarsall_path_tmp[0][1] if len(vcvarsall_path_tmp) > 0 else None
         if not vcvarsall_path:
             raise DistutilsSetupError(
-                "Failed to find the vcvarsall.bat for MSVC version %s." % msvc_version)
+                "Failed to find the vcvars.bat for MSVC version %s." % msvc_version)
     else:
         # By default use first MSVC compiler found in system
-        msvc_version = all_vcvarsall_paths[0][0]
-        vcvarsall_path = all_vcvarsall_paths[0][1]
-    
+        msvc_version = all_vcvars[0][0]
+        vcvarsall_path = all_vcvars[0][1]
+
     # Get MSVC env
     logger.info("Using MSVC %s in %s" % (msvc_version, vcvarsall_path))
     msvc_arch = "x86" if platform_arch.startswith("32") else "amd64"
@@ -107,7 +165,7 @@ def init_msvc_env(default_msvc_version, platform_arch, logger):
     msvc_env = get_environment_from_batch_command(vcvarsall_cmd)
     msvc_env_paths = os.pathsep.join([msvc_env[k] for k in msvc_env if k.upper() == 'PATH']).split(os.pathsep)
     msvc_env_without_paths = dict([(k, msvc_env[k]) for k in msvc_env if k.upper() != 'PATH'])
-    
+
     # Extend os.environ with MSVC env
     logger.info("Initializing MSVC env...")
     update_env_path(msvc_env_paths, logger)
