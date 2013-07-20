@@ -576,7 +576,8 @@ class pyside_build(_build):
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
             if sys.version_info[0] > 2:
                 cmake_cmd.append("-DUSE_PYTHON3=ON")
-        elif sys.platform == 'darwin':
+        
+        if sys.platform == 'darwin':
             if 'QTDIR' in os.environ:
                 # If the user has QTDIR set, then use it as a prefix for an extra include path
                 cmake_cmd.append('-DALTERNATIVE_QT_INCLUDE_DIR={0}/include'.format(os.environ['QTDIR']))
