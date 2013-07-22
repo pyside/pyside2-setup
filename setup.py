@@ -106,6 +106,7 @@ OPTION_NOEXAMPLES = has_option("no-examples")     # don't include pyside-example
 OPTION_JOBS = option_value('jobs')                # number of parallel build jobs
 OPTION_JOM = has_option('jom')                    # use jom instead of nmake with msvc
 OPTION_BUILDTESTS = has_option("build-tests")
+OPTION_OSXARCH = option_value("osx-arch")
 
 if OPTION_QMAKE is None:
     OPTION_QMAKE = find_executable("qmake")
@@ -377,9 +378,17 @@ class pyside_build(_build):
             if sys.version_info[0] > 2:
                 lib_suff = getattr(sys, 'abiflags', None)
             else: # Python 2
-                lib_suff = dbgPostfix
+                lib_suff = ''
             lib_exts.append('.so.1')
             lib_exts.append('.a') # static library as last gasp
+
+            if sys.version_info[0] == 2 and dbgPostfix:
+                # For Python2 add a duplicate set of extensions combined with
+                # the dbgPostfix, so we test for both the debug version of
+                # the lib and the normal one. This allows a debug PySide to
+                # be built with a non-debug Python.
+                lib_exts = [dbgPostfix + e for e in lib_exts] + lib_exts
+                
             libs_tried = []
             for lib_ext in lib_exts:
                 lib_name = "libpython%s%s%s" % (py_version, lib_suff, lib_ext)
@@ -568,16 +577,22 @@ class pyside_build(_build):
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
             if sys.version_info[0] > 2:
                 cmake_cmd.append("-DUSE_PYTHON3=ON")
-        elif sys.platform == 'darwin':
+        
+        if sys.platform == 'darwin':
             if 'QTDIR' in os.environ:
                 # If the user has QTDIR set, then use it as a prefix for an extra include path
-                cmake_cmd.append('-DALTERNATIVE_QT_INCLUDE_DIR={0}/include:{0}/lib'.format(os.environ['QTDIR']))
+                cmake_cmd.append('-DALTERNATIVE_QT_INCLUDE_DIR={0}/include'.format(os.environ['QTDIR']))
+                #:{0}/lib  I had problems specifying both dirs.  Is it needed? Is there some other way to do it? --Robin
             else:
                 # Otherwise assume it is a standard install and add the
                 # Frameworks folder as a workaround for a cmake include problem
                 # http://neilweisenfeld.com/wp/120/building-pyside-on-the-mac
                 # https://groups.google.com/forum/#!msg/pyside/xciZZ4Hm2j8/CUmqfJptOwoJ
                 cmake_cmd.append('-DALTERNATIVE_QT_INCLUDE_DIR=/Library/Frameworks')
+            
+            if OPTION_OSXARCH:
+                # also tell cmake which architecture to use 
+                cmake_cmd.append("-DCMAKE_OSX_ARCHITECTURES:STRING={}".format(OPTION_OSXARCH))
 
         log.info("Configuring module %s (%s)..." % (extension,  module_src_dir))
         if run_process(cmake_cmd, log) != 0:
