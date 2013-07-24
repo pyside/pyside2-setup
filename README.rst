@@ -121,12 +121,6 @@ Building PySide distribution
 
       c:\> c:\Python27\python.exe setup.py bdist_wininst --version=1.2.0 --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
-#. Optionally you can specify the msvc compiler version:
-
-   ::
-
-      c:\> c:\Python27\python.exe setup.py bdist_wininst --msvc-version=10.0 --version=1.2.0 --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
-
 #. To build the development version of ``PySide`` windows installer, ignore the --version parameter:
 
    ::
@@ -286,7 +280,7 @@ Options
 
 ``--msvc-version``
     Specify the Visual C++ compiler version. 
-    Supported values are ``9.0`` (for VS 2008), ``10.0`` (for VS 2010), ``11.0`` (for VS 2012).
+    Supported values are ``9.0`` (for VS 2008), ``10.0`` (for VS 2010).
 
 ``--standalone``
     When enabled, all required Qt libs will be included in PySide distribution.

@@ -119,12 +119,17 @@ if sys.platform == "win32":
     if not OPTION_MAKESPEC in ["msvc", "mingw"]:
         print("Invalid option --make-spec. Available values are %s" % (["msvc", "mingw"]))
         sys.exit(1)
-    if OPTION_MSVCVERSION:
+    if not OPTION_MSVCVERSION:
+        if sys.version_info[:2] < (3,3):
+            OPTION_MSVCVERSION = "9.0"
+        else:
+            OPTION_MSVCVERSION = "10.0"
+    else:
         if OPTION_MAKESPEC != "msvc":
             print("Option --msvc-version can be used only with option --make-spec=msvc")
             sys.exit(1)
-        if not OPTION_MSVCVERSION in ["9.0", "10.0", "11.0"]:
-            print("Invalid option --msvc-version. Available values are %s" % (["9.0", "10.0", "11.0"]))
+        if not OPTION_MSVCVERSION in ["9.0", "10.0"]:
+            print("Invalid option --msvc-version. Available values are %s" % (["9.0", "10.0"]))
             sys.exit(1)
 else:
     if OPTION_MAKESPEC is None:
