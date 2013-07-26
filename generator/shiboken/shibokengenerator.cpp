@@ -1659,7 +1659,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             if (type->isReference() || isPointer(type))
                 code.replace(QString("%%1.").arg(idx), QString("%1->").arg(replacement));
         }
-        code.replace(QString("%%1").arg(idx), pair.second);
+        code.replace(QRegExp(QString("%%1\\b").arg(idx)), pair.second);
     }
 
     if (language == TypeSystem::NativeCode) {
@@ -1923,7 +1923,7 @@ bool ShibokenGenerator::injectedCodeUsesArgument(const AbstractMetaFunction* fun
         QString code = snip.code();
         if (code.contains("%ARGUMENT_NAMES"))
             return true;
-        if (code.contains(QString("%%1").arg(argumentIndex + 1)))
+        if (code.contains(QRegExp(QString("%%1\\b").arg(argumentIndex + 1))))
             return true;
     }
     return false;

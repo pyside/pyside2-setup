@@ -43,6 +43,7 @@ size.cpp
 sometime.cpp
 str.cpp
 strlist.cpp
+transform.cpp
 virtualmethods.cpp
 expression.cpp
 filter.cpp
