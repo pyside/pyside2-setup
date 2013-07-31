@@ -77,8 +77,8 @@ Installing prerequisities
 #. Install `Cmake
    <http://www.cmake.org/cmake/resources/software.html>`_.
 
-#. Install `Windows SDK v6.1
-   <http://www.microsoft.com/en-us/download/details.aspx?id=11310>`_
+#. Install `Windows SDK v7.0
+   <http://www.microsoft.com/en-us/download/details.aspx?id=3138>`_
    when building against Python 2.6, 2.7 or 3.2.
    Install `Windows SDK v7.1
    <http://www.microsoft.com/en-us/download/details.aspx?id=8279>`_
