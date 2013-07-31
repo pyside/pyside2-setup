@@ -301,10 +301,6 @@ class pyside_build(_build):
         platform_arch = platform.architecture()[0]
         log.info("Python architecture is %s" % platform_arch)
         
-        # Try to init the MSVC environment
-        if sys.platform == "win32" and OPTION_MAKESPEC == "msvc":
-            init_msvc_env(OPTION_MSVCVERSION, platform_arch, log)
-        
         # Check env
         make_path = None
         make_generator = None
@@ -313,6 +309,12 @@ class pyside_build(_build):
                 make_name = "make"
                 make_generator = "Unix Makefiles"
             elif OPTION_MAKESPEC == "msvc":
+                nmake_path = find_executable("nmake")
+                if nmake_path is None or not os.path.exists(nmake_path):
+                    log.info("nmake not found. Trying to initialize the MSVC env...")
+                    init_msvc_env(OPTION_MSVCVERSION, platform_arch, log)
+                else:
+                    log.info("nmake was found in %s" % nmake_path)
                 if OPTION_JOM:
                     make_name = "jom"
                     make_generator = "NMake Makefiles JOM"
