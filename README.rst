@@ -278,10 +278,6 @@ Options
     Specify the path to cmake.
     Useful when the cmake is not in path.
 
-``--msvc-version``
-    Specify the Visual C++ compiler version. 
-    Supported values are ``9.0`` (for VS 2008), ``10.0`` (for VS 2010).
-
 ``--standalone``
     When enabled, all required Qt libs will be included in PySide distribution.
     This option is allways enabled on Windows System.
@@ -339,6 +335,7 @@ PySide-setup
 ************
 
 - Support for building windows binaries with only Windows SDK installed (Visual Studio is no more required)
+- Removed --msvc-version option. Required msvc compiler version is now resolved from python interpreter version
 
 1.2.0 (2013-07-02)
 ------------------
@@ -436,7 +433,6 @@ PySide-setup
 - Add --jom and --jobs options
 - Add --no-examples option to exclude the examples
 - Add --relwithdebinfo option to enable a release-with-debug-info build mode
-- Add --msvc-version option to specify version of MSVC compiler
 - Add --ignore-git option
 - Add --make-spec option to specify make generator
 

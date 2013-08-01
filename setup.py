@@ -101,7 +101,6 @@ OPTION_VERSION = option_value("version")
 OPTION_LISTVERSIONS = has_option("list-versions")
 OPTION_MAKESPEC = option_value("make-spec")
 OPTION_IGNOREGIT = has_option("ignore-git")
-OPTION_MSVCVERSION = option_value("msvc-version")
 OPTION_NOEXAMPLES = has_option("no-examples")     # don't include pyside-examples
 OPTION_JOBS = option_value('jobs')                # number of parallel build jobs
 OPTION_JOM = has_option('jom')                    # use jom instead of nmake with msvc
@@ -119,18 +118,6 @@ if sys.platform == "win32":
     if not OPTION_MAKESPEC in ["msvc", "mingw"]:
         print("Invalid option --make-spec. Available values are %s" % (["msvc", "mingw"]))
         sys.exit(1)
-    if not OPTION_MSVCVERSION:
-        if sys.version_info[:2] < (3,3):
-            OPTION_MSVCVERSION = "9.0"
-        else:
-            OPTION_MSVCVERSION = "10.0"
-    else:
-        if OPTION_MAKESPEC != "msvc":
-            print("Option --msvc-version can be used only with option --make-spec=msvc")
-            sys.exit(1)
-        if not OPTION_MSVCVERSION in ["9.0", "10.0"]:
-            print("Invalid option --msvc-version. Available values are %s" % (["9.0", "10.0"]))
-            sys.exit(1)
 else:
     if OPTION_MAKESPEC is None:
         OPTION_MAKESPEC = "make"
@@ -312,7 +299,7 @@ class pyside_build(_build):
                 nmake_path = find_executable("nmake")
                 if nmake_path is None or not os.path.exists(nmake_path):
                     log.info("nmake not found. Trying to initialize the MSVC env...")
-                    init_msvc_env(OPTION_MSVCVERSION, platform_arch, log)
+                    init_msvc_env(platform_arch, log)
                 else:
                     log.info("nmake was found in %s" % nmake_path)
                 if OPTION_JOM:

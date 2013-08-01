@@ -111,58 +111,39 @@ def find_vcdir(version):
     return productdir
 
 
-def find_vcdirs(versions):
-    paths = []
-    for version in versions:
-        vcdir_path = find_vcdir(version)
-        if vcdir_path:
-            paths.append([version, vcdir_path])
-    return paths
+def init_msvc_env(platform_arch, logger):
+    from distutils.msvc9compiler import VERSION as MSVC_VERSION
 
-
-def init_msvc_env(default_msvc_version, platform_arch, logger):
-    logger.info("Searching vcvars.bat")
-
-    all_vcdirs = find_vcdirs([9.0, 10.0, 11.0])
-    if len(all_vcdirs) == 0:
+    logger.info("Searching MSVC compiler version %s" % MSVC_VERSION)
+    vcdir_path = find_vcdir(MSVC_VERSION)
+    if not vcdir_path:
         raise DistutilsSetupError(
-            "Failed to find the MSVC compiler on your system.")
-
-    all_vcvars = []
-    for v in all_vcdirs:
-        if platform_arch.startswith("32"):
-            vcvars_path = os.path.join(v[1], "bin", "vcvars32.bat")
-        else:
-            vcvars_path = os.path.join(v[1], "bin", "vcvars64.bat")
-            if not os.path.exists(vcvars_path):
-                vcvars_path = os.path.join(v[1], "bin", "amd64", "vcvars64.bat")
-        if os.path.exists(vcvars_path):
-            all_vcvars.append([v[0], vcvars_path])
-
-    if len(all_vcvars) == 0:
-        raise DistutilsSetupError(
-            "Failed to find the MSVC compiler on your system.")
-    for v in all_vcvars:
-        logger.info("Found %s" % v[1])
-
-    if default_msvc_version:
-        msvc_version = float(default_msvc_version)
-        vcvarsall_path_tmp = [p for p in all_vcvars if p[0] == msvc_version]
-        vcvarsall_path = vcvarsall_path_tmp[0][1] if len(vcvarsall_path_tmp) > 0 else None
-        if not vcvarsall_path:
-            raise DistutilsSetupError(
-                "Failed to find the vcvars.bat for MSVC version %s." % msvc_version)
+            "Failed to find the MSVC compiler version %s on your system." % MSVC_VERSION)
     else:
-        # By default use first MSVC compiler found in system
-        msvc_version = all_vcvars[0][0]
-        vcvarsall_path = all_vcvars[0][1]
+        logger.info("Found %s" % vcdir_path)
+
+    logger.info("Searching MSVC compiler %s environment init script" % MSVC_VERSION)
+    if platform_arch.startswith("32"):
+        vcvars_path = os.path.join(vcdir_path, "bin", "vcvars32.bat")
+    else:
+        vcvars_path = os.path.join(vcdir_path, "bin", "vcvars64.bat")
+        if not os.path.exists(vcvars_path):
+            vcvars_path = os.path.join(vcdir_path, "bin", "amd64", "vcvars64.bat")
+            if not os.path.exists(vcvars_path):
+                vcvars_path = os.path.join(vcdir_path, "bin", "amd64", "vcvarsamd64.bat")
+
+    if not os.path.exists(vcvars_path):
+        raise DistutilsSetupError(
+            "Failed to find the MSVC compiler environment init script (vcvars.bat) on your system.")
+    else:
+        logger.info("Found %s" % vcvars_path)
 
     # Get MSVC env
-    logger.info("Using MSVC %s in %s" % (msvc_version, vcvarsall_path))
+    logger.info("Using MSVC %s in %s" % (MSVC_VERSION, vcvars_path))
     msvc_arch = "x86" if platform_arch.startswith("32") else "amd64"
     logger.info("Getting MSVC env for %s architecture" % msvc_arch)
-    vcvarsall_cmd = [vcvarsall_path, msvc_arch]
-    msvc_env = get_environment_from_batch_command(vcvarsall_cmd)
+    vcvars_cmd = [vcvars_path, msvc_arch]
+    msvc_env = get_environment_from_batch_command(vcvars_cmd)
     msvc_env_paths = os.pathsep.join([msvc_env[k] for k in msvc_env if k.upper() == 'PATH']).split(os.pathsep)
     msvc_env_without_paths = dict([(k, msvc_env[k]) for k in msvc_env if k.upper() != 'PATH'])
 
