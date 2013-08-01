@@ -660,26 +660,27 @@ bool Handler::startElement(const QString &, const QString &n,
             type->setPreferredTargetLangType(preferred);
 
             element->entry = type;
-            }
-            break;
-        case StackElement::ContainerTypeEntry:
-            {
-                QString typeName = attributes["type"];
-                ContainerTypeEntry::Type containerType =
-                        ContainerTypeEntry::containerTypeFromString(typeName);
-                if (typeName.isEmpty()) {
-                    m_error = "no 'type' attribute specified";
-                    return false;
-                } else if (containerType == ContainerTypeEntry::NoContainer) {
-                    m_error = "there is no container of type " + containerType;
-                    return false;
-                }
+        }
+        break;
 
-                ContainerTypeEntry *type = new ContainerTypeEntry(name, containerType, since);
-                type->setCodeGeneration(m_generate);
-                element->entry = type;
+        case StackElement::ContainerTypeEntry: {
+            QString typeName = attributes["type"];
+            ContainerTypeEntry::Type containerType =
+                    ContainerTypeEntry::containerTypeFromString(typeName);
+            if (typeName.isEmpty()) {
+                m_error = "no 'type' attribute specified";
+                return false;
+            } else if (containerType == ContainerTypeEntry::NoContainer) {
+                m_error = "there is no container of type " + containerType;
+                return false;
             }
-            break;
+
+            ContainerTypeEntry *type = new ContainerTypeEntry(name, containerType, since);
+            type->setCodeGeneration(m_generate);
+            element->entry = type;
+        }
+        break;
+
         case StackElement::EnumTypeEntry: {
             QStringList names = name.split(QLatin1String("::"));
             if (names.size() == 1)
