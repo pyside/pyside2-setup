@@ -4,7 +4,9 @@
 # Manifest template for creating the PySide source distribution.
 
 include MANIFEST.in
-include distribute_setup.py
+include CHANGES.rst
+include README.rst
+include ez_setup.py
 include setup.py
 include pyside_postinstall.py
 include popenasync.py

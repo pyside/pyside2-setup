@@ -26,8 +26,8 @@ Installation
 Installing prerequisities
 -------------------------
 
-Install latest `distribute` distribution: download `distribute_setup.py
-<http://python-distribute.org/distribute_setup.py>`_ and run it using
+Install latest `setuptools` distribution: download `ez_setup.py
+<https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py>`_ and run it using
 the ``python`` interpreter.
 
 Installing PySide on a Windows System
@@ -90,15 +90,15 @@ Installing prerequisities
 #. (Optional) Install `OpenSSL
    <http://slproweb.com/products/Win32OpenSSL.html>`_.
 
-#. Install latest `distribute` distribution into the Python you
-   installed in the first step: download `distribute_setup.py
-   <http://python-distribute.org/distribute_setup.py>`_ and run it using
+#. Install latest `setuptools` distribution into the Python you
+   installed in the first step: download `ez_setup.py
+   <https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py>`_ and run it using
    the ``python`` interpreter of your Python 2.7 installation using a
    command prompt:
 
    ::
 
-      c:\> c:\Python27\python distribute_setup.py
+      c:\> c:\Python27\python ez_setup.py
 
 Building PySide distribution
 ----------------------------
@@ -166,15 +166,15 @@ Installing prerequisities
 
       $ sudo apt-get install git
    
-#. Install latest `distribute` distribution into the Python you
-   installed in the first step: download `distribute_setup.py
-   <http://python-distribute.org/distribute_setup.py>`_ and run it using
+#. Install latest `setuptools` distribution into the Python you
+   installed in the first step: download `ez_setup.py
+   <https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py>`_ and run it using
    the ``python`` interpreter of your Python 2.7 installation using a
    command prompt:
 
    ::
 
-      $ sudo python2.7 distribute_setup.py
+      $ sudo python2.7 ez_setup.py
 
 Building PySide distribution
 ----------------------------

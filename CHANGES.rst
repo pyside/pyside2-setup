@@ -18,6 +18,7 @@ PySide-setup
 
 - Support for building windows binaries with only Windows SDK installed (Visual Studio is no more required)
 - Removed --msvc-version option. Required msvc compiler version is now resolved from python interpreter version
+- Switched to the new setuptools (v0.9.8) which has been merged with Distribute again and works for Python 2 and 3 with one codebase.
 
 1.2.0 (2013-07-02)
 ------------------
