@@ -36,7 +36,7 @@ Installing PySide on a Windows System
 There are two options to install PySide on Windows:
 
 #. Download and install the packages from the `releases page
-   <http://download.qt-project.org/official_releases/pyside/>`_.
+   <http://qt-project.org/wiki/PySide_Binaries_Windows>`_.
 
 #. Use setuptools:
    
@@ -68,10 +68,10 @@ Installing prerequisities
    <http://www.python.org/download/>`_.
 
 #. Install `Qt 4.8 libraries for Windows VS 2008 edition
-   <http://download.qt-project.org/official_releases/qt/4.8/4.8.4/qt-win-opensource-4.8.4-vs2008.exe>`_
+   <http://download.qt-project.org/official_releases/qt/4.8/4.8.5/qt-win-opensource-4.8.5-vs2008.exe>`_
    when building against Python 2.6, 2.7 or 3.2.
    Install `Qt 4.8 libraries for Windows VS 2010 edition
-   <http://download.qt-project.org/official_releases/qt/4.8/4.8.4/qt-win-opensource-4.8.4-vs2010.exe>`_
+   <http://download.qt-project.org/official_releases/qt/4.8/4.8.5/qt-win-opensource-4.8.5-vs2010.exe>`_
    when building against Python 3.3.
 
 #. Install `Cmake
@@ -119,13 +119,13 @@ Building PySide distribution
 
    ::
 
-      c:\> c:\Python27\python.exe setup.py bdist_wininst --version=1.2.0 --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+      c:\> c:\Python27\python.exe setup.py bdist_wininst --version=1.2.0 --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
 #. To build the development version of ``PySide`` windows installer, ignore the --version parameter:
 
    ::
 
-      c:\> c:\Python27\python.exe setup.py bdist_wininst --qmake=c:\Qt\4.8.4\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+      c:\> c:\Python27\python.exe setup.py bdist_wininst --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
 Installing PySide distribution
 ------------------------------
