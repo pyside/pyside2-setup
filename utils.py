@@ -64,6 +64,66 @@ def update_env_path(newpaths, logger):
             os.environ['PATH'] = path + os.pathsep + os.environ['PATH']
 
 
+def winsdk_setenv(platform_arch, build_type, logger):
+    from distutils.msvc9compiler import VERSION as MSVC_VERSION
+    from distutils.msvc9compiler import Reg
+    from distutils.msvc9compiler import HKEYS
+    from distutils.msvc9compiler import WINSDK_BASE
+
+    sdk_version_map = {
+        "v6.0a": 9.0,
+        "v6.1": 9.0,
+        "v7.0": 9.0,
+        "v7.0a": 10.0,
+        "v7.1": 10.0
+    }
+
+    logger.info("Searching Windows SDK with MSVC compiler version %s" % MSVC_VERSION)
+    setenv_paths = []
+    for base in HKEYS:
+        sdk_versions = Reg.read_keys(base, WINSDK_BASE)
+        if sdk_versions:
+            for sdk_version in sdk_versions:
+                installationfolder = Reg.get_value(WINSDK_BASE + "\\" +
+                    sdk_version, "installationfolder")
+                productversion = Reg.get_value(WINSDK_BASE + "\\" +
+                    sdk_version, "productversion")
+                setenv_path = os.path.join(installationfolder, os.path.join(
+                    'bin', 'SetEnv.cmd'))
+                if not os.path.exists(setenv_path):
+                    continue
+                if not sdk_version in sdk_version_map:
+                    continue
+                if sdk_version_map[sdk_version] != MSVC_VERSION:
+                    continue
+                setenv_paths.append(setenv_path)
+    if len(setenv_paths) == 0:
+        raise DistutilsSetupError(
+            "Failed to find the Windows SDK with MSVC compiler version %s"
+                % MSVC_VERSION)
+    for setenv_path in setenv_paths:
+        logger.info("Found %s" % setenv_path)
+
+    # Get SDK env (use latest SDK version installed on system)
+    setenv_path = setenv_paths[-1]
+    logger.info("Using %s " % setenv_path)
+    build_arch = "/x86" if platform_arch.startswith("32") else "/x64"
+    build_type = "/Debug" if build_type.lower() == "debug" else "/Release"
+    setenv_cmd = [setenv_path, build_arch, build_type]
+    setenv_env = get_environment_from_batch_command(setenv_cmd)
+    setenv_env_paths = os.pathsep.join([setenv_env[k] for k in setenv_env if k.upper() == 'PATH']).split(os.pathsep)
+    setenv_env_without_paths = dict([(k, setenv_env[k]) for k in setenv_env if k.upper() != 'PATH'])
+
+    # Extend os.environ with SDK env
+    logger.info("Initializing Windows SDK env...")
+    update_env_path(setenv_env_paths, logger)
+    for k in sorted(setenv_env_without_paths):
+        v = setenv_env_without_paths[k]
+        logger.info("Inserting \"%s = %s\" to environment" % (k, v))
+        os.environ[k] = v
+    logger.info("Done initializing Windows SDK env")
+
+
 def find_vcdir(version):
     """
     This is the customized version of distutils.msvc9compiler.find_vcvarsall method
@@ -111,7 +171,7 @@ def find_vcdir(version):
     return productdir
 
 
-def init_msvc_env(platform_arch, logger):
+def init_msvc_env(platform_arch, build_type, logger):
     from distutils.msvc9compiler import VERSION as MSVC_VERSION
 
     logger.info("Searching MSVC compiler version %s" % MSVC_VERSION)
@@ -133,8 +193,11 @@ def init_msvc_env(platform_arch, logger):
                 vcvars_path = os.path.join(vcdir_path, "bin", "amd64", "vcvarsamd64.bat")
 
     if not os.path.exists(vcvars_path):
-        raise DistutilsSetupError(
+        # MSVC init script not found, try to find and init Windows SDK env
+        logger.error(
             "Failed to find the MSVC compiler environment init script (vcvars.bat) on your system.")
+        winsdk_setenv(platform_arch, build_type, logger)
+        return
     else:
         logger.info("Found %s" % vcvars_path)
 
@@ -347,7 +410,7 @@ def get_environment_from_batch_command(env_cmd, initial=None):
     # create a tag so we can tell in the output when the proc is done
     tag = 'Done running command'
     # construct a cmd.exe command to do accomplish this
-    cmd = 'cmd.exe /s /c "{env_cmd} && echo "{tag}" && set"'.format(**vars())
+    cmd = 'cmd.exe /E:ON /V:ON /s /c "{env_cmd} && echo "{tag}" && set"'.format(**vars())
     # launch the process
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, env=initial)
     # parse the output sent to stdout

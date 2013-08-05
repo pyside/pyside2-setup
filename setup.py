@@ -287,7 +287,11 @@ class pyside_build(_build):
     def run(self):
         platform_arch = platform.architecture()[0]
         log.info("Python architecture is %s" % platform_arch)
-        
+
+        build_type = OPTION_DEBUG and "Debug" or "Release"
+        if OPTION_RELWITHDEBINFO:
+            build_type = 'RelWithDebInfo'
+
         # Check env
         make_path = None
         make_generator = None
@@ -299,7 +303,7 @@ class pyside_build(_build):
                 nmake_path = find_executable("nmake")
                 if nmake_path is None or not os.path.exists(nmake_path):
                     log.info("nmake not found. Trying to initialize the MSVC env...")
-                    init_msvc_env(platform_arch, log)
+                    init_msvc_env(platform_arch, build_type, log)
                 else:
                     log.info("nmake was found in %s" % nmake_path)
                 if OPTION_JOM:
@@ -331,9 +335,6 @@ class pyside_build(_build):
                 " Please specify the path to qmake with --qmake parameter.")
         
         # Prepare parameters
-        build_type = OPTION_DEBUG and "Debug" or "Release"
-        if OPTION_RELWITHDEBINFO:
-            build_type = 'RelWithDebInfo'
         py_executable = sys.executable
         py_version = "%s.%s" % (sys.version_info[0], sys.version_info[1])
         py_include_dir = get_config_var("INCLUDEPY")
