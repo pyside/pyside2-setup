@@ -26,7 +26,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-'''Test cases for StrList class that inherits from std::list<Str>.'''
+'''Test cases for argument modification with more than nine arguments.'''
 
 import unittest
 
