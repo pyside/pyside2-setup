@@ -24,7 +24,13 @@
 
 #include "transform.h"
 
+#ifdef _WIN32
+#include <math.h>
+#include <float.h>
+static inline bool isfinite(double a) { return _finite(a); }
+#else
 #include <cmath>
+#endif
 
 using namespace std;
 
