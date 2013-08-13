@@ -431,8 +431,8 @@ class pyside_build(_build):
         
         script_dir = os.getcwd()
         sources_dir = os.path.join(script_dir, "sources")
-        build_dir = os.path.join(script_dir, os.path.join("pyside_build", "%s" % build_name))
-        install_dir = os.path.join(script_dir, os.path.join("pyside_install", "%s" % build_name))
+        build_dir = os.path.join(script_dir, "pyside_build", "%s" % build_name)
+        install_dir = os.path.join(script_dir, "pyside_install", "%s" % build_name)
         
         # Try to ensure that tools built by this script (such as shiboken)
         # are found before any that may already be installed on the system.
