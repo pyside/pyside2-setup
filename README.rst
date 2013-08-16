@@ -119,7 +119,7 @@ Building PySide distribution
 
    ::
 
-      c:\> c:\Python27\python.exe setup.py bdist_wininst --version=1.2.0 --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+      c:\> c:\Python27\python.exe setup.py bdist_wininst --version=1.2.1 --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
 #. To build the development version of ``PySide`` windows installer, ignore the --version parameter:
 
@@ -134,7 +134,7 @@ Installing PySide distribution
    
    ::
 
-      c:\> c:\Python27\Scripts\easy_install dist\PySide-1.2.0.win32-py2.7.exe
+      c:\> c:\Python27\Scripts\easy_install dist\PySide-1.2.1.win32-py2.7.exe
 
 Building PySide on a UNIX System (Ubuntu 12.04 LTS)
 ===================================================
@@ -195,13 +195,13 @@ Building PySide distribution
 
    ::
 
-      $ python2.7 setup.py bdist_egg --version=1.2.0
+      $ python2.7 setup.py bdist_egg --version=1.2.1
 
 #. Optionally you can build standalone version of distribution with embedded Qt libs:
 
    ::
 
-      $ python2.7 setup.py bdist_egg --standalone --version=1.2.0
+      $ python2.7 setup.py bdist_egg --standalone --version=1.2.1
 
 #. To build the development version of ``PySide`` distribution, ignore the --version parameter:
 
@@ -217,7 +217,7 @@ Installing PySide distribution
    
    ::
 
-      $ sudo easy_install-2.7 dist/PySide-1.2.0-py2.7.egg
+      $ sudo easy_install-2.7 dist/PySide-1.2.1-py2.7.egg
       $ sudo python2.7 pyside_postinstall.py -install
 
 PySide Setup Script command line options
