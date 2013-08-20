@@ -309,7 +309,7 @@ class pyside_build(_build):
                 nmake_path = find_executable("nmake")
                 if nmake_path is None or not os.path.exists(nmake_path):
                     log.info("nmake not found. Trying to initialize the MSVC env...")
-                    init_msvc_env(platform_arch, build_type, log)
+                    init_msvc_env(platform_arch, build_type)
                 else:
                     log.info("nmake was found in %s" % nmake_path)
                 if OPTION_JOM:
@@ -430,7 +430,7 @@ class pyside_build(_build):
             sys.exit(1)
         
         # Update the PATH environment variable
-        update_env_path([py_scripts_dir, qt_dir], log)
+        update_env_path([py_scripts_dir, qt_dir])
         
         build_name = "py%s-qt%s-%s-%s" % \
             (py_version, qt_version, platform.architecture()[0], build_type.lower())
@@ -442,7 +442,7 @@ class pyside_build(_build):
         
         # Try to ensure that tools built by this script (such as shiboken)
         # are found before any that may already be installed on the system.
-        update_env_path([os.path.join(install_dir, 'bin')], log)
+        update_env_path([os.path.join(install_dir, 'bin')])
         
         # Tell cmake to look here for *.cmake files 
         os.environ['CMAKE_PREFIX_PATH'] = install_dir
@@ -529,7 +529,7 @@ class pyside_build(_build):
             "-o",
             "patchelf",
         ]
-        if run_process(build_cmd, log) != 0:
+        if run_process(build_cmd) != 0:
             raise DistutilsSetupError("Error building patchelf")
 
     def build_extension(self, extension):
@@ -596,23 +596,23 @@ class pyside_build(_build):
                 cmake_cmd.append("-DCMAKE_OSX_ARCHITECTURES:STRING={}".format(OPTION_OSXARCH))
 
         log.info("Configuring module %s (%s)..." % (extension,  module_src_dir))
-        if run_process(cmake_cmd, log) != 0:
+        if run_process(cmake_cmd) != 0:
             raise DistutilsSetupError("Error configuring " + extension)
         
         log.info("Compiling module %s..." % extension)
         cmd_make = [self.make_path]
         if OPTION_JOBS:
             cmd_make.append(OPTION_JOBS)
-        if run_process(cmd_make, log) != 0:
+        if run_process(cmd_make) != 0:
             raise DistutilsSetupError("Error compiling " + extension)
         
         if extension.lower() == "shiboken":
             log.info("Generating Shiboken documentation %s..." % extension)
-            if run_process([self.make_path, "doc"], log) != 0:
+            if run_process([self.make_path, "doc"]) != 0:
                 raise DistutilsSetupError("Error generating documentation " + extension)
         
         log.info("Installing module %s..." % extension)
-        if run_process([self.make_path, "install/fast"], log) != 0:
+        if run_process([self.make_path, "install/fast"]) != 0:
             raise DistutilsSetupError("Error pseudo installing " + extension)
         
         os.chdir(self.script_dir)
@@ -650,7 +650,7 @@ class pyside_build(_build):
             copyfile(
                 "{script_dir}/patchelf",
                 "{dist_dir}/PySide/patchelf",
-                logger=log, vars=vars)
+                vars=vars)
             so_ext = '.so'
             so_star = so_ext + '.*'
         elif sys.platform == 'darwin':
@@ -660,30 +660,30 @@ class pyside_build(_build):
         copydir(
             "{build_dir}/shiboken/doc/html",
             "{dist_dir}/PySide/docs/shiboken",
-            force=False, logger=log, vars=vars)
+            force=False, vars=vars)
         # <install>/lib/site-packages/PySide/* -> <setup>/PySide
         copydir(
             "{site_packages_dir}/PySide",
             "{dist_dir}/PySide",
-            logger=log, vars=vars)
+            vars=vars)
         # <install>/lib/site-packages/shiboken.so -> <setup>/PySide/shiboken.so
         copyfile(
             "{site_packages_dir}/shiboken.so",
             "{dist_dir}/PySide/shiboken.so",
-            logger=log, vars=vars)
+            vars=vars)
         # <install>/lib/site-packages/pysideuic/* -> <setup>/pysideuic
         copydir(
             "{site_packages_dir}/pysideuic",
             "{dist_dir}/pysideuic",
-            force=False, logger=log, vars=vars)
+            force=False, vars=vars)
         # <install>/bin/pyside-uic -> PySide/scripts/uic.py
         makefile(
             "{dist_dir}/PySide/scripts/__init__.py",
-            logger=log, vars=vars)
+            vars=vars)
         copyfile(
             "{install_dir}/bin/pyside-uic",
             "{dist_dir}/PySide/scripts/uic.py",
-            force=False, logger=log, vars=vars)
+            force=False, vars=vars)
         # <install>/bin/* -> PySide/
         copydir(
             "{install_dir}/bin/",
@@ -693,7 +693,7 @@ class pyside_build(_build):
                 "pyside-rcc",
                 "shiboken",
             ],
-            recursive=False, logger=log, vars=vars)
+            recursive=False, vars=vars)
         # <install>/lib/lib* -> PySide/
         copydir(
             "{install_dir}/lib/",
@@ -702,23 +702,23 @@ class pyside_build(_build):
                 "libpyside*" + so_star,
                 "libshiboken*" + so_star,
             ],
-            recursive=False, logger=log, vars=vars)
+            recursive=False, vars=vars)
         # <install>/share/PySide/typesystems/* -> <setup>/PySide/typesystems
         copydir(
             "{install_dir}/share/PySide/typesystems",
             "{dist_dir}/PySide/typesystems",
-            logger=log, vars=vars)
+            vars=vars)
         # <install>/include/* -> <setup>/PySide/include
         copydir(
             "{install_dir}/include",
             "{dist_dir}/PySide/include",
-            logger=log, vars=vars)
+            vars=vars)
         if not OPTION_NOEXAMPLES:
             # <sources>/pyside-examples/examples/* -> <setup>/PySide/examples
             copydir(
                 "{sources_dir}/pyside-examples/examples",
                 "{dist_dir}/PySide/examples",
-                force=False, logger=log, vars=vars)
+                force=False, vars=vars)
         # Copy Qt libs to package
         if OPTION_STANDALONE:
             if sys.platform == 'darwin':
@@ -732,27 +732,27 @@ class pyside_build(_build):
                     "lupdate",
                     "lconvert",
                 ],
-                recursive=False, logger=log, vars=vars)
+                recursive=False, vars=vars)
             # <qt>/lib/* -> <setup>/PySide
             copydir("{qt_lib_dir}", "{dist_dir}/PySide",
                 filter=[
                     "libQt*.so.?",
                     "libphonon.so.?",
                 ],
-                recursive=False, logger=log, vars=vars)
+                recursive=False, vars=vars)
             # <qt>/plugins/* -> <setup>/PySide/plugins
             copydir("{qt_plugins_dir}", "{dist_dir}/PySide/plugins",
                 filter=["*.so"],
-                logger=log, vars=vars)
+                vars=vars)
             # <qt>/imports/* -> <setup>/PySide/imports
             if float(vars["qt_version"][:3]) > 4.6:
                 copydir("{qt_imports_dir}", "{dist_dir}/PySide/imports",
                     filter=["qmldir", "*.so"],
-                    logger=log, vars=vars)
+                    vars=vars)
             # <qt>/translations/* -> <setup>/PySide/translations
             copydir("{qt_translations_dir}", "{dist_dir}/PySide/translations",
                 filter=["*.qm"],
-                logger=log, vars=vars)
+                vars=vars)
 
     def prepare_packages_win32(self, vars):
         pdbs = ['*.pdb'] if self.debug or self.build_type == 'RelWithDebInfo' else []       
@@ -760,76 +760,76 @@ class pyside_build(_build):
         copydir(
             "{site_packages_dir}/PySide",
             "{dist_dir}/PySide",
-            logger=log, vars=vars)
+            vars=vars)
         if self.debug or self.build_type == 'RelWithDebInfo':
             # <build>/pyside/PySide/*.pdb -> <setup>/PySide
             copydir(
                 "{build_dir}/pyside/PySide",
                 "{dist_dir}/PySide",
                 filter=pdbs,
-                recursive=False, logger=log, vars=vars)
+                recursive=False, vars=vars)
         # <build>/shiboken/doc/html/* -> <setup>/PySide/docs/shiboken
         copydir(
             "{build_dir}/shiboken/doc/html",
             "{dist_dir}/PySide/docs/shiboken",
-            force=False, logger=log, vars=vars)
+            force=False, vars=vars)
         # <install>/lib/site-packages/shiboken.pyd -> <setup>/PySide/shiboken.pyd
         copyfile(
             "{site_packages_dir}/shiboken{dbgPostfix}.pyd",
             "{dist_dir}/PySide/shiboken{dbgPostfix}.pyd",
-            logger=log, vars=vars)
+            vars=vars)
         if self.debug or self.build_type == 'RelWithDebInfo':
             copyfile(
                 "{build_dir}/shiboken/shibokenmodule/shiboken{dbgPostfix}.pdb",
                 "{dist_dir}/PySide/shiboken{dbgPostfix}.pdb",
-                logger=log, vars=vars)        
+                vars=vars)        
         # <install>/lib/site-packages/pysideuic/* -> <setup>/pysideuic
         copydir(
             "{site_packages_dir}/pysideuic",
             "{dist_dir}/pysideuic",
-            force=False, logger=log, vars=vars)
+            force=False, vars=vars)
         # <install>/bin/pyside-uic -> PySide/scripts/uic.py
         makefile(
             "{dist_dir}/PySide/scripts/__init__.py",
-            logger=log, vars=vars)
+            vars=vars)
         copyfile(
             "{install_dir}/bin/pyside-uic",
             "{dist_dir}/PySide/scripts/uic.py",
-            force=False, logger=log, vars=vars)
+            force=False, vars=vars)
         # <install>/bin/*.exe,*.dll,*.pdb -> PySide/
         copydir(
             "{install_dir}/bin/",
             "{dist_dir}/PySide",
             filter=["*.exe", "*.dll"] + pdbs,
-            recursive=False, logger=log, vars=vars)
+            recursive=False, vars=vars)
         # <install>/lib/*.lib -> PySide/
         copydir(
             "{install_dir}/lib/",
             "{dist_dir}/PySide",
             filter=["*.lib"],
-            recursive=False, logger=log, vars=vars)
+            recursive=False, vars=vars)
         # <install>/share/PySide/typesystems/* -> <setup>/PySide/typesystems
         copydir(
             "{install_dir}/share/PySide/typesystems",
             "{dist_dir}/PySide/typesystems",
-            logger=log, vars=vars)
+            vars=vars)
         # <install>/include/* -> <setup>/PySide/include
         copydir(
             "{install_dir}/include",
             "{dist_dir}/PySide/include",
-            logger=log, vars=vars)
+            vars=vars)
         if not OPTION_NOEXAMPLES:
             # <sources>/pyside-examples/examples/* -> <setup>/PySide/examples
             copydir(
                 "{sources_dir}/pyside-examples/examples",
                 "{dist_dir}/PySide/examples",
-                force=False, logger=log, vars=vars)
+                force=False, vars=vars)
         # <ssl_libs>/* -> <setup>/PySide/openssl
         copydir("{ssl_libs_dir}", "{dist_dir}/PySide/openssl",
             filter=[
                 "libeay32.dll",
                 "ssleay32.dll"],
-            force=False, logger=log, vars=vars)
+            force=False, vars=vars)
         
         # <qt>/bin/*.dll -> <setup>/PySide
         copydir("{qt_bin_dir}", "{dist_dir}/PySide",
@@ -841,18 +841,18 @@ class pyside_build(_build):
                 "lupdate.exe",
                 "lconvert.exe"],
             ignore=["*d4.dll"],
-            recursive=False, logger=log, vars=vars)
+            recursive=False, vars=vars)
         if self.debug:
             # <qt>/bin/*d4.dll -> <setup>/PySide
             copydir("{qt_bin_dir}", "{dist_dir}/PySide",
                 filter=["*d4.dll"] + pdbs,
-                recursive=False, logger=log, vars=vars)
+                recursive=False, vars=vars)
 
         if self.debug  or self.build_type == 'RelWithDebInfo':
             # <qt>/lib/*.pdb -> <setup>/PySide
             copydir("{qt_lib_dir}", "{dist_dir}/PySide",
                 filter=["*.pdb"],
-                recursive=False, logger=log, vars=vars)
+                recursive=False, vars=vars)
             
         # I think these are the qt-mobility DLLs, at least some are,
         # so let's copy them too
@@ -860,41 +860,41 @@ class pyside_build(_build):
         copydir("{qt_lib_dir}", "{dist_dir}/PySide",
             filter=["*.dll"],
             ignore=["*d?.dll"],
-            recursive=False, logger=log, vars=vars)
+            recursive=False, vars=vars)
         if self.debug:
             # <qt>/lib/*d4.dll -> <setup>/PySide
             copydir("{qt_lib_dir}", "{dist_dir}/PySide",
                 filter=["*d?.dll"],
-                recursive=False, logger=log, vars=vars)
+                recursive=False, vars=vars)
         if self.debug  or self.build_type == 'RelWithDebInfo':
             # <qt>/lib/*pdb -> <setup>/PySide
             copydir("{qt_lib_dir}", "{dist_dir}/PySide",
                 filter=pdbs,
-                recursive=False, logger=log, vars=vars)
+                recursive=False, vars=vars)
         
         # <qt>/plugins/* -> <setup>/PySide/plugins
         copydir("{qt_plugins_dir}", "{dist_dir}/PySide/plugins",
             filter=["*.dll"] + pdbs,
-            logger=log, vars=vars)
+            vars=vars)
         # <qt>/imports/* -> <setup>/PySide/imports
         copydir("{qt_imports_dir}", "{dist_dir}/PySide/imports",
             filter=["qmldir", "*.dll"] + pdbs,
-            logger=log, vars=vars)
+            vars=vars)
         # <qt>/translations/* -> <setup>/PySide/translations
         copydir("{qt_translations_dir}", "{dist_dir}/PySide/translations",
             filter=["*.qm"],
-            logger=log, vars=vars)
+            vars=vars)
 
         # pdb files for libshiboken and libpyside
         if self.debug or self.build_type == 'RelWithDebInfo':
             copyfile(
                 "{build_dir}/shiboken/libshiboken/shiboken-python{py_version}{dbgPostfix}.pdb",
                 "{dist_dir}/PySide/shiboken-python{py_version}{dbgPostfix}.pdb",
-                logger=log, vars=vars)
+                vars=vars)
             copyfile(
                 "{build_dir}/pyside/libpyside/pyside-python{py_version}{dbgPostfix}.pdb",
                 "{dist_dir}/PySide/pyside-python{py_version}{dbgPostfix}.pdb",
-                logger=log, vars=vars)
+                vars=vars)
 
 
 def read(fname):

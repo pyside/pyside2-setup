@@ -9,6 +9,7 @@ import fnmatch
 import itertools
 import popenasync
 
+from distutils import log
 from distutils.errors import DistutilsOptionError
 from distutils.errors import DistutilsSetupError
 from distutils.spawn import spawn
@@ -55,16 +56,16 @@ def filter_match(name, patterns):
     return False
 
 
-def update_env_path(newpaths, logger):
+def update_env_path(newpaths):
     paths = os.environ['PATH'].lower().split(os.pathsep)
     for path in newpaths:
         if not path.lower() in paths:
-            logger.info("Inserting path \"%s\" to environment" % path)
+            log.info("Inserting path \"%s\" to environment" % path)
             paths.insert(0, path)
             os.environ['PATH'] = path + os.pathsep + os.environ['PATH']
 
 
-def winsdk_setenv(platform_arch, build_type, logger):
+def winsdk_setenv(platform_arch, build_type):
     from distutils.msvc9compiler import VERSION as MSVC_VERSION
     from distutils.msvc9compiler import Reg
     from distutils.msvc9compiler import HKEYS
@@ -78,7 +79,7 @@ def winsdk_setenv(platform_arch, build_type, logger):
         "v7.1": 10.0
     }
 
-    logger.info("Searching Windows SDK with MSVC compiler version %s" % MSVC_VERSION)
+    log.info("Searching Windows SDK with MSVC compiler version %s" % MSVC_VERSION)
     setenv_paths = []
     for base in HKEYS:
         sdk_versions = Reg.read_keys(base, WINSDK_BASE)
@@ -102,11 +103,11 @@ def winsdk_setenv(platform_arch, build_type, logger):
             "Failed to find the Windows SDK with MSVC compiler version %s"
                 % MSVC_VERSION)
     for setenv_path in setenv_paths:
-        logger.info("Found %s" % setenv_path)
+        log.info("Found %s" % setenv_path)
 
     # Get SDK env (use latest SDK version installed on system)
     setenv_path = setenv_paths[-1]
-    logger.info("Using %s " % setenv_path)
+    log.info("Using %s " % setenv_path)
     build_arch = "/x86" if platform_arch.startswith("32") else "/x64"
     build_type = "/Debug" if build_type.lower() == "debug" else "/Release"
     setenv_cmd = [setenv_path, build_arch, build_type]
@@ -115,13 +116,13 @@ def winsdk_setenv(platform_arch, build_type, logger):
     setenv_env_without_paths = dict([(k, setenv_env[k]) for k in setenv_env if k.upper() != 'PATH'])
 
     # Extend os.environ with SDK env
-    logger.info("Initializing Windows SDK env...")
-    update_env_path(setenv_env_paths, logger)
+    log.info("Initializing Windows SDK env...")
+    update_env_path(setenv_env_paths)
     for k in sorted(setenv_env_without_paths):
         v = setenv_env_without_paths[k]
-        logger.info("Inserting \"%s = %s\" to environment" % (k, v))
+        log.info("Inserting \"%s = %s\" to environment" % (k, v))
         os.environ[k] = v
-    logger.info("Done initializing Windows SDK env")
+    log.info("Done initializing Windows SDK env")
 
 
 def find_vcdir(version):
@@ -171,18 +172,18 @@ def find_vcdir(version):
     return productdir
 
 
-def init_msvc_env(platform_arch, build_type, logger):
+def init_msvc_env(platform_arch, build_type):
     from distutils.msvc9compiler import VERSION as MSVC_VERSION
 
-    logger.info("Searching MSVC compiler version %s" % MSVC_VERSION)
+    log.info("Searching MSVC compiler version %s" % MSVC_VERSION)
     vcdir_path = find_vcdir(MSVC_VERSION)
     if not vcdir_path:
         raise DistutilsSetupError(
             "Failed to find the MSVC compiler version %s on your system." % MSVC_VERSION)
     else:
-        logger.info("Found %s" % vcdir_path)
+        log.info("Found %s" % vcdir_path)
 
-    logger.info("Searching MSVC compiler %s environment init script" % MSVC_VERSION)
+    log.info("Searching MSVC compiler %s environment init script" % MSVC_VERSION)
     if platform_arch.startswith("32"):
         vcvars_path = os.path.join(vcdir_path, "bin", "vcvars32.bat")
     else:
@@ -194,56 +195,53 @@ def init_msvc_env(platform_arch, build_type, logger):
 
     if not os.path.exists(vcvars_path):
         # MSVC init script not found, try to find and init Windows SDK env
-        logger.error(
+        log.error(
             "Failed to find the MSVC compiler environment init script (vcvars.bat) on your system.")
-        winsdk_setenv(platform_arch, build_type, logger)
+        winsdk_setenv(platform_arch, build_type)
         return
     else:
-        logger.info("Found %s" % vcvars_path)
+        log.info("Found %s" % vcvars_path)
 
     # Get MSVC env
-    logger.info("Using MSVC %s in %s" % (MSVC_VERSION, vcvars_path))
+    log.info("Using MSVC %s in %s" % (MSVC_VERSION, vcvars_path))
     msvc_arch = "x86" if platform_arch.startswith("32") else "amd64"
-    logger.info("Getting MSVC env for %s architecture" % msvc_arch)
+    log.info("Getting MSVC env for %s architecture" % msvc_arch)
     vcvars_cmd = [vcvars_path, msvc_arch]
     msvc_env = get_environment_from_batch_command(vcvars_cmd)
     msvc_env_paths = os.pathsep.join([msvc_env[k] for k in msvc_env if k.upper() == 'PATH']).split(os.pathsep)
     msvc_env_without_paths = dict([(k, msvc_env[k]) for k in msvc_env if k.upper() != 'PATH'])
 
     # Extend os.environ with MSVC env
-    logger.info("Initializing MSVC env...")
-    update_env_path(msvc_env_paths, logger)
+    log.info("Initializing MSVC env...")
+    update_env_path(msvc_env_paths)
     for k in sorted(msvc_env_without_paths):
         v = msvc_env_without_paths[k]
-        logger.info("Inserting \"%s = %s\" to environment" % (k, v))
+        log.info("Inserting \"%s = %s\" to environment" % (k, v))
         os.environ[k] = v
-    logger.info("Done initializing MSVC env")
+    log.info("Done initializing MSVC env")
 
 
-def copyfile(src, dst, logger=None, force=True, vars=None):
+def copyfile(src, dst, force=True, vars=None):
     if vars is not None:
         src = src.format(**vars)
         dst = dst.format(**vars)
     
     if not os.path.exists(src) and not force:
-        if logger is not None:
-            logger.info("**Skiping copy file %s to %s. Source does not exists." % (src, dst))
+        log.info("**Skiping copy file %s to %s. Source does not exists." % (src, dst))
         return
     
-    if logger is not None:
-        logger.info("Copying file %s to %s." % (src, dst))
+    log.info("Copying file %s to %s." % (src, dst))
     
     shutil.copy2(src, dst)
 
 
-def makefile(dst, content=None, logger=None, vars=None):
+def makefile(dst, content=None, vars=None):
     if vars is not None:
         if content is not None:
             content = content.format(**vars)
         dst = dst.format(**vars)
     
-    if logger is not None:
-        logger.info("Making file %s." % (dst))
+    log.info("Making file %s." % (dst))
     
     dstdir = os.path.dirname(dst)
     if not os.path.exists(dstdir):
@@ -255,7 +253,7 @@ def makefile(dst, content=None, logger=None, vars=None):
     f.close()
 
 
-def copydir(src, dst, logger=None, filter=None, ignore=None, force=True,
+def copydir(src, dst, filter=None, ignore=None, force=True,
     recursive=True, vars=None):
     
     if vars is not None:
@@ -269,14 +267,12 @@ def copydir(src, dst, logger=None, filter=None, ignore=None, force=True,
                 ignore[i] = ignore[i].format(**vars)
     
     if not os.path.exists(src) and not force:
-        if logger is not None:
-            logger.info("**Skiping copy tree %s to %s. Source does not exists. filter=%s. ignore=%s." % \
-                (src, dst, filter, ignore))
+        log.info("**Skiping copy tree %s to %s. Source does not exists. filter=%s. ignore=%s." % \
+            (src, dst, filter, ignore))
         return
     
-    if logger is not None:
-        logger.info("Copying tree %s to %s. filter=%s. ignore=%s." % \
-            (src, dst, filter, ignore))
+    log.info("Copying tree %s to %s. filter=%s. ignore=%s." % \
+        (src, dst, filter, ignore))
     
     names = os.listdir(src)
     
@@ -287,14 +283,14 @@ def copydir(src, dst, logger=None, filter=None, ignore=None, force=True,
         try:
             if os.path.isdir(srcname):
                 if recursive:
-                    copydir(srcname, dstname, logger, filter, ignore, force, recursive, vars)
+                    copydir(srcname, dstname, filter, ignore, force, recursive, vars)
             else:
                 if (filter is not None and not filter_match(name, filter)) or \
                     (ignore is not None and filter_match(name, ignore)):
                     continue
                 if not os.path.exists(dst):
                     os.makedirs(dst)
-                copyfile(srcname, dstname, logger, True, vars)
+                copyfile(srcname, dstname, True, vars)
         # catch the Error from the recursive copytree so that we can
         # continue with other files
         except shutil.Error as err:
@@ -324,8 +320,8 @@ def rmtree(dirname):
     shutil.rmtree(dirname, ignore_errors=False, onerror=handleRemoveReadonly)
 
 
-def run_process(args, logger=None, initial_env=None):
-    def log(buffer, checkNewLine=False):
+def run_process(args, initial_env=None):
+    def _log(buffer, checkNewLine=False):
         endsWithNewLine = False
         if buffer.endswith('\n'):
             endsWithNewLine = True
@@ -337,13 +333,10 @@ def run_process(args, logger=None, initial_env=None):
             buffer = lines[-1]
             lines = lines[:-1]
         for line in lines:
-            if not logger is None:
-                logger.info(line.rstrip('\r'))
-            else:
-                print(line.rstrip('\r'))
+            log.info(line.rstrip('\r'))
         return buffer
     
-    log("Running process: {0}".format(" ".join([(" " in x and '"{0}"'.format(x) or x) for x in args])))
+    _log("Running process: {0}".format(" ".join([(" " in x and '"{0}"'.format(x) or x) for x in args])))
     
     if sys.platform != "win32":
         try:
@@ -369,9 +362,9 @@ def run_process(args, logger=None, initial_env=None):
     
     log_buffer = None;
     while proc.poll() is None:
-        log_buffer = log(proc.read_async(wait=0.1, e=0))
+        log_buffer = _log(proc.read_async(wait=0.1, e=0))
     if log_buffer:
-        log(log_buffer)
+        _log(log_buffer)
     
     proc.wait()
     return proc.returncode
