@@ -1602,9 +1602,6 @@ bool AbstractMetaBuilder::setupInheritance(AbstractMetaClass *metaClass)
                 metaClass->typeEntry()->setBaseContainerType(templ->typeEntry());
                 return true;
             }
-            ComplexTypeEntry* baseContainerType = types->findContainerType(baseName);
-            if (baseContainerType)
-                metaClass->typeEntry()->setBaseContainerType(baseContainerType);
         }
 
         ReportHandler::warning(QString("template baseclass '%1' of '%2' is not known")
