@@ -141,6 +141,12 @@ AbstractMetaClassList ApiExtractor::classes() const
     return m_builder->classes();
 }
 
+AbstractMetaClassList ApiExtractor::classesTopologicalSorted() const
+{
+    Q_ASSERT(m_builder);
+    return m_builder->classesTopologicalSorted();
+}
+
 PrimitiveTypeEntryList ApiExtractor::primitiveTypes() const
 {
     return TypeDatabase::instance()->primitiveTypes();

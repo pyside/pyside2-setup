@@ -37,13 +37,21 @@ enum ClassType {
     DuplicatorType = 2
 };
 
-template<ClassType CLASS_TYPE>
-class LIBSAMPLE_API TemplateBase
+class LIBSAMPLE_API Base
 {
 public:
-    explicit TemplateBase(int value) : m_value(value) {}
+    explicit Base(int value) : m_value(value) {}
     inline void setValue(int value) { m_value = value; }
     inline int value() const { return m_value; }
+protected:
+    int m_value;
+};
+
+template<ClassType CLASS_TYPE>
+class LIBSAMPLE_API TemplateBase : public Base
+{
+public:
+    explicit TemplateBase(int value) : Base(value) {}
     inline int multiplicator() const { return (int)CLASS_TYPE; }
     inline int calculate() const { return m_value * ((int)CLASS_TYPE); }
     static inline ClassType classType() { return CLASS_TYPE; }
@@ -60,8 +68,6 @@ public:
     }
 
     static inline TemplateBase<CLASS_TYPE>* passPointerThrough(TemplateBase<CLASS_TYPE>* obj) { return obj; }
-private:
-    int m_value;
 };
 
 #if defined _WIN32 || defined __CYGWIN__

@@ -595,6 +595,7 @@
 
     <namespace-type name="Photon">
         <enum-type name="ClassType"/>
+        <value-type name="Base"/>
         <value-type name="TemplateBase" generate="no"/>
         <value-type name="ValueIdentity"/>
         <value-type name="ValueDuplicator"/>

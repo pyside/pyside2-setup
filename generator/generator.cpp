@@ -153,6 +153,11 @@ AbstractMetaClassList Generator::classes() const
     return m_d->apiextractor->classes();
 }
 
+AbstractMetaClassList Generator::classesTopologicalSorted() const
+{
+    return m_d->apiextractor->classesTopologicalSorted();
+}
+
 AbstractMetaFunctionList Generator::globalFunctions() const
 {
     return m_d->apiextractor->globalFunctions();

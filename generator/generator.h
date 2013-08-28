@@ -95,6 +95,12 @@ public:
     /// Returns the classes used to generate the binding code.
     AbstractMetaClassList classes() const;
 
+    /// Returns the classes, topologically ordered, used to generate the binding code.
+    ///
+    /// The classes are ordered such that derived classes appear later in the list than
+    /// their parent classes.
+    AbstractMetaClassList classesTopologicalSorted() const;
+
     /// Returns all global functions found by APIExtractor
     AbstractMetaFunctionList globalFunctions() const;
 

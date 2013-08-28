@@ -4590,7 +4590,7 @@ void CppGenerator::finishGeneration()
 
     //this is a temporary solution before new type revison implementation
     //We need move QMetaObject register before QObject
-    AbstractMetaClassList lst = classes();
+    AbstractMetaClassList lst = classesTopologicalSorted();
     AbstractMetaClass* klassQObject = lst.findClass("QObject");
     AbstractMetaClass* klassQMetaObject = lst.findClass("QMetaObject");
     if (klassQObject && klassQMetaObject) {

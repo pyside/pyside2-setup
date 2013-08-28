@@ -55,6 +55,7 @@ public:
     AbstractMetaEnumList globalEnums() const;
     AbstractMetaFunctionList globalFunctions() const;
     AbstractMetaClassList classes() const;
+    AbstractMetaClassList classesTopologicalSorted() const;
     PrimitiveTypeEntryList primitiveTypes() const;
     ContainerTypeEntryList containerTypes() const;
     QSet<QString> qtMetaTypeDeclaredTypeNames() const;
