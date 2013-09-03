@@ -212,12 +212,16 @@ Building PySide distribution
 Installing PySide distribution
 ------------------------------
 
-#. After the successful build, install the distribution with easy_install
-   and run the post-install script:
+#. After the successful build, install the distribution with easy_install:
    
    ::
 
       $ sudo easy_install-2.7 dist/PySide-1.2.1-py2.7.egg
+
+#. Run the post-install script to finish the package configuration:
+   
+   ::
+
       $ sudo python2.7 pyside_postinstall.py -install
 
 PySide Setup Script command line options
