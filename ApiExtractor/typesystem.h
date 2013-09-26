@@ -473,6 +473,8 @@ struct AddedFunction
     */
     struct TypeInfo {
         TypeInfo() : isConstant(false), indirections(0), isReference(false) {}
+        static TypeInfo fromSignature(const QString& signature);
+
         QString name;
         bool isConstant;
         int indirections;

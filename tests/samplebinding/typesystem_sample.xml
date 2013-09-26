@@ -1513,6 +1513,42 @@
         </modify-function>
     </function>
 
+    <!-- Tests add-function for nested template types -->
+    <add-function signature="sum2d(std::list&lt;std::list&lt;int&gt; &gt;)" return-type="int">
+        <inject-code class="target" position="beginning">
+            typedef std::list&lt;int&gt; Inner;
+            typedef std::list&lt;Inner&gt; Outer;
+
+            int result = 0;
+
+            Outer::const_iterator oiter, oend = %1.end();
+            for (oiter = %1.begin(); oiter != oend; ++oiter) {
+                const Inner&amp; inner = *oiter;
+                Inner::const_iterator iiter, iend = inner.end();
+                for (iiter = inner.begin(); iiter != iend; ++iiter)
+                    result += *iiter;
+            }
+
+            %PYARG_0 = %CONVERTTOPYTHON[int](result);
+        </inject-code>
+    </add-function>
+
+    <!-- Tests add-function for nested template types -->
+    <add-function signature="sumproduct(std::list&lt;std::pair&lt;int, int&gt; &gt;)" return-type="int">
+        <inject-code class="target" position="beginning">
+            typedef std::pair&lt;int, int&gt; Pair;
+            typedef std::list&lt;Pair&gt; List;
+
+            int result = 0;
+
+            List::const_iterator iter, end = %1.end();
+            for (iter = %1.begin(); iter != end; ++iter)
+                result += iter->first * iter->second;
+
+            %PYARG_0 = %CONVERTTOPYTHON[int](result);
+        </inject-code>
+    </add-function>
+
 
     <value-type name="InjectCode">
         <!--

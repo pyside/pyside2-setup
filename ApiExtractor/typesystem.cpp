@@ -2202,6 +2202,11 @@ AddedFunction::AddedFunction(QString signature, QString returnType, double vr) :
     }
 }
 
+AddedFunction::TypeInfo AddedFunction::TypeInfo::fromSignature(const QString& signature)
+{
+    return parseType(signature);
+}
+
 QString ComplexTypeEntry::targetLangApiName() const
 {
     return strings_jobject;
