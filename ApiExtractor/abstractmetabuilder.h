@@ -164,6 +164,8 @@ public:
         return m_globalEnums;
     }
 
+    AbstractMetaClass *findTemplateClass(const QString& name, const AbstractMetaClass *context,
+                                         TypeParser::Info *info = 0, ComplexTypeEntry **baseContainerType = 0) const;
     AbstractMetaClassList getBaseClasses(const AbstractMetaClass* metaClass) const;
     bool ancestorHasPrivateCopyConstructor(const AbstractMetaClass* metaClass) const;
 

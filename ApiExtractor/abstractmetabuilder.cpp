@@ -1622,45 +1622,32 @@ bool AbstractMetaBuilder::setupInheritance(AbstractMetaClass *metaClass)
 
     QStringList baseClasses = metaClass->baseClassNames();
 
-    TypeDatabase* types = TypeDatabase::instance();
-
     // we only support our own containers and ONLY if there is only one baseclass
-    if (baseClasses.size() == 1 && baseClasses.first().count('<') == 1) {
-        QStringList scope = metaClass->typeEntry()->qualifiedCppName().split("::");
-        scope.removeLast();
-        for (int i = scope.size(); i >= 0; --i) {
-            QString prefix = i > 0 ? QStringList(scope.mid(0, i)).join("::") + "::" : QString();
-            QString completeName = prefix + baseClasses.first();
-            TypeParser::Info info = TypeParser::parse(completeName);
-            QString baseName = info.qualified_name.join("::");
-
-            AbstractMetaClass* templ = 0;
-            foreach (AbstractMetaClass *c, m_templates) {
-                if (c->typeEntry()->name() == baseName) {
-                    templ = c;
-                    break;
-                }
-            }
-
-            if (!templ)
-                templ = m_metaClasses.findClass(baseName);
-
-            if (templ) {
-                setupInheritance(templ);
-                inheritTemplate(metaClass, templ, info);
-                metaClass->typeEntry()->setBaseContainerType(templ->typeEntry());
-                return true;
-            }
-            ComplexTypeEntry* baseContainerType = types->findContainerType(baseName);
-            if (baseContainerType)
-                metaClass->typeEntry()->setBaseContainerType(baseContainerType);
+    if (baseClasses.size() == 1 && baseClasses.first().contains('<')) {
+        TypeParser::Info info;
+        ComplexTypeEntry* baseContainerType;
+        AbstractMetaClass* templ = findTemplateClass(baseClasses.first(), metaClass, &info, &baseContainerType);
+        if (templ) {
+            setupInheritance(templ);
+            inheritTemplate(metaClass, templ, info);
+            metaClass->typeEntry()->setBaseContainerType(templ->typeEntry());
+            return true;
         }
+
+        // Container types are not necessarily wrapped as 'real' classes, but
+        // there may still be classes derived from them. In such case, we still
+        // need to set the base container type in order to generate correct
+        // code for type conversion checking.
+        if (baseContainerType)
+            metaClass->typeEntry()->setBaseContainerType(baseContainerType);
 
         ReportHandler::warning(QString("template baseclass '%1' of '%2' is not known")
                                .arg(baseClasses.first())
                                .arg(metaClass->name()));
         return false;
     }
+
+    TypeDatabase* types = TypeDatabase::instance();
 
     int primary = -1;
     int primaries = 0;
@@ -2489,11 +2476,54 @@ bool AbstractMetaBuilder::isEnum(const QStringList& qualified_name)
     return item && item->kind() == _EnumModelItem::__node_kind;
 }
 
+AbstractMetaClass* AbstractMetaBuilder::findTemplateClass(const QString& name, const AbstractMetaClass *context,
+                                                          TypeParser::Info *info, ComplexTypeEntry **baseContainerType) const
+{
+    TypeParser::Info localInfo;
+    if (!info)
+        info = &localInfo;
+
+    TypeDatabase* types = TypeDatabase::instance();
+
+    QStringList scope = context->typeEntry()->qualifiedCppName().split("::");
+    scope.removeLast();
+    for (int i = scope.size(); i >= 0; --i) {
+        QString prefix = i > 0 ? QStringList(scope.mid(0, i)).join("::") + "::" : QString();
+        QString completeName = prefix + name;
+        *info = TypeParser::parse(completeName);
+        QString qualifiedName = info->qualified_name.join("::");
+
+        AbstractMetaClass* templ = 0;
+        foreach (AbstractMetaClass *c, m_templates) {
+            if (c->typeEntry()->name() == qualifiedName) {
+                templ = c;
+                break;
+            }
+        }
+
+        if (!templ)
+            templ = m_metaClasses.findClass(qualifiedName);
+
+        if (templ)
+            return templ;
+
+        if (baseContainerType)
+            *baseContainerType = types->findContainerType(qualifiedName);
+    }
+
+    return 0;
+}
+
 AbstractMetaClassList AbstractMetaBuilder::getBaseClasses(const AbstractMetaClass* metaClass) const
 {
     AbstractMetaClassList baseClasses;
     foreach (const QString& parent, metaClass->baseClassNames()) {
-        AbstractMetaClass* cls = m_metaClasses.findClass(parent);
+        AbstractMetaClass* cls = 0;
+        if (parent.contains('<'))
+            cls = findTemplateClass(parent, metaClass);
+        else
+            cls = m_metaClasses.findClass(parent);
+
         if (cls)
             baseClasses << cls;
     }
