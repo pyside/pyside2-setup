@@ -1634,12 +1634,17 @@ bool AbstractMetaBuilder::setupInheritance(AbstractMetaClass *metaClass)
             return true;
         }
 
-        // Container types are not necessarily wrapped as 'real' classes, but
-        // there may still be classes derived from them. In such case, we still
-        // need to set the base container type in order to generate correct
-        // code for type conversion checking.
-        if (baseContainerType)
+        if (baseContainerType) {
+            // Container types are not necessarily wrapped as 'real' classes,
+            // but there may still be classes derived from them. In such case,
+            // we still need to set the base container type in order to
+            // generate correct code for type conversion checking.
+            //
+            // Additionally, we consider this case as successfully setting up
+            // inheritance.
             metaClass->typeEntry()->setBaseContainerType(baseContainerType);
+            return true;
+        }
 
         ReportHandler::warning(QString("template baseclass '%1' of '%2' is not known")
                                .arg(baseClasses.first())

@@ -2406,8 +2406,6 @@
     <suppress-warning text="hiding of function 'takeChild' in class 'ObjectView'" />
     <suppress-warning text="visibility of function 'publicMethod' modified in class 'MDerived3'" />
     <suppress-warning text="skipping function 'InjectCode::toStr', unmatched parameter type 'T const&amp;'" />
-    <suppress-warning text="template baseclass 'std::list&lt;T>' of 'QList' is not known" />
-    <suppress-warning text="template baseclass 'std::list&lt;Str>' of 'StrList' is not known" />
 
     <!-- Do not fix this warning, the generator should be able to handle this situation for Object Types. -->
     <suppress-warning text="Argument in position 1 of added function 'SampleNamespace::passReferenceToObjectType(ObjectType * arg__1)', has a type that is not a reference, while the argument in the corresponding position in C++ function 'SampleNamespace::passReferenceToObjectType(const ObjectType &amp; obj, int multiplier)' is a reference." />
