@@ -368,7 +368,7 @@ _InputIterator pp::handle_include(bool __skip_current_path, _InputIterator __fir
         name.reserve(255);
         expand_include(__first, __last, std::back_inserter(name));
         std::string::iterator it = skip_blanks(name.begin(), name.end());
-        if (it != name.end() && (*it != '<' || *it != '"')) {
+        if (it != name.end() && !(*it == '<' || *it == '"')) {
             std::cerr << "** WARNING APIExtractor does not support the use "
                          "of #include directives without passing either "
                          "\"<path/to/header.h>\" or \"./path/to/header.h\", "
