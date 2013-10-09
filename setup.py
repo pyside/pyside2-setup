@@ -971,6 +971,6 @@ setup(
     # overriding the build command to do it using cmake) so things like
     # bdist_egg will know that there are extension modules and will name the
     # dist with the full platform info.
-    #ext_modules = [Extension('QtCore', [])],
+    ext_modules = [Extension('QtCore', [])],
     ext_package = 'PySide',
 )
