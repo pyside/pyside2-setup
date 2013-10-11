@@ -33,30 +33,29 @@ the ``python`` interpreter.
 Installing PySide on a Windows System
 -------------------------------------
 
-There are two options to install PySide on Windows:
+To install PySide on Windows you can choose from the following options:
 
-#. Download and install the packages from the `releases page
+#. Downloading and installing the packages offline from the `releases page
    <http://qt-project.org/wiki/PySide_Binaries_Windows>`_.
 
-#. Use setuptools:
+#. Using setuptools to install the `egg` binary packages:
    
    ::
 
       c:\> c:\Python27\Scripts\easy_install PySide
 
+#. Using pip to install the `wheel` binary packages:
+   
+   ::
+
+      c:\> c:\Python27\Scripts\pip install --use-wheel PySide
+
 Installing PySide on a UNIX System
 ----------------------------------
 
 There are no prebuild setuptools distributions available for UNIX System.
-To build and install setuptools compatible distributions for UNIX System,
+To build and install setuptools compatible distributions on UNIX System,
 please read the instructions in section ``Building PySide on a UNIX System``.
-
-Using pip vs easy_install
--------------------------
-
-Pip can install only from source (it does not support binary distributions) and allways rebuilds the distribution
-before the distribution is installed to system. For that reason the recommended tool to install the ``PySide``
-is easy_install.
 
 Building PySide on a Windows System
 ===================================
