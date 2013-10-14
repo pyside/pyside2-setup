@@ -35,16 +35,16 @@ Installing PySide on a Windows System
 
 To install PySide on Windows you can choose from the following options:
 
-#. Downloading and installing the packages offline from the `releases page
+#. Download and install the packages from the `releases page
    <http://qt-project.org/wiki/PySide_Binaries_Windows>`_.
 
-#. Using setuptools to install the `egg` binary packages:
+#. Use setuptools to install the `egg` binary packages:
    
    ::
 
       c:\> c:\Python27\Scripts\easy_install PySide
 
-#. Using pip to install the `wheel` binary packages:
+#. Use pip to install the `wheel` binary packages:
    
    ::
 
@@ -118,13 +118,13 @@ Building PySide distribution
 
    ::
 
-      c:\> c:\Python27\python.exe setup.py bdist_wininst --version=1.2.1 --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+      c:\> c:\Python27\python.exe setup.py bdist_egg --version=1.2.1 --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
 #. To build the development version of ``PySide`` windows installer, ignore the --version parameter:
 
    ::
 
-      c:\> c:\Python27\python.exe setup.py bdist_wininst --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+      c:\> c:\Python27\python.exe setup.py bdist_egg --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
 Installing PySide distribution
 ------------------------------
@@ -133,7 +133,7 @@ Installing PySide distribution
    
    ::
 
-      c:\> c:\Python27\Scripts\easy_install dist\PySide-1.2.1.win32-py2.7.exe
+      c:\> c:\Python27\Scripts\easy_install dist\PySide-1.2.1-py2.7-win32.egg
 
 Building PySide on a UNIX System (Ubuntu 12.04 LTS)
 ===================================================
