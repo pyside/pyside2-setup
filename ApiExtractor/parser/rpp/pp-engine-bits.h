@@ -623,6 +623,8 @@ _InputIterator pp::handle_define(_InputIterator __first, _InputIterator __last)
             } else {
                 __first = skip_comment_or_divop(__first, __last);
                 env.current_line += skip_comment_or_divop.lines;
+                if (__first == __last)
+                    break;
             }
         }
 
