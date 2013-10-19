@@ -78,6 +78,9 @@ def back_tick(cmd, ret_err=False):
     """
     proc = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
     out, err = proc.communicate()
+    if not isinstance(out, str):
+        # python 3
+        out = out.decode()
     retcode = proc.returncode
     if retcode is None:
         proc.terminate()

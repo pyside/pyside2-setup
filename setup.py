@@ -580,16 +580,7 @@ class pyside_build(_build):
                 cmake_cmd.append("-DUSE_PYTHON3=ON")
         
         if sys.platform == 'darwin':
-            if 'QTDIR' in os.environ:
-                # If the user has QTDIR set, then use it as a prefix for an extra include path
-                cmake_cmd.append('-DALTERNATIVE_QT_INCLUDE_DIR={0}/include'.format(os.environ['QTDIR']))
-                #:{0}/lib  I had problems specifying both dirs.  Is it needed? Is there some other way to do it? --Robin
-            else:
-                # Otherwise assume it is a standard install and add the
-                # Frameworks folder as a workaround for a cmake include problem
-                # http://neilweisenfeld.com/wp/120/building-pyside-on-the-mac
-                # https://groups.google.com/forum/#!msg/pyside/xciZZ4Hm2j8/CUmqfJptOwoJ
-                cmake_cmd.append('-DALTERNATIVE_QT_INCLUDE_DIR=/Library/Frameworks')
+            cmake_cmd.append('-DALTERNATIVE_QT_INCLUDE_DIR=' + self.qtinfo.headers_dir)
             
             if OPTION_OSXARCH:
                 # also tell cmake which architecture to use 

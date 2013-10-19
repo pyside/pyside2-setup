@@ -30,6 +30,9 @@ class QtInfo(object):
     def getTranslationsPath(self):
         return self.getProperty("QT_INSTALL_TRANSLATIONS")
 
+    def getHeadersPath(self):
+        return self.getProperty("QT_INSTALL_HEADERS")
+
     def getProperty(self, prop_name):
         cmd = [self._qmake_path, "-query", prop_name]
         proc = subprocess.Popen(cmd, stdout = subprocess.PIPE, shell=False)
@@ -48,3 +51,4 @@ class QtInfo(object):
     qmake_path = property(getQMakePath)
     imports_dir = property(getImportsPath)
     translations_dir = property(getTranslationsPath)
+    headers_dir = property(getHeadersPath)
