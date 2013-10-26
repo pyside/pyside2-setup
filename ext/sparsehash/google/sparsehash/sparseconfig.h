@@ -13,6 +13,16 @@
     #define HASH_NAMESPACE stdext
     /* The system-provided hash function including the namespace. */
     #define SPARSEHASH_HASH  HASH_NAMESPACE::hash_compare
+/* libc++ does not implement the tr1 namespce, instead the
+ * equivalient functionality is placed in namespace std,
+ * so use when it targeting such systems (OS X 10.7 onwards) */
+#elif defined(_LIBCPP_VERSION)
+    /* the location of the header defining hash functions */
+    #define HASH_FUN_H <functional>
+    /* the namespace of the hash<> function */
+    #define HASH_NAMESPACE std
+    /* The system-provided hash function including the namespace. */
+    #define SPARSEHASH_HASH HASH_NAMESPACE::hash
 #else
     /* the location of the header defining hash functions */
     #define HASH_FUN_H <tr1/functional>
