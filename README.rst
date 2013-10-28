@@ -135,6 +135,33 @@ Installing PySide distribution
 
       c:\> c:\Python27\Scripts\easy_install dist\PySide-1.2.1-py2.7-win32.egg
 
+Installing PySide distribution into ``virtual`` Python environment
+------------------------------------------------------------------
+
+#. Install latest `virtualenv` distribution:
+
+   ::
+
+      c:\> c:\Python27\Scripts\easy_install virtualenv
+
+#. Use `virtualenv` to make a workspace:
+
+   ::
+
+      c:\> c:\Python27\Scripts\virtualenv --no-site-packages env
+
+#. Switch to the ``env`` directory:
+
+   ::
+
+      c:\> cd env
+
+#. Install the distribution with easy_install:
+   
+   ::
+
+      c:\> Scripts\easy_install ..\dist\PySide-1.2.1-py2.7-win32.egg
+
 Building PySide on a UNIX System (Ubuntu 12.04 LTS)
 ===================================================
 
@@ -222,6 +249,39 @@ Installing PySide distribution
    ::
 
       $ sudo python2.7 pyside_postinstall.py -install
+
+Installing PySide distribution into ``virtual`` Python environment
+------------------------------------------------------------------
+
+#. Install latest `virtualenv` distribution:
+
+   ::
+
+      $ sudo easy_install-2.7 virtualenv
+
+#. Use `virtualenv` to make a workspace:
+
+   ::
+
+      $ sudo virtualenv-2.7 --no-site-packages env
+
+#. Switch to the ``env`` directory:
+
+   ::
+
+      $ cd env
+
+#. Install the distribution with easy_install:
+   
+   ::
+
+      $ bin/easy_install ../dist/PySide-1.2.1-py2.7.egg
+
+#. Run the post-install script to finish the package configuration:
+   
+   ::
+
+      $ bin/python bin/pyside_postinstall.py -install
 
 PySide Setup Script command line options
 ========================================
