@@ -162,8 +162,8 @@ Installing PySide distribution into ``virtual`` Python environment
 
       c:\> Scripts\easy_install ..\dist\PySide-1.2.1-py2.7-win32.egg
 
-Building PySide on a UNIX System (Ubuntu 12.04 LTS)
-===================================================
+Building PySide on a UNIX System (Ubuntu 12.04 - 13.10)
+=======================================================
 
 Installing prerequisities
 -------------------------
@@ -210,19 +210,19 @@ Building PySide distribution
 
    ::
 
-      $ python2.7 setup.py bdist_egg --version=1.2.1
+      $ python2.7 setup.py bdist_egg --qmake=/usr/bin/qmake-qt4 --version=1.2.1
 
 #. Optionally you can build standalone version of distribution with embedded Qt libs:
 
    ::
 
-      $ python2.7 setup.py bdist_egg --standalone --version=1.2.1
+      $ python2.7 setup.py bdist_egg --qmake=/usr/bin/qmake-qt4 --version=1.2.1 --standalone
 
 #. To build the development version of ``PySide`` distribution, ignore the --version parameter:
 
    ::
 
-      $ python2.7 setup.py bdist_egg
+      $ python2.7 setup.py bdist_egg --qmake=/usr/bin/qmake-qt4
 
 Installing PySide distribution
 ------------------------------
@@ -231,7 +231,7 @@ Installing PySide distribution
    
    ::
 
-      $ sudo easy_install-2.7 dist/PySide-1.2.1-py2.7.egg
+      $ sudo easy_install-2.7 dist/PySide-1.2.1-py2.7-linux-x86_64.egg
 
 #. Run the post-install script to finish the package configuration:
    
@@ -264,117 +264,7 @@ Installing PySide distribution into ``virtual`` Python environment
    
    ::
 
-      $ bin/easy_install ../dist/PySide-1.2.1-py2.7.egg
-
-#. Run the post-install script to finish the package configuration:
-   
-   ::
-
-      $ bin/python bin/pyside_postinstall.py -install
-
-Building PySide on a UNIX System (Ubuntu 13.10)
-===============================================
-
-Installing prerequisities
--------------------------
-
-#. Install Python 3.3 header files and a static library:
-    
-   ::
-
-      $ sudo apt-get install python3.3-dev
-   
-#. Install Qt SDK:
-    
-   ::
-
-      $ sudo apt-get install qt-sdk
-   
-#. Install latest `setuptools` distribution into the Python you
-   installed in the first step: download `ez_setup.py
-   <https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py>`_ and run it using
-   the ``python`` interpreter of your Python 3.3 installation using a
-   command prompt:
-
-   ::
-
-      $ wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
-      $ sudo python3.3 ez_setup.py
-
-Building PySide distribution
-----------------------------
-
-#. Clone ``PySide`` setup scripts from git repository:
-
-   ::
-
-      $ git clone https://github.com/PySide/pyside-setup.git pyside-setup
-
-#. Switch to the ``pyside-setup`` directory:
-
-   ::
-
-      $ cd pyside-setup
-
-#. Build ``PySide`` distribution:
-
-   ::
-
-      $ python3.3 setup.py bdist_egg --qmake=/usr/bin/qmake-qt4 --version=1.2.1
-
-#. Optionally you can build standalone version of distribution with embedded Qt libs:
-
-   ::
-
-      $ python3.3 setup.py bdist_egg --standalone --qmake=/usr/bin/qmake-qt4 --version=1.2.1
-
-#. To build the development version of ``PySide`` distribution, ignore the --version parameter:
-
-   ::
-
-      $ python3.3 setup.py bdist_egg --qmake=/usr/bin/qmake-qt4
-
-Installing PySide distribution
-------------------------------
-
-#. After the successful build, install the distribution with easy_install:
-   
-   ::
-
-      $ sudo easy_install-3.3 dist/PySide-1.2.1-py3.3-linux-x86_64.egg
-
-#. Run the post-install script to finish the package configuration:
-   
-   ::
-
-      $ sudo python3.3 pyside_postinstall.py -install
-
-Installing PySide distribution into ``virtual`` Python environment
-------------------------------------------------------------------
-
-#. Install latest `virtualenv` distribution:
-
-   ::
-
-      $ sudo easy_install-3.3 virtualenv
-
-#. Use `virtualenv` to make a workspace:
-
-   ::
-
-      $ virtualenv-3.3 --no-site-packages env
-
-#. Switch to the ``env`` directory:
-
-   ::
-
-      $ cd env
-
-#. Install the distribution with easy_install:
-   
-   ::
-
-      $ bin/easy_install ../dist/PySide-1.2.1-py3.3-linux-x86_64.egg
+      $ bin/easy_install ../dist/PySide-1.2.1-py2.7-linux-x86_64.egg
 
 #. Run the post-install script to finish the package configuration:
    
