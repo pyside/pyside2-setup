@@ -78,6 +78,7 @@ from distutils.sysconfig import get_config_var
 from distutils.sysconfig import get_python_lib
 from distutils.spawn import find_executable
 from distutils.command.build import build as _build
+from distutils.command.build_ext import build_ext as _build_ext
 
 from setuptools import setup, Extension
 from setuptools.command.install import install as _install
@@ -266,6 +267,14 @@ class pyside_bdist_egg(_bdist_egg):
     def run(self):
         self.run_command("build")
         _bdist_egg.run(self)
+
+class pyside_build_ext(_build_ext):
+
+    def __init__(self, *args, **kwargs):
+        _build_ext.__init__(self, *args, **kwargs)
+
+    def run(self):
+        pass
 
 class pyside_build(_build):
 
@@ -953,6 +962,7 @@ setup(
     },
     cmdclass = {
         'build': pyside_build,
+        'build_ext': pyside_build_ext,
         'bdist_egg': pyside_bdist_egg,
         'develop': pyside_develop,
         'install': pyside_install,
