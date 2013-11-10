@@ -1850,6 +1850,14 @@ void AbstractMetaBuilder::fixArgumentNames(AbstractMetaFunction* func)
     }
 }
 
+static QString functionSignature(FunctionModelItem functionItem)
+{
+    QStringList args;
+    foreach (ArgumentModelItem arg, functionItem->arguments())
+        args << arg->type().toString();
+    return QString("%1(%2)").arg(functionItem->name(), args.join(","));
+}
+
 AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem functionItem)
 {
     QString functionName = functionItem->name();
@@ -1858,6 +1866,10 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
         className = m_currentClass->typeEntry()->qualifiedCppName();
 
     if (TypeDatabase::instance()->isFunctionRejected(className, functionName)) {
+        m_rejectedFunctions.insert(className + "::" + functionName, GenerationDisabled);
+        return 0;
+    }
+    else if (TypeDatabase::instance()->isFunctionRejected(className, functionSignature(functionItem))) {
         m_rejectedFunctions.insert(className + "::" + functionName, GenerationDisabled);
         return 0;
     }

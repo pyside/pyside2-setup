@@ -2393,6 +2393,11 @@
     <rejection class="ListUser" function-name="sumList(std::list&lt;int&gt;)"/>
     <rejection class="ListUser" function-name="sumList(std::list&lt;double&gt;)"/>
 
+    <!-- test rejections using full signatures; this method is a template and
+         cannot be wrapped, but is otherwise recognized by shiboken and will
+         result in a compile error if the rejection is not matched -->
+    <rejection class="Photon::Base" function-name="isType()"/>
+
     <value-type name="ValueAndVirtual" />
 
     <object-type name="ObjectTypeByValue" />

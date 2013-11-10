@@ -33,6 +33,7 @@ namespace Photon
 {
 
 enum ClassType {
+    BaseType = 0,
     IdentityType = 1,
     DuplicatorType = 2
 };
@@ -41,9 +42,17 @@ class LIBSAMPLE_API Base
 {
 public:
     explicit Base(int value) : m_value(value) {}
+    virtual ~Base() {}
     inline void setValue(int value) { m_value = value; }
     inline int value() const { return m_value; }
+
+    template <class T> bool isType() { return type() == T::staticType; }
+    bool isType(ClassType t) { return type() == t; }
+
 protected:
+    virtual ClassType type() const { return BaseType; };
+    static const ClassType staticType = BaseType;
+
     int m_value;
 };
 
@@ -68,6 +77,10 @@ public:
     }
 
     static inline TemplateBase<CLASS_TYPE>* passPointerThrough(TemplateBase<CLASS_TYPE>* obj) { return obj; }
+
+protected:
+    virtual ClassType type() const { return CLASS_TYPE; }
+    static const ClassType staticType = CLASS_TYPE;
 };
 
 #if defined _WIN32 || defined __CYGWIN__
