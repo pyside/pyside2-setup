@@ -3401,9 +3401,24 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
     if (callOp && !callOp->isModifiedRemoved())
         tp_call = '&' + cpythonFunctionName(callOp);
 
-
     s << "// Class Definition -----------------------------------------------" << endl;
     s << "extern \"C\" {" << endl;
+
+    if (supportsNumberProtocol(metaClass)) {
+        s << "static PyNumberMethods " << className + "_TypeAsNumber" << ";" << endl;
+        s << endl;
+    }
+
+    if (supportsSequenceProtocol(metaClass)) {
+        s << "static PySequenceMethods " << className + "_TypeAsSequence" << ";" << endl;
+        s << endl;
+    }
+
+    if (supportsMappingProtocol(metaClass)) {
+        s << "static PyMappingMethods " << className + "_TypeAsMapping" << ";" << endl;
+        s << endl;
+    }
+
     s << "static SbkObjectType " << className + "_Type" << " = { { {" << endl;
     s << INDENT << "PyVarObject_HEAD_INIT(&SbkObjectType_Type, 0)" << endl;
     s << INDENT << "/*tp_name*/             \"" << getClassTargetFullName(metaClass) << "\"," << endl;
@@ -3536,13 +3551,13 @@ void CppGenerator::writeTypeAsSequenceDefinition(QTextStream& s, const AbstractM
         funcs["__setitem__"] = baseName + "__setitem__";
     }
 
-    s << INDENT << "memset(&" << baseName << "_Type.super.as_sequence, 0, sizeof(PySequenceMethods));" << endl;
+    s << INDENT << "memset(&" << baseName << "_TypeAsSequence, 0, sizeof(PySequenceMethods));" << endl;
     foreach (const QString& sqName, m_sqFuncs.keys()) {
         if (funcs[sqName].isEmpty())
             continue;
         if (m_sqFuncs[sqName] == "sq_slice")
             s << "#ifndef IS_PY3K" << endl;
-        s << INDENT << baseName << "_Type.super.as_sequence." << m_sqFuncs[sqName] << " = " << funcs[sqName] << ';' << endl;
+        s << INDENT << baseName << "_TypeAsSequence." << m_sqFuncs[sqName] << " = " << funcs[sqName] << ';' << endl;
         if (m_sqFuncs[sqName] == "sq_slice")
             s << "#endif" << endl;
     }
@@ -3567,11 +3582,11 @@ void CppGenerator::writeTypeAsMappingDefinition(QTextStream& s, const AbstractMe
     }
 
     QString baseName = cpythonBaseName(metaClass);
-    s << INDENT << "memset(&" << baseName << "_Type.super.as_mapping, 0, sizeof(PyMappingMethods));" << endl;
+    s << INDENT << "memset(&" << baseName << "_TypeAsMapping, 0, sizeof(PyMappingMethods));" << endl;
     foreach (const QString& mpName, m_mpFuncs.keys()) {
         if (funcs[mpName].isEmpty())
             continue;
-        s << INDENT << baseName << "_Type.super.as_mapping." << m_mpFuncs[mpName] << " = " << funcs[mpName] << ';' << endl;
+        s << INDENT << baseName << "_TypeAsMapping." << m_mpFuncs[mpName] << " = " << funcs[mpName] << ';' << endl;
     }
 }
 
@@ -3619,7 +3634,7 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
 
     nb["bool"] = hasBoolCast(metaClass) ? baseName + "___nb_bool" : QString();
 
-    s << INDENT << "memset(&" << baseName << "_Type.super.as_number, 0, sizeof(PyNumberMethods));" << endl;
+    s << INDENT << "memset(&" << baseName << "_TypeAsNumber, 0, sizeof(PyNumberMethods));" << endl;
     foreach (const QString& nbName, m_nbFuncs.keys()) {
         if (nb[nbName].isEmpty())
             continue;
@@ -3627,18 +3642,18 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
         // bool is special because the field name differs on Python 2 and 3 (nb_nonzero vs nb_bool)
         // so a shiboken macro is used.
         if (nbName == "bool") {
-            s << INDENT << "SBK_NB_BOOL(" << baseName << "_Type.super.as_number) = " << nb[nbName] << ';' << endl;
+            s << INDENT << "SBK_NB_BOOL(" << baseName << "_TypeAsNumber) = " << nb[nbName] << ';' << endl;
         } else {
             bool excludeFromPy3K = nbName == "__div__" || nbName == "__idiv__";
             if (excludeFromPy3K)
                 s << "#ifndef IS_PY3K" << endl;
-            s << INDENT << baseName << "_Type.super.as_number." << m_nbFuncs[nbName] << " = " << nb[nbName] << ';' << endl;
+            s << INDENT << baseName << "_TypeAsNumber." << m_nbFuncs[nbName] << " = " << nb[nbName] << ';' << endl;
             if (excludeFromPy3K)
                 s << "#endif" << endl;
         }
     }
     if (!nb["__div__"].isEmpty())
-        s << INDENT << baseName << "_Type.super.as_number.nb_true_divide = " << nb["__div__"] << ';' << endl;
+        s << INDENT << baseName << "_TypeAsNumber.nb_true_divide = " << nb["__div__"] << ';' << endl;
 }
 
 void CppGenerator::writeTpTraverseFunction(QTextStream& s, const AbstractMetaClass* metaClass)
@@ -4243,21 +4258,21 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     if (supportsNumberProtocol(metaClass)) {
         s << INDENT << "// type has number operators" << endl;
         writeTypeAsNumberDefinition(s, metaClass);
-        s << INDENT << pyTypeName << ".super.ht_type.tp_as_number = &" << pyTypeName << ".super.as_number;" << endl;
+        s << INDENT << pyTypeName << ".super.ht_type.tp_as_number = &" << pyTypeName << "AsNumber;" << endl;
         s << endl;
     }
 
     if (supportsSequenceProtocol(metaClass)) {
         s << INDENT << "// type supports sequence protocol" << endl;
         writeTypeAsSequenceDefinition(s, metaClass);
-        s << INDENT << pyTypeName << ".super.ht_type.tp_as_sequence = &" << pyTypeName << ".super.as_sequence;" << endl;
+        s << INDENT << pyTypeName << ".super.ht_type.tp_as_sequence = &" << pyTypeName << "AsSequence;" << endl;
         s << endl;
     }
 
     if (supportsMappingProtocol(metaClass)) {
         s << INDENT << "// type supports mapping protocol" << endl;
         writeTypeAsMappingDefinition(s, metaClass);
-        s << INDENT << pyTypeName << ".super.ht_type.tp_as_mapping = &" << pyTypeName << ".super.as_mapping;" << endl;
+        s << INDENT << pyTypeName << ".super.ht_type.tp_as_mapping = &" << pyTypeName << "AsMapping;" << endl;
         s << endl;
     }
 
