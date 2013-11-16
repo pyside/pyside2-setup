@@ -168,17 +168,11 @@ Building PySide on a UNIX System (Ubuntu 12.04 - 13.10)
 Installing prerequisities
 -------------------------
 
-#. Install Python 2.7 header files and a static library:
+#. Install build dependencies:
     
    ::
 
-      $ sudo apt-get install python2.7-dev
-   
-#. Install Qt SDK:
-    
-   ::
-
-      $ sudo apt-get install qt-sdk
+      $ sudo apt-get install build-essential git cmake libqt4-dev python2.7-dev libxml2-dev libxslt1-dev qtmobility-dev
    
 #. Install latest `setuptools` distribution into the Python you
    installed in the first step: download `ez_setup.py
