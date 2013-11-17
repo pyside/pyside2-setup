@@ -18,7 +18,7 @@ any contribution without requiring a transfer of copyright.
 Compatibility
 =============
 
-PySide requires Python 2.6 or later and Qt 4.6 or better.
+PySide requires Python 2.6 or later and Qt 4.6 or better. Qt 5.x is currently not supported.
 
 Installation
 ============
