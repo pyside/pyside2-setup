@@ -102,6 +102,24 @@ Installing prerequisities
 Building PySide distribution
 ----------------------------
 
+#. Download and extract `PySide source distribution
+   <https://pypi.python.org/packages/source/P/PySide/PySide-1.2.1.tar.gz>`_
+
+#. Switch to the distribution directory:
+
+   ::
+
+      c:\> cd PySide-1.2.1
+
+#. Build the `egg` binary distribution:
+
+   ::
+
+      c:\> c:\Python27\python.exe setup.py bdist_egg --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+
+Building PySide distribution from git repository
+------------------------------------------------
+
 #. Clone ``PySide`` setup scripts from git repository:
 
    ::
@@ -114,13 +132,13 @@ Building PySide distribution
 
       c:\> cd pyside-setup
 
-#. Build ``PySide`` windows installer:
+#. Build the `egg` binary distribution:
 
    ::
 
       c:\> c:\Python27\python.exe setup.py bdist_egg --version=1.2.1 --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
-#. To build the development version of ``PySide`` windows installer, ignore the --version parameter:
+#. To build the development version of ``PySide`` distribution, ignore the --version parameter:
 
    ::
 
@@ -169,11 +187,11 @@ Installing prerequisities
 -------------------------
 
 #. Install build dependencies:
-    
+
    ::
 
       $ sudo apt-get install build-essential git cmake libqt4-dev python2.7-dev libxml2-dev libxslt1-dev qtmobility-dev
-   
+
 #. Install latest `setuptools` distribution into the Python you
    installed in the first step: download `ez_setup.py
    <https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py>`_ and run it using
@@ -187,6 +205,39 @@ Installing prerequisities
 
 Building PySide distribution
 ----------------------------
+
+#. Download ``PySide`` source distribution:
+
+   ::
+
+      $ wget https://pypi.python.org/packages/source/P/PySide/PySide-1.2.1.tar.gz
+
+#. Extract the source distribution:
+
+   ::
+
+      $ tar -xvzf PySide-1.2.1.tar.gz
+
+#. Switch to the distribution directory:
+
+   ::
+
+      $ cd PySide-1.2.1
+
+#. Build the `egg` binary distribution:
+
+   ::
+
+      $ python2.7 setup.py bdist_egg --qmake=/usr/bin/qmake-qt4
+
+#. Optionally you can build standalone version of distribution with embedded Qt libs:
+
+   ::
+
+      $ python2.7 setup.py bdist_egg --qmake=/usr/bin/qmake-qt4 --standalone
+
+Building PySide distribution from git repository
+------------------------------------------------
 
 #. Clone ``PySide`` setup scripts from git repository:
 
