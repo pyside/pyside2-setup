@@ -190,7 +190,7 @@ Installing prerequisities
 
    ::
 
-      $ sudo apt-get install build-essential git cmake libqt4-dev python2.7-dev libxml2-dev libxslt1-dev qtmobility-dev
+      $ sudo apt-get install build-essential git cmake libqt4-dev libphonon-dev python2.7-dev libxml2-dev libxslt1-dev qtmobility-dev
 
 #. Install latest `setuptools` distribution into the Python you
    installed in the first step: download `ez_setup.py
