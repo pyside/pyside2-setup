@@ -2422,8 +2422,13 @@ void CppGenerator::writeCppToPythonFunction(QTextStream& s, const AbstractMetaTy
         return;
     }
     QString code = customConversion->nativeToTargetConversion();
-    for (int i = 0; i < containerType->instantiations().count(); ++i)
-        code.replace(QString("%INTYPE_%1").arg(i), getFullTypeName(containerType->instantiations().at(i)));
+    for (int i = 0; i < containerType->instantiations().count(); ++i) {
+        AbstractMetaType* type = containerType->instantiations().at(i);
+        QString typeName = getFullTypeName(type);
+        if (type->isConstant())
+            typeName = "const " + typeName;
+        code.replace(QString("%INTYPE_%1").arg(i), typeName);
+    }
     replaceCppToPythonVariables(code, getFullTypeNameWithoutModifiers(containerType));
     processCodeSnip(code);
     writeCppToPythonFunction(s, code, fixedCppTypeName(containerType));

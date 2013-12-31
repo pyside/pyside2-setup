@@ -5,6 +5,7 @@
 #include "collector.h"
 #include "complex.h"
 #include "ctorconvrule.h"
+#include "cvlist.h"
 #include "sbkdate.h"
 #include "derived.h"
 #include "echo.h"

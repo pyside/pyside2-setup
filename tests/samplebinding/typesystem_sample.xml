@@ -601,6 +601,9 @@
         <value-type name="ValueDuplicator"/>
     </namespace-type>
 
+    <value-type name="CVValueType"/>
+    <value-type name="CVListUser"/>
+
     <value-type name="IntList">
         <enum-type name="CtorEnum"/>
     </value-type>

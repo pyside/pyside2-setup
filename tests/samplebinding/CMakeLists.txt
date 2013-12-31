@@ -19,6 +19,8 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/bucket_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/collector_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/color_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/ctorconvrule_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/cvlistuser_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/cvvaluetype_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/sbkdate_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/derived_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/derived_someinnerclass_wrapper.cpp
