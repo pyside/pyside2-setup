@@ -50,6 +50,9 @@ To install PySide on Windows you can choose from the following options:
 
       c:\> c:\Python27\Scripts\pip install --use-wheel PySide
 
+Please note that all provided packages are fully standalone and without any other dependencies.
+All required Qt libraries, development tools and examples are included.
+
 Installing PySide on a UNIX System
 ----------------------------------
 
