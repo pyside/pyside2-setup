@@ -1124,6 +1124,7 @@ bool Parser::parseDeclarator(DeclaratorAST *&node)
             token_stream.nextToken();  // skip ')'
 
             parseCvQualify(ast->fun_cv);
+            parseNoExcept();
             parseExceptionSpecification(ast->exception_spec);
 
             if (token_stream.lookAhead() == Token___attribute__)
@@ -1861,6 +1862,14 @@ bool Parser::parseElaboratedTypeSpecifier(TypeSpecifierAST *&node)
 
     token_stream.rewind((int) start);
     return false;
+}
+
+bool Parser::parseNoExcept()
+{
+    // right now we only accept 'noexcept' with no conditional
+    CHECK(Token_noexcept);
+
+    return true;
 }
 
 bool Parser::parseExceptionSpecification(ExceptionSpecificationAST *&node)

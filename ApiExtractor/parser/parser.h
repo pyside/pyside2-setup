@@ -119,6 +119,7 @@ public:
     bool parseNewExpression(ExpressionAST *&node);
     bool parseNewInitializer(NewInitializerAST *&node);
     bool parseNewTypeId(NewTypeIdAST *&node);
+    bool parseNoExcept();
     bool parseOperator(OperatorAST *&node);
     bool parseOperatorFunctionId(OperatorFunctionIdAST *&node);
     bool parseParameterDeclaration(ParameterDeclarationAST *&node);
