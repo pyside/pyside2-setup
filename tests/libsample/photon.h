@@ -49,10 +49,10 @@ public:
     template <class T> bool isType() { return type() == T::staticType; }
     bool isType(ClassType t) { return type() == t; }
 
-protected:
     virtual ClassType type() const { return BaseType; };
     static const ClassType staticType = BaseType;
 
+protected:
     int m_value;
 };
 
@@ -78,7 +78,6 @@ public:
 
     static inline TemplateBase<CLASS_TYPE>* passPointerThrough(TemplateBase<CLASS_TYPE>* obj) { return obj; }
 
-protected:
     virtual ClassType type() const { return CLASS_TYPE; }
     static const ClassType staticType = CLASS_TYPE;
 };
