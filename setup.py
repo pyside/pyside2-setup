@@ -677,6 +677,10 @@ class pyside_build(_build):
             "{site_packages_dir}/pysideuic",
             "{dist_dir}/pysideuic",
             force=False, vars=vars)
+        if sys.version_info[0] > 2:
+            rmtree("{dist_dir}/pysideuic/port_v2".format(**vars))
+        else:
+            rmtree("{dist_dir}/pysideuic/port_v3".format(**vars))
         # <install>/bin/pyside-uic -> PySide/scripts/uic.py
         makefile(
             "{dist_dir}/PySide/scripts/__init__.py",
@@ -789,6 +793,10 @@ class pyside_build(_build):
             "{site_packages_dir}/pysideuic",
             "{dist_dir}/pysideuic",
             force=False, vars=vars)
+        if sys.version_info[0] > 2:
+            rmtree("{dist_dir}/pysideuic/port_v2".format(**vars))
+        else:
+            rmtree("{dist_dir}/pysideuic/port_v3".format(**vars))
         # <install>/bin/pyside-uic -> PySide/scripts/uic.py
         makefile(
             "{dist_dir}/PySide/scripts/__init__.py",
