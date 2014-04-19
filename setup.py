@@ -753,7 +753,7 @@ class pyside_build(_build):
             if float(vars["qt_version"][:3]) > 4.6:
                 copydir("{qt_imports_dir}", "{dist_dir}/PySide/imports",
                     filter=["qmldir", "*.so"],
-                    vars=vars)
+                    force=False, vars=vars)
             # <qt>/translations/* -> <setup>/PySide/translations
             copydir("{qt_translations_dir}", "{dist_dir}/PySide/translations",
                 filter=["*.qm"],
