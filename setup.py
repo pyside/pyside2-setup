@@ -958,7 +958,7 @@ setup(
     author = 'PySide Team',
     author_email = 'contact@pyside.org',
     url = 'http://www.pyside.org',
-    download_url = 'http://download.qt-project.org/official_releases/pyside/',
+    download_url = 'https://download.qt-project.org/official_releases/pyside/',
     license = 'LGPL',
     packages = ['PySide', 'pysideuic'],
     package_dir = {'': 'pyside_package'},
