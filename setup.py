@@ -95,6 +95,7 @@ from utils import has_option
 from utils import option_value
 from utils import update_env_path
 from utils import init_msvc_env
+from utils import regenerate_qt_resources
 
 # Declare options
 OPTION_DEBUG = has_option("debug")
@@ -724,6 +725,13 @@ class pyside_build(_build):
                 "{sources_dir}/pyside-examples/examples",
                 "{dist_dir}/PySide/examples",
                 force=False, vars=vars)
+            # Re-generate examples Qt resource files for Python 3 compatibility
+            if sys.version_info[0] == 3:
+                examples_path = "{dist_dir}/PySide/examples".format(**vars)
+                pyside_rcc_path = "{install_dir}/bin/pyside-rcc".format(**vars)
+                pyside_rcc_options = '-py3'
+                regenerate_qt_resources(examples_path, pyside_rcc_path,
+                    pyside_rcc_options)
         # Copy Qt libs to package
         if OPTION_STANDALONE:
             if sys.platform == 'darwin':
@@ -833,6 +841,13 @@ class pyside_build(_build):
                 "{sources_dir}/pyside-examples/examples",
                 "{dist_dir}/PySide/examples",
                 force=False, vars=vars)
+            # Re-generate examples Qt resource files for Python 3 compatibility
+            if sys.version_info[0] == 3:
+                examples_path = "{dist_dir}/PySide/examples".format(**vars)
+                pyside_rcc_path = "{install_dir}/bin/pyside-rcc".format(**vars)
+                pyside_rcc_options = '-py3'
+                regenerate_qt_resources(examples_path, pyside_rcc_path,
+                    pyside_rcc_options)
         # <ssl_libs>/* -> <setup>/PySide/openssl
         copydir("{ssl_libs_dir}", "{dist_dir}/PySide/openssl",
             filter=[
