@@ -26,8 +26,8 @@ Installation
 Installing prerequisities
 -------------------------
 
-Install latest `setuptools` distribution: download `ez_setup.py
-<https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py>`_ and run it using
+Install latest `pip` distribution: download `get-pip.py
+<https://raw.github.com/pypa/pip/master/contrib/get-pip.py>`_ and run it using
 the ``python`` interpreter.
 
 Installing PySide on a Windows System
@@ -35,8 +35,11 @@ Installing PySide on a Windows System
 
 To install PySide on Windows you can choose from the following options:
 
-#. Download and install the packages from the `releases page
-   <http://qt-project.org/wiki/PySide_Binaries_Windows>`_.
+#. Use pip to install the `wheel` binary packages:
+   
+   ::
+
+      c:\> c:\Python27\Scripts\pip install PySide --use-wheel -f https://download.qt-project.org/official_releases/pyside/
 
 #. Use setuptools to install the `egg` binary packages:
    
@@ -44,21 +47,19 @@ To install PySide on Windows you can choose from the following options:
 
       c:\> c:\Python27\Scripts\easy_install PySide
 
-#. Use pip to install the `wheel` binary packages:
-   
-   ::
+#. Download and install the packages from the `releases page
+   <http://qt-project.org/wiki/PySide_Binaries_Windows>`_.
 
-      c:\> c:\Python27\Scripts\pip install --use-wheel PySide
+.. note::
 
-Please note that all provided packages are fully standalone and without any other dependencies.
-All required Qt libraries, development tools and examples are included.
+  Provided binaries are without any other external dependencies.
+  All required Qt libraries, development tools and examples are included.
 
 Installing PySide on a UNIX System
 ----------------------------------
 
-There are no prebuild setuptools distributions available for UNIX System.
-To build and install setuptools compatible distributions on UNIX System,
-please read the instructions in section ``Building PySide on a UNIX System``.
+We do not provide binaries for UNIX System. Please read the build instructions in section
+``Building PySide on a UNIX System``.
 
 Building PySide on a Windows System
 ===================================
@@ -92,15 +93,21 @@ Installing prerequisities
 #. (Optional) Install `OpenSSL
    <http://slproweb.com/products/Win32OpenSSL.html>`_.
 
-#. Install latest `setuptools` distribution into the Python you
-   installed in the first step: download `ez_setup.py
-   <https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py>`_ and run it using
+#. Install latest `pip` distribution into the Python you
+   installed in the first step: download `get-pip.py 
+   <https://raw.github.com/pypa/pip/master/contrib/get-pip.py>`_ and run it using
    the ``python`` interpreter of your Python 2.7 installation using a
    command prompt:
 
    ::
 
-      c:\> c:\Python27\python ez_setup.py
+      c:\> c:\Python27\python get-pip.py
+
+#. Install latest `wheel` distribution:
+
+   ::
+
+      c:\> c:\Python27\Scripts\pip install wheel
 
 Building PySide distribution
 ----------------------------
@@ -114,11 +121,11 @@ Building PySide distribution
 
       c:\> cd PySide-1.2.1
 
-#. Build the `egg` binary distribution:
+#. Build the `wheel` binary distribution:
 
    ::
 
-      c:\> c:\Python27\python.exe setup.py bdist_egg --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+      c:\> c:\Python27\python.exe setup.py bdist_wheel --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
 Building PySide distribution from git repository
 ------------------------------------------------
@@ -135,26 +142,26 @@ Building PySide distribution from git repository
 
       c:\> cd pyside-setup
 
-#. Build the `egg` binary distribution:
+#. Build the `wheel` binary distribution:
 
    ::
 
-      c:\> c:\Python27\python.exe setup.py bdist_egg --version=1.2.1 --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+      c:\> c:\Python27\python.exe setup.py bdist_wheel --version=1.2.1 --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
 #. To build the development version of ``PySide`` distribution, ignore the --version parameter:
 
    ::
 
-      c:\> c:\Python27\python.exe setup.py bdist_egg --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+      c:\> c:\Python27\python.exe setup.py bdist_wheel --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
 Installing PySide distribution
 ------------------------------
 
-#. After the successful build, install the distribution with easy_install:
+#. After the successful build, install the distribution with ``pip``:
    
    ::
 
-      c:\> c:\Python27\Scripts\easy_install dist\PySide-1.2.1-py2.7-win32.egg
+      c:\> c:\Python27\Scripts\pip install --use-wheel dist\PySide-1.2.1-cp27-none-win32.whl
 
 Installing PySide distribution into ``virtual`` Python environment
 ------------------------------------------------------------------
@@ -163,7 +170,7 @@ Installing PySide distribution into ``virtual`` Python environment
 
    ::
 
-      c:\> c:\Python27\Scripts\easy_install virtualenv
+      c:\> c:\Python27\Scripts\pip install virtualenv
 
 #. Use `virtualenv` to make a workspace:
 
@@ -177,11 +184,11 @@ Installing PySide distribution into ``virtual`` Python environment
 
       c:\> cd env
 
-#. Install the distribution with easy_install:
+#. Install the distribution with ``pip``:
    
    ::
 
-      c:\> Scripts\easy_install ..\dist\PySide-1.2.1-py2.7-win32.egg
+      c:\> Scripts\pip install --use-wheel ..\dist\PySide-1.2.1-cp27-none-win32.whl
 
 Building PySide on a UNIX System (Ubuntu 12.04 - 13.10)
 =======================================================
@@ -195,16 +202,22 @@ Installing prerequisities
 
       $ sudo apt-get install build-essential git cmake libqt4-dev libphonon-dev python2.7-dev libxml2-dev libxslt1-dev qtmobility-dev
 
-#. Install latest `setuptools` distribution into the Python you
-   installed in the first step: download `ez_setup.py
-   <https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py>`_ and run it using
+#. Install latest `pip` distribution into the Python you
+   installed in the first step: download `get-pip.py 
+   <https://raw.github.com/pypa/pip/master/contrib/get-pip.py>`_ and run it using
    the ``python`` interpreter of your Python 2.7 installation using a
    command prompt:
 
    ::
 
-      $ wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
-      $ sudo python2.7 ez_setup.py
+      $ wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+      $ sudo python2.7 get-pip.py
+
+#. Install latest `wheel` distribution:
+
+   ::
+
+      $ sudo pip2.7 install wheel
 
 Building PySide distribution
 ----------------------------
@@ -227,17 +240,17 @@ Building PySide distribution
 
       $ cd PySide-1.2.1
 
-#. Build the `egg` binary distribution:
+#. Build the `wheel` binary distribution:
 
    ::
 
-      $ python2.7 setup.py bdist_egg --qmake=/usr/bin/qmake-qt4
+      $ python2.7 setup.py bdist_wheel --qmake=/usr/bin/qmake-qt4
 
 #. Optionally you can build standalone version of distribution with embedded Qt libs:
 
    ::
 
-      $ python2.7 setup.py bdist_egg --qmake=/usr/bin/qmake-qt4 --standalone
+      $ python2.7 setup.py bdist_wheel --qmake=/usr/bin/qmake-qt4 --standalone
 
 Building PySide distribution from git repository
 ------------------------------------------------
@@ -258,28 +271,28 @@ Building PySide distribution from git repository
 
    ::
 
-      $ python2.7 setup.py bdist_egg --qmake=/usr/bin/qmake-qt4 --version=1.2.1
+      $ python2.7 setup.py bdist_wheel --qmake=/usr/bin/qmake-qt4 --version=1.2.1
 
 #. Optionally you can build standalone version of distribution with embedded Qt libs:
 
    ::
 
-      $ python2.7 setup.py bdist_egg --qmake=/usr/bin/qmake-qt4 --version=1.2.1 --standalone
+      $ python2.7 setup.py bdist_wheel --qmake=/usr/bin/qmake-qt4 --version=1.2.1 --standalone
 
 #. To build the development version of ``PySide`` distribution, ignore the --version parameter:
 
    ::
 
-      $ python2.7 setup.py bdist_egg --qmake=/usr/bin/qmake-qt4
+      $ python2.7 setup.py bdist_wheel --qmake=/usr/bin/qmake-qt4
 
 Installing PySide distribution
 ------------------------------
 
-#. After the successful build, install the distribution with easy_install:
+#. After the successful build, install the distribution with ``pip``:
    
    ::
 
-      $ sudo easy_install-2.7 dist/PySide-1.2.1-py2.7-linux-x86_64.egg
+      $ sudo pip2.7 install --use-wheel dist/PySide-1.2.1-cp27-none-linux-x86_64.whl
 
 #. Run the post-install script to finish the package configuration:
    
@@ -294,7 +307,7 @@ Installing PySide distribution into ``virtual`` Python environment
 
    ::
 
-      $ sudo easy_install-2.7 virtualenv
+      $ sudo pip2.7 virtualenv
 
 #. Use `virtualenv` to make a workspace:
 
@@ -308,11 +321,11 @@ Installing PySide distribution into ``virtual`` Python environment
 
       $ cd env
 
-#. Install the distribution with easy_install:
+#. Install the distribution with ``pip``:
    
    ::
 
-      $ bin/easy_install ../dist/PySide-1.2.1-py2.7-linux-x86_64.egg
+      $ bin/pip2.7 install --use-wheel ../dist/PySide-1.2.1-cp27-none-linux-x86_64.whl
 
 #. Run the post-install script to finish the package configuration:
    
@@ -340,12 +353,16 @@ Usage on UNIX System
 Distribution types
 ------------------
 
-``bdist_wininst``
-    Create standalone windows installer with embedded Qt libs and development tools.
-    This distribution type can be installed with ``easy_install``.
+``bdist_wheel``
+    Create wheel binary distribution.
+    This distribution type can be installed with ``pip``.
 
 ``bdist_egg``
     Create egg binary distribution.
+    This distribution type can be installed with ``easy_install``.
+
+``bdist_wininst``
+    Create standalone windows installer with embedded Qt libs and development tools.
     This distribution type can be installed with ``easy_install``.
 
 ``install``
@@ -404,7 +421,7 @@ Options
     Specify the number of parallel build jobs
 
 ``--jom``
-    Use jom instead of nmake with msvc
+    Use `jom <http://qt-project.org/wiki/jom>`_ instead of nmake with msvc
 
 ``--build-tests``
     Enable building the tests
