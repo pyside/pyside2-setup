@@ -8,16 +8,16 @@ to build and install into your current Python installation.
 
 On Linux you can use option --standalone, to embed Qt libraries to PySide distribution
 
-You can use special option --only-package, if you want to create more binary packages (bdist_egg, bdist_wininst, ...)
+You can use special option --only-package, if you want to create more binary packages (bdist_wheel, bdist_egg, ...)
 without rebuilding entire PySide every time:
-  # First time we create bdist_winist with full PySide build
-  python setup.py bdist_winist --qmake=c:\Qt\4.8.4\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --opnessl=c:\libs\OpenSSL32bit\bin
-  
+  # First time we create bdist_wheel with full PySide build
+  python setup.py bdist_wheel --qmake=c:\Qt\4.8.5\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --opnessl=c:\libs\OpenSSL32bit\bin
+
   # Then we crate bdist_egg reusing PySide build with option --only-package
-  python setup.py bdist_egg --only-package --qmake=c:\Qt\4.8.4\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --opnessl=c:\libs\OpenSSL32bit\bin
+  python setup.py bdist_egg --only-package --qmake=c:\Qt\4.8.5\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --opnessl=c:\libs\OpenSSL32bit\bin
 
 REQUIREMENTS:
-- Python: 2.6, 2.7, 3.2 and 3.3 is supported
+- Python: 2.6, 2.7, 3.2, 3.3 and 3.4 is supported
 - Cmake: Specify the path to cmake with --cmake option or add cmake to the system path.
 - Qt: 4.6, 4.7 and 4.8 is supported. Specify the path to qmake with --qmake option or add qmake to the system path.
 
@@ -962,6 +962,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
         'Topic :: Database',
         'Topic :: Software Development',
         'Topic :: Software Development :: Code Generators',
