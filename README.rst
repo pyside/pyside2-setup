@@ -190,7 +190,7 @@ Installing PySide distribution into ``virtual`` Python environment
 
       c:\> Scripts\pip install --use-wheel ..\dist\PySide-1.2.1-cp27-none-win32.whl
 
-Building PySide on a UNIX System (Ubuntu 12.04 - 13.10)
+Building PySide on a UNIX System (Ubuntu 12.04 - 14.04)
 =======================================================
 
 Installing prerequisities
