@@ -113,13 +113,13 @@ Building PySide distribution
 ----------------------------
 
 #. Download and extract `PySide source distribution
-   <https://pypi.python.org/packages/source/P/PySide/PySide-1.2.1.tar.gz>`_
+   <https://pypi.python.org/packages/source/P/PySide/PySide-1.2.2.tar.gz>`_
 
 #. Switch to the distribution directory:
 
    ::
 
-      c:\> cd PySide-1.2.1
+      c:\> cd PySide-1.2.2
 
 #. Build the `wheel` binary distribution:
 
@@ -146,7 +146,7 @@ Building PySide distribution from git repository
 
    ::
 
-      c:\> c:\Python27\python.exe setup.py bdist_wheel --version=1.2.1 --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
+      c:\> c:\Python27\python.exe setup.py bdist_wheel --version=1.2.2 --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
 #. To build the development version of ``PySide`` distribution, ignore the --version parameter:
 
@@ -161,7 +161,7 @@ Installing PySide distribution
    
    ::
 
-      c:\> c:\Python27\Scripts\pip install --use-wheel dist\PySide-1.2.1-cp27-none-win32.whl
+      c:\> c:\Python27\Scripts\pip install --use-wheel dist\PySide-1.2.2-cp27-none-win32.whl
 
 Installing PySide distribution into ``virtual`` Python environment
 ------------------------------------------------------------------
@@ -188,7 +188,7 @@ Installing PySide distribution into ``virtual`` Python environment
    
    ::
 
-      c:\> Scripts\pip install --use-wheel ..\dist\PySide-1.2.1-cp27-none-win32.whl
+      c:\> Scripts\pip install --use-wheel ..\dist\PySide-1.2.2-cp27-none-win32.whl
 
 Building PySide on a UNIX System (Ubuntu 12.04 - 14.04)
 =======================================================
@@ -226,19 +226,19 @@ Building PySide distribution
 
    ::
 
-      $ wget https://pypi.python.org/packages/source/P/PySide/PySide-1.2.1.tar.gz
+      $ wget https://pypi.python.org/packages/source/P/PySide/PySide-1.2.2.tar.gz
 
 #. Extract the source distribution:
 
    ::
 
-      $ tar -xvzf PySide-1.2.1.tar.gz
+      $ tar -xvzf PySide-1.2.2.tar.gz
 
 #. Switch to the distribution directory:
 
    ::
 
-      $ cd PySide-1.2.1
+      $ cd PySide-1.2.2
 
 #. Build the `wheel` binary distribution:
 
@@ -271,13 +271,13 @@ Building PySide distribution from git repository
 
    ::
 
-      $ python2.7 setup.py bdist_wheel --qmake=/usr/bin/qmake-qt4 --version=1.2.1
+      $ python2.7 setup.py bdist_wheel --qmake=/usr/bin/qmake-qt4 --version=1.2.2
 
 #. Optionally you can build standalone version of distribution with embedded Qt libs:
 
    ::
 
-      $ python2.7 setup.py bdist_wheel --qmake=/usr/bin/qmake-qt4 --version=1.2.1 --standalone
+      $ python2.7 setup.py bdist_wheel --qmake=/usr/bin/qmake-qt4 --version=1.2.2 --standalone
 
 #. To build the development version of ``PySide`` distribution, ignore the --version parameter:
 
@@ -292,7 +292,7 @@ Installing PySide distribution
    
    ::
 
-      $ sudo pip2.7 install --use-wheel dist/PySide-1.2.1-cp27-none-linux-x86_64.whl
+      $ sudo pip2.7 install --use-wheel dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
 
 #. Run the post-install script to finish the package configuration:
    
@@ -325,7 +325,7 @@ Installing PySide distribution into ``virtual`` Python environment
    
    ::
 
-      $ bin/pip2.7 install --use-wheel ../dist/PySide-1.2.1-cp27-none-linux-x86_64.whl
+      $ bin/pip2.7 install --use-wheel ../dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
 
 #. Run the post-install script to finish the package configuration:
    

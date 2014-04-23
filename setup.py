@@ -26,13 +26,13 @@ OpenSSL: You can specify the location of OpenSSL DLLs with option --opnessl=</pa
     You can download OpenSSL for windows here: http://slproweb.com/products/Win32OpenSSL.html
 """
 
-__version__ = "1.3.0dev"
+__version__ = "1.2.2"
 
 submodules = {
-    '1.3.0dev': [
-        ["shiboken", "master"],
-        ["pyside", "master"],
-        ["pyside-tools", "master"],
+    '1.2.2': [
+        ["shiboken", "1.2.2"],
+        ["pyside", "1.2.2"],
+        ["pyside-tools", "0.2.15"],
         ["pyside-examples", "master"],
     ],
     '1.2.1': [

@@ -1,6 +1,48 @@
 Changes
 =======
 
+1.2.2 (2014-04-24)
+------------------
+
+Complete list of changes and bug fixes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+PySide
+******
+
+- Fix PYSIDE-190: QCoreApplication would deadlock on exit if the global
+  QThreadPool.globalInstance() is running a QRunnable with python code
+- Change GlobalReceiver to explicitly 'use' [dis]connectNotify of the base
+  class in order to avoid hiding these with its own overloads.
+- Add explicit casts when initializing an int[] using {}'s, as required
+  by C++11 to be "well formed"
+- Fix PYSIDE-172: multiple rules for file
+- Use file system encoding instead of assumed 'ascii' when registering
+  qt.conf in Qt resource system
+
+Shiboken
+********
+
+- Remove rejection lines that cause the sample_list test to fail
+- Remove protected from samblebinding test
+- Add parsing of 'noexcept' keyword
+- Fix function rejections (i.e. support overloads)
+- Fix building with python 3.3 and 3.4
+- Doc: Stop requiring sphinx.ext.refcounting with Sphinx 1.2+
+- Fix for containers with 'const' values
+- Fix compilation issue on OS X 10.9
+- Only use fields in PyTypeObject when defining types
+- Fix buffer overrun processing macro definitions
+- Fix 'special' include handling
+- Fix finding container base classes
+- Refactor and improve added function resolving
+- Work around MSVC's deficient <cmath> in libsample/transform.cpp
+- Fix description of sample/transform unit test
+- Change wrapping and indent of some code in Handler::startElement to
+  improve consistency
+- Fix '%#' substitution for # > 9
+- Improve dependencies for tests
+
 1.2.1 (2013-08-16)
 ------------------
 
