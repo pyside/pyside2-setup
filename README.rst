@@ -75,7 +75,7 @@ Installing prerequisities
    when building against Python 2.6, 2.7 or 3.2.
    Install `Qt 4.8 libraries for Windows VS 2010 edition
    <http://download.qt-project.org/official_releases/qt/4.8/4.8.5/qt-win-opensource-4.8.5-vs2010.exe>`_
-   when building against Python 3.3.
+   when building against Python 3.3 or 3.4.
 
 #. Install `Cmake
    <http://www.cmake.org/cmake/resources/software.html>`_.
@@ -85,7 +85,7 @@ Installing prerequisities
    when building against Python 2.6, 2.7 or 3.2.
    Install `Windows SDK v7.1
    <http://www.microsoft.com/en-us/download/details.aspx?id=8279>`_
-   when building against Python 3.3.
+   when building against Python 3.3 or 3.4.
 
 #. Install `Git
    <http://git-scm.com/download/win>`_.
