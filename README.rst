@@ -15,6 +15,9 @@ from any modern OSS project such as all code in a git repository, an open
 Bugzilla for reporting bugs, and an open design process. We welcome
 any contribution without requiring a transfer of copyright.
 
+The PySide documentation is hosted at `http://pyside.github.io/docs/pyside/
+<http://pyside.github.io/docs/pyside/>`_.
+
 Compatibility
 =============
 
