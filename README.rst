@@ -39,13 +39,13 @@ To install PySide on Windows you can choose from the following options:
    
    ::
 
-      c:\> c:\Python27\Scripts\pip install PySide --use-wheel -f https://download.qt-project.org/official_releases/pyside/
+      pip install -U PySide --use-wheel -f http://download.qt-project.org/official_releases/pyside/
 
 #. Use setuptools to install the `egg` binary packages:
    
    ::
 
-      c:\> c:\Python27\Scripts\easy_install PySide
+      easy_install -U PySide
 
 #. Download and install the packages from the `releases page
    <http://qt-project.org/wiki/PySide_Binaries_Windows>`_.
