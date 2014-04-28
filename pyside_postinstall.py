@@ -1,3 +1,4 @@
+#!/usr/bin/env python #
 # Postinstall script for PySide
 #
 # Generates the qt.conf file
