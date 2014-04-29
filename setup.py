@@ -8,7 +8,7 @@ to build and install into your current Python installation.
 
 On Linux you can use option --standalone, to embed Qt libraries to PySide distribution
 
-You can use special option --only-package, if you want to create more binary packages (bdist_wheel, bdist_egg, ...)
+You can use option --only-package, if you want to create more binary packages (bdist_wheel, bdist_egg, ...)
 without rebuilding entire PySide every time:
   # First time we create bdist_wheel with full PySide build
   python setup.py bdist_wheel --qmake=c:\Qt\4.8.5\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --opnessl=c:\libs\OpenSSL32bit\bin
@@ -26,9 +26,15 @@ OpenSSL: You can specify the location of OpenSSL DLLs with option --opnessl=</pa
     You can download OpenSSL for windows here: http://slproweb.com/products/Win32OpenSSL.html
 """
 
-__version__ = "1.2.2"
+__version__ = "1.3.0dev"
 
 submodules = {
+    '1.3.0dev': [
+        ["shiboken", "master"],
+        ["pyside", "master"],
+        ["pyside-tools", "master"],
+        ["pyside-examples", "master"],
+    ],
     '1.2.2': [
         ["shiboken", "1.2.2"],
         ["pyside", "1.2.2"],
