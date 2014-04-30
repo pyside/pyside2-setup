@@ -69,7 +69,7 @@ Alternatively you can use `Homebrew <http://brew.sh/>`_ and install Qt with
 
    ::
    
-      brew install qt
+      $ brew install qt
 
 To install PySide on Mac OS X you can choose from the following options:
 
@@ -77,26 +77,26 @@ To install PySide on Mac OS X you can choose from the following options:
    
    ::
 
-      pip install -U PySide --use-wheel -f http://download.qt-project.org/official_releases/pyside/
+      $ pip install -U PySide --use-wheel -f http://download.qt-project.org/official_releases/pyside/
 
 #. Use setuptools to install the `egg` binary packages (deprecated):
    
    ::
 
-      easy_install -U PySide
+      $ easy_install -U PySide
 
 After the installation, the following call must be made manually:
 
    ::
    
-      pyside_postinstall.py -install
+      $ pyside_postinstall.py -install
       
 If for some reason the script is not callable, it can alternatively be
 run directly by:
 
    ::
    
-      python $(which pyside_postinstall.py) -install
+      $ python $(which pyside_postinstall.py) -install
 
 
 Installing PySide on a UNIX System
