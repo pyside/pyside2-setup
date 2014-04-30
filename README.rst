@@ -217,13 +217,13 @@ Windows: Installing PySide distribution
 Windows: Installing PySide distribution into ``virtual`` Python environment
 ---------------------------------------------------------------------------
 
-#. Install latest `virtualenv` distribution:
+#. Install latest ``virtualenv`` distribution:
 
    ::
 
       c:\> c:\Python27\Scripts\pip install virtualenv
 
-#. Use `virtualenv` to make a workspace:
+#. Use ``virtualenv`` to make a workspace:
 
    ::
 
