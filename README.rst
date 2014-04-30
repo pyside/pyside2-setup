@@ -29,7 +29,7 @@ Installation
 Installing prerequisities
 -------------------------
 
-Install latest `pip` distribution: download `get-pip.py
+Install latest ``pip`` distribution: download `get-pip.py
 <https://raw.github.com/pypa/pip/master/contrib/get-pip.py>`_ and run it using
 the ``python`` interpreter.
 
@@ -38,13 +38,13 @@ Installing PySide on a Windows System
 
 To install PySide on Windows you can choose from the following options:
 
-#. Use pip to install the `wheel` binary packages:
+#. Use pip to install the ``wheel`` binary packages:
    
    ::
 
       pip install -U PySide --use-wheel -f http://download.qt-project.org/official_releases/pyside/
 
-#. Use setuptools to install the `egg` binary packages (deprecated):
+#. Use setuptools to install the ``egg`` binary packages (deprecated):
    
    ::
 
@@ -73,13 +73,13 @@ Alternatively you can use `Homebrew <http://brew.sh/>`_ and install Qt with
 
 To install PySide on Mac OS X you can choose from the following options:
 
-#. Use pip to install the `wheel` binary packages:
+#. Use pip to install the ``wheel`` binary packages:
    
    ::
 
       $ pip install -U PySide --use-wheel -f http://download.qt-project.org/official_releases/pyside/
 
-#. Use setuptools to install the `egg` binary packages (deprecated):
+#. Use setuptools to install the ``egg`` binary packages (deprecated):
    
    ::
 
@@ -138,7 +138,7 @@ Windows: Installing prerequisities
 #. (Optional) Install `OpenSSL
    <http://slproweb.com/products/Win32OpenSSL.html>`_.
 
-#. Install latest `pip` distribution into the Python you
+#. Install latest ``pip`` distribution into the Python you
    installed in the first step: download `get-pip.py 
    <https://raw.github.com/pypa/pip/master/contrib/get-pip.py>`_ and run it using
    the ``python`` interpreter of your Python 2.7 installation using a
@@ -252,7 +252,7 @@ Linux: Installing prerequisities
 
       $ sudo apt-get install build-essential git cmake libqt4-dev libphonon-dev python2.7-dev libxml2-dev libxslt1-dev qtmobility-dev
 
-#. Install latest `pip` distribution into the Python you
+#. Install latest ``pip`` distribution into the Python you
    installed in the first step: download `get-pip.py 
    <https://raw.github.com/pypa/pip/master/contrib/get-pip.py>`_ and run it using
    the ``python`` interpreter of your Python 2.7 installation using a
@@ -263,7 +263,7 @@ Linux: Installing prerequisities
       $ wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
       $ sudo python2.7 get-pip.py
 
-#. Install latest `wheel` distribution:
+#. Install latest ``wheel`` distribution:
 
    ::
 
@@ -291,7 +291,7 @@ Linux: Building PySide distribution
 
       $ cd PySide-1.2.2
 
-#. Build the `wheel` binary distribution:
+#. Build the ``wheel`` binary distribution:
 
    ::
 
@@ -357,13 +357,13 @@ Linux: Installing PySide distribution
 Linux: Installing PySide distribution into ``virtual`` Python environment
 -------------------------------------------------------------------------
 
-#. Install latest `virtualenv` distribution:
+#. Install latest ``virtualenv`` distribution:
 
    ::
 
       $ sudo pip2.7 virtualenv
 
-#. Use `virtualenv` to make a workspace:
+#. Use ``virtualenv`` to make a workspace:
 
    ::
 
