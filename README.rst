@@ -69,7 +69,7 @@ Alternatively you can use `Homebrew <http://brew.sh/>`_ and install Qt with
 
    ::
    
-      brew install qt
+      $ brew install qt
 
 To install PySide on Mac OS X you can choose from the following options:
 
@@ -77,38 +77,33 @@ To install PySide on Mac OS X you can choose from the following options:
    
    ::
 
-      pip install -U PySide --use-wheel -f http://download.qt-project.org/official_releases/pyside/
+      $ pip install -U PySide --use-wheel -f http://download.qt-project.org/official_releases/pyside/
 
 #. Use setuptools to install the `egg` binary packages (deprecated):
    
    ::
 
-      easy_install -U PySide
+      $ easy_install -U PySide
 
 After the installation, the following call must be made manually:
 
    ::
    
-      pyside_postinstall.py -install
+      $ pyside_postinstall.py -install
       
 If for some reason the script is not callable, it can alternatively be
 run directly by:
 
    ::
    
-      python $(which pyside_postinstall.py) -install
-
-.. note::
-
-  Provided binaries are without any other external dependencies.
-  All required Qt libraries, development tools and examples are included.
+      $ python $(which pyside_postinstall.py) -install
 
 
-Installing PySide on a UNIX System
-----------------------------------
+Installing PySide on a Linux System
+-----------------------------------
 
-We do not provide binaries for UNIX System. Please read the build instructions in section
-``Building PySide on a UNIX System``.
+We do not provide binaries for Linux. Please read the build instructions in section
+``Building PySide on a Linux System``.
 
 Building PySide on a Windows System
 ===================================
@@ -225,7 +220,7 @@ Installing PySide distribution into ``virtual`` Python environment
 
    ::
 
-      c:\> c:\Python27\Scripts\virtualenv --no-site-packages env
+      c:\> c:\Python27\Scripts\virtualenv env
 
 #. Switch to the ``env`` directory:
 
@@ -239,8 +234,8 @@ Installing PySide distribution into ``virtual`` Python environment
 
       c:\> Scripts\pip install --use-wheel ..\dist\PySide-1.2.2-cp27-none-win32.whl
 
-Building PySide on a UNIX System (Ubuntu 12.04 - 14.04)
-=======================================================
+Building PySide on a Linux System (Ubuntu 12.04 - 14.04)
+========================================================
 
 Installing prerequisities
 -------------------------
@@ -362,7 +357,7 @@ Installing PySide distribution into ``virtual`` Python environment
 
    ::
 
-      $ virtualenv-2.7 --no-site-packages env
+      $ virtualenv-2.7 env
 
 #. Switch to the ``env`` directory:
 
@@ -382,18 +377,19 @@ Installing PySide distribution into ``virtual`` Python environment
 
       $ bin/python bin/pyside_postinstall.py -install
 
+
 PySide Setup Script command line options
 ========================================
 
-Usage on Windows System
------------------------
+Usage on a Windows System
+-------------------------
     
    ::
 
       c:\> c:\Python27\python.exe setup.py [distribution_type] [options]
 
-Usage on UNIX System
---------------------
+Usage on a Linux System
+-----------------------
     
    ::
 
@@ -403,15 +399,15 @@ Distribution types
 ------------------
 
 ``bdist_wheel``
-    Create wheel binary distribution.
+    Create a wheel binary distribution.
     This distribution type can be installed with ``pip``.
 
 ``bdist_egg``
-    Create egg binary distribution.
+    Create an egg binary distribution.
     This distribution type can be installed with ``easy_install``.
 
 ``bdist_wininst``
-    Create standalone windows installer with embedded Qt libs and development tools.
+    Create a standalone windows installer with embedded Qt libs and development tools.
     This distribution type can be installed with ``easy_install``.
 
 ``install``
@@ -422,7 +418,7 @@ Distribution types
     ``sys.path``, yet can still be edited directly from its source folder.
 
 ``sdist``
-    Create full source distribution with included sources of PySide Setup Scripts,
+    Create a full source distribution with included sources of PySide Setup Scripts,
     PySide, Shiboken, PySide Tools and PySide Examples.
     Can be used to build binary distribution in offline mode.
 
@@ -440,14 +436,25 @@ Options
     Skip rebuilding everything and create distribution from prebuilt binaries.
     Before using this option first time, the full distribution build is required.
 
+.. note::
+
+  This option is broken on Mac OS X and fails to produce a usable distribution.
+  But adding multiple targets on the same command line works, so you can build eggs
+  and wheels with one compilation.
+
 ``--cmake``
     Specify the path to cmake.
     Useful when the cmake is not in path.
 
 ``--standalone``
     When enabled, all required Qt libs will be included in PySide distribution.
-    This option is allways enabled on Windows System.
+    This option is allways enabled on Windows.
     On Linux it's disabled by default.
+
+.. note::
+
+  This option does not work on Mac OS X, yet.
+
 
 ``--version``
     Specify what version of PySide distribution to build.
@@ -461,7 +468,7 @@ Options
 
 ``--make-spec``
     Specify the cmake makefile generator type.
-    Available values are ``msvc`` on Windows System and ``make`` on UNIX System.
+    Available values are ``msvc`` on Windows and ``make`` on Linux/Mac OS X.
 
 ``--no-examples``
     Don't include PySide examples in PySide distribution
