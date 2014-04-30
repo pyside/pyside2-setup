@@ -377,6 +377,7 @@ Installing PySide distribution into ``virtual`` Python environment
 
       $ bin/python bin/pyside_postinstall.py -install
 
+
 PySide Setup Script command line options
 ========================================
 
@@ -435,6 +436,11 @@ Options
     Skip rebuilding everything and create distribution from prebuilt binaries.
     Before using this option first time, the full distribution build is required.
 
+.. note::
+
+  This option is broken on Mac OS X and fails to produce a usable distribution.
+
+
 ``--cmake``
     Specify the path to cmake.
     Useful when the cmake is not in path.
@@ -443,6 +449,11 @@ Options
     When enabled, all required Qt libs will be included in PySide distribution.
     This option is allways enabled on Windows System.
     On Linux it's disabled by default.
+
+.. note::
+
+  This option does not work on Mac OS X, yet.
+
 
 ``--version``
     Specify what version of PySide distribution to build.
