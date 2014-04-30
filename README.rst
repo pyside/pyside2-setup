@@ -102,7 +102,7 @@ run directly by:
 Installing PySide on a Linux System
 -----------------------------------
 
-We do not provide binaries for a Linux System. Please read the build instructions in section
+We do not provide binaries for Linux. Please read the build instructions in section
 ``Building PySide on a Linux System``.
 
 Building PySide on a Windows System
@@ -448,7 +448,7 @@ Options
 
 ``--standalone``
     When enabled, all required Qt libs will be included in PySide distribution.
-    This option is allways enabled on Windows System.
+    This option is allways enabled on Windows.
     On Linux it's disabled by default.
 
 .. note::
@@ -468,7 +468,7 @@ Options
 
 ``--make-spec``
     Specify the cmake makefile generator type.
-    Available values are ``msvc`` on Windows System and ``make`` on a Linux/OS X System.
+    Available values are ``msvc`` on Windows and ``make`` on Linux/Mac OS X.
 
 ``--no-examples``
     Don't include PySide examples in PySide distribution
