@@ -26,8 +26,8 @@ PySide requires Python 2.6 or later and Qt 4.6 or better. Qt 5.x is currently no
 Installation
 ============
 
-Installing prerequisities
--------------------------
+Installing prerequisites
+------------------------
 
 Install latest ``pip`` distribution: download `get-pip.py
 <https://raw.github.com/pypa/pip/master/contrib/get-pip.py>`_ and run it using
@@ -109,8 +109,8 @@ We do not provide binaries for Linux. Please read the build instructions in sect
 Building PySide on a Windows System
 ===================================
 
-Windows: Installing prerequisities
-----------------------------------
+Windows: Installing prerequisites
+---------------------------------
 
 #. Install `Python
    <http://www.python.org/download/>`_.
@@ -245,8 +245,8 @@ Windows: Installing PySide distribution into ``virtual`` Python environment
 Building PySide on a Linux System (Ubuntu 12.04 - 14.04)
 ========================================================
 
-Linux: Installing prerequisities
---------------------------------
+Linux: Installing prerequisites
+-------------------------------
 
 #. Install build dependencies:
 
@@ -400,12 +400,13 @@ Usage on a Windows System
 
       c:\> c:\Python27\python.exe setup.py [distribution_type] [options]
 
-Usage on a Linux System
------------------------
+Usage on a Linux/Mac OS X System
+--------------------------------
     
    ::
 
       python2.7 setup.py [distribution_type] [options]
+
 
 Distribution types
 ------------------
