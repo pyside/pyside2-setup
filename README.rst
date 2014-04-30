@@ -105,11 +105,12 @@ Installing PySide on a Linux System
 We do not provide binaries for Linux. Please read the build instructions in section
 ``Building PySide on a Linux System``.
 
+
 Building PySide on a Windows System
 ===================================
 
-Installing prerequisities
--------------------------
+Windows: Installing prerequisities
+----------------------------------
 
 #. Install `Python
    <http://www.python.org/download/>`_.
@@ -153,8 +154,9 @@ Installing prerequisities
 
       c:\> c:\Python27\Scripts\pip install wheel
 
-Building PySide distribution
-----------------------------
+
+Windows: Building PySide distribution
+-------------------------------------
 
 #. Download and extract `PySide source distribution
    <https://pypi.python.org/packages/source/P/PySide/PySide-1.2.2.tar.gz>`_
@@ -171,8 +173,9 @@ Building PySide distribution
 
       c:\> c:\Python27\python.exe setup.py bdist_wheel --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
-Building PySide distribution from git repository
-------------------------------------------------
+
+Windows: Building PySide distribution from git repository
+---------------------------------------------------------
 
 #. Clone ``PySide`` setup scripts from git repository:
 
@@ -198,8 +201,9 @@ Building PySide distribution from git repository
 
       c:\> c:\Python27\python.exe setup.py bdist_wheel --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
-Installing PySide distribution
-------------------------------
+
+Windows: Installing PySide distribution
+---------------------------------------
 
 #. After the successful build, install the distribution with ``pip``:
    
@@ -207,8 +211,9 @@ Installing PySide distribution
 
       c:\> c:\Python27\Scripts\pip install --use-wheel dist\PySide-1.2.2-cp27-none-win32.whl
 
-Installing PySide distribution into ``virtual`` Python environment
-------------------------------------------------------------------
+
+Windows: Installing PySide distribution into ``virtual`` Python environment
+---------------------------------------------------------------------------
 
 #. Install latest `virtualenv` distribution:
 
@@ -234,11 +239,12 @@ Installing PySide distribution into ``virtual`` Python environment
 
       c:\> Scripts\pip install --use-wheel ..\dist\PySide-1.2.2-cp27-none-win32.whl
 
+
 Building PySide on a Linux System (Ubuntu 12.04 - 14.04)
 ========================================================
 
-Installing prerequisities
--------------------------
+Linux: Installing prerequisities
+--------------------------------
 
 #. Install build dependencies:
 
@@ -263,8 +269,9 @@ Installing prerequisities
 
       $ sudo pip2.7 install wheel
 
-Building PySide distribution
-----------------------------
+
+Linux: Building PySide distribution
+-----------------------------------
 
 #. Download ``PySide`` source distribution:
 
@@ -296,8 +303,9 @@ Building PySide distribution
 
       $ python2.7 setup.py bdist_wheel --qmake=/usr/bin/qmake-qt4 --standalone
 
-Building PySide distribution from git repository
-------------------------------------------------
+
+Linux: Building PySide distribution from git repository
+-------------------------------------------------------
 
 #. Clone ``PySide`` setup scripts from git repository:
 
@@ -329,8 +337,9 @@ Building PySide distribution from git repository
 
       $ python2.7 setup.py bdist_wheel --qmake=/usr/bin/qmake-qt4
 
-Installing PySide distribution
-------------------------------
+
+Linux: Installing PySide distribution
+-------------------------------------
 
 #. After the successful build, install the distribution with ``pip``:
    
@@ -344,8 +353,9 @@ Installing PySide distribution
 
       $ sudo python2.7 pyside_postinstall.py -install
 
-Installing PySide distribution into ``virtual`` Python environment
-------------------------------------------------------------------
+
+Linux: Installing PySide distribution into ``virtual`` Python environment
+-------------------------------------------------------------------------
 
 #. Install latest `virtualenv` distribution:
 
