@@ -245,6 +245,34 @@ Windows: Installing PySide distribution into ``virtual`` Python environment
 Building PySide on a Mac OS X System
 ====================================
 
+Mac OS X is a Unix flavor, partially based upon 
+`BSD Unix <http://en.wikipedia.org/wiki/Berkeley_Software_Distribution>`_.
+
+The supported Mac OS X versions created by `Apple <http://www.apple.com/>`_ are
+
+- OS X 10.6 *Snow Leopard*
+- OS X 10.7 *Lion*
+- OS X 10.8 *Mountain Lion*
+- OS X 10.9 *Mavericks*
+
+Mac OS X is a proprietary UNIX flavor of BSD Unix and only partially similar to
+Linux. Therefore, the usual packages from Linux distributions cannot be used
+without modifications.
+
+There are several known package managers which provide support for Mac OS X, namely
+
+- `MacPorts <http://www.macports.org/>`_
+- `Fink <http://www.finkproject.org/>`_
+- `Homebrew <http://brew.sh/>`_
+
+The main purpose of all of these projects is to provide the missing Linux packages
+for Mac OS X.
+
+Throughout this tutorial, we are only using `Homebrew <http://brew.sh/>`_, because
+it appears to be the most light-weight package manager available.
+
+But it should be easy to translate these instructions for the other, heavier package managers.
+
 
 Mac OS X: Installing prerequisites
 ----------------------------------
