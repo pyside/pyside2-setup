@@ -98,11 +98,6 @@ run directly by:
    
       python $(which pyside_postinstall.py) -install
 
-.. note::
-
-  Provided binaries are without any other external dependencies.
-  All required Qt libraries, development tools and examples are included.
-
 
 Installing PySide on a UNIX System
 ----------------------------------
