@@ -439,7 +439,8 @@ Options
 .. note::
 
   This option is broken on Mac OS X and fails to produce a usable distribution.
-
+  But adding multiple targets on the same command line works, so you can build eggs
+  and wheels with one compilation.
 
 ``--cmake``
     Specify the path to cmake.
