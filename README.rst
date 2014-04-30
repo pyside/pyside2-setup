@@ -99,11 +99,11 @@ run directly by:
       $ python $(which pyside_postinstall.py) -install
 
 
-Installing PySide on a UNIX System
-----------------------------------
+Installing PySide on a Linux System
+-----------------------------------
 
-We do not provide binaries for UNIX System. Please read the build instructions in section
-``Building PySide on a UNIX System``.
+We do not provide binaries for a Linux System. Please read the build instructions in section
+``Building PySide on a Linux System``.
 
 Building PySide on a Windows System
 ===================================
@@ -234,8 +234,8 @@ Installing PySide distribution into ``virtual`` Python environment
 
       c:\> Scripts\pip install --use-wheel ..\dist\PySide-1.2.2-cp27-none-win32.whl
 
-Building PySide on a UNIX System (Ubuntu 12.04 - 14.04)
-=======================================================
+Building PySide on a Linux System (Ubuntu 12.04 - 14.04)
+========================================================
 
 Installing prerequisities
 -------------------------
@@ -381,15 +381,15 @@ Installing PySide distribution into ``virtual`` Python environment
 PySide Setup Script command line options
 ========================================
 
-Usage on Windows System
------------------------
+Usage on a Windows System
+-------------------------
     
    ::
 
       c:\> c:\Python27\python.exe setup.py [distribution_type] [options]
 
-Usage on UNIX System
---------------------
+Usage on a Linux System
+-----------------------
     
    ::
 
@@ -399,15 +399,15 @@ Distribution types
 ------------------
 
 ``bdist_wheel``
-    Create wheel binary distribution.
+    Create a wheel binary distribution.
     This distribution type can be installed with ``pip``.
 
 ``bdist_egg``
-    Create egg binary distribution.
+    Create an egg binary distribution.
     This distribution type can be installed with ``easy_install``.
 
 ``bdist_wininst``
-    Create standalone windows installer with embedded Qt libs and development tools.
+    Create a standalone windows installer with embedded Qt libs and development tools.
     This distribution type can be installed with ``easy_install``.
 
 ``install``
@@ -418,7 +418,7 @@ Distribution types
     ``sys.path``, yet can still be edited directly from its source folder.
 
 ``sdist``
-    Create full source distribution with included sources of PySide Setup Scripts,
+    Create a full source distribution with included sources of PySide Setup Scripts,
     PySide, Shiboken, PySide Tools and PySide Examples.
     Can be used to build binary distribution in offline mode.
 
@@ -467,7 +467,7 @@ Options
 
 ``--make-spec``
     Specify the cmake makefile generator type.
-    Available values are ``msvc`` on Windows System and ``make`` on UNIX System.
+    Available values are ``msvc`` on Windows System and ``make`` on a Linux/OS X System.
 
 ``--no-examples``
     Don't include PySide examples in PySide distribution
