@@ -220,7 +220,7 @@ Installing PySide distribution into ``virtual`` Python environment
 
    ::
 
-      c:\> c:\Python27\Scripts\virtualenv --no-site-packages env
+      c:\> c:\Python27\Scripts\virtualenv env
 
 #. Switch to the ``env`` directory:
 
@@ -357,7 +357,7 @@ Installing PySide distribution into ``virtual`` Python environment
 
    ::
 
-      $ virtualenv-2.7 --no-site-packages env
+      $ virtualenv-2.7 env
 
 #. Switch to the ``env`` directory:
 
