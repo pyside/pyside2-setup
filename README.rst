@@ -269,13 +269,46 @@ The main purpose of all of these projects is to provide the missing Linux packag
 for Mac OS X.
 
 Throughout this tutorial, we are only using `Homebrew <http://brew.sh/>`_, because
-it appears to be the most light-weight package manager available.
+it appears to be the most light-weight package manager available. All installations
+are made to /usr/local/(bin|lib|include|shared) by simple symlinks.
 
 But it should be easy to translate these instructions for the other, heavier package managers.
 
 
 Mac OS X: Installing prerequisites
 ----------------------------------
+
+#. Install Package Manager:
+
+   ::
+   
+      $ ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+      # follow the on-screen instructions to make adjustions, especially tun
+      
+.. note::
+
+      An case of trouble, check the output from
+      
+      $ brew doctor
+      
+      Also see the `homebrew homepage<http://brew.sh/>` for further information
+
+#. Install `Xcode <https://itunes.apple.com/en/app/xcode/id497799835?mt=12>`_:
+
+Follow the on-screen instructions. If you selected any extensions to be installed,
+wait for their completion befor you proceed.
+
+#. Install the Xcode command Line Tools:
+
+   After Xcode installation has finished, you can open a command shell and issue
+   
+   ::
+   
+      $ xcode-select --install
+      
+   This will open a dialog wirth further instructions.
+   After the command line tools are installed, you will not need to use Xcode again
+   in order to set up PySide.
 
 #. Install build dependencies:
 
