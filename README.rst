@@ -44,7 +44,7 @@ To install PySide on Windows you can choose from the following options:
 
       pip install -U PySide --use-wheel -f http://download.qt-project.org/official_releases/pyside/
 
-#. Use setuptools to install the `egg` binary packages:
+#. Use setuptools to install the `egg` binary packages (deprecated):
    
    ::
 
@@ -57,6 +57,52 @@ To install PySide on Windows you can choose from the following options:
 
   Provided binaries are without any other external dependencies.
   All required Qt libraries, development tools and examples are included.
+
+
+Installing PySide on a Mac OS X System
+--------------------------------------
+
+You need to install or build Qt 4.8 first, see the `Qt Project Documentation
+<http://qt-project.org/doc/qt-4.8/install-mac.html>`_.
+
+Alternatively you can use `Homebrew <http://brew.sh/>`_ and install Qt with
+
+   ::
+   
+      brew install qt
+
+To install PySide on Mac OS X you can choose from the following options:
+
+#. Use pip to install the `wheel` binary packages:
+   
+   ::
+
+      pip install -U PySide --use-wheel -f http://download.qt-project.org/official_releases/pyside/
+
+#. Use setuptools to install the `egg` binary packages (deprecated):
+   
+   ::
+
+      easy_install -U PySide
+
+After the installation, the following call must be made manually:
+
+   ::
+   
+      pyside_postinstall.py -install
+      
+If for some reason the script is not callable, it can alternatively be
+run directly by:
+
+   ::
+   
+      python $(which pyside_postinstall.py) -install
+
+.. note::
+
+  Provided binaries are without any other external dependencies.
+  All required Qt libraries, development tools and examples are included.
+
 
 Installing PySide on a UNIX System
 ----------------------------------
