@@ -432,11 +432,12 @@ Mac OS X: Building PySide distribution from git repository
 
       $ python2.7 setup.py bdist_wheel --version=1.2.2
 
-#. Optionally you can build standalone version of distribution with embedded Qt libs:
-
-   ::
-
-      $ python2.7 setup.py bdist_wheel --version=1.2.2 --standalone
+   ..  commented out, working on this
+        #. Optionally you can build standalone version of distribution with embedded Qt libs:
+        
+           ::
+        
+              $ python2.7 setup.py bdist_wheel --version=1.2.2 --standalone
 
 #. To build the development version of ``PySide`` distribution, ignore the --version parameter:
 
