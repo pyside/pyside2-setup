@@ -322,7 +322,7 @@ wait for their completion before you proceed.
       $ brew install install python cmake qt
 
 Remark: This installs Homebrew Python, which is fine for you as a single user.
-If you are considering to build for externals, see the section on XXX
+If you are considering to build for externals, see the section ``About PySide Distributions``.
 
 #. Install latest ``pip`` distribution into the Python you
    installed in the first step: download `get-pip.py 
@@ -356,6 +356,33 @@ If you are considering to build for externals, see the section on XXX
       $ sudo pip2.7 install wheel
 
 
+Mac OS X: About PySide Distribution
+-----------------------------------
+
+If you want to build PySide for your own use, the above instructions are ok.
+
+But when you are considering to build PySide for other versions or other users, you need
+to be aware of the following caveat:
+
+- Mac OS X has the concept of a ``MACOSX_DEPLOYMENT_TARGET``
+
+- The current deployment targets which work with PySide are 10.6 to 10.9 .
+
+- All binary installers from https://www.python.org are built with the sessing
+
+    ::
+    
+        $ export MACOSX_DEPLOYMENT_TARGET=10.6  # Snow Leopard
+
+- The default setting for the deployment target of an extension (like PySide)
+  is always set to the value that was present at the build time of CPython.
+  
+- Current distributions like Homebrew set the deployment target to the same
+  value as the OS version they are built with. (I.E. 10.9 for Mavericks).
+  
+- A PySide, built on Mavericks, will therefore not run on a Python that was built
+  for Mountain Lion.
+
 Mac OS X: Building PySide distribution
 --------------------------------------
 
@@ -381,13 +408,7 @@ Mac OS X: Building PySide distribution
 
    ::
 
-      $ python2.7 setup.py bdist_wheel --qmake=/usr/bin/qmake-qt4
-
-#. Optionally you can build standalone version of distribution with embedded Qt libs:
-
-   ::
-
-      $ python2.7 setup.py bdist_wheel --qmake=/usr/bin/qmake-qt4 --standalone
+      $ python2.7 setup.py bdist_wheel
 
 
 Mac OS X: Building PySide distribution from git repository
@@ -409,19 +430,19 @@ Mac OS X: Building PySide distribution from git repository
 
    ::
 
-      $ python2.7 setup.py bdist_wheel --qmake=/usr/bin/qmake-qt4 --version=1.2.2
+      $ python2.7 setup.py bdist_wheel --version=1.2.2
 
 #. Optionally you can build standalone version of distribution with embedded Qt libs:
 
    ::
 
-      $ python2.7 setup.py bdist_wheel --qmake=/usr/bin/qmake-qt4 --version=1.2.2 --standalone
+      $ python2.7 setup.py bdist_wheel --version=1.2.2 --standalone
 
 #. To build the development version of ``PySide`` distribution, ignore the --version parameter:
 
    ::
 
-      $ python2.7 setup.py bdist_wheel --qmake=/usr/bin/qmake-qt4
+      $ python2.7 setup.py bdist_wheel
 
 
 Mac OS X: Installing PySide distribution
@@ -455,23 +476,29 @@ Mac OS X: Installing PySide distribution into ``virtual`` Python environment
 
       $ virtualenv-2.7 env
 
-#. Switch to the ``env`` directory:
+#. Activate the virtual Python in the ``env`` directory:
 
    ::
 
-      $ cd env
+      $ source env/bin/activate
 
 #. Install the distribution with ``pip``:
    
    ::
 
-      $ bin/pip2.7 install --use-wheel ../dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
+      (env) $ pip install --use-wheel ../dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
 
 #. Run the post-install script to finish the package configuration:
    
    ::
 
-      $ bin/python bin/pyside_postinstall.py -install
+      (env) $ pyside_postinstall.py -install
+      
+#. Leave the virtual environment (optional):
+
+   ::
+   
+      (env) $ deactivate
 
 
 Building PySide on a Linux System (Ubuntu 12.04 - 14.04)
