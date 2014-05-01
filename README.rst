@@ -319,7 +319,10 @@ wait for their completion before you proceed.
 
    ::
 
-      $ sudo apt-get install build-essential git cmake libqt4-dev libphonon-dev python2.7-dev libxml2-dev libxslt1-dev qtmobility-dev
+      $ brew install install python cmake qt
+
+Remark: This installs Homebrew Python, which is fine for you as a single user.
+If you are considering to build for externals, see the section on XXX
 
 #. Install latest ``pip`` distribution into the Python you
    installed in the first step: download `get-pip.py 
@@ -331,6 +334,20 @@ wait for their completion before you proceed.
 
       $ wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
       $ sudo python2.7 get-pip.py
+
+.. note::
+    
+  There are situations with older Python versions, where the above procedure does not work.
+  You can then use this last-resort work-around (tested):
+  
+  ::
+  
+      $ wget https://bitbucket.org/pypa/setuptools/raw/bootstrap-py24/ez_setup.py'
+      $ sudo python2.7 ez_setup.py
+      $ sudo easy_install pip
+      $ sudo pip install setuptools -U
+      $ sudo pip install wheel -U
+
 
 #. Install latest ``wheel`` distribution:
 
