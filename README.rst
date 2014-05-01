@@ -283,20 +283,21 @@ Mac OS X: Installing prerequisites
    ::
    
       $ ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
-      # follow the on-screen instructions to make adjustions, especially tun
-      
-.. note::
 
-      An case of trouble, check the output from
+      # follow the on-screen instructions to make adjustions, especially run
       
       $ brew doctor
       
-      Also see the `homebrew homepage<http://brew.sh/>` for further information
+      Also see the `homebrew homepage <http://brew.sh/>`_ for further information
 
-#. Install `Xcode <https://itunes.apple.com/en/app/xcode/id497799835?mt=12>`_:
+#. Install `Xcode <https://itunes.apple.com/en/app/xcode/id497799835?mt=12>`_ (optional):
 
 Follow the on-screen instructions. If you selected any extensions to be installed,
 wait for their completion befor you proceed.
+
+If you are using Mavericks, you can also use the Xcode Command Line Tools without actually installing Xcode
+(not tested, see this article: `How to Install Command Line Tools in OS X Mavericks (Without Xcode)
+http://osxdaily.com/2014/02/12/install-command-line-tools-mac-os-x/`_).
 
 #. Install the Xcode command Line Tools:
 
