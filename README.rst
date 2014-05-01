@@ -169,7 +169,7 @@ Windows: Building PySide distribution
 
       c:\> cd PySide-1.2.2
 
-#. Build the `wheel` binary distribution:
+#. Build the ``wheel`` binary distribution:
 
    ::
 
@@ -311,7 +311,7 @@ wait for their completion before you proceed.
    
       $ xcode-select --install
       
-   This will open a dialog wirth further instructions.
+   This will open a dialog window with further instructions.
    After the command line tools are installed, you will not need to use Xcode again
    in order to set up PySide.
 
