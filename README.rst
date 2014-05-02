@@ -341,8 +341,7 @@ If you are considering to build for externals, see the section ``About PySide Di
   You can then use this last-resort work-around (tested):
   
   ::
-  
-      $ wget https://bitbucket.org/pypa/setuptools/raw/bootstrap-py24/ez_setup.py'
+      $ wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
       $ sudo python2.7 ez_setup.py
       $ sudo easy_install pip
       $ sudo pip install setuptools -U
@@ -500,6 +499,7 @@ Mac OS X: Installing PySide distribution into ``virtual`` Python environment
    ::
    
       (env) $ deactivate
+      $ 
 
 
 Building PySide on a Linux System (Ubuntu 12.04 - 14.04)
