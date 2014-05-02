@@ -367,7 +367,7 @@ to be aware of the following caveat:
 
 - The current deployment targets which work with PySide are 10.6 to 10.9 .
 
-- All binary installers from https://www.python.org are built with the sessing
+- All binary installers from https://www.python.org are built with the setting
 
     ::
     
