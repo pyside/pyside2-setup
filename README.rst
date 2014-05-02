@@ -374,9 +374,9 @@ to be aware of the following caveat:
         $ export MACOSX_DEPLOYMENT_TARGET=10.6  # Snow Leopard
 
 - The default setting for the deployment target of an extension (like PySide)
-  is always set to the value that was present at the build time of CPython.
+  is always inherited from the Python used for building.
   You can set the deployment target higher than that, but not below the
-  OS X version that was set with your Python installation.
+  OS X version that was set during building your Python installation.
   
 - Current distributions like Homebrew set the deployment target to the same
   value as the OS version they are built with. (I.E. 10.9 for Mavericks).
@@ -391,7 +391,7 @@ Recommendation:
 - Use one of the `Python.org Distributions <https://www.python.org/downloads/>`_
   or 
   
-- build your own Python, either from a tar archive (
+- Build your own Python, either from a tar archive (
   `Python 2.7 <https://www.python.org/ftp/python/2.7.6/Python-2.7.6.tgz>`_ or
   `Python 3.4 <https://www.python.org/ftp/python/3.4.0/Python-3.4.0.tgz>`_), or from a
   `Mercurial repository <https://docs.python.org/devguide/>`_ with an explicit setting of
