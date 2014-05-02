@@ -176,8 +176,8 @@ Windows: Building PySide distribution
       c:\> c:\Python27\python.exe setup.py bdist_wheel --qmake=c:\Qt\4.8.5\bin\qmake.exe --openssl=c:\OpenSSL32bit\bin
 
 
-Windows: Building PySide distribution from git repository
----------------------------------------------------------
+Windows: Building PySide distribution from a Git repository
+-----------------------------------------------------------
 
 #. Clone ``PySide`` setup scripts from git repository:
 
@@ -319,10 +319,11 @@ wait for their completion before you proceed.
 
    ::
 
-      $ brew install install python cmake qt
+      $ brew install python cmake qt
 
-Remark: This installs Homebrew Python, which is fine for you as a single user.
-If you are considering to build for externals, see the section ``About PySide Distributions``.
+Remark: This installs ``Homebrew`` Python, which is fine for you as a single user.
+If you are considering to build installers for external users, see the section
+``About PySide Distributions``.
 
 #. Install latest ``pip`` distribution into the Python you
    installed in the first step: download `get-pip.py 
@@ -338,9 +339,8 @@ If you are considering to build for externals, see the section ``About PySide Di
 .. note::
     
   There are situations with older Python versions, where the above procedure does not work.
-  You can then use this last-resort work-around (tested):
+  You can then use this last-resort work-around (tested)::
   
-  ::
       $ wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
       $ sudo python2.7 ez_setup.py
       $ sudo easy_install pip
@@ -375,12 +375,27 @@ to be aware of the following caveat:
 
 - The default setting for the deployment target of an extension (like PySide)
   is always set to the value that was present at the build time of CPython.
+  You can set the deployment target higher than that, but not below the
+  OS X version that was set with your Python installation.
   
 - Current distributions like Homebrew set the deployment target to the same
   value as the OS version they are built with. (I.E. 10.9 for Mavericks).
   
-- A PySide, built on Mavericks, will therefore not run on a Python that was built
+- Example: A PySide, built on Mavericks, will therefore not run on a Python that was built
   for Mountain Lion.
+
+Recommendation:
+
+- Use Homebrew's simplicity for your own machine. Do not use it for distributing.
+
+- Use one of the `Python.org Distributions <https://www.python.org/downloads/>`_
+  or 
+  
+- build your own Python, either from a tar archive (
+  `Python 2.7 <https://www.python.org/ftp/python/2.7.6/Python-2.7.6.tgz>`_ or
+  `Python 3.4 <https://www.python.org/ftp/python/3.4.0/Python-3.4.0.tgz>`_), or from a
+  `Mercurial repository <https://docs.python.org/devguide/>`_ with an explicit setting of
+  ``MACOSX_DEPLOYMENT_TARGET``.
 
 Mac OS X: Building PySide distribution
 --------------------------------------
@@ -410,8 +425,8 @@ Mac OS X: Building PySide distribution
       $ python2.7 setup.py bdist_wheel
 
 
-Mac OS X: Building PySide distribution from git repository
-----------------------------------------------------------
+Mac OS X: Building PySide distribution from a Git repository
+------------------------------------------------------------
 
 #. Clone ``PySide`` setup scripts from git repository:
 
@@ -566,8 +581,8 @@ Linux: Building PySide distribution
       $ python2.7 setup.py bdist_wheel --qmake=/usr/bin/qmake-qt4 --standalone
 
 
-Linux: Building PySide distribution from git repository
--------------------------------------------------------
+Linux: Building PySide distribution from a Git repository
+---------------------------------------------------------
 
 #. Clone ``PySide`` setup scripts from git repository:
 
