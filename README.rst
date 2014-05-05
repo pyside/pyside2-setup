@@ -282,15 +282,15 @@ Mac OS X: Installing prerequisites
 #. Install Package Manager:
 
    ::
-   
+
       $ ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
 
 Follow the on-screen instructions to make adjustions, especially run
- 
+
    ::
-        
+
       $ brew doctor
-      
+
 Also see the `homebrew homepage <http://brew.sh/>`_ for further information
 
 #. Install `Xcode <https://itunes.apple.com/en/app/xcode/id497799835?mt=12>`_ (optional):
@@ -307,11 +307,11 @@ wait for their completion before you proceed.
 #. Install the Xcode command Line Tools:
 
    After Xcode installation has finished, you can open a command shell and issue
-   
+
    ::
-   
+
       $ xcode-select --install
-      
+
    This will open a dialog window with further instructions.
    After the command line tools are installed, you will not need to use Xcode again
    in order to set up PySide.
@@ -338,16 +338,15 @@ If you are considering to build installers for external users, see the section
       $ sudo python2.7 get-pip.py
 
 .. note::
-    
+
   There are situations with older Python versions, where the above procedure does not work.
   You can then use this last-resort work-around (tested)::
-  
-      $ wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
-      $ sudo python2.7 ez_setup.py
-      $ sudo easy_install pip
-      $ sudo pip install setuptools -U
-      $ sudo pip install wheel -U
 
+    $ wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
+    $ sudo python2.7 ez_setup.py
+    $ sudo easy_install pip
+    $ sudo pip install setuptools -U
+    $ sudo pip install wheel -U
 
 #. Install latest ``wheel`` distribution:
 
@@ -371,7 +370,7 @@ to be aware of the following caveat:
 - All binary installers from https://www.python.org are built with the setting
 
     ::
-    
+
         $ export MACOSX_DEPLOYMENT_TARGET=10.6  # Snow Leopard
 
 - The default setting for the deployment target of an extension (like PySide)
@@ -671,17 +670,17 @@ PySide Setup Script command line options
 
 Usage on a Windows System
 -------------------------
-    
-   ::
 
-      c:\> c:\Python27\python.exe setup.py [distribution_type] [options]
+::
+
+   c:\> c:\Python27\python.exe setup.py [distribution_type] [options]
 
 Usage on a Linux/Mac OS X System
 --------------------------------
-    
-   ::
 
-      python2.7 setup.py [distribution_type] [options]
+::
+
+   python2.7 setup.py [distribution_type] [options]
 
 
 Distribution types
