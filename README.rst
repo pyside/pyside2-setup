@@ -54,9 +54,6 @@ To install PySide on Windows you can choose from the following options:
 
       easy_install -U PySide
 
-#. Download and install the packages from the `releases page
-   <http://qt-project.org/wiki/PySide_Binaries_Windows>`_.
-
 .. note::
 
   Provided binaries are without any other external dependencies.
