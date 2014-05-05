@@ -21,7 +21,11 @@ The PySide documentation is hosted at `http://pyside.github.io/docs/pyside/
 Compatibility
 =============
 
-PySide requires Python 2.6 or later and Qt 4.6 or better. Qt 5.x is currently not supported.
+PySide requires Python 2.6 or later and Qt 4.6 or better.
+
+.. note::
+
+  Qt 5.x is currently not supported.
 
 Installation
 ============
@@ -30,7 +34,7 @@ Installing prerequisites
 ------------------------
 
 Install latest ``pip`` distribution: download `get-pip.py
-<https://raw.github.com/pypa/pip/master/contrib/get-pip.py>`_ and run it using
+<https://bootstrap.pypa.io/get-pip.py>`_ and run it using
 the ``python`` interpreter.
 
 Installing PySide on a Windows System
@@ -42,7 +46,7 @@ To install PySide on Windows you can choose from the following options:
    
    ::
 
-      pip install -U PySide --use-wheel -f http://download.qt-project.org/official_releases/pyside/
+      pip install -U PySide
 
 #. Use setuptools to install the ``egg`` binary packages (deprecated):
    
@@ -77,7 +81,7 @@ To install PySide on Mac OS X you can choose from the following options:
    
    ::
 
-      $ pip install -U PySide --use-wheel -f http://download.qt-project.org/official_releases/pyside/
+      $ pip install -U PySide -f http://download.qt-project.org/official_releases/pyside/
 
 #. Use setuptools to install the ``egg`` binary packages (deprecated):
    
@@ -142,7 +146,7 @@ Windows: Installing prerequisites
 
 #. Install latest ``pip`` distribution into the Python you
    installed in the first step: download `get-pip.py 
-   <https://raw.github.com/pypa/pip/master/contrib/get-pip.py>`_ and run it using
+   <https://bootstrap.pypa.io/get-pip.py>`_ and run it using
    the ``python`` interpreter of your Python 2.7 installation using a
    command prompt:
 
@@ -211,7 +215,7 @@ Windows: Installing PySide distribution
    
    ::
 
-      c:\> c:\Python27\Scripts\pip install --use-wheel dist\PySide-1.2.2-cp27-none-win32.whl
+      c:\> c:\Python27\Scripts\pip install dist\PySide-1.2.2-cp27-none-win32.whl
 
 
 Windows: Installing PySide distribution into ``virtual`` Python environment
@@ -239,7 +243,7 @@ Windows: Installing PySide distribution into ``virtual`` Python environment
    
    ::
 
-      c:\> Scripts\pip install --use-wheel ..\dist\PySide-1.2.2-cp27-none-win32.whl
+      c:\> Scripts\pip install ..\dist\PySide-1.2.2-cp27-none-win32.whl
 
 
 Building PySide on a Mac OS X System
@@ -327,13 +331,13 @@ If you are considering to build installers for external users, see the section
 
 #. Install latest ``pip`` distribution into the Python you
    installed in the first step: download `get-pip.py 
-   <https://raw.github.com/pypa/pip/master/contrib/get-pip.py>`_ and run it using
+   <https://bootstrap.pypa.io/get-pip.py>`_ and run it using
    the ``python`` interpreter of your Python 2.7 installation using a
    command prompt:
 
    ::
 
-      $ wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+      $ wget https://bootstrap.pypa.io/get-pip.py
       $ sudo python2.7 get-pip.py
 
 .. note::
@@ -467,7 +471,7 @@ Mac OS X: Installing PySide distribution
    
    ::
 
-      $ sudo pip2.7 install --use-wheel dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
+      $ sudo pip2.7 install dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
 
 #. Run the post-install script to finish the package configuration:
    
@@ -501,7 +505,7 @@ Mac OS X: Installing PySide distribution into ``virtual`` Python environment
    
    ::
 
-      (env) $ pip install --use-wheel ../dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
+      (env) $ pip install ../dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
 
 #. Run the post-install script to finish the package configuration:
    
@@ -531,13 +535,13 @@ Linux: Installing prerequisites
 
 #. Install latest ``pip`` distribution into the Python you
    installed in the first step: download `get-pip.py 
-   <https://raw.github.com/pypa/pip/master/contrib/get-pip.py>`_ and run it using
+   <https://bootstrap.pypa.io/get-pip.py>`_ and run it using
    the ``python`` interpreter of your Python 2.7 installation using a
    command prompt:
 
    ::
 
-      $ wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+      $ wget https://bootstrap.pypa.io/get-pip.py
       $ sudo python2.7 get-pip.py
 
 #. Install latest ``wheel`` distribution:
@@ -622,7 +626,7 @@ Linux: Installing PySide distribution
    
    ::
 
-      $ sudo pip2.7 install --use-wheel dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
+      $ sudo pip2.7 install dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
 
 #. Run the post-install script to finish the package configuration:
    
@@ -656,7 +660,7 @@ Linux: Installing PySide distribution into ``virtual`` Python environment
    
    ::
 
-      $ bin/pip2.7 install --use-wheel ../dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
+      $ bin/pip2.7 install ../dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
 
 #. Run the post-install script to finish the package configuration:
    
@@ -742,7 +746,6 @@ Options
 .. note::
 
   This option does not work on Mac OS X, yet.
-
 
 ``--version``
     Specify what version of PySide distribution to build.
