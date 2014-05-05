@@ -25,7 +25,7 @@ PySide requires Python 2.6 or later and Qt 4.6 or better.
 
 .. note::
 
-  Qt 5.x is currently not supported.
+   Qt 5.x is currently not supported.
 
 Installation
 ============
@@ -43,21 +43,21 @@ Installing PySide on a Windows System
 To install PySide on Windows you can choose from the following options:
 
 #. Use pip to install the ``wheel`` binary packages:
-   
+
    ::
 
       pip install -U PySide
 
 #. Use setuptools to install the ``egg`` binary packages (deprecated):
-   
+
    ::
 
       easy_install -U PySide
 
 .. note::
 
-  Provided binaries are without any other external dependencies.
-  All required Qt libraries, development tools and examples are included.
+   Provided binaries are without any other external dependencies.
+   All required Qt libraries, development tools and examples are included.
 
 
 Installing PySide on a Mac OS X System
@@ -68,36 +68,36 @@ You need to install or build Qt 4.8 first, see the `Qt Project Documentation
 
 Alternatively you can use `Homebrew <http://brew.sh/>`_ and install Qt with
 
-   ::
-   
-      $ brew install qt
+::
+
+   $ brew install qt
 
 To install PySide on Mac OS X you can choose from the following options:
 
 #. Use pip to install the ``wheel`` binary packages:
-   
+
    ::
 
       $ pip install -U PySide -f http://download.qt-project.org/official_releases/pyside/
 
 #. Use setuptools to install the ``egg`` binary packages (deprecated):
-   
+
    ::
 
       $ easy_install -U PySide
 
 After the installation, the following call must be made manually:
 
-   ::
-   
-      $ pyside_postinstall.py -install
+::
+
+   $ pyside_postinstall.py -install
       
 If for some reason the script is not callable, it can alternatively be
 run directly by:
 
-   ::
-   
-      $ python $(which pyside_postinstall.py) -install
+::
+
+   $ python $(which pyside_postinstall.py) -install
 
 
 Installing PySide on a Linux System
@@ -209,7 +209,7 @@ Windows: Installing PySide distribution
 ---------------------------------------
 
 #. After the successful build, install the distribution with ``pip``:
-   
+
    ::
 
       c:\> c:\Python27\Scripts\pip install dist\PySide-1.2.2-cp27-none-win32.whl
@@ -237,7 +237,7 @@ Windows: Installing PySide distribution into ``virtual`` Python environment
       c:\> cd env
 
 #. Install the distribution with ``pip``:
-   
+
    ::
 
       c:\> Scripts\pip install ..\dist\PySide-1.2.2-cp27-none-win32.whl
@@ -285,24 +285,24 @@ Mac OS X: Installing prerequisites
 
       $ ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
 
-Follow the on-screen instructions to make adjustions, especially run
+   Follow the on-screen instructions to make adjustions, especially run
 
    ::
 
       $ brew doctor
 
-Also see the `homebrew homepage <http://brew.sh/>`_ for further information
+   Also see the `homebrew homepage <http://brew.sh/>`_ for further information
 
 #. Install `Xcode <https://itunes.apple.com/en/app/xcode/id497799835?mt=12>`_ (optional):
 
-Follow the on-screen instructions. If you selected any extensions to be installed,
-wait for their completion before you proceed.
+   Follow the on-screen instructions. If you selected any extensions to be installed,
+   wait for their completion before you proceed.
 
-.. note::
+   .. note::
 
-    If you are using Mavericks, you can also use the Xcode Command Line Tools without actually installing Xcode
-    (not tested, see this article: `How to Install Command Line Tools in OS X Mavericks (Without Xcode)
-    <http://osxdaily.com/2014/02/12/install-command-line-tools-mac-os-x/>`_).
+      If you are using Mavericks, you can also use the Xcode Command Line Tools without actually installing Xcode
+      (not tested, see this article: `How to Install Command Line Tools in OS X Mavericks (Without Xcode)
+      <http://osxdaily.com/2014/02/12/install-command-line-tools-mac-os-x/>`_).
 
 #. Install the Xcode command Line Tools:
 
@@ -322,9 +322,9 @@ wait for their completion before you proceed.
 
       $ brew install python cmake qt
 
-Remark: This installs ``Homebrew`` Python, which is fine for you as a single user.
-If you are considering to build installers for external users, see the section
-``About PySide Distributions``.
+   Remark: This installs ``Homebrew`` Python, which is fine for you as a single user.
+   If you are considering to build installers for external users, see the section
+   ``About PySide Distributions``.
 
 #. Install latest ``pip`` distribution into the Python you
    installed in the first step: download `get-pip.py 
@@ -337,16 +337,16 @@ If you are considering to build installers for external users, see the section
       $ wget https://bootstrap.pypa.io/get-pip.py
       $ sudo python2.7 get-pip.py
 
-.. note::
+   .. note::
 
-  There are situations with older Python versions, where the above procedure does not work.
-  You can then use this last-resort work-around (tested)::
+      There are situations with older Python versions, where the above procedure does not work.
+      You can then use this last-resort work-around (tested)::
 
-    $ wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
-    $ sudo python2.7 ez_setup.py
-    $ sudo easy_install pip
-    $ sudo pip install setuptools -U
-    $ sudo pip install wheel -U
+         $ wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
+         $ sudo python2.7 ez_setup.py
+         $ sudo easy_install pip
+         $ sudo pip install setuptools -U
+         $ sudo pip install wheel -U
 
 #. Install latest ``wheel`` distribution:
 
@@ -369,9 +369,9 @@ to be aware of the following caveat:
 
 - All binary installers from https://www.python.org are built with the setting
 
-    ::
+::
 
-        $ export MACOSX_DEPLOYMENT_TARGET=10.6  # Snow Leopard
+   $ export MACOSX_DEPLOYMENT_TARGET=10.6  # Snow Leopard
 
 - The default setting for the deployment target of an extension (like PySide)
   is always inherited from the Python used for building.
@@ -464,7 +464,7 @@ Mac OS X: Installing PySide distribution
 ----------------------------------------
 
 #. After the successful build, install the distribution with ``pip``:
-   
+
    ::
 
       $ sudo pip2.7 install dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
@@ -498,21 +498,21 @@ Mac OS X: Installing PySide distribution into ``virtual`` Python environment
       $ source env/bin/activate
 
 #. Install the distribution with ``pip``:
-   
+
    ::
 
       (env) $ pip install ../dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
 
 #. Run the post-install script to finish the package configuration:
-   
+
    ::
 
       (env) $ pyside_postinstall.py -install
-      
+
 #. Leave the virtual environment (optional):
 
    ::
-   
+
       (env) $ deactivate
       $ 
 
@@ -619,13 +619,13 @@ Linux: Installing PySide distribution
 -------------------------------------
 
 #. After the successful build, install the distribution with ``pip``:
-   
+
    ::
 
       $ sudo pip2.7 install dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
 
 #. Run the post-install script to finish the package configuration:
-   
+
    ::
 
       $ sudo python2.7 pyside_postinstall.py -install
@@ -653,13 +653,13 @@ Linux: Installing PySide distribution into ``virtual`` Python environment
       $ cd env
 
 #. Install the distribution with ``pip``:
-   
+
    ::
 
       $ bin/pip2.7 install ../dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
 
 #. Run the post-install script to finish the package configuration:
-   
+
    ::
 
       $ bin/python bin/pyside_postinstall.py -install
@@ -724,11 +724,11 @@ Options
     Skip rebuilding everything and create distribution from prebuilt binaries.
     Before using this option first time, the full distribution build is required.
 
-.. note::
+    .. note::
 
-  This option is broken on Mac OS X and fails to produce a usable distribution.
-  But adding multiple targets on the same command line works, so you can build eggs
-  and wheels with one compilation.
+      This option is broken on Mac OS X and fails to produce a usable distribution.
+      But adding multiple targets on the same command line works, so you can build eggs
+      and wheels with one compilation.
 
 ``--cmake``
     Specify the path to cmake.
@@ -739,9 +739,9 @@ Options
     This option is allways enabled on Windows.
     On Linux it's disabled by default.
 
-.. note::
+    .. note::
 
-  This option does not work on Mac OS X, yet.
+      This option does not work on Mac OS X, yet.
 
 ``--version``
     Specify what version of PySide distribution to build.
