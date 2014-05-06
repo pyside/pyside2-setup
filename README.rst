@@ -94,7 +94,7 @@ To install PySide on Mac OS X you can choose from the following options:
 
    ::
 
-      $ pip install -U PySide -f http://download.qt-project.org/official_releases/pyside/
+      $ pip install -U PySide
 
 
 After the installation, the following call must be made manually:
