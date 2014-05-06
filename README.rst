@@ -2,6 +2,22 @@
 PySide
 ======
 
+.. image:: https://pypip.in/wheel/PySide/badge.png
+   :target: https://pypi.python.org/pypi/PySide/
+   :alt: Wheel Status
+
+.. image:: https://pypip.in/download/PySide/badge.png
+   :target: https://pypi.python.org/pypi/PySide/
+   :alt: Downloads
+
+.. image:: https://pypip.in/version/PySide/badge.png
+   :target: https://pypi.python.org/pypi/PySide/
+   :alt: Latest Version
+
+.. image:: https://pypip.in/license/PySide/badge.png
+   :target: https://pypi.python.org/pypi/PySide/
+   :alt: License
+
 .. contents:: **Table of Contents** 
 
 Introduction
