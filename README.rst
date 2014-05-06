@@ -107,13 +107,6 @@ After the installation, the following call must be made manually:
 ::
 
    $ pyside_postinstall.py -install
-      
-If for some reason the script is not callable, it can alternatively be
-run directly by:
-
-::
-
-   $ python $(which pyside_postinstall.py) -install
 
 
 Installing PySide on a Linux System
