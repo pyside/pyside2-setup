@@ -927,15 +927,22 @@ class pyside_build(_build):
                 vars=vars)
 
 
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+try:
+    with open(os.path.join(script_dir, 'README.rst')) as f:
+        README = f.read()
+    with open(os.path.join(script_dir, 'CHANGES.rst')) as f:
+        CHANGES = "Changes" + "\n" + \
+                  "=======" + "\n\n" + \
+                  f.read()
+except IOError:
+    README = CHANGES = ''
+
 
 setup(
     name = "PySide",
     version = __version__,
     description = ("Python bindings for the Qt cross-platform application and UI framework"),
-    long_description = open("README.rst").read() + "\n" +
-                       open("CHANGES.rst").read(),
+    long_description = README + "\n\n" + CHANGES,
     options = {
         "bdist_wininst": {
             "install_script": "pyside_postinstall.py",

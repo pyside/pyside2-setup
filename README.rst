@@ -110,17 +110,17 @@ Installing PySide on a Linux System
 
 We do not provide binaries for Linux. Please read the build instructions in section
 `Building PySide on a Linux System
-<http://pyside.readthedocs.org/en/latest/#building-pyside-on-a-linux-system-ubuntu-12-04-14-04>`_.
+<http://pyside.readthedocs.org/en/latest/building/linux.html>`_.
 
 
 Building PySide
 ===============
 
-- `Building PySide on a Windows System <http://pyside.readthedocs.org/en/latest/#building-pyside-on-a-windows-system>`_.
+- `Building PySide on a Windows System <http://pyside.readthedocs.org/en/latest/building/windows.html>`_.
 
-- `Building PySide on a Mac OS X System <http://pyside.readthedocs.org/en/latest/#building-pyside-on-a-mac-os-x-system>`_.
+- `Building PySide on a Mac OS X System <http://pyside.readthedocs.org/en/latest/building/macosx.html>`_.
 
-- `Building PySide on a Linux System <http://pyside.readthedocs.org/en/latest/#building-pyside-on-a-linux-system-ubuntu-12-04-14-04>`_.
+- `Building PySide on a Linux System <http://pyside.readthedocs.org/en/latest/building/linux.html>`_.
 
 
 Feedback and getting involved
