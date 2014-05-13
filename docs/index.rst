@@ -20,8 +20,6 @@ PySide
    :target: https://pypi.python.org/pypi/PySide/
    :alt: License
 
-.. contents:: **Table of Contents** 
-
 Introduction
 ============
 
