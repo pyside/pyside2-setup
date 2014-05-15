@@ -3,8 +3,6 @@
 PySide Setup Script command line options
 ========================================
 
-.. contents:: :local:
-
 Usage on a Windows System
 -------------------------
 

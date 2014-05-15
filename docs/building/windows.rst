@@ -3,8 +3,6 @@
 Building PySide on a Windows System
 ===================================
 
-.. contents:: :local:
-
 Installing prerequisites
 ------------------------
 

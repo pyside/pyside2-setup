@@ -3,8 +3,6 @@
 Building PySide on a Mac OS X System
 ====================================
 
-.. contents:: :local:
-
 Mac OS X is a Unix flavor, partially based upon 
 `BSD Unix <http://en.wikipedia.org/wiki/Berkeley_Software_Distribution>`_.
 

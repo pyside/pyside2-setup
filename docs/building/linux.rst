@@ -3,8 +3,6 @@
 Building PySide on a Linux System (Ubuntu 12.04 - 14.04)
 ========================================================
 
-.. contents:: :local:
-
 Installing prerequisites
 ------------------------
 

@@ -931,9 +931,7 @@ try:
     with open(os.path.join(script_dir, 'README.rst')) as f:
         README = f.read()
     with open(os.path.join(script_dir, 'CHANGES.rst')) as f:
-        CHANGES = "Changes" + "\n" + \
-                  "=======" + "\n\n" + \
-                  f.read()
+        CHANGES = f.read()
 except IOError:
     README = CHANGES = ''
 
