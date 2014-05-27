@@ -878,6 +878,8 @@
 
     <value-type name="ProtectedProperty" />
 
+    <function signature="createProtectedProperty()" />
+
     <template name="boolptr_at_end_fix_beginning">
     bool __ok__;
     %RETURN_TYPE %0 = %CPPSELF.%TYPE::%FUNCTION_NAME(%ARGUMENT_NAMES, &amp;__ok__);

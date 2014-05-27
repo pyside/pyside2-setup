@@ -143,16 +143,22 @@ struct BindingManager::BindingManagerPrivate {
     bool destroying;
 
     BindingManagerPrivate() : destroying(false) {}
-    void releaseWrapper(void* cptr);
+    bool releaseWrapper(void* cptr, SbkObject* wrapper);
     void assignWrapper(SbkObject* wrapper, const void* cptr);
 
 };
 
-void BindingManager::BindingManagerPrivate::releaseWrapper(void* cptr)
+bool BindingManager::BindingManagerPrivate::releaseWrapper(void* cptr, SbkObject* wrapper)
 {
+    // The wrapper argument is checked to ensure that the correct wrapper is released.
+    // Returns true if the correct wrapper is found and released.
+    // If wrapper argument is NULL, no such check is performed.
     WrapperMap::iterator iter = wrapperMapper.find(cptr);
-    if (iter != wrapperMapper.end())
+    if (iter != wrapperMapper.end() && (wrapper == 0 || iter->second == wrapper)) {
         wrapperMapper.erase(iter);
+        return true;
+    }
+    return false;
 }
 
 void BindingManager::BindingManagerPrivate::assignWrapper(SbkObject* wrapper, const void* cptr)
@@ -234,12 +240,12 @@ void BindingManager::releaseWrapper(SbkObject* sbkObj)
     void** cptrs = reinterpret_cast<SbkObject*>(sbkObj)->d->cptr;
     for (int i = 0; i < numBases; ++i) {
         unsigned char *cptr = reinterpret_cast<unsigned char *>(cptrs[i]);
-        m_d->releaseWrapper(cptr);
+        m_d->releaseWrapper(cptr, sbkObj);
         if (d && d->mi_offsets) {
             int* offset = d->mi_offsets;
             while (*offset != -1) {
                 if (*offset > 0)
-                    m_d->releaseWrapper(cptr + *offset);
+                    m_d->releaseWrapper(reinterpret_cast<void *>((std::size_t) cptr + (*offset)), sbkObj);
                 offset++;
             }
         }

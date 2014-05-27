@@ -36,7 +36,7 @@ import unittest
 from sample import cacheSize
 from sample import ProtectedNonPolymorphic, ProtectedVirtualDestructor
 from sample import ProtectedPolymorphic, ProtectedPolymorphicDaughter, ProtectedPolymorphicGrandDaughter
-from sample import ProtectedProperty, ProtectedEnumClass
+from sample import createProtectedProperty, ProtectedProperty, ProtectedEnumClass
 from sample import PrivateDtor
 from sample import Event, ObjectType, Point
 
@@ -300,7 +300,23 @@ class ProtectedPropertyTest(unittest.TestCase):
         self.assertEqual(self.obj.protectedValueTypeProperty, point)
         self.assertFalse(self.obj.protectedValueTypeProperty is point)
         pointProperty = self.obj.protectedValueTypeProperty
-        self.assertFalse(self.obj.protectedValueTypeProperty is pointProperty)
+        self.assertTrue(self.obj.protectedValueTypeProperty is pointProperty)
+
+    def testProtectedValueTypePropertyWrapperRegistration(self):
+        '''Access colocated protected value type property.'''
+        cache_size = cacheSize()
+        point = Point(12, 34)
+        obj = createProtectedProperty()
+        obj.protectedValueTypeProperty
+        self.assertEqual(obj.protectedValueTypeProperty.copy(),
+                         obj.protectedValueTypeProperty)
+        obj.protectedValueTypeProperty = point
+        self.assertEqual(obj.protectedValueTypeProperty, point)
+        self.assertFalse(obj.protectedValueTypeProperty is point)
+        pointProperty = obj.protectedValueTypeProperty
+        self.assertTrue(obj.protectedValueTypeProperty is pointProperty)
+        del obj, point, pointProperty
+        self.assertEqual(cacheSize(), cache_size)
 
     def testProtectedValueTypePointerProperty(self):
         '''Writes and reads a protected value type pointer property.'''

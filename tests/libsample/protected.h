@@ -127,19 +127,25 @@ class LIBSAMPLE_API ProtectedProperty
 {
 public:
     ProtectedProperty()
-        : protectedProperty(0),
+        : protectedValueTypeProperty(Point(0, 0)),
+          protectedProperty(0),
           protectedEnumProperty(Event::NO_EVENT),
-          protectedValueTypeProperty(Point(0, 0)),
           protectedValueTypePointerProperty(0),
           protectedObjectTypeProperty(0)
     {}
 protected:
+    // This is deliberately the first member to test wrapper registration
+    // for value type members sharing the same memory address.
+    Point protectedValueTypeProperty;
     int protectedProperty;
     std::list<int> protectedContainerProperty;
     Event::EventType protectedEnumProperty;
-    Point protectedValueTypeProperty;
     Point* protectedValueTypePointerProperty;
     ObjectType* protectedObjectTypeProperty;
 };
+
+LIBSAMPLE_API inline ProtectedProperty* createProtectedProperty() {
+    return new ProtectedProperty;
+}
 
 #endif // PROTECTED_H

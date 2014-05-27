@@ -1577,6 +1577,14 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
     // Python owns it and C++ wrapper is false.
     if (shouldGenerateCppWrapper(overloads.first()->ownerClass()))
         s << INDENT << "Shiboken::Object::setHasCppWrapper(sbkSelf, true);" << endl;
+    // Need to check if a wrapper for same pointer is already registered
+    // Caused by bug PYSIDE-217, where deleted objects' wrappers are not released
+    s << INDENT << "if (Shiboken::BindingManager::instance().hasWrapper(cptr)) {" << endl;
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "Shiboken::BindingManager::instance().releaseWrapper(Shiboken::BindingManager::instance().retrieveWrapper(cptr));" << endl;
+    }
+    s << INDENT << "}" << endl;
     s << INDENT << "Shiboken::BindingManager::instance().registerWrapper(sbkSelf, cptr);" << endl;
 
     // Create metaObject and register signal/slot
@@ -4011,12 +4019,38 @@ void CppGenerator::writeGetterFunction(QTextStream &s,
         cppField = QLatin1String("fieldValue");
     }
 
-    s << INDENT << "PyObject* pyOut = ";
+    s << INDENT << "PyObject* pyOut = 0;\n";
     if (newWrapperSameObject) {
+        // Special case colocated field with same address (first field in a struct)
+        s << INDENT << "if (reinterpret_cast<void *>("
+                    << cppField
+                    << ") == reinterpret_cast<void *>("
+                    << CPP_SELF_VAR << ")) {\n";
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "pyOut = (PyObject*)Shiboken::Object::findColocatedChild("
+                        << "(SbkObject*)self , (SbkObjectType*)"
+                        << cpythonTypeNameExt(fieldType)
+                        << ");" << "\n";
+            s << INDENT << "if (pyOut) {Py_IncRef(pyOut); return pyOut;}\n";
+        }
+        s << INDENT << "}\n";
+        // Check if field wrapper has already been created.
+        s << INDENT << "else if (Shiboken::BindingManager::instance().hasWrapper(" << cppField << ")) {" << "\n";
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "pyOut = (PyObject*)Shiboken::BindingManager::instance().retrieveWrapper(" << cppField << ");" << "\n";
+            s << INDENT << "Py_IncRef(pyOut);" << "\n";
+            s << INDENT << "return pyOut;" << "\n";
+        }
+        s << INDENT << "}\n";
+        // Create and register new wrapper
+        s << INDENT << "pyOut = ";
         s << "Shiboken::Object::newObject((SbkObjectType*)" << cpythonTypeNameExt(fieldType);
         s << ", " << cppField << ", false, true);" << endl;
         s << INDENT << "Shiboken::Object::setParent(" PYTHON_SELF_VAR ", pyOut)";
     } else {
+        s << INDENT << "pyOut = ";
         writeToPythonConversion(s, fieldType, metaField->enclosingClass(), cppField);
     }
     s << ';' << endl;
