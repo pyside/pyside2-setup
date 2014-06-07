@@ -101,10 +101,12 @@ Building PySide distribution from a Git repository
 Installing PySide distribution
 ------------------------------
 
-#. After the successful build, install the distribution with ``pip``:
+#. After the successful build, install the distribution with ``pip``. The file name may vary depending on your platform so look into the ``dist`` directory for the correct name:
 
    ::
 
+      $ ls dist
+      PySide-1.2.2-cp27-none-linux-x86_64.whl
       $ sudo pip2.7 install dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
 
 #. Run the post-install script to finish the package configuration:
@@ -135,7 +137,7 @@ Installing PySide distribution into ``virtual`` Python environment
 
       $ cd env
 
-#. Install the distribution with ``pip``:
+#. Install the distribution with ``pip`` (wheel binary file name may vary by platform):
 
    ::
 
