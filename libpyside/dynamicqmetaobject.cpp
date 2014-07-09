@@ -166,7 +166,8 @@ static bool isQRealType(const char *type)
 
 uint PropertyData::flags() const
 {
-    const char* typeName = type().data();
+    const QByteArray btype(type());
+    const char* typeName = btype.data();
     uint flags = Invalid;
     if (!isVariantType(typeName))
          flags |= EnumOrFlag;
