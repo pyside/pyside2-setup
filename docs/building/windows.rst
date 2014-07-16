@@ -10,11 +10,11 @@ Installing prerequisites
    <http://www.python.org/download/>`_.
 
 #. Install `Qt 4.8 libraries for Windows VS 2008 edition
-   <http://download.qt-project.org/official_releases/qt/4.8/4.8.5/qt-win-opensource-4.8.5-vs2008.exe>`_
+   <http://download.qt-project.org/official_releases/qt/4.8/4.8.6/qt-opensource-windows-x86-vs2008-4.8.6.exe>`_
    when building against Python 2.6, 2.7 or 3.2.
-   
+
    Install `Qt 4.8 libraries for Windows VS 2010 edition
-   <http://download.qt-project.org/official_releases/qt/4.8/4.8.5/qt-win-opensource-4.8.5-vs2010.exe>`_
+   <http://download.qt-project.org/official_releases/qt/4.8/4.8.6/qt-opensource-windows-x86-vs2010-4.8.6.exe>`_
    when building against Python 3.3 or 3.4.
 
 #. Install `Cmake
@@ -23,7 +23,7 @@ Installing prerequisites
 #. Install `Windows SDK v7.0
    <http://www.microsoft.com/en-us/download/details.aspx?id=3138>`_
    when building against Python 2.6, 2.7 or 3.2.
-   
+
    Install `Windows SDK v7.1
    <http://www.microsoft.com/en-us/download/details.aspx?id=8279>`_
    when building against Python 3.3 or 3.4.
