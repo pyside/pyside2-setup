@@ -225,13 +225,13 @@ def copyfile(src, dst, force=True, vars=None):
     if vars is not None:
         src = src.format(**vars)
         dst = dst.format(**vars)
-    
+
     if not os.path.exists(src) and not force:
         log.info("**Skiping copy file %s to %s. Source does not exists." % (src, dst))
         return
-    
+
     log.info("Copying file %s to %s." % (src, dst))
-    
+
     shutil.copy2(src, dst)
 
 
@@ -240,13 +240,13 @@ def makefile(dst, content=None, vars=None):
         if content is not None:
             content = content.format(**vars)
         dst = dst.format(**vars)
-    
+
     log.info("Making file %s." % (dst))
-    
+
     dstdir = os.path.dirname(dst)
     if not os.path.exists(dstdir):
         os.makedirs(dstdir)
-    
+
     f = open(dst, "wt")
     if content is not None:
         f.write(content)
@@ -255,7 +255,7 @@ def makefile(dst, content=None, vars=None):
 
 def copydir(src, dst, filter=None, ignore=None, force=True,
     recursive=True, vars=None):
-    
+
     if vars is not None:
         src = src.format(**vars)
         dst = dst.format(**vars)
@@ -265,17 +265,17 @@ def copydir(src, dst, filter=None, ignore=None, force=True,
         if ignore is not None:
             for i in range(len(ignore)):
                 ignore[i] = ignore[i].format(**vars)
-    
+
     if not os.path.exists(src) and not force:
         log.info("**Skiping copy tree %s to %s. Source does not exists. filter=%s. ignore=%s." % \
             (src, dst, filter, ignore))
         return
-    
+
     log.info("Copying tree %s to %s. filter=%s. ignore=%s." % \
         (src, dst, filter, ignore))
-    
+
     names = os.listdir(src)
-    
+
     errors = []
     for name in names:
         srcname = os.path.join(src, name)
@@ -298,7 +298,8 @@ def copydir(src, dst, filter=None, ignore=None, force=True,
         except EnvironmentError as why:
             errors.append((srcname, dstname, str(why)))
     try:
-        shutil.copystat(src, dst)
+        if os.path.exists(dst):
+            shutil.copystat(src, dst)
     except OSError as why:
         if WindowsError is not None and isinstance(why, WindowsError):
             # Copying file access times may fail on Windows
@@ -335,9 +336,9 @@ def run_process(args, initial_env=None):
         for line in lines:
             log.info(line.rstrip('\r'))
         return buffer
-    
+
     _log("Running process: {0}".format(" ".join([(" " in x and '"{0}"'.format(x) or x) for x in args])))
-    
+
     if sys.platform != "win32":
         try:
             spawn(args)
@@ -348,24 +349,24 @@ def run_process(args, initial_env=None):
     shell = False
     if sys.platform == "win32":
         shell = True
-    
+
     if initial_env is None:
         initial_env = os.environ
-    
+
     proc = popenasync.Popen(args,
         stdin = subprocess.PIPE,
-        stdout = subprocess.PIPE, 
+        stdout = subprocess.PIPE,
         stderr = subprocess.STDOUT,
         universal_newlines = 1,
         shell = shell,
         env = initial_env)
-    
+
     log_buffer = None;
     while proc.poll() is None:
         log_buffer = _log(proc.read_async(wait=0.1, e=0))
     if log_buffer:
         _log(log_buffer)
-    
+
     proc.wait()
     return proc.returncode
 
@@ -380,7 +381,7 @@ def get_environment_from_batch_command(env_cmd, initial=None):
     If initial is supplied, it is used as the initial environment passed
     to the child process.
     """
-    
+
     def validate_pair(ob):
         try:
             if not (len(ob) == 2):
@@ -389,7 +390,7 @@ def get_environment_from_batch_command(env_cmd, initial=None):
         except:
             return False
         return True
-    
+
     def consume(iter):
         try:
             while True: next(iter)
