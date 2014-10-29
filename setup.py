@@ -243,10 +243,7 @@ class pyside_install(_install):
         # for bdist_wininst to use) - in which case we must *not* run our
         # installer
         if not self.dry_run and not self.root:
-            if sys.platform == "win32":
-                filename = os.path.join(self.prefix, "Scripts", "pyside_postinstall.py")
-            else:
-                filename = os.path.join(self.prefix, "bin", "pyside_postinstall.py")
+            filename = os.path.join(self.install_scripts, "pyside_postinstall.py")
             if not os.path.isfile(filename):
                 raise RuntimeError("Can't find '%s'" % (filename,))
             print("Executing post install script '%s'..." % filename)
