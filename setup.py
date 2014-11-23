@@ -102,6 +102,7 @@ from utils import option_value
 from utils import update_env_path
 from utils import init_msvc_env
 from utils import regenerate_qt_resources
+from utils import filter_match
 
 # Declare options
 OPTION_DEBUG = has_option("debug")
@@ -233,11 +234,13 @@ for pkg in ["pyside_package/PySide", "pyside_package/pysideuic"]:
     pkg_dir = os.path.join(script_dir, pkg)
     os.makedirs(pkg_dir)
 
+# TODO:
+#   This class can be removed after OSX support
+#   is implemented in pyside_build.update_rpath()
 class pyside_install(_install):
     def run(self):
         _install.run(self)
-        # Custom script we run at the end of installing - this is the same script
-        # run by bdist_wininst
+        # Custom script we run at the end of installing
         # If self.root has a value, it means we are being "installed" into
         # some other directory than Python itself (eg, into a temp directory
         # for bdist_wininst to use) - in which case we must *not* run our
@@ -250,7 +253,6 @@ class pyside_install(_install):
             cmd = [
                 os.path.abspath(sys.executable),
                 filename,
-                "-install"
             ]
             run_process(cmd)
 
@@ -650,12 +652,8 @@ class pyside_build(_build):
         return self.prepare_packages_posix(vars)
 
     def prepare_packages_posix(self, vars):
+        executables = []
         if sys.platform.startswith('linux'):
-            # patchelf -> PySide/patchelf
-            copyfile(
-                "{script_dir}/patchelf",
-                "{dist_dir}/PySide/patchelf",
-                vars=vars)
             so_ext = '.so'
             so_star = so_ext + '.*'
         elif sys.platform == 'darwin':
@@ -694,7 +692,7 @@ class pyside_build(_build):
             "{dist_dir}/PySide/scripts/uic.py",
             force=False, vars=vars)
         # <install>/bin/* -> PySide/
-        copydir(
+        executables.extend(copydir(
             "{install_dir}/bin/",
             "{dist_dir}/PySide",
             filter=[
@@ -702,7 +700,7 @@ class pyside_build(_build):
                 "pyside-rcc",
                 "shiboken",
             ],
-            recursive=False, vars=vars)
+            recursive=False, vars=vars))
         # <install>/lib/lib* -> PySide/
         copydir(
             "{install_dir}/lib/",
@@ -740,7 +738,7 @@ class pyside_build(_build):
             if sys.platform == 'darwin':
                 raise RuntimeError('--standalone not yet supported for OSX')
             # <qt>/bin/* -> <setup>/PySide
-            copydir("{qt_bin_dir}", "{dist_dir}/PySide",
+            executables.extend(copydir("{qt_bin_dir}", "{dist_dir}/PySide",
                 filter=[
                     "designer",
                     "linguist",
@@ -748,7 +746,7 @@ class pyside_build(_build):
                     "lupdate",
                     "lconvert",
                 ],
-                recursive=False, vars=vars)
+                recursive=False, vars=vars))
             # <qt>/lib/* -> <setup>/PySide
             copydir("{qt_lib_dir}", "{dist_dir}/PySide",
                 filter=[
@@ -769,6 +767,9 @@ class pyside_build(_build):
             copydir("{qt_translations_dir}", "{dist_dir}/PySide/translations",
                 filter=["*.qm"],
                 vars=vars)
+        # Update rpath to $ORIGIN
+        if sys.platform.startswith('linux'):
+            self.update_rpath("{dist_dir}/PySide".format(**vars), executables)
 
     def prepare_packages_win32(self, vars):
         pdbs = ['*.pdb'] if self.debug or self.build_type == 'RelWithDebInfo' else []       
@@ -923,6 +924,41 @@ class pyside_build(_build):
                 "{dist_dir}/PySide/pyside-python{py_version}{dbgPostfix}.pdb",
                 vars=vars)
 
+    def update_rpath(self, package_path, executables):
+        if sys.platform.startswith('linux'):
+            pyside_libs = [lib for lib in os.listdir(package_path) if filter_match(
+                           lib, ["*.so", "*.so.*"])]
+
+            patchelf_path = os.path.join(self.script_dir, "patchelf")
+
+            def rpath_cmd(srcpath):
+                cmd = [patchelf_path, '--set-rpath', '$ORIGIN/', srcpath]
+                if run_process(cmd) != 0:
+                    raise RuntimeError("Error patching rpath in " + srcpath)
+
+        # TODO: Add support for OSX platform
+        #elif sys.platform == 'darwin':
+        #    pyside_libs = [lib for lib in os.listdir(package_path) if filter_match(
+        #                   lib, ["*.so", "*.dylib"])]
+        #    def rpath_cmd(srcpath):
+        #        utils.osx_localize_libpaths(srcpath, pyside_libs, None)
+
+        else:
+            raise RuntimeError('Not configured for platform ' +
+                               sys.platform)
+
+        pyside_libs.extend(executables)
+
+        # Update rpath in PySide libs
+        for srcname in pyside_libs:
+            srcpath = os.path.join(package_path, srcname)
+            if os.path.isdir(srcpath):
+                continue
+            if not os.path.exists(srcpath):
+                continue
+            rpath_cmd(srcpath)
+            print("Patched rpath to '$ORIGIN/' in %s." % (srcpath))
+
 
 try:
     with open(os.path.join(script_dir, 'README.rst')) as f:
@@ -938,14 +974,6 @@ setup(
     version = __version__,
     description = ("Python bindings for the Qt cross-platform application and UI framework"),
     long_description = README + "\n\n" + CHANGES,
-    options = {
-        "bdist_wininst": {
-            "install_script": "pyside_postinstall.py",
-        },
-        "bdist_msi": {
-            "install_script": "pyside_postinstall.py",
-        },
-    },
     scripts = [
         "pyside_postinstall.py"
     ],
