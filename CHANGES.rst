@@ -1,6 +1,17 @@
 Changes
 =======
 
+1.2.3 (2014-??-??)
+------------------
+
+Major changes
+~~~~~~~~~~~~~
+
+PySide-setup
+************
+
+- On Linux systems there is no more need to call the post-install script
+
 1.2.2 (2014-04-24)
 ------------------
 
