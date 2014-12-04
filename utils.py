@@ -233,6 +233,8 @@ def copyfile(src, dst, force=True, vars=None):
     log.info("Copying file %s to %s." % (src, dst))
 
     shutil.copy2(src, dst)
+    
+    return dst
 
 
 def makefile(dst, content=None, vars=None):
@@ -269,13 +271,14 @@ def copydir(src, dst, filter=None, ignore=None, force=True,
     if not os.path.exists(src) and not force:
         log.info("**Skiping copy tree %s to %s. Source does not exists. filter=%s. ignore=%s." % \
             (src, dst, filter, ignore))
-        return
+        return []
 
     log.info("Copying tree %s to %s. filter=%s. ignore=%s." % \
         (src, dst, filter, ignore))
 
     names = os.listdir(src)
 
+    results = []
     errors = []
     for name in names:
         srcname = os.path.join(src, name)
@@ -283,14 +286,14 @@ def copydir(src, dst, filter=None, ignore=None, force=True,
         try:
             if os.path.isdir(srcname):
                 if recursive:
-                    copydir(srcname, dstname, filter, ignore, force, recursive, vars)
+                    results.extend(copydir(srcname, dstname, filter, ignore, force, recursive, vars))
             else:
                 if (filter is not None and not filter_match(name, filter)) or \
                     (ignore is not None and filter_match(name, ignore)):
                     continue
                 if not os.path.exists(dst):
                     os.makedirs(dst)
-                copyfile(srcname, dstname, True, vars)
+                results.append(copyfile(srcname, dstname, True, vars))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
         except shutil.Error as err:
@@ -308,6 +311,7 @@ def copydir(src, dst, filter=None, ignore=None, force=True,
             errors.extend((src, dst, str(why)))
     if errors:
         raise EnvironmentError(errors)
+    return results
 
 
 def rmtree(dirname):
