@@ -18,6 +18,9 @@ PySide
    :target: https://pypi.python.org/pypi/PySide/
    :alt: License
 
+.. image:: https://readthedocs.org/projects/pip/badge/
+    :target: https://pyside.readthedocs.org
+
 .. contents:: **Table of Contents** 
    :depth: 2
 
