@@ -11,9 +11,9 @@ On Linux you can use option --standalone, to embed Qt libraries to PySide distri
 You can use option --only-package, if you want to create more binary packages (bdist_wheel, bdist_egg, ...)
 without rebuilding entire PySide every time:
   # First time we create bdist_wheel with full PySide build
-  python setup.py bdist_wheel --qmake=c:\Qt\4.8.5\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --opnessl=c:\libs\OpenSSL32bit\bin
+  python setup.py bdist_wheel --qmake=c:\Qt\4.8.5\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --openssl=c:\libs\OpenSSL32bit\bin
 
-  # Then we crate bdist_egg reusing PySide build with option --only-package
+  # Then we create bdist_egg reusing PySide build with option --only-package
   python setup.py bdist_egg --only-package --qmake=c:\Qt\4.8.5\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --opnessl=c:\libs\OpenSSL32bit\bin
 
 REQUIREMENTS:
