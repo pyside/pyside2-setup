@@ -414,9 +414,8 @@ bool AbstractMetaBuilder::build(QIODevice* input)
     ReportHandler::flush();
 
     // We need to know all global enums
-    QHash<QString, EnumModelItem> enumMap = m_dom->enumMap();
-    ReportHandler::setProgressReference(enumMap);
-    foreach (EnumModelItem item, enumMap) {
+    ReportHandler::setProgressReference(m_dom->enumMap());
+    foreach (EnumModelItem item, m_dom->enums()) {
         ReportHandler::progress("Generating enum model...");
         AbstractMetaEnum *metaEnum = traverseEnum(item, 0, QSet<QString>());
         if (metaEnum) {
