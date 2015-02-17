@@ -406,7 +406,10 @@ FunctionDefinitionList _ScopeModelItem::functionDefinitions() const
 
 EnumList _ScopeModelItem::enums() const
 {
-    return _M_enums.values();
+    EnumList result;
+    foreach (const QString& name, _M_enumNames)
+        result.append(_M_enums.value(name));
+    return result;
 }
 
 void _ScopeModelItem::addClass(ClassModelItem item)
@@ -440,7 +443,9 @@ void _ScopeModelItem::addTypeAlias(TypeAliasModelItem item)
 
 void _ScopeModelItem::addEnum(EnumModelItem item)
 {
+    _M_enumNames.removeOne(item->name());
     _M_enums.insert(item->name(), item);
+    _M_enumNames.append(item->name());
 }
 
 void _ScopeModelItem::removeClass(ClassModelItem item)
@@ -499,8 +504,10 @@ void _ScopeModelItem::removeEnum(EnumModelItem item)
 {
     QHash<QString, EnumModelItem>::Iterator it = _M_enums.find(item->name());
 
-    if (it != _M_enums.end() && it.value() == item)
+    if (it != _M_enums.end() && it.value() == item) {
+        _M_enumNames.removeOne(item->name());
         _M_enums.erase(it);
+    }
 }
 
 ClassModelItem _ScopeModelItem::findClass(const QString &name) const

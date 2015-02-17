@@ -401,6 +401,7 @@ private:
     _ScopeModelItem(const _ScopeModelItem &other);
     void operator = (const _ScopeModelItem &other);
 
+    QStringList _M_enumNames;
     QStringList _M_enumsDeclarations;
 };
 
