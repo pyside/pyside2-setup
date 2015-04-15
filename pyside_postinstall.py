@@ -50,12 +50,14 @@ def back_tick(cmd, ret_err=False):
     if not isinstance(out, str):
         # python 3
         out = out.decode()
+        err = err.decode()
     retcode = proc.returncode
     if retcode is None:
         proc.terminate()
         raise RuntimeError(cmd + ' process did not terminate')
     if retcode != 0:
-        raise RuntimeError(cmd + ' process returned code %d' % retcode)
+        raise RuntimeError(cmd + ' process returned code %d\n*** %s' %
+                           (retcode, err))
     out = out.strip()
     if not ret_err:
         return out
