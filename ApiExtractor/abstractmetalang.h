@@ -1395,9 +1395,7 @@ public:
     };
 
     AbstractMetaClass()
-            : m_namespace(false),
-              m_qobject(false),
-              m_hasVirtuals(false),
+            : m_hasVirtuals(false),
               m_isPolymorphic(false),
               m_hasNonpublic(false),
               m_hasVirtualSlots(false),
@@ -1907,8 +1905,6 @@ public:
         return m_hasToStringCapability;
     }
 private:
-    uint m_namespace : 1;
-    uint m_qobject : 1;
     uint m_hasVirtuals : 1;
     uint m_isPolymorphic : 1;
     uint m_hasNonpublic : 1;
@@ -1924,7 +1920,6 @@ private:
     uint m_hasCloneOperator : 1;
     uint m_isTypeAlias : 1;
     uint m_hasToStringCapability : 1;
-    uint m_reserved : 17;
 
     const AbstractMetaClass *m_enclosingClass;
     AbstractMetaClass *m_baseClass;
