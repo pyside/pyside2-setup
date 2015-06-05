@@ -1344,7 +1344,6 @@ private:
     AbstractMetaClass *m_class;
 
     uint m_hasQenumsDeclaration : 1;
-    uint m_reserved : 31;
 };
 
 typedef QList<AbstractMetaEnum *> AbstractMetaEnumList;

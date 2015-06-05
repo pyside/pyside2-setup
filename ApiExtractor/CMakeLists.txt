@@ -23,7 +23,7 @@ endif ()
 
 set(QT_USE_QTCORE 1)
 set(QT_USE_QTXML 1)
-include(${QT_USE_FILE})
+# no more supported: include(${QT_USE_FILE})
 add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
@@ -79,8 +79,8 @@ endif()
 
 set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
 
-qt4_add_resources(apiextractor_RCCS_SRC generator.qrc)
-qt4_automoc(apiextractor_SRC)
+qt5_add_resources(apiextractor_RCCS_SRC generator.qrc)
+set(CMAKE_AUTOMOC ON)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
@@ -88,6 +88,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}/parser/rpp
                     ${QT_INCLUDE_DIR}
                     ${APIEXTRACTOR_EXTRA_INCLUDES}
+                    ${Qt5Core_INCLUDE_DIRS}
                     )
 
 add_library(apiextractor STATIC ${apiextractor_SRC} ${apiextractor_RCCS_SRC})
