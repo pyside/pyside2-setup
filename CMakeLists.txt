@@ -1,14 +1,14 @@
 Include(icecc.cmake)
 project(shiboken)
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.11)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/
                       ${CMAKE_MODULE_PATH})
 
 find_package(Qt5 REQUIRED COMPONENTS Core) 
 
-add_definitions(${QT_DEFINITIONS})
+add_definitions(${Qt5Core_DEFINITIONS})
 
 set(shiboken_MAJOR_VERSION "1")
 set(shiboken_MINOR_VERSION "2")

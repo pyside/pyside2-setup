@@ -14,16 +14,17 @@ include_directories(${generators_SOURCE_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
                     ${APIEXTRACTOR_INCLUDE_DIR}
-                    ${QT_INCLUDE_DIR}
-                    ${QT_QTCORE_INCLUDE_DIR}
-                    ${QT_QTXML_INCLUDE_DIR})
+                    ${Qt5Core_INCLUDE_DIRS}
+                    ${Qt5Xml_INCLUDE_DIRS}
+                    )
 
 add_executable(shiboken ${shiboken_SRC})
 set_target_properties(shiboken PROPERTIES OUTPUT_NAME shiboken${shiboken_SUFFIX})
 target_link_libraries(shiboken
                       ${APIEXTRACTOR_LIBRARY}
-                      ${QT_QTCORE_LIBRARY}
-                      ${QT_QTXML_LIBRARY})
+                      ${Qt5Core_LIBRARIES}
+                      ${Qt5Xml_LIBRARIES}
+                      )
 
 configure_file(shibokenconfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/shibokenconfig.h" @ONLY)
 

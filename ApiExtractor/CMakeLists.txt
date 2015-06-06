@@ -86,14 +86,15 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}/parser
                     ${CMAKE_CURRENT_SOURCE_DIR}/parser/rpp
-                    ${QT_INCLUDE_DIR}
                     ${APIEXTRACTOR_EXTRA_INCLUDES}
                     ${Qt5Core_INCLUDE_DIRS}
                     ${QtXml_INCLUDE_DIRS}
                     )
 
 add_library(apiextractor STATIC ${apiextractor_SRC} ${apiextractor_RCCS_SRC})
-target_link_libraries(apiextractor ${APIEXTRACTOR_EXTRA_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTXMLPATTERNS_LIBRARY} ${QT_QTXML_LIBRARY})
+target_link_libraries(apiextractor
+                      ${APIEXTRACTOR_EXTRA_LIBRARIES}
+                      )
 
 if (BUILD_TESTS)
     enable_testing()
