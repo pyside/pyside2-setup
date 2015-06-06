@@ -1739,7 +1739,7 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                                || strArg == "QMultiMap" || strArg == "QMultiHash") {
                         strArg = "dict";
                     } else if (strArg == "QPair") {
-                        strArg == "2-tuple";
+                        strArg = "2-tuple";
                     }
                 } else {
                     strArg = argType->fullName();
@@ -3226,7 +3226,7 @@ void CppGenerator::writeEnumConverterInitialization(QTextStream& s, const TypeEn
 
 void CppGenerator::writeContainerConverterInitialization(QTextStream& s, const AbstractMetaType* type)
 {
-    QByteArray cppSignature = QMetaObject::normalizedSignature(type->cppSignature().toAscii());
+    QByteArray cppSignature = QMetaObject::normalizedSignature(type->cppSignature().toUtf8());
     s << INDENT << "// Register converter for type '" << cppSignature << "'." << endl;
     QString converter = converterObject(type);
     s << INDENT << converter << " = Shiboken::Conversions::createConverter(";
@@ -4919,7 +4919,7 @@ void CppGenerator::finishGeneration()
                         QString value = translateType(arg->type(), metaClass, ExcludeConst | ExcludeReference);
                         if (value.startsWith("::"))
                             value.remove(0, 2);
-                        typeResolvers << SBK_NORMALIZED_TYPE(value.toAscii().constData());
+                        typeResolvers << SBK_NORMALIZED_TYPE(value.toUtf8().constData());
                     }
                 }
             }

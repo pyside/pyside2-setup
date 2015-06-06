@@ -282,7 +282,7 @@ static inline void errorPrint(const QString& s,
     if (verAndBanner)
         printVerAndBanner();
 
-    std::cerr << s.toAscii().constData() << std::endl;
+    std::cerr << s.toUtf8().constData() << std::endl;
 }
 
 int main(int argc, char *argv[])
@@ -411,7 +411,7 @@ int main(int argc, char *argv[])
             QString version;
             package = parts.count() == 1 ? "*" : parts.first();
             version = parts.last();
-            extractor.setApiVersion(package, version.toAscii());
+            extractor.setApiVersion(package, version.toUtf8());
         }
     }
 

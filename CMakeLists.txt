@@ -1,7 +1,8 @@
 Include(icecc.cmake)
 project(shiboken)
 
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.1.3)
+cmake_policy(VERSION 3.1.3)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/
                       ${CMAKE_MODULE_PATH})
@@ -21,7 +22,7 @@ option(USE_PYTHON3 "Use python3 libraries to build shiboken." FALSE)
 if (USE_PYTHON3)
     find_package(Python3Libs)
     find_package(Python3InterpWithDebug)
-    #use commom vars
+    #use common vars
     set(PYTHONLIBS_FOUND ${PYTHON3LIBS_FOUND})
     set(PYTHON_LIBRARIES ${PYTHON3_LIBRARIES})
     set(PYTHON_INCLUDE_DIRS ${PYTHON3_INCLUDE_DIRS})
@@ -32,6 +33,7 @@ else()
     find_package(PythonLibs 2.6)
     find_package(PythonInterpWithDebug)
 endif()
+
 
 if (NOT PYTHON_SITE_PACKAGES)
     execute_process(
@@ -115,7 +117,7 @@ add_subdirectory(libshiboken)
 add_subdirectory(doc)
 
 # deps found, compile the generator.
-if (QT5_FOUND AND PYTHONINTERP_FOUND)
+if (Qt5Core_FOUND AND PYTHONINTERP_FOUND)
     add_subdirectory(generator)
     add_subdirectory(shibokenmodule)
 

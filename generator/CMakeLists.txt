@@ -1,5 +1,7 @@
 project(shibokengenerator)
 
+find_package(Qt5Xml)
+
 set(shiboken_SRC
 generator.cpp
 shiboken/cppgenerator.cpp
