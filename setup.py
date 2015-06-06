@@ -26,9 +26,15 @@ OpenSSL: You can specify the location of OpenSSL DLLs with option --opnessl=</pa
     You can download OpenSSL for windows here: http://slproweb.com/products/Win32OpenSSL.html
 """
 
-__version__ = "1.3.0dev"
+__version__ = "2.0.0.dev0"
 
 submodules = {
+    '2.0.0.dev0': [
+        ["shiboken2", "qt5"],
+        ["pyside2", "qt5"],
+        ["pyside-tools", "master"],
+        ["pyside-examples", "master"],
+    ],
     '1.3.0dev': [
         ["shiboken", "master"],
         ["pyside", "master"],
@@ -76,6 +82,8 @@ except ImportError:
 import os
 import sys
 import platform
+
+import difflib # for a close match of dirname and module
 
 from distutils import log
 from distutils.errors import DistutilsOptionError
@@ -548,6 +556,10 @@ class pyside_build(_build):
             raise DistutilsSetupError("Error building patchelf")
 
     def build_extension(self, extension):
+        # calculate the subrepos folder name
+        maybe = list(map(lambda x:x[0], submodules[__version__]))
+        folder = difflib.get_close_matches(extension, maybe)[0]
+
         log.info("Building module %s..." % extension)
         
         # Prepare folders
@@ -560,7 +572,7 @@ class pyside_build(_build):
         os.makedirs(module_build_dir)
         os.chdir(module_build_dir)
         
-        module_src_dir = os.path.join(self.sources_dir, extension)
+        module_src_dir = os.path.join(self.sources_dir, folder)
         
         # Build module
         cmake_cmd = [
