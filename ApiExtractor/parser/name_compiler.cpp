@@ -110,13 +110,13 @@ void NameCompiler::visitTemplateArgument(TemplateArgumentAST *node)
 #if defined (RXX_RESOLVE_TYPEDEF) // ### it'll break :(
             TypeInfo tp;
             tp.setQualifiedName(q);
-            tp = TypeInfo::resolveType(tp, _M_binder.load()->currentScope().load()->toItem());
+            tp = TypeInfo::resolveType(tp, _M_binder->currentScope()->toItem());
             q = tp.qualifiedName();
 #endif
 
-            if (CodeModelItem item = _M_binder->model()->findItem(q, _M_binder->currentScope().load()->toItem())) {
-                if (item.load()->name() == q.last())
-                    q = item.load()->qualifiedName();
+            if (CodeModelItem item = _M_binder->model()->findItem(q, _M_binder->currentScope()->toItem())) {
+                if (item->name() == q.last())
+                    q = item->qualifiedName();
             }
         }
 

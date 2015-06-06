@@ -83,13 +83,13 @@ void CodeModelFinder::visitUnqualifiedName(UnqualifiedNameAST *node)
     name_cc.run(node);
     QString id = name_cc.name();
 
-    if (ClassModelItem klass = _M_current_scope.load()->findClass(id)) {
+    if (ClassModelItem klass = _M_current_scope->findClass(id)) {
         _M_current_scope = klass;
     } else if (NamespaceModelItem parentNamespace = model_safe_cast<NamespaceModelItem>(_M_current_scope)) {
-        NamespaceModelItem ns = parentNamespace.load()->findNamespace(id);
+        NamespaceModelItem ns = parentNamespace->findNamespace(id);
         _M_current_scope = model_static_cast<ScopeModelItem>(ns);
     } else if (FileModelItem file = model_safe_cast<FileModelItem>(_M_current_scope)) {
-        NamespaceModelItem ns = file.load()->findNamespace(id);
+        NamespaceModelItem ns = file->findNamespace(id);
         _M_current_scope = model_static_cast<ScopeModelItem>(ns);
     }
 }
