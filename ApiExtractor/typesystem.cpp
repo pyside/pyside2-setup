@@ -25,7 +25,7 @@
 #include "typesystem_p.h"
 #include "typedatabase.h"
 #include "reporthandler.h"
-#include <QtXml>
+#include <QtXml/QtXml>
 
 static QString strings_Object = QLatin1String("Object");
 static QString strings_String = QLatin1String("String");
@@ -462,7 +462,7 @@ bool Handler::startElement(const QString &, const QString &n,
 
     if (!m_defaultPackage.isEmpty() && atts.index("since") != -1) {
         TypeDatabase* td = TypeDatabase::instance();
-        if (!td->checkApiVersion(m_defaultPackage, atts.value("since").toAscii())) {
+        if (!td->checkApiVersion(m_defaultPackage, atts.value("since").toUtf8())) {
             ++m_ignoreDepth;
             return true;
         }
@@ -2288,7 +2288,7 @@ bool TypeEntry::isCppPrimitive() const
         return false;
 
     PrimitiveTypeEntry* aliasedType = ((PrimitiveTypeEntry*)this)->basicAliasedTypeEntry();
-    QByteArray typeName = (aliasedType ? aliasedType->name() : m_name).toAscii();
+    QByteArray typeName = (aliasedType ? aliasedType->name() : m_name).toUtf8();
 
     if (typeName.contains(' ') || m_type == VoidType)
         return true;

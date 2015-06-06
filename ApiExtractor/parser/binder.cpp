@@ -64,7 +64,7 @@ FileModelItem Binder::run(AST *node)
     _M_current_access = CodeModel::Public;
 
     _M_current_file = model()->create<FileModelItem>();
-    updateItemPosition(_M_current_file->toItem(), node);
+    updateItemPosition(_M_current_file.load()->toItem(), node);
     visit(node);
     FileModelItem result = _M_current_file;
 
@@ -246,13 +246,13 @@ void Binder::declare_symbol(SimpleDeclarationAST *node, InitDeclaratorAST *init_
         name_cc.run(id->unqualified_name);
 
         FunctionModelItem fun = model()->create<FunctionModelItem>();
-        updateItemPosition(fun->toItem(), node);
-        fun->setAccessPolicy(_M_current_access);
-        fun->setFunctionType(_M_current_function_type);
-        fun->setName(name_cc.name());
-        fun->setAbstract(init_declarator->initializer != 0);
-        fun->setConstant(declarator->fun_cv != 0);
-        fun->setTemplateParameters(_M_current_template_parameters);
+        updateItemPosition(fun.load()->toItem(), node);
+        fun.load()->setAccessPolicy(_M_current_access);
+        fun.load()->setFunctionType(_M_current_function_type);
+        fun.load()->setName(name_cc.name());
+        fun.load()->setAbstract(init_declarator->initializer != 0);
+        fun.load()->setConstant(declarator->fun_cv != 0);
+        fun.load()->setTemplateParameters(_M_current_template_parameters);
         applyStorageSpecifiers(node->storage_specifiers, model_static_cast<MemberModelItem>(fun));
         applyFunctionSpecifiers(node->function_specifiers, fun);
 
@@ -261,31 +261,31 @@ void Binder::declare_symbol(SimpleDeclarationAST *node, InitDeclaratorAST *init_
                                                            declarator,
                                                            this);
 
-        fun->setType(qualifyType(typeInfo, symbolScope->qualifiedName()));
+        fun.load()->setType(qualifyType(typeInfo, symbolScope.load()->qualifiedName()));
 
 
-        fun->setVariadics(decl_cc.isVariadics());
+        fun.load()->setVariadics(decl_cc.isVariadics());
 
         // ... and the signature
         foreach (DeclaratorCompiler::Parameter p, decl_cc.parameters()) {
             ArgumentModelItem arg = model()->create<ArgumentModelItem>();
-            arg->setType(qualifyType(p.type, _M_context));
-            arg->setName(p.name);
-            arg->setDefaultValue(p.defaultValue);
+            arg.load()->setType(qualifyType(p.type, _M_context));
+            arg.load()->setName(p.name);
+            arg.load()->setDefaultValue(p.defaultValue);
             if (p.defaultValue)
-                arg->setDefaultValueExpression(p.defaultValueExpression);
-            fun->addArgument(arg);
+                arg.load()->setDefaultValueExpression(p.defaultValueExpression);
+            fun.load()->addArgument(arg);
         }
 
-        fun->setScope(symbolScope->qualifiedName());
-        symbolScope->addFunction(fun);
+        fun.load()->setScope(symbolScope.load()->qualifiedName());
+        symbolScope.load()->addFunction(fun);
     } else {
         VariableModelItem var = model()->create<VariableModelItem>();
-        updateItemPosition(var->toItem(), node);
-        var->setTemplateParameters(_M_current_template_parameters);
-        var->setAccessPolicy(_M_current_access);
+        updateItemPosition(var.load()->toItem(), node);
+        var.load()->setTemplateParameters(_M_current_template_parameters);
+        var.load()->setAccessPolicy(_M_current_access);
         name_cc.run(id->unqualified_name);
-        var->setName(name_cc.name());
+        var.load()->setName(name_cc.name());
         TypeInfo typeInfo = CompilerUtils::typeDescription(node->type_specifier,
                                                            declarator,
                                                            this);
@@ -297,11 +297,11 @@ void Binder::declare_symbol(SimpleDeclarationAST *node, InitDeclaratorAST *init_
             typeInfo.addArgument(p.type);
         }
 
-        var->setType(qualifyType(typeInfo, _M_context));
+        var.load()->setType(qualifyType(typeInfo, _M_context));
         applyStorageSpecifiers(node->storage_specifiers, model_static_cast<MemberModelItem>(var));
 
-        var->setScope(symbolScope->qualifiedName());
-        symbolScope->addVariable(var);
+        var.load()->setScope(symbolScope.load()->qualifiedName());
+        symbolScope.load()->addVariable(var);
     }
 }
 
@@ -339,54 +339,54 @@ void Binder::visitFunctionDefinition(FunctionDefinitionAST *node)
 
     FunctionDefinitionModelItem
     old = changeCurrentFunction(_M_model->create<FunctionDefinitionModelItem>());
-    _M_current_function->setScope(functionScope->qualifiedName());
-    updateItemPosition(_M_current_function->toItem(), node);
+    _M_current_function.load()->setScope(functionScope.load()->qualifiedName());
+    updateItemPosition(_M_current_function.load()->toItem(), node);
 
     Q_ASSERT(declarator->id->unqualified_name);
     name_cc.run(declarator->id->unqualified_name);
     QString unqualified_name = name_cc.name();
 
-    _M_current_function->setName(unqualified_name);
+    _M_current_function.load()->setName(unqualified_name);
     TypeInfo tmp_type = CompilerUtils::typeDescription(node->type_specifier,
                                                        declarator, this);
 
-    _M_current_function->setType(qualifyType(tmp_type, _M_context));
-    _M_current_function->setAccessPolicy(_M_current_access);
-    _M_current_function->setFunctionType(_M_current_function_type);
-    _M_current_function->setConstant(declarator->fun_cv);
-    _M_current_function->setTemplateParameters(_M_current_template_parameters);
+    _M_current_function.load()->setType(qualifyType(tmp_type, _M_context));
+    _M_current_function.load()->setAccessPolicy(_M_current_access);
+    _M_current_function.load()->setFunctionType(_M_current_function_type);
+    _M_current_function.load()->setConstant(declarator->fun_cv);
+    _M_current_function.load()->setTemplateParameters(_M_current_template_parameters);
 
     applyStorageSpecifiers(node->storage_specifiers,
                            model_static_cast<MemberModelItem>(_M_current_function));
     applyFunctionSpecifiers(node->function_specifiers,
                             model_static_cast<FunctionModelItem>(_M_current_function));
 
-    _M_current_function->setVariadics(decl_cc.isVariadics());
+    _M_current_function.load()->setVariadics(decl_cc.isVariadics());
 
     foreach (DeclaratorCompiler::Parameter p, decl_cc.parameters()) {
         ArgumentModelItem arg = model()->create<ArgumentModelItem>();
-        arg->setType(qualifyType(p.type, functionScope->qualifiedName()));
-        arg->setName(p.name);
-        arg->setDefaultValue(p.defaultValue);
+        arg.load()->setType(qualifyType(p.type, functionScope.load()->qualifiedName()));
+        arg.load()->setName(p.name);
+        arg.load()->setDefaultValue(p.defaultValue);
         if (p.defaultValue)
-            arg->setDefaultValueExpression(p.defaultValueExpression);
-        _M_current_function->addArgument(arg);
+            arg.load()->setDefaultValueExpression(p.defaultValueExpression);
+        _M_current_function.load()->addArgument(arg);
     }
 
-    functionScope->addFunctionDefinition(_M_current_function);
+    functionScope.load()->addFunctionDefinition(_M_current_function);
 
     FunctionModelItem prototype = model_static_cast<FunctionModelItem>(_M_current_function);
-    FunctionModelItem declared = functionScope->declaredFunction(prototype);
+    FunctionModelItem declared = functionScope.load()->declaredFunction(prototype);
 
     // try to find a function declaration for this definition..
     if (!declared) {
-        functionScope->addFunction(prototype);
+        functionScope.load()->addFunction(prototype);
     } else {
         applyFunctionSpecifiers(node->function_specifiers, declared);
 
         // fix the function type and the access policy
-        _M_current_function->setAccessPolicy(declared->accessPolicy());
-        _M_current_function->setFunctionType(declared->functionType());
+        _M_current_function.load()->setAccessPolicy(declared.load()->accessPolicy());
+        _M_current_function.load()->setFunctionType(declared.load()->functionType());
     }
 
     changeCurrentFunction(old);
@@ -455,7 +455,7 @@ void Binder::visitTemplateDeclaration(TemplateDeclarationAST *node)
 
         TemplateParameterModelItem p = model()->create<TemplateParameterModelItem>();
         name_cc.run(name);
-        p->setName(name_cc.name());
+        p.load()->setName(name_cc.name());
 
         _M_current_template_parameters.append(p);
         it = it->next;
@@ -517,12 +517,12 @@ void Binder::visitTypedef(TypedefAST *node)
         ScopeModelItem typedefScope = finder.resolveScope(declarator->id, scope);
 
         TypeAliasModelItem typeAlias = model()->create<TypeAliasModelItem> ();
-        updateItemPosition(typeAlias->toItem(), node);
-        typeAlias->setName(alias_name);
-        typeAlias->setType(qualifyType(typeInfo, currentScope()->qualifiedName()));
-        typeAlias->setScope(typedefScope->qualifiedName());
-        _M_qualified_types[typeAlias->qualifiedName().join(".")] = QString();
-        currentScope()->addTypeAlias(typeAlias);
+        updateItemPosition(typeAlias.load()->toItem(), node);
+        typeAlias.load()->setName(alias_name);
+        typeAlias.load()->setType(qualifyType(typeInfo, currentScope().load()->qualifiedName()));
+        typeAlias.load()->setScope(typedefScope.load()->qualifiedName());
+        _M_qualified_types[typeAlias.load()->qualifiedName().join(".")] = QString();
+        currentScope().load()->addTypeAlias(typeAlias);
     } while (it != end);
 }
 
@@ -536,16 +536,16 @@ void Binder::visitNamespace(NamespaceAST *node)
     if (!anonymous) {
         QString name = decode_symbol(node->namespace_name)->as_string();
 
-        QStringList qualified_name = scope->qualifiedName();
+        QStringList qualified_name = scope.load()->qualifiedName();
         qualified_name += name;
         NamespaceModelItem ns =
             model_safe_cast<NamespaceModelItem>(_M_model->findItem(qualified_name,
-                                                                   _M_current_file->toItem()));
+                                                                   _M_current_file.load()->toItem()));
         if (!ns) {
             ns = _M_model->create<NamespaceModelItem>();
-            updateItemPosition(ns->toItem(), node);
-            ns->setName(name);
-            ns->setScope(scope->qualifiedName());
+            updateItemPosition(ns.load()->toItem(), node);
+            ns.load()->setName(name);
+            ns.load()->setScope(scope.load()->qualifiedName());
         }
         old = changeCurrentNamespace(ns);
 
@@ -555,13 +555,13 @@ void Binder::visitNamespace(NamespaceAST *node)
     DefaultVisitor::visitNamespace(node);
 
     if (!anonymous) {
-        Q_ASSERT(scope->kind() == _CodeModelItem::Kind_Namespace
-                 || scope->kind() == _CodeModelItem::Kind_File);
+        Q_ASSERT(scope.load()->kind() == _CodeModelItem::Kind_Namespace
+                 || scope.load()->kind() == _CodeModelItem::Kind_File);
 
         _M_context.removeLast();
 
         if (NamespaceModelItem ns = model_static_cast<NamespaceModelItem>(scope))
-            ns->addNamespace(_M_current_namespace);
+            ns.load()->addNamespace(_M_current_namespace);
 
         changeCurrentNamespace(old);
     }
@@ -574,7 +574,7 @@ void Binder::visitForwardDeclarationSpecifier(ForwardDeclarationSpecifierAST *no
         return;
 
     ScopeModelItem scope = currentScope();
-    _M_qualified_types[(scope->qualifiedName() + name_cc.qualifiedName()).join(".")] = QString();
+    _M_qualified_types[(scope.load()->qualifiedName() + name_cc.qualifiedName()).join(".")] = QString();
 }
 
 void Binder::visitClassSpecifier(ClassSpecifierAST *node)
@@ -592,41 +592,41 @@ void Binder::visitClassSpecifier(ClassSpecifierAST *node)
     ScopeModelItem scope = currentScope();
 
     ClassModelItem old = changeCurrentClass(_M_model->create<ClassModelItem>());
-    updateItemPosition(_M_current_class->toItem(), node);
-    _M_current_class->setName(class_cc.name());
+    updateItemPosition(_M_current_class.load()->toItem(), node);
+    _M_current_class.load()->setName(class_cc.name());
 
     QStringList baseClasses = class_cc.baseClasses();
     TypeInfo info;
     for (int i = 0; i < baseClasses.size(); ++i) {
         info.setQualifiedName(baseClasses.at(i).split("::"));
-        baseClasses[i] = qualifyType(info, scope->qualifiedName()).qualifiedName().join("::");
+        baseClasses[i] = qualifyType(info, scope.load()->qualifiedName()).qualifiedName().join("::");
     }
 
-    _M_current_class->setBaseClasses(baseClasses);
-    _M_current_class->setClassType(decode_class_type(node->class_key));
-    _M_current_class->setTemplateParameters(_M_current_template_parameters);
+    _M_current_class.load()->setBaseClasses(baseClasses);
+    _M_current_class.load()->setClassType(decode_class_type(node->class_key));
+    _M_current_class.load()->setTemplateParameters(_M_current_template_parameters);
 
     if (!_M_current_template_parameters.isEmpty()) {
-        QString name = _M_current_class->name();
+        QString name = _M_current_class.load()->name();
         name += "<";
         for (int i = 0; i < _M_current_template_parameters.size(); ++i) {
             if (i > 0)
                 name += ",";
 
-            name += _M_current_template_parameters.at(i)->name();
+            name += _M_current_template_parameters.at(i).load()->name();
         }
 
         name += ">";
-        _M_current_class->setName(name);
+        _M_current_class.load()->setName(name);
     }
 
     CodeModel::AccessPolicy oldAccessPolicy = changeCurrentAccess(decode_access_policy(node->class_key));
     CodeModel::FunctionType oldFunctionType = changeCurrentFunctionType(CodeModel::Normal);
 
-    _M_current_class->setScope(scope->qualifiedName());
-    _M_qualified_types[_M_current_class->qualifiedName().join(".")] = QString();
+    _M_current_class.load()->setScope(scope.load()->qualifiedName());
+    _M_qualified_types[_M_current_class.load()->qualifiedName().join(".")] = QString();
 
-    scope->addClass(_M_current_class);
+    scope.load()->addClass(_M_current_class);
 
     name_cc.run(node->name->unqualified_name);
     _M_context.append(name_cc.name());
@@ -667,15 +667,15 @@ void Binder::visitEnumSpecifier(EnumSpecifierAST *node)
     }
 
     _M_current_enum = model()->create<EnumModelItem>();
-    _M_current_enum->setAccessPolicy(_M_current_access);
-    updateItemPosition(_M_current_enum->toItem(), node);
-    _M_current_enum->setName(name);
-    _M_current_enum->setAnonymous(isAnonymous);
-    _M_current_enum->setScope(enumScope->qualifiedName());
+    _M_current_enum.load()->setAccessPolicy(_M_current_access);
+    updateItemPosition(_M_current_enum.load()->toItem(), node);
+    _M_current_enum.load()->setName(name);
+    _M_current_enum.load()->setAnonymous(isAnonymous);
+    _M_current_enum.load()->setScope(enumScope.load()->qualifiedName());
 
-    _M_qualified_types[_M_current_enum->qualifiedName().join(".")] = QString();
+    _M_qualified_types[_M_current_enum.load()->qualifiedName().join(".")] = QString();
 
-    enumScope->addEnum(_M_current_enum);
+    enumScope.load()->addEnum(_M_current_enum);
 
     DefaultVisitor::visitEnumSpecifier(node);
 
@@ -697,18 +697,18 @@ void Binder::visitEnumerator(EnumeratorAST *node)
 {
     Q_ASSERT(_M_current_enum);
     EnumeratorModelItem e = model()->create<EnumeratorModelItem>();
-    updateItemPosition(e->toItem(), node);
-    e->setName(decode_symbol(node->id)->as_string());
+    updateItemPosition(e.load()->toItem(), node);
+    e.load()->setName(decode_symbol(node->id)->as_string());
 
     if (ExpressionAST *expr = node->expression) {
         const Token &start_token = _M_token_stream->token((int) expr->start_token);
         const Token &end_token = _M_token_stream->token((int) expr->end_token);
 
-        e->setValue(strip_preprocessor_lines(QString::fromUtf8(&start_token.text[start_token.position],
+        e.load()->setValue(strip_preprocessor_lines(QString::fromUtf8(&start_token.text[start_token.position],
                                                                (int)(end_token.position - start_token.position)).trimmed()).remove(' '));
     }
 
-    _M_current_enum->addEnumerator(e);
+    _M_current_enum.load()->addEnumerator(e);
 }
 
 void Binder::visitUsingDirective(UsingDirectiveAST *node)
@@ -725,7 +725,7 @@ void Binder::visitQEnums(QEnumsAST *node)
 
     ScopeModelItem scope = currentScope();
     for (int i = 0; i < enum_list.size(); ++i)
-        scope->addEnumsDeclaration(enum_list.at(i));
+        scope.load()->addEnumsDeclaration(enum_list.at(i));
 }
 
 void Binder::visitQProperty(QPropertyAST *node)
@@ -734,7 +734,7 @@ void Binder::visitQProperty(QPropertyAST *node)
     const Token &end = _M_token_stream->token((int) node->end_token);
     QString property = QString::fromLatin1(start.text + start.position,
                                            end.position - start.position);
-    _M_current_class->addPropertyDeclaration(property);
+    _M_current_class.load()->addPropertyDeclaration(property);
 }
 
 void Binder::applyStorageSpecifiers(const ListNode<std::size_t> *it, MemberModelItem item)
@@ -751,22 +751,22 @@ void Binder::applyStorageSpecifiers(const ListNode<std::size_t> *it, MemberModel
             break;
 
         case Token_friend:
-            item->setFriend(true);
+            item.load()->setFriend(true);
             break;
         case Token_auto:
-            item->setAuto(true);
+            item.load()->setAuto(true);
             break;
         case Token_register:
-            item->setRegister(true);
+            item.load()->setRegister(true);
             break;
         case Token_static:
-            item->setStatic(true);
+            item.load()->setStatic(true);
             break;
         case Token_extern:
-            item->setExtern(true);
+            item.load()->setExtern(true);
             break;
         case Token_mutable:
-            item->setMutable(true);
+            item.load()->setMutable(true);
             break;
         }
         it = it->next;
@@ -787,19 +787,19 @@ void Binder::applyFunctionSpecifiers(const ListNode<std::size_t> *it, FunctionMo
             break;
 
         case Token_inline:
-            item->setInline(true);
+            item.load()->setInline(true);
             break;
 
         case Token_virtual:
-            item->setVirtual(true);
+            item.load()->setVirtual(true);
             break;
 
         case Token_explicit:
-            item->setExplicit(true);
+            item.load()->setExplicit(true);
             break;
 
         case Token_Q_INVOKABLE:
-            item->setInvokable(true);
+            item.load()->setInvokable(true);
             break;
         }
         it = it->next;
@@ -822,10 +822,10 @@ TypeInfo Binder::qualifyType(const TypeInfo &type, const QStringList &context) c
             modified_type.setQualifiedName(expanded);
             return modified_type;
         } else {
-            CodeModelItem scope = model()->findItem(context, _M_current_file->toItem());
+            CodeModelItem scope = model()->findItem(context, _M_current_file.load()->toItem());
 
             if (ClassModelItem klass = model_dynamic_cast<ClassModelItem> (scope)) {
-                foreach (QString base, klass->baseClasses()) {
+                foreach (QString base, klass.load()->baseClasses()) {
                     QStringList ctx = context;
                     ctx.removeLast();
                     ctx.append(base);
@@ -850,5 +850,5 @@ void Binder::updateItemPosition(CodeModelItem item, AST *node)
 
     assert(node);
     _M_location.positionAt(_M_token_stream->position(node->start_token), &line, &column, &filename);
-    item->setFileName(filename);
+    item.load()->setFileName(filename);
 }

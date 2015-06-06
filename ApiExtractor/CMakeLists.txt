@@ -89,6 +89,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${QT_INCLUDE_DIR}
                     ${APIEXTRACTOR_EXTRA_INCLUDES}
                     ${Qt5Core_INCLUDE_DIRS}
+                    ${QtXml_INCLUDE_DIRS}
                     )
 
 add_library(apiextractor STATIC ${apiextractor_SRC} ${apiextractor_RCCS_SRC})

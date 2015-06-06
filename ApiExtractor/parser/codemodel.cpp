@@ -56,12 +56,12 @@ NamespaceModelItem CodeModel::globalNamespace() const
 void CodeModel::addFile(FileModelItem item)
 {
     _M_creation_id = 0; // reset the creation id
-    _M_files.insert(item->name(), item);
+    _M_files.insert(item.load()->name(), item);
 }
 
 void CodeModel::removeFile(FileModelItem item)
 {
-    QHash<QString, FileModelItem>::Iterator it = _M_files.find(item->name());
+    QHash<QString, FileModelItem>::Iterator it = _M_files.find(item.load()->name());
 
     if (it != _M_files.end() && it.value() == item)
         _M_files.erase(it);
@@ -84,21 +84,21 @@ CodeModelItem CodeModel::findItem(const QStringList &qualifiedName, CodeModelIte
         const QString &name = qualifiedName.at(i);
 
         if (NamespaceModelItem ns = model_dynamic_cast<NamespaceModelItem>(scope)) {
-            if (NamespaceModelItem tmp_ns = ns->findNamespace(name)) {
+            if (NamespaceModelItem tmp_ns = ns.load()->findNamespace(name)) {
                 scope = tmp_ns;
                 continue;
             }
         }
 
         if (ScopeModelItem ss = model_dynamic_cast<ScopeModelItem>(scope)) {
-            if (ClassModelItem cs = ss->findClass(name)) {
+            if (ClassModelItem cs = ss.load()->findClass(name)) {
                 scope = cs;
-            } else if (EnumModelItem es = ss->findEnum(name)) {
+            } else if (EnumModelItem es = ss.load()->findEnum(name)) {
                 if (i == qualifiedName.size() - 1)
-                    return es->toItem();
-            } else if (TypeAliasModelItem tp = ss->findTypeAlias(name)) {
+                    return es.load()->toItem();
+            } else if (TypeAliasModelItem tp = ss.load()->findTypeAlias(name)) {
                 if (i == qualifiedName.size() - 1)
-                    return tp->toItem();
+                    return tp.load()->toItem();
             } else {
                 // If we don't find the name in the scope chain we
                 // need to return an empty item to indicate failure...
@@ -127,7 +127,7 @@ TypeInfo TypeInfo::combine(const TypeInfo &__lhs, const TypeInfo &__rhs)
 
 TypeInfo TypeInfo::resolveType(TypeInfo const &__type, CodeModelItem __scope)
 {
-    CodeModel *__model = __scope->model();
+    CodeModel *__model = __scope.load()->model();
     Q_ASSERT(__model != 0);
 
     CodeModelItem __item = __model->findItem(__type.qualifiedName(), __scope);
@@ -138,12 +138,12 @@ TypeInfo TypeInfo::resolveType(TypeInfo const &__type, CodeModelItem __scope)
     // has more than 2 entries in the qualified name... This test
     // could be improved by returning if the type was found or not.
     TypeInfo otherType(__type);
-    if (__item && __item->qualifiedName().size() > 1) {
-        otherType.setQualifiedName(__item->qualifiedName());
+    if (__item && __item.load()->qualifiedName().size() > 1) {
+        otherType.setQualifiedName(__item.load()->qualifiedName());
     }
 
     if (TypeAliasModelItem __alias = model_dynamic_cast<TypeAliasModelItem> (__item))
-        return resolveType(TypeInfo::combine(__alias->type(), otherType), __scope);
+        return resolveType(TypeInfo::combine(__alias.load()->type(), otherType), __scope);
 
     return otherType;
 }
@@ -360,10 +360,10 @@ void _ClassModelItem::addPropertyDeclaration(const QString &propertyDeclaration)
 // ---------------------------------------------------------------------------
 FunctionModelItem _ScopeModelItem::declaredFunction(FunctionModelItem item)
 {
-    FunctionList function_list = findFunctions(item->name());
+    FunctionList function_list = findFunctions(item.load()->name());
 
     foreach(FunctionModelItem fun, function_list) {
-        if (fun->isSimilar(item))
+        if (fun.load()->isSimilar(item))
             return fun;
     }
 
@@ -414,7 +414,7 @@ EnumList _ScopeModelItem::enums() const
 
 void _ScopeModelItem::addClass(ClassModelItem item)
 {
-    QString name = item->name();
+    QString name = item.load()->name();
     int idx = name.indexOf("<");
     if (idx > 0)
         _M_classes.insert(name.left(idx), item);
@@ -423,34 +423,34 @@ void _ScopeModelItem::addClass(ClassModelItem item)
 
 void _ScopeModelItem::addFunction(FunctionModelItem item)
 {
-    _M_functions.insert(item->name(), item);
+    _M_functions.insert(item.load()->name(), item);
 }
 
 void _ScopeModelItem::addFunctionDefinition(FunctionDefinitionModelItem item)
 {
-    _M_functionDefinitions.insert(item->name(), item);
+    _M_functionDefinitions.insert(item.load()->name(), item);
 }
 
 void _ScopeModelItem::addVariable(VariableModelItem item)
 {
-    _M_variables.insert(item->name(), item);
+    _M_variables.insert(item.load()->name(), item);
 }
 
 void _ScopeModelItem::addTypeAlias(TypeAliasModelItem item)
 {
-    _M_typeAliases.insert(item->name(), item);
+    _M_typeAliases.insert(item.load()->name(), item);
 }
 
 void _ScopeModelItem::addEnum(EnumModelItem item)
 {
-    _M_enumNames.removeOne(item->name());
-    _M_enums.insert(item->name(), item);
-    _M_enumNames.append(item->name());
+    _M_enumNames.removeOne(item.load()->name());
+    _M_enums.insert(item.load()->name(), item);
+    _M_enumNames.append(item.load()->name());
 }
 
 void _ScopeModelItem::removeClass(ClassModelItem item)
 {
-    QHash<QString, ClassModelItem>::Iterator it = _M_classes.find(item->name());
+    QHash<QString, ClassModelItem>::Iterator it = _M_classes.find(item.load()->name());
 
     if (it != _M_classes.end() && it.value() == item)
         _M_classes.erase(it);
@@ -458,9 +458,9 @@ void _ScopeModelItem::removeClass(ClassModelItem item)
 
 void _ScopeModelItem::removeFunction(FunctionModelItem item)
 {
-    QMultiHash<QString, FunctionModelItem>::Iterator it = _M_functions.find(item->name());
+    QMultiHash<QString, FunctionModelItem>::Iterator it = _M_functions.find(item.load()->name());
 
-    while (it != _M_functions.end() && it.key() == item->name()
+    while (it != _M_functions.end() && it.key() == item.load()->name()
            && it.value() != item) {
         ++it;
     }
@@ -472,9 +472,9 @@ void _ScopeModelItem::removeFunction(FunctionModelItem item)
 
 void _ScopeModelItem::removeFunctionDefinition(FunctionDefinitionModelItem item)
 {
-    QMultiHash<QString, FunctionDefinitionModelItem>::Iterator it = _M_functionDefinitions.find(item->name());
+    QMultiHash<QString, FunctionDefinitionModelItem>::Iterator it = _M_functionDefinitions.find(item.load()->name());
 
-    while (it != _M_functionDefinitions.end() && it.key() == item->name()
+    while (it != _M_functionDefinitions.end() && it.key() == item.load()->name()
            && it.value() != item) {
         ++it;
     }
@@ -486,7 +486,7 @@ void _ScopeModelItem::removeFunctionDefinition(FunctionDefinitionModelItem item)
 
 void _ScopeModelItem::removeVariable(VariableModelItem item)
 {
-    QHash<QString, VariableModelItem>::Iterator it = _M_variables.find(item->name());
+    QHash<QString, VariableModelItem>::Iterator it = _M_variables.find(item.load()->name());
 
     if (it != _M_variables.end() && it.value() == item)
         _M_variables.erase(it);
@@ -494,7 +494,7 @@ void _ScopeModelItem::removeVariable(VariableModelItem item)
 
 void _ScopeModelItem::removeTypeAlias(TypeAliasModelItem item)
 {
-    QHash<QString, TypeAliasModelItem>::Iterator it = _M_typeAliases.find(item->name());
+    QHash<QString, TypeAliasModelItem>::Iterator it = _M_typeAliases.find(item.load()->name());
 
     if (it != _M_typeAliases.end() && it.value() == item)
         _M_typeAliases.erase(it);
@@ -502,10 +502,10 @@ void _ScopeModelItem::removeTypeAlias(TypeAliasModelItem item)
 
 void _ScopeModelItem::removeEnum(EnumModelItem item)
 {
-    QHash<QString, EnumModelItem>::Iterator it = _M_enums.find(item->name());
+    QHash<QString, EnumModelItem>::Iterator it = _M_enums.find(item.load()->name());
 
     if (it != _M_enums.end() && it.value() == item) {
-        _M_enumNames.removeOne(item->name());
+        _M_enumNames.removeOne(item.load()->name());
         _M_enums.erase(it);
     }
 }
@@ -547,11 +547,11 @@ NamespaceList _NamespaceModelItem::namespaces() const
 }
 void _NamespaceModelItem::addNamespace(NamespaceModelItem item)
 {
-    _M_namespaces.insert(item->name(), item);
+    _M_namespaces.insert(item.load()->name(), item);
 }
 void _NamespaceModelItem::removeNamespace(NamespaceModelItem item)
 {
-    QHash<QString, NamespaceModelItem>::Iterator it = _M_namespaces.find(item->name());
+    QHash<QString, NamespaceModelItem>::Iterator it = _M_namespaces.find(item.load()->name());
 
     if (it != _M_namespaces.end() && it.value() == item)
         _M_namespaces.erase(it);
@@ -586,25 +586,25 @@ void _ArgumentModelItem::setDefaultValue(bool defaultValue)
 // ---------------------------------------------------------------------------
 bool _FunctionModelItem::isSimilar(FunctionModelItem other) const
 {
-    if (name() != other->name())
+    if (name() != other.load()->name())
         return false;
 
-    if (isConstant() != other->isConstant())
+    if (isConstant() != other.load()->isConstant())
         return false;
 
-    if (isVariadics() != other->isVariadics())
+    if (isVariadics() != other.load()->isVariadics())
         return false;
 
-    if (arguments().count() != other->arguments().count())
+    if (arguments().count() != other.load()->arguments().count())
         return false;
 
     // ### check the template parameters
 
     for (int i = 0; i < arguments().count(); ++i) {
         ArgumentModelItem arg1 = arguments().at(i);
-        ArgumentModelItem arg2 = other->arguments().at(i);
+        ArgumentModelItem arg2 = other.load()->arguments().at(i);
 
-        if (arg1->type() != arg2->type())
+        if (arg1.load()->type() != arg2.load()->type())
             return false;
     }
 

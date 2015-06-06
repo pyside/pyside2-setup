@@ -24,7 +24,7 @@
 #define TYPESYSTEM_P_H
 
 #include <QStack>
-#include <QXmlDefaultHandler>
+#include <QtXml/QtXml>
 #include "typesystem.h"
 
 class TypeDatabase;

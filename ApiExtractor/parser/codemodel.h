@@ -78,7 +78,7 @@ public:
         typedef typename _Target::Type _Target_type;
 
         _Target result = _Target_type::create(this);
-        result->setCreationId(_M_creation_id++);
+        result.load()->setCreationId(_M_creation_id++);
         return result;
     }
 
