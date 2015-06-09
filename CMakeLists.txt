@@ -2,13 +2,18 @@ include(cmake/Macros/icecc.cmake) # this must be the first line!
 
 project(pysidebindings)
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.1.3)
+cmake_policy(VERSION 3.1.3)
+
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Macros/
                       ${CMAKE_MODULE_PATH})
-find_package(Shiboken 1.2.0 REQUIRED)
-find_package(Qt4 4.5.0 REQUIRED)
+find_package(Shiboken 2.0.0 REQUIRED)
+find_package(Qt5 REQUIRED COMPONENTS Core) 
+add_definitions(${Qt5Core_DEFINITIONS})
+
 find_file(GL_H "gl.h" PATH_SUFFIXES "GL")
-include(FindQt4Extra)
+message("result:" "${GL_H}")
+include(FindQt5Extra)
 
 set(XVFB_EXEC "")
 option(USE_XVFB "Uses xvfb-run with the unit tests to avoid QtGui tests popping windows on the screen." FALSE)
@@ -78,32 +83,23 @@ if(ENABLE_VERSION_SUFFIX)
       set(pyside_SUFFIX "-${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION}")
 endif()
 
-include(${QT_USE_FILE})
-if (${QTVERSION} VERSION_LESS 4.5.0)
-    message(FATAL_ERROR "You need Qt4.5, found ${QTVERSION}.")
-endif()
+# no more supported: include(${QT_USE_FILE})
 
 # Configure OS support
 set(ENABLE_X11 "0")
 set(ENABLE_MAC "0")
 set(ENABLE_WIN "0")
 set(ENABLE_SIMULATOR "0")
-if(Q_WS_X11)
-    set(ENABLE_X11 "1")
-    if(Q_WS_MAEMO_5)
-        set(AUTO_OS "maemo")
-    else()
-        set(AUTO_OS "x11")
-    endif()
-elseif(Q_WS_MAC)
+
+# no more Maemo, no more simulator
+if(CMAKE_HOST_APPLE)
     set(ENABLE_MAC "1")
     set(AUTO_OS "mac")
-elseif(Q_WS_WIN)
+elseif(CMAKE_HOST_WIN32)
     set(ENABLE_WIN "1")
     set(AUTO_OS "win")
-elseif(Q_WS_SIMULATOR)
-    set(ENABLE_SIMULATOR "1")
-    set(AUTO_OS "simulator")
+elseif(CMAKE_HOST_UNIX)
+    set(AUTO_OS "x11")
 else()
     message(FATAL_ERROR "OS not supported")
 endif()

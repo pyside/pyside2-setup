@@ -45,19 +45,6 @@ else()
                              ENVIRONMENT "PYTHONPATH=${TEST_PYTHONPATH};${LIBRARY_PATH_VAR}=${TEST_LIBRARY_PATH}")
     endmacro()
 
-    # Try to find QtMultimedia
-    # TODO: Remove this hack when cmake support QtMultimedia module
-    if (NOT QT_QTMULTIMEDIA_FOUND AND ${QTVERSION} VERSION_GREATER 4.5.9)
-        find_path(QT_QTMULTIMEDIA_INCLUDE_DIR QtMultimedia
-                PATHS ${QT_HEADERS_DIR}/QtMultimedia
-                    ${QT_LIBRARY_DIR}/QtMultimedia.framework/Headers
-                NO_DEFAULT_PATH)
-        find_library(QT_QTMULTIMEDIA_LIBRARY QtMultimedia PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
-        if (QT_QTMULTIMEDIA_INCLUDE_DIR AND QT_QTMULTIMEDIA_LIBRARY)
-            set(QT_QTMULTIMEDIA_FOUND ON)
-        endif()
-    endif ()
-
     add_subdirectory(pysidetest)
     add_subdirectory(signals)
     TEST_QT_MODULE(QT_QTCORE_FOUND QtCore)

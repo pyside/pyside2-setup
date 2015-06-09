@@ -4,7 +4,7 @@ project(testbinding)
 cmake_minimum_required(VERSION 2.6)
 
 set(QT_USE_QTCORE 1)
-include(${QT_USE_FILE})
+# no more supported: include(${QT_USE_FILE})
 add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_SHARED)
 add_definitions(-DRXX_ALLOCATOR_INIT_0)
@@ -21,7 +21,7 @@ testview.h
 hiddenobject.h
 )
 
-qt4_wrap_cpp(pysidetest_MOC_SRC ${pysidetest_MOC_HEADERS})
+qt5_wrap_cpp(pysidetest_MOC_SRC ${pysidetest_MOC_HEADERS})
 
 set(testbinding_SRC
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testobject_wrapper.cpp

@@ -1,7 +1,7 @@
 project(libpyside)
 
 
-qt4_wrap_cpp(DESTROYLISTENER_MOC "destroylistener.h")
+qt5_wrap_cpp(DESTROYLISTENER_MOC "destroylistener.h")
 
 set(libpyside_SRC
     dynamicqmetaobject.cpp
