@@ -1,9 +1,9 @@
 """This is a distutils setup-script for the PySide project
 
 To build the PySide, simply execute:
-  python setup.py build --qmake=</path/to/qt/bin/qmake> [--cmake=</path/to/cmake>] [--opnessl=</path/to/openssl/bin>]
+  python setup.py build --qmake=</path/to/qt/bin/qmake> [--cmake=</path/to/cmake>] [--openssl=</path/to/openssl/bin>]
 or
-  python setup.py install --qmake=</path/to/qt/bin/qmake> [--cmake=</path/to/cmake>] [--opnessl=</path/to/openssl/bin>]
+  python setup.py install --qmake=</path/to/qt/bin/qmake> [--cmake=</path/to/cmake>] [--openssl=</path/to/openssl/bin>]
 to build and install into your current Python installation.
 
 On Linux you can use option --standalone, to embed Qt libraries to PySide distribution
