@@ -163,7 +163,7 @@ void DynamicSlotData::onCallbackDestroyed(void *data)
 
     //Disconnect all sources
     QMetaMethod m = self->m_parent->metaObject()->method(self->m_id);
-    QByteArray methodName = QByteArray::number(m.methodType()).append(m.signature());
+    QByteArray methodName = QByteArray::number(m.methodType()).append(m.methodSignature());
     QLinkedList<const QObject*> sources = self->m_refs;
     foreach(const QObject* src, sources)
         const_cast<QObject*>(src)->disconnect(self->m_parent, methodName);
@@ -265,7 +265,7 @@ int GlobalReceiver::qt_metacall(QMetaObject::Call call, int id, void** args)
     QMetaMethod slot = metaObject()->method(id);
     Q_ASSERT(slot.methodType() == QMetaMethod::Slot);
 
-    if (strcmp(slot.signature(), RECEIVER_DESTROYED_SLOT_NAME) == 0) {
+    if (strcmp(slot.methodSignature(), RECEIVER_DESTROYED_SLOT_NAME) == 0) {
         QObject *arg = *(QObject**)args[1];
 
         //avoid hash changes during the destruction

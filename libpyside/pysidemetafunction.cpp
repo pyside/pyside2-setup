@@ -146,7 +146,7 @@ bool call(QObject* self, int methodIndex, PyObject* args, PyObject** retVal)
     int numArgs = PySequence_Fast_GET_SIZE(sequence.object()) + 1;
 
     if (numArgs - 1 != argTypes.count()) {
-        PyErr_Format(PyExc_TypeError, "%s only accepts %d arguments, %d given!", method.signature(), argTypes.count(), numArgs);
+        PyErr_Format(PyExc_TypeError, "%s only accepts %d arguments, %d given!", method.methodSignature().data(), argTypes.count(), numArgs);
         return false;
     }
 

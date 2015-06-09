@@ -313,7 +313,7 @@ DynamicQMetaObject::DynamicQMetaObject(const char* className, const QMetaObject*
 
 DynamicQMetaObject::~DynamicQMetaObject()
 {
-    free(const_cast<char*>(d.stringdata));
+    free(const_cast<QByteArrayData*>(d.stringdata));
     free(const_cast<uint*>(d.data));
     delete m_d;
 }
@@ -349,7 +349,7 @@ int DynamicQMetaObject::addMethod(QMetaMethod::MethodType mtype, const char* sig
 
 void DynamicQMetaObject::removeMethod(QMetaMethod::MethodType mtype, uint index)
 {
-    const char* methodSig = method(index).signature();
+    const char* methodSig = method(index).methodSignature();
     QList<MethodData>::iterator it = m_d->m_methods.begin();
     for (; it != m_d->m_methods.end(); ++it) {
         if ((it->signature() == methodSig) && (it->methodType() == mtype)){
@@ -657,13 +657,13 @@ void DynamicQMetaObject::DynamicQMetaObjectPrivate::updateMetaObject(QMetaObject
     }
 
     int newSize = (m_stringDataSize + str.count()) * sizeof(char);
-    char *stringdata = reinterpret_cast<char*>(realloc(const_cast<char*>(metaObj->d.stringdata), newSize));
+    QByteArrayData *stringdata = reinterpret_cast<QByteArrayData*>(realloc(const_cast<QByteArrayData*>(metaObj->d.stringdata), newSize));
     Q_ASSERT(stringdata);
 
     metaObj->d.stringdata = stringdata;
 
     stringdata += m_stringDataSize; //shift to the end of old position
-    std::copy(str.begin(), str.end(), stringdata);
+    std::copy(str.begin(), str.end(), reinterpret_cast<char*>(stringdata));
 
     m_stringDataSize = newSize;
     metaObj->d.data = data;

@@ -23,12 +23,12 @@ set(libpyside_SRC
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${SHIBOKEN_INCLUDE_DIR}
                     ${SHIBOKEN_PYTHON_INCLUDE_DIR}
-                    ${QT_QTCORE_INCLUDE_DIR})
+                    ${Qt5Core_INCLUDE_DIRS})
 add_library(pyside SHARED ${libpyside_SRC})
 target_link_libraries(pyside
                       ${SHIBOKEN_PYTHON_LIBRARIES}
                       ${SHIBOKEN_LIBRARY}
-                      ${QT_QTCORE_LIBRARY})
+                      ${Qt5Core_LIBRARIES})
 
 set_target_properties(pyside PROPERTIES
                       VERSION ${BINDING_API_VERSION}

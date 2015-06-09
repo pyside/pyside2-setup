@@ -705,11 +705,11 @@ PySideSignalInstance* newObjectFromMethod(PyObject* source, const QList<QMetaMet
         item->d = new PySideSignalInstancePrivate;
         PySideSignalInstancePrivate* selfPvt = item->d;
         selfPvt->source = source;
-        QByteArray cppName(m.signature());
+        QByteArray cppName(m.methodSignature());
         cppName = cppName.mid(0, cppName.indexOf('('));
         // separe SignalName
         selfPvt->signalName = strdup(cppName.data());
-        selfPvt->signature = strdup(m.signature());
+        selfPvt->signature = strdup(m.methodSignature());
         selfPvt->homonymousMethod = 0;
         selfPvt->next = 0;
     }
@@ -789,7 +789,7 @@ void registerSignals(SbkObjectType* pyObj, const QMetaObject* metaObject)
         QMetaMethod method = metaObject->method(i);
 
         if (method.methodType() == QMetaMethod::Signal) {
-            QByteArray methodName(method.signature());
+            QByteArray methodName(method.methodSignature());
             methodName.chop(methodName.size() - methodName.indexOf('('));
             signalsFound[methodName] << join(method.parameterTypes(), ",");
         }
@@ -894,8 +894,8 @@ QString getCallbackSignature(const char* signal, QObject* receiver, PyObject* ca
             prefix += '(';
             for (int i = 0; i < mo->methodCount(); i++) {
                 QMetaMethod me = mo->method(i);
-                if ((strncmp(me.signature(), prefix, prefix.size()) == 0) &&
-                    QMetaObject::checkConnectArgs(signal, me.signature())) {
+                if ((strncmp(me.methodSignature(), prefix, prefix.size()) == 0) &&
+                    QMetaObject::checkConnectArgs(signal, me.methodSignature())) {
                     numArgs = me.parameterTypes().size() + useSelf;
                     break;
                 }

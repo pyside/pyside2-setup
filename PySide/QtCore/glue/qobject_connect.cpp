@@ -30,7 +30,7 @@ static bool getReceiver(QObject *source, const char* signal, PyObject* callback,
 
     // Check if this callback is a overwrite of a non-virtual Qt slot.
     if (!usingGlobalReceiver && receiver && self) {
-        *callbackSig = PySide::Signal::getCallbackSignature(signal, *receiver, callback, usingGlobalReceiver).toAscii();
+        *callbackSig = PySide::Signal::getCallbackSignature(signal, *receiver, callback, usingGlobalReceiver).toUtf8();
         const QMetaObject* metaObject = (*receiver)->metaObject();
         int slotIndex = metaObject->indexOfSlot(callbackSig->constData());
         if (slotIndex != -1 && slotIndex < metaObject->methodOffset() && PyMethod_Check(callback))
@@ -40,7 +40,7 @@ static bool getReceiver(QObject *source, const char* signal, PyObject* callback,
     if (usingGlobalReceiver) {
         PySide::SignalManager& signalManager = PySide::SignalManager::instance();
         *receiver = signalManager.globalReceiver(source, callback);
-        *callbackSig = PySide::Signal::getCallbackSignature(signal, *receiver, callback, usingGlobalReceiver).toAscii();
+        *callbackSig = PySide::Signal::getCallbackSignature(signal, *receiver, callback, usingGlobalReceiver).toUtf8();
     }
 
     return usingGlobalReceiver;

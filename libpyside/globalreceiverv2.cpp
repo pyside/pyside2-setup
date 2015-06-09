@@ -288,7 +288,7 @@ int GlobalReceiverV2::qt_metacall(QMetaObject::Call call, int id, void** args)
         m_refs.removeAll(obj); // remove all refs to this object
         decRef(); //remove the safe ref
     } else {
-        bool isShortCuit = (strstr(slot.signature(), "(") == 0);
+        bool isShortCuit = (strstr(slot.methodSignature(), "(") == 0);
         Shiboken::AutoDecRef callback(m_data->callback());
         SignalManager::callPythonMetaMethod(slot, args, callback, isShortCuit);
     }

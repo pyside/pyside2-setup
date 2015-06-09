@@ -580,7 +580,7 @@ static int callMethod(QObject* object, int id, void** args)
     } else {
         Shiboken::GilState gil;
         PyObject* self = (PyObject*)Shiboken::BindingManager::instance().retrieveWrapper(object);
-        QByteArray methodName = method.signature();
+        QByteArray methodName = method.methodSignature();
         methodName = methodName.left(methodName.indexOf('('));
         Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(self, methodName));
         SignalManager::callPythonMetaMethod(method, args, pyMethod, false);

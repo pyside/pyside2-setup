@@ -154,7 +154,7 @@ PyObject* slotCall(PyObject* self, PyObject* args, PyObject* kw)
 
 
         QByteArray returnType = QMetaObject::normalizedType(data->resultType);
-        QByteArray signature = QString().sprintf("%s(%s)", data->slotName, data->args).toAscii();
+        QByteArray signature = QString().sprintf("%s(%s)", data->slotName, data->args).toUtf8();
         signature = returnType + " " + signature;
 
         if (!pySlotName)
