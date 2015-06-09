@@ -565,6 +565,10 @@ class pyside_build(_build):
         # Prepare folders
         os.chdir(self.build_dir)
         module_build_dir = os.path.join(self.build_dir,  extension)
+        skipflag_file = module_build_dir + '-skip'
+        if os.path.exists(skipflag_file):
+            log.info("Skipping %s because %s exists" % (extension, skipflag_file))
+            return
         if os.path.exists(module_build_dir):
             log.info("Deleting module build folder %s..." % module_build_dir)
             rmtree(module_build_dir)
