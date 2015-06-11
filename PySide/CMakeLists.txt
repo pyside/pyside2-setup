@@ -12,7 +12,19 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_utils.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/_utils.py" @ONLY)
 
-HAS_QT_MODULE(QT_QTCORE_FOUND QtCore)
+macro(CHECK_VAR name)
+    if(${name})
+        message("xxx ${name}")
+    endif()
+endmacro()
+
+find_package(Qt5Xml)
+
+CHECK_VAR(Qt5Core_FOUND)
+CHECK_VAR(Qt5Gui_FOUND)
+CHECK_VAR(Qt5Xml_FOUND)
+
+HAS_QT_MODULE(Qt5Core_FOUND QtCore)
 HAS_QT_MODULE(QT_QTGUI_FOUND QtGui)
 HAS_QT_MODULE(QT_QTNETWORK_FOUND QtNetwork)
 HAS_QT_MODULE(QT_QTWEBKIT_FOUND QtWebKit)

@@ -1,4 +1,11 @@
-macro(create_pyside_module module_name module_include_dir module_libraries module_deps module_typesystem_path module_sources module_static_sources)
+macro(create_pyside_module
+      module_name
+      module_include_dir
+      module_libraries
+      module_deps
+      module_typesystem_path
+      module_sources
+      module_static_sources)
     string(TOLOWER ${module_name} _module)
     string(REGEX REPLACE ^qt "" _module ${_module})
 
@@ -125,3 +132,4 @@ macro(HAS_QT_MODULE var name)
         set("end_${name}" "-->" PARENT_SCOPE)
     endif()
 endmacro()
+

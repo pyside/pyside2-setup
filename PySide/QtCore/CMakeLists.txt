@@ -2,6 +2,14 @@ project(QtCore)
 
 set(QtCore_gluecode "${CMAKE_CURRENT_SOURCE_DIR}/glue/qeasingcurve_glue.cpp")
 
+# some hack to mimick qt4 version variables
+find_package(Qt5Core)
+
+string(REGEX MATCHALL "[0-9]+" qt_version_helper "${Qt5Core_VERSION_STRING}")
+list(GET qt_version_helper 0 QT_VERSION_MAJOR)
+list(GET qt_version_helper 1 QT_VERSION_MINOR)
+unset(qt_version_helper)
+
 if (${QT_VERSION_MAJOR} EQUAL 4 AND ${QT_VERSION_MINOR} LESS 6)
     set (QtCore_46_SRC )
 else()
@@ -150,18 +158,21 @@ ${SPECIFIC_OS_FILES}
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/typesystem_core.xml.in"
                "${CMAKE_CURRENT_BINARY_DIR}/typesystem_core.xml" @ONLY)
 
+set(QtCore_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+# fake this variable for qt5
+
 set(QtCore_typesystem_path "${QtCore_SOURCE_DIR}")
 
 set(QtCore_include_dirs ${CMAKE_CURRENT_SOURCE_DIR}
                         ${CMAKE_CURRENT_BINARY_DIR}/${BINDING_NAME}/QtCore/
-                        ${QT_INCLUDE_DIR}
+                        ${Qt5Core_INCLUDE_DIRS}
                         ${SHIBOKEN_INCLUDE_DIR}
                         ${libpyside_SOURCE_DIR}
                         ${SHIBOKEN_PYTHON_INCLUDE_DIR})
 set(QtCore_libraries  pyside
                       ${SHIBOKEN_PYTHON_LIBRARIES}
                       ${SHIBOKEN_LIBRARY}
-                      ${QT_QTCORE_LIBRARY})
+                      ${Qt5Core_LIBRARIES})
 
 create_pyside_module(QtCore
                      QtCore_include_dirs
