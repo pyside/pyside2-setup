@@ -338,37 +338,37 @@ QT_END_HEADER
 #include <QtGui/QtGui>
 #include "qpytextobject.h"  // PySide class
 #if @ENABLE_X11@
-  #include "@QT_QTGUI_INCLUDE_DIR@/QX11Info"
-  #include "@QT_QTGUI_INCLUDE_DIR@/QX11EmbedContainer"
-  #include "@QT_QTGUI_INCLUDE_DIR@/QX11EmbedWidget"
+  #include <QtGui/QX11Info>
+  #include <QtGui/QX11EmbedContainer>
+  #include <QtGui/QX11EmbedWidget>
 #elif @ENABLE_MAC@
-  #include "@QT_QTGUI_INCLUDE_DIR@/qmacstyle_mac.h"
+  #include <QtGui/qmacstyle_mac.h>
 #endif
 #include <QtXml/QtXml>
-#include "@QT_QTUITOOLS_INCLUDE_DIR@/QtUiTools"
-#include "@QT_QTNETWORK_INCLUDE_DIR@/QtNetwork"
-#include "@QT_QTSCRIPT_INCLUDE_DIR@/QtScript"
-#include "@QT_QTSCRIPTTOOLS_INCLUDE_DIR@/QtScriptTools"
-#include "@QT_QTMULTIMEDIA_INCLUDE_DIR@/QtMultimedia"
+#include <QtUiTools/QtUiTools>
+#include <QtNetwork/QtNetwork>
+#include <QtScript/QtScript>
+#include <QtScriptTools/QtScriptTools>
+#include <QtMultimedia/QtMultimedia>
 #include <QtMaemo5/QtMaemo5>
-#include "@QT_QTDECLARATIVE_INCLUDE_DIR@/QtDeclarative"
+#include <QtDeclarative/QtDeclarative>
 
 // QT_GUI_LIB must be defined to QSqlRelationalDelegate become visible
 #define QT_GUI_LIB
 #undef Q_DECLARE_INTERFACE
 #include <QtSql/QtSql>
-#include "@QT_QTSVG_INCLUDE_DIR@/QtSvg"
+#include <QtSvg/QtSvg>
 
 #if @QT_QTXMLPATTERNS_FOUND@
-#  include "@QT_QTXMLPATTERNS_INCLUDE_DIR@/QtXmlPatterns"
+#  include <QtXmlPatterns/QtXmlPatterns>
 #endif
 
 #if @QT_QTWEBKIT_FOUND@
-#  include "@QT_QTWEBKIT_INCLUDE_DIR@/QtWebKit"
+#  include <QtWebKit/QtWebKit>
 #endif
 
 #if @QT_QTTEST_FOUND@
-#  include "@QT_QTTEST_INCLUDE_DIR@/QtTest"
+#  include <QtTest/QtTest>
 #if @QT_VERSION_MINOR@ > 5
 #  include "pysideqtesttouch.h"
 #endif
@@ -410,7 +410,7 @@ QT_END_HEADER
 #include "@QT_PHONON_INCLUDE_DIR@/volumeslider.h"
 
 //QtHelp need be included after QtSql
-#include "@QT_QTHELP_INCLUDE_DIR@/QtHelp"
+#include <QtHelp/QtHelp>
 
 #ifndef QT_NO_OPENGL
 #include <@GL_H@>
