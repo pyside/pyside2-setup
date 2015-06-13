@@ -9,6 +9,8 @@ add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_SHARED)
 add_definitions(-DRXX_ALLOCATOR_INIT_0)
 
+find_package(Qt5Widgets)
+
 set(pysidetest_SRC
 testobject.cpp
 testview.cpp
@@ -46,18 +48,21 @@ COMMENT "Running generator for test binding..."
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
-                    ${QT_INCLUDE_DIR}
-                    ${QT_QTCORE_INCLUDE_DIR}
-                    ${QT_QTGUI_INCLUDE_DIR}
+                    ${Qt5Core_INCLUDE_DIRS}
+                    ${Qt5Gui_INCLUDE_DIRS}
                     ${SHIBOKEN_INCLUDE_DIR}
                     ${pyside_SOURCE_DIR}
-                    ${QtCore_BINARY_DIR}/PySide/QtCore
-                    ${QtGui_BINARY_DIR}/PySide/QtGui
+                    ${Qt5Core_BINARY_DIR}/PySide/QtCore
+                    ${Qt5Gui_BINARY_DIR}/PySide/QtGui
                     ${libpyside_SOURCE_DIR}
                     ${SHIBOKEN_PYTHON_INCLUDE_DIR})
 
 add_library(pysidetest SHARED ${pysidetest_SRC} ${pysidetest_MOC_SRC})
-target_link_libraries(pysidetest ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
+target_link_libraries(pysidetest 
+                      ${Qt5Core_LIBRARIES}
+                      ${Qt5Gui_LIBRARIES}
+                      ${Qt5Widgets_LIBRARIES}
+                      )
 
 add_library(testbinding MODULE ${testbinding_SRC})
 set_property(TARGET testbinding PROPERTY PREFIX "")
@@ -69,11 +74,12 @@ target_link_libraries(testbinding
                       pyside
                       ${PYTHON_LIBRARIES}
                       ${SHIBOKEN_LIBRARY}
-                      ${QT_QTCORE_LIBRARY}
-                      ${QT_QTGUI_LIBRARY}
+                      ${Qt5Core_LIBRARIES}
+                      ${Qt5Gui_LIBRARIES}
+                      ${Qt5Widgets_LIBRARIES}
                       ${SBK_PYTHON_LIBRARIES})
 
-add_dependencies(testbinding pyside QtCore QtGui libpyside pysidetest)
+add_dependencies(testbinding pyside QtCore QtGui QtWidgets libpyside pysidetest)
 
 PYSIDE_TEST(application_test.py)
 PYSIDE_TEST(decoratedslot_test.py)

@@ -39,18 +39,17 @@ set(QtXml_typesystem_path "${QtCore_SOURCE_DIR}${PATH_SEP}${QtCore_BINARY_DIR}")
 set(QtXml_include_dirs      ${CMAKE_CURRENT_SOURCE_DIR}
                             ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXml
                             ${CMAKE_SOURCE_DIR}
-                            ${QT_INCLUDE_DIR}
-                            ${QT_QTCORE_INCLUDE_DIR}
-                            ${QT_QTXML_INCLUDE_DIR}
+                            ${Qt5Core_INCLUDE_DIRS}
+                            ${Qt5Xml_INCLUDE_DIRS}
                             ${SHIBOKEN_INCLUDE_DIR}
                             ${libpyside_SOURCE_DIR}
                             ${SHIBOKEN_PYTHON_INCLUDE_DIR}
-                            ${QtCore_BINARY_DIR}/PySide/QtCore)
+                            ${Qt5Core_BINARY_DIR}/PySide/QtCore)
 set(QtXml_libraries         pyside
                             ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${SHIBOKEN_LIBRARY}
-                            ${QT_QTXML_LIBRARY})
-set(QtXml_deps QtCore)
+                            ${Qt5Xml_LIBRARIES})
+###set(QtXml_deps QtCore)
 create_pyside_module(QtXml
                      QtXml_include_dirs
                      QtXml_libraries

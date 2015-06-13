@@ -22,7 +22,7 @@
 #undef QT_NO_STL_WCHAR
 #define Q_BYTE_ORDER // used to enable QSysInfo.Endian detection on MacOSX
 
-#include "@QT_QTCORE_INCLUDE_DIR@/qnamespace.h"
+#include <QtCore/qnamespace.h>
 
 QT_BEGIN_HEADER
 
@@ -329,13 +329,13 @@ QT_END_HEADER
 // not in release
 #define QT_NO_DEBUG
 
-#include "@QT_QTCORE_INCLUDE_DIR@/QtCore"
+#include <QtCore/QtCore>
 #if @ENABLE_MAC@ || @ENABLE_WIN@
   // Workaround to parse the QApplication header
   #define Q_INTERNAL_QAPP_SRC
   #undef qdoc
 #endif
-#include "@QT_QTGUI_INCLUDE_DIR@/QtGui"
+#include <QtGui/QtGui>
 #include "qpytextobject.h"  // PySide class
 #if @ENABLE_X11@
   #include "@QT_QTGUI_INCLUDE_DIR@/QX11Info"
@@ -344,7 +344,7 @@ QT_END_HEADER
 #elif @ENABLE_MAC@
   #include "@QT_QTGUI_INCLUDE_DIR@/qmacstyle_mac.h"
 #endif
-#include "@QT_QTXML_INCLUDE_DIR@/QtXml"
+#include <QtXml/QtXml>
 #include "@QT_QTUITOOLS_INCLUDE_DIR@/QtUiTools"
 #include "@QT_QTNETWORK_INCLUDE_DIR@/QtNetwork"
 #include "@QT_QTSCRIPT_INCLUDE_DIR@/QtScript"
@@ -356,7 +356,7 @@ QT_END_HEADER
 // QT_GUI_LIB must be defined to QSqlRelationalDelegate become visible
 #define QT_GUI_LIB
 #undef Q_DECLARE_INTERFACE
-#include "@QT_QTSQL_INCLUDE_DIR@/QtSql"
+#include <QtSql/QtSql>
 #include "@QT_QTSVG_INCLUDE_DIR@/QtSvg"
 
 #if @QT_QTXMLPATTERNS_FOUND@

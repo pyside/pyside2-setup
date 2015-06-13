@@ -1,9 +1,9 @@
 include(cmake/Macros/icecc.cmake) # this must be the first line!
 
-project(pysidebindings)
-
 cmake_minimum_required(VERSION 3.1.3)
 cmake_policy(VERSION 3.1.3)
+
+project(pysidebindings)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Macros/
                       ${CMAKE_MODULE_PATH})
