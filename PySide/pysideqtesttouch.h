@@ -50,7 +50,7 @@
 
 #include <QtCore/qmap.h>
 #include <QtGui/qevent.h>
-#include <QtGui/qwidget.h>
+#include <QtWidgets/qwidget.h>
 
 QT_BEGIN_NAMESPACE
 

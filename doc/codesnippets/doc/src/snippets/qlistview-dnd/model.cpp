@@ -55,7 +55,7 @@
   A simple model that uses a QStringList as its data source.
 */
 
-#include <QtGui>
+#include <QtWidgets>
 
 #include "model.h"
 

@@ -39,7 +39,7 @@
 **
 ****************************************************************************/
 
-#include <QtGui>
+#include <QtWidgets>
 #include <QTranslator>
 #include <QLocale>
 #include <QLibraryInfo>

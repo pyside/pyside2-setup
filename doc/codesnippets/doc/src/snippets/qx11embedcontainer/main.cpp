@@ -39,7 +39,7 @@
 **
 ****************************************************************************/
 
-#include <QtGui>
+#include <QtWidgets>
 #include <QX11EmbedContainer>
 
 //! [0]

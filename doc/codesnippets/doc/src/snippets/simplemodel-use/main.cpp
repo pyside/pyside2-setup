@@ -45,7 +45,7 @@
   A simple example of how to access items from an existing model.
 */
 
-#include <QtGui>
+#include <QtWidgets>
 
 /*!
     Create a default directory model and, using the index-based interface to

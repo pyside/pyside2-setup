@@ -1,4 +1,4 @@
-#include <QtGui>
+#include <QtWidgets>
 
 #include <phonon/audiooutput.h>
 #include <phonon/seekslider.h>

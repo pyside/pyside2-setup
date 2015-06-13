@@ -39,7 +39,7 @@
 **
 ****************************************************************************/
 
-#include <QtGui>
+#include <QtWidgets>
 
 #include "dragwidget.h"
 #include "mainwindow.h"

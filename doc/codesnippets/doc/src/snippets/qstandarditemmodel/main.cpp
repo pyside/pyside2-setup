@@ -39,7 +39,7 @@
 **
 ****************************************************************************/
 
-#include <QtGui>
+#include <QtWidgets>
 #include <QApplication>
 
 class Widget : public QWidget

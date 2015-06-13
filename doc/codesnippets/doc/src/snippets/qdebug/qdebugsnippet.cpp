@@ -39,7 +39,7 @@
 **
 ****************************************************************************/
 
-#include <QtGui>
+#include <QtWidgets>
 #include <QtDebug>
 
 class Coordinate : public QObject

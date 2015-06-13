@@ -39,7 +39,7 @@
 **
 ****************************************************************************/
 
-#include <QtGui>
+#include <QtWidgets>
 #include "object.h"
 
 int main(int argc, char *argv[])

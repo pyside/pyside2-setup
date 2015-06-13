@@ -40,7 +40,7 @@
 ****************************************************************************/
 
 #include <QApplication>
-#include <QtGui>
+#include <QtWidgets>
 
 class MyStylePlugin : public QStylePlugin
 {
