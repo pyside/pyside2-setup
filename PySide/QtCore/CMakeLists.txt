@@ -2,14 +2,6 @@ project(QtCore)
 
 set(QtCore_gluecode "${CMAKE_CURRENT_SOURCE_DIR}/glue/qeasingcurve_glue.cpp")
 
-# some hack to mimick qt4 version variables
-find_package(Qt5Core)
-
-string(REGEX MATCHALL "[0-9]+" qt_version_helper "${Qt5Core_VERSION_STRING}")
-list(GET qt_version_helper 0 QT_VERSION_MAJOR)
-list(GET qt_version_helper 1 QT_VERSION_MINOR)
-unset(qt_version_helper)
-
 if (${QT_VERSION_MAJOR} EQUAL 4 AND ${QT_VERSION_MINOR} LESS 6)
     set (QtCore_46_SRC )
 else()
@@ -54,74 +46,71 @@ else()
 endif()
 
 set(QtCore_SRC
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstracteventdispatcher_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstractfileengine_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstractfileenginehandler_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstractfileengineiterator_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstractitemmodel_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstractlistmodel_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstracttablemodel_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qbasictimer_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qbitarray_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qbuffer_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qbytearray_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qbytearraymatcher_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qchildevent_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qcoreapplication_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qcryptographichash_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qdatastream_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qdate_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qdatetime_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qdir_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qdiriterator_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qdynamicpropertychangeevent_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qevent_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qeventloop_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qfactoryinterface_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qfile_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qfileinfo_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qfilesystemwatcher_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qfsfileengine_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qgenericargument_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qgenericreturnargument_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qiodevice_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qlibraryinfo_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qline_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qlinef_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qlocale_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmetaclassinfo_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmetaenum_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmetaproperty_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmetamethod_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmetaobject_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmimedata_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmodelindex_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmutex_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmutexlocker_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qobject_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qpersistentmodelindex_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qpluginloader_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qpoint_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qpointf_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qprocess_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qreadlocker_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qreadwritelock_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qrect_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qrectf_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qregexp_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qresource_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qrunnable_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsemaphore_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsettings_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsignalmapper_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsize_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsizef_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsocketnotifier_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsysinfo_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsystemlocale_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsystemsemaphore_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qt_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtconcurrent_wrapper.cpp
+### creates error ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstracteventdispatcher_wrapper.cpp
+### creates error ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstractitemmodel_wrapper.cpp
+### creates error ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstractlistmodel_wrapper.cpp
+### creates error ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstracttablemodel_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qbasictimer_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qbitarray_wrapper.cpp
+### creates error ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qbuffer_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qbytearray_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qbytearraymatcher_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qchildevent_wrapper.cpp
+### creates error ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qcoreapplication_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qcryptographichash_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qdatastream_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qdate_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qdatetime_wrapper.cpp
+### creates QFlag error ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qdir_wrapper.cpp
+### creates QFlag error ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qdiriterator_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qdynamicpropertychangeevent_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qevent_wrapper.cpp
+### creates QFlag error ### creates QFlag error ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qeventloop_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qfactoryinterface_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qfile_wrapper.cpp
+### missing SBK_QFLAGS_QFILE_PERMISSION__IDX ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qfileinfo_wrapper.cpp
+### metaObject problem ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qfilesystemwatcher_wrapper.cpp
+### ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qfsfileengine_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qgenericargument_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qgenericreturnargument_wrapper.cpp
+### QFlag problem ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qiodevice_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qlibraryinfo_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qline_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qlinef_wrapper.cpp
+### QFlag problem ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qlocale_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmetaclassinfo_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmetaenum_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmetaproperty_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmetamethod_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmetaobject_wrapper.cpp
+### metaObject problem ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmimedata_wrapper.cpp
+### creates error ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmodelindex_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmutex_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmutexlocker_wrapper.cpp
+### metaObject problem ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qobject_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qpersistentmodelindex_wrapper.cpp
+### metaObject problem ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qpluginloader_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qpoint_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qpointf_wrapper.cpp
+### metaObject problem ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qprocess_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qreadlocker_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qreadwritelock_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qrect_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qrectf_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qregexp_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qresource_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qrunnable_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsemaphore_wrapper.cpp
+### metaObject problem ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsettings_wrapper.cpp
+### metaObject problem ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsignalmapper_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsize_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsizef_wrapper.cpp
+### metaObject problem ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsocketnotifier_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsysinfo_wrapper.cpp
+### no more public ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsystemlocale_wrapper.cpp
+#works# ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsystemsemaphore_wrapper.cpp
+### QFlag problem ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qt_wrapper.cpp
+### renamed, see QtConcurrent module ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtconcurrent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtcore_module_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtemporaryfile_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtextboundaryfinder_wrapper.cpp

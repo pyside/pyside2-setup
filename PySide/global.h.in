@@ -24,11 +24,11 @@
 
 #include <QtCore/qnamespace.h>
 
-QT_BEGIN_HEADER
+// omit that in Qt5? QT_BEGIN_HEADER
 
 QT_BEGIN_NAMESPACE
 
-QT_MODULE(Core)
+// omit that in Qt5? QT_MODULE(Core)
 
 class QByteArray;
 
@@ -62,12 +62,6 @@ Q_CORE_EXPORT const char *qFlagLocation(const char *method);
 # define METHOD(a)   "0"#a
 # define SLOT(a)     "1"#a
 # define SIGNAL(a)   "2"#a
-#endif
-
-#ifdef QT3_SUPPORT
-#define METHOD_CODE   0                        // member type codes
-#define SLOT_CODE     1
-#define SIGNAL_CODE   2
 #endif
 
 #define QMETHOD_CODE  0                        // member type codes
@@ -279,10 +273,6 @@ struct Q_CORE_EXPORT QMetaObject
 
     int static_metacall(Call, int, void **) const;
 
-#ifdef QT3_SUPPORT
-    QT3_SUPPORT const char *superClassName() const;
-#endif
-
     struct { // private data
         const QMetaObject *superdata;
         const char *stringdata;
@@ -303,14 +293,9 @@ inline const char *QMetaObject::className() const
 inline const QMetaObject *QMetaObject::superClass() const
 { return d.superdata; }
 
-#ifdef QT3_SUPPORT
-inline const char *QMetaObject::superClassName() const
-{ return d.superdata ? d.superdata->className() : 0; }
-#endif
-
 QT_END_NAMESPACE
 
-QT_END_HEADER
+// omit that in Qt5? QT_END_HEADER
 
 #define qdoc
 
@@ -321,8 +306,6 @@ QT_END_HEADER
 #elif @ENABLE_WIN@
   #include "pysidewtypes.h"
   #define Q_WS_WIN
-#elif @ENABLE_SIMULATOR@
-  #define Q_WS_SIMULATOR
 #endif
 
 // There are symbols in Qt that exist in Debug but
@@ -359,55 +342,18 @@ QT_END_HEADER
 #include <QtSql/QtSql>
 #include <QtSvg/QtSvg>
 
-#if @QT_QTXMLPATTERNS_FOUND@
+#if @Qt5XmlPatterns_FOUND@
 #  include <QtXmlPatterns/QtXmlPatterns>
 #endif
 
-#if @QT_QTWEBKIT_FOUND@
+#if @Qt5WebKit_FOUND@
 #  include <QtWebKit/QtWebKit>
 #endif
 
-#if @QT_QTTEST_FOUND@
+#if @Qt5Test_FOUND@
 #  include <QtTest/QtTest>
-#if @QT_VERSION_MINOR@ > 5
 #  include "pysideqtesttouch.h"
 #endif
-#endif
-
-// Phonon
-#include "phonon/pyside_phonon.h"
-#include "@QT_PHONON_INCLUDE_DIR@/abstractaudiooutput.h"
-#include "@QT_PHONON_INCLUDE_DIR@/abstractmediastream.h"
-#include "@QT_PHONON_INCLUDE_DIR@/abstractvideooutput.h"
-#include "@QT_PHONON_INCLUDE_DIR@/addoninterface.h"
-#include "@QT_PHONON_INCLUDE_DIR@/audiooutput.h"
-#include "@QT_PHONON_INCLUDE_DIR@/audiooutputinterface.h"
-#include "@QT_PHONON_INCLUDE_DIR@/backendcapabilities.h"
-#include "@QT_PHONON_INCLUDE_DIR@/backendinterface.h"
-#include "@QT_PHONON_INCLUDE_DIR@/effect.h"
-#include "@QT_PHONON_INCLUDE_DIR@/effectinterface.h"
-#include "@QT_PHONON_INCLUDE_DIR@/effectparameter.h"
-#include "@QT_PHONON_INCLUDE_DIR@/effectwidget.h"
-#include "@QT_PHONON_INCLUDE_DIR@/mediacontroller.h"
-#include "@QT_PHONON_INCLUDE_DIR@/medianode.h"
-#include "@QT_PHONON_INCLUDE_DIR@/mediaobject.h"
-#include "@QT_PHONON_INCLUDE_DIR@/mediaobjectinterface.h"
-#include "@QT_PHONON_INCLUDE_DIR@/mediasource.h"
-#include "@QT_PHONON_INCLUDE_DIR@/objectdescription.h"
-#include "@QT_PHONON_INCLUDE_DIR@/objectdescriptionmodel.h"
-#include "@QT_PHONON_INCLUDE_DIR@/path.h"
-#include "@QT_PHONON_INCLUDE_DIR@/phonon_export.h"
-#include "@QT_PHONON_INCLUDE_DIR@/phonondefs.h"
-#include "@QT_PHONON_INCLUDE_DIR@/phononnamespace.h"
-#include "@QT_PHONON_INCLUDE_DIR@/platformplugin.h"
-#include "@QT_PHONON_INCLUDE_DIR@/seekslider.h"
-#include "@QT_PHONON_INCLUDE_DIR@/streaminterface.h"
-#include "@QT_PHONON_INCLUDE_DIR@/videoplayer.h"
-#include "@QT_PHONON_INCLUDE_DIR@/videowidget.h"
-#include "@QT_PHONON_INCLUDE_DIR@/videowidgetinterface.h"
-#include "@QT_PHONON_INCLUDE_DIR@/volumefadereffect.h"
-#include "@QT_PHONON_INCLUDE_DIR@/volumefaderinterface.h"
-#include "@QT_PHONON_INCLUDE_DIR@/volumeslider.h"
 
 //QtHelp need be included after QtSql
 #include <QtHelp/QtHelp>

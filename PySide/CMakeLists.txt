@@ -19,10 +19,12 @@ macro(CHECK_VAR name)
 endmacro()
 
 find_package(Qt5Xml)
+find_package(Qt5XmlPatterns)
 
 CHECK_VAR(Qt5Core_FOUND)
 CHECK_VAR(Qt5Gui_FOUND)
 CHECK_VAR(Qt5Xml_FOUND)
+CHECK_VAR(Qt5XmlPatterns_FOUND)
 
 HAS_QT_MODULE(Qt5Core_FOUND QtCore)
 ###HAS_QT_MODULE(Qt5Xml_FOUND QtXml)

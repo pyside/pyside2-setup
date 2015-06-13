@@ -78,6 +78,15 @@ else()
     set(BINDING_API_VERSION_FULL "${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION}.${BINDING_API_MICRO_VERSION}~${BINDING_API_RELEASE_LEVEL}${BINDING_API_SERIAL}"
         CACHE STRING "PySide version [full]" FORCE)
 endif()
+
+# some hack to mimick the qt4 version variables
+find_package(Qt5Core)
+
+string(REGEX MATCHALL "[0-9]+" qt_version_helper "${Qt5Core_VERSION_STRING}")
+list(GET qt_version_helper 0 QT_VERSION_MAJOR)
+list(GET qt_version_helper 1 QT_VERSION_MINOR)
+unset(qt_version_helper)
+
 set(PYSIDE_QT_VERSION "${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" CACHE STRING "Qt version used to compile PySide" FORCE)
 if(ENABLE_VERSION_SUFFIX)
       set(pyside_SUFFIX "-${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION}")
