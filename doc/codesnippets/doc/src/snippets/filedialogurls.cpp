@@ -1,5 +1,5 @@
 
-#include <QtGui>
+#include <QtWidgets>
 
 int main(int argv, char **args)
 {

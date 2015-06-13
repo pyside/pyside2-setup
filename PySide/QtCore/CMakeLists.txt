@@ -161,7 +161,10 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/typesystem_core.xml.in"
 set(QtCore_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 # fake this variable for qt5
 
+
 set(QtCore_typesystem_path "${QtCore_SOURCE_DIR}")
+
+#message(FATAL_ERROR "${Qt5Core_INCLUDE_DIRS} ${testvar}")
 
 set(QtCore_include_dirs ${CMAKE_CURRENT_SOURCE_DIR}
                         ${CMAKE_CURRENT_BINARY_DIR}/${BINDING_NAME}/QtCore/

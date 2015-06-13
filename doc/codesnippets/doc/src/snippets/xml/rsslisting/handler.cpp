@@ -54,7 +54,7 @@ link information. This may be used by user interfaces for the purpose of
 displaying items as they are read.
 */
 
-#include <QtGui>
+#include <QtWidgets>
 
 #include "handler.h"
 

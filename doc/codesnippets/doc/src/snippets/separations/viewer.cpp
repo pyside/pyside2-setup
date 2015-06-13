@@ -49,7 +49,7 @@ A main menu provides entries for selecting files, and adjusting the
 brightness of the separations.
 */
 
-#include <QtGui>
+#include <QtWidgets>
 
 #include "finalwidget.h"
 #include "screenwidget.h"

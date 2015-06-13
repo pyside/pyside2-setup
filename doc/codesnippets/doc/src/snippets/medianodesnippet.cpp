@@ -1,4 +1,4 @@
-#include <QtGui>
+#include <QtWidgets>
 
 #include <phonon/mediaobject.h>
 #include <phonon/audiooutput.h>

@@ -1,4 +1,4 @@
-#include <QtGui>
+#include <QtWidgets>
 
 #include <phonon/backendcapabilities.h>
 #include <phonon/phononnamespace.h>

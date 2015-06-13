@@ -1,6 +1,6 @@
 
 
-#include <QtGui>
+#include <QtWidgets>
 #include <phonon>
 
 
