@@ -165,6 +165,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     // headers
     s << "// default includes" << endl;
     s << "#include <shiboken.h>" << endl;
+    s << "#include <QDebug>" << endl;
     if (usePySideExtensions()) {
         s << "#include <pysidesignal.h>" << endl;
         s << "#include <pysideproperty.h>" << endl;
@@ -4652,8 +4653,10 @@ void CppGenerator::finishGeneration()
     s << "#include <sbkpython.h>" << endl;
     s << "#include <shiboken.h>" << endl;
     s << "#include <algorithm>" << endl;
-    if (usePySideExtensions())
+    if (usePySideExtensions()) {
+        s << "#include <QDebug>" << endl;
         s << "#include <pyside.h>" << endl;
+    }
 
     s << "#include \"" << getModuleHeaderFileName() << '"' << endl << endl;
     foreach (const Include& include, includes)
