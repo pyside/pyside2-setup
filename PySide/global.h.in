@@ -137,6 +137,8 @@ inline void qYouForgotTheQ_OBJECT_Macro(T1, T2) {}
 # define Q_DECL_HIDDEN_STATIC_METACALL Q_DECL_HIDDEN
 #endif
 
+// from the qt5 qobjectdefs.h, but needed to exclude
+#if false
 /* qmake ignore Q_OBJECT */
 #define Q_OBJECT \
 public: \
@@ -149,6 +151,8 @@ public: \
 private: \
     Q_DECL_HIDDEN_STATIC_METACALL static void qt_static_metacall(QObject *, QMetaObject::Call, int, void **); \
     struct QPrivateSignal {};
+
+#endif
 
 /* qmake ignore Q_OBJECT */
 #define Q_OBJECT_FAKE Q_OBJECT

@@ -46,37 +46,37 @@ static bool getReceiver(QObject *source, const char* signal, PyObject* callback,
     return usingGlobalReceiver;
 }
 
-static bool qobjectConnect(QObject* source, const char* signal, QObject* receiver, const char* slot, Qt::ConnectionType type)
+static QMetaObject::Connection qobjectConnect(QObject* source, const char* signal, QObject* receiver, const char* slot, Qt::ConnectionType type)
 {
     if (!signal || !slot)
-        return false;
+        return QMetaObject::Connection();
 
     if (!PySide::Signal::checkQtSignal(signal))
-        return false;
+        return QMetaObject::Connection();
     signal++;
 
     if (!PySide::SignalManager::registerMetaMethod(source, signal, QMetaMethod::Signal))
-        return false;
+        return QMetaObject::Connection();
 
     bool isSignal = PySide::Signal::isQtSignal(slot);
     slot++;
     PySide::SignalManager::registerMetaMethod(receiver, slot, isSignal ? QMetaMethod::Signal : QMetaMethod::Slot);
-    bool connected;
+    QMetaObject::Connection connection;
     Py_BEGIN_ALLOW_THREADS
-    connected = QObject::connect(source, signal - 1, receiver, slot - 1, type);
+    connection = QObject::connect(source, signal - 1, receiver, slot - 1, type);
     Py_END_ALLOW_THREADS
-    return connected;
+    return connection;
 }
 
-static bool qobjectConnectCallback(QObject* source, const char* signal, PyObject* callback, Qt::ConnectionType type)
+static QMetaObject::Connection qobjectConnectCallback(QObject* source, const char* signal, PyObject* callback, Qt::ConnectionType type)
 {
     if (!signal || !PySide::Signal::checkQtSignal(signal))
-        return false;
+        return QMetaObject::Connection();
     signal++;
 
     int signalIndex = PySide::SignalManager::registerMetaMethodGetIndex(source, signal, QMetaMethod::Signal);
     if (signalIndex == -1)
-        return false;
+        return QMetaObject::Connection();
 
     PySide::SignalManager& signalManager = PySide::SignalManager::instance();
 
@@ -86,7 +86,7 @@ static bool qobjectConnectCallback(QObject* source, const char* signal, PyObject
     QByteArray callbackSig;
     bool usingGlobalReceiver = getReceiver(source, signal, callback, &receiver, &self, &callbackSig);
     if (receiver == 0 && self == 0)
-        return false;
+        return QMetaObject::Connection();
 
     const QMetaObject* metaObject = receiver->metaObject();
     const char* slot = callbackSig.constData();
@@ -98,7 +98,7 @@ static bool qobjectConnectCallback(QObject* source, const char* signal, PyObject
             if (usingGlobalReceiver)
                 signalManager.releaseGlobalReceiver(source, receiver);
 
-            return false;
+            return QMetaObject::Connection();
         }
 
         if (usingGlobalReceiver)
@@ -110,14 +110,14 @@ static bool qobjectConnectCallback(QObject* source, const char* signal, PyObject
             if (usingGlobalReceiver)
                 signalManager.releaseGlobalReceiver(source, receiver);
 
-            return false;
+            return QMetaObject::Connection();
         }
     }
-    bool connected;
+    QMetaObject::Connection connection;
     Py_BEGIN_ALLOW_THREADS
-    connected = QMetaObject::connect(source, signalIndex, receiver, slotIndex, type);
+    connection = QMetaObject::connect(source, signalIndex, receiver, slotIndex, type);
     Py_END_ALLOW_THREADS
-    if (connected) {
+    if (connection) {
         if (usingGlobalReceiver)
             signalManager.notifyGlobalReceiver(receiver);
         #ifndef AVOID_PROTECTED_HACK
@@ -128,13 +128,13 @@ static bool qobjectConnectCallback(QObject* source, const char* signal, PyObject
             reinterpret_cast<QObjectWrapper*>(source)->connectNotify(signal - 1);
         #endif
 
-        return true;
+        return connection;
     }
 
     if (usingGlobalReceiver)
         signalManager.releaseGlobalReceiver(source, receiver);
 
-    return false;
+    return QMetaObject::Connection();
 }
 
 
