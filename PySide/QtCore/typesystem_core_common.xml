@@ -2007,7 +2007,7 @@
         </inject-code>
     </modify-function>
     <inject-code class="native" position="beginning" file="glue/qobject_connect.cpp" />
-    <add-function signature="connect(const QObject*, const char*, PyCallable*, Qt::ConnectionType)" return-type="bool" static="yes">
+    <add-function signature="connect(const QObject*, const char*, PyCallable*, Qt::ConnectionType)" return-type="QMetaObject::Connection" static="yes">
         <modify-argument index="4">
             <rename to="type"/>
             <replace-default-expression with="Qt::AutoConnection" />
@@ -2019,7 +2019,7 @@
         </inject-code>
     </add-function>
     <!-- static version -->
-    <add-function signature="connect(const char*, PyCallable*, Qt::ConnectionType)" return-type="bool">
+    <add-function signature="connect(const char*, PyCallable*, Qt::ConnectionType)" return-type="QMetaObject::Connection">
         <modify-argument index="3">
             <rename to="type"/>
             <replace-default-expression with="Qt::AutoConnection" />
@@ -2030,7 +2030,7 @@
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
         </inject-code>
     </add-function>
-    <add-function signature="connect(const char*, const QObject*, const char *, Qt::ConnectionType)" return-type="bool">
+    <add-function signature="connect(const char*, const QObject*, const char *, Qt::ConnectionType)" return-type="QMetaObject::Connection">
         <modify-argument index="4">
             <rename to="type"/>
             <replace-default-expression with="Qt::AutoConnection" />
