@@ -93,6 +93,7 @@
     <rejection class="QMetaObject" function-name="changeGuard"/>
     <rejection class="QMetaObject" function-name="removeGuard"/>
 
+  <rejection class="QByteArray" field-name="MaxSize"/>
   <rejection class="QChildEvent" field-name="c"/>
   <rejection class="QTimerEvent" field-name="id"/>
   <rejection class="QEvent" field-name="t"/>
@@ -162,6 +163,7 @@
     <!-- FIXME APIExtractor or shiboken do not support multiple includes by primitive type -->
     <include file-name="signalmanager.h" location="global"/>
   </primitive-type>
+  <!-- Qt5: Replace QBool by bool
   <primitive-type name="QBool" target-lang-api-name="PyBool">
     <conversion-rule>
         <native-to-target>
@@ -173,11 +175,8 @@
             </add-conversion>
         </target-to-native>
     </conversion-rule>
-    <!-- FIXME This is a workaround to include some headers needed by some includes (nothing to do with QBool) -->
-    <!-- CT: disabled for qt5 since concurrent is its own module
-    <include file-name="QtConcurrentFilter" location="global"/>
-  -->
   </primitive-type>
+  -->
 
   <inject-code class="native" position="beginning">
     bool py2kStrCheck(PyObject* obj)
@@ -966,15 +965,20 @@
   </inject-code>
 
   <inject-code class="native" position="beginning">
-    // Define a global variable to handle qInstallMsgHandler callback
+    // Define a global variable to handle qInstallMessageHandler callback
     static PyObject* qtmsghandler = 0;
 
-    static void msgHandlerCallback(QtMsgType type, const char* msg)
+    static void msgHandlerCallback(QtMsgType type, const QMessageLogContext &amp; ctx, const QString &amp;msg)
     {
         Shiboken::GilState state;
-        Shiboken::AutoDecRef arglist(PyTuple_New(2));
+        Shiboken::AutoDecRef arglist(PyTuple_New(3));
         PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[QtMsgType](type));
-        PyTuple_SET_ITEM(arglist, 1, %CONVERTTOPYTHON[const char*](msg));
+        //PyTuple_SET_ITEM(arglist, 1, %xxx CONVERTTOPYTHON[QMessageLogContext](ctx));
+        // XXX we need to handle class QMessageLogContext
+        PyTuple_SET_ITEM(arglist, 1, Py_None);
+        QByteArray array = msg.toLatin1().data();
+        char *data = array.data();
+        PyTuple_SET_ITEM(arglist, 2, %CONVERTTOPYTHON[char *](data));
         Shiboken::AutoDecRef ret(PyObject_CallObject(qtmsghandler, arglist));
     }
     static void QtCoreModuleExit()
@@ -982,10 +986,10 @@
         PySide::SignalManager::instance().clear();
     }
   </inject-code>
-  <add-function signature="qInstallMsgHandler(PyObject)" return-type="PyObject">
+  <add-function signature="qInstallMessageHandler(PyObject)" return-type="PyObject">
     <inject-code class="target" position="beginning">
       if (%PYARG_1 == Py_None) {
-        qInstallMsgHandler(0);
+        qInstallMessageHandler(0);
         %PYARG_0 = qtmsghandler ? qtmsghandler : Py_None;
         qtmsghandler = 0;
       } else if (!PyCallable_Check(%PYARG_1)) {
@@ -994,7 +998,7 @@
         %PYARG_0 = qtmsghandler ? qtmsghandler : Py_None;
         Py_INCREF(%PYARG_1);
         qtmsghandler = %PYARG_1;
-        qInstallMsgHandler(msgHandlerCallback);
+        qInstallMessageHandler(msgHandlerCallback);
       }
 
       if (%PYARG_0 == Py_None)
