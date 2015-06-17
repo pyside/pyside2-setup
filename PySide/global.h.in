@@ -465,8 +465,8 @@ inline const QMetaObject *QMetaObject::superClass() const
 
 QT_END_NAMESPACE
 
-
-#define Q_QDOC
+// this was defined in qt4, but we cannot use it, because then QObject becomes inconsistent!
+#undef Q_QDOC
 
 #if @ENABLE_X11@
   #define Q_WS_X11

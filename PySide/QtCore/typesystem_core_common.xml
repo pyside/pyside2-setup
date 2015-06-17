@@ -1942,8 +1942,6 @@
       <include file-name="QCoreApplication" location="global"/>
       <include file-name="signalmanager.h" location="local" />
     </extra-includes>
-    <!-- qt5 adds a parameter. XXX We just remove this for now. The private QPrivateSignal is not seen. Why? -->
-    <modify-function signature="objectNameChanged(const QString &amp;)"  remove="all"/>
     <modify-function signature="metaObject() const">
       <inject-code class="target" position="beginning">
         %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME();
