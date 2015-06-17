@@ -466,7 +466,7 @@ inline const QMetaObject *QMetaObject::superClass() const
 QT_END_NAMESPACE
 
 
-#define qdoc
+#define Q_QDOC
 
 #if @ENABLE_X11@
   #define Q_WS_X11
@@ -485,7 +485,7 @@ QT_END_NAMESPACE
 #if @ENABLE_MAC@ || @ENABLE_WIN@
   // Workaround to parse the QApplication header
   #define Q_INTERNAL_QAPP_SRC
-  #undef qdoc
+  #undef Q_QDOC
 #endif
 #include <QtGui/QtGui>
 #include "qpytextobject.h"  // PySide class
