@@ -1,3 +1,12 @@
+/*
+
+This is a harder problem right now:
+
+Qt 5.X implements signals in a very different way.
+In order to get the best possible result in very little time, I (ctismer) decided to
+create these functions as defunct definitions, in order to do them right, pretty soon.
+For today, I don't have the brains for that!
+
 static bool isDecorator(PyObject* method, PyObject* self)
 {
     Shiboken::AutoDecRef methodName(PyObject_GetAttrString(method, "__name__"));
@@ -179,3 +188,9 @@ static bool qobjectDisconnectCallback(QObject* source, const char* signal, PyObj
     }
     return false;
 }
+
+*/
+
+// the temporary definitions may follow, soon:
+
+

@@ -1986,6 +1986,8 @@
         <parent index="1" action="add"/>
       </modify-argument>
     </modify-function>
+
+    <!-- this stuff needs to wait for, maybe, 2 weeks
     <modify-function signature="connect(const QObject*, const char*, const char *, Qt::ConnectionType) const">
         <modify-argument index="4">
             <rename to="type"/>
@@ -2018,7 +2020,10 @@
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
         </inject-code>
     </add-function>
+  -->
     <!-- static version -->
+
+    <!--
     <add-function signature="connect(const char*, PyCallable*, Qt::ConnectionType)" return-type="QMetaObject::Connection">
         <modify-argument index="3">
             <rename to="type"/>
@@ -2041,7 +2046,7 @@
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
         </inject-code>
     </add-function>
-    <add-function signature="emit(const char*, ...)" return-type="bool">
+   <add-function signature="emit(const char*, ...)" return-type="bool">
         <inject-code class="target" position="beginning">
         %RETURN_TYPE %0 = PySide::SignalManager::instance().emitSignal(%CPPSELF, %1, %PYARG_2);
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
@@ -2061,7 +2066,9 @@
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
         </inject-code>
     </add-function>
-    <inject-code class="native" file="glue/qobject_findchild.cpp"/>
+    -->
+
+     <inject-code class="native" file="glue/qobject_findchild.cpp"/>
     <add-function signature="findChild(PyTypeObject*, const QString&amp;)" return-type="PyObject*">
         <inject-code class="target" position="beginning">
         QObject* child = _findChildHelper(%CPPSELF, %2, (PyTypeObject*)%PYARG_1);
