@@ -46,6 +46,7 @@ else()
 endif()
 
 set(QtCore_SRC
+    #[[
 ### abstract class type ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstracteventdispatcher_wrapper.cpp
 ### abstract class type ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstractitemmodel_wrapper.cpp
 ### abstract class type ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstractlistmodel_wrapper.cpp
@@ -112,7 +113,6 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsystemsemaphore_wrapper.cpp
 ### QFlag problem ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qt_wrapper.cpp
 ### renamed, see QtConcurrent module ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtconcurrent_wrapper.cpp
 ### QBool, qInstallMsgHandler
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtcore_module_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtemporaryfile_wrapper.cpp
 ### QFlag problem ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtextboundaryfinder_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtextcodec_converterstate_wrapper.cpp
@@ -143,6 +143,9 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qxmlstreamwriter_wrapper.cpp
 ${QtCore_46_SRC}
 ${QtCore_47_SRC}
 ${SPECIFIC_OS_FILES}
+]]
+# this file is always needed
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtcore_module_wrapper.cpp
 )
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/typesystem_core.xml.in"
@@ -190,9 +193,9 @@ file(COPY ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/fake_shiboken.sh
 
 set(SHIBOKEN_BINARY "${CMAKE_CURRENT_BINARY_DIR}/fake_shiboken.sh")
 
+# fake these variables for qt5
 set(QtCore_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-# fake this variable for qt5
-
+set(QtCore_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore)
 
 set(QtCore_typesystem_path "${QtCore_SOURCE_DIR}")
 
