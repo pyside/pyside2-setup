@@ -101,13 +101,6 @@ To install PySide on Mac OS X you can choose from the following options:
       $ pip install -U PySide
 
 
-After the installation, the following call must be made manually:
-
-::
-
-   $ pyside_postinstall.py -install
-
-
 Installing PySide on a Linux System
 -----------------------------------
 

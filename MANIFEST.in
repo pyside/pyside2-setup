@@ -8,7 +8,6 @@ include CHANGES.rst
 include README.rst
 include ez_setup.py
 include setup.py
-include pyside_postinstall.py
 include popenasync.py
 include qtinfo.py
 include utils.py
