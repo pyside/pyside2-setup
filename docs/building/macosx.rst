@@ -12,6 +12,7 @@ The supported Mac OS X versions created by `Apple <http://www.apple.com/>`_ are
 - OS X 10.7 *Lion*
 - OS X 10.8 *Mountain Lion*
 - OS X 10.9 *Mavericks*
+- OS X 10.10 *Yosemite*
 
 Mac OS X is a proprietary UNIX flavor of BSD Unix and only partially similar to
 Linux. Therefore, the usual packages from Linux distributions cannot be used
@@ -226,12 +227,6 @@ Installing PySide distribution
 
       $ sudo pip2.7 install dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
 
-#. Run the post-install script to finish the package configuration:
-   
-   ::
-
-      $ sudo python2.7 pyside_postinstall.py -install
-
 
 Installing PySide distribution into ``virtual`` Python environment
 ------------------------------------------------------------------
@@ -259,12 +254,6 @@ Installing PySide distribution into ``virtual`` Python environment
    ::
 
       (env) $ pip install ../dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
-
-#. Run the post-install script to finish the package configuration:
-
-   ::
-
-      (env) $ pyside_postinstall.py -install
 
 #. Leave the virtual environment (optional):
 

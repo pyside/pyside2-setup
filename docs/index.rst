@@ -46,7 +46,7 @@ PySide requires Python 2.6 or later and Qt 4.6 or better.
 
 .. note::
 
-   Qt 5.x is currently not supported.
+   Qt 5.x is currently under construction.
 
 
 Contents

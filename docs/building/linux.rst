@@ -109,12 +109,6 @@ Installing PySide distribution
       PySide-1.2.2-cp27-none-linux-x86_64.whl
       $ sudo pip2.7 install dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
 
-#. Run the post-install script to finish the package configuration:
-
-   ::
-
-      $ sudo python2.7 pyside_postinstall.py -install
-
 
 Installing PySide distribution into ``virtual`` Python environment
 ------------------------------------------------------------------
@@ -142,9 +136,3 @@ Installing PySide distribution into ``virtual`` Python environment
    ::
 
       $ bin/pip2.7 install ../dist/PySide-1.2.2-cp27-none-linux-x86_64.whl
-
-#. Run the post-install script to finish the package configuration:
-
-   ::
-
-      $ bin/python bin/pyside_postinstall.py -install
