@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 import stat
 import errno
 import time
@@ -233,7 +234,7 @@ def copyfile(src, dst, force=True, vars=None):
     log.info("Copying file %s to %s." % (src, dst))
 
     shutil.copy2(src, dst)
-    
+
     return dst
 
 
@@ -450,3 +451,138 @@ def regenerate_qt_resources(src, pyside_rcc_path, pyside_rcc_options):
                 run_process([pyside_rcc_path,
                              pyside_rcc_options,
                              srcname, '-o', dstname])
+
+
+def back_tick(cmd, ret_err=False):
+    """ Run command `cmd`, return stdout, or stdout, stderr if `ret_err`
+
+    Roughly equivalent to ``check_output`` in Python 2.7
+
+    Parameters
+    ----------
+    cmd : str
+        command to execute
+    ret_err : bool, optional
+        If True, return stderr in addition to stdout.  If False, just return
+        stdout
+
+    Returns
+    -------
+    out : str or tuple
+        If `ret_err` is False, return stripped string containing stdout from
+        `cmd`.  If `ret_err` is True, return tuple of (stdout, stderr) where
+        ``stdout`` is the stripped stdout, and ``stderr`` is the stripped
+        stderr.
+
+    Raises
+    ------
+    Raises RuntimeError if command returns non-zero exit code
+    """
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    out, err = proc.communicate()
+    if not isinstance(out, str):
+        # python 3
+        out = out.decode()
+        err = err.decode()
+    retcode = proc.returncode
+    if retcode is None:
+        proc.terminate()
+        raise RuntimeError(cmd + ' process did not terminate')
+    if retcode != 0:
+        raise RuntimeError(cmd + ' process returned code %d\n*** %s' %
+                           (retcode, err))
+    out = out.strip()
+    if not ret_err:
+        return out
+    return out, err.strip()
+
+
+OSX_OUTNAME_RE = re.compile(r'\(compatibility version [\d.]+, current version '
+                        '[\d.]+\)')
+
+def osx_get_install_names(libpath):
+    """ Get OSX library install names from library `libpath` using ``otool``
+
+    Parameters
+    ----------
+    libpath : str
+        path to library
+
+    Returns
+    -------
+    install_names : list of str
+        install names in library `libpath`
+    """
+    out = back_tick('otool -L ' + libpath)
+    libs = [line for line in out.split('\n')][1:]
+    return [OSX_OUTNAME_RE.sub('', lib).strip() for lib in libs]
+
+
+OSX_RPATH_RE = re.compile(r"path (.+) \(offset \d+\)")
+
+def osx_get_rpaths(libpath):
+    """ Get rpaths from library `libpath` using ``otool``
+
+    Parameters
+    ----------
+    libpath : str
+        path to library
+
+    Returns
+    -------
+    rpaths : list of str
+        rpath values stored in ``libpath``
+
+    Notes
+    -----
+    See ``man dyld`` for more information on rpaths in libraries
+    """
+    lines = back_tick('otool -l ' + libpath).split('\n')
+    ctr = 0
+    rpaths = []
+    while ctr < len(lines):
+        line = lines[ctr].strip()
+        if line != 'cmd LC_RPATH':
+            ctr += 1
+            continue
+        assert lines[ctr + 1].strip().startswith('cmdsize')
+        rpath_line = lines[ctr + 2].strip()
+        match = OSX_RPATH_RE.match(rpath_line)
+        if match is None:
+            raise RuntimeError('Unexpected path line: ' + rpath_line)
+        rpaths.append(match.groups()[0])
+        ctr += 3
+    return rpaths
+
+
+def osx_localize_libpaths(libpath, local_libs, enc_path=None):
+    """ Set rpaths and install names to load local dynamic libs at run time
+
+    Use ``install_name_tool`` to set relative install names in `libpath` (as
+    named in `local_libs` to be relative to `enc_path`.  The default for
+    `enc_path` is the directory containing `libpath`.
+
+    Parameters
+    ----------
+    libpath : str
+        path to library for which to set install names and rpaths
+    local_libs : sequence of str
+        library (install) names that should be considered relative paths
+    enc_path : str, optional
+        path that does or will contain the `libpath` library, and to which the
+        `local_libs` are relative.  Defaults to current directory containing
+        `libpath`.
+    """
+    if enc_path is None:
+        enc_path = os.path.abspath(os.path.dirname(libpath))
+    install_names = osx_get_install_names(libpath)
+    need_rpath = False
+    for install_name in install_names:
+        if install_name[0] in '/@':
+            continue
+        back_tick('install_name_tool -change %s @rpath/%s %s' %
+           (install_name, install_name, libpath))
+        need_rpath = True
+    if need_rpath and enc_path not in osx_get_rpaths(libpath):
+        back_tick('install_name_tool -add_rpath %s %s' %
+           (enc_path, libpath))
