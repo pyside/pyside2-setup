@@ -578,11 +578,17 @@ def osx_localize_libpaths(libpath, local_libs, enc_path=None):
     install_names = osx_get_install_names(libpath)
     need_rpath = False
     for install_name in install_names:
-        if install_name[0] in '/@':
+        if install_name[0] == '/':
+            # absolute path, nothing to do
             continue
-        back_tick('install_name_tool -change %s @rpath/%s %s' %
-           (install_name, install_name, libpath))
+        # we possibly need to add an rpath command.
+        # note that a @rpath may be there already, but no rpath command.
+        # this happens when Qt is not linked (with qt5 this is the default)
         need_rpath = True
+        if install_name[0] != '@':
+            # we need to change a relative path to @rpath
+            back_tick('install_name_tool -change {ina} @rpath/{ina} {lipa}'.format(
+                      ina=install_name, lipa=libpath ))
     if need_rpath and enc_path not in osx_get_rpaths(libpath):
-        back_tick('install_name_tool -add_rpath %s %s' %
-           (enc_path, libpath))
+        back_tick('install_name_tool -add_rpath {epa} {lipa}'.format(
+                  epa=enc_path, lipa=libpath ))
