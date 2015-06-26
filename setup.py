@@ -932,10 +932,10 @@ class pyside_build(_build):
                     raise RuntimeError("Error patching rpath in " + srcpath)
 
         elif sys.platform == 'darwin':
-           pyside_libs = [lib for lib in os.listdir(package_path) if filter_match(
+            pyside_libs = [lib for lib in os.listdir(package_path) if filter_match(
                           lib, ["*.so", "*.dylib"])]
-           def rpath_cmd(srcpath):
-               osx_localize_libpaths(srcpath, pyside_libs, None)
+            def rpath_cmd(srcpath):
+                osx_localize_libpaths(srcpath, pyside_libs, None)
 
         else:
             raise RuntimeError('Not configured for platform ' +
@@ -951,7 +951,7 @@ class pyside_build(_build):
             if not os.path.exists(srcpath):
                 continue
             rpath_cmd(srcpath)
-            print("Patched rpath to '$ORIGIN/' in %s." % (srcpath))
+            print("Patched rpath to '$ORIGIN/' (Linux) or updated rpath (OS/X) in %s." % (srcpath))
 
 
 try:
