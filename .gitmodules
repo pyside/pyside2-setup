@@ -1,12 +1,15 @@
-[submodule "sources/shiboken"]
-	path = sources/shiboken
-	url = https://git.gitorious.org/pyside/shiboken.git
-[submodule "sources/pyside"]
-	path = sources/pyside
-	url = https://git.gitorious.org/pyside/pyside.git
-[submodule "sources/pyside-tools"]
-	path = sources/pyside-tools
-	url = https://github.com/PySide/Tools.git
+[submodule "sources/pyside2"]
+	path = sources/pyside2
+	url = https://bitbucket.org/ctismer/pyside2
+	branch = qt5
 [submodule "sources/pyside-examples"]
 	path = sources/pyside-examples
 	url = https://github.com/PySide/Examples.git
+[submodule "sources/shiboken2"]
+	path = sources/shiboken2
+	url = https://bitbucket.org/ctismer/shiboken2
+	branch = qt5
+[submodule "sources/pyside-tools2"]
+	path = sources/pyside-tools2
+	url = https://bitbucket.org/ctismer/pyside-tools2
+	branch = qt5
