@@ -26,14 +26,14 @@
 #include "sbkpython.h"
 #include "shibokenmacros.h"
 
-class SbkObject;
+struct SbkObject;
 namespace Shiboken
 {
 
 /**
  *  AutoDecRef holds a PyObject pointer and decrement its reference counter when destroyed.
  */
-class LIBSHIBOKEN_API AutoDecRef
+struct LIBSHIBOKEN_API AutoDecRef
 {
 public:
     /**
