@@ -890,7 +890,7 @@ void CppGenerator::writeEnumConverterFunctions(QTextStream& s, const TypeEntry* 
     QTextStream c(&code);
     c << INDENT << "*((" << cppTypeName << "*)cppOut) = ";
     if (enumType->isFlags())
-        c << cppTypeName << "(QFlag(PySide::QFlags::getValue(reinterpret_cast<PySideQFlagsObject*>(pyIn))))";
+        c << cppTypeName << "(QFlag((int)PySide::QFlags::getValue(reinterpret_cast<PySideQFlagsObject*>(pyIn))))";
     else
         c << "(" << cppTypeName << ") Shiboken::Enum::getValue(pyIn)";
     c << ';' << endl;
@@ -927,7 +927,7 @@ void CppGenerator::writeEnumConverterFunctions(QTextStream& s, const TypeEntry* 
     code.clear();
     cppTypeName = getFullTypeName(flags).trimmed();
     c << INDENT << "*((" << cppTypeName << "*)cppOut) = " << cppTypeName;
-    c << "(QFlag(Shiboken::Enum::getValue(pyIn)));" << endl;
+    c << "(QFlag((int)Shiboken::Enum::getValue(pyIn)));" << endl;
 
     QString flagsTypeName = fixedCppTypeName(flags);
     writePythonToCppFunction(s, code, typeName, flagsTypeName);
@@ -936,7 +936,7 @@ void CppGenerator::writeEnumConverterFunctions(QTextStream& s, const TypeEntry* 
     code.clear();
     c << INDENT << "Shiboken::AutoDecRef pyLong(PyNumber_Long(pyIn));" << endl;
     c << INDENT << "*((" << cppTypeName << "*)cppOut) = " << cppTypeName;
-    c << "(QFlag(PyLong_AsLong(pyLong.object())));" << endl;
+    c << "(QFlag((int)PyLong_AsLong(pyLong.object())));" << endl;
     writePythonToCppFunction(s, code, "number", flagsTypeName);
     writeIsPythonConvertibleToCppFunction(s, "number", flagsTypeName, "PyNumber_Check(pyIn)");
 }
@@ -4208,11 +4208,11 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream& s, const AbstractMetaEn
     AbstractMetaType* flagsType = buildAbstractMetaTypeFromTypeEntry(flagsEntry);
     s << INDENT << "::" << flagsEntry->originalName() << " cppResult, " CPP_SELF_VAR ", cppArg;" << endl;
     s << "#ifdef IS_PY3K" << endl;
-    s << INDENT << CPP_SELF_VAR " = (::" << flagsEntry->originalName() << ")PyLong_AsLong(" PYTHON_SELF_VAR ");" << endl;
-    s << INDENT << "cppArg = (" << flagsEntry->originalName() << ")PyLong_AsLong(" PYTHON_ARG ");" << endl;
+    s << INDENT << CPP_SELF_VAR " = (::" << flagsEntry->originalName() << ")(int)PyLong_AsLong(" PYTHON_SELF_VAR ");" << endl;
+    s << INDENT << "cppArg = (" << flagsEntry->originalName() << ")(int)PyLong_AsLong(" PYTHON_ARG ");" << endl;
     s << "#else" << endl;
-    s << INDENT << CPP_SELF_VAR " = (::" << flagsEntry->originalName() << ")PyInt_AsLong(" PYTHON_SELF_VAR ");" << endl;
-    s << INDENT << "cppArg = (" << flagsEntry->originalName() << ")PyInt_AsLong(" PYTHON_ARG ");" << endl;
+    s << INDENT << CPP_SELF_VAR " = (::" << flagsEntry->originalName() << ")(int)PyInt_AsLong(" PYTHON_SELF_VAR ");" << endl;
+    s << INDENT << "cppArg = (" << flagsEntry->originalName() << ")(int)PyInt_AsLong(" PYTHON_ARG ");" << endl;
     s << "#endif" << endl << endl;
     s << INDENT << "cppResult = " CPP_SELF_VAR " " << cppOpName << " cppArg;" << endl;
     s << INDENT << "return ";
