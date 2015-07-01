@@ -771,6 +771,7 @@
   <rejection class="" enum-name="QtValidLicenseForHelpModule"/>
   <rejection class="QtConcurrent" enum-name="enum_1"/>
   <rejection class="QAbstractEventDispatcher" function-name="filterEvent"/>
+  <rejection class="QAbstractEventDispatcher" function-name="filterNativeEvent"/>
   <rejection class="QAbstractEventDispatcher" function-name="setEventFilter"/>
   <!-- Internal -->
   <rejection class="QAbstractFileEngine"/> <!--
@@ -2675,9 +2676,6 @@
   </value-type>
   <object-type name="QXmlStreamEntityResolver"/>
   <object-type name="QAbstractEventDispatcher">
-    <extra-includes>
-      <include file-name="QPair" location="global"/>
-    </extra-includes>
     <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>)" allow-thread="yes"/>
   </object-type>
   <object-type name="QEventLoop">
