@@ -70,9 +70,8 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qeventloop_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qfactoryinterface_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qfile_wrapper.cpp 
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qfiledevice_wrapper.cpp
-### missing SBK_QFLAGS_QFILE_PERMISSION__IDX ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qfileinfo_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qfileinfo_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qfilesystemwatcher_wrapper.cpp
-### ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qfsfileengine_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qgenericargument_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qgenericreturnargument_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qiodevice_wrapper.cpp
@@ -86,7 +85,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmetaproperty_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmetamethod_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmetaobject_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmimedata_wrapper.cpp
-### creates error ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmodelindex_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmodelindex_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmutex_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qmutexlocker_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qobject_wrapper.cpp
@@ -107,11 +106,10 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsettings_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsignalmapper_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsize_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsizef_wrapper.cpp
-### missing constructor problem ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsocketnotifier_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsocketnotifier_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsysinfo_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsystemsemaphore_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qt_wrapper.cpp
-### QBool, qInstallMsgHandler
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtemporaryfile_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtextboundaryfinder_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtextcodec_converterstate_wrapper.cpp

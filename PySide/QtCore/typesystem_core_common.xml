@@ -177,6 +177,10 @@
     </conversion-rule>
   </primitive-type>
   -->
+  <!-- Qt5: add the new pointer-ish types -->
+  <primitive-type name="qintptr" />
+  <primitive-type name="quintptr" />
+  <primitive-type name="qptrdiff" />
 
   <inject-code class="native" position="beginning">
     bool py2kStrCheck(PyObject* obj)
@@ -2851,6 +2855,7 @@
     <modify-function signature="acquire(int)" allow-thread="yes"/>
     <modify-function signature="tryAcquire(int, int)" allow-thread="yes"/>
   </object-type>
+
   <object-type name="QSocketNotifier">
     <enum-type name="Type"/>
     <add-function signature="QSocketNotifier(PyObject*, QSocketNotifier::Type, QObject*)">
@@ -2864,7 +2869,13 @@
             Shiboken::AutoDecRef fileNoValue(PyObject_CallObject(fileNo, 0));
             if (%CHECKTYPE[int](fileNoValue)) {
                 int cppFileNoValue = %CONVERTTOCPP[int](fileNoValue);
-                %0 = new %TYPE(cppFileNoValue, %2, %3);
+                /* Qt4 version:
+                 * %0 = new %TYPE(cppFileNoValue, %2, %3);
+                 * Qt5 has qintptr instead.
+                 * XXX check if this means a pointer or just the pointer size cast (what I implemented)
+                 */
+                qintptr socket = (qintptr)cppFileNoValue;
+                %0 = new %TYPE(socket, %2, %3);
             }
         }
         </inject-code>
