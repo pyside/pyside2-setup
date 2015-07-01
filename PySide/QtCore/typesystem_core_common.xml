@@ -2158,7 +2158,6 @@
         %PYARG_0 = %PYARG_1;
     }
     </template>
-    -->
     <add-function signature="trUtf8(const char *, const char *, int)" return-type="QString">
         <modify-argument index="2">
           <replace-default-expression with="0"/>
@@ -2187,6 +2186,7 @@
             </insert-template>
         </inject-code>
     </add-function>
+    -->
 
    <modify-function signature="receivers(const char*) const">
      <inject-code class="target" position="beginning">
