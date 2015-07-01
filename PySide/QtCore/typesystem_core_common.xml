@@ -2236,7 +2236,10 @@
     </extra-includes>
   </object-type>
   <value-type name="QUrl" hash-function="PySide::hash">
-    <enum-type name="FormattingOption" flags="FormattingOptions"/>
+    <!-- Qt5: lots of changes -->
+    <enum-type name="ComponentFormattingOption" flags="ComponentFormattingOptions" flags="FormattingOptions"/>
+    <enum-type name="UrlFormattingOption" />
+    <enum-type name="UserInputResolutionOption" flags="UserInputResolutionOptions"/>
     <enum-type name="ParsingMode"/>
     <modify-documentation xpath='description/para[3]'>
         &lt;para>URLs can be represented in two forms: encoded or unencoded. The unencoded representation is suitable for showing to users, but the encoded representation is typically what you would send to a web server. For example, the unencoded URL &quot;http://bühler.example.com&quot; would be sent to the server as &quot;http://xn--bhler-kva.example.com/List%20of%20applicants.xml&quot;.&lt;/para>
