@@ -20,6 +20,7 @@ macro(CHECK_VAR name)
     endif()
 endmacro()
 
+find_package(Qt5Concurrent) # new in Qt5, from QtCore
 find_package(Qt5Xml)
 find_package(Qt5XmlPatterns)
 find_package(Qt5Svg)
@@ -30,6 +31,7 @@ find_package(Qt5Test)
 find_package(Qt5Network)
 
 CHECK_VAR(Qt5Core_FOUND)
+CHECK_VAR(Qt5Concurrent_FOUND)
 CHECK_VAR(Qt5Gui_FOUND)
 CHECK_VAR(Qt5Xml_FOUND)
 CHECK_VAR(Qt5XmlPatterns_FOUND)

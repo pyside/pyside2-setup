@@ -111,14 +111,13 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsizef_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsysinfo_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qsystemsemaphore_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qt_wrapper.cpp
-### renamed, see QtConcurrent module ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtconcurrent_wrapper.cpp
 ### QBool, qInstallMsgHandler
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtemporaryfile_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtextboundaryfinder_wrapper.cpp
-### crash on init ### ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtextcodec_converterstate_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtextcodec_converterstate_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtextcodec_wrapper.cpp
-### crash on init ### ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtextdecoder_wrapper.cpp
-### crash on init ### ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtextencoder_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtextdecoder_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtextencoder_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtextstream_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtextstreammanipulator_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qthread_wrapper.cpp
