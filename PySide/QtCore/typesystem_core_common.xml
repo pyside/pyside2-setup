@@ -2771,7 +2771,7 @@
         <modify-argument index="return">
             <replace-type modified-type="PyObject"/>
             <conversion-rule class="native">
-                %RETURN_TYPE %out;
+                %RETURN_TYPE %out = 0;
                 if (PyBytes_Check(%PYARG_0)) {
                     %out = PyBytes_GET_SIZE((PyObject*)%PYARG_0);
                     memcpy(%1, PyBytes_AS_STRING((PyObject*)%PYARG_0), %out);
