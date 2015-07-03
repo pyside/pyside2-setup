@@ -46,7 +46,7 @@
     <function signature="qIsInf(double)" />
     <function signature="qIsNaN(double)" />
     <function signature="qIsNull(double)" />
-    <function signature="qRound(qreal)" />
+    <!-- Qt5: gone <function signature="qRound(qreal)" /> -->
     <function signature="qTan(qreal)" since="4.6" />
     <function signature="qtTrId(const char *, int)" since="4.6" />
     <function signature="qVersion()" />
@@ -116,9 +116,11 @@
   <rejection class="*" function-name="qFreeAligned"/>
   <rejection class="QMetaMethod" enum-name="Attributes" />
 
+  <!-- Qt5: no longer here
   <enum-type name="QtValidLicenseForOpenVGModule"/>
   <enum-type name="QtValidLicenseForMultimediaModule"/>
   <enum-type name="QtValidLicenseForDeclarativeModule" />
+  -->
   <!-- From Qt4.6 ^^^ -->
 
 
@@ -789,11 +791,14 @@
   <rejection class="QFile" function-name="setEncodingFunction"/>
   <rejection class="QRegion" function-name="cleanUp"/>
   <rejection class="QSettings" function-name="registerFormat"/>
+  <!-- Qt5: no more public
   <rejection class="QAbstractFileEngineIterator" function-name="entryInfo"/>
   <rejection class="QAbstractFileEngineIterator" enum-name="EntryInfoType"/>
+  -->
+
   <namespace-type name="Qt">
     <enum-type name="AlignmentFlag" flags="Alignment" />
-    <enum-type name="AnchorAttribute"/>
+    <!-- Qt5: gone <enum-type name="AnchorAttribute"/> -->
     <enum-type name="AnchorPoint" since="4.6" />
     <enum-type name="ApplicationAttribute"/>
     <enum-type name="ApplicationState" flags="ApplicationStates"/>
@@ -1918,7 +1923,8 @@
     </modify-function>
     <modify-function signature="exit(int)" allow-thread="yes" />
   </object-type>
-  <object-type name="QAbstractFileEngineIterator"/>
+
+  <!-- Qt5: no longer public <object-type name="QAbstractFileEngineIterator"/> -->
   <object-type name="QAbstractItemModel">
     <enum-type name="LayoutChangeHint" />
     <!-- This function was replaced by a added function -->
@@ -2893,9 +2899,12 @@
         </inject-code>
     </add-function>
   </object-type>
+  <!-- Qt5: use QLocale, instead
   <object-type name="QSystemLocale">
     <enum-type name="QueryType"/>
   </object-type>
+  -->
+
   <object-type name="QSysInfo">
     <enum-type name="Endian"/>
     <enum-type name="Sizes"/>
@@ -3054,6 +3063,7 @@
         </inject-code>
     </add-function>
   </object-type>
+  <!-- Qt5: not here
   <object-type name="QAbstractFileEngineHandler">
       <modify-function signature="create(const QString&map;)const">
         <modify-argument index="return">
@@ -3061,6 +3071,7 @@
         </modify-argument>
       </modify-function>
   </object-type>
+  -->
   <!-- <object-type name="QAbstractFileEngine::MapExtensionOption" /> -->
   <!-- <object-type name="QAbstractFileEngine::MapExtensionReturn" /> -->
   <!-- <object-type name="QAbstractFileEngine::UnMapExtensionOption" /> -->
@@ -3593,11 +3604,14 @@
     <modify-function signature="readBytes(char*&amp;,uint&amp;)" remove="all"/>
     <modify-function signature="writeBytes(const char*,uint)" remove="all" />
   </object-type>
+  <!-- Qt5: no more public
   <object-type name="QFSFileEngine">
     <extra-includes>
       <include file-name="QDateTime" location="global"/>
     </extra-includes>
   </object-type>
+  -->
+
   <value-type name="QTextStreamManipulator" default-constructor="QTextStreamManipulator(0, 0)">
     <modify-function signature="exec(QTextStream &amp;)" rename="exec_"/>
   </value-type>
@@ -3660,6 +3674,7 @@
     <enum-type name="AccessMode"/>
     <enum-type name="SystemSemaphoreError"/>
   </object-type>
+  <!-- Qt5: move to QtConcurrent module
   <namespace-type name="QtConcurrent" target-type="class">
     <enum-type name="ReduceOption" flags="ReduceOptions"/>
     <extra-includes>
@@ -3667,6 +3682,8 @@
       <include file-name="qtconcurrentthreadengine.h" location="global"/>
     </extra-includes>
   </namespace-type>
+  -->
+
   <object-type name="QThreadPool">
     <modify-function signature="start(QRunnable*, int)">
       <modify-argument index="1">
@@ -4024,7 +4041,9 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   <object-type name="QStateMachine" since="4.6">
     <enum-type name="Error"/>
     <enum-type name="EventPriority"/>
+    <!-- Qt5: gone
     <enum-type name="RestorePolicy"/>
+    -->
 
     <value-type name="SignalEvent" since="4.6"/>
     <value-type name="WrappedEvent" since="4.6"/>
