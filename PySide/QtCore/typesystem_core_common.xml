@@ -883,7 +883,7 @@
    <!--### These functions are part of QtGui, not QtCore -->
     <modify-function signature="codecForHtml(const QByteArray &amp;)" remove="all"/>
     <modify-function signature="mightBeRichText(const QString &amp;)" remove="all"/>
-    <modify-function signature="escape(const QString&amp;)" remove="all"/>
+    <!-- Qt5: gone <modify-function signature="escape(const QString&amp;)" remove="all"/> -->
     <modify-function signature="convertFromPlainText(const QString &amp;, Qt::WhiteSpaceMode)" remove="all"/>
     <!--### -->
     <extra-includes>
@@ -2234,7 +2234,7 @@
   </modify-function>
 
    <!-- This is not supported due the lack of information durring the call with no arguments,  this can cause a memory leak -->
-   <modify-function signature="disconnect(const char*, const QObject *, const char *)">
+   <modify-function signature="disconnect(const char*, const QObject *, const char *)const">
        <modify-argument index="1">
            <remove-default-expression />
        </modify-argument>
@@ -2482,7 +2482,7 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <modify-function signature="QByteArray(const char *)">
+    <modify-function signature="QByteArray(const char *, int)">
         <!-- Keep \x00 bytes passed in python strings -->
         <inject-code class="target" position="beginning">
             if (PyBytes_Check(%PYARG_1)) {
@@ -2702,6 +2702,8 @@
   <object-type name="QXmlStreamEntityResolver"/>
   <object-type name="QAbstractEventDispatcher">
     <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>)" allow-thread="yes"/>
+    <!-- Qt5: had to add this recursive object def. This was crucial to get rid of "pure virtual" -->
+    <object-type name="TimerInfo"/>
   </object-type>
   <object-type name="QEventLoop">
       <enum-type name="ProcessEventsFlag" flags="ProcessEventsFlags"/>
@@ -2727,7 +2729,7 @@
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
         </inject-code>
     </modify-function>
-    <modify-function signature="map(qint64,qint64,QFile::MemoryMapFlags)">
+    <modify-function signature="map(qint64,qint64,QFileDevice::MemoryMapFlags)">
         <modify-argument index="return">
             <replace-type modified-type="PyObject"/>
         </modify-argument>
@@ -2970,7 +2972,7 @@
     <enum-type name="State"/>
   </object-type>
   <object-type name="QTranslator">
-    <modify-function signature="load(const uchar*, int)">
+    <modify-function signature="load(const uchar*, int, QString)">
         <modify-argument index="1">
             <replace-type modified-type="PyBuffer" />
         </modify-argument>
@@ -3280,11 +3282,6 @@
     </modify-function>
     <modify-function signature="QCoreApplication(int &amp;, char  **, int)" access="private"/>
     <inject-code class="native" file="glue/qcoreapplication_init.cpp" position="beginning" />
-    <modify-function signature="postEvent(QObject*,QEvent*)">
-      <modify-argument index="2">
-        <define-ownership owner="c++"/>
-      </modify-argument>
-    </modify-function>
     <modify-function signature="postEvent(QObject*,QEvent*, int)">
       <modify-argument index="2">
         <define-ownership owner="c++"/>
@@ -3755,13 +3752,13 @@
     <enum-type name="MethodType"/>
     <!-- This isn't part of Qt public API -->
     <modify-function signature="attributes()const" remove="all" />
+    <modify-function signature="getParameterTypes(int *) const" remove="all" />
   </value-type>
   <object-type name="QMetaObject">
     <enum-type name="Call"/>
     <include file-name="qobjectdefs.h" location="global" />
     <!-- This isn't part of Qt public API -->
     <modify-function signature="connect(const QObject*, int, const QObject*, int, int, int*)" remove="all" />
-    <modify-function signature="getParameterTypes(int *) const" remove="all" />
   </object-type>
   <object-type name="QMetaObject::Connection">
     <include file-name="qobjectdefs.h" location="global" />

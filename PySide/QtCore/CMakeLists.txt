@@ -46,7 +46,8 @@ else()
 endif()
 
 set(QtCore_SRC
-### abstract class type ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstracteventdispatcher_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstracteventdispatcher_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstracteventdispatcher_timerinfo_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstractitemmodel_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstractlistmodel_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qabstracttablemodel_wrapper.cpp
@@ -195,8 +196,6 @@ set(QtCore_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(QtCore_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore)
 
 set(QtCore_typesystem_path "${QtCore_SOURCE_DIR}")
-
-#message(FATAL_ERROR "${Qt5Core_INCLUDE_DIRS} ${testvar}")
 
 set(QtCore_include_dirs ${CMAKE_CURRENT_SOURCE_DIR}
                         ${CMAKE_CURRENT_BINARY_DIR}/${BINDING_NAME}/QtCore/
