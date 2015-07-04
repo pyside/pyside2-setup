@@ -21,4 +21,3 @@ Qt is splitted in several modules.
     PySide/QtUiTools/index.rst
     PySide/QtXml/index.rst
     PySide/QtWebKit/index.rst
-    PySide/phonon/index.rst

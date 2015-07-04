@@ -141,7 +141,6 @@ Cpp.ignoretokens        = QAXFACTORY_EXPORT \
                           QT_BEGIN_INCLUDE_NAMESPACE \
                           QT_END_NAMESPACE \
                           QT_END_INCLUDE_NAMESPACE \
-                          PHONON_EXPORT \
                           Q_DECLARATIVE_EXPORT \
                           Q_GADGET \
                           QWEBKIT_EXPORT
@@ -162,8 +161,6 @@ Cpp.ignoredirectives    = Q_DECLARE_HANDLE \
                           Q_INTERFACES \
                           __attribute__ \
                           K_DECLARE_PRIVATE \
-                          PHONON_OBJECT \
-                          PHONON_HEIR \
                           Q_PRIVATE_PROPERTY \
                           Q_DECLARE_PRIVATE_D \
                           Q_CLASSINFO
@@ -238,11 +235,6 @@ excludedirs             = @QT_SRC_DIR@/src/3rdparty/clucene \
                           @QT_SRC_DIR@/src/3rdparty/webkit/WebCore \
                           @QT_SRC_DIR@/src/3rdparty/wintab \
                           @QT_SRC_DIR@/src/3rdparty/zlib \
-                          @QT_SRC_DIR@/src/3rdparty/phonon/gstreamer \
-                          @QT_SRC_DIR@/src/3rdparty/phonon/ds9 \
-                          @QT_SRC_DIR@/src/3rdparty/phonon/qt7 \
-                          @QT_SRC_DIR@/src/3rdparty/phonon/mmf \
-                          @QT_SRC_DIR@/src/3rdparty/phonon/waveout \
                           @QT_SRC_DIR@/doc/src/snippets \
                           @QT_SRC_DIR@/doc/src/ja_JP \
                           @QT_SRC_DIR@/doc/src/zh_CN
