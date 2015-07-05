@@ -57,138 +57,6 @@ class QString;
 // The following macros are our "extensions" to C++
 // They are used, strictly speaking, only by the moc.
 
-#ifndef Q_MOC_RUN
-#ifndef QT_NO_META_MACROS
-# if defined(QT_NO_KEYWORDS)
-#  define QT_NO_EMIT
-# else
-#   ifndef QT_NO_SIGNALS_SLOTS_KEYWORDS
-#     define slots
-#     define signals public
-#   endif
-# endif
-# define Q_SLOTS
-# define Q_SIGNALS public
-# define Q_PRIVATE_SLOT(d, signature)
-# define Q_EMIT
-#ifndef QT_NO_EMIT
-# define emit
-#endif
-#define Q_CLASSINFO(name, value)
-#define Q_PLUGIN_METADATA(x)
-#define Q_INTERFACES(x)
-#define Q_PROPERTY(text)
-#define Q_PRIVATE_PROPERTY(d, text)
-#define Q_REVISION(v)
-#define Q_OVERRIDE(text)
-#define Q_ENUMS(x)
-#define Q_FLAGS(x)
-#define Q_SCRIPTABLE
-#define Q_INVOKABLE
-#define Q_SIGNAL
-#define Q_SLOT
-#endif // QT_NO_META_MACROS
-
-#ifndef QT_NO_TRANSLATION
-// full set of tr functions
-#  define QT_TR_FUNCTIONS \
-    static inline QString tr(const char *s, const char *c = 0, int n = -1) \
-        { return staticMetaObject.tr(s, c, n); } \
-    QT_DEPRECATED static inline QString trUtf8(const char *s, const char *c = 0, int n = -1) \
-        { return staticMetaObject.tr(s, c, n); }
-#else
-// inherit the ones from QObject
-# define QT_TR_FUNCTIONS
-#endif
-
-#if defined(QT_NO_QOBJECT_CHECK)
-/* qmake ignore Q_OBJECT */
-#define Q_OBJECT_CHECK
-#else
-
-/* This is a compile time check that ensures that any class cast with qobject_cast
-   actually contains a Q_OBJECT macro. Note: qobject_cast will fail if a QObject
-   subclass doesn't contain Q_OBJECT.
-
-   In qt_check_for_QOBJECT_macro, we call a dummy templated function with two
-   parameters, the first being "this" and the other the target of the qobject
-   cast. If the types are not identical, we know that a Q_OBJECT macro is missing.
-
-   If you get a compiler error here, make sure that the class you are casting
-   to contains a Q_OBJECT macro.
-*/
-
-/* qmake ignore Q_OBJECT */
-#define Q_OBJECT_CHECK \
-    template <typename ThisObject> inline void qt_check_for_QOBJECT_macro(const ThisObject &_q_argument) const \
-    { int i = qYouForgotTheQ_OBJECT_Macro(this, &_q_argument); i = i + 1; }
-
-template <typename T>
-inline int qYouForgotTheQ_OBJECT_Macro(T, T) { return 0; }
-
-template <typename T1, typename T2>
-inline void qYouForgotTheQ_OBJECT_Macro(T1, T2) {}
-#endif // QT_NO_QOBJECT_CHECK
-
-#if defined(Q_CC_INTEL)
-// Cannot redefine the visibility of a method in an exported class
-# define Q_DECL_HIDDEN_STATIC_METACALL
-#else
-# define Q_DECL_HIDDEN_STATIC_METACALL Q_DECL_HIDDEN
-#endif
-
-// from the qt5 qobjectdefs.h, but needed to exclude
-#if false
-/* qmake ignore Q_OBJECT */
-#define Q_OBJECT \
-public: \
-    Q_OBJECT_CHECK \
-    static const QMetaObject staticMetaObject; \
-    virtual const QMetaObject *metaObject() const; \
-    virtual void *qt_metacast(const char *); \
-    QT_TR_FUNCTIONS \
-    virtual int qt_metacall(QMetaObject::Call, int, void **); \
-private: \
-    Q_DECL_HIDDEN_STATIC_METACALL static void qt_static_metacall(QObject *, QMetaObject::Call, int, void **); \
-    struct QPrivateSignal {};
-
-#endif
-
-/* qmake ignore Q_OBJECT */
-#define Q_OBJECT_FAKE Q_OBJECT
-
-#ifndef QT_NO_META_MACROS
-/* qmake ignore Q_GADGET */
-#define Q_GADGET \
-public: \
-    static const QMetaObject staticMetaObject; \
-private:
-#endif // QT_NO_META_MACROS
-
-#else // Q_MOC_RUN
-#define slots slots
-#define signals signals
-#define Q_SLOTS Q_SLOTS
-#define Q_SIGNALS Q_SIGNALS
-#define Q_CLASSINFO(name, value) Q_CLASSINFO(name, value)
-#define Q_INTERFACES(x) Q_INTERFACES(x)
-#define Q_PROPERTY(text) Q_PROPERTY(text)
-#define Q_PRIVATE_PROPERTY(d, text) Q_PRIVATE_PROPERTY(d, text)
-#define Q_REVISION(v) Q_REVISION(v)
-#define Q_OVERRIDE(text) Q_OVERRIDE(text)
-#define Q_ENUMS(x) Q_ENUMS(x)
-#define Q_FLAGS(x) Q_FLAGS(x)
- /* qmake ignore Q_OBJECT */
-#define Q_OBJECT Q_OBJECT
- /* qmake ignore Q_OBJECT */
-#define Q_OBJECT_FAKE Q_OBJECT_FAKE
- /* qmake ignore Q_GADGET */
-#define Q_GADGET Q_GADGET
-#define Q_SCRIPTABLE Q_SCRIPTABLE
-#define Q_INVOKABLE Q_INVOKABLE
-#define Q_SIGNAL Q_SIGNAL
-#define Q_SLOT Q_SLOT
-#endif //Q_MOC_RUN
 
 #ifndef QT_NO_META_MACROS
 // macro for onaming members
@@ -465,7 +333,7 @@ inline const QMetaObject *QMetaObject::superClass() const
 
 QT_END_NAMESPACE
 
-// this was defined in qt4, but we cannot use it, because then QObject becomes inconsistent!
+// Qt5: this was defined in qt4, but we cannot use it, because then QObject becomes inconsistent!
 #undef Q_QDOC
 
 #if @ENABLE_X11@
