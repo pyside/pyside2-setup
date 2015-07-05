@@ -33,7 +33,7 @@ submodules = {
         ["shiboken2", "qt5"],
         ["pyside2", "qt5"],
         ["pyside-tools2", "qt5"],
-        ["pyside-examples", "master"],
+        ["pyside-examples2", "qt5"],
     ],
     '1.3.0dev': [
         ["shiboken", "master"],

@@ -2,9 +2,6 @@
 	path = sources/pyside2
 	url = https://bitbucket.org/ctismer/pyside2
 	branch = qt5
-[submodule "sources/pyside-examples"]
-	path = sources/pyside-examples
-	url = https://github.com/PySide/Examples.git
 [submodule "sources/shiboken2"]
 	path = sources/shiboken2
 	url = https://bitbucket.org/ctismer/shiboken2
@@ -12,4 +9,8 @@
 [submodule "sources/pyside-tools2"]
 	path = sources/pyside-tools2
 	url = https://bitbucket.org/ctismer/pyside-tools2
+	branch = qt5
+[submodule "sources/pyside-examples2"]
+	path = sources/pyside-examples2
+	url = https://bitbucket.org/ctismer/pyside-examples2
 	branch = qt5
