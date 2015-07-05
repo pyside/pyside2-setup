@@ -113,6 +113,12 @@ from utils import regenerate_qt_resources
 from utils import filter_match
 from utils import osx_localize_libpaths
 
+# guess a close folder name for extensions
+def get_extension_folder(ext):
+    maybe = list(map(lambda x:x[0], submodules[__version__]))
+    folder = difflib.get_close_matches(ext, maybe)[0]
+    return folder
+
 # Declare options
 OPTION_DEBUG = has_option("debug")
 OPTION_RELWITHDEBINFO = has_option('relwithdebinfo')
@@ -203,7 +209,7 @@ Use --list-versions option to get list of available versions""" % OPTION_VERSION
 if OPTION_NOEXAMPLES:
     # remove pyside-exampes from submodules so they will not be included
     for idx, item in enumerate(submodules[__version__]):
-        if item[0] == 'pyside-examples':
+        if item[0].startswith('pyside-examples'):
             del submodules[__version__][idx]
 
 
@@ -536,8 +542,7 @@ class pyside_build(_build):
 
     def build_extension(self, extension):
         # calculate the subrepos folder name
-        maybe = list(map(lambda x:x[0], submodules[__version__]))
-        folder = difflib.get_close_matches(extension, maybe)[0]
+        folder = get_extension_folder(extension)
 
         log.info("Building module %s..." % extension)
 
@@ -717,8 +722,9 @@ class pyside_build(_build):
             vars=vars)
         if not OPTION_NOEXAMPLES:
             # <sources>/pyside-examples/examples/* -> <setup>/PySide/examples
+            folder = get_extension_folder('pyside-examples')
             copydir(
-                "{sources_dir}/pyside-examples/examples",
+                "{sources_dir}/%s/examples" % folder,
                 "{dist_dir}/PySide/examples",
                 force=False, vars=vars)
             # Re-generate examples Qt resource files for Python 3 compatibility
@@ -836,8 +842,9 @@ class pyside_build(_build):
             vars=vars)
         if not OPTION_NOEXAMPLES:
             # <sources>/pyside-examples/examples/* -> <setup>/PySide/examples
+            folder = get_extension_folder('pyside-examples')
             copydir(
-                "{sources_dir}/pyside-examples/examples",
+                "{sources_dir}/%s/examples" % folder,
                 "{dist_dir}/PySide/examples",
                 force=False, vars=vars)
             # Re-generate examples Qt resource files for Python 3 compatibility
