@@ -14,7 +14,7 @@ include_directories(${QT_QTDESIGNER_INCLUDE_DIR}
                     ${SHIBOKEN_INCLUDE_DIR}
                     ${SHIBOKEN_PYTHON_INCLUDE_DIR})
 
-QT4_WRAP_CPP(MOC_FILES ${ui_plugin_moc})
+qt5_wrap_cpp(MOC_FILES ${ui_plugin_moc})
 add_library(uiplugin STATIC ${ui_plugin_src} ${MOC_FILES})
 add_definitions(-fPIC)
 add_definitions(-DQT_STATICPLUGIN)

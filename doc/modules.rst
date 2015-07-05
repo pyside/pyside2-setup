@@ -10,7 +10,6 @@ Qt is splitted in several modules.
     PySide/QtDeclarative/index.rst
     PySide/QtGui/index.rst
     PySide/QtHelp/index.rst
-    PySide/QtMaemo5/index.rst
     PySide/QtMultimedia/index.rst
     PySide/QtNetwork/index.rst
     PySide/QtOpenGL/index.rst

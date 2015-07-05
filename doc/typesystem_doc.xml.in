@@ -44,10 +44,6 @@
     <load-typesystem name="typesystem_help.xml" generate="yes" />
     @end_QtHelp@
 
-    @if_Maemo5@
-    <load-typesystem name="typesystem_maemo5.xml" generate="yes" />
-    @end_Maemo5@
-
     @if_QtMultimedia@
     <load-typesystem name="typesystem_multimedia.xml" generate="yes" />
     @end_QtMultimedia@

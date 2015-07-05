@@ -20,7 +20,10 @@ macro(CHECK_VAR name)
     endif()
 endmacro()
 
+find_package(Qt5Core)
 find_package(Qt5Concurrent) # new in Qt5, from QtCore
+find_package(Qt5Gui)        # reduced, small version without widgets
+find_package(Qt5Widgets)    # widgets in their separate module
 find_package(Qt5Xml)
 find_package(Qt5XmlPatterns)
 find_package(Qt5Svg)
@@ -33,6 +36,7 @@ find_package(Qt5Network)
 CHECK_VAR(Qt5Core_FOUND)
 CHECK_VAR(Qt5Concurrent_FOUND)
 CHECK_VAR(Qt5Gui_FOUND)
+CHECK_VAR(Qt5Widgets_FOUND)
 CHECK_VAR(Qt5Xml_FOUND)
 CHECK_VAR(Qt5XmlPatterns_FOUND)
 CHECK_VAR(Qt5Svg_FOUND)
@@ -43,6 +47,7 @@ CHECK_VAR(Qt5Test_FOUND)
 CHECK_VAR(Qt5Network_FOUND)
 
 HAS_QT_MODULE(Qt5Core_FOUND QtCore)
+HAS_QT_MODULE(Qt5Gui_FOUND QtGui)
 ### depends on QtGui HAS_QT_MODULE(Qt5Sql_FOUND QtSql)
 # compiles, skip   HAS_QT_MODULE(Qt5Network_FOUND QtNetwork)
 # need to split this HAS_QT_MODULE(Qt5Gui_FOUND QtGui)
