@@ -1,0 +1,118 @@
+Generating class model...                    [WARNING]
+    enum 'QStyleOptionViewItem::ViewItemPosition' does not have a type entry or is not an enum
+    Unable to decide type of property: 'SizeAdjustPolicy' in class 'QAbstractScrollArea'
+    enum 'QSound::Loop' does not have a type entry or is not an enum
+    enum 'QStyleOptionViewItem::ViewItemFeature' does not have a type entry or is not an enum
+    enum 'QStyleOptionToolBox::TabPosition' does not have a type entry or is not an enum
+    enum 'QStyleOptionToolBox::SelectedPosition' does not have a type entry or is not an enum
+    enum 'QIconEngine::IconEngineHook' does not have a type entry or is not an enum
+    enum 'QFontDatabase::SystemFont' does not have a type entry or is not an enum
+    enum 'QFileIconProvider::Option' does not have a type entry or is not an enum
+    enum 'QAbstractScrollArea::SizeAdjustPolicy' does not have a type entry or is not an enum
+    enum 'QStyleOptionTab::TabFeature' does not have a type entry or is not an enum
+    enum 'QTouchEvent::TouchPoint::InfoFlag' does not have a type entry or is not an enum
+    enum 'QStyleOptionFrame::FrameFeature' does not have a type entry or is not an enum
+    enum 'QLineEdit::ActionPosition' does not have a type entry or is not an enum
+    enum 'QColor::NameFormat' does not have a type entry or is not an enum
+    enum 'QTextCharFormat::FontPropertiesInheritanceBehavior' does not have a type entry or is not an enum
+    
+
+Generating enum model...                     [WARNING]
+    enum 'q_static_assert_result39' does not have a type entry or is not an enum
+    
+
+Generating namespace model...                [OK]
+Resolving typedefs...                        [OK]
+Fixing class inheritance...                  [WARNING]
+    template baseclass 'QGenericMatrix<float>' of 'QMatrix3x2' is not known
+    template baseclass 'QGenericMatrix<float>' of 'QMatrix2x4' is not known
+    template baseclass 'QGenericMatrix<float>' of 'QMatrix4x3' is not known
+    skipping field 'QTouchEvent::_device' with unmatched type 'QTouchDevice'
+    skipping field 'QStyleOptionFrame::features' with unmatched type 'QFlags<QStyleOptionFrame::FrameFeature>'
+    horribly broken type ''
+    skipping field 'QStyleOptionToolBox::position' with unmatched type 'QStyleOptionToolBox::TabPosition'
+    template baseclass 'QGenericMatrix<float>' of 'QMatrix2x2' is not known
+    template baseclass 'QGenericMatrix<float>' of 'QMatrix3x3' is not known
+    skipping field 'QStyleOptionTab::features' with unmatched type 'QFlags<QStyleOptionTab::TabFeature>'
+    skipping field 'QStyleOptionToolBox::selectedPosition' with unmatched type 'QStyleOptionToolBox::SelectedPosition'
+    skipping field 'QTouchEvent::_window' with unmatched type 'QWindow'
+    class 'QApplication' inherits from unknown base class 'QGuiApplication'
+    template baseclass 'QGenericMatrix<float>' of 'QMatrix4x2' is not known
+    skipping field 'QStyleOptionGroupBox::features' with unmatched type 'QFlags<QStyleOptionFrame::FrameFeature>'
+    class not found for setup inheritance 'QGuiApplication'
+    skipping field 'QStyleOptionViewItem::viewItemPosition' with unmatched type 'QStyleOptionViewItem::ViewItemPosition'
+    template baseclass 'QListSpecialMethods<T>' of 'QList' is not known
+    template baseclass 'QGenericMatrix<float>' of 'QMatrix2x3' is not known
+    template baseclass 'QGenericMatrix<float>' of 'QMatrix3x4' is not known
+    skipping field 'QStyleOptionViewItem::features' with unmatched type 'QFlags<QStyleOptionViewItem::ViewItemFeature>'
+    skipping field 'QAccessibleEvent::m_type' with unmatched type 'QAccessible::Event'
+    
+
+Detecting inconsistencies in class model...  [WARNING]
+[OK]
+    enum 'QStyleOptionDockWidgetV2::StyleOptionVersion' is specified in typesystem, but not declared
+    enum 'QPrintEngine::PrintEnginePropertyKey' is specified in typesystem, but not declared
+    enum 'QStyleOptionViewItemV4::StyleOptionVersion' is specified in typesystem, but not declared
+    enum 'QPageSetupDialog::PageSetupDialogOption' is specified in typesystem, but not declared
+    type 'QAbstractPageSetupDialog' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QAbstractPrintDialog' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QStyleOptionFrameV2::FrameFeature' is specified in typesystem, but not declared
+    enum 'QPrinter::Unit' is specified in typesystem, but not declared
+    enum 'QStyleOptionViewItemV3::StyleOptionVersion' is specified in typesystem, but not declared
+    type 'QProxyModel' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QPrinter::OutputFormat' is specified in typesystem, but not declared
+    enum 'QPrinter::Orientation' is specified in typesystem, but not declared
+    type 'QPrinter' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QInputContext' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QPrinter::PageOrder' is specified in typesystem, but not declared
+    enum 'QStyleOptionViewItemV2::ViewItemFeature' is specified in typesystem, but not declared
+    type 'QPlastiqueStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QStyleOptionProgressBarV2::StyleOptionVersion' is specified in typesystem, but not declared
+    enum 'QStyleOptionFrameV2::StyleOptionVersion' is specified in typesystem, but not declared
+    enum 'QPrinter::PaperSource' is specified in typesystem, but not declared
+    enum 'QStyleOptionToolBoxV2::SelectedPosition' is specified in typesystem, but not declared
+    enum 'QPrinter::PrinterState' is specified in typesystem, but not declared
+    type 'QIconEngineV2' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QStyleOptionTabV2::StyleOptionVersion' is specified in typesystem, but not declared
+    type 'QPrintEngine' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QCleanlooksStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QWindowsStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QAction::SoftKeyRole' is specified in typesystem, but not declared
+    enum 'QIconEngineV2::IconEngineHook' is specified in typesystem, but not declared
+    type 'QPrintDialog' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QInputContextFactory' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QAbstractPrintDialog::PrintDialogOption' is specified in typesystem, but not declared
+    type 'QWorkspace' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QDesktopServices::StandardLocation' is specified in typesystem, but not declared
+    enum 'QStyleOptionToolBoxV2::StyleOptionVersion' is specified in typesystem, but not declared
+    enum 'QAbstractPrintDialog::PrintRange' is specified in typesystem, but not declared
+    enum 'QPrinter::PrinterMode' is specified in typesystem, but not declared
+    enum 'QPrinter::DuplexMode' is specified in typesystem, but not declared
+    type 'QMacStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QCDEStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QStyleOptionViewItemV2::StyleOptionVersion' is specified in typesystem, but not declared
+    enum 'QPrinter::PageSize' is specified in typesystem, but not declared
+    enum 'QMacStyle::FocusRectPolicy' is specified in typesystem, but not declared
+    enum 'QApplication::Type' is specified in typesystem, but not declared
+    enum 'QStyleOptionFrameV3::StyleOptionVersion' is specified in typesystem, but not declared
+    enum 'QStyleOptionViewItemV4::ViewItemPosition' is specified in typesystem, but not declared
+    enum 'QInputContext::StandardFormat' is specified in typesystem, but not declared
+    type 'QPageSetupDialog' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QPrintPreviewWidget::ViewMode' is specified in typesystem, but not declared
+    enum 'QStyleOptionTabV3::StyleOptionVersion' is specified in typesystem, but not declared
+    type 'QPrintPreviewDialog' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QMotifStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QStyleOptionProgressBarV2::StyleOptionType' is specified in typesystem, but not declared
+    enum 'QMacStyle::WidgetSizePolicy' is specified in typesystem, but not declared
+    enum 'QTouchEvent::DeviceType' is specified in typesystem, but not declared
+    enum 'QPrinter::PrintRange' is specified in typesystem, but not declared
+    enum 'QStyleOptionTabBarBaseV2::StyleOptionVersion' is specified in typesystem, but not declared
+    enum 'QPrintPreviewWidget::ZoomMode' is specified in typesystem, but not declared
+    type 'QPrintPreviewWidget' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QStyleOptionToolBoxV2::TabPosition' is specified in typesystem, but not declared
+    type 'QPrinterInfo' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QPrinter::ColorMode' is specified in typesystem, but not declared
+    enum 'QWorkspace::WindowOrder' is specified in typesystem, but not declared
+    type 'QClipboardEvent' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    
+

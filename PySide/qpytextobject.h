@@ -28,7 +28,9 @@
 
 // Qt5: no idea why this definition is not found automatically! It should come
 // from <QTextObjectInterface> which resolves to qabstracttextdocumentlayout.h
+#ifdef Q_MOC_RUN
 Q_DECLARE_INTERFACE(QTextObjectInterface, "org.qt-project.Qt.QTextObjectInterface")
+#endif
 
 class QPyTextObject : public QObject, public QTextObjectInterface
 {
