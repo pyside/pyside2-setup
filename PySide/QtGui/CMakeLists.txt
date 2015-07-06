@@ -26,7 +26,6 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qcolor_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qconicalgradient_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qcontextmenuevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qcursor_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qdesktopservices_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qdoublevalidator_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qdrag_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qdragenterevent_wrapper.cpp
@@ -61,16 +60,6 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qitemselectionrange_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qkeyevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qkeysequence_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qlineargradient_wrapper.cpp
-### no constructor   ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix2x2_wrapper.cpp
-### no constructor   ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix2x3_wrapper.cpp
-### no constructor   ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix2x4_wrapper.cpp
-### no constructor   ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix3x2_wrapper.cpp
-### no constructor   ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix3x3_wrapper.cpp
-### no constructor   ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix3x4_wrapper.cpp
-### no constructor   ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix4x2_wrapper.cpp
-### no constructor   ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix4x3_wrapper.cpp
-### no constructor   ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix4x4_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmouseevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmoveevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmovie_wrapper.cpp
@@ -78,7 +67,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qpaintdevice_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qpaintengine_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qpaintenginestate_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qpainter_pixmapfragment_wrapper.cpp
-### looks for QWidget??? ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qpainter_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qpainter_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qpainterpath_element_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qpainterpath_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qpainterpathstroker_wrapper.cpp

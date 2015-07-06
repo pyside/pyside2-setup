@@ -83,6 +83,8 @@
     besides the fact they are accessible by ordinary event methods.
     -->
 
+  <rejection class="QAccessibleEvent" field-name="m_type"/>
+
   <rejection class="QInputEvent" field-name="modState"/>
   <rejection class="QInputEvent" field-name="modState"/>
 
@@ -147,7 +149,9 @@
   <rejection class="QShortcutEvent" field-name="ambig"/>
   <rejection class="QShortcutEvent" field-name="sid"/>
 
+  <rejection class="QTouchEvent" field-name="_device"/>
   <rejection class="QTouchEvent" field-name="_widget"/>
+  <rejection class="QTouchEvent" field-name="_window"/>
   <rejection class="QTouchEvent" field-name="_deviceType"/>
   <rejection class="QTouchEvent" field-name="_touchPointStates"/>
   <rejection class="QTouchEvent" field-name="_touchPoints"/>
@@ -1453,12 +1457,16 @@
     </modify-function>
   </object-type>
   <object-type name="QPyTextObject" />
+
+  <!-- Qt5: gone.
   <object-type name="QCDEStyle">
     <modify-function signature="standardIconImplementation(QStyle::StandardPixmap, const QStyleOption *, const QWidget *)const" virtual-slot="yes"/>
   </object-type>
   <object-type name="QDesktopServices">
       <enum-type name="StandardLocation"/>
   </object-type>
+  -->
+  
   <object-type name="QDoubleValidator">
       <enum-type name="Notation"/>
   </object-type>
@@ -1486,14 +1494,19 @@
     </modify-function>
     <modify-function signature="write(const QImage&amp;)" allow-thread="yes"/>
   </object-type>
+  <!-- Qt5: gone
   <object-type name="QInputContextFactory"/>
+  -->
   <object-type name="QIntValidator" />
   <object-type name="QItemSelectionModel">
       <enum-type name="SelectionFlag" flags="SelectionFlags"/>
   </object-type>
 
+  <!-- Qt5: gone. Use the new fusion style.
   <object-type name="QMotifStyle">
   </object-type>
+-->
+
   <object-type name="QPainterPathStroker" copyable="false"/>
   <object-type name="QPictureIO">
     <modify-function signature="setIODevice(QIODevice*)">
@@ -1516,6 +1529,7 @@
         </inject-code>
     </add-function>
   </object-type>
+
   <object-type name="QRegExpValidator" />
 
   <!-- Qt5: QtMultimedia <object-type name="QSound"/> -->
@@ -1699,9 +1713,14 @@
       </inject-code>
     </modify-function>
   </object-type>
+
+  <!-- Qt5: gone.  Use the new fusion style.
   <object-type name="QWindowsStyle">
     <modify-function signature="standardIconImplementation(QStyle::StandardPixmap, const QStyleOption *, const QWidget *)const" virtual-slot="yes"/>
   </object-type>
+  -->
+
+  <!-- Qt5: becomes QMdiArea in QtWidgets
   <object-type name="QWorkspace">
     <enum-type name="WindowOrder"/>
     <modify-function signature="addWindow(QWidget*, QFlags&lt;Qt::WindowType>)">
@@ -1710,8 +1729,10 @@
         </modify-argument>
     </modify-function>
   </object-type>
+  -->
+
   <object-type name="QActionEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::ActionAdded || %1-&gt;type() == QEvent::ActionRemoved || %1-&gt;type() == QEvent::ActionChanged" />
-  <object-type name="QClipboardEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::Clipboard"/>
+  <!-- Qt5: gone <object-type name="QClipboardEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::Clipboard"/> -->
   <object-type name="QCloseEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::Close"/>
   <object-type name="QContextMenuEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::ContextMenu">
       <enum-type name="Reason"/>
@@ -1753,7 +1774,7 @@
   <object-type name="QResizeEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Resize"/>
   <object-type name="QShortcutEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Shortcut">
     <!-- All these have const overloads that are used instead -->
-    <modify-function signature="isAmbiguous()" remove="all"/>
+    <modify-function signature="isAmbiguous()const" remove="all"/>
     <modify-function signature="shortcutId()" remove="all"/>
     <modify-function signature="key()" remove="all"/>
     <!-- ### -->
@@ -1827,9 +1848,11 @@
       </modify-argument>
     </modify-function>
   </object-type>
-  <object-type name="QProxyModel" polymorphic-id-expression="qobject_cast&lt;QProxyModel*&gt;(%1)">
+
+  <!-- Qt5: gone. Use QAbstractProxyModel, instead
+  <object-type name="QProxyModel" polymorphic-id-expression="qobject_cast&lt;QProxyModel*&gt;(%1)">  -->
     <!-- ### This reimplementation of "QObject::parent()" is used in C++ only
-         when "using QObject::parent;" is not available. It's useless in Python. -->
+         when "using QObject::parent;" is not available. It's useless in Python. -->  <!--
     <modify-function signature="parent()const" remove="all"/>
     <extra-includes>
       <include file-name="QPixmap" location="global"/>
@@ -1842,6 +1865,8 @@
       </modify-argument>
     </modify-function>
   </object-type>
+  -->
+
   <object-type name="QImageReader">
     <extra-includes>
       <include file-name="QColor" location="global"/>
@@ -1922,6 +1947,7 @@
       </modify-argument>
     </modify-function>
   </object-type>
+  <!-- Qt5: gone
   <object-type name="QInputContext">
     <extra-includes>
       <include file-name="QTextFormat" location="global"/>
@@ -1934,6 +1960,7 @@
       <modify-argument index="2" invalidate-after-use="yes"/>
     </modify-function>
   </object-type>
+  -->
 
   <object-type name="QStandardItemModel" polymorphic-id-expression="qobject_cast&lt;QStandardItemModel*&gt;(%1)">
     <extra-includes>
@@ -2386,6 +2413,21 @@
   </inject-code>
   <inject-code class="target" file="glue/qtgui_qapp.cpp" position="end" />
   -->
+
+  <!--  _______ Qt5: begin of matrix block _________
+
+  """
+  The problem:
+  QMatrixNxM objects were always based upon the qreal type.
+  Since Qt5.0, this has been changed to the float type.
+
+  This creates quite some problems in doing the conversion right, and also
+  looses accuracy for no obvious reason.
+
+  Before we don't agree on a strategy how to treat these matrices in the future,
+  I (ctismer) refuse to implement this. Therefore, the matrix stuff is commented
+  out for now.
+  """
 
   <value-type name="QMatrix2x2" since="4.6">
     <add-function signature="__repr__" return-type="PyObject*">
@@ -2984,10 +3026,10 @@
         </inject-code>
     </add-function>
 
-    <!-- ### "QMatrix4x4(const qreal*,int,int)" is an internal constructor. -->
-    <modify-function signature="QMatrix4x4(const qreal*,int,int)" remove="all"/>
+    --> <!-- ### "QMatrix4x4(const qreal*,int,int)" is an internal constructor. --> <!--
+    <modify-function signature="QMatrix4x4(const float*,int,int)" remove="all"/>
 
-    <modify-function signature="QMatrix4x4(const qreal*)">
+    <modify-function signature="QMatrix4x4(const float*)">
       <modify-argument index="1">
         <replace-type modified-type="PySequence" />
       </modify-argument>
@@ -3013,7 +3055,7 @@
         </insert-template>
       </inject-code>
     </modify-function>
-    <modify-function signature="copyDataTo(qreal *) const">
+    <modify-function signature="copyDataTo(float *) const">
       <modify-argument index="1">
         <remove-argument/>
       </modify-argument>
@@ -3043,10 +3085,10 @@
       </inject-code>
     </modify-function>
 
-    <!-- ### "constData() const" and "data() const" are unnecessary in Python and their function is performed by "data()". -->
+    --> <!-- ### "constData() const" and "data() const" are unnecessary in Python and their function is performed by "data()". --> <!--
     <modify-function signature="data() const" remove="all"/>
     <modify-function signature="constData() const" remove="all"/>
-    <!-- ### -->
+    --> <!-- ### --> <!--
     <modify-function signature="operator()(int, int) const" remove="all"/>
     <modify-function signature="operator()(int, int)" remove="all"/>
     <add-function signature="__mgetitem__" return-type="PyObject*">
@@ -3067,6 +3109,9 @@
        </inject-code>
     </add-function>
   </value-type>
+
+    _______ end of matrix block _______ -->
+
 
   <value-type name="QQuaternion" since="4.6">
     <add-function signature="__repr__" return-type="PyObject*">
@@ -3187,7 +3232,8 @@
     </add-function>
   </value-type>
 
-  <suppress-warning text="template baseclass 'QGenericMatrix&lt;qreal&gt;' of '*' is not known"/>
+  <suppress-warning text="template baseclass 'QGenericMatrix&lt;float&gt;' of '*' is not known"/>
+  <suppress-warning text="template baseclass 'QListSpecialMethods&lt;T&gt;' of 'QList' is not known"/>
   <suppress-warning text="signature 'QApplication(int&amp;,char**)' for function modification in 'QApplication' not found."/>
   <suppress-warning text="signature 'QApplication(int&amp;,char**,bool)' for function modification in 'QApplication' not found."/>
   <suppress-warning text="signature 'QApplication(int&amp;,char**,QApplication::Type)' for function modification in 'QApplication' not found."/>
@@ -3201,23 +3247,13 @@
   <suppress-warning text="class 'QDropEvent' inherits from unknown base class 'QMimeSource'"/>
 
 
-  <!-- The following entries may be present in the system or not. Keep this section organized. -->
+  <!-- Qt5: this whole printer stuff goes to module QtPrintSupport
+
   <object-type name="QAbstractPageSetupDialog"/>
   <object-type name="QAbstractPrintDialog">
     <enum-type name="PrintDialogOption" flags="PrintDialogOptions"/>
     <enum-type name="PrintRange"/>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes" />
-  </object-type>
-
-  <object-type name="QGtkStyle">
-    <modify-function signature="standardPixmap(QStyle::StandardPixmap,const QStyleOption*,const QWidget*)const">
-      <modify-argument index="2">
-        <replace-default-expression with="0"/>
-      </modify-argument>
-      <modify-argument index="3">
-        <replace-default-expression with="0"/>
-      </modify-argument>
-    </modify-function>
   </object-type>
 
   <object-type name="QPageSetupDialog">
@@ -3288,6 +3324,8 @@
     <enum-type name="ZoomMode"/>
     <modify-function signature="print()" rename="print_" />
   </object-type>
+
+  -->
 
   <object-type name="QSessionManager">
     <extra-includes>
