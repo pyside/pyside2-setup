@@ -1,12 +1,4 @@
-Generating class model...                    [WARNING]
-    enum 'QTextCharFormat::FontPropertiesInheritanceBehavior' does not have a type entry or is not an enum
-    enum 'QTouchEvent::TouchPoint::InfoFlag' does not have a type entry or is not an enum
-    File for inject code not exist: glue/qtgui_qapp.cpp
-    enum 'QColor::NameFormat' does not have a type entry or is not an enum
-    enum 'QFontDatabase::SystemFont' does not have a type entry or is not an enum
-    enum 'QIconEngine::IconEngineHook' does not have a type entry or is not an enum
-    
-
+Generating class model...                    [OK]
 Generating enum model...                     [WARNING]
     enum 'q_static_assert_result39' does not have a type entry or is not an enum
     
@@ -15,92 +7,89 @@ Generating namespace model...                [OK]
 Resolving typedefs...                        [OK]
 Fixing class inheritance...                  [WARNING]
     skipping field 'QAccessibleEvent::m_type' with unmatched type 'QAccessible::Event'
-    template baseclass 'QGenericMatrix<float>' of 'QMatrix2x2' is not known
-    template baseclass 'QGenericMatrix<float>' of 'QMatrix3x4' is not known
-    horribly broken type ''
-    template baseclass 'QGenericMatrix<float>' of 'QMatrix2x3' is not known
-    skipping field 'QTouchEvent::_window' with unmatched type 'QWindow'
-    template baseclass 'QListSpecialMethods<T>' of 'QList' is not known
     template baseclass 'QGenericMatrix<float>' of 'QMatrix2x4' is not known
-    skipping field 'QTouchEvent::_device' with unmatched type 'QTouchDevice'
     template baseclass 'QGenericMatrix<float>' of 'QMatrix4x2' is not known
     template baseclass 'QGenericMatrix<float>' of 'QMatrix4x3' is not known
+    horribly broken type ''
     template baseclass 'QGenericMatrix<float>' of 'QMatrix3x2' is not known
+    skipping field 'QTouchEvent::_device' with unmatched type 'QTouchDevice'
     template baseclass 'QGenericMatrix<float>' of 'QMatrix3x3' is not known
+    skipping field 'QTouchEvent::_window' with unmatched type 'QWindow'
+    template baseclass 'QGenericMatrix<float>' of 'QMatrix2x2' is not known
+    template baseclass 'QListSpecialMethods<T>' of 'QList' is not known
+    template baseclass 'QGenericMatrix<float>' of 'QMatrix3x4' is not known
+    template baseclass 'QGenericMatrix<float>' of 'QMatrix2x3' is not known
     
 
 Detecting inconsistencies in class model...  [WARNING]
 [OK]
-    type 'QMotifStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QPrinter::OutputFormat' is specified in typesystem, but not declared
-    type 'QAbstractPrintDialog' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    type 'QPrintPreviewDialog' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    type 'QAbstractPageSetupDialog' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QAbstractPrintDialog::PrintRange' is specified in typesystem, but not declared
-    enum 'QPrinter::Unit' is specified in typesystem, but not declared
-    enum 'QWorkspace::WindowOrder' is specified in typesystem, but not declared
     type 'QPageSetupDialog' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    type 'QPrinterInfo' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QPrinter::PrinterState' is specified in typesystem, but not declared
-    enum 'QPrinter::ColorMode' is specified in typesystem, but not declared
-    enum 'QPageSetupDialog::PageSetupDialogOption' is specified in typesystem, but not declared
-    enum 'QPrinter::PrintRange' is specified in typesystem, but not declared
-    enum 'QAbstractPrintDialog::PrintDialogOption' is specified in typesystem, but not declared
-    type 'QMacStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QIconEngineV2::IconEngineHook' is specified in typesystem, but not declared
-    type 'QInputContext' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    type 'QPrinter' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    type 'QInputContextFactory' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QMacStyle::WidgetSizePolicy' is specified in typesystem, but not declared
-    type 'QIconEngineV2' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QPrinter::PageOrder' is specified in typesystem, but not declared
-    type 'QClipboardEvent' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QPrinter::DuplexMode' is specified in typesystem, but not declared
-    enum 'QTouchEvent::DeviceType' is specified in typesystem, but not declared
     enum 'QInputContext::StandardFormat' is specified in typesystem, but not declared
-    type 'QPrintPreviewWidget' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QMacStyle::FocusRectPolicy' is specified in typesystem, but not declared
+    enum 'QPrinter::PageOrder' is specified in typesystem, but not declared
     enum 'QPrintPreviewWidget::ViewMode' is specified in typesystem, but not declared
-    enum 'QDesktopServices::StandardLocation' is specified in typesystem, but not declared
-    type 'QPrintEngine' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    type 'QWorkspace' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    type 'QWindowsStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QPrinter::PrinterMode' is specified in typesystem, but not declared
-    enum 'QPrintPreviewWidget::ZoomMode' is specified in typesystem, but not declared
+    enum 'QPrinter::DuplexMode' is specified in typesystem, but not declared
+    type 'QPrinter' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QPrinter::PrinterState' is specified in typesystem, but not declared
     enum 'QPrinter::Orientation' is specified in typesystem, but not declared
-    enum 'QPrinter::PageSize' is specified in typesystem, but not declared
+    enum 'QAbstractPrintDialog::PrintDialogOption' is specified in typesystem, but not declared
+    type 'QWorkspace' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QPrintPreviewWidget::ZoomMode' is specified in typesystem, but not declared
     type 'QProxyModel' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    type 'QPrintDialog' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QPrintEngine::PrintEnginePropertyKey' is specified in typesystem, but not declared
-    type 'QCDEStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QDesktopServices::StandardLocation' is specified in typesystem, but not declared
+    type 'QPrintPreviewDialog' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QAbstractPrintDialog::PrintRange' is specified in typesystem, but not declared
     enum 'QPrinter::PaperSource' is specified in typesystem, but not declared
+    type 'QPrintEngine' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QPrintPreviewWidget' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QPrinter::PrintRange' is specified in typesystem, but not declared
+    enum 'QPrinter::Unit' is specified in typesystem, but not declared
+    type 'QCDEStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QPrinter::OutputFormat' is specified in typesystem, but not declared
+    type 'QInputContextFactory' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QPrintDialog' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QWorkspace::WindowOrder' is specified in typesystem, but not declared
+    enum 'QPrinter::PrinterMode' is specified in typesystem, but not declared
+    type 'QAbstractPageSetupDialog' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QPageSetupDialog::PageSetupDialogOption' is specified in typesystem, but not declared
+    type 'QClipboardEvent' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QMacStyle::FocusRectPolicy' is specified in typesystem, but not declared
+    enum 'QPrinter::ColorMode' is specified in typesystem, but not declared
+    type 'QWindowsStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QPrinterInfo' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QMacStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QPrinter::PageSize' is specified in typesystem, but not declared
+    type 'QMotifStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QMacStyle::WidgetSizePolicy' is specified in typesystem, but not declared
+    type 'QAbstractPrintDialog' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QPrintEngine::PrintEnginePropertyKey' is specified in typesystem, but not declared
+    type 'QInputContext' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
     
 
 
-    signature 'copyDataTo(qreal*)const' for function modification in 'QMatrix4x4' not found. Possible candidates: copyDataTo(float*)const in QMatrix4x4
-    signature 'encodedData(const char*)const' for function modification in 'QDropEvent' not found. Possible candidates: 
-    signature 'QImage(uchar*,int,int,QImage::Format)' for function modification in 'QImage' not found. Possible candidates: QImage() in QImage, QImage(QString&,int,int,QImage::Format) in QImage, QImage(QString&,int,int,int,QImage::Format) in QImage, QImage(QImage) in QImage, QImage(QSize,QImage::Format) in QImage, QImage(QString,const char*) in QImage, QImage(const char**) in QImage, QImage(int,int,QImage::Format) in QImage
-    signature 'QIcon(QIconEngineV2*)' for function modification in 'QIcon' not found. Possible candidates: QIcon() in QIcon, QIcon(QIconEngine*) in QIcon, QIcon(QIcon) in QIcon, QIcon(QPixmap) in QIcon, QIcon(QString) in QIcon
-    signature 'handle()const' for function modification in 'QSessionManager' not found. Possible candidates: 
-    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'float *' in function 'QMatrix4x4::copyDataTo(float * values) const'.
-    signature 'shortcutId()' for function modification in 'QShortcutEvent' not found. Possible candidates: shortcutId()const in QShortcutEvent
     There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'const float *' in function 'QMatrix4x4::QMatrix4x4(const float * values)'.
-    signature 'QImage(const uchar*,int,int,QImage::Format)' for function modification in 'QImage' not found. Possible candidates: QImage() in QImage, QImage(QString&,int,int,QImage::Format) in QImage, QImage(QString&,int,int,int,QImage::Format) in QImage, QImage(QImage) in QImage, QImage(QSize,QImage::Format) in QImage, QImage(QString,const char*) in QImage, QImage(const char**) in QImage, QImage(int,int,QImage::Format) in QImage
-    signature 'key()' for function modification in 'QShortcutEvent' not found. Possible candidates: key()const in QShortcutEvent
-    signature 'QMatrix4x4(const qreal*,int,int)' for function modification in 'QMatrix4x4' not found. Possible candidates: QMatrix4x4() in QMatrix4x4, QMatrix4x4(QMatrix) in QMatrix4x4, QMatrix4x4(QTransform) in QMatrix4x4, QMatrix4x4(const float*) in QMatrix4x4, QMatrix4x4(const float*,int,int) in QMatrix4x4, QMatrix4x4(float,float,float,float,float,float,float,float,float,float,float,float,float,float,float,float) in QMatrix4x4, QMatrix4x4(QMatrix4x4) in QMatrix4x4
-    signature 'provides(const char*)const' for function modification in 'QDropEvent' not found. Possible candidates: 
-    signature 'format(int)const' for function modification in 'QDropEvent' not found. Possible candidates: 
-    signature 'text(const char*,const char*)const' for function modification in 'QImage' not found. Possible candidates: text(QString)const in QImage
-    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'const float *' in function 'QMatrix4x4::QMatrix4x4(const float * values, int cols, int rows)'.
-    signature 'QImage(const uchar*,int,int,int,QImage::Format)' for function modification in 'QImage' not found. Possible candidates: QImage() in QImage, QImage(QString&,int,int,QImage::Format) in QImage, QImage(QString&,int,int,int,QImage::Format) in QImage, QImage(QImage) in QImage, QImage(QSize,QImage::Format) in QImage, QImage(QString,const char*) in QImage, QImage(const char**) in QImage, QImage(int,int,QImage::Format) in QImage
-    signature 'isAmbiguous()' for function modification in 'QShortcutEvent' not found. Possible candidates: isAmbiguous()const in QShortcutEvent
-    signature 'QMatrix4x4(const qreal*)' for function modification in 'QMatrix4x4' not found. Possible candidates: QMatrix4x4() in QMatrix4x4, QMatrix4x4(QMatrix) in QMatrix4x4, QMatrix4x4(QTransform) in QMatrix4x4, QMatrix4x4(const float*) in QMatrix4x4, QMatrix4x4(const float*,int,int) in QMatrix4x4, QMatrix4x4(float,float,float,float,float,float,float,float,float,float,float,float,float,float,float,float) in QMatrix4x4, QMatrix4x4(QMatrix4x4) in QMatrix4x4
-    signature 'QImage(uchar*,int,int,int,QImage::Format)' for function modification in 'QImage' not found. Possible candidates: QImage() in QImage, QImage(QString&,int,int,QImage::Format) in QImage, QImage(QString&,int,int,int,QImage::Format) in QImage, QImage(QImage) in QImage, QImage(QSize,QImage::Format) in QImage, QImage(QString,const char*) in QImage, QImage(const char**) in QImage, QImage(int,int,QImage::Format) in QImage
-    signature 'QImage(const char*,const char*)' for function modification in 'QImage' not found. Possible candidates: QImage() in QImage, QImage(QString&,int,int,QImage::Format) in QImage, QImage(QString&,int,int,int,QImage::Format) in QImage, QImage(QImage) in QImage, QImage(QSize,QImage::Format) in QImage, QImage(QString,const char*) in QImage, QImage(const char**) in QImage, QImage(int,int,QImage::Format) in QImage
-    signature 'setText(const char*,const char*,QString)' for function modification in 'QImage' not found. Possible candidates: setText(QString,QString) in QImage
-    signature 'cacheMode()' for function modification in 'QMovie' not found. Possible candidates: cacheMode()const in QMovie
-    signature 'QDrag(QWidget*)' for function modification in 'QDrag' not found. Possible candidates: QDrag(QObject*) in QDrag, QDrag(QDrag) in QDrag
     signature 'print(QPrinter*)const' for function modification in 'QTextDocument' not found. Possible candidates: 
+    signature 'QImage(const uchar*,int,int,int,QImage::Format)' for function modification in 'QImage' not found. Possible candidates: QImage() in QImage, QImage(QString&,int,int,QImage::Format) in QImage, QImage(QString&,int,int,int,QImage::Format) in QImage, QImage(QImage) in QImage, QImage(QSize,QImage::Format) in QImage, QImage(QString,const char*) in QImage, QImage(const char**) in QImage, QImage(int,int,QImage::Format) in QImage
+    signature 'QImage(const char*,const char*)' for function modification in 'QImage' not found. Possible candidates: QImage() in QImage, QImage(QString&,int,int,QImage::Format) in QImage, QImage(QString&,int,int,int,QImage::Format) in QImage, QImage(QImage) in QImage, QImage(QSize,QImage::Format) in QImage, QImage(QString,const char*) in QImage, QImage(const char**) in QImage, QImage(int,int,QImage::Format) in QImage
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'const float *' in function 'QMatrix4x4::QMatrix4x4(const float * values, int cols, int rows)'.
+    signature 'QMatrix4x4(const qreal*)' for function modification in 'QMatrix4x4' not found. Possible candidates: QMatrix4x4() in QMatrix4x4, QMatrix4x4(QMatrix) in QMatrix4x4, QMatrix4x4(QTransform) in QMatrix4x4, QMatrix4x4(const float*) in QMatrix4x4, QMatrix4x4(const float*,int,int) in QMatrix4x4, QMatrix4x4(float,float,float,float,float,float,float,float,float,float,float,float,float,float,float,float) in QMatrix4x4, QMatrix4x4(QMatrix4x4) in QMatrix4x4
+    signature 'QImage(const uchar*,int,int,QImage::Format)' for function modification in 'QImage' not found. Possible candidates: QImage() in QImage, QImage(QString&,int,int,QImage::Format) in QImage, QImage(QString&,int,int,int,QImage::Format) in QImage, QImage(QImage) in QImage, QImage(QSize,QImage::Format) in QImage, QImage(QString,const char*) in QImage, QImage(const char**) in QImage, QImage(int,int,QImage::Format) in QImage
+    signature 'QIcon(QIconEngineV2*)' for function modification in 'QIcon' not found. Possible candidates: QIcon() in QIcon, QIcon(QIconEngine*) in QIcon, QIcon(QIcon) in QIcon, QIcon(QPixmap) in QIcon, QIcon(QString) in QIcon
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'float *' in function 'QMatrix4x4::copyDataTo(float * values) const'.
+    signature 'isAmbiguous()' for function modification in 'QShortcutEvent' not found. Possible candidates: isAmbiguous()const in QShortcutEvent
+    signature 'QImage(uchar*,int,int,int,QImage::Format)' for function modification in 'QImage' not found. Possible candidates: QImage() in QImage, QImage(QString&,int,int,QImage::Format) in QImage, QImage(QString&,int,int,int,QImage::Format) in QImage, QImage(QImage) in QImage, QImage(QSize,QImage::Format) in QImage, QImage(QString,const char*) in QImage, QImage(const char**) in QImage, QImage(int,int,QImage::Format) in QImage
+    signature 'cacheMode()' for function modification in 'QMovie' not found. Possible candidates: cacheMode()const in QMovie
+    signature 'encodedData(const char*)const' for function modification in 'QDropEvent' not found. Possible candidates: 
+    signature 'key()' for function modification in 'QShortcutEvent' not found. Possible candidates: key()const in QShortcutEvent
+    signature 'copyDataTo(qreal*)const' for function modification in 'QMatrix4x4' not found. Possible candidates: copyDataTo(float*)const in QMatrix4x4
+    signature 'QDrag(QWidget*)' for function modification in 'QDrag' not found. Possible candidates: QDrag(QObject*) in QDrag, QDrag(QDrag) in QDrag
+    signature 'provides(const char*)const' for function modification in 'QDropEvent' not found. Possible candidates: 
+    signature 'QImage(uchar*,int,int,QImage::Format)' for function modification in 'QImage' not found. Possible candidates: QImage() in QImage, QImage(QString&,int,int,QImage::Format) in QImage, QImage(QString&,int,int,int,QImage::Format) in QImage, QImage(QImage) in QImage, QImage(QSize,QImage::Format) in QImage, QImage(QString,const char*) in QImage, QImage(const char**) in QImage, QImage(int,int,QImage::Format) in QImage
+    signature 'text(const char*,const char*)const' for function modification in 'QImage' not found. Possible candidates: text(QString)const in QImage
+    signature 'QMatrix4x4(const qreal*,int,int)' for function modification in 'QMatrix4x4' not found. Possible candidates: QMatrix4x4() in QMatrix4x4, QMatrix4x4(QMatrix) in QMatrix4x4, QMatrix4x4(QTransform) in QMatrix4x4, QMatrix4x4(const float*) in QMatrix4x4, QMatrix4x4(const float*,int,int) in QMatrix4x4, QMatrix4x4(float,float,float,float,float,float,float,float,float,float,float,float,float,float,float,float) in QMatrix4x4, QMatrix4x4(QMatrix4x4) in QMatrix4x4
+    signature 'handle()const' for function modification in 'QSessionManager' not found. Possible candidates: 
+    signature 'setText(const char*,const char*,QString)' for function modification in 'QImage' not found. Possible candidates: setText(QString,QString) in QImage
+    signature 'format(int)const' for function modification in 'QDropEvent' not found. Possible candidates: 
+    signature 'shortcutId()' for function modification in 'QShortcutEvent' not found. Possible candidates: shortcutId()const in QShortcutEvent
     
 
-Done, 87 warnings (517 known issues)
+Done, 78 warnings (512 known issues)

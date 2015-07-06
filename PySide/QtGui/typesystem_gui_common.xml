@@ -463,6 +463,7 @@
   </value-type>
   <value-type name="QTextTableCellFormat" />
   <value-type name="QTextCharFormat" >
+    <enum-type name="FontPropertiesInheritanceBehavior"/>
     <enum-type name="UnderlineStyle"/>
     <enum-type name="VerticalAlignment"/>
     <modify-function signature="isValid()const" access="non-final"/>
@@ -878,6 +879,7 @@
     <extra-includes>
       <include file-name="QStringList" location="global"/>
     </extra-includes>
+    <enum-type name="SystemFont" />
     <enum-type name="WritingSystem" />
   </value-type>
   <value-type name="QPen">
@@ -934,6 +936,7 @@
      }
   </template>
   <value-type name="QColor">
+    <enum-type name="NameFormat"/>
     <enum-type name="Spec"/>
     <extra-includes>
       <include file-name="QVariant" location="global"/>
@@ -1460,12 +1463,11 @@
       <enum-type name="Notation"/>
   </object-type>
   <object-type name="QIconEngine">
+    <object-type name="AvailableSizesArgument" />
+    <enum-type name="IconEngineHook" />
     <modify-function signature="paint(QPainter*,QRect,QIcon::Mode,QIcon::State)">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
-  </object-type>
-  <object-type name="QIconEngineV2">
-    <enum-type name="IconEngineHook"/>
     <modify-function signature="read(QDataStream&amp;)">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
@@ -2221,7 +2223,9 @@
   </object-type>
   <object-type name="QPainter">
     <extra-includes>
+      <!-- Qt5: no longer referenced
       <include file-name="QWidget" location="global"/>
+      -->
       <include file-name="QPainterPath" location="global"/>
       <include file-name="QPixmap" location="global"/>
     </extra-includes>
@@ -2324,11 +2328,13 @@
         <no-null-pointer/>
       </modify-argument>
     </modify-function>
+    <!-- Qt5: gone
     <modify-function signature="initFrom(const QWidget*)">
       <modify-argument index="1">
         <no-null-pointer/>
       </modify-argument>
     </modify-function>
+    -->
     <modify-function signature="setRedirected(const QPaintDevice*, QPaintDevice*, const QPoint&amp;)">
       <modify-argument index="1">
         <no-null-pointer/>
@@ -2373,11 +2379,13 @@
       </inject-code>
     </modify-function>
   </object-type>
-  <!-- qApp macro -->
+  <!-- Qt5: move to QtWidgets
+       qApp macro
   <inject-code class="native" position="beginning">
     PyObject* moduleQtGui;
   </inject-code>
   <inject-code class="target" file="glue/qtgui_qapp.cpp" position="end" />
+  -->
 
   <value-type name="QMatrix2x2" since="4.6">
     <add-function signature="__repr__" return-type="PyObject*">
@@ -3081,8 +3089,9 @@
   </value-type>
 
   <object-type name="QTouchEvent" since="4.6">
-      <enum-type name="DeviceType"/>
-      <value-type name="TouchPoint" since="4.6"/>
+      <value-type name="TouchPoint" since="4.6">
+        <enum-type name="InfoFlag" flags="InfoFlags"/>
+      </value-type>
   </object-type>
 
   <value-type name="QVector2D" since="4.6">
