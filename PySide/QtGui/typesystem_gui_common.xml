@@ -166,12 +166,6 @@
   <rejection class="QPolygon" function-name="setPoint"/>
   <rejection class="QPolygon" function-name="points"/>
   <rejection class="QPolygon" function-name="point"/>
-  <rejection class="QWidget" function-name="create"/>
-  <rejection class="QWidget" function-name="find"/>
-  <rejection class="QWidget" function-name="handle"/>
-  <rejection class="QWidget" function-name="styleChange"/>
-  <rejection class="QWidget" function-name="internalWinId"/>
-  <rejection class="QWidgetItem" field-name="wid"/>
   <rejection class="QActionGroup" function-name="selected"/>
   <rejection class="QPaintEngine" function-name="fix_neg_rect"/>
   <rejection class="*" enum-name="enum_1"/>
@@ -412,6 +406,7 @@
     <modify-function signature="operator&amp;=(QRect)" remove="all"/>
     <!-- ### -->
   </value-type>
+  
   <value-type name="QTextBlock">
     <value-type name="iterator" >
       <include file-name="QTextBlock" location="global"/>
@@ -539,12 +534,6 @@
   <value-type name="QIcon" >
     <enum-type name="Mode"/>
     <enum-type name="State"/>
-    <modify-function signature="QIcon(QIconEngineV2 *)">
-      <modify-argument index="1">
-        <no-null-pointer/>
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
     <modify-function signature="QIcon(QIconEngine *)">
       <modify-argument index="1">
         <no-null-pointer/>
@@ -758,7 +747,13 @@
     <extra-includes>
       <include file-name="QTextCursor" location="global"/>
     </extra-includes>
-  </value-type>
+  </value-type> <!--
+  <function signature="QImageCleanupFunction(void*)">
+    <extra-includes>
+      <include file-name="QImage" location="global"/>
+    </extra-includes>
+  </function> -->
+  <primitive-type name="QImageCleanupFunction" />
   <value-type name="QImage">
     <enum-type name="Format"/>
     <enum-type name="InvertMode"/>
@@ -771,7 +766,7 @@
         uchar* ptr = (uchar*) Shiboken::Buffer::getPointer(%PYARG_1);
         %0 = new %TYPE(ptr, %ARGS);
     </template>
-    <modify-function signature="QImage(uchar *,int,int,int,QImage::Format)">
+    <modify-function signature="QImage(uchar *,int,int,int,QImage::Format,QImageCleanupFunction, void *)">
         <modify-argument index="1">
             <replace-type modified-type="PyBuffer"/>
         </modify-argument>
@@ -781,7 +776,7 @@
             </insert-template>
         </inject-code>
     </modify-function>
-    <modify-function signature="QImage(uchar*,int,int,QImage::Format)">
+    <modify-function signature="QImage(uchar*,int,int,QImage::Format,QImageCleanupFunction, void *)">
         <modify-argument index="1">
             <replace-type modified-type="PyBuffer"/>
         </modify-argument>
@@ -808,8 +803,8 @@
     </add-function>
 
     <!-- The non-const versions are already used -->
-    <modify-function signature="QImage(const uchar*,int,int,int,QImage::Format)" remove="all"/>
-    <modify-function signature="QImage(const uchar*,int,int,QImage::Format)" remove="all" />
+    <modify-function signature="QImage(const uchar*,int,int,int,QImage::Format,QImageCleanupFunction, void *)" remove="all"/>
+    <modify-function signature="QImage(const uchar*,int,int,QImage::Format,QImageCleanupFunction, void *)" remove="all" />
     <!-- ### -->
 
     <modify-function signature="QImage(const char**)">
@@ -820,17 +815,10 @@
             <insert-template name="load_xpm" />
         </inject-code>
     </modify-function>
-    <!-- ### "QImage(const char*,const char*)" is just an overload for "QImage(QString,const char*)" -->
-    <modify-function signature="QImage(const char*,const char*)" remove="all" />
     <!-- ### There is already an fromData with a QByteArray type (that is convertible from Python's str) as the first type. -->
     <modify-function signature="fromData(const uchar*,int,const char*)" remove="all"/>
     <!-- ### There is already an loadFromData with a QByteArray type (that is convertible from Python's str) as the first type. -->
     <modify-function signature="loadFromData(const uchar*,int,const char*)" remove="all" />
-
-    <!-- ### Functions removed because we already have overloads using QString -->
-    <modify-function signature="setText(const char*,const char*,QString)" remove="all" />
-    <modify-function signature="text(const char*,const char*)const" remove="all" />
-    <!-- ### -->
 
     <modify-function signature="constBits()const" since="4.7">
         <inject-code>
@@ -1439,6 +1427,10 @@
   <object-type name="QPaintDevice">
       <enum-type name="PaintDeviceMetric"/>
   </object-type>
+  <object-type name="QPagedPaintDevice">
+    <value-type name="Margins" />
+    <enum-type name="PageSize" />
+  </object-type>
   <object-type name="QAbstractTextDocumentLayout">
     <value-type name="PaintContext" >
       <include file-name="QAbstractTextDocumentLayout" location="global"/>
@@ -1746,13 +1738,6 @@
         <define-ownership owner="target"/>
       </modify-argument>
     </modify-function>
-    <!--### Method encodedData(const char*) exists only for Qt3 compatibility. -->
-    <modify-function signature="encodedData(const char*)const" remove="all"/>
-    <!--### Method format(int) exists only for Qt3 compatibility. -->
-    <modify-function signature="format(int)const" remove="all"/>
-    <!--### Method provides(const char*) exists only for Qt3 compatibility. -->
-    <modify-function signature="provides(const char*)const" remove="all"/>
-    <!-- ### -->
   </object-type>
   <object-type name="QFileOpenEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::FileOpen" />
   <object-type name="QFocusEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::FocusIn || %1-&gt;type() == QEvent::FocusOut" />
@@ -1775,8 +1760,8 @@
   <object-type name="QShortcutEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Shortcut">
     <!-- All these have const overloads that are used instead -->
     <modify-function signature="isAmbiguous()const" remove="all"/>
-    <modify-function signature="shortcutId()" remove="all"/>
-    <modify-function signature="key()" remove="all"/>
+    <modify-function signature="shortcutId()const" remove="all"/>
+    <modify-function signature="key()const" remove="all"/>
     <!-- ### -->
   </object-type>
   <object-type name="QShowEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Show"/>
@@ -1896,7 +1881,6 @@
     <enum-type name="CacheMode"/>
     <enum-type name="MovieState"/>
     <!-- ### "cacheMode()" is an internal method. -->
-    <modify-function signature="cacheMode()" remove="all"/>
     <modify-function signature="setDevice(QIODevice*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
@@ -1908,7 +1892,7 @@
       <include file-name="QPoint" location="global"/>
       <include file-name="QPixmap" location="global"/>
     </extra-includes>
-    <modify-function signature="QDrag(QWidget*)">
+    <modify-function signature="QDrag(QObject*)">
       <modify-argument index="this">
         <parent index="1" action="add"/>
       </modify-argument>
@@ -2208,7 +2192,7 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="print(QPrinter*)const" rename="print_" />
+    <modify-function signature="print(QPagedPaintDevice*)const" rename="print_" />
   </object-type>
   <object-type name="QAbstractProxyModel" polymorphic-id-expression="qobject_cast&lt;QAbstractProxyModel*&gt;(%1)">
     <extra-includes>
@@ -3337,9 +3321,7 @@
     <extra-includes>
     </extra-includes>
     <enum-type name="RestartHint"/>
-    <!-- ### "handle()const" is an internal method. -->
-    <modify-function signature="handle()const" remove="all"/>
-    <!-- ### -->
+     <!-- ### -->
   </object-type>
 
   <!-- The above entries may be present in the system or not. Keep this section organized. -->

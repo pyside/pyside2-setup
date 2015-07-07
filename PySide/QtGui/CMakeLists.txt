@@ -47,7 +47,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qicon_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qicondragevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qiconengine_availablesizesargument_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qiconengine_wrapper.cpp
-### no constructor   ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qimage_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qimage_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qimageiohandler_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qimagereader_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qimagewriter_wrapper.cpp
@@ -65,6 +65,8 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmouseevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmoveevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmovie_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qpagedpaintdevice_margins_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qpagedpaintdevice_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qpaintdevice_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qpaintengine_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qpaintenginestate_wrapper.cpp
@@ -111,7 +113,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextdocumentfragment_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextformat_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextfragment_wrapper.cpp
 ### QMetaType::registerType: Binary compatibility break -- Size mismatch for type 'iterator' [1317]. Previously registered size 24, now registering size 32.
-### ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextframe_iterator_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextframe_iterator_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextframe_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextframeformat_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextimageformat_wrapper.cpp
