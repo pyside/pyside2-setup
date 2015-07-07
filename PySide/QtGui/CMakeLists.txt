@@ -108,7 +108,8 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextdocument_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextdocumentfragment_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextformat_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextfragment_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextframe_iterator_wrapper.cpp
+### QMetaType::registerType: Binary compatibility break -- Size mismatch for type 'iterator' [1317]. Previously registered size 24, now registering size 32.
+### ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextframe_iterator_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextframe_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextframeformat_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextimageformat_wrapper.cpp

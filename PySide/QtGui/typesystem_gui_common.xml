@@ -2419,14 +2419,20 @@
   """
   The problem:
   QMatrixNxM objects were always based upon the qreal type.
-  Since Qt5.0, this has been changed to the float type.
+  Since Qt5.0, this has been changed to the float type, for some
+  complicated reasons (long discussions, see for instance
+    https://groups.google.com/forum/#!topic/qt-project-list-development/dPcP3NASY1k
+  )
 
-  This creates quite some problems in doing the conversion right, and also
-  looses accuracy for no obvious reason.
+  This creates a few problems in doing the conversion right, and also
+  looses accuracy. I understand the lengthy discussion about this,
+  my question is simply if it is worth the effort to support these
+  functions in python, when it looses accuracy, but python uses double, anyway.
+  Does this make sense?
 
-  Before we don't agree on a strategy how to treat these matrices in the future,
-  I (ctismer) refuse to implement this. Therefore, the matrix stuff is commented
-  out for now.
+  Before we agree on a strategy how to treat these matrices in the future,
+  I (ctismer) am saving the time to implement this change. Therefore, the matrix
+  stuff is commented out for now.
   """
 
   <value-type name="QMatrix2x2" since="4.6">
