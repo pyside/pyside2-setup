@@ -4444,8 +4444,16 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream& s, const Abstrac
         }
 
         if (canBeValue) {
-            foreach (QString name, nameVariants)
+            foreach (QString name, nameVariants) {
+                if (name == "iterator") {
+                    ReportHandler::warning(QString("%1:%2 FIXME:\n"
+                        "    The code tried to qRegisterMetaType the unqualified name "
+                        "'iterator'. This is currently fixed by a hack(ct) and needs improvement!")
+                        .arg(__FILE__).arg(__LINE__));
+                    continue;
+                }
                 s << INDENT << "qRegisterMetaType< ::" << className << " >(\"" << name << "\");" << endl;
+            }
         }
     }
 
