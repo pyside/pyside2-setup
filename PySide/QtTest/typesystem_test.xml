@@ -52,23 +52,27 @@
   <rejection class="QTest" function-name="qt_snprintf"/>
 
   <rejection class="QTest" function-name="compare_helper"/>
-  <rejection class="QTest" function-name="touchEvent"/>
+  <rejection class="QTest" function-name="toPrettyUnicode"/>
 
   <namespace-type name="QTest">
-    <enum-type name="AttributeIndex" since="4.6"/>
+    <!-- Qt5: private <enum-type name="AttributeIndex" since="4.6"/> -->
     <enum-type name="KeyAction"/>
-    <enum-type name="LogElementType" since="4.6"/>
+    <!-- Qt5: private <enum-type name="LogElementType" since="4.6"/> -->
     <enum-type name="MouseAction"/>
     <enum-type name="QBenchmarkMetric" since="4.7"/>
-    <enum-type name="SkipMode"/>
+    <!-- Qt5: gone <enum-type name="SkipMode"/> -->
     <enum-type name="TestFailMode"/>
     <extra-includes>
         <include file-name="QtTest" location="global"/>
     </extra-includes>
-    <!--<modify-function signature="qCompare<char>(char">-->
     <rejection class="QTouchEventSequence"/>
     <object-type name="PySideQTouchEventSequence" target-lang-name="QTouchEventSequence" since="4.6" >
         <modify-function signature="press(int, const QPoint&amp;, QWidget*)">
+            <modify-argument index="return">
+                <define-ownership class="target" owner="default"/>
+            </modify-argument>
+        </modify-function>
+        <modify-function signature="press(int, const QPoint&amp;, QWindow*)">
             <modify-argument index="return">
                 <define-ownership class="target" owner="default"/>
             </modify-argument>
@@ -78,7 +82,17 @@
                 <define-ownership class="target" owner="default"/>
             </modify-argument>
         </modify-function>
+        <modify-function signature="move(int, const QPoint&amp;, QWindow*)">
+            <modify-argument index="return">
+                <define-ownership class="target" owner="default"/>
+            </modify-argument>
+        </modify-function>
         <modify-function signature="release(int, const QPoint&amp;, QWidget*)">
+            <modify-argument index="return">
+                <define-ownership class="target" owner="default"/>
+            </modify-argument>
+        </modify-function>
+        <modify-function signature="release(int, const QPoint&amp;, QWindow*)">
             <modify-argument index="return">
                 <define-ownership class="target" owner="default"/>
             </modify-argument>
@@ -89,7 +103,12 @@
             </modify-argument>
         </modify-function>
     </object-type>
-    <modify-function signature="generateTouchEvent(QWidget*, QTouchEvent::DeviceType)" rename="touchEvent" since="4.6">
+    <modify-function signature="generateTouchEvent(QWidget*, QTouchDevice*, bool)" rename="touchEvent" since="4.6">
+        <modify-argument index="return">
+            <define-ownership class="target" owner="target"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="generateTouchEvent(QWindow*, QTouchDevice*, bool)" rename="touchEvent" since="4.6">
         <modify-argument index="return">
             <define-ownership class="target" owner="target"/>
         </modify-argument>
