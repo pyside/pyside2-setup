@@ -99,6 +99,8 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qstandarditem_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qstandarditemmodel_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qstatustipevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qstringlistmodel_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qsurface_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qsurfaceformat_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qsyntaxhighlighter_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtabletevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextblock_iterator_wrapper.cpp
@@ -141,6 +143,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qvector3d_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qvector4d_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qwhatsthisclickedevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qwheelevent_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qwindow_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qwindowstatechangeevent_wrapper.cpp
 
 ${SPECIFIC_OS_FILES}

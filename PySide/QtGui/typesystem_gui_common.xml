@@ -2645,7 +2645,7 @@
       </inject-code>
     </add-function>
     <add-function signature="operator==(const QMatrix2x4&amp;)" return-type="bool" />
- </value-type>
+  </value-type>
 
   <value-type name="QMatrix3x2" since="4.6">
     <add-function signature="__repr__" return-type="PyObject*">
@@ -3328,6 +3328,31 @@
 
   <!-- This enum is present on QtCore -->
   <suppress-warning text="enum 'QCoreApplication::ApplicationFlags' is specified in typesystem, but not declared" />
+
+  <!-- Qt5: here the new QWindow stuff and what it pulls in -->
+  <object-type name="QSurface">
+    <enum-type name="SurfaceClass"/>
+    <enum-type name="SurfaceType"/>
+  </object-type>
+  <rejection class="QSurface" field-name="m_reserved"/>
+  <value-type name="QSurfaceFormat">
+    <enum-type name="FormatOption" flags="FormatOptions"/>
+    <enum-type name="OpenGLContextProfile"/>
+    <enum-type name="RenderableType"/>
+    <enum-type name="SwapBehavior"/>
+  </value-type>
+  <primitive-type name="QPlatformSurface">
+    <extra-includes>
+      <include file-name="QtGui/qpa/qplatformsurface.h" location="global"/>
+    </extra-includes>
+  </primitive-type>
+
+  <object-type name="QWindow">
+    <enum-type name="AncestorMode"/>
+    <enum-type name="Visibility"/>
+  </object-type>
+  <!-- Qt5: not sure if this needs support, skipped for now -->
+  <rejection class="QWindow" function-name="nativeEvent"/>"
 
 </typesystem>
 
