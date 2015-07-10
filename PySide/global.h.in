@@ -370,11 +370,11 @@ QT_END_NAMESPACE
 #include <QtScript/QtScript>
 #include <QtScriptTools/QtScriptTools>
 #include <QtMultimedia/QtMultimedia>
-#include <QtMaemo5/QtMaemo5>
 #include <QtDeclarative/QtDeclarative>
 
-// QT_GUI_LIB must be defined to QSqlRelationalDelegate become visible
-#define QT_GUI_LIB
+// QT_WIDGETS_LIB must be defined to QSqlRelationalDelegate become visible.
+// It also changes code generation in pysideqtesttouch.h
+#define QT_WIDGETS_LIB
 #undef Q_DECLARE_INTERFACE
 #include <QtSql/QtSql>
 #include <QtSvg/QtSvg>
@@ -425,7 +425,7 @@ QT_END_NAMESPACE
 #endif
 
 #if @Qt5Test_FOUND@
-#  include <QtTest/QtTest>
+#  include <QtTest/qtest_gui.h>
 #  include "pysideqtesttouch.h"
 #endif
 

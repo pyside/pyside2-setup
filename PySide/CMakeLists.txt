@@ -2,6 +2,20 @@ project(pyside)
 
 include(PySideModules)
 
+find_package(Qt5Core)
+find_package(Qt5Concurrent) # new in Qt5, from QtCore
+find_package(Qt5Gui)        # reduced, small version without widgets
+find_package(Qt5Widgets)    # widgets in their separate module
+find_package(Qt5Xml)
+find_package(Qt5XmlPatterns)
+find_package(Qt5Svg)
+find_package(Qt5Sql)
+find_package(Qt5Designer)
+find_package(Qt5UiTools)
+find_package(Qt5Test)
+find_package(Qt5Network)
+find_package(Qt5Webkit)
+
 # Configure include based on platform
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/global.h.in"
                "${CMAKE_CURRENT_BINARY_DIR}/pyside_global.h" @ONLY)
@@ -20,19 +34,6 @@ macro(CHECK_VAR name)
     endif()
 endmacro()
 
-find_package(Qt5Core)
-find_package(Qt5Concurrent) # new in Qt5, from QtCore
-find_package(Qt5Gui)        # reduced, small version without widgets
-find_package(Qt5Widgets)    # widgets in their separate module
-find_package(Qt5Xml)
-find_package(Qt5XmlPatterns)
-find_package(Qt5Svg)
-find_package(Qt5Sql)
-find_package(Qt5Designer)
-find_package(Qt5UiTools)
-find_package(Qt5Test)
-find_package(Qt5Network)
-
 CHECK_VAR(Qt5Core_FOUND)
 CHECK_VAR(Qt5Concurrent_FOUND)
 CHECK_VAR(Qt5Gui_FOUND)
@@ -45,6 +46,7 @@ CHECK_VAR(Qt5Designer_FOUND)
 CHECK_VAR(Qt5UiTools_FOUND)
 CHECK_VAR(Qt5Test_FOUND)
 CHECK_VAR(Qt5Network_FOUND)
+CHECK_VAR(Qt5Webkit_FOUND)
 
 HAS_QT_MODULE(Qt5Core_FOUND QtCore)
 HAS_QT_MODULE(Qt5Gui_FOUND QtGui)
@@ -53,7 +55,7 @@ HAS_QT_MODULE(Qt5Gui_FOUND QtGui)
 # need to split this HAS_QT_MODULE(Qt5Gui_FOUND QtGui)
 # compiles, skip   HAS_QT_MODULE(Qt5Xml_FOUND QtXml)
 ### generates no classes HAS_QT_MODULE(Qt5XmlPatterns_FOUND QtXmlPatterns)
-### depends on QtGui HAS_QT_MODULE(Qt5Test_FOUND QtTest)
+HAS_QT_MODULE(Qt5Test_FOUND QtTest)
 ### depends on QtGui HAS_QT_MODULE(Qt5Svg_FOUND QtSvg)
 
 HAS_QT_MODULE(QT_QTWEBKIT_FOUND QtWebKit)
