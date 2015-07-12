@@ -18,8 +18,8 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 -->
-<typesystem package="PySide.QtGui">
-    <load-typesystem name="typesystem_core.xml" generate="no"/>
-    <load-typesystem name="typesystem_gui_@AUTO_OS@.xml" generate="yes"/>
-    <load-typesystem name="typesystem_gui_common.xml" generate="yes"/>
+<typesystem package="PySide.QtWidgets">
+    <load-typesystem name="typesystem_gui.xml" generate="no"/>
+    <load-typesystem name="typesystem_widgets_@AUTO_OS@.xml" generate="yes"/>
+    <load-typesystem name="typesystem_widgets_common.xml" generate="yes"/>
 </typesystem>

@@ -256,8 +256,8 @@
         }
       </inject-code>
     </add-function>
-
   </value-type>
+
   <value-type name="QTextFragment" />
   <value-type name="QBitmap" >
     <modify-function signature="fromData(QSize,const uchar*,QImage::Format)">
@@ -1497,7 +1497,7 @@
   <!-- Qt5: gone. Use the new fusion style.
   <object-type name="QMotifStyle">
   </object-type>
--->
+  -->
 
   <object-type name="QPainterPathStroker" copyable="false"/>
   <object-type name="QPictureIO">
@@ -2390,13 +2390,6 @@
       </inject-code>
     </modify-function>
   </object-type>
-  <!-- Qt5: move to QtWidgets
-       qApp macro
-  <inject-code class="native" position="beginning">
-    PyObject* moduleQtGui;
-  </inject-code>
-  <inject-code class="target" file="glue/qtgui_qapp.cpp" position="end" />
-  -->
 
   <!--  _______ Qt5: begin of matrix block _________
 
@@ -3323,8 +3316,6 @@
     <enum-type name="RestartHint"/>
      <!-- ### -->
   </object-type>
-
-  <!-- The above entries may be present in the system or not. Keep this section organized. -->
 
   <!-- This enum is present on QtCore -->
   <suppress-warning text="enum 'QCoreApplication::ApplicationFlags' is specified in typesystem, but not declared" />

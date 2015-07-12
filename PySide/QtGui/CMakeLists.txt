@@ -159,7 +159,7 @@ file(WRITE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/fake_shiboken.sh"
      "
 echo \"$*\"
 ${prev_shiboken_binary} $*
-python3 ${CMAKE_CURRENT_BINARY_DIR}/filter_init.py "${QtGui_SRC_escape}"
+python3 ${CMAKE_CURRENT_BINARY_DIR}/filter_init.py ${QtGui_SRC_escape}
      ")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/filter_init.py"
      "#! env python
@@ -206,6 +206,7 @@ set(QtGui_include_dirs  ${CMAKE_CURRENT_SOURCE_DIR}
                         ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/
                         ${pyside_SOURCE_DIR}
                         ${Qt5Core_INCLUDE_DIRS}
+                        ${Qt5Gui_INCLUDE_DIRS}
                         ${SHIBOKEN_INCLUDE_DIR}
                         ${libpyside_SOURCE_DIR}
                         ${SHIBOKEN_PYTHON_INCLUDE_DIR}

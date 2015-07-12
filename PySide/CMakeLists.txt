@@ -50,6 +50,7 @@ CHECK_VAR(Qt5Webkit_FOUND)
 
 HAS_QT_MODULE(Qt5Core_FOUND QtCore)
 HAS_QT_MODULE(Qt5Gui_FOUND QtGui)
+HAS_QT_MODULE(Qt5Widgets_FOUND QtWidgets)
 ### depends on QtGui HAS_QT_MODULE(Qt5Sql_FOUND QtSql)
 # compiles, skip   HAS_QT_MODULE(Qt5Network_FOUND QtNetwork)
 # need to split this HAS_QT_MODULE(Qt5Gui_FOUND QtGui)

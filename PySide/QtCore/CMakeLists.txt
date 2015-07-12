@@ -141,7 +141,7 @@ file(WRITE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/fake_shiboken.sh"
      "
 echo \"$*\"
 ${prev_shiboken_binary} $*
-python3 ${CMAKE_CURRENT_BINARY_DIR}/filter_init.py "${QtCore_SRC_escape}"
+python3 ${CMAKE_CURRENT_BINARY_DIR}/filter_init.py ${QtCore_SRC_escape}
      ")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/filter_init.py"
      "#! env python
