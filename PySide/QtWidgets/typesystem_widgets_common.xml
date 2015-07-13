@@ -59,22 +59,13 @@
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionDockWidgetV2" polymorphic-id-expression="%1-&gt;type == QStyleOptionDockWidgetV2::Type &amp;&amp; %1-&gt;version == QStyleOptionDockWidgetV2::Version">
-      <enum-type name="StyleOptionVersion"/>
-  </object-type>
   <object-type name="QStyleOptionFocusRect" polymorphic-id-expression="%1-&gt;type == QStyleOptionFocusRect::Type &amp;&amp; %1-&gt;version == QStyleOptionFocusRect::Version">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
   <object-type name="QStyleOptionFrame" polymorphic-id-expression="%1-&gt;type == QStyleOptionFrame::Type &amp;&amp; %1-&gt;version == QStyleOptionFrame::Version">
-      <enum-type name="StyleOptionType"/>
-      <enum-type name="StyleOptionVersion"/>
-  </object-type>
-  <object-type name="QStyleOptionFrameV2" polymorphic-id-expression="%1-&gt;type == QStyleOptionFrameV2::Type &amp;&amp; %1-&gt;version == QStyleOptionFrameV2::Version">
       <enum-type name="FrameFeature" flags="FrameFeatures"/>
-      <enum-type name="StyleOptionVersion"/>
-  </object-type>
-  <object-type name="QStyleOptionFrameV3" polymorphic-id-expression="%1-&gt;type == QStyleOptionFrameV3::Type &amp;&amp; %1-&gt;version == QStyleOptionFrameV3::Version">
+      <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
   <object-type name="QStyleOptionGroupBox" polymorphic-id-expression="%1-&gt;type == QStyleOptionGroupBox::Type &amp;&amp; %1-&gt;version == QStyleOptionGroupBox::Version">
@@ -98,10 +89,6 @@
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionProgressBarV2" polymorphic-id-expression="%1-&gt;type == QStyleOptionProgressBarV2::Type &amp;&amp; %1-&gt;version == QStyleOptionProgressBarV2::Version">
-      <enum-type name="StyleOptionType"/>
-      <enum-type name="StyleOptionVersion"/>
-  </object-type>
   <object-type name="QStyleOptionRubberBand" polymorphic-id-expression="%1-&gt;type == QStyleOptionRubberBand::Type &amp;&amp; %1-&gt;version == QStyleOptionRubberBand::Version">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
@@ -119,19 +106,11 @@
       <enum-type name="SelectedPosition"/>
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
+      <enum-type name="TabFeature" flags="TabFeatures"/>
       <enum-type name="TabPosition"/>
-  </object-type>
-  <object-type name="QStyleOptionTabV2" polymorphic-id-expression="%1-&gt;type == QStyleOptionTabV2::Type &amp;&amp; %1-&gt;version == QStyleOptionTabV2::Version">
-      <enum-type name="StyleOptionVersion"/>
-  </object-type>
-  <object-type name="QStyleOptionTabV3" polymorphic-id-expression="%1-&gt;type == QStyleOptionTabV3::Type &amp;&amp; %1-&gt;version == QStyleOptionTabV3::Version">
-      <enum-type name="StyleOptionVersion"/>
   </object-type>
   <object-type name="QStyleOptionTabBarBase" polymorphic-id-expression="%1-&gt;type == QStyleOptionTabBarBase::Type &amp;&amp; %1-&gt;version == QStyleOptionTabBarBase::Version">
       <enum-type name="StyleOptionType"/>
-      <enum-type name="StyleOptionVersion"/>
-  </object-type>
-  <object-type name="QStyleOptionTabBarBaseV2" delete-in-main-thread="yes" polymorphic-id-expression="%1-&gt;type == QStyleOptionTabBarBaseV2::Type &amp;&amp; %1-&gt;version == QStyleOptionTabBarBaseV2::Version">
       <enum-type name="StyleOptionVersion"/>
   </object-type>
   <object-type name="QStyleOptionTabWidgetFrame" polymorphic-id-expression="%1-&gt;type == QStyleOptionTabWidgetFrame::Type &amp;&amp; %1-&gt;version == QStyleOptionTabWidgetFrame::Version">
@@ -149,11 +128,8 @@
       <enum-type name="ToolBarPosition"/>
   </object-type>
   <object-type name="QStyleOptionToolBox" polymorphic-id-expression="%1-&gt;type == QStyleOptionToolBox::Type &amp;&amp; %1-&gt;version == QStyleOptionToolBox::Version">
-      <enum-type name="StyleOptionType"/>
-      <enum-type name="StyleOptionVersion"/>
-  </object-type>
-  <object-type name="QStyleOptionToolBoxV2" polymorphic-id-expression="%1-&gt;type == QStyleOptionToolBoxV2::Type &amp;&amp; %1-&gt;version == QStyleOptionToolBoxV2::Version">
       <enum-type name="SelectedPosition"/>
+      <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
       <enum-type name="TabPosition"/>
   </object-type>
@@ -166,16 +142,7 @@
       <enum-type name="Position"/>
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
-  </value-type>
-  <value-type name="QStyleOptionViewItemV2" polymorphic-id-expression="%1-&gt;type == QStyleOptionViewItemV2::Type &amp;&amp; %1-&gt;version == QStyleOptionViewItemV2::Version">
-      <enum-type name="StyleOptionVersion"/>
       <enum-type name="ViewItemFeature" flags="ViewItemFeatures"/>
-  </value-type>
-  <value-type name="QStyleOptionViewItemV3" polymorphic-id-expression="%1-&gt;type == QStyleOptionViewItemV3::Type &amp;&amp; %1-&gt;version == QStyleOptionViewItemV3::Version">
-      <enum-type name="StyleOptionVersion"/>
-  </value-type>
-  <value-type name="QStyleOptionViewItemV4" polymorphic-id-expression="%1-&gt;type == QStyleOptionViewItemV4::Type &amp;&amp; %1-&gt;version == QStyleOptionViewItemV4::Version" >
-      <enum-type name="StyleOptionVersion"/>
       <enum-type name="ViewItemPosition"/>
   </value-type>
 
@@ -483,19 +450,11 @@
       </modify-argument>
     </modify-function>
   </object-type>
-  <object-type name="QCDEStyle">
-    <modify-function signature="standardIconImplementation(QStyle::StandardPixmap, const QStyleOption *, const QWidget *)const" virtual-slot="yes"/>
-  </object-type>
   <object-type name="QCheckBox"/>
-  <object-type name="QCleanlooksStyle">
-    <!--### Obsolete in 4.3-->
-    <modify-function signature="standardPixmap(QStyle::StandardPixmap,const QStyleOption*,const QWidget*)const" remove="all"/>
-    <modify-function signature="standardIconImplementation(QStyle::StandardPixmap, const QStyleOption *, const QWidget *)const" virtual-slot="yes"/>
-  </object-type>
   <object-type name="QCommonStyle">
     <!--### Obsolete in 4.3-->
     <modify-function signature="standardPixmap(QStyle::StandardPixmap, const QStyleOption*,const QWidget*)const" remove="all"/>
-    <modify-function signature="standardIconImplementation(QStyle::StandardPixmap, const QStyleOption *, const QWidget *)const" virtual-slot="yes"/>
+    <!-- Qt5: gone <modify-function signature="standardIconImplementation(QStyle::StandardPixmap, const QStyleOption *, const QWidget *)const" virtual-slot="yes"/> -->
   </object-type>
   <object-type name="QDataWidgetMapper">
     <enum-type name="SubmitPolicy"/>
@@ -526,9 +485,6 @@
     </modify-function>
   </object-type>
   <object-type name="QDateEdit"/>
-  <object-type name="QDesktopServices">
-      <enum-type name="StandardLocation"/>
-  </object-type>
   <object-type name="QDialog">
     <enum-type name="DialogCode"/>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
@@ -568,6 +524,7 @@
   </object-type>
   <object-type name="QFileIconProvider">
       <enum-type name="IconType"/>
+      <enum-type name="Option" flags="Options"/>
   </object-type>
   <object-type name="QWizard">
     <enum-type name="WizardButton" />
@@ -616,28 +573,6 @@
             <insert-template name="fix_bool*,arg"/>
         </inject-code>
     </modify-function>
-    <modify-function signature="getFont(bool*,QFont,QWidget*)" allow-thread="yes">
-        <modify-argument index="1">
-            <remove-argument />
-        </modify-argument>
-        <modify-argument index="return">
-            <replace-type modified-type="PyTuple" />
-        </modify-argument>
-        <inject-code class="target" position="beginning">
-            <insert-template name="fix_bool*,arg,arg"/>
-        </inject-code>
-    </modify-function>
-    <modify-function signature="getFont(bool*,QFont,QWidget*,QString)" allow-thread="yes">
-        <modify-argument index="1">
-            <remove-argument />
-        </modify-argument>
-        <modify-argument index="return">
-            <replace-type modified-type="PyTuple" />
-        </modify-argument>
-        <inject-code class="target" position="beginning">
-            <insert-template name="fix_bool*,arg,arg,arg"/>
-        </inject-code>
-    </modify-function>
     <modify-function signature="getFont(bool*,QFont,QWidget*,QString,QFlags&lt;QFontDialog::FontDialogOption&gt;)">
         <modify-argument index="1">
             <remove-argument />
@@ -683,7 +618,7 @@
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
   </object-type>
-  <object-type name="QInputContextFactory"/>
+  <!-- Qt5: gone <object-type name="QInputContextFactory"/> -->
   <object-type name="QItemDelegate">
     <!-- ### "doLayout(...)" is an internal method. -->
     <modify-function signature="doLayout(QStyleOptionViewItem,QRect*,QRect*,QRect*,bool)const" remove="all" />
@@ -873,7 +808,6 @@
 
     <modify-function signature="exec()" rename="exec_" allow-thread="yes" />
     <modify-function signature="exec(const QPoint&amp;, QAction*)" rename="exec_" allow-thread="yes" />
-    <modify-function signature="exec(QList&lt;QAction*>, const QPoint&amp;, QAction*)" rename="exec_" allow-thread="yes" />
     <modify-function signature="exec(QList&lt;QAction*>, const QPoint&amp;, QAction*, QWidget*)" rename="exec_" allow-thread="yes" />
     <modify-function signature="addAction(const QString&amp;)">
       <modify-argument index="return">
@@ -1018,11 +952,6 @@
       </inject-code>
     </modify-function>
   </object-type>
-  <object-type name="QMotifStyle">
-    <!--### Obsolete in 4.3-->
-    <modify-function signature="standardPixmap(QStyle::StandardPixmap, const QStyleOption*, const QWidget*)const" remove="all"/>
-    <modify-function signature="standardIconImplementation(QStyle::StandardPixmap, const QStyleOption *, const QWidget *)const" virtual-slot="yes"/>
-  </object-type>
   <object-type name="QProgressBar">
       <enum-type name="Direction"/>
   </object-type>
@@ -1050,7 +979,6 @@
       </inject-code>
     </add-function>
   </object-type>
-  <object-type name="QSound"/>
   <object-type name="QSpacerItem"/>
   <object-type name="QStatusBar">
     <modify-function signature="addWidget(QWidget*, int)">
@@ -1677,15 +1605,6 @@
   <object-type name="QInputDialog">
     <enum-type name="InputDialogOption"/>
     <enum-type name="InputMode"/>
-    <modify-function signature="getInteger(QWidget*, const QString&amp;, const QString&amp;, int, int, int, int, bool*, QFlags&lt;Qt::WindowType&gt;)" allow-thread="yes">
-      <modify-argument index="8">
-        <remove-default-expression/>
-        <remove-argument/>
-      </modify-argument>
-      <inject-code class="target" position="beginning">
-        <insert-template name="fix_arg,arg,arg,arg,arg,arg,arg,bool*,arg"/>
-      </inject-code>
-    </modify-function>
     <modify-function signature="getInt(QWidget*, const QString&amp;, const QString&amp;, int, int, int, int, bool*, QFlags&lt;Qt::WindowType&gt;)" allow-thread="yes">
       <modify-argument index="8">
         <remove-default-expression/>
@@ -1928,7 +1847,6 @@
       <include file-name="QTextCharFormat" location="global"/>
     </extra-includes>
     <!--### Obsolete in 4.3-->
-    <modify-function signature="isHeaderVisible()const" remove="all"/>
     <modify-function signature="setHeaderVisible(bool)" remove="all"/>
     <!--### End of obsolete section -->
     <modify-function signature="paintCell(QPainter*,QRect,QDate)const">
@@ -2466,16 +2384,6 @@
         // %FUNCTION_NAME() - disable generation of function call.
       </inject-code>
     </modify-function>
-    <!--### Obsolete in 4.3-->
-    <modify-function signature="enabledChange(bool)" remove="all"/>
-    <modify-function signature="fontChange(QFont)" remove="all"/>
-    <modify-function signature="isEnabledToTLW()const" remove="all"/>
-    <modify-function signature="isTopLevel()const" remove="all"/>
-    <modify-function signature="paletteChange(QPalette)" remove="all"/>
-    <modify-function signature="setShown(bool)" remove="all"/>
-    <modify-function signature="topLevelWidget()const" remove="all"/>
-    <modify-function signature="windowActivationChange(bool)" remove="all"/>
-    <!--### End of obsolete section -->
     <modify-function signature="raise()" rename="raise_" />
     <modify-function signature="setParent(QWidget*, QFlags&lt;Qt::WindowType>)">
       <modify-argument index="this">
@@ -2514,20 +2422,6 @@
     <extra-includes>
       <include file-name="QPixmap" location="global"/>
     </extra-includes>
-    <!--### Obsolete in 4.3-->
-    <modify-function signature="QMessageBox(QString,QString,QMessageBox::Icon,int,int,int,QWidget*,QFlags&lt;Qt::WindowType&gt;)" remove="all"/>
-    <modify-function signature="buttonText(int)const" remove="all"/>
-    <modify-function signature="setButtonText(int, QString)" remove="all"/>
-    <modify-function signature="standardIcon(QMessageBox::Icon)" remove="all"/>
-    <modify-function signature="critical(QWidget*,QString,QString,int,int,int)" remove="all"/>
-    <modify-function signature="critical(QWidget*,QString,QString,QString,QString,QString,int,int)" remove="all"/>
-    <modify-function signature="information(QWidget*,QString,QString,int,int,int)" remove="all"/>
-    <modify-function signature="information(QWidget*,QString,QString,QString,QString,QString,int,int)" remove="all"/>
-    <modify-function signature="question(QWidget*, QString, QString, int, int, int)" remove="all"/>
-    <modify-function signature="question(QWidget*, QString, QString, QString, QString, QString, int, int)" remove="all"/>
-    <modify-function signature="warning(QWidget*, QString, QString, int, int, int)" remove="all"/>
-    <modify-function signature="warning(QWidget*, QString, QString, QString, QString, QString, int, int)" remove="all"/>
-    <!--### End of obsolete section -->
 
     <modify-function signature="critical(QWidget*, const QString&amp;, const QString&amp;, QFlags&lt;QMessageBox::StandardButton&gt;, QMessageBox::StandardButton)" allow-thread="yes"/>
     <modify-function signature="information(QWidget*, const QString&amp;, const QString&amp;, QFlags&lt;QMessageBox::StandardButton&gt;, QMessageBox::StandardButton)" allow-thread="yes"/>
@@ -2733,6 +2627,7 @@
   <object-type name="QRadioButton" />
   <object-type name="QScrollBar" />
   <object-type name="QAbstractScrollArea">
+    <enum-type name="SizeAdjustPolicy"/>
     <modify-function signature="setViewport(QWidget *)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
@@ -2893,6 +2788,7 @@
   <object-type name="QSplitterHandle"/>
   <object-type name="QDial" />
   <object-type name="QLineEdit">
+    <enum-type name="ActionPosition"/>
     <enum-type name="EchoMode"/>
     <modify-function signature="setCompleter(QCompleter*)">
       <modify-argument index="1">
@@ -3179,7 +3075,7 @@
     <enum-type name="ActionEvent"/>
     <enum-type name="MenuRole"/>
     <enum-type name="Priority" since="4.6"/>
-    <enum-type name="SoftKeyRole" since="4.6"/>
+    <!-- Qt5: gone <enum-type name="SoftKeyRole" since="4.6"/> -->
     <modify-function signature="setMenu(QMenu*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
@@ -3194,7 +3090,7 @@
   <inject-code class="target" file="glue/qtwidgets_qapp.cpp" position="end" />
   <object-type name="QApplication">
     <enum-type name="ColorSpec"/>
-    <enum-type name="Type"/>
+    <!-- Qt5: gone <enum-type name="Type"/> -->
     <extra-includes>
       <include file-name="QBasicTimer" location="global"/>
       <include file-name="QFont" location="global"/>
@@ -3216,12 +3112,6 @@
             QApplicationConstructor(%PYSELF, %1, %2, &amp;%0);
         </inject-code>
     </add-function>
-    <modify-function signature="QApplication(int&amp;,char**,QApplication::Type)" access="private" />
-    <add-function signature="QApplication(PySequence,QApplication::Type)">
-        <inject-code>
-            QApplicationConstructor(%PYSELF, %1, %2, &amp;%0);
-        </inject-code>
-    </add-function>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
     <inject-code class="native" file="glue/qapplication_init.cpp" position="beginning" />
 
@@ -3229,7 +3119,6 @@
          removing Q_INTERNAL_QAPP_SRC || qdoc from #define section-->
     <modify-function signature="QApplication(int&amp;,char**,int)" remove="all"/>
     <modify-function signature="QApplication(int&amp;,char**,bool,int)" remove="all"/>
-    <modify-function signature="QApplication(int&amp;,char**,QApplication::Type,int)" remove="all"/>
     <!-- ### -->
 
     <!-- ownership control transfer to qApp -->

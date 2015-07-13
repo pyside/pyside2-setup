@@ -23,10 +23,12 @@
   <rejection class="*" function-name="macMenu"/>
 
   <primitive-type name="Qt::HANDLE" target-lang-api-name="PyObject"/>
+  <!-- Qt5: internal
   <object-type name="QMacStyle" >
     <enum-type name="FocusRectPolicy"/>
     <enum-type name="WidgetSizePolicy"/>
   </object-type>
+  -->
 
   <suppress-warning text="enum 'QPixmap::ShareMode' does not have a type entry or is not an enum" />
   <suppress-warning text="enum 'QSysInfo::Endian' is specified in typesystem, but not declared" />

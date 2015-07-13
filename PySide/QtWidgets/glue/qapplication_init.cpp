@@ -1,5 +1,5 @@
-// Borrowed reference to QtGui module
-extern PyObject* moduleQtGui;
+// Borrowed reference to QtWidgets module
+extern PyObject* moduleQtWidgets;
 
 static int QApplicationArgCount;
 static char** QApplicationArgValues;
@@ -25,7 +25,7 @@ void QApplicationConstructorEnd(PyObject* self)
             PyDict_SetItemString(globalsDict, QAPP_MACRO, self);
     }
 
-    PyObject_SetAttrString(moduleQtGui, QAPP_MACRO, self);
+    PyObject_SetAttrString(moduleQtWidgets, QAPP_MACRO, self);
     PySide::registerCleanupFunction(&PySide::destroyQCoreApplication);
     Py_INCREF(self);
 }
