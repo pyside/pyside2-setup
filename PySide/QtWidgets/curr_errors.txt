@@ -1,0 +1,133 @@
+Generating class model...                    [WARNING]
+    Duplicate type entry: 'QTextObjectInterface'
+    Duplicate type entry: 'QStandardItem'
+    Duplicate type entry: 'QTextObject'
+    Duplicate type entry: 'QItemSelectionModel'
+    Duplicate type entry: 'QTextBlockUserData'
+    Duplicate type entry: 'QPaintDevice'
+    Duplicate type entry: 'QSyntaxHighlighter'
+    Duplicate type entry: 'QClipboard'
+    Duplicate type entry: 'QDoubleValidator'
+    enum 'QStyleOptionFrame::FrameFeature' does not have a type entry or is not an enum
+    Unable to decide type of property: 'SizeAdjustPolicy' in class 'QAbstractScrollArea'
+    enum 'QAbstractScrollArea::SizeAdjustPolicy' does not have a type entry or is not an enum
+    Duplicate type entry: 'QIntValidator'
+    Duplicate type entry: 'QAbstractProxyModel'
+    Duplicate type entry: 'QPaintEngineState'
+    enum 'QStyleOptionToolBox::SelectedPosition' does not have a type entry or is not an enum
+    Duplicate type entry: 'QTextDocument'
+    Duplicate type entry: 'QTextTable'
+    enum 'QSound::Loop' does not have a type entry or is not an enum
+    Duplicate type entry: 'QRegExpValidator'
+    Duplicate type entry: 'QTextBlockGroup'
+    Duplicate type entry: 'QPyTextObject'
+    Duplicate type entry: 'QStringListModel'
+    Duplicate type entry: 'QTextItem'
+    enum 'QStyleOptionViewItem::ViewItemPosition' does not have a type entry or is not an enum
+    Duplicate type entry: 'QPixmapCache'
+    enum 'QFileIconProvider::Option' does not have a type entry or is not an enum
+    Duplicate type entry: 'QPictureIO'
+    Duplicate type entry: 'QPainterPathStroker'
+    Duplicate type entry: 'QAbstractTextDocumentLayout'
+    enum 'QStyleOptionToolBox::TabPosition' does not have a type entry or is not an enum
+    Duplicate type entry: 'QImageWriter'
+    Duplicate type entry: 'QIconEngine'
+    enum 'QLineEdit::ActionPosition' does not have a type entry or is not an enum
+    enum 'QStyleOptionViewItem::ViewItemFeature' does not have a type entry or is not an enum
+    Duplicate type entry: 'QStandardItemModel'
+    enum 'QStyleOptionTab::TabFeature' does not have a type entry or is not an enum
+    
+
+Generating enum model...                     [WARNING]
+    enum 'q_static_assert_result39' does not have a type entry or is not an enum
+    
+
+Generating namespace model...                [OK]
+Resolving typedefs...                        [OK]
+Fixing class inheritance...                  [WARNING]
+    class not found for setup inheritance 'QGuiApplication'
+    skipping field 'QStyleOptionViewItem::viewItemPosition' with unmatched type 'QStyleOptionViewItem::ViewItemPosition'
+    skipping field 'QStyleOptionGroupBox::features' with unmatched type 'QFlags<QStyleOptionFrame::FrameFeature>'
+    horribly broken type ''
+    skipping field 'QStyleOptionViewItem::features' with unmatched type 'QFlags<QStyleOptionViewItem::ViewItemFeature>'
+    skipping field 'QStyleOptionTab::features' with unmatched type 'QFlags<QStyleOptionTab::TabFeature>'
+    skipping field 'QStyleOptionToolBox::selectedPosition' with unmatched type 'QStyleOptionToolBox::SelectedPosition'
+    skipping field 'QStyleOptionFrame::features' with unmatched type 'QFlags<QStyleOptionFrame::FrameFeature>'
+    skipping field 'QStyleOptionToolBox::position' with unmatched type 'QStyleOptionToolBox::TabPosition'
+    class 'QApplication' inherits from unknown base class 'QGuiApplication'
+    
+
+Detecting inconsistencies in class model...  [OK]
+[OK]
+    enum 'QStyleOptionViewItemV4::ViewItemPosition' is specified in typesystem, but not declared
+    enum 'QStyleOptionViewItemV3::StyleOptionVersion' is specified in typesystem, but not declared
+    enum 'QStyleOptionDockWidgetV2::StyleOptionVersion' is specified in typesystem, but not declared
+    enum 'QStyleOptionViewItemV2::ViewItemFeature' is specified in typesystem, but not declared
+    type 'QInputContextFactory' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QMotifStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QStyleOptionViewItemV4::StyleOptionVersion' is specified in typesystem, but not declared
+    enum 'QStyleOptionTabV2::StyleOptionVersion' is specified in typesystem, but not declared
+    enum 'QApplication::Type' is specified in typesystem, but not declared
+    enum 'QStyleOptionProgressBarV2::StyleOptionType' is specified in typesystem, but not declared
+    enum 'QAction::SoftKeyRole' is specified in typesystem, but not declared
+    type 'QIconEngineV2' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QStyleOptionProgressBarV2::StyleOptionVersion' is specified in typesystem, but not declared
+    enum 'QStyleOptionFrameV2::StyleOptionVersion' is specified in typesystem, but not declared
+    enum 'QStyleOptionTabV3::StyleOptionVersion' is specified in typesystem, but not declared
+    type 'QMacStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QDesktopServices::StandardLocation' is specified in typesystem, but not declared
+    type 'QCDEStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QMacStyle::WidgetSizePolicy' is specified in typesystem, but not declared
+    enum 'QStyleOptionFrameV2::FrameFeature' is specified in typesystem, but not declared
+    enum 'QStyleOptionFrameV3::StyleOptionVersion' is specified in typesystem, but not declared
+    enum 'QStyleOptionToolBoxV2::TabPosition' is specified in typesystem, but not declared
+    enum 'QMacStyle::FocusRectPolicy' is specified in typesystem, but not declared
+    type 'QPlastiqueStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QStyleOptionToolBoxV2::SelectedPosition' is specified in typesystem, but not declared
+    enum 'QIconEngineV2::IconEngineHook' is specified in typesystem, but not declared
+    enum 'QStyleOptionTabBarBaseV2::StyleOptionVersion' is specified in typesystem, but not declared
+    enum 'QStyleOptionViewItemV2::StyleOptionVersion' is specified in typesystem, but not declared
+    type 'QCleanlooksStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QStyleOptionToolBoxV2::StyleOptionVersion' is specified in typesystem, but not declared
+    
+
+
+    signature 'children()const' for function modification in 'QGraphicsItem' not found. Possible candidates: 
+    signature 'indexOfTopLevelItem(QTreeWidgetItem*)' for function modification in 'QTreeWidget' not found. Possible candidates: indexOfTopLevelItem(QTreeWidgetItem*)const in QTreeWidget
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'int *' in function 'QGridLayout::getItemPosition(int idx, int * row, int * column, int * rowSpan, int * columnSpan) const'.
+    signature 'clipboard()' for function modification in 'QApplication' not found. Possible candidates: 
+    signature 'overrideCursor()' for function modification in 'QApplication' not found. Possible candidates: 
+    signature 'registerEditor(QVariant::Type,QItemEditorCreatorBase*)' for function modification in 'QItemEditorFactory' not found. Possible candidates: registerEditor(int,QItemEditorCreatorBase*) in QItemEditorFactory
+    signature 'getText(QWidget*,QString,QString,QLineEdit::EchoMode,QString,bool*,QFlags<Qt::WindowType>)' for function modification in 'QInputDialog' not found. Possible candidates: getText(QWidget*,QString,QString,QLineEdit::EchoMode,QString,bool*,QFlags<Qt::WindowType>,QFlags<Qt::InputMethodHint>) in QInputDialog
+    signature 'getInteger(QWidget*,QString,QString,int,int,int,int,bool*,QFlags<Qt::WindowType>)' for function modification in 'QInputDialog' not found. Possible candidates: 
+    signature 'getColor(QColor,QWidget*)' for function modification in 'QColorDialog' not found. Possible candidates: getColor(QColor,QWidget*,QString,QFlags<QColorDialog::ColorDialogOption>) in QColorDialog
+    signature 'exec(QList<QAction*>,QPoint,QAction*)' for function modification in 'QMenu' not found. Possible candidates: exec() in QMenu, exec(QList<QAction*>,QPoint,QAction*,QWidget*) in QMenu, exec(QPoint,QAction*) in QMenu
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'bool *' in function 'QInputDialog::getMultiLineText(QWidget * parent, const QString & title, const QString & label, const QString & text, bool * ok, QFlags<Qt::WindowType> flags, QFlags<Qt::InputMethodHint> inputMethodHints)'.
+    signature 'windowActivationChange(bool)' for function modification in 'QWidget' not found. Possible candidates: 
+    signature 'setShown(bool)' for function modification in 'QWidget' not found. Possible candidates: 
+    signature 'getFont(bool*,QFont,QWidget*)' for function modification in 'QFontDialog' not found. Possible candidates: getFont(bool*,QWidget*) in QFontDialog, getFont(bool*,QFont,QWidget*,QString,QFlags<QFontDialog::FontDialogOption>) in QFontDialog
+    signature 'isHeaderVisible()const' for function modification in 'QCalendarWidget' not found. Possible candidates: 
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'QString *' in function 'QFileDialog::getSaveFileUrl(QWidget * parent, const QString & caption, const QUrl & dir, const QString & filter, QString * selectedFilter, QFlags<QFileDialog::Option> options, const QStringList & supportedSchemes)'.
+    signature 'paletteChange(QPalette)' for function modification in 'QWidget' not found. Possible candidates: 
+    signature 'fontChange(QFont)' for function modification in 'QWidget' not found. Possible candidates: 
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'QString *' in function 'QFileDialog::getOpenFileUrl(QWidget * parent, const QString & caption, const QUrl & dir, const QString & filter, QString * selectedFilter, QFlags<QFileDialog::Option> options, const QStringList & supportedSchemes)'.
+    signature 'winId()const' for function modification in 'QWidget' not found. Possible candidates: 
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'bool *' in function 'QInputDialog::getItem(QWidget * parent, const QString & title, const QString & label, const QStringList & items, int current, bool editable, bool * ok, QFlags<Qt::WindowType> flags, QFlags<Qt::InputMethodHint> inputMethodHints)'.
+    signature 'getItemPosition(int,int*,int*,int*,int*)' for function modification in 'QGridLayout' not found. Possible candidates: getItemPosition(int,int*,int*,int*,int*)const in QGridLayout
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'long *' in function 'QWidget::nativeEvent(const QByteArray & eventType, void * message, long * result)'.
+    signature 'addButton(QAbstractButton*)' for function modification in 'QButtonGroup' not found. Possible candidates: addButton(QAbstractButton*,int) in QButtonGroup
+    signature 'layoutSpacingImplementation(QSizePolicy::ControlType,QSizePolicy::ControlType,Qt::Orientation,const QStyleOption*,const QWidget*)const' for function modification in 'QStyle' not found. Possible candidates: 
+    signature 'print(QPrinter*)const' for function modification in 'QTextEdit' not found. Possible candidates: print(QPagedPaintDevice*)const in QTextEdit
+    signature 'setInputContext(QInputContext*)' for function modification in 'QWidget' not found. Possible candidates: 
+    signature 'standardIconImplementation(QStyle::StandardPixmap,const QStyleOption*,const QWidget*)const' for function modification in 'QStyle' not found. Possible candidates: 
+    signature 'getItem(QWidget*,QString,QString,QStringList,int,bool,bool*,QFlags<Qt::WindowType>)' for function modification in 'QInputDialog' not found. Possible candidates: getItem(QWidget*,QString,QString,QStringList,int,bool,bool*,QFlags<Qt::WindowType>,QFlags<Qt::InputMethodHint>) in QInputDialog
+    signature 'print(QPrinter*)const' for function modification in 'QPlainTextEdit' not found. Possible candidates: print(QPagedPaintDevice*)const in QPlainTextEdit
+    signature 'getFont(bool*,QFont,QWidget*,QString)' for function modification in 'QFontDialog' not found. Possible candidates: getFont(bool*,QWidget*) in QFontDialog, getFont(bool*,QFont,QWidget*,QString,QFlags<QFontDialog::FontDialogOption>) in QFontDialog
+    signature 'enabledChange(bool)' for function modification in 'QWidget' not found. Possible candidates: 
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'QString *' in function 'QFileDialog::getOpenFileUrls(QWidget * parent, const QString & caption, const QUrl & dir, const QString & filter, QString * selectedFilter, QFlags<QFileDialog::Option> options, const QStringList & supportedSchemes)'.
+    signature 'setHeaderVisible(bool)' for function modification in 'QCalendarWidget' not found. Possible candidates: 
+    signature 'standardIconImplementation(QStyle::StandardPixmap,const QStyleOption*,const QWidget*)const' for function modification in 'QCommonStyle' not found. Possible candidates: 
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'bool *' in function 'QInputDialog::getText(QWidget * parent, const QString & title, const QString & label, QLineEdit::EchoMode echo, const QString & text, bool * ok, QFlags<Qt::WindowType> flags, QFlags<Qt::InputMethodHint> inputMethodHints)'.
+    
+
+Done, 114 warnings (1048 known issues)
