@@ -244,11 +244,8 @@
         <define-ownership class="target" owner="default"/>
       </modify-argument>
     </modify-function>
+  </object-type>
 
-  </object-type>
-  <object-type name="QPaintDevice">
-      <enum-type name="PaintDeviceMetric"/>
-  </object-type>
   <object-type name="QGraphicsItem">
     <enum-type name="CacheMode"/>
     <enum-type name="Extension"/>
@@ -474,24 +471,6 @@
     <enum-type name="SliderAction"/>
     <enum-type name="SliderChange"/>
   </object-type>
-  <object-type name="QAbstractTextDocumentLayout">
-    <value-type name="PaintContext" >
-      <include file-name="QAbstractTextDocumentLayout" location="global"/>
-    </value-type>
-    <value-type name="Selection" />
-    <modify-function signature="setPaintDevice(QPaintDevice*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="draw(QPainter*,QAbstractTextDocumentLayout::PaintContext)">
-      <modify-argument index="1" invalidate-after-use="yes"/>
-    </modify-function>
-    <modify-function signature="drawInlineObject(QPainter*,QRectF,QTextInlineObject,int,QTextFormat)">
-      <modify-argument index="1" invalidate-after-use="yes"/>
-    </modify-function>
-  </object-type>
-  <object-type name="QPyTextObject" />
   <object-type name="QActionGroup">
     <modify-function signature="addAction(QAction*)">
       <modify-argument index="1">
@@ -586,9 +565,6 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-  </object-type>
-  <object-type name="QDoubleValidator">
-      <enum-type name="Notation"/>
   </object-type>
   <object-type name="QFileIconProvider">
       <enum-type name="IconType"/>
@@ -707,37 +683,7 @@
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
   </object-type>
-  <object-type name="QIconEngine">
-    <modify-function signature="paint(QPainter*,QRect,QIcon::Mode,QIcon::State)">
-      <modify-argument index="1" invalidate-after-use="yes"/>
-    </modify-function>
-  </object-type>
-  <object-type name="QIconEngineV2">
-    <enum-type name="IconEngineHook"/>
-    <modify-function signature="read(QDataStream&amp;)">
-      <modify-argument index="1" invalidate-after-use="yes"/>
-    </modify-function>
-    <modify-function signature="write(QDataStream&amp;)const">
-      <modify-argument index="1" invalidate-after-use="yes"/>
-    </modify-function>
-    <!-- ### This makes little sense in Python. Could be reassessed later. -->
-    <modify-function signature="virtual_hook(int,void*)" remove="all"/>
-  </object-type>
-  <object-type name="QImageWriter">
-    <enum-type name="ImageWriterError"/>
-    <modify-function signature="setDevice(QIODevice*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="write(const QImage&amp;)" allow-thread="yes"/>
-    <!--### Obsolete in 4.3-->
-    <modify-function signature="description()const" remove="all"/>
-    <modify-function signature="setDescription(QString)" remove="all"/>
-    <!--### End of obsolete section -->
-  </object-type>
   <object-type name="QInputContextFactory"/>
-  <object-type name="QIntValidator" />
   <object-type name="QItemDelegate">
     <!-- ### "doLayout(...)" is an internal method. -->
     <modify-function signature="doLayout(QStyleOptionViewItem,QRect*,QRect*,QRect*,bool)const" remove="all" />
@@ -791,9 +737,6 @@
         _defaultValue = %PYARG_1;
       </inject-code>
     </modify-function>
-  </object-type>
-  <object-type name="QItemSelectionModel">
-      <enum-type name="SelectionFlag" flags="SelectionFlags"/>
   </object-type>
   <object-type name="QListView">
       <enum-type name="Flow"/>
@@ -1080,42 +1023,10 @@
     <modify-function signature="standardPixmap(QStyle::StandardPixmap, const QStyleOption*, const QWidget*)const" remove="all"/>
     <modify-function signature="standardIconImplementation(QStyle::StandardPixmap, const QStyleOption *, const QWidget *)const" virtual-slot="yes"/>
   </object-type>
-  <object-type name="QPainterPathStroker" copyable="false"/>
-  <object-type name="QPictureIO">
-    <modify-function signature="setIODevice(QIODevice*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-  </object-type>
-  <object-type name="QPixmapCache">
-    <value-type name="Key"/>
-    <add-function signature="find(QPixmapCache::Key&amp;)">
-        <inject-code>
-            QPixmap p;
-            if (%CPPSELF.%FUNCTION_NAME(%1, &amp;p)) {
-                %PYARG_0 = %CONVERTTOPYTHON[QPixmap](p);
-            } else {
-                %PYARG_0 = Py_None;
-                Py_INCREF(%PYARG_0);
-            }
-        </inject-code>
-    </add-function>
-    <!-- ### Obsolete. -->
-    <modify-function signature="find(QString,QPixmap&amp;)" remove="all"/>
-    <!--### End of obsolete section -->
-  </object-type>
-  <object-type name="QPlastiqueStyle">
-    <!--### Obsolete in 4.3-->
-    <modify-function signature="standardPixmap(QStyle::StandardPixmap, const QStyleOption*, const QWidget*)const" remove="all"/>
-    <modify-function signature="standardIconImplementation(QStyle::StandardPixmap, const QStyleOption *, const QWidget *)const" virtual-slot="yes"/>
-    <modify-function signature="layoutSpacingImplementation(QSizePolicy::ControlType, QSizePolicy::ControlType, Qt::Orientation, const QStyleOption *, const QWidget *) const" virtual-slot="yes"/>
-  </object-type>
   <object-type name="QProgressBar">
       <enum-type name="Direction"/>
   </object-type>
   <object-type name="QPushButton" />
-  <object-type name="QRegExpValidator" />
   <object-type name="QScrollArea">
     <modify-function signature="setWidget(QWidget*)">
       <modify-argument index="1">
@@ -1141,98 +1052,6 @@
   </object-type>
   <object-type name="QSound"/>
   <object-type name="QSpacerItem"/>
-  <object-type name="QStandardItem">
-    <enum-type name="ItemType"/>
-    <modify-function signature="operator&lt;(QStandardItem)const">
-      <modify-argument index="1" invalidate-after-use="yes"/>
-    </modify-function>
-    <modify-function signature="read(QDataStream&amp;)">
-      <modify-argument index="1" invalidate-after-use="yes"/>
-    </modify-function>
-    <modify-function signature="write(QDataStream&amp;)const">
-      <modify-argument index="1" invalidate-after-use="yes"/>
-    </modify-function>
-
-    <modify-function signature="appendColumn(const QList&lt;QStandardItem *&gt; &amp;)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="appendRow(const QList&lt;QStandardItem *&gt; &amp;)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="appendRow(QStandardItem *)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="appendRows(const QList&lt;QStandardItem *&gt; &amp;)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="insertColumn(int, const QList&lt;QStandardItem *&gt; &amp;)">
-      <modify-argument index="2">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="insertRow(int, const QList&lt;QStandardItem *&gt; &amp;)">
-      <modify-argument index="2">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="insertRows(int, const QList&lt;QStandardItem *&gt; &amp;)">
-      <modify-argument index="2">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="setChild(int, int, QStandardItem *)">
-      <inject-code class="target" position="beginning">
-        // Clear parent from the old child
-        QStandardItem* _i = %CPPSELF->child(%1, %2);
-        if (_i) {
-            PyObject* _pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
-            Shiboken::Object::setParent(0, _pyI);
-        }
-      </inject-code>
-      <modify-argument index="3">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="setChild(int, QStandardItem *)">
-      <inject-code class="target" position="beginning">
-        // Clear parent from the old child
-        QStandardItem* _i = %CPPSELF->child(%1);
-        if (_i) {
-            PyObject* _pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
-            Shiboken::Object::setParent(0, _pyI);
-        }
-      </inject-code>
-      <modify-argument index="2">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-
-     <modify-function signature="takeChild(int, int)">
-      <modify-argument index="return">
-        <parent index="this" action="remove"/>
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="clone() const">
-      <modify-argument index="return">
-        <define-ownership class="native" owner="c++"/>
-        <define-ownership class="target" owner="target"/>
-      </modify-argument>
-    </modify-function>
-
-    <!-- ??? -->
-    <modify-function signature="operator&lt;(QStandardItem)const" remove="all"/>
-  </object-type>
   <object-type name="QStatusBar">
     <modify-function signature="addWidget(QWidget*, int)">
       <modify-argument index="1">
@@ -1255,7 +1074,6 @@
       </modify-argument>
     </modify-function>
   </object-type>
-  <object-type name="QStringListModel"/>
   <object-type name="QStyleFactory">
     <modify-function signature="create(const QString&amp;)">
       <modify-argument index="return">
@@ -1277,23 +1095,6 @@
       <enum-type name="StyleOptionVersion"/>
   </object-type>
   <object-type name="QStylePainter" />
-  <object-type name="QSyntaxHighlighter">
-    <modify-function signature="setCurrentBlockUserData(QTextBlockUserData*)">
-      <modify-argument index="1">
-        <define-ownership class="target" owner="c++"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="setDocument(QTextDocument*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="document() const">
-      <modify-argument index="this">
-        <parent index="return" action="add"/>
-      </modify-argument>
-    </modify-function>
-  </object-type>
   <object-type name="QTableView">
     <modify-function signature="setHorizontalHeader(QHeaderView*)">
       <modify-argument index="1">
@@ -1307,21 +1108,6 @@
     </modify-function>
     <!--### Obsolete in 4.3-->
     <modify-function signature="sortByColumn(int)" remove="all"/>
-  </object-type>
-  <object-type name="QTextBlockGroup" />
-  <object-type name="QTextBlockUserData" />
-  <object-type name="QTextItem">
-      <enum-type name="RenderFlag" flags="RenderFlags"/>
-  </object-type>
-  <object-type name="QTextList" >
-    <!--### Obsolete in 4.3-->
-    <modify-function signature="isEmpty()const" remove="all"/>
-  </object-type>
-  <object-type name="QTextObject"/>
-  <object-type name="QTextObjectInterface" >
-    <modify-function signature="drawObject(QPainter*,QRectF,QTextDocument*,int,QTextFormat)">
-      <modify-argument index="1" invalidate-after-use="yes"/>
-    </modify-function>
   </object-type>
   <object-type name="QTimeEdit"/>
   <object-type name="QToolBox">
@@ -2944,210 +2730,8 @@
     <enum-type name="SelectionBehavior"/>
     <enum-type name="ButtonPosition"/>
   </object-type>
-  <object-type name="QStandardItemModel" polymorphic-id-expression="qobject_cast&lt;QStandardItemModel*&gt;(%1)">
-    <extra-includes>
-      <include file-name="QStringList" location="global"/>
-      <include file-name="QSize" location="global"/>
-    </extra-includes>
-    <modify-function signature="takeItem(int,int)">
-      <modify-argument index="return">
-        <parent index="this" action="remove" />
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="takeHorizontalHeaderItem(int)">
-      <modify-argument index="return">
-        <parent index="this" action="remove" />
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="takeVerticalHeaderItem(int)">
-      <modify-argument index="return">
-        <parent index="this" action="remove" />
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="verticalHeaderItem(int) const">
-      <modify-argument index="return">
-        <parent index="this" action="add" />
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="horizontalHeaderItem(int) const">
-      <modify-argument index="return">
-        <parent index="this" action="add" />
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="invisibleRootItem() const">
-      <modify-argument index="return">
-        <parent index="this" action="add" />
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="item(int, int) const">
-      <modify-argument index="return">
-        <parent index="this" action="add" />
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="itemFromIndex(const QModelIndex&amp;) const">
-      <modify-argument index="return">
-        <parent index="this" action="add" />
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="itemPrototype() const">
-      <modify-argument index="return">
-        <parent index="this" action="add" />
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="appendRow(const QList&lt;QStandardItem*&gt;&amp;)">
-      <modify-argument index="1">
-        <parent index="this" action="add" />
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="appendRow(QStandardItem*)">
-      <modify-argument index="1">
-        <parent index="this" action="add" />
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="insertRow(int, QStandardItem*)">
-      <modify-argument index="2">
-        <parent index="this" action="add" />
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="setHorizontalHeaderItem(int, QStandardItem*)">
-      <modify-argument index="2">
-        <parent index="this" action="add" />
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="setItem(int, int, QStandardItem*)">
-      <inject-code class="target" position="beginning">
-        // Clear parent from the old child
-        QStandardItem* _i = %CPPSELF->item(%1, %2);
-        if (_i) {
-            PyObject* _pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
-            Shiboken::Object::setParent(0, _pyI);
-        }
-      </inject-code>
-      <modify-argument index="3">
-        <parent index="this" action="add" />
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="setItem(int, QStandardItem*)">
-      <inject-code class="target" position="beginning">
-        // Clear parent from the old child
-        QStandardItem* _i = %CPPSELF->item(%1);
-        if (_i) {
-            PyObject* _pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
-            Shiboken::Object::setParent(0, _pyI);
-        }
-      </inject-code>
-      <modify-argument index="2">
-        <parent index="this" action="add" />
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="setItemPrototype(const QStandardItem*)">
-      <modify-argument index="1">
-        <parent index="this" action="add" />
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="setVerticalHeaderItem(int, QStandardItem*)">
-      <inject-code class="target" position="beginning">
-        // Clear parent from the old child
-        QStandardItem* _i = %CPPSELF->verticalHeaderItem(%1);
-        if (_i) {
-            PyObject* _pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
-            Shiboken::Object::setParent(0, _pyI);
-        }
-      </inject-code>
-      <modify-argument index="2">
-        <parent index="this" action="add" />
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="takeColumn(int)">
-      <modify-argument index="return">
-        <parent index="this" action="remove" />
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="takeRow(int)">
-      <modify-argument index="return">
-        <parent index="this" action="remove" />
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="findItems(const QString&amp;, QFlags&lt;Qt::MatchFlag&gt;, int) const">
-      <modify-argument index="return">
-        <parent index="this" action="add" />
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="insertColumn(int, const QList&lt;QStandardItem*&gt;&amp;)">
-      <modify-argument index="2">
-        <parent index="this" action="add" />
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="insertRow(int, const QList&lt;QStandardItem*&gt;&amp;)">
-      <modify-argument index="2">
-        <parent index="this" action="add" />
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="appendColumn(const QList&lt;QStandardItem*&gt;&amp;)">
-      <modify-argument index="1">
-        <parent index="this" action="add" />
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="clear()">
-        <inject-code class="target" position="beginning">
-          Shiboken::BindingManager&amp; bm = Shiboken::BindingManager::instance();
-          SbkObject* pyRoot = bm.retrieveWrapper(%CPPSELF.invisibleRootItem());
-          if (pyRoot) {
-            Shiboken::Object::destroy(pyRoot, %CPPSELF.invisibleRootItem());
-          }
-
-          for(int r=0, r_max = %CPPSELF.rowCount(); r &lt; r_max; r++) {
-            QList&lt;QStandardItem *&gt; ri = %CPPSELF.takeRow(0);
-
-            PyObject *pyResult = %CONVERTTOPYTHON[QList&lt;QStandardItem * &gt;](ri);
-            Shiboken::Object::setParent(Py_None, pyResult);
-            Py_XDECREF(pyResult);
-          }
-        </inject-code>
-    </modify-function>
-  </object-type>
   <object-type name="QRadioButton" />
   <object-type name="QScrollBar" />
-  <object-type name="QClipboard">
-    <extra-includes>
-      <include file-name="QImage" location="global"/>
-      <include file-name="QPixmap" location="global"/>
-    </extra-includes>
-    <enum-type name="Mode" />
-    <modify-function signature="setMimeData(QMimeData *, QClipboard::Mode)">
-      <modify-argument index="1">
-        <!-- TODO: maybe this is not the best solution -->
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="text(QString&amp;,QClipboard::Mode)const">
-      <modify-argument index="2">
-        <replace-default-expression with="QClipboard::Clipboard"/>
-      </modify-argument>
-      <modify-argument index="return">
-        <replace-type modified-type="(retval, subtype)"/>
-      </modify-argument>
-      <inject-code class="target" position="end">
-      %BEGIN_ALLOW_THREADS
-      %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2);
-      %END_ALLOW_THREADS
-      %PYARG_0 = PyTuple_New(2);
-      PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
-      PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
-      </inject-code>
-    </modify-function>
-  </object-type>
   <object-type name="QAbstractScrollArea">
     <modify-function signature="setViewport(QWidget *)">
       <modify-argument index="1">
@@ -3187,11 +2771,6 @@
     <modify-function signature="viewportEvent(QEvent*)">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
-  </object-type>
-  <object-type name="QPaintEngineState">
-    <extra-includes>
-      <include file-name="QPainterPath" location="global"/>
-    </extra-includes>
   </object-type>
   <object-type name="QRubberBand">
     <enum-type name="Shape"/>
@@ -3259,38 +2838,6 @@
     <modify-function signature="setItemSelected(const QTableWidgetItem*,bool)" remove="all"/>
     <modify-function signature="isItemSelected(const QTableWidgetItem*)const" remove="all"/>
     <!-- ### -->
-  </object-type>
-  <object-type name="QTextDocument">
-    <extra-includes>
-      <include file-name="QTextBlock" location="global"/>
-      <include file-name="QTextFormat" location="global"/>
-      <include file-name="QTextCursor" location="global"/>
-    </extra-includes>
-    <enum-type name="FindFlag" flags="FindFlags"/>
-    <enum-type name="MetaInformation"/>
-    <enum-type name="ResourceType"/>
-    <enum-type name="Stacks" since="4.7"/>
-    <modify-function signature="setDocumentLayout(QAbstractTextDocumentLayout*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="object(int)const">
-      <modify-argument index="return">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="objectForFormat(const QTextFormat&amp;)const">
-      <modify-argument index="return">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="createObject(const QTextFormat&amp;)">
-      <modify-argument index="return">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="print(QPrinter*)const" rename="print_" />
   </object-type>
   <object-type name="QSplitter">
     <modify-function signature="getRange(int,int*,int*)const">
@@ -3405,28 +2952,11 @@
       </modify-argument>
     </modify-function>
   </object-type>
-  <object-type name="QAbstractProxyModel" polymorphic-id-expression="qobject_cast&lt;QAbstractProxyModel*&gt;(%1)">
-    <extra-includes>
-      <include file-name="QItemSelection" location="global"/>
-      <include file-name="QStringList" location="global"/>
-      <include file-name="QSize" location="global"/>
-    </extra-includes>
-    <modify-function signature="setSourceModel(QAbstractItemModel *)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-  </object-type>
   <object-type name="QDesktopWidget"/>
   <object-type name="QFrame">
       <enum-type name="Shadow" extensible="yes"/>
       <enum-type name="Shape"/>
       <enum-type name="StyleMask"/>
-  </object-type>
-  <object-type name="QTextTable">
-    <extra-includes>
-      <include file-name="QTextCursor" location="global"/>
-    </extra-includes>
   </object-type>
   <object-type name="QSpinBox">
       <modify-function signature="valueChanged(int)">
@@ -4256,4 +3786,3 @@
   <suppress-warning text="enum 'QCoreApplication::ApplicationFlags' is specified in typesystem, but not declared" />
 
 </typesystem>
-

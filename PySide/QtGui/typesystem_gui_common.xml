@@ -56,8 +56,7 @@
   <rejection class="*" function-name="qobject_interface_iid&lt;QGraphicsLayout*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QAccessibleBridgeFactoryInterface*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QImageIOHandlerFactoryInterface*&gt;"/>
-  <rejection class="*" function-name="qobject_interface_iid&lt;QIconEngineFactoryInterfaceV2*&gt;"/>
-  <rejection class="*" function-name="qobject_interface_iid&lt;QAccessibleInterface*&gt;"/>
+   <rejection class="*" function-name="qobject_interface_iid&lt;QAccessibleInterface*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QTextObjectInterface*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QGraphicsLayoutItem*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QIconEngineFactoryInterface*&gt;"/>
@@ -1639,6 +1638,10 @@
   <object-type name="QTextBlockUserData" />
   <object-type name="QTextItem">
       <enum-type name="RenderFlag" flags="RenderFlags"/>
+  </object-type>
+  <object-type name="QTextList" >
+    <!--### Obsolete in 4.3-->
+    <modify-function signature="isEmpty()const" remove="all"/>
   </object-type>
   <object-type name="QTextObject"/>
   <object-type name="QTextObjectInterface" >
