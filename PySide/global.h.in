@@ -365,6 +365,7 @@ QT_END_NAMESPACE
   #include <QtGui/qmacstyle_mac.h>
 #endif
 #include <QtXml/QtXml>
+#include <QtXmlPatterns/QtXmlPatterns>
 #include <QtUiTools/QtUiTools>
 #include <QtNetwork/QtNetwork>
 #include <QtScript/QtScript>

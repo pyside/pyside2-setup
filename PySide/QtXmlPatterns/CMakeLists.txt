@@ -26,10 +26,17 @@ set(QtXmlPatterns_SRC
     ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns/qxmlserializer_wrapper.cpp
     ${QtXmlPatterns_46_SRC}
 )
-set(QtXmlPatterns_typesystem_path "${QtCore_SOURCE_DIR}${PATH_SEP}${QtCore_BINARY_DIR}")
+
+# fake these variables for qt5
+set(QtXmlPatterns_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(QtXmlPatterns_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns)
+
+make_path(QtXmlPatterns_typesystem_path ${QtCore_SOURCE_DIR} ${QtCore_BINARY_DIR}
+                                        ${QtXmlPatterns_SOURCE_DIR})
+
 set(QtXmlPatterns_include_dirs  ${CMAKE_CURRENT_SOURCE_DIR}
-                                ${QT_QTCORE_INCLUDE_DIR}
-                                ${QT_QTXMLPATTERNS_INCLUDE_DIR}
+                                ${Qt5Core_INCLUDE_DIRS}
+                                ${Qt5XmlPatterns_INCLUDE_DIRS}
                                 ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                                 ${SHIBOKEN_INCLUDE_DIR}
                                 ${libpyside_SOURCE_DIR}
@@ -37,8 +44,8 @@ set(QtXmlPatterns_include_dirs  ${CMAKE_CURRENT_SOURCE_DIR}
                                 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns)
 set(QtXmlPatterns_libraries     pyside
                                 ${SHIBOKEN_PYTHON_LIBRARIES}
-                                ${QT_QTCORE_LIBRARY}
-                                ${QT_QTXMLPATTERNS_LIBRARY})
+                                ${Qt5Core_LIBRARIES}
+                                ${Qt5XmlPatterns_LIBRARY})
 set(QtXmlPatterns_deps QtCore)
 create_pyside_module(QtXmlPatterns
                      QtXmlPatterns_include_dirs

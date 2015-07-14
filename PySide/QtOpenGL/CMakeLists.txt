@@ -32,11 +32,18 @@ set(QtOpenGL_SRC
     ${QtOpenGL_47_SRC}
 )
 
-set(QtOpenGL_typesystem_path "${QtCore_SOURCE_DIR}${PATH_SEP}${QtCore_BINARY_DIR}${PATH_SEP}${QtGui_SOURCE_DIR}${PATH_SEP}${QtOpenGL_SOURCE_DIR}${PATH_SEP}${QtGui_BINARY_DIR}")
+# fake these variables for qt5
+set(QtOpenGL_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(QtOpenGL_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtOpenGL)
+
+make_path(QtOpenGL_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR}
+                                   ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR}
+                                   ${QtWebKit_SOURCE_DIR})
+
 set(QtOpenGL_include_dirs   ${CMAKE_CURRENT_SOURCE_DIR}
-                            ${QT_QTCORE_INCLUDE_DIR}
-                            ${QT_QTGUI_INCLUDE_DIR}
-                            ${QT_QTOPENGL_INCLUDE_DIR}
+                            ${Qt5Core_INCLUDE_DIRS}
+                            ${Qt5Gui_INCLUDE_DIRS}
+                            ${Qt5OpenGL_INCLUDE_DIRS}
                             ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                             ${SHIBOKEN_INCLUDE_DIR}
                             ${libpyside_SOURCE_DIR}
@@ -45,9 +52,9 @@ set(QtOpenGL_include_dirs   ${CMAKE_CURRENT_SOURCE_DIR}
                             ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtOpenGL)
 set(QtOpenGL_libraries      pyside
                             ${SHIBOKEN_PYTHON_LIBRARIES}
-                            ${QT_QTCORE_LIBRARY}
-                            ${QT_QTGUI_LIBRARY}
-                            ${QT_QTOPENGL_LIBRARY})
+                            ${Qt5Core_LIBRARIES}
+                            ${Qt5Gui_LIBRARIES}
+                            ${Qt5OpenGL_LIBRARIES})
 set(QtOpenGL_deps QtGui)
 create_pyside_module(QtOpenGL
                     QtOpenGL_include_dirs
