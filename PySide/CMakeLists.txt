@@ -26,11 +26,17 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_utils.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/_utils.py" @ONLY)
 
-macro(CHECK_VAR name)
-    if(${name})
+macro(MAKE_PATH varname)
+   # accepts any number of path variables
+   string(REPLACE ";" "${PATH_SEP}" ${varname} "${ARGN}")
+endmacro()
+
+macro(CHECK_PACKAGE_FOUND name)
+    set(_name_found "${name}_FOUND")
+    if(${_name_found})
         message("module ${name} found")
     else()
-        message(FATAL_ERROR "${name} MISSING")
+        message(FATAL_ERROR "module ${name} MISSING")
     endif()
 endmacro()
 

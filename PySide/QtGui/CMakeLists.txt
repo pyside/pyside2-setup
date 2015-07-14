@@ -202,7 +202,8 @@ set(SHIBOKEN_BINARY "${CMAKE_CURRENT_BINARY_DIR}/fake_shiboken.sh")
 set(QtGui_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(QtGui_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui)
 
-set(QtGui_typesystem_path "${QtCore_SOURCE_DIR}${PATH_SEP}${QtCore_BINARY_DIR}${PATH_SEP}${QtGui_SOURCE_DIR}")
+make_path(QtGui_typesystem_path ${QtCore_SOURCE_DIR} ${QtCore_BINARY_DIR}
+                                ${QtGui_SOURCE_DIR})
 
 set(QtGui_include_dirs  ${CMAKE_CURRENT_SOURCE_DIR}
                         ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/

@@ -182,7 +182,7 @@ set(SHIBOKEN_BINARY "${CMAKE_CURRENT_BINARY_DIR}/fake_shiboken.sh")
 set(QtCore_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(QtCore_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore)
 
-set(QtCore_typesystem_path "${QtCore_SOURCE_DIR}")
+make_path(QtCore_typesystem_path ${QtCore_SOURCE_DIR})
 
 set(QtCore_include_dirs ${CMAKE_CURRENT_SOURCE_DIR}
                         ${CMAKE_CURRENT_BINARY_DIR}/${BINDING_NAME}/QtCore/

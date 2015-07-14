@@ -25,7 +25,10 @@ set(QtSql_SRC
 set(QtSql_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(QtSql_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtSql)
 
-set(QtSql_typesystem_path "${QtCore_SOURCE_DIR}${PATH_SEP}${QtCore_BINARY_DIR}${PATH_SEP}${QtGui_SOURCE_DIR}${PATH_SEP}${QtGui_BINARY_DIR}${PATH_SEP}${QtWidgets_SOURCE_DIR}${PATH_SEP}${QtWidgets_BINARY_DIR}${PATH_SEP}${QtSql_SOURCE_DIR}")
+make_path(QtSql_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
+                                ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR}
+                                ${QtSql_SOURCE_DIR})
+
 set(QtSql_include_dirs  ${CMAKE_CURRENT_SOURCE_DIR}
                         ${Qt5Core_INCLUDE_DIRS}
                         ${Qt5Gui_INCLUDE_DIRS}

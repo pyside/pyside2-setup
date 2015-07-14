@@ -8,7 +8,14 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtSvg/qsvgwidget_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtSvg/qtsvg_module_wrapper.cpp
 )
 
-set(QtSvg_typesystem_path "${QtCore_SOURCE_DIR}${PATH_SEP}${QtCore_BINARY_DIR}${PATH_SEP}${QtGui_SOURCE_DIR}${PATH_SEP}${QtGui_BINARY_DIR}${QtWidgets_SOURCE_DIR}${PATH_SEP}${QtWidgets_BINARY_DIR}${PATH_SEP}${QtSvg_SOURCE_DIR}")
+# fake these variables for qt5
+set(QtSvg_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(QtSvg_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtSvg)
+
+make_path(QtSvg_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
+                                ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR}
+                                ${QtSvg_SOURCE_DIR})
+
 set(QtSvg_include_dirs  ${CMAKE_CURRENT_SOURCE_DIR}
                         ${Qt5Core_INCLUDE_DIRS}
                         ${Qt5Gui_INCLUDE_DIRS}
