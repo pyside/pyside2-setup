@@ -40,10 +40,11 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qfontinfo_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qfontmetrics_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qfontmetricsf_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qgradient_wrapper.cpp
+### 'QStyle' file not found ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qguiapplication_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qhelpevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qhideevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qhoverevent_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qicon_wrapper.cpp
+### 'QStyle' file not found ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qicon_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qicondragevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qiconengine_availablesizesargument_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qiconengine_wrapper.cpp
@@ -124,6 +125,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextlayout_formatrange_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextlayout_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextlength_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextline_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextlist_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextlistformat_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextobject_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtextobjectinterface_wrapper.cpp

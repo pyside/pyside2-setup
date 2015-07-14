@@ -56,7 +56,7 @@ HAS_QT_MODULE(Qt5Widgets_FOUND QtWidgets)
 # need to split this HAS_QT_MODULE(Qt5Gui_FOUND QtGui)
 # compiles, skip   HAS_QT_MODULE(Qt5Xml_FOUND QtXml)
 ### generates no classes HAS_QT_MODULE(Qt5XmlPatterns_FOUND QtXmlPatterns)
-HAS_QT_MODULE(Qt5Test_FOUND QtTest)
+# compiles, skip HAS_QT_MODULE(Qt5Test_FOUND QtTest)
 ### depends on QtGui HAS_QT_MODULE(Qt5Svg_FOUND QtSvg)
 
 HAS_QT_MODULE(QT_QTWEBKIT_FOUND QtWebKit)

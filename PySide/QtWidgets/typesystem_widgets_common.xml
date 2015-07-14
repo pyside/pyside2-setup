@@ -3085,7 +3085,7 @@
 
   <!-- qApp macro -->
   <inject-code class="native" position="beginning">
-    PyObject* moduleQtGui;
+    PyObject* moduleQtWidgets;
   </inject-code>
   <inject-code class="target" file="glue/qtwidgets_qapp.cpp" position="end" />
   <object-type name="QApplication">
