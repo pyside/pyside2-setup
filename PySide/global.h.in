@@ -420,7 +420,8 @@ namespace QtPrivate {
 QT_END_NAMESPACE
 
 
-#if @Qt5WebKit_FOUND@
+#if @Qt5Webkit_FOUND@
+// Danger! The macro above has a lower case 'k', the includes are with upper 'K'!
 #  include <QtWebKit/QtWebKit>
 #endif
 
