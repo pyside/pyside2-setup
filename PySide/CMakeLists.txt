@@ -55,8 +55,7 @@ CHECK_PACKAGE_FOUND(Qt5Test)
 CHECK_PACKAGE_FOUND(Qt5Network)
 CHECK_PACKAGE_FOUND(Qt5Webkit)
 # Careful: Qt5Webkit_FOUND but Qt5WebKit_INCLUDE_DIRS
-# XXX fix this and report this!
-### ? CHECK_PACKAGE_FOUND(Qt5OpenGL)
+# XXX fix this in a better way, and report this to Qt!
 
 HAS_QT_MODULE(Qt5Core_FOUND QtCore)
 HAS_QT_MODULE(Qt5Gui_FOUND QtGui)
@@ -69,9 +68,15 @@ HAS_QT_MODULE(Qt5XmlPatterns_FOUND QtXmlPatterns)
 HAS_QT_MODULE(Qt5Test_FOUND QtTest)
 HAS_QT_MODULE(Qt5Webkit_FOUND QtWebKit)
 
-HAS_QT_MODULE(Qt5OpenGL_FOUND QtOpenGL)
+###
+# This module is deprecated! It should be replaces by QtGui.
+# We keep the source code until we are done with QtGui migration.
+# See http://doc.qt.io/qt-5/qtgui-index.html
+# HAS_QT_MODULE(Qt5OpenGL_FOUND QtOpenGL)
+###
+
 if(Qt5Designer_FOUND)
-    ### almost... HAS_QT_MODULE(Qt5UiTools_FOUND QtUiTools)
+    HAS_QT_MODULE(Qt5UiTools_FOUND QtUiTools)
 endif()
 HAS_QT_MODULE(QT_QTHELP_FOUND QtHelp)
 HAS_QT_MODULE(QT_QTSCRIPT_FOUND QtScript)
