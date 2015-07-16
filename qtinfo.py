@@ -33,6 +33,9 @@ class QtInfo(object):
     def getHeadersPath(self):
         return self.getProperty("QT_INSTALL_HEADERS")
 
+    def getDocsPath(self):
+        return self.getProperty("QT_INSTALL_DOCS")
+
     def getProperty(self, prop_name):
         cmd = [self._qmake_path, "-query", prop_name]
         proc = subprocess.Popen(cmd, stdout = subprocess.PIPE, shell=False)
@@ -52,3 +55,4 @@ class QtInfo(object):
     imports_dir = property(getImportsPath)
     translations_dir = property(getTranslationsPath)
     headers_dir = property(getHeadersPath)
+    docs_dir = property(getDocsPath)

@@ -496,6 +496,7 @@ class pyside_build(_build):
         log.info("Qt qmake: %s" % self.qmake_path)
         log.info("Qt version: %s" % qtinfo.version)
         log.info("Qt bins: %s" % qtinfo.bins_dir)
+        log.info("Qt docs: %s" % qtinfo.docs_dir)
         log.info("Qt plugins: %s" % qtinfo.plugins_dir)
         log.info("-" * 3)
         log.info("OpenSSL libs: %s" % OPTION_OPENSSL)
@@ -569,6 +570,7 @@ class pyside_build(_build):
             "-DQT_QMAKE_EXECUTABLE=%s" % self.qmake_path,
             "-DBUILD_TESTS=%s" % self.build_tests,
             "-DDISABLE_DOCSTRINGS=True",
+            "-DQt5Help_DIR=%s" % self.qtinfo.docs_dir,
             "-DCMAKE_BUILD_TYPE=%s" % self.build_type,
             "-DCMAKE_INSTALL_PREFIX=%s" % self.install_dir,
             module_src_dir
@@ -639,6 +641,7 @@ class pyside_build(_build):
             "py_version": self.py_version,
             "qt_version": self.qtinfo.version,
             "qt_bin_dir": self.qtinfo.bins_dir,
+            "qt_doc_dir": self.qtinfo.docs_dir,
             "qt_lib_dir": self.qtinfo.libs_dir,
             "qt_plugins_dir": self.qtinfo.plugins_dir,
             "qt_imports_dir": self.qtinfo.imports_dir,
