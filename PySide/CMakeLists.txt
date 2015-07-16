@@ -90,7 +90,7 @@ HAS_QT_MODULE(Qt5ScriptTools_FOUND QtScriptTools)
 HAS_QT_MODULE(Qt5Declarative_FOUND QtDeclarative)
 HAS_QT_MODULE(Qt5Help_FOUND QtHelp)
 if(0)
-  ### crashes shiboken!
+  ### crashes shiboken, as soon as 'QAbstractVideoBuffer' is touched!
   HAS_QT_MODULE(Qt5Multimedia_FOUND QtMultimedia)
 endif()
 
