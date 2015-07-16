@@ -15,11 +15,13 @@ set(QtHelp_SRC
     ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtHelp/qthelp_module_wrapper.cpp
 )
 
-set(QtHelp_typesystem_path "${QtCore_SOURCE_DIR}${PATH_SEP}${QtCore_BINARY_DIR}${PATH_SEP}${QtGui_SOURCE_DIR}${PATH_SEP}${QtHelp_SOURCE_DIR}${PATH_SEP}${QtGui_BINARY_DIR}")
+make_path(QtHelp_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
+                                 ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR}
+                                 ${QtHelp_SOURCE_DIR}${PATH_SEP})
 set(QtHelp_include_dirs ${CMAKE_CURRENT_SOURCE_DIR}
-                        ${QT_QTCORE_INCLUDE_DIR}
-                        ${QT_QTGUI_INCLUDE_DIR}
-                        ${QT_QTHELP_INCLUDE_DIR}
+                        ${Qt5Core_INCLUDE_DIRS}
+                        ${Qt5Gui_INCLUDE_DIRS}
+                        ${Qt5Help_INCLUDE_DIRS}
                         ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                         ${SHIBOKEN_INCLUDE_DIR}
                         ${libpyside_SOURCE_DIR}
@@ -28,10 +30,10 @@ set(QtHelp_include_dirs ${CMAKE_CURRENT_SOURCE_DIR}
                         ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtHelp)
 set(QtHelp_libraries  pyside
                       ${SHIBOKEN_PYTHON_LIBRARIES}
-                      ${QT_QTCORE_LIBRARY}
-                      ${QT_QTGUI_LIBRARY}
-                      ${QT_QTHELP_LIBRARY})
-set(QtHelp_deps QtGui)
+                      ${Qt5Core_LIBRARIes}
+                      ${Qt5Gui_LIBRARIES}
+                      ${Qt5Help_LIBRARIES})
+set(QtHelp_deps QtWidgets)
 
 create_pyside_module(QtHelp
                      QtHelp_include_dirs

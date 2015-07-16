@@ -25,11 +25,12 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtScript/qscriptvalueiterator_wrapper.cpp
 ${QtScript_47_SRC}
 )
 
-set(QtScript_typesystem_path "${QtCore_SOURCE_DIR}${PATH_SEP}${QtCore_BINARY_DIR}")
+make_path(QtScript_typesystem_path ${QtCore_SOURCE_DIR} ${QtCore_BINARY_DIR})
+
 set(QtScript_include_dirs   ${CMAKE_CURRENT_SOURCE_DIR}
                             ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtScript
-                            ${QT_INCLUDE_DIR}
-                            ${QT_QTSCRIPT_INCLUDE_DIR}
+                            ${Qt5Core_INCLUDE_DIRS}
+                            ${Qt5Script_INCLUDE_DIRS}
                             ${SHIBOKEN_INCLUDE_DIR}
                             ${libpyside_SOURCE_DIR}
                             ${SHIBOKEN_PYTHON_INCLUDE_DIR}
@@ -37,8 +38,8 @@ set(QtScript_include_dirs   ${CMAKE_CURRENT_SOURCE_DIR}
 set(QtScript_libraries      pyside
                             ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${SHIBOKEN_LIBRARY}
-                            ${QT_QTCORE_LIBRARY}
-                            ${QT_QTSCRIPT_LIBRARY})
+                            ${Qt5Core_LIBRARIES}
+                            ${Qt5Script_LIBRARIES})
 set(QtScript_deps QtCore)
 create_pyside_module(QtScript
                      QtScript_include_dirs

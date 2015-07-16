@@ -5,13 +5,18 @@ set(QtUiTools_SRC
     ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtUiTools/quiloader_wrapper.cpp
 )
 
-set(QtUiTools_typesystem_path "${QtCore_SOURCE_DIR}${PATH_SEP}${QtCore_BINARY_DIR}${PATH_SEP}${QtGui_SOURCE_DIR}${PATH_SEP}${QtXml_SOURCE_DIR}${PATH_SEP}${QtUiTools_SOURCE_DIR}${PATH_SEP}${QtGui_BINARY_DIR}")
+make_path(QtUiTools_typesystem_path 
+    ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR} ${QtXml_SOURCE_DIR}
+    ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR} ${QtXml_BINARY_DIR}
+    ${QtUiTools_SOURCE_DIR})
+
 set(QtUiTools_include_dirs  ${CMAKE_CURRENT_SOURCE_DIR}
-                            ${QT_QTCORE_INCLUDE_DIR}
-                            ${QT_QTGUI_INCLUDE_DIR}
-                            ${QT_QTXML_INCLUDE_DIR}
-                            ${QT_QTDESIGNER_INCLUDE_DIR}
-                            ${QT_QTUITOOLS_INCLUDE_DIR}
+                            ${Qt5Core_INCLUDE_DIRS}
+                            ${Qt5Gui_INCLUDE_DIRS}
+                            ${Qt5Widgets_INCLUDE_DIRS}
+                            ${Qt5Xml_INCLUDE_DIRS}
+                            ${Qt5Designer_INCLUDE_DIRS}
+                            ${Qt5UiTools_INCLUDE_DIRS}
                             ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                             ${SHIBOKEN_INCLUDE_DIR}
                             ${libpyside_SOURCE_DIR}
@@ -19,14 +24,16 @@ set(QtUiTools_include_dirs  ${CMAKE_CURRENT_SOURCE_DIR}
                             ${QtCore_BINARY_DIR}/PySide/QtCore/
                             ${QtXml_BINARY_DIR}/PySide/QtXml/
                             ${QtGui_BINARY_DIR}/PySide/QtGui/
+                            ${QtWidgets_BINARY_DIR}/PySide/QtWidgets/
                             ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtUiTools)
 set(QtUiTools_libraries     pyside
                             uiplugin
                             ${SHIBOKEN_PYTHON_LIBRARIES}
-                            ${QT_QTUITOOLS_LIBRARY}
-                            ${QT_QTDESIGNER_LIBRARY}
-                            ${QT_QTCORE_LIBRARY}
-                            ${QT_QTGUI_LIBRARY})
+                            ${Qt5UiTools_LIBRARIES}
+                            ${Qt5Core_LIBRARIES}
+                            ${Qt5Gui_LIBRARIES}
+                            ${Qt5Widgets_LIBRARIES}
+                            )
 set(QtUiTools_deps QtGui QtXml)
 create_pyside_module(QtUiTools
                      QtUiTools_include_dirs

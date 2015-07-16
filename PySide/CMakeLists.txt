@@ -16,6 +16,10 @@ find_package(Qt5Test)
 find_package(Qt5Network)
 find_package(Qt5Webkit)
 find_package(Qt5OpenGL)
+find_package(Qt5Script)
+find_package(Qt5ScriptTools)
+find_package(Qt5Help)
+find_package(Qt5Declarative)
 
 # Configure include based on platform
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/global.h.in"
@@ -56,6 +60,10 @@ CHECK_PACKAGE_FOUND(Qt5Network)
 CHECK_PACKAGE_FOUND(Qt5Webkit)
 # Careful: Qt5Webkit_FOUND but Qt5WebKit_INCLUDE_DIRS
 # XXX fix this in a better way, and report this to Qt!
+CHECK_PACKAGE_FOUND(Qt5Script)
+### ??? CHECK_PACKAGE_FOUND(Qt5ScriptTools)
+### ??? CHECK_PACKAGE_FOUND(Qt5Help)
+set(Qt5Help_FOUND 1)
 
 HAS_QT_MODULE(Qt5Core_FOUND QtCore)
 HAS_QT_MODULE(Qt5Gui_FOUND QtGui)
@@ -78,11 +86,12 @@ HAS_QT_MODULE(Qt5Webkit_FOUND QtWebKit)
 if(Qt5Designer_FOUND)
     HAS_QT_MODULE(Qt5UiTools_FOUND QtUiTools)
 endif()
-HAS_QT_MODULE(QT_QTHELP_FOUND QtHelp)
-HAS_QT_MODULE(QT_QTSCRIPT_FOUND QtScript)
-HAS_QT_MODULE(QT_QTSCRIPTTOOLS_FOUND QtScriptTools)
+### ??? HAS_QT_MODULE(Qt5Help_FOUND QtHelp)
+HAS_QT_MODULE(Qt5Script_FOUND QtScript)
+HAS_QT_MODULE(Qt5ScriptTools_FOUND QtScriptTools)
 HAS_QT_MODULE(QT_QTMULTIMEDIA_FOUND QtMultimedia)
-HAS_QT_MODULE(QT_QTDECLARATIVE_FOUND QtDeclarative)
+HAS_QT_MODULE(Qt5Declarative_FOUND QtDeclarative)
+HAS_QT_MODULE(Qt5Help_FOUND QtHelp)
 
 # install
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/__init__.py"

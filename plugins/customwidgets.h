@@ -30,6 +30,13 @@
 #include <QtPlugin>
 #include <QDesignerCustomWidgetInterface>
 
+// Qt5: no idea why this definition is not found automatically! It should come
+// from <QDesignerCustomWidgetInterface> which resolves to Qt5's customwidget.h
+#ifdef Q_MOC_RUN
+Q_DECLARE_INTERFACE(QDesignerCustomWidgetCollectionInterface, 
+                    "org.qt-project.Qt.QDesignerCustomWidgetCollectionInterface")
+#endif
+
 struct PyCustomWidgetsPrivate;
 
 class PyCustomWidgets: public QObject, public QDesignerCustomWidgetCollectionInterface

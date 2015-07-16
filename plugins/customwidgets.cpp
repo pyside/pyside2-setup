@@ -25,6 +25,18 @@
 
 #include <shiboken.h>
 
+/************
+ * not sure what I'm doing here; taken from
+ * https://github.com/Vitallium/qt5/blob/master/qtbase/src/tools/moc/generator.cpp
+ */
+static const unsigned char qt_pluginMetaData[] = {
+          'Q', 'T', 'M', 'E', 'T', 'A', 'D', 'A', 'T', 'A', ' ', ' '} ;
+/*
+ * This worked to silence complaints at the bottom, concerning
+ * QT_MOC_EXPORT_PLUGIN
+ * Note: I got crazy recursion when using '#include <QtPlugin>'
+ ***********/
+
 struct PyCustomWidgetPrivate
 {
     PyObject* pyObject;
@@ -65,4 +77,4 @@ QList<QDesignerCustomWidgetInterface*> PyCustomWidgets::customWidgets() const
     return m_data->widgets;
 }
 
-Q_EXPORT_STATIC_PLUGIN2(uiplugin, PyCustomWidgets)
+QT_MOC_EXPORT_PLUGIN(PyCustomWidgets, PyCustomWidgets)

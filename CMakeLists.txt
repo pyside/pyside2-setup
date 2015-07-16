@@ -166,7 +166,9 @@ else()
 endif()
 
 add_subdirectory(libpyside)
-if(QT_QTUITOOLS_FOUND AND QT_QTDESIGNER_FOUND)
+find_package(Qt5Designer)
+find_package(Qt5UiTools)
+if(Qt5UiTools_FOUND AND Qt5Designer_FOUND)
     add_subdirectory(plugins)
 endif()
 # project directories
