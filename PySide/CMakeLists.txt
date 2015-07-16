@@ -20,6 +20,7 @@ find_package(Qt5Script)
 find_package(Qt5ScriptTools)
 find_package(Qt5Help)
 find_package(Qt5Declarative)
+find_package(Qt5Multimedia)
 
 # Configure include based on platform
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/global.h.in"
@@ -59,8 +60,9 @@ CHECK_PACKAGE_FOUND(Qt5Test)
 CHECK_PACKAGE_FOUND(Qt5Network)
 CHECK_PACKAGE_FOUND(Qt5WebKit)
 CHECK_PACKAGE_FOUND(Qt5Script)
-### ??? CHECK_PACKAGE_FOUND(Qt5ScriptTools)
+CHECK_PACKAGE_FOUND(Qt5ScriptTools)
 CHECK_PACKAGE_FOUND(Qt5Help)
+CHECK_PACKAGE_FOUND(Qt5Multimedia)
 
 HAS_QT_MODULE(Qt5Core_FOUND QtCore)
 HAS_QT_MODULE(Qt5Gui_FOUND QtGui)
@@ -85,9 +87,12 @@ if(Qt5Designer_FOUND)
 endif()
 HAS_QT_MODULE(Qt5Script_FOUND QtScript)
 HAS_QT_MODULE(Qt5ScriptTools_FOUND QtScriptTools)
-HAS_QT_MODULE(QT_QTMULTIMEDIA_FOUND QtMultimedia)
 HAS_QT_MODULE(Qt5Declarative_FOUND QtDeclarative)
 HAS_QT_MODULE(Qt5Help_FOUND QtHelp)
+if(0)
+  ### crashes shiboken!
+  HAS_QT_MODULE(Qt5Multimedia_FOUND QtMultimedia)
+endif()
 
 # install
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/__init__.py"

@@ -17,14 +17,15 @@ set(QtMultimedia_SRC
     ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtMultimedia/qvideoframe_wrapper.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtMultimedia/qtmultimedia_module_wrapper.cpp
 )
-set(QtMultimedia_typesystem_path "${QtCore_SOURCE_DIR}${PATH_SEP}${QtCore_BINARY_DIR}${PATH_SEP}${QtGui_SOURCE_DIR}${PATH_SEP}${QtGui_BINARY_DIR}")
+make_path(QtMultimedia_typesystem_path  ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR}
+                                        ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR}
+                                        ${QtMultimedia_SOURCE_DIR})
 
 set(QtMultimedia_include_dirs   ${CMAKE_CURRENT_SOURCE_DIR}
                                 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtMultimedia/
-                                ${QT_INCLUDE_DIR}
-                                ${QT_QTCORE_INCLUDE_DIR}
-                                ${QT_QTGUI_INCLUDE_DIR}
-                                ${QT_QTMULTIMEDIA_INCLUDE_DIR}
+                                ${Qt5Core_INCLUDE_DIRS}
+                                ${Qt5Gui_INCLUDE_DIRS}
+                                ${Qt5Multimedia_INCLUDE_DIRS}
                                 ${SHIBOKEN_INCLUDE_DIR}
                                 ${libpyside_SOURCE_DIR}
                                 ${SHIBOKEN_PYTHON_INCLUDE_DIR}
@@ -34,8 +35,8 @@ set(QtMultimedia_include_dirs   ${CMAKE_CURRENT_SOURCE_DIR}
 set(QtMultimedia_libraries  pyside
                             ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${SHIBOKEN_LIBRARY}
-                            ${QT_QTMULTIMEDIA_LIBRARY}
-                            ${QT_QTGUI_LIBRARY})
+                            ${Qt5Multimedia_LIBRARIES}
+                            ${Qt5Gui_LIBRARIES})
 
 set(QtMultimedia_deps QtGui)
 

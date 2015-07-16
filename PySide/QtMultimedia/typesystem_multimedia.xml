@@ -21,9 +21,6 @@
 <typesystem package="PySide.QtMultimedia">
   <load-typesystem name="typesystem_gui.xml" generate="no" />
 
-  <rejection class="" function-name="qobject_cast&lt;QAudioEngineFactoryInterface*&gt;"/>
-  <rejection class="" function-name="qobject_interface_iid&lt;QAudioEngineFactoryInterface*&gt;"/>
-
   <namespace-type name="QAudio">
       <enum-type name="Error"/>
       <enum-type name="Mode"/>
@@ -86,6 +83,7 @@
     </modify-function>
   </object-type>
 
+  <!-- Qt5: gone
   <object-type name="QAudioEnginePlugin">
     <modify-function signature="createInput(const QByteArray&amp;, const QAudioFormat&amp;)">
       <modify-argument index="return">
@@ -121,6 +119,7 @@
       </modify-argument>
     </modify-function>
   </object-type>
+  -->
 
   <object-type name="QAudioInput">
     <modify-function signature="start()">
