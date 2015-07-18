@@ -115,6 +115,9 @@ private:
     TemplateParameterList _M_current_template_parameters; // ### check me
     QHash<QString, QString> _M_qualified_types;
     QHash<QString, int> _M_anonymous_enums;
+    void dummy() {
+        _M_control=0;
+    }
 
 protected:
     TypeCompiler type_cc;

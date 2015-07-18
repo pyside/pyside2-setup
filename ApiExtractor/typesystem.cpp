@@ -671,7 +671,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 m_error = "no 'type' attribute specified";
                 return false;
             } else if (containerType == ContainerTypeEntry::NoContainer) {
-                m_error = "there is no container of type " + containerType;
+                m_error = "there is no container of type " + typeName;
                 return false;
             }
 

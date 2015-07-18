@@ -685,7 +685,6 @@ void Lexer::scan_EOF()
 void Lexer::scan_invalid_input()
 {
     QString errmsg("invalid input: %1");
-    errmsg.arg(int(*cursor));
     reportError(errmsg);
     ++cursor;
 }
