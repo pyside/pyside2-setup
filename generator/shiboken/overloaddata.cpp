@@ -31,7 +31,7 @@
 static const TypeEntry* getAliasedTypeEntry(const TypeEntry* typeEntry)
 {
     if (typeEntry->isPrimitive()) {
-        const PrimitiveTypeEntry* pte = reinterpret_cast<const PrimitiveTypeEntry*>(typeEntry);
+        const PrimitiveTypeEntry* pte = dynamic_cast<const PrimitiveTypeEntry*>(typeEntry);
         while (pte->aliasedTypeEntry())
             pte = pte->aliasedTypeEntry();
         typeEntry = pte;
@@ -139,7 +139,7 @@ static QString getImplicitConversionTypeName(const AbstractMetaType* containerTy
     foreach (const AbstractMetaType* otherType, containerType->instantiations())
         types << (otherType == instantiation ? impConv : getTypeName(otherType));
 
-    const ContainerTypeEntry* containerTypeEntry = reinterpret_cast<const ContainerTypeEntry*>(containerType->typeEntry());
+    const ContainerTypeEntry* containerTypeEntry = dynamic_cast<const ContainerTypeEntry*>(containerType->typeEntry());
     return containerTypeEntry->qualifiedCppName() + '<' + types.join(", ") + " >";
 }
 
