@@ -713,9 +713,18 @@ QString ShibokenGenerator::converterObject(const TypeEntry* type)
         return QString("Shiboken::Conversions::PrimitiveTypeConverter<%1>()").arg(type->qualifiedCppName());
     if (isWrapperType(type) || type->isEnum() || type->isFlags())
         return QString("SBK_CONVERTER(%1)").arg(cpythonTypeNameExt(type));
-
+    
+    if (type->isArray()) {
+        qDebug() << "Warning: no idea how to handle the Qt5 type " << type->qualifiedCppName();
+        return 0;
+    }
+        
     /* the typedef'd primitive types case */
-    const PrimitiveTypeEntry* pte = reinterpret_cast<const PrimitiveTypeEntry*>(type);
+    const PrimitiveTypeEntry* pte = dynamic_cast<const PrimitiveTypeEntry*>(type);
+    if (!pte) {
+        qDebug() << "Warning: the Qt5 primitive type is unknown" << type->qualifiedCppName();
+        return 0;
+    }
     if (pte->basicAliasedTypeEntry())
         pte = pte->basicAliasedTypeEntry();
     if (pte->isPrimitive() && !pte->isCppPrimitive() && !pte->customConversion())
