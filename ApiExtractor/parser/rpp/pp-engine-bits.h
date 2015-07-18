@@ -290,10 +290,12 @@ inline FILE *pp::find_include_file(std::string const &__input_filename, std::str
             __filepath->append(__input_filename.substr(0, slashPos));
             __filepath->append(".framework/Headers/");
             __filepath->append(__input_filename.substr(slashPos + 1, std::string::npos));
-            std::cerr << *__filepath << "\n";
 
-            if (file_exists(*__filepath) && !file_isdir(*__filepath))
+            if (file_exists(*__filepath) && !file_isdir(*__filepath)) {
+                // this seems never to happen
+                std::cerr << "Include from framework: " << *__filepath << "\n";
                 return fopen(__filepath->c_str(), "r");
+            }
         }
 #endif // Q_OS_MAC
     }
