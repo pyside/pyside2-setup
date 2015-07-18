@@ -34,7 +34,7 @@ set(QtUiTools_libraries     pyside
                             ${Qt5Gui_LIBRARIES}
                             ${Qt5Widgets_LIBRARIES}
                             )
-set(QtUiTools_deps QtGui QtXml)
+set(QtUiTools_deps QtWidgets QtXml)
 create_pyside_module(QtUiTools
                      QtUiTools_include_dirs
                      QtUiTools_libraries
