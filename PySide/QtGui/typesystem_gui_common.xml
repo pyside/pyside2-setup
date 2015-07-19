@@ -3218,21 +3218,10 @@
     </add-function>
   </value-type>
 
-  <suppress-warning text="template baseclass 'QGenericMatrix&lt;float&gt;' of '*' is not known"/>
+  <suppress-warning text="enum 'q_static_assert_result39' does not have a type entry or is not an enum"/>
   <suppress-warning text="template baseclass 'QListSpecialMethods&lt;T&gt;' of 'QList' is not known"/>
-  <suppress-warning text="signature 'QGuiApplication(int&amp;,char**)' for function modification in 'QGuiApplication' not found."/>
-  <suppress-warning text="signature 'QGuiApplication(int&amp;,char**,bool)' for function modification in 'QGuiApplication' not found."/>
-  <suppress-warning text="signature 'QGuiApplication(int&amp;,char**,QGuiApplication::Type)' for function modification in 'QGuiApplication' not found."/>
-  <suppress-warning text="signature 'addToolbar(Qt::ToolBarArea,QToolBar*)' for function modification in 'QMainWindow' not found."/>
-  <suppress-warning text="signature 'addToolbar(QToolBar*)' for function modification in 'QMainWindow' not found."/>
-  <suppress-warning text="signature 'addToolbar(QString)' for function modification in 'QMainWindow' not found."/>
-  <suppress-warning text="unhandled enum value: ~FlagMask in QMessageBox::StandardButton"/>
-  <suppress-warning text="unmatched enum ~FlagMask"/>
-  <suppress-warning text="enum 'QMatrix4x4::enum_1' is specified in typesystem, but not declared"/>
-  <suppress-warning text="class not found for setup inheritance 'QMimeSource'"/>
-  <suppress-warning text="class 'QDropEvent' inherits from unknown base class 'QMimeSource'"/>
-
-
+  <suppress-warning text="horribly broken type ''"/>
+    
   <!-- Qt5: this whole printer stuff goes to module QtPrintSupport
 
   <object-type name="QAbstractPageSetupDialog"/>
@@ -3363,35 +3352,17 @@
       <include file-name="QPalette" location="global"/>
       <include file-name="QIcon" location="global"/>
       <include file-name="QLocale" location="global"/>
-      <include file-name="QStyle" location="global"/>
+    <!-- Qt5: in QtWidgets  <include file-name="QStyle" location="global"/> -->
     </extra-includes>
-    <modify-function signature="QGuiApplication(int&amp;,char**)" access="private" />
+    <modify-function signature="QGuiApplication(int&amp;,char**,int)" access="private" />
     <add-function signature="QGuiApplication(PySequence)">
         <inject-code>
             QGuiApplicationConstructor(%PYSELF, %1, &amp;%0);
         </inject-code>
     </add-function>
-    <modify-function signature="QGuiApplication(int&amp;,char**,bool)" access="private"/>
-    <add-function signature="QGuiApplication(PySequence,bool)">
-        <inject-code>
-            QGuiApplicationConstructor(%PYSELF, %1, %2, &amp;%0);
-        </inject-code>
-    </add-function>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
     <inject-code class="native" file="glue/qguiapplication_init.cpp" position="beginning" />
 
-    <!-- ### Causes warnings using generator. They were kept here to avoid generation even
-         removing Q_INTERNAL_QAPP_SRC || qdoc from #define section-->
-    <modify-function signature="QGuiApplication(int&amp;,char**,int)" remove="all"/>
-    <modify-function signature="QGuiApplication(int&amp;,char**,bool,int)" remove="all"/>
-    <!-- ### -->
-
-    <!-- ownership control transfer to qApp -->
-    <modify-function signature="setStyle(QStyle*)">
-        <inject-code class="target" position="end">
-            Shiboken::Object::setParent(%CONVERTTOPYTHON[QGuiApplication*](qApp), %PYARG_1);
-        </inject-code>
-    </modify-function>
   </object-type>
 
 </typesystem>

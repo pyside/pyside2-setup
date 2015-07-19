@@ -3,7 +3,7 @@ extern PyObject* moduleQtGui;
 
 static int QGuiApplicationArgCount;
 static char** QGuiApplicationArgValues;
-static const char QAPP_MACRO[] = "qApp";
+static const char QAPP_MACRO[] = "qGuiApp";
 
 bool QGuiApplicationConstructorStart(PyObject* argv)
 {
@@ -33,17 +33,7 @@ void QGuiApplicationConstructorEnd(PyObject* self)
 static void QGuiApplicationConstructor(PyObject* self, PyObject* argv, QGuiApplicationWrapper** cptr)
 {
     if (QGuiApplicationConstructorStart(argv)) {
-        *cptr = new QGuiApplicationWrapper(QGuiApplicationArgCount, QGuiApplicationArgValues);
-        Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject*>(self));
-        QGuiApplicationConstructorEnd(self);
-    }
-}
-
-template <typename T>
-static void QGuiApplicationConstructor(PyObject* self, PyObject* argv, T extraArg, QGuiApplicationWrapper** cptr)
-{
-    if (QGuiApplicationConstructorStart(argv)) {
-        *cptr = new QGuiApplicationWrapper(QGuiApplicationArgCount, QGuiApplicationArgValues, extraArg);
+        *cptr = new QGuiApplicationWrapper(QGuiApplicationArgCount, QGuiApplicationArgValues, 0);
         Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject*>(self));
         QGuiApplicationConstructorEnd(self);
     }
