@@ -135,49 +135,6 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtcore_module_wrapper.cpp
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/typesystem_core.xml.in"
                "${CMAKE_CURRENT_BINARY_DIR}/typesystem_core.xml" @ONLY)
 
-set(prev_shiboken_binary ${SHIBOKEN_BINARY})
-string(REPLACE ";" " " QtCore_SRC_escape "${QtCore_SRC}")
-file(WRITE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/fake_shiboken.sh"
-     "
-echo \"$*\"
-${prev_shiboken_binary} $*
-python3 ${CMAKE_CURRENT_BINARY_DIR}/filter_init.py ${QtCore_SRC_escape}
-     ")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/filter_init.py"
-     "#! env python
-import sys, os, re, pprint
-pprint.pprint(sys.argv)
-nset = set()
-for fname in sys.argv[1:]:
-    name = os.path.splitext(os.path.basename(fname))[0]
-    print(name)
-    if name.endswith('module_wrapper'):
-        fn = fname
-    else:
-        name = name.split('_wrapper')
-        assert name[1] == ''
-        nset.add(name[0])
-print(fn)
-with open(fn) as f:
-    lines = f.readlines()
-removals = set()
-for idx, line in enumerate(lines):
-    res = re.search(' init_(\\w+)', line)
-    if res and res.group(1).lower() not in nset:
-        removals.add(res.group(1))
-        lines[idx] = '//' + line
-with open(fn, 'w') as f:
-    f.writelines(lines)
-removals = sorted(list(removals))
-print('Removals:', removals)
-")
-file(COPY ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/fake_shiboken.sh
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
-  FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
-  GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-
-set(SHIBOKEN_BINARY "${CMAKE_CURRENT_BINARY_DIR}/fake_shiboken.sh")
-
 # fake these variables for qt5
 set(QtCore_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(QtCore_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore)
