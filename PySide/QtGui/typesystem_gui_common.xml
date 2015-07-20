@@ -167,7 +167,6 @@
   <rejection class="QPolygon" function-name="point"/>
   <rejection class="QActionGroup" function-name="selected"/>
   <rejection class="QPaintEngine" function-name="fix_neg_rect"/>
-  <rejection class="*" enum-name="enum_1"/>
   <value-type name="QTransform">
     <enum-type name="TransformationType"/>
     <add-function signature="__repr__" return-type="PyObject*">
@@ -658,6 +657,8 @@
   </value-type>
 
   <value-type name="QItemSelection" />
+  
+  <!-- Qt5: this _should_ be obsolete, but QImage is still using it... -->
   <value-type name="QMatrix">
     <extra-includes>
       <include file-name="QPainterPath" location="global"/>
@@ -721,6 +722,7 @@
       </inject-code>
     </modify-function>
   </value-type>
+
   <value-type name="QConicalGradient" polymorphic-id-expression="%1-&gt;type() == QGradient::ConicalGradient" />
   <value-type name="QFontInfo" />
   <value-type name="QRadialGradient" polymorphic-id-expression="%1-&gt;type() == QGradient::RadialGradient" />
@@ -1523,7 +1525,6 @@
 
   <object-type name="QRegExpValidator" />
 
-  <!-- Qt5: QtMultimedia <object-type name="QSound"/> -->
   <object-type name="QStandardItem">
     <enum-type name="ItemType"/>
     <modify-function signature="operator&lt;(QStandardItem)const">
@@ -2394,33 +2395,12 @@
     </modify-function>
   </object-type>
 
-  <!--  _______ Qt5: begin of matrix block _________
-
-  """
-  The problem:
-  QMatrixNxM objects were always based upon the qreal type.
-  Since Qt5.0, this has been changed to the float type, for some
-  complicated reasons (long discussions, see for instance
-    https://groups.google.com/forum/#!topic/qt-project-list-development/dPcP3NASY1k
-  )
-
-  This creates a few problems in doing the conversion right, and also
-  looses accuracy. I understand the lengthy discussion about this,
-  my question is simply if it is worth the effort to support these
-  functions in python, when it looses accuracy, but python uses double, anyway.
-  Does this make sense?
-
-  Before we agree on a strategy how to treat these matrices in the future,
-  I (ctismer) am saving the time to implement this change. Therefore, the matrix
-  stuff is commented out for now.
-  """
-
   <value-type name="QMatrix2x2" since="4.6">
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
                <replace from="%MATRIX_SIZE" to="4" />
-               <replace from="%MATRIX_TYPE" to="qreal" />
+               <replace from="%MATRIX_TYPE" to="float" />
              </insert-template>
         </inject-code>
     </add-function>
@@ -2428,7 +2408,7 @@
     <add-function signature="__reduce__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code_matrix">
-              <replace from="%MATRIX_TYPE" to="qreal" />
+              <replace from="%MATRIX_TYPE" to="float" />
               <replace from="%MATRIX_SIZE" to="4" />
             </insert-template>
         </inject-code>
@@ -2440,7 +2420,7 @@
         </insert-template>
       </inject-code>
     </add-function>
-    <add-function signature="data()" return-type="qreal">
+    <add-function signature="data()" return-type="float">
       <inject-code class="target" position="beginning">
         <insert-template name="matrix_data_function">
           <replace from="%MATRIX_SIZE" to="4" />
@@ -2480,7 +2460,7 @@
     return %CONVERTTOPYTHON[%RETURN_TYPE](*%CPPSELF);
     </template>
 
-    <add-function signature="operator*=(qreal)" return-type="QMatrix2x2" >
+    <add-function signature="operator*=(float)" return-type="QMatrix2x2" >
       <inject-code class="target" position="beginning">
         <insert-template name="inplace_mult"/>
       </inject-code>
@@ -2495,7 +2475,7 @@
         <insert-template name="inplace_sub"/>
       </inject-code>
     </add-function>
-    <add-function signature="operator/=(qreal)" return-type="QMatrix2x2" >
+    <add-function signature="operator/=(float)" return-type="QMatrix2x2" >
       <inject-code class="target" position="beginning">
         <insert-template name="inplace_div"/>
       </inject-code>
@@ -2508,7 +2488,7 @@
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
                <replace from="%MATRIX_SIZE" to="6" />
-               <replace from="%MATRIX_TYPE" to="qreal" />
+               <replace from="%MATRIX_TYPE" to="float" />
              </insert-template>
         </inject-code>
     </add-function>
@@ -2516,7 +2496,7 @@
     <add-function signature="__reduce__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code_matrix">
-              <replace from="%MATRIX_TYPE" to="qreal" />
+              <replace from="%MATRIX_TYPE" to="float" />
               <replace from="%MATRIX_SIZE" to="6" />
             </insert-template>
         </inject-code>
@@ -2528,7 +2508,7 @@
         </insert-template>
       </inject-code>
     </add-function>
-    <add-function signature="data()" return-type="qreal">
+    <add-function signature="data()" return-type="float">
       <inject-code class="target" position="beginning">
         <insert-template name="matrix_data_function">
           <replace from="%MATRIX_SIZE" to="6" />
@@ -2550,7 +2530,7 @@
       </inject-code>
     </add-function>
     <add-function signature="operator!=(const QMatrix2x3&amp;)" return-type="bool" />
-    <add-function signature="operator*=(qreal)" return-type="QMatrix2x3" >
+    <add-function signature="operator*=(float)" return-type="QMatrix2x3" >
       <inject-code class="target" position="beginning">
         <insert-template name="inplace_mult"/>
       </inject-code>
@@ -2565,7 +2545,7 @@
         <insert-template name="inplace_sub"/>
       </inject-code>
     </add-function>
-    <add-function signature="operator/=(qreal)" return-type="QMatrix2x3" >
+    <add-function signature="operator/=(float)" return-type="QMatrix2x3" >
       <inject-code class="target" position="beginning">
         <insert-template name="inplace_div"/>
       </inject-code>
@@ -2578,7 +2558,7 @@
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
                <replace from="%MATRIX_SIZE" to="8" />
-               <replace from="%MATRIX_TYPE" to="qreal" />
+               <replace from="%MATRIX_TYPE" to="float" />
              </insert-template>
         </inject-code>
     </add-function>
@@ -2586,7 +2566,7 @@
     <add-function signature="__reduce__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code_matrix">
-              <replace from="%MATRIX_TYPE" to="qreal" />
+              <replace from="%MATRIX_TYPE" to="float" />
               <replace from="%MATRIX_SIZE" to="8" />
             </insert-template>
         </inject-code>
@@ -2598,7 +2578,7 @@
         </insert-template>
       </inject-code>
     </add-function>
-    <add-function signature="data()" return-type="qreal">
+    <add-function signature="data()" return-type="float">
       <inject-code class="target" position="beginning">
         <insert-template name="matrix_data_function">
           <replace from="%MATRIX_SIZE" to="8" />
@@ -2620,7 +2600,7 @@
       </inject-code>
     </add-function>
     <add-function signature="operator!=(const QMatrix2x4&amp;)" return-type="bool" />
-    <add-function signature="operator*=(qreal)" return-type="QMatrix2x4" >
+    <add-function signature="operator*=(float)" return-type="QMatrix2x4" >
       <inject-code class="target" position="beginning">
         <insert-template name="inplace_mult"/>
       </inject-code>
@@ -2635,7 +2615,7 @@
         <insert-template name="inplace_sub"/>
       </inject-code>
     </add-function>
-    <add-function signature="operator/=(qreal)" return-type="QMatrix2x4" >
+    <add-function signature="operator/=(float)" return-type="QMatrix2x4" >
       <inject-code class="target" position="beginning">
         <insert-template name="inplace_div"/>
       </inject-code>
@@ -2648,7 +2628,7 @@
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
                <replace from="%MATRIX_SIZE" to="6" />
-               <replace from="%MATRIX_TYPE" to="qreal" />
+               <replace from="%MATRIX_TYPE" to="float" />
              </insert-template>
         </inject-code>
     </add-function>
@@ -2656,7 +2636,7 @@
     <add-function signature="__reduce__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code_matrix">
-              <replace from="%MATRIX_TYPE" to="qreal" />
+              <replace from="%MATRIX_TYPE" to="float" />
               <replace from="%MATRIX_SIZE" to="6" />
             </insert-template>
         </inject-code>
@@ -2668,7 +2648,7 @@
         </insert-template>
       </inject-code>
     </add-function>
-    <add-function signature="data()" return-type="qreal">
+    <add-function signature="data()" return-type="float">
       <inject-code class="target" position="beginning">
         <insert-template name="matrix_data_function">
           <replace from="%MATRIX_SIZE" to="6" />
@@ -2690,7 +2670,7 @@
       </inject-code>
     </add-function>
     <add-function signature="operator!=(const QMatrix3x2&amp;)" return-type="bool" />
-    <add-function signature="operator*=(qreal)" return-type="QMatrix3x2" >
+    <add-function signature="operator*=(float)" return-type="QMatrix3x2" >
       <inject-code class="target" position="beginning">
         <insert-template name="inplace_mult"/>
       </inject-code>
@@ -2705,7 +2685,7 @@
         <insert-template name="inplace_sub"/>
       </inject-code>
     </add-function>
-    <add-function signature="operator/=(qreal)" return-type="QMatrix3x2" >
+    <add-function signature="operator/=(float)" return-type="QMatrix3x2" >
       <inject-code class="target" position="beginning">
         <insert-template name="inplace_div"/>
       </inject-code>
@@ -2718,7 +2698,7 @@
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
                <replace from="%MATRIX_SIZE" to="9" />
-               <replace from="%MATRIX_TYPE" to="qreal" />
+               <replace from="%MATRIX_TYPE" to="float" />
              </insert-template>
         </inject-code>
     </add-function>
@@ -2726,7 +2706,7 @@
     <add-function signature="__reduce__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code_matrix">
-              <replace from="%MATRIX_TYPE" to="qreal" />
+              <replace from="%MATRIX_TYPE" to="float" />
               <replace from="%MATRIX_SIZE" to="9" />
             </insert-template>
         </inject-code>
@@ -2738,7 +2718,7 @@
         </insert-template>
       </inject-code>
     </add-function>
-    <add-function signature="data()" return-type="qreal">
+    <add-function signature="data()" return-type="float">
       <inject-code class="target" position="beginning">
         <insert-template name="matrix_data_function">
           <replace from="%MATRIX_SIZE" to="9" />
@@ -2760,7 +2740,7 @@
       </inject-code>
     </add-function>
     <add-function signature="operator!=(const QMatrix3x3&amp;)" return-type="bool" />
-    <add-function signature="operator*=(qreal)" return-type="QMatrix3x3" >
+    <add-function signature="operator*=(float)" return-type="QMatrix3x3" >
       <inject-code class="target" position="beginning">
         <insert-template name="inplace_mult"/>
       </inject-code>
@@ -2775,7 +2755,7 @@
         <insert-template name="inplace_sub"/>
       </inject-code>
     </add-function>
-    <add-function signature="operator/=(qreal)" return-type="QMatrix3x3" >
+    <add-function signature="operator/=(float)" return-type="QMatrix3x3" >
       <inject-code class="target" position="beginning">
         <insert-template name="inplace_div"/>
       </inject-code>
@@ -2788,7 +2768,7 @@
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
                <replace from="%MATRIX_SIZE" to="12" />
-               <replace from="%MATRIX_TYPE" to="qreal" />
+               <replace from="%MATRIX_TYPE" to="float" />
              </insert-template>
         </inject-code>
     </add-function>
@@ -2796,7 +2776,7 @@
     <add-function signature="__reduce__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code_matrix">
-              <replace from="%MATRIX_TYPE" to="qreal" />
+              <replace from="%MATRIX_TYPE" to="float" />
               <replace from="%MATRIX_SIZE" to="12" />
             </insert-template>
         </inject-code>
@@ -2808,7 +2788,7 @@
         </insert-template>
       </inject-code>
     </add-function>
-    <add-function signature="data()" return-type="qreal">
+    <add-function signature="data()" return-type="float">
       <inject-code class="target" position="beginning">
         <insert-template name="matrix_data_function">
           <replace from="%MATRIX_SIZE" to="12" />
@@ -2830,7 +2810,7 @@
       </inject-code>
     </add-function>
     <add-function signature="operator!=(const QMatrix3x4&amp;)" return-type="bool" />
-    <add-function signature="operator*=(qreal)" return-type="QMatrix3x4" >
+    <add-function signature="operator*=(float)" return-type="QMatrix3x4" >
       <inject-code class="target" position="beginning">
         <insert-template name="inplace_mult"/>
       </inject-code>
@@ -2845,7 +2825,7 @@
         <insert-template name="inplace_sub"/>
       </inject-code>
     </add-function>
-    <add-function signature="operator/=(qreal)" return-type="QMatrix3x4" >
+    <add-function signature="operator/=(float)" return-type="QMatrix3x4" >
       <inject-code class="target" position="beginning">
         <insert-template name="inplace_div"/>
       </inject-code>
@@ -2858,7 +2838,7 @@
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
                <replace from="%MATRIX_SIZE" to="8" />
-               <replace from="%MATRIX_TYPE" to="qreal" />
+               <replace from="%MATRIX_TYPE" to="float" />
              </insert-template>
         </inject-code>
     </add-function>
@@ -2866,7 +2846,7 @@
     <add-function signature="__reduce__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code_matrix">
-              <replace from="%MATRIX_TYPE" to="qreal" />
+              <replace from="%MATRIX_TYPE" to="float" />
               <replace from="%MATRIX_SIZE" to="8" />
             </insert-template>
         </inject-code>
@@ -2878,7 +2858,7 @@
         </insert-template>
       </inject-code>
     </add-function>
-    <add-function signature="data()" return-type="qreal">
+    <add-function signature="data()" return-type="float">
       <inject-code class="target" position="beginning">
         <insert-template name="matrix_data_function">
           <replace from="%MATRIX_SIZE" to="8" />
@@ -2900,7 +2880,7 @@
       </inject-code>
     </add-function>
     <add-function signature="operator!=(const QMatrix4x2&amp;)" return-type="bool" />
-    <add-function signature="operator*=(qreal)" return-type="QMatrix4x2" >
+    <add-function signature="operator*=(float)" return-type="QMatrix4x2" >
       <inject-code class="target" position="beginning">
         <insert-template name="inplace_mult"/>
       </inject-code>
@@ -2915,7 +2895,7 @@
         <insert-template name="inplace_sub"/>
       </inject-code>
     </add-function>
-    <add-function signature="operator/=(qreal)" return-type="QMatrix4x2" >
+    <add-function signature="operator/=(float)" return-type="QMatrix4x2" >
       <inject-code class="target" position="beginning">
         <insert-template name="inplace_div"/>
       </inject-code>
@@ -2928,7 +2908,7 @@
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
                <replace from="%MATRIX_SIZE" to="12" />
-               <replace from="%MATRIX_TYPE" to="qreal" />
+               <replace from="%MATRIX_TYPE" to="float" />
              </insert-template>
         </inject-code>
     </add-function>
@@ -2936,7 +2916,7 @@
     <add-function signature="__reduce__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code_matrix">
-              <replace from="%MATRIX_TYPE" to="qreal" />
+              <replace from="%MATRIX_TYPE" to="float" />
               <replace from="%MATRIX_SIZE" to="12" />
             </insert-template>
         </inject-code>
@@ -2948,7 +2928,7 @@
         </insert-template>
       </inject-code>
     </add-function>
-    <add-function signature="data()" return-type="qreal">
+    <add-function signature="data()" return-type="float">
       <inject-code class="target" position="beginning">
         <insert-template name="matrix_data_function">
           <replace from="%MATRIX_SIZE" to="12" />
@@ -2970,7 +2950,7 @@
       </inject-code>
     </add-function>
     <add-function signature="operator!=(const QMatrix4x3&amp;)" return-type="bool" />
-    <add-function signature="operator*=(qreal)" return-type="QMatrix4x3" >
+    <add-function signature="operator*=(float)" return-type="QMatrix4x3" >
       <inject-code class="target" position="beginning">
         <insert-template name="inplace_mult"/>
       </inject-code>
@@ -2985,7 +2965,7 @@
         <insert-template name="inplace_sub"/>
       </inject-code>
     </add-function>
-    <add-function signature="operator/=(qreal)" return-type="QMatrix4x3" >
+    <add-function signature="operator/=(float)" return-type="QMatrix4x3" >
       <inject-code class="target" position="beginning">
         <insert-template name="inplace_div"/>
       </inject-code>
@@ -2994,11 +2974,34 @@
   </value-type>
 
   <value-type name="QMatrix4x4" since="4.6">
+
+
+    <!-- Qt5: HAIRY TRICK ALERT ahead!
+        Qt5 partially replaced 'qreal' by float.
+        That had the side effect that all matrix types did not work any longer.
+
+        Reason (I guess):
+
+        The signature "QList<qreal>" is needed by the __reduce__ methods,
+        but created by some other object used elsewhere.
+        After the matrix type was changed, "QList<float>" was nowhere created.
+
+        I don't know an explicit way to produce the right conversion function, so what I did
+        was to create a dummy function and immediately dele it again.
+        This has the desired effect of creating the implicitly needed "QList<float>"
+        conversion, although the dummy function goes away.
+
+        Q: Do you know a better solution?
+    -->
+    <add-function signature="__dummy(const QList&lt;float &gt; &amp;)"/>
+    <modify-function signature="__dummy(const QList&lt;float &gt; &amp;)" remove="all"/>
+    <!-- that was the trick ^^^^^^^^^^^^^^^^^^^^^^ -->
+
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
                <replace from="%MATRIX_SIZE" to="16" />
-               <replace from="%MATRIX_TYPE" to="qreal" />
+               <replace from="%MATRIX_TYPE" to="float" />
              </insert-template>
         </inject-code>
     </add-function>
@@ -3006,13 +3009,13 @@
     <add-function signature="__reduce__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code_matrix">
-              <replace from="%MATRIX_TYPE" to="qreal" />
+              <replace from="%MATRIX_TYPE" to="float" />
               <replace from="%MATRIX_SIZE" to="16" />
             </insert-template>
         </inject-code>
     </add-function>
 
-    --> <!-- ### "QMatrix4x4(const qreal*,int,int)" is an internal constructor. --> <!--
+    <!-- ### "QMatrix4x4(const float*,int,int)" is an internal constructor. -->
     <modify-function signature="QMatrix4x4(const float*,int,int)" remove="all"/>
 
     <modify-function signature="QMatrix4x4(const float*)">
@@ -3021,7 +3024,7 @@
       </modify-argument>
       <inject-code class="target" position="beginning">
         if (PySequence_Size(%PYARG_1) == 16) {
-            qreal values[16];
+            float values[16];
             for(int i=0; i &lt; 16; i++) {
                 PyObject *pv = PySequence_Fast_GET_ITEM(%PYARG_1, i);
                 values[i] = PyFloat_AsDouble(pv);
@@ -3049,7 +3052,7 @@
         <replace-type modified-type="PyTupleObject*"/>
       </modify-argument>
       <inject-code class="target" position="beginning">
-        qreal values[16];
+        float values[16];
         %CPPSELF.%FUNCTION_NAME(values);
         %PYARG_0 = PyTuple_New(16);
         for(int i=0; i &lt; 16; i++) {
@@ -3071,10 +3074,10 @@
       </inject-code>
     </modify-function>
 
-    --> <!-- ### "constData() const" and "data() const" are unnecessary in Python and their function is performed by "data()". --> <!--
+    <!-- ### "constData() const" and "data() const" are unnecessary in Python and their function is performed by "data()". -->
     <modify-function signature="data() const" remove="all"/>
     <modify-function signature="constData() const" remove="all"/>
-    --> <!-- ### --> <!--
+    <!-- ### -->
     <modify-function signature="operator()(int, int) const" remove="all"/>
     <modify-function signature="operator()(int, int)" remove="all"/>
     <add-function signature="__mgetitem__" return-type="PyObject*">
@@ -3086,8 +3089,8 @@
                  PyObject* posy = PySequence_Fast_GET_ITEM(key.object(), 1);
                  Py_ssize_t x = PyInt_AsSsize_t(posx);
                  Py_ssize_t y = PyInt_AsSsize_t(posy);
-                 qreal ret = (*%CPPSELF)(x,y);
-                 return %CONVERTTOPYTHON[qreal](ret);
+                 float ret = (*%CPPSELF)(x,y);
+                 return %CONVERTTOPYTHON[float](ret);
              }
          }
          PyErr_SetString(PyExc_IndexError, "Invalid matrix index.");
@@ -3221,6 +3224,7 @@
   <suppress-warning text="enum 'q_static_assert_result39' does not have a type entry or is not an enum"/>
   <suppress-warning text="template baseclass 'QListSpecialMethods&lt;T&gt;' of 'QList' is not known"/>
   <suppress-warning text="horribly broken type ''"/>
+  <suppress-warning text="template baseclass 'QGenericMatrix&lt;float&gt;' of '*' is not known"/>
     
   <!-- Qt5: this whole printer stuff goes to module QtPrintSupport
 

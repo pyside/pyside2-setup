@@ -63,6 +63,15 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qkeyevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qkeysequence_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qlineargradient_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix2x2_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix2x3_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix2x4_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix3x2_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix3x3_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix3x4_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix4x2_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix4x3_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmatrix4x4_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmouseevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmoveevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qmovie_wrapper.cpp

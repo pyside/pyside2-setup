@@ -326,27 +326,27 @@
     <template name="matrix_constructor">
         if (PySequence_Size(%PYARG_1) == %SIZE) {
             Shiboken::AutoDecRef fast(PySequence_Fast(%PYARG_1, "Failed to parse sequence on %TYPE constructor."));
-            qreal values[%SIZE];
+            float values[%SIZE];
             for(int i=0; i &lt; %SIZE; i++) {
                 PyObject *pv = PySequence_Fast_GET_ITEM(fast.object(), i);
-                values[i] = %CONVERTTOCPP[qreal](pv);
+                values[i] = %CONVERTTOCPP[float](pv);
             }
             %0 = new %TYPE(values);
         }
     </template>
 
     <template name="matrix_data_function">
-        const qreal* data = %CPPSELF.constData();
+        const float* data = %CPPSELF.constData();
         PyObject *pyData = PyTuple_New(%MATRIX_SIZE);
         if (data) {
             for(int i=0; i &lt; %MATRIX_SIZE; i++)
-                PyTuple_SET_ITEM(pyData, i, %CONVERTTOPYTHON[qreal](data[i]));
+                PyTuple_SET_ITEM(pyData, i, %CONVERTTOPYTHON[float](data[i]));
         }
         return pyData;
     </template>
 
     <template name="matrix_fill_function">
-        qreal value = %CONVERTTOCPP[qreal](%PYARG_1);
+        float value = %CONVERTTOCPP[float](%PYARG_1);
         %CPPSELF.fill(value);
     </template>
 
