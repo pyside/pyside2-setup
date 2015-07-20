@@ -28,9 +28,7 @@
     <enum-type name="FocusRectPolicy"/>
     <enum-type name="WidgetSizePolicy"/>
   </object-type>
-  -->
-
-  <suppress-warning text="enum 'QPixmap::ShareMode' does not have a type entry or is not an enum" />
-  <suppress-warning text="enum 'QSysInfo::Endian' is specified in typesystem, but not declared" />
-  <suppress-warning text="type 'QGtkStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors." />
+  --> 
+  <rejection class="QWidget" function-name="macCGHandle"/>
+  <rejection class="QWidget" function-name="macQDHandle"/>
 </typesystem>

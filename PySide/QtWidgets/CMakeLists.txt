@@ -28,7 +28,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qabstractslider_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qabstractspinbox_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qaction_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qactiongroup_wrapper.cpp
-### missing constructor ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qapplication_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qapplication_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qboxlayout_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qbuttongroup_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qcalendarwidget_wrapper.cpp
@@ -207,7 +207,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qundostack_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qundoview_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qvboxlayout_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qwhatsthis_wrapper.cpp
-### no member named 'macCGHandle' in 'QWidget' ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qwidget_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qwidget_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qwidgetaction_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qwidgetitem_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qwizard_wrapper.cpp

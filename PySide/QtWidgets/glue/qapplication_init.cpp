@@ -33,17 +33,8 @@ void QApplicationConstructorEnd(PyObject* self)
 static void QApplicationConstructor(PyObject* self, PyObject* argv, QApplicationWrapper** cptr)
 {
     if (QApplicationConstructorStart(argv)) {
-        *cptr = new QApplicationWrapper(QApplicationArgCount, QApplicationArgValues);
-        Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject*>(self));
-        QApplicationConstructorEnd(self);
-    }
-}
-
-template <typename T>
-static void QApplicationConstructor(PyObject* self, PyObject* argv, T extraArg, QApplicationWrapper** cptr)
-{
-    if (QApplicationConstructorStart(argv)) {
-        *cptr = new QApplicationWrapper(QApplicationArgCount, QApplicationArgValues, extraArg);
+         // XXX do we need to support the ApplicationFlags parameter, instead of 0?
+        *cptr = new QApplicationWrapper(QApplicationArgCount, QApplicationArgValues, 0);
         Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject*>(self));
         QApplicationConstructorEnd(self);
     }

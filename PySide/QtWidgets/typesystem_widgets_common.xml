@@ -649,7 +649,7 @@
     </modify-function>
   </object-type>
   <object-type name="QItemEditorFactory">
-      <modify-function signature="registerEditor(QVariant::Type, QItemEditorCreatorBase *)">
+      <modify-function signature="registerEditor(int, QItemEditorCreatorBase *)">
       <modify-argument index="2">
         <reference-count action="set"/>
       </modify-argument>
@@ -1227,7 +1227,6 @@
     <enum-type name="StyleHint" extensible="yes" />
     <enum-type name="SubControl" flags="SubControls" extensible="yes" force-integer="yes"/>
     <enum-type name="SubElement" extensible="yes" />
-    <modify-function signature="standardIconImplementation(QStyle::StandardPixmap, const QStyleOption *, const QWidget *)const" virtual-slot="yes"/>
     <modify-function signature="layoutSpacingImplementation(QSizePolicy::ControlType, QSizePolicy::ControlType, Qt::Orientation, const QStyleOption *, const QWidget *) const" virtual-slot="yes"/>
     <modify-function signature="drawComplexControl(QStyle::ComplexControl,const QStyleOptionComplex*,QPainter*,const QWidget*)const">
       <modify-argument index="3" invalidate-after-use="yes"/>
@@ -1483,7 +1482,7 @@
         addLayoutOwnership(%CPPSELF, %1);
       </inject-code>
     </modify-function>
-    <modify-function signature="getItemPosition(int,int*,int*,int*,int*)">
+    <modify-function signature="getItemPosition(int,int*,int*,int*,int*)const">
         <modify-argument index="return">
             <replace-type modified-type="PyObject*" />
         </modify-argument>
@@ -2142,6 +2141,7 @@
       </modify-argument>
     </modify-function>
   </object-type>
+
   <object-type name="QWidget">
     <extra-includes>
       <include file-name="QIcon" location="global"/>
@@ -2410,6 +2410,7 @@
       </modify-argument>
     </modify-function>
   </object-type>
+  
   <object-type name="QMessageBox">
     <enum-type name="ButtonRole"/>
     <enum-type name="Icon"/>
@@ -3069,7 +3070,7 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="print(QPrinter*) const" rename="print_"/>
+    <modify-function signature="print(QPagedPaintDevice*) const" rename="print_"/>
   </object-type>
   <object-type name="QAction">
     <enum-type name="ActionEvent"/>
@@ -3100,26 +3101,14 @@
       <include file-name="QLocale" location="global"/>
       <include file-name="QStyle" location="global"/>
     </extra-includes>
-    <modify-function signature="QApplication(int&amp;,char**)" access="private" />
+    <modify-function signature="QApplication(int&amp;,char**,int)" access="private" />
     <add-function signature="QApplication(PySequence)">
         <inject-code>
             QApplicationConstructor(%PYSELF, %1, &amp;%0);
         </inject-code>
     </add-function>
-    <modify-function signature="QApplication(int&amp;,char**,bool)" access="private"/>
-    <add-function signature="QApplication(PySequence,bool)">
-        <inject-code>
-            QApplicationConstructor(%PYSELF, %1, %2, &amp;%0);
-        </inject-code>
-    </add-function>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
     <inject-code class="native" file="glue/qapplication_init.cpp" position="beginning" />
-
-    <!-- ### Causes warnings using generator. They were kept here to avoid generation even
-         removing Q_INTERNAL_QAPP_SRC || qdoc from #define section-->
-    <modify-function signature="QApplication(int&amp;,char**,int)" remove="all"/>
-    <modify-function signature="QApplication(int&amp;,char**,bool,int)" remove="all"/>
-    <!-- ### -->
 
     <!-- ownership control transfer to qApp -->
     <modify-function signature="setStyle(QStyle*)">
@@ -3586,7 +3575,7 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="print(QPrinter*)const" rename="print_" />
+    <modify-function signature="print(QPagedPaintDevice*)const" rename="print_" />
   </object-type>
   <object-type name="QStyledItemDelegate">
     <modify-function signature="setItemEditorFactory(QItemEditorFactory*)">
@@ -3643,19 +3632,6 @@
   </object-type>
 
   <value-type name="QTileRules" since="4.6"/>
-
-  <suppress-warning text="template baseclass 'QGenericMatrix&lt;qreal&gt;' of '*' is not known"/>
-  <suppress-warning text="signature 'QApplication(int&amp;,char**)' for function modification in 'QApplication' not found."/>
-  <suppress-warning text="signature 'QApplication(int&amp;,char**,bool)' for function modification in 'QApplication' not found."/>
-  <suppress-warning text="signature 'QApplication(int&amp;,char**,QApplication::Type)' for function modification in 'QApplication' not found."/>
-  <suppress-warning text="signature 'addToolbar(Qt::ToolBarArea,QToolBar*)' for function modification in 'QMainWindow' not found."/>
-  <suppress-warning text="signature 'addToolbar(QToolBar*)' for function modification in 'QMainWindow' not found."/>
-  <suppress-warning text="signature 'addToolbar(QString)' for function modification in 'QMainWindow' not found."/>
-  <suppress-warning text="unhandled enum value: ~FlagMask in QMessageBox::StandardButton"/>
-  <suppress-warning text="unmatched enum ~FlagMask"/>
-  <suppress-warning text="enum 'QMatrix4x4::enum_1' is specified in typesystem, but not declared"/>
-  <suppress-warning text="class not found for setup inheritance 'QMimeSource'"/>
-  <suppress-warning text="class 'QDropEvent' inherits from unknown base class 'QMimeSource'"/>
 
   <object-type name="QSizeGrip"/>
 

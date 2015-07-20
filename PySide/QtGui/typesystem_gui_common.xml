@@ -56,7 +56,7 @@
   <rejection class="*" function-name="qobject_interface_iid&lt;QGraphicsLayout*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QAccessibleBridgeFactoryInterface*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QImageIOHandlerFactoryInterface*&gt;"/>
-   <rejection class="*" function-name="qobject_interface_iid&lt;QAccessibleInterface*&gt;"/>
+  <rejection class="*" function-name="qobject_interface_iid&lt;QAccessibleInterface*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QTextObjectInterface*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QGraphicsLayoutItem*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QIconEngineFactoryInterface*&gt;"/>
