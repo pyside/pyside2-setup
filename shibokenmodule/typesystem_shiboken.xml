@@ -17,7 +17,7 @@
         </inject-code>
     </add-function>
 
-    <add-function signature="wrapInstance(unsigned long, PyType)" return-type="PyObject*">
+    <add-function signature="wrapInstance(size_t, PyType)" return-type="PyObject*">
         <inject-code>
             if (Shiboken::ObjectType::checkType((PyTypeObject*)%2))
                 %PYARG_0 = Shiboken::Object::newObject((SbkObjectType*)%2, (void*)%1, false, true);
