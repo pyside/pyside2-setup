@@ -4,6 +4,7 @@
     <custom-type name="PyType" />
     <primitive-type name="bool" />
     <primitive-type name="unsigned long" />
+    <primitive-type name="size_t" />
     <add-function signature="isValid(PyObject*)" return-type="bool">
         <inject-code>
             bool isValid = Shiboken::Object::isValid(%1, false);
