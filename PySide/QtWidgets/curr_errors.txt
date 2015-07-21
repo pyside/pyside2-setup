@@ -1,4 +1,18 @@
-Generating class model...                    [OK]
+Generating class model...                    [WARNING]
+    enum 'QGraphicsItem::UserType' does not have a type entry or is not an enum
+    enum 'QGraphicsWidget::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsProxyWidget::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsEllipseItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsPixmapItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsSimpleTextItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsTextItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsItemGroup::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsRectItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsLineItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsPathItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsPolygonItem::Type' does not have a type entry or is not an enum
+    
+
 Generating enum model...                     [OK]
 Generating namespace model...                [OK]
 Resolving typedefs...                        [OK]
@@ -6,28 +20,11 @@ Fixing class inheritance...                  [OK]
 Detecting inconsistencies in class model...  [OK]
 [OK]
 
-    signature 'layoutSpacingImplementation(QSizePolicy::ControlType,QSizePolicy::ControlType,Qt::Orientation,const QStyleOption*,const QWidget*)const' for function modification in 'QStyle' not found. Possible candidates: 
-    signature 'addButton(QAbstractButton*)' for function modification in 'QButtonGroup' not found. Possible candidates: addButton(QAbstractButton*,int) in QButtonGroup
-    signature 'getColor(QColor,QWidget*)' for function modification in 'QColorDialog' not found. Possible candidates: getColor(QColor,QWidget*,QString,QFlags<QColorDialog::ColorDialogOption>) in QColorDialog
-    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'QString *' in function 'QFileDialog::getOpenFileUrl(QWidget * parent, const QString & caption, const QUrl & dir, const QString & filter, QString * selectedFilter, QFlags<QFileDialog::Option> options, const QStringList & supportedSchemes)'.
-    signature 'overrideCursor()' for function modification in 'QApplication' not found. Possible candidates: overrideCursor() in QGuiApplication
-    signature 'addToolbar(Qt::ToolBarArea,QToolBar*)' for function modification in 'QMainWindow' not found. Possible candidates: 
-    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'bool *' in function 'QInputDialog::getItem(QWidget * parent, const QString & title, const QString & label, const QStringList & items, int current, bool editable, bool * ok, QFlags<Qt::WindowType> flags, QFlags<Qt::InputMethodHint> inputMethodHints)'.
-    signature 'indexOfTopLevelItem(QTreeWidgetItem*)' for function modification in 'QTreeWidget' not found. Possible candidates: indexOfTopLevelItem(QTreeWidgetItem*)const in QTreeWidget
-    signature 'children()const' for function modification in 'QGraphicsItem' not found. Possible candidates: 
-    signature 'setHeaderVisible(bool)' for function modification in 'QCalendarWidget' not found. Possible candidates: 
-    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'bool *' in function 'QInputDialog::getMultiLineText(QWidget * parent, const QString & title, const QString & label, const QString & text, bool * ok, QFlags<Qt::WindowType> flags, QFlags<Qt::InputMethodHint> inputMethodHints)'.
-    signature 'getItem(QWidget*,QString,QString,QStringList,int,bool,bool*,QFlags<Qt::WindowType>)' for function modification in 'QInputDialog' not found. Possible candidates: getItem(QWidget*,QString,QString,QStringList,int,bool,bool*,QFlags<Qt::WindowType>,QFlags<Qt::InputMethodHint>) in QInputDialog
-    signature 'addToolbar(QString)' for function modification in 'QMainWindow' not found. Possible candidates: 
-    signature 'getText(QWidget*,QString,QString,QLineEdit::EchoMode,QString,bool*,QFlags<Qt::WindowType>)' for function modification in 'QInputDialog' not found. Possible candidates: getText(QWidget*,QString,QString,QLineEdit::EchoMode,QString,bool*,QFlags<Qt::WindowType>,QFlags<Qt::InputMethodHint>) in QInputDialog
-    signature 'winId()const' for function modification in 'QWidget' not found. Possible candidates: 
-    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'long *' in function 'QWidget::nativeEvent(const QByteArray & eventType, void * message, long * result)'.
-    signature 'setInputContext(QInputContext*)' for function modification in 'QWidget' not found. Possible candidates: 
-    signature 'clipboard()' for function modification in 'QApplication' not found. Possible candidates: clipboard() in QGuiApplication
-    signature 'addToolbar(QToolBar*)' for function modification in 'QMainWindow' not found. Possible candidates: 
-    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'bool *' in function 'QInputDialog::getText(QWidget * parent, const QString & title, const QString & label, QLineEdit::EchoMode echo, const QString & text, bool * ok, QFlags<Qt::WindowType> flags, QFlags<Qt::InputMethodHint> inputMethodHints)'.
-    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'QString *' in function 'QFileDialog::getOpenFileUrls(QWidget * parent, const QString & caption, const QUrl & dir, const QString & filter, QString * selectedFilter, QFlags<QFileDialog::Option> options, const QStringList & supportedSchemes)'.
     There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'QString *' in function 'QFileDialog::getSaveFileUrl(QWidget * parent, const QString & caption, const QUrl & dir, const QString & filter, QString * selectedFilter, QFlags<QFileDialog::Option> options, const QStringList & supportedSchemes)'.
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'QString *' in function 'QFileDialog::getOpenFileUrls(QWidget * parent, const QString & caption, const QUrl & dir, const QString & filter, QString * selectedFilter, QFlags<QFileDialog::Option> options, const QStringList & supportedSchemes)'.
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'bool *' in function 'QInputDialog::getMultiLineText(QWidget * parent, const QString & title, const QString & label, const QString & text, bool * ok, QFlags<Qt::WindowType> flags, QFlags<Qt::InputMethodHint> inputMethodHints)'.
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'bool *' in function 'QColorDialog::getRgba(unsigned int rgba, bool * ok, QWidget * parent)'.
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'QString *' in function 'QFileDialog::getOpenFileUrl(QWidget * parent, const QString & caption, const QUrl & dir, const QString & filter, QString * selectedFilter, QFlags<QFileDialog::Option> options, const QStringList & supportedSchemes)'.
     
 
-Done, 22 warnings (1047 known issues)
+Done, 17 warnings (1048 known issues)

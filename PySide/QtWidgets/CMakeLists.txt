@@ -4,6 +4,7 @@ project(QtWidgets)
 set(QtWidgets_OPTIONAL_SRC )
 set(QtWidgets_DROPPED_ENTRIES )
 ## gone check_qt_class(Qt5Widgets QAbstractPageSetupDialog   QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
+## actually, all the printer stuff is in QtPrintSupport, maybe support it?
 check_qt_class(Qt5Widgets QAbstractPrintDialog       QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
 check_qt_class(Qt5Widgets QGtkStyle                  QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
 check_qt_class(Qt5Widgets QPageSetupDialog           QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
@@ -34,7 +35,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qbuttongroup_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qcalendarwidget_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qcheckbox_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qcolordialog_wrapper.cpp
-### Symbol not found: __ZN11QColumnView16staticMetaObjectE${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qcolumnview_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qcolumnview_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qcombobox_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qcommandlinkbutton_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qcommonstyle_wrapper.cpp
@@ -85,7 +86,9 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsproxywidget_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsrectitem_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsrotation_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsscale_wrapper.cpp
-### no member named 'children' in 'QGraphicsItemGroup' ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsscene_wrapper.cpp
+### cannot initialize a parameter of type 'QGraphicsItem **' with an
+###      lvalue of type '::QGraphicsItem *'  ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsscene_wrapper.cpp
+### how could this ever work in Qt4?
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsscenecontextmenuevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsscenedragdropevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicssceneevent_wrapper.cpp
@@ -97,8 +100,10 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicssceneresizeevent_wrapper.c
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsscenewheelevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicssimpletextitem_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicstextitem_wrapper.cpp
-### allocating an object of abstract class type '::QGraphicsTransformWrapper' ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicstransform_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsview_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicstransform_wrapper.cpp
+### cannot initialize a parameter of type 'QGraphicsItem **' with an
+###      lvalue of type '::QGraphicsItem *'  ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsview_wrapper.cpp
+### how could this ever work in Qt4?
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicswidget_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgridlayout_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgroupbox_wrapper.cpp
@@ -117,12 +122,12 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qlineedit_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qlistview_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qlistwidget_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qlistwidgetitem_wrapper.cpp
-### Symbol not found: __ZN11QMainWindow16staticMetaObjectE${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qmainwindow_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qmainwindow_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qmdiarea_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qmdisubwindow_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qmenu_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qmenubar_wrapper.cpp
-### Symbol not found: __ZN11QMessageBox16staticMetaObjectE${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qmessagebox_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qmessagebox_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qmouseeventtransition_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qpangesture_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qpinchgesture_wrapper.cpp
