@@ -1263,7 +1263,10 @@
   <object-type name="QColorDialog">
     <enum-type name="ColorDialogOption" flags="ColorDialogOptions"/>
     <modify-function signature="getColor(const QColor&amp;, QWidget*, const QString&amp;, QFlags&lt;QColorDialog::ColorDialogOption>)" allow-thread="yes" />
+    <!-- Qt5: obsolete -->
+    <modify-function signature="getRgba(unsigned int, bool*, QWidget*)" remove="all" />
   </object-type>
+
   <object-type name="QLayout">
     <inject-code class="native" position="beginning" file="glue/qlayout_help_functions.cpp"/>
 
@@ -1593,6 +1596,7 @@
   <object-type name="QInputDialog">
     <enum-type name="InputDialogOption"/>
     <enum-type name="InputMode"/>
+
     <modify-function signature="getInt(QWidget*, const QString&amp;, const QString&amp;, int, int, int, int, bool*, QFlags&lt;Qt::WindowType&gt;)" allow-thread="yes">
       <modify-argument index="8">
         <remove-default-expression/>
@@ -1602,6 +1606,7 @@
         <insert-template name="fix_arg,arg,arg,arg,arg,arg,arg,bool*,arg"/>
       </inject-code>
     </modify-function>
+
     <modify-function signature="getItem(QWidget*, const QString&amp;, const QString&amp;, const QStringList&amp;, int, bool, bool*, QFlags&lt;Qt::WindowType&gt;,QFlags&lt;Qt::InputMethodHint&gt;)" allow-thread="yes">
       <modify-argument index="7">
         <remove-default-expression/>
@@ -1611,7 +1616,18 @@
         <insert-template name="fix_arg,arg,arg,arg,arg,arg,bool*,arg"/>
       </inject-code>
     </modify-function>
-    <modify-function signature="getText(QWidget *, const QString&amp;, const QString&amp;, QLineEdit::EchoMode, const QString&amp;, bool*, QFlags&lt;Qt::WindowType&gt;,QFlags&lt;Qt::InputMethodHint&gt;)" allow-thread="yes">
+
+    <modify-function signature="getMultiLineText(QWidget*, const QString&amp;, const QString&amp;, const QString&amp;, bool*, QFlags&lt;Qt::WindowType&gt;, QFlags&lt;Qt::InputMethodHint&gt;)" allow-thread="yes">
+      <modify-argument index="5">
+        <remove-default-expression/>
+        <remove-argument/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        <insert-template name="fix_arg,arg,arg,arg,bool*,arg,arg"/>
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="getText(QWidget*, const QString&amp;, const QString&amp;, QLineEdit::EchoMode, const QString&amp;, bool*, QFlags&lt;Qt::WindowType&gt;,QFlags&lt;Qt::InputMethodHint&gt;)" allow-thread="yes">
       <modify-argument index="6">
         <remove-default-expression/>
         <remove-argument/>
@@ -1620,6 +1636,7 @@
         <insert-template name="fix_arg,arg,arg,arg,arg,bool*,arg"/>
       </inject-code>
     </modify-function>
+
     <modify-function signature="getDouble(QWidget*, const QString&amp;, const QString&amp;, double, double, double, int, bool*, QFlags&lt;Qt::WindowType&gt;)" allow-thread="yes">
       <modify-argument index="8">
         <remove-default-expression/>
