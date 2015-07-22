@@ -1589,6 +1589,7 @@
         </modify-argument>
     </modify-function>
   </object-type>
+
   <object-type name="QInputDialog">
     <enum-type name="InputDialogOption"/>
     <enum-type name="InputMode"/>
@@ -2522,18 +2523,8 @@
       </modify-argument>
     </modify-function>
 
-    <modify-function signature="getOpenFileNames(QWidget*, const QString&amp;, const QString&amp;, const QString&amp;, QString*, QFlags&lt;QFileDialog::Option&gt;)" allow-thread="yes">
-      <modify-argument index="return">
-        <replace-type modified-type="(fileNames, selectedFilter)"/>
-      </modify-argument>
-      <modify-argument index="5">
-        <replace-type modified-type="QString"/>
-        <replace-default-expression with="QString()"/>
-      </modify-argument>
-      <inject-code class="target" position="end">
-        <insert-template name="return_for_QFileDialog"/>
-      </inject-code>
-    </modify-function>
+    <modify-function signature="getExistingDirectory(QWidget*, const QString&amp;, const QString&amp;, QFlags&lt;QFileDialog::Option>)" allow-thread="yes" />
+    <modify-function signature="getExistingDirectoryUrl(QWidget*, const QString&amp;, const QUrl&amp;, QFlags&lt;QFileDialog::Option>, const QStringList&amp;)" />
     <modify-function signature="getOpenFileName(QWidget*, const QString&amp;, const QString&amp;, const QString&amp;, QString*, QFlags&lt;QFileDialog::Option&gt;)" allow-thread="yes">
       <modify-argument index="return">
         <replace-type modified-type="(fileName, selectedFilter)"/>
@@ -2546,6 +2537,45 @@
         <insert-template name="return_for_QFileDialog"/>
       </inject-code>
     </modify-function>
+    <modify-function signature="getOpenFileNames(QWidget*, const QString&amp;, const QString&amp;, const QString&amp;, QString*, QFlags&lt;QFileDialog::Option&gt;)" allow-thread="yes">
+      <modify-argument index="return">
+        <replace-type modified-type="(fileNames, selectedFilter)"/>
+      </modify-argument>
+      <modify-argument index="5">
+        <replace-type modified-type="QString"/>
+        <replace-default-expression with="QString()"/>
+      </modify-argument>
+      <inject-code class="target" position="end">
+        <insert-template name="return_for_QFileDialog"/>
+      </inject-code>
+    </modify-function>
+    
+    <modify-function signature="getOpenFileUrl(QWidget*, const QString&amp;, const QUrl&amp;, const QString&amp;, QString*, QFlags&lt;QFileDialog::Option&gt;, const QStringList&amp;)" allow-thread="yes">
+      <modify-argument index="return">
+        <replace-type modified-type="(fileName, selectedFilter)"/>
+      </modify-argument>
+      <modify-argument index="5">
+        <replace-type modified-type="QString"/>
+        <replace-default-expression with="QString()"/>
+      </modify-argument>
+      <inject-code class="target" position="end">
+        <insert-template name="return_for_QFileDialog"/>
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="getOpenFileUrls(QWidget*, const QString&amp;, const QUrl&amp;, const QString&amp;, QString *, QFlags&lt;QFileDialog::Option&gt;, const QStringList&amp;)" allow-thread="yes">
+      <modify-argument index="return">
+        <replace-type modified-type="(fileName, selectedFilter)"/>
+      </modify-argument>
+      <modify-argument index="5">
+        <replace-type modified-type="QString"/>
+        <replace-default-expression with="QString()"/>
+      </modify-argument>
+      <inject-code class="target" position="end">
+        <insert-template name="return_for_QFileDialog"/>
+      </inject-code>
+    </modify-function>
+
     <modify-function signature="getSaveFileName(QWidget*, const QString&amp;, const QString&amp;, const QString&amp;, QString*, QFlags&lt;QFileDialog::Option&gt;)" allow-thread="yes">
       <modify-argument index="return">
         <replace-type modified-type="(fileName, selectedFilter)"/>
@@ -2558,8 +2588,22 @@
         <insert-template name="return_for_QFileDialog"/>
       </inject-code>
     </modify-function>
-    <modify-function signature="getExistingDirectory(QWidget*, const QString&amp;, const QString&amp;, QFlags&lt;QFileDialog::Option>)" allow-thread="yes" />
+
+    <modify-function signature="getSaveFileUrl(QWidget*, const QString&amp;, const QUrl&amp;, const QString&amp;, QString*, QFlags&lt;QFileDialog::Option&gt;, const QStringList&amp;)" allow-thread="yes">
+      <modify-argument index="return">
+        <replace-type modified-type="(fileName, selectedFilter)"/>
+      </modify-argument>
+      <modify-argument index="5">
+        <replace-type modified-type="QString"/>
+        <replace-default-expression with="QString()"/>
+      </modify-argument>
+      <inject-code class="target" position="end">
+        <insert-template name="return_for_QFileDialog"/>
+      </inject-code>
+    </modify-function>
+
   </object-type>
+
   <object-type name="QErrorMessage"/>
   <object-type name="QTabBar">
     <extra-includes>
