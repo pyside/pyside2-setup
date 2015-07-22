@@ -1,18 +1,4 @@
-Generating class model...                    [WARNING]
-    enum 'QGraphicsItem::UserType' does not have a type entry or is not an enum
-    enum 'QGraphicsWidget::Type' does not have a type entry or is not an enum
-    enum 'QGraphicsProxyWidget::Type' does not have a type entry or is not an enum
-    enum 'QGraphicsEllipseItem::Type' does not have a type entry or is not an enum
-    enum 'QGraphicsPixmapItem::Type' does not have a type entry or is not an enum
-    enum 'QGraphicsSimpleTextItem::Type' does not have a type entry or is not an enum
-    enum 'QGraphicsTextItem::Type' does not have a type entry or is not an enum
-    enum 'QGraphicsItemGroup::Type' does not have a type entry or is not an enum
-    enum 'QGraphicsRectItem::Type' does not have a type entry or is not an enum
-    enum 'QGraphicsLineItem::Type' does not have a type entry or is not an enum
-    enum 'QGraphicsPathItem::Type' does not have a type entry or is not an enum
-    enum 'QGraphicsPolygonItem::Type' does not have a type entry or is not an enum
-    
-
+Generating class model...                    [OK]
 Generating enum model...                     [OK]
 Generating namespace model...                [OK]
 Resolving typedefs...                        [OK]
@@ -23,8 +9,9 @@ Detecting inconsistencies in class model...  [OK]
     There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'QString *' in function 'QFileDialog::getSaveFileUrl(QWidget * parent, const QString & caption, const QUrl & dir, const QString & filter, QString * selectedFilter, QFlags<QFileDialog::Option> options, const QStringList & supportedSchemes)'.
     There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'QString *' in function 'QFileDialog::getOpenFileUrls(QWidget * parent, const QString & caption, const QUrl & dir, const QString & filter, QString * selectedFilter, QFlags<QFileDialog::Option> options, const QStringList & supportedSchemes)'.
     There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'bool *' in function 'QInputDialog::getMultiLineText(QWidget * parent, const QString & title, const QString & label, const QString & text, bool * ok, QFlags<Qt::WindowType> flags, QFlags<Qt::InputMethodHint> inputMethodHints)'.
-    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'bool *' in function 'QColorDialog::getRgba(unsigned int rgba, bool * ok, QWidget * parent)'.
+    signature 'drawItems(QPainter*,int,QGraphicsItem**,const QStyleOptionGraphicsItem*,QWidget*)' for function modification in 'QGraphicsView' not found. Possible candidates: drawItems(QPainter*,int,QGraphicsItem**,const QStyleOptionGraphicsItem*) in QGraphicsView
     There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'QString *' in function 'QFileDialog::getOpenFileUrl(QWidget * parent, const QString & caption, const QUrl & dir, const QString & filter, QString * selectedFilter, QFlags<QFileDialog::Option> options, const QStringList & supportedSchemes)'.
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'bool *' in function 'QColorDialog::getRgba(unsigned int rgba, bool * ok, QWidget * parent)'.
     
 
-Done, 17 warnings (1048 known issues)
+Done, 6 warnings (1050 known issues)

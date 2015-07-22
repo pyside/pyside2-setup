@@ -21,6 +21,31 @@
 <typesystem package="PySide.QtWidgets">
   <load-typesystem name="typesystem_gui.xml" generate="no"/>
 
+
+
+  <!-- Qt5: Beware forgetting the following rejection!
+    There are anonymous enums "enum { Type = 1 }" etc. in these QGraphics classes, but they
+    don't show up as "enum_1", but pretend they were a real enum field, not a value.
+
+  """
+  Generating class model...                    [WARNING]
+    enum 'QGraphicsItem::UserType' does not have a type entry or is not an enum
+    enum 'QGraphicsWidget::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsProxyWidget::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsEllipseItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsPixmapItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsSimpleTextItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsTextItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsItemGroup::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsRectItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsLineItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsPathItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsPolygonItem::Type' does not have a type entry or is not an enum
+  """
+  -->
+  <rejection class="*" enum-name="enum_1"/>
+
+
   <!--
     Event classes have a lot of non-documented protected fields, those fields
     are removed from PySide because they are Qt implementation details,
@@ -212,7 +237,6 @@
   </object-type>
 
   <object-type name="QGraphicsItem">
-    <!-- Qt5: enum? <enum-type name="UserType"/> -->
     <enum-type name="CacheMode"/>
     <enum-type name="Extension"/>
     <enum-type name="GraphicsItemChange"/>
@@ -560,9 +584,7 @@
         </inject-code>
     </modify-function>
   </object-type>
-
   <object-type name="QGraphicsEllipseItem">
-    <!-- Qt5: enum? <enum-type name="Type"/> -->
   </object-type>
   <object-type name="QGraphicsItemAnimation">
     <modify-function signature="setItem(QGraphicsItem*)">
@@ -579,28 +601,15 @@
       <include file-name="QPair" location="global"/>
     </extra-includes>
   </object-type>
-  <object-type name="QGraphicsItemGroup">
-    <!-- Qt5: enum? <enum-type name="Type"/> -->
-  </object-type>
-  <object-type name="QGraphicsLineItem">
-    <!-- Qt5: enum? <enum-type name="Type"/> -->
-  </object-type>
-  <object-type name="QGraphicsPathItem">
-    <!-- Qt5: enum? <enum-type name="Type"/> -->
-  </object-type>
+  <object-type name="QGraphicsItemGroup"/>
+  <object-type name="QGraphicsLineItem" />
+  <object-type name="QGraphicsPathItem" />
   <object-type name="QGraphicsPixmapItem">
-      <!-- Qt5: enum? <enum-type name="Type"/> -->
       <enum-type name="ShapeMode"/>
   </object-type>
-  <object-type name="QGraphicsPolygonItem">
-    <!-- Qt5: enum? <enum-type name="Type"/> -->
-  </object-type>
-  <object-type name="QGraphicsRectItem">
-    <!-- Qt5: enum? <enum-type name="Type"/> -->
-  </object-type>
-  <object-type name="QGraphicsSimpleTextItem">
-    <!-- Qt5: enum? <enum-type name="Type"/> -->
-  </object-type>
+  <object-type name="QGraphicsPolygonItem"/>
+  <object-type name="QGraphicsRectItem" />
+  <object-type name="QGraphicsSimpleTextItem" />
   <object-type name="QHBoxLayout"/>
   <object-type name="QHeaderView">
     <enum-type name="ResizeMode" />
@@ -1940,7 +1949,6 @@
     </modify-function>
   </object-type>
   <object-type name="QGraphicsTextItem">
-    <!-- Qt5: enum? <enum-type name="Type"/> -->
     <!-- a QObject so main-thread delete redundant -->
     <extra-includes>
       <include file-name="QTextCursor" location="global"/>
@@ -3342,7 +3350,6 @@
     </modify-function>
   </object-type>
   <object-type name="QGraphicsProxyWidget">
-    <!-- Qt5: enum? <enum-type name="Type"/> -->
     <modify-function signature="QGraphicsProxyWidget(QGraphicsItem*, QFlags&lt;Qt::WindowType&gt;)">
       <modify-argument index="this">
         <parent index="1" action="add"/>
@@ -3370,7 +3377,6 @@
   </object-type>
   <!-- a QObject so main-thread delete redundant -->
   <object-type name="QGraphicsWidget">
-    <!-- Qt5: enum? <enum-type name="Type"/> -->
     <modify-function signature="getContentsMargins(qreal*,qreal*,qreal*,qreal*)const">
         <modify-argument index="return">
             <replace-type modified-type="PyObject" />

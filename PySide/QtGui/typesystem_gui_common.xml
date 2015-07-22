@@ -3225,6 +3225,15 @@
   <suppress-warning text="template baseclass 'QListSpecialMethods&lt;T&gt;' of 'QList' is not known"/>
   <suppress-warning text="horribly broken type ''"/>
   <suppress-warning text="template baseclass 'QGenericMatrix&lt;float&gt;' of '*' is not known"/>
+
+  <!-- Qt5: note: the unnamed enum cannot be rejected by
+    <rejection class="QMatrix4x4" enum-name="enum_1"/>
+    Instead, we have to suppress the warning. Why that?
+
+    Compare also the note at the beginning of typesystem_widgets_common.xml .
+    This seems to be a related problem with unnamed structures in shiboken.
+  -->
+  <suppress-warning text="enum 'QMatrix4x4::enum_1' is specified in typesystem, but not declared"/>
     
   <!-- Qt5: this whole printer stuff goes to module QtPrintSupport
 
