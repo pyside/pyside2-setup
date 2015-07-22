@@ -2955,9 +2955,10 @@
     <!-- fromUnicode(QString) does the job -->
     <modify-function signature="fromUnicode(const QChar*,int,QTextCodec::ConverterState*)const" remove="all" />
     <modify-function signature="convertFromUnicode(const QChar*,int,QTextCodec::ConverterState*)const" remove="all" />
+    <!-- this causes a warning that I cannot avoid. See suppressed warning at the end. -->
   </object-type>
   <object-type name="QTextDecoder">
-    <!-- ### toUnicode(QByteArray) to the job -->
+    <!-- ### toUnicode(QByteArray) does the job -->
     <modify-function signature="toUnicode(const char*,int)" remove="all" />
     <modify-function signature="toUnicode(QString*,const char*,int)" remove="all" />
     <!-- ### -->
@@ -3772,10 +3773,34 @@
     <!-- This isn't part of Qt public API -->
     <modify-function signature="enclosingMetaObject()const" remove="all" />
   </value-type>
+
   <value-type name="QMetaEnum">
+    <modify-function signature="keyToValue(const char*, bool*) const" allow-thread="yes">
+        <modify-argument index="2">
+            <remove-argument />
+        </modify-argument>
+        <modify-argument index="return">
+            <replace-type modified-type="PyTuple" />
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_args,bool*"/>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="keysToValue(const char*, bool*) const" allow-thread="yes">
+        <modify-argument index="2">
+            <remove-argument />
+        </modify-argument>
+        <modify-argument index="return">
+            <replace-type modified-type="PyTuple" />
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_args,bool*"/>
+        </inject-code>
+    </modify-function>
     <!-- This isn't part of Qt public API -->
     <modify-function signature="enclosingMetaObject()const" remove="all" />
   </value-type>
+
   <!-- From Qt4.6 -->
   <object-type name="QAbstractAnimation" since="4.6">
     <enum-type name="DeletionPolicy"/>
@@ -4204,5 +4229,8 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   <suppress-warning text="skipping function '*', unmatched return type '*'"/>
   <suppress-warning text="skipping function '*', unmatched parameter type '*'"/>
 
+  <suppress-warning text="enum 'q_static_assert_result39' does not have a type entry or is not an enum"/>
+  <suppress-warning text="horribly broken type ''"/>
+  <suppress-warning text="Pure virtual method 'QTextCodec::convertFromUnicode(const QChar*,int,QTextCodec::ConverterState*)const' must be implement but was completely removed on type system." />
 
 </typesystem>

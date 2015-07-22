@@ -3221,9 +3221,7 @@
     </add-function>
   </value-type>
 
-  <suppress-warning text="enum 'q_static_assert_result39' does not have a type entry or is not an enum"/>
   <suppress-warning text="template baseclass 'QListSpecialMethods&lt;T&gt;' of 'QList' is not known"/>
-  <suppress-warning text="horribly broken type ''"/>
   <suppress-warning text="template baseclass 'QGenericMatrix&lt;float&gt;' of '*' is not known"/>
 
   <!-- Qt5: note: the unnamed enum cannot be rejected by
