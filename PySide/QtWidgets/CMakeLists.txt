@@ -86,9 +86,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsproxywidget_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsrectitem_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsrotation_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsscale_wrapper.cpp
-### cannot initialize a parameter of type 'QGraphicsItem **' with an
-###      lvalue of type '::QGraphicsItem *'  ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsscene_wrapper.cpp
-### how could this ever work in Qt4?
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsscene_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsscenecontextmenuevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsscenedragdropevent_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicssceneevent_wrapper.cpp
@@ -101,9 +99,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsscenewheelevent_wrapper.cp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicssimpletextitem_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicstextitem_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicstransform_wrapper.cpp
-### cannot initialize a parameter of type 'QGraphicsItem **' with an
-###      lvalue of type '::QGraphicsItem *'  ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsview_wrapper.cpp
-### how could this ever work in Qt4?
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicsview_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgraphicswidget_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgridlayout_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWidgets/qgroupbox_wrapper.cpp

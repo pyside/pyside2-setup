@@ -1541,7 +1541,7 @@
     </modify-function>
 
     <!-- TODO: Support conversions on virtual function -->
-    <modify-function signature="drawItems(QPainter*, int, QGraphicsItem**, const QStyleOptionGraphicsItem*, QWidget*)">
+    <modify-function signature="drawItems(QPainter*, int, QGraphicsItem**, const QStyleOptionGraphicsItem*)">
         <modify-argument index="2">
             <remove-argument/>
             <conversion-rule class="native">

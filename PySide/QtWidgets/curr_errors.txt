@@ -6,12 +6,8 @@ Fixing class inheritance...                  [OK]
 Detecting inconsistencies in class model...  [OK]
 [OK]
 
-    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'QString *' in function 'QFileDialog::getSaveFileUrl(QWidget * parent, const QString & caption, const QUrl & dir, const QString & filter, QString * selectedFilter, QFlags<QFileDialog::Option> options, const QStringList & supportedSchemes)'.
-    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'QString *' in function 'QFileDialog::getOpenFileUrls(QWidget * parent, const QString & caption, const QUrl & dir, const QString & filter, QString * selectedFilter, QFlags<QFileDialog::Option> options, const QStringList & supportedSchemes)'.
-    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'bool *' in function 'QInputDialog::getMultiLineText(QWidget * parent, const QString & title, const QString & label, const QString & text, bool * ok, QFlags<Qt::WindowType> flags, QFlags<Qt::InputMethodHint> inputMethodHints)'.
-    signature 'drawItems(QPainter*,int,QGraphicsItem**,const QStyleOptionGraphicsItem*,QWidget*)' for function modification in 'QGraphicsView' not found. Possible candidates: drawItems(QPainter*,int,QGraphicsItem**,const QStyleOptionGraphicsItem*) in QGraphicsView
-    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'QString *' in function 'QFileDialog::getOpenFileUrl(QWidget * parent, const QString & caption, const QUrl & dir, const QString & filter, QString * selectedFilter, QFlags<QFileDialog::Option> options, const QStringList & supportedSchemes)'.
     There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'bool *' in function 'QColorDialog::getRgba(unsigned int rgba, bool * ok, QWidget * parent)'.
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'bool *' in function 'QInputDialog::getMultiLineText(QWidget * parent, const QString & title, const QString & label, const QString & text, bool * ok, QFlags<Qt::WindowType> flags, QFlags<Qt::InputMethodHint> inputMethodHints)'.
     
 
-Done, 6 warnings (1050 known issues)
+Done, 2 warnings (1050 known issues)
