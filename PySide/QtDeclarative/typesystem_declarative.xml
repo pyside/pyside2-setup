@@ -21,7 +21,7 @@
 <typesystem package="PySide.QtDeclarative">
     <load-typesystem name="typesystem_core.xml" generate="no"/>
     <load-typesystem name="typesystem_network.xml" generate="no"/>
-    <load-typesystem name="typesystem_gui.xml" generate="no"/>
+    <load-typesystem name="typesystem_widgets.xml" generate="no"/>
 
     <add-function signature="qmlRegisterType(PyTypeObject, const char*, int, int, const char*)" return-type="int">
         <inject-documentation format="target" mode="append">

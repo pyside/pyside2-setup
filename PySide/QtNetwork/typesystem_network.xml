@@ -263,7 +263,7 @@
     </value-type>
 
     <value-type name="QSslCipher"/>
-    
+
     <value-type name="QSslConfiguration">
         <enum-type name="NextProtocolNegotiationStatus" />
     </value-type>
@@ -276,7 +276,7 @@
     <object-type name="QSslSocket">
         <enum-type name="SslMode"/>
         <enum-type name="PeerVerifyMode"/>
-        <modify-function signature="connectToHostEncrypted(const QString&amp;, quint16, QFlags&lt;QIODevice::OpenModeFlag>)" allow-thread="yes" />
+        <modify-function signature="connectToHostEncrypted(const QString&amp;, quint16, QFlags&lt;QIODevice::OpenModeFlag>, QAbstractSocket::NetworkLayerProtocol)" allow-thread="yes" />
         <modify-function signature="waitForEncrypted(int)" allow-thread="yes" />
     </object-type>
     <!-- The above entries may be present in the system or not. Keep this section organized. -->
