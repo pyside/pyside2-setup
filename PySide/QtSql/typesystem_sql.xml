@@ -98,8 +98,10 @@
   </value-type>
 
   <object-type name="QSqlDriver">
+    <enum-type name="DbmsType" />
     <enum-type name="DriverFeature"/>
     <enum-type name="IdentifierType"/>
+    <enum-type name="NotificationSource" />
     <enum-type name="StatementType"/>
     <extra-includes>
         <include file-name="QSqlQuery" location="global"/>
@@ -130,6 +132,7 @@
     </extra-includes>
   </object-type>
   <object-type name="QSqlRelationalTableModel">
+    <enum-type name="JoinMode" />
     <extra-includes>
         <include file-name="QStringList" location="global"/>
         <include file-name="QSize" location="global"/>
