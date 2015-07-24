@@ -1,3 +1,7 @@
+The following two warnings do not want to go away, and I have no clue
+where the difference to Qt4.8 is. Can somebody please help?
+---------------------------------------------------------------------
+
 Generating class model...                    [OK]
 Generating enum model...                     [OK]
 Generating namespace model...                [OK]
