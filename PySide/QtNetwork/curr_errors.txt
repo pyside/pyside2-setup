@@ -1,0 +1,43 @@
+Generating class model...                    [WARNING]
+    enum 'QAbstractSocket::PauseMode' does not have a type entry or is not an enum
+    enum 'QNetworkSession::UsagePolicy' does not have a type entry or is not an enum
+    Unable to decide type of property: 'SocketOptions' in class 'QLocalServer'
+    enum 'QAbstractSocket::BindFlag' does not have a type entry or is not an enum
+    enum 'QLocalServer::SocketOption' does not have a type entry or is not an enum
+    
+
+Generating enum model...                     [OK]
+Generating namespace model...                [WARNING]
+    enum 'QSsl::SslOption' does not have a type entry or is not an enum
+    enum 'QSsl::AlternativeNameEntryType' does not have a type entry or is not an enum
+    
+
+Resolving typedefs...                        [OK]
+Fixing class inheritance...                  [OK]
+Detecting inconsistencies in class model...  [OK]
+[OK]
+    enum 'QFtp::Command' is specified in typesystem, but not declared
+    enum 'QFtp::TransferType' is specified in typesystem, but not declared
+    enum 'QHttp::ConnectionMode' is specified in typesystem, but not declared
+    type 'QUrlInfo' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QHttp' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QHttpRequestHeader' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QHttp::Error' is specified in typesystem, but not declared
+    type 'QHttpHeader' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QHttpResponseHeader' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QSsl::AlternateNameEntryType' is specified in typesystem, but not declared
+    type 'QFtp' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QFtp::TransferMode' is specified in typesystem, but not declared
+    enum 'QUrlInfo::PermissionSpec' is specified in typesystem, but not declared
+    enum 'QUdpSocket::BindFlag' is specified in typesystem, but not declared
+    enum 'QSslCertificate::SubjectInfo' is specified in typesystem, but not declared
+    enum 'QFtp::State' is specified in typesystem, but not declared
+    enum 'QFtp::Error' is specified in typesystem, but not declared
+    enum 'QHttp::State' is specified in typesystem, but not declared
+    
+
+
+    signature 'connectToHost(QString,quint16,QFlags<QIODevice::OpenModeFlag>)' for function modification in 'QAbstractSocket' not found. Possible candidates: connectToHost(QHostAddress,quint16,QFlags<QIODevice::OpenModeFlag>) in QAbstractSocket, connectToHost(QString,quint16,QFlags<QIODevice::OpenModeFlag>,QAbstractSocket::NetworkLayerProtocol) in QAbstractSocket
+    
+
+Done, 26 warnings (421 known issues)

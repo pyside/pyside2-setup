@@ -1,0 +1,14 @@
+Generating class model...                    [WARNING]
+    enum 'QSqlDriver::NotificationSource' does not have a type entry or is not an enum
+    enum 'QSqlDriver::DbmsType' does not have a type entry or is not an enum
+    enum 'QSqlRelationalTableModel::JoinMode' does not have a type entry or is not an enum
+    
+
+Generating enum model...                     [OK]
+Generating namespace model...                [OK]
+Resolving typedefs...                        [OK]
+Fixing class inheritance...                  [OK]
+Detecting inconsistencies in class model...  [OK]
+[OK]
+
+Done, 3 warnings (1117 known issues)
