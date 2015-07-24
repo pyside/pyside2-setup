@@ -1,95 +1,37 @@
 Generating class model...                    [WARNING]
-    Unable to decide type of property: 'SocketOptions' in class 'QLocalServer'
     enum 'QWebSettings::ThirdPartyCookiePolicy' does not have a type entry or is not an enum
-    enum 'QAbstractSocket::BindFlag' does not have a type entry or is not an enum
     enum 'QWebSecurityOrigin::SubdomainSetting' does not have a type entry or is not an enum
-    enum 'QAbstractSocket::PauseMode' does not have a type entry or is not an enum
-    enum 'QNetworkSession::UsagePolicy' does not have a type entry or is not an enum
-    enum 'QSslConfiguration::NextProtocolNegotiationStatus' does not have a type entry or is not an enum
-    enum 'QLocalServer::SocketOption' does not have a type entry or is not an enum
     
 
 Generating enum model...                     [OK]
-Generating namespace model...                [WARNING]
-    enum 'QSsl::SslOption' does not have a type entry or is not an enum
-    enum 'QSsl::AlternativeNameEntryType' does not have a type entry or is not an enum
-    
-
+Generating namespace model...                [OK]
 Resolving typedefs...                        [OK]
 Fixing class inheritance...                  [OK]
 Detecting inconsistencies in class model...  [OK]
 [OK]
-    enum 'QWebPage::WebWindowType' is specified in typesystem, but not declared
-    enum 'QWebPage::Extension' is specified in typesystem, but not declared
-    type 'QWebPage::ErrorPageExtensionReturn' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QWebPage::PermissionPolicy' is specified in typesystem, but not declared
-    type 'QHttpResponseHeader' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QWebPage::LinkDelegationPolicy' is specified in typesystem, but not declared
-    type 'QWebPage::ErrorPageExtensionOption' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QFtp::State' is specified in typesystem, but not declared
-    enum 'QWebPage::ErrorDomain' is specified in typesystem, but not declared
-    type 'QUrlInfo' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QHttp::ConnectionMode' is specified in typesystem, but not declared
-    type 'QFtp' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QFtp::TransferMode' is specified in typesystem, but not declared
-    enum 'QUrlInfo::PermissionSpec' is specified in typesystem, but not declared
-    type 'QWebPage::ExtensionOption' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    type 'QWebView' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    type 'QWebHitTestResult' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QFtp::TransferType' is specified in typesystem, but not declared
-    enum 'QFtp::Command' is specified in typesystem, but not declared
-    enum 'QSsl::AlternateNameEntryType' is specified in typesystem, but not declared
-    type 'QHttpRequestHeader' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QWebFrame::RenderLayer' is specified in typesystem, but not declared
-    type 'QHttpHeader' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QWebPage::WebAction' is specified in typesystem, but not declared
-    type 'QHttp' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    type 'QGraphicsWebView' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    type 'QWebPage::ExtensionReturn' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QUdpSocket::BindFlag' is specified in typesystem, but not declared
-    type 'QWebPage::ChooseMultipleFilesExtensionReturn' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QWebPage::FindFlag' is specified in typesystem, but not declared
-    enum 'QFtp::Error' is specified in typesystem, but not declared
-    enum 'QHttp::State' is specified in typesystem, but not declared
-    type 'QWebInspector' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
     enum 'QWebPage::Feature' is specified in typesystem, but not declared
     type 'QWebPage::ChooseMultipleFilesExtensionOption' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    type 'QWebFrame' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QWebPage::ErrorPageExtensionOption' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
     enum 'QWebPage::NavigationType' is specified in typesystem, but not declared
+    enum 'QWebPage::PermissionPolicy' is specified in typesystem, but not declared
+    enum 'QWebPage::WebAction' is specified in typesystem, but not declared
+    enum 'QWebFrame::RenderLayer' is specified in typesystem, but not declared
+    enum 'QWebPage::LinkDelegationPolicy' is specified in typesystem, but not declared
+    type 'QWebFrame' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QWebPage::Extension' is specified in typesystem, but not declared
+    type 'QWebPage::ErrorPageExtensionReturn' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QWebPage::ChooseMultipleFilesExtensionReturn' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QWebPage::FindFlag' is specified in typesystem, but not declared
+    type 'QWebInspector' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QWebPage::WebWindowType' is specified in typesystem, but not declared
+    type 'QGraphicsWebView' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    enum 'QWebPage::ErrorDomain' is specified in typesystem, but not declared
+    type 'QWebView' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
     type 'QWebPage' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    enum 'QHttp::Error' is specified in typesystem, but not declared
+    type 'QWebPage::ExtensionOption' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QWebHitTestResult' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    type 'QWebPage::ExtensionReturn' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
     
 
 
-    signature 'connectToHost(QString,quint16,QFlags<QIODevice::OpenModeFlag>)' for function modification in 'QAbstractSocket' not found. Possible candidates: connectToHost(QHostAddress,quint16,QFlags<QIODevice::OpenModeFlag>) in QAbstractSocket, connectToHost(QString,quint16,QFlags<QIODevice::OpenModeFlag>,QAbstractSocket::NetworkLayerProtocol) in QAbstractSocket
-    signature 'connectToHostEncrypted(QString,quint16,QFlags<QIODevice::OpenModeFlag>)' for function modification in 'QSslSocket' not found. Possible candidates: connectToHostEncrypted(QString,quint16,QFlags<QIODevice::OpenModeFlag>,QAbstractSocket::NetworkLayerProtocol) in QSslSocket, connectToHostEncrypted(QString,quint16,QString,QFlags<QIODevice::OpenModeFlag>,QAbstractSocket::NetworkLayerProtocol) in QSslSocket
-    
-
-Done, 51 warnings (587 known issues)
-['/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/PySide/QtWebKit/filter_init.py',
- '/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/PySide/QtWebKit/PySide/QtWebKit/qwebdatabase_wrapper.cpp',
- '/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/PySide/QtWebKit/PySide/QtWebKit/qwebelementcollection_wrapper.cpp',
- '/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/PySide/QtWebKit/PySide/QtWebKit/qwebhistory_wrapper.cpp',
- '/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/PySide/QtWebKit/PySide/QtWebKit/qwebhistoryinterface_wrapper.cpp',
- '/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/PySide/QtWebKit/PySide/QtWebKit/qwebhistoryitem_wrapper.cpp',
- '/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/PySide/QtWebKit/PySide/QtWebKit/qwebpluginfactory_mimetype_wrapper.cpp',
- '/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/PySide/QtWebKit/PySide/QtWebKit/qwebpluginfactory_plugin_wrapper.cpp',
- '/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/PySide/QtWebKit/PySide/QtWebKit/qwebpluginfactory_wrapper.cpp',
- '/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/PySide/QtWebKit/PySide/QtWebKit/qwebsecurityorigin_wrapper.cpp',
- '/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/PySide/QtWebKit/PySide/QtWebKit/qwebsettings_wrapper.cpp',
- '/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/PySide/QtWebKit/PySide/QtWebKit/webcore_wrapper.cpp',
- '/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/PySide/QtWebKit/PySide/QtWebKit/qtwebkit_module_wrapper.cpp']
-qwebdatabase_wrapper
-qwebelementcollection_wrapper
-qwebhistory_wrapper
-qwebhistoryinterface_wrapper
-qwebhistoryitem_wrapper
-qwebpluginfactory_mimetype_wrapper
-qwebpluginfactory_plugin_wrapper
-qwebpluginfactory_wrapper
-qwebsecurityorigin_wrapper
-qwebsettings_wrapper
-webcore_wrapper
-qtwebkit_module_wrapper
-/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/PySide/QtWebKit/PySide/QtWebKit/qtwebkit_module_wrapper.cpp
-Removals: ['QWebElement']
+Done, 24 warnings (575 known issues)
