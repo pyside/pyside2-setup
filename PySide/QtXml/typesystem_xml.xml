@@ -223,7 +223,6 @@
     <value-type name="QDomNode">
         <enum-type name="EncodingPolicy"/>
         <enum-type name="NodeType"/>
-        <modify-function signature="save(QTextStream&amp;, int)const" allow-thread="yes"/>
         <modify-function signature="save(QTextStream&amp;, int, QDomNode::EncodingPolicy)const" allow-thread="yes"/>
     </value-type>
 
