@@ -425,6 +425,10 @@ QT_END_NAMESPACE
 #  include <QtWebKit/QtWebKit>
 #endif
 
+#if @Qt5WebKitWidgets_FOUND@
+#  include <QtWebKitWidgets/QtWebKitWidgets>
+#endif
+
 #if @Qt5Test_FOUND@
 #  include <QtTest/qtest_gui.h>
 #  include "pysideqtesttouch.h"

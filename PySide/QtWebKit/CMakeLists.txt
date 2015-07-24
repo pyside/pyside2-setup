@@ -47,7 +47,7 @@ set(QtWebKit_libraries      pyside
                             ${Qt5Gui_LIBRARIES}
                             ${Qt5Core_LIBRARIES}
                             )
-set(QtWebKit_deps QtWidgets QtNetwork)
+set(QtWebKit_deps QtGui QtNetwork)
 create_pyside_module(QtWebKit
                      QtWebKit_include_dirs
                      QtWebKit_libraries
