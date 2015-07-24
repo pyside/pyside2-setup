@@ -25,8 +25,8 @@ set(QtWebKitWidgets_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidget
 make_path(QtWebKitWidgets_typesystem_path 
                             ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
                             ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR}
-                            ${QtWebKit_SOURCE_DIR} ${QtNetwork_SOURCE_DIR}
-                            ${QtWebKit_BINARY_DIR} ${QtNetwork_BINARY_DIR}
+                            ${QtWebKit_SOURCE_DIR} ${QtPrintSupport_SOURCE_DIR} ${QtNetwork_SOURCE_DIR}
+                            ${QtWebKit_BINARY_DIR} ${QtPrintSupport_BINARY_DIR} ${QtNetwork_BINARY_DIR}
                             ${QtWebKitWidgets_SOURCE_DIR})
 
 set(QtWebKitWidgets_include_dirs
@@ -36,6 +36,7 @@ set(QtWebKitWidgets_include_dirs
                             ${Qt5Gui_INCLUDE_DIRS}
                             ${Qt5Widgets_INCLUDE_DIRS}
                             ${Qt5WebKit_INCLUDE_DIRS}
+                            ${Qt5PrintSupport_INCLUDE_DIRS}
                             ${Qt5Network_INCLUDE_DIRS}
                             ${Qt5WebKitWidgets_INCLUDE_DIRS}
                             ${SHIBOKEN_INCLUDE_DIR}
@@ -44,6 +45,7 @@ set(QtWebKitWidgets_include_dirs
                             ${QtCore_BINARY_DIR}/PySide/QtCore/
                             ${QtGui_BINARY_DIR}/PySide/QtGui/
                             ${QtWidgets_BINARY_DIR}/PySide/QtWidgets/
+                            ${QtPrintSupport_BINARY_DIR}/PySide/QtPrintSupport/
                             ${QtWebKit_BINARY_DIR}/PySide/QtWebKit/
                             ${QtNetwork_BINARY_DIR}/PySide/QtNetwork/ )
 set(QtWebKitWidgets_libraries      pyside
@@ -55,7 +57,7 @@ set(QtWebKitWidgets_libraries      pyside
                             ${Qt5Gui_LIBRARIES}
                             ${Qt5Core_LIBRARIES}
                             )
-set(QtWebKitWidgets_deps QtWidgets QtNetwork)
+set(QtWebKitWidgets_deps QtWidgets QtPrintSupport QtNetwork)
 create_pyside_module(QtWebKitWidgets
                      QtWebKitWidgets_include_dirs
                      QtWebKitWidgets_libraries

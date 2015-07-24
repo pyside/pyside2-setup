@@ -24,6 +24,7 @@
   <load-typesystem name="typesystem_widgets.xml" generate="no"/>
   <load-typesystem name="typesystem_webkit.xml" generate="no"/>
   <load-typesystem name="typesystem_network.xml" generate="no"/>
+  <load-typesystem name="typesystem_printsupport.xml" generate="no"/>
 
   <object-type name="QWebView">
     <modify-function signature="setPage(QWebPage*)">
@@ -47,7 +48,7 @@
   <object-type name="QWebFrame">
     <enum-type name="RenderLayer" flags="RenderLayers" since="4.6"/>
     <enum-type name="ValueOwnership" />
-    <modify-function signature="addToJavaScriptWindowObject(QString,QObject*)">
+    <modify-function signature="addToJavaScriptWindowObject(QString,QObject*,QWebFrame::ValueOwnership)">
       <modify-argument index="2">
           <parent index="this" action="add"/>
       </modify-argument>
