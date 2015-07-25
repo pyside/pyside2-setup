@@ -123,8 +123,11 @@ endmacro()
 
 
 # Only add subdirectory if the associated Qt module is found.
+# As a side effect, this macro now also defines the variable ${name}_GEN_DIR
+# and must be called for every subproject.
 macro(HAS_QT_MODULE var name)
     if (NOT DISABLE_${name} AND ${var})
+        set(${name}_GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/${name}/PySide/${name})
         add_subdirectory(${name})
     else()
         # Used on documentation to skip modules
