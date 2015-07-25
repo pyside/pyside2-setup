@@ -1,6 +1,7 @@
 project(shibokengenerator)
 
 find_package(Qt5Xml)
+find_package(Qt5XmlPatterns)
 
 set(shiboken_SRC
 generator.cpp
@@ -24,6 +25,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/shiboken
                     ${apiextractor_SOURCE_DIR}
                     ${Qt5Core_INCLUDE_DIRS}
                     ${Qt5Xml_INCLUDE_DIRS}
+                    ${Qt5XmlPatterns_INCLUDE_DIRS}
                     )
 
 add_executable(shiboken ${shiboken_SRC})
@@ -33,6 +35,7 @@ target_link_libraries(shiboken
                       apiextractor
                       ${Qt5Core_LIBRARIES}
                       ${Qt5Xml_LIBRARIES}
+                      ${Qt5XmlPatterns_LIBRARIES}
                       )
 
 configure_file(shibokenconfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/shibokenconfig.h" @ONLY)

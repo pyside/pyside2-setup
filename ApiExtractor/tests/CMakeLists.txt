@@ -2,6 +2,7 @@ find_package(Qt5Core)
 find_package(Qt5Gui)
 find_package(Qt5Test)
 find_package(Qt5Xml)
+find_package(Qt5XmlPatterns)
 
 macro(declare_test testname)
     # gone: qt4_automoc("${testname}.cpp")
@@ -13,6 +14,7 @@ macro(declare_test testname)
                         )
     target_link_libraries(${testname}
                           ${Qt5Xml_LIBRARIES}
+                          ${Qt5XmlPatterns_LIBRARIES}
                           ${Qt5Test_LIBRARIES}
                           ${Qt5Core_LIBRARIES}
                           ${Qt5Gui_LIBRARIES}

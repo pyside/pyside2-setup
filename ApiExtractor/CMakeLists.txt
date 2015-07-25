@@ -23,8 +23,6 @@ endif ()
 
 set(QT_USE_QTCORE 1)
 set(QT_USE_QTXML 1)
-# no more supported: include(${QT_USE_FILE})
-add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 add_definitions(-DRXX_ALLOCATOR_INIT_0)
@@ -88,7 +86,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}/parser/rpp
                     ${APIEXTRACTOR_EXTRA_INCLUDES}
                     ${Qt5Core_INCLUDE_DIRS}
-                    ${QtXml_INCLUDE_DIRS}
+                    ${Qt5Xml_INCLUDE_DIRS}
                     )
 
 add_library(apiextractor STATIC ${apiextractor_SRC} ${apiextractor_RCCS_SRC})
