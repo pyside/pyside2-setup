@@ -158,33 +158,31 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qwindow_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qwindowstatechangeevent_wrapper.cpp
 
 ${SPECIFIC_OS_FILES}
+# module is always needed
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/qtgui_module_wrapper.cpp
 )
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/typesystem_gui.xml.in"
                "${CMAKE_CURRENT_BINARY_DIR}/typesystem_gui.xml" @ONLY)
 
-# fake these variables for qt5
-set(QtGui_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(QtGui_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui)
-
 make_path(QtGui_typesystem_path ${QtCore_SOURCE_DIR} ${QtCore_BINARY_DIR}
                                 ${QtGui_SOURCE_DIR})
 
-set(QtGui_include_dirs  ${CMAKE_CURRENT_SOURCE_DIR}
-                        ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtGui/
+set(QtGui_include_dirs  ${QtGui_SOURCE_DIR}
+                        ${QtGui_BINARY_DIR}
                         ${pyside_SOURCE_DIR}
                         ${Qt5Core_INCLUDE_DIRS}
                         ${Qt5Gui_INCLUDE_DIRS}
                         ${SHIBOKEN_INCLUDE_DIR}
                         ${libpyside_SOURCE_DIR}
                         ${SHIBOKEN_PYTHON_INCLUDE_DIR}
-                        ${QtCore_BINARY_DIR}/PySide/QtCore/)
+                        ${QtCore_BINARY_DIR}/PySide/QtCore/
+                        )
 set(QtGui_libraries   pyside
                       ${SHIBOKEN_PYTHON_LIBRARIES}
                       ${SHIBOKEN_LIBRARY}
                       ${Qt5Gui_LIBRARIES})
-set(QtGui_deps "QtCore")
+set(QtGui_deps QtCore)
 
 create_pyside_module(QtGui
                      QtGui_include_dirs

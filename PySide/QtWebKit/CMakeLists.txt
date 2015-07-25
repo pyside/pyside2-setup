@@ -13,21 +13,16 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/qwebpluginfactory_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/qwebsecurityorigin_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/qwebsettings_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/webcore_wrapper.cpp
-
-# this file is always needed
+# module is always needed
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/qtwebkit_module_wrapper.cpp
 )
-
-# fake these variables for qt5
-set(QtWebKit_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(QtWebKit_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit)
 
 make_path(QtWebKit_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtNetwork_SOURCE_DIR}
                                    ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtNetwork_BINARY_DIR}
                                    ${QtWebKit_SOURCE_DIR})
 
-set(QtWebKit_include_dirs   ${CMAKE_CURRENT_SOURCE_DIR}
-                            ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/
+set(QtWebKit_include_dirs   ${QtWebKit_SOURCE_DIR}
+                            ${QtWebKit_BINARY_DIR}
                             ${Qt5Core_INCLUDE_DIRS}
                             ${Qt5Gui_INCLUDE_DIRS}
                             ${Qt5Network_INCLUDE_DIRS}
@@ -38,7 +33,8 @@ set(QtWebKit_include_dirs   ${CMAKE_CURRENT_SOURCE_DIR}
                             ${QtCore_BINARY_DIR}/PySide/QtCore/
                             ${QtGui_BINARY_DIR}/PySide/QtGui/
                             ${QtWidgets_BINARY_DIR}/PySide/QtWidgets/
-                            ${QtNetwork_BINARY_DIR}/PySide/QtNetwork/ )
+                            ${QtNetwork_BINARY_DIR}/PySide/QtNetwork/
+                            )
 set(QtWebKit_libraries      pyside
                             ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${SHIBOKEN_LIBRARY}

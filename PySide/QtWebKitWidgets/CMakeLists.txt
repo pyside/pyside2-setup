@@ -14,13 +14,9 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qwebpage_extensionreturn_wrap
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qwebpage_viewportattributes_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qwebpage_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qwebview_wrapper.cpp
-# this file is always needed
+# module is always needed
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qtwebkitwidgets_module_wrapper.cpp
 )
-
-# fake these variables for qt5
-set(QtWebKitWidgets_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(QtWebKitWidgets_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets)
 
 make_path(QtWebKitWidgets_typesystem_path 
                             ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
@@ -30,8 +26,8 @@ make_path(QtWebKitWidgets_typesystem_path
                             ${QtWebKitWidgets_SOURCE_DIR})
 
 set(QtWebKitWidgets_include_dirs
-                            ${CMAKE_CURRENT_SOURCE_DIR}
-                            ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/
+                            ${QtWebKitWidgets_SOURCE_DIR}
+                            ${QtWebKitWidgets_BINARY_DIR}
                             ${Qt5Core_INCLUDE_DIRS}
                             ${Qt5Gui_INCLUDE_DIRS}
                             ${Qt5Widgets_INCLUDE_DIRS}
@@ -47,7 +43,8 @@ set(QtWebKitWidgets_include_dirs
                             ${QtWidgets_BINARY_DIR}/PySide/QtWidgets/
                             ${QtPrintSupport_BINARY_DIR}/PySide/QtPrintSupport/
                             ${QtWebKit_BINARY_DIR}/PySide/QtWebKit/
-                            ${QtNetwork_BINARY_DIR}/PySide/QtNetwork/ )
+                            ${QtNetwork_BINARY_DIR}/PySide/QtNetwork/
+                            )
 set(QtWebKitWidgets_libraries      pyside
                             ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${SHIBOKEN_LIBRARY}

@@ -20,6 +20,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativepropertyvaluesource
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativeproperty_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativescriptstring_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativeview_wrapper.cpp
+# module is always needed
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qtdeclarative_module_wrapper.cpp
 )
 
@@ -27,19 +28,19 @@ make_path(QtDeclarative_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR}
                                         ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR} ${QtNetwork_BINARY_DIR}
                                         ${QtDeclarative_SOURCE_DIR})
 
-set(QtDeclarative_include_dirs  ${CMAKE_CURRENT_SOURCE_DIR}
-                            ${Qt5Core_INCLUDE_DIRS}
-                            ${Qt5Gui_INCLUDE_DIRS}
-                            ${Qt5Network_INCLUDE_DIRS}
-                            ${Qt5Declarative_INCLUDE_DIRS}
-                            ${SHIBOKEN_PYTHON_INCLUDE_DIR}
-                            ${SHIBOKEN_INCLUDE_DIR}
-                            ${libpyside_SOURCE_DIR}
-                            ${QtWidgets_BINARY_DIR}/PySide/QtWidgets/
-                            ${QtGui_BINARY_DIR}/PySide/QtGui/
-                            ${QtCore_BINARY_DIR}/PySide/QtCore/
-                            ${QtNetwork_BINARY_DIR}/PySide/QtNetwork/
-                            ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative)
+set(QtDeclarative_include_dirs  ${QtDeclarative_SOURCE_DIR}
+                                ${Qt5Core_INCLUDE_DIRS}
+                                ${Qt5Gui_INCLUDE_DIRS}
+                                ${Qt5Network_INCLUDE_DIRS}
+                                ${Qt5Declarative_INCLUDE_DIRS}
+                                ${SHIBOKEN_PYTHON_INCLUDE_DIR}
+                                ${SHIBOKEN_INCLUDE_DIR}
+                                ${libpyside_SOURCE_DIR}
+                                ${QtWidgets_BINARY_DIR}/PySide/QtWidgets/
+                                ${QtGui_BINARY_DIR}/PySide/QtGui/
+                                ${QtCore_BINARY_DIR}/PySide/QtCore/
+                                ${QtNetwork_BINARY_DIR}/PySide/QtNetwork/
+                                ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative)
 
 set(QtDeclarative_libraries   pyside
                               ${SHIBOKEN_PYTHON_LIBRARIES}
@@ -51,7 +52,6 @@ set(QtDeclarative_libraries   pyside
                               ${Qt5Svg_LIBRARIES}
                               ${Qt5Sql_LIBRARIES}
                               ${Qt5XmlPatterns_LIBRARIES}
-                              ### deprecated ${QT_QTOPENGL_LIBRARIES}
                               ${Qt5Declarative_LIBRARIES})
 
 set(QtDeclarative_deps QtWidgets QtNetwork)

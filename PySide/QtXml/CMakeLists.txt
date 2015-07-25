@@ -18,7 +18,6 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXml/qdomnodelist_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXml/qdomnotation_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXml/qdomprocessinginstruction_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXml/qdomtext_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXml/qtxml_module_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXml/qxmlattributes_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXml/qxmlcontenthandler_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXml/qxmldeclhandler_wrapper.cpp
@@ -33,29 +32,29 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXml/qxmlnamespacesupport_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXml/qxmlparseexception_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXml/qxmlreader_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXml/qxmlsimplereader_wrapper.cpp
+# module is always needed
+${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXml/qtxml_module_wrapper.cpp
 )
-
-# fake these variables for qt5
-set(QtXml_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(QtXml_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXml)
 
 make_path(QtXml_typesystem_path ${QtCore_SOURCE_DIR} ${QtCore_BINARY_DIR}
                                 ${QtXml_SOURCE_DIR})
 
-set(QtXml_include_dirs      ${CMAKE_CURRENT_SOURCE_DIR}
-                            ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXml
+set(QtXml_include_dirs      ${QtXml_SOURCE_DIR}
+                            ${QtXml_BINARY_DIR}
                             ${CMAKE_SOURCE_DIR}
                             ${Qt5Core_INCLUDE_DIRS}
                             ${Qt5Xml_INCLUDE_DIRS}
                             ${SHIBOKEN_INCLUDE_DIR}
                             ${libpyside_SOURCE_DIR}
                             ${SHIBOKEN_PYTHON_INCLUDE_DIR}
-                            ${QtCore_BINARY_DIR}/PySide/QtCore)
+                            ${QtCore_BINARY_DIR}/PySide/QtCore
+                            )
 set(QtXml_libraries         pyside
                             ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${SHIBOKEN_LIBRARY}
                             ${Qt5Xml_LIBRARIES})
 set(QtXml_deps QtCore)
+
 create_pyside_module(QtXml
                      QtXml_include_dirs
                      QtXml_libraries

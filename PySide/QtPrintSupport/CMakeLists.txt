@@ -9,20 +9,16 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport/qprinter_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport/qprinterinfo_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport/qprintpreviewdialog_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport/qprintpreviewwidget_wrapper.cpp
-# always needed
+# module is always needed
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport/qtprintsupport_module_wrapper.cpp
 )
-
-# fake these variables for qt5
-set(QtPrintSupport_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(QtPrintSupport_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport)
 
 make_path(QtPrintSupport_typesystem_path    ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
                                             ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR}
                                             ${QtPrintSupport_SOURCE_DIR})
 
-set(QtPrintSupport_include_dirs ${CMAKE_CURRENT_SOURCE_DIR}
-                                ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport
+set(QtPrintSupport_include_dirs ${QtPrintSupport_SOURCE_DIR}
+                                ${QtPrintSupport_BINARY_DIR}
                                 ${Qt5Core_INCLUDE_DIRS}
                                 ${Qt5Gui_INCLUDE_DIRS}
                                 ${Qt5Widgets_INCLUDE_DIRS}

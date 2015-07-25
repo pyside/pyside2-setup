@@ -32,19 +32,23 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qtcpserver_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qtcpsocket_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qudpsocket_wrapper.cpp
 ${QtNetwork_OPTIONAL_SRC}
-# always needed
+# module is always needed
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qtnetwork_module_wrapper.cpp
 )
 
-set(QtNetwork_typesystem_path "${QtCore_SOURCE_DIR}${PATH_SEP}${QtCore_BINARY_DIR}")
-set(QtNetwork_include_dirs  ${CMAKE_CURRENT_SOURCE_DIR}
-                            ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/
+make_path(QtNetwork_typesystem_path ${QtCore_SOURCE_DIR}
+                                    ${QtCore_BINARY_DIR}
+                                    ${QtNetwork_SOURCE_DIR})
+
+set(QtNetwork_include_dirs  ${QtNetwork_SOURCE_DIR}
+                            ${QtNetwork_BINARY_DIR}
                             ${Qt5Core_INCLUDE_DIRS}
                             ${Qt5Network_INCLUDE_DIRS}
                             ${SHIBOKEN_INCLUDE_DIR}
                             ${libpyside_SOURCE_DIR}
                             ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                             ${QtCore_BINARY_DIR}/PySide/QtCore/)
+
 set(QtNetwork_libraries pyside
                         ${SHIBOKEN_PYTHON_LIBRARIES}
                         ${SHIBOKEN_LIBRARY}

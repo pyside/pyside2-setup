@@ -128,21 +128,17 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qxmlstreamreader_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qxmlstreamwriter_wrapper.cpp
 
 ${SPECIFIC_OS_FILES}
-# this file is always needed
+# module is always needed
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore/qtcore_module_wrapper.cpp
 )
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/typesystem_core.xml.in"
                "${CMAKE_CURRENT_BINARY_DIR}/typesystem_core.xml" @ONLY)
 
-# fake these variables for qt5
-set(QtCore_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(QtCore_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtCore)
-
 make_path(QtCore_typesystem_path ${QtCore_SOURCE_DIR})
 
-set(QtCore_include_dirs ${CMAKE_CURRENT_SOURCE_DIR}
-                        ${CMAKE_CURRENT_BINARY_DIR}/${BINDING_NAME}/QtCore/
+set(QtCore_include_dirs ${QtCore_SOURCE_DIR}
+                        ${QtCore_BINARY_DIR}
                         ${Qt5Core_INCLUDE_DIRS}
                         ${SHIBOKEN_INCLUDE_DIR}
                         ${libpyside_SOURCE_DIR}
