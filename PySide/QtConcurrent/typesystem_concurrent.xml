@@ -25,6 +25,8 @@
         the name space from QtCore -->
   <namespace-type name="QtConcurrent" target-type="class">
     <enum-type name="ReduceOption" flags="ReduceOptions"/>
+    <enum-type name="ThreadFunctionResult" />
+    <enum-type name="ReduceQueueThrottleLimit" />
     <extra-includes>
       <include file-name="qtconcurrentreducekernel.h" location="global"/>
       <include file-name="qtconcurrentthreadengine.h" location="global"/>

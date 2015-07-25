@@ -12,6 +12,7 @@ make_path(QtConcurrent_typesystem_path  ${QtCore_SOURCE_DIR}
 set(QtConcurrent_include_dirs   ${QtConcurrent_SOURCE_DIR}
                                 ${QtConcurrent_BINARY_DIR}
                                 ${Qt5Core_INCLUDE_DIRS}
+                                ${Qt5Concurrent_INCLUDE_DIRS}
                                 ${SHIBOKEN_INCLUDE_DIR}
                                 ${libpyside_SOURCE_DIR}
                                 ${SHIBOKEN_PYTHON_INCLUDE_DIR}

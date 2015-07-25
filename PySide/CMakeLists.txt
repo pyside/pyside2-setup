@@ -127,7 +127,7 @@ CHECK_PACKAGE_FOUND(Qt5Multimedia)
 # note: the order of this list is relevant for dependencies.
 # For instance: Qt5Printsupport must come before Qt5WebKitWidgets
 HAS_QT_MODULE(Qt5Core_FOUND QtCore)
-HAS_QT_MODULE(Qt5Concurrent_FOUND QtConcurrent)
+### not yet working HAS_QT_MODULE(Qt5Concurrent_FOUND QtConcurrent)
 HAS_QT_MODULE(Qt5Gui_FOUND QtGui)
 HAS_QT_MODULE(Qt5Widgets_FOUND QtWidgets)
 HAS_QT_MODULE(Qt5PrintSupport_FOUND QtPrintSupport)
