@@ -13,13 +13,19 @@ ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport/qprintpreviewwidget_wrapper.cp
 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport/qtprintsupport_module_wrapper.cpp
 )
 
+# fake these variables for qt5
+set(QtPrintSupport_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(QtPrintSupport_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport)
+
 make_path(QtPrintSupport_typesystem_path    ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
                                             ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR}
-                                            )
+                                            ${QtPrintSupport_SOURCE_DIR})
 
 set(QtPrintSupport_include_dirs ${CMAKE_CURRENT_SOURCE_DIR}
                                 ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport
                                 ${Qt5Core_INCLUDE_DIRS}
+                                ${Qt5Gui_INCLUDE_DIRS}
+                                ${Qt5Widgets_INCLUDE_DIRS}
                                 ${Qt5PrintSupport_INCLUDE_DIRS}
                                 ${SHIBOKEN_INCLUDE_DIR}
                                 ${libpyside_SOURCE_DIR}
