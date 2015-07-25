@@ -775,7 +775,6 @@
   <rejection class="" enum-name="QtValidLicenseForGuiModule"/>
   <rejection class="" enum-name="QtValidLicenseForScriptModule"/>
   <rejection class="" enum-name="QtValidLicenseForHelpModule"/>
-  <rejection class="QtConcurrent" enum-name="enum_1"/>
   <rejection class="QAbstractEventDispatcher" function-name="filterEvent"/>
   <rejection class="QAbstractEventDispatcher" function-name="filterNativeEvent"/>
   <rejection class="QAbstractEventDispatcher" function-name="setEventFilter"/>
@@ -3672,15 +3671,6 @@
     <enum-type name="AccessMode"/>
     <enum-type name="SystemSemaphoreError"/>
   </object-type>
-  <!-- Qt5: move to QtConcurrent module
-  <namespace-type name="QtConcurrent" target-type="class">
-    <enum-type name="ReduceOption" flags="ReduceOptions"/>
-    <extra-includes>
-      <include file-name="qtconcurrentreducekernel.h" location="global"/>
-      <include file-name="qtconcurrentthreadengine.h" location="global"/>
-    </extra-includes>
-  </namespace-type>
-  -->
 
   <object-type name="QThreadPool">
     <modify-function signature="start(QRunnable*, int)">
