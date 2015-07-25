@@ -1,23 +1,23 @@
 project(QtXmlPatterns)
 
 set(QtXmlPatterns_SRC
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns/qabstractmessagehandler_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns/qabstracturiresolver_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns/qabstractxmlnodemodel_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns/qabstractxmlreceiver_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns/qsourcelocation_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns/qxmlformatter_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns/qxmlitem_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns/qxmlnamepool_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns/qxmlname_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns/qxmlnodemodelindex_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns/qxmlquery_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns/qxmlresultitems_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns/qxmlschemavalidator_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns/qxmlschema_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns/qxmlserializer_wrapper.cpp
+${QtXmlPatterns_GEN_DIR}/qabstractmessagehandler_wrapper.cpp
+${QtXmlPatterns_GEN_DIR}/qabstracturiresolver_wrapper.cpp
+${QtXmlPatterns_GEN_DIR}/qabstractxmlnodemodel_wrapper.cpp
+${QtXmlPatterns_GEN_DIR}/qabstractxmlreceiver_wrapper.cpp
+${QtXmlPatterns_GEN_DIR}/qsourcelocation_wrapper.cpp
+${QtXmlPatterns_GEN_DIR}/qxmlformatter_wrapper.cpp
+${QtXmlPatterns_GEN_DIR}/qxmlitem_wrapper.cpp
+${QtXmlPatterns_GEN_DIR}/qxmlnamepool_wrapper.cpp
+${QtXmlPatterns_GEN_DIR}/qxmlname_wrapper.cpp
+${QtXmlPatterns_GEN_DIR}/qxmlnodemodelindex_wrapper.cpp
+${QtXmlPatterns_GEN_DIR}/qxmlquery_wrapper.cpp
+${QtXmlPatterns_GEN_DIR}/qxmlresultitems_wrapper.cpp
+${QtXmlPatterns_GEN_DIR}/qxmlschemavalidator_wrapper.cpp
+${QtXmlPatterns_GEN_DIR}/qxmlschema_wrapper.cpp
+${QtXmlPatterns_GEN_DIR}/qxmlserializer_wrapper.cpp
 ## always needed
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtXmlPatterns/qtxmlpatterns_module_wrapper.cpp
+${QtXmlPatterns_GEN_DIR}/qtxmlpatterns_module_wrapper.cpp
 )
 
 make_path(QtXmlPatterns_typesystem_path ${QtCore_SOURCE_DIR} ${QtCore_BINARY_DIR}
@@ -30,7 +30,7 @@ set(QtXmlPatterns_include_dirs  ${QtXmlPatterns_SOURCE_DIR}
                                 ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                                 ${SHIBOKEN_INCLUDE_DIR}
                                 ${libpyside_SOURCE_DIR}
-                                ${QtCore_BINARY_DIR}/PySide/QtCore/
+                                ${QtCore_GEN_DIR}
                                 )
 set(QtXmlPatterns_libraries     pyside
                                 ${SHIBOKEN_PYTHON_LIBRARIES}

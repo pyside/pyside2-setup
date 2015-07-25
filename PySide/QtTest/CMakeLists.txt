@@ -1,10 +1,10 @@
 project(QtTest)
 
 set(QtTest_SRC
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtTest/qtest_pysideqtoucheventsequence_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtTest/qtest_wrapper.cpp
+${QtTest_GEN_DIR}/qtest_pysideqtoucheventsequence_wrapper.cpp
+${QtTest_GEN_DIR}/qtest_wrapper.cpp
 # module is always needed
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtTest/qttest_module_wrapper.cpp
+${QtTest_GEN_DIR}/qttest_module_wrapper.cpp
 )
 
 make_path(QtTest_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
@@ -20,9 +20,9 @@ set(QtTest_include_dirs ${QtTest_SOURCE_DIR}
                         ${SHIBOKEN_INCLUDE_DIR}
                         ${libpyside_SOURCE_DIR}
                         ${SHIBOKEN_PYTHON_INCLUDE_DIR}
-                        ${QtCore_BINARY_DIR}/PySide/QtCore/
-                        ${QtGui_BINARY_DIR}/PySide/QtGui/
-                        ${QtWidgets_BINARY_DIR}/PySide/QtWidgets/
+                        ${QtCore_GEN_DIR}
+                        ${QtGui_GEN_DIR}
+                        ${QtWidgets_GEN_DIR}
                         )
 set(QtTest_libraries    pyside
                         ${SHIBOKEN_PYTHON_LIBRARIES}

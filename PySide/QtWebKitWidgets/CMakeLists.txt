@@ -1,21 +1,21 @@
 project(QtWebKitWidgets)
 
 set(QtWebKitWidgets_SRC
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qgraphicswebview_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qwebframe_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qwebhittestresult_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qwebinspector_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qwebpage_choosemultiplefilesextensionoption_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qwebpage_choosemultiplefilesextensionreturn_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qwebpage_errorpageextensionoption_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qwebpage_errorpageextensionreturn_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qwebpage_extensionoption_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qwebpage_extensionreturn_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qwebpage_viewportattributes_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qwebpage_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qwebview_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qgraphicswebview_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebframe_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebhittestresult_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebinspector_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebpage_choosemultiplefilesextensionoption_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebpage_choosemultiplefilesextensionreturn_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebpage_errorpageextensionoption_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebpage_errorpageextensionreturn_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebpage_extensionoption_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebpage_extensionreturn_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebpage_viewportattributes_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebpage_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebview_wrapper.cpp
 # module is always needed
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKitWidgets/qtwebkitwidgets_module_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qtwebkitwidgets_module_wrapper.cpp
 )
 
 make_path(QtWebKitWidgets_typesystem_path 
@@ -38,12 +38,12 @@ set(QtWebKitWidgets_include_dirs
                             ${SHIBOKEN_INCLUDE_DIR}
                             ${libpyside_SOURCE_DIR}
                             ${SHIBOKEN_PYTHON_INCLUDE_DIR}
-                            ${QtCore_BINARY_DIR}/PySide/QtCore/
-                            ${QtGui_BINARY_DIR}/PySide/QtGui/
-                            ${QtWidgets_BINARY_DIR}/PySide/QtWidgets/
-                            ${QtPrintSupport_BINARY_DIR}/PySide/QtPrintSupport/
-                            ${QtWebKit_BINARY_DIR}/PySide/QtWebKit/
-                            ${QtNetwork_BINARY_DIR}/PySide/QtNetwork/
+                            ${QtCore_GEN_DIR}
+                            ${QtGui_GEN_DIR}
+                            ${QtWidgets_GEN_DIR}
+                            ${QtPrintSupport_GEN_DIR}
+                            ${QtWebKit_GEN_DIR}
+                            ${QtNetwork_GEN_DIR}
                             )
 set(QtWebKitWidgets_libraries      pyside
                             ${SHIBOKEN_PYTHON_LIBRARIES}

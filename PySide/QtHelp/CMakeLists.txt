@@ -1,19 +1,19 @@
 project(QtHelp)
 
 set(QtHelp_SRC
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtHelp/qhelpcontentitem_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtHelp/qhelpcontentmodel_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtHelp/qhelpcontentwidget_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtHelp/qhelpenginecore_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtHelp/qhelpengine_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtHelp/qhelpindexmodel_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtHelp/qhelpindexwidget_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtHelp/qhelpsearchengine_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtHelp/qhelpsearchquerywidget_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtHelp/qhelpsearchquery_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtHelp/qhelpsearchresultwidget_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpcontentitem_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpcontentmodel_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpcontentwidget_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpenginecore_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpengine_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpindexmodel_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpindexwidget_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpsearchengine_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpsearchquerywidget_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpsearchquery_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpsearchresultwidget_wrapper.cpp
 # module is always needed
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtHelp/qthelp_module_wrapper.cpp
+${QtHelp_GEN_DIR}/qthelp_module_wrapper.cpp
 )
 
 make_path(QtHelp_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
@@ -29,9 +29,9 @@ set(QtHelp_include_dirs ${QtHelp_SOURCE_DIR}
                         ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                         ${SHIBOKEN_INCLUDE_DIR}
                         ${libpyside_SOURCE_DIR}
-                        ${QtWidgets_BINARY_DIR}/PySide/QtWidgets/
-                        ${QtGui_BINARY_DIR}/PySide/QtGui/
-                        ${QtCore_BINARY_DIR}/PySide/QtCore/
+                        ${QtWidgets_GEN_DIR}
+                        ${QtGui_GEN_DIR}
+                        ${QtCore_GEN_DIR}
                         )
 set(QtHelp_libraries  pyside
                       ${SHIBOKEN_PYTHON_LIBRARIES}

@@ -1,35 +1,35 @@
 project(QtOpenGL)
 
 set(QtOpenGL_SRC
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtOpenGL/qgl_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtOpenGL/qglbuffer_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtOpenGL/qglcolormap_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtOpenGL/qglcontext_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtOpenGL/qglformat_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtOpenGL/qglframebufferobject_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtOpenGL/qglframebufferobjectformat_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtOpenGL/qglpixelbuffer_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtOpenGL/qglshader_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtOpenGL/qglshaderprogram_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtOpenGL/qglwidget_wrapper.cpp
+${QtOpenGL_GEN_DIR}/qgl_wrapper.cpp
+${QtOpenGL_GEN_DIR}/qglbuffer_wrapper.cpp
+${QtOpenGL_GEN_DIR}/qglcolormap_wrapper.cpp
+${QtOpenGL_GEN_DIR}/qglcontext_wrapper.cpp
+${QtOpenGL_GEN_DIR}/qglformat_wrapper.cpp
+${QtOpenGL_GEN_DIR}/qglframebufferobject_wrapper.cpp
+${QtOpenGL_GEN_DIR}/qglframebufferobjectformat_wrapper.cpp
+${QtOpenGL_GEN_DIR}/qglpixelbuffer_wrapper.cpp
+${QtOpenGL_GEN_DIR}/qglshader_wrapper.cpp
+${QtOpenGL_GEN_DIR}/qglshaderprogram_wrapper.cpp
+${QtOpenGL_GEN_DIR}/qglwidget_wrapper.cpp
 # module is always needed
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtOpenGL/qtopengl_module_wrapper.cpp
+${QtOpenGL_GEN_DIR}/qtopengl_module_wrapper.cpp
 )
 
 make_path(QtOpenGL_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR}
                                    ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR}
                                    ${QtWebKit_SOURCE_DIR})
 
-set(QtOpenGL_include_dirs   ${CMAKE_CURRENT_SOURCE_DIR}
+set(QtOpenGL_include_dirs   ${QtOpenGL_SOURCE_DIR}
                             ${Qt5Core_INCLUDE_DIRS}
                             ${Qt5Gui_INCLUDE_DIRS}
                             ${Qt5OpenGL_INCLUDE_DIRS}
                             ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                             ${SHIBOKEN_INCLUDE_DIR}
                             ${libpyside_SOURCE_DIR}
-                            ${QtGui_BINARY_DIR}/PySide/QtGui/
-                            ${QtCore_BINARY_DIR}/PySide/QtCore/
-                            ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtOpenGL
+                            ${QtGui_GEN_DIR}
+                            ${QtCore_GEN_DIR}
+                            ${QtOpenGL_GEN_DIR}
                             )
 set(QtOpenGL_libraries      pyside
                             ${SHIBOKEN_PYTHON_LIBRARIES}

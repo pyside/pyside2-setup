@@ -1,27 +1,27 @@
 project(QtDeclarative)
 
-set(QtDeclarative_registerType "${CMAKE_CURRENT_SOURCE_DIR}/pysideqmlregistertype.cpp")
+set(QtDeclarative_registerType "${QtDeclarative_SOURCE_DIR}/pysideqmlregistertype.cpp")
 
 set(QtDeclarative_SRC
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativecomponent_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativecontext_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativeengine_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativeerror_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativeexpression_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativeextensioninterface_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativeextensionplugin_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativeimageprovider_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativeitem_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativelistreference_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativenetworkaccessmanagerfactory_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativeparserstatus_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativepropertymap_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativepropertyvaluesource_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativeproperty_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativescriptstring_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qdeclarativeview_wrapper.cpp
+${QtDeclarative_GEN_DIR}/qdeclarativecomponent_wrapper.cpp
+${QtDeclarative_GEN_DIR}/qdeclarativecontext_wrapper.cpp
+${QtDeclarative_GEN_DIR}/qdeclarativeengine_wrapper.cpp
+${QtDeclarative_GEN_DIR}/qdeclarativeerror_wrapper.cpp
+${QtDeclarative_GEN_DIR}/qdeclarativeexpression_wrapper.cpp
+${QtDeclarative_GEN_DIR}/qdeclarativeextensioninterface_wrapper.cpp
+${QtDeclarative_GEN_DIR}/qdeclarativeextensionplugin_wrapper.cpp
+${QtDeclarative_GEN_DIR}/qdeclarativeimageprovider_wrapper.cpp
+${QtDeclarative_GEN_DIR}/qdeclarativeitem_wrapper.cpp
+${QtDeclarative_GEN_DIR}/qdeclarativelistreference_wrapper.cpp
+${QtDeclarative_GEN_DIR}/qdeclarativenetworkaccessmanagerfactory_wrapper.cpp
+${QtDeclarative_GEN_DIR}/qdeclarativeparserstatus_wrapper.cpp
+${QtDeclarative_GEN_DIR}/qdeclarativepropertymap_wrapper.cpp
+${QtDeclarative_GEN_DIR}/qdeclarativepropertyvaluesource_wrapper.cpp
+${QtDeclarative_GEN_DIR}/qdeclarativeproperty_wrapper.cpp
+${QtDeclarative_GEN_DIR}/qdeclarativescriptstring_wrapper.cpp
+${QtDeclarative_GEN_DIR}/qdeclarativeview_wrapper.cpp
 # module is always needed
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative/qtdeclarative_module_wrapper.cpp
+${QtDeclarative_GEN_DIR}/qtdeclarative_module_wrapper.cpp
 )
 
 make_path(QtDeclarative_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR} ${QtNetwork_SOURCE_DIR}
@@ -36,11 +36,11 @@ set(QtDeclarative_include_dirs  ${QtDeclarative_SOURCE_DIR}
                                 ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                                 ${SHIBOKEN_INCLUDE_DIR}
                                 ${libpyside_SOURCE_DIR}
-                                ${QtWidgets_BINARY_DIR}/PySide/QtWidgets/
-                                ${QtGui_BINARY_DIR}/PySide/QtGui/
-                                ${QtCore_BINARY_DIR}/PySide/QtCore/
-                                ${QtNetwork_BINARY_DIR}/PySide/QtNetwork/
-                                ${CMAKE_CURRENT_BINARY_DIR}/PySide/QtDeclarative)
+                                ${QtWidgets_GEN_DIR}
+                                ${QtGui_GEN_DIR}
+                                ${QtCore_GEN_DIR}
+                                ${QtNetwork_GEN_DIR}
+                                ${QtDeclarative_GEN_DIR})
 
 set(QtDeclarative_libraries   pyside
                               ${SHIBOKEN_PYTHON_LIBRARIES}

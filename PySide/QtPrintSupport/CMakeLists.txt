@@ -1,16 +1,16 @@
 project(QtPrintSupport)
 
 set(QtPrintSupport_SRC
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport/qabstractprintdialog_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport/qpagesetupdialog_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport/qprintdialog_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport/qprintengine_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport/qprinter_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport/qprinterinfo_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport/qprintpreviewdialog_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport/qprintpreviewwidget_wrapper.cpp
+${QtPrintSupport_GEN_DIR}/qabstractprintdialog_wrapper.cpp
+${QtPrintSupport_GEN_DIR}/qpagesetupdialog_wrapper.cpp
+${QtPrintSupport_GEN_DIR}/qprintdialog_wrapper.cpp
+${QtPrintSupport_GEN_DIR}/qprintengine_wrapper.cpp
+${QtPrintSupport_GEN_DIR}/qprinter_wrapper.cpp
+${QtPrintSupport_GEN_DIR}/qprinterinfo_wrapper.cpp
+${QtPrintSupport_GEN_DIR}/qprintpreviewdialog_wrapper.cpp
+${QtPrintSupport_GEN_DIR}/qprintpreviewwidget_wrapper.cpp
 # module is always needed
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtPrintSupport/qtprintsupport_module_wrapper.cpp
+${QtPrintSupport_GEN_DIR}/qtprintsupport_module_wrapper.cpp
 )
 
 make_path(QtPrintSupport_typesystem_path    ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
@@ -26,9 +26,9 @@ set(QtPrintSupport_include_dirs ${QtPrintSupport_SOURCE_DIR}
                                 ${SHIBOKEN_INCLUDE_DIR}
                                 ${libpyside_SOURCE_DIR}
                                 ${SHIBOKEN_PYTHON_INCLUDE_DIR}
-                                ${QtCore_BINARY_DIR}/PySide/QtCore
-                                ${QtGui_BINARY_DIR}/PySide/QtGui
-                                ${QtWidgets_BINARY_DIR}/PySide/QtWidgets
+                                ${QtCore_GEN_DIR}
+                                ${QtGui_GEN_DIR}
+                                ${QtWidgets_GEN_DIR}
                                 )
 set(QtPrintSupport_libraries    pyside
                                 ${SHIBOKEN_PYTHON_LIBRARIES}

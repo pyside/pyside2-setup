@@ -1,20 +1,20 @@
 project(QtWebKit)
 
 set(QtWebKit_SRC
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/qwebdatabase_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/qwebelement_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/qwebelementcollection_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/qwebhistory_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/qwebhistoryinterface_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/qwebhistoryitem_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/qwebpluginfactory_mimetype_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/qwebpluginfactory_plugin_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/qwebpluginfactory_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/qwebsecurityorigin_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/qwebsettings_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/webcore_wrapper.cpp
+${QtWebKit_GEN_DIR}/qwebdatabase_wrapper.cpp
+${QtWebKit_GEN_DIR}/qwebelement_wrapper.cpp
+${QtWebKit_GEN_DIR}/qwebelementcollection_wrapper.cpp
+${QtWebKit_GEN_DIR}/qwebhistory_wrapper.cpp
+${QtWebKit_GEN_DIR}/qwebhistoryinterface_wrapper.cpp
+${QtWebKit_GEN_DIR}/qwebhistoryitem_wrapper.cpp
+${QtWebKit_GEN_DIR}/qwebpluginfactory_mimetype_wrapper.cpp
+${QtWebKit_GEN_DIR}/qwebpluginfactory_plugin_wrapper.cpp
+${QtWebKit_GEN_DIR}/qwebpluginfactory_wrapper.cpp
+${QtWebKit_GEN_DIR}/qwebsecurityorigin_wrapper.cpp
+${QtWebKit_GEN_DIR}/qwebsettings_wrapper.cpp
+${QtWebKit_GEN_DIR}/webcore_wrapper.cpp
 # module is always needed
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtWebKit/qtwebkit_module_wrapper.cpp
+${QtWebKit_GEN_DIR}/qtwebkit_module_wrapper.cpp
 )
 
 make_path(QtWebKit_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtNetwork_SOURCE_DIR}
@@ -30,10 +30,10 @@ set(QtWebKit_include_dirs   ${QtWebKit_SOURCE_DIR}
                             ${SHIBOKEN_INCLUDE_DIR}
                             ${libpyside_SOURCE_DIR}
                             ${SHIBOKEN_PYTHON_INCLUDE_DIR}
-                            ${QtCore_BINARY_DIR}/PySide/QtCore/
-                            ${QtGui_BINARY_DIR}/PySide/QtGui/
-                            ${QtWidgets_BINARY_DIR}/PySide/QtWidgets/
-                            ${QtNetwork_BINARY_DIR}/PySide/QtNetwork/
+                            ${QtCore_GEN_DIR}
+                            ${QtGui_GEN_DIR}
+                            ${QtWidgets_GEN_DIR}
+                            ${QtNetwork_GEN_DIR}
                             )
 set(QtWebKit_libraries      pyside
                             ${SHIBOKEN_PYTHON_LIBRARIES}

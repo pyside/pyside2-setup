@@ -1,9 +1,9 @@
 project(QtScriptTools)
 
 set(QtScriptTools_SRC
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtScriptTools/qscriptenginedebugger_wrapper.cpp
+${QtScriptTools_GEN_DIR}/qscriptenginedebugger_wrapper.cpp
 # module is always needed
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtScriptTools/qtscripttools_module_wrapper.cpp
+${QtScriptTools_GEN_DIR}/qtscripttools_module_wrapper.cpp
 )
 
 make_path(QtScriptTools_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtScript_SOURCE_DIR}
@@ -19,9 +19,9 @@ set(QtScriptTools_include_dirs  ${QtScriptTools_SOURCE_DIR}
                                 ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                                 ${SHIBOKEN_INCLUDE_DIR}
                                 ${libpyside_SOURCE_DIR}
-                                ${QtCore_BINARY_DIR}/PySide/QtCore/
-                                ${QtGui_BINARY_DIR}/PySide/QtGui/
-                                ${QtScript_BINARY_DIR}/PySide/QtScript/
+                                ${QtCore_GEN_DIR}
+                                ${QtGui_GEN_DIR}
+                                ${QtScript_GEN_DIR}
                                 )
 
 set(QtScriptTools_libraries pyside

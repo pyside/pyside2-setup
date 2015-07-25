@@ -1,9 +1,9 @@
 project(QtUiTools)
 
 set(QtUiTools_SRC
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtUiTools/quiloader_wrapper.cpp
+${QtUiTools_GEN_DIR}/quiloader_wrapper.cpp
 # module is always needed
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtUiTools/qtuitools_module_wrapper.cpp
+${QtUiTools_GEN_DIR}/qtuitools_module_wrapper.cpp
 )
 
 make_path(QtUiTools_typesystem_path 
@@ -23,10 +23,10 @@ set(QtUiTools_include_dirs  ${QtUiTools_SOURCE_DIR}
                             ${SHIBOKEN_INCLUDE_DIR}
                             ${libpyside_SOURCE_DIR}
                             ${plugins_SOURCE_DIR}
-                            ${QtCore_BINARY_DIR}/PySide/QtCore/
-                            ${QtXml_BINARY_DIR}/PySide/QtXml/
-                            ${QtGui_BINARY_DIR}/PySide/QtGui/
-                            ${QtWidgets_BINARY_DIR}/PySide/QtWidgets/
+                            ${QtCore_GEN_DIR}
+                            ${QtXml_GEN_DIR}
+                            ${QtGui_GEN_DIR}
+                            ${QtWidgets_GEN_DIR}
                             )
 set(QtUiTools_libraries     pyside
                             uiplugin
@@ -44,4 +44,3 @@ create_pyside_module(QtUiTools
                      QtUiTools_typesystem_path
                      QtUiTools_SRC
                      "")
-

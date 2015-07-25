@@ -1,12 +1,12 @@
 project(QtSvg)
 
 set(QtSvg_SRC
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtSvg/qgraphicssvgitem_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtSvg/qsvggenerator_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtSvg/qsvgrenderer_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtSvg/qsvgwidget_wrapper.cpp
+${QtSvg_GEN_DIR}/qgraphicssvgitem_wrapper.cpp
+${QtSvg_GEN_DIR}/qsvggenerator_wrapper.cpp
+${QtSvg_GEN_DIR}/qsvgrenderer_wrapper.cpp
+${QtSvg_GEN_DIR}/qsvgwidget_wrapper.cpp
 # module is always needed
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtSvg/qtsvg_module_wrapper.cpp
+${QtSvg_GEN_DIR}/qtsvg_module_wrapper.cpp
 )
 
 make_path(QtSvg_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
@@ -22,9 +22,9 @@ set(QtSvg_include_dirs  ${QtSvg_SOURCE_DIR}
                         ${SHIBOKEN_INCLUDE_DIR}
                         ${libpyside_SOURCE_DIR}
                         ${SHIBOKEN_PYTHON_INCLUDE_DIR}
-                        ${QtCore_BINARY_DIR}/PySide/QtCore/
-                        ${QtGui_BINARY_DIR}/PySide/QtGui/
-                        ${QtWidgets_BINARY_DIR}/PySide/QtWidgets/
+                        ${QtCore_GEN_DIR}
+                        ${QtGui_GEN_DIR}
+                        ${QtWidgets_GEN_DIR}
                         )
 set(QtSvg_libraries     pyside
                         ${SHIBOKEN_PYTHON_LIBRARIES}

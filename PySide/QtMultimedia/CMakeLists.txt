@@ -1,22 +1,22 @@
 project(QtMultimedia)
 
 set(QtMultimedia_SRC
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtMultimedia/qaudio_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtMultimedia/qabstractvideobuffer_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtMultimedia/qaudioenginefactoryinterface_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtMultimedia/qvideosurfaceformat_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtMultimedia/qabstractvideosurface_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtMultimedia/qaudiodeviceinfo_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtMultimedia/qabstractaudiodeviceinfo_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtMultimedia/qabstractaudiooutput_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtMultimedia/qabstractaudioinput_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtMultimedia/qaudioengineplugin_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtMultimedia/qaudioformat_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtMultimedia/qaudioinput_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtMultimedia/qaudiooutput_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtMultimedia/qvideoframe_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qaudio_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qabstractvideobuffer_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qaudioenginefactoryinterface_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qvideosurfaceformat_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qabstractvideosurface_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qaudiodeviceinfo_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qabstractaudiodeviceinfo_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qabstractaudiooutput_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qabstractaudioinput_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qaudioengineplugin_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qaudioformat_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qaudioinput_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qaudiooutput_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qvideoframe_wrapper.cpp
 # module is always needed
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtMultimedia/qtmultimedia_module_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qtmultimedia_module_wrapper.cpp
 )
 
 make_path(QtMultimedia_typesystem_path  ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR}
@@ -31,8 +31,8 @@ set(QtMultimedia_include_dirs   ${QtMultimedia_SOURCE_DIR}
                                 ${SHIBOKEN_INCLUDE_DIR}
                                 ${libpyside_SOURCE_DIR}
                                 ${SHIBOKEN_PYTHON_INCLUDE_DIR}
-                                ${QtCore_BINARY_DIR}/PySide/QtCore/
-                                ${QtGui_BINARY_DIR}/PySide/QtGui/)
+                                ${QtCore_GEN_DIR}
+                                ${QtGui_GEN_DIR})
 
 set(QtMultimedia_libraries  pyside
                             ${SHIBOKEN_PYTHON_LIBRARIES}

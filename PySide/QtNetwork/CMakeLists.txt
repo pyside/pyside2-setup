@@ -10,30 +10,30 @@ check_qt_class(QtNetwork QSslKey            QtNetwork_OPTIONAL_SRC QtNetwork_DRO
 check_qt_class(QtNetwork QSslSocket         QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
 
 set(QtNetwork_SRC
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qabstractsocket_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qauthenticator_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qhostaddress_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qhostinfo_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qipv6address_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qlocalserver_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qlocalsocket_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qnetworkaccessmanager_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qnetworkaddressentry_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qnetworkcookie_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qnetworkcookiejar_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qnetworkinterface_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qnetworkproxy_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qnetworkproxyfactory_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qnetworkproxyquery_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qnetworkreply_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qnetworkrequest_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qssl_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qtcpserver_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qtcpsocket_wrapper.cpp
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qudpsocket_wrapper.cpp
+${QtNetwork_GEN_DIR}/qabstractsocket_wrapper.cpp
+${QtNetwork_GEN_DIR}/qauthenticator_wrapper.cpp
+${QtNetwork_GEN_DIR}/qhostaddress_wrapper.cpp
+${QtNetwork_GEN_DIR}/qhostinfo_wrapper.cpp
+${QtNetwork_GEN_DIR}/qipv6address_wrapper.cpp
+${QtNetwork_GEN_DIR}/qlocalserver_wrapper.cpp
+${QtNetwork_GEN_DIR}/qlocalsocket_wrapper.cpp
+${QtNetwork_GEN_DIR}/qnetworkaccessmanager_wrapper.cpp
+${QtNetwork_GEN_DIR}/qnetworkaddressentry_wrapper.cpp
+${QtNetwork_GEN_DIR}/qnetworkcookie_wrapper.cpp
+${QtNetwork_GEN_DIR}/qnetworkcookiejar_wrapper.cpp
+${QtNetwork_GEN_DIR}/qnetworkinterface_wrapper.cpp
+${QtNetwork_GEN_DIR}/qnetworkproxy_wrapper.cpp
+${QtNetwork_GEN_DIR}/qnetworkproxyfactory_wrapper.cpp
+${QtNetwork_GEN_DIR}/qnetworkproxyquery_wrapper.cpp
+${QtNetwork_GEN_DIR}/qnetworkreply_wrapper.cpp
+${QtNetwork_GEN_DIR}/qnetworkrequest_wrapper.cpp
+${QtNetwork_GEN_DIR}/qssl_wrapper.cpp
+${QtNetwork_GEN_DIR}/qtcpserver_wrapper.cpp
+${QtNetwork_GEN_DIR}/qtcpsocket_wrapper.cpp
+${QtNetwork_GEN_DIR}/qudpsocket_wrapper.cpp
 ${QtNetwork_OPTIONAL_SRC}
 # module is always needed
-${CMAKE_CURRENT_BINARY_DIR}/PySide/QtNetwork/qtnetwork_module_wrapper.cpp
+${QtNetwork_GEN_DIR}/qtnetwork_module_wrapper.cpp
 )
 
 make_path(QtNetwork_typesystem_path ${QtCore_SOURCE_DIR}
@@ -47,7 +47,7 @@ set(QtNetwork_include_dirs  ${QtNetwork_SOURCE_DIR}
                             ${SHIBOKEN_INCLUDE_DIR}
                             ${libpyside_SOURCE_DIR}
                             ${SHIBOKEN_PYTHON_INCLUDE_DIR}
-                            ${QtCore_BINARY_DIR}/PySide/QtCore/)
+                            ${QtCore_GEN_DIR})
 
 set(QtNetwork_libraries pyside
                         ${SHIBOKEN_PYTHON_LIBRARIES}
