@@ -1,0 +1,49 @@
+Generating class model...                    [WARNING]
+    enum 'QLocale::QuotationStyle' does not have a type entry or is not an enum
+    enum 'QTextBlockFormat::LineHeightTypes' does not have a type entry or is not an enum
+    enum 'QXmlStreamReader::ReadElementTextBehaviour' does not have a type entry or is not an enum
+    enum 'QDataStream::FloatingPointPrecision' does not have a type entry or is not an enum
+    enum 'QLocale::Script' does not have a type entry or is not an enum
+    enum 'QLocale::CurrencySymbolFormat' does not have a type entry or is not an enum
+    enum 'QFileDevice::FileHandleFlag' does not have a type entry or is not an enum
+    Unable to decide type of property: 'QEasingCurve' in class 'QTimeLine'
+    enum 'QTextDocument::Stacks' does not have a type entry or is not an enum
+    enum 'QPainter::PixmapFragmentHint' does not have a type entry or is not an enum
+    enum 'QCoreApplication::ApplicationFlags' does not have a type entry or is not an enum
+    enum 'QFont::HintingPreference' does not have a type entry or is not an enum
+    
+
+Generating enum model...                     [OK]
+Generating namespace model...                [WARNING]
+    enum 'Qt::GestureFlag' does not have a type entry or is not an enum
+    enum 'Qt::InputMethodHint' does not have a type entry or is not an enum
+    enum 'Qt::TouchPointState' does not have a type entry or is not an enum
+    enum 'Qt::AnchorPoint' does not have a type entry or is not an enum
+    enum 'Qt::CursorMoveStyle' does not have a type entry or is not an enum
+    enum 'Qt::GestureState' does not have a type entry or is not an enum
+    enum 'Qt::CoordinateSystem' does not have a type entry or is not an enum
+    enum 'Qt::GestureType' does not have a type entry or is not an enum
+    enum 'Qt::TileRule' does not have a type entry or is not an enum
+    enum 'Qt::NavigationMode' does not have a type entry or is not an enum
+    
+
+Resolving typedefs...                        [OK]
+Fixing class inheritance...                  [WARNING]
+    skipping field 'QMouseEvent::velocity' with unmatched type 'QVector2D'
+    
+
+Detecting inconsistencies in class model...  [OK]
+[OK]
+    type 'QPyTextObject' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
+    
+
+
+Done, 24 warnings (507 known issues)
+Scanning dependencies of target testbinding
+[ 99%] Building CXX object tests/pysidetest/CMakeFiles/testbinding.dir/testbinding/testobject_wrapper.cpp.o
+In file included from /Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/tests/pysidetest/testbinding/testobject_wrapper.cpp:16:
+/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/tests/pysidetest/testbinding/testbinding_python.h:18:10: fatal error: 'pyside_qtcore_python.h' file not
+      found
+#include <pyside_qtcore_python.h>
+         ^
+1 error generated.
