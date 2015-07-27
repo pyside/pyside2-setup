@@ -58,13 +58,6 @@ WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for test binding..."
 )
 
-macro(make_gen_dir name)
-    set(${name}_GEN_DIR ${${name}_BINARY_DIR}/PySide/${name})
-endmacro()
-make_gen_dir(QtCore)
-make_gen_dir(QtGui)
-make_gen_dir(QtWidgets)
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
                     ${Qt5Core_INCLUDE_DIRS}

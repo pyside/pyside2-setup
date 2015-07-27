@@ -127,7 +127,8 @@ endmacro()
 # and must be called for every subproject.
 macro(HAS_QT_MODULE var name)
     if (NOT DISABLE_${name} AND ${var})
-        set(${name}_GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/${name}/PySide/${name})
+        set(${name}_GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/${name}/PySide/${name}
+            CACHE INTERNAL "dir with generated source" FORCE)
         add_subdirectory(${name})
     else()
         # Used on documentation to skip modules
