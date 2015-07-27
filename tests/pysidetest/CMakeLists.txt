@@ -53,6 +53,7 @@ COMMAND ${SHIBOKEN_BINARY} ${GENERATOR_EXTRA_FLAGS}
         --typesystem-paths=${testbinding_typesystem_path}
         --output-directory=${CMAKE_CURRENT_BINARY_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_pysidetest.xml
+        --api-version=${SUPPORTED_QT_VERSION}
 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for test binding..."
 )

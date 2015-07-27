@@ -1,54 +1,12 @@
-Generating class model...                    [WARNING]
-    enum 'QStyle::RequestSoftwareInputPanel' does not have a type entry or is not an enum
-    enum 'QAction::Priority' does not have a type entry or is not an enum
-    enum 'QTextBlockFormat::LineHeightTypes' does not have a type entry or is not an enum
-    enum 'QDataStream::FloatingPointPrecision' does not have a type entry or is not an enum
-    enum 'QLocale::Script' does not have a type entry or is not an enum
-    Unable to decide type of property: 'QEasingCurve' in class 'QTimeLine'
-    enum 'QXmlStreamReader::ReadElementTextBehaviour' does not have a type entry or is not an enum
-    enum 'QLocale::QuotationStyle' does not have a type entry or is not an enum
-    Unable to decide type of property: 'Qt::InputMethodHints' in class 'QWidget'
-    Unable to decide type of property: 'Priority' in class 'QAction'
-    enum 'QTextDocument::Stacks' does not have a type entry or is not an enum
-    enum 'QFont::HintingPreference' does not have a type entry or is not an enum
-    enum 'QLocale::CurrencySymbolFormat' does not have a type entry or is not an enum
-    enum 'QGraphicsItem::PanelModality' does not have a type entry or is not an enum
-    enum 'QFileDevice::FileHandleFlag' does not have a type entry or is not an enum
-    Unable to decide type of property: 'Qt::CursorMoveStyle' in class 'QLineEdit'
-    enum 'QPainter::PixmapFragmentHint' does not have a type entry or is not an enum
-    
-
+Generating class model...                    [OK]
 Generating enum model...                     [OK]
-Generating namespace model...                [WARNING]
-    enum 'Qt::GestureType' does not have a type entry or is not an enum
-    enum 'Qt::TileRule' does not have a type entry or is not an enum
-    enum 'Qt::NavigationMode' does not have a type entry or is not an enum
-    enum 'Qt::GestureFlag' does not have a type entry or is not an enum
-    enum 'Qt::InputMethodHint' does not have a type entry or is not an enum
-    enum 'Qt::CoordinateSystem' does not have a type entry or is not an enum
-    enum 'Qt::TouchPointState' does not have a type entry or is not an enum
-    enum 'Qt::GestureState' does not have a type entry or is not an enum
-    enum 'Qt::AnchorPoint' does not have a type entry or is not an enum
-    enum 'Qt::CursorMoveStyle' does not have a type entry or is not an enum
-    
-
+Generating namespace model...                [OK]
 Resolving typedefs...                        [OK]
-Fixing class inheritance...                  [WARNING]
-    skipping field 'QMouseEvent::velocity' with unmatched type 'QVector2D'
-    class 'QGraphicsTextItem' inherits from unknown base class 'QGraphicsObject'
-    class not found for setup inheritance 'QGraphicsObject'
-    class 'QGraphicsWidget' inherits from unknown base class 'QGraphicsObject'
-    
-
+Fixing class inheritance...                  [OK]
 Detecting inconsistencies in class model...  [OK]
 [OK]
     type 'QPyTextObject' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
     
 
 
-    signature 'getText(QWidget*,QString,QString,QLineEdit::EchoMode,QString,bool*,QFlags<Qt::WindowType>,QFlags<Qt::InputMethodHint>)' for function modification in 'QInputDialog' not found. Possible candidates: 
-    signature 'getItem(QWidget*,QString,QString,QStringList,int,bool,bool*,QFlags<Qt::WindowType>,QFlags<Qt::InputMethodHint>)' for function modification in 'QInputDialog' not found. Possible candidates: 
-    signature 'getMultiLineText(QWidget*,QString,QString,QString,bool*,QFlags<Qt::WindowType>,QFlags<Qt::InputMethodHint>)' for function modification in 'QInputDialog' not found. Possible candidates: 
-    
-
-Done, 35 warnings (1025 known issues)
+Done, 1 warnings (1051 known issues)

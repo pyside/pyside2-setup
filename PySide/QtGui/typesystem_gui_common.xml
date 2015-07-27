@@ -3283,7 +3283,6 @@
       <include file-name="QPalette" location="global"/>
       <include file-name="QIcon" location="global"/>
       <include file-name="QLocale" location="global"/>
-    <!-- Qt5: in QtWidgets  <include file-name="QStyle" location="global"/> -->
     </extra-includes>
     <modify-function signature="QGuiApplication(int&amp;,char**,int)" access="private" />
     <add-function signature="QGuiApplication(PySequence)">
