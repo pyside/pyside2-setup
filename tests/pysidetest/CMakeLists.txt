@@ -35,25 +35,45 @@ ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testview_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testbinding_module_wrapper.cpp
 )
 
+make_path(testbinding_include_dirs  ${pyside_BINARY_DIR}
+                                    ${CMAKE_CURRENT_SOURCE_DIR}
+                                    ${QT_INCLUDE_DIR}
+                                    )
+
+make_path(testbinding_typesystem_path ${CMAKE_CURRENT_SOURCE_DIR}
+                                      ${pyside_SOURCE_DIR}
+                                      ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
+                                      ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR}
+                                      )
+
 add_custom_command(OUTPUT ${testbinding_SRC}
 COMMAND ${SHIBOKEN_BINARY} ${GENERATOR_EXTRA_FLAGS}
         ${CMAKE_CURRENT_SOURCE_DIR}/pysidetest_global.h
-        --include-paths=${pyside_BINARY_DIR}${PATH_SEP}${CMAKE_CURRENT_SOURCE_DIR}${PATH_SEP}${QT_INCLUDE_DIR}${PATH_SEP}${QT_QTCORE_INCLUDE_DIR}${PATH_SEP}${QT_QTGUI_INCLUDE_DIR}
-        --typesystem-paths=${CMAKE_CURRENT_SOURCE_DIR}${PATH_SEP}${pyside_SOURCE_DIR}${PATH_SEP}${QtCore_SOURCE_DIR}${PATH_SEP}${QtCore_BINARY_DIR}${PATH_SEP}${QtGui_SOURCE_DIR}${PATH_SEP}${QtGui_BINARY_DIR}
+        --include-paths=${testbinding_include_dirs}
+        --typesystem-paths=${testbinding_typesystem_path}
         --output-directory=${CMAKE_CURRENT_BINARY_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_pysidetest.xml
 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for test binding..."
 )
 
+macro(make_gen_dir name)
+    set(${name}_GEN_DIR ${${name}_BINARY_DIR}/PySide/${name})
+endmacro()
+make_gen_dir(QtCore)
+make_gen_dir(QtGui)
+make_gen_dir(QtWidgets)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
                     ${Qt5Core_INCLUDE_DIRS}
                     ${Qt5Gui_INCLUDE_DIRS}
+                    ${Qt5Widgets_INCLUDE_DIRS}
                     ${SHIBOKEN_INCLUDE_DIR}
                     ${pyside_SOURCE_DIR}
-                    ${Qt5Core_BINARY_DIR}/PySide/QtCore
-                    ${Qt5Gui_BINARY_DIR}/PySide/QtGui
+                    ${QtCore_GEN_DIR}
+                    ${QtGui_GEN_DIR}
+                    ${QtWidgets_GEN_DIR}
                     ${libpyside_SOURCE_DIR}
                     ${SHIBOKEN_PYTHON_INCLUDE_DIR})
 

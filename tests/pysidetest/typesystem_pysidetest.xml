@@ -2,6 +2,7 @@
 <typesystem package="testbinding">
     <load-typesystem name="typesystem_core.xml" generate="no" />
     <load-typesystem name="typesystem_gui.xml" generate="no"/>
+    <load-typesystem name="typesystem_widgets.xml" generate="no"/>
     <value-type name="IntValue"/>
     <primitive-type name="TypedefValue">
         <!--
