@@ -55,4 +55,12 @@
             </modify-argument>
         </modify-function>
     </object-type>
+    <suppress-warning text="type 'QPyTextObject' is specified in typesystem, but not defined. This could potentially lead to compilation errors." />
+    <!-- Qt5: I never really understood this warning. Probably it is because there
+        is no way to instantiate the class. Anyway, why must this class emit this warning?
+        I am not a C++ warrior, so I'd prefer if it would say "it is ok if you see this warning!".
+        Well, maybe somebody will enlighten me, and I'll change this comment.
+        I'd actually prefer an implementation that avoids generating this message, but I still failed
+        doing so :-(
+    -->
 </typesystem>
