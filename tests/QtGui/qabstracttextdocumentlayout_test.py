@@ -2,7 +2,8 @@ import unittest
 import py3kcompat as py3k
 
 from PySide.QtCore import QSizeF, QTimer
-from PySide.QtGui import QTextFormat, QTextCharFormat, QTextEdit, QPyTextObject
+from PySide.QtGui import QTextFormat, QTextCharFormat, QPyTextObject
+from PySide.QtWidgets import QTextEdit
 from helper import UsesQApplication
 
 class Foo(QPyTextObject):
