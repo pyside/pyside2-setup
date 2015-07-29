@@ -1,10 +1,12 @@
-from PySide.QtGui import QMacStyle
-from PySide.QtWidgets import QApplication, QLabel
+# Qt5: this is gone: from PySide.QtGui import QMacStyle
+from PySide.QtWidgets import QApplication, QLabel, QStyleFactory
 from PySide.QtCore import QObject
 
 import unittest
 
 from helper import UsesQApplication
+
+QMacStyle = type(QStyleFactory.create('Macintosh'))
 
 class QMacStyleTest(UsesQApplication):
     def testWidgetStyle(self):
