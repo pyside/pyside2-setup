@@ -10,6 +10,7 @@ check_qt_class(QtNetwork QSslKey            QtNetwork_OPTIONAL_SRC QtNetwork_DRO
 check_qt_class(QtNetwork QSslSocket         QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
 
 set(QtNetwork_SRC
+${QtNetwork_GEN_DIR}/qabstractnetworkcache_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qabstractsocket_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qauthenticator_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhostaddress_wrapper.cpp
@@ -19,19 +20,23 @@ ${QtNetwork_GEN_DIR}/qlocalserver_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qlocalsocket_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkaccessmanager_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkaddressentry_wrapper.cpp
+${QtNetwork_GEN_DIR}/qnetworkcachemetadata_wrapper.cpp
+${QtNetwork_GEN_DIR}/qnetworkconfiguration_wrapper.cpp
+${QtNetwork_GEN_DIR}/qnetworkconfigurationmanager_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkcookie_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkcookiejar_wrapper.cpp
+${QtNetwork_GEN_DIR}/qnetworkdiskcache_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkinterface_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkproxy_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkproxyfactory_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkproxyquery_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkreply_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkrequest_wrapper.cpp
+${QtNetwork_GEN_DIR}/qnetworksession_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qssl_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qtcpserver_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qtcpsocket_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qudpsocket_wrapper.cpp
-${QtNetwork_OPTIONAL_SRC}
 # module is always needed
 ${QtNetwork_GEN_DIR}/qtnetwork_module_wrapper.cpp
 )

@@ -2,7 +2,13 @@ project(QtWebKitWidgets)
 
 set(QtWebKitWidgets_SRC
 ${QtWebKitWidgets_GEN_DIR}/qgraphicswebview_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebdatabase_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebelement_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebelementcollection_wrapper.cpp
 ${QtWebKitWidgets_GEN_DIR}/qwebframe_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebhistory_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebhistoryinterface_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebhistoryitem_wrapper.cpp
 ${QtWebKitWidgets_GEN_DIR}/qwebhittestresult_wrapper.cpp
 ${QtWebKitWidgets_GEN_DIR}/qwebinspector_wrapper.cpp
 ${QtWebKitWidgets_GEN_DIR}/qwebpage_choosemultiplefilesextensionoption_wrapper.cpp
@@ -13,6 +19,11 @@ ${QtWebKitWidgets_GEN_DIR}/qwebpage_extensionoption_wrapper.cpp
 ${QtWebKitWidgets_GEN_DIR}/qwebpage_extensionreturn_wrapper.cpp
 ${QtWebKitWidgets_GEN_DIR}/qwebpage_viewportattributes_wrapper.cpp
 ${QtWebKitWidgets_GEN_DIR}/qwebpage_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebpluginfactory_mimetype_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebpluginfactory_plugin_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebpluginfactory_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebsecurityorigin_wrapper.cpp
+${QtWebKitWidgets_GEN_DIR}/qwebsettings_wrapper.cpp
 ${QtWebKitWidgets_GEN_DIR}/qwebview_wrapper.cpp
 # module is always needed
 ${QtWebKitWidgets_GEN_DIR}/qtwebkitwidgets_module_wrapper.cpp

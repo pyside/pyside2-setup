@@ -1,17 +1,6 @@
 project(QtWebKit)
 
 set(QtWebKit_SRC
-${QtWebKit_GEN_DIR}/qwebdatabase_wrapper.cpp
-${QtWebKit_GEN_DIR}/qwebelement_wrapper.cpp
-${QtWebKit_GEN_DIR}/qwebelementcollection_wrapper.cpp
-${QtWebKit_GEN_DIR}/qwebhistory_wrapper.cpp
-${QtWebKit_GEN_DIR}/qwebhistoryinterface_wrapper.cpp
-${QtWebKit_GEN_DIR}/qwebhistoryitem_wrapper.cpp
-${QtWebKit_GEN_DIR}/qwebpluginfactory_mimetype_wrapper.cpp
-${QtWebKit_GEN_DIR}/qwebpluginfactory_plugin_wrapper.cpp
-${QtWebKit_GEN_DIR}/qwebpluginfactory_wrapper.cpp
-${QtWebKit_GEN_DIR}/qwebsecurityorigin_wrapper.cpp
-${QtWebKit_GEN_DIR}/qwebsettings_wrapper.cpp
 ${QtWebKit_GEN_DIR}/webcore_wrapper.cpp
 # module is always needed
 ${QtWebKit_GEN_DIR}/qtwebkit_module_wrapper.cpp

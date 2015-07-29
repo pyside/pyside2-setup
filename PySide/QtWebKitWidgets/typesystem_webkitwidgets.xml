@@ -26,6 +26,36 @@
   <load-typesystem name="typesystem_network.xml" generate="no"/>
   <load-typesystem name="typesystem_printsupport.xml" generate="no"/>
 
+  <value-type name="QWebDatabase"/>
+
+  <object-type name="QWebPluginFactory">
+    <enum-type name="Extension"/>
+    <value-type name="Plugin"/>
+    <value-type name="MimeType"/>
+    <modify-function signature="create(const QString &amp;, const QUrl &amp;, const QStringList &amp;, const QStringList &amp;) const">
+        <modify-argument index="return">
+            <define-ownership class="native" owner="c++"/>
+            <define-ownership class="target" owner="target"/>
+        </modify-argument>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QWebHistory"/>
+  <object-type name="QWebHistoryInterface"/>
+  <value-type name="QWebHistoryItem"/>
+
+  <value-type name="QWebSecurityOrigin">
+    <enum-type name="SubdomainSetting" />
+  </value-type>
+
+  <object-type name="QWebSettings">
+    <enum-type name="FontFamily"/>
+    <enum-type name="FontSize"/>
+    <enum-type name="ThirdPartyCookiePolicy" />
+    <enum-type name="WebAttribute"/>
+    <enum-type name="WebGraphic"/>
+  </object-type>
+
   <object-type name="QWebView">
     <modify-function signature="setPage(QWebPage*)">
         <modify-argument index="1">
@@ -44,6 +74,28 @@
     </modify-function>
     <modify-function signature="print(QPrinter*)const" rename="print_" />
   </object-type>
+
+  <value-type name="QWebElement" since="4.6">
+    <enum-type name="StyleResolveStrategy"/>
+  </value-type>
+
+  <value-type name="QWebElementCollection" since="4.6">
+    <add-function signature="__len__">
+        <inject-code>
+        return %CPPSELF.count();
+        </inject-code>
+    </add-function>
+    <add-function signature="__getitem__">
+        <inject-code>
+        if (_i &lt; 0 || _i >= %CPPSELF.count()) {
+            PyErr_SetString(PyExc_IndexError, "index out of bounds");
+            return 0;
+        }
+        QWebElement element = %CPPSELF.at(_i);
+        return %CONVERTTOPYTHON[QWebElement](element);
+        </inject-code>
+    </add-function>
+  </value-type>
 
   <object-type name="QWebFrame">
     <enum-type name="RenderLayer" flags="RenderLayers" since="4.6"/>
