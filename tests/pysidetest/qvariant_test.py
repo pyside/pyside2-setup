@@ -2,7 +2,7 @@ import unittest
 
 from testbinding import TestObject
 from PySide.QtCore import Qt
-from PySide.QtGui import QKeySequence
+from PySide.QtWidgets import QKeySequence
 
 from helper import UsesQApplication
 

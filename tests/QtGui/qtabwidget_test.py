@@ -1,7 +1,7 @@
 
 import unittest
 
-from PySide.QtGui import *
+from PySide.QtWidgets import *
 from helper import TimedQApplication
 
 def makeBug643(tab):

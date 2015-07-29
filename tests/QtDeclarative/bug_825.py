@@ -1,5 +1,5 @@
 from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide.QtWidgets import *
 from PySide.QtDeclarative import *
 
 from helper import adjust_filename

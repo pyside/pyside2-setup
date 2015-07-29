@@ -4,7 +4,7 @@
 import unittest
 import sys
 
-from PySide.QtGui import QApplication
+from PySide.QtWidgets import QApplication
 from PySide.QtWebKit import QWebView
 
 class Bug448(unittest.TestCase):

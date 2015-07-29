@@ -3,7 +3,7 @@
 import unittest
 from helper import TimedQApplication
 from PySide.QtCore import QSignalTransition, QState, Qt, QStateMachine
-from PySide.QtGui import QCheckBox
+from PySide.QtWidgets import QCheckBox
 
 class CheckedTransition(QSignalTransition):
     def __init__(self, check):

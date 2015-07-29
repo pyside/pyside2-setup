@@ -3,7 +3,7 @@ import sys
 import unittest
 
 from PySide.QtCore import QSignalMapper
-from PySide.QtGui import QCheckBox
+from PySide.QtWidgets import QCheckBox
 
 from helper import UsesQApplication
 

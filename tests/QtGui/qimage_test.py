@@ -4,6 +4,7 @@
 import unittest
 import py3kcompat as py3k
 from PySide.QtGui import *
+from PySide.QtWidgets import *
 from helper import UsesQApplication, adjust_filename
 
 xpm = [

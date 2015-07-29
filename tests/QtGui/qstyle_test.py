@@ -2,7 +2,7 @@
 import unittest
 from helper import UsesQApplication
 
-from PySide.QtGui import QWidget, QLabel, QFontComboBox, QStyleFactory
+from PySide.QtWidgets import QWidget, QLabel, QFontComboBox, QStyleFactory
 
 class SetStyleTest(UsesQApplication):
     '''Tests setting the same QStyle for all objects in a UI hierarchy.'''

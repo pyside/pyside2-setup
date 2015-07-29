@@ -1,6 +1,6 @@
 import unittest
 import sys
-from PySide.QtGui import QWidget, QPushButton
+from PySide.QtWidgets import QWidget, QPushButton
 
 from helper import UsesQApplication
 

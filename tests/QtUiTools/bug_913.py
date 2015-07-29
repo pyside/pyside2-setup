@@ -6,7 +6,7 @@ import unittest
 from helper import adjust_filename
 
 from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide.QtWidgets import *
 from PySide.QtUiTools import *
 
 class TestBug913 (unittest.TestCase):

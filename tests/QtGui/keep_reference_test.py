@@ -5,7 +5,7 @@ import unittest
 from sys import getrefcount
 from helper import UsesQApplication
 from PySide.QtCore import *
-from PySide.QtGui import QTableView
+from PySide.QtWidgets import QTableView
 
 class TestModel(QAbstractTableModel):
     def __init__(self, parent=None):

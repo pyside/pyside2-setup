@@ -4,6 +4,7 @@ import unittest
 
 from PySide.QtCore import QObject
 from PySide.QtGui import *
+from PySide.QtWidgets import *
 
 from helper import UsesQApplication
 

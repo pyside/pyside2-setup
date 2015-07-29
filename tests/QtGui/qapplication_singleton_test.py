@@ -1,7 +1,7 @@
 
 import unittest
 
-from PySide.QtGui import QApplication
+from PySide.QtWidgets import QApplication
 
 class TestSingleton(unittest.TestCase):
     def testBasic(self):

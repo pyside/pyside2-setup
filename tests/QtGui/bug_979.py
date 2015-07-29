@@ -1,4 +1,4 @@
-from PySide.QtGui import QDialog
+from PySide.QtWidgets import QDialog
 from import_test import PysideImportTest2
 
 class PysideImportTest1(QDialog, PysideImportTest2):

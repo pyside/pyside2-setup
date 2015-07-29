@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import unittest, os
 from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide.QtWidgets import *
 from PySide.QtSvg import *
 
 class QSvgWidgetTest(unittest.TestCase):

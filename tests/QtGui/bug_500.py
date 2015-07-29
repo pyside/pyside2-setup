@@ -3,7 +3,7 @@
 import unittest
 
 from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide.QtPrintSupport import *
 from helper import UsesQApplication
 
 class NeverDiesTest(UsesQApplication):

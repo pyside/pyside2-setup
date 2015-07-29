@@ -2,7 +2,7 @@
 import unittest
 
 from PySide.QtCore import Qt
-from PySide.QtGui import QPushButton
+from PySide.QtWidgets import QPushButton
 from helper import UsesQApplication
 
 class QInputContextTest(UsesQApplication):

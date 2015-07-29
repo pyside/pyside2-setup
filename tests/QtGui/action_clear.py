@@ -1,4 +1,4 @@
-from PySide.QtGui import QMenu, QWidget, QMenuBar, QToolBar
+from PySide.QtWidgets import QMenu, QWidget, QMenuBar, QToolBar
 import weakref
 
 import unittest

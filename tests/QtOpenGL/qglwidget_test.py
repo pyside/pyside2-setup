@@ -1,5 +1,5 @@
 import unittest
-from PySide.QtGui import *
+from PySide.QtWidgets import *
 from PySide.QtOpenGL import *
 
 class TestQGLWidget (unittest.TestCase):

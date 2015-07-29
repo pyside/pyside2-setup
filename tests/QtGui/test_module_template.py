@@ -1,4 +1,4 @@
-from PySide.QtGui import QWidget
+from PySide.QtWidgets import QWidget
 from PySide.QtCore import QObject
 
 class MyQObject(QObject):

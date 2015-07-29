@@ -3,7 +3,7 @@
 import unittest
 
 from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide.QtWidgets import *
 
 class MyObject(QWidget):
     def __init__(self, parent=None):

@@ -2,7 +2,7 @@
 
 import unittest
 
-from PySide.QtGui import QWidget, QVBoxLayout, QPushButton, QApplication, QHBoxLayout
+from PySide.QtWidgets import QWidget, QVBoxLayout, QPushButton, QApplication, QHBoxLayout
 from helper import UsesQApplication
 
 class QWidgetTest(UsesQApplication):

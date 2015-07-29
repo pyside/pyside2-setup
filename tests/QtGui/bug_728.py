@@ -1,4 +1,4 @@
-from PySide.QtGui import *
+from PySide.QtWidgets import *
 from PySide.QtCore import *
 
 app = QApplication([])

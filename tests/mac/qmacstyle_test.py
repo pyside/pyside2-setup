@@ -1,4 +1,5 @@
-from PySide.QtGui import QApplication, QLabel, QMacStyle
+from PySide.QtGui import QMacStyle
+from PySide.QtWidgets import QApplication, QLabel
 from PySide.QtCore import QObject
 
 import unittest

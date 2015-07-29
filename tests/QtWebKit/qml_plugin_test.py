@@ -4,7 +4,7 @@ import sys
 import unittest
 
 from PySide.QtCore import QUrl, QTimer
-from PySide.QtGui import QApplication, QLabel
+from PySide.QtWidgets import QApplication, QLabel
 from PySide.QtWebKit import QWebPluginFactory, QWebView, QWebSettings
 
 from helper import UsesQApplication

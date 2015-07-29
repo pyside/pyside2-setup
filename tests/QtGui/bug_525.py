@@ -1,6 +1,6 @@
 import unittest
-from PySide.QtGui import QApplication
-from PySide.QtGui import QMenu
+from PySide.QtWidgets import QApplication
+from PySide.QtWidgets import QMenu
 
 class M2(QMenu):
     def __init__(self,parent=None):

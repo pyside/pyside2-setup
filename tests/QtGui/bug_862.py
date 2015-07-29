@@ -1,6 +1,6 @@
 
 from PySide.QtCore import QObject
-from PySide.QtGui import *
+from PySide.QtWidgets import *
 import PySide.QtCore
 import unittest
 

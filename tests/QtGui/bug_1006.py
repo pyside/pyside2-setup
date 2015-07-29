@@ -3,7 +3,7 @@ import weakref
 import sys
 
 from PySide.QtCore import Qt
-from PySide.QtGui import QDialog, QLabel, QGridLayout, QHBoxLayout, QWidget
+from PySide.QtWidgets import QDialog, QLabel, QGridLayout, QHBoxLayout, QWidget
 
 from helper import TimedQApplication
 

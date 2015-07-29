@@ -3,7 +3,7 @@
 import unittest
 from helper import UsesQApplication
 from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide.QtWidgets import *
 
 class BugTest(UsesQApplication):
     def testCase(self):

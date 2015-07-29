@@ -3,7 +3,8 @@ import unittest
 import os
 from helper import UsesQApplication
 from PySide.QtCore import QTimer
-from PySide.QtGui import QPicture, QPainter, QWidget
+from PySide.QtGui import QPicture, QPainter
+from PySide.QtWidgets import QWidget
 
 class MyWidget(QWidget):
     def paintEvent(self, e):

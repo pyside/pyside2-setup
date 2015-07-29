@@ -1,6 +1,6 @@
 import unittest
 from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide.QtWidgets import *
 
 class TestBug653(unittest.TestCase):
     """Crash after calling QWizardPage.wizard()"""

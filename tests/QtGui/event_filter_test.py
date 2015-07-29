@@ -3,7 +3,7 @@ import sys
 
 from helper import UsesQApplication
 from PySide.QtCore import QObject, QEvent
-from PySide.QtGui import QWidget
+from PySide.QtWidgets import QWidget
 
 class MyFilter(QObject):
   def eventFilter(self, obj, event):

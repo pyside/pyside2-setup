@@ -1,7 +1,7 @@
 """ Unittest for bug #575 """
 """ http://bugs.openbossa.org/show_bug.cgi?id=575 """
 
-from PySide.QtGui import QApplication, QPlainTextEdit, QTextEdit
+from PySide.QtWidgets import QApplication, QPlainTextEdit, QTextEdit
 import sys
 import unittest
 

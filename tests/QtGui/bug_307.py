@@ -3,7 +3,7 @@ import unittest
 import colorsys
 
 from PySide.QtCore import SIGNAL
-from PySide.QtGui import QPushButton, QApplication
+from PySide.QtWidgets import QPushButton, QApplication
 
 
 class Test (QApplication) :

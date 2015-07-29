@@ -1,5 +1,10 @@
 import unittest
-from PySide.QtGui import QToolBar, QApplication, QAction, QToolButton
+from PySide.QtWidgets import QToolBar, QApplication, QAction, QToolButton
+
+try:
+    xrange
+except NameError:
+    xrange = range # py3k
 
 class TestLabelPixmap(unittest.TestCase):
     def testReference(self):

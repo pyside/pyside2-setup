@@ -1,4 +1,4 @@
-from PySide.QtGui import QTableView, QVBoxLayout, QApplication
+from PySide.QtWidgets import QTableView, QVBoxLayout, QApplication
 from PySide.QtCore import QAbstractItemModel
 
 from helper import UsesQApplication

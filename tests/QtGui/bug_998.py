@@ -1,5 +1,5 @@
 import unittest
-from PySide.QtGui import QApplication
+from PySide.QtWidgets import QApplication
 
 class TestBug998 (unittest.TestCase):
     def testNoFocusWindow(self):

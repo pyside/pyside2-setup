@@ -4,7 +4,7 @@ import unittest
 import sys
 import signal
 from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide.QtWidgets import *
 
 class QBug( QObject ):
     def __init__(self, parent = None):

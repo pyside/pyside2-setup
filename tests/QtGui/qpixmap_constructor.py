@@ -2,7 +2,8 @@
 
 import unittest
 
-from PySide.QtGui import QLabel, QPixmap
+from PySide.QtGui import QPixmap
+from PySide.QtWidgets import QLabel
 
 from helper import UsesQApplication
 

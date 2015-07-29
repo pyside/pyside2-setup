@@ -1,6 +1,6 @@
 import unittest
 from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide.QtWidgets import *
 
 def foo(a, b):
     pass

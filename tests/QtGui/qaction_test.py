@@ -1,6 +1,6 @@
 import unittest
 
-from PySide.QtGui import QAction, QWidget
+from PySide.QtWidgets import QAction, QWidget
 from helper import UsesQApplication
 
 class QPainterDrawText(UsesQApplication):

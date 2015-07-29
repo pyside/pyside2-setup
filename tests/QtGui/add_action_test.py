@@ -4,7 +4,7 @@
 import unittest
 
 from PySide.QtCore import SLOT
-from PySide.QtGui import QMenuBar, QAction, QPushButton
+from PySide.QtWidgets import QMenuBar, QAction, QPushButton
 
 from helper import UsesQApplication
 

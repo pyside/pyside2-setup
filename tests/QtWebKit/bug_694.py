@@ -1,7 +1,7 @@
 import sys
 import unittest
 from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide.QtWidgets import *
 from PySide.QtWebKit import *
 
 class ErrorPage (QWebPage):

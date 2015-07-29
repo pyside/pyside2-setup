@@ -1,6 +1,6 @@
 ''' unit test for BUG #1060 '''
 
-from PySide.QtGui import QApplication
+from PySide.QtWidgets import QApplication
 from PySide.QtUiTools import QUiLoader
 from helper import adjust_filename
 

@@ -5,7 +5,7 @@ from helper import UsesQApplication
 
 from testbinding import TestView
 from PySide.QtCore import Qt
-from PySide.QtGui import QAbstractItemDelegate, QComboBox
+from PySide.QtWidgets import QAbstractItemDelegate, QComboBox
 
 id_text = 'This is me'
 

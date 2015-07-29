@@ -1,6 +1,6 @@
 import unittest
 from PySide.QtCore import QSizeF
-from PySide.QtGui import QGraphicsProxyWidget, QSizePolicy, QPushButton, QGraphicsScene, QGraphicsView
+from PySide.QtWidgets import QGraphicsProxyWidget, QSizePolicy, QPushButton, QGraphicsScene, QGraphicsView
 
 from helper import TimedQApplication
 

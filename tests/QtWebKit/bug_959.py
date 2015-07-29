@@ -1,6 +1,6 @@
 from PySide.QtCore import QObject, Slot, QTimer
 from PySide.QtWebKit import QWebView
-from PySide.QtGui import QApplication
+from PySide.QtWidgets import QApplication
 from PySide import QtCore
 
 import sys

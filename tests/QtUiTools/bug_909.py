@@ -2,7 +2,7 @@ import sys
 import unittest
 
 from PySide.QtCore import QFile
-from PySide.QtGui import QTabWidget
+from PySide.QtWidgets import QTabWidget
 from PySide.QtUiTools import QUiLoader
 
 from helper import UsesQApplication

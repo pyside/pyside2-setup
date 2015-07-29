@@ -2,7 +2,7 @@
 
 import unittest
 
-from PySide.QtGui import QTreeWidgetItem
+from PySide.QtWidgets import QTreeWidgetItem
 from helper import UsesQApplication
 
 class HashableTest(UsesQApplication):

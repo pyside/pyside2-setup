@@ -2,7 +2,7 @@
 import unittest
 
 from PySide.QtCore import QObject
-from PySide.QtGui import QInputDialog
+from PySide.QtWidgets import QInputDialog
 
 from helper import UsesQApplication
 

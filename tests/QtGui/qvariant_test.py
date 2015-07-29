@@ -1,7 +1,7 @@
 
 import unittest
 from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide.QtWidgets import *
 
 class MyDiagram(QGraphicsScene):
     pass

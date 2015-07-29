@@ -3,7 +3,7 @@ import unittest
 from PySide.QtCore import QObject, SIGNAL, SLOT, Qt
 
 try:
-    from PySide.QtGui import QSpinBox, QApplication, QWidget
+    from PySide.QtWidgets import QSpinBox, QApplication, QWidget
     hasQtGui = True
 except ImportError:
     hasQtGui = False

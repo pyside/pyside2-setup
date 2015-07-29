@@ -2,7 +2,8 @@
 
 import unittest
 
-from PySide.QtGui import QGraphicsScene, QGraphicsRectItem, QGraphicsView, QApplication, QBrush, QColor
+from PySide.QtWidgets import QGraphicsScene, QGraphicsRectItem, QGraphicsView, QApplication
+from PySide.QtGui import QBrush, QColor
 from PySide.QtCore import QTimer
 from helper import UsesQApplication
 

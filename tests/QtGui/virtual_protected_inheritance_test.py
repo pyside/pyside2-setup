@@ -4,7 +4,7 @@
 import unittest
 
 from PySide.QtCore import QTimerEvent
-from PySide.QtGui import QApplication, QSpinBox
+from PySide.QtWidgets import QApplication, QSpinBox
 
 from helper import UsesQApplication
 

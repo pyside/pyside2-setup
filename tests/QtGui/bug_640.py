@@ -1,5 +1,5 @@
 import sys
-from PySide.QtGui import *
+from PySide.QtWidgets import *
 import unittest
 
 class Bug640(unittest.TestCase):

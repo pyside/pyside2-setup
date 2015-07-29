@@ -5,7 +5,7 @@ from functools import partial
 from PySide.QtCore import QObject, SIGNAL
 
 try:
-    from PySide.QtGui import QPushButton, QSpinBox
+    from PySide.QtWidgets import QPushButton, QSpinBox
     hasQtGui = True
 except ImportError:
     hasQtGui = False

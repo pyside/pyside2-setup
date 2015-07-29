@@ -1,7 +1,8 @@
 
 import unittest
 
-from PySide.QtGui import QMenu, QKeySequence, QIcon
+from PySide.QtWidgets import QMenu
+from PySide.QtGui import QKeySequence, QIcon
 from PySide.QtCore import SLOT
 
 from helper import UsesQApplication

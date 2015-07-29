@@ -9,7 +9,8 @@ import gc
 
 
 from PySide.QtCore import Qt, QPointF
-from PySide.QtGui import QApplication, QGraphicsScene, QGraphicsRectItem, QPolygonF, QGraphicsPolygonItem, QGraphicsRectItem
+from PySide.QtGui import QPolygonF
+from PySide.QtWidgets import QApplication, QGraphicsScene, QGraphicsRectItem, QGraphicsPolygonItem, QGraphicsRectItem
 
 from helper import UsesQApplication
 

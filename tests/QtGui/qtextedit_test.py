@@ -2,7 +2,7 @@
 
 import unittest
 from sys import getrefcount
-from PySide.QtGui import QTextEdit
+from PySide.QtWidgets import QTextEdit
 
 from helper import UsesQApplication
 

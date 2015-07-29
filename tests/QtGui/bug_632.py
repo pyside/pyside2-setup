@@ -1,5 +1,5 @@
 import sys
-from PySide.QtGui import QLineEdit, QApplication
+from PySide.QtWidgets import QLineEdit, QApplication
 import unittest
 
 

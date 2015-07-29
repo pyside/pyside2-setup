@@ -3,7 +3,7 @@ import sys
 
 from helper import UsesQApplication
 from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide.QtWidgets import *
 
 class MyLayout(QLayout):
     def __init__(self, parent=None):

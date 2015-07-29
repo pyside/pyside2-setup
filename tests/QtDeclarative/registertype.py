@@ -3,7 +3,7 @@ import sys
 import unittest
 import helper
 from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide.QtWidgets import *
 from PySide.QtDeclarative import *
 
 class PieSlice (QDeclarativeItem):

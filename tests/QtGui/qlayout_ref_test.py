@@ -4,9 +4,9 @@
 import unittest
 from sys import getrefcount
 
-from PySide.QtGui import QHBoxLayout, QVBoxLayout, QGridLayout, QWidget
-from PySide.QtGui import QStackedLayout, QFormLayout
-from PySide.QtGui import QApplication, QPushButton, QLabel
+from PySide.QtWidgets import QHBoxLayout, QVBoxLayout, QGridLayout, QWidget
+from PySide.QtWidgets import QStackedLayout, QFormLayout
+from PySide.QtWidgets import QApplication, QPushButton, QLabel
 
 from helper import UsesQApplication
 

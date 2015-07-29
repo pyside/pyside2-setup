@@ -2,7 +2,7 @@
 import unittest
 
 from PySide.QtCore import QObject, QTimer, QThread
-from PySide.QtGui import *
+from PySide.QtWidgets import *
 
 class Foo(QTableView):
     def __init__(self, parent=None):

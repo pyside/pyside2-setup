@@ -4,7 +4,8 @@
 import unittest
 
 from PySide.QtCore import Qt
-from PySide.QtGui import QApplication, QColor, QBrush
+from PySide.QtGui import QColor, QBrush
+from PySide.QtWidgets import QApplication
 
 from helper import UsesQApplication
 

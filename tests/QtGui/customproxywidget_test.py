@@ -2,8 +2,9 @@ import unittest
 
 from helper import UsesQApplication
 from PySide.QtCore import Qt, QTimer
-from PySide.QtGui import QLabel, QPainter
-from PySide.QtGui import QGraphicsScene, QGraphicsView, QGraphicsItem, QGraphicsProxyWidget
+from PySide.QtGui import QPainter
+from PySide.QtWidgets import QLabel
+from PySide.QtWidgets import QGraphicsScene, QGraphicsView, QGraphicsItem, QGraphicsProxyWidget
 
 class CustomProxy(QGraphicsProxyWidget):
     def __init__(self, parent=None, wFlags=0):

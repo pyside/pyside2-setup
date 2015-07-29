@@ -1,6 +1,6 @@
 # coding: utf-8
 from PySide.QtCore import *
-from PySide.QtGui  import *
+from PySide.QtWidgets  import *
 
 import sys
 

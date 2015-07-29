@@ -1,7 +1,7 @@
 import unittest
 import sys
 from PySide.QtCore import QTimer
-from PySide.QtGui import QWidget, QApplication
+from PySide.QtWidgets import QWidget, QApplication
 
 class TestW1(QWidget):
     def __init__(self, parent = None):
