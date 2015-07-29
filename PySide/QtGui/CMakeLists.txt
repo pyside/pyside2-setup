@@ -145,6 +145,7 @@ ${QtGui_GEN_DIR}/qtexttablecell_wrapper.cpp
 ${QtGui_GEN_DIR}/qtexttablecellformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qtexttableformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qtoolbarchangeevent_wrapper.cpp
+${QtGui_GEN_DIR}/qtouchdevice_wrapper.cpp
 ${QtGui_GEN_DIR}/qtouchevent_touchpoint_wrapper.cpp
 ${QtGui_GEN_DIR}/qtouchevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qtransform_wrapper.cpp

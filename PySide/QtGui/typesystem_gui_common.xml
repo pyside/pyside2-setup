@@ -3128,6 +3128,11 @@
       </value-type>
   </object-type>
 
+  <object-type name="QTouchDevice">
+    <enum-type name="CapabilityFlag" flags="Capabilities" />
+    <enum-type name="DeviceType" />
+  </object-type>
+
   <value-type name="QVector2D" since="4.6">
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
