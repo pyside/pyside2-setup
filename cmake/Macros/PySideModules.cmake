@@ -5,7 +5,7 @@ endmacro()
 
 macro(create_pyside_module
       module_name
-      module_include_dirs
+      module_include_dir
       module_libraries
       module_deps
       module_typesystem_path
@@ -13,10 +13,6 @@ macro(create_pyside_module
       module_static_sources)
     string(TOLOWER ${module_name} _module)
     string(REGEX REPLACE ^qt "" _module ${_module})
-    # turn the include dirs into a correct path
-    set(_temp_var ${pyside_SOURCE_DIR} ${module_include_dirs} ${_temp_var} ${QT_INCLUDE_DIR})
-    # XXX this QT_INCLUDE_DIR must go away!!!
-    make_path(_temp_var ${${_temp_var}})
     if(${ARGC} GREATER 7)
         set (typesystem_name ${ARGV7})
     else()
@@ -37,7 +33,7 @@ macro(create_pyside_module
     add_custom_command(OUTPUT ${${module_sources}}
                         COMMAND ${SHIBOKEN_BINARY} ${GENERATOR_EXTRA_FLAGS}
                         ${pyside_BINARY_DIR}/pyside_global.h
-                        --include-paths=${_temp_var}
+                        --include-paths=${pyside_SOURCE_DIR}${PATH_SEP}${QT_INCLUDE_DIR}
                         --typesystem-paths=${pyside_SOURCE_DIR}${PATH_SEP}${${module_typesystem_path}}
                         --output-directory=${CMAKE_CURRENT_BINARY_DIR}
                         --license-file=${CMAKE_CURRENT_SOURCE_DIR}/../licensecomment.txt
@@ -47,7 +43,7 @@ macro(create_pyside_module
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                         COMMENT "Running generator for ${module_name}...")
 
-    include_directories(${module_name} ${${module_include_dirs}} ${pyside_SOURCE_DIR})
+    include_directories(${module_name} ${${module_include_dir}} ${pyside_SOURCE_DIR})
     add_library(${module_name} MODULE ${${module_sources}} ${${module_static_sources}})
     set_target_properties(${module_name} PROPERTIES PREFIX "" LIBRARY_OUTPUT_DIRECTORY ${pyside_BINARY_DIR})
     if(WIN32)
