@@ -46,12 +46,4 @@
   <inject-code class="native" position="beginning">
     <insert-template name="checkPyCapsuleOrPyCObject_func"/>
   </inject-code>
-  <value-type name="POINT">
-      <include file-name="wtypes.h" location="global"/>
-  </value-type>
-  <value-type name="MSG">
-      <include file-name="wtypes.h" location="global"/>
-  </value-type>
-  <suppress-warning text="class 'MSG' inherits from unknown base class 'tagMSG'"/>
-  <suppress-warning text="class not found for setup inheritance 'tagMSG'"/>
 </typesystem>
