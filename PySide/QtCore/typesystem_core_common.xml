@@ -885,11 +885,6 @@
     <!-- Qt5: gone <modify-function signature="escape(const QString&amp;)" remove="all"/> -->
     <modify-function signature="convertFromPlainText(const QString &amp;, Qt::WhiteSpaceMode)" remove="all"/>
     <!--### -->
-    <extra-includes>
-    <!-- Qt5: this is in QtGui
-      <include file-name="QTextDocument" location="global"/>
-    -->
-    </extra-includes>
   </namespace-type>
 
   <add-function signature="qAbs(double)" return-type="double">
