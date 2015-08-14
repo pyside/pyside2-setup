@@ -4,8 +4,9 @@ set(QtCore_gluecode "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.cpp")
 
 if(ENABLE_WIN)
     set(SPECIFIC_OS_FILES
-        ${QtCore_GEN_DIR}/msg_wrapper.cpp
-        ${QtCore_GEN_DIR}/point_wrapper.cpp
+      # Qt5: not sure why this was needed
+      #  ${QtCore_GEN_DIR}/msg_wrapper.cpp
+      #  ${QtCore_GEN_DIR}/point_wrapper.cpp
     )
 else()
     set(SPECIFIC_OS_FILES "")
@@ -14,7 +15,7 @@ endif()
 set(QtCore_SRC
 ${QtCore_GEN_DIR}/qabstractanimation_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstracteventdispatcher_timerinfo_wrapper.cpp
-${QtCore_GEN_DIR}/qabstracteventdispatcher_wrapper.cpp
+### 'bool QAbstractEventDispatcher::registerEventNotifier(QWinEventNotifier *)' : is abstract ${QtCore_GEN_DIR}/qabstracteventdispatcher_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstractitemmodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstractlistmodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstractstate_wrapper.cpp
@@ -30,7 +31,7 @@ ${QtCore_GEN_DIR}/qbytearraymatcher_wrapper.cpp
 ${QtCore_GEN_DIR}/qchildevent_wrapper.cpp
 ${QtCore_GEN_DIR}/qcoreapplication_wrapper.cpp
 ${QtCore_GEN_DIR}/qcryptographichash_wrapper.cpp
-${QtCore_GEN_DIR}/qdatastream_wrapper.cpp
+### 'numArgs' : undeclared identifier ${QtCore_GEN_DIR}/qdatastream_wrapper.cpp
 ${QtCore_GEN_DIR}/qdate_wrapper.cpp
 ${QtCore_GEN_DIR}/qdatetime_wrapper.cpp
 ${QtCore_GEN_DIR}/qdir_wrapper.cpp
@@ -136,6 +137,9 @@ configure_file("${QtCore_SOURCE_DIR}/typesystem_core.xml.in"
                "${QtCore_BINARY_DIR}/typesystem_core.xml" @ONLY)
 
 make_path(QtCore_typesystem_path ${QtCore_SOURCE_DIR})
+
+# because two things do not compile yet, we use this trick:
+skip_missing_classes(QtCore_SRC)
 
 set(QtCore_include_dirs ${QtCore_SOURCE_DIR}
                         ${QtCore_BINARY_DIR}

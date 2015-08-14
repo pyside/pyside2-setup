@@ -3205,7 +3205,7 @@
         </inject-code>
     </modify-function>
     <!-- Function removed because on windows it returns a win32 specific structure -->
-    <modify-function signature="pid()const" remove="all" />
+    <modify-function signature="pid()" remove="all" />
     <add-function signature="pid()" return-type="long">
         <inject-code>
             long result;

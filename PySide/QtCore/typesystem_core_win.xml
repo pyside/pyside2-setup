@@ -19,6 +19,9 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 -->
 <typesystem package="PySide.QtCore">
+  <extra-includes>
+    <include file-name="windows.h" location="global"/>
+  </extra-includes>
   <primitive-type name="Qt::HANDLE" target-lang-api-name="PyObject" />
   <primitive-type name="HWND">
       <conversion-rule>
@@ -46,4 +49,8 @@
   <inject-code class="native" position="beginning">
     <insert-template name="checkPyCapsuleOrPyCObject_func"/>
   </inject-code>
+  <rejection class="QAbstractEventDispatcher" function-name="registerEventNotifier"/>
+  <rejection class="QAbstractEventDispatcher" function-name="unregisterEventNotifier"/>
+
+  <object-type name="QWinEventNotifier" />
 </typesystem>
