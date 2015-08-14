@@ -337,12 +337,12 @@ QT_END_NAMESPACE
 #undef Q_QDOC
 
 #if @ENABLE_X11@
-  #define Q_WS_X11
+  #define Q_OS_X11
 #elif @ENABLE_MAC@
-  #define Q_WS_MAC
+  #define Q_OS_MAC
 #elif @ENABLE_WIN@
   #include "pysidewtypes.h"
-  #define Q_WS_WIN
+  #define Q_OS_WIN
 #endif
 
 // There are symbols in Qt that exist in Debug but
