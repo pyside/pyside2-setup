@@ -30,8 +30,23 @@ macro(create_pyside_module
         set(typesystem_path ${typesystem_name})
     endif()
 
+    # check for class files that were commented away.
+    if(DEFINED ${module_sources}_skipped_files)
+        if(DEFINED PYTHON3_EXECUTABLE)
+            set(_python_interpreter "${PYTHON3_EXECUTABLE}")
+        else()
+            set(_python_interpreter "${PYTHON_EXECUTABLE}")
+        endif()
+        if(NOT _python_interpreter)
+            message(FATAL_ERROR "*** we need a python interpreter for postprocessing!")
+        endif()
+        set(_python_postprocessor "${_python_interpreter}" "${CMAKE_CURRENT_BINARY_DIR}/filter_init.py")
+    else()
+        set(_python_postprocessor "")
+    endif()
+
     add_custom_command(OUTPUT ${${module_sources}}
-                        COMMAND ${SHIBOKEN_BINARY} ${GENERATOR_EXTRA_FLAGS}
+                        COMMAND "${SHIBOKEN_BINARY}" ${GENERATOR_EXTRA_FLAGS}
                         ${pyside_BINARY_DIR}/pyside_global.h
                         --include-paths=${pyside_SOURCE_DIR}${PATH_SEP}${QT_INCLUDE_DIR}
                         --typesystem-paths=${pyside_SOURCE_DIR}${PATH_SEP}${${module_typesystem_path}}
@@ -40,6 +55,7 @@ macro(create_pyside_module
                         ${typesystem_path}
                         --api-version=${SUPPORTED_QT_VERSION}
                         --drop-type-entries="${dropped_entries}"
+                        COMMAND ${_python_postprocessor}
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                         COMMENT "Running generator for ${module_name}...")
 
@@ -52,11 +68,11 @@ macro(create_pyside_module
     else()
         set(${module_name}_suffix ${CMAKE_SHARED_MODULE_SUFFIX})
     endif()
+
     target_link_libraries(${module_name} ${${module_libraries}})
     if(${module_deps})
         add_dependencies(${module_name} ${${module_deps}})
     endif()
-
 
     # install
     install(TARGETS ${module_name} LIBRARY DESTINATION ${SITE_PACKAGE}/PySide)

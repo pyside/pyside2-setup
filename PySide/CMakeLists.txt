@@ -55,20 +55,17 @@ endmacro()
 #
 
 macro(skip_missing_classes sources)
-    set(prev_shiboken_binary ${SHIBOKEN_BINARY})
-    string(REPLACE ";" " " _escaped_sources "${${sources}}")
-    file(WRITE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/fake_shiboken.sh"
-         "
-    echo \"$*\"
-    ${prev_shiboken_binary} $*
-    python3 ${CMAKE_CURRENT_BINARY_DIR}/filter_init.py ${_escaped_sources}
-         ")
+    # this line signals postprocessing to macro "create_pyside_module".
+    set(${sources}_skipped_files 1)
+    # you just need to pass exactly the same sources variable.
+    string(REPLACE ";" "\n" _escaped_sources "${${sources}}")
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/filter_init.py"
          "if True: # allow the indentation
+    files = '''\n${_escaped_sources}\n'''.strip().split('\\n')
     import sys, os, re, pprint
-    pprint.pprint(sys.argv)
+    pprint.pprint(files)
     nset = set()
-    for fname in sys.argv[1:]:
+    for fname in files:
         name = os.path.splitext(os.path.basename(fname))[0]
         print(name)
         if name.endswith('module_wrapper'):
@@ -91,12 +88,6 @@ macro(skip_missing_classes sources)
     removals = sorted(list(removals))
     print('Removals:', removals)
     ")
-    file(COPY ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/fake_shiboken.sh
-      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
-      FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
-      GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-
-    set(SHIBOKEN_BINARY "${CMAKE_CURRENT_BINARY_DIR}/fake_shiboken.sh")
 endmacro()
 
 CHECK_PACKAGE_FOUND(Qt5Core)
