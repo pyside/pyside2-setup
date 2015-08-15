@@ -16,7 +16,9 @@ include_directories(${Qt5Designer_INCLUDE_DIRS}
 
 qt5_wrap_cpp(MOC_FILES ${ui_plugin_moc})
 add_library(uiplugin STATIC ${ui_plugin_src} ${MOC_FILES})
-add_definitions(-fPIC)
+if(CMAKE_HOST_UNIX AND NOT CYGWIN)
+    add_definitions(-fPIC)
+endif()
 add_definitions(-DQT_STATICPLUGIN)
 target_link_libraries(uiplugin
                       ${Qt5UiTools_LIBRARY}
