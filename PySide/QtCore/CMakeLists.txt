@@ -4,9 +4,7 @@ set(QtCore_gluecode "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.cpp")
 
 if(ENABLE_WIN)
     set(SPECIFIC_OS_FILES
-      # Qt5: not sure why this was needed
-      #  ${QtCore_GEN_DIR}/msg_wrapper.cpp
-      #  ${QtCore_GEN_DIR}/point_wrapper.cpp
+      ${QtCore_GEN_DIR}/qwineventnotifier_wrapper.cpp
     )
 else()
     set(SPECIFIC_OS_FILES "")
