@@ -23,7 +23,7 @@
     <conversion-rule>
         <native-to-target>
         #ifdef IS_PY3K
-        return PyCapsule_New(%in, 0, 0);
+        return PyCapsule_New(reinterpret_cast&lt;void*&gt;(%in), 0, 0);
         #else
         return PyCObject_FromVoidPtr(%in, 0);
         #endif
