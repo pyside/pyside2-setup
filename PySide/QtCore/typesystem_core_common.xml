@@ -180,9 +180,42 @@
   </primitive-type>
 
   <!-- Qt5: add the new pointer-ish types -->
-  <primitive-type name="qintptr" />
-  <primitive-type name="quintptr" />
-  <primitive-type name="qptrdiff" />
+  <primitive-type name="qintptr" target-lang-api-name="PyLong">
+    <conversion-rule>
+        <native-to-target>
+        return PyLong_FromLong(%in);
+        </native-to-target>
+        <target-to-native>
+            <add-conversion type="PyLong">
+            %out = %OUTTYPE(PyLong_AsLong(%in));
+            </add-conversion>
+        </target-to-native>
+    </conversion-rule>
+  </primitive-type>
+  <primitive-type name="quintptr" target-lang-api-name="PyLong">
+    <conversion-rule>
+        <native-to-target>
+        return PyLong_FromUnsignedLong(%in);
+        </native-to-target>
+        <target-to-native>
+            <add-conversion type="PyLong">
+            %out = %OUTTYPE(PyLong_AsUnsignedLong(%in));
+            </add-conversion>
+        </target-to-native>
+    </conversion-rule>
+  </primitive-type>
+  <primitive-type name="qptrdiff" target-lang-api-name="PyLong">
+    <conversion-rule>
+        <native-to-target>
+        return PyLong_FromLong(%in);
+        </native-to-target>
+        <target-to-native>
+            <add-conversion type="PyLong">
+            %out = %OUTTYPE(PyLong_AsLong(%in));
+            </add-conversion>
+        </target-to-native>
+    </conversion-rule>
+  </primitive-type>
 
   <inject-code class="native" position="beginning">
     bool py2kStrCheck(PyObject* obj)
