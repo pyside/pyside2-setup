@@ -26,17 +26,21 @@ endif()
 
 # Detect if the python libs were compiled in debug mode
 execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "from distutils import sysconfig; \\
-        print bool(sysconfig.get_config_var('Py_DEBUG'))"
+    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+        from distutils import sysconfig
+        print bool(sysconfig.get_config_var('Py_DEBUG'))
+        "
     OUTPUT_VARIABLE PYTHON_WITH_DEBUG
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "import sys; \\
-        from distutils import sysconfig; \\
-        vr = sys.version_info; \\
-        suffix = '-dbg' if bool(sysconfig.get_config_var('Py_DEBUG')) else ''; \\
-        print '-python%d.%d%s' % (vr[0], vr[1], suffix)"
+    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+        import sys
+        from distutils import sysconfig
+        vr = sys.version_info
+        suffix = '-dbg' if bool(sysconfig.get_config_var('Py_DEBUG')) else ''
+        print '-python%d.%d%s' % (vr[0], vr[1], suffix)
+        "
     OUTPUT_VARIABLE PYTHON_SUFFIX
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
