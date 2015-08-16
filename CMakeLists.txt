@@ -153,8 +153,11 @@ add_custom_target(dist
 
 if (NOT SITE_PACKAGE)
     execute_process(
-        COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} -c "from distutils import sysconfig; \\
-            print(sysconfig.get_python_lib(1,0,prefix='${CMAKE_INSTALL_PREFIX}'))"
+        COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} -c "if True:
+            from distutils import sysconfig
+            from os.path import sep
+            print(sysconfig.get_python_lib(1, 0, prefix='${CMAKE_INSTALL_PREFIX}').replace(sep, '/'))
+            "
         OUTPUT_VARIABLE SITE_PACKAGE
         OUTPUT_STRIP_TRAILING_WHITESPACE)
     if (NOT SITE_PACKAGE)
