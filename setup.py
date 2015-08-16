@@ -242,7 +242,11 @@ for n in ["pyside_package", "build", "PySide-%s" % __version__]:
     d = os.path.join(script_dir, n)
     if os.path.isdir(d):
         print("Removing %s" % d)
-        rmtree(d)
+        try:
+            rmtree(d)
+        except Exception as e:
+            print('***** problem removing "{}"'.format(d))
+            print('ignored error: {}'.format(e))
 
 # Prepare package folders
 for pkg in ["pyside_package/PySide", "pyside_package/pysideuic"]:
@@ -556,9 +560,14 @@ class pyside_build(_build):
             return
         if os.path.exists(module_build_dir):
             log.info("Deleting module build folder %s..." % module_build_dir)
-            rmtree(module_build_dir)
+            try:
+                rmtree(module_build_dir)
+            except Exception as e:
+                print('***** problem removing "{}"'.format(module_build_dir))
+                print('ignored error: {}'.format(e))
         log.info("Creating module build folder %s..." % module_build_dir)
-        os.makedirs(module_build_dir)
+        if not os.path.exists(module_build_dir):
+            os.makedirs(module_build_dir)
         os.chdir(module_build_dir)
 
         module_src_dir = os.path.join(self.sources_dir, folder)
