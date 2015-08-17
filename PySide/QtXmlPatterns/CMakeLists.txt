@@ -35,7 +35,7 @@ set(QtXmlPatterns_include_dirs  ${QtXmlPatterns_SOURCE_DIR}
 set(QtXmlPatterns_libraries     pyside
                                 ${SHIBOKEN_PYTHON_LIBRARIES}
                                 ${Qt5Core_LIBRARIES}
-                                ${Qt5XmlPatterns_LIBRARY})
+                                ${Qt5XmlPatterns_LIBRARIES})
 set(QtXmlPatterns_deps QtCore)
 
 create_pyside_module(QtXmlPatterns
