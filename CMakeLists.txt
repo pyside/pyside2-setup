@@ -33,13 +33,16 @@ if(CMAKE_HOST_APPLE)
     set(ALTERNATIVE_QT_INCLUDE_DIR "" CACHE PATH "The Alternative value to QT_INCLUDE_DIR. Necessary to fix bug on cmake 2.8 MACOS users")
 endif()
 
-if(MSVC)
-    set(CMAKE_CXX_FLAGS "/Zc:wchar_t- /GR /EHsc /DNOCOLOR /DWIN32 /D_WINDOWS /D_SCL_SECURE_NO_WARNINGS")
+if(NOT CMAKE_HOST_APPLE)
     # Qt5: QT_INCLUDE_DIR does no longer exist.
-    # On Windows, it can be computed from Qt5Core_INCLUDE_DIRS
+    # On Windows and Linux, it can be computed from Qt5Core_INCLUDE_DIRS
     message("Qt5Core_INCLUDE_DIRS ${Qt5Core_INCLUDE_DIRS}")
     list(GET Qt5Core_INCLUDE_DIRS 0 QT_INCLUDE_DIR)
-    message(WARNING "*** computed QT_INCLUDE_DIR as ${QT_INCLUDE_DIR}")
+    message(STATUS "*** computed QT_INCLUDE_DIR as ${QT_INCLUDE_DIR}")
+endif()
+
+if(MSVC)
+    set(CMAKE_CXX_FLAGS "/Zc:wchar_t- /GR /EHsc /DNOCOLOR /DWIN32 /D_WINDOWS /D_SCL_SECURE_NO_WARNINGS")
 else()
     if(CMAKE_HOST_UNIX AND NOT CYGWIN)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fvisibility=hidden -Wno-strict-aliasing")
