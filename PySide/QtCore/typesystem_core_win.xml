@@ -49,8 +49,12 @@
   <inject-code class="native" position="beginning">
     <insert-template name="checkPyCapsuleOrPyCObject_func"/>
   </inject-code>
-  <rejection class="QAbstractEventDispatcher" function-name="registerEventNotifier"/>
-  <rejection class="QAbstractEventDispatcher" function-name="unregisterEventNotifier"/>
 
+  <!-- Qt5: had to move QAbstractEventDispatcher into os-specific files because of Windows -->
   <object-type name="QWinEventNotifier" />
+  <object-type name="QAbstractEventDispatcher">
+    <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>)" allow-thread="yes"/>
+    <!-- Qt5: had to add this recursive object def. This was crucial to get rid of "pure virtual" -->
+    <object-type name="TimerInfo"/>
+  </object-type>
 </typesystem>

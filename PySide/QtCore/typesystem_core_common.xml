@@ -2727,11 +2727,9 @@
     <modify-function signature="QTextBoundaryFinder(QTextBoundaryFinder::BoundaryType,const QChar*,int,unsigned char*,int)" remove="all"/>
   </value-type>
   <object-type name="QXmlStreamEntityResolver"/>
-  <object-type name="QAbstractEventDispatcher">
-    <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>)" allow-thread="yes"/>
-    <!-- Qt5: had to add this recursive object def. This was crucial to get rid of "pure virtual" -->
-    <object-type name="TimerInfo"/>
-  </object-type>
+
+  <!-- Qt5: had to move QAbstractEventDispatcher into os-specific files because of Windows -->
+
   <object-type name="QEventLoop">
       <enum-type name="ProcessEventsFlag" flags="ProcessEventsFlags"/>
       <modify-function signature="exec(QFlags&lt;QEventLoop::ProcessEventsFlag>)" rename="exec_" allow-thread="yes" />
