@@ -59,6 +59,7 @@ set(QtWebKitWidgets_include_dirs
 set(QtWebKitWidgets_libraries      pyside
                             ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${SHIBOKEN_LIBRARY}
+                            ${Qt5Webkit_LIBRARIES}
                             ${Qt5WebkitWidgets_LIBRARIES}
                             ${Qt5Network_LIBRARIES}
                             ${Qt5Widgets_LIBRARIES}

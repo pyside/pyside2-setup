@@ -29,7 +29,8 @@ ${QtCore_GEN_DIR}/qbytearraymatcher_wrapper.cpp
 ${QtCore_GEN_DIR}/qchildevent_wrapper.cpp
 ${QtCore_GEN_DIR}/qcoreapplication_wrapper.cpp
 ${QtCore_GEN_DIR}/qcryptographichash_wrapper.cpp
-${QtCore_GEN_DIR}/qdatastream_wrapper.cpp
+### seems to be a shiboken weirdness, only on Windows ?!
+### 'numArgs' : undeclared identifier   ${QtCore_GEN_DIR}/qdatastream_wrapper.cpp
 ${QtCore_GEN_DIR}/qdate_wrapper.cpp
 ${QtCore_GEN_DIR}/qdatetime_wrapper.cpp
 ${QtCore_GEN_DIR}/qdir_wrapper.cpp

@@ -132,7 +132,10 @@ HAS_QT_MODULE(Qt5Xml_FOUND QtXml)
 HAS_QT_MODULE(Qt5XmlPatterns_FOUND QtXmlPatterns)
 HAS_QT_MODULE(Qt5Test_FOUND QtTest)
 HAS_QT_MODULE(Qt5WebKit_FOUND QtWebKit)
-HAS_QT_MODULE(Qt5WebKitWidgets_FOUND QtWebKitWidgets)
+if(NOT MSVC)
+    # right now this does not build on windows
+    HAS_QT_MODULE(Qt5WebKitWidgets_FOUND QtWebKitWidgets)
+ENDIF()
 ###
 # This module is deprecated! It should be replaces by QtGui.
 # We keep the source code until we are done with QtGui migration.
@@ -140,12 +143,22 @@ HAS_QT_MODULE(Qt5WebKitWidgets_FOUND QtWebKitWidgets)
 # HAS_QT_MODULE(Qt5OpenGL_FOUND QtOpenGL)
 ###
 
-if(Qt5Designer_FOUND)
-    HAS_QT_MODULE(Qt5UiTools_FOUND QtUiTools)
+if(NOT MSVC)
+    # right now this does not build on windows
+    if(Qt5Designer_FOUND)
+        HAS_QT_MODULE(Qt5UiTools_FOUND QtUiTools)
+    endif()
 endif()
 HAS_QT_MODULE(Qt5Script_FOUND QtScript)
-HAS_QT_MODULE(Qt5ScriptTools_FOUND QtScriptTools)
-HAS_QT_MODULE(Qt5Declarative_FOUND QtDeclarative)
+if(NOT MSVC)
+    # right now this does not build on windows
+    HAS_QT_MODULE(Qt5ScriptTools_FOUND QtScriptTools)
+ENDIF()
+if(0)
+    # deprecated!
+    # XXX We should build the new QtQml and QtQuick modules.
+    HAS_QT_MODULE(Qt5Declarative_FOUND QtDeclarative)
+endif()
 HAS_QT_MODULE(Qt5Help_FOUND QtHelp)
 if(0)
   ### crashes shiboken, as soon as 'QAbstractVideoBuffer' is touched!
