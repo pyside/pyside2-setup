@@ -137,8 +137,16 @@ configure_file("${QtCore_SOURCE_DIR}/typesystem_core.xml.in"
 
 make_path(QtCore_typesystem_path ${QtCore_SOURCE_DIR})
 
-# because two things do not compile yet, we use this trick:
-skip_missing_classes(QtCore_SRC)
+# because one last thing does not compile yet, we use this trick:
+if(MSVC)
+    # on windows, link without the problem module,
+    skip_missing_classes(QtCore_SRC)
+else()
+    # otherwise, add the module back to the sources.
+    set(QtCore_SRC ${QtCore_SRC}
+        ${QtCore_GEN_DIR}/qdatastream_wrapper.cpp
+        )
+endif()
 
 set(QtCore_include_dirs ${QtCore_SOURCE_DIR}
                         ${QtCore_BINARY_DIR}
