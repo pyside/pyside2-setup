@@ -527,7 +527,7 @@ int DynamicQMetaObject::DynamicQMetaObjectPrivate::createMetaData(QMetaObject* m
     uint n_methods = m_methods.size();
     uint n_properties = m_properties.size();
     uint n_info = m_info.size();
-    int header[] = {3,                      // revision
+    int header[] = {7,                      // revision  Qt5: was 3, but no longer supported!
                     0,                      // class name index in m_metadata
                     int(n_info), 0,         // classinfo and classinfo index
                     int(n_methods), 0,      // method count and method list index
