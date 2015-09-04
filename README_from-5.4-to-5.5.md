@@ -48,3 +48,65 @@ Detecting inconsistencies in class model...  [OK]
 Done, 18 warnings (426 known issues)
 
 ```
+
+By systematically looking up the missing types in the search field of the Qt5.5 documentation at
+http://doc.qt.io/qt-5/ we apply the following changes to typesystem_core_common.xml:
+
+```
+diff --git a/PySide/QtCore/typesystem_core_common.xml b/PySide/QtCore/typesystem_core_common.xml
+index 2f39db3..f0a504f 100644
+--- a/PySide/QtCore/typesystem_core_common.xml
++++ b/PySide/QtCore/typesystem_core_common.xml
+@@ -2935,6 +2935,8 @@
+   <object-type name="QSysInfo">
+     <enum-type name="Endian"/>
+     <enum-type name="Sizes"/>
++    <enum-type name="MacVersion" since="5.5" />
++    <enum-type name="WinVersion" since="5.5" />
+   </object-type>
+   <object-type name="QTemporaryFile">
+     <extra-includes>
+@@ -3833,6 +3835,8 @@
+   </object-type>
+ 
+   <object-type name="QAbstractTransition" since="4.6">
++    <enum-type name="TransitionType" since="5.5" />
++
+     <modify-function signature="QAbstractTransition(QState*)">
+       <modify-argument index="1">
+         <parent index="this" action="add"/>
+```
+
+As a result, this reduces the warnings to this:
+
+```
+Generating enum model...                     [WARNING]
+    enum 'InterfaceType' does not have a type entry or is not an enum
+    enum 'TextBoundaryType' does not have a type entry or is not an enum
+    enum 'RelationFlag' does not have a type entry or is not an enum
+    enum 'Role' does not have a type entry or is not an enum
+    
+
+Generating namespace model...                [WARNING]
+    enum 'Qt::TabFocusBehavior' does not have a type entry or is not an enum
+    enum 'Qt::ItemSelectionOperation' does not have a type entry or is not an enum
+    
+
+Resolving typedefs...                        [OK]
+Fixing class inheritance...                  [OK]
+Detecting inconsistencies in class model...  [OK]
+[OK]
+    enum 'QState::RestorePolicy' is specified in typesystem, but not declared
+    enum 'QLocale::FormatType' is specified in typesystem, but not declared
+    enum 'QAbstractAnimation::DeletionPolicy' is specified in typesystem, but not declared
+    enum 'QLocale::MeasurementSystem' is specified in typesystem, but not declared
+    enum 'QAbstractAnimation::State' is specified in typesystem, but not declared
+    
+
+
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'QString *' in function 'QTextStream::readLineInto(QString * line, qint64 maxlen)'.
+    
+
+Done, 12 warnings (422 known issues)
+
+```
