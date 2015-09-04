@@ -170,5 +170,19 @@ Done, 6 warnings (418 known issues)
 ```
 
 We now get rid of the last 5 enum complaints:
+The enums are moved elsewhere, and I have no idea what to do when something becomes invalid?
+What I did was ignoring these errors:
+
+```
+  <!-- Qt5.5: No idea how to get rid of the following five enums, which are moved elsewhere since 5.5: -->
+  <suppress-warning text="enum 'QLocale::MeasurementSystem' is specified in typesystem, but not declared" />
+  <suppress-warning text="enum 'QState::RestorePolicy' is specified in typesystem, but not declared" />
+  <suppress-warning text="enum 'QLocale::FormatType' is specified in typesystem, but not declared" />
+  <suppress-warning text="enum 'QAbstractAnimation::DeletionPolicy' is specified in typesystem, but not declared" />
+  <suppress-warning text="enum 'QAbstractAnimation::State' is specified in typesystem, but not declared" />
+
+</typesystem>
+```
+
 
 

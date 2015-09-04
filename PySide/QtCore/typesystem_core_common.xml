@@ -4260,4 +4260,11 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   <suppress-warning text="horribly broken type ''"/>
   <suppress-warning text="Pure virtual method 'QTextCodec::convertFromUnicode(const QChar*,int,QTextCodec::ConverterState*)const' must be implement but was completely removed on type system." />
 
+  <!-- Qt5.5: No idea how to get rid of the following five enums, which are moved elsewhere since 5.5: -->
+  <suppress-warning text="enum 'QLocale::MeasurementSystem' is specified in typesystem, but not declared" />
+  <suppress-warning text="enum 'QState::RestorePolicy' is specified in typesystem, but not declared" />
+  <suppress-warning text="enum 'QLocale::FormatType' is specified in typesystem, but not declared" />
+  <suppress-warning text="enum 'QAbstractAnimation::DeletionPolicy' is specified in typesystem, but not declared" />
+  <suppress-warning text="enum 'QAbstractAnimation::State' is specified in typesystem, but not declared" />
+
 </typesystem>
