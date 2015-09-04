@@ -184,5 +184,40 @@ What I did was ignoring these errors:
 </typesystem>
 ```
 
+We get rid of the function warning from above by looking in the Docs: *readLineInto seems to be a new
+function, and it has a target variable, that normally needs extra support by a code snippet in the XML:
+```
+bool    readLineInto(QString * line, qint64 maxlen = 0)
+```
+
+But since we do not need to forcibly support new methods, it is easiest to just remove the method
+and leave a comment, as it was done before for different argument types:
+
+```
+diff --git a/PySide/QtCore/typesystem_core_common.xml b/PySide/QtCore/typesystem_core_common.xml
+index 8cd71f4..63f2342 100644
+--- a/PySide/QtCore/typesystem_core_common.xml
++++ b/PySide/QtCore/typesystem_core_common.xml
+@@ -3656,6 +3656,8 @@
+     <enum-type name="Status"/>
+     <!-- Removed because it expect QString to be mutable -->
+     <modify-function signature="QTextStream(QString*,QFlags&lt;QIODevice::OpenModeFlag&gt;)" remove="all"/>
++    <!-- Qt5.5: Removed because it expect QString to be mutable -->
++    <modify-function signature="readLineInto(QString*,qint64)" since="5.5" remove="all"/>
+     <!-- Removed because we use the non-const version -->
+     <modify-function signature="QTextStream(const QByteArray&amp;, QFlags&lt;QIODevice::OpenModeFlag&gt;)" remove="all"/>
+ 
+```
+
+The only remaining problem seems now to be an include file, which is now required for some unclear reason:
+
+```
+/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.5.0-64bit-debug/pyside/PySide/QtCore/PySide/QtCore/pyside_qtcore_python.h:56:10: fatal error: 
+      'qaccessible.h' file not found
+#include <qaccessible.h>
+         ^
+1 error generated.
+```
+
 
 

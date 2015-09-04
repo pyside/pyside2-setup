@@ -3656,6 +3656,8 @@
     <enum-type name="Status"/>
     <!-- Removed because it expect QString to be mutable -->
     <modify-function signature="QTextStream(QString*,QFlags&lt;QIODevice::OpenModeFlag&gt;)" remove="all"/>
+    <!-- Qt5.5: Removed because it expect QString to be mutable -->
+    <modify-function signature="readLineInto(QString*,qint64)" since="5.5" remove="all"/>
     <!-- Removed because we use the non-const version -->
     <modify-function signature="QTextStream(const QByteArray&amp;, QFlags&lt;QIODevice::OpenModeFlag&gt;)" remove="all"/>
 
