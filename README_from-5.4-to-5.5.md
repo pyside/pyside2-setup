@@ -144,4 +144,31 @@ Done, 8 warnings (422 known issues)
 
 ```
 
+Removing the next enum complaints
+
+```
+Generating class model...                    [OK]
+Generating enum model...                     [OK]
+Generating namespace model...                [OK]
+Resolving typedefs...                        [OK]
+Fixing class inheritance...                  [OK]
+Detecting inconsistencies in class model...  [OK]
+[OK]
+    enum 'QLocale::MeasurementSystem' is specified in typesystem, but not declared
+    enum 'QState::RestorePolicy' is specified in typesystem, but not declared
+    enum 'QLocale::FormatType' is specified in typesystem, but not declared
+    enum 'QAbstractAnimation::DeletionPolicy' is specified in typesystem, but not declared
+    enum 'QAbstractAnimation::State' is specified in typesystem, but not declared
+    
+
+
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'QString *' in function 'QTextStream::readLineInto(QString * line, qint64 maxlen)'.
+    
+
+Done, 6 warnings (418 known issues)
+
+```
+
+We now get rid of the last 5 enum complaints:
+
 
