@@ -126,6 +126,13 @@
 
   <enum-type name="QtMsgType"/>
 
+  <!-- Qt5.5: no idea why these are here, they are not in QtCore -->
+  <enum-type name="InterfaceType" since="5.5" />
+  <enum-type name="Role" since="5.5" />
+  <enum-type name="TextBoundaryType" since="5.5" />
+  <enum-type name="RelationFlag" since="5.5" />
+  <!-- they are documented as QtGui enum types for QAccessible. Maybe we need to come back to this -->
+
   <primitive-type name="qint8"/>
   <primitive-type name="qint16"/>
   <primitive-type name="qint32"/>
@@ -869,6 +876,7 @@
     <enum-type name="ItemDataRole" force-integer="yes" />
     <enum-type name="ItemFlag" flags="ItemFlags"/>
     <enum-type name="ItemSelectionMode"/>
+    <enum-type name="ItemSelectionOperation" since="5.5" />
     <enum-type name="Key" />
     <enum-type name="KeyboardModifier" flags="KeyboardModifiers"/>
     <enum-type name="LayoutDirection"/>
@@ -891,6 +899,7 @@
     <enum-type name="SizeHint"/>
     <enum-type name="SizeMode"/>
     <enum-type name="SortOrder"/>
+    <enum-type name="TabFocusBehavior" since="5.5" />
     <enum-type name="TextElideMode"/>
     <enum-type name="TextFlag"/>
     <enum-type name="TextFormat"/>
@@ -3867,13 +3876,11 @@
       </modify-argument>
     </modify-function>
 
-
     <modify-function signature="targetStates() const">
       <modify-argument index="return">
         <reference-count action="set" variable-name="setTargetState(QAbstractState*)1" />
       </modify-argument>
     </modify-function>
-
 
     <modify-function signature="setTargetStates(QList&lt;QAbstractState*&gt;)">
       <modify-argument index="1">

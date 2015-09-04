@@ -110,3 +110,38 @@ Detecting inconsistencies in class model...  [OK]
 Done, 12 warnings (422 known issues)
 
 ```
+
+The next four enum entries "InterfaceType", "TextBoundaryType", "RelationFlag", "Role" do not
+exist in QtCore, and I have no idea how they were found by shiboken. They should be entries for
+QAccessible in QtGui and others. I defined them anyway, and the warnings disappeared.
+
+We are now down to 8 warnings:
+
+```
+Generating class model...                    [OK]
+Generating enum model...                     [OK]
+Generating namespace model...                [WARNING]
+    enum 'Qt::ItemSelectionOperation' does not have a type entry or is not an enum
+    enum 'Qt::TabFocusBehavior' does not have a type entry or is not an enum
+    
+
+Resolving typedefs...                        [OK]
+Fixing class inheritance...                  [OK]
+Detecting inconsistencies in class model...  [OK]
+[OK]
+    enum 'QLocale::FormatType' is specified in typesystem, but not declared
+    enum 'QLocale::MeasurementSystem' is specified in typesystem, but not declared
+    enum 'QAbstractAnimation::DeletionPolicy' is specified in typesystem, but not declared
+    enum 'QState::RestorePolicy' is specified in typesystem, but not declared
+    enum 'QAbstractAnimation::State' is specified in typesystem, but not declared
+    
+
+
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'QString *' in function 'QTextStream::readLineInto(QString * line, qint64 maxlen)'.
+    
+
+Done, 8 warnings (422 known issues)
+
+```
+
+
