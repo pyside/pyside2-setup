@@ -219,5 +219,52 @@ The only remaining problem seems now to be an include file, which is now require
 1 error generated.
 ```
 
+This file actually belongs to the QtGui library, and the according include files are not configured
+in the cmake file for QtCore (and really should not!).
 
+There must be something referenced by QtCore XML that reaches out into QtGui.
+Actually, this looks like a shiboken bug, and we revert the change to define the enums
+"InterfaceType", "TextBoundaryType", "RelationFlag", "Role" and ignore them, instead:
 
+After suppressing these four warnings, we are faced with the following compile errors:
+
+```
+[ 22%] Building CXX object PySide/QtCore/CMakeFiles/QtCore.dir/PySide/QtCore/qbuffer_wrapper.cpp.o
+/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.5.0-64bit-debug/pyside/PySide/QtCore/PySide/QtCore/qabstractanimation_wrapper.cpp:344:81: error: use
+      of undeclared identifier 'SBK_QABSTRACTANIMATION_STATE_IDX'
+        Shiboken::Conversions::copyToPython(SBK_CONVERTER(SbkPySide_QtCoreTypes[SBK_QABSTRACTANIMATION_STATE_IDX]), &newState),
+                                                                                ^
+/Users/tismer/src/pyside-setup2/pyside_install/py3.4-qt5.5.0-64bit-debug/include/shiboken/sbkconverter.h:339:68: note: expanded from macro 'SBK_CONVERTER'
+#define SBK_CONVERTER(pyType) (*reinterpret_cast<_SbkGenericType*>(pyType)->converter)
+                                                                   ^
+/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.5.0-64bit-debug/pyside/PySide/QtCore/PySide/QtCore/qanimationgroup_wrapper.cpp:344:81: error: use of
+      undeclared identifier 'SBK_QABSTRACTANIMATION_STATE_IDX'
+        Shiboken::Conversions::copyToPython(SBK_CONVERTER(SbkPySide_QtCoreTypes[SBK_QABSTRACTANIMATION_STATE_IDX]), &newState),
+...                                                                                ^
+```
+
+This is pretty crazy, and after quite a while of searching, I found out that this is due to the new "Q_ENUM" macro.
+I commented the macros away in qabstractanimation.h, and compilation went on much further.
+
+Then, by scanning the sources folder, I found out that certain macros in Qt get special treatment
+in shiboken, and now it is clear that I have to augment shiboken, once again.
+
+```
+$ grep -rn  Q_ENUM sources/
+sources//pyside2/doc/codesnippets/doc/src/snippets/code/src_corelib_kernel_qobject.cpp:290:    Q_ENUMS(Priority)
+sources//pyside2/doc/codesnippets/doc/src/snippets/moc/myclass2.h:54:    Q_ENUMS(Priority)
+sources//pyside2/doc/pyside.qdocconf.in:159:                          Q_ENUMS \
+sources//pyside2/README_from-5.4-to-5.5.md:246:This is pretty crazy, and after quite a while of searching, I found out that this is due to the new "Q_ENUM" macro.
+sources//shiboken2/ApiExtractor/abstractmetalang.h:1305:    // Has the enum been declared inside a Q_ENUMS() macro in its enclosing class?
+sources//shiboken2/ApiExtractor/parser/lexer.cpp:1338:            token_stream[(int) index++].kind = Token_Q_ENUMS;
+sources//shiboken2/ApiExtractor/parser/parser.cpp:425:    case Token_Q_ENUMS:
+sources//shiboken2/ApiExtractor/parser/parser.cpp:426:        return parseQ_ENUMS(node);
+sources//shiboken2/ApiExtractor/parser/parser.cpp:1781:    } else if (parseQ_ENUMS(node)) {
+sources//shiboken2/ApiExtractor/parser/parser.cpp:4002:bool Parser::parseQ_ENUMS(DeclarationAST *&node)
+sources//shiboken2/ApiExtractor/parser/parser.cpp:4004:    if (token_stream.lookAhead() != Token_Q_ENUMS)
+sources//shiboken2/ApiExtractor/parser/parser.h:167:    bool parseQ_ENUMS(DeclarationAST *&node);
+sources//shiboken2/ApiExtractor/parser/tokens.cpp:135:    "Q_ENUMS"
+sources//shiboken2/ApiExtractor/parser/tokens.h:136:    Token_Q_ENUMS,
+```
+
+Now we first need to change shiboken, and then evaluatet a lot of things, again.

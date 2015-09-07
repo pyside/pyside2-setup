@@ -126,12 +126,6 @@
 
   <enum-type name="QtMsgType"/>
 
-  <!-- Qt5.5: no idea why these are here, they are not in QtCore -->
-  <enum-type name="InterfaceType" since="5.5" />
-  <enum-type name="Role" since="5.5" />
-  <enum-type name="TextBoundaryType" since="5.5" />
-  <enum-type name="RelationFlag" since="5.5" />
-  <!-- they are documented as QtGui enum types for QAccessible. Maybe we need to come back to this -->
 
   <primitive-type name="qint8"/>
   <primitive-type name="qint16"/>
@@ -4265,8 +4259,13 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   <!-- Qt5.5: No idea how to get rid of the following five enums, which are moved elsewhere since 5.5: -->
   <suppress-warning text="enum 'QLocale::MeasurementSystem' is specified in typesystem, but not declared" />
   <suppress-warning text="enum 'QState::RestorePolicy' is specified in typesystem, but not declared" />
-  <suppress-warning text="enum 'QLocale::FormatType' is specified in typesystem, but not declared" />
+  <!-- <suppress-warning text="enum 'QLocale::FormatType' is specified in typesystem, but not declared" /> -->
   <suppress-warning text="enum 'QAbstractAnimation::DeletionPolicy' is specified in typesystem, but not declared" />
-  <suppress-warning text="enum 'QAbstractAnimation::State' is specified in typesystem, but not declared" />
+  <!-- <suppress-warning text="enum 'QAbstractAnimation::State' is specified in typesystem, but not declared" /> -->
+  <!-- Qt5.5: we also suppress these warnings, instead of adding wrong enums -->
+  <suppress-warning text="enum 'InterfaceType' does not have a type entry or is not an enum" />
+  <suppress-warning text="enum 'TextBoundaryType' does not have a type entry or is not an enum" />
+  <suppress-warning text="enum 'RelationFlag' does not have a type entry or is not an enum" />
+  <suppress-warning text="enum 'Role' does not have a type entry or is not an enum" />
 
 </typesystem>
