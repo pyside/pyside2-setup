@@ -25,7 +25,7 @@
         #ifdef IS_PY3K
         return PyCapsule_New(reinterpret_cast&lt;void*&gt;(%in), 0, 0);
         #else
-        return PyCObject_FromVoidPtr(%in, 0);
+        return PyCObject_FromVoidPtr(reinterpret_cast&lt;void*&gt;(%in), 0);
         #endif
         </native-to-target>
         <target-to-native>
