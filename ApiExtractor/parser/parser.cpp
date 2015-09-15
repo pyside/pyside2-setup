@@ -423,6 +423,11 @@ bool Parser::parseDeclaration(DeclarationAST *&node)
         return parseAsmDefinition(node);
 
     case Token_Q_ENUMS:
+    case Token_Q_ENUM:
+        // Qt5:
+        // These two Q_ENUM tokens map to the same handler.
+        // If that turns out to be wrong, then write a new one
+        // named parseQ_ENUM
         return parseQ_ENUMS(node);
 
     case Token_template:
@@ -4001,9 +4006,11 @@ bool Parser::parseThrowExpression(ExpressionAST *&node)
 
 bool Parser::parseQ_ENUMS(DeclarationAST *&node)
 {
-    if (token_stream.lookAhead() != Token_Q_ENUMS)
+    
+    if ((token_stream.lookAhead() != Token_Q_ENUMS) and
+        (token_stream.lookAhead() != Token_Q_ENUM))
         return false;
-
+    
     if (token_stream.lookAhead(1) != '(')
         return false;
 
