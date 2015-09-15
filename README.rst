@@ -1,6 +1,6 @@
-======
-PySide
-======
+=======
+PySide2
+=======
 
 .. image:: https://pypip.in/wheel/PySide/badge.png
    :target: https://pypi.python.org/pypi/PySide/
@@ -27,6 +27,12 @@ PySide
 Introduction
 ============
 
+.. note::
+
+   This text is from PySide 1.2.X. We need to update it when
+   PySide2 for Qt5 is more ready.
+
+
 PySide is the Python Qt bindings project, providing access the complete Qt 4.8 framework
 as well as to generator tools for rapidly generating bindings for any C++ libraries.
 
@@ -45,7 +51,7 @@ PySide requires Python 2.6 or later and Qt 4.6 or better.
 
 .. note::
 
-   Qt 5.x is currently not supported.
+   Qt 5.x is currently in the works.
 
 Installation
 ============
