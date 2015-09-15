@@ -1,9 +1,9 @@
 [submodule "sources/shiboken"]
 	path = sources/shiboken
-	url = https://git.gitorious.org/pyside/shiboken.git
+	url = https://github.com/PySide/shiboken.git
 [submodule "sources/pyside"]
 	path = sources/pyside
-	url = https://git.gitorious.org/pyside/pyside.git
+	url = https://github.com/PySide/pyside.git
 [submodule "sources/pyside-tools"]
 	path = sources/pyside-tools
 	url = https://github.com/PySide/Tools.git
