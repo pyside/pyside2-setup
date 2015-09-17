@@ -512,9 +512,6 @@
   </object-type>
   <object-type name="QDirModel" polymorphic-id-expression="qobject_cast&lt;QDirModel*&gt;(%1)">
     <enum-type name="Roles"/>
-    <!-- ### This reimplementation of "QObject::parent()" is used in C++ only
-         when "using QObject::parent;" is not available. It's useless in Python. -->
-    <modify-function signature="parent()const" remove="all"/>
     <modify-function signature="setIconProvider(QFileIconProvider*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>

@@ -1777,6 +1777,9 @@
   <object-type name="QToolBarChangeEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::ToolBarChange"/>
   <object-type name="QWhatsThisClickedEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::WhatsThisClicked"/>
   <object-type name="QWheelEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Wheel"/>
+  <!-- Qt5.5: suppress this nameless enum -->
+  <suppress-warning text="enum 'QWheelEvent::DefaultDeltasPerStep' does not have a type entry or is not an enum" />
+
   <object-type name="QWindowStateChangeEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::WindowStateChange"/>
   <object-type name="QInputEvent" copyable="false">
     <modify-function signature="modifiers()const" access="non-final"/>
@@ -1831,6 +1834,7 @@
       <include file-name="QRect" location="global"/>
     </extra-includes>
     <enum-type name="ImageOption"/>
+    <enum-type name="Transformation" flags="Transformations" since="5.5" />
     <modify-function signature="setDevice(QIODevice*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
@@ -1921,9 +1925,6 @@
     <modify-function signature="exec(QFlags&lt;Qt::DropAction&gt;, Qt::DropAction)" rename="exec_" allow-thread="yes"/>
   </object-type>
   <object-type name="QSortFilterProxyModel">
-    <!-- ### This reimplementation of "QObject::parent()" is used in C++ only
-         when "using QObject::parent;" is not available. It's useless in Python. -->
-    <modify-function signature="parent()const" remove="all"/>
     <extra-includes>
       <include file-name="QItemSelection" location="global"/>
       <include file-name="QStringList" location="global"/>
@@ -3120,6 +3121,11 @@
             </insert-template>
         </inject-code>
     </add-function>
+
+    <!-- Qt5.5: XXX support the output variables! For now, I just suppressed the new methods. -->
+    <modify-function signature="getAxisAndAngle(float *, float *, float *, float *) const" since="5.5" remove="all" />
+    <modify-function signature="getAxisAndAngle(QVector3D *, float *) const" since="5.5" remove="all" />
+    <modify-function signature="getEulerAngles(float *, float *, float *) const" since="5.5" remove="all" />
   </value-type>
 
   <object-type name="QTouchEvent" since="4.6">

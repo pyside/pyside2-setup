@@ -3822,6 +3822,9 @@
     </modify-function>
     <!-- This isn't part of Qt public API -->
     <modify-function signature="enclosingMetaObject()const" remove="all" />
+    <!-- Qt5.5: "template<typename T> static QMetaEnum fromType()" is not understood by the compiler.
+         We therefore ignore this 5.5 addition for now: -->
+    <modify-function signature="fromType()" since="5.5" remove="all" />
   </value-type>
 
   <!-- From Qt4.6 -->
