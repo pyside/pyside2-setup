@@ -30,11 +30,15 @@ __version__ = "2.0.0.dev0"
 
 submodules = {
     '2.0.0.dev0': [
-        ["shiboken2", "qt5"],
-        ["pyside2", "qt5"],
-        ["pyside-tools2", "qt5"],
-        ["pyside-examples2", "qt5"],
+        ["shiboken2", "master"],
+        ["pyside2", "master"],
+        ["pyside-tools2", "master"],
+        ["pyside-examples2", "master"],
     ],
+}
+old_submodules = {
+    # these are just kept a while for reference but not maintained.
+    # if you need an old version, please use the pyside/pyside-setup version.
     '1.3.0dev': [
         ["shiboken", "master"],
         ["pyside", "master"],
