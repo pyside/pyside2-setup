@@ -28,6 +28,7 @@
 #include "dynamicqmetaobject.h"
 #include "pysidemetafunction_p.h"
 
+#include <QtCore>
 #include <QHash>
 #include <QStringList>
 #include <QMetaMethod>
