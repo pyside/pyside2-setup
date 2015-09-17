@@ -33,7 +33,7 @@ submodules = {
         ["shiboken2", "qt5"],
         ["pyside2", "qt5"],
         ["pyside-tools2", "qt5"],
-        ["pyside-examples", "master"],
+        ["pyside-examples2", "qt5"],
     ],
     '1.3.0dev': [
         ["shiboken", "master"],
@@ -112,6 +112,12 @@ from utils import init_msvc_env
 from utils import regenerate_qt_resources
 from utils import filter_match
 from utils import osx_localize_libpaths
+
+# guess a close folder name for extensions
+def get_extension_folder(ext):
+    maybe = list(map(lambda x:x[0], submodules[__version__]))
+    folder = difflib.get_close_matches(ext, maybe)[0]
+    return folder
 
 # Declare options
 OPTION_DEBUG = has_option("debug")
@@ -203,7 +209,7 @@ Use --list-versions option to get list of available versions""" % OPTION_VERSION
 if OPTION_NOEXAMPLES:
     # remove pyside-exampes from submodules so they will not be included
     for idx, item in enumerate(submodules[__version__]):
-        if item[0] == 'pyside-examples':
+        if item[0].startswith('pyside-examples'):
             del submodules[__version__][idx]
 
 
@@ -236,7 +242,11 @@ for n in ["pyside_package", "build", "PySide-%s" % __version__]:
     d = os.path.join(script_dir, n)
     if os.path.isdir(d):
         print("Removing %s" % d)
-        rmtree(d)
+        try:
+            rmtree(d)
+        except Exception as e:
+            print('***** problem removing "{}"'.format(d))
+            print('ignored error: {}'.format(e))
 
 # Prepare package folders
 for pkg in ["pyside_package/PySide", "pyside_package/pysideuic"]:
@@ -490,6 +500,7 @@ class pyside_build(_build):
         log.info("Qt qmake: %s" % self.qmake_path)
         log.info("Qt version: %s" % qtinfo.version)
         log.info("Qt bins: %s" % qtinfo.bins_dir)
+        log.info("Qt docs: %s" % qtinfo.docs_dir)
         log.info("Qt plugins: %s" % qtinfo.plugins_dir)
         log.info("-" * 3)
         log.info("OpenSSL libs: %s" % OPTION_OPENSSL)
@@ -536,8 +547,7 @@ class pyside_build(_build):
 
     def build_extension(self, extension):
         # calculate the subrepos folder name
-        maybe = list(map(lambda x:x[0], submodules[__version__]))
-        folder = difflib.get_close_matches(extension, maybe)[0]
+        folder = get_extension_folder(extension)
 
         log.info("Building module %s..." % extension)
 
@@ -550,9 +560,14 @@ class pyside_build(_build):
             return
         if os.path.exists(module_build_dir):
             log.info("Deleting module build folder %s..." % module_build_dir)
-            rmtree(module_build_dir)
+            try:
+                rmtree(module_build_dir)
+            except Exception as e:
+                print('***** problem removing "{}"'.format(module_build_dir))
+                print('ignored error: {}'.format(e))
         log.info("Creating module build folder %s..." % module_build_dir)
-        os.makedirs(module_build_dir)
+        if not os.path.exists(module_build_dir):
+            os.makedirs(module_build_dir)
         os.chdir(module_build_dir)
 
         module_src_dir = os.path.join(self.sources_dir, folder)
@@ -564,6 +579,7 @@ class pyside_build(_build):
             "-DQT_QMAKE_EXECUTABLE=%s" % self.qmake_path,
             "-DBUILD_TESTS=%s" % self.build_tests,
             "-DDISABLE_DOCSTRINGS=True",
+            "-DQt5Help_DIR=%s" % self.qtinfo.docs_dir,
             "-DCMAKE_BUILD_TYPE=%s" % self.build_type,
             "-DCMAKE_INSTALL_PREFIX=%s" % self.install_dir,
             module_src_dir
@@ -634,6 +650,7 @@ class pyside_build(_build):
             "py_version": self.py_version,
             "qt_version": self.qtinfo.version,
             "qt_bin_dir": self.qtinfo.bins_dir,
+            "qt_doc_dir": self.qtinfo.docs_dir,
             "qt_lib_dir": self.qtinfo.libs_dir,
             "qt_plugins_dir": self.qtinfo.plugins_dir,
             "qt_imports_dir": self.qtinfo.imports_dir,
@@ -717,8 +734,9 @@ class pyside_build(_build):
             vars=vars)
         if not OPTION_NOEXAMPLES:
             # <sources>/pyside-examples/examples/* -> <setup>/PySide/examples
+            folder = get_extension_folder('pyside-examples')
             copydir(
-                "{sources_dir}/pyside-examples/examples",
+                "{sources_dir}/%s/examples" % folder,
                 "{dist_dir}/PySide/examples",
                 force=False, vars=vars)
             # Re-generate examples Qt resource files for Python 3 compatibility
@@ -836,8 +854,9 @@ class pyside_build(_build):
             vars=vars)
         if not OPTION_NOEXAMPLES:
             # <sources>/pyside-examples/examples/* -> <setup>/PySide/examples
+            folder = get_extension_folder('pyside-examples')
             copydir(
-                "{sources_dir}/pyside-examples/examples",
+                "{sources_dir}/%s/examples" % folder,
                 "{dist_dir}/PySide/examples",
                 force=False, vars=vars)
             # Re-generate examples Qt resource files for Python 3 compatibility
