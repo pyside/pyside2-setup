@@ -4,6 +4,8 @@ Migration from Qt5.4 to Qt5.5
 
 This is an example session when migrating from Qt5.4.2 to Qt5.5.0 .
 
+2015-09-04
+
 A first build attempt results in the following shiboken warnings on QtCore:
 
 ```
@@ -219,6 +221,8 @@ The only remaining problem seems now to be an include file, which is now require
 1 error generated.
 ```
 
+2015-09-07
+
 This file actually belongs to the QtGui library, and the according include files are not configured
 in the cmake file for QtCore (and really should not!).
 
@@ -268,3 +272,127 @@ sources//shiboken2/ApiExtractor/parser/tokens.h:136:    Token_Q_ENUMS,
 ```
 
 Now we first need to change shiboken, and then evaluatet a lot of things, again.
+
+---------
+
+2015-09-17
+
+After a longer break, shiboken was fixed for Qt5.5 .
+
+# QtCore 
+has a problem with the new entry in `qmetaobject.h`:
+
+```
+    template<typename T> static QMetaEnum fromType() {
+        Q_STATIC_ASSERT_X(QtPrivate::IsQEnumHelper<T>::Value,
+                          "QMetaEnum::fromType only works with enums declared as Q_ENUM or Q_FLAG");
+        const QMetaObject *metaObject = qt_getEnumMetaObject(T());
+        const char *name = qt_getEnumName(T());
+        return metaObject->enumerator(metaObject->indexOfEnumerator(name));
+    }
+```
+Because the C compiler did not know how to resolve the template, I disabled the function like so:
+```
+    <!-- Qt5.5: "template<typename T> static QMetaEnum fromType()" is not understood by the compiler.
+         We therefore ignore this 5.5 addition for now: -->
+    <modify-function signature="fromType()" since="5.5" remove="all" />
+```
+If somebody finds a better way to support it, please improve this!
+
+Anyway, this change was now enough to make the 5.5 version build!
+
+The remaining warnings are as follows:
+
+# QtGui
+```
+[ 22%] Running generator for QtGui...
+** WARNING scope not found for function definition:QtPrivate::IsMetaTypePair<T,true>::registerConverter
+    definition *ignored*
+Generating class model...                    [WARNING]
+    enum 'QImageIOHandler::Transformation' does not have a type entry or is not an enum
+    enum 'QWheelEvent::DefaultDeltasPerStep' does not have a type entry or is not an enum
+    
+
+Generating enum model...                     [OK]
+Generating namespace model...                [OK]
+Resolving typedefs...                        [OK]
+Fixing class inheritance...                  [OK]
+Detecting inconsistencies in class model...  [OK]
+[OK]
+
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'float *' in function 'QQuaternion::getAxisAndAngle(float * x, float * y, float * z, float * angle) const'.
+    /Users/tismer/src/pyside-setup2/sources/shiboken2/generator/shiboken/cppgenerator.cpp:4452 FIXME:
+    The code tried to qRegisterMetaType the unqualified name 'iterator'. This is currently fixed by a hack(ct) and needs improvement!
+    signature 'parent()const' for function modification in 'QSortFilterProxyModel' not found. Possible candidates: parent(QModelIndex)const in QSortFilterProxyModel
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'float *' in function 'QQuaternion::getAxisAndAngle(QVector3D * axis, float * angle) const'.
+    There's no user provided way (conversion rule, argument removal, custom code, etc) to handle the primitive argument type 'float *' in function 'QQuaternion::getEulerAngles(float * pitch, float * yaw, float * roll) const'.
+    
+
+Done, 7 warnings (556 known issues)
+```
+The first enum was a simple addition, after looking it up in http://doc.qt.io/qt-5/qimageiohandler.html :
+We simply added the new enum with a 'since' tag.
+```
+  <object-type name="QImageIOHandler">
+    <extra-includes>
+      <include file-name="QRect" location="global"/>
+    </extra-includes>
+    <enum-type name="ImageOption"/>
+    <enum-type name="Transformation" flags="Transformations" since="5.5" />
+    <modify-function signature="setDevice(QIODevice*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+```
+The `QWheelEvent::DefaultDeltasPerStep` was harder, because it had no entry in the Qt docs. So we had to look
+into the source. It turns out that the enum is a nameless one:
+```
+#ifndef QT_NO_WHEELEVENT
+class Q_GUI_EXPORT QWheelEvent : public QInputEvent
+{
+public:
+    enum { DefaultDeltasPerStep = 120 };
+    ...
+```
+We suppress the warning, no idea what else can be done:
+```
+  <!-- Qt5.5: suppress this nameless enum -->
+  <suppress-warning text="enum 'QWheelEvent::DefaultDeltasPerStep' does not have a type entry or is not an enum" />
+```
+We ignore the `QQuaternion` methods, which have output variables.
+It is easy to support them later, but I think nobody cares at the moment.
+They are marked for later review.
+```
+  <value-type name="QQuaternion" since="4.6">
+    ...
+    <!-- Qt5.5: XXX support the output variables! For now, I just suppressed the new methods. -->
+    <modify-function signature="getAxisAndAngle(float *, float *, float *, float *) const" since="5.5" remove="all" />
+    <modify-function signature="getAxisAndAngle(QVector3D *, float *) const" since="5.5" remove="all" />
+    <modify-function signature="getEulerAngles(float *, float *, float *) const" since="5.5" remove="all" />
+  </value-type>
+```
+The remaining warning is from me, and it shall stay there, until some brave soul fixes that shiboken problem:
+```
+The code tried to qRegisterMetaType the unqualified name 'iterator'. This is currently fixed by a hack(ct) and needs improvement!
+```
+
+The remaining messages in QtGui and QtWidgets are of the form:
+```
+signature 'parent()const' for function modification in 'QSortFilterProxyModel' not found. ...
+```
+These entries were useful in Qt5.4 :
+```
+    <!-- ### This reimplementation of "QObject::parent()" is used in C++ only
+         when "using QObject::parent;" is not available. It's useless in Python. -->
+    <modify-function signature="parent()const" remove="all"/>
+```
+but make no more sense in Qt5.5 . Because there is no easy way to specify, when something is _removed_, I simply
+removed these entries, which will produce warnings when building for Qt5.4 (ignoring this).
+
+# That's all, Folks
+
+
+
+
