@@ -23,10 +23,7 @@ if sys.version_info >= (3,):
 else:
     null_byte = '\x00'
 
-if hasattr(subprocess, 'mswindows'):
-    mswindows = subprocess.mswindows
-else:
-    mswindows = subprocess._mswindows
+mswindows = (sys.platform == "win32")
 
 if mswindows:
     if sys.version_info >= (3,):
