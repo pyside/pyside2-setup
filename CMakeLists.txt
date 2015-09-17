@@ -42,7 +42,8 @@ if(NOT CMAKE_HOST_APPLE)
 endif()
 
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "/Zc:wchar_t- /GR /EHsc /DNOCOLOR /DWIN32 /D_WINDOWS /D_SCL_SECURE_NO_WARNINGS") # XXX
+    # Qt5: this flag has changed from /Zc:wchar_t- in Qt4.X
+    set(CMAKE_CXX_FLAGS "/Zc:wchar_t /GR /EHsc /DNOCOLOR /DWIN32 /D_WINDOWS /D_SCL_SECURE_NO_WARNINGS") # XXX
 else()
     if(CMAKE_HOST_UNIX AND NOT CYGWIN)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fvisibility=hidden -Wno-strict-aliasing")
