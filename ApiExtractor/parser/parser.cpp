@@ -4007,7 +4007,7 @@ bool Parser::parseThrowExpression(ExpressionAST *&node)
 bool Parser::parseQ_ENUMS(DeclarationAST *&node)
 {
     
-    if ((token_stream.lookAhead() != Token_Q_ENUMS) and
+    if ((token_stream.lookAhead() != Token_Q_ENUMS) &&
         (token_stream.lookAhead() != Token_Q_ENUM))
         return false;
     
