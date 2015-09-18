@@ -239,6 +239,12 @@ bool ApiExtractor::run()
 #ifndef NDEBUG
     ppFile.setAutoRemove(false);
 #endif
+    // make sure that a tempfile can be written
+    if (!ppFile.open()) {
+        std::cerr << "could not create tempfile in " << qPrintable(QDir::tempPath());
+        return false;
+    }
+    
     // run rpp pre-processor
     if (!preprocess(m_cppFileName, ppFile, m_includePaths)) {
         std::cerr << "Preprocessor failed on file: " << qPrintable(m_cppFileName);
