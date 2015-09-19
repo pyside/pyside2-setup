@@ -4,9 +4,9 @@
 [submodule "sources/shiboken2"]
 	path = sources/shiboken2
     url=https://github.com/PySide/shiboken2.git
-[submodule "sources/pyside-tools2"]
-	path = sources/pyside-tools2
-    url=https://github.com/PySide/pyside-tools2.git
-[submodule "sources/pyside-examples2"]
-	path = sources/pyside-examples2
-    url=https://github.com/PySide/pyside-examples2.git
+[submodule "sources/pyside2-tools"]
+	path = sources/pyside2-tools
+    url=https://github.com/PySide/pyside2-tools.git
+[submodule "sources/pyside2-examples"]
+	path = sources/pyside2-examples
+    url=https://github.com/PySide/pyside2-examples.git
