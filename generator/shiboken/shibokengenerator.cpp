@@ -131,7 +131,7 @@ void ShibokenGenerator::initPrimitiveTypesCorrespondences()
     // PyLong
     m_pythonPrimitiveTypeName["unsigned long"] = "PyLong";
     m_pythonPrimitiveTypeName["signed long"] = "PyLong";
-    m_pythonPrimitiveTypeName["ulong"] = "PyLong";
+    m_pythonPrimitiveTypeName["unsigned long int"] = "PyLong";
     m_pythonPrimitiveTypeName["long long"] = "PyLong";
     m_pythonPrimitiveTypeName["__int64"] = "PyLong";
     m_pythonPrimitiveTypeName["unsigned long long"] = "PyLong";
@@ -640,7 +640,7 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry* type)
         while (ptype->basicAliasedTypeEntry())
             ptype = ptype->basicAliasedTypeEntry();
         if (ptype->targetLangApiName() == ptype->name())
-            baseName = m_pythonPrimitiveTypeName[ptype->name()];
+            baseName = pythonPrimitiveTypeName(ptype->name());
         else
             baseName = ptype->targetLangApiName();
     } else if (type->isEnum()) {
@@ -779,7 +779,10 @@ QString ShibokenGenerator::fixedCppTypeName(const TypeEntry* type, QString typeN
 
 QString ShibokenGenerator::pythonPrimitiveTypeName(const QString& cppTypeName)
 {
-    return ShibokenGenerator::m_pythonPrimitiveTypeName.value(cppTypeName, QString());
+    QString rv = ShibokenGenerator::m_pythonPrimitiveTypeName.value(cppTypeName, QString());
+    if (rv.isEmpty())
+        abort();
+    return rv;
 }
 
 QString ShibokenGenerator::pythonPrimitiveTypeName(const PrimitiveTypeEntry* type)
