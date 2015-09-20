@@ -32,8 +32,8 @@ submodules = {
     '2.0.0.dev0': [
         ["shiboken2", "master"],
         ["pyside2", "master"],
-        ["pyside-tools2", "master"],
-        ["pyside-examples2", "master"],
+        ["pyside2-tools", "master"],
+        ["pyside2-examples", "master"],
     ],
 }
 old_submodules = {
