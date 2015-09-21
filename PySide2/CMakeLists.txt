@@ -1,4 +1,4 @@
-project(pyside)
+project(pyside2)
 
 include(PySideModules)
 
@@ -26,7 +26,7 @@ find_package(Qt5Multimedia)
 
 # Configure include based on platform
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/global.h.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/pyside_global.h" @ONLY)
+               "${CMAKE_CURRENT_BINARY_DIR}/pyside2_global.h" @ONLY)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/__init__.py" @ONLY)
@@ -167,11 +167,11 @@ endif()
 
 # install
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/__init__.py"
-        DESTINATION "${SITE_PACKAGE}/${BINDING_NAME}${pyside_SUFFIX}")
+        DESTINATION "${SITE_PACKAGE}/${BINDING_NAME}${pyside2_SUFFIX}")
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/_utils.py
-        DESTINATION "${SITE_PACKAGE}/${BINDING_NAME}${pyside_SUFFIX}")
+        DESTINATION "${SITE_PACKAGE}/${BINDING_NAME}${pyside2_SUFFIX}")
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_templates.xml
-        DESTINATION share/PySide${pyside_SUFFIX}/typesystems)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pyside_global.h
-        DESTINATION include/${BINDING_NAME}${pyside_SUFFIX})
+        DESTINATION share/PySide2${pyside_SUFFIX}/typesystems)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pyside2_global.h
+        DESTINATION include/${BINDING_NAME}${pyside2_SUFFIX})
 

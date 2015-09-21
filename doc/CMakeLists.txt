@@ -52,7 +52,7 @@ add_dependencies(docrsts qdoc3)
 
 #install files
 add_custom_target(apidocinstall
-    COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/share/doc/PySide-${BINDING_API_VERSION} && cp -rv ${CMAKE_CURRENT_BINARY_DIR}/html/* ${CMAKE_INSTALL_PREFIX}/share/doc/PySide-${BINDING_API_VERSION}
+    COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/share/doc/PySide2-${BINDING_API_VERSION} && cp -rv ${CMAKE_CURRENT_BINARY_DIR}/html/* ${CMAKE_INSTALL_PREFIX}/share/doc/PySide-${BINDING_API_VERSION}
 )
 
 add_dependencies(apidocinstall apidoc)

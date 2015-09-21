@@ -9,7 +9,7 @@ if(ENABLE_X11)
 
 endif()
 
-qt5_wrap_cpp(QPYTEXTOBJECT_MOC "${pyside_SOURCE_DIR}/qpytextobject.h")
+qt5_wrap_cpp(QPYTEXTOBJECT_MOC "${pyside2_SOURCE_DIR}/qpytextobject.h")
 
 set(QtGui_SRC
 ${QtGui_GEN_DIR}/qabstractproxymodel_wrapper.cpp
@@ -194,4 +194,4 @@ create_pyside_module(QtGui
                      QPYTEXTOBJECT_MOC
                      ${QtGui_BINARY_DIR}/typesystem_gui.xml)
 
-install(FILES ${pyside_SOURCE_DIR}/qpytextobject.h DESTINATION include/PySide/QtGui/)
+install(FILES ${pyside2_SOURCE_DIR}/qpytextobject.h DESTINATION include/PySide2/QtGui/)
