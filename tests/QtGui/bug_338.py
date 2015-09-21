@@ -2,7 +2,7 @@
 
 import sys
 import unittest
-from PySide import QtCore,QtGui
+from PySide2 import QtCore,QtGui
 
 class DiagramItem(QtGui.QGraphicsPolygonItem):
     def __init__(self, parent=None, scene=None):

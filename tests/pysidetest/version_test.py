@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import unittest
-from PySide import __version_info__, __version__, QtCore
+from PySide2 import __version_info__, __version__, QtCore
 
 class CheckForVariablesTest(unittest.TestCase):
     def testVesions(self):

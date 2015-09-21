@@ -1,7 +1,7 @@
 """ Unittest for bug #547 """
 """ http://bugs.openbossa.org/show_bug.cgi?id=547 """
 
-from PySide import QtGui
+from PySide2 import QtGui
 import sys
 import unittest
 

@@ -2,7 +2,7 @@
 
 import unittest
 import py3kcompat as py3k
-from PySide import QtGui
+from PySide2 import QtGui
 from helper import UsesQApplication
 
 import warnings

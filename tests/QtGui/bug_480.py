@@ -1,6 +1,6 @@
 import unittest
 
-from PySide import QtGui
+from PySide2 import QtGui
 
 class BuggyWidget(QtGui.QWidget):
     def setup(self):

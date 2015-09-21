@@ -6,7 +6,7 @@ import unittest
 
 from random import randint
 
-from PySide.QtCore import QCoreApplication, QTimer
+from PySide2.QtCore import QCoreApplication, QTimer
 
 try:
     from PySide.QtWidgets import QApplication

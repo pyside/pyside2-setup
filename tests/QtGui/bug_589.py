@@ -1,7 +1,7 @@
 # trimmed down diagramscene.py to demonstrate crash in sizeHint()
 
 import sys
-from PySide import QtCore, QtGui
+from PySide2 import QtCore, QtGui
 import unittest
 
 class CustomWidget(QtGui.QGraphicsProxyWidget):

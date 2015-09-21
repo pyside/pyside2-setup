@@ -1,7 +1,7 @@
 """ Unittest for bug #515 """
 """ http://bugs.openbossa.org/show_bug.cgi?id=515 """
 
-from PySide import QtCore
+from PySide2 import QtCore
 
 callCleanup = False
 def _cleanup():

@@ -1,7 +1,7 @@
 from PySide.QtCore import QObject, Slot, QTimer
 from PySide.QtWebKit import QWebView
 from PySide.QtWidgets import QApplication
-from PySide import QtCore
+from PySide2 import QtCore
 
 import sys
 import unittest

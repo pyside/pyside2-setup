@@ -1,7 +1,7 @@
 ''' unit test for BUG #1084 '''
 
 import unittest
-from PySide import QtNetwork
+from PySide2 import QtNetwork
 import py3kcompat as py3k
 
 class QTcpSocketTestCase(unittest.TestCase):

@@ -1,6 +1,6 @@
 ''' unit test for BUG #1077 '''
 
-from PySide import QtCore, QtGui
+from PySide2 import QtCore, QtGui
 import time
 
 class Highlighter(QtGui.QSyntaxHighlighter):

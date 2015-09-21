@@ -2,7 +2,7 @@
 '''(Very) Simple test case for missing names from QtCore'''
 
 import unittest
-from PySide import QtCore
+from PySide2 import QtCore
 
 class MissingClasses(unittest.TestCase):
 
