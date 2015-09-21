@@ -1,19 +1,19 @@
-"""This is a distutils setup-script for the PySide project
+"""This is a distutils setup-script for the PySide2 project
 
-To build the PySide, simply execute:
+To build the PySide2, simply execute:
   python setup.py build --qmake=</path/to/qt/bin/qmake> [--cmake=</path/to/cmake>] [--openssl=</path/to/openssl/bin>]
 or
   python setup.py install --qmake=</path/to/qt/bin/qmake> [--cmake=</path/to/cmake>] [--openssl=</path/to/openssl/bin>]
 to build and install into your current Python installation.
 
-On Linux you can use option --standalone, to embed Qt libraries to PySide distribution
+On Linux you can use option --standalone, to embed Qt libraries to PySide2 distribution
 
 You can use option --only-package, if you want to create more binary packages (bdist_wheel, bdist_egg, ...)
-without rebuilding entire PySide every time:
-  # First time we create bdist_wheel with full PySide build
+without rebuilding entire PySide2 every time:
+  # First time we create bdist_wheel with full PySide2 build
   python setup.py bdist_wheel --qmake=c:\Qt\4.8.5\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --openssl=c:\libs\OpenSSL32bit\bin
 
-  # Then we create bdist_egg reusing PySide build with option --only-package
+  # Then we create bdist_egg reusing PySide2 build with option --only-package
   python setup.py bdist_egg --only-package --qmake=c:\Qt\4.8.5\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --opnessl=c:\libs\OpenSSL32bit\bin
 
 REQUIREMENTS:
@@ -135,7 +135,7 @@ OPTION_VERSION = option_value("version")
 OPTION_LISTVERSIONS = has_option("list-versions")
 OPTION_MAKESPEC = option_value("make-spec")
 OPTION_IGNOREGIT = has_option("ignore-git")
-OPTION_NOEXAMPLES = has_option("no-examples")     # don't include pyside-examples
+OPTION_NOEXAMPLES = has_option("no-examples")     # don't include pyside2-examples
 OPTION_JOBS = option_value('jobs')                # number of parallel build jobs
 OPTION_JOM = has_option('jom')                    # use jom instead of nmake with msvc
 OPTION_BUILDTESTS = has_option("build-tests")
@@ -202,7 +202,7 @@ if OPTION_VERSION:
         print("Option --version can not be used together with option --ignore-git")
         sys.exit(1)
     if not os.path.isdir(".git"):
-        print("Option --version is available only when pyside-setup was cloned from git repository")
+        print("Option --version is available only when pyside2-setup was cloned from git repository")
         sys.exit(1)
     if not OPTION_VERSION in submodules:
         print("""Invalid version specified %s
@@ -211,15 +211,15 @@ Use --list-versions option to get list of available versions""" % OPTION_VERSION
     __version__ = OPTION_VERSION
 
 if OPTION_NOEXAMPLES:
-    # remove pyside-exampes from submodules so they will not be included
+    # remove pyside2-exampes from submodules so they will not be included
     for idx, item in enumerate(submodules[__version__]):
-        if item[0].startswith('pyside-examples'):
+        if item[0].startswith('pyside2-examples'):
             del submodules[__version__][idx]
 
 
 # Initialize, pull and checkout submodules
 if os.path.isdir(".git") and not OPTION_IGNOREGIT and not OPTION_ONLYPACKAGE:
-    print("Initializing submodules for PySide version %s" % __version__)
+    print("Initializing submodules for PySide2 version %s" % __version__)
     git_update_cmd = ["git", "submodule", "update", "--init"]
     if run_process(git_update_cmd) != 0:
         raise DistutilsSetupError("Failed to initialize the git submodules")
@@ -242,7 +242,7 @@ if os.path.isdir(".git") and not OPTION_IGNOREGIT and not OPTION_ONLYPACKAGE:
         os.chdir(script_dir)
 
 # Clean up temp and package folders
-for n in ["pyside_package", "build", "PySide-%s" % __version__]:
+for n in ["pyside_package", "build", "PySide2-%s" % __version__]:
     d = os.path.join(script_dir, n)
     if os.path.isdir(d):
         print("Removing %s" % d)
@@ -253,7 +253,7 @@ for n in ["pyside_package", "build", "PySide-%s" % __version__]:
             print('ignored error: {}'.format(e))
 
 # Prepare package folders
-for pkg in ["pyside_package/PySide", "pyside_package/pysideuic"]:
+for pkg in ["pyside_package/PySide2", "pyside_package/pysideuic"]:
     pkg_dir = os.path.join(script_dir, pkg)
     os.makedirs(pkg_dir)
 
@@ -343,7 +343,7 @@ class pyside_build(_build):
             make_path = find_executable(make_name)
             if make_path is None or not os.path.exists(make_path):
                 raise DistutilsSetupError(
-                    "You need the program \"%s\" on your system path to compile PySide." \
+                    "You need the program \"%s\" on your system path to compile PySide2." \
                     % make_name)
 
             if OPTION_CMAKE is None or not os.path.exists(OPTION_CMAKE):
@@ -402,7 +402,7 @@ class pyside_build(_build):
             if sys.version_info[0] == 2 and dbgPostfix:
                 # For Python2 add a duplicate set of extensions combined with
                 # the dbgPostfix, so we test for both the debug version of
-                # the lib and the normal one. This allows a debug PySide to
+                # the lib and the normal one. This allows a debug PySide2 to
                 # be built with a non-debug Python.
                 lib_exts = [dbgPostfix + e for e in lib_exts] + lib_exts
 
@@ -456,7 +456,7 @@ class pyside_build(_build):
         build_dir = os.path.join(script_dir, "pyside_build", "%s" % build_name)
         install_dir = os.path.join(script_dir, "pyside_install", "%s" % build_name)
 
-        # Try to ensure that tools built by this script (such as shiboken)
+        # Try to ensure that tools built by this script (such as shiboken2)
         # are found before any that may already be installed on the system.
         update_env_path([os.path.join(install_dir, 'bin')])
 
@@ -523,7 +523,7 @@ class pyside_build(_build):
 
         if not OPTION_ONLYPACKAGE:
             # Build extensions
-            for ext in ['shiboken', 'pyside', 'pyside-tools']:
+            for ext in ['shiboken2', 'pyside2', 'pyside2-tools']:
                 self.build_extension(ext)
 
         # Build patchelf if needed
@@ -605,7 +605,7 @@ class pyside_build(_build):
         if sys.platform == 'win32':
             cmake_cmd.append("-DCMAKE_DEBUG_POSTFIX=_d")
 
-        if extension.lower() == "shiboken":
+        if extension.lower() == "shiboken2":
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
             if sys.version_info[0] > 2:
                 cmake_cmd.append("-DUSE_PYTHON3=ON")
@@ -628,7 +628,7 @@ class pyside_build(_build):
         if run_process(cmd_make) != 0:
             raise DistutilsSetupError("Error compiling " + extension)
 
-        if extension.lower() == "shiboken":
+        if extension.lower() == "shiboken2":
             log.info("Generating Shiboken documentation %s..." % extension)
             if run_process([self.make_path, "doc"]) != 0:
                 raise DistutilsSetupError("Error generating documentation " + extension)
@@ -675,20 +675,20 @@ class pyside_build(_build):
         elif sys.platform == 'darwin':
             so_ext = '.dylib'
             so_star = so_ext
-        # <build>/shiboken/doc/html/* -> <setup>/PySide/docs/shiboken
+        # <build>/shiboken2/doc/html/* -> <setup>/PySide2/docs/shiboken2
         copydir(
-            "{build_dir}/shiboken/doc/html",
-            "{dist_dir}/PySide/docs/shiboken",
+            "{build_dir}/shiboken2/doc/html",
+            "{dist_dir}/PySide2/docs/shiboken2",
             force=False, vars=vars)
-        # <install>/lib/site-packages/PySide/* -> <setup>/PySide
+        # <install>/lib/site-packages/PySide2/* -> <setup>/PySide2
         copydir(
-            "{site_packages_dir}/PySide",
-            "{dist_dir}/PySide",
+            "{site_packages_dir}/PySide2",
+            "{dist_dir}/PySide2",
             vars=vars)
-        # <install>/lib/site-packages/shiboken.so -> <setup>/PySide/shiboken.so
+        # <install>/lib/site-packages/shiboken2.so -> <setup>/PySide2/shiboken2.so
         copyfile(
-            "{site_packages_dir}/shiboken.so",
-            "{dist_dir}/PySide/shiboken.so",
+            "{site_packages_dir}/shiboken2.so",
+            "{dist_dir}/PySide2/shiboken2.so",
             vars=vars)
         # <install>/lib/site-packages/pysideuic/* -> <setup>/pysideuic
         copydir(
@@ -699,54 +699,54 @@ class pyside_build(_build):
             rmtree("{dist_dir}/pysideuic/port_v2".format(**vars))
         else:
             rmtree("{dist_dir}/pysideuic/port_v3".format(**vars))
-        # <install>/bin/pyside-uic -> PySide/scripts/uic.py
+        # <install>/bin/pyside2-uic -> PySide2/scripts/uic.py
         makefile(
-            "{dist_dir}/PySide/scripts/__init__.py",
+            "{dist_dir}/PySide2/scripts/__init__.py",
             vars=vars)
         copyfile(
-            "{install_dir}/bin/pyside-uic",
-            "{dist_dir}/PySide/scripts/uic.py",
+            "{install_dir}/bin/pyside2-uic",
+            "{dist_dir}/PySide2/scripts/uic.py",
             force=False, vars=vars)
-        # <install>/bin/* -> PySide/
+        # <install>/bin/* -> PySide2/
         executables.extend(copydir(
             "{install_dir}/bin/",
-            "{dist_dir}/PySide",
+            "{dist_dir}/PySide2",
             filter=[
-                "pyside-lupdate",
-                "pyside-rcc",
-                "shiboken",
+                "pyside2-lupdate",
+                "pyside2-rcc",
+                "shiboken2",
             ],
             recursive=False, vars=vars))
-        # <install>/lib/lib* -> PySide/
+        # <install>/lib/lib* -> PySide2/
         copydir(
             "{install_dir}/lib/",
-            "{dist_dir}/PySide",
+            "{dist_dir}/PySide2",
             filter=[
                 "libpyside*" + so_star,
                 "libshiboken*" + so_star,
             ],
             recursive=False, vars=vars)
-        # <install>/share/PySide/typesystems/* -> <setup>/PySide/typesystems
+        # <install>/share/PySide2/typesystems/* -> <setup>/PySide2/typesystems
         copydir(
-            "{install_dir}/share/PySide/typesystems",
-            "{dist_dir}/PySide/typesystems",
+            "{install_dir}/share/PySide2/typesystems",
+            "{dist_dir}/PySide2/typesystems",
             vars=vars)
-        # <install>/include/* -> <setup>/PySide/include
+        # <install>/include/* -> <setup>/PySide2/include
         copydir(
             "{install_dir}/include",
-            "{dist_dir}/PySide/include",
+            "{dist_dir}/PySide2/include",
             vars=vars)
         if not OPTION_NOEXAMPLES:
-            # <sources>/pyside-examples/examples/* -> <setup>/PySide/examples
-            folder = get_extension_folder('pyside-examples')
+            # <sources>/pyside2-examples/examples/* -> <setup>/PySide2/examples
+            folder = get_extension_folder('pyside2-examples')
             copydir(
                 "{sources_dir}/%s/examples" % folder,
-                "{dist_dir}/PySide/examples",
+                "{dist_dir}/PySide2/examples",
                 force=False, vars=vars)
             # Re-generate examples Qt resource files for Python 3 compatibility
             if sys.version_info[0] == 3:
-                examples_path = "{dist_dir}/PySide/examples".format(**vars)
-                pyside_rcc_path = "{install_dir}/bin/pyside-rcc".format(**vars)
+                examples_path = "{dist_dir}/PySide2/examples".format(**vars)
+                pyside_rcc_path = "{install_dir}/bin/pyside2-rcc".format(**vars)
                 pyside_rcc_options = '-py3'
                 regenerate_qt_resources(examples_path, pyside_rcc_path,
                     pyside_rcc_options)
@@ -754,8 +754,8 @@ class pyside_build(_build):
         if OPTION_STANDALONE:
             if sys.platform == 'darwin':
                 raise RuntimeError('--standalone not yet supported for OSX')
-            # <qt>/bin/* -> <setup>/PySide
-            executables.extend(copydir("{qt_bin_dir}", "{dist_dir}/PySide",
+            # <qt>/bin/* -> <setup>/PySide2
+            executables.extend(copydir("{qt_bin_dir}", "{dist_dir}/PySide2",
                 filter=[
                     "designer",
                     "linguist",
@@ -764,58 +764,58 @@ class pyside_build(_build):
                     "lconvert",
                 ],
                 recursive=False, vars=vars))
-            # <qt>/lib/* -> <setup>/PySide
-            copydir("{qt_lib_dir}", "{dist_dir}/PySide",
+            # <qt>/lib/* -> <setup>/PySide2
+            copydir("{qt_lib_dir}", "{dist_dir}/PySide2",
                 filter=[
                     "libQt*.so.?",
                     "libphonon.so.?",
                 ],
                 recursive=False, vars=vars)
-            # <qt>/plugins/* -> <setup>/PySide/plugins
-            copydir("{qt_plugins_dir}", "{dist_dir}/PySide/plugins",
+            # <qt>/plugins/* -> <setup>/PySide2/plugins
+            copydir("{qt_plugins_dir}", "{dist_dir}/PySide2/plugins",
                 filter=["*.so"],
                 vars=vars)
-            # <qt>/imports/* -> <setup>/PySide/imports
+            # <qt>/imports/* -> <setup>/PySide2/imports
             if float(vars["qt_version"][:3]) > 4.6:
-                copydir("{qt_imports_dir}", "{dist_dir}/PySide/imports",
+                copydir("{qt_imports_dir}", "{dist_dir}/PySide2/imports",
                     filter=["qmldir", "*.so"],
                     force=False, vars=vars)
-            # <qt>/translations/* -> <setup>/PySide/translations
-            copydir("{qt_translations_dir}", "{dist_dir}/PySide/translations",
+            # <qt>/translations/* -> <setup>/PySide2/translations
+            copydir("{qt_translations_dir}", "{dist_dir}/PySide2/translations",
                 filter=["*.qm"],
                 vars=vars)
         # Update rpath to $ORIGIN
         if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
-            self.update_rpath("{dist_dir}/PySide".format(**vars), executables)
+            self.update_rpath("{dist_dir}/PySide2".format(**vars), executables)
 
     def prepare_packages_win32(self, vars):
         pdbs = ['*.pdb'] if self.debug or self.build_type == 'RelWithDebInfo' else []
-        # <install>/lib/site-packages/PySide/* -> <setup>/PySide
+        # <install>/lib/site-packages/PySide2/* -> <setup>/PySide2
         copydir(
-            "{site_packages_dir}/PySide",
-            "{dist_dir}/PySide",
+            "{site_packages_dir}/PySide2",
+            "{dist_dir}/PySide2",
             vars=vars)
         if self.debug or self.build_type == 'RelWithDebInfo':
-            # <build>/pyside/PySide/*.pdb -> <setup>/PySide
+            # <build>/pyside2/PySide2/*.pdb -> <setup>/PySide2
             copydir(
-                "{build_dir}/pyside/PySide",
-                "{dist_dir}/PySide",
+                "{build_dir}/pyside2/PySide2",
+                "{dist_dir}/PySide2",
                 filter=pdbs,
                 recursive=False, vars=vars)
-        # <build>/shiboken/doc/html/* -> <setup>/PySide/docs/shiboken
+        # <build>/shiboken2/doc/html/* -> <setup>/PySide2/docs/shiboken2
         copydir(
-            "{build_dir}/shiboken/doc/html",
-            "{dist_dir}/PySide/docs/shiboken",
+            "{build_dir}/shiboken2/doc/html",
+            "{dist_dir}/PySide2/docs/shiboken2",
             force=False, vars=vars)
-        # <install>/lib/site-packages/shiboken.pyd -> <setup>/PySide/shiboken.pyd
+        # <install>/lib/site-packages/shiboken2.pyd -> <setup>/PySide2/shiboken2.pyd
         copyfile(
-            "{site_packages_dir}/shiboken{dbgPostfix}.pyd",
-            "{dist_dir}/PySide/shiboken{dbgPostfix}.pyd",
+            "{site_packages_dir}/shiboken2{dbgPostfix}.pyd",
+            "{dist_dir}/PySide2/shiboken2{dbgPostfix}.pyd",
             vars=vars)
         if self.debug or self.build_type == 'RelWithDebInfo':
             copyfile(
-                "{build_dir}/shiboken/shibokenmodule/shiboken{dbgPostfix}.pdb",
-                "{dist_dir}/PySide/shiboken{dbgPostfix}.pdb",
+                "{build_dir}/shiboken2/shibokenmodule/shiboken2{dbgPostfix}.pdb",
+                "{dist_dir}/PySide2/shiboken2{dbgPostfix}.pdb",
                 vars=vars)
         # <install>/lib/site-packages/pysideuic/* -> <setup>/pysideuic
         copydir(
@@ -826,59 +826,59 @@ class pyside_build(_build):
             rmtree("{dist_dir}/pysideuic/port_v2".format(**vars))
         else:
             rmtree("{dist_dir}/pysideuic/port_v3".format(**vars))
-        # <install>/bin/pyside-uic -> PySide/scripts/uic.py
+        # <install>/bin/pyside2-uic -> PySide2/scripts/uic.py
         makefile(
-            "{dist_dir}/PySide/scripts/__init__.py",
+            "{dist_dir}/PySide2/scripts/__init__.py",
             vars=vars)
         copyfile(
-            "{install_dir}/bin/pyside-uic",
-            "{dist_dir}/PySide/scripts/uic.py",
+            "{install_dir}/bin/pyside2-uic",
+            "{dist_dir}/PySide2/scripts/uic.py",
             force=False, vars=vars)
-        # <install>/bin/*.exe,*.dll,*.pdb -> PySide/
+        # <install>/bin/*.exe,*.dll,*.pdb -> PySide2/
         copydir(
             "{install_dir}/bin/",
-            "{dist_dir}/PySide",
+            "{dist_dir}/PySide2",
             filter=["*.exe", "*.dll"] + pdbs,
             recursive=False, vars=vars)
-        # <install>/lib/*.lib -> PySide/
+        # <install>/lib/*.lib -> PySide2/
         copydir(
             "{install_dir}/lib/",
-            "{dist_dir}/PySide",
+            "{dist_dir}/PySide2",
             filter=["*.lib"],
             recursive=False, vars=vars)
-        # <install>/share/PySide/typesystems/* -> <setup>/PySide/typesystems
+        # <install>/share/PySide2/typesystems/* -> <setup>/PySide2/typesystems
         copydir(
-            "{install_dir}/share/PySide/typesystems",
-            "{dist_dir}/PySide/typesystems",
+            "{install_dir}/share/PySide2/typesystems",
+            "{dist_dir}/PySide2/typesystems",
             vars=vars)
-        # <install>/include/* -> <setup>/PySide/include
+        # <install>/include/* -> <setup>/PySide2/include
         copydir(
             "{install_dir}/include",
-            "{dist_dir}/PySide/include",
+            "{dist_dir}/PySide2/include",
             vars=vars)
         if not OPTION_NOEXAMPLES:
-            # <sources>/pyside-examples/examples/* -> <setup>/PySide/examples
-            folder = get_extension_folder('pyside-examples')
+            # <sources>/pyside2-examples/examples/* -> <setup>/PySide2/examples
+            folder = get_extension_folder('pyside2-examples')
             copydir(
                 "{sources_dir}/%s/examples" % folder,
-                "{dist_dir}/PySide/examples",
+                "{dist_dir}/PySide2/examples",
                 force=False, vars=vars)
             # Re-generate examples Qt resource files for Python 3 compatibility
             if sys.version_info[0] == 3:
-                examples_path = "{dist_dir}/PySide/examples".format(**vars)
-                pyside_rcc_path = "{install_dir}/bin/pyside-rcc".format(**vars)
+                examples_path = "{dist_dir}/PySide2/examples".format(**vars)
+                pyside_rcc_path = "{install_dir}/bin/pyside2-rcc".format(**vars)
                 pyside_rcc_options = '-py3'
                 regenerate_qt_resources(examples_path, pyside_rcc_path,
                     pyside_rcc_options)
-        # <ssl_libs>/* -> <setup>/PySide/openssl
-        copydir("{ssl_libs_dir}", "{dist_dir}/PySide/openssl",
+        # <ssl_libs>/* -> <setup>/PySide2/openssl
+        copydir("{ssl_libs_dir}", "{dist_dir}/PySide2/openssl",
             filter=[
                 "libeay32.dll",
                 "ssleay32.dll"],
             force=False, vars=vars)
 
-        # <qt>/bin/*.dll -> <setup>/PySide
-        copydir("{qt_bin_dir}", "{dist_dir}/PySide",
+        # <qt>/bin/*.dll -> <setup>/PySide2
+        copydir("{qt_bin_dir}", "{dist_dir}/PySide2",
             filter=[
                 "*.dll",
                 "designer.exe",
@@ -889,57 +889,57 @@ class pyside_build(_build):
             ignore=["*d4.dll"],
             recursive=False, vars=vars)
         if self.debug:
-            # <qt>/bin/*d4.dll -> <setup>/PySide
-            copydir("{qt_bin_dir}", "{dist_dir}/PySide",
+            # <qt>/bin/*d4.dll -> <setup>/PySide2
+            copydir("{qt_bin_dir}", "{dist_dir}/PySide2",
                 filter=["*d4.dll"] + pdbs,
                 recursive=False, vars=vars)
 
         if self.debug  or self.build_type == 'RelWithDebInfo':
-            # <qt>/lib/*.pdb -> <setup>/PySide
-            copydir("{qt_lib_dir}", "{dist_dir}/PySide",
+            # <qt>/lib/*.pdb -> <setup>/PySide2
+            copydir("{qt_lib_dir}", "{dist_dir}/PySide2",
                 filter=["*.pdb"],
                 recursive=False, vars=vars)
 
         # I think these are the qt-mobility DLLs, at least some are,
         # so let's copy them too
-        # <qt>/lib/*.dll -> <setup>/PySide
-        copydir("{qt_lib_dir}", "{dist_dir}/PySide",
+        # <qt>/lib/*.dll -> <setup>/PySide2
+        copydir("{qt_lib_dir}", "{dist_dir}/PySide2",
             filter=["*.dll"],
             ignore=["*d?.dll"],
             recursive=False, vars=vars)
         if self.debug:
-            # <qt>/lib/*d4.dll -> <setup>/PySide
-            copydir("{qt_lib_dir}", "{dist_dir}/PySide",
+            # <qt>/lib/*d4.dll -> <setup>/PySide2
+            copydir("{qt_lib_dir}", "{dist_dir}/PySide2",
                 filter=["*d?.dll"],
                 recursive=False, vars=vars)
         if self.debug  or self.build_type == 'RelWithDebInfo':
-            # <qt>/lib/*pdb -> <setup>/PySide
-            copydir("{qt_lib_dir}", "{dist_dir}/PySide",
+            # <qt>/lib/*pdb -> <setup>/PySide2
+            copydir("{qt_lib_dir}", "{dist_dir}/PySide2",
                 filter=pdbs,
                 recursive=False, vars=vars)
 
-        # <qt>/plugins/* -> <setup>/PySide/plugins
-        copydir("{qt_plugins_dir}", "{dist_dir}/PySide/plugins",
+        # <qt>/plugins/* -> <setup>/PySide2/plugins
+        copydir("{qt_plugins_dir}", "{dist_dir}/PySide2/plugins",
             filter=["*.dll"] + pdbs,
             vars=vars)
-        # <qt>/imports/* -> <setup>/PySide/imports
-        copydir("{qt_imports_dir}", "{dist_dir}/PySide/imports",
+        # <qt>/imports/* -> <setup>/PySide2/imports
+        copydir("{qt_imports_dir}", "{dist_dir}/PySide2/imports",
             filter=["qmldir", "*.dll"] + pdbs,
             vars=vars)
-        # <qt>/translations/* -> <setup>/PySide/translations
-        copydir("{qt_translations_dir}", "{dist_dir}/PySide/translations",
+        # <qt>/translations/* -> <setup>/PySide2/translations
+        copydir("{qt_translations_dir}", "{dist_dir}/PySide2/translations",
             filter=["*.qm"],
             vars=vars)
 
         # pdb files for libshiboken and libpyside
         if self.debug or self.build_type == 'RelWithDebInfo':
             copyfile(
-                "{build_dir}/shiboken/libshiboken/shiboken-python{py_version}{dbgPostfix}.pdb",
-                "{dist_dir}/PySide/shiboken-python{py_version}{dbgPostfix}.pdb",
+                "{build_dir}/shiboken2/libshiboken/shiboken2-python{py_version}{dbgPostfix}.pdb",
+                "{dist_dir}/PySide2/shiboken2-python{py_version}{dbgPostfix}.pdb",
                 vars=vars)
             copyfile(
-                "{build_dir}/pyside/libpyside/pyside-python{py_version}{dbgPostfix}.pdb",
-                "{dist_dir}/PySide/pyside-python{py_version}{dbgPostfix}.pdb",
+                "{build_dir}/pyside2/libpyside/pyside2-python{py_version}{dbgPostfix}.pdb",
+                "{dist_dir}/PySide2/pyside2-python{py_version}{dbgPostfix}.pdb",
                 vars=vars)
 
     def update_rpath(self, package_path, executables):
@@ -966,7 +966,7 @@ class pyside_build(_build):
 
         pyside_libs.extend(executables)
 
-        # Update rpath in PySide libs
+        # Update rpath in PySide2 libs
         for srcname in pyside_libs:
             srcpath = os.path.join(package_path, srcname)
             if os.path.isdir(srcpath):
@@ -987,7 +987,7 @@ except IOError:
 
 
 setup(
-    name = "PySide",
+    name = "PySide2",
     version = __version__,
     description = ("Python bindings for the Qt cross-platform application and UI framework"),
     long_description = README + "\n\n" + CHANGES,
@@ -1021,18 +1021,18 @@ setup(
         'Topic :: Software Development :: Widget Sets',
     ],
     keywords = 'Qt',
-    author = 'PySide Team',
+    author = 'PySide2 Team',
     author_email = 'contact@pyside.org',
     url = 'http://www.pyside.org',
-    download_url = 'https://download.qt-project.org/official_releases/pyside/',
+    download_url = 'https://download.qt-project.org/official_releases/pyside2/',
     license = 'LGPL',
-    packages = ['PySide', 'pysideuic'],
+    packages = ['PySide2', 'pysideuic'],
     package_dir = {'': 'pyside_package'},
     include_package_data = True,
     zip_safe = False,
     entry_points = {
         'console_scripts': [
-            'pyside-uic = PySide.scripts.uic:main',
+            'pyside2-uic = PySide2.scripts.uic:main',
         ]
     },
     cmdclass = {
@@ -1047,5 +1047,5 @@ setup(
     # bdist_egg will know that there are extension modules and will name the
     # dist with the full platform info.
     ext_modules = [Extension('QtCore', [])],
-    ext_package = 'PySide',
+    ext_package = 'PySide2',
 )
