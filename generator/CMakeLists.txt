@@ -3,7 +3,7 @@ project(shibokengenerator)
 find_package(Qt5Xml)
 find_package(Qt5XmlPatterns)
 
-set(shiboken_SRC
+set(shiboken2_SRC
 generator.cpp
 shiboken/cppgenerator.cpp
 shiboken/headergenerator.cpp
@@ -14,7 +14,7 @@ main.cpp
 )
 
 if (NOT DISABLE_DOCSTRINGS)
-    set(shiboken_SRC ${shiboken_SRC} qtdoc/qtdocgenerator.cpp)
+    set(shiboken2_SRC ${shiboken2_SRC} qtdoc/qtdocgenerator.cpp)
     add_definitions(-DDOCSTRINGS_ENABLED)
 endif()
 
@@ -28,10 +28,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/shiboken
                     ${Qt5XmlPatterns_INCLUDE_DIRS}
                     )
 
-add_executable(shiboken ${shiboken_SRC})
-add_dependencies(shiboken apiextractor)
-set_target_properties(shiboken PROPERTIES OUTPUT_NAME shiboken${shiboken_SUFFIX})
-target_link_libraries(shiboken
+add_executable(shiboken2 ${shiboken2_SRC})
+add_dependencies(shiboken2 apiextractor)
+set_target_properties(shiboken2 PROPERTIES OUTPUT_NAME shiboken2${shiboken2_SUFFIX})
+target_link_libraries(shiboken2
                       apiextractor
                       ${Qt5Core_LIBRARIES}
                       ${Qt5Xml_LIBRARIES}
@@ -40,4 +40,4 @@ target_link_libraries(shiboken
 
 configure_file(shibokenconfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/shibokenconfig.h" @ONLY)
 
-install(TARGETS shiboken DESTINATION bin)
+install(TARGETS shiboken2 DESTINATION bin)

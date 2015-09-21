@@ -1,5 +1,5 @@
 Include(icecc.cmake)
-project(shiboken)
+project(shiboken2)
 
 cmake_minimum_required(VERSION 3.0)
 cmake_policy(VERSION 3.0)
@@ -14,10 +14,10 @@ add_definitions(${Qt5Core_DEFINITIONS})
 set(shiboken_MAJOR_VERSION "2")
 set(shiboken_MINOR_VERSION "0")
 set(shiboken_MICRO_VERSION "0")
-set(shiboken_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
+set(shiboken2_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
 
 option(BUILD_TESTS "Build tests." TRUE)
-option(USE_PYTHON3 "Use python3 libraries to build shiboken." FALSE)
+option(USE_PYTHON3 "Use python3 libraries to build shiboken2." FALSE)
 
 if (USE_PYTHON3)
     find_package(Python3Libs)
@@ -96,7 +96,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         message(WARNING "Python debug shared library not found; assuming python was built with shared library support disabled.")
     endif()
     if(NOT PYTHON_WITH_DEBUG)
-        message(WARNING "Compiling shiboken with debug enabled, but the python executable was not compiled with debug support.")
+        message(WARNING "Compiling shiboken2 with debug enabled, but the python executable was not compiled with debug support.")
     else()
         add_definitions("-DPy_DEBUG")
         set(SBK_ADD_PY_DEBUG_DEFINITION "add_definitions(\"-DPy_DEBUG\")")
@@ -131,13 +131,13 @@ if (Qt5Core_FOUND AND PYTHONINTERP_FOUND)
         add_subdirectory(tests)
     endif()
 else()
-    message(WARNING "Some dependencies were not found, shiboken generator compilation disabled!")
+    message(WARNING "Some dependencies were not found, shiboken2 generator compilation disabled!")
 endif()
 
 add_subdirectory(data)
 
 # dist target
-set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${shiboken_VERSION})
+set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${shiboken2_VERSION})
 add_custom_target(dist
     COMMAND mkdir -p "${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}" &&
             git log > "${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}/ChangeLog" &&
