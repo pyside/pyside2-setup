@@ -4,7 +4,7 @@
 import sys
 import unittest
 
-from PySide import QtSql
+from PySide2 import QtSql
 from PySide.QtCore import *
 from PySide.QtWidgets import *
 

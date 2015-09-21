@@ -1,6 +1,6 @@
 ''' Test bug 451: http://bugs.openbossa.org/show_bug.cgi?id=451'''
 
-from PySide import QtCore, QtGui, QtDeclarative
+from PySide2 import QtCore, QtGui, QtDeclarative
 from helper import adjust_filename
 import sys
 import unittest

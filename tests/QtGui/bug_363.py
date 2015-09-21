@@ -3,7 +3,7 @@
 import sys
 import unittest
 from helper import UsesQApplication
-from PySide import QtCore,QtGui
+from PySide2 import QtCore,QtGui
 
 # Check for desktop object lifetime
 class BugTest(UsesQApplication):

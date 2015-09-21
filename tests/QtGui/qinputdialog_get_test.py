@@ -1,6 +1,6 @@
 import unittest
 
-from PySide import QtCore, QtGui
+from PySide2 import QtCore, QtGui
 from helper import UsesQApplication, TimedQApplication
 
 class TestInputDialog(TimedQApplication):

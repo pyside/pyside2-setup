@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import unittest
-from PySide import QtCore
+from PySide2 import QtCore
 
 class Lock(QtCore.QMutex):
     def tryLock(self,timeoutt=10):

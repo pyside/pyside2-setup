@@ -5,7 +5,7 @@
 import unittest
 import sys
 
-from PySide import QtGui, QtCore
+from PySide2 import QtGui, QtCore
 
 class Foo(QtGui.QWidget):
     def __init__(self):

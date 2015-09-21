@@ -1,5 +1,5 @@
 from helper import adjust_filename
-from PySide import QtGui, QtCore
+from PySide2 import QtGui, QtCore
 from PySide.QtUiTools import QUiLoader
 
 class View_1(QtGui.QWidget):

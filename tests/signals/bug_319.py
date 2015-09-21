@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from PySide import QtCore
+from PySide2 import QtCore
 from helper import UsesQCoreApplication
 
 class Listener(QtCore.QObject):
