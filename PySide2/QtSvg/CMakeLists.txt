@@ -26,7 +26,7 @@ set(QtSvg_include_dirs  ${QtSvg_SOURCE_DIR}
                         ${QtGui_GEN_DIR}
                         ${QtWidgets_GEN_DIR}
                         )
-set(QtSvg_libraries     pyside
+set(QtSvg_libraries     pyside2
                         ${SHIBOKEN_PYTHON_LIBRARIES}
                         ${SHIBOKEN_LIBRARY}
                         ${Qt5Core_LIBRARIES}

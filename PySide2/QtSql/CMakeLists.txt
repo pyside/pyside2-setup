@@ -37,7 +37,7 @@ set(QtSql_include_dirs  ${QtSql_SOURCE_DIR}
                         ${QtGui_GEN_DIR}
                         ${QtWidgets_GEN_DIR}
                         )
-set(QtSql_libraries     pyside
+set(QtSql_libraries     pyside2
                         ${SHIBOKEN_PYTHON_LIBRARIES}
                         ${SHIBOKEN_LIBRARY}
                         ${Qt5Core_LIBRARIES}

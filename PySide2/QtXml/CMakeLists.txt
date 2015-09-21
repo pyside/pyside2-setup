@@ -49,7 +49,7 @@ set(QtXml_include_dirs      ${QtXml_SOURCE_DIR}
                             ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                             ${QtCore_GEN_DIR}
                             )
-set(QtXml_libraries         pyside
+set(QtXml_libraries         pyside2
                             ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${SHIBOKEN_LIBRARY}
                             ${Qt5Xml_LIBRARIES})

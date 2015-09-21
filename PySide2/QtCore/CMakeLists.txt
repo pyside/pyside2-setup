@@ -155,7 +155,7 @@ set(QtCore_include_dirs ${QtCore_SOURCE_DIR}
                         ${libpyside_SOURCE_DIR}
                         ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                         )
-set(QtCore_libraries  pyside
+set(QtCore_libraries  pyside2
                       ${SHIBOKEN_PYTHON_LIBRARIES}
                       ${SHIBOKEN_LIBRARY}
                       ${Qt5Core_LIBRARIES}

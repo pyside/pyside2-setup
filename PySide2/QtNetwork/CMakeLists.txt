@@ -54,7 +54,7 @@ set(QtNetwork_include_dirs  ${QtNetwork_SOURCE_DIR}
                             ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                             ${QtCore_GEN_DIR})
 
-set(QtNetwork_libraries pyside
+set(QtNetwork_libraries pyside2
                         ${SHIBOKEN_PYTHON_LIBRARIES}
                         ${SHIBOKEN_LIBRARY}
                         ${Qt5Network_LIBRARIES})

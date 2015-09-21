@@ -28,7 +28,7 @@ set(QtUiTools_include_dirs  ${QtUiTools_SOURCE_DIR}
                             ${QtGui_GEN_DIR}
                             ${QtWidgets_GEN_DIR}
                             )
-set(QtUiTools_libraries     pyside
+set(QtUiTools_libraries     pyside2
                             uiplugin
                             ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${Qt5UiTools_LIBRARIES}

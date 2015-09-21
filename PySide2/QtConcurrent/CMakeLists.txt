@@ -18,7 +18,7 @@ set(QtConcurrent_include_dirs   ${QtConcurrent_SOURCE_DIR}
                                 ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                                 ${QtCore_GEN_DIR}
                                 )
-set(QtConcurrent_libraries  pyside
+set(QtConcurrent_libraries  pyside2
                             ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${SHIBOKEN_LIBRARY}
                             ${QtConcurrent_LIBRARIES}

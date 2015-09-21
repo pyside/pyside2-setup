@@ -33,7 +33,7 @@ set(QtHelp_include_dirs ${QtHelp_SOURCE_DIR}
                         ${QtGui_GEN_DIR}
                         ${QtCore_GEN_DIR}
                         )
-set(QtHelp_libraries  pyside
+set(QtHelp_libraries  pyside2
                       ${SHIBOKEN_PYTHON_LIBRARIES}
                       ${Qt5Core_LIBRARIES}
                       ${Qt5Gui_LIBRARIES}

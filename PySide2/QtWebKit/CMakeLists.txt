@@ -24,7 +24,7 @@ set(QtWebKit_include_dirs   ${QtWebKit_SOURCE_DIR}
                             ${QtWidgets_GEN_DIR}
                             ${QtNetwork_GEN_DIR}
                             )
-set(QtWebKit_libraries      pyside
+set(QtWebKit_libraries      pyside2
                             ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${SHIBOKEN_LIBRARY}
                             ${Qt5Webkit_LIBRARIES}

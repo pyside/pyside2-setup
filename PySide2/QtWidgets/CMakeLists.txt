@@ -239,7 +239,7 @@ set(QtWidgets_include_dirs  ${QtWidgets_SOURCE_DIR}
                             ${QtCore_GEN_DIR}
                             ${QtGui_GEN_DIR}
                             )
-set(QtWidgets_libraries pyside
+set(QtWidgets_libraries pyside2
                         ${SHIBOKEN_PYTHON_LIBRARIES}
                         ${SHIBOKEN_LIBRARY}
                         ${Qt5Core_LIBRARIES}

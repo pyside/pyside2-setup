@@ -29,7 +29,7 @@ set(QtScript_include_dirs   ${QtScript_SOURCE_DIR}
                             ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                             ${QtCore_GEN_DIR}
                             )
-set(QtScript_libraries      pyside
+set(QtScript_libraries      pyside2
                             ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${SHIBOKEN_LIBRARY}
                             ${Qt5Core_LIBRARIES}

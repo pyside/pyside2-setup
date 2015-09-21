@@ -36,7 +36,7 @@ set(QtMultimedia_include_dirs   ${QtMultimedia_SOURCE_DIR}
                                 ${QtGui_GEN_DIR}
                                 ${QtNetwork_GEN_DIR}
                                 )
-set(QtMultimedia_libraries  pyside
+set(QtMultimedia_libraries  pyside2
                             ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${SHIBOKEN_LIBRARY}
                             ${Qt5Multimedia_LIBRARIES}

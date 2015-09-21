@@ -30,7 +30,7 @@ set(QtPrintSupport_include_dirs ${QtPrintSupport_SOURCE_DIR}
                                 ${QtGui_GEN_DIR}
                                 ${QtWidgets_GEN_DIR}
                                 )
-set(QtPrintSupport_libraries    pyside
+set(QtPrintSupport_libraries    pyside2
                                 ${SHIBOKEN_PYTHON_LIBRARIES}
                                 ${SHIBOKEN_LIBRARY}
                                 ${Qt5Core_LIBRARIES}

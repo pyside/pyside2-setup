@@ -24,7 +24,7 @@ set(QtScriptTools_include_dirs  ${QtScriptTools_SOURCE_DIR}
                                 ${QtScript_GEN_DIR}
                                 )
 
-set(QtScriptTools_libraries pyside
+set(QtScriptTools_libraries pyside2
                             ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${Qt5Core_LIBRARIES}
                             ${Qt5Gui_LIBRARIES}

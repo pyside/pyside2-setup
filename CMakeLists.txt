@@ -7,7 +7,7 @@ project(pysidebindings)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Macros/
                       ${CMAKE_MODULE_PATH})
-find_package(Shiboken 2.0.0 REQUIRED)
+find_package(Shiboken2 2.0.0 REQUIRED)
 find_package(Qt5 REQUIRED COMPONENTS Core) 
 add_definitions(${Qt5Core_DEFINITIONS})
 

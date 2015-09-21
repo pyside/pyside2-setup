@@ -31,7 +31,7 @@ set(QtOpenGL_include_dirs   ${QtOpenGL_SOURCE_DIR}
                             ${QtCore_GEN_DIR}
                             ${QtOpenGL_GEN_DIR}
                             )
-set(QtOpenGL_libraries      pyside
+set(QtOpenGL_libraries      pyside2
                             ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${Qt5Core_LIBRARIES}
                             ${Qt5Gui_LIBRARIES}

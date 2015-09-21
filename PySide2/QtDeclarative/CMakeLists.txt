@@ -42,7 +42,7 @@ set(QtDeclarative_include_dirs  ${QtDeclarative_SOURCE_DIR}
                                 ${QtNetwork_GEN_DIR}
                                 ${QtDeclarative_GEN_DIR})
 
-set(QtDeclarative_libraries   pyside
+set(QtDeclarative_libraries   pyside2
                               ${SHIBOKEN_PYTHON_LIBRARIES}
                               ${Qt5Core_LIBRARIES}
                               ${Qt5Gui_LIBRARIES}

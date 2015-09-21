@@ -24,7 +24,7 @@ set(QtTest_include_dirs ${QtTest_SOURCE_DIR}
                         ${QtGui_GEN_DIR}
                         ${QtWidgets_GEN_DIR}
                         )
-set(QtTest_libraries    pyside
+set(QtTest_libraries    pyside2
                         ${SHIBOKEN_PYTHON_LIBRARIES}
                         ${SHIBOKEN_LIBRARY}
                         ${Qt5Test_LIBRARIES}
