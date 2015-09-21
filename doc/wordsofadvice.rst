@@ -83,7 +83,7 @@ Example with old style class:
 
     .. code-block:: python
 
-        from PySide import QtCore
+        from PySide2 import QtCore
 
         class MyOldStyleObject:
             pass
@@ -97,7 +97,7 @@ this example will raise a 'TypeError' due to the limitation on PySide, to fix th
 
     .. code-block:: python
 
-        from PySide import QtCore
+        from PySide2 import QtCore
 
         class MyOldStyleObject(object):
             pass
