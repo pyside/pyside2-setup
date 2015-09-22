@@ -5,8 +5,8 @@ import sys
 import unittest
 
 from PySide2 import QtSql
-from PySide.QtCore import *
-from PySide.QtWidgets import *
+from PySide2.QtCore import *
+from PySide2.QtWidgets import *
 
 class Foo(QWidget):
     def __init__(self):

@@ -1,8 +1,8 @@
 
 import unittest
 
-from PySide.QtCore import QAbstractTableModel
-from PySide.QtWidgets import QTableWidget
+from PySide2.QtCore import QAbstractTableModel
+from PySide2.QtWidgets import QTableWidget
 from helper import UsesQApplication
 
 class QPenTest(UsesQApplication):

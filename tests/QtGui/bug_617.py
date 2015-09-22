@@ -1,5 +1,5 @@
-from PySide.QtCore import QEvent
-from PySide.QtGui import QColor
+from PySide2.QtCore import QEvent
+from PySide2.QtGui import QColor
 import unittest
 
 class MyEvent(QEvent):
@@ -15,7 +15,7 @@ class Bug617(unittest.TestCase):
 
     def testOutOfBounds(self):
         e = MyEvent()
-        self.assertEqual(repr(e.type()), 'PySide.QtCore.QEvent.Type(999)')
+        self.assertEqual(repr(e.type()), 'PySide2.QtCore.QEvent.Type(999)')
 
 if __name__ == "__main__":
    unittest.main()

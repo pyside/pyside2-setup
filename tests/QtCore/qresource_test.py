@@ -4,7 +4,7 @@
 
 import unittest
 from helper import adjust_filename
-from PySide.QtCore import QFile, QIODevice
+from PySide2.QtCore import QFile, QIODevice
 import resources_mc
 
 class ResourcesUsage(unittest.TestCase):

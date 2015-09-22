@@ -1,8 +1,8 @@
 import unittest
 
 import PySide
-from PySide.QtGui import QVector2D, QVector3D, QVector4D
-from PySide.QtGui import QColor
+from PySide2.QtGui import QVector2D, QVector3D, QVector4D
+from PySide2.QtGui import QColor
 
 class testCases(unittest.TestCase):
     def testQVector2DToTuple(self):

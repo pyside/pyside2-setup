@@ -1,6 +1,6 @@
 import unittest
 
-from PySide.QtWidgets import QApplication, QLCDNumber
+from PySide2.QtWidgets import QApplication, QLCDNumber
 
 class QLCDNumberOverflow(unittest.TestCase):
     '''Test case for unhandled overflow on QLCDNumber() numDigits argument (see bug #215).'''

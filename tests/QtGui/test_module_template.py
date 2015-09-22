@@ -1,5 +1,5 @@
-from PySide.QtWidgets import QWidget
-from PySide.QtCore import QObject
+from PySide2.QtWidgets import QWidget
+from PySide2.QtCore import QObject
 
 class MyQObject(QObject):
     pass

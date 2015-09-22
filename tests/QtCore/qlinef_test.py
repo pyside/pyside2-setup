@@ -4,7 +4,7 @@
 import unittest
 import os
 
-from PySide.QtCore import *
+from PySide2.QtCore import *
 
 class TestQLineF (unittest.TestCase):
     def testIntersect(self):

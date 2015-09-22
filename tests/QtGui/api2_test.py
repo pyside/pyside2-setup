@@ -4,8 +4,8 @@
 import unittest
 import sys
 
-from PySide.QtGui import QIntValidator, QValidator
-from PySide.QtWidgets import QWidget, QSpinBox, QApplication
+from PySide2.QtGui import QIntValidator, QValidator
+from PySide2.QtWidgets import QWidget, QSpinBox, QApplication
 
 from helper import UsesQApplication
 

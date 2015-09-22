@@ -2,14 +2,14 @@
 import unittest
 
 import PySide
-from PySide.QtCore import QPoint
-from PySide.QtGui import QMatrix
-from PySide.QtGui import QMatrix2x2, QMatrix2x3, QMatrix2x4
-from PySide.QtGui import QMatrix3x2, QMatrix3x3, QMatrix3x4
-from PySide.QtGui import QMatrix4x2, QMatrix4x3, QMatrix4x4
-from PySide.QtGui import QVector2D, QVector3D, QVector4D
-from PySide.QtGui import QColor, QTransform, QKeySequence, QQuaternion
-from PySide.QtGui import QPolygon
+from PySide2.QtCore import QPoint
+from PySide2.QtGui import QMatrix
+from PySide2.QtGui import QMatrix2x2, QMatrix2x3, QMatrix2x4
+from PySide2.QtGui import QMatrix3x2, QMatrix3x3, QMatrix3x4
+from PySide2.QtGui import QMatrix4x2, QMatrix4x3, QMatrix4x4
+from PySide2.QtGui import QVector2D, QVector3D, QVector4D
+from PySide2.QtGui import QColor, QTransform, QKeySequence, QQuaternion
+from PySide2.QtGui import QPolygon
 
 class ReprCopyHelper:
     def testCopy(self):

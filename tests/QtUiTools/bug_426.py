@@ -1,7 +1,7 @@
 import sys
 import os
 from PySide2 import QtCore, QtGui
-from PySide.QtUiTools import QUiLoader
+from PySide2.QtUiTools import QUiLoader
 
 class Window(object):
     def __init__(self):

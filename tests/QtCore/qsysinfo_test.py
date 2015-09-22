@@ -1,5 +1,5 @@
 import unittest
-from PySide.QtCore import QSysInfo
+from PySide2.QtCore import QSysInfo
 
 class TestQSysInfo(unittest.TestCase):
     def testEnumEndian(self):

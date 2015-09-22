@@ -5,7 +5,7 @@ import os
 import tempfile
 import py3kcompat as py3k
 
-from PySide.QtCore import QFile, QIODevice
+from PySide2.QtCore import QFile, QIODevice
 
 class GetCharTest(unittest.TestCase):
     '''Test case for QIODevice.getChar in QFile'''

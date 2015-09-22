@@ -1,5 +1,5 @@
 import unittest
-from PySide.QtGui import *
+from PySide2.QtGui import *
 
 class MyData(QTextBlockUserData):
     def __init__(self, data):

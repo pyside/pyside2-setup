@@ -28,7 +28,7 @@ import sys
 import unittest
 
 from helper import UsesQApplication
-from PySide.QtWidgets import QMainWindow, QMenu, QApplication
+from PySide2.QtWidgets import QMainWindow, QMenu, QApplication
 
 class MainWindow(QMainWindow):
     def __init__(self, *args):

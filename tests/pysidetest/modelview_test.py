@@ -3,7 +3,7 @@
 import unittest
 import py3kcompat as py3k
 from testbinding import TestView
-from PySide.QtCore import QAbstractListModel, QObject, QModelIndex
+from PySide2.QtCore import QAbstractListModel, QObject, QModelIndex
 
 '''Tests model/view relationship.'''
 

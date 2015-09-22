@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 import unittest
-from PySide.QtCore import *
-from PySide.QtXmlPatterns import QXmlSchema
+from PySide2.QtCore import *
+from PySide2.QtXmlPatterns import QXmlSchema
 from helper import UsesQCoreApplication
 
 class QXmlPatternsTest(UsesQCoreApplication):

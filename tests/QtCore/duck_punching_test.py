@@ -5,7 +5,7 @@
 import unittest
 import types
 import sys
-from PySide.QtCore import QObject
+from PySide2.QtCore import QObject
 from helper import UsesQCoreApplication
 
 def MethodType(func, instance, instanceType):

@@ -3,7 +3,7 @@ import os
 from helper import UsesQApplication
 
 from PySide2 import QtCore, QtGui
-from PySide.QtUiTools import QUiLoader
+from PySide2.QtUiTools import QUiLoader
 
 class MyQUiLoader(QUiLoader):
     def __init__(self, baseinstance):

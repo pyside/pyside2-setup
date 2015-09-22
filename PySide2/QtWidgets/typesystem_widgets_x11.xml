@@ -18,7 +18,7 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 -->
-<typesystem package="PySide.QtWidgets">
+<typesystem package="PySide2.QtWidgets">
 
   <rejection class="" function-name="qt_x11_getX11InfoForWindow"/>
   <rejection class="QX11Info" field-name="x11data"/>

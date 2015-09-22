@@ -4,7 +4,7 @@
 
 import unittest
 
-from PySide.QtCore import QObject, QTimer, QCoreApplication, Signal
+from PySide2.QtCore import QObject, QTimer, QCoreApplication, Signal
 from helper import UsesQCoreApplication
 
 class WatchDog(QObject):

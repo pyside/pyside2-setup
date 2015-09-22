@@ -1,4 +1,4 @@
-from PySide.QtCore import QCoreApplication, QEventLoop, QObject, Qt, QThread, QTimer, SIGNAL
+from PySide2.QtCore import QCoreApplication, QEventLoop, QObject, Qt, QThread, QTimer, SIGNAL
 import unittest
 
 

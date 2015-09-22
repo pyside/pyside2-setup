@@ -18,7 +18,7 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 -->
-<typesystem package="PySide.QtCore">
+<typesystem package="PySide2.QtCore">
     <load-typesystem name="typesystem_templates.xml" generate="no"/>
 
     <custom-type name="str" />
@@ -547,7 +547,7 @@
 
   <primitive-type name="QVariantMap" target-lang-api-name="PyDict"/>
   <inject-code class="target" position="end">
-  Shiboken::Conversions::registerConverterName(SbkPySide_QtCoreTypeConverters[SBK_QTCORE_QMAP_QSTRING_QVARIANT_IDX], "QVariantMap");
+  Shiboken::Conversions::registerConverterName(SbkPySide2_QtCoreTypeConverters[SBK_QTCORE_QMAP_QSTRING_QVARIANT_IDX], "QVariantMap");
   </inject-code>
 
   <inject-code class="native" position="beginning">
@@ -1002,9 +1002,9 @@
 
   <!--signal/slot-->
   <inject-code class="target" position="end">
-    Shiboken::Conversions::registerConverterName(SbkPySide_QtCoreTypeConverters[SBK_QSTRING_IDX], "unicode");
-    Shiboken::Conversions::registerConverterName(SbkPySide_QtCoreTypeConverters[SBK_QSTRING_IDX], "str");
-    Shiboken::Conversions::registerConverterName(SbkPySide_QtCoreTypeConverters[SBK_QTCORE_QLIST_QVARIANT_IDX], "QVariantList");
+    Shiboken::Conversions::registerConverterName(SbkPySide2_QtCoreTypeConverters[SBK_QSTRING_IDX], "unicode");
+    Shiboken::Conversions::registerConverterName(SbkPySide2_QtCoreTypeConverters[SBK_QSTRING_IDX], "str");
+    Shiboken::Conversions::registerConverterName(SbkPySide2_QtCoreTypeConverters[SBK_QTCORE_QLIST_QVARIANT_IDX], "QVariantList");
 
     PySide::init(module);
     Py_AtExit(QtCoreModuleExit);
@@ -4059,7 +4059,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
     </modify-function>
 
     <!-- FIXME: the proper signature for this added function would be something like
-         addTransition(PySide.QtCore.Signal, QAbstractState*)
+         addTransition(PySide2.QtCore.Signal, QAbstractState*)
          but that depends on bug #362. -->
     <add-function signature="addTransition(PyObject*, QAbstractState*)" return-type="QSignalTransition*">
       <modify-argument index="return">

@@ -2,7 +2,7 @@
 
 import unittest
 
-from PySide.QtCore import QTimer, Signal, QObject, Slot, Qt
+from PySide2.QtCore import QTimer, Signal, QObject, Slot, Qt
 from helper import UsesQCoreApplication
 
 class MyObject(QTimer):

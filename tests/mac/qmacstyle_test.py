@@ -1,6 +1,6 @@
-# Qt5: this is gone: from PySide.QtGui import QMacStyle
-from PySide.QtWidgets import QApplication, QLabel, QStyleFactory
-from PySide.QtCore import QObject
+# Qt5: this is gone: from PySide2.QtGui import QMacStyle
+from PySide2.QtWidgets import QApplication, QLabel, QStyleFactory
+from PySide2.QtCore import QObject
 
 import unittest
 

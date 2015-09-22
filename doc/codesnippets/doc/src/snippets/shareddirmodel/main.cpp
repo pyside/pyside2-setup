@@ -46,7 +46,7 @@
   selection model.
 """
 
-from PySide.QtGui import *
+from PySide2.QtGui import *
 
 
 //! [0] //! [1]

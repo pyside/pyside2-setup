@@ -9,7 +9,7 @@ from random import randint
 from PySide2.QtCore import QCoreApplication, QTimer
 
 try:
-    from PySide.QtWidgets import QApplication
+    from PySide2.QtWidgets import QApplication
 except ImportError:
     has_gui = False
 else:

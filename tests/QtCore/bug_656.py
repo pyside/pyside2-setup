@@ -1,4 +1,4 @@
-from PySide.QtCore import *
+from PySide2.QtCore import *
 
 class CoreApp(QCoreApplication):
     def __init__(self,*args):

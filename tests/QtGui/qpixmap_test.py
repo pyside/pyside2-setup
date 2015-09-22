@@ -2,8 +2,8 @@ import unittest
 
 import os
 from helper import UsesQApplication
-from PySide.QtGui import *
-from PySide.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtCore import *
 
 class QPixmapTest(UsesQApplication):
     def testQVariantConstructor(self):

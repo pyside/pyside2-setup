@@ -42,7 +42,7 @@
 #include <QApplication>
 #include <QPushButton>
 //! [0]
-from PySide.QtCore import QTranslator
+from PySide2.QtCore import QTranslator
 //! [0]
 
 //! [1] //! [2]

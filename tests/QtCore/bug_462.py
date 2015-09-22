@@ -1,7 +1,7 @@
 import unittest
 import sys
 
-from PySide.QtCore import QObject, QCoreApplication, QEvent, QThread
+from PySide2.QtCore import QObject, QCoreApplication, QEvent, QThread
 
 class MyEvent(QEvent):
     def __init__(self,i):

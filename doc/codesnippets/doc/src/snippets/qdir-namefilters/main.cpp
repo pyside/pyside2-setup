@@ -39,7 +39,7 @@
 **
 ****************************************************************************/
 
-from PySide.QtCore import *
+from PySide2.QtCore import *
 
 def main():
     dir_ = QDir()

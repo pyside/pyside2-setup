@@ -1,5 +1,5 @@
-from PySide.QtDeclarative import QDeclarativeItem, qmlRegisterType, QDeclarativeView
-from PySide.QtCore import QUrl
+from PySide2.QtDeclarative import QDeclarativeItem, qmlRegisterType, QDeclarativeView
+from PySide2.QtCore import QUrl
 
 from helper import adjust_filename, TimedQApplication
 import unittest

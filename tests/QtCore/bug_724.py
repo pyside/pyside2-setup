@@ -1,4 +1,4 @@
-from PySide.QtCore import QAbstractFileEngine, QIODevice, QFile
+from PySide2.QtCore import QAbstractFileEngine, QIODevice, QFile
 import unittest
 import tempfile
 import os

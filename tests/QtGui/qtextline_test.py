@@ -1,7 +1,7 @@
 
 import unittest
 
-from PySide.QtGui import QTextLayout
+from PySide2.QtGui import QTextLayout
 from helper import UsesQApplication
 
 class QTextLineTest(UsesQApplication):

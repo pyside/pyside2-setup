@@ -1,8 +1,8 @@
 
 import unittest
 
-from PySide.QtCore import QObject, QTimer, QThread
-from PySide.QtWidgets import *
+from PySide2.QtCore import QObject, QTimer, QThread
+from PySide2.QtWidgets import *
 
 class Foo(QTableView):
     def __init__(self, parent=None):

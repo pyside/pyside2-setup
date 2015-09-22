@@ -1,8 +1,8 @@
 
 import unittest
 
-from PySide.QtGui import QPixmap
-from PySide.QtWidgets import QStyle
+from PySide2.QtGui import QPixmap
+from PySide2.QtWidgets import QStyle
 
 from helper import UsesQApplication
 

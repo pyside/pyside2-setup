@@ -1,8 +1,8 @@
 #!/usr/bin/python
 import unittest
 from sys import getrefcount
-from PySide.QtCore import QBuffer
-from PySide.QtSvg import QSvgGenerator
+from PySide2.QtCore import QBuffer
+from PySide2.QtSvg import QSvgGenerator
 
 class QSvgGeneratorTest(unittest.TestCase):
 

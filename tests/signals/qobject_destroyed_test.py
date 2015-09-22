@@ -1,7 +1,7 @@
 
 import unittest
 
-from PySide.QtCore import QObject, SIGNAL
+from PySide2.QtCore import QObject, SIGNAL
 
 class QObjectDestroyed(unittest.TestCase):
     """Very simple test case for the destroyed() signal of QObject"""

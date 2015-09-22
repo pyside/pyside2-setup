@@ -1,7 +1,7 @@
 
 import unittest
 
-from PySide.QtUiTools import QUiLoader
+from PySide2.QtUiTools import QUiLoader
 
 from helper import UsesQApplication
 

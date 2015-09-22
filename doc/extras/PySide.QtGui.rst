@@ -2,6 +2,6 @@ To include the definitions of modules classes, use the following directive:
 
 ::
 
-    import PySide.QtGui
+    import PySide2.QtGui
 
-.. seealso:: :mod:`PySide.QtCore`
+.. seealso:: :mod:`PySide2.QtCore`

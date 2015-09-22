@@ -3,7 +3,7 @@ http://bugs.openbossa.org/show_bug.cgi?id=630
 '''
 
 import unittest
-from PySide.QtGui import QBitmap, QCursor, QPixmap
+from PySide2.QtGui import QBitmap, QCursor, QPixmap
 from helper import UsesQApplication
 
 class TestQCursor(UsesQApplication):

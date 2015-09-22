@@ -15,7 +15,7 @@ To include the definitions of the module's classes, use the following directive:
 
 ::
 
-    import PySide.QtWebKit
+    import PySide2.QtWebKit
 
 
 .. note:: Web site icons, also known as "FavIcons", are currently not supported on Windows. We plan to address this in a future release.

@@ -5,7 +5,7 @@ import unittest
 import ctypes
 import sys
 
-from PySide.QtCore import QLocale
+from PySide2.QtCore import QLocale
 
 class QLocaleTestToNumber(unittest.TestCase):
     def testToNumberInt(self):

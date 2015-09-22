@@ -1,8 +1,8 @@
 ''' Test bug 635: http://bugs.openbossa.org/show_bug.cgi?id=635'''
 
 import unittest
-from PySide.QtGui import QIcon
-from PySide.QtWidgets import QApplication, QToolBar
+from PySide2.QtGui import QIcon
+from PySide2.QtWidgets import QApplication, QToolBar
 import sys
 
 class testQToolBar(unittest.TestCase):

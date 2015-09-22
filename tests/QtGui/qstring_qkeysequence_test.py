@@ -6,8 +6,8 @@ import unittest
 import py3kcompat as py3k
 from helper import UsesQApplication
 
-from PySide.QtGui import QKeySequence
-from PySide.QtWidgets import QAction
+from PySide2.QtGui import QKeySequence
+from PySide2.QtWidgets import QAction
 
 class QStringQKeySequenceTest(UsesQApplication):
     '''Tests conversions of QString to and from QKeySequence.'''

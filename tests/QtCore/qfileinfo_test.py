@@ -4,7 +4,7 @@ import unittest
 import os
 import tempfile
 
-from PySide.QtCore import QFile, QFileInfo
+from PySide2.QtCore import QFile, QFileInfo
 
 class QFileConstructor(unittest.TestCase):
     '''QFileInfo constructor with qfile'''

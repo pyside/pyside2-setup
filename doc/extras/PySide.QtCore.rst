@@ -2,4 +2,4 @@ All other Qt modules rely on this module. To include the definitions of the modu
 
 ::
 
-    import PySide.QtCore
+    import PySide2.QtCore

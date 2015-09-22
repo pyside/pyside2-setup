@@ -4,7 +4,7 @@
 
 import unittest
 
-from PySide.QtCore import QCoreApplication
+from PySide2.QtCore import QCoreApplication
 
 class QCoreApplicationInstanceTest(unittest.TestCase):
     '''Test cases for QCoreApplication.instance static method'''

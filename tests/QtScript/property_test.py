@@ -1,7 +1,7 @@
 import unittest
 
-from PySide.QtCore import QObject, Property, QCoreApplication
-from PySide.QtScript import  QScriptEngine
+from PySide2.QtCore import QObject, Property, QCoreApplication
+from PySide2.QtScript import  QScriptEngine
 
 class MyObject(QObject):
     def __init__(self, parent = None):

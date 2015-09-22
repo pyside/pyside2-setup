@@ -1,7 +1,7 @@
 
 import unittest
 
-from PySide.QtHelp import QHelpEngine
+from PySide2.QtHelp import QHelpEngine
 
 from helper import UsesQApplication
 

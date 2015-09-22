@@ -1,8 +1,8 @@
 import unittest
 import sys
 
-from PySide.QtGui import QStandardItemModel, QStandardItem
-from PySide.QtWidgets import QWidget
+from PySide2.QtGui import QStandardItemModel, QStandardItem
+from PySide2.QtWidgets import QWidget
 import shiboken
 
 from helper import UsesQApplication

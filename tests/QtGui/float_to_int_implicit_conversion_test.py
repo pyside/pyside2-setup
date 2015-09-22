@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtGui import QImage, qRgb
+from PySide2.QtGui import QImage, qRgb
 
 from helper import UsesQApplication
 

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import unittest
 from sys import getrefcount
-from PySide.QtCore import *
+from PySide2.QtCore import *
 
 def addStates(transition):
     sx = QState()

@@ -1,7 +1,7 @@
 
-from PySide.QtCore import *
-from PySide.QtGui import *
-from PySide.QtWebKit import *
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWebKit import *
 import sys
 
 app = QApplication(sys.argv)

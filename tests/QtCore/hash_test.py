@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import unittest
-from PySide.QtCore import QDate, QDateTime, QTime, QUrl
-from PySide.QtCore import QLine, QPoint, QRect, QSize
+from PySide2.QtCore import QDate, QDateTime, QTime, QUrl
+from PySide2.QtCore import QLine, QPoint, QRect, QSize
 
 class HashTest(unittest.TestCase):
     def testInsert(self):

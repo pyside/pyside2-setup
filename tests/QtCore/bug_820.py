@@ -1,7 +1,7 @@
 import functools
 import unittest
 
-from PySide.QtCore import QObject, Slot, Signal, SIGNAL
+from PySide2.QtCore import QObject, Slot, Signal, SIGNAL
 
 def log_exception():
     def log_exception_decorator(func):

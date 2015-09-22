@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtCore import QObject, Property, Signal
+from PySide2.QtCore import QObject, Property, Signal
 
 class MyObjectWithNotifyProperty(QObject):
     def __init__(self, parent=None):

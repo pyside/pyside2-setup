@@ -18,7 +18,7 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 -->
-<typesystem package="PySide.QtUiTools">
+<typesystem package="PySide2.QtUiTools">
     <load-typesystem name="typesystem_widgets.xml" generate="no" />
     <load-typesystem name="typesystem_xml.xml" generate="no" />
 
@@ -45,7 +45,7 @@
          &lt;http://www.pyside.org/docs/shiboken/wordsofadvice.html#duck-punching-and-virtual-methods>`_)
 
          Let's see an obvious example. If you want to create a new widget it's probable you'll end up
-         overriding :class:`~PySide.QtGui.QWidget`'s :meth:`~PySide.QtGui.QWidget.paintEvent` method.
+         overriding :class:`~PySide2.QtGui.QWidget`'s :meth:`~PySide2.QtGui.QWidget.paintEvent` method.
 
          .. code-block:: python
 

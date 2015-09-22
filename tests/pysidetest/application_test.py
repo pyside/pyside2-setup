@@ -2,7 +2,7 @@
 
 import unittest
 from testbinding import TestObject
-from PySide.QtWidgets import QApplication
+from PySide2.QtWidgets import QApplication
 
 class QApplicationInstance(unittest.TestCase):
 

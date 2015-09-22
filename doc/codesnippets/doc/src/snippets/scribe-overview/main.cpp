@@ -40,7 +40,7 @@
 ****************************************************************************/
 
 #include <QtWidgets>
-from PySide.QtGui import *
+from PySide2.QtGui import *
 
 # edit : QTextEdit
 def mergeFormat(edit):

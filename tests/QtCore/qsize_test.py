@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtCore import QSize
+from PySide2.QtCore import QSize
 
 class QSizeOperator(unittest.TestCase):
     def testOperatorMultiply(self):

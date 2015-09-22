@@ -1,6 +1,6 @@
 import unittest
-from PySide.QtCore import Property, QObject
-from PySide.QtWebKit import QWebView
+from PySide2.QtCore import Property, QObject
+from PySide2.QtWebKit import QWebView
 from helper import TimedQApplication
 
 class TestLoadFinished(TimedQApplication):

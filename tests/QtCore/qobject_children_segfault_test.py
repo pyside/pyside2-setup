@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtCore import QObject, QCoreApplication
+from PySide2.QtCore import QObject, QCoreApplication
 
 class ChildrenCoreApplication(unittest.TestCase):
     '''Test case for calling QObject.children after creating a QCoreApp'''

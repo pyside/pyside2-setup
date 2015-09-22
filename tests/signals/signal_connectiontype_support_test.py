@@ -1,7 +1,7 @@
 
 import unittest
 
-from PySide.QtCore import QObject, SIGNAL, Qt
+from PySide2.QtCore import QObject, SIGNAL, Qt
 
 class Dummy(QObject):
     """Dummy class used in this test."""

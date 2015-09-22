@@ -2,7 +2,7 @@
 
 import unittest
 
-from PySide.QtCore import SIGNAL, SLOT
+from PySide2.QtCore import SIGNAL, SLOT
 
 class SIGNALSLOTTests(unittest.TestCase):
     '''Test the output of SIGNAL and SLOT.'''

@@ -2,7 +2,7 @@
 import unittest
 
 from helper import TimedQApplication
-from PySide.QtGui import QIcon
+from PySide2.QtGui import QIcon
 
 
 class QIconCtorWithNoneTest(TimedQApplication):

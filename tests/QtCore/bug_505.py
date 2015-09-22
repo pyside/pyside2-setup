@@ -1,6 +1,6 @@
 import unittest
 
-from PySide.QtCore import QObject
+from PySide2.QtCore import QObject
 
 class MyBaseObject(QObject):
     def __init__(self, parent=None):

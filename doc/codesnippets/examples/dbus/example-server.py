@@ -8,8 +8,8 @@ import dbus.service
 import dbus.mainloop.glib
 import random
 
-from PySide.QtCore import *
-from PySide.QtGui import QPushButton, QApplication
+from PySide2.QtCore import *
+from PySide2.QtGui import QPushButton, QApplication
 
 # The adaptor, MUST inherit dbus.service.Object
 class DBusWidget(dbus.service.Object):

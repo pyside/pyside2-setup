@@ -2,7 +2,7 @@
 
 import unittest
 
-from PySide.QtNetwork import *
+from PySide2.QtNetwork import *
 
 class QIPv6AddressGetItemTest(unittest.TestCase):
     def testLength(self):

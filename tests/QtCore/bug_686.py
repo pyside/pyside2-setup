@@ -1,7 +1,7 @@
 from __future__ import with_statement
 
 import unittest
-from PySide.QtCore import *
+from PySide2.QtCore import *
 
 class MyWriteThread(QThread):
     def __init__(self, lock):

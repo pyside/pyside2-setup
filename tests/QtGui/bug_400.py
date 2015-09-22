@@ -2,7 +2,7 @@
 
 import unittest
 from helper import UsesQApplication
-from PySide.QtWidgets import QTreeWidgetItemIterator, QTreeWidgetItem, QTreeWidget
+from PySide2.QtWidgets import QTreeWidgetItemIterator, QTreeWidgetItem, QTreeWidget
 
 class BugTest(UsesQApplication):
     def testCase(self):

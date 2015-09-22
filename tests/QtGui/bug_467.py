@@ -2,7 +2,7 @@
 
 import unittest
 from helper import UsesQApplication
-from PySide.QtWidgets import QMainWindow, QApplication
+from PySide2.QtWidgets import QMainWindow, QApplication
 
 class MyWidget(QMainWindow):
     def __init__(self, parent = None):

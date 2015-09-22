@@ -3,7 +3,7 @@ import os
 from helper import UsesQApplication
 
 from PySide2 import QtGui
-from PySide.QtUiTools import QUiLoader
+from PySide2.QtUiTools import QUiLoader
 
 class MyWidget(QtGui.QComboBox):
     def __init__(self, parent=None):

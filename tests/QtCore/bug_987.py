@@ -1,4 +1,4 @@
-from PySide.QtCore import QObject
+from PySide2.QtCore import QObject
 
 import unittest
 

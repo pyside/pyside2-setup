@@ -1,7 +1,7 @@
 
-from PySide.QtGui import *
-from PySide.QWebKit import QWebPage
-from PySide.QWebKit import QWebFrame
+from PySide2.QtGui import *
+from PySide2.QWebKit import QWebPage
+from PySide2.QWebKit import QWebFrame
 
 
 //! [0]

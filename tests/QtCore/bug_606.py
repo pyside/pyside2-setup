@@ -1,9 +1,9 @@
 import unittest
 
 import PySide
-from PySide.QtCore import QPoint, QPointF
-from PySide.QtCore import QLine, QLineF
-from PySide.QtCore import QSize, QSizeF
+from PySide2.QtCore import QPoint, QPointF
+from PySide2.QtCore import QLine, QLineF
+from PySide2.QtCore import QSize, QSizeF
 
 class testCases(unittest.TestCase):
     def testQPointToTuple(self):

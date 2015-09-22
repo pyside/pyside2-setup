@@ -2,8 +2,8 @@
 
 import unittest
 from helper import UsesQApplication
-from PySide.QtGui import QTextFrame, QTextCursor, QTextCharFormat, QFont, QTextFrameFormat
-from PySide.QtWidgets import QTextEdit
+from PySide2.QtGui import QTextFrame, QTextCursor, QTextCharFormat, QFont, QTextFrameFormat
+from PySide2.QtWidgets import QTextEdit
 
 class BugTest(UsesQApplication):
     def testCase(self):

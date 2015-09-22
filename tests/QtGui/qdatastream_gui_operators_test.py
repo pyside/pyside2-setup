@@ -3,8 +3,8 @@
 import unittest
 import sys
 
-from PySide.QtCore import QDataStream, QByteArray, QIODevice, Qt
-from PySide.QtGui import QPixmap, QColor
+from PySide2.QtCore import QDataStream, QByteArray, QIODevice, Qt
+from PySide2.QtGui import QPixmap, QColor
 
 from helper import UsesQApplication
 

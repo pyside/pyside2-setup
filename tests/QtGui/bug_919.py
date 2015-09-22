@@ -1,8 +1,8 @@
 import unittest
 
 from helper import TimedQApplication
-from PySide.QtGui import QPainter
-from PySide.QtWidgets import QPushButton, QStyleOptionButton, QApplication, QStyle
+from PySide2.QtGui import QPainter
+from PySide2.QtWidgets import QPushButton, QStyleOptionButton, QApplication, QStyle
 
 class MyWidget(QPushButton):
     def __init__(self, parent = None):

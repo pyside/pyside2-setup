@@ -5,7 +5,7 @@ import unittest
 import os
 import sys
 from tempfile import mkstemp
-from PySide.QtCore import QObject, QTimer, SIGNAL
+from PySide2.QtCore import QObject, QTimer, SIGNAL
 from helper import UsesQCoreApplication
 
 class WatchDog(QObject):

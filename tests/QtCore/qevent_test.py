@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtCore import QEvent
+from PySide2.QtCore import QEvent
 
 class QEventTypeFlag(unittest.TestCase):
     '''Test case for usage of QEvent.Type flags'''

@@ -1,5 +1,5 @@
 import unittest
-from PySide.QtWidgets import QFormLayout, QWidget
+from PySide2.QtWidgets import QFormLayout, QWidget
 
 from helper import UsesQApplication
 

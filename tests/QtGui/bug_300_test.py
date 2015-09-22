@@ -1,5 +1,5 @@
-from PySide.QtGui import QStringListModel
-from PySide.QtCore import QModelIndex
+from PySide2.QtGui import QStringListModel
+from PySide2.QtCore import QModelIndex
 import unittest
 
 class TestQAbstractItemModelSignals(unittest.TestCase):

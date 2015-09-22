@@ -1,6 +1,6 @@
 import unittest
 
-from PySide.QtCore import QEasingCurve
+from PySide2.QtCore import QEasingCurve
 
 def myFunction(progress):
     if progress == 1.0:

@@ -2,7 +2,7 @@ import unittest
 
 from helper import UsesQApplication
 
-from PySide.QtWidgets import QDoubleSpinBox, QGraphicsBlurEffect
+from PySide2.QtWidgets import QDoubleSpinBox, QGraphicsBlurEffect
 
 class TestSignalConnection(UsesQApplication):
     def testFloatSignal(self):

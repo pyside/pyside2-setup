@@ -2,8 +2,8 @@ from __future__ import print_function
 
 import sys
 
-from PySide.QtGui import QStandardItem, QStandardItemModel
-from PySide.QtWidgets import QMainWindow, QTreeView, QAbstractItemView, QApplication, QMessageBox
+from PySide2.QtGui import QStandardItem, QStandardItemModel
+from PySide2.QtWidgets import QMainWindow, QTreeView, QAbstractItemView, QApplication, QMessageBox
 
 class Item(QStandardItem):
     def __init__(self, text):

@@ -1,6 +1,6 @@
 import unittest
 
-from PySide.QtCore import QObject, Slot, QMetaObject
+from PySide2.QtCore import QObject, Slot, QMetaObject
 
 class MyObject(QObject):
     @Slot(int, str)

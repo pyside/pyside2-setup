@@ -2,9 +2,9 @@
 
 import unittest
 
-from PySide.QtCore import QObject
-from PySide.QtGui import *
-from PySide.QtWidgets import *
+from PySide2.QtCore import QObject
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
 
 from helper import UsesQApplication
 

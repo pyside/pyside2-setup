@@ -2,7 +2,7 @@
 
 from sys import getrefcount
 import unittest
-from PySide.QtCore import QObject, SIGNAL
+from PySide2.QtCore import QObject, SIGNAL
 
 class SignalManagerRefCount(unittest.TestCase):
     """Simple test case to check if the signal_manager is erroneously incrementing the object refcounter"""

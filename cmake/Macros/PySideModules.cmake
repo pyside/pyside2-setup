@@ -77,7 +77,7 @@ macro(create_pyside_module
     # install
     install(TARGETS ${module_name} LIBRARY DESTINATION ${SITE_PACKAGE}/PySide2)
     string(TOLOWER ${module_name} lower_module_name)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PySide/${module_name}/pyside_${lower_module_name}_python.h
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PySide2/${module_name}/pyside2_${lower_module_name}_python.h
             DESTINATION include/PySide2${pyside2_SUFFIX}/${module_name}/)
     file(GLOB typesystem_files ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_*.xml ${typesystem_path})
     install(FILES ${typesystem_files} DESTINATION share/PySide2${pyside2_SUFFIX}/typesystems)
@@ -148,7 +148,7 @@ endmacro()
 macro(HAS_QT_MODULE var name)
     if (NOT DISABLE_${name} AND ${var})
         # we keep the PySide name here because this is compiled into shiboken
-        set(${name}_GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/${name}/PySide/${name}
+        set(${name}_GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/${name}/PySide2/${name}
             CACHE INTERNAL "dir with generated source" FORCE)
         add_subdirectory(${name})
     else()

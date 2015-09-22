@@ -39,7 +39,7 @@
 ##
 ############################################################################
 
-form PySide.QtGui import *
+form PySide2.QtGui import *
 
 
 def __init__(self, parent):

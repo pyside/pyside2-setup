@@ -1,7 +1,7 @@
 import gc
 import unittest
 
-from PySide.QtCore import qsrand
+from PySide2.QtCore import qsrand
 
 class OverflowExceptionCollect(unittest.TestCase):
     '''Test case for OverflowError exception during garbage collection. See bug #147'''

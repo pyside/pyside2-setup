@@ -1,5 +1,5 @@
-from PySide.QtCore import Qt, QPersistentModelIndex
-from PySide.QtGui import QStringListModel
+from PySide2.QtCore import Qt, QPersistentModelIndex
+from PySide2.QtGui import QStringListModel
 
 if __name__ == '__main__':
     stringListModel = QStringListModel(['one', 'two'])

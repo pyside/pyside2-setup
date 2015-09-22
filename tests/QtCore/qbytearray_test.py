@@ -6,7 +6,7 @@ import ctypes
 import pickle
 import py3kcompat as py3k
 
-from PySide.QtCore import QByteArray, QSettings, QObject
+from PySide2.QtCore import QByteArray, QSettings, QObject
 
 class QByteArrayTestToNumber(unittest.TestCase):
     def testToNumberInt(self):
@@ -151,7 +151,7 @@ class QByteArrayBug720(unittest.TestCase):
     def testIt(self):
         ba = QByteArray(b"32\"1\x00123")
         self.assertEqual(str(ba), "32\"1\x00123")
-        self.assertEqual(repr(ba), "PySide.QtCore.QByteArray('32\"1\x00123')")
+        self.assertEqual(repr(ba), "PySide2.QtCore.QByteArray('32\"1\x00123')")
 
 class QByteArrayImplicitConvert(unittest.TestCase):
     def testString(self):

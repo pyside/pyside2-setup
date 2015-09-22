@@ -1,7 +1,7 @@
 import unittest
 import sys
-from PySide.QtGui import QPixmap
-from PySide.QtWidgets import QLabel, QApplication
+from PySide2.QtGui import QPixmap
+from PySide2.QtWidgets import QLabel, QApplication
 
 class TestLabelPixmap(unittest.TestCase):
     def testReference(self):

@@ -41,7 +41,7 @@
 
 //! [0]
 
-from PySide.QtCore import QDir, QCoreApplication
+from PySide2.QtCore import QDir, QCoreApplication
 import sys
 
 app = QCoreApplication(sys.argv)

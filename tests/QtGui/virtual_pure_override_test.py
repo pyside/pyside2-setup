@@ -2,9 +2,9 @@
 
 import unittest
 
-from PySide.QtWidgets import QGraphicsScene, QGraphicsRectItem, QGraphicsView, QApplication
-from PySide.QtGui import QBrush, QColor
-from PySide.QtCore import QTimer
+from PySide2.QtWidgets import QGraphicsScene, QGraphicsRectItem, QGraphicsView, QApplication
+from PySide2.QtGui import QBrush, QColor
+from PySide2.QtCore import QTimer
 from helper import UsesQApplication
 
 qgraphics_item_painted = False

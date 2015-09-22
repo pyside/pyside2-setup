@@ -1,7 +1,7 @@
 import time
 import unittest
 
-from PySide.QtCore import QTime, QRunnable, QThreadPool
+from PySide2.QtCore import QTime, QRunnable, QThreadPool
 
 class Task(QRunnable):
    def run(self):

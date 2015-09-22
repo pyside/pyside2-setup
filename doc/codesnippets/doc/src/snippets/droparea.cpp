@@ -37,7 +37,7 @@
 ##
 ############################################################################/
 
-from PySide.QtGui import *
+from PySide2.QtGui import *
 
 
 DropArea.DropArea(QWidget *parent)

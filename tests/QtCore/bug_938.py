@@ -1,5 +1,5 @@
 import unittest
-from PySide.QtCore import *
+from PySide2.QtCore import *
 
 class TestBug938 (unittest.TestCase):
 

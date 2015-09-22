@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtCore import QThread, QObject, SIGNAL, QCoreApplication
+from PySide2.QtCore import QThread, QObject, SIGNAL, QCoreApplication
 
 thread_run = False
 

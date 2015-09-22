@@ -3,8 +3,8 @@
 
 import unittest
 
-from PySide.QtCore import QTimerEvent
-from PySide.QtWidgets import QApplication, QWidget
+from PySide2.QtCore import QTimerEvent
+from PySide2.QtWidgets import QApplication, QWidget
 
 from helper import UsesQApplication
 

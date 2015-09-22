@@ -3,7 +3,7 @@
 
 import unittest
 import os
-from PySide.QtCore import QAbstractFileEngineIterator, QAbstractFileEngine, QAbstractFileEngineHandler, QDir
+from PySide2.QtCore import QAbstractFileEngineIterator, QAbstractFileEngine, QAbstractFileEngineHandler, QDir
 
 
 class TestFSIterator(QAbstractFileEngineIterator):

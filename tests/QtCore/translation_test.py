@@ -6,7 +6,7 @@
 import os
 import unittest
 import py3kcompat as py3k
-from PySide.QtCore import QObject, QTranslator, QCoreApplication
+from PySide2.QtCore import QObject, QTranslator, QCoreApplication
 
 from helper import UsesQCoreApplication
 

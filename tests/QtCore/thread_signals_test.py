@@ -5,7 +5,7 @@ import unittest
 import os
 from tempfile import mkstemp
 
-from PySide.QtCore import QObject, SIGNAL, QFile, QThread, QTimer, Qt
+from PySide2.QtCore import QObject, SIGNAL, QFile, QThread, QTimer, Qt
 from helper import UsesQCoreApplication
 
 class MyThread(QThread):

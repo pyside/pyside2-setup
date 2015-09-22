@@ -1,4 +1,4 @@
-.. module:: PySide.QtDeclarative
+.. module:: PySide2.QtDeclarative
 .. _ListProperty:
 
 ListProperty

@@ -4,7 +4,7 @@
 
 import unittest
 
-from PySide.QtCore import QObject, QTimer, QCoreApplication, SIGNAL
+from PySide2.QtCore import QObject, QTimer, QCoreApplication, SIGNAL
 from helper import UsesQCoreApplication
 
 class TestDeleteLater(UsesQCoreApplication):

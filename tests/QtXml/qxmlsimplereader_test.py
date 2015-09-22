@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import unittest
-from PySide.QtXml import QXmlSimpleReader
+from PySide2.QtXml import QXmlSimpleReader
 
 class QXmlSimpleReaderTest(unittest.TestCase):
 

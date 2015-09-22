@@ -2,7 +2,7 @@
 import unittest
 import sys
 
-from PySide.QtWidgets import QApplication, QPushButton, QWidget, QSpinBox
+from PySide2.QtWidgets import QApplication, QPushButton, QWidget, QSpinBox
 
 class QApplicationDelete(unittest.TestCase):
     '''Test for segfault when deleting a QApplication before a QWidget'''

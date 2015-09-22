@@ -1,7 +1,7 @@
 import unittest
 from helper import UsesQApplication
-from PySide.QtGui import QValidator, QIntValidator
-from PySide.QtWidgets import QLineEdit
+from PySide2.QtGui import QValidator, QIntValidator
+from PySide2.QtWidgets import QLineEdit
 
 '''Bug #871 - http://bugs.pyside.org/show_bug.cgi?id=871'''
 

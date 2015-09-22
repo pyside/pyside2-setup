@@ -47,7 +47,7 @@ static PyObject* slotCall(PyObject*, PyObject*, PyObject*);
 // Class Definition -----------------------------------------------
 static PyTypeObject PySideSlotType = {
     PyVarObject_HEAD_INIT(0, 0)
-    "PySide.QtCore." SLOT_DEC_NAME, /*tp_name*/
+    "PySide2.QtCore." SLOT_DEC_NAME, /*tp_name*/
     sizeof(PySideSlot),        /*tp_basicsize*/
     0,                         /*tp_itemsize*/
     0,                         /*tp_dealloc*/

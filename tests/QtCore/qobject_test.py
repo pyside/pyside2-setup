@@ -5,7 +5,7 @@
 import unittest
 import py3kcompat as py3k
 
-from PySide.QtCore import QObject
+from PySide2.QtCore import QObject
 
 class ObjectNameCase(unittest.TestCase):
     '''Tests related to QObject object name'''

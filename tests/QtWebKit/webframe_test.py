@@ -1,9 +1,9 @@
 import unittest
 import sys
 
-from PySide.QtCore import QObject, SIGNAL, QUrl
-from PySide.QtWebKit import *
-from PySide.QtNetwork import QNetworkRequest
+from PySide2.QtCore import QObject, SIGNAL, QUrl
+from PySide2.QtWebKit import *
+from PySide2.QtNetwork import QNetworkRequest
 
 from helper import adjust_filename, UsesQApplication
 

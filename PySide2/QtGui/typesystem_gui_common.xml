@@ -18,7 +18,7 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 -->
-<typesystem package="PySide.QtGui">
+<typesystem package="PySide2.QtGui">
   <load-typesystem name="typesystem_core.xml" generate="no"/>
 
   <template name="QFontCharFix">
@@ -892,7 +892,7 @@
         {
             qreal r, g, b, a;
             %CPPSELF.getRgbF(&amp;r, &amp;g, &amp;b, &amp;a);
-            QString repr = QString().sprintf("PySide.QtGui.QColor.fromRgbF(%.6f, %.6f, %.6f, %.6f)", r, g, b, a);
+            QString repr = QString().sprintf("PySide2.QtGui.QColor.fromRgbF(%.6f, %.6f, %.6f, %.6f)", r, g, b, a);
             %PYARG_0 = Shiboken::String::fromCString(qPrintable(repr));
             break;
         }
@@ -900,7 +900,7 @@
         {
             qreal h, s, v, a;
             %CPPSELF.getHsvF(&amp;h, &amp;s, &amp;v, &amp;a);
-            QString repr = QString().sprintf("PySide.QtGui.QColor.fromHsvF(%.6f, %.6f, %.6f, %.6f)", h, s, v, a);
+            QString repr = QString().sprintf("PySide2.QtGui.QColor.fromHsvF(%.6f, %.6f, %.6f, %.6f)", h, s, v, a);
             %PYARG_0 = Shiboken::String::fromCString(qPrintable(repr));
             break;
         }
@@ -908,7 +908,7 @@
         {
             qreal c, m, y, k, a;
             %CPPSELF.getCmykF(&amp;c, &amp;m, &amp;y, &amp;k, &amp;a);
-            QString repr = QString().sprintf("PySide.QtGui.QColor.fromCmykF(%.6f, %.6f, %.6f, %.6f, %.6f)", c, m, y, k, a);
+            QString repr = QString().sprintf("PySide2.QtGui.QColor.fromCmykF(%.6f, %.6f, %.6f, %.6f, %.6f)", c, m, y, k, a);
             %PYARG_0 = Shiboken::String::fromCString(qPrintable(repr));
             break;
         }
@@ -917,14 +917,14 @@
         {
             qreal h, s, l, a;
             %CPPSELF.getHslF(&amp;h, &amp;s, &amp;l, &amp;a);
-            QString repr = QString().sprintf("PySide.QtGui.QColor.fromHslF(%.6f, %.6f, %.6f, %.6f)", h, s, l, a);
+            QString repr = QString().sprintf("PySide2.QtGui.QColor.fromHslF(%.6f, %.6f, %.6f, %.6f)", h, s, l, a);
             %PYARG_0 = Shiboken::String::fromCString(qPrintable(repr));
             break;
         }
         #endif
         default:
         {
-            %PYARG_0 = Shiboken::String::fromCString("PySide.QtGui.QColor()");
+            %PYARG_0 = Shiboken::String::fromCString("PySide2.QtGui.QColor()");
         }
      }
   </template>
@@ -1681,7 +1681,7 @@
         } else {
             PyErr_Format(PyExc_TypeError, "Invalid return value in function %s, expected %s, got %s.",
                         "QValidator.validate",
-                        "PySide.QtGui.QValidator.State, (PySide.QtGui.QValidator.State,), (PySide.QtGui.QValidator.State, unicode) or (PySide.QtGui.QValidator.State, unicode, int)",
+                        "PySide2.QtGui.QValidator.State, (PySide2.QtGui.QValidator.State,), (PySide2.QtGui.QValidator.State, unicode) or (PySide2.QtGui.QValidator.State, unicode, int)",
                         pyResult->ob_type->tp_name);
             return QValidator::State();
         }

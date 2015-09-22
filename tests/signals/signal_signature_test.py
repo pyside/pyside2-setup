@@ -3,7 +3,7 @@
 '''Test case for signal signature received by QObject::connectNotify().'''
 
 import unittest
-from PySide.QtCore import *
+from PySide2.QtCore import *
 from helper import UsesQCoreApplication
 
 class Obj(QObject):

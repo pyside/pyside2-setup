@@ -1,7 +1,7 @@
 import unittest
 
-from PySide.QtCore import Qt
-from PySide.QtGui import QKeySequence
+from PySide2.QtCore import Qt
+from PySide2.QtGui import QKeySequence
 
 from helper import UsesQApplication
 

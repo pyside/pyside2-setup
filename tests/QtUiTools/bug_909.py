@@ -1,9 +1,9 @@
 import sys
 import unittest
 
-from PySide.QtCore import QFile
-from PySide.QtWidgets import QTabWidget
-from PySide.QtUiTools import QUiLoader
+from PySide2.QtCore import QFile
+from PySide2.QtWidgets import QTabWidget
+from PySide2.QtUiTools import QUiLoader
 
 from helper import UsesQApplication
 from helper import adjust_filename

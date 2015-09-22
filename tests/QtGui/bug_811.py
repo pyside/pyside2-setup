@@ -4,8 +4,8 @@ import weakref
 
 from helper import UsesQApplication
 
-from PySide.QtGui import QTextBlockUserData, QTextCursor
-from PySide.QtWidgets import QTextEdit
+from PySide2.QtGui import QTextBlockUserData, QTextCursor
+from PySide2.QtWidgets import QTextEdit
 
 class TestUserData(QTextBlockUserData):
     def __init__(self, data):

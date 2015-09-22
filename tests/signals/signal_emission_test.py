@@ -6,7 +6,7 @@ import sys
 import unittest
 import functools
 
-from PySide.QtCore import QObject, SIGNAL, SLOT, QProcess, QTimeLine
+from PySide2.QtCore import QObject, SIGNAL, SLOT, QProcess, QTimeLine
 
 from helper import BasicPySlotCase, UsesQCoreApplication
 

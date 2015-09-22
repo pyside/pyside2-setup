@@ -3,7 +3,7 @@ import sys
 import unittest
 from functools import partial
 
-from PySide.QtCore import QObject, SIGNAL, QProcess
+from PySide2.QtCore import QObject, SIGNAL, QProcess
 
 from helper import BasicPySlotCase, UsesQCoreApplication
 

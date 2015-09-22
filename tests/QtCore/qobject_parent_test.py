@@ -4,7 +4,7 @@
 import unittest
 from sys import getrefcount
 
-from PySide.QtCore import *
+from PySide2.QtCore import *
 
 class ParentRefCountCase(unittest.TestCase):
     '''Test case for the refcount changes of setParent'''
