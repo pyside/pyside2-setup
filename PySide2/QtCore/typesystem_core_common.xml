@@ -2136,7 +2136,7 @@
     </add-function>
     -->
 
-     <inject-code class="native" file="glue/qobject_findchild.cpp"/>
+    <inject-code class="native" file="glue/qobject_findchild.cpp"/>
     <add-function signature="findChild(PyTypeObject*, const QString&amp;)" return-type="PyObject*">
         <inject-code class="target" position="beginning">
         QObject* child = _findChildHelper(%CPPSELF, %2, (PyTypeObject*)%PYARG_1);
