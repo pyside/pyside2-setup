@@ -26,4 +26,10 @@
     <!-- Qt5: had to add this recursive object def. This was crucial to get rid of "pure virtual" -->
     <object-type name="TimerInfo"/>
   </object-type>
+  <object-type name="QSysInfo">
+    <enum-type name="Endian"/>
+    <enum-type name="Sizes"/>
+    <enum-type name="MacVersion" since="5.5" />
+  </object-type>
+  <suppress-warning text="skipping field 'QSysInfo::WindowsVersion' with unmatched type 'QSysInfo::WinVersion'" />
 </typesystem>

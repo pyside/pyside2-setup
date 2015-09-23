@@ -2935,12 +2935,6 @@
   </object-type>
   -->
 
-  <object-type name="QSysInfo">
-    <enum-type name="Endian"/>
-    <enum-type name="Sizes"/>
-    <enum-type name="MacVersion" since="5.5" />
-    <enum-type name="WinVersion" since="5.5" />
-  </object-type>
   <object-type name="QTemporaryFile">
     <extra-includes>
       <!-- Qt5: private <include file-name="QAbstractFileEngine" location="global"/> -->
