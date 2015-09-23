@@ -14,7 +14,7 @@ from any modern OSS project such as all code in a git repository and an open des
 any contribution without requiring a transfer of copyright.
 
 
-PySide 2 supports Qt5. For building, please read about [gettting the dependencies](https://github.com/PySide/pyside-setup2/wiki/Dependencies). Then download the sources by running `git clone --recursive https://github.com/PySide/pyside-setup2.git`.
+PySide 2 supports Qt5. For building, please read about [gettting the dependencies](https://github.com/PySide/pyside-setup2/wiki/Dependencies). Then download the sources by running `git clone --recursive https://github.com/PySide/pyside2-setup.git`.
 
 ###Building
 
