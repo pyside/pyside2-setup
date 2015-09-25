@@ -14,12 +14,12 @@ from any modern OSS project such as all code in a git repository and an open des
 any contribution without requiring a transfer of copyright.
 
 
-PySide 2 supports Qt5. For building, please read about [gettting the dependencies](https://github.com/PySide/pyside-setup2/wiki/Dependencies). Then download the sources by running `git clone --recursive https://github.com/PySide/pyside2-setup.git`.
+PySide 2 supports Qt5. For building, please read about [gettting the dependencies](https://github.com/PySide/pyside2/wiki/Dependencies). Then download the sources by running `git clone --recursive https://github.com/PySide/pyside2-setup.git`.
 
 ###Building
 
 ####Windows
-On Windows, once you have gotten the dependencies and the source, `cd pyside-setup2.git` to enter the directory and then:
+On Windows, once you have gotten the dependencies and the source, `cd pyside2-setup.git` to enter the directory and then:
 ```
 python setup.py install --qmake=\path\to\bin\qmake --cmake=\path\to\bin\cmake --openssl=\path\to\openssl\bin
 ```
