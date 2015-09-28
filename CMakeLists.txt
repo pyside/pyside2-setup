@@ -153,7 +153,7 @@ add_custom_target(dist
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 if (UNIX) # TODO: This part needs more testing first to be available on OSX and WIN
-if (NOT PYTHON_MULTIARCH_SUFFIX)
+  if (NOT PYTHON_MULTIARCH_SUFFIX)
     execute_process(
         COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} -c "if True:
             import sysconfig
@@ -161,9 +161,9 @@ if (NOT PYTHON_MULTIARCH_SUFFIX)
             "
         OUTPUT_VARIABLE PYTHON_MULTIARCH_SUFFIX
         OUTPUT_STRIP_TRAILING_WHITESPACE)
-endif()
+  endif()
 
-if (NOT PYTHON_EXTENSION_SUFFIX)
+  if (NOT PYTHON_EXTENSION_SUFFIX)
     if (SHIBOKEN_PYTHON_VERSION_MAJOR EQUAL 2)
         set(PYTHON_EXTENSION_SUFFIX ".${PYTHON_MULTIARCH_SUFFIX}")
     elseif (SHIBOKEN_PYTHON_VERSION_MAJOR EQUAL 3)
@@ -175,7 +175,7 @@ if (NOT PYTHON_EXTENSION_SUFFIX)
     else()
         message( FATAL_ERROR "Unsupported PYTHON_VERSION=${SHIBOKEN_PYTHON_VERSION_MAJOR}.${SHIBOKEN_PYTHON_VERSION_MINOR}.${SHIBOKEN_PYTHON_VERSION_PATCH}!" )
     endif()
-endif()
+  endif()
 endif (UNIX)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
