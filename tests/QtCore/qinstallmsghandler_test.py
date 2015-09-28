@@ -4,7 +4,7 @@
 import unittest
 import sys
 
-from PySide.QtCore import *
+from PySide2.QtCore import *
 
 param = []
 

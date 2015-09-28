@@ -1,7 +1,7 @@
 
 import unittest
 
-from PySide.QtWidgets import QWidget, QMainWindow
+from PySide2.QtWidgets import QWidget, QMainWindow
 from helper import UsesQApplication
 
 class QWidgetInherit(QMainWindow):

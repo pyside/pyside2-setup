@@ -1,6 +1,6 @@
 import sys
-from PySide.QtCore import *
-from PySide.QtWidgets import *
+from PySide2.QtCore import *
+from PySide2.QtWidgets import *
 
 class ListModel(QAbstractListModel):
     def rowCount(self, parent = QModelIndex()):

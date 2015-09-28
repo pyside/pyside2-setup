@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtWidgets import QToolBar, QMainWindow, QAction
+from PySide2.QtWidgets import QToolBar, QMainWindow, QAction
 
 from helper import UsesQApplication
 

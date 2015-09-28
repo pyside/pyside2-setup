@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtCore import QObject, SIGNAL
+from PySide2.QtCore import QObject, SIGNAL
 
 class InvalidCallback(unittest.TestCase):
     '''Test case for passing an invalid callback to QObject.connect'''

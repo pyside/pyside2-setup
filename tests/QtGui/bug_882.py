@@ -1,5 +1,5 @@
-from PySide.QtWidgets import *
-from PySide.QtCore import *
+from PySide2.QtWidgets import *
+from PySide2.QtCore import *
 import os
 
 if "DISPLAY" in os.environ:

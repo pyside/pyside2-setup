@@ -1,6 +1,6 @@
 import unittest
 import pickle
-from PySide.QtGui import QColor
+from PySide2.QtGui import QColor
 
 class TestQColor (unittest.TestCase):
     def reduceColor(self, c):

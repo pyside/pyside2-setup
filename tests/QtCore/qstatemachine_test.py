@@ -1,8 +1,8 @@
 #!/usr/bin/python
 import unittest
-from PySide.QtCore import QObject, QState, QFinalState, SIGNAL
-from PySide.QtCore import QTimer, QStateMachine
-from PySide.QtCore import QParallelAnimationGroup
+from PySide2.QtCore import QObject, QState, QFinalState, SIGNAL
+from PySide2.QtCore import QTimer, QStateMachine
+from PySide2.QtCore import QParallelAnimationGroup
 
 from helper import UsesQCoreApplication
 
@@ -12,9 +12,9 @@ class StateMachineTest(unittest.TestCase):
 
     def testBasic(self):
         '''State machine classes'''
-        import PySide.QtCore
-        PySide.QtCore.QSignalTransition
-        PySide.QtCore.QPropertyAnimation
+        import PySide2.QtCore
+        PySide2.QtCore.QSignalTransition
+        PySide2.QtCore.QPropertyAnimation
 
 
 

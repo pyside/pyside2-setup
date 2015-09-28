@@ -1,6 +1,6 @@
 import unittest
 
-from PySide.QtCore import *
+from PySide2.QtCore import *
 
 class MyDevice(QIODevice):
     def __init__(self, txt):

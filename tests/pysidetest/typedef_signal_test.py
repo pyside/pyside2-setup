@@ -1,7 +1,7 @@
 
 import unittest
 
-from PySide.QtCore import QObject
+from PySide2.QtCore import QObject
 from testbinding import TestObject
 
 class Receiver(QObject):

@@ -3,8 +3,8 @@ import unittest
 import colorsys
 import PySide
 
-from PySide.QtCore import Qt
-from PySide.QtGui import QColor
+from PySide2.QtCore import Qt
+from PySide2.QtGui import QColor
 
 
 class QColorGetTest(unittest.TestCase):

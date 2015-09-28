@@ -81,7 +81,7 @@ if __name__=='__main__':
                 'QtXml',
                 'QtXmlPatterns' ]
 
-    libraries = ["PySide", "PyQt4"]
+    libraries = ["PySide2", "PyQt5"]
     librarySymbols = {}
     for l in libraries:
         dictionary = []

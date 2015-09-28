@@ -3,7 +3,7 @@
 
 import unittest, time
 
-from PySide.QtCore import QThread
+from PySide2.QtCore import QThread
 
 class Test (QThread):
     def run(self):

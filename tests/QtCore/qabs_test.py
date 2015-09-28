@@ -1,7 +1,7 @@
 
 import unittest
 
-from PySide import QtCore
+from PySide2 import QtCore
 
 
 class QAbsTest(unittest.TestCase):

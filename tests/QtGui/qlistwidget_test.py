@@ -2,7 +2,7 @@
 import unittest
 
 import sys
-from PySide import QtGui, QtCore
+from PySide2 import QtGui, QtCore
 from helper import UsesQApplication
 
 class QListWidgetTest(UsesQApplication):

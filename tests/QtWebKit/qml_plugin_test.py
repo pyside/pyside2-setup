@@ -3,9 +3,9 @@ import os
 import sys
 import unittest
 
-from PySide.QtCore import QUrl, QTimer
-from PySide.QtWidgets import QApplication, QLabel
-from PySide.QtWebKit import QWebPluginFactory, QWebView, QWebSettings
+from PySide2.QtCore import QUrl, QTimer
+from PySide2.QtWidgets import QApplication, QLabel
+from PySide2.QtWebKit import QWebPluginFactory, QWebView, QWebSettings
 
 from helper import UsesQApplication
 

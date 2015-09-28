@@ -4,8 +4,8 @@
 
 import unittest
 
-from PySide.QtCore import QObject, SIGNAL, SLOT
-from PySide.QtWidgets import QPushButton, QWidget
+from PySide2.QtCore import QObject, SIGNAL, SLOT
+from PySide2.QtWidgets import QPushButton, QWidget
 
 from helper import UsesQApplication
 

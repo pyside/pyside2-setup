@@ -2,7 +2,7 @@
 '''(Very) Simple test case for missing names from QtGui'''
 
 import unittest
-from PySide import QtGui
+from PySide2 import QtGui
 
 class MissingClasses(unittest.TestCase):
     def testQDrag(self): # Bug 222

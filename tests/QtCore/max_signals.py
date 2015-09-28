@@ -1,6 +1,6 @@
 import unittest
 
-from PySide.QtCore import QObject, SIGNAL
+from PySide2.QtCore import QObject, SIGNAL
 
 class MyObject(QObject):
     pass

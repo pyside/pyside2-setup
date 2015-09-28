@@ -1,6 +1,6 @@
 
-from PySide.QtCore import *
-from PySide.QtWidgets import *
+from PySide2.QtCore import *
+from PySide2.QtWidgets import *
 import unittest
 
 class MyModel (QAbstractListModel):
@@ -22,7 +22,7 @@ class TestBug693(unittest.TestCase):
         view.show()
 
         # This must NOT throw the exception:
-        # RuntimeError: Internal C++ object (PySide.QtCore.QLine) already deleted.
+        # RuntimeError: Internal C++ object (PySide2.QtCore.QLine) already deleted.
         MyModel.stupidLine.isNull()
 
 

@@ -1,5 +1,5 @@
 import unittest
-from PySide import QtGui, QtCore
+from PySide2 import QtGui, QtCore
 
 class Properties(unittest.TestCase):
 

@@ -3,7 +3,7 @@
 
 import unittest
 from time import sleep
-from PySide.QtCore import QObject, QTimer, QCoreApplication
+from PySide2.QtCore import QObject, QTimer, QCoreApplication
 
 from helper import UsesQCoreApplication
 

@@ -1,7 +1,7 @@
 ''' unit test for BUG #1091 '''
 
 import unittest
-from PySide import QtGui
+from PySide2 import QtGui
 
 class QPainterTestCase(unittest.TestCase):
     def testIt(self):

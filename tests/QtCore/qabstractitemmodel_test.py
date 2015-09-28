@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from PySide.QtCore import *
+from PySide2.QtCore import *
 
 class MyModel (QAbstractListModel):
     pass

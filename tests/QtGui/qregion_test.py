@@ -1,8 +1,8 @@
 import unittest
 import sys
 
-from PySide.QtGui import QRegion
-from PySide.QtCore import QPoint
+from PySide2.QtGui import QRegion
+from PySide2.QtCore import QPoint
 from helper import UsesQApplication
 
 class QRegionTest(UsesQApplication):

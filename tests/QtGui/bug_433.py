@@ -1,4 +1,4 @@
-from PySide import QtCore, QtGui
+from PySide2 import QtCore, QtGui
 import sys
 
 class Test(QtGui.QGraphicsView):

@@ -4,7 +4,7 @@
 
 import unittest
 import py3kcompat as py3k
-from PySide.QtCore import QObject
+from PySide2.QtCore import QObject
 
 class QStringConstructor(unittest.TestCase):
     '''Test case for QString constructors'''

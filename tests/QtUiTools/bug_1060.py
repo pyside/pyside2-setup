@@ -1,7 +1,7 @@
 ''' unit test for BUG #1060 '''
 
-from PySide.QtWidgets import QApplication
-from PySide.QtUiTools import QUiLoader
+from PySide2.QtWidgets import QApplication
+from PySide2.QtUiTools import QUiLoader
 from helper import adjust_filename
 
 class MyQUiLoader(QUiLoader):

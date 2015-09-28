@@ -5,7 +5,7 @@ import unittest
 import os
 import py3kcompat as py3k
 
-from PySide.QtCore import *
+from PySide2.QtCore import *
 
 class TestQProcess (unittest.TestCase):
     def testStartDetached(self):

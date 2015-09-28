@@ -1,6 +1,6 @@
 '''Test bug 585: http://bugs.openbossa.org/show_bug.cgi?id=585'''
 
-from PySide import QtCore ,QtGui
+from PySide2 import QtCore ,QtGui
 import sys
 import unittest
 

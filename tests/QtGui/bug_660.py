@@ -1,6 +1,6 @@
 import unittest
 import py3kcompat as py3k
-from PySide.QtGui import QStandardItemModel, QStandardItem
+from PySide2.QtGui import QStandardItemModel, QStandardItem
 
 class MyItemModel(QStandardItemModel):
     def __init__(self,parent=None):

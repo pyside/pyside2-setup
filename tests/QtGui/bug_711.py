@@ -1,5 +1,5 @@
 import unittest
-from PySide.QtWidgets import QToolBar, QApplication, QAction, QToolButton
+from PySide2.QtWidgets import QToolBar, QApplication, QAction, QToolButton
 
 try:
     xrange

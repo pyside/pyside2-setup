@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from PySide.QtDeclarative import QDeclarativeView, QDeclarativeItem
+from PySide2.QtDeclarative import QDeclarativeView, QDeclarativeItem
 from helper import TimedQApplication
 
 class TestBug915(TimedQApplication):

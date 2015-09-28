@@ -2,9 +2,9 @@
 
 import unittest
 
-from PySide.QtCore import QUrl
-from PySide.QtDeclarative import QDeclarativeView, QDeclarativeNetworkAccessManagerFactory
-from PySide.QtNetwork import QNetworkAccessManager
+from PySide2.QtCore import QUrl
+from PySide2.QtDeclarative import QDeclarativeView, QDeclarativeNetworkAccessManagerFactory
+from PySide2.QtNetwork import QNetworkAccessManager
 
 from helper import adjust_filename, TimedQApplication
 

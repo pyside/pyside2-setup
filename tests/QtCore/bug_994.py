@@ -1,6 +1,6 @@
 import unittest
 import py3kcompat as py3k
-from PySide.QtCore import QIODevice, QTextStream
+from PySide2.QtCore import QIODevice, QTextStream
 
 
 class MyIODevice (QIODevice):

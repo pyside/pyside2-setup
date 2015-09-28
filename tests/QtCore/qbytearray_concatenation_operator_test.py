@@ -4,7 +4,7 @@
 
 import unittest
 
-from PySide.QtCore import QByteArray
+from PySide2.QtCore import QByteArray
 
 class QByteArrayConcatenationOperatorTest(unittest.TestCase):
     '''Test cases for QByteArray concatenation with '+' operator'''

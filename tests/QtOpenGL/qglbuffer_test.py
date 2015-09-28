@@ -3,8 +3,8 @@
 
 import unittest
 
-from PySide.QtCore import QByteArray
-from PySide.QtOpenGL import QGLBuffer, QGLWidget
+from PySide2.QtCore import QByteArray
+from PySide2.QtOpenGL import QGLBuffer, QGLWidget
 import py3kcompat as py3k
 from helper import UsesQApplication
 

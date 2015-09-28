@@ -2,9 +2,9 @@
 import unittest
 from helper import UsesQApplication
 
-from PySide.QtCore import Qt, QTimer
-from PySide.QtGui import QPen, QPainter
-from PySide.QtWidgets import QWidget
+from PySide2.QtCore import Qt, QTimer
+from PySide2.QtGui import QPen, QPainter
+from PySide2.QtWidgets import QWidget
 
 class Painting(QWidget):
     def __init__(self):

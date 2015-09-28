@@ -3,7 +3,7 @@
 
 import unittest
 import sys
-from PySide.QtCore import QObject, SIGNAL
+from PySide2.QtCore import QObject, SIGNAL
 
 MAX_LOOPS = 5
 MAX_OBJECTS = 200

@@ -2,8 +2,8 @@
 import unittest
 import colorsys
 
-from PySide.QtCore import SIGNAL
-from PySide.QtWidgets import QPushButton, QApplication
+from PySide2.QtCore import SIGNAL
+from PySide2.QtWidgets import QPushButton, QApplication
 
 
 class Test (QApplication) :

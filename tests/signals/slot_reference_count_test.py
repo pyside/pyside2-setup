@@ -4,7 +4,7 @@
 import unittest
 from sys import getrefcount
 
-from PySide.QtCore import QObject, SIGNAL, SLOT
+from PySide2.QtCore import QObject, SIGNAL, SLOT
 
 class Dummy(QObject):
     def dispatch(self):

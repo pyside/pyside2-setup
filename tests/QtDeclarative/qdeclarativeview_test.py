@@ -2,8 +2,8 @@
 
 import unittest
 
-from PySide.QtCore import QUrl, QObject, Property, Slot
-from PySide.QtDeclarative import QDeclarativeView
+from PySide2.QtCore import QUrl, QObject, Property, Slot
+from PySide2.QtDeclarative import QDeclarativeView
 
 from helper import adjust_filename, TimedQApplication
 

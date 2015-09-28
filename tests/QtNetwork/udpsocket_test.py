@@ -3,8 +3,8 @@
 
 import unittest
 
-from PySide.QtCore import QUrl, QObject, SIGNAL, QCoreApplication, QTimer
-from PySide.QtNetwork import QUdpSocket, QHostAddress
+from PySide2.QtCore import QUrl, QObject, SIGNAL, QCoreApplication, QTimer
+from PySide2.QtNetwork import QUdpSocket, QHostAddress
 
 class HttpSignalsCase(unittest.TestCase):
     '''Test case for bug #124 - readDatagram signature

@@ -1,8 +1,8 @@
 ''' Test bug 662: http://bugs.openbossa.org/show_bug.cgi?id=662'''
 
 import unittest
-from PySide.QtGui import QTextCharFormat
-from PySide.QtWidgets import QTextEdit, QApplication
+from PySide2.QtGui import QTextCharFormat
+from PySide2.QtWidgets import QTextEdit, QApplication
 import sys
 
 class testQTextBlock(unittest.TestCase):

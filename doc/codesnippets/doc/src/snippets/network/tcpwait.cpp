@@ -39,8 +39,8 @@
 **
 ****************************************************************************/
 
-from PySide.QtGui import *
-from PySide.QtNetwork import QTcpSocket
+from PySide2.QtGui import *
+from PySide2.QtNetwork import QTcpSocket
 
 def main():
     app = QCoreApplication()

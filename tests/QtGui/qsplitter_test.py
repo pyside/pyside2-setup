@@ -1,5 +1,5 @@
 import unittest
-from PySide.QtWidgets import QSplitter
+from PySide2.QtWidgets import QSplitter
 
 from helper import UsesQApplication
 

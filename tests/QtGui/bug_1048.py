@@ -1,4 +1,4 @@
-from PySide import QtGui
+from PySide2 import QtGui
 
 a = QtGui.QApplication([])
 

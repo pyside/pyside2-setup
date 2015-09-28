@@ -1,4 +1,4 @@
-from PySide.QtCore import QEvent, Qt
+from PySide2.QtCore import QEvent, Qt
 import PySide
 
 import unittest

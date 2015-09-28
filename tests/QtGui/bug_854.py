@@ -1,5 +1,5 @@
-from PySide.QtWidgets import QTableView, QVBoxLayout, QApplication
-from PySide.QtCore import QAbstractItemModel
+from PySide2.QtWidgets import QTableView, QVBoxLayout, QApplication
+from PySide2.QtCore import QAbstractItemModel
 
 from helper import UsesQApplication
 import unittest

@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtWidgets import QPushButton, QWidget
+from PySide2.QtWidgets import QPushButton, QWidget
 
 from helper import UsesQApplication
 

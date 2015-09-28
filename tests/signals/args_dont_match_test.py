@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import unittest
-from PySide.QtCore import *
+from PySide2.QtCore import *
 
 class ArgsDontMatch(unittest.TestCase):
 

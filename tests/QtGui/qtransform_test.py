@@ -1,6 +1,6 @@
 import unittest
-from PySide.QtCore import QPointF
-from PySide.QtGui import QTransform, QPolygonF, QPolygonF
+from PySide2.QtCore import QPointF
+from PySide2.QtGui import QTransform, QPolygonF, QPolygonF
 
 class QTransformTest(unittest.TestCase):
 

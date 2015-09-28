@@ -5,7 +5,7 @@
 import unittest
 import sys
 
-from PySide import QtGui
+from PySide2 import QtGui
 
 from helper import UsesQApplication
 

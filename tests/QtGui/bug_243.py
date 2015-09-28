@@ -4,7 +4,7 @@
 import unittest
 import sys
 
-from PySide.QtWidgets import QApplication, QMainWindow, QLayout
+from PySide2.QtWidgets import QApplication, QMainWindow, QLayout
 
 class QAppPresence(unittest.TestCase):
 

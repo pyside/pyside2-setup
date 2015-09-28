@@ -4,8 +4,8 @@ import unittest
 from helper import UsesQApplication
 
 from testbinding import TestView
-from PySide.QtCore import Qt
-from PySide.QtWidgets import QAbstractItemDelegate, QComboBox
+from PySide2.QtCore import Qt
+from PySide2.QtWidgets import QAbstractItemDelegate, QComboBox
 
 id_text = 'This is me'
 

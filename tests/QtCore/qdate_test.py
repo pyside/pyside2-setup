@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtCore import *
+from PySide2.QtCore import *
 
 class TestQDate (unittest.TestCase):
     def testGetDate(self):

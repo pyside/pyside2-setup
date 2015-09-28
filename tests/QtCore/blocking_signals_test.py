@@ -5,7 +5,7 @@ import unittest
 import os
 from tempfile import mkstemp
 
-from PySide.QtCore import QObject, SIGNAL, QFile
+from PySide2.QtCore import QObject, SIGNAL, QFile
 
 class TestSignalsBlockedBasic(unittest.TestCase):
     '''Basic test case for signalsBlocked'''

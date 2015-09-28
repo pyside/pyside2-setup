@@ -39,7 +39,7 @@
 ##
 ############################################################################
 
-from PySide.QtGui import *
+from PySide2.QtGui import *
 
 def __init__(self):
 

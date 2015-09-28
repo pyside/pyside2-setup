@@ -7,7 +7,7 @@ To include the definitions of the module's classes, use the following directive:
 
 ::
 
-    import PySide.QtOpenGL
+    import PySide2.QtOpenGL
 
 The Qt OpenGL module is implemented as a platform-independent wrapper around the platform-dependent GLX (version 1.3 or later), WGL, or AGL C APIs. Although the basic functionality provided is very similar to Mark Kilgard's GLUT library, applications using the Qt OpenGL module can take advantage of the whole Qt API for non-OpenGL-specific GUI functionality.
 

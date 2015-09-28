@@ -2,4 +2,4 @@ To include the definitions of the module's classes, use the following directive:
 
 ::
 
-    import PySide.QtDeclarative
+    import PySide2.QtDeclarative

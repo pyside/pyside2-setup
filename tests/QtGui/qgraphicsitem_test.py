@@ -3,8 +3,8 @@
 
 import unittest
 
-from PySide.QtGui import QPolygonF, QColor, QBrush
-from PySide.QtWidgets import QGraphicsScene
+from PySide2.QtGui import QPolygonF, QColor, QBrush
+from PySide2.QtWidgets import QGraphicsScene
 
 from helper import UsesQApplication
 

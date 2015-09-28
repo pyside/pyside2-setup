@@ -1,7 +1,7 @@
 import unittest
 
-from PySide.QtCore import QPoint
-from PySide.QtGui import QMatrix, QMatrix4x4
+from PySide2.QtCore import QPoint
+from PySide2.QtGui import QMatrix, QMatrix4x4
 
 
 def qpointTimesQMatrix(point, matrix):

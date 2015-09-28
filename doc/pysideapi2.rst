@@ -20,7 +20,7 @@ your code will run on both bindings.
 __hash__() function return value
 ================================
 
-The hash value returned for the classes :class:`PySide.QtCore.QDate`, :class:`PySide.QtCore.QDateTime`, :class:`PySide.QtCore.QTime`, :class:`PySide.QtCore.QUrl` will be
+The hash value returned for the classes :class:`PySide2.QtCore.QDate`, :class:`PySide2.QtCore.QDateTime`, :class:`PySide2.QtCore.QTime`, :class:`PySide2.QtCore.QUrl` will be
 based on their string representations, thus objects with the same value will
 produce the same hash.
 

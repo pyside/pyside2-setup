@@ -1,7 +1,7 @@
 
 import unittest
 
-from PySide.QtGui import QTextDocument, QTextCursor
+from PySide2.QtGui import QTextDocument, QTextCursor
 
 class QTextDocumentTest(unittest.TestCase):
 

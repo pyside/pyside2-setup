@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from PySide.QtCore import QCoreApplication, QTimeLine
+from PySide2.QtCore import QCoreApplication, QTimeLine
 from helper import UsesQCoreApplication
 
 class NativeSignalsTest(UsesQCoreApplication):

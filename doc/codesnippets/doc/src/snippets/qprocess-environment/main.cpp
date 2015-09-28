@@ -45,7 +45,7 @@ void startProcess()
     {
 //! [0]
 import re
-from PySide.QtCore import QProcess
+from PySide2.QtCore import QProcess
 
 process = QProcess()
 

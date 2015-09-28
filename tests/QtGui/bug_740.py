@@ -1,8 +1,8 @@
 import unittest
 import py3kcompat as py3k
 from helper import UsesQApplication
-from PySide.QtCore import QSize
-from PySide.QtGui import QBitmap, QImage
+from PySide2.QtCore import QSize
+from PySide2.QtGui import QBitmap, QImage
 
 class TestQBitmap(UsesQApplication):
     def testFromDataMethod(self):

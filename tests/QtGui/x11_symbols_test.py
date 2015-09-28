@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtWidgets import *
+from PySide2.QtWidgets import *
 
 class X11Test(unittest.TestCase):
 

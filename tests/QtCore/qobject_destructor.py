@@ -1,6 +1,6 @@
 import sys
 import unittest
-from PySide import QtCore
+from PySide2 import QtCore
 
 class MyObject(QtCore.QObject):
     def __init__(self, other=None):

@@ -1,7 +1,7 @@
 import unittest
 
-from PySide.QtCore import QObject
-from PySide.QtScript import  QScriptEngine
+from PySide2.QtCore import QObject
+from PySide2.QtScript import  QScriptEngine
 
 class QScriptEngineTest(unittest.TestCase):
 

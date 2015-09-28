@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtCore import QThread, Qt
+from PySide2.QtCore import QThread, Qt
 
 class TestHANDLE(unittest.TestCase):
     def testIntConversion(self):

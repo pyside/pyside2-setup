@@ -1,6 +1,6 @@
-from PySide.QtCore import Qt, QEvent
-from PySide.QtGui import QKeyEvent, QKeySequence
-from PySide.QtWidgets import QApplication
+from PySide2.QtCore import Qt, QEvent
+from PySide2.QtGui import QKeyEvent, QKeySequence
+from PySide2.QtWidgets import QApplication
 import unittest
 
 

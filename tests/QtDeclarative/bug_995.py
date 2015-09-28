@@ -1,5 +1,5 @@
-from PySide.QtWidgets import *
-from PySide.QtDeclarative import *
+from PySide2.QtWidgets import *
+from PySide2.QtDeclarative import *
 from helper import adjust_filename, UsesQApplication
 
 app = QApplication([])

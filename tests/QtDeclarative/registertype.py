@@ -2,9 +2,9 @@
 import sys
 import unittest
 import helper
-from PySide.QtCore import *
-from PySide.QtWidgets import *
-from PySide.QtDeclarative import *
+from PySide2.QtCore import *
+from PySide2.QtWidgets import *
+from PySide2.QtDeclarative import *
 
 class PieSlice (QDeclarativeItem):
 

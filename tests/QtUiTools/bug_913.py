@@ -5,9 +5,9 @@ import sys
 import unittest
 from helper import adjust_filename
 
-from PySide.QtCore import *
-from PySide.QtWidgets import *
-from PySide.QtUiTools import *
+from PySide2.QtCore import *
+from PySide2.QtWidgets import *
+from PySide2.QtUiTools import *
 
 class TestBug913 (unittest.TestCase):
 

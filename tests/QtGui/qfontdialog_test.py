@@ -1,8 +1,8 @@
 import unittest
 import sys
 
-from PySide import QtGui
-from PySide import QtCore
+from PySide2 import QtGui
+from PySide2 import QtCore
 
 from helper import TimedQApplication
 

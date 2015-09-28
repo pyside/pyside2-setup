@@ -1,4 +1,4 @@
-from PySide.QtWidgets import *
+from PySide2.QtWidgets import *
 
 if __name__ == '__main__':
     app = QApplication([])

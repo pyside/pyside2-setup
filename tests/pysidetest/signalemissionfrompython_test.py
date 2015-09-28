@@ -2,7 +2,7 @@
 
 import unittest
 from testbinding import TestObject
-from PySide.QtCore import QObject, SIGNAL
+from PySide2.QtCore import QObject, SIGNAL
 
 '''Tests the behaviour of signals with default values when emitted from Python.'''
 

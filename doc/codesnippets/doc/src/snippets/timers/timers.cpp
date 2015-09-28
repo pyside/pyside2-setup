@@ -39,7 +39,7 @@
 **
 ****************************************************************************/
 
-from PySide.QtCore import QTimer
+from PySide2.QtCore import QTimer
 
 class Foo : public QObject
 {

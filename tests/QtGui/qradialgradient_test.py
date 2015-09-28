@@ -1,7 +1,7 @@
 import unittest
 
-from PySide.QtGui import QRadialGradient
-from PySide.QtCore import QPointF
+from PySide2.QtGui import QRadialGradient
+from PySide2.QtCore import QPointF
 
 class QRadialGradientConstructor(unittest.TestCase):
     def _compare(self, qptf, tpl):

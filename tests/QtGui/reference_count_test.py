@@ -8,9 +8,9 @@ import weakref
 import gc
 
 
-from PySide.QtCore import Qt, QPointF
-from PySide.QtGui import QPolygonF
-from PySide.QtWidgets import QApplication, QGraphicsScene, QGraphicsRectItem, QGraphicsPolygonItem, QGraphicsRectItem
+from PySide2.QtCore import Qt, QPointF
+from PySide2.QtGui import QPolygonF
+from PySide2.QtWidgets import QApplication, QGraphicsScene, QGraphicsRectItem, QGraphicsPolygonItem, QGraphicsRectItem
 
 from helper import UsesQApplication
 

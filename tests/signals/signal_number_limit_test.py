@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from PySide import QtCore
+from PySide2 import QtCore
 
 class Emitter(QtCore.QObject):
     s1 = QtCore.Signal()

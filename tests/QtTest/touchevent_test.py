@@ -1,6 +1,6 @@
-from PySide.QtWidgets import QWidget
-from PySide.QtCore import QPoint, QTimer, Qt, QEvent
-from PySide.QtTest import QTest
+from PySide2.QtWidgets import QWidget
+from PySide2.QtCore import QPoint, QTimer, Qt, QEvent
+from PySide2.QtTest import QTest
 
 import unittest
 

@@ -1,8 +1,8 @@
 //! [0]
 import sys
 
-from PySide.QtGui import QApplication, qRgb
-from PySide.QtOpenGL import QGLColormap
+from PySide2.QtGui import QApplication, qRgb
+from PySide2.QtOpenGL import QGLColormap
 
 def main(argv):
     app = QApplication(argv)

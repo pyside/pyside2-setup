@@ -77,7 +77,7 @@ static PyMethodDef Signal_methods[] = {
 
 PyTypeObject PySideSignalMetaType = {
     PyVarObject_HEAD_INIT(0, 0)
-    /*tp_name*/             "PySide.QtCore.MetaSignal",
+    /*tp_name*/             "PySide2.QtCore.MetaSignal",
     /*tp_basicsize*/        sizeof(PyTypeObject),
     /*tp_itemsize*/         0,
     /*tp_dealloc*/          0,
@@ -111,7 +111,7 @@ PyTypeObject PySideSignalMetaType = {
 
 PyTypeObject PySideSignalType = {
     PyVarObject_HEAD_INIT(&PySideSignalMetaType, 0)
-    /*tp_name*/             "PySide.QtCore." SIGNAL_CLASS_NAME,
+    /*tp_name*/             "PySide2.QtCore." SIGNAL_CLASS_NAME,
     /*tp_basicsize*/        sizeof(PySideSignal),
     /*tp_itemsize*/         0,
     /*tp_dealloc*/          0,
@@ -173,7 +173,7 @@ static PyMappingMethods SignalInstance_as_mapping = {
 
 PyTypeObject PySideSignalInstanceType = {
     PyVarObject_HEAD_INIT(0, 0)
-    /*tp_name*/             "PySide.QtCore." SIGNAL_INSTANCE_NAME,
+    /*tp_name*/             "PySide2.QtCore." SIGNAL_INSTANCE_NAME,
     /*tp_basicsize*/        sizeof(PySideSignalInstance),
     /*tp_itemsize*/         0,
     /*tp_dealloc*/          0,
@@ -944,7 +944,7 @@ bool isQtSignal(const char* signal)
 bool checkQtSignal(const char* signal)
 {
     if (!isQtSignal(signal)) {
-        PyErr_SetString(PyExc_TypeError, "Use the function PySide.QtCore.SIGNAL on signals");
+        PyErr_SetString(PyExc_TypeError, "Use the function PySide2.QtCore.SIGNAL on signals");
         return false;
     }
     return true;

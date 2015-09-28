@@ -2,8 +2,8 @@ import unittest
 import sys
 
 from helper import UsesQApplication
-from PySide.QtCore import QObject, QEvent
-from PySide.QtWidgets import QWidget
+from PySide2.QtCore import QObject, QEvent
+from PySide2.QtWidgets import QWidget
 
 class MyFilter(QObject):
   def eventFilter(self, obj, event):

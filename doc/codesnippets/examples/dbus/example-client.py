@@ -11,7 +11,7 @@ import dbus
 # import python dbus GLib mainloop support
 import dbus.mainloop.glib
 # import QtCore
-from PySide.QtCore import *
+from PySide2.QtCore import *
 
 # signal handler
 def button_clicked():

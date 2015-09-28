@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtCore import Qt
+from PySide2.QtCore import Qt
 
 class QtNamespace(unittest.TestCase):
     '''Test case for accessing attributes from Qt namespace'''

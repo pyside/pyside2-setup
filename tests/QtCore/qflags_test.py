@@ -2,7 +2,7 @@
 '''Test cases for QFlags'''
 
 import unittest
-from PySide.QtCore import Qt, QTemporaryFile, QFile, QIODevice, QObject
+from PySide2.QtCore import Qt, QTemporaryFile, QFile, QIODevice, QObject
 
 class QFlagTest(unittest.TestCase):
     '''Test case for usage of flags'''

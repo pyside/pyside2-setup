@@ -2,8 +2,8 @@
 '''Test cases for QThread'''
 
 import unittest
-from PySide.QtCore import QThread, QCoreApplication, QObject, SIGNAL, QMutex, QTimer
-from PySide.QtCore import QEventLoop
+from PySide2.QtCore import QThread, QCoreApplication, QObject, SIGNAL, QMutex, QTimer
+from PySide2.QtCore import QEventLoop
 
 from helper import UsesQCoreApplication
 

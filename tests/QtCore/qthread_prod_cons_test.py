@@ -7,7 +7,7 @@ import logging
 
 logging.basicConfig(level=logging.WARNING)
 
-from PySide.QtCore import QThread, QCoreApplication, QObject, SIGNAL
+from PySide2.QtCore import QThread, QCoreApplication, QObject, SIGNAL
 
 class Bucket(QObject):
     '''Dummy class to hold the produced values'''

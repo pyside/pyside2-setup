@@ -4,15 +4,15 @@
 import unittest
 import gc
 
-from PySide.QtCore import QPointF
-from PySide.QtGui import QPolygonF, QPixmap, QPainterPath
-from PySide.QtWidgets import QApplication, QPushButton
-from PySide.QtWidgets import QGraphicsScene
-from PySide.QtWidgets import QGraphicsEllipseItem, QGraphicsLineItem
-from PySide.QtWidgets import QGraphicsPathItem, QGraphicsPixmapItem
-from PySide.QtWidgets import QGraphicsPolygonItem, QGraphicsRectItem
-from PySide.QtWidgets import QGraphicsSimpleTextItem, QGraphicsTextItem
-from PySide.QtWidgets import QGraphicsProxyWidget
+from PySide2.QtCore import QPointF
+from PySide2.QtGui import QPolygonF, QPixmap, QPainterPath
+from PySide2.QtWidgets import QApplication, QPushButton
+from PySide2.QtWidgets import QGraphicsScene
+from PySide2.QtWidgets import QGraphicsEllipseItem, QGraphicsLineItem
+from PySide2.QtWidgets import QGraphicsPathItem, QGraphicsPixmapItem
+from PySide2.QtWidgets import QGraphicsPolygonItem, QGraphicsRectItem
+from PySide2.QtWidgets import QGraphicsSimpleTextItem, QGraphicsTextItem
+from PySide2.QtWidgets import QGraphicsProxyWidget
 
 from helper import UsesQApplication
 

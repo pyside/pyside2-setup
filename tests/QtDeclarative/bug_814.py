@@ -6,8 +6,8 @@
 # 2011-04-08 Thomas Perl <m@thp.io>
 # Released under the same terms as PySide itself
 
-from PySide.QtCore import QUrl, QAbstractListModel, QModelIndex
-from PySide.QtDeclarative import QDeclarativeView
+from PySide2.QtCore import QUrl, QAbstractListModel, QModelIndex
+from PySide2.QtDeclarative import QDeclarativeView
 
 from helper import adjust_filename, TimedQApplication
 import unittest

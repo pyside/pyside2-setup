@@ -3,7 +3,7 @@
 
 import unittest
 from sys import getrefcount
-from PySide.QtCore import QObject
+from PySide2.QtCore import QObject
 
 class DisconnectSignalsTest(unittest.TestCase):
 

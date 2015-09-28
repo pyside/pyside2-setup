@@ -4,7 +4,7 @@
 import unittest
 import py3kcompat as py3k
 
-from PySide.QtCore import QByteArray, QTextStream, QIODevice, QTextCodec, QFile
+from PySide2.QtCore import QByteArray, QTextStream, QIODevice, QTextCodec, QFile
 
 class QTextStreamShiftTest(unittest.TestCase):
 

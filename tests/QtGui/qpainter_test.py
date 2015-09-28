@@ -1,7 +1,7 @@
 import unittest
 
-from PySide.QtGui import QPainter, QLinearGradient
-from PySide.QtCore import QLine, QLineF, QPoint, QPointF, QRect, QRectF, Qt
+from PySide2.QtGui import QPainter, QLinearGradient
+from PySide2.QtCore import QLine, QLineF, QPoint, QPointF, QRect, QRectF, Qt
 
 class QPainterDrawText(unittest.TestCase):
 

@@ -1,4 +1,4 @@
-from PySide import QtCore, QtGui, QtDeclarative
+from PySide2 import QtCore, QtGui, QtDeclarative
 from helper import adjust_filename, TimedQApplication
 import unittest
 

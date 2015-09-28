@@ -1,8 +1,8 @@
 
 import unittest
 
-from PySide.QtGui import QIcon
-from PySide.QtWidgets import QToolBox, QWidget
+from PySide2.QtGui import QIcon
+from PySide2.QtWidgets import QToolBox, QWidget
 
 from helper import UsesQApplication
 

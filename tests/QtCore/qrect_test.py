@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtCore import QPoint, QRect, QRectF
+from PySide2.QtCore import QPoint, QRect, QRectF
 
 class RectConstructor(unittest.TestCase):
 

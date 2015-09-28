@@ -1,6 +1,6 @@
 import unittest
 import sys
-from PySide.QtCore import QObject, ClassInfo
+from PySide2.QtCore import QObject, ClassInfo
 
 @ClassInfo(author='pyside',url='http://www.pyside.org')
 class MyObject(QObject):

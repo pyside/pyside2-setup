@@ -39,8 +39,8 @@
 #
 ######################################
 
-from PySide.QtGui import *
-from PySide.QtSql import *
+from PySide2.QtGui import *
+from PySide2.QtSql import *
 
 
 def tr(text):

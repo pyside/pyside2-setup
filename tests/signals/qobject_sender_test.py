@@ -3,7 +3,7 @@
 '''Test cases for QObject.sender()'''
 
 import unittest
-from PySide.QtCore import *
+from PySide2.QtCore import *
 from helper import UsesQCoreApplication
 
 class ExtQTimer(QTimer):

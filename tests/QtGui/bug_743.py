@@ -1,6 +1,6 @@
 import unittest
 
-from PySide.QtGui import QMatrix4x4
+from PySide2.QtGui import QMatrix4x4
 
 class TestQMatrix(unittest.TestCase):
     def testOperator(self):

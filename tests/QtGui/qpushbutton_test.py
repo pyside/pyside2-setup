@@ -1,8 +1,8 @@
 import unittest
 
 from helper import UsesQApplication
-from PySide.QtWidgets import QPushButton, QMenu, QWidget
-from PySide.QtCore import QTimer
+from PySide2.QtWidgets import QPushButton, QMenu, QWidget
+from PySide2.QtCore import QTimer
 
 class MyWidget(QWidget):
     def __init__(self):

@@ -1,5 +1,5 @@
 import unittest
-from PySide import QtGui, QtUiTools
+from PySide2 import QtGui, QtUiTools
 from helper import adjust_filename
 from helper import TimedQApplication
 

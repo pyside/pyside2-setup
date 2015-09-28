@@ -1,6 +1,6 @@
 import unittest
 import PySide
-from PySide.QtScript import *
+from PySide2.QtScript import *
 
 from helper import UsesQApplication
 

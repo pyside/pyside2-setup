@@ -6,8 +6,8 @@
 
 import unittest
 
-from PySide.QtCore import Slot, Signal, QUrl
-from PySide.QtDeclarative import QDeclarativeView
+from PySide2.QtCore import Slot, Signal, QUrl
+from PySide2.QtDeclarative import QDeclarativeView
 
 from helper import adjust_filename, UsesQApplication
 

@@ -2,8 +2,8 @@
 import sys
 import unittest
 
-from PySide.QtCore import QSignalMapper
-from PySide.QtWidgets import QCheckBox
+from PySide2.QtCore import QSignalMapper
+from PySide2.QtWidgets import QCheckBox
 
 from helper import UsesQApplication
 

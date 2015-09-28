@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import unittest
-from PySide.QtCore import *
+from PySide2.QtCore import *
 
 class QAnimationGroupTest(unittest.TestCase):
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from PySide.QtCore import QObject, QCoreApplication, QTimeLine, Signal, Slot
+from PySide2.QtCore import QObject, QCoreApplication, QTimeLine, Signal, Slot
 from helper import UsesQCoreApplication
 
 class ExtQObject(QObject):
