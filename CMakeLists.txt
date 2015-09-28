@@ -152,6 +152,37 @@ add_custom_target(dist
             echo "Source package created at ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2.\n"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+if (NOT PYTHON_MULTIARCH_SUFFIX)
+    execute_process(
+        COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} -c "if True:
+            import sysconfig
+            print(sysconfig.get_config_var('MULTIARCH'))
+            "
+        OUTPUT_VARIABLE PYTHON_MULTIARCH_SUFFIX
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif()
+
+if (NOT PYTHON_EXTENSION_SUFFIX)
+    if (SHIBOKEN_PYTHON_VERSION_MAJOR EQUAL 2)
+        set(PYTHON_EXTENSION_SUFFIX ".${PYTHON_MULTIARCH_SUFFIX}")
+    elseif (SHIBOKEN_PYTHON_VERSION_MAJOR EQUAL 3)
+        if (SHIBOKEN_PYTHON_VERSION_MINOR LESS  5)
+            set(PYTHON_EXTENSION_SUFFIX ".cpython-${SHIBOKEN_PYTHON_VERSION_MAJOR}${SHIBOKEN_PYTHON_VERSION_MINOR}m")
+        else()
+            set(PYTHON_EXTENSION_SUFFIX ".cpython-${SHIBOKEN_PYTHON_VERSION_MAJOR}${SHIBOKEN_PYTHON_VERSION_MINOR}m-${PYTHON_MULTIARCH_SUFFIX}")
+        endif()
+    else()
+        message( FATAL_ERROR "Unsupported PYTHON_VERSION=${SHIBOKEN_PYTHON_VERSION_STRING}!" )
+    endif()
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    if (SHIBOKEN_PYTHON_VERSION_MAJOR EQUAL 2)
+        set(PYTHON_DEBUG_SUFFIX "_d")
+    endif()
+endif()
+
+
 if (NOT SITE_PACKAGE)
     execute_process(
         COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} -c "if True:
