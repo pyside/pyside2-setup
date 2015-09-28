@@ -21,6 +21,7 @@ option(USE_PYTHON3 "Use python3 libraries to build shiboken2." FALSE)
 
 if (USE_PYTHON3)
     find_package(Python3Libs)
+    find_package(Python3Interp)
     find_package(Python3InterpWithDebug)
     #use common vars
     set(PYTHONLIBS_FOUND ${PYTHON3LIBS_FOUND})
@@ -34,6 +35,7 @@ if (USE_PYTHON3)
     set(PYTHON_VERSION_PATCH ${PYTHON3_VERSION_PATCH})
 else()
     find_package(PythonLibs 2.6)
+    find_package(PythonInterp)
     find_package(PythonInterpWithDebug)
 endif()
 
