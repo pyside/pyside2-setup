@@ -152,6 +152,7 @@ add_custom_target(dist
             echo "Source package created at ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2.\n"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+if (UNIX) # TODO: This part needs more testing first to be available on OSX and WIN
 if (NOT PYTHON_MULTIARCH_SUFFIX)
     execute_process(
         COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} -c "if True:
@@ -175,6 +176,7 @@ if (NOT PYTHON_EXTENSION_SUFFIX)
         message( FATAL_ERROR "Unsupported PYTHON_VERSION=${SHIBOKEN_PYTHON_VERSION_MAJOR}.${SHIBOKEN_PYTHON_VERSION_MINOR}.${SHIBOKEN_PYTHON_VERSION_PATCH}!" )
     endif()
 endif()
+endif (UNIX)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if (SHIBOKEN_PYTHON_VERSION_MAJOR EQUAL 2)
