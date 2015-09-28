@@ -602,9 +602,6 @@ class pyside_build(_build):
             if self.build_type.lower() == 'debug':
                 cmake_cmd.append("-DPYTHON_DEBUG_LIBRARY=%s" % self.py_library)
 
-        if sys.platform == 'win32':
-            cmake_cmd.append("-DCMAKE_DEBUG_POSTFIX=_d")
-
         if extension.lower() == "shiboken2":
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
             if sys.version_info[0] > 2:
