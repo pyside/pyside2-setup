@@ -32,4 +32,5 @@
     <enum-type name="MacVersion" since="5.5" />
   </object-type>
   <suppress-warning text="skipping field 'QSysInfo::WindowsVersion' with unmatched type 'QSysInfo::WinVersion'" />
+  <suppress-warning text="enum 'QSysInfo::WinVersion' does not have a type entry or is not an enum" />
 </typesystem>
