@@ -8,7 +8,7 @@ project(pysidebindings)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Macros/
                       ${CMAKE_MODULE_PATH})
 find_package(Shiboken2 2.0.0 REQUIRED)
-find_package(Qt5 REQUIRED COMPONENTS Core) 
+find_package(Qt5 5.3.0 REQUIRED COMPONENTS Core) 
 add_definitions(${Qt5Core_DEFINITIONS})
 
 find_file(GL_H "gl.h" PATH_SUFFIXES "GL")
