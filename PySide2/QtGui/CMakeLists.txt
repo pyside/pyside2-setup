@@ -171,7 +171,7 @@ make_path(QtGui_typesystem_path ${QtCore_SOURCE_DIR} ${QtCore_BINARY_DIR}
 
 set(QtGui_include_dirs  ${QtGui_SOURCE_DIR}
                         ${QtGui_BINARY_DIR}
-                        ${pyside_SOURCE_DIR}
+                        ${pyside2_SOURCE_DIR}
                         ${Qt5Core_INCLUDE_DIRS}
                         ${Qt5Gui_INCLUDE_DIRS}
                         ${SHIBOKEN_INCLUDE_DIR}

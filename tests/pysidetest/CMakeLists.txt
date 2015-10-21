@@ -35,13 +35,13 @@ ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testview_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testbinding_module_wrapper.cpp
 )
 
-make_path(testbinding_include_dirs  ${pyside_BINARY_DIR}
+make_path(testbinding_include_dirs  ${pyside2_BINARY_DIR}
                                     ${CMAKE_CURRENT_SOURCE_DIR}
                                     ${QT_INCLUDE_DIR}
                                     )
 
 make_path(testbinding_typesystem_path ${CMAKE_CURRENT_SOURCE_DIR}
-                                      ${pyside_SOURCE_DIR}
+                                      ${pyside2_SOURCE_DIR}
                                       ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
                                       ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR}
                                       )
@@ -64,7 +64,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${Qt5Gui_INCLUDE_DIRS}
                     ${Qt5Widgets_INCLUDE_DIRS}
                     ${SHIBOKEN_INCLUDE_DIR}
-                    ${pyside_SOURCE_DIR}
+                    ${pyside2_SOURCE_DIR}
                     ${QtCore_GEN_DIR}
                     ${QtGui_GEN_DIR}
                     ${QtWidgets_GEN_DIR}
@@ -85,7 +85,7 @@ if(WIN32)
 endif()
 target_link_libraries(testbinding
                       pysidetest
-                      pyside
+                      pyside2
                       ${PYTHON_LIBRARIES}
                       ${SHIBOKEN_LIBRARY}
                       ${Qt5Core_LIBRARIES}
@@ -93,7 +93,7 @@ target_link_libraries(testbinding
                       ${Qt5Widgets_LIBRARIES}
                       ${SBK_PYTHON_LIBRARIES})
 
-add_dependencies(testbinding pyside QtCore QtGui QtWidgets libpyside pysidetest)
+add_dependencies(testbinding pyside2 QtCore QtGui QtWidgets libpyside pysidetest)
 
 PYSIDE_TEST(application_test.py)
 PYSIDE_TEST(decoratedslot_test.py)

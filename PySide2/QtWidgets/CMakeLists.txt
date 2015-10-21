@@ -229,7 +229,7 @@ make_path(QtWidgets_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR}
 
 set(QtWidgets_include_dirs  ${QtWidgets_SOURCE_DIR}
                             ${QtWidgets_BINARY_DIR}
-                            ${pyside_SOURCE_DIR}
+                            ${pyside2_SOURCE_DIR}
                             ${Qt5Core_INCLUDE_DIRS}
                             ${Qt5Gui_INCLUDE_DIRS}
                             ${Qt5Widgets_INCLUDE_DIRS}
