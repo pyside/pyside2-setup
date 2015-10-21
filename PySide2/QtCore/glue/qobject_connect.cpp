@@ -1,11 +1,3 @@
-/*
-
-This is a harder problem right now:
-
-Qt 5.X implements signals in a very different way.
-In order to get the best possible result in very little time, I (ctismer) decided to
-create these functions as defunct definitions, in order to do them right, pretty soon.
-For today, I don't have the brains for that!
 
 static bool isDecorator(PyObject* method, PyObject* self)
 {
@@ -39,7 +31,7 @@ static bool getReceiver(QObject *source, const char* signal, PyObject* callback,
 
     // Check if this callback is a overwrite of a non-virtual Qt slot.
     if (!usingGlobalReceiver && receiver && self) {
-        *callbackSig = PySide::Signal::getCallbackSignature(signal, *receiver, callback, usingGlobalReceiver).toUtf8();
+        *callbackSig = PySide::Signal::getCallbackSignature(signal, *receiver, callback, usingGlobalReceiver).toLatin1();
         const QMetaObject* metaObject = (*receiver)->metaObject();
         int slotIndex = metaObject->indexOfSlot(callbackSig->constData());
         if (slotIndex != -1 && slotIndex < metaObject->methodOffset() && PyMethod_Check(callback))
@@ -49,7 +41,7 @@ static bool getReceiver(QObject *source, const char* signal, PyObject* callback,
     if (usingGlobalReceiver) {
         PySide::SignalManager& signalManager = PySide::SignalManager::instance();
         *receiver = signalManager.globalReceiver(source, callback);
-        *callbackSig = PySide::Signal::getCallbackSignature(signal, *receiver, callback, usingGlobalReceiver).toUtf8();
+        *callbackSig = PySide::Signal::getCallbackSignature(signal, *receiver, callback, usingGlobalReceiver).toLatin1();
     }
 
     return usingGlobalReceiver;
@@ -100,6 +92,7 @@ static QMetaObject::Connection qobjectConnectCallback(QObject* source, const cha
     const QMetaObject* metaObject = receiver->metaObject();
     const char* slot = callbackSig.constData();
     int slotIndex = metaObject->indexOfSlot(slot);
+    QMetaMethod signalMethod = metaObject->method(signalIndex);
 
     if (slotIndex == -1) {
         if (!usingGlobalReceiver && self && !Shiboken::Object::hasCppWrapper((SbkObject*)self)) {
@@ -130,11 +123,11 @@ static QMetaObject::Connection qobjectConnectCallback(QObject* source, const cha
         if (usingGlobalReceiver)
             signalManager.notifyGlobalReceiver(receiver);
         #ifndef AVOID_PROTECTED_HACK
-            source->connectNotify(signal - 1);
+            source->connectNotify(signalMethod); //Qt5: QMetaMethod instead of char*
         #else
             // Need to cast to QObjectWrapper* and call the public version of
             // connectNotify when avoiding the protected hack.
-            reinterpret_cast<QObjectWrapper*>(source)->connectNotify(signal - 1);
+            reinterpret_cast<QObjectWrapper*>(source)->connectNotify(signalMethod); //Qt5: QMetaMethod instead of char*
         #endif
 
         return connection;
@@ -158,6 +151,7 @@ static bool qobjectDisconnectCallback(QObject* source, const char* signal, PyObj
     QObject* receiver = 0;
     PyObject* self = 0;
     QByteArray callbackSig;
+    QMetaMethod slotMethod;
     bool usingGlobalReceiver = getReceiver(NULL, signal, callback, &receiver, &self, &callbackSig);
     if (receiver == 0 && self == 0)
         return false;
@@ -167,6 +161,7 @@ static bool qobjectDisconnectCallback(QObject* source, const char* signal, PyObj
     int slotIndex = -1;
 
     slotIndex = metaObject->indexOfSlot(callbackSig);
+    slotMethod = metaObject->method(slotIndex);
 
     bool disconnected;
     Py_BEGIN_ALLOW_THREADS
@@ -178,19 +173,13 @@ static bool qobjectDisconnectCallback(QObject* source, const char* signal, PyObj
             signalManager.releaseGlobalReceiver(source, receiver);
 
         #ifndef AVOID_PROTECTED_HACK
-            source->disconnectNotify(callbackSig);
+            source->disconnectNotify(slotMethod); //Qt5: QMetaMethod instead of char*
         #else
             // Need to cast to QObjectWrapper* and call the public version of
             // connectNotify when avoiding the protected hack.
-            reinterpret_cast<QObjectWrapper*>(source)->disconnectNotify(callbackSig);
+            reinterpret_cast<QObjectWrapper*>(source)->disconnectNotify(slotMethod); //Qt5: QMetaMethod instead of char*
         #endif
         return true;
     }
     return false;
 }
-
-*/
-
-// the temporary definitions may follow, soon:
-
-

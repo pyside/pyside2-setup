@@ -4229,8 +4229,6 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   <suppress-warning text="enum 'enum_5' does not have a type entry or is not an enum" />
   <suppress-warning text="enum 'FP_NORMAL' does not have a type entry or is not an enum" />
   <suppress-warning text="Shadowing: *" />
-  <!-- this enum is defined on Qt global header but only used in QtDeclarative module -->
-  <suppress-warning text="enum 'QML_HAS_ATTACHED_PROPERTIES' does not have a type entry or is not an enum" />
 
   <!-- this enum is defined on Qt global header but only used in QtGui module -->
   <suppress-warning text="enum 'PM_MessageBoxHeight' does not have a type entry or is not an enum" />

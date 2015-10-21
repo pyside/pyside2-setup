@@ -141,6 +141,14 @@ public:
         : QGenericArgument(aName, static_cast<const void *>(&aData))
         {}
 };
+template <class T>
+class QArgument<T &>: public QGenericArgument
+{
+public:
+    inline QArgument(const char *aName, T &aData)
+        : QGenericArgument(aName, static_cast<const void *>(&aData))
+        {}
+};
 
 
 template <typename T>
@@ -372,7 +380,6 @@ QT_END_NAMESPACE
 #include <QtScript/QtScript>
 #include <QtScriptTools/QtScriptTools>
 #include <QtMultimedia/QtMultimedia>
-#include <QtDeclarative/QtDeclarative>
 #include <QtPrintSupport/QtPrintSupport>
 
 // QT_WIDGETS_LIB must be defined to QSqlRelationalDelegate become visible.
