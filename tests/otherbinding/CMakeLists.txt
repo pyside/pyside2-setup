@@ -18,8 +18,8 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/other-binding.txt.in"
                "${CMAKE_CURRENT_BINARY_DIR}/other-binding.txt" @ONLY)
 
 add_custom_command(OUTPUT ${other_SRC}
-COMMAND shiboken --project-file=${CMAKE_CURRENT_BINARY_DIR}/other-binding.txt ${GENERATOR_EXTRA_FLAGS}
-DEPENDS ${other_TYPESYSTEM} ${CMAKE_CURRENT_SOURCE_DIR}/global.h shiboken
+COMMAND shiboken2 --project-file=${CMAKE_CURRENT_BINARY_DIR}/other-binding.txt ${GENERATOR_EXTRA_FLAGS}
+DEPENDS ${other_TYPESYSTEM} ${CMAKE_CURRENT_SOURCE_DIR}/global.h shiboken2
 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for 'other' test binding..."
 )
