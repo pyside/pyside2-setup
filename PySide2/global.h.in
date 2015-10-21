@@ -380,7 +380,6 @@ QT_END_NAMESPACE
 #include <QtScript/QtScript>
 #include <QtScriptTools/QtScriptTools>
 #include <QtMultimedia/QtMultimedia>
-#include <QtDeclarative/QtDeclarative>
 #include <QtPrintSupport/QtPrintSupport>
 
 // QT_WIDGETS_LIB must be defined to QSqlRelationalDelegate become visible.

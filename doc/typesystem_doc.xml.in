@@ -48,10 +48,6 @@
     <load-typesystem name="typesystem_multimedia.xml" generate="yes" />
     @end_QtMultimedia@
 
-    @if_QtDeclarative@
-    <load-typesystem name="typesystem_declarative.xml" generate="yes"/>
-    @end_QtDeclarative@
-
     @if_QtOpenGL@
     <load-typesystem name="typesystem_opengl.xml" generate="yes" />
     @end_QtOpenGL@

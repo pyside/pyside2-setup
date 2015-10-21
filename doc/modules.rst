@@ -7,7 +7,6 @@ Qt is splitted in several modules.
     :maxdepth: 1
 
     PySide/QtCore/index.rst
-    PySide/QtDeclarative/index.rst
     PySide/QtGui/index.rst
     PySide/QtHelp/index.rst
     PySide/QtMultimedia/index.rst
