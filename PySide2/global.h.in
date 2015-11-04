@@ -141,14 +141,6 @@ public:
         : QGenericArgument(aName, static_cast<const void *>(&aData))
         {}
 };
-template <class T>
-class QArgument<T &>: public QGenericArgument
-{
-public:
-    inline QArgument(const char *aName, T &aData)
-        : QGenericArgument(aName, static_cast<const void *>(&aData))
-        {}
-};
 
 
 template <typename T>
@@ -327,22 +319,48 @@ struct Q_CORE_EXPORT QMetaObject
     } d;
 };
 
-struct QMetaObjectExtraData
-{
-    const QMetaObject **objects;
-    int (*static_metacall)(QMetaObject::Call, int, void **);
-};
+class Q_CORE_EXPORT QMetaObject::Connection {
+    void *d_ptr; //QObjectPrivate::Connection*
+    explicit Connection(void *data) : d_ptr(data) {  }
+    friend class QObject;
+    friend class QObjectPrivate;
+    friend struct QMetaObject;
+public:
+    ~Connection();
+    Connection();
+    Connection(const Connection &other);
+    Connection &operator=(const Connection &other);
+#ifdef Q_QDOC
+    operator bool() const;
+#else
+    typedef void *Connection::*RestrictedBool;
+    operator RestrictedBool() const { return d_ptr ? &Connection::d_ptr : 0; }
+#endif
 
-inline const char *QMetaObject::className() const
-{ return d.stringdata; }
+#ifdef Q_COMPILER_RVALUE_REFS
+    inline Connection(Connection &&o) : d_ptr(o.d_ptr) { o.d_ptr = 0; }
+    inline Connection &operator=(Connection &&other)
+    { qSwap(d_ptr, other.d_ptr); return *this; }
+#endif
+};
 
 inline const QMetaObject *QMetaObject::superClass() const
 { return d.superdata; }
 
+namespace QtPrivate {
+    /* Trait that tells is a the Object has a Q_OBJECT macro */
+    template <typename Object> struct HasQ_OBJECT_Macro {
+        template <typename T>
+        static char test(int (T::*)(QMetaObject::Call, int, void **));
+        static int test(int (Object::*)(QMetaObject::Call, int, void **));
+        enum { Value =  sizeof(test(&Object::qt_metacall)) == sizeof(int) };
+    };
+}
+
 QT_END_NAMESPACE
 
-// Qt5: this was defined in qt4, but we cannot use it, because then QObject becomes inconsistent!
-#undef Q_QDOC
+/
+#define Q_QDOC
 
 #if @ENABLE_X11@
   #define Q_OS_X11
@@ -388,48 +406,6 @@ QT_END_NAMESPACE
 #undef Q_DECLARE_INTERFACE
 #include <QtSql/QtSql>
 #include <QtSvg/QtSvg>
-
-class Q_CORE_EXPORT QMetaObject::Connection {
-    void *d_ptr; //QObjectPrivate::Connection*
-    explicit Connection(void *data) : d_ptr(data) {  }
-    friend class QObject;
-    friend class QObjectPrivate;
-    friend struct QMetaObject;
-public:
-    ~Connection();
-    Connection();
-    Connection(const Connection &other);
-    Connection &operator=(const Connection &other);
-#ifdef Q_QDOC
-    operator bool() const;
-#else
-    typedef void *Connection::*RestrictedBool;
-    operator RestrictedBool() const { return d_ptr ? &Connection::d_ptr : 0; }
-#endif
-
-#ifdef Q_COMPILER_RVALUE_REFS
-    inline Connection(Connection &&o) : d_ptr(o.d_ptr) { o.d_ptr = 0; }
-    inline Connection &operator=(Connection &&other)
-    { qSwap(d_ptr, other.d_ptr); return *this; }
-#endif
-};
-
-inline const QMetaObject *QMetaObject::superClass() const
-{ return d.superdata; }
-
-namespace QtPrivate {
-    /* Trait that tells is a the Object has a Q_OBJECT macro */
-    template <typename Object> struct HasQ_OBJECT_Macro {
-        template <typename T>
-        static char test(int (T::*)(QMetaObject::Call, int, void **));
-        static int test(int (Object::*)(QMetaObject::Call, int, void **));
-        enum { Value =  sizeof(test(&Object::qt_metacall)) == sizeof(int) };
-    };
-}
-
-QT_END_NAMESPACE
-
-
 #if @Qt5WebKit_FOUND@
 #  include <QtWebKit/QtWebKit>
 #endif

@@ -377,7 +377,7 @@ PyObject* signalInstanceConnect(PyObject* self, PyObject* args, PyObject* kwds)
         else
             Py_XDECREF(result);
     }
-    if (!PyErr_Occurred())
+    if (PyErr_Occurred())
         PyErr_Format(PyExc_RuntimeError, "Failed to connect signal %s.", source->d->signature);
     return 0;
 }

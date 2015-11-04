@@ -2006,8 +2006,6 @@
       <include file-name="QCoreApplication" location="global"/>
       <include file-name="signalmanager.h" location="local" />
     </extra-includes>
-    <!-- XXX Qt5: probably needs to be handled by "QObject::d_ptr->dynamicMetaObject();"
-        see cppgenerator.cpp
     <modify-function signature="metaObject() const">
       <inject-code class="target" position="beginning">
         %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME();
@@ -2017,7 +2015,6 @@
         <reference-count action="set"/>
       </modify-argument>
     </modify-function>
-    -->
 
     <modify-function signature="deleteLater()">
       <modify-argument index="this">
@@ -2054,30 +2051,39 @@
         <parent index="1" action="add"/>
       </modify-argument>
     </modify-function>
-
-    <!-- this stuff needs to wait for, maybe, 2 weeks
     <modify-function signature="connect(const QObject*, const char*, const char *, Qt::ConnectionType) const">
         <modify-argument index="4">
             <rename to="type"/>
         </modify-argument>
         <inject-code class="target" position="beginning" file="">
         // %FUNCTION_NAME() - disable generation of function call.
-        %RETURN_TYPE %0 = qobjectConnect(%1, %2, %CPPSELF, %3, %4);
-        %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+        bool %0 = qobjectConnect(%1, %2, %CPPSELF, %3, %4);
+        %PYARG_0 = %CONVERTTOPYTHON[bool](%0);
+        </inject-code>
+    </modify-function>
+    <!-- static version -->
+    <modify-function signature="connect(const QObject*, QMetaMethod, const QObject*, QMetaMethod, Qt::ConnectionType)">
+        <modify-argument index="5">
+            <rename to="type"/>
+        </modify-argument>
+        <inject-code class="target" position="beginning" file="">
+        // %FUNCTION_NAME() - disable generation of function call.
+        bool %0 = qobjectConnect(%1, %2, %3, %4, %5);
+        %PYARG_0 = %CONVERTTOPYTHON[bool](%0);
         </inject-code>
     </modify-function>
     <modify-function signature="connect(const QObject*, const char*, const QObject*, const char *, Qt::ConnectionType)">
         <modify-argument index="5">
             <rename to="type"/>
         </modify-argument>
-        <inject-code class="target" position="beginning" file="">
+        <inject-code class="target" position="beginning">
         // %FUNCTION_NAME() - disable generation of function call.
-        %RETURN_TYPE %0 = qobjectConnect(%1, %2, %3, %4, %5);
-        %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+        bool %0 = qobjectConnect(%1, %2, %3, %4, %5);
+        %PYARG_0 = %CONVERTTOPYTHON[bool](%0);
         </inject-code>
     </modify-function>
     <inject-code class="native" position="beginning" file="glue/qobject_connect.cpp" />
-    <add-function signature="connect(const QObject*, const char*, PyCallable*, Qt::ConnectionType)" return-type="QMetaObject::Connection" static="yes">
+    <add-function signature="connect(const QObject*, const char*, PyCallable*, Qt::ConnectionType)" return-type="bool" static="yes">
         <modify-argument index="4">
             <rename to="type"/>
             <replace-default-expression with="Qt::AutoConnection" />
@@ -2088,11 +2094,8 @@
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
         </inject-code>
     </add-function>
-  -->
     <!-- static version -->
-
-    <!--
-    <add-function signature="connect(const char*, PyCallable*, Qt::ConnectionType)" return-type="QMetaObject::Connection">
+    <add-function signature="connect(const char*, PyCallable*, Qt::ConnectionType)" return-type="bool">
         <modify-argument index="3">
             <rename to="type"/>
             <replace-default-expression with="Qt::AutoConnection" />
@@ -2103,7 +2106,7 @@
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
         </inject-code>
     </add-function>
-    <add-function signature="connect(const char*, const QObject*, const char *, Qt::ConnectionType)" return-type="QMetaObject::Connection">
+    <add-function signature="connect(const char*, const QObject*, const char *, Qt::ConnectionType)" return-type="bool">
         <modify-argument index="4">
             <rename to="type"/>
             <replace-default-expression with="Qt::AutoConnection" />
@@ -2114,7 +2117,8 @@
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
         </inject-code>
     </add-function>
-   <add-function signature="emit(const char*, ...)" return-type="bool">
+    
+    <add-function signature="emit(const char*, ...)" return-type="bool">
         <inject-code class="target" position="beginning">
         %RETURN_TYPE %0 = PySide::SignalManager::instance().emitSignal(%CPPSELF, %1, %PYARG_2);
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
@@ -2134,7 +2138,7 @@
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
         </inject-code>
     </add-function>
-    -->
+
 
     <inject-code class="native" file="glue/qobject_findchild.cpp"/>
     <add-function signature="findChild(PyTypeObject*, const QString&amp;)" return-type="PyObject*">
@@ -2386,7 +2390,7 @@
     </add-function>
   </value-type>
   <value-type name="QByteArray" hash-function="qHash">
-    <enum-type name="Base64Option" />
+    <enum-type name="Base64Option" flags="Base64Options" since="5.2"/>
     <conversion-rule>
         <target-to-native>
             <add-conversion type="Py_None">
@@ -2739,11 +2743,11 @@
       <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>)" allow-thread="yes" />
       <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>, int)" allow-thread="yes" />
   </object-type>
-  <object-type name="QFileDevice">
+  <object-type name="QFileDevice" since="5.0">
     <enum-type name="FileError"/>
     <enum-type name="MemoryMapFlags"/>
     <enum-type name="Permission" flags="Permissions"/>
-    <enum-type name="FileHandleFlag" flags="FileHandleFlags" since="4.8" revision="4800"/>
+    <enum-type name="FileHandleFlag" flags="FileHandleFlags"/>
     <extra-includes>
       <!-- Qt5: private <include file-name="QAbstractFileEngine" location="global"/> -->
     </extra-includes>
@@ -3230,7 +3234,7 @@
         </inject-code>
     </modify-function>
     <!-- Function removed because on windows it returns a win32 specific structure -->
-    <modify-function signature="pid()" remove="all" />
+    <modify-function signature="pid() const" remove="all" />
     <add-function signature="pid()" return-type="long">
         <inject-code>
             long result;
@@ -3305,7 +3309,7 @@
     <modify-function signature="notify(QObject*,QEvent*)" allow-thread="yes">
       <modify-argument index="2" invalidate-after-use="yes"/>
     </modify-function>
-    <modify-function signature="QCoreApplication(int &amp;, char  **, int)" access="private"/>
+    <modify-function signature="QCoreApplication(int &amp;, char  **)" access="private"/>
     <inject-code class="native" file="glue/qcoreapplication_init.cpp" position="beginning" />
     <modify-function signature="postEvent(QObject*,QEvent*, int)">
       <modify-argument index="2">
@@ -3780,7 +3784,6 @@
   </object-type>
   <object-type name="QMetaObject::Connection">
     <include file-name="qobjectdefs.h" location="global" />
-    <!-- This isn't part of Qt public API -->
   </object-type>
   <value-type name="QMetaProperty" >
     <!-- This isn't part of Qt public API -->
