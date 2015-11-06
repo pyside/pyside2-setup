@@ -1491,9 +1491,6 @@
   <object-type name="QInputContextFactory"/>
   -->
   <object-type name="QIntValidator" />
-  <object-type name="QItemSelectionModel">
-      <enum-type name="SelectionFlag" flags="SelectionFlags"/>
-  </object-type>
 
   <!-- Qt5: gone. Use the new fusion style.
   <object-type name="QMotifStyle">
@@ -1924,18 +1921,6 @@
     <modify-function signature="exec(QFlags&lt;Qt::DropAction&gt;)" rename="exec_" allow-thread="yes"/>
     <modify-function signature="exec(QFlags&lt;Qt::DropAction&gt;, Qt::DropAction)" rename="exec_" allow-thread="yes"/>
   </object-type>
-  <object-type name="QSortFilterProxyModel">
-    <extra-includes>
-      <include file-name="QItemSelection" location="global"/>
-      <include file-name="QStringList" location="global"/>
-      <include file-name="QSize" location="global"/>
-    </extra-includes>
-    <modify-function signature="setSourceModel(QAbstractItemModel*)">
-      <modify-argument index="1">
-        <reference-count action="set"/>
-      </modify-argument>
-    </modify-function>
-  </object-type>
   <!-- Qt5: gone
   <object-type name="QInputContext">
     <extra-includes>
@@ -2198,18 +2183,6 @@
       </modify-argument>
     </modify-function>
     <modify-function signature="print(QPagedPaintDevice*)const" rename="print_" />
-  </object-type>
-  <object-type name="QAbstractProxyModel" polymorphic-id-expression="qobject_cast&lt;QAbstractProxyModel*&gt;(%1)">
-    <extra-includes>
-      <include file-name="QItemSelection" location="global"/>
-      <include file-name="QStringList" location="global"/>
-      <include file-name="QSize" location="global"/>
-    </extra-includes>
-    <modify-function signature="setSourceModel(QAbstractItemModel *)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
   </object-type>
   <object-type name="QTextTable">
     <extra-includes>

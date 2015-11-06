@@ -71,7 +71,7 @@ static bool qobjectConnect(QObject* source, const char* signal, QObject* receive
 
 static bool qobjectConnect(QObject* source, QMetaMethod signal, QObject* receiver, QMetaMethod slot, Qt::ConnectionType type)
 {
-   return qobjectConnect(source, signal.methodSignature(), receiver, slot.methodSignature(), type;
+   return qobjectConnect(source, signal.methodSignature(), receiver, slot.methodSignature(), type);
 }
 
 static bool qobjectConnectCallback(QObject* source, const char* signal, PyObject* callback, Qt::ConnectionType type)

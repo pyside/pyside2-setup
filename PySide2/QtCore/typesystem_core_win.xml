@@ -24,6 +24,8 @@
   </extra-includes>
   <primitive-type name="Qt::HANDLE" target-lang-api-name="PyObject" />
   <primitive-type name="HWND">
+      <!-- Qt5: Add this include there to insert ti in the global qtcore header (needed by qprocess_wrapper) -->
+      <include file-name="wtypes.h" location="global"/>
       <conversion-rule>
         <native-to-target>
         #ifdef IS_PY3K

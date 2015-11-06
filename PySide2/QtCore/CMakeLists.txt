@@ -10,12 +10,16 @@ else()
     set(SPECIFIC_OS_FILES "")
 endif()
 
+# TODO: Fix cycling dependency  when generating QDataStream operator<< for QUuid
+set (QtCore_SRC_FIXED_ME ${QtCore_GEN_DIR}/quuid_wrapper.cpp)
+
 set(QtCore_SRC
 ${QtCore_GEN_DIR}/qabstractanimation_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstracteventdispatcher_timerinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstracteventdispatcher_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstractitemmodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstractlistmodel_wrapper.cpp
+${QtCore_GEN_DIR}/qabstractproxymodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstractstate_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstracttablemodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstracttransition_wrapper.cpp
@@ -29,8 +33,7 @@ ${QtCore_GEN_DIR}/qbytearraymatcher_wrapper.cpp
 ${QtCore_GEN_DIR}/qchildevent_wrapper.cpp
 ${QtCore_GEN_DIR}/qcoreapplication_wrapper.cpp
 ${QtCore_GEN_DIR}/qcryptographichash_wrapper.cpp
-### seems to be a shiboken weirdness, only on Windows ?!
-### 'numArgs' : undeclared identifier   ${QtCore_GEN_DIR}/qdatastream_wrapper.cpp
+${QtCore_GEN_DIR}/qdatastream_wrapper.cpp
 ${QtCore_GEN_DIR}/qdate_wrapper.cpp
 ${QtCore_GEN_DIR}/qdatetime_wrapper.cpp
 ${QtCore_GEN_DIR}/qdir_wrapper.cpp
@@ -51,11 +54,13 @@ ${QtCore_GEN_DIR}/qgenericargument_wrapper.cpp
 ${QtCore_GEN_DIR}/qgenericreturnargument_wrapper.cpp
 ${QtCore_GEN_DIR}/qhistorystate_wrapper.cpp
 ${QtCore_GEN_DIR}/qiodevice_wrapper.cpp
+${QtCore_GEN_DIR}/qitemselectionmodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qlibraryinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qline_wrapper.cpp
 ${QtCore_GEN_DIR}/qlinef_wrapper.cpp
 ${QtCore_GEN_DIR}/qlocale_wrapper.cpp
 ${QtCore_GEN_DIR}/qmargins_wrapper.cpp
+${QtCore_GEN_DIR}/qmessagelogcontext_wrapper.cpp
 ${QtCore_GEN_DIR}/qmetaclassinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qmetaenum_wrapper.cpp
 ${QtCore_GEN_DIR}/qmetamethod_wrapper.cpp
@@ -91,6 +96,7 @@ ${QtCore_GEN_DIR}/qsignaltransition_wrapper.cpp
 ${QtCore_GEN_DIR}/qsize_wrapper.cpp
 ${QtCore_GEN_DIR}/qsizef_wrapper.cpp
 ${QtCore_GEN_DIR}/qsocketnotifier_wrapper.cpp
+${QtCore_GEN_DIR}/qsortfilterproxymodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qstate_wrapper.cpp
 ${QtCore_GEN_DIR}/qstatemachine_signalevent_wrapper.cpp
 ${QtCore_GEN_DIR}/qstatemachine_wrappedevent_wrapper.cpp
@@ -114,7 +120,6 @@ ${QtCore_GEN_DIR}/qtimer_wrapper.cpp
 ${QtCore_GEN_DIR}/qtimerevent_wrapper.cpp
 ${QtCore_GEN_DIR}/qtranslator_wrapper.cpp
 ${QtCore_GEN_DIR}/qurl_wrapper.cpp
-${QtCore_GEN_DIR}/quuid_wrapper.cpp
 ${QtCore_GEN_DIR}/qvariantanimation_wrapper.cpp
 ${QtCore_GEN_DIR}/qwaitcondition_wrapper.cpp
 ${QtCore_GEN_DIR}/qwritelocker_wrapper.cpp
@@ -127,6 +132,7 @@ ${QtCore_GEN_DIR}/qxmlstreamnotationdeclaration_wrapper.cpp
 ${QtCore_GEN_DIR}/qxmlstreamreader_wrapper.cpp
 ${QtCore_GEN_DIR}/qxmlstreamwriter_wrapper.cpp
 
+
 ${SPECIFIC_OS_FILES}
 # module is always needed
 ${QtCore_GEN_DIR}/qtcore_module_wrapper.cpp
@@ -137,16 +143,6 @@ configure_file("${QtCore_SOURCE_DIR}/typesystem_core.xml.in"
 
 make_path(QtCore_typesystem_path ${QtCore_SOURCE_DIR})
 
-# because one last thing does not compile yet, we use this trick:
-if(MSVC)
-    # on windows, link without the problem module,
-    skip_missing_classes(QtCore_SRC)
-else()
-    # otherwise, add the module back to the sources.
-    set(QtCore_SRC ${QtCore_SRC}
-        ${QtCore_GEN_DIR}/qdatastream_wrapper.cpp
-        )
-endif()
 
 set(QtCore_include_dirs ${QtCore_SOURCE_DIR}
                         ${QtCore_BINARY_DIR}

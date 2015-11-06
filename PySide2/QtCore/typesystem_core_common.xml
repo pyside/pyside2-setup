@@ -834,7 +834,7 @@
     <!-- Qt5: gone <enum-type name="AnchorAttribute"/> -->
     <enum-type name="AnchorPoint" since="4.6" />
     <enum-type name="ApplicationAttribute"/>
-    <enum-type name="ApplicationState" flags="ApplicationStates"/>
+    <enum-type name="ApplicationState" flags="ApplicationStates" since="5.1"/> 
     <enum-type name="ArrowType"/>
     <enum-type name="AspectRatioMode"/>
     <enum-type name="Axis"/>
@@ -853,10 +853,10 @@
     <enum-type name="DockWidgetArea" flags="DockWidgetAreas" />
     <enum-type name="DockWidgetAreaSizes"/>
     <enum-type name="DropAction" flags="DropActions"/>
-    <enum-type name="Edge" flags="Edges"/>
+    <enum-type name="Edge" flags="Edges" since="5.1"/>
     <enum-type name="EventPriority"/>
     <enum-type name="FillRule"/>
-    <enum-type name="FindChildOption" flags="FindChildOptions"/>
+    <enum-type name="FindChildOption" flags="FindChildOptions" since="5.0"/>
     <enum-type name="FocusPolicy"/>
     <enum-type name="FocusReason"/>
     <enum-type name="GestureFlag" flags="GestureFlags" since="4.6"/>
@@ -878,17 +878,17 @@
     <enum-type name="MatchFlag" flags="MatchFlags"/>
     <enum-type name="Modifier"/>
     <enum-type name="MouseButton" flags="MouseButtons"/>
-    <enum-type name="MouseEventFlag" flags="MouseEventFlags"/>
-    <enum-type name="MouseEventSource"/>
-    <enum-type name="NativeGestureType"/>
+    <enum-type name="MouseEventFlag" flags="MouseEventFlags" since="5.3"/>
+    <enum-type name="MouseEventSource" since="5.3"/>
+    <enum-type name="NativeGestureType" since="5.0"/>
     <enum-type name="NavigationMode" since="4.6"/>
     <enum-type name="Orientation" flags="Orientations"/>
     <enum-type name="PenCapStyle"/>
     <enum-type name="PenJoinStyle"/>
     <enum-type name="PenStyle"/>
-    <enum-type name="ScreenOrientation" flags="ScreenOrientations"/>
+    <enum-type name="ScreenOrientation" flags="ScreenOrientations" since="5.0"/>
     <enum-type name="ScrollBarPolicy"/>
-    <enum-type name="ScrollPhase"/>
+    <enum-type name="ScrollPhase" since="5.2"/>
     <enum-type name="ShortcutContext"/>
     <enum-type name="SizeHint"/>
     <enum-type name="SizeMode"/>
@@ -899,7 +899,7 @@
     <enum-type name="TextFormat"/>
     <enum-type name="TextInteractionFlag" flags="TextInteractionFlags"/>
     <enum-type name="TileRule" since="4.6"/>
-    <enum-type name="TimerType"/>
+    <enum-type name="TimerType" since="5.0"/>
     <enum-type name="TimeSpec"/>
     <enum-type name="ToolBarArea" flags="ToolBarAreas" />
     <enum-type name="ToolBarAreaSizes"/>
@@ -1022,9 +1022,7 @@
         Shiboken::GilState state;
         Shiboken::AutoDecRef arglist(PyTuple_New(3));
         PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[QtMsgType](type));
-        //PyTuple_SET_ITEM(arglist, 1, %xxx CONVERTTOPYTHON[QMessageLogContext](ctx));
-        // XXX we need to handle class QMessageLogContext
-        PyTuple_SET_ITEM(arglist, 1, Py_None);
+        PyTuple_SET_ITEM(arglist, 1, %CONVERTTOPYTHON[QMessageLogContext](ctx));
         QByteArray array = msg.toLatin1().data();
         char *data = array.data();
         PyTuple_SET_ITEM(arglist, 2, %CONVERTTOPYTHON[char *](data));
@@ -1716,7 +1714,10 @@
         </modify-argument>
     </modify-function>
   </value-type>
-  <value-type name="QUuid">
+  
+  <!-- FIXME QT5: Remove QUuid because cyclic dependency found on overloaddata QUuid(), 
+  this lead to cyclic dependency in <<(QDataStream &, QUUid) and incorrect QDataStream code generation (Windows only)-->
+  <!-- <value-type name="QUuid">
     <enum-type name="Variant"/>
     <enum-type name="Version"/>
     <add-function signature="__repr__" return-type="PyObject*">
@@ -1735,7 +1736,7 @@
             </insert-template>
         </inject-code>
     </add-function>
-  </value-type>
+  </value-type> -->
 
   <value-type name="QLocale">
     <enum-type name="Country" />
@@ -1999,6 +2000,41 @@
       </modify-argument>
     </modify-function>
   </object-type>
+  <object-type name="QItemSelectionModel">
+    <enum-type name="SelectionFlag" flags="SelectionFlags"/>
+  </object-type>
+  <primitive-type name="QModelIndexList"/>
+  <object-type name="QAbstractProxyModel" polymorphic-id-expression="qobject_cast&lt;QAbstractProxyModel*&gt;(%1)">
+    <extra-includes>
+      <include file-name="QItemSelection" location="global"/>
+      <include file-name="QStringList" location="global"/>
+      <include file-name="QSize" location="global"/>
+    </extra-includes>
+    <modify-function signature="setSourceModel(QAbstractItemModel *)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QSortFilterProxyModel">
+    <!-- ### This reimplementation of "QObject::parent()" is used in C++ only
+         when "using QObject::parent;" is not available. It's useless in Python. -->
+    <modify-function signature="parent()const" remove="all"/>
+    <extra-includes>
+      <include file-name="QItemSelection" location="global"/>
+      <include file-name="QStringList" location="global"/>
+      <include file-name="QSize" location="global"/>
+    </extra-includes>
+    <modify-function signature="setSourceModel(QAbstractItemModel *)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+    </modify-function>
+    <!--### Obsolete in 4.3-->
+    <modify-function signature="clear()" remove="all"/>
+    <modify-function signature="filterChanged()" remove="all"/>
+    <!--### End of obsolete section -->
+  </object-type>  
   <!-- QObject is created manually -->
   <object-type name="QObject">
     <extra-includes>
@@ -3769,6 +3805,10 @@
     <include file-name="qobjectdefs.h" location="global" />
   </value-type>
 
+  <object-type name="QMessageLogContext">
+    <modify-function signature="copy(const QMessageLogContext &amp;)" remove="all" />
+  </object-type>
+  
   <value-type name="QMetaMethod">
     <enum-type name="Access"/>
     <enum-type name="MethodType"/>

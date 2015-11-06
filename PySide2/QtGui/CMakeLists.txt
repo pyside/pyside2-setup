@@ -12,7 +12,6 @@ endif()
 qt5_wrap_cpp(QPYTEXTOBJECT_MOC "${pyside2_SOURCE_DIR}/qpytextobject.h")
 
 set(QtGui_SRC
-${QtGui_GEN_DIR}/qabstractproxymodel_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_paintcontext_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_selection_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_wrapper.cpp
@@ -57,7 +56,6 @@ ${QtGui_GEN_DIR}/qinputmethodevent_attribute_wrapper.cpp
 ${QtGui_GEN_DIR}/qinputmethodevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qintvalidator_wrapper.cpp
 ${QtGui_GEN_DIR}/qitemselection_wrapper.cpp
-${QtGui_GEN_DIR}/qitemselectionmodel_wrapper.cpp
 ${QtGui_GEN_DIR}/qitemselectionrange_wrapper.cpp
 ${QtGui_GEN_DIR}/qkeyevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qkeysequence_wrapper.cpp
@@ -104,7 +102,6 @@ ${QtGui_GEN_DIR}/qresizeevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qsessionmanager_wrapper.cpp
 ${QtGui_GEN_DIR}/qshortcutevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qshowevent_wrapper.cpp
-${QtGui_GEN_DIR}/qsortfilterproxymodel_wrapper.cpp
 ${QtGui_GEN_DIR}/qstandarditem_wrapper.cpp
 ${QtGui_GEN_DIR}/qstandarditemmodel_wrapper.cpp
 ${QtGui_GEN_DIR}/qstatustipevent_wrapper.cpp
