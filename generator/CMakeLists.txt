@@ -5,11 +5,11 @@ find_package(Qt5XmlPatterns)
 
 set(shiboken2_SRC
 generator.cpp
-shiboken/cppgenerator.cpp
-shiboken/headergenerator.cpp
-shiboken/overloaddata.cpp
-shiboken/shibokengenerator.cpp
-shiboken/shibokennormalize.cpp
+shiboken2/cppgenerator.cpp
+shiboken2/headergenerator.cpp
+shiboken2/overloaddata.cpp
+shiboken2/shibokengenerator.cpp
+shiboken2/shibokennormalize.cpp
 main.cpp
 )
 
@@ -18,7 +18,7 @@ if (NOT DISABLE_DOCSTRINGS)
     add_definitions(-DDOCSTRINGS_ENABLED)
 endif()
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/shiboken
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/shiboken2
                     ${CMAKE_CURRENT_SOURCE_DIR}/qtdoc
                     ${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
