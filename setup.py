@@ -683,7 +683,8 @@ class pyside_build(_build):
         if sys.platform == "win32":
             vars['dbgPostfix'] = OPTION_DEBUG and "_d" or ""
             return self.prepare_packages_win32(vars)
-        return self.prepare_packages_posix(vars)
+        else:
+            return self.prepare_packages_posix(vars)
 
     def prepare_packages_posix(self, vars):
         executables = []
