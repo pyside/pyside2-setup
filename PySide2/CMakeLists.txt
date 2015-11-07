@@ -121,6 +121,13 @@ HAS_QT_MODULE(Qt5Core_FOUND QtCore)
 if(NOT MSVC)
     # right now this does not build on windows
     HAS_QT_MODULE(Qt5Concurrent_FOUND QtConcurrent)
+else()
+    # Note: in order to use this variable in a sibling project (tests),
+    # we need to either make the value persistent like so:
+    # set(DISABLE_QtConcurrent 1 CACHE INTERNAL "")
+    # or export it to the caller's scope by the PARENT_SCOPE specifier.
+    # This is preferable, because there are no sticky side effects.
+    set(DISABLE_QtConcurrent 1 PARENT_SCOPE)
 ENDIF()
 HAS_QT_MODULE(Qt5Gui_FOUND QtGui)
 HAS_QT_MODULE(Qt5Widgets_FOUND QtWidgets)
@@ -135,6 +142,8 @@ HAS_QT_MODULE(Qt5WebKit_FOUND QtWebKit)
 if(NOT MSVC)
     # right now this does not build on windows
     HAS_QT_MODULE(Qt5WebKitWidgets_FOUND QtWebKitWidgets)
+else()
+    set(DISABLE_QtWebKitWidgets 1 PARENT_SCOPE)
 ENDIF()
 ###
 # This module is deprecated! It should be replaces by QtGui.
@@ -147,23 +156,25 @@ if(NOT MSVC)
     # right now this does not build on windows
     if(Qt5Designer_FOUND)
         HAS_QT_MODULE(Qt5UiTools_FOUND QtUiTools)
+    else()
+        set(DISABLE_QtUiTools 1 PARENT_SCOPE)
     endif()
 endif()
 HAS_QT_MODULE(Qt5Script_FOUND QtScript)
 if(NOT MSVC)
     # right now this does not build on windows
     HAS_QT_MODULE(Qt5ScriptTools_FOUND QtScriptTools)
+else()
+    set(DISABLE_QtScriptTools 1 PARENT_SCOPE)
 ENDIF()
-if(0)
-    # deprecated!
-    # XXX We should build the new QtQml and QtQuick modules.
-    HAS_QT_MODULE(Qt5Declarative_FOUND QtDeclarative)
-endif()
 HAS_QT_MODULE(Qt5Help_FOUND QtHelp)
 if(0)
-  ### crashes shiboken, as soon as 'QAbstractVideoBuffer' is touched!
-  HAS_QT_MODULE(Qt5Multimedia_FOUND QtMultimedia)
+    ### crashes shiboken, as soon as 'QAbstractVideoBuffer' is touched!
+    HAS_QT_MODULE(Qt5Multimedia_FOUND QtMultimedia)
+else()
+    set(DISABLE_QtMultimedia 1 PARENT_SCOPE)
 endif()
+message(WARNING "hier in PySide2 ${DISABLE_QtMultimedia}")
 
 # install
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/__init__.py"
