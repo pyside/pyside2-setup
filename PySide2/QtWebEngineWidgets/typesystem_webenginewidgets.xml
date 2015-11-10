@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<!--
+    This file is part of PySide project.
+    Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+    Contact: PySide team <contact@pyside.org>
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+-->
+<typesystem package="PySide2.QtWebEngineWidgets">
+  <load-typesystem name="typesystem_core.xml" generate="no"/>
+  <load-typesystem name="typesystem_gui.xml" generate="no"/>
+  <load-typesystem name="typesystem_widgets.xml" generate="no"/>
+  <load-typesystem name="typesystem_network.xml" generate="no"/>
+
+  <object-type name="QWebEngineCertificateError">
+    <enum-type name="Error"/>
+  </object-type>
+
+  <object-type name="QWebEngineDownloadItem">
+    <enum-type name="DownloadState" />
+  </object-type>
+  
+  <!-- TODO: Deal with private constructor
+  <value-type name="QWebEngineHistory" /> -->
+
+  <value-type name="QWebEngineHistoryItem" />
+
+  <object-type name="QWebEnginePage">
+    <enum-type name="WebAction" />
+    <enum-type name="FindFlag" flags="FindFlags"/>
+    <enum-type name="WebWindowType" />
+    <enum-type name="PermissionPolicy" />
+    <enum-type name="NavigationType" />
+    <enum-type name="Feature" />
+    <enum-type name="FileSelectionMode" />
+    <enum-type name="JavaScriptConsoleMessageLevel" />
+  </object-type>
+
+  <object-type name="QWebEngineProfile">
+    <enum-type name="HttpCacheType" />
+    <enum-type name="PersistentCookiesPolicy" />
+  </object-type>
+
+  <value-type name="QWebEngineScript">
+    <enum-type name="InjectionPoint" />
+    <enum-type name="ScriptWorldId" />
+  </value-type>
+
+  <!-- TODO: Deal with private constructor
+  <value-type name="QWebEngineScriptCollection" /> -->
+
+  <!-- TODO: Deal with private constructor
+  <value-type name="QWebEngineSettings">
+    <enum-type name="FontFamily" />
+    <enum-type name="WebAttribute" />
+    <enum-type name="FontSize" />
+  </value-type> -->
+
+  <object-type name="QWebEngineView" />
+
+</typesystem>

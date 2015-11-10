@@ -3990,6 +3990,20 @@
       </inject-code>
     </add-function>
   </value-type>
+  <value-type name="QJsonArray">
+    <extra-includes>
+      <include file-name="QStringList" location="global"/>
+    </extra-includes>
+  </value-type>
+  <value-type name="QJsonObject" />
+  <value-type name="QJsonValue">
+    <enum-type name="Type"/>
+    <extra-includes>
+      <include file-name="QVariant" location="global"/>
+      <include file-name="QJsonArray" location="global"/>
+      <include file-name="QJsonObject" location="global"/>
+    </extra-includes>
+  </value-type>
 
   <object-type name="QEventTransition" since="4.6">
     <modify-function signature="QEventTransition(QState*)">

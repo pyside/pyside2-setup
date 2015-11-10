@@ -419,6 +419,20 @@ QT_END_NAMESPACE
 #  include "pysideqtesttouch.h"
 #endif
 
+#if @Qt5WebEngine_FOUND@
+#  include <QtWebEngineWidgets/QtWebEngineWidgets>
+#endif
+
+#if @Qt5WebChannel_FOUND@
+#  include <QtWebChannel/QtWebChannel>
+#endif
+
+/** Doesn't build yet.
+#if @Qt5WebSockets_FOUND@
+#  include <QtWebSockets/QtWebSockets>
+#endif
+*/
+
 //QtHelp needs to be included after QtSql. Why?
 #include <QtHelp/QtHelp>
 
