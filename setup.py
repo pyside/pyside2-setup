@@ -159,6 +159,7 @@ OPTION_JOBS = option_value('jobs')                # number of parallel build job
 OPTION_JOM = has_option('jom')                    # use jom instead of nmake with msvc
 OPTION_BUILDTESTS = has_option("build-tests")
 OPTION_OSXARCH = option_value("osx-arch")
+OPTION_XVFB = has_option("use-xvfb")
 
 if OPTION_QMAKE is None:
     OPTION_QMAKE = find_executable("qmake")
