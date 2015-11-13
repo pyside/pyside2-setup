@@ -3,7 +3,6 @@ extern PyObject* moduleQtGui;
 
 static int QGuiApplicationArgCount;
 static char** QGuiApplicationArgValues;
-static const char QAPP_MACRO[] = "qGuiApp";
 
 bool QGuiApplicationConstructorStart(PyObject* argv)
 {
@@ -17,15 +16,6 @@ bool QGuiApplicationConstructorStart(PyObject* argv)
 
 void QGuiApplicationConstructorEnd(PyObject* self)
 {
-    // Verify if qApp is in main module
-    PyObject* globalsDict = PyEval_GetGlobals();
-    if (globalsDict) {
-        PyObject* qAppObj = PyDict_GetItemString(globalsDict, QAPP_MACRO);
-        if (qAppObj)
-            PyDict_SetItemString(globalsDict, QAPP_MACRO, self);
-    }
-
-    PyObject_SetAttrString(moduleQtGui, QAPP_MACRO, self);
     PySide::registerCleanupFunction(&PySide::destroyQCoreApplication);
     Py_INCREF(self);
 }
