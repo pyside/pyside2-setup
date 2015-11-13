@@ -21,8 +21,10 @@ find_package(Qt5OpenGL)
 find_package(Qt5Script)
 find_package(Qt5ScriptTools)
 find_package(Qt5Help)
-find_package(Qt5Declarative)
 find_package(Qt5Multimedia)
+find_package(Qt5Quick)
+find_package(Qt5Qml)
+find_package(Qt5QuickWidgets)
 
 # Configure include based on platform
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/global.h.in"
@@ -114,6 +116,9 @@ CHECK_PACKAGE_FOUND(Qt5Script opt)
 CHECK_PACKAGE_FOUND(Qt5ScriptTools opt)
 CHECK_PACKAGE_FOUND(Qt5Help opt)
 CHECK_PACKAGE_FOUND(Qt5Multimedia opt)
+CHECK_PACKAGE_FOUND(Qt5Quick opt)
+CHECK_PACKAGE_FOUND(Qt5Qml opt)
+CHECK_PACKAGE_FOUND(Qt5QuickWidgets opt)
 
 # note: the order of this list is relevant for dependencies.
 # For instance: Qt5Printsupport must come before Qt5WebKitWidgets
@@ -175,6 +180,9 @@ else()
     set(DISABLE_QtMultimedia 1 PARENT_SCOPE)
 endif()
 message(WARNING "hier in PySide2 ${DISABLE_QtMultimedia}")
+HAS_QT_MODULE(Qt5Quick_FOUND QtQuick)
+HAS_QT_MODULE(Qt5Qml_FOUND QtQml)
+HAS_QT_MODULE(Qt5QuickWidgets_FOUND QtQuickWidgets)
 
 # install
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/__init__.py"

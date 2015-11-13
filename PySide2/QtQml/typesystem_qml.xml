@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<!--
+    This file is part of PySide project.
+    Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+    Contact: PySide team <contact@pyside.org>
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+-->
+<typesystem package="PySide2.QtQml">
+    <load-typesystem name="typesystem_core.xml" generate="no"/>
+    <load-typesystem name="typesystem_network.xml" generate="no"/>
+    <load-typesystem name="typesystem_gui.xml" generate="no"/>
+    <load-typesystem name="typesystem_quick.xml" generate="no"/>
+
+    <add-function signature="qmlRegisterType(PyTypeObject, const char*, int, int, const char*)" return-type="int">
+        <inject-documentation format="target" mode="append">
+            This function registers the Python type in the QML system with the name qmlName, in the library imported from uri having the version number composed from versionMajor and versionMinor.
+            Returns the QML type id.
+
+            For example, this registers a Python class MySliderItem as a QML type named Slider for version 1.0 of a module called "com.mycompany.qmlcomponents":
+
+            ::
+
+                qmlRegisterType(MySliderItem, "com.mycompany.qmlcomponents", 1, 0, "Slider")
+
+            Once this is registered, the type can be used in QML by importing the specified module name and version number:
+
+            ::
+
+                import com.mycompany.qmlcomponents 1.0
+
+                Slider { ... }
+
+            Note that it's perfectly reasonable for a library to register types to older versions than the actual version of the library. Indeed, it is normal for the new library to allow QML written to previous versions to continue to work, even if more advanced versions of some of its types are available.
+        </inject-documentation>
+
+        <inject-code class="target">
+        int %0 = PySide::qmlRegisterType(%ARGUMENT_NAMES);
+        %PYARG_0 = %CONVERTTOPYTHON[int](%0);
+        </inject-code>
+    </add-function>
+
+    <enum-type identified-by-value="QML_HAS_ATTACHED_PROPERTIES">
+        <extra-includes>
+            <include file-name="QtQuick" location="global"/>
+            <include file-name="QtQml" location="global"/>
+            <!-- FIXME The include tag doesn't work on modules -->
+            <include file-name="pysideqmlregistertype.h" location="local"/>
+        </extra-includes>
+    </enum-type>
+
+    <inject-code class="target" position="end">
+    PySide::initQmlSupport(module);
+    </inject-code>
+
+    <object-type name="QJSEngine">
+        <add-function signature="toScriptValue(const QVariant&amp;)" return-type="QJSValue">
+            <inject-code class="target" position="end">
+                %RETURN_TYPE retval = %CPPSELF.%FUNCTION_NAME(%1);
+                return %CONVERTTOPYTHON[%RETURN_TYPE](retval);
+            </inject-code>
+        </add-function>
+    </object-type>
+    <value-type name="QJSValue">
+        <enum-type name="SpecialValue" />
+    </value-type>
+    <!-- TODO: Attempts to use private members/operators
+    <value-type name="QJSValueIterator" /> -->
+
+    <!-- TODO: Figure out what's causing this abstract class
+         to fail.
+    <value-type name="QQmlAbstractUrlInterceptor">
+        <enum-type name="DataType" />
+    </value-type> -->
+    <object-type name="QQmlApplicationEngine" />
+    <!-- TODO: More private method errors
+    <object-type name="QQmlComponent">
+        <enum-type name="CompilationMode" />
+        <enum-type name="Status" />
+    </object-type> -->
+    <object-type name="QQmlContext" />
+    <value-type name="QQmlError" />
+    <!-- <object-type name="QQmlDebuggingEnabler" /> -->
+    <object-type name="QQmlEngine">
+        <enum-type name="ObjectOwnership" />
+    </object-type>
+    <object-type name="QQmlExpression" />
+    <!-- TODO: Abstract class
+    <value-type name="QQmlExtensionPlugin" /> -->
+    <!-- qRegisterMetaType issues
+    <value-type name="QQmlFile">
+        <enum-type name="Status" />
+    </value-type> -->
+    <object-type name="QQmlFileSelector" />
+    <!-- TODO: Abstract class
+    <value-type name="QQmlImageProviderBase">
+        <enum-type name="IncubationMode" />
+        <enum-type name="Flag" flags="Flags" />
+    </value-type> -->
+    <!-- TODO: More constructor issues
+    <value-type name="QQmlIncubator">
+        <enum-type name="IncubationMode" />
+        <enum-type name="Status" />
+    </value-type> -->
+
+    <!-- TODO: Gets this error when parsing:
+        Could not find type '::T*' for use in 'toPython' conversion. Make sure to use the full C++ name, e.g. 'Namespace::Class'.
+    <value-type name="QQmlListProperty" /> -->
+    <value-type name="QQmlListReference" />
+    <!-- TODO: Constructor issues
+    <value-type name="QQmlParserStatus" /> -->
+    <value-type name="QQmlProperty">
+        <enum-type name="PropertyTypeCategory" />
+        <enum-type name="Type" />
+    </value-type>
+    <!-- TODO: these fail too
+    <value-type name="QQmlPropertyMap" />
+    <value-type name="QQmlPropertyValueSource" />
+    <value-type name="QQmlScriptString" /> -->
+</typesystem>

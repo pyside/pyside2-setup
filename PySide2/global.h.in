@@ -419,6 +419,18 @@ QT_END_NAMESPACE
 #  include "pysideqtesttouch.h"
 #endif
 
+#if @Qt5Quick_FOUND@
+#  include <QtQuick/QtQuick>
+#endif
+
+#if @Qt5Qml_FOUND@
+#  include <QtQml/QtQml>
+#endif
+
+#if @Qt5QuickWidgets_FOUND@
+#  include <QtQuickWidgets/QtQuickWidgets>
+#endif
+
 //QtHelp needs to be included after QtSql. Why?
 #include <QtHelp/QtHelp>
 
