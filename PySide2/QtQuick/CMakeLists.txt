@@ -37,7 +37,7 @@ set(QtQuick_libraries pyside2
                       ${Qt5Gui_LIBRARIES}
                       ${Qt5Quick_LIBRARIES})
 
-set(QtQml_deps QtGui)
+set(QtQuick_deps QtGui)
 
 create_pyside_module(QtQuick
                      QtQuick_include_dirs
