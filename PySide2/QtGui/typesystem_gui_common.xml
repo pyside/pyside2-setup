@@ -3253,10 +3253,6 @@
   <rejection class="QWindow" function-name="nativeEvent"/>"
 
   <!-- Qt5: here the new QGuiApplication and related things -->
-  <!-- qApp macro -->
-  <inject-code class="native" position="beginning">
-    PyObject* moduleQtGui;
-  </inject-code>
   <object-type name="QGuiApplication">
     <!-- Qt5: gone <enum-type name="ColorSpec"/> -->
     <!-- Qt5: gone <enum-type name="Type"/> -->
