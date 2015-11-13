@@ -41,7 +41,7 @@ set(QtQuickWidgets_libraries pyside2
                              ${Qt5Qml_LIBRARIES}
                              ${Qt5QuickWidgets_LIBRARIES})
 
-set(QtQuickWidgets_deps QtGui QtQml QtQuick QtWidgets)
+set(QtQuickWidgets_deps QtGui QtQml QtQuick QtWidgets QtNetwork)
 
 create_pyside_module(QtQuickWidgets
                      QtQuickWidgets_include_dirs
