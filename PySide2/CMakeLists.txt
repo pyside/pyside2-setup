@@ -25,6 +25,9 @@ find_package(Qt5Multimedia)
 find_package(Qt5Quick)
 find_package(Qt5Qml)
 find_package(Qt5QuickWidgets)
+find_package(Qt5WebEngineWidgets)
+find_package(Qt5WebChannel)
+find_package(Qt5WebSockets)
 
 # Configure include based on platform
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/global.h.in"
@@ -119,6 +122,9 @@ CHECK_PACKAGE_FOUND(Qt5Multimedia opt)
 CHECK_PACKAGE_FOUND(Qt5Quick opt)
 CHECK_PACKAGE_FOUND(Qt5Qml opt)
 CHECK_PACKAGE_FOUND(Qt5QuickWidgets opt)
+CHECK_PACKAGE_FOUND(Qt5WebEngineWidgets opt)
+CHECK_PACKAGE_FOUND(Qt5WebChannel opt)
+CHECK_PACKAGE_FOUND(Qt5WebSockets opt)
 
 # note: the order of this list is relevant for dependencies.
 # For instance: Qt5Printsupport must come before Qt5WebKitWidgets
@@ -183,6 +189,15 @@ message(WARNING "hier in PySide2 ${DISABLE_QtMultimedia}")
 HAS_QT_MODULE(Qt5Quick_FOUND QtQuick)
 HAS_QT_MODULE(Qt5Qml_FOUND QtQml)
 HAS_QT_MODULE(Qt5QuickWidgets_FOUND QtQuickWidgets)
+HAS_QT_MODULE(Qt5WebEngineWidgets_FOUND QtWebEngineWidgets)
+HAS_QT_MODULE(Qt5WebChannel_FOUND QtWebChannel)
+if(0)
+    # Doesn't build yet, requires SSL classes in QtNetwork which
+    # Shiboken doesn't seem to pick up yet
+    HAS_QT_MODULE(Qt5WebSockets_FOUND QtWebSockets)
+else()
+    set(DISABLE_QtWebSockets 1 PARENT_SCOPE)
+endif()
 
 # install
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/__init__.py"
