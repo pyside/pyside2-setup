@@ -1,8 +1,10 @@
 project(QtWebSockets)
 
 set(QtWebSockets_SRC
+${QtWebSockets_GEN_DIR}/qmaskgenerator_wrapper.cpp
 ${QtWebSockets_GEN_DIR}/qwebsocket_wrapper.cpp
 ${QtWebSockets_GEN_DIR}/qwebsocketcorsauthenticator_wrapper.cpp
+${QtWebSockets_GEN_DIR}/qwebsocketprotocol_wrapper.cpp
 ${QtWebSockets_GEN_DIR}/qwebsocketserver_wrapper.cpp
 # module is always needed
 ${QtWebSockets_GEN_DIR}/qtwebsockets_module_wrapper.cpp
