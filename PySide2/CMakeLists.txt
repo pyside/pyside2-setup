@@ -191,13 +191,7 @@ HAS_QT_MODULE(Qt5Qml_FOUND QtQml)
 HAS_QT_MODULE(Qt5QuickWidgets_FOUND QtQuickWidgets)
 HAS_QT_MODULE(Qt5WebEngineWidgets_FOUND QtWebEngineWidgets)
 HAS_QT_MODULE(Qt5WebChannel_FOUND QtWebChannel)
-if(0)
-    # Doesn't build yet, requires SSL classes in QtNetwork which
-    # Shiboken doesn't seem to pick up yet
-    HAS_QT_MODULE(Qt5WebSockets_FOUND QtWebSockets)
-else()
-    set(DISABLE_QtWebSockets 1 PARENT_SCOPE)
-endif()
+HAS_QT_MODULE(Qt5WebSockets_FOUND QtWebSockets)
 
 # install
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/__init__.py"

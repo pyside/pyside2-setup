@@ -22,12 +22,21 @@
   <load-typesystem name="typesystem_core.xml" generate="no"/>
   <load-typesystem name="typesystem_network.xml" generate="no"/>
 
+  <object-type name="QMaskGenerator" />
+
   <object-type name="QWebSocket">
     <extra-includes>
       <include file-name="QTcpSocket" location="global"/>
     </extra-includes>
   </object-type>
+
   <object-type name="QWebSocketCorsAuthenticator" />
+
+  <namespace-type name="QWebSocketProtocol">
+    <enum-type name="Version"/>
+    <enum-type name="CloseCode"/>
+  </namespace-type>
+
   <object-type name="QWebSocketServer">
     <enum-type name="SslMode" />
     <extra-includes>
@@ -35,4 +44,14 @@
     </extra-includes>
   </object-type>
 
+  <!-- TODO: Gracefully handle the lack of SSL support -->
+  <rejection class="QWebSocket" function-name="ignoreSslErrors" />
+  <rejection class="QWebSocket" function-name="setSslConfiguration" />
+  <rejection class="QWebSocket" function-name="sslConfiguration" />
+  <rejection class="QWebSocket" function-name="ignoreSslErrors" />
+  <rejection class="QWebSocket" function-name="sslErrors" />
+  <rejection class="QWebSocketServer" function-name="setSslConfiguration" />
+  <rejection class="QWebSocketServer" function-name="sslConfiguration" />
+  <rejection class="QWebSocketServer" function-name="peerVerifyError" />
+  <rejection class="QWebSocketServer" function-name="sslErrors" />
 </typesystem>
