@@ -439,11 +439,9 @@ QT_END_NAMESPACE
 #  include <QtWebChannel/QtWebChannel>
 #endif
 
-/** Doesn't build yet.
 #if @Qt5WebSockets_FOUND@
 #  include <QtWebSockets/QtWebSockets>
 #endif
-*/
 
 //QtHelp needs to be included after QtSql. Why?
 #include <QtHelp/QtHelp>
