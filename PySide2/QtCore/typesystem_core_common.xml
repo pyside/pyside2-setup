@@ -590,6 +590,28 @@
     </conversion-rule>
   </primitive-type>
 
+  <primitive-type name="QJsonObject">
+    <conversion-rule>
+        <native-to-target>
+        // The QVariantMap returned by QJsonObject seems to cause a segfault, so
+        // using QJsonObject.toVariantMap() won't work.
+        // Wrapping it in a QJsonValue first allows it to work
+        QJsonValue val(%in);
+        QVariant ret = val.toVariant();
+
+        return %CONVERTTOPYTHON[QVariant](ret);
+        </native-to-target>
+        <target-to-native>
+            <add-conversion type="PyDict">
+            QVariant dict = QVariant_convertToVariantMap(%in);
+            QJsonValue val = QJsonValue::fromVariant(dict);
+
+            %out = val.toObject();
+            </add-conversion>
+        </target-to-native>
+    </conversion-rule>
+  </primitive-type>
+
   <primitive-type name="QModelIndexList">
     <include file-name="qabstractitemmodel.h" location="global"/>
     <conversion-rule>
@@ -3990,12 +4012,24 @@
       </inject-code>
     </add-function>
   </value-type>
+
   <value-type name="QJsonArray">
     <extra-includes>
       <include file-name="QStringList" location="global"/>
     </extra-includes>
   </value-type>
-  <value-type name="QJsonObject" />
+
+  <value-type name="QJsonDocument">
+    <enum-type name="DataValidation" />
+    <enum-type name="JsonFormat" />
+  </value-type>
+
+  <rejection class="QJsonDocument" field-name="BinaryFormatTag" />
+
+  <value-type name="QJsonParseError">
+    <enum-type name="Type"/>
+  </value-type>
+
   <value-type name="QJsonValue">
     <enum-type name="Type"/>
     <extra-includes>

@@ -55,7 +55,8 @@ ${QtCore_GEN_DIR}/qgenericreturnargument_wrapper.cpp
 ${QtCore_GEN_DIR}/qhistorystate_wrapper.cpp
 ${QtCore_GEN_DIR}/qiodevice_wrapper.cpp
 ${QtCore_GEN_DIR}/qjsonarray_wrapper.cpp
-${QtCore_GEN_DIR}/qjsonobject_wrapper.cpp
+${QtCore_GEN_DIR}/qjsondocument_wrapper.cpp
+${QtCore_GEN_DIR}/qjsonparseerror_wrapper.cpp
 ${QtCore_GEN_DIR}/qjsonvalue_wrapper.cpp
 ${QtCore_GEN_DIR}/qitemselectionmodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qlibraryinfo_wrapper.cpp
