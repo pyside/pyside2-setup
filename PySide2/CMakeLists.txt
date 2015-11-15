@@ -185,7 +185,7 @@ if(0)
 else()
     set(DISABLE_QtMultimedia 1 PARENT_SCOPE)
 endif()
-message(WARNING "hier in PySide2 ${DISABLE_QtMultimedia}")
+
 HAS_QT_MODULE(Qt5Quick_FOUND QtQuick)
 HAS_QT_MODULE(Qt5Qml_FOUND QtQml)
 HAS_QT_MODULE(Qt5QuickWidgets_FOUND QtQuickWidgets)
