@@ -155,7 +155,7 @@ bool call(QObject* self, int methodIndex, PyObject* args, PyObject** retVal)
 
     // Prepare room for return type
     const char* returnType = method.typeName();
-    if (returnType)
+    if (returnType && std::strcmp("void", returnType))
         argTypes.prepend(returnType);
     else
         argTypes.prepend(QByteArray());

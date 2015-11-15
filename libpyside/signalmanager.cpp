@@ -469,7 +469,7 @@ int SignalManager::callPythonMetaMethod(const QMetaMethod& method, void** args, 
     if (pyArguments) {
         Shiboken::Conversions::SpecificConverter* retConverter = NULL;
         const char* returnType = method.typeName();
-        if (returnType && std::strcmp("", returnType)) {
+        if (returnType && std::strcmp("", returnType) && std::strcmp("void", returnType)) {
             retConverter = new Shiboken::Conversions::SpecificConverter(returnType);
             if (!retConverter || !*retConverter) {
                 PyErr_Format(PyExc_RuntimeError, "Can't find converter for '%s' to call Python meta method.", returnType);
