@@ -959,8 +959,8 @@ class pyside_build(_build):
                 "{dist_dir}/PySide2/shiboken2-python{py_version}.pdb", # omitted dbgPostfix
                 vars=vars)
             copyfile(
-                "{build_dir}/pyside2/libpyside/pyside2-python{py_version}{dbgPostfix}.pdb",
-                "{dist_dir}/PySide2/pyside2-python{py_version}{dbgPostfix}.pdb", # omitted dbgPostfix
+                "{build_dir}/pyside2/libpyside/pyside2-python{py_version}.pdb",
+                "{dist_dir}/PySide2/pyside2-python{py_version}.pdb", # omitted dbgPostfix
                 vars=vars)
 
     def update_rpath(self, package_path, executables):
