@@ -957,6 +957,7 @@
     static QStack&lt;PyObject*&gt; globalPostRoutineFunctions;
     void globalPostRoutineCallback()
     {
+        Shiboken::GilState state;
         foreach(PyObject* callback, globalPostRoutineFunctions) {
             Shiboken::AutoDecRef result(PyObject_CallObject(callback, NULL));
             Py_DECREF(callback);
