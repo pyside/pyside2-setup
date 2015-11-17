@@ -1,6 +1,6 @@
 import unittest
 
-import PySide
+import PySide2
 from PySide2.QtCore import QPoint, QPointF
 from PySide2.QtCore import QLine, QLineF
 from PySide2.QtCore import QSize, QSizeF

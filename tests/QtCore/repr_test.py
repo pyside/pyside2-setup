@@ -1,4 +1,4 @@
-import PySide
+import PySide2
 import unittest
 
 from PySide2.QtCore import QByteArray, QDate, QDateTime, QTime, QLine, QLineF
