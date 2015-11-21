@@ -89,13 +89,30 @@ PyTypeObject PySideClassInfoType = {
 
 PyObject* classCall(PyObject* self, PyObject* args, PyObject* kw)
 {
+    if (!PyTuple_Check(args) || PyTuple_Size(args) != 1) {
+        PyErr_Format(PyExc_TypeError,
+                     "The ClassInfo decorator takes exactly 1 positional argument (%i given)",
+                     PyTuple_Size(args));
+        return 0;
+    }
+
+    PySideClassInfo* data = reinterpret_cast<PySideClassInfo*>(self);
+    PySideClassInfoPrivate* pData = data->d;
+
+    if (pData->m_alreadyWrapped) {
+        PyErr_SetString(PyExc_TypeError, "This instance of ClassInfo() was already used to wrap an object");
+        return 0;
+    }
+
     PyObject* klass;
     klass = PyTuple_GetItem(args, 0);
 
     if (Shiboken::ObjectType::checkType(reinterpret_cast<PyTypeObject*>(klass))) {
         PySide::DynamicQMetaObject* mo = reinterpret_cast<PySide::DynamicQMetaObject*>(Shiboken::ObjectType::getTypeUserData(reinterpret_cast<SbkObjectType*>(klass)));
-        if (mo)
-            mo->addInfo(PySide::ClassInfo::getMap(reinterpret_cast<PySideClassInfo*>(self)));
+        if (mo) {
+            mo->addInfo(PySide::ClassInfo::getMap(data));
+            pData->m_alreadyWrapped = true;
+        }
     }
 
     Py_INCREF(klass);
@@ -106,20 +123,36 @@ static PyObject* classInfoTpNew(PyTypeObject* subtype, PyObject* args, PyObject*
 {
     PySideClassInfo* me = reinterpret_cast<PySideClassInfo*>(subtype->tp_alloc(subtype, 0));
     me->d = new PySideClassInfoPrivate;
+
+    me->d->m_alreadyWrapped = false;
+
     return (PyObject*) me;
 }
 
 int classInfoTpInit(PyObject* self, PyObject* args, PyObject* kwds)
 {
+    if (PyTuple_Check(args) && PyTuple_Size(args) > 0) {
+        PyErr_Format(PyExc_TypeError, "ClassInfo() takes exactly 0 positional arguments (%zd given)", PyTuple_Size(args));
+        return -1;
+    }
+
     PySideClassInfo* data = reinterpret_cast<PySideClassInfo*>(self);
     PySideClassInfoPrivate* pData = data->d;
 
     PyObject* key;
     PyObject* value;
     Py_ssize_t pos = 0;
-    while (PyDict_Next(kwds, &pos, &key, &value)) {
-        if (Shiboken::String::check(key) && Shiboken::String::check(value))
-            pData->m_data[Shiboken::String::toCString(key)] = Shiboken::String::toCString(value);
+
+    // PyDict_Next causes a segfault if kwds is empty
+    if (kwds && PyDict_Check(kwds) && PyDict_Size(kwds) > 0) {
+        while (PyDict_Next(kwds, &pos, &key, &value)) {
+            if (Shiboken::String::check(key) && Shiboken::String::check(value)) {
+                pData->m_data[Shiboken::String::toCString(key)] = Shiboken::String::toCString(value);
+            } else {
+                PyErr_SetString(PyExc_TypeError, "All keys and values provided to ClassInfo() must be strings");
+                return -1;
+            }
+        }
     }
 
     return PyErr_Occurred() ? -1 : 1;
