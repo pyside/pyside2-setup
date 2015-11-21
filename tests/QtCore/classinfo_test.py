@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from PySide2.QtCore import QObject, ClassInfo
+from PySide2.QtCore import QObject, QCoreApplication, ClassInfo
 
 class TestClassInfo(unittest.TestCase):
     def test_metadata(self):
@@ -22,7 +22,7 @@ class TestClassInfo(unittest.TestCase):
         self.assertEqual(ci.value(), 'http://www.pyside.org')
 
     def test_verify_metadata_types(self):
-        valid_dict = { '123':  '456' }
+        valid_dict = { '123': '456' }
 
         invalid_dict_1 = { '123': 456 }
         invalid_dict_2 = {  123:  456 }
@@ -57,6 +57,21 @@ class TestClassInfo(unittest.TestCase):
 
         self.assertRaises(TypeError, decorator, MyObject2)
 
+    def test_can_only_be_used_on_qobjects(self):
+        def test_function(): pass
+        self.assertRaises(TypeError, ClassInfo(), test_function)
+
+        class NotAQObject(object): pass
+        self.assertRaises(TypeError, ClassInfo(), NotAQObject)
+
+        class QObjectSubclass(QObject): pass
+        ClassInfo()(QObjectSubclass)
+
+        class SubclassOfNativeQObjectSubclass(QCoreApplication): pass
+        ClassInfo()(SubclassOfNativeQObjectSubclass)
+
+        class SubclassOfPythonQObjectSubclass(QObjectSubclass): pass
+        ClassInfo()(SubclassOfPythonQObjectSubclass)
 
 if __name__ == '__main__':
     if sys.version_info[0] < 2:

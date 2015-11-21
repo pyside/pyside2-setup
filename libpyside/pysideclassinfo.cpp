@@ -40,7 +40,7 @@ static PyObject* classCall(PyObject*, PyObject*, PyObject*);
 
 PyTypeObject PySideClassInfoType = {
     PyVarObject_HEAD_INIT(0, 0)
-    CLASSINFO_CLASS_NAME,      /*tp_name*/
+    "PySide2.QtCore." CLASSINFO_CLASS_NAME, /*tp_name*/
     sizeof(PySideClassInfo),   /*tp_basicsize*/
     0,                         /*tp_itemsize*/
     0,                         /*tp_dealloc*/
@@ -91,7 +91,7 @@ PyObject* classCall(PyObject* self, PyObject* args, PyObject* kw)
 {
     if (!PyTuple_Check(args) || PyTuple_Size(args) != 1) {
         PyErr_Format(PyExc_TypeError,
-                     "The ClassInfo decorator takes exactly 1 positional argument (%i given)",
+                     "The ClassInfo decorator takes exactly 1 positional argument (%zd given)",
                      PyTuple_Size(args));
         return 0;
     }
@@ -106,13 +106,26 @@ PyObject* classCall(PyObject* self, PyObject* args, PyObject* kw)
 
     PyObject* klass;
     klass = PyTuple_GetItem(args, 0);
+    bool validClass = false;
+
+    // This will sometimes segfault if you mistakenly use it on a function declaration
+    if (!PyType_Check(klass)) {
+        PyErr_SetString(PyExc_TypeError, "This decorator can only be used on class declarations");
+        return 0;
+    }
 
     if (Shiboken::ObjectType::checkType(reinterpret_cast<PyTypeObject*>(klass))) {
         PySide::DynamicQMetaObject* mo = reinterpret_cast<PySide::DynamicQMetaObject*>(Shiboken::ObjectType::getTypeUserData(reinterpret_cast<SbkObjectType*>(klass)));
         if (mo) {
             mo->addInfo(PySide::ClassInfo::getMap(data));
             pData->m_alreadyWrapped = true;
+            validClass = true;
         }
+    }
+
+    if (!validClass) {
+        PyErr_SetString(PyExc_TypeError, "This decorator can only be used on classes that are subclasses of QObject");
+        return 0;
     }
 
     Py_INCREF(klass);
