@@ -63,6 +63,7 @@ else()
     TEST_QT_MODULE(Qt5Script_FOUND QtScript)
     TEST_QT_MODULE(Qt5ScriptTools_FOUND QtScriptTools)
     TEST_QT_MODULE(Qt5Multimedia_FOUND QtMultimedia)
+    TEST_QT_MODULE(Qt5Qml_FOUND QtQml)
 
     #platform specific
     if (ENABLE_MAC)
