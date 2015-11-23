@@ -1,7 +1,7 @@
 
 import unittest
 
-import PySide
+import PySide2
 from PySide2.QtCore import QPoint
 from PySide2.QtGui import QMatrix
 from PySide2.QtGui import QMatrix2x2, QMatrix2x3, QMatrix2x4

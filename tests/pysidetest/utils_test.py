@@ -24,7 +24,7 @@ import os
 
 
 if sys.platform == 'win32':
-    from PySide._utils import _get_win32_case_sensitive_name
+    from PySide2._utils import _get_win32_case_sensitive_name
 
     class Win32UtilsTest(unittest.TestCase):
         def testWin32CaseSensitiveName(self):

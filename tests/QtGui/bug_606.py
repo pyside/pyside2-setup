@@ -1,6 +1,6 @@
 import unittest
 
-import PySide
+import PySide2
 from PySide2.QtGui import QVector2D, QVector3D, QVector4D
 from PySide2.QtGui import QColor
 

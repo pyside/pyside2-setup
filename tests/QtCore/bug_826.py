@@ -1,5 +1,5 @@
 from PySide2.QtCore import QEvent, Qt
-import PySide
+import PySide2
 
 import unittest
 
