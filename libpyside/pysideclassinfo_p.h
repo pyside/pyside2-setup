@@ -36,6 +36,7 @@ extern "C"
 
 struct PySideClassInfoPrivate {
     QMap<QByteArray, QByteArray> m_data;
+    bool m_alreadyWrapped;
 };
 
 } // extern "C"
