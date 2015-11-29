@@ -20,25 +20,14 @@ option(BUILD_TESTS "Build tests." TRUE)
 option(USE_PYTHON3 "Use python3 libraries to build shiboken2." FALSE)
 
 if (USE_PYTHON3)
-    find_package(Python3Libs)
-    find_package(Python3Interp)
-    find_package(Python3InterpWithDebug)
-    #use common vars
-    set(PYTHONLIBS_FOUND ${PYTHON3LIBS_FOUND})
-    set(PYTHON_LIBRARIES ${PYTHON3_LIBRARIES})
-    set(PYTHON_INCLUDE_DIRS ${PYTHON3_INCLUDE_DIRS})
-    set(PYTHON_DEBUG_LIBRARIES ${PYTHON3_DEBUG_LIBRARIES})
-    set(PYTHONINTERP_FOUND ${PYTHON3INTERP_FOUND})
-    set(PYTHON_EXECUTABLE ${PYTHON3_EXECUTABLE})
-    set(PYTHON_VERSION_MAJOR ${PYTHON3_VERSION_MAJOR})
-    set(PYTHON_VERSION_MINOR ${PYTHON3_VERSION_MINOR})
-    set(PYTHON_VERSION_PATCH ${PYTHON3_VERSION_PATCH})
+    find_package(PythonInterp 3.3)
+    find_package(PythonLibs 3.3)
+    find_package(PythonInterpWithDebug 3.3)
 else()
+    find_package(PythonInterp 2.6)
     find_package(PythonLibs 2.6)
-    find_package(PythonInterp)
-    find_package(PythonInterpWithDebug)
+    find_package(PythonInterpWithDebug 2.6)
 endif()
-
 
 if (NOT PYTHON_SITE_PACKAGES)
     execute_process(
@@ -151,5 +140,3 @@ add_custom_target(dist
             bzip2 -f9 "${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar" &&
             echo "Source package created at ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2."
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-
-
