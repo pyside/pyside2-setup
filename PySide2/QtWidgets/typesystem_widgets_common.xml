@@ -875,6 +875,12 @@
       </inject-code>
     </add-function>
 
+    <add-function signature="addAction(QAction*)">
+      <inject-code class="target" position="beginning">
+        %CPPSELF.addAction(%1);
+      </inject-code>
+    </add-function>
+
     <modify-function signature="clear()">
       <inject-code>
           Shiboken::BindingManager&amp; bm = Shiboken::BindingManager::instance();
@@ -947,6 +953,13 @@
           }
       </inject-code>
     </modify-function>
+
+    <add-function signature="addAction(QAction*)">
+      <inject-code class="target" position="beginning">
+        %CPPSELF.addAction(%1);
+      </inject-code>
+    </add-function>
+
   </object-type>
   <object-type name="QProgressBar">
       <enum-type name="Direction"/>
@@ -2822,6 +2835,13 @@
             </insert-template>
         </inject-code>
     </modify-function>
+
+    <add-function signature="addAction(QAction*)">
+      <inject-code class="target" position="beginning">
+        %CPPSELF.addAction(%1);
+      </inject-code>
+    </add-function>
+
   </object-type>
   <object-type name="QLCDNumber">
       <enum-type name="Mode"/>
@@ -2948,6 +2968,11 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
+    <add-function signature="addAction(QAction*)">
+      <inject-code class="target" position="beginning">
+        %CPPSELF.addAction(%1);
+      </inject-code>
+    </add-function>
     <modify-function signature="addSeparator()">
       <modify-argument index="return">
         <parent index="this" action="add"/>
