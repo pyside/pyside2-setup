@@ -1,4 +1,4 @@
-find_program(PYTHON_EXECUTABLE NAMES python2.7 python2.6 python2.5)
+find_program(PYTHON_EXECUTABLE NAMES python3.6 python3.5 python3.4 python3.3 python3.2 python2.7 python2.6 python2.5)
 
 if (NOT PYTHON_EXECUTABLE)
     find_package(PythonInterp REQUIRED)
@@ -28,7 +28,7 @@ endif()
 execute_process(
     COMMAND ${PYTHON_EXECUTABLE} -c "if True:
         from distutils import sysconfig
-        print bool(sysconfig.get_config_var('Py_DEBUG'))
+        print(bool(sysconfig.get_config_var('Py_DEBUG')))
         "
     OUTPUT_VARIABLE PYTHON_WITH_DEBUG
     OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -39,7 +39,7 @@ execute_process(
         from distutils import sysconfig
         vr = sys.version_info
         suffix = '-dbg' if bool(sysconfig.get_config_var('Py_DEBUG')) else ''
-        print '-python%d.%d%s' % (vr[0], vr[1], suffix)
+        print('-python%d.%d%s' % (vr[0], vr[1], suffix))
         "
     OUTPUT_VARIABLE PYTHON_SUFFIX
     OUTPUT_STRIP_TRAILING_WHITESPACE)
