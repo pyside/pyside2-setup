@@ -43,6 +43,9 @@ macro(CHECK_PACKAGE_FOUND name)
     set(_name_found "${name}_FOUND")
     if(${_name_found})
         message("module ${name} found")
+
+        # Hoist this to the parent scope to make sure all tests get built
+        set("${name}_FOUND" 1 PARENT_SCOPE)
     else()
         if("${ARGN}" STREQUAL "opt")
             message(STATUS "optional module ${name} skipped")
