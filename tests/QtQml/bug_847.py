@@ -8,7 +8,7 @@ import unittest
 
 from helper import adjust_filename, UsesQApplication
 
-from PySide2.QtCore import Slot, Signal, QUrl
+from PySide2.QtCore import Slot, Signal, QUrl, QTimer, QCoreApplication
 from PySide2.QtQuick import QQuickView
 
 class View(QQuickView):
@@ -34,6 +34,7 @@ class TestQML(UsesQApplication):
         view = View()
         view.called.connect(self.done)
         view.show()
+        QTimer.singleShot(300, QCoreApplication.instance().quit)
         self.app.exec_()
         self.assertTrue(self._sucess)
 
