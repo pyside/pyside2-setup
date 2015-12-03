@@ -212,27 +212,20 @@ inline pp::PP_DIRECTIVE_TYPE pp::find_directive(char const *__directive, std::si
 inline bool pp::file_isdir(std::string const &__filename) const
 {
     struct stat __st;
-#if defined(PP_OS_WIN)
     if (stat(__filename.c_str(), &__st) == 0)
+#if defined(PP_OS_WIN)
         return (__st.st_mode & _S_IFDIR) == _S_IFDIR;
-    else
-        return false;
 #else
-    if (lstat(__filename.c_str(), &__st) == 0)
         return (__st.st_mode & S_IFDIR) == S_IFDIR;
+#endif
     else
         return false;
-#endif
 }
 
 inline bool pp::file_exists(std::string const &__filename) const
 {
     struct stat __st;
-#if defined(PP_OS_WIN)
     return stat(__filename.c_str(), &__st) == 0;
-#else
-    return lstat(__filename.c_str(), &__st) == 0;
-#endif
 }
 
 inline FILE *pp::find_include_file(std::string const &__input_filename, std::string *__filepath,
@@ -243,7 +236,7 @@ inline FILE *pp::find_include_file(std::string const &__input_filename, std::str
 
     __filepath->assign(__input_filename);
 
-    if (is_absolute(*__filepath))
+    if (is_absolute(*__filepath) && !file_isdir(*__filepath))
         return std::fopen(__filepath->c_str(), "r");
 
     if (! env.current_file.empty())
