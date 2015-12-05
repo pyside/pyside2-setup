@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<typesystem package="shiboken">
+<typesystem package="shiboken2">
     <custom-type name="PyObject" />
     <custom-type name="PyType" />
     <primitive-type name="bool" />
