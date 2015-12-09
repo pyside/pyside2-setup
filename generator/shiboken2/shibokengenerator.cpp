@@ -2083,14 +2083,15 @@ AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromString(QString typ
     if (isConst)
         typeString.remove(0, sizeof("const ") / sizeof(char) - 1);
 
-    int indirections = typeString.count("*");
-    while (typeString.endsWith("*")) {
+    bool isReference = typeString.endsWith("&");
+    if (isReference) {
         typeString.chop(1);
         typeString = typeString.trimmed();
     }
 
-    bool isReference = typeString.endsWith("&");
-    if (isReference) {
+    int indirections = 0;
+    while (typeString.endsWith("*")) {
+        ++indirections;
         typeString.chop(1);
         typeString = typeString.trimmed();
     }
