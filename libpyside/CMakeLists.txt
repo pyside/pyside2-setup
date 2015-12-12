@@ -1,12 +1,26 @@
 project(libpyside)
 
+if(Qt5Qml_FOUND AND Qt5Qml_PRIVATE_INCLUDE_DIRS)
+    set(QML_INCLUDES ${Qt5Qml_INCLUDE_DIRS} ${Qt5Qml_PRIVATE_INCLUDE_DIRS})
+    set(QML_LIBRARIES ${Qt5Qml_LIBRARIES})
+
+    set(QML_SUPPORT 1)
+else()
+    set(QML_INCLUDES "")
+    set(QML_LIBRARIES "")
+
+    set(QML_SUPPORT 0)
+endif()
 
 qt5_wrap_cpp(DESTROYLISTENER_MOC "destroylistener.h")
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/signalmanager.cpp.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/signalmanager.cpp" @ONLY)
 
 set(libpyside_SRC
     dynamicqmetaobject.cpp
     destroylistener.cpp
-    signalmanager.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/signalmanager.cpp
     globalreceiver.cpp
     globalreceiverv2.cpp
     pysideclassinfo.cpp
@@ -23,11 +37,13 @@ set(libpyside_SRC
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${SHIBOKEN_INCLUDE_DIR}
                     ${SHIBOKEN_PYTHON_INCLUDE_DIR}
+                    ${QML_INCLUDES}
                     ${Qt5Core_INCLUDE_DIRS})
 add_library(pyside2 SHARED ${libpyside_SRC})
 target_link_libraries(pyside2
                       ${SHIBOKEN_PYTHON_LIBRARIES}
                       ${SHIBOKEN_LIBRARY}
+                      ${QML_LIBRARIES}
                       ${Qt5Core_LIBRARIES})
 
 set_target_properties(pyside2 PROPERTIES
@@ -87,4 +103,3 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/PySide2Config${SHIBOKEN_PYTHON_SUFFIX
         DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide2-${BINDING_API_VERSION}")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/PySide2ConfigVersion.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide2-${BINDING_API_VERSION}")
-

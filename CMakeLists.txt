@@ -212,6 +212,7 @@ else()
     message(STATUS "PySide will be generated using the protected hack!")
 endif()
 
+find_package(Qt5Qml)
 add_subdirectory(libpyside)
 find_package(Qt5Designer)
 find_package(Qt5UiTools)
