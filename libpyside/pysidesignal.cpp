@@ -463,7 +463,7 @@ PyObject* signalInstanceDisconnect(PyObject* self, PyObject* args)
         Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
         Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(source->d->source, "disconnect"));
         PyObject* result = PyObject_CallObject(pyMethod, tupleArgs);
-        if (result == Py_True)
+        if (!result || result == Py_True)
             return result;
         else
             Py_DECREF(result);
