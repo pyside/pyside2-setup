@@ -1,3 +1,4 @@
+// -*- mode: cpp;-*-
 /*
 * This file is part of the PySide project.
 *
@@ -41,6 +42,13 @@
 #include <basewrapper.h>
 #include <sbkconverter.h>
 #include <conversions.h>
+
+// These private headers are needed to throw JavaScript exceptions
+#if @QML_SUPPORT@
+    #include <private/qv4engine_p.h>
+    #include <private/qv4context_p.h>
+    #include <private/qqmlcontextwrapper_p.h>
+#endif
 
 #if QSLOT_CODE != 1 || QSIGNAL_CODE != 2
 #error QSLOT_CODE and/or QSIGNAL_CODE changed! change the hardcoded stuff to the correct value!
@@ -402,8 +410,9 @@ int SignalManager::qt_metacall(QObject* object, QMetaObject::Call call, int id, 
 
     if (call != QMetaObject::InvokeMetaMethod) {
         mp = metaObject->property(id);
-        if (!mp.isValid())
+        if (!mp.isValid()) {
             return id - methodCount;
+        }
 
         Shiboken::GilState gil;
         pySelf = (PyObject*)Shiboken::BindingManager::instance().retrieveWrapper(object);
@@ -441,16 +450,57 @@ int SignalManager::qt_metacall(QObject* object, QMetaObject::Call call, int id, 
     // WARNING Isn't safe to call any metaObject and/or object methods beyond this point
     //         because the object can be deleted inside the called slot.
 
-    if (call == QMetaObject::InvokeMetaMethod)
+    if (call == QMetaObject::InvokeMetaMethod) {
         id = id - methodCount;
-    else
+    } else {
         id = id - propertyCount;
+    }
 
     if (pp || pp_name) {
         Shiboken::GilState gil;
         Py_XDECREF(pp);
         Py_XDECREF(pp_name);
     }
+
+    // Bubbles Python exceptions up to the Javascript engine, if called from one
+    {
+        Shiboken::GilState gil;
+
+        if (PyErr_Occurred()) {
+
+#if @QML_SUPPORT@
+            // This JS engine grabber based off of Qt 5.5's `qjsEngine` function
+            QQmlData *data = QQmlData::get(object, false);
+
+            if (data || !data->jsWrapper.isNullOrUndefined()) {
+                QV4::ExecutionEngine *engine = data->jsWrapper.engine();
+                QV4::Heap::ExecutionContext *ctx = engine->currentContext();
+
+                if (ctx->type == QV4::Heap::ExecutionContext::ContextType::Type_CallContext ||
+                    ctx->type == QV4::Heap::ExecutionContext::ContextType::Type_SimpleCallContext) {
+                    PyObject *errType, *errValue, *errTraceback;
+                    PyErr_Fetch(&errType, &errValue, &errTraceback);
+                    PyErr_Restore(errType, errValue, errTraceback);
+
+                    const char *errString = Shiboken::String::toCString(PyObject_Str(errValue));
+
+                    PyErr_Print();
+
+                    if (errType == PyExc_SyntaxError) {
+                        return engine->throwSyntaxError(errString);
+                    } else if (errType == PyExc_TypeError) {
+                        return engine->throwTypeError(errString);
+                    } else {
+                        return engine->throwError(errString);
+                    }
+                }
+            }
+#endif
+
+            PyErr_Print();
+        }
+    }
+
     return id;
 }
 
@@ -461,10 +511,11 @@ int SignalManager::callPythonMetaMethod(const QMetaMethod& method, void** args, 
     Shiboken::GilState gil;
     PyObject* pyArguments = 0;
 
-    if (isShortCuit)
+    if (isShortCuit){
         pyArguments = reinterpret_cast<PyObject*>(args[1]);
-    else
+    } else {
         pyArguments = parseArguments(method.parameterTypes(), args);
+    }
 
     if (pyArguments) {
         Shiboken::Conversions::SpecificConverter* retConverter = NULL;
@@ -473,23 +524,21 @@ int SignalManager::callPythonMetaMethod(const QMetaMethod& method, void** args, 
             retConverter = new Shiboken::Conversions::SpecificConverter(returnType);
             if (!retConverter || !*retConverter) {
                 PyErr_Format(PyExc_RuntimeError, "Can't find converter for '%s' to call Python meta method.", returnType);
-                PyErr_Print();
                 return -1;
             }
         }
 
         Shiboken::AutoDecRef retval(PyObject_CallObject(pyMethod, pyArguments));
 
-        if (!isShortCuit && pyArguments)
+        if (!isShortCuit && pyArguments){
             Py_DECREF(pyArguments);
+        }
 
-        if (!retval.isNull() && retval != Py_None && !PyErr_Occurred() && retConverter)
+        if (!retval.isNull() && retval != Py_None && !PyErr_Occurred() && retConverter) {
             retConverter->toCpp(retval, args[0]);
+        }
         delete retConverter;
     }
-
-    if (PyErr_Occurred())
-        PyErr_Print();
 
     return -1;
 }
@@ -584,7 +633,7 @@ static int callMethod(QObject* object, int id, void** args)
         QByteArray methodName = method.methodSignature();
         methodName = methodName.left(methodName.indexOf('('));
         Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(self, methodName));
-        SignalManager::callPythonMetaMethod(method, args, pyMethod, false);
+        return SignalManager::callPythonMetaMethod(method, args, pyMethod, false);
     }
     return -1;
 }
