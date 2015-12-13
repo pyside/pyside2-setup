@@ -19,9 +19,9 @@
 # 02110-1301 USA
 
 import unittest
-from PySide import QtCore, QtGui
-from helper import UsesQApplication
 
+from PySide2 import QtCore, QtWidgets
+from helper import UsesQApplication
 
 class TestBugPYSIDE189(UsesQApplication):
 
@@ -31,7 +31,7 @@ class TestBugPYSIDE189(UsesQApplication):
         def onValueChanged(self, value):
             pass
 
-        sld = QtGui.QSlider()
+        sld = QtWidgets.QSlider()
         sld.valueChanged.connect(onValueChanged)
 
         sld.deleteLater()

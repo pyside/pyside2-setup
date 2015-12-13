@@ -1,4 +1,5 @@
 PYSIDE_TEST(args_dont_match_test.py)
+PYSIDE_TEST(bug_186.py)
 PYSIDE_TEST(bug_311.py)
 PYSIDE_TEST(bug_312.py)
 PYSIDE_TEST(bug_319.py)
