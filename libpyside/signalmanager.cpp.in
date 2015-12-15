@@ -474,7 +474,7 @@ int SignalManager::qt_metacall(QObject* object, QMetaObject::Call call, int id, 
 
             if (data || !data->jsWrapper.isNullOrUndefined()) {
                 QV4::ExecutionEngine *engine = data->jsWrapper.engine();
-                QV4::Heap::ExecutionContext *ctx = engine->currentContext();
+                QV4::Heap::ExecutionContext *ctx = engine->current;
 
                 if (ctx->type == QV4::Heap::ExecutionContext::ContextType::Type_CallContext ||
                     ctx->type == QV4::Heap::ExecutionContext::ContextType::Type_SimpleCallContext) {
