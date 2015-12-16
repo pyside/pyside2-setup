@@ -2,8 +2,9 @@
 
 import sys
 import unittest
+
 from helper import UsesQApplication
-from PySide2 import QtCore,QtGui
+from PySide2 import QtCore, QtWidgets
 
 # Check for desktop object lifetime
 class BugTest(UsesQApplication):
@@ -12,14 +13,14 @@ class BugTest(UsesQApplication):
 
     # test if it is possible to connect with a desktop object after storing that on an auxiliar variable
     def testCase1(self):
-        desktop = QtGui.QApplication.desktop()
+        desktop = QtWidgets.QApplication.desktop()
         desktop.resized[int].connect(self.mySlot)
-        self.assert_(True)
+        self.assertTrue(True)
 
     # test if it is possible to connect with a desktop object without storing that on an auxiliar variable
     def testCase2(self):
-        QtGui.QApplication.desktop().resized[int].connect(self.mySlot)
-        self.assert_(True)
+        QtWidgets.QApplication.desktop().resized[int].connect(self.mySlot)
+        self.assertTrue(True)
 
 if __name__ == '__main__':
     unittest.main()

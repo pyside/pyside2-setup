@@ -5,7 +5,7 @@
 import unittest
 import sys
 
-from PySide2 import QtGui
+from PySide2 import QtWidgets
 
 from helper import UsesQApplication
 
@@ -15,7 +15,7 @@ class QMenuAddAction(UsesQApplication):
         self.arg = args
 
     def testQMenuAddAction(self):
-        fileMenu = QtGui.QMenu("&File")
+        fileMenu = QtWidgets.QMenu("&File")
 
         addNewAction = fileMenu.addAction("&Open...", self.openFile)
         addNewAction.trigger()

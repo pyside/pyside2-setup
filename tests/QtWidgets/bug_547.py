@@ -1,14 +1,15 @@
 """ Unittest for bug #547 """
 """ http://bugs.openbossa.org/show_bug.cgi?id=547 """
 
-from PySide2 import QtGui
 import sys
 import unittest
 
+from PySide2 import QtWidgets
+
 class MyMainWindow(unittest.TestCase):
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     def testCase1(self):
-        self._tree = QtGui.QTreeWidget()
+        self._tree = QtWidgets.QTreeWidget()
         self._tree.setColumnCount(2)
         self._i1 = None
         self._i11 = None
@@ -25,7 +26,7 @@ class MyMainWindow(unittest.TestCase):
         self.assertEqual(sys.getrefcount(self._i11), 3)
 
     def testCase2(self):
-        self._tree = QtGui.QTreeWidget()
+        self._tree = QtWidgets.QTreeWidget()
         self._tree.setColumnCount(2)
         self._i1 = None
         self._i11 = None
@@ -46,9 +47,9 @@ class MyMainWindow(unittest.TestCase):
             self.assertEqual(sys.getrefcount(self._i1), 2)
             self.assertEqual(sys.getrefcount(self._i11), 2)
 
-        self._i1 = QtGui.QTreeWidgetItem(self._tree, ['1', ])
+        self._i1 = QtWidgets.QTreeWidgetItem(self._tree, ['1', ])
         self.assertEqual(sys.getrefcount(self._i1), 3)
-        self._i11 = QtGui.QTreeWidgetItem(self._i1, ['11', ])
+        self._i11 = QtWidgets.QTreeWidgetItem(self._i1, ['11', ])
         self.assertEqual(sys.getrefcount(self._i11), 3)
 
 if __name__ == '__main__':

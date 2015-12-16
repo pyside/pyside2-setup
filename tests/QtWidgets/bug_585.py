@@ -1,17 +1,17 @@
 '''Test bug 585: http://bugs.openbossa.org/show_bug.cgi?id=585'''
 
-from PySide2 import QtCore ,QtGui
 import sys
 import unittest
 
+from PySide2 import QtCore, QtWidgets
 
 class Bug585(unittest.TestCase):
     def testCase(self):
-        app = QtGui.QApplication([])
-        self._tree = QtGui.QTreeWidget()
+        app = QtWidgets.QApplication([])
+        self._tree = QtWidgets.QTreeWidget()
         self._tree.setColumnCount(2)
-        i1 = QtGui.QTreeWidgetItem(self._tree, ['1', ])
-        i2 = QtGui.QTreeWidgetItem(self._tree, ['2', ])
+        i1 = QtWidgets.QTreeWidgetItem(self._tree, ['1', ])
+        i2 = QtWidgets.QTreeWidgetItem(self._tree, ['2', ])
         refCount = sys.getrefcount(i1)
 
         # this function return None

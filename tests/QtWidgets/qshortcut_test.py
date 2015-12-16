@@ -5,11 +5,11 @@
 import unittest
 import sys
 
-from PySide2 import QtGui, QtCore
+from PySide2 import QtCore, QtGui, QtWidgets
 
-class Foo(QtGui.QWidget):
+class Foo(QtWidgets.QWidget):
     def __init__(self):
-        QtGui.QWidget.__init__(self)
+        QtWidgets.QWidget.__init__(self)
         self.ok = False
         self.copy = False
 
@@ -19,9 +19,9 @@ class Foo(QtGui.QWidget):
     def slot_of_copy(self):
         self.copy = True
 
-class MyShortcut(QtGui.QShortcut):
+class MyShortcut(QtWidgets.QShortcut):
     def __init__(self, keys, wdg, slot):
-        QtGui.QShortcut.__init__(self, keys, wdg, slot)
+        QtWidgets.QShortcut.__init__(self, keys, wdg, slot)
 
     def emit_signal(self):
         self.emit(QtCore.SIGNAL("activated()"))
@@ -29,7 +29,7 @@ class MyShortcut(QtGui.QShortcut):
 class QAppPresence(unittest.TestCase):
 
     def testQShortcut(self):
-        self.qapp = QtGui.QApplication([])
+        self.qapp = QtWidgets.QApplication([])
         f = Foo()
 
         self.sc = MyShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Return), f, f.slot_of_foo)

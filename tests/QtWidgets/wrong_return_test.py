@@ -2,14 +2,14 @@
 
 import unittest
 import py3kcompat as py3k
-from PySide2 import QtGui
+from PySide2 import QtWidgets
 from helper import UsesQApplication
 
 import warnings
 warnings.simplefilter('error')
 
 
-class MyWidget(QtGui.QWidget):
+class MyWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(MyWidget, self).__init__(parent)
 

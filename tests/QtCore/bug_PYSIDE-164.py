@@ -1,15 +1,17 @@
-from PySide2.QtCore import QCoreApplication, QEventLoop, QObject, Qt, QThread, QTimer, SIGNAL
+from __future__ import print_function
+
 import unittest
 
+from PySide2.QtCore import QCoreApplication, QEventLoop, QObject, Qt, QThread, QTimer, SIGNAL
 
 class Emitter(QThread):
     def __init__(self):
         QThread.__init__(self)
 
     def run(self):
-        print "Before emit."
+        print("Before emit.")
         self.emit(SIGNAL("signal(int)"), 0)
-        print "After emit."
+        print("After emit.")
 
 class Receiver(QObject):
     def __init__(self, eventloop):
@@ -17,7 +19,7 @@ class Receiver(QObject):
         self.eventloop = eventloop
 
     def receive(self, number):
-        print "Received number: %d" % number
+        print("Received number: %d" % number)
         self.eventloop.exit(0)
 
 

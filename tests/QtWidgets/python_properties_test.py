@@ -1,13 +1,14 @@
 import unittest
-from PySide2 import QtGui, QtCore
+
+from PySide2 import QtCore, QtWidgets
 
 class Properties(unittest.TestCase):
 
     def testStaticProperty(self):
-        self.assertEqual(QtGui.QGraphicsItem.UserType, 65536)
+        self.assertEqual(QtWidgets.QGraphicsItem.UserType, 65536)
 
     def testInstanceProperty(self):
-        p = QtGui.QStyleOptionViewItemV3()
+        p = QtWidgets.QStyleOptionViewItem()
         self.assert_(isinstance(p.locale, QtCore.QLocale))
 
 
