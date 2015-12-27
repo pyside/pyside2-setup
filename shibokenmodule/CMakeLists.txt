@@ -5,7 +5,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shibokenmodule.txt.in"
 
 
 set(sample_SRC
-${CMAKE_CURRENT_BINARY_DIR}/shiboken/shiboken_module_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/shiboken2/shiboken2_module_wrapper.cpp
 )
 
 add_custom_command(OUTPUT ${sample_SRC}

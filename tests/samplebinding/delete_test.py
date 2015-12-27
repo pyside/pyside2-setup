@@ -26,7 +26,7 @@
 
 import unittest
 import sample
-import shiboken
+import shiboken2 as shiboken
 
 class DeleteTest(unittest.TestCase):
     def testNonCppWrapperClassDelete(self):
