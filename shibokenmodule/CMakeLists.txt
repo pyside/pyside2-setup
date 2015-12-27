@@ -9,7 +9,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/shiboken2/shiboken2_module_wrapper.cpp
 )
 
 add_custom_command(OUTPUT ${sample_SRC}
-COMMAND ${shibokengenerator_BINARY_DIR}/shiboken2 --project-file=${CMAKE_CURRENT_BINARY_DIR}/shibokenmodule.txt ${GENERATOR_EXTRA_FLAGS}
+COMMAND shiboken2 --project-file=${CMAKE_CURRENT_BINARY_DIR}/shibokenmodule.txt ${GENERATOR_EXTRA_FLAGS}
 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for 'shiboken2'..."
 )
