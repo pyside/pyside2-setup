@@ -2395,6 +2395,10 @@
     <value-type name="ValueAndVirtual" />
 
     <object-type name="ObjectTypeByValue" />
+    
+    <object-type name="TemplatePtr">
+        <modify-function signature="dummy(std::list&lt;std::pair&lt;BlackBox *, BlackBox *&gt; &gt; &amp;)" rename="dummy_method" />
+    </object-type>
 
     <suppress-warning text="horribly broken type '__off64_t'" />
     <suppress-warning text="enum '__codecvt_result' does not have a type entry or is not an enum" />
