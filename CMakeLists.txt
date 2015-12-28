@@ -34,7 +34,7 @@ if (NOT PYTHON_SITE_PACKAGES)
         COMMAND ${PYTHON_EXECUTABLE} -c "if True:
             from distutils import sysconfig
             from os.path import sep
-            print(sysconfig.get_python_lib(1, 0, prefix='${CMAKE_INSTALL_PREFIX}').replace(sep, '/'))
+            print(sysconfig.get_python_lib(1, 0).replace(sep, '/'))
             "
         OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
         OUTPUT_STRIP_TRAILING_WHITESPACE)
