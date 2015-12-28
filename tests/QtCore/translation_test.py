@@ -43,7 +43,7 @@ class TranslationTest(UsesQCoreApplication):
         self.app.installTranslator(translator)
 
         obj = QObject()
-        obj.setObjectName(obj.trUtf8('Hello World!'))
+        obj.setObjectName(obj.tr('Hello World!'))
         self.assertEqual(obj.objectName(), py3k.unicode_('привет мир!'))
 
     def testTranslateWithNoneDisambiguation(self):

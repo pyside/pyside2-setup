@@ -2,7 +2,7 @@
 import unittest
 
 import sys
-from PySide2 import QtGui, QtCore
+from PySide2 import QtWidgets, QtCore
 from helper import UsesQApplication
 
 class QListWidgetTest(UsesQApplication):
@@ -11,7 +11,7 @@ class QListWidgetTest(UsesQApplication):
         o = QtCore.QObject()
         o.setObjectName("obj")
 
-        item = QtGui.QListWidgetItem("item0")
+        item = QtWidgets.QListWidgetItem("item0")
         item.setData(QtCore.Qt.UserRole, o)
         #item._data = o
         self.assert_(sys.getrefcount(o), 3)
@@ -31,7 +31,7 @@ class QListWidgetTest(UsesQApplication):
         self.assert_(sys.getrefcount(o), 2)
 
     def testConstructorWithParent(self):
-        lst = QtGui.QListWidget()
+        lst = QtWidgets.QListWidget()
         self.populateList(lst)
         self.checkCurrentItem(lst)
         i = lst.item(0)
@@ -42,10 +42,10 @@ class QListWidgetTest(UsesQApplication):
         del i
 
     def testIt(self):
-        lst = QtGui.QListWidget()
+        lst = QtWidgets.QListWidget()
         lst.show()
         slot = lambda : lst.removeItemWidget(lst.currentItem())
-        lst.addItem(QtGui.QListWidgetItem("foo"))
+        lst.addItem(QtWidgets.QListWidgetItem("foo"))
         QtCore.QTimer.singleShot(0, slot)
         QtCore.QTimer.singleShot(0, lst.close)
         self.app.exec_()

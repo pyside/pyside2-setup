@@ -1,8 +1,9 @@
 
-'''(Very) Simple test case for missing names from QtGui'''
+'''(Very) Simple test case for missing names from QtGui and QtWidgets'''
 
 import unittest
 from PySide2 import QtGui
+from PySide2 import QtWidgets
 
 class MissingClasses(unittest.TestCase):
     def testQDrag(self): # Bug 222
@@ -17,7 +18,7 @@ class MissingMembers(unittest.TestCase):
         QtGui.QFontMetrics.size
 
     def testQLayoutSetSpacing(self): # Bug 231
-        QtGui.QLayout.setSpacing
+        QtWidgets.QLayout.setSpacing
 
     def testQImageLoad(self): # Bug 257
         QtGui.QImage.load

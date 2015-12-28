@@ -1,9 +1,9 @@
-from PySide2 import QtGui, QtCore
+from PySide2 import QtCore, QtWidgets
 from helper import UsesQApplication
 
 import unittest
 
-class MyWindow(QtGui.QMainWindow):
+class MyWindow(QtWidgets.QMainWindow):
     appendText = QtCore.Signal(str)
 
     @QtCore.Slot()
@@ -13,8 +13,8 @@ class MyWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(MyWindow, self).__init__(parent)
 
-        self.textEdit = QtGui.QTextEdit()
-        self.btn = QtGui.QPushButton("ClickMe")
+        self.textEdit = QtWidgets.QTextEdit()
+        self.btn = QtWidgets.QPushButton("ClickMe")
         self.btn.clicked.connect(self.onButtonPressed)
         self.appendText.connect(self.textEdit.append)
 

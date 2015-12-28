@@ -1,6 +1,6 @@
 ''' unit test for BUG #1077 '''
 
-from PySide2 import QtCore, QtGui
+from PySide2 import QtCore, QtGui, QtWidgets
 import time
 
 class Highlighter(QtGui.QSyntaxHighlighter):
@@ -9,8 +9,8 @@ class Highlighter(QtGui.QSyntaxHighlighter):
         self.tstamp = time.time()
 
 if __name__ == "__main__":
-    app = QtGui.QApplication([])
-    python = QtGui.QTextEdit()
+    app = QtWidgets.QApplication([])
+    python = QtWidgets.QTextEdit()
     python.setWindowTitle("python")
     hl = Highlighter(python.document(), "python")
     python.show()

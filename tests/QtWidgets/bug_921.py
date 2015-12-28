@@ -2,8 +2,7 @@
 
 import unittest
 
-import PySide2.QtCore as QtCore
-import PySide2.QtGui as QtGui
+from PySide2 import QtCore, QtWidgets
 
 from helper import TimedQApplication
 
@@ -15,7 +14,7 @@ class Signaller(QtCore.QObject):
 class Window(object):
 
     def __init__(self, s):
-        self._window = QtGui.QMainWindow()
+        self._window = QtWidgets.QMainWindow()
         self._window.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
         self._window.setWindowTitle("Demo!")
 

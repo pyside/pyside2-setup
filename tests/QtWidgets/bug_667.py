@@ -1,5 +1,7 @@
-from   PySide2.QtCore import *
-from   PySide2.QtGui  import *
+import sys
+
+from PySide2.QtCore import QTimer, QPointF
+from PySide2.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphicsEllipseItem
 
 class Ball(QGraphicsEllipseItem):
     def __init__(self, d, parent=None):
@@ -15,7 +17,6 @@ class Foo(QGraphicsView):
 
 
 if __name__ == "__main__":
-    import sys
     app = QApplication(sys.argv)
     w = Foo()
     w.show()

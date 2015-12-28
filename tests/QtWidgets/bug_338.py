@@ -2,9 +2,10 @@
 
 import sys
 import unittest
-from PySide2 import QtCore,QtGui
 
-class DiagramItem(QtGui.QGraphicsPolygonItem):
+from PySide2 import QtCore, QtWidgets
+
+class DiagramItem(QtWidgets.QGraphicsPolygonItem):
     def __init__(self, parent=None, scene=None):
         super(DiagramItem, self).__init__(parent, scene)
 
@@ -14,11 +15,13 @@ class DiagramItem(QtGui.QGraphicsPolygonItem):
 
 class BugTest(unittest.TestCase):
     def test(self):
-        app = QtGui.QApplication(sys.argv)
-        scene = QtGui.QGraphicsScene()
+        app = QtWidgets.QApplication(sys.argv)
+        scene = QtWidgets.QGraphicsScene()
         item = DiagramItem()
         item2 = DiagramItem()
         #this cause segfault 
         scene.addItem(item)
         scene.addItem(item2)
   
+if __name__ == "__main__":
+    unittest.main()

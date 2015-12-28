@@ -2,25 +2,25 @@ import unittest
 import sys
 import weakref
 
-from PySide2 import QtGui
+from PySide2 import QtWidgets
 from PySide2 import QtCore
 
 from helper import UsesQApplication
 
-class MainWindow(QtGui.QMainWindow):
+class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
-        QtGui.QMainWindow.__init__(self)
+        QtWidgets.QMainWindow.__init__(self)
 
         self.createToolbar()
 
     def createToolbar(self):
-        pointerButton = QtGui.QToolButton()
+        pointerButton = QtWidgets.QToolButton()
         pointerToolbar = self.addToolBar("Pointer type")
         pointerToolbar.addWidget(pointerButton)
 
-class MyButton(QtGui.QPushButton):
+class MyButton(QtWidgets.QPushButton):
     def __init__(self, parent=None):
-        QtGui.QPushButton.__init__(self)
+        QtWidgets.QPushButton.__init__(self)
         self._called = False
 
     def myCallback(self):
@@ -39,8 +39,8 @@ class TestMainWindow(UsesQApplication):
         self.app.quit()
 
     def testRefCountToNull(self):
-        w = QtGui.QMainWindow()
-        c = QtGui.QWidget()
+        w = QtWidgets.QMainWindow()
+        c = QtWidgets.QWidget()
         self.assertEqual(sys.getrefcount(c), 2)
         w.setCentralWidget(c)
         self.assertEqual(sys.getrefcount(c), 3)
@@ -50,13 +50,13 @@ class TestMainWindow(UsesQApplication):
         self.app.exec_()
 
     def testRefCountToAnother(self):
-        w = QtGui.QMainWindow()
-        c = QtGui.QWidget()
+        w = QtWidgets.QMainWindow()
+        c = QtWidgets.QWidget()
         self.assertEqual(sys.getrefcount(c), 2)
         w.setCentralWidget(c)
         self.assertEqual(sys.getrefcount(c), 3)
 
-        c2 = QtGui.QWidget()
+        c2 = QtWidgets.QWidget()
         w.setCentralWidget(c2)
         self.assertEqual(sys.getrefcount(c2), 3)
 
@@ -67,7 +67,7 @@ class TestMainWindow(UsesQApplication):
         self.app.exec_()
 
     def testSignalDisconect(self):
-        w = QtGui.QMainWindow()
+        w = QtWidgets.QMainWindow()
         b = MyButton("button")
         b.clicked.connect(b.myCallback)
         w.setCentralWidget(b)
