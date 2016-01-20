@@ -7,7 +7,7 @@ cmake_policy(VERSION 3.0)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/
                       ${CMAKE_MODULE_PATH})
 
-find_package(Qt5 REQUIRED COMPONENTS Core Xml XmlPatterns) 
+find_package(Qt5 REQUIRED COMPONENTS Core Xml XmlPatterns)
 
 add_definitions(${Qt5Core_DEFINITIONS})
 
@@ -17,24 +17,71 @@ set(shiboken_MICRO_VERSION "0")
 set(shiboken2_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
 
 option(BUILD_TESTS "Build tests." TRUE)
-option(USE_PYTHON3 "Use python3 libraries to build shiboken2." FALSE)
+option(USE_PYTHON_VERSION "Use specific python version to build shiboken2." "")
 
-if (USE_PYTHON3)
-    find_package(PythonInterp 3.3)
-    find_package(PythonLibs 3.3)
-    find_package(PythonInterpWithDebug 3.3)
+if (USE_PYTHON_VERSION)
+    find_package(PythonLibs ${USE_PYTHON_VERSION} REQUIRED)
+    find_package(PythonInterp ${USE_PYTHON_VERSION} REQUIRED)
 else()
-    find_package(PythonInterp 2.6)
     find_package(PythonLibs 2.6)
-    find_package(PythonInterpWithDebug 2.6)
+    find_package(PythonInterp 2.6)
 endif()
+
+## For debugging the PYTHON* variables
+#message("PYTHONLIBS_FOUND: " ${PYTHONLIBS_FOUND})
+#message("PYTHON_LIBRARIES: " ${PYTHON_LIBRARIES})
+#message("PYTHON_INCLUDE_DIRS: " ${PYTHON_INCLUDE_DIRS})
+#message("PYTHON_DEBUG_LIBRARIES: " ${PYTHON_DEBUG_LIBRARIES})
+#message("PYTHONINTERP_FOUND: " ${PYTHONINTERP_FOUND})
+#message("PYTHON_EXECUTABLE: " ${PYTHON_EXECUTABLE})
+#message("PYTHON_VERSION_MAJOR: " ${PYTHON_VERSION_MAJOR})
+#message("PYTHON_VERSION_MINOR: " ${PYTHON_VERSION_MINOR})
+#message("PYTHON_VERSION_PATCH: " ${PYTHON_VERSION_PATCH})
+
+if (UNIX AND NOT APPLE)
+    # TODO: This part needs more testing first to be available on OSX and WIN
+    # Also note the quirk that UNIX includes Apple!
+  if (NOT PYTHON_MULTIARCH_SUFFIX)
+    execute_process(
+        COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+            import sysconfig
+            print(sysconfig.get_config_var('MULTIARCH'))
+            "
+        OUTPUT_VARIABLE PYTHON_MULTIARCH_SUFFIX
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+  endif()
+
+  if (NOT PYTHON_EXTENSION_SUFFIX)
+    if (PYTHON_VERSION_MAJOR EQUAL 2)
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            set(PYTHON_EXTENSION_SUFFIX "-python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}-dbg")
+        else()
+            set(PYTHON_EXTENSION_SUFFIX "-python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
+        endif()
+    elseif (PYTHON_VERSION_MAJOR EQUAL 3)
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            set(PYTHON3_RELEASE_SUFFIX "dm")
+        else()
+            set(PYTHON3_RELEASE_SUFFIX "m")
+        endif()
+        if (PYTHON_VERSION_MINOR LESS  5)
+            set(PYTHON_EXTENSION_SUFFIX ".cpython-${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}${PYTHON3_RELEASE_SUFFIX}")
+        else()
+            set(PYTHON_EXTENSION_SUFFIX ".cpython-${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}${PYTHON3_RELEASE_SUFFIX}-${PYTHON_MULTIARCH_SUFFIX}")
+        endif()
+    else()
+        message( FATAL_ERROR "Unsupported PYTHON_VERSION=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.${PYTHON_VERSION_PATCH}!" )
+    endif()
+  endif()
+  message("PYTHON_EXTENSION_SUFFIX: " ${PYTHON_EXTENSION_SUFFIX})
+endif ()
 
 if (NOT PYTHON_SITE_PACKAGES)
     execute_process(
         COMMAND ${PYTHON_EXECUTABLE} -c "if True:
             from distutils import sysconfig
             from os.path import sep
-            print(sysconfig.get_python_lib(1, 0).replace(sep, '/'))
+            print(sysconfig.get_python_lib(1, 0, prefix='${CMAKE_INSTALL_PREFIX}').replace(sep, '/'))
             "
         OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
         OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -140,3 +187,5 @@ add_custom_target(dist
             bzip2 -f9 "${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar" &&
             echo "Source package created at ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2."
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+
