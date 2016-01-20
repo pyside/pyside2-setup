@@ -610,24 +610,16 @@ class pyside_build(_build):
             "-DCMAKE_INSTALL_PREFIX=%s" % self.install_dir,
             module_src_dir
         ]
-        if sys.version_info[0] > 2:
-            cmake_cmd.append("-DPYTHON3_EXECUTABLE=%s" % self.py_executable)
-            cmake_cmd.append("-DPYTHON3_INCLUDE_DIR=%s" % self.py_include_dir)
-            cmake_cmd.append("-DPYTHON3_LIBRARY=%s" % self.py_library)
-            if self.build_type.lower() == 'debug':
-                cmake_cmd.append("-DPYTHON3_DBG_EXECUTABLE=%s" % self.py_executable)
-                cmake_cmd.append("-DPYTHON3_DEBUG_LIBRARY=%s" % self.py_library)
-        else:
-            cmake_cmd.append("-DPYTHON_EXECUTABLE=%s" % self.py_executable)
-            cmake_cmd.append("-DPYTHON_INCLUDE_DIR=%s" % self.py_include_dir)
-            cmake_cmd.append("-DPYTHON_LIBRARY=%s" % self.py_library)
-            if self.build_type.lower() == 'debug':
-                cmake_cmd.append("-DPYTHON_DEBUG_LIBRARY=%s" % self.py_library)
+        cmake_cmd.append("-DPYTHON_EXECUTABLE=%s" % self.py_executable)
+        cmake_cmd.append("-DPYTHON_INCLUDE_DIR=%s" % self.py_include_dir)
+        cmake_cmd.append("-DPYTHON_LIBRARY=%s" % self.py_library)
+        if self.build_type.lower() == 'debug':
+            cmake_cmd.append("-DPYTHON_DEBUG_LIBRARY=%s" % self.py_library)
 
         if extension.lower() == "shiboken2":
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
             if sys.version_info[0] > 2:
-                cmake_cmd.append("-DUSE_PYTHON3=ON")
+                cmake_cmd.append("-DUSE_PYTHON_VERSION=3.4")
 
         if sys.platform == 'darwin':
             cmake_cmd.append('-DALTERNATIVE_QT_INCLUDE_DIR=' + self.qtinfo.headers_dir)
