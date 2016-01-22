@@ -7,6 +7,55 @@ project(pysidebindings)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Macros/
                       ${CMAKE_MODULE_PATH})
+
+option(USE_PYTHON_VERSION "Use specific python version to build shiboken2." "")
+
+if (USE_PYTHON_VERSION)
+    find_package(PythonLibs ${USE_PYTHON_VERSION} REQUIRED)
+    find_package(PythonInterp ${USE_PYTHON_VERSION} REQUIRED)
+else()
+    find_package(PythonLibs 2.6)
+    find_package(PythonInterp 2.6)
+endif()
+
+if (UNIX AND NOT APPLE)
+    # TODO: This part needs more testing first to be available on OSX and WIN
+    # Also note the quirk that UNIX includes Apple!
+  if (NOT PYTHON_MULTIARCH_SUFFIX)
+    execute_process(
+        COMMAND ${PYTHON_INTERPRETER} -c "if True:
+            import sysconfig
+            print(sysconfig.get_config_var('MULTIARCH'))
+            "
+        OUTPUT_VARIABLE PYTHON_MULTIARCH_SUFFIX
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+  endif()
+
+  if (NOT PYTHON_EXTENSION_SUFFIX)
+    if (PYTHON_VERSION_MAJOR EQUAL 2)
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            set(PYTHON_EXTENSION_SUFFIX "-python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}-dbg")
+        else()
+            set(PYTHON_EXTENSION_SUFFIX "-python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
+        endif()
+    elseif (PYTHON_VERSION_MAJOR EQUAL 3)
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            set(PYTHON3_RELEASE_SUFFIX "dm")
+        else()
+            set(PYTHON3_RELEASE_SUFFIX "m")
+        endif()
+        if (PYTHON_VERSION_MINOR LESS  5)
+            set(PYTHON_EXTENSION_SUFFIX ".cpython-${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}${PYTHON3_RELEASE_SUFFIX}")
+        else()
+            set(PYTHON_EXTENSION_SUFFIX ".cpython-${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}${PYTHON3_RELEASE_SUFFIX}-${PYTHON_MULTIARCH_SUFFIX}")
+        endif()
+    else()
+        message( FATAL_ERROR "Unsupported PYTHON_VERSION=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.${PYTHON_VERSION_PATCH}!" )
+    endif()
+  endif()
+  message("PYTHON_EXTENSION_SUFFIX: " ${PYTHON_EXTENSION_SUFFIX})
+endif ()
+
 find_package(Shiboken2 2.0.0 REQUIRED)
 find_package(Qt5 5.3.0 REQUIRED COMPONENTS Core) 
 add_definitions(${Qt5Core_DEFINITIONS})
@@ -151,44 +200,6 @@ add_custom_target(dist
             bzip2 -f9 "${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar" &&
             echo "Source package created at ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2.\n"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-
-if (UNIX AND NOT APPLE)
-    # TODO: This part needs more testing first to be available on OSX and WIN
-    # Also note the quirk that UNIX includes Apple!
-  if (NOT PYTHON_MULTIARCH_SUFFIX)
-    execute_process(
-        COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-            import sysconfig
-            print(sysconfig.get_config_var('MULTIARCH'))
-            "
-        OUTPUT_VARIABLE PYTHON_MULTIARCH_SUFFIX
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-  endif()
-
-  if (NOT PYTHON_EXTENSION_SUFFIX)
-    if (PYTHON_VERSION_MAJOR EQUAL 2)
-        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-            set(PYTHON_EXTENSION_SUFFIX "-python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}-dbg")
-        else()
-            set(PYTHON_EXTENSION_SUFFIX "-python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
-        endif()
-    elseif (PYTHON_VERSION_MAJOR EQUAL 3)
-        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-            set(PYTHON3_RELEASE_SUFFIX "dm")
-        else()
-            set(PYTHON3_RELEASE_SUFFIX "m")
-        endif()
-        if (PYTHON_VERSION_MINOR LESS  5)
-            set(PYTHON_EXTENSION_SUFFIX ".cpython-${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}${PYTHON3_RELEASE_SUFFIX}")
-        else()
-            set(PYTHON_EXTENSION_SUFFIX ".cpython-${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}${PYTHON3_RELEASE_SUFFIX}-${PYTHON_MULTIARCH_SUFFIX}")
-        endif()
-    else()
-        message( FATAL_ERROR "Unsupported PYTHON_VERSION=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.${PYTHON_VERSION_PATCH}!" )
-    endif()
-  endif()
-  message("PYTHON_EXTENSION_SUFFIX: " ${PYTHON_EXTENSION_SUFFIX})
-endif ()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if (SHIBOKEN_PYTHON_VERSION_MAJOR EQUAL 2)
