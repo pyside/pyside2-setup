@@ -8,7 +8,7 @@ project(pysidebindings)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Macros/
                       ${CMAKE_MODULE_PATH})
 
-option(USE_PYTHON_VERSION "Use specific python version to build shiboken2." "")
+option(USE_PYTHON_VERSION "Use specific python version to build pyside2." "")
 
 if (USE_PYTHON_VERSION)
     find_package(PythonLibs ${USE_PYTHON_VERSION} REQUIRED)
