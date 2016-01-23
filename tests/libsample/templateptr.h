@@ -26,7 +26,7 @@
 #include <utility>
 #include <list>
 #include "libsamplemacros.h"
-#include "BlackBox.h"
+#include "blackbox.h"
 
 class LIBSAMPLE_API TemplatePtr
 {
