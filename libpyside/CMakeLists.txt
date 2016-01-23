@@ -49,7 +49,7 @@ target_link_libraries(pyside2
 set_target_properties(pyside2 PROPERTIES
                       VERSION ${BINDING_API_VERSION}
                       SOVERSION "${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION}"
-                      OUTPUT_NAME "pyside2${pyside2_SUFFIX}${SHIBOKEN_PYTHON_SUFFIX}"
+                      OUTPUT_NAME "pyside2${pyside2_SUFFIX}${SHIBOKEN_PYTHON_EXTENSION_SUFFIX}"
                       DEFINE_SYMBOL PYSIDE_EXPORTS)
 
 #
@@ -85,7 +85,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/pyside2.pc.in"
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/PySide2Config.cmake.in" 
                "${CMAKE_CURRENT_BINARY_DIR}/PySide2Config.cmake" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/PySide2Config-spec.cmake.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/PySide2Config${SHIBOKEN_PYTHON_SUFFIX}.cmake" @ONLY)
+               "${CMAKE_CURRENT_BINARY_DIR}/PySide2Config${SHIBOKEN_PYTHON_EXTENSION_SUFFIX}.cmake" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/PySide2ConfigVersion.cmake.in"
                "${CMAKE_CURRENT_BINARY_DIR}/PySide2ConfigVersion.cmake" @ONLY)
 
@@ -99,7 +99,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pyside2${pyside2_SUFFIX}.pc"
         DESTINATION "${LIB_INSTALL_DIR}/pkgconfig")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/PySide2Config.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide2-${BINDING_API_VERSION}")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/PySide2Config${SHIBOKEN_PYTHON_SUFFIX}.cmake"
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/PySide2Config${SHIBOKEN_PYTHON_EXTENSION_SUFFIX}.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide2-${BINDING_API_VERSION}")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/PySide2ConfigVersion.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide2-${BINDING_API_VERSION}")
