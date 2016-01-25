@@ -8,5 +8,6 @@ addons:
     - george-edison55-precise-backports
     packages:
     - cmake
+    - cmake-data
 script:
   - python setup.py install # --qmake=/path/to/bin/qmake --cmake=/path/to/bin/cmake --openssl=/path/to/openssl/bin
