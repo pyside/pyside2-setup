@@ -481,8 +481,8 @@ int SignalManager::qt_metacall(QObject* object, QMetaObject::Call call, int id, 
                 QV4::Heap::ExecutionContext *ctx = engine->currentContext();
                 #endif
 
-                if (ctx->type == QV4::Heap::ExecutionContext::ContextType::Type_CallContext ||
-                    ctx->type == QV4::Heap::ExecutionContext::ContextType::Type_SimpleCallContext) {
+                if (ctx->type == QV4::Heap::ExecutionContext::Type_CallContext ||
+                    ctx->type == QV4::Heap::ExecutionContext::Type_SimpleCallContext) {
                     PyObject *errType, *errValue, *errTraceback;
                     PyErr_Fetch(&errType, &errValue, &errTraceback);
                     PyErr_Restore(errType, errValue, errTraceback);
