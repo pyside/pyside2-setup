@@ -39,12 +39,12 @@ private:
     bool m_value;
 };
 
-inline bool operator==(MinBool b1, bool b2) { return !b1 == !b2; }
-inline bool operator==(bool b1, MinBool b2) { return !b1 == !b2; }
-inline bool operator==(MinBool b1, MinBool b2) { return !b1 == !b2; }
-inline bool operator!=(MinBool b1, bool b2) { return !b1 != !b2; }
-inline bool operator!=(bool b1, MinBool b2) { return !b1 != !b2; }
-inline bool operator!=(MinBool b1, MinBool b2) { return !b1 != !b2; }
+inline bool operator==(MinBool b1, bool b2) { return (!b1) == !b2; }
+inline bool operator==(bool b1, MinBool b2) { return (!b1) == !b2; }
+inline bool operator==(MinBool b1, MinBool b2) { return (!b1) == !b2; }
+inline bool operator!=(MinBool b1, bool b2) { return (!b1) != !b2; }
+inline bool operator!=(bool b1, MinBool b2) { return (!b1) != !b2; }
+inline bool operator!=(MinBool b1, MinBool b2) { return (!b1) != !b2; }
 
 class LIBMINIMAL_API MinBoolUser
 {
