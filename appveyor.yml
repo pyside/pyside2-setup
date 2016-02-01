@@ -16,9 +16,10 @@ build_script:
       
       cd C:\projects\pyside2-setup
       dir C:\Qt\5.5
-      dir C:\Qt\5.5\msvc2013
+      dir C:\Qt\5.5\mingw482_32
+      dir C:\Qt\5.5\mingw482_32\bin
       dir C:\OpenSSL-Win32
-      set QTDIR=C:\Qt\5.5
+      set QTDIR=C:\Qt\5.5\mingw482_32
       set PATH=%PATH%;%QTDIR%\bin
       qmake --version
       python setup.py install --openssl=C:\OpenSSL-Win32
