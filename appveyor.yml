@@ -10,14 +10,15 @@ build_script:
       cmake --version
       dir
       cd C:\Qt
-      curl -sLO https://download.qt.io/archive/qt/5.5/5.5.0/qt-opensource-windows-x86-msvc2010-5.5.0.exe
-      7z x qt-opensource-windows-x86-msvc2010-5.5.0.exe
+      rem curl -sLO https://download.qt.io/archive/qt/5.5/5.5.0/qt-opensource-windows-x86-msvc2010-5.5.0.exe
+      rem 7z 9.20 fails to unpack the archive properly (only 13/585Mb are unpacked)
+      rem 7z x qt-opensource-windows-x86-msvc2010-5.5.0.exe
+      
       cd C:\projects\pyside2-setup
       dir C:\Qt\5.5
       dir C:\Qt\5.5\msvc2013
-      dir C:\Qt\5.5\Src
       dir C:\OpenSSL-Win32
-      set QTDIR=C:\Qt\5.5\Src
+      set QTDIR=C:\Qt\5.5
       set PATH=%PATH%;%QTDIR%\bin
       qmake --version
       python setup.py install --openssl=C:\OpenSSL-Win32
