@@ -146,6 +146,7 @@ check_allowed_python_version()
 OPTION_DEBUG = has_option("debug")
 OPTION_RELWITHDEBINFO = has_option('relwithdebinfo')
 OPTION_QMAKE = option_value("qmake")
+OPTION_QT_VERSION = option_value("qt")
 OPTION_CMAKE = option_value("cmake")
 OPTION_OPENSSL = option_value("openssl")
 OPTION_ONLYPACKAGE = has_option("only-package")
@@ -161,6 +162,8 @@ OPTION_BUILDTESTS = has_option("build-tests")
 OPTION_OSXARCH = option_value("osx-arch")
 OPTION_XVFB = has_option("use-xvfb")
 
+if OPTION_QT_VERSION is None:
+    OPTION_QT_VERSION = "5"
 if OPTION_QMAKE is None:
     OPTION_QMAKE = find_executable("qmake-qt5")
 if OPTION_QMAKE is None:
@@ -460,7 +463,7 @@ class pyside_build(_build):
                 log.error("Failed to locate a dynamic Python library, using %s"
                           % py_library)
 
-        qtinfo = QtInfo([OPTION_QMAKE,])
+        qtinfo = QtInfo([OPTION_QMAKE, "-qt=%s" %(OPTION_QT_VERSION)])
         qt_dir = os.path.dirname(OPTION_QMAKE)
         qt_version = qtinfo.version
         if not qt_version:
