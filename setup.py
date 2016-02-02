@@ -460,7 +460,7 @@ class pyside_build(_build):
                 log.error("Failed to locate a dynamic Python library, using %s"
                           % py_library)
 
-        qtinfo = QtInfo(OPTION_QMAKE)
+        qtinfo = QtInfo([OPTION_QMAKE,])
         qt_dir = os.path.dirname(OPTION_QMAKE)
         qt_version = qtinfo.version
         if not qt_version:
