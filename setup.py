@@ -162,9 +162,9 @@ OPTION_OSXARCH = option_value("osx-arch")
 OPTION_XVFB = has_option("use-xvfb")
 
 if OPTION_QMAKE is None:
-    OPTION_QMAKE = find_executable("qmake")
-if OPTION_QMAKE is None:
     OPTION_QMAKE = find_executable("qmake-qt5")
+if OPTION_QMAKE is None:
+    OPTION_QMAKE = find_executable("qmake")
 if OPTION_CMAKE is None:
     OPTION_CMAKE = find_executable("cmake")
 
