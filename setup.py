@@ -168,6 +168,15 @@ if OPTION_QMAKE is None:
     OPTION_QMAKE = find_executable("qmake-qt5")
 if OPTION_QMAKE is None:
     OPTION_QMAKE = find_executable("qmake")
+
+QMAKE_COMMAND = None
+if os.path.exists(OPTION_QMAKE): # Checking whether qmake executable exists
+    if os.path.islink(OPTION_QMAKE) and os.path.lexists(OPTION_QMAKE): # Looking whether qmake path is a link and whether the link exists
+        if "qtchooser" in os.readlink(OPTION_QMAKE): # Set -qt=X here.
+            QMAKE_COMMAND = [OPTION_QMAKE, "-qt=%s" %(OPTION_QT_VERSION)]
+if not QMAKE_COMMAND:
+    QMAKE_COMMAND = [OPTION_QMAKE]
+
 if OPTION_CMAKE is None:
     OPTION_CMAKE = find_executable("cmake")
 
@@ -463,7 +472,7 @@ class pyside_build(_build):
                 log.error("Failed to locate a dynamic Python library, using %s"
                           % py_library)
 
-        qtinfo = QtInfo([OPTION_QMAKE, "-qt=%s" %(OPTION_QT_VERSION)])
+        qtinfo = QtInfo(QMAKE_COMMAND)
         qt_dir = os.path.dirname(OPTION_QMAKE)
         qt_version = qtinfo.version
         if not qt_version:
