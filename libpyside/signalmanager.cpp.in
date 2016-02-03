@@ -475,14 +475,21 @@ int SignalManager::qt_metacall(QObject* object, QMetaObject::Call call, int id, 
             if (data || !data->jsWrapper.isNullOrUndefined()) {
                 QV4::ExecutionEngine *engine = data->jsWrapper.engine();
 
-                #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
                 QV4::Heap::ExecutionContext *ctx = engine->current;
-                #else
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
                 QV4::Heap::ExecutionContext *ctx = engine->currentContext();
-                #endif
+#else
+                QV4::ExecutionContext *ctx = engine->currentContext();
+#endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
                 if (ctx->type == QV4::Heap::ExecutionContext::Type_CallContext ||
                     ctx->type == QV4::Heap::ExecutionContext::Type_SimpleCallContext) {
+#else
+                if (ctx->type == QV4::ExecutionContext::Type_CallContext ||
+                    ctx->type == QV4::ExecutionContext::Type_SimpleCallContext) {
+#endif
                     PyObject *errType, *errValue, *errTraceback;
                     PyErr_Fetch(&errType, &errValue, &errTraceback);
                     PyErr_Restore(errType, errValue, errTraceback);
@@ -491,6 +498,7 @@ int SignalManager::qt_metacall(QObject* object, QMetaObject::Call call, int id, 
 
                     PyErr_Print();
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
                     if (errType == PyExc_SyntaxError) {
                         return engine->throwSyntaxError(errString);
                     } else if (errType == PyExc_TypeError) {
@@ -498,6 +506,15 @@ int SignalManager::qt_metacall(QObject* object, QMetaObject::Call call, int id, 
                     } else {
                         return engine->throwError(errString);
                     }
+#else
+                    if (errType == PyExc_SyntaxError) {
+                        return ctx->throwSyntaxError(errString);
+                    } else if (errType == PyExc_TypeError) {
+                        return ctx->throwTypeError(errString);
+                    } else {
+                        return ctx->throwError(errString);
+                    }
+#endif
                 }
             }
 #endif
