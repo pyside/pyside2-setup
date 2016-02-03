@@ -1,4 +1,4 @@
-import sys
+import os, sys
 import subprocess
 from distutils.spawn import find_executable
 
@@ -10,7 +10,7 @@ class QtInfo(object):
             self._qmake_command = [find_executable("qmake"),]
 
     def getQMakePath(self):
-        qmake_path = self._qmake_path[0] # Guessing the first of the commands is qmake
+        qmake_path = self._qmake_command[0] # Guessing the first of the commands is qmake
         if not os.path.exists(qmake_path): # Making it here a bit more failsave.
             qmake_path = find_executable(qmake_path) # In case someone just passed the name of the executable I'll search for it now.
             if qmake_path == None: # If we couldn't resolv the location of the executable
