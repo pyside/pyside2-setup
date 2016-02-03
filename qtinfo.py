@@ -10,7 +10,12 @@ class QtInfo(object):
             self._qmake_command = [find_executable("qmake"),]
 
     def getQMakePath(self):
-        return self._qmake_path
+        qmake_path = self._qmake_path[0] # Guessing the first of the commands is qmake
+        if not os.path.exists(qmake_path): # Making it here a bit more failsave.
+            qmake_path = find_executable(qmake_path) # In case someone just passed the name of the executable I'll search for it now.
+            if qmake_path == None: # If we couldn't resolv the location of the executable
+                raise ValueError("Could not find the location of %s. Please pass the absolute path to qmake or please pass the correct name of the executable." %(qmake_path))
+        return qmake_path
 
     def getVersion(self):
         return self.getProperty("QT_VERSION")
