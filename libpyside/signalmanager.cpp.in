@@ -486,6 +486,9 @@ int SignalManager::qt_metacall(QObject* object, QMetaObject::Call call, int id, 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
                 if (ctx->type == QV4::Heap::ExecutionContext::Type_CallContext ||
                     ctx->type == QV4::Heap::ExecutionContext::Type_SimpleCallContext) {
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
+                if (ctx->d()->type == QV4::ExecutionContext::Type_CallContext ||
+                    ctx->d()->type == QV4::ExecutionContext::Type_SimpleCallContext) {
 #else
                 if (ctx->type == QV4::ExecutionContext::Type_CallContext ||
                     ctx->type == QV4::ExecutionContext::Type_SimpleCallContext) {
