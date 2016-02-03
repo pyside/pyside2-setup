@@ -145,6 +145,10 @@ class Popen(subprocess.Popen):
         setattr(self, which, None)
     
     if mswindows:
+        def _close(self, which):
+            getattr(self, which).close()
+            setattr(self, which, None)
+
         def kill(self):
             # Recipes
             #http://me.in-berlin.de/doc/python/faq/windows.html#how-do-i-emulate-os-kill-in-windows
