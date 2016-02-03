@@ -331,7 +331,6 @@ class pyside_build(_build):
         self.sources_dir = None
         self.build_dir = None
         self.install_dir = None
-        self.qmake_path = None
         self.py_executable = None
         self.py_include_dir = None
         self.py_library = None
@@ -472,11 +471,11 @@ class pyside_build(_build):
                 log.error("Failed to locate a dynamic Python library, using %s"
                           % py_library)
 
-        qtinfo = QtInfo(QMAKE_COMMAND)
+        self.qtinfo = QtInfo(QMAKE_COMMAND)
         qt_dir = os.path.dirname(OPTION_QMAKE)
-        qt_version = qtinfo.version
+        qt_version = self.qtinfo.version
         if not qt_version:
-            log.error("Failed to query the Qt version with qmake %s" % qtinfo.qmake_path)
+            log.error("Failed to query the Qt version with qmake %s" % self.qtinfo.qmake_command)
             sys.exit(1)
 
         # Update the PATH environment variable
@@ -504,13 +503,11 @@ class pyside_build(_build):
         self.sources_dir = sources_dir
         self.build_dir = build_dir
         self.install_dir = install_dir
-        self.qmake_path = OPTION_QMAKE
         self.py_executable = py_executable
         self.py_include_dir = py_include_dir
         self.py_library = py_library
         self.py_version = py_version
         self.build_type = build_type
-        self.qtinfo = qtinfo
         self.site_packages_dir = get_python_lib(1, 0, prefix=install_dir)
         self.build_tests = OPTION_BUILDTESTS
 
@@ -535,11 +532,11 @@ class pyside_build(_build):
         log.info("Python prefix: %s" % py_prefix)
         log.info("Python scripts: %s" % py_scripts_dir)
         log.info("-" * 3)
-        log.info("Qt qmake: %s" % self.qmake_path)
-        log.info("Qt version: %s" % qtinfo.version)
-        log.info("Qt bins: %s" % qtinfo.bins_dir)
-        log.info("Qt docs: %s" % qtinfo.docs_dir)
-        log.info("Qt plugins: %s" % qtinfo.plugins_dir)
+        log.info("Qt qmake: %s" % self.qtinfo.qmake_command)
+        log.info("Qt version: %s" % self.qtinfo.version)
+        log.info("Qt bins: %s" % self.qtinfo.bins_dir)
+        log.info("Qt docs: %s" % self.qtinfo.docs_dir)
+        log.info("Qt plugins: %s" % self.qtinfo.plugins_dir)
         log.info("-" * 3)
         log.info("OpenSSL libs: %s" % OPTION_OPENSSL)
         log.info("=" * 30)
@@ -614,7 +611,7 @@ class pyside_build(_build):
         cmake_cmd = [
             OPTION_CMAKE,
             "-G", self.make_generator,
-            "-DQT_QMAKE_EXECUTABLE=%s" % self.qmake_path,
+            "-DQT_QMAKE_EXECUTABLE='%s'" % self.qtinfo.qmake_command,
             "-DBUILD_TESTS=%s" % self.build_tests,
             "-DDISABLE_DOCSTRINGS=True",
             "-DQt5Help_DIR=%s" % self.qtinfo.docs_dir,
