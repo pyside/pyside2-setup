@@ -1,4 +1,4 @@
-import sys
+import os, sys
 import subprocess
 from distutils.spawn import find_executable
 
@@ -9,8 +9,11 @@ class QtInfo(object):
         else:
             self._qmake_command = [find_executable("qmake"),]
 
-    def getQMakePath(self):
-        return self._qmake_path
+    def getQMakeCommand(self):
+        qmake_command_string = self._qmake_command[0]
+        for entry in self._qmake_command[1:]:
+            qmake_command_string += " %s" %(entry)
+        return qmake_command_string
 
     def getVersion(self):
         return self.getProperty("QT_VERSION")
@@ -51,7 +54,7 @@ class QtInfo(object):
     bins_dir = property(getBinsPath)
     libs_dir = property(getLibsPath)
     plugins_dir = property(getPluginsPath)
-    qmake_command = property(getQMakePath)
+    qmake_command = property(getQMakeCommand)
     imports_dir = property(getImportsPath)
     translations_dir = property(getTranslationsPath)
     headers_dir = property(getHeadersPath)
