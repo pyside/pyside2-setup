@@ -23,7 +23,7 @@ if (UNIX AND NOT APPLE)
     # Also note the quirk that UNIX includes Apple!
   if (NOT PYTHON_MULTIARCH_SUFFIX)
     execute_process(
-        COMMAND ${PYTHON_INTERPRETER} -c "if True:
+        COMMAND ${PYTHON_EXECUTABLE} -c "if True:
             import sysconfig
             print(sysconfig.get_config_var('MULTIARCH'))
             "
