@@ -377,7 +377,7 @@ QT_END_NAMESPACE
 
 #include <QtCore/QtCore>
 #include <QtConcurrent/QtConcurrent>
-#if @ENABLE_MAC@ || @ENABLE_WIN@
+#if @ENABLE_MAC@ || @ENABLE_WIN@ || @ENABLE_X11@
   // Workaround to parse the QApplication header
   #define Q_INTERNAL_QAPP_SRC
   #undef Q_QDOC
