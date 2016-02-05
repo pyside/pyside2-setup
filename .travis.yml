@@ -13,6 +13,6 @@ addons:
 #before_install:
 #  - sudo add-apt-repository ppa:beineri/opt-qt551 -y
 install:
-  - sudo apt-get install qt5-default -y
+  - sudo apt-get install qt5-default libqt5xmlpatterns5-dev -y
 script:
   - python setup.py install # --qmake=/path/to/bin/qmake --cmake=/path/to/bin/cmake --openssl=/path/to/openssl/bin
