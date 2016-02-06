@@ -205,7 +205,7 @@ add_custom_target(dist
             echo "Source package created at ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2.\n"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT PYTHON_MODULE_SUFFIX)
     if (SHIBOKEN_PYTHON_VERSION_MAJOR EQUAL 2)
         set(PYTHON_DEBUG_SUFFIX "_d")
     endif()
