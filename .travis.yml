@@ -12,6 +12,7 @@ addons:
     - cmake-data
 before_install:
    - sudo add-apt-repository ppa:beineri/opt-qt551 -y
+   - sudo apt-get update
 install:
   ##- sudo apt-get install qt5-default libqt5xmlpatterns5-dev -y
   - sudo apt-get install qt55-meta -y
