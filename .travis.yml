@@ -1,0 +1,13 @@
+language: python
+dist: trusty
+python:
+  - "2.7"
+  - "3.5"
+before_install:
+   - sudo add-apt-repository ppa:beineri/opt-qt551-trusty -y
+   - sudo apt-get update
+install:
+  - sudo apt-get install qt55-meta-full -y
+script:
+  - source /opt/qt55/bin/qt55-env.sh
+  - python setup.py install --jobs=2 --build-tests # --openssl=/path/to/openssl/bin
