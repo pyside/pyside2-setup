@@ -20,4 +20,4 @@ install:
   - sudo apt-get install cmake -y
 script:
   - qtchooser -l
-  - python setup.py install --qt=opt-qt55 # --qmake=/path/to/bin/qmake --cmake=/path/to/bin/cmake --openssl=/path/to/openssl/bin
+  - CMAKE_MODULE_PATH="/opt/qt55/lib/cmake/Qt5/;/usr/share/cmake-2.8/Modules/" python setup.py install --qt=opt-qt55 # --qmake=/path/to/bin/qmake --cmake=/path/to/bin/cmake --openssl=/path/to/openssl/bin
