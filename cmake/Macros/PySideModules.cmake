@@ -63,7 +63,7 @@ macro(create_pyside_module
     add_library(${module_name} MODULE ${${module_sources}} ${${module_static_sources}})
     set_target_properties(${module_name} PROPERTIES
                           PREFIX ""
-                          OUTPUT_NAME "${module_name}${PYTHON_EXTENSION_SUFFIX}${PYTHON_DEBUG_SUFFIX}"
+                          OUTPUT_NAME "${module_name}${PYTHON_MODULE_SUFFIX}${PYTHON_DEBUG_SUFFIX}"
                           LIBRARY_OUTPUT_DIRECTORY ${pyside2_BINARY_DIR})
     if(WIN32)
         set_target_properties(${module_name} PROPERTIES SUFFIX ".pyd")
