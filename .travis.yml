@@ -11,4 +11,4 @@ install:
 script:
   - cat /opt/qt55/bin/qt55-env.sh
   - source /opt/qt55/bin/qt55-env.sh
-  - python setup.py install --qt=opt-qt55 # --qmake=/path/to/bin/qmake --cmake=/path/to/bin/cmake --openssl=/path/to/openssl/bin
+  - python setup.py install --jobs=2 --qt=opt-qt55 # --qmake=/path/to/bin/qmake --cmake=/path/to/bin/cmake --openssl=/path/to/openssl/bin
