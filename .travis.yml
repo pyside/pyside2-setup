@@ -20,6 +20,6 @@ install:
   #- sudo apt-get install cmake -y
 script:
   - qtchooser -l
-  #- cat /opt/qt55/bin/qt55-env.sh
-  #- source /opt/qt55/bin/qt55-env.sh
-  - CMAKE_MODULE_PATH="/opt/qt55/lib/cmake/Qt5/;/opt/qt55/lib/cmake/Qt5Concurrent/;/opt/qt55/lib/cmake/Qt5Core/;/opt/qt55/lib/cmake/Qt5DBus/;/opt/qt55/lib/cmake/Qt5Gui/;/opt/qt55/lib/cmake/Qt5Network/;/opt/qt55/lib/cmake/Qt5OpenGL/;/opt/qt55/lib/cmake/Qt5OpenGLExtensions/;/opt/qt55/lib/cmake/Qt5PrintSupport/;/opt/qt55/lib/cmake/Qt5Sql/;/opt/qt55/lib/cmake/Qt5Test/;/opt/qt55/lib/cmake/Qt5Widgets/;/opt/qt55/lib/cmake/Qt5Xml/;/usr/share/cmake-2.8/Modules/" python setup.py install --jobs=2 --qt=opt-qt55 # --qmake=/path/to/bin/qmake --cmake=/path/to/bin/cmake --openssl=/path/to/openssl/bin
+  - cat /opt/qt55/bin/qt55-env.sh
+  - source /opt/qt55/bin/qt55-env.sh
+  - python setup.py install --jobs=2 --qt=opt-qt55 # --qmake=/path/to/bin/qmake --cmake=/path/to/bin/cmake --openssl=/path/to/openssl/bin
