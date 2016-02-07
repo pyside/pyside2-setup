@@ -29,6 +29,10 @@ find_package(Qt5WebEngineWidgets)
 find_package(Qt5WebChannel)
 find_package(Qt5WebSockets)
 
+if(UNIX AND NOT APPLE)
+  find_package(Qt5X11Extras) # new in Qt5, from QtGui
+endif()
+
 # Configure include based on platform
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/global.h.in"
                "${CMAKE_CURRENT_BINARY_DIR}/pyside2_global.h" @ONLY)
@@ -129,6 +133,10 @@ CHECK_PACKAGE_FOUND(Qt5WebEngineWidgets opt)
 CHECK_PACKAGE_FOUND(Qt5WebChannel opt)
 CHECK_PACKAGE_FOUND(Qt5WebSockets opt)
 
+if(UNIX AND NOT APPLE)
+  check_package_found(Qt5X11Extras)
+endif()
+
 # note: the order of this list is relevant for dependencies.
 # For instance: Qt5Printsupport must come before Qt5WebKitWidgets
 HAS_QT_MODULE(Qt5Core_FOUND QtCore)
@@ -195,6 +203,10 @@ HAS_QT_MODULE(Qt5QuickWidgets_FOUND QtQuickWidgets)
 HAS_QT_MODULE(Qt5WebEngineWidgets_FOUND QtWebEngineWidgets)
 HAS_QT_MODULE(Qt5WebChannel_FOUND QtWebChannel)
 HAS_QT_MODULE(Qt5WebSockets_FOUND QtWebSockets)
+
+if(UNIX AND NOT APPLE)
+    has_qt_module(Qt5X11Extras_FOUND QtX11Extras)
+endif()
 
 # install
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/__init__.py"

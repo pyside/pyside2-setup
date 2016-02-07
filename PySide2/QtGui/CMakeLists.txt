@@ -1,15 +1,5 @@
 project(QtGui)
 
-if(ENABLE_X11)
-    message(WARNING "Qt X11 Extras don't get generated. Skipping them for now...")
-#    set(SPECIFIC_OS_FILES
-#        ${QtGui_GEN_DIR}/qx11info_wrapper.cpp
-#        ${QtGui_GEN_DIR}/qx11embedcontainer_wrapper.cpp
-#        ${QtGui_GEN_DIR}/qx11embedwidget_wrapper.cpp
-#    )
-
-endif()
-
 qt5_wrap_cpp(QPYTEXTOBJECT_MOC "${pyside2_SOURCE_DIR}/qpytextobject.h")
 
 set(QtGui_SRC
@@ -156,7 +146,6 @@ ${QtGui_GEN_DIR}/qwheelevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qwindow_wrapper.cpp
 ${QtGui_GEN_DIR}/qwindowstatechangeevent_wrapper.cpp
 
-${SPECIFIC_OS_FILES}
 # module is always needed
 ${QtGui_GEN_DIR}/qtgui_module_wrapper.cpp
 )

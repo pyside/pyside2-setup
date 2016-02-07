@@ -385,9 +385,9 @@ QT_END_NAMESPACE
 #include <QtGui/QtGui>
 #include "qpytextobject.h"  // PySide class
 #if @ENABLE_X11@
-  #include <QtGui/QX11Info>
-  #include <QtGui/QX11EmbedContainer>
-  #include <QtGui/QX11EmbedWidget>
+#if @Qt5X11Extras_FOUND@
+#include <QtX11Extras/QX11Info>
+#endif
 #elif @ENABLE_MAC@
   #include <QtGui/qmacstyle_mac.h>
 #endif
@@ -450,4 +450,3 @@ QT_END_NAMESPACE
 #include <@GL_H@>
 #include <@QT_QTOPENGL_INCLUDE_DIR@/QtOpenGL>
 #endif // QT_NO_OPENGL
-
