@@ -1,7 +1,7 @@
 project(QtGui)
 
 if(ENABLE_X11)
-    message(WARNING "QX11Info and other wrappers don't get generated. Skipping them for now...")
+    message(WARNING "Qt X11 Extras don't get generated. Skipping them for now...")
 #    set(SPECIFIC_OS_FILES
 #        ${QtGui_GEN_DIR}/qx11info_wrapper.cpp
 #        ${QtGui_GEN_DIR}/qx11embedcontainer_wrapper.cpp
