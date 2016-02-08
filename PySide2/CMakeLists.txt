@@ -134,7 +134,7 @@ CHECK_PACKAGE_FOUND(Qt5WebChannel opt)
 CHECK_PACKAGE_FOUND(Qt5WebSockets opt)
 
 if(UNIX AND NOT APPLE)
-  check_package_found(Qt5X11Extras)
+  CHECK_PACKAGE_FOUND(Qt5X11Extras opt)
 endif()
 
 # note: the order of this list is relevant for dependencies.
