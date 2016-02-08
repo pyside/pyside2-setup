@@ -2,7 +2,7 @@
 
 | Windows | Linux |
 |---------|-------|
-| [![AppVeyor](https://img.shields.io/appveyor/ci/techtonik/pyside2-setup.svg)](https://ci.appveyor.com/project/techtonik/pyside2-setup) | [#20](https://github.com/PySide/pyside2-setup/issues/20) |
+| [![AppVeyor](https://img.shields.io/appveyor/ci/techtonik/pyside2-setup.svg)](https://ci.appveyor.com/project/techtonik/pyside2-setup) | [![Travis CI](https://img.shields.io/travis/ci/PySide/pyside2-setup.svg)](https://travis-ci.org/PySide/pyside2-setup) |
 
 
 ###Introduction
