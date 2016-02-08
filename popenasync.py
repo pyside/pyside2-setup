@@ -136,19 +136,16 @@ class Popen(subprocess.Popen):
         return getattr(self, which), maxsize
     
     def _close(self, which):
-        conn = getattr(self, which)
-        flags = fcntl.fcntl(conn, fcntl.F_GETFL)
-        if not conn.closed:
-            fcntl.fcntl(conn, fcntl.F_SETFL, flags & ~os.O_NONBLOCK)
-        assert conn.read() == ''
+        if not mswindows:
+            conn = getattr(self, which)
+            flags = fcntl.fcntl(conn, fcntl.F_GETFL)
+            if not conn.closed:
+                fcntl.fcntl(conn, fcntl.F_SETFL, flags & ~os.O_NONBLOCK)
+            assert conn.read() == ''
         getattr(self, which).close()
         setattr(self, which, None)
     
     if mswindows:
-        def _close(self, which):
-            getattr(self, which).close()
-            setattr(self, which, None)
-
         def kill(self):
             # Recipes
             #http://me.in-berlin.de/doc/python/faq/windows.html#how-do-i-emulate-os-kill-in-windows
