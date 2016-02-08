@@ -1,5 +1,9 @@
 #PySide2
 
+| Windows | Linux |
+|---------|-------|
+| [![AppVeyor](https://img.shields.io/appveyor/ci/techtonik/pyside2-setup.svg)](https://ci.appveyor.com/project/techtonik/pyside2-setup) | [![Travis CI](https://img.shields.io/travis/PySide/pyside2-setup.svg)](https://travis-ci.org/PySide/pyside2-setup) |
+
 
 ###Introduction
 
