@@ -16,6 +16,8 @@ any contribution without requiring a transfer of copyright.
 
 PySide 2 supports Qt5. For building, please read about [getting the dependencies](https://github.com/PySide/pyside2/wiki/Dependencies). Then download the sources by running `git clone --recursive https://github.com/PySide/pyside2-setup.git`.
 
+[![Build Status](https://travis-ci.org/PySide/pyside2-setup.svg?branch=master)](https://travis-ci.org/PySide/pyside2-setup)
+
 ###Building
 
 ####Windows
