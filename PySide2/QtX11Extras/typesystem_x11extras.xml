@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
 <!--
     This file is part of PySide project.
-    Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
-    Contact: PySide team <contact@pyside.org>
+    Copyright (C) 2016 Mateusz Skowroński <skowri@gmail.com>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -18,8 +17,8 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 -->
-<typesystem package="PySide2.QtGui">
+<typesystem package="PySide2.QtX11Extras">
+    <load-typesystem name="typesystem_core.xml" generate="no"/>
 
-  <enum-type name="QPixmap::ShareMode"/>
-
+    <object-type name="QX11Info" />
 </typesystem>
