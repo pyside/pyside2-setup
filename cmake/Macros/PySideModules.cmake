@@ -61,10 +61,17 @@ macro(create_pyside_module
 
     include_directories(${module_name} ${${module_include_dir}} ${pyside2_SOURCE_DIR})
     add_library(${module_name} MODULE ${${module_sources}} ${${module_static_sources}})
-    set_target_properties(${module_name} PROPERTIES
-                          PREFIX ""
-                          OUTPUT_NAME "${module_name}${PYTHON_MODULE_SUFFIX}${PYTHON_DEBUG_SUFFIX}"
-                          LIBRARY_OUTPUT_DIRECTORY ${pyside2_BINARY_DIR})
+    if(PYTHON_MULTIARCH_SUFFIX)
+        set_target_properties(${module_name} PROPERTIES
+                              PREFIX ""
+                              OUTPUT_NAME "${module_name}${PYTHON_MODULE_SUFFIX}"
+                              LIBRARY_OUTPUT_DIRECTORY ${pyside2_BINARY_DIR})
+    else()
+        set_target_properties(${module_name} PROPERTIES
+                              PREFIX ""
+                              OUTPUT_NAME "${module_name}"
+                              LIBRARY_OUTPUT_DIRECTORY ${pyside2_BINARY_DIR})
+    endif()
     if(WIN32)
         set_target_properties(${module_name} PROPERTIES SUFFIX ".pyd")
         set(${module_name}_suffix ".pyd")
