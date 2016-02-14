@@ -64,4 +64,3 @@ QList<QDesignerCustomWidgetInterface*> PyCustomWidgets::customWidgets() const
     return m_data->widgets;
 }
 
-Q_PLUGIN_METADATA(IID "org.qt-project.Qt.PySide.PyCustomWidgetsInterface")

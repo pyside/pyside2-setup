@@ -28,7 +28,7 @@
       </extra-includes>
       <inject-code class="native" position="beginning" file="glue/uitools_loadui.cpp"/>
       <inject-code>
-          Q_IMPORT_PLUGIN(uiplugin);
+          Q_IMPORT_PLUGIN(PyCustomWidgets);
       </inject-code>
       <add-function signature="registerCustomWidget(PyObject*)" return-type="void">
          <modify-argument index="1">

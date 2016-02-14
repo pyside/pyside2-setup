@@ -174,14 +174,14 @@ ENDIF()
 # HAS_QT_MODULE(Qt5OpenGL_FOUND QtOpenGL)
 ###
 
-if(NOT MSVC)
-    # right now this does not build on windows
-    if(Qt5Designer_FOUND)
-        HAS_QT_MODULE(Qt5UiTools_FOUND QtUiTools)
-    else()
-        set(DISABLE_QtUiTools 1 PARENT_SCOPE)
-    endif()
+#if(NOT MSVC)
+# right now this does not build on windows
+if(Qt5Designer_FOUND)
+    HAS_QT_MODULE(Qt5UiTools_FOUND QtUiTools)
+else()
+    set(DISABLE_QtUiTools 1 PARENT_SCOPE)
 endif()
+#endif()
 HAS_QT_MODULE(Qt5Script_FOUND QtScript)
 if(NOT MSVC)
     # right now this does not build on windows
