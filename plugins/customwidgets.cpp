@@ -64,3 +64,4 @@ QList<QDesignerCustomWidgetInterface*> PyCustomWidgets::customWidgets() const
     return m_data->widgets;
 }
 
+
