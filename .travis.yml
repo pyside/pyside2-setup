@@ -8,6 +8,8 @@ before_install:
    - sudo apt-get update
 install:
   - sudo apt-get install qt55-meta-full -y
+    # no idea if that works
+  - sudo apt-get install libqt5xml5 libqt5xmlpatterns5 libqt5xmlpatterns5-dev libqt5xmlpatterns5-private-dev
 script:
   - source /opt/qt55/bin/qt55-env.sh
   - python setup.py install --jobs=2 --build-tests # --openssl=/path/to/openssl/bin
