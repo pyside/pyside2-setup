@@ -68,7 +68,7 @@ if (NOT DISABLE_DOCSTRINGS)
         doxygenparser.cpp
         qtdocparser.cpp
     )
-    set(APIEXTRACTOR_EXTRA_INCLUDES ${LIBXSLT_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
+    set(APIEXTRACTOR_EXTRA_INCLUDES ${LIBXSLT_INCLUDE_DIRS} ${LIBXML2_INCLUDE_DIRS})
     set(APIEXTRACTOR_EXTRA_LIBRARIES ${LIBXSLT_LIBRARIES} ${LIBXML2_LIBRARIES})
 else()
     set(APIEXTRACTOR_EXTRA_INCLUDES "")
@@ -91,6 +91,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 
 add_library(apiextractor STATIC ${apiextractor_SRC} ${apiextractor_RCCS_SRC})
 target_link_libraries(apiextractor
+                      ${Qt5Xml_LIBRARIES}
                       ${APIEXTRACTOR_EXTRA_LIBRARIES}
                       )
 
