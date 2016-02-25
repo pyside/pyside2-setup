@@ -1371,6 +1371,13 @@
             </insert-template>
         </inject-code>
     </modify-function>
+
+    <add-function signature="setAlignment(QFlags&lt;Qt::AlignmentFlag&gt;)">
+      <inject-code class="target" position="beginning">
+        %CPPSELF.setAlignment(%1);
+      </inject-code>
+    </add-function>
+
   </object-type>
 
   <object-type name="QStackedLayout">
