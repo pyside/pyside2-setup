@@ -2011,6 +2011,9 @@
             .. warning:: Because of some Qt/Python itegration rules, the ptr argument do not get the reference incremented during the QModelIndex life time. So it is necessary to keep the object used on ptr argument alive during the whole process. Do not destroy the object if you are not sure about that.
         </inject-documentation>
     </add-function>
+    <inject-code class="target" position="end">
+        qRegisterMetaType&lt;QVector&lt;int&gt; &gt;("QVector&lt;int&gt;");
+    </inject-code>
     <modify-function signature="mimeData(QModelIndexList) const">
       <modify-argument index="return">
         <define-ownership class="native" owner="c++"/>
