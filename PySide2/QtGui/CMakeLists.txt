@@ -46,8 +46,6 @@ ${QtGui_GEN_DIR}/qinputevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qinputmethodevent_attribute_wrapper.cpp
 ${QtGui_GEN_DIR}/qinputmethodevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qintvalidator_wrapper.cpp
-${QtGui_GEN_DIR}/qitemselection_wrapper.cpp
-${QtGui_GEN_DIR}/qitemselectionrange_wrapper.cpp
 ${QtGui_GEN_DIR}/qkeyevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qkeysequence_wrapper.cpp
 ${QtGui_GEN_DIR}/qlineargradient_wrapper.cpp
@@ -182,3 +180,4 @@ create_pyside_module(QtGui
                      ${QtGui_BINARY_DIR}/typesystem_gui.xml)
 
 install(FILES ${pyside2_SOURCE_DIR}/qpytextobject.h DESTINATION include/PySide2/QtGui/)
+

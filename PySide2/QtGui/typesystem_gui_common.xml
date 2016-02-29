@@ -310,8 +310,6 @@
   <value-type name="QTextLength">
       <enum-type name="Type"/>
   </value-type>
-  <value-type name="QItemSelectionRange" hash-function="qHash">
-  </value-type>
   <value-type name="QPainterPath">
     <enum-type name="ElementType"/>
     <value-type name="Element">
@@ -655,8 +653,6 @@
       </modify-argument>
     </modify-function>
   </value-type>
-
-  <value-type name="QItemSelection" />
   
   <!-- Qt5: this _should_ be obsolete, but QImage is still using it... -->
   <value-type name="QMatrix">
@@ -3276,4 +3272,5 @@
   </object-type>
 
 </typesystem>
+
 
