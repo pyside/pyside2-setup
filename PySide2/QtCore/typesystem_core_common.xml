@@ -2023,9 +2023,19 @@
       </modify-argument>
     </modify-function>
   </object-type>
+  <value-type name="QItemSelection">
+    <include file-name="QList" location="global"/>
+  </value-type>
+    
   <object-type name="QItemSelectionModel">
+    <extra-includes>
+        <include file-name="QItemSelection" location="global"/>
+    </extra-includes>
     <enum-type name="SelectionFlag" flags="SelectionFlags"/>
   </object-type>
+ 
+  <value-type name="QItemSelectionRange" hash-function="qHash">
+  </value-type>
   <primitive-type name="QModelIndexList"/>
   <object-type name="QAbstractProxyModel" polymorphic-id-expression="qobject_cast&lt;QAbstractProxyModel*&gt;(%1)">
     <extra-includes>

@@ -58,7 +58,9 @@ ${QtCore_GEN_DIR}/qjsonarray_wrapper.cpp
 ${QtCore_GEN_DIR}/qjsondocument_wrapper.cpp
 ${QtCore_GEN_DIR}/qjsonparseerror_wrapper.cpp
 ${QtCore_GEN_DIR}/qjsonvalue_wrapper.cpp
+${QtCore_GEN_DIR}/qitemselection_wrapper.cpp
 ${QtCore_GEN_DIR}/qitemselectionmodel_wrapper.cpp
+${QtCore_GEN_DIR}/qitemselectionrange_wrapper.cpp
 ${QtCore_GEN_DIR}/qlibraryinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qline_wrapper.cpp
 ${QtCore_GEN_DIR}/qlinef_wrapper.cpp
@@ -168,3 +170,4 @@ create_pyside_module(QtCore
                      QtCore_SRC
                      QtCore_gluecode
                      ${QtCore_BINARY_DIR}/typesystem_core.xml)
+
