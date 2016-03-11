@@ -33,6 +33,6 @@ python setup.py install --qmake=\path\to\bin\qmake --cmake=\path\to\bin\cmake --
 You should be able to build:
 
 ```
-python setup.py install --qmake=/path/to/bin/qmake --cmake=/path/to/bin/cmake --openssl=/path/to/openssl/bin
+python setup.py install --qmake=/usr/bin/qmake --cmake=/usr/bin/cmake --openssl=/usr/bin/openssl
 ```
 
