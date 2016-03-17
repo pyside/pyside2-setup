@@ -417,8 +417,12 @@ static QString searchForEnumScope(const AbstractMetaClass* metaClass, const QStr
 QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction* func, const AbstractMetaArgument* arg)
 {
     QString value = getDefaultValue(func, arg);
+
     if (value.isEmpty())
         return QString();
+
+    if (isPointer(arg->type()))
+        return value;
 
     static QRegExp enumValueRegEx("^([A-Za-z_]\\w*)?$");
     QString prefix;
