@@ -460,7 +460,7 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction*
         }
     } else if (arg->type()->typeEntry()->isValue()) {
         const AbstractMetaClass* metaClass = classes().findClass(arg->type()->typeEntry());
-        if (enumValueRegEx.exactMatch(value))
+        if (enumValueRegEx.exactMatch(value)&& value != "NULL")
             prefix = resolveScopePrefix(metaClass, value);
     } else if (arg->type()->isPrimitive() && arg->type()->name() == "int") {
         if (enumValueRegEx.exactMatch(value) && func->implementingClass())
