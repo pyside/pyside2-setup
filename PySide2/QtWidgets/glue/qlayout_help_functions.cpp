@@ -98,7 +98,7 @@ inline void removeLayoutOwnership(QLayout* layout, QLayoutItem* item)
         removeWidgetFromLayout(layout, w);
     else {
         QLayout* l = item->layout();
-        if (l)
+        if (l && item != l)
             removeLayoutOwnership(layout, l);
     }
 

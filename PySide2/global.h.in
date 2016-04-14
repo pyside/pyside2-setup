@@ -431,7 +431,7 @@ QT_END_NAMESPACE
 #  include <QtQuickWidgets/QtQuickWidgets>
 #endif
 
-#if @Qt5WebEngine_FOUND@
+#if @Qt5WebEngineWidgets_FOUND@
 #  include <QtWebEngineWidgets/QtWebEngineWidgets>
 #endif
 

@@ -27,7 +27,7 @@ set(QtWebKit_include_dirs   ${QtWebKit_SOURCE_DIR}
 set(QtWebKit_libraries      pyside2
                             ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${SHIBOKEN_LIBRARY}
-                            ${Qt5Webkit_LIBRARIES}
+                            ${Qt5WebKit_LIBRARIES}
                             ${Qt5Network_LIBRARIES}
                             ${Qt5Gui_LIBRARIES}
                             ${Qt5Core_LIBRARIES}

@@ -472,7 +472,7 @@ int SignalManager::qt_metacall(QObject* object, QMetaObject::Call call, int id, 
             // This JS engine grabber based off of Qt 5.5's `qjsEngine` function
             QQmlData *data = QQmlData::get(object, false);
 
-            if (data || !data->jsWrapper.isNullOrUndefined()) {
+            if (data && !data->jsWrapper.isNullOrUndefined()) {
                 QV4::ExecutionEngine *engine = data->jsWrapper.engine();
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)

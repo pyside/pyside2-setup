@@ -41,6 +41,8 @@
   <rejection class="QTest" function-name="toString"/>
   <rejection class="QTest" function-name="toString&lt;bool>"/>
   <rejection class="QTest" function-name="toString&lt;char>"/>
+  <rejection class="QTest" function-name="toString&lt;unsigned char>"/>
+  <rejection class="QTest" function-name="toString&lt;signed char>"/>
   <rejection class="QTest" function-name="toString&lt;double>"/>
   <rejection class="QTest" function-name="toString&lt;float>"/>
   <rejection class="QTest" function-name="toString&lt;int>"/>
@@ -55,6 +57,9 @@
 
   <rejection class="QTest" function-name="compare_helper"/>
   <rejection class="QTest" function-name="toPrettyUnicode"/>
+  
+  <rejection class="QTest" field-name="lastMouseButton"/>
+  <rejection class="QTest" field-name="lastMouseTimestamp"/>
 
   <!-- Qt5: this new stuff below belongs to QtGui. I keep it here for now, after a long odyssey.
 
