@@ -319,6 +319,12 @@ void Binder::visitFunctionDefinition(FunctionDefinitionAST *node)
     // node is generated in 'parser.cpp'
     while (declarator && declarator->sub_declarator)
         declarator = declarator->sub_declarator;
+    if (!declarator->id) {
+        std::cerr << "** WARNING temp hack for Qt 5.6.0: "
+                  << "skipped a class that inherits from a private class"
+                  << std::endl;
+        return;
+    }
     Q_ASSERT(declarator->id);
 
     CodeModelFinder finder(model(), this);
