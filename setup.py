@@ -287,7 +287,7 @@ for n in ["pyside_package", "build", "PySide2-%s" % __version__]:
             print('ignored error: {}'.format(e))
 
 # Prepare package folders
-for pkg in ["pyside_package/PySide2", "pyside_package/pysideuic"]:
+for pkg in ["pyside_package/PySide2", "pyside_package/pyside2uic"]:
     pkg_dir = os.path.join(script_dir, pkg)
     os.makedirs(pkg_dir)
 
@@ -711,15 +711,15 @@ class pyside_build(_build):
             "{site_packages_dir}/shiboken2.so",
             "{dist_dir}/PySide2/shiboken2.so",
             vars=vars)
-        # <install>/lib/site-packages/pysideuic/* -> <setup>/pysideuic
+        # <install>/lib/site-packages/pyside2uic/* -> <setup>/pyside2uic
         copydir(
-            "{site_packages_dir}/pysideuic",
-            "{dist_dir}/pysideuic",
+            "{site_packages_dir}/pyside2uic",
+            "{dist_dir}/pyside2uic",
             force=False, vars=vars)
         if sys.version_info[0] > 2:
-            rmtree("{dist_dir}/pysideuic/port_v2".format(**vars))
+            rmtree("{dist_dir}/pyside2uic/port_v2".format(**vars))
         else:
-            rmtree("{dist_dir}/pysideuic/port_v3".format(**vars))
+            rmtree("{dist_dir}/pyside2uic/port_v3".format(**vars))
         # <install>/bin/pyside2-uic -> PySide2/scripts/uic.py
         makefile(
             "{dist_dir}/PySide2/scripts/__init__.py",
@@ -838,15 +838,15 @@ class pyside_build(_build):
                 "{build_dir}/shiboken2/shibokenmodule/shiboken2{dbgPostfix}.pdb",
                 "{dist_dir}/PySide2/shiboken2{dbgPostfix}.pdb",
                 vars=vars)
-        # <install>/lib/site-packages/pysideuic/* -> <setup>/pysideuic
+        # <install>/lib/site-packages/pyside2uic/* -> <setup>/pyside2uic
         copydir(
-            "{site_packages_dir}/pysideuic",
-            "{dist_dir}/pysideuic",
+            "{site_packages_dir}/pyside2uic",
+            "{dist_dir}/pyside2uic",
             force=False, vars=vars)
         if sys.version_info[0] > 2:
-            rmtree("{dist_dir}/pysideuic/port_v2".format(**vars))
+            rmtree("{dist_dir}/pyside2uic/port_v2".format(**vars))
         else:
-            rmtree("{dist_dir}/pysideuic/port_v3".format(**vars))
+            rmtree("{dist_dir}/pyside2uic/port_v3".format(**vars))
         # <install>/bin/pyside2-uic -> PySide2/scripts/uic.py
         makefile(
             "{dist_dir}/PySide2/scripts/__init__.py",
@@ -1049,7 +1049,7 @@ setup(
     url = 'http://www.pyside.org',
     download_url = 'https://download.qt-project.org/official_releases/pyside2/',
     license = 'LGPL',
-    packages = ['PySide2', 'pysideuic'],
+    packages = ['PySide2', 'pyside2uic'],
     package_dir = {'': 'pyside_package'},
     include_package_data = True,
     zip_safe = False,
