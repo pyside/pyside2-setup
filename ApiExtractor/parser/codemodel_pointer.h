@@ -55,6 +55,12 @@ public:
     {
         return (const T *) *this;
     }
+
+    // added for backward compatible behavior in shiboken
+    inline T *operator->() const
+    {
+        return this->load();
+    }
 };
 
 #endif // CODEMODEL_POINTER_H

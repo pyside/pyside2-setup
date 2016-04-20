@@ -30,7 +30,7 @@ import gc
 import sys
 import unittest
 
-import shiboken
+import shiboken2 as shiboken
 from sample import PrivateDtor
 
 

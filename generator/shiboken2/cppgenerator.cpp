@@ -165,6 +165,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     // headers
     s << "// default includes" << endl;
     s << "#include <shiboken.h>" << endl;
+    s << "#include <QDebug>" << endl;
     if (usePySideExtensions()) {
         s << "#include <pysidesignal.h>" << endl;
         s << "#include <pysideproperty.h>" << endl;
@@ -817,7 +818,7 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
     s << "const QMetaObject* " << wrapperClassName << "::metaObject() const" << endl;
     s << '{' << endl;
     s << INDENT << "#if QT_VERSION >= 0x040700" << endl;
-    s << INDENT << "if (QObject::d_ptr->metaObject) return QObject::d_ptr->metaObject;" << endl;
+    s << INDENT << "if (QObject::d_ptr->metaObject) return QObject::d_ptr->dynamicMetaObject();" << endl;
     s << INDENT << "#endif" << endl;
     s << INDENT << "SbkObject* pySelf = Shiboken::BindingManager::instance().retrieveWrapper(this);" << endl;
     s << INDENT << "if (pySelf == NULL)" << endl;
@@ -889,7 +890,7 @@ void CppGenerator::writeEnumConverterFunctions(QTextStream& s, const TypeEntry* 
     QTextStream c(&code);
     c << INDENT << "*((" << cppTypeName << "*)cppOut) = ";
     if (enumType->isFlags())
-        c << cppTypeName << "(QFlag(PySide::QFlags::getValue(reinterpret_cast<PySideQFlagsObject*>(pyIn))))";
+        c << cppTypeName << "(QFlag((int)PySide::QFlags::getValue(reinterpret_cast<PySideQFlagsObject*>(pyIn))))";
     else
         c << "(" << cppTypeName << ") Shiboken::Enum::getValue(pyIn)";
     c << ';' << endl;
@@ -926,7 +927,7 @@ void CppGenerator::writeEnumConverterFunctions(QTextStream& s, const TypeEntry* 
     code.clear();
     cppTypeName = getFullTypeName(flags).trimmed();
     c << INDENT << "*((" << cppTypeName << "*)cppOut) = " << cppTypeName;
-    c << "(QFlag(Shiboken::Enum::getValue(pyIn)));" << endl;
+    c << "(QFlag((int)Shiboken::Enum::getValue(pyIn)));" << endl;
 
     QString flagsTypeName = fixedCppTypeName(flags);
     writePythonToCppFunction(s, code, typeName, flagsTypeName);
@@ -935,7 +936,7 @@ void CppGenerator::writeEnumConverterFunctions(QTextStream& s, const TypeEntry* 
     code.clear();
     c << INDENT << "Shiboken::AutoDecRef pyLong(PyNumber_Long(pyIn));" << endl;
     c << INDENT << "*((" << cppTypeName << "*)cppOut) = " << cppTypeName;
-    c << "(QFlag(PyLong_AsLong(pyLong.object())));" << endl;
+    c << "(QFlag((int)PyLong_AsLong(pyLong.object())));" << endl;
     writePythonToCppFunction(s, code, "number", flagsTypeName);
     writeIsPythonConvertibleToCppFunction(s, "number", flagsTypeName, "PyNumber_Check(pyIn)");
 }
@@ -1739,7 +1740,7 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                                || strArg == "QMultiMap" || strArg == "QMultiHash") {
                         strArg = "dict";
                     } else if (strArg == "QPair") {
-                        strArg == "2-tuple";
+                        strArg = "2-tuple";
                     }
                 } else {
                     strArg = argType->fullName();
@@ -3226,7 +3227,7 @@ void CppGenerator::writeEnumConverterInitialization(QTextStream& s, const TypeEn
 
 void CppGenerator::writeContainerConverterInitialization(QTextStream& s, const AbstractMetaType* type)
 {
-    QByteArray cppSignature = QMetaObject::normalizedSignature(type->cppSignature().toAscii());
+    QByteArray cppSignature = QMetaObject::normalizedSignature(type->cppSignature().toUtf8());
     s << INDENT << "// Register converter for type '" << cppSignature << "'." << endl;
     QString converter = converterObject(type);
     s << INDENT << converter << " = Shiboken::Conversions::createConverter(";
@@ -3650,8 +3651,11 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
             s << INDENT << "SBK_NB_BOOL(" << baseName << "_TypeAsNumber) = " << nb[nbName] << ';' << endl;
         } else {
             bool excludeFromPy3K = nbName == "__div__" || nbName == "__idiv__";
-            if (excludeFromPy3K)
-                s << "#ifndef IS_PY3K" << endl;
+            if (excludeFromPy3K) {
+                s << "#ifdef IS_PY3K" << endl;
+                s << INDENT << "SBK_UNUSED(" << nb[nbName] << ");" << endl;
+                s << "#else" << endl;
+            }
             s << INDENT << baseName << "_TypeAsNumber." << m_nbFuncs[nbName] << " = " << nb[nbName] << ';' << endl;
             if (excludeFromPy3K)
                 s << "#endif" << endl;
@@ -4207,11 +4211,11 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream& s, const AbstractMetaEn
     AbstractMetaType* flagsType = buildAbstractMetaTypeFromTypeEntry(flagsEntry);
     s << INDENT << "::" << flagsEntry->originalName() << " cppResult, " CPP_SELF_VAR ", cppArg;" << endl;
     s << "#ifdef IS_PY3K" << endl;
-    s << INDENT << CPP_SELF_VAR " = (::" << flagsEntry->originalName() << ")PyLong_AsLong(" PYTHON_SELF_VAR ");" << endl;
-    s << INDENT << "cppArg = (" << flagsEntry->originalName() << ")PyLong_AsLong(" PYTHON_ARG ");" << endl;
+    s << INDENT << CPP_SELF_VAR " = (::" << flagsEntry->originalName() << ")(int)PyLong_AsLong(" PYTHON_SELF_VAR ");" << endl;
+    s << INDENT << "cppArg = (" << flagsEntry->originalName() << ")(int)PyLong_AsLong(" PYTHON_ARG ");" << endl;
     s << "#else" << endl;
-    s << INDENT << CPP_SELF_VAR " = (::" << flagsEntry->originalName() << ")PyInt_AsLong(" PYTHON_SELF_VAR ");" << endl;
-    s << INDENT << "cppArg = (" << flagsEntry->originalName() << ")PyInt_AsLong(" PYTHON_ARG ");" << endl;
+    s << INDENT << CPP_SELF_VAR " = (::" << flagsEntry->originalName() << ")(int)PyInt_AsLong(" PYTHON_SELF_VAR ");" << endl;
+    s << INDENT << "cppArg = (" << flagsEntry->originalName() << ")(int)PyInt_AsLong(" PYTHON_ARG ");" << endl;
     s << "#endif" << endl << endl;
     s << INDENT << "cppResult = " CPP_SELF_VAR " " << cppOpName << " cppArg;" << endl;
     s << INDENT << "return ";
@@ -4440,8 +4444,16 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream& s, const Abstrac
         }
 
         if (canBeValue) {
-            foreach (QString name, nameVariants)
+            foreach (QString name, nameVariants) {
+                if (name == "iterator") {
+                    ReportHandler::warning(QString("%1:%2 FIXME:\n"
+                        "    The code tried to qRegisterMetaType the unqualified name "
+                        "'iterator'. This is currently fixed by a hack(ct) and needs improvement!")
+                        .arg(__FILE__).arg(__LINE__));
+                    continue;
+                }
                 s << INDENT << "qRegisterMetaType< ::" << className << " >(\"" << name << "\");" << endl;
+            }
         }
     }
 
@@ -4652,8 +4664,10 @@ void CppGenerator::finishGeneration()
     s << "#include <sbkpython.h>" << endl;
     s << "#include <shiboken.h>" << endl;
     s << "#include <algorithm>" << endl;
-    if (usePySideExtensions())
+    if (usePySideExtensions()) {
+        s << "#include <QDebug>" << endl;
         s << "#include <pyside.h>" << endl;
+    }
 
     s << "#include \"" << getModuleHeaderFileName() << '"' << endl << endl;
     foreach (const Include& include, includes)
@@ -4919,7 +4933,7 @@ void CppGenerator::finishGeneration()
                         QString value = translateType(arg->type(), metaClass, ExcludeConst | ExcludeReference);
                         if (value.startsWith("::"))
                             value.remove(0, 2);
-                        typeResolvers << SBK_NORMALIZED_TYPE(value.toAscii().constData());
+                        typeResolvers << SBK_NORMALIZED_TYPE(value.toUtf8().constData());
                     }
                 }
             }

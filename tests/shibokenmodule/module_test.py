@@ -1,4 +1,4 @@
-import shiboken
+import shiboken2 as shiboken
 import unittest
 from sample import *
 

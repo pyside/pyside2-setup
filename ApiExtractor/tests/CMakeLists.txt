@@ -1,12 +1,29 @@
+find_package(Qt5Core)
+find_package(Qt5Gui)
+find_package(Qt5Test)
+find_package(Qt5Xml)
+find_package(Qt5XmlPatterns)
 
 macro(declare_test testname)
-    qt4_automoc("${testname}.cpp")
+    # gone: qt4_automoc("${testname}.cpp")
     add_executable(${testname} "${testname}.cpp")
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${apiextractor_SOURCE_DIR})
-    target_link_libraries(${testname} ${QT_QTTEST_LIBRARY} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} apiextractor)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}
+                        ${CMAKE_CURRENT_BINARY_DIR}
+                        ${apiextractor_SOURCE_DIR}
+                        ${Qt5Xml_INCLUDE_DIRS}
+                        ${Qt5Test_INCLUDE_DIRS}
+                        )
+    target_link_libraries(${testname}
+                          ${Qt5Xml_LIBRARIES}
+                          ${Qt5XmlPatterns_LIBRARIES}
+                          ${Qt5Test_LIBRARIES}
+                          ${Qt5Core_LIBRARIES}
+                          ${Qt5Gui_LIBRARIES}
+                          apiextractor)
     add_test(${testname} ${testname})
     if (INSTALL_TESTS)
-        install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${testname} DESTINATION share/apiextractor${apiextractor_SUFFIX}/tests)
+        install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${testname}
+                DESTINATION share/apiextractor${apiextractor_SUFFIX}/tests)
     endif()
 endmacro(declare_test testname)
 

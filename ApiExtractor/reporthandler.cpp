@@ -54,7 +54,7 @@ static int m_step_warning = 0;
 
 static void printProgress()
 {
-    std::printf("%s", m_progressBuffer.toAscii().data());
+    std::printf("%s", m_progressBuffer.toUtf8().data());
     std::fflush(stdout);
     m_progressBuffer.clear();
 }

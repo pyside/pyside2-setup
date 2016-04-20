@@ -206,7 +206,8 @@ bool FileOut::done()
                                        .arg(fileWrite.fileName()));
                 return false;
             }
-            QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+            QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+            stream.setCodec(codec);
             stream.setDevice(&fileWrite);
             stream << tmp;
         }

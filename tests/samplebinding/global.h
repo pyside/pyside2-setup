@@ -54,6 +54,7 @@
 #include "str.h"
 #include "strlist.h"
 #include "sometime.h"
+#include "templateptr.h"
 #include "transform.h"
 #include "virtualmethods.h"
 #include "voidholder.h"

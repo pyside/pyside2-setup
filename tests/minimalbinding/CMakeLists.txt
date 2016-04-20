@@ -16,8 +16,8 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/minimal-binding.txt.in"
                "${CMAKE_CURRENT_BINARY_DIR}/minimal-binding.txt" @ONLY)
 
 add_custom_command(OUTPUT ${minimal_SRC}
-COMMAND shiboken --project-file=${CMAKE_CURRENT_BINARY_DIR}/minimal-binding.txt ${GENERATOR_EXTRA_FLAGS}
-DEPENDS ${minimal_TYPESYSTEM} ${CMAKE_CURRENT_SOURCE_DIR}/global.h shiboken
+COMMAND shiboken2 --project-file=${CMAKE_CURRENT_BINARY_DIR}/minimal-binding.txt ${GENERATOR_EXTRA_FLAGS}
+DEPENDS ${minimal_TYPESYSTEM} ${CMAKE_CURRENT_SOURCE_DIR}/global.h shiboken2
 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for 'minimal' test binding..."
 )

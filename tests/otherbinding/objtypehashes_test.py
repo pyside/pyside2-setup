@@ -1,7 +1,7 @@
 import unittest
 from sample import *
 from other import *
-import shiboken
+import shiboken2 as shiboken
 
 class TestHashFuncs (unittest.TestCase):
 

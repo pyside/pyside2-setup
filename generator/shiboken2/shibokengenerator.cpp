@@ -25,6 +25,7 @@
 #include "overloaddata.h"
 #include <reporthandler.h>
 #include <typedatabase.h>
+#include <iostream>
 
 #include <QtCore/QDir>
 #include <QtCore/QDebug>
@@ -132,10 +133,12 @@ void ShibokenGenerator::initPrimitiveTypesCorrespondences()
     m_pythonPrimitiveTypeName["unsigned long"] = "PyLong";
     m_pythonPrimitiveTypeName["signed long"] = "PyLong";
     m_pythonPrimitiveTypeName["ulong"] = "PyLong";
+    m_pythonPrimitiveTypeName["unsigned long int"] = "PyLong";
     m_pythonPrimitiveTypeName["long long"] = "PyLong";
     m_pythonPrimitiveTypeName["__int64"] = "PyLong";
     m_pythonPrimitiveTypeName["unsigned long long"] = "PyLong";
     m_pythonPrimitiveTypeName["unsigned __int64"] = "PyLong";
+    m_pythonPrimitiveTypeName["size_t"] = "PyLong";
 
     // Python operators
     m_pythonOperators.clear();
@@ -457,7 +460,7 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction*
         }
     } else if (arg->type()->typeEntry()->isValue()) {
         const AbstractMetaClass* metaClass = classes().findClass(arg->type()->typeEntry());
-        if (enumValueRegEx.exactMatch(value))
+        if (enumValueRegEx.exactMatch(value)&& value != "NULL")
             prefix = resolveScopePrefix(metaClass, value);
     } else if (arg->type()->isPrimitive() && arg->type()->name() == "int") {
         if (enumValueRegEx.exactMatch(value) && func->implementingClass())
@@ -640,7 +643,7 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry* type)
         while (ptype->basicAliasedTypeEntry())
             ptype = ptype->basicAliasedTypeEntry();
         if (ptype->targetLangApiName() == ptype->name())
-            baseName = m_pythonPrimitiveTypeName[ptype->name()];
+            baseName = pythonPrimitiveTypeName(ptype->name());
         else
             baseName = ptype->targetLangApiName();
     } else if (type->isEnum()) {
@@ -713,9 +716,18 @@ QString ShibokenGenerator::converterObject(const TypeEntry* type)
         return QString("Shiboken::Conversions::PrimitiveTypeConverter<%1>()").arg(type->qualifiedCppName());
     if (isWrapperType(type) || type->isEnum() || type->isFlags())
         return QString("SBK_CONVERTER(%1)").arg(cpythonTypeNameExt(type));
-
+    
+    if (type->isArray()) {
+        qDebug() << "Warning: no idea how to handle the Qt5 type " << type->qualifiedCppName();
+        return 0;
+    }
+        
     /* the typedef'd primitive types case */
-    const PrimitiveTypeEntry* pte = reinterpret_cast<const PrimitiveTypeEntry*>(type);
+    const PrimitiveTypeEntry* pte = dynamic_cast<const PrimitiveTypeEntry*>(type);
+    if (!pte) {
+        qDebug() << "Warning: the Qt5 primitive type is unknown" << type->qualifiedCppName();
+        return 0;
+    }
     if (pte->basicAliasedTypeEntry())
         pte = pte->basicAliasedTypeEntry();
     if (pte->isPrimitive() && !pte->isCppPrimitive() && !pte->customConversion())
@@ -770,7 +782,18 @@ QString ShibokenGenerator::fixedCppTypeName(const TypeEntry* type, QString typeN
 
 QString ShibokenGenerator::pythonPrimitiveTypeName(const QString& cppTypeName)
 {
-    return ShibokenGenerator::m_pythonPrimitiveTypeName.value(cppTypeName, QString());
+    QString rv = ShibokenGenerator::m_pythonPrimitiveTypeName.value(cppTypeName, QString());
+    if (rv.isEmpty()) {
+        // activate this when some primitive types are missing,
+        // i.e. when shiboken itself fails to build.
+        // In general, this is valid while just called by isNumeric()
+        // used on Qt5, 2015-09-20
+        if (false) {
+            std::cerr << "primitive type not found: " << qPrintable(cppTypeName) << std::endl;
+            abort();
+        }
+    }
+    return rv;
 }
 
 QString ShibokenGenerator::pythonPrimitiveTypeName(const PrimitiveTypeEntry* type)
@@ -1743,7 +1766,7 @@ static QString getConverterTypeSystemVariableArgument(const QString& code, int p
     int parenthesisDepth = 0;
     int count = 0;
     while (pos + count < code.count()) {
-        char c = code.at(pos+count).toAscii();
+        char c = code.at(pos+count).toLatin1(); // toAscii is gone
         if (c == '(') {
             ++parenthesisDepth;
         } else if (c == ')') {
@@ -2060,14 +2083,15 @@ AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromString(QString typ
     if (isConst)
         typeString.remove(0, sizeof("const ") / sizeof(char) - 1);
 
-    int indirections = typeString.count("*");
-    while (typeString.endsWith("*")) {
+    bool isReference = typeString.endsWith("&");
+    if (isReference) {
         typeString.chop(1);
         typeString = typeString.trimmed();
     }
 
-    bool isReference = typeString.endsWith("&");
-    if (isReference) {
+    int indirections = 0;
+    while (typeString.endsWith("*")) {
+        ++indirections;
         typeString.chop(1);
         typeString = typeString.trimmed();
     }

@@ -26,7 +26,7 @@
 #include "typesystem_p.h"
 
 #include <QFile>
-#include <QXmlInputSource>
+#include <QtXml/QtXml>
 #include "reporthandler.h"
 // #include <tr1/tuple>
 #include <algorithm>

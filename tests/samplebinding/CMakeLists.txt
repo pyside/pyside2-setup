@@ -105,6 +105,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/sonofmderived1_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/str_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/strlist_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/time_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/templateptr_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/unremovednamespace_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/virtualdaughter_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/virtualdtor_wrapper.cpp
@@ -121,8 +122,8 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/sample-binding.txt.in"
                "${CMAKE_CURRENT_BINARY_DIR}/sample-binding.txt" @ONLY)
 
 add_custom_command(OUTPUT ${sample_SRC}
-COMMAND shiboken --project-file=${CMAKE_CURRENT_BINARY_DIR}/sample-binding.txt ${GENERATOR_EXTRA_FLAGS}
-DEPENDS ${sample_TYPESYSTEM} ${CMAKE_CURRENT_SOURCE_DIR}/global.h shiboken
+COMMAND shiboken2 --project-file=${CMAKE_CURRENT_BINARY_DIR}/sample-binding.txt ${GENERATOR_EXTRA_FLAGS}
+DEPENDS ${sample_TYPESYSTEM} ${CMAKE_CURRENT_SOURCE_DIR}/global.h shiboken2
 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for 'sample' test binding..."
 )

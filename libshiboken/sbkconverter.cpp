@@ -62,7 +62,7 @@ void init()
     converters.set_empty_key("");
     converters.set_deleted_key("?");
     converters["PY_LONG_LONG"] = primitiveTypeConverters[SBK_PY_LONG_LONG_IDX];
-    converters["bool"] = primitiveTypeConverters[SBK_BOOL_IDX];
+    converters["bool"] = primitiveTypeConverters[SBK_BOOL_IDX_1];
     converters["char"] = primitiveTypeConverters[SBK_CHAR_IDX];
     converters["const char *"] = primitiveTypeConverters[SBK_CONSTCHARPTR_IDX];
     converters["double"] = primitiveTypeConverters[SBK_DOUBLE_IDX];

@@ -295,7 +295,8 @@ LIBSHIBOKEN_API bool pythonTypeIsObjectType(SbkConverter* converter);
 LIBSHIBOKEN_API bool pythonTypeIsWrapperType(SbkConverter* converter);
 
 #define SBK_PY_LONG_LONG_IDX            0
-#define SBK_BOOL_IDX                    1
+// Qt5: name collision in QtCore after QBool is replaced by bool
+#define SBK_BOOL_IDX_1                  1
 #define SBK_CHAR_IDX                    2
 #define SBK_CONSTCHARPTR_IDX            3
 #define SBK_DOUBLE_IDX                  4
@@ -315,7 +316,7 @@ LIBSHIBOKEN_API bool pythonTypeIsWrapperType(SbkConverter* converter);
 
 template<typename T> SbkConverter* PrimitiveTypeConverter() { return 0; }
 template<> inline SbkConverter* PrimitiveTypeConverter<PY_LONG_LONG>() { return primitiveTypeConverter(SBK_PY_LONG_LONG_IDX); }
-template<> inline SbkConverter* PrimitiveTypeConverter<bool>() { return primitiveTypeConverter(SBK_BOOL_IDX); }
+template<> inline SbkConverter* PrimitiveTypeConverter<bool>() { return primitiveTypeConverter(SBK_BOOL_IDX_1); }
 template<> inline SbkConverter* PrimitiveTypeConverter<char>() { return primitiveTypeConverter(SBK_CHAR_IDX); }
 template<> inline SbkConverter* PrimitiveTypeConverter<const char*>() { return primitiveTypeConverter(SBK_CONSTCHARPTR_IDX); }
 template<> inline SbkConverter* PrimitiveTypeConverter<double>() { return primitiveTypeConverter(SBK_DOUBLE_IDX); }

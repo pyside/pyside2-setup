@@ -23,8 +23,6 @@ endif ()
 
 set(QT_USE_QTCORE 1)
 set(QT_USE_QTXML 1)
-include(${QT_USE_FILE})
-add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 add_definitions(-DRXX_ALLOCATOR_INIT_0)
@@ -79,19 +77,23 @@ endif()
 
 set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
 
-qt4_add_resources(apiextractor_RCCS_SRC generator.qrc)
-qt4_automoc(apiextractor_SRC)
+qt5_add_resources(apiextractor_RCCS_SRC generator.qrc)
+set(CMAKE_AUTOMOC ON)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}/parser
                     ${CMAKE_CURRENT_SOURCE_DIR}/parser/rpp
-                    ${QT_INCLUDE_DIR}
                     ${APIEXTRACTOR_EXTRA_INCLUDES}
+                    ${Qt5Core_INCLUDE_DIRS}
+                    ${Qt5Xml_INCLUDE_DIRS}
                     )
 
 add_library(apiextractor STATIC ${apiextractor_SRC} ${apiextractor_RCCS_SRC})
-target_link_libraries(apiextractor ${APIEXTRACTOR_EXTRA_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTXMLPATTERNS_LIBRARY} ${QT_QTXML_LIBRARY})
+target_link_libraries(apiextractor
+                      ${Qt5Xml_LIBRARIES}
+                      ${APIEXTRACTOR_EXTRA_LIBRARIES}
+                      )
 
 if (BUILD_TESTS)
     enable_testing()

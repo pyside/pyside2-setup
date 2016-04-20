@@ -38,12 +38,12 @@ private:
     bool m_value;
 };
 
-inline bool operator==(OddBool b1, bool b2) { return !b1 == !b2; }
-inline bool operator==(bool b1, OddBool b2) { return !b1 == !b2; }
-inline bool operator==(OddBool b1, OddBool b2) { return !b1 == !b2; }
-inline bool operator!=(OddBool b1, bool b2) { return !b1 != !b2; }
-inline bool operator!=(bool b1, OddBool b2) { return !b1 != !b2; }
-inline bool operator!=(OddBool b1, OddBool b2) { return !b1 != !b2; }
+inline bool operator==(OddBool b1, bool b2) { return (!b1) == !b2; }
+inline bool operator==(bool b1, OddBool b2) { return (!b1) == !b2; }
+inline bool operator==(OddBool b1, OddBool b2) { return (!b1) == !b2; }
+inline bool operator!=(OddBool b1, bool b2) { return (!b1) != !b2; }
+inline bool operator!=(bool b1, OddBool b2) { return (!b1) != !b2; }
+inline bool operator!=(OddBool b1, OddBool b2) { return (!b1) != !b2; }
 
 class OddBoolUser
 {

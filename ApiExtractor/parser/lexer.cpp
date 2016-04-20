@@ -685,7 +685,6 @@ void Lexer::scan_EOF()
 void Lexer::scan_invalid_input()
 {
     QString errmsg("invalid input: %1");
-    errmsg.arg(int(*cursor));
     reportError(errmsg);
     ++cursor;
 }
@@ -1252,6 +1251,17 @@ void Lexer::scanKeyword6()
         }
         break;
 
+    case 'Q':
+        if (*(cursor + 1) == '_' &&
+            *(cursor + 2) == 'E' &&
+            *(cursor + 3) == 'N' &&
+            *(cursor + 4) == 'U' &&
+            *(cursor + 5) == 'M') { // Qt5.5
+            token_stream[(int) index++].kind = Token_Q_ENUM;
+            return;
+        }
+        break;
+            
     }
     token_stream[(int) index++].kind = Token_identifier;
 }

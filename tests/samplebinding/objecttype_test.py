@@ -30,7 +30,7 @@ import unittest
 import sys
 
 from sample import ObjectType, Str
-import shiboken
+import shiboken2 as shiboken
 
 
 class ObjectTypeTest(unittest.TestCase):

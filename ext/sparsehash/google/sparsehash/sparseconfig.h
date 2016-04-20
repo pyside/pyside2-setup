@@ -8,7 +8,7 @@
 
 #ifdef _MSC_VER
     /* the location of the header defining hash functions */
-    #define HASH_FUN_H <hash_map>
+    #define HASH_FUN_H <unordered_map>
     /* the namespace of the hash<> function */
     #define HASH_NAMESPACE stdext
     /* The system-provided hash function including the namespace. */
