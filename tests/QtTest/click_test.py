@@ -3,9 +3,9 @@
 
 import unittest
 
-from PySide.QtCore import Qt, QObject
-from PySide.QtGui import QPushButton, QLineEdit
-from PySide.QtTest import QTest
+from PySide2.QtCore import Qt, QObject
+from PySide2.QtWidgets import QPushButton, QLineEdit
+from PySide2.QtTest import QTest
 
 from helper import UsesQApplication
 

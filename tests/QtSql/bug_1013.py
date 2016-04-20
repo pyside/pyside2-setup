@@ -1,5 +1,5 @@
-from PySide.QtCore import *
-from PySide.QtSql import *
+from PySide2.QtCore import *
+from PySide2.QtSql import *
 import unittest
 
 class TestBug1013 (unittest.TestCase):

@@ -26,10 +26,12 @@
 #
 # Usage:
 #
-# ./list-class-hierarchy.py PySide > pyside.list
-# ./list-class-hierarchy.py PyQt4 > pyqt4.list
+# ./list-class-hierarchy.py PySide2 > pyside2.list
+# ./list-class-hierarchy.py PyQt5 > pyqt5.list
 #
-# meld pyside.list pyqt4.list
+# meld pyside.list pyqt5.list
+
+from __future__ import print_function
 
 import sys
 import pdb
@@ -70,7 +72,7 @@ if __name__=='__main__':
                 'QtHelp',
                #'QtMultimedia',
                 'QtNetwork',
-                'QtOpenGL',
+               #'QtOpenGL',
                 'QtScript',
                 'QtScriptTools',
                 'QtSql',
@@ -81,11 +83,11 @@ if __name__=='__main__':
                 'QtXml',
                 'QtXmlPatterns' ]
 
-    libraries = ["PySide", "PyQt4"]
+    libraries = ["PySide2", "PyQt5"]
     librarySymbols = {}
     for l in libraries:
         dictionary = []
-        if l =="PyQt4":
+        if l =="PyQt5":
             import sip
             sip.setapi('QDate',2)
             sip.setapi('QDateTime',2)
@@ -96,12 +98,12 @@ if __name__=='__main__':
             sip.setapi('QVariant',2)
 
         for m in modules:
-            exec "from %s import %s" % (l,m) in globals(), locals()
+            exec("from %s import %s" % (l,m), globals(), locals())
             dictionary += recurse_into(m, eval(m))
         librarySymbols[l] = dictionary
 
-    print "PyQt4: ", len(librarySymbols["PyQt4"]), " PySide: ", len(librarySymbols["PySide"])
+    print("PyQt5: ", len(librarySymbols["PyQt5"]), " PySide2: ", len(librarySymbols["PySide2"]))
 
-    for symbol in librarySymbols["PyQt4"]:
-        if not (symbol in librarySymbols["PySide"]):
-            print "Symbol not found in PySide:", symbol
+    for symbol in librarySymbols["PyQt5"]:
+        if not (symbol in librarySymbols["PySide2"]):
+            print("Symbol not found in PySide2:", symbol)

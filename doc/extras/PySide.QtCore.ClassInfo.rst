@@ -1,4 +1,4 @@
-.. module:: PySide.QtCore
+.. module:: PySide2.QtCore
 .. _ClassInfo:
 
 ClassInfo

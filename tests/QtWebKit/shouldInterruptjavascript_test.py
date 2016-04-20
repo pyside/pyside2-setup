@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from PySide import QtCore, QtWebKit
+from PySide2 import QtCore, QtWebKit
 
 from helper import UsesQApplication
 

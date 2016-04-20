@@ -1,6 +1,6 @@
 
 import unittest
-from PySide import QtCore
+from PySide2 import QtCore
 import weakref
 
 class LeakingSignal(unittest.TestCase):

@@ -1,7 +1,7 @@
 '''Test cases for QVariant::Type converter'''
 import unittest
 import py3kcompat as py3k
-from PySide.QtSql import QSqlField
+from PySide2.QtSql import QSqlField
 
 class QVariantTypeTest(unittest.TestCase):
     def testQVariantType(self):

@@ -1,6 +1,9 @@
+from __future__ import print_function
+
 import sys
 
-from PySide.QtGui import QStandardItem, QStandardItemModel, QMainWindow, QTreeView, QAbstractItemView, QApplication, QMessageBox
+from PySide2.QtGui import QStandardItem, QStandardItemModel
+from PySide2.QtWidgets import QMainWindow, QTreeView, QAbstractItemView, QApplication, QMessageBox
 
 class Item(QStandardItem):
     def __init__(self, text):
@@ -34,7 +37,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.view)
 
     def mousePressEvent(self, e):
-        print e.x(), e.y()
+        print(e.x(), e.y())
         return QMainWindow.mousePressEvent(self, e)
 
 def main():

@@ -3,7 +3,7 @@
 # Marcus Lindblom <macke@yar.nu>; 2011-02-16
 
 import unittest
-from PySide.QtCore import QCoreApplication
+from PySide2.QtCore import QCoreApplication
 
 class Mock(object):
     def __init__(self):

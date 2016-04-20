@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtCore import QUrl
+from PySide2.QtCore import QUrl
 
 class QUrlBasicConstructor(unittest.TestCase):
     '''Tests the basic constructors'''

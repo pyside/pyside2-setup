@@ -1,4 +1,4 @@
-from PySide.QtCore import QTimer, QObject
+from PySide2.QtCore import QTimer, QObject
 import sys
 import unittest
 

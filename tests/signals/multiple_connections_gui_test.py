@@ -2,10 +2,10 @@ import unittest
 import random
 from functools import partial
 
-from PySide.QtCore import QObject, SIGNAL
+from PySide2.QtCore import QObject, SIGNAL
 
 try:
-    from PySide.QtGui import QPushButton, QSpinBox
+    from PySide2.QtWidgets import QPushButton, QSpinBox
     hasQtGui = True
 except ImportError:
     hasQtGui = False

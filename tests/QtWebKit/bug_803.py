@@ -1,6 +1,6 @@
 import unittest
-from PySide.QtGui import *
-from PySide.QtWebKit import *
+from PySide2.QtWidgets import *
+from PySide2.QtWebKit import *
 
 class TestBug803 (unittest.TestCase):
 

@@ -1,9 +1,9 @@
 
 import unittest
-from PySide.QtCore import QObject, SIGNAL, SLOT, Qt
+from PySide2.QtCore import QObject, SIGNAL, SLOT, Qt
 
 try:
-    from PySide.QtGui import QSpinBox, QApplication, QWidget
+    from PySide2.QtWidgets import QSpinBox, QApplication, QWidget
     hasQtGui = True
 except ImportError:
     hasQtGui = False

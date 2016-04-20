@@ -3,8 +3,8 @@
    and QFontMetricsF'''
 
 import unittest
-from PySide.QtGui import QFont, QFontMetrics, QFontMetricsF
-from PySide.QtCore import QRect, QRectF, Qt, QSize, QSizeF
+from PySide2.QtGui import QFont, QFontMetrics, QFontMetricsF
+from PySide2.QtCore import QRect, QRectF, Qt, QSize, QSizeF
 from helper import UsesQApplication
 
 

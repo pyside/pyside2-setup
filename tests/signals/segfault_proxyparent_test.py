@@ -1,7 +1,7 @@
 
 import unittest
 
-from PySide.QtCore import QObject, SIGNAL
+from PySide2.QtCore import QObject, SIGNAL
 
 # Description of the problem
 # After creating an PyObject that inherits from QObject, connecting it,

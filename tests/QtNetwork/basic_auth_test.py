@@ -1,7 +1,7 @@
 ﻿import unittest
 
-from PySide.QtCore import *
-from PySide.QtNetwork import *
+from PySide2.QtCore import *
+from PySide2.QtNetwork import *
 
 from helper import UsesQCoreApplication
 from httpd import TestServer

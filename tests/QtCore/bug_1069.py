@@ -1,6 +1,6 @@
 ''' unit test for BUG #1069 '''
 
-from PySide import QtCore
+from PySide2 import QtCore
 import unittest
 
 class QDataStreamOpOverloadTestCase(unittest.TestCase):

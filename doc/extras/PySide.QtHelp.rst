@@ -2,7 +2,7 @@ To include the definitions of the module's classes, use the following directive:
 
 ::
 
-    import PySide.QtHelp
+    import PySide2.QtHelp
 
 License Information
 -------------------

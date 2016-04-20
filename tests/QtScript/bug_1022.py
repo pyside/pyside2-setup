@@ -1,7 +1,7 @@
 import unittest
 
-from PySide.QtCore import *
-from PySide.QtScript import *
+from PySide2.QtCore import *
+from PySide2.QtScript import *
 
 class QScriptValueTest(unittest.TestCase):
     def testQScriptValue(self): 

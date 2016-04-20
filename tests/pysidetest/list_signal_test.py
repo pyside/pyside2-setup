@@ -2,7 +2,7 @@
 
 import unittest
 from testbinding import TestObject
-from PySide.QtCore import QObject
+from PySide2.QtCore import QObject
 
 class ListConnectionTest(unittest.TestCase):
 

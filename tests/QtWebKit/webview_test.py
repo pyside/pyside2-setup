@@ -5,9 +5,9 @@ import unittest
 import py3kcompat as py3k
 import sys
 
-from PySide.QtCore import QObject, SIGNAL, QUrl
-from PySide.QtWebKit import QWebPage, QWebView
-from PySide.QtNetwork import QNetworkRequest
+from PySide2.QtCore import QObject, SIGNAL, QUrl
+from PySide2.QtWebKit import QWebPage, QWebView
+from PySide2.QtNetwork import QNetworkRequest
 
 from helper import adjust_filename, TimedQApplication
 

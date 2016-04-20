@@ -1,7 +1,18 @@
-macro(create_pyside_module module_name module_include_dir module_libraries module_deps module_typesystem_path module_sources module_static_sources)
+macro(make_path varname)
+   # accepts any number of path variables
+   string(REPLACE ";" "${PATH_SEP}" ${varname} "${ARGN}")
+endmacro()
+
+macro(create_pyside_module
+      module_name
+      module_include_dir
+      module_libraries
+      module_deps
+      module_typesystem_path
+      module_sources
+      module_static_sources)
     string(TOLOWER ${module_name} _module)
     string(REGEX REPLACE ^qt "" _module ${_module})
-
     if(${ARGC} GREATER 7)
         set (typesystem_name ${ARGV7})
     else()
@@ -19,41 +30,60 @@ macro(create_pyside_module module_name module_include_dir module_libraries modul
         set(typesystem_path ${typesystem_name})
     endif()
 
+    # check for class files that were commented away.
+    if(DEFINED ${module_sources}_skipped_files)
+        if(DEFINED PYTHON3_EXECUTABLE)
+            set(_python_interpreter "${PYTHON3_EXECUTABLE}")
+        else()
+            set(_python_interpreter "${PYTHON_EXECUTABLE}")
+        endif()
+        if(NOT _python_interpreter)
+            message(FATAL_ERROR "*** we need a python interpreter for postprocessing!")
+        endif()
+        set(_python_postprocessor "${_python_interpreter}" "${CMAKE_CURRENT_BINARY_DIR}/filter_init.py")
+    else()
+        set(_python_postprocessor "")
+    endif()
+
     add_custom_command(OUTPUT ${${module_sources}}
-                        COMMAND ${SHIBOKEN_BINARY} ${GENERATOR_EXTRA_FLAGS}
-                        ${pyside_BINARY_DIR}/pyside_global.h
-                        --include-paths=${pyside_SOURCE_DIR}${PATH_SEP}${QT_INCLUDE_DIR}
-                        --typesystem-paths=${pyside_SOURCE_DIR}${PATH_SEP}${${module_typesystem_path}}
+                        COMMAND "${SHIBOKEN_BINARY}" ${GENERATOR_EXTRA_FLAGS}
+                        ${pyside2_BINARY_DIR}/pyside2_global.h
+                        --include-paths=${pyside2_SOURCE_DIR}${PATH_SEP}${QT_INCLUDE_DIR}
+                        --typesystem-paths=${pyside2_SOURCE_DIR}${PATH_SEP}${${module_typesystem_path}}
                         --output-directory=${CMAKE_CURRENT_BINARY_DIR}
                         --license-file=${CMAKE_CURRENT_SOURCE_DIR}/../licensecomment.txt
                         ${typesystem_path}
                         --api-version=${SUPPORTED_QT_VERSION}
                         --drop-type-entries="${dropped_entries}"
+                        COMMAND ${_python_postprocessor}
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                         COMMENT "Running generator for ${module_name}...")
 
-    include_directories(${module_name} ${${module_include_dir}} ${pyside_SOURCE_DIR})
+    include_directories(${module_name} ${${module_include_dir}} ${pyside2_SOURCE_DIR})
     add_library(${module_name} MODULE ${${module_sources}} ${${module_static_sources}})
-    set_target_properties(${module_name} PROPERTIES PREFIX "" LIBRARY_OUTPUT_DIRECTORY ${pyside_BINARY_DIR})
+    set_target_properties(${module_name} PROPERTIES
+                          PREFIX ""
+                          OUTPUT_NAME "${module_name}${PYTHON_MODULE_SUFFIX}"
+                          LIBRARY_OUTPUT_DIRECTORY ${pyside2_BINARY_DIR})
     if(WIN32)
         set_target_properties(${module_name} PROPERTIES SUFFIX ".pyd")
         set(${module_name}_suffix ".pyd")
     else()
         set(${module_name}_suffix ${CMAKE_SHARED_MODULE_SUFFIX})
     endif()
+
     target_link_libraries(${module_name} ${${module_libraries}})
     if(${module_deps})
         add_dependencies(${module_name} ${${module_deps}})
     endif()
 
-
     # install
-    install(TARGETS ${module_name} LIBRARY DESTINATION ${SITE_PACKAGE}/PySide)
+    install(TARGETS ${module_name} LIBRARY DESTINATION ${SITE_PACKAGE}/PySide2)
     string(TOLOWER ${module_name} lower_module_name)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PySide/${module_name}/pyside_${lower_module_name}_python.h
-            DESTINATION include/PySide${pyside_SUFFIX}/${module_name}/)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PySide2/${module_name}/pyside2_${lower_module_name}_python.h
+            DESTINATION include/PySide2${pyside2_SUFFIX}/${module_name}/)
     file(GLOB typesystem_files ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_*.xml ${typesystem_path})
-    install(FILES ${typesystem_files} DESTINATION share/PySide${pyside_SUFFIX}/typesystems)
+    install(FILES ${typesystem_files} DESTINATION share/PySide2${pyside2_SUFFIX}/typesystems)
 endmacro()
 
 #macro(check_qt_class_with_namespace module namespace class optional_source_files dropped_entries [namespace] [module])
@@ -72,15 +102,15 @@ macro(check_qt_class module class optional_source_files dropped_entries)
     string(TOLOWER ${class} _class)
     string(TOUPPER ${module} _module)
     if (_namespace)
-        set(_cppfile ${CMAKE_CURRENT_BINARY_DIR}/PySide/${module}/${_namespace}_${_class}_wrapper.cpp)
+        set(_cppfile ${CMAKE_CURRENT_BINARY_DIR}/PySide2/${module}/${_namespace}_${_class}_wrapper.cpp)
     else ()
-        set(_cppfile ${CMAKE_CURRENT_BINARY_DIR}/PySide/${module}/${_class}_wrapper.cpp)
+        set(_cppfile ${CMAKE_CURRENT_BINARY_DIR}/PySide2/${module}/${_class}_wrapper.cpp)
     endif ()
     if (DEFINED PYSIDE_${class})
         if (PYSIDE_${class})
             list(APPEND ${optional_source_files} ${_cppfile})
         else()
-            list(APPEND ${dropped_entries} PySide.${module}.${class})
+            list(APPEND ${dropped_entries} PySide2.${module}.${class})
         endif()
     else()
         if (NOT ${namespace} STREQUAL "" )
@@ -109,15 +139,20 @@ macro(check_qt_class module class optional_source_files dropped_entries)
             list(APPEND ${optional_source_files} ${_cppfile})
         else()
             message(STATUS "Checking for ${class} in ${module} -- not found")
-            list(APPEND ${dropped_entries} PySide.${module}.${class})
+            list(APPEND ${dropped_entries} PySide2.${module}.${class})
         endif()
     endif()
 endmacro()
 
 
 # Only add subdirectory if the associated Qt module is found.
+# As a side effect, this macro now also defines the variable ${name}_GEN_DIR
+# and must be called for every subproject.
 macro(HAS_QT_MODULE var name)
     if (NOT DISABLE_${name} AND ${var})
+        # we keep the PySide name here because this is compiled into shiboken
+        set(${name}_GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/${name}/PySide2/${name}
+            CACHE INTERNAL "dir with generated source" FORCE)
         add_subdirectory(${name})
     else()
         # Used on documentation to skip modules
@@ -125,3 +160,4 @@ macro(HAS_QT_MODULE var name)
         set("end_${name}" "-->" PARENT_SCOPE)
     endif()
 endmacro()
+

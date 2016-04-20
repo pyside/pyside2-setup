@@ -2,7 +2,7 @@ To include the definitions of the module's classes, use the following directive:
 
 ::
 
-    import PySide.QtXmlPatterns
+    import PySide2.QtXmlPatterns
 
 Further Reading
 ---------------

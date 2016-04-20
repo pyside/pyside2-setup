@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import unittest
-from PySide.QtCore import QByteArray
-from PySide.QtXml import QDomDocument, QDomElement
+from PySide2.QtCore import QByteArray
+from PySide2.QtXml import QDomDocument, QDomElement
 
 class QDomDocumentTest(unittest.TestCase):
 
@@ -9,14 +9,14 @@ class QDomDocumentTest(unittest.TestCase):
         self.dom = QDomDocument()
 
         self.goodXmlData = QByteArray('''
-        <typesystem package="PySide.QtXml">
+        <typesystem package="PySide2.QtXml">
             <value-type name="QDomDocument"/>
             <value-type name="QDomElement"/>
         </typesystem>
         ''')
 
         self.badXmlData = QByteArray('''
-        <typesystem package="PySide.QtXml">
+        <typesystem package="PySide2.QtXml">
             <value-type name="QDomDocument">
         </typesystem>
         ''')
@@ -54,7 +54,7 @@ class QDomDocumentTest(unittest.TestCase):
         ok, errorStr, errorLine, errorColumn = self.dom.setContent(self.goodXmlData, True)
         root = self.dom.documentElement()
         self.assertEqual(root.tagName(), 'typesystem')
-        checkAttribute(root, 'package', 'PySide.QtXml')
+        checkAttribute(root, 'package', 'PySide2.QtXml')
 
         child = root.firstChildElement('value-type')
         checkAttribute(child, 'name', 'QDomDocument')

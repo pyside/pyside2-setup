@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from PySide.QtCore import QObject, Signal
+from PySide2.QtCore import QObject, Signal
 
 class ExtQObject(QObject):
 

@@ -40,7 +40,7 @@
 ****************************************************************************/
 
 #include "textedit.h"
-#include <QtGui>
+#include <QtWidgets>
 
 TextEdit::TextEdit(QWidget *parent)
 	: QTextEdit(parent)

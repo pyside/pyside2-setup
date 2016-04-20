@@ -2,7 +2,7 @@
 
 import unittest
 import tempfile
-from PySide import QtCore
+from PySide2 import QtCore
 import os
 import py3kcompat as py3k
 

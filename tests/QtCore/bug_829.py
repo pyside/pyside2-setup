@@ -2,7 +2,7 @@
 # Thomas Perl <thp.io/about>; 2011-04-16
 
 import unittest
-from PySide.QtCore import QSettings
+from PySide2.QtCore import QSettings
 import tempfile
 
 class QVariantConversions(unittest.TestCase):

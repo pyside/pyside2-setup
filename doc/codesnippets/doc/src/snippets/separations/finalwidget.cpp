@@ -45,7 +45,7 @@ finalwidget.cpp
 A widget to display an image and a label containing a description.
 */
 
-#include <QtGui>
+#include <QtWidgets>
 #include "finalwidget.h"
 
 FinalWidget::FinalWidget(QWidget *parent, const QString &name,

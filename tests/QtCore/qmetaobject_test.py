@@ -4,7 +4,7 @@
 
 import unittest
 
-from PySide.QtCore import *
+from PySide2.QtCore import *
 
 class Foo(QFile):
   pass

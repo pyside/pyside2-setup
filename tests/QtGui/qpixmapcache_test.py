@@ -1,6 +1,6 @@
 import unittest
 from helper import UsesQApplication
-from PySide.QtGui import QPixmapCache, QPixmap
+from PySide2.QtGui import QPixmapCache, QPixmap
 
 
 class QPixmapCacheTest(UsesQApplication):

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import unittest
-from PySide.QtCore import QRegExp
+from PySide2.QtCore import QRegExp
 
 class QRegExpTest(unittest.TestCase):
 

@@ -6,7 +6,7 @@ import unittest
 import py3kcompat as py3k
 
 from os.path import isdir
-from PySide.QtCore import QByteArray
+from PySide2.QtCore import QByteArray
 
 
 class QByteArrayBufferProtocolTest(unittest.TestCase):

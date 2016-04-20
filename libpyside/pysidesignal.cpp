@@ -77,7 +77,7 @@ static PyMethodDef Signal_methods[] = {
 
 PyTypeObject PySideSignalMetaType = {
     PyVarObject_HEAD_INIT(0, 0)
-    /*tp_name*/             "PySide.QtCore.MetaSignal",
+    /*tp_name*/             "PySide2.QtCore.MetaSignal",
     /*tp_basicsize*/        sizeof(PyTypeObject),
     /*tp_itemsize*/         0,
     /*tp_dealloc*/          0,
@@ -111,7 +111,7 @@ PyTypeObject PySideSignalMetaType = {
 
 PyTypeObject PySideSignalType = {
     PyVarObject_HEAD_INIT(&PySideSignalMetaType, 0)
-    /*tp_name*/             "PySide.QtCore." SIGNAL_CLASS_NAME,
+    /*tp_name*/             "PySide2.QtCore." SIGNAL_CLASS_NAME,
     /*tp_basicsize*/        sizeof(PySideSignal),
     /*tp_itemsize*/         0,
     /*tp_dealloc*/          0,
@@ -173,7 +173,7 @@ static PyMappingMethods SignalInstance_as_mapping = {
 
 PyTypeObject PySideSignalInstanceType = {
     PyVarObject_HEAD_INIT(0, 0)
-    /*tp_name*/             "PySide.QtCore." SIGNAL_INSTANCE_NAME,
+    /*tp_name*/             "PySide2.QtCore." SIGNAL_INSTANCE_NAME,
     /*tp_basicsize*/        sizeof(PySideSignalInstance),
     /*tp_itemsize*/         0,
     /*tp_dealloc*/          0,
@@ -377,7 +377,7 @@ PyObject* signalInstanceConnect(PyObject* self, PyObject* args, PyObject* kwds)
         else
             Py_XDECREF(result);
     }
-    if (!PyErr_Occurred())
+    if (PyErr_Occurred())
         PyErr_Format(PyExc_RuntimeError, "Failed to connect signal %s.", source->d->signature);
     return 0;
 }
@@ -463,7 +463,7 @@ PyObject* signalInstanceDisconnect(PyObject* self, PyObject* args)
         Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
         Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(source->d->source, "disconnect"));
         PyObject* result = PyObject_CallObject(pyMethod, tupleArgs);
-        if (result == Py_True)
+        if (!result || result == Py_True)
             return result;
         else
             Py_DECREF(result);
@@ -705,11 +705,11 @@ PySideSignalInstance* newObjectFromMethod(PyObject* source, const QList<QMetaMet
         item->d = new PySideSignalInstancePrivate;
         PySideSignalInstancePrivate* selfPvt = item->d;
         selfPvt->source = source;
-        QByteArray cppName(m.signature());
+        QByteArray cppName(m.methodSignature());
         cppName = cppName.mid(0, cppName.indexOf('('));
         // separe SignalName
         selfPvt->signalName = strdup(cppName.data());
-        selfPvt->signature = strdup(m.signature());
+        selfPvt->signature = strdup(m.methodSignature());
         selfPvt->homonymousMethod = 0;
         selfPvt->next = 0;
     }
@@ -789,7 +789,7 @@ void registerSignals(SbkObjectType* pyObj, const QMetaObject* metaObject)
         QMetaMethod method = metaObject->method(i);
 
         if (method.methodType() == QMetaMethod::Signal) {
-            QByteArray methodName(method.signature());
+            QByteArray methodName(method.methodSignature());
             methodName.chop(methodName.size() - methodName.indexOf('('));
             signalsFound[methodName] << join(method.parameterTypes(), ",");
         }
@@ -894,8 +894,8 @@ QString getCallbackSignature(const char* signal, QObject* receiver, PyObject* ca
             prefix += '(';
             for (int i = 0; i < mo->methodCount(); i++) {
                 QMetaMethod me = mo->method(i);
-                if ((strncmp(me.signature(), prefix, prefix.size()) == 0) &&
-                    QMetaObject::checkConnectArgs(signal, me.signature())) {
+                if ((strncmp(me.methodSignature(), prefix, prefix.size()) == 0) &&
+                    QMetaObject::checkConnectArgs(signal, me.methodSignature())) {
                     numArgs = me.parameterTypes().size() + useSelf;
                     break;
                 }
@@ -944,7 +944,7 @@ bool isQtSignal(const char* signal)
 bool checkQtSignal(const char* signal)
 {
     if (!isQtSignal(signal)) {
-        PyErr_SetString(PyExc_TypeError, "Use the function PySide.QtCore.SIGNAL on signals");
+        PyErr_SetString(PyExc_TypeError, "Use the function PySide2.QtCore.SIGNAL on signals");
         return false;
     }
     return true;

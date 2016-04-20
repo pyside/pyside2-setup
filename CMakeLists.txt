@@ -1,14 +1,75 @@
 include(cmake/Macros/icecc.cmake) # this must be the first line!
 
+cmake_minimum_required(VERSION 3.0)
+cmake_policy(VERSION 3.0)
+
 project(pysidebindings)
 
-cmake_minimum_required(VERSION 2.6)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Macros/
                       ${CMAKE_MODULE_PATH})
-find_package(Shiboken 1.2.0 REQUIRED)
-find_package(Qt4 4.5.0 REQUIRED)
+
+option(USE_PYTHON_VERSION "Use specific python version to build pyside2." "")
+
+if (USE_PYTHON_VERSION)
+    find_package(PythonLibs ${USE_PYTHON_VERSION} REQUIRED)
+    find_package(PythonInterp ${USE_PYTHON_VERSION} REQUIRED)
+else()
+    find_package(PythonLibs 2.6)
+    find_package(PythonInterp 2.6)
+endif()
+
+if (UNIX AND NOT APPLE)
+    # TODO: This part needs more testing first to be available on OSX and WIN
+    # Also note the quirk that UNIX includes Apple!
+  if (NOT PYTHON_MULTIARCH_SUFFIX)
+    execute_process(
+        COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+            import sysconfig
+            print(sysconfig.get_config_var('MULTIARCH'))
+            "
+        OUTPUT_VARIABLE PYTHON_MULTIARCH_SUFFIX
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+  endif()
+
+  if (NOT PYTHON_EXTENSION_SUFFIX)
+    if (PYTHON_VERSION_MAJOR EQUAL 2)
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            set(PYTHON_RELEASE_SUFFIX "-dbg")
+            set(PYTHON_MODULE_RELEASE_SUFFIX "_d")
+        else()
+            set(PYTHON_RELEASE_SUFFIX "")
+            set(PYTHON_MODULE_RELEASE_SUFFIX "")
+        endif()
+        set(PYTHON_EXTENSION_SUFFIX "-python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}${PYTHON_RELEASE_SUFFIX}")
+        if(PYTHON_MULTIARCH_SUFFIX)
+            set(PYTHON_MODULE_SUFFIX ".${PYTHON_MULTIARCH_SUFFIX}${PYTHON_MODULE_RELEASE_SUFFIX}")
+            set(PYTHON_EXTENSION_SUFFIX "${PYTHON_EXTENSION_SUFFIX}-${PYTHON_MULTIARCH_SUFFIX}")
+        endif()
+    elseif (PYTHON_VERSION_MAJOR EQUAL 3)
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            set(PYTHON_RELEASE_SUFFIX "dm")
+        else()
+            set(PYTHON_RELEASE_SUFFIX "m")
+        endif()
+        set(PYTHON_EXTENSION_SUFFIX ".cpython-${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}${PYTHON_RELEASE_SUFFIX}")
+        if(PYTHON_MULTIARCH_SUFFIX)
+            set(PYTHON_EXTENSION_SUFFIX "${PYTHON_EXTENSION_SUFFIX}-${PYTHON_MULTIARCH_SUFFIX}")
+            set(PYTHON_MODULE_SUFFIX "${PYTHON_EXTENSION_SUFFIX}")
+        endif()
+    else()
+        message(FATAL_ERROR "Unsupported PYTHON_VERSION=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.${PYTHON_VERSION_PATCH}!")
+    endif()
+  endif()
+  message("PYTHON_EXTENSION_SUFFIX: " ${PYTHON_EXTENSION_SUFFIX})
+endif ()
+
+find_package(Shiboken2 2.0.0 REQUIRED)
+find_package(Qt5 5.3.0 REQUIRED COMPONENTS Core) 
+add_definitions(${Qt5Core_DEFINITIONS})
+
 find_file(GL_H "gl.h" PATH_SUFFIXES "GL")
-include(FindQt4Extra)
+message("result:" "${GL_H}")
+include(FindQt5Extra)
 
 set(XVFB_EXEC "")
 option(USE_XVFB "Uses xvfb-run with the unit tests to avoid QtGui tests popping windows on the screen." FALSE)
@@ -28,8 +89,17 @@ if(CMAKE_HOST_APPLE)
     set(ALTERNATIVE_QT_INCLUDE_DIR "" CACHE PATH "The Alternative value to QT_INCLUDE_DIR. Necessary to fix bug on cmake 2.8 MACOS users")
 endif()
 
+if(NOT CMAKE_HOST_APPLE)
+    # Qt5: QT_INCLUDE_DIR does no longer exist.
+    # On Windows and Linux, it can be computed from Qt5Core_INCLUDE_DIRS
+    message("Qt5Core_INCLUDE_DIRS ${Qt5Core_INCLUDE_DIRS}")
+    list(GET Qt5Core_INCLUDE_DIRS 0 QT_INCLUDE_DIR)
+    message(STATUS "*** computed QT_INCLUDE_DIR as ${QT_INCLUDE_DIR}")
+endif()
+
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "/Zc:wchar_t- /GR /EHsc /DNOCOLOR /DWIN32 /D_WINDOWS /D_SCL_SECURE_NO_WARNINGS")
+    # Qt5: this flag has changed from /Zc:wchar_t- in Qt4.X
+    set(CMAKE_CXX_FLAGS "/Zc:wchar_t /GR /EHsc /DNOCOLOR /DWIN32 /D_WINDOWS /D_SCL_SECURE_NO_WARNINGS") # XXX
 else()
     if(CMAKE_HOST_UNIX AND NOT CYGWIN)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fvisibility=hidden -Wno-strict-aliasing")
@@ -59,11 +129,11 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE ${SHIBOKEN_BUILD_TYPE})
 endif()
 
-set(BINDING_NAME PySide)
-set(BINDING_API_MAJOR_VERSION "1")
-set(BINDING_API_MINOR_VERSION "2")
-set(BINDING_API_MICRO_VERSION "2")
-set(BINDING_API_RELEASE_LEVEL "final") # alpha, beta, rc, or final
+set(BINDING_NAME PySide2)
+set(BINDING_API_MAJOR_VERSION "2")
+set(BINDING_API_MINOR_VERSION "0")
+set(BINDING_API_MICRO_VERSION "0")
+set(BINDING_API_RELEASE_LEVEL "alpha") # alpha, beta, rc, or final
 set(BINDING_API_SERIAL 0) # leave as 0 when release level is final
 set(BINDING_API_VERSION "${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION}.${BINDING_API_MICRO_VERSION}" CACHE STRING "PySide version" FORCE)
 if (BINDING_API_RELEASE_LEVEL STREQUAL "final")
@@ -73,37 +143,38 @@ else()
     set(BINDING_API_VERSION_FULL "${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION}.${BINDING_API_MICRO_VERSION}~${BINDING_API_RELEASE_LEVEL}${BINDING_API_SERIAL}"
         CACHE STRING "PySide version [full]" FORCE)
 endif()
+
+# some hack to mimick the qt4 version variables
+find_package(Qt5Core)
+
+string(REGEX MATCHALL "[0-9]+" qt_version_helper "${Qt5Core_VERSION_STRING}")
+list(GET qt_version_helper 0 QT_VERSION_MAJOR)
+list(GET qt_version_helper 1 QT_VERSION_MINOR)
+unset(qt_version_helper)
+
 set(PYSIDE_QT_VERSION "${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" CACHE STRING "Qt version used to compile PySide" FORCE)
 if(ENABLE_VERSION_SUFFIX)
       set(pyside_SUFFIX "-${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION}")
 endif()
 
-include(${QT_USE_FILE})
-if (${QTVERSION} VERSION_LESS 4.5.0)
-    message(FATAL_ERROR "You need Qt4.5, found ${QTVERSION}.")
-endif()
+# no more supported: include(${QT_USE_FILE})
 
 # Configure OS support
 set(ENABLE_X11 "0")
 set(ENABLE_MAC "0")
 set(ENABLE_WIN "0")
 set(ENABLE_SIMULATOR "0")
-if(Q_WS_X11)
-    set(ENABLE_X11 "1")
-    if(Q_WS_MAEMO_5)
-        set(AUTO_OS "maemo")
-    else()
-        set(AUTO_OS "x11")
-    endif()
-elseif(Q_WS_MAC)
+
+# no more Maemo, no more simulator
+if(CMAKE_HOST_APPLE)
     set(ENABLE_MAC "1")
     set(AUTO_OS "mac")
-elseif(Q_WS_WIN)
+elseif(CMAKE_HOST_WIN32)
     set(ENABLE_WIN "1")
     set(AUTO_OS "win")
-elseif(Q_WS_SIMULATOR)
-    set(ENABLE_SIMULATOR "1")
-    set(AUTO_OS "simulator")
+elseif(CMAKE_HOST_UNIX)
+    set(ENABLE_X11 "1")
+    set(AUTO_OS "x11")
 else()
     message(FATAL_ERROR "OS not supported")
 endif()
@@ -138,10 +209,20 @@ add_custom_target(dist
             echo "Source package created at ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2.\n"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT PYTHON_MODULE_SUFFIX)
+    if (SHIBOKEN_PYTHON_VERSION_MAJOR EQUAL 2)
+        set(PYTHON_DEBUG_SUFFIX "_d")
+    endif()
+endif()
+
+
 if (NOT SITE_PACKAGE)
     execute_process(
-        COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} -c "from distutils import sysconfig; \\
-            print(sysconfig.get_python_lib(1,0,prefix='${CMAKE_INSTALL_PREFIX}'))"
+        COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} -c "if True:
+            from distutils import sysconfig
+            from os.path import sep
+            print(sysconfig.get_python_lib(1, 0, prefix='${CMAKE_INSTALL_PREFIX}').replace(sep, '/'))
+            "
         OUTPUT_VARIABLE SITE_PACKAGE
         OUTPUT_STRIP_TRAILING_WHITESPACE)
     if (NOT SITE_PACKAGE)
@@ -153,19 +234,22 @@ endif()
 
 set(GENERATOR_EXTRA_FLAGS --generator-set=shiboken --enable-parent-ctor-heuristic --enable-pyside-extensions --enable-return-value-heuristic --use-isnull-as-nb_nonzero)
 if(WIN32 OR DEFINED AVOID_PROTECTED_HACK)
-    message(STATUS "PySide will be generated avoiding the protected hack!")
+    message(STATUS "PySide2 will be generated avoiding the protected hack!")
     set(GENERATOR_EXTRA_FLAGS ${GENERATOR_EXTRA_FLAGS} --avoid-protected-hack)
     add_definitions(-DAVOID_PROTECTED_HACK)
 else()
     message(STATUS "PySide will be generated using the protected hack!")
 endif()
 
+find_package(Qt5Qml)
 add_subdirectory(libpyside)
-if(QT_QTUITOOLS_FOUND AND QT_QTDESIGNER_FOUND)
+find_package(Qt5Designer)
+find_package(Qt5UiTools)
+if(Qt5UiTools_FOUND AND Qt5Designer_FOUND)
     add_subdirectory(plugins)
 endif()
 # project directories
-add_subdirectory(PySide)
+add_subdirectory(PySide2)
 if (BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)

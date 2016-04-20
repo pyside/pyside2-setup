@@ -17,15 +17,15 @@ PySide exports their version numbers among the version of Qt used to compile PyS
 
     # Prints the Qt version used to compile PySide
     # e.g. "4.7.2"
-    print PySide.QtCore.__version__
+    print PySide2.QtCore.__version__
 
     # Gets a tuple with each version components of Qt used to compile PySide
     # e.g. (4, 7, 2)
-    print PySide.QtCore.__version_info__
+    print PySide2.QtCore.__version_info__
 
 
 Note that the Qt version used to compile PySide may differ from the version used to run PySide, to get the current running Qt version you can do:
 
 ::
 
-    print PySide.QtCore.qVersion()
+    print PySide2.QtCore.qVersion()

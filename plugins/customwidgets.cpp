@@ -23,7 +23,6 @@
 #include "customwidget.h"
 #include "customwidgets.h"
 
-#include <shiboken.h>
 
 struct PyCustomWidgetPrivate
 {
@@ -65,4 +64,4 @@ QList<QDesignerCustomWidgetInterface*> PyCustomWidgets::customWidgets() const
     return m_data->widgets;
 }
 
-Q_EXPORT_STATIC_PLUGIN2(uiplugin, PyCustomWidgets)
+

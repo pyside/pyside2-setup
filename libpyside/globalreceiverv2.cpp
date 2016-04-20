@@ -157,7 +157,9 @@ void DynamicSlotDataV2::onCallbackDestroyed(void *data)
 {
     DynamicSlotDataV2* self = reinterpret_cast<DynamicSlotDataV2*>(data);
     self->m_weakRef = 0;
+    Py_BEGIN_ALLOW_THREADS
     delete self->m_parent;
+    Py_END_ALLOW_THREADS
 }
 
 DynamicSlotDataV2::~DynamicSlotDataV2()
@@ -206,7 +208,11 @@ void GlobalReceiverV2::incRef(const QObject* link)
 {
     if (link) {
         if (!m_refs.contains(link)) {
-            if (QMetaObject::connect(link, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID))
+            bool connected;
+            Py_BEGIN_ALLOW_THREADS
+            connected = QMetaObject::connect(link, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID);
+            Py_END_ALLOW_THREADS
+            if (connected)
                 m_refs.append(link);
             else
                 Q_ASSERT(false);
@@ -227,7 +233,10 @@ void GlobalReceiverV2::decRef(const QObject* link)
     m_refs.removeOne(link);
     if (link) {
         if (!m_refs.contains(link)) {
-            bool result = QMetaObject::disconnect(link, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID);
+            bool result;
+            Py_BEGIN_ALLOW_THREADS
+            result = QMetaObject::disconnect(link, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID);
+            Py_END_ALLOW_THREADS
             Q_ASSERT(result);
             if (!result)
                 return;
@@ -235,7 +244,9 @@ void GlobalReceiverV2::decRef(const QObject* link)
     }
 
     if (m_refs.size() == 0)
+        Py_BEGIN_ALLOW_THREADS
         delete this;
+        Py_END_ALLOW_THREADS
 
 }
 
@@ -250,10 +261,12 @@ int GlobalReceiverV2::refCount(const QObject* link) const
 void GlobalReceiverV2::notify()
 {
     QSet<const QObject*> objs = QSet<const QObject*>::fromList(m_refs);
+    Py_BEGIN_ALLOW_THREADS
     foreach(const QObject* o, objs) {
         QMetaObject::disconnect(o, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID);
         QMetaObject::connect(o, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID);
     }
+    Py_END_ALLOW_THREADS
 }
 
 QByteArray GlobalReceiverV2::hash() const
@@ -288,7 +301,7 @@ int GlobalReceiverV2::qt_metacall(QMetaObject::Call call, int id, void** args)
         m_refs.removeAll(obj); // remove all refs to this object
         decRef(); //remove the safe ref
     } else {
-        bool isShortCuit = (strstr(slot.signature(), "(") == 0);
+        bool isShortCuit = (strstr(slot.methodSignature(), "(") == 0);
         Shiboken::AutoDecRef callback(m_data->callback());
         SignalManager::callPythonMetaMethod(slot, args, callback, isShortCuit);
     }

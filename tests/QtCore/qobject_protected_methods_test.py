@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtCore import QObject, QThread, SIGNAL
+from PySide2.QtCore import QObject, QThread, SIGNAL
 
 class Dummy(QObject):
     '''Dummy class'''

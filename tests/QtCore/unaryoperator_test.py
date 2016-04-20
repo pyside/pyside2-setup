@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtCore import QPoint
+from PySide2.QtCore import QPoint
 
 class NegUnaryOperatorTest(unittest.TestCase):
     '''Tests the presence of unary operator __neg__ on the QPoint class'''

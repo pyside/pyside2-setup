@@ -4,7 +4,7 @@
 import unittest
 import datetime
 
-from PySide.QtCore import QTime, QDateTime, QDate
+from PySide2.QtCore import QTime, QDateTime, QDate
 
 class TestDateTimeConversions (unittest.TestCase):
     def testQDate(self):

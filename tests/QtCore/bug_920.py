@@ -2,7 +2,7 @@
 
 import sys
 import unittest
-import PySide.QtCore as QtCore
+import PySide2.QtCore as QtCore
 
 class Signaller(QtCore.QObject):
     s1 = QtCore.Signal()

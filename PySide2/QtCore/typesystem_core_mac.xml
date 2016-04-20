@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!--
+    This file is part of PySide project.
+    Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+    Contact: PySide team <contact@pyside.org>
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+-->
+<typesystem package="PySide2.QtCore">
+  <primitive-type name="Qt::HANDLE" target-lang-api-name="PyObject" />
+  <!-- Qt5: had to move QAbstractEventDispatcher into os-specific files because of Windows -->
+  <object-type name="QAbstractEventDispatcher">
+    <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>)" allow-thread="yes"/>
+    <!-- Qt5: had to add this recursive object def. This was crucial to get rid of "pure virtual" -->
+    <object-type name="TimerInfo"/>
+  </object-type>
+  <object-type name="QSysInfo">
+    <enum-type name="Endian"/>
+    <enum-type name="Sizes"/>
+    <enum-type name="MacVersion" since="5.5" />
+  </object-type>
+  <suppress-warning text="skipping field 'QSysInfo::WindowsVersion' with unmatched type 'QSysInfo::WinVersion'" />
+  <suppress-warning text="enum 'QSysInfo::WinVersion' does not have a type entry or is not an enum" />
+</typesystem>

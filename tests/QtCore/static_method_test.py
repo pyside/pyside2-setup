@@ -4,7 +4,7 @@
 import os
 import unittest
 
-from PySide.QtCore import QFile
+from PySide2.QtCore import QFile
 
 class StaticNonStaticMethodsTest(unittest.TestCase):
     '''Test cases for overloads involving static and non-static versions of a method.'''

@@ -4,10 +4,10 @@
 
 import unittest
 
-from PySide.QtCore import QObject, SIGNAL, SLOT
+from PySide2.QtCore import QObject, SIGNAL, SLOT
 
 try:
-    from PySide.QtGui import QSpinBox, QPushButton
+    from PySide2.QtWidgets import QSpinBox, QPushButton
     hasQtGui = True
 except ImportError:
     hasQtGui = False

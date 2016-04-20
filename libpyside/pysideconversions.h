@@ -239,7 +239,8 @@ struct QFlagsConverter
 
     static inline T toCpp(PyObject* pyObj)
     {
-        long val = 0;
+        /* this was long. Needed int in Qt5 */
+        int val = 0;
         if (Shiboken::Enum::check(pyObj)) {
             val = Shiboken::Enum::getValue(pyObj);
         } else if (PyObject_TypeCheck(pyObj, Shiboken::SbkType<T>())) {

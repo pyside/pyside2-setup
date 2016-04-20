@@ -24,8 +24,14 @@
 #define _PY_CUSTOM_WIDGET_H_
 
 #include <shiboken.h>
-#include <QtDesigner/QtDesigner>
-#include <QDesignerCustomWidgetInterface>
+
+#include <QtCore/QtGlobal>
+#if (QT_VERSION < QT_VERSION_CHECK(5, 5, 0))
+ #include <QtDesigner/QDesignerCustomWidgetInterface>
+#else
+ #include <QtUiPlugin/QDesignerCustomWidgetInterface>
+#endif
+
 
 struct PyCustomWidgetPrivate;
 

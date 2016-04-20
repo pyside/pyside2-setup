@@ -1,7 +1,7 @@
 
 //! [using a custom style]
 import sys
-from PySide.QtGui import *
+from PySide2.QtGui import *
 
 QApplication.setStyle(CustomStyle())
 app = QApplication(sys.argv)

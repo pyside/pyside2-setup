@@ -5,7 +5,7 @@
 import sys
 import unittest
 
-from PySide.QtCore import QObject, SIGNAL, QProcess
+from PySide2.QtCore import QObject, SIGNAL, QProcess
 
 from helper import UsesQCoreApplication
 

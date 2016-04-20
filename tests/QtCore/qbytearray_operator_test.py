@@ -5,7 +5,7 @@
 import unittest
 import py3kcompat as py3k
 
-from PySide.QtCore import QByteArray
+from PySide2.QtCore import QByteArray
 
 class QByteArrayOperatorEqual(unittest.TestCase):
     '''TestCase for operator QByteArray == QByteArray'''

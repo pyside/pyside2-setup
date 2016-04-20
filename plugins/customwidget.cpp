@@ -23,7 +23,6 @@
 
 #include "customwidget.h"
 
-#include <shiboken.h>
 
 struct PyCustomWidgetPrivate
 {

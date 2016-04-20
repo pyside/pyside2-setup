@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtCore import QBitArray
+from PySide2.QtCore import QBitArray
 
 def bool_list_from_qbitarray(qbitarray):
     '''This function is used instead of a list comprehension because

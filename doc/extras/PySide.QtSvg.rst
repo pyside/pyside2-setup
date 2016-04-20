@@ -2,7 +2,7 @@ To include the definitions of the module's classes, use the following directive:
 
 ::
 
-    import PySide.QtSvg
+    import PySide2.QtSvg
 
 License Information
 -------------------

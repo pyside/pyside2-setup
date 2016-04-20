@@ -2,8 +2,8 @@ import unittest
 import os
 from helper import UsesQApplication
 
-from PySide.QtGui import QWidget
-from PySide.QtUiTools import QUiLoader
+from PySide2.QtWidgets import QWidget
+from PySide2.QtUiTools import QUiLoader
 
 def get_file_path():
     for path in file_path:

@@ -1,9 +1,9 @@
-import PySide
+import PySide2
 import unittest
 
-from PySide.QtCore import QByteArray, QDate, QDateTime, QTime, QLine, QLineF
-from PySide.QtCore import Qt, QSize, QSizeF, QRect, QRectF, QPoint, QPointF
-from PySide.QtCore import QUuid
+from PySide2.QtCore import QByteArray, QDate, QDateTime, QTime, QLine, QLineF
+from PySide2.QtCore import Qt, QSize, QSizeF, QRect, QRectF, QPoint, QPointF
+from PySide2.QtCore import QUuid
 
 class ReprCopyHelper:
     def testCopy(self):

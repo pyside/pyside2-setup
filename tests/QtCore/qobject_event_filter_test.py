@@ -5,7 +5,7 @@ import unittest
 import weakref
 import sys
 
-from PySide.QtCore import QObject, QTimerEvent
+from PySide2.QtCore import QObject, QTimerEvent
 
 from helper import UsesQCoreApplication
 

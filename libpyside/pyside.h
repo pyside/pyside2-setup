@@ -29,7 +29,7 @@
 #include <QHash>
 #include <QList>
 
-class SbkObjectType;
+struct SbkObjectType;
 
 namespace PySide
 {

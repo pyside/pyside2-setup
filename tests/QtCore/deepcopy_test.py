@@ -2,9 +2,9 @@
 import unittest
 from copy import deepcopy
 
-from PySide.QtCore import QByteArray, QDate, QDateTime, QTime, QLine, QLineF
-from PySide.QtCore import Qt, QSize, QSizeF, QRect, QRectF, QDir, QPoint, QPointF
-from PySide.QtCore import QUuid
+from PySide2.QtCore import QByteArray, QDate, QDateTime, QTime, QLine, QLineF
+from PySide2.QtCore import Qt, QSize, QSizeF, QRect, QRectF, QDir, QPoint, QPointF
+from PySide2.QtCore import QUuid
 
 class DeepCopyHelper:
     def testCopy(self):

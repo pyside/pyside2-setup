@@ -2,4 +2,4 @@ To include the definitions of the module's classes, use the following directive:
 
 ::
 
-    import PySide.QtXml
+    import PySide2.QtXml

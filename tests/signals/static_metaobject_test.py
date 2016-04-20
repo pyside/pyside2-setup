@@ -4,7 +4,7 @@
 
 import unittest
 
-from PySide.QtCore import QObject, SIGNAL
+from PySide2.QtCore import QObject, SIGNAL
 from helper import UsesQCoreApplication
 
 class MyObject(QObject):

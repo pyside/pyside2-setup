@@ -119,8 +119,6 @@ static void qpropertyMetaCall(PySideProperty* pp, PyObject* self, QMetaObject::C
             if (value) {
                 converter.toCpp(value, args[0]);
                 Py_DECREF(value);
-            } else if (PyErr_Occurred()) {
-                PyErr_Print(); // Clear any errors but print them to stderr
             }
             break;
         }

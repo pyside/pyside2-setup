@@ -40,17 +40,23 @@ namespace PySide
          * \param signature method signature
          * \param type method return type
          */
-        MethodData(QMetaMethod::MethodType mtype, const char* signature, const char* type = 0);
+        MethodData(QMetaMethod::MethodType mtype, 
+                   const QByteArray& signature, 
+                   const QByteArray& rtype = QByteArray("void"));
         void clear();
         bool isValid() const;
         const QByteArray& signature() const { return m_signature; }
-        const QByteArray& type() const { return m_type; }
-        QMetaMethod::MethodType methodType() const;
+        const QByteArray& returnType() const { return m_rtype; }
+        QMetaMethod::MethodType methodType() const { return m_mtype; }
+        //Qt5 moc: now we have to store method parameter names, count, type
+        QList<QByteArray> parameterTypes() const;
+        int parameterCount() const;
+        QByteArray name() const;
         bool operator==(const MethodData& other) const;
 
     private:
         QByteArray m_signature;
-        QByteArray m_type;
+        QByteArray m_rtype;
         QMetaMethod::MethodType m_mtype;
         static const QByteArray m_emptySig;
     };

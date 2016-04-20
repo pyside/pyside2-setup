@@ -1,7 +1,7 @@
 import gc
 import unittest
 
-from PySide.QtCore import QTextCodec
+from PySide2.QtCore import QTextCodec
 
 class TestCodecGetters(unittest.TestCase):
 

@@ -20,7 +20,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PYSIDE_FUNCTION_H
+#ifndef PYSIDE_METAFUNCTION_H
 #define PYSIDE_METAFUNCTION_H
 
 #include <QObject>

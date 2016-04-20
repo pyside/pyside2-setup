@@ -39,7 +39,7 @@
 **
 ****************************************************************************/
 
-#include <QtGui>
+#include <QtWidgets>
 
 //! [0]
 QAccessibleInterface *sliderFactory(const QString &classname, QObject *object)

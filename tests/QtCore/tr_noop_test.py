@@ -1,8 +1,8 @@
 import unittest
 
 import sys
-from PySide.QtCore import QT_TR_NOOP, QT_TR_NOOP_UTF8
-from PySide.QtCore import QT_TRANSLATE_NOOP, QT_TRANSLATE_NOOP3, QT_TRANSLATE_NOOP_UTF8
+from PySide2.QtCore import QT_TR_NOOP, QT_TR_NOOP_UTF8
+from PySide2.QtCore import QT_TRANSLATE_NOOP, QT_TRANSLATE_NOOP3, QT_TRANSLATE_NOOP_UTF8
 
 class QtTrNoopTest(unittest.TestCase):
 

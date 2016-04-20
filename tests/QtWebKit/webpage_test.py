@@ -3,9 +3,9 @@
 
 import unittest
 
-from PySide.QtCore import QObject, SIGNAL, QUrl
-from PySide.QtWebKit import QWebPage
-from PySide.QtNetwork import QNetworkAccessManager
+from PySide2.QtCore import QObject, SIGNAL, QUrl
+from PySide2.QtWebKit import QWebPage
+from PySide2.QtNetwork import QNetworkAccessManager
 
 from helper import adjust_filename, TimedQApplication
 

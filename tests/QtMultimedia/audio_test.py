@@ -3,8 +3,8 @@
 
 import unittest
 
-from PySide.QtCore import *
-from PySide.QtMultimedia import *
+from PySide2.QtCore import *
+from PySide2.QtMultimedia import *
 
 class testAudioDevices(unittest.TestCase):
 

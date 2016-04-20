@@ -4,7 +4,7 @@
 import unittest
 import py3kcompat as py3k
 
-from PySide.QtCore import QBitArray, QByteArray, QIODevice, QDataStream, QDate, QTime, QDateTime
+from PySide2.QtCore import QBitArray, QByteArray, QIODevice, QDataStream, QDate, QTime, QDateTime
 
 def create_bitarray(string):
     array = QBitArray(len(string))

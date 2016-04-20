@@ -3,7 +3,7 @@
 ''' Test case for QObject.receivers()'''
 
 import unittest
-from PySide.QtCore import *
+from PySide2.QtCore import *
 
 def cute_slot():
     pass

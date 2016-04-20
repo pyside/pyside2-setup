@@ -1,5 +1,5 @@
 //! [0]
-from PySide.QtCore import QApplication, QTimer
+from PySide2.QtCore import QApplication, QTimer
 
 def main():
 

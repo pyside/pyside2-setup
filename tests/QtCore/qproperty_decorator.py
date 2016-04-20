@@ -1,7 +1,7 @@
 import weakref
 import unittest
 
-from PySide.QtCore import QObject, Property
+from PySide2.QtCore import QObject, Property
 
 class MyObject(QObject):
     def __init__(self):

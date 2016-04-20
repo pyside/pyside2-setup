@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtNetwork import QTcpServer
+from PySide2.QtNetwork import QTcpServer
 
 class ListenDefaultArgsCase(unittest.TestCase):
     '''Test case for TcpServer.listen with default args'''

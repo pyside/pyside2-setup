@@ -2,4 +2,4 @@ Applications that use the Qt Script Tools classes need to be configured to be bu
 
 ::
 
-    import PySide.QtScriptTools
+    import PySide2.QtScriptTools

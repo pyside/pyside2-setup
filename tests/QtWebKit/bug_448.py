@@ -4,8 +4,8 @@
 import unittest
 import sys
 
-from PySide.QtGui import QApplication
-from PySide.QtWebKit import QWebView
+from PySide2.QtWidgets import QApplication
+from PySide2.QtWebKit import QWebView
 
 class Bug448(unittest.TestCase):
     def onError(self, erros):

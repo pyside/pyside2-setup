@@ -5,7 +5,7 @@ http://bugs.openbossa.org/show_bug.cgi?id=378
 '''
 
 import unittest
-from PySide.QtCore import QObject
+from PySide2.QtCore import QObject
 
 class ExtQObject(QObject):
     def __init__(self):

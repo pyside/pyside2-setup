@@ -39,8 +39,8 @@
 **
 ****************************************************************************/
 
-#include <QtGui>
-from PySide.QtGui import *
+#include <QtWidgets>
+from PySide2.QtGui import *
 
 # edit : QTextEdit
 def mergeFormat(edit):

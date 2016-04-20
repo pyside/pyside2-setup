@@ -3,7 +3,7 @@
 
 import unittest
 
-from PySide.QtCore import QPoint, QPointF
+from PySide2.QtCore import QPoint, QPointF
 
 
 class QPointTest(unittest.TestCase):
