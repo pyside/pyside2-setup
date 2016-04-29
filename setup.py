@@ -30,9 +30,9 @@ __version__ = "2.0.0.dev0"
 
 submodules = {
     '2.0.0.dev0': [
-        ["shiboken2", "master"],
-        ["pyside2", "master"],
-        ["pyside2-tools", "master"],
+        ["shiboken2", "dev"],
+        ["pyside2", "dev"],
+        ["pyside2-tools", "dev"],
         ["pyside2-examples", "master"],
     ],
 }
@@ -257,10 +257,7 @@ if os.path.isdir(".git") and not OPTION_IGNOREGIT and not OPTION_ONLYPACKAGE:
     git_update_cmd = ["git", "submodule", "update", "--init"]
     if run_process(git_update_cmd) != 0:
         raise DistutilsSetupError("Failed to initialize the git submodules")
-    git_pull_cmd = ["git", "submodule", "foreach", "git", "fetch", "origin"]
-    if run_process(git_pull_cmd) != 0:
-        raise DistutilsSetupError("Failed to initialize the git submodules")
-    git_pull_cmd = ["git", "submodule", "foreach", "git", "pull", "origin", "master"]
+    git_pull_cmd = ["git", "submodule", "foreach", "git", "fetch", "--all"]
     if run_process(git_pull_cmd) != 0:
         raise DistutilsSetupError("Failed to initialize the git submodules")
     submodules_dir = os.path.join(script_dir, "sources")

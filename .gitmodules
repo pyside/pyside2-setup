@@ -1,12 +1,12 @@
 [submodule "sources/pyside2"]
 	path = sources/pyside2
-    url=https://github.com/PySide/pyside2.git
+    url=https://code.qt.io/pyside/pyside
 [submodule "sources/shiboken2"]
 	path = sources/shiboken2
-    url=https://github.com/PySide/shiboken2.git
+    url=https://code.qt.io/pyside/shiboken
 [submodule "sources/pyside2-tools"]
 	path = sources/pyside2-tools
-    url=https://github.com/PySide/pyside2-tools.git
+    url=https://code.qt.io/pyside/pyside-tools
 [submodule "sources/pyside2-examples"]
 	path = sources/pyside2-examples
     url=https://github.com/PySide/pyside2-examples.git
