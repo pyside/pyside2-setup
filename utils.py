@@ -341,8 +341,7 @@ def run_process(args, initial_env=None):
         for line in lines:
             log.info(line.rstrip('\r'))
         return buffer
-
-    _log("Running process: {0}".format(" ".join([(" " in x and '"{0}"'.format(x) or x) for x in args])))
+    _log("Running process in {0}: {1}".format(os.getcwd(), " ".join([(" " in x and '"{0}"'.format(x) or x) for x in args])))
 
     if sys.platform != "win32":
         try:
