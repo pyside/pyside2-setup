@@ -1,15 +1,15 @@
 [submodule "sources/pyside2"]
 	path = sources/pyside2
-	url=../pyside
+	url = ../pyside
 [submodule "sources/shiboken2"]
 	path = sources/shiboken2
-	url=../shiboken
+	url = ../shiboken
 [submodule "sources/pyside2-tools"]
 	path = sources/pyside2-tools
-	url=../pyside-tools
+	url = ../pyside-tools
 [submodule "sources/pyside2-examples"]
 	path = sources/pyside2-examples
-    url=https://github.com/PySide/pyside2-examples.git
+	url = https://github.com/PySide/pyside2-examples.git
 [submodule "wiki"]
 	path = wiki
 	url = https://github.com/PySide/pyside2.wiki.git
