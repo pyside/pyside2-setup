@@ -120,6 +120,13 @@ else()
     set(PATH_SEP ":")
 endif()
 
+if(CMAKE_HOST_APPLE)
+    set(OSX_USE_LIBCPP "OFF" CACHE BOOL "Explicitly link the libc++ standard library (useful for osx deployment targets lower than 10.9.")
+    if(OSX_USE_LIBCPP)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+    endif()
+endif()
+
 add_subdirectory(ApiExtractor)
 
 set(generator_plugin_DIR ${LIB_INSTALL_DIR}/generatorrunner${generator_SUFFIX})
