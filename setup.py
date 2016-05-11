@@ -160,6 +160,7 @@ OPTION_JOBS = option_value('jobs')                # number of parallel build job
 OPTION_JOM = has_option('jom')                    # use jom instead of nmake with msvc
 OPTION_BUILDTESTS = has_option("build-tests")
 OPTION_OSXARCH = option_value("osx-arch")
+OPTION_OSX_USE_LIBCPP = has_option("osx-use-libc++")
 OPTION_XVFB = has_option("use-xvfb")
 
 if OPTION_QT_VERSION is None:
@@ -633,6 +634,15 @@ class pyside_build(_build):
             if OPTION_OSXARCH:
                 # also tell cmake which architecture to use
                 cmake_cmd.append("-DCMAKE_OSX_ARCHITECTURES:STRING={}".format(OPTION_OSXARCH))
+
+            if OPTION_OSX_USE_LIBCPP:
+                # Explicitly link the libc++ standard library (useful for osx deployment targets
+                # lower than 10.9). This is not on by default, because most libraries and
+                # executables on OSX <= 10.8 are linked to libstdc++, and mixing standard libraries
+                # can lead to crashes.
+                # On OSX >= 10.9 with a similar minimum deployment target, libc++ is linked in
+                # implicitly, thus the option is a no-op in those cases.
+                cmake_cmd.append("-DOSX_USE_LIBCPP=ON")
 
         log.info("Configuring module %s (%s)..." % (extension,  module_src_dir))
         if run_process(cmake_cmd) != 0:
