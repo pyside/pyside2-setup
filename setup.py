@@ -24,6 +24,9 @@ REQUIREMENTS:
 OPTIONAL:
 OpenSSL: You can specify the location of OpenSSL DLLs with option --opnessl=</path/to/openssl/bin>.
     You can download OpenSSL for windows here: http://slproweb.com/products/Win32OpenSSL.html
+
+OS X SDK: You can specify which OS X SDK should be used for compilation with the option --osx-sysroot=</path/to/sdk>.
+          For e.g. "--osx-sysroot=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/".
 """
 
 __version__ = "2.0.0.dev0"
@@ -161,6 +164,7 @@ OPTION_JOM = has_option('jom')                    # use jom instead of nmake wit
 OPTION_BUILDTESTS = has_option("build-tests")
 OPTION_OSXARCH = option_value("osx-arch")
 OPTION_OSX_USE_LIBCPP = has_option("osx-use-libc++")
+OPTION_OSX_SYSROOT = option_value("osx-sysroot")
 OPTION_XVFB = has_option("use-xvfb")
 
 if OPTION_QT_VERSION is None:
@@ -643,6 +647,9 @@ class pyside_build(_build):
                 # On OSX >= 10.9 with a similar minimum deployment target, libc++ is linked in
                 # implicitly, thus the option is a no-op in those cases.
                 cmake_cmd.append("-DOSX_USE_LIBCPP=ON")
+
+            if OPTION_OSX_SYSROOT:
+                cmake_cmd.append("-DCMAKE_OSX_SYSROOT={}".format(OPTION_OSX_SYSROOT))
 
         log.info("Configuring module %s (%s)..." % (extension,  module_src_dir))
         if run_process(cmake_cmd) != 0:
