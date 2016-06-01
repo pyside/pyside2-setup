@@ -691,7 +691,6 @@ class pyside_build(_build):
             "qt_doc_dir": self.qtinfo.docs_dir,
             "qt_lib_dir": self.qtinfo.libs_dir,
             "qt_plugins_dir": self.qtinfo.plugins_dir,
-            "qt_imports_dir": self.qtinfo.imports_dir,
             "qt_translations_dir": self.qtinfo.translations_dir,
             "version": version_str,
         }
@@ -810,11 +809,6 @@ class pyside_build(_build):
             copydir("{qt_plugins_dir}", "{dist_dir}/PySide2/plugins",
                 filter=["*.so"],
                 vars=vars)
-            # <qt>/imports/* -> <setup>/PySide2/imports
-            if float(vars["qt_version"][:3]) > 4.6:
-                copydir("{qt_imports_dir}", "{dist_dir}/PySide2/imports",
-                    filter=["qmldir", "*.so"],
-                    force=False, vars=vars)
             # <qt>/translations/* -> <setup>/PySide2/translations
             copydir("{qt_translations_dir}", "{dist_dir}/PySide2/translations",
                 filter=["*.qm"],
@@ -956,10 +950,6 @@ class pyside_build(_build):
         # <qt>/plugins/* -> <setup>/PySide2/plugins
         copydir("{qt_plugins_dir}", "{dist_dir}/PySide2/plugins",
             filter=["*.dll"] + pdbs,
-            vars=vars)
-        # <qt>/imports/* -> <setup>/PySide2/imports
-        copydir("{qt_imports_dir}", "{dist_dir}/PySide2/imports",
-            filter=["qmldir", "*.dll"] + pdbs,
             vars=vars)
         # <qt>/translations/* -> <setup>/PySide2/translations
         copydir("{qt_translations_dir}", "{dist_dir}/PySide2/translations",
