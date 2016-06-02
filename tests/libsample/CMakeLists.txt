@@ -29,7 +29,6 @@ overload.cpp
 overloadsort.cpp
 pairuser.cpp
 pen.cpp
-photon.cpp
 point.cpp
 pointf.cpp
 polygon.cpp
