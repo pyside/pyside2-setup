@@ -25,8 +25,6 @@
 namespace Photon
 {
 const ClassType Base::staticType;
-template <> const ClassType TemplateBase<IdentityType>::staticType;
-template <> const ClassType TemplateBase<DuplicatorType>::staticType;
 int callCalculateForValueDuplicatorPointer(ValueDuplicator* value)
 {
     return value->calculate();
