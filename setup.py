@@ -633,7 +633,11 @@ class pyside_build(_build):
                 cmake_cmd.append("-DUSE_PYTHON_VERSION=3.4")
 
         if sys.platform == 'darwin':
-            cmake_cmd.append('-DALTERNATIVE_QT_INCLUDE_DIR=' + self.qtinfo.headers_dir)
+            # When using Qt from QtCompany installers, headers are under framework directories
+            if os.path.isdir(self.qtinfo.headers_dir + "/../lib/QtCore.framework"):
+                cmake_cmd.append('-DALTERNATIVE_QT_INCLUDE_DIR=' + self.qtinfo.headers_dir + "/../lib/")
+            else:
+                cmake_cmd.append('-DALTERNATIVE_QT_INCLUDE_DIR=' + self.qtinfo.headers_dir)
 
             if OPTION_OSXARCH:
                 # also tell cmake which architecture to use
