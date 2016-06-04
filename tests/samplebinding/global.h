@@ -36,6 +36,7 @@
 #include "overload.h"
 #include "pairuser.h"
 #include "pen.h"
+#include "photon.h"
 #include "point.h"
 #include "pointf.h"
 #include "pointerholder.h"
