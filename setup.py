@@ -633,11 +633,17 @@ class pyside_build(_build):
                 cmake_cmd.append("-DUSE_PYTHON_VERSION=3.4")
 
         if sys.platform == 'darwin':
-            # When using Qt from QtCompany installers, headers are under framework directories
+            # Shiboken supports specifying multiple include paths separated by a colon on *nix
+            # systems.
+            # In a framework build, two paths should be included:
+            # path_to_qt/lib -> which contains framework folders with headers, and
+            # path_to_qt/include -> which contains headers for static libraries.
+            # A non-framework build contains all headers in the path_to_qt/include folder.
+            path_separator = ":"
+            includes_dir = '-DALTERNATIVE_QT_INCLUDE_DIR=' + self.qtinfo.headers_dir
             if os.path.isdir(self.qtinfo.headers_dir + "/../lib/QtCore.framework"):
-                cmake_cmd.append('-DALTERNATIVE_QT_INCLUDE_DIR=' + self.qtinfo.headers_dir + "/../lib/")
-            else:
-                cmake_cmd.append('-DALTERNATIVE_QT_INCLUDE_DIR=' + self.qtinfo.headers_dir)
+                includes_dir += path_separator + self.qtinfo.headers_dir + "/../lib/"
+            cmake_cmd.append(includes_dir)
 
             if OPTION_OSXARCH:
                 # also tell cmake which architecture to use
