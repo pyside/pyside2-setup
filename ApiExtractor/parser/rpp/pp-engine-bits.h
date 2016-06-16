@@ -285,8 +285,6 @@ inline FILE *pp::find_include_file(std::string const &__input_filename, std::str
             __filepath->append(__input_filename.substr(slashPos + 1, std::string::npos));
 
             if (file_exists(*__filepath) && !file_isdir(*__filepath)) {
-                // this seems never to happen
-                std::cerr << "Include from framework: " << *__filepath << "\n";
                 return fopen(__filepath->c_str(), "r");
             }
         }
