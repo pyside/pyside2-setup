@@ -77,7 +77,7 @@ Time::operator==(const Time& other) const
             && m_minute == other.m_minute
             && m_second == other.m_second
             && m_msec == other.m_msec
-            && m_is_null == m_is_null;
+            && m_is_null == other.m_is_null;
 }
 
 bool

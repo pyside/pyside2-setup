@@ -165,6 +165,7 @@ public:
     ~MDerived4() {}
 
     inline int mderived4Method() { return 0; }
+    inline int justDummyMethod() { return m_value; }
 
     inline Base3* castToBase3() { return (Base3*) this; }
     inline Base4* castToBase4() { return (Base4*) this; }

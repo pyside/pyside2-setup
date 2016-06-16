@@ -42,7 +42,7 @@ public:
     explicit HandleHolder(HANDLE ptr = 0) : m_handle(ptr) {}
     explicit HandleHolder(Foo::HANDLE val): m_handle2(val) {}
 
-    inline void set(HANDLE ptr) { m_handle = m_handle; }
+    inline void set(HANDLE ptr) { HANDLE tmp; tmp = m_handle;  m_handle = tmp; }
     inline void set(const Foo::HANDLE& val) { m_handle2 = val; }
     inline HANDLE handle() { return m_handle; }
     inline Foo::HANDLE handle2() { return m_handle2; }
