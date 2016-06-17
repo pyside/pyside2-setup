@@ -16,6 +16,15 @@ without rebuilding entire PySide2 every time:
   # Then we create bdist_egg reusing PySide2 build with option --only-package
   python setup.py bdist_egg --only-package --qmake=c:\Qt\4.8.5\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --opnessl=c:\libs\OpenSSL32bit\bin
 
+For development purposes the following options might be of use, when using "setup.py build":
+    --reuse-build option allows recompiling only the modified sources and not the whole world,
+      shortening development iteration time,
+    --skip-cmake will reuse the already generated Makefiles (or equivalents), instead of invoking,
+      CMake to update the Makefiles (note, CMake should be ran at least once to generate the files),
+    --skip-make-install will not run make install (or equivalent) for each built module,
+    --skip-packaging will skip creation of the python package,
+    --ignore-git will skip the fetching and checkout steps for supermodule and all submodules.
+
 REQUIREMENTS:
 - Python: 2.6, 2.7, 3.2, 3.3 and 3.4 is supported
 - Cmake: Specify the path to cmake with --cmake option or add cmake to the system path.
@@ -89,6 +98,7 @@ except ImportError:
 import os
 import sys
 import platform
+import time
 
 import difflib # for a close match of dirname and module
 
@@ -166,6 +176,10 @@ OPTION_OSXARCH = option_value("osx-arch")
 OPTION_OSX_USE_LIBCPP = has_option("osx-use-libc++")
 OPTION_OSX_SYSROOT = option_value("osx-sysroot")
 OPTION_XVFB = has_option("use-xvfb")
+OPTION_REUSE_BUILD = has_option("reuse-build")
+OPTION_SKIP_CMAKE = has_option("skip-cmake")
+OPTION_SKIP_MAKE_INSTALL = has_option("skip-make-install")
+OPTION_SKIP_PACKAGING = has_option("skip-packaging")
 
 if OPTION_QT_VERSION is None:
     OPTION_QT_VERSION = "5"
@@ -559,14 +573,17 @@ class pyside_build(_build):
             for ext in ['shiboken2', 'pyside2', 'pyside2-tools']:
                 self.build_extension(ext)
 
-        # Build patchelf if needed
-        self.build_patchelf()
+        if not OPTION_SKIP_PACKAGING:
+            # Build patchelf if needed
+            self.build_patchelf()
 
-        # Prepare packages
-        self.prepare_packages()
+            # Prepare packages
+            self.prepare_packages()
 
-        # Build packages
-        _build.run(self)
+            # Build packages
+            _build.run(self)
+        else:
+            log.info("Skipped preparing and building packages.")
 
     def build_patchelf(self):
         if not sys.platform.startswith('linux'):
@@ -595,15 +612,20 @@ class pyside_build(_build):
         if os.path.exists(skipflag_file):
             log.info("Skipping %s because %s exists" % (extension, skipflag_file))
             return
-        if os.path.exists(module_build_dir):
-            log.info("Deleting module build folder %s..." % module_build_dir)
-            try:
-                rmtree(module_build_dir)
-            except Exception as e:
-                print('***** problem removing "{}"'.format(module_build_dir))
-                print('ignored error: {}'.format(e))
-        log.info("Creating module build folder %s..." % module_build_dir)
+
+        module_build_exists = os.path.exists(module_build_dir)
+        if module_build_exists:
+            if not OPTION_REUSE_BUILD:
+                log.info("Deleting module build folder %s..." % module_build_dir)
+                try:
+                    rmtree(module_build_dir)
+                except Exception as e:
+                    print('***** problem removing "{}"'.format(module_build_dir))
+                    print('ignored error: {}'.format(e))
+            else:
+                log.info("Reusing module build folder %s..." % module_build_dir)
         if not os.path.exists(module_build_dir):
+            log.info("Creating module build folder %s..." % module_build_dir)
             os.makedirs(module_build_dir)
         os.chdir(module_build_dir)
 
@@ -661,9 +683,13 @@ class pyside_build(_build):
             if OPTION_OSX_SYSROOT:
                 cmake_cmd.append("-DCMAKE_OSX_SYSROOT={}".format(OPTION_OSX_SYSROOT))
 
-        log.info("Configuring module %s (%s)..." % (extension,  module_src_dir))
-        if run_process(cmake_cmd) != 0:
-            raise DistutilsSetupError("Error configuring " + extension)
+        if not OPTION_SKIP_CMAKE:
+            log.info("Configuring module %s (%s)..." % (extension,  module_src_dir))
+            if run_process(cmake_cmd) != 0:
+                raise DistutilsSetupError("Error configuring " + extension)
+        else:
+            log.info("Reusing old configuration for module %s (%s)..." % (extension,
+                                                                          module_src_dir))
 
         log.info("Compiling module %s..." % extension)
         cmd_make = [self.make_path]
@@ -677,9 +703,18 @@ class pyside_build(_build):
             if run_process([self.make_path, "doc"]) != 0:
                 raise DistutilsSetupError("Error generating documentation " + extension)
 
-        log.info("Installing module %s..." % extension)
-        if run_process([self.make_path, "install/fast"]) != 0:
-            raise DistutilsSetupError("Error pseudo installing " + extension)
+        if not OPTION_SKIP_MAKE_INSTALL:
+            log.info("Installing module %s..." % extension)
+            # Need to wait a second, so installed file timestamps are older than build file
+            # timestamps.
+            # See https://gitlab.kitware.com/cmake/cmake/issues/16155 for issue details.
+            if sys.platform == 'darwin':
+                log.info("Waiting 1 second, to ensure installation is successful...")
+                time.sleep(1)
+            if run_process([self.make_path, "install/fast"]) != 0:
+                raise DistutilsSetupError("Error pseudo installing " + extension)
+        else:
+            log.info("Skipped installing module %s" % extension)
 
         os.chdir(self.script_dir)
 
