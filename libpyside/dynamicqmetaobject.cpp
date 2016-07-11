@@ -708,7 +708,17 @@ void DynamicQMetaObject::DynamicQMetaObjectPrivate::updateMetaObject(QMetaObject
             } else
                 data[index++] = m_nullIndex;
 
-            data[index++] = (i->isValid() ? (registerString(i->type(), strings)) :  m_nullIndex); // normalized type
+            // Find out the property type index.
+            int typeInfo = m_nullIndex;
+            if (i->isValid()) {
+                const QByteArray &typeName = i->type();
+                if (QtPrivate::isBuiltinType(typeName))
+                   typeInfo = QMetaType::type(typeName);
+                else
+                   typeInfo = IsUnresolvedType | registerString(typeName, strings);
+            }
+            data[index++] = typeInfo; // normalized type
+
             data[index++] = i->flags();
             i++;
         }
