@@ -64,5 +64,6 @@
     <enum-type name="Sizes"/>
     <enum-type name="WinVersion" since="5.5" />
   </object-type>
+  <suppress-warning text="skipping field 'QSysInfo::MacintoshVersion' with unmatched type 'QSysInfo::MacVersion'" />
   <suppress-warning text="enum 'QSysInfo::MacVersion' does not have a type entry or is not an enum" />
 </typesystem>
