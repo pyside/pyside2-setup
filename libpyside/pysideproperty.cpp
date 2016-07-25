@@ -146,6 +146,9 @@ static void qpropertyMetaCall(PySideProperty* pp, PyObject* self, QMetaObject::C
         // just to avoid gcc warnings
         case QMetaObject::InvokeMetaMethod:
         case QMetaObject::CreateInstance:
+        case QMetaObject::IndexOfMethod:
+        case QMetaObject::RegisterPropertyMetaType:
+        case QMetaObject::RegisterMethodArgumentMetaType:
             break;
     }
 }

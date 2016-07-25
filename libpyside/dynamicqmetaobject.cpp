@@ -275,9 +275,9 @@ MethodData::MethodData()
 }
 
 MethodData::MethodData(QMetaMethod::MethodType mtype, const QByteArray& signature, const QByteArray& rtype)
-    : m_mtype(mtype)
-    , m_signature(QMetaObject::normalizedSignature(signature.constData()))
+    : m_signature(QMetaObject::normalizedSignature(signature.constData()))
     , m_rtype(QMetaObject::normalizedSignature(rtype.constData()))
+    , m_mtype(mtype)
 {
 }
 
@@ -612,10 +612,9 @@ void DynamicQMetaObject::parsePythonType(PyTypeObject* type)
 */
 int DynamicQMetaObject::DynamicQMetaObjectPrivate::createMetaData(QMetaObject* metaObj, QLinkedList<QByteArray> &strings)
 {
-    uint n_methods = m_methods.size();
-    uint n_properties = m_properties.size();
-    uint n_info = m_info.size();
-    uint n_signal = 0; // Signal count will be computed later..
+    const int n_methods = m_methods.size();
+    const int n_properties = m_properties.size();
+    const int n_info = m_info.size();
 
     int header[] = {7,                  // revision (Used by moc, qmetaobjectbuilder and qdbus)
                     0,                  // class name index in m_metadata
