@@ -45,7 +45,8 @@ submodules = {
         ["shiboken2", "dev"],
         ["pyside2", "dev"],
         ["pyside2-tools", "dev"],
-        ["pyside2-examples", "master"],
+        ["pyside2-examples", "dev"],
+        ["wiki", "master", ".."],
     ],
 }
 old_submodules = {
@@ -284,7 +285,10 @@ if os.path.isdir(".git") and not OPTION_IGNOREGIT and not OPTION_ONLYPACKAGE:
         module_name = m[0]
         module_version = m[1]
         print("Checking out submodule %s to branch %s" % (module_name, module_version))
-        module_dir = os.path.join(submodules_dir, module_name)
+        module_dir = ''
+        if len(m) > 2:
+            module_dir =  m[2]
+        module_dir = os.path.join(submodules_dir, module_dir, module_name)
         os.chdir(module_dir)
         git_checkout_cmd = ["git", "checkout", module_version]
         if run_process(git_checkout_cmd) != 0:
