@@ -1084,9 +1084,6 @@
       </modify-argument>
     </modify-function>
     <modify-function signature="setMenu(QMenu *)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
     </modify-function>
   </object-type>
   <object-type name="QToolTip"/>
