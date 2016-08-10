@@ -23,6 +23,8 @@
   <load-typesystem name="typesystem_gui.xml" generate="no"/>
   <load-typesystem name="typesystem_widgets.xml" generate="no"/>
   <load-typesystem name="typesystem_network.xml" generate="no"/>
+  <load-typesystem name="typesystem_webchannel.xml" generate="no"/>
+
 
   <object-type name="QWebEngineCertificateError">
     <enum-type name="Error"/>

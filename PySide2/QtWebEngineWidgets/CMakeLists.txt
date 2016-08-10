@@ -19,6 +19,7 @@ make_path(QtWebEngineWidgets_typesystem_path
                             ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
                             ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR}
                             ${QtNetwork_SOURCE_DIR} ${QtNetwork_BINARY_DIR}
+                            ${QtWebChannel_SOURCE_DIR} ${QtWebChannel_BINARY_DIR}
                             ${QtWebEngineWidgets_SOURCE_DIR})
 
 set(QtWebEngineWidgets_include_dirs
@@ -28,6 +29,7 @@ set(QtWebEngineWidgets_include_dirs
                             ${Qt5Gui_INCLUDE_DIRS}
                             ${Qt5Widgets_INCLUDE_DIRS}
                             ${Qt5Network_INCLUDE_DIRS}
+                            ${Qt5WebChannel_INCLUDE_DIRS}
                             ${Qt5WebEngineWidgets_INCLUDE_DIRS}
                             ${SHIBOKEN_INCLUDE_DIR}
                             ${libpyside_SOURCE_DIR}
@@ -37,12 +39,14 @@ set(QtWebEngineWidgets_include_dirs
                             ${QtWidgets_GEN_DIR}
                             ${QtWebEngineWidgets_GEN_DIR}
                             ${QtNetwork_GEN_DIR}
+                            ${QtWebChannel_GEN_DIR}
                             )
 set(QtWebEngineWidgets_libraries      pyside2
                             ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${SHIBOKEN_LIBRARY}
                             ${Qt5WebEngineWidgets_LIBRARIES}
                             ${Qt5Network_LIBRARIES}
+                            ${Qt5WebChannel_LIBRARIES}
                             ${Qt5Widgets_LIBRARIES}
                             ${Qt5Gui_LIBRARIES}
                             ${Qt5Core_LIBRARIES}
