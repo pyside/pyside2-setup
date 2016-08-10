@@ -12,3 +12,4 @@
 distribute-*.egg
 distribute-*.tar.gz
 explore2
+build_history/2*

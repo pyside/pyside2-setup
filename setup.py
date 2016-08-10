@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 """This is a distutils setup-script for the PySide2 project
 
 To build the PySide2, simply execute:
@@ -629,6 +631,18 @@ class pyside_build(_build):
             # Build extensions
             for ext in ['shiboken2', 'pyside2', 'pyside2-tools']:
                 self.build_extension(ext)
+
+            if OPTION_BUILDTESTS:
+                # we record the latest successful build and note the build
+                # directory for supporting the tests.
+                timestamp = time.strftime('%Y-%m-%d_%H%M%S')
+                build_history = os.path.join(script_dir, 'build_history')
+                unique_dir = os.path.join(build_history, timestamp)
+                os.makedirs(unique_dir)
+                fpath = os.path.join(unique_dir, 'build_dir.txt')
+                with open(fpath, 'w') as f:
+                    print(build_dir, file=f)
+                log.info("Created %s" % build_history)
 
         if not OPTION_SKIP_PACKAGING:
             # Build patchelf if needed

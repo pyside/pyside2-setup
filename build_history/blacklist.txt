@@ -1,0 +1,156 @@
+[pysidetest::modelview_test]
+    darwin py3
+[pysidetest::qvariant_test]
+    darwin py3
+[pysidetest::utils_test]
+    win32
+[signals::disconnect_test]
+    linux2
+    darwin py2
+    win32
+[signals::multiple_connections_test]
+    linux2
+    darwin
+    win32
+[signals::ref06_test]
+    linux2
+    darwin
+    win32
+[signals::short_circuit_test]
+    linux2
+    darwin
+    win32
+[signals::signal_signature_test]
+    linux2
+    darwin
+    win32
+[signals::static_metaobject_test]
+    linux2
+    darwin
+    win32
+[QtCore::bug_829]
+    win32
+[QtCore::bug_1063]
+    linux2
+    darwin
+    win32
+[QtCore::deepcopy_test]
+    linux2
+    darwin
+    win32
+[QtCore::qfile_test]
+    win32
+    darwin py3
+[QtCore::qflags_test]
+    win32
+    darwin py3
+[QtCore::qobject_connect_notify_test]
+    linux2
+    darwin
+    win32
+[QtCore::qthread_test]
+    linux2
+[QtCore::qtextstream_test]
+    linux2
+    darwin
+    win32
+[QtCore::repr_test]
+    linux2
+    darwin
+    win32
+[QtGui::qmatrix_test]
+    win32
+[QtWidgets::bug_576]
+    linux2
+    win32
+    darwin py3
+[QtWidgets::bug_722]
+    linux2
+    darwin
+    win32
+[QtWidgets::bug_919]
+    linux2
+[QtWidgets::qstandarditemmodel_test]
+    linux2
+    darwin
+    win32
+[QtWidgets::returnquadruplesofnumbers_test]
+    linux2
+    darwin
+    win32
+[QtTest::touchevent_test]
+    linux2
+    darwin
+    win32
+[QtMultimedia::audio_test]
+    linux2
+    darwin
+    win32
+[QtQml::bug_451]
+    linux2
+    darwin
+    win32
+[QtQml::bug_456]
+    linux2
+    darwin
+    win32
+[QtQml::bug_557]
+    linux2
+    darwin
+    win32
+[QtQml::bug_726]
+    linux2
+    darwin
+    win32
+[QtQml::bug_814]
+    linux2
+    darwin
+    win32
+[QtQml::bug_825]
+    linux2
+    darwin
+    win32
+[QtQml::bug_847]
+    linux2
+    darwin
+    win32
+[QtQml::bug_915]
+    linux2
+    darwin
+    win32
+[QtQml::bug_926]
+    linux2
+    darwin
+    win32
+[QtQml::bug_951]
+    linux2
+    darwin
+    win32
+[QtQml::bug_995]
+    linux2
+    darwin
+    win32
+[QtQml::bug_997]
+    linux2
+    darwin
+    win32
+[QtQml::qqmlnetwork_test]
+    linux2
+    darwin
+    win32
+[QtQml::qquickview_test]
+    linux2
+    darwin
+    win32
+[QtQml::registertype]
+    linux2
+    darwin
+    win32
+[QtScript::qscriptvalue_test]
+    linux2
+    darwin
+    win32
+[QtScriptTools::debugger_test]
+    linux2
+    darwin
+    win32
