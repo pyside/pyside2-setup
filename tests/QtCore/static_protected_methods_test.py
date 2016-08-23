@@ -23,7 +23,7 @@ class QStaticProtectedCall(unittest.TestCase):
     def testPathSeparator(self):
         thread = Test()
         thread.start()
-        thread.wait()
+        self.assertTrue(thread.wait(2000))
         self.assertTrue(thread.time_elapsed <= 1.1) # tolarance of 100ms
 
 if __name__ == '__main__':

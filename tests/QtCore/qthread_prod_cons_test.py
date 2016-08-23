@@ -97,8 +97,8 @@ class ProducerConsumer(unittest.TestCase):
 
         self.app.exec_()
 
-        prod.wait()
-        cons.wait()
+        prod.wait(50)
+        cons.wait(50)
 
         self.assertEqual(prod.production_list, cons.consumption_list)
 
