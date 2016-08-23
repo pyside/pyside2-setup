@@ -1,5 +1,6 @@
 from PySide2.QtWidgets import QWidget
 from PySide2.QtCore import QPoint, QTimer, Qt, QEvent
+from PySide2.QtGui import QTouchDevice
 from PySide2.QtTest import QTest
 
 import unittest
@@ -10,6 +11,9 @@ class MyWidget(QWidget):
     def __init__(self, parent = None):
         QWidget.__init__(self, parent)
         self._sequence = []
+        # Fixme (Qt 5): The device needs to be registered (using
+        # QWindowSystemInterface::registerTouchDevice()) for the test to work
+        self._device = QTouchDevice()
         self.setAttribute(Qt.WA_AcceptTouchEvents)
         QTimer.singleShot(200, self.generateEvent)
 
@@ -18,16 +22,15 @@ class MyWidget(QWidget):
         return QWidget.event(self, e)
 
     def generateEvent(self):
-        o = QTest.touchEvent(self)
+        o = QTest.touchEvent(self, self._device)
         o.press(0, QPoint(10, 10))
         o.commit()
         del o
 
-        QTest.touchEvent(self).press(0, QPoint(10, 10))
-        QTest.touchEvent(self).stationary(0).press(1, QPoint(40, 10))
-        QTest.touchEvent(self).move(0, QPoint(12, 12)).move(1, QPoint(45, 5))
-        QTest.touchEvent(self).release(0, QPoint(12, 12)).release(1, QPoint(45, 5))
-
+        QTest.touchEvent(self, self._device).press(0, QPoint(10, 10))
+        QTest.touchEvent(self, self._device).stationary(0).press(1, QPoint(40, 10))
+        QTest.touchEvent(self, self._device).move(0, QPoint(12, 12)).move(1, QPoint(45, 5))
+        QTest.touchEvent(self, self._device).release(0, QPoint(12, 12)).release(1, QPoint(45, 5))
         QTimer.singleShot(200, self.deleteLater)
 
 
