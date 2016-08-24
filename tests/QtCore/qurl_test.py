@@ -26,7 +26,7 @@ class QUrlBasicConstructor(unittest.TestCase):
         url.setPort(8080)
         self.assertEqual(url.toString(), 'ftp://www.google.com:8080')
 
-        url.setPath('mail/view')
+        url.setPath('/mail/view')
         self.assertEqual(url.toString(),
                         'ftp://www.google.com:8080/mail/view')
 
