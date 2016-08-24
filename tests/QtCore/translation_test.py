@@ -48,7 +48,7 @@ class TranslationTest(UsesQCoreApplication):
 
     def testTranslateWithNoneDisambiguation(self):
         value = 'String here'
-        obj = QCoreApplication.translate('context', value, None, QCoreApplication.UnicodeUTF8)
+        obj = QCoreApplication.translate('context', value, None)
         self.assertTrue(isinstance(obj, py3k.unicode))
         self.assertEqual(obj, value)
 
