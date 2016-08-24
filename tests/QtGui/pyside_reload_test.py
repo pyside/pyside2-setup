@@ -6,7 +6,7 @@ import py3kcompat as py3k
 
 orig_path = os.path.join(os.path.dirname(__file__))
 workdir = os.getcwd()
-src = os.path.join(orig_path, 'test_module_template.py')
+src = os.path.normpath(os.path.join(orig_path, '..', 'QtWidgets', 'test_module_template.py'))
 dst = os.path.join(workdir, 'test_module.py')
 shutil.copyfile(src, dst)
 sys.path.append(workdir)
