@@ -132,7 +132,3 @@ PYSIDE_TEST(test_module_template.py)
 PYSIDE_TEST(virtual_protected_inheritance_test.py)
 PYSIDE_TEST(virtual_pure_override_test.py)
 PYSIDE_TEST(wrong_return_test.py)
-
-if(Q_WS_X11)
-    PYSIDE_TEST(x11_symbols_test.py)
-endif()
