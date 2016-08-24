@@ -5,7 +5,7 @@ import unittest
 import gc
 
 from PySide2.QtCore import QPointF
-from PySide2.QtGui import QPolygonF, QPixmap, QPainterPath
+from PySide2.QtGui import QPolygonF, QPixmap, QPainterPath, QTransform
 from PySide2.QtWidgets import QApplication, QPushButton
 from PySide2.QtWidgets import QGraphicsScene
 from PySide2.QtWidgets import QGraphicsEllipseItem, QGraphicsLineItem
@@ -145,10 +145,10 @@ class ItemRetrieve(UsesQApplication):
 
     def testItemAt(self):
         #QGraphicsScene.itemAt()
-        self.assertEqual(self.scene.itemAt(50, 50), self.topleft)
-        self.assertEqual(self.scene.itemAt(150, 50), self.topright)
-        self.assertEqual(self.scene.itemAt(50, 150), self.bottomleft)
-        self.assertEqual(self.scene.itemAt(150, 150), self.bottomright)
+        self.assertEqual(self.scene.itemAt(50, 50, QTransform()), self.topleft)
+        self.assertEqual(self.scene.itemAt(150, 50, QTransform()), self.topright)
+        self.assertEqual(self.scene.itemAt(50, 150, QTransform()), self.bottomleft)
+        self.assertEqual(self.scene.itemAt(150, 150, QTransform()), self.bottomright)
 
 class TestGraphicsGroup(UsesQApplication):
     def testIt(self):
