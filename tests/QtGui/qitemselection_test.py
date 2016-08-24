@@ -1,7 +1,8 @@
 import unittest
 
 from helper import UsesQApplication
-from PySide2.QtGui import QItemSelection, QStandardItemModel
+from PySide2.QtCore import QItemSelection
+from PySide2.QtGui import QStandardItemModel
 
 class QItemSelectionTest(UsesQApplication):
     def testLen(self):
