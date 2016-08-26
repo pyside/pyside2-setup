@@ -1,11 +1,11 @@
 from helper import adjust_filename
-from PySide2 import QtGui, QtCore
+from PySide2 import QtWidgets, QtCore
 from PySide2.QtUiTools import QUiLoader
 
-class View_1(QtGui.QWidget):
+class View_1(QtWidgets.QWidget):
 
     def __init__(self):
-        QtGui.QWidget.__init__(self)
+        QtWidgets.QWidget.__init__(self)
         loader = QUiLoader()
         widget = loader.load(adjust_filename('bug_552.ui', __file__), self)
         self.children = []
@@ -14,7 +14,7 @@ class View_1(QtGui.QWidget):
         self.t = widget.tabWidget
         self.t.removeTab(0)
 
-app = QtGui.QApplication([])
+app = QtWidgets.QApplication([])
 window = View_1()
 window.show()
 

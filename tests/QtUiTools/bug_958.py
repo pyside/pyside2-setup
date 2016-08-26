@@ -1,9 +1,9 @@
 import unittest
-from PySide2 import QtGui, QtUiTools
+from PySide2 import QtWidgets, QtUiTools
 from helper import adjust_filename
 from helper import TimedQApplication
 
-class Gui_Qt(QtGui.QMainWindow):
+class Gui_Qt(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super(Gui_Qt, self).__init__(parent)
 

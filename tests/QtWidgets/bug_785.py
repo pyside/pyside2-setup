@@ -1,7 +1,8 @@
 import sys
 
 import unittest
-from PySide2.QtGui import QStandardItemModel, QStandardItem, QItemSelection
+from PySide2.QtCore import QItemSelection
+from PySide2.QtGui import QStandardItemModel, QStandardItem
 from PySide2.QtWidgets import QApplication
 class Bug324(unittest.TestCase):
     def testOperators(self):
