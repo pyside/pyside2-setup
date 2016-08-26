@@ -35,7 +35,7 @@ class QThreadSimpleCase(UsesQCoreApplication):
         #Basic QThread test
         obj = Dummy()
         obj.start()
-        obj.wait()
+        self.assert_(obj.wait(100))
 
         self.assert_(obj.called)
 
@@ -44,7 +44,8 @@ class QThreadSimpleCase(UsesQCoreApplication):
         #self.exit_app_cb()
 
     def abort_application(self):
-        self._thread.terminate()
+        if self._thread.isRunning():
+            self._thread.terminate()
         self.app.quit()
 
     def testSignalFinished(self):
