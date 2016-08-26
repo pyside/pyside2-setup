@@ -28,13 +28,13 @@ class TestRepr (unittest.TestCase):
 
         self.assertEqual("<__main__.MyQObject object at ", repr(MyQObject())[:30])
         self.assertEqual("<__main__.MyQWidget object at ", repr(MyQWidget())[:30])
-        self.assertEqual("<__main__.MyQGraphicsObject(this = 0x", repr(MyQGraphicsObject())[:37])
-        self.assertEqual("<__main__.MyQGraphicsItem(this = 0x", repr(MyQGraphicsItem())[:35])
+        self.assertEqual("<__main__.MyQGraphicsObject(0x", repr(MyQGraphicsObject())[:30])
+        self.assertEqual("<__main__.MyQGraphicsItem(0x", repr(MyQGraphicsItem())[:28])
 
-        self.assertEqual("<PySide2.QtCore.QObject object at ", repr(QObject())[:33])
-        self.assertEqual("<PySide2.QtCore.QObject object at ", repr(PySide2.QtCore.QObject())[:33])
-        self.assertEqual("<PySide2.QtGui.QWidget object at ", repr(QWidget())[:32])
-        self.assertEqual("<PySide2.QtGui.QGraphicsWidget(this = 0x", repr(QGraphicsWidget())[:39])
+        self.assertEqual("<PySide2.QtCore.QObject object at ", repr(QObject())[:34])
+        self.assertEqual("<PySide2.QtCore.QObject object at ", repr(PySide2.QtCore.QObject())[:34])
+        self.assertEqual("<PySide2.QtWidgets.QWidget object at ", repr(QWidget())[:37])
+        self.assertEqual("<PySide2.QtWidgets.QGraphicsWidget(0x", repr(QGraphicsWidget())[:37])
 
 if __name__ == "__main__":
     unittest.main()
