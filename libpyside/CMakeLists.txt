@@ -34,12 +34,37 @@ set(libpyside_SRC
     ${DESTROYLISTENER_MOC}
 )
 
+# Add python files to project explorer in Qt Creator, when opening the CMakeLists.txt as a project,
+# so you can look up python files with the Locator.
+macro(add_other_files)
+     foreach(_it ${ARGN})
+         if(NOT IS_DIRECTORY ${_it})
+             get_filename_component(name ${_it} NAME)
+             if(NOT ${_it} MATCHES "^/\\\\..*$;~$")
+                 set_source_files_properties(${_it} PROPERTIES HEADER_FILE_ONLY TRUE)
+             endif()
+         endif()
+     endforeach()
+endmacro()
+
+# Test files.
+file(GLOB_RECURSE pyside_folder_py_files "../*.py")
+
+# Example files.
+file(GLOB_RECURSE example_folder_py_files "../../pyside2-examples/*.py")
+
+# Mostly for setup.py.
+file(GLOB setup_folder_py_files "../../../*.py")
+
+set(other_files ${pyside_folder_py_files} ${example_folder_py_files} ${setup_folder_py_files})
+add_other_files(${other_files})
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${SHIBOKEN_INCLUDE_DIR}
                     ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                     ${QML_INCLUDES}
                     ${Qt5Core_INCLUDE_DIRS})
-add_library(pyside2 SHARED ${libpyside_SRC})
+add_library(pyside2 SHARED ${libpyside_SRC} ${other_files})
 target_link_libraries(pyside2
                       ${SHIBOKEN_PYTHON_LIBRARIES}
                       ${SHIBOKEN_LIBRARY}
