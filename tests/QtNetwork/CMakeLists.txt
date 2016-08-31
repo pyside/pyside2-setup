@@ -1,6 +1,5 @@
 PYSIDE_TEST(bug_446.py)
 PYSIDE_TEST(bug_1084.py)
-PYSIDE_TEST(basic_auth_test.py)
 PYSIDE_TEST(accessManager_test.py)
 # Qt5: QHttp is gone PYSIDE_TEST(http_test.py)
 PYSIDE_TEST(tcpserver_test.py)
