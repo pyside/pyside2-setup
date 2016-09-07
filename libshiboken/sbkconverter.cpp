@@ -26,6 +26,7 @@
 #include "google/dense_hash_map"
 #include "autodecref.h"
 #include "sbkdbg.h"
+#include "helper.h"
 
 static SbkConverter** PrimitiveTypeConverters;
 
@@ -160,6 +161,11 @@ PyObject* pointerToPython(SbkConverter* converter, const void* cppIn)
     assert(converter);
     if (!cppIn)
         Py_RETURN_NONE;
+    if (!converter->pointerToPython) {
+        warning(PyExc_RuntimeWarning, 0, "pointerToPython(): SbkConverter::pointerToPython is null for \"%s\".",
+                converter->pythonType->tp_name);
+        Py_RETURN_NONE;
+    }
     return converter->pointerToPython(cppIn);
 }
 
@@ -177,6 +183,11 @@ PyObject* referenceToPython(SbkConverter* converter, const void* cppIn)
         Py_INCREF(pyOut);
         return pyOut;
     }
+    if (!converter->pointerToPython) {
+        warning(PyExc_RuntimeWarning, 0, "referenceToPython(): SbkConverter::pointerToPython is null for \"%s\".",
+                converter->pythonType->tp_name);
+        Py_RETURN_NONE;
+    }
     return converter->pointerToPython(cppIn);
 }
 
@@ -184,6 +195,11 @@ static inline PyObject* CopyCppToPython(SbkConverter* converter, const void* cpp
 {
     if (!cppIn)
         Py_RETURN_NONE;
+    if (!converter->copyToPython) {
+        warning(PyExc_RuntimeWarning, 0, "CopyCppToPython(): SbkConverter::copyToPython is null for \"%s\".",
+                converter->pythonType->tp_name);
+        Py_RETURN_NONE;
+    }
     return converter->copyToPython(cppIn);
 }
 PyObject* copyToPython(SbkObjectType* type, const void* cppIn)
