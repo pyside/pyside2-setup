@@ -3,14 +3,12 @@ project(QtMultimedia)
 set(QtMultimedia_SRC
 ${QtMultimedia_GEN_DIR}/qaudio_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qabstractvideobuffer_wrapper.cpp
-${QtMultimedia_GEN_DIR}/qaudioenginefactoryinterface_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qvideosurfaceformat_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qabstractvideosurface_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudiodeviceinfo_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qabstractaudiodeviceinfo_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qabstractaudiooutput_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qabstractaudioinput_wrapper.cpp
-${QtMultimedia_GEN_DIR}/qaudioengineplugin_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudioformat_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudioinput_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudiooutput_wrapper.cpp
