@@ -1046,7 +1046,7 @@
         Shiboken::GilState state;
         Shiboken::AutoDecRef arglist(PyTuple_New(3));
         PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[QtMsgType](type));
-        PyTuple_SET_ITEM(arglist, 1, %CONVERTTOPYTHON[QMessageLogContext](ctx));
+        PyTuple_SET_ITEM(arglist, 1, %CONVERTTOPYTHON[QMessageLogContext &amp;](ctx));
         QByteArray array = msg.toLatin1().data();
         char *data = array.data();
         PyTuple_SET_ITEM(arglist, 2, %CONVERTTOPYTHON[char *](data));
