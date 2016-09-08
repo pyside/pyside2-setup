@@ -2669,12 +2669,18 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction* func, in
         pyArgName = QString(PYTHON_SELF_VAR);
         *wrappedClass = func->implementingClass();
     } else if (argIndex == 0) {
-        AbstractMetaType* returnType = getTypeWithoutContainer(func->type());
+        AbstractMetaType *funcType = func->type();
+        AbstractMetaType *returnType = getTypeWithoutContainer(funcType);
         if (returnType) {
             pyArgName = PYTHON_RETURN_VAR;
             *wrappedClass = classes().findClass(returnType->typeEntry()->name());
         } else {
-            ReportHandler::warning("Invalid Argument index on function modification: " + func->name());
+            QString message = QLatin1String("Invalid Argument index (0, return value) on function modification: ")
+                + (funcType ? funcType->name() : QLatin1String("void")) + QLatin1Char(' ');
+            if (const AbstractMetaClass *declaringClass = func->declaringClass())
+                message += declaringClass->name() + QLatin1String("::");
+            message += func->name() + QLatin1String("()");
+            ReportHandler::warning(message);
         }
     } else {
         int realIndex = argIndex - 1 - OverloadData::numberOfRemovedArguments(func, argIndex - 1);
