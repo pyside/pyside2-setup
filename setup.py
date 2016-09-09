@@ -286,7 +286,7 @@ if OPTION_NOEXAMPLES:
 
 
 # Initialize, pull and checkout submodules
-if os.path.isdir(".git") and not OPTION_IGNOREGIT and not OPTION_ONLYPACKAGE and not OPTION_REUSE_BUILD:
+def prepareSubModules():
     print("Initializing submodules for PySide2 version %s" % __version__)
     git_update_cmd = ["git", "submodule", "update", "--init"]
     if run_process(git_update_cmd) != 0:
@@ -309,21 +309,30 @@ if os.path.isdir(".git") and not OPTION_IGNOREGIT and not OPTION_ONLYPACKAGE and
             raise DistutilsSetupError("Failed to initialize the git submodule %s" % module_name)
         os.chdir(script_dir)
 
-# Clean up temp and package folders
-for n in ["pyside_package", "build", "PySide2-%s" % __version__]:
-    d = os.path.join(script_dir, n)
-    if os.path.isdir(d):
-        print("Removing %s" % d)
-        try:
-            rmtree(d)
-        except Exception as e:
-            print('***** problem removing "{}"'.format(d))
-            print('ignored error: {}'.format(e))
+def prepareBuild():
+    if os.path.isdir(".git") and not OPTION_IGNOREGIT and not OPTION_ONLYPACKAGE and not OPTION_REUSE_BUILD:
+        prepareSubModules()
+    # Clean up temp and package folders
+    for n in ["pyside_package", "build", "PySide2-%s" % __version__]:
+        d = os.path.join(script_dir, n)
+        if os.path.isdir(d):
+            print("Removing %s" % d)
+            try:
+                rmtree(d)
+            except Exception as e:
+                print('***** problem removing "{}"'.format(d))
+                print('ignored error: {}'.format(e))
+    # Prepare package folders
+    for pkg in ["pyside_package/PySide2", "pyside_package/pyside2uic"]:
+        pkg_dir = os.path.join(script_dir, pkg)
+        os.makedirs(pkg_dir)
 
-# Prepare package folders
-for pkg in ["pyside_package/PySide2", "pyside_package/pyside2uic"]:
-    pkg_dir = os.path.join(script_dir, pkg)
-    os.makedirs(pkg_dir)
+class pyside_install(_install):
+    def _init(self, *args, **kwargs):
+        _install.__init__(self, *args, **kwargs)
+
+    def run(self):
+        _install.run(self)
 
 class pyside_develop(_develop):
 
@@ -374,6 +383,7 @@ class pyside_build(_build):
         self.build_tests = False
 
     def run(self):
+        prepareBuild()
         platform_arch = platform.architecture()[0]
         log.info("Python architecture is %s" % platform_arch)
 
@@ -1130,6 +1140,7 @@ setup(
         'build_ext': pyside_build_ext,
         'bdist_egg': pyside_bdist_egg,
         'develop': pyside_develop,
+        'install': pyside_install
     },
 
     # Add a bogus extension module (will never be built here since we are
