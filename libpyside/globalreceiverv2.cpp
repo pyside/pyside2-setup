@@ -194,9 +194,18 @@ GlobalReceiverV2::GlobalReceiverV2(PyObject *callback, SharedMap map)
 GlobalReceiverV2::~GlobalReceiverV2()
 {
     m_refs.clear();
-    //Remove itself from map
+    // Remove itself from map.
     m_sharedMap->remove(m_data->hash());
-    delete m_data;
+    // Suppress handling of destroyed() for objects whose last reference is contained inside
+    // the callback object that will now be deleted. The reference could be a default argument,
+    // a callback local variable, etc.
+    // The signal has to be suppressed because it would lead to the following situation:
+    // Callback is deleted, hence the last reference is decremented,
+    // leading to the object being deleted, which emits destroyed(), which would try to invoke
+    // the already deleted callback, and also try to delete the object again.
+    DynamicSlotDataV2 *data = m_data;
+    m_data = Q_NULLPTR;
+    delete data;
 }
 
 int GlobalReceiverV2::addSlot(const char* signature)
@@ -292,6 +301,15 @@ int GlobalReceiverV2::qt_metacall(QMetaObject::Call call, int id, void** args)
 
     QMetaMethod slot = metaObject()->method(id);
     Q_ASSERT(slot.methodType() == QMetaMethod::Slot);
+
+    if (!m_data) {
+        if (id != DESTROY_SLOT_ID) {
+            const QByteArray message = "PySide2 Warning: Skipping callback call "
+                + slot.methodSignature() + " because the callback object is being destructed.";
+            PyErr_WarnEx(PyExc_RuntimeWarning, message.constData(), 0);
+        }
+        return -1;
+    }
 
     if (id == DESTROY_SLOT_ID) {
         if (m_refs.size() == 0)
