@@ -333,6 +333,7 @@ class pyside_install(_install):
 
     def run(self):
         _install.run(self)
+        log.info('*** Install completed')
 
 class pyside_develop(_develop):
 
@@ -612,6 +613,7 @@ class pyside_build(_build):
             _build.run(self)
         else:
             log.info("Skipped preparing and building packages.")
+        log.info('*** Build completed')
 
     def build_patchelf(self):
         if not sys.platform.startswith('linux'):
