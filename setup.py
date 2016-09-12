@@ -190,15 +190,29 @@ if OPTION_QMAKE is None:
     OPTION_QMAKE = find_executable("qmake")
 
 QMAKE_COMMAND = None
-if os.path.exists(OPTION_QMAKE): # Checking whether qmake executable exists
+if OPTION_QMAKE is not None and os.path.exists(OPTION_QMAKE): # Checking whether qmake executable exists
     if os.path.islink(OPTION_QMAKE) and os.path.lexists(OPTION_QMAKE): # Looking whether qmake path is a link and whether the link exists
         if "qtchooser" in os.readlink(OPTION_QMAKE): # Set -qt=X here.
             QMAKE_COMMAND = [OPTION_QMAKE, "-qt=%s" %(OPTION_QT_VERSION)]
 if not QMAKE_COMMAND:
     QMAKE_COMMAND = [OPTION_QMAKE]
 
+if len(QMAKE_COMMAND) == 0 or QMAKE_COMMAND[0] is None:
+    print("qmake could not be found.")
+    sys.exit(1)
+if not os.path.exists(QMAKE_COMMAND[0]):
+    print("'%s' does not exist." % QMAKE_COMMAND[0])
+    sys.exit(1)
+
 if OPTION_CMAKE is None:
     OPTION_CMAKE = find_executable("cmake")
+
+if OPTION_CMAKE is None:
+    print("cmake could not be found.")
+    sys.exit(1)
+if not os.path.exists(OPTION_CMAKE):
+    print("'%s' does not exist." % OPTION_CMAKE)
+    sys.exit(1)
 
 if sys.platform == "win32":
     if OPTION_MAKESPEC is None:
