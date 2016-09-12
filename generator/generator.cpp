@@ -75,7 +75,7 @@ bool Generator::setup(const ApiExtractor& extractor, const QMap< QString, QStrin
     if (entryFound)
         m_d->packageName = entryFound->name();
     else
-        ReportHandler::warning("Couldn't find the package name!!");
+        qCWarning(lcShiboken) << "Couldn't find the package name!!";
 
     collectInstantiatedContainers();
 
@@ -253,7 +253,8 @@ void Generator::generate()
         QString fileName = fileNameForClass(cls);
         if (fileName.isNull())
             continue;
-        ReportHandler::debugSparse(QString("generating: %1").arg(fileName));
+        if (ReportHandler::isDebug(ReportHandler::SparseDebug))
+            qCDebug(lcShiboken) << "generating: " << fileName;
 
         FileOut fileOut(outputDirectory() + '/' + subDirectoryForClass(cls) + '/' + fileName);
         generateClass(fileOut.stream, cls);
@@ -279,9 +280,10 @@ void verifyDirectoryFor(const QFile &file)
 {
     QDir dir = QFileInfo(file).dir();
     if (!dir.exists()) {
-        if (!dir.mkpath(dir.absolutePath()))
-            ReportHandler::warning(QString("unable to create directory '%1'")
-                                   .arg(dir.absolutePath()));
+        if (!dir.mkpath(dir.absolutePath())) {
+            qCWarning(lcShiboken).noquote().nospace()
+                << QStringLiteral("unable to create directory '%1'").arg(dir.absolutePath());
+        }
     }
 }
 

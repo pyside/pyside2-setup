@@ -197,8 +197,10 @@ void AbstractMetaType::decideUsagePattern()
         }
     } else {
         setTypeUsagePattern(AbstractMetaType::NativePointerPattern);
-        ReportHandler::debugFull(QString("native pointer pattern for '%1'")
-                                 .arg(cppSignature()));
+        if (ReportHandler::isDebug(ReportHandler::FullDebug)) {
+            qCDebug(lcShiboken)
+              << QStringLiteral("native pointer pattern for '%1'").arg(cppSignature());
+        }
     }
 }
 
@@ -1406,9 +1408,9 @@ void AbstractMetaClass::setFunctions(const AbstractMetaFunctionList &functions)
                 foreach (AbstractMetaFunction *final_function, finalFunctions) {
                     *final_function += AbstractMetaAttributes::ForceShellImplementation;
 
-                    QString warn = QString("hiding of function '%1' in class '%2'")
-                                   .arg(final_function->name()).arg(name());
-                    ReportHandler::warning(warn);
+                    qCWarning(lcShiboken).noquote().nospace()
+                        << QStringLiteral("hiding of function '%1' in class '%2'")
+                                          .arg(final_function->name(), name());
                 }
             }
 
@@ -2090,7 +2092,8 @@ void AbstractMetaClass::fixFunctions()
         if (superClass) {
             // Super classes can never be final
             if (superClass->isFinalInTargetLang()) {
-                ReportHandler::warning("Final class '" + superClass->name() + "' set to non-final, as it is extended by other classes");
+                qCWarning(lcShiboken).noquote().nospace()
+                    << "Final class '" << superClass->name() << "' set to non-final, as it is extended by other classes";
                 *superClass -= AbstractMetaAttributes::FinalInTargetLang;
             }
             superFuncs = superClass->queryFunctions(AbstractMetaClass::ClassImplements);
@@ -2141,9 +2144,9 @@ void AbstractMetaClass::fixFunctions()
                                     f->setFunctionType(AbstractMetaFunction::EmptyFunction);
                                     f->setVisibility(AbstractMetaAttributes::Protected);
                                     *f += AbstractMetaAttributes::FinalInTargetLang;
-                                    ReportHandler::warning(QString("private virtual function '%1' in '%2'")
-                                                           .arg(f->signature())
-                                                           .arg(f->implementingClass()->name()));
+                                    qCWarning(lcShiboken).noquote().nospace()
+                                        << QStringLiteral("private virtual function '%1' in '%2'")
+                                                          .arg(f->signature(), f->implementingClass()->name());
                                 }
 #endif
                             }
@@ -2152,7 +2155,7 @@ void AbstractMetaClass::fixFunctions()
                         if (f->visibility() != sf->visibility()) {
                             QString warn = QString("visibility of function '%1' modified in class '%2'")
                                            .arg(f->name()).arg(name());
-                            ReportHandler::warning(warn);
+                            qCWarning(lcShiboken).noquote().nospace() << warn;
 #if 0
                             // If new visibility is private, we can't
                             // do anything. If it isn't, then we
@@ -2195,11 +2198,10 @@ void AbstractMetaClass::fixFunctions()
                                 }
 
                                 if (!hasNonFinalModifier && !isBaseImplPrivate) {
-                                    ReportHandler::warning(QString::fromLatin1("Shadowing: %1::%2 and %3::%4")
-                                                           .arg(sf->implementingClass()->name())
-                                                           .arg(sf->signature())
-                                                           .arg(f->implementingClass()->name())
-                                                           .arg(f->signature()));
+                                    qCWarning(lcShiboken).noquote().nospace()
+                                        << QStringLiteral("Shadowing: %1::%2 and %3::%4")
+                                           .arg(sf->implementingClass()->name(), sf->signature(),
+                                                f->implementingClass()->name(), f->signature());
                                 }
                             }
                         }
@@ -2349,8 +2351,9 @@ AbstractMetaEnum *AbstractMetaClassList::findEnum(const EnumTypeEntry *entry) co
 
     AbstractMetaClass *metaClass = findClass(className);
     if (!metaClass) {
-        ReportHandler::warning(QString("AbstractMeta::findEnum(), unknown class '%1' in '%2'")
-                               .arg(className).arg(entry->qualifiedCppName()));
+        qCWarning(lcShiboken).noquote().nospace()
+            << QStringLiteral("AbstractMeta::findEnum(), unknown class '%1' in '%2'")
+                              .arg(className, entry->qualifiedCppName());
         return 0;
     }
 
@@ -2387,7 +2390,8 @@ AbstractMetaEnumValue *AbstractMetaClassList::findEnumValue(const QString &name)
         }
     }
 
-    ReportHandler::warning(QString("no matching enum '%1'").arg(name));
+    qCWarning(lcShiboken).noquote().nospace()
+        << QStringLiteral("no matching enum '%1'").arg(name);
     return 0;
 }
 

@@ -24,14 +24,17 @@
 #ifndef REPORTHANDLER_H
 #define REPORTHANDLER_H
 
-class QString;
+#include <QLoggingCategory>
+#include <QString>
+
+Q_DECLARE_LOGGING_CATEGORY(lcShiboken)
 
 class ReportHandler
 {
 public:
     enum DebugLevel { NoDebug, SparseDebug, MediumDebug, FullDebug };
 
-    static void setContext(const QString &context);
+    static void install();
 
     static DebugLevel debugLevel();
     static void setDebugLevel(DebugLevel level);
@@ -39,8 +42,6 @@ public:
     static int warningCount();
 
     static int suppressedCount();
-
-    static void warning(const QString &str);
 
     template <typename T>
     static void setProgressReference(T collection)
@@ -52,23 +53,14 @@ public:
 
     static void progress(const QString &str, ...);
 
-    static void debugSparse(const QString &str)
-    {
-        debug(SparseDebug, str);
-    }
-    static void debugMedium(const QString &str)
-    {
-        debug(MediumDebug, str);
-    }
-    static void debugFull(const QString &str)
-    {
-        debug(FullDebug, str);
-    }
-    static void debug(DebugLevel level, const QString &str);
+    static bool isDebug(DebugLevel level)
+    { return debugLevel() >= level; }
 
     static bool isSilent();
     static void setSilent(bool silent);
-    static void flush();
+
+private:
+    static void messageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 };
 
 #endif // REPORTHANDLER_H

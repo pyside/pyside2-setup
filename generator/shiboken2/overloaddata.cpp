@@ -395,7 +395,9 @@ void OverloadData::sortNextOverloads()
         for (; it != sortData.map.end(); ++it)
             nodeNames.insert(it.value(), it.key());
         graph.dumpDot(nodeNames, graphName);
-        ReportHandler::warning(QString("Cyclic dependency found on overloaddata for '%1' method! The graph boy saved the graph at %2.").arg(qPrintable(funcName)).arg(qPrintable(graphName)));
+        qCWarning(lcShiboken).noquote().nospace()
+            << QStringLiteral("Cyclic dependency found on overloaddata for '%1' method! The graph boy saved the graph at %2.")
+                              .arg(funcName, graphName);
     }
 
     m_nextOverloadData.clear();

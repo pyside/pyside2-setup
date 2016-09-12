@@ -122,10 +122,12 @@ void Handler::fetchAttributeValues(const QString &name, const QXmlAttributes &at
         QString key = atts.localName(i).toLower();
         QString val = atts.value(i);
 
-        if (!acceptedAttributes->contains(key))
-            ReportHandler::warning(QString("Unknown attribute for '%1': '%2'").arg(name).arg(key));
-         else
+        if (!acceptedAttributes->contains(key)) {
+            qCWarning(lcShiboken).noquote().nospace()
+                << QStringLiteral("Unknown attribute for '%1': '%2'").arg(name, key);
+        } else {
             (*acceptedAttributes)[key] = val;
+        }
 
     }
 }
@@ -401,7 +403,7 @@ bool Handler::convertBoolean(const QString &_value, const QString &attributeName
         QString warn = QString("Boolean value '%1' not supported in attribute '%2'. Use 'yes' or 'no'. Defaulting to '%3'.")
                        .arg(value).arg(attributeName).arg(defaultValue ? "yes" : "no");
 
-        ReportHandler::warning(warn);
+        qCWarning(lcShiboken).noquote().nospace() << warn;
         return defaultValue;
     }
 }
@@ -568,7 +570,10 @@ bool Handler::startElement(const QString &, const QString &n,
             if (m_database->shouldDropTypeEntry(identifier)) {
                 m_currentDroppedEntry = element;
                 m_currentDroppedEntryDepth = 1;
-                ReportHandler::debugSparse(QString("Type system entry '%1' was intentionally dropped from generation.").arg(identifier));
+                if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {
+                      qCDebug(lcShiboken)
+                          << QStringLiteral("Type system entry '%1' was intentionally dropped from generation.").arg(identifier);
+                }
                 return true;
             }
         }
@@ -605,7 +610,8 @@ bool Handler::startElement(const QString &, const QString &n,
             && element->type != StackElement::FunctionTypeEntry) {
             TypeEntry *tmp = m_database->findType(name);
             if (tmp)
-                ReportHandler::warning(QString("Duplicate type entry: '%1'").arg(name));
+                qCWarning(lcShiboken).noquote().nospace()
+                    << QStringLiteral("Duplicate type entry: '%1'").arg(name);
         }
 
         if (element->type == StackElement::EnumTypeEntry) {
@@ -717,9 +723,9 @@ bool Handler::startElement(const QString &, const QString &n,
 
                 QStringList lst = n.split("::");
                 if (QStringList(lst.mid(0, lst.size() - 1)).join("::") != m_currentEnum->targetLangQualifier()) {
-                    ReportHandler::warning(QString("enum %1 and flags %2 differ in qualifiers")
-                                           .arg(m_currentEnum->targetLangQualifier())
-                                           .arg(lst.at(0)));
+                    qCWarning(lcShiboken).noquote().nospace()
+                        << QStringLiteral("enum %1 and flags %2 differ in qualifiers")
+                                          .arg(m_currentEnum->targetLangQualifier(), lst.constFirst());
                 }
 
                 ftype->setFlagsName(lst.last());
@@ -866,7 +872,8 @@ bool Handler::startElement(const QString &, const QString &n,
             m_database->addType(element->entry);
             setTypeRevision(element->entry, attributes["revision"].toInt());
         } else {
-            ReportHandler::warning(QString("Type: %1 was rejected by typesystem").arg(name));
+            qCWarning(lcShiboken).noquote().nospace()
+                << QStringLiteral("Type: %1 was rejected by typesystem").arg(name);
         }
 
     } else if (element->type == StackElement::InjectDocumentation) {
@@ -1190,10 +1197,10 @@ bool Handler::startElement(const QString &, const QString &n,
                         if (conversionSource.open(QIODevice::ReadOnly | QIODevice::Text)) {
                             topElement.entry->setConversionRule(conversionFlag + QString::fromUtf8(conversionSource.readAll()));
                         } else {
-                            ReportHandler::warning("File containing conversion code for "
-                                                   + topElement.entry->name()
-                                                   + " type does not exist or is not readable: "
-                                                   + sourceFile);
+                            qCWarning(lcShiboken).noquote().nospace()
+                                << "File containing conversion code for "
+                                << topElement.entry->name() << " type does not exist or is not readable: "
+                                << sourceFile;
                         }
                     }
                 }
@@ -1280,7 +1287,7 @@ bool Handler::startElement(const QString &, const QString &n,
             if (!m_contextStack.top()->functionMods.last().argument_mods.last().index)
                 m_contextStack.top()->functionMods.last().argument_mods.last().nullPointerDefaultValue = attributes["default-value"];
              else if (!attributes["default-value"].isEmpty())
-                ReportHandler::warning("default values for null pointer guards are only effective for return values");
+                qCWarning(lcShiboken) << "default values for null pointer guards are only effective for return values";
 
         }
         break;
@@ -1322,7 +1329,7 @@ bool Handler::startElement(const QString &, const QString &n,
         break;
         case StackElement::SuppressedWarning:
             if (attributes["text"].isEmpty())
-                ReportHandler::warning("Suppressed warning with no text specified");
+                qCWarning(lcShiboken) << "Suppressed warning with no text specified";
             else
                 m_database->addSuppressedWarning(attributes["text"]);
             break;
@@ -1347,14 +1354,14 @@ bool Handler::startElement(const QString &, const QString &n,
 
             QString meta_name = attributes["meta-name"];
             if (meta_name.isEmpty())
-                ReportHandler::warning("Empty meta name in argument map");
+                qCWarning(lcShiboken) << "Empty meta name in argument map";
 
 
             if (topElement.type == StackElement::InjectCodeInFunction)
                 m_contextStack.top()->functionMods.last().snips.last().argumentMap[pos] = meta_name;
              else {
-                ReportHandler::warning("Argument maps are only useful for injection of code "
-                                       "into functions.");
+                qCWarning(lcShiboken) << "Argument maps are only useful for injection of code "
+                                       "into functions.";
             }
         }
         break;
@@ -1735,8 +1742,10 @@ bool Handler::startElement(const QString &, const QString &n,
                         snip.addCode(content);
                         in_file = true;
                     }
-                } else
-                    ReportHandler::warning("File for inject code not exist: " + file_name);
+                } else {
+                    qCWarning(lcShiboken).noquote().nospace()
+                        << "File for inject code not exist: " << QDir::toNativeSeparators(file_name);
+                }
 
             }
 
@@ -2021,8 +2030,10 @@ QString TemplateInstance::expandCode() const
             res.replace(key, replaceRules[key]);
 
         return "// TEMPLATE - " + m_name + " - START" + res + "// TEMPLATE - " + m_name + " - END";
-    } else
-        ReportHandler::warning("insert-template referring to non-existing template '" + m_name + "'");
+    } else {
+        qCWarning(lcShiboken).noquote().nospace()
+            << "insert-template referring to non-existing template '" << m_name << '\'';
+    }
 
     return QString();
 }

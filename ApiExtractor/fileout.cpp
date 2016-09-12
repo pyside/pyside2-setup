@@ -181,8 +181,9 @@ bool FileOut::done()
     QByteArray original;
     if (info.exists() && (diff || (info.size() == tmp.size()))) {
         if (!fileRead.open(QIODevice::ReadOnly)) {
-            ReportHandler::warning(QString("failed to open file '%1' for reading")
-                                   .arg(fileRead.fileName()));
+            qCWarning(lcShiboken).noquote().nospace()
+                << QStringLiteral("failed to open file '%1' for reading")
+                                  .arg(QDir::toNativeSeparators(fileRead.fileName()));
             return false;
         }
 
@@ -195,15 +196,17 @@ bool FileOut::done()
         if (!FileOut::dummy) {
             QDir dir(info.absolutePath());
             if (!dir.mkpath(dir.absolutePath())) {
-                ReportHandler::warning(QString("unable to create directory '%1'")
-                                       .arg(dir.absolutePath()));
+                qCWarning(lcShiboken).noquote().nospace()
+                    << QStringLiteral("unable to create directory '%1'")
+                                      .arg(QDir::toNativeSeparators(dir.absolutePath()));
                 return false;
             }
 
             QFile fileWrite(name);
             if (!fileWrite.open(QIODevice::WriteOnly)) {
-                ReportHandler::warning(QString("failed to open file '%1' for writing")
-                                       .arg(fileWrite.fileName()));
+                qCWarning(lcShiboken).noquote().nospace()
+                    << QStringLiteral("failed to open file '%1' for writing")
+                                      .arg(QDir::toNativeSeparators(fileWrite.fileName()));
                 return false;
             }
             QTextCodec *codec = QTextCodec::codecForName("UTF-8");

@@ -337,7 +337,8 @@ bool TypeDatabase::parseFile(const QString &filename, bool generate)
 
     QFile file(filepath);
     if (!file.exists()) {
-        ReportHandler::warning("Can't find " + filename+", typesystem paths: "+m_typesystemPaths.join(", "));
+        qCWarning(lcShiboken).noquote().nospace()
+            << "Can't find " << filename << ", typesystem paths: " << m_typesystemPaths.join(", ");
         return false;
     }
 
@@ -346,9 +347,10 @@ bool TypeDatabase::parseFile(const QString &filename, bool generate)
     m_parsedTypesystemFiles[filepath] = ok;
     int newCount = m_entries.size();
 
-    ReportHandler::debugSparse(QString::fromLatin1("Parsed: '%1', %2 new entries")
-    .arg(filename)
-    .arg(newCount - count));
+    if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {
+          qCDebug(lcShiboken)
+              << QStringLiteral("Parsed: '%1', %2 new entries").arg(filename).arg(newCount - count);
+    }
     return ok;
 }
 

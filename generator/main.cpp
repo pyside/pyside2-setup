@@ -291,6 +291,7 @@ int main(int argc, char *argv[])
 {
     // needed by qxmlpatterns
     QCoreApplication app(argc, argv);
+    ReportHandler::install();
 
     // Store command arguments in a map
     QMap<QString, QString> args = getCommandLineArgs();
@@ -347,7 +348,8 @@ int main(int argc, char *argv[])
 
     if (!QDir(outputDirectory).exists()) {
         if (!QDir().mkpath(outputDirectory)) {
-            ReportHandler::warning("Can't create output directory: "+outputDirectory);
+            qCWarning(lcShiboken).noquote().nospace()
+                << "Can't create output directory: " << QDir::toNativeSeparators(outputDirectory);
             return EXIT_FAILURE;
         }
     }
@@ -431,7 +433,7 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
 
     if (!extractor.classCount())
-        ReportHandler::warning("No C++ classes found!");
+        qCWarning(lcShiboken) << "No C++ classes found!";
 
     foreach (Generator* g, generators) {
         g->setOutputDirectory(outputDirectory);
@@ -441,7 +443,6 @@ int main(int argc, char *argv[])
     }
     qDeleteAll(generators);
 
-    ReportHandler::flush();
     std::cout << "Done, " << ReportHandler::warningCount();
     std::cout << " warnings (" << ReportHandler::suppressedCount() << " known issues)";
     std::cout << std::endl;

@@ -44,13 +44,14 @@
 static bool m_silent = false;
 static int m_warningCount = 0;
 static int m_suppressedCount = 0;
-static QString m_context;
 static ReportHandler::DebugLevel m_debugLevel = ReportHandler::NoDebug;
 static QSet<QString> m_reportedWarnings;
 static QString m_progressBuffer;
 static int m_step_size = 0;
 static int m_step = -1;
 static int m_step_warning = 0;
+
+Q_LOGGING_CATEGORY(lcShiboken, "qt.shiboken")
 
 static void printProgress()
 {
@@ -59,16 +60,9 @@ static void printProgress()
     m_progressBuffer.clear();
 }
 
-static void printWarnings()
+void ReportHandler::install()
 {
-    if (m_reportedWarnings.size() > 0) {
-        m_progressBuffer += "\t";
-        foreach(QString msg, m_reportedWarnings)
-            m_progressBuffer += msg + "\n\t";
-        m_progressBuffer += "\n\n";
-        m_reportedWarnings.clear();
-        printProgress();
-    }
+    qInstallMessageHandler(ReportHandler::messageOutput);
 }
 
 ReportHandler::DebugLevel ReportHandler::debugLevel()
@@ -79,11 +73,6 @@ ReportHandler::DebugLevel ReportHandler::debugLevel()
 void ReportHandler::setDebugLevel(ReportHandler::DebugLevel level)
 {
     m_debugLevel = level;
-}
-
-void ReportHandler::setContext(const QString& context)
-{
-    m_context = context;
 }
 
 int ReportHandler::suppressedCount()
@@ -112,21 +101,21 @@ void ReportHandler::setSilent(bool silent)
     m_silent = silent;
 }
 
-void ReportHandler::warning(const QString &text)
+void ReportHandler::messageOutput(QtMsgType type, const QMessageLogContext &context, const QString &text)
 {
-    if (m_silent)
-        return;
-
-// Context is useless!
-//     QString warningText = QString("\r" COLOR_YELLOW "WARNING(%1)" COLOR_END " :: %2").arg(m_context).arg(text);
-    TypeDatabase *db = TypeDatabase::instance();
-    if (db && db->isSuppressedWarning(text)) {
-        ++m_suppressedCount;
-    } else if (!m_reportedWarnings.contains(text)) {
+    if (type == QtWarningMsg) {
+        if (m_silent || m_reportedWarnings.contains(text))
+            return;
+        const TypeDatabase *db = TypeDatabase::instance();
+        if (db && db->isSuppressedWarning(text)) {
+            ++m_suppressedCount;
+            return;
+        }
         ++m_warningCount;
         ++m_step_warning;
-        m_reportedWarnings << text;
+        m_reportedWarnings.insert(text);
     }
+    fprintf(stderr, "%s\n", qPrintable(qFormatLogMessage(type, context, text)));
 }
 
 void ReportHandler::progress(const QString& str, ...)
@@ -151,22 +140,5 @@ void ReportHandler::progress(const QString& str, ...)
         }
         printProgress();
         m_step_warning = 0;
-    }
-}
-
-void ReportHandler::flush()
-{
-    if (!m_silent)
-        printWarnings();
-}
-
-void ReportHandler::debug(DebugLevel level, const QString &text)
-{
-    if (m_debugLevel == NoDebug)
-        return;
-
-    if (level <= m_debugLevel) {
-        std::printf("\r" COLOR_GREEN "DEBUG" COLOR_END " :: %-70s\n", qPrintable(text));
-        printProgress();
     }
 }

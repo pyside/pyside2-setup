@@ -613,12 +613,11 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func,
         } else if (isCString(arg->type())) {
             result += 'z';
         } else {
-            QString report;
-            QTextStream(&report) << "Method: " << func->ownerClass()->qualifiedCppName()
-                                 << "::" << func->signature() << " => Arg:"
-                                 << arg->name() << "index: " << arg->argumentIndex()
-                                 << " - cannot be handled properly. Use an inject-code to fix it!";
-            ReportHandler::warning(report);
+            qCWarning(lcShiboken).noquote().nospace()
+                << "Method: " << func->ownerClass()->qualifiedCppName()
+                << "::" << func->signature() << " => Arg:"
+                << arg->name() << "index: " << arg->argumentIndex()
+                << " - cannot be handled properly. Use an inject-code to fix it!";
             result += '?';
         }
     }
@@ -811,7 +810,7 @@ QString ShibokenGenerator::pythonOperatorFunctionName(QString cppOpFuncName)
 {
     QString value = m_pythonOperators.value(cppOpFuncName);
     if (value.isEmpty()) {
-        ReportHandler::warning("Unknown operator: "+cppOpFuncName);
+        qCWarning(lcShiboken).noquote().nospace() << "Unknown operator:  " << cppOpFuncName;
         value = "UNKNOWN_OPERATOR";
     }
     value.prepend("__").append("__");
@@ -1559,7 +1558,8 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
         } else {
             static QRegExp pyArgsRegexCheck("%PYARG_([2-9]+)");
             if (pyArgsRegexCheck.indexIn(code) != -1) {
-                ReportHandler::warning("Wrong index for %PYARG variable ("+pyArgsRegexCheck.cap(1)+") on "+func->signature());
+                qCWarning(lcShiboken).noquote().nospace()
+                    << "Wrong index for %PYARG variable (" << pyArgsRegexCheck.cap(1) << ") on " << func->signature();
                 return;
             }
             code.replace("%PYARG_1", PYTHON_ARG);
@@ -1582,7 +1582,9 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
     int pos = 0;
     static QRegExp cppArgTypeRegexCheck("%ARG(\\d+)_TYPE");
     while ((pos = cppArgTypeRegexCheck.indexIn(code, pos)) != -1) {
-        ReportHandler::warning("Wrong index for %ARG#_TYPE variable ("+cppArgTypeRegexCheck.cap(1)+") on "+func->signature());
+        qCWarning(lcShiboken).noquote().nospace()
+            << "Wrong index for %ARG#_TYPE variable (" << cppArgTypeRegexCheck.cap(1)
+            << ") on " << func->signature();
         pos += cppArgTypeRegexCheck.matchedLength();
     }
 
@@ -1643,7 +1645,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                 code.replace("%BEGIN_ALLOW_THREADS", BEGIN_ALLOW_THREADS);
                 code.replace("%END_ALLOW_THREADS", END_ALLOW_THREADS);
             } else {
-                ReportHandler::warning("%BEGIN_ALLOW_THREADS and %END_ALLOW_THREADS mismatch");
+                qCWarning(lcShiboken) << "%BEGIN_ALLOW_THREADS and %END_ALLOW_THREADS mismatch";
             }
         }
 

@@ -47,7 +47,6 @@ ApiExtractor::ApiExtractor() : m_builder(0)
     QString envTypesystemPaths = getenv("TYPESYSTEMPATH");
     if (!envTypesystemPaths.isEmpty())
         TypeDatabase::instance()->addTypesystemPath(envTypesystemPaths);
-    ReportHandler::setContext("ApiExtractor");
 }
 
 ApiExtractor::~ApiExtractor()

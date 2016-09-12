@@ -152,7 +152,8 @@ bool CppGenerator::hasBoolCast(const AbstractMetaClass* metaClass) const
 */
 void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaClass)
 {
-    ReportHandler::debugSparse("Generating wrapper implementation for " + metaClass->fullName());
+    if (ReportHandler::isDebug(ReportHandler::SparseDebug))
+        qCDebug(lcShiboken) << "Generating wrapper implementation for " << metaClass->fullName();
 
     // write license comment
     s << licenseComment() << endl;
@@ -542,7 +543,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
                     while ((offset = regex.indexIn(defaultReturnExpr, offset)) != -1) {
                         int argId = regex.cap(1).toInt() - 1;
                         if (argId < 0 || argId > func->arguments().count()) {
-                            ReportHandler::warning("The expression used in return value contains an invalid index.");
+                            qCWarning(lcShiboken) << "The expression used in return value contains an invalid index.";
                             break;
                         }
                         defaultReturnExpr.replace(regex.cap(0), func->arguments()[argId]->name());
@@ -554,16 +555,16 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
             defaultReturnExpr = minimalConstructor(func->type());
         if (defaultReturnExpr.isEmpty()) {
             QString errorMsg = QString(MIN_CTOR_ERROR_MSG).arg(func->type()->cppSignature());
-            ReportHandler::warning(errorMsg);
+            qCWarning(lcShiboken).noquote().nospace() << errorMsg;
             s << endl << INDENT << "#error " << errorMsg << endl;
         }
     }
 
     if (func->isAbstract() && func->isModifiedRemoved()) {
-        ReportHandler::warning(QString("Pure virtual method '%1::%2' must be implement but was "\
-                                       "completely removed on type system.")
-                                  .arg(func->ownerClass()->name())
-                                  .arg(func->minimalSignature()));
+        qCWarning(lcShiboken).noquote().nospace()
+            << QString::fromLatin1("Pure virtual method '%1::%2' must be implement but was "\
+                                   "completely removed on type system.")
+                                   .arg(func->ownerClass()->name(), func->minimalSignature());
         s << INDENT << "return " << defaultReturnExpr << ';' << endl;
         s << '}' << endl << endl;
         return;
@@ -1855,12 +1856,11 @@ static void checkTypeViability(const AbstractMetaFunction* func, const AbstractM
     QString prefix;
     if (func->ownerClass())
         prefix = QString("%1::").arg(func->ownerClass()->qualifiedCppName());
-    ReportHandler::warning(QString("There's no user provided way (conversion rule, argument removal, custom code, etc) "
-                                   "to handle the primitive %1 type '%2' in function '%3%4'.")
-                                    .arg(argIdx == 0 ? "return" : "argument")
-                                    .arg(type->cppSignature())
-                                    .arg(prefix)
-                                    .arg(func->signature()));
+    qCWarning(lcShiboken).noquote().nospace()
+        << QString::fromLatin1("There's no user provided way (conversion rule, argument removal, custom code, etc) "
+                               "to handle the primitive %1 type '%2' in function '%3%4'.")
+                               .arg(argIdx == 0 ? QStringLiteral("return") : QStringLiteral("argument"),
+                               type->cppSignature(), prefix, func->signature());
 }
 
 static void checkTypeViability(const AbstractMetaFunction* func)
@@ -1916,7 +1916,8 @@ void CppGenerator::writeArgumentConversion(QTextStream& s,
 const AbstractMetaType* CppGenerator::getArgumentType(const AbstractMetaFunction* func, int argPos)
 {
     if (argPos < 0 || argPos > func->arguments().size()) {
-        ReportHandler::warning(QString("Argument index for function '%1' out of range.").arg(func->signature()));
+        qCWarning(lcShiboken).noquote().nospace()
+            << QStringLiteral("Argument index for function '%1' out of range.").arg(func->signature());
         return 0;
     }
 
@@ -1927,10 +1928,10 @@ const AbstractMetaType* CppGenerator::getArgumentType(const AbstractMetaFunction
     else
         argType = buildAbstractMetaTypeFromString(typeReplaced);
     if (!argType && !m_knownPythonTypes.contains(typeReplaced)) {
-        ReportHandler::warning(QString("Unknown type '%1' used as argument type replacement "\
-                                       "in function '%2', the generated code may be broken.")
-                                      .arg(typeReplaced)
-                                      .arg(func->signature()));
+        qCWarning(lcShiboken).noquote().nospace()
+            << QString::fromLatin1("Unknown type '%1' used as argument type replacement "\
+                                   "in function '%2', the generated code may be broken.")
+                                   .arg(typeReplaced, func->signature());
     }
     return argType;
 }
@@ -2680,7 +2681,7 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction* func, in
             if (const AbstractMetaClass *declaringClass = func->declaringClass())
                 message += declaringClass->name() + QLatin1String("::");
             message += func->name() + QLatin1String("()");
-            ReportHandler::warning(message);
+            qCWarning(lcShiboken).noquote().nospace() << message;
         }
     } else {
         int realIndex = argIndex - 1 - OverloadData::numberOfRemovedArguments(func, argIndex - 1);
@@ -3040,7 +3041,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             if (refCount.action != ReferenceCount::Set
                 && refCount.action != ReferenceCount::Remove
                 && refCount.action != ReferenceCount::Add) {
-                ReportHandler::warning("\"set\", \"add\" and \"remove\" are the only values supported by Shiboken for action attribute of reference-count tag.");
+                qCWarning(lcShiboken) << "\"set\", \"add\" and \"remove\" are the only values supported by Shiboken for action attribute of reference-count tag.";
                 continue;
             }
             const AbstractMetaClass* wrappedClass = 0;
@@ -4096,8 +4097,11 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
             AbstractMetaType* metaType = arg->type();
             QByteArray origType = SBK_NORMALIZED_TYPE(qPrintable(metaType->originalTypeDescription()));
             QByteArray cppSig = SBK_NORMALIZED_TYPE(qPrintable(metaType->cppSignature()));
-            if ((origType != cppSig) && (!metaType->isFlags()))
-                ReportHandler::warning("Typedef used on signal " + metaClass->qualifiedCppName() + "::" + cppSignal->signature());
+            if ((origType != cppSig) && (!metaType->isFlags())) {
+                qCWarning(lcShiboken).noquote().nospace()
+                    << "Typedef used on signal " << metaClass->qualifiedCppName() << "::"
+                    << cppSignal->signature();
+                }
         }
     }
 
@@ -4452,10 +4456,11 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream& s, const Abstrac
         if (canBeValue) {
             foreach (QString name, nameVariants) {
                 if (name == "iterator") {
-                    ReportHandler::warning(QString("%1:%2 FIXME:\n"
-                        "    The code tried to qRegisterMetaType the unqualified name "
-                        "'iterator'. This is currently fixed by a hack(ct) and needs improvement!")
-                        .arg(__FILE__).arg(__LINE__));
+                    qCWarning(lcShiboken).noquote().nospace()
+                         << QString::fromLatin1("%1:%2 FIXME:\n"
+                                                "    The code tried to qRegisterMetaType the unqualified name "
+                                                "'iterator'. This is currently fixed by a hack(ct) and needs improvement!")
+                                                .arg(__FILE__).arg(__LINE__);
                     continue;
                 }
                 s << INDENT << "qRegisterMetaType< ::" << className << " >(\"" << name << "\");" << endl;
@@ -4501,9 +4506,10 @@ void CppGenerator::writeTypeDiscoveryFunction(QTextStream& s, const AbstractMeta
                 s << INDENT << "return dynamic_cast< ::" << metaClass->qualifiedCppName()
                             << "*>(reinterpret_cast< ::"<< ancestor->qualifiedCppName() << "*>(cptr));" << endl;
             } else {
-                ReportHandler::warning(metaClass->qualifiedCppName() + " inherits from a non polymorphic type ("
-                                       + ancestor->qualifiedCppName() + "), type discovery based on RTTI is "
-                                       "impossible, write a polymorphic-id-expression for this type.");
+                qCWarning(lcShiboken).noquote().nospace()
+                    << metaClass->qualifiedCppName() << " inherits from a non polymorphic type ("
+                    << ancestor->qualifiedCppName() << "), type discovery based on RTTI is "
+                       "impossible, write a polymorphic-id-expression for this type.";
             }
 
         }
@@ -4658,7 +4664,8 @@ void CppGenerator::finishGeneration()
     QFile file(moduleFileName);
     verifyDirectoryFor(file);
     if (!file.open(QFile::WriteOnly)) {
-        ReportHandler::warning("Error writing file: " + moduleFileName);
+        qCWarning(lcShiboken).noquote().nospace()
+            << "Error writing file: " << QDir::toNativeSeparators(moduleFileName);
         return;
     }
 
@@ -5016,7 +5023,8 @@ bool CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
     QString childVariable;
     if (action != ArgumentOwner::Invalid) {
         if (!usePyArgs && argIndex > 1)
-            ReportHandler::warning("Argument index for parent tag out of bounds: "+func->signature());
+            qCWarning(lcShiboken).noquote().nospace()
+                << "Argument index for parent tag out of bounds: " << func->signature();
 
         if (action == ArgumentOwner::Remove) {
             parentVariable = "Py_None";
