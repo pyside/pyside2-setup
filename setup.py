@@ -272,7 +272,7 @@ if OPTION_NOEXAMPLES:
 
 
 # Initialize, pull and checkout submodules
-if os.path.isdir(".git") and not OPTION_IGNOREGIT and not OPTION_ONLYPACKAGE:
+if os.path.isdir(".git") and not OPTION_IGNOREGIT and not OPTION_ONLYPACKAGE and not OPTION_REUSE_BUILD:
     print("Initializing submodules for PySide2 version %s" % __version__)
     git_update_cmd = ["git", "submodule", "update", "--init"]
     if run_process(git_update_cmd) != 0:
