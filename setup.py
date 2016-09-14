@@ -171,7 +171,8 @@ OPTION_MAKESPEC = option_value("make-spec")
 OPTION_IGNOREGIT = has_option("ignore-git")
 OPTION_NOEXAMPLES = has_option("no-examples")     # don't include pyside2-examples
 OPTION_JOBS = option_value('jobs')                # number of parallel build jobs
-OPTION_JOM = has_option('jom')                    # use jom instead of nmake with msvc
+OPTION_JOM = has_option('jom')                    # Legacy, not used any more.
+OPTION_NO_JOM = has_option('no-jom')              # Do not use jom instead of nmake with msvc
 OPTION_BUILDTESTS = has_option("build-tests")
 OPTION_OSXARCH = option_value("osx-arch")
 OPTION_OSX_USE_LIBCPP = has_option("osx-use-libc++")
@@ -227,14 +228,9 @@ else:
         print("Invalid option --make-spec. Available values are %s" % (["make"]))
         sys.exit(1)
 
-if OPTION_JOM:
-    if OPTION_MAKESPEC != "msvc":
-        print("Option --jom can only be used with msvc")
-        sys.exit(1)
-
 if OPTION_JOBS:
-    if sys.platform == 'win32' and not OPTION_JOM:
-        print("Option --jobs can only be used with --jom on Windows.")
+    if sys.platform == 'win32' and OPTION_NO_JOM:
+        print("Option --jobs can only be used with jom on Windows.")
         sys.exit(1)
     else:
         if not OPTION_JOBS.startswith('-j'):
@@ -404,12 +400,15 @@ class pyside_build(_build):
                 if nmake_path is None or not os.path.exists(nmake_path):
                     log.info("nmake not found. Trying to initialize the MSVC env...")
                     init_msvc_env(platform_arch, build_type)
-                else:
-                    log.info("nmake was found in %s" % nmake_path)
-                if OPTION_JOM:
+                    nmake_path = find_executable("nmake")
+                    assert(nmake_path is not None and os.path.exists(nmake_path))
+                jom_path = None if OPTION_NO_JOM else find_executable("jom")
+                if jom_path is not None and os.path.exists(jom_path):
+                    log.info("jom was found in %s" % jom_path)
                     make_name = "jom"
                     make_generator = "NMake Makefiles JOM"
                 else:
+                    log.info("nmake was found in %s" % nmake_path)
                     make_name = "nmake"
                     make_generator = "NMake Makefiles"
             elif OPTION_MAKESPEC == "mingw":
