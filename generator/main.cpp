@@ -22,6 +22,7 @@
  */
 
 #include <QCoreApplication>
+#include <QElapsedTimer>
 #include <QLinkedList>
 #include <QLibrary>
 #include <QtXml/QDomDocument>
@@ -289,9 +290,12 @@ static inline void errorPrint(const QString& s,
 
 int main(int argc, char *argv[])
 {
+    QElapsedTimer timer;
+    timer.start();
     // needed by qxmlpatterns
     QCoreApplication app(argc, argv);
     ReportHandler::install();
+    qCDebug(lcShiboken()).noquote().nospace() << QCoreApplication::arguments().join(QLatin1Char(' '));
 
     // Store command arguments in a map
     QMap<QString, QString> args = getCommandLineArgs();
@@ -444,9 +448,13 @@ int main(int argc, char *argv[])
          }
     }
 
-    std::cout << "Done, " << ReportHandler::warningCount();
-    std::cout << " warnings (" << ReportHandler::suppressedCount() << " known issues)";
-    std::cout << std::endl;
+    QByteArray doneMessage = "Done, " + QByteArray::number(timer.elapsed()) + "ms";
+    if (const int w = ReportHandler::warningCount())
+        doneMessage += ", " + QByteArray::number(w) + " warnings";
+    if (const int sw = ReportHandler::suppressedCount())
+        doneMessage += " (" + QByteArray::number(sw) + " known issues)";
+    qCDebug(lcShiboken()).noquote().nospace() << doneMessage;
+    std::cout << doneMessage.constData() << std::endl;
 
     return EXIT_SUCCESS;
 }
