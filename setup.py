@@ -122,7 +122,7 @@ from utils import rmtree
 from utils import makefile
 from utils import copyfile
 from utils import copydir
-from utils import run_process
+from utils import run_process_output, run_process
 from utils import has_option
 from utils import option_value
 from utils import update_env_path
@@ -284,25 +284,46 @@ if OPTION_NOEXAMPLES:
 # Initialize, pull and checkout submodules
 def prepareSubModules():
     print("Initializing submodules for PySide2 version %s" % __version__)
-    git_update_cmd = ["git", "submodule", "update", "--init"]
-    if run_process(git_update_cmd) != 0:
-        raise DistutilsSetupError("Failed to initialize the git submodules")
-    git_pull_cmd = ["git", "submodule", "foreach", "git", "fetch", "--all"]
-    if run_process(git_pull_cmd) != 0:
-        raise DistutilsSetupError("Failed to initialize the git submodules")
     submodules_dir = os.path.join(script_dir, "sources")
+    # Create list of [name, desired branch, absolute path, desired branch]
+    # and determine whether all submodules are present
+    needInitSubModules = False
+    modulesList = []
     for m in submodules[__version__]:
         module_name = m[0]
         module_version = m[1]
-        print("Checking out submodule %s to branch %s" % (module_name, module_version))
-        module_dir = ''
-        if len(m) > 2:
-            module_dir =  m[2]
+        module_dir = m[2] if len(m) > 2 else ''
         module_dir = os.path.join(submodules_dir, module_dir, module_name)
+        if not os.path.exists(module_dir):
+            needInitSubModules = True
+        modulesList.append([module_name, module_version, module_dir])
+    if needInitSubModules:
+        git_update_cmd = ["git", "submodule", "update", "--init"]
+        if run_process(git_update_cmd) != 0:
+            raise DistutilsSetupError("Failed to initialize the git submodules")
+        git_pull_cmd = ["git", "submodule", "foreach", "git", "fetch", "--all"]
+        if run_process(git_pull_cmd) != 0:
+            raise DistutilsSetupError("Failed to initialize the git submodules")
+    else:
+        print("All submodules present...")
+    # Ensure all submodules have the correct branch checked out
+    for m in modulesList:
+        module_name = m[0]
+        module_version = m[1]
+        module_dir = m[2]
         os.chdir(module_dir)
-        git_checkout_cmd = ["git", "checkout", module_version]
-        if run_process(git_checkout_cmd) != 0:
-            raise DistutilsSetupError("Failed to initialize the git submodule %s" % module_name)
+        currentBranch = ''
+        for line in run_process_output(['git', 'branch']):
+            if line.startswith('* '):
+                currentBranch = line[2:len(line)]
+                break
+        if currentBranch != module_version:
+            print("Checking out submodule %s to branch %s (from %s)" % (module_name, module_version, currentBranch))
+            git_checkout_cmd = ["git", "checkout", module_version]
+            if run_process(git_checkout_cmd) != 0:
+                raise DistutilsSetupError("Failed to initialize the git submodule %s" % module_name)
+        else:
+            print("Submodule %s has branch %s checked out" % (module_name, module_version))
         os.chdir(script_dir)
 
 def prepareBuild():

@@ -325,6 +325,16 @@ def rmtree(dirname):
             raise
     shutil.rmtree(dirname, ignore_errors=False, onerror=handleRemoveReadonly)
 
+def run_process_output(args, initial_env=None):
+    if initial_env is None:
+        initial_env = os.environ
+    stdOut = subprocess.Popen(args, env = initial_env, universal_newlines = 1,
+                              stdout=subprocess.PIPE).stdout
+    result = []
+    for rawLine in stdOut.readlines():
+        line = rawLine.decode('utf-8')
+        result.append(line.rstrip())
+    return result
 
 def run_process(args, initial_env=None):
     def _log(buffer, checkNewLine=False):
