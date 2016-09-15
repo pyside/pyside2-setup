@@ -84,13 +84,15 @@ void LocationManager::extract_line(int offset, int *line, QString *filename) con
 void LocationManager::positionAt(std::size_t offset, int *line, int *column,
                                  QString *filename) const
 {
-    int ppline, ppcolumn;
+    int ppline = 0;
+    int ppcolumn = 0;
     line_table.positionAt(offset, &ppline, &ppcolumn);
 
-    int base_line;
+    int base_line = 0;
     extract_line((int) line_table[ppline-1], &base_line, filename);
 
-    int line2, column2;
+    int line2 = 0;
+    int column2 = 0;
     location_table.positionAt((int) line_table[ppline-1], &line2, &column2);
 
     location_table.positionAt(offset, line, column);
@@ -144,7 +146,8 @@ void Lexer::tokenize(const char *contents, std::size_t size)
 
 void Lexer::reportError(const QString& msg)
 {
-    int line, column;
+    int line = 0;
+    int column = 0;
     QString fileName;
 
     std::size_t tok = token_stream.cursor();
