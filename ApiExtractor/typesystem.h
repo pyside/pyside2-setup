@@ -1181,11 +1181,13 @@ public:
     EnumTypeEntry(const QString &nspace, const QString &enumName, double vr)
             : TypeEntry(nspace.isEmpty() ? enumName : nspace + QLatin1String("::") + enumName,
                         EnumType, vr),
+            m_qualifier(nspace),
+            m_targetLangName(enumName),
             m_flags(0),
-            m_extensible(false)
+            m_extensible(false),
+            m_forceInteger(false),
+            m_anonymous(false)
     {
-        m_qualifier = nspace;
-        m_targetLangName = enumName;
     }
 
     QString targetLangPackage() const
