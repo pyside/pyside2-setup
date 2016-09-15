@@ -26,7 +26,8 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QDir>
-#include <QtCore/QLinkedList>
+#include <QtCore/QSharedPointer>
+#include <QtCore/QVector>
 #include <abstractmetalang.h>
 
 class ApiExtractor;
@@ -305,7 +306,8 @@ private:
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Generator::Options)
-typedef QLinkedList<Generator*> GeneratorList;
+typedef QSharedPointer<Generator> GeneratorPtr;
+typedef QVector<GeneratorPtr> Generators;
 
 /**
 * Utility class to store the identation level, use it in a QTextStream.

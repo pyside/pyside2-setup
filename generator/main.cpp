@@ -240,7 +240,7 @@ static QMap<QString, QString> getCommandLineArgs()
     return args;
 }
 
-void printUsage(const GeneratorList& generators)
+void printUsage(const Generators& generators)
 {
     QTextStream s(stdout);
     s << "Usage:\n  "
@@ -263,7 +263,7 @@ void printUsage(const GeneratorList& generators)
     generalOptions.insert("drop-type-entries=\"<TypeEntry0>[;TypeEntry1;...]\"", "Semicolon separated list of type system entries (classes, namespaces, global functions and enums) to be dropped from generation.");
     printOptions(s, generalOptions);
 
-    foreach (Generator* generator, generators) {
+    foreach (const GeneratorPtr &generator, generators) {
         QMap<QString, QString> options = generator->options();
         if (!options.isEmpty()) {
             s << endl << generator->name() << " options:\n";
@@ -296,7 +296,7 @@ int main(int argc, char *argv[])
     // Store command arguments in a map
     QMap<QString, QString> args = getCommandLineArgs();
     ArgsHandler argsHandler(args);
-    GeneratorList generators;
+    Generators generators;
 
     if (argsHandler.argExistsRemove("version")) {
         printVerAndBanner();
@@ -317,7 +317,7 @@ int main(int argc, char *argv[])
         generators << new QtDocGenerator;
 #endif
     } else if (generatorSet.isEmpty() || generatorSet == "shiboken") {
-        generators << new CppGenerator << new HeaderGenerator;
+        generators << GeneratorPtr(new CppGenerator) << GeneratorPtr(new HeaderGenerator);
     } else {
         errorPrint("shiboken: Unknown generator set, try \"shiboken\" or \"qtdoc\".");
         return EXIT_FAILURE;
@@ -412,7 +412,7 @@ int main(int argc, char *argv[])
         for ( ; it != projectFileArgs.constEnd(); ++it)
             argsHandler.removeArg(it.key());
     }
-    foreach (Generator* generator, generators) {
+    foreach (const GeneratorPtr &generator, generators) {
         QMap<QString, QString> options = generator->options();
         if (!options.isEmpty()) {
             QMap<QString, QString>::const_iterator it = options.constBegin();
@@ -435,13 +435,12 @@ int main(int argc, char *argv[])
     if (!extractor.classCount())
         qCWarning(lcShiboken) << "No C++ classes found!";
 
-    foreach (Generator* g, generators) {
+    foreach (const GeneratorPtr &g, generators) {
         g->setOutputDirectory(outputDirectory);
         g->setLicenseComment(licenseComment);
         if (g->setup(extractor, args))
             g->generate();
     }
-    qDeleteAll(generators);
 
     std::cout << "Done, " << ReportHandler::warningCount();
     std::cout << " warnings (" << ReportHandler::suppressedCount() << " known issues)";
