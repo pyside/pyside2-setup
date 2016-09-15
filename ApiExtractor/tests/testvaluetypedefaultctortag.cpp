@@ -42,12 +42,12 @@ void TestValueTypeDefaultCtorTag::testValueTypeDefaultCtorTagArgument()
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
 
-    AbstractMetaClass* classA = classes.findClass("A");
+    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QVERIFY(classA);
     QVERIFY(classA->typeEntry()->hasDefaultConstructor());
-    QCOMPARE(classA->typeEntry()->defaultConstructor(), QString("A(0, 0)"));
+    QCOMPARE(classA->typeEntry()->defaultConstructor(), QLatin1String("A(0, 0)"));
 
-    AbstractMetaClass* classB = classes.findClass("B");
+    AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
     QVERIFY(classB);
     QVERIFY(!classB->typeEntry()->hasDefaultConstructor());
 }

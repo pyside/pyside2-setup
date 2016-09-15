@@ -36,7 +36,7 @@ void TestFunctionTag::testFunctionTagForSpecificSignature()
     </typesystem>";
     TestUtil t(cppCode, xmlCode, false);
 
-    FunctionTypeEntry* func = (FunctionTypeEntry*) TypeDatabase::instance()->findType("globalFunction");
+    FunctionTypeEntry* func = (FunctionTypeEntry*) TypeDatabase::instance()->findType(QLatin1String("globalFunction"));
     QVERIFY(func);
     QCOMPARE(t.builder()->globalFunctions().size(), 1);
 }
@@ -53,7 +53,7 @@ void TestFunctionTag::testFunctionTagForAllSignatures()
     </typesystem>";
     TestUtil t(cppCode, xmlCode, false);
 
-    FunctionTypeEntry* func = (FunctionTypeEntry*) TypeDatabase::instance()->findType("globalFunction");
+    FunctionTypeEntry* func = (FunctionTypeEntry*) TypeDatabase::instance()->findType(QLatin1String("globalFunction"));
     QVERIFY(func);
     QCOMPARE(t.builder()->globalFunctions().size(), 2);
 }
@@ -67,7 +67,7 @@ void TestFunctionTag::testRenameGlobalFunction()
     </typesystem>";
     TestUtil t(cppCode, xmlCode, false);
 
-    FunctionTypeEntry* func = (FunctionTypeEntry*) TypeDatabase::instance()->findType("global_function_with_ugly_name");
+    FunctionTypeEntry* func = (FunctionTypeEntry*) TypeDatabase::instance()->findType(QLatin1String("global_function_with_ugly_name"));
     QVERIFY(func);
 
     QCOMPARE(t.builder()->globalFunctions().size(), 1);
@@ -76,11 +76,11 @@ void TestFunctionTag::testRenameGlobalFunction()
     QVERIFY(metaFunc);
     QCOMPARE(metaFunc->modifications().size(), 1);
     QVERIFY(metaFunc->modifications().first().isRenameModifier());
-    QCOMPARE(metaFunc->modifications().first().renamedTo(), QString("smooth"));
+    QCOMPARE(metaFunc->modifications().first().renamedTo(), QLatin1String("smooth"));
 
-    QCOMPARE(metaFunc->name(), QString("smooth"));
-    QCOMPARE(metaFunc->originalName(), QString("global_function_with_ugly_name"));
-    QCOMPARE(metaFunc->minimalSignature(), QString("global_function_with_ugly_name()"));
+    QCOMPARE(metaFunc->name(), QLatin1String("smooth"));
+    QCOMPARE(metaFunc->originalName(), QLatin1String("global_function_with_ugly_name"));
+    QCOMPARE(metaFunc->minimalSignature(), QLatin1String("global_function_with_ugly_name()"));
 }
 
 QTEST_APPLESS_MAIN(TestFunctionTag)

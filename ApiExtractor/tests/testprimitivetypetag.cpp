@@ -40,13 +40,13 @@ void TestPrimitiveTypeTag::testPrimitiveTypeDefaultConstructor()
 
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 1);
-    AbstractMetaClass* classB = classes.findClass("B");
+    AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
     QVERIFY(classB);
 
-    PrimitiveTypeEntry* typeEntry = TypeDatabase::instance()->findPrimitiveType("A");
+    PrimitiveTypeEntry* typeEntry = TypeDatabase::instance()->findPrimitiveType(QLatin1String("A"));
     QVERIFY(typeEntry);
     QVERIFY(typeEntry->hasDefaultConstructor());
-    QCOMPARE(typeEntry->defaultConstructor(), QString("A()"));
+    QCOMPARE(typeEntry->defaultConstructor(), QLatin1String("A()"));
 }
 
 QTEST_APPLESS_MAIN(TestPrimitiveTypeTag)

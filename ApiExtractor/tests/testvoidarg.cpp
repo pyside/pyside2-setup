@@ -35,9 +35,9 @@ void TestVoidArg::testVoidParsedFunction()
     </typesystem>";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
-    AbstractMetaClass* classA = classes.findClass("A");
+    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QVERIFY(classA);
-    const AbstractMetaFunction* addedFunc = classA->findFunction("a");
+    const AbstractMetaFunction* addedFunc = classA->findFunction(QLatin1String("a"));
     QCOMPARE(addedFunc->arguments().count(), 0);
 }
 
@@ -52,9 +52,9 @@ void TestVoidArg::testVoidAddedFunction()
     </typesystem>";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
-    AbstractMetaClass* classA = classes.findClass("A");
+    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QVERIFY(classA);
-    const AbstractMetaFunction* addedFunc = classA->findFunction("a");
+    const AbstractMetaFunction* addedFunc = classA->findFunction(QLatin1String("a"));
     QCOMPARE(addedFunc->arguments().count(), 0);
 
 }
@@ -68,9 +68,9 @@ void TestVoidArg::testVoidPointerParsedFunction()
     </typesystem>";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
-    AbstractMetaClass* classA = classes.findClass("A");
+    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QVERIFY(classA);
-    const AbstractMetaFunction* addedFunc = classA->findFunction("a");
+    const AbstractMetaFunction* addedFunc = classA->findFunction(QLatin1String("a"));
     QCOMPARE(addedFunc->arguments().count(), 1);
 
 }

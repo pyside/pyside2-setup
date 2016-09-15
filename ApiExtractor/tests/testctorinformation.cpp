@@ -39,9 +39,9 @@ void TestCtorInformation::testCtorIsPrivate()
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 3);
-    QCOMPARE(classes.findClass("Control")->hasNonPrivateConstructor(), true);
-    QCOMPARE(classes.findClass("Subject")->hasNonPrivateConstructor(), false);
-    QCOMPARE(classes.findClass("CtorLess")->hasNonPrivateConstructor(), true);
+    QCOMPARE(classes.findClass(QLatin1String("Control"))->hasNonPrivateConstructor(), true);
+    QCOMPARE(classes.findClass(QLatin1String("Subject"))->hasNonPrivateConstructor(), false);
+    QCOMPARE(classes.findClass(QLatin1String("CtorLess"))->hasNonPrivateConstructor(), true);
 }
 
 void TestCtorInformation::testHasNonPrivateCtor()
@@ -59,9 +59,9 @@ void TestCtorInformation::testHasNonPrivateCtor()
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 2);
-    AbstractMetaClass* base = classes.findClass("Base");
+    AbstractMetaClass* base = classes.findClass(QLatin1String("Base"));
     QCOMPARE(base->hasNonPrivateConstructor(), true);
-    AbstractMetaClass* derived = classes.findClass("Derived");
+    AbstractMetaClass* derived = classes.findClass(QLatin1String("Derived"));
     QCOMPARE(derived->hasNonPrivateConstructor(), true);
 }
 

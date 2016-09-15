@@ -44,11 +44,11 @@ void TestNamespace::testNamespaceMembers()
     </typesystem>";
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
-    AbstractMetaClass* ns = classes.findClass("Namespace");
+    AbstractMetaClass* ns = classes.findClass(QLatin1String("Namespace"));
     QVERIFY(ns);
-    const AbstractMetaEnum* metaEnum = ns->findEnum("Option");
+    const AbstractMetaEnum* metaEnum = ns->findEnum(QLatin1String("Option"));
     QVERIFY(metaEnum);
-    const AbstractMetaFunction* func = ns->findFunction("foo");
+    const AbstractMetaFunction* func = ns->findFunction(QLatin1String("foo"));
     QVERIFY(func);
 }
 
@@ -73,13 +73,13 @@ void TestNamespace::testNamespaceInnerClassMembers()
     </typesystem>";
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
-    AbstractMetaClass* ons = classes.findClass("OuterNamespace");
+    AbstractMetaClass* ons = classes.findClass(QLatin1String("OuterNamespace"));
     QVERIFY(ons);
-    AbstractMetaClass* ins = classes.findClass("OuterNamespace::InnerNamespace");
+    AbstractMetaClass* ins = classes.findClass(QLatin1String("OuterNamespace::InnerNamespace"));
     QVERIFY(ins);
-    AbstractMetaClass* sc = classes.findClass("OuterNamespace::InnerNamespace::SomeClass");
+    AbstractMetaClass* sc = classes.findClass(QLatin1String("OuterNamespace::InnerNamespace::SomeClass"));
     QVERIFY(sc);
-    const AbstractMetaFunction* meth = sc->findFunction("method");
+    const AbstractMetaFunction* meth = sc->findFunction(QLatin1String("method"));
     QVERIFY(meth);
 }
 

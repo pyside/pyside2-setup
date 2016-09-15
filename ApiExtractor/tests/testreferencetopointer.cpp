@@ -40,11 +40,11 @@ void TestReferenceToPointer::testReferenceToPointerArgument()
     </typesystem>";
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
-    AbstractMetaClass* classB = classes.findClass("B");
+    AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
     QVERIFY(classB);
-    const AbstractMetaFunction* func = classB->findFunction("dummy");
+    const AbstractMetaFunction* func = classB->findFunction(QLatin1String("dummy"));
     QVERIFY(func);
-    QCOMPARE(func->arguments().first()->type()->minimalSignature(), QString("A*&"));
+    QCOMPARE(func->arguments().first()->type()->minimalSignature(), QLatin1String("A*&"));
 }
 
 QTEST_APPLESS_MAIN(TestReferenceToPointer)

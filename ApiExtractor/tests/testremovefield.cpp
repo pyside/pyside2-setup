@@ -42,12 +42,12 @@ void TestRemoveField::testRemoveField()
     </typesystem>";
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
-    AbstractMetaClass* classA = classes.findClass("A");
+    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QVERIFY(classA);
     QCOMPARE(classA->fields().size(), 1);
     const AbstractMetaField* fieldA = classA->fields().first();
     QVERIFY(fieldA);
-    QCOMPARE(fieldA->name(), QString("fieldA"));
+    QCOMPARE(fieldA->name(), QLatin1String("fieldA"));
 }
 
 QTEST_APPLESS_MAIN(TestRemoveField)

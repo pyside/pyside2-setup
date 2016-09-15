@@ -40,20 +40,20 @@ void TestTypeRevision::testRevisionAttr()
                         "</typesystem>";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
-    AbstractMetaClass* rev0 = classes.findClass("Rev_0");
+    AbstractMetaClass* rev0 = classes.findClass(QLatin1String("Rev_0"));
     QCOMPARE(getTypeRevision(rev0->typeEntry()), 0);
 
-    AbstractMetaClass* rev1 = classes.findClass("Rev_1");
+    AbstractMetaClass* rev1 = classes.findClass(QLatin1String("Rev_1"));
     QCOMPARE(getTypeRevision(rev1->typeEntry()), 1);
 
-    AbstractMetaClass* rev2 = classes.findClass("Rev_2");
+    AbstractMetaClass* rev2 = classes.findClass(QLatin1String("Rev_2"));
     QCOMPARE(getTypeRevision(rev2->typeEntry()), 2);
 
-    AbstractMetaEnum* rev3 = rev2->findEnum("Rev_3");
+    AbstractMetaEnum* rev3 = rev2->findEnum(QLatin1String("Rev_3"));
     QCOMPARE(getTypeRevision(rev3->typeEntry()), 3);
     FlagsTypeEntry* rev4 = rev3->typeEntry()->flags();
     QCOMPARE(getTypeRevision(rev4), 4);
-    AbstractMetaEnum* rev5 = rev2->findEnum("Rev_5");
+    AbstractMetaEnum* rev5 = rev2->findEnum(QLatin1String("Rev_5"));
     QCOMPARE(getTypeRevision(rev5->typeEntry()), 5);
     QCOMPARE(getTypeRevision(rev5->typeEntry()->flags()), 5);
 }

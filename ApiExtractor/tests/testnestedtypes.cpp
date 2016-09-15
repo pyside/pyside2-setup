@@ -54,28 +54,28 @@ void TestNestedTypes::testNestedTypesModifications()
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
 
-    AbstractMetaClass* ons = classes.findClass("OuterNamespace");
+    AbstractMetaClass* ons = classes.findClass(QLatin1String("OuterNamespace"));
     QVERIFY(ons);
 
-    AbstractMetaClass* ins = classes.findClass("OuterNamespace::InnerNamespace");
+    AbstractMetaClass* ins = classes.findClass(QLatin1String("OuterNamespace::InnerNamespace"));
     QVERIFY(ins);
     QCOMPARE(ins->functions().count(), 1);
     QCOMPARE(ins->typeEntry()->codeSnips().count(), 1);
     CodeSnip snip = ins->typeEntry()->codeSnips().first();
-    QCOMPARE(snip.code(), QString("custom_code1();"));
+    QCOMPARE(snip.code(), QLatin1String("custom_code1();"));
 
     AbstractMetaFunction* addedFunc = ins->functions().first();
     QVERIFY(addedFunc->isUserAdded());
     QCOMPARE(addedFunc->visibility(), uint(AbstractMetaFunction::Public));
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::NormalFunction);
-    QCOMPARE(addedFunc->type()->minimalSignature(), QString("OuterNamespace::InnerNamespace::SomeClass"));
+    QCOMPARE(addedFunc->type()->minimalSignature(), QLatin1String("OuterNamespace::InnerNamespace::SomeClass"));
 
     QCOMPARE(addedFunc->modifications().size(), 1);
     QVERIFY(addedFunc->modifications().first().isCodeInjection());
     snip = addedFunc->modifications().first().snips.first();
-    QCOMPARE(snip.code(), QString("custom_code2();"));
+    QCOMPARE(snip.code(), QLatin1String("custom_code2();"));
 
-    AbstractMetaClass* sc = classes.findClass("OuterNamespace::InnerNamespace::SomeClass");
+    AbstractMetaClass* sc = classes.findClass(QLatin1String("OuterNamespace::InnerNamespace::SomeClass"));
     QVERIFY(ins);
     QCOMPARE(sc->functions().count(), 2); // default constructor and removed method
     AbstractMetaFunction* removedFunc = sc->functions().last();
@@ -101,19 +101,19 @@ void TestNestedTypes::testDuplicationOfNestedTypes()
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 2);
-    AbstractMetaClass* nspace = classes.findClass("Namespace");
+    AbstractMetaClass* nspace = classes.findClass(QLatin1String("Namespace"));
     QVERIFY(nspace);
-    AbstractMetaClass* cls1 = classes.findClass("SomeClass");
+    AbstractMetaClass* cls1 = classes.findClass(QLatin1String("SomeClass"));
     QVERIFY(cls1);
-    AbstractMetaClass* cls2 = classes.findClass("Namespace::SomeClass");
+    AbstractMetaClass* cls2 = classes.findClass(QLatin1String("Namespace::SomeClass"));
     QVERIFY(cls2);
     QCOMPARE(cls1, cls2);
-    QCOMPARE(cls1->name(), QString("SomeClass"));
-    QCOMPARE(cls1->qualifiedCppName(), QString("Namespace::SomeClass"));
+    QCOMPARE(cls1->name(), QLatin1String("SomeClass"));
+    QCOMPARE(cls1->qualifiedCppName(), QLatin1String("Namespace::SomeClass"));
 
-    TypeEntry* t1 = TypeDatabase::instance()->findType("Namespace::SomeClass");
+    TypeEntry* t1 = TypeDatabase::instance()->findType(QLatin1String("Namespace::SomeClass"));
     QVERIFY(t1);
-    TypeEntry* t2 = TypeDatabase::instance()->findType("SomeClass");
+    TypeEntry* t2 = TypeDatabase::instance()->findType(QLatin1String("SomeClass"));
     QVERIFY(!t2);
 }
 

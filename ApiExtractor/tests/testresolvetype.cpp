@@ -46,9 +46,9 @@ void TestResolveType::testResolveReturnTypeFromParentScope()
     </typesystem>";
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
-    AbstractMetaClass* classD = classes.findClass("A::D");
+    AbstractMetaClass* classD = classes.findClass(QLatin1String("A::D"));
     QVERIFY(classD);
-    const AbstractMetaFunction* meth = classD->findFunction("method");
+    const AbstractMetaFunction* meth = classD->findFunction(QLatin1String("method"));
     QVERIFY(meth);
 }
 

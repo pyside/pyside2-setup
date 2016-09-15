@@ -39,12 +39,12 @@ void TestExtraInclude::testClassExtraInclude()
 
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
-    const AbstractMetaClass* classA = classes.findClass("A");
+    const AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QVERIFY(classA);
 
     QList<Include> includes = classA->typeEntry()->extraIncludes();
     QCOMPARE(includes.count(), 1);
-    QCOMPARE(includes.first().name(), QString("header.h"));
+    QCOMPARE(includes.first().name(), QLatin1String("header.h"));
 }
 
 void TestExtraInclude::testGlobalExtraIncludes()
@@ -61,16 +61,16 @@ void TestExtraInclude::testGlobalExtraIncludes()
 
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
-    QVERIFY(classes.findClass("A"));
+    QVERIFY(classes.findClass(QLatin1String("A")));
 
     TypeDatabase* td = TypeDatabase::instance();
-    TypeEntry* module = td->findType("Foo");
+    TypeEntry* module = td->findType(QLatin1String("Foo"));
     QVERIFY(module);
 
     QList<Include> includes = module->extraIncludes();
     QCOMPARE(includes.count(), 2);
-    QCOMPARE(includes.first().name(), QString("header1.h"));
-    QCOMPARE(includes.last().name(), QString("header2.h"));
+    QCOMPARE(includes.first().name(), QLatin1String("header1.h"));
+    QCOMPARE(includes.last().name(), QLatin1String("header2.h"));
 }
 
 QTEST_APPLESS_MAIN(TestExtraInclude)

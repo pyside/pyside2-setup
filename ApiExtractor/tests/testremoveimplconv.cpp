@@ -48,11 +48,11 @@ void TestRemoveImplConv::testRemoveImplConv()
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 3);
-    AbstractMetaClass* classA = classes.findClass("A");
+    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QVERIFY(classA);
-    AbstractMetaClass* classB = classes.findClass("B");
+    AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
     QVERIFY(classB);
-    AbstractMetaClass* classC = classes.findClass("C");
+    AbstractMetaClass* classC = classes.findClass(QLatin1String("C"));
     QVERIFY(classC);
     AbstractMetaFunctionList implConv = classC->implicitConversions();
     QCOMPARE(implConv.count(), 1);

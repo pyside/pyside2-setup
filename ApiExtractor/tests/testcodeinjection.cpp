@@ -34,17 +34,17 @@ void TestCodeInjections::testReadFileUtf8()
     char *argv[] = {NULL};
     QCoreApplication app(argc, argv);
     QString filePath = QDir::currentPath();
-    QString xmlCode = "\
+    QString xmlCode = QLatin1String("\
     <typesystem package=\"Foo\"> \
         <value-type name='A'> \
-            <conversion-rule file='"+filePath+"/utf8code.txt'/>\
-            <inject-code class='target' file='"+filePath+"/utf8code.txt' />\
+            <conversion-rule file='") +filePath+ QLatin1String("/utf8code.txt'/>\
+            <inject-code class='target' file='") + filePath + QLatin1String("/utf8code.txt' />\
         </value-type>\
         <value-type name='A::B'/> \
-    </typesystem>";
+    </typesystem>");
     TestUtil t(cppCode, xmlCode.toLocal8Bit().constData());
     AbstractMetaClassList classes = t.builder()->classes();
-    AbstractMetaClass* classA = classes.findClass("A");
+    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QCOMPARE(classA->typeEntry()->codeSnips().count(), 1);
     QString code = classA->typeEntry()->codeSnips().first().code();
     QString utf8Data = QString::fromUtf8("\xC3\xA1\xC3\xA9\xC3\xAD\xC3\xB3\xC3\xBA");
@@ -68,7 +68,7 @@ void TestCodeInjections::testInjectWithValidApiVersion()
     TestUtil t(cppCode, xmlCode, true, "1.0");
 
     AbstractMetaClassList classes = t.builder()->classes();
-    AbstractMetaClass* classA = classes.findClass("A");
+    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QCOMPARE(classA->typeEntry()->codeSnips().count(), 1);
 }
 
@@ -87,7 +87,7 @@ void TestCodeInjections::testInjectWithInvalidApiVersion()
     TestUtil t(cppCode, xmlCode, true, "0.1");
 
     AbstractMetaClassList classes = t.builder()->classes();
-    AbstractMetaClass* classA = classes.findClass("A");
+    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QCOMPARE(classA->typeEntry()->codeSnips().count(), 0);
 }
 

@@ -37,19 +37,19 @@ void TestConversionRuleTag::testConversionRuleTagWithFile()
     file.close();
 
     const char cppCode[] = "struct A {};";
-    QString xmlCode = "\
+    QString xmlCode = QLatin1String("\
     <typesystem package='Foo'>\
         <value-type name='A'>\
-            <conversion-rule file='"+ file.fileName() +"' />\
+            <conversion-rule file='") + file.fileName() + QLatin1String("' />\
         </value-type>\
-    </typesystem>";
+    </typesystem>");
     TestUtil t(cppCode, xmlCode.toLocal8Bit().data());
     AbstractMetaClassList classes = t.builder()->classes();
-    AbstractMetaClass* classA = classes.findClass("A");
+    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QVERIFY(classA);
     const ComplexTypeEntry* typeEntry = classA->typeEntry();
     QVERIFY(typeEntry->hasConversionRule());
-    QCOMPARE(typeEntry->conversionRule(), QString(conversionData));
+    QCOMPARE(typeEntry->conversionRule(), QLatin1String(conversionData));
 }
 
 void TestConversionRuleTag::testConversionRuleTagReplace()
@@ -93,14 +93,14 @@ void TestConversionRuleTag::testConversionRuleTagReplace()
 
     TestUtil t(cppCode, xmlCode);
     TypeDatabase* typeDb = TypeDatabase::instance();
-    PrimitiveTypeEntry* typeA = typeDb->findPrimitiveType("A");
+    PrimitiveTypeEntry* typeA = typeDb->findPrimitiveType(QLatin1String("A"));
     QVERIFY(typeA);
 
     CustomConversion* conversion = typeA->customConversion();
     QVERIFY(conversion);
 
     QCOMPARE(typeA, conversion->ownerType());
-    QCOMPARE(conversion->nativeToTargetConversion().trimmed(), QString("DoThis();                return ConvertFromCppToPython(%IN);"));
+    QCOMPARE(conversion->nativeToTargetConversion().trimmed(), QLatin1String("DoThis();                return ConvertFromCppToPython(%IN);"));
 
     QVERIFY(conversion->replaceOriginalTargetToNativeConversions());
     QVERIFY(conversion->hasTargetToNativeConversions());
@@ -108,29 +108,29 @@ void TestConversionRuleTag::testConversionRuleTagReplace()
 
     CustomConversion::TargetToNativeConversion* toNative = conversion->targetToNativeConversions().at(0);
     QVERIFY(toNative);
-    QCOMPARE(toNative->sourceTypeName(), QString("TargetNone"));
+    QCOMPARE(toNative->sourceTypeName(), QLatin1String("TargetNone"));
     QVERIFY(toNative->isCustomType());
     QCOMPARE(toNative->sourceType(), (const TypeEntry*)0);
-    QCOMPARE(toNative->sourceTypeCheck(), QString("%IN == Target_None"));
-    QCOMPARE(toNative->conversion().trimmed(), QString("DoThat();                    DoSomething();                    %OUT = A();"));
+    QCOMPARE(toNative->sourceTypeCheck(), QLatin1String("%IN == Target_None"));
+    QCOMPARE(toNative->conversion().trimmed(), QLatin1String("DoThat();                    DoSomething();                    %OUT = A();"));
 
     toNative = conversion->targetToNativeConversions().at(1);
     QVERIFY(toNative);
-    QCOMPARE(toNative->sourceTypeName(), QString("B"));
+    QCOMPARE(toNative->sourceTypeName(), QLatin1String("B"));
     QVERIFY(!toNative->isCustomType());
-    TypeEntry* typeB = typeDb->findType("B");
+    TypeEntry* typeB = typeDb->findType(QLatin1String("B"));
     QVERIFY(typeB);
     QCOMPARE(toNative->sourceType(), typeB);
-    QCOMPARE(toNative->sourceTypeCheck(), QString("CheckIfInputObjectIsB(%IN)"));
-    QCOMPARE(toNative->conversion().trimmed(), QString("%OUT = %IN.createA();"));
+    QCOMPARE(toNative->sourceTypeCheck(), QLatin1String("CheckIfInputObjectIsB(%IN)"));
+    QCOMPARE(toNative->conversion().trimmed(), QLatin1String("%OUT = %IN.createA();"));
 
     toNative = conversion->targetToNativeConversions().at(2);
     QVERIFY(toNative);
-    QCOMPARE(toNative->sourceTypeName(), QString("String"));
+    QCOMPARE(toNative->sourceTypeName(), QLatin1String("String"));
     QVERIFY(toNative->isCustomType());
     QCOMPARE(toNative->sourceType(), (const TypeEntry*)0);
-    QCOMPARE(toNative->sourceTypeCheck(), QString("String_Check(%IN)"));
-    QCOMPARE(toNative->conversion().trimmed(), QString("%OUT = new A(String_AsString(%IN), String_GetSize(%IN));"));
+    QCOMPARE(toNative->sourceTypeCheck(), QLatin1String("String_Check(%IN)"));
+    QCOMPARE(toNative->conversion().trimmed(), QLatin1String("%OUT = new A(String_AsString(%IN), String_GetSize(%IN));"));
 }
 
 void TestConversionRuleTag::testConversionRuleTagAdd()
@@ -157,7 +157,7 @@ void TestConversionRuleTag::testConversionRuleTagAdd()
     </typesystem>";
 
     TestUtil t(cppCode, xmlCode);
-    AbstractMetaClass* classA = t.builder()->classes().findClass("Date");
+    AbstractMetaClass* classA = t.builder()->classes().findClass(QLatin1String("Date"));
     QVERIFY(classA);
 
     CustomConversion* conversion = classA->typeEntry()->customConversion();
@@ -171,11 +171,11 @@ void TestConversionRuleTag::testConversionRuleTagAdd()
 
     CustomConversion::TargetToNativeConversion* toNative = conversion->targetToNativeConversions().first();
     QVERIFY(toNative);
-    QCOMPARE(toNative->sourceTypeName(), QString("TargetDate"));
+    QCOMPARE(toNative->sourceTypeName(), QLatin1String("TargetDate"));
     QVERIFY(toNative->isCustomType());
     QCOMPARE(toNative->sourceType(), (const TypeEntry*)0);
-    QCOMPARE(toNative->sourceTypeCheck(), QString("TargetDate_Check(%IN)"));
-    QCOMPARE(toNative->conversion().trimmed(), QString("if (!TargetDateTimeAPI) TargetDateTime_IMPORT;                    %OUT = new Date(TargetDate_Day(%IN), TargetDate_Month(%IN), TargetDate_Year(%IN));"));
+    QCOMPARE(toNative->sourceTypeCheck(), QLatin1String("TargetDate_Check(%IN)"));
+    QCOMPARE(toNative->conversion().trimmed(), QLatin1String("if (!TargetDateTimeAPI) TargetDateTime_IMPORT;                    %OUT = new Date(TargetDate_Day(%IN), TargetDate_Month(%IN), TargetDate_Year(%IN));"));
 }
 
 void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
@@ -206,7 +206,7 @@ void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
 
     TestUtil t(cppCode, xmlCode);
     TypeDatabase* typeDb = TypeDatabase::instance();
-    PrimitiveTypeEntry* typeA = typeDb->findPrimitiveType("A");
+    PrimitiveTypeEntry* typeA = typeDb->findPrimitiveType(QLatin1String("A"));
     QVERIFY(typeA);
 
     CustomConversion* conversion = typeA->customConversion();
@@ -214,7 +214,7 @@ void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
 
     QCOMPARE(typeA, conversion->ownerType());
     QCOMPARE(conversion->nativeToTargetConversion().trimmed(),
-             QString("// TEMPLATE - native_to_target - START        return ConvertFromCppToPython(%IN);        // TEMPLATE - native_to_target - END"));
+             QLatin1String("// TEMPLATE - native_to_target - START        return ConvertFromCppToPython(%IN);        // TEMPLATE - native_to_target - END"));
 
     QVERIFY(conversion->hasTargetToNativeConversions());
     QCOMPARE(conversion->targetToNativeConversions().size(), 1);
@@ -222,7 +222,7 @@ void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
     CustomConversion::TargetToNativeConversion* toNative = conversion->targetToNativeConversions().first();
     QVERIFY(toNative);
     QCOMPARE(toNative->conversion().trimmed(),
-             QString("// TEMPLATE - target_to_native - START        %OUT = %IN.createA();        // TEMPLATE - target_to_native - END"));
+             QLatin1String("// TEMPLATE - target_to_native - START        %OUT = %IN.createA();        // TEMPLATE - target_to_native - END"));
 }
 
 QTEST_APPLESS_MAIN(TestConversionRuleTag)

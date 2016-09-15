@@ -42,11 +42,11 @@ void TestInsertTemplate::testInsertTemplateOnClassInjectCode()
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 1);
-    AbstractMetaClass* classA = classes.findClass("A");
+    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QVERIFY(classA);
     QCOMPARE(classA->typeEntry()->codeSnips().count(), 1);
     QString code = classA->typeEntry()->codeSnips().first().code();
-    QVERIFY(code.contains("code template content"));
+    QVERIFY(code.contains(QLatin1String("code template content")));
 }
 
 void TestInsertTemplate::testInsertTemplateOnModuleInjectCode()
@@ -65,11 +65,11 @@ void TestInsertTemplate::testInsertTemplateOnModuleInjectCode()
     AbstractMetaClassList classes = t.builder()->classes();
     QVERIFY(classes.isEmpty());
 
-    TypeEntry* module = TypeDatabase::instance()->findType("Foo");
+    TypeEntry* module = TypeDatabase::instance()->findType(QLatin1String("Foo"));
     QVERIFY(module);
     QCOMPARE(module->codeSnips().count(), 1);
     QString code = module->codeSnips().first().code().trimmed();
-    QVERIFY(code.contains("code template content"));
+    QVERIFY(code.contains(QLatin1String("code template content")));
 }
 
 void TestInsertTemplate::testInvalidTypeSystemTemplate()
@@ -85,7 +85,7 @@ void TestInsertTemplate::testInvalidTypeSystemTemplate()
     AbstractMetaClassList classes = t.builder()->classes();
     QVERIFY(classes.isEmpty());
 
-    TypeEntry* module = TypeDatabase::instance()->findType("Foo");
+    TypeEntry* module = TypeDatabase::instance()->findType(QLatin1String("Foo"));
     QVERIFY(module);
     QCOMPARE(module->codeSnips().count(), 1);
     QString code = module->codeSnips().first().code().trimmed();
@@ -109,11 +109,11 @@ void TestInsertTemplate::testValidAndInvalidTypeSystemTemplate()
     AbstractMetaClassList classes = t.builder()->classes();
     QVERIFY(classes.isEmpty());
 
-    TypeEntry* module = TypeDatabase::instance()->findType("Foo");
+    TypeEntry* module = TypeDatabase::instance()->findType(QLatin1String("Foo"));
     QVERIFY(module);
     QCOMPARE(module->codeSnips().count(), 1);
     QString code = module->codeSnips().first().code().trimmed();
-    QVERIFY(code.contains("code template content"));
+    QVERIFY(code.contains(QLatin1String("code template content")));
 }
 
 QTEST_APPLESS_MAIN(TestInsertTemplate)

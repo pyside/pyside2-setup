@@ -40,7 +40,7 @@ public:
         m_builder = new AbstractMetaBuilder;
         TypeDatabase* td = TypeDatabase::instance(true);
         if (apiVersion)
-            td->setApiVersion("*", apiVersion);
+            td->setApiVersion(QLatin1String("*"), apiVersion);
         td->setDropTypeEntries(dropTypeEntries);
         QBuffer buffer;
         // parse typesystem

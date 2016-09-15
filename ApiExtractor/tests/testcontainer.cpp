@@ -48,7 +48,7 @@ void TestContainer::testContainerType()
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 2);
     //search for class A
-    AbstractMetaClass* classA = classes.findClass("A");
+    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QVERIFY(classA);
     QVERIFY(classA->typeEntry()->baseContainerType());
     QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(classA->typeEntry()->baseContainerType())->type(), ContainerTypeEntry::ListContainer);
@@ -79,7 +79,7 @@ void TestContainer::testListOfValueType()
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 3);
 
-    AbstractMetaClass* classA = classes.findClass("A");
+    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QVERIFY(classA);
     QCOMPARE(classA->templateBaseClassInstantiations().count(), 1);
     const AbstractMetaType* templateInstanceType = classA->templateBaseClassInstantiations().first();

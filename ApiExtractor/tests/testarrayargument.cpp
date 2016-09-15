@@ -41,13 +41,13 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByInteger()
     </typesystem>";
 
     TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClass* classA = t.builder()->classes().findClass("A");
+    AbstractMetaClass* classA = t.builder()->classes().findClass(QLatin1String("A"));
     QVERIFY(classA);
 
     const AbstractMetaArgument* arg = classA->functions().last()->arguments().first();
     QVERIFY(arg->type()->isArray());
     QCOMPARE(arg->type()->arrayElementCount(), 3);
-    QCOMPARE(arg->type()->arrayElementType()->name(), QString("double"));
+    QCOMPARE(arg->type()->arrayElementType()->name(), QLatin1String("double"));
 }
 
 void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()
@@ -66,18 +66,18 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()
     </typesystem>";
 
     TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClass* classA = t.builder()->classes().findClass("A");
+    AbstractMetaClass* classA = t.builder()->classes().findClass(QLatin1String("A"));
     QVERIFY(classA);
 
-    AbstractMetaEnum* someEnum = classA->findEnum("SomeEnum");
+    AbstractMetaEnum* someEnum = classA->findEnum(QLatin1String("SomeEnum"));
     QVERIFY(someEnum);
-    AbstractMetaEnumValue* nvalues = classA->findEnumValue("NValues", someEnum);
+    AbstractMetaEnumValue* nvalues = classA->findEnumValue(QLatin1String("NValues"), someEnum);
     QVERIFY(nvalues);
 
     const AbstractMetaArgument* arg = classA->functions().last()->arguments().first();
     QVERIFY(arg->type()->isArray());
     QCOMPARE(arg->type()->arrayElementCount(), nvalues->value());
-    QCOMPARE(arg->type()->arrayElementType()->name(), QString("double"));
+    QCOMPARE(arg->type()->arrayElementType()->name(), QLatin1String("double"));
 };
 
 void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnum()
@@ -96,14 +96,14 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnu
     </typesystem>";
 
     TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClass* classA = t.builder()->classes().findClass("A");
+    AbstractMetaClass* classA = t.builder()->classes().findClass(QLatin1String("A"));
     QVERIFY(classA);
 
     AbstractMetaEnum* someEnum = t.builder()->globalEnums().first();
     QVERIFY(someEnum);
     AbstractMetaEnumValue* nvalues = 0;
     foreach (AbstractMetaEnumValue* enumValue, someEnum->values()) {
-        if (enumValue->name() == "NValues") {
+        if (enumValue->name() == QLatin1String("NValues")) {
             nvalues = enumValue;
             break;
         }
@@ -113,7 +113,7 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnu
     const AbstractMetaArgument* arg = classA->functions().last()->arguments().first();
     QVERIFY(arg->type()->isArray());
     QCOMPARE(arg->type()->arrayElementCount(), nvalues->value());
-    QCOMPARE(arg->type()->arrayElementType()->name(), QString("double"));
+    QCOMPARE(arg->type()->arrayElementType()->name(), QLatin1String("double"));
 };
 
 QTEST_APPLESS_MAIN(TestArrayArgument)

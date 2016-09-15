@@ -38,8 +38,8 @@ void TestAbstractMetaType::testConstCharPtrType()
     AbstractMetaType* rtype = func->type();
     // Test properties of const char*
     QVERIFY(rtype);
-    QCOMPARE(rtype->package(), QString("Foo"));
-    QCOMPARE(rtype->name(), QString("char"));
+    QCOMPARE(rtype->package(), QLatin1String("Foo"));
+    QCOMPARE(rtype->name(), QLatin1String("char"));
     QVERIFY(rtype->isConstant());
     QVERIFY(!rtype->isArray());
     QVERIFY(!rtype->isContainer());
@@ -99,7 +99,7 @@ void TestAbstractMetaType::testCharType()
 
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.size(), 1);
-    QCOMPARE(classes.first()->package(), QString("Foo"));
+    QCOMPARE(classes.first()->package(), QLatin1String("Foo"));
 
     AbstractMetaFunctionList functions = t.builder()->globalFunctions();
     QCOMPARE(functions.size(), 1);
@@ -107,8 +107,8 @@ void TestAbstractMetaType::testCharType()
     AbstractMetaType* rtype = func->type();
     // Test properties of const char*
     QVERIFY(rtype);
-    QCOMPARE(rtype->package(), QString("Foo"));
-    QCOMPARE(rtype->name(), QString("char"));
+    QCOMPARE(rtype->package(), QLatin1String("Foo"));
+    QCOMPARE(rtype->name(), QLatin1String("char"));
     QVERIFY(!rtype->isConstant());
     QVERIFY(!rtype->isArray());
     QVERIFY(!rtype->isContainer());
@@ -136,7 +136,7 @@ void TestAbstractMetaType::testTypedef()
 
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.size(), 1);
-    AbstractMetaClass* c = classes.findClass("C");
+    AbstractMetaClass* c = classes.findClass(QLatin1String("C"));
     QVERIFY(c);
     QVERIFY(c->isTypeAlias());
 }
@@ -168,7 +168,7 @@ void TestAbstractMetaType::testTypedefWithTemplates()
     QCOMPARE(args.count(), 1);
     AbstractMetaArgument* arg = args.first();
     AbstractMetaType* metaType = arg->type();
-    QCOMPARE(metaType->cppSignature(), QString("A<B >"));
+    QCOMPARE(metaType->cppSignature(), QLatin1String("A<B >"));
 }
 
 
@@ -186,9 +186,9 @@ void TestAbstractMetaType::testObjectTypeUsedAsValue()
 
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.size(), 1);
-    AbstractMetaClass* classA = classes.findClass("A");
+    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QVERIFY(classA);
-    AbstractMetaFunctionList overloads = classA->queryFunctionsByName("method");
+    AbstractMetaFunctionList overloads = classA->queryFunctionsByName(QLatin1String("method"));
     QCOMPARE(overloads.count(), 1);
     AbstractMetaFunction* method = overloads.first();
     QVERIFY(method);
@@ -196,7 +196,7 @@ void TestAbstractMetaType::testObjectTypeUsedAsValue()
     QCOMPARE(args.count(), 1);
     AbstractMetaArgument* arg = args.first();
     AbstractMetaType* metaType = arg->type();
-    QCOMPARE(metaType->cppSignature(), QString("A"));
+    QCOMPARE(metaType->cppSignature(), QLatin1String("A"));
     QVERIFY(metaType->isValue());
     QVERIFY(metaType->typeEntry()->isObject());
 }

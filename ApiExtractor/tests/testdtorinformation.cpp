@@ -33,8 +33,8 @@ void TestDtorInformation::testDtorIsPrivate()
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 2);
-    QCOMPARE(classes.findClass("Control")->hasPrivateDestructor(), false);
-    QCOMPARE(classes.findClass("Subject")->hasPrivateDestructor(), true);
+    QCOMPARE(classes.findClass(QLatin1String("Control"))->hasPrivateDestructor(), false);
+    QCOMPARE(classes.findClass(QLatin1String("Subject"))->hasPrivateDestructor(), true);
 }
 
 void TestDtorInformation::testDtorIsProtected()
@@ -44,8 +44,8 @@ void TestDtorInformation::testDtorIsProtected()
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 2);
-    QCOMPARE(classes.findClass("Control")->hasProtectedDestructor(), false);
-    QCOMPARE(classes.findClass("Subject")->hasProtectedDestructor(), true);
+    QCOMPARE(classes.findClass(QLatin1String("Control"))->hasProtectedDestructor(), false);
+    QCOMPARE(classes.findClass(QLatin1String("Subject"))->hasProtectedDestructor(), true);
 }
 
 void TestDtorInformation::testDtorIsVirtual()
@@ -55,8 +55,8 @@ void TestDtorInformation::testDtorIsVirtual()
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 2);
-    QCOMPARE(classes.findClass("Control")->hasVirtualDestructor(), false);
-    QCOMPARE(classes.findClass("Subject")->hasVirtualDestructor(), true);
+    QCOMPARE(classes.findClass(QLatin1String("Control"))->hasVirtualDestructor(), false);
+    QCOMPARE(classes.findClass(QLatin1String("Subject"))->hasVirtualDestructor(), true);
 }
 
 void TestDtorInformation::testClassWithVirtualDtorIsPolymorphic()
@@ -66,8 +66,8 @@ void TestDtorInformation::testClassWithVirtualDtorIsPolymorphic()
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 2);
-    QCOMPARE(classes.findClass("Control")->isPolymorphic(), true);
-    QCOMPARE(classes.findClass("Subject")->isPolymorphic(), true);
+    QCOMPARE(classes.findClass(QLatin1String("Control"))->isPolymorphic(), true);
+    QCOMPARE(classes.findClass(QLatin1String("Subject"))->isPolymorphic(), true);
 }
 
 QTEST_APPLESS_MAIN(TestDtorInformation)
