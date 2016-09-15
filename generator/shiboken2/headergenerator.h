@@ -36,7 +36,7 @@ public:
 protected:
     QString fileNameForClass(const AbstractMetaClass* metaClass) const;
     void generateClass(QTextStream& s, const AbstractMetaClass* metaClass);
-    void finishGeneration();
+    bool finishGeneration();
 
 private:
     void writeCopyCtor(QTextStream &s, const AbstractMetaClass* metaClass) const;

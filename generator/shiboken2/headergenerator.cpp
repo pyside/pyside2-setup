@@ -267,7 +267,7 @@ void HeaderGenerator::writeTypeIndexDefine(QTextStream& s, const AbstractMetaCla
     }
 }
 
-void HeaderGenerator::finishGeneration()
+bool HeaderGenerator::finishGeneration()
 {
     // Generate the main header for this module.
     // This header should be included by binding modules
@@ -434,6 +434,8 @@ void HeaderGenerator::finishGeneration()
     s << "} // namespace Shiboken" << endl << endl;
 
     s << "#endif // " << includeShield << endl << endl;
+
+    return file.done() != FileOut::Failure;
 }
 
 void HeaderGenerator::writeProtectedEnumSurrogate(QTextStream& s, const AbstractMetaEnum* cppEnum)

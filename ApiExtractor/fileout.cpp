@@ -167,11 +167,11 @@ static void diff(QList<QByteArray> a, QList<QByteArray> b)
 }
 
 
-bool FileOut::done()
+FileOut::State FileOut::done()
 {
     Q_ASSERT(!isDone);
     if (name.isEmpty())
-        return false;
+        return Failure;
 
     isDone = true;
     bool fileEqual = false;
@@ -184,7 +184,7 @@ bool FileOut::done()
             qCWarning(lcShiboken).noquote().nospace()
                 << QStringLiteral("failed to open file '%1' for reading")
                                   .arg(QDir::toNativeSeparators(fileRead.fileName()));
-            return false;
+            return Failure;
         }
 
         original = fileRead.readAll();
@@ -192,34 +192,35 @@ bool FileOut::done()
         fileEqual = (original == tmp);
     }
 
-    if (!fileEqual) {
-        if (!FileOut::dummy) {
-            QDir dir(info.absolutePath());
-            if (!dir.mkpath(dir.absolutePath())) {
-                qCWarning(lcShiboken).noquote().nospace()
-                    << QStringLiteral("unable to create directory '%1'")
-                                      .arg(QDir::toNativeSeparators(dir.absolutePath()));
-                return false;
-            }
+    if (fileEqual)
+        return Unchanged;
 
-            QFile fileWrite(name);
-            if (!fileWrite.open(QIODevice::WriteOnly)) {
-                qCWarning(lcShiboken).noquote().nospace()
+    if (!FileOut::dummy) {
+        QDir dir(info.absolutePath());
+        if (!dir.mkpath(dir.absolutePath())) {
+            qCWarning(lcShiboken).noquote().nospace()
+                    << QStringLiteral("unable to create directory '%1'")
+                       .arg(QDir::toNativeSeparators(dir.absolutePath()));
+            return Failure;
+        }
+
+        QFile fileWrite(name);
+        if (!fileWrite.open(QIODevice::WriteOnly)) {
+            qCWarning(lcShiboken).noquote().nospace()
                     << QStringLiteral("failed to open file '%1' for writing")
-                                      .arg(QDir::toNativeSeparators(fileWrite.fileName()));
-                return false;
-            }
-            QTextCodec *codec = QTextCodec::codecForName("UTF-8");
-            stream.setCodec(codec);
-            stream.setDevice(&fileWrite);
-            stream << tmp;
+                       .arg(QDir::toNativeSeparators(fileWrite.fileName()));
+            return Failure;
         }
-        if (diff) {
-            std::printf("%sFile: %s%s\n", colorInfo, qPrintable(name), colorReset);
-            ::diff(original.split('\n'), tmp.split('\n'));
-            std::printf("\n");
-        }
-        return true;
+        QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+        stream.setCodec(codec);
+        stream.setDevice(&fileWrite);
+        stream << tmp;
     }
-    return false;
+    if (diff) {
+        std::printf("%sFile: %s%s\n", colorInfo, qPrintable(name), colorReset);
+        ::diff(original.split('\n'), tmp.split('\n'));
+        std::printf("\n");
+    }
+
+    return Success;
 }

@@ -1539,10 +1539,10 @@ static void writeFancyToc(QTextStream& s, const QStringList& items, int cols = 4
     s << table;
 }
 
-void QtDocGenerator::finishGeneration()
+bool QtDocGenerator::finishGeneration()
 {
     if (classes().isEmpty())
-        return;
+        return true;
 
     QMap<QString, QStringList>::iterator it = m_packages.begin();
     for (; it != m_packages.end(); ++it) {
@@ -1610,6 +1610,7 @@ void QtDocGenerator::finishGeneration()
             }
         }
     }
+    return true;
 }
 
 bool QtDocGenerator::doSetup(const QMap<QString, QString>& args)

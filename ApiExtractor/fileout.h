@@ -35,6 +35,8 @@ private:
     QString name;
 
 public:
+    enum State { Failure, Unchanged, Success };
+
     FileOut(QString name);
     ~FileOut()
     {
@@ -42,7 +44,7 @@ public:
             done();
     }
 
-    bool done();
+    State done();
 
     QTextStream stream;
 

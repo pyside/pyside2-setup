@@ -4599,7 +4599,7 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
     s << '}' << endl;
 }
 
-void CppGenerator::finishGeneration()
+bool CppGenerator::finishGeneration()
 {
     //Generate CPython wrapper file
     QString classInitDecl;
@@ -4666,7 +4666,7 @@ void CppGenerator::finishGeneration()
     if (!file.open(QFile::WriteOnly)) {
         qCWarning(lcShiboken).noquote().nospace()
             << "Error writing file: " << QDir::toNativeSeparators(moduleFileName);
-        return;
+        return false;
     }
 
     QTextStream s(&file);
@@ -4989,6 +4989,8 @@ void CppGenerator::finishGeneration()
     }
 
     s << "SBK_MODULE_INIT_FUNCTION_END" << endl;
+
+    return true;
 }
 
 static ArgumentOwner getArgumentOwner(const AbstractMetaFunction* func, int argIndex)

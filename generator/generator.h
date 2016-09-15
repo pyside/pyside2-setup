@@ -138,13 +138,10 @@ public:
     *   class and the associated text stream, then write the text stream contents if needed.
     *   \see #write
     */
-    void generate();
+    bool generate();
 
     /// Returns the number of generated items
     int numGenerated() const;
-
-    /// Returns the number of generated items written
-    int numGeneratedAndWritten() const;
 
     /// Returns the generator's name. Used for cosmetic purposes.
     virtual const char* name() const = 0;
@@ -279,7 +276,7 @@ protected:
      *   \param  metaClass  the class that should be generated
      */
     virtual void generateClass(QTextStream& s, const AbstractMetaClass* metaClass) = 0;
-    virtual void finishGeneration() = 0;
+    virtual bool finishGeneration() = 0;
 
     /**
     *    Returns the subdirectory path for a given package

@@ -39,7 +39,7 @@ protected:
     QList<AbstractMetaFunctionList> filterGroupedOperatorFunctions(const AbstractMetaClass* metaClass,
                                                                    uint query);
     void generateClass(QTextStream& s, const AbstractMetaClass* metaClass);
-    void finishGeneration();
+    bool finishGeneration();
 
 private:
     void writeConstructorNative(QTextStream& s, const AbstractMetaFunction* func);

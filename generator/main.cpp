@@ -438,11 +438,15 @@ int main(int argc, char *argv[])
     foreach (const GeneratorPtr &g, generators) {
         g->setOutputDirectory(outputDirectory);
         g->setLicenseComment(licenseComment);
-        if (g->setup(extractor, args))
-            g->generate();
+         if (g->setup(extractor, args)) {
+             if (!g->generate())
+                 return EXIT_FAILURE;
+         }
     }
 
     std::cout << "Done, " << ReportHandler::warningCount();
     std::cout << " warnings (" << ReportHandler::suppressedCount() << " known issues)";
     std::cout << std::endl;
+
+    return EXIT_SUCCESS;
 }

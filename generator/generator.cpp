@@ -39,7 +39,6 @@ struct Generator::GeneratorPrivate {
     QString licenseComment;
     QString packageName;
     int numGenerated;
-    int numGeneratedWritten;
     QStringList instantiatedContainersNames;
     QList<const AbstractMetaType*> instantiatedContainers;
 };
@@ -47,7 +46,6 @@ struct Generator::GeneratorPrivate {
 Generator::Generator() : m_d(new GeneratorPrivate)
 {
     m_d->numGenerated = 0;
-    m_d->numGeneratedWritten = 0;
     m_d->instantiatedContainers = QList<const AbstractMetaType*>();
     m_d->instantiatedContainersNames = QStringList();
 }
@@ -239,12 +237,7 @@ int Generator::numGenerated() const
     return m_d->numGenerated;
 }
 
-int Generator::numGeneratedAndWritten() const
-{
-    return m_d->numGeneratedWritten;
-}
-
-void Generator::generate()
+bool Generator::generate()
 {
     foreach (AbstractMetaClass *cls, m_d->apiextractor->classes()) {
         if (!shouldGenerate(cls))
@@ -259,11 +252,11 @@ void Generator::generate()
         FileOut fileOut(outputDirectory() + '/' + subDirectoryForClass(cls) + '/' + fileName);
         generateClass(fileOut.stream, cls);
 
-        if (fileOut.done())
-            ++m_d->numGeneratedWritten;
+        if (fileOut.done() == FileOut::Failure)
+            return false;
         ++m_d->numGenerated;
     }
-    finishGeneration();
+    return finishGeneration();
 }
 
 bool Generator::shouldGenerateTypeEntry(const TypeEntry* type) const
