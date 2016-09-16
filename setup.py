@@ -280,6 +280,14 @@ if OPTION_NOEXAMPLES:
         if item[0].startswith('pyside2-examples'):
             del submodules[__version__][idx]
 
+# Return a prefix suitable for the _install/_build directory
+def prefix():
+    virtualEnvName = os.environ['VIRTUAL_ENV']
+    name = os.path.basename(virtualEnvName) if virtualEnvName is not None else 'pyside'
+    name += str(sys.version_info[0])
+    if OPTION_DEBUG:
+        name += 'd'
+    return name
 
 # Initialize, pull and checkout submodules
 def prepareSubModules():
@@ -551,8 +559,8 @@ class pyside_build(_build):
 
         script_dir = os.getcwd()
         sources_dir = os.path.join(script_dir, "sources")
-        build_dir = os.path.join(script_dir, "pyside_build", "%s" % build_name)
-        install_dir = os.path.join(script_dir, "pyside_install", "%s" % build_name)
+        build_dir = os.path.join(script_dir, prefix() + '_build', "%s" % build_name)
+        install_dir = os.path.join(script_dir, prefix() + '_install', "%s" % build_name)
 
         # Try to ensure that tools built by this script (such as shiboken2)
         # are found before any that may already be installed on the system.
