@@ -45,7 +45,7 @@ public:
     }
 
     QString name() const {
-        return _M_name.join("::");
+        return _M_name.join(QLatin1String("::"));
     }
     QStringList qualifiedName() const {
         return _M_name;

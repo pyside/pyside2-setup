@@ -167,7 +167,7 @@ public:
     static QString globalNamespaceClassName(const TypeEntry *te);
     QString filename() const
     {
-        return "typesystem.txt";
+        return QLatin1String("typesystem.txt");
     }
 
     QString modifiedTypesystemFilepath(const QString& tsFile) const;

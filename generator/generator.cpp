@@ -89,7 +89,7 @@ QString Generator::getSimplifiedContainerTypeName(const AbstractMetaType* type)
         typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
     if (type->isReference())
         typeName.chop(1);
-    while (typeName.endsWith('*') || typeName.endsWith(' '))
+    while (typeName.endsWith(QLatin1Char('*')) || typeName.endsWith(QLatin1Char(' ')))
         typeName.chop(1);
     return typeName;
 }
@@ -219,7 +219,7 @@ QString Generator::packageName() const
 QString Generator::moduleName() const
 {
     QString& pkgName = m_d->packageName;
-    return QString(pkgName).remove(0, pkgName.lastIndexOf('.') + 1);
+    return QString(pkgName).remove(0, pkgName.lastIndexOf(QLatin1Char('.')) + 1);
 }
 
 QString Generator::outputDirectory() const
@@ -249,7 +249,7 @@ bool Generator::generate()
         if (ReportHandler::isDebug(ReportHandler::SparseDebug))
             qCDebug(lcShiboken) << "generating: " << fileName;
 
-        FileOut fileOut(outputDirectory() + '/' + subDirectoryForClass(cls) + '/' + fileName);
+        FileOut fileOut(outputDirectory() + QLatin1Char('/') + subDirectoryForClass(cls) + QLatin1Char('/') + fileName);
         generateClass(fileOut.stream, cls);
 
         if (fileOut.done() == FileOut::Failure)
@@ -284,35 +284,35 @@ void Generator::replaceTemplateVariables(QString &code, const AbstractMetaFuncti
 {
     const AbstractMetaClass *cpp_class = func->ownerClass();
     if (cpp_class)
-        code.replace("%TYPE", cpp_class->name());
+        code.replace(QLatin1String("%TYPE"), cpp_class->name());
 
     foreach (AbstractMetaArgument *arg, func->arguments())
-        code.replace("%" + QString::number(arg->argumentIndex() + 1), arg->name());
+        code.replace(QLatin1Char('%') + QString::number(arg->argumentIndex() + 1), arg->name());
 
     //template values
-    code.replace("%RETURN_TYPE", translateType(func->type(), cpp_class));
-    code.replace("%FUNCTION_NAME", func->originalName());
+    code.replace(QLatin1String("%RETURN_TYPE"), translateType(func->type(), cpp_class));
+    code.replace(QLatin1String("%FUNCTION_NAME"), func->originalName());
 
-    if (code.contains("%ARGUMENT_NAMES")) {
+    if (code.contains(QLatin1String("%ARGUMENT_NAMES"))) {
         QString str;
         QTextStream aux_stream(&str);
         writeArgumentNames(aux_stream, func, Generator::SkipRemovedArguments);
-        code.replace("%ARGUMENT_NAMES", str);
+        code.replace(QLatin1String("%ARGUMENT_NAMES"), str);
     }
 
-    if (code.contains("%ARGUMENTS")) {
+    if (code.contains(QLatin1String("%ARGUMENTS"))) {
         QString str;
         QTextStream aux_stream(&str);
         writeFunctionArguments(aux_stream, func, Options(SkipDefaultValues) | SkipRemovedArguments);
-        code.replace("%ARGUMENTS", str);
+        code.replace(QLatin1String("%ARGUMENTS"), str);
     }
 }
 
 QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
 {
     // detect number of spaces before the first character
-    QStringList lst(code.split("\n"));
-    QRegExp nonSpaceRegex("[^\\s]");
+    QStringList lst(code.split(QLatin1Char('\n')));
+    QRegExp nonSpaceRegex(QLatin1String("[^\\s]"));
     int spacesToRemove = 0;
     foreach(QString line, lst) {
         if (!line.trimmed().isEmpty()) {
@@ -323,7 +323,7 @@ QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
         }
     }
 
-    static QRegExp emptyLine("\\s*[\\r]?[\\n]?\\s*");
+    static QRegExp emptyLine(QLatin1String("\\s*[\\r]?[\\n]?\\s*"));
 
     foreach(QString line, lst) {
         if (!line.isEmpty() && !emptyLine.exactMatch(line)) {
@@ -388,48 +388,50 @@ bool Generator::isCString(const AbstractMetaType* type)
 {
     return type->isNativePointer()
             && type->indirections() == 1
-            && type->name() == "char";
+            && type->name() == QLatin1String("char");
 }
 
 bool Generator::isVoidPointer(const AbstractMetaType* type)
 {
     return type->isNativePointer()
             && type->indirections() == 1
-            && type->name() == "void";
+            && type->name() == QLatin1String("void");
 }
 
 QString Generator::getFullTypeName(const TypeEntry* type) const
 {
-    return QString("%1%2").arg(type->isCppPrimitive() ? "" : "::").arg(type->qualifiedCppName());
+    return type->isCppPrimitive()
+        ? type->qualifiedCppName()
+        : (QLatin1String("::") + type->qualifiedCppName());
 }
 
 QString Generator::getFullTypeName(const AbstractMetaType* type) const
 {
     if (isCString(type))
-        return "const char*";
+        return QLatin1String("const char*");
     if (isVoidPointer(type))
-        return "void*";
+        return QLatin1String("void*");
     if (type->typeEntry()->isContainer())
-        return QString("::%1").arg(type->cppSignature());
+        return QLatin1String("::") + type->cppSignature();
     QString typeName;
     if (type->typeEntry()->isComplex() && type->hasInstantiations())
         typeName = getFullTypeNameWithoutModifiers(type);
     else
         typeName = getFullTypeName(type->typeEntry());
-    return typeName + QString("*").repeated(type->indirections());
+    return typeName + QString::fromLatin1("*").repeated(type->indirections());
 }
 
 QString Generator::getFullTypeName(const AbstractMetaClass* metaClass) const
 {
-    return QString("::%1").arg(metaClass->qualifiedCppName());
+    return QLatin1String("::") + metaClass->qualifiedCppName();
 }
 
 QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType* type) const
 {
     if (isCString(type))
-        return "const char*";
+        return QLatin1String("const char*");
     if (isVoidPointer(type))
-        return "void*";
+        return QLatin1String("void*");
     if (!type->hasInstantiations())
         return getFullTypeName(type->typeEntry());
     QString typeName = type->cppSignature();
@@ -437,9 +439,9 @@ QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType* type)
         typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
     if (type->isReference())
         typeName.chop(1);
-    while (typeName.endsWith('*') || typeName.endsWith(' '))
+    while (typeName.endsWith(QLatin1Char('*')) || typeName.endsWith(QLatin1Char(' ')))
         typeName.chop(1);
-    return QString("::%1").arg(typeName);
+    return QLatin1String("::") + typeName;
 }
 
 QString Generator::minimalConstructor(const AbstractMetaType* type) const
@@ -449,22 +451,22 @@ QString Generator::minimalConstructor(const AbstractMetaType* type) const
 
     if (type->isContainer()) {
         QString ctor = type->cppSignature();
-        if (ctor.endsWith("*"))
-            return QString("0");
-        if (ctor.startsWith("const "))
+        if (ctor.endsWith(QLatin1Char('*')))
+            return QLatin1String("0");
+        if (ctor.startsWith(QLatin1String("const ")))
             ctor.remove(0, sizeof("const ") / sizeof(char) - 1);
-        if (ctor.endsWith("&")) {
+        if (ctor.endsWith(QLatin1Char('&'))) {
             ctor.chop(1);
             ctor = ctor.trimmed();
         }
-        return QString("::%1()").arg(ctor);
+        return QLatin1String("::") + ctor + QLatin1String("()");
     }
 
     if (type->isNativePointer())
-        return QString("((%1*)0)").arg(type->typeEntry()->qualifiedCppName());
+        return QString::fromLatin1("((%1*)0)").arg(type->typeEntry()->qualifiedCppName());
 
     if (Generator::isPointer(type))
-        return QString("((::%1*)0)").arg(type->typeEntry()->qualifiedCppName());
+        return QString::fromLatin1("((::%1*)0)").arg(type->typeEntry()->qualifiedCppName());
 
     if (type->typeEntry()->isComplex()) {
         const ComplexTypeEntry* cType = reinterpret_cast<const ComplexTypeEntry*>(type->typeEntry());
@@ -486,10 +488,10 @@ QString Generator::minimalConstructor(const TypeEntry* type) const
         return QString();
 
     if (type->isCppPrimitive())
-        return QString("((%1)0)").arg(type->qualifiedCppName());
+        return QString::fromLatin1("((%1)0)").arg(type->qualifiedCppName());
 
     if (type->isEnum() || type->isFlags())
-        return QString("((::%1)0)").arg(type->qualifiedCppName());
+        return QString::fromLatin1("((::%1)0)").arg(type->qualifiedCppName());
 
     if (type->isPrimitive()) {
         QString ctor = reinterpret_cast<const PrimitiveTypeEntry*>(type)->defaultConstructor();
@@ -497,7 +499,9 @@ QString Generator::minimalConstructor(const TypeEntry* type) const
         // a default constructor defined by the user, the empty constructor is
         // heuristically returned. If this is wrong the build of the generated
         // bindings will tell.
-        return (ctor.isEmpty()) ? QString("::%1()").arg(type->qualifiedCppName()) : ctor;
+        return ctor.isEmpty()
+            ? (QLatin1String("::") + type->qualifiedCppName() + QLatin1String("()"))
+            : ctor;
     }
 
     if (type->isComplex())
@@ -533,11 +537,10 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
     QStringList templateTypes;
     foreach (TypeEntry* templateType, metaClass->templateArguments())
         templateTypes << templateType->qualifiedCppName();
-    QString fixedTypeName = QString("%1<%2 >").arg(qualifiedCppName).arg(templateTypes.join(", "));
 
     // Empty constructor.
     if (maxArgs == 0)
-        return QString("::%1()").arg(qualifiedCppName);
+        return QLatin1String("::") + qualifiedCppName + QLatin1String("()");
 
     QList<const AbstractMetaFunction*> candidates;
 
@@ -582,7 +585,7 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
             }
 
             if (!args.isEmpty())
-                return QString("::%1(%2)").arg(qualifiedCppName).arg(args.join(", "));
+                return QString::fromLatin1("::%1(%2)").arg(qualifiedCppName, args.join(QLatin1String(", ")));
 
             candidates << ctor;
         }
@@ -606,8 +609,7 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
             args << argValue;
         }
         if (!args.isEmpty()) {
-            return QString("::%1(%2)").arg(qualifiedCppName)
-                                      .arg(args.join(", "));
+            return QString::fromLatin1("::%1(%2)").arg(qualifiedCppName, args.join(QLatin1String(", ")));
         }
     }
 
@@ -628,20 +630,20 @@ QString Generator::translateType(const AbstractMetaType *cType,
     }
 
     if (!cType) {
-        s = "void";
+        s = QLatin1String("void");
     } else if (cType->isArray()) {
-        s = translateType(cType->arrayElementType(), context, options) + "[]";
+        s = translateType(cType->arrayElementType(), context, options) + QLatin1String("[]");
     } else if (options & Generator::EnumAsInts && (cType->isEnum() || cType->isFlags())) {
-        s = "int";
+        s = QLatin1String("int");
     } else {
         if (options & Generator::OriginalName) {
             s = cType->originalTypeDescription().trimmed();
-            if ((options & Generator::ExcludeReference) && s.endsWith("&"))
+            if ((options & Generator::ExcludeReference) && s.endsWith(QLatin1Char('&')))
                 s = s.left(s.size()-1);
 
             // remove only the last const (avoid remove template const)
             if (options & Generator::ExcludeConst) {
-                int index = s.lastIndexOf("const");
+                int index = s.lastIndexOf(QLatin1String("const"));
 
                 if (index >= (s.size() - (constLen + 1))) // (VarType const)  or (VarType const[*|&])
                     s = s.remove(index, constLen);
@@ -657,7 +659,7 @@ QString Generator::translateType(const AbstractMetaType *cType,
 
             s = copyType->cppSignature();
             if (!copyType->typeEntry()->isVoid() && !copyType->typeEntry()->isCppPrimitive())
-                s.prepend("::");
+                s.prepend(QLatin1String("::"));
             delete copyType;
         } else {
             s = cType->cppSignature();
@@ -677,7 +679,7 @@ QString Generator::subDirectoryForPackage(QString packageName) const
 {
     if (packageName.isEmpty())
         packageName = m_d->packageName;
-    return QString(packageName).replace(".", QDir::separator());
+    return QString(packageName).replace(QLatin1Char('.'), QDir::separator());
 }
 
 template<typename T>
@@ -686,12 +688,12 @@ static QString getClassTargetFullName_(const T* t, bool includePackageName)
     QString name = t->name();
     const AbstractMetaClass* context = t->enclosingClass();
     while (context) {
-        name.prepend('.');
+        name.prepend(QLatin1Char('.'));
         name.prepend(context->name());
         context = context->enclosingClass();
     }
     if (includePackageName) {
-        name.prepend('.');
+        name.prepend(QLatin1Char('.'));
         name.prepend(t->package());
     }
     return name;

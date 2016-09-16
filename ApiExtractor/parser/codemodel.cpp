@@ -152,7 +152,7 @@ QString TypeInfo::toString() const
 {
     QString tmp;
 
-    tmp += m_qualifiedName.join("::");
+    tmp += m_qualifiedName.join(QLatin1String("::"));
     if (isConstant())
         tmp += QLatin1String(" const");
 
@@ -173,13 +173,13 @@ QString TypeInfo::toString() const
 
             tmp += m_arguments.at(i).toString();
         }
-        tmp += QLatin1String(")");
+        tmp += QLatin1Char(')');
     }
 
     foreach(QString elt, arrayElements()) {
-        tmp += QLatin1String("[");
+        tmp += QLatin1Char('[');
         tmp += elt;
-        tmp += QLatin1String("]");
+        tmp += QLatin1Char(']');
     }
 
     return tmp;
@@ -415,7 +415,7 @@ EnumList _ScopeModelItem::enums() const
 void _ScopeModelItem::addClass(ClassModelItem item)
 {
     QString name = item->name();
-    int idx = name.indexOf("<");
+    int idx = name.indexOf(QLatin1Char('<'));
     if (idx > 0)
         _M_classes.insert(name.left(idx), item);
     _M_classes.insert(name, item);

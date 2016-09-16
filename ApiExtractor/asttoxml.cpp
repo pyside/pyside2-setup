@@ -61,7 +61,7 @@ void astToXML(QString name)
     QXmlStreamWriter s(&outputFile);
     s.setAutoFormatting(true);
 
-    s.writeStartElement("code");
+    s.writeStartElement(QLatin1String("code"));
 
     QHash<QString, NamespaceModelItem> namespaceMap = dom->namespaceMap();
     foreach (NamespaceModelItem item, namespaceMap.values())
@@ -77,8 +77,8 @@ void astToXML(QString name)
 
 void writeOutNamespace(QXmlStreamWriter &s, NamespaceModelItem &item)
 {
-    s.writeStartElement("namespace");
-    s.writeAttribute("name", item->name());
+    s.writeStartElement(QLatin1String("namespace"));
+    s.writeAttribute(QLatin1String("name"), item->name());
 
     QHash<QString, NamespaceModelItem> namespaceMap = item->namespaceMap();
     foreach (NamespaceModelItem item, namespaceMap.values())
@@ -97,15 +97,15 @@ void writeOutNamespace(QXmlStreamWriter &s, NamespaceModelItem &item)
 
 void writeOutEnum(QXmlStreamWriter &s, EnumModelItem &item)
 {
-    QString qualifiedName = item->qualifiedName().join("::");
-    s.writeStartElement("enum");
-    s.writeAttribute("name", qualifiedName);
+    QString qualifiedName = item->qualifiedName().join(QLatin1String("::"));
+    s.writeStartElement(QLatin1String("enum"));
+    s.writeAttribute(QLatin1String("name"), qualifiedName);
 
     EnumeratorList enumList = item->enumerators();
     for (int i = 0; i < enumList.size() ; i++) {
-        s.writeStartElement("enumerator");
+        s.writeStartElement(QLatin1String("enumerator"));
         if (!enumList[i]->value().isEmpty())
-            s.writeAttribute("value", enumList[i]->value());
+            s.writeAttribute(QLatin1String("value"), enumList[i]->value());
         s.writeCharacters(enumList[i]->name());
 
         s.writeEndElement();
@@ -115,14 +115,14 @@ void writeOutEnum(QXmlStreamWriter &s, EnumModelItem &item)
 
 void writeOutFunction(QXmlStreamWriter &s, FunctionModelItem &item)
 {
-    QString qualifiedName = item->qualifiedName().join("::");
-    s.writeStartElement("function");
-    s.writeAttribute("name", qualifiedName);
+    QString qualifiedName = item->qualifiedName().join(QLatin1String("::"));
+    s.writeStartElement(QLatin1String("function"));
+    s.writeAttribute(QLatin1String("name"), qualifiedName);
 
     ArgumentList arguments = item->arguments();
     for (int i = 0; i < arguments.size() ; i++) {
-        s.writeStartElement("argument");
-        s.writeAttribute("type",  arguments[i]->type().qualifiedName().join("::"));
+        s.writeStartElement(QLatin1String("argument"));
+        s.writeAttribute(QLatin1String("type"), arguments[i]->type().qualifiedName().join(QLatin1String("::")));
         s.writeEndElement();
     }
     s.writeEndElement();
@@ -130,9 +130,9 @@ void writeOutFunction(QXmlStreamWriter &s, FunctionModelItem &item)
 
 void writeOutClass(QXmlStreamWriter &s, ClassModelItem &item)
 {
-    QString qualifiedName = item->qualifiedName().join("::");
-    s.writeStartElement("class");
-    s.writeAttribute("name", qualifiedName);
+    QString qualifiedName = item->qualifiedName().join(QLatin1String("::"));
+    s.writeStartElement(QLatin1String("class"));
+    s.writeAttribute(QLatin1String("name"), qualifiedName);
 
     QHash<QString, EnumModelItem> enumMap = item->enumMap();
     foreach (EnumModelItem item, enumMap.values())

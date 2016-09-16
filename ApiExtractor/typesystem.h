@@ -843,7 +843,7 @@ public:
         QString pkg = targetLangPackage();
         if (pkg.isEmpty())
             return targetLangName();
-        return pkg + '.' + targetLangName();
+        return pkg + QLatin1Char('.') + targetLangName();
     }
 
     virtual InterfaceTypeEntry *designatedInterface() const
@@ -955,13 +955,13 @@ public:
     /// TODO-CONVERTER: mark as deprecated
     bool hasNativeConversionRule() const
     {
-        return m_conversionRule.startsWith(NATIVE_CONVERSION_RULE_FLAG);
+        return m_conversionRule.startsWith(QLatin1String(NATIVE_CONVERSION_RULE_FLAG));
     }
 
     /// TODO-CONVERTER: mark as deprecated
     bool hasTargetConversionRule() const
     {
-        return m_conversionRule.startsWith(TARGET_CONVERSION_RULE_FLAG);
+        return m_conversionRule.startsWith(QLatin1String(TARGET_CONVERSION_RULE_FLAG));
     }
 
     bool isCppPrimitive() const;
@@ -1001,13 +1001,13 @@ public:
 class VoidTypeEntry : public TypeEntry
 {
 public:
-    VoidTypeEntry() : TypeEntry("void", VoidType, 0) { }
+    VoidTypeEntry() : TypeEntry(QLatin1String("void"), VoidType, 0) { }
 };
 
 class VarargsTypeEntry : public TypeEntry
 {
 public:
-    VarargsTypeEntry() : TypeEntry("...", VarargsType, 0) { }
+    VarargsTypeEntry() : TypeEntry(QLatin1String("..."), VarargsType, 0) { }
 };
 
 class TemplateArgumentEntry : public TypeEntry
@@ -1035,7 +1035,7 @@ class ArrayTypeEntry : public TypeEntry
 {
 public:
     ArrayTypeEntry(const TypeEntry *nested_type, double vr)
-            : TypeEntry("Array", ArrayType, vr), m_nestedType(nested_type)
+            : TypeEntry(QLatin1String("Array"), ArrayType, vr), m_nestedType(nested_type)
     {
         Q_ASSERT(m_nestedType);
     }
@@ -1051,14 +1051,14 @@ public:
 
     QString targetLangName() const
     {
-        return m_nestedType->targetLangName() + "[]";
+        return m_nestedType->targetLangName() + QLatin1String("[]");
     }
     QString targetLangApiName() const
     {
         if (m_nestedType->isPrimitive())
-            return m_nestedType->targetLangApiName() + "Array";
+            return m_nestedType->targetLangApiName() + QLatin1String("Array");
         else
-            return "jobjectArray";
+            return QLatin1String("jobjectArray");
     }
 
 private:
@@ -1211,9 +1211,9 @@ public:
         QString qualifier = targetLangQualifier();
 
         if (!pkg.isEmpty())
-            qualifiedName += pkg + '.';
+            qualifiedName += pkg + QLatin1Char('.');
         if (!qualifier.isEmpty())
-            qualifiedName += qualifier + '.';
+            qualifiedName += qualifier + QLatin1Char('.');
         qualifiedName += targetLangName();
 
         return qualifiedName;
@@ -1422,14 +1422,13 @@ public:
     };
 
     ComplexTypeEntry(const QString &name, Type t, double vr)
-            : TypeEntry(QString(name).replace(".*::", ""), t, vr),
+            : TypeEntry(QString(name).replace(QLatin1String(".*::"), QString()), t, vr),
             m_qualifiedCppName(name),
             m_qobject(false),
             m_polymorphicBase(false),
             m_genericClass(false),
             m_typeFlags(0),
             m_copyableFlag(Unknown),
-            m_hashFunction(""),
             m_baseContainerType(0)
     {
     }
@@ -1711,18 +1710,18 @@ public:
     {
         static QHash<QString, Type> m_stringToContainerType;
         if (m_stringToContainerType.isEmpty()) {
-            m_stringToContainerType["list"] = ListContainer;
-            m_stringToContainerType["string-list"] = StringListContainer;
-            m_stringToContainerType["linked-list"] = LinkedListContainer;
-            m_stringToContainerType["vector"] = VectorContainer;
-            m_stringToContainerType["stack"] = StackContainer;
-            m_stringToContainerType["queue"] = QueueContainer;
-            m_stringToContainerType["set"] = SetContainer;
-            m_stringToContainerType["map"] = MapContainer;
-            m_stringToContainerType["multi-map"] = MultiMapContainer;
-            m_stringToContainerType["hash"] = HashContainer;
-            m_stringToContainerType["multi-hash"] = MultiHashContainer;
-            m_stringToContainerType["pair"] = PairContainer;
+            m_stringToContainerType.insert(QLatin1String("list"), ListContainer);
+            m_stringToContainerType.insert(QLatin1String("string-list"), StringListContainer);
+            m_stringToContainerType.insert(QLatin1String("linked-list"), LinkedListContainer);
+            m_stringToContainerType.insert(QLatin1String("vector"), VectorContainer);
+            m_stringToContainerType.insert(QLatin1String("stack"), StackContainer);
+            m_stringToContainerType.insert(QLatin1String("queue"), QueueContainer);
+            m_stringToContainerType.insert(QLatin1String("set"), SetContainer);
+            m_stringToContainerType.insert(QLatin1String("map"), MapContainer);
+            m_stringToContainerType.insert(QLatin1String("multi-map"), MultiMapContainer);
+            m_stringToContainerType.insert(QLatin1String("hash"), HashContainer);
+            m_stringToContainerType.insert(QLatin1String("multi-hash"), MultiHashContainer);
+            m_stringToContainerType.insert(QLatin1String("pair"), PairContainer);
         }
         return m_stringToContainerType.value(typeName, NoContainer);
     }
@@ -1824,7 +1823,7 @@ public:
 
     static QString interfaceName(const QString &name)
     {
-        return name + "Interface";
+        return name + QLatin1String("Interface");
     }
 
     ObjectTypeEntry *origin() const
@@ -1842,7 +1841,8 @@ public:
     }
     virtual QString qualifiedCppName() const
     {
-        return ComplexTypeEntry::qualifiedCppName().left(ComplexTypeEntry::qualifiedCppName().length() - interfaceName("").length());
+        const int len = ComplexTypeEntry::qualifiedCppName().length() - interfaceName(QString()).length();
+        return ComplexTypeEntry::qualifiedCppName().left(len);
     }
 
 private:

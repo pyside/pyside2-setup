@@ -102,7 +102,7 @@ void NameCompiler::visitTemplateArgument(TemplateArgumentAST *node)
         decl_cc.run(node->type_id->declarator);
 
         if (type_cc.isConstant())
-            _M_name.last() += "const ";
+            _M_name.last() += QLatin1String("const ");
 
         QStringList q = type_cc.qualifiedName();
 
@@ -120,14 +120,14 @@ void NameCompiler::visitTemplateArgument(TemplateArgumentAST *node)
             }
         }
 
-        _M_name.last() += q.join("::");
+        _M_name.last() += q.join(QLatin1String("::"));
 
         if (decl_cc.isReference())
-            _M_name.last() += "&";
+            _M_name.last() += QLatin1Char('&');
         if (decl_cc.indirection())
-            _M_name.last() += QString(decl_cc.indirection(), '*');
+            _M_name.last() += QString(decl_cc.indirection(), QLatin1Char('*'));
 
-        _M_name.last() += QLatin1String(",");
+        _M_name.last() += QLatin1Char(',');
     }
 }
 

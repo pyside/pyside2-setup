@@ -141,12 +141,12 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
         if (line.isEmpty())
             continue;
 
-        int split = line.indexOf("=");
-        QString key;
+        int split = line.indexOf('=');
+        QByteArray key;
         QString value;
         if (split > 0) {
             key = line.left(split - 1).trimmed();
-            value = line.mid(split + 1).trimmed();
+            value = QString::fromUtf8(line.mid(split + 1).trimmed());
         } else {
             key = line;
         }
@@ -158,20 +158,20 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
         else if (key == "api-version")
             apiVersions << value;
         else if (key == "header-file")
-            args["arg-1"] = value;
+            args.insert(QLatin1String("arg-1"), value);
         else if (key == "typesystem-file")
-            args["arg-2"] = value;
+            args.insert(QLatin1String("arg-2"), value);
         else
-            args[key] = value;
+            args.insert(QString::fromUtf8(key), value);
     }
 
     if (!includePaths.isEmpty())
-        args["include-paths"] = includePaths.join(PATH_SPLITTER);
+        args.insert(QLatin1String("include-paths"), includePaths.join(QLatin1String(PATH_SPLITTER)));
 
     if (!typesystemPaths.isEmpty())
-        args["typesystem-paths"] = typesystemPaths.join(PATH_SPLITTER);
+        args.insert(QLatin1String("typesystem-paths"), typesystemPaths.join(QLatin1String(PATH_SPLITTER)));
     if (!apiVersions.isEmpty())
-        args["api-version"] = apiVersions.join("|");
+        args.insert(QLatin1String("api-version"), apiVersions.join(QLatin1Char('|')));
     return true;
 }
 
@@ -184,8 +184,8 @@ static QMap<QString, QString> getInitializedArguments()
 
     QString projectFileName;
     foreach (const QString& arg, arguments) {
-        if (arg.startsWith("--project-file")) {
-            int split = arg.indexOf("=");
+        if (arg.startsWith(QLatin1String("--project-file"))) {
+            int split = arg.indexOf(QLatin1Char('='));
             if (split > 0)
                 projectFileName = arg.mid(split + 1).trimmed();
             break;
@@ -225,17 +225,17 @@ static QMap<QString, QString> getCommandLineArgs()
     int argNum = 0;
     foreach (QString arg, arguments) {
         arg = arg.trimmed();
-        if (arg.startsWith("--")) {
-            int split = arg.indexOf("=");
+        if (arg.startsWith(QLatin1String("--"))) {
+            int split = arg.indexOf(QLatin1Char('='));
             if (split > 0)
                 args[arg.mid(2).left(split-2)] = arg.mid(split + 1).trimmed();
             else
                 args[arg.mid(2)] = QString();
-        } else if (arg.startsWith("-")) {
+        } else if (arg.startsWith(QLatin1Char('-'))) {
             args[arg.mid(1)] = QString();
         } else {
             argNum++;
-            args[QString("arg-%1").arg(argNum)] = arg;
+            args[QString::fromLatin1("arg-%1").arg(argNum)] = arg;
         }
     }
     return args;
@@ -248,20 +248,34 @@ void printUsage(const Generators& generators)
       << "shiboken [options] header-file typesystem-file\n\n"
       << "General options:\n";
     QMap<QString, QString> generalOptions;
-    generalOptions.insert("project-file=<file>", "text file containing a description of the binding project. Replaces and overrides command line arguments");
-    generalOptions.insert("debug-level=[sparse|medium|full]", "Set the debug level");
-    generalOptions.insert("silent", "Avoid printing any message");
-    generalOptions.insert("help", "Display this help and exit");
-    generalOptions.insert("no-suppress-warnings", "Show all warnings");
-    generalOptions.insert("output-directory=<path>", "The directory where the generated files will be written");
-    generalOptions.insert("include-paths=<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]", "Include paths used by the C++ parser");
-    generalOptions.insert("typesystem-paths=<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]", "Paths used when searching for typesystems");
-    generalOptions.insert("documentation-only", "Do not generates any code, just the documentation");
-    generalOptions.insert("license-file=<license-file>", "File used for copyright headers of generated files");
-    generalOptions.insert("version", "Output version information and exit");
-    generalOptions.insert("generator-set=<\"generator module\">", "generator-set to be used. e.g. qtdoc");
-    generalOptions.insert("api-version=<\"package mask\">,<\"version\">", "Specify the supported api version used to generate the bindings");
-    generalOptions.insert("drop-type-entries=\"<TypeEntry0>[;TypeEntry1;...]\"", "Semicolon separated list of type system entries (classes, namespaces, global functions and enums) to be dropped from generation.");
+    generalOptions.insert(QLatin1String("project-file=<file>"),
+                          QLatin1String("text file containing a description of the binding project. Replaces and overrides command line arguments"));
+    generalOptions.insert(QLatin1String("debug-level=[sparse|medium|full]"),
+                          QLatin1String("Set the debug level"));
+    generalOptions.insert(QLatin1String("silent"),
+                          QLatin1String("Avoid printing any message"));
+    generalOptions.insert(QLatin1String("help"),
+                          QLatin1String("Display this help and exit"));
+    generalOptions.insert(QLatin1String("no-suppress-warnings"),
+                          QLatin1String("Show all warnings"));
+    generalOptions.insert(QLatin1String("output-directory=<path>"),
+                          QLatin1String("The directory where the generated files will be written"));
+    generalOptions.insert(QLatin1String("include-paths=<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]"),
+                          QLatin1String("Include paths used by the C++ parser"));
+    generalOptions.insert(QLatin1String("typesystem-paths=<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]"),
+                          QLatin1String("Paths used when searching for typesystems"));
+    generalOptions.insert(QLatin1String("documentation-only"),
+                          QLatin1String("Do not generates any code, just the documentation"));
+    generalOptions.insert(QLatin1String("license-file=<license-file>"),
+                          QLatin1String("File used for copyright headers of generated files"));
+    generalOptions.insert(QLatin1String("version"),
+                          QLatin1String("Output version information and exit"));
+    generalOptions.insert(QLatin1String("generator-set=<\"generator module\">"),
+                          QLatin1String("generator-set to be used. e.g. qtdoc"));
+    generalOptions.insert(QLatin1String("api-version=<\"package mask\">,<\"version\">"),
+                          QLatin1String("Specify the supported api version used to generate the bindings"));
+    generalOptions.insert(QLatin1String("drop-type-entries=\"<TypeEntry0>[;TypeEntry1;...]\""),
+                          QLatin1String("Semicolon separated list of type system entries (classes, namespaces, global functions and enums) to be dropped from generation."));
     printOptions(s, generalOptions);
 
     foreach (const GeneratorPtr &generator, generators) {
@@ -302,53 +316,53 @@ int main(int argc, char *argv[])
     ArgsHandler argsHandler(args);
     Generators generators;
 
-    if (argsHandler.argExistsRemove("version")) {
+    if (argsHandler.argExistsRemove(QLatin1String("version"))) {
         printVerAndBanner();
         return EXIT_SUCCESS;
     }
 
-    QString generatorSet = argsHandler.removeArg("generator-set");
-    // Also check "generatorSet" command line argument for backward compatibility.
+    QString generatorSet = argsHandler.removeArg(QLatin1String("generator-set"));
+    // Also check QLatin1String("generatorSet") command line argument for backward compatibility.
     if (generatorSet.isEmpty())
-        generatorSet = argsHandler.removeArg("generatorSet");
+        generatorSet = argsHandler.removeArg(QLatin1String("generatorSet"));
 
     // Pre-defined generator sets.
-    if (generatorSet == "qtdoc") {
+    if (generatorSet == QLatin1String("qtdoc")) {
 #ifndef DOCSTRINGS_ENABLED
-        errorPrint("shiboken: Doc strings extractions was not enabled in this shiboken build.");
+        errorPrint(QLatin1String("shiboken: Doc strings extractions was not enabled in this shiboken build."));
         return EXIT_FAILURE;
 #else
         generators << new QtDocGenerator;
 #endif
-    } else if (generatorSet.isEmpty() || generatorSet == "shiboken") {
+    } else if (generatorSet.isEmpty() || generatorSet == QLatin1String("shiboken")) {
         generators << GeneratorPtr(new CppGenerator) << GeneratorPtr(new HeaderGenerator);
     } else {
-        errorPrint("shiboken: Unknown generator set, try \"shiboken\" or \"qtdoc\".");
+        errorPrint(QLatin1String("shiboken: Unknown generator set, try \"shiboken\" or \"qtdoc\"."));
         return EXIT_FAILURE;
     }
 
-    if (argsHandler.argExistsRemove("help")) {
+    if (argsHandler.argExistsRemove(QLatin1String("help"))) {
         printUsage(generators);
         return EXIT_SUCCESS;
     }
 
     QString licenseComment;
-    QString licenseFileName = argsHandler.removeArg("license-file");
+    QString licenseFileName = argsHandler.removeArg(QLatin1String("license-file"));
     if (!licenseFileName.isEmpty()) {
         if (QFile::exists(licenseFileName)) {
             QFile licenseFile(licenseFileName);
             if (licenseFile.open(QIODevice::ReadOnly))
-                licenseComment = licenseFile.readAll();
+                licenseComment = QString::fromUtf8(licenseFile.readAll());
         } else {
-            errorPrint(QString("Couldn't find the file containing the license heading: %1").
-                       arg(qPrintable(licenseFileName)));
+            errorPrint(QStringLiteral("Couldn't find the file containing the license heading: %1").
+                       arg(licenseFileName));
             return EXIT_FAILURE;
         }
     }
 
-    QString outputDirectory = argsHandler.removeArg("output-directory");
+    QString outputDirectory = argsHandler.removeArg(QLatin1String("output-directory"));
     if (outputDirectory.isEmpty())
-        outputDirectory = "out";
+        outputDirectory = QLatin1String("out");
 
     if (!QDir(outputDirectory).exists()) {
         if (!QDir().mkpath(outputDirectory)) {
@@ -362,53 +376,53 @@ int main(int argc, char *argv[])
     ApiExtractor extractor;
     extractor.setLogDirectory(outputDirectory);
 
-    if (argsHandler.argExistsRemove("silent")) {
+    if (argsHandler.argExistsRemove(QLatin1String("silent"))) {
         extractor.setSilent(true);
     } else {
-        QString level = argsHandler.removeArg("debug-level");
+        QString level = argsHandler.removeArg(QLatin1String("debug-level"));
         if (!level.isEmpty()) {
-            if (level == "sparse")
+            if (level == QLatin1String("sparse"))
                 extractor.setDebugLevel(ReportHandler::SparseDebug);
-            else if (level == "medium")
+            else if (level == QLatin1String("medium"))
                 extractor.setDebugLevel(ReportHandler::MediumDebug);
-            else if (level == "full")
+            else if (level == QLatin1String("full"))
                 extractor.setDebugLevel(ReportHandler::FullDebug);
         }
     }
-    if (argsHandler.argExistsRemove("no-suppress-warnings"))
+    if (argsHandler.argExistsRemove(QLatin1String("no-suppress-warnings")))
         extractor.setSuppressWarnings(false);
 
-    if (argsHandler.argExists("api-version")) {
-        QStringList versions = argsHandler.removeArg("api-version").split("|");
+    if (argsHandler.argExists(QLatin1String("api-version"))) {
+        QStringList versions = argsHandler.removeArg(QLatin1String("api-version")).split(QLatin1Char('|'));
         foreach (QString fullVersion, versions) {
-            QStringList parts = fullVersion.split(",");
+            QStringList parts = fullVersion.split(QLatin1Char(','));
             QString package;
             QString version;
-            package = parts.count() == 1 ? "*" : parts.first();
+            package = parts.count() == 1 ? QLatin1String("*") : parts.constFirst();
             version = parts.last();
             extractor.setApiVersion(package, version.toUtf8());
         }
     }
 
-    if (argsHandler.argExists("drop-type-entries"))
-        extractor.setDropTypeEntries(argsHandler.removeArg("drop-type-entries"));
+    if (argsHandler.argExists(QLatin1String("drop-type-entries")))
+        extractor.setDropTypeEntries(argsHandler.removeArg(QLatin1String("drop-type-entries")));
 
-    QString path = argsHandler.removeArg("typesystem-paths");
+    QString path = argsHandler.removeArg(QLatin1String("typesystem-paths"));
     if (!path.isEmpty())
-        extractor.addTypesystemSearchPath(path.split(PATH_SPLITTER));
+        extractor.addTypesystemSearchPath(path.split(QLatin1String(PATH_SPLITTER)));
 
-    path = argsHandler.removeArg("include-paths");
+    path = argsHandler.removeArg(QLatin1String("include-paths"));
     if (!path.isEmpty())
-        extractor.addIncludePath(path.split(PATH_SPLITTER));
+        extractor.addIncludePath(path.split(QLatin1String(PATH_SPLITTER)));
 
-    QString cppFileName = argsHandler.removeArg("arg-1");
-    QString typeSystemFileName = argsHandler.removeArg("arg-2");
+    QString cppFileName = argsHandler.removeArg(QLatin1String("arg-1"));
+    QString typeSystemFileName = argsHandler.removeArg(QLatin1String("arg-2"));
 
     /* Make sure to remove the project file's arguments (if any) and
      * --project-file, also the arguments of each generator before
      * checking if there isn't any existing arguments in argsHandler.
      */
-    argsHandler.removeArg("project-file");
+    argsHandler.removeArg(QLatin1String("project-file"));
     QMap<QString, QString> projectFileArgs = getInitializedArguments();
     if (!projectFileArgs.isEmpty()) {
         QMap<QString, QString>::const_iterator it =
@@ -426,7 +440,7 @@ int main(int argc, char *argv[])
     }
 
     if (!argsHandler.noArgs()) {
-        errorPrint("shiboken: Called with wrong arguments.");
+        errorPrint(QLatin1String("shiboken: Called with wrong arguments."));
         std::cout << "Note: use --help option for more information." << std::endl;
         return EXIT_FAILURE;
     }

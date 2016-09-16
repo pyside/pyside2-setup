@@ -45,13 +45,13 @@ Binder::Binder(CodeModel *__model, LocationManager &__location, Control *__contr
         name_cc(this),
         decl_cc(this)
 {
-    _M_qualified_types["char"] = QString();
-    _M_qualified_types["double"] = QString();
-    _M_qualified_types["float"] = QString();
-    _M_qualified_types["int"] = QString();
-    _M_qualified_types["long"] = QString();
-    _M_qualified_types["short"] = QString();
-    _M_qualified_types["void"] = QString();
+    _M_qualified_types.insert(QLatin1String("char"), QString());
+    _M_qualified_types.insert(QLatin1String("double"), QString());
+    _M_qualified_types.insert(QLatin1String("float"), QString());
+    _M_qualified_types.insert(QLatin1String("int"), QString());
+    _M_qualified_types.insert(QLatin1String("long"), QString());
+    _M_qualified_types.insert(QLatin1String("short"), QString());
+    _M_qualified_types.insert(QLatin1String("void"), QString());
 }
 
 Binder::~Binder()
@@ -527,7 +527,7 @@ void Binder::visitTypedef(TypedefAST *node)
         typeAlias->setName(alias_name);
         typeAlias->setType(qualifyType(typeInfo, currentScope()->qualifiedName()));
         typeAlias->setScope(typedefScope->qualifiedName());
-        _M_qualified_types[typeAlias->qualifiedName().join(".")] = QString();
+        _M_qualified_types[typeAlias->qualifiedName().join(QLatin1Char('.'))] = QString();
         currentScope()->addTypeAlias(typeAlias);
     } while (it != end);
 }
@@ -580,7 +580,7 @@ void Binder::visitForwardDeclarationSpecifier(ForwardDeclarationSpecifierAST *no
         return;
 
     ScopeModelItem scope = currentScope();
-    _M_qualified_types[(scope->qualifiedName() + name_cc.qualifiedName()).join(".")] = QString();
+    _M_qualified_types[(scope->qualifiedName() + name_cc.qualifiedName()).join(QLatin1Char('.'))] = QString();
 }
 
 void Binder::visitClassSpecifier(ClassSpecifierAST *node)
@@ -604,8 +604,8 @@ void Binder::visitClassSpecifier(ClassSpecifierAST *node)
     QStringList baseClasses = class_cc.baseClasses();
     TypeInfo info;
     for (int i = 0; i < baseClasses.size(); ++i) {
-        info.setQualifiedName(baseClasses.at(i).split("::"));
-        baseClasses[i] = qualifyType(info, scope->qualifiedName()).qualifiedName().join("::");
+        info.setQualifiedName(baseClasses.at(i).split(QLatin1String("::")));
+        baseClasses[i] = qualifyType(info, scope->qualifiedName()).qualifiedName().join(QLatin1String("::"));
     }
 
     _M_current_class->setBaseClasses(baseClasses);
@@ -614,15 +614,15 @@ void Binder::visitClassSpecifier(ClassSpecifierAST *node)
 
     if (!_M_current_template_parameters.isEmpty()) {
         QString name = _M_current_class->name();
-        name += "<";
+        name += QLatin1Char('<');
         for (int i = 0; i < _M_current_template_parameters.size(); ++i) {
             if (i > 0)
-                name += ",";
+                name += QLatin1Char(',');
 
             name += _M_current_template_parameters.at(i)->name();
         }
 
-        name += ">";
+        name += QLatin1Char('>');
         _M_current_class->setName(name);
     }
 
@@ -630,7 +630,7 @@ void Binder::visitClassSpecifier(ClassSpecifierAST *node)
     CodeModel::FunctionType oldFunctionType = changeCurrentFunctionType(CodeModel::Normal);
 
     _M_current_class->setScope(scope->qualifiedName());
-    _M_qualified_types[_M_current_class->qualifiedName().join(".")] = QString();
+    _M_qualified_types[_M_current_class->qualifiedName().join(QLatin1Char('.'))] = QString();
 
     scope->addClass(_M_current_class);
 
@@ -666,7 +666,7 @@ void Binder::visitEnumSpecifier(EnumSpecifierAST *node)
     bool isAnonymous = name.isEmpty();
     if (isAnonymous) {
         // anonymous enum
-        QString key = _M_context.join("::");
+        QString key = _M_context.join(QLatin1String("::"));
         int current = ++_M_anonymous_enums[key];
         name += QLatin1String("enum_");
         name += QString::number(current);
@@ -679,7 +679,7 @@ void Binder::visitEnumSpecifier(EnumSpecifierAST *node)
     _M_current_enum->setAnonymous(isAnonymous);
     _M_current_enum->setScope(enumScope->qualifiedName());
 
-    _M_qualified_types[_M_current_enum->qualifiedName().join(".")] = QString();
+    _M_qualified_types[_M_current_enum->qualifiedName().join(QLatin1Char('.'))] = QString();
 
     enumScope->addEnum(_M_current_enum);
 
@@ -690,10 +690,10 @@ void Binder::visitEnumSpecifier(EnumSpecifierAST *node)
 
 static QString strip_preprocessor_lines(const QString &name)
 {
-    QStringList lst = name.split("\n");
+    QStringList lst = name.split(QLatin1Char('\n'));
     QString s;
     for (int i = 0; i < lst.size(); ++i) {
-        if (!lst.at(i).startsWith('#'))
+        if (!lst.at(i).startsWith(QLatin1Char('#')))
             s += lst.at(i);
     }
     return s.trimmed();
@@ -709,9 +709,11 @@ void Binder::visitEnumerator(EnumeratorAST *node)
     if (ExpressionAST *expr = node->expression) {
         const Token &start_token = _M_token_stream->token((int) expr->start_token);
         const Token &end_token = _M_token_stream->token((int) expr->end_token);
-
-        e->setValue(strip_preprocessor_lines(QString::fromUtf8(&start_token.text[start_token.position],
-                                                               (int)(end_token.position - start_token.position)).trimmed()).remove(' '));
+        const QString token = QString::fromUtf8(&start_token.text[start_token.position],
+                                                (int)(end_token.position - start_token.position));
+        QString lines = strip_preprocessor_lines(token.trimmed());
+        lines.remove(QLatin1Char(' '));
+        e->setValue(lines);
     }
 
     _M_current_enum->addEnumerator(e);
@@ -727,7 +729,7 @@ void Binder::visitQEnums(QEnumsAST *node)
     const Token &start = _M_token_stream->token((int) node->start_token);
     const Token &end = _M_token_stream->token((int) node->end_token);
     QStringList enum_list = QString::fromLatin1(start.text + start.position,
-                                                end.position - start.position).split(' ');
+                                                end.position - start.position).split(QLatin1Char(' '));
 
     ScopeModelItem scope = currentScope();
     for (int i = 0; i < enum_list.size(); ++i)
@@ -818,12 +820,12 @@ TypeInfo Binder::qualifyType(const TypeInfo &type, const QStringList &context) c
     if (!context.size()) {
         // ### We can assume that this means global namespace for now...
         return type;
-    } else if (_M_qualified_types.contains(type.qualifiedName().join("."))) {
+    } else if (_M_qualified_types.contains(type.qualifiedName().join(QLatin1Char('.')))) {
         return type;
     } else {
         QStringList expanded = context;
         expanded << type.qualifiedName();
-        if (_M_qualified_types.contains(expanded.join("."))) {
+        if (_M_qualified_types.contains(expanded.join(QLatin1Char('.')))) {
             TypeInfo modified_type = type;
             modified_type.setQualifiedName(expanded);
             return modified_type;

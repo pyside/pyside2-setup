@@ -129,11 +129,11 @@ void DeclaratorCompiler::visitParameterDeclaration(ParameterDeclarationAST *node
 
         p.defaultValueExpression = QString();
         QString source = QString::fromUtf8(&start.text[start.position], length).trimmed();
-        QStringList list = source.split("\n");
+        QStringList list = source.split(QLatin1Char('\n'));
 
 
         for (int i = 0; i < list.size(); ++i) {
-            if (!list.at(i).startsWith("#"))
+            if (!list.at(i).startsWith(QLatin1Char('#')))
                 p.defaultValueExpression += list.at(i).trimmed();
         }
 

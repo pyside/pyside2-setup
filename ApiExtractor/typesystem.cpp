@@ -44,50 +44,50 @@ Handler::Handler(TypeDatabase* database, bool generate)
     m_currentDroppedEntryDepth = 0;
     m_ignoreDepth = 0;
 
-    tagNames["rejection"] = StackElement::Rejection;
-    tagNames["custom-type"] = StackElement::CustomTypeEntry;
-    tagNames["primitive-type"] = StackElement::PrimitiveTypeEntry;
-    tagNames["container-type"] = StackElement::ContainerTypeEntry;
-    tagNames["object-type"] = StackElement::ObjectTypeEntry;
-    tagNames["value-type"] = StackElement::ValueTypeEntry;
-    tagNames["interface-type"] = StackElement::InterfaceTypeEntry;
-    tagNames["namespace-type"] = StackElement::NamespaceTypeEntry;
-    tagNames["enum-type"] = StackElement::EnumTypeEntry;
-    tagNames["function"] = StackElement::FunctionTypeEntry;
-    tagNames["extra-includes"] = StackElement::ExtraIncludes;
-    tagNames["include"] = StackElement::Include;
-    tagNames["inject-code"] = StackElement::InjectCode;
-    tagNames["modify-function"] = StackElement::ModifyFunction;
-    tagNames["modify-field"] = StackElement::ModifyField;
-    tagNames["access"] = StackElement::Access;
-    tagNames["remove"] = StackElement::Removal;
-    tagNames["rename"] = StackElement::Rename;
-    tagNames["typesystem"] = StackElement::Root;
-    tagNames["custom-constructor"] = StackElement::CustomMetaConstructor;
-    tagNames["custom-destructor"] = StackElement::CustomMetaDestructor;
-    tagNames["argument-map"] = StackElement::ArgumentMap;
-    tagNames["suppress-warning"] = StackElement::SuppressedWarning;
-    tagNames["load-typesystem"] = StackElement::LoadTypesystem;
-    tagNames["define-ownership"] = StackElement::DefineOwnership;
-    tagNames["replace-default-expression"] = StackElement::ReplaceDefaultExpression;
-    tagNames["reject-enum-value"] = StackElement::RejectEnumValue;
-    tagNames["replace-type"] = StackElement::ReplaceType;
-    tagNames["conversion-rule"] = StackElement::ConversionRule;
-    tagNames["native-to-target"] = StackElement::NativeToTarget;
-    tagNames["target-to-native"] = StackElement::TargetToNative;
-    tagNames["add-conversion"] = StackElement::AddConversion;
-    tagNames["modify-argument"] = StackElement::ModifyArgument;
-    tagNames["remove-argument"] = StackElement::RemoveArgument;
-    tagNames["remove-default-expression"] = StackElement::RemoveDefaultExpression;
-    tagNames["template"] = StackElement::Template;
-    tagNames["insert-template"] = StackElement::TemplateInstanceEnum;
-    tagNames["replace"] = StackElement::Replace;
-    tagNames["no-null-pointer"] = StackElement::NoNullPointers;
-    tagNames["reference-count"] = StackElement::ReferenceCount;
-    tagNames["parent"] = StackElement::ParentOwner;
-    tagNames["inject-documentation"] = StackElement::InjectDocumentation;
-    tagNames["modify-documentation"] = StackElement::ModifyDocumentation;
-    tagNames["add-function"] = StackElement::AddFunction;
+    tagNames.insert(QLatin1String("rejection"), StackElement::Rejection);
+    tagNames.insert(QLatin1String("custom-type"), StackElement::CustomTypeEntry);
+    tagNames.insert(QLatin1String("primitive-type"), StackElement::PrimitiveTypeEntry);
+    tagNames.insert(QLatin1String("container-type"), StackElement::ContainerTypeEntry);
+    tagNames.insert(QLatin1String("object-type"), StackElement::ObjectTypeEntry);
+    tagNames.insert(QLatin1String("value-type"), StackElement::ValueTypeEntry);
+    tagNames.insert(QLatin1String("interface-type"), StackElement::InterfaceTypeEntry);
+    tagNames.insert(QLatin1String("namespace-type"), StackElement::NamespaceTypeEntry);
+    tagNames.insert(QLatin1String("enum-type"), StackElement::EnumTypeEntry);
+    tagNames.insert(QLatin1String("function"), StackElement::FunctionTypeEntry);
+    tagNames.insert(QLatin1String("extra-includes"), StackElement::ExtraIncludes);
+    tagNames.insert(QLatin1String("include"), StackElement::Include);
+    tagNames.insert(QLatin1String("inject-code"), StackElement::InjectCode);
+    tagNames.insert(QLatin1String("modify-function"), StackElement::ModifyFunction);
+    tagNames.insert(QLatin1String("modify-field"), StackElement::ModifyField);
+    tagNames.insert(QLatin1String("access"), StackElement::Access);
+    tagNames.insert(QLatin1String("remove"), StackElement::Removal);
+    tagNames.insert(QLatin1String("rename"), StackElement::Rename);
+    tagNames.insert(QLatin1String("typesystem"), StackElement::Root);
+    tagNames.insert(QLatin1String("custom-constructor"), StackElement::CustomMetaConstructor);
+    tagNames.insert(QLatin1String("custom-destructor"), StackElement::CustomMetaDestructor);
+    tagNames.insert(QLatin1String("argument-map"), StackElement::ArgumentMap);
+    tagNames.insert(QLatin1String("suppress-warning"), StackElement::SuppressedWarning);
+    tagNames.insert(QLatin1String("load-typesystem"), StackElement::LoadTypesystem);
+    tagNames.insert(QLatin1String("define-ownership"), StackElement::DefineOwnership);
+    tagNames.insert(QLatin1String("replace-default-expression"), StackElement::ReplaceDefaultExpression);
+    tagNames.insert(QLatin1String("reject-enum-value"), StackElement::RejectEnumValue);
+    tagNames.insert(QLatin1String("replace-type"), StackElement::ReplaceType);
+    tagNames.insert(QLatin1String("conversion-rule"), StackElement::ConversionRule);
+    tagNames.insert(QLatin1String("native-to-target"), StackElement::NativeToTarget);
+    tagNames.insert(QLatin1String("target-to-native"), StackElement::TargetToNative);
+    tagNames.insert(QLatin1String("add-conversion"), StackElement::AddConversion);
+    tagNames.insert(QLatin1String("modify-argument"), StackElement::ModifyArgument);
+    tagNames.insert(QLatin1String("remove-argument"), StackElement::RemoveArgument);
+    tagNames.insert(QLatin1String("remove-default-expression"), StackElement::RemoveDefaultExpression);
+    tagNames.insert(QLatin1String("template"), StackElement::Template);
+    tagNames.insert(QLatin1String("insert-template"), StackElement::TemplateInstanceEnum);
+    tagNames.insert(QLatin1String("replace"), StackElement::Replace);
+    tagNames.insert(QLatin1String("no-null-pointer"), StackElement::NoNullPointers);
+    tagNames.insert(QLatin1String("reference-count"), StackElement::ReferenceCount);
+    tagNames.insert(QLatin1String("parent"), StackElement::ParentOwner);
+    tagNames.insert(QLatin1String("inject-documentation"), StackElement::InjectDocumentation);
+    tagNames.insert(QLatin1String("modify-documentation"), StackElement::ModifyDocumentation);
+    tagNames.insert(QLatin1String("add-function"), StackElement::AddFunction);
 }
 
 bool Handler::error(const QXmlParseException &e)
@@ -152,7 +152,7 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
     }
 
     QString tagName = localName.toLower();
-    if (tagName == "import-file")
+    if (tagName == QLatin1String("import-file"))
         return true;
 
     if (!m_current)
@@ -190,14 +190,14 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
     case StackElement::AddConversion: {
         CustomConversion* customConversion = static_cast<TypeEntry*>(m_current->entry)->customConversion();
         if (!customConversion) {
-            m_error = "CustomConversion object is missing.";
+            m_error = QLatin1String("CustomConversion object is missing.");
             return false;
         }
 
         QString code = m_contextStack.top()->codeSnips.takeLast().code();
         if (m_current->type == StackElement::AddConversion) {
             if (customConversion->targetToNativeConversions().isEmpty()) {
-                m_error = "CustomConversion's target to native conversions missing.";
+                m_error = QLatin1String("CustomConversion's target to native conversions missing.");
                 return false;
             }
             customConversion->targetToNativeConversions().last()->setConversion(code);
@@ -338,26 +338,26 @@ bool Handler::characters(const QString &ch)
 
 bool Handler::importFileElement(const QXmlAttributes &atts)
 {
-    QString fileName = atts.value("name");
+    QString fileName = atts.value(QLatin1String("name"));
     if (fileName.isEmpty()) {
-        m_error = "Required attribute 'name' missing for include-file tag.";
+        m_error = QLatin1String("Required attribute 'name' missing for include-file tag.");
         return false;
     }
 
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        file.setFileName(":/trolltech/generator/" + fileName);
+        file.setFileName(QLatin1String(":/trolltech/generator/") + fileName);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            m_error = QString("Could not open file: '%1'").arg(fileName);
+            m_error = QString::fromLatin1("Could not open file: '%1'").arg(QDir::toNativeSeparators(fileName));
             return false;
         }
     }
 
-    QString quoteFrom = atts.value("quote-after-line");
+    QString quoteFrom = atts.value(QLatin1String("quote-after-line"));
     bool foundFromOk = quoteFrom.isEmpty();
     bool from = quoteFrom.isEmpty();
 
-    QString quoteTo = atts.value("quote-before-line");
+    QString quoteTo = atts.value(QLatin1String("quote-before-line"));
     bool foundToOk = quoteTo.isEmpty();
     bool to = true;
 
@@ -370,22 +370,24 @@ bool Handler::importFileElement(const QXmlAttributes &atts)
             break;
         }
         if (from && to)
-            characters(line + "\n");
+            characters(line + QLatin1Char('\n'));
         if (!from && line.contains(quoteFrom)) {
             from = true;
             foundFromOk = true;
         }
     }
     if (!foundFromOk || !foundToOk) {
-        QString fromError = QString("Could not find quote-after-line='%1' in file '%2'.").arg(quoteFrom).arg(fileName);
-        QString toError = QString("Could not find quote-before-line='%1' in file '%2'.").arg(quoteTo).arg(fileName);
+        QString fromError = QStringLiteral("Could not find quote-after-line='%1' in file '%2'.")
+                                           .arg(quoteFrom, fileName);
+        QString toError = QStringLiteral("Could not find quote-before-line='%1' in file '%2'.")
+                                         .arg(quoteTo, fileName);
 
         if (!foundToOk)
             m_error = toError;
         if (!foundFromOk)
             m_error = fromError;
         if (!foundFromOk && !foundToOk)
-            m_error = fromError + " " + toError;
+            m_error = fromError + QLatin1Char(' ') + toError;
         return false;
     }
 
@@ -395,13 +397,14 @@ bool Handler::importFileElement(const QXmlAttributes &atts)
 bool Handler::convertBoolean(const QString &_value, const QString &attributeName, bool defaultValue)
 {
     QString value = _value.toLower();
-    if (value == "true" || value == "yes")
+    if (value == QLatin1String("true") || value == QLatin1String("yes"))
         return true;
-     else if (value == "false" || value == "no")
+     else if (value == QLatin1String("false") || value == QLatin1String("no"))
         return false;
      else {
-        QString warn = QString("Boolean value '%1' not supported in attribute '%2'. Use 'yes' or 'no'. Defaulting to '%3'.")
-                       .arg(value).arg(attributeName).arg(defaultValue ? "yes" : "no");
+        QString warn = QStringLiteral("Boolean value '%1' not supported in attribute '%2'. Use 'yes' or 'no'. Defaulting to '%3'.")
+                                      .arg(value, attributeName,
+                                           defaultValue ? QLatin1String("yes") : QLatin1String("no"));
 
         qCWarning(lcShiboken).noquote().nospace() << warn;
         return defaultValue;
@@ -436,20 +439,19 @@ static QString getNamePrefix(StackElement* element)
 {
     QStringList names;
     getNamePrefixRecursive(element, names);
-    return names.join(".");
+    return names.join(QLatin1Char('.'));
 }
 
 // Returns empty string if there's no error.
 static QString checkSignatureError(const QString& signature, const QString& tag)
 {
-    QString funcName = signature.left(signature.indexOf('(')).trimmed();
-    static QRegExp whiteSpace("\\s");
-    if (!funcName.startsWith("operator ") && funcName.contains(whiteSpace)) {
-        return QString("Error in <%1> tag signature attribute '%2'.\n"
-                       "White spaces aren't allowed in function names, "
-                       "and return types should not be part of the signature.")
-                  .arg(tag)
-                  .arg(signature);
+    QString funcName = signature.left(signature.indexOf(QLatin1Char('('))).trimmed();
+    static QRegExp whiteSpace(QLatin1String("\\s"));
+    if (!funcName.startsWith(QLatin1String("operator ")) && funcName.contains(whiteSpace)) {
+        return QStringLiteral("Error in <%1> tag signature attribute '%2'.\n"
+                              "White spaces aren't allowed in function names, "
+                              "and return types should not be part of the signature.")
+                              .arg(tag, signature);
     }
     return QString();
 }
@@ -462,9 +464,9 @@ bool Handler::startElement(const QString &, const QString &n,
         return true;
     }
 
-    if (!m_defaultPackage.isEmpty() && atts.index("since") != -1) {
+    if (!m_defaultPackage.isEmpty() && atts.index(QLatin1String("since")) != -1) {
         TypeDatabase* td = TypeDatabase::instance();
-        if (!td->checkApiVersion(m_defaultPackage, atts.value("since").toUtf8())) {
+        if (!td->checkApiVersion(m_defaultPackage, atts.value(QLatin1String("since")).toUtf8())) {
             ++m_ignoreDepth;
             return true;
         }
@@ -472,11 +474,11 @@ bool Handler::startElement(const QString &, const QString &n,
 
 
     QString tagName = n.toLower();
-    if (tagName == "import-file")
+    if (tagName == QLatin1String("import-file"))
         return importFileElement(atts);
 
     if (!tagNames.contains(tagName)) {
-        m_error = QString("Unknown tag name: '%1'").arg(tagName);
+        m_error = QStringLiteral("Unknown tag name: '%1'").arg(tagName);
         return false;
     }
 
@@ -502,71 +504,71 @@ bool Handler::startElement(const QString &, const QString &n,
 
     if (element->type & StackElement::TypeEntryMask) {
         QHash<QString, QString> attributes;
-        attributes["name"] = QString();
-        attributes["since"] = QString("0");
-        attributes["revision"] = QString("0");
+        attributes.insert(QLatin1String("name"), QString());
+        attributes.insert(QLatin1String("revision"), QLatin1String("0"));
+        attributes.insert(QLatin1String("since"), QLatin1String("0"));
 
         switch (element->type) {
         case StackElement::PrimitiveTypeEntry:
-            attributes["target-lang-name"] = QString();
-            attributes["target-lang-api-name"] = QString();
-            attributes["preferred-conversion"] = "yes";
-            attributes["preferred-target-lang-type"] = "yes";
-            attributes["default-constructor"] = QString();
+            attributes.insert(QLatin1String("target-lang-name"), QString());
+            attributes.insert(QLatin1String("target-lang-api-name"), QString());
+            attributes.insert(QLatin1String("preferred-conversion"), QLatin1String("yes"));
+            attributes.insert(QLatin1String("preferred-target-lang-type"), QLatin1String("yes"));
+            attributes.insert(QLatin1String("default-constructor"), QString());
             break;
         case StackElement::ContainerTypeEntry:
-            attributes["type"] = QString();
+            attributes.insert(QLatin1String("type"), QString());
             break;
         case StackElement::EnumTypeEntry:
-            attributes["flags"] = QString();
-            attributes["flags-revision"] = QString();
-            attributes["upper-bound"] = QString();
-            attributes["lower-bound"] = QString();
-            attributes["force-integer"] = "no";
-            attributes["extensible"] = "no";
-            attributes["identified-by-value"] = QString();
+            attributes.insert(QLatin1String("flags"), QString());
+            attributes.insert(QLatin1String("flags-revision"), QString());
+            attributes.insert(QLatin1String("upper-bound"), QString());
+            attributes.insert(QLatin1String("lower-bound"), QString());
+            attributes.insert(QLatin1String("force-integer"), QLatin1String("no"));
+            attributes.insert(QLatin1String("extensible"), QLatin1String("no"));
+            attributes.insert(QLatin1String("identified-by-value"), QString());
             break;
         case StackElement::ValueTypeEntry:
-            attributes["default-constructor"] = QString();
+            attributes.insert(QLatin1String("default-constructor"), QString());
             // fall throooough
         case StackElement::ObjectTypeEntry:
-            attributes["force-abstract"] = QString("no");
-            attributes["deprecated"] = QString("no");
-            attributes["hash-function"] = QString("");
-            attributes["stream"] = QString("no");
+            attributes.insert(QLatin1String("force-abstract"), QLatin1String("no"));
+            attributes.insert(QLatin1String("deprecated"), QLatin1String("no"));
+            attributes.insert(QLatin1String("hash-function"), QString());
+            attributes.insert(QLatin1String("stream"), QLatin1String("no"));
             // fall throooough
         case StackElement::InterfaceTypeEntry:
-            attributes["default-superclass"] = m_defaultSuperclass;
-            attributes["polymorphic-id-expression"] = QString();
-            attributes["delete-in-main-thread"] = QString("no");
-            attributes["held-type"] = QString();
-            attributes["copyable"] = QString();
+            attributes[QLatin1String("default-superclass")] = m_defaultSuperclass;
+            attributes.insert(QLatin1String("polymorphic-id-expression"), QString());
+            attributes.insert(QLatin1String("delete-in-main-thread"), QLatin1String("no"));
+            attributes.insert(QLatin1String("held-type"), QString());
+            attributes.insert(QLatin1String("copyable"), QString());
             // fall through
         case StackElement::NamespaceTypeEntry:
-            attributes["target-lang-name"] = QString();
-            attributes["package"] = m_defaultPackage;
-            attributes["expense-cost"] = "1";
-            attributes["expense-limit"] = "none";
-            attributes["polymorphic-base"] = QString("no");
-            attributes["generate"] = QString("yes");
-            attributes["target-type"] = QString();
-            attributes["generic-class"] = QString("no");
+            attributes.insert(QLatin1String("target-lang-name"), QString());
+            attributes[QLatin1String("package")] = m_defaultPackage;
+            attributes.insert(QLatin1String("expense-cost"), QLatin1String("1"));
+            attributes.insert(QLatin1String("expense-limit"), QLatin1String("none"));
+            attributes.insert(QLatin1String("polymorphic-base"), QLatin1String("no"));
+            attributes.insert(QLatin1String("generate"), QLatin1String("yes"));
+            attributes.insert(QLatin1String("target-type"), QString());
+            attributes.insert(QLatin1String("generic-class"), QLatin1String("no"));
             break;
         case StackElement::FunctionTypeEntry:
-            attributes["signature"] = QString();
-            attributes["rename"] = QString();
+            attributes.insert(QLatin1String("signature"), QString());
+            attributes.insert(QLatin1String("rename"), QString());
             break;
         default:
             { } // nada
         };
 
         fetchAttributeValues(tagName, atts, &attributes);
-        QString name = attributes["name"];
-        double since = attributes["since"].toDouble();
+        QString name = attributes[QLatin1String("name")];
+        double since = attributes[QLatin1String("since")].toDouble();
 
         if (m_database->hasDroppedTypeEntries()) {
-            QString identifier = getNamePrefix(element) + '.';
-            identifier += (element->type == StackElement::FunctionTypeEntry ? attributes["signature"] : name);
+            QString identifier = getNamePrefix(element) + QLatin1Char('.');
+            identifier += (element->type == StackElement::FunctionTypeEntry ? attributes[QLatin1String("signature")] : name);
             if (m_database->shouldDropTypeEntry(identifier)) {
                 m_currentDroppedEntry = element;
                 m_currentDroppedEntryDepth = 1;
@@ -581,23 +583,24 @@ bool Handler::startElement(const QString &, const QString &n,
         // The top level tag 'function' has only the 'signature' tag
         // and we should extract the 'name' value from it.
         if (element->type == StackElement::FunctionTypeEntry) {
-            QString signature = attributes["signature"];
-            name = signature.left(signature.indexOf('(')).trimmed();
-            QString errorString = checkSignatureError(signature, "function");
+            QString signature = attributes[QLatin1String("signature")];
+            name = signature.left(signature.indexOf(QLatin1Char('('))).trimmed();
+            QString errorString = checkSignatureError(signature, QLatin1String("function"));
             if (!errorString.isEmpty()) {
                 m_error = errorString;
                 return false;
             }
-            QString rename = attributes["rename"];
+            QString rename = attributes[QLatin1String("rename")];
             if (!rename.isEmpty()) {
-                static QRegExp functionNameRegExp("^[a-zA-Z_][a-zA-Z0-9_]*$");
+                static QRegExp functionNameRegExp(QLatin1String("^[a-zA-Z_][a-zA-Z0-9_]*$"));
                 if (!functionNameRegExp.exactMatch(rename)) {
-                    m_error = "can not rename '" + signature + "', '" + rename + "' is not a valid function name";
+                    m_error = QLatin1String("can not rename '") + signature + QLatin1String("', '")
+                              + rename + QLatin1String("' is not a valid function name");
                     return false;
                 }
                 FunctionModification mod(since);
                 mod.signature = signature;
-                mod.renamedToName = attributes["rename"];
+                mod.renamedToName = attributes[QLatin1String("rename")];
                 mod.modifiers |= Modification::Rename;
                 m_contextStack.top()->functionMods << mod;
             }
@@ -616,9 +619,9 @@ bool Handler::startElement(const QString &, const QString &n,
 
         if (element->type == StackElement::EnumTypeEntry) {
             if (name.isEmpty()) {
-                name = attributes["identified-by-value"];
-            } else if (!attributes["identified-by-value"].isEmpty()) {
-                m_error = "can't specify both 'name' and 'identified-by-value' attributes";
+                name = attributes[QLatin1String("identified-by-value")];
+            } else if (!attributes[QLatin1String("identified-by-value")].isEmpty()) {
+                m_error = QLatin1String("can't specify both 'name' and 'identified-by-value' attributes");
                 return false;
             }
         }
@@ -626,12 +629,12 @@ bool Handler::startElement(const QString &, const QString &n,
         // Fix type entry name using nesting information.
         if (element->type & StackElement::TypeEntryMask
             && element->parent && element->parent->type != StackElement::Root) {
-            name = element->parent->entry->name() + "::" + name;
+            name = element->parent->entry->name() + QLatin1String("::") + name;
         }
 
 
         if (name.isEmpty()) {
-            m_error = "no 'name' attribute specified";
+            m_error = QLatin1String("no 'name' attribute specified");
             return false;
         }
 
@@ -640,11 +643,11 @@ bool Handler::startElement(const QString &, const QString &n,
             element->entry = new TypeEntry(name, TypeEntry::CustomType, since);
             break;
         case StackElement::PrimitiveTypeEntry: {
-            QString targetLangName = attributes["target-lang-name"];
-            QString targetLangApiName = attributes["target-lang-api-name"];
-            QString preferredConversion = attributes["preferred-conversion"].toLower();
-            QString preferredTargetLangType = attributes["preferred-target-lang-type"].toLower();
-            QString defaultConstructor = attributes["default-constructor"];
+            QString targetLangName = attributes[QLatin1String("target-lang-name")];
+            QString targetLangApiName = attributes[QLatin1String("target-lang-api-name")];
+            QString preferredConversion = attributes[QLatin1String("preferred-conversion")].toLower();
+            QString preferredTargetLangType = attributes[QLatin1String("preferred-target-lang-type")].toLower();
+            QString defaultConstructor = attributes[QLatin1String("default-constructor")];
 
             if (targetLangName.isEmpty())
                 targetLangName = name;
@@ -659,10 +662,10 @@ bool Handler::startElement(const QString &, const QString &n,
             type->setDefaultConstructor(defaultConstructor);
 
             bool preferred;
-            preferred = convertBoolean(preferredConversion, "preferred-conversion", true);
+            preferred = convertBoolean(preferredConversion, QLatin1String("preferred-conversion"), true);
             type->setPreferredConversion(preferred);
             preferred = convertBoolean(preferredTargetLangType,
-                                       "preferred-target-lang-type", true);
+                                       QLatin1String("preferred-target-lang-type"), true);
             type->setPreferredTargetLangType(preferred);
 
             element->entry = type;
@@ -670,14 +673,14 @@ bool Handler::startElement(const QString &, const QString &n,
         break;
 
         case StackElement::ContainerTypeEntry: {
-            QString typeName = attributes["type"];
+            QString typeName = attributes[QLatin1String("type")];
             ContainerTypeEntry::Type containerType =
                     ContainerTypeEntry::containerTypeFromString(typeName);
             if (typeName.isEmpty()) {
-                m_error = "no 'type' attribute specified";
+                m_error = QLatin1String("no 'type' attribute specified");
                 return false;
             } else if (containerType == ContainerTypeEntry::NoContainer) {
-                m_error = "there is no container of type " + typeName;
+                m_error = QLatin1String("there is no container of type ") + typeName;
                 return false;
             }
 
@@ -693,36 +696,36 @@ bool Handler::startElement(const QString &, const QString &n,
                 m_currentEnum = new EnumTypeEntry(QString(), name, since);
              else
                 m_currentEnum =
-                    new EnumTypeEntry(QStringList(names.mid(0, names.size() - 1)).join("::"),
+                    new EnumTypeEntry(QStringList(names.mid(0, names.size() - 1)).join(QLatin1String("::")),
                                       names.last(), since);
-            m_currentEnum->setAnonymous(!attributes["identified-by-value"].isEmpty());
+            m_currentEnum->setAnonymous(!attributes[QLatin1String("identified-by-value")].isEmpty());
             element->entry = m_currentEnum;
             m_currentEnum->setCodeGeneration(m_generate);
             m_currentEnum->setTargetLangPackage(m_defaultPackage);
-            m_currentEnum->setUpperBound(attributes["upper-bound"]);
-            m_currentEnum->setLowerBound(attributes["lower-bound"]);
-            m_currentEnum->setForceInteger(convertBoolean(attributes["force-integer"], "force-integer", false));
-            m_currentEnum->setExtensible(convertBoolean(attributes["extensible"], "extensible", false));
+            m_currentEnum->setUpperBound(attributes[QLatin1String("upper-bound")]);
+            m_currentEnum->setLowerBound(attributes[QLatin1String("lower-bound")]);
+            m_currentEnum->setForceInteger(convertBoolean(attributes[QLatin1String("force-integer")], QLatin1String("force-integer"), false));
+            m_currentEnum->setExtensible(convertBoolean(attributes[QLatin1String("extensible")], QLatin1String("extensible"), false));
 
             // put in the flags parallel...
-            QString flagName = attributes["flags"];
+            QString flagName = attributes[QLatin1String("flags")];
             if (!flagName.isEmpty()) {
-                FlagsTypeEntry *ftype = new FlagsTypeEntry("QFlags<" + name + ">", since);
+                FlagsTypeEntry *ftype = new FlagsTypeEntry(QLatin1String("QFlags<") + name + QLatin1Char('>'), since);
                 ftype->setOriginator(m_currentEnum);
                 // Try to get the guess the qualified flag name
-                if (!flagName.contains("::") && names.count() > 1) {
+                if (!flagName.contains(QLatin1String("::")) && names.count() > 1) {
                     QStringList cpy(names);
                     cpy.removeLast();
                     cpy.append(flagName);
-                    flagName = cpy.join("::");
+                    flagName = cpy.join(QLatin1String("::"));
                 }
 
                 ftype->setOriginalName(flagName);
                 ftype->setCodeGeneration(m_generate);
                 QString n = ftype->originalName();
 
-                QStringList lst = n.split("::");
-                if (QStringList(lst.mid(0, lst.size() - 1)).join("::") != m_currentEnum->targetLangQualifier()) {
+                QStringList lst = n.split(QLatin1String("::"));
+                if (QStringList(lst.mid(0, lst.size() - 1)).join(QLatin1String("::")) != m_currentEnum->targetLangQualifier()) {
                     qCWarning(lcShiboken).noquote().nospace()
                         << QStringLiteral("enum %1 and flags %2 differ in qualifiers")
                                           .arg(m_currentEnum->targetLangQualifier(), lst.constFirst());
@@ -734,7 +737,9 @@ bool Handler::startElement(const QString &, const QString &n,
                 m_database->addFlagsType(ftype);
                 m_database->addType(ftype);
 
-                QString revision = attributes["flags-revision"].isEmpty() ? attributes["revision"] : attributes["flags-revision"];
+                QString revision = attributes[QLatin1String("flags-revision")].isEmpty()
+                                   ? attributes[QLatin1String("revision")]
+                                   : attributes[QLatin1String("flags-revision")];
                 setTypeRevision(ftype, revision.toInt());
             }
         }
@@ -742,13 +747,13 @@ bool Handler::startElement(const QString &, const QString &n,
 
         case StackElement::InterfaceTypeEntry: {
             ObjectTypeEntry *otype = new ObjectTypeEntry(name, since);
-            QString targetLangName = attributes["target-lang-name"];
+            QString targetLangName = attributes[QLatin1String("target-lang-name")];
             if (targetLangName.isEmpty())
                 targetLangName = name;
             InterfaceTypeEntry *itype =
                 new InterfaceTypeEntry(InterfaceTypeEntry::interfaceName(targetLangName), since);
 
-            if (!convertBoolean(attributes["generate"], "generate", true))
+            if (!convertBoolean(attributes[QLatin1String("generate")], QLatin1String("generate"), true))
                 itype->setCodeGeneration(TypeEntry::GenerateForSubclass);
             else
                 itype->setCodeGeneration(m_generate);
@@ -760,7 +765,7 @@ bool Handler::startElement(const QString &, const QString &n,
         case StackElement::ValueTypeEntry: {
             if (!element->entry) {
                 ValueTypeEntry* typeEntry = new ValueTypeEntry(name, since);
-                QString defaultConstructor = attributes["default-constructor"];
+                QString defaultConstructor = attributes[QLatin1String("default-constructor")];
                 if (!defaultConstructor.isEmpty())
                     typeEntry->setDefaultConstructor(defaultConstructor);
                 element->entry = typeEntry;
@@ -776,39 +781,39 @@ bool Handler::startElement(const QString &, const QString &n,
             if (!element->entry)
                 element->entry = new ObjectTypeEntry(name, since);
 
-            element->entry->setStream(attributes["stream"] == QString("yes"));
+            element->entry->setStream(attributes[QLatin1String("stream")] == QLatin1String("yes"));
 
             ComplexTypeEntry *ctype = static_cast<ComplexTypeEntry *>(element->entry);
-            ctype->setTargetLangPackage(attributes["package"]);
-            ctype->setDefaultSuperclass(attributes["default-superclass"]);
-            ctype->setGenericClass(convertBoolean(attributes["generic-class"], "generic-class", false));
+            ctype->setTargetLangPackage(attributes[QLatin1String("package")]);
+            ctype->setDefaultSuperclass(attributes[QLatin1String("default-superclass")]);
+            ctype->setGenericClass(convertBoolean(attributes[QLatin1String("generic-class")], QLatin1String("generic-class"), false));
 
-            if (!convertBoolean(attributes["generate"], "generate", true))
+            if (!convertBoolean(attributes[QLatin1String("generate")], QLatin1String("generate"), true))
                 element->entry->setCodeGeneration(TypeEntry::GenerateForSubclass);
             else
                 element->entry->setCodeGeneration(m_generate);
 
-            QString targetLangName = attributes["target-lang-name"];
+            QString targetLangName = attributes[QLatin1String("target-lang-name")];
             if (!targetLangName.isEmpty())
                 ctype->setTargetLangName(targetLangName);
 
             // The expense policy
-            QString limit = attributes["expense-limit"];
-            if (!limit.isEmpty() && limit != "none") {
+            QString limit = attributes[QLatin1String("expense-limit")];
+            if (!limit.isEmpty() && limit != QLatin1String("none")) {
                 ExpensePolicy ep;
                 ep.limit = limit.toInt();
-                ep.cost = attributes["expense-cost"];
+                ep.cost = attributes[QLatin1String("expense-cost")];
                 ctype->setExpensePolicy(ep);
             }
 
 
-            ctype->setIsPolymorphicBase(convertBoolean(attributes["polymorphic-base"], "polymorphic-base", false));
-            ctype->setPolymorphicIdValue(attributes["polymorphic-id-expression"]);
+            ctype->setIsPolymorphicBase(convertBoolean(attributes[QLatin1String("polymorphic-base")], QLatin1String("polymorphic-base"), false));
+            ctype->setPolymorphicIdValue(attributes[QLatin1String("polymorphic-id-expression")]);
             //Copyable
-            if (attributes["copyable"].isEmpty())
+            if (attributes[QLatin1String("copyable")].isEmpty())
                 ctype->setCopyable(ComplexTypeEntry::Unknown);
              else {
-                if (convertBoolean(attributes["copyable"], "copyable", false))
+                if (convertBoolean(attributes[QLatin1String("copyable")], QLatin1String("copyable"), false))
                     ctype->setCopyable(ComplexTypeEntry::CopyableSet);
                  else
                     ctype->setCopyable(ComplexTypeEntry::NonCopyableSet);
@@ -816,46 +821,47 @@ bool Handler::startElement(const QString &, const QString &n,
             }
 
             if (element->type == StackElement::ObjectTypeEntry || element->type == StackElement::ValueTypeEntry)
-                ctype->setHashFunction(attributes["hash-function"]);
+                ctype->setHashFunction(attributes[QLatin1String("hash-function")]);
 
 
-            ctype->setHeldType(attributes["held-type"]);
+            ctype->setHeldType(attributes[QLatin1String("held-type")]);
 
             if (element->type == StackElement::ObjectTypeEntry
                 || element->type == StackElement::ValueTypeEntry) {
-                if (convertBoolean(attributes["force-abstract"], "force-abstract", false))
+                if (convertBoolean(attributes[QLatin1String("force-abstract")], QLatin1String("force-abstract"), false))
                     ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::ForceAbstract);
-                if (convertBoolean(attributes["deprecated"], "deprecated", false))
+                if (convertBoolean(attributes[QLatin1String("deprecated")], QLatin1String("deprecated"), false))
                     ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::Deprecated);
             }
 
             if (element->type == StackElement::InterfaceTypeEntry
                 || element->type == StackElement::ValueTypeEntry
                 || element->type == StackElement::ObjectTypeEntry) {
-                if (convertBoolean(attributes["delete-in-main-thread"], "delete-in-main-thread", false))
+                if (convertBoolean(attributes[QLatin1String("delete-in-main-thread")], QLatin1String("delete-in-main-thread"), false))
                     ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::DeleteInMainThread);
             }
 
-            QString targetType = attributes["target-type"];
+            QString targetType = attributes[QLatin1String("target-type")];
             if (!targetType.isEmpty() && element->entry->isComplex())
                 static_cast<ComplexTypeEntry *>(element->entry)->setTargetType(targetType);
 
             // ctype->setInclude(Include(Include::IncludePath, ctype->name()));
             ctype = ctype->designatedInterface();
             if (ctype)
-                ctype->setTargetLangPackage(attributes["package"]);
+                ctype->setTargetLangPackage(attributes[QLatin1String("package")]);
 
         }
         break;
         case StackElement::FunctionTypeEntry: {
-            QString signature = attributes["signature"];
+            QString signature = attributes[QLatin1String("signature")];
             signature = TypeDatabase::normalizedSignature(signature.toLatin1().constData());
             element->entry = m_database->findType(name);
             if (element->entry) {
                 if (element->entry->type() == TypeEntry::FunctionType) {
                     reinterpret_cast<FunctionTypeEntry*>(element->entry)->addSignature(signature);
                 } else {
-                    m_error = QString("%1 expected to be a function, but isn't! Maybe it was already declared as a class or something else.").arg(name);
+                    m_error = QStringLiteral("%1 expected to be a function, but isn't! Maybe it was already declared as a class or something else.")
+                                             .arg(name);
                     return false;
                 }
             } else {
@@ -870,7 +876,7 @@ bool Handler::startElement(const QString &, const QString &n,
 
         if (element->entry) {
             m_database->addType(element->entry);
-            setTypeRevision(element->entry, attributes["revision"].toInt());
+            setTypeRevision(element->entry, attributes[QLatin1String("revision")].toInt());
         } else {
             qCWarning(lcShiboken).noquote().nospace()
                 << QStringLiteral("Type: %1 was rejected by typesystem").arg(name);
@@ -879,40 +885,40 @@ bool Handler::startElement(const QString &, const QString &n,
     } else if (element->type == StackElement::InjectDocumentation) {
         // check the XML tag attributes
         QHash<QString, QString> attributes;
-        attributes["mode"] = "replace";
-        attributes["format"] = "native";
-        attributes["since"] = QString("0");
+        attributes.insert(QLatin1String("mode"), QLatin1String("replace"));
+        attributes.insert(QLatin1String("format"), QLatin1String("native"));
+        attributes.insert(QLatin1String("since"), QLatin1String("0"));
 
         fetchAttributeValues(tagName, atts, &attributes);
-        double since = attributes["since"].toDouble();
+        double since = attributes[QLatin1String("since")].toDouble();
 
         const int validParent = StackElement::TypeEntryMask
                                 | StackElement::ModifyFunction
                                 | StackElement::ModifyField;
         if (m_current->parent && m_current->parent->type & validParent) {
-            QString modeName = attributes["mode"];
+            QString modeName = attributes[QLatin1String("mode")];
             DocModification::Mode mode;
-            if (modeName == "append") {
+            if (modeName == QLatin1String("append")) {
                 mode = DocModification::Append;
-            } else if (modeName == "prepend") {
+            } else if (modeName == QLatin1String("prepend")) {
                 mode = DocModification::Prepend;
-            } else if (modeName == "replace") {
+            } else if (modeName == QLatin1String("replace")) {
                 mode = DocModification::Replace;
             } else {
-                m_error = "Unknow documentation injection mode: " + modeName;
+                m_error = QLatin1String("Unknow documentation injection mode: ") + modeName;
                 return false;
             }
 
             static QHash<QString, TypeSystem::Language> languageNames;
             if (languageNames.isEmpty()) {
-                languageNames["target"] = TypeSystem::TargetLangCode;
-                languageNames["native"] = TypeSystem::NativeCode;
+                languageNames[QLatin1String("target")] = TypeSystem::TargetLangCode;
+                languageNames[QLatin1String("native")] = TypeSystem::NativeCode;
             }
 
-            QString format = attributes["format"].toLower();
+            QString format = attributes[QLatin1String("format")].toLower();
             TypeSystem::Language lang = languageNames.value(format, TypeSystem::NoLanguage);
             if (lang == TypeSystem::NoLanguage) {
-                m_error = QString("unsupported class attribute: '%1'").arg(format);
+                m_error = QStringLiteral("unsupported class attribute: '%1'").arg(format);
                 return false;
             }
 
@@ -921,27 +927,27 @@ bool Handler::startElement(const QString &, const QString &n,
             mod.format = lang;
             m_contextStack.top()->docModifications << mod;
         } else {
-            m_error = "inject-documentation must be inside modify-function, "
-                      "modify-field or other tags that creates a type";
+            m_error = QLatin1String("inject-documentation must be inside modify-function, "
+                      "modify-field or other tags that creates a type");
             return false;
         }
     } else if (element->type == StackElement::ModifyDocumentation) {
         // check the XML tag attributes
         QHash<QString, QString> attributes;
-        attributes["xpath"] = QString();
-        attributes["since"] = QString("0");
+        attributes.insert(QLatin1String("xpath"), QString());
+        attributes.insert(QLatin1String("since"), QLatin1String("0"));
         fetchAttributeValues(tagName, atts, &attributes);
-        double since = attributes["since"].toDouble();
+        double since = attributes[QLatin1String("since")].toDouble();
 
         const int validParent = StackElement::TypeEntryMask
                                 | StackElement::ModifyFunction
                                 | StackElement::ModifyField;
         if (m_current->parent && m_current->parent->type & validParent) {
             QString signature = (m_current->type & StackElement::TypeEntryMask) ? QString() : m_currentSignature;
-            m_contextStack.top()->docModifications << DocModification(attributes["xpath"], signature, since);
+            m_contextStack.top()->docModifications << DocModification(attributes[QLatin1String("xpath")], signature, since);
         } else {
-            m_error = "modify-documentation must be inside modify-function, "
-                      "modify-field or other tags that creates a type";
+            m_error = QLatin1String("modify-documentation must be inside modify-function, "
+                      "modify-field or other tags that creates a type");
             return false;
         }
     } else if (element->type != StackElement::None) {
@@ -956,7 +962,7 @@ bool Handler::startElement(const QString &, const QString &n,
                         || element->type == StackElement::Template;
 
         if (!topLevel && m_current->type == StackElement::Root) {
-            m_error = QString("Tag requires parent: '%1'").arg(tagName);
+            m_error = QStringLiteral("Tag requires parent: '%1'").arg(tagName);
             return false;
         }
 
@@ -964,127 +970,127 @@ bool Handler::startElement(const QString &, const QString &n,
         element->entry = topElement.entry;
 
         QHash<QString, QString> attributes;
-        attributes["since"] = QString("0");
+        attributes.insert(QLatin1String("since"), QLatin1String("0"));
         switch (element->type) {
         case StackElement::Root:
-            attributes["package"] = QString();
-            attributes["default-superclass"] = QString();
+            attributes.insert(QLatin1String("package"), QString());
+            attributes.insert(QLatin1String("default-superclass"), QString());
             break;
         case StackElement::LoadTypesystem:
-            attributes["name"] = QString();
-            attributes["generate"] = "yes";
+            attributes.insert(QLatin1String("name"), QString());
+            attributes.insert(QLatin1String("generate"), QLatin1String("yes"));
             break;
         case StackElement::NoNullPointers:
-            attributes["default-value"] = QString();
+            attributes.insert(QLatin1String("default-value"), QString());
             break;
         case StackElement::SuppressedWarning:
-            attributes["text"] = QString();
+            attributes.insert(QLatin1String("text"), QString());
             break;
         case StackElement::ReplaceDefaultExpression:
-            attributes["with"] = QString();
+            attributes.insert(QLatin1String("with"), QString());
             break;
         case StackElement::DefineOwnership:
-            attributes["class"] = "target";
-            attributes["owner"] = "";
+            attributes.insert(QLatin1String("class"), QLatin1String("target"));
+            attributes.insert(QLatin1String("owner"), QString());
             break;
         case StackElement::AddFunction:
-            attributes["signature"] = QString();
-            attributes["return-type"] = QString("void");
-            attributes["access"] = QString("public");
-            attributes["static"] = QString("no");
+            attributes.insert(QLatin1String("signature"), QString());
+            attributes.insert(QLatin1String("return-type"), QLatin1String("void"));
+            attributes.insert(QLatin1String("access"), QLatin1String("public"));
+            attributes.insert(QLatin1String("static"), QLatin1String("no"));
             break;
         case StackElement::ModifyFunction:
-            attributes["signature"] = QString();
-            attributes["access"] = QString();
-            attributes["remove"] = QString();
-            attributes["rename"] = QString();
-            attributes["deprecated"] = QString("no");
-            attributes["associated-to"] = QString();
-            attributes["virtual-slot"] = QString("no");
-            attributes["thread"] = QString("no");
-            attributes["allow-thread"] = QString("no");
+            attributes.insert(QLatin1String("signature"), QString());
+            attributes.insert(QLatin1String("access"), QString());
+            attributes.insert(QLatin1String("remove"), QString());
+            attributes.insert(QLatin1String("rename"), QString());
+            attributes.insert(QLatin1String("deprecated"), QLatin1String("no"));
+            attributes.insert(QLatin1String("associated-to"), QString());
+            attributes.insert(QLatin1String("virtual-slot"), QLatin1String("no"));
+            attributes.insert(QLatin1String("thread"), QLatin1String("no"));
+            attributes.insert(QLatin1String("allow-thread"), QLatin1String("no"));
             break;
         case StackElement::ModifyArgument:
-            attributes["index"] = QString();
-            attributes["replace-value"] = QString();
-            attributes["invalidate-after-use"] = QString("no");
+            attributes.insert(QLatin1String("index"), QString());
+            attributes.insert(QLatin1String("replace-value"), QString());
+            attributes.insert(QLatin1String("invalidate-after-use"), QLatin1String("no"));
             break;
         case StackElement::ModifyField:
-            attributes["name"] = QString();
-            attributes["write"] = "true";
-            attributes["read"] = "true";
-            attributes["remove"] = QString();
+            attributes.insert(QLatin1String("name"), QString());
+            attributes.insert(QLatin1String("write"), QLatin1String("true"));
+            attributes.insert(QLatin1String("read"), QLatin1String("true"));
+            attributes.insert(QLatin1String("remove"), QString());
             break;
         case StackElement::Access:
-            attributes["modifier"] = QString();
+            attributes.insert(QLatin1String("modifier"), QString());
             break;
         case StackElement::Include:
-            attributes["file-name"] = QString();
-            attributes["location"] = QString();
+            attributes.insert(QLatin1String("file-name"), QString());
+            attributes.insert(QLatin1String("location"), QString());
             break;
         case StackElement::CustomMetaConstructor:
-            attributes["name"] = topElement.entry->name().toLower() + "_create";
-            attributes["param-name"] = "copy";
+            attributes[QLatin1String("name")] = topElement.entry->name().toLower() + QLatin1String("_create");
+            attributes.insert(QLatin1String("param-name"), QLatin1String("copy"));
             break;
         case StackElement::CustomMetaDestructor:
-            attributes["name"] = topElement.entry->name().toLower() + "_delete";
-            attributes["param-name"] = "copy";
+            attributes[QLatin1String("name")] = topElement.entry->name().toLower() + QLatin1String("_delete");
+            attributes.insert(QLatin1String("param-name"), QLatin1String("copy"));
             break;
         case StackElement::ReplaceType:
-            attributes["modified-type"] = QString();
+            attributes.insert(QLatin1String("modified-type"), QString());
             break;
         case StackElement::InjectCode:
-            attributes["class"] = "target";
-            attributes["position"] = "beginning";
-            attributes["file"] = QString();
+            attributes.insert(QLatin1String("class"), QLatin1String("target"));
+            attributes.insert(QLatin1String("position"), QLatin1String("beginning"));
+            attributes.insert(QLatin1String("file"), QString());
             break;
         case StackElement::ConversionRule:
-            attributes["class"] = QString();
-            attributes["file"] = QString();
+            attributes.insert(QLatin1String("class"), QString());
+            attributes.insert(QLatin1String("file"), QString());
             break;
         case StackElement::TargetToNative:
-            attributes["replace"] = QString("yes");
+            attributes.insert(QLatin1String("replace"), QLatin1String("yes"));
             break;
         case StackElement::AddConversion:
-            attributes["type"] = QString();
-            attributes["check"] = QString();
+            attributes.insert(QLatin1String("type"), QString());
+            attributes.insert(QLatin1String("check"), QString());
             break;
         case StackElement::RejectEnumValue:
-            attributes["name"] = "";
+            attributes.insert(QLatin1String("name"), QString());
             break;
         case StackElement::ArgumentMap:
-            attributes["index"] = "1";
-            attributes["meta-name"] = QString();
+            attributes.insert(QLatin1String("index"), QLatin1String("1"));
+            attributes.insert(QLatin1String("meta-name"), QString());
             break;
         case StackElement::Rename:
-            attributes["to"] = QString();
+            attributes.insert(QLatin1String("to"), QString());
             break;
         case StackElement::Rejection:
-            attributes["class"] = "*";
-            attributes["function-name"] = "*";
-            attributes["field-name"] = "*";
-            attributes["enum-name"] = "*";
+            attributes.insert(QLatin1String("class"), QLatin1String("*"));
+            attributes.insert(QLatin1String("function-name"), QLatin1String("*"));
+            attributes.insert(QLatin1String("field-name"), QLatin1String("*"));
+            attributes.insert(QLatin1String("enum-name"), QLatin1String("*"));
             break;
         case StackElement::Removal:
-            attributes["class"] = "all";
+            attributes.insert(QLatin1String("class"), QLatin1String("all"));
             break;
         case StackElement::Template:
-            attributes["name"] = QString();
+            attributes.insert(QLatin1String("name"), QString());
             break;
         case StackElement::TemplateInstanceEnum:
-            attributes["name"] = QString();
+            attributes.insert(QLatin1String("name"), QString());
             break;
         case StackElement::Replace:
-            attributes["from"] = QString();
-            attributes["to"] = QString();
+            attributes.insert(QLatin1String("from"), QString());
+            attributes.insert(QLatin1String("to"), QString());
             break;
         case StackElement::ReferenceCount:
-            attributes["action"] = QString();
-            attributes["variable-name"] = QString();
+            attributes.insert(QLatin1String("action"), QString());
+            attributes.insert(QLatin1String("variable-name"), QString());
             break;
         case StackElement::ParentOwner:
-            attributes["index"] = QString();
-            attributes["action"] = QString();
+            attributes.insert(QLatin1String("index"), QString());
+            attributes.insert(QLatin1String("action"), QString());
         default:
             { };
         };
@@ -1092,13 +1098,13 @@ bool Handler::startElement(const QString &, const QString &n,
         double since = 0;
         if (attributes.count() > 0) {
             fetchAttributeValues(tagName, atts, &attributes);
-            since = attributes["since"].toDouble();
+            since = attributes[QLatin1String("since")].toDouble();
         }
 
         switch (element->type) {
         case StackElement::Root:
-            m_defaultPackage = attributes["package"];
-            m_defaultSuperclass = attributes["default-superclass"];
+            m_defaultPackage = attributes[QLatin1String("package")];
+            m_defaultSuperclass = attributes[QLatin1String("default-superclass")];
             element->type = StackElement::Root;
             {
                 TypeSystemTypeEntry* moduleEntry = reinterpret_cast<TypeSystemTypeEntry*>(
@@ -1108,44 +1114,44 @@ bool Handler::startElement(const QString &, const QString &n,
             }
 
             if ((m_generate == TypeEntry::GenerateForSubclass ||
-                 m_generate == TypeEntry::GenerateNothing) && m_defaultPackage != "")
+                 m_generate == TypeEntry::GenerateNothing) && !m_defaultPackage.isEmpty())
                 TypeDatabase::instance()->addRequiredTargetImport(m_defaultPackage);
 
             if (!element->entry->qualifiedCppName().isEmpty())
                 m_database->addType(element->entry);
             break;
         case StackElement::LoadTypesystem: {
-            QString name = attributes["name"];
+            QString name = attributes[QLatin1String("name")];
             if (name.isEmpty()) {
-                m_error = "No typesystem name specified";
+                m_error = QLatin1String("No typesystem name specified");
                 return false;
             }
-            bool generateChild = (convertBoolean(attributes["generate"], "generate", true) && (m_generate == TypeEntry::GenerateAll));
+            bool generateChild = (convertBoolean(attributes[QLatin1String("generate")], QLatin1String("generate"), true) && (m_generate == TypeEntry::GenerateAll));
             if (!m_database->parseFile(name, generateChild)) {
-                m_error = QString("Failed to parse: '%1'").arg(name);
+                m_error = QStringLiteral("Failed to parse: '%1'").arg(name);
                 return false;
             }
         }
         break;
         case StackElement::RejectEnumValue: {
             if (!m_currentEnum) {
-                m_error = "<reject-enum-value> node must be used inside a <enum-type> node";
+                m_error = QLatin1String("<reject-enum-value> node must be used inside a <enum-type> node");
                 return false;
             }
-            QString name = attributes["name"];
+            QString name = attributes[QLatin1String("name")];
         } break;
         case StackElement::ReplaceType: {
             if (topElement.type != StackElement::ModifyArgument) {
-                m_error = "Type replacement can only be specified for argument modifications";
+                m_error = QLatin1String("Type replacement can only be specified for argument modifications");
                 return false;
             }
 
-            if (attributes["modified-type"].isEmpty()) {
-                m_error = "Type replacement requires 'modified-type' attribute";
+            if (attributes[QLatin1String("modified-type")].isEmpty()) {
+                m_error = QLatin1String("Type replacement requires 'modified-type' attribute");
                 return false;
             }
 
-            m_contextStack.top()->functionMods.last().argument_mods.last().modified_type = attributes["modified-type"];
+            m_contextStack.top()->functionMods.last().argument_mods.last().modified_type = attributes[QLatin1String("modified-type")];
         }
         break;
         case StackElement::ConversionRule: {
@@ -1153,23 +1159,23 @@ bool Handler::startElement(const QString &, const QString &n,
                 && topElement.type != StackElement::ValueTypeEntry
                 && topElement.type != StackElement::PrimitiveTypeEntry
                 && topElement.type != StackElement::ContainerTypeEntry) {
-                m_error = "Conversion rules can only be specified for argument modification, "
-                          "value-type, primitive-type or container-type conversion.";
+                m_error = QLatin1String("Conversion rules can only be specified for argument modification, "
+                          "value-type, primitive-type or container-type conversion.");
                 return false;
             }
 
             static QHash<QString, TypeSystem::Language> languageNames;
             if (languageNames.isEmpty()) {
-                languageNames["target"] = TypeSystem::TargetLangCode;
-                languageNames["native"] = TypeSystem::NativeCode;
+                languageNames[QLatin1String("target")] = TypeSystem::TargetLangCode;
+                languageNames[QLatin1String("native")] = TypeSystem::NativeCode;
             }
 
-            QString languageAttribute = attributes["class"].toLower();
+            QString languageAttribute = attributes[QLatin1String("class")].toLower();
             TypeSystem::Language lang = languageNames.value(languageAttribute, TypeSystem::NoLanguage);
 
             if (topElement.type == StackElement::ModifyArgument) {
                if (lang == TypeSystem::NoLanguage) {
-                    m_error = QString("unsupported class attribute: '%1'").arg(lang);
+                    m_error = QStringLiteral("unsupported class attribute: '%1'").arg(lang);
                     return false;
                 }
 
@@ -1178,13 +1184,13 @@ bool Handler::startElement(const QString &, const QString &n,
                 m_contextStack.top()->functionMods.last().argument_mods.last().conversion_rules.append(snip);
             } else {
                 if (topElement.entry->hasConversionRule() || topElement.entry->hasCustomConversion()) {
-                    m_error = "Types can have only one conversion rule";
+                    m_error = QLatin1String("Types can have only one conversion rule");
                     return false;
                 }
 
                 // The old conversion rule tag that uses a file containing the conversion
                 // will be kept temporarily for compatibility reasons.
-                QString sourceFile = attributes["file"];
+                QString sourceFile = attributes[QLatin1String("file")];
                 if (!sourceFile.isEmpty()) {
                     if (m_generate != TypeEntry::GenerateForSubclass
                         && m_generate != TypeEntry::GenerateNothing) {
@@ -1195,7 +1201,7 @@ bool Handler::startElement(const QString &, const QString &n,
 
                         QFile conversionSource(sourceFile);
                         if (conversionSource.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                            topElement.entry->setConversionRule(conversionFlag + QString::fromUtf8(conversionSource.readAll()));
+                            topElement.entry->setConversionRule(QLatin1String(conversionFlag) + QString::fromUtf8(conversionSource.readAll()));
                         } else {
                             qCWarning(lcShiboken).noquote().nospace()
                                 << "File containing conversion code for "
@@ -1212,7 +1218,7 @@ bool Handler::startElement(const QString &, const QString &n,
         break;
         case StackElement::NativeToTarget: {
             if (topElement.type != StackElement::ConversionRule) {
-                m_error = "Native to Target conversion code can only be specified for custom conversion rules.";
+                m_error = QLatin1String("Native to Target conversion code can only be specified for custom conversion rules.");
                 return false;
             }
             m_contextStack.top()->codeSnips << CodeSnip(0);
@@ -1220,24 +1226,24 @@ bool Handler::startElement(const QString &, const QString &n,
         break;
         case StackElement::TargetToNative: {
             if (topElement.type != StackElement::ConversionRule) {
-                m_error = "Target to Native conversions can only be specified for custom conversion rules.";
+                m_error = QLatin1String("Target to Native conversions can only be specified for custom conversion rules.");
                 return false;
             }
-            bool replace = attributes["replace"] == "yes";
+            bool replace = attributes[QLatin1String("replace")] == QLatin1String("yes");
             static_cast<TypeEntry*>(m_current->entry)->customConversion()->setReplaceOriginalTargetToNativeConversions(replace);
         }
         break;
         case StackElement::AddConversion: {
             if (topElement.type != StackElement::TargetToNative) {
-                m_error = "Target to Native conversions can only be added inside 'target-to-native' tags.";
+                m_error = QLatin1String("Target to Native conversions can only be added inside 'target-to-native' tags.");
                 return false;
             }
-            QString sourceTypeName = attributes["type"];
+            QString sourceTypeName = attributes[QLatin1String("type")];
             if (sourceTypeName.isEmpty()) {
-                m_error = "Target to Native conversions must specify the input type with the 'type' attribute.";
+                m_error = QLatin1String("Target to Native conversions must specify the input type with the 'type' attribute.");
                 return false;
             }
-            QString typeCheck = attributes["check"];
+            QString typeCheck = attributes[QLatin1String("check")];
             static_cast<TypeEntry*>(m_current->entry)->customConversion()->addTargetToNativeConversion(sourceTypeName, typeCheck);
             m_contextStack.top()->codeSnips << CodeSnip(0);
         }
@@ -1251,76 +1257,76 @@ bool Handler::startElement(const QString &, const QString &n,
                 return false;
             }
 
-            QString index = attributes["index"];
-            if (index == "return")
-                index = "0";
-            else if (index == "this")
-                index = "-1";
+            QString index = attributes[QLatin1String("index")];
+            if (index == QLatin1String("return"))
+                index = QLatin1String("0");
+            else if (index == QLatin1String("this"))
+                index = QLatin1String("-1");
 
             bool ok = false;
             int idx = index.toInt(&ok);
             if (!ok) {
-                m_error = QString("Cannot convert '%1' to integer").arg(index);
+                m_error = QStringLiteral("Cannot convert '%1' to integer").arg(index);
                 return false;
             }
 
-            QString replace_value = attributes["replace-value"];
+            QString replace_value = attributes[QLatin1String("replace-value")];
 
             if (!replace_value.isEmpty() && idx) {
-                m_error = QString("replace-value is only supported for return values (index=0).");
+                m_error = QLatin1String("replace-value is only supported for return values (index=0).");
                 return false;
             }
 
             ArgumentModification argumentModification = ArgumentModification(idx, since);
             argumentModification.replace_value = replace_value;
-            argumentModification.resetAfterUse = convertBoolean(attributes["invalidate-after-use"], "invalidate-after-use", false);
+            argumentModification.resetAfterUse = convertBoolean(attributes[QLatin1String("invalidate-after-use")], QLatin1String("invalidate-after-use"), false);
             m_contextStack.top()->functionMods.last().argument_mods.append(argumentModification);
         }
         break;
         case StackElement::NoNullPointers: {
             if (topElement.type != StackElement::ModifyArgument) {
-                m_error = "no-null-pointer requires argument modification as parent";
+                m_error = QLatin1String("no-null-pointer requires argument modification as parent");
                 return false;
             }
 
             m_contextStack.top()->functionMods.last().argument_mods.last().noNullPointers = true;
             if (!m_contextStack.top()->functionMods.last().argument_mods.last().index)
-                m_contextStack.top()->functionMods.last().argument_mods.last().nullPointerDefaultValue = attributes["default-value"];
-             else if (!attributes["default-value"].isEmpty())
+                m_contextStack.top()->functionMods.last().argument_mods.last().nullPointerDefaultValue = attributes[QLatin1String("default-value")];
+             else if (!attributes[QLatin1String("default-value")].isEmpty())
                 qCWarning(lcShiboken) << "default values for null pointer guards are only effective for return values";
 
         }
         break;
         case StackElement::DefineOwnership: {
             if (topElement.type != StackElement::ModifyArgument) {
-                m_error = "define-ownership requires argument modification as parent";
+                m_error = QLatin1String("define-ownership requires argument modification as parent");
                 return false;
             }
 
             static QHash<QString, TypeSystem::Language> languageNames;
             if (languageNames.isEmpty()) {
-                languageNames["target"] = TypeSystem::TargetLangCode;
-                languageNames["native"] = TypeSystem::NativeCode;
+                languageNames[QLatin1String("target")] = TypeSystem::TargetLangCode;
+                languageNames[QLatin1String("native")] = TypeSystem::NativeCode;
             }
 
-            QString classAttribute = attributes["class"].toLower();
+            QString classAttribute = attributes[QLatin1String("class")].toLower();
             TypeSystem::Language lang = languageNames.value(classAttribute, TypeSystem::NoLanguage);
             if (lang == TypeSystem::NoLanguage) {
-                m_error = QString("unsupported class attribute: '%1'").arg(classAttribute);
+                m_error = QStringLiteral("unsupported class attribute: '%1'").arg(classAttribute);
                 return false;
             }
 
             static QHash<QString, TypeSystem::Ownership> ownershipNames;
             if (ownershipNames.isEmpty()) {
-                ownershipNames["target"] = TypeSystem::TargetLangOwnership;
-                ownershipNames["c++"] = TypeSystem::CppOwnership;
-                ownershipNames["default"] = TypeSystem::DefaultOwnership;
+                ownershipNames[QLatin1String("target")] = TypeSystem::TargetLangOwnership;
+                ownershipNames[QLatin1String("c++")] = TypeSystem::CppOwnership;
+                ownershipNames[QLatin1String("default")] = TypeSystem::DefaultOwnership;
             }
 
-            QString ownershipAttribute = attributes["owner"].toLower();
+            QString ownershipAttribute = attributes[QLatin1String("owner")].toLower();
             TypeSystem::Ownership owner = ownershipNames.value(ownershipAttribute, TypeSystem::InvalidOwnership);
             if (owner == TypeSystem::InvalidOwnership) {
-                m_error = QString("unsupported owner attribute: '%1'").arg(ownershipAttribute);
+                m_error = QStringLiteral("unsupported owner attribute: '%1'").arg(ownershipAttribute);
                 return false;
             }
 
@@ -1328,31 +1334,31 @@ bool Handler::startElement(const QString &, const QString &n,
         }
         break;
         case StackElement::SuppressedWarning:
-            if (attributes["text"].isEmpty())
+            if (attributes[QLatin1String("text")].isEmpty())
                 qCWarning(lcShiboken) << "Suppressed warning with no text specified";
             else
-                m_database->addSuppressedWarning(attributes["text"]);
+                m_database->addSuppressedWarning(attributes[QLatin1String("text")]);
             break;
         case StackElement::ArgumentMap: {
             if (!(topElement.type & StackElement::CodeSnipMask)) {
-                m_error = "Argument maps requires code injection as parent";
+                m_error = QLatin1String("Argument maps requires code injection as parent");
                 return false;
             }
 
             bool ok;
-            int pos = attributes["index"].toInt(&ok);
+            int pos = attributes[QLatin1String("index")].toInt(&ok);
             if (!ok) {
-                m_error = QString("Can't convert position '%1' to integer")
-                          .arg(attributes["position"]);
+                m_error = QStringLiteral("Can't convert position '%1' to integer")
+                          .arg(attributes[QLatin1String("position")]);
                 return false;
             }
 
             if (pos <= 0) {
-                m_error = QString("Argument position %1 must be a positive number").arg(pos);
+                m_error = QStringLiteral("Argument position %1 must be a positive number").arg(pos);
                 return false;
             }
 
-            QString meta_name = attributes["meta-name"];
+            QString meta_name = attributes[QLatin1String("meta-name")];
             if (meta_name.isEmpty())
                 qCWarning(lcShiboken) << "Empty meta name in argument map";
 
@@ -1367,20 +1373,20 @@ bool Handler::startElement(const QString &, const QString &n,
         break;
         case StackElement::Removal: {
             if (topElement.type != StackElement::ModifyFunction) {
-                m_error = "Function modification parent required";
+                m_error = QLatin1String("Function modification parent required");
                 return false;
             }
 
             static QHash<QString, TypeSystem::Language> languageNames;
             if (languageNames.isEmpty()) {
-                languageNames["target"] = TypeSystem::TargetLangAndNativeCode;
-                languageNames["all"] = TypeSystem::All;
+                languageNames.insert(QLatin1String("target"), TypeSystem::TargetLangAndNativeCode);
+                languageNames.insert(QLatin1String("all"), TypeSystem::All);
             }
 
-            QString languageAttribute = attributes["class"].toLower();
+            QString languageAttribute = attributes[QLatin1String("class")].toLower();
             TypeSystem::Language lang = languageNames.value(languageAttribute, TypeSystem::NoLanguage);
             if (lang == TypeSystem::NoLanguage) {
-                m_error = QString("unsupported class attribute: '%1'").arg(languageAttribute);
+                m_error = QStringLiteral("unsupported class attribute: '%1'").arg(languageAttribute);
                 return false;
             }
 
@@ -1392,7 +1398,7 @@ bool Handler::startElement(const QString &, const QString &n,
             if (topElement.type != StackElement::ModifyField
                 && topElement.type != StackElement::ModifyFunction
                 && topElement.type != StackElement::ModifyArgument) {
-                m_error = "Function, field  or argument modification parent required";
+                m_error = QLatin1String("Function, field  or argument modification parent required");
                 return false;
             }
 
@@ -1404,10 +1410,10 @@ bool Handler::startElement(const QString &, const QString &n,
 
             QString modifier;
             if (element->type == StackElement::Rename) {
-                modifier = "rename";
-                QString renamed_to = attributes["to"];
+                modifier = QLatin1String("rename");
+                QString renamed_to = attributes[QLatin1String("to")];
                 if (renamed_to.isEmpty()) {
-                    m_error = "Rename modifier requires 'to' attribute";
+                    m_error = QLatin1String("Rename modifier requires 'to' attribute");
                     return false;
                 }
 
@@ -1418,27 +1424,27 @@ bool Handler::startElement(const QString &, const QString &n,
                 else
                     m_contextStack.top()->functionMods.last().argument_mods.last().renamed_to = renamed_to;
             } else
-                modifier = attributes["modifier"].toLower();
+                modifier = attributes[QLatin1String("modifier")].toLower();
 
 
             if (modifier.isEmpty()) {
-                m_error = "No access modification specified";
+                m_error = QLatin1String("No access modification specified");
                 return false;
             }
 
             static QHash<QString, FunctionModification::Modifiers> modifierNames;
             if (modifierNames.isEmpty()) {
-                modifierNames["private"] = Modification::Private;
-                modifierNames["public"] = Modification::Public;
-                modifierNames["protected"] = Modification::Protected;
-                modifierNames["friendly"] = Modification::Friendly;
-                modifierNames["rename"] = Modification::Rename;
-                modifierNames["final"] = Modification::Final;
-                modifierNames["non-final"] = Modification::NonFinal;
+                modifierNames[QLatin1String("private")] = Modification::Private;
+                modifierNames[QLatin1String("public")] = Modification::Public;
+                modifierNames[QLatin1String("protected")] = Modification::Protected;
+                modifierNames[QLatin1String("friendly")] = Modification::Friendly;
+                modifierNames[QLatin1String("rename")] = Modification::Rename;
+                modifierNames[QLatin1String("final")] = Modification::Final;
+                modifierNames[QLatin1String("non-final")] = Modification::NonFinal;
             }
 
             if (!modifierNames.contains(modifier)) {
-                m_error = QString("Unknown access modifier: '%1'").arg(modifier);
+                m_error = QStringLiteral("Unknown access modifier: '%1'").arg(modifier);
                 return false;
             }
 
@@ -1448,7 +1454,7 @@ bool Handler::startElement(const QString &, const QString &n,
         break;
         case StackElement::RemoveArgument:
             if (topElement.type != StackElement::ModifyArgument) {
-                m_error = "Removing argument requires argument modification as parent";
+                m_error = QLatin1String("Removing argument requires argument modification as parent");
                 return false;
             }
 
@@ -1456,21 +1462,21 @@ bool Handler::startElement(const QString &, const QString &n,
             break;
 
         case StackElement::ModifyField: {
-            QString name = attributes["name"];
+            QString name = attributes[QLatin1String("name")];
             if (name.isEmpty())
                 break;
             FieldModification fm;
             fm.name = name;
             fm.modifiers = 0;
 
-            if (!convertRemovalAttribute(attributes["remove"], fm, m_error))
+            if (!convertRemovalAttribute(attributes[QLatin1String("remove")], fm, m_error))
                 return false;
 
-            QString read = attributes["read"];
-            QString write = attributes["write"];
+            QString read = attributes[QLatin1String("read")];
+            QString write = attributes[QLatin1String("write")];
 
-            if (read == "true") fm.modifiers |= FieldModification::Readable;
-            if (write == "true") fm.modifiers |= FieldModification::Writable;
+            if (read == QLatin1String("true")) fm.modifiers |= FieldModification::Readable;
+            if (write == QLatin1String("true")) fm.modifiers |= FieldModification::Writable;
 
             m_contextStack.top()->fieldMods << fm;
         }
@@ -1481,27 +1487,27 @@ bool Handler::startElement(const QString &, const QString &n,
                                               ", was=%1").arg(topElement.type, 0, 16);
                 return false;
             }
-            QString signature = attributes["signature"];
+            QString signature = attributes[QLatin1String("signature")];
 
             signature = TypeDatabase::normalizedSignature(signature.toLocal8Bit().constData());
             if (signature.isEmpty()) {
-                m_error = "No signature for the added function";
+                m_error = QLatin1String("No signature for the added function");
                 return false;
             }
 
-            QString errorString = checkSignatureError(signature, "add-function");
+            QString errorString = checkSignatureError(signature, QLatin1String("add-function"));
             if (!errorString.isEmpty()) {
                 m_error = errorString;
                 return false;
             }
 
-            AddedFunction func(signature, attributes["return-type"], since);
-            func.setStatic(attributes["static"] == "yes");
-            if (!signature.contains("("))
-                signature += "()";
+            AddedFunction func(signature, attributes[QLatin1String("return-type")], since);
+            func.setStatic(attributes[QLatin1String("static")] == QLatin1String("yes"));
+            if (!signature.contains(QLatin1Char('(')))
+                signature += QLatin1String("()");
             m_currentSignature = signature;
 
-            QString access = attributes["access"].toLower();
+            QString access = attributes[QLatin1String("access")].toLower();
             if (!access.isEmpty()) {
                 if (access == QLatin1String("protected")) {
                     func.setAccess(AddedFunction::Protected);
@@ -1526,15 +1532,15 @@ bool Handler::startElement(const QString &, const QString &n,
                                               ", was=%1").arg(topElement.type, 0, 16);
                 return false;
             }
-            QString signature = attributes["signature"];
+            QString signature = attributes[QLatin1String("signature")];
 
             signature = TypeDatabase::normalizedSignature(signature.toLocal8Bit().constData());
             if (signature.isEmpty()) {
-                m_error = "No signature for modified function";
+                m_error = QLatin1String("No signature for modified function");
                 return false;
             }
 
-            QString errorString = checkSignatureError(signature, "modify-function");
+            QString errorString = checkSignatureError(signature, QLatin1String("modify-function"));
             if (!errorString.isEmpty()) {
                 m_error = errorString;
                 return false;
@@ -1543,7 +1549,7 @@ bool Handler::startElement(const QString &, const QString &n,
             FunctionModification mod(since);
             m_currentSignature = mod.signature = signature;
 
-            QString access = attributes["access"].toLower();
+            QString access = attributes[QLatin1String("access")].toLower();
             if (!access.isEmpty()) {
                 if (access == QLatin1String("private"))
                     mod.modifiers |= Modification::Private;
@@ -1561,56 +1567,56 @@ bool Handler::startElement(const QString &, const QString &n,
                 }
             }
 
-            if (convertBoolean(attributes["deprecated"], "deprecated", false))
+            if (convertBoolean(attributes[QLatin1String("deprecated")], QLatin1String("deprecated"), false))
                 mod.modifiers |= Modification::Deprecated;
 
-            if (!convertRemovalAttribute(attributes["remove"], mod, m_error))
+            if (!convertRemovalAttribute(attributes[QLatin1String("remove")], mod, m_error))
                 return false;
 
-            QString rename = attributes["rename"];
+            QString rename = attributes[QLatin1String("rename")];
             if (!rename.isEmpty()) {
                 mod.renamedToName = rename;
                 mod.modifiers |= Modification::Rename;
             }
 
-            QString association = attributes["associated-to"];
+            QString association = attributes[QLatin1String("associated-to")];
             if (!association.isEmpty())
                 mod.association = association;
 
-            mod.setIsThread(convertBoolean(attributes["thread"], "thread", false));
-            mod.setAllowThread(convertBoolean(attributes["allow-thread"], "allow-thread", false));
+            mod.setIsThread(convertBoolean(attributes[QLatin1String("thread")], QLatin1String("thread"), false));
+            mod.setAllowThread(convertBoolean(attributes[QLatin1String("allow-thread")], QLatin1String("allow-thread"), false));
 
-            mod.modifiers |= (convertBoolean(attributes["virtual-slot"], "virtual-slot", false) ? Modification::VirtualSlot : 0);
+            mod.modifiers |= (convertBoolean(attributes[QLatin1String("virtual-slot")], QLatin1String("virtual-slot"), false) ? Modification::VirtualSlot : 0);
 
             m_contextStack.top()->functionMods << mod;
         }
         break;
         case StackElement::ReplaceDefaultExpression:
             if (!(topElement.type & StackElement::ModifyArgument)) {
-                m_error = "Replace default expression only allowed as child of argument modification";
+                m_error = QLatin1String("Replace default expression only allowed as child of argument modification");
                 return false;
             }
 
-            if (attributes["with"].isEmpty()) {
-                m_error = "Default expression replaced with empty string. Use remove-default-expression instead.";
+            if (attributes[QLatin1String("with")].isEmpty()) {
+                m_error = QLatin1String("Default expression replaced with empty string. Use remove-default-expression instead.");
                 return false;
             }
 
-            m_contextStack.top()->functionMods.last().argument_mods.last().replacedDefaultExpression = attributes["with"];
+            m_contextStack.top()->functionMods.last().argument_mods.last().replacedDefaultExpression = attributes[QLatin1String("with")];
             break;
         case StackElement::RemoveDefaultExpression:
             m_contextStack.top()->functionMods.last().argument_mods.last().removedDefaultExpression = true;
             break;
         case StackElement::CustomMetaConstructor:
         case StackElement::CustomMetaDestructor: {
-            CustomFunction *func = new CustomFunction(attributes["name"]);
-            func->paramName = attributes["param-name"];
+            CustomFunction *func = new CustomFunction(attributes[QLatin1String("name")]);
+            func->paramName = attributes[QLatin1String("param-name")];
             element->value.customFunction = func;
         }
         break;
         case StackElement::ReferenceCount: {
             if (topElement.type != StackElement::ModifyArgument) {
-                m_error = "reference-count must be child of modify-argument";
+                m_error = QLatin1String("reference-count must be child of modify-argument");
                 return false;
             }
 
@@ -1618,19 +1624,19 @@ bool Handler::startElement(const QString &, const QString &n,
 
             static QHash<QString, ReferenceCount::Action> actions;
             if (actions.isEmpty()) {
-                actions["add"] = ReferenceCount::Add;
-                actions["add-all"] = ReferenceCount::AddAll;
-                actions["remove"] = ReferenceCount::Remove;
-                actions["set"] = ReferenceCount::Set;
-                actions["ignore"] = ReferenceCount::Ignore;
+                actions[QLatin1String("add")] = ReferenceCount::Add;
+                actions[QLatin1String("add-all")] = ReferenceCount::AddAll;
+                actions[QLatin1String("remove")] = ReferenceCount::Remove;
+                actions[QLatin1String("set")] = ReferenceCount::Set;
+                actions[QLatin1String("ignore")] = ReferenceCount::Ignore;
             }
-            rc.action = actions.value(attributes["action"].toLower(), ReferenceCount::Invalid);
-            rc.varName = attributes["variable-name"];
+            rc.action = actions.value(attributes[QLatin1String("action")].toLower(), ReferenceCount::Invalid);
+            rc.varName = attributes[QLatin1String("variable-name")];
 
             if (rc.action == ReferenceCount::Invalid) {
-                m_error = "unrecognized value for action attribute. supported actions:";
+                m_error = QLatin1String("unrecognized value for action attribute. supported actions:");
                 foreach (QString action, actions.keys())
-                    m_error += " " + action;
+                    m_error += QLatin1Char(' ') + action;
             }
 
             m_contextStack.top()->functionMods.last().argument_mods.last().referenceCounts.append(rc);
@@ -1639,34 +1645,34 @@ bool Handler::startElement(const QString &, const QString &n,
 
         case StackElement::ParentOwner: {
             if (topElement.type != StackElement::ModifyArgument) {
-                m_error = "parent-policy must be child of modify-argument";
+                m_error = QLatin1String("parent-policy must be child of modify-argument");
                 return false;
             }
 
             ArgumentOwner ao;
 
-            QString index = attributes["index"];
-            if (index == "return")
-                index = "0";
-            else if (index == "this")
-                index = "-1";
+            QString index = attributes[QLatin1String("index")];
+            if (index == QLatin1String("return"))
+                index = QLatin1String("0");
+            else if (index == QLatin1String("this"))
+                index = QLatin1String("-1");
 
             bool ok = false;
             int idx = index.toInt(&ok);
             if (!ok) {
-                m_error = QString("Cannot convert '%1' to integer").arg(index);
+                m_error = QStringLiteral("Cannot convert '%1' to integer").arg(index);
                 return false;
             }
 
             static QHash<QString, ArgumentOwner::Action> actions;
             if (actions.isEmpty()) {
-                actions["add"] = ArgumentOwner::Add;
-                actions["remove"] = ArgumentOwner::Remove;
+                actions[QLatin1String("add")] = ArgumentOwner::Add;
+                actions[QLatin1String("remove")] = ArgumentOwner::Remove;
             }
 
-            ao.action = actions.value(attributes["action"].toLower(), ArgumentOwner::Invalid);
+            ao.action = actions.value(attributes[QLatin1String("action")].toLower(), ArgumentOwner::Invalid);
             if (!ao.action) {
-                m_error = QString("Invalid parent actionr");
+                m_error = QLatin1String("Invalid parent actionr");
                 return false;
             }
             ao.index = idx;
@@ -1680,43 +1686,43 @@ bool Handler::startElement(const QString &, const QString &n,
                 && (topElement.type != StackElement::AddFunction)
                 && (topElement.type != StackElement::ModifyFunction)
                 && (topElement.type != StackElement::Root)) {
-                m_error = "wrong parent type for code injection";
+                m_error = QLatin1String("wrong parent type for code injection");
                 return false;
             }
 
             static QHash<QString, TypeSystem::Language> languageNames;
             if (languageNames.isEmpty()) {
-                languageNames["target"] = TypeSystem::TargetLangCode; // em algum lugar do cpp
-                languageNames["native"] = TypeSystem::NativeCode; // em algum lugar do cpp
-                languageNames["shell"] = TypeSystem::ShellCode; // coloca no header, mas antes da declaracao da classe
-                languageNames["shell-declaration"] = TypeSystem::ShellDeclaration; // coloca no header, dentro da declaracao da classe
-                languageNames["library-initializer"] = TypeSystem::PackageInitializer;
-                languageNames["destructor-function"] = TypeSystem::DestructorFunction;
-                languageNames["constructors"] = TypeSystem::Constructors;
-                languageNames["interface"] = TypeSystem::Interface;
+                languageNames[QLatin1String("target")] = TypeSystem::TargetLangCode; // em algum lugar do cpp
+                languageNames[QLatin1String("native")] = TypeSystem::NativeCode; // em algum lugar do cpp
+                languageNames[QLatin1String("shell")] = TypeSystem::ShellCode; // coloca no header, mas antes da declaracao da classe
+                languageNames[QLatin1String("shell-declaration")] = TypeSystem::ShellDeclaration; // coloca no header, dentro da declaracao da classe
+                languageNames[QLatin1String("library-initializer")] = TypeSystem::PackageInitializer;
+                languageNames[QLatin1String("destructor-function")] = TypeSystem::DestructorFunction;
+                languageNames[QLatin1String("constructors")] = TypeSystem::Constructors;
+                languageNames[QLatin1String("interface")] = TypeSystem::Interface;
             }
 
-            QString className = attributes["class"].toLower();
+            QString className = attributes[QLatin1String("class")].toLower();
             if (!languageNames.contains(className)) {
-                m_error = QString("Invalid class specifier: '%1'").arg(className);
+                m_error = QStringLiteral("Invalid class specifier: '%1'").arg(className);
                 return false;
             }
 
 
             static QHash<QString, CodeSnip::Position> positionNames;
             if (positionNames.isEmpty()) {
-                positionNames["beginning"] = CodeSnip::Beginning;
-                positionNames["end"] = CodeSnip::End;
+                positionNames[QLatin1String("beginning")] = CodeSnip::Beginning;
+                positionNames[QLatin1String("end")] = CodeSnip::End;
                 // QtScript
-                positionNames["declaration"] = CodeSnip::Declaration;
-                positionNames["prototype-initialization"] = CodeSnip::PrototypeInitialization;
-                positionNames["constructor-initialization"] = CodeSnip::ConstructorInitialization;
-                positionNames["constructor"] = CodeSnip::Constructor;
+                positionNames[QLatin1String("declaration")] = CodeSnip::Declaration;
+                positionNames[QLatin1String("prototype-initialization")] = CodeSnip::PrototypeInitialization;
+                positionNames[QLatin1String("constructor-initialization")] = CodeSnip::ConstructorInitialization;
+                positionNames[QLatin1String("constructor")] = CodeSnip::Constructor;
             }
 
-            QString position = attributes["position"].toLower();
+            QString position = attributes[QLatin1String("position")].toLower();
             if (!positionNames.contains(position)) {
-                m_error = QString("Invalid position: '%1'").arg(position);
+                m_error = QStringLiteral("Invalid position: '%1'").arg(position);
                 return false;
             }
 
@@ -1725,7 +1731,7 @@ bool Handler::startElement(const QString &, const QString &n,
             snip.position = positionNames[position];
             bool in_file = false;
 
-            QString file_name = attributes["file"];
+            QString file_name = attributes[QLatin1String("file")];
 
             //Handler constructor....
             if (m_generate != TypeEntry::GenerateForSubclass &&
@@ -1734,11 +1740,14 @@ bool Handler::startElement(const QString &, const QString &n,
                 if (QFile::exists(file_name)) {
                     QFile codeFile(file_name);
                     if (codeFile.open(QIODevice::Text | QIODevice::ReadOnly)) {
-                        QString content = QString::fromUtf8(codeFile.readAll());
-                        content.prepend("// ========================================================================\n"
-                                        "// START of custom code block [file: " + file_name + "]\n");
-                        content.append("\n// END of custom code block [file: " + file_name + "]\n"
-                                       "// ========================================================================\n");
+                        QString content = QLatin1String("// ========================================================================\n"
+                                                        "// START of custom code block [file: ");
+                        content += file_name;
+                        content += QLatin1String("]\n");
+                        content += QString::fromUtf8(codeFile.readAll());
+                        content += QLatin1String("\n// END of custom code block [file: ");
+                        content += file_name;
+                        content += QLatin1String("]\n// ========================================================================\n");
                         snip.addCode(content);
                         in_file = true;
                     }
@@ -1750,14 +1759,14 @@ bool Handler::startElement(const QString &, const QString &n,
             }
 
             if (snip.language == TypeSystem::Interface && topElement.type != StackElement::InterfaceTypeEntry) {
-                m_error = "Interface code injections must be direct child of an interface type entry";
+                m_error = QLatin1String("Interface code injections must be direct child of an interface type entry");
                 return false;
             }
 
             if (topElement.type == StackElement::ModifyFunction || topElement.type == StackElement::AddFunction) {
                 FunctionModification mod = m_contextStack.top()->functionMods.last();
                 if (snip.language == TypeSystem::ShellDeclaration) {
-                    m_error = "no function implementation in shell declaration in which to inject code";
+                    m_error = QLatin1String("no function implementation in shell declaration in which to inject code");
                     return false;
                 }
 
@@ -1774,22 +1783,22 @@ bool Handler::startElement(const QString &, const QString &n,
         }
         break;
         case StackElement::Include: {
-            QString location = attributes["location"].toLower();
+            QString location = attributes[QLatin1String("location")].toLower();
 
             static QHash<QString, Include::IncludeType> locationNames;
             if (locationNames.isEmpty()) {
-                locationNames["global"] = Include::IncludePath;
-                locationNames["local"] = Include::LocalPath;
-                locationNames["target"] = Include::TargetLangImport;
+                locationNames[QLatin1String("global")] = Include::IncludePath;
+                locationNames[QLatin1String("local")] = Include::LocalPath;
+                locationNames[QLatin1String("target")] = Include::TargetLangImport;
             }
 
             if (!locationNames.contains(location)) {
-                m_error = QString("Location not recognized: '%1'").arg(location);
+                m_error = QStringLiteral("Location not recognized: '%1'").arg(location);
                 return false;
             }
 
             Include::IncludeType loc = locationNames[location];
-            Include inc(loc, attributes["file-name"]);
+            Include inc(loc, attributes[QLatin1String("file-name")]);
 
             ComplexTypeEntry *ctype = static_cast<ComplexTypeEntry *>(element->entry);
             if (topElement.type & (StackElement::ComplexTypeEntryMask | StackElement::PrimitiveTypeEntry)) {
@@ -1797,7 +1806,7 @@ bool Handler::startElement(const QString &, const QString &n,
             } else if (topElement.type == StackElement::ExtraIncludes) {
                 element->entry->addExtraInclude(inc);
             } else {
-                m_error = "Only supported parent tags are primitive-type, complex types or extra-includes";
+                m_error = QLatin1String("Only supported parent tags are primitive-type, complex types or extra-includes");
                 return false;
             }
 
@@ -1811,20 +1820,20 @@ bool Handler::startElement(const QString &, const QString &n,
         }
         break;
         case StackElement::Rejection: {
-            QString cls = attributes["class"];
-            QString function = attributes["function-name"];
-            QString field = attributes["field-name"];
-            QString enum_ = attributes["enum-name"];
-            if (cls == "*" && function == "*" && field == "*" && enum_ == "*") {
-                m_error = "bad reject entry, neither 'class', 'function-name' nor "
-                          "'field' specified";
+            QString cls = attributes[QLatin1String("class")];
+            QString function = attributes[QLatin1String("function-name")];
+            QString field = attributes[QLatin1String("field-name")];
+            QString enum_ = attributes[QLatin1String("enum-name")];
+            if (cls == QLatin1String("*") && function == QLatin1String("*") && field == QLatin1String("*") && enum_ == QLatin1String("*")) {
+                m_error = QLatin1String("bad reject entry, neither 'class', 'function-name' nor "
+                          "'field' specified");
                 return false;
             }
             m_database->addRejection(cls, function, field, enum_);
         }
         break;
         case StackElement::Template:
-            element->value.templateEntry = new TemplateEntry(attributes["name"], since);
+            element->value.templateEntry = new TemplateEntry(attributes[QLatin1String("name")], since);
             break;
         case StackElement::TemplateInstanceEnum:
             if (!(topElement.type & StackElement::CodeSnipMask) &&
@@ -1834,18 +1843,18 @@ bool Handler::startElement(const QString &, const QString &n,
                 (topElement.type != StackElement::NativeToTarget) &&
                 (topElement.type != StackElement::AddConversion) &&
                 (topElement.type != StackElement::ConversionRule)) {
-                m_error = "Can only insert templates into code snippets, templates, custom-constructors, "\
-                          "custom-destructors, conversion-rule, native-to-target or add-conversion tags.";
+                m_error = QLatin1String("Can only insert templates into code snippets, templates, custom-constructors, "\
+                          "custom-destructors, conversion-rule, native-to-target or add-conversion tags.");
                 return false;
             }
-            element->value.templateInstance = new TemplateInstance(attributes["name"], since);
+            element->value.templateInstance = new TemplateInstance(attributes[QLatin1String("name")], since);
             break;
         case StackElement::Replace:
             if (topElement.type != StackElement::TemplateInstanceEnum) {
-                m_error = "Can only insert replace rules into insert-template.";
+                m_error = QLatin1String("Can only insert replace rules into insert-template.");
                 return false;
             }
-            element->parent->value.templateInstance->addReplaceRule(attributes["from"], attributes["to"]);
+            element->parent->value.templateInstance->addReplaceRule(attributes[QLatin1String("from")], attributes[QLatin1String("to")]);
             break;
         default:
             break; // nada
@@ -1889,10 +1898,10 @@ CodeSnipList TypeEntry::codeSnips() const
 
 QString Modification::accessModifierString() const
 {
-    if (isPrivate()) return "private";
-    if (isProtected()) return "protected";
-    if (isPublic()) return "public";
-    if (isFriendly()) return "friendly";
+    if (isPrivate()) return QLatin1String("private");
+    if (isProtected()) return QLatin1String("protected");
+    if (isPublic()) return QLatin1String("public");
+    if (isFriendly()) return QLatin1String("friendly");
     return QString();
 }
 
@@ -1947,18 +1956,18 @@ QString ContainerTypeEntry::targetLangName() const
 {
 
     switch (m_type) {
-    case StringListContainer: return "QStringList";
-    case ListContainer: return "QList";
-    case LinkedListContainer: return "QLinkedList";
-    case VectorContainer: return "QVector";
-    case StackContainer: return "QStack";
-    case QueueContainer: return "QQueue";
-    case SetContainer: return "QSet";
-    case MapContainer: return "QMap";
-    case MultiMapContainer: return "QMultiMap";
-    case HashContainer: return "QHash";
-    case MultiHashContainer: return "QMultiHash";
-    case PairContainer: return "QPair";
+    case StringListContainer: return QLatin1String("QStringList");
+    case ListContainer: return QLatin1String("QList");
+    case LinkedListContainer: return QLatin1String("QLinkedList");
+    case VectorContainer: return QLatin1String("QVector");
+    case StackContainer: return QLatin1String("QStack");
+    case QueueContainer: return QLatin1String("QQueue");
+    case SetContainer: return QLatin1String("QSet");
+    case MapContainer: return QLatin1String("QMap");
+    case MultiMapContainer: return QLatin1String("QMultiMap");
+    case HashContainer: return QLatin1String("QHash");
+    case MultiHashContainer: return QLatin1String("QMultiHash");
+    case PairContainer: return QLatin1String("QPair");
     default:
         qWarning("bad type... %d", m_type);
         break;
@@ -1969,7 +1978,7 @@ QString ContainerTypeEntry::targetLangName() const
 QString ContainerTypeEntry::qualifiedCppName() const
 {
     if (m_type == StringListContainer)
-        return "QStringList";
+        return QLatin1String("QStringList");
     return ComplexTypeEntry::qualifiedCppName();
 }
 
@@ -1984,12 +1993,12 @@ QString EnumTypeEntry::targetLangQualifier() const
 
 QString EnumTypeEntry::targetLangApiName() const
 {
-    return "jint";
+    return QLatin1String("jint");
 }
 
 QString FlagsTypeEntry::targetLangApiName() const
 {
-    return "jint";
+    return QLatin1String("jint");
 }
 
 void EnumTypeEntry::addEnumValueRedirection(const QString &rejected, const QString &usedValue)
@@ -2007,7 +2016,8 @@ QString EnumTypeEntry::enumValueRedirection(const QString &value) const
 
 QString FlagsTypeEntry::qualifiedTargetLangName() const
 {
-    return targetLangPackage() + "." + m_enum->targetLangQualifier() + "." + targetLangName();
+    return targetLangPackage() + QLatin1Char('.') + m_enum->targetLangQualifier()
+        + QLatin1Char('.') + targetLangName();
 }
 
 /*!
@@ -2016,8 +2026,10 @@ QString FlagsTypeEntry::qualifiedTargetLangName() const
  */
 QString fixCppTypeName(const QString &name)
 {
-    if (name == "long long") return "qint64";
-    else if (name == "unsigned long long") return "quint64";
+    if (name == QLatin1String("long long"))
+        return QLatin1String("qint64");
+    else if (name == QLatin1String("unsigned long long"))
+        return QLatin1String("quint64");
     return name;
 }
 
@@ -2029,7 +2041,8 @@ QString TemplateInstance::expandCode() const
         foreach (QString key, replaceRules.keys())
             res.replace(key, replaceRules[key]);
 
-        return "// TEMPLATE - " + m_name + " - START" + res + "// TEMPLATE - " + m_name + " - END";
+        return QLatin1String("// TEMPLATE - ") + m_name + QLatin1String(" - START")
+            + res + QLatin1String("// TEMPLATE - ") + m_name + QLatin1String(" - END");
     } else {
         qCWarning(lcShiboken).noquote().nospace()
             << "insert-template referring to non-existing template '" << m_name << '\'';
@@ -2124,14 +2137,14 @@ bool FunctionModification::operator==(const FunctionModification& other) const
 static AddedFunction::TypeInfo parseType(const QString& signature, int startPos = 0, int* endPos = 0)
 {
     AddedFunction::TypeInfo result;
-    QRegExp regex("\\w");
+    QRegExp regex(QLatin1String("\\w"));
     int length = signature.length();
     int start = signature.indexOf(regex, startPos);
     if (start == -1) {
-        if (signature.mid(startPos + 1, 3) == "...") { // varargs
+        if (signature.midRef(startPos + 1, 3) == QLatin1String("...")) { // varargs
             if (endPos)
                 *endPos = startPos + 4;
-            result.name = "...";
+            result.name = QLatin1String("...");
         } else { // error
             if (endPos)
                 *endPos = length;
@@ -2145,13 +2158,13 @@ static AddedFunction::TypeInfo parseType(const QString& signature, int startPos 
     int i = start;
     for (; i < length; ++i) {
         c = signature[i];
-        if (c == '<')
+        if (c == QLatin1Char('<'))
             cantStop++;
-        if (c == '>')
+        if (c == QLatin1Char('>'))
             cantStop--;
         if (cantStop < 0)
             break; // FIXME: report error?
-        if ((c == ')' || c == ',') && !cantStop)
+        if ((c == QLatin1Char(')') || c == QLatin1Char(',')) && !cantStop)
             break;
         paramString += signature[i];
     }
@@ -2159,26 +2172,26 @@ static AddedFunction::TypeInfo parseType(const QString& signature, int startPos 
         *endPos = i;
 
     // Check default value
-    if (paramString.contains('=')) {
-        QStringList lst = paramString.split('=');
+    if (paramString.contains(QLatin1Char('='))) {
+        QStringList lst = paramString.split(QLatin1Char('='));
         paramString = lst[0].trimmed();
         result.defaultValue = lst[1].trimmed();
     }
 
     // check constness
-    if (paramString.startsWith("const ")) {
+    if (paramString.startsWith(QLatin1String("const "))) {
         result.isConstant = true;
         paramString.remove(0, sizeof("const")/sizeof(char));
         paramString = paramString.trimmed();
     }
     // check reference
-    if (paramString.endsWith("&")) {
+    if (paramString.endsWith(QLatin1Char('&'))) {
         result.isReference = true;
         paramString.chop(1);
         paramString = paramString.trimmed();
     }
     // check Indirections
-    while (paramString.endsWith("*")) {
+    while (paramString.endsWith(QLatin1Char('*'))) {
         result.indirections++;
         paramString.chop(1);
         paramString = paramString.trimmed();
@@ -2193,7 +2206,7 @@ AddedFunction::AddedFunction(QString signature, QString returnType, double vr) :
     Q_ASSERT(!returnType.isEmpty());
     m_returnType = parseType(returnType);
     signature = signature.trimmed();
-    int endPos = signature.indexOf('(');
+    int endPos = signature.indexOf(QLatin1Char('('));
     if (endPos < 0) {
         m_isConst = false;
         m_name = signature;
@@ -2205,11 +2218,11 @@ AddedFunction::AddedFunction(QString signature, QString returnType, double vr) :
             if (!arg.name.isEmpty())
                 m_arguments.append(arg);
             // end of parameters...
-            if (signature[endPos] == ')')
+            if (signature[endPos] == QLatin1Char(')'))
                 break;
         }
         // is const?
-        m_isConst = signature.right(signatureLength - endPos).contains("const");
+        m_isConst = signature.right(signatureLength - endPos).contains(QLatin1String("const"));
     }
 }
 
@@ -2259,32 +2272,32 @@ QString ContainerTypeEntry::typeName() const
 {
     switch(m_type) {
         case LinkedListContainer:
-            return "linked-list";
+            return QLatin1String("linked-list");
         case ListContainer:
-            return "list";
+            return QLatin1String("list");
         case StringListContainer:
-            return "string-list";
+            return QLatin1String("string-list");
         case VectorContainer:
-            return "vector";
+            return QLatin1String("vector");
         case StackContainer:
-            return "stack";
+            return QLatin1String("stack");
         case QueueContainer:
-            return "queue";
+            return QLatin1String("queue");
         case SetContainer:
-            return "set";
+            return QLatin1String("set");
         case MapContainer:
-            return "map";
+            return QLatin1String("map");
         case MultiMapContainer:
-            return "multi-map";
+            return QLatin1String("multi-map");
         case HashContainer:
-            return "hash";
+            return QLatin1String("hash");
         case MultiHashContainer:
-            return "multi-hash";
+            return QLatin1String("multi-hash");
         case PairContainer:
-            return "pair";
+            return QLatin1String("pair");
         case NoContainer:
         default:
-            return "?";
+            return QLatin1String("?");
     }
 }
 

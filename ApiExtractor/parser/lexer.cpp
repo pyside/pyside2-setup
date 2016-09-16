@@ -75,7 +75,7 @@ void LocationManager::extract_line(int offset, int *line, QString *filename) con
         Q_ASSERT(*cursor == '"');
         ++cursor;
 
-        *filename = buffer;
+        *filename = QLatin1String(buffer);
         *line = l;
         // printf("filename: %s line: %d\n", buffer, line);
     }
@@ -224,7 +224,7 @@ void Lexer::scan_preprocessor()
         ++cursor;
 
     if (*cursor != '\n')
-        reportError("expected newline");
+        reportError(QLatin1String("expected newline"));
 }
 
 void Lexer::scan_char_constant()
@@ -234,7 +234,7 @@ void Lexer::scan_char_constant()
     ++cursor;
     while (*cursor && *cursor != '\'') {
         if (*cursor == '\n')
-            reportError("did not expect newline");
+            reportError(QLatin1String("did not expect newline"));
 
         if (*cursor == '\\')
             ++cursor;
@@ -242,7 +242,7 @@ void Lexer::scan_char_constant()
     }
 
     if (*cursor != '\'')
-        reportError("expected \'");
+        reportError(QLatin1String("expected \'"));
 
     ++cursor;
 
@@ -259,7 +259,7 @@ void Lexer::scan_string_constant()
     ++cursor;
     while (*cursor && *cursor != '"') {
         if (*cursor == '\n')
-            reportError("did not expect newline");
+            reportError(QLatin1String("did not expect newline"));
 
         if (*cursor == '\\')
             ++cursor;
@@ -267,7 +267,7 @@ void Lexer::scan_string_constant()
     }
 
     if (*cursor != '"')
-        reportError("expected \"");
+        reportError(QLatin1String("expected \""));
 
     ++cursor;
 
@@ -687,7 +687,7 @@ void Lexer::scan_EOF()
 
 void Lexer::scan_invalid_input()
 {
-    QString errmsg("invalid input: %1");
+    QString errmsg(QLatin1String("invalid input: %1"));
     reportError(errmsg);
     ++cursor;
 }

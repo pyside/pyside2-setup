@@ -143,12 +143,12 @@ void Parser::tokenRequiredError(int token)
 {
     QString err;
 
-    err += "expected token ";
-    err += "``";
-    err += token_name(token);
-    err += "'' found ``";
-    err += token_name(token_stream.lookAhead());
-    err += "''";
+    err += QLatin1String("expected token ");
+    err += QLatin1String("``");
+    err += QLatin1String(token_name(token));
+    err += QLatin1String("'' found ``");
+    err += QLatin1String(token_name(token_stream.lookAhead()));
+    err += QLatin1String("''");
 
     reportError(err);
 }
@@ -157,10 +157,10 @@ void Parser::syntaxError()
 {
     QString err;
 
-    err += "unexpected token ";
-    err += "``";
-    err += token_name(token_stream.lookAhead());
-    err += "''";
+    err += QLatin1String("unexpected token ");
+    err += QLatin1String("``");
+    err += QLatin1String(token_name(token_stream.lookAhead()));
+    err += QLatin1String("''");
 
     reportError(err);
 }
@@ -489,7 +489,7 @@ bool Parser::parseLinkageSpecification(DeclarationAST *&node)
     if (token_stream.lookAhead() == '{')
         parseLinkageBody(ast->linkage_body);
     else if (!parseDeclaration(ast->declaration))
-        reportError(("Declaration syntax error"));
+        reportError(QLatin1String("Declaration syntax error"));
 
     UPDATE_POS(ast, start, token_stream.cursor());
     node = ast;
@@ -528,7 +528,7 @@ bool Parser::parseLinkageBody(LinkageBodyAST *&node)
     }
 
     if (token_stream.lookAhead() != '}')
-        reportError(("} expected"));
+        reportError(QLatin1String("} expected"));
     else
         token_stream.nextToken();
 
@@ -566,11 +566,11 @@ bool Parser::parseNamespace(DeclarationAST *&node)
             node = ast;
             return true;
         } else {
-            reportError(("namespace expected"));
+            reportError(QLatin1String("namespace expected"));
             return false;
         }
     } else if (token_stream.lookAhead() != '{') {
-        reportError(("{ expected"));
+        reportError(QLatin1String("{ expected"));
         return false;
     }
 
@@ -619,7 +619,7 @@ bool Parser::parseUsingDirective(DeclarationAST *&node)
 
     NameAST *name = 0;
     if (!parseName(name)) {
-        reportError(("Namespace name expected"));
+        reportError(QLatin1String("Namespace name expected"));
         return false;
     }
 
@@ -703,7 +703,7 @@ bool Parser::parseTypedef(DeclarationAST *&node)
 
     TypeSpecifierAST *spec = 0;
     if (!parseTypeSpecifierOrClassSpec(spec)) {
-        reportError(("Need a type specifier to declare"));
+        reportError(QLatin1String("Need a type specifier to declare"));
         return false;
     }
 
@@ -771,7 +771,7 @@ bool Parser::parseTemplateDeclaration(DeclarationAST *&node)
 
     DeclarationAST *declaration = 0;
     if (!parseDeclaration(declaration))
-        reportError(("expected a declaration"));
+        reportError(QLatin1String("expected a declaration"));
 
     TemplateDeclarationAST *ast = CreateNode<TemplateDeclarationAST>(_M_pool);
     ast->exported = exported;
@@ -1071,7 +1071,7 @@ bool Parser::parseDeclarator(DeclaratorAST *&node)
             token_stream.nextToken();
 
             if (!parseConstantExpression(ast->bit_expression))
-                reportError(("Constant expression expected"));
+                reportError(QLatin1String("Constant expression expected"));
 
             goto update_pos;
         }
@@ -1138,7 +1138,7 @@ bool Parser::parseDeclarator(DeclaratorAST *&node)
 
         if (skipParen) {
             if (token_stream.lookAhead() != ')')
-                reportError(("')' expected"));
+                reportError(QLatin1String("')' expected"));
             else
                 token_stream.nextToken();
         }
@@ -1182,7 +1182,7 @@ bool Parser::parseAbstractDeclarator(DeclaratorAST *&node)
         token_stream.nextToken();
         if (!parseConstantExpression(ast->bit_expression)) {
             ast->bit_expression = 0;
-            reportError(("Constant expression expected"));
+            reportError(QLatin1String("Constant expression expected"));
         }
         goto update_pos;
     }
@@ -1567,7 +1567,7 @@ bool Parser::parseParameterDeclaration(ParameterDeclarationAST *&node)
     if (token_stream.lookAhead() == '=') {
         token_stream.nextToken();
         if (!parseLogicalOrExpression(expr, true))
-            reportError(("Expression expected"));
+            reportError(QLatin1String("Expression expected"));
     }
 
     ParameterDeclarationAST *ast = CreateNode<ParameterDeclarationAST>(_M_pool);
@@ -1591,7 +1591,7 @@ bool Parser::parse_Attribute__()
     parseExpression(expr);
 
     if (token_stream.lookAhead() != ')') {
-        reportError(("')' expected"));
+        reportError(QLatin1String("')' expected"));
         return false;
     } else {
         token_stream.nextToken();
@@ -1829,7 +1829,7 @@ bool Parser::parseCtorInitializer(CtorInitializerAST *&node)
     ast->colon = start;
 
     if (!parseMemInitializerList(ast->member_initializers))
-        reportError(("Member initializers expected"));
+        reportError(QLatin1String("Member initializers expected"));
 
     UPDATE_POS(ast, start, token_stream.cursor());
     node = ast;
@@ -1915,7 +1915,7 @@ bool Parser::parseEnumerator(EnumeratorAST *&node)
         token_stream.nextToken();
 
         if (!parseConstantExpression(ast->expression))
-            reportError(("Constant expression expected"));
+            reportError(QLatin1String("Constant expression expected"));
     }
 
     UPDATE_POS(ast, start, token_stream.cursor());
@@ -1968,7 +1968,7 @@ bool Parser::parseBaseClause(BaseClauseAST *&node)
         token_stream.nextToken();
 
         if (!parseBaseSpecifier(baseSpec)) {
-            reportError(("Base class specifier expected"));
+            reportError(QLatin1String("Base class specifier expected"));
             break;
         }
         ast->base_specifiers = snoc(ast->base_specifiers, baseSpec, _M_pool);
@@ -1994,7 +1994,7 @@ bool Parser::parseInitializer(InitializerAST *&node)
         token_stream.nextToken();
 
         if (!parseInitializerClause(ast->initializer_clause))
-            reportError(("Initializer clause expected"));
+            reportError(QLatin1String("Initializer clause expected"));
 
     } else if (tk == '(') {
         token_stream.nextToken();
@@ -2035,7 +2035,7 @@ bool Parser::parseMemInitializer(MemInitializerAST *&node)
 
     NameAST *initId = 0;
     if (!parseName(initId, true)) {
-        reportError(("Identifier expected"));
+        reportError(QLatin1String("Identifier expected"));
         return false;
     }
 
@@ -2067,7 +2067,7 @@ bool Parser::parseTypeIdList(const ListNode<TypeIdAST*> *&node)
         if (parseTypeId(typeId)) {
             node = snoc(node, typeId, _M_pool);
         } else {
-            reportError(("Type id expected"));
+            reportError(QLatin1String("Type id expected"));
             break;
         }
     }
@@ -2106,7 +2106,7 @@ bool Parser::parseBaseSpecifier(BaseSpecifierAST *&node)
     }
 
     if (!parseName(ast->name, true))
-        reportError(("Class name expected"));
+        reportError(QLatin1String("Class name expected"));
 
     UPDATE_POS(ast, start, token_stream.cursor());
     node = ast;
@@ -2127,10 +2127,10 @@ bool Parser::parseInitializerClause(InitializerClauseAST *&node)
         if (skip('{', '}'))
             token_stream.nextToken();
         else
-            reportError(("} missing"));
+            reportError(QLatin1String("} missing"));
     } else {
         if (!parseAssignmentExpression(ast->expression))
-            reportError(("Expression expected"));
+            reportError(QLatin1String("Expression expected"));
     }
 
     UPDATE_POS(ast, start, token_stream.cursor());
@@ -2439,14 +2439,14 @@ bool Parser::parseWhileStatement(StatementAST *&node)
 
     ConditionAST *cond = 0;
     if (!parseCondition(cond)) {
-        reportError(("condition expected"));
+        reportError(QLatin1String("condition expected"));
         return false;
     }
     ADVANCE(')', ")");
 
     StatementAST *body = 0;
     if (!parseStatement(body)) {
-        reportError(("statement expected"));
+        reportError(QLatin1String("statement expected"));
         return false;
     }
 
@@ -2468,7 +2468,7 @@ bool Parser::parseDoStatement(StatementAST *&node)
 
     StatementAST *body = 0;
     if (!parseStatement(body)) {
-        reportError(("statement expected"));
+        reportError(QLatin1String("statement expected"));
         //return false;
     }
 
@@ -2477,7 +2477,7 @@ bool Parser::parseDoStatement(StatementAST *&node)
 
     ExpressionAST *expr = 0;
     if (!parseCommaExpression(expr)) {
-        reportError(("expression expected"));
+        reportError(QLatin1String("expression expected"));
         //return false;
     }
 
@@ -2503,7 +2503,7 @@ bool Parser::parseForStatement(StatementAST *&node)
 
     StatementAST *init = 0;
     if (!parseForInitStatement(init)) {
-        reportError(("for initialization expected"));
+        reportError(QLatin1String("for initialization expected"));
         return false;
     }
 
@@ -2584,14 +2584,14 @@ bool Parser::parseIfStatement(StatementAST *&node)
 
     ConditionAST *cond = 0;
     if (!parseCondition(cond)) {
-        reportError(("condition expected"));
+        reportError(QLatin1String("condition expected"));
         return false;
     }
     ADVANCE(')', ")");
 
     StatementAST *stmt = 0;
     if (!parseStatement(stmt)) {
-        reportError(("statement expected"));
+        reportError(QLatin1String("statement expected"));
         return false;
     }
 
@@ -2602,7 +2602,7 @@ bool Parser::parseIfStatement(StatementAST *&node)
         token_stream.nextToken();
 
         if (!parseStatement(ast->else_statement)) {
-            reportError(("statement expected"));
+            reportError(QLatin1String("statement expected"));
             return false;
         }
     }
@@ -2622,7 +2622,7 @@ bool Parser::parseSwitchStatement(StatementAST *&node)
 
     ConditionAST *cond = 0;
     if (!parseCondition(cond)) {
-        reportError(("condition expected"));
+        reportError(QLatin1String("condition expected"));
         return false;
     }
     ADVANCE(')', ")");
@@ -2664,13 +2664,13 @@ bool Parser::parseLabeledStatement(StatementAST *&node)
         token_stream.nextToken();
         ExpressionAST *expr = 0;
         if (!parseConstantExpression(expr)) {
-            reportError(("expression expected"));
+            reportError(QLatin1String("expression expected"));
         } else if (token_stream.lookAhead() == Token_ellipsis) {
             token_stream.nextToken();
 
             ExpressionAST *expr2 = 0;
             if (!parseConstantExpression(expr2))
-                reportError(("expression expected"));
+                reportError(QLatin1String("expression expected"));
         }
         ADVANCE(':', ":");
 
@@ -2753,7 +2753,7 @@ bool Parser::parseNamespaceAliasDefinition(DeclarationAST *&node)
     ADVANCE('=', "=");
 
     if (!parseName(ast->alias_name))
-        reportError(("Namespace name expected"));
+        reportError(QLatin1String("Namespace name expected"));
 
     ADVANCE(';', ";");
 
@@ -3032,7 +3032,7 @@ bool Parser::parseTryBlockStatement(StatementAST *&node)
     }
 
     if (token_stream.lookAhead() != Token_catch) {
-        reportError(("catch expected"));
+        reportError(QLatin1String("catch expected"));
         return false;
     }
 
@@ -3043,7 +3043,7 @@ bool Parser::parseTryBlockStatement(StatementAST *&node)
         if (token_stream.lookAhead() == Token_ellipsis) {
             token_stream.nextToken();
         } else if (!parseCondition(cond, false)) {
-            reportError(("condition expected"));
+            reportError(QLatin1String("condition expected"));
             return false;
         }
         ADVANCE(')', ")");

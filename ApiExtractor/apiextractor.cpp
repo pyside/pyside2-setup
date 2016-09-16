@@ -44,7 +44,7 @@ ApiExtractor::ApiExtractor() : m_builder(0)
     if (!qrcInitialized)
         Q_INIT_RESOURCE(generator);
     // Environment TYPESYSTEMPATH
-    QString envTypesystemPaths = getenv("TYPESYSTEMPATH");
+    QString envTypesystemPaths = QFile::decodeName(getenv("TYPESYSTEMPATH"));
     if (!envTypesystemPaths.isEmpty())
         TypeDatabase::instance()->addTypesystemPath(envTypesystemPaths);
 }
@@ -107,7 +107,7 @@ void ApiExtractor::setSilent ( bool value )
 
 void ApiExtractor::setApiVersion(double version)
 {
-    TypeDatabase::instance()->setApiVersion("*", QByteArray::number(version));
+    TypeDatabase::instance()->setApiVersion(QLatin1String("*"), QByteArray::number(version));
 }
 
 void ApiExtractor::setApiVersion(const QString& package, const QByteArray& version)
@@ -117,8 +117,8 @@ void ApiExtractor::setApiVersion(const QString& package, const QByteArray& versi
 
 void ApiExtractor::setDropTypeEntries(QString dropEntries)
 {
-    dropEntries.remove(' ');
-    QStringList entries = dropEntries.split(';');
+    dropEntries.remove(QLatin1Char(' '));
+    QStringList entries = dropEntries.split(QLatin1Char(';'));
     TypeDatabase::instance()->setDropTypeEntries(entries);
 }
 
@@ -269,7 +269,8 @@ static bool preprocess(const QString& sourceFile,
 
     const char *ppconfig = ":/trolltech/generator/pp-qt-configuration";
 
-    QFile file(ppconfig);
+    const QString fileName = QLatin1String(ppconfig);
+    QFile file(fileName);
     if (!file.open(QFile::ReadOnly)) {
         std::cerr << "Preprocessor configuration file not found " << ppconfig << std::endl;
         return false;

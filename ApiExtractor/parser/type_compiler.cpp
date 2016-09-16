@@ -82,8 +82,8 @@ void TypeCompiler::visitSimpleTypeSpecifier(SimpleTypeSpecifierAST *node)
         QString current_item;
         do {
             std::size_t token = it->element;
-            current_item += token_name(_M_token_stream->kind(token));
-            current_item += " ";
+            current_item += QLatin1String(token_name(_M_token_stream->kind(token)));
+            current_item += QLatin1Char(' ');
             it = it->next;
         } while (it != end);
         _M_type += current_item.trimmed();

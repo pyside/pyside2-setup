@@ -134,9 +134,9 @@ void ReportHandler::progress(const QString& str, ...)
     m_step++;
     if (m_step >= m_step_size) {
         if (m_step_warning == 0) {
-            m_progressBuffer = "[" COLOR_GREEN "OK" COLOR_END "]\n";
+            m_progressBuffer = QLatin1String("[" COLOR_GREEN "OK" COLOR_END "]\n");
         } else {
-            m_progressBuffer = "[" COLOR_YELLOW "WARNING" COLOR_END "]\n";
+            m_progressBuffer = QLatin1String("[" COLOR_YELLOW "WARNING" COLOR_END "]\n");
         }
         printProgress();
         m_step_warning = 0;

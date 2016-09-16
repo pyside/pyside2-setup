@@ -86,27 +86,27 @@ QString AbstractMetaType::cppSignature() const
 {
     if (m_cachedCppSignature.isEmpty()) {
         if (isConstant())
-            m_cachedCppSignature += "const ";
+            m_cachedCppSignature += QLatin1String("const ");
 
         m_cachedCppSignature += typeEntry()->qualifiedCppName();
 
         if (hasInstantiationInCpp()) {
             AbstractMetaTypeList types = instantiations();
-            m_cachedCppSignature += "<";
+            m_cachedCppSignature += QLatin1Char('<');
             for (int i = 0; i < types.count(); ++i) {
                 if (i > 0)
-                    m_cachedCppSignature += ", ";
+                    m_cachedCppSignature += QLatin1String(", ");
                 m_cachedCppSignature += types[i]->cppSignature();
             }
-            m_cachedCppSignature += " >";
+            m_cachedCppSignature += QLatin1String(" >");
         }
 
         if (actualIndirections()) {
-            m_cachedCppSignature += ' ';
+            m_cachedCppSignature += QLatin1Char(' ');
             if (indirections())
-                m_cachedCppSignature += QString(indirections(), '*');
+                m_cachedCppSignature += QString(indirections(), QLatin1Char('*'));
             if (isReference())
-                m_cachedCppSignature += '&';
+                m_cachedCppSignature += QLatin1Char('&');
         }
     }
     return m_cachedCppSignature;
@@ -278,16 +278,20 @@ bool AbstractMetaFunction::needsSuppressUncheckedWarning() const
 
 QString AbstractMetaFunction::marshalledName() const
 {
-    QString returned = "__qt_" + name();
+    QString returned = QLatin1String("__qt_") + name();
     AbstractMetaArgumentList arguments = this->arguments();
     foreach (const AbstractMetaArgument *arg, arguments) {
-        returned += "_";
-        if (arg->type()->isNativePointer())
-            returned += "nativepointer";
-        else if (arg->type()->isIntegerEnum() || arg->type()->isIntegerFlags())
-            returned += "int";
-        else
-            returned += arg->type()->name().replace("[]", "_3").replace(".", "_");
+        returned += QLatin1Char('_');
+        if (arg->type()->isNativePointer()) {
+            returned += QLatin1String("nativepointer");
+        } else if (arg->type()->isIntegerEnum() || arg->type()->isIntegerFlags()) {
+            returned += QLatin1String("int");
+        } else {
+            QString a = arg->type()->name();
+            a.replace(QLatin1String("[]"), QLatin1String("_3"));
+            a.replace(QLatin1Char('.'), QLatin1Char('_'));
+            returned += a;
+        }
     }
     return returned;
 }
@@ -400,15 +404,16 @@ QStringList AbstractMetaFunction::introspectionCompatibleSignatures(const QStrin
 {
     AbstractMetaArgumentList arguments = this->arguments();
     if (arguments.size() == resolvedArguments.size()) {
-        return (QStringList() << TypeDatabase::normalizedSignature((name() + "(" + resolvedArguments.join(",") + ")").toUtf8().constData()));
+        QString signature = name() + QLatin1Char('(') + resolvedArguments.join(QLatin1Char(',')) + QLatin1Char(')');
+        return QStringList(TypeDatabase::normalizedSignature(signature.toUtf8().constData()));
     } else {
         QStringList returned;
 
         AbstractMetaArgument *argument = arguments.at(resolvedArguments.size());
-        QStringList minimalTypeSignature = argument->type()->minimalSignature().split("::");
+        QStringList minimalTypeSignature = argument->type()->minimalSignature().split(QLatin1String("::"));
         for (int i = 0; i < minimalTypeSignature.size(); ++i) {
             returned += introspectionCompatibleSignatures(QStringList(resolvedArguments)
-                                                          << QStringList(minimalTypeSignature.mid(minimalTypeSignature.size() - i - 1)).join("::"));
+                                                          << QStringList(minimalTypeSignature.mid(minimalTypeSignature.size() - i - 1)).join(QLatin1String("::")));
         }
 
         return returned;
@@ -420,22 +425,22 @@ QString AbstractMetaFunction::signature() const
     if (m_cachedSignature.isEmpty()) {
         m_cachedSignature = m_originalName;
 
-        m_cachedSignature += '(';
+        m_cachedSignature += QLatin1Char('(');
 
         for (int i = 0; i < m_arguments.count(); ++i) {
             if (i > 0)
-                m_cachedSignature += ", ";
+                m_cachedSignature += QLatin1String(", ");
             AbstractMetaArgument *a = m_arguments.at(i);
             m_cachedSignature += a->type()->cppSignature();
 
             // We need to have the argument names in the qdoc files
-            m_cachedSignature += ' ';
+            m_cachedSignature += QLatin1Char(' ');
             m_cachedSignature += a->name();
         }
-        m_cachedSignature += ")";
+        m_cachedSignature += QLatin1Char(')');
 
         if (isConstant())
-            m_cachedSignature += " const";
+            m_cachedSignature += QLatin1String(" const");
     }
     return m_cachedSignature;
 }
@@ -616,7 +621,7 @@ QString AbstractMetaFunction::argumentReplaced(int key) const
         }
     }
 
-    return "";
+    return QString();
 }
 
 // FIXME If we remove a arg. in the method at the base class, it will not reflect here.
@@ -750,20 +755,20 @@ QString AbstractMetaFunction::minimalSignature() const
     if (!m_cachedMinimalSignature.isEmpty())
         return m_cachedMinimalSignature;
 
-    QString minimalSignature = originalName() + "(";
+    QString minimalSignature = originalName() + QLatin1Char('(');
     AbstractMetaArgumentList arguments = this->arguments();
 
     for (int i = 0; i < arguments.count(); ++i) {
         AbstractMetaType *t = arguments.at(i)->type();
 
         if (i > 0)
-            minimalSignature += ",";
+            minimalSignature += QLatin1Char(',');
 
         minimalSignature += t->minimalSignature();
     }
-    minimalSignature += ")";
+    minimalSignature += QLatin1Char(')');
     if (isConstant())
-        minimalSignature += "const";
+        minimalSignature += QLatin1String("const");
 
     minimalSignature = TypeDatabase::normalizedSignature(minimalSignature.toLocal8Bit().constData());
     m_cachedMinimalSignature = minimalSignature;
@@ -805,7 +810,7 @@ QString AbstractMetaFunction::argumentName(int index, bool create, const Abstrac
 
 bool AbstractMetaFunction::isCallOperator() const
 {
-    return m_name == "operator()";
+    return m_name == QLatin1String("operator()");
 }
 
 bool AbstractMetaFunction::hasInjectedCode() const
@@ -850,7 +855,7 @@ bool AbstractMetaFunction::hasSignatureModifications() const
 
 bool AbstractMetaFunction::isConversionOperator(QString funcName)
 {
-    static QRegExp opRegEx("^operator(?:\\s+(?:const|volatile))?\\s+(\\w+\\s*)&?$");
+    static QRegExp opRegEx(QLatin1String("^operator(?:\\s+(?:const|volatile))?\\s+(\\w+\\s*)&?$"));
     return opRegEx.indexIn(funcName) > -1;
 }
 
@@ -859,17 +864,17 @@ bool AbstractMetaFunction::isOperatorOverload(QString funcName)
     if (isConversionOperator(funcName))
         return true;
 
-    static QRegExp opRegEx("^operator([+\\-\\*/%=&\\|\\^\\<>!][=]?"
+    static QRegExp opRegEx(QLatin1String("^operator([+\\-\\*/%=&\\|\\^\\<>!][=]?"
                     "|\\+\\+|\\-\\-|&&|\\|\\||<<[=]?|>>[=]?|~"
                     "|\\[\\]|\\s+delete\\[?\\]?"
                     "|\\(\\)"
-                    "|\\s+new\\[?\\]?)$");
+                    "|\\s+new\\[?\\]?)$"));
     return opRegEx.indexIn(funcName) > -1;
 }
 
 bool AbstractMetaFunction::isCastOperator() const
 {
-    return originalName().startsWith("operator ");
+    return originalName().startsWith(QLatin1String("operator "));
 }
 
 bool AbstractMetaFunction::isArithmeticOperator() const
@@ -880,15 +885,15 @@ bool AbstractMetaFunction::isArithmeticOperator() const
     QString name = originalName();
 
     // It's a dereference operator!
-    if (name == "operator*" && m_arguments.isEmpty())
+    if (name == QLatin1String("operator*") && m_arguments.isEmpty())
         return false;
 
-    return name == "operator+" || name == "operator+="
-            || name == "operator-" || name == "operator-="
-            || name == "operator*" || name == "operator*="
-            || name == "operator/" || name == "operator/="
-            || name == "operator%" || name == "operator%="
-            || name == "operator++" || name == "operator--";
+    return name == QLatin1String("operator+") || name == QLatin1String("operator+=")
+            || name == QLatin1String("operator-") || name == QLatin1String("operator-=")
+            || name == QLatin1String("operator*") || name == QLatin1String("operator*=")
+            || name == QLatin1String("operator/") || name == QLatin1String("operator/=")
+            || name == QLatin1String("operator%") || name == QLatin1String("operator%=")
+            || name == QLatin1String("operator++") || name == QLatin1String("operator--");
 }
 
 bool AbstractMetaFunction::isBitwiseOperator() const
@@ -897,12 +902,12 @@ bool AbstractMetaFunction::isBitwiseOperator() const
         return false;
 
     QString name = originalName();
-    return name == "operator<<" || name == "operator<<="
-            || name == "operator>>" || name == "operator>>="
-            || name == "operator&" || name == "operator&="
-            || name == "operator|" || name == "operator|="
-            || name == "operator^" || name == "operator^="
-            || name == "operator~";
+    return name == QLatin1String("operator<<") || name == QLatin1String("operator<<=")
+            || name == QLatin1String("operator>>") || name == QLatin1String("operator>>=")
+            || name == QLatin1String("operator&") || name == QLatin1String("operator&=")
+            || name == QLatin1String("operator|") || name == QLatin1String("operator|=")
+            || name == QLatin1String("operator^") || name == QLatin1String("operator^=")
+            || name == QLatin1String("operator~");
 }
 
 bool AbstractMetaFunction::isComparisonOperator() const
@@ -911,9 +916,9 @@ bool AbstractMetaFunction::isComparisonOperator() const
         return false;
 
     QString name = originalName();
-    return name == "operator<" || name == "operator<="
-            || name == "operator>" || name == "operator>="
-            || name == "operator==" || name == "operator!=";
+    return name == QLatin1String("operator<") || name == QLatin1String("operator<=")
+            || name == QLatin1String("operator>") || name == QLatin1String("operator>=")
+            || name == QLatin1String("operator==") || name == QLatin1String("operator!=");
 }
 
 bool AbstractMetaFunction::isLogicalOperator() const
@@ -922,9 +927,9 @@ bool AbstractMetaFunction::isLogicalOperator() const
         return false;
 
     QString name = originalName();
-    return name == "operator!"
-            || name == "operator&&"
-            || name == "operator||";
+    return name == QLatin1String("operator!")
+            || name == QLatin1String("operator&&")
+            || name == QLatin1String("operator||");
 }
 
 bool AbstractMetaFunction::isSubscriptOperator() const
@@ -932,7 +937,7 @@ bool AbstractMetaFunction::isSubscriptOperator() const
     if (!isOperatorOverload())
         return false;
 
-    return originalName() == "operator[]";
+    return originalName() == QLatin1String("operator[]");
 }
 
 bool AbstractMetaFunction::isAssignmentOperator() const
@@ -940,7 +945,7 @@ bool AbstractMetaFunction::isAssignmentOperator() const
     if (!isOperatorOverload())
         return false;
 
-    return originalName() == "operator=";
+    return originalName() == QLatin1String("operator=");
 }
 
 bool AbstractMetaFunction::isOtherOperator() const
@@ -980,11 +985,11 @@ bool AbstractMetaFunction::isInplaceOperator() const
         return false;
 
     QString name = originalName();
-    return name == "operator+=" || name == "operator&="
-           || name == "operator-=" || name == "operator|="
-           || name == "operator*=" || name == "operator^="
-           || name == "operator/=" || name == "operator<<="
-           || name == "operator%=" || name == "operator>>=";
+    return name == QLatin1String("operator+=") || name == QLatin1String("operator&=")
+           || name == QLatin1String("operator-=") || name == QLatin1String("operator|=")
+           || name == QLatin1String("operator*=") || name == QLatin1String("operator^=")
+           || name == QLatin1String("operator/=") || name == QLatin1String("operator<<=")
+           || name == QLatin1String("operator%=") || name == QLatin1String("operator>>=");
 }
 
 bool AbstractMetaFunction::isVirtual() const
@@ -1026,33 +1031,33 @@ QString AbstractMetaFunction::targetLangSignature(bool minimal) const
     if (!minimal) {
         // Return type
         if (type())
-            s += type()->name() + " ";
+            s += type()->name() + QLatin1Char(' ');
         else
-            s += "void ";
+            s += QLatin1String("void ");
     }
 
     s += modifiedName();
-    s += "(";
+    s += QLatin1Char('(');
 
     int j = 0;
     for (int i = 0; i < m_arguments.size(); ++i) {
         if (argumentRemoved(i + 1))
             continue;
         if (j) {
-            s += ",";
+            s += QLatin1Char(',');
             if (!minimal)
                 s += QLatin1Char(' ');
         }
         s += m_arguments.at(i)->type()->name();
 
         if (!minimal) {
-            s += " ";
+            s += QLatin1Char(' ');
             s += m_arguments.at(i)->name();
         }
         ++j;
     }
 
-    s += ")";
+    s += QLatin1Char(')');
 
     return s;
 }
@@ -1435,7 +1440,7 @@ bool AbstractMetaClass::hasFieldAccessors() const
 
 bool AbstractMetaClass::hasDefaultToStringFunction() const
 {
-    foreach (AbstractMetaFunction *f, queryFunctionsByName("toString")) {
+    foreach (AbstractMetaFunction *f, queryFunctionsByName(QLatin1String("toString"))) {
         if (!f->actualMinimumArgumentCount())
             return true;
     }
@@ -1444,7 +1449,7 @@ bool AbstractMetaClass::hasDefaultToStringFunction() const
 
 void AbstractMetaClass::addFunction(AbstractMetaFunction *function)
 {
-    Q_ASSERT(!function->signature().startsWith("("));
+    Q_ASSERT(!function->signature().startsWith(QLatin1Char('(')));
     function->setOwnerClass(this);
 
     if (!function->isDestructor())
@@ -1474,7 +1479,7 @@ bool AbstractMetaClass::hasSignal(const AbstractMetaFunction *other) const
 
 QString AbstractMetaClass::name() const
 {
-    return QString(m_typeEntry->targetLangName()).split("::").last();
+    return QString(m_typeEntry->targetLangName()).split(QLatin1String("::")).last();
 }
 
 void AbstractMetaClass::setBaseClass(AbstractMetaClass *baseClass)
@@ -1694,7 +1699,7 @@ const AbstractMetaFunction *AbstractMetaField::setter() const
 {
     if (!m_setter) {
         m_setter = createXetter(this,
-                                "set" + upCaseFirst(name()),
+                                QLatin1String("set") + upCaseFirst(name()),
                                 AbstractMetaAttributes::SetterFunction);
         AbstractMetaArgumentList arguments;
         AbstractMetaArgument *argument = new AbstractMetaArgument;
@@ -2153,8 +2158,8 @@ void AbstractMetaClass::fixFunctions()
                         }
 
                         if (f->visibility() != sf->visibility()) {
-                            QString warn = QString("visibility of function '%1' modified in class '%2'")
-                                           .arg(f->name()).arg(name());
+                            QString warn = QStringLiteral("visibility of function '%1' modified in class '%2'")
+                                                          .arg(f->name(), name());
                             qCWarning(lcShiboken).noquote().nospace() << warn;
 #if 0
                             // If new visibility is private, we can't
@@ -2299,23 +2304,23 @@ QString AbstractMetaType::minimalSignature() const
 {
     QString minimalSignature;
     if (isConstant())
-        minimalSignature += "const ";
+        minimalSignature += QLatin1String("const ");
     minimalSignature += typeEntry()->qualifiedCppName();
     if (hasInstantiations()) {
         AbstractMetaTypeList instantiations = this->instantiations();
-        minimalSignature += "< ";
+        minimalSignature += QLatin1String("< ");
         for (int i = 0; i < instantiations.size(); ++i) {
             if (i > 0)
-                minimalSignature += ",";
+                minimalSignature += QLatin1Char(',');
             minimalSignature += instantiations[i]->minimalSignature();
         }
-        minimalSignature += " >";
+        minimalSignature += QLatin1String(" >");
     }
 
     for (int j = 0; j < indirections(); ++j)
-        minimalSignature += "*";
+        minimalSignature += QLatin1Char('*');
     if (isReference())
-        minimalSignature += "&";
+        minimalSignature += QLatin1Char('&');
 
     return minimalSignature;
 }
@@ -2336,7 +2341,7 @@ AbstractMetaEnum *AbstractMetaClassList::findEnum(const EnumTypeEntry *entry) co
     Q_ASSERT(entry->isEnum());
 
     QString qualifiedName = entry->qualifiedCppName();
-    int pos = qualifiedName.lastIndexOf("::");
+    int pos = qualifiedName.lastIndexOf(QLatin1String("::"));
 
     QString enumName;
     QString className;

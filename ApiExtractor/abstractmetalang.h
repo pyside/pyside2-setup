@@ -326,7 +326,7 @@ public:
     QString name() const
     {
         if (m_name.isNull())
-            m_name = m_typeEntry->targetLangName().split("::").last();
+            m_name = m_typeEntry->targetLangName().split(QLatin1String("::")).constLast();
         return m_name;
     }
     QString fullName() const
@@ -708,8 +708,8 @@ public:
 
     QString toString() const
     {
-        return type()->name() + " " + AbstractMetaVariable::name() +
-               (m_expression.isEmpty() ? "" :  " = " + m_expression);
+        return type()->name() + QLatin1Char(' ') + AbstractMetaVariable::name() +
+               (m_expression.isEmpty() ? QString() :  QLatin1String(" = ") + m_expression);
     }
 
     int argumentIndex() const
@@ -1299,7 +1299,7 @@ public:
 
     QString fullName() const
     {
-        return package() + "." + qualifier()  + "." + name();
+        return package() + QLatin1Char('.') + qualifier()  + QLatin1Char('.') + name();
     }
 
     // Has the enum been declared inside a Q_ENUMS() macro in its enclosing class?
@@ -1559,7 +1559,7 @@ public:
 
     QString fullName() const
     {
-        return package() + "." + name();
+        return package() + QLatin1Char('.') + name();
     }
 
     /**
@@ -1627,7 +1627,7 @@ public:
 
     bool isQtNamespace() const
     {
-        return isNamespace() && name() == "Qt";
+        return isNamespace() && name() == QLatin1String("Qt");
     }
 
     QString qualifiedCppName() const

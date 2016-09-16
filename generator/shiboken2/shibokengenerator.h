@@ -226,8 +226,8 @@ public:
      *   \param arg_count the number of function arguments
      */
     QString functionSignature(const AbstractMetaFunction* func,
-                              QString prepend = "",
-                              QString append = "",
+                              QString prepend = QString(),
+                              QString append = QString(),
                               Options options = NoOption,
                               int arg_count = -1) const;
 
@@ -378,7 +378,7 @@ public:
     QString cpythonSetattroFunctionName(const AbstractMetaClass* metaClass);
     QString cpythonGetterFunctionName(const AbstractMetaField* metaField);
     QString cpythonSetterFunctionName(const AbstractMetaField* metaField);
-    QString cpythonWrapperCPtr(const AbstractMetaClass* metaClass, QString argName = PYTHON_SELF_VAR);
+    QString cpythonWrapperCPtr(const AbstractMetaClass* metaClass, QString argName = QLatin1String(PYTHON_SELF_VAR));
     QString cpythonWrapperCPtr(const AbstractMetaType* metaType, QString argName);
     QString cpythonWrapperCPtr(const TypeEntry* type, QString argName);
 

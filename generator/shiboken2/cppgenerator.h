@@ -75,7 +75,7 @@ private:
     /// Writes the check section for the validity of wrapped C++ objects.
     void writeInvalidPyObjectCheck(QTextStream& s, const QString& pyObj);
 
-    void writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, bool isNumber = false, QString customType = "", bool rejectNull = false);
+    void writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, bool isNumber = false, QString customType = QString(), bool rejectNull = false);
     void writeTypeCheck(QTextStream& s, const OverloadData* overloadData, QString argumentName);
 
     void writeTypeDiscoveryFunction(QTextStream& s, const AbstractMetaClass* metaClass);
@@ -258,7 +258,7 @@ private:
 
     void writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func, bool userHeuristicForReturn);
     bool writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func, int argIndex, bool userHeuristicPolicy);
-    void writeReturnValueHeuristics(QTextStream& s, const AbstractMetaFunction* func, const QString& self = PYTHON_SELF_VAR);
+    void writeReturnValueHeuristics(QTextStream& s, const AbstractMetaFunction* func, const QString& self = QLatin1String(PYTHON_SELF_VAR));
     void writeInitQtMetaTypeFunctionBody(QTextStream& s, const AbstractMetaClass* metaClass) const;
 
     /**

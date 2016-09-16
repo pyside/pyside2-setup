@@ -47,7 +47,7 @@ public:
         QString data;
 
         TableCell(const QString& text = QString()) : rowSpan(0), colSpan(0), data(text) {}
-        TableCell(const char* text) : rowSpan(0), colSpan(0), data(text) {}
+        TableCell(const char* text) : rowSpan(0), colSpan(0), data(QLatin1String(text)) {}
     };
 
     typedef QList<TableCell> TableRow;
