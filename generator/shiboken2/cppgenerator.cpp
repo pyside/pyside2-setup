@@ -66,9 +66,9 @@ CppGenerator::CppGenerator()
     m_nbFuncs["__or__"] = "nb_or";
     m_nbFuncs["__iadd__"] = "nb_inplace_add";
     m_nbFuncs["__isub__"] = "nb_inplace_subtract";
-    m_nbFuncs["__imul__"] = "nb_multiply";
-    m_nbFuncs["__idiv__"] = "nb_divide";
-    m_nbFuncs["__imod__"] = "nb_remainder";
+    m_nbFuncs.insert(QLatin1String("__imul__"), QLatin1String("nb_inplace_multiply"));
+    m_nbFuncs.insert(QLatin1String("__idiv__"), QLatin1String("nb_inplace_divide"));
+    m_nbFuncs.insert(QLatin1String("__imod__"), QLatin1String("nb_inplace_remainder"));
     m_nbFuncs["__ilshift__"] = "nb_inplace_lshift";
     m_nbFuncs["__irshift__"] = "nb_inplace_rshift";
     m_nbFuncs["__iand__"] = "nb_inplace_and";
