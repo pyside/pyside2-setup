@@ -235,11 +235,12 @@ struct SignalManager::SignalManagerPrivate
     ~SignalManagerPrivate()
     {
         if (!m_globalReceivers.isNull()) {
-            QList<GlobalReceiverV2*> values = m_globalReceivers->values();
-            m_globalReceivers->clear();
-            if (values.size()) {
-                qDeleteAll(values);
-            }
+            // Delete receivers by always retrieving the current first element, because deleting a
+            // receiver can indirectly delete another one, and if we use qDeleteAll, that could
+            // cause either a double delete, or iterator invalidation, and thus undefined behavior.
+            while (!m_globalReceivers->isEmpty())
+                delete *m_globalReceivers->cbegin();
+            Q_ASSERT(m_globalReceivers->isEmpty());
         }
     }
 };
