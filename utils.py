@@ -332,7 +332,7 @@ def run_process_output(args, initial_env=None):
                               stdout=subprocess.PIPE).stdout
     result = []
     for rawLine in stdOut.readlines():
-        line = rawLine.decode('utf-8')
+        line = rawLine if sys.version_info >= (3,) else rawLine.decode('utf-8')
         result.append(line.rstrip())
     return result
 
