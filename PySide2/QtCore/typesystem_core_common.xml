@@ -288,11 +288,6 @@
         delete[] str;
         return %out;
         </native-to-target>
-        <target-to-native>
-            <add-conversion type="PyObject" check="Shiboken::String::check(%in) || %in == Py_None">
-            %out = %OUTTYPE();
-            </add-conversion>
-        </target-to-native>
     </conversion-rule>
   </primitive-type>
   <primitive-type name="QChar">
