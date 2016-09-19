@@ -2404,6 +2404,15 @@
     <modify-function signature="information(QWidget*, const QString&amp;, const QString&amp;, QFlags&lt;QMessageBox::StandardButton&gt;, QMessageBox::StandardButton)" allow-thread="yes"/>
     <modify-function signature="question(QWidget*, const QString&amp;, const QString&amp;, QFlags&lt;QMessageBox::StandardButton&gt;, QMessageBox::StandardButton)" allow-thread="yes"/>
     <modify-function signature="warning(QWidget*, const QString&amp;, const QString&amp;, QFlags&lt;QMessageBox::StandardButton&gt;, QMessageBox::StandardButton)" allow-thread="yes"/>
+    <modify-function signature="QMessageBox(const QString&amp;, const QString&amp;, QMessageBox::Icon, int, int, int, QWidget*, QFlags&lt;Qt::WindowType&gt;)" remove="all"/>
+    <modify-function signature="critical(QWidget*, const QString&amp;, const QString&amp;, int, int, int)" remove="all"/>
+    <modify-function signature="critical(QWidget*, const QString&amp;, const QString&amp;, const QString&amp;, const QString&amp;, const QString&amp;, int, int)" remove="all"/>
+    <modify-function signature="information(QWidget*, const QString&amp;, const QString&amp;, int, int, int)" remove="all"/>
+    <modify-function signature="information(QWidget*, const QString&amp;, const QString&amp;, const QString&amp;, const QString&amp;, const QString&amp;, int, int)" remove="all"/>
+    <modify-function signature="question(QWidget*, const QString&amp;, const QString&amp;, int, int, int)" remove="all"/>
+    <modify-function signature="question(QWidget*, const QString&amp;, const QString&amp;, const QString&amp;, const QString&amp;, const QString&amp;, int, int)" remove="all"/>
+    <modify-function signature="warning(QWidget*, const QString&amp;, const QString&amp;, int, int, int)" remove="all"/>
+    <modify-function signature="warning(QWidget*, const QString&amp;, const QString&amp;, const QString&amp;, const QString&amp;, const QString&amp;, int, int)" remove="all"/>
 
   </object-type>
   <object-type name="QAbstractSpinBox">
