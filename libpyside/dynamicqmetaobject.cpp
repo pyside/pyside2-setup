@@ -356,7 +356,7 @@ bool PropertyData::operator==(const PropertyData& other) const
 
 bool PropertyData::operator==(const char* name) const
 {
-    return m_name == QString(name);
+    return m_name == name;
 }
 
 

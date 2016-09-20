@@ -103,6 +103,8 @@ else()
     set(LIBRARY_OUTPUT_SUFFIX ${CMAKE_RELEASE_POSTFIX})
 endif()
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D QT_NO_CAST_FROM_ASCII -D QT_NO_CAST_TO_ASCII")
+
 # create pkg-config file
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/pyside2.pc.in"
                "${CMAKE_CURRENT_BINARY_DIR}/pyside2${pyside2_SUFFIX}.pc" @ONLY)

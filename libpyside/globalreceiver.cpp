@@ -176,7 +176,7 @@ GlobalReceiver::GlobalReceiver()
     //slot used to be notifyed of object destrouction
     m_metaObject.addSlot(RECEIVER_DESTROYED_SLOT_NAME);
     m_metaObject.update();
-    setObjectName("GLOBAL RECEIVER");
+    setObjectName(QLatin1String("GLOBAL RECEIVER"));
 }
 
 GlobalReceiver::~GlobalReceiver()

@@ -498,7 +498,7 @@ int SignalManager::qt_metacall(QObject* object, QMetaObject::Call call, int id, 
                     PyErr_Fetch(&errType, &errValue, &errTraceback);
                     PyErr_Restore(errType, errValue, errTraceback);
 
-                    const char *errString = Shiboken::String::toCString(PyObject_Str(errValue));
+                    const QString errString = QLatin1String(Shiboken::String::toCString(PyObject_Str(errValue)));
 
                     PyErr_Print();
 

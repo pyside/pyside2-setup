@@ -849,18 +849,19 @@ const char** getSignatures(PyObject* signal, int* size)
 
 QStringList getArgsFromSignature(const char* signature, bool* isShortCircuit)
 {
-    QString qsignature(signature);
+    const QString qsignature = QLatin1String(signature);
     QStringList result;
-    QRegExp splitRegex("\\s*,\\s*");
+    QRegExp splitRegex(QLatin1String("\\s*,\\s*"));
 
     if (isShortCircuit)
-        *isShortCircuit = !qsignature.contains('(');
-    if (qsignature.contains("()") || qsignature.contains("(void)")) {
+        *isShortCircuit = !qsignature.contains(QLatin1Char('('));
+    if (qsignature.contains(QLatin1String("()")) || qsignature.contains(QLatin1String("(void)"))) {
         return result;
-    } else if (qsignature.contains('(')) {
-        static QRegExp regex(".+\\((.*)\\)");
+    } else if (qsignature.contains(QLatin1Char('('))) {
+        static QRegExp regex(QLatin1String(".+\\((.*)\\)"));
         //get args types
-        QString types = qsignature.replace(regex, "\\1");
+        QString types = qsignature;
+        types.replace(regex, QLatin1String("\\1"));
         result = types.split(splitRegex);
     }
     return result;
@@ -869,8 +870,6 @@ QStringList getArgsFromSignature(const char* signature, bool* isShortCircuit)
 QString getCallbackSignature(const char* signal, QObject* receiver, PyObject* callback, bool encodeName)
 {
     QByteArray functionName;
-    QByteArray signature;
-    QStringList args;
     int numArgs = -1;
     bool useSelf = false;
     bool isMethod = PyMethod_Check(callback);
@@ -916,22 +915,19 @@ QString getCallbackSignature(const char* signal, QObject* receiver, PyObject* ca
 
     bool isShortCircuit = false;
 
-    if (encodeName)
-        signature = qPrintable(codeCallbackName(callback, functionName));
-    else
-        signature = functionName;
-
-    args = getArgsFromSignature(signal, &isShortCircuit);
+    const QString functionNameS = QLatin1String(functionName);
+    QString signature = encodeName ? codeCallbackName(callback, functionNameS) : functionNameS;
+    QStringList args = getArgsFromSignature(signal, &isShortCircuit);
 
     if (!isShortCircuit) {
-        signature.append('(');
+        signature.append(QLatin1Char('('));
         if (numArgs == -1)
             numArgs = std::numeric_limits<int>::max();
         while (args.count() && (args.count() > (numArgs - useSelf))) {
             args.removeLast();
         }
-        signature.append(args.join(","));
-        signature.append(')');
+        signature.append(args.join(QLatin1Char(',')));
+        signature.append(QLatin1Char(')'));
     }
     return signature;
 }
