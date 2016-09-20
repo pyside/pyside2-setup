@@ -356,8 +356,8 @@ QObject* SignalManager::globalReceiver(QObject *sender, PyObject *callback)
 int SignalManager::countConnectionsWith(const QObject *object)
 {
     int count = 0;
-    foreach(GlobalReceiverV2* g, m_d->m_globalReceivers->values()) {
-        if (g->refCount(object))
+    for (GlobalReceiverV2Map::const_iterator it = m_d->m_globalReceivers->cbegin(), end = m_d->m_globalReceivers->cend(); it != end; ++it) {
+        if (it.value()->refCount(object))
             count++;
     }
     return count;

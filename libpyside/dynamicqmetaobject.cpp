@@ -139,7 +139,7 @@ static int blobSize(QLinkedList<QByteArray> &strings)
 
    QByteArray str;
    QByteArray debug_str;
-   foreach(QByteArray field, strings) {
+   foreach (const QByteArray &field, strings) {
       str.append(field);
       str.append(char(0));
 
@@ -600,7 +600,7 @@ void DynamicQMetaObject::parsePythonType(PyTypeObject* type)
     }
 
     // Register properties
-    foreach (PropPair propPair, properties)
+    foreach (const PropPair &propPair, properties)
         addProperty(propPair.first, propPair.second);
 
     

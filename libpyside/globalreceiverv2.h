@@ -39,7 +39,8 @@ namespace PySide
 class DynamicSlotDataV2;
 class GlobalReceiverV2;
 
-typedef QSharedPointer< QMap<QByteArray, GlobalReceiverV2*> >  SharedMap;
+typedef QMap<QByteArray, GlobalReceiverV2 *> GlobalReceiverV2Map;
+typedef QSharedPointer<GlobalReceiverV2Map> SharedMap;
 
 /**
  * A class used to make the link between the C++ Signal/Slot and Python callback
