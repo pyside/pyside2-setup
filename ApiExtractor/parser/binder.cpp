@@ -267,7 +267,7 @@ void Binder::declare_symbol(SimpleDeclarationAST *node, InitDeclaratorAST *init_
         fun->setVariadics(decl_cc.isVariadics());
 
         // ... and the signature
-        foreach (DeclaratorCompiler::Parameter p, decl_cc.parameters()) {
+        foreach (const DeclaratorCompiler::Parameter &p, decl_cc.parameters()) {
             ArgumentModelItem arg = model()->create<ArgumentModelItem>();
             arg->setType(qualifyType(p.type, _M_context));
             arg->setName(p.name);
@@ -293,7 +293,7 @@ void Binder::declare_symbol(SimpleDeclarationAST *node, InitDeclaratorAST *init_
             && init_declarator->declarator->parameter_declaration_clause) {
             typeInfo.setFunctionPointer(true);
             decl_cc.run(init_declarator->declarator);
-            foreach (DeclaratorCompiler::Parameter p, decl_cc.parameters())
+            foreach (const DeclaratorCompiler::Parameter &p, decl_cc.parameters())
             typeInfo.addArgument(p.type);
         }
 
@@ -369,7 +369,7 @@ void Binder::visitFunctionDefinition(FunctionDefinitionAST *node)
 
     _M_current_function->setVariadics(decl_cc.isVariadics());
 
-    foreach (DeclaratorCompiler::Parameter p, decl_cc.parameters()) {
+    foreach (const DeclaratorCompiler::Parameter &p, decl_cc.parameters()) {
         ArgumentModelItem arg = model()->create<ArgumentModelItem>();
         arg->setType(qualifyType(p.type, functionScope->qualifiedName()));
         arg->setName(p.name);
@@ -513,7 +513,7 @@ void Binder::visitTypedef(TypedefAST *node)
             && init_declarator->declarator->parameter_declaration_clause) {
             typeInfo.setFunctionPointer(true);
             decl_cc.run(init_declarator->declarator);
-            foreach (DeclaratorCompiler::Parameter p, decl_cc.parameters())
+            foreach (const DeclaratorCompiler::Parameter &p, decl_cc.parameters())
                 typeInfo.addArgument(p.type);
         }
 
@@ -833,7 +833,7 @@ TypeInfo Binder::qualifyType(const TypeInfo &type, const QStringList &context) c
             CodeModelItem scope = model()->findItem(context, _M_current_file->toItem());
 
             if (ClassModelItem klass = model_dynamic_cast<ClassModelItem> (scope)) {
-                foreach (QString base, klass->baseClasses()) {
+                foreach (const QString &base, klass->baseClasses()) {
                     QStringList ctx = context;
                     ctx.removeLast();
                     ctx.append(base);

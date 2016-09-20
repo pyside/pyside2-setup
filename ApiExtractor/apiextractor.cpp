@@ -61,7 +61,7 @@ void ApiExtractor::addTypesystemSearchPath (const QString& path)
 
 void ApiExtractor::addTypesystemSearchPath(const QStringList& paths)
 {
-    foreach (QString path, paths)
+    foreach (const QString &path, paths)
         addTypesystemSearchPath(path);
 }
 
@@ -281,7 +281,7 @@ static bool preprocess(const QString& sourceFile,
     preprocess.operator()(ba.constData(), ba.constData() + ba.size(), null_out);
 
     preprocess.push_include_path(".");
-    foreach (QString include, includes)
+    foreach (const QString &include, includes)
         preprocess.push_include_path(QDir::toNativeSeparators(include).toStdString());
     preprocess.push_include_path("/usr/include");
 

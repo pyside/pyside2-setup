@@ -576,8 +576,8 @@ bool ShibokenGenerator::shouldRejectNullPointerArgument(const AbstractMetaFuncti
         return false;
     if (func->argumentRemoved(argIndex + 1))
         return false;
-    foreach (FunctionModification funcMod, func->modifications()) {
-        foreach (ArgumentModification argMod, funcMod.argument_mods) {
+    foreach (const FunctionModification &funcMod, func->modifications()) {
+        foreach (const ArgumentModification &argMod, funcMod.argument_mods) {
             if (argMod.index == argIndex + 1 && argMod.noNullPointers)
                 return true;
         }
@@ -993,7 +993,7 @@ bool ShibokenGenerator::shouldDereferenceAbstractMetaTypePointer(const AbstractM
 
 bool ShibokenGenerator::visibilityModifiedToPrivate(const AbstractMetaFunction* func)
 {
-    foreach (FunctionModification mod, func->modifications()) {
+    foreach (const FunctionModification &mod, func->modifications()) {
         if (mod.modifiers & Modification::Private)
             return true;
     }
@@ -1442,7 +1442,7 @@ QString ShibokenGenerator::getCodeSnippets(const CodeSnipList& codeSnips,
 {
     QString code;
     QTextStream c(&code);
-    foreach (CodeSnip snip, codeSnips) {
+    foreach (const CodeSnip &snip, codeSnips) {
         if ((position != CodeSnip::Any && snip.position != position) || !(snip.language & language))
             continue;
         QString snipCode;
@@ -1685,14 +1685,14 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
     ArgumentVarReplacementList argReplacements = getArgumentReplacement(func, usePyArgs, language, lastArg);
 
     QStringList args;
-    foreach (ArgumentVarReplacementPair pair, argReplacements) {
+    foreach (const ArgumentVarReplacementPair &pair, argReplacements) {
         if (pair.second.startsWith(QLatin1String(CPP_ARG_REMOVED)))
             continue;
         args << pair.second;
     }
     code.replace(QLatin1String("%ARGUMENT_NAMES"), args.join(QLatin1String(", ")));
 
-    foreach (ArgumentVarReplacementPair pair, argReplacements) {
+    foreach (const ArgumentVarReplacementPair &pair, argReplacements) {
         const AbstractMetaArgument* arg = pair.first;
         int idx = arg->argumentIndex() + 1;
         AbstractMetaType* type = arg->type();
@@ -1897,14 +1897,14 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
         }
         replacements.append(qMakePair(conversionString, conversion));
     }
-    foreach (StringPair rep, replacements)
+    foreach (const StringPair &rep, replacements)
         code.replace(rep.first, rep.second);
 }
 
 bool ShibokenGenerator::injectedCodeUsesCppSelf(const AbstractMetaFunction* func)
 {
     CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
-    foreach (CodeSnip snip, snips) {
+    foreach (const CodeSnip &snip, snips) {
         if (snip.code().contains(QLatin1String("%CPPSELF")))
             return true;
     }
@@ -1914,7 +1914,7 @@ bool ShibokenGenerator::injectedCodeUsesCppSelf(const AbstractMetaFunction* func
 bool ShibokenGenerator::injectedCodeUsesPySelf(const AbstractMetaFunction* func)
 {
     CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::NativeCode);
-    foreach (CodeSnip snip, snips) {
+    foreach (const CodeSnip &snip, snips) {
         if (snip.code().contains(QLatin1String("%PYSELF")))
             return true;
     }
@@ -1930,7 +1930,7 @@ bool ShibokenGenerator::injectedCodeCallsCppFunction(const AbstractMetaFunction*
         wrappedCtorCall = QStringLiteral("new %1(").arg(wrapperName(func->ownerClass()));
     }
     CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
-    foreach (CodeSnip snip, snips) {
+    foreach (const CodeSnip &snip, snips) {
         if (snip.code().contains(QLatin1String("%FUNCTION_NAME(")) || snip.code().contains(funcCall)
             || (func->isConstructor()
                 && ((func->ownerClass()->isPolymorphic() && snip.code().contains(wrappedCtorCall))
@@ -1945,7 +1945,7 @@ bool ShibokenGenerator::injectedCodeCallsPythonOverride(const AbstractMetaFuncti
 {
     static QRegExp overrideCallRegexCheck(QLatin1String("PyObject_Call\\s*\\(\\s*%PYTHON_METHOD_OVERRIDE\\s*,"));
     CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::NativeCode);
-    foreach (CodeSnip snip, snips) {
+    foreach (const CodeSnip &snip, snips) {
         if (overrideCallRegexCheck.indexIn(snip.code()) != -1)
             return true;
     }
@@ -1957,7 +1957,7 @@ bool ShibokenGenerator::injectedCodeHasReturnValueAttribution(const AbstractMeta
     static QRegExp retValAttributionRegexCheck_native(QLatin1String("%0\\s*=[^=]\\s*.+"));
     static QRegExp retValAttributionRegexCheck_target(QLatin1String("%PYARG_0\\s*=[^=]\\s*.+"));
     CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, language);
-    foreach (CodeSnip snip, snips) {
+    foreach (const CodeSnip &snip, snips) {
         if (language == TypeSystem::TargetLangCode) {
             if (retValAttributionRegexCheck_target.indexIn(snip.code()) != -1)
                 return true;
@@ -1972,7 +1972,7 @@ bool ShibokenGenerator::injectedCodeHasReturnValueAttribution(const AbstractMeta
 bool ShibokenGenerator::injectedCodeUsesArgument(const AbstractMetaFunction* func, int argumentIndex)
 {
     CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any);
-    foreach (CodeSnip snip, snips) {
+    foreach (const CodeSnip &snip, snips) {
         QString code = snip.code();
         if (code.contains(QLatin1String("%ARGUMENT_NAMES")))
             return true;
@@ -2043,7 +2043,7 @@ AbstractMetaClassList ShibokenGenerator::getBaseClasses(const AbstractMetaClass*
 {
     AbstractMetaClassList baseClasses;
     if (metaClass) {
-        foreach (QString parent, metaClass->baseClassNames()) {
+        foreach (const QString &parent, metaClass->baseClassNames()) {
             AbstractMetaClass* clazz = classes().findClass(parent);
             if (clazz)
                 baseClasses << clazz;

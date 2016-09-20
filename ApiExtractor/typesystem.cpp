@@ -1635,7 +1635,7 @@ bool Handler::startElement(const QString &, const QString &n,
 
             if (rc.action == ReferenceCount::Invalid) {
                 m_error = QLatin1String("unrecognized value for action attribute. supported actions:");
-                foreach (QString action, actions.keys())
+                foreach (const QString &action, actions.keys())
                     m_error += QLatin1Char(' ') + action;
             }
 
@@ -2038,7 +2038,7 @@ QString TemplateInstance::expandCode() const
     TemplateEntry *templateEntry = TypeDatabase::instance()->findTemplate(m_name);
     if (templateEntry) {
         QString res = templateEntry->code();
-        foreach (QString key, replaceRules.keys())
+        foreach (const QString &key, replaceRules.keys())
             res.replace(key, replaceRules[key]);
 
         return QLatin1String("// TEMPLATE - ") + m_name + QLatin1String(" - START")
@@ -2055,7 +2055,7 @@ QString TemplateInstance::expandCode() const
 QString CodeSnipAbstract::code() const
 {
     QString res;
-    foreach (CodeSnipFragment codeFrag, codeList)
+    foreach (const CodeSnipFragment &codeFrag, codeList)
         res.append(codeFrag.code());
 
     return res;
@@ -2088,7 +2088,7 @@ QString FunctionModification::toString() const
     if (modifiers & Writable) str += QLatin1String("writable");
 
     if (modifiers & CodeInjection) {
-        foreach (CodeSnip s, snips) {
+        foreach (const CodeSnip &s, snips) {
             str += QLatin1String("\n//code injection:\n");
             str += s.code();
         }

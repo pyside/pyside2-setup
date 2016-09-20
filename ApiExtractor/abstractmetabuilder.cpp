@@ -135,7 +135,7 @@ void AbstractMetaBuilder::checkFunctionModifications()
         ComplexTypeEntry* centry = static_cast<ComplexTypeEntry*>(entry);
         FunctionModificationList modifications = centry->functionModifications();
 
-        foreach (FunctionModification modification, modifications) {
+        foreach (const FunctionModification &modification, modifications) {
             QString signature = modification.signature;
 
             QString name = signature.trimmed();
@@ -348,7 +348,7 @@ void AbstractMetaBuilder::fixQObjectForScope(TypeDatabase *types,
 {
     typedef QHash<QString, NamespaceModelItem> NamespaceModelItemMap;
 
-    foreach (ClassModelItem item, scope->classes()) {
+    foreach (const ClassModelItem &item, scope->classes()) {
         QString qualifiedName = item->qualifiedName().join(colonColon());
         TypeEntry* entry = types->findType(qualifiedName);
         if (entry) {
@@ -408,7 +408,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
     typeValues.erase(it, typeValues.end());
 
     ReportHandler::setProgressReference(typeValues);
-    foreach (ClassModelItem item, typeValues) {
+    foreach (const ClassModelItem &item, typeValues) {
         ReportHandler::progress(QLatin1String("Generating class model..."));
         AbstractMetaClass *cls = traverseClass(item);
         if (!cls)
@@ -419,7 +419,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
 
     // We need to know all global enums
     ReportHandler::setProgressReference(m_dom->enumMap());
-    foreach (EnumModelItem item, m_dom->enums()) {
+    foreach (const EnumModelItem &item, m_dom->enums()) {
         ReportHandler::progress(QLatin1String("Generating enum model..."));
         AbstractMetaEnum *metaEnum = traverseEnum(item, 0, QSet<QString>());
         if (metaEnum) {
@@ -454,14 +454,14 @@ bool AbstractMetaBuilder::build(QIODevice* input)
 
     figureOutEnumValues();
 
-    foreach (ClassModelItem item, typeValues)
+    foreach (const ClassModelItem &item, typeValues)
         traverseClassMembers(item);
 
-    foreach (NamespaceModelItem item, namespaceTypeValues)
+    foreach (const NamespaceModelItem &item, namespaceTypeValues)
         traverseNamespaceMembers(item);
 
     // Global functions
-    foreach (FunctionModelItem func, m_dom->functions()) {
+    foreach (const FunctionModelItem &func, m_dom->functions()) {
         if (func->accessPolicy() != CodeModel::Public || func->name().startsWith(QLatin1String("operator")))
             continue;
 
@@ -537,7 +537,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
                                       .arg(entry->qualifiedCppName());
             } else if (entry->generateCode() && entry->type() == TypeEntry::FunctionType) {
                 const FunctionTypeEntry* fte = static_cast<const FunctionTypeEntry*>(entry);
-                foreach (QString signature, fte->signatures()) {
+                foreach (const QString &signature, fte->signatures()) {
                     bool ok = false;
                     foreach (AbstractMetaFunction* func, m_globalFunctions) {
                         if (signature == func->minimalSignature()) {
@@ -579,13 +579,13 @@ bool AbstractMetaBuilder::build(QIODevice* input)
 
     {
         FunctionList hashFunctions = m_dom->findFunctions(QLatin1String("qHash"));
-        foreach (FunctionModelItem item, hashFunctions)
+        foreach (const FunctionModelItem &item, hashFunctions)
             registerHashFunction(item);
     }
 
     {
         FunctionList hashFunctions = m_dom->findFunctions(QLatin1String("operator<<"));
-        foreach (FunctionModelItem item, hashFunctions)
+        foreach (const FunctionModelItem &item, hashFunctions)
             registerToStringCapability(item);
     }
 
@@ -605,14 +605,14 @@ bool AbstractMetaBuilder::build(QIODevice* input)
                                         + m_dom->findFunctions(QLatin1String("operator~"))
                                         + m_dom->findFunctions(QLatin1String("operator>"));
 
-        foreach (FunctionModelItem item, binaryOperators)
+        foreach (const FunctionModelItem &item, binaryOperators)
             traverseOperatorFunction(item);
     }
 
     {
         FunctionList streamOperators = m_dom->findFunctions(QLatin1String("operator<<"))
                                        + m_dom->findFunctions(QLatin1String("operator>>"));
-        foreach (FunctionModelItem item, streamOperators)
+        foreach (const FunctionModelItem &item, streamOperators)
             traverseStreamOperator(item);
     }
 
@@ -642,7 +642,7 @@ bool AbstractMetaBuilder::build(QIODevice* input)
     m_currentClass = 0;
 
     // Functions added to the module on the type system.
-    foreach (AddedFunction addedFunc, types->globalUserFunctions()) {
+    foreach (const AddedFunction &addedFunc, types->globalUserFunctions()) {
         AbstractMetaFunction* metaFunc = traverseFunction(addedFunc);
         metaFunc->setFunctionType(AbstractMetaFunction::NormalFunction);
         m_globalFunctions << metaFunc;
@@ -714,7 +714,7 @@ AbstractMetaClass* AbstractMetaBuilder::traverseNamespace(NamespaceModelItem nam
     m_namespacePrefix = currentScope()->qualifiedName().join(colonColon());
 
     ClassList classes = namespaceItem->classes();
-    foreach (ClassModelItem cls, classes) {
+    foreach (const ClassModelItem &cls, classes) {
         AbstractMetaClass* mjc = traverseClass(cls);
         if (mjc) {
             metaClass->addInnerClass(mjc);
@@ -726,7 +726,7 @@ AbstractMetaClass* AbstractMetaBuilder::traverseNamespace(NamespaceModelItem nam
     // Go through all typedefs to see if we have defined any
     // specific typedefs to be used as classes.
     TypeAliasList typeAliases = namespaceItem->typeAliases();
-    foreach (TypeAliasModelItem typeAlias, typeAliases) {
+    foreach (const TypeAliasModelItem &typeAlias, typeAliases) {
         AbstractMetaClass* cls = traverseTypeAlias(typeAlias);
         if (cls) {
             metaClass->addInnerClass(cls);
@@ -1032,7 +1032,7 @@ AbstractMetaEnum* AbstractMetaBuilder::traverseEnum(EnumModelItem enumItem, Abst
     if (ReportHandler::isDebug(ReportHandler::MediumDebug))
         qCDebug(lcShiboken) << " - traversing enum " << metaEnum->fullName();
 
-    foreach (EnumeratorModelItem value, enumItem->enumerators()) {
+    foreach (const EnumeratorModelItem &value, enumItem->enumerators()) {
 
         AbstractMetaEnumValue* metaEnumValue = createMetaEnumValue();
         metaEnumValue->setName(value->name());
@@ -1213,7 +1213,7 @@ AbstractMetaClass* AbstractMetaBuilder::traverseClass(ClassModelItem classItem)
     // Go through all typedefs to see if we have defined any
     // specific typedefs to be used as classes.
     TypeAliasList typeAliases = classItem->typeAliases();
-    foreach (TypeAliasModelItem typeAlias, typeAliases) {
+    foreach (const TypeAliasModelItem &typeAlias, typeAliases) {
         AbstractMetaClass* cls = traverseTypeAlias(typeAlias);
         if (cls) {
             cls->setEnclosingClass(metaClass);
@@ -1354,7 +1354,7 @@ AbstractMetaField* AbstractMetaBuilder::traverseField(VariableModelItem field, c
 
 void AbstractMetaBuilder::traverseFields(ScopeModelItem scope_item, AbstractMetaClass *metaClass)
 {
-    foreach (VariableModelItem field, scope_item->variables()) {
+    foreach (const VariableModelItem &field, scope_item->variables()) {
         AbstractMetaField* metaField = traverseField(field, metaClass);
 
         if (metaField && !metaField->isModifiedRemoved()) {
@@ -1590,7 +1590,7 @@ void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scopeItem, AbstractMe
 void AbstractMetaBuilder::fillAddedFunctions(AbstractMetaClass* metaClass)
 {
     // Add the functions added by the typesystem
-    foreach (AddedFunction addedFunc, metaClass->typeEntry()->addedFunctions())
+    foreach (const AddedFunction &addedFunc, metaClass->typeEntry()->addedFunctions())
         traverseFunction(addedFunc, metaClass);
 }
 
@@ -1598,7 +1598,7 @@ void AbstractMetaBuilder::applyFunctionModifications(AbstractMetaFunction* func)
 {
     FunctionModificationList mods = func->modifications(func->implementingClass());
     AbstractMetaFunction& funcRef = *func;
-    foreach (FunctionModification mod, mods) {
+    foreach (const FunctionModification &mod, mods) {
         if (mod.isRenameModifier()) {
             func->setOriginalName(func->name());
             func->setName(mod.renamedTo());
@@ -1732,7 +1732,7 @@ bool AbstractMetaBuilder::setupInheritance(AbstractMetaClass *metaClass)
 void AbstractMetaBuilder::traverseEnums(ScopeModelItem scopeItem, AbstractMetaClass* metaClass, const QStringList &enumsDeclarations)
 {
     EnumList enums = scopeItem->enums();
-    foreach (EnumModelItem enumItem, enums) {
+    foreach (const EnumModelItem &enumItem, enums) {
         AbstractMetaEnum* metaEnum = traverseEnum(enumItem, metaClass, QSet<QString>::fromList(enumsDeclarations));
         if (metaEnum) {
             metaClass->addEnum(metaEnum);
@@ -1845,8 +1845,8 @@ void AbstractMetaBuilder::fixArgumentNames(AbstractMetaFunction* func)
 {
     if (func->arguments().isEmpty())
         return;
-    foreach (FunctionModification mod, func->modifications(m_currentClass)) {
-        foreach (ArgumentModification argMod, mod.argument_mods) {
+    foreach (const FunctionModification &mod, func->modifications(m_currentClass)) {
+        foreach (const ArgumentModification &argMod, mod.argument_mods) {
             if (!argMod.renamed_to.isEmpty()) {
                 AbstractMetaArgument* arg = func->arguments().at(argMod.index - 1);
                 arg->setOriginalName(arg->name());
@@ -1866,7 +1866,7 @@ void AbstractMetaBuilder::fixArgumentNames(AbstractMetaFunction* func)
 static QString functionSignature(FunctionModelItem functionItem)
 {
     QStringList args;
-    foreach (ArgumentModelItem arg, functionItem->arguments())
+    foreach (const ArgumentModelItem &arg, functionItem->arguments())
         args << arg->type().toString();
     return functionItem->name() + QLatin1Char('(') + args.join(QLatin1Char(',')) + QLatin1Char(')');
 }
@@ -2651,7 +2651,7 @@ bool AbstractMetaBuilder::inheritTemplate(AbstractMetaClass* subclass,
         TypeDatabase* typeDb = TypeDatabase::instance();
         TypeEntry* t = 0;
         QString templateParamName;
-        foreach (QString possibleName, possibleNames) {
+        foreach (const QString &possibleName, possibleNames) {
             t = typeDb->findType(possibleName);
             if (t) {
                 QString templateParamName = possibleName;

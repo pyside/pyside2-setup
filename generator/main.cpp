@@ -223,8 +223,8 @@ static QMap<QString, QString> getCommandLineArgs()
     arguments.removeFirst();
 
     int argNum = 0;
-    foreach (QString arg, arguments) {
-        arg = arg.trimmed();
+    foreach (const QString &carg, arguments) {
+        const QString &arg = carg.trimmed();
         if (arg.startsWith(QLatin1String("--"))) {
             int split = arg.indexOf(QLatin1Char('='));
             if (split > 0)
@@ -394,7 +394,7 @@ int main(int argc, char *argv[])
 
     if (argsHandler.argExists(QLatin1String("api-version"))) {
         QStringList versions = argsHandler.removeArg(QLatin1String("api-version")).split(QLatin1Char('|'));
-        foreach (QString fullVersion, versions) {
+        foreach (const QString &fullVersion, versions) {
             QStringList parts = fullVersion.split(QLatin1Char(','));
             QString package;
             QString version;

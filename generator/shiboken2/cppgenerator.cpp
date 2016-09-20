@@ -233,7 +233,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     foreach (AbstractMetaEnum* cppEnum, classEnums)
         includes.append(cppEnum->typeEntry()->extraIncludes());
     qSort(includes.begin(), includes.end());
-    foreach (Include inc, includes)
+    foreach (const Include &inc, includes)
         s << inc.toString() << endl;
     s << endl;
 
@@ -388,7 +388,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
                 | AbstractMetaClass::LogicalOp
                 | AbstractMetaClass::BitwiseOp);
 
-        foreach (AbstractMetaFunctionList allOverloads, opOverloads) {
+        foreach (const AbstractMetaFunctionList &allOverloads, opOverloads) {
             AbstractMetaFunctionList overloads;
             foreach (AbstractMetaFunction* func, allOverloads) {
                 if (!func->isModifiedRemoved()
@@ -563,8 +563,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
 
     QString defaultReturnExpr;
     if (retType) {
-        foreach (FunctionModification mod, func->modifications()) {
-            foreach (ArgumentModification argMod, mod.argument_mods) {
+        foreach (const FunctionModification &mod, func->modifications()) {
+            foreach (const ArgumentModification &argMod, mod.argument_mods) {
                 if (argMod.index == 0 && !argMod.replacedDefaultExpression.isEmpty()) {
                     QRegExp regex(QLatin1String("%(\\d+)"));
                     defaultReturnExpr = argMod.replacedDefaultExpression;
@@ -698,8 +698,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
 
     bool invalidateReturn = false;
     QSet<int> invalidateArgs;
-    foreach (FunctionModification funcMod, func->modifications()) {
-        foreach (ArgumentModification argMod, funcMod.argument_mods) {
+    foreach (const FunctionModification &funcMod, func->modifications()) {
+        foreach (const ArgumentModification &argMod, funcMod.argument_mods) {
             if (argMod.resetAfterUse && !invalidateArgs.contains(argMod.index)) {
                 invalidateArgs.insert(argMod.index);
                 s << INDENT << "bool invalidateArg" << argMod.index;
@@ -804,8 +804,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
     }
 
 
-    foreach (FunctionModification funcMod, func->modifications()) {
-        foreach (ArgumentModification argMod, funcMod.argument_mods) {
+    foreach (const FunctionModification &funcMod, func->modifications()) {
+        foreach (const ArgumentModification &argMod, funcMod.argument_mods) {
             if (argMod.ownerships.contains(TypeSystem::NativeCode)
                 && argMod.index == 0 && argMod.ownerships[TypeSystem::NativeCode] == TypeSystem::CppOwnership) {
                 s << INDENT << "if (Shiboken::Object::checkType(" PYTHON_RETURN_VAR "))" << endl;
@@ -1446,7 +1446,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     // Constructor code injections, position=end
     bool hasCodeInjectionsAtEnd = false;
     foreach(AbstractMetaFunction* func, overloads) {
-        foreach (CodeSnip cs, func->injectedCodeSnips()) {
+        foreach (const CodeSnip &cs, func->injectedCodeSnips()) {
             if (cs.position == CodeSnip::End) {
                 hasCodeInjectionsAtEnd = true;
                 break;
@@ -1458,7 +1458,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
         s << INDENT << "switch(overloadId) {" << endl;
         foreach(AbstractMetaFunction* func, overloads) {
             Indentation indent(INDENT);
-            foreach (CodeSnip cs, func->injectedCodeSnips()) {
+            foreach (const CodeSnip &cs, func->injectedCodeSnips()) {
                 if (cs.position == CodeSnip::End) {
                     s << INDENT << "case " << metaClass->functions().indexOf(func) << ':' << endl;
                     s << INDENT << '{' << endl;
@@ -2752,7 +2752,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 {
     s << INDENT << "// " << func->minimalSignature() << (func->isReverseOperator() ? " [reverse operator]": "") << endl;
     if (func->isConstructor()) {
-        foreach (CodeSnip cs, func->injectedCodeSnips()) {
+        foreach (const CodeSnip &cs, func->injectedCodeSnips()) {
             if (cs.position == CodeSnip::End) {
                 s << INDENT << "overloadId = " << func->ownerClass()->functions().indexOf(const_cast<AbstractMetaFunction* const>(func)) << ';' << endl;
                 break;
@@ -3038,8 +3038,8 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     QList<ArgumentModification> ownership_mods;
     // Python object reference management.
     QList<ArgumentModification> refcount_mods;
-    foreach (FunctionModification func_mod, func->modifications()) {
-        foreach (ArgumentModification arg_mod, func_mod.argument_mods) {
+    foreach (const FunctionModification &func_mod, func->modifications()) {
+        foreach (const ArgumentModification &arg_mod, func_mod.argument_mods) {
             if (!arg_mod.ownerships.isEmpty() && arg_mod.ownerships.contains(TypeSystem::TargetLangCode))
                 ownership_mods.append(arg_mod);
             else if (!arg_mod.referenceCounts.isEmpty())
@@ -3053,7 +3053,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
     if (!ownership_mods.isEmpty()) {
         s << endl << INDENT << "// Ownership transferences." << endl;
-        foreach (ArgumentModification arg_mod, ownership_mods) {
+        foreach (const ArgumentModification &arg_mod, ownership_mods) {
             const AbstractMetaClass* wrappedClass = 0;
             QString pyArgName = argumentNameFromIndex(func, arg_mod.index, &wrappedClass);
             if (!wrappedClass) {
@@ -3084,7 +3084,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
         }
 
     } else if (!refcount_mods.isEmpty()) {
-        foreach (ArgumentModification arg_mod, refcount_mods) {
+        foreach (const ArgumentModification &arg_mod, refcount_mods) {
             ReferenceCount refCount = arg_mod.referenceCounts.first();
             if (refCount.action != ReferenceCount::Set
                 && refCount.action != ReferenceCount::Remove
@@ -3162,7 +3162,7 @@ void CppGenerator::writeMultipleInheritanceInitializerFunction(QTextStream& s, c
         s << INDENT << "const " << className << "* class_ptr = reinterpret_cast<const " << className << "*>(cptr);" << endl;
         s << INDENT << "size_t base = (size_t) class_ptr;" << endl;
 
-        foreach (QString ancestor, ancestors)
+        foreach (const QString &ancestor, ancestors)
             s << INDENT << "offsets.insert(" << ancestor << ");" << endl;
 
         s << endl;
@@ -3694,7 +3694,7 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
                                            | AbstractMetaClass::LogicalOp
                                            | AbstractMetaClass::BitwiseOp);
 
-    foreach (AbstractMetaFunctionList opOverload, opOverloads) {
+    foreach (const AbstractMetaFunctionList &opOverload, opOverloads) {
         const AbstractMetaFunction* rfunc = opOverload[0];
         QString opName = ShibokenGenerator::pythonOperatorFunctionName(rfunc);
         nb[opName] = cpythonFunctionName(rfunc);
@@ -3895,7 +3895,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
     s << INDENT << "switch (op) {" << endl;
     {
         Indentation indent(INDENT);
-        foreach (AbstractMetaFunctionList overloads, filterGroupedOperatorFunctions(metaClass, AbstractMetaClass::ComparisonOp)) {
+        foreach (const AbstractMetaFunctionList &overloads, filterGroupedOperatorFunctions(metaClass, AbstractMetaClass::ComparisonOp)) {
             const AbstractMetaFunction* rfunc = overloads[0];
 
             QString operatorId = ShibokenGenerator::pythonRichCompareOperatorId(rfunc);
@@ -4516,7 +4516,7 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream& s, const Abstrac
         }
 
         if (canBeValue) {
-            foreach (QString name, nameVariants) {
+            foreach (const QString &name, nameVariants) {
                 if (name == QLatin1String("iterator")) {
                     qCWarning(lcShiboken).noquote().nospace()
                          << QString::fromLatin1("%1:%2 FIXME:\n"
@@ -4532,7 +4532,7 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream& s, const Abstrac
 
     foreach (AbstractMetaEnum* metaEnum, metaClass->enums()) {
         if (!metaEnum->isPrivate() && !metaEnum->isAnonymous()) {
-            foreach (QString name, nameVariants)
+            foreach (const QString &name, nameVariants)
                 s << INDENT << "qRegisterMetaType< ::" << metaEnum->typeEntry()->qualifiedCppName() << " >(\"" << name << "::" << metaEnum->name() << "\");" << endl;
 
             if (metaEnum->typeEntry()->flags()) {

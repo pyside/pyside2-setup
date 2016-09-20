@@ -267,7 +267,7 @@ FlagsTypeEntry* TypeDatabase::findFlagsType(const QString &name) const
 AddedFunctionList TypeDatabase::findGlobalUserFunctions(const QString& name) const
 {
     AddedFunctionList addedFunctions;
-    foreach (AddedFunction func, m_globalUserFunctions) {
+    foreach (const AddedFunction &func, m_globalUserFunctions) {
         if (func.name() == name)
             addedFunctions.append(func);
     }
