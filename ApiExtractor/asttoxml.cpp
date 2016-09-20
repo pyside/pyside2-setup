@@ -75,7 +75,7 @@ void astToXML(QString name)
 }
 
 
-void writeOutNamespace(QXmlStreamWriter &s, NamespaceModelItem &item)
+void writeOutNamespace(QXmlStreamWriter &s, const NamespaceModelItem &item)
 {
     s.writeStartElement(QLatin1String("namespace"));
     s.writeAttribute(QLatin1String("name"), item->name());
@@ -95,7 +95,7 @@ void writeOutNamespace(QXmlStreamWriter &s, NamespaceModelItem &item)
     s.writeEndElement();
 }
 
-void writeOutEnum(QXmlStreamWriter &s, EnumModelItem &item)
+void writeOutEnum(QXmlStreamWriter &s, const EnumModelItem &item)
 {
     QString qualifiedName = item->qualifiedName().join(QLatin1String("::"));
     s.writeStartElement(QLatin1String("enum"));
@@ -113,7 +113,7 @@ void writeOutEnum(QXmlStreamWriter &s, EnumModelItem &item)
     s.writeEndElement();
 }
 
-void writeOutFunction(QXmlStreamWriter &s, FunctionModelItem &item)
+void writeOutFunction(QXmlStreamWriter &s, const FunctionModelItem &item)
 {
     QString qualifiedName = item->qualifiedName().join(QLatin1String("::"));
     s.writeStartElement(QLatin1String("function"));
@@ -128,7 +128,7 @@ void writeOutFunction(QXmlStreamWriter &s, FunctionModelItem &item)
     s.writeEndElement();
 }
 
-void writeOutClass(QXmlStreamWriter &s, ClassModelItem &item)
+void writeOutClass(QXmlStreamWriter &s, const ClassModelItem &item)
 {
     QString qualifiedName = item->qualifiedName().join(QLatin1String("::"));
     s.writeStartElement(QLatin1String("class"));
