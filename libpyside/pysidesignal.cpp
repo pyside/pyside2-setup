@@ -706,7 +706,7 @@ PySideSignalInstance* newObjectFromMethod(PyObject* source, const QList<QMetaMet
         PySideSignalInstancePrivate* selfPvt = item->d;
         selfPvt->source = source;
         QByteArray cppName(m.methodSignature());
-        cppName = cppName.mid(0, cppName.indexOf('('));
+        cppName.truncate(cppName.indexOf('('));
         // separe SignalName
         selfPvt->signalName = strdup(cppName.data());
         selfPvt->signature = strdup(m.methodSignature());
