@@ -139,7 +139,7 @@ void AbstractMetaBuilder::checkFunctionModifications()
             QString signature = modification.signature;
 
             QString name = signature.trimmed();
-            name = name.mid(0, signature.indexOf(QLatin1Char('(')));
+            name.truncate(name.indexOf(QLatin1Char('(')));
 
             AbstractMetaClass* clazz = m_metaClasses.findClass(centry->qualifiedCppName());
             if (!clazz)

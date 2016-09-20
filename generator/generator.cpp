@@ -639,7 +639,7 @@ QString Generator::translateType(const AbstractMetaType *cType,
         if (options & Generator::OriginalName) {
             s = cType->originalTypeDescription().trimmed();
             if ((options & Generator::ExcludeReference) && s.endsWith(QLatin1Char('&')))
-                s = s.left(s.size()-1);
+                s.chop(1);
 
             // remove only the last const (avoid remove template const)
             if (options & Generator::ExcludeConst) {

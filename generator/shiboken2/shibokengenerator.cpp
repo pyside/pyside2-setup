@@ -2107,7 +2107,7 @@ AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromString(QString typ
 {
     typeSignature = typeSignature.trimmed();
     if (typeSignature.startsWith(QLatin1String("::")))
-        typeSignature = typeSignature.mid(2);
+        typeSignature.remove(0, 2);
 
     if (m_metaTypeFromStringCache.contains(typeSignature))
         return m_metaTypeFromStringCache.value(typeSignature);
@@ -2153,7 +2153,7 @@ AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromString(QString typ
                 }
             }
             instantiatedTypes << type.mid(start).trimmed();
-            adjustedTypeName = adjustedTypeName.left(lpos);
+            adjustedTypeName.truncate(lpos);
         }
     }
 
@@ -2181,7 +2181,7 @@ AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromTypeEntry(const Ty
 {
     QString typeName = typeEntry->qualifiedCppName();
     if (typeName.startsWith(QLatin1String("::")))
-        typeName = typeName.mid(2);
+        typeName.remove(0, 2);
     if (m_metaTypeFromStringCache.contains(typeName))
         return m_metaTypeFromStringCache.value(typeName);
     AbstractMetaType* metaType = new AbstractMetaType;
