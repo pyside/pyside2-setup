@@ -128,8 +128,8 @@ FunctionTypeEntry* TypeDatabase::findFunctionType(const QString& name) const
 
 PrimitiveTypeEntry* TypeDatabase::findTargetLangPrimitiveType(const QString& targetLangName) const
 {
-    foreach (QList<TypeEntry*> entries, m_entries.values()) {
-        foreach (TypeEntry* e, entries) {
+    for (TypeEntryHash::const_iterator it = m_entries.cbegin(), end = m_entries.cend(); it != end; ++it) {
+        foreach (TypeEntry* e, it.value()) {
             if (e && e->isPrimitive()) {
                 PrimitiveTypeEntry *pe = static_cast<PrimitiveTypeEntry*>(e);
                 if (pe->targetLangName() == targetLangName && pe->preferredConversion())
@@ -158,10 +158,8 @@ SingleTypeEntryHash TypeDatabase::entries() const
     TypeEntryHash entries = allEntries();
 
     SingleTypeEntryHash returned;
-    QList<QString> keys = entries.keys();
-
-    foreach (QString key, keys)
-        returned[key] = findType(key);
+    for (TypeEntryHash::const_iterator it = entries.cbegin(), end = entries.cend(); it != end; ++it)
+        returned.insert(it.key(), findType(it.key()));
 
     return returned;
 }
@@ -170,8 +168,8 @@ QList<const PrimitiveTypeEntry*> TypeDatabase::primitiveTypes() const
 {
     TypeEntryHash entries = allEntries();
     QList<const PrimitiveTypeEntry*> returned;
-    foreach(QString key, entries.keys()) {
-        foreach(const TypeEntry* typeEntry, entries[key]) {
+    for (TypeEntryHash::const_iterator it = entries.cbegin(), end = entries.cend(); it != end; ++it) {
+        foreach (const TypeEntry* typeEntry, it.value()) {
             if (typeEntry->isPrimitive())
                 returned.append((PrimitiveTypeEntry*) typeEntry);
         }
@@ -183,8 +181,8 @@ QList<const ContainerTypeEntry*> TypeDatabase::containerTypes() const
 {
     TypeEntryHash entries = allEntries();
     QList<const ContainerTypeEntry*> returned;
-    foreach(QString key, entries.keys()) {
-        foreach(const TypeEntry* typeEntry, entries[key]) {
+    for (TypeEntryHash::const_iterator it = entries.cbegin(), end = entries.cend(); it != end; ++it) {
+        foreach (const TypeEntry* typeEntry, it.value()) {
             if (typeEntry->isContainer())
                 returned.append((ContainerTypeEntry*) typeEntry);
         }
@@ -255,9 +253,9 @@ FlagsTypeEntry* TypeDatabase::findFlagsType(const QString &name) const
         fte = (FlagsTypeEntry*) m_flagsEntries.value(name);
         if (!fte) {
             //last hope, search for flag without scope  inside of flags hash
-            foreach(QString key, m_flagsEntries.keys()) {
-                if (key.endsWith(name)) {
-                    fte = (FlagsTypeEntry*) m_flagsEntries.value(key);
+            for (SingleTypeEntryHash::const_iterator it = m_flagsEntries.cbegin(), end = m_flagsEntries.cend(); it != end; ++it) {
+                if (it.key().endsWith(name)) {
+                    fte = static_cast<FlagsTypeEntry *>(const_cast<TypeEntry *>(it.value()));
                     break;
                 }
             }

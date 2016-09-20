@@ -60,8 +60,8 @@ bool Generator::setup(const ApiExtractor& extractor, const QMap< QString, QStrin
     m_d->apiextractor = &extractor;
     TypeEntryHash allEntries = TypeDatabase::instance()->allEntries();
     TypeEntry* entryFound = 0;
-    foreach (QList<TypeEntry*> entryList, allEntries.values()) {
-        foreach (TypeEntry* entry, entryList) {
+    for (TypeEntryHash::const_iterator it = allEntries.cbegin(), end = allEntries.cend(); it != end; ++it) {
+        foreach (TypeEntry *entry, it.value()) {
             if (entry->type() == TypeEntry::TypeSystemType && entry->generateCode()) {
                 entryFound = entry;
                 break;

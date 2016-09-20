@@ -1991,13 +1991,17 @@ bool ShibokenGenerator::hasMultipleInheritanceInAncestry(const AbstractMetaClass
     return hasMultipleInheritanceInAncestry(metaClass->baseClass());
 }
 
+typedef QMap<QString, AbstractMetaFunctionList> FunctionGroupMap;
+typedef FunctionGroupMap::const_iterator FunctionGroupMapIt;
+
 bool ShibokenGenerator::classNeedsGetattroFunction(const AbstractMetaClass* metaClass)
 {
     if (!metaClass)
         return false;
-    foreach (AbstractMetaFunctionList allOverloads, getFunctionGroups(metaClass).values()) {
+    const FunctionGroupMap &functionGroup = getFunctionGroups(metaClass);
+    for (FunctionGroupMapIt it = functionGroup.cbegin(), end = functionGroup.cend(); it != end; ++it) {
         AbstractMetaFunctionList overloads;
-        foreach (AbstractMetaFunction* func, allOverloads) {
+        foreach (AbstractMetaFunction* func, it.value()) {
             if (func->isAssignmentOperator() || func->isCastOperator() || func->isModifiedRemoved()
                 || func->isPrivate() || func->ownerClass() != func->implementingClass()
                 || func->isConstructor() || func->isOperatorOverload())
@@ -2016,9 +2020,10 @@ AbstractMetaFunctionList ShibokenGenerator::getMethodsWithBothStaticAndNonStatic
 {
     AbstractMetaFunctionList methods;
     if (metaClass) {
-        foreach (AbstractMetaFunctionList allOverloads, getFunctionGroups(metaClass).values()) {
+        const FunctionGroupMap &functionGroups = getFunctionGroups(metaClass);
+        for (FunctionGroupMapIt it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
             AbstractMetaFunctionList overloads;
-            foreach (AbstractMetaFunction* func, allOverloads) {
+            foreach (AbstractMetaFunction* func, it.value()) {
                 if (func->isAssignmentOperator() || func->isCastOperator() || func->isModifiedRemoved()
                     || func->isPrivate() || func->ownerClass() != func->implementingClass()
                     || func->isConstructor() || func->isOperatorOverload())
@@ -2331,8 +2336,9 @@ bool ShibokenGenerator::doSetup(const QMap<QString, QString>& args)
     foreach (const AbstractMetaClass* metaClass, classes())
         getCode(snips, metaClass->typeEntry());
     getCode(snips, td->findType(packageName()));
-    foreach (AbstractMetaFunctionList globalOverloads, getFunctionGroups().values()) {
-        foreach (AbstractMetaFunction* func, globalOverloads)
+    const FunctionGroupMap &functionGroups = getFunctionGroups();
+    for (FunctionGroupMapIt it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
+        foreach (AbstractMetaFunction* func, it.value())
             getCode(snips, func->injectedCodeSnips());
     }
 

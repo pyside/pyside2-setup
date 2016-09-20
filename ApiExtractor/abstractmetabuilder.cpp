@@ -346,6 +346,8 @@ void AbstractMetaBuilder::traverseStreamOperator(FunctionModelItem item)
 void AbstractMetaBuilder::fixQObjectForScope(TypeDatabase *types,
                                              NamespaceModelItem scope)
 {
+    typedef QHash<QString, NamespaceModelItem> NamespaceModelItemMap;
+
     foreach (ClassModelItem item, scope->classes()) {
         QString qualifiedName = item->qualifiedName().join(colonColon());
         TypeEntry* entry = types->findType(qualifiedName);
@@ -355,9 +357,10 @@ void AbstractMetaBuilder::fixQObjectForScope(TypeDatabase *types,
         }
     }
 
-    foreach (NamespaceModelItem item, scope->namespaceMap().values()) {
-        if (scope != item)
-            fixQObjectForScope(types, item);
+    const NamespaceModelItemMap namespaceMap = scope->namespaceMap();
+    for (NamespaceModelItemMap::const_iterator it = namespaceMap.cbegin(), end = namespaceMap.cend(); it != end; ++it) {
+        if (scope != it.value())
+            fixQObjectForScope(types, it.value());
     }
 }
 
@@ -2083,10 +2086,10 @@ AbstractMetaType* AbstractMetaBuilder::translateType(double vr, const AddedFunct
     if (!type) {
         QStringList candidates;
         SingleTypeEntryHash entries = typeDb->entries();
-        foreach (QString candidate, entries.keys()) {
+        for (SingleTypeEntryHash::const_iterator it = entries.cbegin(), end = entries.cend(); it != end; ++it) {
             // Let's try to find the type in different scopes.
-            if (candidate.endsWith(colonColon() + typeName))
-                candidates << candidate;
+            if (it.key().endsWith(colonColon() + typeName))
+                candidates.append(it.key());
         }
 
         QString msg = QStringLiteral("Type '%1' wasn't found in the type database.\n").arg(typeName);

@@ -166,6 +166,9 @@ bool CppGenerator::hasBoolCast(const AbstractMetaClass* metaClass) const
     return func && func->isConstant() && pte->name() == QLatin1String("bool") && func->arguments().isEmpty();
 }
 
+typedef QMap<QString, AbstractMetaFunctionList> FunctionGroupMap;
+typedef FunctionGroupMap::const_iterator FunctionGroupMapIt;
+
 /*!
     Function used to write the class generated binding code on the buffer
     \param s the output buffer
@@ -299,9 +302,10 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     s << endl << "// Target ---------------------------------------------------------" << endl << endl;
     s << "extern \"C\" {" << endl;
-    foreach (AbstractMetaFunctionList allOverloads, getFunctionGroups(metaClass).values()) {
+    const FunctionGroupMap &functionGroups = getFunctionGroups(metaClass);
+    for (FunctionGroupMapIt it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
         AbstractMetaFunctionList overloads;
-        foreach (AbstractMetaFunction* func, allOverloads) {
+        foreach (AbstractMetaFunction* func, it.value()) {
             if (!func->isAssignmentOperator()
                 && !func->isCastOperator()
                 && !func->isModifiedRemoved()
@@ -3327,10 +3331,12 @@ QString CppGenerator::multipleInheritanceInitializerFunctionName(const AbstractM
     return cpythonBaseName(metaClass->typeEntry()) + QLatin1String("_mi_init");
 }
 
+typedef QHash<QString, QPair<QString, QString> >::const_iterator ProtocolIt;
+
 bool CppGenerator::supportsMappingProtocol(const AbstractMetaClass* metaClass)
 {
-    foreach(QString funcName, m_mappingProtocol.keys()) {
-        if (metaClass->hasFunction(funcName))
+    for (ProtocolIt it = m_mappingProtocol.cbegin(), end = m_mappingProtocol.cend(); it != end; ++it) {
+        if (metaClass->hasFunction(it.key()))
             return true;
     }
 
@@ -3347,8 +3353,8 @@ bool CppGenerator::supportsNumberProtocol(const AbstractMetaClass* metaClass)
 
 bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass* metaClass)
 {
-    foreach(QString funcName, m_sequenceProtocol.keys()) {
-        if (metaClass->hasFunction(funcName))
+    for (ProtocolIt it = m_sequenceProtocol.cbegin(), end = m_sequenceProtocol.cend(); it != end; ++it) {
+        if (metaClass->hasFunction(it.key()))
             return true;
     }
 
@@ -3595,7 +3601,8 @@ void CppGenerator::writeTypeAsSequenceDefinition(QTextStream& s, const AbstractM
 {
     bool hasFunctions = false;
     QMap<QString, QString> funcs;
-    foreach(QString funcName, m_sequenceProtocol.keys()) {
+    for (ProtocolIt it = m_sequenceProtocol.cbegin(), end = m_sequenceProtocol.cend(); it != end; ++it) {
+        const QString &funcName = it.key();
         const AbstractMetaFunction* func = metaClass->findFunction(funcName);
         funcs[funcName] = func ? cpythonFunctionName(func).prepend(QLatin1Char('&')) : QString();
         if (!hasFunctions && func)
@@ -3612,13 +3619,14 @@ void CppGenerator::writeTypeAsSequenceDefinition(QTextStream& s, const AbstractM
     }
 
     s << INDENT << "memset(&" << baseName << "_TypeAsSequence, 0, sizeof(PySequenceMethods));" << endl;
-    foreach (const QString& sqName, m_sqFuncs.keys()) {
+    for (QHash<QString, QString>::const_iterator it = m_sqFuncs.cbegin(), end = m_sqFuncs.cend(); it != end; ++it) {
+        const QString& sqName = it.key();
         if (funcs[sqName].isEmpty())
             continue;
-        if (m_sqFuncs[sqName] == QLatin1String("sq_slice"))
+        if (it.value() == QLatin1String("sq_slice"))
             s << "#ifndef IS_PY3K" << endl;
-        s << INDENT << baseName << "_TypeAsSequence." << m_sqFuncs[sqName] << " = " << funcs[sqName] << ';' << endl;
-        if (m_sqFuncs[sqName] == QLatin1String("sq_slice"))
+        s << INDENT << baseName << "_TypeAsSequence." << it.value() << " = " << funcs[sqName] << ';' << endl;
+        if (it.value() == QLatin1String("sq_slice"))
             s << "#endif" << endl;
     }
 }
@@ -3627,7 +3635,8 @@ void CppGenerator::writeTypeAsMappingDefinition(QTextStream& s, const AbstractMe
 {
     bool hasFunctions = false;
     QMap<QString, QString> funcs;
-    foreach(QString funcName, m_mappingProtocol.keys()) {
+    for (ProtocolIt it = m_mappingProtocol.cbegin(), end = m_mappingProtocol.cend(); it != end; ++it) {
+        const QString &funcName = it.key();
         const AbstractMetaFunction* func = metaClass->findFunction(funcName);
         funcs[funcName] = func ? cpythonFunctionName(func).prepend(QLatin1Char('&')) : QLatin1String("0");
         if (!hasFunctions && func)
@@ -3643,10 +3652,11 @@ void CppGenerator::writeTypeAsMappingDefinition(QTextStream& s, const AbstractMe
 
     QString baseName = cpythonBaseName(metaClass);
     s << INDENT << "memset(&" << baseName << "_TypeAsMapping, 0, sizeof(PyMappingMethods));" << endl;
-    foreach (const QString& mpName, m_mpFuncs.keys()) {
+    for (QHash<QString, QString>::const_iterator it =  m_mpFuncs.cbegin(), end = m_mpFuncs.end(); it != end; ++it) {
+        const QString &mpName = it.key();
         if (funcs[mpName].isEmpty())
             continue;
-        s << INDENT << baseName << "_TypeAsMapping." << m_mpFuncs[mpName] << " = " << funcs[mpName] << ';' << endl;
+        s << INDENT << baseName << "_TypeAsMapping." << it.value() << " = " << funcs[mpName] << ';' << endl;
     }
 }
 
@@ -3695,7 +3705,8 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
     nb[QLatin1String("bool")] = hasBoolCast(metaClass) ? baseName + QLatin1String("___nb_bool") : QString();
 
     s << INDENT << "memset(&" << baseName << "_TypeAsNumber, 0, sizeof(PyNumberMethods));" << endl;
-    foreach (const QString& nbName, m_nbFuncs.keys()) {
+    for (QHash<QString, QString>::const_iterator it = m_nbFuncs.cbegin(), end = m_nbFuncs.cend(); it != end; ++it) {
+        const QString &nbName = it.key();
         if (nb[nbName].isEmpty())
             continue;
 
@@ -3710,7 +3721,7 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
                 s << INDENT << "SBK_UNUSED(" << nb[nbName] << ");" << endl;
                 s << "#else" << endl;
             }
-            s << INDENT << baseName << "_TypeAsNumber." << m_nbFuncs[nbName] << " = " << nb[nbName] << ';' << endl;
+            s << INDENT << baseName << "_TypeAsNumber." << it.value() << " = " << nb[nbName] << ';' << endl;
             if (excludeFromPy3K)
                 s << "#endif" << endl;
         }
@@ -4669,9 +4680,10 @@ bool CppGenerator::finishGeneration()
 
     Indentation indent(INDENT);
 
-    foreach (AbstractMetaFunctionList globalOverloads, getFunctionGroups().values()) {
+    const FunctionGroupMap &functionGroups = getFunctionGroups();
+    for (FunctionGroupMapIt it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
         AbstractMetaFunctionList overloads;
-        foreach (AbstractMetaFunction* func, globalOverloads) {
+        foreach (AbstractMetaFunction* func, it.value()) {
             if (!func->isModifiedRemoved()) {
                 overloads.append(func);
                 if (func->typeEntry())
@@ -4846,7 +4858,8 @@ bool CppGenerator::finishGeneration()
     ExtendedConverterData extendedConverters = getExtendedConverters();
     if (!extendedConverters.isEmpty()) {
         s << endl << "// Extended Converters." << endl << endl;
-        foreach (const TypeEntry* externalType, extendedConverters.keys()) {
+        for (ExtendedConverterData::const_iterator it = extendedConverters.cbegin(), end = extendedConverters.cend(); it != end; ++it) {
+            const TypeEntry *externalType = it.key();
             s << "// Extended implicit conversions for " << externalType->qualifiedTargetLangName() << '.' << endl;
             foreach (const AbstractMetaClass* sourceClass, extendedConverters[externalType]) {
                 AbstractMetaType* sourceType = buildAbstractMetaTypeFromAbstractMetaClass(sourceClass);
@@ -4965,8 +4978,8 @@ bool CppGenerator::finishGeneration()
 
     if (!extendedConverters.isEmpty()) {
         s << endl;
-        foreach (const TypeEntry* externalType, extendedConverters.keys()) {
-            writeExtendedConverterInitialization(s, externalType, extendedConverters[externalType]);
+        for (ExtendedConverterData::const_iterator it = extendedConverters.cbegin(), end = extendedConverters.cend(); it != end; ++it) {
+            writeExtendedConverterInitialization(s, it.key(), it.value());
             s << endl;
         }
     }

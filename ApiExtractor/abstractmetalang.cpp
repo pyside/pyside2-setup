@@ -654,6 +654,8 @@ bool AbstractMetaFunction::isVirtualSlot() const
 
 bool AbstractMetaFunction::disabledGarbageCollection(const AbstractMetaClass *cls, int key) const
 {
+    typedef QHash<TypeSystem::Language, TypeSystem::Ownership>::const_iterator OwnershipMapIt;
+
     FunctionModificationList modifications = this->modifications(cls);
     foreach (FunctionModification modification, modifications) {
         QList<ArgumentModification> argumentModifications = modification.argument_mods;
@@ -661,8 +663,8 @@ bool AbstractMetaFunction::disabledGarbageCollection(const AbstractMetaClass *cl
             if (argumentModification.index != key)
                 continue;
 
-            foreach (TypeSystem::Ownership ownership, argumentModification.ownerships.values()) {
-                if (ownership == TypeSystem::CppOwnership)
+            for (OwnershipMapIt it = argumentModification.ownerships.cbegin(), end = argumentModification.ownerships.cend(); it != end; ++it) {
+                if (it.value() == TypeSystem::CppOwnership)
                     return true;
             }
 
