@@ -282,7 +282,7 @@ if OPTION_NOEXAMPLES:
 
 # Return a prefix suitable for the _install/_build directory
 def prefix():
-    virtualEnvName = os.environ['VIRTUAL_ENV']
+    virtualEnvName = os.environ.get('VIRTUAL_ENV', None)
     name = os.path.basename(virtualEnvName) if virtualEnvName is not None else 'pyside'
     name += str(sys.version_info[0])
     if OPTION_DEBUG:
