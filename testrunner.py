@@ -105,7 +105,7 @@ class BuildLog(object):
                 if not os.path.exists(build_dir):
                     rel_dir, low_part = os.path.split(build_dir)
                     rel_dir, two_part = os.path.split(rel_dir)
-                    if two_part == "pyside_build":
+                    if two_part.startswith("pyside") and two_part.endswith("build"):
                         build_dir = os.path.abspath(os.path.join(two_part, low_part))
                         if os.path.exists(build_dir):
                             print("Note: build_dir was probably moved.")
@@ -204,11 +204,11 @@ class TestRunner(object):
             make = subprocess.Popen(cmd, cwd=self.test_dir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             tee = subprocess.Popen(tee_cmd, cwd=self.test_dir, stdin=make.stdout, shell=True)
         else:
-            cmd = (self.makeCommand, 'test', '-C', "%s" % self.test_dir)
+            cmd = (self.makeCommand, 'test')
             tee_cmd = (self.teeCommand, self.logfile)
             print("running", cmd, 'in', self.test_dir, ',\n  logging to', self.logfile, 'using ', tee_cmd)
-            make = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-            tee = subprocess.Popen(tee_cmd, stdin=make.stdout)
+            make = subprocess.Popen(cmd, cwd=self.test_dir, stdout=subprocess.PIPE)
+            tee = subprocess.Popen(tee_cmd, cwd=self.test_dir, stdin=make.stdout)
         make.stdout.close()
         try:
             if PY3:
@@ -668,10 +668,10 @@ def _update_header(old_blname, build_history):
 if __name__ == '__main__':
     # create the top-level parser
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers()
+    subparsers = parser.add_subparsers(dest="subparser_name")
 
     # create the parser for the "test" command
-    parser_test = subparsers.add_parser('test')
+    parser_test = subparsers.add_parser("test")
     group = parser_test.add_mutually_exclusive_group(required=False)
     group.add_argument("--blacklist", "-b", type=argparse.FileType('r'),
                        help="a Qt blacklist file")
@@ -679,6 +679,11 @@ if __name__ == '__main__':
                        help="add new entries to a blacklist file")
     parser_test.add_argument("--skip", action='store_true',
                         help="skip the tests if they were run before")
+    parser_test.add_argument("--environ", nargs='+',
+                        help="use name=value ... to set environment variables")
+    parser_getcwd = subparsers.add_parser("getcwd")
+    parser_getcwd.add_argument("filename", type=argparse.FileType('w'),
+                               help="write the build dir name into a file")
     args = parser.parse_args()
 
     builds = BuildLog(script_dir)
@@ -686,6 +691,12 @@ if __name__ == '__main__':
     latest_build = builds.last_build
     if latest_build is None:
         raise ValueError("you have never created a test build")
+
+    if args.subparser_name == "getcwd":
+        print(latest_build.build_dir, file=args.filename)
+        print(latest_build.build_dir, "written to file", args.filename.name)
+        sys.exit(0)
+
     runner = TestRunner(latest_build)
     if os.path.exists(runner.logfile) and args.skip:
         print("Parsing existing log file:", runner.logfile)
@@ -702,6 +713,13 @@ if __name__ == '__main__':
         bl = BlackList(args.learn.name)
     else:
         bl = BlackList(None)
+    if args.environ:
+        for line in args.environ:
+            things = line.split("=")
+            if len(things) != 2:
+                raise ValueError("you need to pass one or more name=value pairs.")
+            key, value = things
+            os.environ[key] = value
     print("********* Start testing of PySide *********")
     print("Config: Using", " ".join(builds.classifiers))
     pass_, skipped, fail, bfail, bpass = 0, 0, 0, 0, 0
@@ -717,3 +735,9 @@ if __name__ == '__main__':
     for test, res in result.iter_blacklist(bl):
         if res == "FAIL":
             raise ValueError("At least one failure was not blacklisted")
+    # the makefile does run, although it does not find any tests.
+    # We simply check if any tests were found.
+    if len(result) == 0:
+        path = builds.last_build.build_dir
+        pyside2 = os.path.join(path, "pyside2")
+        raise ValueError("there are no tests in %s" % pyside2)

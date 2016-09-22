@@ -1,8 +1,8 @@
 /build
 /dist
-/pyside_build
-/pyside_package
-/pyside_install
+/pyside*_build
+/pyside*_package
+/pyside*_install
 /PySide
 /PySide-*.*.*
 /SciTE.*
