@@ -8,6 +8,10 @@ class QtInfo(object):
             self._qmake_command = qmake_command
         else:
             self._qmake_command = [find_executable("qmake"),]
+        self._dict = {}
+        # bind all variables early at __init__ time.
+        for thing in self.__class__.__dict__:
+            getattr(self, thing)
 
     def getQMakeCommand(self):
         qmake_command_string = self._qmake_command[0]
@@ -39,7 +43,7 @@ class QtInfo(object):
     def getDocsPath(self):
         return self.getProperty("QT_INSTALL_DOCS")
 
-    def getProperty(self, prop_name):
+    def _getProperty(self, prop_name):
         cmd = self._qmake_command + ["-query", prop_name]
         proc = subprocess.Popen(cmd, stdout = subprocess.PIPE, shell=False)
         prop = proc.communicate()[0]
@@ -49,6 +53,11 @@ class QtInfo(object):
         if sys.version_info >= (3,):
             return str(prop, 'ascii').strip()
         return prop.strip()
+
+    def getProperty(self, prop_name):
+        if prop_name not in self._dict:
+            self._dict[prop_name] = self._getProperty(prop_name)
+        return self._dict[prop_name]
 
     version = property(getVersion)
     bins_dir = property(getBinsPath)

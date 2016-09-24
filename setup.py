@@ -233,6 +233,12 @@ if OPTION_QMAKE is None:
 if OPTION_QMAKE is None:
     OPTION_QMAKE = find_executable("qmake")
 
+# make qtinfo.py independent of relative paths.
+if OPTION_QMAKE is not None and os.path.exists(OPTION_QMAKE):
+    OPTION_QMAKE = os.path.abspath(OPTION_QMAKE)
+if OPTION_CMAKE is not None and os.path.exists(OPTION_CMAKE):
+    OPTION_CMAKE = os.path.abspath(OPTION_CMAKE)
+
 QMAKE_COMMAND = None
 if OPTION_QMAKE is not None and os.path.exists(OPTION_QMAKE): # Checking whether qmake executable exists
     if os.path.islink(OPTION_QMAKE) and os.path.lexists(OPTION_QMAKE): # Looking whether qmake path is a link and whether the link exists
@@ -247,7 +253,6 @@ if len(QMAKE_COMMAND) == 0 or QMAKE_COMMAND[0] is None:
 if not os.path.exists(QMAKE_COMMAND[0]):
     print("'%s' does not exist." % QMAKE_COMMAND[0])
     sys.exit(1)
-
 if OPTION_CMAKE is None:
     OPTION_CMAKE = find_executable("cmake")
 
