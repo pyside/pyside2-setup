@@ -30,6 +30,7 @@
 
 #include "codemodel.h"
 #include <algorithm>
+#include <iostream>
 
 // ---------------------------------------------------------------------------
 CodeModel::CodeModel()
@@ -135,8 +136,11 @@ TypeInfo TypeInfo::resolveType(TypeInfo const &__type, CodeModelItem __scope)
     CodeModel *__model = __scope->model();
     Q_ASSERT(__model != 0);
 
-    CodeModelItem __item = __model->findItem(__type.qualifiedName(), __scope);
+    return TypeInfo::resolveType(__model->findItem(__type.qualifiedName(), __scope),  __type, __scope);
+}
 
+TypeInfo TypeInfo::resolveType(CodeModelItem __item, TypeInfo const &__type, CodeModelItem __scope)
+{
     // Copy the type and replace with the proper qualified name. This
     // only makes sence to do if we're actually getting a resolved
     // type with a namespace. We only get this if the returned type
@@ -147,8 +151,21 @@ TypeInfo TypeInfo::resolveType(TypeInfo const &__type, CodeModelItem __scope)
         otherType.setQualifiedName(__item->qualifiedName());
     }
 
-    if (TypeAliasModelItem __alias = model_dynamic_cast<TypeAliasModelItem> (__item))
-        return resolveType(TypeInfo::combine(__alias->type(), otherType), __scope);
+    if (TypeAliasModelItem __alias = model_dynamic_cast<TypeAliasModelItem> (__item)) {
+        const TypeInfo combined = TypeInfo::combine(__alias->type(), otherType);
+        const CodeModelItem nextItem = __scope->model()->findItem(combined.qualifiedName(), __scope);
+        if (!nextItem)
+            return otherType;
+        // PYSIDE-362, prevent recursion on opaque structs like
+        // typedef struct xcb_connection_t xcb_connection_t;
+        if (nextItem.constData() ==__item.constData()) {
+            std::cerr << "** WARNING Bailing out recursion of " << __FUNCTION__
+                << "() on " << qPrintable(__type.qualifiedName().join(QLatin1String("::")))
+                << std::endl;
+            return otherType;
+        }
+        return resolveType(nextItem, combined, __scope);
+    }
 
     return otherType;
 }

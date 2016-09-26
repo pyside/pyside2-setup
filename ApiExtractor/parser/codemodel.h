@@ -230,6 +230,8 @@ private:
         };
     };
 
+    static TypeInfo resolveType(CodeModelItem item, TypeInfo const &__type, CodeModelItem __scope);
+
     QStringList m_qualifiedName;
     QStringList m_arrayElements;
     QList<TypeInfo> m_arguments;
