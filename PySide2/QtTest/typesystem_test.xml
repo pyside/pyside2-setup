@@ -102,7 +102,6 @@
     <!-- Qt5: private <enum-type name="LogElementType" since="4.6"/> -->
     <enum-type name="MouseAction"/>
     <enum-type name="QBenchmarkMetric" since="4.7"/>
-    <!-- Qt5: gone <enum-type name="SkipMode"/> -->
     <enum-type name="TestFailMode"/>
     <extra-includes>
         <include file-name="QtTest" location="global"/>

@@ -477,7 +477,6 @@
   </object-type>
   <object-type name="QCheckBox"/>
   <object-type name="QCommonStyle">
-    <!-- Qt5: gone <modify-function signature="standardIconImplementation(QStyle::StandardPixmap, const QStyleOption *, const QWidget *)const" virtual-slot="yes"/> -->
   </object-type>
   <object-type name="QDataWidgetMapper">
     <enum-type name="SubmitPolicy"/>
@@ -631,7 +630,6 @@
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
   </object-type>
-  <!-- Qt5: gone <object-type name="QInputContextFactory"/> -->
   <object-type name="QItemDelegate">
     <!-- ### "doLayout(...)" is an internal method. -->
     <modify-function signature="doLayout(QStyleOptionViewItem,QRect*,QRect*,QRect*,bool)const" remove="all" />
@@ -1246,7 +1244,6 @@
     <enum-type name="StyleHint" extensible="yes" />
     <enum-type name="SubControl" flags="SubControls" extensible="yes" force-integer="yes"/>
     <enum-type name="SubElement" extensible="yes" />
-    <!-- Qt5: gone <modify-function signature="layoutSpacingImplementation(QSizePolicy::ControlType, QSizePolicy::ControlType, Qt::Orientation, const QStyleOption *, const QWidget *) const" virtual-slot="yes"/> -->
     <modify-function signature="drawComplexControl(QStyle::ComplexControl,const QStyleOptionComplex*,QPainter*,const QWidget*)const">
       <modify-argument index="3" invalidate-after-use="yes"/>
       <modify-argument index="4">
@@ -3117,7 +3114,6 @@
     <enum-type name="ActionEvent"/>
     <enum-type name="MenuRole"/>
     <enum-type name="Priority" since="4.6"/>
-    <!-- Qt5: gone <enum-type name="SoftKeyRole" since="4.6"/> -->
     <modify-function signature="setMenu(QMenu*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
@@ -3132,7 +3128,6 @@
   <inject-code class="target" file="glue/qtwidgets_qapp.cpp" position="end" />
   <object-type name="QApplication">
     <enum-type name="ColorSpec"/>
-    <!-- Qt5: gone <enum-type name="Type"/> -->
     <extra-includes>
       <include file-name="QBasicTimer" location="global"/>
       <include file-name="QFont" location="global"/>

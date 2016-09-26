@@ -39,7 +39,6 @@
     <load-typesystem name="typesystem_widgets.xml" generate="no" />
 
   <object-type name="QPageSetupDialog">
-    <!-- Qt5: gone <enum-type name="PageSetupDialogOption" flags="PageSetupDialogOptions"/> -->
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
   </object-type>
 

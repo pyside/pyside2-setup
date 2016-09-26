@@ -41,13 +41,6 @@
 
   <primitive-type name="Qt::HANDLE" target-lang-api-name="PyObject"/>
 
-  <!-- Qt5: gone. Use the new fusion style.
-  <object-type name="QMacStyle" >
-    <enum-type name="FocusRectPolicy"/>
-    <enum-type name="WidgetSizePolicy"/>
-  </object-type>
-  -->
-
   <suppress-warning text="enum 'QSysInfo::Endian' is specified in typesystem, but not declared" />
   <suppress-warning text="type 'QGtkStyle' is specified in typesystem, but not defined. This could potentially lead to compilation errors." />
 </typesystem>

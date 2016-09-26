@@ -62,5 +62,4 @@
   <inject-code class="native" position="beginning">
     <insert-template name="checkPyCapsuleOrPyCObject_func"/>
   </inject-code>
-  <!-- Qt5: gone <enum-type name="QPixmap::HBitmapFormat" /> -->
 </typesystem>

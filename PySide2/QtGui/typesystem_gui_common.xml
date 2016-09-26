@@ -1464,15 +1464,6 @@
   </object-type>
   <object-type name="QPyTextObject" />
 
-  <!-- Qt5: gone.
-  <object-type name="QCDEStyle">
-    <modify-function signature="standardIconImplementation(QStyle::StandardPixmap, const QStyleOption *, const QWidget *)const" virtual-slot="yes"/>
-  </object-type>
-  <object-type name="QDesktopServices">
-      <enum-type name="StandardLocation"/>
-  </object-type>
-  -->
-  
   <object-type name="QDoubleValidator">
       <enum-type name="Notation"/>
   </object-type>
@@ -1500,15 +1491,7 @@
     </modify-function>
     <modify-function signature="write(const QImage&amp;)" allow-thread="yes"/>
   </object-type>
-  <!-- Qt5: gone
-  <object-type name="QInputContextFactory"/>
-  -->
   <object-type name="QIntValidator" />
-
-  <!-- Qt5: gone. Use the new fusion style.
-  <object-type name="QMotifStyle">
-  </object-type>
-  -->
 
   <object-type name="QPainterPathStroker" copyable="false"/>
   <object-type name="QPictureIO">
@@ -1720,25 +1703,7 @@
     </modify-function>
   </object-type>
 
-  <!-- Qt5: gone.  Use the new fusion style.
-  <object-type name="QWindowsStyle">
-    <modify-function signature="standardIconImplementation(QStyle::StandardPixmap, const QStyleOption *, const QWidget *)const" virtual-slot="yes"/>
-  </object-type>
-  -->
-
-  <!-- Qt5: becomes QMdiArea in QtWidgets
-  <object-type name="QWorkspace">
-    <enum-type name="WindowOrder"/>
-    <modify-function signature="addWindow(QWidget*, QFlags&lt;Qt::WindowType>)">
-        <modify-argument index="1">
-            <parent index="this" action="add" />
-        </modify-argument>
-    </modify-function>
-  </object-type>
-  -->
-
   <object-type name="QActionEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::ActionAdded || %1-&gt;type() == QEvent::ActionRemoved || %1-&gt;type() == QEvent::ActionChanged" />
-  <!-- Qt5: gone <object-type name="QClipboardEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::Clipboard"/> -->
   <object-type name="QCloseEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::Close"/>
   <object-type name="QContextMenuEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::ContextMenu">
       <enum-type name="Reason"/>
@@ -1852,24 +1817,6 @@
     </modify-function>
   </object-type>
 
-  <!-- Qt5: gone. Use QAbstractProxyModel, instead
-  <object-type name="QProxyModel" polymorphic-id-expression="qobject_cast&lt;QProxyModel*&gt;(%1)">  -->
-    <!-- ### This reimplementation of "QObject::parent()" is used in C++ only
-         when "using QObject::parent;" is not available. It's useless in Python. -->  <!--
-    <modify-function signature="parent()const" remove="all"/>
-    <extra-includes>
-      <include file-name="QPixmap" location="global"/>
-      <include file-name="QStringList" location="global"/>
-      <include file-name="QSize" location="global"/>
-    </extra-includes>
-    <modify-function signature="setModel(QAbstractItemModel*)">
-      <modify-argument index="1">
-        <reference-count action="set"/>
-      </modify-argument>
-    </modify-function>
-  </object-type>
-  -->
-
   <object-type name="QImageReader">
     <extra-includes>
       <include file-name="QColor" location="global"/>
@@ -1934,20 +1881,6 @@
     <modify-function signature="exec(QFlags&lt;Qt::DropAction&gt;)" rename="exec_" allow-thread="yes"/>
     <modify-function signature="exec(QFlags&lt;Qt::DropAction&gt;, Qt::DropAction)" rename="exec_" allow-thread="yes"/>
   </object-type>
-  <!-- Qt5: gone
-  <object-type name="QInputContext">
-    <extra-includes>
-      <include file-name="QTextFormat" location="global"/>
-    </extra-includes>
-    <enum-type name="StandardFormat"/>
-    <modify-function signature="filterEvent(const QEvent*)">
-      <modify-argument index="1" invalidate-after-use="yes"/>
-    </modify-function>
-    <modify-function signature="mouseHandler(int,QMouseEvent*)">
-      <modify-argument index="2" invalidate-after-use="yes"/>
-    </modify-function>
-  </object-type>
-  -->
 
   <object-type name="QStandardItemModel" polymorphic-id-expression="qobject_cast&lt;QStandardItemModel*&gt;(%1)">
     <extra-includes>
@@ -2225,9 +2158,6 @@
   </object-type>
   <object-type name="QPainter">
     <extra-includes>
-      <!-- Qt5: no longer referenced
-      <include file-name="QWidget" location="global"/>
-      -->
       <include file-name="QPainterPath" location="global"/>
       <include file-name="QPixmap" location="global"/>
     </extra-includes>
@@ -2330,13 +2260,6 @@
         <no-null-pointer/>
       </modify-argument>
     </modify-function>
-    <!-- Qt5: gone
-    <modify-function signature="initFrom(const QWidget*)">
-      <modify-argument index="1">
-        <no-null-pointer/>
-      </modify-argument>
-    </modify-function>
-    -->
     <modify-function signature="setRedirected(const QPaintDevice*, QPaintDevice*, const QPoint&amp;)">
       <modify-argument index="1">
         <no-null-pointer/>
