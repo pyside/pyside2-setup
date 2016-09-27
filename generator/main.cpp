@@ -295,7 +295,7 @@ void printUsage(const Generators& generators)
 static inline void printVerAndBanner()
 {
     std::cout << "shiboken v" SHIBOKEN_VERSION << std::endl;
-    std::cout << "Copyright (C) 2009-2012 Nokia Corporation and/or its subsidiary(-ies)" << std::endl;
+    std::cout << "Copyright (C) 2016 The Qt Company Ltd." << std::endl;
 }
 
 static inline void errorPrint(const QString& s,
