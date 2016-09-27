@@ -76,6 +76,8 @@ public:
         return m_args->isEmpty();
     }
 
+    QString errorMessage() const;
+
 private:
     QMap<QString, QString>* m_args;
 };
@@ -114,6 +116,21 @@ bool ArgsHandler::argExistsRemove(const QString& s)
     return retval;
 }
 
+QString ArgsHandler::errorMessage() const
+{
+    typedef QMap<QString, QString>::ConstIterator StringMapConstIt;
+
+    QString message;
+    QTextStream str(&message);
+    str << "shiboken: Called with wrong arguments:";
+    for (StringMapConstIt it = m_args->cbegin(), end = m_args->cend(); it != end; ++it) {
+        str << ' ' << it.key();
+        if (!it.value().isEmpty())
+            str << ' ' << it.value();
+    }
+    str << "\nCommand line: " << QCoreApplication::arguments().join(QLatin1Char(' '));
+    return message;
+}
 }
 
 static void printOptions(QTextStream& s, const QMap<QString, QString>& options)
@@ -246,7 +263,23 @@ static QMap<QString, QString> getCommandLineArgs()
     return args;
 }
 
-void printUsage(const Generators& generators)
+static inline Generators docGenerators()
+{
+    Generators result;
+#ifdef DOCSTRINGS_ENABLED
+    result.append(GeneratorPtr(new QtDocGenerator));
+#endif
+    return result;
+}
+
+static inline Generators shibokenGenerators()
+{
+    Generators result;
+    result << GeneratorPtr(new CppGenerator) << GeneratorPtr(new HeaderGenerator);
+    return result;
+}
+
+void printUsage()
 {
     QTextStream s(stdout);
     s << "Usage:\n  "
@@ -283,6 +316,7 @@ void printUsage(const Generators& generators)
                           QLatin1String("Semicolon separated list of type system entries (classes, namespaces, global functions and enums) to be dropped from generation."));
     printOptions(s, generalOptions);
 
+    const Generators generators = shibokenGenerators() + docGenerators();
     foreach (const GeneratorPtr &generator, generators) {
         QMap<QString, QString> options = generator->options();
         if (!options.isEmpty()) {
@@ -333,21 +367,20 @@ int main(int argc, char *argv[])
 
     // Pre-defined generator sets.
     if (generatorSet == QLatin1String("qtdoc")) {
-#ifndef DOCSTRINGS_ENABLED
-        errorPrint(QLatin1String("shiboken: Doc strings extractions was not enabled in this shiboken build."));
-        return EXIT_FAILURE;
-#else
-        generators << GeneratorPtr(new QtDocGenerator);
-#endif
+        generators = docGenerators();
+        if (generators.isEmpty()) {
+            errorPrint(QLatin1String("shiboken: Doc strings extractions was not enabled in this shiboken build."));
+            return EXIT_FAILURE;
+        }
     } else if (generatorSet.isEmpty() || generatorSet == QLatin1String("shiboken")) {
-        generators << GeneratorPtr(new CppGenerator) << GeneratorPtr(new HeaderGenerator);
+        generators = shibokenGenerators();
     } else {
         errorPrint(QLatin1String("shiboken: Unknown generator set, try \"shiboken\" or \"qtdoc\"."));
         return EXIT_FAILURE;
     }
 
     if (argsHandler.argExistsRemove(QLatin1String("help"))) {
-        printUsage(generators);
+        printUsage();
         return EXIT_SUCCESS;
     }
 
@@ -445,7 +478,7 @@ int main(int argc, char *argv[])
     }
 
     if (!argsHandler.noArgs()) {
-        errorPrint(QLatin1String("shiboken: Called with wrong arguments."));
+        errorPrint(argsHandler.errorMessage());
         std::cout << "Note: use --help option for more information." << std::endl;
         return EXIT_FAILURE;
     }
