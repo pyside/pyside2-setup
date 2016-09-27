@@ -126,6 +126,7 @@ public:
     void updateMetaObject(QMetaObject* metaObj);
     void writeMethodsData(const QList<MethodData>& methods, unsigned int** data, QLinkedList<QByteArray>& strings, int* prtIndex, int nullIndex, int flags);
     void writeStringData(char *,  QLinkedList<QByteArray> &strings);
+    int getPropertyNotifyId(PySideProperty *property) const;
 };
 
 bool sortMethodSignalSlot(const MethodData &m1, const MethodData &m2)
@@ -271,7 +272,7 @@ uint PropertyData::flags() const
     else
         flags |= ResolveUser;
 
-    if (m_notifyId != -1)
+    if (m_cachedNotifyId != -1)
         flags |= Notify;
 
     if (PySide::Property::isConstant(m_data))
@@ -341,12 +342,12 @@ QByteArray MethodData::name() const
 }
 
 PropertyData::PropertyData()
-    : m_notifyId(0), m_data(0)
+    : m_cachedNotifyId(0), m_data(0)
 {
 }
 
 PropertyData::PropertyData(const char* name, int notifyId, PySideProperty* data)
-    : m_name(name), m_notifyId(notifyId), m_data(data)
+    : m_name(name), m_cachedNotifyId(notifyId), m_data(data)
 {
 }
 
@@ -361,9 +362,9 @@ bool PropertyData::isValid() const
     return !m_name.isEmpty();
 }
 
-int PropertyData::notifyId() const
+int PropertyData::cachedNotifyId() const
 {
-    return m_notifyId;
+    return m_cachedNotifyId;
 }
 
 bool PropertyData::operator==(const PropertyData& other) const
@@ -483,15 +484,8 @@ int DynamicQMetaObject::addProperty(const char* propertyName, PyObject* data)
         return m_d->m_propertyOffset + index;
 
     // retrieve notifyId
-    int notifyId = -1;
-    PySideProperty* property = reinterpret_cast<PySideProperty*>(data);
-    if (property->d->notify) {
-        const char* signalNotify = PySide::Property::getNotifyName(property);
-        if (signalNotify) {
-            MethodData signalObject(QMetaMethod::Signal, signalNotify, "");
-            notifyId = m_d->m_methods.indexOf(signalObject);
-        }
-    }
+    PySideProperty *property = reinterpret_cast<PySideProperty *>(data);
+    const int notifyId = m_d->getPropertyNotifyId(property);
 
     //search for a empty space
     PropertyData blank;
@@ -504,6 +498,18 @@ int DynamicQMetaObject::addProperty(const char* propertyName, PyObject* data)
     }
     m_d->m_updated = false;
     return  m_d->m_propertyOffset + index;
+}
+
+int DynamicQMetaObject::DynamicQMetaObjectPrivate::getPropertyNotifyId(PySideProperty *property) const {
+    int notifyId = -1;
+    if (property->d->notify) {
+        const char *signalNotify = PySide::Property::getNotifyName(property);
+        if (signalNotify) {
+            const MethodData signalObject(QMetaMethod::Signal, signalNotify, "");
+            notifyId = m_methods.indexOf(signalObject);
+        }
+    }
+    return notifyId;
 }
 
 void DynamicQMetaObject::addInfo(const char* key, const char* value)
@@ -620,7 +626,7 @@ void DynamicQMetaObject::parsePythonType(PyTypeObject* type)
     foreach (const PropPair &propPair, properties)
         addProperty(propPair.first, propPair.second);
 
-    
+
 }
 
 /*!
@@ -650,7 +656,7 @@ int DynamicQMetaObject::DynamicQMetaObjectPrivate::createMetaData(QMetaObject* m
     m_dataSize += n_methods*5;     //method: name, argc, parameters, tag, flags
     m_dataSize += n_properties*4;  //property: name, type, flags
     m_dataSize += 1;               //eod
-    
+
     m_dataSize += aggregateParameterCount(m_methods); // types and parameter names
 
     uint* data = reinterpret_cast<uint*>(realloc(const_cast<uint*>(metaObj->d.data), m_dataSize * sizeof(uint)));
@@ -690,14 +696,14 @@ void DynamicQMetaObject::DynamicQMetaObjectPrivate::updateMetaObject(QMetaObject
     m_dataSize = 0;
 
     // Recompute the size and reallocate memory
-    // index is set after the last header field
+    // index is set after the last header field.
     index = createMetaData(metaObj, strings);
     data = const_cast<uint*>(metaObj->d.data);
 
     registerString(m_className, strings); // register class string
     m_nullIndex = registerString("", strings); // register a null string
 
-    //write class info
+    // Write class info.
     if (m_info.size()) {
         if (data[3] == 0)
             data[3] = index;
@@ -712,42 +718,9 @@ void DynamicQMetaObject::DynamicQMetaObjectPrivate::updateMetaObject(QMetaObject
         }
     }
 
-    //write properties
-    if (m_properties.size()) {
-        if (data[7] == 0)
-            data[7] = index;
-
-        QList<PropertyData>::const_iterator i = m_properties.constBegin();
-        while(i != m_properties.constEnd()) {
-            if (i->isValid()) {
-                data[index++] = registerString(i->name(), strings); // name
-            } else
-                data[index++] = m_nullIndex;
-
-            // Find out the property type index.
-            int typeInfo = m_nullIndex;
-            if (i->isValid()) {
-                const QByteArray &typeName = i->type();
-                if (QtPrivate::isBuiltinType(typeName))
-                   typeInfo = QMetaType::type(typeName);
-                else
-                   typeInfo = IsUnresolvedType | registerString(typeName, strings);
-            }
-            data[index++] = typeInfo; // normalized type
-
-            data[index++] = i->flags();
-            i++;
-        }
-
-        //write properties notify
-        i = m_properties.constBegin();
-        while(i != m_properties.constEnd()) {
-            data[index++] = i->notifyId() >= 0 ? i->notifyId() : 0; //signal notify index
-            i++;
-        }
-    }
-
-    //write signals/slots (signals must be written first, see indexOfMethodRelative in qmetaobject.cpp)
+    // Write methods first, then properties, to be consistent with moc.
+    // Write signals/slots (signals must be written first, see indexOfMethodRelative in
+    // qmetaobject.cpp).
     qStableSort(m_methods.begin(), m_methods.end(), sortMethodSignalSlot);
 
     if (m_methods.size()) {
@@ -757,7 +730,7 @@ void DynamicQMetaObject::DynamicQMetaObjectPrivate::updateMetaObject(QMetaObject
         writeMethodsData(m_methods, &data, strings, &index, m_nullIndex, AccessPublic);
     }
 
-    //write signal/slots parameters
+    // Write signal/slots parameters.
     if (m_methods.size()) {
        QList<MethodData>::iterator it = m_methods.begin();
        for (; it != m_methods.end(); ++it) {
@@ -780,9 +753,47 @@ void DynamicQMetaObject::DynamicQMetaObjectPrivate::updateMetaObject(QMetaObject
        }
     }
 
+    // Write properties.
+    if (m_properties.size()) {
+        if (data[7] == 0)
+            data[7] = index;
+
+        QList<PropertyData>::const_iterator i = m_properties.constBegin();
+        while (i != m_properties.constEnd()) {
+            if (i->isValid()) {
+                data[index++] = registerString(i->name(), strings); // name
+            } else
+                data[index++] = m_nullIndex;
+
+            // Find out the property type index.
+            int typeInfo = m_nullIndex;
+            if (i->isValid()) {
+                const QByteArray &typeName = i->type();
+                if (QtPrivate::isBuiltinType(typeName))
+                   typeInfo = QMetaType::type(typeName);
+                else
+                   typeInfo = IsUnresolvedType | registerString(typeName, strings);
+            }
+            data[index++] = typeInfo; // normalized type
+
+            data[index++] = i->flags();
+            i++;
+        }
+
+        // Write properties notify.
+        i = m_properties.constBegin();
+        while (i != m_properties.constEnd()) {
+            // Recompute notifyId, because sorting the methods might have changed the relative
+            // index.
+            const int notifyId = getPropertyNotifyId(i->data());
+            data[index++] = notifyId >= 0 ? static_cast<uint>(notifyId) : 0; //signal notify index
+            i++;
+        }
+    }
+
     data[index++] = 0; // the end
 
-    // create the m_metadata string
+    // Create the m_metadata string.
     int size = blobSize(strings);
     char *blob = reinterpret_cast<char *>(realloc((char*)metaObj->d.stringdata, size));
     writeStringData(blob, strings);

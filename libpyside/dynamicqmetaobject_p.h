@@ -82,18 +82,19 @@ namespace PySide
     {
     public:
         PropertyData();
-        PropertyData(const char* name, int notifyId=0, PySideProperty* data = 0);
+        PropertyData(const char *name, int cachedNotifyId = 0, PySideProperty *data = 0);
         const QByteArray& name() const { return m_name; }
+        PySideProperty *data() const { return m_data; }
         QByteArray type() const;
         uint flags() const;
         bool isValid() const;
-        int notifyId() const;
+        int cachedNotifyId() const;
         bool operator==(const PropertyData& other) const;
         bool operator==(const char* name) const;
 
     private:
         QByteArray m_name;
-        int m_notifyId;
+        int m_cachedNotifyId;
         PySideProperty* m_data;
     };
 
