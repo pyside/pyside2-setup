@@ -42,7 +42,7 @@ source_encoding = 'utf-8'
 
 # General information about the project.
 project = u'Shiboken'
-copyright = u'Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies)'
+copyright = u'Copyright (C) 2016 The Qt Company Ltd.'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
