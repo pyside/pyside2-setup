@@ -54,7 +54,8 @@ QString DocParser::execXQuery(QXmlQuery& xquery, const QString& query) const
 {
     QString escapedQuery(query);
     // XQuery can't have invalid XML characters
-    escapedQuery.replace("&", "&amp;").replace("<", "&lt;");
+    escapedQuery.replace(QLatin1Char('&'), QLatin1String("&amp;"));
+    escapedQuery.replace(QLatin1Char('<'), QLatin1String("&lt;"));
     xquery.setQuery(escapedQuery);
     if (!xquery.isValid()) {
         qWarning() << "Bad XQuery: " << escapedQuery;
@@ -125,8 +126,10 @@ QString DocParser::applyDocModifications(const DocModificationList& mods, const 
                                );
     foreach (DocModification mod, mods) {
         if (mod.mode() == DocModification::XPathReplace) {
+            QString xpath = mod.xpath();
+            xpath.replace(QLatin1Char('"'), QLatin1String("&quot;"));
             xsl += QLatin1String("<xsl:template match=\"")
-                   + mod.xpath().replace("\"", "&quot;") + QLatin1String("\">")
+                   + xpath + QLatin1String("\">")
                    + mod.code() + QLatin1String("</xsl:template>\n");
         }
     }

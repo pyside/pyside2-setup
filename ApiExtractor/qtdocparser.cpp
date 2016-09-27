@@ -49,15 +49,17 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
         context = context->enclosingClass();
     }
 
-    QString filename = metaClass->qualifiedCppName().toLower().replace("::", "-");
-    QString sourceFile = documentationDataDirectory() + '/' + filename + ".xml";
+    QString filename = metaClass->qualifiedCppName().toLower();
+    filename.replace(QLatin1String("::"), QLatin1String("-"));
+    QString sourceFile = documentationDataDirectory() + QLatin1Char('/')
+                         + filename + QLatin1String(".xml");
     if (metaClass->enclosingClass())
-        sourceFile.replace("::", "-");
+        sourceFile.replace(QLatin1String("::"), QLatin1String("-"));
 
     if (!QFile::exists(sourceFile)) {
-        ReportHandler::warning("Can't find qdoc3 file for class "
-                               + metaClass->name() + ", tried: "
-                               + sourceFile);
+        qCWarning(lcShiboken).noquote().nospace()
+            << "Can't find qdoc3 file for class " << metaClass->name() << ", tried: "
+            << QDir::toNativeSeparators(sourceFile);
         return;
     }
 
@@ -68,7 +70,8 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
 
     // Class/Namespace documentation
     QString type = metaClass->isNamespace() ? QLatin1String("namespace") : QLatin1String("class");
-    QString query = "/WebXML/document/" + type + "[@name=\"" + className + "\"]/description";
+    QString query = QLatin1String("/WebXML/document/") + type + QLatin1String("[@name=\"")
+                    + className + QLatin1String("\"]/description");
 
     DocModificationList signedModifs, classModifs;
     foreach (DocModification docModif, metaClass->typeEntry()->docModifications()) {
@@ -88,36 +91,39 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
         if (!func || func->isPrivate())
             continue;
 
-        QString query = "/WebXML/document/" + type + "[@" + "name" + "=\"" + className + "\"]";
+        QString query = QLatin1String("/WebXML/document/") + type
+                        + QLatin1String("[@name=\"") + className + QLatin1String("\"]");
         // properties
         if (func->isPropertyReader() || func->isPropertyWriter() || func->isPropertyResetter()) {
-            query += "/property[@name=\"" + func->propertySpec()->name() + "\"]";
+            query += QLatin1String("/property[@name=\"") + func->propertySpec()->name()
+                     + QLatin1String("\"]");
         } else { // normal methods
-            QString isConst = func->isConstant() ? "true" : "false";
-            query += "/function[@name=\"" + func->originalName()
-                     + "\" and count(parameter)="
+            QString isConst = func->isConstant() ? QLatin1String("true") : QLatin1String("false");
+            query += QLatin1String("/function[@name=\"") + func->originalName()
+                     + QLatin1String("\" and count(parameter)=")
                      + QString::number(func->arguments().count())
-                     + " and @const=\"" + isConst + "\"]";
+                     + QLatin1String(" and @const=\"") + isConst + QLatin1String("\"]");
 
             int i = 1;
             foreach (AbstractMetaArgument* arg, func->arguments()) {
                 QString type = arg->type()->name();
 
                 if (arg->type()->isConstant())
-                    type.prepend("const ");
+                    type.prepend(QLatin1String("const "));
 
                 if (arg->type()->isReference()) {
-                    type += " &";
+                    type += QLatin1String(" &");
                 } if (arg->type()->indirections()) {
-                    type += ' ';
+                    type += QLatin1Char(' ');
                     for (int j = 0, max = arg->type()->indirections(); j < max; ++j)
-                        type += '*';
+                        type += QLatin1Char('*');
                 }
-                query += "/parameter[" + QString::number(i) + "][@left=\"" + type + "\"]/..";
+                query += QLatin1String("/parameter[") + QString::number(i)
+                         + QLatin1String("][@left=\"") + type + QLatin1String("\"]/..");
                 ++i;
             }
         }
-        query += "/description";
+        query += QLatin1String("/description");
         DocModificationList funcModifs;
         foreach (DocModification funcModif, signedModifs) {
             if (funcModif.signature() == func->minimalSignature())
@@ -141,9 +147,10 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     // Enums
     AbstractMetaEnumList enums = metaClass->enums();
     foreach (AbstractMetaEnum *meta_enum, enums) {
-        QString query = "/WebXML/document/" + type + "[@" + "name" + "=\""
-                        + className + "\"]/enum[@name=\""
-                        + meta_enum->name() + "\"]/description";
+        QString query = QLatin1String("/WebXML/document/") + type
+                        + QLatin1String("[@name=\"")
+                        + className + QLatin1String("\"]/enum[@name=\"")
+                        + meta_enum->name() + QLatin1String("\"]/description");
         doc.setValue(getDocumentation(xquery, query, DocModificationList()));
         meta_enum->setDocumentation(doc);
     }
@@ -153,13 +160,15 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
 {
     // TODO: This method of acquiring the module name supposes that the target language uses
     // dots as module separators in package names. Improve this.
-    QString moduleName = QString(name).remove(0, name.lastIndexOf('.') + 1);
-    QString sourceFile = documentationDataDirectory() + '/' + moduleName.toLower() + ".xml";
+    QString moduleName = name;
+    moduleName.remove(0, name.lastIndexOf(QLatin1Char('.')) + 1);
+    QString sourceFile = documentationDataDirectory() + QLatin1Char('/')
+                         + moduleName.toLower() + QLatin1String(".xml");
 
     if (!QFile::exists(sourceFile)) {
-        ReportHandler::warning("Can't find qdoc3 file for module "
-                               + name + ", tried: "
-                                                 + sourceFile);
+        qCWarning(lcShiboken).noquote().nospace()
+            << "Can't find qdoc3 file for module " <<  name << ", tried: "
+            << QDir::toNativeSeparators(sourceFile);
         return Documentation();
     }
 
@@ -167,6 +176,6 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
     xquery.setFocus(QUrl(sourceFile));
 
     // Module documentation
-    QString query = "/WebXML/document/page[@name=\"" + moduleName + "\"]/description";
+    QString query = QLatin1String("/WebXML/document/page[@name=\"") + moduleName + QLatin1String("\"]/description");
     return Documentation(getDocumentation(xquery, query, DocModificationList()));
 }

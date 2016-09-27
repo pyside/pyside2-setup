@@ -48,18 +48,18 @@ void TestModifyDocumentation::testModifyDocumentation()
     </typesystem>";
     TestUtil t(cppCode, xmlCode);
 
-    AbstractMetaClass* classA = t.builder()->classes().findClass("A");
+    AbstractMetaClass* classA = t.builder()->classes().findClass(QLatin1String("A"));
     QVERIFY(classA);
     DocModificationList docMods = classA->typeEntry()->docModifications();
     QCOMPARE(docMods.count(), 1);
-    QCOMPARE(docMods[0].code().trimmed(), QString("<para>Some changed contents here</para>"));
-    QCOMPARE(docMods[0].signature(), QString(""));
+    QCOMPARE(docMods[0].code().trimmed(), QLatin1String("<para>Some changed contents here</para>"));
+    QCOMPARE(docMods[0].signature(), QString());
     QtDocParser docParser;
     docParser.setDocumentationDataDirectory(QDir::currentPath());
     docParser.fillDocumentation(classA);
 
     QVERIFY(!classA->documentation().value().trimmed().isEmpty());
-    QCOMPARE(classA->documentation().value(), QString("<?xml version=\"1.0\"?>\n\
+    QCOMPARE(classA->documentation().value(), QLatin1String("<?xml version=\"1.0\"?>\n\
 <description>oi\n\
                 <para>Paragraph number 1</para>\n\
     <para>Paragraph number 2</para>\n\

@@ -337,7 +337,7 @@ int main(int argc, char *argv[])
         errorPrint(QLatin1String("shiboken: Doc strings extractions was not enabled in this shiboken build."));
         return EXIT_FAILURE;
 #else
-        generators << new QtDocGenerator;
+        generators << GeneratorPtr(new QtDocGenerator);
 #endif
     } else if (generatorSet.isEmpty() || generatorSet == QLatin1String("shiboken")) {
         generators << GeneratorPtr(new CppGenerator) << GeneratorPtr(new HeaderGenerator);

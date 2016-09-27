@@ -48,7 +48,7 @@ static bool shouldSkip(const AbstractMetaFunction* func)
                      || func->isModifiedRemoved()
                      || func->declaringClass() != func->ownerClass()
                      || func->isCastOperator()
-                     || func->name() == "operator=";
+                     || func->name() == QLatin1String("operator=");
 
     // Search a const clone
     if (!skipable && !func->isConstant()) {
@@ -85,16 +85,16 @@ static QString createRepeatedChar(int i, char c)
 {
     QString out;
     for (int j = 0; j < i; ++j)
-        out += c;
+        out += QLatin1Char(c);
 
     return out;
 }
 
-static QString escape(QString& str)
+static QString escape(QString str)
 {
-    return str
-            .replace("*", "\\*")
-            .replace("_", "\\_");
+    str.replace(QLatin1Char('*'), QLatin1String("\\*"));
+    str.replace(QLatin1Char('_'), QLatin1String("\\_"));
+    return str;
 }
 
 static QString escape(const QStringRef& strref)
@@ -107,73 +107,73 @@ static QString escape(const QStringRef& strref)
 QtXmlToSphinx::QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, const QString& context)
         : m_context(context), m_generator(generator), m_insideBold(false), m_insideItalic(false)
 {
-    m_handlerMap.insert("heading", &QtXmlToSphinx::handleHeadingTag);
-    m_handlerMap.insert("brief", &QtXmlToSphinx::handleParaTag);
-    m_handlerMap.insert("para", &QtXmlToSphinx::handleParaTag);
-    m_handlerMap.insert("italic", &QtXmlToSphinx::handleItalicTag);
-    m_handlerMap.insert("bold", &QtXmlToSphinx::handleBoldTag);
-    m_handlerMap.insert("see-also", &QtXmlToSphinx::handleSeeAlsoTag);
-    m_handlerMap.insert("snippet", &QtXmlToSphinx::handleSnippetTag);
-    m_handlerMap.insert("dots", &QtXmlToSphinx::handleDotsTag);
-    m_handlerMap.insert("codeline", &QtXmlToSphinx::handleDotsTag);
-    m_handlerMap.insert("table", &QtXmlToSphinx::handleTableTag);
-    m_handlerMap.insert("header", &QtXmlToSphinx::handleRowTag);
-    m_handlerMap.insert("row", &QtXmlToSphinx::handleRowTag);
-    m_handlerMap.insert("item", &QtXmlToSphinx::handleItemTag);
-    m_handlerMap.insert("argument", &QtXmlToSphinx::handleArgumentTag);
-    m_handlerMap.insert("teletype", &QtXmlToSphinx::handleArgumentTag);
-    m_handlerMap.insert("link", &QtXmlToSphinx::handleLinkTag);
-    m_handlerMap.insert("inlineimage", &QtXmlToSphinx::handleImageTag);
-    m_handlerMap.insert("image", &QtXmlToSphinx::handleImageTag);
-    m_handlerMap.insert("list", &QtXmlToSphinx::handleListTag);
-    m_handlerMap.insert("term", &QtXmlToSphinx::handleTermTag);
-    m_handlerMap.insert("raw", &QtXmlToSphinx::handleRawTag);
-    m_handlerMap.insert("underline", &QtXmlToSphinx::handleItalicTag);
-    m_handlerMap.insert("superscript", &QtXmlToSphinx::handleSuperScriptTag);
-    m_handlerMap.insert("code", &QtXmlToSphinx::handleCodeTag);
-    m_handlerMap.insert("badcode", &QtXmlToSphinx::handleCodeTag);
-    m_handlerMap.insert("legalese", &QtXmlToSphinx::handleCodeTag);
-    m_handlerMap.insert("section", &QtXmlToSphinx::handleAnchorTag);
-    m_handlerMap.insert("quotefile", &QtXmlToSphinx::handleQuoteFileTag);
+    m_handlerMap.insert(QLatin1String("heading"), &QtXmlToSphinx::handleHeadingTag);
+    m_handlerMap.insert(QLatin1String("brief"), &QtXmlToSphinx::handleParaTag);
+    m_handlerMap.insert(QLatin1String("para"), &QtXmlToSphinx::handleParaTag);
+    m_handlerMap.insert(QLatin1String("italic"), &QtXmlToSphinx::handleItalicTag);
+    m_handlerMap.insert(QLatin1String("bold"), &QtXmlToSphinx::handleBoldTag);
+    m_handlerMap.insert(QLatin1String("see-also"), &QtXmlToSphinx::handleSeeAlsoTag);
+    m_handlerMap.insert(QLatin1String("snippet"), &QtXmlToSphinx::handleSnippetTag);
+    m_handlerMap.insert(QLatin1String("dots"), &QtXmlToSphinx::handleDotsTag);
+    m_handlerMap.insert(QLatin1String("codeline"), &QtXmlToSphinx::handleDotsTag);
+    m_handlerMap.insert(QLatin1String("table"), &QtXmlToSphinx::handleTableTag);
+    m_handlerMap.insert(QLatin1String("header"), &QtXmlToSphinx::handleRowTag);
+    m_handlerMap.insert(QLatin1String("row"), &QtXmlToSphinx::handleRowTag);
+    m_handlerMap.insert(QLatin1String("item"), &QtXmlToSphinx::handleItemTag);
+    m_handlerMap.insert(QLatin1String("argument"), &QtXmlToSphinx::handleArgumentTag);
+    m_handlerMap.insert(QLatin1String("teletype"), &QtXmlToSphinx::handleArgumentTag);
+    m_handlerMap.insert(QLatin1String("link"), &QtXmlToSphinx::handleLinkTag);
+    m_handlerMap.insert(QLatin1String("inlineimage"), &QtXmlToSphinx::handleImageTag);
+    m_handlerMap.insert(QLatin1String("image"), &QtXmlToSphinx::handleImageTag);
+    m_handlerMap.insert(QLatin1String("list"), &QtXmlToSphinx::handleListTag);
+    m_handlerMap.insert(QLatin1String("term"), &QtXmlToSphinx::handleTermTag);
+    m_handlerMap.insert(QLatin1String("raw"), &QtXmlToSphinx::handleRawTag);
+    m_handlerMap.insert(QLatin1String("underline"), &QtXmlToSphinx::handleItalicTag);
+    m_handlerMap.insert(QLatin1String("superscript"), &QtXmlToSphinx::handleSuperScriptTag);
+    m_handlerMap.insert(QLatin1String("code"), &QtXmlToSphinx::handleCodeTag);
+    m_handlerMap.insert(QLatin1String("badcode"), &QtXmlToSphinx::handleCodeTag);
+    m_handlerMap.insert(QLatin1String("legalese"), &QtXmlToSphinx::handleCodeTag);
+    m_handlerMap.insert(QLatin1String("section"), &QtXmlToSphinx::handleAnchorTag);
+    m_handlerMap.insert(QLatin1String("quotefile"), &QtXmlToSphinx::handleQuoteFileTag);
 
     // ignored tags
-    m_handlerMap.insert("generatedlist", &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert("tableofcontents", &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert("quotefromfile", &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert("skipto", &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert("target", &QtXmlToSphinx::handleIgnoredTag);
+    m_handlerMap.insert(QLatin1String("generatedlist"), &QtXmlToSphinx::handleIgnoredTag);
+    m_handlerMap.insert(QLatin1String("tableofcontents"), &QtXmlToSphinx::handleIgnoredTag);
+    m_handlerMap.insert(QLatin1String("quotefromfile"), &QtXmlToSphinx::handleIgnoredTag);
+    m_handlerMap.insert(QLatin1String("skipto"), &QtXmlToSphinx::handleIgnoredTag);
+    m_handlerMap.insert(QLatin1String("target"), &QtXmlToSphinx::handleIgnoredTag);
 
     // useless tags
-    m_handlerMap.insert("description", &QtXmlToSphinx::handleUselessTag);
-    m_handlerMap.insert("definition", &QtXmlToSphinx::handleUselessTag);
-    m_handlerMap.insert("printuntil", &QtXmlToSphinx::handleUselessTag);
-    m_handlerMap.insert("relation", &QtXmlToSphinx::handleUselessTag);
+    m_handlerMap.insert(QLatin1String("description"), &QtXmlToSphinx::handleUselessTag);
+    m_handlerMap.insert(QLatin1String("definition"), &QtXmlToSphinx::handleUselessTag);
+    m_handlerMap.insert(QLatin1String("printuntil"), &QtXmlToSphinx::handleUselessTag);
+    m_handlerMap.insert(QLatin1String("relation"), &QtXmlToSphinx::handleUselessTag);
 
     // Doxygen tags
-    m_handlerMap.insert("title", &QtXmlToSphinx::handleHeadingTag);
-    m_handlerMap.insert("ref", &QtXmlToSphinx::handleParaTag);
-    m_handlerMap.insert("computeroutput", &QtXmlToSphinx::handleParaTag);
-    m_handlerMap.insert("detaileddescription", &QtXmlToSphinx::handleParaTag);
-    m_handlerMap.insert("name", &QtXmlToSphinx::handleParaTag);
-    m_handlerMap.insert("listitem", &QtXmlToSphinx::handleItemTag);
-    m_handlerMap.insert("parametername", &QtXmlToSphinx::handleItemTag);
-    m_handlerMap.insert("parameteritem", &QtXmlToSphinx::handleItemTag);
-    m_handlerMap.insert("ulink", &QtXmlToSphinx::handleLinkTag);
-    m_handlerMap.insert("itemizedlist", &QtXmlToSphinx::handleListTag);
-    m_handlerMap.insert("parameternamelist", &QtXmlToSphinx::handleListTag);
-    m_handlerMap.insert("parameterlist", &QtXmlToSphinx::handleListTag);
+    m_handlerMap.insert(QLatin1String("title"), &QtXmlToSphinx::handleHeadingTag);
+    m_handlerMap.insert(QLatin1String("ref"), &QtXmlToSphinx::handleParaTag);
+    m_handlerMap.insert(QLatin1String("computeroutput"), &QtXmlToSphinx::handleParaTag);
+    m_handlerMap.insert(QLatin1String("detaileddescription"), &QtXmlToSphinx::handleParaTag);
+    m_handlerMap.insert(QLatin1String("name"), &QtXmlToSphinx::handleParaTag);
+    m_handlerMap.insert(QLatin1String("listitem"), &QtXmlToSphinx::handleItemTag);
+    m_handlerMap.insert(QLatin1String("parametername"), &QtXmlToSphinx::handleItemTag);
+    m_handlerMap.insert(QLatin1String("parameteritem"), &QtXmlToSphinx::handleItemTag);
+    m_handlerMap.insert(QLatin1String("ulink"), &QtXmlToSphinx::handleLinkTag);
+    m_handlerMap.insert(QLatin1String("itemizedlist"), &QtXmlToSphinx::handleListTag);
+    m_handlerMap.insert(QLatin1String("parameternamelist"), &QtXmlToSphinx::handleListTag);
+    m_handlerMap.insert(QLatin1String("parameterlist"), &QtXmlToSphinx::handleListTag);
 
     // Doxygen ignored tags
-    m_handlerMap.insert("highlight", &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert("linebreak", &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert("programlisting", &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert("xreftitle", &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert("sp", &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert("entry", &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert("simplesect", &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert("verbatim", &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert("xrefsect", &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert("xrefdescription", &QtXmlToSphinx::handleIgnoredTag);
+    m_handlerMap.insert(QLatin1String("highlight"), &QtXmlToSphinx::handleIgnoredTag);
+    m_handlerMap.insert(QLatin1String("linebreak"), &QtXmlToSphinx::handleIgnoredTag);
+    m_handlerMap.insert(QLatin1String("programlisting"), &QtXmlToSphinx::handleIgnoredTag);
+    m_handlerMap.insert(QLatin1String("xreftitle"), &QtXmlToSphinx::handleIgnoredTag);
+    m_handlerMap.insert(QLatin1String("sp"), &QtXmlToSphinx::handleIgnoredTag);
+    m_handlerMap.insert(QLatin1String("entry"), &QtXmlToSphinx::handleIgnoredTag);
+    m_handlerMap.insert(QLatin1String("simplesect"), &QtXmlToSphinx::handleIgnoredTag);
+    m_handlerMap.insert(QLatin1String("verbatim"), &QtXmlToSphinx::handleIgnoredTag);
+    m_handlerMap.insert(QLatin1String("xrefsect"), &QtXmlToSphinx::handleIgnoredTag);
+    m_handlerMap.insert(QLatin1String("xrefdescription"), &QtXmlToSphinx::handleIgnoredTag);
 
     m_result = transform(doc);
 }
@@ -197,7 +197,7 @@ QString QtXmlToSphinx::popOutputBuffer()
 
 QString QtXmlToSphinx::expandFunction(const QString& function)
 {
-    QStringList functionSpec = function.split('.');
+    QStringList functionSpec = function.split(QLatin1Char('.'));
     QString className = functionSpec.first();
     const AbstractMetaClass* metaClass = 0;
     foreach (const AbstractMetaClass* cls, m_generator->classes()) {
@@ -209,7 +209,8 @@ QString QtXmlToSphinx::expandFunction(const QString& function)
 
     if (metaClass) {
         functionSpec.removeFirst();
-        return metaClass->typeEntry()->qualifiedTargetLangName() + "." + functionSpec.join(".");
+        return metaClass->typeEntry()->qualifiedTargetLangName()
+               + QLatin1Char('.') + functionSpec.join(QLatin1Char('.'));
     } else {
         return function;
     }
@@ -217,7 +218,7 @@ QString QtXmlToSphinx::expandFunction(const QString& function)
 
 QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName)
 {
-    QString currentClass = m_context.split(".").last();
+    QString currentClass = m_context.split(QLatin1Char('.')).constLast();
 
     const AbstractMetaClass* metaClass = 0;
     foreach (const AbstractMetaClass* cls, m_generator->classes()) {
@@ -245,7 +246,7 @@ QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName)
             return implementingClass->typeEntry()->qualifiedTargetLangName();
     }
 
-    return QLatin1String("~") + m_context;
+    return QLatin1Char('~') + m_context;
 }
 
 QString QtXmlToSphinx::transform(const QString& doc)
@@ -262,8 +263,10 @@ QString QtXmlToSphinx::transform(const QString& doc)
     while (!reader.atEnd()) {
         QXmlStreamReader::TokenType token = reader.readNext();
         if (reader.hasError()) {
-            m_output << INDENT << "XML Error: " + reader.errorString() + "\n" + doc;
-            ReportHandler::warning("XML Error: " + reader.errorString() + "\n" + doc);
+            const QString message = QLatin1String("XML Error: ") + reader.errorString()
+                                    + QLatin1Char('\n') + doc;
+            m_output << INDENT << message;
+            qCWarning(lcShiboken).noquote().nospace() << message;
             break;
         }
 
@@ -295,15 +298,18 @@ QString QtXmlToSphinx::readFromLocations(const QStringList& locations, const QSt
     QString result;
     bool ok;
     foreach (QString location, locations) {
-        location.append('/');
+        location.append(QLatin1Char('/'));
         location.append(path);
         result = readFromLocation(location, identifier, &ok);
         if (ok)
             break;
     }
-    if (!ok)
-        ReportHandler::warning("Couldn't read code snippet file: {"+ locations.join("|") + '}' + path);
+    if (!ok) {
+        qCDebug(lcShiboken).noquote().nospace() << "Couldn't read code snippet file: {"
+            << locations.join(QLatin1Char('|')) << '}' << path;
+    }
     return result;
+
 }
 
 QString QtXmlToSphinx::readFromLocation(const QString& location, const QString& identifier, bool* ok)
@@ -311,26 +317,29 @@ QString QtXmlToSphinx::readFromLocation(const QString& location, const QString& 
     QFile inputFile;
     inputFile.setFileName(location);
     if (!inputFile.open(QIODevice::ReadOnly)) {
-        if (!ok)
-            ReportHandler::warning("Couldn't read code snippet file: "+inputFile.fileName());
-        else
+        if (!ok) {
+            qCDebug(lcShiboken).noquote().nospace() << "Couldn't read code snippet file: "
+                << QDir::toNativeSeparators(inputFile.fileName());
+        } else {
             *ok = false;
+        }
         return QString();
     }
 
-    QRegExp searchString("//!\\s*\\[" + identifier + "\\]");
-    QRegExp codeSnippetCode("//!\\s*\\[[\\w\\d\\s]+\\]");
+    QRegExp searchString(QLatin1String("//!\\s*\\[") + identifier + QLatin1String("\\]"));
+    QRegExp codeSnippetCode(QLatin1String("//!\\s*\\[[\\w\\d\\s]+\\]"));
     QString code;
-    QString line;
+
     bool identifierIsEmpty = identifier.isEmpty();
     bool getCode = false;
 
     while (!inputFile.atEnd()) {
-        line = inputFile.readLine();
+        QString line = QString::fromUtf8(inputFile.readLine());
         if (identifierIsEmpty) {
             code += line;
         } else if (getCode && !line.contains(searchString)) {
-            code += line.replace(codeSnippetCode, "");
+            line.remove(codeSnippetCode);
+            code += line;
         } else if (line.contains(searchString)) {
             if (getCode)
                 break;
@@ -339,8 +348,10 @@ QString QtXmlToSphinx::readFromLocation(const QString& location, const QString& 
         }
     }
 
-    if (!identifierIsEmpty && !getCode)
-        ReportHandler::warning("Code snippet file found ("+location+"), but snippet "+ identifier +" not found.");
+    if (!identifierIsEmpty && !getCode) {
+        qCDebug(lcShiboken).noquote().nospace() << "Code snippet file found ("
+            << location << "), but snippet " << identifier << " not found.";
+    }
 
     if (ok)
         *ok = true;
@@ -354,7 +365,7 @@ void QtXmlToSphinx::handleHeadingTag(QXmlStreamReader& reader)
     static char types[] = { '-', '^' };
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        uint typeIdx = reader.attributes().value("level").toString().toInt();
+        uint typeIdx = reader.attributes().value(QLatin1String("level")).toString().toInt();
         if (typeIdx >= sizeof(types))
             type = types[sizeof(types)-1];
         else
@@ -374,10 +385,10 @@ void QtXmlToSphinx::handleParaTag(QXmlStreamReader& reader)
         pushOutputBuffer();
     } else if (token == QXmlStreamReader::EndElement) {
         QString result = popOutputBuffer().simplified();
-        if (result.startsWith("**Warning:**"))
-            result.replace(0, 12, ".. warning:: ");
-        else if (result.startsWith("**Note:**"))
-            result.replace(0, 9, ".. note:: ");
+        if (result.startsWith(QLatin1String("**Warning:**")))
+            result.replace(0, 12, QLatin1String(".. warning:: "));
+        else if (result.startsWith(QLatin1String("**Note:**")))
+            result.replace(0, 9, QLatin1String(".. note:: "));
 
         m_output << INDENT << result << endl << endl;
     } else if (token == QXmlStreamReader::Characters) {
@@ -385,7 +396,7 @@ void QtXmlToSphinx::handleParaTag(QXmlStreamReader& reader)
         if (!m_output.string()->isEmpty()) {
             QChar start = text[0];
             QChar end = m_output.string()->at(m_output.string()->length() - 1);
-            if ((end == '*' || end == '`') && start != ' ' && !start.isPunct())
+            if ((end == QLatin1Char('*') || end == QLatin1Char('`')) && start != QLatin1Char(' ') && !start.isPunct())
                 m_output << '\\';
         }
         m_output << INDENT << text;
@@ -436,13 +447,14 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        bool consecutiveSnippet = m_lastTagName == "snippet" || m_lastTagName == "dots" || m_lastTagName == "codeline";
+        const bool consecutiveSnippet = m_lastTagName == QLatin1String("snippet")
+            || m_lastTagName == QLatin1String("dots") || m_lastTagName == QLatin1String("codeline");
         if (consecutiveSnippet) {
             m_output.flush();
             m_output.string()->chop(2);
         }
-        QString location = reader.attributes().value("location").toString();
-        QString identifier = reader.attributes().value("identifier").toString();
+        QString location = reader.attributes().value(QLatin1String("location")).toString();
+        QString identifier = reader.attributes().value(QLatin1String("identifier")).toString();
         QString code = readFromLocations(m_generator->codeSnippetDirs(), location, identifier);
         if (!consecutiveSnippet)
             m_output << INDENT << "::\n\n";
@@ -451,7 +463,7 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
         if (code.isEmpty()) {
             m_output << INDENT << "<Code snippet \"" << location << ':' << identifier << "\" not found>" << endl;
         } else {
-            foreach (QString line, code.split("\n")) {
+            foreach (const QString &line, code.split(QLatin1Char('\n'))) {
                 if (!QString(line).trimmed().isEmpty())
                     m_output << INDENT << line;
 
@@ -465,7 +477,8 @@ void QtXmlToSphinx::handleDotsTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        bool consecutiveSnippet = m_lastTagName == "snippet" || m_lastTagName == "dots" || m_lastTagName == "codeline";
+        const bool consecutiveSnippet = m_lastTagName == QLatin1String("snippet")
+            || m_lastTagName == QLatin1String("dots") || m_lastTagName == QLatin1String("codeline");
         if (consecutiveSnippet) {
             m_output.flush();
             m_output.string()->chop(2);
@@ -473,7 +486,7 @@ void QtXmlToSphinx::handleDotsTag(QXmlStreamReader& reader)
         Indentation indentation(INDENT);
         pushOutputBuffer();
         m_output << INDENT;
-        int indent = reader.attributes().value("indent").toString().toInt();
+        int indent = reader.attributes().value(QLatin1String("indent")).toString().toInt();
         for (int i = 0; i < indent; ++i)
             m_output << ' ';
     } else if (token == QXmlStreamReader::Characters) {
@@ -504,7 +517,7 @@ void QtXmlToSphinx::handleTermTag(QXmlStreamReader& reader)
     if (token == QXmlStreamReader::StartElement) {
         pushOutputBuffer();
     } else if (token == QXmlStreamReader::Characters) {
-        m_output << reader.text().toString().replace("::", ".");
+        m_output << reader.text().toString().replace(QLatin1String("::"), QLatin1String("."));
     } else if (token == QXmlStreamReader::EndElement) {
         TableCell cell;
         cell.data = popOutputBuffer().trimmed();
@@ -521,8 +534,8 @@ void QtXmlToSphinx::handleItemTag(QXmlStreamReader& reader)
             m_currentTable << TableRow();
         TableRow& row = m_currentTable.last();
         TableCell cell;
-        cell.colSpan = reader.attributes().value("colspan").toString().toShort();
-        cell.rowSpan = reader.attributes().value("rowspan").toString().toShort();
+        cell.colSpan = reader.attributes().value(QLatin1String("colspan")).toString().toShort();
+        cell.rowSpan = reader.attributes().value(QLatin1String("rowspan")).toString().toShort();
         row << cell;
         pushOutputBuffer();
     } else if (token == QXmlStreamReader::EndElement) {
@@ -539,7 +552,7 @@ void QtXmlToSphinx::handleRowTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        m_tableHasHeader = reader.name() == "header";
+        m_tableHasHeader = reader.name() == QLatin1String("header");
         m_currentTable << TableRow();
     }
 }
@@ -550,8 +563,8 @@ void QtXmlToSphinx::handleListTag(QXmlStreamReader& reader)
     static QString listType;
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        listType = reader.attributes().value("type").toString();
-        if (listType == "enum") {
+        listType = reader.attributes().value(QLatin1String("type")).toString();
+        if (listType == QLatin1String("enum")) {
             m_currentTable << (TableRow() << "Constant" << "Description");
             m_tableHasHeader = true;
         }
@@ -559,16 +572,16 @@ void QtXmlToSphinx::handleListTag(QXmlStreamReader& reader)
     } else if (token == QXmlStreamReader::EndElement) {
         INDENT.indent++;
         if (!m_currentTable.isEmpty()) {
-            if (listType == "bullet") {
+            if (listType == QLatin1String("bullet")) {
                 m_output << endl;
                 foreach (TableCell cell, m_currentTable.first()) {
-                    QStringList itemLines = cell.data.split('\n');
+                    QStringList itemLines = cell.data.split(QLatin1Char('\n'));
                     m_output << INDENT << "* " << itemLines.first() << endl;
                     for (int i = 1, max = itemLines.count(); i < max; ++i)
                         m_output << INDENT << "  " << itemLines[i] << endl;
                 }
                 m_output << endl;
-            } else if (listType == "enum") {
+            } else if (listType == QLatin1String("enum")) {
                 m_currentTable.enableHeader(m_tableHasHeader);
                 m_currentTable.normalize();
                 m_output << m_currentTable;
@@ -587,86 +600,87 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
     static QString l_type;
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        l_linktagending = "` ";
+        l_linktagending = QLatin1String("` ");
         if (m_insideBold) {
-            l_linktag.prepend("**");
-            l_linktagending.append("**");
+            l_linktag.prepend(QLatin1String("**"));
+            l_linktagending.append(QLatin1String("**"));
         } else if (m_insideItalic) {
-            l_linktag.prepend('*');
-            l_linktagending.append('*');
+            l_linktag.prepend(QLatin1Char('*'));
+            l_linktagending.append(QLatin1Char('*'));
         }
-        l_type = reader.attributes().value("type").toString();
+        l_type = reader.attributes().value(QLatin1String("type")).toString();
 
         // TODO: create a flag PROPERTY-AS-FUNCTION to ask if the properties
         // are recognized as such or not in the binding
-        if (l_type == "property")
-            l_type = "function";
+        if (l_type == QLatin1String("property"))
+            l_type = QLatin1String("function");
 
-        if (l_type == "typedef")
-            l_type = "class";
+        if (l_type == QLatin1String("typedef"))
+            l_type = QLatin1String("class");
 
         QString linkSource;
-        if (l_type == "function" || l_type == "class") {
-            linkSource  = "raw";
-        } else if (l_type == "enum") {
-            linkSource  = "enum";
-        } else if (l_type == "page") {
-            linkSource  = "page";
+        if (l_type == QLatin1String("function") || l_type == QLatin1String("class")) {
+            linkSource  = QLatin1String("raw");
+        } else if (l_type == QLatin1String("enum")) {
+            linkSource  = QLatin1String("enum");
+        } else if (l_type == QLatin1String("page")) {
+            linkSource  = QLatin1String("page");
         } else {
-            linkSource = "href";
+            linkSource = QLatin1String("href");
         }
 
         l_linkref = reader.attributes().value(linkSource).toString();
-        l_linkref.replace("::", ".");
-        l_linkref.remove("()");
+        l_linkref.replace(QLatin1String("::"), QLatin1String("."));
+        l_linkref.remove(QLatin1String("()"));
 
-        if (l_type == "function" && !m_context.isEmpty()) {
-            l_linktag = " :meth:`";
-            QStringList rawlinklist = l_linkref.split(".");
+        if (l_type == QLatin1String("function") && !m_context.isEmpty()) {
+            l_linktag = QLatin1String(" :meth:`");
+            QStringList rawlinklist = l_linkref.split(QLatin1Char('.'));
             if (rawlinklist.size() == 1 || rawlinklist.first() == m_context) {
                 QString context = resolveContextForMethod(rawlinklist.last());
                 if (!l_linkref.startsWith(context))
-                    l_linkref.prepend(context + '.');
+                    l_linkref.prepend(context + QLatin1Char('.'));
             } else {
                 l_linkref = expandFunction(l_linkref);
             }
-        } else if (l_type == "function" && m_context.isEmpty()) {
-            l_linktag = " :func:`";
-        } else if (l_type == "class") {
-            l_linktag = " :class:`";
+        } else if (l_type == QLatin1String("function") && m_context.isEmpty()) {
+            l_linktag = QLatin1String(" :func:`");
+        } else if (l_type == QLatin1String("class")) {
+            l_linktag = QLatin1String(" :class:`");
             TypeEntry* type = TypeDatabase::instance()->findType(l_linkref);
             if (type) {
                 l_linkref = type->qualifiedTargetLangName();
             } else { // fall back to the old heuristic if the type wasn't found.
-                QStringList rawlinklist = l_linkref.split(".");
-                QStringList splittedContext = m_context.split(".");
+                QStringList rawlinklist = l_linkref.split(QLatin1Char('.'));
+                QStringList splittedContext = m_context.split(QLatin1Char('.'));
                 if (rawlinklist.size() == 1 || rawlinklist.first() == splittedContext.last()) {
                     splittedContext.removeLast();
-                    l_linkref.prepend('~' + splittedContext.join(".") + '.');
+                    l_linkref.prepend(QLatin1Char('~') + splittedContext.join(QLatin1Char('.'))
+                                      + QLatin1Char('.'));
                 }
             }
-        } else if (l_type == "enum") {
-            l_linktag = " :attr:`";
-        } else if (l_type == "page" && l_linkref == m_generator->moduleName()) {
-            l_linktag = " :mod:`";
+        } else if (l_type == QLatin1String("enum")) {
+            l_linktag = QLatin1String(" :attr:`");
+        } else if (l_type == QLatin1String("page") && l_linkref == m_generator->moduleName()) {
+            l_linktag = QLatin1String(" :mod:`");
         } else {
-            l_linktag = " :ref:`";
+            l_linktag = QLatin1String(" :ref:`");
         }
 
     } else if (token == QXmlStreamReader::Characters) {
         QString linktext = reader.text().toString();
-        linktext.replace("::", ".");
-        QString item = l_linkref.split(".").last();
+        linktext.replace(QLatin1String("::"), QLatin1String("."));
+        QString item = l_linkref.split(QLatin1Char('.')).constLast();
         if (l_linkref == linktext
-            || (l_linkref + "()") == linktext
+            || (l_linkref + QLatin1String("()")) == linktext
             || item == linktext
-            || (item + "()") == linktext)
+            || (item + QLatin1String("()")) == linktext)
             l_linktext.clear();
         else
-            l_linktext = linktext + QLatin1String("<");
+            l_linktext = linktext + QLatin1Char('<');
     } else if (token == QXmlStreamReader::EndElement) {
         if (!l_linktext.isEmpty())
-            l_linktagending.prepend('>');
+            l_linktagending.prepend(QLatin1Char('>'));
         m_output << l_linktag << l_linktext << escape(l_linkref) << l_linktagending;
     }
 }
@@ -675,11 +689,14 @@ void QtXmlToSphinx::handleImageTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        QString href = reader.attributes().value("href").toString();
-        QDir dir(m_generator->outputDirectory() + '/' + m_generator->packageName().replace(".", "/"));
-        QString imgPath = dir.relativeFilePath(m_generator->libSourceDir() + "/doc/src/") + '/' + href;
+        QString href = reader.attributes().value(QLatin1String("href")).toString();
+        QString packageName = m_generator->packageName();
+        packageName.replace(QLatin1Char('.'), QLatin1Char('/'));
+        QDir dir(m_generator->outputDirectory() + QLatin1Char('/') + packageName);
+        QString imgPath = dir.relativeFilePath(m_generator->libSourceDir() + QLatin1String("/doc/src/"))
+                          + QLatin1Char('/') + href;
 
-        if (reader.name() == "image")
+        if (reader.name() == QLatin1String("image"))
             m_output << INDENT << ".. image:: " <<  imgPath << endl << endl;
         else
             m_output << ".. image:: " << imgPath << ' ';
@@ -690,10 +707,10 @@ void QtXmlToSphinx::handleRawTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        QString format = reader.attributes().value("format").toString();
+        QString format = reader.attributes().value(QLatin1String("format")).toString();
         m_output << INDENT << ".. raw:: " << format.toLower() << endl << endl;
     } else if (token == QXmlStreamReader::Characters) {
-        QStringList lst(reader.text().toString().split("\n"));
+        QStringList lst(reader.text().toString().split(QLatin1Char('\n')));
         foreach(QString row, lst)
             m_output << INDENT << INDENT << row << endl;
     } else if (token == QXmlStreamReader::EndElement) {
@@ -705,11 +722,11 @@ void QtXmlToSphinx::handleCodeTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        QString format = reader.attributes().value("format").toString();
+        QString format = reader.attributes().value(QLatin1String("format")).toString();
         m_output << INDENT << "::" << endl << endl;
         INDENT.indent++;
     } else if (token == QXmlStreamReader::Characters) {
-        QStringList lst(reader.text().toString().split("\n"));
+        QStringList lst(reader.text().toString().split(QLatin1Char('\n')));
         foreach(QString row, lst)
             m_output << INDENT << INDENT << row << endl;
     } else if (token == QXmlStreamReader::EndElement) {
@@ -722,7 +739,7 @@ void QtXmlToSphinx::handleUnknownTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement)
-        ReportHandler::warning("Unknow QtDoc tag: \"" + reader.name().toString() + "\".");
+        qCDebug(lcShiboken).noquote().nospace() << "Unknown QtDoc tag: \"" << reader.name().toString() << "\".";
 }
 
 void QtXmlToSphinx::handleSuperScriptTag(QXmlStreamReader& reader)
@@ -754,16 +771,16 @@ void QtXmlToSphinx::handleAnchorTag(QXmlStreamReader& reader)
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
         QString anchor;
-        if (reader.attributes().hasAttribute("id"))
-            anchor = reader.attributes().value("id").toString();
-        else if (reader.attributes().hasAttribute("name"))
-            anchor = reader.attributes().value("name").toString();
+        if (reader.attributes().hasAttribute(QLatin1String("id")))
+            anchor = reader.attributes().value(QLatin1String("id")).toString();
+        else if (reader.attributes().hasAttribute(QLatin1String("name")))
+            anchor = reader.attributes().value(QLatin1String("name")).toString();
         if (!anchor.isEmpty() && m_opened_anchor != anchor) {
             m_opened_anchor = anchor;
             m_output << INDENT << ".. _" << m_context << "_" << anchor.toLower() << ":" << endl << endl;
         }
    } else if (token == QXmlStreamReader::EndElement) {
-       m_opened_anchor = "";
+       m_opened_anchor.clear();
    }
 }
 
@@ -772,8 +789,8 @@ void QtXmlToSphinx::handleQuoteFileTag(QXmlStreamReader& reader)
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::Characters) {
         QString location = reader.text().toString();
-        QString identifier = "";
-        location.prepend(m_generator->libSourceDir() + '/');
+        QString identifier;
+        location.prepend(m_generator->libSourceDir() + QLatin1Char('/'));
         QString code = readFromLocation(location, identifier);
 
         m_output << INDENT << "::\n\n";
@@ -781,7 +798,7 @@ void QtXmlToSphinx::handleQuoteFileTag(QXmlStreamReader& reader)
         if (code.isEmpty()) {
             m_output << INDENT << "<Code snippet \"" << location << "\" not found>" << endl;
         } else {
-            foreach (QString line, code.split("\n")) {
+            foreach (QString line, code.split(QLatin1Char('\n'))) {
                 if (!QString(line).trimmed().isEmpty())
                     m_output << INDENT << line;
 
@@ -818,7 +835,7 @@ void QtXmlToSphinx::Table::normalize()
                 cell.colSpan = 0;
                 col++;
             } else if (mergeCols) {
-                self[row][maxCols - 1].data += " " + cell.data;
+                self[row][maxCols - 1].data += QLatin1Char(' ') + cell.data;
             }
         }
     }
@@ -851,7 +868,7 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
         return s;
 
     if (!table.isNormalized()) {
-        ReportHandler::warning("Attempt to print an unnormalized table!");
+        qCDebug(lcShiboken) << "Attempt to print an unnormalized table!";
         return s;
     }
 
@@ -861,10 +878,10 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
     for (int i = 0, maxI = table.count(); i < maxI; ++i) {
         const QtXmlToSphinx::TableRow& row = table[i];
         for (int j = 0, maxJ = std::min(row.count(), colWidths.size()); j < maxJ; ++j) {
-            QStringList rowLines = row[j].data.split('\n'); // cache this would be a good idea
+            QStringList rowLines = row[j].data.split(QLatin1Char('\n')); // cache this would be a good idea
             foreach (QString str, rowLines)
                 colWidths[j] = std::max(colWidths[j], str.count());
-            rowHeights[i] = std::max(rowHeights[i], row[j].data.count('\n') + 1);
+            rowHeights[i] = std::max(rowHeights[i], row[j].data.count(QLatin1Char('\n')) + 1);
         }
     }
 
@@ -872,10 +889,10 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
         return s; // empty table (table with empty cells)
 
     // create a horizontal line to be used later.
-    QString horizontalLine("+");
+    QString horizontalLine = QLatin1String("+");
     for (int i = 0, max = colWidths.count(); i < max; ++i) {
         horizontalLine += createRepeatedChar(colWidths[i], '-');
-        horizontalLine += '+';
+        horizontalLine += QLatin1Char('+');
     }
 
     // write table rows
@@ -901,7 +918,7 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
         for (int rowLine = 0; rowLine < rowHeights[i]; ++rowLine) { // for each line in a row
             for (int j = 0, maxJ = std::min(row.count(), colWidths.size()); j < maxJ; ++j) { // for each column
                 const QtXmlToSphinx::TableCell& cell = row[j];
-                QStringList rowLines = cell.data.split('\n'); // FIXME: Cache this!!!
+                QStringList rowLines = cell.data.split(QLatin1Char('\n')); // FIXME: Cache this!!!
                 if (!j) // First column, so we need print the identation
                     s << INDENT;
 
@@ -910,7 +927,7 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
                 else
                     s << ' ';
                 s << qSetFieldWidth(colWidths[j]) << left;
-                s << (rowLine < rowLines.count() ? rowLines[rowLine] : "");
+                s << (rowLine < rowLines.count() ? rowLines[rowLine] : QString());
                 s << qSetFieldWidth(0);
             }
             s << '|' << endl;
@@ -925,38 +942,39 @@ static QString getFuncName(const AbstractMetaFunction* cppFunc) {
     static bool hashInitialized = false;
     static QHash<QString, QString> operatorsHash;
     if (!hashInitialized) {
-        operatorsHash.insert("operator+", "__add__");
-        operatorsHash.insert("operator+=", "__iadd__");
-        operatorsHash.insert("operator-", "__sub__");
-        operatorsHash.insert("operator-=", "__isub__");
-        operatorsHash.insert("operator*", "__mul__");
-        operatorsHash.insert("operator*=", "__imul__");
-        operatorsHash.insert("operator/", "__div__");
-        operatorsHash.insert("operator/=", "__idiv__");
-        operatorsHash.insert("operator%", "__mod__");
-        operatorsHash.insert("operator%=", "__imod__");
-        operatorsHash.insert("operator<<", "__lshift__");
-        operatorsHash.insert("operator<<=", "__ilshift__");
-        operatorsHash.insert("operator>>", "__rshift__");
-        operatorsHash.insert("operator>>=", "__irshift__");
-        operatorsHash.insert("operator&", "__and__");
-        operatorsHash.insert("operator&=", "__iand__");
-        operatorsHash.insert("operator|", "__or__");
-        operatorsHash.insert("operator|=", "__ior__");
-        operatorsHash.insert("operator^", "__xor__");
-        operatorsHash.insert("operator^=", "__ixor__");
-        operatorsHash.insert("operator==", "__eq__");
-        operatorsHash.insert("operator!=", "__ne__");
-        operatorsHash.insert("operator<", "__lt__");
-        operatorsHash.insert("operator<=", "__le__");
-        operatorsHash.insert("operator>", "__gt__");
-        operatorsHash.insert("operator>=", "__ge__");
+        operatorsHash.insert(QLatin1String("operator+"), QLatin1String("__add__"));
+        operatorsHash.insert(QLatin1String("operator+="), QLatin1String("__iadd__"));
+        operatorsHash.insert(QLatin1String("operator-"), QLatin1String("__sub__"));
+        operatorsHash.insert(QLatin1String("operator-="), QLatin1String("__isub__"));
+        operatorsHash.insert(QLatin1String("operator*"), QLatin1String("__mul__"));
+        operatorsHash.insert(QLatin1String("operator*="), QLatin1String("__imul__"));
+        operatorsHash.insert(QLatin1String("operator/"), QLatin1String("__div__"));
+        operatorsHash.insert(QLatin1String("operator/="), QLatin1String("__idiv__"));
+        operatorsHash.insert(QLatin1String("operator%"), QLatin1String("__mod__"));
+        operatorsHash.insert(QLatin1String("operator%="), QLatin1String("__imod__"));
+        operatorsHash.insert(QLatin1String("operator<<"), QLatin1String("__lshift__"));
+        operatorsHash.insert(QLatin1String("operator<<="), QLatin1String("__ilshift__"));
+        operatorsHash.insert(QLatin1String("operator>>"), QLatin1String("__rshift__"));
+        operatorsHash.insert(QLatin1String("operator>>="), QLatin1String("__irshift__"));
+        operatorsHash.insert(QLatin1String("operator&"), QLatin1String("__and__"));
+        operatorsHash.insert(QLatin1String("operator&="), QLatin1String("__iand__"));
+        operatorsHash.insert(QLatin1String("operator|"), QLatin1String("__or__"));
+        operatorsHash.insert(QLatin1String("operator|="), QLatin1String("__ior__"));
+        operatorsHash.insert(QLatin1String("operator^"), QLatin1String("__xor__"));
+        operatorsHash.insert(QLatin1String("operator^="), QLatin1String("__ixor__"));
+        operatorsHash.insert(QLatin1String("operator=="), QLatin1String("__eq__"));
+        operatorsHash.insert(QLatin1String("operator!="), QLatin1String("__ne__"));
+        operatorsHash.insert(QLatin1String("operator<"), QLatin1String("__lt__"));
+        operatorsHash.insert(QLatin1String("operator<="), QLatin1String("__le__"));
+        operatorsHash.insert(QLatin1String("operator>"), QLatin1String("__gt__"));
+        operatorsHash.insert(QLatin1String("operator>="), QLatin1String("__ge__"));
         hashInitialized = true;
     }
 
     QHash<QString, QString>::const_iterator it = operatorsHash.find(cppFunc->name());
     QString result = it != operatorsHash.end() ? it.value() : cppFunc->name();
-    return result.replace("::", ".");
+    result.replace(QLatin1String("::"), QLatin1String("."));
+    return result;
 }
 
 QtDocGenerator::QtDocGenerator() : m_docParser(0)
@@ -970,7 +988,7 @@ QtDocGenerator::~QtDocGenerator()
 
 QString QtDocGenerator::fileNameForClass(const AbstractMetaClass* cppClass) const
 {
-    return QString("%1.rst").arg(getClassTargetFullName(cppClass, false));
+    return getClassTargetFullName(cppClass, false) + QLatin1String(".rst");
 }
 
 void QtDocGenerator::writeFormatedText(QTextStream& s, const Documentation& doc, const AbstractMetaClass* metaClass)
@@ -984,8 +1002,8 @@ void QtDocGenerator::writeFormatedText(QTextStream& s, const Documentation& doc,
         QtXmlToSphinx x(this, doc.value(), metaClassName);
         s << x;
     } else {
-        QStringList lines = doc.value().split("\n");
-        QRegExp regex("\\S"); // non-space character
+        QStringList lines = doc.value().split(QLatin1Char('\n'));
+        QRegExp regex(QLatin1String("\\S")); // non-space character
         int typesystemIndentation = std::numeric_limits<int>().max();
         // check how many spaces must be removed from the begining of each line
         foreach (QString line, lines) {
@@ -1014,13 +1032,13 @@ static void writeInheritedByList(QTextStream& s, const AbstractMetaClass* metaCl
     s << "**Inherited by:** ";
     QStringList classes;
     foreach (AbstractMetaClass* c, res)
-        classes << QString(":ref:`%1`").arg(getClassTargetFullName(c, false));
-    s << classes.join(", ") << endl << endl;
+        classes << QLatin1String(":ref:`") + getClassTargetFullName(c, false) + QLatin1Char('`');
+    s << classes.join(QLatin1String(", ")) << endl << endl;
 }
 
 void QtDocGenerator::generateClass(QTextStream& s, const AbstractMetaClass* metaClass)
 {
-    ReportHandler::debugSparse("Generating Documentation for " + metaClass->fullName());
+    qCDebug(lcShiboken).noquote().nospace() << "Generating Documentation for " << metaClass->fullName();
 
     m_packages[metaClass->package()] << fileNameForClass(metaClass);
 
@@ -1092,21 +1110,21 @@ void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* 
 
         QString className;
         if (!func->isConstructor())
-            className =  getClassTargetFullName(cppClass) + '.';
+            className =  getClassTargetFullName(cppClass) + QLatin1Char('.');
         else if (func->implementingClass() && func->implementingClass()->enclosingClass())
-            className =  getClassTargetFullName(func->implementingClass()->enclosingClass()) + '.';
+            className =  getClassTargetFullName(func->implementingClass()->enclosingClass()) + QLatin1Char('.');
         QString funcName = getFuncName(func);
 
-        QString str("def :meth:`");
+        QString str = QLatin1String("def :meth:`");
 
         str += funcName;
-        str += '<';
+        str += QLatin1Char('<');
         if (!funcName.startsWith(className))
             str += className;
         str += funcName;
-        str += ">` (";
+        str += QLatin1String(">` (");
         str += parseArgDocStyle(cppClass, func);
-        str += ')';
+        str += QLatin1Char(')');
 
         if (func->isStatic())
             staticFunctionList << str;
@@ -1127,11 +1145,11 @@ void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* 
         s << "Synopsis" << endl
           << "--------" << endl << endl;
 
-        writeFunctionBlock(s, "Functions", functionList);
-        writeFunctionBlock(s, "Virtual functions", virtualList);
-        writeFunctionBlock(s, "Slots", slotList);
-        writeFunctionBlock(s, "Signals", signalList);
-        writeFunctionBlock(s, "Static functions", staticFunctionList);
+        writeFunctionBlock(s, QLatin1String("Functions"), functionList);
+        writeFunctionBlock(s, QLatin1String("Virtual functions"), virtualList);
+        writeFunctionBlock(s, QLatin1String("Slots"), slotList);
+        writeFunctionBlock(s, QLatin1String("Signals"), signalList);
+        writeFunctionBlock(s, QLatin1String("Static functions"), staticFunctionList);
     }
 }
 
@@ -1139,7 +1157,7 @@ void QtDocGenerator::writeFunctionBlock(QTextStream& s, const QString& title, QS
 {
     if (functions.size() > 0) {
         s << title << endl
-          << QString('^').repeated(title.size()) << endl;
+          << QString(title.size(), QLatin1Char('^')) << endl;
 
         qSort(functions);
 
@@ -1154,10 +1172,10 @@ void QtDocGenerator::writeFunctionBlock(QTextStream& s, const QString& title, QS
 
 void QtDocGenerator::writeEnums(QTextStream& s, const AbstractMetaClass* cppClass)
 {
-    static const QString section_title(".. attribute:: ");
+    static const QString section_title = QLatin1String(".. attribute:: ");
 
     foreach (AbstractMetaEnum* en, cppClass->enums()) {
-        s << section_title << getClassTargetFullName(cppClass) << "." << en->name() << endl << endl;
+        s << section_title << getClassTargetFullName(cppClass) << '.' << en->name() << endl << endl;
         writeFormatedText(s, en->documentation(), cppClass);
 
         if (en->typeEntry() && (en->typeEntry()->version() != 0))
@@ -1168,7 +1186,7 @@ void QtDocGenerator::writeEnums(QTextStream& s, const AbstractMetaClass* cppClas
 
 void QtDocGenerator::writeFields(QTextStream& s, const AbstractMetaClass* cppClass)
 {
-    static const QString section_title(".. attribute:: ");
+    static const QString section_title = QLatin1String(".. attribute:: ");
 
     foreach (AbstractMetaField* field, cppClass->fields()) {
         s << section_title << getClassTargetFullName(cppClass) << "." << field->name() << endl << endl;
@@ -1179,8 +1197,8 @@ void QtDocGenerator::writeFields(QTextStream& s, const AbstractMetaClass* cppCla
 
 void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* cppClass)
 {
-    static const QString sectionTitle = ".. class:: ";
-    static const QString sectionTitleSpace = QString(sectionTitle.size(), ' ');
+    static const QString sectionTitle = QLatin1String(".. class:: ");
+    static const QString sectionTitleSpace = QString(sectionTitle.size(), QLatin1Char(' '));
 
     AbstractMetaFunctionList lst = cppClass->queryFunctions(AbstractMetaClass::Constructors | AbstractMetaClass::Visible);
 
@@ -1232,33 +1250,35 @@ QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* cppClass, cons
 
         bool thisIsoptional = !arg->defaultValueExpression().isEmpty();
         if (optArgs || thisIsoptional) {
-            ret += '[';
+            ret += QLatin1Char('[');
             optArgs++;
         }
 
         if (arg->argumentIndex() > 0)
-            ret += ", ";
+            ret += QLatin1String(", ");
 
         ret += arg->name();
 
         if (thisIsoptional) {
             QString defValue = arg->defaultValueExpression();
-            if (defValue == "QString()") {
-                defValue = "\"\"";
-            } else if (defValue == "QStringList()" || defValue.startsWith("QVector") || defValue.startsWith("QList")) {
-                defValue = "list()";
-            } else if (defValue == "QVariant()") {
-                defValue = "None";
+            if (defValue == QLatin1String("QString()")) {
+                defValue = QLatin1String("\"\"");
+            } else if (defValue == QLatin1String("QStringList()")
+                       || defValue.startsWith(QLatin1String("QVector"))
+                       || defValue.startsWith(QLatin1String("QList"))) {
+                defValue = QLatin1String("list()");
+            } else if (defValue == QLatin1String("QVariant()")) {
+                defValue = QLatin1String("None");
             } else {
-                defValue.replace("::", ".");
-                if (defValue == "0" && (arg->type()->isQObject() || arg->type()->isObject()))
-                    defValue = "None";
+                defValue.replace(QLatin1String("::"), QLatin1String("."));
+                if (defValue == QLatin1String("0") && (arg->type()->isQObject() || arg->type()->isObject()))
+                    defValue = QLatin1String("None");
             }
-            ret += "=" + defValue;
+            ret += QLatin1Char('=') + defValue;
         }
     }
 
-    ret += QString(']').repeated(optArgs);
+    ret += QString(optArgs, QLatin1Char(']'));
     return ret;
 }
 
@@ -1269,10 +1289,10 @@ void QtDocGenerator::writeDocSnips(QTextStream &s,
 {
     Indentation indentation(INDENT);
     QStringList invalidStrings;
-    const static QString startMarkup("[sphinx-begin]");
-    const static QString endMarkup("[sphinx-end]");
+    const static QString startMarkup = QLatin1String("[sphinx-begin]");
+    const static QString endMarkup = QLatin1String("[sphinx-end]");
 
-    invalidStrings << "*" << "//" << "/*" << "*/";
+    invalidStrings << QLatin1String("*") << QLatin1String("//") << QLatin1String("/*") << QLatin1String("*/");
 
     foreach (CodeSnip snip, codeSnips) {
         if ((snip.position != position) ||
@@ -1288,7 +1308,7 @@ void QtDocGenerator::writeDocSnips(QTextStream &s,
                 break;
 
             QString codeBlock = code.mid(startBlock, endBlock - startBlock);
-            QStringList rows = codeBlock.split("\n");
+            QStringList rows = codeBlock.split(QLatin1Char('\n'));
             int currenRow = 0;
             int offset = 0;
 
@@ -1307,9 +1327,9 @@ void QtDocGenerator::writeDocSnips(QTextStream &s,
                 if (currenRow == 0) {
                     //find offset
                     for (int i=0, i_max = row.size(); i < i_max; i++) {
-                        if (row[i] == ' ')
+                        if (row[i] == QLatin1Char(' '))
                             offset++;
-                        else if (row[i] == '\n')
+                        else if (row[i] == QLatin1Char('\n'))
                             offset = 0;
                         else
                             break;
@@ -1375,9 +1395,9 @@ void QtDocGenerator::writeFunctionSignature(QTextStream& s, const AbstractMetaCl
 {
     QString className;
     if (!func->isConstructor())
-        className =  getClassTargetFullName(cppClass) + '.';
+        className =  getClassTargetFullName(cppClass) + QLatin1Char('.');
     else if (func->implementingClass() && func->implementingClass()->enclosingClass())
-        className =  getClassTargetFullName(func->implementingClass()->enclosingClass()) + '.';
+        className =  getClassTargetFullName(func->implementingClass()->enclosingClass()) + QLatin1Char('.');
 
     QString funcName = getFuncName(func);
     if (!funcName.startsWith(className))
@@ -1389,41 +1409,41 @@ void QtDocGenerator::writeFunctionSignature(QTextStream& s, const AbstractMetaCl
 QString QtDocGenerator::translateToPythonType(const AbstractMetaType* type, const AbstractMetaClass* cppClass)
 {
     QString strType;
-    if (type->name() == "QString") {
-        strType = "unicode";
-    } else if (type->name() == "QVariant") {
-        strType = "object";
-    } else if (type->name() == "QStringList") {
-        strType = "list of strings";
-    } else if (type->isConstant() && type->name() == "char" && type->indirections() == 1) {
-        strType = "str";
-    } else if (type->name().startsWith("unsigned short")) {
-        strType = "int";
-    } else if (type->name().startsWith("unsigned ")) { // uint and ulong
-        strType = "long";
+    if (type->name() == QLatin1String("QString")) {
+        strType = QLatin1String("unicode");
+    } else if (type->name() == QLatin1String("QVariant")) {
+        strType = QLatin1String("object");
+    } else if (type->name() == QLatin1String("QStringList")) {
+        strType = QLatin1String("list of strings");
+    } else if (type->isConstant() && type->name() == QLatin1String("char") && type->indirections() == 1) {
+        strType = QLatin1String("str");
+    } else if (type->name().startsWith(QLatin1String("unsigned short"))) {
+        strType = QLatin1String("int");
+    } else if (type->name().startsWith(QLatin1String("unsigned "))) { // uint and ulong
+        strType = QLatin1String("long");
     } else if (type->isContainer()) {
         QString strType = translateType(type, cppClass, Options(ExcludeConst) | ExcludeReference);
-        strType.remove("*");
-        strType.remove(">");
-        strType.remove("<");
-        strType.replace("::", ".");
-        if (strType.contains("QList") || strType.contains("QVector")) {
-            strType.replace("QList", "list of ");
-            strType.replace("QVector", "list of ");
-        } else if (strType.contains("QHash") || strType.contains("QMap")) {
-            strType.remove("QHash");
-            strType.remove("QMap");
-            QStringList types = strType.split(",");
-            strType = QString("Dictionary with keys of type %1 and values of type %2.")
-            .arg(types[0]).arg(types[1]);
+        strType.remove(QLatin1Char('*'));
+        strType.remove(QLatin1Char('>'));
+        strType.remove(QLatin1Char('<'));
+        strType.replace(QLatin1String("::"), QLatin1String("."));
+        if (strType.contains(QLatin1String("QList")) || strType.contains(QLatin1String("QVector"))) {
+            strType.replace(QLatin1String("QList"), QLatin1String("list of "));
+            strType.replace(QLatin1String("QVector"), QLatin1String("list of "));
+        } else if (strType.contains(QLatin1String("QHash")) || strType.contains(QLatin1String("QMap"))) {
+            strType.remove(QLatin1String("QHash"));
+            strType.remove(QLatin1String("QMap"));
+            QStringList types = strType.split(QLatin1Char(','));
+            strType = QString::fromLatin1("Dictionary with keys of type %1 and values of type %2.")
+                                         .arg(types[0], types[1]);
         }
     } else {
         QString refTag;
         if (type->isEnum())
-            refTag = "attr";
+            refTag = QLatin1String("attr");
         else
-            refTag = "class";
-        strType = ':' + refTag + ":`" + type->fullName() + '`';
+            refTag = QLatin1String("class");
+        strType = QLatin1Char(':') + refTag + QLatin1String(":`") + type->fullName() + QLatin1Char('`');
     }
     return strType;
 }
@@ -1490,7 +1510,7 @@ static void writeFancyToc(QTextStream& s, const QStringList& items, int cols = 4
 {
     typedef QMap<QChar, QStringList> TocMap;
     TocMap tocMap;
-    QChar Q('Q');
+    QChar Q = QLatin1Char('Q');
     QChar idx;
     foreach (QString item, items) {
         if (item.isEmpty())
@@ -1551,8 +1571,10 @@ bool QtDocGenerator::finishGeneration()
 
     QMap<QString, QStringList>::iterator it = m_packages.begin();
     for (; it != m_packages.end(); ++it) {
-        QString outputDir = outputDirectory() + '/' + QString(it.key()).replace(".", "/");
-        FileOut output(outputDir + "/index.rst");
+        QString key = it.key();
+        key.replace(QLatin1Char('.'), QLatin1Char('/'));
+        QString outputDir = outputDirectory() + QLatin1Char('/') + key;
+        FileOut output(outputDir + QLatin1String("/index.rst"));
         QTextStream& s = output.stream;
 
         s << ".. module:: " << it.key() << endl << endl;
@@ -1567,17 +1589,18 @@ bool QtDocGenerator::finishGeneration()
         // Search for extra-sections
         if (!m_extraSectionDir.isEmpty()) {
             QDir extraSectionDir(m_extraSectionDir);
-            QStringList fileList = extraSectionDir.entryList(QStringList() << (it.key() + "?*.rst"), QDir::Files);
+            QStringList fileList = extraSectionDir.entryList(QStringList() << (it.key() + QLatin1String("?*.rst")), QDir::Files);
             QStringList::iterator it2 = fileList.begin();
             for (; it2 != fileList.end(); ++it2) {
                 QString origFileName(*it2);
                 it2->remove(0, it.key().count() + 1);
-                QString newFilePath = outputDir + '/' + *it2;
+                QString newFilePath = outputDir + QLatin1Char('/') + *it2;
                 if (QFile::exists(newFilePath))
                     QFile::remove(newFilePath);
-                if (!QFile::copy(m_extraSectionDir + '/' + origFileName, newFilePath)) {
-                    ReportHandler::warning("Error copying extra doc " + (m_extraSectionDir + '/' + origFileName)
-                                           + " to " + newFilePath);
+                if (!QFile::copy(m_extraSectionDir + QLatin1Char('/') + origFileName, newFilePath)) {
+                    qCDebug(lcShiboken).noquote().nospace() << "Error copying extra doc "
+                        << QDir::toNativeSeparators(m_extraSectionDir + QLatin1Char('/') + origFileName)
+                        << " to " << QDir::toNativeSeparators(newFilePath);
                 }
             }
             it.value().append(fileList);
@@ -1600,7 +1623,7 @@ bool QtDocGenerator::finishGeneration()
         s << "--------------------" << endl << endl;
 
         // module doc is always wrong and C++istic, so go straight to the extra directory!
-        QFile moduleDoc(m_extraSectionDir + '/' + it.key() + ".rst");
+        QFile moduleDoc(m_extraSectionDir + QLatin1Char('/') + it.key() + QLatin1String(".rst"));
         if (moduleDoc.open(QIODevice::ReadOnly | QIODevice::Text)) {
             s << moduleDoc.readAll();
             moduleDoc.close();
@@ -1608,7 +1631,9 @@ bool QtDocGenerator::finishGeneration()
             // try the normal way
             Documentation moduleDoc = m_docParser->retrieveModuleDocumentation(it.key());
             if (moduleDoc.format() == Documentation::Native) {
-                QtXmlToSphinx x(this, moduleDoc.value(), QString(it.key()).remove(0, it.key().lastIndexOf('.') + 1));
+                QString context = it.key();
+                context.remove(0, context.lastIndexOf(QLatin1Char('.')) + 1);
+                QtXmlToSphinx x(this, moduleDoc.value(), context);
                 s << x;
             } else {
                 s << moduleDoc.value();
@@ -1620,22 +1645,24 @@ bool QtDocGenerator::finishGeneration()
 
 bool QtDocGenerator::doSetup(const QMap<QString, QString>& args)
 {
-    m_libSourceDir = args.value("library-source-dir");
-    m_docDataDir = args.value("documentation-data-dir");
+    m_libSourceDir = args.value(QLatin1String("library-source-dir"));
+    m_docDataDir = args.value(QLatin1String("documentation-data-dir"));
 #ifdef __WIN32__
-#   define PATH_SEP ";"
+#   define PATH_SEP ';'
 #else
-#   define PATH_SEP ":"
+#   define PATH_SEP ':'
 #endif
-    m_codeSnippetDirs = args.value("documentation-code-snippets-dir", m_libSourceDir).split(PATH_SEP);
-    m_extraSectionDir = args.value("documentation-extra-sections-dir");
+    m_codeSnippetDirs = args.value(QLatin1String("documentation-code-snippets-dir"), m_libSourceDir).split(QLatin1Char(PATH_SEP));
+    m_extraSectionDir = args.value(QLatin1String("documentation-extra-sections-dir"));
 
-    m_docParser = args.value("doc-parser") == "doxygen" ? reinterpret_cast<DocParser*>(new DoxygenParser) : reinterpret_cast<DocParser*>(new QtDocParser);
-    ReportHandler::warning("doc-parser: " + args.value("doc-parser"));
+    m_docParser = args.value(QLatin1String("doc-parser")) == QLatin1String("doxygen")
+        ? static_cast<DocParser*>(new DoxygenParser)
+        : static_cast<DocParser*>(new QtDocParser);
+    qCDebug(lcShiboken).noquote().nospace() << "doc-parser: " << args.value(QLatin1String("doc-parser"));
 
     if (m_libSourceDir.isEmpty() || m_docDataDir.isEmpty()) {
-        ReportHandler::warning("Documentation data dir and/or Qt source dir not informed, "
-                               "documentation will not be extracted from Qt sources.");
+        qCWarning(lcShiboken) << "Documentation data dir and/or Qt source dir not informed, "
+                                 "documentation will not be extracted from Qt sources.";
         return false;
     } else {
         m_docParser->setDocumentationDataDirectory(m_docDataDir);
@@ -1648,11 +1675,16 @@ bool QtDocGenerator::doSetup(const QMap<QString, QString>& args)
 QMap<QString, QString> QtDocGenerator::options() const
 {
     QMap<QString, QString> options;
-    options.insert("doc-parser", "The documentation parser used to interpret the documentaion input files (qdoc3|doxygen)");
-    options.insert("library-source-dir", "Directory where library source code is located");
-    options.insert("documentation-data-dir", "Directory with XML files generated by documentation tool (qdoc3 or Doxygen)");
-    options.insert("documentation-code-snippets-dir", "Directory used to search code snippets used by the documentation");
-    options.insert("documentation-extra-sections-dir", "Directory used to search for extra documentation sections");
+    options.insert(QLatin1String("doc-parser"),
+                   QLatin1String("The documentation parser used to interpret the documentation input files (qdoc3|doxygen)"));
+    options.insert(QLatin1String("library-source-dir"),
+                   QLatin1String("Directory where library source code is located"));
+    options.insert(QLatin1String("documentation-data-dir"),
+                   QLatin1String("Directory with XML files generated by documentation tool (qdoc3 or Doxygen)"));
+    options.insert(QLatin1String("documentation-code-snippets-dir"),
+                   QLatin1String("Directory used to search code snippets used by the documentation"));
+    options.insert(QLatin1String("documentation-extra-sections-dir"),
+                   QLatin1String("Directory used to search for extra documentation sections"));
     return options;
 }
 
