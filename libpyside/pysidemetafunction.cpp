@@ -224,7 +224,6 @@ bool call(QObject* self, int methodIndex, PyObject* args, PyObject** retVal)
                 static SbkConverter* qVariantTypeConverter = Shiboken::Conversions::getConverter("QVariant");
                 Q_ASSERT(qVariantTypeConverter);
                 *retVal = Shiboken::Conversions::copyToPython(qVariantTypeConverter, &methValues[0]);
-                SbkDbg() << (*retVal);
             } else {
                 *retVal = Py_None;
                 Py_INCREF(*retVal);
