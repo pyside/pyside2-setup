@@ -155,7 +155,7 @@ TypeInfo TypeInfo::resolveType(CodeModelItem __item, TypeInfo const &__type, Cod
         const TypeInfo combined = TypeInfo::combine(__alias->type(), otherType);
         const CodeModelItem nextItem = __scope->model()->findItem(combined.qualifiedName(), __scope);
         if (!nextItem)
-            return otherType;
+            return combined;
         // PYSIDE-362, prevent recursion on opaque structs like
         // typedef struct xcb_connection_t xcb_connection_t;
         if (nextItem.constData() ==__item.constData()) {
