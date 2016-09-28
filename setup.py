@@ -709,7 +709,6 @@ class pyside_build(_build):
             "-G", self.make_generator,
             "-DQT_QMAKE_EXECUTABLE='%s'" % self.qtinfo.qmake_command,
             "-DBUILD_TESTS=%s" % self.build_tests,
-            "-DDISABLE_DOCSTRINGS=True",
             "-DQt5Help_DIR=%s" % self.qtinfo.docs_dir,
             "-DCMAKE_BUILD_TYPE=%s" % self.build_type,
             "-DCMAKE_INSTALL_PREFIX=%s" % self.install_dir,
