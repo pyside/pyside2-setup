@@ -423,15 +423,19 @@
             // Do not resolve types to value type
             if (valueType)
                 return 0;
-            // find in base types
-            if (type->tp_base) {
-                return QVariant_resolveMetaType(type->tp_base, typeId);
-            } else if (type->tp_bases) {
+            // Find in base types. First check tp_bases, and only after check tp_base, because
+            // tp_base does not always point to the first base class, but rather to the first
+            // that has added any python fields or slots to its object layout.
+            // See https://mail.python.org/pipermail/python-list/2009-January/520733.html
+            if (type->tp_bases) {
                 for(int i = 0; i &lt; PyTuple_GET_SIZE(type->tp_bases); ++i) {
                     const char* derivedName = QVariant_resolveMetaType((PyTypeObject*)PyTuple_GET_ITEM(type->tp_bases, i), typeId);
                     if (derivedName)
                         return derivedName;
                 }
+            }
+            else if (type->tp_base) {
+                return QVariant_resolveMetaType(type->tp_base, typeId);
             }
         }
         *typeId = 0;
