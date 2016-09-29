@@ -44,27 +44,31 @@ from PySide2.QtQuick import QQuickView
 class View(QQuickView):
     def __init__(self):
         QQuickView.__init__(self)
-        self.setSource(QUrl.fromLocalFile(adjust_filename('bug_847.qml', __file__)))
-        self.rootObject().setProperty('pythonObject', self)
+
+    called = Signal(int, int)
 
     @Slot(int, int)
     def blubb(self, x, y):
         self.called.emit(x, y)
 
-    called = Signal(int, int)
-
-
 class TestQML(UsesQApplication):
     def done(self, x, y):
         self._sucess = True
         self.app.quit()
+        print "done called"
 
     def testPythonSlot(self):
         self._sucess = False
         view = View()
+
+        # Connect first, then set the property.
         view.called.connect(self.done)
+        view.setSource(QUrl.fromLocalFile(adjust_filename('bug_847.qml', __file__)))
+        view.rootObject().setProperty('pythonObject', view)
+
         view.show()
-        QTimer.singleShot(300, QCoreApplication.instance().quit)
+        # Essentially a timeout in case method invocation fails.
+        QTimer.singleShot(2000, QCoreApplication.instance().quit)
         self.app.exec_()
         self.assertTrue(self._sucess)
 

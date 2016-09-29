@@ -37,13 +37,23 @@ from PySide2.QtNetwork import QNetworkAccessManager
 
 from helper import adjust_filename, TimedQApplication
 
-class TestQQmlNetworkFactory(TimedQApplication):
+class CustomManager(QNetworkAccessManager):
+    def createRequest(self, op, req, data = None):
+        print ">> createRequest ", self, op, req.url(), data
+        return QNetworkAccessManager.createRequest(self, op, req, data)
 
+class CustomFactory(QQmlNetworkAccessManagerFactory):
+    def create(self, parent = None):
+        return CustomManager()
+
+class TestQQmlNetworkFactory(TimedQApplication):
     def setUp(self):
         TimedQApplication.setUp(self, timeout=1000)
 
     def testQQuickNetworkFactory(self):
         view = QQuickView()
+        self.factory = CustomFactory()
+        view.engine().setNetworkAccessManagerFactory(self.factory)
 
         url = QUrl.fromLocalFile(adjust_filename('hw.qml', __file__))
 

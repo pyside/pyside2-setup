@@ -40,4 +40,9 @@ Rectangle {
          anchors.horizontalCenter: page.horizontalCenter
          font.pointSize: 24; font.bold: true
      }
+
+     Image {
+         // It's okay for this to fail.
+         source: "http://localhost/logo.png"
+     }
 }

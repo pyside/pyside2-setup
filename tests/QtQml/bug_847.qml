@@ -41,10 +41,19 @@ Rectangle {
         color: 'white'
     }
 
+    onPythonObjectChanged: {
+        if (pythonObject) {
+            // Delay execution of method invocation, so that the event loop has a chance to start,
+            // which will subsequently be stopped by the method.
+            timer.start()
+        }
+    }
+
     Timer {
-        interval: 100; running: true;
+        id: timer
+        interval: 100; running: false;
         onTriggered: {
-            if (pythonObject != undefined) {
+            if (pythonObject) {
                 pythonObject.blubb(42, 84)
             }
         }

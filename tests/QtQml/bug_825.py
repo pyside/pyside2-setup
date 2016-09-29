@@ -34,7 +34,7 @@ from PySide2.QtCore import Qt, QUrl, QTimer
 from PySide2.QtGui import QGuiApplication, QPen
 from PySide2.QtWidgets import QGraphicsItem
 from PySide2.QtQml import qmlRegisterType
-from PySide2.QtQuick import QQuickView, QQuickItem
+from PySide2.QtQuick import QQuickView, QQuickItem, QQuickPaintedItem
 
 paintCalled = False
 
@@ -44,8 +44,8 @@ class MetaA(type):
 class A(object):
     __metaclass__ = MetaA
 
-MetaB = type(QQuickItem)
-B = QQuickItem
+MetaB = type(QQuickPaintedItem)
+B = QQuickPaintedItem
 
 class MetaC(MetaA, MetaB):
     pass
@@ -54,13 +54,10 @@ class C(A, B):
     __metaclass__ = MetaC
 
 class Bug825 (C):
-
     def __init__(self, parent = None):
-        QQuickItem.__init__(self, parent)
-        # need to disable this flag to draw inside a QQuickItem
-        self.setFlag(QGraphicsItem.ItemHasNoContents, False)
+        QQuickPaintedItem.__init__(self, parent)
 
-    def paint(self, painter, options, widget):
+    def paint(self, painter):
         global paintCalled
         pen = QPen(Qt.black, 2)
         painter.setPen(pen);
@@ -80,7 +77,6 @@ class TestBug825 (unittest.TestCase):
         QTimer.singleShot(250, view.close)
         app.exec_()
         self.assertTrue(paintCalled)
-
 
 if __name__ == '__main__':
     unittest.main()

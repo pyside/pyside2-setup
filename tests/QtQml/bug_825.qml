@@ -33,6 +33,6 @@ Item {
     width: 300; height: 200
 
     Bug825 {
-
+        anchors.fill: parent
     }
 }

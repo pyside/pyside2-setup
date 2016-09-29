@@ -32,16 +32,13 @@ import unittest
 import helper
 
 from PySide2.QtCore import Property, QTimer, QUrl
-from PySide2.QtGui import QGuiApplication, QPen, QColor
+from PySide2.QtGui import QGuiApplication, QPen, QColor, QPainter
 from PySide2.QtQml import qmlRegisterType, ListProperty
-from PySide2.QtQuick import QQuickView, QQuickItem
+from PySide2.QtQuick import QQuickView, QQuickItem, QQuickPaintedItem
 
-class PieSlice (QQuickItem):
-
+class PieSlice (QQuickPaintedItem):
     def __init__(self, parent = None):
-        QQuickItem.__init__(self, parent)
-        # need to disable this flag to draw inside a QQuickItem
-        self.setFlag(QGraphicsItem.ItemHasNoContents, False)
+        QQuickPaintedItem.__init__(self, parent)
         self._color = QColor()
         self._fromAngle = 0
         self._angleSpan = 0
@@ -68,7 +65,7 @@ class PieSlice (QQuickItem):
     fromAngle = Property(int, getFromAngle, setFromAngle)
     angleSpan = Property(int, getAngleSpan, setAngleSpan)
 
-    def paint(self, painter, options, widget):
+    def paint(self, painter):
         global paintCalled
         pen = QPen(self._color, 2)
         painter.setPen(pen);
@@ -77,7 +74,6 @@ class PieSlice (QQuickItem):
         paintCalled = True
 
 class PieChart (QQuickItem):
-
     def __init__(self, parent = None):
         QQuickItem.__init__(self, parent)
         self._name = ''

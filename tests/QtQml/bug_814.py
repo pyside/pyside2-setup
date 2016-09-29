@@ -41,29 +41,31 @@ import unittest
 
 from helper import adjust_filename, TimedQApplication
 
-from PySide2.QtCore import QUrl, QAbstractListModel, QModelIndex
+from PySide2.QtCore import QUrl, QAbstractListModel, QModelIndex, Qt
 from PySide2.QtQuick import QQuickView
 
 class ListModel(QAbstractListModel):
     def __init__(self):
         QAbstractListModel.__init__(self)
-        self.setRoleNames({0: 'pysideModelData'})
 
-    def rowCount(self, parent=QModelIndex()):
+    def roleNames(self):
+        return { Qt.DisplayRole: 'pysideModelData' }
+
+    def rowCount(self, parent = QModelIndex()):
         return 3
 
     def data(self, index, role):
-        if index.isValid() and role == 0:
+        if index.isValid() and role == Qt.DisplayRole:
             return 'blubb'
         return None
 
 class TestBug814(TimedQApplication):
     def testAbstractItemModelTransferToQML(self):
         view = QQuickView()
+        model = ListModel()
+        view.rootContext().setContextProperty("pythonModel", model)
         view.setSource(QUrl.fromLocalFile(adjust_filename('bug_814.qml', __file__)))
         root = view.rootObject()
-        model = ListModel()
-        root.setProperty('model', model)
         view.show()
 
 if __name__ == '__main__':
