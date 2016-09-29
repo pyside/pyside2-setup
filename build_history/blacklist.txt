@@ -86,66 +86,6 @@
     linux2
     darwin
     win32
-[QtQml::bug_451]
-    linux2
-    darwin
-    win32
-[QtQml::bug_456]
-    linux2
-    darwin
-    win32
-[QtQml::bug_557]
-    linux2
-    darwin
-    win32
-[QtQml::bug_726]
-    linux2
-    darwin
-    win32
-[QtQml::bug_814]
-    linux2
-    darwin
-    win32
-[QtQml::bug_825]
-    linux2
-    darwin
-    win32
-[QtQml::bug_847]
-    linux2
-    darwin
-    win32
-[QtQml::bug_915]
-    linux2
-    darwin
-    win32
-[QtQml::bug_926]
-    linux2
-    darwin
-    win32
-[QtQml::bug_951]
-    linux2
-    darwin
-    win32
-[QtQml::bug_995]
-    linux2
-    darwin
-    win32
-[QtQml::bug_997]
-    linux2
-    darwin
-    win32
-[QtQml::qqmlnetwork_test]
-    linux2
-    darwin
-    win32
-[QtQml::qquickview_test]
-    linux2
-    darwin
-    win32
-[QtQml::registertype]
-    linux2
-    darwin
-    win32
 [QtScript::qscriptvalue_test]
     linux2
     darwin
