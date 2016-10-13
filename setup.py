@@ -197,6 +197,8 @@ def check_allowed_python_version():
 
 check_allowed_python_version()
 
+qtSrcDir = ''
+
 # Declare options
 OPTION_DEBUG = has_option("debug")
 OPTION_RELWITHDEBINFO = has_option('relwithdebinfo')
@@ -392,6 +394,11 @@ def prepareBuild():
     for pkg in ["pyside_package/PySide2", "pyside_package/pyside2uic"]:
         pkg_dir = os.path.join(script_dir, pkg)
         os.makedirs(pkg_dir)
+    # locate Qt sources for the documentation
+    qmakeOutput = run_process_output([OPTION_QMAKE, '-query', 'QT_INSTALL_PREFIX/src'])
+    if qmakeOutput:
+        global qtSrcDir
+        qtSrcDir = qmakeOutput[0].rstrip()
 
 class pyside_install(_install):
     def _init(self, *args, **kwargs):
@@ -756,6 +763,9 @@ class pyside_build(_build):
         cmake_cmd.append("-DPYTHON_EXECUTABLE=%s" % self.py_executable)
         cmake_cmd.append("-DPYTHON_INCLUDE_DIR=%s" % self.py_include_dir)
         cmake_cmd.append("-DPYTHON_LIBRARY=%s" % self.py_library)
+        # Add source location for generating documentation
+        if qtSrcDir:
+            cmake_cmd.append("-DQT_SRC_DIR=%s" % qtSrcDir)
         if self.build_type.lower() == 'debug':
             cmake_cmd.append("-DPYTHON_DEBUG_LIBRARY=%s" % self.py_library)
 
