@@ -1,7 +1,7 @@
 /****************************************************************************
 **
 ** Copyright (C) 2016 The Qt Company Ltd.
-** Copyright 2005 Harald Fernengel <harry@kdevelop.org>
+** Copyright (C) 2005 Harald Fernengel <harry@kdevelop.org>
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of PySide2.
