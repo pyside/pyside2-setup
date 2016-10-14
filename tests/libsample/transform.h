@@ -1,7 +1,7 @@
 /****************************************************************************
 **
 ** Copyright (C) 2016 The Qt Company Ltd.
-** Copyright 2013 Kitware, Inc.
+** Copyright (C) 2013 Kitware, Inc.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of PySide2.
