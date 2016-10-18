@@ -36,7 +36,7 @@
     $QT_END_LICENSE$
 -->
 <typesystem package="PySide2.QtOpenGL">
-  <load-typesystem name="typesystem_gui.xml" generate="no" />
+  <load-typesystem name="typesystem_widgets.xml" generate="no" />
 
   <primitive-type name="GLbitfield"/>
   <primitive-type name="GLboolean"/>
@@ -85,7 +85,6 @@
     </modify-function>
 
     <!-- ### Obsolete functions and ctors -->
-    <modify-function signature="generateFontDisplayLists(QFont, int)" remove="all"/>
     <modify-function signature="QGLContext(const QGLFormat&amp;, QPaintDevice*)" remove="all" />
     <!-- ### -->
   </object-type>
@@ -114,7 +113,6 @@
     <modify-function signature="setContext(QGLContext*,const QGLContext*,bool)" remove="all" />
     <!-- ### -->
     <!--- ### Obsolete functions -->
-    <modify-function signature="fontDisplayListBase(QFont, int)" remove="all"/>
     <modify-function signature="setFormat(QGLFormat)" remove="all"/>
     <!-- ### -->
   </object-type>

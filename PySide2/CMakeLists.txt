@@ -161,6 +161,11 @@ else()
 ENDIF()
 HAS_QT_MODULE(Qt5Gui_FOUND QtGui)
 HAS_QT_MODULE(Qt5Widgets_FOUND QtWidgets)
+# This module is deprecated and should be replaces by QtGui.
+# See http://doc.qt.io/qt-5/qtgui-index.html
+# Update: We support QtOpenGL now!
+# Note: The dependency is wrong: QtWidgets is needed!
+HAS_QT_MODULE(Qt5OpenGL_FOUND QtOpenGL)
 HAS_QT_MODULE(Qt5PrintSupport_FOUND QtPrintSupport)
 HAS_QT_MODULE(Qt5Svg_FOUND QtSvg)
 HAS_QT_MODULE(Qt5Sql_FOUND QtSql)
@@ -175,12 +180,6 @@ if(NOT MSVC)
 else()
     set(DISABLE_QtWebKitWidgets 1 PARENT_SCOPE)
 ENDIF()
-###
-# This module is deprecated! It should be replaces by QtGui.
-# We keep the source code until we are done with QtGui migration.
-# See http://doc.qt.io/qt-5/qtgui-index.html
-# HAS_QT_MODULE(Qt5OpenGL_FOUND QtOpenGL)
-###
 
 if(Qt5Designer_FOUND)
     HAS_QT_MODULE(Qt5UiTools_FOUND QtUiTools)

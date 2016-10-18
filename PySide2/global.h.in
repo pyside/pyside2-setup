@@ -390,6 +390,8 @@ QT_END_NAMESPACE
   #undef Q_QDOC
 #endif
 #include <QtGui/QtGui>
+#include <QtWidgets/QtWidgets>
+#include <QtOpenGL/QtOpenGL>
 #include "qpytextobject.h"  // PySide class
 #if @ENABLE_X11@
 #if @Qt5X11Extras_FOUND@
