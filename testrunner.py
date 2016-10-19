@@ -281,7 +281,7 @@ _TEST_PAT = r"""
               (                          #
                 (Passed)                 # either "Passed", None
                 |                        #
-                \*\*\*(\w+)              # or     None, "Something"
+                \*\*\*(\w+.*?)           # or     None, "Something"
               )                          #                         code
               \s+                        # some WS
               ([0-9]+\.[0-9]+)           #                         tim
