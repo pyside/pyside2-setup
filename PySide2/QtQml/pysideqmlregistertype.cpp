@@ -38,42 +38,36 @@
 ****************************************************************************/
 
 #include "pysideqmlregistertype.h"
-// Qt
-#include <QObject>
-#include <QQmlEngine>
-#include <QMutex>
+
 // shiboken
-#include <typeresolver.h>
-#include <gilstate.h>
-#include <sbkdbg.h>
+#include <shiboken.h>
+
 // pyside
 #include <pyside.h>
-#include <dynamicqmetaobject.h>
 #include <pysideproperty.h>
 
 // auto generated headers
-#include "qquickitem_wrapper.h"
 #include "pyside2_qtcore_python.h"
-#include "pyside2_qtquick_python.h"
 #include "pyside2_qtqml_python.h"
 
 #ifndef PYSIDE_MAX_QML_TYPES
-// Maximum number of different types the user can export to QML using qmlRegisterType.
-// 
-// Qt5 Note: this is a vestige of the old QtDeclarative qmlRegisterType - it might be worth
-// checking if this is still relevant to QtQml or if it's higher/lower.
+// Maximum number of different Qt QML types the user can export to QML using
+// qmlRegisterType. This limit exists because the QML engine instantiates objects
+// by calling a function with one argument (a void* pointer where the object should
+// be created), and thus does not allow us to choose which object to create. Thus
+// we create a C++ factory function for each new registered type at compile time.
 #define PYSIDE_MAX_QML_TYPES 50
 #endif
 
-// Forward declarations
-static void propListMetaCall(PySideProperty* pp, PyObject* self, QMetaObject::Call call, void** args);
+// Forward declarations.
+static void propListMetaCall(PySideProperty* pp, PyObject* self, QMetaObject::Call call,
+                             void **args);
 
-
-// All registered python types
+// All registered python types and their creation functions.
 static PyObject* pyTypes[PYSIDE_MAX_QML_TYPES];
 static void (*createFuncs[PYSIDE_MAX_QML_TYPES])(void*);
 
-// Mutex used to avoid race condition on PySide::nextQObjectMemoryAddr
+// Mutex used to avoid race condition on PySide::nextQObjectMemoryAddr.
 static QMutex nextQmlElementMutex;
 
 template<int N>
@@ -110,73 +104,85 @@ struct  ElementFactory<0> : ElementFactoryBase<0>
     }
 };
 
-int PySide::qmlRegisterType(PyObject* pyObj, const char* uri, int versionMajor, int versionMinor, const char* qmlName)
+int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
+                            int versionMinor, const char *qmlName)
 {
     using namespace Shiboken;
 
-    static PyTypeObject* qobjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
-    static PyTypeObject* qquickType = Shiboken::Conversions::getPythonTypeObject("QQuickItem*");
+    static PyTypeObject *qobjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
     assert(qobjectType);
     static int nextType = 0;
 
     if (nextType >= PYSIDE_MAX_QML_TYPES) {
-        PyErr_Format(PyExc_TypeError, "QML doesn't really like language bindings, so you can only export %d types to QML.", PYSIDE_MAX_QML_TYPES);
+        PyErr_Format(PyExc_TypeError, "You can only export %d custom QML types to QML.",
+                     PYSIDE_MAX_QML_TYPES);
         return -1;
     }
 
-    if (!PySequence_Contains(((PyTypeObject*)pyObj)->tp_mro, (PyObject*)qobjectType)) {
-        PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.", qobjectType->tp_name, ((PyTypeObject*)pyObj)->tp_name);
+    PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
+    if (!PySequence_Contains(pyObjType->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
+        PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.",
+                     qobjectType->tp_name, pyObjType->tp_name);
         return -1;
     }
 
-    bool isQuickType = PySequence_Contains(((PyTypeObject*)pyObj)->tp_mro, (PyObject*)qquickType);
-
-    QMetaObject* metaObject = reinterpret_cast<QMetaObject*>(ObjectType::getTypeUserData(reinterpret_cast<SbkObjectType*>(pyObj)));
+    QMetaObject *metaObject = reinterpret_cast<QMetaObject *>(
+                ObjectType::getTypeUserData(reinterpret_cast<SbkObjectType *>(pyObj)));
     Q_ASSERT(metaObject);
 
-    // Inc ref the type object, don't worry about dec ref them because there's no way to unregister a QML type
-    Py_INCREF(pyObj);
-
-    // All ready... now the ugly code begins... :-)
-    pyTypes[nextType] = pyObj;
-
-    // Init proxy object static meta object
     QQmlPrivate::RegisterType type;
     type.version = 0;
-    if (isQuickType) {
-        type.typeId = qMetaTypeId<QQuickItem*>();
-        type.listId = qMetaTypeId<QQmlListProperty<QQuickItem> >();
 
-        type.attachedPropertiesFunction = QQmlPrivate::attachedPropertiesFunc<QQuickItem>();
-        type.attachedPropertiesMetaObject = QQmlPrivate::attachedPropertiesMetaObject<QQuickItem>();
+    // Allow registering Qt Quick items.
+    bool registered = false;
+    QuickRegisterItemFunction quickRegisterItemFunction = getQuickRegisterItemFunction();
+    if (quickRegisterItemFunction) {
+        registered = quickRegisterItemFunction(pyObj, uri, versionMajor, versionMinor,
+                                               qmlName, &type);
+    }
 
-        type.parserStatusCast = QQmlPrivate::StaticCastSelector<QQuickItem, QQmlParserStatus>::cast();
-        type.valueSourceCast = QQmlPrivate::StaticCastSelector<QQuickItem, QQmlPropertyValueSource>::cast();
-        type.valueInterceptorCast = QQmlPrivate::StaticCastSelector<QQuickItem, QQmlPropertyValueInterceptor>::cast();
-    } else {
+    // Register as simple QObject rather than Qt Quick item.
+    if (!registered) {
+        // Incref the type object, don't worry about decref'ing it because
+        // there's no way to unregister a QML type.
+        Py_INCREF(pyObj);
+
+        pyTypes[nextType] = pyObj;
+
+        // FIXME: Fix this to assign new type ids each time.
         type.typeId = qMetaTypeId<QObject*>();
         type.listId = qMetaTypeId<QQmlListProperty<QObject> >();
         type.attachedPropertiesFunction = QQmlPrivate::attachedPropertiesFunc<QObject>();
         type.attachedPropertiesMetaObject = QQmlPrivate::attachedPropertiesMetaObject<QObject>();
 
-        type.parserStatusCast = QQmlPrivate::StaticCastSelector<QObject, QQmlParserStatus>::cast();
-        type.valueSourceCast = QQmlPrivate::StaticCastSelector<QObject, QQmlPropertyValueSource>::cast();
-        type.valueInterceptorCast = QQmlPrivate::StaticCastSelector<QObject, QQmlPropertyValueInterceptor>::cast();
-    }
-    type.objectSize = PySide::getSizeOfQObject(reinterpret_cast<SbkObjectType*>(pyObj));
-    type.create = createFuncs[nextType];
-    type.uri = uri;
-    type.versionMajor = versionMajor;
-    type.versionMinor = versionMinor;
-    type.elementName = qmlName;
-    type.metaObject = metaObject;
+        type.parserStatusCast =
+                QQmlPrivate::StaticCastSelector<QObject, QQmlParserStatus>::cast();
+        type.valueSourceCast =
+                QQmlPrivate::StaticCastSelector<QObject, QQmlPropertyValueSource>::cast();
+        type.valueInterceptorCast =
+                QQmlPrivate::StaticCastSelector<QObject, QQmlPropertyValueInterceptor>::cast();
 
-    type.extensionObjectCreate = 0;
-    type.extensionMetaObject = 0;
-    type.customParser = 0;
+        int objectSize = static_cast<int>(PySide::getSizeOfQObject(
+                                              reinterpret_cast<SbkObjectType *>(pyObj)));
+        type.objectSize = objectSize;
+        type.create = createFuncs[nextType];
+        type.uri = uri;
+        type.versionMajor = versionMajor;
+        type.versionMinor = versionMinor;
+        type.elementName = qmlName;
+        type.metaObject = metaObject;
+
+        type.extensionObjectCreate = 0;
+        type.extensionMetaObject = 0;
+        type.customParser = 0;
+        ++nextType;
+    }
 
     int qmlTypeId = QQmlPrivate::qmlregister(QQmlPrivate::TypeRegistration, &type);
-    ++nextType;
+    if (qmlTypeId == -1) {
+        PyErr_Format(PyExc_TypeError, "QML meta type registration of \"%s\" failed.",
+                     qmlName);
+    }
     return qmlTypeId;
 }
 
@@ -210,7 +216,7 @@ static int propListTpInit(PyObject* self, PyObject* args, PyObject* kwds)
         return 0;
     }
     PySide::Property::setMetaCallHandler(pySelf, &propListMetaCall);
-    PySide::Property::setTypeName(pySelf, "QQmlListProperty<QQuickItem>");
+    PySide::Property::setTypeName(pySelf, "QQmlListProperty<QObject>");
     PySide::Property::setUserData(pySelf, data);
 
     return 1;
@@ -276,13 +282,13 @@ PyTypeObject PropertyListType = {
 } // extern "C"
 
 // Implementation of QQmlListProperty<T>::AppendFunction callback
-void propListAppender(QQmlListProperty<QQuickItem>* propList, QQuickItem* item)
+void propListAppender(QQmlListProperty<QObject> *propList, QObject *item)
 {
     Shiboken::GilState state;
 
     Shiboken::AutoDecRef args(PyTuple_New(2));
     PyTuple_SET_ITEM(args, 0, Shiboken::Conversions::pointerToPython((SbkObjectType*)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], propList->object));
-    PyTuple_SET_ITEM(args, 1, Shiboken::Conversions::pointerToPython((SbkObjectType*)SbkPySide2_QtQuickTypes[SBK_QQUICKITEM_IDX], item));
+    PyTuple_SET_ITEM(args, 1, Shiboken::Conversions::pointerToPython((SbkObjectType*)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], item));
 
     QmlListProperty* data = reinterpret_cast<QmlListProperty*>(propList->data);
     Shiboken::AutoDecRef retVal(PyObject_CallObject(data->append, args));
@@ -292,7 +298,7 @@ void propListAppender(QQmlListProperty<QQuickItem>* propList, QQuickItem* item)
 }
 
 // Implementation of QQmlListProperty<T>::CountFunction callback
-int propListCount(QQmlListProperty<QQuickItem>* propList)
+int propListCount(QQmlListProperty<QObject> *propList)
 {
     Shiboken::GilState state;
 
@@ -313,7 +319,7 @@ int propListCount(QQmlListProperty<QQuickItem>* propList)
 }
 
 // Implementation of QQmlListProperty<T>::AtFunction callback
-QQuickItem* propListAt(QQmlListProperty<QQuickItem>* propList, int index)
+QObject *propListAt(QQmlListProperty<QObject> *propList, int index)
 {
     Shiboken::GilState state;
 
@@ -324,16 +330,16 @@ QQuickItem* propListAt(QQmlListProperty<QQuickItem>* propList, int index)
     QmlListProperty* data = reinterpret_cast<QmlListProperty*>(propList->data);
     Shiboken::AutoDecRef retVal(PyObject_CallObject(data->at, args));
 
-    QQuickItem* result = 0;
+    QObject *result = 0;
     if (PyErr_Occurred())
         PyErr_Print();
     else if (PyType_IsSubtype(Py_TYPE(retVal), data->type))
-        Shiboken::Conversions::pythonToCppPointer((SbkObjectType*)SbkPySide2_QtCoreTypes[SBK_QQUICKITEM_IDX], retVal, &result);
+        Shiboken::Conversions::pythonToCppPointer((SbkObjectType*)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], retVal, &result);
     return result;
 }
 
 // Implementation of QQmlListProperty<T>::ClearFunction callback
-void propListClear(QQmlListProperty<QQuickItem>* propList)
+void propListClear(QQmlListProperty<QObject> * propList)
 {
     Shiboken::GilState state;
 
@@ -356,13 +362,12 @@ static void propListMetaCall(PySideProperty* pp, PyObject* self, QMetaObject::Ca
     QmlListProperty* data = reinterpret_cast<QmlListProperty*>(PySide::Property::userData(pp));
     QObject* qobj;
     Shiboken::Conversions::pythonToCppPointer((SbkObjectType*)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], self, &qobj);
-    QQmlListProperty<QQuickItem> declProp(qobj, data, &propListAppender, &propListCount, &propListAt, &propListClear);
+    QQmlListProperty<QObject> declProp(qobj, data, &propListAppender, &propListCount, &propListAt, &propListClear);
 
     // Copy the data to the memory location requested by the meta call
     void* v = args[0];
-    *reinterpret_cast<QQmlListProperty<QQuickItem>*>(v) = declProp;
+    *reinterpret_cast<QQmlListProperty<QObject> *>(v) = declProp;
 }
-
 
 void PySide::initQmlSupport(PyObject* module)
 {
@@ -374,6 +379,4 @@ void PySide::initQmlSupport(PyObject* module)
 
     Py_INCREF((PyObject*)&PropertyListType);
     PyModule_AddObject(module, PropertyListType.tp_name, (PyObject*)&PropertyListType);
-
 }
-

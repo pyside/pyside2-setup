@@ -39,7 +39,6 @@
     <load-typesystem name="typesystem_core.xml" generate="no"/>
     <load-typesystem name="typesystem_network.xml" generate="no"/>
     <load-typesystem name="typesystem_gui.xml" generate="no"/>
-    <load-typesystem name="typesystem_quick.xml" generate="no"/>
 
     <add-function signature="qmlRegisterType(PyTypeObject, const char*, int, int, const char*)" return-type="int">
         <inject-documentation format="target" mode="append">
@@ -71,7 +70,6 @@
 
     <enum-type identified-by-value="QML_HAS_ATTACHED_PROPERTIES">
         <extra-includes>
-            <include file-name="QtQuick" location="global"/>
             <include file-name="QtQml" location="global"/>
             <!-- FIXME The include tag doesn't work on modules -->
             <include file-name="pysideqmlregistertype.h" location="local"/>
@@ -102,11 +100,11 @@
         <enum-type name="DataType" />
     </value-type> -->
     <object-type name="QQmlApplicationEngine" />
-    <!-- TODO: More private method errors
+    <!-- TODO: More private method errors-->
     <object-type name="QQmlComponent">
         <enum-type name="CompilationMode" />
         <enum-type name="Status" />
-    </object-type> -->
+    </object-type>
     <object-type name="QQmlContext" />
     <value-type name="QQmlError" />
     <!-- <object-type name="QQmlDebuggingEnabler" /> -->
@@ -123,7 +121,7 @@
     <object-type name="QQmlFileSelector" />
     <!-- TODO: Abstract class
     <value-type name="QQmlImageProviderBase">
-        <enum-type name="IncubationMode" />
+         <enum-type name="IncubationMode" />
         <enum-type name="Flag" flags="Flags" />
     </value-type> -->
     <!-- TODO: More constructor issues
@@ -136,14 +134,21 @@
         Could not find type '::T*' for use in 'toPython' conversion. Make sure to use the full C++ name, e.g. 'Namespace::Class'.
     <value-type name="QQmlListProperty" /> -->
     <value-type name="QQmlListReference" />
-    <!-- TODO: Constructor issues
-    <value-type name="QQmlParserStatus" /> -->
+    <!-- TODO: Constructor issues -->
+    <object-type name="QQmlParserStatus" />
     <value-type name="QQmlProperty">
         <enum-type name="PropertyTypeCategory" />
         <enum-type name="Type" />
     </value-type>
+    <object-type name="QQmlPropertyMap" />
     <!-- TODO: these fail too
-    <value-type name="QQmlPropertyMap" />
     <value-type name="QQmlPropertyValueSource" />
     <value-type name="QQmlScriptString" /> -->
+    <object-type name="QQmlNetworkAccessManagerFactory">
+      <modify-function signature="create(QObject*)">
+        <modify-argument index="return">
+          <define-ownership class="native" owner="c++"/>
+        </modify-argument>
+      </modify-function>
+    </object-type>
 </typesystem>

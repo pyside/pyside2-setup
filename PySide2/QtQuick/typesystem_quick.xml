@@ -37,10 +37,20 @@
 -->
 <typesystem package="PySide2.QtQuick">
     <load-typesystem name="typesystem_core.xml" generate="no"/>
+    <load-typesystem name="typesystem_network.xml" generate="no"/>
     <load-typesystem name="typesystem_gui.xml" generate="no"/>
+    <load-typesystem name="typesystem_qml.xml" generate="no"/>
 
-    <!-- TODO: Abstract
-    <object-type name="QQuickFramebufferObject" /> -->
+    <extra-includes>
+        <include file-name="pysidequickregistertype.h" location="local"/>
+    </extra-includes>
+
+    <inject-code class="target" position="end">
+    PySide::initQuickSupport(module);
+    </inject-code>
+
+    <object-type name="QQuickFramebufferObject" />
+    <object-type name="QQuickFramebufferObject::Renderer" />
 
     <!-- TODO: Abstract
     <object-type name="QQuickTextureFactory" /> -->
@@ -58,14 +68,13 @@
     <!-- private
     <object-type name="QQuickItemGrabResult" /> -->
 
-    <!-- `unimplemented pure virtual method 'paint' in 'QQuickPaintedItemWrapper'`
     <object-type name="QQuickPaintedItem">
         <enum-type name="RenderTarget" />
         <enum-type name="PerformanceHint" flags="PerformanceHints" />
-    </object-type> -->
+    </object-type>
 
-    <!-- private
-    <object-type name="QQuickRenderControl" /> -->
+    <!-- private-->
+    <object-type name="QQuickRenderControl" />
 
     <object-type name="QQuickTextDocument" />
 

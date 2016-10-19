@@ -604,7 +604,7 @@ void DynamicQMetaObject::parsePythonType(PyTypeObject* type)
                     sig += data->signatures[i];
                 sig += ')';
                 if (d.superdata->indexOfSignal(sig) == -1)
-                    addSignal(sig);
+                    addSignal(sig, "void");
             }
         } else if (PyFunction_Check(value)) { // Register slots
             if (PyObject_HasAttr(value, slotAttrName)) {

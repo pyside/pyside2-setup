@@ -367,5 +367,19 @@ PyObject* getWrapperForQObject(QObject* cppSelf, SbkObjectType* sbk_type)
     return pyOut;
 }
 
+#ifdef PYSIDE_QML_SUPPORT
+static QuickRegisterItemFunction quickRegisterItem;
+
+QuickRegisterItemFunction getQuickRegisterItemFunction()
+{
+    return quickRegisterItem;
+}
+
+void setQuickRegisterItemFunction(QuickRegisterItemFunction function)
+{
+    quickRegisterItem = function;
+}
+#endif // PYSIDE_QML_SUPPORT
+
 } //namespace PySide
 

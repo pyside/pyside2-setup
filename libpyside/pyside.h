@@ -42,6 +42,11 @@
 
 #include <sbkpython.h>
 #include <pysidemacros.h>
+
+#ifdef PYSIDE_QML_SUPPORT
+#  include <qqml.h>
+#endif
+
 #include <QMetaType>
 #include <QHash>
 #include <QList>
@@ -135,6 +140,15 @@ PYSIDE_API void* nextQObjectMemoryAddr();
 PYSIDE_API void setNextQObjectMemoryAddr(void* addr);
 
 PYSIDE_API PyObject* getWrapperForQObject(QObject* cppSelf, SbkObjectType* sbk_type);
+
+#ifdef PYSIDE_QML_SUPPORT
+// Used by QtQuick module to notify QtQml that custom QtQuick items can be registered.
+typedef bool (*QuickRegisterItemFunction)(PyObject *pyObj, const char *uri, int versionMajor,
+                                 int versionMinor, const char *qmlName,
+                                 QQmlPrivate::RegisterType *);
+PYSIDE_API QuickRegisterItemFunction getQuickRegisterItemFunction();
+PYSIDE_API void setQuickRegisterItemFunction(QuickRegisterItemFunction function);
+#endif // PYSIDE_QML_SUPPORT
 
 } //namespace PySide
 
