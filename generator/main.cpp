@@ -436,7 +436,8 @@ int main(int argc, char *argv[])
             QStringList parts = fullVersion.split(QLatin1Char(','));
             QString package;
             QString version;
-            package = parts.count() == 1 ? QLatin1String("*") : parts.constFirst();
+            // avoid constFirst to stay Qt 5.5 compatible
+            package = parts.count() == 1 ? QLatin1String("*") : parts.first();
             version = parts.last();
             extractor.setApiVersion(package, version.toUtf8());
         }

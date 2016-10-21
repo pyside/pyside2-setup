@@ -218,7 +218,8 @@ QString QtXmlToSphinx::expandFunction(const QString& function)
 
 QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName)
 {
-    QString currentClass = m_context.split(QLatin1Char('.')).constLast();
+    // avoid constLast to stay Qt 5.5 compatible
+    QString currentClass = m_context.split(QLatin1Char('.')).last();
 
     const AbstractMetaClass* metaClass = 0;
     foreach (const AbstractMetaClass* cls, m_generator->classes()) {
@@ -670,7 +671,8 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
     } else if (token == QXmlStreamReader::Characters) {
         QString linktext = reader.text().toString();
         linktext.replace(QLatin1String("::"), QLatin1String("."));
-        QString item = l_linkref.split(QLatin1Char('.')).constLast();
+        // avoid constLast to stay Qt 5.5 compatible
+        QString item = l_linkref.split(QLatin1Char('.')).last();
         if (l_linkref == linktext
             || (l_linkref + QLatin1String("()")) == linktext
             || item == linktext

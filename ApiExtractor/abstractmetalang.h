@@ -331,7 +331,8 @@ public:
     QString name() const
     {
         if (m_name.isNull())
-            m_name = m_typeEntry->targetLangName().split(QLatin1String("::")).constLast();
+            // avoid constLast to stay Qt 5.5 compatible
+            m_name = m_typeEntry->targetLangName().split(QLatin1String("::")).last();
         return m_name;
     }
     QString fullName() const

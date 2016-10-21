@@ -733,7 +733,8 @@ bool Handler::startElement(const QString &, const QString &n,
                 if (QStringList(lst.mid(0, lst.size() - 1)).join(QLatin1String("::")) != m_currentEnum->targetLangQualifier()) {
                     qCWarning(lcShiboken).noquote().nospace()
                         << QStringLiteral("enum %1 and flags %2 differ in qualifiers")
-                                          .arg(m_currentEnum->targetLangQualifier(), lst.constFirst());
+                                          // avoid constFirst to stay Qt 5.5 compatible
+                                          .arg(m_currentEnum->targetLangQualifier(), lst.first());
                 }
 
                 ftype->setFlagsName(lst.last());

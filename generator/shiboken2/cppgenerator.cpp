@@ -3421,7 +3421,8 @@ void CppGenerator::writeClassDefinition(QTextStream& s, const AbstractMetaClass*
         else
             deallocClassName = cppClassName;
         tp_dealloc = QLatin1String("&SbkDeallocWrapper");
-        tp_init = (onlyPrivCtor || ctors.isEmpty()) ? QLatin1String("0") : cpythonFunctionName(ctors.constFirst());
+        // avoid constFirst to stay Qt 5.5 compatible
+        tp_init = (onlyPrivCtor || ctors.isEmpty()) ? QLatin1String("0") : cpythonFunctionName(ctors.first());
     }
 
     QString tp_getattro(QLatin1Char('0'));
