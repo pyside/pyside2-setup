@@ -1304,6 +1304,17 @@ void AbstractMetaBuilder::traverseNamespaceMembers(NamespaceModelItem item)
     m_currentClass = oldCurrentClass;
 }
 
+static inline QString fieldSignatureWithType(VariableModelItem field)
+{
+    return field->name() + QStringLiteral(" -> ") + field->type().toString();
+}
+
+static inline QString qualifiedFieldSignatureWithType(const QString &className,
+                                                      VariableModelItem field)
+{
+    return className + colonColon() + fieldSignatureWithType(field);
+}
+
 AbstractMetaField* AbstractMetaBuilder::traverseField(VariableModelItem field, const AbstractMetaClass *cls)
 {
     QString fieldName = field->name();
@@ -1317,7 +1328,8 @@ AbstractMetaField* AbstractMetaBuilder::traverseField(VariableModelItem field, c
         return 0;
 
     if (TypeDatabase::instance()->isFieldRejected(className, fieldName)) {
-        m_rejectedFields.insert(className + colonColon() + fieldName, GenerationDisabled);
+        m_rejectedFields.insert(qualifiedFieldSignatureWithType(className, field),
+                                GenerationDisabled);
         return 0;
     }
 
@@ -1876,19 +1888,35 @@ static QString functionSignature(FunctionModelItem functionItem)
     return functionItem->name() + QLatin1Char('(') + args.join(QLatin1Char(',')) + QLatin1Char(')');
 }
 
+static inline QString functionSignatureWithReturnType(FunctionModelItem functionItem)
+{
+    return functionSignature(functionItem)
+            + QStringLiteral(" -> ") + functionItem->type().toString();
+}
+
+static inline QString qualifiedFunctionSignatureWithType(const QString &className,
+                                                  FunctionModelItem functionItem)
+{
+    return className + colonColon() + functionSignatureWithReturnType(functionItem);
+}
+
 AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem functionItem)
 {
     QString functionName = functionItem->name();
     QString className;
+    QString rejectedFunctionSignature;
     if (m_currentClass)
         className = m_currentClass->typeEntry()->qualifiedCppName();
 
     if (TypeDatabase::instance()->isFunctionRejected(className, functionName)) {
-        m_rejectedFunctions.insert(className + colonColon() + functionName, GenerationDisabled);
+        rejectedFunctionSignature = qualifiedFunctionSignatureWithType(className, functionItem);
+        m_rejectedFunctions.insert(rejectedFunctionSignature, GenerationDisabled);
         return 0;
     }
-    else if (TypeDatabase::instance()->isFunctionRejected(className, functionSignature(functionItem))) {
-        m_rejectedFunctions.insert(className + colonColon() + functionName, GenerationDisabled);
+    else if (TypeDatabase::instance()->isFunctionRejected(className,
+                                                          functionSignature(functionItem))) {
+        rejectedFunctionSignature = qualifiedFunctionSignatureWithType(className, functionItem);
+        m_rejectedFunctions.insert(rejectedFunctionSignature, GenerationDisabled);
         return 0;
     }
 
@@ -1955,9 +1983,10 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
             Q_ASSERT(type == 0);
             qCWarning(lcShiboken).noquote().nospace()
                 << QStringLiteral("skipping function '%1::%2', unmatched return type '%3'")
-                                  .arg(className, functionItem->name(), functionItem->type().toString());
-            m_rejectedFunctions[className + colonColon() + functionName] =
-                UnmatchedReturnType;
+                                  .arg(className, functionItem->name(),
+                                       functionItem->type().toString());
+            rejectedFunctionSignature = qualifiedFunctionSignatureWithType(className, functionItem);
+            m_rejectedFunctions[rejectedFunctionSignature] = UnmatchedReturnType;
             metaFunction->setInvalid(true);
             return metaFunction;
         }
@@ -1991,8 +2020,8 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
             qCWarning(lcShiboken).noquote().nospace()
                 << QStringLiteral("skipping function '%1::%2', unmatched parameter type '%3'")
                                   .arg(className, functionItem->name(), arg->type().toString());
-            m_rejectedFunctions[className + colonColon() + functionName] =
-                UnmatchedArgumentType;
+            rejectedFunctionSignature = qualifiedFunctionSignatureWithType(className, functionItem);
+            m_rejectedFunctions[rejectedFunctionSignature] = UnmatchedArgumentType;
             metaFunction->setInvalid(true);
             return metaFunction;
         }
