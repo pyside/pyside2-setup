@@ -242,6 +242,21 @@ int Generator::numGenerated() const
     return m_d->numGenerated;
 }
 
+inline void touchFile(const QString &filePath)
+{
+    QFile toucher(filePath);
+    qint64 size = toucher.size();
+    if (!toucher.open(QIODevice::ReadWrite)) {
+        qCWarning(lcShiboken).noquote().nospace()
+                << QStringLiteral("Failed to touch file '%1'")
+                   .arg(QDir::toNativeSeparators(filePath));
+        return;
+    }
+    toucher.resize(size+1);
+    toucher.resize(size);
+    toucher.close();
+}
+
 bool Generator::generate()
 {
     foreach (AbstractMetaClass *cls, m_d->apiextractor->classes()) {
@@ -254,11 +269,24 @@ bool Generator::generate()
         if (ReportHandler::isDebug(ReportHandler::SparseDebug))
             qCDebug(lcShiboken) << "generating: " << fileName;
 
-        FileOut fileOut(outputDirectory() + QLatin1Char('/') + subDirectoryForClass(cls) + QLatin1Char('/') + fileName);
+        QString filePath = outputDirectory() + QLatin1Char('/') + subDirectoryForClass(cls)
+                + QLatin1Char('/') + fileName;
+        FileOut fileOut(filePath);
         generateClass(fileOut.stream, cls);
 
-        if (fileOut.done() == FileOut::Failure)
+        FileOut::State state = fileOut.done();
+        switch (state) {
+        case FileOut::Failure:
             return false;
+        case FileOut::Unchanged:
+            // Even if contents is unchanged, the last file modification time should be updated,
+            // so that the build system can rely on the fact the generated file is up-to-date.
+            touchFile(filePath);
+            break;
+        case FileOut::Success:
+            break;
+        }
+
         ++m_d->numGenerated;
     }
     return finishGeneration();
