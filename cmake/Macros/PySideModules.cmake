@@ -3,6 +3,10 @@ macro(make_path varname)
    string(REPLACE ";" "${PATH_SEP}" ${varname} "${ARGN}")
 endmacro()
 
+macro(unmake_path varname)
+   string(REPLACE "${PATH_SEP}" ";" ${varname} "${ARGN}")
+endmacro()
+
 macro(create_pyside_module
       module_name
       module_include_dir
@@ -45,6 +49,24 @@ macro(create_pyside_module
         set(_python_postprocessor "")
     endif()
 
+    # Create typesystem XML dependencies list, so that whenever they change, shiboken is invoked
+    # automatically.
+    # First add the main file.
+    set(total_type_system_files ${typesystem_path})
+
+    # Transform the path separator list back into a cmake list (so from a:b:c to a;b;c)
+    unmake_path(list_of_paths ${${module_typesystem_path}})
+
+    # Collect all XML files, in each given path, and append them to the final total list.
+    foreach(type_system_files_path ${list_of_paths})
+        set(glob_expression "${type_system_files_path}/*.xml")
+        file(GLOB type_system_files ${glob_expression})
+        set(total_type_system_files ${total_type_system_files} ${type_system_files})
+    endforeach(type_system_files_path)
+
+    # Remove any possible duplicates.
+    list(REMOVE_DUPLICATES total_type_system_files)
+
     add_custom_command(OUTPUT ${${module_sources}}
                         COMMAND "${SHIBOKEN_BINARY}" ${GENERATOR_EXTRA_FLAGS}
                         ${pyside2_BINARY_DIR}/pyside2_global.h
@@ -56,6 +78,7 @@ macro(create_pyside_module
                         --api-version=${SUPPORTED_QT_VERSION}
                         --drop-type-entries="${dropped_entries}"
                         COMMAND ${_python_postprocessor}
+                        DEPENDS ${total_type_system_files}
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                         COMMENT "Running generator for ${module_name}...")
 
