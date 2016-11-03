@@ -35,8 +35,6 @@
 
 #include "codemodel.h"
 
-class QString;
-class QStringList;
 struct TypeSpecifierAST;
 struct DeclaratorAST;
 class TokenStream;

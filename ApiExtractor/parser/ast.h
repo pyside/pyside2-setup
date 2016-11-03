@@ -34,7 +34,7 @@
 #include "smallobject.h"
 #include "list.h"
 
-class QString;
+#include <QString>
 
 #define DECLARE_AST_NODE(k) \
     enum { __node_kind = Kind_##k };

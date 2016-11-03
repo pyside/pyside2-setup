@@ -32,7 +32,9 @@
 #include <QString>
 #include <QList>
 
+QT_BEGIN_NAMESPACE
 class QTextStream;
+QT_END_NAMESPACE
 
 class Include
 {

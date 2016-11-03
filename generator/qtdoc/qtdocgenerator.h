@@ -39,7 +39,9 @@
 class QtDocParser;
 class AbstractMetaFunction;
 class AbstractMetaClass;
+QT_BEGIN_NAMESPACE
 class QXmlStreamReader;
+QT_END_NAMESPACE
 class QtDocGenerator;
 
 class QtXmlToSphinx

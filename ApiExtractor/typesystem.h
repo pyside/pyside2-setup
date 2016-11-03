@@ -43,7 +43,9 @@
 class Indentor;
 
 class AbstractMetaType;
+QT_BEGIN_NAMESPACE
 class QTextStream;
+QT_END_NAMESPACE
 
 class EnumTypeEntry;
 class FlagsTypeEntry;

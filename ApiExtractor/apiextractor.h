@@ -35,7 +35,9 @@
 #include <QStringList>
 
 class AbstractMetaBuilder;
+QT_BEGIN_NAMESPACE
 class QIODevice;
+QT_END_NAMESPACE
 
 class ApiExtractor
 {

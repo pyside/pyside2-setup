@@ -33,9 +33,11 @@
 
 #include "abstractmetalang.h"
 
+QT_BEGIN_NAMESPACE
 class QDomDocument;
 class QDomNode;
 class QXmlQuery;
+QT_END_NAMESPACE
 
 class DocParser
 {

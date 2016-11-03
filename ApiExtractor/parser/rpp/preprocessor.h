@@ -34,7 +34,6 @@
 #include <QtCore/qstring.h>
 #include <QtCore/qstringlist.h>
 
-class QByteArray;
 class PreprocessorPrivate;
 
 class Preprocessor

@@ -37,7 +37,9 @@
 
 class ApiExtractor;
 class AbstractMetaBuilder;
+QT_BEGIN_NAMESPACE
 class QFile;
+QT_END_NAMESPACE
 
 QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor);
 void verifyDirectoryFor(const QFile &file);
