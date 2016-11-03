@@ -35,9 +35,11 @@
 #endif
 #include "pysidemacros.h"
 
+QT_BEGIN_NAMESPACE
 class QWidget;
 class QAbstractListModel;
 class QAbstractItemDelegate;
+QT_END_NAMESPACE
 
 class PYSIDE_API TestView : public QObject
 {

@@ -45,9 +45,6 @@
 #include <Qt>
 #include <QStringList>
 #include <QMetaMethod>
-#include <QMetaType>
-
-class QObject;
 
 namespace PySide
 {

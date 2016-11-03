@@ -44,7 +44,9 @@
 #include <QList>
 #include <QByteArray>
 
+QT_BEGIN_NAMESPACE
 class QObject;
+QT_END_NAMESPACE
 
 namespace PySide { namespace MetaFunction {
 
