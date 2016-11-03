@@ -67,7 +67,7 @@ For development purposes the following options might be of use, when using "setu
     --ignore-git will skip the fetching and checkout steps for supermodule and all submodules.
 
 REQUIREMENTS:
-- Python: 2.6, 2.7, 3.2, 3.3 and 3.4 is supported
+- Python: 2.6, 2.7, 3.3, 3.4 and 3.5 is supported
 - Cmake: Specify the path to cmake with --cmake option or add cmake to the system path.
 - Qt: 4.6, 4.7 and 4.8 is supported. Specify the path to qmake with --qmake option or add qmake to the system path.
 
@@ -777,7 +777,7 @@ class pyside_build(_build):
         if extension.lower() == "shiboken2":
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
             if sys.version_info[0] > 2:
-                cmake_cmd.append("-DUSE_PYTHON_VERSION=3.4")
+                cmake_cmd.append("-DUSE_PYTHON_VERSION=3.3")
 
         if sys.platform == 'darwin':
             # Shiboken supports specifying multiple include paths separated by a colon on *nix
@@ -1206,7 +1206,6 @@ setup(
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
