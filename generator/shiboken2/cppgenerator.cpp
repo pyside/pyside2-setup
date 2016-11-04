@@ -140,10 +140,11 @@ QString CppGenerator::fileNameForClass(const AbstractMetaClass *metaClass) const
 }
 
 QList<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(const AbstractMetaClass* metaClass,
-                                                                             uint query)
+                                                                             uint queryIn)
 {
     // ( func_name, num_args ) => func_list
     QMap<QPair<QString, int >, AbstractMetaFunctionList> results;
+    const AbstractMetaClass::OperatorQueryOptions query(queryIn);
     foreach (AbstractMetaFunction* func, metaClass->operatorOverloads(query)) {
         if (func->isModifiedRemoved() || func->name() == QLatin1String("operator[]") || func->name() == QLatin1String("operator->"))
             continue;

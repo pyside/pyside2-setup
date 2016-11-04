@@ -303,8 +303,7 @@ QString AbstractMetaFunction::marshalledName() const
 
 bool AbstractMetaFunction::operator<(const AbstractMetaFunction &other) const
 {
-    uint result = compareTo(&other);
-    return result & NameLessThan;
+    return compareTo(&other) & NameLessThan;
 }
 
 
@@ -312,9 +311,9 @@ bool AbstractMetaFunction::operator<(const AbstractMetaFunction &other) const
     Returns a mask of CompareResult describing how this function is
     compares to another function
 */
-uint AbstractMetaFunction::compareTo(const AbstractMetaFunction *other) const
+AbstractMetaFunction::CompareResult AbstractMetaFunction::compareTo(const AbstractMetaFunction *other) const
 {
-    uint result = 0;
+    CompareResult result = 0;
 
     // Enclosing class...
     if (ownerClass() == other->ownerClass())
@@ -1172,14 +1171,17 @@ QList<ReferenceCount> AbstractMetaClass::referenceCounts() const
  */
 AbstractMetaFunctionList AbstractMetaClass::functionsInTargetLang() const
 {
-    int default_flags = NormalFunctions | Visible | NotRemovedFromTargetLang;
+    FunctionQueryOptions default_flags = NormalFunctions | Visible | NotRemovedFromTargetLang;
 
     // Interfaces don't implement functions
-    default_flags |= isInterface() ? 0 : ClassImplements;
+    if (isInterface())
+        default_flags |= ClassImplements;
 
     // Only public functions in final classes
     // default_flags |= isFinal() ? WasPublic : 0;
-    int public_flags = isFinal() ? WasPublic : 0;
+    FunctionQueryOptions public_flags;
+    if (isFinal())
+        public_flags |= WasPublic;
 
     // Constructors
     AbstractMetaFunctionList returned = queryFunctions(Constructors | default_flags | public_flags);
@@ -1245,7 +1247,7 @@ AbstractMetaFunctionList AbstractMetaClass::implicitConversions() const
     return returned;
 }
 
-AbstractMetaFunctionList AbstractMetaClass::operatorOverloads(uint query) const
+AbstractMetaFunctionList AbstractMetaClass::operatorOverloads(OperatorQueryOptions query) const
 {
     AbstractMetaFunctionList list = queryFunctions(OperatorOverloads | Visible);
     AbstractMetaFunctionList returned;
@@ -1343,7 +1345,7 @@ bool AbstractMetaClass::hasConversionOperatorOverload() const
 AbstractMetaFunctionList AbstractMetaClass::functionsInShellClass() const
 {
     // Only functions and only protected and public functions
-    int default_flags = NormalFunctions | Visible | WasVisible | NotRemovedFromShell;
+    FunctionQueryOptions default_flags = NormalFunctions | Visible | WasVisible | NotRemovedFromShell;
 
     // All virtual functions
     AbstractMetaFunctionList returned = queryFunctions(VirtualFunctions | default_flags);
@@ -1636,7 +1638,8 @@ static QString upCaseFirst(const QString &str)
     return s;
 }
 
-static AbstractMetaFunction *createXetter(const AbstractMetaField *g, const QString &name, uint type)
+static AbstractMetaFunction *createXetter(const AbstractMetaField *g, const QString &name,
+                                          AbstractMetaAttributes::Attributes type)
 {
     AbstractMetaFunction *f = new AbstractMetaFunction;
 
@@ -1646,7 +1649,7 @@ static AbstractMetaFunction *createXetter(const AbstractMetaField *g, const QStr
     f->setImplementingClass(g->enclosingClass());
     f->setDeclaringClass(g->enclosingClass());
 
-    uint attr = AbstractMetaAttributes::Native
+    AbstractMetaAttributes::Attributes attr = AbstractMetaAttributes::Native
                 | AbstractMetaAttributes::Final
                 | type;
     if (g->isStatic())
@@ -1753,7 +1756,7 @@ void AbstractMetaClass::addDefaultConstructor()
     f->setArguments(AbstractMetaArgumentList());
     f->setDeclaringClass(this);
 
-    uint attr = AbstractMetaAttributes::Native;
+    AbstractMetaAttributes::Attributes attr = AbstractMetaAttributes::Native;
     attr |= AbstractMetaAttributes::Public;
     attr |= AbstractMetaAttributes::Final;
     f->setAttributes(attr);
@@ -1784,7 +1787,7 @@ void AbstractMetaClass::addDefaultCopyConstructor(bool isPrivate)
     arg->setName(name());
     f->addArgument(arg);
 
-    uint attr = AbstractMetaAttributes::Native;
+    AbstractMetaAttributes::Attributes attr = AbstractMetaAttributes::Native;
     attr |= AbstractMetaAttributes::Final;
     if (isPrivate)
         attr |= AbstractMetaAttributes::Private;
@@ -1806,7 +1809,7 @@ bool AbstractMetaClass::hasFunction(const AbstractMetaFunction *f) const
    functions matching all of the criteria in \a query.
  */
 
-AbstractMetaFunctionList AbstractMetaClass::queryFunctions(uint query) const
+AbstractMetaFunctionList AbstractMetaClass::queryFunctions(FunctionQueryOptions query) const
 {
     AbstractMetaFunctionList functions;
 
@@ -2126,7 +2129,7 @@ void AbstractMetaClass::fixFunctions()
                     continue;
 
 
-                uint cmp = f->compareTo(sf);
+                const AbstractMetaFunction::CompareResult cmp = f->compareTo(sf);
 
                 if (cmp & AbstractMetaFunction::EqualModifiedName) {
                     add = false;
@@ -2282,7 +2285,7 @@ void AbstractMetaClass::fixFunctions()
     foreach (AbstractMetaFunction *f1, funcs) {
         foreach (AbstractMetaFunction *f2, funcs) {
             if (f1 != f2) {
-                uint cmp = f1->compareTo(f2);
+                const AbstractMetaFunction::CompareResult cmp = f1->compareTo(f2);
                 if ((cmp & AbstractMetaFunction::EqualName)
                     && !f1->isFinalInCpp()
                     && f2->isFinalInCpp()) {

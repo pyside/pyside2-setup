@@ -1353,7 +1353,7 @@ AbstractMetaField* AbstractMetaBuilder::traverseField(VariableModelItem field, c
 
     metaField->setType(metaType);
 
-    uint attr = 0;
+    AbstractMetaAttributes::Attributes attr = 0;
     if (field->isStatic())
         attr |= AbstractMetaAttributes::Static;
 
@@ -1769,7 +1769,9 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(const AddedFunction&
     metaFunction->setConstant(addedFunc.isConstant());
     metaFunction->setName(addedFunc.name());
     metaFunction->setOriginalName(addedFunc.name());
-    int visibility = addedFunc.access() == AddedFunction::Public ? AbstractMetaAttributes::Public : AbstractMetaAttributes::Protected;
+    AbstractMetaClass::Attributes visibility =
+        addedFunc.access() == AddedFunction::Public
+        ? AbstractMetaAttributes::Public : AbstractMetaAttributes::Protected;
     metaFunction->setVisibility(visibility);
     metaFunction->setUserAdded(true);
     AbstractMetaAttributes::Attribute isStatic = addedFunc.isStatic() ? AbstractMetaFunction::Static : AbstractMetaFunction::None;

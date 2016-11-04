@@ -89,7 +89,7 @@ void TestAddFunction::testAddFunction()
     QCOMPARE(classA->functions().count(), 4); // default ctor, default copy ctor, func a() and the added function
 
     AbstractMetaFunction* addedFunc = classA->functions().last();
-    QCOMPARE(addedFunc->visibility(), uint(AbstractMetaFunction::Protected));
+    QCOMPARE(addedFunc->visibility(), AbstractMetaFunction::Protected);
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::NormalFunction);
     QVERIFY(addedFunc->isUserAdded());
     QCOMPARE(addedFunc->ownerClass(), classA);
@@ -125,7 +125,7 @@ void TestAddFunction::testAddFunctionConstructor()
     QVERIFY(classA);
     QCOMPARE(classA->functions().count(), 3); // default and added ctors
     AbstractMetaFunction* addedFunc = classA->functions().last();
-    QCOMPARE(addedFunc->visibility(), uint(AbstractMetaFunction::Public));
+    QCOMPARE(addedFunc->visibility(), AbstractMetaFunction::Public);
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::ConstructorFunction);
     QCOMPARE(addedFunc->arguments().size(), 1);
     QVERIFY(addedFunc->isUserAdded());
@@ -147,7 +147,7 @@ void TestAddFunction::testAddFunctionTagDefaultValues()
     QVERIFY(classA);
     QCOMPARE(classA->functions().count(), 3); // default ctor, default copy ctor and the added function
     AbstractMetaFunction* addedFunc = classA->functions().last();
-    QCOMPARE(addedFunc->visibility(), uint(AbstractMetaFunction::Public));
+    QCOMPARE(addedFunc->visibility(), AbstractMetaFunction::Public);
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::NormalFunction);
     QVERIFY(addedFunc->isUserAdded());
     QVERIFY(!addedFunc->type());

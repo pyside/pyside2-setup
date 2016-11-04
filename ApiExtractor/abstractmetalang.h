@@ -98,6 +98,7 @@ public:
 
 class AbstractMetaAttributes
 {
+    Q_GADGET
 public:
     AbstractMetaAttributes() : m_attributes(0), m_originalAttributes(0) {};
 
@@ -134,33 +135,35 @@ public:
 
         Final                       = FinalInTargetLang | FinalInCpp
     };
+    Q_DECLARE_FLAGS(Attributes, Attribute)
+    Q_FLAG(Attribute)
 
-    uint attributes() const
+    Attributes attributes() const
     {
         return m_attributes;
     }
 
-    void setAttributes(uint attributes)
+    void setAttributes(Attributes attributes)
     {
         m_attributes = attributes;
     }
 
-    uint originalAttributes() const
+    Attributes originalAttributes() const
     {
         return m_originalAttributes;
     }
 
-    void setOriginalAttributes(uint attributes)
+    void setOriginalAttributes(Attributes attributes)
     {
         m_originalAttributes = attributes;
     }
 
-    uint visibility() const
+    Attributes visibility() const
     {
         return m_attributes & Visibility;
     }
 
-    void setVisibility(uint visi)
+    void setVisibility(Attributes visi)
     {
         m_attributes = (m_attributes & ~Visibility) | visi;
     }
@@ -291,14 +294,17 @@ public:
     }
 
 private:
-    uint m_attributes;
-    uint m_originalAttributes;
+    Attributes m_attributes;
+    Attributes m_originalAttributes;
     Documentation m_doc;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaAttributes::Attributes)
 
 typedef QList<AbstractMetaType*> AbstractMetaTypeList;
 class AbstractMetaType
 {
+    Q_GADGET
 public:
 
     enum TypeUsagePattern {
@@ -320,6 +326,7 @@ public:
         ArrayPattern,
         ThreadPattern
     };
+    Q_ENUM(TypeUsagePattern)
 
     AbstractMetaType();
     ~AbstractMetaType();
@@ -772,6 +779,7 @@ private:
 
 class AbstractMetaFunction : public AbstractMetaAttributes
 {
+    Q_GADGET
 public:
     enum FunctionType {
         ConstructorFunction,
@@ -782,8 +790,9 @@ public:
         SlotFunction,
         GlobalScopeFunction
     };
+    Q_ENUM(FunctionType)
 
-    enum CompareResult {
+    enum CompareResultFlag {
         EqualName                   = 0x00000001,
         EqualArguments              = 0x00000002,
         EqualAttributes             = 0x00000004,
@@ -798,6 +807,8 @@ public:
         Equal                       = 0x0000001f,
         NotEqual                    = 0x00001000
     };
+    Q_DECLARE_FLAGS(CompareResult, CompareResultFlag)
+    Q_FLAG(CompareResultFlag)
 
     AbstractMetaFunction()
             : m_typeEntry(0),
@@ -1079,7 +1090,7 @@ public:
         return m_name;
     }
 
-    uint compareTo(const AbstractMetaFunction *other) const;
+    CompareResult compareTo(const AbstractMetaFunction *other) const;
 
     bool operator <(const AbstractMetaFunction &a) const;
 
@@ -1197,6 +1208,7 @@ private:
     uint m_isCallOperator           : 1;
 };
 
+Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::CompareResult)
 
 class AbstractMetaEnumValue
 {
@@ -1356,6 +1368,7 @@ typedef QList<AbstractMetaEnum *> AbstractMetaEnumList;
 
 class AbstractMetaClass : public AbstractMetaAttributes
 {
+    Q_GADGET
 public:
     enum FunctionQueryOption {
         Constructors                 = 0x0000001, // Only constructors
@@ -1385,6 +1398,8 @@ public:
         VirtualSlots                 = 0x1000000, // Only functions that are set as virtual slots in the type system
         OperatorOverloads            = 0x2000000  // Only functions that are operator overloads
     };
+    Q_DECLARE_FLAGS(FunctionQueryOptions, FunctionQueryOption)
+    Q_FLAG(FunctionQueryOption)
 
     enum OperatorQueryOption {
         ArithmeticOp   = 0x01, // Arithmetic: +, -, *, /, %, +=, -=, *=, /=, %=, ++, --, unary+, unary-
@@ -1399,6 +1414,8 @@ public:
                         | LogicalOp | ConversionOp | SubscriptionOp
                         | AssignmentOp | OtherOp
     };
+    Q_DECLARE_FLAGS(OperatorQueryOptions, OperatorQueryOption)
+    Q_FLAG(OperatorQueryOption)
 
     AbstractMetaClass()
             : m_hasVirtuals(false),
@@ -1491,7 +1508,7 @@ public:
     }
 
     AbstractMetaFunctionList queryFunctionsByName(const QString &name) const;
-    AbstractMetaFunctionList queryFunctions(uint query) const;
+    AbstractMetaFunctionList queryFunctions(FunctionQueryOptions query) const;
     inline AbstractMetaFunctionList allVirtualFunctions() const;
     inline AbstractMetaFunctionList allFinalFunctions() const;
     AbstractMetaFunctionList functionsInTargetLang() const;
@@ -1512,7 +1529,7 @@ public:
      *   /return list of operator overload methods that meet the
      *   query criteria
      */
-    AbstractMetaFunctionList operatorOverloads(uint query = AllOperators) const;
+    AbstractMetaFunctionList operatorOverloads(OperatorQueryOptions query = AllOperators) const;
 
     bool hasOperatorOverload() const;
     bool hasArithmeticOperatorOverload() const;
@@ -1957,6 +1974,9 @@ private:
     bool m_stream;
     static int m_count;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaClass::FunctionQueryOptions)
+Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaClass::OperatorQueryOptions)
 
 class QPropertySpec
 {
