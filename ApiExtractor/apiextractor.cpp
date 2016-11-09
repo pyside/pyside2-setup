@@ -320,3 +320,36 @@ static bool preprocess(const QString& sourceFile,
     return true;
 }
 
+#ifndef QT_NO_DEBUG_STREAM
+template <class Container>
+static void debugFormatSequence(QDebug &d, const char *key, const Container& c)
+{
+    typedef typename Container::const_iterator ConstIt;
+    if (c.isEmpty())
+        return;
+    const ConstIt begin = c.begin();
+    const ConstIt end = c.end();
+    d << "\n  " << key << '[' << c.size() << "]=(";
+    for (ConstIt it = begin; it != end; ++it) {
+        if (it != begin)
+            d << ", ";
+        d << *it;
+    }
+    d << ')';
+}
+
+QDebug operator<<(QDebug d, const ApiExtractor &ae)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "ApiExtractor(typeSystem=\"" << ae.typeSystem() << "\", cppFileName=\""
+      << ae.cppFileName() << ", classCount=" << ae.classCount();
+    debugFormatSequence(d, "qtMetaTypeDeclaredTypeNames", ae.qtMetaTypeDeclaredTypeNames());
+    debugFormatSequence(d, "globalEnums", ae.globalEnums());
+    debugFormatSequence(d, "globalFunctions", ae.globalFunctions());
+    debugFormatSequence(d, "classes", ae.classes());
+    d << ')';
+    return d;
+}
+#endif // QT_NO_DEBUG_STREAM

@@ -30,6 +30,27 @@
 #include "reporthandler.h"
 #include "typedatabase.h"
 
+#ifndef QT_NO_DEBUG_STREAM
+#  include <QtCore/QMetaEnum>
+#  include <QtCore/QMetaObject>
+#endif
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const AbstractMetaAttributes *aa)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "AbstractMetaAttributes(";
+    if (aa)
+        d << aa->attributes();
+    else
+        d << '0';
+    d << ')';
+    return d;
+}
+#endif // !QT_NO_DEBUG_STREAM
+
 /*******************************************************************************
  * AbstractMetaVariable
  */
@@ -42,6 +63,23 @@ AbstractMetaVariable::AbstractMetaVariable(const AbstractMetaVariable &other)
     m_hasName = other.m_hasName;
     m_doc = other.m_doc;
 }
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const AbstractMetaVariable *av)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "AbstractMetaVariable(";
+    if (av) {
+        d << av->type()->name() << ' ' << av->name();
+    } else {
+        d << '0';
+      }
+    d << ')';
+    return d;
+}
+#endif // !QT_NO_DEBUG_STREAM
 
 /*******************************************************************************
  * AbstractMetaType
@@ -209,6 +247,22 @@ void AbstractMetaType::decideUsagePattern()
     }
 }
 
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const AbstractMetaType *at)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "AbstractMetaType(";
+    if (at)
+        d << at->name();
+    else
+        d << '0';
+    d << ')';
+    return d;
+}
+#endif // !QT_NO_DEBUG_STREAM
+
 /*******************************************************************************
  * AbstractMetaArgument
  */
@@ -216,6 +270,22 @@ AbstractMetaArgument *AbstractMetaArgument::copy() const
 {
     return new AbstractMetaArgument(*this);
 }
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const AbstractMetaArgument *aa)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "AbstractMetaArgument(";
+    if (aa)
+        aa->toString();
+    else
+        d << '0';
+    d << ')';
+    return d;
+}
+#endif // !QT_NO_DEBUG_STREAM
 
 /*******************************************************************************
  * AbstractMetaFunction
@@ -1063,6 +1133,29 @@ bool function_sorter(AbstractMetaFunction *a, AbstractMetaFunction *b)
     return a->signature() < b->signature();
 }
 
+#ifndef QT_NO_DEBUG_STREAM
+static inline void formatMetaFunction(QDebug &d, const AbstractMetaFunction *af)
+{
+    d << '"' << af->minimalSignature() << '"';
+}
+
+QDebug operator<<(QDebug d, const AbstractMetaFunction *af)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "AbstractMetaFunction(";
+    if (af) {
+        d << "signature=";
+        formatMetaFunction(d, af);
+    } else {
+        d << '0';
+    }
+    d << ')';
+    return d;
+}
+#endif // !QT_NO_DEBUG_STREAM
+
 /*******************************************************************************
  * AbstractMetaClass
  */
@@ -1722,6 +1815,79 @@ const AbstractMetaFunction *AbstractMetaField::getter() const
     return m_getter;
 }
 
+#ifndef QT_NO_DEBUG_STREAM
+static void formatMetaAttributes(QDebug &d, AbstractMetaAttributes::Attributes value)
+{
+    static const int meIndex = AbstractMetaAttributes::staticMetaObject.indexOfEnumerator("Attribute");
+    Q_ASSERT(meIndex >= 0);
+    const QMetaEnum me = AbstractMetaAttributes::staticMetaObject.enumerator(meIndex);
+    d << me.valueToKeys(value);
+}
+
+static void formatMetaField(QDebug &d, const AbstractMetaField *af)
+{
+    formatMetaAttributes(d, af->attributes());
+    d << ' ' << af->type()->name() << " \"" << af->name() << '"';
+}
+
+QDebug operator<<(QDebug d, const AbstractMetaField *af)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "AbstractMetaField(";
+    if (af)
+        formatMetaField(d, af);
+    else
+        d << '0';
+    d << ')';
+    return d;
+}
+
+static void formatMetaEnumValue(QDebug &d, const AbstractMetaEnumValue *v)
+{
+    const QString &name = v->stringValue();
+    if (!name.isEmpty())
+        d << name << '=';
+    d << v->value();
+}
+
+QDebug operator<<(QDebug d, const AbstractMetaEnumValue *v)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "AbstractMetaEnumValue(";
+    if (v)
+        formatMetaEnumValue(d, v);
+    else
+        d << '0';
+    d << ')';
+    return d;
+}
+
+QDebug operator<<(QDebug d, const AbstractMetaEnum *ae)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "AbstractMetaEnum(";
+    if (ae) {
+        d << ae->fullName() << '[';
+        const AbstractMetaEnumValueList &values = ae->values();
+        for (int i = 0, count = values.size(); i < count; ++i) {
+            if (i)
+                d << ' ';
+            formatMetaEnumValue(d, values.at(i));
+        }
+        d << ']';
+    } else {
+        d << '0';
+    }
+    d << ')';
+    return d;
+}
+#endif // !QT_NO_DEBUG_STREAM
 
 bool AbstractMetaClass::hasConstructors() const
 {
@@ -2435,3 +2601,47 @@ AbstractMetaClass *AbstractMetaClassList::findClass(const TypeEntry* typeEntry) 
     }
     return 0;
 }
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const AbstractMetaClass *ac)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "AbstractMetaClass(";
+    if (ac) {
+        d << '"' << ac->fullName() << '"';
+        if (ac->m_baseClass)
+            d << ", inherits \"" << ac->m_baseClass->name() << '"';
+        const AbstractMetaEnumList &enums = ac->enums();
+        if (!enums.isEmpty())
+            d << ", enums[" << enums.size() << "]=" << enums;
+        const AbstractMetaFunctionList &functions = ac->functions();
+        if (!functions.isEmpty()) {
+            const int count = functions.size();
+            d << ", functions=[" << count << "](";
+            for (int i = 0; i < count; ++i) {
+                if (i)
+                    d << ", ";
+                formatMetaFunction(d, functions.at(i));
+            }
+            d << ')';
+        }
+        const AbstractMetaFieldList &fields = ac->fields();
+        if (!fields.isEmpty()) {
+            const int count = fields.size();
+            d << ", fields=[" << count << "](";
+            for (int i = 0; i < count; ++i) {
+                if (i)
+                    d << ", ";
+                formatMetaField(d, fields.at(i));
+            }
+            d << ')';
+        }
+    } else {
+        d << '0';
+    }
+    d << ')';
+    return d;
+}
+#endif // !QT_NO_DEBUG_STREAM

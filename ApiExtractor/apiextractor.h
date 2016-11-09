@@ -36,6 +36,7 @@
 
 class AbstractMetaBuilder;
 QT_BEGIN_NAMESPACE
+class QDebug;
 class QIODevice;
 QT_END_NAMESPACE
 
@@ -46,7 +47,9 @@ public:
     ~ApiExtractor();
 
     void setTypeSystem(const QString& typeSystemFileName);
+    QString typeSystem() const { return m_typeSystemFileName; }
     void setCppFileName(const QString& cppFileName);
+    QString cppFileName() const { return m_cppFileName; }
     void setDebugLevel(ReportHandler::DebugLevel debugLevel);
     void setSuppressWarnings(bool value);
     void setSilent(bool value);
@@ -54,6 +57,7 @@ public:
     void addTypesystemSearchPath(const QStringList& paths);
     void addIncludePath(const QString& path);
     void addIncludePath(const QStringList& paths);
+    QStringList includePaths() const { return m_includePaths; }
     void setLogDirectory(const QString& logDir);
     APIEXTRACTOR_DEPRECATED(void setApiVersion(double version));
     void setApiVersion(const QString& package, const QByteArray& version);
@@ -86,5 +90,9 @@ private:
     ApiExtractor(const ApiExtractor&);
     ApiExtractor& operator=(const ApiExtractor&);
 };
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const ApiExtractor &ae);
+#endif
 
 #endif // APIEXTRACTOR_H

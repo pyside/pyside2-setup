@@ -36,6 +36,7 @@
 #include <QtCore/QTextStream>
 #include <QSharedPointer>
 
+QT_FORWARD_DECLARE_CLASS(QDebug)
 
 class AbstractMeta;
 class AbstractMetaClass;
@@ -300,6 +301,10 @@ private:
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaAttributes::Attributes)
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const AbstractMetaAttributes *aa);
+#endif
 
 typedef QList<AbstractMetaType*> AbstractMetaTypeList;
 class AbstractMetaType
@@ -628,6 +633,10 @@ private:
     Q_DISABLE_COPY(AbstractMetaType);
 };
 
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const AbstractMetaType *at);
+#endif
+
 class AbstractMetaVariable
 {
 public:
@@ -694,7 +703,9 @@ private:
     Documentation m_doc;
 };
 
-
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const AbstractMetaVariable *av);
+#endif
 
 class AbstractMetaArgument : public AbstractMetaVariable
 {
@@ -743,6 +754,9 @@ private:
     friend class AbstractMetaClass;
 };
 
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const AbstractMetaArgument *aa);
+#endif
 
 class AbstractMetaField : public AbstractMetaVariable, public AbstractMetaAttributes
 {
@@ -776,6 +790,10 @@ private:
     mutable AbstractMetaFunction *m_setter;
     const AbstractMetaClass *m_class;
 };
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const AbstractMetaField *af);
+#endif
 
 class AbstractMetaFunction : public AbstractMetaAttributes
 {
@@ -1210,6 +1228,10 @@ private:
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::CompareResult)
 
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const AbstractMetaFunction *af);
+#endif
+
 class AbstractMetaEnumValue
 {
 public:
@@ -1363,6 +1385,10 @@ private:
 
     uint m_hasQenumsDeclaration : 1;
 };
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const AbstractMetaEnum *ae);
+#endif
 
 typedef QList<AbstractMetaEnum *> AbstractMetaEnumList;
 
@@ -1928,6 +1954,9 @@ public:
         return m_hasToStringCapability;
     }
 private:
+#ifndef QT_NO_DEBUG_STREAM
+    friend QDebug operator<<(QDebug d, const AbstractMetaClass *ac);
+#endif
     uint m_hasVirtuals : 1;
     uint m_isPolymorphic : 1;
     uint m_hasNonpublic : 1;

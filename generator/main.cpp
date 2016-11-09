@@ -492,6 +492,8 @@ int main(int argc, char *argv[])
     if (!extractor.classCount())
         qCWarning(lcShiboken) << "No C++ classes found!";
 
+    qCDebug(lcShiboken) << extractor;
+
     foreach (const GeneratorPtr &g, generators) {
         g->setOutputDirectory(outputDirectory);
         g->setLicenseComment(licenseComment);
