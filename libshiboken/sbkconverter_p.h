@@ -124,11 +124,11 @@ struct OverFlowChecker<T, false> {
 };
 template<>
 struct OverFlowChecker<PY_LONG_LONG, true> {
-    static bool check(const PY_LONG_LONG& value) { return false; }
+    static bool check(const PY_LONG_LONG &) { return false; }
 };
 template<>
 struct OverFlowChecker<double, true> {
-    static bool check(const double& value) { return false; }
+    static bool check(const double &) { return false; }
 };
 template<>
 struct OverFlowChecker<float, true> {
@@ -401,7 +401,7 @@ struct Primitive<const char*> : TwoPrimitive<const char*>
             Py_RETURN_NONE;
         return Shiboken::String::fromCString((const char*)cppIn);
     }
-    static void toCpp(PyObject* pyIn, void* cppOut)
+    static void toCpp(PyObject *, void *cppOut)
     {
         *((const char**)cppOut) = 0;
     }
@@ -430,7 +430,7 @@ struct Primitive<std::string> : TwoPrimitive<std::string>
     {
         return Shiboken::String::fromCString(((std::string*)cppIn)->c_str());
     }
-    static void toCpp(PyObject* pyIn, void* cppOut)
+    static void toCpp(PyObject *, void *cppOut)
     {
         *((std::string*)cppOut) = std::string();
     }
@@ -471,7 +471,7 @@ struct Primitive<void*> : OnePrimitive<void*>
         SbkDbg() << pyIn;
         *((void**)cppOut) = pyIn;
     }
-    static PythonToCppFunc isConvertible(PyObject* pyIn)
+    static PythonToCppFunc isConvertible(PyObject *)
     {
         return toCpp;
     }

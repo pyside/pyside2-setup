@@ -102,7 +102,7 @@ static PyObject* SbkEnumObject_name(PyObject* self, void*)
     return enum_self->ob_name;
 }
 
-static PyObject* SbkEnum_tp_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
+static PyObject* SbkEnum_tp_new(PyTypeObject *type, PyObject *args, PyObject *)
 {
     long itemValue = 0;
     if (!PyArg_ParseTuple(args, "|l:__new__", &itemValue))

@@ -1989,7 +1989,7 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream& s,
                                                   const AbstractMetaType* type,
                                                   const QString& pyIn,
                                                   const QString& cppOut,
-                                                  const AbstractMetaClass* context,
+                                                  const AbstractMetaClass* /* context */,
                                                   const QString& defaultValue)
 {
     const TypeEntry* typeEntry = type->typeEntry();
@@ -2078,7 +2078,7 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream& s,
 }
 
 static void addConversionRuleCodeSnippet(CodeSnipList& snippetList, QString& rule,
-                                         TypeSystem::Language conversionLanguage,
+                                         TypeSystem::Language /* conversionLanguage */,
                                          TypeSystem::Language snippetLanguage,
                                          QString outputName = QString(),
                                          QString inputName = QString())

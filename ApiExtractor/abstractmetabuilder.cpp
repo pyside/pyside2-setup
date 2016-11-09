@@ -2424,7 +2424,7 @@ void AbstractMetaBuilder::decideUsagePattern(AbstractMetaType *metaType)
 
 QString AbstractMetaBuilder::fixDefaultValue(ArgumentModelItem item, AbstractMetaType* type,
                                                    AbstractMetaFunction* fnc, AbstractMetaClass* implementingClass,
-                                                   int argumentIndex)
+                                                   int /* argumentIndex */)
 {
     QString functionName = fnc->name();
     QString className = implementingClass ? implementingClass->qualifiedCppName() : QString();

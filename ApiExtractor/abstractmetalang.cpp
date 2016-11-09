@@ -797,7 +797,9 @@ bool AbstractMetaFunction::hasModifications(const AbstractMetaClass *implementor
     return !modifications(implementor).isEmpty();
 }
 
-QString AbstractMetaFunction::argumentName(int index, bool create, const AbstractMetaClass *implementor) const
+QString AbstractMetaFunction::argumentName(int index,
+                                           bool /* create */,
+                                           const AbstractMetaClass * /* implementor */) const
 {
     return m_arguments[--index]->name();
 }

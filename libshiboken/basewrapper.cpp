@@ -640,7 +640,7 @@ bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctorType)
 
 
 bool hasExternalCppConversions(SbkObjectType*) { return false; }                    // DEPRECATED.
-bool isExternalConvertible(SbkObjectType* self, PyObject* obj) { return false; }    // DEPRECATED.
+bool isExternalConvertible(SbkObjectType *, PyObject *) { return false; }           // DEPRECATED.
 void setExternalCppConversionFunction(SbkObjectType*, ExtendedToCppFunc) {}         // DEPRECATED.
 void setExternalIsConvertibleFunction(SbkObjectType*, ExtendedIsConvertibleFunc) {} // DEPRECATED.
 void* callExternalCppConversion(SbkObjectType*, PyObject*) { return 0; }            // DEPRECATED.

@@ -540,7 +540,7 @@ QString ShibokenGenerator::cpythonWrapperCPtr(const TypeEntry* type, QString arg
               .arg(type->qualifiedCppName(), cpythonTypeNameExt(type), argName);
 }
 
-QString ShibokenGenerator::getFunctionReturnType(const AbstractMetaFunction* func, Options options) const
+QString ShibokenGenerator::getFunctionReturnType(const AbstractMetaFunction* func, Options) const
 {
     if (func->ownerClass() && (func->isConstructor() || func->isCopyConstructor()))
         return func->ownerClass()->qualifiedCppName() + QLatin1Char('*');
@@ -548,8 +548,9 @@ QString ShibokenGenerator::getFunctionReturnType(const AbstractMetaFunction* fun
     return translateTypeForWrapperMethod(func->type(), func->implementingClass());
 }
 
-void ShibokenGenerator::writeToPythonConversion(QTextStream& s, const AbstractMetaType* type,
-                                                const AbstractMetaClass* context, const QString& argumentName)
+void ShibokenGenerator::writeToPythonConversion(QTextStream & s, const AbstractMetaType* type,
+                                                const AbstractMetaClass * /* context */,
+                                                const QString& argumentName)
 {
     s << cpythonToPythonConversionFunction(type) << argumentName << ')';
 }
@@ -1120,7 +1121,9 @@ QString ShibokenGenerator::guessCPythonIsConvertible(const QString& type)
     return type + QLatin1String("_Check");
 }
 
-QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry* type, bool genericNumberType, bool checkExact)
+QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry* type,
+                                                        bool /* genericNumberType */,
+                                                        bool /* checkExact */)
 {
     if (isWrapperType(type)) {
         QString isConv = (type->isValue() && !isValueTypeWithCopyConstructorOnly(type))
@@ -1132,7 +1135,8 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry* type, b
     return QString::fromLatin1("Shiboken::Conversions::isPythonToCppConvertible(%1, ")
               .arg(converterObject(type));
 }
-QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* metaType, bool genericNumberType)
+QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* metaType,
+                                                        bool /* genericNumberType */)
 {
     QString customCheck;
     if (metaType->typeEntry()->isCustom()) {
@@ -1164,7 +1168,8 @@ QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaClas
     return QStringLiteral("Shiboken::Conversions::pythonToCppPointer((SbkObjectType*)%1, ")
               .arg(cpythonTypeNameExt(metaClass->typeEntry()));
 }
-QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaType* type, const AbstractMetaClass* context)
+QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaType *type,
+                                                          const AbstractMetaClass * /* context */)
 {
     if (isWrapperType(type)) {
         return QStringLiteral("Shiboken::Conversions::pythonToCpp%1((SbkObjectType*)%2, ")
@@ -1175,7 +1180,8 @@ QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaType
               .arg(converterObject(type));
 }
 
-QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaType* type, const AbstractMetaClass* context)
+QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaType *type,
+                                                             const AbstractMetaClass * /* context */)
 {
     if (isWrapperType(type)) {
         QString conversion;
@@ -1298,7 +1304,7 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunction *func,
                                              QString prepend,
                                              QString append,
                                              Options options,
-                                             int argCount) const
+                                             int /* argCount */) const
 {
     QString result;
     QTextStream s(&result);
