@@ -26,6 +26,9 @@
 ##
 #############################################################################
 
+import os, sys
+sys.path.insert(0, os.path.join("..", "pysidetest"))
+
 import unittest
 from PySide2.QtCore import *
 from testbinding import TestObject

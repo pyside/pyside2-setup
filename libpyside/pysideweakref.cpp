@@ -130,10 +130,10 @@ PyObject* create(PyObject* obj, PySideWeakRefFunction func, void* userData)
     if (!weak || PyErr_Occurred())
         return 0;
 
-    Py_DECREF(callable);
-
     callable->weakref_func = func;
     callable->user_data = userData;
+    Py_DECREF(callable); // PYSIDE-79: after decref the callable is undefined (theoretically)
+
     return (PyObject*)weak;
 }
 

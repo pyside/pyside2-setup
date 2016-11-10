@@ -406,13 +406,17 @@ PyObject* signalInstanceConnect(PyObject* self, PyObject* args, PyObject* kwds)
     if (match) {
         Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
         Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(source->d->source, "connect"));
+        if (pyMethod == 0) { // PYSIDE-79: check if pyMethod exists.
+            PyErr_SetString(PyExc_RuntimeError, "method 'connect' vanished!");
+            return 0;
+        }
         PyObject* result = PyObject_CallObject(pyMethod, tupleArgs);
         if (result == Py_True)
             return result;
         else
             Py_XDECREF(result);
     }
-    if (PyErr_Occurred())
+    if (!PyErr_Occurred()) // PYSIDE-79: inverse the logic. A Null return needs an error.
         PyErr_Format(PyExc_RuntimeError, "Failed to connect signal %s.", source->d->signature);
     return 0;
 }
@@ -677,6 +681,9 @@ void appendSignature(PySideSignal* self, char* signature)
 PySideSignalInstance* initialize(PySideSignal* self, PyObject* name, PyObject* object)
 {
     PySideSignalInstance* instance = PyObject_New(PySideSignalInstance, &PySideSignalInstanceType);
+    SbkObject* sbkObj = reinterpret_cast<SbkObject*>(object);
+    if (!Shiboken::Object::wasCreatedByPython(sbkObj))
+        Py_INCREF(object); // PYSIDE-79: this flag was crucial for a wrapper call.
     instanceInitialize(instance, name, self, object, 0);
     return instance;
 }
@@ -740,6 +747,7 @@ PySideSignalInstance* newObjectFromMethod(PyObject* source, const QList<QMetaMet
         item->d = new PySideSignalInstancePrivate;
         PySideSignalInstancePrivate* selfPvt = item->d;
         selfPvt->source = source;
+        Py_INCREF(selfPvt->source); // PYSIDE-79: an INCREF is missing.
         QByteArray cppName(m.methodSignature());
         cppName.truncate(cppName.indexOf('('));
         // separe SignalName
