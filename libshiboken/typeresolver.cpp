@@ -97,7 +97,7 @@ TypeResolver* TypeResolver::createTypeResolver(const char* typeName,
             SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(pyType);
             // TODO-CONVERTERS: to be deprecated
             if (!sbkType->d->type_behaviour) {
-                int len = strlen(typeName);
+                const size_t len = strlen(typeName);
                 sbkType->d->type_behaviour = typeName[len -1] == '*' ? BEHAVIOUR_OBJECTTYPE : BEHAVIOUR_VALUETYPE;
             }
         }
@@ -139,7 +139,7 @@ PyTypeObject* TypeResolver::pythonType()
 
 TypeResolver::Type TypeResolver::getType(const char* name)
 {
-    int len = strlen(name);
+    const size_t len = strlen(name);
     bool isObjTypeName = name[len - 1] == '*';
     if (TypeResolver::get(name)) {
         // great, we found the type in our first attempt!

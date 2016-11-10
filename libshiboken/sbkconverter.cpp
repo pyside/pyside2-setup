@@ -369,8 +369,8 @@ bool checkSequenceTypes(PyTypeObject* type, PyObject* pyIn)
     assert(pyIn);
     if (!PySequence_Check(pyIn))
         return false;
-    int size = PySequence_Size(pyIn);
-    for (int i = 0; i < size; ++i) {
+    const Py_ssize_t size = PySequence_Size(pyIn);
+    for (Py_ssize_t i = 0; i < size; ++i) {
         if (!PyObject_TypeCheck(AutoDecRef(PySequence_GetItem(pyIn, i)), type))
             return false;
     }
@@ -382,8 +382,8 @@ bool convertibleSequenceTypes(SbkConverter* converter, PyObject* pyIn)
     assert(pyIn);
     if (!PySequence_Check(pyIn))
         return false;
-    int size = PySequence_Size(pyIn);
-    for (int i = 0; i < size; ++i) {
+    const Py_ssize_t size = PySequence_Size(pyIn);
+    for (Py_ssize_t i = 0; i < size; ++i) {
         if (!isPythonToCppConvertible(converter, AutoDecRef(PySequence_GetItem(pyIn, i))))
             return false;
     }
@@ -518,7 +518,7 @@ SpecificConverter::SpecificConverter(const char* typeName)
     m_converter = getConverter(typeName);
     if (!m_converter)
         return;
-    int len = strlen(typeName);
+    const Py_ssize_t len = strlen(typeName);
     char lastChar = typeName[len -1];
     if (lastChar == '&') {
         m_type = ReferenceConversion;

@@ -536,7 +536,7 @@ void setErrorAboutWrongArguments(PyObject* args, const char* funcName, const cha
     std::string params;
     if (args) {
         if (PyTuple_Check(args)) {
-            for (int i = 0, max = PyTuple_GET_SIZE(args); i < max; ++i) {
+            for (Py_ssize_t i = 0, max = PyTuple_GET_SIZE(args); i < max; ++i) {
                 if (i)
                     params += ", ";
                 PyObject* arg = PyTuple_GET_ITEM(args, i);
@@ -592,7 +592,7 @@ std::list<SbkObject*> splitPyObject(PyObject* pyObj)
     if (PySequence_Check(pyObj)) {
         AutoDecRef lst(PySequence_Fast(pyObj, "Invalid keep reference object."));
         if (!lst.isNull()) {
-            for(int i = 0, i_max = PySequence_Fast_GET_SIZE(lst.object()); i < i_max; i++) {
+            for (Py_ssize_t i = 0, i_max = PySequence_Fast_GET_SIZE(lst.object()); i < i_max; ++i) {
                 PyObject* item = PySequence_Fast_GET_ITEM(lst.object(), i);
                 if (Object::checkType(item))
                     result.push_back(reinterpret_cast<SbkObject*>(item));
@@ -1228,7 +1228,7 @@ void setParent(PyObject* parent, PyObject* child)
      */
     if (PySequence_Check(child) && !Object::checkType(child)) {
         Shiboken::AutoDecRef seq(PySequence_Fast(child, 0));
-        for (int i = 0, max = PySequence_Size(seq); i < max; ++i)
+        for (Py_ssize_t i = 0, max = PySequence_Size(seq); i < max; ++i)
             setParent(parent, PySequence_Fast_GET_ITEM(seq.object(), i));
         return;
     }

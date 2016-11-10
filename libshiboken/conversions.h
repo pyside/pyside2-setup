@@ -416,7 +416,7 @@ template <> struct Converter<char> : CharConverter<char>
             PY_LONG_LONG result = PyInt_AsUnsignedLongLongMask(pyobj);
             if (OverFlowChecker<char>::check(result))
                 PyErr_SetObject(PyExc_OverflowError, 0);
-            return result;
+            return char(result);
         } else if (Shiboken::String::check(pyobj)) {
             return Shiboken::String::toCString(pyobj)[0];
         } else {
