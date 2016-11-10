@@ -263,8 +263,8 @@ static Py_hash_t enum_hash(PyObject* pyObj)
 }
 
 static PyGetSetDef SbkEnumGetSetList[] = {
-    {const_cast<char*>("name"), &SbkEnumObject_name},
-    {0}  // Sentinel
+    {const_cast<char*>("name"), &SbkEnumObject_name, 0, 0, 0},
+    {0, 0, 0, 0, 0} // Sentinel
 };
 
 static PyNumberMethods enum_as_number = {
@@ -371,7 +371,9 @@ PyTypeObject SbkEnumType_Type = {
     /*tp_mro*/              0,
     /*tp_cache*/            0,
     /*tp_subclasses*/       0,
-    /*tp_weaklist*/         0
+    /*tp_weaklist*/         0,
+    /*tp_del*/              0,
+    /*tp_version_tag*/      0
 };
 
 void SbkEnumTypeDealloc(PyObject* pyObj)
