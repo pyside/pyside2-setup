@@ -109,6 +109,7 @@ static PyTypeObject PySideSlotType = {
     0,                         /*tp_subclasses */
     0,                         /*tp_weaklist */
     0,                         /*tp_del */
+    0                          /*tp_version_tag*/
 };
 
 int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
@@ -154,7 +155,7 @@ int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
     return 1;
 }
 
-PyObject* slotCall(PyObject* self, PyObject* args, PyObject* kw)
+PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 {
     static PyObject* pySlotName = 0;
     PyObject* callback;

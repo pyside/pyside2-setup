@@ -65,11 +65,11 @@ static int qpropertyTraverse(PyObject* self, visitproc visit, void* arg);
 static int qpropertyClear(PyObject* self);
 
 static PyMethodDef PySidePropertyMethods[] = {
-    {"setter", (PyCFunction)qPropertySetter, METH_O},
-    {"write", (PyCFunction)qPropertySetter, METH_O},
-    {"getter", (PyCFunction)qPropertyGetter, METH_O},
-    {"read", (PyCFunction)qPropertyGetter, METH_O},
-    {0}
+    {"setter", (PyCFunction)qPropertySetter, METH_O, 0},
+    {"write", (PyCFunction)qPropertySetter, METH_O, 0},
+    {"getter", (PyCFunction)qPropertyGetter, METH_O, 0},
+    {"read", (PyCFunction)qPropertyGetter, METH_O, 0},
+    {0, 0, 0, 0}
 };
 
 PyTypeObject PySidePropertyType = {
@@ -119,6 +119,7 @@ PyTypeObject PySidePropertyType = {
     0,                         /*tp_subclasses */
     0,                         /*tp_weaklist */
     0,                         /*tp_del */
+    0                          /*tp_version_tag */
 };
 
 static void qpropertyMetaCall(PySideProperty* pp, PyObject* self, QMetaObject::Call call, void** args)
@@ -171,7 +172,7 @@ static void qpropertyMetaCall(PySideProperty* pp, PyObject* self, QMetaObject::C
 }
 
 
-static PyObject* qpropertyTpNew(PyTypeObject* subtype, PyObject* args, PyObject* kwds)
+static PyObject *qpropertyTpNew(PyTypeObject *subtype, PyObject * /* args */, PyObject * /* kwds */)
 {
     PySideProperty* me = reinterpret_cast<PySideProperty*>(subtype->tp_alloc(subtype, 0));
     me->d = new PySidePropertyPrivate;
@@ -234,7 +235,7 @@ void qpropertyDeAlloc(PyObject* self)
     Py_TYPE(self)->tp_free(self);
 }
 
-PyObject* qPropertyCall(PyObject* self, PyObject* args, PyObject* kw)
+PyObject *qPropertyCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 {
     PyObject *callback = PyTuple_GetItem(args, 0);
     if (PyFunction_Check(callback)) {
@@ -438,7 +439,7 @@ PySideProperty* getObject(PyObject* source, PyObject* name)
     return 0;
 }
 
-bool isReadable(const PySideProperty* self)
+bool isReadable(const PySideProperty * /* self */)
 {
     return true;
 }

@@ -102,9 +102,10 @@ PyTypeObject PySideClassInfoType = {
     0,                         /*tp_subclasses */
     0,                         /*tp_weaklist */
     0,                         /*tp_del */
+    0,                         /*tp_version_tag */
 };
 
-PyObject* classCall(PyObject* self, PyObject* args, PyObject* kw)
+PyObject *classCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 {
     if (!PyTuple_Check(args) || PyTuple_Size(args) != 1) {
         PyErr_Format(PyExc_TypeError,
@@ -149,7 +150,7 @@ PyObject* classCall(PyObject* self, PyObject* args, PyObject* kw)
     return klass;
 }
 
-static PyObject* classInfoTpNew(PyTypeObject* subtype, PyObject* args, PyObject* kwds)
+static PyObject *classInfoTpNew(PyTypeObject *subtype, PyObject * /* args */, PyObject * /* kwds */)
 {
     PySideClassInfo* me = reinterpret_cast<PySideClassInfo*>(subtype->tp_alloc(subtype, 0));
     me->d = new PySideClassInfoPrivate;

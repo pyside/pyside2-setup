@@ -56,7 +56,7 @@ extern "C" {
 
     #define PYSIDE_QFLAGS(X) reinterpret_cast<PySideQFlagsObject*>(X)
 
-    PyObject* PySideQFlagsNew(PyTypeObject* type, PyObject* args, PyObject* kwds)
+    PyObject *PySideQFlagsNew(PyTypeObject *type, PyObject *args, PyObject * /* kwds */)
     {
         long val = 0;
         if (PyTuple_GET_SIZE(args)) {

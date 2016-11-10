@@ -105,6 +105,7 @@ PyTypeObject PySideMetaFunctionType = {
     /*tp_subclasses*/       0,
     /*tp_weaklist*/         0,
     /*tp_del*/              0,
+    /*tp_version_tag*/      0
 };
 
 void functionFree(void *self)
@@ -113,7 +114,7 @@ void functionFree(void *self)
     delete function->d;
 }
 
-PyObject* functionCall(PyObject* self, PyObject* args, PyObject* kw)
+PyObject *functionCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 {
     PySideMetaFunction* function = reinterpret_cast<PySideMetaFunction*>(self);
 

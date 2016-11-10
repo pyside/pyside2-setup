@@ -89,7 +89,7 @@ static PyMappingMethods Signal_as_mapping = {
 
 static PyMethodDef Signal_methods[] = {
     {"__instancecheck__", (PyCFunction)metaSignalCheck, METH_O, NULL},
-    {0}
+    {0, 0, 0, 0}
 };
 
 PyTypeObject PySideSignalMetaType = {
@@ -124,6 +124,22 @@ PyTypeObject PySideSignalMetaType = {
     /*tp_members*/          0,
     /*tp_getset*/           0,
     /*tp_base*/             &PyType_Type,
+    /*tp_dict*/             0,
+    /*tp_descr_get*/        0,
+    /*tp_descr_set*/        0,
+    /*tp_dictoffset*/       0,
+    /*tp_init*/             0,
+    /*tp_alloc*/            0,
+    /*tp_new*/              0,
+    /*tp_free*/             0,
+    /*tp_is_gc*/            0,
+    /*tp_bases*/            0,
+    /*tp_mro*/              0,
+    /*tp_cache*/            0,
+    /*tp_subclasses*/       0,
+    /*tp_weaklist*/         0,
+    /*tp_del*/              0,
+    /*tp_version_tag*/      0
 };
 
 PyTypeObject PySideSignalType = {
@@ -173,13 +189,14 @@ PyTypeObject PySideSignalType = {
     /*tp_subclasses*/       0,
     /*tp_weaklist*/         0,
     /*tp_del*/              0,
+    /*tp_version_tag*/      0
 };
 
 static PyMethodDef SignalInstance_methods[] = {
     {"connect", (PyCFunction)signalInstanceConnect, METH_VARARGS|METH_KEYWORDS, 0},
     {"disconnect", signalInstanceDisconnect, METH_VARARGS, 0},
     {"emit", signalInstanceEmit, METH_VARARGS, 0},
-    {0}  /* Sentinel */
+    {0, 0, 0, 0}  /* Sentinel */
 };
 
 static PyMappingMethods SignalInstance_as_mapping = {
@@ -235,6 +252,7 @@ PyTypeObject PySideSignalInstanceType = {
     /*tp_subclasses*/       0,
     /*tp_weaklist*/         0,
     /*tp_del*/              0,
+    /*tp_version_tag*/      0
 };
 
 int signalTpInit(PyObject* self, PyObject* args, PyObject* kwds)
@@ -522,7 +540,7 @@ PyObject* signalInstanceCall(PyObject* self, PyObject* args, PyObject* kw)
     return PyCFunction_Call(homonymousMethod, args, kw);
 }
 
-static PyObject* metaSignalCheck(PyObject* klass, PyObject* args)
+static PyObject *metaSignalCheck(PyObject * /* klass */, PyObject* args)
 {
     if (PyType_IsSubtype(args->ob_type, &PySideSignalInstanceType))
         Py_RETURN_TRUE;
@@ -793,7 +811,7 @@ static void _addSignalToWrapper(SbkObjectType* wrapperType, const char* signalNa
 }
 
 // This function is used by qStableSort to promote empty signatures
-static bool compareSignals(const QByteArray& sig1, const QByteArray& sig2)
+static bool compareSignals(const QByteArray &sig1, const QByteArray &)
 {
     return sig1.isEmpty();
 }

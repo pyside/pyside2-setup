@@ -211,7 +211,7 @@ void initDynamicMetaObject(SbkObjectType* type, const QMetaObject* base)
     initDynamicMetaObject(type, base, 0);
 }
 
-void initQObjectSubType(SbkObjectType* type, PyObject* args, PyObject* kwds)
+void initQObjectSubType(SbkObjectType *type, PyObject *args, PyObject * /* kwds */)
 {
     PyTypeObject* qObjType = Shiboken::Conversions::getPythonTypeObject("QObject*");
     QByteArray className(Shiboken::String::toCString(PyTuple_GET_ITEM(args, 0)));
