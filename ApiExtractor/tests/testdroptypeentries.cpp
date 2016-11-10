@@ -138,6 +138,3 @@ void TestDropTypeEntries::testDontDropEntryWithChildTags()
 }
 
 QTEST_APPLESS_MAIN(TestDropTypeEntries)
-
-#include "testdroptypeentries.moc"
-

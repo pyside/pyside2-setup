@@ -65,5 +65,3 @@ void TestRemoveImplConv::testRemoveImplConv()
 }
 
 QTEST_APPLESS_MAIN(TestRemoveImplConv)
-
-#include "testremoveimplconv.moc"

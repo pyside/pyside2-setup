@@ -122,5 +122,3 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnu
 };
 
 QTEST_APPLESS_MAIN(TestArrayArgument)
-
-#include "testarrayargument.moc"

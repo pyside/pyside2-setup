@@ -384,5 +384,3 @@ void TestTemplates::testContainerTypeIncompleteArgument()
 }
 
 QTEST_APPLESS_MAIN(TestTemplates)
-
-#include "testtemplates.moc"

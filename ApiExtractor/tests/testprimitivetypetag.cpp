@@ -56,5 +56,3 @@ void TestPrimitiveTypeTag::testPrimitiveTypeDefaultConstructor()
 
 QTEST_APPLESS_MAIN(TestPrimitiveTypeTag)
 
-#include "testprimitivetypetag.moc"
-

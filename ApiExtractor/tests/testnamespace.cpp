@@ -90,5 +90,3 @@ void TestNamespace::testNamespaceInnerClassMembers()
 
 QTEST_APPLESS_MAIN(TestNamespace)
 
-#include "testnamespace.moc"
-

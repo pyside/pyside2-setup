@@ -159,5 +159,3 @@ void TestImplicitConversions::testWithExternalConversionOperator()
 }
 
 QTEST_APPLESS_MAIN(TestImplicitConversions)
-
-#include "testimplicitconversions.moc"

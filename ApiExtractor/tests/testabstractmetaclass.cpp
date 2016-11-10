@@ -447,5 +447,3 @@ void TestAbstractMetaClass::testIsPolymorphic()
 }
 
 QTEST_APPLESS_MAIN(TestAbstractMetaClass)
-
-#include "testabstractmetaclass.moc"

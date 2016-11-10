@@ -58,5 +58,3 @@ void TestValueTypeDefaultCtorTag::testValueTypeDefaultCtorTagArgument()
 }
 
 QTEST_APPLESS_MAIN(TestValueTypeDefaultCtorTag)
-
-#include "testvaluetypedefaultctortag.moc"

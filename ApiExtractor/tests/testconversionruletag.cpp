@@ -231,5 +231,3 @@ void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
 }
 
 QTEST_APPLESS_MAIN(TestConversionRuleTag)
-
-#include "testconversionruletag.moc"

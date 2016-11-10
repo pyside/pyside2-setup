@@ -180,5 +180,3 @@ void TestConversionOperator::testConversionOperatorReturningConstReference()
 }
 
 QTEST_APPLESS_MAIN(TestConversionOperator)
-
-#include "testconversionoperator.moc"

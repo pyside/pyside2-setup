@@ -59,5 +59,3 @@ void TestResolveType::testResolveReturnTypeFromParentScope()
 
 QTEST_APPLESS_MAIN(TestResolveType)
 
-#include "testresolvetype.moc"
-

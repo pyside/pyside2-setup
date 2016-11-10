@@ -122,5 +122,3 @@ void TestInsertTemplate::testValidAndInvalidTypeSystemTemplate()
 }
 
 QTEST_APPLESS_MAIN(TestInsertTemplate)
-
-#include "testinserttemplate.moc"

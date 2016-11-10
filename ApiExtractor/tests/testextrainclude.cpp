@@ -79,6 +79,3 @@ void TestExtraInclude::testGlobalExtraIncludes()
 }
 
 QTEST_APPLESS_MAIN(TestExtraInclude)
-
-#include "testextrainclude.moc"
-

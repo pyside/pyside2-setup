@@ -6,7 +6,11 @@ find_package(Qt5XmlPatterns)
 
 macro(declare_test testname)
     # gone: qt4_automoc("${testname}.cpp")
-    add_executable(${testname} "${testname}.cpp")
+    if (EXISTS "${testname}.h")
+        add_executable(${testname} "${testname}.h ${testname}.cpp")
+    else ()
+        add_executable(${testname} "${testname}.cpp")
+    endif ()
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                         ${CMAKE_CURRENT_BINARY_DIR}
                         ${apiextractor_SOURCE_DIR}

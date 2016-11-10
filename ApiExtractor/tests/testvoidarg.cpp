@@ -81,6 +81,3 @@ void TestVoidArg::testVoidPointerParsedFunction()
 }
 
 QTEST_APPLESS_MAIN(TestVoidArg)
-
-#include "testvoidarg.moc"
-

@@ -76,5 +76,3 @@ int main(int argc, char** argv)
     TestModifyDocumentation tc;
     return QTest::qExec(&tc, argc, argv);
 }
-
-#include "testmodifydocumentation.moc"

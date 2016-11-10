@@ -77,5 +77,4 @@ void TestDtorInformation::testClassWithVirtualDtorIsPolymorphic()
 
 QTEST_APPLESS_MAIN(TestDtorInformation)
 
-#include "testdtorinformation.moc"
 

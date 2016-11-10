@@ -95,5 +95,4 @@ void TestRefCountTag::testWithApiVersion()
 
 QTEST_APPLESS_MAIN(TestRefCountTag)
 
-#include "testrefcounttag.moc"
 

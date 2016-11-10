@@ -66,5 +66,4 @@ void TestTypeRevision::testRevisionAttr()
 
 QTEST_APPLESS_MAIN(TestTypeRevision)
 
-#include "testtyperevision.moc"
 

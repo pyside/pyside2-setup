@@ -123,5 +123,3 @@ void TestNestedTypes::testDuplicationOfNestedTypes()
 }
 
 QTEST_APPLESS_MAIN(TestNestedTypes)
-
-#include "testnestedtypes.moc"

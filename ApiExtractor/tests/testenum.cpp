@@ -412,5 +412,3 @@ void TestEnum::testTypedefEnum()
 }
 
 QTEST_APPLESS_MAIN(TestEnum)
-
-#include "testenum.moc"

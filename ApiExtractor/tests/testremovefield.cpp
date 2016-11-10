@@ -57,5 +57,4 @@ void TestRemoveField::testRemoveField()
 
 QTEST_APPLESS_MAIN(TestRemoveField)
 
-#include "testremovefield.moc"
 

@@ -67,4 +67,3 @@ void TestTopoSort::testCiclicGraph()
 
 QTEST_APPLESS_MAIN(TestTopoSort)
 
-#include "testtoposort.moc"

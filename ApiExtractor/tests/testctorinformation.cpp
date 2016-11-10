@@ -71,6 +71,3 @@ void TestCtorInformation::testHasNonPrivateCtor()
 }
 
 QTEST_APPLESS_MAIN(TestCtorInformation)
-
-#include "testctorinformation.moc"
-

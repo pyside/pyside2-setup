@@ -245,5 +245,3 @@ void TestModifyFunction::testGlobalFunctionModification()
 }
 
 QTEST_APPLESS_MAIN(TestModifyFunction)
-
-#include "testmodifyfunction.moc"

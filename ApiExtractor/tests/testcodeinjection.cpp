@@ -99,5 +99,3 @@ void TestCodeInjections::testInjectWithInvalidApiVersion()
 
 
 QTEST_APPLESS_MAIN(TestCodeInjections)
-
-#include "testcodeinjection.moc"

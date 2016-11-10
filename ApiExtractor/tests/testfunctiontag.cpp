@@ -90,5 +90,3 @@ void TestFunctionTag::testRenameGlobalFunction()
 
 QTEST_APPLESS_MAIN(TestFunctionTag)
 
-#include "testfunctiontag.moc"
-

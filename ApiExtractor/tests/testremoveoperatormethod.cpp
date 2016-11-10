@@ -117,4 +117,3 @@ void TestRemoveOperatorMethod::testRemoveOperatorMethod()
 
 QTEST_APPLESS_MAIN(TestRemoveOperatorMethod)
 
-#include "testremoveoperatormethod.moc"

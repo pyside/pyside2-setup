@@ -433,5 +433,3 @@ void TestAddFunction::testAddFunctionWithTemplateArg()
 
 QTEST_APPLESS_MAIN(TestAddFunction)
 
-#include "testaddfunction.moc"
-

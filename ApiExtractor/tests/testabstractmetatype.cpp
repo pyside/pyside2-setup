@@ -207,5 +207,3 @@ void TestAbstractMetaType::testObjectTypeUsedAsValue()
 }
 
 QTEST_APPLESS_MAIN(TestAbstractMetaType)
-
-#include "testabstractmetatype.moc"

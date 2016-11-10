@@ -54,5 +54,4 @@ void TestReferenceToPointer::testReferenceToPointerArgument()
 
 QTEST_APPLESS_MAIN(TestReferenceToPointer)
 
-#include "testreferencetopointer.moc"
 

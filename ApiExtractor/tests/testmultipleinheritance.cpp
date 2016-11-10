@@ -70,5 +70,3 @@ void TestMultipleInheritance::testVirtualClass()
 }
 
 QTEST_APPLESS_MAIN(TestMultipleInheritance)
-
-#include "testmultipleinheritance.moc"

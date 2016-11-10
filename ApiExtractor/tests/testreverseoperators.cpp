@@ -132,4 +132,3 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
 
 QTEST_APPLESS_MAIN(TestReverseOperators)
 
-#include "testreverseoperators.moc"
