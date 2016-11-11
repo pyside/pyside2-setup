@@ -540,7 +540,14 @@ int SignalManager::qt_metacall(QObject* object, QMetaObject::Call call, int id, 
             }
 #endif
 
+            int reclimit = Py_GetRecursionLimit();
+            // Inspired by Python's errors.c: PyErr_GivenExceptionMatches() function.
+            // Temporarily bump the recursion limit, so that PyErr_Print will not raise a recursion
+            // error again. Don't do it when the limit is already insanely high, to avoid overflow.
+            if (reclimit < (1 << 30))
+                Py_SetRecursionLimit(reclimit + 5);
             PyErr_Print();
+            Py_SetRecursionLimit(reclimit);
         }
     }
 
