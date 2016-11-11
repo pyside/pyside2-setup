@@ -431,6 +431,16 @@ int DynamicQMetaObject::addMethod(QMetaMethod::MethodType mtype, const char* sig
         counter++;
     }
 
+    // Common mistake not to add parentheses to the signature.
+    if ((strchr(signature, ')') == 0) || ((strchr(signature, '(') == 0))) {
+        const QString message =
+                QLatin1String("DynamicQMetaObject::addMethod: Invalid method signature "
+                "provided for ") + QLatin1String(signature);
+        const QByteArray messageLatin = message.toLatin1();
+        PyErr_WarnEx(PyExc_RuntimeWarning, messageLatin.constData(), 0);
+        return -1;
+    }
+
     //has blank method
     if (index != -1) {
         m_d->m_methods[index] = MethodData(mtype, signature, type);

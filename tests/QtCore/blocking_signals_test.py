@@ -70,14 +70,14 @@ class TestSignalsBlocked(unittest.TestCase):
 
     def testShortCircuitSignals(self):
         #Blocking of Python short-circuit signals
-        QObject.connect(self.obj, SIGNAL('mysignal'), self.callback)
+        QObject.connect(self.obj, SIGNAL('mysignal()'), self.callback)
 
-        self.obj.emit(SIGNAL('mysignal'))
+        self.obj.emit(SIGNAL('mysignal()'))
         self.assert_(self.called)
 
         self.called = False
         self.obj.blockSignals(True)
-        self.obj.emit(SIGNAL('mysignal'))
+        self.obj.emit(SIGNAL('mysignal()'))
         self.assert_(not self.called)
 
     def testPythonSignals(self):

@@ -125,8 +125,8 @@ class DynamicSignalsToFuncPartial(UsesQCoreApplication):
         global called
         called = False
         o = QObject()
-        o.connect(o, SIGNAL("ASignal"), functools.partial(someSlot, "partial .."))
-        o.emit(SIGNAL("ASignal"))
+        o.connect(o, SIGNAL("ASignal()"), functools.partial(someSlot, "partial .."))
+        o.emit(SIGNAL("ASignal()"))
         self.assertTrue(called)
 
 class EmitUnknownType(UsesQCoreApplication):

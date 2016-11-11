@@ -44,9 +44,9 @@ class TestConnectionTypeSupport(unittest.TestCase):
         """Connect signal using a Qt.ConnectionType as argument"""
         obj1 = Dummy()
 
-        QObject.connect(obj1, SIGNAL('foo'), self.callback, Qt.DirectConnection)
+        QObject.connect(obj1, SIGNAL('foo()'), self.callback, Qt.DirectConnection)
         self.args = tuple()
-        obj1.emit(SIGNAL('foo'), *self.args)
+        obj1.emit(SIGNAL('foo()'), *self.args)
 
         self.assert_(self.called)
 
