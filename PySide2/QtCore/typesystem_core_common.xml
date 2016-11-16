@@ -413,7 +413,7 @@
                 return 0;
             bool valueType = '*' != typeName[qstrlen(typeName) - 1];
             // Do not convert user type of value
-            if (valueType &amp;&mp; Shiboken::ObjectType::isUserType(type))
+            if (valueType &amp;&amp; Shiboken::ObjectType::isUserType(type))
                 return 0;
             int obTypeId = QMetaType::type(typeName);
             if (obTypeId) {
@@ -2331,6 +2331,7 @@
   <value-type name="QUrl" hash-function="PySide::hash">
     <!-- Qt5: lots of changes -->
     <enum-type name="ComponentFormattingOption" flags="ComponentFormattingOptions" flags="FormattingOptions"/>
+    <!-- note: above duplication of attribute is not by default XML compliant! -->
     <enum-type name="UrlFormattingOption" />
     <enum-type name="UserInputResolutionOption" flags="UserInputResolutionOptions"/>
     <enum-type name="ParsingMode"/>
