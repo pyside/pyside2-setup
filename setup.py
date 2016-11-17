@@ -125,62 +125,19 @@ OS X Minimum deployment target:
     version.
 """
 
-__version__ = "5.6"
+# This stores the current repo branch / tag version.
+current_git_branch_version = "5.6"
 
-containedModules = ['shiboken2', 'pyside2']
+# This is just for PEP compliance, and shoudn't be used.
+__version__ = current_git_branch_version
 
-submodules = {
-    '2.0.0.dev0': [
-        ["pyside2-tools", "dev"],
-        ["pyside2-examples", "dev"],
-        ["wiki", "master", ".."],
-    ],
-    '5.6': [
-        ["pyside2-tools", "5.6"],
-        ["pyside2-examples", "5.6"],
-        ["wiki", "master", ".."]
-    ],
-}
-old_submodules = {
-    # these are just kept a while for reference but not maintained.
-    # if you need an old version, please use the pyside/pyside-setup version.
-    '1.3.0dev': [
-        ["shiboken", "master"],
-        ["pyside", "master"],
-        ["pyside-tools", "master"],
-        ["pyside-examples", "master"],
-    ],
-    '1.2.2': [
-        ["shiboken", "1.2.2"],
-        ["pyside", "1.2.2"],
-        ["pyside-tools", "0.2.15"],
-        ["pyside-examples", "master"],
-    ],
-    '1.2.1': [
-        ["shiboken", "1.2.1"],
-        ["pyside", "1.2.1"],
-        ["pyside-tools", "0.2.15"],
-        ["pyside-examples", "master"],
-    ],
-    '1.2.0': [
-        ["shiboken", "1.2.0"],
-        ["pyside", "1.2.0"],
-        ["pyside-tools", "0.2.14"],
-        ["pyside-examples", "master"],
-    ],
-    '1.1.2': [
-        ["shiboken", "1.1.2"],
-        ["pyside", "1.1.2"],
-        ["pyside-tools", "0.2.14"],
-        ["pyside-examples", "master"],
-    ],
-    '1.1.1': [
-        ["shiboken", "1.1.1"],
-        ["pyside", "1.1.1"],
-        ["pyside-tools", "0.2.14"],
-        ["pyside-examples", "master"],
-    ],
-}
+# Buildable extensions.
+containedModules = ['shiboken2', 'pyside2', 'pyside2-tools']
+
+# Git submodules.
+submodules = [["pyside2-tools"],
+              ["pyside2-examples"],
+              ["wiki", ".."]]
 
 pyside_package_dir_name = "pyside_package"
 
@@ -246,8 +203,8 @@ from textwrap import dedent
 
 # guess a close folder name for extensions
 def get_extension_folder(ext):
-    candidates = containedModules
-    for gitModules in submodules[__version__]:
+    candidates = list(containedModules)
+    for gitModules in submodules:
         candidates.append(gitModules[0])
     folder = difflib.get_close_matches(ext, candidates)[0]
     return folder
@@ -282,8 +239,8 @@ OPTION_CMAKE = option_value("cmake")
 OPTION_OPENSSL = option_value("openssl")
 OPTION_ONLYPACKAGE = has_option("only-package")
 OPTION_STANDALONE = has_option("standalone")
-OPTION_VERSION = option_value("version")
-OPTION_LISTVERSIONS = has_option("list-versions")
+OPTION_VERSION = option_value("version") # Deprecated
+OPTION_LISTVERSIONS = has_option("list-versions") # Deprecated
 OPTION_MAKESPEC = option_value("make-spec")
 OPTION_IGNOREGIT = has_option("ignore-git")
 OPTION_NOEXAMPLES = has_option("no-examples")     # don't include pyside2-examples
@@ -375,14 +332,6 @@ if OPTION_ICULIB:
     if not OPTION_STANDALONE:
         print("--iculib-url option is a no-op option and will be removed soon.")
 
-# Show available versions
-if OPTION_LISTVERSIONS:
-    for v in submodules:
-        print("%s" % (v))
-        for m in submodules[v]:
-            print("  %s %s" % (m[0], m[1]))
-    sys.exit(1)
-
 # Change the cwd to our source dir
 try:
     this_file = __file__
@@ -393,25 +342,11 @@ if os.path.dirname(this_file):
     os.chdir(os.path.dirname(this_file))
 script_dir = os.getcwd()
 
-# Change package version
-if OPTION_VERSION:
-    if OPTION_IGNOREGIT:
-        print("Option --version can not be used together with option --ignore-git")
-        sys.exit(1)
-    if not os.path.isdir(".git"):
-        print("Option --version is available only when pyside2-setup was cloned from git repository")
-        sys.exit(1)
-    if not OPTION_VERSION in submodules:
-        print("""Invalid version specified %s
-Use --list-versions option to get list of available versions""" % OPTION_VERSION)
-        sys.exit(1)
-    __version__ = OPTION_VERSION
-
 if OPTION_NOEXAMPLES:
-    # remove pyside2-exampes from submodules so they will not be included
-    for idx, item in enumerate(submodules[__version__]):
+    # Remove pyside2-examples from submodules so they will not be included.
+    for idx, item in enumerate(submodules):
         if item[0].startswith('pyside2-examples'):
-            del submodules[__version__][idx]
+            del submodules[idx]
 
 # Return a prefix suitable for the _install/_build directory
 def prefix():
@@ -424,59 +359,38 @@ def prefix():
 
 # Initialize, pull and checkout submodules
 def prepareSubModules():
-    print("Initializing submodules for PySide2 version %s" % __version__)
+    print("Initializing submodules for PySide2 version: {}".format(current_git_branch_version))
     submodules_dir = os.path.join(script_dir, "sources")
+
     # Create list of [name, desired branch, absolute path, desired branch]
     # and determine whether all submodules are present
     needInitSubModules = False
-    modulesList = []
-    for m in submodules[__version__]:
+
+    for m in submodules:
         module_name = m[0]
-        module_version = m[1]
-        module_dir = m[2] if len(m) > 2 else ''
+        module_dir = m[1] if len(m) > 1 else ''
         module_dir = os.path.join(submodules_dir, module_dir, module_name)
         # Check for non-empty directory (repository checked out)
         if not os.listdir(module_dir):
             needInitSubModules = True
-        modulesList.append([module_name, module_version, module_dir])
+            break
+
     if needInitSubModules:
         git_update_cmd = ["git", "submodule", "update", "--init"]
         if run_process(git_update_cmd) != 0:
-            raise DistutilsSetupError("Failed to initialize the git submodules")
+            m = "Failed to initialize the git submodules: update --init failed"
+            raise DistutilsSetupError(m)
         git_pull_cmd = ["git", "submodule", "foreach", "git", "fetch", "--all"]
         if run_process(git_pull_cmd) != 0:
-            raise DistutilsSetupError("Failed to initialize the git submodules")
+            m = "Failed to initialize the git submodules: git fetch --all failed"
+            raise DistutilsSetupError(m)
     else:
-        print("All submodules present...")
-    # Ensure all submodules have the correct branch checked out
-    for m in modulesList:
-        module_name = m[0]
-        module_version = m[1]
-        module_dir = m[2]
-        os.chdir(module_dir)
-        currentBranch = ''
-        branches = set()
-        for line in run_process_output(['git', 'branch']):
-            if line.startswith('* '):
-                currentBranch = line[2:len(line)]
-            else:
-                branches.add(line.strip())
-        if currentBranch != module_version:
-            if not module_version in branches:
-                print("Creating tracking branch %s for submodule %s" % \
-                      (module_version, module_name))
-                git_create_branch_cmd = ["git", "branch", "--track", module_version,
-                                         "origin/" + module_version]
-                if run_process(git_create_branch_cmd) != 0:
-                    raise DistutilsSetupError("Failed to create a tracking branch %s for %s" % \
-                                              (module_version, module_name))
-            print("Checking out submodule %s to branch %s (from %s)" % (module_name, module_version, currentBranch))
-            git_checkout_cmd = ["git", "checkout", module_version]
-            if run_process(git_checkout_cmd) != 0:
-                raise DistutilsSetupError("Failed to initialize the git submodule %s" % module_name)
-        else:
-            print("Submodule %s has branch %s checked out" % (module_name, module_version))
-        os.chdir(script_dir)
+        print("All submodules present.")
+
+    git_update_cmd = ["git", "submodule", "update"]
+    if run_process(git_update_cmd) != 0:
+        m = "Failed to checkout the correct git submodules SHA1s."
+        raise DistutilsSetupError(m)
 
 # Single global instance of QtInfo to be used later in multiple code paths.
 qtinfo = QtInfo(QMAKE_COMMAND)
@@ -494,7 +408,7 @@ def prepareBuild():
     if os.path.isdir(".git") and not OPTION_IGNOREGIT and not OPTION_ONLYPACKAGE and not OPTION_REUSE_BUILD:
         prepareSubModules()
     # Clean up temp and package folders
-    for n in [pyside_package_dir_name, "build", "PySide2-%s" % __version__]:
+    for n in [pyside_package_dir_name, "build"]:
         d = os.path.join(script_dir, n)
         if os.path.isdir(d):
             print("Removing %s" % d)
@@ -576,7 +490,7 @@ if wheel_module_exists:
             # Example: PySide2-5.6-5.6.4-cp27-cp27m-macosx_10_10_intel.whl
             # The PySide2 version is "5.6. The built against Qt version is "5.6.4.
             qt_version = get_qt_version()
-            wheel_version = "{}-{}".format(__version__, qt_version)
+            wheel_version = "{}-{}".format(current_git_branch_version, qt_version)
             components = (_safer_name(self.distribution.get_name()),
                           wheel_version)
             if self.build_number:
@@ -865,7 +779,7 @@ class pyside_build(_build):
             setuptools_install_prefix = OPTION_FINAL_INSTALL_PREFIX
 
         log.info("=" * 30)
-        log.info("Package version: %s" % __version__)
+        log.info("Package version: %s" % current_git_branch_version)
         log.info("Build type: %s" % self.build_type)
         log.info("Build tests: %s" % self.build_tests)
         log.info("-" * 3)
@@ -927,7 +841,7 @@ class pyside_build(_build):
 
         if not OPTION_ONLYPACKAGE:
             # Build extensions
-            for ext in containedModules + ['pyside2-tools']:
+            for ext in containedModules:
                 self.build_extension(ext)
 
             if OPTION_BUILDTESTS:
@@ -1804,7 +1718,7 @@ if wheel_module_exists:
 
 setup(
     name = "PySide2",
-    version = __version__,
+    version = current_git_branch_version,
     description = ("Python bindings for the Qt cross-platform application and UI framework"),
     long_description = README + "\n\n" + CHANGES,
     classifiers = [
