@@ -136,21 +136,27 @@ class BuildLog(object):
         # we take the latest build for now.
         build_history.sort()
         self.history = build_history
+        self._buildno = None
+
+    def set_buildno(self, buildno):
+        self.history[buildno] # test
+        self._buildno = buildno
 
     @property
-    def last_build(self):
-        if(self.history):
-            return self.history[-1]
-        else:
+    def selected(self):
+        if self._buildno is None:
             return None
+        if self.history is None:
+            return None
+        return self.history[self._buildno]
 
     @property
     def classifiers(self):
-        if not self.last_build:
-            raise ValueError('+++ No last build with the configuration found!')
+        if not self.selected:
+            raise ValueError('+++ No build with the configuration found!')
         res = [sys.platform]
         # the rest must be guessed from the given filename
-        path = self.last_build.build_dir
+        path = self.selected.build_dir
         base = os.path.basename(path)
         res.extend(base.split('-'))
         # add the python version py2 and py3
@@ -581,11 +587,11 @@ def create_read_write(filename):
         except IOError:
             raise argparse.ArgumentError(None, "cannot create file: %s" % filename)
 
-def learn_blacklist(fname, result, latest_build):
+def learn_blacklist(fname, result, selected):
     with open(fname, "r+") as f:
         _remove_from_blacklist(f.name)
         _add_to_blacklist(f.name, result)
-        _update_header(f.name, latest_build)
+        _update_header(f.name, selected)
 
 def _remove_from_blacklist(old_blname):
     # get rid of existing classifiers
@@ -676,7 +682,7 @@ def _update_header(old_blname, build_history):
                 del lines[idx]
 
     classifiers = " ".join(builds.classifiers)
-    path = latest_build.log_dir
+    path = selected.log_dir
     base = os.path.basename(path)
     test = '### test date = %s   classifiers = %s\n' % (base, classifiers)
     lines.insert(0, test)
@@ -693,34 +699,56 @@ if __name__ == '__main__':
     parser_test = subparsers.add_parser("test")
     group = parser_test.add_mutually_exclusive_group(required=False)
     group.add_argument("--blacklist", "-b", type=argparse.FileType('r'),
-                       help="a Qt blacklist file")
+                        help="a Qt blacklist file")
     group.add_argument("--learn", "-l", type=create_read_write,
-                       help="add new entries to a blacklist file")
+                        help="add new entries to a blacklist file")
     parser_test.add_argument("--skip", action='store_true',
                         help="skip the tests if they were run before")
     parser_test.add_argument("--environ", nargs='+',
                         help="use name=value ... to set environment variables")
+    parser_test.add_argument("--buildno", default=-1, type=int,
+                        help="use build number n (0-based), latest = -1 (default)")
     parser_getcwd = subparsers.add_parser("getcwd")
     parser_getcwd.add_argument("filename", type=argparse.FileType('w'),
-                               help="write the build dir name into a file")
+                        help="write the build dir name into a file")
+    parser_getcwd.add_argument("--buildno", default=-1, type=int,
+                        help="use build number n (0-based), latest = -1 (default)")
+    parser_list = subparsers.add_parser("list")
     args = parser.parse_args()
 
     builds = BuildLog(script_dir)
-
-    latest_build = builds.last_build
-    if latest_build is None:
-        raise ValueError("you have never created a test build")
+    if hasattr(args, "buildno"):
+        try:
+            builds.set_buildno(args.buildno)
+        except IndexError:
+            print("history out of range. Try '%s list'" % __file__)
+            sys.exit(1)
 
     if args.subparser_name == "getcwd":
-        print(latest_build.build_dir, file=args.filename)
-        print(latest_build.build_dir, "written to file", args.filename.name)
+        print(selected.build_dir, file=args.filename)
+        print(selected.build_dir, "written to file", args.filename.name)
         sys.exit(0)
+    elif args.subparser_name == "test":
+        pass # we do it afterwards
+    elif args.subparser_name == "list":
+        rp = os.path.relpath
+        print()
+        print("History")
+        print("-------")
+        for idx, build in enumerate(builds.history):
+            print(idx, rp(build.log_dir), rp(build.build_dir))
+        print()
+        print("Note: only the last history entry of a folder is valid!")
+        sys.exit(0)
+    else:
+        parser.print_help()
+        sys.exit(1)
 
-    runner = TestRunner(latest_build)
+    runner = TestRunner(builds.selected)
     if os.path.exists(runner.logfile) and args.skip:
         print("Parsing existing log file:", runner.logfile)
     else:
-        runner.run()
+        runner.run(10 * 60)
     result = TestParser(runner.logfile)
 
     if args.blacklist:
@@ -728,7 +756,7 @@ if __name__ == '__main__':
         bl = BlackList(args.blacklist.name)
     elif args.learn:
         args.learn.close()
-        learn_blacklist(args.learn.name, result.result, latest_build)
+        learn_blacklist(args.learn.name, result.result, selected)
         bl = BlackList(args.learn.name)
     else:
         bl = BlackList(None)
@@ -757,6 +785,6 @@ if __name__ == '__main__':
     # the makefile does run, although it does not find any tests.
     # We simply check if any tests were found.
     if len(result) == 0:
-        path = builds.last_build.build_dir
+        path = builds.selected.build_dir
         pyside2 = os.path.join(path, "pyside2")
         raise ValueError("there are no tests in %s" % pyside2)
