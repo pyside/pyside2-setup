@@ -256,7 +256,7 @@ Example output:
 
 ip1 n        sharp mod_name                                            code      tim
 -----------------------------------------------------------------------------------------
-114/391 Test #114: QtCore_qfileinfo_test ...........................   Passed    0.10 sec
+114/391 Test #114: QtCore_qfileinfo_test-42 ........................   Passed    0.10 sec
         Start 115: QtCore_qfile_test
 115/391 Test #115: QtCore_qfile_test ...............................***Failed    0.11 sec
         Start 116: QtCore_qflags_test
@@ -282,7 +282,7 @@ _TEST_PAT = r"""
               ([0-9]+)                   #                         sharp
               :                          # colon symbol            ':'
               \s+                        # some WS
-              (\w+)                      #                         mod_name
+              ([\w-]+)                   #                         mod_name
               .*?                        # whatever (non greedy)
               (                          #
                 (Passed)                 # either "Passed", None
