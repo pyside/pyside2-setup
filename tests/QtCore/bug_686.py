@@ -82,7 +82,7 @@ class TestQMutex (unittest.TestCase):
                 pass
             self.assertFalse(thread.canQuit)
 
-        thread.wait()
+        thread.wait(2000)
         self.assertTrue(thread.canQuit)
 
     def testWriteLocker(self):
@@ -95,7 +95,7 @@ class TestQMutex (unittest.TestCase):
                 pass
             self.assertFalse(thread.canQuit)
 
-        thread.wait()
+        thread.wait(2000)
         self.assertTrue(thread.canQuit)
 
     def testMutexLocker(self):
@@ -108,7 +108,7 @@ class TestQMutex (unittest.TestCase):
                 pass
             self.assertFalse(thread.canQuit)
 
-        thread.wait()
+        thread.wait(2000)
         self.assertTrue(thread.canQuit)
 
 if __name__ == '__main__':

@@ -62,7 +62,7 @@ class TestBugPYSIDE164(unittest.TestCase):
                         receiver.receive, Qt.BlockingQueuedConnection)
         emitter.start()
         retval = eventloop.exec_()
-        emitter.wait()
+        emitter.wait(2000)
         self.assertEqual(retval, 0)
 
 if __name__ == '__main__':
