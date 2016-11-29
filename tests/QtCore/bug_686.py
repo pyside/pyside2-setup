@@ -68,6 +68,7 @@ class MyMutexedThread(QThread):
         self.started = True
         while not self.mutex.tryLock():
             pass
+        self.mutex.unlock()
         self.canQuit = True
 
 class TestQMutex (unittest.TestCase):
