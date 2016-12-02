@@ -132,7 +132,7 @@ int warning(PyObject* category, int stacklevel, const char* format, ...)
         // format the message
         vsnprintf(message, size, format, args2);
         result = PyErr_WarnEx(category, message, stacklevel);
-        delete message;
+        delete [] message;
     }
     va_end(args2);
     va_end(args);
