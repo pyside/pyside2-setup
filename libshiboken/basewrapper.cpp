@@ -107,7 +107,9 @@ PyTypeObject SbkObjectType_Type = {
     /*tp_mro*/              0,
     /*tp_cache*/            0,
     /*tp_subclasses*/       0,
-    /*tp_weaklist*/         0
+    /*tp_weaklist*/         0,
+    /*tp_del*/              0,
+    /*tp_version_tag*/      0
 };
 
 static PyObject *SbkObjectGetDict(PyObject* pObj, void *)
@@ -215,7 +217,9 @@ SbkObjectType SbkObject_Type = { { {
     /*tp_mro*/              0,
     /*tp_cache*/            0,
     /*tp_subclasses*/       0,
-    /*tp_weaklist*/         0
+    /*tp_weaklist*/         0,
+    /*tp_del*/              0,
+    /*tp_version_tag*/      0
 }, },
     /*priv_data*/           0
 };
