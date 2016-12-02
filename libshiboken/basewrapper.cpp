@@ -110,8 +110,9 @@ PyTypeObject SbkObjectType_Type = {
     /*tp_weaklist*/         0
 };
 
-static PyObject* SbkObjectGetDict(SbkObject* obj)
+static PyObject *SbkObjectGetDict(PyObject* pObj, void *)
 {
+    SbkObject *obj = reinterpret_cast<SbkObject *>(pObj);
     if (!obj->ob_dict)
         obj->ob_dict = PyDict_New();
     if (!obj->ob_dict)
@@ -121,8 +122,8 @@ static PyObject* SbkObjectGetDict(SbkObject* obj)
 }
 
 static PyGetSetDef SbkObjectGetSetList[] = {
-    {const_cast<char*>("__dict__"), (getter)SbkObjectGetDict, 0},
-    {0} // Sentinel
+    {const_cast<char*>("__dict__"), SbkObjectGetDict, 0, 0, 0},
+    {0, 0, 0, 0, 0} // Sentinel
 };
 
 static int SbkObject_traverse(PyObject* self, visitproc visit, void* arg)
