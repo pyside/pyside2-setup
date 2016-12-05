@@ -33,7 +33,7 @@ void Collector::clear()
     m_items.clear();
 }
 
-Collector& Collector::operator<<(unsigned long item)
+Collector& Collector::operator<<(ObjectType::Identifier item)
 {
     m_items.push_back(item);
     return *this;
@@ -45,7 +45,7 @@ Collector& Collector::operator<<(const ObjectType *obj)
     return *this;
 }
 
-std::list<unsigned long> Collector::items()
+std::list<ObjectType::Identifier> Collector::items()
 {
     return m_items;
 }

@@ -35,6 +35,8 @@
 
 #include "libsamplemacros.h"
 
+#include <stddef.h>
+
 struct Event
 {
     enum EventType {
@@ -56,6 +58,8 @@ typedef std::list<ObjectType*> ObjectTypeList;
 class LIBSAMPLE_API ObjectType
 {
 public:
+    // ### Fixme: Use uintptr_t in C++ 11
+    typedef size_t Identifier;
 
     explicit ObjectType(ObjectType* parent = 0);
     virtual ~ObjectType();
@@ -76,7 +80,7 @@ public:
     Str objectName() const;
     void setObjectName(const Str& name);
 
-    inline unsigned long identifier() const { return reinterpret_cast<unsigned long>(this); }
+    inline Identifier identifier() const { return reinterpret_cast<Identifier>(this); }
 
     bool causeEvent(Event::EventType eventType);
 
