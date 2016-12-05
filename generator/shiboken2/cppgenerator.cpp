@@ -3727,7 +3727,7 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
             bool excludeFromPy3K = nbName == QLatin1String("__div__") || nbName == QLatin1String("__idiv__");
             if (excludeFromPy3K) {
                 s << "#ifdef IS_PY3K" << endl;
-                s << INDENT << "SBK_UNUSED(" << nb[nbName] << ");" << endl;
+                s << INDENT << "SBK_UNUSED(&" << nb[nbName] << ");" << endl;
                 s << "#else" << endl;
             }
             s << INDENT << baseName << "_TypeAsNumber." << it.value() << " = " << nb[nbName] << ';' << endl;
