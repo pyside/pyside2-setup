@@ -2372,7 +2372,7 @@ void ShibokenGenerator::collectContainerTypesFromConverterMacros(const QString& 
         if (code.at(start) != QLatin1Char('%')) {
             QString typeString = code.mid(start, end - start);
             AbstractMetaType* type = buildAbstractMetaTypeFromString(typeString);
-            addInstantiatedContainers(type);
+            addInstantiatedContainers(type, type->originalTypeDescription());
         }
         start = end;
     }

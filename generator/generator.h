@@ -299,7 +299,7 @@ protected:
     QList<const AbstractMetaType*> instantiatedContainers() const;
 
     static QString getSimplifiedContainerTypeName(const AbstractMetaType* type);
-    void addInstantiatedContainers(const AbstractMetaType* type);
+    void addInstantiatedContainers(const AbstractMetaType *type, const QString &context);
 
 private:
     struct GeneratorPrivate;

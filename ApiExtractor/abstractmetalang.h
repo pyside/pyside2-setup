@@ -610,6 +610,8 @@ public:
     /// Decides and sets the proper usage patter for the current meta type.
     void decideUsagePattern();
 
+    bool hasTemplateChildren() const;
+
 private:
     const TypeEntry *m_typeEntry;
     AbstractMetaTypeList m_instantiations;

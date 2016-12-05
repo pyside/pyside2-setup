@@ -99,14 +99,25 @@ QString Generator::getSimplifiedContainerTypeName(const AbstractMetaType* type)
     return typeName;
 }
 
-void Generator::addInstantiatedContainers(const AbstractMetaType* type)
+void Generator::addInstantiatedContainers(const AbstractMetaType *type, const QString &context)
 {
     if (!type)
         return;
     foreach (const AbstractMetaType* t, type->instantiations())
-        addInstantiatedContainers(t);
+        addInstantiatedContainers(t, context);
     if (!type->typeEntry()->isContainer())
         return;
+    if (type->hasTemplateChildren()) {
+        QString warning =
+                QStringLiteral("Skipping instantiation of container '%1' because it has template"
+                               " arguments.").arg(type->originalTypeDescription());
+        if (!context.isEmpty())
+            warning.append(QStringLiteral(" Calling context: %1").arg(context));
+
+        qCWarning(lcShiboken).noquote().nospace() << warning;
+        return;
+
+    }
     QString typeName = getSimplifiedContainerTypeName(type);
     if (!m_d->instantiatedContainersNames.contains(typeName)) {
         m_d->instantiatedContainersNames.append(typeName);
@@ -116,9 +127,9 @@ void Generator::addInstantiatedContainers(const AbstractMetaType* type)
 
 void Generator::collectInstantiatedContainers(const AbstractMetaFunction* func)
 {
-    addInstantiatedContainers(func->type());
+    addInstantiatedContainers(func->type(), func->signature());
     foreach (const AbstractMetaArgument* arg, func->arguments())
-        addInstantiatedContainers(arg->type());
+        addInstantiatedContainers(arg->type(), func->signature());
 }
 
 void Generator::collectInstantiatedContainers(const AbstractMetaClass* metaClass)
@@ -128,7 +139,7 @@ void Generator::collectInstantiatedContainers(const AbstractMetaClass* metaClass
     foreach (const AbstractMetaFunction* func, metaClass->functions())
         collectInstantiatedContainers(func);
     foreach (const AbstractMetaField* field, metaClass->fields())
-        addInstantiatedContainers(field->type());
+        addInstantiatedContainers(field->type(), field->name());
     foreach (AbstractMetaClass* innerClass, metaClass->innerClasses())
         collectInstantiatedContainers(innerClass);
 }

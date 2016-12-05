@@ -26,6 +26,8 @@
 **
 ****************************************************************************/
 
+#include <QStack>
+
 #include "abstractmetalang.h"
 #include "reporthandler.h"
 #include "typedatabase.h"
@@ -245,6 +247,23 @@ void AbstractMetaType::decideUsagePattern()
               << QStringLiteral("native pointer pattern for '%1'").arg(cppSignature());
         }
     }
+}
+
+bool AbstractMetaType::hasTemplateChildren() const
+{
+    QStack<AbstractMetaType *> children;
+    children << m_children.toVector();
+
+    // Recursively iterate over the children / descendants of the type, to check if any of them
+    // corresponds to a template argument type.
+    while (!children.isEmpty()) {
+        AbstractMetaType *child = children.pop();
+        if (child->typeEntry()->isTemplateArgument())
+            return true;
+        children << child->m_children.toVector();
+    }
+
+    return false;
 }
 
 #ifndef QT_NO_DEBUG_STREAM
