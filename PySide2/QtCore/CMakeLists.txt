@@ -46,6 +46,7 @@ ${QtCore_GEN_DIR}/qeventloop_wrapper.cpp
 ${QtCore_GEN_DIR}/qeventtransition_wrapper.cpp
 ${QtCore_GEN_DIR}/qfactoryinterface_wrapper.cpp
 ${QtCore_GEN_DIR}/qfile_wrapper.cpp
+${QtCore_GEN_DIR}/qfileselector_wrapper.cpp
 ${QtCore_GEN_DIR}/qfiledevice_wrapper.cpp
 ${QtCore_GEN_DIR}/qfileinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qfilesystemwatcher_wrapper.cpp
