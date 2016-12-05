@@ -406,7 +406,7 @@ PyObject* signalInstanceConnect(PyObject* self, PyObject* args, PyObject* kwds)
     if (match) {
         Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
         Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(source->d->source, "connect"));
-        if (pyMethod == 0) { // PYSIDE-79: check if pyMethod exists.
+        if (pyMethod.isNull()) { // PYSIDE-79: check if pyMethod exists.
             PyErr_SetString(PyExc_RuntimeError, "method 'connect' vanished!");
             return 0;
         }
