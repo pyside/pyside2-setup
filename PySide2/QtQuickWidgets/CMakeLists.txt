@@ -13,6 +13,7 @@ make_path(QtQuickWidgets_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR
                                          ${QtQuickWidgets_SOURCE_DIR})
 
 set(QtQuickWidgets_include_dirs  ${QtQuickWidgets_SOURCE_DIR}
+                                 ${QtQml_SOURCE_DIR}
                                  ${Qt5Core_INCLUDE_DIRS}
                                  ${Qt5Gui_INCLUDE_DIRS}
                                  ${Qt5Widgets_INCLUDE_DIRS}

@@ -26,6 +26,7 @@ make_path(QtQuick_typesystem_path ${QtCore_SOURCE_DIR} ${QtCore_BINARY_DIR}
                                   ${QtQuick_SOURCE_DIR})
 
 set(QtQuick_include_dirs  ${QtQuick_SOURCE_DIR}
+                          ${QtQml_SOURCE_DIR}
                           ${Qt5Core_INCLUDE_DIRS}
                           ${Qt5Gui_INCLUDE_DIRS}
                           ${Qt5Network_INCLUDE_DIRS}

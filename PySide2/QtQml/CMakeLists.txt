@@ -21,6 +21,7 @@ ${QtQml_GEN_DIR}/qqmlfile_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmlfileselector_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmlimageproviderbase_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmlincubator_wrapper.cpp
+${QtQml_GEN_DIR}/qqmlincubationcontroller_wrapper.cpp
 #${QtQml_GEN_DIR}/qqmllistproperty_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmllistreference_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmlparserstatus_wrapper.cpp

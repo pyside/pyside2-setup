@@ -71,4 +71,15 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int vers
                     const char *qmlName);
 }
 
+// Volatile Bool Ptr type definition.
+
+typedef struct {
+    PyObject_HEAD
+    volatile bool flag;
+} QtQml_VolatileBoolObject;
+
+PyAPI_DATA(PyTypeObject) QtQml_VolatileBoolType;
+
+#define VolatileBool_Check(op) (Py_TYPE(op) == &QtQml_VolatileBoolType)
+
 #endif
