@@ -506,7 +506,9 @@
     <function signature="overloadedFunc(double)" />
     <function signature="overloadedFunc(int)" />
 
-    <value-type name="ClassWithFunctionPointer" />
+    <value-type name="ClassWithFunctionPointer">
+        <suppress-warning text="skipping function 'ClassWithFunctionPointer::callFunctionPointer', unmatched parameter type 'void (*)(void*)'" />
+    </value-type>
 
     <enum-type name="OverloadedFuncEnum"/>
     <!-- BUG:

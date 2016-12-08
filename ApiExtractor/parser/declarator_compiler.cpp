@@ -119,14 +119,29 @@ void DeclaratorCompiler::visitPtrOperator(PtrOperatorAST *node)
 void DeclaratorCompiler::visitParameterDeclaration(ParameterDeclarationAST *node)
 {
     Parameter p;
-
-    TypeCompiler type_cc(_M_binder);
     DeclaratorCompiler decl_cc(_M_binder);
 
-    decl_cc.run(node->declarator);
-
+    // Find the innermost declarator, to extract the name / id of the declaration.
+    DeclaratorAST *declarator = node->declarator;
+    while (declarator && declarator->sub_declarator)
+        declarator = declarator->sub_declarator;
+    decl_cc.run(declarator);
     p.name = decl_cc.id();
+
+    // Use the original declarator to extract the type.
     p.type = CompilerUtils::typeDescription(node->type_specifier, node->declarator, _M_binder);
+
+    // In case if the declarator is a function pointer, extract the arguments of the declarator
+    // parameter clause. This only works for top-declarator function pointers, it will fail to
+    // determine nested function pointers.
+    if (declarator != node->declarator
+        && node->declarator->parameter_declaration_clause) {
+        p.type.setFunctionPointer(true);
+        decl_cc.run(node->declarator);
+        foreach (const DeclaratorCompiler::Parameter &innerParam, decl_cc.parameters())
+            p.type.addArgument(innerParam.type);
+    }
+
     if (node->expression != 0) {
         const Token &start = _M_token_stream->token((int) node->expression->start_token);
         const Token &end = _M_token_stream->token((int) node->expression->end_token);

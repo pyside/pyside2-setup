@@ -291,6 +291,12 @@ void Binder::declare_symbol(SimpleDeclarationAST *node, InitDeclaratorAST *init_
         var->setAccessPolicy(_M_current_access);
         name_cc.run(id->unqualified_name);
         var->setName(name_cc.name());
+        // Possible bug, because second parameter uses declarator instead of
+        // init_declarator->declarator like in DeclaratorCompiler::visitParameterDeclaration,
+        // but it doesn't seem to affect anything because the generator doesn't currently use
+        // variable declarations, only function declarations (because it cares about the API only,
+        // variable declarations are not exposed to the target language).
+        // See PYSIDE-455.
         TypeInfo typeInfo = CompilerUtils::typeDescription(node->type_specifier,
                                                            declarator,
                                                            this);
