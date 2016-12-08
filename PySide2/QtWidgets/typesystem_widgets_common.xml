@@ -1892,8 +1892,6 @@
     <modify-function signature="dropMimeData(QTreeWidgetItem*,int,const QMimeData*,Qt::DropAction)">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
-    <!-- ### "indexOfTopLevelItem(QTreeWidgetItem*)const" is an internal method. -->
-    <modify-function signature="indexOfTopLevelItem(QTreeWidgetItem *)const" remove="all"/>
     <modify-function signature="addTopLevelItem(QTreeWidgetItem *)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
