@@ -196,3 +196,19 @@ acceptOddBoolReference(OddBool& x)
 {
     return x;
 }
+
+ClassWithFunctionPointer::ClassWithFunctionPointer()
+{
+    callFunctionPointer(0, &ClassWithFunctionPointer::doNothing);
+}
+
+void ClassWithFunctionPointer::callFunctionPointer(int dummy, void (*fp)(void *))
+{
+    int a = dummy;
+    fp(reinterpret_cast<void *>(a));
+}
+
+void ClassWithFunctionPointer::doNothing(void *operand)
+{
+    (void) operand;
+}

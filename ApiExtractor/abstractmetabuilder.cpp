@@ -2028,6 +2028,18 @@ AbstractMetaFunction* AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
             return metaFunction;
         }
 
+        if (metaType == Q_NULLPTR) {
+            qCWarning(lcShiboken).noquote().nospace()
+                << QStringLiteral("skipping function '%1::%2', 'void' encountered at parameter "
+                                  "position %3, but it can only be the the first and only "
+                                  "parameter")
+                                  .arg(className, functionItem->name()).arg(i);
+            rejectedFunctionSignature = qualifiedFunctionSignatureWithType(className, functionItem);
+            m_rejectedFunctions[rejectedFunctionSignature] = UnmatchedArgumentType;
+            metaFunction->setInvalid(true);
+            return metaFunction;
+        }
+
         AbstractMetaArgument* metaArgument = createMetaArgument();
 
         metaArgument->setType(metaType);

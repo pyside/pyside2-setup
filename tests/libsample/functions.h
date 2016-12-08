@@ -81,4 +81,13 @@ LIBSAMPLE_API double acceptDouble(double x);
 LIBSAMPLE_API int acceptIntReference(int& x);
 LIBSAMPLE_API OddBool acceptOddBoolReference(OddBool& x);
 
+
+class LIBSAMPLE_API ClassWithFunctionPointer
+{
+public:
+    explicit ClassWithFunctionPointer();
+    void callFunctionPointer(int dummy, void (*fp)(void *));
+    static void doNothing(void *operand);
+};
+
 #endif // FUNCTIONS_H
