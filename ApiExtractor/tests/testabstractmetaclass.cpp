@@ -373,7 +373,7 @@ void TestAbstractMetaClass::testAbstractClassDefaultConstructors()
 {
     const char* cppCode ="\
     struct A {\
-        virtual method() = 0;\
+        virtual void method() = 0;\
     };\
     ";
     const char* xmlCode = "\

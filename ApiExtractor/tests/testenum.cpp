@@ -36,7 +36,7 @@ void TestEnum::testEnumCppSignature()
     enum GlobalEnum { A, B };\
     \
     struct A {\
-        enum ClassEnum { A, B };\
+        enum ClassEnum { CA, CB };\
         void method(ClassEnum);\
     };\
     void func(A::ClassEnum);\

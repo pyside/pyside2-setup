@@ -34,6 +34,7 @@
 void TestTemplates::testTemplateWithNamespace()
 {
     const char cppCode[] = "\
+    template<typename T> struct QList {}; \
     struct Url {\
       void name();\
     };\
@@ -77,6 +78,7 @@ void TestTemplates::testTemplateOnContainers()
 {
     const char cppCode[] = "\
     struct Base {};\
+    template<typename T> struct QList {}; \
     namespace Namespace {\
     enum SomeEnum { E1, E2 };\
     template<SomeEnum type> struct A {\
@@ -118,7 +120,7 @@ void TestTemplates::testTemplateOnContainers()
 void TestTemplates::testTemplateValueAsArgument()
 {
     const char cppCode[] = "\
-    template<typename T> struct List() {};\
+    template<typename T> struct List {};\
     void func(List<int> arg) {}\
     ";
 
@@ -142,7 +144,7 @@ void TestTemplates::testTemplateValueAsArgument()
 void TestTemplates::testTemplatePointerAsArgument()
 {
     const char cppCode[] = "\
-    template<typename T> struct List() {};\
+    template<typename T> struct List {};\
     void func(List<int>* arg) {}\
     ";
 
@@ -166,7 +168,7 @@ void TestTemplates::testTemplatePointerAsArgument()
 void TestTemplates::testTemplateReferenceAsArgument()
 {
     const char cppCode[] = "\
-    template<typename T> struct List() {};\
+    template<typename T> struct List {};\
     void func(List<int>& arg) {}\
     ";
 
@@ -352,7 +354,8 @@ void TestTemplates::testContainerTypeIncompleteArgument()
     };\
     template <typename T>\
     void Vector<T>::method(const Vector<T>& vector) {}\
-    Vector Vector<T>::otherMethod() { return Vector<T>(); }\
+    template <typename T>\n\
+    Vector<T> Vector<T>::otherMethod() { return Vector<T>(); }\n\
     typedef Vector<int> IntVector;\
     ";
     const char* xmlCode = "\

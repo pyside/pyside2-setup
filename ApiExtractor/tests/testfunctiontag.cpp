@@ -32,7 +32,7 @@
 
 void TestFunctionTag::testFunctionTagForSpecificSignature()
 {
-    const char cppCode[] = "void globalFunction(int); void globalFunction(float); void dummy()";
+    const char cppCode[] = "void globalFunction(int); void globalFunction(float); void dummy();";
     const char xmlCode[] = "\
     <typesystem package=\"Foo\">\
         <primitive-type name='int'/> \

@@ -32,28 +32,28 @@
 
 void TestRemoveOperatorMethod::testRemoveOperatorMethod()
 {
-    const char* cppCode ="\
-    struct A {\
+    const char* cppCode ="\n\
+    #include <stdint.h>\n\
+    \n\
+    struct Char {};\n\
+    struct ByteArray {};\n\
+    struct String {};\n\
+    \n\
+    struct A {\n\
         A& operator>>(char&);\
         A& operator>>(char*);\
         A& operator>>(signed short&);\
         A& operator>>(unsigned short&);\
         A& operator>>(signed int&);\
         A& operator>>(unsigned int&);\
-        A& operator>>(signed long&);\
-        A& operator>>(unsigned long&);\
-        A& operator>>(__int64&);\
-        A& operator>>(unsigned __int64&);\
+        A& operator>>(int64_t&);\n\
+        A& operator>>(uint64_t&);\n\
         A& operator>>(float&);\
         A& operator>>(double&);\
         A& operator>>(Char&);\
         A& operator>>(ByteArray&);\
         A& operator>>(String&);\
-    };\
-    struct Char {};\
-    struct ByteArray {};\
-    struct String {};\
-    ";
+    };";
     const char* xmlCode = "\
     <typesystem package='Foo'>\
         <primitive-type name='char' />\
@@ -61,10 +61,8 @@ void TestRemoveOperatorMethod::testRemoveOperatorMethod()
         <primitive-type name='unsigned short' />\
         <primitive-type name='signed int' />\
         <primitive-type name='unsigned int' />\
-        <primitive-type name='signed long' />\
-        <primitive-type name='unsigned long' />\
-        <primitive-type name='__int64' />\
-        <primitive-type name='unsigned __int64' />\
+        <primitive-type name='int64_t' />\
+        <primitive-type name='uint64_t' />\
         <primitive-type name='float' />\
         <primitive-type name='double' />\
         <primitive-type name='Char' />\
@@ -77,10 +75,8 @@ void TestRemoveOperatorMethod::testRemoveOperatorMethod()
             <modify-function signature='operator&gt;&gt;(unsigned short&amp;)' remove='all'/>\
             <modify-function signature='operator&gt;&gt;(signed int&amp;)' remove='all'/>\
             <modify-function signature='operator&gt;&gt;(unsigned int&amp;)' remove='all'/>\
-            <modify-function signature='operator&gt;&gt;(signed long&amp;)' remove='all'/>\
-            <modify-function signature='operator&gt;&gt;(unsigned long&amp;)' remove='all'/>\
-            <modify-function signature='operator&gt;&gt;(__int64&amp;)' remove='all'/>\
-            <modify-function signature='operator&gt;&gt;(unsigned __int64&amp;)' remove='all'/>\
+            <modify-function signature='operator&gt;&gt;(int64_t&amp;)' remove='all'/>\
+            <modify-function signature='operator&gt;&gt;(uint64_t&amp;)' remove='all'/>\
             <modify-function signature='operator&gt;&gt;(float&amp;)' remove='all'/>\
             <modify-function signature='operator&gt;&gt;(double&amp;)' remove='all'/>\
             <modify-function signature='operator&gt;&gt;(Char&amp;)' remove='all'/>\
@@ -91,7 +87,7 @@ void TestRemoveOperatorMethod::testRemoveOperatorMethod()
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QVERIFY(classA);
-    QCOMPARE(classA->functions().size(), 15);
+    QCOMPARE(classA->functions().size(), 14);
     QStringList removedSignatures;
     removedSignatures.append(QLatin1String("operator>>(char&)"));
     removedSignatures.append(QLatin1String("operator>>(char*)"));
@@ -99,10 +95,8 @@ void TestRemoveOperatorMethod::testRemoveOperatorMethod()
     removedSignatures.append(QLatin1String("operator>>(unsigned short&)"));
     removedSignatures.append(QLatin1String("operator>>(signed int&)"));
     removedSignatures.append(QLatin1String("operator>>(unsigned int&)"));
-    removedSignatures.append(QLatin1String("operator>>(signed long&)"));
-    removedSignatures.append(QLatin1String("operator>>(unsigned long&)"));
-    removedSignatures.append(QLatin1String("operator>>(__int64&)"));
-    removedSignatures.append(QLatin1String("operator>>(unsigned __int64&)"));
+    removedSignatures.append(QLatin1String("operator>>(int64_t&)"));
+    removedSignatures.append(QLatin1String("operator>>(uint64_t&)"));
     removedSignatures.append(QLatin1String("operator>>(float&)"));
     removedSignatures.append(QLatin1String("operator>>(double&)"));
     removedSignatures.append(QLatin1String("operator>>(Char&)"));
