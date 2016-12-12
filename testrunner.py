@@ -154,8 +154,8 @@ class BuildLog(object):
     def classifiers(self):
         if not self.selected:
             raise ValueError('+++ No build with the configuration found!')
-        # Python2 legacy: Correct 'linux2' to 'linux'
-        platform = 'linux' if sys.platform == 'linux2' else sys.platform
+        # Python2 legacy: Correct 'linux2' to 'linux', recommended way.
+        platform = 'linux' if sys.platform.startswith('linux') else sys.platform
         res = [platform]
         # the rest must be guessed from the given filename
         path = self.selected.build_dir
@@ -180,12 +180,12 @@ class BuildLog(object):
 
 
 class TestRunner(object):
-    def __init__(self, log_entry):
+    def __init__(self, log_entry, project):
         self.log_entry = log_entry
         built_path = log_entry.build_dir
-        self.test_dir = os.path.join(built_path, "pyside2")
+        self.test_dir = os.path.join(built_path, project)
         log_dir = log_entry.log_dir
-        self.logfile = os.path.join(log_dir, "testrun.log")
+        self.logfile = os.path.join(log_dir, project + ".log")
         os.environ['CTEST_OUTPUT_ON_FAILURE'] = '1'
         self._setup()
 
@@ -673,7 +673,7 @@ def _add_to_blacklist(old_blname, result):
     with open(old_blname, "r+") as f:
         f.writelines(lines)
 
-def _update_header(old_blname, build_history):
+def _update_header(old_blname, selected):
     with open(old_blname) as f:
         lines = f.readlines()
     classifierset = set(builds.classifiers)
@@ -710,6 +710,12 @@ if __name__ == '__main__':
                         help="use name=value ... to set environment variables")
     parser_test.add_argument("--buildno", default=-1, type=int,
                         help="use build number n (0-based), latest = -1 (default)")
+    all_projects = "shiboken2 pyside2 pyside2-tools".split()
+    tested_projects = "shiboken2 pyside2".split()
+    parser_test.add_argument("--projects", nargs='+', type=str,
+                        default=tested_projects,
+                        choices=all_projects,
+                        help="use 'pyside2' (default) or other projects")
     parser_getcwd = subparsers.add_parser("getcwd")
     parser_getcwd.add_argument("filename", type=argparse.FileType('w'),
                         help="write the build dir name into a file")
@@ -746,19 +752,12 @@ if __name__ == '__main__':
         parser.print_help()
         sys.exit(1)
 
-    runner = TestRunner(builds.selected)
-    if os.path.exists(runner.logfile) and args.skip:
-        print("Parsing existing log file:", runner.logfile)
-    else:
-        runner.run(10 * 60)
-    result = TestParser(runner.logfile)
-
     if args.blacklist:
         args.blacklist.close()
         bl = BlackList(args.blacklist.name)
     elif args.learn:
         args.learn.close()
-        learn_blacklist(args.learn.name, result.result, selected)
+        learn_blacklist(args.learn.name, result.result, builds.selected)
         bl = BlackList(args.learn.name)
     else:
         bl = BlackList(None)
@@ -769,24 +768,55 @@ if __name__ == '__main__':
                 raise ValueError("you need to pass one or more name=value pairs.")
             key, value = things
             os.environ[key] = value
-    print("********* Start testing of PySide *********")
-    print("Config: Using", " ".join(builds.classifiers))
-    pass_, skipped, fail, bfail, bpass = 0, 0, 0, 0, 0
-    for test, res in result.iter_blacklist(bl):
-        print("%-6s" % res, ":", decorate(test) + "()")
-        pass_ += 1 if res == "PASS" else 0
-        skipped += 1 if res == "SKIPPED" else 0 # not yet supported
-        fail += 1 if res == "FAIL" else 0
-        bfail += 1 if res == "BFAIL" else 0
-        bpass += 1 if res == "BPASS" else 0
-    print("Totals:", len(result), "tests.", pass_, "passed,", fail, "failed,", skipped, "skipped,", bfail, "blacklisted,", bpass, "bpasses")
-    print("********* Finished testing of PySide *********")
-    for test, res in result.iter_blacklist(bl):
-        if res == "FAIL":
-            raise ValueError("At least one failure was not blacklisted")
-    # the makefile does run, although it does not find any tests.
-    # We simply check if any tests were found.
-    if len(result) == 0:
-        path = builds.selected.build_dir
-        pyside2 = os.path.join(path, "pyside2")
-        raise ValueError("there are no tests in %s" % pyside2)
+
+    q = 5 * [0]
+
+    # now loop over the projects and accumulate
+    for project in args.projects:
+        runner = TestRunner(builds.selected, project)
+        if os.path.exists(runner.logfile) and args.skip:
+            print("Parsing existing log file:", runner.logfile)
+        else:
+            runner.run(10 * 60)
+        result = TestParser(runner.logfile)
+        r = 5 * [0]
+        print("********* Start testing of %s *********" % project)
+        print("Config: Using", " ".join(builds.classifiers))
+        for test, res in result.iter_blacklist(bl):
+            print("%-6s" % res, ":", decorate(test) + "()")
+            r[0] += 1 if res == "PASS" else 0
+            r[1] += 1 if res == "FAIL" else 0
+            r[2] += 1 if res == "SKIPPED" else 0 # not yet supported
+            r[3] += 1 if res == "BFAIL" else 0
+            r[4] += 1 if res == "BPASS" else 0
+        print("Totals:", sum(r), "tests.",
+              "{} passed, {} failed, {} skipped, {} blacklisted, {} bpassed."
+              .format(*r))
+        print("********* Finished testing of %s *********" % project)
+        print()
+        q = map(lambda x, y: x+y, r, q)
+
+    if len(args.projects) > 1:
+        print("All above projects:", sum(r), "tests.",
+              "{} passed, {} failed, {} skipped, {} blacklisted, {} bpassed."
+              .format(*q))
+        print()
+
+    # nag us about unsupported projects
+    ap, tp = set(all_projects), set(tested_projects)
+    if ap != tp:
+        print("+++++ Note: please support", " ".join(ap-tp), "+++++")
+        print()
+
+    for project in args.projects:
+        runner = TestRunner(builds.selected, project)
+        result = TestParser(runner.logfile)
+        for test, res in result.iter_blacklist(bl):
+            if res == "FAIL":
+                raise ValueError("At least one failure was not blacklisted")
+        # the makefile does run, although it does not find any tests.
+        # We simply check if any tests were found.
+        if len(result) == 0:
+            path = builds.selected.build_dir
+            project = os.path.join(path, args.project)
+            raise ValueError("there are no tests in %s" % project)
