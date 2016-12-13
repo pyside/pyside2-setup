@@ -46,7 +46,7 @@ public:
 
     Collector& operator<<(const ObjectType *);
 
-    std::list<unsigned long> items();
+    std::list<ObjectType::Identifier> items();
     int size();
 
 private:
