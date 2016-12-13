@@ -154,7 +154,9 @@ class BuildLog(object):
     def classifiers(self):
         if not self.selected:
             raise ValueError('+++ No build with the configuration found!')
-        res = [sys.platform]
+        # Python2 legacy: Correct 'linux2' to 'linux'
+        platform = 'linux' if sys.platform == 'linux2' else sys.platform
+        res = [platform]
         # the rest must be guessed from the given filename
         path = self.selected.build_dir
         base = os.path.basename(path)
@@ -431,7 +433,7 @@ Known keys are:
 
 darwin
 win32
-linux2
+linux
 ...
 
 qt5.6.1
@@ -521,7 +523,7 @@ the following:
 The global section gets the complete set of variables, like so
 
 # Globals
-    darwin win32 linux2
+    darwin win32 linux
     qt5.6.1 qt5.6.2
     py3 py2
     32bit 64bit

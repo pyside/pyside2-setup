@@ -5,37 +5,37 @@
 [pysidetest::utils_test]
     win32
 [signals::disconnect_test]
-    linux2
+    linux
     darwin py2
     win32
 [signals::multiple_connections_test]
-    linux2
+    linux
     darwin
     win32
 [signals::ref06_test]
-    linux2
+    linux
     darwin
     win32
 [signals::short_circuit_test]
-    linux2
+    linux
     darwin
     win32
 [signals::signal_signature_test]
-    linux2
+    linux
     darwin
     win32
 [signals::static_metaobject_test]
-    linux2
+    linux
     darwin
     win32
 [QtCore::bug_829]
     win32
 [QtCore::bug_1063]
-    linux2
+    linux
     darwin
     win32
 [QtCore::deepcopy_test]
-    linux2
+    linux
     darwin
     win32
 [QtCore::qfile_test]
@@ -45,52 +45,52 @@
     win32
     darwin py3
 [QtCore::qobject_connect_notify_test]
-    linux2
+    linux
     darwin
     win32
 [QtCore::qthread_test]
-    linux2
+    linux
 [QtCore::qtextstream_test]
-    linux2
+    linux
     darwin
     win32
 [QtCore::repr_test]
-    linux2
+    linux
     darwin
     win32
 [QtGui::qmatrix_test]
     win32
 [QtWidgets::bug_576]
-    linux2
+    linux
     win32
     darwin py3
 [QtWidgets::bug_722]
-    linux2
+    linux
     darwin
     win32
 [QtWidgets::bug_919]
-    linux2
+    linux
 [QtWidgets::qstandarditemmodel_test]
-    linux2
+    linux
     darwin
     win32
 [QtWidgets::returnquadruplesofnumbers_test]
-    linux2
+    linux
     darwin
     win32
 [QtTest::touchevent_test]
-    linux2
+    linux
     darwin
     win32
 [QtMultimedia::audio_test]
-    linux2
+    linux
     darwin
     win32
 [QtScript::qscriptvalue_test]
-    linux2
+    linux
     darwin
     win32
 [QtScriptTools::debugger_test]
-    linux2
+    linux
     darwin
     win32
