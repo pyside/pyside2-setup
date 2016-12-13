@@ -204,7 +204,7 @@ ClassWithFunctionPointer::ClassWithFunctionPointer()
 
 void ClassWithFunctionPointer::callFunctionPointer(int dummy, void (*fp)(void *))
 {
-    int a = dummy;
+    size_t a = dummy;
     fp(reinterpret_cast<void *>(a));
 }
 
