@@ -35,6 +35,7 @@ import sys
 import unittest
 
 from sample import *
+from py3kcompat import IS_PY3K, long
 
 class OverflowTest(unittest.TestCase):
     '''Test case for overflowing C++ numeric types.'''

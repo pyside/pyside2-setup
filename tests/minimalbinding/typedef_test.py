@@ -35,7 +35,8 @@ from py3kcompat import IS_PY3K
 
 try:
     import numpy as np
-except ImportError, e:
+except ImportError as e:
+    print(e)
     np = None
 
 
