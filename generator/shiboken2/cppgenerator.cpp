@@ -177,6 +177,13 @@ bool CppGenerator::hasBoolCast(const AbstractMetaClass* metaClass) const
 typedef QMap<QString, AbstractMetaFunctionList> FunctionGroupMap;
 typedef FunctionGroupMap::const_iterator FunctionGroupMapIt;
 
+// Prevent ELF symbol qt_version_tag from being generated into the source
+static const char includeQDebug[] =
+"#ifndef QT_NO_VERSION_TAGGING\n"
+"#  define QT_NO_VERSION_TAGGING\n"
+"#endif\n"
+"#include <QDebug>\n";
+
 /*!
     Function used to write the class generated binding code on the buffer
     \param s the output buffer
@@ -198,8 +205,8 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
     // headers
     s << "// default includes" << endl;
     s << "#include <shiboken.h>" << endl;
-    s << "#include <QDebug>" << endl;
     if (usePySideExtensions()) {
+        s << includeQDebug;
         s << "#include <pysidesignal.h>" << endl;
         s << "#include <pysideproperty.h>" << endl;
         s << "#include <pyside.h>" << endl;
@@ -4753,7 +4760,7 @@ bool CppGenerator::finishGeneration()
     s << "#include <shiboken.h>" << endl;
     s << "#include <algorithm>" << endl;
     if (usePySideExtensions()) {
-        s << "#include <QDebug>" << endl;
+        s << includeQDebug;
         s << "#include <pyside.h>" << endl;
     }
 
