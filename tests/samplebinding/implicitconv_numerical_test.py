@@ -36,9 +36,17 @@ import sys
 import sample
 from py3kcompat import IS_PY3K, l, long
 
-if IS_PY3K:
-    sys.maxint = sys.maxsize
-
+# Hardcode the limits of the underlying C-types depending on architecture and memory
+# model (taking MSVC using LLP64 into account).
+cIntMin = -2147483648
+cIntMax = 2147483647
+cLongMin = cIntMin
+cLongMax = cIntMax
+maxRepresentableInt = sys.maxsize if IS_PY3K else sys.maxint
+is64bitArchitecture = maxRepresentableInt > 2**32
+if is64bitArchitecture and sys.platform != 'win32':
+    cLongMin = -9223372036854775808
+    cLongMax = 9223372036854775807
 
 class NumericTester(unittest.TestCase):
     '''Helper class for numeric comparison testing'''
@@ -57,13 +65,13 @@ class FloatImplicitConvert(NumericTester):
     def testFloatAsInt(self):
         '''Float as Int'''
         self.check_value(3.14, 3, sample.acceptInt, int)
-        self.assertRaises(OverflowError, sample.acceptInt, sys.maxint + 400)
+        self.assertRaises(OverflowError, sample.acceptInt, cIntMax + 400)
 
     def testFloatAsLong(self):
         '''Float as Long'''
         #C++ longs are python ints for us
         self.check_value(3.14, 3, sample.acceptLong, int)
-        self.assertRaises(OverflowError, sample.acceptLong, sys.maxint + 400)
+        self.assertRaises(OverflowError, sample.acceptLong, cLongMax + 400)
 
     def testFloatAsUInt(self):
         '''Float as unsigned Int'''
@@ -92,9 +100,9 @@ class IntImplicitConvert(NumericTester):
         '''Int as Long'''
         self.check_value(3, 3, sample.acceptLong, int)
 
-        # sys.maxint goes here as CPython implements int as a C long
-        self.check_value(sys.maxint, sys.maxint, sample.acceptLong, int)
-        self.check_value(-sys.maxint - 1, -sys.maxint - 1, sample.acceptLong, int)
+        # cLongMax goes here as CPython implements int as a C long
+        self.check_value(cLongMax, cLongMax, sample.acceptLong, int)
+        self.check_value(cLongMin, cLongMin, sample.acceptLong, int)
 
     def testIntAsUInt(self):
         '''Int as unsigned Int'''
@@ -117,12 +125,12 @@ class LongImplicitConvert(NumericTester):
     def testLongAsInt(self):
         '''Long as Int'''
         self.check_value(l(24224), 24224, sample.acceptInt, int)
-        self.assertRaises(OverflowError, sample.acceptInt, sys.maxint + 20)
+        self.assertRaises(OverflowError, sample.acceptInt, cIntMax + 20)
 
     def testLongAsLong(self):
         '''Long as Long'''
         self.check_value(l(2405), 2405, sample.acceptLong, int)
-        self.assertRaises(OverflowError, sample.acceptLong, sys.maxint + 20)
+        self.assertRaises(OverflowError, sample.acceptLong, cLongMax + 20)
 
     def testLongAsUInt(self):
         '''Long as unsigned Int'''
