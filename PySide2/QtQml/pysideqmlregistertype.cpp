@@ -513,7 +513,7 @@ PyTypeObject QtQml_VolatileBoolType = {
     0,                                                          /* tp_weaklist */
     0,                                                          /* tp_del */
     0,                                                          /* tp_version_tag */
-#if PY_MAJOR_VERSION >= 3
+#if PY_MAJOR_VERSION > 3 || PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION >= 4
     0                                                           /* tp_finalize */
 #endif
 };
