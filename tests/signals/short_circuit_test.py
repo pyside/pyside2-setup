@@ -52,20 +52,18 @@ class ShortCircuitSignals(unittest.TestCase):
     def testNoArgs(self):
         """Short circuit signal without arguments"""
         obj1 = Dummy()
-
-        QObject.connect(obj1, SIGNAL('foo'), self.callback)
+        QObject.connect(obj1, SIGNAL('foo()'), self.callback)
         self.args = tuple()
-        obj1.emit(SIGNAL('foo'), *self.args)
-
+        obj1.emit(SIGNAL('foo()'), *self.args)
         self.assert_(self.called)
 
     def testWithArgs(self):
         """Short circuit signal with integer arguments"""
         obj1 = Dummy()
 
-        QObject.connect(obj1, SIGNAL('foo'), self.callback)
+        QObject.connect(obj1, SIGNAL('foo(int)'), self.callback)
         self.args = (42,)
-        obj1.emit(SIGNAL('foo'), *self.args)
+        obj1.emit(SIGNAL('foo(int)'), *self.args)
 
         self.assert_(self.called)
 
@@ -73,9 +71,9 @@ class ShortCircuitSignals(unittest.TestCase):
         """Short circuit signal with multiple arguments"""
         obj1 = Dummy()
 
-        QObject.connect(obj1, SIGNAL('foo'), self.callback)
+        QObject.connect(obj1, SIGNAL('foo(int,int,QString)'), self.callback)
         self.args = (42,33,'char')
-        obj1.emit(SIGNAL('foo'), *self.args)
+        obj1.emit(SIGNAL('foo(int,int,QString)'), *self.args)
 
         self.assert_(self.called)
 
@@ -83,9 +81,9 @@ class ShortCircuitSignals(unittest.TestCase):
         """Short circuit signal with complex arguments"""
         obj1 = Dummy()
 
-        QObject.connect(obj1, SIGNAL('foo'), self.callback)
+        QObject.connect(obj1, SIGNAL('foo(int,QObject*)'), self.callback)
         self.args = (42, obj1)
-        obj1.emit(SIGNAL('foo'), *self.args)
+        obj1.emit(SIGNAL('foo(int,QObject*)'), *self.args)
 
         self.assert_(self.called)
 

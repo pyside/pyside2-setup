@@ -71,7 +71,7 @@ class PythonMultipleSlots(UsesQCoreApplication, MultipleSignalConnections):
 
         sender = Dummy()
         receivers = [BasicPySlotCase() for x in range(10)]
-        self.run_many(sender, 'foobar', partial(sender.emit,SIGNAL('foobar')), receivers, (0, ))
+        self.run_many(sender, 'foobar(int)', partial(sender.emit,SIGNAL('foobar(int)')), receivers, (0, ))
 
 
 class QProcessMultipleSlots(UsesQCoreApplication, MultipleSignalConnections):
