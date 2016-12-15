@@ -28,6 +28,8 @@
 
 '''Test cases for QQmlNetwork'''
 
+from __future__ import print_function
+
 import unittest
 
 from PySide2.QtCore import QUrl

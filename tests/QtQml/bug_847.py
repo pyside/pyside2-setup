@@ -34,6 +34,8 @@
 # Released under the same terms as PySide itself
 # 2011-05-04 Thomas Perl <m@thp.io>
 
+from __future__ import print_function
+
 import unittest
 
 from helper import adjust_filename, UsesQApplication
