@@ -45,6 +45,9 @@
 #include "sbkstring.h"
 #include <list>
 #include <limits>
+#include <typeinfo>
+#include <sstream>
+#include <iostream>
 
 #include "sbkdbg.h"
 
@@ -106,20 +109,42 @@ struct SbkConverter
 
 } // extern "C"
 
+template<typename T, bool isSigned>
+struct OverFlowCheckerBase {
+    static void formatOverFlowMessage(const PY_LONG_LONG& value)
+    {
+        std::ostringstream str;
+        str << "libshiboken: Overflow: Value " << value << " exceeds limits of type "
+            << " [" << (isSigned ? "signed" : "unsigned")
+            << "] \"" << typeid(T).name()
+            << "\" (" << sizeof(T) << "bytes).";
+        const std::string message = str.str();
+        PyErr_WarnEx(PyExc_RuntimeWarning, message.c_str(), 0);
+    }
+};
+
 // Helper template for checking if a value overflows when cast to type T.
 template<typename T, bool isSigned = std::numeric_limits<T>::is_signed >
 struct OverFlowChecker;
 
 template<typename T>
-struct OverFlowChecker<T, true> {
-    static bool check(const PY_LONG_LONG& value) {
-        return value < std::numeric_limits<T>::min() || value > std::numeric_limits<T>::max();
+struct OverFlowChecker<T, true> : public OverFlowCheckerBase<T, true> {
+    static bool check(const PY_LONG_LONG& value)
+    {
+        const bool result = value < std::numeric_limits<T>::min() || value > std::numeric_limits<T>::max();
+        if (result)
+            OverFlowChecker::formatOverFlowMessage(value);
+        return result;
     }
 };
 template<typename T>
-struct OverFlowChecker<T, false> {
-    static bool check(const PY_LONG_LONG& value) {
-        return value < 0 || static_cast<unsigned long long>(value) > std::numeric_limits<T>::max();
+struct OverFlowChecker<T, false> : public OverFlowCheckerBase<T, false> {
+    static bool check(const PY_LONG_LONG& value)
+    {
+        const bool result = value < 0 || static_cast<unsigned long long>(value) > std::numeric_limits<T>::max();
+        if (result)
+            OverFlowChecker::formatOverFlowMessage(value);
+        return result;
     }
 };
 template<>
@@ -131,9 +156,13 @@ struct OverFlowChecker<double, true> {
     static bool check(const double &) { return false; }
 };
 template<>
-struct OverFlowChecker<float, true> {
-    static bool check(const double& value) {
-        return value < std::numeric_limits<float>::min() || value > std::numeric_limits<float>::max();
+struct OverFlowChecker<float, true> : public OverFlowCheckerBase<float, true> {
+    static bool check(const double& value)
+    {
+        const bool result = value < std::numeric_limits<float>::min() || value > std::numeric_limits<float>::max();
+        if (result)
+            formatOverFlowMessage(value);
+        return result;
     }
 };
 
