@@ -39,7 +39,7 @@ from helper import adjust_filename, TimedQApplication
 
 class CustomManager(QNetworkAccessManager):
     def createRequest(self, op, req, data = None):
-        print ">> createRequest ", self, op, req.url(), data
+        print(">> createRequest ", self, op, req.url(), data)
         return QNetworkAccessManager.createRequest(self, op, req, data)
 
 class CustomFactory(QQmlNetworkAccessManagerFactory):

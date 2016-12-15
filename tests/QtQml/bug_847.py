@@ -55,7 +55,7 @@ class TestQML(UsesQApplication):
     def done(self, x, y):
         self._sucess = True
         self.app.quit()
-        print "done called"
+        print("done called")
 
     def testPythonSlot(self):
         self._sucess = False
