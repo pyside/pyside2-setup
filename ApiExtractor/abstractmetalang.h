@@ -1193,6 +1193,11 @@ public:
     }
 
     bool isCallOperator() const;
+
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebugVerbose(QDebug &d) const;
+#endif
+
 private:
     QString m_name;
     QString m_originalName;

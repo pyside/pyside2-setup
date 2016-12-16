@@ -1184,9 +1184,40 @@ bool function_sorter(AbstractMetaFunction *a, AbstractMetaFunction *b)
 }
 
 #ifndef QT_NO_DEBUG_STREAM
-static inline void formatMetaFunction(QDebug &d, const AbstractMetaFunction *af)
+static inline void formatMetaFunctionBrief(QDebug &d, const AbstractMetaFunction *af)
 {
     d << '"' << af->minimalSignature() << '"';
+}
+
+void AbstractMetaFunction::formatDebugVerbose(QDebug &d) const
+{
+    d << m_functionType << ' ' << m_type << ' ' << m_name << '(';
+    for (int i = 0, count = m_arguments.size(); i < count; ++i) {
+        if (i)
+            d << ", ";
+        d <<  m_arguments.at(i);
+    }
+    d << "), signature=\"" << minimalSignature() << '"';
+    if (m_constant)
+        d << " [const]";
+    if (m_invalid)
+        d << " [invalid]";
+    if (m_reverse)
+        d << " [reverse]";
+    if (m_userAdded)
+        d << " [userAdded]";
+    if (m_explicit)
+        d << " [explicit]";
+    if (m_pointerOperator)
+        d << " [operator->]";
+    if (m_isCallOperator)
+        d << " [operator()]";
+    if (m_class)
+        d << " class: " << m_class->name();
+    if (m_implementingClass)
+        d << " implementing class: " << m_implementingClass->name();
+    if (m_declaringClass)
+        d << " declaring class: " << m_declaringClass->name();
 }
 
 QDebug operator<<(QDebug d, const AbstractMetaFunction *af)
@@ -1196,8 +1227,12 @@ QDebug operator<<(QDebug d, const AbstractMetaFunction *af)
     d.nospace();
     d << "AbstractMetaFunction(";
     if (af) {
-        d << "signature=";
-        formatMetaFunction(d, af);
+        if (d.verbosity() > 2) {
+            af->formatDebugVerbose(d);
+        } else {
+            d << "signature=";
+            formatMetaFunctionBrief(d, af);
+        }
     } else {
         d << '0';
     }
@@ -2708,7 +2743,10 @@ QDebug operator<<(QDebug d, const AbstractMetaClass *ac)
             for (int i = 0; i < count; ++i) {
                 if (i)
                     d << ", ";
-                formatMetaFunction(d, functions.at(i));
+                if (d.verbosity() > 2)
+                    d << functions.at(i);
+                else
+                    formatMetaFunctionBrief(d, functions.at(i));
             }
             d << ')';
         }
