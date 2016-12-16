@@ -109,57 +109,105 @@ struct SbkConverter
 
 } // extern "C"
 
-template<typename T, bool isSigned>
+template<typename T, typename MaxLimitType, bool isSigned>
 struct OverFlowCheckerBase {
-    static void formatOverFlowMessage(const PY_LONG_LONG& value)
+    static void formatOverFlowMessage(const MaxLimitType& value,
+                                      const std::string *valueAsString = 0)
     {
         std::ostringstream str;
-        str << "libshiboken: Overflow: Value " << value << " exceeds limits of type "
+        str << "libshiboken: Overflow: Value ";
+        if (valueAsString != 0 && !valueAsString->empty())
+            str << *valueAsString;
+        else
+            str << value;
+        str << " exceeds limits of type "
             << " [" << (isSigned ? "signed" : "unsigned")
             << "] \"" << typeid(T).name()
             << "\" (" << sizeof(T) << "bytes).";
         const std::string message = str.str();
         PyErr_WarnEx(PyExc_RuntimeWarning, message.c_str(), 0);
     }
+
+    // Checks if an overflow occurred inside Python code.
+    // Precondition: use after calls like PyLong_AsLongLong or PyLong_AsUnsignedLongLong.
+    // Postcondition: if error ocurred, sets the string reference to the string representation of
+    //                the passed value.
+    static bool checkForInternalPyOverflow(PyObject *pyIn, std::string &valueAsString)
+    {
+        if (PyErr_Occurred()) {
+            PyErr_Print();
+            PyObject *stringRepresentation = PyObject_Str(pyIn);
+            const char *cString = Shiboken::String::toCString(stringRepresentation);
+            valueAsString.assign(cString);
+            Py_DECREF(stringRepresentation);
+            return true;
+        }
+        return false;
+    }
 };
 
 // Helper template for checking if a value overflows when cast to type T.
-template<typename T, bool isSigned = std::numeric_limits<T>::is_signed >
+// The MaxLimitType size is usually >= than type T size, so that it can still represent values that
+// can't be stored in T (unless the types are of course the same).
+// TLDR: MaxLimitType is either long long or unsigned long long.
+template<typename T, typename MaxLimitType = PY_LONG_LONG,
+                     bool isSigned = std::numeric_limits<T>::is_signed >
 struct OverFlowChecker;
 
-template<typename T>
-struct OverFlowChecker<T, true> : public OverFlowCheckerBase<T, true> {
-    static bool check(const PY_LONG_LONG& value)
+template<typename T, typename MaxLimitType>
+struct OverFlowChecker<T, MaxLimitType, true> :
+        public OverFlowCheckerBase<T, MaxLimitType, true> {
+    static bool check(const MaxLimitType& value, PyObject *pyIn)
     {
-        const bool result = value < std::numeric_limits<T>::min() || value > std::numeric_limits<T>::max();
-        if (result)
-            OverFlowChecker::formatOverFlowMessage(value);
-        return result;
+        std::string valueAsString;
+        const bool isOverflow =
+            OverFlowChecker::checkForInternalPyOverflow(pyIn, valueAsString)
+            || value < std::numeric_limits<T>::min()
+            || value > std::numeric_limits<T>::max();
+        if (isOverflow)
+            OverFlowChecker::formatOverFlowMessage(value, &valueAsString);
+        return isOverflow;
     }
 };
-template<typename T>
-struct OverFlowChecker<T, false> : public OverFlowCheckerBase<T, false> {
-    static bool check(const PY_LONG_LONG& value)
+
+template<typename T, typename MaxLimitType>
+struct OverFlowChecker<T, MaxLimitType, false>
+        : public OverFlowCheckerBase<T, MaxLimitType, false> {
+    static bool check(const MaxLimitType& value, PyObject *pyIn)
     {
-        const bool result = value < 0 || static_cast<unsigned long long>(value) > std::numeric_limits<T>::max();
-        if (result)
-            OverFlowChecker::formatOverFlowMessage(value);
-        return result;
+        std::string valueAsString;
+        const bool isOverflow =
+            OverFlowChecker::checkForInternalPyOverflow(pyIn, valueAsString)
+            || value < 0
+            || static_cast<unsigned long long>(value) > std::numeric_limits<T>::max();
+        if (isOverflow)
+            OverFlowChecker::formatOverFlowMessage(value, &valueAsString);
+        return isOverflow;
     }
 };
 template<>
-struct OverFlowChecker<PY_LONG_LONG, true> {
-    static bool check(const PY_LONG_LONG &) { return false; }
+struct OverFlowChecker<PY_LONG_LONG, PY_LONG_LONG, true> :
+        public OverFlowCheckerBase<PY_LONG_LONG, PY_LONG_LONG, true> {
+    static bool check(const PY_LONG_LONG &value, PyObject *pyIn) {
+        std::string valueAsString;
+        const bool isOverflow = checkForInternalPyOverflow(pyIn, valueAsString);
+        if (isOverflow)
+            OverFlowChecker::formatOverFlowMessage(value, &valueAsString);
+        return isOverflow;
+
+    }
 };
 template<>
-struct OverFlowChecker<double, true> {
-    static bool check(const double &) { return false; }
+struct OverFlowChecker<double, PY_LONG_LONG, true> {
+    static bool check(const double &, PyObject *) { return false; }
 };
 template<>
-struct OverFlowChecker<float, true> : public OverFlowCheckerBase<float, true> {
-    static bool check(const double& value)
+struct OverFlowChecker<float, PY_LONG_LONG, true> :
+        public OverFlowCheckerBase<float, PY_LONG_LONG, true> {
+    static bool check(const double& value, PyObject *)
     {
-        const bool result = value < std::numeric_limits<float>::min() || value > std::numeric_limits<float>::max();
+        const bool result = value < std::numeric_limits<float>::min()
+                || value > std::numeric_limits<float>::max();
         if (result)
             formatOverFlowMessage(value);
         return result;
@@ -225,9 +273,9 @@ struct IntPrimitive : TwoPrimitive<INT>
     {
         double result = PyFloat_AS_DOUBLE(pyIn);
         // If cast to long directly it could overflow silently.
-        if (OverFlowChecker<INT>::check(result))
+        if (OverFlowChecker<INT>::check(result, pyIn))
             PyErr_SetObject(PyExc_OverflowError, 0);
-        *((INT*)cppOut) = static_cast<INT>(result);
+        *reinterpret_cast<INT * >(cppOut) = static_cast<INT>(result);
     }
     static PythonToCppFunc isConvertible(PyObject* pyIn)
     {
@@ -238,9 +286,9 @@ struct IntPrimitive : TwoPrimitive<INT>
     static void otherToCpp(PyObject* pyIn, void* cppOut)
     {
         PY_LONG_LONG result = PyLong_AsLongLong(pyIn);
-        if (OverFlowChecker<INT>::check(result))
+        if (OverFlowChecker<INT>::check(result, pyIn))
             PyErr_SetObject(PyExc_OverflowError, 0);
-        *((INT*)cppOut) = static_cast<INT>(result);
+        *reinterpret_cast<INT * >(cppOut) = static_cast<INT>(result);
     }
     static PythonToCppFunc isOtherConvertible(PyObject* pyIn)
     {
@@ -278,7 +326,10 @@ struct Primitive<PY_LONG_LONG> : OnePrimitive<PY_LONG_LONG>
     }
     static void toCpp(PyObject* pyIn, void* cppOut)
     {
-        *((PY_LONG_LONG*)cppOut) = (PY_LONG_LONG) PyLong_AsLongLong(pyIn);
+        PY_LONG_LONG result = PyLong_AsLongLong(pyIn);
+        if (OverFlowChecker<PY_LONG_LONG>::check(result, pyIn))
+            PyErr_SetObject(PyExc_OverflowError, 0);
+        *reinterpret_cast<PY_LONG_LONG * >(cppOut) = result;
     }
     static PythonToCppFunc isConvertible(PyObject* pyIn)
     {
@@ -298,19 +349,27 @@ struct Primitive<unsigned PY_LONG_LONG> : OnePrimitive<unsigned PY_LONG_LONG>
     static void toCpp(PyObject* pyIn, void* cppOut)
     {
 #if PY_MAJOR_VERSION >= 3
-        if (PyLong_Check(pyIn))
-            *reinterpret_cast<unsigned PY_LONG_LONG *>(cppOut) = PyLong_AsUnsignedLongLong(pyIn);
-        else
+        if (PyLong_Check(pyIn)) {
+            unsigned PY_LONG_LONG result = PyLong_AsUnsignedLongLong(pyIn);
+            if (OverFlowChecker<unsigned PY_LONG_LONG, unsigned PY_LONG_LONG>::check(result, pyIn))
+                PyErr_SetObject(PyExc_OverflowError, 0);
+            *reinterpret_cast<unsigned PY_LONG_LONG * >(cppOut) = result;
+        }
+        else {
             PyErr_SetString(PyExc_TypeError, "Invalid type for unsigned long long conversion");
+        }
 #else
         if (PyInt_Check(pyIn)) {
-            long result = (unsigned PY_LONG_LONG) PyInt_AsLong(pyIn);
-            if (result < 0)
+            long result = PyInt_AsLong(pyIn);
+            if (OverFlowChecker<unsigned PY_LONG_LONG>::check(result, pyIn))
                 PyErr_SetObject(PyExc_OverflowError, 0);
-            else
-                *((unsigned PY_LONG_LONG*)cppOut) = (unsigned PY_LONG_LONG) result;
+            *reinterpret_cast<unsigned PY_LONG_LONG * >(cppOut) =
+                static_cast<unsigned PY_LONG_LONG>(result);
         } else if (PyLong_Check(pyIn)) {
-            *((unsigned PY_LONG_LONG*)cppOut) = (unsigned PY_LONG_LONG) PyLong_AsUnsignedLongLong(pyIn);
+            unsigned PY_LONG_LONG result = PyLong_AsUnsignedLongLong(pyIn);
+            if (OverFlowChecker<unsigned PY_LONG_LONG, unsigned PY_LONG_LONG>::check(result, pyIn))
+                PyErr_SetObject(PyExc_OverflowError, 0);
+            *reinterpret_cast<unsigned PY_LONG_LONG * >(cppOut) = result;
         } else {
             PyErr_SetString(PyExc_TypeError, "Invalid type for unsigned long long conversion");
         }
@@ -397,7 +456,7 @@ struct CharPrimitive : IntPrimitive<CHAR>
     static void otherToCpp(PyObject* pyIn, void* cppOut)
     {
         PY_LONG_LONG result = PyLong_AsLongLong(pyIn);
-        if (OverFlowChecker<CHAR>::check(result))
+        if (OverFlowChecker<CHAR>::check(result, pyIn))
             PyErr_SetObject(PyExc_OverflowError, 0);
         *((CHAR*)cppOut) = (CHAR) result;
     }
