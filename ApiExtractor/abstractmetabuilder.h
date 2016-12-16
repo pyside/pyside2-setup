@@ -197,6 +197,10 @@ public:
     */
     void setGlobalHeader(const QString& globalHeader);
 
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const;
+#endif
+
 protected:
     AbstractMetaClass *argumentToClass(ArgumentModelItem);
 
@@ -274,5 +278,9 @@ private:
     QString m_logDirectory;
     QFileInfo m_globalHeader;
 };
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const AbstractMetaBuilder &ab);
+#endif
 
 #endif // ABSTRACTMETBUILDER_H

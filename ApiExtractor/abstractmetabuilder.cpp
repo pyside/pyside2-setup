@@ -3121,3 +3121,43 @@ void AbstractMetaBuilder::setInclude(TypeEntry* te, const QString& fileName) con
     if (m_globalHeader.fileName() != info.fileName())
         te->setInclude(Include(Include::IncludePath, info.fileName()));
 }
+
+#ifndef QT_NO_DEBUG_STREAM
+template <class Container>
+static void debugFormatSequence(QDebug &d, const char *key, const Container& c)
+{
+    typedef typename Container::const_iterator ConstIt;
+    if (c.isEmpty())
+        return;
+    const ConstIt begin = c.begin();
+    const ConstIt end = c.end();
+    d << "\n  " << key << '[' << c.size() << "]=(";
+    for (ConstIt it = begin; it != end; ++it) {
+        if (it != begin)
+            d << ", ";
+        d << *it;
+    }
+    d << ')';
+}
+
+void AbstractMetaBuilder::formatDebug(QDebug &d) const
+{
+    d << "classCount=" << m_metaClasses.size()
+        << ", m_globalHeader=" << m_globalHeader.absoluteFilePath();
+    debugFormatSequence(d, "qtMetaTypeDeclaredTypeNames", m_qmetatypeDeclaredTypenames);
+    debugFormatSequence(d, "globalEnums", m_globalEnums);
+    debugFormatSequence(d, "globalFunctions", m_globalFunctions);
+    debugFormatSequence(d, "classes", m_metaClasses);
+}
+
+QDebug operator<<(QDebug d, const AbstractMetaBuilder &ab)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "AbstractMetaBuilder(";
+    ab.formatDebug(d);
+    d << ')';
+    return d;
+}
+#endif // !QT_NO_DEBUG_STREAM

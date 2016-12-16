@@ -89,10 +89,9 @@ private:
     // disable copy
     ApiExtractor(const ApiExtractor&);
     ApiExtractor& operator=(const ApiExtractor&);
-};
-
 #ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug d, const ApiExtractor &ae);
+    friend QDebug operator<<(QDebug d, const ApiExtractor &ae);
 #endif
+};
 
 #endif // APIEXTRACTOR_H
