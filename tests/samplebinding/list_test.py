@@ -51,7 +51,7 @@ class ListConversionTest(unittest.TestCase):
         '''Test if a Python override of a virtual method is correctly called from C++.'''
         lu = ExtendedListUser()
         lst = lu.callCreateList()
-        self.assert_(lu.create_list_called)
+        self.assertTrue(lu.create_list_called)
         self.assertEqual(type(lst), list)
         for item in lst:
             self.assertEqual(type(item), int)

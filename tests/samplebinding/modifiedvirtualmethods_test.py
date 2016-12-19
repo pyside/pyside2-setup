@@ -111,7 +111,7 @@ class VirtualMethodsTest(unittest.TestCase):
         result2 = self.evm.callSum0(a0, a1, a2)
         self.assertEqual(result0, result1)
         self.assertEqual(result0 * self.evm.multiplier, result2)
-        self.assert_(self.evm.sumThree_called)
+        self.assertTrue(self.evm.sumThree_called)
         self.assertFalse(self.evm.sum0_called)
 
     def testModifiedVirtualMethod1(self):
@@ -131,7 +131,7 @@ class VirtualMethodsTest(unittest.TestCase):
         result0 = self.vm.sum1(a0, a1)
         result1 = self.evm.callSum1(a0, a1, 1000)
         self.assertEqual(result0 * self.evm.multiplier, result1)
-        self.assert_(self.evm.sum1_called)
+        self.assertTrue(self.evm.sum1_called)
 
     def testModifiedVirtualMethod2(self):
         '''Virtual method originally with three arguments, the last
@@ -152,7 +152,7 @@ class VirtualMethodsTest(unittest.TestCase):
         result0 = self.vm.sum2(a0, a1)
         result1 = self.evm.callSum2(a0, a1, ignored)
         self.assertEqual(result0 * self.evm.multiplier, result1)
-        self.assert_(self.evm.sum2_called)
+        self.assertTrue(self.evm.sum2_called)
 
     def testModifiedVirtualMethod3(self):
         '''Virtual method originally with three arguments have the second
@@ -176,7 +176,7 @@ class VirtualMethodsTest(unittest.TestCase):
         result0 = self.vm.sum3(a0, a1)
         result1 = self.evm.callSum3(a0, ignored, a1)
         self.assertEqual(result0 * self.evm.multiplier, result1)
-        self.assert_(self.evm.sum3_called)
+        self.assertTrue(self.evm.sum3_called)
 
     def testModifiedVirtualMethod4(self):
         '''Virtual method originally with three arguments, the
@@ -203,7 +203,7 @@ class VirtualMethodsTest(unittest.TestCase):
         default_value = 3000
         result = self.evm.callSum4(a0, removed_arg_value, a1)
         self.assertEqual(result, (a0 - removed_arg_value + a1 + default_value) * self.evm.multiplier)
-        self.assert_(self.evm.sum4_called)
+        self.assertTrue(self.evm.sum4_called)
 
     def testOverridenMethodResultModification(self):
         '''Injected code modifies the result of a call to a virtual
@@ -213,7 +213,7 @@ class VirtualMethodsTest(unittest.TestCase):
         name = self.evm.callName()
         self.assertEqual(name, 'PimpedExtendedVirtualMethods')
         self.assertEqual(name, Str('PimpedExtendedVirtualMethods'))
-        self.assert_(self.evm.name_called)
+        self.assertTrue(self.evm.name_called)
 
     def testInjectCodeCallsPythonVirtualMethodOverride(self):
         '''When injected code calls the Python override by itself
@@ -224,24 +224,24 @@ class VirtualMethodsTest(unittest.TestCase):
     def testAllArgumentsRemoved(self):
         values = (10, 20, 30, 40)
         self.vm.setMargins(*values)
-        self.assertEquals(self.vm.getMargins(), values)
+        self.assertEqual(self.vm.getMargins(), values)
 
     def testAllArgumentsRemovedCallVirtual(self):
         values = (10, 20, 30, 40)
         self.vm.setMargins(*values)
-        self.assertEquals(self.vm.callGetMargins(), values)
+        self.assertEqual(self.vm.callGetMargins(), values)
 
     def testExtendedAllArgumentsRemoved(self):
         values = (10, 20, 30, 40)
         self.evm.setMargins(*values)
         double = tuple([m*2 for m in values])
-        self.assertEquals(self.evm.getMargins(), double)
+        self.assertEqual(self.evm.getMargins(), double)
 
     def testExtendedAllArgumentsRemovedCallVirtual(self):
         values = (10, 20, 30, 40)
         self.evm.setMargins(*values)
         double = tuple([m*2 for m in values])
-        self.assertEquals(self.evm.callGetMargins(), double)
+        self.assertEqual(self.evm.callGetMargins(), double)
 
 if __name__ == '__main__':
     unittest.main()

@@ -54,7 +54,7 @@ class MapConversionTest(unittest.TestCase):
         '''Test if a Python override of a virtual method is correctly called from C++.'''
         mu = ExtendedMapUser()
         map_ = mu.callCreateMap()
-        self.assert_(mu.create_map_called)
+        self.assertTrue(mu.create_map_called)
         self.assertEqual(type(map_), dict)
         for key, value in map_.items():
             self.assertEqual(type(key), str)

@@ -43,7 +43,7 @@ else:
 class TestEnumUnderNamespace(unittest.TestCase):
     def testInvisibleNamespace(self):
         o1 = EnumOnNamespace.Option1
-        self.assertEquals(o1, 1)
+        self.assertEqual(o1, 1)
 
 class TestClassesUnderNamespace(unittest.TestCase):
     def testIt(self):
@@ -56,14 +56,14 @@ class TestClassesUnderNamespace(unittest.TestCase):
 
     def testFunctionAddedOnNamespace(self):
         res = SampleNamespace.ImInsideANamespace(2, 2)
-        self.assertEquals(res, 4)
+        self.assertEqual(res, 4)
 
     def testTpNames(self):
-        self.assertEquals(str(SampleNamespace.SomeClass), "<%s 'sample.SampleNamespace.SomeClass'>"%TYPE_STR)
-        self.assertEquals(str(SampleNamespace.SomeClass.ProtectedEnum), "<%s 'sample.SampleNamespace.SomeClass.ProtectedEnum'>"%TYPE_STR)
-        self.assertEquals(str(SampleNamespace.SomeClass.SomeInnerClass.ProtectedEnum), "<%s 'sample.SampleNamespace.SomeClass.SomeInnerClass.ProtectedEnum'>"%TYPE_STR)
-        self.assertEquals(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough), "<%s 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough'>"%TYPE_STR)
-        self.assertEquals(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum), "<%s 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum'>"%TYPE_STR)
+        self.assertEqual(str(SampleNamespace.SomeClass), "<%s 'sample.SampleNamespace.SomeClass'>"%TYPE_STR)
+        self.assertEqual(str(SampleNamespace.SomeClass.ProtectedEnum), "<%s 'sample.SampleNamespace.SomeClass.ProtectedEnum'>"%TYPE_STR)
+        self.assertEqual(str(SampleNamespace.SomeClass.SomeInnerClass.ProtectedEnum), "<%s 'sample.SampleNamespace.SomeClass.SomeInnerClass.ProtectedEnum'>"%TYPE_STR)
+        self.assertEqual(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough), "<%s 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough'>"%TYPE_STR)
+        self.assertEqual(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum), "<%s 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum'>"%TYPE_STR)
 
 if __name__ == '__main__':
     unittest.main()

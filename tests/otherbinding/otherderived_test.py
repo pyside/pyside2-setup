@@ -65,16 +65,16 @@ class MultipleTest(unittest.TestCase):
 
     def testConstructor(self):
         o = Multiple()
-        self.assert_(isinstance(o, Multiple))
-        self.assert_(isinstance(o, Number))
-        self.assert_(isinstance(o, Derived))
+        self.assertTrue(isinstance(o, Multiple))
+        self.assertTrue(isinstance(o, Number))
+        self.assertTrue(isinstance(o, Derived))
         del o
 
     def testMethodCall(self):
         o = Multiple()
-        self.assert_(o.id_(), 42)
-        self.assert_(o.value(), 42)
-        self.assert_(o.testCall())
+        self.assertTrue(o.id_(), 42)
+        self.assertTrue(o.value(), 42)
+        self.assertTrue(o.testCall())
 
 class OtherDerivedTest(unittest.TestCase):
     '''Test case for OtherDerived class'''
@@ -83,19 +83,19 @@ class OtherDerivedTest(unittest.TestCase):
         '''Test if OtherDerived class really inherits its methods from parent.'''
         inherited_methods = set(['callPureVirtual', 'callUnpureVirtual',
                                  'id_', 'pureVirtual', 'unpureVirtual'])
-        self.assert_(inherited_methods.issubset(dir(OtherDerived)))
+        self.assertTrue(inherited_methods.issubset(dir(OtherDerived)))
 
     def testReimplementedPureVirtualMethodCall(self):
         '''Test if a Python override of a implemented pure virtual method is correctly called from C++.'''
         d = OtherDeviant()
         d.callPureVirtual()
-        self.assert_(d.pure_virtual_called)
+        self.assertTrue(d.pure_virtual_called)
 
     def testReimplementedVirtualMethodCall(self):
         '''Test if a Python override of a reimplemented virtual method is correctly called from C++.'''
         d = OtherDeviant()
         d.callUnpureVirtual()
-        self.assert_(d.unpure_virtual_called)
+        self.assertTrue(d.unpure_virtual_called)
 
     def testVirtualMethodCallString(self):
         '''Test virtual method call returning string.'''

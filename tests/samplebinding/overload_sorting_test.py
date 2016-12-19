@@ -63,7 +63,7 @@ class SimpleOverloadSorting(unittest.TestCase):
 
     def testImplicitOnly(self):
         '''Passing an implicit convertible object to an overload'''
-        self.assert_(self.obj.implicit_overload(ImplicitTarget()))
+        self.assertTrue(self.obj.implicit_overload(ImplicitTarget()))
 
     def testPyObjectSort(self):
         self.assertEqual(self.obj.pyObjOverload(1, 2), "int,int")
@@ -86,7 +86,7 @@ class DeepOverloadSorting(unittest.TestCase):
 class EnumOverIntSorting(unittest.TestCase):
     def testEnumOverInt(self):
         ic = ImplicitConv(ImplicitConv.CtorTwo)
-        self.assertEquals(ic.ctorEnum(), ImplicitConv.CtorTwo)
+        self.assertEqual(ic.ctorEnum(), ImplicitConv.CtorTwo)
 
 if __name__ == '__main__':
     unittest.main()

@@ -43,7 +43,7 @@ class TestDel(unittest.TestCase):
     def testIt(self):
         a = MyObject()
         del a
-        self.assert_(delCalled)
+        self.assertTrue(delCalled)
 
 if __name__ == '__main__':
     unittest.main()

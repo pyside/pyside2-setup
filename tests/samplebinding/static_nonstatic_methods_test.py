@@ -73,13 +73,13 @@ class StaticNonStaticMethodsTest(unittest.TestCase):
 
     def testCallingStaticMethodWithClass(self):
         '''Call static method using class.'''
-        self.assert_(SimpleFile.exists(self.existing_filename))
+        self.assertTrue(SimpleFile.exists(self.existing_filename))
         self.assertFalse(SimpleFile.exists(self.non_existing_filename))
 
     def testCallingStaticMethodWithInstance(self):
         '''Call static method using instance of class.'''
         f = SimpleFile(self.non_existing_filename)
-        self.assert_(f.exists(self.existing_filename))
+        self.assertTrue(f.exists(self.existing_filename))
         self.assertFalse(f.exists(self.non_existing_filename))
 
     def testCallingInstanceMethod(self):
@@ -87,7 +87,7 @@ class StaticNonStaticMethodsTest(unittest.TestCase):
         f1 = SimpleFile(self.non_existing_filename)
         self.assertFalse(f1.exists())
         f2 = SimpleFile(self.existing_filename)
-        self.assert_(f2.exists())
+        self.assertTrue(f2.exists())
 
     def testOverridingStaticNonStaticMethod(self):
         f = SimpleFile2(self.existing_filename)

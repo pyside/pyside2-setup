@@ -75,7 +75,7 @@ class DuckPunchingTest(unittest.TestCase):
         vm.virtualMethod0 = MethodTypeCompat(myVirtualMethod0, vm)
 
         result1 = vm.callVirtualMethod0(pt, val, cpx, b)
-        self.assert_(self.duck_method_called)
+        self.assertTrue(self.duck_method_called)
 
         result2 = vm.virtualMethod0(pt, val, cpx, b)
         self.assertEqual(result1, result2)
@@ -104,7 +104,7 @@ class DuckPunchingTest(unittest.TestCase):
         duck.virtualMethod0 = MethodTypeCompat(myVirtualMethod0, duck)
 
         result1 = duck.callVirtualMethod0(pt, val, cpx, b)
-        self.assert_(self.duck_method_called)
+        self.assertTrue(self.duck_method_called)
 
         result2 = duck.virtualMethod0(pt, val, cpx, b)
         self.assertEqual(result1, result2)
@@ -132,7 +132,7 @@ class DuckPunchingTest(unittest.TestCase):
         self.assertRaises(TypeError, simplefile.exists, 'sbrubbles')
         # Monkey patched exists
         simplefile.exists()
-        self.assert_(self.duck_method_called)
+        self.assertTrue(self.duck_method_called)
 
         simplefile.exists = None
 
@@ -156,7 +156,7 @@ class DuckPunchingTest(unittest.TestCase):
         self.assertRaises(TypeError, monkey.exists, 'sbrubbles')
         # Monkey patched exists
         monkey.exists()
-        self.assert_(self.duck_method_called)
+        self.assertTrue(self.duck_method_called)
 
         monkey.exists = None
 

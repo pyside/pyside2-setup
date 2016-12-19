@@ -56,7 +56,7 @@ class ReparentingTest(unittest.TestCase):
         for obj in object_list:
             obj.setParent(new_parent)
         for child in new_parent.children():
-            self.assert_(child in object_list)
+            self.assertTrue(child in object_list)
 
     def testReparentWithTheSameParent(self):
         '''Set the same parent twice to check if the ref continue the same'''
@@ -94,7 +94,7 @@ class ReparentingTest(unittest.TestCase):
         for obj in object_list:
             obj.setParent(new_parent)
         for child in new_parent.children():
-            self.assert_(child in object_list)
+            self.assertTrue(child in object_list)
 
     def testReparentedObjectTypeIdentityWithChildrenCreatedInCpp(self):
         '''Reparent children created in C++ from one parent to another.'''
@@ -108,7 +108,7 @@ class ReparentingTest(unittest.TestCase):
         for obj in object_list:
             obj.setParent(new_parent)
         for child in new_parent.children():
-            self.assert_(child in object_list)
+            self.assertTrue(child in object_list)
 
     def testReparentedObjectTypeIdentityWithParentsAndChildrenCreatedInCpp(self):
         '''Reparent children from one parent to another. Parents and children are created in C++.'''
@@ -122,7 +122,7 @@ class ReparentingTest(unittest.TestCase):
         for obj in object_list:
             obj.setParent(new_parent)
         for child in new_parent.children():
-            self.assert_(child in object_list)
+            self.assertTrue(child in object_list)
 
 
 if __name__ == '__main__':

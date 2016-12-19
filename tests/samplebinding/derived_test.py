@@ -59,7 +59,7 @@ class DerivedTest(unittest.TestCase):
         '''Test if Derived class really inherits its methods from parent.'''
         inherited_methods = set(['callPureVirtual', 'callUnpureVirtual',
                                  'id_', 'pureVirtual', 'unpureVirtual'])
-        self.assert_(inherited_methods.issubset(dir(Derived)))
+        self.assertTrue(inherited_methods.issubset(dir(Derived)))
 
     def testOverloadedMethodCall(self):
         '''Test if the correct overloaded method is being called.'''
@@ -105,13 +105,13 @@ class DerivedTest(unittest.TestCase):
         '''Test if a Python override of a implemented pure virtual method is correctly called from C++.'''
         d = Deviant()
         d.callPureVirtual()
-        self.assert_(d.pure_virtual_called)
+        self.assertTrue(d.pure_virtual_called)
 
     def testReimplementedVirtualMethodCall(self):
         '''Test if a Python override of a reimplemented virtual method is correctly called from C++.'''
         d = Deviant()
         d.callUnpureVirtual()
-        self.assert_(d.unpure_virtual_called)
+        self.assertTrue(d.unpure_virtual_called)
 
     def testVirtualMethodCallString(self):
         '''Test virtual method call returning string.'''
@@ -128,8 +128,8 @@ class DerivedTest(unittest.TestCase):
     def testSingleArgument(self):
         '''Test singleArgument call.'''
         d = Derived()
-        self.assert_(d.singleArgument(False))
-        self.assert_(not d.singleArgument(True))
+        self.assertTrue(d.singleArgument(False))
+        self.assertTrue(not d.singleArgument(True))
 
     def testMethodCallWithDefaultValue(self):
         '''Test method call with default value.'''

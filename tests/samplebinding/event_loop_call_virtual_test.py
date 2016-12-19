@@ -63,7 +63,7 @@ class TestEventLoop(unittest.TestCase):
                                         Event(Event.BASIC_EVENT))
 
         self.assertEqual(evaluated, 3)
-        self.assert_(objs[2].called)
+        self.assertTrue(objs[2].called)
 
 
 if __name__ == '__main__':

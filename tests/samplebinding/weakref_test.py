@@ -51,14 +51,14 @@ class WeakrefBasicTest(unittest.TestCase):
         obj = ObjectType()
         ref = weakref.ref(obj, self.cb)
         del obj
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
     def testPrivateDtor(self):
         '''PrivateDtor weakref'''
         obj = PrivateDtor.instance()
         ref = weakref.ref(obj, self.cb)
         del obj
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
 
 if __name__ == '__main__':

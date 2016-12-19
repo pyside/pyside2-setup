@@ -122,7 +122,7 @@ class ProtectedPolymorphicTest(unittest.TestCase):
         original_name = 'Poly'
         p = ExtendedProtectedPolymorphic(original_name)
         name = p.callProtectedName()
-        self.assert_(p.protectedName_called)
+        self.assertTrue(p.protectedName_called)
         self.assertEqual(p.protectedName(), name)
         self.assertEqual(ProtectedPolymorphic.protectedName(p), original_name)
 class ProtectedPolymorphicDaugherTest(unittest.TestCase):
@@ -139,7 +139,7 @@ class ProtectedPolymorphicDaugherTest(unittest.TestCase):
         original_name = 'Poly'
         p = ExtendedProtectedPolymorphicDaughter(original_name)
         name = p.callProtectedName()
-        self.assert_(p.protectedName_called)
+        self.assertTrue(p.protectedName_called)
         self.assertEqual(p.protectedName(), name)
         self.assertEqual(ProtectedPolymorphicDaughter.protectedName(p), original_name)
 
@@ -162,7 +162,7 @@ class ProtectedPolymorphicGrandDaugherTest(unittest.TestCase):
         original_name = 'Poly'
         p = ExtendedProtectedPolymorphicGrandDaughter(original_name)
         name = p.callProtectedName()
-        self.assert_(p.protectedName_called)
+        self.assertTrue(p.protectedName_called)
         self.assertEqual(p.protectedName(), name)
         self.assertEqual(ProtectedPolymorphicGrandDaughter.protectedName(p), original_name)
 
@@ -309,7 +309,7 @@ class ProtectedPropertyTest(unittest.TestCase):
         self.obj.protectedValueTypePointerProperty = pt1
         self.assertEqual(self.obj.protectedValueTypePointerProperty, pt1)
         self.assertEqual(self.obj.protectedValueTypePointerProperty, pt2)
-        self.assert_(self.obj.protectedValueTypePointerProperty is pt1)
+        self.assertTrue(self.obj.protectedValueTypePointerProperty is pt1)
         self.assertFalse(self.obj.protectedValueTypePointerProperty is pt2)
 
     def testProtectedObjectTypeProperty(self):

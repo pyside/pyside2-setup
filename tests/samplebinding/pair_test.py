@@ -52,7 +52,7 @@ class PairConversionTest(unittest.TestCase):
         '''Test if a Python override of a virtual method is correctly called from C++.'''
         pu = ExtendedPairUser()
         pair = pu.callCreatePair()
-        self.assert_(pu.create_pair_called)
+        self.assertTrue(pu.create_pair_called)
         self.assertEqual(type(pair), tuple)
         self.assertEqual(type(pair[0]), int)
         self.assertEqual(type(pair[1]), int)

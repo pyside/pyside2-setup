@@ -42,25 +42,25 @@ class VoidHolderTest(unittest.TestCase):
         '''Passes a void pointer created in C++ and to kept by VoidHolder.'''
         voidptr = VoidHolder.gimmeMeSomeVoidPointer()
         voidholder = VoidHolder(voidptr)
-        self.assertEquals(voidptr, voidholder.voidPointer())
+        self.assertEqual(voidptr, voidholder.voidPointer())
 
     def testPutRandomObjectInsideVoidHolder(self):
         '''Passes a C++ pointer for an object created in Python to be kept by VoidHolder.'''
         obj = Point(1, 2)
         voidholder = VoidHolder(obj)
-        self.assertEquals(obj, voidholder.voidPointer())
+        self.assertEqual(obj, voidholder.voidPointer())
 
     def testGetNoneObjectFromVoidHolder(self):
         '''A VoidHolder created without parameters returns a NULL pointer
            that should be converted to a Python None.'''
         voidholder = VoidHolder()
-        self.assertEquals(voidholder.voidPointer(), None)
+        self.assertEqual(voidholder.voidPointer(), None)
 
     def testPutPythonObjectInsideVoidHolder(self):
         '''Passes a native Python object to be kept by VoidHolder.'''
         obj = 'Foo'
         voidholder = VoidHolder(obj)
-        self.assertEquals(obj, voidholder.voidPointer())
+        self.assertEqual(obj, voidholder.voidPointer())
 
 
 

@@ -155,7 +155,7 @@ class OverloadTest(unittest.TestCase):
         args = (Str(), Str(), Str(), 4, 5)
         result = raisesWithErrorMessage(overload.drawText3, args,
                                         TypeError, 'called with wrong argument types:')
-        self.assert_(result)
+        self.assertTrue(result)
 
     def testDrawText4(self):
         overload = Overload()
@@ -193,7 +193,7 @@ class OverloadTest(unittest.TestCase):
         args = (['line 1', 2], )
         result = raisesWithErrorMessage(overload.acceptSequence, args,
                                         TypeError, 'The argument must be a sequence of strings.')
-        self.assert_(result)
+        self.assertTrue(result)
 
     def testAcceptSequencePyObject(self):
         # Overload.acceptSequence(void*)

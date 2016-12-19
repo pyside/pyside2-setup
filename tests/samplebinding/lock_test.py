@@ -79,7 +79,7 @@ class TestLockUnlock(unittest.TestCase):
         unlocker.start()
         result = bucket.callVirtualBlockerMethodButYouDontKnowThis()
         unlocker.join()
-        self.assert_(result)
+        self.assertTrue(result)
 
     def testReimplementedVirtualBlocker(self):
         '''Same as the basic case but blocker method is a C++ virtual reimplemented in Python and called from C++.'''
@@ -89,7 +89,7 @@ class TestLockUnlock(unittest.TestCase):
         unlocker.start()
         result = mybucket.callVirtualBlockerMethodButYouDontKnowThis()
         unlocker.join()
-        self.assert_(result)
+        self.assertTrue(result)
 
 if __name__ == '__main__':
     unittest.main()

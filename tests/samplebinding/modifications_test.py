@@ -67,12 +67,12 @@ class ModificationsTest(unittest.TestCase):
                                 'multiplyPointCoordsPlusValue', 'name',
                                 'pointToPair', 'overloaded', 'power',
                                 'timesTen'])
-        self.assert_(expected_members.issubset(dir(Modifications)))
+        self.assertTrue(expected_members.issubset(dir(Modifications)))
 
     def testRenamedMethodAvailability(self):
         '''Test if Modification class really have renamed the 'className' virtual method to 'name'.'''
-        self.assert_('className' not in dir(Modifications))
-        self.assert_('name' in dir(Modifications))
+        self.assertTrue('className' not in dir(Modifications))
+        self.assertTrue('name' in dir(Modifications))
 
     def testReimplementationOfRenamedVirtualMethod(self):
         '''Test if class inheriting from Modification class have the reimplementation of renamed virtual method called.'''
@@ -82,13 +82,13 @@ class ModificationsTest(unittest.TestCase):
 
     def testRegularMethodRenaming(self):
         '''Test if Modifications::cppMultiply was correctly renamed to calculateArea.'''
-        self.assert_('cppMultiply' not in dir(Modifications))
-        self.assert_('calculateArea' in dir(Modifications))
+        self.assertTrue('cppMultiply' not in dir(Modifications))
+        self.assertTrue('calculateArea' in dir(Modifications))
         self.assertEqual(self.mods.calculateArea(3, 6), 3 * 6)
 
     def testRegularMethodRemoval(self):
         '''Test if 'Modifications::exclusiveCppStuff' was removed from Python bindings.'''
-        self.assert_('exclusiveCppStuff' not in dir(Modifications))
+        self.assertTrue('exclusiveCppStuff' not in dir(Modifications))
 
     def testArgumentRemoval(self):
         '''Test if second argument of Modifications::doublePlus(int, int) was removed.'''
@@ -161,7 +161,7 @@ class ModificationsTest(unittest.TestCase):
 
     def testNonConversionRuleForArgumentWithDefaultValue(self):
         status, obj = self.mods.nonConversionRuleForArgumentWithDefaultValue()
-        self.assert_(status)
+        self.assertTrue(status)
         self.assertEqual(obj, self.mods.getObject())
         self.assertEqual(obj.objectName(), 'MyObject')
 

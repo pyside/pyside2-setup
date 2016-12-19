@@ -61,7 +61,7 @@ class ReferenceToPointerTest(unittest.TestCase):
         '''Simple call to createStr method with a Python string argument.'''
         obj = VirtualMethods()
         ok, string = obj.createStr('foo')
-        self.assert_(ok)
+        self.assertTrue(ok)
         self.assertEqual(string, Str('foo'))
 
     def testCallNonReimplementedMethodWithNone(self):
@@ -89,7 +89,7 @@ class ReferenceToPointerTest(unittest.TestCase):
         '''Calls reimplemented createStr method from C++ with a Python string argument.'''
         obj = ExtendedVirtualMethods()
         ok, string = obj.callCreateStr('foo')
-        self.assert_(ok)
+        self.assertTrue(ok)
         self.assertEqual(string, Str(obj.prefix + 'foo'))
 
 if __name__ == '__main__':

@@ -42,16 +42,16 @@ class DateConversionTest(unittest.TestCase):
     def testConstructorWithDateObject(self):
         pyDate = date(2010, 12, 12)
         cDate = SbkDate(pyDate)
-        self.assert_(cDate.day(), pyDate.day)
-        self.assert_(cDate.month(), pyDate.month)
-        self.assert_(cDate.year(), pyDate.year)
+        self.assertTrue(cDate.day(), pyDate.day)
+        self.assertTrue(cDate.month(), pyDate.month)
+        self.assertTrue(cDate.year(), pyDate.year)
 
     def testToPythonFunction(self):
         cDate = SbkDate(2010, 12, 12)
         pyDate = cDate.toPython()
-        self.assert_(cDate.day(), pyDate.day)
-        self.assert_(cDate.month(), pyDate.month)
-        self.assert_(cDate.year(), pyDate.year)
+        self.assertTrue(cDate.day(), pyDate.day)
+        self.assertTrue(cDate.month(), pyDate.month)
+        self.assertTrue(cDate.year(), pyDate.year)
 
 if __name__ == '__main__':
     unittest.main()

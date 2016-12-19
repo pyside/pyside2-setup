@@ -64,7 +64,7 @@ class AbstractTest(unittest.TestCase):
 
     def testAbstractPureVirtualMethodAvailability(self):
         '''Test if Abstract class pure virtual method was properly wrapped.'''
-        self.assert_('pureVirtual' in dir(Abstract))
+        self.assertTrue('pureVirtual' in dir(Abstract))
 
     def testAbstractInstanciation(self):
         '''Test if instanciation of an abstract class raises the correct exception.'''
@@ -92,19 +92,19 @@ class AbstractTest(unittest.TestCase):
         '''Test if a Python override of a virtual method is correctly called from C++.'''
         c = Concrete()
         c.callUnpureVirtual()
-        self.assert_(c.unpure_virtual_called)
+        self.assertTrue(c.unpure_virtual_called)
 
     def testImplementedPureVirtualMethodCall(self):
         '''Test if a Python override of a pure virtual method is correctly called from C++.'''
         c = Concrete()
         c.callPureVirtual()
-        self.assert_(c.pure_virtual_called)
+        self.assertTrue(c.pure_virtual_called)
 
     def testEnumParameterOnVirtualMethodCall(self):
         '''testEnumParameterOnVirtualMethodCall'''
         c = Concrete()
         c.callVirtualGettingEnum(Abstract.Short)
-        self.assert_(c.virtual_getting_enum)
+        self.assertTrue(c.virtual_getting_enum)
 
 if __name__ == '__main__':
     unittest.main()

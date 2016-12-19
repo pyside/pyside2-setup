@@ -71,7 +71,7 @@ class ObjTest(unittest.TestCase):
         obj = ExtObj(0)
         even_number = 8
         self.assertEqual(obj.virtualMethod(even_number), obj.callVirtualMethod(even_number))
-        self.assert_(obj.virtual_method_called)
+        self.assertTrue(obj.virtual_method_called)
 
     def testPassObjectType(self):
         obj = Obj(0)

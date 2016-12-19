@@ -59,7 +59,7 @@ class TypeDeallocTest(unittest.TestCase):
             ref = weakref.ref(Ext, self.callback)
         scope()
         gc.collect()
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
     def testDeleteType(self):
         class Ext(Point):
@@ -67,7 +67,7 @@ class TypeDeallocTest(unittest.TestCase):
         ref = weakref.ref(Ext, self.callback)
         del Ext
         gc.collect()
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
 
 if __name__ == '__main__':

@@ -50,7 +50,7 @@ class SimpleCopy(unittest.TestCase):
         point = Point(0.1, 2.4)
         new_point = copy.copy(point)
 
-        self.assert_(point is not new_point)
+        self.assertTrue(point is not new_point)
         self.assertEqual(point, new_point)
 
 
@@ -62,7 +62,7 @@ class DeepCopy(unittest.TestCase):
         point = Point(3.1, 4.2)
         new_point = copy.deepcopy([point])[0]
 
-        self.assert_(point is not new_point)
+        self.assertTrue(point is not new_point)
         self.assertEqual(point, new_point)
 
 
@@ -78,7 +78,7 @@ class PicklingTest(unittest.TestCase):
         new_point = pickle.loads(data)
 
         self.assertEqual(point, new_point)
-        self.assert_(point is not new_point)
+        self.assertTrue(point is not new_point)
 
 
 if __name__ == '__main__':
