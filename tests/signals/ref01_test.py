@@ -47,7 +47,7 @@ class BoundAndUnboundSignalsTest(unittest.TestCase):
     def testBoundSignal(self):
         obj = QObject()
         self.assertNotEqual(type(obj.destroyed), Signal)
-        self.assert_(self.methods.issubset(dir(obj.destroyed)))
+        self.assertTrue(self.methods.issubset(dir(obj.destroyed)))
 
 if __name__ == '__main__':
     unittest.main()

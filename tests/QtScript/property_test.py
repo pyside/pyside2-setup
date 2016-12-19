@@ -74,7 +74,7 @@ class QPropertyTest(unittest.TestCase):
             if mp.name() == "x":
                 found = True
                 break
-        self.assert_(found)
+        self.assertTrue(found)
 
     def testScriptQProperty(self):
         qapp = QCoreApplication([])

@@ -55,7 +55,7 @@ class StaticMetaObjectTest(UsesQCoreApplication):
 
         o.connect(SIGNAL("foo()"), o2.mySlot)
         # SIGNAL foo create after connect
-        self.assert_(o.metaObject().indexOfSignal("foo()") > 0)
+        self.assertTrue(o.metaObject().indexOfSignal("foo()") > 0)
 
         # SIGNAL does not propagate to others objects of the same type
         self.assertEqual(o2.metaObject().indexOfSignal("foo()"), -1)

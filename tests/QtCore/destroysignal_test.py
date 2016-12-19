@@ -32,7 +32,7 @@ import unittest
 
 class TestDestroySignal(unittest.TestCase):
     def onObjectDestroyed(self, timer):
-        self.assert_(isinstance(timer, QObject))
+        self.assertTrue(isinstance(timer, QObject))
         self._destroyed = True
 
     def testSignal(self):
@@ -40,7 +40,7 @@ class TestDestroySignal(unittest.TestCase):
         t = QTimer()
         t.destroyed[QObject].connect(self.onObjectDestroyed)
         del t
-        self.assert_(self._destroyed)
+        self.assertTrue(self._destroyed)
 
     def testWithParent(self):
         self._destroyed = False
@@ -48,7 +48,7 @@ class TestDestroySignal(unittest.TestCase):
         t = QTimer(p)
         t.destroyed[QObject].connect(self.onObjectDestroyed)
         del p
-        self.assert_(self._destroyed)
+        self.assertTrue(self._destroyed)
 
 if __name__ == '__main__':
     unittest.main()

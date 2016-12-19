@@ -46,7 +46,7 @@ class RemoveTabMethod(TimedQApplication):
 
 
     def testRemoveTabPresence(self):
-        self.assert_(getattr(self.tab, 'removeTab'))
+        self.assertTrue(getattr(self.tab, 'removeTab'))
 
     def testInsertTab(self):
         makeBug643(self.tab)

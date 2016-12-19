@@ -53,7 +53,7 @@ class AutoConnectionTest(unittest.TestCase):
         btn.setObjectName("button")
         QMetaObject.connectSlotsByName(win)
         btn.click()
-        self.assert_(win._method_called)
+        self.assertTrue(win._method_called)
 
 if __name__ == '__main__':
     unittest.main()

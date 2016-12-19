@@ -65,7 +65,7 @@ class AccessManagerCase(UsesQCoreApplication):
         manager.finished.connect(self.slot_replyFinished)
         manager.get(QNetworkRequest(QUrl("http://127.0.0.1:%s" % self.httpd.port())))
         self.app.exec_()
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
 if __name__ == '__main__':
     unittest.main()

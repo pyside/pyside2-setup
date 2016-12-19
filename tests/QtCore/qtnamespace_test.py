@@ -41,7 +41,7 @@ class QtNamespace(unittest.TestCase):
         #Access to Qt namespace
         getattr(Qt, 'Horizontal')
         getattr(Qt, 'WindowMaximizeButtonHint')
-        self.assert_(True)
+        self.assertTrue(True)
 
 
 if __name__ == '__main__':

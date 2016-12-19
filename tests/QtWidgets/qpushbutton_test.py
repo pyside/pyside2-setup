@@ -62,7 +62,7 @@ class QPushButtonTest(UsesQApplication):
         self._clicked = False
         b.toggled[bool].connect(self.buttonCb)
         b.toggle()
-        self.assert_(self._clicked)
+        self.assertTrue(self._clicked)
 
 if __name__ == '__main__':
     unittest.main()

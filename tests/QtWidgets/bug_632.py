@@ -41,7 +41,7 @@ class Bug589(unittest.TestCase):
         text = QLineEdit("PySide bug 632")
         text.setTextMargins(10, 20, 30, 40)
         (a, b, c, d) = text.getTextMargins()
-        self.assert_((a, b, c, d), (10, 20, 30, 40))
+        self.assertTrue((a, b, c, d), (10, 20, 30, 40))
 
 if __name__ == "__main__":
    app = QApplication(sys.argv)

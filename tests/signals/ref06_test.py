@@ -69,7 +69,7 @@ class SignaltoSignalTest(UsesQCoreApplication):
 
         self.app.exec_()
 
-        self.assert_(self.receiver.counter > 1)
+        self.assertTrue(self.receiver.counter > 1)
 
 
 if __name__ == '__main__':

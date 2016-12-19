@@ -74,7 +74,7 @@ class TestChildEvent(UsesQCoreApplication):
         parent = ExtQTimer()
         child = QObject()
         child.setParent(parent)
-        self.assert_(parent.child_event_received)
+        self.assertTrue(parent.child_event_received)
 
 if __name__ == '__main__':
     unittest.main()

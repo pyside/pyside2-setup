@@ -49,7 +49,7 @@ class ChildrenCoreApplication(unittest.TestCase):
         # del children
         # del child2
         del parent # XXX Segfaults here
-        self.assert_(True)
+        self.assertTrue(True)
 
 
 if __name__ == '__main__':

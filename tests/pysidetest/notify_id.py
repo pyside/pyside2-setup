@@ -70,7 +70,7 @@ class NotifyIdSignal(unittest.TestCase):
         signalIndex = property.notifySignalIndex()
         signal = metaObject.method(signalIndex)
         signalName = signal.name()
-        self.assertEquals(signalName, "propChanged")
+        self.assertEqual(signalName, "propChanged")
 
 if __name__ == '__main__':
     unittest.main()

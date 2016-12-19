@@ -55,7 +55,7 @@ class ShortCircuitSignals(unittest.TestCase):
         QObject.connect(obj1, SIGNAL('foo()'), self.callback)
         self.args = tuple()
         obj1.emit(SIGNAL('foo()'), *self.args)
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
     def testWithArgs(self):
         """Short circuit signal with integer arguments"""
@@ -65,7 +65,7 @@ class ShortCircuitSignals(unittest.TestCase):
         self.args = (42,)
         obj1.emit(SIGNAL('foo(int)'), *self.args)
 
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
     def testMultipleArgs(self):
         """Short circuit signal with multiple arguments"""
@@ -75,7 +75,7 @@ class ShortCircuitSignals(unittest.TestCase):
         self.args = (42,33,'char')
         obj1.emit(SIGNAL('foo(int,int,QString)'), *self.args)
 
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
     def testComplexArgs(self):
         """Short circuit signal with complex arguments"""
@@ -85,7 +85,7 @@ class ShortCircuitSignals(unittest.TestCase):
         self.args = (42, obj1)
         obj1.emit(SIGNAL('foo(int,QObject*)'), *self.args)
 
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
 if __name__ == '__main__':
     unittest.main()

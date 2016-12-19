@@ -39,7 +39,7 @@ class HashableTest(UsesQApplication):
         h = {}
         obj = QTreeWidgetItem()
         h[obj] = 2
-        self.assert_(h.get(obj), 2)
+        self.assertTrue(h.get(obj), 2)
 
 if __name__ == '__main__':
     unittest.main()

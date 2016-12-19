@@ -76,7 +76,7 @@ class qmetaobject_test(unittest.TestCase):
         #o.connect(o, SIGNAL("foo()"), o2, SIGNAL("bar()"))
         #signal_index = o.metaObject().indexOfMethod("foo()");
 
-        #self.assert_(slot_index != signal_index)
+        #self.assertTrue(slot_index != signal_index)
 
 
 if __name__ == '__main__':

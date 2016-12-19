@@ -66,7 +66,7 @@ class QDomDocumentTest(unittest.TestCase):
     def testQDomDocumentSetContentWithGoodXmlData(self):
         '''Sets valid xml as the QDomDocument contents.'''
         ok, errorStr, errorLine, errorColumn = self.dom.setContent(self.goodXmlData, True)
-        self.assert_(ok)
+        self.assertTrue(ok)
         self.assertEqual(errorStr, '')
         self.assertEqual(errorLine, 0)
         self.assertEqual(errorColumn, 0)
@@ -75,9 +75,9 @@ class QDomDocumentTest(unittest.TestCase):
         '''Checks the QDomDocument elements for the valid xml contents.'''
 
         def checkAttribute(element, attribute, value):
-            self.assert_(isinstance(root, QDomElement))
+            self.assertTrue(isinstance(root, QDomElement))
             self.assertFalse(element.isNull())
-            self.assert_(element.hasAttribute(attribute))
+            self.assertTrue(element.hasAttribute(attribute))
             self.assertEqual(element.attribute(attribute), value)
 
         ok, errorStr, errorLine, errorColumn = self.dom.setContent(self.goodXmlData, True)

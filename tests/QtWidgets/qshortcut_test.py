@@ -64,8 +64,8 @@ class QAppPresence(unittest.TestCase):
         self.scstd = MyShortcut(QtGui.QKeySequence.Copy, f, f.slot_of_copy)
         QtCore.QTimer.singleShot(0, self.init);
         self.qapp.exec_()
-        self.assertEquals(f.ok, True)
-        self.assertEquals(f.copy, True)
+        self.assertEqual(f.ok, True)
+        self.assertEqual(f.copy, True)
 
     def init(self):
         self.sc.emit_signal();

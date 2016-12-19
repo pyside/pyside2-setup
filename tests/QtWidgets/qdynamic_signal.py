@@ -42,13 +42,13 @@ class DynamicSignalTest(UsesQApplication):
         dlg = QInputDialog()
         dlg.setInputMode(QInputDialog.TextInput)
         lst = dlg.children()
-        self.assert_(len(lst))
+        self.assertTrue(len(lst))
         obj = lst[0]
         self._called = False
         obj.destroyed[QObject].connect(self.cb)
         obj = None
         del dlg
-        self.assert_(self._called)
+        self.assertTrue(self._called)
 
 
 if __name__ == '__main__':

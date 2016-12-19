@@ -69,7 +69,7 @@ class QGraphicsItemTest(UsesQApplication):
         view.show()
         QTimer.singleShot(1000, self.quit_app)
         self.app.exec_()
-        self.assert_(qgraphics_item_painted)
+        self.assertTrue(qgraphics_item_painted)
 
 
 if __name__ == '__main__':

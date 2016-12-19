@@ -54,8 +54,8 @@ class SignalWithDefaultValueTest(unittest.TestCase):
         self.obj.signalWithDefaultValue.connect(callbackVoid)
         self.obj.signalWithDefaultValue[bool].connect(callbackBool)
         self.obj.emitSignalWithDefaultValue_void()
-        self.assert_(self.void_called)
-        self.assert_(self.bool_called)
+        self.assertTrue(self.void_called)
+        self.assertTrue(self.bool_called)
 
     def testConnectNewStyleEmitBoolSignal(self):
         def callbackVoid():
@@ -65,8 +65,8 @@ class SignalWithDefaultValueTest(unittest.TestCase):
         self.obj.signalWithDefaultValue.connect(callbackVoid)
         self.obj.signalWithDefaultValue[bool].connect(callbackBool)
         self.obj.emitSignalWithDefaultValue_bool()
-        self.assert_(self.void_called)
-        self.assert_(self.bool_called)
+        self.assertTrue(self.void_called)
+        self.assertTrue(self.bool_called)
 
     def testConnectOldStyleEmitVoidSignal(self):
         def callbackVoid():
@@ -76,8 +76,8 @@ class SignalWithDefaultValueTest(unittest.TestCase):
         QObject.connect(self.obj, SIGNAL('signalWithDefaultValue()'), callbackVoid)
         QObject.connect(self.obj, SIGNAL('signalWithDefaultValue(bool)'), callbackBool)
         self.obj.emitSignalWithDefaultValue_void()
-        self.assert_(self.void_called)
-        self.assert_(self.bool_called)
+        self.assertTrue(self.void_called)
+        self.assertTrue(self.bool_called)
 
     def testConnectOldStyleEmitBoolSignal(self):
         def callbackVoid():
@@ -87,8 +87,8 @@ class SignalWithDefaultValueTest(unittest.TestCase):
         QObject.connect(self.obj, SIGNAL('signalWithDefaultValue()'), callbackVoid)
         QObject.connect(self.obj, SIGNAL('signalWithDefaultValue(bool)'), callbackBool)
         self.obj.emitSignalWithDefaultValue_bool()
-        self.assert_(self.void_called)
-        self.assert_(self.bool_called)
+        self.assertTrue(self.void_called)
+        self.assertTrue(self.bool_called)
 
 if __name__ == '__main__':
     unittest.main()

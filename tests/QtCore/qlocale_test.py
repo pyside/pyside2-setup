@@ -63,7 +63,7 @@ class QLocaleTestToNumber(unittest.TestCase):
 
     def testToNumberULongLongNegative(self):
         obj = QLocale(QLocale.C)
-        self.assert_(not obj.toULongLong('-37')[1])
+        self.assertTrue(not obj.toULongLong('-37')[1])
 
 if __name__ == '__main__':
     unittest.main()

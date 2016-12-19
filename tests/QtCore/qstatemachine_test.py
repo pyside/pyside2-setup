@@ -89,8 +89,8 @@ class QSetConverterTest(UsesQCoreApplication):
 
         configuration = machine.configuration()
 
-        self.assert_(isinstance(configuration, set))
-        self.assert_(s1 in configuration)
+        self.assertTrue(isinstance(configuration, set))
+        self.assertTrue(s1 in configuration)
 
 
 if __name__ == '__main__':

@@ -56,7 +56,7 @@ class NativeSignalsTest(UsesQCoreApplication):
         self.timeline.start()
 
         self.app.exec_()
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
     def testSignalWithoutArguments(self):
 
@@ -68,7 +68,7 @@ class NativeSignalsTest(UsesQCoreApplication):
         self.timeline.start()
 
         self.app.exec_()
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
 if __name__ == '__main__':
     unittest.main()

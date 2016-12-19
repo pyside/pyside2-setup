@@ -45,8 +45,8 @@ class TestParentType(UsesQApplication):
         # class. The method was returning the last C++ class in the hierarchy
         parent = Foo()
         w2 = QWidget(parent)
-        self.assert_(isinstance(w2.parentWidget(), Foo))
-        self.assert_(isinstance(w2.parent(), Foo))
+        self.assertTrue(isinstance(w2.parentWidget(), Foo))
+        self.assertTrue(isinstance(w2.parent(), Foo))
 
 if __name__ == '__main__':
     unittest.main()

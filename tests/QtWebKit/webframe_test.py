@@ -39,11 +39,11 @@ from helper import adjust_filename, UsesQApplication
 
 class TestWebFrame(UsesQApplication):
     def load_finished(self, ok):
-        self.assert_(ok)
+        self.assertTrue(ok)
         page = self.view.page()
-        self.assert_(page)
+        self.assertTrue(page)
         frame = page.mainFrame()
-        self.assert_(frame)
+        self.assertTrue(frame)
         meta = frame.metaData()
         self.assertEqual(meta['description'], ['PySide Test METADATA.'])
         self.app.quit()

@@ -56,7 +56,7 @@ class HomonymousSignalAndMethodTest(unittest.TestCase):
             self.called = True
         self.obj.staticMethodDouble.connect(callback)
         self.obj.emitStaticMethodDoubleSignal()
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
     def testSignalNotCallable(self):
         self.assertRaises(TypeError, self.obj.justASignal)

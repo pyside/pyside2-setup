@@ -55,7 +55,7 @@ class TestThreadSignal(UsesQCoreApplication):
 
         self.app.exec_()
         t.wait()
-        self.assert_(self.__called__);
+        self.assertTrue(self.__called__);
 
 if __name__ == '__main__':
     unittest.main()

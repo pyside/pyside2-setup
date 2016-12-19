@@ -47,7 +47,7 @@ class BugTest(UsesQApplication):
 
         filePath = os.path.join(os.path.dirname(__file__), 'action.ui')
         result = loader.load(filePath, w)
-        self.assert_(isinstance(result.actionFoo, QtWidgets.QAction))
+        self.assertTrue(isinstance(result.actionFoo, QtWidgets.QAction))
 
     def testPythonCustomWidgets(self):
         w = QtWidgets.QWidget()
@@ -56,8 +56,8 @@ class BugTest(UsesQApplication):
 
         filePath = os.path.join(os.path.dirname(__file__), 'pycustomwidget.ui')
         result = loader.load(filePath, w)
-        self.assert_(isinstance(result.custom, MyWidget))
-        self.assert_(result.custom.isPython())
+        self.assertTrue(isinstance(result.custom, MyWidget))
+        self.assertTrue(result.custom.isPython())
 
     def testPythonCustomWidgetsTwice(self):
         w = QtWidgets.QWidget()
@@ -66,9 +66,9 @@ class BugTest(UsesQApplication):
 
         filePath = os.path.join(os.path.dirname(__file__), 'pycustomwidget2.ui')
         result = loader.load(filePath, w)
-        self.assert_(isinstance(result.custom, MyWidget))
-        self.assert_(isinstance(result.custom2, MyWidget))
-        self.assert_(result.custom.isPython())
+        self.assertTrue(isinstance(result.custom, MyWidget))
+        self.assertTrue(isinstance(result.custom2, MyWidget))
+        self.assertTrue(result.custom.isPython())
 
 if __name__ == '__main__':
     unittest.main()

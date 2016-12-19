@@ -52,7 +52,7 @@ class BasicCase(unittest.TestCase):
         QObject.connect(obj, SIGNAL('foo()'),
                         lambda: setattr(obj, 'called', True))
         obj.emit(SIGNAL('foo()'))
-        self.assert_(obj.called)
+        self.assertTrue(obj.called)
 
     def testSimplePythonSignal(self):
         #Connecting a lambda to a simple python signal witharguments
@@ -76,7 +76,7 @@ class QtSigLambda(UsesQCoreApplication):
                         lambda: setattr(dummy, 'called', True))
         proc.start(sys.executable, ['-c', '""'])
         proc.waitForFinished()
-        self.assert_(dummy.called)
+        self.assertTrue(dummy.called)
 
     def testWithArgs(self):
         '''Connecting a lambda to a signal with arguments'''

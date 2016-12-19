@@ -56,7 +56,7 @@ class PropertyWithNotify(unittest.TestCase):
         obj = MyObjectWithNotifyProperty()
         obj.notifyP.connect(self.called)
         obj.myProperty = 10
-        self.assert_(self.called_)
+        self.assertTrue(self.called_)
 
     def testHasProperty(self):
         o = MyObjectWithNotifyProperty()

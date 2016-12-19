@@ -54,7 +54,7 @@ if hasQtGui:
             func = lambda: setattr(ctr, 'arg', True)
             QObject.connect(obj, SIGNAL('clicked()'), func)
             obj.click()
-            self.assert_(ctr.arg)
+            self.assertTrue(ctr.arg)
             QObject.disconnect(obj, SIGNAL('clicked()'), func)
 
 

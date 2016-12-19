@@ -42,10 +42,10 @@ class TestSignalsBlockedBasic(unittest.TestCase):
         The signals aren't blocked by default.
         blockSignals returns the previous value'''
         obj = QObject()
-        self.assert_(not obj.signalsBlocked())
-        self.assert_(not obj.blockSignals(True))
-        self.assert_(obj.signalsBlocked())
-        self.assert_(obj.blockSignals(False))
+        self.assertTrue(not obj.signalsBlocked())
+        self.assertTrue(not obj.blockSignals(True))
+        self.assertTrue(obj.signalsBlocked())
+        self.assertTrue(obj.blockSignals(False))
 
 class TestSignalsBlocked(unittest.TestCase):
     '''Test case to check if the signals are really blocked'''
@@ -73,12 +73,12 @@ class TestSignalsBlocked(unittest.TestCase):
         QObject.connect(self.obj, SIGNAL('mysignal()'), self.callback)
 
         self.obj.emit(SIGNAL('mysignal()'))
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
         self.called = False
         self.obj.blockSignals(True)
         self.obj.emit(SIGNAL('mysignal()'))
-        self.assert_(not self.called)
+        self.assertTrue(not self.called)
 
     def testPythonSignals(self):
         #Blocking of Python typed signals
@@ -86,12 +86,12 @@ class TestSignalsBlocked(unittest.TestCase):
         self.args = (1, 3)
 
         self.obj.emit(SIGNAL('mysignal(int,int)'), *self.args)
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
         self.called = False
         self.obj.blockSignals(True)
         self.obj.emit(SIGNAL('mysignal(int,int)'), *self.args)
-        self.assert_(not self.called)
+        self.assertTrue(not self.called)
 
 class TestQFileSignalBlocking(unittest.TestCase):
     '''Test case for blocking the signal QIODevice.aboutToClose()'''
@@ -118,16 +118,16 @@ class TestQFileSignalBlocking(unittest.TestCase):
 
         QObject.connect(self.qfile, SIGNAL('aboutToClose()'), self.callback)
 
-        self.assert_(self.qfile.open(QFile.ReadOnly))
+        self.assertTrue(self.qfile.open(QFile.ReadOnly))
         self.qfile.close()
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
         self.called = False
         self.qfile.blockSignals(True)
 
-        self.assert_(self.qfile.open(QFile.ReadOnly))
+        self.assertTrue(self.qfile.open(QFile.ReadOnly))
         self.qfile.close()
-        self.assert_(not self.called)
+        self.assertTrue(not self.called)
 
 
 if __name__ == '__main__':

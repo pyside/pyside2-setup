@@ -47,7 +47,7 @@ class QMenuAddAction(UsesQApplication):
 
         addNewAction = fileMenu.addAction("&Open...", self.openFile)
         addNewAction.trigger()
-        self.assertEquals(self.arg, ())
+        self.assertEqual(self.arg, ())
 
 if __name__ == '__main__':
     unittest.main()

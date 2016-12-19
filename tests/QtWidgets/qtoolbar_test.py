@@ -55,7 +55,7 @@ class AddActionText(UsesQApplication):
         self.toolbar.addAction('aaaa')
         self.assertEqual(len(self.toolbar.actions()), 1)
         action = self.toolbar.actions()[0]
-        self.assert_(isinstance(action, QAction))
+        self.assertTrue(isinstance(action, QAction))
         self.assertEqual(action.text(), 'aaaa')
 
 if __name__ == '__main__':

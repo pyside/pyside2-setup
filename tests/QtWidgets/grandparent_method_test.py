@@ -44,7 +44,7 @@ class GrandParentMethod(UsesQApplication):
     def testMethod(self):
         obj = Dummy()
         obj.show()
-        self.assert_(obj.called)
+        self.assertTrue(obj.called)
 
 if __name__ == '__main__':
     unittest.main()

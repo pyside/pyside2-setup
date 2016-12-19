@@ -53,7 +53,7 @@ class QStringQKeySequenceTest(UsesQApplication):
         action = QAction(None)
         action.setShortcut(keyseq)
         shortcut = action.shortcut()
-        self.assert_(isinstance(shortcut, QKeySequence))
+        self.assertTrue(isinstance(shortcut, QKeySequence))
         self.assertEqual(shortcut.toString(), keyseq)
 
 if __name__ == '__main__':

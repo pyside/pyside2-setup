@@ -40,7 +40,7 @@ class RectConstructor(unittest.TestCase):
         #QRect()
         obj = QRect()
 
-        self.assert_(obj.isNull())
+        self.assertTrue(obj.isNull())
 
     def testConstructorQPoint(self):
         topLeft = QPoint(3, 0)

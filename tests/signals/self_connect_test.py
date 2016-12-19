@@ -45,9 +45,9 @@ class SelfConnect(UsesQApplication):
         button.connect(button, SIGNAL('clicked()'), SLOT('close()'))
 
         button.show()
-        self.assert_(button.isVisible())
+        self.assertTrue(button.isVisible())
         button.click()
-        self.assert_(not button.isVisible())
+        self.assertTrue(not button.isVisible())
 
     def testWindowButtonClickClose(self):
         button = QPushButton()
@@ -55,9 +55,9 @@ class SelfConnect(UsesQApplication):
         window.connect(button, SIGNAL('clicked()'), SLOT('close()'))
 
         window.show()
-        self.assert_(window.isVisible())
+        self.assertTrue(window.isVisible())
         button.click()
-        self.assert_(not window.isVisible())
+        self.assertTrue(not window.isVisible())
 
 
 

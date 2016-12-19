@@ -54,7 +54,7 @@ class AddActionTest(UsesQApplication):
         menubar = QMenuBar()
         action = menubar.addAction("Accounts", self._callback)
         action.activate(QAction.Trigger)
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
     def testWithCppSlot(self):
         '''QMenuBar.addAction(id, object, slot)'''
@@ -64,7 +64,7 @@ class AddActionTest(UsesQApplication):
         widget.setChecked(False)
         action = menubar.addAction("Accounts", widget, SLOT("toggle()"))
         action.activate(QAction.Trigger)
-        self.assert_(widget.isChecked())
+        self.assertTrue(widget.isChecked())
 
 if __name__ == '__main__':
     unittest.main()

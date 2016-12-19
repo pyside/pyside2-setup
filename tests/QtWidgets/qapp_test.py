@@ -36,7 +36,7 @@ class QAppPresence(unittest.TestCase):
 
     def testQApp(self):
         #QtGui.qApp variable is instance of QApplication
-        self.assert_(isinstance(qApp, QApplication))
+        self.assertTrue(isinstance(qApp, QApplication))
 
 def main():
     app = QApplication([])

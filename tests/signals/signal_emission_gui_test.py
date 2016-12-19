@@ -52,7 +52,7 @@ if hasQtGui:
             QObject.connect(button, SIGNAL('clicked()'), self.cb)
             self.args = tuple()
             button.emit(SIGNAL('clicked(bool)'), False)
-            self.assert_(self.called)
+            self.assertTrue(self.called)
 
         def testButtonClick(self):
             """Indirect qt signal emission using the QPushButton.click() method """
@@ -60,7 +60,7 @@ if hasQtGui:
             QObject.connect(button, SIGNAL('clicked()'), self.cb)
             self.args = tuple()
             button.click()
-            self.assert_(self.called)
+            self.assertTrue(self.called)
 
 
 if hasQtGui:
@@ -80,14 +80,14 @@ if hasQtGui:
             QObject.connect(self.spin, SIGNAL('valueChanged(int)'), self.cb)
             self.args = [3]
             self.spin.emit(SIGNAL('valueChanged(int)'), *self.args)
-            self.assert_(self.called)
+            self.assertTrue(self.called)
 
         def testSpinBoxValueChangedImplicit(self):
             """Indirect qt signal emission using QSpinBox.setValue(int)"""
             QObject.connect(self.spin, SIGNAL('valueChanged(int)'), self.cb)
             self.args = [42]
             self.spin.setValue(self.args[0])
-            self.assert_(self.called)
+            self.assertTrue(self.called)
 
         def atestSpinBoxValueChangedFewArgs(self):
             """Emission of signals with fewer arguments than needed"""

@@ -46,7 +46,7 @@ class LayoutTransferOwnerShip(unittest.TestCase):
         w = BuggyWidget()
         w.setup()
         w.show()
-        self.assert_(True)
+        self.assertTrue(True)
 
 if __name__ == '__main__':
     unittest.main()

@@ -57,7 +57,7 @@ class ObjectSenderTest(unittest.TestCase):
         recv = Receiver()
         QObject.connect(sender, SIGNAL('foo()'), recv.callback)
         sender.emit(SIGNAL('foo()'))
-        self.assertEquals(sender, recv.the_sender)
+        self.assertEqual(sender, recv.the_sender)
 
 class ObjectSenderCheckOnReceiverTest(unittest.TestCase):
     '''Test case for QObject.sender() method, this one tests the equality on the Receiver object.'''
@@ -67,7 +67,7 @@ class ObjectSenderCheckOnReceiverTest(unittest.TestCase):
         recv = Receiver()
         QObject.connect(sender, SIGNAL('foo()'), recv.callback)
         sender.emit(SIGNAL('foo()'))
-        self.assertEquals(sender, recv.the_sender)
+        self.assertEqual(sender, recv.the_sender)
 
 class ObjectSenderWithQAppTest(UsesQCoreApplication):
     '''Test case for QObject.sender() method with QApplication.'''
@@ -79,7 +79,7 @@ class ObjectSenderWithQAppTest(UsesQCoreApplication):
         QObject.connect(sender, SIGNAL('timeout()'), recv.callback)
         sender.start(10)
         self.app.exec_()
-        self.assertEquals(sender, recv.the_sender)
+        self.assertEqual(sender, recv.the_sender)
 
     def testSenderCppSignalSingleShotTimer(self):
         recv = Receiver()
@@ -93,7 +93,7 @@ class ObjectSenderWithQAppTest(UsesQCoreApplication):
         QObject.connect(sender, SIGNAL('timeout()'), recv.callback)
         sender.start(10)
         self.app.exec_()
-        self.assertEquals(sender, recv.the_sender)
+        self.assertEqual(sender, recv.the_sender)
 
 class ObjectSenderWithQAppCheckOnReceiverTest(UsesQCoreApplication):
     '''Test case for QObject.sender() method with QApplication.'''
@@ -105,7 +105,7 @@ class ObjectSenderWithQAppCheckOnReceiverTest(UsesQCoreApplication):
         QObject.connect(sender, SIGNAL('timeout()'), recv.callback)
         sender.start(10)
         self.app.exec_()
-        self.assertEquals(sender, recv.the_sender)
+        self.assertEqual(sender, recv.the_sender)
 
     def testSenderCppSignalWithPythonExtendedClass(self):
         sender = ExtQTimer()
@@ -113,7 +113,7 @@ class ObjectSenderWithQAppCheckOnReceiverTest(UsesQCoreApplication):
         QObject.connect(sender, SIGNAL('timeout()'), recv.callback)
         sender.start(10)
         self.app.exec_()
-        self.assertEquals(sender, recv.the_sender)
+        self.assertEqual(sender, recv.the_sender)
 
 if __name__ == '__main__':
     unittest.main()

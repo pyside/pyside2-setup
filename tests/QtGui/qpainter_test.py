@@ -46,7 +46,7 @@ class QPainterDrawText(unittest.TestCase):
         rect = self.painter.drawText(100, 100, 100, 100,
                                      Qt.AlignCenter | Qt.TextWordWrap,
                                      self.text)
-        self.assert_(isinstance(rect, QRect))
+        self.assertTrue(isinstance(rect, QRect))
 
     def testDrawTextWithRect(self):
         # bug #225
@@ -54,7 +54,7 @@ class QPainterDrawText(unittest.TestCase):
         newRect = self.painter.drawText(rect, Qt.AlignCenter | Qt.TextWordWrap,
                                         self.text)
 
-        self.assert_(isinstance(newRect, QRect))
+        self.assertTrue(isinstance(newRect, QRect))
 
     def testDrawTextWithRectF(self):
         '''QPainter.drawText(QRectF, ... ,QRectF*) inject code'''
@@ -62,7 +62,7 @@ class QPainterDrawText(unittest.TestCase):
         newRect = self.painter.drawText(rect, Qt.AlignCenter | Qt.TextWordWrap,
                                         self.text)
 
-        self.assert_(isinstance(newRect, QRectF))
+        self.assertTrue(isinstance(newRect, QRectF))
 
     def testDrawOverloads(self):
         '''Calls QPainter.drawLines overloads, if something is

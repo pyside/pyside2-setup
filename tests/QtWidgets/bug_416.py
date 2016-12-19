@@ -65,7 +65,7 @@ class TestBug(TimedQApplication):
         check.stateChanged[int].emit(1)
         check.show()
         self.app.exec_()
-        self.assert_(t1.eventTested)
+        self.assertTrue(t1.eventTested)
 
 if __name__ == '__main__':
     unittest.main()

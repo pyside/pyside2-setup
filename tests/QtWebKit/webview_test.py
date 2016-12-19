@@ -65,7 +65,7 @@ class TestLoadFinished(TimedQApplication):
         self.view.setUrl(url)
         self.app.exec_()
 
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
     def testSetPageAndGetPage(self):
         twp = testWebPage()
@@ -77,12 +77,12 @@ class TestLoadFinished(TimedQApplication):
         # Setting the same webpage should not incref the python obj
         refCount = sys.getrefcount(p)
         self.view.setPage(p)
-        self.assertEquals(sys.getrefcount(p), refCount)
+        self.assertEqual(sys.getrefcount(p), refCount)
 
         # Changing the webpage obj should decref the old one
         twp2 = testWebPage()
         self.view.setPage(twp2)
-        self.assertEquals(sys.getrefcount(p), refCount - 1)
+        self.assertEqual(sys.getrefcount(p), refCount - 1)
 
     def load_finished(self, ok):
         #Callback to check if load was successful

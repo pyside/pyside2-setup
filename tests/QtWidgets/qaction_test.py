@@ -42,14 +42,14 @@ class QPainterDrawText(UsesQApplication):
         self._called = False
         act.triggered.connect(self._cb)
         act.trigger()
-        self.assert_(self._called)
+        self.assertTrue(self._called)
 
     def testNewCtor(self):
         o = QWidget()
         self._called = False
         myAction = QAction("&Quit", o, triggered=self._cb)
         myAction.trigger()
-        self.assert_(self._called)
+        self.assertTrue(self._called)
 
 
 class SetShortcutTest(UsesQApplication):

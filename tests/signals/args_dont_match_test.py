@@ -42,7 +42,7 @@ class ArgsDontMatch(unittest.TestCase):
         QObject.connect(obj1, SIGNAL('the_signal(int, int, int)'), self.callback)
         obj1.emit(SIGNAL('the_signal(int, int, int)'), 1, 2, 3)
 
-        self.assert_(self.ok)
+        self.assertTrue(self.ok)
 
 
 

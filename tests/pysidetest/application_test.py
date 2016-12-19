@@ -35,7 +35,7 @@ from PySide2.QtWidgets import QApplication
 class QApplicationInstance(unittest.TestCase):
 
     def appDestroyed(self):
-        sefl.assert_(False)
+        sefl.assertTrue(False)
 
     def testInstanceObject(self):
         TestObject.createApp()

@@ -67,10 +67,10 @@ class QMatrixTest(unittest.TestCase):
 
         m = QMatrix4x4(my_data)
         d = m.data()
-        self.assert_(my_datac, d)
+        self.assertTrue(my_datac, d)
 
         d = m.copyDataTo()
-        self.assert_(my_data == list(d))
+        self.assertTrue(my_data == list(d))
 
     def testMatrixMapping(self):
         m = QMatrix(1.0, 2.0, 1.0, 3.0, 100.0, 200.0)

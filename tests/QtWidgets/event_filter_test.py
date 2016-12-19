@@ -61,7 +61,7 @@ class EventFilter(UsesQApplication):
         w.show()
         w.close()
         w = None
-        self.assert_(True)
+        self.assertTrue(True)
 
 if __name__ == '__main__':
     unittest.main()

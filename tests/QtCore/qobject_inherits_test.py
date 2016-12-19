@@ -38,7 +38,7 @@ class InheritsCase(unittest.TestCase):
     def testCppInheritance(self):
         #QObject.inherits() for c++ classes
         #An class inherits itself
-        self.assert_(QObject().inherits('QObject'))
+        self.assertTrue(QObject().inherits('QObject'))
 
     def testPythonInheritance(self):
         #QObject.inherits() for python classes
@@ -47,9 +47,9 @@ class InheritsCase(unittest.TestCase):
             #Dummy class
             pass
 
-        self.assert_(Dummy().inherits('QObject'))
-        self.assert_(Dummy().inherits('Dummy'))
-        self.assert_(not Dummy().inherits('FooBar'))
+        self.assertTrue(Dummy().inherits('QObject'))
+        self.assertTrue(Dummy().inherits('Dummy'))
+        self.assertTrue(not Dummy().inherits('FooBar'))
 
     def testPythonMultiInheritance(self):
         #QObject.inherits() for multiple inheritance
@@ -63,8 +63,8 @@ class InheritsCase(unittest.TestCase):
             #Dummy class
             pass
 
-        self.assert_(Dummy().inherits('QObject'))
-        self.assert_(not Dummy().inherits('Parent'))
+        self.assertTrue(Dummy().inherits('QObject'))
+        self.assertTrue(not Dummy().inherits('Parent'))
 
     def testSetAttributeBeforeCallingInitOnQObjectDerived(self):
         '''Test for bug #428.'''

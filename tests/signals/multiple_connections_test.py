@@ -51,13 +51,13 @@ class MultipleSignalConnections(unittest.TestCase):
             args = tuple()
         for rec in receivers:
             rec.setUp()
-            self.assert_(QObject.connect(sender, SIGNAL(signal), rec.cb))
+            self.assertTrue(QObject.connect(sender, SIGNAL(signal), rec.cb))
             rec.args = tuple(args)
 
         emitter(*args)
 
         for rec in receivers:
-            self.assert_(rec.called)
+            self.assertTrue(rec.called)
 
 
 class PythonMultipleSlots(UsesQCoreApplication, MultipleSignalConnections):

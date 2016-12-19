@@ -71,14 +71,14 @@ class SegfaultCase(unittest.TestCase):
         QObject.connect(obj, SIGNAL('bar(int)'), self.callback)
         self.args = (33,)
         obj.emit(SIGNAL('bar(int)'), self.args[0])
-        self.assert_(self.called)
+        self.assertTrue(self.called)
         del obj
 
         obj = Joe()
         QObject.connect(obj, SIGNAL('bar(int)'), self.callback)
         self.args = (33,)
         obj.emit(SIGNAL('bar(int)'), self.args[0])
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
 
 if __name__ == '__main__':

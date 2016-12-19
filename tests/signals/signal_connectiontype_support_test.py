@@ -48,7 +48,7 @@ class TestConnectionTypeSupport(unittest.TestCase):
         self.args = tuple()
         obj1.emit(SIGNAL('foo()'), *self.args)
 
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
 
 if __name__ == '__main__':

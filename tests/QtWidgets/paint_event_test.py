@@ -90,7 +90,7 @@ class PaintEventOverride(UsesQApplication):
 
         self.widget.killTimer(timer_id)
 
-        self.assert_(self.widget.paint_event_called)
+        self.assertTrue(self.widget.paint_event_called)
         self.assertEqual(self.widget.runs, 5)
 
 

@@ -48,7 +48,7 @@ class TestQPainter(UsesQApplication):
         w._info = None
         QTimer.singleShot(300, w.show)
         self.app.exec_()
-        self.assert_(w._info)
+        self.assertTrue(w._info)
 
 if __name__ == '__main__':
     unittest.main()

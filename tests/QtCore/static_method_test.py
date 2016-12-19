@@ -62,13 +62,13 @@ class StaticNonStaticMethodsTest(unittest.TestCase):
 
     def testCallingStaticMethodWithClass(self):
         '''Call static method using class.'''
-        self.assert_(QFile.exists(self.existing_filename))
+        self.assertTrue(QFile.exists(self.existing_filename))
         self.assertFalse(QFile.exists(self.non_existing_filename))
 
     def testCallingStaticMethodWithInstance(self):
         '''Call static method using instance of class.'''
         f = QFile(self.non_existing_filename)
-        self.assert_(f.exists(self.existing_filename))
+        self.assertTrue(f.exists(self.existing_filename))
         self.assertFalse(f.exists(self.non_existing_filename))
 
     def testCallingInstanceMethod(self):
@@ -76,7 +76,7 @@ class StaticNonStaticMethodsTest(unittest.TestCase):
         f1 = QFile(self.non_existing_filename)
         self.assertFalse(f1.exists())
         f2 = QFile(self.existing_filename)
-        self.assert_(f2.exists())
+        self.assertTrue(f2.exists())
 
 
 if __name__ == '__main__':

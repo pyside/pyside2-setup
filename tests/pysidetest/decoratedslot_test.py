@@ -59,7 +59,7 @@ class DecoratedSlotTest(unittest.TestCase):
         receiver = Receiver()
         obj.staticMethodDouble.connect(receiver.slot)
         obj.emitStaticMethodDoubleSignal()
-        self.assert_(receiver.called)
+        self.assertTrue(receiver.called)
 
 
 if __name__ == '__main__':

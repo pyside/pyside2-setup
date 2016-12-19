@@ -67,7 +67,7 @@ class slotTest(unittest.TestCase):
         QtCore.QTimer.singleShot(1000, self.quit_app)
         qApp.exec_()
 
-        self.assert_(my_obj.ok)   
+        self.assertTrue(my_obj.ok)
 
 
 if __name__ == '__main__':

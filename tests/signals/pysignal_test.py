@@ -126,7 +126,7 @@ class PythonSigSlot(unittest.TestCase):
         self.args = tuple()
         obj1.emit(SIGNAL('foo()'), *self.args)
 
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
     def testWithArgs(self):
         """Python signal and slots with integer arguments"""
@@ -136,7 +136,7 @@ class PythonSigSlot(unittest.TestCase):
         self.args = (42,)
         obj1.emit(SIGNAL('foo(int)'), *self.args)
 
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
 
     def testDisconnect(self):
@@ -148,7 +148,7 @@ class PythonSigSlot(unittest.TestCase):
         self.args = (42, )
         obj1.emit(SIGNAL('foo(int)'), *self.args)
 
-        self.assert_(not self.called)
+        self.assertTrue(not self.called)
 
 
 if hasQtGui:
@@ -205,10 +205,10 @@ if hasQtGui:
             self.widget.hide()
 
             QObject.connect(self.obj, SIGNAL('dummy()'), self.widget, SLOT('show()'))
-            self.assert_(not self.widget.isVisible())
+            self.assertTrue(not self.widget.isVisible())
 
             self.obj.emit(SIGNAL('dummy()'))
-            self.assert_(self.widget.isVisible())
+            self.assertTrue(self.widget.isVisible())
 
 if __name__ == '__main__':
     unittest.main()

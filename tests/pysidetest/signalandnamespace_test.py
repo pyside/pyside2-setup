@@ -41,26 +41,26 @@ class ModelViewTest(unittest.TestCase):
         o = PySideCPP.TestObjectWithNamespace(None)
         o.emitSignal.connect(self.callback)
         o.emitSignal.emit(o)
-        self.assert_(o == self._called)
+        self.assertTrue(o == self._called)
 
         self._called = None
         o = PySideCPP.TestObjectWithNamespace(None)
         o.emitSignal.connect(self.callback)
         o.callSignal(o)
-        self.assert_(o == self._called)
+        self.assertTrue(o == self._called)
 
     def testWithNamespace(self):
         self._called = None
         o = PySideCPP.TestObjectWithNamespace(None)
         o.emitSignalWithNamespace.connect(self.callback)
         o.emitSignalWithNamespace.emit(o)
-        self.assert_(o == self._called)
+        self.assertTrue(o == self._called)
 
         self._called = None
         o = PySideCPP.TestObjectWithNamespace(None)
         o.emitSignalWithNamespace.connect(self.callback)
         o.callSignalWithNamespace(o)
-        self.assert_(o == self._called)
+        self.assertTrue(o == self._called)
 
 
     def testWithoutNamespace1(self):
@@ -68,26 +68,26 @@ class ModelViewTest(unittest.TestCase):
         o = TestObjectWithoutNamespace(None)
         o.emitSignal.connect(self.callback)
         o.emitSignal.emit(o)
-        self.assert_(o == self._called)
+        self.assertTrue(o == self._called)
 
         self._called = None
         o = TestObjectWithoutNamespace(None)
         o.emitSignal.connect(self.callback)
         o.callSignal(o)
-        self.assert_(o == self._called)
+        self.assertTrue(o == self._called)
 
     def testWithNamespace1(self):
         self._called = None
         o = TestObjectWithoutNamespace(None)
         o.emitSignalWithNamespace.connect(self.callback)
         o.emitSignalWithNamespace.emit(o)
-        self.assert_(o == self._called)
+        self.assertTrue(o == self._called)
 
         self._called = None
         o = TestObjectWithoutNamespace(None)
         o.emitSignalWithNamespace.connect(self.callback)
         o.callSignalWithNamespace(o)
-        self.assert_(o == self._called)
+        self.assertTrue(o == self._called)
 
     def testTypedfWithouNamespace(self):
         self._called = None

@@ -38,7 +38,7 @@ class HttpSignalsCase(UsesQCoreApplication):
     DATA = "PySide rocks"
 
     def onError(self):
-        self.assert_(False)
+        self.assertTrue(False)
 
     def onNewConnection(self):
         self.serverConnection = self.server.nextPendingConnection()
@@ -58,7 +58,7 @@ class HttpSignalsCase(UsesQCoreApplication):
     def initServer(self):
         self.server = QTcpServer()
         self.server.newConnection.connect(self.onNewConnection)
-        self.assert_(self.server.listen())
+        self.assertTrue(self.server.listen())
         self.client = QTcpSocket()
         self.client.connected.connect(self.onClientConnect)
         self.client.connectToHost(QHostAddress(QHostAddress.LocalHost), self.server.serverPort())

@@ -72,7 +72,7 @@ class HttpSignalsCase(unittest.TestCase):
         self.sendPackage()
         self.app.exec_()
 
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
 if __name__ == '__main__':
     unittest.main()

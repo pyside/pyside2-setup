@@ -36,8 +36,8 @@ class QTransformTest(unittest.TestCase):
         transform = QTransform()
         values = (10.0, 20.0)
         tx, ty = transform.map(*values)
-        self.assert_(isinstance(tx, float))
-        self.assert_(isinstance(ty, float))
+        self.assertTrue(isinstance(tx, float))
+        self.assertTrue(isinstance(ty, float))
         self.assertEqual((tx, ty), values)
 
     def testquadToQuad(self):
@@ -58,7 +58,7 @@ class QTransformTest(unittest.TestCase):
         r2 = QTransform.quadToQuad(q1, q2)
 
         self.assertTrue(r1)
-        self.assert_(r2)
+        self.assertTrue(r2)
 
         self.assertEqual(t1, r2)
 
@@ -74,7 +74,7 @@ class QTransformTest(unittest.TestCase):
         r2 = QTransform.quadToSquare(q1)
 
         self.assertTrue(r1)
-        self.assert_(r2)
+        self.assertTrue(r2)
 
         self.assertEqual(t1, r2)
 
@@ -91,7 +91,7 @@ class QTransformTest(unittest.TestCase):
         r2 = QTransform.squareToQuad(q1)
 
         self.assertTrue(r1)
-        self.assert_(r2)
+        self.assertTrue(r2)
 
         self.assertEqual(t1, r2)
 

@@ -64,7 +64,7 @@ class testAudioDevices(unittest.TestCase):
                                     fmt.setByteOrder(endian)
                                     if devInfo.isFormatSupported(fmt):
                                         return
-        self.assert_(False)
+        self.assertTrue(False)
 
 
 if __name__ == '__main__':

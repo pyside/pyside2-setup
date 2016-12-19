@@ -46,7 +46,7 @@ class QColorGetTest(unittest.TestCase):
         hls = colorsys.rgb_to_hls(20.0/255, 40.0/255, 60.0/255)
         hsla = hls[0], hls[2], hls[1], self.color.alphaF()
         for x, y in zip(self.color.getHslF(), hsla): # Due to rounding problems
-            self.assert_(x - y < 1/100000.0)
+            self.assertTrue(x - y < 1/100000.0)
 
     def testGetHsv(self):
         hsv = colorsys.rgb_to_hsv(20.0/255, 40.0/255, 60.0/255)
@@ -58,7 +58,7 @@ class QColorGetTest(unittest.TestCase):
 
     def testGetCmykF(self): # not supported by colorsys
         for x, y in zip(self.color.getCmykF(), (170/255.0, 85/255.0, 0, 195/255.0, 80/255.0)):
-            self.assert_(x - y < 1/10000.0)
+            self.assertTrue(x - y < 1/10000.0)
 
 
 class QColorQRgbConstructor(unittest.TestCase):
@@ -91,7 +91,7 @@ class QColorCopy(unittest.TestCase):
         original = QColor(0, 0, 255)
         copy = deepcopy([original])[0]
 
-        self.assert_(original is not copy)
+        self.assertTrue(original is not copy)
         self.assertEqual(original, copy)
         del original
         self.assertEqual(copy, QColor(0, 0, 255))
@@ -101,7 +101,7 @@ class QColorCopy(unittest.TestCase):
 
         original = QColor()
         copy = deepcopy([original])[0]
-        self.assert_(original is not copy)
+        self.assertTrue(original is not copy)
         self.assertEqual(original, copy)
         del original
         self.assertEqual(copy, QColor())

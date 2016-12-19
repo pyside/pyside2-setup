@@ -37,7 +37,7 @@ class Properties(unittest.TestCase):
 
     def testInstanceProperty(self):
         p = QtWidgets.QStyleOptionViewItem()
-        self.assert_(isinstance(p.locale, QtCore.QLocale))
+        self.assertTrue(isinstance(p.locale, QtCore.QLocale))
 
 
 if __name__ == '__main__':

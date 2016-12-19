@@ -48,7 +48,7 @@ class QApplicationSignalsTest(unittest.TestCase):
         button = QPushButton("BUTTON")
         app.connect(button, SIGNAL("clicked()"), app.called)
         button.click()
-        self.assert_(app._called)
+        self.assertTrue(app._called)
         
 if __name__ == '__main__':
     unittest.main()

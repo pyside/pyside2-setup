@@ -48,7 +48,7 @@ class MockClassTest(unittest.TestCase):
         mock = Mock()
         setattr(QCoreApplication, 'instance', mock)
         QCoreApplication.instance()
-        self.assert_(mock.called)
+        self.assertTrue(mock.called)
 
 if __name__ == '__main__':
     unittest.main()

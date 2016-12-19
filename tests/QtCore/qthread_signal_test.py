@@ -85,7 +85,7 @@ class BasicConnection(unittest.TestCase):
         app.exec_()
         thread.wait()
 
-        self.assert_(thread.target.called)
+        self.assertTrue(thread.target.called)
 
 if __name__ == '__main__':
     unittest.main()

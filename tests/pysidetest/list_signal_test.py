@@ -44,7 +44,7 @@ class ListConnectionTest(unittest.TestCase):
         self._child = None
         o.childrenChanged.connect(self.childrenChanged)
         o.addChild(c)
-        self.assertEquals(self._child.objectName(), "child")
+        self.assertEqual(self._child.objectName(), "child")
 
 if __name__ == '__main__':
     unittest.main()

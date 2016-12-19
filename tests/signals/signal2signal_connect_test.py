@@ -83,7 +83,7 @@ class TestSignal2SignalConnect(unittest.TestCase):
         QObject.connect(self.forwarder, SIGNAL("forward()"),
                         self.callback_noargs)
         del self.sender
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
 
     def testSignalWithOnePrimitiveTypeArgument(self):
@@ -93,7 +93,7 @@ class TestSignal2SignalConnect(unittest.TestCase):
                         self.callback_args)
         self.args = (19,)
         self.sender.emit(SIGNAL('mysignal(int)'), *self.args)
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
 
     def testSignalWithMultiplePrimitiveTypeArguments(self):
@@ -103,7 +103,7 @@ class TestSignal2SignalConnect(unittest.TestCase):
                         self.callback_args)
         self.args = (23, 29)
         self.sender.emit(SIGNAL('mysignal(int,int)'), *self.args)
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
 
     def testSignalWithOneStringArgument(self):
@@ -113,7 +113,7 @@ class TestSignal2SignalConnect(unittest.TestCase):
                         self.callback_args)
         self.args = ('myargument',)
         self.sender.emit(SIGNAL('mysignal(QString)'), *self.args)
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
 
     def testSignalWithOneQObjectArgument(self):
@@ -126,7 +126,7 @@ class TestSignal2SignalConnect(unittest.TestCase):
         self.sender.setObjectName(obj_name)
         self.args = (obj_name, )
         del self.sender
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
 
 if __name__ == '__main__':

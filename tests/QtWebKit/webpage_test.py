@@ -60,13 +60,13 @@ class TestFindText(TimedQApplication):
         url = QUrl.fromLocalFile(adjust_filename('fox.html', __file__))
         self.page.mainFrame().load(url)
         self.app.exec_()
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
     def load_finished(self, ok):
         #Callback to check if load was successful
         if ok:
             self.called = True
-            self.assert_(self.page.findText('fox'))
+            self.assertTrue(self.page.findText('fox'))
             self.assertEqual(self.page.selectedText(), 'fox')
         self.app.quit()
 

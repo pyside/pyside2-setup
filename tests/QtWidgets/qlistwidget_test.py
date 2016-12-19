@@ -41,31 +41,31 @@ class QListWidgetTest(UsesQApplication):
         item = QtWidgets.QListWidgetItem("item0")
         item.setData(QtCore.Qt.UserRole, o)
         #item._data = o
-        self.assert_(sys.getrefcount(o), 3)
-        self.assert_(sys.getrefcount(item), 2)
+        self.assertTrue(sys.getrefcount(o), 3)
+        self.assertTrue(sys.getrefcount(item), 2)
         lst.addItem(item)
-        self.assert_(sys.getrefcount(item), 3)
+        self.assertTrue(sys.getrefcount(item), 3)
 
     def checkCurrentItem(self, lst):
         item = lst.currentItem()
-        self.assert_(sys.getrefcount(item), 3)
+        self.assertTrue(sys.getrefcount(item), 3)
 
     def checkItemData(self, lst):
         item = lst.currentItem()
         o = item.data(QtCore.Qt.UserRole)
-        self.assert_(sys.getrefcount(o), 4)
+        self.assertTrue(sys.getrefcount(o), 4)
         self.assertEqual(o, item._data)
-        self.assert_(sys.getrefcount(o), 2)
+        self.assertTrue(sys.getrefcount(o), 2)
 
     def testConstructorWithParent(self):
         lst = QtWidgets.QListWidget()
         self.populateList(lst)
         self.checkCurrentItem(lst)
         i = lst.item(0)
-        self.assert_(sys.getrefcount(i), 3)
+        self.assertTrue(sys.getrefcount(i), 3)
 
         del lst
-        self.assert_(sys.getrefcount(i), 2)
+        self.assertTrue(sys.getrefcount(i), 2)
         del i
 
     def testIt(self):

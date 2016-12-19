@@ -67,7 +67,7 @@ class EventFilterTest(UsesQApplication):
 
         QTest.keyClick(widget, key)
 
-        self.assert_(eventFilter.processed)
+        self.assertTrue(eventFilter.processed)
 
 
 

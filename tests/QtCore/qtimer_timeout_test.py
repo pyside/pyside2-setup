@@ -79,7 +79,7 @@ class TestTimeoutSignal(UsesQCoreApplication):
 
         self.app.exec_()
 
-        self.assert_(self.called)
+        self.assertTrue(self.called)
         self.assertEqual(sys.getrefcount(self.timer), refCount)
 
 if __name__ == '__main__':

@@ -64,9 +64,9 @@ class QThreadSimpleCase(UsesQCoreApplication):
         #Basic QThread test
         obj = Dummy()
         obj.start()
-        self.assert_(obj.wait(100))
+        self.assertTrue(obj.wait(100))
 
-        self.assert_(obj.called)
+        self.assertTrue(obj.called)
 
     def cb(self, *args):
         self.called = True
@@ -89,7 +89,7 @@ class QThreadSimpleCase(UsesQCoreApplication):
         QTimer.singleShot(1000, self.abort_application)
         self.app.exec_()
 
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
     def testSignalStarted(self):
         #QThread.started() (signal)
@@ -102,7 +102,7 @@ class QThreadSimpleCase(UsesQCoreApplication):
         self.app.exec_()
 
         self.assertEqual(obj.qobj.thread(), obj) # test QObject.thread() method
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
 if __name__ == '__main__':
     unittest.main()

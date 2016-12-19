@@ -39,7 +39,7 @@ class QAppPresence(unittest.TestCase):
         app = QApplication(sys.argv)
         window = QMainWindow()
         l = window.layout()
-        self.assert_(isinstance(l, QLayout))
+        self.assertTrue(isinstance(l, QLayout))
 
 if __name__ == '__main__':
     unittest.main()

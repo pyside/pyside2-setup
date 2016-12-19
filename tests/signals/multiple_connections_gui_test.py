@@ -63,7 +63,7 @@ class MultipleSignalConnections(unittest.TestCase):
         emitter(*args)
 
         for rec in receivers:
-            self.assert_(rec.called)
+            self.assertTrue(rec.called)
 
 
 if hasQtGui:

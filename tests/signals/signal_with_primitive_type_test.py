@@ -50,7 +50,7 @@ class SignalPrimitiveTypeTest(unittest.TestCase):
         tl = self.createTimeLine()
         tl.start()
         self._app.exec_()
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
 if __name__ == '__main__':
     unittest.main()

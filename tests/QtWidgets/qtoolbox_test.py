@@ -47,12 +47,12 @@ class OwnershipControl(UsesQApplication):
         # Was losing ownership of the widget.
         index = self.toolbox.addItem(QWidget(), 'item')
         item = self.toolbox.widget(index)
-        self.assert_(isinstance(item, QWidget))
+        self.assertTrue(isinstance(item, QWidget))
 
     def testAddItemWithIcon(self):
         index = self.toolbox.addItem(QWidget(), QIcon(), 'item')
         item = self.toolbox.widget(index)
-        self.assert_(isinstance(item, QWidget))
+        self.assertTrue(isinstance(item, QWidget))
 
 
 if __name__ == '__main__':

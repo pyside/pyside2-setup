@@ -70,7 +70,7 @@ class TestDuckPunchingOnQObjectInstance(UsesQCoreApplication):
         parent.childEvent = MethodType(childEvent, parent, QObject)
         child = QObject()
         child.setParent(parent)
-        self.assert_(self.duck_childEvent_called)
+        self.assertTrue(self.duck_childEvent_called)
         # This is done to decrease the refcount of the vm object
         # allowing the object wrapper to be deleted before the
         # BindingManager. This is useful when compiling Shiboken
@@ -89,7 +89,7 @@ class TestDuckPunchingOnQObjectInstance(UsesQCoreApplication):
         parent.childEvent = MethodType(childEvent, parent, QObject)
         child = QObject()
         child.setParent(parent)
-        self.assert_(self.duck_childEvent_called)
+        self.assertTrue(self.duck_childEvent_called)
         # This is done to decrease the refcount of the vm object
         # allowing the object wrapper to be deleted before the
         # BindingManager. This is useful when compiling Shiboken

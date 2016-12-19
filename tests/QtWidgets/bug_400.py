@@ -45,7 +45,7 @@ class BugTest(UsesQApplication):
         index = 0
         while(_iter.value()):
             item = _iter.value()
-            self.assert_(item is items[index])
+            self.assertTrue(item is items[index])
             index += 1
             _iter += 1
 

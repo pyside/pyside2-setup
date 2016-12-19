@@ -42,7 +42,7 @@ class testQToolBar(unittest.TestCase):
         self._called = False
         a = bar.addAction("act1", self.callback)
         a.trigger()
-        self.assert_(self._called)
+        self.assertTrue(self._called)
 
     def testAddActionWithIcon(self):
         bar = QToolBar()
@@ -50,7 +50,7 @@ class testQToolBar(unittest.TestCase):
         icon = QIcon()
         a = bar.addAction(icon, "act1", self.callback)
         a.trigger()
-        self.assert_(self._called)
+        self.assertTrue(self._called)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

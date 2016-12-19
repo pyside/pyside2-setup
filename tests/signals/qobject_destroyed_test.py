@@ -44,7 +44,7 @@ class QObjectDestroyed(unittest.TestCase):
         obj = QObject()
         QObject.connect(obj, SIGNAL('destroyed()'), self.destroyed_cb)
         del obj
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
 if __name__ == '__main__':
     unittest.main()

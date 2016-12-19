@@ -40,7 +40,7 @@ class BugTest(UsesQApplication):
 
         filePath = os.path.join(os.path.dirname(__file__), 'test.ui')
         result = loader.load(filePath, w)
-        self.assert_(isinstance(result.child_object, QtWidgets.QFrame))
+        self.assertTrue(isinstance(result.child_object, QtWidgets.QFrame))
 
 if __name__ == '__main__':
     unittest.main()

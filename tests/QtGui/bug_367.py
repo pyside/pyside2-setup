@@ -44,7 +44,7 @@ class BugTest(UsesQApplication):
             self.assertEqual(rcount+1, sys.getrefcount(item))
             parentItem = item
 
-        self.assert_(True)
+        self.assertTrue(True)
 
 if __name__ == '__main__':
     unittest.main()

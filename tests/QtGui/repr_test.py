@@ -41,7 +41,7 @@ from PySide2.QtGui import QPolygon
 class ReprCopyHelper:
     def testCopy(self):
         copy = eval(self.original.__repr__())
-        self.assert_(copy is not self.original)
+        self.assertTrue(copy is not self.original)
         self.assertEqual(copy, self.original)
 
 class QTransformReprCopy(ReprCopyHelper, unittest.TestCase):

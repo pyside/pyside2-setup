@@ -36,7 +36,7 @@ from PySide2.QtCore import QUuid
 class DeepCopyHelper:
     def testCopy(self):
         copy = deepcopy([self.original])[0]
-        self.assert_(copy is not self.original)
+        self.assertTrue(copy is not self.original)
         self.assertEqual(copy, self.original)
 
 class QByteArrayDeepCopy(DeepCopyHelper, unittest.TestCase):

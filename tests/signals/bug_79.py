@@ -62,7 +62,7 @@ class ConnectTest(unittest.TestCase):
             o.selectionModel().destroyed.disconnect(self.callback)
         gc.collect()
         if not skiptest:
-            self.assert_(abs(gettotalrefcount() - total) < 10)
+            self.assertTrue(abs(gettotalrefcount() - total) < 10)
 
 
 if __name__ == '__main__':

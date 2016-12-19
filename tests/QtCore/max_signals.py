@@ -50,7 +50,7 @@ class TestSignalLimitless(unittest.TestCase):
         #chek if the signals are valid
         m = o.metaObject()
         for i in range(self.SIGNAL_MAX):
-            self.assert_(m.indexOfSignal('sig%d()'%i) > 0)
+            self.assertTrue(m.indexOfSignal('sig%d()'%i) > 0)
 
         #emit all 100 signals
         for i in range(self.SIGNAL_MAX):

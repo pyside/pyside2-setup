@@ -81,7 +81,7 @@ class TestDisconnect(unittest.TestCase):
             return True
         obj.signalWithDefaultValue.connect(callback)
         obj.signalWithDefaultValue.emit()
-        self.assert_(self.called)
+        self.assertTrue(self.called)
 
 
 if __name__ == '__main__':

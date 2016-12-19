@@ -41,7 +41,7 @@ class BugTest(UsesQApplication):
     def testCase(self):
         w = MyWidget()
         widgets = QApplication.allWidgets()
-        self.assert_(w in widgets)
+        self.assertTrue(w in widgets)
 
 if __name__ == '__main__':
     unittest.main()

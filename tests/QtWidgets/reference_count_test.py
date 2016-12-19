@@ -64,7 +64,7 @@ class ReferenceCount(UsesQApplication):
     def beforeTest(self):
         points = [QPointF(0, 0), QPointF(100, 100), QPointF(0, 100)]
         pol = self.scene.addPolygon(QPolygonF(points))
-        self.assert_(isinstance(pol, QGraphicsPolygonItem))
+        self.assertTrue(isinstance(pol, QGraphicsPolygonItem))
         self.wrp = weakref.ref(pol, pol_del)
 
         #refcount need be 3 because one ref for QGraphicsScene, and one to rect obj
@@ -77,7 +77,7 @@ class ReferenceCount(UsesQApplication):
         self.beforeTest()
         
         rect = self.scene.addRect(10.0, 10.0, 10.0, 10.0)
-        self.assert_(isinstance(rect, QGraphicsRectItem))
+        self.assertTrue(isinstance(rect, QGraphicsRectItem))
 
         self.wrr = weakref.ref(rect, rect_del)
 

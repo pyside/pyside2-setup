@@ -50,7 +50,7 @@ class QXmlPatternsTest(UsesQCoreApplication):
 
         schema = QXmlSchema()
         schema.load(buf)
-        self.assert_(schema.isValid())
+        self.assertTrue(schema.isValid())
 
 
 if __name__ == '__main__':

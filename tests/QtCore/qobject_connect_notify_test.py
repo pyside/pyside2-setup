@@ -68,34 +68,34 @@ class TestQObjectConnectNotify(UsesQCoreApplication):
         sender = Obj()
         receiver = QObject()
         sender.connect(SIGNAL("destroyed()"), receiver, SLOT("deleteLater()"))
-        self.assert_(sender.con_notified)
+        self.assertTrue(sender.con_notified)
         self.assertEqual(sender.signal, SIGNAL("destroyed()"))
         sender.disconnect(SIGNAL("destroyed()"), receiver, SLOT("deleteLater()"))
-        self.assert_(sender.dis_notified)
+        self.assertTrue(sender.dis_notified)
 
     def testPySignal(self):
         sender = Obj()
         receiver = QObject()
         sender.connect(SIGNAL("foo()"), receiver, SLOT("deleteLater()"))
-        self.assert_(sender.con_notified)
+        self.assertTrue(sender.con_notified)
         sender.disconnect(SIGNAL("foo()"), receiver, SLOT("deleteLater()"))
-        self.assert_(sender.dis_notified)
+        self.assertTrue(sender.dis_notified)
 
     def testPySlots(self):
         sender = Obj()
         receiver = QObject()
         sender.connect(SIGNAL("destroyed()"), cute_slot)
-        self.assert_(sender.con_notified)
+        self.assertTrue(sender.con_notified)
         sender.disconnect(SIGNAL("destroyed()"), cute_slot)
-        self.assert_(sender.dis_notified)
+        self.assertTrue(sender.dis_notified)
 
     def testpyAll(self):
         sender = Obj()
         receiver = QObject()
         sender.connect(SIGNAL("foo()"), cute_slot)
-        self.assert_(sender.con_notified)
+        self.assertTrue(sender.con_notified)
         sender.disconnect(SIGNAL("foo()"), cute_slot)
-        self.assert_(sender.dis_notified)
+        self.assertTrue(sender.dis_notified)
 
 if __name__ == '__main__':
     unittest.main()

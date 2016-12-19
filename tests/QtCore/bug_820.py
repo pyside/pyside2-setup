@@ -83,8 +83,8 @@ class MyObject(QObject):
 class SlotWithDecoratorTest(unittest.TestCase):
     def testSlots(self):
         o = MyObject()
-        self.assert_(o.metaObject().indexOfSlot("mySlot()") > 0)
-        self.assert_(o.metaObject().indexOfSlot("mySlot2()") > 0)
+        self.assertTrue(o.metaObject().indexOfSlot("mySlot()") > 0)
+        self.assertTrue(o.metaObject().indexOfSlot("mySlot2()") > 0)
 
         o.events.connect(o.mySlot)
         o.events.connect(o.mySlot2)

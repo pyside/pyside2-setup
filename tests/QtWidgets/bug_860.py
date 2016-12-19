@@ -50,14 +50,14 @@ class MultipleSlotTest(UsesQApplication):
         checkboxMapper.mapped[str].connect(self.cb_changed)
         self._changed = False
         box.setChecked(True)
-        self.assert_(self._changed)
+        self.assertTrue(self._changed)
 
     def testSimpleSignal(self):
         box = QCheckBox('check me')
         box.stateChanged[int].connect(self.cb_changedVoid)
         self._changed = False
         box.setChecked(True)
-        self.assert_(self._changed)
+        self.assertTrue(self._changed)
 
 if __name__ == '__main__':
     unittest.main()

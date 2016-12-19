@@ -41,13 +41,13 @@ from PySide2.QtGui import QPolygon
 class DeepCopyHelper:
     def testCopy(self):
         copy = deepcopy([self.original])[0]
-        self.assert_(copy is not self.original)
+        self.assertTrue(copy is not self.original)
         self.assertEqual(copy, self.original)
 
 class DeepCopyColorHelperF:
     def testCopy(self):
         copy = deepcopy([self.original])[0]
-        self.assert_(copy is not self.original)
+        self.assertTrue(copy is not self.original)
         self.assertEqual(copy.spec(), self.original.spec())
         # impossible to compare float point
         # self.assertEqual(copy, self.original)

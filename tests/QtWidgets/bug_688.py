@@ -97,7 +97,7 @@ class BugTest(UsesQApplication):
         i = 0
         while not b.atEnd():
             self.assertEqual(b, items[i])
-            self.assert_(b.parentFrame(), items[i].parentFrame())
+            self.assertTrue(b.parentFrame(), items[i].parentFrame())
             b.__iadd__(1)
             i += 1
 
@@ -106,7 +106,7 @@ class BugTest(UsesQApplication):
         i = 0
         while i > 0:
             self.assertEqual(b, items[i])
-            self.assert_(b.parentFrame(), items[i].parentFrame())
+            self.assertTrue(b.parentFrame(), items[i].parentFrame())
             b.__isub__(1)
             i -= 1
 

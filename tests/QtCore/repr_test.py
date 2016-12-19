@@ -36,7 +36,7 @@ from PySide2.QtCore import QUuid
 class ReprCopyHelper:
     def testCopy(self):
         copy = eval(self.original.__repr__())
-        self.assert_(copy is not self.original)
+        self.assertTrue(copy is not self.original)
         self.assertEqual(copy, self.original)
 
 class QByteArrayReprCopy(ReprCopyHelper, unittest.TestCase):
