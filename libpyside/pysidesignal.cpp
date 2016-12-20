@@ -629,7 +629,10 @@ char* getTypeName(PyObject* type)
     } else if (type == Py_None) { // Must be checked before as Shiboken::String::check accepts Py_None
         return strdup("void");
     } else if (Shiboken::String::check(type)) {
-        return strdup(Shiboken::String::toCString(type));
+        const char *result = Shiboken::String::toCString(type);
+        if (!strcmp(result, "qreal"))
+            result = sizeof(qreal) == sizeof(double) ? "double" : "float";
+        return strdup(result);
     }
     return 0;
 }
