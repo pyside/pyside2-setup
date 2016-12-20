@@ -59,7 +59,7 @@ class QGLBufferTest(UsesQApplication):
             b.unmap()
 
             m = b.map(QGLBuffer.ReadWrite)
-            m[3] = py3k.b('A')
+            m[3] = py3k.b('A')[0]
             b.unmap()
             result, rdata = b.read(3, 1)
             self.assertTrue(result)
