@@ -626,6 +626,7 @@ class CustomConversion;
 
 class TypeEntry
 {
+    Q_GADGET
 public:
     enum Type {
         PrimitiveType,
@@ -651,6 +652,7 @@ public:
         TargetLangType,
         FunctionType
     };
+    Q_ENUM(Type)
 
     enum CodeGeneration {
         GenerateTargetLang      = 0x0001,
@@ -661,6 +663,7 @@ public:
         GenerateAll             = 0xffff,
         GenerateCode            = GenerateTargetLang | GenerateCpp
     };
+    Q_ENUM(CodeGeneration)
 
     TypeEntry(const QString &name, Type t, double vr)
             : m_name(name),
@@ -1680,6 +1683,7 @@ private:
 
 class ContainerTypeEntry : public ComplexTypeEntry
 {
+    Q_GADGET
 public:
     enum Type {
         NoContainer,
@@ -1696,6 +1700,7 @@ public:
         MultiHashContainer,
         PairContainer,
     };
+    Q_ENUM(Type)
 
     ContainerTypeEntry(const QString &name, Type type, double vr)
         : ComplexTypeEntry(name, ContainerType, vr), m_type(type)
