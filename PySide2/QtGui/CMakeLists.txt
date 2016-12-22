@@ -22,6 +22,7 @@ ${QtGui_GEN_DIR}/qdragenterevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qdragleaveevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qdragmoveevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qdropevent_wrapper.cpp
+${QtGui_GEN_DIR}/qexposeevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qfileopenevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qfocusevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qfont_wrapper.cpp
@@ -95,6 +96,14 @@ ${QtGui_GEN_DIR}/qstandarditem_wrapper.cpp
 ${QtGui_GEN_DIR}/qstandarditemmodel_wrapper.cpp
 ${QtGui_GEN_DIR}/qstatustipevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qstringlistmodel_wrapper.cpp
+${QtGui_GEN_DIR}/qopenglcontext_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessible_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessible_state_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessibleinterface_wrapper.cpp
+${QtGui_GEN_DIR}/qscreen_wrapper.cpp
+${QtGui_GEN_DIR}/qopenglshader_wrapper.cpp
+${QtGui_GEN_DIR}/qopenglshaderprogram_wrapper.cpp
+${QtGui_GEN_DIR}/qopenglframebufferobject_wrapper.cpp
 ${QtGui_GEN_DIR}/qsurface_wrapper.cpp
 ${QtGui_GEN_DIR}/qsurfaceformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qsyntaxhighlighter_wrapper.cpp

@@ -1722,6 +1722,7 @@
       </modify-argument>
     </modify-function>
   </object-type>
+  <object-type name="QExposeEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::Expose" />
   <object-type name="QFileOpenEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::FileOpen" />
   <object-type name="QFocusEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::FocusIn || %1-&gt;type() == QEvent::FocusOut" />
   <object-type name="QHelpEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::ToolTip || %1-&gt;type() == QEvent::WhatsThis"/>
@@ -3214,6 +3215,29 @@
     <inject-code class="native" file="glue/qguiapplication_init.cpp" position="beginning" />
 
   </object-type>
+
+  <value-type name="QAccessible">
+      <value-type name="State"/>
+      <enum-type name="Role"/>
+      <enum-type name="Text"/>
+      <enum-type name="RelationFlag"/>
+      <enum-type name="InterfaceType"/>
+      <enum-type name="TextBoundaryType"/>
+      <enum-type name="Event"/>
+  </value-type>
+  <object-type name="QAccessibleInterface">
+  </object-type>
+  <object-type name="QOpenGLContext">
+    <enum-type name="OpenGLModuleType" />
+  </object-type>
+  <object-type name="QOpenGLFramebufferObject">
+    <enum-type name="Attachment" />
+  </object-type>
+  <object-type name="QOpenGLShader" >
+    <enum-type name="ShaderTypeBit" flags="ShaderType" />
+  </object-type>
+  <object-type name="QOpenGLShaderProgram" />
+  <object-type name="QScreen" />
 
 </typesystem>
 
