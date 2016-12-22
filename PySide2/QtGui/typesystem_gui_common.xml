@@ -188,6 +188,20 @@
   <rejection class="QPolygon" function-name="point"/>
   <rejection class="QActionGroup" function-name="selected"/>
   <rejection class="QPaintEngine" function-name="fix_neg_rect"/>
+
+  <primitive-type name="WId" target-lang-api-name="PyLong">
+    <conversion-rule>
+      <native-to-target>
+      return PyLong_FromVoidPtr(reinterpret_cast&lt;void *&gt;(%in));
+      </native-to-target>
+      <target-to-native>
+        <add-conversion type="PyLong">
+          %out = reinterpret_cast&lt;%OUTTYPE&gt;(PyLong_AsVoidPtr(%in));
+        </add-conversion>
+      </target-to-native>
+    </conversion-rule>
+  </primitive-type>
+
   <value-type name="QTransform">
     <enum-type name="TransformationType"/>
     <add-function signature="__repr__" return-type="PyObject*">

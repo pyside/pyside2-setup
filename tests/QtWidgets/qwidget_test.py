@@ -48,6 +48,7 @@ class QWidgetVisible(UsesQApplication):
         self.assertTrue(not widget.isVisible())
         widget.setVisible(True)
         self.assertTrue(widget.isVisible())
+        self.assertTrue(widget.winId() is not 0)
 
 
 if __name__ == '__main__':
