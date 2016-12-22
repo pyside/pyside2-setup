@@ -45,6 +45,8 @@
     <load-typesystem name="typesystem_gui.xml" generate="no"/>
     <load-typesystem name="typesystem_qml.xml" generate="no"/>
 
+    <primitive-type name="GLuint"/>
+
     <extra-includes>
         <include file-name="pysidequickregistertype.h" location="local"/>
     </extra-includes>
@@ -53,31 +55,42 @@
     PySide::initQuickSupport(module);
     </inject-code>
 
+    <object-type name="QQuickAsyncImageProvider" />
+
     <object-type name="QQuickFramebufferObject" />
     <object-type name="QQuickFramebufferObject::Renderer" />
 
-    <!-- TODO: Abstract
-    <object-type name="QQuickTextureFactory" /> -->
+    <object-type name="QQuickTextureFactory" />
     <object-type name="QQuickImageProvider" />
+    <object-type name="QQuickImageResponse" />
 
-    <!-- TODO: private
-    <object-type name="QQuickTransform" /> -->
+    <object-type name="QQuickTransform" />
     <object-type name="QQuickItem">
+        <value-type name="UpdatePaintNodeData" />
         <enum-type name="Flag" flags="Flags" />
         <enum-type name="ItemChange" />
         <enum-type name="TransformOrigin" />
+        <modify-function signature="itemTransform(QQuickItem *, bool *) const" allow-thread="yes">
+            <modify-argument index="2">
+                <remove-argument />
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PyTuple" />
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+                <insert-template name="fix_args,bool*" />
+            </inject-code>
+        </modify-function>
         <!-- TODO: Find a way to wrap `union ItemChangeData {}` -->
     </object-type>
 
-    <!-- private
-    <object-type name="QQuickItemGrabResult" /> -->
+    <object-type name="QQuickItemGrabResult" />
 
     <object-type name="QQuickPaintedItem">
         <enum-type name="RenderTarget" />
         <enum-type name="PerformanceHint" flags="PerformanceHints" />
     </object-type>
 
-    <!-- private-->
     <object-type name="QQuickRenderControl" />
 
     <object-type name="QQuickTextDocument" />
@@ -93,6 +106,64 @@
         <enum-type name="SceneGraphError" />
     </object-type>
 
-    <!-- TODO: the scene graph (QSG*) classes -->
+    <object-type name="QSGAbstractRenderer">
+        <enum-type name="ClearModeBit" flags="ClearMode" />
+    </object-type>
+    <object-type name="QSGBasicGeometryNode" />
+    <object-type name="QSGClipNode" />
+    <object-type name="QSGDynamicTexture" />
+    <object-type name="QSGEngine">
+        <enum-type name="CreateTextureOption" flags="CreateTextureOptions" />
+    </object-type>
+    <!-- <object-type name="QSGFlatColorMaterial" /> -->
+    <object-type name="QSGGeometry">
+        <enum-type name="DataPattern" />
+    </object-type>
+    <value-type name="QSGGeometry::Attribute" />
+    <value-type name="QSGGeometry::AttributeSet" />
+    <value-type name="QSGGeometry::ColoredPoint2D" />
+    <value-type name="QSGGeometry::Point2D" />
+    <value-type name="QSGGeometry::TexturedPoint2D" />
+    <object-type name="QSGGeometryNode" />
+
+    <!-- QSGMaterialShader doesn't compile because of const char * char * types not being recognized
+         by the C++ parser, nor the generator.
+    <object-type name="QSGMaterial">
+        <enum-type name="Flag" flags="Flags" />
+    </object-type>
+    <object-type name="QSGMaterialShader" />
+    <value-type name="QSGMaterialShader::RenderState">
+        <enum-type name="DirtyState" flags="DirtyStates" />
+    </value-type>
+    -->
+    <object-type name="QSGMaterialType" />
+    <object-type name="QSGNode">
+        <enum-type name="DirtyStateBit" flags="DirtyState" />
+        <enum-type name="Flag" flags="Flags" />
+        <enum-type name="NodeType" />
+    </object-type>
+    <object-type name="QSGOpacityNode" />
+    <!-- <object-type name="QSGOpaqueTextureMaterial" /> -->
+    <object-type name="QSGSimpleRectNode" />
+    <object-type name="QSGSimpleTextureNode">
+        <enum-type name="TextureCoordinatesTransformFlag" flags="TextureCoordinatesTransformMode" />
+    </object-type>
+    <object-type name="QSGTexture">
+        <enum-type name="Filtering" />
+        <enum-type name="WrapMode" />
+    </object-type>
+    <!-- <object-type name="QSGTextureMaterial" /> -->
+    <object-type name="QSGTextureProvider" />
+    <object-type name="QSGTransformNode" />
+    <!-- <object-type name="QSGVertexColorMaterial" /> -->
+
+    <!-- These currently don't work because they are template classes, and the generator chokes on
+         them. Making these work properly would require fixing the parsing of template classes,
+         allowing creation of State structures and passing them to the template classes, as well as
+         implementing some mechanism of registration of the custom template classes, kind of how
+         it's done for qt quick items.
+    <object-type name="QSGSimpleMaterial" />
+    <object-type name="QSGSimpleMaterialShader" />
+    -->
 
 </typesystem>
