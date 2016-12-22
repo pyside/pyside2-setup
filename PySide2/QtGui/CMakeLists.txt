@@ -102,7 +102,7 @@ ${QtGui_GEN_DIR}/qaccessible_state_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibleinterface_wrapper.cpp
 ${QtGui_GEN_DIR}/qscreen_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglshader_wrapper.cpp
-${QtGui_GEN_DIR}/qopenglshaderprogram_wrapper.cpp
+#${QtGui_GEN_DIR}/qopenglshaderprogram_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglframebufferobject_wrapper.cpp
 ${QtGui_GEN_DIR}/qsurface_wrapper.cpp
 ${QtGui_GEN_DIR}/qsurfaceformat_wrapper.cpp

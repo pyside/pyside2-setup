@@ -3250,7 +3250,12 @@
   <object-type name="QOpenGLShader" >
     <enum-type name="ShaderTypeBit" flags="ShaderType" />
   </object-type>
+  <!-- Temporarily disable type, because it causes segfault on Linux due to incorrect parsing
+       of the void setUniformValue(const char *name, const GLfloat value[2][2]); method.
+       The float[][] ends up with an "Array" cpp signature, which obviously can't be found in the
+       typesystem.
   <object-type name="QOpenGLShaderProgram" />
+  -->
   <object-type name="QScreen" />
 
 </typesystem>
