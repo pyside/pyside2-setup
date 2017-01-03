@@ -32,14 +32,14 @@
 
 void TestReverseOperators::testReverseSum()
 {
-    const char cppCode[] = "struct A {\
-            A& operator+(int);\
-        };\
+    const char cppCode[] = "struct A {\n\
+            A& operator+(int);\n\
+        };\n\
         A& operator+(int, const A&);";
-    const char xmlCode[] = "\
-    <typesystem package=\"Foo\">\
-        <primitive-type name='int' />\
-        <value-type name='A' />\
+    const char xmlCode[] = "\n\
+    <typesystem package=\"Foo\">\n\
+        <primitive-type name='int' />\n\
+        <value-type name='A' />\n\
     </typesystem>";
 
     TestUtil t(cppCode, xmlCode, false);
@@ -69,20 +69,20 @@ void TestReverseOperators::testReverseSum()
 
 void TestReverseOperators::testReverseSumWithAmbiguity()
 {
-    const char cppCode[] = "\
-    struct A { A operator+(int); };\
-    A operator+(int, const A&);\
-    struct B {};\
-    B operator+(const A&, const B&);\
-    B operator+(const B&, const A&);\
-    int operator-(int, const A*);\
-    int operator/(const A*, int);\
+    const char cppCode[] = "\n\
+    struct A { A operator+(int); };\n\
+    A operator+(int, const A&);\n\
+    struct B {};\n\
+    B operator+(const A&, const B&);\n\
+    B operator+(const B&, const A&);\n\
+    int operator-(int, const A*);\n\
+    int operator/(const A*, int);\n\
     ";
-    const char xmlCode[] = "\
-    <typesystem package=\"Foo\">\
-        <primitive-type name='int' />\
-        <value-type name='A' />\
-        <value-type name='B' />\
+    const char xmlCode[] = "\n\
+    <typesystem package=\"Foo\">\n\
+        <primitive-type name='int' />\n\
+        <value-type name='A' />\n\
+        <value-type name='B' />\n\
     </typesystem>";
 
     TestUtil t(cppCode, xmlCode, false);

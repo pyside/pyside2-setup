@@ -34,20 +34,20 @@
 void TestConversionOperator::testConversionOperator()
 {
     const char cppCode[] = "\
-    struct A {\
-    };\
-    struct B {\
-        operator A() const;\
-    };\
-    struct C {\
-        operator A() const;\
-    };";
+    struct A {\n\
+    };\n\
+    struct B {\n\
+        operator A() const;\n\
+    };\n\
+    struct C {\n\
+        operator A() const;\n\
+    };\n";
     const char xmlCode[] = "\
-    <typesystem package=\"Foo\">\
-        <value-type name='A' />\
-        <value-type name='B' />\
-        <value-type name='C' />\
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <value-type name='A'/>\n\
+        <value-type name='B'/>\n\
+        <value-type name='C'/>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
@@ -76,15 +76,15 @@ void TestConversionOperator::testConversionOperator()
 void TestConversionOperator::testConversionOperatorOfDiscardedClass()
 {
     const char cppCode[] = "\
-    struct A {\
-    };\
-    struct B {\
-        operator A() const;\
-    };";
+    struct A {\n\
+    };\n\
+    struct B {\n\
+        operator A() const;\n\
+    };\n";
     const char xmlCode[] = "\
-    <typesystem package=\"Foo\">\
-        <value-type name='A' />\
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <value-type name='A' />\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
@@ -96,18 +96,18 @@ void TestConversionOperator::testConversionOperatorOfDiscardedClass()
 void TestConversionOperator::testRemovedConversionOperator()
 {
     const char cppCode[] = "\
-    struct A {\
-    };\
-    struct B {\
-        operator A() const;\
-    };";
+    struct A {\n\
+    };\n\
+    struct B {\n\
+        operator A() const;\n\
+    };\n";
     const char xmlCode[] = "\
-    <typesystem package=\"Foo\">\
-        <value-type name='A' />\
-        <value-type name='B'>\
-            <modify-function signature='operator A() const' remove='all' />\
-        </value-type>\
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <value-type name='A' />\n\
+        <value-type name='B'>\n\
+            <modify-function signature='operator A() const' remove='all'/>\n\
+        </value-type>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
@@ -124,15 +124,15 @@ void TestConversionOperator::testRemovedConversionOperator()
 void TestConversionOperator::testConversionOperatorReturningReference()
 {
     const char cppCode[] = "\
-    struct A {};\
-    struct B {\
-        operator A&() const;\
-    };";
+    struct A {};\n\
+    struct B {\n\
+        operator A&() const;\n\
+    };\n";
     const char xmlCode[] = "\
-    <typesystem package='Foo'>\
-        <value-type name='A' />\
-        <value-type name='B' />\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <value-type name='A'/>\n\
+        <value-type name='B'/>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
@@ -153,15 +153,15 @@ void TestConversionOperator::testConversionOperatorReturningReference()
 void TestConversionOperator::testConversionOperatorReturningConstReference()
 {
     const char cppCode[] = "\
-    struct A {};\
-    struct B {\
-        operator const A&() const;\
-    };";
+    struct A {};\n\
+    struct B {\n\
+        operator const A&() const;\n\
+    };\n";
     const char xmlCode[] = "\
-    <typesystem package='Foo'>\
-        <value-type name='A' />\
-        <value-type name='B' />\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <value-type name='A'/>\n\
+        <value-type name='B'/>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();

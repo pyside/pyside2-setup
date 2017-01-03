@@ -32,22 +32,22 @@
 
 void TestResolveType::testResolveReturnTypeFromParentScope()
 {
-    const char* cppCode = "\
-    namespace A {\
-        struct B {\
-            struct C {};\
-        };\
-        struct D : public B::C {\
-            C* foo = 0;\
-            C* method();\
-        };\
+    const char* cppCode = "\n\
+    namespace A {\n\
+        struct B {\n\
+            struct C {};\n\
+        };\n\
+        struct D : public B::C {\n\
+            C* foo = 0;\n\
+            C* method();\n\
+        };\n\
     };";
-    const char* xmlCode = "\
-    <typesystem package='Foo'> \
-        <namespace-type name='A' />\
-        <value-type name='A::B' /> \
-        <value-type name='A::B::C' /> \
-        <value-type name='A::D' /> \
+    const char* xmlCode = "\n\
+    <typesystem package='Foo'>\n\
+        <namespace-type name='A'/>\n\
+        <value-type name='A::B'/>\n\
+        <value-type name='A::B::C'/>\n\
+        <value-type name='A::D'/>\n\
     </typesystem>";
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();

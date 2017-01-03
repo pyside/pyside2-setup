@@ -35,21 +35,20 @@
 void TestRemoveImplConv::testRemoveImplConv()
 {
     const char* cppCode ="\
-    struct A {};\
-    struct B {};\
-    struct C {\
-        C(const A&);\
-        C(const B&);\
-    };\
-    ";
+    struct A {};\n\
+    struct B {};\n\
+    struct C {\n\
+        C(const A&);\n\
+        C(const B&);\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package=\"Foo\"> \
-        <value-type name='A' /> \
-        <value-type name='B' /> \
-        <value-type name='C'> \
-            <modify-function signature='C(const A&amp;)' remove='all' />\
-        </value-type>\
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <value-type name='A'/>\n\
+        <value-type name='B'/>\n\
+        <value-type name='C'>\n\
+            <modify-function signature='C(const A&amp;)' remove='all'/>\n\
+        </value-type>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 3);

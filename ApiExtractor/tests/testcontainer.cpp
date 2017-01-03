@@ -33,21 +33,20 @@
 void TestContainer::testContainerType()
 {
     const char* cppCode ="\
-    namespace std {\
-    template<class T>\
-    class list { \
-        T get(int x) { return 0; }\
-    };\
-    }\
-    class A : public std::list<int> {\
-    };\
-    ";
+    namespace std {\n\
+    template<class T>\n\
+    class list {\n\
+        T get(int x) { return 0; }\n\
+    };\n\
+    }\n\
+    class A : public std::list<int> {\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'> \
-        <namespace-type name='std' generate='no' /> \
-        <container-type name='std::list' type='list' /> \
-        <object-type name='A'/> \
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <namespace-type name='std' generate='no' />\n\
+        <container-type name='std::list' type='list' />\n\
+        <object-type name='A'/>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode, true);
     AbstractMetaClassList classes = t.builder()->classes();
@@ -62,23 +61,22 @@ void TestContainer::testContainerType()
 void TestContainer::testListOfValueType()
 {
     const char* cppCode ="\
-    namespace std {\
-    template<class T>\
-    class list { \
-        T get(int x) { return 0; }\
-    };\
-    }\
-    class ValueType {};\
-    class A : public std::list<ValueType> {\
-    };\
-    ";
+    namespace std {\n\
+    template<class T>\n\
+    class list {\n\
+        T get(int x) { return 0; }\n\
+    };\n\
+    }\n\
+    class ValueType {};\n\
+    class A : public std::list<ValueType> {\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'> \
-        <namespace-type name='std' generate='no' /> \
-        <container-type name='std::list' type='list' /> \
-        <value-type name='ValueType'/> \
-        <value-type name='A'/> \
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <namespace-type name='std' generate='no'/>\n\
+        <container-type name='std::list' type='list'/>\n\
+        <value-type name='ValueType'/>\n\
+        <value-type name='A'/>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode, true);
     AbstractMetaClassList classes = t.builder()->classes();

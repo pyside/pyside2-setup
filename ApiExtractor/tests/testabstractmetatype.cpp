@@ -32,11 +32,11 @@
 
 void TestAbstractMetaType::testConstCharPtrType()
 {
-    const char* cppCode ="const char* justAtest();";
-    const char* xmlCode = "<typesystem package=\"Foo\">\
-        <primitive-type name='char'/>\
-        <function signature='justAtest()' />\
-    </typesystem>";
+    const char* cppCode ="const char* justAtest();\n";
+    const char* xmlCode = "<typesystem package=\"Foo\">\n\
+        <primitive-type name='char'/>\n\
+        <function signature='justAtest()' />\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     QCOMPARE(t.builder()->globalFunctions().size(), 1);
     AbstractMetaFunction* func = t.builder()->globalFunctions().first();
@@ -59,16 +59,16 @@ void TestAbstractMetaType::testConstCharPtrType()
 
 void TestAbstractMetaType::testApiVersionSupported()
 {
-    const char* cppCode ="class foo {}; class foo2 {};\
-                          void justAtest(); void justAtest3();";
-    const char* xmlCode = "<typesystem package='Foo'>\
-        <value-type name='foo' since='0.1'/>\
-        <value-type name='foo2' since='1.0'/>\
-        <value-type name='foo3' since='1.1'/>\
-        <function signature='justAtest()' since='0.1'/>\
-        <function signature='justAtest2()' since='1.1'/>\
-        <function signature='justAtest3()'/>\
-    </typesystem>";
+    const char* cppCode ="class foo {}; class foo2 {};\n\
+                          void justAtest(); void justAtest3();\n";
+    const char* xmlCode = "<typesystem package='Foo'>\n\
+        <value-type name='foo' since='0.1'/>\n\
+        <value-type name='foo2' since='1.0'/>\n\
+        <value-type name='foo3' since='1.1'/>\n\
+        <function signature='justAtest()' since='0.1'/>\n\
+        <function signature='justAtest2()' since='1.1'/>\n\
+        <function signature='justAtest3()'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode, false, "1.0");
 
     AbstractMetaClassList classes = t.builder()->classes();
@@ -82,10 +82,10 @@ void TestAbstractMetaType::testApiVersionSupported()
 
 void TestAbstractMetaType::testApiVersionNotSupported()
 {
-    const char* cppCode ="class object {};";
-    const char* xmlCode = "<typesystem package='Foo'>\
-        <value-type name='object' since='0.1'/>\
-    </typesystem>";
+    const char* cppCode ="class object {};\n";
+    const char* xmlCode = "<typesystem package='Foo'>\n\
+        <value-type name='object' since='0.1'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode, true, "0.1");
 
     AbstractMetaClassList classes = t.builder()->classes();
@@ -94,12 +94,12 @@ void TestAbstractMetaType::testApiVersionNotSupported()
 
 void TestAbstractMetaType::testCharType()
 {
-    const char* cppCode ="char justAtest(); class A {};";
-    const char* xmlCode = "<typesystem package=\"Foo\">\
-    <primitive-type name='char'/>\
-    <value-type name='A' />\
-    <function signature='justAtest()' />\
-    </typesystem>";
+    const char* cppCode ="char justAtest(); class A {};\n";
+    const char* xmlCode = "<typesystem package=\"Foo\">\n\
+    <primitive-type name='char'/>\n\
+    <value-type name='A'/>\n\
+    <function signature='justAtest()'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
 
     AbstractMetaClassList classes = t.builder()->classes();
@@ -129,14 +129,14 @@ void TestAbstractMetaType::testCharType()
 void TestAbstractMetaType::testTypedef()
 {
     const char* cppCode ="\
-    struct A {\
-        void someMethod();\
-    };\
-    typedef A B;\
-    typedef B C;";
-    const char* xmlCode = "<typesystem package=\"Foo\">\
-    <value-type name='C' />\
-    </typesystem>";
+    struct A {\n\
+        void someMethod();\n\
+    };\n\
+    typedef A B;\n\
+    typedef B C;\n";
+    const char* xmlCode = "<typesystem package=\"Foo\">\n\
+    <value-type name='C' />\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
 
     AbstractMetaClassList classes = t.builder()->classes();
@@ -149,19 +149,18 @@ void TestAbstractMetaType::testTypedef()
 void TestAbstractMetaType::testTypedefWithTemplates()
 {
     const char* cppCode ="\
-    template<typename T>\
-    class A {};\
-    \
-    class B {};\
-    typedef A<B> C;\
-    \
-    void func(C c);\
-    ";
-    const char* xmlCode = "<typesystem package=\"Foo\">\
-    <container-type name='A' type='list'/>\
-    <value-type name='B' />\
-    <function signature='func(A&lt;B&gt;)' />\
-    </typesystem>";
+    template<typename T>\n\
+    class A {};\n\
+    \n\
+    class B {};\n\
+    typedef A<B> C;\n\
+    \n\
+    void func(C c);\n";
+    const char* xmlCode = "<typesystem package=\"Foo\">\n\
+    <container-type name='A' type='list'/>\n\
+    <value-type name='B' />\n\
+    <function signature='func(A&lt;B&gt;)'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
 
     AbstractMetaClassList classes = t.builder()->classes();
@@ -180,13 +179,12 @@ void TestAbstractMetaType::testTypedefWithTemplates()
 void TestAbstractMetaType::testObjectTypeUsedAsValue()
 {
     const char* cppCode ="\
-    class A {\
-        void method(A);\
-    };\
-    ";
-    const char* xmlCode = "<typesystem package='Foo'>\
-    <object-type name='A' />\
-    </typesystem>";
+    class A {\n\
+        void method(A);\n\
+    };\n";
+    const char* xmlCode = "<typesystem package='Foo'>\n\
+    <object-type name='A'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
 
     AbstractMetaClassList classes = t.builder()->classes();

@@ -33,22 +33,21 @@
 void TestImplicitConversions::testWithPrivateCtors()
 {
     const char* cppCode ="\
-    class B;\
-    class C;\
-    class A {\
-        A(const B&);\
-    public:\
-        A(const C&);\
-    };\
-    class B {};\
-    class C {};\
-    ";
+    class B;\n\
+    class C;\n\
+    class A {\n\
+        A(const B&);\n\
+    public:\n\
+        A(const C&);\n\
+    };\n\
+    class B {};\n\
+    class C {};\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'> \
-        <value-type name='A'/> \
-        <value-type name='B'/> \
-        <value-type name='C'/> \
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <value-type name='A'/>\n\
+        <value-type name='B'/>\n\
+        <value-type name='C'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 3);
@@ -63,22 +62,21 @@ void TestImplicitConversions::testWithPrivateCtors()
 void TestImplicitConversions::testWithModifiedVisibility()
 {
     const char* cppCode ="\
-    class B;\
-    class A {\
-    public:\
-        A(const B&);\
-    };\
-    class B {};\
-    ";
+    class B;\n\
+    class A {\n\
+    public:\n\
+        A(const B&);\n\
+    };\n\
+    class B {};\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'>\
-        <value-type name='A'>\
-            <modify-function signature='A(const B&amp;)'>\
-                <access modifier='private' />\
-            </modify-function>\
-        </value-type>\
-        <value-type name='B'/>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <value-type name='A'>\n\
+            <modify-function signature='A(const B&amp;)'>\n\
+                <access modifier='private'/>\n\
+            </modify-function>\n\
+        </value-type>\n\
+        <value-type name='B'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 2);
@@ -93,25 +91,24 @@ void TestImplicitConversions::testWithModifiedVisibility()
 void TestImplicitConversions::testWithAddedCtor()
 {
     const char* cppCode ="\
-    class B;\
-    class A {\
-    public:\
-        A(const B&);\
-    };\
-    class B {};\
-    class C {};\
-    ";
+    class B;\n\
+    class A {\n\
+    public:\n\
+        A(const B&);\n\
+    };\n\
+    class B {};\n\
+    class C {};\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'>\
-        <custom-type name='TARGETLANGTYPE' />\
-        <value-type name='A'>\
-            <add-function signature='A(const C&amp;)' />\
-        </value-type>\
-        <value-type name='B'>\
-            <add-function signature='B(TARGETLANGTYPE*)' />\
-        </value-type>\
-        <value-type name='C'/>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <custom-type name='TARGETLANGTYPE'/>\n\
+        <value-type name='A'>\n\
+            <add-function signature='A(const C&amp;)'/>\n\
+        </value-type>\n\
+        <value-type name='B'>\n\
+            <add-function signature='B(TARGETLANGTYPE*)'/>\n\
+        </value-type>\n\
+        <value-type name='C'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 3);
@@ -129,16 +126,15 @@ void TestImplicitConversions::testWithAddedCtor()
 void TestImplicitConversions::testWithExternalConversionOperator()
 {
     const char* cppCode ="\
-    class A {};\
-    struct B {\
-        operator A() const;\
-    };\
-    ";
-    const char* xmlCode = "\
-    <typesystem package='Foo'>\
-        <value-type name='A'/>\
-        <value-type name='B'/>\
-    </typesystem>";
+    class A {};\n\
+    struct B {\n\
+        operator A() const;\n\
+    };\n";
+    const char* xmlCode = "\n\
+    <typesystem package='Foo'>\n\
+        <value-type name='A'/>\n\
+        <value-type name='B'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 2);

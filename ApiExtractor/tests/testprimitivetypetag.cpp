@@ -33,14 +33,13 @@
 void TestPrimitiveTypeTag::testPrimitiveTypeDefaultConstructor()
 {
     const char* cppCode ="\
-    struct A {};\
-    struct B {};\
-    ";
+    struct A {};\n\
+    struct B {};\n";
     const char* xmlCode = "\
-    <typesystem package=\"Foo\"> \
-        <primitive-type name='A' default-constructor='A()'/> \
-        <object-type name='B' /> \
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <primitive-type name='A' default-constructor='A()'/>\n\
+        <object-type name='B'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode, false);
 
     AbstractMetaClassList classes = t.builder()->classes();

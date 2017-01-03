@@ -33,28 +33,27 @@
 void TestNestedTypes::testNestedTypesModifications()
 {
     const char* cppCode ="\
-    namespace OuterNamespace {\
-        namespace InnerNamespace {\
-            struct SomeClass {\
-                void method() {}\
-            };\
-        };\
-    };\
-    ";
+    namespace OuterNamespace {\n\
+        namespace InnerNamespace {\n\
+            struct SomeClass {\n\
+                void method() {}\n\
+            };\n\
+        };\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'> \
-        <namespace-type name='OuterNamespace'>\
-            <namespace-type name='InnerNamespace'>\
-                <inject-code class='native'>custom_code1();</inject-code>\
-                <add-function signature='method()' return-type='OuterNamespace::InnerNamespace::SomeClass'>\
-                    <inject-code class='target'>custom_code2();</inject-code>\
-                </add-function>\
-                <object-type name='SomeClass' target-lang-name='RenamedSomeClass'>\
-                    <modify-function signature='method()' remove='all'/>\
-                </object-type>\
-            </namespace-type>\
-        </namespace-type>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <namespace-type name='OuterNamespace'>\n\
+            <namespace-type name='InnerNamespace'>\n\
+                <inject-code class='native'>custom_code1();</inject-code>\n\
+                <add-function signature='method()' return-type='OuterNamespace::InnerNamespace::SomeClass'>\n\
+                    <inject-code class='target'>custom_code2();</inject-code>\n\
+                </add-function>\n\
+                <object-type name='SomeClass' target-lang-name='RenamedSomeClass'>\n\
+                    <modify-function signature='method()' remove='all'/>\n\
+                </object-type>\n\
+            </namespace-type>\n\
+        </namespace-type>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
@@ -91,17 +90,17 @@ void TestNestedTypes::testNestedTypesModifications()
 void TestNestedTypes::testDuplicationOfNestedTypes()
 {
     const char* cppCode ="\
-    namespace Namespace {\
-        class SomeClass {};\
-    };";
+    namespace Namespace {\n\
+        class SomeClass {};\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'> \
-        <namespace-type name='Namespace'>\
-            <value-type name='SomeClass'>\
-                <add-function signature='createSomeClass(Namespace::SomeClass)'/>\
-            </value-type>\
-        </namespace-type>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <namespace-type name='Namespace'>\n\
+            <value-type name='SomeClass'>\n\
+                <add-function signature='createSomeClass(Namespace::SomeClass)'/>\n\
+            </value-type>\n\
+        </namespace-type>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();

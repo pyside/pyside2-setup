@@ -70,17 +70,17 @@ void TestAddFunction::testParsingFuncNameAndConstness()
 
 void TestAddFunction::testAddFunction()
 {
-    const char cppCode[] = "struct B {}; struct A { void a(int); };";
+    const char cppCode[] = "struct B {}; struct A { void a(int); };\n";
     const char xmlCode[] = "\
-    <typesystem package='Foo'>\
-        <primitive-type name='int' />\
-        <primitive-type name='float' />\
-        <value-type name='B' />\
-        <value-type name='A'>\
-            <add-function signature='b(int, float = 4.6, const B&amp;)' return-type='int' access='protected'>\
-            </add-function>\
-        </value-type>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <primitive-type name='int'/>\n\
+        <primitive-type name='float'/>\n\
+        <value-type name='B'/>\n\
+        <value-type name='A'>\n\
+            <add-function signature='b(int, float = 4.6, const B&amp;)' return-type='int' access='protected'>\n\
+            </add-function>\n\
+        </value-type>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     TypeDatabase* typeDb = TypeDatabase::instance();
     AbstractMetaClassList classes = t.builder()->classes();
@@ -111,14 +111,14 @@ void TestAddFunction::testAddFunction()
 
 void TestAddFunction::testAddFunctionConstructor()
 {
-    const char cppCode[] = "struct A { A() {} };";
+    const char cppCode[] = "struct A { A() {} };\n";
     const char xmlCode[] = "\
-    <typesystem package='Foo'>\
-        <primitive-type name='int' />\
-        <value-type name='A'>\
-            <add-function signature='A(int)' />\
-        </value-type>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <primitive-type name='int'/>\n\
+        <value-type name='A'>\n\
+            <add-function signature='A(int)'/>\n\
+        </value-type>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
@@ -134,13 +134,13 @@ void TestAddFunction::testAddFunctionConstructor()
 
 void TestAddFunction::testAddFunctionTagDefaultValues()
 {
-    const char cppCode[] = "struct A {};";
+    const char cppCode[] = "struct A {};\n";
     const char xmlCode[] = "\
-    <typesystem package='Foo'>\
-        <value-type name='A'>\
-            <add-function signature='func()' />\
-        </value-type>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <value-type name='A'>\n\
+            <add-function signature='func()'/>\n\
+        </value-type>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
@@ -155,15 +155,15 @@ void TestAddFunction::testAddFunctionTagDefaultValues()
 
 void TestAddFunction::testAddFunctionCodeSnippets()
 {
-    const char cppCode[] = "struct A {};";
+    const char cppCode[] = "struct A {};\n";
     const char xmlCode[] = "\
-    <typesystem package='Foo'>\
-        <value-type name='A'>\
-            <add-function signature='func()'>\
-                <inject-code class='target' position='end'>Hi!, I am the code.</inject-code>\
-            </add-function>\
-        </value-type>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <value-type name='A'>\n\
+            <add-function signature='func()'>\n\
+                <inject-code class='target' position='end'>Hi!, I am the code.</inject-code>\n\
+            </add-function>\n\
+        </value-type>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
@@ -182,15 +182,15 @@ void TestAddFunction::testAddFunctionWithoutParenteses()
     QCOMPARE(f1.arguments().count(), 0);
     QCOMPARE(f1.isConstant(), false);
 
-    const char cppCode[] = "struct A {};";
+    const char cppCode[] = "struct A {};\n";
     const char xmlCode[] = "\
-    <typesystem package='Foo'>\
-        <value-type name='A'>\
-            <add-function signature='func'>\
-                <inject-code class='target' position='end'>Hi!, I am the code.</inject-code>\
-            </add-function>\
-        </value-type>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <value-type name='A'>\n\
+            <add-function signature='func'>\n\
+                <inject-code class='target' position='end'>Hi!, I am the code.</inject-code>\n\
+            </add-function>\n\
+        </value-type>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
@@ -211,18 +211,18 @@ void TestAddFunction::testAddFunctionWithDefaultArgs()
     QCOMPARE(f1.arguments().count(), 0);
     QCOMPARE(f1.isConstant(), false);
 
-    const char cppCode[] = "struct A { };";
+    const char cppCode[] = "struct A { };\n";
     const char xmlCode[] = "\
-    <typesystem package='Foo'>\
-        <primitive-type name='int'/> \
-        <value-type name='A'>\
-            <add-function signature='func(int, int)'>\
-              <modify-argument index='2'>\
-                <replace-default-expression with='2'/> \
-              </modify-argument> \
-            </add-function>\
-        </value-type>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <primitive-type name='int'/>\n\
+        <value-type name='A'>\n\
+            <add-function signature='func(int, int)'>\n\
+              <modify-argument index='2'>\n\
+                <replace-default-expression with='2'/>\n\
+              </modify-argument>\n\
+            </add-function>\n\
+        </value-type>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
@@ -236,15 +236,15 @@ void TestAddFunction::testAddFunctionWithDefaultArgs()
 
 void TestAddFunction::testAddFunctionAtModuleLevel()
 {
-    const char cppCode[] = "struct A { };";
+    const char cppCode[] = "struct A { };\n";
     const char xmlCode[] = "\
-    <typesystem package='Foo'>\
-        <primitive-type name='int'/> \
-        <value-type name='A'/>\
-        <add-function signature='func(int, int)'>\
-            <inject-code class='target' position='beginning'>custom_code();</inject-code>\
-        </add-function>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <primitive-type name='int'/>\n\
+        <value-type name='A'/>\n\
+        <add-function signature='func(int, int)'>\n\
+            <inject-code class='target' position='beginning'>custom_code();</inject-code>\n\
+        </add-function>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
@@ -274,15 +274,15 @@ void TestAddFunction::testAddFunctionWithVarargs()
     QCOMPARE(f1.arguments().count(), 3);
     QVERIFY(!f1.isConstant());
 
-    const char cppCode[] = "struct A {};";
+    const char cppCode[] = "struct A {};\n";
     const char xmlCode[] = "\
-    <typesystem package='Foo'>\
-        <primitive-type name='int'/> \
-        <primitive-type name='char'/> \
-        <value-type name='A'>\
-            <add-function signature='func(int,char,...)'/>\
-        </value-type>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <primitive-type name='int'/>\n\
+        <primitive-type name='char'/>\n\
+        <value-type name='A'>\n\
+            <add-function signature='func(int,char,...)'/>\n\
+        </value-type>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
@@ -297,16 +297,16 @@ void TestAddFunction::testAddFunctionWithVarargs()
 
 void TestAddFunction::testAddStaticFunction()
 {
-    const char cppCode[] = "struct A { };";
+    const char cppCode[] = "struct A { };\n";
     const char xmlCode[] = "\
-    <typesystem package='Foo'>\
-        <primitive-type name='int'/> \
-        <value-type name='A'>\
-            <add-function signature='func(int, int)' static='yes'>\
-                <inject-code class='target' position='beginning'>custom_code();</inject-code>\
-            </add-function>\
-        </value-type>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <primitive-type name='int'/>\n\
+        <value-type name='A'>\n\
+            <add-function signature='func(int, int)' static='yes'>\n\
+                <inject-code class='target' position='beginning'>custom_code();</inject-code>\n\
+            </add-function>\n\
+        </value-type>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
@@ -318,19 +318,19 @@ void TestAddFunction::testAddStaticFunction()
 
 void TestAddFunction::testAddGlobalFunction()
 {
-    const char cppCode[] = "struct A { };struct B {};";
+    const char cppCode[] = "struct A { };struct B {};\n";
     const char xmlCode[] = "\
-    <typesystem package='Foo'>\
-        <primitive-type name='int'/> \
-        <value-type name='A' />\
-        <add-function signature='globalFunc(int, int)' static='yes'>\
-            <inject-code class='target' position='beginning'>custom_code();</inject-code>\
-        </add-function>\
-        <add-function signature='globalFunc2(int, int)' static='yes'>\
-            <inject-code class='target' position='beginning'>custom_code();</inject-code>\
-        </add-function>\
-        <value-type name='B' />\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <primitive-type name='int'/>\n\
+        <value-type name='A'/>\n\
+        <add-function signature='globalFunc(int, int)' static='yes'>\n\
+            <inject-code class='target' position='beginning'>custom_code();</inject-code>\n\
+        </add-function>\n\
+        <add-function signature='globalFunc2(int, int)' static='yes'>\n\
+            <inject-code class='target' position='beginning'>custom_code();</inject-code>\n\
+        </add-function>\n\
+        <value-type name='B'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaFunctionList globalFuncs = t.builder()->globalFunctions();
     QCOMPARE(globalFuncs.count(), 2);
@@ -344,15 +344,15 @@ void TestAddFunction::testAddFunctionWithApiVersion()
 {
     const char cppCode[] = "";
     const char xmlCode[] = "\
-    <typesystem package='Foo'>\
-        <primitive-type name='int'/> \
-        <add-function signature='globalFunc(int, int)' static='yes' since='1.3'>\
-            <inject-code class='target' position='beginning'>custom_code();</inject-code>\
-        </add-function>\
-        <add-function signature='globalFunc2(int, int)' static='yes' since='0.1'>\
-            <inject-code class='target' position='beginning'>custom_code();</inject-code>\
-        </add-function>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <primitive-type name='int'/>\n\
+        <add-function signature='globalFunc(int, int)' static='yes' since='1.3'>\n\
+            <inject-code class='target' position='beginning'>custom_code();</inject-code>\n\
+        </add-function>\n\
+        <add-function signature='globalFunc2(int, int)' static='yes' since='0.1'>\n\
+            <inject-code class='target' position='beginning'>custom_code();</inject-code>\n\
+        </add-function>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode, true, "0.1");
     AbstractMetaFunctionList globalFuncs = t.builder()->globalFunctions();
     QCOMPARE(globalFuncs.count(), 1);
@@ -360,21 +360,21 @@ void TestAddFunction::testAddFunctionWithApiVersion()
 
 void TestAddFunction::testModifyAddedFunction()
 {
-    const char cppCode[] = "class Foo { };";
+    const char cppCode[] = "class Foo { };\n";
     const char xmlCode[] = "\
-    <typesystem package='Package'>\
-        <primitive-type name='float'/>\
-        <primitive-type name='int'/>\
-        <value-type name='Foo'>\
-            <add-function signature='method(float, int)'>\
-                <inject-code class='target' position='beginning'>custom_code();</inject-code>\
-                <modify-argument index='2'>\
-                    <replace-default-expression with='0' />\
-                    <rename to='varName' />\
-                </modify-argument>\
-            </add-function>\
-        </value-type>\
-    </typesystem>";
+    <typesystem package='Package'>\n\
+        <primitive-type name='float'/>\n\
+        <primitive-type name='int'/>\n\
+        <value-type name='Foo'>\n\
+            <add-function signature='method(float, int)'>\n\
+                <inject-code class='target' position='beginning'>custom_code();</inject-code>\n\
+                <modify-argument index='2'>\n\
+                    <replace-default-expression with='0'/>\n\
+                    <rename to='varName'/>\n\
+                </modify-argument>\n\
+            </add-function>\n\
+        </value-type>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* foo = classes.findClass(QLatin1String("Foo"));
@@ -388,20 +388,20 @@ void TestAddFunction::testModifyAddedFunction()
 
 void TestAddFunction::testAddFunctionOnTypedef()
 {
-    const char cppCode[] = "template<class T> class Foo { }; typedef Foo<int> FooInt;";
+    const char cppCode[] = "template<class T> class Foo { }; typedef Foo<int> FooInt;\n";
     const char xmlCode[] = "\
-    <typesystem package='Package'>\
-        <custom-type name='PySequence'/>\
-        <primitive-type name='int'/>\
-        <value-type name='FooInt'>\
-            <add-function signature='FooInt(PySequence)'>\
-                <inject-code class='target' position='beginning'>custom_code();</inject-code>\
-            </add-function>\
-            <add-function signature='method()'>\
-                <inject-code class='target' position='beginning'>custom_code();</inject-code>\
-            </add-function>\
-        </value-type>\
-    </typesystem>";
+    <typesystem package='Package'>\n\
+        <custom-type name='PySequence'/>\n\
+        <primitive-type name='int'/>\n\
+        <value-type name='FooInt'>\n\
+            <add-function signature='FooInt(PySequence)'>\n\
+                <inject-code class='target' position='beginning'>custom_code();</inject-code>\n\
+            </add-function>\n\
+            <add-function signature='method()'>\n\
+                <inject-code class='target' position='beginning'>custom_code();</inject-code>\n\
+            </add-function>\n\
+        </value-type>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* foo = classes.findClass(QLatin1String("FooInt"));
@@ -416,13 +416,13 @@ void TestAddFunction::testAddFunctionOnTypedef()
 
 void TestAddFunction::testAddFunctionWithTemplateArg()
 {
-    const char cppCode[] = "template<class T> class Foo { };";
+    const char cppCode[] = "template<class T> class Foo { };\n";
     const char xmlCode[] = "\
-    <typesystem package='Package'>\
-        <primitive-type name='int'/>\
-        <container-type name='Foo'  type='list'/>\
-        <add-function signature='func(Foo&lt;int>)' />\
-    </typesystem>";
+    <typesystem package='Package'>\n\
+        <primitive-type name='int'/>\n\
+        <container-type name='Foo' type='list'/>\n\
+        <add-function signature='func(Foo&lt;int>)'/>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode);
     QCOMPARE(t.builder()->globalFunctions().size(), 1);

@@ -33,14 +33,14 @@
 
 void TestCtorInformation::testCtorIsPrivate()
 {
-    const char* cppCode = "class Control { public: Control() {} };\
-                           class Subject { private: Subject() {} };\
-                           class CtorLess { };";
-    const char* xmlCode = "<typesystem package='Foo'>\
-                                <value-type name='Control'/>\
-                                <object-type name='Subject'/>\
-                                <value-type name='CtorLess'/>\
-                           </typesystem>";
+    const char* cppCode = "class Control { public: Control() {} };\n\
+                           class Subject { private: Subject() {} };\n\
+                           class CtorLess { };\n";
+    const char* xmlCode = "<typesystem package='Foo'>\n\
+                                <value-type name='Control'/>\n\
+                                <object-type name='Subject'/>\n\
+                                <value-type name='CtorLess'/>\n\
+                           </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 3);
@@ -51,16 +51,15 @@ void TestCtorInformation::testCtorIsPrivate()
 
 void TestCtorInformation::testHasNonPrivateCtor()
 {
-    const char* cppCode = "template<typename T>\
-                           struct Base { Base(double) {} };\
-                           typedef Base<int> Derived;\
-                          ";
-    const char* xmlCode = "<typesystem package='Foo'>\
-                                <primitive-type name='int' />\
-                                <primitive-type name='double' />\
-                                <object-type name='Base' generate='no'/>\
-                                <object-type name='Derived'/>\
-                           </typesystem>";
+    const char* cppCode = "template<typename T>\n\
+                           struct Base { Base(double) {} };\n\
+                           typedef Base<int> Derived;\n";
+    const char* xmlCode = "<typesystem package='Foo'>\n\
+                                <primitive-type name='int'/>\n\
+                                <primitive-type name='double'/>\n\
+                                <object-type name='Base' generate='no'/>\n\
+                                <object-type name='Derived'/>\n\
+                           </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 2);

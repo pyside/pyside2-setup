@@ -33,16 +33,15 @@
 void TestReferenceToPointer::testReferenceToPointerArgument()
 {
     const char* cppCode ="\
-    struct A {};\
-    struct B {\
-        void dummy(A*&);\
-    };\
-    ";
+    struct A {};\n\
+    struct B {\n\
+        void dummy(A*&);\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package=\"Foo\"> \
-        <object-type name='A' /> \
-        <object-type name='B' /> \
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <object-type name='A'/>\n\
+        <object-type name='B'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));

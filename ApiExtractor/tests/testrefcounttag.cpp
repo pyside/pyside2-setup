@@ -33,22 +33,21 @@
 void TestRefCountTag::testReferenceCountTag()
 {
     const char* cppCode ="\
-    struct A {};\
-    struct B {\
-        void keepObject(B* b);\
-    };\
-    ";
+    struct A {};\n\
+    struct B {\n\
+        void keepObject(B* b);\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package=\"Foo\"> \
-        <object-type name='A' /> \
-        <object-type name='B'> \
-        <modify-function signature='keepObject(B*)'>\
-            <modify-argument index='1'>\
-                <reference-count action='add' /> \
-            </modify-argument>\
-        </modify-function>\
-        </object-type>\
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <object-type name='A'/>\n\
+        <object-type name='B'>\n\
+        <modify-function signature='keepObject(B*)'>\n\
+            <modify-argument index='1'>\n\
+                <reference-count action='add'/>\n\
+            </modify-argument>\n\
+        </modify-function>\n\
+        </object-type>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
@@ -61,25 +60,24 @@ void TestRefCountTag::testReferenceCountTag()
 void TestRefCountTag::testWithApiVersion()
 {
     const char* cppCode ="\
-    struct A {};\
-    struct B {\
-        void keepObject(B*, B*);\
-    };\
-    ";
+    struct A {};\n\
+    struct B {\n\
+        void keepObject(B*, B*);\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package=\"Foo\"> \
-        <object-type name='A' /> \
-        <object-type name='B'> \
-        <modify-function signature='keepObject(B*, B*)'>\
-            <modify-argument index='1' since='0.1'>\
-                <reference-count action='add' /> \
-            </modify-argument>\
-            <modify-argument index='2' since='0.2'>\
-                <reference-count action='add' /> \
-            </modify-argument>\
-        </modify-function>\
-        </object-type>\
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <object-type name='A'/>\n\
+        <object-type name='B'>\n\
+        <modify-function signature='keepObject(B*, B*)'>\n\
+            <modify-argument index='1' since='0.1'>\n\
+                <reference-count action='add'/>\n\
+            </modify-argument>\n\
+            <modify-argument index='2' since='0.2'>\n\
+                <reference-count action='add'/>\n\
+            </modify-argument>\n\
+        </modify-function>\n\
+        </object-type>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode, false, "0.1");
     AbstractMetaClassList classes = t.builder()->classes();

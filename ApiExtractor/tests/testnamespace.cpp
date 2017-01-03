@@ -33,20 +33,20 @@
 void TestNamespace::testNamespaceMembers()
 {
     const char* cppCode = "\
-    namespace Namespace\
-    {\
-        enum Option {\
-            OpZero,\
-            OpOne\
-        };\
-        void foo(Option opt);\
-    };";
+    namespace Namespace\n\
+    {\n\
+        enum Option {\n\
+            OpZero,\n\
+            OpOne\n\
+        };\n\
+        void foo(Option opt);\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'> \
-        <namespace-type name='Namespace'>\
-            <enum-type name='Option' /> \
-        </namespace-type>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <namespace-type name='Namespace'>\n\
+            <enum-type name='Option' />\n\
+        </namespace-type>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* ns = classes.findClass(QLatin1String("Namespace"));
@@ -60,22 +60,22 @@ void TestNamespace::testNamespaceMembers()
 void TestNamespace::testNamespaceInnerClassMembers()
 {
     const char* cppCode = "\
-    namespace OuterNamespace\
-    {\
-        namespace InnerNamespace {\
-            struct SomeClass {\
-                void method();\
-            };\
-        };\
-    };";
+    namespace OuterNamespace\n\
+    {\n\
+        namespace InnerNamespace {\n\
+            struct SomeClass {\n\
+                void method();\n\
+            };\n\
+        };\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'> \
-        <namespace-type name='OuterNamespace'>\
-            <namespace-type name='InnerNamespace'>\
-                <value-type name='SomeClass' /> \
-            </namespace-type>\
-        </namespace-type>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <namespace-type name='OuterNamespace'>\n\
+            <namespace-type name='InnerNamespace'>\n\
+                <value-type name='SomeClass'/>\n\
+            </namespace-type>\n\
+        </namespace-type>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* ons = classes.findClass(QLatin1String("OuterNamespace"));

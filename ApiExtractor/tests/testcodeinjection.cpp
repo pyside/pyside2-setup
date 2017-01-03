@@ -34,19 +34,20 @@
 
 void TestCodeInjections::testReadFileUtf8()
 {
-    const char* cppCode ="struct A {};";
+    const char* cppCode ="struct A {};\n";
     int argc = 0;
     char *argv[] = {NULL};
     QCoreApplication app(argc, argv);
     QString filePath = QDir::currentPath();
     QString xmlCode = QLatin1String("\
-    <typesystem package=\"Foo\"> \
-        <value-type name='A'> \
-            <conversion-rule file='") +filePath+ QLatin1String("/utf8code.txt'/>\
-            <inject-code class='target' file='") + filePath + QLatin1String("/utf8code.txt' />\
-        </value-type>\
-        <value-type name='A::B'/> \
-    </typesystem>");
+    <typesystem package=\"Foo\">\n\
+        <value-type name='A'>\n\
+            <conversion-rule file='") + filePath + QLatin1String("/utf8code.txt'/>\n\
+            <inject-code class='target' file='") + filePath
+        + QLatin1String("/utf8code.txt'/>\n\
+        </value-type>\n\
+        <value-type name='A::B'/>\n\
+    </typesystem>\n");
     TestUtil t(cppCode, xmlCode.toLocal8Bit().constData());
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
@@ -60,15 +61,15 @@ void TestCodeInjections::testReadFileUtf8()
 
 void TestCodeInjections::testInjectWithValidApiVersion()
 {
-    const char* cppCode ="struct A {};";
+    const char* cppCode ="struct A {};\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'> \
-        <value-type name='A'> \
-            <inject-code class='target' since='1.0'>\
-                test Inject code\
-            </inject-code>\
-        </value-type>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <value-type name='A'>\n\
+            <inject-code class='target' since='1.0'>\n\
+                test Inject code\n\
+            </inject-code>\n\
+        </value-type>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode, true, "1.0");
 
@@ -79,15 +80,15 @@ void TestCodeInjections::testInjectWithValidApiVersion()
 
 void TestCodeInjections::testInjectWithInvalidApiVersion()
 {
-    const char* cppCode ="struct A {};";
+    const char* cppCode ="struct A {};\n";
     const char* xmlCode  = "\
-    <typesystem package=\"Foo\"> \
-        <value-type name='A'> \
-            <inject-code class='target' since='1.0'>\
-                test Inject code\
-            </inject-code>\
-        </value-type>\
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <value-type name='A'>\n\
+            <inject-code class='target' since='1.0'>\n\
+                test Inject code\n\
+            </inject-code>\n\
+        </value-type>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode, true, "0.1");
 

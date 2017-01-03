@@ -35,17 +35,17 @@
 
 void TestModifyDocumentation::testModifyDocumentation()
 {
-    const char* cppCode ="struct B { void b(); }; class A {};";
-    const char* xmlCode = "<typesystem package=\"Foo\">\
-    <value-type name='B'>\
-        <modify-function signature='b()' remove='all' />\
-    </value-type>\
-    <value-type name='A'>\
-    <modify-documentation xpath='description/para[3]'>\
-    &lt;para>Some changed contents here&lt;/para>\
-    </modify-documentation>\
-    </value-type>\
-    </typesystem>";
+    const char* cppCode ="struct B { void b(); }; class A {};\n";
+    const char* xmlCode = "<typesystem package=\"Foo\">\n\
+    <value-type name='B'>\n\
+        <modify-function signature='b()' remove='all'/>\n\
+    </value-type>\n\
+    <value-type name='A'>\n\
+    <modify-documentation xpath='description/para[3]'>\n\
+    &lt;para>Some changed contents here&lt;/para>\n\
+    </modify-documentation>\n\
+    </value-type>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
 
     AbstractMetaClass* classA = t.builder()->classes().findClass(QLatin1String("A"));

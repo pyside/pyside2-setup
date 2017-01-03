@@ -33,21 +33,20 @@
 void TestModifyFunction::testRenameArgument()
 {
     const char* cppCode ="\
-    struct A {\
-        void method(int=0);\
-    };\
-    ";
+    struct A {\n\
+        void method(int=0);\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'> \
-        <primitive-type name='int'/>\
-        <object-type name='A'> \
-        <modify-function signature='method(int)'>\
-            <modify-argument index='1'>\
-                <rename to='otherArg' />\
-            </modify-argument>\
-        </modify-function>\
-        </object-type>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <primitive-type name='int'/>\n\
+        <object-type name='A'>\n\
+        <modify-function signature='method(int)'>\n\
+            <modify-argument index='1'>\n\
+                <rename to='otherArg'/>\n\
+            </modify-argument>\n\
+        </modify-function>\n\
+        </object-type>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
@@ -60,22 +59,21 @@ void TestModifyFunction::testRenameArgument()
 void TestModifyFunction::testOwnershipTransfer()
 {
     const char* cppCode ="\
-    struct A {};\
-    struct B {\
-        virtual A* method();\
-    };\
-    ";
+    struct A {};\n\
+    struct B {\n\
+        virtual A* method();\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package=\"Foo\"> \
-        <object-type name='A' /> \
-        <object-type name='B'> \
-        <modify-function signature='method()'>\
-            <modify-argument index='return'>\
-                <define-ownership owner='c++' /> \
-            </modify-argument>\
-        </modify-function>\
-        </object-type>\
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <object-type name='A' />\n\
+        <object-type name='B'>\n\
+        <modify-function signature='method()'>\n\
+            <modify-argument index='return'>\n\
+                <define-ownership owner='c++'/>\n\
+            </modify-argument>\n\
+        </modify-function>\n\
+        </object-type>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
@@ -88,41 +86,40 @@ void TestModifyFunction::testOwnershipTransfer()
 void TestModifyFunction::invalidateAfterUse()
 {
     const char* cppCode ="\
-    struct A {\
-        virtual void call(int *a);\
-    };\
-    struct B : A {\
-    };\
-    struct C : B {\
-        virtual void call2(int *a);\
-    };\
-    struct D : C {\
-        virtual void call2(int *a);\
-    };\
-    struct E : D {\
-    };\
-    ";
+    struct A {\n\
+        virtual void call(int *a);\n\
+    };\n\
+    struct B : A {\n\
+    };\n\
+    struct C : B {\n\
+        virtual void call2(int *a);\n\
+    };\n\
+    struct D : C {\n\
+        virtual void call2(int *a);\n\
+    };\n\
+    struct E : D {\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'> \
-        <primitive-type name='int'/>\
-        <object-type name='A'> \
-        <modify-function signature='call(int*)'>\
-          <modify-argument index='1' invalidate-after-use='true'/>\
-        </modify-function>\
-        </object-type>\
-        <object-type name='B' /> \
-        <object-type name='C'> \
-        <modify-function signature='call2(int*)'>\
-          <modify-argument index='1' invalidate-after-use='true'/>\
-        </modify-function>\
-        </object-type>\
-        <object-type name='D'> \
-        <modify-function signature='call2(int*)'>\
-          <modify-argument index='1' invalidate-after-use='true'/>\
-        </modify-function>\
-        </object-type>\
-        <object-type name='E' /> \
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <primitive-type name='int'/>\n\
+        <object-type name='A'>\n\
+        <modify-function signature='call(int*)'>\n\
+          <modify-argument index='1' invalidate-after-use='true'/>\n\
+        </modify-function>\n\
+        </object-type>\n\
+        <object-type name='B' />\n\
+        <object-type name='C'>\n\
+        <modify-function signature='call2(int*)'>\n\
+          <modify-argument index='1' invalidate-after-use='true'/>\n\
+        </modify-function>\n\
+        </object-type>\n\
+        <object-type name='D'>\n\
+        <modify-function signature='call2(int*)'>\n\
+          <modify-argument index='1' invalidate-after-use='true'/>\n\
+        </modify-function>\n\
+        </object-type>\n\
+        <object-type name='E' />\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode, false, "0.1");
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
@@ -173,28 +170,27 @@ void TestModifyFunction::invalidateAfterUse()
 void TestModifyFunction::testWithApiVersion()
 {
     const char* cppCode ="\
-    struct A {};\
-    struct B {\
-        virtual A* method();\
-        virtual B* methodB();\
-    };\
-    ";
+    struct A {};\n\
+    struct B {\n\
+        virtual A* method();\n\
+        virtual B* methodB();\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'> \
-        <object-type name='A' /> \
-        <object-type name='B'> \
-        <modify-function signature='method()' since='0.1'>\
-            <modify-argument index='return'>\
-                <define-ownership owner='c++' /> \
-            </modify-argument>\
-        </modify-function>\
-        <modify-function signature='methodB()' since='0.2'>\
-            <modify-argument index='return'>\
-                <define-ownership owner='c++' /> \
-            </modify-argument>\
-        </modify-function>\
-        </object-type>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <object-type name='A' />\n\
+        <object-type name='B'>\n\
+        <modify-function signature='method()' since='0.1'>\n\
+            <modify-argument index='return'>\n\
+                <define-ownership owner='c++'/>\n\
+            </modify-argument>\n\
+        </modify-function>\n\
+        <modify-function signature='methodB()' since='0.2'>\n\
+            <modify-argument index='return'>\n\
+                <define-ownership owner='c++'/>\n\
+            </modify-argument>\n\
+        </modify-function>\n\
+        </object-type>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode, false, "0.1");
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
@@ -209,21 +205,20 @@ void TestModifyFunction::testWithApiVersion()
 void TestModifyFunction::testGlobalFunctionModification()
 {
     const char* cppCode ="\
-    struct A {};\
-    void function(A* a = 0);\
-    ";
+    struct A {};\n\
+    void function(A* a = 0);\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'> \
-        <primitive-type name='A'/>\
-        <function signature='function(A*)'>\
-            <modify-function signature='function(A*)'>\
-                <modify-argument index='1'>\
-                    <replace-type modified-type='A'/>\
-                    <replace-default-expression with='A()'/>\
-                </modify-argument>\
-            </modify-function>\
-        </function>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <primitive-type name='A'/>\n\
+        <function signature='function(A*)'>\n\
+            <modify-function signature='function(A*)'>\n\
+                <modify-argument index='1'>\n\
+                    <replace-type modified-type='A'/>\n\
+                    <replace-default-expression with='A()'/>\n\
+                </modify-argument>\n\
+            </modify-function>\n\
+        </function>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode, false);
     QCOMPARE(t.builder()->globalFunctions().size(), 1);

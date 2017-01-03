@@ -32,13 +32,13 @@
 
 void TestFunctionTag::testFunctionTagForSpecificSignature()
 {
-    const char cppCode[] = "void globalFunction(int); void globalFunction(float); void dummy();";
+    const char cppCode[] = "void globalFunction(int); void globalFunction(float); void dummy();\n";
     const char xmlCode[] = "\
-    <typesystem package=\"Foo\">\
-        <primitive-type name='int'/> \
-        <primitive-type name='float'/> \
-        <function signature='globalFunction(int)'/>\
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <primitive-type name='int'/>\n\
+        <primitive-type name='float'/>\n\
+        <function signature='globalFunction(int)'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode, false);
 
     FunctionTypeEntry* func = (FunctionTypeEntry*) TypeDatabase::instance()->findType(QLatin1String("globalFunction"));
@@ -48,14 +48,14 @@ void TestFunctionTag::testFunctionTagForSpecificSignature()
 
 void TestFunctionTag::testFunctionTagForAllSignatures()
 {
-    const char cppCode[] = "void globalFunction(int); void globalFunction(float); void dummy();";
+    const char cppCode[] = "void globalFunction(int); void globalFunction(float); void dummy();\n";
     const char xmlCode[] = "\
-    <typesystem package=\"Foo\">\
-        <primitive-type name='int'/> \
-        <primitive-type name='float'/> \
-        <function signature='globalFunction(int)'/>\
-        <function signature='globalFunction(float)'/>\
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <primitive-type name='int'/>\n\
+        <primitive-type name='float'/>\n\
+        <function signature='globalFunction(int)'/>\n\
+        <function signature='globalFunction(float)'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode, false);
 
     FunctionTypeEntry* func = (FunctionTypeEntry*) TypeDatabase::instance()->findType(QLatin1String("globalFunction"));
@@ -65,11 +65,11 @@ void TestFunctionTag::testFunctionTagForAllSignatures()
 
 void TestFunctionTag::testRenameGlobalFunction()
 {
-    const char* cppCode ="void global_function_with_ugly_name();";
+    const char* cppCode ="void global_function_with_ugly_name();\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'> \
-        <function signature='global_function_with_ugly_name()' rename='smooth' />\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <function signature='global_function_with_ugly_name()' rename='smooth'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode, false);
 
     FunctionTypeEntry* func = (FunctionTypeEntry*) TypeDatabase::instance()->findType(QLatin1String("global_function_with_ugly_name"));

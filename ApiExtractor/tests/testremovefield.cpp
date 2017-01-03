@@ -33,18 +33,17 @@
 void TestRemoveField::testRemoveField()
 {
     const char* cppCode ="\
-    struct A {\
-        int fieldA;\
-        int fieldB;\
-    };\
-    ";
+    struct A {\n\
+        int fieldA;\n\
+        int fieldB;\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package=\"Foo\"> \
-        <primitive-type name='int' />\
-        <value-type name='A'> \
-            <modify-field name='fieldB' remove='all' />\
-        </value-type>\
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <primitive-type name='int'/>\n\
+        <value-type name='A'>\n\
+            <modify-field name='fieldB' remove='all'/>\n\
+        </value-type>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));

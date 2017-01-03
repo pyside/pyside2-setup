@@ -43,12 +43,12 @@ void TestAbstractMetaClass::testClassName()
 
 void TestAbstractMetaClass::testClassNameUnderNamespace()
 {
-    const char* cppCode ="namespace Namespace { class ClassName {}; }";
+    const char* cppCode ="namespace Namespace { class ClassName {}; }\n";
     const char* xmlCode = "\
-    <typesystem package=\"Foo\"> \
-        <namespace-type name=\"Namespace\"/> \
-        <value-type name=\"Namespace::ClassName\"/> \
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <namespace-type name=\"Namespace\"/>\n\
+        <value-type name=\"Namespace::ClassName\"/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 2); // 1 namespace + 1 class
@@ -85,23 +85,22 @@ void TestAbstractMetaClass::testClassNameUnderNamespace()
 void TestAbstractMetaClass::testVirtualMethods()
 {
     const char* cppCode ="\
-    class A {\
-    public:\
-        virtual int pureVirtual() const = 0;\
-    };\
-    class B : public A {};\
-    class C : public B {\
-    public:\
-        int pureVirtual() const { return 0; }\
-    };\
-    ";
+    class A {\n\
+    public:\n\
+        virtual int pureVirtual() const = 0;\n\
+    };\n\
+    class B : public A {};\n\
+    class C : public B {\n\
+    public:\n\
+        int pureVirtual() const { return 0; }\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package=\"Foo\"> \
-        <primitive-type name='int' />\
-        <object-type name='A'/> \
-        <object-type name='B'/> \
-        <object-type name='C'/> \
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <primitive-type name='int'/>\n\
+        <object-type name='A'/>\n\
+        <object-type name='B'/>\n\
+        <object-type name='C'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 3);
@@ -160,16 +159,15 @@ void TestAbstractMetaClass::testVirtualMethods()
 void TestAbstractMetaClass::testDefaultValues()
 {
     const char* cppCode ="\
-    struct A {\
-        class B {};\
-        void method(B b = B());\
-    };\
-    ";
+    struct A {\n\
+        class B {};\n\
+        void method(B b = B());\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package=\"Foo\"> \
-        <value-type name='A'/> \
-        <value-type name='A::B'/> \
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <value-type name='A'/>\n\
+        <value-type name='A::B'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 2);
@@ -183,22 +181,21 @@ void TestAbstractMetaClass::testDefaultValues()
 void TestAbstractMetaClass::testModifiedDefaultValues()
 {
     const char* cppCode ="\
-    struct A {\
-        class B {};\
-        void method(B b = B());\
-    };\
-    ";
+    struct A {\n\
+        class B {};\n\
+        void method(B b = B());\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package=\"Foo\"> \
-        <value-type name='A'> \
-        <modify-function signature='method(A::B)'>\
-            <modify-argument index='1'>\
-                <replace-default-expression with='Hello'/>\
-            </modify-argument>\
-        </modify-function>\
-        </value-type>\
-        <value-type name='A::B'/> \
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <value-type name='A'>\n\
+        <modify-function signature='method(A::B)'>\n\
+            <modify-argument index='1'>\n\
+                <replace-default-expression with='Hello'/>\n\
+            </modify-argument>\n\
+        </modify-function>\n\
+        </value-type>\n\
+        <value-type name='A::B'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 2);
@@ -213,16 +210,15 @@ void TestAbstractMetaClass::testModifiedDefaultValues()
 void TestAbstractMetaClass::testInnerClassOfAPolymorphicOne()
 {
     const char* cppCode ="\
-    struct A {\
-        class B {};\
-        virtual void method();\
-    };\
-    ";
+    struct A {\n\
+        class B {};\n\
+        virtual void method();\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package=\"Foo\"> \
-        <object-type name='A' /> \
-        <value-type name='A::B' /> \
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <object-type name='A'/>\n\
+        <value-type name='A::B'/>\n\
+    </typesystem>\n";
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     QCOMPARE(classes.count(), 2);
@@ -237,42 +233,41 @@ void TestAbstractMetaClass::testInnerClassOfAPolymorphicOne()
 void TestAbstractMetaClass::testClassDefaultConstructors()
 {
     const char* cppCode ="\
-    struct A {};\
-    \
-    struct B {\
-        B();\
-    private: \
-        B(const B&);\
-    };\
-    \
-    struct C {\
-        C(const C&);\
-    };\
-    \
-    struct D {\
-    private: \
-        D(const D&);\
-    };\
-    \
-    struct E {\
-    private: \
-        ~E();\
-    };\
-    \
-    struct F {\
-        F(int, int);\
-    };\
-    ";
+    struct A {};\n\
+    \n\
+    struct B {\n\
+        B();\n\
+    private: \n\
+        B(const B&);\n\
+    };\n\
+    \n\
+    struct C {\n\
+        C(const C&);\n\
+    };\n\
+    \n\
+    struct D {\n\
+    private: \n\
+        D(const D&);\n\
+    };\n\
+    \n\
+    struct E {\n\
+    private: \n\
+        ~E();\n\
+    };\n\
+    \n\
+    struct F {\n\
+        F(int, int);\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'> \
-        <primitive-type name='int' />\
-        <value-type name='A' /> \
-        <object-type name='B' /> \
-        <value-type name='C' /> \
-        <object-type name='D' /> \
-        <object-type name='E' /> \
-        <value-type name='F' /> \
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <primitive-type name='int'/>\n\
+        <value-type name='A'/>\n\
+        <object-type name='B'/>\n\
+        <value-type name='C'/>\n\
+        <object-type name='D'/>\n\
+        <object-type name='E'/>\n\
+        <value-type name='F'/>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
@@ -330,18 +325,17 @@ void TestAbstractMetaClass::testClassDefaultConstructors()
 void TestAbstractMetaClass::testClassInheritedDefaultConstructors()
 {
     const char* cppCode ="\
-    struct A {\
-        A();\
-    private: \
-        A(const A&);\
-    };\
-    struct B : public A {};\
-    ";
+    struct A {\n\
+        A();\n\
+    private: \n\
+        A(const A&);\n\
+    };\n\
+    struct B : public A {};\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'> \
-        <object-type name='A' /> \
-        <object-type name='B' /> \
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <object-type name='A'/>\n\
+        <object-type name='B'/>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
@@ -372,14 +366,13 @@ void TestAbstractMetaClass::testClassInheritedDefaultConstructors()
 void TestAbstractMetaClass::testAbstractClassDefaultConstructors()
 {
     const char* cppCode ="\
-    struct A {\
-        virtual void method() = 0;\
-    };\
-    ";
+    struct A {\n\
+        virtual void method() = 0;\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'> \
-        <object-type name='A' /> \
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <object-type name='A'/>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
@@ -395,11 +388,11 @@ void TestAbstractMetaClass::testAbstractClassDefaultConstructors()
 
 void TestAbstractMetaClass::testObjectTypesMustNotHaveCopyConstructors()
 {
-    const char* cppCode ="struct A {};";
+    const char* cppCode ="struct A {};\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'> \
-        <object-type name='A' /> \
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <object-type name='A'/>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
@@ -416,25 +409,25 @@ void TestAbstractMetaClass::testObjectTypesMustNotHaveCopyConstructors()
 void TestAbstractMetaClass::testIsPolymorphic()
 {
     const char* cppCode = "\
-    class A\
-    {\
-    public:\
-        A();\
-        inline bool abc() const {}\
-    };\
-    \
-    class B : public A\
-    {\
-    public:\
-        B();\
-        inline bool abc() const {}\
-    };";
+    class A\n\
+    {\n\
+    public:\n\
+        A();\n\
+        inline bool abc() const {}\n\
+    };\n\
+    \n\
+    class B : public A\n\
+    {\n\
+    public:\n\
+        B();\n\
+        inline bool abc() const {}\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package='Foo'>\
-        <primitive-type name='bool' />\
-        <value-type name='A' />\
-        <value-type name='B' />\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <primitive-type name='bool'/>\n\
+        <value-type name='A'/>\n\
+        <value-type name='B'/>\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();

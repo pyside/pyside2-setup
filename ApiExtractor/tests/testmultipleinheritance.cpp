@@ -33,25 +33,24 @@
 void TestMultipleInheritance::testVirtualClass()
 {
     const char* cppCode ="\
-    struct A {\
-        virtual ~A();\
-        virtual void theBug();\
-    };\
-    struct B {\
-        virtual ~B();\
-    };\
-    struct C : A, B {\
-    };\
-    struct D : C {\
-    };\
-    ";
+    struct A {\n\
+        virtual ~A();\n\
+        virtual void theBug();\n\
+    };\n\
+    struct B {\n\
+        virtual ~B();\n\
+    };\n\
+    struct C : A, B {\n\
+    };\n\
+    struct D : C {\n\
+    };\n";
     const char* xmlCode = "\
-    <typesystem package=\"Foo\"> \
-        <object-type name='A' /> \
-        <object-type name='B' /> \
-        <object-type name='C' /> \
-        <object-type name='D' /> \
-    </typesystem>";
+    <typesystem package=\"Foo\">\n\
+        <object-type name='A' />\n\
+        <object-type name='B' />\n\
+        <object-type name='C' />\n\
+        <object-type name='D' />\n\
+    </typesystem>\n";
 
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();

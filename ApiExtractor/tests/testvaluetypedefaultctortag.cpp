@@ -32,17 +32,17 @@
 
 void TestValueTypeDefaultCtorTag::testValueTypeDefaultCtorTagArgument()
 {
-    const char* cppCode ="\
-    struct A {\
-        A(int,int);\
-    };\
-    struct B {};\
+    const char* cppCode ="\n\
+    struct A {\n\
+        A(int,int);\n\
+    };\n\
+    struct B {};\n\
     ";
-    const char* xmlCode = "\
-    <typesystem package='Foo'>\
-        <primitive-type name='int' />\
-        <value-type name='A' default-constructor='A(0, 0)' />\
-        <value-type name='B' />\
+    const char* xmlCode = "\n\
+    <typesystem package='Foo'>\n\
+        <primitive-type name='int' />\n\
+        <value-type name='A' default-constructor='A(0, 0)' />\n\
+        <value-type name='B' />\n\
     </typesystem>";
     TestUtil t(cppCode, xmlCode, false);
     AbstractMetaClassList classes = t.builder()->classes();
