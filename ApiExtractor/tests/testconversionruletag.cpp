@@ -187,27 +187,37 @@ void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
 {
     const char cppCode[] = "struct A {};";
     const char* xmlCode = "\
-    <typesystem package='Foo'>\
-        <primitive-type name='int'/>\
-        <template name='native_to_target'>\
-        return ConvertFromCppToPython(%IN);\
-        </template>\
-        <template name='target_to_native'>\
-        %OUT = %IN.createA();\
-        </template>\
-        <primitive-type name='A'>\
-            <conversion-rule>\
-                <native-to-target>\
-                    <insert-template name='native_to_target'/>\
-                </native-to-target>\
-                <target-to-native>\
-                    <add-conversion type='TargetType'>\
-                        <insert-template name='target_to_native'/>\
-                    </add-conversion>\
-                </target-to-native>\
-            </conversion-rule>\
-        </primitive-type>\
-    </typesystem>";
+    <typesystem package='Foo'>\n\
+        <primitive-type name='int'/>\n\
+        <!-- single line -->\n\
+        <template name='native_to_target'>return ConvertFromCppToPython(%IN);</template>\n\
+        <!-- multi-line -->\n\
+        <template name='target_to_native'>\n\
+%OUT = %IN.createA();\n\
+        </template>\n\
+        <primitive-type name='A'>\n\
+            <conversion-rule>\n\
+                <native-to-target>\n\
+                    <insert-template name='native_to_target'/>\n\
+                </native-to-target>\n\
+                <target-to-native>\n\
+                    <add-conversion type='TargetType'>\n\
+                        <insert-template name='target_to_native'/>\n\
+                    </add-conversion>\n\
+                </target-to-native>\n\
+            </conversion-rule>\n\
+        </primitive-type>\n\
+    </typesystem>\n";
+
+    const char nativeToTargetExpected[] =
+    "// TEMPLATE - native_to_target - START\n"
+    "return ConvertFromCppToPython(%IN);\n"
+    "// TEMPLATE - native_to_target - END";
+
+    const char targetToNativeExpected[] =
+    "// TEMPLATE - target_to_native - START\n"
+    "%OUT = %IN.createA();\n"
+    "// TEMPLATE - target_to_native - END";
 
     TestUtil t(cppCode, xmlCode);
     TypeDatabase* typeDb = TypeDatabase::instance();
@@ -219,7 +229,7 @@ void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
 
     QCOMPARE(typeA, conversion->ownerType());
     QCOMPARE(conversion->nativeToTargetConversion().trimmed(),
-             QLatin1String("// TEMPLATE - native_to_target - START        return ConvertFromCppToPython(%IN);        // TEMPLATE - native_to_target - END"));
+             QLatin1String(nativeToTargetExpected));
 
     QVERIFY(conversion->hasTargetToNativeConversions());
     QCOMPARE(conversion->targetToNativeConversions().size(), 1);
@@ -227,7 +237,7 @@ void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
     CustomConversion::TargetToNativeConversion* toNative = conversion->targetToNativeConversions().first();
     QVERIFY(toNative);
     QCOMPARE(toNative->conversion().trimmed(),
-             QLatin1String("// TEMPLATE - target_to_native - START        %OUT = %IN.createA();        // TEMPLATE - target_to_native - END"));
+             QLatin1String(targetToNativeExpected));
 }
 
 QTEST_APPLESS_MAIN(TestConversionRuleTag)

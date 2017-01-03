@@ -2043,12 +2043,18 @@ QString TemplateInstance::expandCode() const
 {
     TemplateEntry *templateEntry = TypeDatabase::instance()->findTemplate(m_name);
     if (templateEntry) {
-        QString res = templateEntry->code();
-        foreach (const QString &key, replaceRules.keys())
-            res.replace(key, replaceRules[key]);
-
-        return QLatin1String("// TEMPLATE - ") + m_name + QLatin1String(" - START")
-            + res + QLatin1String("// TEMPLATE - ") + m_name + QLatin1String(" - END");
+        typedef QHash<QString, QString>::const_iterator ConstIt;
+        QString code = templateEntry->code();
+        for (ConstIt it = replaceRules.begin(), end = replaceRules.end(); it != end; ++it)
+            code.replace(it.key(), it.value());
+        while (!code.isEmpty() && code.at(code.size() - 1).isSpace())
+            code.chop(1);
+        QString result = QLatin1String("// TEMPLATE - ") + m_name + QLatin1String(" - START");
+        if (!code.startsWith(QLatin1Char('\n')))
+            result += QLatin1Char('\n');
+        result += code;
+        result += QLatin1String("\n// TEMPLATE - ") + m_name + QLatin1String(" - END");
+        return result;
     } else {
         qCWarning(lcShiboken).noquote().nospace()
             << "insert-template referring to non-existing template '" << m_name << '\'';
