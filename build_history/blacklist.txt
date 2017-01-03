@@ -4,22 +4,6 @@
     darwin py3
 [pysidetest::utils_test]
     win32
-[signals::disconnect_test]
-    linux
-    darwin py2
-    win32
-[signals::multiple_connections_test]
-    linux
-    darwin
-    win32
-[signals::ref06_test]
-    linux
-    darwin
-    win32
-[signals::short_circuit_test]
-    linux
-    darwin
-    win32
 [signals::signal_signature_test]
     linux
     darwin
@@ -41,15 +25,13 @@
 [QtCore::qfile_test]
     win32
     darwin py3
+#  Nested exception in Python 3
 [QtCore::qflags_test]
-    win32
-    darwin py3
+    py3
 [QtCore::qobject_connect_notify_test]
     linux
     darwin
     win32
-[QtCore::qthread_test]
-    linux
 [QtCore::qtextstream_test]
     linux
     darwin
@@ -64,12 +46,6 @@
     linux
     win32
     darwin py3
-[QtWidgets::bug_722]
-    linux
-    darwin
-    win32
-[QtWidgets::bug_919]
-    linux
 [QtWidgets::qstandarditemmodel_test]
     linux
     darwin
@@ -94,3 +70,7 @@
     linux
     darwin
     win32
+# AttributeError: 'PySide2.QtQuick.QQuickItem' object has no attribute 'simpleFunction'
+[QtQml::bug_451]
+    py2
+    py3
