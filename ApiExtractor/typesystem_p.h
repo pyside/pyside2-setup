@@ -29,7 +29,7 @@
 #define TYPESYSTEM_P_H
 
 #include <QStack>
-#include <QtXml/QtXml>
+#include <QtXml/QXmlDefaultHandler>
 #include "typesystem.h"
 
 class TypeDatabase;

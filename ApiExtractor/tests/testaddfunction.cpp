@@ -199,7 +199,7 @@ void TestAddFunction::testAddFunctionWithoutParenteses()
     const AbstractMetaFunction* addedFunc = classA->findFunction(QLatin1String("func"));
     QVERIFY(addedFunc);
     QVERIFY(addedFunc->hasInjectedCode());
-    QCOMPARE(addedFunc->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode).count(), 1);
+    QCOMPARE(addedFunc->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode).count(), 1);
 }
 
 void TestAddFunction::testAddFunctionWithDefaultArgs()

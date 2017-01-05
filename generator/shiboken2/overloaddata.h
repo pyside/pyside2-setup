@@ -29,7 +29,7 @@
 #ifndef OVERLOADDATA_H
 #define OVERLOADDATA_H
 
-#include <abstractmetalang.h>
+#include <abstractmetalang_typedefs.h>
 #include <QtCore/QList>
 #include <QtCore/QBitArray>
 

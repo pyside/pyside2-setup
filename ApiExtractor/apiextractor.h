@@ -30,11 +30,23 @@
 #define APIEXTRACTOR_H
 
 #include "reporthandler.h"
-#include "abstractmetalang.h"
+#include "abstractmetalang_typedefs.h"
 #include "apiextractormacros.h"
+#include "typesystem_typedefs.h"
 #include <QStringList>
 
 class AbstractMetaBuilder;
+class AbstractMetaClass;
+class AbstractMetaClassList;
+class AbstractMetaEnum;
+class AbstractMetaFunction;
+class AbstractMetaType;
+class ContainerTypeEntry;
+class EnumTypeEntry;
+class FlagsTypeEntry;
+class PrimitiveTypeEntry;
+class TypeEntry;
+
 QT_BEGIN_NAMESPACE
 class QDebug;
 class QIODevice;

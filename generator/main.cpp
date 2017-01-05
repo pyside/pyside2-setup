@@ -31,6 +31,8 @@
 #include <QLinkedList>
 #include <QLibrary>
 #include <QtXml/QDomDocument>
+#include <QtCore/QFile>
+#include <QtCore/QDir>
 #include <iostream>
 #include <apiextractor.h>
 #include "generator.h"

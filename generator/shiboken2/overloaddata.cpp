@@ -26,12 +26,15 @@
 **
 ****************************************************************************/
 
-#include <QtCore/QFile>
+#include <abstractmetalang.h>
 #include <reporthandler.h>
 #include <graph.h>
 #include "overloaddata.h"
 #include "shibokengenerator.h"
-#include <QTemporaryFile>
+
+#include <QtCore/QDir>
+#include <QtCore/QFile>
+#include <QtCore/QTemporaryFile>
 
 static const TypeEntry* getAliasedTypeEntry(const TypeEntry* typeEntry)
 {

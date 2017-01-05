@@ -29,12 +29,15 @@
 #ifndef TYPESYSTEM_H
 #define TYPESYSTEM_H
 
+#include "typesystem_enums.h"
+#include "typesystem_typedefs.h"
+#include "include.h"
+
 #include <QtCore/QHash>
+#include <QtCore/qobjectdefs.h>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QMap>
-#include <QtCore/QDebug>
-#include "include.h"
 
 //Used to identify the conversion rule to avoid break API
 #define TARGET_CONVERSION_RULE_FLAG "0"
@@ -53,40 +56,6 @@ class FlagsTypeEntry;
 typedef QMap<int, QString> ArgumentMap;
 
 class TemplateInstance;
-
-namespace TypeSystem
-{
-enum Language {
-    NoLanguage          = 0x0000,
-    TargetLangCode      = 0x0001,
-    NativeCode          = 0x0002,
-    ShellCode           = 0x0004,
-    ShellDeclaration    = 0x0008,
-    PackageInitializer  = 0x0010,
-    DestructorFunction  = 0x0020,
-    Constructors        = 0x0040,
-    Interface           = 0x0080,
-
-    // masks
-    All                 = TargetLangCode
-    | NativeCode
-    | ShellCode
-    | ShellDeclaration
-    | PackageInitializer
-    | Constructors
-    | Interface
-    | DestructorFunction,
-
-    TargetLangAndNativeCode   = TargetLangCode | NativeCode
-};
-
-enum Ownership {
-    InvalidOwnership,
-    DefaultOwnership,
-    TargetLangOwnership,
-    CppOwnership
-};
-};
 
 struct ReferenceCount
 {
@@ -194,8 +163,6 @@ private:
     double m_version;
 };
 
-typedef QHash<QString, TemplateEntry *> TemplateEntryHash;
-
 class TemplateInstance
 {
 public:
@@ -229,27 +196,14 @@ private:
 class CodeSnip : public CodeSnipAbstract
 {
 public:
-    enum Position {
-        Beginning,
-        End,
-        AfterThis,
-        // QtScript
-        Declaration,
-        PrototypeInitialization,
-        ConstructorInitialization,
-        Constructor,
-        Any
-    };
-
     CodeSnip(double vr) : language(TypeSystem::TargetLangCode), version(vr) { }
     CodeSnip(double vr, TypeSystem::Language lang) : language(lang), version(vr) { }
 
     TypeSystem::Language language;
-    Position position;
+    TypeSystem::CodeSnipPosition position;
     ArgumentMap argumentMap;
     double version;
 };
-typedef QList<CodeSnip> CodeSnipList;
 
 struct ArgumentModification
 {
@@ -440,7 +394,6 @@ private:
 
 
 };
-typedef QList<FunctionModification> FunctionModificationList;
 
 struct FieldModification: public Modification
 {
@@ -455,8 +408,6 @@ struct FieldModification: public Modification
 
     QString name;
 };
-
-typedef QList<FieldModification> FieldModificationList;
 
 /**
 *   \internal
@@ -553,7 +504,6 @@ private:
     bool m_isStatic;
     double m_version;
 };
-typedef QList<AddedFunction> AddedFunctionList;
 
 struct ExpensePolicy
 {
@@ -572,17 +522,10 @@ class ObjectTypeEntry;
 class DocModification
 {
 public:
-    enum Mode {
-        Append,
-        Prepend,
-        Replace,
-        XPathReplace
-    };
-
     DocModification(const QString& xpath, const QString& signature, double vr)
-            : format(TypeSystem::NativeCode), m_mode(XPathReplace),
+            : format(TypeSystem::NativeCode), m_mode(TypeSystem::DocModificationXPathReplace),
               m_xpath(xpath), m_signature(signature), m_version(vr) {}
-    DocModification(Mode mode, const QString& signature, double vr)
+    DocModification(TypeSystem::DocModificationMode mode, const QString& signature, double vr)
             : m_mode(mode), m_signature(signature), m_version(vr) {}
 
     void setCode(const QString& code)
@@ -601,7 +544,7 @@ public:
     {
         return m_signature;
     }
-    Mode mode() const
+    TypeSystem::DocModificationMode mode() const
     {
         return m_mode;
     }
@@ -613,14 +556,12 @@ public:
     TypeSystem::Language format;
 
 private:
-    Mode m_mode;
+    TypeSystem::DocModificationMode m_mode;
     QString m_code;
     QString m_xpath;
     QString m_signature;
     double m_version;
 };
-
-typedef QList<DocModification> DocModificationList;
 
 class CustomConversion;
 
@@ -995,9 +936,6 @@ private:
     bool m_stream;
     double m_version;
 };
-typedef QHash<QString, QList<TypeEntry *> > TypeEntryHash;
-typedef QHash<QString, TypeEntry *> SingleTypeEntryHash;
-
 
 class TypeSystemTypeEntry : public TypeEntry
 {
@@ -1171,8 +1109,6 @@ private:
     uint m_preferredTargetLangType : 1;
     PrimitiveTypeEntry* m_aliasedTypeEntry;
 };
-
-typedef QList<const PrimitiveTypeEntry*> PrimitiveTypeEntryList;
 
 struct EnumValueRedirection
 {
@@ -1741,8 +1677,6 @@ public:
 private:
     Type m_type;
 };
-
-typedef QList<const ContainerTypeEntry*> ContainerTypeEntryList;
 
 class NamespaceTypeEntry : public ComplexTypeEntry
 {

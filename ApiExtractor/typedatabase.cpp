@@ -232,6 +232,11 @@ bool TypeDatabase::isEnumRejected(const QString& className, const QString& enumN
     return false;
 }
 
+void TypeDatabase::addType(TypeEntry *e)
+{
+    m_entries[e->qualifiedCppName()].append(e);
+}
+
 bool TypeDatabase::isFunctionRejected(const QString& className, const QString& functionName) const
 {
     foreach (const TypeRejection& r, m_rejections)
@@ -267,6 +272,16 @@ FlagsTypeEntry* TypeDatabase::findFlagsType(const QString &name) const
         }
     }
     return fte;
+}
+
+void TypeDatabase::addFlagsType(FlagsTypeEntry *fte)
+{
+    m_flagsEntries[fte->originalName()] = fte;
+}
+
+void TypeDatabase::addTemplate(TemplateEntry *t)
+{
+    m_templates[t->name()] = t;
 }
 
 AddedFunctionList TypeDatabase::findGlobalUserFunctions(const QString& name) const

@@ -29,7 +29,9 @@
 #include <memory>
 
 #include "cppgenerator.h"
+#include "overloaddata.h"
 #include "shibokennormalize_p.h"
+#include <abstractmetalang.h>
 #include <reporthandler.h>
 #include <typedatabase.h>
 
@@ -269,7 +271,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     // class inject-code native/beginning
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
-        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Beginning, TypeSystem::NativeCode, metaClass);
+        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode, metaClass);
         s << endl;
     }
 
@@ -492,7 +494,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
 
     // class inject-code native/end
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
-        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::End, TypeSystem::NativeCode, metaClass);
+        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), TypeSystem::CodeSnipPositionEnd, TypeSystem::NativeCode, metaClass);
         s << endl;
     }
 }
@@ -506,9 +508,9 @@ void CppGenerator::writeConstructorNative(QTextStream& s, const AbstractMetaFunc
     writeFunctionCall(s, func);
     s << " {" << endl;
     const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().last();
-    writeCodeSnips(s, func->injectedCodeSnips(), CodeSnip::Beginning, TypeSystem::NativeCode, func, lastArg);
+    writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode, func, lastArg);
     s << INDENT << "// ... middle" << endl;
-    writeCodeSnips(s, func->injectedCodeSnips(), CodeSnip::End, TypeSystem::NativeCode, func, lastArg);
+    writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionEnd, TypeSystem::NativeCode, func, lastArg);
     s << '}' << endl << endl;
 }
 
@@ -618,7 +620,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
     if (func->hasInjectedCode()) {
         CodeSnipList snips = func->injectedCodeSnips();
         const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().last();
-        writeCodeSnips(s, snips, CodeSnip::Declaration, TypeSystem::NativeCode, func, lastArg);
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionDeclaration, TypeSystem::NativeCode, func, lastArg);
         s << endl;
     }
 
@@ -641,7 +643,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
         if (func->hasInjectedCode()) {
             snips = func->injectedCodeSnips();
             const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().last();
-            writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::ShellCode, func, lastArg);
+            writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::ShellCode, func, lastArg);
             s << endl;
         }
 
@@ -734,7 +736,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
             s << INDENT << "PyObject* pySelf = BindingManager::instance().retrieveWrapper(this);" << endl;
 
         const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().last();
-        writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::NativeCode, func, lastArg);
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode, func, lastArg);
         s << endl;
     }
 
@@ -833,7 +835,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
     if (func->hasInjectedCode()) {
         s << endl;
         const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().last();
-        writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::NativeCode, func, lastArg);
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd, TypeSystem::NativeCode, func, lastArg);
     }
 
     if (retType) {
@@ -886,7 +888,7 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
         snips = func->injectedCodeSnips();
         if (func->isUserAdded()) {
             CodeSnipList snips = func->injectedCodeSnips();
-            writeCodeSnips(s, snips, CodeSnip::Any, TypeSystem::NativeCode, func);
+            writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionAny, TypeSystem::NativeCode, func);
         }
     }
 
@@ -1462,7 +1464,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
     bool hasCodeInjectionsAtEnd = false;
     foreach(AbstractMetaFunction* func, overloads) {
         foreach (const CodeSnip &cs, func->injectedCodeSnips()) {
-            if (cs.position == CodeSnip::End) {
+            if (cs.position == TypeSystem::CodeSnipPositionEnd) {
                 hasCodeInjectionsAtEnd = true;
                 break;
             }
@@ -1474,12 +1476,12 @@ void CppGenerator::writeConstructorWrapper(QTextStream& s, const AbstractMetaFun
         foreach(AbstractMetaFunction* func, overloads) {
             Indentation indent(INDENT);
             foreach (const CodeSnip &cs, func->injectedCodeSnips()) {
-                if (cs.position == CodeSnip::End) {
+                if (cs.position == TypeSystem::CodeSnipPositionEnd) {
                     s << INDENT << "case " << metaClass->functions().indexOf(func) << ':' << endl;
                     s << INDENT << '{' << endl;
                     {
                         Indentation indent(INDENT);
-                        writeCodeSnips(s, func->injectedCodeSnips(), CodeSnip::End, TypeSystem::TargetLangCode, func);
+                        writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionEnd, TypeSystem::TargetLangCode, func);
                     }
                     s << INDENT << '}' << endl;
                     break;
@@ -2100,7 +2102,7 @@ static void addConversionRuleCodeSnippet(CodeSnipList& snippetList, QString& rul
         rule.replace(QLatin1String("%out"), outputName);
     }
     CodeSnip snip(0, snippetLanguage);
-    snip.position = (snippetLanguage == TypeSystem::NativeCode) ? CodeSnip::Any : CodeSnip::Beginning;
+    snip.position = (snippetLanguage == TypeSystem::NativeCode) ? TypeSystem::CodeSnipPositionAny : TypeSystem::CodeSnipPositionBeginning;
     snip.addCode(rule);
     snippetList << snip;
 }
@@ -2113,7 +2115,7 @@ void CppGenerator::writeConversionRule(QTextStream& s, const AbstractMetaFunctio
         addConversionRuleCodeSnippet(snippets, rule, language, TypeSystem::TargetLangCode,
                                      arg->name(), arg->name());
     }
-    writeCodeSnips(s, snippets, CodeSnip::Beginning, TypeSystem::TargetLangCode, func);
+    writeCodeSnips(s, snippets, TypeSystem::CodeSnipPositionBeginning, TypeSystem::TargetLangCode, func);
 }
 
 void CppGenerator::writeConversionRule(QTextStream& s, const AbstractMetaFunction* func, TypeSystem::Language language, const QString& outputVar)
@@ -2121,7 +2123,7 @@ void CppGenerator::writeConversionRule(QTextStream& s, const AbstractMetaFunctio
     CodeSnipList snippets;
     QString rule = func->conversionRule(language, 0);
     addConversionRuleCodeSnippet(snippets, rule, language, language, outputVar);
-    writeCodeSnips(s, snippets, CodeSnip::Any, language, func);
+    writeCodeSnips(s, snippets, TypeSystem::CodeSnipPositionAny, language, func);
 }
 
 void CppGenerator::writeNoneReturn(QTextStream& s, const AbstractMetaFunction* func, bool thereIsReturnValue)
@@ -2768,7 +2770,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
     s << INDENT << "// " << func->minimalSignature() << (func->isReverseOperator() ? " [reverse operator]": "") << endl;
     if (func->isConstructor()) {
         foreach (const CodeSnip &cs, func->injectedCodeSnips()) {
-            if (cs.position == CodeSnip::End) {
+            if (cs.position == TypeSystem::CodeSnipPositionEnd) {
                 s << INDENT << "overloadId = " << func->ownerClass()->functions().indexOf(const_cast<AbstractMetaFunction* const>(func)) << ';' << endl;
                 break;
             }
@@ -2807,7 +2809,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
             lastArg = func->arguments().last();
         }
 
-        writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::TargetLangCode, func, lastArg);
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::TargetLangCode, func, lastArg);
         s << endl;
     }
 
@@ -3044,7 +3046,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
     if (func->hasInjectedCode() && !func->isConstructor()) {
         s << endl;
-        writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::TargetLangCode, func, lastArg);
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd, TypeSystem::TargetLangCode, func, lastArg);
     }
 
     bool hasReturnPolicy = false;
@@ -3570,14 +3572,14 @@ void CppGenerator::writeMappingMethods(QTextStream& s, const AbstractMetaClass* 
         QString funcArgs = it.value().first;
         QString funcRetVal = it.value().second;
 
-        CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
+        CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode);
         s << funcRetVal << ' ' << funcName << '(' << funcArgs << ')' << endl << '{' << endl;
         writeInvalidPyObjectCheck(s, QLatin1String(PYTHON_SELF_VAR));
 
         writeCppSelfDefinition(s, func);
 
         const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().last();
-        writeCodeSnips(s, snips, CodeSnip::Any, TypeSystem::TargetLangCode, func, lastArg);
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode, func, lastArg);
         s << '}' << endl << endl;
     }
 }
@@ -3598,14 +3600,14 @@ void CppGenerator::writeSequenceMethods(QTextStream& s, const AbstractMetaClass*
         QString funcArgs = it.value().first;
         QString funcRetVal = it.value().second;
 
-        CodeSnipList snips = func->injectedCodeSnips(CodeSnip::Any, TypeSystem::TargetLangCode);
+        CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode);
         s << funcRetVal << ' ' << funcName << '(' << funcArgs << ')' << endl << '{' << endl;
         writeInvalidPyObjectCheck(s, QLatin1String(PYTHON_SELF_VAR));
 
         writeCppSelfDefinition(s, func);
 
         const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().last();
-        writeCodeSnips(s, snips,CodeSnip::Any, TypeSystem::TargetLangCode, func, lastArg);
+        writeCodeSnips(s, snips,TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode, func, lastArg);
         s << '}' << endl << endl;
     }
 
@@ -3957,7 +3959,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream& s, const AbstractMetaCl
                     // If the function is user added, use the inject code
                     if (func->isUserAdded()) {
                         CodeSnipList snips = func->injectedCodeSnips();
-                        writeCodeSnips(s, snips, CodeSnip::Any, TypeSystem::TargetLangCode, func, func->arguments().last());
+                        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode, func, func->arguments().last());
                     } else {
                         QString expression = QString::fromLatin1("%1%2 %3 (%4" CPP_ARG0 ")")
                                                 .arg(func->isPointerOperator() ? QLatin1String("&") : QString(),
@@ -4436,7 +4438,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
 
     // class inject-code target/beginning
     if (!classTypeEntry->codeSnips().isEmpty()) {
-        writeCodeSnips(s, classTypeEntry->codeSnips(), CodeSnip::Beginning, TypeSystem::TargetLangCode, metaClass);
+        writeCodeSnips(s, classTypeEntry->codeSnips(), TypeSystem::CodeSnipPositionBeginning, TypeSystem::TargetLangCode, metaClass);
         s << endl;
     }
 
@@ -4486,7 +4488,7 @@ void CppGenerator::writeClassRegister(QTextStream& s, const AbstractMetaClass* m
     // class inject-code target/end
     if (!classTypeEntry->codeSnips().isEmpty()) {
         s << endl;
-        writeCodeSnips(s, classTypeEntry->codeSnips(), CodeSnip::End, TypeSystem::TargetLangCode, metaClass);
+        writeCodeSnips(s, classTypeEntry->codeSnips(), TypeSystem::CodeSnipPositionEnd, TypeSystem::TargetLangCode, metaClass);
     }
 
     if (usePySideExtensions()) {
@@ -4805,7 +4807,7 @@ bool CppGenerator::finishGeneration()
 
     // module inject-code native/beginning
     if (!snips.isEmpty()) {
-        writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::NativeCode);
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode);
         s << endl;
     }
 
@@ -4932,7 +4934,7 @@ bool CppGenerator::finishGeneration()
     ErrorCode errorCode(QLatin1String("SBK_MODULE_INIT_ERROR"));
     // module inject-code target/beginning
     if (!snips.isEmpty()) {
-        writeCodeSnips(s, snips, CodeSnip::Beginning, TypeSystem::TargetLangCode);
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::TargetLangCode);
         s << endl;
     }
 
@@ -5051,13 +5053,13 @@ bool CppGenerator::finishGeneration()
 
     // module inject-code target/end
     if (!snips.isEmpty()) {
-        writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::TargetLangCode);
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd, TypeSystem::TargetLangCode);
         s << endl;
     }
 
     // module inject-code native/end
     if (!snips.isEmpty()) {
-        writeCodeSnips(s, snips, CodeSnip::End, TypeSystem::NativeCode);
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd, TypeSystem::NativeCode);
         s << endl;
     }
 

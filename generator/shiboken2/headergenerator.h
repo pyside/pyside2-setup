@@ -31,6 +31,10 @@
 
 #include "shibokengenerator.h"
 
+#include <QtCore/QSet>
+
+class AbstractMetaFunction;
+
 /**
  *   The HeaderGenerator generate the declarations of C++ bindings classes.
  */

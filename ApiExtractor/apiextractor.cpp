@@ -27,6 +27,8 @@
 ****************************************************************************/
 
 #include "apiextractor.h"
+#include "abstractmetalang.h"
+
 #include <QDir>
 #include <QDebug>
 #include <QTemporaryFile>
@@ -38,6 +40,7 @@
 #include "parser/rpp/pp.h"
 #include "abstractmetabuilder.h"
 #include "typedatabase.h"
+#include "typesystem.h"
 
 static bool preprocess(const QString& sourceFile,
                        QFile& targetFile,

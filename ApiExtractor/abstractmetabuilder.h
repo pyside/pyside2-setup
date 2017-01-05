@@ -29,7 +29,7 @@
 #ifndef ABSTRACTMETABUILDER_H
 #define ABSTRACTMETABUILDER_H
 
-#include "parser/codemodel.h"
+#include "parser/codemodel_fwd.h"
 #include "abstractmetalang.h"
 #include "typesystem.h"
 #include "typeparser.h"

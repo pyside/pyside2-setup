@@ -26,6 +26,8 @@
 **
 ****************************************************************************/
 #include "docparser.h"
+#include "abstractmetalang.h"
+#include "typesystem.h"
 #include <QtCore/QDebug>
 #include <QtXmlPatterns/QXmlQuery>
 #include <QBuffer>
@@ -103,7 +105,7 @@ QString DocParser::applyDocModifications(const DocModificationList& mods, const 
 
     bool hasXPathBasedModification = false;
     foreach (DocModification mod, mods) {
-        if (mod.mode() == DocModification::XPathReplace) {
+        if (mod.mode() == TypeSystem::DocModificationXPathReplace) {
             hasXPathBasedModification = true;
             break;
         }
@@ -125,7 +127,7 @@ QString DocParser::applyDocModifications(const DocModificationList& mods, const 
                                 "</xsl:template>\n"
                                );
     foreach (DocModification mod, mods) {
-        if (mod.mode() == DocModification::XPathReplace) {
+        if (mod.mode() == TypeSystem::DocModificationXPathReplace) {
             QString xpath = mod.xpath();
             xpath.replace(QLatin1Char('"'), QLatin1String("&quot;"));
             xsl += QLatin1String("<xsl:template match=\"")

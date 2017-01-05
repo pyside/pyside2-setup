@@ -29,9 +29,25 @@
 #ifndef TYPEDATABASE_H
 #define TYPEDATABASE_H
 
-#include <QStringList>
-#include "typesystem.h"
 #include "apiextractormacros.h"
+#include "include.h"
+#include "typesystem_enums.h"
+#include "typesystem_typedefs.h"
+
+#include <QtCore/QStringList>
+
+QT_FORWARD_DECLARE_CLASS(QIODevice)
+
+class ComplexTypeEntry;
+class ContainerTypeEntry;
+class FlagsTypeEntry;
+class FunctionTypeEntry;
+class NamespaceTypeEntry;
+class ObjectTypeEntry;
+class TemplateEntry;
+class TypeEntry;
+
+struct TypeRejection;
 
 void setTypeRevision(TypeEntry* typeEntry, int revision);
 int getTypeRevision(const TypeEntry* typeEntry);
@@ -103,30 +119,21 @@ public:
     bool isFieldRejected(const QString& className, const QString& fieldName) const;
     bool isEnumRejected(const QString& className, const QString& enumName) const;
 
-    void addType(TypeEntry* e)
-    {
-        m_entries[e->qualifiedCppName()].append(e);
-    }
+    void addType(TypeEntry* e);
 
     SingleTypeEntryHash flagsEntries() const
     {
         return m_flagsEntries;
     }
     FlagsTypeEntry* findFlagsType(const QString& name) const;
-    void addFlagsType(FlagsTypeEntry* fte)
-    {
-        m_flagsEntries[fte->originalName()] = fte;
-    }
+    void addFlagsType(FlagsTypeEntry* fte);
 
     TemplateEntry* findTemplate(const QString& name) const
     {
         return m_templates[name];
     }
 
-    void addTemplate(TemplateEntry* t)
-    {
-        m_templates[t->name()] = t;
-    }
+    void addTemplate(TemplateEntry* t);
 
     AddedFunctionList globalUserFunctions() const
     {

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of PySide2.
@@ -26,37 +26,23 @@
 **
 ****************************************************************************/
 
-#ifndef FILEOUT_H
-#define FILEOUT_H
+#ifndef ABSTRACTMETALANG_TYPEDEFS_H
+#define ABSTRACTMETALANG_TYPEDEFS_H
 
-#include <QtCore/QObject>
-#include <QtCore/QTextStream>
+#include <QtCore/QList>
 
-class FileOut : public QObject
-{
-private:
-    QByteArray tmp;
-    QString name;
+class AbstractMetaField;
+class AbstractMetaArgument;
+class AbstractMetaEnum;
+class AbstractMetaEnumValueList;
+class AbstractMetaFunction;
+class AbstractMetaClassList;
+class AbstractMetaType;
 
-public:
-    enum State { Failure, Unchanged, Success };
+typedef QList<AbstractMetaArgument *> AbstractMetaArgumentList;
+typedef QList<AbstractMetaEnum *> AbstractMetaEnumList;
+typedef QList<AbstractMetaField *> AbstractMetaFieldList;
+typedef QList<AbstractMetaFunction *> AbstractMetaFunctionList;
+typedef QList<AbstractMetaType *> AbstractMetaTypeList;
 
-    FileOut(QString name);
-    ~FileOut()
-    {
-        if (!isDone)
-            done();
-    }
-
-    State done();
-
-    QTextStream stream;
-
-    static bool dummy;
-    static bool diff;
-
-private:
-    bool isDone;
-};
-
-#endif // FILEOUT_H
+#endif // ABSTRACTMETALANG_TYPEDEFS_H

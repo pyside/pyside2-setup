@@ -29,17 +29,30 @@
 #ifndef GENERATOR_H
 #define GENERATOR_H
 
+#include <abstractmetalang_typedefs.h>
 #include <QtCore/QObject>
-#include <QtCore/QDir>
 #include <QtCore/QSharedPointer>
+#include <QtCore/QTextStream>
 #include <QtCore/QVector>
-#include <abstractmetalang.h>
 
 class ApiExtractor;
 class AbstractMetaBuilder;
+class AbstractMetaFunction;
+class AbstractMetaClass;
+class AbstractMetaEnum;
+class TypeEntry;
+class ComplexTypeEntry;
+class AbstractMetaType;
+class EnumTypeEntry;
+class FlagsTypeEntry;
+
 QT_BEGIN_NAMESPACE
 class QFile;
 QT_END_NAMESPACE
+
+class PrimitiveTypeEntry;
+class ContainerTypeEntry;
+class Indentor;
 
 QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor);
 void verifyDirectoryFor(const QFile &file);

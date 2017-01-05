@@ -31,6 +31,7 @@
 #include "abstractmetalang.h"
 #include "reporthandler.h"
 #include "typedatabase.h"
+#include "typesystem.h"
 
 #ifndef QT_NO_DEBUG_STREAM
 #  include <QtCore/QMetaEnum>
@@ -105,6 +106,24 @@ AbstractMetaType::~AbstractMetaType()
 {
     qDeleteAll(m_children);
     m_instantiations.clear();
+}
+
+QString AbstractMetaType::package() const
+{
+    return m_typeEntry->targetLangPackage();
+}
+
+QString AbstractMetaType::name() const
+{
+    if (m_name.isNull())
+        // avoid constLast to stay Qt 5.5 compatible
+        m_name = m_typeEntry->targetLangName().split(QLatin1String("::")).last();
+    return m_name;
+}
+
+QString AbstractMetaType::fullName() const
+{
+    return m_typeEntry->qualifiedTargetLangName();
 }
 
 AbstractMetaType *AbstractMetaType::copy() const
@@ -918,14 +937,14 @@ bool AbstractMetaFunction::hasInjectedCode() const
     return false;
 }
 
-CodeSnipList AbstractMetaFunction::injectedCodeSnips(CodeSnip::Position position, TypeSystem::Language language) const
+CodeSnipList AbstractMetaFunction::injectedCodeSnips(TypeSystem::CodeSnipPosition position, TypeSystem::Language language) const
 {
     CodeSnipList result;
     foreach (const FunctionModification &mod, modifications(ownerClass())) {
         if (mod.isCodeInjection()) {
             QList<CodeSnip>::const_iterator it = mod.snips.constBegin();
             for (;it != mod.snips.constEnd(); ++it) {
-                if ((it->language & language) && (it->position == position || position == CodeSnip::Any))
+                if ((it->language & language) && (it->position == position || position == TypeSystem::CodeSnipPositionAny))
                     result << *it;
             }
         }
@@ -1609,6 +1628,31 @@ void AbstractMetaClass::setBaseClass(AbstractMetaClass *baseClass)
     m_baseClass = baseClass;
     if (baseClass)
         m_isPolymorphic |= baseClass->isPolymorphic();
+}
+
+QString AbstractMetaClass::package() const
+{
+    return m_typeEntry->targetLangPackage();
+}
+
+bool AbstractMetaClass::isInterface() const
+{
+    return m_typeEntry->isInterface();
+}
+
+bool AbstractMetaClass::isNamespace() const
+{
+    return m_typeEntry->isNamespace();
+}
+
+bool AbstractMetaClass::isQObject() const
+{
+    return m_typeEntry->isQObject();
+}
+
+QString AbstractMetaClass::qualifiedCppName() const
+{
+    return m_typeEntry->qualifiedCppName();
 }
 
 bool AbstractMetaClass::hasFunction(const QString &str) const
@@ -2526,6 +2570,16 @@ bool AbstractMetaType::hasNativeId() const
     return (isQObject() || isValue() || isObject()) && typeEntry()->isNativeIdBased();
 }
 
+bool AbstractMetaType::isTargetLangEnum() const
+{
+    return isEnum() && !static_cast<const EnumTypeEntry *>(typeEntry())->forceInteger();
+}
+
+bool AbstractMetaType::isTargetLangFlags() const
+{
+    return isFlags() && !static_cast<const FlagsTypeEntry *>(typeEntry())->forceInteger();
+}
+
 
 /*******************************************************************************
  * Other stuff...
@@ -2676,3 +2730,23 @@ QDebug operator<<(QDebug d, const AbstractMetaClass *ac)
     return d;
 }
 #endif // !QT_NO_DEBUG_STREAM
+
+QString AbstractMetaEnum::name() const
+{
+    return m_typeEntry->targetLangName();
+}
+
+QString AbstractMetaEnum::qualifier() const
+{
+    return m_typeEntry->targetLangQualifier();
+}
+
+QString AbstractMetaEnum::package() const
+{
+    return m_typeEntry->targetLangPackage();
+}
+
+bool AbstractMetaEnum::isAnonymous() const
+{
+    return m_typeEntry->isAnonymous();
+}

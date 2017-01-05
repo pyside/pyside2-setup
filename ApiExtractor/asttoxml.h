@@ -30,10 +30,11 @@
 #ifndef ASTTOXML
 #define ASTTOXML
 
-#include "parser/codemodel.h"
+#include "parser/codemodel_fwd.h"
 
 #include <QtCore/QString>
-#include <QtCore/QXmlStreamWriter>
+
+QT_FORWARD_DECLARE_CLASS(QXmlStreamWriter)
 
 void astToXML(const QString name);
 void writeOutNamespace(QXmlStreamWriter &s, const NamespaceModelItem &item);

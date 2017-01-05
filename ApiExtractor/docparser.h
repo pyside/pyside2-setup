@@ -28,16 +28,19 @@
 #ifndef DOCPARSER_H
 #define DOCPARSER_H
 
-#include <QString>
-#include <QDir>
+#include "typesystem_typedefs.h"
 
-#include "abstractmetalang.h"
+#include <QtCore/QString>
 
 QT_BEGIN_NAMESPACE
 class QDomDocument;
 class QDomNode;
 class QXmlQuery;
 QT_END_NAMESPACE
+
+class AbstractMetaClass;
+class DocModification;
+class Documentation;
 
 class DocParser
 {

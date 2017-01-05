@@ -30,7 +30,6 @@
 #define CPPGENERATOR_H
 
 #include "shibokengenerator.h"
-#include "overloaddata.h"
 
 /**
  *   The CppGenerator generate the implementations of C++ bindings classes.

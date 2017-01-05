@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "headergenerator.h"
+#include <abstractmetalang.h>
 #include <typedatabase.h>
 #include <reporthandler.h>
 #include <fileout.h>
@@ -136,7 +137,7 @@ void HeaderGenerator::generateClass(QTextStream& s, const AbstractMetaClass* met
             s << "~" << wrapperName << "();" << endl;
         }
 
-        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), CodeSnip::Declaration, TypeSystem::NativeCode);
+        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), TypeSystem::CodeSnipPositionDeclaration, TypeSystem::NativeCode);
 
         if ((!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
             && usePySideExtensions() && metaClass->isQObject()) {

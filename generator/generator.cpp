@@ -27,9 +27,11 @@
 ****************************************************************************/
 
 #include "generator.h"
+#include "abstractmetalang.h"
 #include "reporthandler.h"
 #include "fileout.h"
 #include "apiextractor.h"
+#include "typesystem.h"
 
 #include <QtCore/QDir>
 #include <QtCore/QFile>

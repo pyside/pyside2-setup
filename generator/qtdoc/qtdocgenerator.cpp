@@ -27,7 +27,9 @@
 ****************************************************************************/
 
 #include "qtdocgenerator.h"
+#include <abstractmetalang.h>
 #include <reporthandler.h>
+#include <typesystem.h>
 #include <qtdocparser.h>
 #include <doxygenparser.h>
 #include <typedatabase.h>
@@ -1072,8 +1074,8 @@ void QtDocGenerator::generateClass(QTextStream& s, const AbstractMetaClass* meta
     s << "Detailed Description\n"
          "--------------------\n\n";
 
-    writeInjectDocumentation(s, DocModification::Prepend, metaClass, 0);
-    if (!writeInjectDocumentation(s, DocModification::Replace, metaClass, 0))
+    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass, 0);
+    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass, 0))
         writeFormatedText(s, metaClass->documentation(), metaClass);
 
     if (!metaClass->isNamespace())
@@ -1095,7 +1097,7 @@ void QtDocGenerator::generateClass(QTextStream& s, const AbstractMetaClass* meta
         writeFunction(s, true, metaClass, func);
     }
 
-    writeInjectDocumentation(s, DocModification::Append, metaClass, 0);
+    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass, 0);
 }
 
 void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* cppClass)
@@ -1286,7 +1288,7 @@ QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* cppClass, cons
 
 void QtDocGenerator::writeDocSnips(QTextStream &s,
                                  const CodeSnipList &codeSnips,
-                                 CodeSnip::Position position,
+                                 TypeSystem::CodeSnipPosition position,
                                  TypeSystem::Language language)
 {
     Indentation indentation(INDENT);
@@ -1348,7 +1350,7 @@ void QtDocGenerator::writeDocSnips(QTextStream &s,
 }
 
 bool QtDocGenerator::writeInjectDocumentation(QTextStream& s,
-                                            DocModification::Mode mode,
+                                            TypeSystem::DocModificationMode mode,
                                             const AbstractMetaClass* cppClass,
                                             const AbstractMetaFunction* func)
 {
@@ -1381,15 +1383,12 @@ bool QtDocGenerator::writeInjectDocumentation(QTextStream& s,
 
     // TODO: Deprecate the use of doc string on glue code.
     //       This is pre "add-function" and "inject-documentation" tags.
-    if (func) {
-        writeDocSnips(s, func->injectedCodeSnips(),
-                       (mode == DocModification::Prepend ? CodeSnip::Beginning : CodeSnip::End),
-                       TypeSystem::TargetLangCode);
-    } else {
-        writeDocSnips(s, cppClass->typeEntry()->codeSnips(),
-                       (mode == DocModification::Prepend ? CodeSnip::Beginning : CodeSnip::End),
-                       TypeSystem::TargetLangCode);
-    }
+    const TypeSystem::CodeSnipPosition pos = mode == TypeSystem::DocModificationPrepend
+        ? TypeSystem::CodeSnipPositionBeginning : TypeSystem::CodeSnipPositionEnd;
+    if (func)
+        writeDocSnips(s, func->injectedCodeSnips(), pos, TypeSystem::TargetLangCode);
+    else
+        writeDocSnips(s, cppClass->typeEntry()->codeSnips(), pos, TypeSystem::TargetLangCode);
     return didSomething;
 }
 
@@ -1501,10 +1500,10 @@ void QtDocGenerator::writeFunction(QTextStream& s, bool writeDoc, const Abstract
         s << endl;
         writeFunctionParametersType(s, cppClass, func);
         s << endl;
-        writeInjectDocumentation(s, DocModification::Prepend, cppClass, func);
-        if (!writeInjectDocumentation(s, DocModification::Replace, cppClass, func))
+        writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, cppClass, func);
+        if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, cppClass, func))
             writeFormatedText(s, func->documentation(), cppClass);
-        writeInjectDocumentation(s, DocModification::Append, cppClass, func);
+        writeInjectDocumentation(s, TypeSystem::DocModificationAppend, cppClass, func);
     }
 }
 

@@ -29,8 +29,11 @@
 #include "doxygenparser.h"
 #include "abstractmetalang.h"
 #include "reporthandler.h"
+#include "typesystem.h"
 
 #include <QtXmlPatterns/QXmlQuery>
+#include <QtCore/QFile>
+#include <QtCore/QDir>
 
 namespace
 {

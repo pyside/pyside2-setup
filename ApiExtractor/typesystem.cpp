@@ -903,13 +903,13 @@ bool Handler::startElement(const QString &, const QString &n,
                                 | StackElement::ModifyField;
         if (m_current->parent && m_current->parent->type & validParent) {
             QString modeName = attributes[QLatin1String("mode")];
-            DocModification::Mode mode;
+            TypeSystem::DocModificationMode mode;
             if (modeName == QLatin1String("append")) {
-                mode = DocModification::Append;
+                mode = TypeSystem::DocModificationAppend;
             } else if (modeName == QLatin1String("prepend")) {
-                mode = DocModification::Prepend;
+                mode = TypeSystem::DocModificationPrepend;
             } else if (modeName == QLatin1String("replace")) {
-                mode = DocModification::Replace;
+                mode = TypeSystem::DocModificationReplace;
             } else {
                 m_error = QLatin1String("Unknow documentation injection mode: ") + modeName;
                 return false;
@@ -1715,15 +1715,15 @@ bool Handler::startElement(const QString &, const QString &n,
             }
 
 
-            static QHash<QString, CodeSnip::Position> positionNames;
+            static QHash<QString, TypeSystem::CodeSnipPosition> positionNames;
             if (positionNames.isEmpty()) {
-                positionNames[QLatin1String("beginning")] = CodeSnip::Beginning;
-                positionNames[QLatin1String("end")] = CodeSnip::End;
+                positionNames.insert(QLatin1String("beginning"), TypeSystem::CodeSnipPositionBeginning);
+                positionNames.insert(QLatin1String("end"), TypeSystem::CodeSnipPositionEnd);
                 // QtScript
-                positionNames[QLatin1String("declaration")] = CodeSnip::Declaration;
-                positionNames[QLatin1String("prototype-initialization")] = CodeSnip::PrototypeInitialization;
-                positionNames[QLatin1String("constructor-initialization")] = CodeSnip::ConstructorInitialization;
-                positionNames[QLatin1String("constructor")] = CodeSnip::Constructor;
+                positionNames.insert(QLatin1String("declaration"), TypeSystem::CodeSnipPositionDeclaration);
+                positionNames.insert(QLatin1String("prototype-initialization"), TypeSystem::CodeSnipPositionPrototypeInitialization);
+                positionNames.insert(QLatin1String("constructor-initialization"), TypeSystem::CodeSnipPositionConstructorInitialization);
+                positionNames.insert(QLatin1String("constructor"), TypeSystem::CodeSnipPositionConstructor);
             }
 
             QString position = attributes[QLatin1String("position")].toLower();

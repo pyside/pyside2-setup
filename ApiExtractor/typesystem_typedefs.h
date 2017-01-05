@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of PySide2.
@@ -26,37 +26,33 @@
 **
 ****************************************************************************/
 
-#ifndef FILEOUT_H
-#define FILEOUT_H
+#ifndef TYPESYSTEM_TYPEDEFS_H
+#define TYPESYSTEM_TYPEDEFS_H
 
-#include <QtCore/QObject>
-#include <QtCore/QTextStream>
+#include <QtCore/QHash>
+#include <QtCore/QList>
 
-class FileOut : public QObject
-{
-private:
-    QByteArray tmp;
-    QString name;
+class CodeSnip;
+class ContainerTypeEntry;
+class DocModification;
+class PrimitiveTypeEntry;
+class TemplateEntry;
+class TypeEntry;
 
-public:
-    enum State { Failure, Unchanged, Success };
+struct AddedFunction;
+struct FieldModification;
+struct FunctionModification;
 
-    FileOut(QString name);
-    ~FileOut()
-    {
-        if (!isDone)
-            done();
-    }
+typedef QHash<QString, QList<TypeEntry *> > TypeEntryHash;
+typedef QHash<QString, TypeEntry *> SingleTypeEntryHash;
+typedef QHash<QString, TemplateEntry *> TemplateEntryHash;
 
-    State done();
+typedef QList<AddedFunction> AddedFunctionList;
+typedef QList<CodeSnip> CodeSnipList;
+typedef QList<const ContainerTypeEntry *> ContainerTypeEntryList;
+typedef QList<DocModification> DocModificationList;
+typedef QList<FieldModification> FieldModificationList;
+typedef QList<FunctionModification> FunctionModificationList;
+typedef QList<const PrimitiveTypeEntry *> PrimitiveTypeEntryList;
 
-    QTextStream stream;
-
-    static bool dummy;
-    static bool diff;
-
-private:
-    bool isDone;
-};
-
-#endif // FILEOUT_H
+#endif // TYPESYSTEM_TYPEDEFS_H

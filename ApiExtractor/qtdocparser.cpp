@@ -27,8 +27,13 @@
 ****************************************************************************/
 
 #include "qtdocparser.h"
+#include "abstractmetalang.h"
 #include "reporthandler.h"
+#include "typesystem.h"
+
 #include <QtXmlPatterns/QXmlQuery>
+#include <QtCore/QDir>
+#include <QtCore/QFile>
 #include <QUrl>
 
 Documentation QtDocParser::retrieveModuleDocumentation()
