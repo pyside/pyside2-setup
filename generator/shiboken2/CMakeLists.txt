@@ -6,7 +6,6 @@ cppgenerator.cpp
 headergenerator.cpp
 overloaddata.cpp
 shibokengenerator.cpp
-shibokennormalize.cpp
 main.cpp
 )
 

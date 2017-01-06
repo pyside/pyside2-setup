@@ -30,12 +30,12 @@
 
 #include "cppgenerator.h"
 #include "overloaddata.h"
-#include "shibokennormalize_p.h"
 #include <abstractmetalang.h>
 #include <reporthandler.h>
 #include <typedatabase.h>
 
 #include <QtCore/QDir>
+#include <QtCore/QMetaObject>
 #include <QtCore/QTextStream>
 #include <QtCore/QDebug>
 #include <QMetaType>
@@ -4175,8 +4175,10 @@ void CppGenerator::writeSignalInitialization(QTextStream& s, const AbstractMetaC
             continue;
         foreach (AbstractMetaArgument* arg, cppSignal->arguments()) {
             AbstractMetaType* metaType = arg->type();
-            QByteArray origType = SBK_NORMALIZED_TYPE(qPrintable(metaType->originalTypeDescription()));
-            QByteArray cppSig = SBK_NORMALIZED_TYPE(qPrintable(metaType->cppSignature()));
+            const QByteArray origType =
+                QMetaObject::normalizedType(qPrintable(metaType->originalTypeDescription()));
+            const QByteArray cppSig =
+                QMetaObject::normalizedType(qPrintable(metaType->cppSignature()));
             if ((origType != cppSig) && (!metaType->isFlags())) {
                 qCWarning(lcShiboken).noquote().nospace()
                     << "Typedef used on signal " << metaClass->qualifiedCppName() << "::"
@@ -5031,7 +5033,7 @@ bool CppGenerator::finishGeneration()
                         QString value = translateType(arg->type(), metaClass, ExcludeConst | ExcludeReference);
                         if (value.startsWith(QLatin1String("::")))
                             value.remove(0, 2);
-                        typeResolvers << SBK_NORMALIZED_TYPE(value.toUtf8().constData());
+                        typeResolvers << QMetaObject::normalizedType(value.toUtf8().constData());
                     }
                 }
             }
