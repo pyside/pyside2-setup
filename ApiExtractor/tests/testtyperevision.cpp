@@ -29,7 +29,8 @@
 #include "testtyperevision.h"
 #include <QtTest/QTest>
 #include "testutil.h"
-
+#include <abstractmetalang.h>
+#include <typesystem.h>
 
 void TestTypeRevision::testRevisionAttr()
 {

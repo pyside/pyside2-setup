@@ -29,6 +29,8 @@
 #include "testdroptypeentries.h"
 #include <QtTest/QTest>
 #include "testutil.h"
+#include <abstractmetalang.h>
+#include <typesystem.h>
 
 static const char* cppCode ="\
     struct ValueA {};\n\

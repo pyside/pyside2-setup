@@ -29,6 +29,8 @@
 #include "testarrayargument.h"
 #include <QtTest/QTest>
 #include "testutil.h"
+#include <abstractmetalang.h>
+#include <typesystem.h>
 
 void TestArrayArgument::testArrayArgumentWithSizeDefinedByInteger()
 {

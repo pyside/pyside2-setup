@@ -30,6 +30,8 @@
 #include <QtTest/QTest>
 #include <QTemporaryFile>
 #include "testutil.h"
+#include <abstractmetalang.h>
+#include <typesystem.h>
 
 void TestTemplates::testTemplateWithNamespace()
 {

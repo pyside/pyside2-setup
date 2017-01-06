@@ -31,6 +31,8 @@
 #include <QCoreApplication>
 #include <QtTest/QTest>
 #include "testutil.h"
+#include <abstractmetalang.h>
+#include <typesystem.h>
 #include <qtdocparser.h>
 
 void TestModifyDocumentation::testModifyDocumentation()

@@ -28,6 +28,8 @@
 
 #include "testimplicitconversions.h"
 #include "testutil.h"
+#include <abstractmetalang.h>
+#include <typesystem.h>
 #include <QtTest/QTest>
 
 void TestImplicitConversions::testWithPrivateCtors()

@@ -29,6 +29,8 @@
 #include "testremoveimplconv.h"
 #include "testutil.h"
 #include <QtTest/QTest>
+#include <abstractmetalang.h>
+#include <typesystem.h>
 
 // When a constructor able to trigger implicity conversions is removed
 // it should not appear in the implicity conversion list.

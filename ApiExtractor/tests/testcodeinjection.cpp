@@ -31,6 +31,8 @@
 #include <QDir>
 #include <QtTest/QTest>
 #include "testutil.h"
+#include <abstractmetalang.h>
+#include <typesystem.h>
 
 void TestCodeInjections::testReadFileUtf8()
 {

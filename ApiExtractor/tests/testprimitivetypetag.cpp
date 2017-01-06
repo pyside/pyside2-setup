@@ -29,6 +29,8 @@
 #include "testprimitivetypetag.h"
 #include <QtTest/QTest>
 #include "testutil.h"
+#include <abstractmetalang.h>
+#include <typesystem.h>
 
 void TestPrimitiveTypeTag::testPrimitiveTypeDefaultConstructor()
 {
