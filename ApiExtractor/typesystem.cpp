@@ -2238,6 +2238,43 @@ AddedFunction::AddedFunction(QString signature, QString returnType, double vr) :
     }
 }
 
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const AddedFunction::TypeInfo &ti)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "TypeInfo(";
+    if (ti.isConstant)
+        d << "const";
+    if (ti.indirections)
+        d << QByteArray(ti.indirections, '*');
+    if (ti.isReference)
+        d << " &";
+    d << ti.name;
+    if (!ti.defaultValue.isEmpty())
+        d << " = " << ti.defaultValue;
+    d << ')';
+    return d;
+}
+
+QDebug operator<<(QDebug d, const AddedFunction &af)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "AddedFunction(";
+    if (af.access() == AddedFunction::Protected)
+        d << "protected";
+    if (af.isStatic())
+        d << " static";
+    d << af.returnType() << ' ' << af.name() << '(' << af.arguments() << ')';
+    if (af.isConstant())
+        d << " const";
+    return d;
+}
+#endif // !QT_NO_DEBUG_STREAM
+
 AddedFunction::TypeInfo AddedFunction::TypeInfo::fromSignature(const QString& signature)
 {
     return parseType(signature);

@@ -567,3 +567,45 @@ bool TypeDatabase::checkApiVersion(const QString& package, const QByteArray& ver
     }
     return false;
 }
+
+#ifndef QT_NO_DEBUG_STREAM
+void TypeDatabase::formatDebug(QDebug &d) const
+{
+    typedef TypeEntryHash::ConstIterator Eit;
+    d << "TypeDatabase("
+      << "entries=";
+    for (Eit it = m_entries.cbegin(), end = m_entries.cend(); it != end; ++it) {
+        d << '"' << it.key() << "\": [";
+        for (int t = 0, cnt = it.value().size(); t < cnt; ++t) {
+            if (t)
+                d << ", ";
+            d << it.value().at(t);
+        }
+        d << "]\n";
+    }
+    d <<"\nglobalUserFunctions=" << m_globalUserFunctions << ')';
+}
+
+QDebug operator<<(QDebug d, const TypeEntry *te)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "TypeEntry(";
+    if (te)
+        d << te->qualifiedCppName() << ", type=" << te->type();
+    else
+        d << '0';
+    d << ')';
+    return d;
+}
+
+QDebug operator<<(QDebug d, const TypeDatabase &db)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    db.formatDebug(d);
+    return d;
+}
+#endif // !QT_NO_DEBUG_STREAM

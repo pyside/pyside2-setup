@@ -49,6 +49,8 @@ class TypeEntry;
 
 struct TypeRejection;
 
+QT_FORWARD_DECLARE_CLASS(QDebug)
+
 void setTypeRevision(TypeEntry* typeEntry, int revision);
 int getTypeRevision(const TypeEntry* typeEntry);
 int getTypeIndex(const TypeEntry* typeEntry);
@@ -144,6 +146,9 @@ public:
 
     void setDropTypeEntries(QStringList dropTypeEntries);
 
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const;
+#endif
 private:
     QList<TypeEntry *> findTypes(const QString &name) const;
     QString modifiedTypesystemFilepath(const QString &tsFile) const;
@@ -167,4 +172,8 @@ private:
     QStringList m_dropTypeEntries;
 };
 
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const TypeEntry *te);
+QDebug operator<<(QDebug d, const TypeDatabase &db);
 #endif
+#endif // TYPEDATABASE_H

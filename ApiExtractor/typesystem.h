@@ -505,6 +505,11 @@ private:
     double m_version;
 };
 
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const AddedFunction::TypeInfo &ti);
+QDebug operator<<(QDebug d, const AddedFunction &af);
+#endif
+
 struct ExpensePolicy
 {
     ExpensePolicy() : limit(-1) {}
