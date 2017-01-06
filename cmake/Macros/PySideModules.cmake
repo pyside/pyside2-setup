@@ -67,10 +67,20 @@ macro(create_pyside_module
     # Remove any possible duplicates.
     list(REMOVE_DUPLICATES total_type_system_files)
 
+    # Contains include directories to pass to shiboken's preprocessor.
+    set(shiboken_include_dirs ${pyside2_SOURCE_DIR}${PATH_SEP}${QT_INCLUDE_DIR})
+    if(CMAKE_HOST_APPLE)
+        # On macOS, provide the framework paths for OpenGL headers.
+        set(shiboken_include_dirs ${shiboken_include_dirs} ${CMAKE_SYSTEM_FRAMEWORK_PATH})
+    endif()
+
+    # Transform the path separators into something shiboken understands.
+    make_path(shiboken_include_dirs ${shiboken_include_dirs})
+
     add_custom_command(OUTPUT ${${module_sources}}
                         COMMAND "${SHIBOKEN_BINARY}" ${GENERATOR_EXTRA_FLAGS}
                         ${pyside2_BINARY_DIR}/pyside2_global.h
-                        --include-paths=${pyside2_SOURCE_DIR}${PATH_SEP}${QT_INCLUDE_DIR}
+                        --include-paths=${shiboken_include_dirs}
                         --typesystem-paths=${pyside2_SOURCE_DIR}${PATH_SEP}${${module_typesystem_path}}
                         --output-directory=${CMAKE_CURRENT_BINARY_DIR}
                         --license-file=${CMAKE_CURRENT_SOURCE_DIR}/../licensecomment.txt
