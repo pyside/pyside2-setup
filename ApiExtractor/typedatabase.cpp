@@ -41,10 +41,14 @@ typedef QMap<QString, QByteArray> ApiVersionMap;
 
 Q_GLOBAL_STATIC(ApiVersionMap, apiVersions)
 
-TypeDatabase::TypeDatabase() : m_suppressWarnings(true), m_apiVersion(0)
+TypeDatabase::TypeDatabase() : m_suppressWarnings(true)
 {
     addType(new VoidTypeEntry());
     addType(new VarargsTypeEntry());
+}
+
+TypeDatabase::~TypeDatabase()
+{
 }
 
 TypeDatabase* TypeDatabase::instance(bool newInstance)
@@ -130,22 +134,6 @@ FunctionTypeEntry* TypeDatabase::findFunctionType(const QString& name) const
     return 0;
 }
 
-
-PrimitiveTypeEntry* TypeDatabase::findTargetLangPrimitiveType(const QString& targetLangName) const
-{
-    for (TypeEntryHash::const_iterator it = m_entries.cbegin(), end = m_entries.cend(); it != end; ++it) {
-        foreach (TypeEntry* e, it.value()) {
-            if (e && e->isPrimitive()) {
-                PrimitiveTypeEntry *pe = static_cast<PrimitiveTypeEntry*>(e);
-                if (pe->targetLangName() == targetLangName && pe->preferredConversion())
-                    return pe;
-            }
-        }
-    }
-
-    return 0;
-}
-
 TypeEntry* TypeDatabase::findType(const QString& name) const
 {
     QList<TypeEntry *> entries = findTypes(name);
@@ -156,6 +144,11 @@ TypeEntry* TypeDatabase::findType(const QString& name) const
         }
     }
     return 0;
+}
+
+QList<TypeEntry *> TypeDatabase::findTypes(const QString &name) const
+{
+    return m_entries.value(name);
 }
 
 SingleTypeEntryHash TypeDatabase::entries() const
@@ -208,9 +201,6 @@ void TypeDatabase::addRejection(const QString& className, const QString& functio
 
 bool TypeDatabase::isClassRejected(const QString& className) const
 {
-    if (!m_rebuildClasses.isEmpty())
-        return !m_rebuildClasses.contains(className);
-
     foreach (const TypeRejection& r, m_rejections) {
         if (r.class_name == className && r.function_name == QLatin1String("*")
             && r.field_name == QLatin1String("*") && r.enum_name == QLatin1String("*")) {
@@ -284,6 +274,11 @@ void TypeDatabase::addTemplate(TemplateEntry *t)
     m_templates[t->name()] = t;
 }
 
+void TypeDatabase::addGlobalUserFunctions(const AddedFunctionList &functions)
+{
+    m_globalUserFunctions << functions;
+}
+
 AddedFunctionList TypeDatabase::findGlobalUserFunctions(const QString& name) const
 {
     AddedFunctionList addedFunctions;
@@ -294,6 +289,10 @@ AddedFunctionList TypeDatabase::findGlobalUserFunctions(const QString& name) con
     return addedFunctions;
 }
 
+void TypeDatabase::addGlobalUserFunctionModifications(const FunctionModificationList &functionModifications)
+{
+    m_functionMods << functionModifications;
+}
 
 QString TypeDatabase::globalNamespaceClassName(const TypeEntry * /*entry*/)
 {
@@ -310,6 +309,11 @@ FunctionModificationList TypeDatabase::functionModifications(const QString& sign
     }
 
     return lst;
+}
+
+void TypeDatabase::addSuppressedWarning(const QString &s)
+{
+    m_suppressedWarnings.append(s);
 }
 
 bool TypeDatabase::isSuppressedWarning(const QString& s) const
@@ -379,9 +383,6 @@ bool TypeDatabase::parseFile(const QString &filename, bool generate)
 
 bool TypeDatabase::parseFile(QIODevice* device, bool generate)
 {
-    if (m_apiVersion) // backwards compatibility with deprecated API
-        setApiVersion(QLatin1String("*"), QByteArray::number(m_apiVersion));
-
     QXmlInputSource source(device);
     QXmlSimpleReader reader;
     Handler handler(this, generate);
@@ -432,11 +433,6 @@ NamespaceTypeEntry* TypeDatabase::findNamespaceType(const QString& name) const
             return static_cast<NamespaceTypeEntry*>(entry);
     }
     return 0;
-}
-
-bool TypeDatabase::supportedApiVersion(double version) const
-{
-    return version <= m_apiVersion;
 }
 
 bool TypeDatabase::shouldDropTypeEntry(const QString& fullTypeName) const
