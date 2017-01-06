@@ -41,7 +41,7 @@
 #define AUTODECREF_H
 
 #include "sbkpython.h"
-#include "shibokenmacros.h"
+#include "basewrapper.h"
 
 struct SbkObject;
 namespace Shiboken

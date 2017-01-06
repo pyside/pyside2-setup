@@ -41,6 +41,8 @@
 #define BASEWRAPPER_P_H
 
 #include "sbkpython.h"
+#include "basewrapper.h"
+
 #include <list>
 #include <map>
 #include <set>

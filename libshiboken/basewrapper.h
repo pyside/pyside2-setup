@@ -41,10 +41,9 @@
 #define BASEWRAPPER_H
 
 #include "sbkpython.h"
-#include "bindingmanager.h"
-#include <list>
+#include "shibokenmacros.h"
+
 #include <vector>
-#include <map>
 #include <string>
 
 extern "C"
