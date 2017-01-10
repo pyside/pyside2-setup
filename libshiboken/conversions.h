@@ -42,7 +42,6 @@
 
 #include "sbkpython.h"
 #include <limits>
-#include <memory>
 #include <typeinfo>
 
 #include "sbkstring.h"
@@ -205,8 +204,9 @@ struct ValueTypeConverter
             SbkObjectType* shiboType = reinterpret_cast<SbkObjectType*>(SbkType<T>());
             if (ObjectType::hasExternalCppConversions(shiboType) && isConvertible(pyobj)) {
                 T* cptr = reinterpret_cast<T*>(ObjectType::callExternalCppConversion(shiboType, pyobj));
-                std::auto_ptr<T> cptr_auto_ptr(cptr);
-                return *cptr;
+                const T result = *cptr;
+                delete cptr;
+                return result;
             }
             assert(false);
         }
