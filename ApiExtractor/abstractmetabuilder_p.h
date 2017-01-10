@@ -46,7 +46,9 @@ public:
     AbstractMetaBuilderPrivate();
     ~AbstractMetaBuilderPrivate();
 
-    bool build(QIODevice *input);
+    FileModelItem buildDom(QIODevice *input);
+    void traverseDom(const FileModelItem &dom);
+
     void dumpLog() const;
     AbstractMetaClassList classesTopologicalSorted(const AbstractMetaClass *cppClass = Q_NULLPTR) const;
 
@@ -64,14 +66,17 @@ public:
     void figureOutDefaultEnumArguments();
 
     void addAbstractMetaClass(AbstractMetaClass *cls);
-    AbstractMetaClass *traverseTypeAlias(TypeAliasModelItem item);
-    AbstractMetaClass *traverseClass(ClassModelItem item);
+    AbstractMetaClass *traverseTypeAlias(const FileModelItem &dom,
+                                         const TypeAliasModelItem &item);
+    AbstractMetaClass *traverseClass(const FileModelItem &dom,
+                                     const ClassModelItem &item);
     AbstractMetaClass *currentTraversedClass(ScopeModelItem item);
     void traverseScopeMembers(ScopeModelItem item, AbstractMetaClass *metaClass);
     void traverseClassMembers(ClassModelItem scopeItem);
     void traverseNamespaceMembers(NamespaceModelItem scopeItem);
     bool setupInheritance(AbstractMetaClass *metaClass);
-    AbstractMetaClass *traverseNamespace(NamespaceModelItem item);
+    AbstractMetaClass *traverseNamespace(const FileModelItem &dom,
+                                         const NamespaceModelItem &item);
     AbstractMetaEnum *traverseEnum(EnumModelItem item, AbstractMetaClass *enclosing,
                                    const QSet<QString> &enumsDeclarations);
     void traverseEnums(ScopeModelItem item, AbstractMetaClass *parent,
@@ -136,10 +141,11 @@ public:
                                           const AbstractMetaType *metaType,
                                           bool *ok = Q_NULLPTR);
 
-    bool isQObject(const QString &qualifiedName);
-    bool isEnum(const QStringList &qualifiedName);
+    bool isQObject(const FileModelItem &dom, const QString &qualifiedName);
+    bool isEnum(const FileModelItem &dom, const QStringList &qualifiedName);
 
-    void fixQObjectForScope(TypeDatabase *types, NamespaceModelItem item);
+    void fixQObjectForScope(const FileModelItem &dom, const TypeDatabase *types,
+                            const NamespaceModelItem &item);
 
     void sortLists();
     AbstractMetaArgumentList reverseList(const AbstractMetaArgumentList &list);
@@ -148,7 +154,6 @@ public:
     void fillAddedFunctions(AbstractMetaClass *metaClass);
 
     AbstractMetaBuilder *q;
-    FileModelItem m_dom;
     AbstractMetaClassList m_metaClasses;
     AbstractMetaClassList m_templates;
     AbstractMetaFunctionList m_globalFunctions;

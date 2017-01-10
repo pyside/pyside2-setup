@@ -417,8 +417,9 @@ void AbstractMetaBuilderPrivate::traverseStreamOperator(FunctionModelItem item)
     }
 }
 
-void AbstractMetaBuilderPrivate::fixQObjectForScope(TypeDatabase *types,
-                                                    NamespaceModelItem scope)
+void AbstractMetaBuilderPrivate::fixQObjectForScope(const FileModelItem &dom,
+                                                    const TypeDatabase *types,
+                                                    const NamespaceModelItem &scope)
 {
     typedef QHash<QString, NamespaceModelItem> NamespaceModelItemMap;
 
@@ -426,7 +427,7 @@ void AbstractMetaBuilderPrivate::fixQObjectForScope(TypeDatabase *types,
         QString qualifiedName = item->qualifiedName().join(colonColon());
         TypeEntry* entry = types->findType(qualifiedName);
         if (entry) {
-            if (isQObject(qualifiedName) && entry->isComplex())
+            if (isQObject(dom, qualifiedName) && entry->isComplex())
                 ((ComplexTypeEntry*) entry)->setQObject(true);
         }
     }
@@ -434,7 +435,7 @@ void AbstractMetaBuilderPrivate::fixQObjectForScope(TypeDatabase *types,
     const NamespaceModelItemMap namespaceMap = scope->namespaceMap();
     for (NamespaceModelItemMap::const_iterator it = namespaceMap.cbegin(), end = namespaceMap.cend(); it != end; ++it) {
         if (scope != it.value())
-            fixQObjectForScope(types, it.value());
+            fixQObjectForScope(dom, types, it.value());
     }
 }
 
@@ -444,16 +445,12 @@ void AbstractMetaBuilderPrivate::sortLists()
         cls->sortFunctions();
 }
 
-bool AbstractMetaBuilderPrivate::build(QIODevice *input)
+FileModelItem AbstractMetaBuilderPrivate::buildDom(QIODevice *input)
 {
     Q_ASSERT(input);
 
-    if (!input->isOpen()) {
-        if (!input->open(QIODevice::ReadOnly))
-            return false;
-    }
-
-    TypeDatabase* types = TypeDatabase::instance();
+    if (!input->isOpen() && !input->open(QIODevice::ReadOnly))
+        return FileModelItem();
 
     QByteArray contents = input->readAll();
     input->close();
@@ -466,14 +463,19 @@ bool AbstractMetaBuilderPrivate::build(QIODevice *input)
 
     CodeModel model;
     Binder binder(&model, p.location());
-    m_dom = binder.run(ast);
+    return binder.run(ast);
+}
 
-    pushScope(model_dynamic_cast<ScopeModelItem>(m_dom));
+void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
+{
+    const TypeDatabase *types = TypeDatabase::instance();
 
-    QHash<QString, ClassModelItem> typeMap = m_dom->classMap();
+    pushScope(model_dynamic_cast<ScopeModelItem>(dom));
+
+    QHash<QString, ClassModelItem> typeMap = dom->classMap();
 
     // fix up QObject's in the type system..
-    fixQObjectForScope(types, model_dynamic_cast<NamespaceModelItem>(m_dom));
+    fixQObjectForScope(dom, types, model_dynamic_cast<NamespaceModelItem>(dom));
 
     // Start the generation...
     ClassList typeValues = typeMap.values();
@@ -484,7 +486,7 @@ bool AbstractMetaBuilderPrivate::build(QIODevice *input)
     ReportHandler::setProgressReference(typeValues);
     foreach (const ClassModelItem &item, typeValues) {
         ReportHandler::progress(QLatin1String("Generating class model..."));
-        AbstractMetaClass *cls = traverseClass(item);
+        AbstractMetaClass *cls = traverseClass(dom, item);
         if (!cls)
             continue;
 
@@ -492,8 +494,8 @@ bool AbstractMetaBuilderPrivate::build(QIODevice *input)
     }
 
     // We need to know all global enums
-    ReportHandler::setProgressReference(m_dom->enumMap());
-    foreach (const EnumModelItem &item, m_dom->enums()) {
+    ReportHandler::setProgressReference(dom->enumMap());
+    foreach (const EnumModelItem &item, dom->enums()) {
         ReportHandler::progress(QLatin1String("Generating enum model..."));
         AbstractMetaEnum *metaEnum = traverseEnum(item, 0, QSet<QString>());
         if (metaEnum) {
@@ -502,7 +504,7 @@ bool AbstractMetaBuilderPrivate::build(QIODevice *input)
         }
     }
 
-    QHash<QString, NamespaceModelItem> namespaceMap = m_dom->namespaceMap();
+    QHash<QString, NamespaceModelItem> namespaceMap = dom->namespaceMap();
     NamespaceList namespaceTypeValues = namespaceMap.values();
     qSort(namespaceTypeValues);
     NamespaceList::iterator nsit = std::unique(namespaceTypeValues.begin(), namespaceTypeValues.end());
@@ -511,18 +513,18 @@ bool AbstractMetaBuilderPrivate::build(QIODevice *input)
     ReportHandler::setProgressReference(namespaceMap);
     foreach (NamespaceModelItem item, namespaceTypeValues) {
         ReportHandler::progress(QLatin1String("Generating namespace model..."));
-        AbstractMetaClass *metaClass = traverseNamespace(item);
+        AbstractMetaClass *metaClass = traverseNamespace(dom, item);
         if (metaClass)
             m_metaClasses << metaClass;
     }
 
     // Go through all typedefs to see if we have defined any
     // specific typedefs to be used as classes.
-    TypeAliasList typeAliases = m_dom->typeAliases();
+    TypeAliasList typeAliases = dom->typeAliases();
     ReportHandler::setProgressReference(typeAliases);
     foreach (TypeAliasModelItem typeAlias, typeAliases) {
         ReportHandler::progress(QLatin1String("Resolving typedefs..."));
-        AbstractMetaClass* cls = traverseTypeAlias(typeAlias);
+        AbstractMetaClass* cls = traverseTypeAlias(dom, typeAlias);
         addAbstractMetaClass(cls);
     }
 
@@ -535,7 +537,7 @@ bool AbstractMetaBuilderPrivate::build(QIODevice *input)
         traverseNamespaceMembers(item);
 
     // Global functions
-    foreach (const FunctionModelItem &func, m_dom->functions()) {
+    foreach (const FunctionModelItem &func, dom->functions()) {
         if (func->accessPolicy() != CodeModel::Public || func->name().startsWith(QLatin1String("operator")))
             continue;
 
@@ -652,40 +654,40 @@ bool AbstractMetaBuilderPrivate::build(QIODevice *input)
     }
 
     {
-        FunctionList hashFunctions = m_dom->findFunctions(QLatin1String("qHash"));
+        FunctionList hashFunctions = dom->findFunctions(QLatin1String("qHash"));
         foreach (const FunctionModelItem &item, hashFunctions)
             registerHashFunction(item);
     }
 
     {
-        FunctionList hashFunctions = m_dom->findFunctions(QLatin1String("operator<<"));
+        FunctionList hashFunctions = dom->findFunctions(QLatin1String("operator<<"));
         foreach (const FunctionModelItem &item, hashFunctions)
             registerToStringCapability(item);
     }
 
     {
-        FunctionList binaryOperators = m_dom->findFunctions(QLatin1String("operator=="))
-                                        + m_dom->findFunctions(QLatin1String("operator!="))
-                                        + m_dom->findFunctions(QLatin1String("operator<="))
-                                        + m_dom->findFunctions(QLatin1String("operator>="))
-                                        + m_dom->findFunctions(QLatin1String("operator<"))
-                                        + m_dom->findFunctions(QLatin1String("operator+"))
-                                        + m_dom->findFunctions(QLatin1String("operator/"))
-                                        + m_dom->findFunctions(QLatin1String("operator*"))
-                                        + m_dom->findFunctions(QLatin1String("operator-"))
-                                        + m_dom->findFunctions(QLatin1String("operator&"))
-                                        + m_dom->findFunctions(QLatin1String("operator|"))
-                                        + m_dom->findFunctions(QLatin1String("operator^"))
-                                        + m_dom->findFunctions(QLatin1String("operator~"))
-                                        + m_dom->findFunctions(QLatin1String("operator>"));
+        FunctionList binaryOperators = dom->findFunctions(QLatin1String("operator=="))
+                                        + dom->findFunctions(QLatin1String("operator!="))
+                                        + dom->findFunctions(QLatin1String("operator<="))
+                                        + dom->findFunctions(QLatin1String("operator>="))
+                                        + dom->findFunctions(QLatin1String("operator<"))
+                                        + dom->findFunctions(QLatin1String("operator+"))
+                                        + dom->findFunctions(QLatin1String("operator/"))
+                                        + dom->findFunctions(QLatin1String("operator*"))
+                                        + dom->findFunctions(QLatin1String("operator-"))
+                                        + dom->findFunctions(QLatin1String("operator&"))
+                                        + dom->findFunctions(QLatin1String("operator|"))
+                                        + dom->findFunctions(QLatin1String("operator^"))
+                                        + dom->findFunctions(QLatin1String("operator~"))
+                                        + dom->findFunctions(QLatin1String("operator>"));
 
         foreach (const FunctionModelItem &item, binaryOperators)
             traverseOperatorFunction(item);
     }
 
     {
-        FunctionList streamOperators = m_dom->findFunctions(QLatin1String("operator<<"))
-                                       + m_dom->findFunctions(QLatin1String("operator>>"));
+        FunctionList streamOperators = dom->findFunctions(QLatin1String("operator<<"))
+                                       + dom->findFunctions(QLatin1String("operator>>"));
         foreach (const FunctionModelItem &item, streamOperators)
             traverseStreamOperator(item);
     }
@@ -723,12 +725,15 @@ bool AbstractMetaBuilderPrivate::build(QIODevice *input)
     }
 
     std::puts("");
-    return true;
 }
 
 bool AbstractMetaBuilder::build(QIODevice *input)
 {
-    return d->build(input);
+    FileModelItem dom = d->buildDom(input);
+    const bool result = dom.data() != Q_NULLPTR;
+    if (result)
+        d->traverseDom(dom);
+    return result;
 }
 
 void AbstractMetaBuilder::setLogDirectory(const QString& logDir)
@@ -757,7 +762,8 @@ void AbstractMetaBuilderPrivate::addAbstractMetaClass(AbstractMetaClass *cls)
     }
 }
 
-AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(NamespaceModelItem namespaceItem)
+AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModelItem &dom,
+                                                                 const NamespaceModelItem &namespaceItem)
 {
     QString namespaceName =
         (!m_namespacePrefix.isEmpty() ? m_namespacePrefix + colonColon() : QString())
@@ -794,7 +800,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(NamespaceModelI
 
     ClassList classes = namespaceItem->classes();
     foreach (const ClassModelItem &cls, classes) {
-        AbstractMetaClass* mjc = traverseClass(cls);
+        AbstractMetaClass* mjc = traverseClass(dom, cls);
         if (mjc) {
             metaClass->addInnerClass(mjc);
             mjc->setEnclosingClass(metaClass);
@@ -806,7 +812,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(NamespaceModelI
     // specific typedefs to be used as classes.
     TypeAliasList typeAliases = namespaceItem->typeAliases();
     foreach (const TypeAliasModelItem &typeAlias, typeAliases) {
-        AbstractMetaClass* cls = traverseTypeAlias(typeAlias);
+        AbstractMetaClass* cls = traverseTypeAlias(dom, typeAlias);
         if (cls) {
             metaClass->addInnerClass(cls);
             cls->setEnclosingClass(metaClass);
@@ -820,7 +826,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(NamespaceModelI
     NamespaceList::iterator it = std::unique(innerNamespaces.begin(), innerNamespaces.end());
     innerNamespaces.erase(it, innerNamespaces.end());
     foreach (const NamespaceModelItem &ni, innerNamespaces) {
-        AbstractMetaClass* mjc = traverseNamespace(ni);
+        AbstractMetaClass* mjc = traverseNamespace(dom, ni);
         if (mjc) {
             metaClass->addInnerClass(mjc);
             mjc->setEnclosingClass(metaClass);
@@ -1156,7 +1162,8 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(EnumModelItem enumIte
     return metaEnum;
 }
 
-AbstractMetaClass* AbstractMetaBuilderPrivate::traverseTypeAlias(TypeAliasModelItem typeAlias)
+AbstractMetaClass* AbstractMetaBuilderPrivate::traverseTypeAlias(const FileModelItem &dom,
+                                                                 const TypeAliasModelItem &typeAlias)
 {
     TypeDatabase* types = TypeDatabase::instance();
     QString className = stripTemplateArgs(typeAlias->name());
@@ -1185,7 +1192,7 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::traverseTypeAlias(TypeAliasModelI
         return 0;
 
     if (type->isObject())
-        static_cast<ObjectTypeEntry *>(type)->setQObject(isQObject(stripTemplateArgs(typeAlias->type().qualifiedName().join(colonColon()))));
+        static_cast<ObjectTypeEntry *>(type)->setQObject(isQObject(dom, stripTemplateArgs(typeAlias->type().qualifiedName().join(colonColon()))));
 
     AbstractMetaClass *metaClass = q->createMetaClass();
     metaClass->setTypeAlias(true);
@@ -1202,7 +1209,8 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::traverseTypeAlias(TypeAliasModelI
     return metaClass;
 }
 
-AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(ClassModelItem classItem)
+AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem &dom,
+                                                             const ClassModelItem &classItem)
 {
     QString className = stripTemplateArgs(classItem->name());
     QString fullClassName = className;
@@ -1243,7 +1251,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(ClassModelItem clas
     }
 
     if (type->isObject())
-        ((ObjectTypeEntry*)type)->setQObject(isQObject(fullClassName));
+        ((ObjectTypeEntry*)type)->setQObject(isQObject(dom, fullClassName));
 
     AbstractMetaClass *metaClass = q->createMetaClass();
     metaClass->setTypeEntry(type);
@@ -1281,7 +1289,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(ClassModelItem clas
     {
         QList<ClassModelItem> innerClasses = classItem->classMap().values();
         foreach (const ClassModelItem &ci, innerClasses) {
-            AbstractMetaClass *cl = traverseClass(ci);
+            AbstractMetaClass *cl = traverseClass(dom, ci);
             if (cl) {
                 cl->setEnclosingClass(metaClass);
                 metaClass->addInnerClass(cl);
@@ -1295,7 +1303,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(ClassModelItem clas
     // specific typedefs to be used as classes.
     TypeAliasList typeAliases = classItem->typeAliases();
     foreach (const TypeAliasModelItem &typeAlias, typeAliases) {
-        AbstractMetaClass* cls = traverseTypeAlias(typeAlias);
+        AbstractMetaClass* cls = traverseTypeAlias(dom, typeAlias);
         if (cls) {
             cls->setEnclosingClass(metaClass);
             addAbstractMetaClass(cls);
@@ -2609,16 +2617,16 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(ArgumentModelItem item,
     return expr;
 }
 
-bool AbstractMetaBuilderPrivate::isQObject(const QString &qualifiedName)
+bool AbstractMetaBuilderPrivate::isQObject(const FileModelItem &dom, const QString &qualifiedName)
 {
     if (qualifiedName == QLatin1String("QObject"))
         return true;
 
-    ClassModelItem classItem = m_dom->findClass(qualifiedName);
+    ClassModelItem classItem = dom->findClass(qualifiedName);
 
     if (!classItem) {
         QStringList names = qualifiedName.split(colonColon());
-        NamespaceModelItem ns = model_dynamic_cast<NamespaceModelItem>(m_dom);
+        NamespaceModelItem ns = model_dynamic_cast<NamespaceModelItem>(dom);
         for (int i = 0; i < names.size() - 1 && ns; ++i)
             ns = ns->namespaceMap().value(names.at(i));
         if (ns && names.size() >= 2)
@@ -2631,7 +2639,7 @@ bool AbstractMetaBuilderPrivate::isQObject(const QString &qualifiedName)
         QStringList baseClasses = classItem->baseClasses();
         for (int i = 0; i < baseClasses.count(); ++i) {
 
-            isqobject = isQObject(baseClasses.at(i));
+            isqobject = isQObject(dom, baseClasses.at(i));
             if (isqobject)
                 break;
         }
@@ -2641,9 +2649,9 @@ bool AbstractMetaBuilderPrivate::isQObject(const QString &qualifiedName)
 }
 
 
-bool AbstractMetaBuilderPrivate::isEnum(const QStringList& qualified_name)
+bool AbstractMetaBuilderPrivate::isEnum(const FileModelItem &dom, const QStringList& qualified_name)
 {
-    CodeModelItem item = m_dom->model()->findItem(qualified_name, m_dom->toItem());
+    CodeModelItem item = dom->model()->findItem(qualified_name, dom->toItem());
     return item && item->kind() == _EnumModelItem::__node_kind;
 }
 
