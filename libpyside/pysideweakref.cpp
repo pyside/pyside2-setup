@@ -102,7 +102,7 @@ static PyTypeObject PySideCallableObjectType = {
 
 static PyObject *CallableObject_call(PyObject *callable_object, PyObject *args, PyObject * /* kw */)
 {
-    PySideCallableObject* obj = (PySideCallableObject*)(callable_object);
+    PySideCallableObject* obj = reinterpret_cast<PySideCallableObject *>(callable_object);
     obj->weakref_func(obj->user_data);
 
     Py_XDECREF(PyTuple_GET_ITEM(args, 0)); //kill weak ref object
@@ -126,7 +126,7 @@ PyObject* create(PyObject* obj, PySideWeakRefFunction func, void* userData)
     if (!callable || PyErr_Occurred())
         return 0;
 
-    PyObject* weak = PyWeakref_NewRef(obj, (PyObject*)callable);
+    PyObject* weak = PyWeakref_NewRef(obj, reinterpret_cast<PyObject *>(callable));
     if (!weak || PyErr_Occurred())
         return 0;
 
@@ -134,7 +134,7 @@ PyObject* create(PyObject* obj, PySideWeakRefFunction func, void* userData)
     callable->user_data = userData;
     Py_DECREF(callable); // PYSIDE-79: after decref the callable is undefined (theoretically)
 
-    return (PyObject*)weak;
+    return reinterpret_cast<PyObject *>(weak);
 }
 
 } }  //namespace

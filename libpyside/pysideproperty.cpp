@@ -181,7 +181,7 @@ static PyObject *qpropertyTpNew(PyTypeObject *subtype, PyObject * /* args */, Py
     pData->designable = true;
     pData->scriptable = true;
     pData->stored = true;
-    return (PyObject*) me;
+    return reinterpret_cast<PyObject *>(me);
 }
 
 int qpropertyTpInit(PyObject* self, PyObject* args, PyObject* kwds)
@@ -359,7 +359,7 @@ void init(PyObject* module)
         return;
 
     Py_INCREF(&PySidePropertyType);
-    PyModule_AddObject(module, QPROPERTY_CLASS_NAME, ((PyObject*)&PySidePropertyType));
+    PyModule_AddObject(module, QPROPERTY_CLASS_NAME, reinterpret_cast<PyObject *>(&PySidePropertyType));
 }
 
 bool checkType(PyObject* pyObj)

@@ -133,7 +133,7 @@ void init(PyObject* module)
     if (PyType_Ready(&PySideMetaFunctionType) < 0)
         return;
 
-    PyModule_AddObject(module, "MetaFunction", ((PyObject*)&PySideMetaFunctionType));
+    PyModule_AddObject(module, "MetaFunction", reinterpret_cast<PyObject *>(&PySideMetaFunctionType));
 }
 
 PySideMetaFunction* newObject(QObject* source, int methodIndex)
@@ -196,7 +196,7 @@ bool call(QObject* self, int methodIndex, PyObject* args, PyObject** retVal)
                                                   "registered on meta type: %s", typeName.data());
                     break;
                 }
-                methValues[i] = QVariant(typeId, (void*) 0);
+                methValues[i] = QVariant(typeId, static_cast<const void *>(0));
             }
             methArgs[i] = methValues[i].data();
             if (i == 0) // Don't do this for return type

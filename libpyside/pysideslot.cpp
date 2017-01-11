@@ -213,7 +213,7 @@ void init(PyObject* module)
         return;
 
     Py_INCREF(&PySideSlotType);
-    PyModule_AddObject(module, SLOT_DEC_NAME, ((PyObject*)&PySideSlotType));
+    PyModule_AddObject(module, SLOT_DEC_NAME, reinterpret_cast<PyObject *>(&PySideSlotType));
 }
 
 } // namespace Slot

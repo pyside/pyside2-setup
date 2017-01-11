@@ -157,7 +157,7 @@ static PyObject *classInfoTpNew(PyTypeObject *subtype, PyObject * /* args */, Py
 
     me->d->m_alreadyWrapped = false;
 
-    return (PyObject*) me;
+    return reinterpret_cast<PyObject *>(me);
 }
 
 int classInfoTpInit(PyObject* self, PyObject* args, PyObject* kwds)
@@ -210,7 +210,7 @@ void init(PyObject* module)
         return;
 
     Py_INCREF(&PySideClassInfoType);
-    PyModule_AddObject(module, CLASSINFO_CLASS_NAME, ((PyObject*)&PySideClassInfoType));
+    PyModule_AddObject(module, CLASSINFO_CLASS_NAME, reinterpret_cast<PyObject *>(&PySideClassInfoType));
 }
 
 bool checkType(PyObject* pyObj)

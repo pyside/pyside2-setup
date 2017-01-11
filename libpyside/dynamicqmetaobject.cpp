@@ -411,7 +411,7 @@ DynamicQMetaObject::DynamicQMetaObject(const char* className, const QMetaObject*
 
 DynamicQMetaObject::~DynamicQMetaObject()
 {
-    free((char *)(d.stringdata));
+    free(reinterpret_cast<char *>(const_cast<QByteArrayData *>(d.stringdata)));
     free(const_cast<uint*>(d.data));
     delete m_d;
 }
@@ -805,7 +805,8 @@ void DynamicQMetaObject::DynamicQMetaObjectPrivate::updateMetaObject(QMetaObject
 
     // Create the m_metadata string.
     int size = blobSize(strings);
-    char *blob = reinterpret_cast<char *>(realloc((char*)metaObj->d.stringdata, size));
+    char *blob =
+        reinterpret_cast<char *>(realloc(reinterpret_cast<char *>(const_cast<QByteArrayData *>(metaObj->d.stringdata)), size));
     writeStringData(blob, strings);
 
     metaObj->d.stringdata = reinterpret_cast<const QByteArrayData *>(blob);

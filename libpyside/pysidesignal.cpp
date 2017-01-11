@@ -566,7 +566,7 @@ void init(PyObject* module)
         return;
 
     Py_INCREF(&PySideSignalType);
-    PyModule_AddObject(module, SIGNAL_CLASS_NAME, ((PyObject*)&PySideSignalType));
+    PyModule_AddObject(module, SIGNAL_CLASS_NAME, reinterpret_cast<PyObject *>(&PySideSignalType));
 
     if (PyType_Ready(&PySideSignalInstanceType) < 0)
         return;
@@ -591,7 +591,7 @@ void updateSourceObject(PyObject* source)
 
     while (PyDict_Next(objType->tp_dict, &pos, &key, &value)) {
         if (PyObject_TypeCheck(value, &PySideSignalType)) {
-            Shiboken::AutoDecRef signalInstance((PyObject*)PyObject_New(PySideSignalInstance, &PySideSignalInstanceType));
+            Shiboken::AutoDecRef signalInstance(reinterpret_cast<PyObject *>(PyObject_New(PySideSignalInstance, &PySideSignalInstanceType)));
             instanceInitialize(signalInstance.cast<PySideSignalInstance*>(), key, reinterpret_cast<PySideSignal*>(value), source, 0);
             PyObject_SetAttr(source, key, signalInstance);
         }
@@ -859,7 +859,7 @@ void registerSignals(SbkObjectType* pyObj, const QMetaObject* metaObject)
             appendSignature(self, strdup(j->constData()));
 
         _addSignalToWrapper(pyObj, it.key(), self);
-        Py_DECREF((PyObject*) self);
+        Py_DECREF(reinterpret_cast<PyObject *>(self));
     }
 }
 
@@ -928,9 +928,10 @@ QString getCallbackSignature(const char* signal, QObject* receiver, PyObject* ca
         useSelf = isMethod;
         numArgs = objCode->co_flags & CO_VARARGS ? -1 : objCode->co_argcount;
     } else if (PyCFunction_Check(callback)) {
-        functionName = ((PyCFunctionObject*)callback)->m_ml->ml_name;
-        useSelf = ((PyCFunctionObject*)callback)->m_self;
-        int flags = ((PyCFunctionObject*)callback)->m_ml->ml_flags;
+        const PyCFunctionObject *funcObj = reinterpret_cast<const PyCFunctionObject *>(callback);
+        functionName = funcObj->m_ml->ml_name;
+        useSelf = funcObj->m_self;
+        const int flags = funcObj->m_ml->ml_flags;
 
         if (receiver) {
             //Search for signature on metaobject
