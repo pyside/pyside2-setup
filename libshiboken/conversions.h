@@ -131,7 +131,7 @@ struct Converter<T*>
     static T* toCpp(PyObject* pyobj)
     {
         if (PyObject_TypeCheck(pyobj, SbkType<T>()))
-            return (T*) Object::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<T>());
+            return reinterpret_cast<T *>(Object::cppPointer(reinterpret_cast<SbkObject *>(pyobj), SbkType<T>()));
         else if (Converter<T>::isConvertible(pyobj))
             return new T(Converter<T>::toCpp(pyobj));
         else if (pyobj == Py_None)
@@ -163,7 +163,7 @@ struct Converter<void*>
     {
         if (!cppobj)
             Py_RETURN_NONE;
-        PyObject* result = (PyObject*) cppobj;
+        PyObject *result = reinterpret_cast<PyObject *>(cppobj);
         Py_INCREF(result);
         return result;
     }
@@ -242,10 +242,11 @@ struct ObjectTypeConverter
     {
         if (pyobj == Py_None)
             return 0;
+        SbkObject *sbkObj = reinterpret_cast<SbkObject *>(pyobj);
         SbkObjectType* shiboType = reinterpret_cast<SbkObjectType*>(pyobj->ob_type);
         if (ObjectType::hasCast(shiboType))
-            return reinterpret_cast<T*>(ObjectType::cast(shiboType, reinterpret_cast<SbkObject*>(pyobj), SbkType<T>()));
-        return (T*) Object::cppPointer(reinterpret_cast<SbkObject*>(pyobj), SbkType<T>());
+            return reinterpret_cast<T*>(ObjectType::cast(shiboType, sbkObj, SbkType<T>()));
+        return reinterpret_cast<T *>(Object::cppPointer(sbkObj, SbkType<T>()));
     }
 };
 

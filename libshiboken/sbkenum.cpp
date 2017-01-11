@@ -72,28 +72,28 @@ struct SbkEnumObject
 
 static PyObject* SbkEnumObject_repr(PyObject* self)
 {
-    PyObject* enumName = ((SbkEnumObject*)self)->ob_name;
-    if (enumName)
-        return Shiboken::String::fromFormat("%s.%s", self->ob_type->tp_name, PyBytes_AS_STRING(enumName));
+    const SbkEnumObject *enumObj = reinterpret_cast<SbkEnumObject *>(self);
+    if (enumObj->ob_name)
+        return Shiboken::String::fromFormat("%s.%s", self->ob_type->tp_name, PyBytes_AS_STRING(enumObj->ob_name));
     else
-        return Shiboken::String::fromFormat("%s(%ld)", self->ob_type->tp_name, ((SbkEnumObject*)self)->ob_value);
+        return Shiboken::String::fromFormat("%s(%ld)", self->ob_type->tp_name, enumObj->ob_value);
 }
 
 static int SbkEnumObject_print(PyObject* self, FILE* fp, int)
 {
     Py_BEGIN_ALLOW_THREADS
-    PyObject* enumName = ((SbkEnumObject*)self)->ob_name;
-    if (enumName)
-        fprintf(fp, "%s.%s", self->ob_type->tp_name, PyBytes_AS_STRING(enumName));
+    const SbkEnumObject *enumObj = reinterpret_cast<SbkEnumObject *>(self);
+    if (enumObj->ob_name)
+        fprintf(fp, "%s.%s", self->ob_type->tp_name, PyBytes_AS_STRING(enumObj->ob_name));
     else
-        fprintf(fp, "%s(%ld)", self->ob_type->tp_name, ((SbkEnumObject*)self)->ob_value);
+        fprintf(fp, "%s(%ld)", self->ob_type->tp_name, enumObj->ob_value);
     Py_END_ALLOW_THREADS
     return 0;
 }
 
 static PyObject* SbkEnumObject_name(PyObject* self, void*)
 {
-    SbkEnumObject* enum_self = (SbkEnumObject*)self;
+    SbkEnumObject *enum_self = reinterpret_cast<SbkEnumObject *>(self);
 
     if (enum_self->ob_name == NULL)
         Py_RETURN_NONE;
@@ -428,10 +428,10 @@ PyObject* getEnumItemFromValue(PyTypeObject* enumType, long itemValue)
     PyObject* values = PyDict_GetItemString(enumType->tp_dict, const_cast<char*>("values"));
 
     while (PyDict_Next(values, &pos, &key, &value)) {
-        SbkEnumObject* obj = (SbkEnumObject*)value;
+        SbkEnumObject *obj = reinterpret_cast<SbkEnumObject *>(value);
         if (obj->ob_value == itemValue) {
             Py_INCREF(obj);
-            return reinterpret_cast<PyObject*>(obj);
+            return value;
         }
     }
     return 0;
@@ -455,9 +455,9 @@ PyTypeObject* createGlobalEnum(PyObject* module, const char* name, const char* f
     PyTypeObject* enumType = createEnum(fullName, cppName, name, flagsType);
     Shiboken::TypeResolver::createValueTypeResolver<int>("Qt::WindowType");
     Shiboken::TypeResolver::createValueTypeResolver<int>("WindowType");
-    if (enumType && PyModule_AddObject(module, name, (PyObject*)enumType) < 0)
+    if (enumType && PyModule_AddObject(module, name, reinterpret_cast<PyObject *>(enumType)) < 0)
         return 0;
-    if (flagsType && PyModule_AddObject(module, flagsType->tp_name, (PyObject*)flagsType) < 0)
+    if (flagsType && PyModule_AddObject(module, flagsType->tp_name, reinterpret_cast<PyObject *>(flagsType)) < 0)
         return 0;
     return enumType;
 }
@@ -465,9 +465,9 @@ PyTypeObject* createGlobalEnum(PyObject* module, const char* name, const char* f
 PyTypeObject* createScopedEnum(SbkObjectType* scope, const char* name, const char* fullName, const char* cppName, PyTypeObject* flagsType)
 {
     PyTypeObject* enumType = createEnum(fullName, cppName, name, flagsType);
-    if (enumType && PyDict_SetItemString(scope->super.ht_type.tp_dict, name, (PyObject*)enumType) < 0)
+    if (enumType && PyDict_SetItemString(scope->super.ht_type.tp_dict, name, reinterpret_cast<PyObject *>(enumType)) < 0)
        return 0;
-    if (flagsType && PyDict_SetItemString(scope->super.ht_type.tp_dict, flagsType->tp_name, (PyObject*)flagsType) < 0)
+    if (flagsType && PyDict_SetItemString(scope->super.ht_type.tp_dict, flagsType->tp_name, reinterpret_cast<PyObject *>(flagsType)) < 0)
        return 0;
     return enumType;
 }

@@ -126,10 +126,11 @@ static void showWrapperMap(const WrapperMap& wrapperMap)
         fprintf(stderr, "WrapperMap: %p (size: %d)\n", &wrapperMap, (int) wrapperMap.size());
         WrapperMap::const_iterator iter;
         for (iter = wrapperMap.begin(); iter != wrapperMap.end(); ++iter) {
+            const SbkObject *sbkObj = iter->second;
             fprintf(stderr, "key: %p, value: %p (%s, refcnt: %d)\n", iter->first,
-                                                            iter->second,
-                                                            Py_TYPE(iter->second)->tp_name,
-                                                            (int) ((PyObject*)iter->second)->ob_refcnt);
+                    static_cast<const void *>(sbkObj),
+                    Py_TYPE(sbkObj)->tp_name,
+                    int(reinterpret_cast<const PyObject *>(sbkObj)->ob_refcnt));
         }
         fprintf(stderr, "-------------------------------\n");
     }
@@ -232,13 +233,13 @@ void BindingManager::releaseWrapper(SbkObject* sbkObj)
 
     void** cptrs = reinterpret_cast<SbkObject*>(sbkObj)->d->cptr;
     for (int i = 0; i < numBases; ++i) {
-        void* cptr = cptrs[i];
+        unsigned char *cptr = reinterpret_cast<unsigned char *>(cptrs[i]);
         m_d->releaseWrapper(cptr);
         if (d && d->mi_offsets) {
             int* offset = d->mi_offsets;
             while (*offset != -1) {
                 if (*offset > 0)
-                    m_d->releaseWrapper((void*) ((std::size_t) cptr + (*offset)));
+                    m_d->releaseWrapper(cptr + *offset);
                 offset++;
             }
         }
@@ -259,19 +260,19 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
     SbkObject* wrapper = retrieveWrapper(cptr);
     // The refcount can be 0 if the object is dieing and someone called
     // a virtual method from the destructor
-    if (!wrapper || ((PyObject*)wrapper)->ob_refcnt == 0)
+    if (!wrapper || reinterpret_cast<const PyObject *>(wrapper)->ob_refcnt == 0)
         return 0;
 
     if (wrapper->ob_dict) {
         PyObject* method = PyDict_GetItemString(wrapper->ob_dict, methodName);
         if (method) {
-            Py_INCREF((PyObject*)method);
+            Py_INCREF(reinterpret_cast<PyObject *>(method));
             return method;
         }
     }
 
     PyObject* pyMethodName = Shiboken::String::fromCString(methodName);
-    PyObject* method = PyObject_GetAttr((PyObject*)wrapper, pyMethodName);
+    PyObject *method = PyObject_GetAttr(reinterpret_cast<PyObject *>(wrapper), pyMethodName);
 
     if (method && PyMethod_Check(method)
         && reinterpret_cast<PyMethodObject*>(method)->im_self == reinterpret_cast<PyObject*>(wrapper)) {

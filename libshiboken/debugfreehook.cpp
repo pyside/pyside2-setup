@@ -69,7 +69,7 @@ static int testPointerBeingFreed(void *ptr)
         SbkObject *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(ptr);
 
         fprintf(stderr, "SbkObject still in binding map when deleted: ");
-        PyObject_Print((PyObject*)wrapper, stderr, 0);
+        PyObject_Print(reinterpret_cast<PyObject *>(wrapper), stderr, 0);
         fprintf(stderr, "\n");
 
 #ifdef _WIN32

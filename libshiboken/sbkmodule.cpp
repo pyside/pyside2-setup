@@ -89,7 +89,7 @@ PyObject* create(const char* moduleName, void* moduleData)
 {
     Shiboken::init();
 #ifndef IS_PY3K
-    return Py_InitModule(moduleName, (PyMethodDef*)moduleData);
+    return Py_InitModule(moduleName, reinterpret_cast<PyMethodDef *>(moduleData));
 #else
     return PyModule_Create(reinterpret_cast<PyModuleDef*>(moduleData));
 #endif

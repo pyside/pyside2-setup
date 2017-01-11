@@ -267,7 +267,7 @@ struct IntPrimitive : TwoPrimitive<INT>
 {
     static PyObject* toPython(const void* cppIn)
     {
-        return PyInt_FromLong((long)*((INT*)cppIn));
+        return PyInt_FromLong(*reinterpret_cast<const INT *>(cppIn));
     }
     static void toCpp(PyObject* pyIn, void* cppOut)
     {
@@ -309,7 +309,7 @@ struct UnsignedLongPrimitive : IntPrimitive<LONG>
 {
     static PyObject* toPython(const void* cppIn)
     {
-        return PyLong_FromUnsignedLong(*((LONG*)cppIn));
+        return PyLong_FromUnsignedLong(*reinterpret_cast<const LONG *>(cppIn));
     }
 };
 template <> struct Primitive<unsigned int> : UnsignedLongPrimitive<unsigned int> {};
@@ -390,11 +390,11 @@ struct FloatPrimitive : TwoPrimitive<FLOAT>
 {
     static PyObject* toPython(const void* cppIn)
     {
-        return PyFloat_FromDouble((double)*((FLOAT*)cppIn));
+        return PyFloat_FromDouble(*reinterpret_cast<const FLOAT *>(cppIn));
     }
     static void toCpp(PyObject* pyIn, void* cppOut)
     {
-        *((FLOAT*)cppOut) = (FLOAT) PyLong_AsLong(pyIn);
+        *reinterpret_cast<FLOAT *>(cppOut) = FLOAT(PyLong_AsLong(pyIn));
     }
     static PythonToCppFunc isConvertible(PyObject* pyIn)
     {
@@ -404,7 +404,7 @@ struct FloatPrimitive : TwoPrimitive<FLOAT>
     }
     static void otherToCpp(PyObject* pyIn, void* cppOut)
     {
-        *((FLOAT*)cppOut) = (FLOAT) PyFloat_AsDouble(pyIn);
+        *reinterpret_cast<FLOAT *>(cppOut) = FLOAT(PyFloat_AsDouble(pyIn));
     }
     static PythonToCppFunc isOtherConvertible(PyObject* pyIn)
     {
@@ -423,7 +423,7 @@ struct Primitive<bool> : OnePrimitive<bool>
 {
     static PyObject* toPython(const void* cppIn)
     {
-        return PyBool_FromLong(*((bool*)cppIn));
+        return PyBool_FromLong(*reinterpret_cast<const bool *>(cppIn));
     }
     static PythonToCppFunc isConvertible(PyObject* pyIn)
     {
@@ -433,7 +433,7 @@ struct Primitive<bool> : OnePrimitive<bool>
     }
     static void toCpp(PyObject* pyIn, void* cppOut)
     {
-        *((bool*)cppOut) = (bool) PyInt_AS_LONG(pyIn);
+        *reinterpret_cast<bool *>(cppOut) = PyInt_AS_LONG(pyIn) != 0;
     }
 };
 
@@ -444,8 +444,7 @@ struct CharPrimitive : IntPrimitive<CHAR>
 {
     static void toCpp(PyObject* pyIn, void* cppOut)
     {
-
-        *((CHAR*)cppOut) = (CHAR) Shiboken::String::toCString(pyIn)[0];
+        *reinterpret_cast<CHAR *>(cppOut) = CHAR(Shiboken::String::toCString(pyIn)[0]);
     }
     static PythonToCppFunc isConvertible(PyObject* pyIn)
     {
@@ -458,7 +457,7 @@ struct CharPrimitive : IntPrimitive<CHAR>
         PY_LONG_LONG result = PyLong_AsLongLong(pyIn);
         if (OverFlowChecker<CHAR>::check(result, pyIn))
             PyErr_SetObject(PyExc_OverflowError, 0);
-        *((CHAR*)cppOut) = (CHAR) result;
+        *reinterpret_cast<CHAR *>(cppOut) = CHAR(result);
     }
     static PythonToCppFunc isOtherConvertible(PyObject* pyIn)
     {
@@ -557,14 +556,14 @@ struct Primitive<void*> : OnePrimitive<void*>
         SbkDbg() << cppIn;
         if (!cppIn)
             Py_RETURN_NONE;
-        PyObject* result = (PyObject*) cppIn;
+        PyObject *result = reinterpret_cast<PyObject *>(const_cast<void *>(cppIn));
         Py_INCREF(result);
         return result;
     }
     static void toCpp(PyObject* pyIn, void* cppOut)
     {
         SbkDbg() << pyIn;
-        *((void**)cppOut) = pyIn;
+        *reinterpret_cast<void **>(cppOut) = pyIn;
     }
     static PythonToCppFunc isConvertible(PyObject *)
     {
