@@ -43,7 +43,7 @@ void TestFunctionTag::testFunctionTagForSpecificSignature()
     </typesystem>\n";
     TestUtil t(cppCode, xmlCode, false);
 
-    FunctionTypeEntry* func = (FunctionTypeEntry*) TypeDatabase::instance()->findType(QLatin1String("globalFunction"));
+    const TypeEntry *func = TypeDatabase::instance()->findType(QLatin1String("globalFunction"));
     QVERIFY(func);
     QCOMPARE(t.builder()->globalFunctions().size(), 1);
 }
@@ -60,7 +60,7 @@ void TestFunctionTag::testFunctionTagForAllSignatures()
     </typesystem>\n";
     TestUtil t(cppCode, xmlCode, false);
 
-    FunctionTypeEntry* func = (FunctionTypeEntry*) TypeDatabase::instance()->findType(QLatin1String("globalFunction"));
+    const TypeEntry *func = TypeDatabase::instance()->findType(QLatin1String("globalFunction"));
     QVERIFY(func);
     QCOMPARE(t.builder()->globalFunctions().size(), 2);
 }
@@ -74,7 +74,7 @@ void TestFunctionTag::testRenameGlobalFunction()
     </typesystem>\n";
     TestUtil t(cppCode, xmlCode, false);
 
-    FunctionTypeEntry* func = (FunctionTypeEntry*) TypeDatabase::instance()->findType(QLatin1String("global_function_with_ugly_name"));
+    const TypeEntry *func = TypeDatabase::instance()->findType(QLatin1String("global_function_with_ugly_name"));
     QVERIFY(func);
 
     QCOMPARE(t.builder()->globalFunctions().size(), 1);

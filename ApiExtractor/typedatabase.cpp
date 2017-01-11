@@ -167,9 +167,9 @@ QList<const PrimitiveTypeEntry*> TypeDatabase::primitiveTypes() const
     TypeEntryHash entries = allEntries();
     QList<const PrimitiveTypeEntry*> returned;
     for (TypeEntryHash::const_iterator it = entries.cbegin(), end = entries.cend(); it != end; ++it) {
-        foreach (const TypeEntry* typeEntry, it.value()) {
+        foreach (TypeEntry *typeEntry, it.value()) {
             if (typeEntry->isPrimitive())
-                returned.append((PrimitiveTypeEntry*) typeEntry);
+                returned.append(static_cast<PrimitiveTypeEntry *>(typeEntry));
         }
     }
     return returned;
@@ -180,9 +180,9 @@ QList<const ContainerTypeEntry*> TypeDatabase::containerTypes() const
     TypeEntryHash entries = allEntries();
     QList<const ContainerTypeEntry*> returned;
     for (TypeEntryHash::const_iterator it = entries.cbegin(), end = entries.cend(); it != end; ++it) {
-        foreach (const TypeEntry* typeEntry, it.value()) {
+        foreach (TypeEntry *typeEntry, it.value()) {
             if (typeEntry->isContainer())
-                returned.append((ContainerTypeEntry*) typeEntry);
+                returned.append(static_cast<ContainerTypeEntry *>(typeEntry));
         }
     }
     return returned;
@@ -248,20 +248,20 @@ bool TypeDatabase::isFieldRejected(const QString& className, const QString& fiel
 
 FlagsTypeEntry* TypeDatabase::findFlagsType(const QString &name) const
 {
-    FlagsTypeEntry* fte = (FlagsTypeEntry*) findType(name);
+    TypeEntry *fte = findType(name);
     if (!fte) {
-        fte = (FlagsTypeEntry*) m_flagsEntries.value(name);
+        fte = m_flagsEntries.value(name);
         if (!fte) {
             //last hope, search for flag without scope  inside of flags hash
             for (SingleTypeEntryHash::const_iterator it = m_flagsEntries.cbegin(), end = m_flagsEntries.cend(); it != end; ++it) {
                 if (it.key().endsWith(name)) {
-                    fte = static_cast<FlagsTypeEntry *>(const_cast<TypeEntry *>(it.value()));
+                    fte = it.value();
                     break;
                 }
             }
         }
     }
-    return fte;
+    return static_cast<FlagsTypeEntry *>(fte);
 }
 
 void TypeDatabase::addFlagsType(FlagsTypeEntry *fte)

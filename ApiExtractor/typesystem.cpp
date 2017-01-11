@@ -2323,7 +2323,8 @@ bool TypeEntry::isCppPrimitive() const
     if (!isPrimitive())
         return false;
 
-    PrimitiveTypeEntry* aliasedType = ((PrimitiveTypeEntry*)this)->basicAliasedTypeEntry();
+    const PrimitiveTypeEntry *aliasedType =
+        static_cast<const PrimitiveTypeEntry *>(this)->basicAliasedTypeEntry();
     QByteArray typeName = (aliasedType ? aliasedType->name() : m_name).toUtf8();
 
     if (typeName.contains(' ') || m_type == VoidType)

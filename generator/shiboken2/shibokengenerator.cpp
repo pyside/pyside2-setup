@@ -909,7 +909,7 @@ bool ShibokenGenerator::isPyInt(const AbstractMetaType* type)
 bool ShibokenGenerator::isPairContainer(const AbstractMetaType* type)
 {
     return type->isContainer()
-            && ((ContainerTypeEntry*)type->typeEntry())->type() == ContainerTypeEntry::PairContainer;
+        && static_cast<const ContainerTypeEntry *>(type->typeEntry())->type() == ContainerTypeEntry::PairContainer;
 }
 
 bool ShibokenGenerator::isWrapperType(const TypeEntry* type)
