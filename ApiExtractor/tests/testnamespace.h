@@ -31,7 +31,9 @@
 
 #include <QObject>
 
-class TestNamespace : public QObject
+// The class is named 'NamespaceTest' to avoid clashes with Qt COIN using
+// '-qtnamespace TestNamespace'.
+class NamespaceTest : public QObject
 {
     Q_OBJECT
     private slots:

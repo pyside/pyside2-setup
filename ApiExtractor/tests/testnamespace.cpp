@@ -32,7 +32,7 @@
 #include <abstractmetalang.h>
 #include <typesystem.h>
 
-void TestNamespace::testNamespaceMembers()
+void NamespaceTest::testNamespaceMembers()
 {
     const char* cppCode = "\
     namespace Namespace\n\
@@ -59,7 +59,7 @@ void TestNamespace::testNamespaceMembers()
     QVERIFY(func);
 }
 
-void TestNamespace::testNamespaceInnerClassMembers()
+void NamespaceTest::testNamespaceInnerClassMembers()
 {
     const char* cppCode = "\
     namespace OuterNamespace\n\
@@ -90,5 +90,5 @@ void TestNamespace::testNamespaceInnerClassMembers()
     QVERIFY(meth);
 }
 
-QTEST_APPLESS_MAIN(TestNamespace)
+QTEST_APPLESS_MAIN(NamespaceTest)
 
