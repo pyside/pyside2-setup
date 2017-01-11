@@ -106,12 +106,19 @@ def prepare_sources():
         else:
             module_dir = os.path.join("sources", module_name)
             os.chdir(module_dir)
-            print("Checking out submodule %s to branch %s" % (module_name, SUBMODULE_BRANCH))
-            git_checkout_cmd = ["git", "checkout", SUBMODULE_BRANCH]
+            #Make sure  the branch exists, if not use dev
+            _branch = SUBMODULE_BRANCH
+            git_list_branch_cmd = ["git", "branch", "--list", _branch]
+            if len(run_process_output(git_list_branch_cmd))==0:
+                print("Warning: Requested %s branch doesn't exist so we'll fall back to 'dev' branch instead"\
+                % SUBMODULE_BRANCH)
+                _branch = "dev"
+            print("Checking out submodule %s to branch %s" % (module_name, _branch))
+            git_checkout_cmd = ["git", "checkout", _branch]
             if run_process(git_checkout_cmd) != 0:
                 print("Failed to initialize the git submodule %s" % module_name)
             else:
-                print("Submodule %s has branch %s checked out" % (module_name, SUBMODULE_BRANCH))
+                print("Submodule %s has branch %s checked out" % (module_name, _branch))
             os.chdir(script_dir)
 
 
