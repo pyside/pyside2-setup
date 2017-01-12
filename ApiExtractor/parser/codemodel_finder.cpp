@@ -90,12 +90,12 @@ void CodeModelFinder::visitUnqualifiedName(UnqualifiedNameAST *node)
 
     if (ClassModelItem klass = _M_current_scope->findClass(id)) {
         _M_current_scope = klass;
-    } else if (NamespaceModelItem parentNamespace = model_safe_cast<NamespaceModelItem>(_M_current_scope)) {
+    } else if (NamespaceModelItem parentNamespace = qSharedPointerDynamicCast<_NamespaceModelItem>(_M_current_scope)) {
         NamespaceModelItem ns = parentNamespace->findNamespace(id);
-        _M_current_scope = model_static_cast<ScopeModelItem>(ns);
-    } else if (FileModelItem file = model_safe_cast<FileModelItem>(_M_current_scope)) {
+        _M_current_scope = ns;
+    } else if (FileModelItem file = qSharedPointerDynamicCast<_FileModelItem>(_M_current_scope)) {
         NamespaceModelItem ns = file->findNamespace(id);
-        _M_current_scope = model_static_cast<ScopeModelItem>(ns);
+        _M_current_scope = ns;
     }
 }
 

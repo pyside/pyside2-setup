@@ -89,22 +89,22 @@ CodeModelItem CodeModel::findItem(const QStringList &qualifiedName, CodeModelIte
         // ### Extend to look for members etc too.
         const QString &name = qualifiedName.at(i);
 
-        if (NamespaceModelItem ns = model_dynamic_cast<NamespaceModelItem>(scope)) {
+        if (NamespaceModelItem ns = qSharedPointerDynamicCast<_NamespaceModelItem>(scope)) {
             if (NamespaceModelItem tmp_ns = ns->findNamespace(name)) {
                 scope = tmp_ns;
                 continue;
             }
         }
 
-        if (ScopeModelItem ss = model_dynamic_cast<ScopeModelItem>(scope)) {
+        if (ScopeModelItem ss = qSharedPointerDynamicCast<_ScopeModelItem>(scope)) {
             if (ClassModelItem cs = ss->findClass(name)) {
                 scope = cs;
             } else if (EnumModelItem es = ss->findEnum(name)) {
                 if (i == qualifiedName.size() - 1)
-                    return es->toItem();
+                    return es;
             } else if (TypeAliasModelItem tp = ss->findTypeAlias(name)) {
                 if (i == qualifiedName.size() - 1)
-                    return tp->toItem();
+                    return tp;
             } else {
                 // If we don't find the name in the scope chain we
                 // need to return an empty item to indicate failure...
@@ -151,14 +151,14 @@ TypeInfo TypeInfo::resolveType(CodeModelItem __item, TypeInfo const &__type, Cod
         otherType.setQualifiedName(__item->qualifiedName());
     }
 
-    if (TypeAliasModelItem __alias = model_dynamic_cast<TypeAliasModelItem> (__item)) {
+    if (TypeAliasModelItem __alias = qSharedPointerDynamicCast<_TypeAliasModelItem>(__item)) {
         const TypeInfo combined = TypeInfo::combine(__alias->type(), otherType);
         const CodeModelItem nextItem = __scope->model()->findItem(combined.qualifiedName(), __scope);
         if (!nextItem)
             return combined;
         // PYSIDE-362, prevent recursion on opaque structs like
         // typedef struct xcb_connection_t xcb_connection_t;
-        if (nextItem.constData() ==__item.constData()) {
+        if (nextItem.data() ==__item.data()) {
             std::cerr << "** WARNING Bailing out recursion of " << __FUNCTION__
                 << "() on " << qPrintable(__type.qualifiedName().join(QLatin1String("::")))
                 << std::endl;
@@ -241,11 +241,6 @@ _CodeModelItem::_CodeModelItem(CodeModel *model, int kind)
 
 _CodeModelItem::~_CodeModelItem()
 {
-}
-
-CodeModelItem _CodeModelItem::toItem() const
-{
-    return CodeModelItem(const_cast<_CodeModelItem*>(this));
 }
 
 int _CodeModelItem::kind() const

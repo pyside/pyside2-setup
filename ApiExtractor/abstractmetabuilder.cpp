@@ -470,12 +470,12 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 {
     const TypeDatabase *types = TypeDatabase::instance();
 
-    pushScope(model_dynamic_cast<ScopeModelItem>(dom));
+    pushScope(dom);
 
     QHash<QString, ClassModelItem> typeMap = dom->classMap();
 
     // fix up QObject's in the type system..
-    fixQObjectForScope(dom, types, model_dynamic_cast<NamespaceModelItem>(dom));
+    fixQObjectForScope(dom, types, dom);
 
     // Start the generation...
     ClassList typeValues = typeMap.values();
@@ -793,9 +793,9 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
             << QStringLiteral("namespace '%1.%2'").arg(metaClass->package(), namespaceItem->name());
     }
 
-    traverseEnums(model_dynamic_cast<ScopeModelItem>(namespaceItem), metaClass, namespaceItem->enumsDeclarations());
+    traverseEnums(namespaceItem, metaClass, namespaceItem->enumsDeclarations());
 
-    pushScope(model_dynamic_cast<ScopeModelItem>(namespaceItem));
+    pushScope(namespaceItem);
     m_namespacePrefix = currentScope()->qualifiedName().join(colonColon());
 
     ClassList classes = namespaceItem->classes();
@@ -1283,7 +1283,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
 
     parseQ_Property(metaClass, classItem->propertyDeclarations());
 
-    traverseEnums(model_dynamic_cast<ScopeModelItem>(classItem), metaClass, classItem->enumsDeclarations());
+    traverseEnums(classItem, metaClass, classItem->enumsDeclarations());
 
     // Inner classes
     {
@@ -1353,7 +1353,7 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::currentTraversedClass(ScopeModelI
 
 void AbstractMetaBuilderPrivate::traverseClassMembers(ClassModelItem item)
 {
-    AbstractMetaClass* metaClass = currentTraversedClass(model_dynamic_cast<ScopeModelItem>(item));
+    AbstractMetaClass* metaClass = currentTraversedClass(item);
     if (!metaClass)
         return;
 
@@ -1361,14 +1361,14 @@ void AbstractMetaBuilderPrivate::traverseClassMembers(ClassModelItem item)
     m_currentClass = metaClass;
 
     // Class members
-    traverseScopeMembers(model_dynamic_cast<ScopeModelItem>(item), metaClass);
+    traverseScopeMembers(item, metaClass);
 
     m_currentClass = oldCurrentClass;
 }
 
 void AbstractMetaBuilderPrivate::traverseNamespaceMembers(NamespaceModelItem item)
 {
-    AbstractMetaClass* metaClass = currentTraversedClass(model_dynamic_cast<ScopeModelItem>(item));
+    AbstractMetaClass* metaClass = currentTraversedClass(item);
     if (!metaClass)
         return;
 
@@ -1376,7 +1376,7 @@ void AbstractMetaBuilderPrivate::traverseNamespaceMembers(NamespaceModelItem ite
     m_currentClass = metaClass;
 
     // Namespace members
-    traverseScopeMembers(model_dynamic_cast<ScopeModelItem>(item), metaClass);
+    traverseScopeMembers(item, metaClass);
 
     // Inner namespaces
     NamespaceList innerNamespaces = item->namespaceMap().values();
@@ -1429,7 +1429,7 @@ AbstractMetaField *AbstractMetaBuilderPrivate::traverseField(VariableModelItem f
     AbstractMetaType *metaType = translateType(fieldType, &ok);
 
     if (!metaType || !ok) {
-        const QString type = TypeInfo::resolveType(fieldType, currentScope()->toItem()).qualifiedName().join(colonColon());
+        const QString type = TypeInfo::resolveType(fieldType, currentScope()).qualifiedName().join(colonColon());
         qCWarning(lcShiboken).noquote().nospace()
              << QStringLiteral("skipping field '%1::%2' with unmatched type '%3'")
                                .arg(m_currentClass->name(), fieldName, type);
@@ -2099,7 +2099,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
         ArgumentModelItem arg = arguments.at(0);
         TypeInfo type = arg->type();
         if (type.qualifiedName().first() == QLatin1String("void") && type.indirections() == 0)
-            delete arguments.takeFirst();
+            arguments.pop_front();
     }
 
     AbstractMetaArgumentList metaArguments;
@@ -2301,7 +2301,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
         // seemed non-trivial
         int i = m_scopes.size() - 1;
         while (i >= 0) {
-            typei = TypeInfo::resolveType(_typei, m_scopes.at(i--)->toItem());
+            typei = TypeInfo::resolveType(_typei, m_scopes.at(i--));
             if (typei.qualifiedName().join(colonColon()) != _typei.qualifiedName().join(colonColon()))
                 break;
         }
@@ -2626,7 +2626,7 @@ bool AbstractMetaBuilderPrivate::isQObject(const FileModelItem &dom, const QStri
 
     if (!classItem) {
         QStringList names = qualifiedName.split(colonColon());
-        NamespaceModelItem ns = model_dynamic_cast<NamespaceModelItem>(dom);
+        NamespaceModelItem ns = dom;
         for (int i = 0; i < names.size() - 1 && ns; ++i)
             ns = ns->namespaceMap().value(names.at(i));
         if (ns && names.size() >= 2)
@@ -2651,7 +2651,7 @@ bool AbstractMetaBuilderPrivate::isQObject(const FileModelItem &dom, const QStri
 
 bool AbstractMetaBuilderPrivate::isEnum(const FileModelItem &dom, const QStringList& qualified_name)
 {
-    CodeModelItem item = dom->model()->findItem(qualified_name, dom->toItem());
+    CodeModelItem item = dom->model()->findItem(qualified_name, dom);
     return item && item->kind() == _EnumModelItem::__node_kind;
 }
 

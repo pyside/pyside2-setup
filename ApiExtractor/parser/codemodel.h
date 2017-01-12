@@ -32,7 +32,6 @@
 #define CODEMODEL_H
 
 #include "codemodel_fwd.h"
-#include "codemodel_pointer.h"
 
 #include <QtCore/QHash>
 #include <QtCore/QList>
@@ -41,17 +40,7 @@
 #include <QtCore/QVector>
 
 #define DECLARE_MODEL_NODE(k) \
-    enum { __node_kind = Kind_##k }; \
-    typedef CodeModelPointer<k##ModelItem> Pointer;
-
-template <class _Target, class _Source>
-_Target model_static_cast(_Source item)
-{
-    typedef typename _Target::Type * _Target_pointer;
-
-    _Target ptr(static_cast<_Target_pointer>(item.data()));
-    return ptr;
-}
+    enum { __node_kind = Kind_##k };
 
 class CodeModel
 {
@@ -237,7 +226,7 @@ private:
     QList<TypeInfo> m_arguments;
 };
 
-class _CodeModelItem: public QSharedData
+class _CodeModelItem
 {
 public:
     enum Kind {
@@ -299,8 +288,6 @@ public:
     {
         return _M_model;
     }
-
-    CodeModelItem toItem() const;
 
 protected:
     _CodeModelItem(CodeModel *model, int kind);
@@ -812,38 +799,6 @@ private:
     void operator = (const _TemplateParameterModelItem &other);
 };
 
-template <class _Target, class _Source>
-_Target model_safe_cast(_Source item)
-{
-    typedef typename _Target::Type * _Target_pointer;
-    typedef typename _Source::Type * _Source_pointer;
-
-    _Source_pointer source = item.data();
-    if (source && source->kind() == _Target_pointer(0)->__node_kind) {
-        _Target ptr(static_cast<_Target_pointer>(source));
-        return ptr;
-    }
-
-    return _Target();
-}
-
-template <typename _Target, typename _Source>
-_Target model_dynamic_cast(_Source item)
-{
-    typedef typename _Target::Type * _Target_pointer;
-    typedef typename _Source::Type * _Source_pointer;
-
-    _Source_pointer source = item.data();
-    if (source && (source->kind() == _Target_pointer(0)->__node_kind
-                   || (int(_Target_pointer(0)->__node_kind) <= int(_CodeModelItem::KindMask)
-                       && ((source->kind() & _Target_pointer(0)->__node_kind)
-                           == _Target_pointer(0)->__node_kind)))) {
-        _Target ptr(static_cast<_Target_pointer>(source));
-        return ptr;
-    }
-
-    return _Target();
-}
 #endif // CODEMODEL_H
 
 // kate: space-indent on; indent-width 2; replace-tabs on;
