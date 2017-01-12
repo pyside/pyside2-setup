@@ -33,10 +33,9 @@
 #include <iostream>
 
 // ---------------------------------------------------------------------------
-CodeModel::CodeModel()
-        : _M_creation_id(0)
+
+CodeModel::CodeModel() : _M_globalNamespace(new _NamespaceModelItem(this))
 {
-    _M_globalNamespace = create<NamespaceModelItem>();
 }
 
 CodeModel::~CodeModel()
@@ -45,7 +44,7 @@ CodeModel::~CodeModel()
 
 void CodeModel::wipeout()
 {
-    _M_globalNamespace = create<NamespaceModelItem>();
+    _M_globalNamespace.reset(new _NamespaceModelItem(this));
     _M_files.clear();
 }
 
@@ -61,7 +60,6 @@ NamespaceModelItem CodeModel::globalNamespace() const
 
 void CodeModel::addFile(FileModelItem item)
 {
-    _M_creation_id = 0; // reset the creation id
     _M_files.insert(item->name(), item);
 }
 
@@ -234,8 +232,18 @@ _CodeModelItem::_CodeModelItem(CodeModel *model, int kind)
         _M_startLine(0),
         _M_startColumn(0),
         _M_endLine(0),
-        _M_endColumn(0),
-        _M_creation_id(0)
+        _M_endColumn(0)
+{
+}
+
+_CodeModelItem::_CodeModelItem(CodeModel *model, const QString &name, int kind)
+    : _M_model(model),
+    _M_kind(kind),
+    _M_startLine(0),
+    _M_startColumn(0),
+    _M_endLine(0),
+    _M_endColumn(0),
+    _M_name(name)
 {
 }
 
@@ -791,79 +799,6 @@ bool _TemplateParameterModelItem::defaultValue() const
 void _TemplateParameterModelItem::setDefaultValue(bool defaultValue)
 {
     _M_defaultValue = defaultValue;
-}
-
-// ---------------------------------------------------------------------------
-ScopeModelItem _ScopeModelItem::create(CodeModel *model)
-{
-    ScopeModelItem item(new _ScopeModelItem(model));
-    return item;
-}
-
-ClassModelItem _ClassModelItem::create(CodeModel *model)
-{
-    ClassModelItem item(new _ClassModelItem(model));
-    return item;
-}
-
-NamespaceModelItem _NamespaceModelItem::create(CodeModel *model)
-{
-    NamespaceModelItem item(new _NamespaceModelItem(model));
-    return item;
-}
-
-FileModelItem _FileModelItem::create(CodeModel *model)
-{
-    FileModelItem item(new _FileModelItem(model));
-    return item;
-}
-
-ArgumentModelItem _ArgumentModelItem::create(CodeModel *model)
-{
-    ArgumentModelItem item(new _ArgumentModelItem(model));
-    return item;
-}
-
-FunctionModelItem _FunctionModelItem::create(CodeModel *model)
-{
-    FunctionModelItem item(new _FunctionModelItem(model));
-    return item;
-}
-
-FunctionDefinitionModelItem _FunctionDefinitionModelItem::create(CodeModel *model)
-{
-    FunctionDefinitionModelItem item(new _FunctionDefinitionModelItem(model));
-    return item;
-}
-
-VariableModelItem _VariableModelItem::create(CodeModel *model)
-{
-    VariableModelItem item(new _VariableModelItem(model));
-    return item;
-}
-
-TypeAliasModelItem _TypeAliasModelItem::create(CodeModel *model)
-{
-    TypeAliasModelItem item(new _TypeAliasModelItem(model));
-    return item;
-}
-
-EnumModelItem _EnumModelItem::create(CodeModel *model)
-{
-    EnumModelItem item(new _EnumModelItem(model));
-    return item;
-}
-
-EnumeratorModelItem _EnumeratorModelItem::create(CodeModel *model)
-{
-    EnumeratorModelItem item(new _EnumeratorModelItem(model));
-    return item;
-}
-
-TemplateParameterModelItem _TemplateParameterModelItem::create(CodeModel *model)
-{
-    TemplateParameterModelItem item(new _TemplateParameterModelItem(model));
-    return item;
 }
 
 // ---------------------------------------------------------------------------

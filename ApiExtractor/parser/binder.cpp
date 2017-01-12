@@ -68,7 +68,7 @@ FileModelItem Binder::run(AST *node)
     FileModelItem old = _M_current_file;
     _M_current_access = CodeModel::Public;
 
-    _M_current_file = model()->create<FileModelItem>();
+    _M_current_file.reset(new _FileModelItem(model()));
     updateItemPosition(_M_current_file, node);
     visit(node);
     FileModelItem result = _M_current_file;
@@ -250,11 +250,10 @@ void Binder::declare_symbol(SimpleDeclarationAST *node, InitDeclaratorAST *init_
     if (decl_cc.isFunction()) {
         name_cc.run(id->unqualified_name);
 
-        FunctionModelItem fun = model()->create<FunctionModelItem>();
+        FunctionModelItem fun(new _FunctionModelItem(model(), name_cc.name()));
         updateItemPosition(fun, node);
         fun->setAccessPolicy(_M_current_access);
         fun->setFunctionType(_M_current_function_type);
-        fun->setName(name_cc.name());
         fun->setAbstract(init_declarator->initializer != 0);
         fun->setConstant(declarator->fun_cv != 0);
         fun->setTemplateParameters(_M_current_template_parameters);
@@ -273,9 +272,8 @@ void Binder::declare_symbol(SimpleDeclarationAST *node, InitDeclaratorAST *init_
 
         // ... and the signature
         foreach (const DeclaratorCompiler::Parameter &p, decl_cc.parameters()) {
-            ArgumentModelItem arg = model()->create<ArgumentModelItem>();
+            ArgumentModelItem arg(new _ArgumentModelItem(model(), p.name));
             arg->setType(qualifyType(p.type, _M_context));
-            arg->setName(p.name);
             arg->setDefaultValue(p.defaultValue);
             if (p.defaultValue)
                 arg->setDefaultValueExpression(p.defaultValueExpression);
@@ -285,7 +283,7 @@ void Binder::declare_symbol(SimpleDeclarationAST *node, InitDeclaratorAST *init_
         fun->setScope(symbolScope->qualifiedName());
         symbolScope->addFunction(fun);
     } else {
-        VariableModelItem var(model()->create<VariableModelItem>());
+        VariableModelItem var(new _VariableModelItem(model()));
         updateItemPosition(var, node);
         var->setTemplateParameters(_M_current_template_parameters);
         var->setAccessPolicy(_M_current_access);
@@ -355,7 +353,7 @@ void Binder::visitFunctionDefinition(FunctionDefinitionAST *node)
     Q_ASSERT(!decl_cc.id().isEmpty());
 
     FunctionDefinitionModelItem
-    old = changeCurrentFunction(_M_model->create<FunctionDefinitionModelItem>());
+    old = changeCurrentFunction(FunctionDefinitionModelItem(new _FunctionDefinitionModelItem(_M_model)));
     _M_current_function->setScope(functionScope->qualifiedName());
     updateItemPosition(_M_current_function, node);
 
@@ -381,9 +379,8 @@ void Binder::visitFunctionDefinition(FunctionDefinitionAST *node)
     _M_current_function->setVariadics(decl_cc.isVariadics());
 
     foreach (const DeclaratorCompiler::Parameter &p, decl_cc.parameters()) {
-        ArgumentModelItem arg = model()->create<ArgumentModelItem>();
+        ArgumentModelItem arg(new _ArgumentModelItem(model(), p.name));
         arg->setType(qualifyType(p.type, functionScope->qualifiedName()));
-        arg->setName(p.name);
         arg->setDefaultValue(p.defaultValue);
         if (p.defaultValue)
             arg->setDefaultValueExpression(p.defaultValueExpression);
@@ -470,10 +467,9 @@ void Binder::visitTemplateDeclaration(TemplateDeclarationAST *node)
             name = type_parameter->name;
         }
 
-        TemplateParameterModelItem p = model()->create<TemplateParameterModelItem>();
-        name_cc.run(name);
-        p->setName(name_cc.name());
 
+        name_cc.run(name);
+        const TemplateParameterModelItem p(new _TemplateParameterModelItem(model(), name_cc.name()));
         _M_current_template_parameters.append(p);
         it = it->next;
     } while (it != end);
@@ -533,7 +529,7 @@ void Binder::visitTypedef(TypedefAST *node)
         CodeModelFinder finder(model(), this);
         ScopeModelItem typedefScope = finder.resolveScope(declarator->id, scope);
 
-        TypeAliasModelItem typeAlias = model()->create<TypeAliasModelItem> ();
+        TypeAliasModelItem typeAlias(new _TypeAliasModelItem(model()));
         updateItemPosition(typeAlias, node);
         typeAlias->setName(alias_name);
         typeAlias->setType(qualifyType(typeInfo, currentScope()->qualifiedName()));
@@ -558,7 +554,7 @@ void Binder::visitNamespace(NamespaceAST *node)
         const CodeModelItem nsI = _M_model->findItem(qualified_name, _M_current_file);
         NamespaceModelItem ns = qSharedPointerDynamicCast<_NamespaceModelItem>(nsI);
         if (!ns) {
-            ns = _M_model->create<NamespaceModelItem>();
+            ns.reset(new _NamespaceModelItem(_M_model));
             updateItemPosition(ns, node);
             ns->setName(name);
             ns->setScope(scope->qualifiedName());
@@ -607,7 +603,7 @@ void Binder::visitClassSpecifier(ClassSpecifierAST *node)
 
     ScopeModelItem scope = currentScope();
 
-    ClassModelItem old = changeCurrentClass(_M_model->create<ClassModelItem>());
+    ClassModelItem old = changeCurrentClass(ClassModelItem(new _ClassModelItem(_M_model)));
     updateItemPosition(_M_current_class, node);
     _M_current_class->setName(class_cc.name());
 
@@ -682,7 +678,7 @@ void Binder::visitEnumSpecifier(EnumSpecifierAST *node)
         name += QString::number(current);
     }
 
-    _M_current_enum = model()->create<EnumModelItem>();
+    _M_current_enum.reset(new _EnumModelItem(model()));
     _M_current_enum->setAccessPolicy(_M_current_access);
     updateItemPosition(_M_current_enum, node);
     _M_current_enum->setName(name);
@@ -712,7 +708,7 @@ static QString strip_preprocessor_lines(const QString &name)
 void Binder::visitEnumerator(EnumeratorAST *node)
 {
     Q_ASSERT(_M_current_enum);
-    EnumeratorModelItem e = model()->create<EnumeratorModelItem>();
+    EnumeratorModelItem e(new _EnumeratorModelItem(model()));
     updateItemPosition(e, node);
     e->setName(decode_symbol(node->id)->as_string());
 
