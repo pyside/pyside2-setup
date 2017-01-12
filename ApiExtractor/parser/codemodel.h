@@ -218,6 +218,7 @@ private:
 
 class _CodeModelItem
 {
+    Q_DISABLE_COPY(_CodeModelItem)
 public:
     enum Kind {
         /* These are bit-flags resembling inheritance */
@@ -285,10 +286,6 @@ private:
     QString _M_name;
     QString _M_fileName;
     QStringList _M_scope;
-
-private:
-    _CodeModelItem(const _CodeModelItem &other);
-    void operator = (const _CodeModelItem &other);
 };
 
 class _ScopeModelItem: public _CodeModelItem
@@ -372,9 +369,6 @@ private:
     QMultiHash<QString, FunctionModelItem> _M_functions;
 
 private:
-    _ScopeModelItem(const _ScopeModelItem &other);
-    void operator = (const _ScopeModelItem &other);
-
     QStringList _M_enumNames;
     QStringList _M_enumsDeclarations;
 };
@@ -415,10 +409,6 @@ private:
     CodeModel::ClassType _M_classType;
 
     QStringList _M_propertyDeclarations;
-
-private:
-    _ClassModelItem(const _ClassModelItem &other);
-    void operator = (const _ClassModelItem &other);
 };
 
 class _NamespaceModelItem: public _ScopeModelItem
@@ -445,10 +435,6 @@ public:
 
 private:
     QHash<QString, NamespaceModelItem> _M_namespaces;
-
-private:
-    _NamespaceModelItem(const _NamespaceModelItem &other);
-    void operator = (const _NamespaceModelItem &other);
 };
 
 class _FileModelItem: public _NamespaceModelItem
@@ -496,10 +482,6 @@ private:
     TypeInfo _M_type;
     QString _M_defaultValueExpression;
     bool _M_defaultValue;
-
-private:
-    _ArgumentModelItem(const _ArgumentModelItem &other);
-    void operator = (const _ArgumentModelItem &other);
 };
 
 class _MemberModelItem: public _CodeModelItem
@@ -624,10 +606,6 @@ private:
         };
         uint _M_flags;
     };
-
-private:
-    _FunctionModelItem(const _FunctionModelItem &other);
-    void operator = (const _FunctionModelItem &other);
 };
 
 class _FunctionDefinitionModelItem: public _FunctionModelItem
@@ -639,10 +617,6 @@ public:
         : _FunctionModelItem(model, kind) {}
     explicit _FunctionDefinitionModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
         : _FunctionModelItem(model, name, kind) {}
-
-private:
-    _FunctionDefinitionModelItem(const _FunctionDefinitionModelItem &other);
-    void operator = (const _FunctionDefinitionModelItem &other);
 };
 
 class _VariableModelItem: public _MemberModelItem
@@ -654,10 +628,6 @@ public:
         : _MemberModelItem(model, kind) {}
     explicit _VariableModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
         : _MemberModelItem(model, name, kind) {}
-
-private:
-    _VariableModelItem(const _VariableModelItem &other);
-    void operator = (const _VariableModelItem &other);
 };
 
 class _TypeAliasModelItem: public _CodeModelItem
@@ -675,10 +645,6 @@ public:
 
 private:
     TypeInfo _M_type;
-
-private:
-    _TypeAliasModelItem(const _TypeAliasModelItem &other);
-    void operator = (const _TypeAliasModelItem &other);
 };
 
 class _EnumModelItem: public _CodeModelItem
@@ -704,10 +670,6 @@ private:
     CodeModel::AccessPolicy _M_accessPolicy;
     EnumeratorList _M_enumerators;
     bool _M_anonymous;
-
-private:
-    _EnumModelItem(const _EnumModelItem &other);
-    void operator = (const _EnumModelItem &other);
 };
 
 class _EnumeratorModelItem: public _CodeModelItem
@@ -725,10 +687,6 @@ public:
 
 private:
     QString _M_value;
-
-private:
-    _EnumeratorModelItem(const _EnumeratorModelItem &other);
-    void operator = (const _EnumeratorModelItem &other);
 };
 
 class _TemplateParameterModelItem: public _CodeModelItem
@@ -750,10 +708,6 @@ public:
 private:
     TypeInfo _M_type;
     bool _M_defaultValue;
-
-private:
-    _TemplateParameterModelItem(const _TemplateParameterModelItem &other);
-    void operator = (const _TemplateParameterModelItem &other);
 };
 
 #endif // CODEMODEL_H
