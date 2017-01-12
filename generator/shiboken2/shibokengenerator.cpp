@@ -305,6 +305,11 @@ QString ShibokenGenerator::wrapperName(const AbstractMetaClass* metaClass) const
     }
 }
 
+QString ShibokenGenerator::wrapperName(const AbstractMetaType *metaType) const
+{
+    return metaType->cppSignature();
+}
+
 QString ShibokenGenerator::fullPythonFunctionName(const AbstractMetaFunction* func)
 {
     QString funcName;
@@ -549,9 +554,12 @@ QString ShibokenGenerator::cpythonWrapperCPtr(const AbstractMetaClass* metaClass
     return cpythonWrapperCPtr(metaClass->typeEntry(), argName);
 }
 
-QString ShibokenGenerator::cpythonWrapperCPtr(const AbstractMetaType* metaType, QString argName)
+QString ShibokenGenerator::cpythonWrapperCPtr(const AbstractMetaType *metaType, QString argName)
 {
-    return cpythonWrapperCPtr(metaType->typeEntry(), argName);
+    if (!ShibokenGenerator::isWrapperType(metaType->typeEntry()))
+        return QString();
+    return QStringLiteral("((::%1*)Shiboken::Conversions::cppPointer(%2, (SbkObject*)%3))")
+              .arg(metaType->cppSignature(), cpythonTypeNameExt(metaType), argName);
 }
 
 QString ShibokenGenerator::cpythonWrapperCPtr(const TypeEntry* type, QString argName)
@@ -631,6 +639,7 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func,
             || arg->type()->isEnum()
             || arg->type()->isFlags()
             || arg->type()->isContainer()
+            || arg->type()->isSmartPointer()
             || arg->type()->referenceType() == LValueReference) {
             result += QLatin1Char(objType);
         } else if (arg->type()->isPrimitive()) {
@@ -937,16 +946,17 @@ bool ShibokenGenerator::isWrapperType(const TypeEntry* type)
 {
     if (type->isComplex())
         return ShibokenGenerator::isWrapperType((const ComplexTypeEntry*)type);
-    return type->isObject() || type->isValue();
+    return type->isObject() || type->isValue() || type->isSmartPointer();
 }
 bool ShibokenGenerator::isWrapperType(const ComplexTypeEntry* type)
 {
-    return isObjectType(type) || type->isValue();
+    return isObjectType(type) || type->isValue() || type->isSmartPointer();
 }
 bool ShibokenGenerator::isWrapperType(const AbstractMetaType* metaType)
 {
     return isObjectType(metaType)
-            || metaType->typeEntry()->isValue();
+            || metaType->typeEntry()->isValue()
+            || metaType->typeEntry()->isSmartPointer();
 }
 
 bool ShibokenGenerator::isPointerToWrapperType(const AbstractMetaType* type)
@@ -1227,7 +1237,7 @@ QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaT
         QString conversion;
         if (type->referenceType() == LValueReference && !(type->isValue() && type->isConstant()) && !isPointer(type))
             conversion = QLatin1String("reference");
-        else if (type->isValue())
+        else if (type->isValue() || type->isSmartPointer())
             conversion = QLatin1String("copy");
         else
             conversion = QLatin1String("pointer");
@@ -2048,6 +2058,8 @@ bool ShibokenGenerator::classNeedsGetattroFunction(const AbstractMetaClass* meta
 {
     if (!metaClass)
         return false;
+    if (metaClass->typeEntry()->isSmartPointer())
+        return true;
     const FunctionGroupMap &functionGroup = getFunctionGroups(metaClass);
     for (FunctionGroupMapIt it = functionGroup.cbegin(), end = functionGroup.cend(); it != end; ++it) {
         AbstractMetaFunctionList overloads;
@@ -2063,6 +2075,15 @@ bool ShibokenGenerator::classNeedsGetattroFunction(const AbstractMetaClass* meta
         if (OverloadData::hasStaticAndInstanceFunctions(overloads))
             return true;
     }
+    return false;
+}
+
+bool ShibokenGenerator::classNeedsSetattroFunction(const AbstractMetaClass *metaClass)
+{
+    if (!metaClass)
+        return false;
+    if (metaClass->typeEntry()->isSmartPointer())
+        return true;
     return false;
 }
 
@@ -2416,7 +2437,7 @@ void ShibokenGenerator::collectContainerTypesFromConverterMacros(const QString& 
         if (code.at(start) != QLatin1Char('%')) {
             QString typeString = code.mid(start, end - start);
             AbstractMetaType* type = buildAbstractMetaTypeFromString(typeString);
-            addInstantiatedContainers(type, type->originalTypeDescription());
+            addInstantiatedContainersAndSmartPointers(type, type->originalTypeDescription());
         }
         start = end;
     }

@@ -47,14 +47,19 @@ struct Generator::GeneratorPrivate {
     QString packageName;
     int numGenerated;
     QStringList instantiatedContainersNames;
-    QList<const AbstractMetaType*> instantiatedContainers;
+    QStringList instantiatedSmartPointerNames;
+    QList<const AbstractMetaType *> instantiatedContainers;
+    QList<const AbstractMetaType *> instantiatedSmartPointers;
+
 };
 
 Generator::Generator() : m_d(new GeneratorPrivate)
 {
     m_d->numGenerated = 0;
-    m_d->instantiatedContainers = QList<const AbstractMetaType*>();
+    m_d->instantiatedContainers = QList<const AbstractMetaType *>();
+    m_d->instantiatedSmartPointers = QList<const AbstractMetaType *>();
     m_d->instantiatedContainersNames = QStringList();
+    m_d->instantiatedSmartPointerNames = QStringList();
 }
 
 Generator::~Generator()
@@ -82,16 +87,17 @@ bool Generator::setup(const ApiExtractor& extractor, const QMap< QString, QStrin
     else
         qCWarning(lcShiboken) << "Couldn't find the package name!!";
 
-    collectInstantiatedContainers();
+    collectInstantiatedContainersAndSmartPointers();
 
     return doSetup(args);
 }
 
 QString Generator::getSimplifiedContainerTypeName(const AbstractMetaType* type)
 {
-    if (!type->typeEntry()->isContainer())
-        return type->cppSignature();
-    QString typeName = type->cppSignature();
+    const QString signature = type->cppSignature();
+    if (!type->typeEntry()->isContainer() && !type->typeEntry()->isSmartPointer())
+        return signature;
+    QString typeName = signature;
     if (type->isConstant())
         typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
     switch (type->referenceType()) {
@@ -109,18 +115,21 @@ QString Generator::getSimplifiedContainerTypeName(const AbstractMetaType* type)
     return typeName;
 }
 
-void Generator::addInstantiatedContainers(const AbstractMetaType *type, const QString &context)
+void Generator::addInstantiatedContainersAndSmartPointers(const AbstractMetaType *type,
+                                                          const QString &context)
 {
     if (!type)
         return;
     foreach (const AbstractMetaType* t, type->instantiations())
-        addInstantiatedContainers(t, context);
-    if (!type->typeEntry()->isContainer())
+        addInstantiatedContainersAndSmartPointers(t, context);
+    if (!type->typeEntry()->isContainer() && !type->typeEntry()->isSmartPointer())
         return;
+    bool isContainer = type->typeEntry()->isContainer();
     if (type->hasTemplateChildren()) {
+        QString piece = isContainer ? QStringLiteral("container") : QStringLiteral("smart pointer");
         QString warning =
-                QString::fromLatin1("Skipping instantiation of container '%1' because it has template"
-                                    " arguments.").arg(type->originalTypeDescription());
+                QString::fromLatin1("Skipping instantiation of %1 '%2' because it has template"
+                               " arguments.").arg(piece).arg(type->originalTypeDescription());
         if (!context.isEmpty())
             warning.append(QStringLiteral(" Calling context: %1").arg(context));
 
@@ -129,42 +138,56 @@ void Generator::addInstantiatedContainers(const AbstractMetaType *type, const QS
 
     }
     QString typeName = getSimplifiedContainerTypeName(type);
-    if (!m_d->instantiatedContainersNames.contains(typeName)) {
-        m_d->instantiatedContainersNames.append(typeName);
-        m_d->instantiatedContainers.append(type);
+    if (isContainer) {
+        if (!m_d->instantiatedContainersNames.contains(typeName)) {
+            m_d->instantiatedContainersNames.append(typeName);
+            m_d->instantiatedContainers.append(type);
+        }
+    } else {
+        // Is smart pointer.
+        if (!m_d->instantiatedSmartPointerNames.contains(typeName)) {
+            m_d->instantiatedSmartPointerNames.append(typeName);
+            m_d->instantiatedSmartPointers.append(type);
+        }
     }
+
 }
 
-void Generator::collectInstantiatedContainers(const AbstractMetaFunction* func)
+void Generator::collectInstantiatedContainersAndSmartPointers(const AbstractMetaFunction *func)
 {
-    addInstantiatedContainers(func->type(), func->signature());
+    addInstantiatedContainersAndSmartPointers(func->type(), func->signature());
     foreach (const AbstractMetaArgument* arg, func->arguments())
-        addInstantiatedContainers(arg->type(), func->signature());
+        addInstantiatedContainersAndSmartPointers(arg->type(), func->signature());
 }
 
-void Generator::collectInstantiatedContainers(const AbstractMetaClass* metaClass)
+void Generator::collectInstantiatedContainersAndSmartPointers(const AbstractMetaClass *metaClass)
 {
     if (!metaClass->typeEntry()->generateCode())
         return;
     foreach (const AbstractMetaFunction* func, metaClass->functions())
-        collectInstantiatedContainers(func);
+        collectInstantiatedContainersAndSmartPointers(func);
     foreach (const AbstractMetaField* field, metaClass->fields())
-        addInstantiatedContainers(field->type(), field->name());
+        addInstantiatedContainersAndSmartPointers(field->type(), field->name());
     foreach (AbstractMetaClass* innerClass, metaClass->innerClasses())
-        collectInstantiatedContainers(innerClass);
+        collectInstantiatedContainersAndSmartPointers(innerClass);
 }
 
-void Generator::collectInstantiatedContainers()
+void Generator::collectInstantiatedContainersAndSmartPointers()
 {
     foreach (const AbstractMetaFunction* func, globalFunctions())
-        collectInstantiatedContainers(func);
+        collectInstantiatedContainersAndSmartPointers(func);
     foreach (const AbstractMetaClass* metaClass, classes())
-        collectInstantiatedContainers(metaClass);
+        collectInstantiatedContainersAndSmartPointers(metaClass);
 }
 
 QList<const AbstractMetaType*> Generator::instantiatedContainers() const
 {
     return m_d->instantiatedContainers;
+}
+
+QList<const AbstractMetaType*> Generator::instantiatedSmartPointers() const
+{
+    return m_d->instantiatedSmartPointers;
 }
 
 QMap< QString, QString > Generator::options() const
@@ -278,37 +301,68 @@ inline void touchFile(const QString &filePath)
     toucher.close();
 }
 
+bool Generator::generateFileForContext(GeneratorContext &context)
+{
+    AbstractMetaClass *cls = context.metaClass();
+
+    if (!shouldGenerate(cls))
+        return true;
+
+    const QString fileName = fileNameForContext(context);
+    if (fileName.isEmpty())
+        return true;
+    if (ReportHandler::isDebug(ReportHandler::SparseDebug))
+        qCDebug(lcShiboken) << "generating: " << fileName;
+
+    QString filePath = outputDirectory() + QLatin1Char('/') + subDirectoryForClass(cls)
+            + QLatin1Char('/') + fileName;
+    FileOut fileOut(filePath);
+
+    generateClass(fileOut.stream, context);
+
+    FileOut::State state = fileOut.done();
+    switch (state) {
+    case FileOut::Failure:
+        return false;
+    case FileOut::Unchanged:
+        // Even if contents is unchanged, the last file modification time should be updated,
+        // so that the build system can rely on the fact the generated file is up-to-date.
+        touchFile(filePath);
+        break;
+    case FileOut::Success:
+        break;
+    }
+
+    ++m_d->numGenerated;
+    return true;
+}
+
+QString Generator::getFileNameBaseForSmartPointer(const AbstractMetaType *smartPointerType,
+                                                  const AbstractMetaClass *smartPointerClass) const
+{
+    const AbstractMetaType *innerType = smartPointerType->getSmartPointerInnerType();
+    QString fileName = smartPointerClass->qualifiedCppName().toLower();
+    fileName.replace(QLatin1String("::"), QLatin1String("_"));
+    fileName.append(QLatin1String("_"));
+    fileName.append(innerType->name().toLower());
+
+    return fileName;
+}
+
 bool Generator::generate()
 {
     foreach (AbstractMetaClass *cls, m_d->apiextractor->classes()) {
-        if (!shouldGenerate(cls))
-            continue;
-
-        QString fileName = fileNameForClass(cls);
-        if (fileName.isNull())
-            continue;
-        if (ReportHandler::isDebug(ReportHandler::SparseDebug))
-            qCDebug(lcShiboken) << "generating: " << fileName;
-
-        QString filePath = outputDirectory() + QLatin1Char('/') + subDirectoryForClass(cls)
-                + QLatin1Char('/') + fileName;
-        FileOut fileOut(filePath);
-        generateClass(fileOut.stream, cls);
-
-        FileOut::State state = fileOut.done();
-        switch (state) {
-        case FileOut::Failure:
+        GeneratorContext context(cls);
+        if (!generateFileForContext(context))
             return false;
-        case FileOut::Unchanged:
-            // Even if contents is unchanged, the last file modification time should be updated,
-            // so that the build system can rely on the fact the generated file is up-to-date.
-            touchFile(filePath);
-            break;
-        case FileOut::Success:
-            break;
-        }
+    }
 
-        ++m_d->numGenerated;
+    foreach (const AbstractMetaType *type, instantiatedSmartPointers()) {
+        AbstractMetaClass *smartPointerClass =
+                AbstractMetaClass::findClass(m_d->apiextractor->smartPointers(), type->name());
+        GeneratorContext context(smartPointerClass, type, true);
+        if (!generateFileForContext(context))
+            return false;
     }
     return finishGeneration();
 }
@@ -769,4 +823,27 @@ QString getClassTargetFullName(const AbstractMetaClass* metaClass, bool includeP
 QString getClassTargetFullName(const AbstractMetaEnum* metaEnum, bool includePackageName)
 {
     return getClassTargetFullName_(metaEnum, includePackageName);
+}
+
+QString getClassTargetFullName(const AbstractMetaType *metaType, bool includePackageName)
+{
+    QString name = metaType->cppSignature();
+    name.replace(QLatin1String("::"), QLatin1String("_"));
+    name.replace(QLatin1Char('<'), QLatin1Char('_'));
+    name.remove(QLatin1Char('>'));
+    name.remove(QLatin1Char(' '));
+    if (includePackageName) {
+        name.prepend(QLatin1Char('.'));
+        name.prepend(metaType->package());
+    }
+    return name;
+}
+
+QString getFilteredCppSignatureString(QString signature)
+{
+    signature.replace(QLatin1String("::"), QLatin1String("_"));
+    signature.replace(QLatin1Char('<'), QLatin1Char('_'));
+    signature.replace(QLatin1Char('>'), QLatin1Char('_'));
+    signature.replace(QLatin1Char(' '), QLatin1Char('_'));
+    return signature;
 }

@@ -194,8 +194,9 @@ public:
     }
 
 protected:
-    QString fileNameForClass(const AbstractMetaClass* cppClass) const;
-    void generateClass(QTextStream& s, const AbstractMetaClass* metaClass);
+    QString fileNamePrefix() const;
+    QString fileNameForContext(GeneratorContext &context) const;
+    void generateClass(QTextStream &s, GeneratorContext &classContext);
     bool finishGeneration();
 
     void writeFunctionArguments(QTextStream&, const AbstractMetaFunction*, Options) const {}

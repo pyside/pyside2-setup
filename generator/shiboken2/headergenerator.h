@@ -43,8 +43,9 @@ class HeaderGenerator : public ShibokenGenerator
 public:
     QMap<QString, QString> options() const { return QMap<QString, QString>(); }
 protected:
-    QString fileNameForClass(const AbstractMetaClass* metaClass) const;
-    void generateClass(QTextStream& s, const AbstractMetaClass* metaClass);
+    QString fileNamePrefix() const;
+    QString fileNameForContext(GeneratorContext &context) const;
+    void generateClass(QTextStream& s, GeneratorContext &classContext);
     bool finishGeneration();
 
 private:
@@ -53,6 +54,7 @@ private:
     void writeFunction(QTextStream& s, const AbstractMetaFunction* func);
     void writeSbkTypeFunction(QTextStream& s, const AbstractMetaEnum* cppEnum);
     void writeSbkTypeFunction(QTextStream& s, const AbstractMetaClass* cppClass);
+    void writeSbkTypeFunction(QTextStream &s, const AbstractMetaType *metaType);
     void writeTypeIndexDefineLine(QTextStream& s, const TypeEntry* typeEntry);
     void writeTypeIndexDefine(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeProtectedEnumSurrogate(QTextStream& s, const AbstractMetaEnum* cppEnum);

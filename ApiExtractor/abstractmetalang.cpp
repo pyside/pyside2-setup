@@ -237,6 +237,9 @@ AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() con
     if (m_typeEntry->isContainer() && indirections() == 0)
         return ContainerPattern;
 
+    if (m_typeEntry->isSmartPointer() && indirections() == 0)
+        return SmartPointerPattern;
+
     if (m_typeEntry->isFlags() && indirections() == 0
         && (isConstant() == (m_referenceType == LValueReference)))
         return FlagsPattern;

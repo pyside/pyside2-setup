@@ -593,7 +593,8 @@ public:
         TypeSystemType,
         CustomType,
         TargetLangType,
-        FunctionType
+        FunctionType,
+        SmartPointerType
     };
     Q_ENUM(Type)
 
@@ -659,6 +660,10 @@ public:
     bool isContainer() const
     {
         return m_type == ContainerType;
+    }
+    bool isSmartPointer() const
+    {
+        return m_type == SmartPointerType;
     }
     bool isVariant() const
     {
@@ -1678,6 +1683,37 @@ public:
 
 private:
     Type m_type;
+};
+
+class SmartPointerTypeEntry : public ComplexTypeEntry
+{
+public:
+    SmartPointerTypeEntry(const QString &name,
+                          const QString &getterName,
+                          const QString &smartPointerType,
+                          const QString &refCountMethodName,
+                          double vr)
+        : ComplexTypeEntry(name, SmartPointerType, vr),
+          m_getterName(getterName),
+          m_smartPointerType(smartPointerType),
+          m_refCountMethodName(refCountMethodName)
+    {
+    }
+
+    QString getter() const
+    {
+        return m_getterName;
+    }
+
+    QString refCountMethodName() const
+    {
+        return m_refCountMethodName;
+    }
+
+private:
+    QString m_getterName;
+    QString m_smartPointerType;
+    QString m_refCountMethodName;
 };
 
 class NamespaceTypeEntry : public ComplexTypeEntry

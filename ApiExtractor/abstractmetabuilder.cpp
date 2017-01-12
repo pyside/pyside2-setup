@@ -121,6 +121,7 @@ AbstractMetaBuilderPrivate::~AbstractMetaBuilderPrivate()
     qDeleteAll(m_globalEnums);
     qDeleteAll(m_globalFunctions);
     qDeleteAll(m_templates);
+    qDeleteAll(m_smartPointers);
     qDeleteAll(m_metaClasses);
 }
 
@@ -142,6 +143,11 @@ AbstractMetaClassList AbstractMetaBuilder::classes() const
 AbstractMetaClassList AbstractMetaBuilder::templates() const
 {
     return d->m_templates;
+}
+
+AbstractMetaClassList AbstractMetaBuilder::smartPointers() const
+{
+    return d->m_smartPointers;
 }
 
 AbstractMetaFunctionList AbstractMetaBuilder::globalFunctions() const
@@ -746,6 +752,8 @@ void AbstractMetaBuilderPrivate::addAbstractMetaClass(AbstractMetaClass *cls)
     cls->setOriginalAttributes(cls->attributes());
     if (cls->typeEntry()->isContainer()) {
         m_templates << cls;
+    } else if (cls->typeEntry()->isSmartPointer()) {
+        m_smartPointers << cls;
     } else {
         m_metaClasses << cls;
         if (cls->typeEntry()->designatedInterface()) {
@@ -1337,6 +1345,9 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::currentTraversedClass(ScopeModelI
     AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_metaClasses, fullClassName);
     if (!metaClass)
         metaClass = AbstractMetaClass::findClass(m_templates, fullClassName);
+
+    if (!metaClass)
+        metaClass = AbstractMetaClass::findClass(m_smartPointers, fullClassName);
     return metaClass;
 }
 

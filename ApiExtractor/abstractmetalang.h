@@ -325,6 +325,7 @@ public:
         ValuePointerPattern,
         NativePointerPattern,
         ContainerPattern,
+        SmartPointerPattern,
         VariantPattern,
         VarargsPattern,
         JObjectWrapperPattern,
@@ -473,6 +474,9 @@ public:
         return m_pattern == ContainerPattern;
     }
 
+    // returns true if the type was used as a smart pointer
+    bool isSmartPointer() const { return m_pattern == SmartPointerPattern; }
+
     // returns true if the type was used as a flag
     bool isFlags() const
     {
@@ -581,6 +585,23 @@ public:
     const AbstractMetaType *originalTemplateType() const
     {
         return m_originalTemplateType;
+    }
+
+    AbstractMetaType *getSmartPointerInnerType() const
+    {
+        Q_ASSERT(isSmartPointer());
+        AbstractMetaTypeList instantiations = this->instantiations();
+        Q_ASSERT(!instantiations.isEmpty());
+        AbstractMetaType *innerType = instantiations.at(0);
+        return innerType;
+    }
+
+    QString getSmartPointerInnerTypeName() const
+    {
+        Q_ASSERT(isSmartPointer());
+        AbstractMetaType *innerType = getSmartPointerInnerType();
+        Q_ASSERT(innerType);
+        return innerType->name();
     }
 
     /// Decides and sets the proper usage patter for the current meta type.

@@ -70,7 +70,7 @@ static QString getTypeName(const OverloadData* ov)
 static bool typesAreEqual(const AbstractMetaType* typeA, const AbstractMetaType* typeB)
 {
     if (typeA->typeEntry() == typeB->typeEntry()) {
-        if (typeA->isContainer()) {
+        if (typeA->isContainer() || typeA->isSmartPointer()) {
             if (typeA->instantiations().size() != typeB->instantiations().size())
                 return false;
 

@@ -46,6 +46,7 @@
 #define MIN_CTOR_ERROR_MSG        "Could not find a minimal constructor for type '%1'. "\
                                   "This will result in a compilation error."
 #define PYTHON_TO_CPP_VAR         "pythonToCpp"
+#define SMART_POINTER_GETTER      "kSmartPointerGetter"
 
 #define CHECKTYPE_REGEX           "%CHECKTYPE\\[([^\\[]*)\\]\\("
 #define ISCONVERTIBLE_REGEX       "%ISCONVERTIBLE\\[([^\\[]*)\\]\\("
@@ -245,6 +246,9 @@ public:
     /// Returns true if the class needs to have a getattro function.
     bool classNeedsGetattroFunction(const AbstractMetaClass* metaClass);
 
+    /// Returns true if the class needs to have a setattro function.
+    bool classNeedsSetattroFunction(const AbstractMetaClass *metaClass);
+
     /// Returns a list of methods of the given class where each one is part of a different overload with both static and non-static method.
     AbstractMetaFunctionList getMethodsWithBothStaticAndNonStaticMethods(const AbstractMetaClass* metaClass);
 
@@ -273,6 +277,7 @@ public:
     const AbstractMetaClass* getProperEnclosingClassForEnum(const AbstractMetaEnum* metaEnum);
 
     QString wrapperName(const AbstractMetaClass* metaClass) const;
+    QString wrapperName(const AbstractMetaType *metaType) const;
 
     static QString fullPythonFunctionName(const AbstractMetaFunction* func);
     static QString protectedEnumSurrogateName(const AbstractMetaEnum* metaEnum);
@@ -384,7 +389,7 @@ public:
     QString cpythonGetterFunctionName(const AbstractMetaField* metaField);
     QString cpythonSetterFunctionName(const AbstractMetaField* metaField);
     QString cpythonWrapperCPtr(const AbstractMetaClass* metaClass, QString argName = QLatin1String(PYTHON_SELF_VAR));
-    QString cpythonWrapperCPtr(const AbstractMetaType* metaType, QString argName);
+    QString cpythonWrapperCPtr(const AbstractMetaType *metaType, QString argName);
     QString cpythonWrapperCPtr(const TypeEntry* type, QString argName);
 
     /// Guesses the scope to where belongs an argument's default value.

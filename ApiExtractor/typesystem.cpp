@@ -68,6 +68,7 @@ Handler::Handler(TypeDatabase* database, bool generate)
     tagNames.insert(QLatin1String("interface-type"), StackElement::InterfaceTypeEntry);
     tagNames.insert(QLatin1String("namespace-type"), StackElement::NamespaceTypeEntry);
     tagNames.insert(QLatin1String("enum-type"), StackElement::EnumTypeEntry);
+    tagNames.insert(QLatin1String("smart-pointer-type"), StackElement::SmartPointerTypeEntry);
     tagNames.insert(QLatin1String("function"), StackElement::FunctionTypeEntry);
     tagNames.insert(QLatin1String("extra-includes"), StackElement::ExtraIncludes);
     tagNames.insert(QLatin1String("include"), StackElement::Include);
@@ -536,6 +537,54 @@ void Handler::addFlags(const QString &name, QString flagName,
     setTypeRevision(ftype, revision.toInt());
 }
 
+bool Handler::handleSmartPointerEntry(StackElement *element,
+                                      QHash<QString, QString> &attributes,
+                                      const QString &name,
+                                      double since)
+{
+    QString smartPointerType = attributes[QLatin1String("type")];
+    if (smartPointerType.isEmpty()) {
+        m_error = QLatin1String("No type specified for the smart pointer. Currently supported types: 'shared',");
+        return false;
+    }
+    if (smartPointerType != QLatin1String("shared")) {
+        m_error = QLatin1String("Currently only the 'shared' type is supported.");
+        return false;
+    }
+
+    QString getter = attributes[QLatin1String("getter")];
+    if (getter.isEmpty()) {
+        m_error = QLatin1String("No function getter name specified for getting the raw pointer held by the smart pointer.");
+        return false;
+    }
+
+    QString refCountMethodName = attributes[QLatin1String("ref-count-method")];
+    QString signature = getter + QLatin1String("()");
+
+    signature = TypeDatabase::normalizedSignature(signature.toLocal8Bit().constData());
+    if (signature.isEmpty()) {
+        m_error = QLatin1String("No signature for the smart pointer getter found.");
+        return false;
+    }
+
+    QString errorString = checkSignatureError(signature,
+                                              QLatin1String("smart-pointer-type"));
+    if (!errorString.isEmpty()) {
+        m_error = errorString;
+        return false;
+    }
+
+    SmartPointerTypeEntry *type = new SmartPointerTypeEntry(name,
+                                                            getter,
+                                                            smartPointerType,
+                                                            refCountMethodName,
+                                                            since);
+    type->setTargetLangPackage(m_defaultPackage);
+    type->setCodeGeneration(m_generate);
+    element->entry = type;
+    return true;
+}
+
 bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts)
 {
     if (m_ignoreDepth) {
@@ -597,6 +646,11 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             break;
         case StackElement::ContainerTypeEntry:
             attributes.insert(QLatin1String("type"), QString());
+            break;
+        case StackElement::SmartPointerTypeEntry:
+            attributes.insert(QLatin1String("type"), QString());
+            attributes.insert(QLatin1String("getter"), QString());
+            attributes.insert(QLatin1String("ref-count-method"), QString());
             break;
         case StackElement::EnumTypeEntry:
             attributes.insert(flagsAttribute(), QString());
@@ -766,6 +820,13 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             ContainerTypeEntry *type = new ContainerTypeEntry(name, containerType, since);
             type->setCodeGeneration(m_generate);
             element->entry = type;
+        }
+        break;
+
+        case StackElement::SmartPointerTypeEntry: {
+            bool result = handleSmartPointerEntry(element, attributes, name, since);
+            if (!result)
+                return result;
         }
         break;
 

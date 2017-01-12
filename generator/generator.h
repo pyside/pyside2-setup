@@ -60,6 +60,44 @@ void verifyDirectoryFor(const QFile &file);
 
 QString getClassTargetFullName(const AbstractMetaClass* metaClass, bool includePackageName = true);
 QString getClassTargetFullName(const AbstractMetaEnum* metaEnum, bool includePackageName = true);
+QString getClassTargetFullName(const AbstractMetaType *metaType, bool includePackageName = true);
+QString getFilteredCppSignatureString(QString signature);
+
+
+/**
+ * A GeneratorContext object contains a pointer to an AbstractMetaClass and/or a specialized
+ * AbstractMetaType, for which code is currently being generated.
+ *
+ * The main case is when the context contains only an AbstractMetaClass pointer, which is used
+ * by different methods to generate appropriate expressions, functions, type names, etc.
+ *
+ * The second case is for generation of code for smart pointers. In this case the m_metaClass member
+ * contains the generic template class of the smart pointer, and the m_preciseClassType member
+ * contains the instantiated template type, e.g. a concrete shared_ptr<int>. To
+ * distinguish this case, the member m_forSmartPointer is set to true.
+ *
+ * In the future the second case might be generalized for all template type instantiations.
+ */
+class GeneratorContext {
+public:
+    GeneratorContext() : m_metaClass(0), m_preciseClassType(0), m_forSmartPointer(false) {}
+    GeneratorContext(AbstractMetaClass *metaClass,
+                     const AbstractMetaType *preciseType = 0,
+                     bool forSmartPointer = false)
+        : m_metaClass(metaClass),
+        m_preciseClassType(preciseType),
+        m_forSmartPointer(forSmartPointer) {}
+
+
+    AbstractMetaClass *metaClass() const { return m_metaClass; }
+    bool forSmartPointer() const { return m_forSmartPointer; }
+    const AbstractMetaType *preciseType() const { return m_preciseClassType; }
+
+private:
+    AbstractMetaClass *m_metaClass;
+    const AbstractMetaType *m_preciseClassType;
+    bool m_forSmartPointer;
+};
 
 /**
  *   Base class for all generators. The default implementations does nothing,
@@ -160,6 +198,14 @@ public:
     *   \see #write
     */
     bool generate();
+
+
+    /// Generates a file for given AbstractMetaClass or AbstractMetaType (smart pointer case).
+    bool generateFileForContext(GeneratorContext &context);
+
+    /// Returns the file base name for a smart pointer.
+    QString getFileNameBaseForSmartPointer(const AbstractMetaType *smartPointerType,
+                                           const AbstractMetaClass *smartPointerClass) const;
 
     /// Returns the number of generated items
     int numGenerated() const;
@@ -278,14 +324,16 @@ public:
     QString minimalConstructor(const TypeEntry* type) const;
     QString minimalConstructor(const AbstractMetaType* type) const;
     QString minimalConstructor(const AbstractMetaClass* metaClass) const;
+
 protected:
     /**
-     *   Returns the file name used to write the binding code of an AbstractMetaClass.
-     *   \param metaClass the AbstractMetaClass for which the file name must be
-     *   returned
+     *   Returns the file name used to write the binding code of an AbstractMetaClass/Type.
+     *   \param context the GeneratorContext which contains an AbstractMetaClass or AbstractMetaType
+     *   for which the file name must be returned
      *   \return the file name used to write the binding code for the class
      */
-    virtual QString fileNameForClass(const AbstractMetaClass* metaClass) const = 0;
+    virtual QString fileNamePrefix() const = 0;
+    virtual QString fileNameForContext(GeneratorContext &context) const = 0;
 
 
     virtual bool doSetup(const QMap<QString, QString>& args) = 0;
@@ -296,7 +344,7 @@ protected:
      *   \param  s   text stream to write the generated output
      *   \param  metaClass  the class that should be generated
      */
-    virtual void generateClass(QTextStream& s, const AbstractMetaClass* metaClass) = 0;
+    virtual void generateClass(QTextStream& s, GeneratorContext &classContext) = 0;
     virtual bool finishGeneration() = 0;
 
     /**
@@ -311,16 +359,18 @@ protected:
     virtual QString subDirectoryForPackage(QString packageName = QString()) const;
 
     QList<const AbstractMetaType*> instantiatedContainers() const;
+    QList<const AbstractMetaType*> instantiatedSmartPointers() const;
 
-    static QString getSimplifiedContainerTypeName(const AbstractMetaType* type);
-    void addInstantiatedContainers(const AbstractMetaType *type, const QString &context);
+    static QString getSimplifiedContainerTypeName(const AbstractMetaType *type);
+    void addInstantiatedContainersAndSmartPointers(const AbstractMetaType *type,
+                                                   const QString &context);
 
 private:
     struct GeneratorPrivate;
     GeneratorPrivate* m_d;
-    void collectInstantiatedContainers(const AbstractMetaFunction* func);
-    void collectInstantiatedContainers(const AbstractMetaClass* metaClass);
-    void collectInstantiatedContainers();
+    void collectInstantiatedContainersAndSmartPointers(const AbstractMetaFunction* func);
+    void collectInstantiatedContainersAndSmartPointers(const AbstractMetaClass *metaClass);
+    void collectInstantiatedContainersAndSmartPointers();
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Generator::Options)

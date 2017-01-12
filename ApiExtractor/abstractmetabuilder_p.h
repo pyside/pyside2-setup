@@ -159,6 +159,7 @@ public:
     AbstractMetaBuilder *q;
     AbstractMetaClassList m_metaClasses;
     AbstractMetaClassList m_templates;
+    AbstractMetaClassList m_smartPointers;
     AbstractMetaFunctionList m_globalFunctions;
     AbstractMetaEnumList m_globalEnums;
 

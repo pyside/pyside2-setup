@@ -54,6 +54,7 @@ class StackElement
             ContainerTypeEntry          = 0xa,
             FunctionTypeEntry           = 0xb,
             CustomTypeEntry             = 0xc,
+            SmartPointerTypeEntry       = 0xd,
             TypeEntryMask               = 0xf,
 
             // Documentation tags
@@ -140,6 +141,10 @@ public:
 
 private:
     bool startElement(const QStringRef& localName, const QXmlStreamAttributes& atts);
+    bool handleSmartPointerEntry(StackElement *element,
+                                 QHash<QString, QString> &attributes,
+                                 const QString &name,
+                                 double since);
     bool endElement(const QStringRef& localName);
     template <class String> // QString/QStringRef
     bool characters(const String &ch);

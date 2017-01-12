@@ -990,9 +990,21 @@ QtDocGenerator::~QtDocGenerator()
     delete m_docParser;
 }
 
-QString QtDocGenerator::fileNameForClass(const AbstractMetaClass* cppClass) const
+QString QtDocGenerator::fileNamePrefix() const
 {
-    return getClassTargetFullName(cppClass, false) + QLatin1String(".rst");
+    return QLatin1String(".rst");
+}
+
+QString QtDocGenerator::fileNameForContext(GeneratorContext &context) const
+{
+    const AbstractMetaClass *metaClass = context.metaClass();
+    if (!context.forSmartPointer()) {
+        return getClassTargetFullName(metaClass, false) + fileNamePrefix();
+    } else {
+        const AbstractMetaType *smartPointerType = context.preciseType();
+        QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType, metaClass);
+        return fileNameBase + fileNamePrefix();
+    }
 }
 
 void QtDocGenerator::writeFormatedText(QTextStream& s, const Documentation& doc, const AbstractMetaClass* metaClass)
@@ -1040,11 +1052,12 @@ static void writeInheritedByList(QTextStream& s, const AbstractMetaClass* metaCl
     s << classes.join(QLatin1String(", ")) << endl << endl;
 }
 
-void QtDocGenerator::generateClass(QTextStream& s, const AbstractMetaClass* metaClass)
+void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
 {
+    AbstractMetaClass *metaClass = classContext.metaClass();
     qCDebug(lcShiboken).noquote().nospace() << "Generating Documentation for " << metaClass->fullName();
 
-    m_packages[metaClass->package()] << fileNameForClass(metaClass);
+    m_packages[metaClass->package()] << fileNameForContext(classContext);
 
     m_docParser->setPackageName(metaClass->package());
     m_docParser->fillDocumentation(const_cast<AbstractMetaClass*>(metaClass));

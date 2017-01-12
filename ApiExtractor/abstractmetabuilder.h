@@ -56,6 +56,7 @@ public:
 
     AbstractMetaClassList classes() const;
     AbstractMetaClassList templates() const;
+    AbstractMetaClassList smartPointers() const;
     AbstractMetaFunctionList globalFunctions() const;
     AbstractMetaEnumList globalEnums() const;
     // QtScript

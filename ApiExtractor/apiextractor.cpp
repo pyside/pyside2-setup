@@ -148,6 +148,12 @@ AbstractMetaClassList ApiExtractor::classes() const
     return m_builder->classes();
 }
 
+AbstractMetaClassList ApiExtractor::smartPointers() const
+{
+    Q_ASSERT(m_builder);
+    return m_builder->smartPointers();
+}
+
 AbstractMetaClassList ApiExtractor::classesTopologicalSorted(const Dependencies &additionalDependencies) const
 {
     Q_ASSERT(m_builder);
