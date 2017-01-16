@@ -339,12 +339,7 @@ static PyObject* getFromType(PyTypeObject* type, PyObject* name)
             if (attr)
                 return attr;
         }
-        // PYSIDE-79: needed to capture this code path - attr not found
-        return PyErr_Format(PyExc_RuntimeError, "*** Attribute '%s' not found!",
-                            Shiboken::String::toCString(name));
     }
-    Py_INCREF(attr); // PYSIDE-79: missing incref. PyDict_GetItem borrows a ref.
-    // This was not central to the error, but caused sometimes later crashes.
     return attr;
 }
 
