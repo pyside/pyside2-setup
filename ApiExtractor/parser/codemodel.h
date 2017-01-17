@@ -285,6 +285,8 @@ class _ScopeModelItem: public _CodeModelItem
 public:
     DECLARE_MODEL_NODE(Scope)
 
+    ~_ScopeModelItem();
+
     ClassList classes() const;
     EnumList enums() const;
     FunctionDefinitionList functionDefinitions() const;
@@ -374,6 +376,7 @@ public:
         : _ScopeModelItem(model, kind), _M_classType(CodeModel::Class) {}
     explicit _ClassModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
         : _ScopeModelItem(model, name, kind), _M_classType(CodeModel::Class) {}
+    ~_ClassModelItem();
 
     QStringList baseClasses() const;
 
@@ -412,6 +415,7 @@ public:
         : _ScopeModelItem(model, kind) {}
     explicit _NamespaceModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
         : _ScopeModelItem(model, name, kind) {}
+    ~_NamespaceModelItem();
 
     NamespaceList namespaces() const;
 
@@ -438,6 +442,7 @@ public:
         : _NamespaceModelItem(model, kind) {}
     explicit _FileModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
         : _NamespaceModelItem(model, name, kind) {}
+    ~_FileModelItem();
 
 private:
     _FileModelItem(const _FileModelItem &other);
@@ -453,6 +458,7 @@ public:
         : _CodeModelItem(model, kind), _M_defaultValue(false) {}
     explicit _ArgumentModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
         : _CodeModelItem(model, name, kind), _M_defaultValue(false) {}
+    ~_ArgumentModelItem();
 
     TypeInfo type() const;
     void setType(const TypeInfo &type);
@@ -485,6 +491,7 @@ public:
         : _CodeModelItem(model, kind), _M_accessPolicy(CodeModel::Public), _M_flags(0) {}
     explicit _MemberModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
         : _CodeModelItem(model, name, kind), _M_accessPolicy(CodeModel::Public), _M_flags(0) {}
+    ~_MemberModelItem();
 
     bool isConstant() const;
     void setConstant(bool isConstant);
@@ -555,6 +562,7 @@ public:
         : _MemberModelItem(model, kind), _M_functionType(CodeModel::Normal), _M_flags(0) {}
     explicit _FunctionModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
         : _MemberModelItem(model, name, kind), _M_functionType(CodeModel::Normal), _M_flags(0) {}
+    ~_FunctionModelItem();
 
     ArgumentList arguments() const;
 
@@ -609,6 +617,7 @@ public:
         : _FunctionModelItem(model, kind) {}
     explicit _FunctionDefinitionModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
         : _FunctionModelItem(model, name, kind) {}
+    ~_FunctionDefinitionModelItem();
 };
 
 class _VariableModelItem: public _MemberModelItem
@@ -648,6 +657,7 @@ public:
         : _CodeModelItem(model, kind), _M_accessPolicy(CodeModel::Public)  {}
     explicit _EnumModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
         : _CodeModelItem(model, name, kind), _M_accessPolicy(CodeModel::Public)  {}
+    ~_EnumModelItem();
 
     CodeModel::AccessPolicy accessPolicy() const;
     void setAccessPolicy(CodeModel::AccessPolicy accessPolicy);
@@ -673,6 +683,7 @@ public:
         : _CodeModelItem(model, kind) {}
     explicit _EnumeratorModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
         : _CodeModelItem(model, name, kind) {}
+    ~_EnumeratorModelItem();
 
     QString value() const;
     void setValue(const QString &value);
@@ -690,6 +701,7 @@ public:
         : _CodeModelItem(model, kind), _M_defaultValue(false) {}
     explicit _TemplateParameterModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
         : _CodeModelItem(model, name, kind), _M_defaultValue(false) {}
+    ~_TemplateParameterModelItem();
 
     TypeInfo type() const;
     void setType(const TypeInfo &type);

@@ -331,6 +331,10 @@ void _CodeModelItem::setEndPosition(int line, int column)
 }
 
 // ---------------------------------------------------------------------------
+_ClassModelItem::~_ClassModelItem()
+{
+}
+
 QStringList _ClassModelItem::baseClasses() const
 {
     return _M_baseClasses;
@@ -393,6 +397,10 @@ FunctionModelItem _ScopeModelItem::declaredFunction(FunctionModelItem item)
     }
 
     return FunctionModelItem();
+}
+
+_ScopeModelItem::~_ScopeModelItem()
+{
 }
 
 ClassList _ScopeModelItem::classes() const
@@ -566,6 +574,10 @@ FunctionDefinitionList _ScopeModelItem::findFunctionDefinitions(const QString &n
 }
 
 // ---------------------------------------------------------------------------
+_NamespaceModelItem::~_NamespaceModelItem()
+{
+}
+
 NamespaceList _NamespaceModelItem::namespaces() const
 {
     return _M_namespaces.values();
@@ -587,7 +599,15 @@ NamespaceModelItem _NamespaceModelItem::findNamespace(const QString &name) const
     return _M_namespaces.value(name);
 }
 
+_FileModelItem::~_FileModelItem()
+{
+}
+
 // ---------------------------------------------------------------------------
+_ArgumentModelItem::~_ArgumentModelItem()
+{
+}
+
 TypeInfo _ArgumentModelItem::type() const
 {
     return _M_type;
@@ -609,6 +629,10 @@ void _ArgumentModelItem::setDefaultValue(bool defaultValue)
 }
 
 // ---------------------------------------------------------------------------
+_FunctionModelItem::~_FunctionModelItem()
+{
+}
+
 bool _FunctionModelItem::isSimilar(FunctionModelItem other) const
 {
     if (name() != other->name())
@@ -722,6 +746,10 @@ void _FunctionModelItem::setInvokable(bool isInvokable)
     _M_isInvokable = isInvokable;
 }
 
+_FunctionDefinitionModelItem::~_FunctionDefinitionModelItem()
+{
+}
+
 // ---------------------------------------------------------------------------
 TypeInfo _TypeAliasModelItem::type() const
 {
@@ -737,6 +765,10 @@ void _TypeAliasModelItem::setType(const TypeInfo &type)
 CodeModel::AccessPolicy _EnumModelItem::accessPolicy() const
 {
     return _M_accessPolicy;
+}
+
+_EnumModelItem::~_EnumModelItem()
+{
 }
 
 void _EnumModelItem::setAccessPolicy(CodeModel::AccessPolicy accessPolicy)
@@ -770,6 +802,10 @@ void _EnumModelItem::setAnonymous(bool anonymous)
 }
 
 // ---------------------------------------------------------------------------
+_EnumeratorModelItem::~_EnumeratorModelItem()
+{
+}
+
 QString _EnumeratorModelItem::value() const
 {
     return _M_value;
@@ -781,6 +817,10 @@ void _EnumeratorModelItem::setValue(const QString &value)
 }
 
 // ---------------------------------------------------------------------------
+_TemplateParameterModelItem::~_TemplateParameterModelItem()
+{
+}
+
 TypeInfo _TemplateParameterModelItem::type() const
 {
     return _M_type;
@@ -815,6 +855,10 @@ void _MemberModelItem::setType(const TypeInfo &type)
 CodeModel::AccessPolicy _MemberModelItem::accessPolicy() const
 {
     return _M_accessPolicy;
+}
+
+_MemberModelItem::~_MemberModelItem()
+{
 }
 
 void _MemberModelItem::setAccessPolicy(CodeModel::AccessPolicy accessPolicy)
