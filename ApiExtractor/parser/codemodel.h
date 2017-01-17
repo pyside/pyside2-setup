@@ -91,15 +91,7 @@ private:
 class TypeInfo
 {
 public:
-    TypeInfo(const TypeInfo &other)
-            : flags(other.flags),
-            m_qualifiedName(other.m_qualifiedName),
-            m_arrayElements(other.m_arrayElements),
-            m_arguments(other.m_arguments)
-    {}
-
-    TypeInfo():
-            flags(0) {}
+    TypeInfo() : flags(0) {}
 
     QStringList qualifiedName() const
     {
@@ -196,6 +188,12 @@ public:
     static TypeInfo resolveType(TypeInfo const &__type, CodeModelItem __scope);
 
 private:
+    static TypeInfo resolveType(CodeModelItem item, TypeInfo const &__type, CodeModelItem __scope);
+
+    QStringList m_qualifiedName;
+    QStringList m_arrayElements;
+    QList<TypeInfo> m_arguments;
+
     union {
         uint flags;
 
@@ -208,12 +206,6 @@ private:
             uint m_padding: 22;
         };
     };
-
-    static TypeInfo resolveType(CodeModelItem item, TypeInfo const &__type, CodeModelItem __scope);
-
-    QStringList m_qualifiedName;
-    QStringList m_arrayElements;
-    QList<TypeInfo> m_arguments;
 };
 
 class _CodeModelItem
