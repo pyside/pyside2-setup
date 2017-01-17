@@ -39,6 +39,8 @@
 #include <QtCore/QStringList>
 #include <QtCore/QVector>
 
+QT_FORWARD_DECLARE_CLASS(QDebug)
+
 #define DECLARE_MODEL_NODE(k) \
     enum { __node_kind = Kind_##k };
 
@@ -87,6 +89,10 @@ private:
     CodeModel(const CodeModel &other);
     void operator = (const CodeModel &other);
 };
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const CodeModel *m);
+#endif
 
 class TypeInfo
 {
@@ -208,6 +214,10 @@ private:
     };
 };
 
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const TypeInfo &t);
+#endif
+
 class _CodeModelItem
 {
     Q_DISABLE_COPY(_CodeModelItem)
@@ -262,6 +272,11 @@ public:
         return _M_model;
     }
 
+#ifndef QT_NO_DEBUG_STREAM
+    static void formatKind(QDebug &d, int k);
+    virtual void formatDebug(QDebug &d) const;
+#endif
+
 protected:
     explicit _CodeModelItem(CodeModel *model, int kind);
     explicit _CodeModelItem(CodeModel *model, const QString &name, int kind);
@@ -279,6 +294,10 @@ private:
     QString _M_fileName;
     QStringList _M_scope;
 };
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const _CodeModelItem *t);
+#endif
 
 class _ScopeModelItem: public _CodeModelItem
 {
@@ -348,11 +367,19 @@ public:
 
     FunctionModelItem declaredFunction(FunctionModelItem item);
 
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+#endif
+
 protected:
     explicit _ScopeModelItem(CodeModel *model, int kind = __node_kind)
         : _CodeModelItem(model, kind) {}
     explicit _ScopeModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
         : _CodeModelItem(model, name, kind) {}
+
+#ifndef QT_NO_DEBUG_STREAM
+    void formatScopeItemsDebug(QDebug &d) const;
+#endif
 
 private:
     QHash<QString, ClassModelItem> _M_classes;
@@ -398,6 +425,10 @@ public:
         return _M_propertyDeclarations;
     }
 
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+#endif
+
 private:
     QStringList _M_baseClasses;
     TemplateParameterList _M_templateParameters;
@@ -428,6 +459,10 @@ public:
     {
         return _M_namespaces;
     };
+
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+#endif
 
 private:
     QHash<QString, NamespaceModelItem> _M_namespaces;
@@ -475,6 +510,10 @@ public:
     {
         _M_defaultValueExpression = expr;
     }
+
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+#endif
 
 private:
     TypeInfo _M_type;
@@ -532,6 +571,10 @@ public:
 
     TypeInfo type() const;
     void setType(const TypeInfo &type);
+
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+#endif
 
 private:
     TemplateParameterList _M_templateParameters;
@@ -592,6 +635,10 @@ public:
 
     bool isSimilar(FunctionModelItem other) const;
 
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+#endif
+
 private:
     ArgumentList _M_arguments;
     CodeModel::FunctionType _M_functionType;
@@ -644,6 +691,10 @@ public:
     TypeInfo type() const;
     void setType(const TypeInfo &type);
 
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+#endif
+
 private:
     TypeInfo _M_type;
 };
@@ -668,6 +719,10 @@ public:
     bool isAnonymous() const;
     void setAnonymous(bool anonymous);
 
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+#endif
+
 private:
     CodeModel::AccessPolicy _M_accessPolicy;
     EnumeratorList _M_enumerators;
@@ -687,6 +742,10 @@ public:
 
     QString value() const;
     void setValue(const QString &value);
+
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+#endif
 
 private:
     QString _M_value;
@@ -708,6 +767,10 @@ public:
 
     bool defaultValue() const;
     void setDefaultValue(bool defaultValue);
+
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+#endif
 
 private:
     TypeInfo _M_type;
