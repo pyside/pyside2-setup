@@ -654,9 +654,9 @@ public:
     DECLARE_MODEL_NODE(Enum)
 
     explicit _EnumModelItem(CodeModel *model, int kind = __node_kind)
-        : _CodeModelItem(model, kind), _M_accessPolicy(CodeModel::Public)  {}
+        : _CodeModelItem(model, kind), _M_accessPolicy(CodeModel::Public), _M_anonymous(false)  {}
     explicit _EnumModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
-        : _CodeModelItem(model, name, kind), _M_accessPolicy(CodeModel::Public)  {}
+        : _CodeModelItem(model, name, kind), _M_accessPolicy(CodeModel::Public), _M_anonymous(false) {}
     ~_EnumModelItem();
 
     CodeModel::AccessPolicy accessPolicy() const;
