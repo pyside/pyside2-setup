@@ -583,60 +583,86 @@ void DynamicQMetaObject::DynamicQMetaObjectPrivate::writeMethodsData(const QList
     *prtIndex = index;
 }
 
-void DynamicQMetaObject::parsePythonType(PyTypeObject* type)
+void DynamicQMetaObject::parsePythonType(PyTypeObject *type)
 {
-    PyObject* attrs = type->tp_dict;
-    PyObject* key = 0;
-    PyObject* value = 0;
-    Py_ssize_t pos = 0;
-
-    typedef std::pair<const char*, PyObject*> PropPair;
-    QLinkedList<PropPair> properties;
-
-    Shiboken::AutoDecRef slotAttrName(Shiboken::String::fromCString(PYSIDE_SLOT_LIST_ATTR));
-
-    while (PyDict_Next(attrs, &pos, &key, &value)) {
-        if (Property::checkType(value)) {
-            // Leave the properties to be register after signals because they may depend on notify signals
-            int index = d.superdata->indexOfProperty(Shiboken::String::toCString(key));
-            if (index == -1)
-                properties << PropPair(Shiboken::String::toCString(key), value);
-        } else if (Signal::checkType(value)) { // Register signals
-            PySideSignal* data = reinterpret_cast<PySideSignal*>(value);
-            const char* signalName = Shiboken::String::toCString(key);
-            data->signalName = strdup(signalName);
-            QByteArray sig;
-            sig.reserve(128);
-            for (int i = 0; i < data->signaturesSize; ++i) {
-                sig = signalName;
-                sig += '(';
-                if (data->signatures[i])
-                    sig += data->signatures[i];
-                sig += ')';
-                if (d.superdata->indexOfSignal(sig) == -1)
-                    addSignal(sig, "void");
-            }
-        } else if (PyFunction_Check(value)) { // Register slots
-            if (PyObject_HasAttr(value, slotAttrName)) {
-                PyObject* signatureList = PyObject_GetAttr(value, slotAttrName);
-                for(Py_ssize_t i = 0, i_max = PyList_Size(signatureList); i < i_max; ++i) {
-                    PyObject* signature = PyList_GET_ITEM(signatureList, i);
-                    QByteArray sig(Shiboken::String::toCString(signature));
-                    //slot the slot type and signature
-                    QList<QByteArray> slotInfo = sig.split(' ');
-                    int index = d.superdata->indexOfSlot(slotInfo[1]);
-                    if (index == -1)
-                        addSlot(slotInfo[1], slotInfo[0]);
-                }
-            }
+    // Get all non-QObject-derived base types in method resolution order, filtering out the types
+    // that can't have signals, slots or properties.
+    // This enforces registering of all signals and slots at type parsing time, and not later at
+    // signal connection time, thus making sure no method indices change which would break
+    // existing connections.
+    const PyObject *mro = type->tp_mro;
+    const Py_ssize_t basesCount = PyTuple_GET_SIZE(mro);
+    PyTypeObject *qObjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
+    QVector<PyTypeObject *> basesToCheck;
+    for (Py_ssize_t i = 0; i < basesCount; ++i) {
+        PyTypeObject *baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, i));
+        if (PyType_IsSubtype(baseType, qObjectType)
+                || baseType == reinterpret_cast<PyTypeObject *>(&SbkObject_Type)
+                || baseType == reinterpret_cast<PyTypeObject *>(&PyBaseObject_Type)) {
+            continue;
+        } else {
+            basesToCheck.append(baseType);
         }
     }
 
-    // Register properties
-    foreach (const PropPair &propPair, properties)
-        addProperty(propPair.first, propPair.second);
+    // Prepend the actual type that we are parsing.
+    basesToCheck.prepend(type);
 
+    Shiboken::AutoDecRef slotAttrName(Shiboken::String::fromCString(PYSIDE_SLOT_LIST_ATTR));
+    for (int baseIndex = 0, baseEnd = basesToCheck.size(); baseIndex < baseEnd; ++baseIndex) {
+        PyTypeObject *baseType = basesToCheck[baseIndex];
+        PyObject *attrs = baseType->tp_dict;
+        PyObject *key = 0;
+        PyObject *value = 0;
+        Py_ssize_t pos = 0;
 
+        typedef std::pair<const char *, PyObject *> PropPair;
+        QVector<PropPair> properties;
+
+        while (PyDict_Next(attrs, &pos, &key, &value)) {
+            if (Property::checkType(value)) {
+                // Leave the properties to be registered after signals because they may depend on
+                // notify signals.
+                int index = d.superdata->indexOfProperty(Shiboken::String::toCString(key));
+                if (index == -1)
+                    properties << PropPair(Shiboken::String::toCString(key), value);
+            } else if (Signal::checkType(value)) {
+                // Register signals.
+                PySideSignal *data = reinterpret_cast<PySideSignal *>(value);
+                const char *signalName = Shiboken::String::toCString(key);
+                data->signalName = strdup(signalName);
+                QByteArray sig;
+                sig.reserve(128);
+                for (int i = 0; i < data->signaturesSize; ++i) {
+                    sig = signalName;
+                    sig += '(';
+                    if (data->signatures[i])
+                        sig += data->signatures[i];
+                    sig += ')';
+                    if (d.superdata->indexOfSignal(sig) == -1)
+                        addSignal(sig, "void");
+                }
+            } else if (PyFunction_Check(value)) {
+                // Register slots.
+                if (PyObject_HasAttr(value, slotAttrName)) {
+                    PyObject *signatureList = PyObject_GetAttr(value, slotAttrName);
+                    for (Py_ssize_t i = 0, i_max = PyList_Size(signatureList); i < i_max; ++i) {
+                        PyObject *signature = PyList_GET_ITEM(signatureList, i);
+                        QByteArray sig(Shiboken::String::toCString(signature));
+                        // Split the slot type and its signature.
+                        QList<QByteArray> slotInfo = sig.split(' ');
+                        int index = d.superdata->indexOfSlot(slotInfo[1]);
+                        if (index == -1)
+                            addSlot(slotInfo[1], slotInfo[0]);
+                    }
+                }
+            }
+        }
+
+        // Register properties
+        foreach (const PropPair &propPair, properties)
+            addProperty(propPair.first, propPair.second);
+    }
 }
 
 /*!

@@ -74,7 +74,7 @@ private:
     class DynamicQMetaObjectPrivate;
     DynamicQMetaObjectPrivate* m_d;
 
-    void parsePythonType(PyTypeObject* type);
+    void parsePythonType(PyTypeObject *type);
 };
 
 
