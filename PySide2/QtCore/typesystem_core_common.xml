@@ -1775,6 +1775,11 @@
     </add-function>
   </value-type> -->
 
+  <value-type name="QMimeType" />
+  <object-type name="QMimeDatabase">
+    <enum-type name="MatchMode" />
+  </object-type>
+
   <value-type name="QLocale">
     <enum-type name="Country" />
     <enum-type name="FormatType"/>

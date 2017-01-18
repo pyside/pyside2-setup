@@ -75,6 +75,8 @@ ${QtCore_GEN_DIR}/qmetaobject_connection_wrapper.cpp
 ${QtCore_GEN_DIR}/qmetaobject_wrapper.cpp
 ${QtCore_GEN_DIR}/qmetaproperty_wrapper.cpp
 ${QtCore_GEN_DIR}/qmimedata_wrapper.cpp
+${QtCore_GEN_DIR}/qmimedatabase_wrapper.cpp
+${QtCore_GEN_DIR}/qmimetype_wrapper.cpp
 ${QtCore_GEN_DIR}/qmodelindex_wrapper.cpp
 ${QtCore_GEN_DIR}/qmutex_wrapper.cpp
 ${QtCore_GEN_DIR}/qmutexlocker_wrapper.cpp
