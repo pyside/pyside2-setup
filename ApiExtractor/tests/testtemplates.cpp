@@ -332,7 +332,7 @@ void TestTemplates::testTypedefOfInstantiationOfTemplateClass()
     QVERIFY(one);
     QCOMPARE(one->templateBaseClass(), base);
     QCOMPARE(one->functions().count(), base->functions().count());
-    QVERIFY(one->isTypeAlias());
+    QVERIFY(one->isTypeDef());
     const ComplexTypeEntry* oneType = one->typeEntry();
     const ComplexTypeEntry* baseType = base->typeEntry();
     QCOMPARE(oneType->baseContainerType(), baseType);

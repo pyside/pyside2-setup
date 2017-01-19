@@ -47,7 +47,7 @@ class _FunctionModelItem;
 class _NamespaceModelItem;
 class _ScopeModelItem;
 class _TemplateParameterModelItem;
-class _TypeAliasModelItem;
+class _TypeDefModelItem;
 class _VariableModelItem;
 class _MemberModelItem;
 class TypeInfo;
@@ -63,7 +63,7 @@ typedef QSharedPointer<_FunctionModelItem> FunctionModelItem;
 typedef QSharedPointer<_NamespaceModelItem> NamespaceModelItem;
 typedef QSharedPointer<_ScopeModelItem> ScopeModelItem;
 typedef QSharedPointer<_TemplateParameterModelItem> TemplateParameterModelItem;
-typedef QSharedPointer<_TypeAliasModelItem> TypeAliasModelItem;
+typedef QSharedPointer<_TypeDefModelItem> TypeDefModelItem;
 typedef QSharedPointer<_VariableModelItem> VariableModelItem;
 typedef QSharedPointer<_MemberModelItem> MemberModelItem;
 
@@ -78,7 +78,7 @@ typedef QList<FunctionModelItem> FunctionList;
 typedef QList<NamespaceModelItem> NamespaceList;
 typedef QList<ScopeModelItem> ScopeList;
 typedef QList<TemplateParameterModelItem> TemplateParameterList;
-typedef QList<TypeAliasModelItem> TypeAliasList;
+typedef QList<TypeDefModelItem> TypeDefList;
 typedef QList<VariableModelItem> VariableList;
 typedef QList<MemberModelItem> MemberList;
 

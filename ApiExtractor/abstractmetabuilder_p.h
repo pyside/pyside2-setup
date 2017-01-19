@@ -66,8 +66,8 @@ public:
     void figureOutDefaultEnumArguments();
 
     void addAbstractMetaClass(AbstractMetaClass *cls);
-    AbstractMetaClass *traverseTypeAlias(const FileModelItem &dom,
-                                         const TypeAliasModelItem &item);
+    AbstractMetaClass *traverseTypeDef(const FileModelItem &dom,
+                                       const TypeDefModelItem &typeDef);
     AbstractMetaClass *traverseClass(const FileModelItem &dom,
                                      const ClassModelItem &item);
     AbstractMetaClass *currentTraversedClass(ScopeModelItem item);

@@ -1026,7 +1026,7 @@ public:
             : TypeEntry(name, PrimitiveType, vr),
               m_preferredConversion(true),
               m_preferredTargetLangType(true),
-              m_aliasedTypeEntry(0)
+              m_referencedTypeEntry(0)
     {
     }
 
@@ -1063,28 +1063,28 @@ public:
 
     /**
      *   The PrimitiveTypeEntry pointed by this type entry if it
-     *   represents an alias (i.e. a typedef).
-     *   /return the type pointed by the alias, or a null pointer
-     *   if the current object is not an alias
+     *   represents a typedef).
+     *   /return the type referenced by the typedef, or a null pointer
+     *   if the current object is not an typedef
      */
-    PrimitiveTypeEntry* aliasedTypeEntry() const { return m_aliasedTypeEntry; }
+    PrimitiveTypeEntry* referencedTypeEntry() const { return m_referencedTypeEntry; }
 
     /**
-     *   Defines type aliased by this entry.
-     *   /param aliasedTypeEntry type aliased by this entry
+     *   Defines type referenced by this entry.
+     *   /param referencedTypeEntry type referenced by this entry
      */
-    void setAliasedTypeEntry(PrimitiveTypeEntry* aliasedTypeEntry)
+    void setReferencedTypeEntry(PrimitiveTypeEntry* referencedTypeEntry)
     {
-        m_aliasedTypeEntry = aliasedTypeEntry;
+        m_referencedTypeEntry = referencedTypeEntry;
     }
 
     /**
      *   Finds the most basic primitive type that the typedef represents,
-     *   i.e. a type that is not an alias.
-     *   /return the most basic non-aliased primitive type represented
+     *   i.e. a type that is not an typedef'ed.
+     *   /return the most basic non-typedef'ed primitive type represented
      *   by this typedef
      */
-    PrimitiveTypeEntry* basicAliasedTypeEntry() const;
+    PrimitiveTypeEntry* basicReferencedTypeEntry() const;
 
     virtual bool preferredConversion() const
     {
@@ -1112,7 +1112,7 @@ private:
     QString m_defaultConstructor;
     uint m_preferredConversion : 1;
     uint m_preferredTargetLangType : 1;
-    PrimitiveTypeEntry* m_aliasedTypeEntry;
+    PrimitiveTypeEntry* m_referencedTypeEntry;
 };
 
 struct EnumValueRedirection

@@ -520,11 +520,11 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 
     // Go through all typedefs to see if we have defined any
     // specific typedefs to be used as classes.
-    TypeAliasList typeAliases = dom->typeAliases();
-    ReportHandler::setProgressReference(typeAliases);
-    foreach (TypeAliasModelItem typeAlias, typeAliases) {
+    TypeDefList typeDefs = dom->typeDefs();
+    ReportHandler::setProgressReference(typeDefs);
+    foreach (const TypeDefModelItem &typeDef, typeDefs) {
         ReportHandler::progress(QLatin1String("Resolving typedefs..."));
-        AbstractMetaClass* cls = traverseTypeAlias(dom, typeAlias);
+        AbstractMetaClass* cls = traverseTypeDef(dom, typeDef);
         addAbstractMetaClass(cls);
     }
 
@@ -810,9 +810,9 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
 
     // Go through all typedefs to see if we have defined any
     // specific typedefs to be used as classes.
-    TypeAliasList typeAliases = namespaceItem->typeAliases();
-    foreach (const TypeAliasModelItem &typeAlias, typeAliases) {
-        AbstractMetaClass* cls = traverseTypeAlias(dom, typeAlias);
+    const TypeDefList typeDefs = namespaceItem->typeDefs();
+    foreach (const TypeDefModelItem &typeDef, typeDefs) {
+        AbstractMetaClass *cls = traverseTypeDef(dom, typeDef);
         if (cls) {
             metaClass->addInnerClass(cls);
             cls->setEnclosingClass(metaClass);
@@ -1162,11 +1162,11 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(EnumModelItem enumIte
     return metaEnum;
 }
 
-AbstractMetaClass* AbstractMetaBuilderPrivate::traverseTypeAlias(const FileModelItem &dom,
-                                                                 const TypeAliasModelItem &typeAlias)
+AbstractMetaClass* AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelItem &dom,
+                                                               const TypeDefModelItem &typeDef)
 {
     TypeDatabase* types = TypeDatabase::instance();
-    QString className = stripTemplateArgs(typeAlias->name());
+    QString className = stripTemplateArgs(typeDef->name());
 
     QString fullClassName = className;
     // we have an inner class
@@ -1180,8 +1180,8 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::traverseTypeAlias(const FileModel
     // TypeEntry
     PrimitiveTypeEntry* ptype = types->findPrimitiveType(className);
     if (ptype) {
-        QString typeAliasName = typeAlias->type().qualifiedName()[0];
-        ptype->setAliasedTypeEntry(types->findPrimitiveType(typeAliasName));
+        QString typeDefName = typeDef->type().qualifiedName()[0];
+        ptype->setReferencedTypeEntry(types->findPrimitiveType(typeDefName));
         return 0;
     }
 
@@ -1192,17 +1192,17 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::traverseTypeAlias(const FileModel
         return 0;
 
     if (type->isObject())
-        static_cast<ObjectTypeEntry *>(type)->setQObject(isQObject(dom, stripTemplateArgs(typeAlias->type().qualifiedName().join(colonColon()))));
+        static_cast<ObjectTypeEntry *>(type)->setQObject(isQObject(dom, stripTemplateArgs(typeDef->type().qualifiedName().join(colonColon()))));
 
     AbstractMetaClass *metaClass = q->createMetaClass();
-    metaClass->setTypeAlias(true);
+    metaClass->setTypeDef(true);
     metaClass->setTypeEntry(type);
-    metaClass->setBaseClassNames(QStringList() << typeAlias->type().qualifiedName().join(colonColon()));
+    metaClass->setBaseClassNames(QStringList() << typeDef->type().qualifiedName().join(colonColon()));
     *metaClass += AbstractMetaAttributes::Public;
 
     // Set the default include file name
     if (!type->include().isValid())
-        setInclude(type, typeAlias->fileName());
+        setInclude(type, typeDef->fileName());
 
     fillAddedFunctions(metaClass);
 
@@ -1301,9 +1301,9 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
 
     // Go through all typedefs to see if we have defined any
     // specific typedefs to be used as classes.
-    TypeAliasList typeAliases = classItem->typeAliases();
-    foreach (const TypeAliasModelItem &typeAlias, typeAliases) {
-        AbstractMetaClass* cls = traverseTypeAlias(dom, typeAlias);
+    const TypeDefList typeDefs = classItem->typeDefs();
+    foreach (const TypeDefModelItem &typeDef, typeDefs) {
+        AbstractMetaClass *cls = traverseTypeDef(dom, typeDef);
         if (cls) {
             cls->setEnclosingClass(metaClass);
             addAbstractMetaClass(cls);
@@ -2777,7 +2777,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
     QList<TypeParser::Info> targs = info.template_instantiations;
     QList<AbstractMetaType*> templateTypes;
 
-    if (subclass->isTypeAlias()) {
+    if (subclass->isTypeDef()) {
         subclass->setHasCloneOperator(templateClass->hasCloneOperator());
         subclass->setHasEqualsOperator(templateClass->hasEqualsOperator());
         subclass->setHasHashFunction(templateClass->hasHashFunction());
@@ -2863,7 +2863,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
         f->setDeclaringClass(subclass);
 
 
-        if (f->isConstructor() && subclass->isTypeAlias()) {
+        if (f->isConstructor() && subclass->isTypeDef()) {
             f->setName(subclass->name());
             f->setOriginalName(subclass->name());
         } else if (f->isConstructor()) {

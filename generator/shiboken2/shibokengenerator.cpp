@@ -627,8 +627,8 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func,
             result += QLatin1Char(objType);
         } else if (arg->type()->isPrimitive()) {
             const PrimitiveTypeEntry* ptype = (const PrimitiveTypeEntry*) arg->type()->typeEntry();
-            if (ptype->basicAliasedTypeEntry())
-                ptype = ptype->basicAliasedTypeEntry();
+            if (ptype->basicReferencedTypeEntry())
+                ptype = ptype->basicReferencedTypeEntry();
             if (m_formatUnits.contains(ptype->name()))
                 result += m_formatUnits[ptype->name()];
             else
@@ -666,8 +666,8 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry* type)
         baseName = QLatin1String("Sbk_") + type->name();
     } else if (type->isPrimitive()) {
         const PrimitiveTypeEntry* ptype = (const PrimitiveTypeEntry*) type;
-        while (ptype->basicAliasedTypeEntry())
-            ptype = ptype->basicAliasedTypeEntry();
+        while (ptype->basicReferencedTypeEntry())
+            ptype = ptype->basicReferencedTypeEntry();
         if (ptype->targetLangApiName() == ptype->name())
             baseName = pythonPrimitiveTypeName(ptype->name());
         else
@@ -756,8 +756,8 @@ QString ShibokenGenerator::converterObject(const TypeEntry* type)
         qDebug() << "Warning: the Qt5 primitive type is unknown" << type->qualifiedCppName();
         return QString::null;
     }
-    if (pte->basicAliasedTypeEntry())
-        pte = pte->basicAliasedTypeEntry();
+    if (pte->basicReferencedTypeEntry())
+        pte = pte->basicReferencedTypeEntry();
     if (pte->isPrimitive() && !pte->isCppPrimitive() && !pte->customConversion())
         return QString::fromLatin1("Shiboken::Conversions::PrimitiveTypeConverter<%1>()").arg(pte->qualifiedCppName());
 
@@ -831,8 +831,8 @@ QString ShibokenGenerator::pythonPrimitiveTypeName(const QString& cppTypeName)
 
 QString ShibokenGenerator::pythonPrimitiveTypeName(const PrimitiveTypeEntry* type)
 {
-    while (type->basicAliasedTypeEntry())
-        type = type->basicAliasedTypeEntry();
+    while (type->basicReferencedTypeEntry())
+        type = type->basicReferencedTypeEntry();
     return pythonPrimitiveTypeName(type->name());
 }
 
@@ -967,8 +967,8 @@ bool ShibokenGenerator::isUserPrimitive(const TypeEntry* type)
     if (!type->isPrimitive())
         return false;
     const PrimitiveTypeEntry* trueType = (const PrimitiveTypeEntry*) type;
-    if (trueType->basicAliasedTypeEntry())
-        trueType = trueType->basicAliasedTypeEntry();
+    if (trueType->basicReferencedTypeEntry())
+        trueType = trueType->basicReferencedTypeEntry();
     return trueType->isPrimitive() && !trueType->isCppPrimitive()
            && trueType->qualifiedCppName() != QLatin1String("std::string");
 }
@@ -987,8 +987,8 @@ bool ShibokenGenerator::isCppPrimitive(const TypeEntry* type)
     if (!type->isPrimitive())
         return false;
     const PrimitiveTypeEntry* trueType = (const PrimitiveTypeEntry*) type;
-    if (trueType->basicAliasedTypeEntry())
-        trueType = trueType->basicAliasedTypeEntry();
+    if (trueType->basicReferencedTypeEntry())
+        trueType = trueType->basicReferencedTypeEntry();
     return trueType->qualifiedCppName() == QLatin1String("std::string");
 }
 
@@ -2467,8 +2467,8 @@ QString ShibokenGenerator::getTypeIndexVariableName(const TypeEntry* type)
 {
     if (type->isCppPrimitive()) {
         const PrimitiveTypeEntry* trueType = (const PrimitiveTypeEntry*) type;
-        if (trueType->basicAliasedTypeEntry())
-            type = trueType->basicAliasedTypeEntry();
+        if (trueType->basicReferencedTypeEntry())
+            type = trueType->basicReferencedTypeEntry();
     }
     return QString::fromLatin1("SBK_%1_IDX").arg(_fixedCppTypeName(type->qualifiedCppName()).toUpper());
 }
@@ -2555,8 +2555,8 @@ bool ShibokenGenerator::isCppIntegralPrimitive(const TypeEntry* type)
     if (!type->isCppPrimitive())
         return false;
     const PrimitiveTypeEntry* trueType = (const PrimitiveTypeEntry*) type;
-    if (trueType->basicAliasedTypeEntry())
-        trueType = trueType->basicAliasedTypeEntry();
+    if (trueType->basicReferencedTypeEntry())
+        trueType = trueType->basicReferencedTypeEntry();
     QString typeName = trueType->qualifiedCppName();
     return !typeName.contains(QLatin1String("double"))
         && !typeName.contains(QLatin1String("float"))

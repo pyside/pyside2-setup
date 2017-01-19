@@ -171,8 +171,8 @@ bool CppGenerator::hasBoolCast(const AbstractMetaClass* metaClass) const
     if (!func || !func->type() || !func->type()->typeEntry()->isPrimitive() || !func->isPublic())
         return false;
     const PrimitiveTypeEntry* pte = static_cast<const PrimitiveTypeEntry*>(func->type()->typeEntry());
-    while (pte->aliasedTypeEntry())
-        pte = pte->aliasedTypeEntry();
+    while (pte->referencedTypeEntry())
+        pte = pte->referencedTypeEntry();
     return func && func->isConstant() && pte->name() == QLatin1String("bool") && func->arguments().isEmpty();
 }
 
@@ -687,8 +687,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
                             || arg->type()->isReference();
 
             if (!convert && argType->isPrimitive()) {
-                if (argType->basicAliasedTypeEntry())
-                    argType = argType->basicAliasedTypeEntry();
+                if (argType->basicReferencedTypeEntry())
+                    argType = argType->basicReferencedTypeEntry();
                 convert = !m_formatUnits.contains(argType->name());
             }
 
@@ -1773,8 +1773,8 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                     strArg = QLatin1String("\" SBK_STR_NAME \"");
                 } else if (argType->isPrimitive()) {
                     const PrimitiveTypeEntry* ptp = reinterpret_cast<const PrimitiveTypeEntry*>(argType->typeEntry());
-                    while (ptp->aliasedTypeEntry())
-                        ptp = ptp->aliasedTypeEntry();
+                    while (ptp->referencedTypeEntry())
+                        ptp = ptp->referencedTypeEntry();
                     strArg = ptp->name();
                     if (strArg == QLatin1String("QString")) {
                         strArg = QLatin1String("unicode");
@@ -5010,10 +5010,10 @@ bool CppGenerator::finishGeneration()
     foreach(const PrimitiveTypeEntry* pte, primitiveTypes()) {
         if (!pte->generateCode() || !pte->isCppPrimitive())
             continue;
-        const TypeEntry* alias = pte->basicAliasedTypeEntry();
-        if (!alias)
+        const TypeEntry *referencedType = pte->basicReferencedTypeEntry();
+        if (!referencedType)
             continue;
-        QString converter = converterObject(alias);
+        QString converter = converterObject(referencedType);
         QStringList cppSignature = pte->qualifiedCppName().split(QLatin1String("::"), QString::SkipEmptyParts);
         while (!cppSignature.isEmpty()) {
             QString signature = cppSignature.join(QLatin1String("::"));

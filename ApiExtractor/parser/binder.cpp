@@ -529,13 +529,13 @@ void Binder::visitTypedef(TypedefAST *node)
         CodeModelFinder finder(model(), this);
         ScopeModelItem typedefScope = finder.resolveScope(declarator->id, scope);
 
-        TypeAliasModelItem typeAlias(new _TypeAliasModelItem(model()));
-        updateItemPosition(typeAlias, node);
-        typeAlias->setName(alias_name);
-        typeAlias->setType(qualifyType(typeInfo, currentScope()->qualifiedName()));
-        typeAlias->setScope(typedefScope->qualifiedName());
-        _M_qualified_types[typeAlias->qualifiedName().join(QLatin1Char('.'))] = QString();
-        currentScope()->addTypeAlias(typeAlias);
+        TypeDefModelItem typeDef(new _TypeDefModelItem(model()));
+        updateItemPosition(typeDef, node);
+        typeDef->setName(alias_name);
+        typeDef->setType(qualifyType(typeInfo, currentScope()->qualifiedName()));
+        typeDef->setScope(typedefScope->qualifiedName());
+        _M_qualified_types[typeDef->qualifiedName().join(QLatin1Char('.'))] = QString();
+        currentScope()->addTypeDef(typeDef);
     } while (it != end);
 }
 

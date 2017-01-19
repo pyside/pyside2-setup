@@ -1440,7 +1440,7 @@ public:
               m_hasHashFunction(false),
               m_hasEqualsOperator(false),
               m_hasCloneOperator(false),
-              m_isTypeAlias(false),
+              m_isTypeDef(false),
               m_hasToStringCapability(false),
               m_enclosingClass(0),
               m_baseClass(0),
@@ -1892,15 +1892,8 @@ public:
     AbstractMetaTypeList templateBaseClassInstantiations() const;
     void setTemplateBaseClassInstantiations(AbstractMetaTypeList& instantiations);
 
-    void setTypeAlias(bool typeAlias)
-    {
-        m_isTypeAlias = typeAlias;
-    }
-
-    bool isTypeAlias() const
-    {
-        return m_isTypeAlias;
-    }
+    void setTypeDef(bool typeDef) { m_isTypeDef = typeDef; }
+    bool isTypeDef() const { return m_isTypeDef; }
 
     void setStream(bool stream)
     {
@@ -1938,7 +1931,7 @@ private:
     uint m_hasHashFunction : 1;
     uint m_hasEqualsOperator : 1;
     uint m_hasCloneOperator : 1;
-    uint m_isTypeAlias : 1;
+    uint m_isTypeDef : 1;
     uint m_hasToStringCapability : 1;
 
     const AbstractMetaClass *m_enclosingClass;

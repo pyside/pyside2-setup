@@ -145,7 +145,7 @@ void TestAbstractMetaType::testTypedef()
     QCOMPARE(classes.size(), 1);
     AbstractMetaClass* c = classes.findClass(QLatin1String("C"));
     QVERIFY(c);
-    QVERIFY(c->isTypeAlias());
+    QVERIFY(c->isTypeDef());
 }
 
 void TestAbstractMetaType::testTypedefWithTemplates()

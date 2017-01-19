@@ -100,7 +100,7 @@ CodeModelItem CodeModel::findItem(const QStringList &qualifiedName, CodeModelIte
             } else if (EnumModelItem es = ss->findEnum(name)) {
                 if (i == qualifiedName.size() - 1)
                     return es;
-            } else if (TypeAliasModelItem tp = ss->findTypeAlias(name)) {
+            } else if (TypeDefModelItem tp = ss->findTypeDef(name)) {
                 if (i == qualifiedName.size() - 1)
                     return tp;
             } else {
@@ -149,8 +149,8 @@ TypeInfo TypeInfo::resolveType(CodeModelItem __item, TypeInfo const &__type, Cod
         otherType.setQualifiedName(__item->qualifiedName());
     }
 
-    if (TypeAliasModelItem __alias = qSharedPointerDynamicCast<_TypeAliasModelItem>(__item)) {
-        const TypeInfo combined = TypeInfo::combine(__alias->type(), otherType);
+    if (TypeDefModelItem __typedef = qSharedPointerDynamicCast<_TypeDefModelItem>(__item)) {
+        const TypeInfo combined = TypeInfo::combine(__typedef->type(), otherType);
         const CodeModelItem nextItem = __scope->model()->findItem(combined.qualifiedName(), __scope);
         if (!nextItem)
             return combined;
@@ -412,9 +412,9 @@ ClassList _ScopeModelItem::classes() const
     return result;
 }
 
-TypeAliasList _ScopeModelItem::typeAliases() const
+TypeDefList _ScopeModelItem::typeDefs() const
 {
-    return _M_typeAliases.values();
+    return _M_typeDefs.values();
 }
 
 VariableList _ScopeModelItem::variables() const
@@ -469,9 +469,9 @@ void _ScopeModelItem::addVariable(VariableModelItem item)
     _M_variables.insert(item->name(), item);
 }
 
-void _ScopeModelItem::addTypeAlias(TypeAliasModelItem item)
+void _ScopeModelItem::addTypeDef(TypeDefModelItem item)
 {
-    _M_typeAliases.insert(item->name(), item);
+    _M_typeDefs.insert(item->name(), item);
 }
 
 void _ScopeModelItem::addEnum(EnumModelItem item)
@@ -525,12 +525,12 @@ void _ScopeModelItem::removeVariable(VariableModelItem item)
         _M_variables.erase(it);
 }
 
-void _ScopeModelItem::removeTypeAlias(TypeAliasModelItem item)
+void _ScopeModelItem::removeTypeDef(TypeDefModelItem item)
 {
-    QHash<QString, TypeAliasModelItem>::Iterator it = _M_typeAliases.find(item->name());
+    QHash<QString, TypeDefModelItem>::Iterator it = _M_typeDefs.find(item->name());
 
-    if (it != _M_typeAliases.end() && it.value() == item)
-        _M_typeAliases.erase(it);
+    if (it != _M_typeDefs.end() && it.value() == item)
+        _M_typeDefs.erase(it);
 }
 
 void _ScopeModelItem::removeEnum(EnumModelItem item)
@@ -553,9 +553,9 @@ VariableModelItem _ScopeModelItem::findVariable(const QString &name) const
     return _M_variables.value(name);
 }
 
-TypeAliasModelItem _ScopeModelItem::findTypeAlias(const QString &name) const
+TypeDefModelItem _ScopeModelItem::findTypeDef(const QString &name) const
 {
-    return _M_typeAliases.value(name);
+    return _M_typeDefs.value(name);
 }
 
 EnumModelItem _ScopeModelItem::findEnum(const QString &name) const
@@ -751,12 +751,12 @@ _FunctionDefinitionModelItem::~_FunctionDefinitionModelItem()
 }
 
 // ---------------------------------------------------------------------------
-TypeInfo _TypeAliasModelItem::type() const
+TypeInfo _TypeDefModelItem::type() const
 {
     return _M_type;
 }
 
-void _TypeAliasModelItem::setType(const TypeInfo &type)
+void _TypeDefModelItem::setType(const TypeInfo &type)
 {
     _M_type = type;
 }

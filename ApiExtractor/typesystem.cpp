@@ -1871,16 +1871,16 @@ bool Handler::startElement(const QString &, const QString &n,
     return true;
 }
 
-PrimitiveTypeEntry* PrimitiveTypeEntry::basicAliasedTypeEntry() const
+PrimitiveTypeEntry *PrimitiveTypeEntry::basicReferencedTypeEntry() const
 {
-    if (!m_aliasedTypeEntry)
+    if (!m_referencedTypeEntry)
         return 0;
 
-    PrimitiveTypeEntry* baseAliasTypeEntry = m_aliasedTypeEntry->basicAliasedTypeEntry();
-    if (baseAliasTypeEntry)
-        return baseAliasTypeEntry;
+    PrimitiveTypeEntry *baseReferencedTypeEntry = m_referencedTypeEntry->basicReferencedTypeEntry();
+    if (baseReferencedTypeEntry)
+        return baseReferencedTypeEntry;
     else
-        return m_aliasedTypeEntry;
+        return m_referencedTypeEntry;
 }
 
 typedef QHash<const PrimitiveTypeEntry*, QString> PrimitiveTypeEntryTargetLangPackageMap;
@@ -2360,9 +2360,9 @@ bool TypeEntry::isCppPrimitive() const
     if (!isPrimitive())
         return false;
 
-    const PrimitiveTypeEntry *aliasedType =
-        static_cast<const PrimitiveTypeEntry *>(this)->basicAliasedTypeEntry();
-    QByteArray typeName = (aliasedType ? aliasedType->name() : m_name).toUtf8();
+    const PrimitiveTypeEntry *referencedType =
+        static_cast<const PrimitiveTypeEntry *>(this)->basicReferencedTypeEntry();
+    QByteArray typeName = (referencedType ? referencedType->name() : m_name).toUtf8();
 
     if (typeName.contains(' ') || m_type == VoidType)
         return true;

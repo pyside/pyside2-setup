@@ -229,7 +229,7 @@ public:
         Kind_File = 5 << FirstKind | Kind_Namespace,
         Kind_FunctionDefinition = 6 << FirstKind | Kind_Function,
         Kind_TemplateParameter = 7 << FirstKind,
-        Kind_TypeAlias = 8 << FirstKind,
+        Kind_TypeDef = 8 << FirstKind,
         Kind_Variable = 9 << FirstKind | Kind_Member
     };
 
@@ -291,28 +291,28 @@ public:
     EnumList enums() const;
     FunctionDefinitionList functionDefinitions() const;
     FunctionList functions() const;
-    TypeAliasList typeAliases() const;
+    TypeDefList typeDefs() const;
     VariableList variables() const;
 
     void addClass(ClassModelItem item);
     void addEnum(EnumModelItem item);
     void addFunction(FunctionModelItem item);
     void addFunctionDefinition(FunctionDefinitionModelItem item);
-    void addTypeAlias(TypeAliasModelItem item);
+    void addTypeDef(TypeDefModelItem item);
     void addVariable(VariableModelItem item);
 
     void removeClass(ClassModelItem item);
     void removeEnum(EnumModelItem item);
     void removeFunction(FunctionModelItem item);
     void removeFunctionDefinition(FunctionDefinitionModelItem item);
-    void removeTypeAlias(TypeAliasModelItem item);
+    void removeTypeDef(TypeDefModelItem item);
     void removeVariable(VariableModelItem item);
 
     ClassModelItem findClass(const QString &name) const;
     EnumModelItem findEnum(const QString &name) const;
     FunctionDefinitionList findFunctionDefinitions(const QString &name) const;
     FunctionList findFunctions(const QString &name) const;
-    TypeAliasModelItem findTypeAlias(const QString &name) const;
+    TypeDefModelItem findTypeDef(const QString &name) const;
     VariableModelItem findVariable(const QString &name) const;
 
     void addEnumsDeclaration(const QString &enumsDeclaration);
@@ -329,9 +329,9 @@ public:
     {
         return _M_enums;
     }
-    inline QHash<QString, TypeAliasModelItem> typeAliasMap() const
+    inline QHash<QString, TypeDefModelItem> typeDefMap() const
     {
-        return _M_typeAliases;
+        return _M_typeDefs;
     }
     inline QHash<QString, VariableModelItem> variableMap() const
     {
@@ -357,7 +357,7 @@ protected:
 private:
     QHash<QString, ClassModelItem> _M_classes;
     QHash<QString, EnumModelItem> _M_enums;
-    QHash<QString, TypeAliasModelItem> _M_typeAliases;
+    QHash<QString, TypeDefModelItem> _M_typeDefs;
     QHash<QString, VariableModelItem> _M_variables;
     QMultiHash<QString, FunctionDefinitionModelItem> _M_functionDefinitions;
     QMultiHash<QString, FunctionModelItem> _M_functions;
@@ -631,14 +631,14 @@ public:
         : _MemberModelItem(model, name, kind) {}
 };
 
-class _TypeAliasModelItem: public _CodeModelItem
+class _TypeDefModelItem: public _CodeModelItem
 {
 public:
-    DECLARE_MODEL_NODE(TypeAlias)
+    DECLARE_MODEL_NODE(TypeDef)
 
-    explicit _TypeAliasModelItem(CodeModel *model, int kind = __node_kind)
+    explicit _TypeDefModelItem(CodeModel *model, int kind = __node_kind)
         : _CodeModelItem(model, kind) {}
-    explicit _TypeAliasModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
+    explicit _TypeDefModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
         : _CodeModelItem(model, name, kind) {}
 
     TypeInfo type() const;

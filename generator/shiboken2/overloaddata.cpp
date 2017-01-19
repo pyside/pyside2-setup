@@ -36,12 +36,12 @@
 #include <QtCore/QFile>
 #include <QtCore/QTemporaryFile>
 
-static const TypeEntry* getAliasedTypeEntry(const TypeEntry* typeEntry)
+static const TypeEntry *getReferencedTypeEntry(const TypeEntry *typeEntry)
 {
     if (typeEntry->isPrimitive()) {
         const PrimitiveTypeEntry* pte = dynamic_cast<const PrimitiveTypeEntry*>(typeEntry);
-        while (pte->aliasedTypeEntry())
-            pte = pte->aliasedTypeEntry();
+        while (pte->referencedTypeEntry())
+            pte = pte->referencedTypeEntry();
         typeEntry = pte;
     }
     return typeEntry;
@@ -49,12 +49,12 @@ static const TypeEntry* getAliasedTypeEntry(const TypeEntry* typeEntry)
 
 static QString getTypeName(const AbstractMetaType* type)
 {
-    const TypeEntry* typeEntry = getAliasedTypeEntry(type->typeEntry());
+    const TypeEntry* typeEntry = getReferencedTypeEntry(type->typeEntry());
     QString typeName = typeEntry->name();
     if (typeEntry->isContainer()) {
         QStringList types;
         foreach (const AbstractMetaType* cType, type->instantiations()) {
-            const TypeEntry* typeEntry = getAliasedTypeEntry(cType->typeEntry());
+            const TypeEntry *typeEntry = getReferencedTypeEntry(cType->typeEntry());
             types << typeEntry->name();
         }
         typeName += QLatin1Char('<') + types.join(QLatin1Char(',')) + QLatin1String(" >");
