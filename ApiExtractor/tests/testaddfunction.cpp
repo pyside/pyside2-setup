@@ -406,6 +406,7 @@ void TestAddFunction::testAddFunctionOnTypedef()
     TestUtil t(cppCode, xmlCode);
     AbstractMetaClassList classes = t.builder()->classes();
     AbstractMetaClass* foo = classes.findClass(QLatin1String("FooInt"));
+    QVERIFY(foo);
     QVERIFY(foo->hasNonPrivateConstructor());
     AbstractMetaFunctionList lst = foo->queryFunctions(AbstractMetaClass::Constructors);
     foreach(AbstractMetaFunction* f, lst)

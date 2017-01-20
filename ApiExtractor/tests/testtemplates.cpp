@@ -103,6 +103,7 @@ void TestTemplates::testTemplateOnContainers()
     AbstractMetaClassList classes = t.builder()->classes();
 
     AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
+    QVERIFY(classB);
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isNull());
     const AbstractMetaFunction* func = classB->findFunction(QLatin1String("foo"));
@@ -253,6 +254,7 @@ void TestTemplates::testTemplateInheritanceMixedWithForwardDeclaration()
     AbstractMetaClassList classes = t.builder()->classes();
 
     AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
+    QVERIFY(classB);
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isNull());
     // 3 functions: simple constructor, copy constructor and "method()".
@@ -288,6 +290,7 @@ void TestTemplates::testTemplateInheritanceMixedWithNamespaceAndForwardDeclarati
     AbstractMetaClassList classes = t.builder()->classes();
 
     AbstractMetaClass* classB = classes.findClass(QLatin1String("Namespace::B"));
+    QVERIFY(classB);
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isNull());
     // 3 functions: simple constructor, copy constructor and "method()".
