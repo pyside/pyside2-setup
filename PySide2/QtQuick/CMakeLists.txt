@@ -3,12 +3,10 @@ project(QtQuick)
 set(QtQuick_registerType "${QtQuick_SOURCE_DIR}/pysidequickregistertype.cpp")
 
 set(QtQuick_SRC
-${QtQuick_GEN_DIR}/qquickasyncimageprovider_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickframebufferobject_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickframebufferobject_renderer_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquicktexturefactory_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickimageprovider_wrapper.cpp
-${QtQuick_GEN_DIR}/qquickimageresponse_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquicktransform_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickitem_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickitem_updatepaintnodedata_wrapper.cpp
@@ -51,6 +49,14 @@ ${QtQuick_GEN_DIR}/qsgtransformnode_wrapper.cpp
 # module is always needed
 ${QtQuick_GEN_DIR}/qtquick_module_wrapper.cpp
 )
+
+if (Qt5Quick_VERSION VERSION_GREATER 5.5.1)
+    set(QtQuick_SRC ${QtQuick_SRC}
+                    ${QtQuick_GEN_DIR}/qquickasyncimageprovider_wrapper.cpp
+                    ${QtQuick_GEN_DIR}/qquickimageresponse_wrapper.cpp
+       )
+endif()
+
 
 make_path(QtQuick_typesystem_path ${QtCore_SOURCE_DIR} ${QtCore_BINARY_DIR}
                                   ${QtGui_SOURCE_DIR} ${QtGui_BINARY_DIR}

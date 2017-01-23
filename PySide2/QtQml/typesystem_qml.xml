@@ -94,7 +94,7 @@
     </inject-code>
 
     <object-type name="QJSEngine">
-        <enum-type name="Extension" flags="Extensions" />
+        <enum-type name="Extension" flags="Extensions" since="5.6" />
         <add-function signature="toScriptValue(const QVariant&amp;)" return-type="QJSValue">
             <inject-code class="target" position="end">
                 %RETURN_TYPE retval = %CPPSELF.%FUNCTION_NAME(%1);

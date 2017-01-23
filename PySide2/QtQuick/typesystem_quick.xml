@@ -55,14 +55,14 @@
     PySide::initQuickSupport(module);
     </inject-code>
 
-    <object-type name="QQuickAsyncImageProvider" />
+    <object-type name="QQuickAsyncImageProvider" since="5.6" />
 
     <object-type name="QQuickFramebufferObject" />
     <object-type name="QQuickFramebufferObject::Renderer" />
 
     <object-type name="QQuickTextureFactory" />
     <object-type name="QQuickImageProvider" />
-    <object-type name="QQuickImageResponse" />
+    <object-type name="QQuickImageResponse" since="5.6" />
 
     <object-type name="QQuickTransform" />
     <object-type name="QQuickItem">

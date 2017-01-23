@@ -903,7 +903,7 @@
     <enum-type name="ImageConversionFlag" flags="ImageConversionFlags" />
     <enum-type name="InputMethodHint" flags="InputMethodHints" since="4.6"/>
     <enum-type name="InputMethodQuery" flags="InputMethodQueries" />
-    <enum-type name="EnterKeyType"/>
+    <enum-type name="EnterKeyType" since="5.6" />
     <enum-type name="ItemDataRole" force-integer="yes" />
     <enum-type name="ItemFlag" flags="ItemFlags"/>
     <enum-type name="ItemSelectionMode"/>
