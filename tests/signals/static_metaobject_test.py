@@ -32,7 +32,7 @@
 
 import unittest
 
-from PySide2.QtCore import QObject, SIGNAL
+from PySide2.QtCore import QObject, SIGNAL, Slot
 from helper import UsesQCoreApplication
 
 class MyObject(QObject):
@@ -40,6 +40,9 @@ class MyObject(QObject):
         QObject.__init__(self, parent)
         self._slotCalledCount = 0
 
+    # this '@Slot()' is needed to get the right sort order in testSharedSignalEmission.
+    # For some reason, it also makes the tests actually work!
+    @Slot()
     def mySlot(self):
         self._slotCalledCount = self._slotCalledCount + 1
 
