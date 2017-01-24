@@ -67,6 +67,8 @@ else()
     endforeach()
 endif()
 
+add_subdirectory(dumpcodemodel)
+
 # FIXME Skipped until add an option to choose the generator
 # add_subdirectory(test_generator)
 
