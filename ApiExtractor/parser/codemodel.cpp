@@ -673,11 +673,12 @@ void _ScopeModelItem::removeEnum(EnumModelItem item)
 template <class Hash>
 static void formatScopeHash(QDebug &d, const char *prefix, const Hash &h)
 {
+    typedef typename Hash::ConstIterator HashIterator;
     if (!h.isEmpty()) {
         d << prefix << '[' << h.size() << "](";
-        const auto begin = h.cbegin();
-        const auto end = h.cend();
-        for (auto it = begin; it != end; ++it) { // Omit the names as they are repeated
+        const HashIterator begin = h.begin();
+        const HashIterator end = h.end();
+        for (HashIterator it = begin; it != end; ++it) { // Omit the names as they are repeated
             if (it != begin)
                 d << ", ";
             d << it.value().data();
