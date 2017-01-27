@@ -2333,7 +2333,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
             newInfo.setConstant(typei.isConstant());
             newInfo.setFunctionPointer(typei.isFunctionPointer());
             newInfo.setQualifiedName(typei.qualifiedName());
-            newInfo.setReference(typei.isReference());
+            newInfo.setReferenceType(typei.referenceType());
             newInfo.setVolatile(typei.isVolatile());
 
             AbstractMetaType* elementType = translateType(newInfo, ok);
@@ -2463,7 +2463,8 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
     foreach (const TypeParser::Info &ta, typeInfo.template_instantiations) {
         TypeInfo info;
         info.setConstant(ta.is_constant);
-        info.setReference(ta.is_reference);
+        if (ta.is_reference)
+            info.setReferenceType(TypeInfo::LValueReference);
         info.setIndirections(ta.indirections);
 
         info.setFunctionPointer(false);

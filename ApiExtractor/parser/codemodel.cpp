@@ -141,7 +141,8 @@ TypeInfo TypeInfo::combine(const TypeInfo &__lhs, const TypeInfo &__rhs)
 
     __result.setConstant(__result.isConstant() || __rhs.isConstant());
     __result.setVolatile(__result.isVolatile() || __rhs.isVolatile());
-    __result.setReference(__result.isReference() || __rhs.isReference());
+    if (__rhs.referenceType() > __result.referenceType())
+        __result.setReferenceType(__rhs.referenceType());
     __result.setIndirections(__result.indirections() + __rhs.indirections());
     __result.setArrayElements(__result.arrayElements() + __rhs.arrayElements());
 
@@ -201,8 +202,16 @@ QString TypeInfo::toString() const
     if (indirections())
         tmp += QString(indirections(), QLatin1Char('*'));
 
-    if (isReference())
+    switch (referenceType()) {
+    case NoReference:
+        break;
+    case TypeInfo::LValueReference:
         tmp += QLatin1Char('&');
+        break;
+    case TypeInfo::RValueReference:
+        tmp += QLatin1String("&&");
+        break;
+    }
 
     if (isFunctionPointer()) {
         tmp += QLatin1String(" (*)(");

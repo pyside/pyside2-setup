@@ -97,7 +97,13 @@ QDebug operator<<(QDebug d, const CodeModel *m);
 class TypeInfo
 {
 public:
-    TypeInfo() : flags(0) {}
+    enum ReferenceType {
+        NoReference,
+        LValueReference,
+        RValueReference
+    };
+
+    TypeInfo() : flags(0), m_referenceType(NoReference) {}
 
     QStringList qualifiedName() const
     {
@@ -129,15 +135,8 @@ public:
         m_volatile = is;
     }
 
-    bool isReference() const
-    {
-        return m_reference;
-    }
-
-    void setReference(bool is)
-    {
-        m_reference = is;
-    }
+    ReferenceType referenceType() const { return m_referenceType; }
+    void setReferenceType(ReferenceType r) { m_referenceType = r; }
 
     int indirections() const
     {
@@ -206,12 +205,13 @@ private:
         struct {
             uint m_constant: 1;
             uint m_volatile: 1;
-            uint m_reference: 1;
             uint m_functionPointer: 1;
             uint m_indirections: 6;
-            uint m_padding: 22;
+            uint m_padding: 23;
         };
     };
+
+    ReferenceType m_referenceType;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
