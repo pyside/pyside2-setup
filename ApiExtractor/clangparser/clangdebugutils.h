@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Copyright (C) 2002-2005 Roberto Raggi <roberto@kdevelop.org>
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of PySide2.
@@ -27,49 +26,23 @@
 **
 ****************************************************************************/
 
+#ifndef CLANGDEBUGUTILS_H
+#define CLANGDEBUGUTILS_H
 
-#ifndef CODEMODEL_FINDER_H
-#define CODEMODEL_FINDER_H
+#include <QtCore/QtGlobal>
 
-#include <default_visitor.h>
-#include <codemodel_fwd.h>
-#include <name_compiler.h>
+#include <clang-c/Index.h>
 
-class TokenStream;
-class Binder;
+QT_FORWARD_DECLARE_CLASS(QDebug)
+QT_FORWARD_DECLARE_CLASS(QString)
 
-class CodeModelFinder: protected DefaultVisitor
-{
-    enum ResolvePolicy {
-        ResolveScope,
-        ResolveItem
-    };
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug s, const CXString &cs);
+QDebug operator<<(QDebug s, CXCursorKind cursorKind);
+QDebug operator<<(QDebug s, CX_CXXAccessSpecifier ac);
+QDebug operator<<(QDebug s, const CXType &t);
+QDebug operator<<(QDebug s, const CXCursor &cursor);
+QDebug operator<<(QDebug s, const CXSourceLocation &location);
+#endif // !QT_NO_DEBUG_STREAM
 
-public:
-    CodeModelFinder(CodeModel *model, Binder *binder);
-    virtual ~CodeModelFinder();
-
-    ScopeModelItem resolveScope(NameAST *name, ScopeModelItem scope);
-
-    inline CodeModel *model() const
-    {
-        return _M_model;
-    }
-
-protected:
-    virtual void visitName(NameAST *node);
-    virtual void visitUnqualifiedName(UnqualifiedNameAST *node);
-
-    ScopeModelItem changeCurrentScope(ScopeModelItem scope);
-
-private:
-    CodeModel *_M_model;
-    Binder *_M_binder;
-    TokenStream *_M_token_stream;
-    NameCompiler name_cc;
-
-    ScopeModelItem _M_current_scope;
-    ResolvePolicy _M_resolve_policy;
-};
-
-#endif // CODEMODEL_FINDER_H
+#endif // CLANGDEBUGUTILS_H

@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Copyright (C) 2002-2005 Roberto Raggi <roberto@kdevelop.org>
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of PySide2.
@@ -27,18 +26,15 @@
 **
 ****************************************************************************/
 
-#ifndef PP_FWD_H
-#define PP_FWD_H
+#ifndef COMPILERSUPPORT_H
+#define COMPILERSUPPORT_H
 
-namespace rpp
-{
+#include <QtCore/QByteArrayList>
 
-template <typename _CharT> class pp_string;
+namespace clang {
 
-typedef pp_string<char> pp_fast_string;
+QByteArrayList emulatedCompilerOptions();
 
-} // namespace rpp
+} // namespace clang
 
-#endif // PP_FWD_H
-
-// kate: space-indent on; indent-width 2; replace-tabs on;
+#endif // COMPILERSUPPORT_H

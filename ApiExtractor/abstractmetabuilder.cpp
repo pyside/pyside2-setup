@@ -30,16 +30,13 @@
 #include "reporthandler.h"
 #include "typedatabase.h"
 
-#include "parser/ast.h"
-#include "parser/binder.h"
-#include "parser/control.h"
-#include "parser/default_visitor.h"
-#include "parser/dumptree.h"
-#include "parser/lexer.h"
-#include "parser/parser.h"
-#include "parser/tokens.h"
+#include <clangparser/clangbuilder.h>
+#include <clangparser/clangutils.h>
+
+#include "parser/codemodel.h"
 
 #include <QDebug>
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QTextCodec>
@@ -449,25 +446,22 @@ void AbstractMetaBuilderPrivate::sortLists()
         cls->sortFunctions();
 }
 
-FileModelItem AbstractMetaBuilderPrivate::buildDom(QIODevice *input)
+FileModelItem AbstractMetaBuilderPrivate::buildDom(const QByteArrayList &arguments,
+                                                   unsigned clangFlags)
 {
-    Q_ASSERT(input);
-
-    if (!input->isOpen() && !input->open(QIODevice::ReadOnly))
-        return FileModelItem();
-
-    QByteArray contents = input->readAll();
-    input->close();
-
-    Control control;
-    Parser p(&control);
-    pool __pool;
-
-    TranslationUnitAST* ast = p.parse(contents, contents.size(), &__pool);
-
-    CodeModel model;
-    Binder binder(&model, p.location());
-    return binder.run(ast);
+    clang::Builder builder;
+    FileModelItem result = clang::parse(arguments, clangFlags, builder)
+        ? builder.dom() : FileModelItem();
+    const clang::BaseVisitor::Diagnostics &diagnostics = builder.diagnostics();
+    if (const int diagnosticsCount = diagnostics.size()) {
+        QDebug d = qWarning();
+        d.nospace();
+        d.noquote();
+        d << "Clang: " << diagnosticsCount << " diagnostic messages:\n";
+        for (int i = 0; i < diagnosticsCount; ++i)
+            d << "  " << diagnostics.at(i) << '\n';
+    }
+    return result;
 }
 
 void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
@@ -728,13 +722,15 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     std::puts("");
 }
 
-bool AbstractMetaBuilder::build(QIODevice *input)
+bool AbstractMetaBuilder::build(const QByteArrayList &arguments, unsigned clangFlags)
 {
-    FileModelItem dom = d->buildDom(input);
-    const bool result = dom.data() != Q_NULLPTR;
-    if (result)
-        d->traverseDom(dom);
-    return result;
+    const FileModelItem dom = d->buildDom(arguments, clangFlags);
+    if (dom.isNull())
+        return false;
+    if (ReportHandler::isDebug(ReportHandler::MediumDebug))
+        qCDebug(lcShiboken) << dom.data();
+    d->traverseDom(dom);
+    return true;
 }
 
 void AbstractMetaBuilder::setLogDirectory(const QString& logDir)
@@ -2041,11 +2037,22 @@ static inline QString qualifiedFunctionSignatureWithType(const QString &classNam
 
 AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModelItem functionItem)
 {
+    if (!functionItem->templateParameters().isEmpty())
+        return nullptr;
     QString functionName = functionItem->name();
     QString className;
     QString rejectedFunctionSignature;
-    if (m_currentClass)
+    if (m_currentClass) {
+        // Clang: Skip qt_metacast(), qt_metacall(), expanded from Q_OBJECT
+        // and overridden metaObject(), QGADGET helpers
+        if (functionName == QLatin1String("qt_check_for_QGADGET_macro")
+            || functionName.startsWith(QLatin1String("qt_meta"))) {
+            return nullptr;
+        }
         className = m_currentClass->typeEntry()->qualifiedCppName();
+        if (functionName == QLatin1String("metaObject") && className != QLatin1String("QObject"))
+            return nullptr;
+    }
 
     if (TypeDatabase::instance()->isFunctionRejected(className, functionName)) {
         rejectedFunctionSignature = qualifiedFunctionSignatureWithType(className, functionItem);

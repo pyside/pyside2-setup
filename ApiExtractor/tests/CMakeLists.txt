@@ -16,6 +16,7 @@ macro(declare_test testname)
                         ${apiextractor_SOURCE_DIR}
                         ${Qt5Test_INCLUDE_DIRS}
                         )
+    link_directories(${APIEXTRACTOR_EXTRA_LINK_DIRECTORIES})
     target_link_libraries(${testname}
                           ${Qt5XmlPatterns_LIBRARIES}
                           ${Qt5Test_LIBRARIES}

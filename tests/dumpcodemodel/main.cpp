@@ -37,6 +37,8 @@
 #include <QtCore/QFile>
 
 #include <iostream>
+#include <algorithm>
+#include <iterator>
 
 int main(int argc, char **argv)
 {
@@ -53,22 +55,19 @@ int main(int argc, char **argv)
     parser.addPositionalArgument(QStringLiteral("file"), QStringLiteral("C++ source file"));
 
     parser.process(app);
-    if (parser.positionalArguments().isEmpty())
+    const QStringList &positionalArguments = parser.positionalArguments();
+    if (positionalArguments.isEmpty())
         parser.showHelp(1);
 
-    const QString sourceFileName = parser.positionalArguments().at(0);
-    QFile sourceFile(sourceFileName);
-    if (!sourceFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QString message = QLatin1String("Cannot open \"") + QDir::toNativeSeparators(sourceFileName)
-            +  QLatin1String("\": ") + sourceFile.errorString();
+    QByteArrayList arguments;
+    std::transform(positionalArguments.cbegin(), positionalArguments.cend(),
+                   std::back_inserter(arguments), QFile::encodeName);
+    const FileModelItem dom = AbstractMetaBuilderPrivate::buildDom(arguments, 0);
+    if (dom.isNull()) {
+        QString message = QLatin1String("Unable to parse ") + positionalArguments.join(QLatin1Char(' '));
         std::cerr << qPrintable(message) << '\n';
-        return -1;
-    }
-
-    const FileModelItem dom = AbstractMetaBuilderPrivate::buildDom(&sourceFile);
-    sourceFile.close();
-    if (dom.isNull())
         return -2;
+    }
 
     QString output;
     {

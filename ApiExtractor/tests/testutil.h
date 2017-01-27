@@ -29,6 +29,9 @@
 #ifndef TESTUTIL_H
 #define TESTUTIL_H
 #include <QtCore/QBuffer>
+#include <QtCore/QDebug>
+#include <QtCore/QDir>
+#include <QtCore/QTemporaryFile>
 #include "abstractmetabuilder.h"
 #include "reporthandler.h"
 #include "typedatabase.h"
@@ -53,9 +56,18 @@ namespace TestUtil
         td->parseFile(&buffer);
         buffer.close();
         // parse C++ code
-        buffer.setData(cppCode);
+        QTemporaryFile tempSource(QDir::tempPath() + QLatin1String("/st_XXXXXX_main.cpp"));
+        if (!tempSource.open()) {
+            qWarning().noquote().nospace() << "Creation of temporary file failed: "
+                << tempSource.errorString();
+            return nullptr;
+        }
+        QByteArrayList arguments;
+        arguments.append(QFile::encodeName(tempSource.fileName()));
+        tempSource.write(cppCode, qint64(strlen(cppCode)));
+        tempSource.close();
         AbstractMetaBuilder *builder = new AbstractMetaBuilder;
-        if (!builder->build(&buffer)) {
+        if (!builder->build(arguments, 0)) {
             delete builder;
             return Q_NULLPTR;
         }

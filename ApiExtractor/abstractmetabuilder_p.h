@@ -46,7 +46,7 @@ public:
     AbstractMetaBuilderPrivate();
     ~AbstractMetaBuilderPrivate();
 
-    static FileModelItem buildDom(QIODevice *input);
+    static FileModelItem buildDom(const QByteArrayList &arguments, unsigned clangFlags);
     void traverseDom(const FileModelItem &dom);
 
     void dumpLog() const;

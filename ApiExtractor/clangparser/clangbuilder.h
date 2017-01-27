@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Copyright (C) 2002-2005 Roberto Raggi <roberto@kdevelop.org>
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of PySide2.
@@ -27,51 +26,33 @@
 **
 ****************************************************************************/
 
+#ifndef CLANGBUILDER_H
+#define CLANGBUILDER_H
 
-#ifndef CLASS_COMPILER_H
-#define CLASS_COMPILER_H
+#include "clangparser.h"
 
-#include <QtCore/qglobal.h>
-#include <QtCore/QStringList>
+#include <codemodel_fwd.h>
 
-#include <default_visitor.h>
-#include <name_compiler.h>
-#include <type_compiler.h>
+namespace clang {
 
-class TokenStream;
-class Binder;
+class BuilderPrivate;
 
-class ClassCompiler: protected DefaultVisitor
-{
+class Builder : public BaseVisitor {
 public:
-    ClassCompiler(Binder *binder);
-    virtual ~ClassCompiler();
+    Builder();
+    ~Builder();
 
-    inline QString name() const
-    {
-        return _M_name;
-    }
+    bool visitLocation(const CXSourceLocation &location) const override;
 
-    inline QStringList baseClasses() const
-    {
-        return _M_base_classes;
-    }
+    StartTokenResult startToken(const CXCursor &cursor) override;
+    bool endToken(const CXCursor &cursor) override;
 
-    void run(ClassSpecifierAST *node);
-
-protected:
-    virtual void visitClassSpecifier(ClassSpecifierAST *node);
-    virtual void visitBaseSpecifier(BaseSpecifierAST *node);
+    FileModelItem dom() const;
 
 private:
-    Binder *_M_binder;
-    TokenStream *_M_token_stream;
-    QString _M_name;
-    QStringList _M_base_classes;
-    NameCompiler name_cc;
-    TypeCompiler type_cc;
+    BuilderPrivate *d;
 };
 
-#endif // CLASS_COMPILER_H
+} // namespace clang
 
-// kate: space-indent on; indent-width 2; replace-tabs on;
+#endif // CLANGBUILDER_H

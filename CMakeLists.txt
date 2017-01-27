@@ -27,6 +27,28 @@ else()
     find_package(PythonInterp 2.6)
 endif()
 
+set(CLANG_DIR $ENV{CLANG_INSTALL_DIR})
+
+if (NOT IS_DIRECTORY ${CLANG_DIR})
+    message(FATAL_ERROR "CLANG_INSTALL_DIR is not set or does not point to a valid directory.")
+else()
+endif()
+
+set(CLANG_LIB_NAME "clang")
+if(MSVC)
+    set(CLANG_LIB_NAME "libclang")
+endif()
+
+find_library(CLANG_LIBRARY ${CLANG_LIB_NAME} HINTS ${CLANG_DIR}/lib)
+if (NOT EXISTS ${CLANG_LIBRARY})
+    message(FATAL_ERROR "Unable to find Clang library ${CLANG_LIB_NAME} in ${CLANG_DIR}.")
+endif()
+
+message(STATUS "CLANG: ${CLANG_DIR}, ${CLANG_LIBRARY}")
+
+set(CLANG_EXTRA_INCLUDES ${CLANG_DIR}/include)
+set(CLANG_EXTRA_LIBRARIES ${CLANG_LIBRARY})
+
 ## For debugging the PYTHON* variables
 #message("PYTHONLIBS_FOUND: " ${PYTHONLIBS_FOUND})
 #message("PYTHON_LIBRARIES: " ${PYTHON_LIBRARIES})

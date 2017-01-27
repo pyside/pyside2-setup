@@ -31,7 +31,6 @@ set(apiextractor_SRC
 apiextractor.cpp
 abstractmetabuilder.cpp
 abstractmetalang.cpp
-asttoxml.cpp
 fileout.cpp
 graph.cpp
 reporthandler.cpp
@@ -39,27 +38,18 @@ typeparser.cpp
 typesystem.cpp
 include.cpp
 typedatabase.cpp
-parser/ast.cpp
-parser/binder.cpp
-parser/class_compiler.cpp
+# Clang
+clangparser/compilersupport.cpp
+clangparser/clangparser.cpp
+clangparser/clangbuilder.cpp
+clangparser/clangdebugutils.cpp
+clangparser/clangutils.cpp
+# Old parser
 parser/codemodel.cpp
-parser/codemodel_finder.cpp
-parser/compiler_utils.cpp
-parser/control.cpp
-parser/declarator_compiler.cpp
-parser/default_visitor.cpp
-parser/dumptree.cpp
-parser/lexer.cpp
-parser/list.cpp
-parser/name_compiler.cpp
-parser/parser.cpp
-parser/smallobject.cpp
-parser/tokens.cpp
-parser/type_compiler.cpp
-parser/visitor.cpp
-parser/rpp/builtin-macros.cpp
-parser/rpp/preprocessor.cpp
 )
+
+set(APIEXTRACTOR_EXTRA_INCLUDES ${CLANG_EXTRA_INCLUDES})
+set(APIEXTRACTOR_EXTRA_LIBRARIES ${CLANG_EXTRA_LIBRARIES})
 
 if (NOT DISABLE_DOCSTRINGS)
     set(apiextractor_SRC
@@ -68,16 +58,12 @@ if (NOT DISABLE_DOCSTRINGS)
         doxygenparser.cpp
         qtdocparser.cpp
     )
-    set(APIEXTRACTOR_EXTRA_INCLUDES ${LIBXSLT_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
-    set(APIEXTRACTOR_EXTRA_LIBRARIES ${LIBXSLT_LIBRARIES} ${LIBXML2_LIBRARIES})
-else()
-    set(APIEXTRACTOR_EXTRA_INCLUDES "")
-    set(APIEXTRACTOR_EXTRA_LIBRARIES "")
+    set(APIEXTRACTOR_EXTRA_INCLUDES ${APIEXTRACTOR_EXTRA_INCLUDES} ${LIBXSLT_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
+    set(APIEXTRACTOR_EXTRA_LIBRARIES ${APIEXTRACTOR_EXTRA_LIBRARIES} ${LIBXSLT_LIBRARIES} ${LIBXML2_LIBRARIES})
 endif()
 
 set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
 
-qt5_add_resources(apiextractor_RCCS_SRC generator.qrc)
 set(CMAKE_AUTOMOC ON)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
@@ -95,6 +81,8 @@ target_link_libraries(apiextractor
                       ${Qt5XmlPatterns_LIBRARIES}
                       ${APIEXTRACTOR_EXTRA_LIBRARIES}
                       )
+
+set_property(TARGET apiextractor PROPERTY CXX_STANDARD 11)
 
 if (BUILD_TESTS)
     enable_testing()

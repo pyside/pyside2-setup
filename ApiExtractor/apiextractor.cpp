@@ -32,25 +32,31 @@
 #include <QDir>
 #include <QDebug>
 #include <QTemporaryFile>
+#include <algorithm>
 #include <iostream>
+#include <iterator>
 
 #include "reporthandler.h"
 #include "typesystem.h"
 #include "fileout.h"
-#include "parser/rpp/pp.h"
 #include "abstractmetabuilder.h"
 #include "typedatabase.h"
 #include "typesystem.h"
 
-static bool preprocess(const QString& sourceFile,
-                       QFile& targetFile,
-                       const QStringList& includes);
+static bool appendFile(const QString& sourceFileName, QFile& targetFile)
+{
+    QFile sourceFile(sourceFileName);
+    if (!sourceFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        std::cerr << "Cannot open " << qPrintable(QDir::toNativeSeparators(sourceFileName))
+            << ": " << qPrintable(sourceFile.errorString()) << '\n';
+        return false;
+    }
+    targetFile.write(sourceFile.readAll());
+    return true;
+}
 
 ApiExtractor::ApiExtractor() : m_builder(0)
 {
-    static bool qrcInitialized = false;
-    if (!qrcInitialized)
-        Q_INIT_RESOURCE(generator);
     // Environment TYPESYSTEMPATH
     QString envTypesystemPaths = QFile::decodeName(getenv("TYPESYSTEMPATH"));
     if (!envTypesystemPaths.isEmpty())
@@ -243,85 +249,38 @@ bool ApiExtractor::run()
         return false;
     }
 
-    QTemporaryFile ppFile;
-#ifndef NDEBUG
-    ppFile.setAutoRemove(false);
-#endif
+    const QString pattern = QDir::tempPath() + QLatin1Char('/') +
+        QFileInfo(m_cppFileName).baseName() + QStringLiteral("_XXXXXX.hpp");
+    QTemporaryFile ppFile(pattern);
+    bool autoRemove = !qEnvironmentVariableIsSet("KEEP_TEMP_FILES");
     // make sure that a tempfile can be written
     if (!ppFile.open()) {
-        std::cerr << "could not create tempfile in " << qPrintable(QDir::tempPath());
+        std::cerr << "could not create tempfile " << qPrintable(pattern)
+            << ": " << qPrintable(ppFile.errorString()) << '\n';
         return false;
     }
-    
-    // run rpp pre-processor
-    if (!preprocess(m_cppFileName, ppFile, m_includePaths)) {
-        std::cerr << "Preprocessor failed on file: " << qPrintable(m_cppFileName);
+
+    if (!appendFile(m_cppFileName, ppFile))
         return false;
-    }
-    ppFile.seek(0);
+    const QString preprocessedCppFileName = ppFile.fileName();
+    ppFile.close();
     m_builder = new AbstractMetaBuilder;
     m_builder->setLogDirectory(m_logDirectory);
     m_builder->setGlobalHeader(m_cppFileName);
-    m_builder->build(&ppFile);
-
-    return true;
-}
-
-static bool preprocess(const QString& sourceFile,
-                       QFile& targetFile,
-                       const QStringList& includes)
-{
-    rpp::pp_environment env;
-    rpp::pp preprocess(env);
-
-    rpp::pp_null_output_iterator null_out;
-
-    const char *ppconfig = ":/trolltech/generator/pp-qt-configuration";
-
-    const QString fileName = QLatin1String(ppconfig);
-    QFile file(fileName);
-    if (!file.open(QFile::ReadOnly)) {
-        std::cerr << "Preprocessor configuration file not found " << ppconfig << std::endl;
-        return false;
+    QByteArrayList arguments;
+    arguments.reserve(m_includePaths.size() + 1);
+    foreach (const QString &i, m_includePaths)
+        arguments.append(QByteArrayLiteral("-I") + QFile::encodeName(i));
+    arguments.append(QFile::encodeName(preprocessedCppFileName));
+    qCDebug(lcShiboken) << __FUNCTION__ << arguments;
+    const bool result = m_builder->build(arguments);
+    if (!result)
+        autoRemove = false;
+    if (!autoRemove) {
+        ppFile.setAutoRemove(false);
+        std::cerr << "Keeping temporary file: " << qPrintable(QDir::toNativeSeparators(preprocessedCppFileName)) << '\n';
     }
-
-    QByteArray ba = file.readAll();
-    file.close();
-    preprocess.operator()(ba.constData(), ba.constData() + ba.size(), null_out);
-
-    preprocess.push_include_path(".");
-    foreach (const QString &include, includes)
-        preprocess.push_include_path(QDir::toNativeSeparators(include).toStdString());
-    preprocess.push_include_path("/usr/include");
-
-    QString currentDir = QDir::current().absolutePath();
-    QFileInfo sourceInfo(sourceFile);
-    if (!sourceInfo.exists()) {
-        std::cerr << "File not found " << qPrintable(sourceFile) << std::endl;
-        return false;
-    }
-    QDir::setCurrent(sourceInfo.absolutePath());
-
-    std::string result;
-    result.reserve(20 * 1024);  // 20K
-
-    result += "# 1 \"builtins\"\n";
-    result += "# 1 \"";
-    result += sourceFile.toStdString();
-    result += "\"\n";
-
-    preprocess.file(sourceInfo.fileName().toStdString(),
-                    rpp::pp_output_iterator<std::string> (result));
-
-    QDir::setCurrent(currentDir);
-
-    if (!targetFile.open(QIODevice::ReadWrite | QIODevice::Text)) {
-        std::cerr << "Failed to write preprocessed file: " << qPrintable(targetFile.fileName()) << std::endl;
-        return false;
-    }
-
-    targetFile.write(result.c_str(), result.length());
-    return true;
+    return result;
 }
 
 #ifndef QT_NO_DEBUG_STREAM

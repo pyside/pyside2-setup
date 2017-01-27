@@ -318,7 +318,7 @@ void TestEnum::testEnumValueFromExpression()
 
     AbstractMetaEnumValue* valueA4 = enumA->values().at(4);
     QCOMPARE(valueA4->name(), QLatin1String("ValueA4"));
-    QCOMPARE(valueA4->stringValue(), QLatin1String("8|ValueA3"));
+    QCOMPARE(valueA4->stringValue(), QLatin1String("8 |ValueA3"));
     QCOMPARE(valueA4->value(), 8|0xf0);
 
     AbstractMetaEnumValue* valueA5 = enumA->values().at(5);
@@ -328,12 +328,12 @@ void TestEnum::testEnumValueFromExpression()
 
     AbstractMetaEnumValue* valueA6 = enumA->values().at(6);
     QCOMPARE(valueA6->name(), QLatin1String("ValueA6"));
-    QCOMPARE(valueA6->stringValue(), QLatin1String("ValueA3>>1"));
+    QCOMPARE(valueA6->stringValue(), QLatin1String("ValueA3 >> 1"));
     QCOMPARE(valueA6->value(), 0xf0 >> 1);
 
     AbstractMetaEnumValue* valueA7 = enumA->values().at(7);
     QCOMPARE(valueA7->name(), QLatin1String("ValueA7"));
-    QCOMPARE(valueA7->stringValue(), QLatin1String("ValueA3<<1"));
+    QCOMPARE(valueA7->stringValue(), QLatin1String("ValueA3 << 1"));
     QCOMPARE(valueA7->value(), 0xf0 << 1);
 }
 

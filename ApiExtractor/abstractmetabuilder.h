@@ -71,7 +71,7 @@ public:
     AbstractMetaClassList classesTopologicalSorted(const AbstractMetaClass *cppClass = Q_NULLPTR,
                                                    const Dependencies &additionalDependencies = Dependencies()) const;
 
-    bool build(QIODevice* input);
+    bool build(const QByteArrayList &arguments, unsigned clangFlags = 0);
     void setLogDirectory(const QString& logDir);
 
     /**
