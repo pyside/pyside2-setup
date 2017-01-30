@@ -453,10 +453,10 @@ static QString checkSignatureError(const QString& signature, const QString& tag)
     QString funcName = signature.left(signature.indexOf(QLatin1Char('('))).trimmed();
     static QRegExp whiteSpace(QLatin1String("\\s"));
     if (!funcName.startsWith(QLatin1String("operator ")) && funcName.contains(whiteSpace)) {
-        return QStringLiteral("Error in <%1> tag signature attribute '%2'.\n"
-                              "White spaces aren't allowed in function names, "
-                              "and return types should not be part of the signature.")
-                              .arg(tag, signature);
+        return QString::fromLatin1("Error in <%1> tag signature attribute '%2'.\n"
+                                   "White spaces aren't allowed in function names, "
+                                   "and return types should not be part of the signature.")
+                                   .arg(tag, signature);
     }
     return QString();
 }

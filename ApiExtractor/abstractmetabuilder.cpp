@@ -2122,10 +2122,10 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
 
         if (metaType == Q_NULLPTR) {
             qCWarning(lcShiboken).noquote().nospace()
-                << QStringLiteral("skipping function '%1::%2', 'void' encountered at parameter "
-                                  "position %3, but it can only be the the first and only "
-                                  "parameter")
-                                  .arg(className, functionItem->name()).arg(i);
+                << QString::fromLatin1("skipping function '%1::%2', 'void' encountered at parameter "
+                                       "position %3, but it can only be the the first and only "
+                                       "parameter")
+                                       .arg(className, functionItem->name()).arg(i);
             rejectedFunctionSignature = qualifiedFunctionSignatureWithType(className, functionItem);
             m_rejectedFunctions.insert(rejectedFunctionSignature, AbstractMetaBuilder::UnmatchedArgumentType);
             metaFunction->setInvalid(true);
@@ -3198,7 +3198,7 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
     return result;
 }
 
-AbstractMetaClassList AbstractMetaBuilder::AbstractMetaBuilder::classesTopologicalSorted(const AbstractMetaClass *cppClass) const
+AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const AbstractMetaClass *cppClass) const
 {
     return d->classesTopologicalSorted(cppClass);
 }

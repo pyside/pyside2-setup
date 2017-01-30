@@ -551,9 +551,9 @@ QString AbstractMetaFunction::signature() const
                 m_cachedSignature += a->name();
             } else {
                 qCWarning(lcShiboken).noquote().nospace()
-                    << QStringLiteral("No abstract meta type found for argument '%1' while"
-                                      "constructing signature for function '%2'.")
-                                      .arg(a->name(), name());
+                    << QString::fromLatin1("No abstract meta type found for argument '%1' while"
+                                           "constructing signature for function '%2'.")
+                                           .arg(a->name(), name());
             }
         }
         m_cachedSignature += QLatin1Char(')');
@@ -874,9 +874,9 @@ QString AbstractMetaFunction::minimalSignature() const
             minimalSignature += t->minimalSignature();
         } else {
             qCWarning(lcShiboken).noquote().nospace()
-                << QStringLiteral("No abstract meta type found for argument '%1' while constructing"
-                                  " minimal signature for function '%2'.")
-                                  .arg(arguments.at(i)->name(), name());
+                << QString::fromLatin1("No abstract meta type found for argument '%1' while constructing"
+                                       " minimal signature for function '%2'.")
+                                       .arg(arguments.at(i)->name(), name());
         }
     }
     minimalSignature += QLatin1Char(')');
