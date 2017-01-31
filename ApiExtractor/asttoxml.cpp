@@ -77,9 +77,9 @@ void astToXML(QString name)
     foreach (const NamespaceModelItem &n, namespaces)
         writeOutNamespace(s, n);
 
-    const ClassModelItemMap &typeMap = dom->classMap();
-    for (ClassModelItemMap::const_iterator it = typeMap.cbegin(), end = typeMap.cend(); it != end; ++it)
-        writeOutClass(s, it.value());
+    const ClassList &classList = dom->classes();
+    foreach (const ClassModelItem &c, classList)
+        writeOutClass(s, c);
 
     s.writeEndElement();
 }
@@ -93,9 +93,9 @@ void writeOutNamespace(QXmlStreamWriter &s, const NamespaceModelItem &item)
     foreach (const NamespaceModelItem &n, namespaces)
         writeOutNamespace(s, n);
 
-    const ClassModelItemMap &typeMap = item->classMap();
-    for (ClassModelItemMap::const_iterator it = typeMap.cbegin(), end = typeMap.cend(); it != end; ++it)
-        writeOutClass(s, it.value());
+    const ClassList &classList = item->classes();
+    foreach (const ClassModelItem &c, classList)
+        writeOutClass(s, c);
 
     const EnumList &enums = item->enums();
     foreach (const EnumModelItem &e, enums)
@@ -151,9 +151,9 @@ void writeOutClass(QXmlStreamWriter &s, const ClassModelItem &item)
     for (FunctionModelItemMap::const_iterator it = functionMap.cbegin(), end = functionMap.cend(); it != end; ++it)
         writeOutFunction(s, it.value());
 
-    const ClassModelItemMap &typeMap = item->classMap();
-    for (ClassModelItemMap::const_iterator it = typeMap.cbegin(), end = typeMap.cend(); it != end; ++it)
-        writeOutClass(s, it.value());
+    const ClassList &classList = item->classes();
+    foreach (const ClassModelItem &c, classList)
+        writeOutClass(s, c);
 
     s.writeEndElement();
 }

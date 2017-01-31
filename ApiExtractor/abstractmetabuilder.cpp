@@ -470,13 +470,11 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 
     pushScope(dom);
 
-    QHash<QString, ClassModelItem> typeMap = dom->classMap();
-
     // fix up QObject's in the type system..
     fixQObjectForScope(dom, types, dom);
 
     // Start the generation...
-    ClassList typeValues = typeMap.values();
+    ClassList typeValues = dom->classes();
     qSort(typeValues);
     ClassList::iterator it = std::unique(typeValues.begin(), typeValues.end());
     typeValues.erase(it, typeValues.end());
@@ -1284,7 +1282,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
 
     // Inner classes
     {
-        QList<ClassModelItem> innerClasses = classItem->classMap().values();
+        const ClassList &innerClasses = classItem->classes();
         foreach (const ClassModelItem &ci, innerClasses) {
             AbstractMetaClass *cl = traverseClass(dom, ci);
             if (cl) {
@@ -1325,7 +1323,7 @@ void AbstractMetaBuilderPrivate::traverseScopeMembers(ScopeModelItem item,
     traverseFunctions(item, metaClass);
 
     // Inner classes
-    ClassList innerClasses = item->classMap().values();
+    ClassList innerClasses = item->classes();
     qSort(innerClasses);
     ClassList::iterator it = std::unique(innerClasses.begin(), innerClasses.end());
     innerClasses.erase(it, innerClasses.end());

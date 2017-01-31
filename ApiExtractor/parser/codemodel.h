@@ -297,7 +297,7 @@ public:
 
     ~_ScopeModelItem();
 
-    ClassList classes() const;
+    ClassList classes() const { return m_classes; }
     EnumList enums() const { return m_enums; }
     FunctionDefinitionList functionDefinitions() const;
     FunctionList functions() const;
@@ -321,7 +321,6 @@ public:
     void addEnumsDeclaration(const QString &enumsDeclaration);
     QStringList enumsDeclarations() const { return m_enumsDeclarations; }
 
-    inline QHash<QString, ClassModelItem> classMap() const { return m_classes; }
     inline QMultiHash<QString, FunctionDefinitionModelItem> functionDefinitionMap() const { return m_functionDefinitions; }
     inline QMultiHash<QString, FunctionModelItem> functionMap() const { return m_functions; }
 
@@ -342,7 +341,7 @@ protected:
 #endif
 
 private:
-    QHash<QString, ClassModelItem> m_classes;
+    ClassList m_classes;
     EnumList m_enums;
     TypeDefList m_typeDefs;
     VariableList m_variables;

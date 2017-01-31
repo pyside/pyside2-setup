@@ -534,15 +534,6 @@ _ScopeModelItem::~_ScopeModelItem()
 {
 }
 
-ClassList _ScopeModelItem::classes() const
-{
-    ClassList result = m_classes.values();
-    qSort(result);
-    ClassList::iterator it = std::unique(result.begin(), result.end());
-    result.erase(it, result.end());
-    return result;
-}
-
 FunctionList _ScopeModelItem::functions() const
 {
     return m_functions.values();
@@ -560,11 +551,7 @@ FunctionDefinitionList _ScopeModelItem::functionDefinitions() const
 
 void _ScopeModelItem::addClass(ClassModelItem item)
 {
-    QString name = item->name();
-    int idx = name.indexOf(QLatin1Char('<'));
-    if (idx > 0)
-        m_classes.insert(name.left(idx), item);
-    m_classes.insert(name, item);
+    m_classes.append(item);
 }
 
 void _ScopeModelItem::addFunction(FunctionModelItem item)
@@ -622,7 +609,7 @@ static void formatScopeList(QDebug &d, const char *prefix, const List &l)
 
 void _ScopeModelItem::formatScopeItemsDebug(QDebug &d) const
 {
-    formatScopeHash(d, ", classes=", m_classes);
+    formatScopeList(d, ", classes=", m_classes);
     formatScopeList(d, ", enums=", m_enums);
     formatScopeList(d, ", aliases=", m_typeDefs);
     formatScopeHash(d, ", functionDefs=", m_functionDefinitions);
@@ -637,9 +624,34 @@ void  _ScopeModelItem::formatDebug(QDebug &d) const
 }
 #endif // !QT_NO_DEBUG_STREAM
 
+namespace {
+// Predicate to match a non-template class name against the class list.
+// "Vector" should match "Vector" as well as "Vector<T>" (as seen for methods
+// from within the class "Vector").
+class ClassNamePredicate : public std::unary_function<bool, ClassModelItem>
+{
+public:
+    explicit ClassNamePredicate(const QString &name) : m_name(name) {}
+    bool operator()(const ClassModelItem &item) const
+    {
+        const QString &itemName = item->name();
+        if (!itemName.startsWith(m_name))
+            return false;
+        return itemName.size() == m_name.size() || itemName.at(m_name.size()) == QLatin1Char('<');
+    }
+
+private:
+    const QString m_name;
+};
+} // namespace
+
 ClassModelItem _ScopeModelItem::findClass(const QString &name) const
 {
-    return m_classes.value(name);
+    // A fully qualified template is matched by name only
+    const ClassList::const_iterator it = name.contains(QLatin1Char('<'))
+        ? std::find_if(m_classes.begin(), m_classes.end(), ModelItemNamePredicate<_ClassModelItem>(name))
+        : std::find_if(m_classes.begin(), m_classes.end(), ClassNamePredicate(name));
+    return it != m_classes.end() ? *it : ClassModelItem();
 }
 
 VariableModelItem _ScopeModelItem::findVariable(const QString &name) const
