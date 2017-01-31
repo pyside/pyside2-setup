@@ -73,13 +73,9 @@ public:
     NamespaceModelItem globalNamespace() const;
 
     void addFile(FileModelItem item);
-    void removeFile(FileModelItem item);
     FileModelItem findFile(const QString &name) const;
-    QHash<QString, FileModelItem> fileMap() const;
 
     CodeModelItem findItem(const QStringList &qualifiedName, CodeModelItem scope) const;
-
-    void wipeout();
 
 private:
     QHash<QString, FileModelItem> _M_files;
@@ -280,7 +276,6 @@ public:
 protected:
     explicit _CodeModelItem(CodeModel *model, int kind);
     explicit _CodeModelItem(CodeModel *model, const QString &name, int kind);
-    void setKind(int kind);
 
 private:
     CodeModel *_M_model;
@@ -289,7 +284,6 @@ private:
     int _M_startColumn;
     int _M_endLine;
     int _M_endColumn;
-    std::size_t _M_creation_id;
     QString _M_name;
     QString _M_fileName;
     QStringList _M_scope;
@@ -319,13 +313,6 @@ public:
     void addFunctionDefinition(FunctionDefinitionModelItem item);
     void addTypeDef(TypeDefModelItem item);
     void addVariable(VariableModelItem item);
-
-    void removeClass(ClassModelItem item);
-    void removeEnum(EnumModelItem item);
-    void removeFunction(FunctionModelItem item);
-    void removeFunctionDefinition(FunctionDefinitionModelItem item);
-    void removeTypeDef(TypeDefModelItem item);
-    void removeVariable(VariableModelItem item);
 
     ClassModelItem findClass(const QString &name) const;
     EnumModelItem findEnum(const QString &name) const;
@@ -409,7 +396,6 @@ public:
 
     void setBaseClasses(const QStringList &baseClasses);
     void addBaseClass(const QString &baseClass);
-    void removeBaseClass(const QString &baseClass);
 
     TemplateParameterList templateParameters() const;
     void setTemplateParameters(const TemplateParameterList &templateParameters);
@@ -451,7 +437,6 @@ public:
     NamespaceList namespaces() const;
 
     void addNamespace(NamespaceModelItem item);
-    void removeNamespace(NamespaceModelItem item);
 
     NamespaceModelItem findNamespace(const QString &name) const;
 
@@ -478,10 +463,6 @@ public:
     explicit _FileModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
         : _NamespaceModelItem(model, name, kind) {}
     ~_FileModelItem();
-
-private:
-    _FileModelItem(const _FileModelItem &other);
-    void operator = (const _FileModelItem &other);
 };
 
 class _ArgumentModelItem: public _CodeModelItem
@@ -610,7 +591,6 @@ public:
     ArgumentList arguments() const;
 
     void addArgument(ArgumentModelItem item);
-    void removeArgument(ArgumentModelItem item);
 
     CodeModel::FunctionType functionType() const;
     void setFunctionType(CodeModel::FunctionType functionType);
@@ -715,7 +695,6 @@ public:
 
     EnumeratorList enumerators() const;
     void addEnumerator(EnumeratorModelItem item);
-    void removeEnumerator(EnumeratorModelItem item);
     bool isAnonymous() const;
     void setAnonymous(bool anonymous);
 

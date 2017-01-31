@@ -43,12 +43,6 @@ CodeModel::~CodeModel()
 {
 }
 
-void CodeModel::wipeout()
-{
-    _M_globalNamespace.reset(new _NamespaceModelItem(this));
-    _M_files.clear();
-}
-
 FileList CodeModel::files() const
 {
     return _M_files.values();
@@ -64,22 +58,9 @@ void CodeModel::addFile(FileModelItem item)
     _M_files.insert(item->name(), item);
 }
 
-void CodeModel::removeFile(FileModelItem item)
-{
-    QHash<QString, FileModelItem>::Iterator it = _M_files.find(item->name());
-
-    if (it != _M_files.end() && it.value() == item)
-        _M_files.erase(it);
-}
-
 FileModelItem CodeModel::findFile(const QString &name) const
 {
     return _M_files.value(name);
-}
-
-QHash<QString, FileModelItem> CodeModel::fileMap() const
-{
-    return _M_files;
 }
 
 CodeModelItem CodeModel::findItem(const QStringList &qualifiedName, CodeModelItem scope) const
@@ -295,11 +276,6 @@ int _CodeModelItem::kind() const
     return _M_kind;
 }
 
-void _CodeModelItem::setKind(int kind)
-{
-    _M_kind = kind;
-}
-
 QStringList _CodeModelItem::qualifiedName() const
 {
     QStringList q = scope();
@@ -471,11 +447,6 @@ void _ClassModelItem::addBaseClass(const QString &baseClass)
     _M_baseClasses.append(baseClass);
 }
 
-void _ClassModelItem::removeBaseClass(const QString &baseClass)
-{
-    _M_baseClasses.removeAt(_M_baseClasses.indexOf(baseClass));
-}
-
 bool _ClassModelItem::extendsClass(const QString &name) const
 {
     return _M_baseClasses.contains(name);
@@ -616,68 +587,6 @@ void _ScopeModelItem::addEnum(EnumModelItem item)
     _M_enumNames.append(item->name());
 }
 
-void _ScopeModelItem::removeClass(ClassModelItem item)
-{
-    QHash<QString, ClassModelItem>::Iterator it = _M_classes.find(item->name());
-
-    if (it != _M_classes.end() && it.value() == item)
-        _M_classes.erase(it);
-}
-
-void _ScopeModelItem::removeFunction(FunctionModelItem item)
-{
-    QMultiHash<QString, FunctionModelItem>::Iterator it = _M_functions.find(item->name());
-
-    while (it != _M_functions.end() && it.key() == item->name()
-           && it.value() != item) {
-        ++it;
-    }
-
-    if (it != _M_functions.end() && it.value() == item) {
-        _M_functions.erase(it);
-    }
-}
-
-void _ScopeModelItem::removeFunctionDefinition(FunctionDefinitionModelItem item)
-{
-    QMultiHash<QString, FunctionDefinitionModelItem>::Iterator it = _M_functionDefinitions.find(item->name());
-
-    while (it != _M_functionDefinitions.end() && it.key() == item->name()
-           && it.value() != item) {
-        ++it;
-    }
-
-    if (it != _M_functionDefinitions.end() && it.value() == item) {
-        _M_functionDefinitions.erase(it);
-    }
-}
-
-void _ScopeModelItem::removeVariable(VariableModelItem item)
-{
-    QHash<QString, VariableModelItem>::Iterator it = _M_variables.find(item->name());
-
-    if (it != _M_variables.end() && it.value() == item)
-        _M_variables.erase(it);
-}
-
-void _ScopeModelItem::removeTypeDef(TypeDefModelItem item)
-{
-    QHash<QString, TypeDefModelItem>::Iterator it = _M_typeDefs.find(item->name());
-
-    if (it != _M_typeDefs.end() && it.value() == item)
-        _M_typeDefs.erase(it);
-}
-
-void _ScopeModelItem::removeEnum(EnumModelItem item)
-{
-    QHash<QString, EnumModelItem>::Iterator it = _M_enums.find(item->name());
-
-    if (it != _M_enums.end() && it.value() == item) {
-        _M_enumNames.removeOne(item->name());
-        _M_enums.erase(it);
-    }
-}
-
 #ifndef QT_NO_DEBUG_STREAM
 template <class Hash>
 static void formatScopeHash(QDebug &d, const char *prefix, const Hash &h)
@@ -754,13 +663,6 @@ NamespaceList _NamespaceModelItem::namespaces() const
 void _NamespaceModelItem::addNamespace(NamespaceModelItem item)
 {
     _M_namespaces.insert(item->name(), item);
-}
-void _NamespaceModelItem::removeNamespace(NamespaceModelItem item)
-{
-    QHash<QString, NamespaceModelItem>::Iterator it = _M_namespaces.find(item->name());
-
-    if (it != _M_namespaces.end() && it.value() == item)
-        _M_namespaces.erase(it);
 }
 
 NamespaceModelItem _NamespaceModelItem::findNamespace(const QString &name) const
@@ -854,11 +756,6 @@ ArgumentList _FunctionModelItem::arguments() const
 void _FunctionModelItem::addArgument(ArgumentModelItem item)
 {
     _M_arguments.append(item);
-}
-
-void _FunctionModelItem::removeArgument(ArgumentModelItem item)
-{
-    _M_arguments.removeAt(_M_arguments.indexOf(item));
 }
 
 CodeModel::FunctionType _FunctionModelItem::functionType() const
@@ -997,11 +894,6 @@ EnumeratorList _EnumModelItem::enumerators() const
 void _EnumModelItem::addEnumerator(EnumeratorModelItem item)
 {
     _M_enumerators.append(item);
-}
-
-void _EnumModelItem::removeEnumerator(EnumeratorModelItem item)
-{
-    _M_enumerators.removeAt(_M_enumerators.indexOf(item));
 }
 
 bool _EnumModelItem::isAnonymous() const
