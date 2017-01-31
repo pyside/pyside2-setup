@@ -73,9 +73,9 @@ void astToXML(QString name)
 
     s.writeStartElement(QLatin1String("code"));
 
-    const NamespaceModelItemMap &namespaceMap = dom->namespaceMap();
-    for (NamespaceModelItemMap::const_iterator it = namespaceMap.cbegin(), end = namespaceMap.cend(); it != end; ++it)
-        writeOutNamespace(s, it.value());
+    const NamespaceList &namespaces = dom->namespaces();
+    foreach (const NamespaceModelItem &n, namespaces)
+        writeOutNamespace(s, n);
 
     const ClassModelItemMap &typeMap = dom->classMap();
     for (ClassModelItemMap::const_iterator it = typeMap.cbegin(), end = typeMap.cend(); it != end; ++it)
@@ -89,17 +89,17 @@ void writeOutNamespace(QXmlStreamWriter &s, const NamespaceModelItem &item)
     s.writeStartElement(QLatin1String("namespace"));
     s.writeAttribute(QLatin1String("name"), item->name());
 
-    const NamespaceModelItemMap &namespaceMap = item->namespaceMap();
-    for (NamespaceModelItemMap::const_iterator it = namespaceMap.cbegin(), end = namespaceMap.cend(); it != end; ++it)
-        writeOutNamespace(s, it.value());
+    const NamespaceList &namespaces = item->namespaces();
+    foreach (const NamespaceModelItem &n, namespaces)
+        writeOutNamespace(s, n);
 
     const ClassModelItemMap &typeMap = item->classMap();
     for (ClassModelItemMap::const_iterator it = typeMap.cbegin(), end = typeMap.cend(); it != end; ++it)
         writeOutClass(s, it.value());
 
-    const EnumMap &enumMap = item->enumMap();
-    for (EnumMap::const_iterator it = enumMap.cbegin(), end = enumMap.cend(); it != end; ++it)
-        writeOutEnum(s, it.value());
+    const EnumList &enums = item->enums();
+    foreach (const EnumModelItem &e, enums)
+        writeOutEnum(s, e);
 
     s.writeEndElement();
 }
@@ -143,9 +143,9 @@ void writeOutClass(QXmlStreamWriter &s, const ClassModelItem &item)
     s.writeStartElement(QLatin1String("class"));
     s.writeAttribute(QLatin1String("name"), qualifiedName);
 
-    const EnumMap &enumMap = item->enumMap();
-    for (EnumMap::const_iterator it = enumMap.cbegin(), end = enumMap.cend(); it != end; ++it)
-        writeOutEnum(s, it.value());
+    const EnumList &enums = item->enums();
+    foreach (const EnumModelItem &e, enums)
+        writeOutEnum(s, e);
 
     const FunctionModelItemMap &functionMap = item->functionMap();
     for (FunctionModelItemMap::const_iterator it = functionMap.cbegin(), end = functionMap.cend(); it != end; ++it)

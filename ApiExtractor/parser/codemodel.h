@@ -69,7 +69,7 @@ public:
     CodeModel();
     virtual ~CodeModel();
 
-    FileList files() const;
+    FileList files() const { return m_files; }
     NamespaceModelItem globalNamespace() const;
 
     void addFile(FileModelItem item);
@@ -78,7 +78,7 @@ public:
     CodeModelItem findItem(const QStringList &qualifiedName, CodeModelItem scope) const;
 
 private:
-    QHash<QString, FileModelItem> m_files;
+    FileList m_files;
     NamespaceModelItem m_globalNamespace;
 
 private:
@@ -298,11 +298,11 @@ public:
     ~_ScopeModelItem();
 
     ClassList classes() const;
-    EnumList enums() const;
+    EnumList enums() const { return m_enums; }
     FunctionDefinitionList functionDefinitions() const;
     FunctionList functions() const;
-    TypeDefList typeDefs() const;
-    VariableList variables() const;
+    TypeDefList typeDefs() const { return m_typeDefs; }
+    VariableList variables() const { return m_variables; }
 
     void addClass(ClassModelItem item);
     void addEnum(EnumModelItem item);
@@ -322,9 +322,6 @@ public:
     QStringList enumsDeclarations() const { return m_enumsDeclarations; }
 
     inline QHash<QString, ClassModelItem> classMap() const { return m_classes; }
-    inline QHash<QString, EnumModelItem> enumMap() const { return m_enums; }
-    inline QHash<QString, TypeDefModelItem> typeDefMap() const { return m_typeDefs; }
-    inline QHash<QString, VariableModelItem> variableMap() const { return m_variables; }
     inline QMultiHash<QString, FunctionDefinitionModelItem> functionDefinitionMap() const { return m_functionDefinitions; }
     inline QMultiHash<QString, FunctionModelItem> functionMap() const { return m_functions; }
 
@@ -346,14 +343,13 @@ protected:
 
 private:
     QHash<QString, ClassModelItem> m_classes;
-    QHash<QString, EnumModelItem> m_enums;
-    QHash<QString, TypeDefModelItem> m_typeDefs;
-    QHash<QString, VariableModelItem> m_variables;
+    EnumList m_enums;
+    TypeDefList m_typeDefs;
+    VariableList m_variables;
     QMultiHash<QString, FunctionDefinitionModelItem> m_functionDefinitions;
     QMultiHash<QString, FunctionModelItem> m_functions;
 
 private:
-    QStringList m_enumNames;
     QStringList m_enumsDeclarations;
 };
 
@@ -407,20 +403,18 @@ public:
         : _ScopeModelItem(model, name, kind) {}
     ~_NamespaceModelItem();
 
-    NamespaceList namespaces() const;
+    NamespaceList namespaces() const { return m_namespaces; }
 
     void addNamespace(NamespaceModelItem item);
 
     NamespaceModelItem findNamespace(const QString &name) const;
-
-    inline QHash<QString, NamespaceModelItem> namespaceMap() const { return m_namespaces; };
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
 #endif
 
 private:
-    QHash<QString, NamespaceModelItem> m_namespaces;
+    NamespaceList m_namespaces;
 };
 
 class _FileModelItem: public _NamespaceModelItem

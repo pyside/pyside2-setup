@@ -421,8 +421,6 @@ void AbstractMetaBuilderPrivate::fixQObjectForScope(const FileModelItem &dom,
                                                     const TypeDatabase *types,
                                                     const NamespaceModelItem &scope)
 {
-    typedef QHash<QString, NamespaceModelItem> NamespaceModelItemMap;
-
     foreach (const ClassModelItem &item, scope->classes()) {
         QString qualifiedName = item->qualifiedName().join(colonColon());
         TypeEntry* entry = types->findType(qualifiedName);
@@ -432,10 +430,10 @@ void AbstractMetaBuilderPrivate::fixQObjectForScope(const FileModelItem &dom,
         }
     }
 
-    const NamespaceModelItemMap namespaceMap = scope->namespaceMap();
-    for (NamespaceModelItemMap::const_iterator it = namespaceMap.cbegin(), end = namespaceMap.cend(); it != end; ++it) {
-        if (scope != it.value())
-            fixQObjectForScope(dom, types, it.value());
+    const NamespaceList &namespaces = scope->namespaces();
+    foreach (const NamespaceModelItem &n, namespaces) {
+        if (scope != n)
+            fixQObjectForScope(dom, types, n);
     }
 }
 
@@ -494,7 +492,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     }
 
     // We need to know all global enums
-    ReportHandler::setProgressReference(dom->enumMap());
+    ReportHandler::setProgressReference(dom->enums());
     foreach (const EnumModelItem &item, dom->enums()) {
         ReportHandler::progress(QLatin1String("Generating enum model..."));
         AbstractMetaEnum *metaEnum = traverseEnum(item, 0, QSet<QString>());
@@ -504,13 +502,12 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
         }
     }
 
-    QHash<QString, NamespaceModelItem> namespaceMap = dom->namespaceMap();
-    NamespaceList namespaceTypeValues = namespaceMap.values();
+    NamespaceList namespaceTypeValues = dom->namespaces();
     qSort(namespaceTypeValues);
     NamespaceList::iterator nsit = std::unique(namespaceTypeValues.begin(), namespaceTypeValues.end());
     namespaceTypeValues.erase(nsit, namespaceTypeValues.end());
 
-    ReportHandler::setProgressReference(namespaceMap);
+    ReportHandler::setProgressReference(namespaceTypeValues);
     foreach (NamespaceModelItem item, namespaceTypeValues) {
         ReportHandler::progress(QLatin1String("Generating namespace model..."));
         AbstractMetaClass *metaClass = traverseNamespace(dom, item);
@@ -821,7 +818,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
     }
 
     // Traverse namespaces recursively
-    NamespaceList innerNamespaces = namespaceItem->namespaceMap().values();
+    NamespaceList innerNamespaces = namespaceItem->namespaces();
     qSort(innerNamespaces);
     NamespaceList::iterator it = std::unique(innerNamespaces.begin(), innerNamespaces.end());
     innerNamespaces.erase(it, innerNamespaces.end());
@@ -1379,7 +1376,7 @@ void AbstractMetaBuilderPrivate::traverseNamespaceMembers(NamespaceModelItem ite
     traverseScopeMembers(item, metaClass);
 
     // Inner namespaces
-    NamespaceList innerNamespaces = item->namespaceMap().values();
+    NamespaceList innerNamespaces = item->namespaces();
     qSort(innerNamespaces);
     NamespaceList::iterator it = std::unique(innerNamespaces.begin(), innerNamespaces.end());
     innerNamespaces.erase(it, innerNamespaces.end());
@@ -2629,7 +2626,7 @@ bool AbstractMetaBuilderPrivate::isQObject(const FileModelItem &dom, const QStri
         QStringList names = qualifiedName.split(colonColon());
         NamespaceModelItem ns = dom;
         for (int i = 0; i < names.size() - 1 && ns; ++i)
-            ns = ns->namespaceMap().value(names.at(i));
+            ns = ns->findNamespace(names.at(i));
         if (ns && names.size() >= 2)
             classItem = ns->findClass(names.at(names.size() - 1));
     }

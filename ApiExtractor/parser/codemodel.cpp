@@ -30,8 +30,28 @@
 
 #include "codemodel.h"
 #include <algorithm>
+#include <functional>
 #include <iostream>
 #include <QDebug>
+
+// Predicate to find an item by name in a list of QSharedPointer<Item>
+template <class T> class ModelItemNamePredicate : public std::unary_function<bool, QSharedPointer<T> >
+{
+public:
+    explicit ModelItemNamePredicate(const QString &name) : m_name(name) {}
+    bool operator()(const QSharedPointer<T> &item) const { return item->name() == m_name; }
+
+private:
+    const QString m_name;
+};
+
+template <class T>
+static QSharedPointer<T> findModelItem(const QList<QSharedPointer<T> > &list, const QString &name)
+{
+    typedef typename QList<QSharedPointer<T> >::const_iterator It;
+    const It it = std::find_if(list.begin(), list.end(), ModelItemNamePredicate<T>(name));
+    return it != list.end() ? *it : QSharedPointer<T>();
+}
 
 // ---------------------------------------------------------------------------
 
@@ -43,11 +63,6 @@ CodeModel::~CodeModel()
 {
 }
 
-FileList CodeModel::files() const
-{
-    return m_files.values();
-}
-
 NamespaceModelItem CodeModel::globalNamespace() const
 {
     return m_globalNamespace;
@@ -55,12 +70,12 @@ NamespaceModelItem CodeModel::globalNamespace() const
 
 void CodeModel::addFile(FileModelItem item)
 {
-    m_files.insert(item->name(), item);
+    m_files.append(item);
 }
 
 FileModelItem CodeModel::findFile(const QString &name) const
 {
-    return m_files.value(name);
+    return findModelItem(m_files, name);
 }
 
 CodeModelItem CodeModel::findItem(const QStringList &qualifiedName, CodeModelItem scope) const
@@ -356,6 +371,16 @@ void formatSequence(QDebug &d, It i1, It i2, const char *separator=", ")
     }
 }
 
+template <class It>
+static void formatPtrSequence(QDebug &d, It i1, It i2, const char *separator=", ")
+{
+    for (It i = i1; i != i2; ++i) {
+        if (i != i1)
+            d << separator;
+        d << i->data();
+    }
+}
+
 void _CodeModelItem::formatKind(QDebug &d, int k)
 {
     if ((k & Kind_Variable) == Kind_Variable)
@@ -518,16 +543,6 @@ ClassList _ScopeModelItem::classes() const
     return result;
 }
 
-TypeDefList _ScopeModelItem::typeDefs() const
-{
-    return m_typeDefs.values();
-}
-
-VariableList _ScopeModelItem::variables() const
-{
-    return m_variables.values();
-}
-
 FunctionList _ScopeModelItem::functions() const
 {
     return m_functions.values();
@@ -541,14 +556,6 @@ void _ScopeModelItem::addEnumsDeclaration(const QString &enumsDeclaration)
 FunctionDefinitionList _ScopeModelItem::functionDefinitions() const
 {
     return m_functionDefinitions.values();
-}
-
-EnumList _ScopeModelItem::enums() const
-{
-    EnumList result;
-    foreach (const QString& name, m_enumNames)
-        result.append(m_enums.value(name));
-    return result;
 }
 
 void _ScopeModelItem::addClass(ClassModelItem item)
@@ -572,19 +579,17 @@ void _ScopeModelItem::addFunctionDefinition(FunctionDefinitionModelItem item)
 
 void _ScopeModelItem::addVariable(VariableModelItem item)
 {
-    m_variables.insert(item->name(), item);
+    m_variables.append(item);
 }
 
 void _ScopeModelItem::addTypeDef(TypeDefModelItem item)
 {
-    m_typeDefs.insert(item->name(), item);
+    m_typeDefs.append(item);
 }
 
 void _ScopeModelItem::addEnum(EnumModelItem item)
 {
-    m_enumNames.removeOne(item->name());
-    m_enums.insert(item->name(), item);
-    m_enumNames.append(item->name());
+    m_enums.append(item);
 }
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -605,13 +610,24 @@ static void formatScopeHash(QDebug &d, const char *prefix, const Hash &h)
     }
 }
 
+template <class List>
+static void formatScopeList(QDebug &d, const char *prefix, const List &l)
+{
+    if (!l.isEmpty()) {
+        d << prefix << '[' << l.size() << "](";
+        formatPtrSequence(d, l.begin(), l.end());
+        d << ')';
+    }
+}
+
 void _ScopeModelItem::formatScopeItemsDebug(QDebug &d) const
 {
     formatScopeHash(d, ", classes=", m_classes);
-    formatScopeHash(d, ", enums=", m_enums);
-    formatScopeHash(d, ", aliases=", m_typeDefs);
+    formatScopeList(d, ", enums=", m_enums);
+    formatScopeList(d, ", aliases=", m_typeDefs);
     formatScopeHash(d, ", functionDefs=", m_functionDefinitions);
     formatScopeHash(d, ", functions=", m_functions);
+    formatScopeList(d, ", variables=", m_variables);
 }
 
 void  _ScopeModelItem::formatDebug(QDebug &d) const
@@ -628,17 +644,17 @@ ClassModelItem _ScopeModelItem::findClass(const QString &name) const
 
 VariableModelItem _ScopeModelItem::findVariable(const QString &name) const
 {
-    return m_variables.value(name);
+    return findModelItem(m_variables, name);
 }
 
 TypeDefModelItem _ScopeModelItem::findTypeDef(const QString &name) const
 {
-    return m_typeDefs.value(name);
+    return findModelItem(m_typeDefs, name);
 }
 
 EnumModelItem _ScopeModelItem::findEnum(const QString &name) const
 {
-    return m_enums.value(name);
+    return findModelItem(m_enums, name);
 }
 
 FunctionList _ScopeModelItem::findFunctions(const QString &name) const
@@ -656,18 +672,14 @@ _NamespaceModelItem::~_NamespaceModelItem()
 {
 }
 
-NamespaceList _NamespaceModelItem::namespaces() const
-{
-    return m_namespaces.values();
-}
 void _NamespaceModelItem::addNamespace(NamespaceModelItem item)
 {
-    m_namespaces.insert(item->name(), item);
+    m_namespaces.append(item);
 }
 
 NamespaceModelItem _NamespaceModelItem::findNamespace(const QString &name) const
 {
-    return m_namespaces.value(name);
+    return findModelItem(m_namespaces, name);
 }
 
 _FileModelItem::~_FileModelItem()
@@ -678,7 +690,7 @@ _FileModelItem::~_FileModelItem()
 void _NamespaceModelItem::formatDebug(QDebug &d) const
 {
     _ScopeModelItem::formatDebug(d);
-    formatScopeHash(d, ", namespaces=", m_namespaces);
+    formatScopeList(d, ", namespaces=", m_namespaces);
 }
 #endif // !QT_NO_DEBUG_STREAM
 
