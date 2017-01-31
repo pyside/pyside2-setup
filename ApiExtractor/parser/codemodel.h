@@ -78,8 +78,8 @@ public:
     CodeModelItem findItem(const QStringList &qualifiedName, CodeModelItem scope) const;
 
 private:
-    QHash<QString, FileModelItem> _M_files;
-    NamespaceModelItem _M_globalNamespace;
+    QHash<QString, FileModelItem> m_files;
+    NamespaceModelItem m_globalNamespace;
 
 private:
     CodeModel(const CodeModel &other);
@@ -263,10 +263,7 @@ public:
     void getEndPosition(int *line, int *column);
     void setEndPosition(int line, int column);
 
-    inline CodeModel *model() const
-    {
-        return _M_model;
-    }
+    inline CodeModel *model() const { return m_model; }
 
 #ifndef QT_NO_DEBUG_STREAM
     static void formatKind(QDebug &d, int k);
@@ -278,15 +275,15 @@ protected:
     explicit _CodeModelItem(CodeModel *model, const QString &name, int kind);
 
 private:
-    CodeModel *_M_model;
-    int _M_kind;
-    int _M_startLine;
-    int _M_startColumn;
-    int _M_endLine;
-    int _M_endColumn;
-    QString _M_name;
-    QString _M_fileName;
-    QStringList _M_scope;
+    CodeModel *m_model;
+    int m_kind;
+    int m_startLine;
+    int m_startColumn;
+    int m_endLine;
+    int m_endColumn;
+    QString m_name;
+    QString m_fileName;
+    QStringList m_scope;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -322,35 +319,14 @@ public:
     VariableModelItem findVariable(const QString &name) const;
 
     void addEnumsDeclaration(const QString &enumsDeclaration);
-    QStringList enumsDeclarations() const
-    {
-        return _M_enumsDeclarations;
-    }
+    QStringList enumsDeclarations() const { return m_enumsDeclarations; }
 
-    inline QHash<QString, ClassModelItem> classMap() const
-    {
-        return _M_classes;
-    }
-    inline QHash<QString, EnumModelItem> enumMap() const
-    {
-        return _M_enums;
-    }
-    inline QHash<QString, TypeDefModelItem> typeDefMap() const
-    {
-        return _M_typeDefs;
-    }
-    inline QHash<QString, VariableModelItem> variableMap() const
-    {
-        return _M_variables;
-    }
-    inline QMultiHash<QString, FunctionDefinitionModelItem> functionDefinitionMap() const
-    {
-        return _M_functionDefinitions;
-    }
-    inline QMultiHash<QString, FunctionModelItem> functionMap() const
-    {
-        return _M_functions;
-    }
+    inline QHash<QString, ClassModelItem> classMap() const { return m_classes; }
+    inline QHash<QString, EnumModelItem> enumMap() const { return m_enums; }
+    inline QHash<QString, TypeDefModelItem> typeDefMap() const { return m_typeDefs; }
+    inline QHash<QString, VariableModelItem> variableMap() const { return m_variables; }
+    inline QMultiHash<QString, FunctionDefinitionModelItem> functionDefinitionMap() const { return m_functionDefinitions; }
+    inline QMultiHash<QString, FunctionModelItem> functionMap() const { return m_functions; }
 
     FunctionModelItem declaredFunction(FunctionModelItem item);
 
@@ -369,16 +345,16 @@ protected:
 #endif
 
 private:
-    QHash<QString, ClassModelItem> _M_classes;
-    QHash<QString, EnumModelItem> _M_enums;
-    QHash<QString, TypeDefModelItem> _M_typeDefs;
-    QHash<QString, VariableModelItem> _M_variables;
-    QMultiHash<QString, FunctionDefinitionModelItem> _M_functionDefinitions;
-    QMultiHash<QString, FunctionModelItem> _M_functions;
+    QHash<QString, ClassModelItem> m_classes;
+    QHash<QString, EnumModelItem> m_enums;
+    QHash<QString, TypeDefModelItem> m_typeDefs;
+    QHash<QString, VariableModelItem> m_variables;
+    QMultiHash<QString, FunctionDefinitionModelItem> m_functionDefinitions;
+    QMultiHash<QString, FunctionModelItem> m_functions;
 
 private:
-    QStringList _M_enumNames;
-    QStringList _M_enumsDeclarations;
+    QStringList m_enumNames;
+    QStringList m_enumsDeclarations;
 };
 
 class _ClassModelItem: public _ScopeModelItem
@@ -387,9 +363,9 @@ public:
     DECLARE_MODEL_NODE(Class)
 
     explicit _ClassModelItem(CodeModel *model, int kind = __node_kind)
-        : _ScopeModelItem(model, kind), _M_classType(CodeModel::Class) {}
+        : _ScopeModelItem(model, kind), m_classType(CodeModel::Class) {}
     explicit _ClassModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
-        : _ScopeModelItem(model, name, kind), _M_classType(CodeModel::Class) {}
+        : _ScopeModelItem(model, name, kind), m_classType(CodeModel::Class) {}
     ~_ClassModelItem();
 
     QStringList baseClasses() const;
@@ -406,21 +382,18 @@ public:
     CodeModel::ClassType classType() const;
 
     void addPropertyDeclaration(const QString &propertyDeclaration);
-    QStringList propertyDeclarations() const
-    {
-        return _M_propertyDeclarations;
-    }
+    QStringList propertyDeclarations() const { return m_propertyDeclarations; }
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
 #endif
 
 private:
-    QStringList _M_baseClasses;
-    TemplateParameterList _M_templateParameters;
-    CodeModel::ClassType _M_classType;
+    QStringList m_baseClasses;
+    TemplateParameterList m_templateParameters;
+    CodeModel::ClassType m_classType;
 
-    QStringList _M_propertyDeclarations;
+    QStringList m_propertyDeclarations;
 };
 
 class _NamespaceModelItem: public _ScopeModelItem
@@ -440,17 +413,14 @@ public:
 
     NamespaceModelItem findNamespace(const QString &name) const;
 
-    inline QHash<QString, NamespaceModelItem> namespaceMap() const
-    {
-        return _M_namespaces;
-    };
+    inline QHash<QString, NamespaceModelItem> namespaceMap() const { return m_namespaces; };
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
 #endif
 
 private:
-    QHash<QString, NamespaceModelItem> _M_namespaces;
+    QHash<QString, NamespaceModelItem> m_namespaces;
 };
 
 class _FileModelItem: public _NamespaceModelItem
@@ -471,9 +441,9 @@ public:
     DECLARE_MODEL_NODE(Argument)
 
     explicit _ArgumentModelItem(CodeModel *model, int kind = __node_kind)
-        : _CodeModelItem(model, kind), _M_defaultValue(false) {}
+        : _CodeModelItem(model, kind), m_defaultValue(false) {}
     explicit _ArgumentModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
-        : _CodeModelItem(model, name, kind), _M_defaultValue(false) {}
+        : _CodeModelItem(model, name, kind), m_defaultValue(false) {}
     ~_ArgumentModelItem();
 
     TypeInfo type() const;
@@ -482,24 +452,17 @@ public:
     bool defaultValue() const;
     void setDefaultValue(bool defaultValue);
 
-    QString defaultValueExpression() const
-    {
-        return _M_defaultValueExpression;
-    }
-
-    void setDefaultValueExpression(const QString &expr)
-    {
-        _M_defaultValueExpression = expr;
-    }
+    QString defaultValueExpression() const { return m_defaultValueExpression; }
+    void setDefaultValueExpression(const QString &expr) { m_defaultValueExpression = expr; }
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
 #endif
 
 private:
-    TypeInfo _M_type;
-    QString _M_defaultValueExpression;
-    bool _M_defaultValue;
+    TypeInfo m_type;
+    QString m_defaultValueExpression;
+    bool m_defaultValue;
 };
 
 class _MemberModelItem: public _CodeModelItem
@@ -508,9 +471,9 @@ public:
     DECLARE_MODEL_NODE(Member)
 
     explicit _MemberModelItem(CodeModel *model, int kind = __node_kind)
-        : _CodeModelItem(model, kind), _M_accessPolicy(CodeModel::Public), _M_flags(0) {}
+        : _CodeModelItem(model, kind), m_accessPolicy(CodeModel::Public), m_flags(0) {}
     explicit _MemberModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
-        : _CodeModelItem(model, name, kind), _M_accessPolicy(CodeModel::Public), _M_flags(0) {}
+        : _CodeModelItem(model, name, kind), m_accessPolicy(CodeModel::Public), m_flags(0) {}
     ~_MemberModelItem();
 
     bool isConstant() const;
@@ -540,15 +503,8 @@ public:
     CodeModel::AccessPolicy accessPolicy() const;
     void setAccessPolicy(CodeModel::AccessPolicy accessPolicy);
 
-    TemplateParameterList templateParameters() const
-    {
-        return _M_templateParameters;
-    }
-
-    void setTemplateParameters(const TemplateParameterList &templateParameters)
-    {
-        _M_templateParameters = templateParameters;
-    }
+    TemplateParameterList templateParameters() const { return m_templateParameters; }
+    void setTemplateParameters(const TemplateParameterList &templateParameters) { m_templateParameters = templateParameters; }
 
     TypeInfo type() const;
     void setType(const TypeInfo &type);
@@ -558,21 +514,21 @@ public:
 #endif
 
 private:
-    TemplateParameterList _M_templateParameters;
-    TypeInfo _M_type;
-    CodeModel::AccessPolicy _M_accessPolicy;
+    TemplateParameterList m_templateParameters;
+    TypeInfo m_type;
+    CodeModel::AccessPolicy m_accessPolicy;
     union {
         struct {
-            uint _M_isConstant: 1;
-            uint _M_isVolatile: 1;
-            uint _M_isStatic: 1;
-            uint _M_isAuto: 1;
-            uint _M_isFriend: 1;
-            uint _M_isRegister: 1;
-            uint _M_isExtern: 1;
-            uint _M_isMutable: 1;
+            uint m_isConstant: 1;
+            uint m_isVolatile: 1;
+            uint m_isStatic: 1;
+            uint m_isAuto: 1;
+            uint m_isFriend: 1;
+            uint m_isRegister: 1;
+            uint m_isExtern: 1;
+            uint m_isMutable: 1;
         };
-        uint _M_flags;
+        uint m_flags;
     };
 
 };
@@ -583,9 +539,9 @@ public:
     DECLARE_MODEL_NODE(Function)
 
     explicit _FunctionModelItem(CodeModel *model, int kind = __node_kind)
-        : _MemberModelItem(model, kind), _M_functionType(CodeModel::Normal), _M_flags(0) {}
+        : _MemberModelItem(model, kind), m_functionType(CodeModel::Normal), m_flags(0) {}
     explicit _FunctionModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
-        : _MemberModelItem(model, name, kind), _M_functionType(CodeModel::Normal), _M_flags(0) {}
+        : _MemberModelItem(model, name, kind), m_functionType(CodeModel::Normal), m_flags(0) {}
     ~_FunctionModelItem();
 
     ArgumentList arguments() const;
@@ -620,18 +576,18 @@ public:
 #endif
 
 private:
-    ArgumentList _M_arguments;
-    CodeModel::FunctionType _M_functionType;
+    ArgumentList m_arguments;
+    CodeModel::FunctionType m_functionType;
     union {
         struct {
-            uint _M_isVirtual: 1;
-            uint _M_isInline: 1;
-            uint _M_isAbstract: 1;
-            uint _M_isExplicit: 1;
-            uint _M_isVariadics: 1;
-            uint _M_isInvokable : 1; // Qt
+            uint m_isVirtual: 1;
+            uint m_isInline: 1;
+            uint m_isAbstract: 1;
+            uint m_isExplicit: 1;
+            uint m_isVariadics: 1;
+            uint m_isInvokable : 1; // Qt
         };
-        uint _M_flags;
+        uint m_flags;
     };
 };
 
@@ -676,7 +632,7 @@ public:
 #endif
 
 private:
-    TypeInfo _M_type;
+    TypeInfo m_type;
 };
 
 class _EnumModelItem: public _CodeModelItem
@@ -685,9 +641,9 @@ public:
     DECLARE_MODEL_NODE(Enum)
 
     explicit _EnumModelItem(CodeModel *model, int kind = __node_kind)
-        : _CodeModelItem(model, kind), _M_accessPolicy(CodeModel::Public), _M_anonymous(false)  {}
+        : _CodeModelItem(model, kind), m_accessPolicy(CodeModel::Public), m_anonymous(false)  {}
     explicit _EnumModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
-        : _CodeModelItem(model, name, kind), _M_accessPolicy(CodeModel::Public), _M_anonymous(false) {}
+        : _CodeModelItem(model, name, kind), m_accessPolicy(CodeModel::Public), m_anonymous(false) {}
     ~_EnumModelItem();
 
     CodeModel::AccessPolicy accessPolicy() const;
@@ -703,9 +659,9 @@ public:
 #endif
 
 private:
-    CodeModel::AccessPolicy _M_accessPolicy;
-    EnumeratorList _M_enumerators;
-    bool _M_anonymous;
+    CodeModel::AccessPolicy m_accessPolicy;
+    EnumeratorList m_enumerators;
+    bool m_anonymous;
 };
 
 class _EnumeratorModelItem: public _CodeModelItem
@@ -727,7 +683,7 @@ public:
 #endif
 
 private:
-    QString _M_value;
+    QString m_value;
 };
 
 class _TemplateParameterModelItem: public _CodeModelItem
@@ -736,9 +692,9 @@ public:
     DECLARE_MODEL_NODE(TemplateParameter)
 
     explicit _TemplateParameterModelItem(CodeModel *model, int kind = __node_kind)
-        : _CodeModelItem(model, kind), _M_defaultValue(false) {}
+        : _CodeModelItem(model, kind), m_defaultValue(false) {}
     explicit _TemplateParameterModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
-        : _CodeModelItem(model, name, kind), _M_defaultValue(false) {}
+        : _CodeModelItem(model, name, kind), m_defaultValue(false) {}
     ~_TemplateParameterModelItem();
 
     TypeInfo type() const;
@@ -752,8 +708,8 @@ public:
 #endif
 
 private:
-    TypeInfo _M_type;
-    bool _M_defaultValue;
+    TypeInfo m_type;
+    bool m_defaultValue;
 };
 
 #endif // CODEMODEL_H
