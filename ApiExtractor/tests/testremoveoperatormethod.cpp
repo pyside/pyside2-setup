@@ -44,9 +44,9 @@ void TestRemoveOperatorMethod::testRemoveOperatorMethod()
     struct A {\n\
         A& operator>>(char&);\n\
         A& operator>>(char*);\n\
-        A& operator>>(signed short&);\n\
+        A& operator>>(short&);\n\
         A& operator>>(unsigned short&);\n\
-        A& operator>>(signed int&);\n\
+        A& operator>>(int&);\n\
         A& operator>>(unsigned int&);\n\
         A& operator>>(int64_t&);\n\
         A& operator>>(uint64_t&);\n\
@@ -59,9 +59,9 @@ void TestRemoveOperatorMethod::testRemoveOperatorMethod()
     const char* xmlCode = "\
     <typesystem package='Foo'>\n\
         <primitive-type name='char'/>\n\
-        <primitive-type name='signed short'/>\n\
+        <primitive-type name='short'/>\n\
         <primitive-type name='unsigned short'/>\n\
-        <primitive-type name='signed int'/>\n\
+        <primitive-type name='int'/>\n\
         <primitive-type name='unsigned int'/>\n\
         <primitive-type name='int64_t'/>\n\
         <primitive-type name='uint64_t'/>\n\
@@ -73,9 +73,9 @@ void TestRemoveOperatorMethod::testRemoveOperatorMethod()
         <object-type name='A'>\n\
             <modify-function signature='operator&gt;&gt;(char&amp;)' remove='all'/>\n\
             <modify-function signature='operator&gt;&gt;(char*)' remove='all'/>\n\
-            <modify-function signature='operator&gt;&gt;(signed short&amp;)' remove='all'/>\n\
+            <modify-function signature='operator&gt;&gt;(short&amp;)' remove='all'/>\n\
             <modify-function signature='operator&gt;&gt;(unsigned short&amp;)' remove='all'/>\n\
-            <modify-function signature='operator&gt;&gt;(signed int&amp;)' remove='all'/>\n\
+            <modify-function signature='operator&gt;&gt;(int&amp;)' remove='all'/>\n\
             <modify-function signature='operator&gt;&gt;(unsigned int&amp;)' remove='all'/>\n\
             <modify-function signature='operator&gt;&gt;(int64_t&amp;)' remove='all'/>\n\
             <modify-function signature='operator&gt;&gt;(uint64_t&amp;)' remove='all'/>\n\
@@ -93,9 +93,9 @@ void TestRemoveOperatorMethod::testRemoveOperatorMethod()
     QStringList removedSignatures;
     removedSignatures.append(QLatin1String("operator>>(char&)"));
     removedSignatures.append(QLatin1String("operator>>(char*)"));
-    removedSignatures.append(QLatin1String("operator>>(signed short&)"));
+    removedSignatures.append(QLatin1String("operator>>(short&)"));
     removedSignatures.append(QLatin1String("operator>>(unsigned short&)"));
-    removedSignatures.append(QLatin1String("operator>>(signed int&)"));
+    removedSignatures.append(QLatin1String("operator>>(int&)"));
     removedSignatures.append(QLatin1String("operator>>(unsigned int&)"));
     removedSignatures.append(QLatin1String("operator>>(int64_t&)"));
     removedSignatures.append(QLatin1String("operator>>(uint64_t&)"));
