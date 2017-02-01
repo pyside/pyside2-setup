@@ -474,11 +474,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     fixQObjectForScope(dom, types, dom);
 
     // Start the generation...
-    ClassList typeValues = dom->classes();
-    qSort(typeValues);
-    ClassList::iterator it = std::unique(typeValues.begin(), typeValues.end());
-    typeValues.erase(it, typeValues.end());
-
+    const ClassList &typeValues = dom->classes();
     ReportHandler::setProgressReference(typeValues);
     foreach (const ClassModelItem &item, typeValues) {
         ReportHandler::progress(QLatin1String("Generating class model..."));
@@ -500,11 +496,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
         }
     }
 
-    NamespaceList namespaceTypeValues = dom->namespaces();
-    qSort(namespaceTypeValues);
-    NamespaceList::iterator nsit = std::unique(namespaceTypeValues.begin(), namespaceTypeValues.end());
-    namespaceTypeValues.erase(nsit, namespaceTypeValues.end());
-
+    const QSet<NamespaceModelItem> &namespaceTypeValues = dom->uniqueNamespaces();
     ReportHandler::setProgressReference(namespaceTypeValues);
     foreach (NamespaceModelItem item, namespaceTypeValues) {
         ReportHandler::progress(QLatin1String("Generating namespace model..."));
@@ -816,10 +808,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
     }
 
     // Traverse namespaces recursively
-    NamespaceList innerNamespaces = namespaceItem->namespaces();
-    qSort(innerNamespaces);
-    NamespaceList::iterator it = std::unique(innerNamespaces.begin(), innerNamespaces.end());
-    innerNamespaces.erase(it, innerNamespaces.end());
+    const QSet<NamespaceModelItem> &innerNamespaces = namespaceItem->uniqueNamespaces();
     foreach (const NamespaceModelItem &ni, innerNamespaces) {
         AbstractMetaClass* mjc = traverseNamespace(dom, ni);
         if (mjc) {
@@ -1323,10 +1312,7 @@ void AbstractMetaBuilderPrivate::traverseScopeMembers(ScopeModelItem item,
     traverseFunctions(item, metaClass);
 
     // Inner classes
-    ClassList innerClasses = item->classes();
-    qSort(innerClasses);
-    ClassList::iterator it = std::unique(innerClasses.begin(), innerClasses.end());
-    innerClasses.erase(it, innerClasses.end());
+    const ClassList &innerClasses = item->classes();
     foreach (const ClassModelItem& ci, innerClasses)
         traverseClassMembers(ci);
 }
@@ -1374,10 +1360,7 @@ void AbstractMetaBuilderPrivate::traverseNamespaceMembers(NamespaceModelItem ite
     traverseScopeMembers(item, metaClass);
 
     // Inner namespaces
-    NamespaceList innerNamespaces = item->namespaces();
-    qSort(innerNamespaces);
-    NamespaceList::iterator it = std::unique(innerNamespaces.begin(), innerNamespaces.end());
-    innerNamespaces.erase(it, innerNamespaces.end());
+    const QSet<NamespaceModelItem> &innerNamespaces = item->uniqueNamespaces();
     foreach (const NamespaceModelItem &ni, innerNamespaces)
         traverseNamespaceMembers(ni);
 

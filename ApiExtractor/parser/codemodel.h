@@ -35,6 +35,7 @@
 
 #include <QtCore/QHash>
 #include <QtCore/QList>
+#include <QtCore/QSet>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QVector>
@@ -403,6 +404,7 @@ public:
     ~_NamespaceModelItem();
 
     NamespaceList namespaces() const { return m_namespaces; }
+    QSet<NamespaceModelItem> uniqueNamespaces() const { return m_namespaces.toSet(); }
 
     void addNamespace(NamespaceModelItem item);
 
