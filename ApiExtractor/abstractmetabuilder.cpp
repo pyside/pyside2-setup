@@ -1468,8 +1468,7 @@ void AbstractMetaBuilderPrivate::setupFunctionDefaults(AbstractMetaFunction *met
 
 void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaFunction *metaFunction)
 {
-    if (!metaFunction->isConversionOperator()
-        || metaFunction->implementingClass()->typeEntry() != metaFunction->type()->typeEntry())
+    if (!metaFunction->isConversionOperator())
         return;
 
     TypeDatabase* types = TypeDatabase::instance();
