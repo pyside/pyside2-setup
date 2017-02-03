@@ -1775,8 +1775,8 @@
     </add-function>
   </value-type> -->
 
-  <value-type name="QMimeType" />
-  <object-type name="QMimeDatabase">
+  <value-type name="QMimeType" since="5.0" />
+  <object-type name="QMimeDatabase" since="5.0">
     <enum-type name="MatchMode" />
   </object-type>
 
