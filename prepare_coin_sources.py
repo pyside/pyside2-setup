@@ -41,8 +41,9 @@ from __future__ import print_function
 import os
 import sys
 import shutil
+from subprocess import PIPE, Popen
 from utils import option_value
-from utils import run_process_output, run_process
+from utils import run_process
 
 git_server = "git://code.qt.io"
 
@@ -109,7 +110,9 @@ def prepare_sources():
             #Make sure  the branch exists, if not use dev
             _branch = SUBMODULE_BRANCH
             git_list_branch_cmd = ["git", "branch", "--list", _branch]
-            if len(run_process_output(git_list_branch_cmd))==0:
+            shell = (sys.platform == "win32")
+            result = Popen(git_list_branch_cmd, stdout=PIPE, shell=shell)
+            if len(result.communicate()[0].split())==0:
                 print("Warning: Requested %s branch doesn't exist so we'll fall back to 'dev' branch instead"\
                 % SUBMODULE_BRANCH)
                 _branch = "dev"
