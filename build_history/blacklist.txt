@@ -8,10 +8,6 @@
     linux
     darwin
     win32
-[signals::static_metaobject_test]
-    linux
-    darwin
-    win32
 [QtCore::bug_829]
     win32
 [QtCore::bug_1063]
