@@ -67,9 +67,9 @@ For development purposes the following options might be of use, when using "setu
     --ignore-git will skip the fetching and checkout steps for supermodule and all submodules.
 
 REQUIREMENTS:
-- Python: 2.6, 2.7, 3.3, 3.4 and 3.5 is supported
+- Python: 2.6, 2.7, 3.3, 3.4, 3.5 and 3.6 are supported
 - Cmake: Specify the path to cmake with --cmake option or add cmake to the system path.
-- Qt: 4.6, 4.7 and 4.8 is supported. Specify the path to qmake with --qmake option or add qmake to the system path.
+- Qt: 5.5 and 5.6 are supported. Specify the path to qmake with --qmake option or add qmake to the system path.
 
 OPTIONAL:
 OpenSSL: You can specify the location of OpenSSL DLLs with option --opnessl=</path/to/openssl/bin>.
@@ -1210,6 +1210,7 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Database',
         'Topic :: Software Development',
         'Topic :: Software Development :: Code Generators',
