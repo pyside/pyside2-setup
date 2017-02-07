@@ -31,7 +31,11 @@ from copy import deepcopy
 
 from PySide2.QtCore import QByteArray, QDate, QDateTime, QTime, QLine, QLineF
 from PySide2.QtCore import Qt, QSize, QSizeF, QRect, QRectF, QDir, QPoint, QPointF
-from PySide2.QtCore import QUuid
+try:
+    from PySide2.QtCore import QUuid
+    HAVE_Q = True
+except ImportError:
+    HAVE_Q = False
 
 class DeepCopyHelper:
     def testCopy(self):
@@ -99,6 +103,7 @@ class QDirDeepCopy(DeepCopyHelper, unittest.TestCase):
         self.original = QDir("./")
 
 class QUuiCopy(DeepCopyHelper, unittest.TestCase):
+    @unittest.skipUnless(HAVE_Q, "QUuid is currently not supported on this platform.")
     def setUp(self):
         self.original = QUuid("67C8770B-44F1-410A-AB9A-F9B5446F13EE")
 

@@ -31,7 +31,11 @@ import unittest
 
 from PySide2.QtCore import QByteArray, QDate, QDateTime, QTime, QLine, QLineF
 from PySide2.QtCore import Qt, QSize, QSizeF, QRect, QRectF, QPoint, QPointF
-from PySide2.QtCore import QUuid
+try:
+    from PySide2.QtCore import QUuid
+    HAVE_Q = True
+except ImportError:
+    HAVE_Q = False
 
 class ReprCopyHelper:
     def testCopy(self):
@@ -93,6 +97,7 @@ class QPointFReprCopy(ReprCopyHelper, unittest.TestCase):
         self.original = QPointF(1.1, 2.2)
 
 class QUuiCopy(ReprCopyHelper, unittest.TestCase):
+    @unittest.skipUnless(HAVE_Q, "QUuid is currently not supported on this platform.")
     def setUp(self):
         self.original = QUuid("67C8770B-44F1-410A-AB9A-F9B5446F13EE")
 
