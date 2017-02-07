@@ -31,9 +31,16 @@ import sys
 
 from PySide2.QtGui import QStandardItemModel, QStandardItem
 from PySide2.QtWidgets import QWidget
-import shiboken2 as shiboken
-
+try:
+    # the normal call with installed PySide2
+    from PySide2 import shiboken2 as shiboken
+except ImportError:
+    # sys.path is set a bit weird during tests, so we help a little to find shiboken2.
+    sys.path.append("../../..")
+    # the special call with testrunner.py
+    from shiboken2.shibokenmodule import shiboken2 as shiboken
 from helper import UsesQApplication
+
 
 class QStandardItemModelTest(UsesQApplication):
 
