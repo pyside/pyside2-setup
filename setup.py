@@ -350,6 +350,7 @@ def prepareSubModules():
         module_version = m[1]
         module_dir = m[2] if len(m) > 2 else ''
         module_dir = os.path.join(submodules_dir, module_dir, module_name)
+        # Check for non-empty directory (repository checked out)
         if not os.listdir(module_dir):
             needInitSubModules = True
         modulesList.append([module_name, module_version, module_dir])
