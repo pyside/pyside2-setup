@@ -46,10 +46,6 @@
     linux
     win32
     darwin py3
-[QtWidgets::qstandarditemmodel_test]
-    linux
-    darwin
-    win32
 [QtWidgets::returnquadruplesofnumbers_test]
     linux
     darwin
