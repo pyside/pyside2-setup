@@ -96,6 +96,7 @@ ${QtGui_GEN_DIR}/qstandarditem_wrapper.cpp
 ${QtGui_GEN_DIR}/qstandarditemmodel_wrapper.cpp
 ${QtGui_GEN_DIR}/qstatustipevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qstringlistmodel_wrapper.cpp
+${QtGui_GEN_DIR}/qopenglbuffer_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglcontext_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessible_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessible_state_wrapper.cpp
