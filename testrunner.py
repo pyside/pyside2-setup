@@ -733,8 +733,8 @@ if __name__ == '__main__':
             sys.exit(1)
 
     if args.subparser_name == "getcwd":
-        print(selected.build_dir, file=args.filename)
-        print(selected.build_dir, "written to file", args.filename.name)
+        print(builds.selected.build_dir, file=args.filename)
+        print(builds.selected.build_dir, "written to file", args.filename.name)
         sys.exit(0)
     elif args.subparser_name == "test":
         pass # we do it afterwards
