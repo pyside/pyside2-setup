@@ -590,6 +590,9 @@ int SignalManager::callPythonMetaMethod(const QMetaMethod& method, void** args, 
         delete retConverter;
     }
 
+    if (PyErr_Occurred())
+        PyErr_Print();
+
     return -1;
 }
 
