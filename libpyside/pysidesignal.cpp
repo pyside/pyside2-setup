@@ -722,11 +722,11 @@ void appendSignature(PySideSignal* self, const SignalSignature &signature)
     self->signaturesSize++;
 
     if (self->signaturesSize > 1) {
-        self->signatures = reinterpret_cast<char**>(realloc(self->signatures, sizeof(char**) * self->signaturesSize));
-        self->signatureAttributes = reinterpret_cast<int*>(realloc(self->signatureAttributes, sizeof(int) * self->signaturesSize));
+        self->signatures = reinterpret_cast<char **>(realloc(self->signatures, sizeof(char *) * self->signaturesSize));
+        self->signatureAttributes = reinterpret_cast<int *>(realloc(self->signatureAttributes, sizeof(int) * self->signaturesSize));
     } else {
-        self->signatures = reinterpret_cast<char**>(malloc(sizeof(char**)));
-        self->signatureAttributes = reinterpret_cast<int*>(malloc(sizeof(int)));
+        self->signatures = reinterpret_cast<char **>(malloc(sizeof(char *)));
+        self->signatureAttributes = reinterpret_cast<int *>(malloc(sizeof(int)));
     }
     self->signatures[self->signaturesSize - 1] = strdup(signature.m_parameterTypes);
     self->signatureAttributes[self->signaturesSize - 1] = signature.m_attributes;
