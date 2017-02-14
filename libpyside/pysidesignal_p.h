@@ -51,6 +51,7 @@ extern "C"
         bool initialized;
         char* signalName;
         char** signatures;
+        int* signatureAttributes;
         int signaturesSize;
         PyObject* homonymousMethod;
     };
@@ -59,6 +60,7 @@ extern "C"
     struct PySideSignalInstancePrivate {
         char* signalName;
         char* signature;
+        int attributes;
         PyObject* source;
         PyObject* homonymousMethod;
         PySideSignalInstance* next;
