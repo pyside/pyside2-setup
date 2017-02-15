@@ -271,7 +271,8 @@ PyObject* getMetaDataFromQObject(QObject* cppSelf, PyObject* self, PyObject* nam
             QList<QMetaMethod> signalList;
             for(int i=0, i_max = metaObject->methodCount(); i < i_max; i++) {
                 QMetaMethod method = metaObject->method(i);
-                const char* methSig = method.methodSignature();
+                const QByteArray methSig_ = method.methodSignature();
+                const char *methSig = methSig_.constData();
                 bool methMacth = !std::strncmp(cname, methSig, cnameLen) && methSig[cnameLen] == '(';
                 if (methMacth) {
                     if (method.methodType() == QMetaMethod::Signal) {
