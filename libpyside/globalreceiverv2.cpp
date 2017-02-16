@@ -341,5 +341,18 @@ int GlobalReceiverV2::qt_metacall(QMetaObject::Call call, int id, void** args)
         SignalManager::callPythonMetaMethod(slot, args, callback, isShortCuit);
     }
 
+    // SignalManager::callPythonMetaMethod might have failed, in that case we have to print the
+    // error so it considered "handled".
+    if (PyErr_Occurred()) {
+        int reclimit = Py_GetRecursionLimit();
+        // Inspired by Python's errors.c: PyErr_GivenExceptionMatches() function.
+        // Temporarily bump the recursion limit, so that PyErr_Print will not raise a recursion
+        // error again. Don't do it when the limit is already insanely high, to avoid overflow.
+        if (reclimit < (1 << 30))
+            Py_SetRecursionLimit(reclimit + 5);
+        PyErr_Print();
+        Py_SetRecursionLimit(reclimit);
+    }
+
     return -1;
 }
