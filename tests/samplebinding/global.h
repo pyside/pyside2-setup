@@ -56,7 +56,6 @@
 #include "objecttypebyvalue.h"
 #include "objecttypeholder.h"
 #include "objecttypelayout.h"
-#include "objecttypereference.h"
 #include "objecttypeoperators.h"
 #include "objectview.h"
 #include "oddbool.h"
