@@ -33,6 +33,7 @@
 #include <functional>
 #include <iostream>
 #include <QDebug>
+#include <QDir>
 
 // Predicate to find an item by name in a list of QSharedPointer<Item>
 template <class T> class ModelItemNamePredicate : public std::unary_function<bool, QSharedPointer<T> >
@@ -425,6 +426,8 @@ void _CodeModelItem::formatDebug(QDebug &d) const
          d << ", scope=";
          formatSequence(d, m_scope.cbegin(), m_scope.cend(), "::");
      }
+     if (!m_fileName.isEmpty())
+         d << ", file=\"" << QDir::toNativeSeparators(m_fileName) << '"';
 }
 
 QDebug operator<<(QDebug d, const _CodeModelItem *t)
