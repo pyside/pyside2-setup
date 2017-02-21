@@ -27,6 +27,8 @@
 ****************************************************************************/
 
 #include "include.h"
+#include <QDebug>
+#include <QDir>
 #include <QTextStream>
 #include <QHash>
 
@@ -52,3 +54,18 @@ QTextStream& operator<<(QTextStream& out, const Include& include)
     return out;
 }
 
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const Include &i)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "Include(";
+    if (i.isValid())
+        d << "type=" << i.type() << ", file=\"" << QDir::toNativeSeparators(i.name()) << '"';
+    else
+        d << "invalid";
+    d << ')';
+    return d;
+}
+#endif // !QT_NO_DEBUG_STREAM

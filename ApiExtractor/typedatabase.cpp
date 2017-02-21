@@ -572,6 +572,7 @@ bool TypeDatabase::checkApiVersion(const QString& package, const QByteArray& ver
 void TypeDatabase::formatDebug(QDebug &d) const
 {
     typedef TypeEntryHash::ConstIterator Eit;
+    typedef TemplateEntryHash::ConstIterator TplIt;
     d << "TypeDatabase("
       << "entries=";
     for (Eit it = m_entries.cbegin(), end = m_entries.cend(); it != end; ++it) {
@@ -580,6 +581,16 @@ void TypeDatabase::formatDebug(QDebug &d) const
             if (t)
                 d << ", ";
             d << it.value().at(t);
+        }
+        d << "]\n";
+    }
+    if (!m_templates.isEmpty()) {
+        d << "templates=[";
+        const TplIt begin = m_templates.cbegin();
+        for (TplIt it = begin, end = m_templates.cend(); it != end; ++it) {
+            if (it != begin)
+                d << ", ";
+            d << it.value();
         }
         d << "]\n";
     }
@@ -592,10 +603,22 @@ QDebug operator<<(QDebug d, const TypeEntry *te)
     d.noquote();
     d.nospace();
     d << "TypeEntry(";
-    if (te)
-        d << te->qualifiedCppName() << ", type=" << te->type();
-    else
+    if (te) {
+        d << '"' << te->qualifiedCppName() << "\", type=" << te->type();
+        if (te->include().isValid())
+            d << ", include=" << te->include();
+        const IncludeList &extraIncludes = te->extraIncludes();
+        if (const int count = extraIncludes.size()) {
+            d << ", extraIncludes[" << count << "]=";
+            for (int i = 0; i < count; ++i) {
+                if (i)
+                    d << ", ";
+                d << extraIncludes.at(i);
+            }
+        }
+    } else {
         d << '0';
+    }
     d << ')';
     return d;
 }

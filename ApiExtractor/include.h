@@ -83,6 +83,9 @@ public:
 
 uint qHash(const Include& inc);
 QTextStream& operator<<(QTextStream& out, const Include& include);
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const Include &i);
+#endif
 
 typedef QList<Include> IncludeList;
 
