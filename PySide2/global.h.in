@@ -366,7 +366,6 @@ namespace QtPrivate {
 
 QT_END_NAMESPACE
 
-/
 #define Q_QDOC
 
 #if @ENABLE_X11@
