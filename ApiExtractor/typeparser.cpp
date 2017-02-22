@@ -30,6 +30,7 @@
 
 #include <QtCore/QDebug>
 #include <QtCore/QStack>
+#include <QtCore/QTextStream>
 
 class Scanner
 {
@@ -48,7 +49,8 @@ public:
 
         ConstToken,
         Identifier,
-        NoToken
+        NoToken,
+        InvalidToken
     };
 
     Scanner(const QString &s)
@@ -56,8 +58,10 @@ public:
     {
     }
 
-    Token nextToken();
+    Token nextToken(QString *errorMessage = Q_NULLPTR);
     QString identifier() const;
+
+    QString msgParseError(const QString &why) const;
 
 private:
     int m_pos;
@@ -71,7 +75,7 @@ QString Scanner::identifier() const
     return QString(m_chars + m_tokenStart, m_pos - m_tokenStart);
 }
 
-Scanner::Token Scanner::nextToken()
+Scanner::Token Scanner::nextToken(QString *errorMessage)
 {
     Token tok = NoToken;
 
@@ -102,10 +106,19 @@ Scanner::Token Scanner::nextToken()
                 ++m_pos;
                 break;
             default:
-                if (c.isLetterOrNumber() || c == QLatin1Char('_'))
+                if (c.isLetterOrNumber() || c == QLatin1Char('_')) {
                     tok = Identifier;
-                else
-                    qFatal("Unrecognized character in lexer: %c", c.toLatin1());
+                } else {
+                    QString message;
+                    QTextStream (&message) << ": Unrecognized character in lexer at "
+                        <<  m_pos << " : '" << c << '\'';
+                    message = msgParseError(message);
+                    if (errorMessage)
+                        *errorMessage = message;
+                    else
+                        qWarning().noquote().nospace() << message;
+                    return InvalidToken;
+                }
                 break;
             }
         }
@@ -136,7 +149,20 @@ Scanner::Token Scanner::nextToken()
 
 }
 
-TypeParser::Info TypeParser::parse(const QString &str)
+QString Scanner::msgParseError(const QString &why) const
+{
+    return QStringLiteral("TypeParser: Unable to parse \"")
+        + QString(m_chars, m_length) + QStringLiteral("\": ") + why;
+}
+
+static TypeParser::Info invalidInfo()
+{
+    TypeParser::Info result;
+    result.is_busted = true;
+    return result;
+}
+
+TypeParser::Info TypeParser::parse(const QString &str, QString *errorMessage)
 {
     Scanner scanner(str);
 
@@ -148,8 +174,10 @@ TypeParser::Info TypeParser::parse(const QString &str)
     bool in_array = false;
     QString array;
 
-    Scanner::Token tok = scanner.nextToken();
+    Scanner::Token tok = scanner.nextToken(errorMessage);
     while (tok != Scanner::NoToken) {
+        if (tok == Scanner::InvalidToken)
+            return invalidInfo();
 
 //         switch (tok) {
 //         case Scanner::StarToken: printf(" - *\n"); break;
@@ -201,11 +229,13 @@ TypeParser::Info TypeParser::parse(const QString &str)
 
         case Scanner::OpenParenToken: // function pointers not supported
         case Scanner::CloseParenToken: {
-            Info i;
-            i.is_busted = true;
-            return i;
+            const QString message = scanner.msgParseError(QStringLiteral("Function pointers are not supported"));
+            if (errorMessage)
+                *errorMessage = message;
+            else
+                qWarning().noquote().nospace() << message;
+            return invalidInfo();
         }
-
 
         case Scanner::Identifier:
             if (in_array) {

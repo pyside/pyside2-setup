@@ -2298,8 +2298,11 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
         return 0;
     }
 
-    TypeParser::Info typeInfo = TypeParser::parse(typei.toString());
+    QString errorMessage;
+    TypeParser::Info typeInfo = TypeParser::parse(typei.toString(), &errorMessage);
     if (typeInfo.is_busted) {
+        qWarning().noquote().nospace() << "Unable to translate type \"" << _typei.toString()
+            << "\": " << errorMessage;
         *ok = false;
         return 0;
     }
@@ -2653,11 +2656,18 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::findTemplateClass(const QString &
     TypeDatabase* types = TypeDatabase::instance();
 
     QStringList scope = context->typeEntry()->qualifiedCppName().split(colonColon());
+    QString errorMessage;
     scope.removeLast();
     for (int i = scope.size(); i >= 0; --i) {
         QString prefix = i > 0 ? QStringList(scope.mid(0, i)).join(colonColon()) + colonColon() : QString();
         QString completeName = prefix + name;
-        *info = TypeParser::parse(completeName);
+        const TypeParser::Info parsed = TypeParser::parse(completeName, &errorMessage);
+        if (parsed.is_busted) {
+            qWarning().noquote().nospace() << "Unable to parse type \"" << completeName
+                << "\" while looking for template \"" << name << "\": " << errorMessage;
+            continue;
+        }
+        *info = parsed;
         QString qualifiedName = info->qualified_name.join(colonColon());
 
         AbstractMetaClass* templ = 0;

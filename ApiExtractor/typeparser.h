@@ -51,7 +51,7 @@ public:
         QString instantiationName() const;
     };
 
-    static Info parse(const QString &str);
+    static Info parse(const QString &str, QString *errorMessage = Q_NULLPTR);
 };
 
 #endif // TYPEPARSER_H
