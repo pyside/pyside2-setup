@@ -40,8 +40,8 @@
 #ifndef QPYTEXTOBJECT
 #define QPYTEXTOBJECT
 
-#include <QObject>
-#include <QTextObjectInterface>
+#include <QtCore/QObject>
+#include <QtGui/QTextObjectInterface>
 
 // Qt5: no idea why this definition is not found automatically! It should come
 // from <QTextObjectInterface> which resolves to qabstracttextdocumentlayout.h

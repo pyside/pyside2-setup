@@ -456,5 +456,5 @@ QT_END_NAMESPACE
 
 #ifndef QT_NO_OPENGL
 #include <@GL_H@>
-#include <@QT_QTOPENGL_INCLUDE_DIR@/QtOpenGL>
+#include <QtOpenGL/QtOpenGL>
 #endif // QT_NO_OPENGL
