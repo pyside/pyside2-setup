@@ -653,20 +653,28 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     }
 
     {
-        FunctionList binaryOperators = dom->findFunctions(QLatin1String("operator=="))
-                                        + dom->findFunctions(QLatin1String("operator!="))
-                                        + dom->findFunctions(QLatin1String("operator<="))
-                                        + dom->findFunctions(QLatin1String("operator>="))
-                                        + dom->findFunctions(QLatin1String("operator<"))
-                                        + dom->findFunctions(QLatin1String("operator+"))
-                                        + dom->findFunctions(QLatin1String("operator/"))
-                                        + dom->findFunctions(QLatin1String("operator*"))
-                                        + dom->findFunctions(QLatin1String("operator-"))
-                                        + dom->findFunctions(QLatin1String("operator&"))
-                                        + dom->findFunctions(QLatin1String("operator|"))
-                                        + dom->findFunctions(QLatin1String("operator^"))
-                                        + dom->findFunctions(QLatin1String("operator~"))
-                                        + dom->findFunctions(QLatin1String("operator>"));
+        FunctionList binaryOperators = dom->findFunctions(QStringLiteral("operator=="));
+        binaryOperators.append(dom->findFunctions(QStringLiteral("operator!=")));
+        binaryOperators.append(dom->findFunctions(QStringLiteral("operator<=")));
+        binaryOperators.append(dom->findFunctions(QStringLiteral("operator>=")));
+        binaryOperators.append(dom->findFunctions(QStringLiteral("operator<")));
+        binaryOperators.append(dom->findFunctions(QStringLiteral("operator+")));
+        binaryOperators.append(dom->findFunctions(QStringLiteral("operator/")));
+        // Filter binary operators, skipping for example
+        // class Iterator { ... Value *operator*() ... };
+        const FunctionList potentiallyBinaryOperators =
+            dom->findFunctions(QStringLiteral("operator*"))
+            + dom->findFunctions(QStringLiteral("operator&"));
+        foreach (const FunctionModelItem &item, potentiallyBinaryOperators) {
+            if (!item->arguments().isEmpty())
+                binaryOperators.append(item);
+        }
+        binaryOperators.append(dom->findFunctions(QStringLiteral("operator-")));
+        binaryOperators.append(dom->findFunctions(QStringLiteral("operator&")));
+        binaryOperators.append(dom->findFunctions(QStringLiteral("operator|")));
+        binaryOperators.append(dom->findFunctions(QStringLiteral("operator^")));
+        binaryOperators.append(dom->findFunctions(QStringLiteral("operator~")));
+        binaryOperators.append(dom->findFunctions(QStringLiteral("operator>")));
 
         foreach (const FunctionModelItem &item, binaryOperators)
             traverseOperatorFunction(item);
