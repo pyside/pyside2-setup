@@ -865,9 +865,8 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
     QString wrapperClassName = wrapperName(metaClass);
     s << "const QMetaObject* " << wrapperClassName << "::metaObject() const" << endl;
     s << '{' << endl;
-    s << INDENT << "#if QT_VERSION >= 0x040700" << endl;
-    s << INDENT << "if (QObject::d_ptr->metaObject) return QObject::d_ptr->dynamicMetaObject();" << endl;
-    s << INDENT << "#endif" << endl;
+    s << INDENT << "if (QObject::d_ptr->metaObject)" << endl
+      << INDENT << INDENT << "return QObject::d_ptr->dynamicMetaObject();" << endl;
     s << INDENT << "SbkObject* pySelf = Shiboken::BindingManager::instance().retrieveWrapper(this);" << endl;
     s << INDENT << "if (pySelf == NULL)" << endl;
     s << INDENT << INDENT << "return " << metaClass->qualifiedCppName() << "::metaObject();" << endl;
