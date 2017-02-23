@@ -1298,8 +1298,9 @@ void deallocData(SbkObject* self, bool cleanup)
         Shiboken::BindingManager::instance().releaseWrapper(self);
         delete[] self->d->cptr;
         self->d->cptr = 0;
-        delete self->d;
+        // delete self->d; PYSIDE-205: wrong!
     }
+    delete self->d; // PYSIDE-205: always delete d.
     Py_XDECREF(self->ob_dict);
     Py_TYPE(self)->tp_free(self);
 }
