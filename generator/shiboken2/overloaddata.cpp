@@ -152,6 +152,27 @@ static QString getImplicitConversionTypeName(const AbstractMetaType* containerTy
            + types.join(QLatin1String(", ")) + QLatin1String(" >");
 }
 
+static QString msgCyclicDependency(const QString &funcName, const QString &graphName,
+                                   const QList<const AbstractMetaFunction *> &involvedConversions)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Cyclic dependency found on overloaddata for \"" << funcName
+         << "\" method! The graph boy saved the graph at \"" << QDir::toNativeSeparators(graphName)
+         << "\".";
+    if (const int count = involvedConversions.size()) {
+        str << " Implicit conversions (" << count << "): ";
+        for (int i = 0; i < count; ++i) {
+            if (i)
+                str << ", \"";
+            str << involvedConversions.at(i)->signature() << '"';
+            if (const AbstractMetaClass *c = involvedConversions.at(i)->implementingClass())
+                str << '(' << c->name() << ')';
+        }
+    }
+    return result;
+}
+
 /**
  * Topologically sort the overloads by implicit convertion order
  *
@@ -266,6 +287,8 @@ void OverloadData::sortNextOverloads()
 
     QStringList classesWithIntegerImplicitConversion;
 
+    QList<const AbstractMetaFunction *> involvedConversions;
+
     foreach(OverloadData* ov, m_nextOverloadData) {
         const AbstractMetaType* targetType = ov->argType();
         const QString targetTypeEntryName(getTypeName(ov));
@@ -291,6 +314,7 @@ void OverloadData::sortNextOverloads()
             // container check (This happened to QVariant and QHash)
             graph.removeEdge(targetTypeId, convertibleTypeId);
             graph.addEdge(convertibleTypeId, targetTypeId);
+            involvedConversions.append(function);
         }
 
         // Process inheritance relationships
@@ -324,8 +348,10 @@ void OverloadData::sortNextOverloads()
                 } else {
                     foreach (const AbstractMetaFunction* function, m_generator->implicitConversions(instantiation)) {
                         QString convertibleTypeName = getImplicitConversionTypeName(ov->argType(), instantiation, function);
-                        if (!graph.containsEdge(targetTypeId, sortData.map[convertibleTypeName])) // Avoid cyclic dependency.
+                        if (!graph.containsEdge(targetTypeId, sortData.map[convertibleTypeName])) { // Avoid cyclic dependency.
                             graph.addEdge(sortData.map[convertibleTypeName], targetTypeId);
+                            involvedConversions.append(function);
+                        }
                     }
                 }
             }
@@ -406,9 +432,7 @@ void OverloadData::sortNextOverloads()
         for (; it != sortData.map.end(); ++it)
             nodeNames.insert(it.value(), it.key());
         graph.dumpDot(nodeNames, graphName);
-        qCWarning(lcShiboken).noquote().nospace()
-            << QStringLiteral("Cyclic dependency found on overloaddata for '%1' method! The graph boy saved the graph at %2.")
-                              .arg(funcName, graphName);
+        qCWarning(lcShiboken).noquote() << qPrintable(msgCyclicDependency(funcName, graphName, involvedConversions));
     }
 
     m_nextOverloadData.clear();
