@@ -106,5 +106,11 @@ class TestShiboken(unittest.TestCase):
         self.assertEqual(type(shiboken.__version_info__), tuple)
         self.assertEqual(len(shiboken.__version_info__), 5)
 
+    def testAllWrappers(self):
+        obj = ObjectType()
+        self.assertTrue(obj in shiboken.getAllValidWrappers())
+        shiboken.delete(obj)
+        self.assertFalse(obj in shiboken.getAllValidWrappers())
+
 if __name__ == '__main__':
     unittest.main()

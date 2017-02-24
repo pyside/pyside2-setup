@@ -83,6 +83,26 @@
         </inject-code>
     </add-function>
 
+    <add-function signature="getAllValidWrappers(void)" return-type="PyObject*">
+        <inject-code>
+            std::set&lt;PyObject*&gt; setAll = Shiboken::BindingManager::instance().getAllPyObjects();
+            PyObject* listAll = PyList_New(0);
+            if (listAll == NULL)
+                return NULL;
+
+            const std::set&lt;PyObject*&gt;::iterator end = setAll.end();
+            for (std::set&lt;PyObject*&gt;::iterator iter = setAll.begin(); iter != end; ++iter) {
+                if (*iter != NULL) {
+                    if (PyList_Append(listAll, *iter) != 0) {
+                        Py_DECREF(listAll);
+                        return NULL;
+                    }
+                }
+            }
+            return listAll;
+        </inject-code>
+    </add-function>
+
     <extra-includes>
         <include file-name="sbkversion.h" location="local"/>
     </extra-includes>
