@@ -33,6 +33,8 @@
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
 
+#include "parser/codemodel_enums.h"
+
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/QStringList>
 
@@ -502,14 +504,8 @@ public:
         m_constant = constant;
     }
 
-    bool isReference() const
-    {
-        return m_reference;
-    }
-    void setReference(bool ref)
-    {
-        m_reference = ref;
-    }
+    ReferenceType referenceType() const { return m_referenceType; }
+    void setReferenceType(ReferenceType ref) { m_referenceType = ref; }
 
     /**
      *   Says if the type is to be implemented using target language
@@ -537,7 +533,7 @@ public:
 
     int actualIndirections() const
     {
-        return m_indirections + (isReference() ? 1 : 0);
+        return m_indirections + (m_referenceType == LValueReference ? 1 : 0);
     }
     int indirections() const
     {
@@ -616,10 +612,10 @@ private:
 
     TypeUsagePattern m_pattern;
     uint m_constant : 1;
-    uint m_reference : 1;
     uint m_cppInstantiation : 1;
     int m_indirections : 4;
-    uint m_reserved : 25; // unused
+    uint m_reserved : 26; // unused
+    ReferenceType m_referenceType;
     AbstractMetaTypeList m_children;
 
     Q_DISABLE_COPY(AbstractMetaType);

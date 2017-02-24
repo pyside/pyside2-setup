@@ -95,10 +95,10 @@ AbstractMetaType::AbstractMetaType()
     m_originalTemplateType(0),
     m_pattern(InvalidPattern),
     m_constant(false),
-    m_reference(false),
     m_cppInstantiation(true),
     m_indirections(0),
-    m_reserved(0)
+    m_reserved(0),
+    m_referenceType(NoReference)
 {
 }
 
@@ -132,7 +132,7 @@ AbstractMetaType *AbstractMetaType::copy() const
 
     cpy->setTypeUsagePattern(typeUsagePattern());
     cpy->setConstant(isConstant());
-    cpy->setReference(isReference());
+    cpy->setReferenceType(referenceType());
     cpy->setIndirections(indirections());
     cpy->setInstantiations(instantiations());
     cpy->setArrayElementCount(arrayElementCount());
@@ -169,8 +169,16 @@ QString AbstractMetaType::cppSignature() const
             m_cachedCppSignature += QLatin1Char(' ');
             if (indirections())
                 m_cachedCppSignature += QString(indirections(), QLatin1Char('*'));
-            if (isReference())
+            switch (referenceType()) {
+            case NoReference:
+                break;
+            case LValueReference:
                 m_cachedCppSignature += QLatin1Char('&');
+                break;
+            case RValueReference:
+                m_cachedCppSignature += QLatin1String("&&");
+                break;
+            }
         }
     }
     return m_cachedCppSignature;
@@ -181,7 +189,7 @@ void AbstractMetaType::decideUsagePattern()
     const TypeEntry* type = typeEntry();
 
     if (type->isPrimitive() && (!actualIndirections()
-        || (isConstant() && isReference() && !indirections()))) {
+        || (isConstant() && m_referenceType == LValueReference && !indirections()))) {
         setTypeUsagePattern(AbstractMetaType::PrimitivePattern);
 
     } else if (type->isVoid()) {
@@ -192,30 +200,30 @@ void AbstractMetaType::decideUsagePattern()
 
     } else if (type->isString()
                && indirections() == 0
-               && (isConstant() == isReference()
+               && (isConstant() == (m_referenceType == LValueReference)
                    || isConstant())) {
         setTypeUsagePattern(AbstractMetaType::StringPattern);
 
     } else if (type->isChar()
                && !indirections()
-               && isConstant() == isReference()) {
+               && isConstant() == (m_referenceType == LValueReference)) {
         setTypeUsagePattern(AbstractMetaType::CharPattern);
 
     } else if (type->isJObjectWrapper()
                && !indirections()
-               && isConstant() == isReference()) {
+               && isConstant() == (m_referenceType == LValueReference)) {
         setTypeUsagePattern(AbstractMetaType::JObjectWrapperPattern);
 
     } else if (type->isVariant()
                && !indirections()
-               && isConstant() == isReference()) {
+               && isConstant() == (m_referenceType == LValueReference)) {
         setTypeUsagePattern(AbstractMetaType::VariantPattern);
 
     } else if (type->isEnum() && !actualIndirections()) {
         setTypeUsagePattern(AbstractMetaType::EnumPattern);
 
     } else if (type->isObject() && indirections() == 0) {
-        if (isReference()) {
+        if (m_referenceType == LValueReference) {
             if (((ComplexTypeEntry*) type)->isQObject())
                 setTypeUsagePattern(AbstractMetaType::QObjectPattern);
             else
@@ -232,8 +240,8 @@ void AbstractMetaType::decideUsagePattern()
             setTypeUsagePattern(AbstractMetaType::ObjectPattern);
 
         // const-references to pointers can be passed as pointers
-        if (isReference() && isConstant()) {
-            setReference(false);
+        if (referenceType() == LValueReference && isConstant()) {
+            setReferenceType(NoReference);
             setConstant(false);
         }
 
@@ -244,7 +252,7 @@ void AbstractMetaType::decideUsagePattern()
 
     } else if (type->isFlags()
                && !indirections()
-               && (isConstant() == isReference())) {
+               && (isConstant() == (m_referenceType == LValueReference))) {
         setTypeUsagePattern(AbstractMetaType::FlagsPattern);
 
     } else if (type->isArray()) {
@@ -1119,7 +1127,7 @@ bool AbstractMetaFunction::isCopyConstructor() const
 
     const AbstractMetaType* type = arguments().first()->type();
     return type->typeEntry() == ownerClass()->typeEntry() &&
-           type->isConstant() && type->isReference();
+           type->isConstant() && type->referenceType() == LValueReference;
 }
 
 QString AbstractMetaFunction::modifiedName() const
@@ -2058,7 +2066,7 @@ void AbstractMetaClass::addDefaultCopyConstructor(bool isPrivate)
 
     AbstractMetaType* argType = new AbstractMetaType;
     argType->setTypeEntry(typeEntry());
-    argType->setReference(true);
+    argType->setReferenceType(LValueReference);
     argType->setConstant(true);
     argType->setTypeUsagePattern(AbstractMetaType::ValuePattern);
 
@@ -2598,8 +2606,16 @@ QString AbstractMetaType::minimalSignature() const
 
     for (int j = 0; j < indirections(); ++j)
         minimalSignature += QLatin1Char('*');
-    if (isReference())
+    switch (referenceType()) {
+    case NoReference:
+        break;
+    case LValueReference:
         minimalSignature += QLatin1Char('&');
+        break;
+    case RValueReference:
+        minimalSignature += QLatin1String("&&");
+        break;
+    }
 
     return minimalSignature;
 }

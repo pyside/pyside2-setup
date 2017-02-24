@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Copyright (C) 2002-2005 Roberto Raggi <roberto@kdevelop.org>
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of PySide2.
@@ -27,29 +26,13 @@
 **
 ****************************************************************************/
 
+#ifndef CODEMODEL_ENUMS_H
+#define CODEMODEL_ENUMS_H
 
-#include "compiler_utils.h"
-#include "type_compiler.h"
-#include "name_compiler.h"
-#include "declarator_compiler.h"
-#include "ast.h"
-#include "binder.h"
+enum ReferenceType {
+    NoReference,
+    LValueReference,
+    RValueReference
+};
 
-TypeInfo CompilerUtils::typeDescription(TypeSpecifierAST *type_specifier, DeclaratorAST *declarator, Binder *binder)
-{
-    TypeCompiler type_cc(binder);
-    DeclaratorCompiler decl_cc(binder);
-
-    type_cc.run(type_specifier);
-    decl_cc.run(declarator);
-
-    TypeInfo typeInfo;
-    typeInfo.setQualifiedName(type_cc.qualifiedName());
-    typeInfo.setConstant(type_cc.isConstant());
-    typeInfo.setVolatile(type_cc.isVolatile());
-    typeInfo.setReferenceType(decl_cc.isReference() ? LValueReference : NoReference);
-    typeInfo.setIndirections(decl_cc.indirection());
-    typeInfo.setArrayElements(decl_cc.arrayElements());
-
-    return typeInfo;
-}
+#endif // CODEMODEL_ENUMS_H

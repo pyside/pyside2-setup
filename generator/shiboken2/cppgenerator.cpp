@@ -684,7 +684,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
                             || argType->isFlags()
                             || argType->isEnum()
                             || argType->isContainer()
-                            || arg->type()->isReference();
+                            || arg->type()->referenceType() == LValueReference;
 
             if (!convert && argType->isPrimitive()) {
                 if (argType->basicReferencedTypeEntry())
@@ -851,7 +851,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
                 s << '(' << typeCast << ')';
             }
         }
-        if (func->type()->isReference() && !isPointer(func->type()))
+        if (func->type()->referenceType() == LValueReference && !isPointer(func->type()))
             s << '*';
         s << CPP_RETURN_VAR ";" << endl;
     }
@@ -1118,7 +1118,7 @@ void CppGenerator::writeConverterFunctions(QTextStream& s, const AbstractMetaCla
             }
             if (isWrapperType(sourceType)) {
                 typeCheck += QLatin1String("pyIn)");
-                toCppConv = (sourceType->isReference() || !isPointerToWrapperType(sourceType))
+                toCppConv = (sourceType->referenceType() == LValueReference || !isPointerToWrapperType(sourceType))
                     ? QLatin1String("*") : QString();
                 toCppConv += cpythonWrapperCPtr(sourceType->typeEntry(), QLatin1String("pyIn"));
             } else if (typeCheck.contains(QLatin1String("%in"))) {
@@ -2010,7 +2010,7 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream& s,
     bool treatAsPointer = isValueTypeWithCopyConstructorOnly(type);
     bool isPointerOrObjectType = (isObjectType(type) || isPointer(type)) && !isUserPrimitive(type) && !isCppPrimitive(type);
     bool isNotContainerEnumOrFlags = !typeEntry->isContainer() && !typeEntry->isEnum() && !typeEntry->isFlags();
-    bool mayHaveImplicitConversion = type->isReference()
+    bool mayHaveImplicitConversion = type->referenceType() == LValueReference
                                      && !isUserPrimitive(type)
                                      && !isCppPrimitive(type)
                                      && isNotContainerEnumOrFlags
@@ -2036,7 +2036,7 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream& s,
         s << "* " << cppOut;
         if (!defaultValue.isEmpty())
             s << " = " << defaultValue;
-    } else if (type->isReference() && !typeEntry->isPrimitive() && isNotContainerEnumOrFlags) {
+    } else if (type->referenceType() == LValueReference && !typeEntry->isPrimitive() && isNotContainerEnumOrFlags) {
         s << "* " << cppOut << " = &" << cppOutAux;
     } else {
         s << ' ' << cppOut;
@@ -2836,7 +2836,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                     int idx = arg->argumentIndex() - removedArgs;
                     bool deRef = isValueTypeWithCopyConstructorOnly(arg->type())
                                  || isObjectTypeUsedAsValueType(arg->type())
-                                 || (arg->type()->isReference() && isWrapperType(arg->type()) && !isPointer(arg->type()));
+                                 || (arg->type()->referenceType() == LValueReference && isWrapperType(arg->type()) && !isPointer(arg->type()));
                     QString argName = hasConversionRule
                                       ? arg->name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX)
                                       : QString::fromLatin1("%1" CPP_ARG "%2").arg(deRef ? QLatin1String("*") : QString()).arg(idx);

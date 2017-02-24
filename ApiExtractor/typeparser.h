@@ -29,6 +29,8 @@
 #ifndef TYPEPARSER_H
 #define TYPEPARSER_H
 
+#include "parser/codemodel_enums.h"
+
 #include <QtCore/QList>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
@@ -38,14 +40,14 @@ class TypeParser
 public:
     struct Info
     {
-        Info() : is_reference(false), is_constant(false), is_busted(false), indirections(0) { }
+        Info() : referenceType(NoReference), is_constant(false), is_busted(false), indirections(0) { }
         QStringList qualified_name;
         QStringList arrays;
         QList<Info> template_instantiations;
-        uint is_reference : 1;
+        ReferenceType referenceType;
         uint is_constant : 1;
         uint is_busted : 1;
-        uint indirections : 5;
+        uint indirections : 6;
 
         QString toString() const;
         QString instantiationName() const;

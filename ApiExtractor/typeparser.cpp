@@ -201,9 +201,22 @@ TypeParser::Info TypeParser::parse(const QString &str, QString *errorMessage)
             break;
 
         case Scanner::AmpersandToken:
-            stack.top()->is_reference = true;
+            switch (stack.top()->referenceType) {
+            case NoReference:
+                stack.top()->referenceType = LValueReference;
+                break;
+            case LValueReference:
+                stack.top()->referenceType = RValueReference;
+                break;
+            case RValueReference:
+                const QString message = scanner.msgParseError(QStringLiteral("Too many '&' qualifiers"));
+                if (errorMessage)
+                    *errorMessage = message;
+                else
+                    qWarning().noquote().nospace() << message;
+                return invalidInfo();
+            }
             break;
-
         case Scanner::LessThanToken:
             stack.top()->template_instantiations << Info();
             stack.push(&stack.top()->template_instantiations.last());
@@ -291,8 +304,15 @@ QString TypeParser::Info::toString() const
     for (int i = 0; i < arrays.size(); ++i)
         s += QLatin1Char('[') + arrays.at(i) + QLatin1Char(']');
     s += QString(indirections, QLatin1Char('*'));
-    if (is_reference)
+    switch (referenceType) {
+    case NoReference:
+        break;
+    case LValueReference:
         s += QLatin1Char('&');
-
+        break;
+    case RValueReference:
+        s += QLatin1String("&&");
+        break;
+    }
     return s;
 }

@@ -202,10 +202,10 @@ QString TypeInfo::toString() const
     switch (referenceType()) {
     case NoReference:
         break;
-    case TypeInfo::LValueReference:
+    case LValueReference:
         tmp += QLatin1Char('&');
         break;
-    case TypeInfo::RValueReference:
+    case RValueReference:
         tmp += QLatin1String("&&");
         break;
     }

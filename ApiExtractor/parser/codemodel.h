@@ -32,6 +32,7 @@
 #define CODEMODEL_H
 
 #include "codemodel_fwd.h"
+#include "codemodel_enums.h"
 
 #include <QtCore/QHash>
 #include <QtCore/QList>
@@ -94,12 +95,6 @@ QDebug operator<<(QDebug d, const CodeModel *m);
 class TypeInfo
 {
 public:
-    enum ReferenceType {
-        NoReference,
-        LValueReference,
-        RValueReference
-    };
-
     TypeInfo() : flags(0), m_referenceType(NoReference) {}
 
     QStringList qualifiedName() const

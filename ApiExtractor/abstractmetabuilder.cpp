@@ -1505,7 +1505,7 @@ static bool _compareAbstractMetaTypes(const AbstractMetaType* type, const Abstra
         return false;
     return type->typeEntry() == other->typeEntry()
             && type->isConstant() == other->isConstant()
-            && type->isReference() == other->isReference()
+            && type->referenceType() == other->referenceType()
             && type->indirections() == other->indirections();
 }
 
@@ -1621,7 +1621,7 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
         if (metaFunction->isConstructor() && metaFunction->arguments().size() == 1) {
             const AbstractMetaType* argType = metaFunction->arguments().first()->type();
             isCopyCtor = argType->isConstant()
-                         && argType->isReference()
+                         && argType->referenceType() == LValueReference
                          && argType->typeEntry()->name() == metaFunction->name();
         }
 
@@ -2235,7 +2235,8 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(double vr,
     AbstractMetaType *metaType = q->createMetaType();
     metaType->setTypeEntry(type);
     metaType->setIndirections(typeInfo.indirections);
-    metaType->setReference(typeInfo.isReference);
+    if (typeInfo.isReference)
+        metaType->setReferenceType(LValueReference);
     metaType->setConstant(typeInfo.isConstant);
     if (isTemplate) {
         foreach (const QString& templateArg, templateArgs) {
@@ -2445,15 +2446,14 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
     AbstractMetaType *metaType = q->createMetaType();
     metaType->setTypeEntry(type);
     metaType->setIndirections(typeInfo.indirections);
-    metaType->setReference(typeInfo.is_reference);
+    metaType->setReferenceType(typeInfo.referenceType);
     metaType->setConstant(typeInfo.is_constant);
     metaType->setOriginalTypeDescription(_typei.toString());
 
     foreach (const TypeParser::Info &ta, typeInfo.template_instantiations) {
         TypeInfo info;
         info.setConstant(ta.is_constant);
-        if (ta.is_reference)
-            info.setReferenceType(TypeInfo::LValueReference);
+        info.setReferenceType(ta.referenceType);
         info.setIndirections(ta.indirections);
 
         info.setFunctionPointer(false);
@@ -2808,7 +2808,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
             AbstractMetaType *temporaryType = q->createMetaType();
             temporaryType->setTypeEntry(t);
             temporaryType->setConstant(i.is_constant);
-            temporaryType->setReference(i.is_reference);
+            temporaryType->setReferenceType(i.referenceType);
             temporaryType->setIndirections(i.indirections);
             temporaryType->decideUsagePattern();
             templateTypes << temporaryType;

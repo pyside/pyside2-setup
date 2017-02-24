@@ -94,8 +94,16 @@ QString Generator::getSimplifiedContainerTypeName(const AbstractMetaType* type)
     QString typeName = type->cppSignature();
     if (type->isConstant())
         typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
-    if (type->isReference())
+    switch (type->referenceType()) {
+    case NoReference:
+        break;
+    case LValueReference:
         typeName.chop(1);
+        break;
+    case RValueReference:
+        typeName.chop(2);
+        break;
+    }
     while (typeName.endsWith(QLatin1Char('*')) || typeName.endsWith(QLatin1Char(' ')))
         typeName.chop(1);
     return typeName;
@@ -483,8 +491,16 @@ QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType* type)
     QString typeName = type->cppSignature();
     if (type->isConstant())
         typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
-    if (type->isReference())
+    switch (type->referenceType()) {
+    case NoReference:
+        break;
+    case LValueReference:
         typeName.chop(1);
+        break;
+    case RValueReference:
+        typeName.chop(2);
+        break;
+    }
     while (typeName.endsWith(QLatin1Char('*')) || typeName.endsWith(QLatin1Char(' ')))
         typeName.chop(1);
     return QLatin1String("::") + typeName;
@@ -492,7 +508,7 @@ QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType* type)
 
 QString Generator::minimalConstructor(const AbstractMetaType* type) const
 {
-    if (!type || (type->isReference() && Generator::isObjectType(type)))
+    if (!type || (type->referenceType() ==  LValueReference && Generator::isObjectType(type)))
         return QString();
 
     if (type->isContainer()) {
@@ -701,7 +717,7 @@ QString Generator::translateType(const AbstractMetaType *cType,
                 copyType->setConstant(false);
 
             if (options & Generator::ExcludeReference)
-                copyType->setReference(false);
+                copyType->setReferenceType(NoReference);
 
             s = copyType->cppSignature();
             if (!copyType->typeEntry()->isVoid() && !copyType->typeEntry()->isCppPrimitive())

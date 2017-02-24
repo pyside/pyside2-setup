@@ -93,7 +93,7 @@ void TestContainer::testListOfValueType()
     QCOMPARE(templateInstanceType->indirections(), 0);
     QVERIFY(!templateInstanceType->typeEntry()->isObject());
     QVERIFY(templateInstanceType->typeEntry()->isValue());
-    QVERIFY(!templateInstanceType->isReference());
+    QCOMPARE(templateInstanceType->referenceType(), NoReference);
     QVERIFY(!templateInstanceType->isObject());
     QVERIFY(!templateInstanceType->isValuePointer());
     QVERIFY(templateInstanceType->isValue());

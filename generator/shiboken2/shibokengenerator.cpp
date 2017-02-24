@@ -445,8 +445,16 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction*
             QString typeName = translateTypeForWrapperMethod(arg->type(), func->implementingClass());
             if (arg->type()->isConstant())
                 typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
-            if (arg->type()->isReference())
+            switch (arg->type()->referenceType()) {
+            case NoReference:
+                break;
+            case LValueReference:
                 typeName.chop(1);
+                break;
+            case RValueReference:
+                typeName.chop(2);
+                break;
+            }
             prefix = typeName + QLatin1Char('(');
             suffix = QLatin1Char(')');
         }
@@ -623,7 +631,7 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func,
             || arg->type()->isEnum()
             || arg->type()->isFlags()
             || arg->type()->isContainer()
-            || arg->type()->isReference()) {
+            || arg->type()->referenceType() == LValueReference) {
             result += QLatin1Char(objType);
         } else if (arg->type()->isPrimitive()) {
             const PrimitiveTypeEntry* ptype = (const PrimitiveTypeEntry*) arg->type()->typeEntry();
@@ -662,7 +670,7 @@ QString ShibokenGenerator::cpythonBaseName(const AbstractMetaClass* metaClass)
 QString ShibokenGenerator::cpythonBaseName(const TypeEntry* type)
 {
     QString baseName;
-    if (ShibokenGenerator::isWrapperType(type) || type->isNamespace()) { // && !type->isReference()) {
+    if (ShibokenGenerator::isWrapperType(type) || type->isNamespace()) { // && type->referenceType() == NoReference) {
         baseName = QLatin1String("Sbk_") + type->name();
     } else if (type->isPrimitive()) {
         const PrimitiveTypeEntry* ptype = (const PrimitiveTypeEntry*) type;
@@ -935,7 +943,7 @@ bool ShibokenGenerator::isPointerToWrapperType(const AbstractMetaType* type)
 
 bool ShibokenGenerator::isObjectTypeUsedAsValueType(const AbstractMetaType* type)
 {
-    return type->typeEntry()->isObject() && !type->isReference() && type->indirections() == 0;
+    return type->typeEntry()->isObject() && type->referenceType() == NoReference && type->indirections() == 0;
 }
 
 bool ShibokenGenerator::isValueTypeWithCopyConstructorOnly(const AbstractMetaClass* metaClass)
@@ -1008,7 +1016,7 @@ bool ShibokenGenerator::shouldDereferenceArgumentPointer(const AbstractMetaArgum
 
 bool ShibokenGenerator::shouldDereferenceAbstractMetaTypePointer(const AbstractMetaType* metaType)
 {
-    return metaType->isReference() && isWrapperType(metaType) && !isPointer(metaType);
+    return metaType->referenceType() == LValueReference && isWrapperType(metaType) && !isPointer(metaType);
 }
 
 bool ShibokenGenerator::visibilityModifiedToPrivate(const AbstractMetaFunction* func)
@@ -1166,7 +1174,7 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* 
         QString isConv;
         if (isPointer(metaType) || isValueTypeWithCopyConstructorOnly(metaType))
             isConv = QLatin1String("isPythonToCppPointerConvertible");
-        else if (metaType->isReference())
+        else if (metaType->referenceType() == LValueReference)
             isConv = QLatin1String("isPythonToCppReferenceConvertible");
         else
             isConv = QLatin1String("isPythonToCppValueConvertible");
@@ -1204,7 +1212,7 @@ QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaT
 {
     if (isWrapperType(type)) {
         QString conversion;
-        if (type->isReference() && !(type->isValue() && type->isConstant()) && !isPointer(type))
+        if (type->referenceType() == LValueReference && !(type->isValue() && type->isConstant()) && !isPointer(type))
             conversion = QLatin1String("reference");
         else if (type->isValue())
             conversion = QLatin1String("copy");
@@ -1543,7 +1551,7 @@ ShibokenGenerator::ArgumentVarReplacementList ShibokenGenerator::getArgumentRepl
                                ? arg->name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX)
                                : QLatin1String(CPP_ARG) + QString::number(argPos);
                     if (isWrapperType(type)) {
-                        if (type->isReference() && !isPointer(type))
+                        if (type->referenceType() == LValueReference && !isPointer(type))
                             argValue.prepend(QLatin1Char('*'));
                     }
                 }
@@ -1734,9 +1742,9 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
         }
         if (isWrapperType(type)) {
             QString replacement = pair.second;
-            if (type->isReference() && !isPointer(type))
+            if (type->referenceType() == LValueReference && !isPointer(type))
                 replacement.remove(0, 1);
-            if (type->isReference() || isPointer(type))
+            if (type->referenceType() == LValueReference || isPointer(type))
                 code.replace(QString::fromLatin1("%%1.").arg(idx), replacement + QLatin1String("->"));
         }
         code.replace(QRegExp(QString::fromLatin1("%%1\\b").arg(idx)), pair.second);
@@ -2152,8 +2160,13 @@ AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromString(QString typ
     if (isConst)
         typeString.remove(0, sizeof("const ") / sizeof(char) - 1);
 
-    bool isReference = typeString.endsWith(QLatin1Char('&'));
-    if (isReference) {
+    ReferenceType refType = NoReference;
+    if (typeString.endsWith(QLatin1String("&&"))) {
+        refType = RValueReference;
+        typeString.chop(2);
+        typeString = typeString.trimmed();
+    } else if (typeString.endsWith(QLatin1Char('&'))) {
+        refType = LValueReference;
         typeString.chop(1);
         typeString = typeString.trimmed();
     }
@@ -2199,7 +2212,7 @@ AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromString(QString typ
         metaType = new AbstractMetaType();
         metaType->setTypeEntry(typeEntry);
         metaType->setIndirections(indirections);
-        metaType->setReference(isReference);
+        metaType->setReferenceType(refType);
         metaType->setConstant(isConst);
         metaType->setTypeUsagePattern(AbstractMetaType::ContainerPattern);
         foreach (const QString& instantiation, instantiatedTypes) {
@@ -2222,7 +2235,7 @@ AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromTypeEntry(const Ty
     AbstractMetaType* metaType = new AbstractMetaType;
     metaType->setTypeEntry(typeEntry);
     metaType->setIndirections(0);
-    metaType->setReference(false);
+    metaType->setReferenceType(NoReference);
     metaType->setConstant(false);
     metaType->decideUsagePattern();
     m_metaTypeFromStringCache.insert(typeName, metaType);
@@ -2509,7 +2522,7 @@ Generator::Options ShibokenGenerator::getConverterOptions(const AbstractMetaType
     } else if (metaType->isContainer()
         || (type->isPrimitive() && !isCStr)
         // const refs become just the value, but pure refs must remain pure.
-        || (type->isValue() && metaType->isConstant() && metaType->isReference())) {
+        || (type->isValue() && metaType->isConstant() && metaType->referenceType() == LValueReference)) {
         flags = ExcludeConst | ExcludeReference;
     }
     return flags;
