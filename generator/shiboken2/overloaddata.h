@@ -33,6 +33,8 @@
 #include <QtCore/QList>
 #include <QtCore/QBitArray>
 
+QT_FORWARD_DECLARE_CLASS(QDebug)
+
 class ShibokenGenerator;
 
 class OverloadData;
@@ -123,6 +125,10 @@ public:
     /// Returns a list of function arguments which have default values and were not removed.
     static AbstractMetaArgumentList getArgumentsWithDefaultValues(const AbstractMetaFunction* func);
 
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &) const;
+#endif
+
 private:
     OverloadData(OverloadData* headOverloadData, const AbstractMetaFunction* func,
                  const AbstractMetaType* argType, int argPos);
@@ -148,5 +154,8 @@ private:
     const ShibokenGenerator* m_generator;
 };
 
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug, const OverloadData *);
+#endif
 
 #endif // OVERLOADDATA_H

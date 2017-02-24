@@ -1045,3 +1045,35 @@ AbstractMetaArgumentList OverloadData::getArgumentsWithDefaultValues(const Abstr
     return args;
 }
 
+#ifndef QT_NO_DEBUG_STREAM
+void OverloadData::formatDebug(QDebug &d) const
+{
+    const int count = m_overloads.size();
+    d << "argType=" << m_argType << ", minArgs=" << m_minArgs << ", maxArgs=" << m_maxArgs
+        << ", argPos=" << m_argPos << ", argTypeReplaced=\"" << m_argTypeReplaced
+        << "\", overloads[" << count << "]=(";
+    const int oldVerbosity = d.verbosity();
+    d.setVerbosity(3);
+    for (int i = 0; i < count; ++i) {
+        if (i)
+            d << '\n';
+        d << m_overloads.at(i);
+    }
+    d << ')';
+    d.setVerbosity(oldVerbosity);
+}
+
+QDebug operator<<(QDebug d, const OverloadData *od)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "OverloadData(";
+    if (od)
+        od->formatDebug(d);
+    else
+        d << '0';
+    d << ')';
+    return d;
+}
+#endif // !QT_NO_DEBUG_STREAM
