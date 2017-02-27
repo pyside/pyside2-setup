@@ -1615,20 +1615,10 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
             }
         }
 
-        // Can not use metaFunction->isCopyConstructor() because
-        // the function wasn't assigned to its owner class yet.
-        bool isCopyCtor = false;
-        if (metaFunction->isConstructor() && metaFunction->arguments().size() == 1) {
-            const AbstractMetaType* argType = metaFunction->arguments().first()->type();
-            isCopyCtor = argType->isConstant()
-                         && argType->referenceType() == LValueReference
-                         && argType->typeEntry()->name() == metaFunction->name();
-        }
-
-        bool isInvalidDestructor = metaFunction->isDestructor() && metaFunction->isPrivate();
-        bool isInvalidConstructor = metaFunction->isConstructor()
-                                    && ((metaFunction->isPrivate() && !isCopyCtor) || metaFunction->isInvalid());
-
+        const bool isInvalidDestructor = metaFunction->isDestructor() && metaFunction->isPrivate();
+        const bool isInvalidConstructor = metaFunction->isConstructor()
+            && ((metaFunction->isPrivate() && metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction)
+                || metaFunction->isInvalid());
         if ((isInvalidDestructor || isInvalidConstructor)
             && !metaClass->hasNonPrivateConstructor()) {
             *metaClass += AbstractMetaAttributes::Final;
@@ -1644,7 +1634,7 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
 
         if (!metaFunction->isDestructor()
             && !metaFunction->isInvalid()
-            && !(metaFunction->isPrivate() && metaFunction->isConstructor() && !isCopyCtor)) {
+            && !(metaFunction->isPrivate() && metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction)) {
 
             setupFunctionDefaults(metaFunction, metaClass);
 
@@ -1923,8 +1913,13 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
             *metaFunction += AbstractMetaFunction::Static;
         if (metaFunction->name() == metaClass->name()) {
             metaFunction->setFunctionType(AbstractMetaFunction::ConstructorFunction);
-            if (fargs.size() == 1 && fargs.first()->type()->typeEntry()->isCustom())
-                metaFunction->setExplicit(true);
+            if (fargs.size() == 1) {
+                const TypeEntry *te = fargs.first()->type()->typeEntry();
+                if (te->isCustom())
+                    metaFunction->setExplicit(true);
+                if (te->name() == metaFunction->name())
+                    metaFunction->setFunctionType(AbstractMetaFunction::CopyConstructorFunction);
+            }
         } else {
             metaFunction->setFunctionType(AbstractMetaFunction::NormalFunction);
         }
@@ -2053,6 +2048,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
         metaFunction->setInvalid(true);
     } else if (stripTemplateArgs(functionName) == strippedClassName) {
         metaFunction->setFunctionType(AbstractMetaFunction::ConstructorFunction);
+        // Check for Copy/Move down below
         metaFunction->setExplicit(functionItem->isExplicit());
         metaFunction->setName(m_currentClass->name());
     } else {
@@ -2179,6 +2175,40 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
     }
 
     fixArgumentNames(metaFunction);
+
+    // Determine class special functions
+    if (m_currentClass && metaFunction->arguments().size() == 1) {
+        const AbstractMetaType *argType = metaFunction->arguments().first()->type();
+        if (argType->typeEntry() == m_currentClass->typeEntry() && argType->indirections() == 0) {
+            if (metaFunction->isConstructor()) {
+                switch (argType->referenceType()) {
+                case NoReference:
+                    metaFunction->setFunctionType(AbstractMetaFunction::CopyConstructorFunction);
+                    break;
+                case LValueReference:
+                    if (argType->isConstant())
+                        metaFunction->setFunctionType(AbstractMetaFunction::CopyConstructorFunction);
+                    break;
+                case RValueReference:
+                    metaFunction->setFunctionType(AbstractMetaFunction::MoveConstructorFunction);
+                    break;
+                }
+            } else if (metaFunction->name() == QLatin1String("operator=")) {
+                switch (argType->referenceType()) {
+                case NoReference:
+                    metaFunction->setFunctionType(AbstractMetaFunction::AssignmentOperatorFunction);
+                    break;
+                case LValueReference:
+                    if (argType->isConstant())
+                        metaFunction->setFunctionType(AbstractMetaFunction::AssignmentOperatorFunction);
+                    break;
+                case RValueReference:
+                    metaFunction->setFunctionType(AbstractMetaFunction::MoveAssignmentOperatorFunction);
+                    break;
+                }
+            }
+        }
+    }
     return metaFunction;
 }
 
@@ -2975,13 +3005,9 @@ static AbstractMetaFunction* findCopyCtor(AbstractMetaClass* cls)
     functions <<  cls->queryFunctions(AbstractMetaClass::Visible);
 
     foreach (AbstractMetaFunction* f, functions) {
-        if (f->isConstructor() || f->name() == QLatin1String("operator=")) {
-            AbstractMetaArgumentList arguments = f->arguments();
-            if (arguments.size() == 1) {
-                if (cls->typeEntry()->qualifiedCppName() == arguments.at(0)->type()->typeEntry()->qualifiedCppName())
-                    return f;
-            }
-        }
+        const AbstractMetaFunction::FunctionType t = f->functionType();
+        if (t == AbstractMetaFunction::CopyConstructorFunction || t == AbstractMetaFunction::AssignmentOperatorFunction)
+            return f;
     }
     return 0;
 }

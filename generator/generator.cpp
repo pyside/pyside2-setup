@@ -584,8 +584,9 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
     AbstractMetaFunctionList constructors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
     int maxArgs = 0;
     foreach (const AbstractMetaFunction* ctor, constructors) {
-        if (ctor->isUserAdded() || ctor->isPrivate() || ctor->isCopyConstructor())
+        if (ctor->isUserAdded() || ctor->isPrivate() || ctor->functionType() != AbstractMetaFunction::ConstructorFunction)
             continue;
+
         int numArgs = ctor->arguments().size();
         if (numArgs == 0) {
             maxArgs = 0;
@@ -610,7 +611,7 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
     // Start with the ones with fewer arguments.
     for (int i = 1; i <= maxArgs; ++i) {
         foreach (const AbstractMetaFunction* ctor, constructors) {
-            if (ctor->isUserAdded() || ctor->isPrivate() || ctor->isCopyConstructor())
+            if (ctor->isUserAdded() || ctor->isPrivate() || ctor->functionType() != AbstractMetaFunction::ConstructorFunction)
                 continue;
 
             AbstractMetaArgumentList arguments = ctor->arguments();

@@ -296,7 +296,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
             if ((func->isPrivate() && !visibilityModifiedToPrivate(func))
                 || (func->isModifiedRemoved() && !func->isAbstract()))
                 continue;
-            if (func->isConstructor() && !func->isCopyConstructor() && !func->isUserAdded())
+            if (func->functionType() == AbstractMetaFunction::ConstructorFunction && !func->isUserAdded())
                 writeConstructorNative(s, func);
             else if ((!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
                      && (func->isVirtual() || func->isAbstract()))
@@ -2816,7 +2816,7 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
 
     if (!func->isUserAdded()) {
         QStringList userArgs;
-        if (!func->isCopyConstructor()) {
+        if (func->functionType() != AbstractMetaFunction::CopyConstructorFunction) {
             int removedArgs = 0;
             for (int i = 0; i < maxArgs + removedArgs; i++) {
                 const AbstractMetaArgument* arg = func->arguments().at(i);
@@ -2905,11 +2905,11 @@ void CppGenerator::writeMethodCall(QTextStream& s, const AbstractMetaFunction* f
                 mc << op << ' ' << secondArg;
             }
         } else if (!injectedCodeCallsCppFunction(func)) {
-            if (func->isConstructor() || func->isCopyConstructor()) {
+            if (func->isConstructor()) {
                 isCtor = true;
                 QString className = wrapperName(func->ownerClass());
 
-                if (func->isCopyConstructor() && maxArgs == 1) {
+                if (func->functionType() == AbstractMetaFunction::CopyConstructorFunction && maxArgs == 1) {
                     mc << "new ::" << className << "(*" << CPP_ARG0 << ')';
                 } else {
                     QString ctorCall = className + QLatin1Char('(') + userArgs.join(QLatin1String(", ")) + QLatin1Char(')');

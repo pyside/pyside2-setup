@@ -164,7 +164,7 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
 {
 
     // do not write copy ctors here.
-    if (!func->isPrivate() && func->isCopyConstructor()) {
+    if (!func->isPrivate() && func->functionType() == AbstractMetaFunction::CopyConstructorFunction) {
         writeCopyCtor(s, func->ownerClass());
         return;
     }

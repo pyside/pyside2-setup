@@ -1062,10 +1062,8 @@ bool AbstractMetaFunction::isSubscriptOperator() const
 
 bool AbstractMetaFunction::isAssignmentOperator() const
 {
-    if (!isOperatorOverload())
-        return false;
-
-    return originalName() == QLatin1String("operator=");
+    return m_functionType == AssignmentOperatorFunction
+        || m_functionType == MoveAssignmentOperatorFunction;
 }
 
 bool AbstractMetaFunction::isOtherOperator() const
@@ -1115,16 +1113,6 @@ bool AbstractMetaFunction::isInplaceOperator() const
 bool AbstractMetaFunction::isVirtual() const
 {
     return !isFinal() && !isSignal() && !isStatic() && !isFinalInCpp() && !isConstructor();
-}
-
-bool AbstractMetaFunction::isCopyConstructor() const
-{
-    if (!ownerClass() || !isConstructor() || arguments().count() != 1)
-        return false;
-
-    const AbstractMetaType* type = arguments().first()->type();
-    return type->typeEntry() == ownerClass()->typeEntry() &&
-           type->isConstant() && type->referenceType() == LValueReference;
 }
 
 QString AbstractMetaFunction::modifiedName() const
@@ -1425,7 +1413,8 @@ AbstractMetaFunctionList AbstractMetaClass::implicitConversions() const
     foreach (AbstractMetaFunction *f, list) {
         if ((f->actualMinimumArgumentCount() == 1 || f->arguments().size() == 1 || f->isConversionOperator())
             && !f->isExplicit()
-            && !f->isCopyConstructor()
+            && f->functionType() != AbstractMetaFunction::CopyConstructorFunction
+            && f->functionType() != AbstractMetaFunction::MoveConstructorFunction
             && !f->isModifiedRemoved()
             && (f->originalAttributes() & Public)) {
             returned += f;
@@ -2016,7 +2005,7 @@ bool AbstractMetaClass::hasConstructors() const
 bool AbstractMetaClass::hasCopyConstructor() const
 {
     foreach (const AbstractMetaFunction* ctor, queryFunctions(Constructors)) {
-        if (ctor->isCopyConstructor())
+        if (ctor->functionType() == AbstractMetaFunction::CopyConstructorFunction)
             return true;
     }
     return false;
@@ -2025,7 +2014,7 @@ bool AbstractMetaClass::hasCopyConstructor() const
 bool AbstractMetaClass::hasPrivateCopyConstructor() const
 {
     foreach (const AbstractMetaFunction* ctor, queryFunctions(Constructors)) {
-        if (ctor->isCopyConstructor() && ctor->isPrivate())
+        if (ctor->functionType() == AbstractMetaFunction::CopyConstructorFunction && ctor->isPrivate())
             return true;
     }
     return false;
@@ -2058,7 +2047,7 @@ void AbstractMetaClass::addDefaultCopyConstructor(bool isPrivate)
     f->setOriginalName(name());
     f->setName(name());
     f->setOwnerClass(this);
-    f->setFunctionType(AbstractMetaFunction::ConstructorFunction);
+    f->setFunctionType(AbstractMetaFunction::CopyConstructorFunction);
     f->setDeclaringClass(this);
 
     AbstractMetaType* argType = new AbstractMetaType;

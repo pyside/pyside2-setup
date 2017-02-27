@@ -791,6 +791,10 @@ class AbstractMetaFunction : public AbstractMetaAttributes
 public:
     enum FunctionType {
         ConstructorFunction,
+        CopyConstructorFunction,
+        MoveConstructorFunction,
+        AssignmentOperatorFunction,
+        MoveAssignmentOperatorFunction,
         DestructorFunction,
         NormalFunction,
         SignalFunction,
@@ -914,7 +918,7 @@ public:
     bool isComparisonOperator() const;
     bool isLogicalOperator() const;
     bool isSubscriptOperator() const;
-    bool isAssignmentOperator() const;
+    bool isAssignmentOperator() const; // Assignment or move assignment
     bool isOtherOperator() const;
 
     /**
@@ -930,7 +934,6 @@ public:
     // TODO: ths function *should* know if it is virtual
     // instead of asking to your implementing class.
     bool isVirtual() const;
-    bool isCopyConstructor() const;
     bool isThread() const;
     bool allowThread() const;
     QString modifiedName() const;
@@ -1031,7 +1034,8 @@ public:
     }
     bool isConstructor() const
     {
-        return functionType() == ConstructorFunction;
+        return m_functionType == ConstructorFunction || m_functionType == CopyConstructorFunction
+            || m_functionType == MoveConstructorFunction;
     }
     bool isNormal() const
     {

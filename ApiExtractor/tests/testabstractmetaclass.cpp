@@ -232,6 +232,50 @@ void TestAbstractMetaClass::testInnerClassOfAPolymorphicOne()
     QVERIFY(!classB->isPolymorphic());
 }
 
+void TestAbstractMetaClass::testSpecialFunctions()
+{
+    const char cppCode[] ="\
+    struct A {\n\
+        A();\n\
+        A(const A&);\n\
+        A &operator=(const A&);\n\
+    };\n\
+    struct B {\n\
+        B();\n\
+        B(B);\n\
+        B &operator=(B);\n\
+    };\n";
+    const char xmlCode[] = "\
+    <typesystem package=\"Foo\">\n\
+        <object-type name='A'/>\n\
+        <object-type name='B'/>\n\
+    </typesystem>\n";
+
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.count(), 2);
+
+    const AbstractMetaClass *classA = classes.findClass(QLatin1String("A"));
+    QVERIFY(classA);
+    AbstractMetaFunctionList ctors = classA->queryFunctions(AbstractMetaClass::Constructors);
+    QCOMPARE(ctors.size(), 2);
+    QCOMPARE(ctors.first()->functionType(), AbstractMetaFunction::ConstructorFunction);
+    QCOMPARE(ctors.at(1)->functionType(), AbstractMetaFunction::CopyConstructorFunction);
+    AbstractMetaFunctionList assigmentOps = classA->queryFunctionsByName(QLatin1String("operator="));
+    QCOMPARE(assigmentOps.size(), 1);
+    QCOMPARE(assigmentOps.first()->functionType(), AbstractMetaFunction::AssignmentOperatorFunction);
+
+    const AbstractMetaClass *classB = classes.findClass(QLatin1String("B"));
+    QVERIFY(classB);
+    ctors = classB->queryFunctions(AbstractMetaClass::Constructors);
+    QCOMPARE(ctors.size(), 2);
+    QCOMPARE(ctors.first()->functionType(), AbstractMetaFunction::ConstructorFunction);
+    QCOMPARE(ctors.at(1)->functionType(), AbstractMetaFunction::CopyConstructorFunction);
+    assigmentOps = classA->queryFunctionsByName(QLatin1String("operator="));
+    QCOMPARE(assigmentOps.size(), 1);
+    QCOMPARE(assigmentOps.first()->functionType(), AbstractMetaFunction::AssignmentOperatorFunction);
+}
+
 void TestAbstractMetaClass::testClassDefaultConstructors()
 {
     const char* cppCode ="\

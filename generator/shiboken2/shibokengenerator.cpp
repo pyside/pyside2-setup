@@ -343,7 +343,7 @@ QString ShibokenGenerator::cpythonFunctionName(const AbstractMetaFunction* func)
 
     if (func->ownerClass()) {
         result = cpythonBaseName(func->ownerClass()->typeEntry());
-        if (func->isConstructor() || func->isCopyConstructor()) {
+        if (func->isConstructor()) {
             result += QLatin1String("_Init");
         } else {
             result += QLatin1String("Func_");
@@ -564,7 +564,7 @@ QString ShibokenGenerator::cpythonWrapperCPtr(const TypeEntry* type, QString arg
 
 QString ShibokenGenerator::getFunctionReturnType(const AbstractMetaFunction* func, Options) const
 {
-    if (func->ownerClass() && (func->isConstructor() || func->isCopyConstructor()))
+    if (func->ownerClass() && func->isConstructor())
         return func->ownerClass()->qualifiedCppName() + QLatin1Char('*');
 
     return translateTypeForWrapperMethod(func->type(), func->implementingClass());
@@ -953,7 +953,7 @@ bool ShibokenGenerator::isValueTypeWithCopyConstructorOnly(const AbstractMetaCla
     AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
     if (ctors.count() != 1)
         return false;
-    return ctors.first()->isCopyConstructor();
+    return ctors.first()->functionType() == AbstractMetaFunction::CopyConstructorFunction;
 }
 
 bool ShibokenGenerator::isValueTypeWithCopyConstructorOnly(const TypeEntry* type) const
