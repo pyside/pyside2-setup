@@ -599,6 +599,8 @@ public:
     bool hasTemplateChildren() const;
 
 private:
+    TypeUsagePattern determineUsagePattern() const;
+
     const TypeEntry *m_typeEntry;
     AbstractMetaTypeList m_instantiations;
     QString m_package;

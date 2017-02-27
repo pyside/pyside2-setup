@@ -184,96 +184,93 @@ QString AbstractMetaType::cppSignature() const
     return m_cachedCppSignature;
 }
 
+AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() const
+{
+    if (m_typeEntry->isTemplateArgument() || m_referenceType == RValueReference)
+        return InvalidPattern;
+
+    if (m_typeEntry->isPrimitive() && (!actualIndirections()
+        || (isConstant() && m_referenceType == LValueReference && !indirections()))) {
+        return PrimitivePattern;
+    }
+
+    if (m_typeEntry->isVoid())
+        return NativePointerPattern;
+
+    if (m_typeEntry->isVarargs())
+        return VarargsPattern;
+
+    if (m_typeEntry->isString() && indirections() == 0
+        && (isConstant() == (m_referenceType == LValueReference)
+        || isConstant())) {
+        return StringPattern;
+    }
+
+    if (m_typeEntry->isChar()
+        && indirections() == 0
+        && isConstant() == (m_referenceType == LValueReference)) {
+        return CharPattern;
+    }
+
+    if (m_typeEntry->isJObjectWrapper()
+        && indirections() == 0
+        && isConstant() == (m_referenceType == LValueReference)) {
+        return JObjectWrapperPattern;
+    }
+
+    if (m_typeEntry->isVariant()
+        && indirections() == 0
+        && isConstant() == (m_referenceType == LValueReference)) {
+        return VariantPattern;
+    }
+
+    if (m_typeEntry->isEnum() && actualIndirections() == 0)
+        return EnumPattern;
+
+    if (m_typeEntry->isObject()) {
+        if (indirections() == 0 && m_referenceType == NoReference)
+            return ValuePattern;
+        return static_cast<const ComplexTypeEntry *>(m_typeEntry)->isQObject()
+            ? QObjectPattern : ObjectPattern;
+    }
+
+    if (m_typeEntry->isContainer() && indirections() == 0)
+        return ContainerPattern;
+
+    if (m_typeEntry->isFlags() && indirections() == 0
+        && (isConstant() == (m_referenceType == LValueReference)))
+        return FlagsPattern;
+
+    if (m_typeEntry->isArray())
+        return ArrayPattern;
+
+    if (m_typeEntry->isThread()) {
+        Q_ASSERT(indirections() == 1);
+        return ThreadPattern;
+    }
+
+    if (m_typeEntry->isValue())
+        return indirections() == 1 ? ValuePointerPattern : ValuePattern;
+
+    if (ReportHandler::isDebug(ReportHandler::FullDebug)) {
+        qCDebug(lcShiboken)
+            << QStringLiteral("native pointer pattern for '%1'").arg(cppSignature());
+    }
+    return NativePointerPattern;
+}
+
 void AbstractMetaType::decideUsagePattern()
 {
-    const TypeEntry* type = typeEntry();
-
-    if (type->isPrimitive() && (!actualIndirections()
-        || (isConstant() && m_referenceType == LValueReference && !indirections()))) {
-        setTypeUsagePattern(AbstractMetaType::PrimitivePattern);
-
-    } else if (type->isVoid()) {
-        setTypeUsagePattern(AbstractMetaType::NativePointerPattern);
-
-    } else if (type->isVarargs()) {
-        setTypeUsagePattern(AbstractMetaType::VarargsPattern);
-
-    } else if (type->isString()
-               && indirections() == 0
-               && (isConstant() == (m_referenceType == LValueReference)
-                   || isConstant())) {
-        setTypeUsagePattern(AbstractMetaType::StringPattern);
-
-    } else if (type->isChar()
-               && !indirections()
-               && isConstant() == (m_referenceType == LValueReference)) {
-        setTypeUsagePattern(AbstractMetaType::CharPattern);
-
-    } else if (type->isJObjectWrapper()
-               && !indirections()
-               && isConstant() == (m_referenceType == LValueReference)) {
-        setTypeUsagePattern(AbstractMetaType::JObjectWrapperPattern);
-
-    } else if (type->isVariant()
-               && !indirections()
-               && isConstant() == (m_referenceType == LValueReference)) {
-        setTypeUsagePattern(AbstractMetaType::VariantPattern);
-
-    } else if (type->isEnum() && !actualIndirections()) {
-        setTypeUsagePattern(AbstractMetaType::EnumPattern);
-
-    } else if (type->isObject() && indirections() == 0) {
-        if (m_referenceType == LValueReference) {
-            if (((ComplexTypeEntry*) type)->isQObject())
-                setTypeUsagePattern(AbstractMetaType::QObjectPattern);
-            else
-                setTypeUsagePattern(AbstractMetaType::ObjectPattern);
-        } else {
-            setTypeUsagePattern(AbstractMetaType::ValuePattern);
-        }
-
-    } else if (type->isObject()
-               && indirections() == 1) {
-        if (((ComplexTypeEntry*) type)->isQObject())
-            setTypeUsagePattern(AbstractMetaType::QObjectPattern);
-        else
-            setTypeUsagePattern(AbstractMetaType::ObjectPattern);
-
+    TypeUsagePattern pattern = determineUsagePattern();
+    if (m_typeEntry->isObject() && indirections() == 1
+        && m_referenceType == LValueReference && isConstant()) {
         // const-references to pointers can be passed as pointers
-        if (referenceType() == LValueReference && isConstant()) {
-            setReferenceType(NoReference);
-            setConstant(false);
-        }
-
-    } else if (type->isContainer() && !indirections()) {
-        setTypeUsagePattern(AbstractMetaType::ContainerPattern);
-
-    } else if (type->isTemplateArgument()) {
-
-    } else if (type->isFlags()
-               && !indirections()
-               && (isConstant() == (m_referenceType == LValueReference))) {
-        setTypeUsagePattern(AbstractMetaType::FlagsPattern);
-
-    } else if (type->isArray()) {
-        setTypeUsagePattern(AbstractMetaType::ArrayPattern);
-
-    } else if (type->isThread()) {
-        Q_ASSERT(indirections() == 1);
-        setTypeUsagePattern(AbstractMetaType::ThreadPattern);
-    } else if (type->isValue()) {
-        if (indirections() == 1) {
-            setTypeUsagePattern(AbstractMetaType::ValuePointerPattern);
-        } else {
-            setTypeUsagePattern(AbstractMetaType::ValuePattern);
-        }
-    } else {
-        setTypeUsagePattern(AbstractMetaType::NativePointerPattern);
-        if (ReportHandler::isDebug(ReportHandler::FullDebug)) {
-            qCDebug(lcShiboken)
-              << QStringLiteral("native pointer pattern for '%1'").arg(cppSignature());
-        }
+        setReferenceType(NoReference);
+        setConstant(false);
+        pattern = static_cast<const ComplexTypeEntry *>(m_typeEntry)->isQObject()
+            ? QObjectPattern : ObjectPattern;
     }
+    setTypeUsagePattern(pattern);
 }
 
 bool AbstractMetaType::hasTemplateChildren() const
