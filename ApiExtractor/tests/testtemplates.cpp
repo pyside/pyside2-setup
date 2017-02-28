@@ -192,6 +192,39 @@ void TestTemplates::testTemplateReferenceAsArgument()
     QCOMPARE(func->arguments().first()->type()->cppSignature(), QLatin1String("List<int > &"));
 }
 
+void TestTemplates::testTemplateParameterFixup()
+{
+    const char cppCode[] = "\n\
+    template<typename T>\n\
+    struct List {\n\
+        struct Iterator {};\n\
+        void append(List l);\n\
+        void erase(List::Iterator it);\n\
+    };\n";
+
+    const char xmlCode[] = "\n\
+    <typesystem package='Package'>\n\
+        <container-type name='List' type='list'/>\n\
+        <value-type name='List::Iterator'/>\n\
+    </typesystem>\n";
+
+    TestUtil t(cppCode, xmlCode, false);
+    const AbstractMetaClassList templates = t.builder()->templates();
+
+    QCOMPARE(templates.count(), 1);
+    const AbstractMetaClass *list = templates.first();
+    // Verify that the parameter of "void append(List l)" gets fixed to "List<T >"
+    const AbstractMetaFunction *append = list->findFunction(QStringLiteral("append"));
+    QVERIFY(append);
+    QCOMPARE(append->arguments().size(), 1);
+    QCOMPARE(append->arguments().at(0)->type()->cppSignature(), QLatin1String("List<T >"));
+    // Verify that the parameter of "void erase(Iterator)" is not modified
+    const AbstractMetaFunction *erase = list->findFunction(QStringLiteral("erase"));
+    QVERIFY(erase);
+    QCOMPARE(erase->arguments().size(), 1);
+    QCOMPARE(erase->arguments().at(0)->type()->cppSignature(), QLatin1String("List::Iterator"));
+}
+
 void TestTemplates::testInheritanceFromContainterTemplate()
 {
     const char cppCode[] = "\n\

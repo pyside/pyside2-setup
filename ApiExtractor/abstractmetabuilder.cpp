@@ -1527,37 +1527,41 @@ static bool _compareAbstractMetaFunctions(const AbstractMetaFunction* func, cons
     return true;
 }
 
-static bool _fixFunctionModelItemType(TypeInfo& type, const AbstractMetaClass* metaClass)
-{
-    if (metaClass->templateArguments().isEmpty()
-        || type.qualifiedName().isEmpty()
-        || type.qualifiedName().first() != metaClass->typeEntry()->qualifiedCppName()) {
-        return false;
-    }
-    QStringList templateTypes;
-    foreach (TypeEntry* templateType, metaClass->templateArguments())
-        templateTypes << templateType->qualifiedCppName();
-    QString fixedTypeName = metaClass->typeEntry()->qualifiedCppName() + QLatin1Char('<')
-        + templateTypes.join(QLatin1String(", ")) + QLatin1String(" >");
-    type.setQualifiedName(QStringList(fixedTypeName));
-    return true;
-}
-
+// Fix the arguments of template classes that take the class itself, for example:
+// "QList(const QList &)" to "QList(const QList<T> &)".
 static bool _fixFunctionModelItemTypes(FunctionModelItem& function, const AbstractMetaClass* metaClass)
 {
+    const QList<TypeEntry *> &templateTypes = metaClass->templateArguments();
+    if (templateTypes.isEmpty())
+        return false;
+
+    const QStringList classType = metaClass->typeEntry()->qualifiedCppName().split(colonColon());
+    QStringList fixedClassType = classType;
+    fixedClassType.last().append(QLatin1Char('<'));
+    for (int i = 0, count = templateTypes.size(); i < count; ++i) {
+        if (i)
+            fixedClassType.last().append(QLatin1String(", "));
+        fixedClassType.last().append(templateTypes.at(i)->qualifiedCppName());
+    }
+    fixedClassType.last().append(QLatin1String(" >"));
+
+    bool templateTypeFixed = false;
     TypeInfo functionType = function->type();
-    bool templateTypeFixed = _fixFunctionModelItemType(functionType, metaClass);
-    if (templateTypeFixed)
+    if (functionType.qualifiedName() == classType) {
+        templateTypeFixed = true;
+        functionType.setQualifiedName(fixedClassType);
         function->setType(functionType);
+    }
 
     ArgumentList arguments = function->arguments();
     for (int i = 0; i < arguments.size(); ++i) {
         ArgumentModelItem arg = arguments.at(i);
         TypeInfo type = arg->type();
-        bool tmpTypeFixed = _fixFunctionModelItemType(type, metaClass);
-        if (tmpTypeFixed)
+        if (type.qualifiedName() == classType) {
+            type.setQualifiedName(fixedClassType);
             arg->setType(type);
-        templateTypeFixed |= tmpTypeFixed;
+            templateTypeFixed = true;
+        }
     }
     return templateTypeFixed;
 }

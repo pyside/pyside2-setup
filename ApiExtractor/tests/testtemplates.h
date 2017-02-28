@@ -40,6 +40,7 @@ private slots:
     void testTemplateValueAsArgument();
     void testTemplatePointerAsArgument();
     void testTemplateReferenceAsArgument();
+    void testTemplateParameterFixup();
     void testInheritanceFromContainterTemplate();
     void testTemplateInheritanceMixedWithForwardDeclaration();
     void testTemplateInheritanceMixedWithNamespaceAndForwardDeclaration();
