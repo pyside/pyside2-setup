@@ -323,8 +323,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(FunctionModelItem item
         AbstractMetaClass* oldCurrentClass = m_currentClass;
         m_currentClass = baseoperandClass;
         AbstractMetaFunction *metaFunction = traverseFunction(item);
-        // Strip first argument off "bool operator==(Foo lhs, Foo rhs); }"
-        if (metaFunction && !metaFunction->isInvalid() && metaFunction->arguments().size() > 1) {
+        if (metaFunction && !metaFunction->isInvalid()) {
             // Strip away first argument, since that is the containing object
             AbstractMetaArgumentList arguments = metaFunction->arguments();
             if (firstArgumentIsSelf || unaryOperator) {
