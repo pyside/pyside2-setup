@@ -180,8 +180,10 @@
         <enum-type name="SpecialAddress"/>
         <!-- ### QHostAddress(QIPv6Address) does this -->
         <modify-function signature="QHostAddress(quint8*)" remove="all" />
-        <!-- ### -->
+        <modify-function signature="QHostAddress(const quint8*)" remove="all" />
+       <!-- ### -->
         <modify-function signature="setAddress(quint8*)" remove="all" />
+        <modify-function signature="setAddress(const quint8*)" remove="all" />
     </value-type>
 
     <value-type name="QHostInfo">

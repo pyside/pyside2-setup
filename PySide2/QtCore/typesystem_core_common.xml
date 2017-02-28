@@ -3227,7 +3227,7 @@
     <modify-function signature="notify(QObject*,QEvent*)" allow-thread="yes">
       <modify-argument index="2" invalidate-after-use="yes"/>
     </modify-function>
-    <modify-function signature="QCoreApplication(int &amp;, char  **)" access="private"/>
+    <modify-function signature="QCoreApplication(int &amp;, char  **, int)" access="private"/>
     <inject-code class="native" file="glue/qcoreapplication_init.cpp" position="beginning" />
     <modify-function signature="postEvent(QObject*,QEvent*, int)">
       <modify-argument index="2">
@@ -3571,8 +3571,8 @@
     <modify-function signature="operator&lt;&lt;(float)" remove="all"/>
     <modify-function signature="operator&lt;&lt;(qlonglong)" remove="all"/>
     <modify-function signature="operator&lt;&lt;(qulonglong)" remove="all"/>
-    <modify-function signature="operator&lt;&lt;(signed short)" remove="all"/>
-    <modify-function signature="operator&lt;&lt;(signed int)" remove="all"/>
+    <modify-function signature="operator&lt;&lt;(short)" remove="all"/>
+    <modify-function signature="operator&lt;&lt;(int)" remove="all"/>
     <modify-function signature="operator&lt;&lt;(unsigned int)" remove="all"/>
     <modify-function signature="operator&lt;&lt;(unsigned short)" remove="all"/>
     <modify-function signature="operator&lt;&lt;(const char*)" remove="all"/>
@@ -3583,9 +3583,9 @@
     <modify-function signature="operator&gt;&gt;(double&amp;)" remove="all"/>
     <modify-function signature="operator&gt;&gt;(qlonglong&amp;)" remove="all"/>
     <modify-function signature="operator&gt;&gt;(qulonglong&amp;)" remove="all"/>
-    <modify-function signature="operator&gt;&gt;(signed long&amp;)" remove="all"/>
-    <modify-function signature="operator&gt;&gt;(signed int&amp;)" remove="all"/>
-    <modify-function signature="operator&gt;&gt;(signed short&amp;)" remove="all"/>
+    <modify-function signature="operator&gt;&gt;(long&amp;)" remove="all"/>
+    <modify-function signature="operator&gt;&gt;(int&amp;)" remove="all"/>
+    <modify-function signature="operator&gt;&gt;(short&amp;)" remove="all"/>
     <modify-function signature="operator&gt;&gt;(unsigned long&amp;)" remove="all"/>
     <modify-function signature="operator&gt;&gt;(unsigned int&amp;)" remove="all"/>
     <modify-function signature="operator&gt;&gt;(unsigned short&amp;)" remove="all"/>

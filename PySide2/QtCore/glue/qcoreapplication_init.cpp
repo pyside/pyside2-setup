@@ -55,7 +55,7 @@ void QCoreApplication_constructor(PyObject* self, PyObject* args, QCoreApplicati
         return;
     }
 
-    *cptr = new QCoreApplicationWrapper(QCoreApplicationArgCount, QCoreApplicationArgValues);
+    *cptr = new QCoreApplicationWrapper(QCoreApplicationArgCount, QCoreApplicationArgValues, QT_VERSION);
 
     Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject*>(self));
     PySide::registerCleanupFunction(&PySide::destroyQCoreApplication);
