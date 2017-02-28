@@ -165,7 +165,7 @@ QString AbstractMetaType::cppSignature() const
             m_cachedCppSignature += QLatin1String(" >");
         }
 
-        if (actualIndirections()) {
+        if (indirections() || m_referenceType != NoReference) {
             m_cachedCppSignature += QLatin1Char(' ');
             if (indirections())
                 m_cachedCppSignature += QString(indirections(), QLatin1Char('*'));
