@@ -148,8 +148,10 @@ QList<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(con
     QMap<QPair<QString, int >, AbstractMetaFunctionList> results;
     const AbstractMetaClass::OperatorQueryOptions query(queryIn);
     foreach (AbstractMetaFunction* func, metaClass->operatorOverloads(query)) {
-        if (func->isModifiedRemoved() || func->name() == QLatin1String("operator[]") || func->name() == QLatin1String("operator->"))
+        if (func->isModifiedRemoved() || func->usesRValueReferences()
+            || func->name() == QLatin1String("operator[]") || func->name() == QLatin1String("operator->")) {
             continue;
+        }
         int args;
         if (func->isComparisonOperator()) {
             args = -1;
@@ -324,6 +326,7 @@ void CppGenerator::generateClass(QTextStream &s, const AbstractMetaClass *metaCl
         AbstractMetaFunctionList overloads;
         foreach (AbstractMetaFunction* func, it.value()) {
             if (!func->isAssignmentOperator()
+                && !func->usesRValueReferences()
                 && !func->isCastOperator()
                 && !func->isModifiedRemoved()
                 && (!func->isPrivate() || func->functionType() == AbstractMetaFunction::EmptyFunction)

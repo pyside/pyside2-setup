@@ -1403,8 +1403,7 @@ AbstractMetaFunctionList ShibokenGenerator::filterFunctions(const AbstractMetaCl
 {
     AbstractMetaFunctionList result;
     foreach (AbstractMetaFunction *func, metaClass->functions()) {
-        //skip signals
-        if (func->isSignal() || func->isDestructor()
+        if (func->isSignal() || func->isDestructor() || func->usesRValueReferences()
             || (func->isModifiedRemoved() && !func->isAbstract()
                 && (!avoidProtectedHack() || !func->isProtected())))
             continue;

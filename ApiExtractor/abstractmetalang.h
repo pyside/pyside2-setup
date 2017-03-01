@@ -1066,6 +1066,7 @@ public:
         m_functionType = type;
     }
 
+    bool usesRValueReferences() const;
     QStringList introspectionCompatibleSignatures(const QStringList &resolvedArguments = QStringList()) const;
     QString signature() const;
     QString targetLangSignature(bool minimal = false) const;

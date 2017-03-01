@@ -517,6 +517,19 @@ AbstractMetaFunction *AbstractMetaFunction::copy() const
     return cpy;
 }
 
+bool AbstractMetaFunction::usesRValueReferences() const
+{
+    if (m_functionType == MoveConstructorFunction || m_functionType == MoveAssignmentOperatorFunction)
+        return true;
+    if (m_type && m_type->referenceType() == RValueReference)
+        return true;
+    foreach (const AbstractMetaArgument *a, m_arguments) {
+        if (a->type()->referenceType() == RValueReference)
+            return true;
+    }
+    return false;
+}
+
 QStringList AbstractMetaFunction::introspectionCompatibleSignatures(const QStringList &resolvedArguments) const
 {
     AbstractMetaArgumentList arguments = this->arguments();
@@ -1408,13 +1421,17 @@ AbstractMetaFunctionList AbstractMetaClass::implicitConversions() const
 
     AbstractMetaFunctionList returned;
     AbstractMetaFunctionList list = queryFunctions(Constructors);
+
     list.append(externalConversionOperators());
 
+    // Exclude anything that uses rvalue references, be it a move
+    // constructor "QPolygon(QPolygon &&)" or something else like
+    // "QPolygon(QVector<QPoint> &&)".
     foreach (AbstractMetaFunction *f, list) {
         if ((f->actualMinimumArgumentCount() == 1 || f->arguments().size() == 1 || f->isConversionOperator())
             && !f->isExplicit()
             && f->functionType() != AbstractMetaFunction::CopyConstructorFunction
-            && f->functionType() != AbstractMetaFunction::MoveConstructorFunction
+            && !f->usesRValueReferences()
             && !f->isModifiedRemoved()
             && (f->originalAttributes() & Public)) {
             returned += f;
