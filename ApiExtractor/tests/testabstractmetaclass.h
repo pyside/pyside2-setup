@@ -43,6 +43,7 @@ private slots:
     void testDefaultValues();
     void testModifiedDefaultValues();
     void testInnerClassOfAPolymorphicOne();
+    void testForwardDeclaredInnerClass();
     void testSpecialFunctions();
     void testClassDefaultConstructors();
     void testClassInheritedDefaultConstructors();

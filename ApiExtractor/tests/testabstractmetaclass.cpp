@@ -232,6 +232,32 @@ void TestAbstractMetaClass::testInnerClassOfAPolymorphicOne()
     QVERIFY(!classB->isPolymorphic());
 }
 
+void TestAbstractMetaClass::testForwardDeclaredInnerClass()
+{
+    const char cppCode[] ="\
+    class A {\n\
+        class B;\n\
+    };\n\
+    class A::B {\n\
+    public:\n\
+        void foo();\n\
+    };\n";
+    const char xmlCode[] = "\
+    <typesystem package=\"Foo\">\n\
+        <value-type name='A'/>\n\
+        <value-type name='A::B'/>\n\
+    </typesystem>\n";
+    TestUtil t(cppCode, xmlCode);
+    AbstractMetaClassList classes = t.builder()->classes();
+    QCOMPARE(classes.count(), 2);
+    const AbstractMetaClass *classA = classes.findClass(QLatin1String("A"));
+    QVERIFY(classA);
+    const AbstractMetaClass *classB = classes.findClass(QLatin1String("A::B"));
+    QVERIFY(classB);
+    const AbstractMetaFunction *fooF = classB->findFunction(QLatin1String("foo"));
+    QVERIFY(fooF);
+}
+
 void TestAbstractMetaClass::testSpecialFunctions()
 {
     const char cppCode[] ="\
