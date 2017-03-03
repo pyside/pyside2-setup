@@ -657,8 +657,13 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
             s << INDENT << "return " << (retType ? defaultReturnExpr : QString());
         } else {
             s << INDENT << "gil.release();" << endl;
-            s << INDENT << "return this->::" << func->implementingClass()->qualifiedCppName() << "::";
+            s << INDENT;
+            if (retType)
+                s << "return ";
+            s << "this->::" << func->implementingClass()->qualifiedCppName() << "::";
             writeFunctionCall(s, func, Generator::VirtualCall);
+            if (!retType)
+                s << ";\n" << INDENT << "return";
         }
     }
     s << ';' << endl;
