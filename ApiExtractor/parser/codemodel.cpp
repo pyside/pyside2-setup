@@ -251,12 +251,65 @@ bool TypeInfo::operator==(const TypeInfo &other)
 }
 
 #ifndef QT_NO_DEBUG_STREAM
+template <class It>
+void formatSequence(QDebug &d, It i1, It i2, const char *separator=", ")
+{
+    for (It i = i1; i != i2; ++i) {
+        if (i != i1)
+            d << separator;
+        d << *i;
+    }
+}
+
+void TypeInfo::formatDebug(QDebug &d) const
+{
+    d << '"';
+    formatSequence(d, m_qualifiedName.begin(), m_qualifiedName.end(), "\", \"");
+    d << '"';
+    if (m_constant)
+        d << ", [const]";
+    if (m_volatile)
+        d << ", [volatile]";
+    if (m_indirections)
+        d << ", indirections=" << m_indirections;
+    switch (m_referenceType) {
+    case NoReference:
+        break;
+    case LValueReference:
+        d << ", [ref]";
+        break;
+    case RValueReference:
+        d << ", [rvalref]";
+        break;
+    }
+    if (m_functionPointer) {
+        d << ", function ptr(";
+        formatSequence(d, m_arguments.begin(), m_arguments.end());
+        d << ')';
+    }
+    if (!m_arrayElements.isEmpty()) {
+        d << ", array[" << m_arrayElements.size() << "][";
+        formatSequence(d, m_arrayElements.begin(), m_arrayElements.end());
+        d << ']';
+    }
+}
+
 QDebug operator<<(QDebug d, const TypeInfo &t)
 {
     QDebugStateSaver s(d);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+    const int verbosity = d.verbosity();
+#else
+    const int verbosity = 0;
+#endif
     d.noquote();
     d.nospace();
-    d << "TypeInfo(" << t.toString() << ')';
+    d << "TypeInfo(";
+    if (verbosity > 2)
+        t.formatDebug(d);
+    else
+        d << t.toString();
+    d << ')';
     return d;
 }
 #endif // !QT_NO_DEBUG_STREAM
@@ -363,16 +416,6 @@ void _CodeModelItem::setEndPosition(int line, int column)
 
 #ifndef QT_NO_DEBUG_STREAM
 template <class It>
-void formatSequence(QDebug &d, It i1, It i2, const char *separator=", ")
-{
-    for (It i = i1; i != i2; ++i) {
-        if (i != i1)
-            d << separator;
-        d << *i;
-    }
-}
-
-template <class It>
 static void formatPtrSequence(QDebug &d, It i1, It i2, const char *separator=", ")
 {
     for (It i = i1; i != i2; ++i) {
@@ -413,7 +456,7 @@ void _CodeModelItem::formatKind(QDebug &d, int k)
         d << "NamespaceModelItem";
         break;
     case Kind_Variable:
-        d << "ScopeModelItem";
+        d << "VariableModelItem";
         break;
     case Kind_Scope:
         d << "ScopeModelItem";
@@ -1144,7 +1187,19 @@ void _MemberModelItem::setMutable(bool isMutable)
 void _MemberModelItem::formatDebug(QDebug &d) const
 {
     _CodeModelItem::formatDebug(d);
+    switch (m_accessPolicy) {
+    case CodeModel::Public:
+        d << ", public";
+        break;
+    case CodeModel::Protected:
+        d << ", protected";
+        break;
+    case CodeModel::Private:
+        d << ", private";
+        break;
+    }
     d << ", type=" << m_type;
+    formatScopeList(d, ", templateParameters", m_templateParameters);
 }
 #endif // !QT_NO_DEBUG_STREAM
 

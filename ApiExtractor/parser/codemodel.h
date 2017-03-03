@@ -184,6 +184,10 @@ public:
     static TypeInfo combine(const TypeInfo &__lhs, const TypeInfo &__rhs);
     static TypeInfo resolveType(TypeInfo const &__type, CodeModelItem __scope);
 
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const;
+#endif
+
 private:
     static TypeInfo resolveType(CodeModelItem item, TypeInfo const &__type, CodeModelItem __scope);
 
