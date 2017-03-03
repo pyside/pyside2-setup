@@ -268,7 +268,7 @@ void TestAbstractMetaClass::testSpecialFunctions()
     };\n\
     struct B {\n\
         B();\n\
-        B(B);\n\
+        B(const B &);\n\
         B &operator=(B);\n\
     };\n";
     const char xmlCode[] = "\
