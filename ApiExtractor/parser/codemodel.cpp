@@ -384,50 +384,65 @@ static void formatPtrSequence(QDebug &d, It i1, It i2, const char *separator=", 
 
 void _CodeModelItem::formatKind(QDebug &d, int k)
 {
-    if ((k & Kind_Variable) == Kind_Variable)
-        d << "Variable";
-    else if ((k & Kind_TypeDef) == Kind_TypeDef)
-        d << "TypeAlias";
-    else if ((k & Kind_TemplateParameter) == Kind_TemplateParameter)
-        d << "TemplateParameter";
-    else if ((k & Kind_FunctionDefinition) == Kind_FunctionDefinition)
-        d << "FunctionDefinition";
-    else if ((k & Kind_File) == Kind_File)
-        d << "File";
-    else if ((k & Kind_Enumerator) == Kind_Enumerator)
-        d << "Enumerator";
-    else if ((k & Kind_Enum) == Kind_Enum)
-        d << "Enum";
-    else if ((k & Kind_Class) == Kind_Class)
-        d << "Class";
-    else if ((k & Kind_Argument) == Kind_Argument)
-        d << "Argument";
-    switch (k & KindMask) {
+    switch (k) {
+    case Kind_Argument:
+        d << "ArgumentModelItem";
+        break;
+    case Kind_Class:
+        d << "ClassModelItem";
+        break;
+    case Kind_Enum:
+        d << "EnumModelItem";
+        break;
+    case Kind_Enumerator:
+        d << "EnumeratorModelItem";
+        break;
+    case Kind_File:
+        d << "FileModelItem";
+        break;
     case Kind_Function:
-        d << "/Function";
+        d << "FunctionModelItem";
+        break;
+    case Kind_FunctionDefinition:
+        d << "FunctionDefinitionModelItem";
         break;
     case Kind_Member:
-        d << "/Member";
+        d << "MemberModelItem";
         break;
     case Kind_Namespace:
-        d << "/Namespace";
+        d << "NamespaceModelItem";
+        break;
+    case Kind_Variable:
+        d << "ScopeModelItem";
         break;
     case Kind_Scope:
-        d << "/Scope";
+        d << "ScopeModelItem";
+        break;
+    case Kind_TemplateParameter:
+        d << "TemplateParameter";
+        break;
+    case Kind_TypeDef:
+        d << "TypeDefModelItem";
+        break;
+    default:
+        d << "CodeModelItem";
         break;
     }
 }
 
 void _CodeModelItem::formatDebug(QDebug &d) const
 {
-    _CodeModelItem::formatKind(d, kind());
-     d << ", \"" << name() << '"';
+     d << "(\"" << name() << '"';
      if (!m_scope.isEmpty()) {
          d << ", scope=";
          formatSequence(d, m_scope.cbegin(), m_scope.cend(), "::");
      }
-     if (!m_fileName.isEmpty())
-         d << ", file=\"" << QDir::toNativeSeparators(m_fileName) << '"';
+     if (!m_fileName.isEmpty()) {
+         d << ", file=\"" << QDir::toNativeSeparators(m_fileName);
+         if (m_startLine > 0)
+              d << ':' << m_startLine;
+         d << '"';
+     }
 }
 
 QDebug operator<<(QDebug d, const _CodeModelItem *t)
@@ -435,11 +450,20 @@ QDebug operator<<(QDebug d, const _CodeModelItem *t)
     QDebugStateSaver s(d);
     d.noquote();
     d.nospace();
-    d << "CodeModelItem(";
-    if (t)
-        t->formatDebug(d);
-    else
-        d << '0';
+    if (!t) {
+        d << "CodeModelItem(0)";
+        return d;
+    }
+    _CodeModelItem::formatKind(d, t->kind());
+    t->formatDebug(d);
+    switch (t->kind()) {
+    case  _CodeModelItem::Kind_Class:
+        d << " /* class " << t->name() << " */";
+        break;
+    case  _CodeModelItem::Kind_Namespace:
+        d << " /* namespace " << t->name() << " */";
+        break;
+    }
     d << ')';
     return d;
 }
@@ -497,13 +521,14 @@ void _ClassModelItem::addPropertyDeclaration(const QString &propertyDeclaration)
 
 #ifndef QT_NO_DEBUG_STREAM
 template <class List>
-static void formatModelItemList(QDebug &d, const char *prefix, const List &l)
+static void formatModelItemList(QDebug &d, const char *prefix, const List &l,
+                                const char *separator = ", ")
 {
     if (const int size = l.size()) {
         d << prefix << '[' << size << "](";
         for (int i = 0; i < size; ++i) {
             if (i)
-                d << ", ";
+                d << separator;
             l.at(i)->formatDebug(d);
         }
         d << ')';
@@ -584,7 +609,9 @@ void _ScopeModelItem::addEnum(EnumModelItem item)
 
 #ifndef QT_NO_DEBUG_STREAM
 template <class Hash>
-static void formatScopeHash(QDebug &d, const char *prefix, const Hash &h)
+static void formatScopeHash(QDebug &d, const char *prefix, const Hash &h,
+                            const char *separator = ", ",
+                            bool trailingNewLine = false)
 {
     typedef typename Hash::ConstIterator HashIterator;
     if (!h.isEmpty()) {
@@ -593,30 +620,36 @@ static void formatScopeHash(QDebug &d, const char *prefix, const Hash &h)
         const HashIterator end = h.end();
         for (HashIterator it = begin; it != end; ++it) { // Omit the names as they are repeated
             if (it != begin)
-                d << ", ";
+                d << separator;
             d << it.value().data();
         }
         d << ')';
+        if (trailingNewLine)
+            d << '\n';
     }
 }
 
 template <class List>
-static void formatScopeList(QDebug &d, const char *prefix, const List &l)
+static void formatScopeList(QDebug &d, const char *prefix, const List &l,
+                            const char *separator = ", ",
+                            bool trailingNewLine = false)
 {
     if (!l.isEmpty()) {
         d << prefix << '[' << l.size() << "](";
-        formatPtrSequence(d, l.begin(), l.end());
+        formatPtrSequence(d, l.begin(), l.end(), separator);
         d << ')';
+        if (trailingNewLine)
+            d << '\n';
     }
 }
 
 void _ScopeModelItem::formatScopeItemsDebug(QDebug &d) const
 {
-    formatScopeList(d, ", classes=", m_classes);
-    formatScopeList(d, ", enums=", m_enums);
-    formatScopeList(d, ", aliases=", m_typeDefs);
-    formatScopeHash(d, ", functionDefs=", m_functionDefinitions);
-    formatScopeHash(d, ", functions=", m_functions);
+    formatScopeList(d, ", classes=", m_classes, "\n", true);
+    formatScopeList(d, ", enums=", m_enums, "\n", true);
+    formatScopeList(d, ", aliases=", m_typeDefs, "\n", true);
+    formatScopeHash(d, ", functionDefs=", m_functionDefinitions, "\n", true);
+    formatScopeHash(d, ", functions=", m_functions, "\n", true);
     formatScopeList(d, ", variables=", m_variables);
 }
 

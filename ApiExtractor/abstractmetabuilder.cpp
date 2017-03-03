@@ -3256,7 +3256,8 @@ void AbstractMetaBuilderPrivate::setInclude(TypeEntry *te, const QString &fileNa
 
 #ifndef QT_NO_DEBUG_STREAM
 template <class Container>
-static void debugFormatSequence(QDebug &d, const char *key, const Container& c)
+static void debugFormatSequence(QDebug &d, const char *key, const Container& c,
+                                const char *separator = ", ")
 {
     typedef typename Container::const_iterator ConstIt;
     if (c.isEmpty())
@@ -3266,7 +3267,7 @@ static void debugFormatSequence(QDebug &d, const char *key, const Container& c)
     d << "\n  " << key << '[' << c.size() << "]=(";
     for (ConstIt it = begin; it != end; ++it) {
         if (it != begin)
-            d << ", ";
+            d << separator;
         d << *it;
     }
     d << ')';
@@ -3274,12 +3275,22 @@ static void debugFormatSequence(QDebug &d, const char *key, const Container& c)
 
 void AbstractMetaBuilder::formatDebug(QDebug &debug) const
 {
-    debug << "classCount=" << d->m_metaClasses.size()
-        << ", m_globalHeader=" << d->m_globalHeader.absoluteFilePath();
+    debug << "m_globalHeader=" << d->m_globalHeader.absoluteFilePath();
     debugFormatSequence(debug, "qtMetaTypeDeclaredTypeNames", d->m_qmetatypeDeclaredTypenames);
-    debugFormatSequence(debug, "globalEnums", d->m_globalEnums);
-    debugFormatSequence(debug, "globalFunctions", d->m_globalFunctions);
-    debugFormatSequence(debug, "classes", d->m_metaClasses);
+    debugFormatSequence(debug, "globalEnums", d->m_globalEnums, "\n");
+    debugFormatSequence(debug, "globalFunctions", d->m_globalFunctions, "\n");
+    if (const int scopeCount = d->m_scopes.size()) {
+        debug << "\n  scopes[" << scopeCount << "]=(";
+        for (int i = 0; i < scopeCount; ++i) {
+            if (i)
+                debug << ", ";
+            _CodeModelItem::formatKind(debug, d->m_scopes.at(i)->kind());
+            debug << " \"" << d->m_scopes.at(i)->name() << '"';
+        }
+        debug << ')';
+    }
+    debugFormatSequence(debug, "classes", d->m_metaClasses, "\n");
+    debugFormatSequence(debug, "templates", d->m_templates, "\n");
 }
 
 QDebug operator<<(QDebug d, const AbstractMetaBuilder &ab)
