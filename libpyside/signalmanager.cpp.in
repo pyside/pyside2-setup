@@ -515,24 +515,28 @@ int SignalManager::qt_metacall(QObject* object, QMetaObject::Call call, int id, 
 #endif
                     PyObject *errType, *errValue, *errTraceback;
                     PyErr_Fetch(&errType, &errValue, &errTraceback);
+                    // PYSIDE-464: The error is only valid before PyErr_Restore,
+                    // PYSIDE-464: therefore we take local copies.
+                    Shiboken::AutoDecRef objStr(PyObject_Str(errValue));
+                    const QString errString = QLatin1String(Shiboken::String::toCString(objStr));
+                    const bool isSyntaxError = errType == PyExc_SyntaxError;
+                    const bool isTypeError = errType == PyExc_TypeError;
                     PyErr_Restore(errType, errValue, errTraceback);
 
-                    const QString errString = QLatin1String(Shiboken::String::toCString(PyObject_Str(errValue)));
-
-                    PyErr_Print();
+                    PyErr_Print();    // Note: PyErr_Print clears the error.
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
-                    if (errType == PyExc_SyntaxError) {
+                    if (isSyntaxError) {
                         return engine->throwSyntaxError(errString);
-                    } else if (errType == PyExc_TypeError) {
+                    } else if (isTypeError) {
                         return engine->throwTypeError(errString);
                     } else {
                         return engine->throwError(errString);
                     }
 #else
-                    if (errType == PyExc_SyntaxError) {
+                    if (isSyntaxError) {
                         return ctx->throwSyntaxError(errString);
-                    } else if (errType == PyExc_TypeError) {
+                    } else if (isTypeError) {
                         return ctx->throwTypeError(errString);
                     } else {
                         return ctx->throwError(errString);
