@@ -47,6 +47,9 @@ int main(int argc, char **argv)
     parser.setApplicationDescription(QStringLiteral("Code model tester"));
     parser.addHelpOption();
     parser.addVersionOption();
+    QCommandLineOption verboseOption(QStringLiteral("d"),
+                                     QStringLiteral("Display verbose output about types"));
+    parser.addOption(verboseOption);
     parser.addPositionalArgument(QStringLiteral("file"), QStringLiteral("C++ source file"));
 
     parser.process(app);
@@ -68,8 +71,12 @@ int main(int argc, char **argv)
         return -2;
 
     QString output;
-    QDebug(&output) << dom.data();
-
+    {
+        QDebug debug(&output);
+        if (parser.isSet(verboseOption))
+            debug.setVerbosity(3);
+        debug << dom.data();
+    }
     std::cout << qPrintable(output) << '\n';
 
     return 0;
