@@ -437,6 +437,12 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction*
         return value;
 
     static QRegExp enumValueRegEx(QLatin1String("^([A-Za-z_]\\w*)?$"));
+    // Do not qualify macros by class name, eg QSGGeometry(..., int t = GL_UNSIGNED_SHORT);
+    static QRegExp macroRegEx(QLatin1String("^[A-Z_][A-Z0-9_]*$"));
+    Q_ASSERT(macroRegEx.isValid());
+    if (arg->type()->isPrimitive() && macroRegEx.exactMatch(value))
+        return value;
+
     QString prefix;
     QString suffix;
 
