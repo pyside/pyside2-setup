@@ -64,7 +64,9 @@
 #if @QML_SUPPORT@
     #include <private/qv4engine_p.h>
     #include <private/qv4context_p.h>
-    #include <private/qqmlcontextwrapper_p.h>
+#if QT_VERSION < 0x050700
+        #include <private/qqmlcontextwrapper_p.h>
+#endif
 #endif
 
 #if QSLOT_CODE != 1 || QSIGNAL_CODE != 2
