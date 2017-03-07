@@ -180,7 +180,8 @@ if(UNIX AND NOT APPLE)
   find_package(Qt5X11Extras) # new in Qt5, from QtGui
 endif()
 
-string(REGEX MATCHALL "[0-9]+" qt_version_helper "${Qt5Core_VERSION_STRING}")
+string(REGEX MATCHALL "[0-9]+" qt_version_helper "${Qt5Core_VERSION}")
+
 list(GET qt_version_helper 0 QT_VERSION_MAJOR)
 list(GET qt_version_helper 1 QT_VERSION_MINOR)
 unset(qt_version_helper)
