@@ -20,6 +20,11 @@ if(CMAKE_HOST_UNIX AND NOT CYGWIN)
     add_definitions(-fPIC)
 endif()
 add_definitions(-DQT_STATICPLUGIN)
+
+if(Qt5Core_VERSION VERSION_GREATER "5.7.1")
+    set_property(TARGET uiplugin PROPERTY CXX_STANDARD 11)
+endif()
+
 target_link_libraries(uiplugin
                       ${Qt5UiTools_LIBRARY}
                       ${SHIBOKEN_LIBRARY}

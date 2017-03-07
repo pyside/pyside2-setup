@@ -93,6 +93,10 @@ set_target_properties(pyside2 PROPERTIES
                       OUTPUT_NAME "pyside2${pyside2_SUFFIX}${SHIBOKEN_PYTHON_EXTENSION_SUFFIX}"
                       DEFINE_SYMBOL PYSIDE_EXPORTS)
 
+if(Qt5Core_VERSION VERSION_GREATER "5.7.1")
+    set_property(TARGET pyside2 PROPERTY CXX_STANDARD 11)
+endif()
+
 if(QML_SUPPORT)
     target_compile_definitions(pyside2 PUBLIC PYSIDE_QML_SUPPORT=1)
 endif()
