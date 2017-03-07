@@ -334,13 +334,12 @@ static inline void printVerAndBanner()
     std::cout << "Copyright (C) 2016 The Qt Company Ltd." << std::endl;
 }
 
-static inline void errorPrint(const QString& s,
-                              const bool& verAndBanner = false)
+static inline void errorPrint(const QString& s)
 {
-    if (verAndBanner)
-        printVerAndBanner();
-
-    std::cerr << s.toUtf8().constData() << std::endl;
+    QStringList arguments = QCoreApplication::arguments();
+    arguments.pop_front();
+    std::cerr << "shiboken: " << qPrintable(s)
+        << "\nCommand line: " << qPrintable(arguments.join(QLatin1Char(' '))) << '\n';
 }
 
 int main(int argc, char *argv[])
@@ -371,13 +370,13 @@ int main(int argc, char *argv[])
     if (generatorSet == QLatin1String("qtdoc")) {
         generators = docGenerators();
         if (generators.isEmpty()) {
-            errorPrint(QLatin1String("shiboken: Doc strings extractions was not enabled in this shiboken build."));
+            errorPrint(QLatin1String("Doc strings extractions was not enabled in this shiboken build."));
             return EXIT_FAILURE;
         }
     } else if (generatorSet.isEmpty() || generatorSet == QLatin1String("shiboken")) {
         generators = shibokenGenerators();
     } else {
-        errorPrint(QLatin1String("shiboken: Unknown generator set, try \"shiboken\" or \"qtdoc\"."));
+        errorPrint(QLatin1String("Unknown generator set, try \"shiboken\" or \"qtdoc\"."));
         return EXIT_FAILURE;
     }
 
@@ -488,8 +487,10 @@ int main(int argc, char *argv[])
 
     extractor.setCppFileName(cppFileName);
     extractor.setTypeSystem(typeSystemFileName);
-    if (!extractor.run())
+    if (!extractor.run()) {
+        errorPrint(QLatin1String("Error running ApiExtractor."));
         return EXIT_FAILURE;
+    }
 
     if (!extractor.classCount())
         qCWarning(lcShiboken) << "No C++ classes found!";
@@ -500,8 +501,11 @@ int main(int argc, char *argv[])
         g->setOutputDirectory(outputDirectory);
         g->setLicenseComment(licenseComment);
          if (g->setup(extractor, args)) {
-             if (!g->generate())
+             if (!g->generate()) {
+                 errorPrint(QLatin1String("Error running generator: ")
+                            + QLatin1String(g->name()) + QLatin1Char('.'));
                  return EXIT_FAILURE;
+             }
          }
     }
 
