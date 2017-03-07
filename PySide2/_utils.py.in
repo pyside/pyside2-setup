@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2017 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of PySide2.
@@ -242,7 +242,7 @@ def register_qt_conf(prefix, binaries, plugins, imports, translations,
     else:
         # Check if required Qt libs exists in binaries folder
         if sys.platform == 'win32':
-            pattern = ["QtCore*.dll"]
+            pattern = ["Qt5Core*.dll"]
         else:
             pattern = ["libQtCore.so.*"]
         if not _dir_contains(binaries, pattern):
@@ -278,6 +278,8 @@ def register_qt_conf(prefix, binaries, plugins, imports, translations,
     if QtCore.QFile.exists(":/qt/etc/qt.conf") and not force:
         return
 
+    # Keep these variables alive
+    global rc_struct, rc_name, rc_data
     rc_struct, rc_name, rc_data = _get_qt_conf_resource(prefix, binaries,
                                                         plugins, imports,
                                                         translations)
