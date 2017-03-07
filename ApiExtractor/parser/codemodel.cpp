@@ -1198,7 +1198,24 @@ void _MemberModelItem::formatDebug(QDebug &d) const
         d << ", private";
         break;
     }
-    d << ", type=" << m_type;
+    d << ", type=";
+    if (m_isConstant)
+        d << "const ";
+    if (m_isVolatile)
+        d << "volatile ";
+    if (m_isStatic)
+        d << "static ";
+    if (m_isAuto)
+        d << "auto ";
+    if (m_isFriend)
+        d << "friend ";
+    if (m_isRegister)
+        d << "register ";
+    if (m_isExtern)
+        d << "extern ";
+    if (m_isMutable)
+        d << "mutable ";
+    d << m_type;
     formatScopeList(d, ", templateParameters", m_templateParameters);
 }
 #endif // !QT_NO_DEBUG_STREAM
