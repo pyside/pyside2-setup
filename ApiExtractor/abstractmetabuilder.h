@@ -30,6 +30,7 @@
 #define ABSTRACTMETABUILDER_H
 
 #include "abstractmetalang_typedefs.h"
+#include "dependency.h"
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 
@@ -66,7 +67,8 @@ public:
     *   the list will be the module global classes.
     *   \return a list of classes sorted topologically
     */
-    AbstractMetaClassList classesTopologicalSorted(const AbstractMetaClass *cppClass = Q_NULLPTR) const;
+    AbstractMetaClassList classesTopologicalSorted(const AbstractMetaClass *cppClass = Q_NULLPTR,
+                                                   const Dependencies &additionalDependencies = Dependencies()) const;
 
     bool build(QIODevice* input);
     void setLogDirectory(const QString& logDir);

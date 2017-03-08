@@ -30,6 +30,7 @@
 #define GENERATOR_H
 
 #include <abstractmetalang_typedefs.h>
+#include <dependency.h>
 #include <QtCore/QObject>
 #include <QtCore/QSharedPointer>
 #include <QtCore/QTextStream>
@@ -120,7 +121,7 @@ public:
     ///
     /// The classes are ordered such that derived classes appear later in the list than
     /// their parent classes.
-    AbstractMetaClassList classesTopologicalSorted() const;
+    AbstractMetaClassList classesTopologicalSorted(const Dependencies &additionalDependencies = Dependencies()) const;
 
     /// Returns all global functions found by APIExtractor
     AbstractMetaFunctionList globalFunctions() const;

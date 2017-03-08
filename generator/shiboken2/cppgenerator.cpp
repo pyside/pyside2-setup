@@ -4691,6 +4691,9 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
     s << '}' << endl;
 }
 
+static inline QString qObjectClassName() { return QStringLiteral("QObject"); }
+static inline QString qMetaObjectClassName() { return QStringLiteral("QMetaObject"); }
+
 bool CppGenerator::finishGeneration()
 {
     //Generate CPython wrapper file
@@ -4727,14 +4730,16 @@ bool CppGenerator::finishGeneration()
 
     //this is a temporary solution before new type revison implementation
     //We need move QMetaObject register before QObject
-    AbstractMetaClassList lst = classesTopologicalSorted();
-    AbstractMetaClass* klassQObject = lst.findClass(QLatin1String("QObject"));
-    AbstractMetaClass* klassQMetaObject = lst.findClass(QLatin1String("QMetaObject"));
-    if (klassQObject && klassQMetaObject) {
-        lst.removeAll(klassQMetaObject);
-        int indexOf = lst.indexOf(klassQObject);
-        lst.insert(indexOf, klassQMetaObject);
+    Dependencies additionalDependencies;
+    const AbstractMetaClassList &allClasses = classes();
+    if (allClasses.findClass(qObjectClassName()) != Q_NULLPTR
+        && allClasses.findClass(qMetaObjectClassName()) != Q_NULLPTR) {
+        Dependency dependency;
+        dependency.parent = qMetaObjectClassName();
+        dependency.child = qObjectClassName();
+        additionalDependencies.append(dependency);
     }
+    const AbstractMetaClassList lst = classesTopologicalSorted(additionalDependencies);
 
     foreach (const AbstractMetaClass* cls, lst) {
         if (!shouldGenerate(cls))

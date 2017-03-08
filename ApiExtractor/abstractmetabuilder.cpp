@@ -3126,7 +3126,8 @@ void AbstractMetaBuilderPrivate::dumpLog() const
     writeRejectLogFile(m_logDirectory + QLatin1String("mjb_rejected_fields.log"), m_rejectedFields);
 }
 
-AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const AbstractMetaClass *cppClass) const
+AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const AbstractMetaClass *cppClass,
+                                                                           const Dependencies &additionalDependencies) const
 {
     QLinkedList<int> unmappedResult;
     QHash<QString, int> map;
@@ -3144,6 +3145,18 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
     }
 
     Graph graph(map.count());
+
+    foreach (const Dependency &dep, additionalDependencies) {
+        const int parentIndex = map.value(dep.parent, -1);
+        const int childIndex = map.value(dep.child, -1);
+        if (parentIndex >= 0 && childIndex >= 0) {
+            graph.addEdge(parentIndex, childIndex);
+        } else {
+            qCWarning(lcShiboken).noquote().nospace()
+                << "AbstractMetaBuilder::classesTopologicalSorted(): Invalid additional dependency: "
+                << dep.child << " -> " << dep.parent << '.';
+        }
+    }
 
     // TODO choose a better name to these regexs
     QRegExp regex1(QLatin1String("\\(.*\\)"));
@@ -3223,9 +3236,10 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
     return result;
 }
 
-AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const AbstractMetaClass *cppClass) const
+AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const AbstractMetaClass *cppClass,
+                                                                    const Dependencies &additionalDependencies) const
 {
-    return d->classesTopologicalSorted(cppClass);
+    return d->classesTopologicalSorted(cppClass, additionalDependencies);
 }
 
 AbstractMetaArgumentList AbstractMetaBuilderPrivate::reverseList(const AbstractMetaArgumentList &list)

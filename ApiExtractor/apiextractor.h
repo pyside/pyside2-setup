@@ -30,6 +30,7 @@
 #define APIEXTRACTOR_H
 
 #include "reporthandler.h"
+#include "dependency.h"
 #include "abstractmetalang_typedefs.h"
 #include "apiextractormacros.h"
 #include "typesystem_typedefs.h"
@@ -78,7 +79,7 @@ public:
     AbstractMetaEnumList globalEnums() const;
     AbstractMetaFunctionList globalFunctions() const;
     AbstractMetaClassList classes() const;
-    AbstractMetaClassList classesTopologicalSorted() const;
+    AbstractMetaClassList classesTopologicalSorted(const Dependencies &additionalDependencies = Dependencies()) const;
     PrimitiveTypeEntryList primitiveTypes() const;
     ContainerTypeEntryList containerTypes() const;
     QSet<QString> qtMetaTypeDeclaredTypeNames() const;
