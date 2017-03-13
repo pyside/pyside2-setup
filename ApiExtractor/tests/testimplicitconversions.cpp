@@ -50,8 +50,9 @@ void TestImplicitConversions::testWithPrivateCtors()
         <value-type name='B'/>\n\
         <value-type name='C'/>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.count(), 3);
 
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
@@ -79,8 +80,9 @@ void TestImplicitConversions::testWithModifiedVisibility()
         </value-type>\n\
         <value-type name='B'/>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.count(), 2);
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
@@ -111,8 +113,9 @@ void TestImplicitConversions::testWithAddedCtor()
         </value-type>\n\
         <value-type name='C'/>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.count(), 3);
 
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
@@ -137,8 +140,9 @@ void TestImplicitConversions::testWithExternalConversionOperator()
         <value-type name='A'/>\n\
         <value-type name='B'/>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.count(), 2);
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));

@@ -45,8 +45,9 @@ void TestTypeRevision::testRevisionAttr()
                         "    <enum-type name=\"Rev_5\" revision=\"5\" flags=\"Flag_5\" />"
                         "</object-type>"
                         "</typesystem>";
-    TestUtil t(cppCode, xmlCode);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* rev0 = classes.findClass(QLatin1String("Rev_0"));
     QCOMPARE(getTypeRevision(rev0->typeEntry()), 0);
 

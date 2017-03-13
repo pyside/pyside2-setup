@@ -46,8 +46,9 @@ void TestInsertTemplate::testInsertTemplateOnClassInjectCode()
             </inject-code>\n\
         </value-type>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.count(), 1);
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QVERIFY(classA);
@@ -68,8 +69,9 @@ void TestInsertTemplate::testInsertTemplateOnModuleInjectCode()
             <insert-template name='code_template'/>\n\
         </inject-code>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     QVERIFY(classes.isEmpty());
 
     TypeEntry* module = TypeDatabase::instance()->findType(QLatin1String("Foo"));
@@ -88,8 +90,9 @@ void TestInsertTemplate::testInvalidTypeSystemTemplate()
             <insert-template name='this_code_template_does_not_exists'/>\n\
         </inject-code>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     QVERIFY(classes.isEmpty());
 
     TypeEntry* module = TypeDatabase::instance()->findType(QLatin1String("Foo"));
@@ -112,8 +115,9 @@ void TestInsertTemplate::testValidAndInvalidTypeSystemTemplate()
             <insert-template name='code_template'/>\n\
         </inject-code>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     QVERIFY(classes.isEmpty());
 
     TypeEntry* module = TypeDatabase::instance()->findType(QLatin1String("Foo"));

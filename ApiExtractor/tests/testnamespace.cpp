@@ -49,8 +49,9 @@ void NamespaceTest::testNamespaceMembers()
             <enum-type name='Option' />\n\
         </namespace-type>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* ns = classes.findClass(QLatin1String("Namespace"));
     QVERIFY(ns);
     const AbstractMetaEnum* metaEnum = ns->findEnum(QLatin1String("Option"));
@@ -78,8 +79,9 @@ void NamespaceTest::testNamespaceInnerClassMembers()
             </namespace-type>\n\
         </namespace-type>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* ons = classes.findClass(QLatin1String("OuterNamespace"));
     QVERIFY(ons);
     AbstractMetaClass* ins = classes.findClass(QLatin1String("OuterNamespace::InnerNamespace"));

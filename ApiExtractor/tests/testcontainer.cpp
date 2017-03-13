@@ -50,8 +50,9 @@ void TestContainer::testContainerType()
         <object-type name='A'/>\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode, true);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.count(), 2);
     //search for class A
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
@@ -80,8 +81,9 @@ void TestContainer::testListOfValueType()
         <value-type name='A'/>\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode, true);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.count(), 3);
 
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));

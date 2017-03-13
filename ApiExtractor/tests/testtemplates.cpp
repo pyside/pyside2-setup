@@ -65,8 +65,9 @@ void TestTemplates::testTemplateWithNamespace()
         <value-type name='Internet::Bookmarks'/>\n\
     </typesystem>").arg(file.fileName());
 
-    TestUtil t(cppCode, qPrintable(xmlCode1), false);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, qPrintable(xmlCode1), false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
 
     AbstractMetaClass* classB = classes.findClass(QLatin1String("Bookmarks"));
     QVERIFY(classB);
@@ -99,8 +100,9 @@ void TestTemplates::testTemplateOnContainers()
         <object-type name='Namespace::B'/>\n\
     </typesystem>";
 
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
 
     AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
     QVERIFY(classB);
@@ -135,8 +137,9 @@ void TestTemplates::testTemplateValueAsArgument()
     </typesystem>\n\
     ";
 
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaFunctionList globalFuncs = t.builder()->globalFunctions();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaFunctionList globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.count(), 1);
 
     AbstractMetaFunction* func = globalFuncs.first();
@@ -159,8 +162,9 @@ void TestTemplates::testTemplatePointerAsArgument()
     </typesystem>\n\
     ";
 
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaFunctionList globalFuncs = t.builder()->globalFunctions();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaFunctionList globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.count(), 1);
 
     AbstractMetaFunction* func = globalFuncs.first();
@@ -183,8 +187,9 @@ void TestTemplates::testTemplateReferenceAsArgument()
     </typesystem>\n\
     ";
 
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaFunctionList globalFuncs = t.builder()->globalFunctions();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaFunctionList globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.count(), 1);
 
     AbstractMetaFunction* func = globalFuncs.first();
@@ -208,8 +213,9 @@ void TestTemplates::testTemplateParameterFixup()
         <value-type name='List::Iterator'/>\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode, false);
-    const AbstractMetaClassList templates = t.builder()->templates();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    const AbstractMetaClassList templates = builder->templates();
 
     QCOMPARE(templates.count(), 1);
     const AbstractMetaClass *list = templates.first();
@@ -248,9 +254,10 @@ void TestTemplates::testInheritanceFromContainterTemplate()
     </typesystem>\n\
     ";
 
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
-    AbstractMetaClassList templates = t.builder()->templates();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
+    AbstractMetaClassList templates = builder->templates();
     QCOMPARE(classes.count(), 2);
     QCOMPARE(templates.count(), 1);
 
@@ -283,8 +290,9 @@ void TestTemplates::testTemplateInheritanceMixedWithForwardDeclaration()
         <value-type name='Future' generate='no'/>\n\
     </typesystem>";
 
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
 
     AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
     QVERIFY(classB);
@@ -319,8 +327,9 @@ void TestTemplates::testTemplateInheritanceMixedWithNamespaceAndForwardDeclarati
         <value-type name='Namespace::Future' generate='no'/>\n\
     </typesystem>";
 
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
 
     AbstractMetaClass* classB = classes.findClass(QLatin1String("Namespace::B"));
     QVERIFY(classB);
@@ -355,8 +364,9 @@ void TestTemplates::testTypedefOfInstantiationOfTemplateClass()
     </typesystem>\n\
     ";
 
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.count(), 3);
 
     const AbstractMetaClass* base = classes.findClass(QLatin1String("BaseTemplateClass"));
@@ -403,8 +413,9 @@ void TestTemplates::testContainerTypeIncompleteArgument()
         <value-type name='IntVector'/>\n\
     </typesystem>";
 
-    TestUtil t(cppCode, xmlCode, true);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.count(), 1);
 
     AbstractMetaClass* vector = classes.findClass(QLatin1String("IntVector"));

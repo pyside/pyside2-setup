@@ -57,8 +57,9 @@ void TestNestedTypes::testNestedTypesModifications()
         </namespace-type>\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
 
     AbstractMetaClass* ons = classes.findClass(QLatin1String("OuterNamespace"));
     QVERIFY(ons);
@@ -104,8 +105,9 @@ void TestNestedTypes::testDuplicationOfNestedTypes()
         </namespace-type>\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.count(), 2);
     AbstractMetaClass* nspace = classes.findClass(QLatin1String("Namespace"));
     QVERIFY(nspace);

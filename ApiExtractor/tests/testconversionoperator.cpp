@@ -50,8 +50,9 @@ void TestConversionOperator::testConversionOperator()
         <value-type name='C'/>\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
     AbstractMetaClass* classC = classes.findClass(QLatin1String("C"));
@@ -87,8 +88,9 @@ void TestConversionOperator::testConversionOperatorOfDiscardedClass()
         <value-type name='A' />\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QVERIFY(classA);
     QCOMPARE(classA->externalConversionOperators().count(), 0);
@@ -110,8 +112,9 @@ void TestConversionOperator::testRemovedConversionOperator()
         </value-type>\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
     QVERIFY(classA);
@@ -135,8 +138,9 @@ void TestConversionOperator::testConversionOperatorReturningReference()
         <value-type name='B'/>\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
     QVERIFY(classA);
@@ -164,8 +168,9 @@ void TestConversionOperator::testConversionOperatorReturningConstReference()
         <value-type name='B'/>\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
     QVERIFY(classA);

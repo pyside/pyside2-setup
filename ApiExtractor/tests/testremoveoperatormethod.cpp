@@ -85,8 +85,9 @@ void TestRemoveOperatorMethod::testRemoveOperatorMethod()
             <modify-function signature='operator&gt;&gt;(String&amp;)' remove='all'/>\n\
         </object-type>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QVERIFY(classA);
     QCOMPARE(classA->functions().size(), 14);

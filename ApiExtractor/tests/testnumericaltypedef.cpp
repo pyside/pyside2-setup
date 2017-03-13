@@ -45,12 +45,13 @@ void TestNumericalTypedef::testNumericalTypedef()
         <function signature='funcDouble(double)'/>\n\
         <function signature='funcReal(real)'/>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode, false);
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
 
-    QCOMPARE(t.builder()->globalFunctions().size(), 2);
-    const AbstractMetaFunction* funcDouble = t.builder()->globalFunctions().first();
+    QCOMPARE(builder->globalFunctions().size(), 2);
+    const AbstractMetaFunction* funcDouble = builder->globalFunctions().first();
     QVERIFY(funcDouble);
-    const AbstractMetaFunction* funcReal = t.builder()->globalFunctions().last();
+    const AbstractMetaFunction* funcReal = builder->globalFunctions().last();
     QVERIFY(funcReal);
 
     if (funcDouble->name() == QLatin1String("funcReal"))
@@ -86,12 +87,13 @@ void TestNumericalTypedef::testUnsignedNumericalTypedef()
         <function signature='funcUnsignedShort(unsigned short)'/>\n\
         <function signature='funcUShort(ushort)'/>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode, false);
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
 
-    QCOMPARE(t.builder()->globalFunctions().size(), 2);
-    const AbstractMetaFunction* funcUnsignedShort = t.builder()->globalFunctions().first();
+    QCOMPARE(builder->globalFunctions().size(), 2);
+    const AbstractMetaFunction* funcUnsignedShort = builder->globalFunctions().first();
     QVERIFY(funcUnsignedShort);
-    const AbstractMetaFunction* funcUShort = t.builder()->globalFunctions().last();
+    const AbstractMetaFunction* funcUShort = builder->globalFunctions().last();
     QVERIFY(funcUShort);
 
     if (funcUnsignedShort->name() == QLatin1String("funcUShort"))

@@ -41,11 +41,12 @@ void TestFunctionTag::testFunctionTagForSpecificSignature()
         <primitive-type name='float'/>\n\
         <function signature='globalFunction(int)'/>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode, false);
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
 
     const TypeEntry *func = TypeDatabase::instance()->findType(QLatin1String("globalFunction"));
     QVERIFY(func);
-    QCOMPARE(t.builder()->globalFunctions().size(), 1);
+    QCOMPARE(builder->globalFunctions().size(), 1);
 }
 
 void TestFunctionTag::testFunctionTagForAllSignatures()
@@ -58,11 +59,12 @@ void TestFunctionTag::testFunctionTagForAllSignatures()
         <function signature='globalFunction(int)'/>\n\
         <function signature='globalFunction(float)'/>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode, false);
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
 
     const TypeEntry *func = TypeDatabase::instance()->findType(QLatin1String("globalFunction"));
     QVERIFY(func);
-    QCOMPARE(t.builder()->globalFunctions().size(), 2);
+    QCOMPARE(builder->globalFunctions().size(), 2);
 }
 
 void TestFunctionTag::testRenameGlobalFunction()
@@ -72,13 +74,14 @@ void TestFunctionTag::testRenameGlobalFunction()
     <typesystem package='Foo'>\n\
         <function signature='global_function_with_ugly_name()' rename='smooth'/>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode, false);
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
 
     const TypeEntry *func = TypeDatabase::instance()->findType(QLatin1String("global_function_with_ugly_name"));
     QVERIFY(func);
 
-    QCOMPARE(t.builder()->globalFunctions().size(), 1);
-    const AbstractMetaFunction* metaFunc = t.builder()->globalFunctions().first();
+    QCOMPARE(builder->globalFunctions().size(), 1);
+    const AbstractMetaFunction* metaFunc = builder->globalFunctions().first();
 
     QVERIFY(metaFunc);
     QCOMPARE(metaFunc->modifications().size(), 1);

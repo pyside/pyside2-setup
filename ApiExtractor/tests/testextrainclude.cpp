@@ -44,8 +44,9 @@ void TestExtraInclude::testClassExtraInclude()
         </value-type>\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QVERIFY(classA);
 
@@ -66,8 +67,9 @@ void TestExtraInclude::testGlobalExtraIncludes()
         <value-type name='A'/>\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     QVERIFY(classes.findClass(QLatin1String("A")));
 
     TypeDatabase* td = TypeDatabase::instance();

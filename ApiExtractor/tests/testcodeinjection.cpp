@@ -50,8 +50,9 @@ void TestCodeInjections::testReadFileUtf8()
         </value-type>\n\
         <value-type name='A::B'/>\n\
     </typesystem>\n");
-    TestUtil t(cppCode, xmlCode.toLocal8Bit().constData());
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode.toLocal8Bit().constData()));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QCOMPARE(classA->typeEntry()->codeSnips().count(), 1);
     QString code = classA->typeEntry()->codeSnips().first().code();
@@ -73,9 +74,9 @@ void TestCodeInjections::testInjectWithValidApiVersion()
         </value-type>\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode, true, "1.0");
-
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true, "1.0"));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QCOMPARE(classA->typeEntry()->codeSnips().count(), 1);
 }
@@ -92,9 +93,10 @@ void TestCodeInjections::testInjectWithInvalidApiVersion()
         </value-type>\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode, true, "0.1");
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true, "0.1"));
+    QVERIFY(!builder.isNull());
 
-    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QCOMPARE(classA->typeEntry()->codeSnips().count(), 0);
 }

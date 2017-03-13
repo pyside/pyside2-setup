@@ -47,8 +47,9 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByInteger()
         </object-type>\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClass* classA = t.builder()->classes().findClass(QLatin1String("A"));
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClass* classA = builder->classes().findClass(QLatin1String("A"));
     QVERIFY(classA);
 
     const AbstractMetaArgument* arg = classA->functions().last()->arguments().first();
@@ -72,8 +73,9 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()
         </object-type>\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClass* classA = t.builder()->classes().findClass(QLatin1String("A"));
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClass* classA = builder->classes().findClass(QLatin1String("A"));
     QVERIFY(classA);
 
     AbstractMetaEnum* someEnum = classA->findEnum(QLatin1String("SomeEnum"));
@@ -102,11 +104,12 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnu
         </object-type>\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClass* classA = t.builder()->classes().findClass(QLatin1String("A"));
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClass* classA = builder->classes().findClass(QLatin1String("A"));
     QVERIFY(classA);
 
-    AbstractMetaEnum* someEnum = t.builder()->globalEnums().first();
+    AbstractMetaEnum* someEnum = builder->globalEnums().first();
     QVERIFY(someEnum);
     AbstractMetaEnumValue* nvalues = 0;
     foreach (AbstractMetaEnumValue* enumValue, someEnum->values()) {

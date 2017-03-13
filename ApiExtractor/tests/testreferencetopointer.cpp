@@ -44,8 +44,9 @@ void TestReferenceToPointer::testReferenceToPointerArgument()
         <object-type name='A'/>\n\
         <object-type name='B'/>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
     QVERIFY(classB);
     const AbstractMetaFunction* func = classB->findFunction(QLatin1String("dummy"));

@@ -51,8 +51,9 @@ void TestResolveType::testResolveReturnTypeFromParentScope()
         <value-type name='A::B::C'/>\n\
         <value-type name='A::D'/>\n\
     </typesystem>";
-    TestUtil t(cppCode, xmlCode, false);
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* classD = classes.findClass(QLatin1String("A::D"));
     QVERIFY(classD);
     const AbstractMetaFunction* meth = classD->findFunction(QLatin1String("method"));

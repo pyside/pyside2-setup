@@ -42,9 +42,10 @@ void TestPrimitiveTypeTag::testPrimitiveTypeDefaultConstructor()
         <primitive-type name='A' default-constructor='A()'/>\n\
         <object-type name='B'/>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode, false);
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
 
-    AbstractMetaClassList classes = t.builder()->classes();
+    AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.count(), 1);
     AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
     QVERIFY(classB);

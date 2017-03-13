@@ -48,9 +48,9 @@ void TestModifyDocumentation::testModifyDocumentation()
     </modify-documentation>\n\
     </value-type>\n\
     </typesystem>\n";
-    TestUtil t(cppCode, xmlCode);
-
-    AbstractMetaClass* classA = t.builder()->classes().findClass(QLatin1String("A"));
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClass *classA = builder->classes().findClass(QLatin1String("A"));
     QVERIFY(classA);
     DocModificationList docMods = classA->typeEntry()->docModifications();
     QCOMPARE(docMods.count(), 1);

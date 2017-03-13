@@ -50,8 +50,9 @@ void TestConversionRuleTag::testConversionRuleTagWithFile()
             <conversion-rule file='") + file.fileName() + QLatin1String("'/>\n\
         </value-type>\n\
     </typesystem>\n");
-    TestUtil t(cppCode, xmlCode.toLocal8Bit().data());
-    AbstractMetaClassList classes = t.builder()->classes();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode.toLocal8Bit().data()));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
     QVERIFY(classA);
     const ComplexTypeEntry* typeEntry = classA->typeEntry();
@@ -97,7 +98,8 @@ void TestConversionRuleTag::testConversionRuleTagReplace()
         <value-type name='B'/>\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode);
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
     TypeDatabase* typeDb = TypeDatabase::instance();
     PrimitiveTypeEntry* typeA = typeDb->findPrimitiveType(QLatin1String("A"));
     QVERIFY(typeA);
@@ -163,8 +165,9 @@ if (!TargetDateTimeAPI) TargetDateTime_IMPORT;\n\
         </value-type>\n\
     </typesystem>\n";
 
-    TestUtil t(cppCode, xmlCode);
-    AbstractMetaClass* classA = t.builder()->classes().findClass(QLatin1String("Date"));
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClass* classA = builder->classes().findClass(QLatin1String("Date"));
     QVERIFY(classA);
 
     CustomConversion* conversion = classA->typeEntry()->customConversion();
@@ -222,7 +225,8 @@ void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
     "%OUT = %IN.createA();\n"
     "// TEMPLATE - target_to_native - END";
 
-    TestUtil t(cppCode, xmlCode);
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
     TypeDatabase* typeDb = TypeDatabase::instance();
     PrimitiveTypeEntry* typeA = typeDb->findPrimitiveType(QLatin1String("A"));
     QVERIFY(typeA);
