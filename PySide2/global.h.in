@@ -366,6 +366,8 @@ namespace QtPrivate {
 
 QT_END_NAMESPACE
 
+// This Q_QDOC definition is only a convenience, since the shiboken parser is
+// happier with the simplified constructions. XXX remove this for Qt 5.7.
 #define Q_QDOC
 
 #if @ENABLE_X11@
@@ -390,6 +392,12 @@ QT_END_NAMESPACE
 #endif
 #include <QtGui/QtGui>
 #include <QtWidgets/QtWidgets>
+#ifndef Q_QDOC
+// Make sure that Q_QDOC is defined for as much modules as possible.
+// This creates more wrappers without extra work.
+// Will disappear when we have a really good parser!
+#  define Q_QDOC
+#endif
 #include <QtOpenGL/QtOpenGL>
 #include "qpytextobject.h"  // PySide class
 #if @ENABLE_X11@
