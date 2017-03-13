@@ -74,7 +74,7 @@ import subprocess
 import zipfile
 import argparse
 
-from six import PY3
+PY3 = sys.version_info[0] == 3  # from the six module
 from subprocess import PIPE
 if PY3:
     from subprocess import TimeoutExpired
@@ -794,10 +794,10 @@ if __name__ == '__main__':
               .format(*r))
         print("********* Finished testing of %s *********" % project)
         print()
-        q = map(lambda x, y: x+y, r, q)
+        q = list(map(lambda x, y: x+y, r, q))
 
     if len(args.projects) > 1:
-        print("All above projects:", sum(r), "tests.",
+        print("All above projects:", sum(q), "tests.",
               "{} passed, {} failed, {} skipped, {} blacklisted, {} bpassed."
               .format(*q))
         print()
