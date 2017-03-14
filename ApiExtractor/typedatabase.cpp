@@ -570,34 +570,6 @@ bool TypeDatabase::checkApiVersion(const QString& package, const QByteArray& ver
 }
 
 #ifndef QT_NO_DEBUG_STREAM
-void TypeDatabase::formatDebug(QDebug &d) const
-{
-    typedef TypeEntryHash::ConstIterator Eit;
-    typedef TemplateEntryHash::ConstIterator TplIt;
-    d << "TypeDatabase("
-      << "entries=";
-    for (Eit it = m_entries.cbegin(), end = m_entries.cend(); it != end; ++it) {
-        d << '"' << it.key() << "\": [";
-        for (int t = 0, cnt = it.value().size(); t < cnt; ++t) {
-            if (t)
-                d << ", ";
-            d << it.value().at(t);
-        }
-        d << "]\n";
-    }
-    if (!m_templates.isEmpty()) {
-        d << "templates=[";
-        const TplIt begin = m_templates.cbegin();
-        for (TplIt it = begin, end = m_templates.cend(); it != end; ++it) {
-            if (it != begin)
-                d << ", ";
-            d << it.value();
-        }
-        d << "]\n";
-    }
-    d <<"\nglobalUserFunctions=" << m_globalUserFunctions << ')';
-}
-
 QDebug operator<<(QDebug d, const TypeEntry *te)
 {
     QDebugStateSaver saver(d);
@@ -622,6 +594,61 @@ QDebug operator<<(QDebug d, const TypeEntry *te)
     }
     d << ')';
     return d;
+}
+
+QDebug operator<<(QDebug d, const TemplateEntry *te)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "TemplateEntry(";
+    if (te) {
+        d << '"' << te->name() << "\", version=" << te->version();
+    } else {
+        d << '0';
+    }
+    d << ')';
+    return d;
+}
+
+void TypeDatabase::formatDebug(QDebug &d) const
+{
+    typedef TypeEntryHash::ConstIterator Eit;
+    typedef SingleTypeEntryHash::ConstIterator Sit;
+    typedef TemplateEntryHash::ConstIterator TplIt;
+    d << "TypeDatabase("
+      << "entries[" << m_entries.size() << "]=";
+    for (Eit it = m_entries.cbegin(), end = m_entries.cend(); it != end; ++it) {
+        const int count = it.value().size();
+        d << '"' << it.key() << "\" [" << count << "]: (";
+        for (int t = 0; t < count; ++t) {
+            if (t)
+                d << ", ";
+            d << it.value().at(t);
+        }
+        d << ")\n";
+    }
+    if (!m_templates.isEmpty()) {
+        d << "templates[" << m_templates.size() << "]=(";
+        const TplIt begin = m_templates.cbegin();
+        for (TplIt it = begin, end = m_templates.cend(); it != end; ++it) {
+            if (it != begin)
+                d << ", ";
+            d << it.value();
+        }
+        d << ")\n";
+    }
+    if (!m_flagsEntries.isEmpty()) {
+        d << "flags[" << m_flagsEntries.size() << "]=(";
+        const Sit begin = m_flagsEntries.cbegin();
+        for (Sit it = begin, end = m_flagsEntries.cend(); it != end; ++it) {
+            if (it != begin)
+                d << ", ";
+            d << it.value();
+        }
+        d << ")\n";
+    }
+    d <<"\nglobalUserFunctions=" << m_globalUserFunctions << ')';
 }
 
 QDebug operator<<(QDebug d, const TypeDatabase &db)
