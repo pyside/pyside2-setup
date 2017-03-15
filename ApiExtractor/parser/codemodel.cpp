@@ -446,9 +446,6 @@ void _CodeModelItem::formatKind(QDebug &d, int k)
     case Kind_Function:
         d << "FunctionModelItem";
         break;
-    case Kind_FunctionDefinition:
-        d << "FunctionDefinitionModelItem";
-        break;
     case Kind_Member:
         d << "MemberModelItem";
         break;
@@ -615,11 +612,6 @@ void _ScopeModelItem::addEnumsDeclaration(const QString &enumsDeclaration)
     m_enumsDeclarations << enumsDeclaration;
 }
 
-FunctionDefinitionList _ScopeModelItem::functionDefinitions() const
-{
-    return m_functionDefinitions.values();
-}
-
 void _ScopeModelItem::addClass(ClassModelItem item)
 {
     m_classes.append(item);
@@ -628,11 +620,6 @@ void _ScopeModelItem::addClass(ClassModelItem item)
 void _ScopeModelItem::addFunction(FunctionModelItem item)
 {
     m_functions.insert(item->name(), item);
-}
-
-void _ScopeModelItem::addFunctionDefinition(FunctionDefinitionModelItem item)
-{
-    m_functionDefinitions.insert(item->name(), item);
 }
 
 void _ScopeModelItem::addVariable(VariableModelItem item)
@@ -691,7 +678,6 @@ void _ScopeModelItem::formatScopeItemsDebug(QDebug &d) const
     formatScopeList(d, ", classes=", m_classes, "\n", true);
     formatScopeList(d, ", enums=", m_enums, "\n", true);
     formatScopeList(d, ", aliases=", m_typeDefs, "\n", true);
-    formatScopeHash(d, ", functionDefs=", m_functionDefinitions, "\n", true);
     formatScopeHash(d, ", functions=", m_functions, "\n", true);
     formatScopeList(d, ", variables=", m_variables);
 }
@@ -751,11 +737,6 @@ EnumModelItem _ScopeModelItem::findEnum(const QString &name) const
 FunctionList _ScopeModelItem::findFunctions(const QString &name) const
 {
     return m_functions.values(name);
-}
-
-FunctionDefinitionList _ScopeModelItem::findFunctionDefinitions(const QString &name) const
-{
-    return m_functionDefinitions.values(name);
 }
 
 // ---------------------------------------------------------------------------
@@ -930,10 +911,6 @@ bool _FunctionModelItem::isInvokable() const
 void _FunctionModelItem::setInvokable(bool isInvokable)
 {
     m_isInvokable = isInvokable;
-}
-
-_FunctionDefinitionModelItem::~_FunctionDefinitionModelItem()
-{
 }
 
 #ifndef QT_NO_DEBUG_STREAM

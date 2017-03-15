@@ -233,7 +233,6 @@ public:
         Kind_Enum = 3 << FirstKind,
         Kind_Enumerator = 4 << FirstKind,
         Kind_File = 5 << FirstKind | Kind_Namespace,
-        Kind_FunctionDefinition = 6 << FirstKind | Kind_Function,
         Kind_TemplateParameter = 7 << FirstKind,
         Kind_TypeDef = 8 << FirstKind,
         Kind_Variable = 9 << FirstKind | Kind_Member
@@ -299,7 +298,6 @@ public:
 
     ClassList classes() const { return m_classes; }
     EnumList enums() const { return m_enums; }
-    FunctionDefinitionList functionDefinitions() const;
     FunctionList functions() const;
     TypeDefList typeDefs() const { return m_typeDefs; }
     VariableList variables() const { return m_variables; }
@@ -307,13 +305,11 @@ public:
     void addClass(ClassModelItem item);
     void addEnum(EnumModelItem item);
     void addFunction(FunctionModelItem item);
-    void addFunctionDefinition(FunctionDefinitionModelItem item);
     void addTypeDef(TypeDefModelItem item);
     void addVariable(VariableModelItem item);
 
     ClassModelItem findClass(const QString &name) const;
     EnumModelItem findEnum(const QString &name) const;
-    FunctionDefinitionList findFunctionDefinitions(const QString &name) const;
     FunctionList findFunctions(const QString &name) const;
     TypeDefModelItem findTypeDef(const QString &name) const;
     VariableModelItem findVariable(const QString &name) const;
@@ -321,7 +317,6 @@ public:
     void addEnumsDeclaration(const QString &enumsDeclaration);
     QStringList enumsDeclarations() const { return m_enumsDeclarations; }
 
-    inline QMultiHash<QString, FunctionDefinitionModelItem> functionDefinitionMap() const { return m_functionDefinitions; }
     inline QMultiHash<QString, FunctionModelItem> functionMap() const { return m_functions; }
 
     FunctionModelItem declaredFunction(FunctionModelItem item);
@@ -345,7 +340,6 @@ private:
     EnumList m_enums;
     TypeDefList m_typeDefs;
     VariableList m_variables;
-    QMultiHash<QString, FunctionDefinitionModelItem> m_functionDefinitions;
     QMultiHash<QString, FunctionModelItem> m_functions;
 
 private:
@@ -583,18 +577,6 @@ private:
         };
         uint m_flags;
     };
-};
-
-class _FunctionDefinitionModelItem: public _FunctionModelItem
-{
-public:
-    DECLARE_MODEL_NODE(FunctionDefinition)
-
-    explicit _FunctionDefinitionModelItem(CodeModel *model, int kind = __node_kind)
-        : _FunctionModelItem(model, kind) {}
-    explicit _FunctionDefinitionModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
-        : _FunctionModelItem(model, name, kind) {}
-    ~_FunctionDefinitionModelItem();
 };
 
 class _VariableModelItem: public _MemberModelItem

@@ -93,7 +93,7 @@ private:
     CodeModel::AccessPolicy changeCurrentAccess(CodeModel::AccessPolicy accessPolicy);
     NamespaceModelItem changeCurrentNamespace(NamespaceModelItem item);
     ClassModelItem changeCurrentClass(ClassModelItem item);
-    FunctionDefinitionModelItem changeCurrentFunction(FunctionDefinitionModelItem item);
+    FunctionModelItem changeCurrentFunction(FunctionModelItem item);
     TemplateParameterList changeTemplateParameters(TemplateParameterList templateParameters);
 
     void declare_symbol(SimpleDeclarationAST *node, InitDeclaratorAST *init_declarator);
@@ -114,7 +114,7 @@ private:
     FileModelItem _M_current_file;
     NamespaceModelItem _M_current_namespace;
     ClassModelItem _M_current_class;
-    FunctionDefinitionModelItem _M_current_function;
+    FunctionModelItem _M_current_function;
     EnumModelItem _M_current_enum;
     QStringList _M_context;
     TemplateParameterList _M_current_template_parameters; // ### check me

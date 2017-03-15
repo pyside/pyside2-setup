@@ -123,9 +123,9 @@ ClassModelItem Binder::changeCurrentClass(ClassModelItem item)
     return old;
 }
 
-FunctionDefinitionModelItem Binder::changeCurrentFunction(FunctionDefinitionModelItem item)
+FunctionModelItem Binder::changeCurrentFunction(FunctionModelItem item)
 {
-    FunctionDefinitionModelItem old = _M_current_function;
+    FunctionModelItem old = _M_current_function;
     _M_current_function = item;
     return old;
 }
@@ -352,8 +352,8 @@ void Binder::visitFunctionDefinition(FunctionDefinitionAST *node)
 
     Q_ASSERT(!decl_cc.id().isEmpty());
 
-    FunctionDefinitionModelItem
-    old = changeCurrentFunction(FunctionDefinitionModelItem(new _FunctionDefinitionModelItem(_M_model)));
+    FunctionModelItem
+    old = changeCurrentFunction(FunctionModelItem(new _FunctionModelItem(_M_model)));
     _M_current_function->setScope(functionScope->qualifiedName());
     updateItemPosition(_M_current_function, node);
 
@@ -386,8 +386,6 @@ void Binder::visitFunctionDefinition(FunctionDefinitionAST *node)
             arg->setDefaultValueExpression(p.defaultValueExpression);
         _M_current_function->addArgument(arg);
     }
-
-    functionScope->addFunctionDefinition(_M_current_function);
 
     FunctionModelItem prototype = _M_current_function;
     FunctionModelItem declared = functionScope->declaredFunction(prototype);
