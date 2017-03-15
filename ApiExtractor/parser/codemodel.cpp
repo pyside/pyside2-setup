@@ -588,23 +588,16 @@ void _ClassModelItem::formatDebug(QDebug &d) const
 // ---------------------------------------------------------------------------
 FunctionModelItem _ScopeModelItem::declaredFunction(FunctionModelItem item)
 {
-    FunctionList function_list = findFunctions(item->name());
-
-    foreach(FunctionModelItem fun, function_list) {
-        if (fun->isSimilar(item))
+    foreach (const FunctionModelItem &fun, m_functions) {
+        if (fun->name() == item->name() && fun->isSimilar(item))
             return fun;
-    }
 
+    }
     return FunctionModelItem();
 }
 
 _ScopeModelItem::~_ScopeModelItem()
 {
-}
-
-FunctionList _ScopeModelItem::functions() const
-{
-    return m_functions.values();
 }
 
 void _ScopeModelItem::addEnumsDeclaration(const QString &enumsDeclaration)
@@ -619,7 +612,7 @@ void _ScopeModelItem::addClass(ClassModelItem item)
 
 void _ScopeModelItem::addFunction(FunctionModelItem item)
 {
-    m_functions.insert(item->name(), item);
+    m_functions.append(item);
 }
 
 void _ScopeModelItem::addVariable(VariableModelItem item)
@@ -678,7 +671,7 @@ void _ScopeModelItem::formatScopeItemsDebug(QDebug &d) const
     formatScopeList(d, ", classes=", m_classes, "\n", true);
     formatScopeList(d, ", enums=", m_enums, "\n", true);
     formatScopeList(d, ", aliases=", m_typeDefs, "\n", true);
-    formatScopeHash(d, ", functions=", m_functions, "\n", true);
+    formatScopeList(d, ", functions=", m_functions, "\n", true);
     formatScopeList(d, ", variables=", m_variables);
 }
 
@@ -736,7 +729,12 @@ EnumModelItem _ScopeModelItem::findEnum(const QString &name) const
 
 FunctionList _ScopeModelItem::findFunctions(const QString &name) const
 {
-    return m_functions.values(name);
+    FunctionList result;
+    foreach (const FunctionModelItem &func, m_functions) {
+        if (func->name() == name)
+            result.append(func);
+    }
+    return result;
 }
 
 // ---------------------------------------------------------------------------

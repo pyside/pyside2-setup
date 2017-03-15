@@ -298,7 +298,7 @@ public:
 
     ClassList classes() const { return m_classes; }
     EnumList enums() const { return m_enums; }
-    FunctionList functions() const;
+    inline FunctionList functions() const { return m_functions; }
     TypeDefList typeDefs() const { return m_typeDefs; }
     VariableList variables() const { return m_variables; }
 
@@ -316,8 +316,6 @@ public:
 
     void addEnumsDeclaration(const QString &enumsDeclaration);
     QStringList enumsDeclarations() const { return m_enumsDeclarations; }
-
-    inline QMultiHash<QString, FunctionModelItem> functionMap() const { return m_functions; }
 
     FunctionModelItem declaredFunction(FunctionModelItem item);
 
@@ -340,7 +338,7 @@ private:
     EnumList m_enums;
     TypeDefList m_typeDefs;
     VariableList m_variables;
-    QMultiHash<QString, FunctionModelItem> m_functions;
+    FunctionList m_functions;
 
 private:
     QStringList m_enumsDeclarations;

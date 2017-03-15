@@ -147,9 +147,9 @@ void writeOutClass(QXmlStreamWriter &s, const ClassModelItem &item)
     foreach (const EnumModelItem &e, enums)
         writeOutEnum(s, e);
 
-    const FunctionModelItemMap &functionMap = item->functionMap();
-    for (FunctionModelItemMap::const_iterator it = functionMap.cbegin(), end = functionMap.cend(); it != end; ++it)
-        writeOutFunction(s, it.value());
+    const FunctionList &functionList = item->functions();
+    foreach (const FunctionModelItem &func, functionList)
+        writeOutFunction(s, func);
 
     const ClassList &classList = item->classes();
     foreach (const ClassModelItem &c, classList)
