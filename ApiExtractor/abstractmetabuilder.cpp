@@ -180,7 +180,7 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
             QString name = signature.trimmed();
             name.truncate(name.indexOf(QLatin1Char('(')));
 
-            AbstractMetaClass* clazz = m_metaClasses.findClass(centry->qualifiedCppName());
+            AbstractMetaClass *clazz = AbstractMetaClass::findClass(m_metaClasses, centry->qualifiedCppName());
             if (!clazz)
                 continue;
 
@@ -215,7 +215,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::argumentToClass(ArgumentModelItem
     AbstractMetaType* type = translateType(argument->type(), &ok);
     if (ok && type && type->typeEntry() && type->typeEntry()->isComplex()) {
         const TypeEntry *entry = type->typeEntry();
-        returned = m_metaClasses.findClass(entry->name());
+        returned = AbstractMetaClass::findClass(m_metaClasses, entry->name());
     }
     delete type;
     return returned;
@@ -313,7 +313,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(FunctionModelItem item
             && (retType->isValue() || retType->isObject())
             && retType != baseoperandClass->typeEntry()
             && retType == otherArgClass->typeEntry()) {
-            baseoperandClass = m_metaClasses.findClass(retType);
+            baseoperandClass = AbstractMetaClass::findClass(m_metaClasses, retType);
             firstArgumentIsSelf = false;
         }
         delete type;
@@ -594,7 +594,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                 && !entry->isContainer()
                 && !entry->isCustom()
                 && !entry->isVariant()
-                && !m_metaClasses.findClass(entry->qualifiedCppName())) {
+                && !AbstractMetaClass::findClass(m_metaClasses, entry->qualifiedCppName())) {
                 qCWarning(lcShiboken).noquote().nospace()
                     << QStringLiteral("type '%1' is specified in typesystem, but not defined. This could potentially lead to compilation errors.")
                                       .arg(entry->qualifiedCppName());
@@ -616,7 +616,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                 }
             } else if (entry->isEnum()) {
                 const QString name = ((EnumTypeEntry*) entry)->targetLangQualifier();
-                AbstractMetaClass* cls = m_metaClasses.findClass(name);
+                AbstractMetaClass *cls = AbstractMetaClass::findClass(m_metaClasses, name);
 
                 bool enumFound = false;
                 if (cls) {
@@ -1334,9 +1334,9 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::currentTraversedClass(ScopeModelI
     if (m_currentClass)
         fullClassName = stripTemplateArgs(m_currentClass->typeEntry()->qualifiedCppName()) + colonColon() + fullClassName;
 
-    AbstractMetaClass* metaClass = m_metaClasses.findClass(fullClassName);
+    AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_metaClasses, fullClassName);
     if (!metaClass)
-        metaClass = m_templates.findClass(fullClassName);
+        metaClass = AbstractMetaClass::findClass(m_templates, fullClassName);
     return metaClass;
 }
 
@@ -1822,7 +1822,7 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
     }
 
     if (primary >= 0) {
-        AbstractMetaClass* baseClass = m_metaClasses.findClass(baseClasses.at(primary));
+        AbstractMetaClass *baseClass = AbstractMetaClass::findClass(m_metaClasses, baseClasses.at(primary));
         if (!baseClass) {
             qCWarning(lcShiboken).noquote().nospace()
                 << QStringLiteral("unknown baseclass for '%1': '%2'")
@@ -1837,7 +1837,7 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
             continue;
 
         if (i != primary) {
-            AbstractMetaClass* baseClass = m_metaClasses.findClass(baseClasses.at(i));
+            AbstractMetaClass *baseClass = AbstractMetaClass::findClass(m_metaClasses, baseClasses.at(i));
             if (!baseClass) {
                 qCWarning(lcShiboken).noquote().nospace()
                     << QStringLiteral("class not found for setup inheritance '%1'").arg(baseClasses.at(i));
@@ -1847,7 +1847,7 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
             setupInheritance(baseClass);
 
             QString interfaceName = baseClass->isInterface() ? InterfaceTypeEntry::interfaceName(baseClass->name()) : baseClass->name();
-            AbstractMetaClass* iface = m_metaClasses.findClass(interfaceName);
+            AbstractMetaClass *iface = AbstractMetaClass::findClass(m_metaClasses, interfaceName);
             if (!iface) {
                 qCWarning(lcShiboken).noquote().nospace()
                     << QStringLiteral("unknown interface for '%1': '%2'").arg(metaClass->name(), interfaceName);
@@ -2580,7 +2580,7 @@ int AbstractMetaBuilderPrivate::findOutValueFromString(const QString &stringValu
         return 0;
     }
 
-    AbstractMetaEnumValue* enumValue = m_metaClasses.findEnumValue(stringValue);
+    AbstractMetaEnumValue *enumValue = AbstractMetaClass::findEnumValue(m_metaClasses, stringValue);
     if (enumValue) {
         ok = true;
         return enumValue->value();
@@ -2763,7 +2763,7 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::findTemplateClass(const QString &
         }
 
         if (!templ)
-            templ = m_metaClasses.findClass(qualifiedName);
+            templ = AbstractMetaClass::findClass(m_metaClasses, qualifiedName);
 
         if (templ)
             return templ;
@@ -2783,7 +2783,7 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::getBaseClasses(const AbstractM
         if (parent.contains(QLatin1Char('<')))
             cls = findTemplateClass(parent, metaClass);
         else
-            cls = m_metaClasses.findClass(parent);
+            cls = AbstractMetaClass::findClass(m_metaClasses, parent);
 
         if (cls)
             baseClasses << cls;
@@ -3101,7 +3101,7 @@ void AbstractMetaBuilderPrivate::setupExternalConversion(AbstractMetaClass *cls)
     foreach (AbstractMetaFunction* func, convOps) {
         if (func->isModifiedRemoved())
             continue;
-        AbstractMetaClass* metaClass = m_metaClasses.findClass(func->type()->typeEntry());
+        AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_metaClasses, func->type()->typeEntry());
         if (!metaClass)
             continue;
         metaClass->addExternalConversionOperator(func);

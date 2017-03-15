@@ -67,7 +67,7 @@ void TestEnum::testEnumCppSignature()
     QCOMPARE(functions.first()->arguments().first()->type()->cppSignature(), QLatin1String("A::ClassEnum"));
 
     // enum as parameter of a method
-    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QCOMPARE(classA->enums().count(), 1);
     AbstractMetaFunctionList funcs = classA->queryFunctionsByName(QLatin1String("method"));
     QVERIFY(!funcs.isEmpty());
@@ -289,7 +289,7 @@ void TestEnum::testEnumValueFromExpression()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
 
-    AbstractMetaClass* classA = builder->classes().findClass(QLatin1String("A"));
+    AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
     QVERIFY(classA);
 
     AbstractMetaEnum* enumA = classA->findEnum(QLatin1String("EnumA"));
@@ -356,7 +356,7 @@ void TestEnum::testPrivateEnum()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
 
-    AbstractMetaClass* classA = builder->classes().findClass(QLatin1String("A"));
+    AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
     QVERIFY(classA);
     QCOMPARE(classA->enums().count(), 2);
 

@@ -55,11 +55,11 @@ void TestRemoveImplConv::testRemoveImplConv()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.count(), 3);
-    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
-    AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
+    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     QVERIFY(classB);
-    AbstractMetaClass* classC = classes.findClass(QLatin1String("C"));
+    const AbstractMetaClass *classC = AbstractMetaClass::findClass(classes, QLatin1String("C"));
     QVERIFY(classC);
     AbstractMetaFunctionList implConv = classC->implicitConversions();
     QCOMPARE(implConv.count(), 1);

@@ -52,7 +52,7 @@ void NamespaceTest::testNamespaceMembers()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    AbstractMetaClass* ns = classes.findClass(QLatin1String("Namespace"));
+    AbstractMetaClass *ns = AbstractMetaClass::findClass(classes, QLatin1String("Namespace"));
     QVERIFY(ns);
     const AbstractMetaEnum* metaEnum = ns->findEnum(QLatin1String("Option"));
     QVERIFY(metaEnum);
@@ -82,11 +82,11 @@ void NamespaceTest::testNamespaceInnerClassMembers()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    AbstractMetaClass* ons = classes.findClass(QLatin1String("OuterNamespace"));
+    const AbstractMetaClass *ons = AbstractMetaClass::findClass(classes, QLatin1String("OuterNamespace"));
     QVERIFY(ons);
-    AbstractMetaClass* ins = classes.findClass(QLatin1String("OuterNamespace::InnerNamespace"));
+    const AbstractMetaClass *ins = AbstractMetaClass::findClass(classes, QLatin1String("OuterNamespace::InnerNamespace"));
     QVERIFY(ins);
-    AbstractMetaClass* sc = classes.findClass(QLatin1String("OuterNamespace::InnerNamespace::SomeClass"));
+    const AbstractMetaClass *sc = AbstractMetaClass::findClass(classes, QLatin1String("OuterNamespace::InnerNamespace::SomeClass"));
     QVERIFY(sc);
     const AbstractMetaFunction* meth = sc->findFunction(QLatin1String("method"));
     QVERIFY(meth);

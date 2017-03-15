@@ -400,8 +400,7 @@ QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
 AbstractMetaFunctionList Generator::implicitConversions(const TypeEntry* type) const
 {
     if (type->isValue()) {
-        const AbstractMetaClass* metaClass = classes().findClass(type);
-        if (metaClass)
+        if (const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes(), type))
             return metaClass->implicitConversions();
     }
     return AbstractMetaFunctionList();
@@ -535,7 +534,7 @@ QString Generator::minimalConstructor(const AbstractMetaType* type) const
         QString ctor = cType->defaultConstructor();
         if (!ctor.isEmpty())
             return ctor;
-        ctor = minimalConstructor(classes().findClass(cType));
+        ctor = minimalConstructor(AbstractMetaClass::findClass(classes(), cType));
         if (type->hasInstantiations())
             ctor = ctor.replace(getFullTypeName(cType), getFullTypeNameWithoutModifiers(type));
         return ctor;
@@ -567,7 +566,7 @@ QString Generator::minimalConstructor(const TypeEntry* type) const
     }
 
     if (type->isComplex())
-        return minimalConstructor(classes().findClass(type));
+        return minimalConstructor(AbstractMetaClass::findClass(classes(), type));
 
     return QString();
 }

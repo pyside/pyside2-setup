@@ -53,7 +53,7 @@ void TestConversionRuleTag::testConversionRuleTagWithFile()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode.toLocal8Bit().data()));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
     const ComplexTypeEntry* typeEntry = classA->typeEntry();
     QVERIFY(typeEntry->hasConversionRule());
@@ -167,7 +167,7 @@ if (!TargetDateTimeAPI) TargetDateTime_IMPORT;\n\
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
-    AbstractMetaClass* classA = builder->classes().findClass(QLatin1String("Date"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("Date"));
     QVERIFY(classA);
 
     CustomConversion* conversion = classA->typeEntry()->customConversion();

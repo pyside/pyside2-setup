@@ -52,7 +52,7 @@ void TestModifyFunction::testRenameArgument()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     const AbstractMetaFunction* func = classA->findFunction(QLatin1String("method"));
     Q_ASSERT(func);
 
@@ -80,7 +80,7 @@ void TestModifyFunction::testOwnershipTransfer()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
+    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     const AbstractMetaFunction* func = classB->findFunction(QLatin1String("method"));
 
     QCOMPARE(func->ownership(func->ownerClass(), TypeSystem::TargetLangCode, 0), TypeSystem::CppOwnership);
@@ -127,13 +127,13 @@ void TestModifyFunction::invalidateAfterUse()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false, "0.1"));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
+    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     const AbstractMetaFunction* func = classB->findFunction(QLatin1String("call"));
     QCOMPARE(func->modifications().size(), 1);
     QCOMPARE(func->modifications().at(0).argument_mods.size(), 1);
     QVERIFY(func->modifications().at(0).argument_mods.at(0).resetAfterUse);
 
-    AbstractMetaClass* classC = classes.findClass(QLatin1String("C"));
+    const AbstractMetaClass *classC = AbstractMetaClass::findClass(classes, QLatin1String("C"));
     QVERIFY(classC);
     func = classC->findFunction(QLatin1String("call"));
     QCOMPARE(func->modifications().size(), 1);
@@ -145,7 +145,7 @@ void TestModifyFunction::invalidateAfterUse()
     QCOMPARE(func->modifications().at(0).argument_mods.size(), 1);
     QVERIFY(func->modifications().at(0).argument_mods.at(0).resetAfterUse);
 
-    AbstractMetaClass* classD =  classes.findClass(QLatin1String("D"));
+    const AbstractMetaClass *classD =  AbstractMetaClass::findClass(classes, QLatin1String("D"));
     QVERIFY(classD);
     func = classD->findFunction(QLatin1String("call"));
     QCOMPARE(func->modifications().size(), 1);
@@ -157,7 +157,7 @@ void TestModifyFunction::invalidateAfterUse()
     QCOMPARE(func->modifications().at(0).argument_mods.size(), 1);
     QVERIFY(func->modifications().at(0).argument_mods.at(0).resetAfterUse);
 
-    AbstractMetaClass* classE = classes.findClass(QLatin1String("E"));
+    const AbstractMetaClass *classE = AbstractMetaClass::findClass(classes, QLatin1String("E"));
     QVERIFY(classE);
     func = classE->findFunction(QLatin1String("call"));
     QVERIFY(func);
@@ -199,7 +199,7 @@ void TestModifyFunction::testWithApiVersion()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false, "0.1"));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
+    AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     const AbstractMetaFunction* func = classB->findFunction(QLatin1String("method"));
 
     QCOMPARE(func->ownership(func->ownerClass(), TypeSystem::TargetLangCode, 0), TypeSystem::CppOwnership);

@@ -148,7 +148,7 @@ void TestAbstractMetaType::testTypedef()
 
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
-    AbstractMetaClass* c = classes.findClass(QLatin1String("C"));
+    const AbstractMetaClass *c = AbstractMetaClass::findClass(classes, QLatin1String("C"));
     QVERIFY(c);
     QVERIFY(c->isTypeDef());
 }
@@ -198,7 +198,7 @@ void TestAbstractMetaType::testObjectTypeUsedAsValue()
 
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
-    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
     AbstractMetaFunctionList overloads = classA->queryFunctionsByName(QLatin1String("method"));
     QCOMPARE(overloads.count(), 1);

@@ -478,7 +478,7 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction*
             }
         }
     } else if (arg->type()->typeEntry()->isValue()) {
-        const AbstractMetaClass* metaClass = classes().findClass(arg->type()->typeEntry());
+        const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes(), arg->type()->typeEntry());
         if (enumValueRegEx.exactMatch(value)&& value != QLatin1String("NULL"))
             prefix = resolveScopePrefix(metaClass, value);
     } else if (arg->type()->isPrimitive() && arg->type()->name() == QLatin1String("int")) {
@@ -960,7 +960,7 @@ bool ShibokenGenerator::isValueTypeWithCopyConstructorOnly(const TypeEntry* type
 {
     if (!type || !type->isValue())
         return false;
-    return isValueTypeWithCopyConstructorOnly(classes().findClass(type));
+    return isValueTypeWithCopyConstructorOnly(AbstractMetaClass::findClass(classes(), type));
 }
 
 bool ShibokenGenerator::isValueTypeWithCopyConstructorOnly(const AbstractMetaType* type) const
@@ -2081,7 +2081,7 @@ AbstractMetaClassList ShibokenGenerator::getBaseClasses(const AbstractMetaClass*
     AbstractMetaClassList baseClasses;
     if (metaClass) {
         foreach (const QString &parent, metaClass->baseClassNames()) {
-            AbstractMetaClass* clazz = classes().findClass(parent);
+            AbstractMetaClass *clazz = AbstractMetaClass::findClass(classes(), parent);
             if (clazz)
                 baseClasses << clazz;
         }

@@ -31,15 +31,16 @@
 
 #include <QtCore/QList>
 
+class AbstractMetaClass;
 class AbstractMetaField;
 class AbstractMetaArgument;
 class AbstractMetaEnum;
 class AbstractMetaEnumValueList;
 class AbstractMetaFunction;
-class AbstractMetaClassList;
 class AbstractMetaType;
 
 typedef QList<AbstractMetaArgument *> AbstractMetaArgumentList;
+typedef QList<AbstractMetaClass *> AbstractMetaClassList;
 typedef QList<AbstractMetaEnum *> AbstractMetaEnumList;
 typedef QList<AbstractMetaField *> AbstractMetaFieldList;
 typedef QList<AbstractMetaFunction *> AbstractMetaFunctionList;

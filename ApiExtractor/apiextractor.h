@@ -38,7 +38,6 @@
 
 class AbstractMetaBuilder;
 class AbstractMetaClass;
-class AbstractMetaClassList;
 class AbstractMetaEnum;
 class AbstractMetaFunction;
 class AbstractMetaType;

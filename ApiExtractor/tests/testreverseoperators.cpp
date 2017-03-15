@@ -47,7 +47,7 @@ void TestReverseOperators::testReverseSum()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
+    AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
     QCOMPARE(classA->functions().count(), 4);
 
@@ -91,11 +91,11 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    AbstractMetaClass* classA = classes.findClass(QLatin1String("A"));
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
     QCOMPARE(classA->functions().count(), 6);
 
-    AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
+    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     QVERIFY(classB);
     QCOMPARE(classB->functions().count(), 4);
 

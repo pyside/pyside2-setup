@@ -319,7 +319,7 @@ void OverloadData::sortNextOverloads()
 
         // Process inheritance relationships
         if (targetType->isValue() || targetType->isObject()) {
-            const AbstractMetaClass* metaClass = m_generator->classes().findClass(targetType->typeEntry());
+            const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_generator->classes(), targetType->typeEntry());
             foreach (const AbstractMetaClass* ancestor, m_generator->getAllAncestors(metaClass)) {
                 QString ancestorTypeName = ancestor->typeEntry()->name();
                 if (!sortData.map.contains(ancestorTypeName))

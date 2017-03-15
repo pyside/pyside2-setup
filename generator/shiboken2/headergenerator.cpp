@@ -252,7 +252,7 @@ void HeaderGenerator::writeTypeIndexDefineLine(QTextStream& s, const TypeEntry* 
     if (typeEntry->isComplex()) {
         const ComplexTypeEntry* cType = reinterpret_cast<const ComplexTypeEntry*>(typeEntry);
         if (cType->baseContainerType()) {
-            const AbstractMetaClass* metaClass = classes().findClass(cType);
+            const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes(), cType);
             if (metaClass->templateBaseClass())
                 _writeTypeIndexDefineLine(s, getTypeIndexVariableName(metaClass, true), typeIndex);
         }

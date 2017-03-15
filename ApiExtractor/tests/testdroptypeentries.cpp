@@ -74,13 +74,13 @@ void TestDropTypeEntries::testDropEntries()
     QVERIFY(!builder.isNull());
 
     AbstractMetaClassList classes = builder->classes();
-    QVERIFY(classes.findClass(QLatin1String("ValueA")));
-    QVERIFY(!classes.findClass(QLatin1String("ValueB")));
-    QVERIFY(classes.findClass(QLatin1String("ObjectA")));
-    QVERIFY(!classes.findClass(QLatin1String("ObjectB")));
-    QVERIFY(classes.findClass(QLatin1String("NamespaceA")));
-    QVERIFY(!classes.findClass(QLatin1String("NamespaceA::InnerClassA")));
-    QVERIFY(!classes.findClass(QLatin1String("NamespaceB")));
+    QVERIFY(AbstractMetaClass::findClass(classes, QLatin1String("ValueA")));
+    QVERIFY(!AbstractMetaClass::findClass(classes, QLatin1String("ValueB")));
+    QVERIFY(AbstractMetaClass::findClass(classes, QLatin1String("ObjectA")));
+    QVERIFY(!AbstractMetaClass::findClass(classes, QLatin1String("ObjectB")));
+    QVERIFY(AbstractMetaClass::findClass(classes, QLatin1String("NamespaceA")));
+    QVERIFY(!AbstractMetaClass::findClass(classes, QLatin1String("NamespaceA::InnerClassA")));
+    QVERIFY(!AbstractMetaClass::findClass(classes, QLatin1String("NamespaceB")));
 
     AbstractMetaEnumList globalEnums = builder->globalEnums();
     QCOMPARE(globalEnums.count(), 1);
@@ -97,13 +97,13 @@ void TestDropTypeEntries::testDontDropEntries()
     QVERIFY(!builder.isNull());
 
     AbstractMetaClassList classes = builder->classes();
-    QVERIFY(classes.findClass(QLatin1String("ValueA")));
-    QVERIFY(classes.findClass(QLatin1String("ValueB")));
-    QVERIFY(classes.findClass(QLatin1String("ObjectA")));
-    QVERIFY(classes.findClass(QLatin1String("ObjectB")));
-    QVERIFY(classes.findClass(QLatin1String("NamespaceA")));
-    QVERIFY(classes.findClass(QLatin1String("NamespaceA::InnerClassA")));
-    QVERIFY(classes.findClass(QLatin1String("NamespaceB")));
+    QVERIFY(AbstractMetaClass::findClass(classes, QLatin1String("ValueA")));
+    QVERIFY(AbstractMetaClass::findClass(classes, QLatin1String("ValueB")));
+    QVERIFY(AbstractMetaClass::findClass(classes, QLatin1String("ObjectA")));
+    QVERIFY(AbstractMetaClass::findClass(classes, QLatin1String("ObjectB")));
+    QVERIFY(AbstractMetaClass::findClass(classes, QLatin1String("NamespaceA")));
+    QVERIFY(AbstractMetaClass::findClass(classes, QLatin1String("NamespaceA::InnerClassA")));
+    QVERIFY(AbstractMetaClass::findClass(classes, QLatin1String("NamespaceB")));
 
     QCOMPARE(builder->globalEnums().size(), 2);
 
@@ -131,7 +131,7 @@ void TestDropTypeEntries::testDropEntryWithChildTags()
     QStringList droppedEntries(QLatin1String("Foo.ValueA"));
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode2, xmlCode2, false, Q_NULLPTR, droppedEntries));
     QVERIFY(!builder.isNull());
-    QVERIFY(!builder->classes().findClass(QLatin1String("ValueA")));
+    QVERIFY(!AbstractMetaClass::findClass(builder->classes(), QLatin1String("ValueA")));
 }
 
 
@@ -139,7 +139,7 @@ void TestDropTypeEntries::testDontDropEntryWithChildTags()
 {
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode2, xmlCode2, false));
     QVERIFY(!builder.isNull());
-    QVERIFY(builder->classes().findClass(QLatin1String("ValueA")));
+    QVERIFY(AbstractMetaClass::findClass(builder->classes(), QLatin1String("ValueA")));
 }
 
 QTEST_APPLESS_MAIN(TestDropTypeEntries)

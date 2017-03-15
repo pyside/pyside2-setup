@@ -2746,7 +2746,7 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction* func, in
         AbstractMetaType *returnType = getTypeWithoutContainer(funcType);
         if (returnType) {
             pyArgName = QLatin1String(PYTHON_RETURN_VAR);
-            *wrappedClass = classes().findClass(returnType->typeEntry()->name());
+            *wrappedClass = AbstractMetaClass::findClass(classes(), returnType->typeEntry()->name());
         } else {
             QString message = QLatin1String("Invalid Argument index (0, return value) on function modification: ")
                 + (funcType ? funcType->name() : QLatin1String("void")) + QLatin1Char(' ');
@@ -2760,7 +2760,7 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction* func, in
         AbstractMetaType* argType = getTypeWithoutContainer(func->arguments().at(realIndex)->type());
 
         if (argType) {
-            *wrappedClass = classes().findClass(argType->typeEntry()->name());
+            *wrappedClass = AbstractMetaClass::findClass(classes(), argType->typeEntry()->name());
             if (argIndex == 1
                 && !func->isConstructor()
                 && OverloadData::isSingleArgument(getFunctionGroups(func->implementingClass())[func->name()]))
@@ -4624,6 +4624,9 @@ void CppGenerator::writeSetattroFunction(QTextStream& s, const AbstractMetaClass
     s << '}' << endl;
 }
 
+static inline QString qObjectClassName() { return QStringLiteral("QObject"); }
+static inline QString qMetaObjectClassName() { return QStringLiteral("QMetaObject"); }
+
 void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     s << "static PyObject* " << cpythonGetattroFunctionName(metaClass) << "(PyObject* " PYTHON_SELF_VAR ", PyObject* name)" << endl;
@@ -4631,7 +4634,7 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
 
     QString getattrFunc;
     if (usePySideExtensions() && metaClass->isQObject()) {
-        AbstractMetaClass* qobjectClass = classes().findClass(QLatin1String("QObject"));
+        AbstractMetaClass *qobjectClass = AbstractMetaClass::findClass(classes(), qObjectClassName());
         getattrFunc = QString::fromLatin1("PySide::getMetaDataFromQObject(%1, " PYTHON_SELF_VAR ", name)")
                          .arg(cpythonWrapperCPtr(qobjectClass, QLatin1String(PYTHON_SELF_VAR)));
     } else {
@@ -4691,9 +4694,6 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, const AbstractMetaClass
     s << '}' << endl;
 }
 
-static inline QString qObjectClassName() { return QStringLiteral("QObject"); }
-static inline QString qMetaObjectClassName() { return QStringLiteral("QMetaObject"); }
-
 bool CppGenerator::finishGeneration()
 {
     //Generate CPython wrapper file
@@ -4732,8 +4732,8 @@ bool CppGenerator::finishGeneration()
     //We need move QMetaObject register before QObject
     Dependencies additionalDependencies;
     const AbstractMetaClassList &allClasses = classes();
-    if (allClasses.findClass(qObjectClassName()) != Q_NULLPTR
-        && allClasses.findClass(qMetaObjectClassName()) != Q_NULLPTR) {
+    if (AbstractMetaClass::findClass(allClasses, qObjectClassName()) != Q_NULLPTR
+        && AbstractMetaClass::findClass(allClasses, qMetaObjectClassName()) != Q_NULLPTR) {
         Dependency dependency;
         dependency.parent = qMetaObjectClassName();
         dependency.child = qObjectClassName();

@@ -47,7 +47,7 @@ void TestReferenceToPointer::testReferenceToPointerArgument()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
+    const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     QVERIFY(classB);
     const AbstractMetaFunction* func = classB->findFunction(QLatin1String("dummy"));
     QVERIFY(func);

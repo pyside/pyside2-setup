@@ -2644,7 +2644,8 @@ bool AbstractMetaType::isTargetLangFlags() const
  */
 
 
-AbstractMetaEnum *AbstractMetaClassList::findEnum(const EnumTypeEntry *entry) const
+AbstractMetaEnum *AbstractMetaClass::findEnum(const AbstractMetaClassList &classes,
+                                              const EnumTypeEntry *entry)
 {
     Q_ASSERT(entry->isEnum());
 
@@ -2662,7 +2663,7 @@ AbstractMetaEnum *AbstractMetaClassList::findEnum(const EnumTypeEntry *entry) co
         className = TypeDatabase::globalNamespaceClassName(entry);
     }
 
-    AbstractMetaClass *metaClass = findClass(className);
+    AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes, className);
     if (!metaClass) {
         qCWarning(lcShiboken).noquote().nospace()
             << QStringLiteral("AbstractMeta::findEnum(), unknown class '%1' in '%2'")
@@ -2682,7 +2683,8 @@ AbstractMetaEnumValue *AbstractMetaEnumValueList::find(const QString &name) cons
     return 0;
 }
 
-AbstractMetaEnumValue *AbstractMetaClassList::findEnumValue(const QString &name) const
+AbstractMetaEnumValue *AbstractMetaClass::findEnumValue(const AbstractMetaClassList &classes,
+                                                        const QString &name)
 {
     QStringList lst = name.split(QLatin1String("::"));
 
@@ -2690,12 +2692,12 @@ AbstractMetaEnumValue *AbstractMetaClassList::findEnumValue(const QString &name)
         QString prefixName = lst.at(0);
         QString enumName = lst.at(1);
 
-        AbstractMetaClass* cl = findClass(prefixName);
+        AbstractMetaClass* cl = findClass(classes, prefixName);
         if (cl)
             return cl->findEnumValue(enumName, 0);
     }
 
-    foreach(AbstractMetaClass* metaClass, *this) {
+    foreach (AbstractMetaClass* metaClass, classes) {
         foreach(AbstractMetaEnum* metaEnum, metaClass->enums()) {
             AbstractMetaEnumValue* enumValue = metaClass->findEnumValue(name, metaEnum);
             if (enumValue)
@@ -2713,22 +2715,23 @@ AbstractMetaEnumValue *AbstractMetaClassList::findEnumValue(const QString &name)
  * C++, Target language base name or complete Target language package.class name.
  */
 
-AbstractMetaClass *AbstractMetaClassList::findClass(const QString &name) const
+AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &classes,
+                                                const QString &name)
 {
     if (name.isEmpty())
         return 0;
 
-    foreach (AbstractMetaClass *c, *this) {
+    foreach (AbstractMetaClass *c, classes) {
         if (c->qualifiedCppName() == name)
             return c;
     }
 
-    foreach (AbstractMetaClass *c, *this) {
+    foreach (AbstractMetaClass *c, classes) {
         if (c->fullName() == name)
             return c;
     }
 
-    foreach (AbstractMetaClass *c, *this) {
+    foreach (AbstractMetaClass *c, classes) {
         if (c->name() == name)
             return c;
     }
@@ -2736,9 +2739,10 @@ AbstractMetaClass *AbstractMetaClassList::findClass(const QString &name) const
     return 0;
 }
 
-AbstractMetaClass *AbstractMetaClassList::findClass(const TypeEntry* typeEntry) const
+AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &classes,
+                                                const TypeEntry* typeEntry)
 {
-    foreach (AbstractMetaClass* c, *this) {
+    foreach (AbstractMetaClass* c, classes) {
         if (c->typeEntry() == typeEntry)
             return c;
     }

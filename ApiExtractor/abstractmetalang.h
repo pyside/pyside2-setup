@@ -98,16 +98,6 @@ private:
 
 };
 
-class AbstractMetaClassList : public  QList<AbstractMetaClass *>
-{
-public:
-    AbstractMetaClass *findClass(const QString &name) const;
-    AbstractMetaClass *findClass(const TypeEntry* typeEntry) const;
-    AbstractMetaEnumValue *findEnumValue(const QString &string) const;
-    AbstractMetaEnum *findEnum(const EnumTypeEntry *entry) const;
-
-};
-
 class AbstractMetaAttributes
 {
     Q_GADGET
@@ -1917,6 +1907,16 @@ public:
     {
         return m_hasToStringCapability;
     }
+
+    static AbstractMetaClass *findClass(const AbstractMetaClassList &classes,
+                                        const QString &name);
+    static AbstractMetaClass *findClass(const AbstractMetaClassList &classes,
+                                        const TypeEntry* typeEntry);
+    static AbstractMetaEnumValue *findEnumValue(const AbstractMetaClassList &classes,
+                                                const QString &string);
+    static AbstractMetaEnum *findEnum(const AbstractMetaClassList &classes,
+                                      const EnumTypeEntry *entry);
+
 private:
 #ifndef QT_NO_DEBUG_STREAM
     friend QDebug operator<<(QDebug d, const AbstractMetaClass *ac);

@@ -50,7 +50,7 @@ void TestModifyDocumentation::testModifyDocumentation()
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
-    AbstractMetaClass *classA = builder->classes().findClass(QLatin1String("A"));
+    AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
     QVERIFY(classA);
     DocModificationList docMods = classA->typeEntry()->docModifications();
     QCOMPARE(docMods.count(), 1);

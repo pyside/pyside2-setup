@@ -69,7 +69,7 @@ void TestTemplates::testTemplateWithNamespace()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
 
-    AbstractMetaClass* classB = classes.findClass(QLatin1String("Bookmarks"));
+    AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, QLatin1String("Bookmarks"));
     QVERIFY(classB);
     const AbstractMetaFunction* func = classB->findFunction(QLatin1String("list"));
     AbstractMetaType* funcType = func->type();
@@ -104,7 +104,7 @@ void TestTemplates::testTemplateOnContainers()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
 
-    AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
+    AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     QVERIFY(classB);
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isNull());
@@ -261,7 +261,7 @@ void TestTemplates::testInheritanceFromContainterTemplate()
     QCOMPARE(classes.count(), 2);
     QCOMPARE(templates.count(), 1);
 
-    const AbstractMetaClass* foobars = classes.findClass(QLatin1String("FooBars"));
+    const AbstractMetaClass* foobars = AbstractMetaClass::findClass(classes, QLatin1String("FooBars"));
     QCOMPARE(foobars->functions().count(), 4);
 
     const AbstractMetaClass* lc = templates.first();
@@ -294,7 +294,7 @@ void TestTemplates::testTemplateInheritanceMixedWithForwardDeclaration()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
 
-    AbstractMetaClass* classB = classes.findClass(QLatin1String("B"));
+    AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     QVERIFY(classB);
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isNull());
@@ -331,7 +331,7 @@ void TestTemplates::testTemplateInheritanceMixedWithNamespaceAndForwardDeclarati
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
 
-    AbstractMetaClass* classB = classes.findClass(QLatin1String("Namespace::B"));
+    AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, QLatin1String("Namespace::B"));
     QVERIFY(classB);
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isNull());
@@ -369,9 +369,9 @@ void TestTemplates::testTypedefOfInstantiationOfTemplateClass()
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.count(), 3);
 
-    const AbstractMetaClass* base = classes.findClass(QLatin1String("BaseTemplateClass"));
+    const AbstractMetaClass* base = AbstractMetaClass::findClass(classes, QLatin1String("BaseTemplateClass"));
     QVERIFY(base);
-    const AbstractMetaClass* one = classes.findClass(QLatin1String("TypeOneClass"));
+    const AbstractMetaClass* one = AbstractMetaClass::findClass(classes, QLatin1String("TypeOneClass"));
     QVERIFY(one);
     QCOMPARE(one->templateBaseClass(), base);
     QCOMPARE(one->functions().count(), base->functions().count());
@@ -418,7 +418,7 @@ void TestTemplates::testContainerTypeIncompleteArgument()
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.count(), 1);
 
-    AbstractMetaClass* vector = classes.findClass(QLatin1String("IntVector"));
+    AbstractMetaClass* vector = AbstractMetaClass::findClass(classes, QLatin1String("IntVector"));
     QVERIFY(vector);
     QVERIFY(vector->typeEntry()->baseContainerType());
     QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(vector->typeEntry()->baseContainerType())->type(), ContainerTypeEntry::VectorContainer);
