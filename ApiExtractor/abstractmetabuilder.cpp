@@ -1566,32 +1566,82 @@ static bool _fixFunctionModelItemTypes(FunctionModelItem& function, const Abstra
     return templateTypeFixed;
 }
 
+AbstractMetaFunctionList AbstractMetaBuilderPrivate::classFunctionList(const ScopeModelItem &scopeItem)
+{
+    AbstractMetaFunctionList result;
+    const FunctionList &scopeFunctionList = scopeItem->functions();
+    result.reserve(scopeFunctionList.size());
+    foreach (const FunctionModelItem &function, scopeItem->functions()) {
+        if (AbstractMetaFunction *metaFunction = traverseFunction(function))
+            result.append(metaFunction);
+    }
+    return result;
+}
+
+// For template classes, entries with more specific types may exist from out-of-
+// line definitions. If there is a declaration which matches it after fixing
+// the parameters, remove it as duplicate. For example:
+// template class<T> Vector { public:
+//     Vector(const Vector &rhs);
+// };
+// template class<T>
+// Vector<T>::Vector(const Vector<T>&) {} // More specific, remove declaration.
+
+AbstractMetaFunctionList AbstractMetaBuilderPrivate::templateClassFunctionList(const ScopeModelItem &scopeItem,
+                                                                               AbstractMetaClass *metaClass)
+{
+    class DuplicatingFunctionPredicate : public std::unary_function<bool, const AbstractMetaFunction *> {
+    public:
+        explicit DuplicatingFunctionPredicate(const AbstractMetaFunction *f) : m_function(f) {}
+
+        bool operator()(const AbstractMetaFunction *rhs) const
+        {
+            return rhs != m_function && rhs->name() == m_function->name()
+                && _compareAbstractMetaFunctions(m_function, rhs);
+        }
+
+    private:
+        const AbstractMetaFunction *m_function;
+    };
+
+    AbstractMetaFunctionList result;
+    AbstractMetaFunctionList unchangedFunctions;
+
+    const FunctionList &scopeFunctionList = scopeItem->functions();
+    result.reserve(scopeFunctionList.size());
+    unchangedFunctions.reserve(scopeFunctionList.size());
+    foreach (FunctionModelItem function, scopeItem->functions()) {
+        // This fixes method's arguments and return types that are templates
+        // but the template variable wasn't declared in the C++ header.
+        const bool templateTypeFixed =_fixFunctionModelItemTypes(function, metaClass);
+        if (AbstractMetaFunction *metaFunction = traverseFunction(function)) {
+            result.append(metaFunction);
+            if (!templateTypeFixed)
+                unchangedFunctions.append(metaFunction);
+        }
+    }
+
+    const AbstractMetaFunctionList::ConstIterator unchangedBegin = unchangedFunctions.begin();
+    const AbstractMetaFunctionList::ConstIterator unchangedEnd = unchangedFunctions.end();
+    for (int i = result.size() - 1; i >= 0; --i) {
+        AbstractMetaFunction *function = result.at(i);
+        if (!unchangedFunctions.contains(function)
+            && unchangedEnd != std::find_if(unchangedBegin, unchangedEnd, DuplicatingFunctionPredicate(function))) {
+            delete result.takeAt(i);
+        }
+    }
+    return result;
+}
+
 void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
                                                    AbstractMetaClass *metaClass)
 {
-    foreach (FunctionModelItem function, scopeItem->functions()) {
 
-        // This fixes method's arguments and return types that are templates
-        // but the template variable wasn't declared in the C++ header.
-        bool templateTypeFixed = _fixFunctionModelItemTypes(function, metaClass);
+    const AbstractMetaFunctionList functions = metaClass->templateArguments().isEmpty()
+        ? classFunctionList(scopeItem)
+        : templateClassFunctionList(scopeItem, metaClass);
 
-        AbstractMetaFunction* metaFunction = traverseFunction(function);
-
-        if (!metaFunction)
-            continue;
-
-        if (templateTypeFixed) {
-            foreach (AbstractMetaFunction* func, metaClass->queryFunctionsByName(metaFunction->name())) {
-                if (_compareAbstractMetaFunctions(metaFunction, func)) {
-                    delete metaFunction;
-                    metaFunction = 0;
-                    break;
-                }
-            }
-            if (!metaFunction)
-                continue;
-        }
-
+    foreach (AbstractMetaFunction *metaFunction, functions) {
         metaFunction->setOriginalAttributes(metaFunction->attributes());
         if (metaClass->isNamespace())
             *metaFunction += AbstractMetaAttributes::Static;
