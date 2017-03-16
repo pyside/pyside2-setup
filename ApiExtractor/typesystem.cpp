@@ -38,6 +38,8 @@ static QString strings_char = QLatin1String("char");
 static QString strings_jchar = QLatin1String("jchar");
 static QString strings_jobject = QLatin1String("jobject");
 
+static inline QString colonColon() { return QStringLiteral("::"); }
+
 static QList<CustomConversion*> customConversionsForReview = QList<CustomConversion*>();
 
 Handler::Handler(TypeDatabase* database, bool generate)
@@ -461,6 +463,40 @@ static QString checkSignatureError(const QString& signature, const QString& tag)
     return QString();
 }
 
+void Handler::addFlags(const QString &name, QString flagName,
+                       const QHash<QString, QString> &attributes, double since)
+{
+    FlagsTypeEntry *ftype = new FlagsTypeEntry(QLatin1String("QFlags<") + name + QLatin1Char('>'), since);
+    ftype->setOriginator(m_currentEnum);
+    // Try to get the guess the qualified flag name
+    const int lastSepPos = name.lastIndexOf(colonColon());
+    if (lastSepPos >= 0 && !flagName.contains(colonColon()))
+        flagName.prepend(name.left(lastSepPos + 2));
+
+    ftype->setOriginalName(flagName);
+    ftype->setCodeGeneration(m_generate);
+    QString n = ftype->originalName();
+
+    QStringList lst = n.split(colonColon());
+    if (QStringList(lst.mid(0, lst.size() - 1)).join(colonColon()) != m_currentEnum->targetLangQualifier()) {
+        qCWarning(lcShiboken).noquote().nospace()
+            << QStringLiteral("enum %1 and flags %2 differ in qualifiers")
+                              // avoid constFirst to stay Qt 5.5 compatible
+                              .arg(m_currentEnum->targetLangQualifier(), lst.first());
+    }
+
+    ftype->setFlagsName(lst.last());
+    m_currentEnum->setFlags(ftype);
+
+    m_database->addFlagsType(ftype);
+    m_database->addType(ftype);
+
+    QString revision = attributes.value(QLatin1String("flags-revision"));
+    if (revision.isEmpty())
+        revision = attributes.value(QLatin1String("revision"));
+    setTypeRevision(ftype, revision.toInt());
+}
+
 bool Handler::startElement(const QString &, const QString &n,
                            const QString &, const QXmlAttributes &atts)
 {
@@ -634,7 +670,7 @@ bool Handler::startElement(const QString &, const QString &n,
         // Fix type entry name using nesting information.
         if (element->type & StackElement::TypeEntryMask
             && element->parent && element->parent->type != StackElement::Root) {
-            name = element->parent->entry->name() + QLatin1String("::") + name;
+            name = element->parent->entry->name() + colonColon() + name;
         }
 
 
@@ -696,12 +732,12 @@ bool Handler::startElement(const QString &, const QString &n,
         break;
 
         case StackElement::EnumTypeEntry: {
-            QStringList names = name.split(QLatin1String("::"));
+            QStringList names = name.split(colonColon());
             if (names.size() == 1)
                 m_currentEnum = new EnumTypeEntry(QString(), name, since);
              else
                 m_currentEnum =
-                    new EnumTypeEntry(QStringList(names.mid(0, names.size() - 1)).join(QLatin1String("::")),
+                    new EnumTypeEntry(QStringList(names.mid(0, names.size() - 1)).join(colonColon()),
                                       names.last(), since);
             m_currentEnum->setAnonymous(!attributes[QLatin1String("identified-by-value")].isEmpty());
             element->entry = m_currentEnum;
@@ -713,40 +749,10 @@ bool Handler::startElement(const QString &, const QString &n,
             m_currentEnum->setExtensible(convertBoolean(attributes[QLatin1String("extensible")], QLatin1String("extensible"), false));
 
             // put in the flags parallel...
-            QString flagName = attributes[QLatin1String("flags")];
-            if (!flagName.isEmpty()) {
-                FlagsTypeEntry *ftype = new FlagsTypeEntry(QLatin1String("QFlags<") + name + QLatin1Char('>'), since);
-                ftype->setOriginator(m_currentEnum);
-                // Try to get the guess the qualified flag name
-                if (!flagName.contains(QLatin1String("::")) && names.count() > 1) {
-                    QStringList cpy(names);
-                    cpy.removeLast();
-                    cpy.append(flagName);
-                    flagName = cpy.join(QLatin1String("::"));
-                }
-
-                ftype->setOriginalName(flagName);
-                ftype->setCodeGeneration(m_generate);
-                QString n = ftype->originalName();
-
-                QStringList lst = n.split(QLatin1String("::"));
-                if (QStringList(lst.mid(0, lst.size() - 1)).join(QLatin1String("::")) != m_currentEnum->targetLangQualifier()) {
-                    qCWarning(lcShiboken).noquote().nospace()
-                        << QStringLiteral("enum %1 and flags %2 differ in qualifiers")
-                                          // avoid constFirst to stay Qt 5.5 compatible
-                                          .arg(m_currentEnum->targetLangQualifier(), lst.first());
-                }
-
-                ftype->setFlagsName(lst.last());
-                m_currentEnum->setFlags(ftype);
-
-                m_database->addFlagsType(ftype);
-                m_database->addType(ftype);
-
-                QString revision = attributes[QLatin1String("flags-revision")].isEmpty()
-                                   ? attributes[QLatin1String("revision")]
-                                   : attributes[QLatin1String("flags-revision")];
-                setTypeRevision(ftype, revision.toInt());
+            const QString flagNames = attributes[QLatin1String("flags")];
+            if (!flagNames.isEmpty()) {
+                foreach (const QString &flagName, flagNames.split(QLatin1Char(',')))
+                    addFlags(name, flagName.trimmed(), attributes, since);
             }
         }
         break;

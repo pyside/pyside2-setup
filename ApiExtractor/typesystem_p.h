@@ -155,6 +155,8 @@ private:
 
     bool importFileElement(const QXmlAttributes &atts);
     bool convertBoolean(const QString &, const QString &, bool);
+    void addFlags(const QString &name, QString flagName,
+                  const QHash<QString, QString> &attributes, double since);
 
     TypeDatabase* m_database;
     StackElement* m_current;
