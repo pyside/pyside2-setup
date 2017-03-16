@@ -2330,7 +2330,7 @@
   </object-type>
   <value-type name="QUrl" hash-function="PySide::hash">
     <!-- Qt5: lots of changes -->
-    <enum-type name="ComponentFormattingOption" flags="ComponentFormattingOptions" flags="FormattingOptions"/>
+    <enum-type name="ComponentFormattingOption" flags="ComponentFormattingOptions,FormattingOptions"/>
     <!-- note: above duplication of attribute is not by default XML compliant! -->
     <enum-type name="UrlFormattingOption" />
     <enum-type name="UserInputResolutionOption" flags="UserInputResolutionOptions"/>
