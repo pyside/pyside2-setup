@@ -48,6 +48,8 @@ namespace TestUtil
         QBuffer buffer;
         // parse typesystem
         buffer.setData(xmlCode);
+        if (!buffer.open(QIODevice::ReadOnly))
+            return Q_NULLPTR;
         td->parseFile(&buffer);
         buffer.close();
         // parse C++ code

@@ -14,11 +14,9 @@ macro(declare_test testname)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                         ${CMAKE_CURRENT_BINARY_DIR}
                         ${apiextractor_SOURCE_DIR}
-                        ${Qt5Xml_INCLUDE_DIRS}
                         ${Qt5Test_INCLUDE_DIRS}
                         )
     target_link_libraries(${testname}
-                          ${Qt5Xml_LIBRARIES}
                           ${Qt5XmlPatterns_LIBRARIES}
                           ${Qt5Test_LIBRARIES}
                           ${Qt5Core_LIBRARIES}

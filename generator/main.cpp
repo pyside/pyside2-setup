@@ -30,7 +30,6 @@
 #include <QElapsedTimer>
 #include <QLinkedList>
 #include <QLibrary>
-#include <QtXml/QDomDocument>
 #include <QtCore/QFile>
 #include <QtCore/QDir>
 #include <iostream>

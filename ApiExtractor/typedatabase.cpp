@@ -30,8 +30,9 @@
 #include "typesystem.h"
 #include "typesystem_p.h"
 
-#include <QFile>
-#include <QtXml/QtXml>
+#include <QtCore/QFile>
+#include <QtCore/QDir>
+#include <QtCore/QXmlStreamReader>
 #include "reporthandler.h"
 // #include <tr1/tuple>
 #include <algorithm>
@@ -368,6 +369,11 @@ bool TypeDatabase::parseFile(const QString &filename, bool generate)
             << "Can't find " << filename << ", typesystem paths: " << m_typesystemPaths.join(QLatin1String(", "));
         return false;
     }
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qCWarning(lcShiboken).noquote().nospace()
+            << "Can't open " << QDir::toNativeSeparators(filename) << ": " << file.errorString();
+        return false;
+    }
 
     int count = m_entries.size();
     bool ok = parseFile(&file, generate);
@@ -383,14 +389,9 @@ bool TypeDatabase::parseFile(const QString &filename, bool generate)
 
 bool TypeDatabase::parseFile(QIODevice* device, bool generate)
 {
-    QXmlInputSource source(device);
-    QXmlSimpleReader reader;
+    QXmlStreamReader reader(device);
     Handler handler(this, generate);
-
-    reader.setContentHandler(&handler);
-    reader.setErrorHandler(&handler);
-
-    return reader.parse(&source, false);
+    return handler.parse(reader);
 }
 
 PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name) const

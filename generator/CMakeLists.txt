@@ -23,7 +23,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/shiboken2
                     ${CMAKE_CURRENT_BINARY_DIR}
                     ${apiextractor_SOURCE_DIR}
                     ${Qt5Core_INCLUDE_DIRS}
-                    ${Qt5Xml_INCLUDE_DIRS}
                     ${Qt5XmlPatterns_INCLUDE_DIRS}
                     )
 
@@ -33,7 +32,6 @@ set_target_properties(shiboken2 PROPERTIES OUTPUT_NAME shiboken2${shiboken2_SUFF
 target_link_libraries(shiboken2
                       apiextractor
                       ${Qt5Core_LIBRARIES}
-                      ${Qt5Xml_LIBRARIES}
                       ${Qt5XmlPatterns_LIBRARIES}
                       )
 

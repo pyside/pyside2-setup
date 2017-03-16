@@ -30,7 +30,10 @@
 #include "typesystem_p.h"
 #include "typedatabase.h"
 #include "reporthandler.h"
-#include <QtXml/QtXml>
+#include <QtCore/QDir>
+#include <QtCore/QFile>
+#include <QtCore/QXmlStreamAttributes>
+#include <QtCore/QXmlStreamReader>
 
 static QString strings_Object = QLatin1String("Object");
 static QString strings_String = QLatin1String("String");
@@ -39,6 +42,11 @@ static QString strings_jchar = QLatin1String("jchar");
 static QString strings_jobject = QLatin1String("jobject");
 
 static inline QString colonColon() { return QStringLiteral("::"); }
+static inline QString quoteAfterLineAttribute() { return QStringLiteral("quote-after-line"); }
+static inline QString quoteBeforeLineAttribute() { return QStringLiteral("quote-before-line"); }
+static inline QString nameAttribute() { return QStringLiteral("name"); }
+static inline QString sinceAttribute() { return QStringLiteral("since"); }
+static inline QString flagsAttribute() { return QStringLiteral("flags"); }
 
 static QList<CustomConversion*> customConversionsForReview = QList<CustomConversion*>();
 
@@ -97,49 +105,80 @@ Handler::Handler(TypeDatabase* database, bool generate)
     tagNames.insert(QLatin1String("add-function"), StackElement::AddFunction);
 }
 
-bool Handler::error(const QXmlParseException &e)
+static QString msgReaderError(const QXmlStreamReader &reader, const QString &what)
 {
-    qWarning("Error: line=%d, column=%d, message=%s\n",
-             e.lineNumber(), e.columnNumber(), qPrintable(e.message()));
-    return false;
+    QString message;
+    QTextStream str(&message);
+    str << "Error: ";
+    if (const QFile *file = qobject_cast<const QFile *>(reader.device()))
+        str << "file=" << QDir::toNativeSeparators(file->fileName()) << ", ";
+    str << "line=" << reader.lineNumber() << ", column=" << reader.columnNumber()
+        << ", message=" << what;
+    return message;
 }
 
-bool Handler::fatalError(const QXmlParseException &e)
+static QString msgReaderError(const QXmlStreamReader &reader)
 {
-    qWarning("Fatal error: line=%d, column=%d, message=%s\n",
-             e.lineNumber(), e.columnNumber(), qPrintable(e.message()));
-
-    return false;
+    return msgReaderError(reader, reader.errorString());
 }
 
-bool Handler::warning(const QXmlParseException &e)
+bool Handler::parse(QXmlStreamReader &reader)
 {
-    qWarning("Warning: line=%d, column=%d, message=%s\n",
-             e.lineNumber(), e.columnNumber(), qPrintable(e.message()));
+    m_error.clear();
+    while (!reader.atEnd()) {
+        switch (reader.readNext()) {
+        case QXmlStreamReader::NoToken:
+        case QXmlStreamReader::Invalid:
+            qCWarning(lcShiboken).noquote().nospace() << msgReaderError(reader);
+            return false;
+        case QXmlStreamReader::StartElement:
+            if (!startElement(reader.name(), reader.attributes())) {
+                m_error = msgReaderError(reader, m_error);
+                return false;
+            }
 
-    return false;
+            break;
+        case QXmlStreamReader::EndElement:
+            if (!endElement(reader.name())) {
+                m_error = msgReaderError(reader, m_error);
+                return false;
+            }
+            break;
+        case QXmlStreamReader::Characters:
+            if (!characters(reader.text().toString())) {
+                m_error = msgReaderError(reader, m_error);
+                return false;
+            }
+            break;
+        case QXmlStreamReader::StartDocument:
+        case QXmlStreamReader::EndDocument:
+        case QXmlStreamReader::Comment:
+        case QXmlStreamReader::DTD:
+        case QXmlStreamReader::EntityReference:
+        case QXmlStreamReader::ProcessingInstruction:
+            break;
+        }
+    }
+    return true;
 }
 
-void Handler::fetchAttributeValues(const QString &name, const QXmlAttributes &atts,
+void Handler::fetchAttributeValues(const QString &name, const QXmlStreamAttributes &atts,
                                    QHash<QString, QString> *acceptedAttributes)
 {
     Q_ASSERT(acceptedAttributes);
 
     for (int i = 0; i < atts.length(); ++i) {
-        QString key = atts.localName(i).toLower();
-        QString val = atts.value(i);
-
+        const QString key = atts.at(i).name().toString().toLower();
         if (!acceptedAttributes->contains(key)) {
             qCWarning(lcShiboken).noquote().nospace()
                 << QStringLiteral("Unknown attribute for '%1': '%2'").arg(name, key);
         } else {
-            (*acceptedAttributes)[key] = val;
+            acceptedAttributes->insert(key, atts.at(i).value().toString());
         }
-
     }
 }
 
-bool Handler::endElement(const QString &, const QString &localName, const QString &)
+bool Handler::endElement(const QStringRef &localName)
 {
     if (m_ignoreDepth) {
         --m_ignoreDepth;
@@ -158,8 +197,7 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
         return true;
     }
 
-    QString tagName = localName.toLower();
-    if (tagName == QLatin1String("import-file"))
+    if (!localName.compare(QLatin1String("import-file"), Qt::CaseInsensitive))
         return true;
 
     if (!m_current)
@@ -343,9 +381,9 @@ bool Handler::characters(const QString &ch)
     return true;
 }
 
-bool Handler::importFileElement(const QXmlAttributes &atts)
+bool Handler::importFileElement(const QXmlStreamAttributes &atts)
 {
-    QString fileName = atts.value(QLatin1String("name"));
+    const QString fileName = atts.value(nameAttribute()).toString();
     if (fileName.isEmpty()) {
         m_error = QLatin1String("Required attribute 'name' missing for include-file tag.");
         return false;
@@ -360,11 +398,11 @@ bool Handler::importFileElement(const QXmlAttributes &atts)
         }
     }
 
-    QString quoteFrom = atts.value(QLatin1String("quote-after-line"));
+    const QStringRef quoteFrom = atts.value(quoteAfterLineAttribute());
     bool foundFromOk = quoteFrom.isEmpty();
     bool from = quoteFrom.isEmpty();
 
-    QString quoteTo = atts.value(QLatin1String("quote-before-line"));
+    const QStringRef quoteTo = atts.value(quoteBeforeLineAttribute());
     bool foundToOk = quoteTo.isEmpty();
     bool to = true;
 
@@ -385,9 +423,9 @@ bool Handler::importFileElement(const QXmlAttributes &atts)
     }
     if (!foundFromOk || !foundToOk) {
         QString fromError = QStringLiteral("Could not find quote-after-line='%1' in file '%2'.")
-                                           .arg(quoteFrom, fileName);
+                                           .arg(quoteFrom.toString(), fileName);
         QString toError = QStringLiteral("Could not find quote-before-line='%1' in file '%2'.")
-                                         .arg(quoteTo, fileName);
+                                         .arg(quoteTo.toString(), fileName);
 
         if (!foundToOk)
             m_error = toError;
@@ -497,28 +535,27 @@ void Handler::addFlags(const QString &name, QString flagName,
     setTypeRevision(ftype, revision.toInt());
 }
 
-bool Handler::startElement(const QString &, const QString &n,
-                           const QString &, const QXmlAttributes &atts)
+bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts)
 {
     if (m_ignoreDepth) {
         ++m_ignoreDepth;
         return true;
     }
 
-    if (!m_defaultPackage.isEmpty() && atts.index(QLatin1String("since")) != -1) {
+    if (!m_defaultPackage.isEmpty() && atts.hasAttribute(sinceAttribute())) {
         TypeDatabase* td = TypeDatabase::instance();
-        if (!td->checkApiVersion(m_defaultPackage, atts.value(QLatin1String("since")).toUtf8())) {
+        if (!td->checkApiVersion(m_defaultPackage, atts.value(sinceAttribute()).toUtf8())) {
             ++m_ignoreDepth;
             return true;
         }
     }
 
-
-    QString tagName = n.toLower();
+    const QString tagName = n.toString().toLower();
     if (tagName == QLatin1String("import-file"))
         return importFileElement(atts);
 
-    if (!tagNames.contains(tagName)) {
+    const QHash<QString, StackElement::ElementType>::const_iterator tit = tagNames.constFind(tagName);
+    if (tit == tagNames.constEnd()) {
         m_error = QStringLiteral("Unknown tag name: '%1'").arg(tagName);
         return false;
     }
@@ -529,7 +566,7 @@ bool Handler::startElement(const QString &, const QString &n,
     }
 
     StackElement* element = new StackElement(m_current);
-    element->type = tagNames[tagName];
+    element->type = tit.value();
 
     if (element->type == StackElement::Root && m_generate == TypeEntry::GenerateAll)
         customConversionsForReview.clear();
@@ -545,9 +582,9 @@ bool Handler::startElement(const QString &, const QString &n,
 
     if (element->type & StackElement::TypeEntryMask) {
         QHash<QString, QString> attributes;
-        attributes.insert(QLatin1String("name"), QString());
+        attributes.insert(nameAttribute(), QString());
         attributes.insert(QLatin1String("revision"), QLatin1String("0"));
-        attributes.insert(QLatin1String("since"), QLatin1String("0"));
+        attributes.insert(sinceAttribute(), QLatin1String("0"));
 
         switch (element->type) {
         case StackElement::PrimitiveTypeEntry:
@@ -561,7 +598,7 @@ bool Handler::startElement(const QString &, const QString &n,
             attributes.insert(QLatin1String("type"), QString());
             break;
         case StackElement::EnumTypeEntry:
-            attributes.insert(QLatin1String("flags"), QString());
+            attributes.insert(flagsAttribute(), QString());
             attributes.insert(QLatin1String("flags-revision"), QString());
             attributes.insert(QLatin1String("upper-bound"), QString());
             attributes.insert(QLatin1String("lower-bound"), QString());
@@ -604,8 +641,8 @@ bool Handler::startElement(const QString &, const QString &n,
         };
 
         fetchAttributeValues(tagName, atts, &attributes);
-        QString name = attributes[QLatin1String("name")];
-        double since = attributes[QLatin1String("since")].toDouble();
+        QString name = attributes[nameAttribute()];
+        double since = attributes[sinceAttribute()].toDouble();
 
         if (m_database->hasDroppedTypeEntries()) {
             QString identifier = getNamePrefix(element) + QLatin1Char('.');
@@ -749,7 +786,7 @@ bool Handler::startElement(const QString &, const QString &n,
             m_currentEnum->setExtensible(convertBoolean(attributes[QLatin1String("extensible")], QLatin1String("extensible"), false));
 
             // put in the flags parallel...
-            const QString flagNames = attributes[QLatin1String("flags")];
+            const QString flagNames = attributes.value(flagsAttribute());
             if (!flagNames.isEmpty()) {
                 foreach (const QString &flagName, flagNames.split(QLatin1Char(',')))
                     addFlags(name, flagName.trimmed(), attributes, since);
@@ -899,10 +936,10 @@ bool Handler::startElement(const QString &, const QString &n,
         QHash<QString, QString> attributes;
         attributes.insert(QLatin1String("mode"), QLatin1String("replace"));
         attributes.insert(QLatin1String("format"), QLatin1String("native"));
-        attributes.insert(QLatin1String("since"), QLatin1String("0"));
+        attributes.insert(sinceAttribute(), QLatin1String("0"));
 
         fetchAttributeValues(tagName, atts, &attributes);
-        double since = attributes[QLatin1String("since")].toDouble();
+        double since = attributes[sinceAttribute()].toDouble();
 
         const int validParent = StackElement::TypeEntryMask
                                 | StackElement::ModifyFunction
@@ -947,9 +984,9 @@ bool Handler::startElement(const QString &, const QString &n,
         // check the XML tag attributes
         QHash<QString, QString> attributes;
         attributes.insert(QLatin1String("xpath"), QString());
-        attributes.insert(QLatin1String("since"), QLatin1String("0"));
+        attributes.insert(sinceAttribute(), QLatin1String("0"));
         fetchAttributeValues(tagName, atts, &attributes);
-        double since = attributes[QLatin1String("since")].toDouble();
+        double since = attributes[sinceAttribute()].toDouble();
 
         const int validParent = StackElement::TypeEntryMask
                                 | StackElement::ModifyFunction
@@ -982,14 +1019,14 @@ bool Handler::startElement(const QString &, const QString &n,
         element->entry = topElement.entry;
 
         QHash<QString, QString> attributes;
-        attributes.insert(QLatin1String("since"), QLatin1String("0"));
+        attributes.insert(sinceAttribute(), QLatin1String("0"));
         switch (element->type) {
         case StackElement::Root:
             attributes.insert(QLatin1String("package"), QString());
             attributes.insert(QLatin1String("default-superclass"), QString());
             break;
         case StackElement::LoadTypesystem:
-            attributes.insert(QLatin1String("name"), QString());
+            attributes.insert(nameAttribute(), QString());
             attributes.insert(QLatin1String("generate"), QLatin1String("yes"));
             break;
         case StackElement::NoNullPointers:
@@ -1028,7 +1065,7 @@ bool Handler::startElement(const QString &, const QString &n,
             attributes.insert(QLatin1String("invalidate-after-use"), QLatin1String("no"));
             break;
         case StackElement::ModifyField:
-            attributes.insert(QLatin1String("name"), QString());
+            attributes.insert(nameAttribute(), QString());
             attributes.insert(QLatin1String("write"), QLatin1String("true"));
             attributes.insert(QLatin1String("read"), QLatin1String("true"));
             attributes.insert(QLatin1String("remove"), QString());
@@ -1041,11 +1078,11 @@ bool Handler::startElement(const QString &, const QString &n,
             attributes.insert(QLatin1String("location"), QString());
             break;
         case StackElement::CustomMetaConstructor:
-            attributes[QLatin1String("name")] = topElement.entry->name().toLower() + QLatin1String("_create");
+            attributes[nameAttribute()] = topElement.entry->name().toLower() + QLatin1String("_create");
             attributes.insert(QLatin1String("param-name"), QLatin1String("copy"));
             break;
         case StackElement::CustomMetaDestructor:
-            attributes[QLatin1String("name")] = topElement.entry->name().toLower() + QLatin1String("_delete");
+            attributes[nameAttribute()] = topElement.entry->name().toLower() + QLatin1String("_delete");
             attributes.insert(QLatin1String("param-name"), QLatin1String("copy"));
             break;
         case StackElement::ReplaceType:
@@ -1068,7 +1105,7 @@ bool Handler::startElement(const QString &, const QString &n,
             attributes.insert(QLatin1String("check"), QString());
             break;
         case StackElement::RejectEnumValue:
-            attributes.insert(QLatin1String("name"), QString());
+            attributes.insert(nameAttribute(), QString());
             break;
         case StackElement::ArgumentMap:
             attributes.insert(QLatin1String("index"), QLatin1String("1"));
@@ -1087,10 +1124,10 @@ bool Handler::startElement(const QString &, const QString &n,
             attributes.insert(QLatin1String("class"), QLatin1String("all"));
             break;
         case StackElement::Template:
-            attributes.insert(QLatin1String("name"), QString());
+            attributes.insert(nameAttribute(), QString());
             break;
         case StackElement::TemplateInstanceEnum:
-            attributes.insert(QLatin1String("name"), QString());
+            attributes.insert(nameAttribute(), QString());
             break;
         case StackElement::Replace:
             attributes.insert(QLatin1String("from"), QString());
@@ -1110,7 +1147,7 @@ bool Handler::startElement(const QString &, const QString &n,
         double since = 0;
         if (attributes.count() > 0) {
             fetchAttributeValues(tagName, atts, &attributes);
-            since = attributes[QLatin1String("since")].toDouble();
+            since = attributes[sinceAttribute()].toDouble();
         }
 
         switch (element->type) {
@@ -1133,7 +1170,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 m_database->addType(element->entry);
             break;
         case StackElement::LoadTypesystem: {
-            QString name = attributes[QLatin1String("name")];
+            QString name = attributes[nameAttribute()];
             if (name.isEmpty()) {
                 m_error = QLatin1String("No typesystem name specified");
                 return false;
@@ -1150,7 +1187,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 m_error = QLatin1String("<reject-enum-value> node must be used inside a <enum-type> node");
                 return false;
             }
-            QString name = attributes[QLatin1String("name")];
+            QString name = attributes[nameAttribute()];
         } break;
         case StackElement::ReplaceType: {
             if (topElement.type != StackElement::ModifyArgument) {
@@ -1474,7 +1511,7 @@ bool Handler::startElement(const QString &, const QString &n,
             break;
 
         case StackElement::ModifyField: {
-            QString name = attributes[QLatin1String("name")];
+            QString name = attributes[nameAttribute()];
             if (name.isEmpty())
                 break;
             FieldModification fm;
@@ -1621,7 +1658,7 @@ bool Handler::startElement(const QString &, const QString &n,
             break;
         case StackElement::CustomMetaConstructor:
         case StackElement::CustomMetaDestructor: {
-            CustomFunction *func = new CustomFunction(attributes[QLatin1String("name")]);
+            CustomFunction *func = new CustomFunction(attributes[nameAttribute()]);
             func->paramName = attributes[QLatin1String("param-name")];
             element->value.customFunction = func;
         }
@@ -1845,7 +1882,7 @@ bool Handler::startElement(const QString &, const QString &n,
         }
         break;
         case StackElement::Template:
-            element->value.templateEntry = new TemplateEntry(attributes[QLatin1String("name")], since);
+            element->value.templateEntry = new TemplateEntry(attributes[nameAttribute()], since);
             break;
         case StackElement::TemplateInstanceEnum:
             if (!(topElement.type & StackElement::CodeSnipMask) &&
@@ -1859,7 +1896,7 @@ bool Handler::startElement(const QString &, const QString &n,
                           "custom-destructors, conversion-rule, native-to-target or add-conversion tags.");
                 return false;
             }
-            element->value.templateInstance = new TemplateInstance(attributes[QLatin1String("name")], since);
+            element->value.templateInstance = new TemplateInstance(attributes[nameAttribute()], since);
             break;
         case StackElement::Replace:
             if (topElement.type != StackElement::TemplateInstanceEnum) {
