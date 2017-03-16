@@ -10,14 +10,6 @@
     win32
 [QtCore::bug_829]
     win32
-[QtCore::bug_1063]
-    linux
-    darwin
-    win32
-[QtCore::deepcopy_test]
-    linux
-    darwin
-    win32
 [QtCore::qfile_test]
     win32
     darwin py3
@@ -25,14 +17,6 @@
 [QtCore::qflags_test]
     py3
 [QtCore::qobject_connect_notify_test]
-    linux
-    darwin
-    win32
-[QtCore::qtextstream_test]
-    linux
-    darwin
-    win32
-[QtCore::repr_test]
     linux
     darwin
     win32
