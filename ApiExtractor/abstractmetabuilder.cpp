@@ -1587,23 +1587,23 @@ AbstractMetaFunctionList AbstractMetaBuilderPrivate::classFunctionList(const Sco
 // template class<T>
 // Vector<T>::Vector(const Vector<T>&) {} // More specific, remove declaration.
 
+class DuplicatingFunctionPredicate : public std::unary_function<bool, const AbstractMetaFunction *> {
+public:
+    explicit DuplicatingFunctionPredicate(const AbstractMetaFunction *f) : m_function(f) {}
+
+    bool operator()(const AbstractMetaFunction *rhs) const
+    {
+        return rhs != m_function && rhs->name() == m_function->name()
+            && _compareAbstractMetaFunctions(m_function, rhs);
+    }
+
+private:
+    const AbstractMetaFunction *m_function;
+};
+
 AbstractMetaFunctionList AbstractMetaBuilderPrivate::templateClassFunctionList(const ScopeModelItem &scopeItem,
                                                                                AbstractMetaClass *metaClass)
 {
-    class DuplicatingFunctionPredicate : public std::unary_function<bool, const AbstractMetaFunction *> {
-    public:
-        explicit DuplicatingFunctionPredicate(const AbstractMetaFunction *f) : m_function(f) {}
-
-        bool operator()(const AbstractMetaFunction *rhs) const
-        {
-            return rhs != m_function && rhs->name() == m_function->name()
-                && _compareAbstractMetaFunctions(m_function, rhs);
-        }
-
-    private:
-        const AbstractMetaFunction *m_function;
-    };
-
     AbstractMetaFunctionList result;
     AbstractMetaFunctionList unchangedFunctions;
 
