@@ -819,7 +819,6 @@ public:
             m_class(0),
             m_implementingClass(0),
             m_declaringClass(0),
-            m_interfaceClass(0),
             m_propertySpec(0),
             m_constant(false),
             m_invalid(false),
@@ -1153,18 +1152,6 @@ public:
      */
     QString argumentName(int index, bool create = true, const AbstractMetaClass *cl = 0) const;
 
-    // If this function stems from an interface, this returns the
-    // interface that declares it.
-    const AbstractMetaClass *interfaceClass() const
-    {
-        return m_interfaceClass;
-    }
-
-    void setInterfaceClass(const AbstractMetaClass *cl)
-    {
-        m_interfaceClass = cl;
-    }
-
     void setPropertySpec(QPropertySpec *spec)
     {
         m_propertySpec = spec;
@@ -1204,7 +1191,6 @@ private:
     const AbstractMetaClass *m_class;
     const AbstractMetaClass *m_implementingClass;
     const AbstractMetaClass *m_declaringClass;
-    const AbstractMetaClass *m_interfaceClass;
     QPropertySpec *m_propertySpec;
     AbstractMetaArgumentList m_arguments;
     uint m_constant                 : 1;
@@ -1439,7 +1425,6 @@ public:
               m_baseClass(0),
               m_templateBaseClass(0),
               m_extractedInterface(0),
-              m_primaryInterfaceImplementor(0),
               m_typeEntry(0),
               m_stream(false)
     {
@@ -1511,16 +1496,12 @@ public:
 
     AbstractMetaFunctionList queryFunctionsByName(const QString &name) const;
     AbstractMetaFunctionList queryFunctions(FunctionQueryOptions query) const;
-    inline AbstractMetaFunctionList allVirtualFunctions() const;
-    inline AbstractMetaFunctionList allFinalFunctions() const;
     AbstractMetaFunctionList functionsInTargetLang() const;
     AbstractMetaFunctionList functionsInShellClass() const;
-    inline AbstractMetaFunctionList cppInconsistentFunctions() const;
     inline AbstractMetaFunctionList cppSignalFunctions() const;
     AbstractMetaFunctionList publicOverrideFunctions() const;
     AbstractMetaFunctionList virtualOverrideFunctions() const;
     AbstractMetaFunctionList virtualFunctions() const;
-    AbstractMetaFunctionList nonVirtualShellFunctions() const;
     AbstractMetaFunctionList implicitConversions() const;
 
     /**
@@ -1645,7 +1626,6 @@ public:
 
     QString qualifiedCppName() const;
 
-    bool hasInconsistentFunctions() const;
     bool hasSignals() const;
     bool inheritsFrom(const AbstractMetaClass *other) const;
 
@@ -1720,16 +1700,6 @@ public:
         m_baseClassNames = names;
     }
 
-    AbstractMetaClass *primaryInterfaceImplementor() const
-    {
-        return m_primaryInterfaceImplementor;
-    }
-
-    void setPrimaryInterfaceImplementor(AbstractMetaClass *cl)
-    {
-        m_primaryInterfaceImplementor = cl;
-    }
-
     const ComplexTypeEntry *typeEntry() const
     {
         return m_typeEntry;
@@ -1789,68 +1759,6 @@ public:
     QPropertySpec *propertySpecForRead(const QString &name) const;
     QPropertySpec *propertySpecForWrite(const QString &name) const;
     QPropertySpec *propertySpecForReset(const QString &name) const;
-
-    QList<ReferenceCount> referenceCounts() const;
-
-    void setEqualsFunctions(const AbstractMetaFunctionList &lst)
-    {
-        m_equalsFunctions = lst;
-    }
-
-    AbstractMetaFunctionList equalsFunctions() const
-    {
-        return m_equalsFunctions;
-    }
-
-    void setNotEqualsFunctions(const AbstractMetaFunctionList &lst)
-    {
-        m_nequalsFunctions = lst;
-    }
-
-    AbstractMetaFunctionList notEqualsFunctions() const
-    {
-        return m_nequalsFunctions;
-    }
-
-    void setLessThanFunctions(const AbstractMetaFunctionList &lst)
-    {
-        m_lessThanFunctions = lst;
-    }
-
-    AbstractMetaFunctionList lessThanFunctions() const
-    {
-        return m_lessThanFunctions;
-    }
-
-    void setGreaterThanFunctions(const AbstractMetaFunctionList &lst)
-    {
-        m_greaterThanFunctions = lst;
-    }
-
-    AbstractMetaFunctionList greaterThanFunctions() const
-    {
-        return m_greaterThanFunctions;
-    }
-
-    void setLessThanEqFunctions(const AbstractMetaFunctionList &lst)
-    {
-        m_lessThanEqFunctions = lst;
-    }
-
-    AbstractMetaFunctionList lessThanEqFunctions() const
-    {
-        return m_lessThanEqFunctions;
-    }
-
-    void setGreaterThanEqFunctions(const AbstractMetaFunctionList &lst)
-    {
-        m_greaterThanEqFunctions = lst;
-    }
-
-    AbstractMetaFunctionList greaterThanEqFunctions() const
-    {
-        return m_greaterThanEqFunctions;
-    }
 
     /// Returns a list of conversion operators for this class. The conversion operators are defined in other classes of the same module.
     AbstractMetaFunctionList externalConversionOperators() const
@@ -1944,18 +1852,9 @@ private:
     AbstractMetaFieldList m_fields;
     AbstractMetaEnumList m_enums;
     AbstractMetaClassList m_interfaces;
-    AbstractMetaClassList m_orphanInterfaces;
     AbstractMetaClass *m_extractedInterface;
-    AbstractMetaClass *m_primaryInterfaceImplementor;
     QList<QPropertySpec *> m_propertySpecs;
-    AbstractMetaFunctionList m_equalsFunctions;
-    AbstractMetaFunctionList m_nequalsFunctions;
     AbstractMetaClassList m_innerClasses;
-
-    AbstractMetaFunctionList m_lessThanFunctions;
-    AbstractMetaFunctionList m_greaterThanFunctions;
-    AbstractMetaFunctionList m_lessThanEqFunctions;
-    AbstractMetaFunctionList m_greaterThanEqFunctions;
 
     AbstractMetaFunctionList m_externalConversionOperators;
 
@@ -1965,7 +1864,6 @@ private:
 //     FunctionModelItem m_qDebugStreamFunction;
 
     bool m_stream;
-    static int m_count;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaClass::FunctionQueryOptions)
@@ -2053,26 +1951,6 @@ private:
     const TypeEntry *m_type;
     int m_index;
 };
-
-inline AbstractMetaFunctionList AbstractMetaClass::allVirtualFunctions() const
-{
-    return queryFunctions(VirtualFunctions | NotRemovedFromTargetLang);
-}
-
-inline AbstractMetaFunctionList AbstractMetaClass::allFinalFunctions() const
-{
-    return queryFunctions(FinalInTargetLangFunctions
-                          | FinalInCppFunctions
-                          | NotRemovedFromTargetLang);
-}
-
-inline AbstractMetaFunctionList AbstractMetaClass::cppInconsistentFunctions() const
-{
-    return queryFunctions(Inconsistent
-                          | NormalFunctions
-                          | Visible
-                          | NotRemovedFromTargetLang);
-}
 
 inline AbstractMetaFunctionList AbstractMetaClass::cppSignalFunctions() const
 {

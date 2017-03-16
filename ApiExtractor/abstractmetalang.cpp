@@ -499,7 +499,6 @@ AbstractMetaFunction *AbstractMetaFunction::copy() const
     cpy->setOriginalName(originalName());
     cpy->setOwnerClass(ownerClass());
     cpy->setImplementingClass(implementingClass());
-    cpy->setInterfaceClass(interfaceClass());
     cpy->setFunctionType(functionType());
     cpy->setAttributes(attributes());
     cpy->setDeclaringClass(declaringClass());
@@ -1259,7 +1258,6 @@ AbstractMetaClass::~AbstractMetaClass()
     qDeleteAll(m_functions);
     qDeleteAll(m_fields);
     qDeleteAll(m_enums);
-    qDeleteAll(m_orphanInterfaces);
     if (hasTemplateBaseClassInstantiations()) {
         foreach (AbstractMetaType* inst, templateBaseClassInstantiations())
             delete inst;
@@ -1296,7 +1294,6 @@ AbstractMetaClass *AbstractMetaClass::extractInterface()
         AbstractMetaClass *iface = new AbstractMetaClass;
         iface->setAttributes(attributes());
         iface->setBaseClass(0);
-        iface->setPrimaryInterfaceImplementor(this);
 
         iface->setTypeEntry(typeEntry()->designatedInterface());
 
@@ -1318,7 +1315,6 @@ AbstractMetaClass *AbstractMetaClass::extractInterface()
 
         m_extractedInterface = iface;
         addInterface(iface);
-        m_orphanInterfaces << iface;
     }
 
     return m_extractedInterface;
@@ -1335,20 +1331,6 @@ AbstractMetaFunctionList AbstractMetaClass::queryFunctionsByName(const QString &
         if (function->name() == name)
             returned.append(function);
     }
-
-    return returned;
-}
-
-/*******************************************************************************
- * Returns all reference count modifications for any function in the class
- */
-QList<ReferenceCount> AbstractMetaClass::referenceCounts() const
-{
-    QList<ReferenceCount> returned;
-
-    AbstractMetaFunctionList functions = this->functions();
-    foreach (AbstractMetaFunction *function, functions)
-        returned += function->referenceCounts(this);
 
     return returned;
 }
@@ -1396,18 +1378,6 @@ AbstractMetaFunctionList AbstractMetaClass::virtualFunctions() const
     AbstractMetaFunctionList returned;
     foreach (AbstractMetaFunction *f, list) {
         if (!f->isFinalInCpp() || f->isVirtualSlot())
-            returned += f;
-    }
-
-    return returned;
-}
-
-AbstractMetaFunctionList AbstractMetaClass::nonVirtualShellFunctions() const
-{
-    AbstractMetaFunctionList list = functionsInShellClass();
-    AbstractMetaFunctionList returned;
-    foreach (AbstractMetaFunction *f, list) {
-        if (f->isFinalInCpp() && !f->isVirtualSlot())
             returned += f;
     }
 
@@ -2204,12 +2174,6 @@ AbstractMetaFunctionList AbstractMetaClass::queryFunctions(FunctionQueryOptions 
     }
 
     return functions;
-}
-
-
-bool AbstractMetaClass::hasInconsistentFunctions() const
-{
-    return cppInconsistentFunctions().size() > 0;
 }
 
 bool AbstractMetaClass::hasSignals() const
