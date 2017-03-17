@@ -145,7 +145,7 @@ bool Handler::parse(QXmlStreamReader &reader)
             }
             break;
         case QXmlStreamReader::Characters:
-            if (!characters(reader.text().toString())) {
+            if (!characters(reader.text())) {
                 m_error = msgReaderError(reader, m_error);
                 return false;
             }
@@ -322,7 +322,8 @@ bool Handler::endElement(const QStringRef &localName)
     return true;
 }
 
-bool Handler::characters(const QString &ch)
+template <class String> // QString/QStringRef
+bool Handler::characters(const String &ch)
 {
     if (m_currentDroppedEntry || m_ignoreDepth)
         return true;

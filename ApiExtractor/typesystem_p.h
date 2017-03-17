@@ -141,7 +141,8 @@ public:
 private:
     bool startElement(const QStringRef& localName, const QXmlStreamAttributes& atts);
     bool endElement(const QStringRef& localName);
-    bool characters(const QString &ch);
+    template <class String> // QString/QStringRef
+    bool characters(const String &ch);
     void fetchAttributeValues(const QString &name, const QXmlStreamAttributes &atts,
                               QHash<QString, QString> *acceptedAttributes);
 

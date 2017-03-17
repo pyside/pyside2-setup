@@ -118,10 +118,8 @@ class CodeSnipAbstract
 public:
     QString code() const;
 
-    void addCode(const QString &code)
-    {
-        codeList.append(CodeSnipFragment(code));
-    }
+    void addCode(const QString &code) { codeList.append(CodeSnipFragment(code)); }
+    void addCode(const QStringRef &code) { addCode(code.toString()); }
 
     void addTemplateInstance(TemplateInstance *ti)
     {
@@ -533,10 +531,9 @@ public:
     DocModification(TypeSystem::DocModificationMode mode, const QString& signature, double vr)
             : m_mode(mode), m_signature(signature), m_version(vr) {}
 
-    void setCode(const QString& code)
-    {
-        m_code = code;
-    }
+    void setCode(const QString& code) { m_code = code; }
+    void setCode(const QStringRef& code) { m_code = code.toString(); }
+
     QString code() const
     {
         return m_code;
