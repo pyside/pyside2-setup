@@ -779,12 +779,25 @@ QString ShibokenGenerator::cpythonTypeNameExt(const AbstractMetaType* type)
            + getTypeIndexVariableName(type) + QLatin1Char(']');
 }
 
+static QString msgUnknownOperator(const AbstractMetaFunction* func)
+{
+    QString result = QLatin1String("Unknown operator: \"") + func->originalName() + QLatin1Char('"');
+    if (const AbstractMetaClass *c = func->implementingClass())
+        result += QLatin1String(" in class: ") + c->name();
+    return result;
+}
+
+static inline QString unknownOperator() { return QStringLiteral("__UNKNOWN_OPERATOR__"); }
+
 QString ShibokenGenerator::cpythonOperatorFunctionName(const AbstractMetaFunction* func)
 {
     if (!func->isOperatorOverload())
         return QString();
+    const QString pythonOp = pythonOperatorFunctionName(func->originalName());
+    if (pythonOp == unknownOperator())
+        qCWarning(lcShiboken).noquote().nospace() << msgUnknownOperator(func);
     return QLatin1String("Sbk") + func->ownerClass()->name()
-            + QLatin1Char('_') + pythonOperatorFunctionName(func->originalName());
+            + QLatin1Char('_') + pythonOp;
 }
 
 QString ShibokenGenerator::fixedCppTypeName(const CustomConversion::TargetToNativeConversion* toNative)
@@ -847,10 +860,8 @@ QString ShibokenGenerator::pythonPrimitiveTypeName(const PrimitiveTypeEntry* typ
 QString ShibokenGenerator::pythonOperatorFunctionName(QString cppOpFuncName)
 {
     QString value = m_pythonOperators.value(cppOpFuncName);
-    if (value.isEmpty()) {
-        qCWarning(lcShiboken).noquote().nospace() << "Unknown operator:  " << cppOpFuncName;
-        value = QLatin1String("UNKNOWN_OPERATOR");
-    }
+    if (value.isEmpty())
+        return unknownOperator();
     value.prepend(QLatin1String("__"));
     value.append(QLatin1String("__"));
     return value;
@@ -859,6 +870,8 @@ QString ShibokenGenerator::pythonOperatorFunctionName(QString cppOpFuncName)
 QString ShibokenGenerator::pythonOperatorFunctionName(const AbstractMetaFunction* func)
 {
     QString op = pythonOperatorFunctionName(func->originalName());
+    if (op == unknownOperator())
+        qCWarning(lcShiboken).noquote().nospace() << msgUnknownOperator(func);
     if (func->arguments().isEmpty()) {
         if (op == QLatin1String("__sub__"))
             op = QLatin1String("__neg__");
