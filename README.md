@@ -20,6 +20,28 @@ Then download the sources by running
 
 ### Building
 
+#### Dependencies
+
+PySide versions following 5.6 use a C++ parser based on
+[Clang](http://clang.org/). The Clang library (C-bindings), version 3.9 or
+higher is required for building. Prebuilt versions of it can be downloaded from
+[download.qt.io](http://download.qt.io/development_releases/prebuilt/libclang/).
+
+After unpacking the archive, set the environment variable *CLANG_INSTALL_DIR* to
+point to the folder containing the *include* and *lib* directories of Clang:
+
+    7z x .../libclang-release_39-linux-Rhel7.2-gcc5.3-x86_64.7z
+    export CLANG_INSTALL_DIR=$PWD/libclang
+
+On Windows, the *PATH* variable must be set in addition for the shared library to be
+found:
+
+    7z x .../libclang-release_39-windows-vs2015_64.7z
+    SET CLANG_INSTALL_DIR=%CD%\libclang
+    SET PATH=%CLANG_INSTALL_DIR%\bin;%PATH%
+
+#### Build Instructions
+
 You might consider using a virtual environment as described at
 [getting started](https://wiki.qt.io/PySide2_GettingStarted).
 You should be able to build:
