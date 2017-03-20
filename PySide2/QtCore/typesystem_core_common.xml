@@ -3606,6 +3606,10 @@
     <modify-function signature="readLine(qint64)" allow-thread="yes"/>
     <modify-function signature="readAll()" allow-thread="yes"/>
   </object-type>
+  <object-type name="QStandardPaths" since="5.0">
+    <enum-type name="StandardLocation"/>
+    <enum-type name="LocateOption" flags="LocateOptions"/>
+  </object-type>
   <object-type name="QSystemSemaphore">
     <enum-type name="AccessMode"/>
     <enum-type name="SystemSemaphoreError"/>

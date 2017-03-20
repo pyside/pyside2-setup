@@ -107,6 +107,7 @@ ${QtCore_GEN_DIR}/qsizef_wrapper.cpp
 ${QtCore_GEN_DIR}/qsocketnotifier_wrapper.cpp
 ${QtCore_GEN_DIR}/qsortfilterproxymodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qstate_wrapper.cpp
+${QtCore_GEN_DIR}/qstandardpaths_wrapper.cpp
 ${QtCore_GEN_DIR}/qstatemachine_signalevent_wrapper.cpp
 ${QtCore_GEN_DIR}/qstatemachine_wrappedevent_wrapper.cpp
 ${QtCore_GEN_DIR}/qstatemachine_wrapper.cpp

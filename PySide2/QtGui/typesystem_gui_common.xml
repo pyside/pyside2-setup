@@ -1482,6 +1482,7 @@
   </object-type>
   <object-type name="QPyTextObject" />
 
+  <object-type name="QDesktopServices" since="4.2" />
   <object-type name="QDoubleValidator">
       <enum-type name="Notation"/>
   </object-type>

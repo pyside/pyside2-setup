@@ -16,6 +16,7 @@ ${QtGui_GEN_DIR}/qcolor_wrapper.cpp
 ${QtGui_GEN_DIR}/qconicalgradient_wrapper.cpp
 ${QtGui_GEN_DIR}/qcontextmenuevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qcursor_wrapper.cpp
+${QtGui_GEN_DIR}/qdesktopservices_wrapper.cpp
 ${QtGui_GEN_DIR}/qdoublevalidator_wrapper.cpp
 ${QtGui_GEN_DIR}/qdrag_wrapper.cpp
 ${QtGui_GEN_DIR}/qdragenterevent_wrapper.cpp
