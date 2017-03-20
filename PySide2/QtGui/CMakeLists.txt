@@ -118,6 +118,7 @@ ${QtGui_GEN_DIR}/qtextcharformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qtextcursor_wrapper.cpp
 ${QtGui_GEN_DIR}/qtextdocument_wrapper.cpp
 ${QtGui_GEN_DIR}/qtextdocumentfragment_wrapper.cpp
+${QtGui_GEN_DIR}/qtextdocumentwriter_wrapper.cpp
 ${QtGui_GEN_DIR}/qtextformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qtextfragment_wrapper.cpp
 ${QtGui_GEN_DIR}/qtextframe_iterator_wrapper.cpp

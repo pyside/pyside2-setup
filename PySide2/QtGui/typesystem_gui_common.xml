@@ -2149,6 +2149,7 @@
     </modify-function>
     <modify-function signature="print(QPagedPaintDevice*)const" rename="print_" />
   </object-type>
+  <object-type name="QTextDocumentWriter" since="4.5" />
   <object-type name="QTextTable">
     <extra-includes>
       <include file-name="QTextCursor" location="global"/>
