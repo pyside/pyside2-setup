@@ -370,11 +370,21 @@ def prepareSubModules():
         module_dir = m[2]
         os.chdir(module_dir)
         currentBranch = ''
+        branches = set()
         for line in run_process_output(['git', 'branch']):
             if line.startswith('* '):
                 currentBranch = line[2:len(line)]
-                break
+            else:
+                branches.add(line.strip())
         if currentBranch != module_version:
+            if not module_version in branches:
+                print("Creating tracking branch %s for submodule %s" % \
+                      (module_version, module_name))
+                git_create_branch_cmd = ["git", "branch", "--track", module_version,
+                                         "origin/" + module_version]
+                if run_process(git_create_branch_cmd) != 0:
+                    raise DistutilsSetupError("Failed to create a tracking branch %s for %s" % \
+                                              (module_version, module_name))
             print("Checking out submodule %s to branch %s (from %s)" % (module_name, module_version, currentBranch))
             git_checkout_cmd = ["git", "checkout", module_version]
             if run_process(git_checkout_cmd) != 0:
