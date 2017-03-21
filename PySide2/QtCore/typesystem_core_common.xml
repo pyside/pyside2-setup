@@ -3172,6 +3172,9 @@
   </object-type>
   <object-type name="QSignalMapper" />
 
+  <object-type name="QCollatorSortKey" since="5.2" />
+  <object-type name="QCollator" since="5.2" />
+
   <object-type name="QCoreApplication">
     <!--Qt5: gone <enum-type name="Encoding" /> -->
     <enum-type identified-by-value="ApplicationFlags" since="4.8" revision="4800"/>

@@ -31,6 +31,8 @@ ${QtCore_GEN_DIR}/qbuffer_wrapper.cpp
 ${QtCore_GEN_DIR}/qbytearray_wrapper.cpp
 ${QtCore_GEN_DIR}/qbytearraymatcher_wrapper.cpp
 ${QtCore_GEN_DIR}/qchildevent_wrapper.cpp
+${QtCore_GEN_DIR}/qcollator_wrapper.cpp
+${QtCore_GEN_DIR}/qcollatorsortkey_wrapper.cpp
 ${QtCore_GEN_DIR}/qcoreapplication_wrapper.cpp
 ${QtCore_GEN_DIR}/qcryptographichash_wrapper.cpp
 ${QtCore_GEN_DIR}/qdatastream_wrapper.cpp
