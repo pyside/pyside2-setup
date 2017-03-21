@@ -81,8 +81,11 @@ class ReturnsQuadruplesOfNumbers(UsesQApplication):
     def testQPrinterGetPageMargins(self):
         # Bug #742
         obj = QPrinter()
-        values = (10.0, 20.0, 30.0, 40.0, QPrinter.Point)
+        # On macOS the minimum margin of a page is ~12, setting something lower than that will
+        # actually fail to set all the margins.
+        values = (15.0, 16.0, 17.0, 18.0, QPrinter.Point)
         obj.setPageMargins(*values)
+        print obj.getPageMargins(QPrinter.Point), values[:-1]
         self.assertTrue(self.compareTuples(obj.getPageMargins(QPrinter.Point), values[:-1]))
 
 if __name__ == "__main__":
