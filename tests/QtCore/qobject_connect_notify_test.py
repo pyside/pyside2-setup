@@ -69,7 +69,10 @@ class TestQObjectConnectNotify(UsesQCoreApplication):
         receiver = QObject()
         sender.connect(SIGNAL("destroyed()"), receiver, SLOT("deleteLater()"))
         self.assertTrue(sender.con_notified)
-        self.assertEqual(sender.signal, SIGNAL("destroyed()"))
+        # When connecting to a regular slot, and not a python callback function, QObject::connect
+        # will use the non-cloned method signature, so connecting to destroyed() will actually
+        # connect to destroyed(QObject*).
+        self.assertEqual(sender.signal.methodSignature(), "destroyed(QObject*)")
         sender.disconnect(SIGNAL("destroyed()"), receiver, SLOT("deleteLater()"))
         self.assertTrue(sender.dis_notified)
 
