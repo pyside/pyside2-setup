@@ -42,6 +42,7 @@
 <typesystem package="PySide2.QtScriptTools">
     <load-typesystem name="typesystem_script.xml" generate="no" />
     <load-typesystem name="typesystem_gui.xml" generate="no" />
+    <load-typesystem name="typesystem_widgets.xml" generate="no" />
 
     <object-type name="QScriptEngineDebugger">
         <enum-type name="DebuggerAction"/>

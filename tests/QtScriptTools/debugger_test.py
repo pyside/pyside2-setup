@@ -62,7 +62,11 @@ class DebuggerTest(UsesQApplication):
         self.debugger.connect(SIGNAL('evaluationSuspended()'), self.suspended)
         self.debugger.connect(SIGNAL('evaluationResumed()'), self.resumed)
 
-        self.debugger.action(QScriptEngineDebugger.InterruptAction).trigger()
+        # For some reason StepIntoAction does not actually continue execution, and thus interrupting
+        # causes the test to hang. The same behavior is present in a Qt5.6 C++ code equivalent. It
+        # seems like a bug in QtScript, thus the interruption is commented out for now, which will
+        # force the test to fail.
+        #self.debugger.action(QScriptEngineDebugger.InterruptAction).trigger()
         self.engine.evaluate("3+4\n2+1\n5+1")
         self.assertTrue(self.has_resumed >= 1)
         self.assertTrue(self.has_suspended >= 1)
