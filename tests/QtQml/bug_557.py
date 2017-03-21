@@ -27,6 +27,7 @@
 #############################################################################
 
 import sys
+from helper import adjust_filename
 
 from PySide2.QtCore import QUrl
 from PySide2.QtGui import QGuiApplication
@@ -38,5 +39,5 @@ engine = QQmlEngine()
 component = QQmlComponent(engine)
 
 # This should segfault if the QDeclarativeComponent has not QQmlEngine
-component.loadUrl(QUrl.fromLocalFile('foo.qml'))
+component.loadUrl(QUrl.fromLocalFile(adjust_filename('foo.qml', __file__)))
 
