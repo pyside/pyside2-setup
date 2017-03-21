@@ -52,10 +52,10 @@ class testAudioDevices(unittest.TestCase):
             fmt = QAudioFormat()
             for codec in devInfo.supportedCodecs():
                 fmt.setCodec(codec)
-                for frequency in devInfo.supportedFrequencies():
-                    fmt.setFrequency(frequency)
-                    for channels in devInfo.supportedChannels():
-                        fmt.setChannels(channels)
+                for frequency in devInfo.supportedSampleRates():
+                    fmt.setSampleRate(frequency)
+                    for channels in devInfo.supportedChannelCounts():
+                        fmt.setChannelCount(channels)
                         for sampleType in devInfo.supportedSampleTypes():
                             fmt.setSampleType(sampleType)
                             for sampleSize in devInfo.supportedSampleSizes():
