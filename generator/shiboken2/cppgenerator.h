@@ -39,12 +39,12 @@ class CppGenerator : public ShibokenGenerator
 public:
     CppGenerator();
 protected:
-    QString fileNamePrefix() const;
-    QString fileNameForContext(GeneratorContext &context) const;
+    QString fileNamePrefix() const override;
+    QString fileNameForContext(GeneratorContext &context) const override;
     QList<AbstractMetaFunctionList> filterGroupedOperatorFunctions(const AbstractMetaClass* metaClass,
                                                                    uint query);
-    void generateClass(QTextStream& s, GeneratorContext &classContext);
-    bool finishGeneration();
+    void generateClass(QTextStream& s, GeneratorContext &classContext) override;
+    bool finishGeneration() override;
 
 private:
     void writeConstructorNative(QTextStream& s, const AbstractMetaFunction* func);

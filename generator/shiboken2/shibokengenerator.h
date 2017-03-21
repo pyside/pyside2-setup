@@ -117,7 +117,7 @@ public:
 
     void writeArgumentNames(QTextStream &s,
                             const AbstractMetaFunction* func,
-                            Options options = NoOption) const;
+                            Options options = NoOption) const override;
 
     /**
      *   Function used to write the fucntion arguments on the class buffer.
@@ -128,7 +128,7 @@ public:
      */
     void writeFunctionArguments(QTextStream &s,
                                 const AbstractMetaFunction* func,
-                                Options options = NoOption) const;
+                                Options options = NoOption) const override;
     QString functionReturnType(const AbstractMetaFunction* func, Options options = NoOption) const;
 
     /// Utility function for writeCodeSnips.
@@ -412,7 +412,7 @@ public:
     QString extendedIsConvertibleFunctionName(const TypeEntry* targetType) const;
     QString extendedToCppFunctionName(const TypeEntry* targetType) const;
 
-    QMap< QString, QString > options() const;
+    QMap< QString, QString > options() const override;
 
     /// Returns true if the user enabled the so called "parent constructor heuristic".
     bool useCtorHeuristic() const;

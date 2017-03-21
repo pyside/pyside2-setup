@@ -41,12 +41,12 @@ class AbstractMetaFunction;
 class HeaderGenerator : public ShibokenGenerator
 {
 public:
-    QMap<QString, QString> options() const { return QMap<QString, QString>(); }
+    QMap<QString, QString> options() const override { return QMap<QString, QString>(); }
 protected:
-    QString fileNamePrefix() const;
-    QString fileNameForContext(GeneratorContext &context) const;
-    void generateClass(QTextStream& s, GeneratorContext &classContext);
-    bool finishGeneration();
+    QString fileNamePrefix() const override;
+    QString fileNameForContext(GeneratorContext &context) const override;
+    void generateClass(QTextStream& s, GeneratorContext &classContext) override;
+    bool finishGeneration() override;
 
 private:
     void writeCopyCtor(QTextStream &s, const AbstractMetaClass* metaClass) const;

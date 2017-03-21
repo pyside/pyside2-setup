@@ -1004,11 +1004,11 @@ public:
         return m_nestedType;
     }
 
-    QString targetLangName() const
+    QString targetLangName() const override
     {
         return m_nestedType->targetLangName() + QLatin1String("[]");
     }
-    QString targetLangApiName() const
+    QString targetLangApiName() const override
     {
         if (m_nestedType->isPrimitive())
             return m_nestedType->targetLangApiName() + QLatin1String("Array");
@@ -1032,7 +1032,7 @@ public:
     {
     }
 
-    QString targetLangName() const
+    QString targetLangName() const override
     {
         return m_targetLangName;
     }
@@ -1041,7 +1041,7 @@ public:
         m_targetLangName  = targetLangName;
     }
 
-    QString targetLangApiName() const
+    QString targetLangApiName() const override
     {
         return m_targetLangApiName;
     }
@@ -1088,26 +1088,26 @@ public:
      */
     PrimitiveTypeEntry* basicReferencedTypeEntry() const;
 
-    virtual bool preferredConversion() const
+    bool preferredConversion() const override
     {
         return m_preferredConversion;
     }
-    virtual void setPreferredConversion(bool b)
+    void setPreferredConversion(bool b) override
     {
         m_preferredConversion = b;
     }
 
-    virtual bool preferredTargetLangType() const
+    bool preferredTargetLangType() const
     {
         return m_preferredTargetLangType;
     }
-    virtual void setPreferredTargetLangType(bool b)
+    void setPreferredTargetLangType(bool b)
     {
         m_preferredTargetLangType = b;
     }
 
     void setTargetLangPackage(const QString& package);
-    QString targetLangPackage() const;
+    QString targetLangPackage() const override;
 private:
     QString m_targetLangName;
     QString m_targetLangApiName;
@@ -1157,7 +1157,7 @@ public:
         return m_targetLangName;
     }
     QString targetLangQualifier() const;
-    QString qualifiedTargetLangName() const
+    QString qualifiedTargetLangName() const override
     {
         QString qualifiedName;
         QString pkg = targetLangPackage();
@@ -1172,7 +1172,7 @@ public:
         return qualifiedName;
     }
 
-    QString targetLangApiName() const;
+    QString targetLangApiName() const override;
 
     QString qualifier() const
     {
@@ -1183,7 +1183,7 @@ public:
         m_qualifier = q;
     }
 
-    virtual bool preferredConversion() const
+    bool preferredConversion() const override
     {
         return false;
     }
@@ -1303,13 +1303,13 @@ public:
     {
     }
 
-    QString qualifiedTargetLangName() const;
-    QString targetLangName() const
+    QString qualifiedTargetLangName() const override;
+    QString targetLangName() const override
     {
         return m_targetLangName;
     }
-    QString targetLangApiName() const;
-    virtual bool preferredConversion() const
+    QString targetLangApiName() const override;
+    bool preferredConversion() const override
     {
         return false;
     }
@@ -1346,7 +1346,7 @@ public:
         m_enum = e;
     }
 
-    QString targetLangPackage() const
+    QString targetLangPackage() const override
     {
         return m_enum->targetLangPackage();
     }
@@ -1414,12 +1414,12 @@ public:
         m_lookupName = name;
     }
 
-    virtual QString lookupName() const
+    QString lookupName() const override
     {
         return m_lookupName.isEmpty() ? targetLangName() : m_lookupName;
     }
 
-    QString targetLangApiName() const;
+    QString targetLangApiName() const override;
 
     void setTypeFlags(TypeFlags flags)
     {
@@ -1495,7 +1495,7 @@ public:
         m_defaultSuperclass = sc;
     }
 
-    virtual QString qualifiedCppName() const
+    QString qualifiedCppName() const override
     {
         return m_qualifiedCppName;
     }
@@ -1547,7 +1547,7 @@ public:
         m_targetType = code;
     }
 
-    QString targetLangName() const
+    QString targetLangName() const override
     {
         return m_targetLangName.isEmpty()
                ? TypeEntry::targetLangName()
@@ -1728,12 +1728,12 @@ class ValueTypeEntry : public ComplexTypeEntry
 public:
     ValueTypeEntry(const QString &name, double vr) : ComplexTypeEntry(name, BasicValueType, vr) { }
 
-    bool isValue() const
+    bool isValue() const override
     {
         return true;
     }
 
-    virtual bool isNativeIdBased() const
+    bool isNativeIdBased() const override
     {
         return true;
     }
@@ -1752,11 +1752,11 @@ public:
         setCodeGeneration(GenerateNothing);
     }
 
-    QString targetLangApiName() const;
-    QString targetLangName() const;
-    QString targetLangPackage() const;
+    QString targetLangApiName() const override;
+    QString targetLangName() const override;
+    QString targetLangPackage() const override;
 
-    virtual bool isNativeIdBased() const
+    bool isNativeIdBased() const override
     {
         return false;
     }
@@ -1770,14 +1770,14 @@ public:
         setCodeGeneration(GenerateNothing);
     }
 
-    QString targetLangApiName() const;
-    QString targetLangName() const;
-    QString targetLangPackage() const
+    QString targetLangApiName() const override;
+    QString targetLangName() const override;
+    QString targetLangPackage() const override
     {
         return QString();
     }
 
-    virtual bool isNativeIdBased() const
+    bool isNativeIdBased() const override
     {
         return false;
     }
@@ -1788,11 +1788,11 @@ class VariantTypeEntry: public ValueTypeEntry
 public:
     VariantTypeEntry(const QString &name, double vr) : ValueTypeEntry(name, VariantType, vr) { }
 
-    QString targetLangApiName() const;
-    QString targetLangName() const;
-    QString targetLangPackage() const;
+    QString targetLangApiName() const override;
+    QString targetLangName() const override;
+    QString targetLangPackage() const override;
 
-    virtual bool isNativeIdBased() const
+    bool isNativeIdBased() const override
     {
         return false;
     }
@@ -1819,11 +1819,11 @@ public:
         m_origin = origin;
     }
 
-    virtual bool isNativeIdBased() const
+    bool isNativeIdBased() const override
     {
         return true;
     }
-    virtual QString qualifiedCppName() const
+    QString qualifiedCppName() const override
     {
         const int len = ComplexTypeEntry::qualifiedCppName().length() - interfaceName(QString()).length();
         return ComplexTypeEntry::qualifiedCppName().left(len);
@@ -1875,7 +1875,7 @@ public:
         m_interface = entry;
     }
 
-    virtual bool isNativeIdBased() const
+    bool isNativeIdBased() const override
     {
         return true;
     }

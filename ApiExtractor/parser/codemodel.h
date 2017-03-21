@@ -320,7 +320,7 @@ public:
     FunctionModelItem declaredFunction(FunctionModelItem item);
 
 #ifndef QT_NO_DEBUG_STREAM
-    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+    void formatDebug(QDebug &d) const override;
 #endif
 
 protected:
@@ -372,7 +372,7 @@ public:
     QStringList propertyDeclarations() const { return m_propertyDeclarations; }
 
 #ifndef QT_NO_DEBUG_STREAM
-    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+    void formatDebug(QDebug &d) const override;
 #endif
 
 private:
@@ -402,7 +402,7 @@ public:
     NamespaceModelItem findNamespace(const QString &name) const;
 
 #ifndef QT_NO_DEBUG_STREAM
-    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+    void formatDebug(QDebug &d) const override;
 #endif
 
 private:
@@ -442,7 +442,7 @@ public:
     void setDefaultValueExpression(const QString &expr) { m_defaultValueExpression = expr; }
 
 #ifndef QT_NO_DEBUG_STREAM
-    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+    void formatDebug(QDebug &d) const override;
 #endif
 
 private:
@@ -496,7 +496,7 @@ public:
     void setType(const TypeInfo &type);
 
 #ifndef QT_NO_DEBUG_STREAM
-    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+    void formatDebug(QDebug &d) const override;
 #endif
 
 private:
@@ -558,7 +558,7 @@ public:
     bool isSimilar(FunctionModelItem other) const;
 
 #ifndef QT_NO_DEBUG_STREAM
-    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+    void formatDebug(QDebug &d) const override;
 #endif
 
 private:
@@ -602,7 +602,7 @@ public:
     void setType(const TypeInfo &type);
 
 #ifndef QT_NO_DEBUG_STREAM
-    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+    void formatDebug(QDebug &d) const override;
 #endif
 
 private:
@@ -629,7 +629,7 @@ public:
     void setAnonymous(bool anonymous);
 
 #ifndef QT_NO_DEBUG_STREAM
-    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+    void formatDebug(QDebug &d) const override;
 #endif
 
 private:
@@ -653,7 +653,7 @@ public:
     void setValue(const QString &value);
 
 #ifndef QT_NO_DEBUG_STREAM
-    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+    void formatDebug(QDebug &d) const override;
 #endif
 
 private:
@@ -678,7 +678,7 @@ public:
     void setDefaultValue(bool defaultValue);
 
 #ifndef QT_NO_DEBUG_STREAM
-    void formatDebug(QDebug &d) const Q_DECL_OVERRIDE;
+    void formatDebug(QDebug &d) const override;
 #endif
 
 private:
