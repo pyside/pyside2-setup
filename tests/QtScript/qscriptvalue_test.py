@@ -30,6 +30,9 @@ import unittest
 
 from PySide2.QtScript import *
 
+# Required for eval() to work
+import PySide2.QtScript
+
 from helper import UsesQApplication
 
 class TestQScriptValue (UsesQApplication):
@@ -45,6 +48,7 @@ class TestQScriptValue (UsesQApplication):
 
     def testRepr(self):
         value = QScriptValue("somePerson = { firstName: 'John', lastName: 'Doe' }")
+        print repr(value)
         value2 = eval(repr(value))
         self.assertEqual(value.toString(), value2.toString())
         self.assertEqual(value.toVariant(), value2.toVariant())
