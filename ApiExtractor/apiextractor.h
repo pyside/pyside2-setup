@@ -71,8 +71,7 @@ public:
     void addIncludePath(const QStringList& paths);
     QStringList includePaths() const { return m_includePaths; }
     void setLogDirectory(const QString& logDir);
-    APIEXTRACTOR_DEPRECATED(void setApiVersion(double version));
-    void setApiVersion(const QString& package, const QByteArray& version);
+    bool setApiVersion(const QString& package, const QString& version);
     void setDropTypeEntries(QString dropEntries);
 
     AbstractMetaEnumList globalEnums() const;

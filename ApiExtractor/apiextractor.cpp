@@ -113,14 +113,9 @@ void ApiExtractor::setSilent ( bool value )
     ReportHandler::setSilent(value);
 }
 
-void ApiExtractor::setApiVersion(double version)
+bool ApiExtractor::setApiVersion(const QString& package, const QString &version)
 {
-    TypeDatabase::instance()->setApiVersion(QLatin1String("*"), QByteArray::number(version));
-}
-
-void ApiExtractor::setApiVersion(const QString& package, const QByteArray& version)
-{
-    TypeDatabase::instance()->setApiVersion(package, version);
+    return TypeDatabase::instance()->setApiVersion(package, version);
 }
 
 void ApiExtractor::setDropTypeEntries(QString dropEntries)

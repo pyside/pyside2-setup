@@ -594,7 +594,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
 
     if (!m_defaultPackage.isEmpty() && atts.hasAttribute(sinceAttribute())) {
         TypeDatabase* td = TypeDatabase::instance();
-        if (!td->checkApiVersion(m_defaultPackage, atts.value(sinceAttribute()).toUtf8())) {
+        if (!td->checkApiVersion(m_defaultPackage, atts.value(sinceAttribute()).toString())) {
             ++m_ignoreDepth;
             return true;
         }

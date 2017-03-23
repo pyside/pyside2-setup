@@ -42,8 +42,8 @@ namespace TestUtil
     {
         ReportHandler::setSilent(silent);
         TypeDatabase* td = TypeDatabase::instance(true);
-        if (apiVersion)
-            td->setApiVersion(QLatin1String("*"), apiVersion);
+        if (apiVersion && !td->setApiVersion(QLatin1String("*"), QLatin1String(apiVersion)))
+            return Q_NULLPTR;
         td->setDropTypeEntries(dropTypeEntries);
         QBuffer buffer;
         // parse typesystem

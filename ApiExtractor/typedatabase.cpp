@@ -32,15 +32,28 @@
 
 #include <QtCore/QFile>
 #include <QtCore/QDir>
+#include <QtCore/QPair>
+#include <QtCore/QVector>
+#include <QtCore/QRegularExpression>
+#include <QtCore/QVersionNumber>
 #include <QtCore/QXmlStreamReader>
 #include "reporthandler.h"
 // #include <tr1/tuple>
 #include <algorithm>
 
 // package -> api-version
-typedef QMap<QString, QByteArray> ApiVersionMap;
 
-Q_GLOBAL_STATIC(ApiVersionMap, apiVersions)
+static QString wildcardToRegExp(QString w)
+{
+    w.replace(QLatin1Char('?'), QLatin1Char('.'));
+    w.replace(QLatin1Char('*'), QStringLiteral(".*"));
+    return w;
+}
+
+typedef QPair<QRegularExpression, QVersionNumber> ApiVersion;
+typedef QVector<ApiVersion> ApiVersions;
+
+Q_GLOBAL_STATIC(ApiVersions, apiVersions)
 
 TypeDatabase::TypeDatabase() : m_suppressWarnings(true)
 {
@@ -525,46 +538,39 @@ int getMaxTypeIndex()
     return maxTypeIndex;
 }
 
-void TypeDatabase::setApiVersion(const QString& package, const QByteArray& version)
+bool TypeDatabase::setApiVersion(const QString& packageWildcardPattern, const QString &version)
 {
-    (*apiVersions())[package.trimmed()] = version.trimmed();
-}
-
-/**
- * Returns -1, 0 or 1 if v1 is less, equal or greater than v2
- */
-static int versionCheck(const QByteArray& v1, const QByteArray& v2)
-{
-    if (v1.isEmpty() || v2.isEmpty())
-        return 0;
-
-    QList<QByteArray> v1Components = v1.split('.');
-    QList<QByteArray> v2Components = v2.split('.');
-    int numComponents = qMax(v1Components.count(), v2Components.count());
-    while (v1Components.count() < numComponents)
-        v1Components.append("0");
-    while (v2Components.count() < numComponents)
-        v2Components.append("0");
-
-    for (int i = 0, max = v1Components.count(); i < max; ++i) {
-        int v1Comp = v1Components[i].toInt();
-        int v2Comp = v2Components[i].toInt();
-        if (v1Comp > v2Comp)
-            return 1;
-        else if (v1Comp < v2Comp)
-            return -1;
+    const QString packagePattern = wildcardToRegExp(packageWildcardPattern.trimmed());
+    const QVersionNumber versionNumber = QVersionNumber::fromString(version);
+    if (versionNumber.isNull())
+        return false;
+    ApiVersions &versions = *apiVersions();
+    for (int i = 0, size = versions.size(); i < size; ++i) {
+        if (versions.at(i).first.pattern() == packagePattern) {
+            versions[i].second = versionNumber;
+            return true;
+        }
     }
-    return 0;
+    const QRegularExpression packageRegex(packagePattern);
+    if (!packageRegex.isValid())
+        return false;
+    versions.append(qMakePair(packageRegex, versionNumber));
+    return true;
 }
 
-bool TypeDatabase::checkApiVersion(const QString& package, const QByteArray& version) const
+bool TypeDatabase::checkApiVersion(const QString& package, const QString& version) const
 {
-    ApiVersionMap* vMap = apiVersions();
-    ApiVersionMap::const_iterator it = vMap->begin();
-    for (; it != vMap->end(); ++it) {
-        QRegExp regex(it.key(), Qt::CaseSensitive, QRegExp::Wildcard);
-        if (regex.exactMatch(package))
-            return versionCheck(it.value(), version) >= 0;
+    const QVersionNumber versionNumber = QVersionNumber::fromString(version);
+    if (versionNumber.isNull()) {
+        qCWarning(lcShiboken).noquote().nospace()
+            << "checkApiVersion: Invalid version \"" << version << "\" specified for package "
+            << package << '.';
+        return false;
+    }
+    const ApiVersions &versions = *apiVersions();
+    for (int i = 0, size = versions.size(); i < size; ++i) {
+        if (versions.at(i).first.match(package).hasMatch())
+            return versions.at(i).second >= versionNumber;
     }
     return false;
 }

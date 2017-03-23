@@ -341,6 +341,12 @@ static inline void errorPrint(const QString& s)
         << "\nCommand line: " << qPrintable(arguments.join(QLatin1Char(' '))) << '\n';
 }
 
+static QString msgInvalidVersion(const QString &package, const QString &version)
+{
+    return QLatin1String("Invalid version \"") + version
+        + QLatin1String("\" specified for package ") + package + QLatin1Char('.');
+}
+
 int main(int argc, char *argv[])
 {
     QElapsedTimer timer;
@@ -439,7 +445,10 @@ int main(int argc, char *argv[])
             // avoid constFirst to stay Qt 5.5 compatible
             package = parts.count() == 1 ? QLatin1String("*") : parts.first();
             version = parts.last();
-            extractor.setApiVersion(package, version.toUtf8());
+            if (!extractor.setApiVersion(package, version)) {
+                errorPrint(msgInvalidVersion(package, version));
+                return EXIT_FAILURE;
+            }
         }
     }
 
