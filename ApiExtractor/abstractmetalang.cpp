@@ -26,8 +26,6 @@
 **
 ****************************************************************************/
 
-#include <QStack>
-
 #include "abstractmetalang.h"
 #include "reporthandler.h"
 #include "typedatabase.h"
@@ -37,6 +35,9 @@
 #  include <QtCore/QMetaEnum>
 #  include <QtCore/QMetaObject>
 #endif
+
+#include <QtCore/QRegularExpression>
+#include <QtCore/QStack>
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const AbstractMetaAttributes *aa)
@@ -991,8 +992,9 @@ bool AbstractMetaFunction::hasSignatureModifications() const
 
 bool AbstractMetaFunction::isConversionOperator(QString funcName)
 {
-    static QRegExp opRegEx(QLatin1String("^operator(?:\\s+(?:const|volatile))?\\s+(\\w+\\s*)&?$"));
-    return opRegEx.indexIn(funcName) > -1;
+    static const QRegularExpression opRegEx(QStringLiteral("^operator(?:\\s+(?:const|volatile))?\\s+(\\w+\\s*)&?$"));
+    Q_ASSERT(opRegEx.isValid());
+    return opRegEx.match(funcName).hasMatch();
 }
 
 bool AbstractMetaFunction::isOperatorOverload(QString funcName)
@@ -1000,12 +1002,13 @@ bool AbstractMetaFunction::isOperatorOverload(QString funcName)
     if (isConversionOperator(funcName))
         return true;
 
-    static QRegExp opRegEx(QLatin1String("^operator([+\\-\\*/%=&\\|\\^\\<>!][=]?"
+    static const QRegularExpression opRegEx(QLatin1String("^operator([+\\-\\*/%=&\\|\\^\\<>!][=]?"
                     "|\\+\\+|\\-\\-|&&|\\|\\||<<[=]?|>>[=]?|~"
                     "|\\[\\]|\\s+delete\\[?\\]?"
                     "|\\(\\)"
                     "|\\s+new\\[?\\]?)$"));
-    return opRegEx.indexIn(funcName) > -1;
+    Q_ASSERT(opRegEx.isValid());
+    return opRegEx.match(funcName).hasMatch();
 }
 
 bool AbstractMetaFunction::isCastOperator() const

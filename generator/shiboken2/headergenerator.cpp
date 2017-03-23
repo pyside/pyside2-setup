@@ -35,7 +35,6 @@
 #include <QtCore/QDir>
 #include <QtCore/QTextStream>
 #include <QtCore/QVariant>
-#include <QtCore/QRegExp>
 #include <QtCore/QDebug>
 
 QString HeaderGenerator::fileNamePrefix() const

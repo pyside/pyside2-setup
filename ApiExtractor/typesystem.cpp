@@ -32,6 +32,7 @@
 #include "reporthandler.h"
 #include <QtCore/QDir>
 #include <QtCore/QFile>
+#include <QtCore/QRegularExpression>
 #include <QtCore/QXmlStreamAttributes>
 #include <QtCore/QXmlStreamReader>
 
@@ -494,7 +495,8 @@ static QString getNamePrefix(StackElement* element)
 static QString checkSignatureError(const QString& signature, const QString& tag)
 {
     QString funcName = signature.left(signature.indexOf(QLatin1Char('('))).trimmed();
-    static QRegExp whiteSpace(QLatin1String("\\s"));
+    static const QRegularExpression whiteSpace(QStringLiteral("\\s"));
+    Q_ASSERT(whiteSpace.isValid());
     if (!funcName.startsWith(QLatin1String("operator ")) && funcName.contains(whiteSpace)) {
         return QString::fromLatin1("Error in <%1> tag signature attribute '%2'.\n"
                                    "White spaces aren't allowed in function names, "
@@ -726,8 +728,9 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             }
             QString rename = attributes[QLatin1String("rename")];
             if (!rename.isEmpty()) {
-                static QRegExp functionNameRegExp(QLatin1String("^[a-zA-Z_][a-zA-Z0-9_]*$"));
-                if (!functionNameRegExp.exactMatch(rename)) {
+                static const QRegularExpression functionNameRegExp(QLatin1String("^[a-zA-Z_][a-zA-Z0-9_]*$"));
+                Q_ASSERT(functionNameRegExp.isValid());
+                if (!functionNameRegExp.match(rename).hasMatch()) {
                     m_error = QLatin1String("can not rename '") + signature + QLatin1String("', '")
                               + rename + QLatin1String("' is not a valid function name");
                     return false;
@@ -2256,7 +2259,8 @@ bool FunctionModification::operator==(const FunctionModification& other) const
 static AddedFunction::TypeInfo parseType(const QString& signature, int startPos = 0, int* endPos = 0)
 {
     AddedFunction::TypeInfo result;
-    QRegExp regex(QLatin1String("\\w"));
+    static const QRegularExpression regex(QLatin1String("\\w"));
+    Q_ASSERT(regex.isValid());
     int length = signature.length();
     int start = signature.indexOf(regex, startPos);
     if (start == -1) {

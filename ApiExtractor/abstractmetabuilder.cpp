@@ -39,6 +39,7 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QRegularExpression>
 #include <QTextCodec>
 #include <QTextStream>
 #include <QVariant>
@@ -1497,7 +1498,9 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaF
         return;
 
     TypeDatabase* types = TypeDatabase::instance();
-    QString castTo = metaFunction->name().remove(QRegExp(QLatin1String("^operator "))).trimmed();
+    static const QRegularExpression operatorRegExp(QStringLiteral("^operator "));
+    Q_ASSERT(operatorRegExp.isValid());
+    QString castTo = metaFunction->name().remove(operatorRegExp).trimmed();
 
     if (castTo.endsWith(QLatin1Char('&')))
         castTo.chop(1);
@@ -2605,8 +2608,9 @@ int AbstractMetaBuilderPrivate::findOutValueFromString(const QString &stringValu
 
     // This is a very lame way to handle expression evaluation,
     // but it is not critical and will do for the time being.
-    static QRegExp variableNameRegExp(QLatin1String("^[a-zA-Z_][a-zA-Z0-9_]*$"));
-    if (!variableNameRegExp.exactMatch(stringValue)) {
+    static const QRegularExpression variableNameRegExp(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_]*$"));
+    Q_ASSERT(variableNameRegExp.isValid());
+    if (!variableNameRegExp.match(stringValue).hasMatch()) {
         ok = true;
         return 0;
     }
@@ -2668,23 +2672,28 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(ArgumentModelItem item,
             if (!isNumber && expr.indexOf(colonColon()) < 0) {
                 // Add the enum/flag scope to default value, making it usable
                 // from other contexts beside its owner class hierarchy
-                QRegExp typeRegEx(QLatin1String("[^<]*[<]([^:]*::).*"));
-                typeRegEx.indexIn(type->minimalSignature());
-                expr = typeRegEx.cap(1) + expr;
+                static const QRegularExpression typeRegEx(QStringLiteral("[^<]*[<]([^:]*::).*"));
+                Q_ASSERT(typeRegEx.isValid());
+                const QRegularExpressionMatch match = typeRegEx.match(type->minimalSignature());
+                if (match.hasMatch())
+                    expr.prepend(match.captured(1));
             }
         } else if (type->isContainer() && expr.contains(QLatin1Char('<'))) {
-            QRegExp typeRegEx(QLatin1String("[^<]*<(.*)>"));
-            typeRegEx.indexIn(type->minimalSignature());
-            QRegExp defaultRegEx(QLatin1String("([^<]*<).*(>[^>]*)"));
-            defaultRegEx.indexIn(expr);
-            expr = defaultRegEx.cap(1) + typeRegEx.cap(1) + defaultRegEx.cap(2);
+            static const QRegularExpression typeRegEx(QStringLiteral("[^<]*<(.*)>"));
+            Q_ASSERT(typeRegEx.isValid());
+            const QRegularExpressionMatch typeMatch = typeRegEx.match(type->minimalSignature());
+            static const QRegularExpression defaultRegEx(QLatin1String("([^<]*<).*(>[^>]*)"));
+            Q_ASSERT(defaultRegEx.isValid());
+            const QRegularExpressionMatch defaultMatch = defaultRegEx.match(expr);
+            if (typeMatch.hasMatch() && defaultMatch.hasMatch())
+                expr = defaultMatch.captured(1) + typeMatch.captured(1) + defaultMatch.captured(2);
         } else {
             // Here the default value is supposed to be a constructor,
             // a class field, or a constructor receiving a class field
-            QRegExp defaultRegEx(QLatin1String("([^\\(]*\\(|)([^\\)]*)(\\)|)"));
-            defaultRegEx.indexIn(expr);
-
-            QString defaultValueCtorName = defaultRegEx.cap(1);
+            static const QRegularExpression defaultRegEx(QStringLiteral("([^\\(]*\\(|)([^\\)]*)(\\)|)"));
+            Q_ASSERT(defaultRegEx.isValid());
+            const QRegularExpressionMatch defaultMatch = defaultRegEx.match(expr);
+            QString defaultValueCtorName = defaultMatch.hasMatch() ? defaultMatch.captured(1) : QString();
             if (defaultValueCtorName.endsWith(QLatin1Char('(')))
                 defaultValueCtorName.chop(1);
 
@@ -2692,11 +2701,12 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(ArgumentModelItem item,
             // resolved argument type as a reference.
             // The following regular expression extracts any
             // use of namespaces/scopes from the type string.
-            QRegExp typeRegEx(QLatin1String("^(?:const[\\s]+|)([\\w:]*::|)([A-Za-z_]\\w*)\\s*[&\\*]?$"));
-            typeRegEx.indexIn(type->minimalSignature());
+            static const QRegularExpression typeRegEx(QLatin1String("^(?:const[\\s]+|)([\\w:]*::|)([A-Za-z_]\\w*)\\s*[&\\*]?$"));
+            Q_ASSERT(typeRegEx.isValid());
+            const QRegularExpressionMatch typeMatch = typeRegEx.match(type->minimalSignature());
 
-            QString typeNamespace = typeRegEx.cap(1);
-            QString typeCtorName = typeRegEx.cap(2);
+            QString typeNamespace = typeMatch.hasMatch() ? typeMatch.captured(1) : QString();
+            QString typeCtorName  = typeMatch.hasMatch() ? typeMatch.captured(2) : QString();
             if (!typeNamespace.isEmpty() && defaultValueCtorName == typeCtorName)
                 expr.prepend(typeNamespace);
 
@@ -2704,9 +2714,9 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(ArgumentModelItem item,
             if (implementingClass) {
                 const AbstractMetaFieldList &fields = implementingClass->fields();
                 for (const AbstractMetaField *field : fields) {
-                    if (defaultRegEx.cap(2) == field->name()) {
-                        expr = defaultRegEx.cap(1) + implementingClass->name()
-                               + colonColon() + defaultRegEx.cap(2) + defaultRegEx.cap(3);
+                    if (defaultMatch.hasMatch() && defaultMatch.captured(2) == field->name()) {
+                        expr = defaultMatch.captured(1) + implementingClass->name()
+                               + colonColon() + defaultMatch.captured(2) + defaultMatch.captured(3);
                         break;
                     }
                 }
@@ -3247,8 +3257,10 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
     }
 
     // TODO choose a better name to these regexs
-    QRegExp regex1(QLatin1String("\\(.*\\)"));
-    QRegExp regex2(QLatin1String("::.*"));
+    static const QRegularExpression regex1(QStringLiteral("\\(.*\\)"));
+    Q_ASSERT(regex1.isValid());
+    static const QRegularExpression regex2(QStringLiteral("::.*"));
+    Q_ASSERT(regex2.isValid());
     for (AbstractMetaClass *clazz : classList) {
         if (clazz->enclosingClass() && map.contains(clazz->enclosingClass()->qualifiedCppName()))
             graph.addEdge(map[clazz->enclosingClass()->qualifiedCppName()], map[clazz->qualifiedCppName()]);

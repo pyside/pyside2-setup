@@ -36,6 +36,7 @@
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
+#include <QtCore/QRegularExpression>
 #include <QDebug>
 #include <typedatabase.h>
 
@@ -429,7 +430,8 @@ QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
 {
     // detect number of spaces before the first character
     const QStringList lst(code.split(QLatin1Char('\n')));
-    QRegExp nonSpaceRegex(QLatin1String("[^\\s]"));
+    static const QRegularExpression nonSpaceRegex(QStringLiteral("[^\\s]"));
+    Q_ASSERT(nonSpaceRegex.isValid());
     int spacesToRemove = 0;
     for (const QString &line : lst) {
         if (!line.trimmed().isEmpty()) {
@@ -440,10 +442,11 @@ QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
         }
     }
 
-    static QRegExp emptyLine(QLatin1String("\\s*[\\r]?[\\n]?\\s*"));
+    static const QRegularExpression emptyLine(QStringLiteral("^\\s*[\\r]?[\\n]?\\s*$"));
+    Q_ASSERT(emptyLine.isValid());
 
     for (QString line : lst) {
-        if (!line.isEmpty() && !emptyLine.exactMatch(line)) {
+        if (!line.isEmpty() && !emptyLine.match(line).hasMatch()) {
             while (line.end()->isSpace())
                 line.chop(1);
             int limit = 0;

@@ -36,6 +36,7 @@
 
 #include <QtCore/QDir>
 #include <QtCore/QMetaObject>
+#include <QtCore/QRegularExpression>
 #include <QtCore/QTextStream>
 #include <QtCore/QDebug>
 #include <QMetaType>
@@ -203,6 +204,13 @@ static const char includeQDebug[] =
 "#  define QT_NO_VERSION_TAGGING\n"
 "#endif\n"
 "#include <QDebug>\n";
+
+static QString chopType(QString s)
+{
+    if (s.endsWith(QLatin1String("_Type")))
+        s.chop(5);
+    return s;
+}
 
 /*!
     Function used to write the class generated binding code on the buffer
@@ -424,8 +432,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
         }
     }
 
-    QString className = cpythonTypeName(metaClass);
-    className.remove(QRegExp(QLatin1String("_Type$")));
+    const QString className = chopType(cpythonTypeName(metaClass));
 
     if (metaClass->typeEntry()->isValue() || metaClass->typeEntry()->isSmartPointer())
         writeCopyFunction(s, classContext);
@@ -659,16 +666,20 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
         for (const FunctionModification &mod : mods) {
             for (const ArgumentModification &argMod : mod.argument_mods) {
                 if (argMod.index == 0 && !argMod.replacedDefaultExpression.isEmpty()) {
-                    QRegExp regex(QLatin1String("%(\\d+)"));
+                    static const QRegularExpression regex(QStringLiteral("%(\\d+)"));
+                    Q_ASSERT(regex.isValid());
                     defaultReturnExpr = argMod.replacedDefaultExpression;
-                    int offset = 0;
-                    while ((offset = regex.indexIn(defaultReturnExpr, offset)) != -1) {
-                        int argId = regex.cap(1).toInt() - 1;
+                    for (int offset = 0; ; ) {
+                        const QRegularExpressionMatch match = regex.match(defaultReturnExpr, offset);
+                        if (!match.hasMatch())
+                            break;
+                        const int argId = match.capturedRef(1).toInt() - 1;
                         if (argId < 0 || argId > func->arguments().count()) {
                             qCWarning(lcShiboken) << "The expression used in return value contains an invalid index.";
                             break;
                         }
-                        defaultReturnExpr.replace(regex.cap(0), func->arguments()[argId]->name());
+                        defaultReturnExpr.replace(match.captured(0), func->arguments()[argId]->name());
+                        offset = match.capturedStart(1);
                     }
                 }
             }
@@ -1959,7 +1970,9 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                         strArg = QLatin1String("1-unicode");
                     } else {
                         strArg = ptp->name();
-                        strArg.remove(QRegExp(QLatin1String("^signed\\s+")));
+                        static const QRegularExpression regex(QStringLiteral("^signed\\s+"));
+                        Q_ASSERT(regex.isValid());
+                        strArg.remove(regex);
                         if (strArg == QLatin1String("double"))
                             strArg = QLatin1String("float");
                     }
@@ -2041,9 +2054,13 @@ void CppGenerator::writeInvalidPyObjectCheck(QTextStream& s, const QString& pyOb
 
 static QString pythonToCppConverterForArgumentName(const QString& argumentName)
 {
-    static QRegExp pyArgsRegex(QLatin1String(PYTHON_ARGS"(\\[\\d+[-]?\\d*\\])"));
-    pyArgsRegex.indexIn(argumentName);
-    return QLatin1String(PYTHON_TO_CPP_VAR) + pyArgsRegex.cap(1);
+    static const QRegularExpression pyArgsRegex(QLatin1String(PYTHON_ARGS"(\\[\\d+[-]?\\d*\\])"));
+    Q_ASSERT(pyArgsRegex.isValid());
+    const QRegularExpressionMatch match = pyArgsRegex.match(argumentName);
+    QString result = QLatin1String(PYTHON_TO_CPP_VAR);
+    if (match.hasMatch())
+        result += match.captured(1);
+    return result;
 }
 
 void CppGenerator::writeTypeCheck(QTextStream& s, const AbstractMetaType* argType, QString argumentName, bool isNumber, QString customType, bool rejectNull)
@@ -2825,16 +2842,17 @@ void CppGenerator::writePythonToCppConversionFunctions(QTextStream& s, const Abs
         const AbstractMetaType* type = containerType->instantiations().at(i);
         QString typeName = getFullTypeName(type);
         if (type->isValue() && isValueTypeWithCopyConstructorOnly(type)) {
-            static QRegExp regex(QLatin1String(CONVERTTOCPP_REGEX));
-            int pos = 0;
-            while ((pos = regex.indexIn(code, pos)) != -1) {
-                pos += regex.matchedLength();
-                QStringList list = regex.capturedTexts();
-                QString varName = list.at(1);
-                QString leftCode = code.left(pos);
+            static const QRegularExpression regex(QLatin1String(CONVERTTOCPP_REGEX));
+            Q_ASSERT(regex.isValid());
+            for (int pos = 0; ; ) {
+                const QRegularExpressionMatch match = regex.match(code, pos);
+                if (!match.hasMatch())
+                    break;
+                pos = match.capturedEnd();
+                const QString varName = match.captured(1);
                 QString rightCode = code.mid(pos);
                 rightCode.replace(varName, QLatin1Char('*') + varName);
-                code = leftCode + rightCode;
+                code.replace(pos, code.size() - pos, rightCode);
             }
             typeName.append(QLatin1Char('*'));
         }
@@ -3601,8 +3619,7 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
     QString tp_hash(QLatin1Char('0'));
     QString tp_call = tp_hash;
     QString cppClassName = metaClass->qualifiedCppName();
-    QString className = cpythonTypeName(metaClass);
-    className.remove(QRegExp(QLatin1String("_Type$")));
+    const QString className = chopType(cpythonTypeName(metaClass));
     QString baseClassName(QLatin1Char('0'));
     AbstractMetaFunctionList ctors;
     const AbstractMetaFunctionList &allCtors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
@@ -3987,8 +4004,7 @@ void CppGenerator::writeTpClearFunction(QTextStream& s, const AbstractMetaClass*
 void CppGenerator::writeCopyFunction(QTextStream &s, GeneratorContext &context)
 {
     const AbstractMetaClass *metaClass = context.metaClass();
-    QString className = cpythonTypeName(metaClass);
-    className.remove(QRegExp(QLatin1String("_Type$")));
+    const QString className = chopType(cpythonTypeName(metaClass));
     s << "static PyObject* " << className << "___copy__(PyObject* " PYTHON_SELF_VAR ")" << endl;
     s << "{" << endl;
     writeCppSelfDefinition(s, context, false, true);

@@ -35,6 +35,7 @@
 
 #include <QtCore/QDir>
 #include <QtCore/QDebug>
+#include <QtCore/QRegularExpression>
 #include <limits>
 #include <memory>
 
@@ -53,6 +54,11 @@ QHash<QString, QString> ShibokenGenerator::m_pythonOperators = QHash<QString, QS
 QHash<QString, QString> ShibokenGenerator::m_formatUnits = QHash<QString, QString>();
 QHash<QString, QString> ShibokenGenerator::m_tpFuncs = QHash<QString, QString>();
 QStringList ShibokenGenerator::m_knownPythonTypes = QStringList();
+
+static QRegularExpression placeHolderRegex(int index)
+{
+    return QRegularExpression(QLatin1Char('%') + QString::number(index) + QStringLiteral("\\b"));
+}
 
 static QString resolveScopePrefix(const AbstractMetaClass* scope, const QString& value)
 {
@@ -87,10 +93,10 @@ ShibokenGenerator::ShibokenGenerator() : Generator()
     m_typeSystemConvName[TypeSystemIsConvertibleFunction] = QLatin1String("isConvertible");
     m_typeSystemConvName[TypeSystemToCppFunction]         = QLatin1String("toCpp");
     m_typeSystemConvName[TypeSystemToPythonFunction]      = QLatin1String("toPython");
-    m_typeSystemConvRegEx[TypeSystemCheckFunction]         = QRegExp(QLatin1String(CHECKTYPE_REGEX));
-    m_typeSystemConvRegEx[TypeSystemIsConvertibleFunction] = QRegExp(QLatin1String(ISCONVERTIBLE_REGEX));
-    m_typeSystemConvRegEx[TypeSystemToPythonFunction]      = QRegExp(QLatin1String(CONVERTTOPYTHON_REGEX));
-    m_typeSystemConvRegEx[TypeSystemToCppFunction]         = QRegExp(QLatin1String(CONVERTTOCPP_REGEX));
+    m_typeSystemConvRegEx[TypeSystemCheckFunction]         = QRegularExpression(QLatin1String(CHECKTYPE_REGEX));
+    m_typeSystemConvRegEx[TypeSystemIsConvertibleFunction] = QRegularExpression(QLatin1String(ISCONVERTIBLE_REGEX));
+    m_typeSystemConvRegEx[TypeSystemToPythonFunction]      = QRegularExpression(QLatin1String(CONVERTTOPYTHON_REGEX));
+    m_typeSystemConvRegEx[TypeSystemToCppFunction]         = QRegularExpression(QLatin1String(CONVERTTOCPP_REGEX));
 }
 
 ShibokenGenerator::~ShibokenGenerator()
@@ -439,11 +445,12 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction*
     if (isPointer(arg->type()))
         return value;
 
-    static QRegExp enumValueRegEx(QLatin1String("^([A-Za-z_]\\w*)?$"));
+    static const QRegularExpression enumValueRegEx(QStringLiteral("^([A-Za-z_]\\w*)?$"));
+    Q_ASSERT(enumValueRegEx.isValid());
     // Do not qualify macros by class name, eg QSGGeometry(..., int t = GL_UNSIGNED_SHORT);
-    static QRegExp macroRegEx(QLatin1String("^[A-Z_][A-Z0-9_]*$"));
+    static const QRegularExpression macroRegEx(QStringLiteral("^[A-Z_][A-Z0-9_]*$"));
     Q_ASSERT(macroRegEx.isValid());
-    if (arg->type()->isPrimitive() && macroRegEx.exactMatch(value))
+    if (arg->type()->isPrimitive() && macroRegEx.match(value).hasMatch())
         return value;
 
     QString prefix;
@@ -454,8 +461,9 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction*
         if (metaEnum)
             prefix = resolveScopePrefix(metaEnum->enclosingClass(), value);
     } else if (arg->type()->isFlags()) {
-        static QRegExp numberRegEx(QLatin1String("^\\d+$")); // Numbers to flags
-        if (numberRegEx.exactMatch(value)) {
+        static const QRegularExpression numberRegEx(QStringLiteral("^\\d+$")); // Numbers to flags
+        Q_ASSERT(numberRegEx.isValid());
+        if (numberRegEx.match(value).hasMatch()) {
             QString typeName = translateTypeForWrapperMethod(arg->type(), func->implementingClass());
             if (arg->type()->isConstant())
                 typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
@@ -473,10 +481,12 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction*
             suffix = QLatin1Char(')');
         }
 
-        static QRegExp enumCombinationRegEx(QLatin1String("^([A-Za-z_][\\w:]*)\\(([^,\\(\\)]*)\\)$")); // FlagName(EnumItem|EnumItem|...)
-        if (prefix.isEmpty() && enumCombinationRegEx.indexIn(value) != -1) {
-            QString flagName = enumCombinationRegEx.cap(1);
-            QStringList enumItems = enumCombinationRegEx.cap(2).split(QLatin1Char('|'));
+        static const QRegularExpression enumCombinationRegEx(QStringLiteral("^([A-Za-z_][\\w:]*)\\(([^,\\(\\)]*)\\)$")); // FlagName(EnumItem|EnumItem|...)
+        Q_ASSERT(enumCombinationRegEx.isValid());
+        const QRegularExpressionMatch match = enumCombinationRegEx.match(value);
+        if (prefix.isEmpty() && match.hasMatch()) {
+            QString flagName = match.captured(1);
+            QStringList enumItems = match.captured(2).split(QLatin1Char('|'));
             QString scope = searchForEnumScope(func->implementingClass(), enumItems.first());
             if (!scope.isEmpty())
                 scope.append(QLatin1String("::"));
@@ -493,17 +503,19 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction*
         }
     } else if (arg->type()->typeEntry()->isValue()) {
         const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes(), arg->type()->typeEntry());
-        if (enumValueRegEx.exactMatch(value)&& value != QLatin1String("NULL"))
+        if (enumValueRegEx.match(value).hasMatch() && value != QLatin1String("NULL"))
             prefix = resolveScopePrefix(metaClass, value);
     } else if (arg->type()->isPrimitive() && arg->type()->name() == QLatin1String("int")) {
-        if (enumValueRegEx.exactMatch(value) && func->implementingClass())
+        if (enumValueRegEx.match(value).hasMatch() && func->implementingClass())
             prefix = resolveScopePrefix(func->implementingClass(), value);
     } else if(arg->type()->isPrimitive()) {
-        static QRegExp unknowArgumentRegEx(QLatin1String("^(?:[A-Za-z_][\\w:]*\\()?([A-Za-z_]\\w*)(?:\\))?$")); // [PrimitiveType(] DESIREDNAME [)]
-        if (unknowArgumentRegEx.indexIn(value) != -1 && func->implementingClass()) {
+        static const QRegularExpression unknowArgumentRegEx(QStringLiteral("^(?:[A-Za-z_][\\w:]*\\()?([A-Za-z_]\\w*)(?:\\))?$")); // [PrimitiveType(] DESIREDNAME [)]
+        Q_ASSERT(unknowArgumentRegEx.isValid());
+        const QRegularExpressionMatch match = unknowArgumentRegEx.match(value);
+        if (match.hasMatch() && func->implementingClass()) {
             const AbstractMetaFieldList &fields = func->implementingClass()->fields();
             for (const AbstractMetaField *field : fields) {
-                if (unknowArgumentRegEx.cap(1).trimmed() == field->name()) {
+                if (match.captured(1).trimmed() == field->name()) {
                     QString fieldName = field->name();
                     if (field->isStatic()) {
                         prefix = resolveScopePrefix(func->implementingClass(), value);
@@ -512,7 +524,7 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction*
                     } else {
                         fieldName.prepend(QLatin1String(CPP_SELF_VAR "->"));
                     }
-                    value.replace(unknowArgumentRegEx.cap(1), fieldName);
+                    value.replace(match.captured(1), fieldName);
                     break;
                 }
             }
@@ -1656,15 +1668,19 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
     // Replace %PYARG_# variables.
     code.replace(QLatin1String("%PYARG_0"), QLatin1String(PYTHON_RETURN_VAR));
 
-    static QRegExp pyArgsRegex(QLatin1String("%PYARG_(\\d+)"));
+    static const QRegularExpression pyArgsRegex(QStringLiteral("%PYARG_(\\d+)"));
+    Q_ASSERT(pyArgsRegex.isValid());
     if (language == TypeSystem::TargetLangCode) {
         if (usePyArgs) {
             code.replace(pyArgsRegex, QLatin1String(PYTHON_ARGS"[\\1-1]"));
         } else {
-            static QRegExp pyArgsRegexCheck(QLatin1String("%PYARG_([2-9]+)"));
-            if (pyArgsRegexCheck.indexIn(code) != -1) {
+            static const QRegularExpression pyArgsRegexCheck(QStringLiteral("%PYARG_([2-9]+)"));
+            Q_ASSERT(pyArgsRegexCheck.isValid());
+            const QRegularExpressionMatch match = pyArgsRegexCheck.match(code);
+            if (match.hasMatch()) {
                 qCWarning(lcShiboken).noquote().nospace()
-                    << "Wrong index for %PYARG variable (" << pyArgsRegexCheck.cap(1) << ") on " << func->signature();
+                    << "Wrong index for %PYARG variable (" << match.captured(1)
+                    << ") on " << func->signature();
                 return;
             }
             code.replace(QLatin1String("%PYARG_1"), QLatin1String(PYTHON_ARG));
@@ -1672,7 +1688,8 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
     } else {
         // Replaces the simplest case of attribution to a
         // Python argument on the binding virtual method.
-        static QRegExp pyArgsAttributionRegex(QLatin1String("%PYARG_(\\d+)\\s*=[^=]\\s*([^;]+)"));
+        static const QRegularExpression pyArgsAttributionRegex(QStringLiteral("%PYARG_(\\d+)\\s*=[^=]\\s*([^;]+)"));
+        Q_ASSERT(pyArgsAttributionRegex.isValid());
         code.replace(pyArgsAttributionRegex, QLatin1String("PyTuple_SET_ITEM(" PYTHON_ARGS ", \\1-1, \\2)"));
         code.replace(pyArgsRegex, QLatin1String("PyTuple_GET_ITEM(" PYTHON_ARGS ", \\1-1)"));
     }
@@ -1685,13 +1702,14 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
         code.replace(argTypeVar, argTypeVal);
     }
 
-    int pos = 0;
-    static QRegExp cppArgTypeRegexCheck(QLatin1String("%ARG(\\d+)_TYPE"));
-    while ((pos = cppArgTypeRegexCheck.indexIn(code, pos)) != -1) {
+    static const QRegularExpression cppArgTypeRegexCheck(QStringLiteral("%ARG(\\d+)_TYPE"));
+    Q_ASSERT(cppArgTypeRegexCheck.isValid());
+    QRegularExpressionMatchIterator rit = cppArgTypeRegexCheck.globalMatch(code);
+    while (rit.hasNext()) {
+        QRegularExpressionMatch match = rit.next();
         qCWarning(lcShiboken).noquote().nospace()
-            << "Wrong index for %ARG#_TYPE variable (" << cppArgTypeRegexCheck.cap(1)
-            << ") on " << func->signature();
-        pos += cppArgTypeRegexCheck.matchedLength();
+                << "Wrong index for %ARG#_TYPE variable (" << match.captured(1)
+                << ") on " << func->signature();
     }
 
     // Replace template variable for return variable name.
@@ -1799,7 +1817,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             if (type->referenceType() == LValueReference || isPointer(type))
                 code.replace(QString::fromLatin1("%%1.").arg(idx), replacement + QLatin1String("->"));
         }
-        code.replace(QRegExp(QString::fromLatin1("%%1\\b").arg(idx)), pair.second);
+        code.replace(placeHolderRegex(idx), pair.second);
     }
 
     if (language == TypeSystem::NativeCode) {
@@ -1853,8 +1871,9 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
 // and false if it is a variable.
 static bool isVariable(const QString& code)
 {
-    static QRegExp expr(QLatin1String("\\s*\\*?\\s*[A-Za-z_][A-Za-z_0-9.]*\\s*(?:\\[[^\\[]+\\])*"));
-    return expr.exactMatch(code.trimmed());
+    static const QRegularExpression expr(QStringLiteral("^\\s*\\*?\\s*[A-Za-z_][A-Za-z_0-9.]*\\s*(?:\\[[^\\[]+\\])*$"));
+    Q_ASSERT(expr.isValid());
+    return expr.match(code.trimmed()).hasMatch();
 }
 
 // A miniature normalizer that puts a type string into a format
@@ -1904,12 +1923,11 @@ static QString getConverterTypeSystemVariableArgument(const QString& code, int p
 typedef QPair<QString, QString> StringPair;
 void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVariable converterVariable, QString& code)
 {
-    QRegExp& regex = m_typeSystemConvRegEx[converterVariable];
-    int pos = 0;
     QList<StringPair> replacements;
-    while ((pos = regex.indexIn(code, pos)) != -1) {
-        pos += regex.matchedLength();
-        QStringList list = regex.capturedTexts();
+    QRegularExpressionMatchIterator rit = m_typeSystemConvRegEx[converterVariable].globalMatch(code);
+    while (rit.hasNext()) {
+        const QRegularExpressionMatch match = rit.next();
+        const QStringList list = match.capturedTexts();
         QString conversionString = list.first();
         QString conversionTypeName = list.last();
         const AbstractMetaType* conversionType = buildAbstractMetaTypeFromString(conversionTypeName);
@@ -1923,7 +1941,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
         QTextStream c(&conversion);
         switch (converterVariable) {
             case TypeSystemToCppFunction: {
-                int end = pos - list.first().count();
+                int end = match.capturedStart();
                 int start = end;
                 while (start > 0 && code.at(start) != QLatin1Char('\n'))
                     --start;
@@ -1952,7 +1970,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                 } else {
                     prefix = QLatin1Char('&');
                 }
-                QString arg = getConverterTypeSystemVariableArgument(code, pos);
+                QString arg = getConverterTypeSystemVariableArgument(code, match.capturedEnd());
                 conversionString += arg;
                 c << arg << ", " << prefix << '(' << varName << ')';
                 break;
@@ -1972,7 +1990,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                 if (conversion.isEmpty())
                     conversion = cpythonToPythonConversionFunction(conversionType);
             default: {
-                QString arg = getConverterTypeSystemVariableArgument(code, pos);
+                QString arg = getConverterTypeSystemVariableArgument(code, match.capturedEnd());
                 conversionString += arg;
                 if (converterVariable == TypeSystemToPythonFunction && !isVariable(arg)) {
                     qFatal(qPrintable(QString::fromLatin1("Only variables are acceptable as argument to %%CONVERTTOPYTHON type system variable on code snippet: '%1'")
@@ -2034,10 +2052,11 @@ bool ShibokenGenerator::injectedCodeCallsCppFunction(const AbstractMetaFunction*
 
 bool ShibokenGenerator::injectedCodeCallsPythonOverride(const AbstractMetaFunction* func)
 {
-    static QRegExp overrideCallRegexCheck(QLatin1String("PyObject_Call\\s*\\(\\s*%PYTHON_METHOD_OVERRIDE\\s*,"));
+    static const QRegularExpression overrideCallRegexCheck(QStringLiteral("PyObject_Call\\s*\\(\\s*%PYTHON_METHOD_OVERRIDE\\s*,"));
+    Q_ASSERT(overrideCallRegexCheck.isValid());
     CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, TypeSystem::NativeCode);
     for (const CodeSnip &snip : qAsConst(snips)) {
-        if (overrideCallRegexCheck.indexIn(snip.code()) != -1)
+        if (snip.code().contains(overrideCallRegexCheck))
             return true;
     }
     return false;
@@ -2045,15 +2064,17 @@ bool ShibokenGenerator::injectedCodeCallsPythonOverride(const AbstractMetaFuncti
 
 bool ShibokenGenerator::injectedCodeHasReturnValueAttribution(const AbstractMetaFunction* func, TypeSystem::Language language)
 {
-    static QRegExp retValAttributionRegexCheck_native(QLatin1String("%0\\s*=[^=]\\s*.+"));
-    static QRegExp retValAttributionRegexCheck_target(QLatin1String("%PYARG_0\\s*=[^=]\\s*.+"));
+    static const QRegularExpression retValAttributionRegexCheck_native(QStringLiteral("%0\\s*=[^=]\\s*.+"));
+    Q_ASSERT(retValAttributionRegexCheck_native.isValid());
+    static const QRegularExpression retValAttributionRegexCheck_target(QStringLiteral("%PYARG_0\\s*=[^=]\\s*.+"));
+    Q_ASSERT(retValAttributionRegexCheck_target.isValid());
     CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, language);
     for (const CodeSnip &snip : qAsConst(snips)) {
         if (language == TypeSystem::TargetLangCode) {
-            if (retValAttributionRegexCheck_target.indexIn(snip.code()) != -1)
+            if (snip.code().contains(retValAttributionRegexCheck_target))
                 return true;
         } else {
-            if (retValAttributionRegexCheck_native.indexIn(snip.code()) != -1)
+            if (snip.code().contains(retValAttributionRegexCheck_native))
                 return true;
         }
     }
@@ -2063,11 +2084,10 @@ bool ShibokenGenerator::injectedCodeHasReturnValueAttribution(const AbstractMeta
 bool ShibokenGenerator::injectedCodeUsesArgument(const AbstractMetaFunction* func, int argumentIndex)
 {
     CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny);
+    const QRegularExpression argRegEx = placeHolderRegex(argumentIndex + 1);
     for (const CodeSnip &snip : qAsConst(snips)) {
         QString code = snip.code();
-        if (code.contains(QLatin1String("%ARGUMENT_NAMES")))
-            return true;
-        if (code.contains(QRegExp(QStringLiteral("%%1\\b").arg(argumentIndex + 1))))
+        if (code.contains(QLatin1String("%ARGUMENT_NAMES")) || code.contains(argRegEx))
             return true;
     }
     return false;

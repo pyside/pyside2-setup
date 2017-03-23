@@ -58,6 +58,8 @@
 
 #include "typesystem.h"
 
+#include <QtCore/QRegularExpression>
+
 class DocParser;
 class CodeSnip;
 class OverloadData;
@@ -531,7 +533,7 @@ private:
 
     /// Type system converter variable replacement names and regular expressions.
     QString m_typeSystemConvName[TypeSystemConverterVariables];
-    QRegExp m_typeSystemConvRegEx[TypeSystemConverterVariables];
+    QRegularExpression m_typeSystemConvRegEx[TypeSystemConverterVariables];
 };
 
 #endif // SHIBOKENGENERATOR_H
