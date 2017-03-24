@@ -26,6 +26,8 @@
 ##
 #############################################################################
 
+from __future__ import print_function
+
 import unittest
 
 from PySide2.QtScript import *
@@ -48,7 +50,7 @@ class TestQScriptValue (UsesQApplication):
 
     def testRepr(self):
         value = QScriptValue("somePerson = { firstName: 'John', lastName: 'Doe' }")
-        print repr(value)
+        print(repr(value))
         value2 = eval(repr(value))
         self.assertEqual(value.toString(), value2.toString())
         self.assertEqual(value.toVariant(), value2.toVariant())
