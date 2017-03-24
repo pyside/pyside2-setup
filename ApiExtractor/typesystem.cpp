@@ -561,7 +561,7 @@ bool Handler::handleSmartPointerEntry(StackElement *element,
     QString refCountMethodName = attributes[QLatin1String("ref-count-method")];
     QString signature = getter + QLatin1String("()");
 
-    signature = TypeDatabase::normalizedSignature(signature.toLocal8Bit().constData());
+    signature = TypeDatabase::normalizedSignature(signature);
     if (signature.isEmpty()) {
         m_error = QLatin1String("No signature for the smart pointer getter found.");
         return false;
@@ -965,7 +965,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
         break;
         case StackElement::FunctionTypeEntry: {
             QString signature = attributes[QLatin1String("signature")];
-            signature = TypeDatabase::normalizedSignature(signature.toLatin1().constData());
+            signature = TypeDatabase::normalizedSignature(signature);
             element->entry = m_database->findType(name);
             if (element->entry) {
                 if (element->entry->type() == TypeEntry::FunctionType) {
@@ -1600,7 +1600,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             }
             QString signature = attributes[QLatin1String("signature")];
 
-            signature = TypeDatabase::normalizedSignature(signature.toLocal8Bit().constData());
+            signature = TypeDatabase::normalizedSignature(signature);
             if (signature.isEmpty()) {
                 m_error = QLatin1String("No signature for the added function");
                 return false;
@@ -1645,7 +1645,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             }
             QString signature = attributes[QLatin1String("signature")];
 
-            signature = TypeDatabase::normalizedSignature(signature.toLocal8Bit().constData());
+            signature = TypeDatabase::normalizedSignature(signature);
             if (signature.isEmpty()) {
                 m_error = QLatin1String("No signature for modified function");
                 return false;

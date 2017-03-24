@@ -76,21 +76,46 @@ TypeDatabase* TypeDatabase::instance(bool newInstance)
     return db;
 }
 
-QString TypeDatabase::normalizedSignature(const char* signature)
+// A list of regex/replacements to fix int types like "ushort" to "unsigned short"
+// unless present in TypeDatabase
+struct IntTypeNormalizationEntry
 {
-    QString normalized = QLatin1String(QMetaObject::normalizedSignature(signature));
+    QRegularExpression regex;
+    QString replacement;
+};
 
-    if (!instance() || !QByteArray(signature).contains("unsigned"))
-        return normalized;
+typedef QVector<IntTypeNormalizationEntry> IntTypeNormalizationEntries;
 
-    QStringList types;
-    types << QLatin1String("char") << QLatin1String("short")
-        << QLatin1String("int") << QLatin1String("long");
-    foreach (const QString& type, types) {
-        if (instance()->findType(QLatin1Char('u') + type))
-            continue;
-        const QString pattern = QLatin1String("\\bu") + type + QLatin1String("\\b");
-        normalized.replace(QRegExp(pattern), QLatin1String("unsigned ") + type);
+static const IntTypeNormalizationEntries &intTypeNormalizationEntries()
+{
+    static IntTypeNormalizationEntries result;
+    static bool firstTime = true;
+    if (firstTime) {
+        firstTime = false;
+        static const char *intTypes[] = {"char", "short", "int", "long"};
+        const size_t size = sizeof(intTypes) / sizeof(intTypes[0]);
+        for (size_t i = 0; i < size; ++i) {
+            const QString intType = QLatin1String(intTypes[i]);
+            if (!TypeDatabase::instance()->findType(QLatin1Char('u') + intType)) {
+                IntTypeNormalizationEntry entry;
+                entry.replacement = QStringLiteral("unsigned ") + intType;
+                entry.regex.setPattern(QStringLiteral("\\bu") + intType + QStringLiteral("\\b"));
+                Q_ASSERT(entry.regex.isValid());
+                result.append(entry);
+            }
+        }
+    }
+    return result;
+}
+
+QString TypeDatabase::normalizedSignature(const QString &signature)
+{
+    QString normalized = QLatin1String(QMetaObject::normalizedSignature(signature.toUtf8().constData()));
+
+    if (instance() && signature.contains(QLatin1String("unsigned"))) {
+        const IntTypeNormalizationEntries &entries = intTypeNormalizationEntries();
+        for (int i = 0, size = entries.size(); i < size; ++i)
+            normalized.replace(entries.at(i).regex, entries.at(i).replacement);
     }
 
     return normalized;

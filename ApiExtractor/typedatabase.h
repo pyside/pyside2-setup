@@ -72,7 +72,7 @@ public:
     */
     static TypeDatabase* instance(bool newInstance = false);
 
-    static QString normalizedSignature(const char* signature);
+    static QString normalizedSignature(const QString &signature);
 
     QStringList requiredTargetImports() const;
 
