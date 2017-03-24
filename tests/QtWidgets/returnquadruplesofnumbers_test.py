@@ -26,6 +26,8 @@
 ##
 #############################################################################
 
+from __future__ import print_function
+
 import unittest
 from PySide2.QtGui import QTextCursor
 from PySide2.QtPrintSupport import QPrinter
@@ -85,7 +87,7 @@ class ReturnsQuadruplesOfNumbers(UsesQApplication):
         # actually fail to set all the margins.
         values = (15.0, 16.0, 17.0, 18.0, QPrinter.Point)
         obj.setPageMargins(*values)
-        print obj.getPageMargins(QPrinter.Point), values[:-1]
+        print(obj.getPageMargins(QPrinter.Point), values[:-1])
         self.assertTrue(self.compareTuples(obj.getPageMargins(QPrinter.Point), values[:-1]))
 
 if __name__ == "__main__":
