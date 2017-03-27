@@ -135,11 +135,13 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
 
     // Allow registering Qt Quick items.
     bool registered = false;
+#ifdef PYSIDE_QML_SUPPORT
     QuickRegisterItemFunction quickRegisterItemFunction = getQuickRegisterItemFunction();
     if (quickRegisterItemFunction) {
         registered = quickRegisterItemFunction(pyObj, uri, versionMajor, versionMinor,
                                                qmlName, &type);
     }
+#endif
 
     // Register as simple QObject rather than Qt Quick item.
     if (!registered) {

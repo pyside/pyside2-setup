@@ -247,5 +247,7 @@ void PySide::initQuickSupport(PyObject *module)
 {
     Q_UNUSED(module);
     ElementFactory<PYSIDE_MAX_QUICK_TYPES - 1>::init();
+#ifdef PYSIDE_QML_SUPPORT
     setQuickRegisterItemFunction(quickRegisterType);
+#endif
 }
