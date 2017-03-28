@@ -1105,8 +1105,8 @@ bool isValid(PyObject* pyObj, bool throwPyError)
     return isValid(reinterpret_cast<SbkObject*>(pyObj), throwPyError);
 }
 
-SbkObject *findColocatedChild(SbkObject* wrapper,
-                              SbkObjectType* instanceType)
+SbkObject *findColocatedChild(SbkObject *wrapper,
+                              const SbkObjectType *instanceType)
 {
     // Degenerate case, wrapper is the correct wrapper.
     if (reinterpret_cast<const void *>(Py_TYPE(wrapper)) == reinterpret_cast<const void *>(instanceType))

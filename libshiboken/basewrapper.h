@@ -254,8 +254,8 @@ LIBSHIBOKEN_API Py_hash_t   hash(PyObject* pyObj);
 /**
  * Find a child of given wrapper having same address having the specified type.
  */
-LIBSHIBOKEN_API SbkObject *findColocatedChild(SbkObject* wrapper,
-                                              SbkObjectType* instanceType);
+LIBSHIBOKEN_API SbkObject *findColocatedChild(SbkObject *wrapper,
+                                              const SbkObjectType *instanceType);
 
 /**
  *  Bind a C++ object to Python.
