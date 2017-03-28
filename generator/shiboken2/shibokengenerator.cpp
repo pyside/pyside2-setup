@@ -558,16 +558,18 @@ QString ShibokenGenerator::cpythonWrapperCPtr(const AbstractMetaType *metaType, 
 {
     if (!ShibokenGenerator::isWrapperType(metaType->typeEntry()))
         return QString();
-    return QStringLiteral("((::%1*)Shiboken::Conversions::cppPointer(%2, (SbkObject*)%3))")
-              .arg(metaType->cppSignature(), cpythonTypeNameExt(metaType), argName);
+    return QLatin1String("reinterpret_cast< ::") + metaType->cppSignature()
+        + QLatin1String(" *>(Shiboken::Conversions::cppPointer(") + cpythonTypeNameExt(metaType)
+        + QLatin1String(", reinterpret_cast<SbkObject *>(") + argName + QLatin1String(")))");
 }
 
 QString ShibokenGenerator::cpythonWrapperCPtr(const TypeEntry* type, QString argName)
 {
     if (!ShibokenGenerator::isWrapperType(type))
         return QString();
-    return QStringLiteral("((::%1*)Shiboken::Conversions::cppPointer(%2, (SbkObject*)%3))")
-              .arg(type->qualifiedCppName(), cpythonTypeNameExt(type), argName);
+    return QLatin1String("reinterpret_cast< ::") + type->qualifiedCppName()
+        + QLatin1String(" *>(Shiboken::Conversions::cppPointer(") + cpythonTypeNameExt(type)
+        + QLatin1String(", reinterpret_cast<SbkObject *>(") + argName + QLatin1String(")))");
 }
 
 QString ShibokenGenerator::getFunctionReturnType(const AbstractMetaFunction* func, Options) const
