@@ -578,10 +578,9 @@ QString Generator::minimalConstructor(const AbstractMetaType* type) const
     }
 
     if (type->isNativePointer())
-        return QString::fromLatin1("((%1*)0)").arg(type->typeEntry()->qualifiedCppName());
-
+        return QLatin1String("static_cast<") + type->typeEntry()->qualifiedCppName() + QLatin1String(" *>(0)");
     if (Generator::isPointer(type))
-        return QString::fromLatin1("((::%1*)0)").arg(type->typeEntry()->qualifiedCppName());
+        return QLatin1String("static_cast< ::") + type->typeEntry()->qualifiedCppName() + QLatin1String(" *>(0)");
 
     if (type->typeEntry()->isComplex()) {
         const ComplexTypeEntry* cType = reinterpret_cast<const ComplexTypeEntry*>(type->typeEntry());
@@ -602,11 +601,17 @@ QString Generator::minimalConstructor(const TypeEntry* type) const
     if (!type)
         return QString();
 
-    if (type->isCppPrimitive())
-        return QString::fromLatin1("((%1)0)").arg(type->qualifiedCppName());
+    if (type->isCppPrimitive()) {
+        const QString &name = type->qualifiedCppName();
+        return name == QLatin1String("bool")
+            ? QLatin1String("false") : name + QLatin1String("(0)");
+    }
 
-    if (type->isEnum() || type->isFlags())
-        return QString::fromLatin1("((::%1)0)").arg(type->qualifiedCppName());
+    if (type->isEnum())
+        return QLatin1String("static_cast< ::") + type->qualifiedCppName() + QLatin1String(">(0)");
+
+    if (type->isFlags())
+        return type->qualifiedCppName() + QLatin1String("(0)");
 
     if (type->isPrimitive()) {
         QString ctor = reinterpret_cast<const PrimitiveTypeEntry*>(type)->defaultConstructor();
