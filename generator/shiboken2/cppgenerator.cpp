@@ -2229,8 +2229,8 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream& s,
     if (!defaultValue.isEmpty())
         s << '{' << endl << INDENT;
 
-    s << "if (Shiboken::Conversions::isImplicitConversion((SbkObjectType*)";
-    s << cpythonTypeNameExt(type) << ", " << pythonToCppFunc << "))" << endl;
+    s << "if (Shiboken::Conversions::isImplicitConversion(reinterpret_cast<const SbkObjectType *>("
+        << cpythonTypeNameExt(type) << "), " << pythonToCppFunc << "))" << endl;
     {
         Indentation indent(INDENT);
         s << INDENT << pythonToCppFunc << '(' << pyIn << ", &" << cppOutAux << ");" << endl;
@@ -3207,8 +3207,8 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
                 && !injectedCodeHasReturnValueAttribution(func, TypeSystem::TargetLangCode)) {
                 s << INDENT << PYTHON_RETURN_VAR " = ";
                 if (isObjectTypeUsedAsValueType(func->type())) {
-                    s << "Shiboken::Object::newObject((SbkObjectType*)" << cpythonTypeNameExt(func->type()->typeEntry());
-                    s << ", " << CPP_RETURN_VAR << ", true, true)";
+                    s << "Shiboken::Object::newObject(reinterpret_cast<SbkObjectType *>(" << cpythonTypeNameExt(func->type()->typeEntry())
+                        << "), " << CPP_RETURN_VAR << ", true, true)";
                 } else {
                     writeToPythonConversion(s, func->type(), func->ownerClass(), QLatin1String(CPP_RETURN_VAR));
                 }
@@ -3503,9 +3503,9 @@ void CppGenerator::writeExtendedConverterInitialization(QTextStream& s, const Ty
 {
     s << INDENT << "// Extended implicit conversions for " << externalType->qualifiedTargetLangName() << '.' << endl;
     foreach (const AbstractMetaClass* sourceClass, conversions) {
-        QString converterVar = QString::fromLatin1("(SbkObjectType*)%1[%2]")
-                                  .arg(cppApiVariableName(externalType->targetLangPackage()),
-                                       getTypeIndexVariableName(externalType));
+        const QString converterVar = QLatin1String("reinterpret_cast<SbkObjectType *>(")
+            + cppApiVariableName(externalType->targetLangPackage()) + QLatin1Char('[')
+            + getTypeIndexVariableName(externalType) + QLatin1String("])");
         QString sourceTypeName = fixedCppTypeName(sourceClass->typeEntry());
         QString targetTypeName = fixedCppTypeName(externalType);
         QString toCpp = pythonToCppFunctionName(sourceTypeName, targetTypeName);
@@ -4028,10 +4028,10 @@ void CppGenerator::writeGetterFunction(QTextStream &s,
                     << CPP_SELF_VAR << ")) {\n";
         {
             Indentation indent(INDENT);
-            s << INDENT << "pyOut = (PyObject*)Shiboken::Object::findColocatedChild("
-                        << "(SbkObject*)self , (SbkObjectType*)"
+            s << INDENT << "pyOut = reinterpret_cast<PyObject *>(Shiboken::Object::findColocatedChild("
+                        << "reinterpret_cast<SbkObject *>(self), reinterpret_cast<const SbkObjectType *>("
                         << cpythonTypeNameExt(fieldType)
-                        << ");" << "\n";
+                        << ")));\n";
             s << INDENT << "if (pyOut) {Py_IncRef(pyOut); return pyOut;}\n";
         }
         s << INDENT << "}\n";
@@ -4046,8 +4046,8 @@ void CppGenerator::writeGetterFunction(QTextStream &s,
         s << INDENT << "}\n";
         // Create and register new wrapper
         s << INDENT << "pyOut = ";
-        s << "Shiboken::Object::newObject((SbkObjectType*)" << cpythonTypeNameExt(fieldType);
-        s << ", " << cppField << ", false, true);" << endl;
+        s << "Shiboken::Object::newObject(reinterpret_cast<SbkObjectType *>(" << cpythonTypeNameExt(fieldType)
+            << "), " << cppField << ", false, true);" << endl;
         s << INDENT << "Shiboken::Object::setParent(" PYTHON_SELF_VAR ", pyOut)";
     } else {
         s << INDENT << "pyOut = ";
@@ -4357,8 +4357,8 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
                 {
                     Indentation indent(INDENT);
                     s << INDENT << "PyObject* anonEnumItem = PyInt_FromLong(" << enumValueText << ");" << endl;
-                    s << INDENT << "if (PyDict_SetItemString(((SbkObjectType*)" << enclosingObjectVariable;
-                    s << ")->super.ht_type.tp_dict, \"" << enumValue->name() << "\", anonEnumItem) < 0)" << endl;
+                    s << INDENT << "if (PyDict_SetItemString(reinterpret_cast<SbkObjectType *>(" << enclosingObjectVariable
+                        << ")->super.ht_type.tp_dict, \"" << enumValue->name() << "\", anonEnumItem) < 0)" << endl;
                     {
                         Indentation indent(INDENT);
                         s << INDENT << "return " << m_currentErrorCode << ';' << endl;
@@ -4677,7 +4677,7 @@ void CppGenerator::writeClassRegister(QTextStream &s,
 
         // Base type
         if (metaClass->baseClass()) {
-            s << ", (SbkObjectType*)" << cpythonTypeNameExt(metaClass->baseClass()->typeEntry());
+            s << ", reinterpret_cast<SbkObjectType *>(" << cpythonTypeNameExt(metaClass->baseClass()->typeEntry()) << ')';
             // The other base types
             if (metaClass->baseClassNames().size() > 1)
                 s << ", " << pyTypeBasesVariable;

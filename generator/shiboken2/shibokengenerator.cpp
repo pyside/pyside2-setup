@@ -1082,12 +1082,15 @@ QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType
             || type == ContainerTypeEntry::SetContainer
             || type == ContainerTypeEntry::QueueContainer) {
             const AbstractMetaType* type = metaType->instantiations().first();
-            if (isPointerToWrapperType(type))
+            if (isPointerToWrapperType(type)) {
                 typeCheck += QString::fromLatin1("checkSequenceTypes(%1, ").arg(cpythonTypeNameExt(type));
-            else if (isWrapperType(type))
-                typeCheck += QString::fromLatin1("convertibleSequenceTypes((SbkObjectType*)%1, ").arg(cpythonTypeNameExt(type));
-            else
+            } else if (isWrapperType(type)) {
+                typeCheck += QLatin1String("convertibleSequenceTypes(reinterpret_cast<const SbkObjectType *>(");
+                typeCheck += cpythonTypeNameExt(type);
+                typeCheck += QLatin1String("), ");
+            } else {
                 typeCheck += QString::fromLatin1("convertibleSequenceTypes(%1, ").arg(converterObject(type));
+            }
         } else if (type == ContainerTypeEntry::MapContainer
             || type == ContainerTypeEntry::MultiMapContainer
             || type == ContainerTypeEntry::HashContainer
@@ -1173,11 +1176,13 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntry* type,
                                                         bool /* checkExact */)
 {
     if (isWrapperType(type)) {
-        QString isConv = (type->isValue() && !isValueTypeWithCopyConstructorOnly(type))
+        QString result = QLatin1String("Shiboken::Conversions::");
+        result += (type->isValue() && !isValueTypeWithCopyConstructorOnly(type))
                          ? QLatin1String("isPythonToCppValueConvertible")
                          : QLatin1String("isPythonToCppPointerConvertible");
-        return QString::fromLatin1("Shiboken::Conversions::%1((SbkObjectType*)%2, ")
-                  .arg(isConv, cpythonTypeNameExt(type));
+        result += QLatin1String("(reinterpret_cast<SbkObjectType *>(")
+            + cpythonTypeNameExt(type) + QLatin1String("), ");
+        return result;
     }
     return QString::fromLatin1("Shiboken::Conversions::isPythonToCppConvertible(%1, ")
               .arg(converterObject(type));
@@ -1196,15 +1201,16 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* 
     }
 
     if (isWrapperType(metaType)) {
-        QString isConv;
+        QString result = QLatin1String("Shiboken::Conversions::");
         if (isPointer(metaType) || isValueTypeWithCopyConstructorOnly(metaType))
-            isConv = QLatin1String("isPythonToCppPointerConvertible");
+            result += QLatin1String("isPythonToCppPointerConvertible");
         else if (metaType->referenceType() == LValueReference)
-            isConv = QLatin1String("isPythonToCppReferenceConvertible");
+            result += QLatin1String("isPythonToCppReferenceConvertible");
         else
-            isConv = QLatin1String("isPythonToCppValueConvertible");
-        return QStringLiteral("Shiboken::Conversions::%1((SbkObjectType*)%2, ")
-                  .arg(isConv, cpythonTypeNameExt(metaType));
+            result += QLatin1String("isPythonToCppValueConvertible");
+        result += QLatin1String("(reinterpret_cast<const SbkObjectType *>(")
+            + cpythonTypeNameExt(metaType) + QLatin1String("), ");
+        return result;
     }
     return QStringLiteral("Shiboken::Conversions::isPythonToCppConvertible(%1, ")
               .arg(converterObject(metaType));
@@ -1217,16 +1223,18 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaArgume
 
 QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaClass* metaClass)
 {
-    return QStringLiteral("Shiboken::Conversions::pythonToCppPointer((SbkObjectType*)%1, ")
-              .arg(cpythonTypeNameExt(metaClass->typeEntry()));
+    return QLatin1String("Shiboken::Conversions::pythonToCppPointer(reinterpret_cast<SbkObjectType *>(")
+        + cpythonTypeNameExt(metaClass->typeEntry()) + QLatin1String("), ");
 }
+
 QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaType *type,
                                                           const AbstractMetaClass * /* context */)
 {
     if (isWrapperType(type)) {
-        return QStringLiteral("Shiboken::Conversions::pythonToCpp%1((SbkObjectType*)%2, ")
-                  .arg(isPointer(type) ? QLatin1String("Pointer") : QLatin1String("Copy"))
-                  .arg(cpythonTypeNameExt(type));
+        return QLatin1String("Shiboken::Conversions::pythonToCpp")
+            + (isPointer(type) ? QLatin1String("Pointer") : QLatin1String("Copy"))
+            + QLatin1String("(reinterpret_cast<SbkObjectType *>(")
+            + cpythonTypeNameExt(type) + QLatin1String("), ");
     }
     return QStringLiteral("Shiboken::Conversions::pythonToCppCopy(%1, ")
               .arg(converterObject(type));
@@ -1243,9 +1251,12 @@ QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaT
             conversion = QLatin1String("copy");
         else
             conversion = QLatin1String("pointer");
-        return QStringLiteral("Shiboken::Conversions::%1ToPython((SbkObjectType*)%2, %3")
-                  .arg(conversion, cpythonTypeNameExt(type),
-                       conversion == QLatin1String("pointer") ? QString() : QLatin1String("&"));
+        QString result = QLatin1String("Shiboken::Conversions::") + conversion
+            + QLatin1String("ToPython(reinterpret_cast<const SbkObjectType *>(")
+            + cpythonTypeNameExt(type) + QLatin1String("), ");
+        if (conversion != QLatin1String("pointer"))
+            result += QLatin1Char('&');
+        return result;
     }
     return QStringLiteral("Shiboken::Conversions::copyToPython(%1, %2")
               .arg(converterObject(type),
@@ -1260,14 +1271,13 @@ QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaC
 QString ShibokenGenerator::cpythonToPythonConversionFunction(const TypeEntry* type)
 {
     if (isWrapperType(type)) {
-        QString conversion;
-        if (type->isValue())
-            conversion = QLatin1String("copy");
-        else
-            conversion = QLatin1String("pointer");
-        return QStringLiteral("Shiboken::Conversions::%1ToPython((SbkObjectType*)%2, %3")
-                  .arg(conversion, cpythonTypeNameExt(type),
-                       conversion == QLatin1String("pointer") ? QString() : QLatin1String("&"));
+        const QString conversion = type->isValue() ? QLatin1String("copy") : QLatin1String("pointer");
+         QString result = QLatin1String("Shiboken::Conversions::") + conversion
+             + QLatin1String("ToPython(reinterpret_cast<const SbkObjectType *>(") + cpythonTypeNameExt(type)
+             + QLatin1String("), ");
+         if (conversion != QLatin1String("pointer"))
+             result += QLatin1Char('&');
+        return result;
     }
 
     return QStringLiteral("Shiboken::Conversions::copyToPython(%1, &").arg(converterObject(type));
