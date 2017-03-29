@@ -1122,7 +1122,7 @@ public:
     QString replacedDefaultExpression(const AbstractMetaClass *cls, int idx) const;
     bool removedDefaultExpression(const AbstractMetaClass *cls, int idx) const;
     QString conversionRule(TypeSystem::Language language, int idx) const;
-    QList<ReferenceCount> referenceCounts(const AbstractMetaClass *cls, int idx = -2) const;
+    QVector<ReferenceCount> referenceCounts(const AbstractMetaClass *cls, int idx = -2) const;
     ArgumentOwner argumentOwner(const AbstractMetaClass *cls, int idx) const;
 
     bool nullPointersDisabled(const AbstractMetaClass *cls = 0, int argument_idx = 0) const;
@@ -1294,7 +1294,7 @@ private:
 };
 
 
-class AbstractMetaEnumValueList : public QList<AbstractMetaEnumValue *>
+class AbstractMetaEnumValueList : public QVector<AbstractMetaEnumValue *>
 {
 public:
     AbstractMetaEnumValue *find(const QString &name) const;
@@ -1698,12 +1698,12 @@ public:
     bool hasProtectedMembers() const;
 
 
-    QList<TypeEntry *> templateArguments() const
+    QVector<TypeEntry *> templateArguments() const
     {
         return m_templateArgs;
     }
 
-    void setTemplateArguments(const QList<TypeEntry *> &args)
+    void setTemplateArguments(const QVector<TypeEntry *> &args)
     {
         m_templateArgs = args;
     }
@@ -1772,7 +1772,7 @@ public:
         m_propertySpecs << spec;
     }
 
-    QList<QPropertySpec *> propertySpecs() const
+    QVector<QPropertySpec *> propertySpecs() const
     {
         return m_propertySpecs;
     }
@@ -1874,13 +1874,13 @@ private:
     AbstractMetaEnumList m_enums;
     AbstractMetaClassList m_interfaces;
     AbstractMetaClass *m_extractedInterface;
-    QList<QPropertySpec *> m_propertySpecs;
+    QVector<QPropertySpec *> m_propertySpecs;
     AbstractMetaClassList m_innerClasses;
 
     AbstractMetaFunctionList m_externalConversionOperators;
 
     QStringList m_baseClassNames;
-    QList<TypeEntry *> m_templateArgs;
+    QVector<TypeEntry *> m_templateArgs;
     ComplexTypeEntry *m_typeEntry;
 //     FunctionModelItem m_qDebugStreamFunction;
 

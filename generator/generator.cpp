@@ -668,7 +668,7 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
 
     QString qualifiedCppName = metaClass->typeEntry()->qualifiedCppName();
     QStringList templateTypes;
-    const QList<TypeEntry *> &templateArguments = metaClass->templateArguments();
+    const QVector<TypeEntry *> &templateArguments = metaClass->templateArguments();
     for (TypeEntry *templateType : templateArguments)
         templateTypes << templateType->qualifiedCppName();
 

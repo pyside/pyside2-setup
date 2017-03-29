@@ -140,7 +140,7 @@ public:
     bool inheritTemplate(AbstractMetaClass *subclass,
                          const AbstractMetaClass *templateClass,
                          const TypeParser::Info &info);
-    AbstractMetaType *inheritTemplateType(const QList<AbstractMetaType *> &templateTypes,
+    AbstractMetaType *inheritTemplateType(const QVector<AbstractMetaType *> &templateTypes,
                                           const AbstractMetaType *metaType,
                                           bool *ok = Q_NULLPTR);
 

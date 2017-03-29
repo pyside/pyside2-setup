@@ -57,7 +57,7 @@ void TestAbstractMetaClass::testClassNameUnderNamespace()
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.count(), 2); // 1 namespace + 1 class
     if (classes.first()->name() != QLatin1String("ClassName"))
-        classes.swap(0, 1);
+        qSwap(classes[0], classes[1]);
 
     QCOMPARE(classes[0]->name(), QLatin1String("ClassName"));
     QCOMPARE(classes[0]->qualifiedCppName(), QLatin1String("Namespace::ClassName"));
@@ -71,7 +71,7 @@ void TestAbstractMetaClass::testClassNameUnderNamespace()
     AbstractMetaFunctionList ctors = classes[0]->queryFunctions(AbstractMetaClass::Constructors);
     QCOMPARE(ctors.size(), 2);
     if (ctors.first()->minimalSignature() != QLatin1String("ClassName()"))
-        ctors.swap(0, 1);
+        qSwap(ctors[0], ctors[1]);
 
     QCOMPARE(ctors[0]->arguments().size(), 0);
     QCOMPARE(ctors[0]->minimalSignature(), QLatin1String("ClassName()"));
@@ -361,7 +361,7 @@ void TestAbstractMetaClass::testClassDefaultConstructors()
     AbstractMetaFunctionList ctors = classA->queryFunctions(AbstractMetaClass::Constructors);
     QCOMPARE(ctors.size(), 2);
     if (ctors.first()->minimalSignature() != QLatin1String("A()"))
-        ctors.swap(0, 1);
+        qSwap(ctors[0], ctors[1]);
 
     QCOMPARE(ctors[0]->arguments().size(), 0);
     QCOMPARE(ctors[0]->minimalSignature(), QLatin1String("A()"));
@@ -395,7 +395,7 @@ void TestAbstractMetaClass::testClassDefaultConstructors()
     ctors = classF->queryFunctions(AbstractMetaClass::Constructors);
     QCOMPARE(ctors.size(), 2);
     if (ctors.first()->minimalSignature() != QLatin1String("F(int,int)"))
-        ctors.swap(0, 1);
+        qSwap(ctors[0], ctors[1]);
 
     QCOMPARE(ctors[0]->arguments().size(), 2);
     QCOMPARE(ctors[0]->minimalSignature(), QLatin1String("F(int,int)"));
@@ -428,7 +428,7 @@ void TestAbstractMetaClass::testClassInheritedDefaultConstructors()
     AbstractMetaFunctionList ctors = classA->queryFunctions(AbstractMetaClass::Constructors);
     QCOMPARE(ctors.size(), 2);
     if (ctors.first()->minimalSignature() != QLatin1String("A()"))
-        ctors.swap(0, 1);
+        qSwap(ctors[0], ctors[1]);
 
     QCOMPARE(ctors[0]->arguments().size(), 0);
     QCOMPARE(ctors[0]->minimalSignature(), QLatin1String("A()"));

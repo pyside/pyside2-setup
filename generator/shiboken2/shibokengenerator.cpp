@@ -1327,8 +1327,6 @@ QString ShibokenGenerator::argumentString(const AbstractMetaFunction *func,
         arg += argument->name();
     }
 
-    QList<ReferenceCount> referenceCounts;
-    referenceCounts = func->referenceCounts(func->implementingClass(), argument->argumentIndex() + 1);
     if ((options & Generator::SkipDefaultValues) != Generator::SkipDefaultValues &&
         !argument->originalDefaultValueExpression().isEmpty())
     {

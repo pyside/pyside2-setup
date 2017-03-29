@@ -49,7 +49,7 @@ static inline QString nameAttribute() { return QStringLiteral("name"); }
 static inline QString sinceAttribute() { return QStringLiteral("since"); }
 static inline QString flagsAttribute() { return QStringLiteral("flags"); }
 
-static QList<CustomConversion*> customConversionsForReview = QList<CustomConversion*>();
+static QVector<CustomConversion *> customConversionsForReview;
 
 Handler::Handler(TypeDatabase* database, bool generate)
             : m_database(database), m_generate(generate ? TypeEntry::GenerateAll : TypeEntry::GenerateForSubclass)

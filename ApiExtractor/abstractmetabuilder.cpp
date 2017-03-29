@@ -1277,7 +1277,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     }
 
     TemplateParameterList template_parameters = classItem->templateParameters();
-    QList<TypeEntry *> template_args;
+    QVector<TypeEntry *> template_args;
     template_args.clear();
     for (int i = 0; i < template_parameters.size(); ++i) {
         const TemplateParameterModelItem &param = template_parameters.at(i);
@@ -1551,7 +1551,7 @@ static bool _compareAbstractMetaFunctions(const AbstractMetaFunction* func, cons
 // "QList(const QList &)" to "QList(const QList<T> &)".
 static bool _fixFunctionModelItemTypes(FunctionModelItem& function, const AbstractMetaClass* metaClass)
 {
-    const QList<TypeEntry *> &templateTypes = metaClass->templateArguments();
+    const QVector<TypeEntry *> &templateTypes = metaClass->templateArguments();
     if (templateTypes.isEmpty())
         return false;
 
@@ -1921,7 +1921,7 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
     metaFunction->setType(translateType(addedFunc.version(), addedFunc.returnType()));
 
 
-    QList<AddedFunction::TypeInfo> args = addedFunc.arguments();
+    QVector<AddedFunction::TypeInfo> args = addedFunc.arguments();
     AbstractMetaArgumentList metaArguments;
 
     for (int i = 0; i < args.count(); ++i) {
@@ -2222,7 +2222,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
         } else {
             FunctionModificationList mods = TypeDatabase::instance()->functionModifications(metaFunction->minimalSignature());
             if (!mods.isEmpty()) {
-                QList<ArgumentModification> argMods = mods.first().argument_mods;
+                QVector<ArgumentModification> argMods = mods.first().argument_mods;
                 if (!argMods.isEmpty())
                     replacedExpression = argMods.first().replacedDefaultExpression;
             }
@@ -2518,7 +2518,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
     // 8. No? Check if the current class is a template and this type is one
     //    of the parameters.
     if (!type && m_currentClass) {
-        const QList<TypeEntry *> &template_args = m_currentClass->templateArguments();
+        const QVector<TypeEntry *> &template_args = m_currentClass->templateArguments();
         for (TypeEntry *te : template_args) {
             if (te->name() == qualifiedName)
                 type = te;
@@ -2847,7 +2847,7 @@ bool AbstractMetaBuilderPrivate::ancestorHasPrivateCopyConstructor(const Abstrac
     return false;
 }
 
-AbstractMetaType* AbstractMetaBuilderPrivate::inheritTemplateType(const QList<AbstractMetaType *> &templateTypes,
+AbstractMetaType* AbstractMetaBuilderPrivate::inheritTemplateType(const QVector<AbstractMetaType *> &templateTypes,
                                                                   const AbstractMetaType *metaType,
                                                                   bool *ok)
 {
@@ -2899,8 +2899,8 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
                                                  const AbstractMetaClass *templateClass,
                                                  const TypeParser::Info &info)
 {
-    QList<TypeParser::Info> targs = info.template_instantiations;
-    QList<AbstractMetaType*> templateTypes;
+    QVector<TypeParser::Info> targs = info.template_instantiations;
+    QVector<AbstractMetaType *> templateTypes;
 
     if (subclass->isTypeDef()) {
         subclass->setHasCloneOperator(templateClass->hasCloneOperator());
@@ -3124,11 +3124,11 @@ void AbstractMetaBuilderPrivate::setupClonable(AbstractMetaClass *cls)
         QQueue<AbstractMetaClass*> baseClasses;
         if (cls->baseClass())
             baseClasses.enqueue(cls->baseClass());
-        baseClasses << cls->interfaces();
+        baseClasses << cls->interfaces().toList();
 
         while (!baseClasses.isEmpty()) {
             AbstractMetaClass* currentClass = baseClasses.dequeue();
-            baseClasses << currentClass->interfaces();
+            baseClasses << currentClass->interfaces().toList();
             if (currentClass->baseClass())
                 baseClasses.enqueue(currentClass->baseClass());
 

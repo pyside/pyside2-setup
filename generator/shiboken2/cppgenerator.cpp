@@ -275,7 +275,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
 
     //Extra includes
     s << endl << "// Extra includes" << endl;
-    QList<Include> includes = metaClass->typeEntry()->extraIncludes();
+    QVector<Include> includes = metaClass->typeEntry()->extraIncludes();
     for (AbstractMetaEnum *cppEnum : qAsConst(classEnums))
         includes.append(cppEnum->typeEntry()->extraIncludes());
     qSort(includes.begin(), includes.end());
@@ -5208,7 +5208,7 @@ bool CppGenerator::finishGeneration()
 
     //Extra includes
     s << endl << "// Extra includes" << endl;
-    QList<Include> extraIncludes;
+    QVector<Include> extraIncludes;
     if (moduleEntry)
         extraIncludes = moduleEntry->extraIncludes();
     for (AbstractMetaEnum *cppEnum : qAsConst(globalEnums))

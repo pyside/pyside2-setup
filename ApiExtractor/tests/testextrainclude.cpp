@@ -50,7 +50,7 @@ void TestExtraInclude::testClassExtraInclude()
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
 
-    QList<Include> includes = classA->typeEntry()->extraIncludes();
+    QVector<Include> includes = classA->typeEntry()->extraIncludes();
     QCOMPARE(includes.count(), 1);
     QCOMPARE(includes.first().name(), QLatin1String("header.h"));
 }
@@ -76,7 +76,7 @@ void TestExtraInclude::testGlobalExtraIncludes()
     TypeEntry* module = td->findType(QLatin1String("Foo"));
     QVERIFY(module);
 
-    QList<Include> includes = module->extraIncludes();
+    QVector<Include> includes = module->extraIncludes();
     QCOMPARE(includes.count(), 2);
     QCOMPARE(includes.first().name(), QLatin1String("header1.h"));
     QCOMPARE(includes.last().name(), QLatin1String("header2.h"));

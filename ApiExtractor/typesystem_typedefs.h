@@ -31,6 +31,7 @@
 
 #include <QtCore/QHash>
 #include <QtCore/QList>
+#include <QtCore/QVector>
 
 class CodeSnip;
 class ContainerTypeEntry;
@@ -47,12 +48,12 @@ typedef QHash<QString, QList<TypeEntry *> > TypeEntryHash;
 typedef QHash<QString, TypeEntry *> SingleTypeEntryHash;
 typedef QHash<QString, TemplateEntry *> TemplateEntryHash;
 
-typedef QList<AddedFunction> AddedFunctionList;
-typedef QList<CodeSnip> CodeSnipList;
+typedef QVector<AddedFunction> AddedFunctionList;
+typedef QVector<CodeSnip> CodeSnipList;
 typedef QList<const ContainerTypeEntry *> ContainerTypeEntryList;
-typedef QList<DocModification> DocModificationList;
-typedef QList<FieldModification> FieldModificationList;
-typedef QList<FunctionModification> FunctionModificationList;
+typedef QVector<DocModification> DocModificationList;
+typedef QVector<FieldModification> FieldModificationList;
+typedef QVector<FunctionModification> FunctionModificationList;
 typedef QList<const PrimitiveTypeEntry *> PrimitiveTypeEntryList;
 
 #endif // TYPESYSTEM_TYPEDEFS_H

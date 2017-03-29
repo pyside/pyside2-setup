@@ -34,6 +34,7 @@
 #include <QtCore/QList>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
+#include <QtCore/QVector>
 
 class TypeParser
 {
@@ -43,7 +44,7 @@ public:
         Info() : referenceType(NoReference), is_constant(false), is_busted(false), indirections(0) { }
         QStringList qualified_name;
         QStringList arrays;
-        QList<Info> template_instantiations;
+        QVector<Info> template_instantiations;
         ReferenceType referenceType;
         uint is_constant : 1;
         uint is_busted : 1;

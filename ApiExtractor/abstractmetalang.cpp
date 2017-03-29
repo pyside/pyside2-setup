@@ -280,7 +280,7 @@ void AbstractMetaType::decideUsagePattern()
 bool AbstractMetaType::hasTemplateChildren() const
 {
     QStack<AbstractMetaType *> children;
-    children << m_children.toVector();
+    children << m_children;
 
     // Recursively iterate over the children / descendants of the type, to check if any of them
     // corresponds to a template argument type.
@@ -288,7 +288,7 @@ bool AbstractMetaType::hasTemplateChildren() const
         AbstractMetaType *child = children.pop();
         if (child->typeEntry()->isTemplateArgument())
             return true;
-        children << child->m_children.toVector();
+        children << child->m_children;
     }
 
     return false;
@@ -389,7 +389,7 @@ bool AbstractMetaFunction::needsCallThrough() const
 bool AbstractMetaFunction::needsSuppressUncheckedWarning() const
 {
     for (int i = -1; i <= arguments().size(); ++i) {
-        const QList<ReferenceCount> &referenceCounts = this->referenceCounts(implementingClass(), i);
+        const QVector<ReferenceCount> &referenceCounts = this->referenceCounts(implementingClass(), i);
         for (const ReferenceCount &referenceCount : referenceCounts) {
             if (referenceCount.action != ReferenceCount::Set)
                 return true;
@@ -600,9 +600,9 @@ int AbstractMetaFunction::actualMinimumArgumentCount() const
 }
 
 // Returns reference counts for argument at idx, or all arguments if idx == -2
-QList<ReferenceCount> AbstractMetaFunction::referenceCounts(const AbstractMetaClass *cls, int idx) const
+QVector<ReferenceCount> AbstractMetaFunction::referenceCounts(const AbstractMetaClass *cls, int idx) const
 {
-    QList<ReferenceCount> returned;
+    QVector<ReferenceCount> returned;
 
     const FunctionModificationList &mods = this->modifications(cls);
     for (const FunctionModification &mod : mods) {

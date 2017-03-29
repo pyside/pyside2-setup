@@ -30,7 +30,7 @@
 #define INCLUDE_H
 
 #include <QString>
-#include <QList>
+#include <QVector>
 
 QT_BEGIN_NAMESPACE
 class QTextStream;
@@ -87,6 +87,6 @@ QTextStream& operator<<(QTextStream& out, const Include& include);
 QDebug operator<<(QDebug d, const Include &i);
 #endif
 
-typedef QList<Include> IncludeList;
+typedef QVector<Include> IncludeList;
 
 #endif

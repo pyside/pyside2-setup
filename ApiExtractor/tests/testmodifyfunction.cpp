@@ -232,7 +232,7 @@ void TestModifyFunction::testGlobalFunctionModification()
 
     FunctionModificationList mods = TypeDatabase::instance()->functionModifications(QLatin1String("function(A*)"));
     QCOMPARE(mods.count(), 1);
-    QList<ArgumentModification> argMods = mods.first().argument_mods;
+    QVector<ArgumentModification> argMods = mods.first().argument_mods;
     QCOMPARE(argMods.count(), 1);
     ArgumentModification argMod = argMods.first();
     QCOMPARE(argMod.replacedDefaultExpression, QLatin1String("A()"));

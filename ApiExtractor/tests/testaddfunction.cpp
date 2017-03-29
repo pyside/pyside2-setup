@@ -49,7 +49,7 @@ void TestAddFunction::testParsingFuncNameAndConstness()
     const char sig2[] = "    _fu__nc_       (  type1, const type2, const Abc<int& , C<char*> *   >  * *, const type3* const    )   const ";
     AddedFunction f2(QLatin1String(sig2), QLatin1String("const Abc<int& , C<char*> *   >  * *"), 0);
     QCOMPARE(f2.name(), QLatin1String("_fu__nc_"));
-    QList< AddedFunction::TypeInfo > args = f2.arguments();
+    QVector< AddedFunction::TypeInfo > args = f2.arguments();
     QCOMPARE(args.count(), 4);
     retval = f2.returnType();
     QCOMPARE(retval.name, QLatin1String("Abc<int& , C<char*> *   >"));

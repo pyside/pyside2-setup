@@ -38,6 +38,7 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QMap>
+#include <QtCore/QVector>
 
 //Used to identify the conversion rule to avoid break API
 #define TARGET_CONVERSION_RULE_FLAG "0"
@@ -103,6 +104,7 @@ private:
     TemplateInstance *m_instance;
 
 public:
+    CodeSnipFragment() : m_instance(0) {}
     CodeSnipFragment(const QString &code)
         : m_code(code),
           m_instance(0) {}
@@ -126,7 +128,7 @@ public:
         codeList.append(CodeSnipFragment(ti));
     }
 
-    QList<CodeSnipFragment> codeList;
+    QVector<CodeSnipFragment> codeList;
 };
 
 class CustomFunction : public CodeSnipAbstract
@@ -194,6 +196,7 @@ private:
 class CodeSnip : public CodeSnipAbstract
 {
 public:
+    CodeSnip() : language(TypeSystem::TargetLangCode), version(0) {}
     CodeSnip(double vr) : language(TypeSystem::TargetLangCode), version(vr) { }
     CodeSnip(double vr, TypeSystem::Language lang) : language(lang), version(vr) { }
 
@@ -205,6 +208,8 @@ public:
 
 struct ArgumentModification
 {
+    ArgumentModification() : removedDefaultExpression(false), removed(false),
+        noNullPointers(false), index(-1), version(0) {}
     ArgumentModification(int idx, double vr)
             : removedDefaultExpression(false), removed(false),
               noNullPointers(false), index(idx), version(vr) {}
@@ -219,7 +224,7 @@ struct ArgumentModification
     int index;
 
     // Reference count flags for this argument
-    QList<ReferenceCount> referenceCounts;
+    QVector<ReferenceCount> referenceCounts;
 
     // The text given for the new type of the argument
     QString modified_type;
@@ -344,6 +349,7 @@ struct Modification
 
 struct FunctionModification: public Modification
 {
+    FunctionModification() : m_thread(false), m_allowThread(false), m_version(0) {}
     FunctionModification(double vr) : m_thread(false), m_allowThread(false), m_version(vr) {}
 
     bool isCodeInjection() const
@@ -381,11 +387,9 @@ struct FunctionModification: public Modification
     QString association;
     CodeSnipList snips;
 
-    QList<ArgumentModification> argument_mods;
+    QVector<ArgumentModification> argument_mods;
 
 private:
-    FunctionModification() {}
-
     bool m_thread;
     bool m_allowThread;
     double m_version;
@@ -440,6 +444,7 @@ struct AddedFunction
 
     /// Creates a new AddedFunction with a signature and a return type.
     AddedFunction(QString signature, QString returnType, double vr);
+    AddedFunction() : m_access(Protected), m_isConst(false), m_isStatic(false), m_version(0) {}
 
     /// Returns the function name.
     QString name() const
@@ -466,7 +471,7 @@ struct AddedFunction
     }
 
     /// Returns a list of argument type infos.
-    QList<TypeInfo> arguments() const
+    QVector<TypeInfo> arguments() const
     {
         return m_arguments;
     }
@@ -496,7 +501,7 @@ struct AddedFunction
 private:
     QString m_name;
     Access m_access;
-    QList<TypeInfo> m_arguments;
+    QVector<TypeInfo> m_arguments;
     TypeInfo m_returnType;
     bool m_isConst;
     bool m_isStatic;
@@ -525,6 +530,7 @@ class ObjectTypeEntry;
 class DocModification
 {
 public:
+    DocModification() : format(TypeSystem::NativeCode), m_mode(TypeSystem::DocModificationXPathReplace), m_version(0) {}
     DocModification(const QString& xpath, const QString& signature, double vr)
             : format(TypeSystem::NativeCode), m_mode(TypeSystem::DocModificationXPathReplace),
               m_xpath(xpath), m_signature(signature), m_version(vr) {}
@@ -1119,6 +1125,7 @@ private:
 
 struct EnumValueRedirection
 {
+    EnumValueRedirection() {}
     EnumValueRedirection(const QString &rej, const QString &us)
             : rejected(rej),
             used(us)
@@ -1272,7 +1279,7 @@ private:
     QString m_upperBound;
 
     QStringList m_rejectedEnums;
-    QList<EnumValueRedirection> m_enumRedirections;
+    QVector<EnumValueRedirection> m_enumRedirections;
 
     FlagsTypeEntry *m_flags;
 
@@ -1932,7 +1939,7 @@ public:
     bool replaceOriginalTargetToNativeConversions() const;
     void setReplaceOriginalTargetToNativeConversions(bool replaceOriginalTargetToNativeConversions);
 
-    typedef QList<TargetToNativeConversion*> TargetToNativeConversions;
+    typedef QVector<TargetToNativeConversion*> TargetToNativeConversions;
     bool hasTargetToNativeConversions() const;
     TargetToNativeConversions& targetToNativeConversions();
     const TargetToNativeConversions& targetToNativeConversions() const;

@@ -142,20 +142,20 @@ public:
 
     /// Write user's custom code snippets at class or module level.
     void writeCodeSnips(QTextStream& s,
-                        const QList<CodeSnip>& codeSnips,
+                        const QVector<CodeSnip> & codeSnips,
                         TypeSystem::CodeSnipPosition position,
                         TypeSystem::Language language,
                         const AbstractMetaClass* context = 0);
     /// Write user's custom code snippets at function level.
     void writeCodeSnips(QTextStream& s,
-                        const QList<CodeSnip>& codeSnips,
+                        const QVector<CodeSnip> & codeSnips,
                         TypeSystem::CodeSnipPosition position,
                         TypeSystem::Language language,
                         const AbstractMetaFunction* func,
                         const AbstractMetaArgument* lastArg = 0);
 
     /// Returns a string with the user's custom code snippets that comply with \p position and \p language.
-    QString getCodeSnippets(const QList<CodeSnip>& codeSnips, TypeSystem::CodeSnipPosition position, TypeSystem::Language language);
+    QString getCodeSnippets(const QVector<CodeSnip> & codeSnips, TypeSystem::CodeSnipPosition position, TypeSystem::Language language);
 
     /// Replaces variables for the user's custom code at global or class level.
     void processCodeSnip(QString& code, const AbstractMetaClass* context = 0);
