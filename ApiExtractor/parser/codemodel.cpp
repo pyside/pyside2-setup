@@ -47,9 +47,9 @@ private:
 };
 
 template <class T>
-static QSharedPointer<T> findModelItem(const QList<QSharedPointer<T> > &list, const QString &name)
+static QSharedPointer<T> findModelItem(const QVector<QSharedPointer<T> > &list, const QString &name)
 {
-    typedef typename QList<QSharedPointer<T> >::const_iterator It;
+    typedef typename QVector<QSharedPointer<T> >::const_iterator It;
     const It it = std::find_if(list.begin(), list.end(), ModelItemNamePredicate<T>(name));
     return it != list.end() ? *it : QSharedPointer<T>();
 }
@@ -230,7 +230,7 @@ QString TypeInfo::toString() const
     return tmp;
 }
 
-bool TypeInfo::operator==(const TypeInfo &other)
+bool TypeInfo::operator==(const TypeInfo &other) const
 {
     if (arrayElements().count() != other.arrayElements().count())
         return false;
@@ -740,6 +740,14 @@ FunctionList _ScopeModelItem::findFunctions(const QString &name) const
 // ---------------------------------------------------------------------------
 _NamespaceModelItem::~_NamespaceModelItem()
 {
+}
+
+QSet<NamespaceModelItem> _NamespaceModelItem::uniqueNamespaces() const
+{
+    QSet<NamespaceModelItem> result;
+    for (const NamespaceModelItem &n : m_namespaces)
+        result.insert(n);
+    return result;
 }
 
 void _NamespaceModelItem::addNamespace(NamespaceModelItem item)

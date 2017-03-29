@@ -31,7 +31,7 @@
 #ifndef CODEMODEL_FWD_H
 #define CODEMODEL_FWD_H
 
-#include <QtCore/QList>
+#include <QtCore/QVector>
 #include <QtCore/QSharedPointer>
 
 // forward declarations
@@ -65,18 +65,18 @@ typedef QSharedPointer<_TypeDefModelItem> TypeDefModelItem;
 typedef QSharedPointer<_VariableModelItem> VariableModelItem;
 typedef QSharedPointer<_MemberModelItem> MemberModelItem;
 
-typedef QList<ArgumentModelItem> ArgumentList;
-typedef QList<ClassModelItem> ClassList;
-typedef QList<CodeModelItem> ItemList;
-typedef QList<EnumModelItem> EnumList;
-typedef QList<EnumeratorModelItem> EnumeratorList;
-typedef QList<FileModelItem> FileList;
-typedef QList<FunctionModelItem> FunctionList;
-typedef QList<NamespaceModelItem> NamespaceList;
-typedef QList<ScopeModelItem> ScopeList;
-typedef QList<TemplateParameterModelItem> TemplateParameterList;
-typedef QList<TypeDefModelItem> TypeDefList;
-typedef QList<VariableModelItem> VariableList;
-typedef QList<MemberModelItem> MemberList;
+typedef QVector<ArgumentModelItem> ArgumentList;
+typedef QVector<ClassModelItem> ClassList;
+typedef QVector<CodeModelItem> ItemList;
+typedef QVector<EnumModelItem> EnumList;
+typedef QVector<EnumeratorModelItem> EnumeratorList;
+typedef QVector<FileModelItem> FileList;
+typedef QVector<FunctionModelItem> FunctionList;
+typedef QVector<NamespaceModelItem> NamespaceList;
+typedef QVector<ScopeModelItem> ScopeList;
+typedef QVector<TemplateParameterModelItem> TemplateParameterList;
+typedef QVector<TypeDefModelItem> TypeDefList;
+typedef QVector<VariableModelItem> VariableList;
+typedef QVector<MemberModelItem> MemberList;
 
 #endif // CODEMODEL_FWD_H
