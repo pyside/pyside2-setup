@@ -135,7 +135,7 @@ public:
 
     /// Utility function for writeCodeSnips.
     typedef QPair<const AbstractMetaArgument*, QString> ArgumentVarReplacementPair;
-    typedef QList<ArgumentVarReplacementPair> ArgumentVarReplacementList;
+    typedef QVector<ArgumentVarReplacementPair> ArgumentVarReplacementList;
     ArgumentVarReplacementList getArgumentReplacement(const AbstractMetaFunction* func,
                                                       bool usePyArgs, TypeSystem::Language language,
                                                       const AbstractMetaArgument* lastArg);
@@ -499,12 +499,12 @@ protected:
 
     // All data about extended converters: the type entries of the target type, and a
     // list of AbstractMetaClasses accepted as argument for the conversion.
-    typedef QHash<const TypeEntry*, QList<const AbstractMetaClass*> > ExtendedConverterData;
+    typedef QHash<const TypeEntry *, QVector<const AbstractMetaClass *> > ExtendedConverterData;
     /// Returns all extended conversions for the current module.
     ExtendedConverterData getExtendedConverters() const;
 
     /// Returns a list of converters for the non wrapper types of the current module.
-    QList<const CustomConversion*> getPrimitiveCustomConversions();
+    QVector<const CustomConversion *> getPrimitiveCustomConversions();
 
     /// Returns true if the Python wrapper for the received OverloadData must accept a list of arguments.
     static bool pythonFunctionWrapperUsesListOfArguments(const OverloadData& overloadData);

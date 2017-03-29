@@ -155,7 +155,7 @@ static QString getImplicitConversionTypeName(const AbstractMetaType* containerTy
 }
 
 static QString msgCyclicDependency(const QString &funcName, const QString &graphName,
-                                   const QList<const AbstractMetaFunction *> &involvedConversions)
+                                   const OverloadData::MetaFunctionList &involvedConversions)
 {
     QString result;
     QTextStream str(&result);
@@ -291,7 +291,7 @@ void OverloadData::sortNextOverloads()
 
     QStringList classesWithIntegerImplicitConversion;
 
-    QList<const AbstractMetaFunction *> involvedConversions;
+    MetaFunctionList involvedConversions;
 
     for (OverloadData *ov : m_nextOverloadData) {
         const AbstractMetaType* targetType = ov->argType();
@@ -731,9 +731,9 @@ bool OverloadData::isFinalOccurrence(const AbstractMetaFunction* func) const
     return true;
 }
 
-QList<const AbstractMetaFunction*> OverloadData::overloadsWithoutRepetition() const
+OverloadData::MetaFunctionList OverloadData::overloadsWithoutRepetition() const
 {
-    QList<const AbstractMetaFunction*> overloads = m_overloads;
+    MetaFunctionList overloads = m_overloads;
     for (const AbstractMetaFunction *func : m_overloads) {
         if (func->minimalSignature().endsWith(QLatin1String("const")))
             continue;
@@ -761,7 +761,7 @@ const AbstractMetaFunction* OverloadData::getFunctionWithDefaultValue() const
     return 0;
 }
 
-QList<int> OverloadData::invalidArgumentLengths() const
+QVector<int> OverloadData::invalidArgumentLengths() const
 {
     QSet<int> validArgLengths;
 
@@ -779,7 +779,7 @@ QList<int> OverloadData::invalidArgumentLengths() const
         validArgLengths << args.size() - offset;
     }
 
-    QList<int> invalidArgLengths;
+    QVector<int> invalidArgLengths;
     for (int i = minArgs() + 1; i < maxArgs(); i++) {
         if (!validArgLengths.contains(i))
             invalidArgLengths.append(i);

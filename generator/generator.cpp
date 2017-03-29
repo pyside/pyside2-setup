@@ -49,18 +49,14 @@ struct Generator::GeneratorPrivate {
     int numGenerated;
     QStringList instantiatedContainersNames;
     QStringList instantiatedSmartPointerNames;
-    QList<const AbstractMetaType *> instantiatedContainers;
-    QList<const AbstractMetaType *> instantiatedSmartPointers;
+    QVector<const AbstractMetaType *> instantiatedContainers;
+    QVector<const AbstractMetaType *> instantiatedSmartPointers;
 
 };
 
 Generator::Generator() : m_d(new GeneratorPrivate)
 {
     m_d->numGenerated = 0;
-    m_d->instantiatedContainers = QList<const AbstractMetaType *>();
-    m_d->instantiatedSmartPointers = QList<const AbstractMetaType *>();
-    m_d->instantiatedContainersNames = QStringList();
-    m_d->instantiatedSmartPointerNames = QStringList();
 }
 
 Generator::~Generator()
@@ -188,12 +184,12 @@ void Generator::collectInstantiatedContainersAndSmartPointers()
         collectInstantiatedContainersAndSmartPointers(metaClass);
 }
 
-QList<const AbstractMetaType*> Generator::instantiatedContainers() const
+QVector<const AbstractMetaType *> Generator::instantiatedContainers() const
 {
     return m_d->instantiatedContainers;
 }
 
-QList<const AbstractMetaType*> Generator::instantiatedSmartPointers() const
+QVector<const AbstractMetaType*> Generator::instantiatedSmartPointers() const
 {
     return m_d->instantiatedSmartPointers;
 }
@@ -676,7 +672,7 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
     if (maxArgs == 0)
         return QLatin1String("::") + qualifiedCppName + QLatin1String("()");
 
-    QList<const AbstractMetaFunction*> candidates;
+    QVector<const AbstractMetaFunction *> candidates;
 
     // Constructors with C++ primitive types, enums or pointers only.
     // Start with the ones with fewer arguments.

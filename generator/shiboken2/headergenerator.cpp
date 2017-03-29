@@ -327,7 +327,7 @@ bool HeaderGenerator::finishGeneration()
     // Write the smart pointer define indexes.
     int smartPointerCountIndex = getMaxTypeIndex();
     int smartPointerCount = 0;
-    const QList<const AbstractMetaType *> &instantiatedSmartPtrs = instantiatedSmartPointers();
+    const QVector<const AbstractMetaType *> &instantiatedSmartPtrs = instantiatedSmartPointers();
     for (const AbstractMetaType *metaType : instantiatedSmartPtrs) {
         QString variableName = getTypeIndexVariableName(metaType);
         macrosStream << "#define ";
@@ -367,7 +367,7 @@ bool HeaderGenerator::finishGeneration()
         _writeTypeIndexDefineLine(macrosStream, getTypeIndexVariableName(ptype), pCount++);
     }
 
-    const QList<const AbstractMetaType *> &containers = instantiatedContainers();
+    const QVector<const AbstractMetaType *> &containers = instantiatedContainers();
     for (const AbstractMetaType *container : containers) {
         //_writeTypeIndexDefineLine(macrosStream, getTypeIndexVariableName(container), pCount);
         // DEBUG

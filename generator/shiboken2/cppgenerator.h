@@ -41,8 +41,8 @@ public:
 protected:
     QString fileNamePrefix() const override;
     QString fileNameForContext(GeneratorContext &context) const override;
-    QList<AbstractMetaFunctionList> filterGroupedOperatorFunctions(const AbstractMetaClass* metaClass,
-                                                                   uint query);
+    QVector<AbstractMetaFunctionList> filterGroupedOperatorFunctions(const AbstractMetaClass* metaClass,
+                                                                     uint query);
     void generateClass(QTextStream& s, GeneratorContext &classContext) override;
     bool finishGeneration() override;
 
@@ -290,7 +290,7 @@ private:
     void writeEnumConverterInitialization(QTextStream& s, const TypeEntry* enumType);
     void writeEnumConverterInitialization(QTextStream& s, const AbstractMetaEnum* metaEnum);
     void writeContainerConverterInitialization(QTextStream& s, const AbstractMetaType* type);
-    void writeExtendedConverterInitialization(QTextStream& s, const TypeEntry* externalType, const QList<const AbstractMetaClass*>& conversions);
+    void writeExtendedConverterInitialization(QTextStream& s, const TypeEntry* externalType, const QVector<const AbstractMetaClass*>& conversions);
 
     void writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func, bool userHeuristicForReturn);
     bool writeParentChildManagement(QTextStream& s, const AbstractMetaFunction* func, int argIndex, bool userHeuristicPolicy);

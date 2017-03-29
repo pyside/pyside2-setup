@@ -30,19 +30,21 @@
 #define OVERLOADDATA_H
 
 #include <abstractmetalang_typedefs.h>
-#include <QtCore/QList>
 #include <QtCore/QBitArray>
+#include <QtCore/QVector>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
 class ShibokenGenerator;
 
 class OverloadData;
-typedef QList<OverloadData*> OverloadDataList;
+typedef QVector<OverloadData *> OverloadDataList;
 
 class OverloadData
 {
 public:
+    typedef QVector<const AbstractMetaFunction *> MetaFunctionList;
+
     OverloadData(const AbstractMetaFunctionList& overloads, const ShibokenGenerator* generator);
     ~OverloadData();
 
@@ -100,12 +102,12 @@ public:
     bool isFinalOccurrence(const AbstractMetaFunction* func) const;
 
     /// Returns the list of overloads removing repeated constant functions (ex.: "foo()" and "foo()const", the second is removed).
-    QList<const AbstractMetaFunction*> overloadsWithoutRepetition() const;
-    const QList<const AbstractMetaFunction*>& overloads() const { return m_overloads; }
+    MetaFunctionList overloadsWithoutRepetition() const;
+    const MetaFunctionList& overloads() const { return m_overloads; }
     OverloadDataList nextOverloadData() const { return m_nextOverloadData; }
     OverloadData* previousOverloadData() const { return m_previousOverloadData; }
 
-    QList<int> invalidArgumentLengths() const;
+    QVector<int> invalidArgumentLengths() const;
 
     static int numberOfRemovedArguments(const AbstractMetaFunction* func, int finalArgPos = -1);
     static QPair<int, int> getMinMaxArguments(const AbstractMetaFunctionList& overloads);
@@ -146,7 +148,7 @@ private:
     int m_argPos;
     const AbstractMetaType* m_argType;
     QString m_argTypeReplaced;
-    QList<const AbstractMetaFunction*> m_overloads;
+    MetaFunctionList m_overloads;
 
     OverloadData* m_headOverloadData;
     OverloadDataList m_nextOverloadData;

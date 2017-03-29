@@ -359,8 +359,8 @@ protected:
     */
     virtual QString subDirectoryForPackage(QString packageName = QString()) const;
 
-    QList<const AbstractMetaType*> instantiatedContainers() const;
-    QList<const AbstractMetaType*> instantiatedSmartPointers() const;
+    QVector<const AbstractMetaType*> instantiatedContainers() const;
+    QVector<const AbstractMetaType*> instantiatedSmartPointers() const;
 
     static QString getSimplifiedContainerTypeName(const AbstractMetaType *type);
     void addInstantiatedContainersAndSmartPointers(const AbstractMetaType *type,
