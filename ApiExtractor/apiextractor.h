@@ -33,6 +33,7 @@
 #include "dependency.h"
 #include "abstractmetalang_typedefs.h"
 #include "apiextractormacros.h"
+#include "typedatabase_typedefs.h"
 #include "typesystem_typedefs.h"
 #include <QStringList>
 

@@ -223,12 +223,12 @@ AbstractMetaEnumList Generator::globalEnums() const
     return m_d->apiextractor->globalEnums();
 }
 
-QList<const PrimitiveTypeEntry*> Generator::primitiveTypes() const
+PrimitiveTypeEntryList Generator::primitiveTypes() const
 {
     return m_d->apiextractor->primitiveTypes();
 }
 
-QList<const ContainerTypeEntry*> Generator::containerTypes() const
+ContainerTypeEntryList Generator::containerTypes() const
 {
     return m_d->apiextractor->containerTypes();
 }

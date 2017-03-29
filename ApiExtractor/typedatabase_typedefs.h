@@ -26,24 +26,24 @@
 **
 ****************************************************************************/
 
-#ifndef TYPESYSTEM_TYPEDEFS_H
-#define TYPESYSTEM_TYPEDEFS_H
+#ifndef TYPEDATABASE_TYPEDEFS_H
+#define TYPEDATABASE_TYPEDEFS_H
 
 #include <QtCore/QHash>
-#include <QtCore/QList>
+#include <QtCore/QString>
 #include <QtCore/QVector>
 
-class CodeSnip;
-class DocModification;
+class ContainerTypeEntry;
+class PrimitiveTypeEntry;
+class TemplateEntry;
+class TypeEntry;
 
-struct AddedFunction;
-struct FieldModification;
-struct FunctionModification;
+typedef QVector<TypeEntry *> TypeEntryList;
+typedef QHash<QString, TypeEntryList> TypeEntryHash;
+typedef QHash<QString, TypeEntry *> SingleTypeEntryHash;
+typedef QHash<QString, TemplateEntry *> TemplateEntryHash;
 
-typedef QVector<AddedFunction> AddedFunctionList;
-typedef QVector<CodeSnip> CodeSnipList;
-typedef QVector<DocModification> DocModificationList;
-typedef QVector<FieldModification> FieldModificationList;
-typedef QVector<FunctionModification> FunctionModificationList;
+typedef QVector<const ContainerTypeEntry *> ContainerTypeEntryList;
+typedef QVector<const PrimitiveTypeEntry *> PrimitiveTypeEntryList;
 
-#endif // TYPESYSTEM_TYPEDEFS_H
+#endif // TYPEDATABASE_TYPEDEFS_H

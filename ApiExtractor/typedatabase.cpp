@@ -175,7 +175,7 @@ FunctionTypeEntry* TypeDatabase::findFunctionType(const QString& name) const
 
 TypeEntry* TypeDatabase::findType(const QString& name) const
 {
-    const QList<TypeEntry *> &entries = findTypes(name);
+    const TypeEntryList &entries = findTypes(name);
     for (TypeEntry *entry : entries) {
         if (entry &&
             (!entry->isPrimitive() || static_cast<PrimitiveTypeEntry *>(entry)->preferredTargetLangType())) {
@@ -185,7 +185,7 @@ TypeEntry* TypeDatabase::findType(const QString& name) const
     return 0;
 }
 
-QList<TypeEntry *> TypeDatabase::findTypes(const QString &name) const
+TypeEntryList TypeDatabase::findTypes(const QString &name) const
 {
     return m_entries.value(name);
 }
@@ -201,10 +201,10 @@ SingleTypeEntryHash TypeDatabase::entries() const
     return returned;
 }
 
-QList<const PrimitiveTypeEntry*> TypeDatabase::primitiveTypes() const
+PrimitiveTypeEntryList TypeDatabase::primitiveTypes() const
 {
     TypeEntryHash entries = allEntries();
-    QList<const PrimitiveTypeEntry*> returned;
+    PrimitiveTypeEntryList returned;
     for (TypeEntryHash::const_iterator it = entries.cbegin(), end = entries.cend(); it != end; ++it) {
         for (TypeEntry *typeEntry : it.value()) {
             if (typeEntry->isPrimitive())
@@ -214,10 +214,10 @@ QList<const PrimitiveTypeEntry*> TypeDatabase::primitiveTypes() const
     return returned;
 }
 
-QList<const ContainerTypeEntry*> TypeDatabase::containerTypes() const
+ContainerTypeEntryList TypeDatabase::containerTypes() const
 {
     TypeEntryHash entries = allEntries();
-    QList<const ContainerTypeEntry*> returned;
+    ContainerTypeEntryList returned;
     for (TypeEntryHash::const_iterator it = entries.cbegin(), end = entries.cend(); it != end; ++it) {
         for (TypeEntry *typeEntry : it.value()) {
             if (typeEntry->isContainer())
@@ -435,7 +435,7 @@ bool TypeDatabase::parseFile(QIODevice* device, bool generate)
 
 PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name) const
 {
-    const QList<TypeEntry *> &entries = findTypes(name);
+    const TypeEntryList &entries = findTypes(name);
 
     for (TypeEntry *entry : entries) {
         if (entry && entry->isPrimitive() && static_cast<PrimitiveTypeEntry*>(entry)->preferredTargetLangType())
@@ -447,7 +447,7 @@ PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name) const
 
 ComplexTypeEntry* TypeDatabase::findComplexType(const QString& name) const
 {
-    const QList<TypeEntry *> &entries = findTypes(name);
+    const TypeEntryList &entries = findTypes(name);
     for (TypeEntry *entry : entries) {
         if (entry && entry->isComplex())
             return static_cast<ComplexTypeEntry*>(entry);
@@ -457,7 +457,7 @@ ComplexTypeEntry* TypeDatabase::findComplexType(const QString& name) const
 
 ObjectTypeEntry* TypeDatabase::findObjectType(const QString& name) const
 {
-    const QList<TypeEntry*> &entries = findTypes(name);
+    const TypeEntryList &entries = findTypes(name);
     for (TypeEntry *entry : entries) {
         if (entry && entry->isObject())
             return static_cast<ObjectTypeEntry*>(entry);
@@ -467,7 +467,7 @@ ObjectTypeEntry* TypeDatabase::findObjectType(const QString& name) const
 
 NamespaceTypeEntry* TypeDatabase::findNamespaceType(const QString& name) const
 {
-    const QList<TypeEntry *> &entries = findTypes(name);
+    const TypeEntryList &entries = findTypes(name);
     for (TypeEntry *entry : entries) {
         if (entry && entry->isNamespace())
             return static_cast<NamespaceTypeEntry*>(entry);
@@ -513,7 +513,7 @@ static bool compareTypeEntriesByName(const TypeEntry* t1, const TypeEntry* t2)
 static void _computeTypeIndexes()
 {
     TypeDatabase* tdb = TypeDatabase::instance();
-    typedef QMap<int, QList<TypeEntry*> > GroupedTypeEntries;
+    typedef QMap<int, TypeEntryList> GroupedTypeEntries;
     GroupedTypeEntries groupedEntries;
 
     // Group type entries by revision numbers
@@ -538,7 +538,7 @@ static void _computeTypeIndexes()
     GroupedTypeEntries::iterator it = groupedEntries.begin();
     for (; it != groupedEntries.end(); ++it) {
         // Remove duplicates
-        QList<TypeEntry*>::iterator newEnd = std::unique(it.value().begin(), it.value().end());
+        TypeEntryList::iterator newEnd = std::unique(it.value().begin(), it.value().end());
         it.value().erase(newEnd, it.value().end());
         // Sort the type entries by name
         qSort(it.value().begin(), newEnd, compareTypeEntriesByName);

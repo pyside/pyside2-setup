@@ -1497,7 +1497,7 @@ ShibokenGenerator::ExtendedConverterData ShibokenGenerator::getExtendedConverter
 QList<const CustomConversion*> ShibokenGenerator::getPrimitiveCustomConversions()
 {
     QList<const CustomConversion*> conversions;
-    const QList<const PrimitiveTypeEntry *> &primitiveTypeList = primitiveTypes();
+    const PrimitiveTypeEntryList &primitiveTypeList = primitiveTypes();
     for (const PrimitiveTypeEntry *type : primitiveTypeList) {
         if (!shouldGenerateTypeEntry(type) || !isUserPrimitive(type) || !type->customConversion())
             continue;
@@ -2456,10 +2456,10 @@ bool ShibokenGenerator::doSetup(const QMap<QString, QString>& args)
 
     TypeDatabase* td = TypeDatabase::instance();
     QStringList snips;
-    const QList<const PrimitiveTypeEntry *> &primitiveTypeList = primitiveTypes();
+    const PrimitiveTypeEntryList &primitiveTypeList = primitiveTypes();
     for (const PrimitiveTypeEntry *type : primitiveTypeList)
         getCode(snips, type);
-    const QList<const ContainerTypeEntry *> &containerTypeList = containerTypes();
+    const ContainerTypeEntryList &containerTypeList = containerTypes();
     for (const ContainerTypeEntry *type : containerTypeList)
         getCode(snips, type);
     const AbstractMetaClassList &classList = classes();

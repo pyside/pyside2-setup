@@ -5428,7 +5428,7 @@ bool CppGenerator::finishGeneration()
     writeEnumsInitialization(s, globalEnums);
 
     s << INDENT << "// Register primitive types converters." << endl;
-    const QList<const PrimitiveTypeEntry *> &primitiveTypeList = primitiveTypes();
+    const PrimitiveTypeEntryList &primitiveTypeList = primitiveTypes();
     for (const PrimitiveTypeEntry *pte : primitiveTypeList) {
         if (!pte->generateCode() || !pte->isCppPrimitive())
             continue;

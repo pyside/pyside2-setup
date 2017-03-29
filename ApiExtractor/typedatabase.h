@@ -31,6 +31,7 @@
 
 #include "apiextractormacros.h"
 #include "include.h"
+#include "typedatabase_typedefs.h"
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
 
@@ -95,9 +96,9 @@ public:
 
     SingleTypeEntryHash entries() const;
 
-    QList<const PrimitiveTypeEntry*> primitiveTypes() const;
+    PrimitiveTypeEntryList primitiveTypes() const;
 
-    QList<const ContainerTypeEntry*> containerTypes() const;
+    ContainerTypeEntryList containerTypes() const;
 
     void addRejection(const QString& className, const QString& functionName,
                         const QString& fieldName, const QString& enumName);
@@ -150,7 +151,7 @@ public:
     void formatDebug(QDebug &d) const;
 #endif
 private:
-    QList<TypeEntry *> findTypes(const QString &name) const;
+    TypeEntryList findTypes(const QString &name) const;
     QString modifiedTypesystemFilepath(const QString &tsFile) const;
 
     bool m_suppressWarnings;
@@ -167,7 +168,7 @@ private:
     QStringList m_typesystemPaths;
     QHash<QString, bool> m_parsedTypesystemFiles;
 
-    QList<TypeRejection> m_rejections;
+    QVector<TypeRejection> m_rejections;
 
     QStringList m_dropTypeEntries;
 };
