@@ -175,8 +175,8 @@ FunctionTypeEntry* TypeDatabase::findFunctionType(const QString& name) const
 
 TypeEntry* TypeDatabase::findType(const QString& name) const
 {
-    QList<TypeEntry *> entries = findTypes(name);
-    foreach (TypeEntry *entry, entries) {
+    const QList<TypeEntry *> &entries = findTypes(name);
+    for (TypeEntry *entry : entries) {
         if (entry &&
             (!entry->isPrimitive() || static_cast<PrimitiveTypeEntry *>(entry)->preferredTargetLangType())) {
             return entry;
@@ -206,7 +206,7 @@ QList<const PrimitiveTypeEntry*> TypeDatabase::primitiveTypes() const
     TypeEntryHash entries = allEntries();
     QList<const PrimitiveTypeEntry*> returned;
     for (TypeEntryHash::const_iterator it = entries.cbegin(), end = entries.cend(); it != end; ++it) {
-        foreach (TypeEntry *typeEntry, it.value()) {
+        for (TypeEntry *typeEntry : it.value()) {
             if (typeEntry->isPrimitive())
                 returned.append(static_cast<PrimitiveTypeEntry *>(typeEntry));
         }
@@ -219,7 +219,7 @@ QList<const ContainerTypeEntry*> TypeDatabase::containerTypes() const
     TypeEntryHash entries = allEntries();
     QList<const ContainerTypeEntry*> returned;
     for (TypeEntryHash::const_iterator it = entries.cbegin(), end = entries.cend(); it != end; ++it) {
-        foreach (TypeEntry *typeEntry, it.value()) {
+        for (TypeEntry *typeEntry : it.value()) {
             if (typeEntry->isContainer())
                 returned.append(static_cast<ContainerTypeEntry *>(typeEntry));
         }
@@ -240,7 +240,7 @@ void TypeDatabase::addRejection(const QString& className, const QString& functio
 
 bool TypeDatabase::isClassRejected(const QString& className) const
 {
-    foreach (const TypeRejection& r, m_rejections) {
+    for (const TypeRejection& r : m_rejections) {
         if (r.class_name == className && r.function_name == QLatin1String("*")
             && r.field_name == QLatin1String("*") && r.enum_name == QLatin1String("*")) {
             return true;
@@ -251,7 +251,7 @@ bool TypeDatabase::isClassRejected(const QString& className) const
 
 bool TypeDatabase::isEnumRejected(const QString& className, const QString& enumName) const
 {
-    foreach (const TypeRejection& r, m_rejections) {
+    for (const TypeRejection& r : m_rejections) {
         if (r.enum_name == enumName
             && (r.class_name == className || r.class_name == QLatin1String("*"))) {
             return true;
@@ -268,20 +268,22 @@ void TypeDatabase::addType(TypeEntry *e)
 
 bool TypeDatabase::isFunctionRejected(const QString& className, const QString& functionName) const
 {
-    foreach (const TypeRejection& r, m_rejections)
+    for (const TypeRejection &r : m_rejections) {
     if (r.function_name == functionName &&
         (r.class_name == className || r.class_name == QLatin1String("*")))
         return true;
+    }
     return false;
 }
 
 
 bool TypeDatabase::isFieldRejected(const QString& className, const QString& fieldName) const
 {
-    foreach (const TypeRejection& r, m_rejections)
+    for (const TypeRejection &r : m_rejections) {
     if (r.field_name == fieldName &&
         (r.class_name == className || r.class_name == QLatin1String("*")))
         return true;
+    }
     return false;
 }
 
@@ -321,7 +323,7 @@ void TypeDatabase::addGlobalUserFunctions(const AddedFunctionList &functions)
 AddedFunctionList TypeDatabase::findGlobalUserFunctions(const QString& name) const
 {
     AddedFunctionList addedFunctions;
-    foreach (const AddedFunction &func, m_globalUserFunctions) {
+    for (const AddedFunction &func : m_globalUserFunctions) {
         if (func.name() == name)
             addedFunctions.append(func);
     }
@@ -360,8 +362,7 @@ bool TypeDatabase::isSuppressedWarning(const QString& s) const
     if (!m_suppressWarnings)
         return false;
 
-    foreach (const QString &_warning, m_suppressedWarnings) {
-        QString warning = _warning;
+    for (QString warning : m_suppressedWarnings) {
         warning.replace(QLatin1String("\\*"), QLatin1String("&place_holder_for_asterisk;"));
 
         QStringList segs = warning.split(QLatin1Char('*'), QString::SkipEmptyParts);
@@ -386,7 +387,7 @@ QString TypeDatabase::modifiedTypesystemFilepath(const QString& tsFile) const
     if (!QFile::exists(tsFile)) {
         int idx = tsFile.lastIndexOf(QLatin1Char('/'));
         QString fileName = idx >= 0 ? tsFile.right(tsFile.length() - idx - 1) : tsFile;
-        foreach (const QString &path, m_typesystemPaths) {
+        for (const QString &path : m_typesystemPaths) {
             QString filepath(path + QLatin1Char('/') + fileName);
             if (QFile::exists(filepath))
                 return filepath;
@@ -434,9 +435,9 @@ bool TypeDatabase::parseFile(QIODevice* device, bool generate)
 
 PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name) const
 {
-    QList<TypeEntry*> entries = findTypes(name);
+    const QList<TypeEntry *> &entries = findTypes(name);
 
-    foreach (TypeEntry* entry, entries) {
+    for (TypeEntry *entry : entries) {
         if (entry && entry->isPrimitive() && static_cast<PrimitiveTypeEntry*>(entry)->preferredTargetLangType())
             return static_cast<PrimitiveTypeEntry*>(entry);
     }
@@ -446,8 +447,8 @@ PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name) const
 
 ComplexTypeEntry* TypeDatabase::findComplexType(const QString& name) const
 {
-    QList<TypeEntry*> entries = findTypes(name);
-    foreach (TypeEntry* entry, entries) {
+    const QList<TypeEntry *> &entries = findTypes(name);
+    for (TypeEntry *entry : entries) {
         if (entry && entry->isComplex())
             return static_cast<ComplexTypeEntry*>(entry);
     }
@@ -456,8 +457,8 @@ ComplexTypeEntry* TypeDatabase::findComplexType(const QString& name) const
 
 ObjectTypeEntry* TypeDatabase::findObjectType(const QString& name) const
 {
-    QList<TypeEntry*> entries = findTypes(name);
-    foreach (TypeEntry* entry, entries) {
+    const QList<TypeEntry*> &entries = findTypes(name);
+    for (TypeEntry *entry : entries) {
         if (entry && entry->isObject())
             return static_cast<ObjectTypeEntry*>(entry);
     }
@@ -466,8 +467,8 @@ ObjectTypeEntry* TypeDatabase::findObjectType(const QString& name) const
 
 NamespaceTypeEntry* TypeDatabase::findNamespaceType(const QString& name) const
 {
-    QList<TypeEntry*> entries = findTypes(name);
-    foreach (TypeEntry* entry, entries) {
+    const QList<TypeEntry *> &entries = findTypes(name);
+    for (TypeEntry *entry : entries) {
         if (entry && entry->isNamespace())
             return static_cast<NamespaceTypeEntry*>(entry);
     }
@@ -516,9 +517,9 @@ static void _computeTypeIndexes()
     GroupedTypeEntries groupedEntries;
 
     // Group type entries by revision numbers
-    TypeEntryHash allEntries = tdb->allEntries();
-    foreach (QList<TypeEntry*> entryList, allEntries) {
-        foreach (TypeEntry* entry, entryList) {
+    const TypeEntryHash &allEntries = tdb->allEntries();
+    for (TypeEntryHash::const_iterator tit = allEntries.cbegin(), end = allEntries.cend(); tit != end; ++tit) {
+        for (TypeEntry *entry : tit.value()) {
             if (entry->isPrimitive()
                 || entry->isContainer()
                 || entry->isFunction()
@@ -542,7 +543,7 @@ static void _computeTypeIndexes()
         // Sort the type entries by name
         qSort(it.value().begin(), newEnd, compareTypeEntriesByName);
 
-        foreach (TypeEntry* entry, it.value()) {
+        for (TypeEntry *entry : qAsConst(it.value())) {
             (*typeEntryFields())[entry].second = maxTypeIndex++;
         }
     }

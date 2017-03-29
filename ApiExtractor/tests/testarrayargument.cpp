@@ -112,7 +112,8 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnu
     AbstractMetaEnum* someEnum = builder->globalEnums().first();
     QVERIFY(someEnum);
     AbstractMetaEnumValue* nvalues = 0;
-    foreach (AbstractMetaEnumValue* enumValue, someEnum->values()) {
+    const AbstractMetaEnumValueList &values = someEnum->values();
+    for (AbstractMetaEnumValue *enumValue : values) {
         if (enumValue->name() == QLatin1String("NValues")) {
             nvalues = enumValue;
             break;

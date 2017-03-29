@@ -133,14 +133,16 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
         s << endl << '{' << endl << "public:" << endl;
 
         bool hasVirtualFunction = false;
-        foreach (AbstractMetaFunction *func, filterFunctions(metaClass)) {
+        const AbstractMetaFunctionList &funcs = filterFunctions(metaClass);
+        for (AbstractMetaFunction *func : funcs) {
             if (func->isVirtual())
                 hasVirtualFunction = true;
             writeFunction(s, func);
         }
 
         if (avoidProtectedHack() && metaClass->hasProtectedFields()) {
-            foreach (AbstractMetaField* field, metaClass->fields()) {
+            const AbstractMetaFieldList &fields = metaClass->fields();
+            for (AbstractMetaField *field : fields) {
                 if (!field->isProtected())
                     continue;
                 writeProtectedFieldAccessors(s, field);
@@ -198,7 +200,8 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
             s << func->ownerClass()->qualifiedCppName() << "::";
         s << func->originalName() << '(';
         QStringList args;
-        foreach (const AbstractMetaArgument* arg, func->arguments()) {
+        const AbstractMetaArgumentList &arguments = func->arguments();
+        for (const AbstractMetaArgument *arg : arguments) {
             QString argName = arg->name();
             const TypeEntry* enumTypeEntry = 0;
             if (arg->type()->isFlags())
@@ -234,7 +237,8 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
         s << functionSignature(func, QString(), QString(), virtualOption) << ';' << endl;
 
         // Check if this method hide other methods in base classes
-        foreach (const AbstractMetaFunction* f, func->ownerClass()->functions()) {
+        const AbstractMetaFunctionList &ownerFuncs = func->ownerClass()->functions();
+        for (const AbstractMetaFunction *f : ownerFuncs) {
             if (f != func
                 && !f->isConstructor()
                 && !f->isPrivate()
@@ -287,7 +291,8 @@ void HeaderGenerator::writeTypeIndexDefine(QTextStream& s, const AbstractMetaCla
     if (!metaClass->typeEntry()->generateCode())
         return;
     writeTypeIndexDefineLine(s, metaClass->typeEntry());
-    foreach (const AbstractMetaEnum* metaEnum, metaClass->enums()) {
+    const AbstractMetaEnumList &enums = metaClass->enums();
+    for (const AbstractMetaEnum *metaEnum : enums) {
         if (metaEnum->isPrivate())
             continue;
         writeTypeIndexDefineLine(s, metaEnum->typeEntry());
@@ -311,18 +316,20 @@ bool HeaderGenerator::finishGeneration()
 
     macrosStream << "// Type indices" << endl;
     AbstractMetaEnumList globalEnums = this->globalEnums();
-    foreach (const AbstractMetaClass* metaClass, classes()) {
+    const AbstractMetaClassList &classList = classes();
+    for (const AbstractMetaClass *metaClass : classList) {
         writeTypeIndexDefine(macrosStream, metaClass);
         lookForEnumsInClassesNotToBeGenerated(globalEnums, metaClass);
     }
 
-    foreach (const AbstractMetaEnum* metaEnum, globalEnums)
+    for (const AbstractMetaEnum *metaEnum : qAsConst(globalEnums))
         writeTypeIndexDefineLine(macrosStream, metaEnum->typeEntry());
 
     // Write the smart pointer define indexes.
     int smartPointerCountIndex = getMaxTypeIndex();
     int smartPointerCount = 0;
-    foreach (const AbstractMetaType *metaType, instantiatedSmartPointers()) {
+    const QList<const AbstractMetaType *> &instantiatedSmartPtrs = instantiatedSmartPointers();
+    for (const AbstractMetaType *metaType : instantiatedSmartPtrs) {
         QString variableName = getTypeIndexVariableName(metaType);
         macrosStream << "#define ";
         macrosStream.setFieldWidth(60);
@@ -348,9 +355,9 @@ bool HeaderGenerator::finishGeneration()
     // TODO-CONVERTER ------------------------------------------------------------------------------
     // Using a counter would not do, a fix must be made to APIExtractor's getTypeIndex().
     macrosStream << "// Converter indices" << endl;
-    QList<const PrimitiveTypeEntry*> primitives = primitiveTypes();
+    const QList<const PrimitiveTypeEntry *> &primitives = primitiveTypes();
     int pCount = 0;
-    foreach (const PrimitiveTypeEntry* ptype, primitives) {
+    for (const PrimitiveTypeEntry *ptype : primitives) {
         /* Note: do not generate indices for typedef'd primitive types
          * as they'll use the primitive type converters instead, so we
          * don't need to create any other.
@@ -361,7 +368,8 @@ bool HeaderGenerator::finishGeneration()
         _writeTypeIndexDefineLine(macrosStream, getTypeIndexVariableName(ptype), pCount++);
     }
 
-    foreach (const AbstractMetaType* container, instantiatedContainers()) {
+    const QList<const AbstractMetaType *> &containers = instantiatedContainers();
+    for (const AbstractMetaType *container : containers) {
         //_writeTypeIndexDefineLine(macrosStream, getTypeIndexVariableName(container), pCount);
         // DEBUG
         QString variableName = getTypeIndexVariableName(container);
@@ -382,7 +390,7 @@ bool HeaderGenerator::finishGeneration()
     // TODO-CONVERTER ------------------------------------------------------------------------------
 
     macrosStream << "// Macros for type check" << endl;
-    foreach (const AbstractMetaEnum* cppEnum, globalEnums) {
+    for (const AbstractMetaEnum *cppEnum : globalEnums) {
         if (cppEnum->isAnonymous() || cppEnum->isPrivate())
             continue;
         includes << cppEnum->typeEntry()->include();
@@ -390,7 +398,7 @@ bool HeaderGenerator::finishGeneration()
         writeSbkTypeFunction(typeFunctions, cppEnum);
     }
 
-    foreach (AbstractMetaClass* metaClass, classes()) {
+    for (AbstractMetaClass *metaClass : classList) {
         if (!shouldGenerate(metaClass))
             continue;
 
@@ -398,7 +406,8 @@ bool HeaderGenerator::finishGeneration()
         const TypeEntry* classType = metaClass->typeEntry();
         includes << classType->include();
 
-        foreach (const AbstractMetaEnum* cppEnum, metaClass->enums()) {
+        const AbstractMetaEnumList &enums = metaClass->enums();
+        for (const AbstractMetaEnum *cppEnum : enums) {
             if (cppEnum->isAnonymous() || cppEnum->isPrivate())
                 continue;
             EnumTypeEntry* enumType = cppEnum->typeEntry();
@@ -411,7 +420,7 @@ bool HeaderGenerator::finishGeneration()
             writeSbkTypeFunction(typeFunctions, metaClass);
     }
 
-    foreach (const AbstractMetaType *metaType, instantiatedSmartPointers()) {
+    for (const AbstractMetaType *metaType : instantiatedSmartPtrs) {
         const TypeEntry *classType = metaType->typeEntry();
         includes << classType->include();
         writeSbkTypeFunction(typeFunctions, metaType);
@@ -447,25 +456,27 @@ bool HeaderGenerator::finishGeneration()
     QStringList requiredTargetImports = TypeDatabase::instance()->requiredTargetImports();
     if (!requiredTargetImports.isEmpty()) {
         s << "// Module Includes" << endl;
-        foreach (const QString& requiredModule, requiredTargetImports)
+        for (const QString &requiredModule : qAsConst(requiredTargetImports))
             s << "#include <" << getModuleHeaderFileName(requiredModule) << ">" << endl;
         s << endl;
     }
 
     s << "// Binded library includes" << endl;
-    foreach (const Include& include, includes)
+    for (const Include &include : qAsConst(includes))
         s << include;
 
     if (!primitiveTypes().isEmpty()) {
         s << "// Conversion Includes - Primitive Types" << endl;
-        foreach (const PrimitiveTypeEntry* ptype, primitiveTypes())
+        const QList<const PrimitiveTypeEntry*> &primitiveTypeList = primitiveTypes();
+        for (const PrimitiveTypeEntry *ptype : primitiveTypeList)
             s << ptype->include();
         s << endl;
     }
 
     if (!containerTypes().isEmpty()) {
         s << "// Conversion Includes - Container Types" << endl;
-        foreach (const ContainerTypeEntry* ctype, containerTypes())
+        const QList<const ContainerTypeEntry *> &containerTypeList = containerTypes();
+        for (const ContainerTypeEntry *ctype : containerTypeList)
             s << ctype->include();
         s << endl;
     }
@@ -530,13 +541,14 @@ void HeaderGenerator::writeSbkTypeFunction(QTextStream &s, const AbstractMetaTyp
 
 void HeaderGenerator::writeInheritedOverloads(QTextStream& s)
 {
-    foreach (const AbstractMetaFunction* func, m_inheritedOverloads) {
+    for (const AbstractMetaFunction *func : qAsConst(m_inheritedOverloads)) {
         s << INDENT << "inline ";
         s << functionSignature(func, QString(), QString(), Generator::EnumAsInts|Generator::OriginalTypeDescription) << " { ";
         s << (func->type() ? "return " : "");
         s << func->ownerClass()->qualifiedCppName() << "::" << func->originalName() << '(';
         QStringList args;
-        foreach (const AbstractMetaArgument* arg, func->arguments()) {
+        const AbstractMetaArgumentList &arguments = func->arguments();
+        for (const AbstractMetaArgument *arg : arguments) {
             QString argName = arg->name();
             const TypeEntry* enumTypeEntry = 0;
             if (arg->type()->isFlags())

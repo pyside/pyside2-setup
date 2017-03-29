@@ -286,7 +286,7 @@ QString TypeParser::Info::instantiationName() const
     QString s(qualified_name.join(QLatin1String("::")));
     if (!template_instantiations.isEmpty()) {
         QStringList insts;
-        foreach (const Info &info, template_instantiations)
+        for (const Info &info : template_instantiations)
             insts << info.toString();
         s += QLatin1String("< ") + insts.join(QLatin1String(", ")) + QLatin1String(" >");
     }

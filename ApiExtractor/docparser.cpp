@@ -104,7 +104,7 @@ QString DocParser::applyDocModifications(const DocModificationList& mods, const 
         return xml;
 
     bool hasXPathBasedModification = false;
-    foreach (DocModification mod, mods) {
+    for (const DocModification &mod : mods) {
         if (mod.mode() == TypeSystem::DocModificationXPathReplace) {
             hasXPathBasedModification = true;
             break;
@@ -126,7 +126,7 @@ QString DocParser::applyDocModifications(const DocModificationList& mods, const 
                                 "</xsl:copy>\n"
                                 "</xsl:template>\n"
                                );
-    foreach (DocModification mod, mods) {
+    for (const DocModification &mod : mods) {
         if (mod.mode() == TypeSystem::DocModificationXPathReplace) {
             QString xpath = mod.xpath();
             xpath.replace(QLatin1Char('"'), QLatin1String("&quot;"));

@@ -55,7 +55,8 @@ static bool shouldSkip(const AbstractMetaFunction* func)
     // Search a const clone
     if (!skipable && !func->isConstant()) {
         const AbstractMetaArgumentList funcArgs = func->arguments();
-        foreach (AbstractMetaFunction* f, func->ownerClass()->functions()) {
+        const AbstractMetaFunctionList &ownerFunctions = func->ownerClass()->functions();
+        for (AbstractMetaFunction *f : ownerFunctions) {
             if (f != func
                 && f->isConstant()
                 && f->name() == func->name()
@@ -202,7 +203,8 @@ QString QtXmlToSphinx::expandFunction(const QString& function)
     QStringList functionSpec = function.split(QLatin1Char('.'));
     QString className = functionSpec.first();
     const AbstractMetaClass* metaClass = 0;
-    foreach (const AbstractMetaClass* cls, m_generator->classes()) {
+    const AbstractMetaClassList &classes = m_generator->classes();
+    for (const AbstractMetaClass *cls : classes) {
         if (cls->name() == className) {
             metaClass = cls;
             break;
@@ -224,7 +226,8 @@ QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName)
     QString currentClass = m_context.split(QLatin1Char('.')).last();
 
     const AbstractMetaClass* metaClass = 0;
-    foreach (const AbstractMetaClass* cls, m_generator->classes()) {
+    const AbstractMetaClassList &classes = m_generator->classes();
+    for (const AbstractMetaClass *cls : classes) {
         if (cls->name() == currentClass) {
             metaClass = cls;
             break;
@@ -233,13 +236,14 @@ QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName)
 
     if (metaClass) {
         QList<const AbstractMetaFunction*> funcList;
-        foreach (const AbstractMetaFunction* func, metaClass->queryFunctionsByName(methodName)) {
+        const AbstractMetaFunctionList &methods = metaClass->queryFunctionsByName(methodName);
+        for (const AbstractMetaFunction *func : methods) {
             if (methodName == func->name())
                 funcList.append(func);
         }
 
         const AbstractMetaClass* implementingClass = 0;
-        foreach (const AbstractMetaFunction* func, funcList) {
+        for (const AbstractMetaFunction *func : qAsConst(funcList)) {
             implementingClass = func->implementingClass();
             if (implementingClass->name() == currentClass)
                 break;
@@ -300,7 +304,7 @@ QString QtXmlToSphinx::readFromLocations(const QStringList& locations, const QSt
 {
     QString result;
     bool ok;
-    foreach (QString location, locations) {
+    for (QString location : locations) {
         location.append(QLatin1Char('/'));
         location.append(path);
         result = readFromLocation(location, identifier, &ok);
@@ -466,7 +470,8 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
         if (code.isEmpty()) {
             m_output << INDENT << "<Code snippet \"" << location << ':' << identifier << "\" not found>" << endl;
         } else {
-            foreach (const QString &line, code.split(QLatin1Char('\n'))) {
+            const QStringList lines = code.split(QLatin1Char('\n'));
+            for (const QString &line : lines) {
                 if (!QString(line).trimmed().isEmpty())
                     m_output << INDENT << line;
 
@@ -577,7 +582,7 @@ void QtXmlToSphinx::handleListTag(QXmlStreamReader& reader)
         if (!m_currentTable.isEmpty()) {
             if (listType == QLatin1String("bullet")) {
                 m_output << endl;
-                foreach (TableCell cell, m_currentTable.first()) {
+                for (const TableCell &cell : m_currentTable.constFirst()) {
                     QStringList itemLines = cell.data.split(QLatin1Char('\n'));
                     m_output << INDENT << "* " << itemLines.first() << endl;
                     for (int i = 1, max = itemLines.count(); i < max; ++i)
@@ -714,8 +719,8 @@ void QtXmlToSphinx::handleRawTag(QXmlStreamReader& reader)
         QString format = reader.attributes().value(QLatin1String("format")).toString();
         m_output << INDENT << ".. raw:: " << format.toLower() << endl << endl;
     } else if (token == QXmlStreamReader::Characters) {
-        QStringList lst(reader.text().toString().split(QLatin1Char('\n')));
-        foreach(QString row, lst)
+        const QStringList lst(reader.text().toString().split(QLatin1Char('\n')));
+        for (const QString &row : lst)
             m_output << INDENT << INDENT << row << endl;
     } else if (token == QXmlStreamReader::EndElement) {
         m_output << endl << endl;
@@ -730,8 +735,8 @@ void QtXmlToSphinx::handleCodeTag(QXmlStreamReader& reader)
         m_output << INDENT << "::" << endl << endl;
         INDENT.indent++;
     } else if (token == QXmlStreamReader::Characters) {
-        QStringList lst(reader.text().toString().split(QLatin1Char('\n')));
-        foreach(QString row, lst)
+        const QStringList lst(reader.text().toString().split(QLatin1Char('\n')));
+        for (const QString row : lst)
             m_output << INDENT << INDENT << row << endl;
     } else if (token == QXmlStreamReader::EndElement) {
         m_output << endl << endl;
@@ -802,7 +807,8 @@ void QtXmlToSphinx::handleQuoteFileTag(QXmlStreamReader& reader)
         if (code.isEmpty()) {
             m_output << INDENT << "<Code snippet \"" << location << "\" not found>" << endl;
         } else {
-            foreach (QString line, code.split(QLatin1Char('\n'))) {
+            const QStringList lines = code.split(QLatin1Char('\n'));
+            for (const QString &line : lines) {
                 if (!QString(line).trimmed().isEmpty())
                     m_output << INDENT << line;
 
@@ -882,8 +888,8 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
     for (int i = 0, maxI = table.count(); i < maxI; ++i) {
         const QtXmlToSphinx::TableRow& row = table[i];
         for (int j = 0, maxJ = std::min(row.count(), colWidths.size()); j < maxJ; ++j) {
-            QStringList rowLines = row[j].data.split(QLatin1Char('\n')); // cache this would be a good idea
-            foreach (QString str, rowLines)
+            const QStringList rowLines = row[j].data.split(QLatin1Char('\n')); // cache this would be a good idea
+            for (const QString &str : rowLines)
                 colWidths[j] = std::max(colWidths[j], str.count());
             rowHeights[i] = std::max(rowHeights[i], row[j].data.count(QLatin1Char('\n')) + 1);
         }
@@ -1018,16 +1024,16 @@ void QtDocGenerator::writeFormatedText(QTextStream& s, const Documentation& doc,
         QtXmlToSphinx x(this, doc.value(), metaClassName);
         s << x;
     } else {
-        QStringList lines = doc.value().split(QLatin1Char('\n'));
+        const QStringList lines = doc.value().split(QLatin1Char('\n'));
         QRegExp regex(QLatin1String("\\S")); // non-space character
         int typesystemIndentation = std::numeric_limits<int>().max();
         // check how many spaces must be removed from the begining of each line
-        foreach (QString line, lines) {
+        for (const QString &line : lines) {
             int idx = line.indexOf(regex);
             if (idx >= 0)
                 typesystemIndentation = qMin(typesystemIndentation, idx);
         }
-        foreach (QString line, lines)
+        for (QString line : lines)
             s << INDENT << line.remove(0, typesystemIndentation) << endl;
     }
 
@@ -1037,7 +1043,7 @@ void QtDocGenerator::writeFormatedText(QTextStream& s, const Documentation& doc,
 static void writeInheritedByList(QTextStream& s, const AbstractMetaClass* metaClass, const AbstractMetaClassList& allClasses)
 {
     AbstractMetaClassList res;
-    foreach (AbstractMetaClass* c, allClasses) {
+    for (AbstractMetaClass *c : allClasses) {
         if (c != metaClass && c->inheritsFrom(metaClass))
             res << c;
     }
@@ -1047,7 +1053,7 @@ static void writeInheritedByList(QTextStream& s, const AbstractMetaClass* metaCl
 
     s << "**Inherited by:** ";
     QStringList classes;
-    foreach (AbstractMetaClass* c, res)
+    for (AbstractMetaClass *c : qAsConst(res))
         classes << QLatin1String(":ref:`") + getClassTargetFullName(c, false) + QLatin1Char('`');
     s << classes.join(QLatin1String(", ")) << endl << endl;
 }
@@ -1098,7 +1104,7 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
         writeFields(s, metaClass);
 
 
-    foreach (AbstractMetaFunction* func, functionList) {
+    for (AbstractMetaFunction *func : qAsConst(functionList)) {
         if (shouldSkip(func))
             continue;
 
@@ -1121,7 +1127,8 @@ void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* 
     QStringList slotList;
     QStringList staticFunctionList;
 
-    foreach (AbstractMetaFunction* func, cppClass->functions()) {
+    const AbstractMetaFunctionList &classFunctions = cppClass->functions();
+    for (AbstractMetaFunction *func : classFunctions) {
         if (shouldSkip(func))
             continue;
 
@@ -1180,7 +1187,7 @@ void QtDocGenerator::writeFunctionBlock(QTextStream& s, const QString& title, QS
 
         s << ".. container:: function_list" << endl << endl;
         Indentation indentation(INDENT);
-        foreach (QString func, functions)
+        for (const QString &func : qAsConst(functions))
             s << '*' << INDENT << func << endl;
 
         s << endl << endl;
@@ -1191,7 +1198,8 @@ void QtDocGenerator::writeEnums(QTextStream& s, const AbstractMetaClass* cppClas
 {
     static const QString section_title = QLatin1String(".. attribute:: ");
 
-    foreach (AbstractMetaEnum* en, cppClass->enums()) {
+    const AbstractMetaEnumList &enums = cppClass->enums();
+    for (AbstractMetaEnum *en : enums) {
         s << section_title << getClassTargetFullName(cppClass) << '.' << en->name() << endl << endl;
         writeFormatedText(s, en->documentation(), cppClass);
 
@@ -1205,7 +1213,8 @@ void QtDocGenerator::writeFields(QTextStream& s, const AbstractMetaClass* cppCla
 {
     static const QString section_title = QLatin1String(".. attribute:: ");
 
-    foreach (AbstractMetaField* field, cppClass->fields()) {
+    const AbstractMetaFieldList &fields = cppClass->fields();
+    for (AbstractMetaField *field : fields) {
         s << section_title << getClassTargetFullName(cppClass) << "." << field->name() << endl << endl;
         //TODO: request for member ‘documentation’ is ambiguous
         writeFormatedText(s, field->AbstractMetaAttributes::documentation(), cppClass);
@@ -1217,12 +1226,12 @@ void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* 
     static const QString sectionTitle = QLatin1String(".. class:: ");
     static const QString sectionTitleSpace = QString(sectionTitle.size(), QLatin1Char(' '));
 
-    AbstractMetaFunctionList lst = cppClass->queryFunctions(AbstractMetaClass::Constructors | AbstractMetaClass::Visible);
+    const AbstractMetaFunctionList lst = cppClass->queryFunctions(AbstractMetaClass::Constructors | AbstractMetaClass::Visible);
 
     bool first = true;
     QHash<QString, AbstractMetaArgument*> arg_map;
 
-    foreach(AbstractMetaFunction* func, lst) {
+    for (AbstractMetaFunction *func : lst) {
         if (func->isModifiedRemoved())
             continue;
 
@@ -1233,8 +1242,8 @@ void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* 
             s << sectionTitleSpace;
         }
         writeFunction(s, false, cppClass, func);
-        foreach(AbstractMetaArgument* arg, func->arguments())
-        {
+        const AbstractMetaArgumentList &arguments = func->arguments();
+        for (AbstractMetaArgument *arg : arguments) {
             if (!arg_map.contains(arg->name())) {
                 arg_map.insert(arg->name(), arg);
             }
@@ -1243,16 +1252,15 @@ void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* 
 
     s << endl;
 
-    foreach (AbstractMetaArgument* arg, arg_map.values()) {
+    for (QHash<QString, AbstractMetaArgument*>::const_iterator it = arg_map.cbegin(), end = arg_map.cend(); it != end; ++it) {
         Indentation indentation(INDENT);
-        writeParamerteType(s, cppClass, arg);
+        writeParamerteType(s, cppClass, it.value());
     }
 
     s << endl;
 
-    foreach (AbstractMetaFunction* func, lst) {
+    for (AbstractMetaFunction *func : lst)
         writeFormatedText(s, func->documentation(), cppClass);
-    }
 }
 
 QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* cppClass, const AbstractMetaFunction* func)
@@ -1260,7 +1268,8 @@ QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* cppClass, cons
     QString ret;
     int optArgs = 0;
 
-    foreach (AbstractMetaArgument* arg, func->arguments()) {
+    const AbstractMetaArgumentList &arguments = func->arguments();
+    for (AbstractMetaArgument *arg : arguments) {
 
         if (func->argumentRemoved(arg->argumentIndex() + 1))
             continue;
@@ -1311,7 +1320,7 @@ void QtDocGenerator::writeDocSnips(QTextStream &s,
 
     invalidStrings << QLatin1String("*") << QLatin1String("//") << QLatin1String("/*") << QLatin1String("*/");
 
-    foreach (CodeSnip snip, codeSnips) {
+    for (const CodeSnip &snip : codeSnips) {
         if ((snip.position != position) ||
             !(snip.language & language))
             continue;
@@ -1325,14 +1334,13 @@ void QtDocGenerator::writeDocSnips(QTextStream &s,
                 break;
 
             QString codeBlock = code.mid(startBlock, endBlock - startBlock);
-            QStringList rows = codeBlock.split(QLatin1Char('\n'));
+            const QStringList rows = codeBlock.split(QLatin1Char('\n'));
             int currenRow = 0;
             int offset = 0;
 
-            foreach(QString row, rows) {
-                foreach(QString invalidString, invalidStrings) {
-                    row = row.remove(invalidString);
-                }
+            for (QString row : rows) {
+                for (const QString &invalidString : qAsConst(invalidStrings))
+                    row.remove(invalidString);
 
                 if (row.trimmed().size() == 0) {
                     if (currenRow == 0)
@@ -1370,7 +1378,8 @@ bool QtDocGenerator::writeInjectDocumentation(QTextStream& s,
     Indentation indentation(INDENT);
     bool didSomething = false;
 
-    foreach (DocModification mod, cppClass->typeEntry()->docModifications()) {
+    const DocModificationList &mods = cppClass->typeEntry()->docModifications();
+    for (const DocModification &mod : mods) {
         if (mod.mode() == mode) {
             bool modOk = func ? mod.signature() == func->minimalSignature() : mod.signature().isEmpty();
 
@@ -1473,7 +1482,8 @@ void QtDocGenerator::writeFunctionParametersType(QTextStream& s, const AbstractM
     Indentation indentation(INDENT);
 
     s << endl;
-    foreach (AbstractMetaArgument* arg, func->arguments()) {
+    const AbstractMetaArgumentList &funcArgs = func->arguments();
+    for (AbstractMetaArgument *arg : funcArgs) {
 
         if (func->argumentRemoved(arg->argumentIndex() + 1))
             continue;
@@ -1485,8 +1495,9 @@ void QtDocGenerator::writeFunctionParametersType(QTextStream& s, const AbstractM
 
         QString retType;
         // check if the return type was modified
-        foreach (FunctionModification mod, func->modifications()) {
-            foreach (ArgumentModification argMod, mod.argument_mods) {
+        const FunctionModificationList &mods = func->modifications();
+        for (const FunctionModification &mod : mods) {
+            for (const ArgumentModification &argMod : mod.argument_mods) {
                 if (argMod.index == 0) {
                     retType = argMod.modified_type;
                     break;
@@ -1526,7 +1537,7 @@ static void writeFancyToc(QTextStream& s, const QStringList& items, int cols = 4
     TocMap tocMap;
     QChar Q = QLatin1Char('Q');
     QChar idx;
-    foreach (QString item, items) {
+    for (QString item : items) {
         if (item.isEmpty())
             continue;
         if (item.startsWith(Q) && item.length() > 1)
@@ -1551,7 +1562,7 @@ static void writeFancyToc(QTextStream& s, const QStringList& items, int cols = 4
 
         ss << "**" << it.key() << "**" << endl << endl;
         i += 2; // a letter title is equivalent to two entries in space
-        foreach (QString item, it.value()) {
+        for (const QString &item : qAsConst(it.value())) {
             ss << "* :doc:`" << item << "`" << endl;
             ++i;
 
@@ -1628,7 +1639,7 @@ bool QtDocGenerator::finishGeneration()
             s << INDENT << ".. toctree::" << endl;
             Indentation deeperIndentation(INDENT);
             s << INDENT << ":maxdepth: 1" << endl << endl;
-            foreach (QString className, it.value())
+            for (const QString &className : qAsConst(it.value()))
                 s << INDENT << className << endl;
             s << endl << endl;
         }

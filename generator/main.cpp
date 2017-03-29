@@ -206,7 +206,7 @@ static QMap<QString, QString> getInitializedArguments()
     arguments.removeFirst();
 
     QString projectFileName;
-    foreach (const QString& arg, arguments) {
+    for (const QString &arg : qAsConst(arguments)) {
         if (arg.startsWith(QLatin1String("--project-file"))) {
             int split = arg.indexOf(QLatin1Char('='));
             if (split > 0)
@@ -246,7 +246,7 @@ static QMap<QString, QString> getCommandLineArgs()
     arguments.removeFirst();
 
     int argNum = 0;
-    foreach (const QString &carg, arguments) {
+    for (const QString &carg : qAsConst(arguments)) {
         const QString &arg = carg.trimmed();
         if (arg.startsWith(QLatin1String("--"))) {
             int split = arg.indexOf(QLatin1Char('='));
@@ -318,7 +318,7 @@ void printUsage()
     printOptions(s, generalOptions);
 
     const Generators generators = shibokenGenerators() + docGenerators();
-    foreach (const GeneratorPtr &generator, generators) {
+    for (const GeneratorPtr &generator : generators) {
         QMap<QString, QString> options = generator->options();
         if (!options.isEmpty()) {
             s << endl << generator->name() << " options:\n";
@@ -437,8 +437,8 @@ int main(int argc, char *argv[])
         extractor.setSuppressWarnings(false);
 
     if (argsHandler.argExists(QLatin1String("api-version"))) {
-        QStringList versions = argsHandler.removeArg(QLatin1String("api-version")).split(QLatin1Char('|'));
-        foreach (const QString &fullVersion, versions) {
+        const QStringList &versions = argsHandler.removeArg(QLatin1String("api-version")).split(QLatin1Char('|'));
+        for (const QString &fullVersion : versions) {
             QStringList parts = fullVersion.split(QLatin1Char(','));
             QString package;
             QString version;
@@ -478,7 +478,7 @@ int main(int argc, char *argv[])
         for ( ; it != projectFileArgs.constEnd(); ++it)
             argsHandler.removeArg(it.key());
     }
-    foreach (const GeneratorPtr &generator, generators) {
+    for (const GeneratorPtr &generator : qAsConst(generators)) {
         QMap<QString, QString> options = generator->options();
         if (!options.isEmpty()) {
             QMap<QString, QString>::const_iterator it = options.constBegin();
@@ -505,7 +505,7 @@ int main(int argc, char *argv[])
 
     qCDebug(lcShiboken) << extractor;
 
-    foreach (const GeneratorPtr &g, generators) {
+    for (const GeneratorPtr &g : qAsConst(generators)) {
         g->setOutputDirectory(outputDirectory);
         g->setLicenseComment(licenseComment);
          if (g->setup(extractor, args)) {

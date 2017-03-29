@@ -53,7 +53,8 @@ static QString getTypeName(const AbstractMetaType* type)
     QString typeName = typeEntry->name();
     if (typeEntry->isContainer()) {
         QStringList types;
-        foreach (const AbstractMetaType* cType, type->instantiations()) {
+        const AbstractMetaTypeList &instantiations = type->instantiations();
+        for (const AbstractMetaType *cType : instantiations) {
             const TypeEntry *typeEntry = getReferencedTypeEntry(cType->typeEntry());
             types << typeEntry->name();
         }
@@ -144,7 +145,8 @@ static QString getImplicitConversionTypeName(const AbstractMetaType* containerTy
         impConv = getTypeName(function->arguments().first()->type());
 
     QStringList types;
-    foreach (const AbstractMetaType* otherType, containerType->instantiations())
+    const AbstractMetaTypeList &instantiations = containerType->instantiations();
+    for (const AbstractMetaType *otherType : instantiations)
         types << (otherType == instantiation ? impConv : getTypeName(otherType));
 
     const ContainerTypeEntry* containerTypeEntry = dynamic_cast<const ContainerTypeEntry*>(containerType->typeEntry());
@@ -209,7 +211,7 @@ void OverloadData::sortNextOverloads()
        << QLatin1String("long");
 
     // sort the children overloads
-    foreach(OverloadData *ov, m_nextOverloadData)
+    for (OverloadData *ov : m_nextOverloadData)
         ov->sortNextOverloads();
 
     if (m_nextOverloadData.size() <= 1)
@@ -218,7 +220,7 @@ void OverloadData::sortNextOverloads()
     // Populates the OverloadSortData object containing map and reverseMap, to map type names to ids,
     // these ids will be used by the topological sort algorithm, because is easier and faster to work
     // with graph sorting using integers.
-    foreach(OverloadData* ov, m_nextOverloadData) {
+    for (OverloadData *ov : m_nextOverloadData) {
         sortData.mapType(ov);
 
         const QString typeName(getTypeName(ov));
@@ -240,7 +242,8 @@ void OverloadData::sortNextOverloads()
             qstringIndex = sortData.lastProcessedItemId();
         }
 
-        foreach (const AbstractMetaType* instantiation, ov->argType()->instantiations()) {
+        const AbstractMetaTypeList &instantiations = ov->argType()->instantiations();
+        for (const AbstractMetaType *instantiation : instantiations) {
             // Add dependencies for type instantiation of container.
             QString typeName = getTypeName(instantiation);
             sortData.mapType(typeName);
@@ -251,10 +254,11 @@ void OverloadData::sortNextOverloads()
             // as Point must come before the PointF instantiation, or else list<Point> will never
             // be called. In the case of primitive types, list<double> must come before list<int>.
             if (instantiation->isPrimitive() && (signedIntegerPrimitives.contains(instantiation->name()))) {
-                foreach (const QString& primitive, nonIntegerPrimitives)
+                for (const QString &primitive : qAsConst(nonIntegerPrimitives))
                     sortData.mapType(getImplicitConversionTypeName(ov->argType(), instantiation, 0, primitive));
             } else {
-                foreach (const AbstractMetaFunction* function, m_generator->implicitConversions(instantiation))
+                const AbstractMetaFunctionList &funcs = m_generator->implicitConversions(instantiation);
+                for (const AbstractMetaFunction *function : funcs)
                     sortData.mapType(getImplicitConversionTypeName(ov->argType(), instantiation, function));
             }
         }
@@ -289,13 +293,14 @@ void OverloadData::sortNextOverloads()
 
     QList<const AbstractMetaFunction *> involvedConversions;
 
-    foreach(OverloadData* ov, m_nextOverloadData) {
+    for (OverloadData *ov : m_nextOverloadData) {
         const AbstractMetaType* targetType = ov->argType();
         const QString targetTypeEntryName(getTypeName(ov));
         int targetTypeId = sortData.map[targetTypeEntryName];
 
         // Process implicit conversions
-        foreach(AbstractMetaFunction* function, m_generator->implicitConversions(targetType)) {
+        const AbstractMetaFunctionList &functions = m_generator->implicitConversions(targetType);
+        for (AbstractMetaFunction *function : functions) {
             QString convertibleType;
             if (function->isConversionOperator())
                 convertibleType = function->ownerClass()->typeEntry()->name();
@@ -320,7 +325,8 @@ void OverloadData::sortNextOverloads()
         // Process inheritance relationships
         if (targetType->isValue() || targetType->isObject()) {
             const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_generator->classes(), targetType->typeEntry());
-            foreach (const AbstractMetaClass* ancestor, m_generator->getAllAncestors(metaClass)) {
+            const AbstractMetaClassList &ancestors = m_generator->getAllAncestors(metaClass);
+            for (const AbstractMetaClass *ancestor : ancestors) {
                 QString ancestorTypeName = ancestor->typeEntry()->name();
                 if (!sortData.map.contains(ancestorTypeName))
                     continue;
@@ -331,7 +337,8 @@ void OverloadData::sortNextOverloads()
         }
 
         // Process template instantiations
-        foreach (const AbstractMetaType* instantiation, targetType->instantiations()) {
+        const AbstractMetaTypeList &instantiations = targetType->instantiations();
+        for (const AbstractMetaType *instantiation : instantiations) {
             if (sortData.map.contains(getTypeName(instantiation))) {
                 int convertible = sortData.map[getTypeName(instantiation)];
 
@@ -339,14 +346,15 @@ void OverloadData::sortNextOverloads()
                     graph.addEdge(convertible, targetTypeId);
 
                 if (instantiation->isPrimitive() && (signedIntegerPrimitives.contains(instantiation->name()))) {
-                    foreach (const QString& primitive, nonIntegerPrimitives) {
+                    for (const QString &primitive : qAsConst(nonIntegerPrimitives)) {
                         QString convertibleTypeName = getImplicitConversionTypeName(ov->argType(), instantiation, 0, primitive);
                         if (!graph.containsEdge(targetTypeId, sortData.map[convertibleTypeName])) // Avoid cyclic dependency.
                             graph.addEdge(sortData.map[convertibleTypeName], targetTypeId);
                     }
 
                 } else {
-                    foreach (const AbstractMetaFunction* function, m_generator->implicitConversions(instantiation)) {
+                    const AbstractMetaFunctionList &funcs = m_generator->implicitConversions(instantiation);
+                    for (const AbstractMetaFunction *function : funcs) {
                         QString convertibleTypeName = getImplicitConversionTypeName(ov->argType(), instantiation, function);
                         if (!graph.containsEdge(targetTypeId, sortData.map[convertibleTypeName])) { // Avoid cyclic dependency.
                             graph.addEdge(sortData.map[convertibleTypeName], targetTypeId);
@@ -396,22 +404,22 @@ void OverloadData::sortNextOverloads()
     if (sortData.map.contains(QLatin1String("QString")) && sortData.map.contains(QLatin1String("QByteArray")))
         graph.addEdge(sortData.map[QLatin1String("QString")], sortData.map[QLatin1String("QByteArray")]);
 
-    foreach(OverloadData* ov, m_nextOverloadData) {
+    for (OverloadData *ov : m_nextOverloadData) {
         const AbstractMetaType* targetType = ov->argType();
         if (!targetType->isEnum())
             continue;
 
         QString targetTypeEntryName = getTypeName(targetType);
         // Enum values must precede types implicitly convertible from "int" or "unsigned int".
-        foreach (const QString& implicitFromInt, classesWithIntegerImplicitConversion)
+        for (const QString &implicitFromInt : qAsConst(classesWithIntegerImplicitConversion))
             graph.addEdge(sortData.map[targetTypeEntryName], sortData.map[implicitFromInt]);
     }
 
 
     // Special case for double(int i) (not tracked by m_generator->implicitConversions
-    foreach (const QString& signedIntegerName, signedIntegerPrimitives) {
+    for (const QString &signedIntegerName : qAsConst(signedIntegerPrimitives)) {
         if (sortData.map.contains(signedIntegerName)) {
-            foreach (const QString& nonIntegerName, nonIntegerPrimitives) {
+            for (const QString &nonIntegerName : qAsConst(nonIntegerPrimitives)) {
                 if (sortData.map.contains(nonIntegerName))
                     graph.addEdge(sortData.map[nonIntegerName], sortData.map[signedIntegerName]);
             }
@@ -419,7 +427,7 @@ void OverloadData::sortNextOverloads()
     }
 
     // sort the overloads topologically based on the dependency graph.
-    QLinkedList<int> unmappedResult = graph.topologicalSort();
+    const QLinkedList<int> unmappedResult = graph.topologicalSort();
     if (unmappedResult.isEmpty()) {
         QString funcName = referenceFunction()->name();
         if (referenceFunction()->ownerClass())
@@ -436,7 +444,7 @@ void OverloadData::sortNextOverloads()
     }
 
     m_nextOverloadData.clear();
-    foreach(int i, unmappedResult) {
+    for (int i : unmappedResult) {
         if (!sortData.reverseMap[i])
             continue;
         m_nextOverloadData << sortData.reverseMap[i];
@@ -464,7 +472,7 @@ OverloadData::OverloadData(const AbstractMetaFunctionList& overloads, const Shib
     : m_minArgs(256), m_maxArgs(0), m_argPos(-1), m_argType(0),
     m_headOverloadData(this), m_previousOverloadData(0), m_generator(generator)
 {
-    foreach (const AbstractMetaFunction* func, overloads) {
+    for (const AbstractMetaFunction *func : overloads) {
         m_overloads.append(func);
         int argSize = func->arguments().size() - numberOfRemovedArguments(func);
         if (m_minArgs > argSize)
@@ -472,7 +480,8 @@ OverloadData::OverloadData(const AbstractMetaFunctionList& overloads, const Shib
         else if (m_maxArgs < argSize)
             m_maxArgs = argSize;
         OverloadData* currentOverloadData = this;
-        foreach (const AbstractMetaArgument* arg, func->arguments()) {
+        const AbstractMetaArgumentList &arguments = func->arguments();
+        for (const AbstractMetaArgument *arg : arguments) {
             if (func->argumentRemoved(arg->argumentIndex() + 1))
                 continue;
             currentOverloadData = currentOverloadData->addOverloadData(func, arg);
@@ -528,7 +537,7 @@ OverloadData* OverloadData::addOverloadData(const AbstractMetaFunction* func,
     const AbstractMetaType* argType = arg->type();
     OverloadData* overloadData = 0;
     if (!func->isOperatorOverload()) {
-        foreach (OverloadData* tmp, m_nextOverloadData) {
+        for (OverloadData *tmp : qAsConst(m_nextOverloadData)) {
             // TODO: 'const char *', 'char *' and 'char' will have the same TypeEntry?
 
             // If an argument have a type replacement, then we should create a new overloaddata
@@ -560,7 +569,7 @@ OverloadData* OverloadData::addOverloadData(const AbstractMetaFunction* func,
 QStringList OverloadData::returnTypes() const
 {
     QSet<QString> retTypes;
-    foreach (const AbstractMetaFunction* func, m_overloads) {
+    for (const AbstractMetaFunction *func : m_overloads) {
         if (!func->typeReplaced(0).isEmpty())
             retTypes << func->typeReplaced(0);
         else if (func->type() && !func->argumentRemoved(0))
@@ -579,7 +588,7 @@ bool OverloadData::hasNonVoidReturnType() const
 
 bool OverloadData::hasVarargs() const
 {
-    foreach (const AbstractMetaFunction* func, m_overloads) {
+    for (const AbstractMetaFunction *func : m_overloads) {
         AbstractMetaArgumentList args = func->arguments();
         if (args.size() > 1 && args.last()->type()->isVarargs())
             return true;
@@ -589,7 +598,7 @@ bool OverloadData::hasVarargs() const
 
 bool OverloadData::hasAllowThread() const
 {
-    foreach (const AbstractMetaFunction* func, m_overloads) {
+    for (const AbstractMetaFunction *func : m_overloads) {
         if (func->allowThread())
             return true;
     }
@@ -598,7 +607,7 @@ bool OverloadData::hasAllowThread() const
 
 bool OverloadData::hasStaticFunction(const AbstractMetaFunctionList& overloads)
 {
-    foreach (const AbstractMetaFunction* func, overloads) {
+    for (const AbstractMetaFunction *func : qAsConst(overloads)) {
         if (func->isStatic())
             return true;
     }
@@ -607,7 +616,7 @@ bool OverloadData::hasStaticFunction(const AbstractMetaFunctionList& overloads)
 
 bool OverloadData::hasStaticFunction() const
 {
-    foreach (const AbstractMetaFunction* func, m_overloads) {
+    for (const AbstractMetaFunction *func : m_overloads) {
         if (func->isStatic())
             return true;
     }
@@ -616,7 +625,7 @@ bool OverloadData::hasStaticFunction() const
 
 bool OverloadData::hasInstanceFunction(const AbstractMetaFunctionList& overloads)
 {
-    foreach (const AbstractMetaFunction* func, overloads) {
+    for (const AbstractMetaFunction *func : qAsConst(overloads)) {
         if (!func->isStatic())
             return true;
     }
@@ -625,7 +634,7 @@ bool OverloadData::hasInstanceFunction(const AbstractMetaFunctionList& overloads
 
 bool OverloadData::hasInstanceFunction() const
 {
-    foreach (const AbstractMetaFunction* func, m_overloads) {
+    for (const AbstractMetaFunction *func : m_overloads) {
         if (!func->isStatic())
             return true;
     }
@@ -670,7 +679,8 @@ OverloadDataList OverloadData::overloadDataOnPosition(OverloadData* overloadData
     if (overloadData->argPos() == argPos) {
         overloadDataList.append(overloadData);
     } else if (overloadData->argPos() < argPos) {
-        foreach (OverloadData* pd, overloadData->nextOverloadData())
+        const OverloadDataList &data = overloadData->nextOverloadData();
+        for (OverloadData *pd : data)
             overloadDataList += overloadDataOnPosition(pd, argPos);
     }
     return overloadDataList;
@@ -685,7 +695,7 @@ OverloadDataList OverloadData::overloadDataOnPosition(int argPos) const
 
 bool OverloadData::nextArgumentHasDefaultValue() const
 {
-    foreach (OverloadData* overloadData, m_nextOverloadData) {
+    for (OverloadData *overloadData : m_nextOverloadData) {
         if (overloadData->getFunctionWithDefaultValue())
             return true;
     }
@@ -698,7 +708,8 @@ static OverloadData* _findNextArgWithDefault(OverloadData* overloadData)
         return overloadData;
 
     OverloadData* result = 0;
-    foreach (OverloadData* odata, overloadData->nextOverloadData()) {
+    const OverloadDataList &data = overloadData->nextOverloadData();
+    for (OverloadData *odata : data) {
         OverloadData* tmp = _findNextArgWithDefault(odata);
         if (!result || (tmp && result->argPos() > tmp->argPos()))
             result = tmp;
@@ -713,7 +724,7 @@ OverloadData* OverloadData::findNextArgWithDefault()
 
 bool OverloadData::isFinalOccurrence(const AbstractMetaFunction* func) const
 {
-    foreach (const OverloadData* pd, m_nextOverloadData) {
+    for (const OverloadData *pd : m_nextOverloadData) {
         if (pd->overloads().contains(func))
             return false;
     }
@@ -723,10 +734,10 @@ bool OverloadData::isFinalOccurrence(const AbstractMetaFunction* func) const
 QList<const AbstractMetaFunction*> OverloadData::overloadsWithoutRepetition() const
 {
     QList<const AbstractMetaFunction*> overloads = m_overloads;
-    foreach (const AbstractMetaFunction* func, m_overloads) {
+    for (const AbstractMetaFunction *func : m_overloads) {
         if (func->minimalSignature().endsWith(QLatin1String("const")))
             continue;
-        foreach (const AbstractMetaFunction* f, overloads) {
+        for (const AbstractMetaFunction *f : qAsConst(overloads)) {
             if ((func->minimalSignature() + QLatin1String("const")) == f->minimalSignature()) {
                 overloads.removeOne(f);
                 break;
@@ -738,7 +749,7 @@ QList<const AbstractMetaFunction*> OverloadData::overloadsWithoutRepetition() co
 
 const AbstractMetaFunction* OverloadData::getFunctionWithDefaultValue() const
 {
-    foreach (const AbstractMetaFunction* func, m_overloads) {
+    for (const AbstractMetaFunction *func : m_overloads) {
         int removedArgs = 0;
         for (int i = 0; i <= m_argPos + removedArgs; i++) {
             if (func->argumentRemoved(i + 1))
@@ -754,7 +765,7 @@ QList<int> OverloadData::invalidArgumentLengths() const
 {
     QSet<int> validArgLengths;
 
-    foreach (const AbstractMetaFunction* func, m_headOverloadData->m_overloads) {
+    for (const AbstractMetaFunction *func : qAsConst(m_headOverloadData->m_overloads)) {
         const AbstractMetaArgumentList args = func->arguments();
         int offset = 0;
         for (int i = 0; i < args.size(); ++i) {
@@ -821,7 +832,7 @@ QPair<int, int> OverloadData::getMinMaxArguments(const AbstractMetaFunctionList&
 bool OverloadData::isSingleArgument(const AbstractMetaFunctionList& overloads)
 {
     bool singleArgument = true;
-    foreach (const AbstractMetaFunction* func, overloads) {
+    for (const AbstractMetaFunction *func : overloads) {
         if (func->arguments().size() - numberOfRemovedArguments(func) != 1) {
             singleArgument = false;
             break;
@@ -859,7 +870,7 @@ QString OverloadData::dumpGraph() const
 
         // Shows all function signatures
         s << "legend [fontsize=9 fontname=freemono shape=rect label=\"";
-        foreach (const AbstractMetaFunction* func, overloads()) {
+        for (const AbstractMetaFunction *func : m_overloads) {
             s << "f" << functionNumber(func) << " : ";
             if (func->type())
                 s << toHtml(func->type()->cppSignature());
@@ -893,7 +904,7 @@ QString OverloadData::dumpGraph() const
         s << "</td></tr>";
 
         // Shows type changes for all function signatures
-        foreach (const AbstractMetaFunction* func, overloads()) {
+        for (const AbstractMetaFunction *func : m_overloads) {
             if (func->typeReplaced(0).isEmpty())
                 continue;
             s << "<tr><td bgcolor=\"gray\" align=\"right\">f" << functionNumber(func);
@@ -916,13 +927,13 @@ QString OverloadData::dumpGraph() const
 
         // Overloads for the signature to present point
         s << "<tr><td bgcolor=\"gray\" align=\"right\">overloads</td><td bgcolor=\"gray\" align=\"left\">";
-        foreach (const AbstractMetaFunction* func, overloads())
+        for (const AbstractMetaFunction *func : m_overloads)
             s << 'f' << functionNumber(func) << ' ';
         s << "</td></tr>";
 
         s << "</table>> ];" << endl;
 
-        foreach (const OverloadData* pd, nextOverloadData())
+        for (const OverloadData *pd : m_nextOverloadData)
             s << indent << '"' << rfunc->name() << "\" -> " << pd->dumpGraph();
 
         s << "}" << endl;
@@ -948,12 +959,12 @@ QString OverloadData::dumpGraph() const
 
         // Overloads for the signature to present point
         s << "<tr><td bgcolor=\"gray\" align=\"right\">overloads</td><td bgcolor=\"gray\" align=\"left\">";
-        foreach (const AbstractMetaFunction* func, overloads())
+        for (const AbstractMetaFunction *func : m_overloads)
             s << 'f' << functionNumber(func) << ' ';
         s << "</td></tr>";
 
         // Show default values (original and modified) for various functions
-        foreach (const AbstractMetaFunction* func, overloads()) {
+        for (const AbstractMetaFunction *func : m_overloads) {
             const AbstractMetaArgument* arg = argument(func);
             if (!arg)
                 continue;
@@ -973,7 +984,7 @@ QString OverloadData::dumpGraph() const
 
         s << "</table>>];" << endl;
 
-        foreach (const OverloadData* pd, nextOverloadData())
+        for (const OverloadData *pd : m_nextOverloadData)
             s << indent << argId << " -> " << pd->dumpGraph();
     }
     return result;
@@ -1004,7 +1015,7 @@ bool OverloadData::hasArgumentWithDefaultValue(const AbstractMetaFunctionList& o
 {
     if (OverloadData::getMinMaxArguments(overloads).second == 0)
         return false;
-    foreach (const AbstractMetaFunction* func, overloads) {
+    for (const AbstractMetaFunction *func : overloads) {
         if (hasArgumentWithDefaultValue(func))
             return true;
     }
@@ -1015,7 +1026,7 @@ bool OverloadData::hasArgumentWithDefaultValue() const
 {
     if (maxArgs() == 0)
         return false;
-    foreach (const AbstractMetaFunction* func, overloads()) {
+    for (const AbstractMetaFunction *func : m_overloads) {
         if (hasArgumentWithDefaultValue(func))
             return true;
     }
@@ -1024,7 +1035,8 @@ bool OverloadData::hasArgumentWithDefaultValue() const
 
 bool OverloadData::hasArgumentWithDefaultValue(const AbstractMetaFunction* func)
 {
-    foreach (const AbstractMetaArgument* arg, func->arguments()) {
+    const AbstractMetaArgumentList &arguments = func->arguments();
+    for (const AbstractMetaArgument *arg : arguments) {
         if (func->argumentRemoved(arg->argumentIndex() + 1))
             continue;
         if (!ShibokenGenerator::getDefaultValue(func, arg).isEmpty())
@@ -1036,7 +1048,8 @@ bool OverloadData::hasArgumentWithDefaultValue(const AbstractMetaFunction* func)
 AbstractMetaArgumentList OverloadData::getArgumentsWithDefaultValues(const AbstractMetaFunction* func)
 {
     AbstractMetaArgumentList args;
-    foreach (AbstractMetaArgument* arg, func->arguments()) {
+    const AbstractMetaArgumentList &arguments = func->arguments();
+    for (AbstractMetaArgument *arg : arguments) {
         if (ShibokenGenerator::getDefaultValue(func, arg).isEmpty()
             || func->argumentRemoved(arg->argumentIndex() + 1))
             continue;

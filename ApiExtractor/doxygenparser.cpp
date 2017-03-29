@@ -105,8 +105,8 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
     metaClass->setDocumentation(classDoc);
 
     //Functions Documentation
-    AbstractMetaFunctionList funcs = metaClass->functionsInTargetLang();
-    foreach (AbstractMetaFunction *func, funcs) {
+    const AbstractMetaFunctionList &funcs = metaClass->functionsInTargetLang();
+    for (AbstractMetaFunction *func : funcs) {
         if (!func || func->isPrivate())
             continue;
 
@@ -128,8 +128,8 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
                 query += QLatin1String("/../argsstring[text()=\"") + args + QLatin1String("\"]");
             } else {
                 int i = 1;
-                foreach (AbstractMetaArgument* arg, func->arguments()) {
-                    QString type;
+                const AbstractMetaArgumentList &arguments = func->arguments();
+                for (AbstractMetaArgument *arg : arguments) {
                     if (!arg->type()->isPrimitive()) {
                         query += QLatin1String("/../param[") + QString::number(i)
                                  + QLatin1String("]/type/ref[text()=\"")
@@ -155,8 +155,8 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
     }
 
     //Fields
-    AbstractMetaFieldList fields = metaClass->fields();
-    foreach (AbstractMetaField *field, fields) {
+    const AbstractMetaFieldList &fields = metaClass->fields();
+    for (AbstractMetaField *field : fields) {
         if (field->isPrivate())
             return;
 
@@ -167,8 +167,8 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
     }
 
     //Enums
-    AbstractMetaEnumList enums = metaClass->enums();
-    foreach (AbstractMetaEnum *meta_enum, enums) {
+    const AbstractMetaEnumList &enums = metaClass->enums();
+    for (AbstractMetaEnum *meta_enum : enums) {
         QString query = QLatin1String("/doxygen/compounddef/sectiondef/memberdef[@kind=\"enum\"]/name[text()=\"")
             + meta_enum->name() + QLatin1String("\"]/..");
         QString doc = getDocumentation(xquery, query, DocModificationList());

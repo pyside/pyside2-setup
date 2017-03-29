@@ -75,7 +75,7 @@ void ApiExtractor::addTypesystemSearchPath (const QString& path)
 
 void ApiExtractor::addTypesystemSearchPath(const QStringList& paths)
 {
-    foreach (const QString &path, paths)
+    for (const QString &path : paths)
         addTypesystemSearchPath(path);
 }
 
@@ -180,8 +180,9 @@ QSet<QString> ApiExtractor::qtMetaTypeDeclaredTypeNames() const
 static const AbstractMetaEnum* findEnumOnClasses(AbstractMetaClassList metaClasses, const EnumTypeEntry* typeEntry)
 {
     const AbstractMetaEnum* result = 0;
-    foreach (const AbstractMetaClass* metaClass, metaClasses) {
-        foreach (const AbstractMetaEnum* metaEnum, metaClass->enums()) {
+    for (const AbstractMetaClass* metaClass : qAsConst(metaClasses)) {
+        const AbstractMetaEnumList &enums = metaClass->enums();
+        for (const AbstractMetaEnum *metaEnum : enums) {
             if (metaEnum->typeEntry() == typeEntry) {
                 result = metaEnum;
                 break;
@@ -198,7 +199,8 @@ const AbstractMetaEnum* ApiExtractor::findAbstractMetaEnum(const EnumTypeEntry* 
 {
     if (!typeEntry)
         return 0;
-    foreach (AbstractMetaEnum* metaEnum, m_builder->globalEnums()) {
+    const AbstractMetaEnumList &globalEnums = m_builder->globalEnums();
+    for (AbstractMetaEnum* metaEnum : globalEnums) {
         if (metaEnum->typeEntry() == typeEntry)
             return metaEnum;
     }
@@ -269,7 +271,7 @@ bool ApiExtractor::run()
     m_builder->setGlobalHeader(m_cppFileName);
     QByteArrayList arguments;
     arguments.reserve(m_includePaths.size() + 1);
-    foreach (const QString &i, m_includePaths)
+    for (const QString &i : qAsConst(m_includePaths))
         arguments.append(QByteArrayLiteral("-I") + QFile::encodeName(i));
     arguments.append(QFile::encodeName(preprocessedCppFileName));
     qCDebug(lcShiboken) << __FUNCTION__ << arguments;

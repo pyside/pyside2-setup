@@ -105,7 +105,8 @@ void TestRemoveOperatorMethod::testRemoveOperatorMethod()
     removedSignatures.append(QLatin1String("operator>>(Char&)"));
     removedSignatures.append(QLatin1String("operator>>(String&)"));
     int notRemoved = classA->functions().size();
-    foreach (const AbstractMetaFunction* f, classA->functions()) {
+    const AbstractMetaFunctionList &functions = classA->functions();
+    for (const AbstractMetaFunction *f : functions) {
         QCOMPARE(f->isModifiedRemoved(), bool(removedSignatures.contains(f->minimalSignature())));
         notRemoved -= int(f->isModifiedRemoved());
     }

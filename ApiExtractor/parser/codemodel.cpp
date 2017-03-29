@@ -221,7 +221,7 @@ QString TypeInfo::toString() const
         tmp += QLatin1Char(')');
     }
 
-    foreach(QString elt, arrayElements()) {
+    for (const QString &elt : m_arrayElements) {
         tmp += QLatin1Char('[');
         tmp += elt;
         tmp += QLatin1Char(']');
@@ -588,7 +588,7 @@ void _ClassModelItem::formatDebug(QDebug &d) const
 // ---------------------------------------------------------------------------
 FunctionModelItem _ScopeModelItem::declaredFunction(FunctionModelItem item)
 {
-    foreach (const FunctionModelItem &fun, m_functions) {
+    for (const FunctionModelItem &fun : qAsConst(m_functions)) {
         if (fun->name() == item->name() && fun->isSimilar(item))
             return fun;
 
@@ -730,7 +730,7 @@ EnumModelItem _ScopeModelItem::findEnum(const QString &name) const
 FunctionList _ScopeModelItem::findFunctions(const QString &name) const
 {
     FunctionList result;
-    foreach (const FunctionModelItem &func, m_functions) {
+    for (const FunctionModelItem &func : m_functions) {
         if (func->name() == name)
             result.append(func);
     }

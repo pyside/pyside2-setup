@@ -52,7 +52,8 @@ DummyGenerator::doSetup(const QMap<QString, QString>& args)
         QFile logFile(args["dump-arguments"]);
         logFile.open(QIODevice::WriteOnly | QIODevice::Text);
         QTextStream out(&logFile);
-        foreach (const QString& key, args.keys()) {
+        for (QMap<QString, QString>::const_iterator it = args.cbegin(), end = args.cend(); it != end; ++it) {
+            const QString& key = it.key();
             if (key == "arg-1")
                 out << "header-file";
             else if (key == "arg-2")

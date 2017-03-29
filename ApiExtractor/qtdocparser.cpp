@@ -79,7 +79,8 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
                     + className + QLatin1String("\"]/description");
 
     DocModificationList signedModifs, classModifs;
-    foreach (DocModification docModif, metaClass->typeEntry()->docModifications()) {
+    const DocModificationList &mods = metaClass->typeEntry()->docModifications();
+    for (const DocModification &docModif : mods) {
         if (docModif.signature().isEmpty())
             classModifs.append(docModif);
         else
@@ -91,8 +92,8 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
 
 
     //Functions Documentation
-    AbstractMetaFunctionList funcs = metaClass->functionsInTargetLang();
-    foreach (AbstractMetaFunction *func, funcs) {
+    const AbstractMetaFunctionList &funcs = metaClass->functionsInTargetLang();
+    for (AbstractMetaFunction *func : funcs) {
         if (!func || func->isPrivate())
             continue;
 
@@ -109,8 +110,9 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
                      + QString::number(func->arguments().count())
                      + QLatin1String(" and @const=\"") + isConst + QLatin1String("\"]");
 
-            int i = 1;
-            foreach (AbstractMetaArgument* arg, func->arguments()) {
+            const AbstractMetaArgumentList &arguments = func->arguments();
+            for (int i = 0, size = arguments.size(); i < size; ++i) {
+                const AbstractMetaArgument *arg = arguments.at(i);
                 QString type = arg->type()->name();
 
                 if (arg->type()->isConstant())
@@ -125,14 +127,13 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
                     for (int j = 0, max = arg->type()->indirections(); j < max; ++j)
                         type += QLatin1Char('*');
                 }
-                query += QLatin1String("/parameter[") + QString::number(i)
+                query += QLatin1String("/parameter[") + QString::number(i + 1)
                          + QLatin1String("][@left=\"") + type + QLatin1String("\"]/..");
-                ++i;
             }
         }
         query += QLatin1String("/description");
         DocModificationList funcModifs;
-        foreach (DocModification funcModif, signedModifs) {
+        for (const DocModification &funcModif : qAsConst(signedModifs)) {
             if (funcModif.signature() == func->minimalSignature())
                 funcModifs.append(funcModif);
         }
@@ -141,8 +142,8 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     }
 #if 0
     // Fields
-    AbstractMetaFieldList fields = metaClass->fields();
-    foreach (AbstractMetaField *field, fields) {
+    const AbstractMetaFieldList &fields = metaClass->fields();
+    for (AbstractMetaField *field : fields) {
         if (field->isPrivate())
             return;
 
@@ -152,8 +153,8 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     }
 #endif
     // Enums
-    AbstractMetaEnumList enums = metaClass->enums();
-    foreach (AbstractMetaEnum *meta_enum, enums) {
+    const AbstractMetaEnumList &enums = metaClass->enums();
+    for (AbstractMetaEnum *meta_enum : enums) {
         QString query = QLatin1String("/WebXML/document/") + type
                         + QLatin1String("[@name=\"")
                         + className + QLatin1String("\"]/enum[@name=\"")

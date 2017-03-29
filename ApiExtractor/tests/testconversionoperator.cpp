@@ -65,7 +65,7 @@ void TestConversionOperator::testConversionOperator()
     QCOMPARE(classA->externalConversionOperators().count(), 2);
 
     AbstractMetaFunction* convOp = 0;
-    foreach(AbstractMetaFunction* func, classB->functions()) {
+    for (AbstractMetaFunction *func : classB->functions()) {
         if (func->isConversionOperator()) {
             convOp = func;
             break;

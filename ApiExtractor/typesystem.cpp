@@ -209,8 +209,9 @@ bool Handler::endElement(const QStringRef &localName)
         if (m_generate == TypeEntry::GenerateAll) {
             TypeDatabase::instance()->addGlobalUserFunctions(m_contextStack.top()->addedFunctions);
             TypeDatabase::instance()->addGlobalUserFunctionModifications(m_contextStack.top()->functionMods);
-            foreach (CustomConversion* customConversion, customConversionsForReview) {
-                foreach (CustomConversion::TargetToNativeConversion* toNative, customConversion->targetToNativeConversions())
+            for (CustomConversion *customConversion : qAsConst(customConversionsForReview)) {
+                const CustomConversion::TargetToNativeConversions &toNatives = customConversion->targetToNativeConversions();
+                for (CustomConversion::TargetToNativeConversion *toNative : toNatives)
                     toNative->setSourceType(m_database->findType(toNative->sourceTypeName()));
             }
         }
@@ -850,7 +851,8 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             // put in the flags parallel...
             const QString flagNames = attributes.value(flagsAttribute());
             if (!flagNames.isEmpty()) {
-                foreach (const QString &flagName, flagNames.split(QLatin1Char(',')))
+                const QStringList &flagNameList = flagNames.split(QLatin1Char(','));
+                for (const QString &flagName : flagNameList)
                     addFlags(name, flagName.trimmed(), attributes, since);
             }
         }
@@ -1746,8 +1748,8 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
 
             if (rc.action == ReferenceCount::Invalid) {
                 m_error = QLatin1String("unrecognized value for action attribute. supported actions:");
-                foreach (const QString &action, actions.keys())
-                    m_error += QLatin1Char(' ') + action;
+                for (QHash<QString, ReferenceCount::Action>::const_iterator it = actions.cbegin(), end = actions.cend(); it != end; ++it)
+                    m_error += QLatin1Char(' ') + it.key();
             }
 
             m_contextStack.top()->functionMods.last().argument_mods.last().referenceCounts.append(rc);
@@ -2172,7 +2174,7 @@ QString TemplateInstance::expandCode() const
 QString CodeSnipAbstract::code() const
 {
     QString res;
-    foreach (const CodeSnipFragment &codeFrag, codeList)
+    for (const CodeSnipFragment &codeFrag : codeList)
         res.append(codeFrag.code());
 
     return res;
@@ -2205,7 +2207,7 @@ QString FunctionModification::toString() const
     if (modifiers & Writable) str += QLatin1String("writable");
 
     if (modifiers & CodeInjection) {
-        foreach (const CodeSnip &s, snips) {
+        for (const CodeSnip &s : snips) {
             str += QLatin1String("\n//code injection:\n");
             str += s.code();
         }
@@ -2563,9 +2565,7 @@ CustomConversion::CustomConversion(TypeEntry* ownerType)
 
 CustomConversion::~CustomConversion()
 {
-    foreach (TargetToNativeConversion* targetToNativeConversion, m_d->targetToNativeConversions)
-        delete targetToNativeConversion;
-    m_d->targetToNativeConversions.clear();
+    qDeleteAll(m_d->targetToNativeConversions);
     delete m_d;
 }
 

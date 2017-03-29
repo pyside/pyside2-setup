@@ -423,8 +423,8 @@ void TestAddFunction::testAddFunctionOnTypedef()
     AbstractMetaClass* foo = AbstractMetaClass::findClass(classes, QLatin1String("FooInt"));
     QVERIFY(foo);
     QVERIFY(foo->hasNonPrivateConstructor());
-    AbstractMetaFunctionList lst = foo->queryFunctions(AbstractMetaClass::Constructors);
-    foreach(AbstractMetaFunction* f, lst)
+    const AbstractMetaFunctionList &lst = foo->queryFunctions(AbstractMetaClass::Constructors);
+    for (const AbstractMetaFunction *f : lst)
         QVERIFY(f->signature().startsWith(f->name()));
     QCOMPARE(lst.size(), 2);
     const AbstractMetaFunction* method = foo->findFunction(QLatin1String("method"));

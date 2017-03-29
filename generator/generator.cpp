@@ -73,7 +73,7 @@ bool Generator::setup(const ApiExtractor& extractor, const QMap< QString, QStrin
     TypeEntryHash allEntries = TypeDatabase::instance()->allEntries();
     TypeEntry* entryFound = 0;
     for (TypeEntryHash::const_iterator it = allEntries.cbegin(), end = allEntries.cend(); it != end; ++it) {
-        foreach (TypeEntry *entry, it.value()) {
+        for (TypeEntry *entry : it.value()) {
             if (entry->type() == TypeEntry::TypeSystemType && entry->generateCode()) {
                 entryFound = entry;
                 break;
@@ -120,7 +120,8 @@ void Generator::addInstantiatedContainersAndSmartPointers(const AbstractMetaType
 {
     if (!type)
         return;
-    foreach (const AbstractMetaType* t, type->instantiations())
+    const AbstractMetaTypeList &instantiations = type->instantiations();
+    for (const AbstractMetaType* t : instantiations)
         addInstantiatedContainersAndSmartPointers(t, context);
     if (!type->typeEntry()->isContainer() && !type->typeEntry()->isSmartPointer())
         return;
@@ -156,7 +157,8 @@ void Generator::addInstantiatedContainersAndSmartPointers(const AbstractMetaType
 void Generator::collectInstantiatedContainersAndSmartPointers(const AbstractMetaFunction *func)
 {
     addInstantiatedContainersAndSmartPointers(func->type(), func->signature());
-    foreach (const AbstractMetaArgument* arg, func->arguments())
+    const AbstractMetaArgumentList &arguments = func->arguments();
+    for (const AbstractMetaArgument *arg : arguments)
         addInstantiatedContainersAndSmartPointers(arg->type(), func->signature());
 }
 
@@ -164,19 +166,24 @@ void Generator::collectInstantiatedContainersAndSmartPointers(const AbstractMeta
 {
     if (!metaClass->typeEntry()->generateCode())
         return;
-    foreach (const AbstractMetaFunction* func, metaClass->functions())
+    const AbstractMetaFunctionList &funcs = metaClass->functions();
+    for (const AbstractMetaFunction *func : funcs)
         collectInstantiatedContainersAndSmartPointers(func);
-    foreach (const AbstractMetaField* field, metaClass->fields())
+    const AbstractMetaFieldList &fields = metaClass->fields();
+    for (const AbstractMetaField *field : fields)
         addInstantiatedContainersAndSmartPointers(field->type(), field->name());
-    foreach (AbstractMetaClass* innerClass, metaClass->innerClasses())
+    const AbstractMetaClassList &innerClasses = metaClass->innerClasses();
+    for (AbstractMetaClass *innerClass : innerClasses)
         collectInstantiatedContainersAndSmartPointers(innerClass);
 }
 
 void Generator::collectInstantiatedContainersAndSmartPointers()
 {
-    foreach (const AbstractMetaFunction* func, globalFunctions())
+    const AbstractMetaFunctionList &funcs = globalFunctions();
+    for (const AbstractMetaFunction *func : funcs)
         collectInstantiatedContainersAndSmartPointers(func);
-    foreach (const AbstractMetaClass* metaClass, classes())
+    const AbstractMetaClassList &classList = classes();
+    for (const AbstractMetaClass *metaClass : classList)
         collectInstantiatedContainersAndSmartPointers(metaClass);
 }
 
@@ -351,13 +358,14 @@ QString Generator::getFileNameBaseForSmartPointer(const AbstractMetaType *smartP
 
 bool Generator::generate()
 {
-    foreach (AbstractMetaClass *cls, m_d->apiextractor->classes()) {
+    const AbstractMetaClassList &classList = m_d->apiextractor->classes();
+    for (AbstractMetaClass *cls : classList) {
         GeneratorContext context(cls);
         if (!generateFileForContext(context))
             return false;
     }
 
-    foreach (const AbstractMetaType *type, instantiatedSmartPointers()) {
+    for (const AbstractMetaType *type : qAsConst(m_d->instantiatedSmartPointers)) {
         AbstractMetaClass *smartPointerClass =
                 AbstractMetaClass::findClass(m_d->apiextractor->smartPointers(), type->name());
         GeneratorContext context(smartPointerClass, type, true);
@@ -394,7 +402,8 @@ void Generator::replaceTemplateVariables(QString &code, const AbstractMetaFuncti
     if (cpp_class)
         code.replace(QLatin1String("%TYPE"), cpp_class->name());
 
-    foreach (AbstractMetaArgument *arg, func->arguments())
+    const AbstractMetaArgumentList &argument = func->arguments();
+    for (AbstractMetaArgument *arg : argument)
         code.replace(QLatin1Char('%') + QString::number(arg->argumentIndex() + 1), arg->name());
 
     //template values
@@ -419,10 +428,10 @@ void Generator::replaceTemplateVariables(QString &code, const AbstractMetaFuncti
 QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
 {
     // detect number of spaces before the first character
-    QStringList lst(code.split(QLatin1Char('\n')));
+    const QStringList lst(code.split(QLatin1Char('\n')));
     QRegExp nonSpaceRegex(QLatin1String("[^\\s]"));
     int spacesToRemove = 0;
-    foreach(QString line, lst) {
+    for (const QString &line : lst) {
         if (!line.trimmed().isEmpty()) {
             spacesToRemove = line.indexOf(nonSpaceRegex);
             if (spacesToRemove == -1)
@@ -433,7 +442,7 @@ QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
 
     static QRegExp emptyLine(QLatin1String("\\s*[\\r]?[\\n]?\\s*"));
 
-    foreach(QString line, lst) {
+    for (QString line : lst) {
         if (!line.isEmpty() && !emptyLine.exactMatch(line)) {
             while (line.end()->isSpace())
                 line.chop(1);
@@ -639,9 +648,9 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
     if (cType->hasDefaultConstructor())
         return cType->defaultConstructor();
 
-    AbstractMetaFunctionList constructors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
+    const AbstractMetaFunctionList &constructors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
     int maxArgs = 0;
-    foreach (const AbstractMetaFunction* ctor, constructors) {
+    for (const AbstractMetaFunction *ctor : constructors) {
         if (ctor->isUserAdded() || ctor->isPrivate() || ctor->functionType() != AbstractMetaFunction::ConstructorFunction)
             continue;
 
@@ -656,7 +665,8 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
 
     QString qualifiedCppName = metaClass->typeEntry()->qualifiedCppName();
     QStringList templateTypes;
-    foreach (TypeEntry* templateType, metaClass->templateArguments())
+    const QList<TypeEntry *> &templateArguments = metaClass->templateArguments();
+    for (TypeEntry *templateType : templateArguments)
         templateTypes << templateType->qualifiedCppName();
 
     // Empty constructor.
@@ -668,16 +678,16 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
     // Constructors with C++ primitive types, enums or pointers only.
     // Start with the ones with fewer arguments.
     for (int i = 1; i <= maxArgs; ++i) {
-        foreach (const AbstractMetaFunction* ctor, constructors) {
+        for (const AbstractMetaFunction *ctor : constructors) {
             if (ctor->isUserAdded() || ctor->isPrivate() || ctor->functionType() != AbstractMetaFunction::ConstructorFunction)
                 continue;
 
-            AbstractMetaArgumentList arguments = ctor->arguments();
+            const AbstractMetaArgumentList &arguments = ctor->arguments();
             if (arguments.size() != i)
                 continue;
 
             QStringList args;
-            foreach (const AbstractMetaArgument* arg, arguments) {
+            for (const AbstractMetaArgument *arg : arguments) {
                 const TypeEntry* type = arg->type()->typeEntry();
                 if (type == metaClass->typeEntry()) {
                     args.clear();
@@ -715,9 +725,10 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
     // Constructors with C++ primitive types, enums, pointers, value types,
     // and user defined primitive types.
     // Builds the minimal constructor recursively.
-    foreach (const AbstractMetaFunction* ctor, candidates) {
+    for (const AbstractMetaFunction *ctor : qAsConst(candidates)) {
         QStringList args;
-        foreach (const AbstractMetaArgument* arg, ctor->arguments()) {
+        const AbstractMetaArgumentList &arguments = ctor->arguments();
+        for (const AbstractMetaArgument *arg : arguments) {
             if (arg->type()->typeEntry() == metaClass->typeEntry()) {
                 args.clear();
                 break;
