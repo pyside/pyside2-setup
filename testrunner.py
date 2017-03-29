@@ -700,8 +700,10 @@ if __name__ == '__main__':
     # create the parser for the "test" command
     parser_test = subparsers.add_parser("test")
     group = parser_test.add_mutually_exclusive_group(required=False)
+    blacklist_default = os.path.join(script_dir, 'build_history', 'blacklist.txt')
     group.add_argument("--blacklist", "-b", type=argparse.FileType('r'),
-                        help="a Qt blacklist file")
+                       default=blacklist_default,
+                       help='a Qt blacklist file (default: {})'.format(blacklist_default))
     group.add_argument("--learn", "-l", type=create_read_write,
                         help="add new entries to a blacklist file")
     parser_test.add_argument("--skip", action='store_true',
