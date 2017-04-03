@@ -79,7 +79,7 @@ OS X SDK: You can specify which OS X SDK should be used for compilation with the
           For e.g. "--osx-sysroot=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/".
 """
 
-__version__ = "2.0.0.dev0"
+__version__ = "5.6"
 
 submodules = {
     '2.0.0.dev0': [
@@ -88,6 +88,13 @@ submodules = {
         ["pyside2-tools", "dev"],
         ["pyside2-examples", "dev"],
         ["wiki", "master", ".."],
+    ],
+    '5.6': [
+        ["shiboken2", "5.6"],
+        ["pyside2", "5.6"],
+        ["pyside2-tools", "5.6"],
+        ["pyside2-examples", "5.6"],
+        ["wiki", "master", ".."]
     ],
 }
 old_submodules = {
