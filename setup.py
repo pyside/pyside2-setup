@@ -89,6 +89,13 @@ submodules = {
         ["pyside2-examples", "dev"],
         ["wiki", "master", ".."],
     ],
+    '5.6': [
+        ["shiboken2", "5.6"],
+        ["pyside2", "5.6"],
+        ["pyside2-tools", "5.6"],
+        ["pyside2-examples", "5.6"],
+        ["wiki", "master", ".."]
+    ],
 }
 old_submodules = {
     # these are just kept a while for reference but not maintained.
