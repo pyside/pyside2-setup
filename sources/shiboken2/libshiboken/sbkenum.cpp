@@ -487,7 +487,12 @@ bool createGlobalEnumItem(PyTypeObject* enumType, PyObject* module, const char* 
     if (enumItem) {
         if (PyModule_AddObject(module, itemName, enumItem) < 0)
             return false;
-        Py_DECREF(enumItem);
+        // @TODO This Py_DECREF causes crashes on exit with a debug Python interpreter, essentially
+        // causing a use-after-free in the GC. This is now commented out to cause a memory leak
+        // instead of a crash. Proper memory management of Enum types and items should be
+        // implemented. See PYSIDE-488. This will require proper allocation and deallocation of
+        // the underlying Enum PyHeapType, which is currently just deallocated at application exit.
+        // Py_DECREF(enumItem);
         return true;
     }
     return false;
