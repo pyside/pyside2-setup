@@ -89,6 +89,13 @@ submodules = {
         ["pyside2-examples", "dev"],
         ["wiki", "master", ".."],
     ],
+    '5.9': [
+        ["shiboken2", "5.9"],
+        ["pyside2", "5.9"],
+        ["pyside2-tools", "5.9"],
+        ["pyside2-examples", "5.9"],
+        ["wiki", "master", ".."]
+    ],
     '5.6': [
         ["shiboken2", "5.6"],
         ["pyside2", "5.6"],

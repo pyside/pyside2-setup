@@ -1,3 +1,5 @@
+[pysidetest::delegatecreateseditor_test]
+    qt5.6
 [pysidetest::modelview_test]
     darwin py3
 [pysidetest::qvariant_test]
@@ -30,6 +32,9 @@
     linux
     darwin
     win32
+[QtWidgets::qstandarditemmodel_test]
+    py2
+    py3
 [QtTest::touchevent_test]
     linux
     darwin
