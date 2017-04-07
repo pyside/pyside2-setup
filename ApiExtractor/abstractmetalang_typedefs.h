@@ -35,13 +35,14 @@ class AbstractMetaClass;
 class AbstractMetaField;
 class AbstractMetaArgument;
 class AbstractMetaEnum;
-class AbstractMetaEnumValueList;
+class AbstractMetaEnumValue;
 class AbstractMetaFunction;
 class AbstractMetaType;
 
 typedef QVector<AbstractMetaArgument *> AbstractMetaArgumentList;
 typedef QVector<AbstractMetaClass *> AbstractMetaClassList;
 typedef QVector<AbstractMetaEnum *> AbstractMetaEnumList;
+typedef QVector<AbstractMetaEnumValue *> AbstractMetaEnumValueList;
 typedef QVector<AbstractMetaField *> AbstractMetaFieldList;
 typedef QVector<AbstractMetaFunction *> AbstractMetaFunctionList;
 typedef QVector<AbstractMetaType *> AbstractMetaTypeList;

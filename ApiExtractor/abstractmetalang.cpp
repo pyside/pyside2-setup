@@ -2647,15 +2647,6 @@ AbstractMetaEnum *AbstractMetaClass::findEnum(const AbstractMetaClassList &class
     return metaClass->findEnum(enumName);
 }
 
-AbstractMetaEnumValue *AbstractMetaEnumValueList::find(const QString &name) const
-{
-    for (int i = 0; i < size(); ++i) {
-        if (name == at(i)->name())
-            return at(i);
-    }
-    return 0;
-}
-
 AbstractMetaEnumValue *AbstractMetaClass::findEnumValue(const AbstractMetaClassList &classes,
                                                         const QString &name)
 {
