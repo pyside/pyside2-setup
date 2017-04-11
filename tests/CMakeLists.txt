@@ -75,7 +75,7 @@ else()
     #TEST_QT_MODULE(Qt5QuickWidgets_FOUND QtQuickWidgets)
     #TEST_QT_MODULE(Qt5WebChannel_FOUND QtWebChannel)
     #TEST_QT_MODULE(Qt5WebEngine_FOUND QtWebEngine)
-    #TEST_QT_MODULE(Qt5WebEngineWidgets_FOUND QtWebEngineWidgets)
+    TEST_QT_MODULE(Qt5WebEngineWidgets_FOUND QtWebEngineWidgets)
     #TEST_QT_MODULE(Qt5WebSockets_FOUND QtWebSockets)
 
     if(UNIX AND NOT APPLE)
