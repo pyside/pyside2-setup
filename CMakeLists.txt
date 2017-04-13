@@ -18,43 +18,83 @@ else()
     find_package(PythonInterp 2.6)
 endif()
 
-if (UNIX AND NOT APPLE)
-    # TODO: This part needs more testing first to be available on OSX and WIN
-    # Also note the quirk that UNIX includes Apple!
+# Queries the python sysconfig for the abi flags which need to be inserted into extension suffixes.
+# Only present starting with Python 3.2.
+# Corresponding configure switches to single letter flags:
+# --with-pymalloc -> m
+# --with-pydebug -> d
+# --with-unicode -> u (rare)
+macro(get_python3_abi_flags)
+  if (NOT PYTHON_ABI_FLAGS)
+    execute_process(
+      COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+          import sysconfig
+          print(sysconfig.get_config_var('abiflags'))
+          "
+      OUTPUT_VARIABLE PYTHON_ABI_FLAGS
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+  endif()
+  message("PYTHON_ABI_FLAGS: " ${PYTHON_ABI_FLAGS})
+endmacro()
+
+macro(get_python_multi_arch_suffix)
+  # TODO: This part needs testing to check if it is available on Windows.
+  # It is present on macOS, but is not used yet.
+  # Result is something like 'x86_64-linux-gnu'.
   if (NOT PYTHON_MULTIARCH_SUFFIX)
     execute_process(
-        COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-            import sysconfig
-            print(sysconfig.get_config_var('MULTIARCH'))
-            "
-        OUTPUT_VARIABLE PYTHON_MULTIARCH_SUFFIX
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
+      COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+         import sysconfig
+         print(sysconfig.get_config_var('MULTIARCH'))
+         "
+      OUTPUT_VARIABLE PYTHON_MULTIARCH_SUFFIX
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
   endif()
+  message("PYTHON_MULTIARCH_SUFFIX: " ${PYTHON_MULTIARCH_SUFFIX})
+endmacro()
 
+macro(get_python2_release_suffix)
+  # Result of imp.get_suffixes() is something like:
+  # [('_d.so', 'rb', 3), ('module_d.so', 'rb', 3), ('.x86_64-linux-gnu_d.so', 'rb', 3)]
+  # or alternatively the same but withut the '_d' part.
+  # The list comprehension is used to choose which suffix to include in library names.
+  execute_process(
+    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+       import imp
+       print('_d' if any([tup[0].endswith('_d.so') for tup in imp.get_suffixes()]) else '')
+       "
+    OUTPUT_VARIABLE PYTHON_MODULE_RELEASE_SUFFIX
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  message("PYTHON_MODULE_RELEASE_SUFFIX: " ${PYTHON_MODULE_RELEASE_SUFFIX})
+endmacro()
+
+if (UNIX AND NOT APPLE)
   if (NOT PYTHON_EXTENSION_SUFFIX)
+    get_python_multi_arch_suffix()
+    # The suffix added to .so libraries should be differenet between Python 2 and 3.
+    # The position of the multiarch suffix is different, and the way the debug flag is set
+    # computed differently.
+    # In Python 2 there is no standard way to query if the python interpeter was built in debug or
+    # release build (sysconfig.get_config_var('Py_Debug') can have a different value than you would
+    # expect if you do a custom Python build). The solution to query for the import
+    # suffixes and check if _d is present there. It is present on Linux distribution
+    # packages of Python, but not in custom built Python builds, because the distros apply their
+    # custom patches too append the '_d's.
+    # In Python 3 (starting with 3.2) there is a standard way to check if '_d' needs to be added,
+    # as well as any other letters, by querying the abiflags sysconfig variable.
     if (PYTHON_VERSION_MAJOR EQUAL 2)
-        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-            set(PYTHON_RELEASE_SUFFIX "-dbg")
-            set(PYTHON_MODULE_RELEASE_SUFFIX "_d")
-        else()
-            set(PYTHON_RELEASE_SUFFIX "")
-            set(PYTHON_MODULE_RELEASE_SUFFIX "")
-        endif()
-        set(PYTHON_EXTENSION_SUFFIX "-python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}${PYTHON_RELEASE_SUFFIX}")
+        get_python2_release_suffix()
+        # The suffix of Python module files (e.g. QtCore.x86_64-linux-gnu_d.so) as well as library
+        # libraries (e.g. libpyside2.x86_64-linux-gnu.so).
         if(PYTHON_MULTIARCH_SUFFIX)
-            set(PYTHON_MODULE_SUFFIX ".${PYTHON_MULTIARCH_SUFFIX}${PYTHON_MODULE_RELEASE_SUFFIX}")
-            set(PYTHON_EXTENSION_SUFFIX "${PYTHON_EXTENSION_SUFFIX}-${PYTHON_MULTIARCH_SUFFIX}")
+            set(PYTHON_EXTENSION_SUFFIX ".${PYTHON_MULTIARCH_SUFFIX}")
         endif()
+        set(PYTHON_EXTENSION_SUFFIX "${PYTHON_EXTENSION_SUFFIX}${PYTHON_MODULE_RELEASE_SUFFIX}")
     elseif (PYTHON_VERSION_MAJOR EQUAL 3)
-        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-            set(PYTHON_RELEASE_SUFFIX "dm")
-        else()
-            set(PYTHON_RELEASE_SUFFIX "m")
-        endif()
-        set(PYTHON_EXTENSION_SUFFIX ".cpython-${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}${PYTHON_RELEASE_SUFFIX}")
+        get_python3_abi_flags()
+        set(PYTHON_EXTENSION_SUFFIX ".cpython-${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}${PYTHON_ABI_FLAGS}")
         if(PYTHON_MULTIARCH_SUFFIX)
             set(PYTHON_EXTENSION_SUFFIX "${PYTHON_EXTENSION_SUFFIX}-${PYTHON_MULTIARCH_SUFFIX}")
-            set(PYTHON_MODULE_SUFFIX "${PYTHON_EXTENSION_SUFFIX}")
         endif()
     else()
         message(FATAL_ERROR "Unsupported PYTHON_VERSION=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.${PYTHON_VERSION_PATCH}!")
@@ -242,13 +282,6 @@ add_custom_target(dist
             bzip2 -f9 "${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar" &&
             echo "Source package created at ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2.\n"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT PYTHON_MODULE_SUFFIX)
-    if (SHIBOKEN_PYTHON_VERSION_MAJOR EQUAL 2)
-        set(PYTHON_DEBUG_SUFFIX "_d")
-    endif()
-endif()
-
 
 if (NOT SITE_PACKAGE)
     execute_process(

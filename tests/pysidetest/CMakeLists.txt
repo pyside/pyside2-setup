@@ -77,7 +77,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${SHIBOKEN_PYTHON_INCLUDE_DIR})
 
 add_library(pysidetest SHARED ${pysidetest_SRC} ${pysidetest_MOC_SRC})
-target_link_libraries(pysidetest 
+target_link_libraries(pysidetest
                       ${Qt5Core_LIBRARIES}
                       ${Qt5Gui_LIBRARIES}
                       ${Qt5Widgets_LIBRARIES}
@@ -107,6 +107,7 @@ PYSIDE_TEST(enum_test.py)
 PYSIDE_TEST(homonymoussignalandmethod_test.py)
 PYSIDE_TEST(list_signal_test.py)
 PYSIDE_TEST(modelview_test.py)
+PYSIDE_TEST(new_inherited_functions_test.py)
 PYSIDE_TEST(notify_id.py)
 PYSIDE_TEST(qvariant_test.py)
 PYSIDE_TEST(signalandnamespace_test.py)
