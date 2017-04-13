@@ -368,6 +368,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
     const FunctionGroupMap &functionGroups = getFunctionGroups(metaClass);
     for (FunctionGroupMapIt it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
         AbstractMetaFunctionList overloads;
+        QSet<QString> seenSignatures;
         for (AbstractMetaFunction *func : it.value()) {
             if (!func->isAssignmentOperator()
                 && !func->usesRValueReferences()
@@ -375,8 +376,12 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
                 && !func->isModifiedRemoved()
                 && (!func->isPrivate() || func->functionType() == AbstractMetaFunction::EmptyFunction)
                 && func->ownerClass() == func->implementingClass()
-                && (func->name() != QLatin1String("qt_metacall")))
-                overloads.append(func);
+                && (func->name() != QLatin1String("qt_metacall"))) {
+                // PYSIDE-331: Inheritance works correctly when there are disjoint functions.
+                // But when a function is both in a class and inherited in a subclass,
+                // then we need to search through all subclasses and collect the new signatures.
+                overloads << getFunctionAndInheritedOverloads(func, &seenSignatures);
+            }
         }
 
         if (overloads.isEmpty())
@@ -3160,6 +3165,9 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
                         if (func->isStatic()) {
                             mc << "::" << methodCallClassName << "::";
                         } else {
+                            const QString selfVarCast = func->ownerClass() == func->implementingClass()
+                                ? QLatin1String(CPP_SELF_VAR)
+                                : QLatin1String("reinterpret_cast<") + methodCallClassName + QLatin1String(" *>(" CPP_SELF_VAR ")");
                             if (func->isConstant()) {
                                 if (avoidProtectedHack()) {
                                     mc << "const_cast<const ::";
@@ -3167,13 +3175,13 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
                                         mc << wrapperName(func->ownerClass());
                                     else
                                         mc << methodCallClassName;
-                                    mc <<  "*>(" CPP_SELF_VAR ")->";
+                                    mc <<  "*>(" << selfVarCast << ")->";
                                 } else {
                                     mc << "const_cast<const ::" << methodCallClassName;
-                                    mc <<  "*>(" CPP_SELF_VAR ")->";
+                                    mc <<  "*>(" << selfVarCast << ")->";
                                 }
                             } else {
-                                mc << CPP_SELF_VAR "->";
+                                mc << selfVarCast << "->";
                             }
                         }
 
