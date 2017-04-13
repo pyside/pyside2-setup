@@ -1293,13 +1293,6 @@ private:
     Documentation m_doc;
 };
 
-
-class AbstractMetaEnumValueList : public QVector<AbstractMetaEnumValue *>
-{
-public:
-    AbstractMetaEnumValue *find(const QString &name) const;
-};
-
 class AbstractMetaEnum : public AbstractMetaAttributes
 {
 public:

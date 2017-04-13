@@ -354,8 +354,10 @@ QString ShibokenGenerator::cpythonFunctionName(const AbstractMetaFunction* func)
 {
     QString result;
 
-    if (func->ownerClass()) {
-        result = cpythonBaseName(func->ownerClass()->typeEntry());
+    // PYSIDE-331: For inherited functions, we need to find the same labels.
+    // Therefore we use the implementing class.
+    if (func->implementingClass()) {
+        result = cpythonBaseName(func->implementingClass()->typeEntry());
         if (func->isConstructor()) {
             result += QLatin1String("_Init");
         } else {
@@ -426,8 +428,11 @@ static QString searchForEnumScope(const AbstractMetaClass* metaClass, const QStr
                 return metaClass->qualifiedCppName();
         }
     }
-
-    return searchForEnumScope(metaClass->enclosingClass(), enumValueName);
+    // PYSIDE-331: We need to also search the base classes.
+    QString ret = searchForEnumScope(metaClass->enclosingClass(), enumValueName);
+    if (ret.isEmpty())
+        ret = searchForEnumScope(metaClass->baseClass(), enumValueName);
+    return ret;
 }
 
 /*
@@ -787,12 +792,12 @@ QString ShibokenGenerator::converterObject(const TypeEntry* type)
         return QString::fromLatin1("Shiboken::Conversions::PrimitiveTypeConverter<%1>()").arg(type->qualifiedCppName());
     if (isWrapperType(type) || type->isEnum() || type->isFlags())
         return QString::fromLatin1("SBK_CONVERTER(%1)").arg(cpythonTypeNameExt(type));
-    
+
     if (type->isArray()) {
         qDebug() << "Warning: no idea how to handle the Qt5 type " << type->qualifiedCppName();
         return QString::null;
     }
-        
+
     /* the typedef'd primitive types case */
     const PrimitiveTypeEntry* pte = dynamic_cast<const PrimitiveTypeEntry*>(type);
     if (!pte) {
@@ -2368,19 +2373,47 @@ QMap< QString, AbstractMetaFunctionList > ShibokenGenerator::getFunctionGroups(c
     return results;
 }
 
+AbstractMetaFunctionList ShibokenGenerator::getInheritedOverloads(const AbstractMetaFunction *func, QSet<QString> *seen)
+{
+    AbstractMetaFunctionList results;
+    AbstractMetaClass* basis;
+    if (func->ownerClass() && (basis = func->ownerClass()->baseClass(), basis)) {
+        for (; basis; basis = basis->baseClass()) {
+            const AbstractMetaFunction* inFunc = basis->findFunction(func->name());
+            if (inFunc && !seen->contains(inFunc->minimalSignature())) {
+                seen->insert(inFunc->minimalSignature());
+                AbstractMetaFunction* newFunc = inFunc->copy();
+                newFunc->setImplementingClass(func->implementingClass());
+                results << newFunc;
+            }
+        }
+    }
+    return results;
+}
+
+AbstractMetaFunctionList ShibokenGenerator::getFunctionAndInheritedOverloads(const AbstractMetaFunction *func, QSet<QString> *seen)
+{
+    AbstractMetaFunctionList results;
+    seen->insert(func->minimalSignature());
+    results << const_cast<AbstractMetaFunction *>(func) << getInheritedOverloads(func, seen);
+    return results;
+}
+
 AbstractMetaFunctionList ShibokenGenerator::getFunctionOverloads(const AbstractMetaClass* scope, const QString& functionName)
 {
     AbstractMetaFunctionList lst = scope ? scope->functions() : globalFunctions();
 
     AbstractMetaFunctionList results;
+    QSet<QString> seenSignatures;
     for (AbstractMetaFunction *func : qAsConst(lst)) {
         if (func->name() != functionName)
             continue;
-        if (isGroupable(func))
-            results << func;
+        if (isGroupable(func)) {
+            // PYSIDE-331: look also into base classes.
+            results << getFunctionAndInheritedOverloads(func, &seenSignatures);
+        }
     }
     return results;
-
 }
 
 QPair< int, int > ShibokenGenerator::getMinMaxArguments(const AbstractMetaFunction* metaFunction)

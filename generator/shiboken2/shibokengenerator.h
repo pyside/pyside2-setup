@@ -80,10 +80,27 @@ public:
 
     /**
     *   Returns a map with all functions grouped, the function name is used as key.
-    *   Example ofg return value: { "foo" -> ["foo(int)", "foo(int, long)], "bar" -> "bar(double)"}
-    * \param scope Where to search for functions, null means all global functions.
+    *   Example of return value: { "foo" -> ["foo(int)", "foo(int, long)], "bar" -> "bar(double)"}
+    *   \param scope Where to search for functions, null means all global functions.
     */
     QMap<QString, AbstractMetaFunctionList> getFunctionGroups(const AbstractMetaClass* scope = 0);
+
+    /**
+    *   Returns all different inherited overloads of func.
+    *   The function can be called multiple times without duplication.
+    *   \param func the metafunction to be searched in subclasses.
+    *   \param seen the function's minimal signatures already seen.
+    */
+    AbstractMetaFunctionList getInheritedOverloads(const AbstractMetaFunction *func, QSet<QString> *seen);
+
+    /**
+    *   Returns all different inherited overloads of func, and includes func as well.
+    *   The function can be called multiple times without duplication.
+    *   \param func the metafunction to be searched in subclasses.
+    *   \param seen the function's minimal signatures already seen.
+    */
+    AbstractMetaFunctionList getFunctionAndInheritedOverloads(const AbstractMetaFunction *func, QSet<QString> *seen);
+
     /**
     *   Returns all overloads for a function named \p functionName.
     *   \param scope scope used to search for overloads.
