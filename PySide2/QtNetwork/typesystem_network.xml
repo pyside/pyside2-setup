@@ -177,6 +177,7 @@
     </object-type>
 
     <value-type name="QHostAddress" hash-function="qHash">
+        <enum-type name="ConversionModeFlag" flags="ConversionMode" since="5.8"/>
         <enum-type name="SpecialAddress"/>
         <!-- ### QHostAddress(QIPv6Address) does this -->
         <modify-function signature="QHostAddress(quint8*)" remove="all" />
@@ -257,6 +258,7 @@
         <enum-type name="Priority" since="4.7"/>
         <enum-type name="CacheLoadControl"/>
         <enum-type name="KnownHeaders"/>
+        <enum-type name="RedirectPolicy" since="5.9"/>
     </value-type>
 
     <value-type name="QNetworkConfiguration" since="4.7">

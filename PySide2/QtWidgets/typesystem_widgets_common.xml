@@ -3675,5 +3675,17 @@
 
   <!-- This enum is present on QtCore -->
   <suppress-warning text="enum 'QCoreApplication::ApplicationFlags' is specified in typesystem, but not declared" />
-
+  <suppress-warning text="QGraphicsEllipseItem::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsItemGroup::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsItem::UserType' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsLineItem::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsPathItem::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsPixmapItem::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsPolygonItem::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsProxyWidget::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsRectItem::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsSimpleTextItem::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsSvgItem::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsTextItem::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsWidget::Type' does not have a type entry or is not an enum"/>
 </typesystem>

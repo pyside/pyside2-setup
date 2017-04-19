@@ -872,6 +872,7 @@
     <enum-type name="BGMode"/>
     <enum-type name="BrushStyle"/>
     <enum-type name="CaseSensitivity"/>
+    <enum-type name="ChecksumType" since="5.9"/>
     <enum-type name="CheckState"/>
     <enum-type name="ClipOperation"/>
     <enum-type name="ConnectionType"/>
@@ -1777,6 +1778,7 @@
 
   <value-type name="QLocale">
     <enum-type name="Country" />
+    <enum-type name="FloatingPointPrecisionOption" since="5.7"/>
     <enum-type name="FormatType"/>
     <enum-type name="Language" />
     <enum-type name="MeasurementSystem"/>
@@ -3175,8 +3177,13 @@
   <object-type name="QCollatorSortKey" since="5.2" />
   <object-type name="QCollator" since="5.2" />
 
-  <object-type name="QCommandLineOption" since="5.2" />
-  <object-type name="QCommandLineParser" since="5.2" />
+  <object-type name="QCommandLineOption" since="5.2">
+    <enum-type name="Flag" flags="Flags" since="5.8"/>
+  </object-type>
+  <object-type name="QCommandLineParser" since="5.2">
+    <enum-type name="OptionsAfterPositionalArgumentsMode" since="5.6"/>
+    <enum-type name="SingleDashWordOptionMode"/>
+  </object-type>
 
   <object-type name="QCoreApplication">
     <!--Qt5: gone <enum-type name="Encoding" /> -->
