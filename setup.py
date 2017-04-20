@@ -862,32 +862,36 @@ class pyside_build(_build):
         os.chdir(self.script_dir)
 
     def prepare_packages(self):
-        log.info("Preparing packages...")
-        version_str = "%sqt%s%s" % (__version__, self.qtinfo.version.replace(".", "")[0:3],
-            self.debug and "dbg" or "")
-        vars = {
-            "site_packages_dir": self.site_packages_dir,
-            "sources_dir": self.sources_dir,
-            "install_dir": self.install_dir,
-            "build_dir": self.build_dir,
-            "script_dir": self.script_dir,
-            "dist_dir": os.path.join(self.script_dir, 'pyside_package'),
-            "ssl_libs_dir": OPTION_OPENSSL,
-            "py_version": self.py_version,
-            "qt_version": self.qtinfo.version,
-            "qt_bin_dir": self.qtinfo.bins_dir,
-            "qt_doc_dir": self.qtinfo.docs_dir,
-            "qt_lib_dir": self.qtinfo.libs_dir,
-            "qt_plugins_dir": self.qtinfo.plugins_dir,
-            "qt_translations_dir": self.qtinfo.translations_dir,
-            "version": version_str,
-        }
-        os.chdir(self.script_dir)
-        if sys.platform == "win32":
-            vars['dbgPostfix'] = OPTION_DEBUG and "_d" or ""
-            return self.prepare_packages_win32(vars)
-        else:
-            return self.prepare_packages_posix(vars)
+        try:
+            log.info("Preparing packages...")
+            version_str = "%sqt%s%s" % (__version__, self.qtinfo.version.replace(".", "")[0:3],
+                self.debug and "dbg" or "")
+            vars = {
+                "site_packages_dir": self.site_packages_dir,
+                "sources_dir": self.sources_dir,
+                "install_dir": self.install_dir,
+                "build_dir": self.build_dir,
+                "script_dir": self.script_dir,
+                "dist_dir": os.path.join(self.script_dir, 'pyside_package'),
+                "ssl_libs_dir": OPTION_OPENSSL,
+                "py_version": self.py_version,
+                "qt_version": self.qtinfo.version,
+                "qt_bin_dir": self.qtinfo.bins_dir,
+                "qt_doc_dir": self.qtinfo.docs_dir,
+                "qt_lib_dir": self.qtinfo.libs_dir,
+                "qt_plugins_dir": self.qtinfo.plugins_dir,
+                "qt_translations_dir": self.qtinfo.translations_dir,
+                "version": version_str,
+            }
+            os.chdir(self.script_dir)
+            if sys.platform == "win32":
+                vars['dbgPostfix'] = OPTION_DEBUG and "_d" or ""
+                return self.prepare_packages_win32(vars)
+            else:
+                return self.prepare_packages_posix(vars)
+        except FileNotFoundError as e:
+            print('setup.py/prepare_packages: ', e)
+            raise
 
     def prepare_packages_posix(self, vars):
         executables = []
