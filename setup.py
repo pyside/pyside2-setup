@@ -1148,12 +1148,12 @@ class pyside_build(_build):
         if self.debug or self.build_type == 'RelWithDebInfo':
             # XXX dbgPostfix gives problems - the structure in shiboken2/data should be re-written!
             copyfile(
-                "{build_dir}/shiboken2/libshiboken/shiboken2-python{py_version}.pdb",
-                "{dist_dir}/PySide2/shiboken2-python{py_version}.pdb", # omitted dbgPostfix
+                "{build_dir}/shiboken2/libshiboken/shiboken2.pdb",
+                "{dist_dir}/PySide2/shiboken2.pdb", # omitted dbgPostfix
                 vars=vars)
             copyfile(
-                "{build_dir}/pyside2/libpyside/pyside2-python{py_version}.pdb",
-                "{dist_dir}/PySide2/pyside2-python{py_version}.pdb", # omitted dbgPostfix
+                "{build_dir}/pyside2/libpyside/pyside2.pdb",
+                "{dist_dir}/PySide2/pyside2.pdb", # omitted dbgPostfix
                 vars=vars)
 
     def update_rpath(self, package_path, executables):
