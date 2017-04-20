@@ -40,7 +40,6 @@
 #include "basewrapper.h"
 #include "basewrapper_p.h"
 #include "bindingmanager.h"
-#include "google/dense_hash_map"
 #include "sbkdbg.h"
 #include "gilstate.h"
 #include "sbkstring.h"
@@ -48,23 +47,23 @@
 
 #include <cstddef>
 #include <fstream>
+#include <unordered_map>
 
 namespace Shiboken
 {
 
-typedef google::dense_hash_map<const void*, SbkObject*> WrapperMap;
+typedef std::unordered_map<const void *, SbkObject *> WrapperMap;
 
 class Graph
 {
 public:
     typedef std::list<SbkObjectType*> NodeList;
-    typedef google::dense_hash_map<SbkObjectType*, NodeList> Edges;
+    typedef std::unordered_map<SbkObjectType *, NodeList> Edges;
 
     Edges m_edges;
 
     Graph()
     {
-        m_edges.set_empty_key(0);
     }
 
     void addEdge(SbkObjectType* from, SbkObjectType* to)
@@ -172,8 +171,6 @@ void BindingManager::BindingManagerPrivate::assignWrapper(SbkObject* wrapper, co
 BindingManager::BindingManager()
 {
     m_d = new BindingManager::BindingManagerPrivate;
-    m_d->wrapperMapper.set_empty_key((WrapperMap::key_type)0);
-    m_d->wrapperMapper.set_deleted_key((WrapperMap::key_type)1);
 
 #ifdef SHIBOKEN_INSTALL_FREE_DEBUG_HOOK
     debugInstallFreeHook();

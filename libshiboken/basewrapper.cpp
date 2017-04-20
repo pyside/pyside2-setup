@@ -505,7 +505,6 @@ void DeallocVisitor::done()
     DtorCallerVisitor::done();
 }
 
-namespace Module { void init(); }
 namespace Conversions { void init(); }
 
 void init()
@@ -514,7 +513,6 @@ void init()
     if (shibokenAlreadInitialised)
         return;
 
-    Module::init();
     Conversions::init();
 
     initTypeResolver();

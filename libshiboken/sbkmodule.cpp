@@ -40,17 +40,13 @@
 #include "sbkmodule.h"
 #include "basewrapper.h"
 #include "bindingmanager.h"
-
-// TODO: for performance reasons this should be a sparse_hash_map,
-// because there'll be very few modules as keys. The sparse_hash_map
-// is missing from the code added in ../ext/sparsehash/google directory.
-#include "google/dense_hash_map"
+#include <unordered_map>
 
 /// This hash maps module objects to arrays of Python types.
-typedef google::dense_hash_map<PyObject*, PyTypeObject**> ModuleTypesMap;
+typedef std::unordered_map<PyObject *, PyTypeObject **> ModuleTypesMap;
 
 /// This hash maps module objects to arrays of converters.
-typedef google::dense_hash_map<PyObject*, SbkConverter**> ModuleConvertersMap;
+typedef std::unordered_map<PyObject *, SbkConverter **> ModuleConvertersMap;
 
 /// All types produced in imported modules are mapped here.
 static ModuleTypesMap moduleTypes;
@@ -60,15 +56,6 @@ namespace Shiboken
 {
 namespace Module
 {
-
-void init()
-{
-    // Initializes type registry for modules.
-    moduleTypes.set_empty_key((ModuleTypesMap::key_type)0);
-    moduleTypes.set_deleted_key((ModuleTypesMap::key_type)1);
-    moduleConverters.set_empty_key((ModuleConvertersMap::key_type)0);
-    moduleConverters.set_deleted_key((ModuleConvertersMap::key_type)1);
-}
 
 PyObject* import(const char* moduleName)
 {

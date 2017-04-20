@@ -38,15 +38,15 @@
 ****************************************************************************/
 
 #include "typeresolver.h"
-#include "google/dense_hash_map"
 #include "sbkdbg.h"
 #include <cstdlib>
 #include <string>
+#include <unordered_map>
 #include "basewrapper_p.h"
 
 using namespace Shiboken;
 
-typedef google::dense_hash_map<std::string, TypeResolver*> TypeResolverMap;
+typedef std::unordered_map<std::string, TypeResolver *> TypeResolverMap;
 static TypeResolverMap typeResolverMap;
 
 struct TypeResolver::TypeResolverPrivate
@@ -66,8 +66,6 @@ static void deinitTypeResolver()
 void Shiboken::initTypeResolver()
 {
     assert(typeResolverMap.empty());
-    typeResolverMap.set_empty_key("");
-    typeResolverMap.set_deleted_key("?");
     std::atexit(deinitTypeResolver);
 }
 
