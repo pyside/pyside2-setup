@@ -259,11 +259,24 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
     if (hasMultipleInheritanceInAncestry(metaClass))
         s << "#include <set>" << endl;
 
-    s << "#include \"" << getModuleHeaderFileName() << '"' << endl << endl;
+    s << endl << "// module include" << endl << "#include \"" << getModuleHeaderFileName() << '"' << endl;
 
     QString headerfile = fileNameForContext(classContext);
     headerfile.replace(QLatin1String(".cpp"), QLatin1String(".h"));
-    s << "#include \"" << headerfile << '"' << endl;
+    s << endl << "// main header" << endl << "#include \"" << headerfile << '"' << endl;
+
+    // PYSIDE-500: Use also includes for inherited wrapper classes, because
+    // with the protected hack, we sometimes need to cast inherited wrappers.
+    s << endl << "// inherited wrapper classes" << endl;
+    AbstractMetaClass *basis = metaClass->baseClass();
+    for (; basis; basis = basis->baseClass()) {
+        GeneratorContext basisContext(basis);
+        QString headerfile = fileNameForContext(basisContext);
+        headerfile.replace(QLatin1String(".cpp"), QLatin1String(".h"));
+        s << "#include \"" << headerfile << '"' << endl;
+    }
+
+    s << endl << "// inner classes" << endl;
     const AbstractMetaClassList &innerClasses = metaClass->innerClasses();
     for (AbstractMetaClass *innerClass : innerClasses) {
         GeneratorContext innerClassContext(innerClass);
@@ -3171,11 +3184,18 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
                             if (func->isConstant()) {
                                 if (avoidProtectedHack()) {
                                     mc << "const_cast<const ::";
-                                    if (func->ownerClass()->hasProtectedMembers())
+                                    if (func->ownerClass()->hasProtectedMembers()) {
+                                        // PYSIDE-500: Need a special wrapper cast when inherited
+                                        const QString selfWrapCast = func->ownerClass() == func->implementingClass()
+                                            ? QLatin1String(CPP_SELF_VAR)
+                                            : QLatin1String("reinterpret_cast<") + wrapperName(func->ownerClass()) + QLatin1String(" *>(" CPP_SELF_VAR ")");
                                         mc << wrapperName(func->ownerClass());
-                                    else
+                                        mc << "*>(" << selfWrapCast << ")->";
+                                    }
+                                    else {
                                         mc << methodCallClassName;
-                                    mc <<  "*>(" << selfVarCast << ")->";
+                                        mc << "*>(" << selfVarCast << ")->";
+                                    }
                                 } else {
                                     mc << "const_cast<const ::" << methodCallClassName;
                                     mc <<  "*>(" << selfVarCast << ")->";

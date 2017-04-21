@@ -40,14 +40,15 @@
 #include "sbkconverter.h"
 #include "sbkconverter_p.h"
 #include "basewrapper_p.h"
-#include "google/dense_hash_map"
 #include "autodecref.h"
 #include "sbkdbg.h"
 #include "helper.h"
 
+#include <unordered_map>
+
 static SbkConverter** PrimitiveTypeConverters;
 
-typedef google::dense_hash_map<std::string, SbkConverter*> ConvertersMap;
+typedef std::unordered_map<std::string, SbkConverter *> ConvertersMap;
 static ConvertersMap converters;
 
 namespace Shiboken {
@@ -77,8 +78,6 @@ void init()
     PrimitiveTypeConverters = primitiveTypeConverters;
 
     assert(converters.empty());
-    converters.set_empty_key("");
-    converters.set_deleted_key("?");
     converters["PY_LONG_LONG"] = primitiveTypeConverters[SBK_PY_LONG_LONG_IDX];
     converters["bool"] = primitiveTypeConverters[SBK_BOOL_IDX_1];
     converters["char"] = primitiveTypeConverters[SBK_CHAR_IDX];
