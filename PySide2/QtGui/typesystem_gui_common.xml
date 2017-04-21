@@ -1462,6 +1462,7 @@
   <object-type name="QPagedPaintDevice">
     <value-type name="Margins" />
     <enum-type name="PageSize" />
+    <enum-type name="PdfVersion" since="5.10"/>
   </object-type>
   <object-type name="QAbstractTextDocumentLayout">
     <value-type name="PaintContext" >
@@ -3191,6 +3192,7 @@
   </object-type>
   <rejection class="QSurface" field-name="m_reserved"/>
   <value-type name="QSurfaceFormat">
+    <enum-type name="ColorSpace" since="5.10"/>
     <enum-type name="FormatOption" flags="FormatOptions"/>
     <enum-type name="OpenGLContextProfile"/>
     <enum-type name="RenderableType"/>
@@ -3254,6 +3256,7 @@
   </object-type>
   <object-type name="QOpenGLFramebufferObject">
     <enum-type name="Attachment" />
+    <enum-type name="FramebufferRestorePolicy" since="5.7"/>
   </object-type>
   <object-type name="QOpenGLShader" >
     <enum-type name="ShaderTypeBit" flags="ShaderType" />

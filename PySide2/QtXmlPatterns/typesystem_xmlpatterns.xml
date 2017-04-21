@@ -66,17 +66,20 @@
     <object-type name="QXmlFormatter" />
     <value-type name="QXmlItem" />
     <value-type name="QXmlName">
+        <primitive-type name="NamespaceCode"/>
+        <primitive-type name="PrefixCode"/>
+        <primitive-type name="LocalNameCode"/>
         <!-- ### These methods aren't part of Qt public API -->
-        <modify-function signature="QXmlName(short, short, short)" remove="all" />
-        <modify-function signature="setNamespaceURI(short)" remove="all" />
+        <modify-function signature="QXmlName(QXmlName::NamespaceCode, QXmlName::LocalNameCode, QXmlName::PrefixCode)" remove="all"/>
+        <modify-function signature="setNamespaceURI(QXmlName::NamespaceCode)" remove="all" />
         <modify-function signature="localName()const" remove="all" />
         <modify-function signature="prefix()const" remove="all" />
         <modify-function signature="hasPrefix()const" remove="all" />
         <modify-function signature="hasNamespace()const" remove="all" />
         <modify-function signature="namespaceURI()const" remove="all" />
         <modify-function signature="isLexicallyEqual(const QXmlName&amp;)const" remove="all" />
-        <modify-function signature="setPrefix(short)" remove="all" />
-        <modify-function signature="setLocalName(short)" remove="all" />
+        <modify-function signature="setPrefix(QXmlName::PrefixCode)" remove="all" />
+        <modify-function signature="setLocalName(QXmlName::LocalNameCode)" remove="all" />
         <modify-function signature="code()const" remove="all" />
         <!-- ### -->
     </value-type>
@@ -100,7 +103,7 @@
         <modify-function signature="compareOrder(const QXmlNodeModelIndex &amp;)const" remove="all" />
         <modify-function signature="sendNamespaces(QAbstractXmlReceiver *)const" remove="all" />
         <modify-function signature="namespaceBindings()const" remove="all" />
-        <modify-function signature="namespaceForPrefix(short)const" remove="all" />
+        <modify-function signature="namespaceForPrefix(QXmlName::PrefixCode)const" remove="all" />
         <modify-function signature="stringValue()const" remove="all" />
         <modify-function signature="is(const QXmlNodeModelIndex &amp;)const" remove="all" />
         <modify-function signature="reset()" remove="all" />

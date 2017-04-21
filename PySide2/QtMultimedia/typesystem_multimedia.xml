@@ -47,7 +47,9 @@
   <namespace-type name="QAudio">
       <enum-type name="Error"/>
       <enum-type name="Mode"/>
+      <enum-type name="Role" since="5.6"/>
       <enum-type name="State"/>
+      <enum-type name="VolumeScale" since="5.8"/>
   </namespace-type>
 
   <value-type name="QVideoSurfaceFormat">
