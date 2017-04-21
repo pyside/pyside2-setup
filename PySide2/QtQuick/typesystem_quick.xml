@@ -118,6 +118,9 @@
     <!-- <object-type name="QSGFlatColorMaterial" /> -->
     <object-type name="QSGGeometry">
         <enum-type name="DataPattern" />
+        <enum-type name="AttributeType" since="5.8"/>
+        <enum-type name="DrawingMode" since="5.8"/>
+        <enum-type name="Type" since="5.8"/>
     </object-type>
     <value-type name="QSGGeometry::Attribute" />
     <value-type name="QSGGeometry::AttributeSet" />
@@ -149,6 +152,7 @@
         <enum-type name="TextureCoordinatesTransformFlag" flags="TextureCoordinatesTransformMode" />
     </object-type>
     <object-type name="QSGTexture">
+        <enum-type name="AnisotropyLevel" since="5.9"/>
         <enum-type name="Filtering" />
         <enum-type name="WrapMode" />
     </object-type>
