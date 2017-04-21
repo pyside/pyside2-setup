@@ -146,4 +146,9 @@
     </modify-function>
   </object-type>
 
+  <!-- For QtMultimediaWidgets -->
+  <object-type name="QMediaBindableInterface"/>
+  <object-type name="QMediaControl"/>
+  <object-type name="QMediaObject"/>
+
 </typesystem>
