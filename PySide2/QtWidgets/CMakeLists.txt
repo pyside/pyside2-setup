@@ -111,6 +111,7 @@ ${QtWidgets_GEN_DIR}/qitemdelegate_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qitemeditorcreatorbase_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qitemeditorfactory_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qkeyeventtransition_wrapper.cpp
+${QtWidgets_GEN_DIR}/qkeysequenceedit_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qlabel_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qlayout_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qlayoutitem_wrapper.cpp
@@ -126,6 +127,7 @@ ${QtWidgets_GEN_DIR}/qmenu_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qmenubar_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qmessagebox_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qmouseeventtransition_wrapper.cpp
+${QtWidgets_GEN_DIR}/qopenglwidget_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qpangesture_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qpinchgesture_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qplaintextdocumentlayout_wrapper.cpp
