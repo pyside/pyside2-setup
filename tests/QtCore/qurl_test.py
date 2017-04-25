@@ -67,6 +67,10 @@ class QUrlBasicConstructor(unittest.TestCase):
         self.assertEqual(url.toString(),
                         'ftp://john:abc123@www.google.com:8080/mail/view')
 
+    def testPath(self):
+        url = QUrl("http://qt-project.org/images/ban/pgs_front.jpg")
+        self.assertEqual(url.path(), "/images/ban/pgs_front.jpg")
+
 # PYSIDE-345: No bindings for QUrlQuery
 # class QueryItemsTest(unittest.TestCase):
 #     '''Test query item management'''
