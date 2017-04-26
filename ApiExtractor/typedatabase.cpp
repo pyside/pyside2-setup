@@ -383,14 +383,16 @@ bool TypeDatabase::isSuppressedWarning(const QString& s) const
 
 QString TypeDatabase::modifiedTypesystemFilepath(const QString& tsFile) const
 {
-    if (!QFile::exists(tsFile)) {
-        int idx = tsFile.lastIndexOf(QLatin1Char('/'));
-        QString fileName = idx >= 0 ? tsFile.right(tsFile.length() - idx - 1) : tsFile;
-        foreach (const QString &path, m_typesystemPaths) {
-            QString filepath(path + QLatin1Char('/') + fileName);
-            if (QFile::exists(filepath))
-                return filepath;
-        }
+    const QFileInfo tsFi(tsFile);
+    if (tsFi.isAbsolute()) // No point in further lookups
+        return tsFi.absoluteFilePath();
+    if (tsFi.isFile()) // Make path absolute
+        return tsFi.absoluteFilePath();
+    const QString fileName = tsFi.fileName();
+    foreach (const QString &path, m_typesystemPaths) {
+        const QFileInfo fi(path + QLatin1Char('/') + fileName);
+        if (fi.isFile())
+            return fi.absoluteFilePath();
     }
     return tsFile;
 }
@@ -401,13 +403,17 @@ bool TypeDatabase::parseFile(const QString &filename, bool generate)
     if (m_parsedTypesystemFiles.contains(filepath))
         return m_parsedTypesystemFiles[filepath];
 
+    m_parsedTypesystemFiles[filepath] = true; // Prevent recursion when including self.
+
     QFile file(filepath);
     if (!file.exists()) {
+        m_parsedTypesystemFiles[filepath] = false;
         qCWarning(lcShiboken).noquote().nospace()
             << "Can't find " << filename << ", typesystem paths: " << m_typesystemPaths.join(QLatin1String(", "));
         return false;
     }
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        m_parsedTypesystemFiles[filepath] = false;
         qCWarning(lcShiboken).noquote().nospace()
             << "Can't open " << QDir::toNativeSeparators(filename) << ": " << file.errorString();
         return false;
