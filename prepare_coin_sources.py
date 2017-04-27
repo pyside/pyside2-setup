@@ -109,7 +109,7 @@ def prepare_sources():
             os.chdir(module_dir)
             #Make sure  the branch exists, if not use dev
             _branch = SUBMODULE_BRANCH
-            git_list_branch_cmd = ["git", "branch", "--list", _branch]
+            git_list_branch_cmd = ["git", "ls-remote", "origin", "refs/heads/" + _branch]
             shell = (sys.platform == "win32")
             result = Popen(git_list_branch_cmd, stdout=PIPE, shell=shell)
             if len(result.communicate()[0].split())==0:
