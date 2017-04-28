@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2017 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of PySide2.
@@ -26,19 +26,34 @@
 ##
 #############################################################################
 
-from PySide2.QtCore import *
+'''Test cases for QtMultimediaWidgets'''
+
 import unittest
 
-class TestBugPYSIDE42 (unittest.TestCase):
+from helper import UsesQApplication
+from PySide2.QtMultimediaWidgets import QGraphicsVideoItem, QVideoWidget
+from PySide2.QtWidgets import QGraphicsScene, QGraphicsView, QVBoxLayout, QWidget
+from PySide2.QtCore import QTimer
 
-    def testIt(self):
-        obj1 = QFile()
-        obj2 = QObject()
-        hash1 = hash(obj1)
-        hash2 = hash(obj2)
+class MyWidget(QWidget):
+    def __init__(self):
+        QWidget.__init__(self)
 
-        self.assertNotEqual(hash1, hash2)
-        self.assertEqual(hash1, hash(obj1))
+        layout = QVBoxLayout(self)
+        layout.addWidget(QVideoWidget())
+
+        graphicsScene = QGraphicsScene()
+        graphicsView = QGraphicsView(graphicsScene)
+        graphicsScene.addItem(QGraphicsVideoItem())
+        layout.addWidget(graphicsView)
+
+class QMultimediaWidgetsTest(UsesQApplication):
+    def testMultimediaWidgets(self):
+        w = MyWidget()
+        w.show()
+
+        timer = QTimer.singleShot(100, self.app.quit)
+        self.app.exec_()
 
 if __name__ == '__main__':
     unittest.main()

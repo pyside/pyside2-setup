@@ -98,9 +98,8 @@ target_link_libraries(testbinding
                       ${Qt5Widgets_LIBRARIES}
                       ${SBK_PYTHON_LIBRARIES})
 
-add_dependencies(testbinding pyside2 QtCore QtGui QtWidgets libpyside pysidetest)
+add_dependencies(testbinding pyside2 QtCore libpyside pysidetest)
 
-PYSIDE_TEST(application_test.py)
 PYSIDE_TEST(decoratedslot_test.py)
 PYSIDE_TEST(delegatecreateseditor_test.py)
 PYSIDE_TEST(enum_test.py)

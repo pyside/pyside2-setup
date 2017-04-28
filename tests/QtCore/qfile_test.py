@@ -33,7 +33,7 @@ import tempfile
 import sys
 import py3kcompat as py3k
 
-from PySide2.QtCore import QFile, QIODevice
+from PySide2.QtCore import QDir, QFile, QIODevice, QSaveFile, QTemporaryDir
 
 class GetCharTest(unittest.TestCase):
     '''Test case for QIODevice.getChar in QFile'''
@@ -74,6 +74,15 @@ class GetCharTest(unittest.TestCase):
         finally:
             obj.unmap(memory)
             obj.close()
+
+    def testQSaveFile(self):
+        dir = QTemporaryDir(QDir.tempPath() + "/XXXXXX.dir")
+        self.assertTrue(dir.isValid())
+        saveFile = QSaveFile(dir.path() + "/test.dat")
+        self.assertTrue(saveFile.open(QIODevice.WriteOnly))
+        saveFile.write("Test")
+        self.assertTrue(saveFile.commit())
+        self.assertTrue(os.path.exists(QDir.toNativeSeparators(saveFile.fileName())))
 
 if __name__ == '__main__':
     unittest.main()

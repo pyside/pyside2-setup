@@ -1,6 +1,7 @@
 project(QtConcurrent)
 
 set(QtConcurrent_SRC
+${QtConcurrent_GEN_DIR}/qtconcurrent_wrapper.cpp
 # module is always needed
 ${QtConcurrent_GEN_DIR}/qtconcurrent_module_wrapper.cpp
 )

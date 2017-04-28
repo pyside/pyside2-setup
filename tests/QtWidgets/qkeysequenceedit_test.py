@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2017 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of PySide2.
@@ -26,19 +26,21 @@
 ##
 #############################################################################
 
-from PySide2.QtCore import *
+'''Test cases for QKeySequenceEdit.'''
+
 import unittest
+from PySide2.QtCore import QTimer
+from PySide2.QtWidgets import QKeySequenceEdit
 
-class TestBugPYSIDE42 (unittest.TestCase):
+from helper import UsesQApplication
 
-    def testIt(self):
-        obj1 = QFile()
-        obj2 = QObject()
-        hash1 = hash(obj1)
-        hash2 = hash(obj2)
+class QKeySequenceEditTest(UsesQApplication):
+    def testKeySequence(self):
+        keySequenceEdit = QKeySequenceEdit()
+        keySequenceEdit.show()
+        QTimer.singleShot(0, keySequenceEdit.close)
+        self.app.exec_()
+        print(keySequenceEdit.keySequence())
 
-        self.assertNotEqual(hash1, hash2)
-        self.assertEqual(hash1, hash(obj1))
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -111,6 +111,53 @@ class QueryItemsTest(unittest.TestCase):
             self.assertEqual(url.allQueryItemValues(key),
                           list(valid_data[:i+1]))
 
+    def testPath(self):
+        url = QUrl("http://qt-project.org/images/ban/pgs_front.jpg")
+        self.assertEqual(url.path(), "/images/ban/pgs_front.jpg")
+
+# PYSIDE-345: No bindings for QUrlQuery
+class QueryItemsTest(unittest.TestCase):
+    '''Test query item management'''
+
+    def testQueryItems(self):
+        url = QUrl('http://www.google.com/search?q=python&hl=en')
+        valid_data = [(('q'), ('python')), (('hl'), ('en'))]
+
+        self.assertEqual(sorted(QUrlQuery(url.query()).queryItems()), sorted(valid_data))
+
+    def testEncodedQueryItems(self):
+        url = QUrl('http://www.google.com/search?q=python&hl=en')
+        valid_data = [(('q'), ('python')), (('hl'), ('en'))]
+
+        self.assertEqual(sorted(QUrlQuery(url.query()).queryItems()), sorted(valid_data))
+
+    def testSetQueryItems(self):
+        urla = QUrl('http://www.google.com/search?q=python&hl=en')
+        urlb = QUrl('http://www.google.com/search')
+
+        urlb.setQuery(urla.query())
+
+        self.assertEqual(urla, urlb)
+
+    def testAddQueryItem(self):
+        url = QUrlQuery()
+        valid_data = [('hl', 'en'), ('user', 'konqui')]
+
+        url.addQueryItem(*valid_data[0])
+        self.assertEqual(url.queryItems()[0], valid_data[0])
+
+        url.addQueryItem(*valid_data[1])
+        self.assertEqual(sorted(url.queryItems()), sorted(valid_data))
+
+    def testAllQueryItemsValues(self):
+        url = QUrlQuery()
+        key = 'key'
+        valid_data = ['data', 'valid', 'test']
+
+        for i, data in enumerate(valid_data):
+            url.addQueryItem(key, data)
+            self.assertEqual(url.allQueryItemValues(key),
+                             list(valid_data[:i+1]))
 
 if __name__ == '__main__':
     unittest.main()

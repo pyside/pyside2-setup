@@ -13,6 +13,10 @@ ${QtMultimedia_GEN_DIR}/qaudioformat_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudioinput_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qaudiooutput_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qvideoframe_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qmediabindableinterface_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qmediacontrol_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qmediaobject_wrapper.cpp
+
 # module is always needed
 ${QtMultimedia_GEN_DIR}/qtmultimedia_module_wrapper.cpp
 )

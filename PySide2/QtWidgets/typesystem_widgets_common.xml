@@ -2828,6 +2828,7 @@
   </object-type>
   <object-type name="QSplitterHandle"/>
   <object-type name="QDial" />
+  <object-type name="QKeySequenceEdit"/>
   <object-type name="QLineEdit">
     <enum-type name="ActionPosition"/>
     <enum-type name="EchoMode"/>
@@ -2875,6 +2876,9 @@
   <object-type name="QLCDNumber">
       <enum-type name="Mode"/>
       <enum-type name="SegmentStyle"/>
+  </object-type>
+  <object-type name="QOpenGLWidget">
+      <enum-type name="UpdateBehavior"/>
   </object-type>
   <object-type name="QSplashScreen">
     <!-- Override QWidget.painter -->
