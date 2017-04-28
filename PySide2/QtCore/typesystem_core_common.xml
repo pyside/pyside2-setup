@@ -2330,6 +2330,7 @@
       <include file-name="QSize" location="global"/>
     </extra-includes>
   </object-type>
+  <value-type name="QUrlQuery" since="5.0" />
   <value-type name="QUrl" hash-function="PySide::hash">
     <!-- Qt5: lots of changes -->
     <enum-type name="ComponentFormattingOption" flags="ComponentFormattingOptions,FormattingOptions"/>

@@ -134,6 +134,7 @@ ${QtCore_GEN_DIR}/qtimer_wrapper.cpp
 ${QtCore_GEN_DIR}/qtimerevent_wrapper.cpp
 ${QtCore_GEN_DIR}/qtranslator_wrapper.cpp
 ${QtCore_GEN_DIR}/qurl_wrapper.cpp
+${QtCore_GEN_DIR}/qurlquery_wrapper.cpp
 ${QtCore_GEN_DIR}/qvariantanimation_wrapper.cpp
 ${QtCore_GEN_DIR}/qwaitcondition_wrapper.cpp
 ${QtCore_GEN_DIR}/qwritelocker_wrapper.cpp
