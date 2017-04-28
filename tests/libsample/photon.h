@@ -108,21 +108,23 @@ LIBSAMPLE_API int countValueDuplicators(const std::list<TemplateBase<DuplicatorT
 //
 // NOTE: For reasons that should be fairly obvious, this test unfortunately can
 //       only be "run" when building in C++11 mode.
-#if __cplusplus < 201103L
-#define noexcept
+#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1900)
+#  define PHOTON_NOEXCEPT noexcept
+#else
+#  define PHOTON_NOEXCEPT
 #endif
 class Pointer
 {
 public:
-    Pointer() noexcept : px(0) {}
+    Pointer() PHOTON_NOEXCEPT : px(0) {}
     Pointer(int* p) : px(p) {}
 
-    void reset() noexcept { Pointer().swap(*this); }
+    void reset() PHOTON_NOEXCEPT { Pointer().swap(*this); }
 
-    int* get() const noexcept { return px; }
+    int* get() const PHOTON_NOEXCEPT { return px; }
     int& operator*() const { return *px; }
 
-    void swap(Pointer& rhs) noexcept
+    void swap(Pointer& rhs) PHOTON_NOEXCEPT
     {
         int* tmp = px;
         px = rhs.px;
