@@ -33,6 +33,7 @@
 #include "dependency.h"
 #include "abstractmetalang_typedefs.h"
 #include "apiextractormacros.h"
+#include "header_paths.h"
 #include "typedatabase_typedefs.h"
 #include "typesystem_typedefs.h"
 #include <QStringList>
@@ -68,9 +69,9 @@ public:
     void setSilent(bool value);
     void addTypesystemSearchPath(const QString& path);
     void addTypesystemSearchPath(const QStringList& paths);
-    void addIncludePath(const QString& path);
-    void addIncludePath(const QStringList& paths);
-    QStringList includePaths() const { return m_includePaths; }
+    void addIncludePath(const HeaderPath& path);
+    void addIncludePath(const HeaderPaths& paths);
+    HeaderPaths includePaths() const { return m_includePaths; }
     void setLogDirectory(const QString& logDir);
     bool setApiVersion(const QString& package, const QString& version);
     void setDropTypeEntries(QString dropEntries);
@@ -95,7 +96,7 @@ public:
 private:
     QString m_typeSystemFileName;
     QString m_cppFileName;
-    QStringList m_includePaths;
+    HeaderPaths m_includePaths;
     AbstractMetaBuilder* m_builder;
     QString m_logDirectory;
 

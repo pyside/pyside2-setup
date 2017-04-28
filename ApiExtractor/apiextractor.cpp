@@ -79,12 +79,12 @@ void ApiExtractor::addTypesystemSearchPath(const QStringList& paths)
         addTypesystemSearchPath(path);
 }
 
-void ApiExtractor::addIncludePath(const QString& path)
+void ApiExtractor::addIncludePath(const HeaderPath& path)
 {
     m_includePaths << path;
 }
 
-void ApiExtractor::addIncludePath(const QStringList& paths)
+void ApiExtractor::addIncludePath(const HeaderPaths& paths)
 {
     m_includePaths << paths;
 }
@@ -271,8 +271,8 @@ bool ApiExtractor::run()
     m_builder->setGlobalHeader(m_cppFileName);
     QByteArrayList arguments;
     arguments.reserve(m_includePaths.size() + 1);
-    for (const QString &i : qAsConst(m_includePaths))
-        arguments.append(QByteArrayLiteral("-I") + QFile::encodeName(i));
+    for (const HeaderPath &headerPath : qAsConst(m_includePaths))
+        arguments.append(HeaderPath::includeOption(headerPath));
     arguments.append(QFile::encodeName(preprocessedCppFileName));
     qCDebug(lcShiboken) << __FUNCTION__ << arguments;
     const bool result = m_builder->build(arguments);

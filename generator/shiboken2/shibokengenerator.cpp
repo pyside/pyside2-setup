@@ -1647,6 +1647,17 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
     s << INDENT << "// End of code injection" << endl;
 }
 
+static QString msgWrongIndex(const char *varName, const QString &capture, const AbstractMetaFunction *func)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Wrong index for " << varName << " variable (" << capture << ") on ";
+    if (const AbstractMetaClass *c = func->implementingClass())
+        str << c->name() << "::";
+    str << func->signature();
+    return  result;
+}
+
 void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                                        const CodeSnipList& codeSnips,
                                        TypeSystem::CodeSnipPosition position,
@@ -1682,8 +1693,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             const QRegularExpressionMatch match = pyArgsRegexCheck.match(code);
             if (match.hasMatch()) {
                 qCWarning(lcShiboken).noquote().nospace()
-                    << "Wrong index for %PYARG variable (" << match.captured(1)
-                    << ") on " << func->signature();
+                    << msgWrongIndex("%PYARG", match.captured(1), func);
                 return;
             }
             code.replace(QLatin1String("%PYARG_1"), QLatin1String(PYTHON_ARG));
@@ -1711,8 +1721,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
     while (rit.hasNext()) {
         QRegularExpressionMatch match = rit.next();
         qCWarning(lcShiboken).noquote().nospace()
-                << "Wrong index for %ARG#_TYPE variable (" << match.captured(1)
-                << ") on " << func->signature();
+            << msgWrongIndex("%ARG#_TYPE", match.captured(1), func);
     }
 
     // Replace template variable for return variable name.

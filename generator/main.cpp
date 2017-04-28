@@ -156,6 +156,7 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
         return false;
 
     QStringList includePaths;
+    QStringList frameworkIncludePaths;
     QStringList typesystemPaths;
     QStringList apiVersions;
 
@@ -176,6 +177,8 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
 
         if (key == "include-path")
             includePaths << QDir::toNativeSeparators(value);
+        else if (key == "framework-include-path")
+            frameworkIncludePaths << QDir::toNativeSeparators(value);
         else if (key == "typesystem-path")
             typesystemPaths << QDir::toNativeSeparators(value);
         else if (key == "api-version")
@@ -190,6 +193,10 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
 
     if (!includePaths.isEmpty())
         args.insert(QLatin1String("include-paths"), includePaths.join(QLatin1String(PATH_SPLITTER)));
+
+    if (!frameworkIncludePaths.isEmpty())
+        args.insert(QLatin1String("framework-include-paths"),
+                    frameworkIncludePaths.join(QLatin1String(PATH_SPLITTER)));
 
     if (!typesystemPaths.isEmpty())
         args.insert(QLatin1String("typesystem-paths"), typesystemPaths.join(QLatin1String(PATH_SPLITTER)));
@@ -301,6 +308,8 @@ void printUsage()
                           QLatin1String("The directory where the generated files will be written"));
     generalOptions.insert(QLatin1String("include-paths=<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]"),
                           QLatin1String("Include paths used by the C++ parser"));
+    generalOptions.insert(QLatin1String("framework-include-paths=<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]"),
+                          QLatin1String("Framework include paths used by the C++ parser"));
     generalOptions.insert(QLatin1String("typesystem-paths=<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]"),
                           QLatin1String("Paths used when searching for typesystems"));
     generalOptions.insert(QLatin1String("documentation-only"),
@@ -460,8 +469,22 @@ int main(int argc, char *argv[])
         extractor.addTypesystemSearchPath(path.split(QLatin1String(PATH_SPLITTER)));
 
     path = argsHandler.removeArg(QLatin1String("include-paths"));
-    if (!path.isEmpty())
-        extractor.addIncludePath(path.split(QLatin1String(PATH_SPLITTER)));
+    if (!path.isEmpty()) {
+        const QStringList includePathListList = path.split(QLatin1String(PATH_SPLITTER));
+        for (const QString &s : qAsConst(includePathListList)) {
+            const bool isFramework = false;
+            extractor.addIncludePath(HeaderPath(s, isFramework));
+        }
+    }
+
+    path = argsHandler.removeArg(QLatin1String("framework-include-paths"));
+    if (!path.isEmpty()) {
+        const QStringList frameworkPathList = path.split(QLatin1String(PATH_SPLITTER));
+        const bool isFramework = true;
+        for (const QString &s : qAsConst(frameworkPathList)) {
+            extractor.addIncludePath(HeaderPath(s, isFramework));
+        }
+    }
 
     QString cppFileName = argsHandler.removeArg(QLatin1String("arg-1"));
     QString typeSystemFileName = argsHandler.removeArg(QLatin1String("arg-2"));
