@@ -825,6 +825,12 @@ class pyside_build(_build):
 
             if OPTION_OSX_SYSROOT:
                 cmake_cmd.append("-DCMAKE_OSX_SYSROOT={}".format(OPTION_OSX_SYSROOT))
+            else:
+                latest_sdk_path = run_process_output(['xcrun', '--show-sdk-path'])
+                if latest_sdk_path:
+                    latest_sdk_path = latest_sdk_path[0]
+                    cmake_cmd.append("-DCMAKE_OSX_SYSROOT={}".format(latest_sdk_path))
+
 
         if not OPTION_SKIP_CMAKE:
             log.info("Configuring module %s (%s)..." % (extension,  module_src_dir))
