@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "compilersupport.h"
+#include "header_paths.h"
 
 #include <QtCore/QDebug>
 #include <QtCore/QProcess>
@@ -76,21 +77,6 @@ static bool runProcess(const QString &program, const QStringList &arguments,
     return true;
 }
 
-class HeaderPath {
-public:
-    explicit HeaderPath(const QByteArray &p = QByteArray()) : path(p), isFramework(false) {}
-
-    QByteArray path;
-    bool isFramework; // macOS framework path
-};
-
-static QByteArray includeOption(const HeaderPath &p)
-{
-    return (p.isFramework ? QByteArrayLiteral("-F") : QByteArrayLiteral("-I")) + p.path;
-}
-
-typedef QList<HeaderPath> HeaderPaths;
-
 #if defined(Q_CC_GNU)
 
 static QByteArray frameworkPath() { return QByteArrayLiteral(" (framework directory)"); }
@@ -121,7 +107,7 @@ static HeaderPaths gppInternalIncludePaths(const QString &compiler)
             } else {
                 HeaderPath headerPath(line.trimmed());
                 if (headerPath.path.endsWith(frameworkPath())) {
-                    headerPath.isFramework = true;
+                    headerPath.m_isFramework = true;
                     headerPath.path.truncate(headerPath.path.size() - frameworkPath().size());
                 }
                 result.append(headerPath);
@@ -160,7 +146,9 @@ QByteArrayList emulatedCompilerOptions()
     const HeaderPaths headerPaths;
 #endif
     std::transform(headerPaths.cbegin(), headerPaths.cend(),
-                   std::back_inserter(result), includeOption);
+                   std::back_inserter(result), [](const HeaderPath &p) {
+                       return HeaderPath::includeOption(p, true);
+    });
     return result;
 }
 
