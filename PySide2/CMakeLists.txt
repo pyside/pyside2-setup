@@ -116,14 +116,6 @@ macro(skip_missing_classes sources)
         f.writelines(lines)
     removals = sorted(list(removals))
     print('Removals:', removals)
-    fix_header_fname = '${CMAKE_CURRENT_SOURCE_DIR}/fixup_headers.py'
-    if sys.platform == 'win32' and os.path.exists(fix_header_fname):
-        global target_dir
-        target_dir = '${${PROJECT_NAME}_GEN_DIR}'
-
-        with open(fix_header_fname) as f:
-            code = compile(f.read(), 'nebbich', 'exec')
-        exec(code, globals(), locals())
     ")
 endmacro()
 

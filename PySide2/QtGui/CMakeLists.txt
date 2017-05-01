@@ -193,11 +193,6 @@ set(QtGui_libraries   pyside2
                       ${Qt5Gui_LIBRARIES})
 set(QtGui_deps QtCore)
 
-if(WIN32)
-    # has a fix for VS2015
-    skip_missing_classes(QtGui_SRC)
-endif()
-
 create_pyside_module(QtGui
                      QtGui_include_dirs
                      QtGui_libraries

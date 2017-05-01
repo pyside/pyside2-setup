@@ -299,7 +299,14 @@ if (NOT SITE_PACKAGE)
     endif()
 endif()
 
-set(GENERATOR_EXTRA_FLAGS --generator-set=shiboken --enable-parent-ctor-heuristic --enable-pyside-extensions --enable-return-value-heuristic --use-isnull-as-nb_nonzero)
+set(GENERATOR_EXTRA_FLAGS --generator-set=shiboken
+                          --enable-parent-ctor-heuristic
+                          --enable-pyside-extensions
+                          --enable-return-value-heuristic
+                          --use-isnull-as-nb_nonzero)
+# 2017-04-24 The protected hack can unfortunately not be disabled, because
+# Clang does produce linker errors when we disable the hack.
+# But the ugly workaround in Python is replaced by a shiboken change.
 if(WIN32 OR DEFINED AVOID_PROTECTED_HACK)
     message(STATUS "PySide2 will be generated avoiding the protected hack!")
     set(GENERATOR_EXTRA_FLAGS ${GENERATOR_EXTRA_FLAGS} --avoid-protected-hack)

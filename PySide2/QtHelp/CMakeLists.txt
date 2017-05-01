@@ -42,11 +42,6 @@ set(QtHelp_libraries  pyside2
 
 set(QtHelp_deps QtWidgets)
 
-if(WIN32)
-    # has a fix for VS2015
-    skip_missing_classes(QtHelp_SRC)
-endif()
-
 create_pyside_module(QtHelp
                      QtHelp_include_dirs
                      QtHelp_libraries
