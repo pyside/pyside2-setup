@@ -104,7 +104,7 @@ if (UNIX AND NOT APPLE)
 endif ()
 
 find_package(Shiboken2 2.0.0 REQUIRED)
-find_package(Qt5 5.3.0 REQUIRED COMPONENTS Core) 
+find_package(Qt5 5.6.0 REQUIRED COMPONENTS Core)
 add_definitions(${Qt5Core_DEFINITIONS})
 
 find_file(GL_H "gl.h" PATH_SUFFIXES "GL")
@@ -186,38 +186,6 @@ if (BINDING_API_RELEASE_LEVEL STREQUAL "final")
 else()
     set(BINDING_API_VERSION_FULL "${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION}.${BINDING_API_MICRO_VERSION}~${BINDING_API_RELEASE_LEVEL}${BINDING_API_SERIAL}"
         CACHE STRING "PySide version [full]" FORCE)
-endif()
-
-find_package(Qt5Core)
-find_package(Qt5Concurrent) # new in Qt5, from QtCore
-find_package(Qt5Gui)        # reduced, small version without widgets
-find_package(Qt5Widgets)    # widgets in their separate module
-find_package(Qt5PrintSupport)
-find_package(Qt5Xml)
-find_package(Qt5XmlPatterns)
-find_package(Qt5Svg)
-find_package(Qt5Sql)
-find_package(Qt5Designer)
-find_package(Qt5UiTools)
-find_package(Qt5Test)
-find_package(Qt5Network)
-find_package(Qt5WebKit)
-find_package(Qt5WebKitWidgets)
-find_package(Qt5OpenGL)
-find_package(Qt5Script)
-find_package(Qt5ScriptTools)
-find_package(Qt5Help)
-find_package(Qt5Multimedia)
-find_package(Qt5Quick)
-find_package(Qt5Qml)
-find_package(Qt5QuickWidgets)
-find_package(Qt5WebChannel)
-find_package(Qt5WebEngine)
-find_package(Qt5WebEngineWidgets)
-find_package(Qt5WebSockets)
-
-if(UNIX AND NOT APPLE)
-  find_package(Qt5X11Extras) # new in Qt5, from QtGui
 endif()
 
 string(REGEX MATCHALL "[0-9]+" qt_version_helper "${Qt5Core_VERSION}")
@@ -316,9 +284,12 @@ else()
 endif()
 
 add_subdirectory(libpyside)
+find_package(Qt5UiTools)
+find_package(Qt5Designer)
 if(Qt5UiTools_FOUND AND Qt5Designer_FOUND)
     add_subdirectory(plugins)
 endif()
+
 # project directories
 add_subdirectory(PySide2)
 if (BUILD_TESTS)

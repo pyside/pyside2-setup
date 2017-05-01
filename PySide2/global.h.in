@@ -384,97 +384,45 @@ QT_END_NAMESPACE
 #define QT_NO_DEBUG
 
 #include <QtCore/QtCore>
-#include <QtConcurrent/QtConcurrent>
 #if @ENABLE_MAC@ || @ENABLE_WIN@ || @ENABLE_X11@
   // Workaround to parse the QApplication header
   #define Q_INTERNAL_QAPP_SRC
   #undef Q_QDOC
 #endif
-#include <QtGui/QtGui>
-#include <QtWidgets/QtWidgets>
+#if @Qt5Gui_FOUND@
+#  include <QtGui/QtGui>
+#endif
+#if @Qt5Widgets_FOUND@
+#  include <QtWidgets/QtWidgets>
+#endif
 #ifndef Q_QDOC
 // Make sure that Q_QDOC is defined for as much modules as possible.
 // This creates more wrappers without extra work.
 // Will disappear when we have a really good parser!
 #  define Q_QDOC
 #endif
-#include <QtOpenGL/QtOpenGL>
+
 #include "qpytextobject.h"  // PySide class
+
 #if @ENABLE_X11@
-#if @Qt5X11Extras_FOUND@
-#include <QtX11Extras/QX11Info>
-#endif
+#  if @Qt5X11Extras_FOUND@
+#    include <QtX11Extras/QX11Info>
+#  endif
 #elif @ENABLE_MAC@
-  #include <QtGui/qmacstyle_mac.h>
+#  include <QtGui/qmacstyle_mac.h>
 #endif
-#include <QtXml/QtXml>
-#include <QtXmlPatterns/QtXmlPatterns>
-#include <QtUiTools/QtUiTools>
-#include <QtNetwork/QtNetwork>
-#include <QtScript/QtScript>
-#include <QtScriptTools/QtScriptTools>
-#include <QtMultimedia/QtMultimedia>
-#include <QtPrintSupport/QtPrintSupport>
 
 // QT_WIDGETS_LIB must be defined to QSqlRelationalDelegate become visible.
 // It also changes code generation in pysideqtesttouch.h
 #define QT_WIDGETS_LIB
 #undef Q_DECLARE_INTERFACE
-#include <QtSql/QtSql>
-#include <QtSvg/QtSvg>
-#if @Qt5WebKit_FOUND@
-#  include <QtWebKit/QtWebKit>
-#endif
-
-#if @Qt5WebKitWidgets_FOUND@
-#  include <QtWebKitWidgets/QtWebKitWidgets>
-#endif
 
 #if @Qt5Test_FOUND@
-#  include <QtTest/qtest_gui.h>
 #  include "pysideqtesttouch.h"
 #endif
 
-#if @Qt5Quick_FOUND@
-#  include <QtQuick/QtQuick>
-#endif
-
-#if @Qt5Qml_FOUND@
-#  include <QtQml/QtQml>
-#endif
-
-#if @Qt5QuickWidgets_FOUND@
-#  include <QtQuickWidgets/QtQuickWidgets>
-#endif
-
-#if @Qt5WebEngineWidgets_FOUND@
-#  include <QtWebEngineWidgets/QtWebEngineWidgets>
-#endif
-
-#if @Qt5MultimediaWidgets_FOUND@
-#  include <QtMultimediaWidgets/QtMultimediaWidgets>
-#endif
-
-#if @Qt5WebChannel_FOUND@
-#  include <QtWebChannel/QtWebChannel>
-#endif
-
-#if @Qt5WebSockets_FOUND@
-#  include <QtWebSockets/QtWebSockets>
-#endif
-
-#if @Qt5WinExtras_FOUND@
-#  include <QtWinExtras/QtWinExtras>
-#endif
-
-#if @Qt5MacExtras_FOUND@
-#  include <QtMacExtras/QtMacExtras>
-#endif
-
-//QtHelp needs to be included after QtSql. Why?
-#include <QtHelp/QtHelp>
-
 #ifndef QT_NO_OPENGL
-#include <@GL_H@>
-#include <QtOpenGL/QtOpenGL>
+#  include <@GL_H@>
 #endif // QT_NO_OPENGL
+
+// Here are now all configured modules appended:
