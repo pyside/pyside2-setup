@@ -1939,6 +1939,7 @@
         </inject-code>
     </add-function>
   </value-type>
+  <value-type name="QStorageInfo"/>
   <!-- QReadWriteLock does not have a copy ctor! -->
   <object-type name="QReadWriteLock">
     <enum-type name="RecursionMode"/>
@@ -2827,6 +2828,7 @@
     <modify-function signature="rename(const QString&amp;)" allow-thread="yes"/>
     <modify-function signature="rename(const QString&amp;, const QString&amp;)" allow-thread="yes"/>
   </object-type>
+  <object-type name="QSaveFile"/>
   <object-type name="QFileSelector" />
 
   <object-type name="QIODevice">
@@ -2987,6 +2989,7 @@
     </extra-includes>
     <modify-function signature="createLocalFile(const QString&amp;)" allow-thread="yes"/>
   </object-type>
+  <object-type name="QTemporaryDir"/>
   <object-type name="QMimeData">
     <extra-includes>
       <include file-name="QStringList" location="global"/>

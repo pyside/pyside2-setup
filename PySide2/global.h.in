@@ -106,6 +106,10 @@
 #  include <QtWebEngineWidgets/QtWebEngineWidgets>
 #endif
 
+#if @Qt5MultimediaWidgets_FOUND@
+#  include <QtMultimediaWidgets/QtMultimediaWidgets>
+#endif
+
 #if @Qt5WebChannel_FOUND@
 #  include <QtWebChannel/QtWebChannel>
 #endif

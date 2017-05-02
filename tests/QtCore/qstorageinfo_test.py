@@ -1,6 +1,8 @@
+#!/usr/bin/python
+
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2017 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of PySide2.
@@ -26,19 +28,16 @@
 ##
 #############################################################################
 
-from PySide2.QtCore import *
+'''Unit tests for QStorageInfo'''
+
 import unittest
 
-class TestBugPYSIDE42 (unittest.TestCase):
+from PySide2.QtCore import QStorageInfo
 
-    def testIt(self):
-        obj1 = QFile()
-        obj2 = QObject()
-        hash1 = hash(obj1)
-        hash2 = hash(obj2)
-
-        self.assertNotEqual(hash1, hash2)
-        self.assertEqual(hash1, hash(obj1))
+class QandardPathsTest(unittest.TestCase):
+    def testQStorageInfo(self):
+        for v in QStorageInfo.mountedVolumes():
+            print(v.name(), v.rootPath(), v.device())
 
 if __name__ == '__main__':
     unittest.main()

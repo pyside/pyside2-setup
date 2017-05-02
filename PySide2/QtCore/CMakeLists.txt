@@ -101,6 +101,7 @@ ${QtCore_GEN_DIR}/qrectf_wrapper.cpp
 ${QtCore_GEN_DIR}/qregexp_wrapper.cpp
 ${QtCore_GEN_DIR}/qresource_wrapper.cpp
 ${QtCore_GEN_DIR}/qrunnable_wrapper.cpp
+${QtCore_GEN_DIR}/qsavefile_wrapper.cpp
 ${QtCore_GEN_DIR}/qsemaphore_wrapper.cpp
 ${QtCore_GEN_DIR}/qsequentialanimationgroup_wrapper.cpp
 ${QtCore_GEN_DIR}/qsettings_wrapper.cpp
@@ -115,9 +116,11 @@ ${QtCore_GEN_DIR}/qstandardpaths_wrapper.cpp
 ${QtCore_GEN_DIR}/qstatemachine_signalevent_wrapper.cpp
 ${QtCore_GEN_DIR}/qstatemachine_wrappedevent_wrapper.cpp
 ${QtCore_GEN_DIR}/qstatemachine_wrapper.cpp
+${QtCore_GEN_DIR}/qstorageinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qsysinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qsystemsemaphore_wrapper.cpp
 ${QtCore_GEN_DIR}/qt_wrapper.cpp
+${QtCore_GEN_DIR}/qtemporarydir_wrapper.cpp
 ${QtCore_GEN_DIR}/qtemporaryfile_wrapper.cpp
 ${QtCore_GEN_DIR}/qtextboundaryfinder_wrapper.cpp
 ${QtCore_GEN_DIR}/qtextcodec_converterstate_wrapper.cpp
