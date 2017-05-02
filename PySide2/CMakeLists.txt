@@ -35,6 +35,10 @@ if(UNIX AND NOT APPLE)
   find_package(Qt5X11Extras)
 endif()
 
+if(WIN32)
+  find_package(Qt5WinExtras)
+endif()
+
 # Configure include based on platform
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/global.h.in"
                "${CMAKE_CURRENT_BINARY_DIR}/pyside2_global.h" @ONLY)
@@ -150,6 +154,10 @@ if(UNIX AND NOT APPLE)
   CHECK_PACKAGE_FOUND(Qt5X11Extras opt)
 endif()
 
+if(WIN32)
+  CHECK_PACKAGE_FOUND(Qt5WinExtras opt)
+endif()
+
 # note: the order of this list is relevant for dependencies.
 # For instance: Qt5Printsupport must come before Qt5WebKitWidgets
 HAS_QT_MODULE(Qt5Core_FOUND QtCore)
@@ -210,6 +218,10 @@ HAS_QT_MODULE(Qt5WebSockets_FOUND QtWebSockets)
 
 if(UNIX AND NOT APPLE)
     has_qt_module(Qt5X11Extras_FOUND QtX11Extras)
+endif()
+
+if(WIN32)
+    has_qt_module(Qt5WinExtras_FOUND QtWinExtras)
 endif()
 
 # install

@@ -463,6 +463,10 @@ QT_END_NAMESPACE
 #  include <QtWebSockets/QtWebSockets>
 #endif
 
+#if @Qt5WinExtras_FOUND@
+#  include <QtWinExtras/QtWinExtras>
+#endif
+
 //QtHelp needs to be included after QtSql. Why?
 #include <QtHelp/QtHelp>
 
