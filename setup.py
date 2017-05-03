@@ -574,6 +574,8 @@ class pyside_build(_build):
             else: # Python 2
                 lib_suff = ''
             lib_exts.append('.so.1')
+            # Suffix for OpenSuSE 13.01
+            lib_exts.append('.so.1.0')
             lib_exts.append('.a') # static library as last gasp
 
             if sys.version_info[0] == 2 and dbgPostfix:
