@@ -467,6 +467,10 @@ QT_END_NAMESPACE
 #  include <QtWinExtras/QtWinExtras>
 #endif
 
+#if @Qt5MacExtras_FOUND@
+#  include <QtMacExtras/QtMacExtras>
+#endif
+
 //QtHelp needs to be included after QtSql. Why?
 #include <QtHelp/QtHelp>
 

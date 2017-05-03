@@ -86,6 +86,10 @@ else()
         TEST_QT_MODULE(Qt5WinExtras_FOUND QtWinExtras)
     endif()
 
+    if(APPLE)
+        TEST_QT_MODULE(Qt5MacExtras_FOUND QtMacExtras)
+    endif()
+
     #platform specific
     if (ENABLE_MAC)
         add_subdirectory(mac)

@@ -39,6 +39,10 @@ if(WIN32)
   find_package(Qt5WinExtras)
 endif()
 
+if(APPLE)
+  find_package(Qt5MacExtras)
+endif()
+
 # Configure include based on platform
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/global.h.in"
                "${CMAKE_CURRENT_BINARY_DIR}/pyside2_global.h" @ONLY)
@@ -158,6 +162,10 @@ if(WIN32)
   CHECK_PACKAGE_FOUND(Qt5WinExtras opt)
 endif()
 
+if(APPLE)
+  CHECK_PACKAGE_FOUND(Qt5MacExtras opt)
+endif()
+
 # note: the order of this list is relevant for dependencies.
 # For instance: Qt5Printsupport must come before Qt5WebKitWidgets
 HAS_QT_MODULE(Qt5Core_FOUND QtCore)
@@ -222,6 +230,10 @@ endif()
 
 if(WIN32)
     has_qt_module(Qt5WinExtras_FOUND QtWinExtras)
+endif()
+
+if(APPLE)
+    has_qt_module(Qt5MacExtras_FOUND QtMacExtras)
 endif()
 
 # install
