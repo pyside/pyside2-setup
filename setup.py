@@ -585,33 +585,55 @@ class pyside_build(_build):
                 # be built with a non-debug Python.
                 lib_exts = [dbgPostfix + e for e in lib_exts] + lib_exts
 
+            python_library_found = False
             libs_tried = []
             for lib_ext in lib_exts:
                 lib_name = "libpython%s%s%s" % (py_version, lib_suff, lib_ext)
                 py_library = os.path.join(py_libdir, lib_name)
                 if os.path.exists(py_library):
+                    python_library_found = True
                     break
                 libs_tried.append(py_library)
             else:
-                py_multiarch = get_config_var("MULTIARCH")
-                if py_multiarch:
-                    try_py_libdir = os.path.join(py_libdir, py_multiarch)
-                    libs_tried = []
-                    for lib_ext in lib_exts:
-                        lib_name = "libpython%s%s%s" % (py_version, lib_suff, lib_ext)
-                        py_library = os.path.join(try_py_libdir, lib_name)
-                        if os.path.exists(py_library):
-                            py_libdir = try_py_libdir
-                            break
-                        libs_tried.append(py_library)
+                # At least on macOS 10.11, the system Python 2.6 does not include a symlink
+                # to the framework file disguised as a .dylib file, thus finding the library would
+                # fail. Manually check if a framework file "Python" exists in the Python framework
+                # bundle.
+                if sys.platform == 'darwin' and sys.version_info[:2] == (2, 6):
+                    # These manipulations essentially transform
+                    # /System/Library/Frameworks/Python.framework/Versions/2.6/lib
+                    # to /System/Library/Frameworks/Python.framework/Versions/2.6/Python
+                    possible_framework_path = os.path.realpath(os.path.join(py_libdir, '..'))
+                    possible_framework_version = os.path.basename(possible_framework_path)
+                    possible_framework_library = os.path.join(possible_framework_path, 'Python')
+
+                    if possible_framework_version == '2.6' \
+                        and os.path.exists(possible_framework_library):
+                            py_library = possible_framework_library
+                            python_library_found = True
                     else:
-                        raise DistutilsSetupError(
-                            "Failed to locate the Python library with %s" %
-                            ', '.join(libs_tried))
-                else:
-                    raise DistutilsSetupError(
-                        "Failed to locate the Python library with %s" %
-                        ', '.join(libs_tried))
+                        libs_tried.append(possible_framework_library)
+
+                # Try to find shared libraries which have a multi arch suffix.
+                if not python_library_found:
+                    py_multiarch = get_config_var("MULTIARCH")
+                    if py_multiarch and not python_library_found:
+                        try_py_libdir = os.path.join(py_libdir, py_multiarch)
+                        libs_tried = []
+                        for lib_ext in lib_exts:
+                            lib_name = "libpython%s%s%s" % (py_version, lib_suff, lib_ext)
+                            py_library = os.path.join(try_py_libdir, lib_name)
+                            if os.path.exists(py_library):
+                                py_libdir = try_py_libdir
+                                python_library_found = True
+                                break
+                            libs_tried.append(py_library)
+
+            if not python_library_found:
+                raise DistutilsSetupError(
+                    "Failed to locate the Python library with %s" %
+                    ', '.join(libs_tried))
+
             if py_library.endswith('.a'):
                 # Python was compiled as a static library
                 log.error("Failed to locate a dynamic Python library, using %s"
