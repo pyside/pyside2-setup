@@ -11,11 +11,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Macros/
 option(USE_PYTHON_VERSION "Use specific python version to build pyside2." "")
 
 if (USE_PYTHON_VERSION)
-    find_package(PythonLibs ${USE_PYTHON_VERSION} REQUIRED)
     find_package(PythonInterp ${USE_PYTHON_VERSION} REQUIRED)
+    find_package(PythonLibs ${USE_PYTHON_VERSION} REQUIRED)
 else()
-    find_package(PythonLibs 2.6)
     find_package(PythonInterp 2.6)
+    find_package(PythonLibs 2.6)
 endif()
 
 # Queries the python sysconfig for the abi flags which need to be inserted into extension suffixes.
