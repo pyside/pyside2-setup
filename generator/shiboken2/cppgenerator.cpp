@@ -4960,7 +4960,7 @@ void CppGenerator::writeTypeDiscoveryFunction(QTextStream& s, const AbstractMeta
 }
 
 QString CppGenerator::writeSmartPointerGetterCast() {
-    return QStringLiteral("const_cast<char *>(" SMART_POINTER_GETTER ")");
+    return QLatin1String("const_cast<char *>(" SMART_POINTER_GETTER ")");
 }
 
 void CppGenerator::writeSetattroFunction(QTextStream &s, GeneratorContext &context)
