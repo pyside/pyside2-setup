@@ -71,6 +71,15 @@
 #endif
 
 #ifndef QT_NO_OPENGL
+// Define export macros for Windows' gl.h
+#  ifdef Q_OS_WIN
+#    ifndef APIENTRY
+#      define APIENTRY
+#    endif
+#    ifndef WINGDIAPI
+#      define WINGDIAPI
+#    endif
+#  endif // Q_OS_WIN
 #  include <@GL_H@>
 #endif // QT_NO_OPENGL
 
