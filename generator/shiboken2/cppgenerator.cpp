@@ -688,7 +688,11 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
         if (defaultReturnExpr.isEmpty())
             defaultReturnExpr = minimalConstructor(func->type());
         if (defaultReturnExpr.isEmpty()) {
-            QString errorMsg = QString::fromLatin1(MIN_CTOR_ERROR_MSG).arg(func->type()->cppSignature());
+            QString errorMsg = QLatin1String(__FUNCTION__) + QLatin1String(": ");
+            if (const AbstractMetaClass *c = func->implementingClass())
+                errorMsg += c->qualifiedCppName() + QLatin1String("::");
+            errorMsg += func->signature();
+            errorMsg = ShibokenGenerator::msgCouldNotFindMinimalConstructor(errorMsg, func->type()->cppSignature());
             qCWarning(lcShiboken).noquote().nospace() << errorMsg;
             s << endl << INDENT << "#error " << errorMsg << endl;
         }
