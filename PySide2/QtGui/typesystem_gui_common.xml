@@ -3300,6 +3300,9 @@
   <value-type name="QRawFont">
       <enum-type name="AntialiasingType"/>
       <enum-type name="LayoutFlag" flags="LayoutFlags"/>
+      <modify-function signature="advancesForGlyphIndexes(const quint32*,QPointF*,int)const" remove="all"/>
+      <modify-function signature="advancesForGlyphIndexes(const quint32*,QPointF*,int,QFlags&lt;QRawFont::LayoutFlag&gt;)const" remove="all"/>
+      <modify-function signature="glyphIndexesForChars(const QChar*,int,quint32*,int*)const" remove="all"/>
   </value-type>
   <object-type name="QRasterWindow"/>
   <object-type name="QScreen" />
