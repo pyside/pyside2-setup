@@ -64,6 +64,36 @@ QString getClassTargetFullName(const AbstractMetaEnum* metaEnum, bool includePac
 QString getClassTargetFullName(const AbstractMetaType *metaType, bool includePackageName = true);
 QString getFilteredCppSignatureString(QString signature);
 
+/**
+ * PYSIDE-504: Handling the "protected hack"
+ *
+ * The problem: Creating wrappers when the class has private destructors.
+ * You can see an example on Windows in qclipboard_wrapper.h and others.
+ * Simply search for the text "// C++11: need to declare (unimplemented) destructor".
+ *
+ * The protected hack is the definition "#define protected public".
+ * For most compilers, this "hack" is enabled, because the problem of private
+ * destructors simply vanishes.
+ *
+ * If one does not want to use this hack, then a new problem arises:
+ * C++11 requires that a destructor is declared in a wrapper class when it is
+ * private in the base class. There is no implementation allowed!
+ *
+ * Unfortunately, MSVC in recent versions supports C++11, and due to restrictive
+ * rules, it is impossible to use the hack with this compiler.
+ * More unfortunate: Clang, when C++11 is enabled, also enforces a declaration
+ * of a private destructor, but it falsely then creates a linker error!
+ *
+ * Originally, we wanted to remove the protected hack. But due to the Clang
+ * problem, we gave up on removal of the protected hack and use it always
+ * when we can. This might change again when the Clang problem is solved.
+ */
+
+#ifdef Q_CC_MSVC
+const int alwaysGenerateDestructor = 1;
+#else
+const int alwaysGenerateDestructor = 0;
+#endif
 
 /**
  * A GeneratorContext object contains a pointer to an AbstractMetaClass and/or a specialized

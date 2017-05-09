@@ -149,11 +149,16 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
         }
 
         //destructor
-        if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor()) {
+        // PYSIDE-504: When C++ 11 is used, then the destructor must always be written.
+        // See generator.h for further reference.
+        if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor() || alwaysGenerateDestructor) {
             s << INDENT;
+            if (avoidProtectedHack() && metaClass->hasPrivateDestructor())
+                s << "// C++11: need to declare (unimplemented) destructor because "
+                     "the base class destructor is private." << endl;
             if (metaClass->hasVirtualDestructor() || hasVirtualFunction)
                 s <<  "virtual ";
-            s << "~" << wrapperName << "();" << endl;
+            s << '~' << wrapperName << "();" << endl;
         }
 
         writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), TypeSystem::CodeSnipPositionDeclaration, TypeSystem::NativeCode);
