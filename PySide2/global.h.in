@@ -54,22 +54,12 @@
 // Make "signals:", "slots:" visible as access specifiers
 #define QT_ANNOTATE_ACCESS_SPECIFIER(a) __attribute__((annotate(#a)))
 
-#include <QtCore/QtCore>
-#if @Qt5Gui_FOUND@
-#  include <QtGui/QtGui>
-#endif
-#if @Qt5Widgets_FOUND@
-#  include <QtWidgets/QtWidgets>
-#endif
-
 #include "qpytextobject.h"  // PySide class
 
 #if @ENABLE_X11@
 #  if @Qt5X11Extras_FOUND@
 #    include <QtX11Extras/QX11Info>
 #  endif
-#elif @ENABLE_MAC@
-#  include <QtGui/qmacstyle_mac.h>
 #endif
 
 // QT_WIDGETS_LIB must be defined to QSqlRelationalDelegate become visible.
