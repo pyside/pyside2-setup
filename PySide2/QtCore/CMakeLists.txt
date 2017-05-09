@@ -71,6 +71,7 @@ ${QtCore_GEN_DIR}/qline_wrapper.cpp
 ${QtCore_GEN_DIR}/qlinef_wrapper.cpp
 ${QtCore_GEN_DIR}/qlocale_wrapper.cpp
 ${QtCore_GEN_DIR}/qmargins_wrapper.cpp
+${QtCore_GEN_DIR}/qmarginsf_wrapper.cpp
 ${QtCore_GEN_DIR}/qmessagelogcontext_wrapper.cpp
 ${QtCore_GEN_DIR}/qmetaclassinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qmetaenum_wrapper.cpp

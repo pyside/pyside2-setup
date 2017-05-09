@@ -105,6 +105,10 @@
 
   <rejection class="QAccessibleEvent" field-name="m_type"/>
 
+  <rejection class="QEnterEvent" field-name="l"/>
+  <rejection class="QEnterEvent" field-name="w"/>
+  <rejection class="QEnterEvent" field-name="s"/>
+
   <rejection class="QInputEvent" field-name="modState"/>
   <rejection class="QInputEvent" field-name="modState"/>
 
@@ -291,6 +295,9 @@
     </add-function>
   </value-type>
 
+  <value-type name="QStaticText">
+      <enum-type name="PerformanceHint"/>
+  </value-type>
   <value-type name="QTextFragment" />
   <value-type name="QBitmap" >
     <modify-function signature="fromData(QSize,const uchar*,QImage::Format)">
@@ -1738,6 +1745,7 @@
       </modify-argument>
     </modify-function>
   </object-type>
+  <object-type name="QEnterEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::Enter"/>
   <object-type name="QExposeEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::Expose" />
   <object-type name="QFileOpenEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::FileOpen" />
   <object-type name="QFocusEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::FocusIn || %1-&gt;type() == QEvent::FocusOut" />
@@ -3186,6 +3194,7 @@
   <suppress-warning text="enum 'QCoreApplication::ApplicationFlags' is specified in typesystem, but not declared" />
 
   <!-- Qt5: here the new QWindow stuff and what it pulls in -->
+  <object-type name="QBackingStore"/>
   <object-type name="QSurface">
     <enum-type name="SurfaceClass"/>
     <enum-type name="SurfaceType"/>
@@ -3267,7 +3276,37 @@
        typesystem.
   <object-type name="QOpenGLShaderProgram" />
   -->
+  <value-type name="QPageLayout">
+      <enum-type name="Mode"/>
+      <enum-type name="Orientation"/>
+      <enum-type name="Unit"/>
+  </value-type>
+  <value-type name="QPageSize">
+      <enum-type name="PageSizeId"/>
+      <enum-type name="Unit"/>
+      <enum-type name="SizeMatchPolicy"/>
+  </value-type>
+  <object-type name="QPaintDeviceWindow"/>
+  <value-type name="QPixelFormat">
+      <enum-type name="AlphaUsage"/>
+      <enum-type name="AlphaPosition"/>
+      <enum-type name="AlphaPremultiplied"/>
+      <enum-type name="ByteOrder"/>
+      <enum-type name="ColorModel"/>
+      <enum-type name="TypeInterpretation"/>
+      <enum-type name="YUVLayout"/>
+  </value-type>
+  <object-type name="QPdfWriter"/>
+  <value-type name="QRawFont">
+      <enum-type name="AntialiasingType"/>
+      <enum-type name="LayoutFlag" flags="LayoutFlags"/>
+      <modify-function signature="advancesForGlyphIndexes(const quint32*,QPointF*,int)const" remove="all"/>
+      <modify-function signature="advancesForGlyphIndexes(const quint32*,QPointF*,int,QFlags&lt;QRawFont::LayoutFlag&gt;)const" remove="all"/>
+      <modify-function signature="glyphIndexesForChars(const QChar*,int,quint32*,int*)const" remove="all"/>
+  </value-type>
+  <object-type name="QRasterWindow"/>
   <object-type name="QScreen" />
+  <object-type name="QStyleHints"/>
 
 </typesystem>
 

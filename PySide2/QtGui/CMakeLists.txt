@@ -8,6 +8,7 @@ ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_selection_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibleevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qactionevent_wrapper.cpp
+${QtGui_GEN_DIR}/qbackingstore_wrapper.cpp
 ${QtGui_GEN_DIR}/qbitmap_wrapper.cpp
 ${QtGui_GEN_DIR}/qbrush_wrapper.cpp
 ${QtGui_GEN_DIR}/qclipboard_wrapper.cpp
@@ -23,6 +24,7 @@ ${QtGui_GEN_DIR}/qdragenterevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qdragleaveevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qdragmoveevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qdropevent_wrapper.cpp
+${QtGui_GEN_DIR}/qenterevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qexposeevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qfileopenevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qfocusevent_wrapper.cpp
@@ -66,7 +68,10 @@ ${QtGui_GEN_DIR}/qmoveevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qmovie_wrapper.cpp
 ${QtGui_GEN_DIR}/qpagedpaintdevice_margins_wrapper.cpp
 ${QtGui_GEN_DIR}/qpagedpaintdevice_wrapper.cpp
+${QtGui_GEN_DIR}/qpagelayout_wrapper.cpp
+${QtGui_GEN_DIR}/qpagesize_wrapper.cpp
 ${QtGui_GEN_DIR}/qpaintdevice_wrapper.cpp
+${QtGui_GEN_DIR}/qpaintdevicewindow_wrapper.cpp
 ${QtGui_GEN_DIR}/qpaintengine_wrapper.cpp
 ${QtGui_GEN_DIR}/qpaintenginestate_wrapper.cpp
 ${QtGui_GEN_DIR}/qpainter_pixmapfragment_wrapper.cpp
@@ -76,12 +81,14 @@ ${QtGui_GEN_DIR}/qpainterpath_wrapper.cpp
 ${QtGui_GEN_DIR}/qpainterpathstroker_wrapper.cpp
 ${QtGui_GEN_DIR}/qpaintevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qpalette_wrapper.cpp
+${QtGui_GEN_DIR}/qpdfwriter_wrapper.cpp
 ${QtGui_GEN_DIR}/qpen_wrapper.cpp
 ${QtGui_GEN_DIR}/qpicture_wrapper.cpp
 ${QtGui_GEN_DIR}/qpictureio_wrapper.cpp
 ${QtGui_GEN_DIR}/qpixmap_wrapper.cpp
 ${QtGui_GEN_DIR}/qpixmapcache_key_wrapper.cpp
 ${QtGui_GEN_DIR}/qpixmapcache_wrapper.cpp
+${QtGui_GEN_DIR}/qpixelformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qpolygon_wrapper.cpp
 ${QtGui_GEN_DIR}/qpolygonf_wrapper.cpp
 ${QtGui_GEN_DIR}/qpytextobject_wrapper.cpp
@@ -106,6 +113,10 @@ ${QtGui_GEN_DIR}/qscreen_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglshader_wrapper.cpp
 #${QtGui_GEN_DIR}/qopenglshaderprogram_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglframebufferobject_wrapper.cpp
+${QtGui_GEN_DIR}/qrasterwindow_wrapper.cpp
+${QtGui_GEN_DIR}/qrawfont_wrapper.cpp
+${QtGui_GEN_DIR}/qstatictext_wrapper.cpp
+${QtGui_GEN_DIR}/qstylehints_wrapper.cpp
 ${QtGui_GEN_DIR}/qsurface_wrapper.cpp
 ${QtGui_GEN_DIR}/qsurfaceformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qsyntaxhighlighter_wrapper.cpp
@@ -181,11 +192,6 @@ set(QtGui_libraries   pyside2
                       ${SHIBOKEN_LIBRARY}
                       ${Qt5Gui_LIBRARIES})
 set(QtGui_deps QtCore)
-
-if(WIN32)
-    # has a fix for VS2015
-    skip_missing_classes(QtGui_SRC)
-endif()
 
 create_pyside_module(QtGui
                      QtGui_include_dirs
