@@ -11,11 +11,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Macros/
 option(USE_PYTHON_VERSION "Use specific python version to build pyside2." "")
 
 if (USE_PYTHON_VERSION)
-    find_package(PythonLibs ${USE_PYTHON_VERSION} REQUIRED)
     find_package(PythonInterp ${USE_PYTHON_VERSION} REQUIRED)
+    find_package(PythonLibs ${USE_PYTHON_VERSION} REQUIRED)
 else()
-    find_package(PythonLibs 2.6)
     find_package(PythonInterp 2.6)
+    find_package(PythonLibs 2.6)
 endif()
 
 # Queries the python sysconfig for the abi flags which need to be inserted into extension suffixes.
@@ -104,7 +104,7 @@ if (UNIX AND NOT APPLE)
 endif ()
 
 find_package(Shiboken2 2.0.0 REQUIRED)
-find_package(Qt5 5.3.0 REQUIRED COMPONENTS Core) 
+find_package(Qt5 5.6.0 REQUIRED COMPONENTS Core)
 add_definitions(${Qt5Core_DEFINITIONS})
 
 find_file(GL_H "gl.h" PATH_SUFFIXES "GL")
@@ -188,38 +188,6 @@ else()
         CACHE STRING "PySide version [full]" FORCE)
 endif()
 
-find_package(Qt5Core)
-find_package(Qt5Concurrent) # new in Qt5, from QtCore
-find_package(Qt5Gui)        # reduced, small version without widgets
-find_package(Qt5Widgets)    # widgets in their separate module
-find_package(Qt5PrintSupport)
-find_package(Qt5Xml)
-find_package(Qt5XmlPatterns)
-find_package(Qt5Svg)
-find_package(Qt5Sql)
-find_package(Qt5Designer)
-find_package(Qt5UiTools)
-find_package(Qt5Test)
-find_package(Qt5Network)
-find_package(Qt5WebKit)
-find_package(Qt5WebKitWidgets)
-find_package(Qt5OpenGL)
-find_package(Qt5Script)
-find_package(Qt5ScriptTools)
-find_package(Qt5Help)
-find_package(Qt5Multimedia)
-find_package(Qt5Quick)
-find_package(Qt5Qml)
-find_package(Qt5QuickWidgets)
-find_package(Qt5WebChannel)
-find_package(Qt5WebEngine)
-find_package(Qt5WebEngineWidgets)
-find_package(Qt5WebSockets)
-
-if(UNIX AND NOT APPLE)
-  find_package(Qt5X11Extras) # new in Qt5, from QtGui
-endif()
-
 string(REGEX MATCHALL "[0-9]+" qt_version_helper "${Qt5Core_VERSION}")
 
 list(GET qt_version_helper 0 QT_VERSION_MAJOR)
@@ -299,7 +267,14 @@ if (NOT SITE_PACKAGE)
     endif()
 endif()
 
-set(GENERATOR_EXTRA_FLAGS --generator-set=shiboken --enable-parent-ctor-heuristic --enable-pyside-extensions --enable-return-value-heuristic --use-isnull-as-nb_nonzero)
+set(GENERATOR_EXTRA_FLAGS --generator-set=shiboken
+                          --enable-parent-ctor-heuristic
+                          --enable-pyside-extensions
+                          --enable-return-value-heuristic
+                          --use-isnull-as-nb_nonzero)
+# 2017-04-24 The protected hack can unfortunately not be disabled, because
+# Clang does produce linker errors when we disable the hack.
+# But the ugly workaround in Python is replaced by a shiboken change.
 if(WIN32 OR DEFINED AVOID_PROTECTED_HACK)
     message(STATUS "PySide2 will be generated avoiding the protected hack!")
     set(GENERATOR_EXTRA_FLAGS ${GENERATOR_EXTRA_FLAGS} --avoid-protected-hack)
@@ -309,9 +284,12 @@ else()
 endif()
 
 add_subdirectory(libpyside)
+find_package(Qt5UiTools)
+find_package(Qt5Designer)
 if(Qt5UiTools_FOUND AND Qt5Designer_FOUND)
     add_subdirectory(plugins)
 endif()
+
 # project directories
 add_subdirectory(PySide2)
 if (BUILD_TESTS)

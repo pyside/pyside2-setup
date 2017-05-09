@@ -3953,6 +3953,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   </object-type>
 
   <value-type name="QMargins" since="4.6"/>
+  <value-type name="QMarginsF" since="5.3"/>
 
   <object-type name="QParallelAnimationGroup" since="4.6"/>
 

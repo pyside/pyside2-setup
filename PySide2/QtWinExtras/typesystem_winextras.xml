@@ -2,7 +2,7 @@
 <!--
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of PySide2.
@@ -39,7 +39,23 @@
 **
 ****************************************************************************/
 -->
-<typesystem package="PySide2.QtMultimedia">
-    <load-typesystem name="typesystem_multimedia_common.xml" generate="yes"/>
-    <load-typesystem name="typesystem_multimedia_forward_declarations.xml" generate="yes"/>
+<typesystem package="PySide2.QtWinExtras">
+    <load-typesystem name="typesystem_core.xml" generate="no"/>
+    <load-typesystem name="typesystem_gui.xml" generate="no"/>
+
+    <object-type name="QWinEvent" since="5.2"/>
+    <object-type name="QWinColorizationChangeEvent" since="5.2"/>
+    <object-type name="QWinCompositionChangeEvent" since="5.2"/>
+    <object-type name="QWinJumpList" since="5.2"/>
+    <object-type name="QWinJumpListCategory" since="5.2">
+        <enum-type name="Type"/>
+    </object-type>
+    <object-type name="QWinJumpListItem" since="5.2">
+        <enum-type name="Type"/>
+    </object-type>
+    <!-- <object-type name="QWinMime" since="5.4"/> -->
+    <object-type name="QWinTaskbarButton" since="5.2"/>
+    <object-type name="QWinTaskbarProgress" since="5.2"/>
+    <object-type name="QWinThumbnailToolBar" since="5.2"/>
+    <object-type name="QWinThumbnailToolButton" since="5.2"/>
 </typesystem>
