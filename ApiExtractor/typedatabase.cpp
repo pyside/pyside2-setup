@@ -31,6 +31,7 @@
 #include "typesystem_p.h"
 
 #include <QtCore/QFile>
+#include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QPair>
 #include <QtCore/QVector>
@@ -226,39 +227,75 @@ ContainerTypeEntryList TypeDatabase::containerTypes() const
     }
     return returned;
 }
-void TypeDatabase::addRejection(const QString& className, const QString& functionName,
-                                const QString& fieldName, const QString& enumName)
-{
-    TypeRejection r;
-    r.class_name = className;
-    r.function_name = functionName;
-    r.field_name = fieldName;
-    r.enum_name = enumName;
 
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const TypeRejection &r)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "TypeRejection(type=" << r.matchType << ", class="
+        << r.className.pattern() << ", pattern=" << r.pattern.pattern() << ')';
+    return d;
+}
+#endif // !QT_NO_DEBUG_STREAM
+
+void TypeDatabase::addRejection(const TypeRejection &r)
+{
     m_rejections << r;
 }
 
-bool TypeDatabase::isClassRejected(const QString& className) const
+static inline QString msgRejectReason(const TypeRejection &r, const QString &needle = QString())
+{
+    QString result;
+    QTextStream str(&result);
+    switch (r.matchType) {
+    case TypeRejection::ExcludeClass:
+        str << " matches class exclusion \"" << r.className.pattern() << '"';
+        break;
+    case TypeRejection::Function:
+    case TypeRejection::Field:
+    case TypeRejection::Enum:
+        str << " matches class \"" << r.className.pattern() << "\" and \"" << r.pattern.pattern() << '"';
+        break;
+    }
+    return result;
+}
+
+// Match class name only
+bool TypeDatabase::isClassRejected(const QString& className, QString *reason) const
 {
     for (const TypeRejection& r : m_rejections) {
-        if (r.class_name == className && r.function_name == QLatin1String("*")
-            && r.field_name == QLatin1String("*") && r.enum_name == QLatin1String("*")) {
+        if (r.matchType == TypeRejection::ExcludeClass && r.className.match(className).hasMatch()) {
+            if (reason)
+                *reason = msgRejectReason(r);
             return true;
         }
     }
     return false;
 }
 
-bool TypeDatabase::isEnumRejected(const QString& className, const QString& enumName) const
+// Match class name and function/enum/field
+static bool findRejection(const QVector<TypeRejection> &rejections,
+                          TypeRejection::MatchType matchType,
+                          const QString& className, const QString& name,
+                          QString *reason = nullptr)
 {
-    for (const TypeRejection& r : m_rejections) {
-        if (r.enum_name == enumName
-            && (r.class_name == className || r.class_name == QLatin1String("*"))) {
+    Q_ASSERT(matchType != TypeRejection::ExcludeClass);
+    for (const TypeRejection& r : rejections) {
+        if (r.matchType == matchType && r.pattern.match(name).hasMatch()
+            && r.className.match(className).hasMatch()) {
+            if (reason)
+                *reason = msgRejectReason(r, name);
             return true;
         }
     }
-
     return false;
+}
+
+bool TypeDatabase::isEnumRejected(const QString& className, const QString& enumName, QString *reason) const
+{
+    return findRejection(m_rejections, TypeRejection::Enum, className, enumName, reason);
 }
 
 void TypeDatabase::addType(TypeEntry *e)
@@ -266,25 +303,16 @@ void TypeDatabase::addType(TypeEntry *e)
     m_entries[e->qualifiedCppName()].append(e);
 }
 
-bool TypeDatabase::isFunctionRejected(const QString& className, const QString& functionName) const
+bool TypeDatabase::isFunctionRejected(const QString& className, const QString& functionName,
+                                      QString *reason) const
 {
-    for (const TypeRejection &r : m_rejections) {
-    if (r.function_name == functionName &&
-        (r.class_name == className || r.class_name == QLatin1String("*")))
-        return true;
-    }
-    return false;
+    return findRejection(m_rejections, TypeRejection::Function, className, functionName, reason);
 }
 
-
-bool TypeDatabase::isFieldRejected(const QString& className, const QString& fieldName) const
+bool TypeDatabase::isFieldRejected(const QString& className, const QString& fieldName,
+                                   QString *reason) const
 {
-    for (const TypeRejection &r : m_rejections) {
-    if (r.field_name == fieldName &&
-        (r.class_name == className || r.class_name == QLatin1String("*")))
-        return true;
-    }
-    return false;
+    return findRejection(m_rejections, TypeRejection::Field, className, fieldName, reason);
 }
 
 FlagsTypeEntry* TypeDatabase::findFlagsType(const QString &name) const

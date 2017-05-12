@@ -100,12 +100,14 @@ public:
 
     ContainerTypeEntryList containerTypes() const;
 
-    void addRejection(const QString& className, const QString& functionName,
-                        const QString& fieldName, const QString& enumName);
-    bool isClassRejected(const QString& className) const;
-    bool isFunctionRejected(const QString& className, const QString& functionName) const;
-    bool isFieldRejected(const QString& className, const QString& fieldName) const;
-    bool isEnumRejected(const QString& className, const QString& enumName) const;
+    void addRejection(const TypeRejection &);
+    bool isClassRejected(const QString& className, QString *reason = nullptr) const;
+    bool isFunctionRejected(const QString& className, const QString& functionName,
+                            QString *reason = nullptr) const;
+    bool isFieldRejected(const QString& className, const QString& fieldName,
+                         QString *reason = nullptr) const;
+    bool isEnumRejected(const QString& className, const QString& enumName,
+                        QString *reason = nullptr) const;
 
     void addType(TypeEntry* e);
 

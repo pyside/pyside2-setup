@@ -1083,10 +1083,11 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(EnumModelItem enumIte
     if (m_currentClass)
         className = m_currentClass->typeEntry()->qualifiedCppName();
 
-    if (TypeDatabase::instance()->isEnumRejected(className, enumName)) {
+    QString rejectReason;
+    if (TypeDatabase::instance()->isEnumRejected(className, enumName, &rejectReason)) {
         if (typeEntry)
             typeEntry->setCodeGeneration(TypeEntry::GenerateNothing);
-        m_rejectedEnums.insert(qualifiedName, AbstractMetaBuilder::GenerationDisabled);
+        m_rejectedEnums.insert(qualifiedName + rejectReason, AbstractMetaBuilder::GenerationDisabled);
         return 0;
     }
 
@@ -1416,8 +1417,9 @@ AbstractMetaField *AbstractMetaBuilderPrivate::traverseField(VariableModelItem f
     if (field->accessPolicy() == CodeModel::Private)
         return 0;
 
-    if (TypeDatabase::instance()->isFieldRejected(className, fieldName)) {
-        m_rejectedFields.insert(qualifiedFieldSignatureWithType(className, field),
+    QString rejectReason;
+    if (TypeDatabase::instance()->isFieldRejected(className, fieldName, &rejectReason)) {
+        m_rejectedFields.insert(qualifiedFieldSignatureWithType(className, field) + rejectReason,
                                 AbstractMetaBuilder::GenerationDisabled);
         return 0;
     }
@@ -2091,13 +2093,14 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
     const QString originalQualifiedSignatureWithReturn =
         qualifiedFunctionSignatureWithType(functionItem, className);
 
-    if (TypeDatabase::instance()->isFunctionRejected(className, functionName)) {
-        m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn, AbstractMetaBuilder::GenerationDisabled);
+    QString rejectReason;
+    if (TypeDatabase::instance()->isFunctionRejected(className, functionName, &rejectReason)) {
+        m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
         return 0;
     }
     else if (TypeDatabase::instance()->isFunctionRejected(className,
-                                                          functionSignature(functionItem))) {
-        m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn, AbstractMetaBuilder::GenerationDisabled);
+                                                          functionSignature(functionItem), &rejectReason)) {
+        m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
         return 0;
     }
 
