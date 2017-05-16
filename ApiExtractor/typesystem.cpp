@@ -52,6 +52,8 @@ static inline QString classAttribute() { return QStringLiteral("class"); }
 static inline QString functionNameAttribute() { return QStringLiteral("function-name"); }
 static inline QString fieldNameAttribute() { return QStringLiteral("field-name"); }
 static inline QString enumNameAttribute() { return QStringLiteral("enum-name"); }
+static inline QString argumentTypeAttribute() { return QStringLiteral("argument-type"); }
+static inline QString returnTypeAttribute() { return QStringLiteral("return-type"); }
 
 static QVector<CustomConversion *> customConversionsForReview;
 
@@ -92,7 +94,10 @@ static bool addRejection(TypeDatabase *database, const QHash<QString, QString> &
     static const AttributeMatchTypePair attributeMatchTypeMapping[] =
     {{functionNameAttribute(), TypeRejection::Function},
      {fieldNameAttribute(), TypeRejection::Field},
-     {enumNameAttribute(), TypeRejection::Enum}};
+     {enumNameAttribute(), TypeRejection::Enum},
+     {argumentTypeAttribute(), TypeRejection::ArgumentType},
+     {returnTypeAttribute(), TypeRejection::ReturnType}
+    };
 
     // Search for non-empty attribute (function, field, enum)
     const auto aend = attributes.cend();
@@ -1254,6 +1259,8 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             attributes.insert(functionNameAttribute(), QString());
             attributes.insert(fieldNameAttribute(), QString());
             attributes.insert(enumNameAttribute(), QString());
+            attributes.insert(argumentTypeAttribute(), QString());
+            attributes.insert(returnTypeAttribute(), QString());
             break;
         case StackElement::Removal:
             attributes.insert(QLatin1String("class"), QLatin1String("all"));

@@ -258,6 +258,11 @@ static inline QString msgRejectReason(const TypeRejection &r, const QString &nee
     case TypeRejection::Enum:
         str << " matches class \"" << r.className.pattern() << "\" and \"" << r.pattern.pattern() << '"';
         break;
+    case TypeRejection::ArgumentType:
+    case TypeRejection::ReturnType:
+        str << " matches class \"" << r.className.pattern() << "\" and \"" << needle
+            << "\" matches \"" << r.pattern.pattern() << '"';
+        break;
     }
     return result;
 }
@@ -313,6 +318,18 @@ bool TypeDatabase::isFieldRejected(const QString& className, const QString& fiel
                                    QString *reason) const
 {
     return findRejection(m_rejections, TypeRejection::Field, className, fieldName, reason);
+}
+
+bool TypeDatabase::isArgumentTypeRejected(const QString& className, const QString& typeName,
+                                          QString *reason) const
+{
+    return findRejection(m_rejections, TypeRejection::ArgumentType, className, typeName, reason);
+}
+
+bool TypeDatabase::isReturnTypeRejected(const QString& className, const QString& typeName,
+                                        QString *reason) const
+{
+    return findRejection(m_rejections, TypeRejection::ReturnType, className, typeName, reason);
 }
 
 FlagsTypeEntry* TypeDatabase::findFlagsType(const QString &name) const

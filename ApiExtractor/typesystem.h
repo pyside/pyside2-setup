@@ -1900,7 +1900,9 @@ struct TypeRejection
         ExcludeClass,                // Match className only
         Function,                    // Match className and function name
         Field,                       // Match className and field name
-        Enum                         // Match className and enum name
+        Enum,                        // Match className and enum name
+        ArgumentType,                // Match className and argument type
+        ReturnType                   // Match className and return type
     };
 
     QRegularExpression className;

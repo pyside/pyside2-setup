@@ -108,6 +108,10 @@ public:
                          QString *reason = nullptr) const;
     bool isEnumRejected(const QString& className, const QString& enumName,
                         QString *reason = nullptr) const;
+    bool isArgumentTypeRejected(const QString& className, const QString& typeName,
+                                QString *reason = nullptr) const;
+    bool isReturnTypeRejected(const QString& className, const QString& typeName,
+                              QString *reason = nullptr) const;
 
     void addType(TypeEntry* e);
 

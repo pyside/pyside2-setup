@@ -2152,6 +2152,13 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
         strippedClassName = strippedClassName.mid(cc_pos + 2);
 
     TypeInfo functionType = functionItem->type();
+
+    if (TypeDatabase::instance()->isReturnTypeRejected(className, functionType.toString(), &rejectReason)) {
+        m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
+        delete metaFunction;
+        return nullptr;
+    }
+
     if (functionName.startsWith(QLatin1Char('~'))) {
         metaFunction->setFunctionType(AbstractMetaFunction::DestructorFunction);
         metaFunction->setInvalid(true);
@@ -2196,6 +2203,12 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
 
     for (int i = 0; i < arguments.size(); ++i) {
         ArgumentModelItem arg = arguments.at(i);
+
+        if (TypeDatabase::instance()->isArgumentTypeRejected(className, arg->type().toString(), &rejectReason)) {
+            m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
+            delete metaFunction;
+            return nullptr;
+        }
 
         bool ok;
         AbstractMetaType* metaType = translateType(arg->type(), &ok);
