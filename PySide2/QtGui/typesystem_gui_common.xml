@@ -54,6 +54,7 @@
     }
   </template>
 
+  <rejection class="^Q.*$" argument-type="^QPlatform.*$"/>
   <function signature="qAlpha(uint)" />
   <function signature="qBlue(uint)" />
   <function signature="qGray(int,int,int)" />
