@@ -4205,7 +4205,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
 
   <!-- TODO: this need be removed -->
   <suppress-warning text="skipping function '*', unmatched return type '*'"/>
-  <suppress-warning text="skipping function '*', unmatched parameter type '*'"/>
+  <suppress-warning text="skipping function '*', unmatched type '*"/>
 
   <suppress-warning text="enum 'q_static_assert_result39' does not have a type entry or is not an enum"/>
   <suppress-warning text="horribly broken type ''"/>
