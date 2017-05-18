@@ -1,7 +1,7 @@
 project(QtMacExtras)
 
 set(QtMacExtras_SRC
-#${QtMacExtras_GEN_DIR}/qmacpasteboardmime_wrapper.cpp
+${QtMacExtras_GEN_DIR}/qmacpasteboardmime_wrapper.cpp
 ${QtMacExtras_GEN_DIR}/qmactoolbar_wrapper.cpp
 ${QtMacExtras_GEN_DIR}/qmactoolbaritem_wrapper.cpp
 

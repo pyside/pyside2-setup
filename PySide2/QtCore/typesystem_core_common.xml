@@ -937,7 +937,7 @@
     <enum-type name="ToolBarArea" flags="ToolBarAreas" />
     <enum-type name="ToolBarAreaSizes"/>
     <enum-type name="ToolButtonStyle"/>
-    <enum-type name="TouchPointState" since="4.6"/>
+    <enum-type name="TouchPointState" flags="TouchPointStates" since="4.6"/>
     <enum-type name="TransformationMode"/>
     <enum-type name="UIEffect"/>
     <enum-type name="WhiteSpaceMode" />
