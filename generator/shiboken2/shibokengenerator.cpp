@@ -2680,9 +2680,13 @@ void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream& s, const 
     if (defaultCtor.isEmpty() && isCppPrimitive(type))
         return;
     QString ctor = defaultCtor.isEmpty() ? minimalConstructor(type) : defaultCtor;
-    if (ctor.isEmpty())
-        qFatal(qPrintable(QString::fromLatin1(MIN_CTOR_ERROR_MSG).arg(type->cppSignature())), NULL);
-    s << " = " << ctor;
+    if (ctor.isEmpty()) {
+        const QString message = msgCouldNotFindMinimalConstructor(QLatin1String(__FUNCTION__), type->cppSignature());
+        qCWarning(lcShiboken()).noquote() << message;
+        s << ";\n#error " << message << '\n';
+    } else {
+        s << " = " << ctor;
+    }
 }
 
 void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream& s, const TypeEntry* type, const QString& defaultCtor)
@@ -2690,9 +2694,14 @@ void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream& s, const 
     if (defaultCtor.isEmpty() && isCppPrimitive(type))
         return;
     QString ctor = defaultCtor.isEmpty() ? minimalConstructor(type) : defaultCtor;
-    if (ctor.isEmpty())
-        qFatal(qPrintable(QString::fromLatin1(MIN_CTOR_ERROR_MSG).arg(type->qualifiedCppName())), NULL);
-    s << " = " << ctor;
+
+    if (ctor.isEmpty()) {
+        const QString message = msgCouldNotFindMinimalConstructor(QLatin1String(__FUNCTION__), type->qualifiedCppName());
+        qCWarning(lcShiboken()).noquote() << message;
+        s << ";\n#error " << message << endl;
+    } else {
+        s << " = " << ctor;
+    }
 }
 
 bool ShibokenGenerator::isCppIntegralPrimitive(const TypeEntry* type)
@@ -2710,4 +2719,10 @@ bool ShibokenGenerator::isCppIntegralPrimitive(const TypeEntry* type)
 bool ShibokenGenerator::isCppIntegralPrimitive(const AbstractMetaType* type)
 {
     return isCppIntegralPrimitive(type->typeEntry());
+}
+
+QString ShibokenGenerator::msgCouldNotFindMinimalConstructor(const QString &where, const QString &type)
+{
+    return where + QLatin1String(": Could not find a minimal constructor for type '") + type
+       + QLatin1String("'. This will result in a compilation error.");
 }

@@ -43,8 +43,6 @@
 #define THREAD_STATE_SAVER_VAR    "threadStateSaver"
 #define BEGIN_ALLOW_THREADS       "PyThreadState* _save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS"
 #define END_ALLOW_THREADS         "PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS"
-#define MIN_CTOR_ERROR_MSG        "Could not find a minimal constructor for type '%1'. "\
-                                  "This will result in a compilation error."
 #define PYTHON_TO_CPP_VAR         "pythonToCpp"
 #define SMART_POINTER_GETTER      "kSmartPointerGetter"
 
@@ -536,6 +534,8 @@ protected:
         TypeSystemConverterVariables
     };
     void replaceConverterTypeSystemVariable(TypeSystemConverterVariable converterVariable, QString& code);
+
+    static QString msgCouldNotFindMinimalConstructor(const QString &where, const QString &type);
 
 private:
     bool m_useCtorHeuristic;
