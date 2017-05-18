@@ -73,6 +73,7 @@
 #ifndef QT_NO_OPENGL
 // Define export macros for Windows' gl.h
 #  ifdef Q_OS_WIN
+#    define NOMINMAX // windows.h is pulled, sanitize
 #    ifndef APIENTRY
 #      define APIENTRY
 #    endif

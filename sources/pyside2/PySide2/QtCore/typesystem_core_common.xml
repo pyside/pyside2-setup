@@ -147,6 +147,8 @@
   <rejection class="*" argument-type="QListData::Data*"/>
   <rejection class="*" argument-type="QListData::NotArrayCompatibleLayout"/>
   <rejection class="*" argument-type="QList::Node*"/>
+  <rejection class="*" argument-type="QTSMFI"/>
+  <rejection class="*" argument-type="QTSMFC"/>
   <rejection class="*" argument-type="QMutexData*"/>
   <rejection class="*" argument-type="QObjectUserData*"/>
   <rejection class="*" argument-type="QtPrivate::QSlotObjectBase*"/>
