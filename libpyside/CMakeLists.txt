@@ -22,6 +22,7 @@ if(Qt5Qml_FOUND AND Qt5Qml_PRIVATE_INCLUDE_DIRS)
 
     set(QML_SUPPORT 1)
 else()
+    message(WARNING "QML private include files could not be found, support for catching QML exceptions inside Python code will not work.")
     set(QML_INCLUDES "")
     set(QML_LIBRARIES "")
 
