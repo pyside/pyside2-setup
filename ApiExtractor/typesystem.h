@@ -35,6 +35,7 @@
 
 #include <QtCore/QHash>
 #include <QtCore/qobjectdefs.h>
+#include <QtCore/QRegularExpression>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QMap>
@@ -48,6 +49,7 @@ class Indentor;
 
 class AbstractMetaType;
 QT_BEGIN_NAMESPACE
+class QDebug;
 class QTextStream;
 QT_END_NAMESPACE
 
@@ -1893,11 +1895,24 @@ private:
 
 struct TypeRejection
 {
-    QString class_name;
-    QString function_name;
-    QString field_name;
-    QString enum_name;
+    enum MatchType
+    {
+        ExcludeClass,                // Match className only
+        Function,                    // Match className and function name
+        Field,                       // Match className and field name
+        Enum,                        // Match className and enum name
+        ArgumentType,                // Match className and argument type
+        ReturnType                   // Match className and return type
+    };
+
+    QRegularExpression className;
+    QRegularExpression pattern;
+    MatchType matchType;
 };
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const TypeRejection &r);
+#endif
 
 QString fixCppTypeName(const QString &name);
 

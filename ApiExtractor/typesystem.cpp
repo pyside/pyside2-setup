@@ -48,8 +48,81 @@ static inline QString quoteBeforeLineAttribute() { return QStringLiteral("quote-
 static inline QString nameAttribute() { return QStringLiteral("name"); }
 static inline QString sinceAttribute() { return QStringLiteral("since"); }
 static inline QString flagsAttribute() { return QStringLiteral("flags"); }
+static inline QString classAttribute() { return QStringLiteral("class"); }
+static inline QString functionNameAttribute() { return QStringLiteral("function-name"); }
+static inline QString fieldNameAttribute() { return QStringLiteral("field-name"); }
+static inline QString enumNameAttribute() { return QStringLiteral("enum-name"); }
+static inline QString argumentTypeAttribute() { return QStringLiteral("argument-type"); }
+static inline QString returnTypeAttribute() { return QStringLiteral("return-type"); }
 
 static QVector<CustomConversion *> customConversionsForReview;
+
+// Set a regular expression for rejection from text. By legacy, those are fixed
+// strings, except for '*' meaning 'match all'. Enclosing in "^..$"
+// indicates regular expression.
+static bool setRejectionRegularExpression(const QString &patternIn,
+                                          QRegularExpression *re,
+                                          QString *errorMessage)
+{
+    QString pattern;
+    if (patternIn.startsWith(QLatin1Char('^')) && patternIn.endsWith(QLatin1Char('$')))
+        pattern = patternIn;
+    else if (patternIn == QLatin1String("*"))
+        pattern = QStringLiteral("^.*$");
+    else
+        pattern = QLatin1Char('^') + QRegularExpression::escape(patternIn) + QLatin1Char('$');
+    re->setPattern(pattern);
+    if (!re->isValid()) {
+        *errorMessage = QLatin1String("Invalid pattern \"") + patternIn
+            + QLatin1String("\": ") + re->errorString();
+        return false;
+    }
+    return true;
+}
+
+static bool addRejection(TypeDatabase *database, const QHash<QString, QString> &attributes,
+                  QString *errorMessage)
+{
+    typedef QPair<QString, TypeRejection::MatchType> AttributeMatchTypePair;
+
+    TypeRejection rejection;
+
+    const QString className = attributes.value(classAttribute());
+    if (!setRejectionRegularExpression(className, &rejection.className, errorMessage))
+        return false;
+
+    static const AttributeMatchTypePair attributeMatchTypeMapping[] =
+    {{functionNameAttribute(), TypeRejection::Function},
+     {fieldNameAttribute(), TypeRejection::Field},
+     {enumNameAttribute(), TypeRejection::Enum},
+     {argumentTypeAttribute(), TypeRejection::ArgumentType},
+     {returnTypeAttribute(), TypeRejection::ReturnType}
+    };
+
+    // Search for non-empty attribute (function, field, enum)
+    const auto aend = attributes.cend();
+    for (const AttributeMatchTypePair &mapping : attributeMatchTypeMapping) {
+        const auto it = attributes.constFind(mapping.first);
+        if (it != aend && !it.value().isEmpty()) {
+            if (!setRejectionRegularExpression(it.value(), &rejection.pattern, errorMessage))
+                return false;
+            rejection.matchType = mapping.second;
+            database->addRejection(rejection);
+            return true;
+        }
+    }
+
+    // Special case: When all fields except class are empty, completely exclude class
+    if (className == QLatin1String("*")) {
+        *errorMessage = QLatin1String("bad reject entry, neither 'class', 'function-name'"
+                                      " nor 'field' specified");
+        return false;
+    }
+    rejection.matchType = TypeRejection::ExcludeClass;
+    database->addRejection(rejection);
+    return true;
+}
+
 
 Handler::Handler(TypeDatabase* database, bool generate)
             : m_database(database), m_generate(generate ? TypeEntry::GenerateAll : TypeEntry::GenerateForSubclass)
@@ -1182,10 +1255,12 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             attributes.insert(QLatin1String("to"), QString());
             break;
         case StackElement::Rejection:
-            attributes.insert(QLatin1String("class"), QLatin1String("*"));
-            attributes.insert(QLatin1String("function-name"), QLatin1String("*"));
-            attributes.insert(QLatin1String("field-name"), QLatin1String("*"));
-            attributes.insert(QLatin1String("enum-name"), QLatin1String("*"));
+            attributes.insert(classAttribute(), QString());
+            attributes.insert(functionNameAttribute(), QString());
+            attributes.insert(fieldNameAttribute(), QString());
+            attributes.insert(enumNameAttribute(), QString());
+            attributes.insert(argumentTypeAttribute(), QString());
+            attributes.insert(returnTypeAttribute(), QString());
             break;
         case StackElement::Removal:
             attributes.insert(QLatin1String("class"), QLatin1String("all"));
@@ -1935,18 +2010,9 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             }
         }
         break;
-        case StackElement::Rejection: {
-            QString cls = attributes[QLatin1String("class")];
-            QString function = attributes[QLatin1String("function-name")];
-            QString field = attributes[QLatin1String("field-name")];
-            QString enum_ = attributes[QLatin1String("enum-name")];
-            if (cls == QLatin1String("*") && function == QLatin1String("*") && field == QLatin1String("*") && enum_ == QLatin1String("*")) {
-                m_error = QLatin1String("bad reject entry, neither 'class', 'function-name' nor "
-                          "'field' specified");
+        case StackElement::Rejection:
+            if (!addRejection(m_database, attributes, &m_error))
                 return false;
-            }
-            m_database->addRejection(cls, function, field, enum_);
-        }
         break;
         case StackElement::Template:
             element->value.templateEntry = new TemplateEntry(attributes[nameAttribute()], since);

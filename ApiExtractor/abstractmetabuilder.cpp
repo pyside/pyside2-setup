@@ -1083,10 +1083,11 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(EnumModelItem enumIte
     if (m_currentClass)
         className = m_currentClass->typeEntry()->qualifiedCppName();
 
-    if (TypeDatabase::instance()->isEnumRejected(className, enumName)) {
+    QString rejectReason;
+    if (TypeDatabase::instance()->isEnumRejected(className, enumName, &rejectReason)) {
         if (typeEntry)
             typeEntry->setCodeGeneration(TypeEntry::GenerateNothing);
-        m_rejectedEnums.insert(qualifiedName, AbstractMetaBuilder::GenerationDisabled);
+        m_rejectedEnums.insert(qualifiedName + rejectReason, AbstractMetaBuilder::GenerationDisabled);
         return 0;
     }
 
@@ -1416,8 +1417,9 @@ AbstractMetaField *AbstractMetaBuilderPrivate::traverseField(VariableModelItem f
     if (field->accessPolicy() == CodeModel::Private)
         return 0;
 
-    if (TypeDatabase::instance()->isFieldRejected(className, fieldName)) {
-        m_rejectedFields.insert(qualifiedFieldSignatureWithType(className, field),
+    QString rejectReason;
+    if (TypeDatabase::instance()->isFieldRejected(className, fieldName, &rejectReason)) {
+        m_rejectedFields.insert(qualifiedFieldSignatureWithType(className, field) + rejectReason,
                                 AbstractMetaBuilder::GenerationDisabled);
         return 0;
     }
@@ -2038,16 +2040,35 @@ static QString functionSignature(FunctionModelItem functionItem)
     return functionItem->name() + QLatin1Char('(') + args.join(QLatin1Char(',')) + QLatin1Char(')');
 }
 
-static inline QString functionSignatureWithReturnType(FunctionModelItem functionItem)
+static inline QString qualifiedFunctionSignatureWithType(const FunctionModelItem &functionItem,
+                                                         const QString &className = QString())
 {
-    return functionSignature(functionItem)
-            + QStringLiteral(" -> ") + functionItem->type().toString();
+    QString result = functionItem->type().toString() + QLatin1Char(' ');
+    if (!className.isEmpty())
+        result += className + colonColon();
+    result += functionSignature(functionItem);
+    return result;
 }
 
-static inline QString qualifiedFunctionSignatureWithType(const QString &className,
-                                                  FunctionModelItem functionItem)
+static inline QString msgUnmatchedParameterType(const ArgumentModelItem &arg, int n)
 {
-    return className + colonColon() + functionSignatureWithReturnType(functionItem);
+    QString result;
+    QTextStream str(&result);
+    str << "unmatched type '" << arg->type().toString() << "' in parameter #"
+        << (n + 1);
+    if (!arg->name().isEmpty())
+        str << " \"" << arg->name() << '"';
+    return result;
+}
+
+static inline QString msgVoidParameterType(const ArgumentModelItem &arg, int n)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "'void' encountered at parameter #" << (n + 1);
+    if (!arg->name().isEmpty())
+        str << " \"" << arg->name() << '"';
+    return result;
 }
 
 AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModelItem functionItem)
@@ -2056,7 +2077,6 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
         return nullptr;
     QString functionName = functionItem->name();
     QString className;
-    QString rejectedFunctionSignature;
     if (m_currentClass) {
         // Clang: Skip qt_metacast(), qt_metacall(), expanded from Q_OBJECT
         // and overridden metaObject(), QGADGET helpers
@@ -2069,15 +2089,18 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
             return nullptr;
     }
 
-    if (TypeDatabase::instance()->isFunctionRejected(className, functionName)) {
-        rejectedFunctionSignature = qualifiedFunctionSignatureWithType(className, functionItem);
-        m_rejectedFunctions.insert(rejectedFunctionSignature, AbstractMetaBuilder::GenerationDisabled);
+    // Store original signature with unresolved typedefs for message/log purposes
+    const QString originalQualifiedSignatureWithReturn =
+        qualifiedFunctionSignatureWithType(functionItem, className);
+
+    QString rejectReason;
+    if (TypeDatabase::instance()->isFunctionRejected(className, functionName, &rejectReason)) {
+        m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
         return 0;
     }
     else if (TypeDatabase::instance()->isFunctionRejected(className,
-                                                          functionSignature(functionItem))) {
-        rejectedFunctionSignature = qualifiedFunctionSignatureWithType(className, functionItem);
-        m_rejectedFunctions.insert(rejectedFunctionSignature, AbstractMetaBuilder::GenerationDisabled);
+                                                          functionSignature(functionItem), &rejectReason)) {
+        m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
         return 0;
     }
 
@@ -2129,6 +2152,13 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
         strippedClassName = strippedClassName.mid(cc_pos + 2);
 
     TypeInfo functionType = functionItem->type();
+
+    if (TypeDatabase::instance()->isReturnTypeRejected(className, functionType.toString(), &rejectReason)) {
+        m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
+        delete metaFunction;
+        return nullptr;
+    }
+
     if (functionName.startsWith(QLatin1Char('~'))) {
         metaFunction->setFunctionType(AbstractMetaFunction::DestructorFunction);
         metaFunction->setInvalid(true);
@@ -2144,11 +2174,10 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
         if (!ok) {
             Q_ASSERT(type == 0);
             qCWarning(lcShiboken).noquote().nospace()
-                << QStringLiteral("skipping function '%1::%2', unmatched return type '%3'")
-                                  .arg(className, functionItem->name(),
+                << QStringLiteral("skipping function '%1', unmatched return type '%2'")
+                                  .arg(originalQualifiedSignatureWithReturn,
                                        functionItem->type().toString());
-            rejectedFunctionSignature = qualifiedFunctionSignatureWithType(className, functionItem);
-            m_rejectedFunctions.insert(rejectedFunctionSignature, AbstractMetaBuilder::UnmatchedReturnType);
+            m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn, AbstractMetaBuilder::UnmatchedReturnType);
             metaFunction->setInvalid(true);
             return metaFunction;
         }
@@ -2175,26 +2204,34 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
     for (int i = 0; i < arguments.size(); ++i) {
         ArgumentModelItem arg = arguments.at(i);
 
+        if (TypeDatabase::instance()->isArgumentTypeRejected(className, arg->type().toString(), &rejectReason)) {
+            m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
+            delete metaFunction;
+            return nullptr;
+        }
+
         bool ok;
         AbstractMetaType* metaType = translateType(arg->type(), &ok);
         if (!ok) {
             Q_ASSERT(metaType == 0);
+            const QString reason = msgUnmatchedParameterType(arg, i);
             qCWarning(lcShiboken).noquote().nospace()
-                << QStringLiteral("skipping function '%1::%2', unmatched parameter type '%3'")
-                                  .arg(className, functionItem->name(), arg->type().toString());
-            rejectedFunctionSignature = qualifiedFunctionSignatureWithType(className, functionItem);
+                << QStringLiteral("skipping function '%1', %2")
+                                  .arg(originalQualifiedSignatureWithReturn, reason);
+            const QString rejectedFunctionSignature = originalQualifiedSignatureWithReturn
+                + QLatin1String(": ") + reason;
             m_rejectedFunctions.insert(rejectedFunctionSignature, AbstractMetaBuilder::UnmatchedArgumentType);
             metaFunction->setInvalid(true);
             return metaFunction;
         }
 
         if (metaType == Q_NULLPTR) {
+            const QString reason = msgVoidParameterType(arg, i);
             qCWarning(lcShiboken).noquote().nospace()
-                << QString::fromLatin1("skipping function '%1::%2', 'void' encountered at parameter "
-                                       "position %3, but it can only be the the first and only "
-                                       "parameter")
-                                       .arg(className, functionItem->name()).arg(i);
-            rejectedFunctionSignature = qualifiedFunctionSignatureWithType(className, functionItem);
+                << QString::fromLatin1("skipping function '%1': %2")
+                                       .arg(originalQualifiedSignatureWithReturn, reason);
+            const QString rejectedFunctionSignature = originalQualifiedSignatureWithReturn
+                + QLatin1String(": ") + reason;
             m_rejectedFunctions.insert(rejectedFunctionSignature, AbstractMetaBuilder::UnmatchedArgumentType);
             metaFunction->setInvalid(true);
             return metaFunction;
