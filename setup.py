@@ -38,6 +38,7 @@
 #############################################################################
 
 from __future__ import print_function
+from distutils.version import LooseVersion
 
 """This is a distutils setup-script for the PySide2 project
 
@@ -351,6 +352,22 @@ def prefix():
         name += 'd'
     return name
 
+def detectClang():
+    source = 'LLVM_INSTALL_DIR'
+    clangDir = os.environ.get(source, None)
+    if not clangDir:
+        source = 'CLANG_INSTALL_DIR'
+        clangDir = os.environ.get(source, None)
+        if not clangDir:
+            source = 'llvm-config'
+            try:
+                output = run_process_output([source, '--prefix'])
+                if output:
+                    clangDir = output[0]
+            except:
+                pass
+    return [clangDir, source]
+
 # Initialize, pull and checkout submodules
 def prepareSubModules():
     print("Initializing submodules for PySide2 version %s" % __version__)
@@ -654,7 +671,20 @@ class pyside_build(_build):
             sys.exit(1)
 
         # Update the PATH environment variable
-        update_env_path([py_scripts_dir, qt_dir])
+        additionalPaths = [py_scripts_dir, qt_dir]
+
+        # Add Clang to path for Windows. Revisit once Clang is bundled with Qt.
+        if sys.platform == "win32" and LooseVersion(self.qtinfo.version) >= LooseVersion("5.7.0"):
+            clangDir = detectClang()
+            if clangDir[0]:
+                clangBinDir = os.path.join(clangDir[0], 'bin')
+                if not clangBinDir in os.environ.get('PATH'):
+                    log.info("Adding %s as detected by %s to PATH" % (clangBinDir, clangDir[1]))
+                    additionalPaths.append(clangBinDir)
+            else:
+                log.error("Failed to detect Clang by checking LLVM_INSTALL_DIR, CLANG_INSTALL_DIR, llvm-config")
+
+        update_env_path(additionalPaths)
 
         build_name = "py%s-qt%s-%s-%s" % \
             (py_version, qt_version, platform.architecture()[0], build_type.lower())
