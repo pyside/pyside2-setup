@@ -35,14 +35,32 @@ ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testview_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testbinding_module_wrapper.cpp
 )
 
+# Get per module include dirs.
+# There are usually 3 paths there:
+# ./qt/include/; ./qt/include/QtCore ; ./qt/mkspecs/linux-g++
+# on framework build they are:
+# ./qt/lib/QtCore.framework; ./qt/lib/QtCore.framework/Headers ; ./qt/mkspecs/macx-clang
+# Thus we use the second direct path, which contains the actual header files.
+
+list(GET Qt5Core_INCLUDE_DIRS 1 Qt5Core_DIRECT_INCLUDE_DIR)
+list(GET Qt5Gui_INCLUDE_DIRS 1 Qt5Gui_DIRECT_INCLUDE_DIR)
+list(GET Qt5Widgets_INCLUDE_DIRS 1 Qt5Widgets_DIRECT_INCLUDE_DIR)
+
+# Adjust include headers paths for frameworks.
+set(shiboken_framework_include_dirs_option "")
+if(CMAKE_HOST_APPLE AND QtCore_is_framework)
+    set(shiboken_framework_include_dirs "${QT_FRAMEWORK_INCLUDE_DIR}")
+    set(shiboken_framework_include_dirs_option "--framework-include-paths=${shiboken_framework_include_dirs}")
+endif()
+
 make_path(testbinding_include_dirs  ${pyside2_BINARY_DIR}
                                     ${CMAKE_CURRENT_SOURCE_DIR}
                                     ${CMAKE_CURRENT_SOURCE_DIR}/../../PySide2
                                     ${CMAKE_CURRENT_SOURCE_DIR}/../../libpyside
                                     ${QT_INCLUDE_DIR}
-                                    ${QT_INCLUDE_DIR}/QtCore
-                                    ${QT_INCLUDE_DIR}/QtGui
-                                    ${QT_INCLUDE_DIR}/QtWidgets
+                                    ${Qt5Core_DIRECT_INCLUDE_DIR}
+                                    ${Qt5Gui_DIRECT_INCLUDE_DIR}
+                                    ${Qt5Widgets_DIRECT_INCLUDE_DIR}
                                     )
 
 make_path(testbinding_typesystem_path ${CMAKE_CURRENT_SOURCE_DIR}
@@ -55,6 +73,7 @@ add_custom_command(OUTPUT ${testbinding_SRC}
 COMMAND ${SHIBOKEN_BINARY} ${GENERATOR_EXTRA_FLAGS}
         ${CMAKE_CURRENT_SOURCE_DIR}/pysidetest_global.h
         --include-paths=${testbinding_include_dirs}
+        ${shiboken_framework_include_dirs_option}
         --typesystem-paths=${testbinding_typesystem_path}
         --output-directory=${CMAKE_CURRENT_BINARY_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_pysidetest.xml

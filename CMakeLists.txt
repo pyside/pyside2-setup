@@ -133,12 +133,22 @@ if(CMAKE_HOST_APPLE)
     endif()
 endif()
 
-if(NOT CMAKE_HOST_APPLE)
-    # Qt5: QT_INCLUDE_DIR does no longer exist.
-    # On Windows and Linux, it can be computed from Qt5Core_INCLUDE_DIRS
-    message("Qt5Core_INCLUDE_DIRS ${Qt5Core_INCLUDE_DIRS}")
-    list(GET Qt5Core_INCLUDE_DIRS 0 QT_INCLUDE_DIR)
-    message(STATUS "*** computed QT_INCLUDE_DIR as ${QT_INCLUDE_DIR}")
+# Qt5: QT_INCLUDE_DIR does no longer exist.
+# On Windows, macOS, and Linux it can be computed from Qt5Core_INCLUDE_DIRS, which contains
+# a list of include directories. We take the first one.
+message(STATUS "*** Qt5Core_INCLUDE_DIRS = ${Qt5Core_INCLUDE_DIRS}")
+list(GET Qt5Core_INCLUDE_DIRS 0 QT_INCLUDE_DIR)
+
+# On macOS, check if Qt is a framework build. This affects how include paths should be handled.
+get_target_property(QtCore_is_framework Qt5::Core FRAMEWORK)
+
+if (QtCore_is_framework)
+    get_filename_component(QT_FRAMEWORK_INCLUDE_DIR "${QT_INCLUDE_DIR}/../" ABSOLUTE)
+    message(STATUS "*** QT_FRAMEWORK_INCLUDE_DIR is ${QT_FRAMEWORK_INCLUDE_DIR}")
+
+    # QT_INCLUDE_DIR points to the QtCore.framework directory, so need to adjust this to point
+    # to the actual include directory.
+    get_filename_component(QT_INCLUDE_DIR "${QT_INCLUDE_DIR}/../../include" ABSOLUTE)
 endif()
 
 if(MSVC)
@@ -162,12 +172,14 @@ else()
         if (NOT QT_INCLUDE_DIR)
             set(QT_INCLUDE_DIR "/Library/Frameworks")
         endif()
-        if(ALTERNATIVE_QT_INCLUDE_DIR)
+        if(NOT QT_INCLUDE_DIR AND ALTERNATIVE_QT_INCLUDE_DIR)
             set(QT_INCLUDE_DIR ${ALTERNATIVE_QT_INCLUDE_DIR})
         endif()
         string(REPLACE " " ":" QT_INCLUDE_DIR ${QT_INCLUDE_DIR})
     endif()
 endif()
+message(STATUS "*** computed QT_INCLUDE_DIR as ${QT_INCLUDE_DIR}")
+
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE ${SHIBOKEN_BUILD_TYPE})

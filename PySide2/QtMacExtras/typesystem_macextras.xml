@@ -43,11 +43,11 @@
     <load-typesystem name="typesystem_core.xml" generate="no"/>
     <load-typesystem name="typesystem_gui.xml" generate="no"/>
 
-    <!--
+    <function signature="qRegisterDraggedTypes(QStringList)" since="5.2"/>
+
     <object-type name="QMacPasteboardMime" since="5.2">
         <enum-type name="QMacPasteboardMimeType"/>
     </object-type>
-     -->
     <object-type name="QMacToolBar" since="5.3"/>
     <object-type name="QMacToolBarItem" since="5.3">
         <enum-type name="StandardItem"/>
