@@ -93,7 +93,6 @@ class OpenGLWindow(QOpenGLWindow):
 
 class QOpenGLWindowTest(UsesQApplication):
     # On macOS, glClear(), glViewport() are rejected due to GLbitfield/GLint not being resolved properly
-    @unittest.skipIf(sys.platform == 'darwin', "unsupported platform")
     def test(self):
         openGlWindow = OpenGLWindow()
         openGlWindow.resize(640, 480)

@@ -209,6 +209,16 @@
     <!-- FIXME APIExtractor or shiboken do not support multiple includes by primitive type -->
     <include file-name="signalmanager.h" location="global"/>
   </primitive-type>
+
+  <!-- Among other use cases, these types are necessary for OpenGL "GLint"-like typedefs on macOS.
+  -->
+  <primitive-type name="int32_t" />
+  <primitive-type name="int16_t" />
+  <primitive-type name="int8_t" />
+  <primitive-type name="uint32_t" />
+  <primitive-type name="uint16_t" />
+  <primitive-type name="uint8_t" />
+
   <primitive-type name="bool" target-lang-api-name="PyBool">
     <conversion-rule>
         <native-to-target>
