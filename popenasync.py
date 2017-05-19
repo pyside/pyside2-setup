@@ -68,10 +68,10 @@ if mswindows:
     if sys.version_info >= (3,):
         # Test date should be in ascii.
         def encode(s):
-            return s.encode('ascii')
-        
+            return s.encode('ascii', 'ignore')
+
         def decode(b):
-            return b.decode('ascii')
+            return b.decode('ascii', 'ignore')
     else:
         # Strings only; do nothing
         def encode(s):
