@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<typesystem package="smart">
+    <primitive-type name="int" />
+    <primitive-type name="char" />
+    <primitive-type name="float" />
+    <primitive-type name="bool" />
+
+    <!-- Used in tests to check what C++ objects are allocated. -->
+    <object-type name="Registry" />
+
+    <!-- Current limitation: shared pointer python objects can only be instantiated from API usage,
+         like when they are returned as a result of a method, or passed as arguments. It is not
+         possible to explicitly instantiate a new shared pointer in python e.g. o = SharedPtr_Foo()
+         won't work.
+    -->
+    <smart-pointer-type name="SharedPtr" type="shared" getter="data" ref-count-method="useCount" />
+
+    <object-type name="Obj" />
+    <value-type name="Integer" />
+
+    <!-- Just used to silence the warnings that shiboken doens't know what to do with this type -->
+    <custom-type name="RefData" />
+</typesystem>

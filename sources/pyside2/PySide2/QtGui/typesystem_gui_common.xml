@@ -1,0 +1,3416 @@
+<?xml version="1.0"?>
+<!--
+/****************************************************************************
+**
+** Copyright (C) 2016 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of PySide2.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+-->
+<typesystem package="PySide2.QtGui">
+  <load-typesystem name="typesystem_core.xml" generate="no"/>
+
+  <template name="QFontCharFix">
+    int size = Shiboken::String::len(%PYARG_1);
+    if (size == 1) {
+        const char *str = Shiboken::String::toCString(%PYARG_1);
+        QChar ch(str[0]);
+        %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(ch);
+        %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+    } else {
+        PyErr_SetString(PyExc_TypeError, "String must have only one character");
+    }
+  </template>
+
+  <rejection class="^Q.*$" argument-type="^QPlatform.*$"/>
+  <function signature="qAlpha(uint)" />
+  <function signature="qBlue(uint)" />
+  <function signature="qGray(int,int,int)" />
+  <function signature="qGray(uint)" />
+  <function signature="qGreen(uint)" />
+  <function signature="qIsGray(uint)" />
+  <function signature="qRed(uint)" />
+  <function signature="qRgb(int,int,int)" />
+  <function signature="qRgba(int,int,int,int)" />
+  <function signature="qFuzzyCompare(QMatrix,QMatrix)" />
+  <function signature="qFuzzyCompare(QTransform,QTransform)" />
+  <function signature="qFuzzyCompare(QQuaternion,QQuaternion)" />
+  <function signature="qFuzzyCompare(QMatrix4x4,QMatrix4x4)" />
+  <function signature="qFuzzyCompare(QVector2D,QVector2D)" />
+  <function signature="qFuzzyCompare(QVector3D,QVector3D)" />
+  <function signature="qFuzzyCompare(QVector4D,QVector4D)" />
+  <rejection class="*" function-name="qobject_interface_iid&lt;QStyleFactoryInterface*&gt;"/>
+  <rejection class="*" function-name="qobject_interface_iid&lt;QAccessibleFactoryInterface*&gt;"/>
+  <rejection class="*" function-name="qobject_interface_iid&lt;QInputContextFactoryInterface*&gt;"/>
+  <rejection class="*" function-name="qobject_interface_iid&lt;QGraphicsItem*&gt;"/>
+  <rejection class="*" function-name="qobject_interface_iid&lt;QGraphicsLayout*&gt;"/>
+  <rejection class="*" function-name="qobject_interface_iid&lt;QAccessibleBridgeFactoryInterface*&gt;"/>
+  <rejection class="*" function-name="qobject_interface_iid&lt;QImageIOHandlerFactoryInterface*&gt;"/>
+  <rejection class="*" function-name="qobject_interface_iid&lt;QAccessibleInterface*&gt;"/>
+  <rejection class="*" function-name="qobject_interface_iid&lt;QTextObjectInterface*&gt;"/>
+  <rejection class="*" function-name="qobject_interface_iid&lt;QGraphicsLayoutItem*&gt;"/>
+  <rejection class="*" function-name="qobject_interface_iid&lt;QIconEngineFactoryInterface*&gt;"/>
+  <rejection class="*" function-name="qobject_interface_iid&lt;QPictureFormatInterface*&gt;"/>
+
+  <rejection class="*" function-name="qobject_cast&lt;QGraphicsLayout*&gt;"/>
+  <rejection class="*" function-name="qobject_cast&lt;QGraphicsItem*&gt;"/>
+  <rejection class="*" function-name="qobject_cast&lt;QGraphicsLayoutItem*&gt;"/>
+  <rejection class="*" function-name="qobject_cast&lt;QGraphicsLayoutItem*&gt;"/>
+
+  <rejection class="*" function-name="qGenericMatrixFromMatrix4x4"/>
+  <rejection class="*" function-name="qDrawBorderPixmap"/>
+  <rejection class="*" function-name="qDrawPixmaps"/>
+  <rejection class="*" function-name="qGenericMatrixToMatrix4x4"/>
+
+  <rejection class="*" function-name="d_func"/>
+  <rejection class="*" field-name="d_ptr"/>
+  <rejection class="*" field-name="d"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLboolean( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLchar( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="GLchar *const const*"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLenum( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLfloat( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLfloat( const)?\[.*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLdouble( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="GLintptr"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLint64( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLsizei( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="GLsizeiptr"/>
+  <rejection class="^QOpenGL.*$" argument-type="GLsync"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLubyte( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" return-type="^GLubyte( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLu?int( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^QMatrix.x.( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="qopengl_GLintptr"/>
+  <rejection class="^QOpenGL.*$" argument-type="qopengl_GLsizeiptr"/>
+  <rejection class="^QOpenGL.*$" argument-type="QOpenGLTextureHelper*"/>
+  <rejection class="^QOpenGL.*$" argument-type="^QVector.D( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^void( const)?\*\*?$"/>
+
+  <!--
+    Event classes have a lot of non-documented protected fields, those fields
+    are removed from PySide because they are Qt implementation details,
+    besides the fact they are accessible by ordinary event methods.
+    -->
+
+  <rejection class="QAccessibleEvent" field-name="m_type"/>
+
+  <rejection class="QEnterEvent" field-name="l"/>
+  <rejection class="QEnterEvent" field-name="w"/>
+  <rejection class="QEnterEvent" field-name="s"/>
+
+  <rejection class="QInputEvent" field-name="modState"/>
+  <rejection class="QInputEvent" field-name="modState"/>
+
+  <rejection class="QMouseEvent" field-name="p"/>
+  <rejection class="QMouseEvent" field-name="g"/>
+  <rejection class="QMouseEvent" field-name="b"/>
+  <rejection class="QMouseEvent" field-name="mouseState"/>
+
+  <rejection class="QHoverEvent" field-name="p"/>
+  <rejection class="QHoverEvent" field-name="op"/>
+
+  <rejection class="QWheelEvent" field-name="p"/>
+  <rejection class="QWheelEvent" field-name="g"/>
+  <rejection class="QWheelEvent" field-name="mouseState"/>
+  <rejection class="QWheelEvent" field-name="o"/>
+
+  <rejection class="QTabletEvent" field-name="mPos"/>
+  <rejection class="QTabletEvent" field-name="mGPos"/>
+  <rejection class="QTabletEvent" field-name="mHiResGlobalPos"/>
+  <rejection class="QTabletEvent" field-name="mDev"/>
+  <rejection class="QTabletEvent" field-name="mPointerType"/>
+  <rejection class="QTabletEvent" field-name="mXT"/>
+  <rejection class="QTabletEvent" field-name="mYT"/>
+  <rejection class="QTabletEvent" field-name="mZ"/>
+  <rejection class="QTabletEvent" field-name="mPress"/>
+  <rejection class="QTabletEvent" field-name="mTangential"/>
+  <rejection class="QTabletEvent" field-name="mRot"/>
+  <rejection class="QTabletEvent" field-name="mUnique"/>
+  <rejection class="QTabletEvent" field-name="mExtra"/>
+
+  <rejection class="QKeyEvent" field-name="txt"/>
+  <rejection class="QKeyEvent" field-name="k"/>
+  <rejection class="QKeyEvent" field-name="c"/>
+  <rejection class="QKeyEvent" field-name="auto"/>
+
+  <rejection class="QPaintEvent" field-name="m_rect"/>
+  <rejection class="QPaintEvent" field-name="m_region"/>
+  <rejection class="QPaintEvent" field-name="m_erased"/>
+
+  <rejection class="QMoveEvent" field-name="p"/>
+  <rejection class="QMoveEvent" field-name="oldp"/>
+
+  <rejection class="QResizeEvent" field-name="s"/>
+  <rejection class="QResizeEvent" field-name="olds"/>
+
+  <rejection class="QContextMenuEvent" field-name="p"/>
+  <rejection class="QContextMenuEvent" field-name="gp"/>
+  <rejection class="QContextMenuEvent" field-name="reas"/>
+
+  <rejection class="QDropEvent" field-name="p"/>
+  <rejection class="QDropEvent" field-name="mouseState"/>
+  <rejection class="QDropEvent" field-name="modState"/>
+  <rejection class="QDropEvent" field-name="act"/>
+  <rejection class="QDropEvent" field-name="drop_action"/>
+  <rejection class="QDropEvent" field-name="default_action"/>
+  <rejection class="QDropEvent" field-name="mdata"/>
+  <rejection class="QDropEvent" field-name="fmts"/>
+
+  <rejection class="QDragMoveEvent" field-name="rect"/>
+
+  <rejection class="QShortcutEvent" field-name="sequence"/>
+  <rejection class="QShortcutEvent" field-name="ambig"/>
+  <rejection class="QShortcutEvent" field-name="sid"/>
+
+  <rejection class="QTouchEvent" field-name="_device"/>
+  <rejection class="QTouchEvent" field-name="_widget"/>
+  <rejection class="QTouchEvent" field-name="_window"/>
+  <rejection class="QTouchEvent" field-name="_deviceType"/>
+  <rejection class="QTouchEvent" field-name="_touchPointStates"/>
+  <rejection class="QTouchEvent" field-name="_touchPoints"/>
+
+  <rejection class="QAbstractTextDocumentLayout::PaintContext" field-name="selections"/>
+  <rejection class="QBrush" function-name="cleanUp"/>
+  <rejection class="QFont" enum-name="ResolveProperties"/>
+  <rejection class="QMotifStyle" field-name="focus"/>
+  <rejection class="QPictureIO" function-name="defineIOHandler"/>
+  <rejection class="QPolygon" function-name="putPoints"/>
+  <rejection class="QPolygon" function-name="setPoints"/>
+  <rejection class="QPolygon" function-name="setPoint"/>
+  <rejection class="QPolygon" function-name="points"/>
+  <rejection class="QPolygon" function-name="point"/>
+  <rejection class="QActionGroup" function-name="selected"/>
+  <rejection class="QPaintEngine" function-name="fix_neg_rect"/>
+
+  <primitive-type name="WId" target-lang-api-name="PyLong">
+    <conversion-rule>
+      <native-to-target>
+      return PyLong_FromVoidPtr(reinterpret_cast&lt;void *&gt;(%in));
+      </native-to-target>
+      <target-to-native>
+        <add-conversion type="PyLong">
+          %out = reinterpret_cast&lt;%OUTTYPE&gt;(PyLong_AsVoidPtr(%in));
+        </add-conversion>
+      </target-to-native>
+    </conversion-rule>
+  </primitive-type>
+
+  <value-type name="QTransform">
+    <enum-type name="TransformationType"/>
+    <add-function signature="__repr__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="repr_code">
+               <replace from="%REPR_FORMAT" to="%f, %f, %f, %f, %f, %f, %f, %f, %f" />
+               <replace from="%REPR_ARGS"
+                        to="%CPPSELF.m11(), %CPPSELF.m12(), %CPPSELF.m13(), %CPPSELF.m21(), %CPPSELF.m22(), %CPPSELF.m23(), %CPPSELF.m31(), %CPPSELF.m32(), %CPPSELF.m33()" />
+             </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="__reduce__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="reduce_code">
+              <replace from="%REDUCE_FORMAT" to="ddddddddd" />
+              <replace from="%REDUCE_ARGS"
+                       to="%CPPSELF.m11(), %CPPSELF.m12(), %CPPSELF.m13(), %CPPSELF.m21(), %CPPSELF.m22(), %CPPSELF.m23(), %CPPSELF.m31(), %CPPSELF.m32(), %CPPSELF.m33()" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+
+    <modify-function signature="map(qreal,qreal,qreal*,qreal*)const">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject" />
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_args,number*,number*">
+                <replace from="$TYPE" to="qreal" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+    <!-- ### This is just an overload to "map(qreal,qreal,qreal*,qreal*)const" and can be discarded in Python -->
+    <modify-function signature="map(int,int,int*,int*)const" remove="all"/>
+    <!-- ### -->
+
+    <modify-function signature="inverted(bool*)const">
+      <modify-argument index="1">
+        <remove-argument/>
+      </modify-argument>
+      <modify-argument index="return">
+        <replace-type modified-type="PyTuple"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        <insert-template name="fix_bool*"/>
+      </inject-code>
+    </modify-function>
+    <add-function signature="quadToQuad(QPolygonF&amp;, QPolygonF&amp;)" return-type="PyObject*" static="true">
+      <inject-code>
+        QTransform _result;
+        if (QTransform::quadToQuad(%1, %2, _result)) {
+            %PYARG_0 = %CONVERTTOPYTHON[QTransform](_result);
+        } else {
+            Py_INCREF(Py_None);
+            %PYARG_0 = Py_None;
+        }
+      </inject-code>
+    </add-function>
+    <add-function signature="quadToSquare(QPolygonF &amp;)" return-type="PyObject*" static="true">
+      <inject-code>
+        QTransform _result;
+        if (QTransform::quadToSquare(%1, _result)) {
+            %PYARG_0 = %CONVERTTOPYTHON[QTransform](_result);
+        } else {
+            Py_INCREF(Py_None);
+            %PYARG_0 = Py_None;
+        }
+      </inject-code>
+    </add-function>
+
+    <add-function signature="squareToQuad(QPolygonF &amp;)" return-type="PyObject*" static="true">
+      <inject-code>
+        QTransform _result;
+        if (QTransform::squareToQuad(%1, _result)) {
+            %PYARG_0 = %CONVERTTOPYTHON[QTransform](_result);
+        } else {
+            Py_INCREF(Py_None);
+            %PYARG_0 = Py_None;
+        }
+      </inject-code>
+    </add-function>
+  </value-type>
+
+  <value-type name="QStaticText">
+      <enum-type name="PerformanceHint"/>
+  </value-type>
+  <value-type name="QTextFragment" />
+  <value-type name="QBitmap" >
+    <modify-function signature="fromData(QSize,const uchar*,QImage::Format)">
+      <modify-argument index="2">
+        <replace-type modified-type="PyBuffer"/>
+      </modify-argument>
+      <inject-code>
+        uchar* buffer = (uchar*) Shiboken::Buffer::getPointer(%PYARG_2);
+        QBitmap %0 = QBitmap::fromData(%1, buffer, %3);
+        %PYARG_0 = %CONVERTTOPYTHON[QBitmap](%0);
+      </inject-code>
+    </modify-function>
+  </value-type>
+  <value-type name="QTextInlineObject" />
+  <value-type name="QTextDocumentFragment" />
+  <value-type name="QTextOption">
+      <enum-type name="Flag" flags="Flags"/>
+      <enum-type name="TabType"/>
+      <enum-type name="WrapMode"/>
+      <value-type name="Tab"/>
+  </value-type>
+  <value-type name="QTextLine" >
+    <enum-type name="CursorPosition"/>
+    <enum-type name="Edge"/>
+    <modify-function signature="cursorToX(int*,QTextLine::Edge)const" remove="all" />
+    <modify-function signature="cursorToX(int,QTextLine::Edge)const">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject" />
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+        %BEGIN_ALLOW_THREADS
+        %RETURN_TYPE %0 = %CPPSELF->::%TYPE::%FUNCTION_NAME(&amp;%1, %2);
+        %END_ALLOW_THREADS
+        %PYARG_0 = PyTuple_New(2);
+        PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
+        PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
+        </inject-code>
+    </modify-function>
+    <modify-function signature="xToCursor(qreal,QTextLine::CursorPosition)const">
+      <modify-argument index="2">
+        <rename to="edge"/>
+      </modify-argument>
+    </modify-function>
+  </value-type>
+  <value-type name="QTextTableFormat" />
+  <value-type name="QTextImageFormat" />
+  <value-type name="QTextFrameFormat" >
+    <enum-type name="BorderStyle"/>
+    <enum-type name="Position"/>
+    <modify-function signature="isValid()const" access="non-final"/>
+  </value-type>
+  <value-type name="QTextLength">
+      <enum-type name="Type"/>
+  </value-type>
+  <value-type name="QPainterPath">
+    <enum-type name="ElementType"/>
+    <value-type name="Element">
+      <modify-field name="x" write="false"/>
+      <modify-field name="y" write="false"/>
+      <modify-field name="type" write="false"/>
+      <include file-name="QPainterPath" location="global"/>
+    </value-type>
+  </value-type>
+  <value-type name="QPalette">
+    <enum-type name="ColorGroup" />
+    <enum-type name="ColorRole" />
+  </value-type>
+  <value-type name="QKeySequence">
+    <enum-type name="SequenceFormat"/>
+    <enum-type name="SequenceMatch"/>
+    <enum-type name="StandardKey"/>
+
+    <add-function signature="__repr__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="repr_code">
+               <replace from="%REPR_FORMAT" to="%i, %i, %i, %i" />
+               <replace from="%REPR_ARGS"
+                        to="(*%CPPSELF)[0], (*%CPPSELF)[1], (*%CPPSELF)[2], (*%CPPSELF)[3]" />
+             </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="__reduce__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="reduce_code">
+              <replace from="%REDUCE_FORMAT" to="iiii" />
+              <replace from="%REDUCE_ARGS" to="(*%CPPSELF)[0], (*%CPPSELF)[1], (*%CPPSELF)[2], (*%CPPSELF)[3]" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+
+    <modify-function signature="operator[](uint) const" remove="all"/>
+    <add-function signature="__getitem__">
+        <inject-code class="target" position="beginning">
+            if (_i &lt; 0 || _i >= %CPPSELF.count()) {
+                PyErr_SetString(PyExc_IndexError, "index out of bounds");
+                return 0;
+            }
+            int item = (*%CPPSELF)[_i];
+            return %CONVERTTOPYTHON[int](item);
+        </inject-code>
+    </add-function>
+
+    <!-- ### Not necessary due the PySide QVariant conversion rules -->
+    <modify-function signature="operator QVariant()const" remove="all"/>
+  </value-type>
+  <value-type name="QPicture" >
+    <modify-function signature="load(QIODevice*, const char*)" allow-thread="yes"/>
+    <modify-function signature="load(const QString&amp;, const char*)" allow-thread="yes"/>
+    <modify-function signature="save(QIODevice*, const char*)" allow-thread="yes"/>
+    <modify-function signature="save(const QString&amp;, const char*)" allow-thread="yes"/>
+    <!-- See bug 759 -->
+    <modify-function signature="data() const">
+        <modify-argument index="return">
+            <replace-type modified-type="PyObject"/>
+        </modify-argument>
+        <inject-code>
+            %PYARG_0 = Shiboken::Buffer::newObject(%CPPSELF.data(), %CPPSELF.size());
+        </inject-code>
+    </modify-function>
+    <modify-function signature="setData(const char*,uint)">
+        <modify-argument index="1">
+            <replace-type modified-type="PyBuffer"/>
+            <conversion-rule class="target">
+                PyObject* %out = Shiboken::Buffer::newObject(%in, size);
+            </conversion-rule>
+            <conversion-rule class="native">
+                Py_ssize_t bufferLen;
+                char* %out = (char*) Shiboken::Buffer::getPointer(%PYARG_1, &amp;bufferLen);
+            </conversion-rule>
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+            <conversion-rule class="native">
+                uint %out = bufferLen;
+            </conversion-rule>
+        </modify-argument>
+    </modify-function>
+  </value-type>
+  <value-type name="QRegion" >
+    <enum-type name="RegionType"/>
+    <!-- ### This operator does not make sense in Python. -->
+    <modify-function signature="operator&amp;=(QRegion)" remove="all"/>
+    <modify-function signature="operator&amp;=(QRect)" remove="all"/>
+    <!-- ### -->
+  </value-type>
+  
+  <value-type name="QTextBlock">
+    <value-type name="iterator" >
+      <include file-name="QTextBlock" location="global"/>
+      <!-- ### These operators where removed because they don't make sense in Python.
+           The iterator methods (__iter__, next) replace this functionality. -->
+      <modify-function signature="operator++()" remove="all"/>
+      <modify-function signature="operator--()" remove="all"/>
+      <!-- ### -->
+      <add-function signature="__iter__()" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+          <insert-template name="__iter__" />
+        </inject-code>
+      </add-function>
+      <add-function signature="__next__()" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+          <insert-template name="__next__">
+            <replace from="%CPPSELF_TYPE" to="QTextBlock::iterator" />
+          </insert-template>
+        </inject-code>
+      </add-function>
+    </value-type>
+    <add-function signature="__iter__()" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+          <insert-template name="__iter_parent__">
+            <replace from="%CPPSELF_TYPE" to="QTextBlock::iterator" />
+          </insert-template>
+        </inject-code>
+    </add-function>
+    <modify-function signature="setUserData(QTextBlockUserData*)">
+        <inject-code class="target" position="end">
+            const QTextDocument* doc = %CPPSELF.document();
+            if (doc) {
+                Shiboken::AutoDecRef pyDocument(%CONVERTTOPYTHON[QTextDocument*](doc));
+                Shiboken::Object::setParent(pyDocument, %PYARG_1);
+            }
+        </inject-code>
+    </modify-function>
+    <modify-function signature="userData() const">
+        <modify-argument index="return">
+            <define-ownership class="target" owner="default"/>
+        </modify-argument>
+        <inject-code class="target" position="end">
+            const QTextDocument* doc = %CPPSELF.document();
+            if (doc) {
+                Shiboken::AutoDecRef pyDocument(%CONVERTTOPYTHON[QTextDocument*](doc));
+                Shiboken::Object::setParent(pyDocument, %PYARG_0);
+            }
+        </inject-code>
+    </modify-function>
+  </value-type>
+  <value-type name="QTextBlockFormat">
+    <enum-type name="LineHeightTypes" since="4.8" revision="4800"/>
+  </value-type>
+  <value-type name="QTextTableCellFormat" />
+  <value-type name="QTextCharFormat" >
+    <enum-type name="FontPropertiesInheritanceBehavior"/>
+    <enum-type name="UnderlineStyle"/>
+    <enum-type name="VerticalAlignment"/>
+    <modify-function signature="isValid()const" access="non-final"/>
+  </value-type>
+  <value-type name="QTextFormat" >
+    <enum-type name="FormatType"/>
+    <enum-type name="ObjectTypes"/>
+    <enum-type name="PageBreakFlag" flags="PageBreakFlags"/>
+    <enum-type name="Property" />
+    <modify-function signature="isValid()const" access="non-final"/>
+  </value-type>
+  <value-type name="QTextListFormat">
+      <enum-type name="Style"/>
+  </value-type>
+  <value-type name="QPolygon">
+    <extra-includes>
+      <include file-name="QMatrix" location="global"/>
+      <include file-name="QTransform" location="global"/>
+    </extra-includes>
+    <add-function signature="__reduce__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            PyObject* points = PyList_New(%CPPSELF.count());
+            for (int i = 0, max = %CPPSELF.count(); i &lt; max; ++i){
+                int x, y;
+                %CPPSELF.point(i, &amp;x, &amp;y);
+                QPoint pt = QPoint(x, y);
+                PyList_SET_ITEM(points, i, %CONVERTTOPYTHON[QPoint](pt));
+            }
+            <insert-template name="reduce_code">
+              <replace from="%REDUCE_FORMAT" to="N" />
+              <replace from="%REDUCE_ARGS" to="points" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+
+    <!-- ### "QPolygon(int, const int*)" is an internal constructor. -->
+    <modify-function signature="QPolygon(int, const int *)" remove="all"/>
+    <!-- ### A QVector parameter, for no defined type, will generate wrong code. -->
+    <modify-function signature="operator+=(QVector&lt;QPoint&gt;)" remove="all"/>
+    <modify-function signature="operator&lt;&lt;(QPoint)">
+        <inject-code>
+            // %FUNCTION_NAME()
+            *%CPPSELF &lt;&lt; %1;
+            %PYARG_0 = %CONVERTTOPYTHON[QPolygon*](%CPPSELF);
+        </inject-code>
+    </modify-function>
+    <modify-function signature="operator&lt;&lt;(QVector&lt;QPoint&gt;)">
+        <inject-code>
+            // %FUNCTION_NAME()
+            *%CPPSELF &lt;&lt; %1;
+            %PYARG_0 = %CONVERTTOPYTHON[QPolygon*](%CPPSELF);
+        </inject-code>
+    </modify-function>
+    <!-- ### -->
+  </value-type>
+  <value-type name="QPolygonF">
+    <extra-includes>
+      <include file-name="QMatrix" location="global"/>
+      <include file-name="QTransform" location="global"/>
+    </extra-includes>
+    <!-- ### A QVector parameter, for no defined type, will generate wrong code. -->
+    <modify-function signature="operator+=(QVector&lt;QPointF&gt;)" remove="all"/>
+    <!-- ### See bug 776 -->
+    <modify-function signature="operator&lt;&lt;(QPointF)" remove="all"/>
+    <!-- ### See bug 777 -->
+    <modify-function signature="operator&lt;&lt;(QVector&lt;QPointF&gt;)" remove="all"/>
+    <!-- ### -->
+  </value-type>
+  <value-type name="QIcon" >
+    <enum-type name="Mode"/>
+    <enum-type name="State"/>
+    <modify-function signature="QIcon(QIconEngine *)">
+      <modify-argument index="1">
+        <no-null-pointer/>
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </value-type>
+
+  <template name="load_xpm">
+        Shiboken::AutoDecRef strList(PySequence_Fast(%PYARG_1, "Invalid sequence."));
+        int lineCount = PySequence_Fast_GET_SIZE(strList.object());
+        for (int line = 0; line &lt; lineCount; ++line) {
+            if (!Shiboken::String::check(PySequence_Fast_GET_ITEM(strList.object(), line))) {
+                PyErr_SetString(PyExc_TypeError, "The argument must be a sequence of strings.");
+                break;
+            }
+        }
+
+        const char** xpm = (const char**) malloc (lineCount * sizeof(const char**));
+        for (int line = 0; line &lt; lineCount; ++line)
+            xpm[line] = Shiboken::String::toCString(PySequence_Fast_GET_ITEM(strList.object(), line));
+
+        %BEGIN_ALLOW_THREADS
+        %0 = new %TYPE(xpm);
+        %END_ALLOW_THREADS
+
+        free(xpm);
+  </template>
+  <value-type name="QPixmap" >
+    <!--<conversion-rule>-->
+        <!--<target-to-native replace="no">-->
+            <!--<add-conversion type="QVariant" check="%CHECKTYPE[QVariant](%in)">-->
+            <!--QVariant in = %CONVERTTOCPP[QVariant](%in);-->
+            <!--%out = in.value&lt;%OUTTYPE&gt;();-->
+            <!--</add-conversion>-->
+        <!--</target-to-native>-->
+    <!--</conversion-rule>-->
+    <add-function signature="QPixmap(const QImage&amp;)">
+        <modify-argument index="1">
+            <rename to="image"/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+        %0 = new %TYPE(QPixmap::fromImage(%1));
+        </inject-code>
+    </add-function>
+    <modify-function signature="QPixmap(const char **)">
+        <modify-argument index="1">
+            <replace-type modified-type="PySequence" />
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="load_xpm" />
+        </inject-code>
+    </modify-function>
+
+    <!-- ### Operator ! doesn't make sense in Python. -->
+    <modify-function signature="operator!()const" remove="all"/>
+ 
+    <modify-function signature="loadFromData(const uchar*,uint,const char*,QFlags&lt;Qt::ImageConversionFlag&gt;)">
+      <modify-argument index="1">
+        <replace-type modified-type="PyBytes"/>
+        <conversion-rule class="native">
+          const uchar* %out = reinterpret_cast&lt;const uchar*>(PyBytes_AS_STRING(%PYARG_1));
+        </conversion-rule>
+      </modify-argument>
+      <modify-argument index="2">
+        <remove-argument/>
+        <conversion-rule class="native">
+          uint %out = static_cast&lt;uint>(PyBytes_Size(%PYARG_1));
+        </conversion-rule>
+      </modify-argument>
+    </modify-function>
+  </value-type>
+  <value-type name="QTextCursor" >
+    <extra-includes>
+      <include file-name="QTextBlock" location="global"/>
+      <include file-name="QTextDocumentFragment" location="global"/>
+    </extra-includes>
+    <enum-type name="MoveMode"/>
+    <enum-type name="MoveOperation"/>
+    <enum-type name="SelectionType"/>
+    <modify-function signature="selectedTableCells(int*,int*,int*,int*)const">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject" />
+        </modify-argument>
+        <modify-argument index="1">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_number*,number*,number*,number*">
+                <replace from="$TYPE" to="int" />
+            </insert-template>
+        </inject-code>
+        <inject-code class="native" position="end">
+            <insert-template name="fix_native_return_number*,number*,number*,number*">
+                <replace from="$TYPE" to="int" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="currentFrame()const">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertTable(int,int,const QTextTableFormat &amp;)">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertTable(int,int)">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
+  </value-type>
+  
+  <!-- Qt5: this _should_ be obsolete, but QImage is still using it... -->
+  <value-type name="QMatrix">
+    <extra-includes>
+      <include file-name="QPainterPath" location="global"/>
+    </extra-includes>
+    <add-function signature="__repr__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="repr_code">
+               <replace from="%REPR_FORMAT" to="%f, %f, %f, %f, %f, %f" />
+               <replace from="%REPR_ARGS"
+                        to="%CPPSELF.m11(), %CPPSELF.m12(), %CPPSELF.m21(), %CPPSELF.m22(), %CPPSELF.dx(), %CPPSELF.dy()" />
+             </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="__reduce__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="reduce_code">
+              <replace from="%REDUCE_FORMAT" to="dddddd" />
+              <replace from="%REDUCE_ARGS" to="%CPPSELF.m11(), %CPPSELF.m12(), %CPPSELF.m21(), %CPPSELF.m22(), %CPPSELF.dx(), %CPPSELF.dy()" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+    <template name="qmatrix_map">
+    %ARG1_TYPE a, b;
+    %CPPSELF.%FUNCTION_NAME(%1, %2, &amp;a, &amp;b);
+    %PYARG_0 = PyTuple_New(2);
+    PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%ARG1_TYPE](a));
+    PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](b));
+    </template>
+    <modify-function signature="map(int,int,int*,int*)const">
+        <modify-argument index="3">
+            <remove-argument />
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument />
+        </modify-argument>
+        <inject-code>
+            <insert-template name="qmatrix_map" />
+        </inject-code>
+    </modify-function>
+    <modify-function signature="map(qreal,qreal,qreal*,qreal*)const">
+        <modify-argument index="3">
+            <remove-argument />
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument />
+        </modify-argument>
+        <inject-code>
+            <insert-template name="qmatrix_map" />
+        </inject-code>
+    </modify-function>
+    <modify-function signature="inverted(bool*)const">
+      <modify-argument index="1">
+        <remove-argument/>
+      </modify-argument>
+      <modify-argument index="return">
+        <replace-type modified-type="PyTuple"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        <insert-template name="fix_bool*"/>
+      </inject-code>
+    </modify-function>
+  </value-type>
+
+  <value-type name="QConicalGradient" polymorphic-id-expression="%1-&gt;type() == QGradient::ConicalGradient" />
+  <value-type name="QFontInfo" />
+  <value-type name="QRadialGradient" polymorphic-id-expression="%1-&gt;type() == QGradient::RadialGradient" />
+  <value-type name="QFont" >
+    <enum-type name="Capitalization"/>
+    <enum-type name="SpacingType"/>
+    <enum-type name="Stretch"/>
+    <enum-type name="Style"/>
+    <enum-type name="StyleHint" />
+    <enum-type name="StyleStrategy"/>
+    <enum-type name="Weight"/>
+    <enum-type name="HintingPreference" since="4.8" revision="4800"/>
+    <extra-includes>
+      <include file-name="QStringList" location="global"/>
+    </extra-includes>
+    <modify-function signature="setStyleHint(QFont::StyleHint, QFont::StyleStrategy)">
+      <modify-argument index="2">
+        <rename to="strategy"/>
+      </modify-argument>
+    </modify-function>
+  </value-type>
+  <value-type name="QTextTableCell" >
+    <extra-includes>
+      <include file-name="QTextCursor" location="global"/>
+    </extra-includes>
+  </value-type> <!--
+  <function signature="QImageCleanupFunction(void*)">
+    <extra-includes>
+      <include file-name="QImage" location="global"/>
+    </extra-includes>
+  </function> -->
+  <primitive-type name="QImageCleanupFunction" />
+  <value-type name="QImage">
+    <enum-type name="Format"/>
+    <enum-type name="InvertMode"/>
+    <extra-includes>
+      <include file-name="QStringList" location="global"/>
+      <include file-name="QMatrix" location="global"/>
+    </extra-includes>
+
+    <template name="qimage_buffer_constructor">
+        uchar* ptr = (uchar*) Shiboken::Buffer::getPointer(%PYARG_1);
+        %0 = new %TYPE(ptr, %ARGS);
+    </template>
+    <modify-function signature="QImage(uchar *,int,int,int,QImage::Format,QImageCleanupFunction, void *)">
+        <modify-argument index="1">
+            <replace-type modified-type="PyBuffer"/>
+        </modify-argument>
+        <inject-code>
+            <insert-template name="qimage_buffer_constructor">
+                <replace from="%ARGS" to="%2, %3, %4, %5" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="QImage(uchar*,int,int,QImage::Format,QImageCleanupFunction, void *)">
+        <modify-argument index="1">
+            <replace-type modified-type="PyBuffer"/>
+        </modify-argument>
+        <inject-code>
+            <insert-template name="qimage_buffer_constructor">
+                <replace from="%ARGS" to="%2, %3, %4" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+
+    <add-function signature="QImage(QString&amp;,int,int,int,QImage::Format)">
+        <inject-code>
+            <insert-template name="qimage_buffer_constructor">
+                <replace from="%ARGS" to="%2, %3, %4, %5" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+    <add-function signature="QImage(QString&amp;,int,int,QImage::Format)">
+        <inject-code>
+            <insert-template name="qimage_buffer_constructor">
+                <replace from="%ARGS" to="%2, %3, %4" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+
+    <!-- The non-const versions are already used -->
+    <modify-function signature="QImage(const uchar*,int,int,int,QImage::Format,QImageCleanupFunction, void *)" remove="all"/>
+    <modify-function signature="QImage(const uchar*,int,int,QImage::Format,QImageCleanupFunction, void *)" remove="all" />
+    <!-- ### -->
+
+    <modify-function signature="QImage(const char**)">
+        <modify-argument index="1">
+            <replace-type modified-type="PySequence" />
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="load_xpm" />
+        </inject-code>
+    </modify-function>
+    <!-- ### There is already an fromData with a QByteArray type (that is convertible from Python's str) as the first type. -->
+    <modify-function signature="fromData(const uchar*,int,const char*)" remove="all"/>
+    <!-- ### There is already an loadFromData with a QByteArray type (that is convertible from Python's str) as the first type. -->
+    <modify-function signature="loadFromData(const uchar*,int,const char*)" remove="all" />
+
+    <modify-function signature="constBits()const" since="4.7">
+        <inject-code>
+            %PYARG_0 = Shiboken::Buffer::newObject(%CPPSELF.%FUNCTION_NAME(), %CPPSELF.byteCount());
+        </inject-code>
+    </modify-function>
+    <modify-function signature="bits()">
+        <inject-code>
+            // byteCount() is only available on Qt4.7, so we use bytesPerLine * height
+            %PYARG_0 = Shiboken::Buffer::newObject(%CPPSELF.%FUNCTION_NAME(), %CPPSELF.bytesPerLine() * %CPPSELF.height(), Shiboken::Buffer::ReadWrite);
+        </inject-code>
+    </modify-function>
+    <modify-function signature="constScanLine(int)const" since="4.7">
+        <inject-code>
+            %PYARG_0 = Shiboken::Buffer::newObject(%CPPSELF.%FUNCTION_NAME(%1), %CPPSELF.bytesPerLine());
+        </inject-code>
+        <modify-argument index="return">
+            <replace-type modified-type="PyObject" />
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="scanLine(int)">
+        <inject-code>
+            %PYARG_0 = Shiboken::Buffer::newObject(%CPPSELF.%FUNCTION_NAME(%1), %CPPSELF.bytesPerLine(), Shiboken::Buffer::ReadWrite);
+        </inject-code>
+        <modify-argument index="return">
+            <replace-type modified-type="PyObject" />
+        </modify-argument>
+    </modify-function>
+    <!--
+        Only the non-const version of bits() and scanLine() is exported to Python
+        If the user don't want to detach the QImage data he must use constBits or constScanLine
+        as Python doesn't have the concept of constness.
+    -->
+    <modify-function signature="bits()const" remove="all"/>
+    <modify-function signature="scanLine(int)const" remove="all"/>
+
+    <modify-function signature="invertPixels(QImage::InvertMode)">
+      <modify-argument index="1">
+        <rename to="mode"/>
+      </modify-argument>
+    </modify-function>
+  </value-type>
+  <value-type name="QCursor" >
+    <extra-includes>
+      <include file-name="QPixmap" location="global"/>
+      <include file-name="Qt" location="global"/>
+    </extra-includes>
+  </value-type>
+  <value-type name="QFontDatabase" >
+    <extra-includes>
+      <include file-name="QStringList" location="global"/>
+    </extra-includes>
+    <enum-type name="SystemFont" />
+    <enum-type name="WritingSystem" />
+  </value-type>
+  <value-type name="QPen">
+    <extra-includes>
+      <include file-name="QBrush" location="global"/>
+    </extra-includes>
+  </value-type>
+  <value-type name="QBrush">
+    <extra-includes>
+      <include file-name="QPixmap" location="global"/>
+    </extra-includes>
+  </value-type>
+
+  <template name="qcolor_repr">
+      switch(%CPPSELF.spec()) {
+        case QColor::Rgb:
+        {
+            qreal r, g, b, a;
+            %CPPSELF.getRgbF(&amp;r, &amp;g, &amp;b, &amp;a);
+            QString repr = QString().sprintf("PySide2.QtGui.QColor.fromRgbF(%.6f, %.6f, %.6f, %.6f)", r, g, b, a);
+            %PYARG_0 = Shiboken::String::fromCString(qPrintable(repr));
+            break;
+        }
+        case QColor::Hsv:
+        {
+            qreal h, s, v, a;
+            %CPPSELF.getHsvF(&amp;h, &amp;s, &amp;v, &amp;a);
+            QString repr = QString().sprintf("PySide2.QtGui.QColor.fromHsvF(%.6f, %.6f, %.6f, %.6f)", h, s, v, a);
+            %PYARG_0 = Shiboken::String::fromCString(qPrintable(repr));
+            break;
+        }
+        case QColor::Cmyk:
+        {
+            qreal c, m, y, k, a;
+            %CPPSELF.getCmykF(&amp;c, &amp;m, &amp;y, &amp;k, &amp;a);
+            QString repr = QString().sprintf("PySide2.QtGui.QColor.fromCmykF(%.6f, %.6f, %.6f, %.6f, %.6f)", c, m, y, k, a);
+            %PYARG_0 = Shiboken::String::fromCString(qPrintable(repr));
+            break;
+        }
+        #if QT_VERSION >= 0x040600
+        case QColor::Hsl:
+        {
+            qreal h, s, l, a;
+            %CPPSELF.getHslF(&amp;h, &amp;s, &amp;l, &amp;a);
+            QString repr = QString().sprintf("PySide2.QtGui.QColor.fromHslF(%.6f, %.6f, %.6f, %.6f)", h, s, l, a);
+            %PYARG_0 = Shiboken::String::fromCString(qPrintable(repr));
+            break;
+        }
+        #endif
+        default:
+        {
+            %PYARG_0 = Shiboken::String::fromCString("PySide2.QtGui.QColor()");
+        }
+     }
+  </template>
+  <value-type name="QColor">
+    <enum-type name="NameFormat"/>
+    <enum-type name="Spec"/>
+    <extra-includes>
+      <include file-name="QVariant" location="global"/>
+    </extra-includes>
+    <add-function signature="__repr__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="qcolor_repr" />
+        </inject-code>
+    </add-function>
+    <add-function signature="__str__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="qcolor_repr" />
+        </inject-code>
+    </add-function>
+    <add-function signature="__setstate__(PyObject*)" return-type="PyObject">
+        <inject-code>
+            Shiboken::AutoDecRef func(PyObject_GetAttr(%PYSELF, PyTuple_GET_ITEM(%1, 0)));
+            PyObject* args = PyTuple_GET_ITEM(%1, 1);
+            %PYARG_0 = PyObject_Call(func, args, NULL);
+        </inject-code>
+    </add-function>
+    <add-function signature="__reduce__" return-type="PyObject">
+        <inject-code class="target" position="beginning">
+          switch(%CPPSELF.spec()) {
+            case QColor::Rgb:
+            {
+                qreal r, g, b, a;
+                %CPPSELF.getRgbF(&amp;r, &amp;g, &amp;b, &amp;a);
+                %PYARG_0 = Py_BuildValue("(ON(s(ffff)))", Py_TYPE(%PYSELF), PyTuple_New(0), "setRgbF", (float)r, (float)g, (float)b, (float)a);
+                break;
+            }
+            case QColor::Hsv:
+            {
+                qreal h, s, v, a;
+                %CPPSELF.getHsvF(&amp;h, &amp;s, &amp;v, &amp;a);
+                %PYARG_0 = Py_BuildValue("(ON(s(ffff)))", Py_TYPE(%PYSELF), PyTuple_New(0), "setHsvF", (float)h, (float)s, (float)v, (float)a);
+                break;
+            }
+            case QColor::Cmyk:
+            {
+                qreal c, m, y, k, a;
+                %CPPSELF.getCmykF(&amp;c, &amp;m, &amp;y, &amp;k, &amp;a);
+                %PYARG_0 = Py_BuildValue("(ON(s(fffff)))", Py_TYPE(%PYSELF), PyTuple_New(0), "setCmykF", (float)c, (float)m, (float)y, (float)k, (float)a);
+                break;
+            }
+            #if QT_VERSION >= 0x040600
+            case QColor::Hsl:
+            {
+                qreal h, s, l, a;
+                %CPPSELF.getHslF(&amp;h, &amp;s, &amp;l, &amp;a);
+                %PYARG_0 = Py_BuildValue("(ON(s(ffff)))", Py_TYPE(%PYSELF), PyTuple_New(0), "setHslF", (float)h, (float)s, (float)l, (float)a);
+                break;
+            }
+            #endif
+            default:
+            {
+                %PYARG_0 = Py_BuildValue("(N(O))", PyObject_Type(%PYSELF), Py_None);
+            }
+          }
+        </inject-code>
+    </add-function>
+
+    <add-function signature="toTuple" return-type="PyObject">
+        <inject-code class="target" position="beginning">
+          switch(%CPPSELF.spec()) {
+          case QColor::Rgb:
+          {
+                int r, g, b, a;
+                %CPPSELF.getRgb(&amp;r, &amp;g, &amp;b, &amp;a);
+                %PYARG_0 = Py_BuildValue("iiii", r, g, b, a);
+                break;
+          }
+          case QColor::Hsv:
+          {
+                int h, s, v, a;
+                %CPPSELF.getHsv(&amp;h, &amp;s, &amp;v, &amp;a);
+                %PYARG_0 = Py_BuildValue("iiii", h, s, v, a);
+                break;
+          }
+          case QColor::Cmyk:
+          {
+                int c, m, y, k, a;
+                %CPPSELF.getCmyk(&amp;c, &amp;m, &amp;y, &amp;k, &amp;a);
+                %PYARG_0 = Py_BuildValue("iiiii", c, m, y, k, a);
+                break;
+          }
+          case QColor::Hsl:
+          {
+                int h, s, l, a;
+                %CPPSELF.getHsl(&amp;h, &amp;s, &amp;l, &amp;a);
+                %PYARG_0 = Py_BuildValue("iiii", h, s, l, a);
+                break;
+          }
+          default:
+          {
+                %PYARG_0 = 0;
+          }
+        }
+        </inject-code>
+    </add-function>
+    <!-- ### "QColor(QColor::Spec)" is an internal method. -->
+    <modify-function signature="QColor(QColor::Spec)" remove="all"/>
+    <!-- ### Constructor removed because we already have an overload using QString. -->
+    <modify-function signature="QColor(const char*)" remove="all" />
+    <!-- ### -->
+    <add-function signature="QColor(QVariant)">
+        <inject-code class="target" position="beginning">
+        if (%1.type() == QVariant::Color)
+            %0 = new %TYPE(%1.value&lt;QColor>());
+        else
+            PyErr_SetString(PyExc_TypeError, "QVariant must be holding a QColor");
+        </inject-code>
+    </add-function>
+    <!-- get* methods. Inject code -->
+    <modify-function signature="getCmyk(int*,int*,int*,int*,int*)">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject *" />
+        </modify-argument>
+        <modify-argument index="1">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="5">
+            <remove-argument/>
+            <remove-default-expression/>
+        </modify-argument>
+
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_number*,number*,number*,number*,number*">
+                <replace from="$TYPE" to="int" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="getCmykF(qreal*,qreal*,qreal*,qreal*,qreal*)">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject *" />
+        </modify-argument>
+        <modify-argument index="1">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="5">
+            <remove-argument/>
+            <remove-default-expression/>
+        </modify-argument>
+
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_number*,number*,number*,number*,number*">
+                <replace from="$TYPE" to="qreal" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="getHsl(int*,int*,int*,int*)const" since="4.6">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject *" />
+        </modify-argument>
+        <modify-argument index="1">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument/>
+            <remove-default-expression/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_number*,number*,number*,number*">
+                <replace from="$TYPE" to="int" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="getHslF(qreal*,qreal*,qreal*,qreal*)const" since="4.6">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject *" />
+        </modify-argument>
+        <modify-argument index="1">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument/>
+            <remove-default-expression/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_number*,number*,number*,number*">
+                <replace from="$TYPE" to="qreal" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="getHsv(int*,int*,int*,int*)const">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject *" />
+        </modify-argument>
+        <modify-argument index="1">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument/>
+            <remove-default-expression/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_number*,number*,number*,number*">
+                <replace from="$TYPE" to="int" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="getHsvF(qreal*,qreal*,qreal*,qreal*)const">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject *" />
+        </modify-argument>
+        <modify-argument index="1">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument/>
+            <remove-default-expression/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_number*,number*,number*,number*">
+                <replace from="$TYPE" to="qreal" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="getRgb(int*,int*,int*,int*)const">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject *" />
+        </modify-argument>
+        <modify-argument index="1">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument/>
+            <remove-default-expression/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_number*,number*,number*,number*">
+                <replace from="$TYPE" to="int" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="getRgbF(qreal*,qreal*,qreal*,qreal*)const">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject *" />
+        </modify-argument>
+        <modify-argument index="1">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument/>
+            <remove-default-expression/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_number*,number*,number*,number*">
+                <replace from="$TYPE" to="qreal" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+  </value-type>
+  <value-type name="QFontMetricsF" >
+
+    <modify-function signature="boundingRect(QChar)const" rename="boundingRectChar">
+      <modify-argument index="1">
+        <replace-type modified-type="char"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        <insert-template name="QFontCharFix"/>
+     </inject-code>
+    </modify-function>
+
+    <modify-function signature="width(QChar)const" rename="widthChar">
+      <modify-argument index="1">
+        <replace-type modified-type="char"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        <insert-template name="QFontCharFix"/>
+     </inject-code>
+    </modify-function>
+
+    <modify-function signature="boundingRect(QRectF,int,QString,int,int*)const">
+      <modify-argument index="5">
+          <replace-type modified-type="PyObject"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        int* array = NULL;
+        bool errorOccurred = false;
+
+        if (numArgs == 5) {
+            array = Shiboken::sequenceToIntArray(%PYARG_5, true);
+            if (PyErr_Occurred()) {
+                if (array)
+                    delete []array;
+                errorOccurred = true;
+            }
+        }
+
+        if (!errorOccurred) {
+            %RETURN_TYPE retval = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, array);
+
+            if (array)
+                delete []array;
+
+            %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](retval);
+        }
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="size(int,QString,int,int*)const">
+      <modify-argument index="4">
+          <replace-type modified-type="PyObject"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        int* array = NULL;
+        bool errorOccurred = false;
+
+        if (numArgs == 4) {
+            array = Shiboken::sequenceToIntArray(%PYARG_4, true);
+            if (PyErr_Occurred()) {
+                if (array)
+                    delete []array;
+                errorOccurred = true;
+            }
+        }
+
+        if (!errorOccurred) {
+            %RETURN_TYPE retval = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, array);
+
+            if (array)
+                delete []array;
+
+            %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](retval);
+        }
+      </inject-code>
+    </modify-function>
+  </value-type>
+  <value-type name="QFontMetrics" >
+
+    <modify-function signature="boundingRect(QChar)const" rename="boundingRectChar">
+      <modify-argument index="1">
+        <replace-type modified-type="char"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        <insert-template name="QFontCharFix"/>
+     </inject-code>
+    </modify-function>
+
+    <modify-function signature="width(QChar)const" rename="widthChar">
+      <modify-argument index="1">
+        <replace-type modified-type="char"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        <insert-template name="QFontCharFix"/>
+     </inject-code>
+    </modify-function>
+
+    <modify-function signature="boundingRect(int,int,int,int,int,QString,int,int*)const">
+      <modify-argument index="8">
+        <replace-type modified-type="PyObject"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        int* array = NULL;
+        bool errorOccurred = false;
+
+        if (numArgs == 8) {
+            array = Shiboken::sequenceToIntArray(%PYARG_8, true);
+            if (PyErr_Occurred()) {
+                if (array)
+                    delete []array;
+                errorOccurred = true;
+            }
+        }
+
+        if (!errorOccurred) {
+            %RETURN_TYPE retval = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, %5, %6, %7, array);
+
+            if (array)
+                delete []array;
+
+            %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](retval);
+        }
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="boundingRect(QRect,int,QString,int,int*)const">
+      <modify-argument index="5">
+          <replace-type modified-type="PyObject"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        int* array = NULL;
+        bool errorOccurred = false;
+
+        if (numArgs == 5) {
+            array = Shiboken::sequenceToIntArray(%PYARG_5, true);
+            if (PyErr_Occurred()) {
+                if (array)
+                    delete []array;
+                errorOccurred = true;
+            }
+        }
+
+        if (!errorOccurred) {
+            %RETURN_TYPE retval = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, array);
+
+            if (array)
+                delete []array;
+
+            %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](retval);
+        }
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="size(int,QString,int,int*)const">
+      <modify-argument index="4">
+          <replace-type modified-type="PyObject"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        int* array = NULL;
+        bool errorOccurred = false;
+
+        if (numArgs == 4) {
+            array = Shiboken::sequenceToIntArray(%PYARG_4, true);
+            if (PyErr_Occurred()) {
+                if (array)
+                    delete []array;
+                errorOccurred = true;
+            }
+        }
+
+        if (!errorOccurred) {
+            %RETURN_TYPE retval = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, array);
+
+            if (array)
+                delete []array;
+
+            %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](retval);
+        }
+
+      </inject-code>
+    </modify-function>
+  </value-type>
+  <value-type name="QGradient" force-abstract="yes" polymorphic-id-expression="%1-&gt;type() == QGradient::NoGradient">
+      <enum-type name="CoordinateMode"/>
+      <enum-type name="InterpolationMode"/>
+      <enum-type name="Spread" lower-bound="QGradient.PadSpread" upper-bound="QGradient.RepeatSpread"/>
+      <enum-type name="Type"/>
+  </value-type>
+  <value-type name="QLinearGradient" polymorphic-id-expression="%1-&gt;type() == QGradient::LinearGradient" />
+  <object-type name="QPaintDevice">
+      <enum-type name="PaintDeviceMetric"/>
+  </object-type>
+  <object-type name="QPagedPaintDevice">
+    <value-type name="Margins" />
+    <enum-type name="PageSize" />
+    <enum-type name="PdfVersion" since="5.10"/>
+  </object-type>
+  <object-type name="QAbstractTextDocumentLayout">
+    <value-type name="PaintContext" >
+      <include file-name="QAbstractTextDocumentLayout" location="global"/>
+    </value-type>
+    <value-type name="Selection" />
+    <modify-function signature="setPaintDevice(QPaintDevice*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="draw(QPainter*,QAbstractTextDocumentLayout::PaintContext)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="drawInlineObject(QPainter*,QRectF,QTextInlineObject,int,QTextFormat)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+  </object-type>
+  <object-type name="QPyTextObject" />
+
+  <object-type name="QDesktopServices" since="4.2" />
+  <object-type name="QDoubleValidator">
+      <enum-type name="Notation"/>
+  </object-type>
+  <object-type name="QIconEngine">
+    <object-type name="AvailableSizesArgument" />
+    <enum-type name="IconEngineHook" />
+    <modify-function signature="paint(QPainter*,QRect,QIcon::Mode,QIcon::State)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="read(QDataStream&amp;)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="write(QDataStream&amp;)const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <!-- ### This makes little sense in Python. Could be reassessed later. -->
+    <modify-function signature="virtual_hook(int,void*)" remove="all"/>
+  </object-type>
+  <object-type name="QImageWriter">
+    <enum-type name="ImageWriterError"/>
+    <modify-function signature="setDevice(QIODevice*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="write(const QImage&amp;)" allow-thread="yes"/>
+  </object-type>
+  <object-type name="QIntValidator" />
+
+  <object-type name="QPainterPathStroker" copyable="false"/>
+  <object-type name="QPictureIO">
+    <modify-function signature="setIODevice(QIODevice*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QPixmapCache">
+    <value-type name="Key"/>
+    <add-function signature="find(QPixmapCache::Key&amp;)">
+        <inject-code>
+            QPixmap p;
+            if (%CPPSELF.%FUNCTION_NAME(%1, &amp;p)) {
+                %PYARG_0 = %CONVERTTOPYTHON[QPixmap](p);
+            } else {
+                %PYARG_0 = Py_None;
+                Py_INCREF(%PYARG_0);
+            }
+        </inject-code>
+    </add-function>
+  </object-type>
+
+  <object-type name="QRegExpValidator" />
+
+  <object-type name="QStandardItem">
+    <enum-type name="ItemType"/>
+    <modify-function signature="operator&lt;(QStandardItem)const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="read(QDataStream&amp;)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="write(QDataStream&amp;)const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+
+    <modify-function signature="appendColumn(const QList&lt;QStandardItem *&gt; &amp;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="appendRow(const QList&lt;QStandardItem *&gt; &amp;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="appendRow(QStandardItem *)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="appendRows(const QList&lt;QStandardItem *&gt; &amp;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="insertColumn(int, const QList&lt;QStandardItem *&gt; &amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertRow(int, const QList&lt;QStandardItem *&gt; &amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertRows(int, const QList&lt;QStandardItem *&gt; &amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="setChild(int, int, QStandardItem *)">
+      <inject-code class="target" position="beginning">
+        // Clear parent from the old child
+        QStandardItem* _i = %CPPSELF->child(%1, %2);
+        if (_i) {
+            PyObject* _pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
+            Shiboken::Object::setParent(0, _pyI);
+        }
+      </inject-code>
+      <modify-argument index="3">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setChild(int, QStandardItem *)">
+      <inject-code class="target" position="beginning">
+        // Clear parent from the old child
+        QStandardItem* _i = %CPPSELF->child(%1);
+        if (_i) {
+            PyObject* _pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
+            Shiboken::Object::setParent(0, _pyI);
+        }
+      </inject-code>
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+
+     <modify-function signature="takeChild(int, int)">
+      <modify-argument index="return">
+        <parent index="this" action="remove"/>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="clone() const">
+      <modify-argument index="return">
+        <define-ownership class="native" owner="c++"/>
+        <define-ownership class="target" owner="target"/>
+      </modify-argument>
+    </modify-function>
+
+    <!-- ??? -->
+    <modify-function signature="operator&lt;(QStandardItem)const" remove="all"/>
+  </object-type>
+  <object-type name="QStringListModel"/>
+  <object-type name="QSyntaxHighlighter">
+    <modify-function signature="setCurrentBlockUserData(QTextBlockUserData*)">
+      <modify-argument index="1">
+        <define-ownership class="target" owner="c++"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setDocument(QTextDocument*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="document() const">
+      <modify-argument index="this">
+        <parent index="return" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QTextBlockGroup" />
+  <object-type name="QTextBlockUserData" />
+  <object-type name="QTextItem">
+      <enum-type name="RenderFlag" flags="RenderFlags"/>
+  </object-type>
+  <object-type name="QTextList" >
+    <!--### Obsolete in 4.3-->
+    <modify-function signature="isEmpty()const" remove="all"/>
+  </object-type>
+  <object-type name="QTextObject"/>
+  <object-type name="QTextObjectInterface" >
+    <modify-function signature="drawObject(QPainter*,QRectF,QTextDocument*,int,QTextFormat)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+  </object-type>
+
+  <template name="validator_conversionrule">
+        QValidator::State %out;
+
+        if (PySequence_Check(%PYARG_0)) {
+            Shiboken::AutoDecRef seq(PySequence_Fast(%PYARG_0, 0));
+            int size = PySequence_Fast_GET_SIZE(seq.object());
+
+            if (size > 1) {
+                if (%ISCONVERTIBLE[QString](PySequence_Fast_GET_ITEM(seq.object(), 1)))
+                    %1 = %CONVERTTOCPP[QString](PySequence_Fast_GET_ITEM(seq.object(), 1));
+                else
+                    qWarning("%TYPE::%FUNCTION_NAME: Second tuple element is not convertible to unicode.");
+            }
+
+            if (size > 2) {
+                if (%ISCONVERTIBLE[int](PySequence_Fast_GET_ITEM(seq.object(), 2)))
+                    %2 = %CONVERTTOCPP[int](PySequence_Fast_GET_ITEM(seq.object(), 2));
+                else
+                    qWarning("%TYPE::%FUNCTION_NAME: Second tuple element is not convertible to int.");
+            }
+            %PYARG_0 = PySequence_Fast_GET_ITEM(seq.object(), 0);
+            Py_INCREF(%PYARG_0); // we need to incref, because "%PYARG_0 = ..." will decref the tuple and the tuple will be decrefed again at the end of this scope.
+        }
+
+        // check retrun value
+        if (%ISCONVERTIBLE[QValidator::State](%PYARG_0)) {
+            %out = %CONVERTTOCPP[QValidator::State](%PYARG_0);
+        } else {
+            PyErr_Format(PyExc_TypeError, "Invalid return value in function %s, expected %s, got %s.",
+                        "QValidator.validate",
+                        "PySide2.QtGui.QValidator.State, (PySide2.QtGui.QValidator.State,), (PySide2.QtGui.QValidator.State, unicode) or (PySide2.QtGui.QValidator.State, unicode, int)",
+                        pyResult->ob_type->tp_name);
+            return QValidator::State();
+        }
+  </template>
+
+  <object-type name="QValidator">
+    <enum-type name="State"/>
+    <modify-function signature="fixup(QString &amp;)const">
+      <modify-argument index="return">
+        <replace-type modified-type="QString"/>
+      </modify-argument>
+      <inject-code class="target" position="end">
+        <insert-template name="return_QString"/>
+      </inject-code>
+    </modify-function>
+    <modify-function signature="validate(QString &amp;, int &amp;)const">
+      <modify-argument index="return">
+        <replace-type modified-type="PyObject"/>
+        <conversion-rule class="native">
+            <insert-template name="validator_conversionrule"/>
+        </conversion-rule>
+      </modify-argument>
+      <inject-code class="target" position="end">
+        <insert-template name="return_tuple_QValidator_QString_int"/>
+      </inject-code>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QActionEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::ActionAdded || %1-&gt;type() == QEvent::ActionRemoved || %1-&gt;type() == QEvent::ActionChanged" />
+  <object-type name="QCloseEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::Close"/>
+  <object-type name="QContextMenuEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::ContextMenu">
+      <enum-type name="Reason"/>
+  </object-type>
+  <object-type name="QDragEnterEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::DragEnter"/>
+  <object-type name="QDragLeaveEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::DragLeave"/>
+  <object-type name="QDragMoveEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::DragMove" />
+  <object-type name="QDropEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::Drop">
+    <modify-function signature="source() const">
+      <modify-argument index="return">
+        <define-ownership owner="target"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QEnterEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::Enter"/>
+  <object-type name="QExposeEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::Expose" />
+  <object-type name="QFileOpenEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::FileOpen" />
+  <object-type name="QFocusEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::FocusIn || %1-&gt;type() == QEvent::FocusOut" />
+  <object-type name="QHelpEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::ToolTip || %1-&gt;type() == QEvent::WhatsThis"/>
+  <object-type name="QHideEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::Hide"/>
+  <object-type name="QHoverEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::HoverEnter || %1-&gt;type() == QEvent::HoverLeave || %1-&gt;type() == QEvent::HoverMove"/>
+  <object-type name="QIconDragEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::IconDrag"/>
+
+  <object-type name="QInputMethodEvent" copyable="no" polymorphic-id-expression="%1-&gt;type() == QEvent::InputMethod">
+    <!-- only declare this if ndef QT_NO_INPUTMETHOD -->
+    <enum-type name="AttributeType"/>
+    <value-type name="Attribute">
+      <include file-name="QInputMethodEvent" location="global"/>
+    </value-type>
+    <!-- endif ndef QT_NO_INPUTMETHOD -->
+  </object-type>
+
+  <object-type name="QMoveEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Move" />
+  <object-type name="QResizeEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Resize"/>
+  <object-type name="QShortcutEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Shortcut">
+    <!-- All these have const overloads that are used instead -->
+    <modify-function signature="isAmbiguous()const" remove="all"/>
+    <modify-function signature="shortcutId()const" remove="all"/>
+    <modify-function signature="key()const" remove="all"/>
+    <!-- ### -->
+  </object-type>
+  <object-type name="QShowEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Show"/>
+  <object-type name="QStatusTipEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::StatusTip"/>
+  <object-type name="QTabletEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::TabletMove || %1-&gt;type() == QEvent::TabletPress || %1-&gt;type() == QEvent::TabletRelease">
+      <enum-type name="PointerType"/>
+      <enum-type name="TabletDevice"/>
+  </object-type>
+  <object-type name="QToolBarChangeEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::ToolBarChange"/>
+  <object-type name="QWhatsThisClickedEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::WhatsThisClicked"/>
+  <object-type name="QWheelEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Wheel"/>
+  <!-- Qt5.5: suppress this nameless enum -->
+  <suppress-warning text="enum 'QWheelEvent::DefaultDeltasPerStep' does not have a type entry or is not an enum" />
+
+  <object-type name="QWindowStateChangeEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::WindowStateChange"/>
+  <object-type name="QInputEvent" copyable="false">
+    <modify-function signature="modifiers()const" access="non-final"/>
+  </object-type>
+  <object-type name="QKeyEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::KeyPress || %1-&gt;type() == QEvent::KeyRelease || %1-&gt;type() == QEvent::ShortcutOverride">
+      <add-function signature="operator!=(QKeySequence::StandardKey)">
+          <inject-code class="target">
+          bool ret = !(&amp;%CPPSELF == %1);
+          %PYARG_0 = %CONVERTTOPYTHON[bool](ret);
+          </inject-code>
+      </add-function>
+  </object-type>
+  <object-type name="QMouseEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::MouseButtonDblClick || %1-&gt;type() == QEvent::MouseButtonPress || %1-&gt;type() == QEvent::MouseButtonRelease || %1-&gt;type() == QEvent::MouseMove"/>
+  <object-type name="QPaintEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Paint"/>
+  <object-type name="QAccessibleEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::AccessibilityDescription || %1-&gt;type() == QEvent::AccessibilityHelp"/>
+
+  <object-type name="QTextFrame" >
+    <extra-includes>
+      <include file-name="QTextCursor" location="global"/>
+    </extra-includes>
+    <value-type name="iterator" >
+      <include file-name="QTextFrame" location="global"/>
+      <!-- ### These operators where removed because they don't make sense in Python.
+           Instead iterator methods (__iter__, next) should be implemented.
+           See bug 688 -->
+      <modify-function signature="operator++()" remove="all"/>
+      <modify-function signature="operator--()" remove="all"/>
+      <!-- ### -->
+      <add-function signature="__iter__()" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+          <insert-template name="__iter__" />
+        </inject-code>
+      </add-function>
+      <add-function signature="__next__()" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+          <insert-template name="__next__">
+            <replace from="%CPPSELF_TYPE" to="QTextFrame::iterator" />
+          </insert-template>
+        </inject-code>
+      </add-function>
+    </value-type>
+    <add-function signature="__iter__()" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+          <insert-template name="__iter_parent__">
+            <replace from="%CPPSELF_TYPE" to="QTextFrame::iterator" />
+          </insert-template>
+        </inject-code>
+    </add-function>
+  </object-type>
+  <object-type name="QImageIOHandler">
+    <extra-includes>
+      <include file-name="QRect" location="global"/>
+    </extra-includes>
+    <enum-type name="ImageOption"/>
+    <enum-type name="Transformation" flags="Transformations" since="5.5" />
+    <modify-function signature="setDevice(QIODevice*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QImageReader">
+    <extra-includes>
+      <include file-name="QColor" location="global"/>
+      <include file-name="QRect" location="global"/>
+      <include file-name="QSize" location="global"/>
+      <include file-name="QStringList" location="global"/>
+      <include file-name="QImage" location="global"/>
+    </extra-includes>
+    <enum-type name="ImageReaderError"/>
+    <!-- ### This method does not make sense in Python.
+         Update: perhaps it does, but no one is missing it. -->
+    <modify-function signature="read(QImage*)" remove="all" />
+    <modify-function signature="setDevice(QIODevice*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QMovie">
+    <extra-includes>
+      <include file-name="QColor" location="global"/>
+      <include file-name="QImage" location="global"/>
+      <include file-name="QPixmap" location="global"/>
+      <include file-name="QRect" location="global"/>
+      <include file-name="QSize" location="global"/>
+    </extra-includes>
+    <enum-type name="CacheMode"/>
+    <enum-type name="MovieState"/>
+    <!-- ### "cacheMode()" is an internal method. -->
+    <modify-function signature="setDevice(QIODevice*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QDrag">
+    <extra-includes>
+      <include file-name="QPoint" location="global"/>
+      <include file-name="QPixmap" location="global"/>
+    </extra-includes>
+    <modify-function signature="QDrag(QObject*)">
+      <modify-argument index="this">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="source() const">
+      <modify-argument index="return">
+        <define-ownership owner="target"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="target() const">
+      <modify-argument index="return">
+        <define-ownership owner="target"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setMimeData(QMimeData*)">
+      <modify-argument index="1">
+        <!-- TODO: maybe this is not the best solution -->
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="exec(QFlags&lt;Qt::DropAction&gt;)" rename="exec_" allow-thread="yes"/>
+    <modify-function signature="exec(QFlags&lt;Qt::DropAction&gt;, Qt::DropAction)" rename="exec_" allow-thread="yes"/>
+  </object-type>
+
+  <object-type name="QStandardItemModel" polymorphic-id-expression="qobject_cast&lt;QStandardItemModel*&gt;(%1)">
+    <extra-includes>
+      <include file-name="QStringList" location="global"/>
+      <include file-name="QSize" location="global"/>
+    </extra-includes>
+    <modify-function signature="takeItem(int,int)">
+      <modify-argument index="return">
+        <parent index="this" action="remove" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="takeHorizontalHeaderItem(int)">
+      <modify-argument index="return">
+        <parent index="this" action="remove" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="takeVerticalHeaderItem(int)">
+      <modify-argument index="return">
+        <parent index="this" action="remove" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="verticalHeaderItem(int) const">
+      <modify-argument index="return">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="horizontalHeaderItem(int) const">
+      <modify-argument index="return">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="invisibleRootItem() const">
+      <modify-argument index="return">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="item(int, int) const">
+      <modify-argument index="return">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="itemFromIndex(const QModelIndex&amp;) const">
+      <modify-argument index="return">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="itemPrototype() const">
+      <modify-argument index="return">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="appendRow(const QList&lt;QStandardItem*&gt;&amp;)">
+      <modify-argument index="1">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="appendRow(QStandardItem*)">
+      <modify-argument index="1">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="insertRow(int, QStandardItem*)">
+      <modify-argument index="2">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setHorizontalHeaderItem(int, QStandardItem*)">
+      <modify-argument index="2">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="setItem(int, int, QStandardItem*)">
+      <inject-code class="target" position="beginning">
+        // Clear parent from the old child
+        QStandardItem* _i = %CPPSELF->item(%1, %2);
+        if (_i) {
+            PyObject* _pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
+            Shiboken::Object::setParent(0, _pyI);
+        }
+      </inject-code>
+      <modify-argument index="3">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setItem(int, QStandardItem*)">
+      <inject-code class="target" position="beginning">
+        // Clear parent from the old child
+        QStandardItem* _i = %CPPSELF->item(%1);
+        if (_i) {
+            PyObject* _pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
+            Shiboken::Object::setParent(0, _pyI);
+        }
+      </inject-code>
+      <modify-argument index="2">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setItemPrototype(const QStandardItem*)">
+      <modify-argument index="1">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="setVerticalHeaderItem(int, QStandardItem*)">
+      <inject-code class="target" position="beginning">
+        // Clear parent from the old child
+        QStandardItem* _i = %CPPSELF->verticalHeaderItem(%1);
+        if (_i) {
+            PyObject* _pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
+            Shiboken::Object::setParent(0, _pyI);
+        }
+      </inject-code>
+      <modify-argument index="2">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="takeColumn(int)">
+      <modify-argument index="return">
+        <parent index="this" action="remove" />
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="takeRow(int)">
+      <modify-argument index="return">
+        <parent index="this" action="remove" />
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="findItems(const QString&amp;, QFlags&lt;Qt::MatchFlag&gt;, int) const">
+      <modify-argument index="return">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="insertColumn(int, const QList&lt;QStandardItem*&gt;&amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="insertRow(int, const QList&lt;QStandardItem*&gt;&amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="appendColumn(const QList&lt;QStandardItem*&gt;&amp;)">
+      <modify-argument index="1">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="clear()">
+        <inject-code class="target" position="beginning">
+          Shiboken::BindingManager&amp; bm = Shiboken::BindingManager::instance();
+          SbkObject* pyRoot = bm.retrieveWrapper(%CPPSELF.invisibleRootItem());
+          if (pyRoot) {
+            Shiboken::Object::destroy(pyRoot, %CPPSELF.invisibleRootItem());
+          }
+
+          for(int r=0, r_max = %CPPSELF.rowCount(); r &lt; r_max; r++) {
+            QList&lt;QStandardItem *&gt; ri = %CPPSELF.takeRow(0);
+
+            PyObject *pyResult = %CONVERTTOPYTHON[QList&lt;QStandardItem * &gt;](ri);
+            Shiboken::Object::setParent(Py_None, pyResult);
+            Py_XDECREF(pyResult);
+          }
+        </inject-code>
+    </modify-function>
+  </object-type>
+  <object-type name="QClipboard">
+    <extra-includes>
+      <include file-name="QImage" location="global"/>
+      <include file-name="QPixmap" location="global"/>
+    </extra-includes>
+    <enum-type name="Mode" />
+    <modify-function signature="setMimeData(QMimeData *, QClipboard::Mode)">
+      <modify-argument index="1">
+        <!-- TODO: maybe this is not the best solution -->
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="text(QString&amp;,QClipboard::Mode)const">
+      <modify-argument index="2">
+        <replace-default-expression with="QClipboard::Clipboard"/>
+      </modify-argument>
+      <modify-argument index="return">
+        <replace-type modified-type="(retval, subtype)"/>
+      </modify-argument>
+      <inject-code class="target" position="end">
+      %BEGIN_ALLOW_THREADS
+      %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2);
+      %END_ALLOW_THREADS
+      %PYARG_0 = PyTuple_New(2);
+      PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+      PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
+      </inject-code>
+    </modify-function>
+  </object-type>
+  <object-type name="QPaintEngineState">
+    <extra-includes>
+      <include file-name="QPainterPath" location="global"/>
+    </extra-includes>
+  </object-type>
+  <object-type name="QTextLayout">
+    <extra-includes>
+      <include file-name="QTextOption" location="global"/>
+    </extra-includes>
+    <enum-type name="CursorMode"/>
+    <value-type name="FormatRange">
+      <include file-name="QTextLayout" location="global"/>
+    </value-type>
+  </object-type>
+  <object-type name="QTextDocument">
+    <extra-includes>
+      <include file-name="QTextBlock" location="global"/>
+      <include file-name="QTextFormat" location="global"/>
+      <include file-name="QTextCursor" location="global"/>
+    </extra-includes>
+    <enum-type name="FindFlag" flags="FindFlags"/>
+    <enum-type name="MetaInformation"/>
+    <enum-type name="ResourceType"/>
+    <enum-type name="Stacks" since="4.7"/>
+    <modify-function signature="setDocumentLayout(QAbstractTextDocumentLayout*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="object(int)const">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="objectForFormat(const QTextFormat&amp;)const">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="createObject(const QTextFormat&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="print(QPagedPaintDevice*)const" rename="print_" />
+  </object-type>
+  <object-type name="QTextDocumentWriter" since="4.5" />
+  <object-type name="QTextTable">
+    <extra-includes>
+      <include file-name="QTextCursor" location="global"/>
+    </extra-includes>
+  </object-type>
+  <object-type name="QPaintEngine">
+    <enum-type name="DirtyFlag" flags="DirtyFlags"/>
+    <enum-type name="PaintEngineFeature" flags="PaintEngineFeatures"/>
+    <enum-type name="PolygonDrawMode"/>
+    <enum-type name="Type"/>
+    <modify-function signature="begin(QPaintDevice*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="updateState(QPaintEngineState)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="drawTextItem(QPointF,QTextItem)">
+      <modify-argument index="2" invalidate-after-use="yes"/>
+    </modify-function>
+    <extra-includes>
+      <include file-name="QVarLengthArray" location="global"/>
+    </extra-includes>
+    <!-- ### "setPaintDevice(QPaintDevice*)" is an internal method. -->
+    <modify-function signature="setPaintDevice(QPaintDevice*)" remove="all"/>
+    <modify-field name="state" read="false" write="false"/>
+  </object-type>
+  <object-type name="QPainter">
+    <extra-includes>
+      <include file-name="QPainterPath" location="global"/>
+      <include file-name="QPixmap" location="global"/>
+    </extra-includes>
+    <enum-type name="CompositionMode"/>
+    <enum-type name="PixmapFragmentHint" flags="PixmapFragmentHints" since="4.7"/>
+    <enum-type name="RenderHint" flags="RenderHints"/>
+    <value-type name="PixmapFragment" since="4.7">
+        <include file-name="QPainter" location="global"/>
+    </value-type>
+
+    <!-- ### "drawText(...)" is an internal method. -->
+    <modify-function signature="drawText(const QPointF&amp;, const QString&amp;, int, int)" remove="all"/>
+
+    <template name="qpainter_drawlist">
+        %BEGIN_ALLOW_THREADS
+        %CPPSELF.%FUNCTION_NAME(%1.data(), %1.size());
+        %END_ALLOW_THREADS
+    </template>
+
+    <modify-function signature="drawConvexPolygon(const QPoint*, int)" remove="all" />
+    <add-function signature="drawConvexPolygon(QVector&lt;QPoint>)">
+        <inject-code>
+            <insert-template name="qpainter_drawlist" />
+        </inject-code>
+    </add-function>
+    <modify-function signature="drawConvexPolygon(const QPointF*, int)" remove="all" />
+    <add-function signature="drawConvexPolygon(QVector&lt;QPointF>)">
+        <inject-code>
+            <insert-template name="qpainter_drawlist" />
+        </inject-code>
+    </add-function>
+    <!-- ### Overloads using QVector<T> does the job of these methods -->
+    <modify-function signature="drawLines(const QLine*, int)" remove="all" />
+    <modify-function signature="drawLines(const QLineF*, int)" remove="all" />
+    <modify-function signature="drawLines(const QPoint*, int)" remove="all" />
+    <modify-function signature="drawLines(const QPointF*, int)" remove="all" />
+    <modify-function signature="drawRects(const QRect*, int)" remove="all" />
+    <modify-function signature="drawRects(const QRectF*, int)" remove="all" />
+    <!-- ### -->
+    <modify-function signature="drawPoints(const QPoint*, int)" remove="all" />
+    <add-function signature="drawPoints(QVector&lt;QPoint>)">
+        <inject-code>
+            <insert-template name="qpainter_drawlist" />
+        </inject-code>
+    </add-function>
+    <modify-function signature="drawPoints(const QPointF*, int)" remove="all" />
+    <add-function signature="drawPoints(QVector&lt;QPointF>)">
+        <inject-code>
+            <insert-template name="qpainter_drawlist" />
+        </inject-code>
+    </add-function>
+    <modify-function signature="drawPolygon(const QPoint*, int, Qt::FillRule)" remove="all" />
+    <add-function signature="drawPolygon(QVector&lt;QPoint>, Qt::FillRule)">
+        <inject-code>
+            %BEGIN_ALLOW_THREADS
+            %CPPSELF.%FUNCTION_NAME(%1.data(), %1.size(), %2);
+            %END_ALLOW_THREADS
+        </inject-code>
+    </add-function>
+    <modify-function signature="drawPolygon(const QPointF*, int, Qt::FillRule)" remove="all" />
+    <add-function signature="drawPolygon(QVector&lt;QPointF>, Qt::FillRule)">
+        <inject-code>
+            %BEGIN_ALLOW_THREADS
+            %CPPSELF.%FUNCTION_NAME(%1.data(), %1.size(), %2);
+            %END_ALLOW_THREADS
+        </inject-code>
+    </add-function>
+    <modify-function signature="drawPolyline(const QPoint*, int)" remove="all" />
+    <add-function signature="drawPolyline(QVector&lt;QPoint>)">
+        <inject-code>
+            <insert-template name="qpainter_drawlist" />
+        </inject-code>
+    </add-function>
+    <modify-function signature="drawPolyline(const QPointF*, int)" remove="all" />
+    <add-function signature="drawPolyline(QVector&lt;QPointF>)">
+        <inject-code>
+            <insert-template name="qpainter_drawlist" />
+        </inject-code>
+    </add-function>
+    <modify-function signature="drawRoundRect(int, int, int, int, int, int)">
+      <modify-argument index="5">
+        <rename to="xRound"/>
+      </modify-argument>
+      <modify-argument index="6">
+        <rename to="yRound"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="drawTiledPixmap(const QRect&amp;,const QPixmap&amp;, const QPoint&amp;)">
+      <modify-argument index="3">
+        <rename to="pos"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="QPainter(QPaintDevice*)">
+      <modify-argument index="1">
+        <no-null-pointer/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="begin(QPaintDevice*)">
+      <modify-argument index="1">
+        <no-null-pointer/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setRedirected(const QPaintDevice*, QPaintDevice*, const QPoint&amp;)">
+      <modify-argument index="1">
+        <no-null-pointer/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="restoreRedirected(const QPaintDevice*)">
+      <modify-argument index="1">
+        <no-null-pointer/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="drawText(QRectF,int,QString,QRectF*)">
+      <modify-argument index="4">
+        <remove-argument/>
+        <remove-default-expression/>
+      </modify-argument>
+      <modify-argument index="return">
+        <replace-type modified-type="QRectF"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        <insert-template name="fix_args,QRectF*"/>
+      </inject-code>
+    </modify-function>
+    <modify-function signature="drawText(QRect,int,QString,QRect*)">
+      <modify-argument index="4">
+        <remove-argument/>
+        <remove-default-expression/>
+      </modify-argument>
+      <modify-argument index="return">
+        <replace-type modified-type="QRect"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        <insert-template name="fix_args,QRect*"/>
+      </inject-code>
+    </modify-function>
+    <modify-function signature="drawText(int,int,int,int,int,QString,QRect*)">
+      <modify-argument index="7">
+        <remove-argument/>
+        <remove-default-expression/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        <insert-template name="fix_args,QRect*"/>
+      </inject-code>
+    </modify-function>
+  </object-type>
+
+  <value-type name="QMatrix2x2" since="4.6">
+    <add-function signature="__repr__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="repr_code_matrix">
+               <replace from="%MATRIX_SIZE" to="4" />
+               <replace from="%MATRIX_TYPE" to="float" />
+             </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="__reduce__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="reduce_code_matrix">
+              <replace from="%MATRIX_TYPE" to="float" />
+              <replace from="%MATRIX_SIZE" to="4" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+    <add-function signature="QMatrix2x2(PySequence*)">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_constructor">
+          <replace from="%SIZE" to="4" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="data()" return-type="float">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_data_function">
+          <replace from="%MATRIX_SIZE" to="4" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="fill(PyObject*)">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_fill_function">
+          <replace from="%MATRIX_SIZE" to="4" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="transposed()" return-type="PyObject">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_transposed_function">
+          <replace from="%TRANSPOSED_TYPE" to="QMatrix2x2" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator!=(const QMatrix2x2&amp;)" return-type="bool" />
+
+    <template name="inplace_add">
+    *%CPPSELF += %1;
+    return %CONVERTTOPYTHON[%RETURN_TYPE](*%CPPSELF);
+    </template>
+    <template name="inplace_sub">
+    *%CPPSELF -= %1;
+    return %CONVERTTOPYTHON[%RETURN_TYPE](*%CPPSELF);
+    </template>
+    <template name="inplace_mult">
+    *%CPPSELF *= %1;
+    return %CONVERTTOPYTHON[%RETURN_TYPE](*%CPPSELF);
+    </template>
+    <template name="inplace_div">
+    *%CPPSELF /= %1;
+    return %CONVERTTOPYTHON[%RETURN_TYPE](*%CPPSELF);
+    </template>
+
+    <add-function signature="operator*=(float)" return-type="QMatrix2x2" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_mult"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator+=(const QMatrix2x2&amp;)" return-type="QMatrix2x2" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_add"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator-=(const QMatrix2x2&amp;)" return-type="QMatrix2x2" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_sub"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator/=(float)" return-type="QMatrix2x2" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_div"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator==(const QMatrix2x2&amp;)" return-type="bool" />
+  </value-type>
+
+  <value-type name="QMatrix2x3" since="4.6">
+    <add-function signature="__repr__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="repr_code_matrix">
+               <replace from="%MATRIX_SIZE" to="6" />
+               <replace from="%MATRIX_TYPE" to="float" />
+             </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="__reduce__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="reduce_code_matrix">
+              <replace from="%MATRIX_TYPE" to="float" />
+              <replace from="%MATRIX_SIZE" to="6" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+    <add-function signature="QMatrix2x3(PySequence*)">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_constructor">
+          <replace from="%SIZE" to="6" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="data()" return-type="float">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_data_function">
+          <replace from="%MATRIX_SIZE" to="6" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="fill(PyObject*)">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_fill_function">
+          <replace from="%MATRIX_SIZE" to="6" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="transposed()" return-type="PyObject">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_transposed_function">
+          <replace from="%TRANSPOSED_TYPE" to="QMatrix3x2" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator!=(const QMatrix2x3&amp;)" return-type="bool" />
+    <add-function signature="operator*=(float)" return-type="QMatrix2x3" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_mult"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator+=(const QMatrix2x3&amp;)" return-type="QMatrix2x3" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_add"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator-=(const QMatrix2x3&amp;)" return-type="QMatrix2x3" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_sub"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator/=(float)" return-type="QMatrix2x3" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_div"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator==(const QMatrix2x3&amp;)" return-type="bool" />
+  </value-type>
+
+  <value-type name="QMatrix2x4" since="4.6">
+    <add-function signature="__repr__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="repr_code_matrix">
+               <replace from="%MATRIX_SIZE" to="8" />
+               <replace from="%MATRIX_TYPE" to="float" />
+             </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="__reduce__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="reduce_code_matrix">
+              <replace from="%MATRIX_TYPE" to="float" />
+              <replace from="%MATRIX_SIZE" to="8" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+    <add-function signature="QMatrix2x4(PySequence*)">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_constructor">
+          <replace from="%SIZE" to="8" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="data()" return-type="float">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_data_function">
+          <replace from="%MATRIX_SIZE" to="8" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="fill(PyObject*)">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_fill_function">
+          <replace from="%MATRIX_SIZE" to="8" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="transposed()" return-type="PyObject">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_transposed_function">
+          <replace from="%TRANSPOSED_TYPE" to="QMatrix4x2" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator!=(const QMatrix2x4&amp;)" return-type="bool" />
+    <add-function signature="operator*=(float)" return-type="QMatrix2x4" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_mult"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator+=(const QMatrix2x4&amp;)" return-type="QMatrix2x4" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_add"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator-=(const QMatrix2x4&amp;)" return-type="QMatrix2x4" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_sub"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator/=(float)" return-type="QMatrix2x4" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_div"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator==(const QMatrix2x4&amp;)" return-type="bool" />
+  </value-type>
+
+  <value-type name="QMatrix3x2" since="4.6">
+    <add-function signature="__repr__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="repr_code_matrix">
+               <replace from="%MATRIX_SIZE" to="6" />
+               <replace from="%MATRIX_TYPE" to="float" />
+             </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="__reduce__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="reduce_code_matrix">
+              <replace from="%MATRIX_TYPE" to="float" />
+              <replace from="%MATRIX_SIZE" to="6" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+    <add-function signature="QMatrix3x2(PySequence*)">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_constructor">
+          <replace from="%SIZE" to="6" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="data()" return-type="float">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_data_function">
+          <replace from="%MATRIX_SIZE" to="6" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="fill(PyObject*)">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_fill_function">
+          <replace from="%MATRIX_SIZE" to="6" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="transposed()" return-type="PyObject">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_transposed_function">
+          <replace from="%TRANSPOSED_TYPE" to="QMatrix2x3" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator!=(const QMatrix3x2&amp;)" return-type="bool" />
+    <add-function signature="operator*=(float)" return-type="QMatrix3x2" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_mult"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator+=(const QMatrix3x2&amp;)" return-type="QMatrix3x2" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_add"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator-=(const QMatrix3x2&amp;)" return-type="QMatrix3x2" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_sub"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator/=(float)" return-type="QMatrix3x2" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_div"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator==(const QMatrix3x2&amp;)" return-type="bool" />
+  </value-type>
+
+  <value-type name="QMatrix3x3" since="4.6">
+    <add-function signature="__repr__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="repr_code_matrix">
+               <replace from="%MATRIX_SIZE" to="9" />
+               <replace from="%MATRIX_TYPE" to="float" />
+             </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="__reduce__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="reduce_code_matrix">
+              <replace from="%MATRIX_TYPE" to="float" />
+              <replace from="%MATRIX_SIZE" to="9" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+    <add-function signature="QMatrix3x3(PySequence*)">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_constructor">
+          <replace from="%SIZE" to="9" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="data()" return-type="float">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_data_function">
+          <replace from="%MATRIX_SIZE" to="9" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="fill(PyObject*)">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_fill_function">
+          <replace from="%MATRIX_SIZE" to="9" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="transposed()" return-type="PyObject">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_transposed_function">
+          <replace from="%TRANSPOSED_TYPE" to="QMatrix3x3" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator!=(const QMatrix3x3&amp;)" return-type="bool" />
+    <add-function signature="operator*=(float)" return-type="QMatrix3x3" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_mult"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator+=(const QMatrix3x3&amp;)" return-type="QMatrix3x3" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_add"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator-=(const QMatrix3x3&amp;)" return-type="QMatrix3x3" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_sub"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator/=(float)" return-type="QMatrix3x3" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_div"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator==(const QMatrix3x3&amp;)" return-type="bool" />
+  </value-type>
+
+  <value-type name="QMatrix3x4" since="4.6">
+    <add-function signature="__repr__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="repr_code_matrix">
+               <replace from="%MATRIX_SIZE" to="12" />
+               <replace from="%MATRIX_TYPE" to="float" />
+             </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="__reduce__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="reduce_code_matrix">
+              <replace from="%MATRIX_TYPE" to="float" />
+              <replace from="%MATRIX_SIZE" to="12" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+    <add-function signature="QMatrix3x4(PySequence*)">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_constructor">
+          <replace from="%SIZE" to="12" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="data()" return-type="float">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_data_function">
+          <replace from="%MATRIX_SIZE" to="12" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="fill(PyObject*)">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_fill_function">
+          <replace from="%MATRIX_SIZE" to="12" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="transposed()" return-type="PyObject">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_transposed_function">
+          <replace from="%TRANSPOSED_TYPE" to="QMatrix4x3" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator!=(const QMatrix3x4&amp;)" return-type="bool" />
+    <add-function signature="operator*=(float)" return-type="QMatrix3x4" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_mult"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator+=(const QMatrix3x4&amp;)" return-type="QMatrix3x4" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_add"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator-=(const QMatrix3x4&amp;)" return-type="QMatrix3x4" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_sub"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator/=(float)" return-type="QMatrix3x4" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_div"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator==(const QMatrix3x4&amp;)" return-type="bool" />
+  </value-type>
+
+  <value-type name="QMatrix4x2" since="4.6">
+    <add-function signature="__repr__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="repr_code_matrix">
+               <replace from="%MATRIX_SIZE" to="8" />
+               <replace from="%MATRIX_TYPE" to="float" />
+             </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="__reduce__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="reduce_code_matrix">
+              <replace from="%MATRIX_TYPE" to="float" />
+              <replace from="%MATRIX_SIZE" to="8" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+    <add-function signature="QMatrix4x2(PySequence*)">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_constructor">
+          <replace from="%SIZE" to="8" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="data()" return-type="float">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_data_function">
+          <replace from="%MATRIX_SIZE" to="8" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="fill(PyObject*)">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_fill_function">
+          <replace from="%MATRIX_SIZE" to="8" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="transposed()" return-type="PyObject">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_transposed_function">
+          <replace from="%TRANSPOSED_TYPE" to="QMatrix2x4" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator!=(const QMatrix4x2&amp;)" return-type="bool" />
+    <add-function signature="operator*=(float)" return-type="QMatrix4x2" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_mult"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator+=(const QMatrix4x2&amp;)" return-type="QMatrix4x2" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_add"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator-=(const QMatrix4x2&amp;)" return-type="QMatrix4x2" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_sub"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator/=(float)" return-type="QMatrix4x2" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_div"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator==(const QMatrix4x2&amp;)" return-type="bool" />
+  </value-type>
+
+  <value-type name="QMatrix4x3" since="4.6">
+    <add-function signature="__repr__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="repr_code_matrix">
+               <replace from="%MATRIX_SIZE" to="12" />
+               <replace from="%MATRIX_TYPE" to="float" />
+             </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="__reduce__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="reduce_code_matrix">
+              <replace from="%MATRIX_TYPE" to="float" />
+              <replace from="%MATRIX_SIZE" to="12" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+    <add-function signature="QMatrix4x3(PySequence*)">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_constructor">
+          <replace from="%SIZE" to="12" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="data()" return-type="float">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_data_function">
+          <replace from="%MATRIX_SIZE" to="12" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="fill(PyObject*)">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_fill_function">
+          <replace from="%MATRIX_SIZE" to="12" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="transposed()" return-type="PyObject">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_transposed_function">
+          <replace from="%TRANSPOSED_TYPE" to="QMatrix3x4" />
+        </insert-template>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator!=(const QMatrix4x3&amp;)" return-type="bool" />
+    <add-function signature="operator*=(float)" return-type="QMatrix4x3" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_mult"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator+=(const QMatrix4x3&amp;)" return-type="QMatrix4x3" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_add"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator-=(const QMatrix4x3&amp;)" return-type="QMatrix4x3" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_sub"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator/=(float)" return-type="QMatrix4x3" >
+      <inject-code class="target" position="beginning">
+        <insert-template name="inplace_div"/>
+      </inject-code>
+    </add-function>
+    <add-function signature="operator==(const QMatrix4x3&amp;)" return-type="bool" />
+  </value-type>
+
+  <value-type name="QMatrix4x4" since="4.6">
+
+
+    <!-- Qt5: HAIRY TRICK ALERT ahead!
+        Qt5 partially replaced 'qreal' by float.
+        That had the side effect that all matrix types did not work any longer.
+
+        Reason (I guess):
+
+        The signature "QList<qreal>" is needed by the __reduce__ methods,
+        but created by some other object used elsewhere.
+        After the matrix type was changed, "QList<float>" was nowhere created.
+
+        I don't know an explicit way to produce the right conversion function, so what I did
+        was to create a dummy function and immediately dele it again.
+        This has the desired effect of creating the implicitly needed "QList<float>"
+        conversion, although the dummy function goes away.
+
+        Q: Do you know a better solution?
+    -->
+    <add-function signature="__dummy(const QList&lt;float &gt; &amp;)"/>
+    <modify-function signature="__dummy(const QList&lt;float &gt; &amp;)" remove="all"/>
+    <!-- that was the trick ^^^^^^^^^^^^^^^^^^^^^^ -->
+
+    <add-function signature="__repr__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="repr_code_matrix">
+               <replace from="%MATRIX_SIZE" to="16" />
+               <replace from="%MATRIX_TYPE" to="float" />
+             </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="__reduce__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="reduce_code_matrix">
+              <replace from="%MATRIX_TYPE" to="float" />
+              <replace from="%MATRIX_SIZE" to="16" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+
+    <!-- ### "QMatrix4x4(const float*,int,int)" is an internal constructor. -->
+    <modify-function signature="QMatrix4x4(const float*,int,int)" remove="all"/>
+
+    <modify-function signature="QMatrix4x4(const float*)">
+      <modify-argument index="1">
+        <replace-type modified-type="PySequence" />
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        if (PySequence_Size(%PYARG_1) == 16) {
+            float values[16];
+            for(int i=0; i &lt; 16; i++) {
+                PyObject *pv = PySequence_Fast_GET_ITEM(%PYARG_1, i);
+                values[i] = PyFloat_AsDouble(pv);
+            }
+
+            %0 = new %TYPE(values[0], values[1], values[2], values[3],
+                           values[4], values[5], values[6], values[7],
+                           values[8], values[9], values[10], values[11],
+                           values[12], values[13], values[14], values[15]);
+        }
+      </inject-code>
+    </modify-function>
+    <modify-function signature="data()">
+      <inject-code class="target" position="beginning">
+        <insert-template name="matrix_data_function">
+          <replace from="%MATRIX_SIZE" to="16" />
+        </insert-template>
+      </inject-code>
+    </modify-function>
+    <modify-function signature="copyDataTo(float *) const">
+      <modify-argument index="1">
+        <remove-argument/>
+      </modify-argument>
+      <modify-argument index="return">
+        <replace-type modified-type="PyTupleObject*"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        float values[16];
+        %CPPSELF.%FUNCTION_NAME(values);
+        %PYARG_0 = PyTuple_New(16);
+        for(int i=0; i &lt; 16; i++) {
+          PyObject *v = PyFloat_FromDouble(values[i]);
+          PyTuple_SET_ITEM(%PYARG_0, i, v);
+        }
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="inverted(bool*)const">
+      <modify-argument index="1">
+        <remove-argument/>
+      </modify-argument>
+      <modify-argument index="return">
+        <replace-type modified-type="PyTuple"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        <insert-template name="fix_bool*"/>
+      </inject-code>
+    </modify-function>
+
+    <!-- ### "constData() const" and "data() const" are unnecessary in Python and their function is performed by "data()". -->
+    <modify-function signature="data() const" remove="all"/>
+    <modify-function signature="constData() const" remove="all"/>
+    <!-- ### -->
+    <modify-function signature="operator()(int, int) const" remove="all"/>
+    <modify-function signature="operator()(int, int)" remove="all"/>
+    <add-function signature="__mgetitem__" return-type="PyObject*">
+       <inject-code>
+         if (PySequence_Check(_key)) {
+             Shiboken::AutoDecRef key(PySequence_Fast(_key, "Invalid matrix index."));
+             if (PySequence_Fast_GET_SIZE(key.object()) == 2) {
+                 PyObject* posx = PySequence_Fast_GET_ITEM(key.object(), 0);
+                 PyObject* posy = PySequence_Fast_GET_ITEM(key.object(), 1);
+                 Py_ssize_t x = PyInt_AsSsize_t(posx);
+                 Py_ssize_t y = PyInt_AsSsize_t(posy);
+                 float ret = (*%CPPSELF)(x,y);
+                 return %CONVERTTOPYTHON[float](ret);
+             }
+         }
+         PyErr_SetString(PyExc_IndexError, "Invalid matrix index.");
+         return 0;
+       </inject-code>
+    </add-function>
+  </value-type>
+
+    _______ end of matrix block _______ -->
+
+
+  <value-type name="QQuaternion" since="4.6">
+    <add-function signature="__repr__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="repr_code">
+               <replace from="%REPR_FORMAT" to="%f, %f, %f, %f" />
+               <replace from="%REPR_ARGS" to="%CPPSELF.scalar(), %CPPSELF.x(), %CPPSELF.y(), %CPPSELF.z()" />
+             </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="__reduce__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="reduce_code">
+              <replace from="%REDUCE_FORMAT" to="dddd" />
+              <replace from="%REDUCE_ARGS" to="%CPPSELF.scalar(), %CPPSELF.x(), %CPPSELF.y(), %CPPSELF.z()" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+
+    <!-- Qt5.5: XXX support the output variables! For now, I just suppressed the new methods. -->
+    <modify-function signature="getAxisAndAngle(float *, float *, float *, float *) const" since="5.5" remove="all" />
+    <modify-function signature="getAxisAndAngle(QVector3D *, float *) const" since="5.5" remove="all" />
+    <modify-function signature="getEulerAngles(float *, float *, float *) const" since="5.5" remove="all" />
+  </value-type>
+
+  <object-type name="QTouchEvent" since="4.6">
+      <value-type name="TouchPoint" since="4.6">
+        <enum-type name="InfoFlag" flags="InfoFlags"/>
+      </value-type>
+  </object-type>
+
+  <object-type name="QTouchDevice">
+    <enum-type name="CapabilityFlag" flags="Capabilities" />
+    <enum-type name="DeviceType" />
+  </object-type>
+
+  <value-type name="QVector2D" since="4.6">
+    <add-function signature="__repr__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="repr_code">
+               <replace from="%REPR_FORMAT" to="%f, %f" />
+               <replace from="%REPR_ARGS" to="%CPPSELF.x(), %CPPSELF.y()" />
+             </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="__reduce__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="reduce_code">
+              <replace from="%REDUCE_FORMAT" to="dd" />
+              <replace from="%REDUCE_ARGS" to="%CPPSELF.x(), %CPPSELF.y()" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="toTuple" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="to_tuple">
+                <replace from="%TT_FORMAT" to="dd" />
+                <replace from="%TT_ARGS" to="%CPPSELF.x(), %CPPSELF.y()" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+
+  </value-type>
+  <value-type name="QVector3D" since="4.6">
+    <extra-includes>
+      <include file-name="QMatrix4x4" location="global"/>
+    </extra-includes>
+    <add-function signature="__repr__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="repr_code">
+               <replace from="%REPR_FORMAT" to="%f, %f, %f" />
+               <replace from="%REPR_ARGS" to="%CPPSELF.x(), %CPPSELF.y(), %CPPSELF.z()" />
+             </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="__reduce__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="reduce_code">
+              <replace from="%REDUCE_FORMAT" to="ddd" />
+              <replace from="%REDUCE_ARGS" to="%CPPSELF.x(), %CPPSELF.y(), %CPPSELF.z()" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="toTuple" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="to_tuple">
+                <replace from="%TT_FORMAT" to="ddd" />
+                <replace from="%TT_ARGS" to="%CPPSELF.x(), %CPPSELF.y(), %CPPSELF.z()" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+
+  </value-type>
+  <value-type name="QVector4D" since="4.6">
+    <extra-includes>
+      <include file-name="QMatrix4x4" location="global"/>
+    </extra-includes>
+    <add-function signature="__repr__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="repr_code">
+               <replace from="%REPR_FORMAT" to="%f, %f, %f, %f" />
+               <replace from="%REPR_ARGS" to="%CPPSELF.x(), %CPPSELF.y(), %CPPSELF.z(), %CPPSELF.w()" />
+             </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="__reduce__" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="reduce_code">
+              <replace from="%REDUCE_FORMAT" to="dddd" />
+              <replace from="%REDUCE_ARGS" to="%CPPSELF.x(), %CPPSELF.y(), %CPPSELF.z(), %CPPSELF.w()" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+
+    <add-function signature="toTuple" return-type="PyObject*">
+        <inject-code class="target" position="beginning">
+            <insert-template name="to_tuple">
+                <replace from="%TT_FORMAT" to="dddd" />
+                <replace from="%TT_ARGS" to="%CPPSELF.x(), %CPPSELF.y(), %CPPSELF.z(), %CPPSELF.w()" />
+            </insert-template>
+        </inject-code>
+    </add-function>
+  </value-type>
+
+  <suppress-warning text="template baseclass 'QListSpecialMethods&lt;T&gt;' of 'QList' is not known"/>
+  <suppress-warning text="template baseclass 'QGenericMatrix&lt;float&gt;' of '*' is not known"/>
+
+  <!-- Qt5: note: the unnamed enum cannot be rejected by
+    <rejection class="QMatrix4x4" enum-name="enum_1"/>
+    Instead, we have to suppress the warning. Why that?
+
+    Compare also the note at the beginning of typesystem_widgets_common.xml .
+    This seems to be a related problem with unnamed structures in shiboken.
+  -->
+  <suppress-warning text="enum 'QMatrix4x4::enum_1' is specified in typesystem, but not declared"/>
+    
+  <object-type name="QSessionManager">
+    <extra-includes>
+    </extra-includes>
+    <enum-type name="RestartHint"/>
+     <!-- ### -->
+  </object-type>
+
+  <!-- This enum is present on QtCore -->
+  <suppress-warning text="enum 'QCoreApplication::ApplicationFlags' is specified in typesystem, but not declared" />
+
+  <!-- Qt5: here the new QWindow stuff and what it pulls in -->
+  <object-type name="QBackingStore"/>
+  <object-type name="QSurface">
+    <enum-type name="SurfaceClass"/>
+    <enum-type name="SurfaceType"/>
+  </object-type>
+  <rejection class="QSurface" field-name="m_reserved"/>
+  <value-type name="QSurfaceFormat">
+    <enum-type name="ColorSpace" since="5.10"/>
+    <enum-type name="FormatOption" flags="FormatOptions"/>
+    <enum-type name="OpenGLContextProfile"/>
+    <enum-type name="RenderableType"/>
+    <enum-type name="SwapBehavior"/>
+  </value-type>
+  <object-type name="QOffscreenSurface" since="5.1"/>
+  <primitive-type name="QPlatformSurface">
+    <extra-includes>
+      <include file-name="QtGui/qpa/qplatformsurface.h" location="global"/>
+    </extra-includes>
+  </primitive-type>
+
+  <object-type name="QWindow">
+    <enum-type name="AncestorMode"/>
+    <enum-type name="Visibility"/>
+  </object-type>
+  <!-- Qt5: not sure if this needs support, skipped for now -->
+  <rejection class="QWindow" function-name="nativeEvent"/>"
+
+  <!-- Qt5: here the new QGuiApplication and related things -->
+  <object-type name="QGuiApplication">
+    <!-- Qt5: gone <enum-type name="ColorSpec"/> -->
+    <!-- Qt5: gone <enum-type name="Type"/> -->
+    <extra-includes>
+      <include file-name="QBasicTimer" location="global"/>
+      <include file-name="QFont" location="global"/>
+      <include file-name="QFontMetrics" location="global"/>
+      <include file-name="QPalette" location="global"/>
+      <include file-name="QIcon" location="global"/>
+      <include file-name="QLocale" location="global"/>
+    </extra-includes>
+    <modify-function signature="QGuiApplication(int&amp;,char**,int)" access="private" />
+    <add-function signature="QGuiApplication(PySequence)">
+        <inject-code>
+            QGuiApplicationConstructor(%PYSELF, %1, &amp;%0);
+        </inject-code>
+    </add-function>
+    <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
+    <inject-code class="native" file="glue/qguiapplication_init.cpp" position="beginning" />
+
+  </object-type>
+
+  <value-type name="QAccessible">
+      <value-type name="State"/>
+      <enum-type name="Role"/>
+      <enum-type name="Text"/>
+      <enum-type name="RelationFlag"/>
+      <enum-type name="InterfaceType"/>
+      <enum-type name="TextBoundaryType"/>
+      <enum-type name="Event"/>
+  </value-type>
+  <object-type name="QAccessibleInterface">
+  </object-type>
+  <object-type name="QOpenGLBuffer" since="5.0">
+    <enum-type name="Access" />
+    <enum-type name="RangeAccessFlag" flags="RangeAccessFlags" />
+    <enum-type name="Type" />
+    <enum-type name="UsagePattern" />
+  </object-type>
+  <object-type name="QOpenGLContext">
+    <enum-type name="OpenGLModuleType" />
+  </object-type>
+  <object-type name="QOpenGLContextGroup" since="5.0"/>
+  <object-type name="QOpenGLDebugLogger" since="5.1">
+      <enum-type name="LoggingMode"/>
+  </object-type>
+  <value-type name="QOpenGLDebugMessage" since="5.1">
+      <enum-type name="Source" flags="Sources"/>
+      <enum-type name="Type" flags="Types"/>
+      <enum-type name="Severity" flags="Severities"/>
+  </value-type>
+  <object-type name="QOpenGLFramebufferObject" since="5.0">
+    <enum-type name="Attachment" />
+    <enum-type name="FramebufferRestorePolicy" since="5.7"/>
+  </object-type>
+  <value-type name="QOpenGLFramebufferObjectFormat"/>
+  <!-- Compile error on Windows: QOpenGLPaintDevice::QOpenGLPaintDevice(const QOpenGLPaintDevice &)': attempting to reference a deleted function
+  <object-type name="QOpenGLPaintDevice" since="5.0"/>
+  -->
+  <object-type name="QOpenGLExtraFunctions" since="5.6">
+      <!-- Exlusions due to compile errors -->
+      <modify-function signature="glEndTransformFeedback()" remove="all"/>
+      <modify-function signature="glPauseTransformFeedback()" remove="all"/>
+      <modify-function signature="glResumeTransformFeedback()" remove="all"/>
+  </object-type>
+  <object-type name="QOpenGLFunctions" since="5.0">
+      <enum-type name="OpenGLFeature" flags="OpenGLFeatures"/>
+  </object-type>
+  <object-type name="QAbstractOpenGLFunctions" since="5.1"/>
+  <!-- Classes are result of a macro expansion in src/gui/opengl/qopenglversionfunctions.h
+  <object-type name="QOpenGLFunctions_1_0" since="5.1"/>
+  <object-type name="QOpenGLFunctions_1_1" since="5.1"/>
+  <object-type name="QOpenGLFunctions_1_2" since="5.1"/>
+  <object-type name="QOpenGLFunctions_1_3" since="5.1"/>
+  <object-type name="QOpenGLFunctions_1_4" since="5.1"/>
+  <object-type name="QOpenGLFunctions_1_5" since="5.1"/>
+  <object-type name="QOpenGLFunctions_2_0" since="5.1">
+  <object-type name="QOpenGLFunctions_2_1" since="5.1"/>
+  <object-type name="QOpenGLFunctions_3_0" since="5.1"/>
+  <object-type name="QOpenGLFunctions_3_1" since="5.1"/>
+  <object-type name="QOpenGLFunctions_3_2_Compatibility" since="5.1"/>
+  <object-type name="QOpenGLFunctions_3_2_Core" since="5.1"/>
+  <object-type name="QOpenGLFunctions_3_3_Compatibility" since="5.1"/>
+  <object-type name="QOpenGLFunctions_3_3_Core" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_0_Compatibility" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_0_Core" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_1_Compatibility" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_1_Core" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_2_Compatibility" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_2_Core" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_3_Compatibility" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_3_Core" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_4_Compatibility" since="5.5/>
+  <object-type name="QOpenGLFunctions_4_4_Core" since="5.5"/>
+  <object-type name="QOpenGLFunctions_4_5_Compatibility since="5.5""/>
+  <object-type name="QOpenGLFunctions_4_5_Core" since="5.5"/>
+  <object-type name="QOpenGLFunctions_ES2" since="5.1"/>
+  -->
+  <value-type  name="QOpenGLPixelTransferOptions"/>
+  <object-type name="QOpenGLShader" since="5.0">
+    <enum-type name="ShaderTypeBit" flags="ShaderType" />
+  </object-type>
+  <object-type name="QOpenGLShaderProgram" since="5.0"/>
+  <object-type name="QOpenGLTexture" since="5.2">
+      <enum-type name="BindingTarget"/>
+      <enum-type name="CoordinateDirection"/>
+      <enum-type name="ComparisonFunction"/>
+      <enum-type name="ComparisonMode"/>
+      <enum-type name="CubeMapFace"/>
+      <enum-type name="DepthStencilMode"/>
+      <enum-type name="Feature" flags="Features"/>
+      <enum-type name="Filter"/>
+      <enum-type name="MipMapGeneration"/>
+      <enum-type name="PixelFormat"/>
+      <enum-type name="PixelType"/>
+      <enum-type name="SwizzleComponent"/>
+      <enum-type name="SwizzleValue"/>
+      <enum-type name="Target"/>
+      <enum-type name="TextureFormat"/>
+      <enum-type name="TextureFormatClass"/>
+      <enum-type name="TextureUnitReset"/>
+      <enum-type name="WrapMode"/>
+      <modify-function signature="borderColor(unsigned int*)const" remove="all"/>
+      <modify-function signature="borderColor(int*)const" remove="all"/>
+      <modify-function signature="borderColor(float*)const" remove="all"/>
+  </object-type>
+  <object-type name="QOpenGLTimeMonitor" since="5.1"/>
+  <object-type name="QOpenGLTimerQuery" since="5.1"/>
+  <object-type name="QOpenGLWindow" since="5.4">
+      <enum-type name="UpdateBehavior"/>
+  </object-type>
+  <value-type name="QOpenGLVersionProfile" since="5.1"/>
+  <object-type name="QOpenGLVertexArrayObject">
+      <object-type name="Binder"/>
+  </object-type>
+  <value-type name="QPageLayout">
+      <enum-type name="Mode"/>
+      <enum-type name="Orientation"/>
+      <enum-type name="Unit"/>
+  </value-type>
+  <value-type name="QPageSize">
+      <enum-type name="PageSizeId"/>
+      <enum-type name="Unit"/>
+      <enum-type name="SizeMatchPolicy"/>
+  </value-type>
+  <object-type name="QPaintDeviceWindow"/>
+  <value-type name="QPixelFormat">
+      <enum-type name="AlphaUsage"/>
+      <enum-type name="AlphaPosition"/>
+      <enum-type name="AlphaPremultiplied"/>
+      <enum-type name="ByteOrder"/>
+      <enum-type name="ColorModel"/>
+      <enum-type name="TypeInterpretation"/>
+      <enum-type name="YUVLayout"/>
+  </value-type>
+  <object-type name="QPdfWriter"/>
+  <value-type name="QRawFont">
+      <enum-type name="AntialiasingType"/>
+      <enum-type name="LayoutFlag" flags="LayoutFlags"/>
+      <modify-function signature="advancesForGlyphIndexes(const quint32*,QPointF*,int)const" remove="all"/>
+      <modify-function signature="advancesForGlyphIndexes(const quint32*,QPointF*,int,QFlags&lt;QRawFont::LayoutFlag&gt;)const" remove="all"/>
+      <modify-function signature="glyphIndexesForChars(const QChar*,int,quint32*,int*)const" remove="all"/>
+  </value-type>
+  <object-type name="QRasterWindow"/>
+  <object-type name="QScreen" />
+  <object-type name="QStyleHints"/>
+
+</typesystem>
+
+

@@ -1,0 +1,8 @@
+build
+.kdev4
+*.log
+*.pyc
+*.o
+*.so
+.*.swp
+*.kdev4

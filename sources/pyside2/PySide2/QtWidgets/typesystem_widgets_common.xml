@@ -1,0 +1,3695 @@
+<?xml version="1.0"?>
+<!--
+/****************************************************************************
+**
+** Copyright (C) 2016 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of PySide2.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+-->
+<typesystem package="PySide2.QtWidgets">
+  <load-typesystem name="typesystem_gui.xml" generate="no"/>
+
+
+
+  <!-- Qt5: Beware forgetting the following rejection!
+    There are anonymous enums "enum { Type = 1 }" etc. in these QGraphics classes, but they
+    don't show up as "enum_1", but pretend they were a real enum field, not a value.
+
+  """
+  Generating class model...                    [WARNING]
+    enum 'QGraphicsItem::UserType' does not have a type entry or is not an enum
+    enum 'QGraphicsWidget::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsProxyWidget::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsEllipseItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsPixmapItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsSimpleTextItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsTextItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsItemGroup::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsRectItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsLineItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsPathItem::Type' does not have a type entry or is not an enum
+    enum 'QGraphicsPolygonItem::Type' does not have a type entry or is not an enum
+  """
+  -->
+  <rejection class="*" enum-name="enum_1"/>
+
+
+  <!--
+    Event classes have a lot of non-documented protected fields, those fields
+    are removed from PySide because they are Qt implementation details,
+    besides the fact they are accessible by ordinary event methods.
+    -->
+
+  <object-type name="QStyleOption" polymorphic-id-expression="%1-&gt;type == QStyleOption::SO_Default">
+    <enum-type name="OptionType" extensible="yes"/>
+    <enum-type name="StyleOptionType"/>
+    <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionGraphicsItem" polymorphic-id-expression="%1-&gt;type == QStyleOptionGraphicsItem::Type &amp;&amp; %1-&gt;version == QStyleOptionGraphicsItem::Version">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionSizeGrip" polymorphic-id-expression="%1-&gt;type == QStyleOptionSizeGrip::Type &amp;&amp; %1-&gt;version == QStyleOptionSizeGrip::Version">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionButton" polymorphic-id-expression="%1-&gt;type == QStyleOptionButton::Type &amp;&amp; %1-&gt;version == QStyleOptionButton::Version">
+      <enum-type name="ButtonFeature" flags="ButtonFeatures"/>
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionComboBox" polymorphic-id-expression="%1-&gt;type == QStyleOptionComboBox::Type &amp;&amp; %1-&gt;version == QStyleOptionComboBox::Version">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionComplex" polymorphic-id-expression="%1-&gt;type == QStyleOptionComplex::Type &amp;&amp; %1-&gt;version == QStyleOptionComplex::Version">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionDockWidget" polymorphic-id-expression="%1-&gt;type == QStyleOptionDockWidget::Type &amp;&amp; %1-&gt;version == QStyleOptionDockWidget::Version">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionFocusRect" polymorphic-id-expression="%1-&gt;type == QStyleOptionFocusRect::Type &amp;&amp; %1-&gt;version == QStyleOptionFocusRect::Version">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionFrame" polymorphic-id-expression="%1-&gt;type == QStyleOptionFrame::Type &amp;&amp; %1-&gt;version == QStyleOptionFrame::Version">
+      <enum-type name="FrameFeature" flags="FrameFeatures"/>
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionGroupBox" polymorphic-id-expression="%1-&gt;type == QStyleOptionGroupBox::Type &amp;&amp; %1-&gt;version == QStyleOptionGroupBox::Version">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionHeader" polymorphic-id-expression="%1-&gt;type == QStyleOptionHeader::Type &amp;&amp; %1-&gt;version == QStyleOptionHeader::Version">
+      <enum-type name="SectionPosition"/>
+      <enum-type name="SelectedPosition"/>
+      <enum-type name="SortIndicator"/>
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionMenuItem" polymorphic-id-expression="%1-&gt;type == QStyleOptionMenuItem::Type &amp;&amp; %1-&gt;version == QStyleOptionMenuItem::Version">
+      <enum-type name="CheckType"/>
+      <enum-type name="MenuItemType"/>
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionProgressBar" polymorphic-id-expression="%1-&gt;type == QStyleOptionProgressBar::Type &amp;&amp; %1-&gt;version == QStyleOptionProgressBar::Version">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionRubberBand" polymorphic-id-expression="%1-&gt;type == QStyleOptionRubberBand::Type &amp;&amp; %1-&gt;version == QStyleOptionRubberBand::Version">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionSlider" polymorphic-id-expression="%1-&gt;type == QStyleOptionSlider::Type &amp;&amp; %1-&gt;version == QStyleOptionSlider::Version">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionSpinBox" polymorphic-id-expression="%1-&gt;type == QStyleOptionSpinBox::Type &amp;&amp; %1-&gt;version == QStyleOptionSpinBox::Version">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionTab" polymorphic-id-expression="%1-&gt;type == QStyleOptionTab::Type &amp;&amp; %1-&gt;version == QStyleOptionTab::Version">
+      <enum-type name="CornerWidget" flags="CornerWidgets"/>
+      <enum-type name="SelectedPosition"/>
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+      <enum-type name="TabFeature" flags="TabFeatures"/>
+      <enum-type name="TabPosition"/>
+  </object-type>
+  <object-type name="QStyleOptionTabBarBase" polymorphic-id-expression="%1-&gt;type == QStyleOptionTabBarBase::Type &amp;&amp; %1-&gt;version == QStyleOptionTabBarBase::Version">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionTabWidgetFrame" polymorphic-id-expression="%1-&gt;type == QStyleOptionTabWidgetFrame::Type &amp;&amp; %1-&gt;version == QStyleOptionTabWidgetFrame::Version">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionTitleBar" polymorphic-id-expression="%1-&gt;type == QStyleOptionTitleBar::Type &amp;&amp; %1-&gt;version == QStyleOptionTitleBar::Version">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleOptionToolBar" polymorphic-id-expression="%1-&gt;type == QStyleOptionToolBar::Type &amp;&amp; %1-&gt;version == QStyleOptionToolBar::Version">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+      <enum-type name="ToolBarFeature" flags="ToolBarFeatures"/>
+      <enum-type name="ToolBarPosition"/>
+  </object-type>
+  <object-type name="QStyleOptionToolBox" polymorphic-id-expression="%1-&gt;type == QStyleOptionToolBox::Type &amp;&amp; %1-&gt;version == QStyleOptionToolBox::Version">
+      <enum-type name="SelectedPosition"/>
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+      <enum-type name="TabPosition"/>
+  </object-type>
+  <object-type name="QStyleOptionToolButton" polymorphic-id-expression="%1-&gt;type == QStyleOptionToolButton::Type &amp;&amp; %1-&gt;version == QStyleOptionToolButton::Version">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+      <enum-type name="ToolButtonFeature" flags="ToolButtonFeatures" />
+  </object-type>
+  <value-type name="QStyleOptionViewItem" polymorphic-id-expression="%1-&gt;type == QStyleOptionViewItem::Type &amp;&amp; %1-&gt;version == QStyleOptionViewItem::Version">
+      <enum-type name="Position"/>
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+      <enum-type name="ViewItemFeature" flags="ViewItemFeatures"/>
+      <enum-type name="ViewItemPosition"/>
+  </value-type>
+
+  <value-type name="QSizePolicy">
+      <enum-type name="ControlType" flags="ControlTypes"/>
+      <enum-type name="Policy"/>
+      <enum-type name="PolicyFlag"/>
+  </value-type>
+  <value-type name="QTableWidgetSelectionRange"/>
+
+  <value-type name="QTreeWidgetItemIterator" >
+    <modify-function signature="QTreeWidgetItemIterator(QTreeWidget *, QFlags&lt;QTreeWidgetItemIterator::IteratorFlag&gt;)">
+        <modify-argument index="this">
+            <parent index="1" action="add" />
+        </modify-argument>
+    </modify-function>
+
+    <add-function signature="__iter__()" return-type="PyObject*">
+      <inject-code class="target" position="beginning">
+        <insert-template name="__iter__" />
+      </inject-code>
+    </add-function>
+    <add-function signature="__next__()" return-type="PyObject*">
+      <inject-code class="target" position="beginning">
+      if (**%CPPSELF) {
+          QTreeWidgetItemIterator* %0 = new QTreeWidgetItemIterator((*%CPPSELF)++);
+          %PYARG_0 = %CONVERTTOPYTHON[QTreeWidgetItemIterator*](%0);
+      }
+      </inject-code>
+    </add-function>
+
+    <add-function signature="value()" return-type="QTreeWidgetItem*">
+        <inject-code>
+        QTreeWidgetItem* %0 = %CPPSELF.operator*();
+        %PYARG_0 = %CONVERTTOPYTHON[QTreeWidgetItem*](%0);
+        Shiboken::Object::releaseOwnership(%PYARG_0);
+        </inject-code>
+    </add-function>
+    <enum-type name="IteratorFlag" flags="IteratorFlags"/>
+    <!-- ### See bug 778 -->
+    <modify-function signature="operator++(int)" remove="all"/>
+    <modify-function signature="operator--(int)" remove="all"/>
+    <modify-function signature="operator++()" remove="all"/>
+    <modify-function signature="operator--()" remove="all"/>
+    <!-- ### Operator* doesn't make sense in Python. -->
+    <modify-function signature="operator*()const" remove="all"/>
+    <!-- ### -->
+  </value-type>
+
+  <object-type name="QLayoutItem">
+
+    <modify-function signature="widget()">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="layout()">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="spacerItem()">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QGraphicsItem">
+    <enum-type name="CacheMode"/>
+    <enum-type name="Extension"/>
+    <enum-type name="GraphicsItemChange"/>
+    <enum-type name="GraphicsItemFlag" flags="GraphicsItemFlags"/>
+    <enum-type name="PanelModality" since="4.6"/>
+    <inject-code class="target" position="end">
+        PyObject* userTypeConstant =  PyInt_FromLong(QGraphicsItem::UserType);
+        PyDict_SetItemString(Sbk_QGraphicsItem_Type.super.ht_type.tp_dict, "UserType", userTypeConstant);
+    </inject-code>
+    <modify-function signature="setParentItem(QGraphicsItem *)">
+      <modify-argument index="this">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <template name="scene_return_parenting">
+    if (%0) {
+        QObject* parent = %0->parent();
+        Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QObject*](parent));
+        Shiboken::Object::setParent(pyParent, %PYARG_0);
+    }
+    </template>
+    <modify-function signature="scene() const">
+        <inject-code position="end">
+            <insert-template name="scene_return_parenting"/>
+        </inject-code>
+        <modify-argument index="this">
+          <parent index="return" action="add"/>
+        </modify-argument>
+    </modify-function>
+
+    <modify-function signature="parentItem() const">
+      <modify-argument index="return">
+        <define-ownership owner="target"/>
+      </modify-argument>
+      <modify-argument index="this">
+        <parent index="return" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="parentWidget() const">
+        <modify-argument index="this">
+          <parent index="return" action="add"/>
+        </modify-argument>
+        <modify-argument index="return">
+          <define-ownership class="target" owner="default"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="paint(QPainter*,const QStyleOptionGraphicsItem*,QWidget*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="collidesWithItem(const QGraphicsItem*,Qt::ItemSelectionMode)const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="contextMenuEvent(QGraphicsSceneContextMenuEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="dragEnterEvent(QGraphicsSceneDragDropEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="dragLeaveEvent(QGraphicsSceneDragDropEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="dragMoveEvent(QGraphicsSceneDragDropEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="dropEvent(QGraphicsSceneDragDropEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="focusInEvent(QFocusEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="focusOutEvent(QFocusEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="hoverEnterEvent(QGraphicsSceneHoverEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="hoverLeaveEvent(QGraphicsSceneHoverEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="hoverMoveEvent(QGraphicsSceneHoverEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="inputMethodEvent(QInputMethodEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="isBlockedByModalPanel(QGraphicsItem**)const" since="4.6">
+      <modify-argument index="1">
+        <remove-argument/>
+      </modify-argument>
+      <modify-argument index="return">
+        <replace-type modified-type="(retval, blockingPanel)"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+      QGraphicsItem *item_ = NULL;
+      %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&amp;item_);
+      %PYARG_0 = PyTuple_New(2);
+      PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+      PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QGraphicsItem*](item_));
+      </inject-code>
+    </modify-function>
+    <modify-function signature="itemTransform(const QGraphicsItem*,bool*)const">
+        <modify-argument index="2">
+            <remove-argument />
+            <remove-default-expression />
+        </modify-argument>
+        <modify-argument index="return">
+            <replace-type modified-type="(QTransform, bool ok)"/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_args,bool*" />
+        </inject-code>
+    </modify-function>
+    <modify-function signature="isObscuredBy(const QGraphicsItem*)const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="keyPressEvent(QKeyEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="keyReleaseEvent(QKeyEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="mouseMoveEvent(QGraphicsSceneMouseEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="mousePressEvent(QGraphicsSceneMouseEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="mouseReleaseEvent(QGraphicsSceneMouseEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="sceneEvent(QEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="sceneEventFilter(QGraphicsItem*,QEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+      <modify-argument index="2" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="wheelEvent(QGraphicsSceneWheelEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <!-- ### These methods are internal on Qt. -->
+    <modify-function signature="supportsExtension(QGraphicsItem::Extension)const" remove="all"/>
+    <modify-function signature="setExtension(QGraphicsItem::Extension,QVariant)" remove="all"/>
+    <!-- ### -->
+  </object-type>
+  <object-type name="QAbstractGraphicsShapeItem"/>
+  <object-type name="QAbstractItemView">
+    <enum-type name="CursorAction"/>
+    <enum-type name="DragDropMode"/>
+    <enum-type name="DropIndicatorPosition"/>
+    <enum-type name="EditTrigger" flags="EditTriggers"/>
+    <enum-type name="ScrollHint"/>
+    <enum-type name="ScrollMode"/>
+    <enum-type name="SelectionBehavior"/>
+    <enum-type name="SelectionMode"/>
+    <enum-type name="State"/>
+    <modify-function signature="setModel(QAbstractItemModel*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setSelectionModel(QItemSelectionModel*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setItemDelegate(QAbstractItemDelegate*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="viewOptions()const">
+      <modify-argument index="return">
+        <replace-default-expression with="QStyleOptionViewItem()" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="model() const">
+      <modify-argument index="return">
+        <!-- Defining ownership as "default" avoids the object to be automatically
+             set as parent of the returned pointer. -->
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="selectionModel() const">
+      <modify-argument index="return">
+        <!-- Defining ownership as "default" avoids the object to be automatically
+             set as parent of the returned pointer. -->
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setIndexWidget(const QModelIndex &amp;, QWidget *)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="edit(QModelIndex,QAbstractItemView::EditTrigger,QEvent*)">
+      <modify-argument index="3" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="selectionCommand(QModelIndex,const QEvent*)const">
+      <modify-argument index="2" invalidate-after-use="yes"/>
+    </modify-function>
+  </object-type>
+  <object-type name="QAbstractSlider">
+    <enum-type name="SliderAction"/>
+    <enum-type name="SliderChange"/>
+  </object-type>
+  <object-type name="QActionGroup">
+    <modify-function signature="addAction(QAction*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="removeAction(QAction*)">
+      <modify-argument index="1">
+        <parent index="this" action="remove"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QCheckBox"/>
+  <object-type name="QCommonStyle">
+  </object-type>
+  <object-type name="QDataWidgetMapper">
+    <enum-type name="SubmitPolicy"/>
+    <modify-function signature="addMapping(QWidget*,int)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addMapping(QWidget*,int,QByteArray)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="removeMapping(QWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="remove"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setItemDelegate(QAbstractItemDelegate*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setModel(QAbstractItemModel*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QDateEdit"/>
+  <object-type name="QDialog">
+    <enum-type name="DialogCode"/>
+    <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
+  </object-type>
+  <object-type name="QDialogButtonBox">
+    <enum-type name="ButtonLayout"/>
+    <enum-type name="ButtonRole"/>
+    <enum-type name="StandardButton" flags="StandardButtons" />
+    <modify-function signature="addButton(QAbstractButton*,QDialogButtonBox::ButtonRole)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="removeButton(QAbstractButton*)">
+      <modify-argument index="1">
+        <parent index="this" action="remove"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QDirModel" polymorphic-id-expression="qobject_cast&lt;QDirModel*&gt;(%1)">
+    <enum-type name="Roles"/>
+    <modify-function signature="setIconProvider(QFileIconProvider*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QFileIconProvider">
+      <enum-type name="IconType"/>
+      <enum-type name="Option" flags="Options"/>
+  </object-type>
+  <object-type name="QWizard">
+    <enum-type name="WizardButton" />
+    <enum-type name="WizardOption" flags="WizardOptions"/>
+    <enum-type name="WizardPixmap"/>
+    <enum-type name="WizardStyle"/>
+    <modify-function signature="addPage(QWizardPage*)">
+      <modify-argument index="1">
+        <no-null-pointer/>
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setButton(QWizard::WizardButton,QAbstractButton*)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QWizardPage">
+    <modify-function signature="wizard()const">
+      <modify-argument index="this">
+        <parent index="return" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QFocusFrame">
+    <modify-function signature="setWidget(QWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QFontComboBox">
+      <enum-type name="FontFilter" flags="FontFilters"/>
+  </object-type>
+  <object-type name="QFontDialog">
+    <enum-type name="FontDialogOption" flags="FontDialogOptions"/>
+    <modify-function signature="getFont(bool*,QWidget*)" allow-thread="yes">
+        <modify-argument index="1">
+            <remove-argument />
+        </modify-argument>
+        <modify-argument index="return">
+            <replace-type modified-type="PyTuple" />
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_bool*,arg"/>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="getFont(bool*,QFont,QWidget*,QString,QFlags&lt;QFontDialog::FontDialogOption&gt;)">
+        <modify-argument index="1">
+            <remove-argument />
+        </modify-argument>
+        <modify-argument index="return">
+            <replace-type modified-type="PyTuple" />
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_bool*,arg,arg,arg,arg"/>
+        </inject-code>
+    </modify-function>
+  </object-type>
+  <object-type name="QGraphicsEllipseItem">
+  </object-type>
+  <object-type name="QGraphicsItemAnimation">
+    <modify-function signature="setItem(QGraphicsItem*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setTimeLine(QTimeLine*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <extra-includes>
+      <include file-name="QPair" location="global"/>
+    </extra-includes>
+  </object-type>
+  <object-type name="QGraphicsItemGroup"/>
+  <object-type name="QGraphicsLineItem" />
+  <object-type name="QGraphicsPathItem" />
+  <object-type name="QGraphicsPixmapItem">
+      <enum-type name="ShapeMode"/>
+  </object-type>
+  <object-type name="QGraphicsPolygonItem"/>
+  <object-type name="QGraphicsRectItem" />
+  <object-type name="QGraphicsSimpleTextItem" />
+  <object-type name="QHBoxLayout"/>
+  <object-type name="QHeaderView">
+    <enum-type name="ResizeMode" />
+    <modify-function signature="paintSection(QPainter*,QRect,int)const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+  </object-type>
+  <object-type name="QItemDelegate">
+    <!-- ### "doLayout(...)" is an internal method. -->
+    <modify-function signature="doLayout(QStyleOptionViewItem,QRect*,QRect*,QRect*,bool)const" remove="all" />
+    <!-- ### "selected(QPixmap,QPalette,bool)" is an internal method. -->
+    <modify-function signature="selected(QPixmap,QPalette,bool)const" remove="all"/>
+    <!-- ### -->
+    <modify-function signature="drawCheck(QPainter*,QStyleOptionViewItem,QRect,Qt::CheckState)const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="drawDecoration(QPainter*,QStyleOptionViewItem,QRect,QPixmap)const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="drawDisplay(QPainter*,QStyleOptionViewItem,QRect,QString)const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="drawFocus(QPainter*,QStyleOptionViewItem,QRect)const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="setItemEditorFactory(QItemEditorFactory*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QItemEditorCreatorBase">
+    <modify-function signature="createWidget(QWidget *) const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+  </object-type>
+  <object-type name="QItemEditorFactory">
+      <modify-function signature="registerEditor(int, QItemEditorCreatorBase *)">
+      <modify-argument index="2">
+        <reference-count action="set"/>
+      </modify-argument>
+      <inject-code>
+        Shiboken::Object::releaseOwnership(%PYARG_2);
+      </inject-code>
+    </modify-function>
+    <modify-function signature="setDefaultFactory(QItemEditorFactory *)">
+      <modify-argument index="1">
+        <define-ownership owner="c++"/>
+      </modify-argument>
+      <inject-code>
+        //this function is static we need keep ref to default value, to be able to call python virtual functions
+        static PyObject* _defaultValue = 0;
+        %CPPSELF.%FUNCTION_NAME(%1);
+        Py_INCREF(%PYARG_1);
+        if (_defaultValue)
+            Py_DECREF(_defaultValue);
+
+        _defaultValue = %PYARG_1;
+      </inject-code>
+    </modify-function>
+  </object-type>
+  <object-type name="QListView">
+      <enum-type name="Flow"/>
+      <enum-type name="LayoutMode"/>
+      <enum-type name="Movement"/>
+      <enum-type name="ResizeMode"/>
+      <enum-type name="ViewMode"/>
+  </object-type>
+  <object-type name="QColumnView">
+    <modify-function signature="setPreviewWidget(QWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QMainWindow">
+    <enum-type name="DockOption" flags="DockOptions"/>
+    <modify-function signature="setCentralWidget(QWidget*)">
+       <inject-code class="target" position="beginning">
+         <insert-template name="replace_child">
+           <replace from="$FUNCTION_GET_OLD" to="centralWidget" />
+           <replace from="$CHILD_TYPE" to="QWidget" />
+           <replace from="$PYARG" to="%PYARG_1" />
+           <replace from="$CPPARG" to="%1" />
+         </insert-template>
+       </inject-code>
+    </modify-function>
+
+    <modify-function signature="setMenuBar(QMenuBar*)">
+       <inject-code class="target" position="beginning">
+         <insert-template name="replace_child">
+           <replace from="$FUNCTION_GET_OLD" to="menuBar" />
+           <replace from="$CHILD_TYPE" to="QMenuBar" />
+           <replace from="$PYARG" to="%PYARG_1" />
+           <replace from="$CPPARG" to="%1" />
+         </insert-template>
+       </inject-code>
+   </modify-function>
+
+   <modify-function signature="setMenuWidget(QWidget*)">
+       <inject-code class="target" position="beginning">
+         <insert-template name="replace_child">
+           <replace from="$FUNCTION_GET_OLD" to="menuWidget" />
+           <replace from="$CHILD_TYPE" to="QWidget" />
+           <replace from="$PYARG" to="%PYARG_1" />
+           <replace from="$CPPARG" to="%1" />
+         </insert-template>
+       </inject-code>
+    </modify-function>
+
+    <modify-function signature="setStatusBar(QStatusBar*)">
+       <inject-code class="target" position="beginning">
+         <insert-template name="replace_child">
+           <replace from="$FUNCTION_GET_OLD" to="statusBar" />
+           <replace from="$CHILD_TYPE" to="QStatusBar" />
+           <replace from="$PYARG" to="%PYARG_1" />
+           <replace from="$CPPARG" to="%1" />
+         </insert-template>
+       </inject-code>
+   </modify-function>
+
+   <modify-function signature="addDockWidget(Qt::DockWidgetArea, QDockWidget*)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addDockWidget(Qt::DockWidgetArea,QDockWidget*,Qt::Orientation)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <!-- this fuction is declared when not defined QT_NO_TOOLBA -->
+    <modify-function signature="addToolBar(Qt::ToolBarArea, QToolBar*)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addToolBar(QToolBar*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addToolBar(const QString&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <!--- END QT_NO_TOOLBAR -->
+    <modify-function signature="removeDockWidget(QDockWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="remove"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="removeToolBar(QToolBar*)">
+      <modify-argument index="1">
+        <parent index="this" action="remove"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="removeDockWidget(QDockWidget*)">
+      <modify-argument index="2">
+        <parent index="this" action="remove"/>
+      </modify-argument>
+    </modify-function>
+
+  </object-type>
+  <object-type name="QMdiArea">
+    <enum-type name="AreaOption" flags="AreaOptions"/>
+    <enum-type name="ViewMode"/>
+    <enum-type name="WindowOrder"/>
+    <modify-function signature="addSubWindow(QWidget*, QFlags&lt;Qt::WindowType&gt;)" >
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QMdiSubWindow">
+    <enum-type name="SubWindowOption" flags="SubWindowOptions"/>
+    <modify-function signature="setWidget(QWidget*)" >
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setSystemMenu(QMenu*)" >
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QMenu">
+    <inject-code class="native" position="beginning" file="glue/qmenu_glue.cpp"/>
+
+    <modify-function signature="exec()" rename="exec_" allow-thread="yes" />
+    <modify-function signature="exec(const QPoint&amp;, QAction*)" rename="exec_" allow-thread="yes" />
+    <modify-function signature="exec(QList&lt;QAction*>, const QPoint&amp;, QAction*, QWidget*)" rename="exec_" allow-thread="yes" />
+    <modify-function signature="addAction(const QString&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addMenu(QMenu*)">
+      <modify-argument index="return">
+        <parent index="1" action="add"/>
+      </modify-argument>
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addMenu(const QString&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addMenu(const QIcon &amp;, const QString &amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertMenu(QAction*,QMenu*)">
+      <modify-argument index="return">
+        <parent index="2" action="add"/>
+      </modify-argument>
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addMenu(const QString&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addMenu(const QIcon &amp;, const QString &amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <!-- ### "setNoReplayFor(QWidget*)" is an internal method. -->
+    <modify-function signature="setNoReplayFor(QWidget*)" remove="all" />
+
+    <add-function signature="addAction(QString&amp;, PyObject*, QKeySequence&amp;)">
+      <modify-argument index="3">
+        <replace-default-expression with="0" />
+      </modify-argument>
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+
+      <inject-code class="target" position="beginning">
+        %PYARG_0 = addActionWithPyObject(%CPPSELF, QIcon(), %1, %2, %3);
+      </inject-code>
+    </add-function>
+
+    <add-function signature="addAction(QIcon&amp;, QString&amp;, PyObject*, QKeySequence&amp;)">
+      <modify-argument index="4">
+        <replace-default-expression with="0" />
+      </modify-argument>
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+
+      <inject-code class="target" position="beginning">
+        %PYARG_0 = addActionWithPyObject(%CPPSELF, %1, %2, %3, %4);
+      </inject-code>
+    </add-function>
+
+    <add-function signature="addAction(QAction*)">
+      <inject-code class="target" position="beginning">
+        %CPPSELF.addAction(%1);
+      </inject-code>
+    </add-function>
+
+    <modify-function signature="clear()">
+      <inject-code>
+          Shiboken::BindingManager&amp; bm = Shiboken::BindingManager::instance();
+          PyObject* pyObj;
+          foreach(QAction* act, %CPPSELF.actions()) {
+            if ((pyObj = (PyObject*)bm.retrieveWrapper(act)) != 0) {
+                Py_INCREF(pyObj);
+                Shiboken::Object::setParent(NULL, pyObj);
+                Shiboken::Object::invalidate(pyObj);
+                Py_DECREF(pyObj);
+            }
+          }
+      </inject-code>
+    </modify-function>
+
+  </object-type>
+
+  <object-type name="QMenuBar">
+    <inject-code class="native" position="beginning" file="glue/qmenubar_glue.cpp"/>
+    <modify-function signature="addAction(const QString&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addAction(QString,const QObject*,const char*)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <add-function signature="addAction(const QString&amp;, PyObject*)">
+      <inject-code class="target" position="beginning">
+        %PYARG_0 = addActionWithPyObject(%CPPSELF, %1, %2);
+      </inject-code>
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </add-function>
+    <modify-function signature="addMenu(QMenu*)">
+      <modify-argument index="return">
+        <parent index="1" action="add"/>
+      </modify-argument>
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addSeparator()">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertMenu(QAction*,QMenu*)">
+      <modify-argument index="return">
+        <parent index="2" action="add"/>
+      </modify-argument>
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertSeparator(QAction*)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="clear()">
+      <inject-code>
+          foreach(QAction *act, %CPPSELF.actions()) {
+            Shiboken::AutoDecRef pyAct(%CONVERTTOPYTHON[QAction*](act));
+            Shiboken::Object::setParent(NULL, pyAct);
+            Shiboken::Object::invalidate(pyAct);
+          }
+      </inject-code>
+    </modify-function>
+
+    <add-function signature="addAction(QAction*)">
+      <inject-code class="target" position="beginning">
+        %CPPSELF.addAction(%1);
+      </inject-code>
+    </add-function>
+
+  </object-type>
+  <object-type name="QProgressBar">
+      <enum-type name="Direction"/>
+  </object-type>
+  <object-type name="QPushButton" />
+  <object-type name="QScrollArea">
+    <modify-function signature="setWidget(QWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QShortcut">
+    <add-function signature="QShortcut(QKeySequence&amp;, QWidget*, PyCallable*, Qt::ShortcutContext)">
+      <modify-argument index="4">
+        <replace-default-expression with="Qt::WindowShortcut"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        %0 = new %TYPE(%1, %2);
+      </inject-code>
+      <inject-code class="target" position="end">
+        Shiboken::AutoDecRef result(PyObject_CallMethod(%PYSELF, "connect", "OsO", %PYSELF, SIGNAL(activated()), %PYARG_3));
+        if (!result.isNull())
+            Shiboken::Object::setParent(%PYARG_2, %PYSELF);
+      </inject-code>
+    </add-function>
+  </object-type>
+  <object-type name="QSpacerItem"/>
+  <object-type name="QStatusBar">
+    <modify-function signature="addWidget(QWidget*, int)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addPermanentWidget(QWidget*, int)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertWidget(int, QWidget*, int)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertPermanentWidget(int, QWidget*, int)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QStyleFactory">
+    <modify-function signature="create(const QString&amp;)">
+      <modify-argument index="return">
+        <define-ownership owner="target"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QStyleHintReturn">
+      <enum-type name="HintReturnType"/>
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleHintReturnVariant">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStyleHintReturnMask">
+      <enum-type name="StyleOptionType"/>
+      <enum-type name="StyleOptionVersion"/>
+  </object-type>
+  <object-type name="QStylePainter" />
+  <object-type name="QTableView">
+    <modify-function signature="setHorizontalHeader(QHeaderView*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setVerticalHeader(QHeaderView*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QTimeEdit"/>
+  <object-type name="QToolBox">
+    <modify-function signature="addItem(QWidget*, const QIcon&amp;, const QString&amp;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addItem(QWidget*, const QString&amp;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertItem(int, QWidget*, const QIcon&amp;, const QString&amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertItem(int, QWidget*, const QString&amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="removeItem(int)">
+      <inject-code class="target" position="beginning">
+        QWidget *_widget = %CPPSELF.widget(%1);
+        if (_widget) {
+            Shiboken::AutoDecRef pyWidget(%CONVERTTOPYTHON[QWidget*](_widget));
+            Shiboken::Object::setParent(0, pyWidget);
+        }
+      </inject-code>
+    </modify-function>
+  </object-type>
+  <object-type name="QToolButton">
+    <enum-type name="ToolButtonPopupMode"/>
+    <modify-function signature="setDefaultAction(QAction *)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setMenu(QMenu *)">
+    </modify-function>
+  </object-type>
+  <object-type name="QToolTip"/>
+  <object-type name="QTreeView">
+    <modify-function signature="drawBranches(QPainter*,QRect,QModelIndex)const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="drawRow(QPainter*,QStyleOptionViewItem,QModelIndex)const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+  </object-type>
+  <object-type name="QUndoCommand">
+    <modify-function signature="mergeWith(const QUndoCommand*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+  </object-type>
+  <object-type name="QUndoGroup">
+    <modify-function signature="addStack(QUndoStack*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="removeStack(QUndoStack*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QUndoStack">
+    <modify-function signature="createUndoAction(QObject*, const QString&amp;)const">
+      <modify-argument index="return">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="createRedoAction(QObject*, const QString&amp;)const">
+      <modify-argument index="return">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="push(QUndoCommand*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QUndoView">
+    <modify-function signature="setGroup(QUndoGroup *)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setStack(QUndoStack *)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="QUndoView(QUndoGroup *,QWidget *)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="QUndoView(QUndoStack *,QWidget *)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QVBoxLayout"/>
+
+  <object-type name="QWhatsThis"/>
+  <object-type name="QWidgetAction">
+    <modify-function signature="setDefaultWidget(QWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="releaseWidget(QWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="remove" />
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QWidgetItem" polymorphic-id-expression="%1-&gt;widget()" />
+
+  <object-type name="QGraphicsSceneContextMenuEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneContextMenu">
+      <enum-type name="Reason"/>
+  </object-type>
+  <object-type name="QGraphicsSceneDragDropEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneDragEnter || %1-&gt;type() == QEvent::GraphicsSceneDragLeave || %1-&gt;type() == QEvent::GraphicsSceneDragMove || %1-&gt;type() == QEvent::GraphicsSceneDrop" >
+    <!-- ### "setMimeData(const QMimeData*)" is an internal method. -->
+    <modify-function signature="setMimeData(const QMimeData *)" remove="all"/>
+    <!-- ### "setSource(QWidget*)" is an internal method. -->
+    <modify-function signature="setSource(QWidget *)" remove="all"/>
+    <!-- ### -->
+  </object-type>
+  <object-type name="QGraphicsSceneEvent" copyable="false">
+    <!-- ### "setWidget(QWidget*)" is an internal method. -->
+    <modify-function signature="setWidget(QWidget *)" remove="all"/>
+  </object-type>
+  <object-type name="QGraphicsSceneMoveEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneMove" />
+  <object-type name="QGraphicsSceneResizeEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneResize" />
+  <object-type name="QGraphicsSceneHelpEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneHelp" />
+  <object-type name="QGraphicsSceneHoverEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneHoverEnter || %1-&gt;type() == QEvent::GraphicsSceneHoverLeave || %1-&gt;type() == QEvent::GraphicsSceneHoverMove" />
+  <object-type name="QGraphicsSceneMouseEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneMouseDoubleClick || %1-&gt;type() == QEvent::GraphicsSceneMouseMove || %1-&gt;type() == QEvent::GraphicsSceneMousePress || %1-&gt;type() == QEvent::GraphicsSceneMouseRelease"/>
+  <object-type name="QGraphicsSceneWheelEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneWheel"/>
+
+  <object-type name="QGestureEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::Gesture || %1-&gt;type() == QEvent::GestureOverride" since="4.6">
+    <modify-function signature="activeGestures()const">
+      <modify-argument index="return">
+        <define-ownership owner="default"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="canceledGestures()const">
+      <modify-argument index="return">
+        <define-ownership owner="default"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="gestures()const">
+      <modify-argument index="return">
+        <define-ownership owner="default"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="gesture(Qt::GestureType)const">
+      <modify-argument index="return">
+        <define-ownership owner="default"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="widget()const">
+      <modify-argument index="return">
+        <define-ownership owner="default"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QAbstractButton"/>
+  <object-type name="QStyle">
+    <enum-type name="ComplexControl" extensible="yes"/>
+    <enum-type name="ContentsType" extensible="yes"/>
+    <enum-type name="ControlElement" extensible="yes"/>
+    <enum-type name="PixelMetric" extensible="yes" />
+    <enum-type name="PrimitiveElement" extensible="yes" />
+    <enum-type name="RequestSoftwareInputPanel" since="4.6"/>
+    <enum-type name="StandardPixmap" extensible="yes"/>
+    <enum-type name="StateFlag" flags="State"/>
+    <enum-type name="StyleHint" extensible="yes" />
+    <enum-type name="SubControl" flags="SubControls" extensible="yes" force-integer="yes"/>
+    <enum-type name="SubElement" extensible="yes" />
+    <modify-function signature="drawComplexControl(QStyle::ComplexControl,const QStyleOptionComplex*,QPainter*,const QWidget*)const">
+      <modify-argument index="3" invalidate-after-use="yes"/>
+      <modify-argument index="4">
+        <replace-default-expression with="0"/>
+        <rename to="widget" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="drawControl(QStyle::ControlElement,const QStyleOption*,QPainter*,const QWidget*)const">
+      <modify-argument index="3" invalidate-after-use="yes"/>
+      <modify-argument index="4">
+        <replace-default-expression with="0"/>
+        <rename to="widget" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="drawPrimitive(QStyle::PrimitiveElement,const QStyleOption*,QPainter*,const QWidget*)const">
+      <modify-argument index="3" invalidate-after-use="yes"/>
+      <modify-argument index="4">
+        <replace-default-expression with="0"/>
+        <rename to="widget" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="hitTestComplexControl(QStyle::ComplexControl, const QStyleOptionComplex*, const QPoint&amp;, const QWidget*)const">
+      <modify-argument index="4">
+        <replace-default-expression with="0"/>
+        <rename to="widget" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="styleHint(QStyle::StyleHint,const QStyleOption*,const QWidget*,QStyleHintReturn*)const">
+      <modify-argument index="4" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="drawItemPixmap(QPainter*,QRect,int,QPixmap)const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="drawItemText(QPainter*,QRect,int,QPalette,bool,QString,QPalette::ColorRole)const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+  </object-type>
+  <object-type name="QColorDialog">
+    <enum-type name="ColorDialogOption" flags="ColorDialogOptions"/>
+    <modify-function signature="getColor(const QColor&amp;, QWidget*, const QString&amp;, QFlags&lt;QColorDialog::ColorDialogOption>)" allow-thread="yes" />
+    <!-- Qt5: obsolete -->
+    <modify-function signature="getRgba(unsigned int, bool*, QWidget*)" remove="all" />
+  </object-type>
+
+  <object-type name="QLayout">
+    <inject-code class="native" position="beginning" file="glue/qlayout_help_functions.cpp"/>
+
+    <enum-type name="SizeConstraint"/>
+
+    <modify-function signature="itemAt(int)const">
+      <modify-argument index="return">
+        <define-ownership owner="default"/>
+      </modify-argument>
+      <inject-code class="target" position="end">
+        addLayoutOwnership(%CPPSELF, %0);
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="removeWidget(QWidget*)">
+      <inject-code class="target" position="beginning">
+        removeLayoutOwnership(%CPPSELF, %1);
+      </inject-code>
+    </modify-function>
+    <modify-function signature="removeItem(QLayoutItem*)">
+      <inject-code class="target" position="beginning">
+        removeLayoutOwnership(%CPPSELF, %1);
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="parentWidget()const">
+      <modify-argument index="this">
+        <parent index="return" action="add"/>
+      </modify-argument>
+      <modify-argument index="return">
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="takeAt(int)">
+      <modify-argument index="return">
+        <parent index="this" action="remove"/>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="addItem(QLayoutItem*)">
+      <inject-code class="target" position="beginning">
+        addLayoutOwnership(%CPPSELF, %1);
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="addWidget(QWidget *)">
+      <inject-code class="target" position="beginning">
+        addLayoutOwnership(%CPPSELF, %1);
+      </inject-code>
+    </modify-function>
+    <modify-function signature="addChildWidget(QWidget *)">
+      <inject-code class="target" position="beginning">
+        addLayoutOwnership(%CPPSELF, %1);
+      </inject-code>
+    </modify-function>
+    <modify-function signature="addChildLayout(QLayout*)">
+      <inject-code class="target" position="beginning">
+        addLayoutOwnership(%CPPSELF, %1);
+      </inject-code>
+    </modify-function>
+    <modify-function signature="setMenuBar(QWidget*)">
+      <inject-code class="target" position="beginning">
+        addLayoutOwnership(%CPPSELF, %1);
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="getContentsMargins(int*,int*,int*,int*)const">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject" />
+        </modify-argument>
+        <modify-argument index="1">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_number*,number*,number*,number*">
+                <replace from="$TYPE" to="int" />
+            </insert-template>
+        </inject-code>
+        <inject-code class="native" position="end">
+            <insert-template name="fix_native_return_number*,number*,number*,number*">
+                <replace from="$TYPE" to="int" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+
+    <add-function signature="setAlignment(QFlags&lt;Qt::AlignmentFlag&gt;)">
+      <inject-code class="target" position="beginning">
+        %CPPSELF.setAlignment(%1);
+      </inject-code>
+    </add-function>
+
+  </object-type>
+
+  <object-type name="QStackedLayout">
+    <inject-code class="native" position="beginning" file="glue/qlayout_help_functions.cpp"/>
+    <enum-type name="StackingMode"/>
+    <modify-function signature="insertWidget(int,QWidget*)">
+      <inject-code class="target" position="beginning">
+        addLayoutOwnership(%CPPSELF, %2);
+      </inject-code>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QBoxLayout">
+    <inject-code class="native" position="beginning" file="glue/qlayout_help_functions.cpp"/>
+
+    <enum-type name="Direction" />
+
+    <modify-function signature="addWidget(QWidget *, int, QFlags&lt;Qt::AlignmentFlag&gt;)">
+      <inject-code class="target" position="beginning">
+        addLayoutOwnership(%CPPSELF, %1);
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="addLayout(QLayout *, int)">
+      <inject-code class="target" position="beginning">
+        addLayoutOwnership(%CPPSELF, %1);
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="insertWidget(int, QWidget *, int, QFlags&lt;Qt::AlignmentFlag&gt;)">
+      <inject-code class="target" position="beginning">
+        addLayoutOwnership(%CPPSELF, %2);
+      </inject-code>
+    </modify-function>
+    <modify-function signature="insertLayout(int, QLayout *, int)">
+      <inject-code class="target" position="beginning">
+        addLayoutOwnership(%CPPSELF, %2);
+      </inject-code>
+    </modify-function>
+    <modify-function signature="insertItem(int, QLayoutItem *)">
+      <inject-code class="target" position="beginning">
+        addLayoutOwnership(%CPPSELF, %2);
+      </inject-code>
+    </modify-function>
+    <modify-function signature="addSpacerItem(QSpacerItem*)">
+      <inject-code class="target" position="beginning">
+        addLayoutOwnership(%CPPSELF, %1);
+      </inject-code>
+    </modify-function>
+    <modify-function signature="insertSpacerItem(int,QSpacerItem*)">
+      <inject-code class="target" position="beginning">
+        addLayoutOwnership(%CPPSELF, %2);
+      </inject-code>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QGridLayout">
+    <inject-code class="native" position="beginning" file="glue/qlayout_help_functions.cpp"/>
+    <modify-function signature="itemAtPosition (int, int) const">
+      <modify-argument index="return">
+        <define-ownership owner="default"/>
+      </modify-argument>
+      <inject-code class="target" position="end">
+        addLayoutOwnership(%CPPSELF, %0);
+      </inject-code>
+    </modify-function>
+    <modify-function signature="addWidget(QWidget *, int, int, QFlags&lt;Qt::AlignmentFlag&gt;)">
+      <modify-argument index="4">
+        <rename to="alignment"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        addLayoutOwnership(%CPPSELF, %1);
+      </inject-code>
+    </modify-function>
+    <modify-function signature="addWidget(QWidget *, int, int, int, int, QFlags&lt;Qt::AlignmentFlag&gt;)">
+      <modify-argument index="6">
+        <rename to="alignment"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        addLayoutOwnership(%CPPSELF, %1);
+      </inject-code>
+    </modify-function>
+    <modify-function signature="addLayout(QLayout *, int, int, QFlags&lt;Qt::AlignmentFlag&gt;)">
+      <modify-argument index="4">
+        <rename to="alignment"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        addLayoutOwnership(%CPPSELF, %1);
+      </inject-code>
+    </modify-function>
+    <modify-function signature="addLayout(QLayout *, int, int, int, int, QFlags&lt;Qt::AlignmentFlag&gt;)">
+      <modify-argument index="6">
+        <rename to="alignment"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        addLayoutOwnership(%CPPSELF, %1);
+      </inject-code>
+    </modify-function>
+    <modify-function signature="addItem(QLayoutItem *, int, int, int, int, QFlags&lt;Qt::AlignmentFlag&gt;)">
+      <modify-argument index="4">
+        <rename to="rowSpan"/>
+      </modify-argument>
+      <modify-argument index="5">
+        <rename to="columnSpan"/>
+      </modify-argument>
+      <modify-argument index="6">
+        <rename to="alignment"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        addLayoutOwnership(%CPPSELF, %1);
+      </inject-code>
+    </modify-function>
+    <modify-function signature="getItemPosition(int,int*,int*,int*,int*)const">
+        <modify-argument index="return">
+            <replace-type modified-type="PyObject*" />
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="5">
+            <remove-argument/>
+            <remove-default-expression/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+        int a, b, c, d;
+        %CPPSELF.%FUNCTION_NAME(%1, &amp;a, &amp;b, &amp;c, &amp;d);
+        %PYARG_0 = PyTuple_New(4);
+        PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[int](a));
+        PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[int](b));
+        PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[int](c));
+        PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](d));
+        </inject-code>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QGraphicsView">
+    <extra-includes>
+      <include file-name="QPainterPath" location="global"/>
+      <include file-name="QVarLengthArray" location="global"/>
+    </extra-includes>
+    <enum-type name="CacheModeFlag" flags="CacheMode"/>
+    <enum-type name="DragMode"/>
+    <enum-type name="OptimizationFlag" flags="OptimizationFlags"/>
+    <enum-type name="ViewportAnchor"/>
+    <enum-type name="ViewportUpdateMode"/>
+    <modify-function signature="setupViewport(QWidget *)" access="non-final"/>
+    <modify-function signature="setScene(QGraphicsScene*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="scene()const">
+        <inject-code position="end">
+            <insert-template name="scene_return_parenting"/>
+        </inject-code>
+        <modify-argument index="return">
+            <define-ownership owner="default"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="itemAt(int,int)const">
+        <modify-argument index="return">
+            <define-ownership owner="default"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="itemAt(QPoint)const">
+        <modify-argument index="return">
+            <define-ownership owner="default"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="drawBackground(QPainter*,QRectF)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="drawForeground(QPainter*,QRectF)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+
+    <!-- TODO: Support conversions on virtual function -->
+    <modify-function signature="drawItems(QPainter*, int, QGraphicsItem**, const QStyleOptionGraphicsItem*)">
+        <modify-argument index="2">
+            <remove-argument/>
+            <conversion-rule class="native">
+              int %out = PySequence_Size(%PYARG_1);
+            </conversion-rule>
+        </modify-argument>
+
+        <modify-argument index="3">
+            <replace-type modified-type="PySequence"/>
+            <conversion-rule class="native">
+                int numItems = PySequence_Size(%PYARG_1);
+                Shiboken::AutoArrayPointer&lt;QGraphicsItem*&gt; %out(numItems);
+                for (int i=0; i &lt; numItems; i++) {
+                    %out[i] = %CONVERTTOCPP[QGraphicsItem*](PySequence_Fast_GET_ITEM(%PYARG_1, i));
+                }
+            </conversion-rule>
+
+            <conversion-rule class="target">
+                Shiboken::AutoDecRef object(PyList_New(0));
+                for (int i=0, max=numItems; i &lt; max; i++) {
+                    PyList_Append(object, %CONVERTTOPYTHON[QGraphicsItem*](%in[i]));
+                }
+                PyObject *%out = object.object();
+            </conversion-rule>
+        </modify-argument>
+
+        <modify-argument index="4">
+            <replace-type modified-type="PySequence"/>
+            <conversion-rule class="target">
+                Shiboken::AutoDecRef option_object(PyList_New(0));
+                for (int i=0, max=numItems; i &lt; max; i++) {
+                    const QStyleOptionGraphicsItem* item = &amp;%in[i];
+                    PyList_Append(option_object, %CONVERTTOPYTHON[QStyleOptionGraphicsItem](item));
+                }
+                PyObject* %out = option_object.object();
+            </conversion-rule>
+
+            <conversion-rule class="native">
+                int numOptions = PySequence_Size(%PYARG_2);
+                Shiboken::AutoArrayPointer&lt;QStyleOptionGraphicsItem&gt; %out(numOptions);
+                for (int i=0; i &lt; numOptions; i++) {
+                    %out[i] = %CONVERTTOCPP[QStyleOptionGraphicsItem](PySequence_Fast_GET_ITEM(%PYARG_1, i));
+                }
+            </conversion-rule>
+        </modify-argument>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QInputDialog">
+    <enum-type name="InputDialogOption"/>
+    <enum-type name="InputMode"/>
+
+    <modify-function signature="getInt(QWidget*, const QString&amp;, const QString&amp;, int, int, int, int, bool*, QFlags&lt;Qt::WindowType&gt;)" allow-thread="yes">
+      <modify-argument index="8">
+        <remove-default-expression/>
+        <remove-argument/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        <insert-template name="fix_arg,arg,arg,arg,arg,arg,arg,bool*,arg"/>
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="getItem(QWidget*, const QString&amp;, const QString&amp;, const QStringList&amp;, int, bool, bool*, QFlags&lt;Qt::WindowType&gt;,QFlags&lt;Qt::InputMethodHint&gt;)" allow-thread="yes">
+      <modify-argument index="7">
+        <remove-default-expression/>
+        <remove-argument/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        <insert-template name="fix_arg,arg,arg,arg,arg,arg,bool*,arg"/>
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="getMultiLineText(QWidget*, const QString&amp;, const QString&amp;, const QString&amp;, bool*, QFlags&lt;Qt::WindowType&gt;, QFlags&lt;Qt::InputMethodHint&gt;)" allow-thread="yes">
+      <modify-argument index="5">
+        <remove-default-expression/>
+        <remove-argument/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        <insert-template name="fix_arg,arg,arg,arg,bool*,arg,arg"/>
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="getText(QWidget*, const QString&amp;, const QString&amp;, QLineEdit::EchoMode, const QString&amp;, bool*, QFlags&lt;Qt::WindowType&gt;,QFlags&lt;Qt::InputMethodHint&gt;)" allow-thread="yes">
+      <modify-argument index="6">
+        <remove-default-expression/>
+        <remove-argument/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        <insert-template name="fix_arg,arg,arg,arg,arg,bool*,arg"/>
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="getDouble(QWidget*, const QString&amp;, const QString&amp;, double, double, double, int, bool*, QFlags&lt;Qt::WindowType&gt;)" allow-thread="yes">
+      <modify-argument index="8">
+        <remove-default-expression/>
+        <remove-argument/>
+      </modify-argument>
+      <inject-code class="target" position="beginning">
+        <insert-template name="fix_arg,arg,arg,arg,arg,arg,arg,bool*,arg"/>
+      </inject-code>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QGraphicsScene">
+    <extra-includes>
+      <include file-name="QVarLengthArray" location="global"/>
+    </extra-includes>
+    <enum-type name="ItemIndexMethod"/>
+    <enum-type name="SceneLayer" flags="SceneLayers"/>
+
+    <!-- Qt5: note: this was called 'obsolete'. Is that true? -->
+    <modify-function signature="drawItems(QPainter*,int,QGraphicsItem**,const QStyleOptionGraphicsItem*,QWidget*)" remove="all" />
+
+    <modify-function signature="createItemGroup(const QList&lt;QGraphicsItem*&gt;&amp;)">
+        <modify-argument index="1">
+            <parent index="return" action="add" />
+        </modify-argument>
+        <modify-argument index="return">
+            <define-ownership owner="default"/>
+        </modify-argument>
+    </modify-function>
+
+    <modify-function signature="destroyItemGroup(QGraphicsItemGroup*)">
+        <inject-code>
+        QGraphicsItem* parentItem = %1->parentItem();
+        Shiboken::AutoDecRef parent(%CONVERTTOPYTHON[QGraphicsItem*](parentItem));
+        foreach (QGraphicsItem* item, %1->childItems())
+            Shiboken::Object::setParent(parent, %CONVERTTOPYTHON[QGraphicsItem*](item));
+        %BEGIN_ALLOW_THREADS
+        %CPPSELF.%FUNCTION_NAME(%1);
+        %END_ALLOW_THREADS
+        // the arg was destroyed by Qt.
+        Shiboken::Object::invalidate(%PYARG_1);
+        </inject-code>
+    </modify-function>
+
+    <modify-function signature="contextMenuEvent(QGraphicsSceneContextMenuEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="dragEnterEvent(QGraphicsSceneDragDropEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="dragLeaveEvent(QGraphicsSceneDragDropEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="dragMoveEvent(QGraphicsSceneDragDropEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="drawBackground(QPainter*,QRectF)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="drawForeground(QPainter*,QRectF)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="dropEvent(QGraphicsSceneDragDropEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="focusInEvent(QFocusEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="focusOutEvent(QFocusEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="helpEvent(QGraphicsSceneHelpEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="inputMethodEvent(QInputMethodEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="keyPressEvent(QKeyEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="keyReleaseEvent(QKeyEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="mouseMoveEvent(QGraphicsSceneMouseEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="mousePressEvent(QGraphicsSceneMouseEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="mouseReleaseEvent(QGraphicsSceneMouseEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="wheelEvent(QGraphicsSceneWheelEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="addItem(QGraphicsItem*)">
+      <modify-argument index="1">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="addEllipse(const QRectF&amp;, const QPen&amp;, const QBrush&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addEllipse(qreal, qreal, qreal, qreal, const QPen&amp;, const QBrush&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="addLine(const QLineF&amp;, const QPen&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addLine(qreal, qreal, qreal, qreal, const QPen&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="addPath(const QPainterPath&amp;, const QPen&amp;, const QBrush&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addPixmap(const QPixmap&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addPolygon(const QPolygonF&amp;, const QPen&amp;, const QBrush&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addRect(const QRectF&amp;, const QPen&amp;, const QBrush&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addRect(qreal, qreal, qreal, qreal, const QPen&amp;, const QBrush&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="addText(const QString&amp;, const QFont&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addSimpleText(const QString&amp;, const QFont&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add" />
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="addWidget(QWidget*,QFlags&lt;Qt::WindowType&gt;)">
+        <!-- TODO: Add a keeper attribute to reference-count tag to do what this inject code do. -->
+        <inject-code>
+        %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(%1, %2);
+        %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+        Shiboken::Object::keepReference((SbkObject*)%PYARG_0, "setWidget(QWidget*)1", %PYARG_1);
+        </inject-code>
+    </modify-function>
+
+    <!-- use glue code -->
+    <modify-function signature="drawItems(QPainter*, int, QGraphicsItem**, const QStyleOptionGraphicsItem*, QWidget *)">
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+    </modify-function>
+
+    <modify-function signature="clear()">
+        <inject-code>
+            const QList&lt;QGraphicsItem*> items = %CPPSELF.items();
+            Shiboken::BindingManager&amp; bm = Shiboken::BindingManager::instance();
+            foreach (QGraphicsItem* item, items) {
+                SbkObject* obj = bm.retrieveWrapper(item);
+                if (obj) {
+                    if (reinterpret_cast&lt;PyObject*&gt;(obj)->ob_refcnt > 1) // If the refcnt is 1 the object will vannish anyway.
+                        Shiboken::Object::invalidate(obj);
+                    Shiboken::Object::removeParent(obj);
+                }
+            }
+            %CPPSELF.%FUNCTION_NAME();
+        </inject-code>
+    </modify-function>
+
+    <modify-function signature="removeItem(QGraphicsItem*)">
+      <modify-argument index="1">
+        <parent index="this" action="remove" />
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="setFocusItem(QGraphicsItem*,Qt::FocusReason)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QCalendarWidget">
+    <enum-type name="HorizontalHeaderFormat"/>
+    <enum-type name="SelectionMode"/>
+    <enum-type name="VerticalHeaderFormat"/>
+    <extra-includes>
+      <include file-name="QTextCharFormat" location="global"/>
+    </extra-includes>
+    <modify-function signature="paintCell(QPainter*,QRect,QDate)const">
+      <modify-argument invalidate-after-use="yes" index="1"/>
+    </modify-function>
+  </object-type>
+  <object-type name="QTreeWidget">
+    <modify-function signature="dropMimeData(QTreeWidgetItem*,int,const QMimeData*,Qt::DropAction)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="addTopLevelItem(QTreeWidgetItem *)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addTopLevelItems(const QList&lt;QTreeWidgetItem*&gt; &amp;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addTopLevelItem(QTreeWidgetItem*)">
+      <modify-argument index="1">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertTopLevelItem(int, QTreeWidgetItem *)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertTopLevelItems(int, const QList&lt;QTreeWidgetItem*&gt; &amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setHeaderItem(QTreeWidgetItem*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="takeTopLevelItem(int)">
+      <modify-argument index="return">
+        <define-ownership owner="default"/>
+        <parent index="this" action="remove"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="clear()">
+        <inject-code>
+        QTreeWidgetItem *rootItem = %CPPSELF.invisibleRootItem();
+        Shiboken::BindingManager &amp;bm = Shiboken::BindingManager::instance();
+        for (int i = 0; i &lt; rootItem->childCount(); ++i) {
+            QTreeWidgetItem *item = rootItem->child(i);
+            SbkObject* wrapper = bm.retrieveWrapper(item);
+            if (wrapper)
+                Shiboken::Object::setParent(0, reinterpret_cast&lt;PyObject*&gt;(wrapper));
+        }
+        </inject-code>
+    </modify-function>
+  </object-type>
+  <object-type name="QAbstractItemDelegate">
+    <enum-type name="EndEditHint"/>
+    <modify-function signature="paint(QPainter*,QStyleOptionViewItem,QModelIndex)const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="editorEvent(QEvent*,QAbstractItemModel*,QStyleOptionViewItem,QModelIndex)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="createEditor(QWidget*,QStyleOptionViewItem,QModelIndex)const">
+      <modify-argument index="1">
+        <define-ownership owner="c++"/>
+      </modify-argument>
+      <modify-argument index="return">
+        <define-ownership class="native" owner="c++"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QTableWidgetItem" >
+    <enum-type name="ItemType"/>
+    <modify-function signature="read(QDataStream&amp;)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="write(QDataStream&amp;)const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+  </object-type>
+  <object-type name="QListWidgetItem" >
+    <enum-type name="ItemType"/>
+    <modify-function signature="QListWidgetItem(const QString&amp;, QListWidget*, int)">
+      <modify-argument index="this">
+        <parent index="2" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="QListWidgetItem(const QIcon&amp;, const QString&amp;, QListWidget*, int)">
+      <modify-argument index="this">
+        <parent index="3" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="QListWidgetItem(QListWidget*, int)">
+      <modify-argument index="this">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="listWidget() const">
+      <modify-argument index="return">
+        <define-ownership owner="target"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="read(QDataStream&amp;)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="write(QDataStream&amp;)const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+  </object-type>
+  <object-type name="QGraphicsTextItem">
+    <!-- a QObject so main-thread delete redundant -->
+    <extra-includes>
+      <include file-name="QTextCursor" location="global"/>
+    </extra-includes>
+    <modify-function signature="setDocument(QTextDocument*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QCompleter">
+    <enum-type name="CompletionMode"/>
+    <enum-type name="ModelSorting"/>
+    <modify-function signature="setModel(QAbstractItemModel*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setPopup(QAbstractItemView*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setWidget(QWidget*)">
+      <modify-argument index="this">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QTreeWidgetItem" hash-function="qHash">
+    <enum-type name="ChildIndicatorPolicy"/>
+    <enum-type name="ItemType"/>
+    <modify-function signature="read(QDataStream&amp;)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="write(QDataStream&amp;)const">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="QTreeWidgetItem(QTreeWidget*, int)">
+      <modify-argument index="this">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="QTreeWidgetItem(QTreeWidget*, const QStringList&amp;, int)">
+      <modify-argument index="this">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="QTreeWidgetItem(QTreeWidget*, QTreeWidgetItem*, int)">
+      <modify-argument index="this">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="QTreeWidgetItem(QTreeWidgetItem *,int)">
+      <modify-argument index="this">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="QTreeWidgetItem(QTreeWidgetItem*, const QStringList &amp;, int)">
+      <modify-argument index="this">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="QTreeWidgetItem(QTreeWidgetItem*, QTreeWidgetItem*, int)">
+      <modify-argument index="this">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addChild(QTreeWidgetItem *)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addChildren(const QList&lt;QTreeWidgetItem*&gt; &amp;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertChild(int, QTreeWidgetItem *)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertChildren(int, const QList&lt;QTreeWidgetItem*&gt; &amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="removeChild(QTreeWidgetItem*)">
+      <modify-argument index="1">
+        <parent index="this" action="remove"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="takeChild(int)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="takeChildren()">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="parent() const">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+      <inject-code class="target" position="end">
+          // Only call the parent function if this return some value
+          // the parent can be the TreeWidget
+          if (%0)
+            Shiboken::Object::setParent(%PYARG_0, %PYSELF);
+      </inject-code>
+    </modify-function>
+    <modify-function signature="treeWidget() const">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+      <inject-code class="target" position="end">
+          // Only call the parent function if this return some value
+          // the parent can be the TreeWidgetItem
+          if (%0)
+            Shiboken::Object::setParent(%PYARG_0, %PYSELF);
+      </inject-code>
+    </modify-function>
+
+  </object-type>
+  <object-type name="QListWidget">
+    <modify-function signature="setItemWidget(QListWidgetItem *, QWidget *)">
+      <modify-argument index="2">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addItem(QListWidgetItem*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertItem(int, QListWidgetItem*)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="takeItem(int)">
+      <modify-argument index="return">
+        <define-ownership owner="default"/>
+        <parent index="this" action="remove"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QWidget">
+    <!-- Qt5: remove native event for now -->
+    <modify-function signature="nativeEvent(const QByteArray &amp;, void *, long *)" remove="all" />
+
+    <extra-includes>
+      <include file-name="QIcon" location="global"/>
+      <include file-name="QMessageBox" location="global"/>
+    </extra-includes>
+
+    <inject-code class="native" file="glue/qwidget_glue.cpp" position="beginning" />
+
+    <enum-type name="RenderFlag" flags="RenderFlags"/>
+
+    <modify-function signature="setParent(QWidget*)">
+      <modify-argument index="this">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="setParent(QWidget*, QFlags&lt;Qt::WindowType&gt;)">
+      <modify-argument index="this">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="parentWidget()const">
+        <modify-argument index="this">
+          <parent index="return" action="add"/>
+        </modify-argument>
+        <modify-argument index="return">
+          <define-ownership class="target" owner="default"/>
+        </modify-argument>
+    </modify-function>
+
+    <modify-function signature="actionEvent(QActionEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="changeEvent(QEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="closeEvent(QCloseEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="contextMenuEvent(QContextMenuEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="dragEnterEvent(QDragEnterEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="dragLeaveEvent(QDragLeaveEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="dragMoveEvent(QDragMoveEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="dropEvent(QDropEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="enterEvent(QEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="focusInEvent(QFocusEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="focusOutEvent(QFocusEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="hideEvent(QHideEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="inputMethodEvent(QInputMethodEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="keyPressEvent(QKeyEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="keyReleaseEvent(QKeyEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="leaveEvent(QEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="mouseDoubleClickEvent(QMouseEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="mouseMoveEvent(QMouseEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="mousePressEvent(QMouseEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="mouseReleaseEvent(QMouseEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="moveEvent(QMoveEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="paintEvent(QPaintEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="resizeEvent(QResizeEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="showEvent(QShowEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="tabletEvent(QTabletEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="wheelEvent(QWheelEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes">
+            <rename to="event"/>
+        </modify-argument>
+    </modify-function>
+
+    <modify-function signature="setStyle(QStyle*)">
+      <inject-code class="target" position="end">
+        Shiboken::Object::keepReference(reinterpret_cast&lt;SbkObject*&gt;(%PYSELF), "__style__",  %PYARG_1);
+      </inject-code>
+    </modify-function>
+    <modify-function signature="style()const">
+      <inject-code class="target" position="end">
+        QStyle* myStyle = %CPPSELF->style();
+        if (myStyle &amp;&amp; qApp) {
+        %PYARG_0 = %CONVERTTOPYTHON[QStyle*](myStyle);
+            QStyle *appStyle = qApp->style();
+            if (appStyle == myStyle) {
+                Shiboken::AutoDecRef pyApp(%CONVERTTOPYTHON[QApplication*](qApp));
+                Shiboken::Object::setParent(pyApp, %PYARG_0);
+                Shiboken::Object::releaseOwnership(%PYARG_0);
+            } else {
+                Shiboken::Object::keepReference(reinterpret_cast&lt;SbkObject*&gt;(%PYSELF), "__style__",  %PYARG_0);
+            }
+        }
+      </inject-code>
+      <modify-argument index="return">
+        <define-ownership owner="default"/>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="render(QPainter*,QPoint,QRegion,QFlags&lt;QWidget::RenderFlag&gt;)">
+      <modify-argument index="2">
+        <!-- Removed because the render(QPainter*) overload conflicts with the identical function in QGraphicsView -->
+        <remove-default-expression/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setFocusProxy(QWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="getContentsMargins(int*,int*,int*,int*)const">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject" />
+        </modify-argument>
+        <modify-argument index="1">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_number*,number*,number*,number*">
+                <replace from="$TYPE" to="int" />
+            </insert-template>
+        </inject-code>
+        <inject-code class="native" position="end">
+            <insert-template name="fix_native_return_number*,number*,number*,number*">
+                <replace from="$TYPE" to="int" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="insertAction(QAction*, QAction*)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="setLayout(QLayout *)">
+      <inject-code class="target" position="beginning">
+        qwidgetSetLayout(%CPPSELF, %1);
+        // %FUNCTION_NAME() - disable generation of function call.
+      </inject-code>
+    </modify-function>
+    <modify-function signature="raise()" rename="raise_" />
+    <modify-function signature="setParent(QWidget*, QFlags&lt;Qt::WindowType>)">
+      <modify-argument index="this">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="window()const">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  
+  <object-type name="QMessageBox">
+    <enum-type name="ButtonRole"/>
+    <enum-type name="Icon"/>
+    <enum-type name="StandardButton" flags="StandardButtons" />
+    <modify-function signature="removeButton(QAbstractButton*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <extra-includes>
+      <include file-name="QPixmap" location="global"/>
+    </extra-includes>
+
+    <modify-function signature="critical(QWidget*, const QString&amp;, const QString&amp;, QFlags&lt;QMessageBox::StandardButton&gt;, QMessageBox::StandardButton)" allow-thread="yes"/>
+    <modify-function signature="information(QWidget*, const QString&amp;, const QString&amp;, QFlags&lt;QMessageBox::StandardButton&gt;, QMessageBox::StandardButton)" allow-thread="yes"/>
+    <modify-function signature="question(QWidget*, const QString&amp;, const QString&amp;, QFlags&lt;QMessageBox::StandardButton&gt;, QMessageBox::StandardButton)" allow-thread="yes"/>
+    <modify-function signature="warning(QWidget*, const QString&amp;, const QString&amp;, QFlags&lt;QMessageBox::StandardButton&gt;, QMessageBox::StandardButton)" allow-thread="yes"/>
+    <modify-function signature="QMessageBox(const QString&amp;, const QString&amp;, QMessageBox::Icon, int, int, int, QWidget*, QFlags&lt;Qt::WindowType&gt;)" remove="all"/>
+    <modify-function signature="critical(QWidget*, const QString&amp;, const QString&amp;, int, int, int)" remove="all"/>
+    <modify-function signature="critical(QWidget*, const QString&amp;, const QString&amp;, const QString&amp;, const QString&amp;, const QString&amp;, int, int)" remove="all"/>
+    <modify-function signature="information(QWidget*, const QString&amp;, const QString&amp;, int, int, int)" remove="all"/>
+    <modify-function signature="information(QWidget*, const QString&amp;, const QString&amp;, const QString&amp;, const QString&amp;, const QString&amp;, int, int)" remove="all"/>
+    <modify-function signature="question(QWidget*, const QString&amp;, const QString&amp;, int, int, int)" remove="all"/>
+    <modify-function signature="question(QWidget*, const QString&amp;, const QString&amp;, const QString&amp;, const QString&amp;, const QString&amp;, int, int)" remove="all"/>
+    <modify-function signature="warning(QWidget*, const QString&amp;, const QString&amp;, int, int, int)" remove="all"/>
+    <modify-function signature="warning(QWidget*, const QString&amp;, const QString&amp;, const QString&amp;, const QString&amp;, const QString&amp;, int, int)" remove="all"/>
+
+  </object-type>
+  <object-type name="QAbstractSpinBox">
+    <enum-type name="ButtonSymbols"/>
+    <enum-type name="CorrectionMode"/>
+    <enum-type name="StepEnabledFlag" flags="StepEnabled"/>
+    <modify-function signature="setLineEdit(QLineEdit *)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="fixup(QString &amp;)const">
+      <modify-argument index="return">
+        <replace-type modified-type="QString"/>
+      </modify-argument>
+      <inject-code class="target" position="end">
+        <insert-template name="return_QString"/>
+      </inject-code>
+    </modify-function>
+    <modify-function signature="validate(QString &amp;, int &amp;)const">
+      <modify-argument index="return">
+        <replace-type modified-type="PyObject"/>
+        <conversion-rule class="native">
+            <insert-template name="validator_conversionrule"/>
+        </conversion-rule>
+      </modify-argument>
+      <inject-code class="target" position="end">
+        <insert-template name="return_tuple_QValidator_QString_int"/>
+      </inject-code>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QTabWidget">
+    <enum-type name="TabPosition"/>
+    <enum-type name="TabShape"/>
+    <modify-function signature="addTab(QWidget*, const QString&amp;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addTab(QWidget*, const QIcon&amp;, const QString&amp;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertTab(int, QWidget*, const QIcon&amp;, const QString&amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertTab(int, QWidget*, const QString&amp;)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setCornerWidget(QWidget*, Qt::Corner)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setTabBar(QTabBar*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+
+    <!-- This function need be re-implemented in inject code -->
+    <modify-function signature="removeTab(int)">
+    <inject-code class="target" position="beginning">
+        QWidget* tab = %CPPSELF.widget(%1);
+        if (tab) {
+            Shiboken::AutoDecRef pyWidget(%CONVERTTOPYTHON[QWidget*](tab));
+            %CPPSELF.%FUNCTION_NAME(%1);
+        }
+    </inject-code>
+    </modify-function>
+    <modify-function signature="clear()">
+        <inject-code class="target" position="beginning">
+            for (int i = 0; i &lt; %CPPSELF.count(); i++) {
+                QWidget* widget = %CPPSELF.widget(i);
+                Shiboken::AutoDecRef pyWidget(%CONVERTTOPYTHON[QWidget*](widget));
+                Shiboken::Object::setParent(0, pyWidget);
+            }
+            %CPPSELF.%FUNCTION_NAME();
+        </inject-code>
+    </modify-function>
+  </object-type>
+  <object-type name="QDateTimeEdit">
+    <enum-type name="Section" flags="Sections"/>
+    <modify-function signature="setCalendarWidget(QCalendarWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QSlider">
+      <enum-type name="TickPosition" />
+  </object-type>
+  <object-type name="QProgressDialog">
+    <modify-function signature="setBar(QProgressBar*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setLabel(QLabel*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setCancelButton(QPushButton*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QLabel">
+    <modify-function signature="setBuddy(QWidget *)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="setMovie(QMovie *)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QFileDialog">
+    <enum-type name="AcceptMode"/>
+    <enum-type name="DialogLabel"/>
+    <enum-type name="FileMode"/>
+    <enum-type name="Option" flags="Options"/>
+    <enum-type name="ViewMode"/>
+    <extra-includes>
+      <include file-name="QUrl" location="global"/>
+      <include file-name="QAbstractProxyModel" location="global"/>
+    </extra-includes>
+    <modify-function signature="setIconProvider(QFileIconProvider*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setItemDelegate(QAbstractItemDelegate*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="getExistingDirectory(QWidget*, const QString&amp;, const QString&amp;, QFlags&lt;QFileDialog::Option>)" allow-thread="yes" />
+    <modify-function signature="getExistingDirectoryUrl(QWidget*, const QString&amp;, const QUrl&amp;, QFlags&lt;QFileDialog::Option>, const QStringList&amp;)" />
+    <modify-function signature="getOpenFileName(QWidget*, const QString&amp;, const QString&amp;, const QString&amp;, QString*, QFlags&lt;QFileDialog::Option&gt;)" allow-thread="yes">
+      <modify-argument index="return">
+        <replace-type modified-type="(fileName, selectedFilter)"/>
+      </modify-argument>
+      <modify-argument index="5">
+        <replace-type modified-type="QString"/>
+        <replace-default-expression with="QString()"/>
+      </modify-argument>
+      <inject-code class="target" position="end">
+        <insert-template name="return_for_QFileDialog"/>
+      </inject-code>
+    </modify-function>
+    <modify-function signature="getOpenFileNames(QWidget*, const QString&amp;, const QString&amp;, const QString&amp;, QString*, QFlags&lt;QFileDialog::Option&gt;)" allow-thread="yes">
+      <modify-argument index="return">
+        <replace-type modified-type="(fileNames, selectedFilter)"/>
+      </modify-argument>
+      <modify-argument index="5">
+        <replace-type modified-type="QString"/>
+        <replace-default-expression with="QString()"/>
+      </modify-argument>
+      <inject-code class="target" position="end">
+        <insert-template name="return_for_QFileDialog"/>
+      </inject-code>
+    </modify-function>
+    
+    <modify-function signature="getOpenFileUrl(QWidget*, const QString&amp;, const QUrl&amp;, const QString&amp;, QString*, QFlags&lt;QFileDialog::Option&gt;, const QStringList&amp;)" allow-thread="yes">
+      <modify-argument index="return">
+        <replace-type modified-type="(fileName, selectedFilter)"/>
+      </modify-argument>
+      <modify-argument index="5">
+        <replace-type modified-type="QString"/>
+        <replace-default-expression with="QString()"/>
+      </modify-argument>
+      <inject-code class="target" position="end">
+        <insert-template name="return_for_QFileDialog"/>
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="getOpenFileUrls(QWidget*, const QString&amp;, const QUrl&amp;, const QString&amp;, QString *, QFlags&lt;QFileDialog::Option&gt;, const QStringList&amp;)" allow-thread="yes">
+      <modify-argument index="return">
+        <replace-type modified-type="(fileName, selectedFilter)"/>
+      </modify-argument>
+      <modify-argument index="5">
+        <replace-type modified-type="QString"/>
+        <replace-default-expression with="QString()"/>
+      </modify-argument>
+      <inject-code class="target" position="end">
+        <insert-template name="return_for_QFileDialog"/>
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="getSaveFileName(QWidget*, const QString&amp;, const QString&amp;, const QString&amp;, QString*, QFlags&lt;QFileDialog::Option&gt;)" allow-thread="yes">
+      <modify-argument index="return">
+        <replace-type modified-type="(fileName, selectedFilter)"/>
+      </modify-argument>
+      <modify-argument index="5">
+        <replace-type modified-type="QString"/>
+        <replace-default-expression with="QString()"/>
+      </modify-argument>
+      <inject-code class="target" position="end">
+        <insert-template name="return_for_QFileDialog"/>
+      </inject-code>
+    </modify-function>
+
+    <modify-function signature="getSaveFileUrl(QWidget*, const QString&amp;, const QUrl&amp;, const QString&amp;, QString*, QFlags&lt;QFileDialog::Option&gt;, const QStringList&amp;)" allow-thread="yes">
+      <modify-argument index="return">
+        <replace-type modified-type="(fileName, selectedFilter)"/>
+      </modify-argument>
+      <modify-argument index="5">
+        <replace-type modified-type="QString"/>
+        <replace-default-expression with="QString()"/>
+      </modify-argument>
+      <inject-code class="target" position="end">
+        <insert-template name="return_for_QFileDialog"/>
+      </inject-code>
+    </modify-function>
+
+  </object-type>
+
+  <object-type name="QErrorMessage"/>
+  <object-type name="QTabBar">
+    <extra-includes>
+      <include file-name="QIcon" location="global"/>
+    </extra-includes>
+    <enum-type name="Shape"/>
+    <enum-type name="SelectionBehavior"/>
+    <enum-type name="ButtonPosition"/>
+  </object-type>
+  <object-type name="QRadioButton" />
+  <object-type name="QScrollBar" />
+  <object-type name="QAbstractScrollArea">
+    <enum-type name="SizeAdjustPolicy"/>
+    <modify-function signature="setViewport(QWidget *)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addScrollBarWidget(QWidget*,QFlags&lt;Qt::AlignmentFlag&gt;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setCornerWidget(QWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setHorizontalScrollBar(QScrollBar*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setVerticalScrollBar(QScrollBar*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setViewport(QWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setupViewport(QWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="viewportEvent(QEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+  </object-type>
+  <object-type name="QRubberBand">
+    <enum-type name="Shape"/>
+    <modify-function signature="QRubberBand(QRubberBand::Shape, QWidget*)">
+      <modify-argument index="this">
+        <parent index="2" action="add"/>
+      </modify-argument>
+      <modify-argument index="2">
+        <rename to="parent"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QTableWidget">
+    <modify-function signature="setHorizontalHeaderItem(int, QTableWidgetItem *)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setItem(int, int, QTableWidgetItem *)">
+      <modify-argument index="3">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="takeHorizontalHeaderItem(int)">
+      <modify-argument index="return">
+        <parent index="this" action="remove"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="takeVerticalHeaderItem(int)">
+      <modify-argument index="return">
+        <parent index="this" action="remove"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="takeItem(int,int)">
+      <modify-argument index="return">
+        <parent index="this" action="remove"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setItemPrototype(const QTableWidgetItem *)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setVerticalHeaderItem(int, QTableWidgetItem *)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setCellWidget(int,int,QWidget*)">
+      <modify-argument index="3">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setCurrentItem(QTableWidgetItem*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setCurrentItem(QTableWidgetItem*,QFlags&lt;QItemSelectionModel::SelectionFlag&gt;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QSplitter">
+    <modify-function signature="getRange(int,int*,int*)const">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject" />
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_args,number*,number*">
+                <replace from="$TYPE" to="int" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="addWidget(QWidget *)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertWidget(int, QWidget *)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QGroupBox" />
+  <object-type name="QStackedWidget">
+    <modify-function signature="addWidget(QWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertWidget(int,QWidget*)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="removeWidget(QWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="remove"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setCurrentWidget(QWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QSplitterHandle"/>
+  <object-type name="QDial" />
+  <object-type name="QKeySequenceEdit"/>
+  <object-type name="QLineEdit">
+    <enum-type name="ActionPosition"/>
+    <enum-type name="EchoMode"/>
+    <modify-function signature="setCompleter(QCompleter*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setValidator(const QValidator*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="del()" rename="del_" />
+    <modify-function signature="getTextMargins(int*, int*, int*, int*) const">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject *" />
+        </modify-argument>
+        <modify-argument index="1">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_number*,number*,number*,number*">
+                <replace from="$TYPE" to="int" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+
+    <add-function signature="addAction(QAction*)">
+      <inject-code class="target" position="beginning">
+        %CPPSELF.addAction(%1);
+      </inject-code>
+    </add-function>
+
+  </object-type>
+  <object-type name="QLCDNumber">
+      <enum-type name="Mode"/>
+      <enum-type name="SegmentStyle"/>
+  </object-type>
+  <object-type name="QOpenGLWidget">
+      <enum-type name="UpdateBehavior"/>
+  </object-type>
+  <object-type name="QSplashScreen">
+    <!-- Override QWidget.painter -->
+    <modify-function signature="repaint()" remove="all"/>
+    <modify-function signature="drawContents(QPainter*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+  </object-type>
+  <object-type name="QDockWidget">
+    <enum-type name="DockWidgetFeature" flags="DockWidgetFeatures"/>
+    <modify-function signature="setTitleBarWidget(QWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setWidget(QWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QDesktopWidget"/>
+  <object-type name="QFrame">
+      <enum-type name="Shadow" extensible="yes"/>
+      <enum-type name="Shape"/>
+      <enum-type name="StyleMask"/>
+  </object-type>
+  <object-type name="QSpinBox">
+      <modify-function signature="valueChanged(int)">
+          <inject-documentation mode="append" format="target">
+::
+
+    def callback_int(value_as_int):
+        print 'int value changed:', repr(value_as_int)
+
+    app = QApplication(sys.argv)
+    spinbox = QSpinBox()
+    spinbox.valueChanged[unicode].connect(callback_unicode)
+    spinbox.show()
+    sys.exit(app.exec_())
+          </inject-documentation>
+      </modify-function>
+      <modify-function signature="valueChanged(QString)">
+          <inject-documentation mode="append" format="target">
+::
+
+    def callback_unicode(value_as_unicode):
+        print 'unicode value changed:', repr(value_as_unicode)
+
+    app = QApplication(sys.argv)
+    spinbox = QSpinBox()
+    spinbox.valueChanged[unicode].connect(callback_unicode)
+    spinbox.show()
+    sys.exit(app.exec_())
+          </inject-documentation>
+      </modify-function>
+  </object-type>
+  <object-type name="QTextBrowser"/>
+  <object-type name="QDoubleSpinBox"/>
+  <object-type name="QButtonGroup">
+    <modify-function signature="addButton(QAbstractButton*, int)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+        <no-null-pointer/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="removeButton(QAbstractButton *)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+        <no-null-pointer/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setId(QAbstractButton *,int)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QToolBar">
+    <modify-function signature="addAction(QIcon,QString,const QObject*,const char*)">
+      <modify-argument index="3">
+        <replace-type modified-type="PyObject" />
+      </modify-argument>
+      <modify-argument index="4">
+        <remove-argument />
+      </modify-argument>
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+
+      <inject-code>
+        QAction* action = %CPPSELF.addAction(%1, %2);
+        %PYARG_0 = %CONVERTTOPYTHON[QAction*](action);
+        Shiboken::AutoDecRef result(PyObject_CallMethod(%PYARG_0, "connect", "OsO", %PYARG_0, SIGNAL(triggered()), %PYARG_3));
+      </inject-code>
+    </modify-function>
+    <modify-function signature="addAction(QString,const QObject*,const char*)">
+      <modify-argument index="2">
+        <replace-type modified-type="PyObject" />
+      </modify-argument>
+      <modify-argument index="3">
+        <remove-argument />
+      </modify-argument>
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+      <inject-code>
+        QAction* action = %CPPSELF.addAction(%1);
+        %PYARG_0 = %CONVERTTOPYTHON[QAction*](action);
+        Shiboken::AutoDecRef result(PyObject_CallMethod(%PYARG_0, "connect", "OsO", %PYARG_0, SIGNAL(triggered()), %PYARG_2));
+      </inject-code>
+    </modify-function>
+    <modify-function signature="addAction(const QString&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addAction(const QIcon&amp;, const QString&amp;)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <add-function signature="addAction(QAction*)">
+      <inject-code class="target" position="beginning">
+        %CPPSELF.addAction(%1);
+      </inject-code>
+    </add-function>
+    <modify-function signature="addSeparator()">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addWidget(QWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertWidget(QAction*,QWidget*)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertSeparator(QAction*)">
+      <modify-argument index="return">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="clear()">
+      <inject-code>
+        QList&lt;PyObject* &gt; lst;
+        Shiboken::BindingManager&amp; bm = Shiboken::BindingManager::instance();
+        foreach(QToolButton* child, %CPPSELF.findChildren&lt;QToolButton*&gt;()) {
+            if (bm.hasWrapper(child)) {
+                PyObject* pyChild = %CONVERTTOPYTHON[QToolButton*](child);
+                Shiboken::Object::setParent(0, pyChild);
+                lst &lt;&lt; pyChild;
+            }
+        }
+
+        //Remove actions
+        foreach(QAction *act, %CPPSELF.actions()) {
+            Shiboken::AutoDecRef pyAct(%CONVERTTOPYTHON[QAction*](act));
+            Shiboken::Object::setParent(NULL, pyAct);
+            Shiboken::Object::invalidate(pyAct);
+        }
+
+        %CPPSELF.clear();
+        foreach(PyObject* obj, lst) {
+            Shiboken::Object::invalidate(reinterpret_cast&lt;SbkObject* &gt;(obj));
+            Py_XDECREF(obj);
+        }
+      </inject-code>
+    </modify-function>
+  </object-type>
+  <object-type name="QComboBox">
+    <enum-type name="InsertPolicy"/>
+    <enum-type name="SizeAdjustPolicy"/>
+    <modify-function signature="setCompleter(QCompleter*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setValidator(const QValidator*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setItemDelegate(QAbstractItemDelegate *)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+        <no-null-pointer/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setView(QAbstractItemView *)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setLineEdit(QLineEdit *)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setModel(QAbstractItemModel *)">
+      <modify-argument index="1">
+        <no-null-pointer/>
+        <reference-count action="set"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QTextEdit">
+    <enum-type name="AutoFormattingFlag" flags="AutoFormatting"/>
+    <enum-type name="LineWrapMode"/>
+    <value-type name="ExtraSelection" >
+      <include file-name="QTextEdit" location="global"/>
+    </value-type>
+    <extra-includes>
+      <include file-name="QTextCursor" location="global"/>
+    </extra-includes>
+    <modify-function signature="setDocument(QTextDocument*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertFromMimeData(const QMimeData*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="print(QPagedPaintDevice*) const" rename="print_"/>
+  </object-type>
+  <object-type name="QAction">
+    <enum-type name="ActionEvent"/>
+    <enum-type name="MenuRole"/>
+    <enum-type name="Priority" since="4.6"/>
+    <modify-function signature="setMenu(QMenu*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+
+  <!-- qApp macro -->
+  <inject-code class="native" position="beginning">
+    PyObject* moduleQtWidgets;
+  </inject-code>
+  <inject-code class="target" file="glue/qtwidgets_qapp.cpp" position="end" />
+  <object-type name="QApplication">
+    <enum-type name="ColorSpec"/>
+    <extra-includes>
+      <include file-name="QBasicTimer" location="global"/>
+      <include file-name="QFont" location="global"/>
+      <include file-name="QFontMetrics" location="global"/>
+      <include file-name="QPalette" location="global"/>
+      <include file-name="QIcon" location="global"/>
+      <include file-name="QLocale" location="global"/>
+      <include file-name="QStyle" location="global"/>
+    </extra-includes>
+    <modify-function signature="QApplication(int&amp;,char**,int)" access="private" />
+    <add-function signature="QApplication(PySequence)">
+        <inject-code>
+            QApplicationConstructor(%PYSELF, %1, &amp;%0);
+        </inject-code>
+    </add-function>
+    <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
+    <inject-code class="native" file="glue/qapplication_init.cpp" position="beginning" />
+
+    <!-- ownership control transfer to qApp -->
+    <modify-function signature="setStyle(QStyle*)">
+        <inject-code class="target" position="end">
+            Shiboken::Object::setParent(%CONVERTTOPYTHON[QApplication*](qApp), %PYARG_1);
+        </inject-code>
+    </modify-function>
+    <modify-function signature="style()">
+      <inject-code class="target" position="end">
+        <insert-template name="set_qapp_parent_for_orphan"/>
+      </inject-code>
+    </modify-function>
+    <modify-function signature="desktop()">
+      <inject-code class="target" position="end">
+        <insert-template name="set_qapp_parent_for_orphan"/>
+      </inject-code>
+    </modify-function>
+    <modify-function signature="focusWidget()">
+      <inject-code class="target" position="end">
+        <insert-template name="set_qapp_parent_for_orphan"/>
+      </inject-code>
+    </modify-function>
+    <modify-function signature="topLevelAt(const QPoint&amp;)">
+      <inject-code class="target" position="end">
+        <insert-template name="set_qapp_parent_for_orphan"/>
+      </inject-code>
+    </modify-function>
+    <modify-function signature="topLevelAt(int, int)">
+      <inject-code class="target" position="end">
+        <insert-template name="set_qapp_parent_for_orphan"/>
+      </inject-code>
+    </modify-function>
+    <modify-function signature="widgetAt(const QPoint&amp;)">
+      <inject-code class="target" position="end">
+        <insert-template name="set_qapp_parent_for_orphan"/>
+      </inject-code>
+    </modify-function>
+    <modify-function signature="widgetAt(int, int)">
+      <inject-code class="target" position="end">
+        <insert-template name="set_qapp_parent_for_orphan"/>
+      </inject-code>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QCommandLinkButton"/>
+  <object-type name="QFileSystemModel" polymorphic-id-expression="qobject_cast&lt;QFileSystemModel*&gt;(%1)">
+    <enum-type name="Roles"/>
+    <modify-function signature="setIconProvider(QFileIconProvider*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QFormLayout">
+    <inject-code class="native" position="beginning" file="glue/qlayout_help_functions.cpp"/>
+
+    <enum-type name="FieldGrowthPolicy"/>
+    <enum-type name="ItemRole"/>
+    <enum-type name="RowWrapPolicy"/>
+
+    <template name="fix_args,int*,ItemRole*">
+    int _row;
+    QFormLayout::ItemRole _role;
+    %BEGIN_ALLOW_THREADS
+    %CPPSELF->%FUNCTION_NAME(%ARGUMENT_NAMES, &amp;_row, &amp;_role);
+    %END_ALLOW_THREADS
+    %PYARG_0 = PyTuple_New(2);
+    PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[int](_row));
+    PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QFormLayout::ItemRole](_role));
+    </template>
+
+    <modify-function signature="getLayoutPosition(QLayout*,int*,QFormLayout::ItemRole*)const">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject" />
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_args,int*,ItemRole*"/>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="getWidgetPosition(QWidget*,int*,QFormLayout::ItemRole*)const">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject" />
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_args,int*,ItemRole*"/>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="getItemPosition(int,int*,QFormLayout::ItemRole*)const">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject" />
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_args,int*,ItemRole*"/>
+        </inject-code>
+    </modify-function>
+
+    <modify-function signature="addRow(QWidget*,QWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addRow(QLayout*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addRow(QWidget*,QLayout*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addRow(QWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addRow(QString,QLayout*)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addRow(QString,QWidget*)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertRow(int,QLayout*)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertRow(int,QWidget*,QLayout*)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+      <modify-argument index="3">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertRow(int,QWidget*,QWidget*)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+      <modify-argument index="3">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertRow(int,QWidget*)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertRow(int,QString,QLayout*)">
+      <modify-argument index="3">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertRow(int,QString,QWidget*)">
+      <modify-argument index="3">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setLayout(int,QFormLayout::ItemRole,QLayout*)">
+      <modify-argument index="3">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setWidget(int,QFormLayout::ItemRole,QWidget*)">
+      <modify-argument index="3">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setItem(int,QFormLayout::ItemRole,QLayoutItem*)">
+      <modify-argument index="3">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QGraphicsGridLayout" >
+    <modify-function signature="addItem(QGraphicsLayoutItem*,int,int,QFlags&lt;Qt::AlignmentFlag&gt;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addItem(QGraphicsLayoutItem*,int,int,int,int,QFlags&lt;Qt::AlignmentFlag&gt;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setAlignment(QGraphicsLayoutItem*,QFlags&lt;Qt::AlignmentFlag&gt;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QGraphicsLayout">
+    <modify-function signature="getContentsMargins(qreal*,qreal*,qreal*,qreal*)const">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject" />
+        </modify-argument>
+        <modify-argument index="1">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_number*,number*,number*,number*">
+                <replace from="$TYPE" to="qreal" />
+            </insert-template>
+        </inject-code>
+        <inject-code class="native" position="end">
+            <insert-template name="fix_native_return_number*,number*,number*,number*">
+                <replace from="$TYPE" to="qreal" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="widgetEvent(QEvent*)">
+        <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+  </object-type>
+  <object-type name="QGraphicsLayoutItem" copyable="false">
+    <modify-function signature="getContentsMargins(qreal*,qreal*,qreal*,qreal*)const">
+        <modify-argument index="0">
+            <replace-type modified-type="PyObject" />
+        </modify-argument>
+        <modify-argument index="1">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_number*,number*,number*,number*">
+                <replace from="$TYPE" to="qreal" />
+            </insert-template>
+        </inject-code>
+        <inject-code class="native" position="end">
+            <insert-template name="fix_native_return_number*,number*,number*,number*">
+                <replace from="$TYPE" to="qreal" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="setParentLayoutItem(QGraphicsLayoutItem*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QGraphicsLinearLayout" >
+    <modify-function signature="addItem(QGraphicsLayoutItem*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertItem(int,QGraphicsLayoutItem*)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="removeItem(QGraphicsLayoutItem*)">
+      <modify-argument index="1">
+        <parent index="this" action="remove"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setAlignment(QGraphicsLayoutItem*,QFlags&lt;Qt::AlignmentFlag&gt;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setStretchFactor(QGraphicsLayoutItem*,int)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QGraphicsProxyWidget">
+    <modify-function signature="QGraphicsProxyWidget(QGraphicsItem*, QFlags&lt;Qt::WindowType&gt;)">
+      <modify-argument index="this">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="createProxyForChildWidget(QWidget*)">
+      <modify-argument index="return">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="newProxyWidget(const QWidget*)">
+      <modify-argument index="return">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setWidget(QWidget*)">
+      <inject-code>
+          QWidget* _old = %CPPSELF.widget();
+          if (_old)
+             Shiboken::Object::setParent(NULL, %CONVERTTOPYTHON[QWidget*](_old));
+          %CPPSELF.%FUNCTION_NAME(%1);
+          Shiboken::Object::setParent(%PYSELF, %PYARG_1);
+      </inject-code>
+    </modify-function>
+  </object-type>
+  <!-- a QObject so main-thread delete redundant -->
+  <object-type name="QGraphicsWidget">
+    <modify-function signature="getContentsMargins(qreal*,qreal*,qreal*,qreal*)const">
+        <modify-argument index="return">
+            <replace-type modified-type="PyObject" />
+        </modify-argument>
+        <modify-argument index="1">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument/>
+        </modify-argument>
+
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_number*,number*,number*,number*">
+                <replace from="$TYPE" to="qreal" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="getWindowFrameMargins(qreal*,qreal*,qreal*,qreal*)const">
+        <modify-argument index="return">
+            <replace-type modified-type="PyObject" />
+        </modify-argument>
+        <modify-argument index="1">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="3">
+            <remove-argument/>
+        </modify-argument>
+        <modify-argument index="4">
+            <remove-argument/>
+        </modify-argument>
+
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_number*,number*,number*,number*">
+                <replace from="$TYPE" to="qreal" />
+            </insert-template>
+        </inject-code>
+    </modify-function>
+    <modify-function signature="setLayout(QGraphicsLayout*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="changeEvent(QEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="closeEvent(QCloseEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="grabKeyboardEvent(QEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="grabMouseEvent(QEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="hideEvent(QHideEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="moveEvent(QGraphicsSceneMoveEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="paintWindowFrame(QPainter*,const QStyleOptionGraphicsItem*,QWidget*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="resizeEvent(QGraphicsSceneResizeEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="showEvent(QShowEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="ungrabKeyboardEvent(QEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="ungrabMouseEvent(QEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="windowFrameEvent(QEvent*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+    <modify-function signature="setStyle(QStyle*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setTabOrder(QGraphicsWidget*,QGraphicsWidget*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QPlainTextDocumentLayout"/>
+  <object-type name="QPlainTextEdit">
+    <enum-type name="LineWrapMode"/>
+    <modify-function signature="setDocument(QTextDocument*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insertFromMimeData(const QMimeData*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="print(QPagedPaintDevice*)const" rename="print_" />
+  </object-type>
+  <object-type name="QStyledItemDelegate">
+    <modify-function signature="setItemEditorFactory(QItemEditorFactory*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setEditorData(QWidget*,QModelIndex)const">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setModelData(QWidget*,QAbstractItemModel*,QModelIndex)const">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QGesture" since="4.6">
+      <enum-type name="GestureCancelPolicy"/>
+  </object-type>
+  <object-type name="QGestureRecognizer" since="4.6">
+      <enum-type name="ResultFlag" flags="Result"/>
+  </object-type>
+  <object-type name="QTapAndHoldGesture" since="4.6"/>
+  <object-type name="QTapGesture" since="4.6"/>
+  <object-type name="QGraphicsAnchor" since="4.6"/>
+  <object-type name="QGraphicsAnchorLayout" since="4.6"/>
+  <object-type name="QGraphicsBlurEffect" since="4.6">
+      <enum-type name="BlurHint" flags="BlurHints"/>
+  </object-type>
+  <object-type name="QGraphicsColorizeEffect" since="4.6"/>
+  <object-type name="QGraphicsDropShadowEffect" since="4.6"/>
+
+  <object-type name="QGraphicsEffect" since="4.6">
+      <enum-type name="ChangeFlag" flags="ChangeFlags"/>
+      <enum-type name="PixmapPadMode"/>
+  </object-type>
+
+  <object-type name="QGraphicsObject" since="4.6" />
+  <object-type name="QGraphicsOpacityEffect" since="4.6"/>
+  <object-type name="QGraphicsRotation" since="4.6"/>
+  <object-type name="QGraphicsScale" since="4.6"/>
+  <object-type name="QGraphicsTransform" since="4.6"/>
+  <object-type name="QKeyEventTransition" since="4.6"/>
+  <object-type name="QMouseEventTransition" since="4.6"/>
+  <object-type name="QPanGesture" since="4.6"/>
+  <object-type name="QPinchGesture" since="4.6">
+      <enum-type name="ChangeFlag" flags="ChangeFlags"/>
+  </object-type>
+  <object-type name="QSwipeGesture" since="4.6">
+      <enum-type name="SwipeDirection"/>
+  </object-type>
+
+  <value-type name="QTileRules" since="4.6"/>
+
+  <object-type name="QSizeGrip"/>
+
+  <object-type name="QSystemTrayIcon">
+    <enum-type name="ActivationReason"/>
+    <enum-type name="MessageIcon"/>
+    <modify-function signature="setContextMenu(QMenu*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+
+  <!-- The above entries may be present in the system or not. Keep this section organized. -->
+
+  <!-- This enum is present on QtCore -->
+  <suppress-warning text="enum 'QCoreApplication::ApplicationFlags' is specified in typesystem, but not declared" />
+  <suppress-warning text="QGraphicsEllipseItem::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsItemGroup::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsItem::UserType' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsLineItem::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsPathItem::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsPixmapItem::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsPolygonItem::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsProxyWidget::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsRectItem::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsSimpleTextItem::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsSvgItem::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsTextItem::Type' does not have a type entry or is not an enum"/>
+  <suppress-warning text="QGraphicsWidget::Type' does not have a type entry or is not an enum"/>
+</typesystem>
