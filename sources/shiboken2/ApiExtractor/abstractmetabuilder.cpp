@@ -2071,6 +2071,34 @@ static inline QString msgVoidParameterType(const ArgumentModelItem &arg, int n)
     return result;
 }
 
+static inline AbstractMetaFunction::FunctionType functionTypeFromCodeModel(CodeModel::FunctionType ft)
+{
+    AbstractMetaFunction::FunctionType result = AbstractMetaFunction::NormalFunction;
+    switch (ft) {
+    case CodeModel::Constructor:
+        result = AbstractMetaFunction::ConstructorFunction;
+        break;
+    case CodeModel::CopyConstructor:
+        result = AbstractMetaFunction::CopyConstructorFunction;
+        break;
+    case CodeModel::MoveConstructor:
+        result = AbstractMetaFunction::MoveConstructorFunction;
+        break;
+    case CodeModel::Destructor:
+        result = AbstractMetaFunction::DestructorFunction;
+        break;
+    case CodeModel::Normal:
+        break;
+    case CodeModel::Signal:
+        result = AbstractMetaFunction::SignalFunction;
+        break;
+    case CodeModel::Slot:
+        result = AbstractMetaFunction::SlotFunction;
+        break;
+    }
+    return result;
+}
+
 AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModelItem functionItem)
 {
     if (!functionItem->templateParameters().isEmpty())
@@ -2104,14 +2132,12 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
         return 0;
     }
 
-    Q_ASSERT(functionItem->functionType() == CodeModel::Normal
-             || functionItem->functionType() == CodeModel::Signal
-             || functionItem->functionType() == CodeModel::Slot);
-
     if (functionItem->isFriend())
         return 0;
 
     AbstractMetaFunction *metaFunction = q->createMetaFunction();
+    // Additional check for assignment/move assignment down below
+    metaFunction->setFunctionType(functionTypeFromCodeModel(functionItem->functionType()));
     metaFunction->setConstant(functionItem->isConstant());
 
     if (ReportHandler::isDebug(ReportHandler::MediumDebug))
@@ -2145,31 +2171,24 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
     else
         *metaFunction += AbstractMetaAttributes::Protected;
 
-
-    QString strippedClassName = className;
-    int cc_pos = strippedClassName.lastIndexOf(colonColon());
-    if (cc_pos > 0)
-        strippedClassName = strippedClassName.mid(cc_pos + 2);
-
-    TypeInfo functionType = functionItem->type();
-
-    if (TypeDatabase::instance()->isReturnTypeRejected(className, functionType.toString(), &rejectReason)) {
-        m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
-        delete metaFunction;
-        return nullptr;
-    }
-
-    if (functionName.startsWith(QLatin1Char('~'))) {
-        metaFunction->setFunctionType(AbstractMetaFunction::DestructorFunction);
-        metaFunction->setInvalid(true);
-    } else if (stripTemplateArgs(functionName) == strippedClassName) {
-        metaFunction->setFunctionType(AbstractMetaFunction::ConstructorFunction);
-        // Check for Copy/Move down below
+    switch (metaFunction->functionType()) {
+    case AbstractMetaFunction::DestructorFunction:
+        break;
+    case AbstractMetaFunction::ConstructorFunction:
         metaFunction->setExplicit(functionItem->isExplicit());
         metaFunction->setName(m_currentClass->name());
-    } else {
+        break;
+    default: {
+        TypeInfo returnType = functionItem->type();
+
+        if (TypeDatabase::instance()->isReturnTypeRejected(className, returnType.toString(), &rejectReason)) {
+            m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
+            delete metaFunction;
+            return nullptr;
+        }
+
         bool ok;
-        AbstractMetaType* type = translateType(functionType, &ok);
+        AbstractMetaType *type = translateType(returnType, &ok);
 
         if (!ok) {
             Q_ASSERT(type == 0);
@@ -2183,11 +2202,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
         }
 
         metaFunction->setType(type);
-
-        if (functionItem->functionType() == CodeModel::Signal)
-            metaFunction->setFunctionType(AbstractMetaFunction::SignalFunction);
-        else if (functionItem->functionType() == CodeModel::Slot)
-            metaFunction->setFunctionType(AbstractMetaFunction::SlotFunction);
+    }
+        break;
     }
 
     ArgumentList arguments = functionItem->arguments();
@@ -2303,20 +2319,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
     if (m_currentClass && metaFunction->arguments().size() == 1) {
         const AbstractMetaType *argType = metaFunction->arguments().first()->type();
         if (argType->typeEntry() == m_currentClass->typeEntry() && argType->indirections() == 0) {
-            if (metaFunction->isConstructor()) {
-                switch (argType->referenceType()) {
-                case NoReference:
-                    metaFunction->setFunctionType(AbstractMetaFunction::CopyConstructorFunction);
-                    break;
-                case LValueReference:
-                    if (argType->isConstant())
-                        metaFunction->setFunctionType(AbstractMetaFunction::CopyConstructorFunction);
-                    break;
-                case RValueReference:
-                    metaFunction->setFunctionType(AbstractMetaFunction::MoveConstructorFunction);
-                    break;
-                }
-            } else if (metaFunction->name() == QLatin1String("operator=")) {
+            if (metaFunction->name() == QLatin1String("operator=")) {
                 switch (argType->referenceType()) {
                 case NoReference:
                     metaFunction->setFunctionType(AbstractMetaFunction::AssignmentOperatorFunction);

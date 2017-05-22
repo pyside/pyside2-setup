@@ -56,6 +56,10 @@ public:
 
     enum FunctionType {
         Normal,
+        Constructor,
+        CopyConstructor,
+        MoveConstructor,
+        Destructor,
         Signal,
         Slot
     };
