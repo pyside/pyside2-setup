@@ -135,6 +135,8 @@ public:
 
         Invokable                   = 0x00040000,
 
+        HasRejectedConstructor      = 0x00080000,
+
         Final                       = FinalInTargetLang | FinalInCpp
     };
     Q_DECLARE_FLAGS(Attributes, Attribute)
@@ -842,7 +844,6 @@ public:
             m_declaringClass(0),
             m_propertySpec(0),
             m_constant(false),
-            m_invalid(false),
             m_reverse(false),
             m_userAdded(false),
             m_explicit(false),
@@ -1029,14 +1030,6 @@ public:
     }
     int actualMinimumArgumentCount() const;
 
-    void setInvalid(bool on)
-    {
-        m_invalid = on;
-    }
-    bool isInvalid() const
-    {
-        return m_invalid;
-    }
     bool isDeprecated() const;
     bool isDestructor() const
     {
@@ -1215,7 +1208,6 @@ private:
     QPropertySpec *m_propertySpec;
     AbstractMetaArgumentList m_arguments;
     uint m_constant                 : 1;
-    uint m_invalid                  : 1;
     uint m_reverse                  : 1;
     uint m_userAdded                : 1;
     uint m_explicit                 : 1;

@@ -1004,6 +1004,8 @@ bool ShibokenGenerator::isValueTypeWithCopyConstructorOnly(const AbstractMetaCla
 {
     if (!metaClass || !metaClass->typeEntry()->isValue())
         return false;
+    if ((metaClass->attributes() & AbstractMetaAttributes::HasRejectedConstructor) != 0)
+        return false;
     AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
     if (ctors.count() != 1)
         return false;

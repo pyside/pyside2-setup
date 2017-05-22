@@ -1212,8 +1212,6 @@ void AbstractMetaFunction::formatDebugVerbose(QDebug &d) const
     d << "), signature=\"" << minimalSignature() << '"';
     if (m_constant)
         d << " [const]";
-    if (m_invalid)
-        d << " [invalid]";
     if (m_reverse)
         d << " [reverse]";
     if (m_userAdded)
