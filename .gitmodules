@@ -1,9 +1,3 @@
-[submodule "sources/pyside2"]
-	path = sources/pyside2
-	url = ../pyside.git
-[submodule "sources/shiboken2"]
-	path = sources/shiboken2
-	url = ../shiboken.git
 [submodule "sources/pyside2-tools"]
 	path = sources/pyside2-tools
 	url = ../pyside-tools.git
