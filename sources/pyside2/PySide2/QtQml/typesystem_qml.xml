@@ -1,0 +1,216 @@
+<?xml version="1.0"?>
+<!--
+/****************************************************************************
+**
+** Copyright (C) 2016 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of PySide2.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+-->
+<typesystem package="PySide2.QtQml">
+    <load-typesystem name="typesystem_core.xml" generate="no"/>
+    <load-typesystem name="typesystem_network.xml" generate="no"/>
+    <load-typesystem name="typesystem_gui.xml" generate="no"/>
+
+    <!-- This is to inform the generator that the VolatileBool python type exists -->
+    <custom-type name="VolatileBool" />
+    <primitive-type name="bool volatile" target-lang-api-name="VolatileBool">
+        <include file-name="pysideqmlregistertype.h" location="local"/>
+        <!-- No conversion rules are specified here, because the generator does not handle
+             pointer to primitive types without function adjustment.
+             See commit ff0b861b59b41387e771d9cd565e13de8b2750d1 or search for changePStr
+             in generator tests folder. -->
+    </primitive-type>
+
+    <add-function signature="qmlRegisterType(PyTypeObject, const char*, int, int, const char*)" return-type="int">
+        <inject-documentation format="target" mode="append">
+            This function registers the Python type in the QML system with the name qmlName, in the library imported from uri having the version number composed from versionMajor and versionMinor.
+            Returns the QML type id.
+
+            For example, this registers a Python class MySliderItem as a QML type named Slider for version 1.0 of a module called "com.mycompany.qmlcomponents":
+
+            ::
+
+                qmlRegisterType(MySliderItem, "com.mycompany.qmlcomponents", 1, 0, "Slider")
+
+            Once this is registered, the type can be used in QML by importing the specified module name and version number:
+
+            ::
+
+                import com.mycompany.qmlcomponents 1.0
+
+                Slider { ... }
+
+            Note that it's perfectly reasonable for a library to register types to older versions than the actual version of the library. Indeed, it is normal for the new library to allow QML written to previous versions to continue to work, even if more advanced versions of some of its types are available.
+        </inject-documentation>
+
+        <inject-code class="target">
+        int %0 = PySide::qmlRegisterType(%ARGUMENT_NAMES);
+        %PYARG_0 = %CONVERTTOPYTHON[int](%0);
+        </inject-code>
+    </add-function>
+
+    <enum-type identified-by-value="QML_HAS_ATTACHED_PROPERTIES">
+        <extra-includes>
+            <include file-name="QtQml" location="global"/>
+            <include file-name="pysideqmlregistertype.h" location="local"/>
+        </extra-includes>
+    </enum-type>
+
+    <inject-code class="target" position="end">
+    PySide::initQmlSupport(module);
+    </inject-code>
+
+    <object-type name="QJSEngine">
+        <enum-type name="Extension" flags="Extensions" since="5.6" />
+        <add-function signature="toScriptValue(const QVariant&amp;)" return-type="QJSValue">
+            <inject-code class="target" position="end">
+                %RETURN_TYPE retval = %CPPSELF.%FUNCTION_NAME(%1);
+                return %CONVERTTOPYTHON[%RETURN_TYPE](retval);
+            </inject-code>
+        </add-function>
+    </object-type>
+    <value-type name="QJSValue">
+        <enum-type name="SpecialValue" />
+    </value-type>
+    <object-type name="QJSValueIterator" />
+    <object-type name="QQmlAbstractUrlInterceptor">
+        <enum-type name="DataType" />
+    </object-type>
+    <object-type name="QQmlApplicationEngine" />
+    <object-type name="QQmlComponent">
+        <enum-type name="CompilationMode" />
+        <enum-type name="Status" />
+    </object-type>
+    <object-type name="QQmlContext" />
+    <value-type name="QQmlError" />
+    <object-type name="QQmlDebuggingEnabler">
+        <enum-type name="StartMode" />
+    </object-type>
+    <object-type name="QQmlEngine">
+        <enum-type name="ObjectOwnership" />
+    </object-type>
+    <object-type name="QQmlExpression">
+        <modify-function signature="evaluate(bool *)" allow-thread="yes">
+            <modify-argument index="1">
+                <remove-argument />
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PyTuple" />
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+                <insert-template name="fix_bool*"/>
+            </inject-code>
+        </modify-function>
+    </object-type>
+    <interface-type name="QQmlTypesExtensionInterface" />
+    <interface-type name="QQmlExtensionInterface" />
+    <object-type name="QQmlExtensionPlugin" />
+    <!-- Possible qRegisterMetaType issues ? -->
+    <object-type name="QQmlFile">
+        <enum-type name="Status" />
+    </object-type>
+    <object-type name="QQmlFileSelector" />
+    <object-type name="QQmlImageProviderBase">
+        <modify-function signature="QQmlImageProviderBase()" remove="all"/>
+        <enum-type name="Flag" flags="Flags" />
+        <enum-type name="ImageType" />
+    </object-type>
+    <object-type name="QQmlIncubator">
+        <enum-type name="IncubationMode" />
+        <enum-type name="Status" />
+    </object-type>
+    <object-type name="QQmlIncubationController">
+        <modify-function signature="incubateWhile(bool volatile*,int)" allow-thread="yes">
+            <modify-argument index="1">
+                <!-- The replace type is needed to use the VolatileBool_Check macro instead of
+                     a template conversion function with "volatile bool" as argument. -->
+                <replace-type modified-type="VolatileBool" />
+                <conversion-rule class="native">
+                    volatile bool * %out =
+                      &amp;((reinterpret_cast&lt;QtQml_VolatileBoolObject *&gt;(%PYARG_1))->flag);
+                </conversion-rule>
+            </modify-argument>
+        </modify-function>
+    </object-type>
+
+    <!-- TODO: QQmlListProperty is a template class, and thus should probably be treated like a
+    container-type tag, which implies custom code for conversion. Not sure there's a use case to
+    allow instantiating or deriving from the class though, given that a separate custom ListProperty
+    type is provided by the module. Plus meta type registration would have to be taken into account
+    for the QML parts.
+    <value-type name="QQmlListProperty" />-->
+    <value-type name="QQmlListReference" />
+    <interface-type name="QQmlParserStatus" />
+    <value-type name="QQmlProperty">
+        <enum-type name="PropertyTypeCategory" />
+        <enum-type name="Type" />
+    </value-type>
+    <object-type name="QQmlPropertyMap" />
+    <object-type name="QQmlPropertyValueSource" />
+    <value-type name="QQmlScriptString">
+        <modify-function signature="numberLiteral(bool *) const" allow-thread="yes">
+            <modify-argument index="1">
+                <remove-argument />
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PyTuple" />
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+                <insert-template name="fix_bool*"/>
+            </inject-code>
+        </modify-function>
+        <modify-function signature="booleanLiteral(bool *) const" allow-thread="yes">
+            <modify-argument index="1">
+                <remove-argument />
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PyTuple" />
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+                <insert-template name="fix_bool*"/>
+            </inject-code>
+        </modify-function>
+    </value-type>
+    <object-type name="QQmlNetworkAccessManagerFactory">
+      <modify-function signature="create(QObject*)">
+        <modify-argument index="return">
+          <define-ownership class="native" owner="c++"/>
+        </modify-argument>
+      </modify-function>
+    </object-type>
+    <!-- Suppress anonymous enum warning -->
+    <suppress-warning text="enum 'QmlCurrentSingletonTypeRegistrationVersion' does not have a type entry or is not an enum" />
+</typesystem>
