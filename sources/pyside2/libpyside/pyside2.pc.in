@@ -1,0 +1,14 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=@CMAKE_INSTALL_PREFIX@
+libdir=@LIB_INSTALL_DIR@
+includedir=@CMAKE_INSTALL_PREFIX@/include/PySide2@pyside2_SUFFIX@
+typesystemdir=@CMAKE_INSTALL_PREFIX@/share/PySide2@pyside2_SUFFIX@/typesystems
+pythonpath=@SITE_PACKAGE@
+
+Name: PySide2@pyside2_SUFFIX@
+Description: Support library for Python bindings of Qt5-based libraries.
+Version: @BINDING_API_VERSION_FULL@
+Libs: -L${libdir} -lpyside2@pyside2_SUFFIX@@SHIBOKEN_PYTHON_EXTENSION_SUFFIX@@LIBRARY_OUTPUT_SUFFIX@
+Cflags: -I${includedir}
+Requires: shiboken2
+
