@@ -51,8 +51,6 @@ QT_CI_TESTED_SUBMODULE = option_value("module")
 SUBMODULE_BRANCH = option_value("branch")
 
 submodules = {
-        "shiboken2" : "shiboken",
-        "pyside2" : "pyside",
         "pyside2-tools" : "pyside-tools",
         "pyside2-examples" : "examples"
 }

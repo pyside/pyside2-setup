@@ -81,17 +81,15 @@ OS X SDK: You can specify which OS X SDK should be used for compilation with the
 
 __version__ = "5.6"
 
+containedModules = ['shiboken2', 'pyside2']
+
 submodules = {
     '2.0.0.dev0': [
-        ["shiboken2", "dev"],
-        ["pyside2", "dev"],
         ["pyside2-tools", "dev"],
         ["pyside2-examples", "dev"],
         ["wiki", "master", ".."],
     ],
     '5.6': [
-        ["shiboken2", "5.6"],
-        ["pyside2", "5.6"],
         ["pyside2-tools", "5.6"],
         ["pyside2-examples", "5.6"],
         ["wiki", "master", ".."]
@@ -181,8 +179,10 @@ from utils import osx_localize_libpaths
 
 # guess a close folder name for extensions
 def get_extension_folder(ext):
-    maybe = list(map(lambda x:x[0], submodules[__version__]))
-    folder = difflib.get_close_matches(ext, maybe)[0]
+    candidates = containedModules
+    for gitModules in submodules[__version__]:
+        candidates.append(gitModules[0])
+    folder = difflib.get_close_matches(ext, candidates)[0]
     return folder
 
 # make sure that setup.py is run with an allowed python version
@@ -722,7 +722,7 @@ class pyside_build(_build):
 
         if not OPTION_ONLYPACKAGE:
             # Build extensions
-            for ext in ['shiboken2', 'pyside2', 'pyside2-tools']:
+            for ext in containedModules + ['pyside2-tools']:
                 self.build_extension(ext)
 
             if OPTION_BUILDTESTS:
