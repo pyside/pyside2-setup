@@ -987,6 +987,11 @@ class pyside_build(_build):
             "{install_dir}/include",
             "{dist_dir}/PySide2/include",
             vars=vars)
+        # <source>/pyside2/PySide2/support/* -> <setup>/PySide2/support/*
+        copydir(
+            "{build_dir}/pyside2/PySide2/support",
+            "{dist_dir}/PySide2/support",
+            vars=vars)
         if not OPTION_NOEXAMPLES:
             # <sources>/pyside2-examples/examples/* -> <setup>/PySide2/examples
             folder = get_extension_folder('pyside2-examples')
@@ -1109,6 +1114,11 @@ class pyside_build(_build):
         copydir(
             "{install_dir}/include",
             "{dist_dir}/PySide2/include",
+            vars=vars)
+        # <source>/pyside2/PySide2/support/* -> <setup>/PySide2/support/*
+        copydir(
+            "{build_dir}/pyside2/PySide2/support",
+            "{dist_dir}/PySide2/support",
             vars=vars)
         if not OPTION_NOEXAMPLES:
             # <sources>/pyside2-examples/examples/* -> <setup>/PySide2/examples

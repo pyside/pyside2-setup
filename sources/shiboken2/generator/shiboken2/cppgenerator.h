@@ -231,13 +231,14 @@ private:
 
     void writeClassRegister(QTextStream &s,
                             const AbstractMetaClass *metaClass,
-                            GeneratorContext &classContext);
+                            GeneratorContext &classContext,
+                            QTextStream &signatureStream);
     void writeClassDefinition(QTextStream &s,
                               const AbstractMetaClass *metaClass,
                               GeneratorContext &classContext);
     void writeMethodDefinitionEntry(QTextStream& s, const AbstractMetaFunctionList overloads);
     void writeMethodDefinition(QTextStream& s, const AbstractMetaFunctionList overloads);
-
+    void writeSignatureInfo(QTextStream &s, const AbstractMetaFunctionList &overloads);
     /// Writes the implementation of all methods part of python sequence protocol
     void writeSequenceMethods(QTextStream &s,
                               const AbstractMetaClass *metaClass,

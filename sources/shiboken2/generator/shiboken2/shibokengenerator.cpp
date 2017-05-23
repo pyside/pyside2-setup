@@ -324,6 +324,9 @@ QString ShibokenGenerator::fullPythonFunctionName(const AbstractMetaFunction* fu
         else
             funcName.prepend(fullName + QLatin1Char('.'));
     }
+    else {
+        funcName = packageName() + QLatin1Char('.') + func->name();
+    }
     return funcName;
 }
 

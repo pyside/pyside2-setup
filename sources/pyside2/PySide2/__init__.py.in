@@ -14,6 +14,8 @@ def _setupQtDirectories():
     import os
     from . import _utils
 
+    os.environ["PYSIDE_PACKAGE_DIR"] = os.path.abspath(os.path.dirname(__file__))
+
     pysideDir = _utils.get_pyside_dir()
 
     # Register PySide qt.conf to override the built-in

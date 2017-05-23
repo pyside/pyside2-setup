@@ -1,0 +1,115 @@
+#############################################################################
+##
+## Copyright (C) 2017 The Qt Company Ltd.
+## Contact: https://www.qt.io/licensing/
+##
+## This file is part of PySide2.
+##
+## $QT_BEGIN_LICENSE:LGPL$
+## Commercial License Usage
+## Licensees holding valid commercial Qt licenses may use this file in
+## accordance with the commercial license agreement provided with the
+## Software or, alternatively, in accordance with the terms contained in
+## a written agreement between you and The Qt Company. For licensing terms
+## and conditions see https://www.qt.io/terms-conditions. For further
+## information use the contact form at https://www.qt.io/contact-us.
+##
+## GNU Lesser General Public License Usage
+## Alternatively, this file may be used under the terms of the GNU Lesser
+## General Public License version 3 as published by the Free Software
+## Foundation and appearing in the file LICENSE.LGPL3 included in the
+## packaging of this file. Please review the following information to
+## ensure the GNU Lesser General Public License version 3 requirements
+## will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+##
+## GNU General Public License Usage
+## Alternatively, this file may be used under the terms of the GNU
+## General Public License version 2.0 or (at your option) the GNU General
+## Public license version 3 or any later version approved by the KDE Free
+## Qt Foundation. The licenses are as published by the Free Software
+## Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+## included in the packaging of this file. Please review the following
+## information to ensure the GNU General Public License requirements will
+## be met: https://www.gnu.org/licenses/gpl-2.0.html and
+## https://www.gnu.org/licenses/gpl-3.0.html.
+##
+## $QT_END_LICENSE$
+##
+#############################################################################
+
+from __future__ import print_function, absolute_import
+
+"""
+This file was originally directly embedded into the C source.
+After it grew more and more, I now prefer to have it as Python file.
+The remaining stub loader is a short string now.
+
+The loader has to lazy-load the signature module and also provides a few
+Python modules that I consider essential and therefore built-in.
+This version does not use an embedded .zip file.
+"""
+
+import sys
+import os
+import functools
+from contextlib import contextmanager
+from distutils import sysconfig
+
+@contextmanager
+def add_path(path):
+    sys.path.insert(0, path)
+    yield
+    sys.path.pop(0)
+
+# Make sure that we always have the PySide containing package first.
+# This is crucial for the mapping during reload in the tests.
+package_dir = __file__
+for _ in "four":
+    package_dir = os.path.dirname(package_dir)
+assured_site_packages = functools.partial(add_path, package_dir)
+
+with assured_site_packages():
+    if sys.version_info >= (3,):
+        from PySide2.support.signature import inspect
+        from PySide2.support.signature import typing
+    else:
+        import inspect
+        namespace = inspect.__dict__
+        from PySide2.support.signature import backport_inspect as inspect
+        inspect.__dict__.update(namespace)
+    from PySide2.support.signature import parser
+# Note also that during the tests we have a different encodind that would
+# break the Python license decorated files without an encoding line.
+
+# name used in signature.cpp
+def pyside_type_init(*args, **kw):
+    with assured_site_packages():
+        return parser.pyside_type_init(*args, **kw)
+
+# name used in signature.cpp
+def create_signature(props, sig_kind):
+    if not props:
+        # empty signatures string
+        return
+    if isinstance(props["multi"], list):
+        return list(create_signature(elem, sig_kind)
+                    for elem in props["multi"])
+    varnames = props["varnames"]
+    if sig_kind == "method":
+        varnames = ("self",) + varnames
+    elif sig_kind == "staticmethod":
+        pass
+    elif sig_kind == "classmethod":
+        varnames = ("klass",) + varnames
+    else:
+        raise SystemError("Methods must be normal, staticmethod or "
+                          "classmethod")
+    argstr = ", ".join(varnames)
+    fakefunc = eval("lambda {}: None".format(argstr))
+    fakefunc.__name__ = props["name"]
+    fakefunc.__defaults__ = props["defaults"]
+    fakefunc.__kwdefaults__ = props["kwdefaults"]
+    fakefunc.__annotations__ = props["annotations"]
+    return inspect._signature_from_function(inspect.Signature, fakefunc)
+
+# end of file

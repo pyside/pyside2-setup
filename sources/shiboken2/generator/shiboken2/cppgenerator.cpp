@@ -348,6 +348,8 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
     QTextStream md(&methodsDefinitions);
     QString singleMethodDefinitions;
     QTextStream smd(&singleMethodDefinitions);
+    QString signaturesString;
+    QTextStream signatureStream(&signaturesString);
 
     s << endl << "// Target ---------------------------------------------------------" << endl << endl;
     s << "extern \"C\" {" << endl;
@@ -383,10 +385,13 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
             if (classContext.forSmartPointer())
                 continue;
             writeConstructorWrapper(s, overloads, classContext);
+            writeSignatureInfo(signatureStream, overloads);
         }
         // call operators
-        else if (rfunc->name() == QLatin1String("operator()"))
+        else if (rfunc->name() == QLatin1String("operator()")) {
             writeMethodWrapper(s, overloads, classContext);
+            writeSignatureInfo(signatureStream, overloads);
+        }
         else if (!rfunc->isOperatorOverload()) {
 
             if (classContext.forSmartPointer()) {
@@ -417,6 +422,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
             }
 
             writeMethodWrapper(s, overloads, classContext);
+            writeSignatureInfo(signatureStream, overloads);
             if (OverloadData::hasStaticAndInstanceFunctions(overloads)) {
                 QString methDefName = cpythonMethodDefinitionName(rfunc);
                 smd << "static PyMethodDef " << methDefName << " = {" << endl;
@@ -431,8 +437,10 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
     QString className = cpythonTypeName(metaClass);
     className.remove(QRegExp(QLatin1String("_Type$")));
 
-    if (metaClass->typeEntry()->isValue() || metaClass->typeEntry()->isSmartPointer())
+    if (metaClass->typeEntry()->isValue() || metaClass->typeEntry()->isSmartPointer()) {
         writeCopyFunction(s, classContext);
+        signatureStream << INDENT << metaClass->fullName() << ".__copy__()" << endl;
+    }
 
     // Write single method definitions
     s << singleMethodDefinitions;
@@ -495,6 +503,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
                 continue;
 
             writeMethodWrapper(s, overloads, classContext);
+            writeSignatureInfo(signatureStream, overloads);
         }
     }
 
@@ -567,7 +576,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
     s << endl;
 
     writeConverterFunctions(s, metaClass, classContext);
-    writeClassRegister(s, metaClass, classContext);
+    writeClassRegister(s, metaClass, classContext, signatureStream);
 
     // class inject-code native/end
     if (!metaClass->typeEntry()->codeSnips().isEmpty()) {
@@ -1976,7 +1985,7 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                         strArg = QLatin1String("str");
                     else if (strArg == QLatin1String("PyBytes"))
                         strArg = QLatin1String("\" SBK_STR_NAME \"");
-                    else if (strArg == QLatin1String("PySequece"))
+                    else if (strArg == QLatin1String("PySequence"))
                         strArg = QLatin1String("list");
                     else if (strArg == QLatin1String("PyTuple"))
                         strArg = QLatin1String("tuple");
@@ -4302,6 +4311,69 @@ void CppGenerator::writeMethodDefinition(QTextStream& s, const AbstractMetaFunct
     s << ',' << endl;
 }
 
+static QString resolveRetOrArgType(const AbstractMetaType *someType)
+{
+    QString strRetArg;
+    if (CppGenerator::isCString(someType)) {
+        strRetArg = QLatin1String("str");
+    } else if (someType->isPrimitive()) {
+        const PrimitiveTypeEntry* ptp = static_cast<const PrimitiveTypeEntry*>(someType->typeEntry());
+        while (ptp->referencedTypeEntry())
+            ptp = ptp->referencedTypeEntry();
+        strRetArg = ptp->name();
+    } else {
+        strRetArg = someType->fullName();
+    }
+    strRetArg.replace(QLatin1String("::"), QLatin1String("."));
+    return strRetArg;
+}
+
+void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunctionList &overloads)
+{
+    OverloadData overloadData(overloads, this);
+    const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
+    QString funcName = fullPythonFunctionName(rfunc);
+
+    int idx = overloads.length() - 1;
+    bool multiple = idx > 0;
+
+// after merging, the #if may be removed!
+#if QT_VERSION >= QT_VERSION_CHECK(5, 7, 0)
+    for (const AbstractMetaFunction *f : overloads) {
+        QStringList args;
+        const AbstractMetaArgumentList &arguments = f->arguments();
+        for (AbstractMetaArgument *arg : arguments)  {
+#else
+    foreach (const AbstractMetaFunction *f, overloads) {
+        QStringList args;
+        const AbstractMetaArgumentList &arguments = f->arguments();
+        foreach (const AbstractMetaArgument *arg, arguments) {
+#endif
+            QString strArg = resolveRetOrArgType(arg->type());
+            if (!arg->defaultValueExpression().isEmpty()) {
+                strArg += QLatin1Char('=');
+                QString e = arg->defaultValueExpression();
+                e.replace(QLatin1String("::"), QLatin1String("."));
+                // the tests insert stuff like Str("<unknown>"):
+                e.replace(QLatin1Char('"'), QLatin1String("\\\""));
+                strArg += e;
+            }
+            args << arg->name() + QLatin1Char(':') + strArg;
+        }
+        s << INDENT;
+        // mark the multiple signatures as such, to make it easier to generate different code
+        if (multiple)
+            s << idx-- << ':';
+        // now calculate the return type.
+        s << funcName << '(' << args.join(QLatin1Char(',')) << ')';
+        AbstractMetaType *returnType = getTypeWithoutContainer(f->type());
+        if (returnType) {
+            s << "->" << resolveRetOrArgType(returnType);
+        }
+        s << endl;
+    }
+}
+
 void CppGenerator::writeEnumsInitialization(QTextStream& s, AbstractMetaEnumList& enums)
 {
     if (enums.isEmpty())
@@ -4604,7 +4676,8 @@ QString CppGenerator::getInitFunctionName(GeneratorContext &context) const
 
 void CppGenerator::writeClassRegister(QTextStream &s,
                                       const AbstractMetaClass *metaClass,
-                                      GeneratorContext &classContext)
+                                      GeneratorContext &classContext,
+                                      QTextStream &signatureStream)
 {
     const ComplexTypeEntry* classTypeEntry = metaClass->typeEntry();
 
@@ -4614,6 +4687,21 @@ void CppGenerator::writeClassRegister(QTextStream &s,
 
     QString pyTypeName = cpythonTypeName(metaClass);
     QString initFunctionName = getInitFunctionName(classContext);
+
+    // PYSIDE-510: Create a signatures string for the introspection feature.
+    s << "// The signatures string for the functions." << endl;
+    s << "// Multiple signatures have their index \"n:\" in front." << endl;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 7, 0)
+    s << "const char " << initFunctionName << "_SignaturesString[] = R\"\"\"(\n"
+        << signatureStream.readAll() << ")\"\"\";" << endl << endl;
+#else
+    s << "const char " << initFunctionName << "_SignaturesString[] = \"\"" << endl;
+    QString line;
+    while (signatureStream.readLineInto(&line)) {
+        s << '"' << line << "\\n\"" << endl;
+    }
+    s << ';' << endl << endl;
+#endif
     s << "void init_" << initFunctionName;
     s << "(PyObject* " << enclosingObjectVariable << ")" << endl;
     s << '{' << endl;
@@ -4640,11 +4728,11 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     }
 
     if (!classContext.forSmartPointer())
-        s << INDENT << cpythonTypeNameExt(classTypeEntry);
+        s << INDENT << cpythonTypeNameExt(classTypeEntry) << endl;
     else
-        s << INDENT << cpythonTypeNameExt(classContext.preciseType());
+        s << INDENT << cpythonTypeNameExt(classContext.preciseType()) << endl;
 
-    s << " = reinterpret_cast<PyTypeObject*>(&" << pyTypeName << ");" << endl;
+    s << INDENT << "    = reinterpret_cast<PyTypeObject*>(&" << pyTypeName << ");" << endl;
     s << endl;
 
     // Multiple inheritance
@@ -4681,7 +4769,8 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     s << "\"," << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "&" << pyTypeName;
+        s << INDENT << "&" << pyTypeName << "," << endl;
+        s << INDENT << initFunctionName << "_SignaturesString";
 
         // Set destructor function
         if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
@@ -5069,6 +5158,8 @@ bool CppGenerator::finishGeneration()
     QTextStream s_globalFunctionImpl(&globalFunctionImpl);
     QString globalFunctionDecl;
     QTextStream s_globalFunctionDef(&globalFunctionDecl);
+    QString signaturesString;
+    QTextStream signatureStream(&signaturesString);
 
     Indentation indent(INDENT);
 
@@ -5089,6 +5180,7 @@ bool CppGenerator::finishGeneration()
         // Dummy context to satisfy the API.
         GeneratorContext classContext;
         writeMethodWrapper(s_globalFunctionImpl, overloads, classContext);
+        writeSignatureInfo(signatureStream, overloads);
         writeMethodDefinition(s_globalFunctionDef, overloads);
     }
 
@@ -5152,6 +5244,7 @@ bool CppGenerator::finishGeneration()
     if (usePySideExtensions()) {
         s << includeQDebug;
         s << "#include <pyside.h>" << endl;
+        s << "#include <signature.h>" << endl;
     }
 
     s << "#include \"" << getModuleHeaderFileName() << '"' << endl << endl;
@@ -5458,7 +5551,25 @@ bool CppGenerator::finishGeneration()
             }
 
         // cleanup staticMetaObject attribute
-        s << INDENT << "PySide::registerCleanupFunction(cleanTypesAttributes);" << endl;
+        s << INDENT << "PySide::registerCleanupFunction(cleanTypesAttributes);" << endl << endl;
+
+        // PYSIDE-510: Create a signatures string for the introspection feature.
+        s << "// The signatures string for the global functions." << endl;
+        s << "// Multiple signatures have their index \"n:\" in front." << endl;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 7, 0)
+        s << "const char " << moduleName() << "_SignaturesString[] = R\"\"\"(\n"
+            << signatureStream.readAll() << ")\"\"\";" << endl << endl;
+#else
+        s << "const char " << moduleName() << "_SignaturesString[] = \"\"" << endl;
+        QString line;
+        while (signatureStream.readLineInto(&line)) {
+            s << '"' << line << "\\n\"" << endl;
+        }
+        s << ';' << endl;
+#endif
+        // finish the rest of __signature__ initialization.
+        s << INDENT << "FinishSignatureInitialization(module, " << moduleName()
+            << "_SignaturesString);" << endl << endl;
     }
 
     s << "SBK_MODULE_INIT_FUNCTION_END" << endl;

@@ -51,6 +51,7 @@
 #include <sstream>
 #include <algorithm>
 #include "threadstatesaver.h"
+#include "signature.h"
 
 namespace {
     void _destroyParentInfo(SbkObject* obj, bool keepReference);
@@ -723,10 +724,12 @@ void initPrivateData(SbkObjectType* self)
     memset(self->d, 0, sizeof(SbkObjectTypePrivate));
 }
 
-bool introduceWrapperType(PyObject* enclosingObject,
-                          const char* typeName, const char* originalName,
-                          SbkObjectType* type, ObjectDestructor cppObjDtor,
-                          SbkObjectType* baseType, PyObject* baseTypes,
+bool introduceWrapperType(PyObject *enclosingObject,
+                          const char *typeName, const char *originalName,
+                          SbkObjectType *type,
+                          const char *signaturesString,
+                          ObjectDestructor cppObjDtor,
+                          SbkObjectType *baseType, PyObject *baseTypes,
                           bool isInnerClass)
 {
     initPrivateData(type);
@@ -744,7 +747,9 @@ bool introduceWrapperType(PyObject* enclosingObject,
         }
     }
 
-    if (PyType_Ready(reinterpret_cast<PyTypeObject *>(type)) < 0)
+    // PySide-510
+    // here is the single change to support signatures.
+    if (SbkSpecial_Type_Ready(enclosingObject, reinterpret_cast<PyTypeObject *>(type), signaturesString) < 0)
         return false;
 
     if (isInnerClass)
