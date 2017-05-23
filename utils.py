@@ -640,3 +640,21 @@ def osx_localize_libpaths(libpath, local_libs, enc_path=None):
     if need_rpath and enc_path not in osx_get_rpaths(libpath):
         back_tick('install_name_tool -add_rpath {epa} {lipa}'.format(
                   epa=enc_path, lipa=libpath ))
+
+# Add Clang to path for Windows for the shiboken ApiExtractor tests.
+# Revisit once Clang is bundled with Qt.
+def detectClang():
+    source = 'LLVM_INSTALL_DIR'
+    clangDir = os.environ.get(source, None)
+    if not clangDir:
+        source = 'CLANG_INSTALL_DIR'
+        clangDir = os.environ.get(source, None)
+        if not clangDir:
+            source = 'llvm-config'
+            try:
+                output = run_process_output([source, '--prefix'])
+                if output:
+                    clangDir = output[0]
+            except OSError:
+                pass
+    return (clangDir, source)

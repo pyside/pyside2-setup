@@ -170,7 +170,7 @@ from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
 from setuptools.command.develop import develop as _develop
 
 from qtinfo import QtInfo
-from utils import rmtree
+from utils import rmtree, detectClang
 from utils import makefile
 from utils import copyfile
 from utils import copydir
@@ -349,22 +349,6 @@ def prefix():
     if OPTION_DEBUG:
         name += 'd'
     return name
-
-def detectClang():
-    source = 'LLVM_INSTALL_DIR'
-    clangDir = os.environ.get(source, None)
-    if not clangDir:
-        source = 'CLANG_INSTALL_DIR'
-        clangDir = os.environ.get(source, None)
-        if not clangDir:
-            source = 'llvm-config'
-            try:
-                output = run_process_output([source, '--prefix'])
-                if output:
-                    clangDir = output[0]
-            except:
-                pass
-    return [clangDir, source]
 
 # Initialize, pull and checkout submodules
 def prepareSubModules():
