@@ -100,9 +100,6 @@ macro(create_pyside_module
                           LIBRARY_OUTPUT_DIRECTORY ${pyside2_BINARY_DIR})
     if(WIN32)
         set_target_properties(${module_name} PROPERTIES SUFFIX ".pyd")
-        set(${module_name}_suffix ".pyd")
-    else()
-        set(${module_name}_suffix ${CMAKE_SHARED_MODULE_SUFFIX})
     endif()
 
     target_link_libraries(${module_name} ${${module_libraries}})

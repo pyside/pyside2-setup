@@ -27,9 +27,6 @@ set_property(TARGET shibokenmodule PROPERTY PREFIX "")
 set_property(TARGET shibokenmodule PROPERTY OUTPUT_NAME "shiboken2${PYTHON_EXTENSION_SUFFIX}")
 
 if(WIN32)
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set_property(TARGET shibokenmodule PROPERTY OUTPUT_NAME "shiboken2_d")
-    endif()
     set_property(TARGET shibokenmodule PROPERTY SUFFIX ".pyd")
 endif()
 target_link_libraries(shibokenmodule

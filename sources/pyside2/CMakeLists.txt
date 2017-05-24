@@ -43,38 +43,36 @@ macro(get_python_extension_suffix)
   message("PYTHON_EXTENSION_SUFFIX: " ${PYTHON_EXTENSION_SUFFIX})
 endmacro()
 
-# Note the quirk that UNIX includes Apple!
-if (UNIX)
-  if (NOT PYTHON_EXTENSION_SUFFIX)
-      get_python_extension_suffix()
-  endif()
 
-  if (NOT PYTHON_CONFIG_SUFFIX)
-      if (PYTHON_VERSION_MAJOR EQUAL 2)
-          set(PYTHON_CONFIG_SUFFIX "-python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
-          if (PYTHON_EXTENSION_SUFFIX)
-              set(PYTHON_CONFIG_SUFFIX "${PYTHON_CONFIG_SUFFIX}${PYTHON_EXTENSION_SUFFIX}")
-          endif()
-      elseif (PYTHON_VERSION_MAJOR EQUAL 3)
-          set(PYTHON_CONFIG_SUFFIX "${PYTHON_EXTENSION_SUFFIX}")
-      endif()
-  endif()
-
-  if (NOT PYTHON_SHARED_LIBRARY_SUFFIX)
-      set(PYTHON_SHARED_LIBRARY_SUFFIX "${PYTHON_CONFIG_SUFFIX}")
-
-      # Append a "v" to disambiguate the python version and the pyside version in the
-      # shared library file name.
-      if (APPLE AND PYTHON_VERSION_MAJOR EQUAL 2)
-          set(PYTHON_SHARED_LIBRARY_SUFFIX "${PYTHON_SHARED_LIBRARY_SUFFIX}v")
-      endif()
-  endif()
-
-
-  message(STATUS "PYTHON_EXTENSION_SUFFIX:      ${PYTHON_EXTENSION_SUFFIX}")
-  message(STATUS "PYTHON_CONFIG_SUFFIX:         ${PYTHON_CONFIG_SUFFIX}")
-  message(STATUS "PYTHON_SHARED_LIBRARY_SUFFIX: ${PYTHON_SHARED_LIBRARY_SUFFIX}")
+if (NOT PYTHON_EXTENSION_SUFFIX)
+  get_python_extension_suffix()
 endif()
+
+if (NOT PYTHON_CONFIG_SUFFIX)
+  if (PYTHON_VERSION_MAJOR EQUAL 2)
+      set(PYTHON_CONFIG_SUFFIX "-python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
+      if (PYTHON_EXTENSION_SUFFIX)
+          set(PYTHON_CONFIG_SUFFIX "${PYTHON_CONFIG_SUFFIX}${PYTHON_EXTENSION_SUFFIX}")
+      endif()
+  elseif (PYTHON_VERSION_MAJOR EQUAL 3)
+      set(PYTHON_CONFIG_SUFFIX "${PYTHON_EXTENSION_SUFFIX}")
+  endif()
+endif()
+
+if (NOT PYTHON_SHARED_LIBRARY_SUFFIX)
+  set(PYTHON_SHARED_LIBRARY_SUFFIX "${PYTHON_CONFIG_SUFFIX}")
+
+  # Append a "v" to disambiguate the python version and the pyside version in the
+  # shared library file name.
+  if (APPLE AND PYTHON_VERSION_MAJOR EQUAL 2)
+      set(PYTHON_SHARED_LIBRARY_SUFFIX "${PYTHON_SHARED_LIBRARY_SUFFIX}v")
+  endif()
+endif()
+
+
+message(STATUS "PYTHON_EXTENSION_SUFFIX:      ${PYTHON_EXTENSION_SUFFIX}")
+message(STATUS "PYTHON_CONFIG_SUFFIX:         ${PYTHON_CONFIG_SUFFIX}")
+message(STATUS "PYTHON_SHARED_LIBRARY_SUFFIX: ${PYTHON_SHARED_LIBRARY_SUFFIX}")
 
 find_package(Shiboken2 2.0.0 REQUIRED)
 find_package(Qt5 5.6.0 REQUIRED COMPONENTS Core)

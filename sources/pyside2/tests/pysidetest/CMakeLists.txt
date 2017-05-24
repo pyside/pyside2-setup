@@ -90,7 +90,7 @@ add_library(testbinding MODULE ${testbinding_SRC})
 set_property(TARGET testbinding PROPERTY PREFIX "")
 set_property(TARGET testbinding PROPERTY OUTPUT_NAME "testbinding${PYTHON_EXTENSION_SUFFIX}")
 if(WIN32)
-    set_target_properties(testbinding PROPERTIES SUFFIX ".pyd")
+    set_property(TARGET testbinding PROPERTY SUFFIX ".pyd")
 endif()
 target_link_libraries(testbinding
                       pysidetest
