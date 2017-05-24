@@ -24,7 +24,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${libshiboken_BINARY_DIR})
 add_library(shibokenmodule MODULE ${sample_SRC})
 set_property(TARGET shibokenmodule PROPERTY PREFIX "")
-set_property(TARGET shibokenmodule PROPERTY OUTPUT_NAME "shiboken2")
+set_property(TARGET shibokenmodule PROPERTY OUTPUT_NAME "shiboken2${PYTHON_EXTENSION_SUFFIX}")
+
 if(WIN32)
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         set_property(TARGET shibokenmodule PROPERTY OUTPUT_NAME "shiboken2_d")

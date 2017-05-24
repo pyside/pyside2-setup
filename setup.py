@@ -146,6 +146,7 @@ import os
 import sys
 import platform
 import time
+import re
 
 import difflib # for a close match of dirname and module
 
@@ -919,7 +920,7 @@ class pyside_build(_build):
                 return self.prepare_packages_win32(vars)
             else:
                 return self.prepare_packages_posix(vars)
-        except FileNotFoundError as e:
+        except IOError as e:
             print('setup.py/prepare_packages: ', e)
             raise
 
@@ -942,9 +943,16 @@ class pyside_build(_build):
             "{dist_dir}/PySide2",
             vars=vars)
         # <install>/lib/site-packages/shiboken2.so -> <setup>/PySide2/shiboken2.so
+        shiboken_module_name = 'shiboken2.so'
+        shiboken_src_path = "{site_packages_dir}".format(**vars)
+        maybe_shiboken_names = [f for f in os.listdir(shiboken_src_path)
+                                if re.match(r'shiboken.*\.so', f)]
+        if maybe_shiboken_names:
+            shiboken_module_name = maybe_shiboken_names[0]
+        vars.update({'shiboken_module_name': shiboken_module_name})
         copyfile(
-            "{site_packages_dir}/shiboken2.so",
-            "{dist_dir}/PySide2/shiboken2.so",
+            "{site_packages_dir}/{shiboken_module_name}",
+            "{dist_dir}/PySide2/{shiboken_module_name}",
             vars=vars)
         # <install>/lib/site-packages/pyside2uic/* -> <setup>/pyside2uic
         copydir(

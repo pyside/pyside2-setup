@@ -36,89 +36,60 @@ message("PYTHONINTERP_FOUND: " ${PYTHONINTERP_FOUND})
 message("PYTHON_EXECUTABLE: " ${PYTHON_EXECUTABLE})
 message("PYTHON_VERSION: " ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.${PYTHON_VERSION_PATCH})
 
-# Queries the python sysconfig for the abi flags which need to be inserted into extension suffixes.
-# Only present starting with Python 3.2.
-# Corresponding configure switches to single letter flags:
-# --with-pymalloc -> m
-# --with-pydebug -> d
-# --with-unicode -> u (rare)
-macro(get_python3_abi_flags)
-  if (NOT PYTHON_ABI_FLAGS)
-    execute_process(
-      COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-          import sysconfig
-          print(sysconfig.get_config_var('abiflags'))
-          "
-      OUTPUT_VARIABLE PYTHON_ABI_FLAGS
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-  endif()
-  message("PYTHON_ABI_FLAGS: " ${PYTHON_ABI_FLAGS})
-endmacro()
+macro(get_python_extension_suffix)
+  # Result of imp.get_suffixes() depends on the platform, but generally looks something like:
+  # [('.cpython-34m-x86_64-linux-gnu.so', 'rb', 3), ('.cpython-34m.so', 'rb', 3),
+  # ('.abi3.so', 'rb', 3), ('.so', 'rb', 3), ('.py', 'r', 1), ('.pyc', 'rb', 2)]
+  # We pick the first most detailed one, strip of the file extension part.
 
-macro(get_python_multi_arch_suffix)
-  # TODO: This part needs testing to check if it is available on Windows.
-  # It is present on macOS, but is not used yet.
-  # Result is something like 'x86_64-linux-gnu'.
-  if (NOT PYTHON_MULTIARCH_SUFFIX)
-    execute_process(
-      COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-         import sysconfig
-         print(sysconfig.get_config_var('MULTIARCH'))
-         "
-      OUTPUT_VARIABLE PYTHON_MULTIARCH_SUFFIX
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-  endif()
-  message("PYTHON_MULTIARCH_SUFFIX: " ${PYTHON_MULTIARCH_SUFFIX})
-endmacro()
-
-macro(get_python2_release_suffix)
-  # Result of imp.get_suffixes() is something like:
-  # [('_d.so', 'rb', 3), ('module_d.so', 'rb', 3), ('.x86_64-linux-gnu_d.so', 'rb', 3)]
-  # or alternatively the same but withut the '_d' part.
-  # The list comprehension is used to choose which suffix to include in library names.
   execute_process(
     COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-       import imp
-       print('_d' if any([tup[0].endswith('_d.so') for tup in imp.get_suffixes()]) else '')
+       import imp, re
+       first_suffix = imp.get_suffixes()[0][0]
+       res = re.search(r'^(.+)\\.', first_suffix)
+       if res:
+           first_suffix = res.group(1)
+       else:
+           first_suffix = ''
+       print(first_suffix)
        "
-    OUTPUT_VARIABLE PYTHON_MODULE_RELEASE_SUFFIX
+    OUTPUT_VARIABLE PYTHON_EXTENSION_SUFFIX
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-  message("PYTHON_MODULE_RELEASE_SUFFIX: " ${PYTHON_MODULE_RELEASE_SUFFIX})
+  message("PYTHON_EXTENSION_SUFFIX: " ${PYTHON_EXTENSION_SUFFIX})
 endmacro()
 
 # Note the quirk that UNIX includes Apple!
-if (UNIX AND NOT APPLE)
+if (UNIX)
   if (NOT PYTHON_EXTENSION_SUFFIX)
-    get_python_multi_arch_suffix()
-    # The suffix added to .so libraries should be differenet between Python 2 and 3.
-    # The position of the multiarch suffix is different, and the way the debug flag is set
-    # computed differently.
-    # In Python 2 there is no standard way to query if the python interpeter was built in debug or
-    # release build (sysconfig.get_config_var('Py_Debug') can have a different value than you would
-    # expect if you do a custom Python build). The solution is to query for the import
-    # suffixes and check if _d is present there. It is present on Linux distribution
-    # packages of Python, but not in custom built Python builds, because the distros apply their
-    # custom patches too append the '_d's.
-    # In Python 3 (starting with 3.2) there is a standard way to check if '_d' needs to be added,
-    # as well as any other letters, by querying the abiflags sysconfig variable.
-    if (PYTHON_VERSION_MAJOR EQUAL 2)
-        get_python2_release_suffix()
-        if(PYTHON_MULTIARCH_SUFFIX)
-            set(PYTHON_EXTENSION_SUFFIX ".${PYTHON_MULTIARCH_SUFFIX}")
-        endif()
-        set(PYTHON_EXTENSION_SUFFIX "${PYTHON_EXTENSION_SUFFIX}${PYTHON_MODULE_RELEASE_SUFFIX}")
-    elseif (PYTHON_VERSION_MAJOR EQUAL 3)
-        get_python3_abi_flags()
-        set(PYTHON_EXTENSION_SUFFIX ".cpython-${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}${PYTHON_ABI_FLAGS}")
-        if(PYTHON_MULTIARCH_SUFFIX)
-            set(PYTHON_EXTENSION_SUFFIX "${PYTHON_EXTENSION_SUFFIX}-${PYTHON_MULTIARCH_SUFFIX}")
-        endif()
-    else()
-        message(FATAL_ERROR "Unsupported PYTHON_VERSION=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.${PYTHON_VERSION_PATCH}!")
-    endif()
+      get_python_extension_suffix()
   endif()
-  message(STATUS "PYTHON_EXTENSION_SUFFIX: ${PYTHON_EXTENSION_SUFFIX}")
-endif ()
+
+  if (NOT PYTHON_CONFIG_SUFFIX)
+      if (PYTHON_VERSION_MAJOR EQUAL 2)
+          set(PYTHON_CONFIG_SUFFIX "-python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
+          if (PYTHON_EXTENSION_SUFFIX)
+              set(PYTHON_CONFIG_SUFFIX "${PYTHON_CONFIG_SUFFIX}${PYTHON_EXTENSION_SUFFIX}")
+          endif()
+      elseif (PYTHON_VERSION_MAJOR EQUAL 3)
+          set(PYTHON_CONFIG_SUFFIX "${PYTHON_EXTENSION_SUFFIX}")
+      endif()
+  endif()
+
+  if (NOT PYTHON_SHARED_LIBRARY_SUFFIX)
+      set(PYTHON_SHARED_LIBRARY_SUFFIX "${PYTHON_CONFIG_SUFFIX}")
+
+      # Append a "v" to disambiguate the python version and the shiboken version in the
+      # shared library file name.
+      if (APPLE AND PYTHON_VERSION_MAJOR EQUAL 2)
+          set(PYTHON_SHARED_LIBRARY_SUFFIX "${PYTHON_SHARED_LIBRARY_SUFFIX}v")
+      endif()
+  endif()
+
+
+  message(STATUS "PYTHON_EXTENSION_SUFFIX:      ${PYTHON_EXTENSION_SUFFIX}")
+  message(STATUS "PYTHON_CONFIG_SUFFIX:         ${PYTHON_CONFIG_SUFFIX}")
+  message(STATUS "PYTHON_SHARED_LIBRARY_SUFFIX: ${PYTHON_SHARED_LIBRARY_SUFFIX}")
+endif()
 
 if (NOT PYTHON_SITE_PACKAGES)
     execute_process(
@@ -184,11 +155,56 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
 add_custom_target(uninstall "${CMAKE_COMMAND}"
                   -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 
+
+# Detect if the python libs were compiled in debug mode
+# On Linux distros there is no standard way to check that.
+execute_process(
+    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+        is_py_debug = False
+        import sys
+        try:
+            sys_py_debug = sys.pydebug
+            if sys_py_debug:
+                is_py_debug = True
+        except:
+            pass
+
+        try:
+            from distutils import sysconfig
+            config_py_debug = sysconfig.get_config_var('Py_DEBUG')
+            if config_py_debug:
+                is_py_debug = True
+        except:
+            pass
+
+        print(bool(is_py_debug))
+        "
+    OUTPUT_VARIABLE PYTHON_WITH_DEBUG
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+# Detect if python interpeter was compiled with COUNT_ALLOCS define
+# Linux distros are inconsistent in setting the sysconfig.get_config_var('COUNT_ALLOCS') value
+execute_process(
+    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+        count_allocs = False
+        import sys
+        try:
+            if sys.getcounts:
+                count_allocs = True
+        except:
+            pass
+
+        print(bool(count_allocs))
+        "
+    OUTPUT_VARIABLE PYTHON_WITH_COUNT_ALLOCS
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
 set(SHIBOKEN_BUILD_TYPE "Release")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if(NOT PYTHON_DEBUG_LIBRARIES)
         message(WARNING "Python debug shared library not found; assuming python was built with shared library support disabled.")
     endif()
+
     if(NOT PYTHON_WITH_DEBUG)
         message(WARNING "Compiling shiboken2 with debug enabled, but the python executable was not compiled with debug support.")
     else()
@@ -196,12 +212,20 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         set(SBK_ADD_PY_DEBUG_DEFINITION "add_definitions(\"-DPy_DEBUG\")")
         set(SBK_PKG_CONFIG_PY_DEBUG_DEFINITION " -DPy_DEBUG")
     endif()
+
+    if (PYTHON_WITH_COUNT_ALLOCS)
+        add_definitions("-DCOUNT_ALLOCS")
+        set(SBK_ADD_PY_DEBUG_DEFINITION "${SBK_ADD_PY_DEBUG_DEFINITION} \nadd_definitions(\"-DCOUNT_ALLOCS\")")
+        set(SBK_PKG_CONFIG_PY_DEBUG_DEFINITION "${SBK_PKG_CONFIG_PY_DEBUG_DEFINITION} -DCOUNT_ALLOCS")
+    endif()
+
     set(SBK_PYTHON_LIBRARIES ${PYTHON_DEBUG_LIBRARIES})
     set(SHIBOKEN_BUILD_TYPE "Debug")
 else()
     set(SBK_PYTHON_LIBRARIES ${PYTHON_LIBRARIES})
     add_definitions("-DNDEBUG")
 endif()
+
 if(APPLE)
     set(SBK_PYTHON_LIBRARIES "-undefined dynamic_lookup")
 endif()
