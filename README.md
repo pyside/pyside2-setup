@@ -27,18 +27,16 @@ PySide versions following 5.6 use a C++ parser based on
 higher is required for building. Prebuilt versions of it can be downloaded from
 [download.qt.io](http://download.qt.io/development_releases/prebuilt/libclang/).
 
-After unpacking the archive, set the environment variable *CLANG_INSTALL_DIR* to
+After unpacking the archive, set the environment variable *LLVM_INSTALL_DIR* to
 point to the folder containing the *include* and *lib* directories of Clang:
 
     7z x .../libclang-release_39-linux-Rhel7.2-gcc5.3-x86_64.7z
-    export CLANG_INSTALL_DIR=$PWD/libclang
+    export LLVM_INSTALL_DIR=$PWD/libclang
 
-On Windows, the *PATH* variable must be set in addition for the shared library to be
-found:
+On Windows:
 
     7z x .../libclang-release_39-windows-vs2015_64.7z
-    SET CLANG_INSTALL_DIR=%CD%\libclang
-    SET PATH=%CLANG_INSTALL_DIR%\bin;%PATH%
+    SET LLVM_INSTALL_DIR=%CD%\libclang
 
 #### Build Instructions
 
