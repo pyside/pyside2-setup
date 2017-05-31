@@ -43,18 +43,6 @@
 #include "typedatabase.h"
 #include "typesystem.h"
 
-static bool appendFile(const QString& sourceFileName, QFile& targetFile)
-{
-    QFile sourceFile(sourceFileName);
-    if (!sourceFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        std::cerr << "Cannot open " << qPrintable(QDir::toNativeSeparators(sourceFileName))
-            << ": " << qPrintable(sourceFile.errorString()) << '\n';
-        return false;
-    }
-    targetFile.write(sourceFile.readAll());
-    return true;
-}
-
 ApiExtractor::ApiExtractor() : m_builder(0)
 {
     // Environment TYPESYSTEMPATH
@@ -258,9 +246,9 @@ bool ApiExtractor::run()
             << ": " << qPrintable(ppFile.errorString()) << '\n';
         return false;
     }
-
-    if (!appendFile(m_cppFileName, ppFile))
-        return false;
+    ppFile.write("#include \"");
+    ppFile.write(m_cppFileName.toLocal8Bit());
+    ppFile.write("\"\n");
     const QString preprocessedCppFileName = ppFile.fileName();
     ppFile.close();
     m_builder = new AbstractMetaBuilder;
