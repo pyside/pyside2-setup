@@ -56,7 +56,7 @@ class PYSIDE_API DestroyListener : public QObject
         static void destroy();
         void listen(QObject* obj);
 
-    public slots:
+    public Q_SLOTS:
         void onObjectDestroyed(QObject* obj);
 
     private:

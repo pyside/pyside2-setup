@@ -962,7 +962,7 @@ class pyside_build(_build):
         executables = []
         if sys.platform.startswith('linux'):
             so_ext = '.so'
-            so_star = so_ext + '.*'
+            so_star = so_ext + '*'
         elif sys.platform == 'darwin':
             so_ext = '.dylib'
             so_star = so_ext
