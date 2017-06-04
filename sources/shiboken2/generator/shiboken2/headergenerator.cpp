@@ -107,11 +107,12 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
     } else {
         wrapperName = HeaderGenerator::wrapperName(classContext.preciseType());
     }
-    QString headerGuard = getFilteredCppSignatureString(wrapperName).toUpper();
+    QString outerHeaderGuard = getFilteredCppSignatureString(wrapperName).toUpper();
+    QString innerHeaderGuard;
 
     // Header
-    s << "#ifndef SBK_" << headerGuard << "_H" << endl;
-    s << "#define SBK_" << headerGuard << "_H" << endl<< endl;
+    s << "#ifndef SBK_" << outerHeaderGuard << "_H" << endl;
+    s << "#define SBK_" << outerHeaderGuard << "_H" << endl << endl;
 
     if (!avoidProtectedHack())
         s << "#define protected public" << endl << endl;
@@ -121,10 +122,16 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
     //Includes
     s << metaClass->typeEntry()->include() << endl;
 
-    if (shouldGenerateCppWrapper(metaClass)) {
+    if (shouldGenerateCppWrapper(metaClass) &&
+        usePySideExtensions() && metaClass->isQObject())
+        s << "namespace PySide { class DynamicQMetaObject; }\n\n";
 
-        if (usePySideExtensions() && metaClass->isQObject())
-            s << "namespace PySide { class DynamicQMetaObject; }\n\n";
+    while (shouldGenerateCppWrapper(metaClass)) {
+        if (!innerHeaderGuard.isEmpty()) {
+            s << "#  ifndef SBK_" << innerHeaderGuard << "_H" << endl;
+            s << "#  define SBK_" << innerHeaderGuard << "_H" << endl << endl;
+            s << "// Inherited base class:" << endl;
+        }
 
         // Class
         s << "class " << wrapperName;
@@ -172,15 +179,33 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
         if (m_inheritedOverloads.size()) {
             s << INDENT << "// Inherited overloads, because the using keyword sux" << endl;
             writeInheritedOverloads(s);
+            m_inheritedOverloads.clear();
         }
 
         if (usePySideExtensions())
             s << INDENT << "static void pysideInitQtMetaTypes();" << endl;
 
         s << "};" << endl << endl;
+        if (!innerHeaderGuard.isEmpty())
+            s << "#  endif // SBK_" << innerHeaderGuard << "_H" << endl << endl;
+
+        // PYSIDE-500: Use also includes for inherited wrapper classes, because
+        // without the protected hack, we sometimes need to cast inherited wrappers.
+        // But we don't use multiple include files. Instead, they are inserted as recursive
+        // headers. This keeps the file structure as simple as before the enhanced inheritance.
+        metaClass = metaClass->baseClass();
+        if (!metaClass || !avoidProtectedHack())
+            break;
+        classContext = GeneratorContext(metaClass);
+        if (!classContext.forSmartPointer()) {
+            wrapperName = HeaderGenerator::wrapperName(metaClass);
+        } else {
+            wrapperName = HeaderGenerator::wrapperName(classContext.preciseType());
+        }
+        innerHeaderGuard = getFilteredCppSignatureString(wrapperName).toUpper();
     }
 
-    s << "#endif // SBK_" << headerGuard << "_H" << endl << endl;
+    s << "#endif // SBK_" << outerHeaderGuard << "_H" << endl << endl;
 }
 
 void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* func)
