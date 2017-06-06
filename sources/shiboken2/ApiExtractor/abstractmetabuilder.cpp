@@ -327,7 +327,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(FunctionModelItem item
         AbstractMetaClass* oldCurrentClass = m_currentClass;
         m_currentClass = baseoperandClass;
         AbstractMetaFunction *metaFunction = traverseFunction(item);
-        if (metaFunction && !metaFunction->isInvalid()) {
+        if (metaFunction) {
             // Strip away first argument, since that is the containing object
             AbstractMetaArgumentList arguments = metaFunction->arguments();
             if (firstArgumentIsSelf || unaryOperator) {
@@ -376,8 +376,7 @@ void AbstractMetaBuilderPrivate::traverseStreamOperator(FunctionModelItem item)
             m_currentClass = streamedClass;
             AbstractMetaFunction *streamFunction = traverseFunction(item);
 
-            if (streamFunction && !streamFunction->isInvalid()) {
-                QString name = item->name();
+            if (streamFunction) {
                 streamFunction->setFunctionType(AbstractMetaFunction::GlobalScopeFunction);
                 // Strip first argument, since that is the containing object
                 AbstractMetaArgumentList arguments = streamFunction->arguments();
@@ -572,7 +571,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                 << QStringLiteral("class '%1' does not have an entry in the type system")
                                   .arg(cls->name());
         } else {
-            bool couldAddDefaultCtors = !cls->isFinalInCpp() && !cls->isInterface() && !cls->isNamespace();
+            const bool couldAddDefaultCtors = !cls->isFinalInCpp() && !cls->isInterface() && !cls->isNamespace()
+                && (cls->attributes() & AbstractMetaAttributes::HasRejectedConstructor) == 0;
             if (couldAddDefaultCtors) {
                 if (!cls->hasConstructors())
                     cls->addDefaultConstructor();
@@ -1588,14 +1588,18 @@ static bool _fixFunctionModelItemTypes(FunctionModelItem& function, const Abstra
     return templateTypeFixed;
 }
 
-AbstractMetaFunctionList AbstractMetaBuilderPrivate::classFunctionList(const ScopeModelItem &scopeItem)
+AbstractMetaFunctionList AbstractMetaBuilderPrivate::classFunctionList(const ScopeModelItem &scopeItem,
+                                                                       bool *constructorRejected)
 {
+    *constructorRejected = false;
     AbstractMetaFunctionList result;
     const FunctionList &scopeFunctionList = scopeItem->functions();
     result.reserve(scopeFunctionList.size());
     for (const FunctionModelItem &function : scopeFunctionList) {
         if (AbstractMetaFunction *metaFunction = traverseFunction(function))
             result.append(metaFunction);
+        else if (function->functionType() == CodeModel::Constructor)
+            *constructorRejected = true;
     }
     return result;
 }
@@ -1624,11 +1628,13 @@ private:
 };
 
 AbstractMetaFunctionList AbstractMetaBuilderPrivate::templateClassFunctionList(const ScopeModelItem &scopeItem,
-                                                                               AbstractMetaClass *metaClass)
+                                                                               AbstractMetaClass *metaClass,
+                                                                               bool *constructorRejected)
 {
     AbstractMetaFunctionList result;
     AbstractMetaFunctionList unchangedFunctions;
 
+    *constructorRejected = false;
     const FunctionList &scopeFunctionList = scopeItem->functions();
     result.reserve(scopeFunctionList.size());
     unchangedFunctions.reserve(scopeFunctionList.size());
@@ -1640,6 +1646,8 @@ AbstractMetaFunctionList AbstractMetaBuilderPrivate::templateClassFunctionList(c
             result.append(metaFunction);
             if (!templateTypeFixed)
                 unchangedFunctions.append(metaFunction);
+        } else if (function->functionType() == CodeModel::Constructor) {
+            *constructorRejected = true;
         }
     }
 
@@ -1658,10 +1666,13 @@ AbstractMetaFunctionList AbstractMetaBuilderPrivate::templateClassFunctionList(c
 void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
                                                    AbstractMetaClass *metaClass)
 {
-
+    bool constructorRejected = false;
     const AbstractMetaFunctionList functions = metaClass->templateArguments().isEmpty()
-        ? classFunctionList(scopeItem)
-        : templateClassFunctionList(scopeItem, metaClass);
+        ? classFunctionList(scopeItem, &constructorRejected)
+        : templateClassFunctionList(scopeItem, metaClass, &constructorRejected);
+
+    if (constructorRejected)
+        *metaClass += AbstractMetaAttributes::HasRejectedConstructor;
 
     for (AbstractMetaFunction *metaFunction : functions){
         metaFunction->setOriginalAttributes(metaFunction->attributes());
@@ -1692,8 +1703,7 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
 
         const bool isInvalidDestructor = metaFunction->isDestructor() && metaFunction->isPrivate();
         const bool isInvalidConstructor = metaFunction->isConstructor()
-            && ((metaFunction->isPrivate() && metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction)
-                || metaFunction->isInvalid());
+            && (metaFunction->isPrivate() && metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction);
         if ((isInvalidDestructor || isInvalidConstructor)
             && !metaClass->hasNonPrivateConstructor()) {
             *metaClass += AbstractMetaAttributes::Final;
@@ -1708,7 +1718,6 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
             metaClass->setForceShellClass(true);
 
         if (!metaFunction->isDestructor()
-            && !metaFunction->isInvalid()
             && !(metaFunction->isPrivate() && metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction)) {
 
             setupFunctionDefaults(metaFunction, metaClass);
@@ -2071,6 +2080,34 @@ static inline QString msgVoidParameterType(const ArgumentModelItem &arg, int n)
     return result;
 }
 
+static inline AbstractMetaFunction::FunctionType functionTypeFromCodeModel(CodeModel::FunctionType ft)
+{
+    AbstractMetaFunction::FunctionType result = AbstractMetaFunction::NormalFunction;
+    switch (ft) {
+    case CodeModel::Constructor:
+        result = AbstractMetaFunction::ConstructorFunction;
+        break;
+    case CodeModel::CopyConstructor:
+        result = AbstractMetaFunction::CopyConstructorFunction;
+        break;
+    case CodeModel::MoveConstructor:
+        result = AbstractMetaFunction::MoveConstructorFunction;
+        break;
+    case CodeModel::Destructor:
+        result = AbstractMetaFunction::DestructorFunction;
+        break;
+    case CodeModel::Normal:
+        break;
+    case CodeModel::Signal:
+        result = AbstractMetaFunction::SignalFunction;
+        break;
+    case CodeModel::Slot:
+        result = AbstractMetaFunction::SlotFunction;
+        break;
+    }
+    return result;
+}
+
 AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModelItem functionItem)
 {
     if (!functionItem->templateParameters().isEmpty())
@@ -2104,14 +2141,12 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
         return 0;
     }
 
-    Q_ASSERT(functionItem->functionType() == CodeModel::Normal
-             || functionItem->functionType() == CodeModel::Signal
-             || functionItem->functionType() == CodeModel::Slot);
-
     if (functionItem->isFriend())
         return 0;
 
     AbstractMetaFunction *metaFunction = q->createMetaFunction();
+    // Additional check for assignment/move assignment down below
+    metaFunction->setFunctionType(functionTypeFromCodeModel(functionItem->functionType()));
     metaFunction->setConstant(functionItem->isConstant());
 
     if (ReportHandler::isDebug(ReportHandler::MediumDebug))
@@ -2145,31 +2180,24 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
     else
         *metaFunction += AbstractMetaAttributes::Protected;
 
-
-    QString strippedClassName = className;
-    int cc_pos = strippedClassName.lastIndexOf(colonColon());
-    if (cc_pos > 0)
-        strippedClassName = strippedClassName.mid(cc_pos + 2);
-
-    TypeInfo functionType = functionItem->type();
-
-    if (TypeDatabase::instance()->isReturnTypeRejected(className, functionType.toString(), &rejectReason)) {
-        m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
-        delete metaFunction;
-        return nullptr;
-    }
-
-    if (functionName.startsWith(QLatin1Char('~'))) {
-        metaFunction->setFunctionType(AbstractMetaFunction::DestructorFunction);
-        metaFunction->setInvalid(true);
-    } else if (stripTemplateArgs(functionName) == strippedClassName) {
-        metaFunction->setFunctionType(AbstractMetaFunction::ConstructorFunction);
-        // Check for Copy/Move down below
+    switch (metaFunction->functionType()) {
+    case AbstractMetaFunction::DestructorFunction:
+        break;
+    case AbstractMetaFunction::ConstructorFunction:
         metaFunction->setExplicit(functionItem->isExplicit());
         metaFunction->setName(m_currentClass->name());
-    } else {
+        break;
+    default: {
+        TypeInfo returnType = functionItem->type();
+
+        if (TypeDatabase::instance()->isReturnTypeRejected(className, returnType.toString(), &rejectReason)) {
+            m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
+            delete metaFunction;
+            return nullptr;
+        }
+
         bool ok;
-        AbstractMetaType* type = translateType(functionType, &ok);
+        AbstractMetaType *type = translateType(returnType, &ok);
 
         if (!ok) {
             Q_ASSERT(type == 0);
@@ -2178,16 +2206,13 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
                                   .arg(originalQualifiedSignatureWithReturn,
                                        functionItem->type().toString());
             m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn, AbstractMetaBuilder::UnmatchedReturnType);
-            metaFunction->setInvalid(true);
-            return metaFunction;
+            delete metaFunction;
+            return nullptr;
         }
 
         metaFunction->setType(type);
-
-        if (functionItem->functionType() == CodeModel::Signal)
-            metaFunction->setFunctionType(AbstractMetaFunction::SignalFunction);
-        else if (functionItem->functionType() == CodeModel::Slot)
-            metaFunction->setFunctionType(AbstractMetaFunction::SlotFunction);
+    }
+        break;
     }
 
     ArgumentList arguments = functionItem->arguments();
@@ -2221,8 +2246,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
             const QString rejectedFunctionSignature = originalQualifiedSignatureWithReturn
                 + QLatin1String(": ") + reason;
             m_rejectedFunctions.insert(rejectedFunctionSignature, AbstractMetaBuilder::UnmatchedArgumentType);
-            metaFunction->setInvalid(true);
-            return metaFunction;
+            delete metaFunction;
+            return nullptr;
         }
 
         if (metaType == Q_NULLPTR) {
@@ -2233,8 +2258,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
             const QString rejectedFunctionSignature = originalQualifiedSignatureWithReturn
                 + QLatin1String(": ") + reason;
             m_rejectedFunctions.insert(rejectedFunctionSignature, AbstractMetaBuilder::UnmatchedArgumentType);
-            metaFunction->setInvalid(true);
-            return metaFunction;
+            delete metaFunction;
+            return nullptr;
         }
 
         AbstractMetaArgument *metaArgument = q->createMetaArgument();
@@ -2303,20 +2328,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
     if (m_currentClass && metaFunction->arguments().size() == 1) {
         const AbstractMetaType *argType = metaFunction->arguments().first()->type();
         if (argType->typeEntry() == m_currentClass->typeEntry() && argType->indirections() == 0) {
-            if (metaFunction->isConstructor()) {
-                switch (argType->referenceType()) {
-                case NoReference:
-                    metaFunction->setFunctionType(AbstractMetaFunction::CopyConstructorFunction);
-                    break;
-                case LValueReference:
-                    if (argType->isConstant())
-                        metaFunction->setFunctionType(AbstractMetaFunction::CopyConstructorFunction);
-                    break;
-                case RValueReference:
-                    metaFunction->setFunctionType(AbstractMetaFunction::MoveConstructorFunction);
-                    break;
-                }
-            } else if (metaFunction->name() == QLatin1String("operator=")) {
+            if (metaFunction->name() == QLatin1String("operator=")) {
                 switch (argType->referenceType()) {
                 case NoReference:
                     metaFunction->setFunctionType(AbstractMetaFunction::AssignmentOperatorFunction);

@@ -54,11 +54,11 @@
   <object-type name="QWebEngineDownloadItem">
     <enum-type name="DownloadState" />
   </object-type>
-  
+
   <!-- TODO: Deal with private constructor
   <value-type name="QWebEngineHistory" /> -->
 
-  <value-type name="QWebEngineHistoryItem" />
+  <object-type name="QWebEngineHistoryItem" />
 
   <object-type name="QWebEnginePage">
     <enum-type name="WebAction" />

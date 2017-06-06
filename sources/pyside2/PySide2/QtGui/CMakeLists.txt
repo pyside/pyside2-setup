@@ -3,6 +3,7 @@ project(QtGui)
 qt5_wrap_cpp(QPYTEXTOBJECT_MOC "${pyside2_SOURCE_DIR}/qpytextobject.h")
 
 set(QtGui_SRC
+${QtGui_GEN_DIR}/qabstractopenglfunctions_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_paintcontext_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_selection_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_wrapper.cpp
@@ -66,6 +67,23 @@ ${QtGui_GEN_DIR}/qmatrix4x4_wrapper.cpp
 ${QtGui_GEN_DIR}/qmouseevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qmoveevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qmovie_wrapper.cpp
+${QtGui_GEN_DIR}/qoffscreensurface_wrapper.cpp
+${QtGui_GEN_DIR}/qopenglcontextgroup_wrapper.cpp
+${QtGui_GEN_DIR}/qopengldebuglogger_wrapper.cpp
+${QtGui_GEN_DIR}/qopengldebugmessage_wrapper.cpp
+${QtGui_GEN_DIR}/qopenglextrafunctions_wrapper.cpp
+${QtGui_GEN_DIR}/qopenglframebufferobjectformat_wrapper.cpp
+${QtGui_GEN_DIR}/qopenglfunctions_wrapper.cpp
+# Compile error on Windows: ${QtGui_GEN_DIR}/qopenglpaintdevice_wrapper.cpp
+${QtGui_GEN_DIR}/qopenglpixeltransferoptions_wrapper.cpp
+${QtGui_GEN_DIR}/qopenglshaderprogram_wrapper.cpp
+${QtGui_GEN_DIR}/qopengltexture_wrapper.cpp
+${QtGui_GEN_DIR}/qopengltimemonitor_wrapper.cpp
+${QtGui_GEN_DIR}/qopengltimerquery_wrapper.cpp
+${QtGui_GEN_DIR}/qopenglversionprofile_wrapper.cpp
+${QtGui_GEN_DIR}/qopenglvertexarrayobject_wrapper.cpp
+${QtGui_GEN_DIR}/qopenglvertexarrayobject_binder_wrapper.cpp
+${QtGui_GEN_DIR}/qopenglwindow_wrapper.cpp
 ${QtGui_GEN_DIR}/qpagedpaintdevice_margins_wrapper.cpp
 ${QtGui_GEN_DIR}/qpagedpaintdevice_wrapper.cpp
 ${QtGui_GEN_DIR}/qpagelayout_wrapper.cpp

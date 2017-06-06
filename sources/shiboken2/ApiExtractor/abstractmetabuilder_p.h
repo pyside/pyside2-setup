@@ -81,9 +81,11 @@ public:
                                    const QSet<QString> &enumsDeclarations);
     void traverseEnums(ScopeModelItem item, AbstractMetaClass *parent,
                        const QStringList &enumsDeclarations);
-    AbstractMetaFunctionList classFunctionList(const ScopeModelItem &scopeItem);
+    AbstractMetaFunctionList classFunctionList(const ScopeModelItem &scopeItem,
+                                               bool *constructorRejected);
     AbstractMetaFunctionList templateClassFunctionList(const ScopeModelItem &scopeItem,
-                                                       AbstractMetaClass *metaClass);
+                                                       AbstractMetaClass *metaClass,
+                                                       bool *constructorRejected);
     void traverseFunctions(ScopeModelItem item, AbstractMetaClass *parent);
     void applyFunctionModifications(AbstractMetaFunction* func);
     void traverseFields(ScopeModelItem item, AbstractMetaClass *parent);

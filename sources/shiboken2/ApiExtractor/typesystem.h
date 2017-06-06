@@ -890,7 +890,13 @@ public:
     }
     void setInclude(const Include &inc)
     {
-        m_include = inc;
+        // This is a workaround for preventing double inclusion of the QSharedPointer implementation
+        // header, which does not use header guards. In the previous parser this was not a problem
+        // because the Q_QDOC define was set, and the implementation header was never included.
+        if (inc.name() == QLatin1String("qsharedpointer_impl.h"))
+            m_include = Include(inc.type(), QLatin1String("qsharedpointer.h"));
+        else
+            m_include = inc;
     }
 
     // Replace conversionRule arg to CodeSnip in future version

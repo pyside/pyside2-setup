@@ -54,6 +54,7 @@
     }
   </template>
 
+  <rejection class="^Q.*$" argument-type="^QPlatform.*$"/>
   <function signature="qAlpha(uint)" />
   <function signature="qBlue(uint)" />
   <function signature="qGray(int,int,int)" />
@@ -96,6 +97,27 @@
   <rejection class="*" function-name="d_func"/>
   <rejection class="*" field-name="d_ptr"/>
   <rejection class="*" field-name="d"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLboolean( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLchar( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="GLchar *const const*"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLenum( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLfloat( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLfloat( const)?\[.*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLdouble( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="GLintptr"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLint64( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLsizei( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="GLsizeiptr"/>
+  <rejection class="^QOpenGL.*$" argument-type="GLsync"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLubyte( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" return-type="^GLubyte( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLu?int( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^QMatrix.x.( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="qopengl_GLintptr"/>
+  <rejection class="^QOpenGL.*$" argument-type="qopengl_GLsizeiptr"/>
+  <rejection class="^QOpenGL.*$" argument-type="QOpenGLTextureHelper*"/>
+  <rejection class="^QOpenGL.*$" argument-type="^QVector.D( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^void( const)?\*\*?$"/>
 
   <!--
     Event classes have a lot of non-documented protected fields, those fields
@@ -3207,6 +3229,7 @@
     <enum-type name="RenderableType"/>
     <enum-type name="SwapBehavior"/>
   </value-type>
+  <object-type name="QOffscreenSurface" since="5.1"/>
   <primitive-type name="QPlatformSurface">
     <extra-includes>
       <include file-name="QtGui/qpa/qplatformsurface.h" location="global"/>
@@ -3263,19 +3286,99 @@
   <object-type name="QOpenGLContext">
     <enum-type name="OpenGLModuleType" />
   </object-type>
-  <object-type name="QOpenGLFramebufferObject">
+  <object-type name="QOpenGLContextGroup" since="5.0"/>
+  <object-type name="QOpenGLDebugLogger" since="5.1">
+      <enum-type name="LoggingMode"/>
+  </object-type>
+  <value-type name="QOpenGLDebugMessage" since="5.1">
+      <enum-type name="Source" flags="Sources"/>
+      <enum-type name="Type" flags="Types"/>
+      <enum-type name="Severity" flags="Severities"/>
+  </value-type>
+  <object-type name="QOpenGLFramebufferObject" since="5.0">
     <enum-type name="Attachment" />
     <enum-type name="FramebufferRestorePolicy" since="5.7"/>
   </object-type>
-  <object-type name="QOpenGLShader" >
+  <value-type name="QOpenGLFramebufferObjectFormat"/>
+  <!-- Compile error on Windows: QOpenGLPaintDevice::QOpenGLPaintDevice(const QOpenGLPaintDevice &)': attempting to reference a deleted function
+  <object-type name="QOpenGLPaintDevice" since="5.0"/>
+  -->
+  <object-type name="QOpenGLExtraFunctions" since="5.6">
+      <!-- Exlusions due to compile errors -->
+      <modify-function signature="glEndTransformFeedback()" remove="all"/>
+      <modify-function signature="glPauseTransformFeedback()" remove="all"/>
+      <modify-function signature="glResumeTransformFeedback()" remove="all"/>
+  </object-type>
+  <object-type name="QOpenGLFunctions" since="5.0">
+      <enum-type name="OpenGLFeature" flags="OpenGLFeatures"/>
+  </object-type>
+  <object-type name="QAbstractOpenGLFunctions" since="5.1"/>
+  <!-- Classes are result of a macro expansion in src/gui/opengl/qopenglversionfunctions.h
+  <object-type name="QOpenGLFunctions_1_0" since="5.1"/>
+  <object-type name="QOpenGLFunctions_1_1" since="5.1"/>
+  <object-type name="QOpenGLFunctions_1_2" since="5.1"/>
+  <object-type name="QOpenGLFunctions_1_3" since="5.1"/>
+  <object-type name="QOpenGLFunctions_1_4" since="5.1"/>
+  <object-type name="QOpenGLFunctions_1_5" since="5.1"/>
+  <object-type name="QOpenGLFunctions_2_0" since="5.1">
+  <object-type name="QOpenGLFunctions_2_1" since="5.1"/>
+  <object-type name="QOpenGLFunctions_3_0" since="5.1"/>
+  <object-type name="QOpenGLFunctions_3_1" since="5.1"/>
+  <object-type name="QOpenGLFunctions_3_2_Compatibility" since="5.1"/>
+  <object-type name="QOpenGLFunctions_3_2_Core" since="5.1"/>
+  <object-type name="QOpenGLFunctions_3_3_Compatibility" since="5.1"/>
+  <object-type name="QOpenGLFunctions_3_3_Core" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_0_Compatibility" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_0_Core" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_1_Compatibility" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_1_Core" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_2_Compatibility" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_2_Core" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_3_Compatibility" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_3_Core" since="5.1"/>
+  <object-type name="QOpenGLFunctions_4_4_Compatibility" since="5.5/>
+  <object-type name="QOpenGLFunctions_4_4_Core" since="5.5"/>
+  <object-type name="QOpenGLFunctions_4_5_Compatibility since="5.5""/>
+  <object-type name="QOpenGLFunctions_4_5_Core" since="5.5"/>
+  <object-type name="QOpenGLFunctions_ES2" since="5.1"/>
+  -->
+  <value-type  name="QOpenGLPixelTransferOptions"/>
+  <object-type name="QOpenGLShader" since="5.0">
     <enum-type name="ShaderTypeBit" flags="ShaderType" />
   </object-type>
-  <!-- Temporarily disable type, because it causes segfault on Linux due to incorrect parsing
-       of the void setUniformValue(const char *name, const GLfloat value[2][2]); method.
-       The float[][] ends up with an "Array" cpp signature, which obviously can't be found in the
-       typesystem.
-  <object-type name="QOpenGLShaderProgram" />
-  -->
+  <object-type name="QOpenGLShaderProgram" since="5.0"/>
+  <object-type name="QOpenGLTexture" since="5.2">
+      <enum-type name="BindingTarget"/>
+      <enum-type name="CoordinateDirection"/>
+      <enum-type name="ComparisonFunction"/>
+      <enum-type name="ComparisonMode"/>
+      <enum-type name="CubeMapFace"/>
+      <enum-type name="DepthStencilMode"/>
+      <enum-type name="Feature" flags="Features"/>
+      <enum-type name="Filter"/>
+      <enum-type name="MipMapGeneration"/>
+      <enum-type name="PixelFormat"/>
+      <enum-type name="PixelType"/>
+      <enum-type name="SwizzleComponent"/>
+      <enum-type name="SwizzleValue"/>
+      <enum-type name="Target"/>
+      <enum-type name="TextureFormat"/>
+      <enum-type name="TextureFormatClass"/>
+      <enum-type name="TextureUnitReset"/>
+      <enum-type name="WrapMode"/>
+      <modify-function signature="borderColor(unsigned int*)const" remove="all"/>
+      <modify-function signature="borderColor(int*)const" remove="all"/>
+      <modify-function signature="borderColor(float*)const" remove="all"/>
+  </object-type>
+  <object-type name="QOpenGLTimeMonitor" since="5.1"/>
+  <object-type name="QOpenGLTimerQuery" since="5.1"/>
+  <object-type name="QOpenGLWindow" since="5.4">
+      <enum-type name="UpdateBehavior"/>
+  </object-type>
+  <value-type name="QOpenGLVersionProfile" since="5.1"/>
+  <object-type name="QOpenGLVertexArrayObject">
+      <object-type name="Binder"/>
+  </object-type>
   <value-type name="QPageLayout">
       <enum-type name="Mode"/>
       <enum-type name="Orientation"/>

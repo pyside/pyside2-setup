@@ -61,7 +61,7 @@
 #include <conversions.h>
 
 // These private headers are needed to throw JavaScript exceptions
-#if @QML_SUPPORT@
+#if @QML_PRIVATE_API_SUPPORT@
     #include <private/qv4engine_p.h>
     #include <private/qv4context_p.h>
     #include <private/qqmldata_p.h>
@@ -489,7 +489,7 @@ int SignalManager::qt_metacall(QObject* object, QMetaObject::Call call, int id, 
 
         if (PyErr_Occurred()) {
 
-#if @QML_SUPPORT@
+#if @QML_PRIVATE_API_SUPPORT@
             // This JS engine grabber based off of Qt 5.5's `qjsEngine` function
             QQmlData *data = QQmlData::get(object, false);
 

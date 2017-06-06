@@ -159,8 +159,7 @@ public:
     bool addClass(const CXCursor &cursor, CodeModel::ClassType t);
     FunctionModelItem createFunction(const CXCursor &cursor,
                                      CodeModel::FunctionType t = CodeModel::Normal) const;
-    FunctionModelItem createMemberFunction(const CXCursor &cursor,
-                                           CodeModel::FunctionType t = CodeModel::Normal) const;
+    FunctionModelItem createMemberFunction(const CXCursor &cursor) const;
     void qualifyConstructor(const CXCursor &cursor);
     TypeInfo createTypeInfo(const CXType &type) const;
     TypeInfo createTypeInfo(const CXCursor &cursor) const
@@ -245,16 +244,39 @@ FunctionModelItem BuilderPrivate::createFunction(const CXCursor &cursor,
     return result;
 }
 
-FunctionModelItem BuilderPrivate::createMemberFunction(const CXCursor &cursor,
-                                                       CodeModel::FunctionType t) const
+static inline CodeModel::FunctionType functionTypeFromCursor(const CXCursor &cursor)
 {
-    FunctionModelItem result = createFunction(cursor, t);
+    CodeModel::FunctionType result = CodeModel::Normal;
+    switch (cursor.kind) {
+    case CXCursor_Constructor:
+        if (clang_CXXConstructor_isCopyConstructor(cursor) != 0)
+            result = CodeModel::CopyConstructor;
+        else if (clang_CXXConstructor_isMoveConstructor(cursor) != 0)
+            result = CodeModel::MoveConstructor;
+        else
+            result = CodeModel::Constructor;
+        break;
+    case CXCursor_Destructor:
+        result = CodeModel::Destructor;
+        break;
+    default:
+        break;
+    }
+    return result;
+}
+
+FunctionModelItem BuilderPrivate::createMemberFunction(const CXCursor &cursor) const
+{
+    const CodeModel::FunctionType functionType =
+        m_currentFunctionType == CodeModel::Signal || m_currentFunctionType == CodeModel::Slot
+        ? m_currentFunctionType // by annotation
+        : functionTypeFromCursor(cursor);
+    FunctionModelItem result = createFunction(cursor, functionType);
     result->setAccessPolicy(accessPolicy(clang_getCXXAccessSpecifier(cursor)));
     result->setConstant(clang_CXXMethod_isConst(cursor) != 0);
     result->setStatic(clang_CXXMethod_isStatic(cursor) != 0);
     result->setVirtual(clang_CXXMethod_isVirtual(cursor) != 0);
     result->setAbstract(clang_CXXMethod_isPureVirtual(cursor) != 0);
-    result->setFunctionType(m_currentFunctionType);
     return result;
 }
 
@@ -609,7 +631,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         // Skip inline member functions outside class, only go by declarations inside class
         if (!withinClassDeclaration(cursor))
             return Skip;
-        d->m_currentFunction = d->createMemberFunction(cursor, CodeModel::Normal);
+        d->m_currentFunction = d->createMemberFunction(cursor);
         d->m_scopeStack.back()->addFunction(d->m_currentFunction);
         break;
     // Not fully supported, currently, seen as normal function
@@ -618,7 +640,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         const CXCursor semParent = clang_getCursorSemanticParent(cursor);
         if (isClassCursor(semParent)) {
             if (semParent == clang_getCursorLexicalParent(cursor)) {
-                d->m_currentFunction = d->createMemberFunction(cursor, CodeModel::Normal);
+                d->m_currentFunction = d->createMemberFunction(cursor);
                 d->m_scopeStack.back()->addFunction(d->m_currentFunction);
                 break;
             } else {

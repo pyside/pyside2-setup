@@ -137,6 +137,35 @@
   <rejection class="*" function-name="qFreeAligned"/>
   <rejection class="QMetaMethod" enum-name="Attributes" />
 
+  <rejection class="*" argument-type="QByteArrayDataPtr"/>
+  <rejection class="*" argument-type="^qfloat16&amp;?$"/>
+  <rejection class="*" argument-type="QHashData"/>
+  <rejection class="*" argument-type="QHashData::Node*"/>
+  <rejection class="*" argument-type="QLatin1String"/>
+  <rejection class="*" argument-type="QLinkedListData*"/>
+  <rejection class="*" argument-type="QListData::ArrayCompatibleLayout"/>
+  <rejection class="*" argument-type="QListData::Data*"/>
+  <rejection class="*" argument-type="QListData::NotArrayCompatibleLayout"/>
+  <rejection class="*" argument-type="QList::Node*"/>
+  <rejection class="*" argument-type="QTSMFI"/>
+  <rejection class="*" argument-type="QTSMFC"/>
+  <rejection class="*" argument-type="QMutexData*"/>
+  <rejection class="*" argument-type="QObjectUserData*"/>
+  <rejection class="*" argument-type="QtPrivate::QSlotObjectBase*"/>
+  <rejection class="*" argument-type="^Q\w+Private( const)?\&amp;$"/>
+  <!-- Note: "QHelpModel(QHelpEnginePrivate*)" is needed -->
+  <rejection class="*" argument-type="^Q[^H]\w+Private( const)?\*$"/>
+  <rejection class="*" argument-type="^.*::QPrivateSignal$"/>
+  <rejection class="*" argument-type="Qt::Initialization"/>
+
+  <rejection class="*" argument-type="FILE*"/>
+  <rejection class="*" argument-type="std::chrono::milliseconds"/>
+  <rejection class="*" argument-type="^std::nullptr_t&amp;?$"/>
+  <rejection class="*" argument-type="^std::initializer_list&lt;.*$"/>
+  <rejection class="*" argument-type="^std::list&lt;[^&gt;]&gt; const&amp;$"/>
+  <rejection class="*" argument-type="std::string const&amp;"/>
+  <rejection class="*" argument-type="^std::vector&lt;[^&gt;]&gt; const&amp;$"/>
+
   <!-- From Qt4.6 ^^^ -->
 
 
@@ -182,6 +211,16 @@
     <!-- FIXME APIExtractor or shiboken do not support multiple includes by primitive type -->
     <include file-name="signalmanager.h" location="global"/>
   </primitive-type>
+
+  <!-- Among other use cases, these types are necessary for OpenGL "GLint"-like typedefs on macOS.
+  -->
+  <primitive-type name="int32_t" />
+  <primitive-type name="int16_t" />
+  <primitive-type name="int8_t" />
+  <primitive-type name="uint32_t" />
+  <primitive-type name="uint16_t" />
+  <primitive-type name="uint8_t" />
+
   <primitive-type name="bool" target-lang-api-name="PyBool">
     <conversion-rule>
         <native-to-target>

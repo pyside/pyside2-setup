@@ -42,7 +42,7 @@ class HiddenObject : public QObject
 public:
     HiddenObject() : m_called(false) {}
     Q_INVOKABLE void callMe();
-public slots:
+public Q_SLOTS:
     bool wasCalled();
 private:
     bool m_called;
