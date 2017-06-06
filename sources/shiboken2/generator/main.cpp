@@ -46,6 +46,10 @@
     #define PATH_SPLITTER ":"
 #endif
 
+static inline QString includePathOption() { return QStringLiteral("include-paths"); }
+static inline QString frameworkIncludePathOption() { return QStringLiteral("framework-include-paths"); }
+static inline QString typesystemPathOption() { return QStringLiteral("typesystem-paths"); }
+
 namespace {
 
 class ArgsHandler
@@ -192,14 +196,14 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
     }
 
     if (!includePaths.isEmpty())
-        args.insert(QLatin1String("include-paths"), includePaths.join(QLatin1String(PATH_SPLITTER)));
+        args.insert(includePathOption(), includePaths.join(QLatin1String(PATH_SPLITTER)));
 
     if (!frameworkIncludePaths.isEmpty())
-        args.insert(QLatin1String("framework-include-paths"),
+        args.insert(frameworkIncludePathOption(),
                     frameworkIncludePaths.join(QLatin1String(PATH_SPLITTER)));
 
     if (!typesystemPaths.isEmpty())
-        args.insert(QLatin1String("typesystem-paths"), typesystemPaths.join(QLatin1String(PATH_SPLITTER)));
+        args.insert(typesystemPathOption(), typesystemPaths.join(QLatin1String(PATH_SPLITTER)));
     if (!apiVersions.isEmpty())
         args.insert(QLatin1String("api-version"), apiVersions.join(QLatin1Char('|')));
     return true;
@@ -246,6 +250,53 @@ static QMap<QString, QString> getInitializedArguments()
     return args;
 }
 
+// Concatenate values of path arguments that can occur multiple times on the
+// command line.
+static void addPathOptionValue(const QString &option, const QString &value,
+                               QMap<QString, QString> &args)
+{
+    const QMap<QString, QString>::iterator it = args.find(option);
+    if (it != args.end())
+        it.value().append(QLatin1String(PATH_SPLITTER) + value);
+    else
+        args.insert(option, value);
+}
+
+static void getCommandLineArg(QString arg, int &argNum, QMap<QString, QString> &args)
+{
+    if (arg.startsWith(QLatin1String("--"))) {
+        arg.remove(0, 2);
+        const int split = arg.indexOf(QLatin1Char('='));
+        if (split < 0) {
+            args.insert(arg, QString());
+            return;
+        }
+        const QString option = arg.left(split);
+        const QString value = arg.mid(split + 1).trimmed();
+        if (option == includePathOption() || option == frameworkIncludePathOption()
+            || option == typesystemPathOption()) {
+            addPathOptionValue(option, value, args);
+        } else {
+            args.insert(option, value);
+        }
+        return;
+    }
+    if (arg.startsWith(QLatin1Char('-'))) {
+        arg.remove(0, 1);
+        if (arg.startsWith(QLatin1Char('I'))) // Shorthand path arguments -I/usr/include...
+            addPathOptionValue(includePathOption(), arg.mid(1), args);
+        else if (arg.startsWith(QLatin1Char('F')))
+            addPathOptionValue(frameworkIncludePathOption(), arg.mid(1), args);
+        else if (arg.startsWith(QLatin1Char('T')))
+            addPathOptionValue(typesystemPathOption(), arg.mid(1), args);
+        else
+            args.insert(arg, QString());
+        return;
+    }
+    argNum++;
+    args.insert(QStringLiteral("arg-") + QString::number(argNum), arg);
+}
+
 static QMap<QString, QString> getCommandLineArgs()
 {
     QMap<QString, QString> args = getInitializedArguments();
@@ -253,21 +304,9 @@ static QMap<QString, QString> getCommandLineArgs()
     arguments.removeFirst();
 
     int argNum = 0;
-    for (const QString &carg : qAsConst(arguments)) {
-        const QString &arg = carg.trimmed();
-        if (arg.startsWith(QLatin1String("--"))) {
-            int split = arg.indexOf(QLatin1Char('='));
-            if (split > 0)
-                args[arg.mid(2).left(split-2)] = arg.mid(split + 1).trimmed();
-            else
-                args[arg.mid(2)] = QString();
-        } else if (arg.startsWith(QLatin1Char('-'))) {
-            args[arg.mid(1)] = QString();
-        } else {
-            argNum++;
-            args[QString::fromLatin1("arg-%1").arg(argNum)] = arg;
-        }
-    }
+    for (const QString &carg : qAsConst(arguments))
+        getCommandLineArg(carg.trimmed(), argNum, args);
+
     return args;
 }
 
@@ -306,11 +345,11 @@ void printUsage()
                           QLatin1String("Show all warnings"));
     generalOptions.insert(QLatin1String("output-directory=<path>"),
                           QLatin1String("The directory where the generated files will be written"));
-    generalOptions.insert(QLatin1String("include-paths=<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]"),
+    generalOptions.insert(QLatin1String("include-paths=/-I<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]"),
                           QLatin1String("Include paths used by the C++ parser"));
-    generalOptions.insert(QLatin1String("framework-include-paths=<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]"),
+    generalOptions.insert(QLatin1String("framework-include-paths=/-F<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]"),
                           QLatin1String("Framework include paths used by the C++ parser"));
-    generalOptions.insert(QLatin1String("typesystem-paths=<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]"),
+    generalOptions.insert(QLatin1String("typesystem-paths=/-T<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]"),
                           QLatin1String("Paths used when searching for typesystems"));
     generalOptions.insert(QLatin1String("documentation-only"),
                           QLatin1String("Do not generates any code, just the documentation"));
