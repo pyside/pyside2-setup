@@ -49,6 +49,8 @@
 static inline QString includePathOption() { return QStringLiteral("include-paths"); }
 static inline QString frameworkIncludePathOption() { return QStringLiteral("framework-include-paths"); }
 static inline QString typesystemPathOption() { return QStringLiteral("typesystem-paths"); }
+static inline QString helpOption() { return QStringLiteral("help"); }
+static const char helpHint[] = "Note: use --help or -h for more information.\n";
 
 namespace {
 
@@ -138,14 +140,17 @@ QString ArgsHandler::errorMessage() const
 }
 }
 
-static void printOptions(QTextStream& s, const QMap<QString, QString>& options)
+typedef Generator::OptionDescriptions OptionDescriptions;
+
+static void printOptions(QTextStream& s, const OptionDescriptions& options)
 {
-    QMap<QString, QString>::const_iterator it = options.constBegin();
     s.setFieldAlignment(QTextStream::AlignLeft);
-    for (; it != options.constEnd(); ++it) {
-        s << "  --";
+    for (const auto &od : options) {
+        s << ' ';
+        if (!od.first.startsWith(QLatin1Char('-')))
+            s << "--";
         s.setFieldWidth(38);
-        s << it.key() << it.value();
+        s << od.first << od.second;
         s.setFieldWidth(0);
         s << endl;
     }
@@ -289,6 +294,8 @@ static void getCommandLineArg(QString arg, int &argNum, QMap<QString, QString> &
             addPathOptionValue(frameworkIncludePathOption(), arg.mid(1), args);
         else if (arg.startsWith(QLatin1Char('T')))
             addPathOptionValue(typesystemPathOption(), arg.mid(1), args);
+        else if (arg == QLatin1String("h"))
+            args.insert(helpOption(), QString());
         else
             args.insert(arg, QString());
         return;
@@ -332,42 +339,47 @@ void printUsage()
     s << "Usage:\n  "
       << "shiboken [options] header-file typesystem-file\n\n"
       << "General options:\n";
-    QMap<QString, QString> generalOptions;
-    generalOptions.insert(QLatin1String("project-file=<file>"),
-                          QLatin1String("text file containing a description of the binding project. Replaces and overrides command line arguments"));
-    generalOptions.insert(QLatin1String("debug-level=[sparse|medium|full]"),
-                          QLatin1String("Set the debug level"));
-    generalOptions.insert(QLatin1String("silent"),
-                          QLatin1String("Avoid printing any message"));
-    generalOptions.insert(QLatin1String("help"),
-                          QLatin1String("Display this help and exit"));
-    generalOptions.insert(QLatin1String("no-suppress-warnings"),
-                          QLatin1String("Show all warnings"));
-    generalOptions.insert(QLatin1String("output-directory=<path>"),
-                          QLatin1String("The directory where the generated files will be written"));
-    generalOptions.insert(QLatin1String("include-paths=/-I<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]"),
-                          QLatin1String("Include paths used by the C++ parser"));
-    generalOptions.insert(QLatin1String("framework-include-paths=/-F<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]"),
-                          QLatin1String("Framework include paths used by the C++ parser"));
-    generalOptions.insert(QLatin1String("typesystem-paths=/-T<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]"),
-                          QLatin1String("Paths used when searching for typesystems"));
-    generalOptions.insert(QLatin1String("documentation-only"),
-                          QLatin1String("Do not generates any code, just the documentation"));
-    generalOptions.insert(QLatin1String("license-file=<license-file>"),
-                          QLatin1String("File used for copyright headers of generated files"));
-    generalOptions.insert(QLatin1String("version"),
-                          QLatin1String("Output version information and exit"));
-    generalOptions.insert(QLatin1String("generator-set=<\"generator module\">"),
-                          QLatin1String("generator-set to be used. e.g. qtdoc"));
-    generalOptions.insert(QLatin1String("api-version=<\"package mask\">,<\"version\">"),
-                          QLatin1String("Specify the supported api version used to generate the bindings"));
-    generalOptions.insert(QLatin1String("drop-type-entries=\"<TypeEntry0>[;TypeEntry1;...]\""),
-                          QLatin1String("Semicolon separated list of type system entries (classes, namespaces, global functions and enums) to be dropped from generation."));
+    const QString pathSyntax = QLatin1String("<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]");
+    OptionDescriptions generalOptions = OptionDescriptions()
+        << qMakePair(QLatin1String("api-version=<\"package mask\">,<\"version\">"),
+                     QLatin1String("Specify the supported api version used to generate the bindings"))
+        << qMakePair(QLatin1String("debug-level=[sparse|medium|full]"),
+                     QLatin1String("Set the debug level"))
+        << qMakePair(QLatin1String("documentation-only"),
+                     QLatin1String("Do not generates any code, just the documentation"))
+        << qMakePair(QLatin1String("drop-type-entries=\"<TypeEntry0>[;TypeEntry1;...]\""),
+                     QLatin1String("Semicolon separated list of type system entries (classes, namespaces, global functions and enums) to be dropped from generation."))
+        << qMakePair(QLatin1String("-F") + pathSyntax, QString())
+        << qMakePair(QLatin1String("framework-include-paths=") + pathSyntax,
+                     QLatin1String("Framework include paths used by the C++ parser"))
+        << qMakePair(QLatin1String("generator-set=<\"generator module\">"),
+                     QLatin1String("generator-set to be used. e.g. qtdoc"))
+        << qMakePair(QLatin1String("-h"), QString())
+        << qMakePair(helpOption(),
+                     QLatin1String("Display this help and exit"))
+        << qMakePair(QLatin1String("-I") + pathSyntax, QString())
+        << qMakePair(QLatin1String("include-paths=") + pathSyntax,
+                     QLatin1String("Include paths used by the C++ parser"))
+        << qMakePair(QLatin1String("license-file=<license-file>"),
+                     QLatin1String("File used for copyright headers of generated files"))
+        << qMakePair(QLatin1String("no-suppress-warnings"),
+                     QLatin1String("Show all warnings"))
+        << qMakePair(QLatin1String("output-directory=<path>"),
+                     QLatin1String("The directory where the generated files will be written"))
+        << qMakePair(QLatin1String("project-file=<file>"),
+                     QLatin1String("text file containing a description of the binding project. Replaces and overrides command line arguments"))
+        << qMakePair(QLatin1String("silent"),
+                     QLatin1String("Avoid printing any message"))
+        << qMakePair(QLatin1String("-T") + pathSyntax, QString())
+        << qMakePair(QLatin1String("typesystem-paths=") + pathSyntax,
+                     QLatin1String("Paths used when searching for typesystems"))
+        << qMakePair(QLatin1String("version"),
+                     QLatin1String("Output version information and exit"));
     printOptions(s, generalOptions);
 
     const Generators generators = shibokenGenerators() + docGenerators();
     for (const GeneratorPtr &generator : generators) {
-        QMap<QString, QString> options = generator->options();
+        const OptionDescriptions options = generator->options();
         if (!options.isEmpty()) {
             s << endl << generator->name() << " options:\n";
             printOptions(s, generator->options());
@@ -541,17 +553,19 @@ int main(int argc, char *argv[])
             argsHandler.removeArg(it.key());
     }
     for (const GeneratorPtr &generator : qAsConst(generators)) {
-        QMap<QString, QString> options = generator->options();
-        if (!options.isEmpty()) {
-            QMap<QString, QString>::const_iterator it = options.constBegin();
-            for ( ; it != options.constEnd(); ++it)
-                argsHandler.removeArg(it.key());
-        }
+        const OptionDescriptions &options = generator->options();
+        for (const auto &od : options)
+            argsHandler.removeArg(od.first);
     }
 
     if (!argsHandler.noArgs()) {
         errorPrint(argsHandler.errorMessage());
-        std::cout << "Note: use --help option for more information." << std::endl;
+        std::cout << helpHint;
+        return EXIT_FAILURE;
+    }
+
+    if (typeSystemFileName.isEmpty()) {
+        std::cout << "You must specify a Type System file." << std::endl << helpHint;
         return EXIT_FAILURE;
     }
 

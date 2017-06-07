@@ -429,7 +429,7 @@ public:
     QString extendedIsConvertibleFunctionName(const TypeEntry* targetType) const;
     QString extendedToCppFunctionName(const TypeEntry* targetType) const;
 
-    QMap< QString, QString > options() const override;
+    OptionDescriptions options() const override;
 
     /// Returns true if the user enabled the so called "parent constructor heuristic".
     bool useCtorHeuristic() const;

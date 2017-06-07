@@ -243,10 +243,7 @@ bool ApiExtractor::run()
     if (m_builder)
         return false;
 
-    if (m_typeSystemFileName.isEmpty()) {
-        std::cerr << "You must specify a Type System file." << std::endl;
-        return false;
-    } else if (!TypeDatabase::instance()->parseFile(m_typeSystemFileName)) {
+    if (!TypeDatabase::instance()->parseFile(m_typeSystemFileName)) {
         std::cerr << "Cannot parse file: " << qPrintable(m_typeSystemFileName);
         return false;
     }

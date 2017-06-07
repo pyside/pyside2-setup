@@ -41,7 +41,7 @@ class AbstractMetaFunction;
 class HeaderGenerator : public ShibokenGenerator
 {
 public:
-    QMap<QString, QString> options() const override { return QMap<QString, QString>(); }
+    OptionDescriptions options() const override { return OptionDescriptions(); }
 protected:
     QString fileNamePrefix() const override;
     QString fileNameForContext(GeneratorContext &context) const override;
