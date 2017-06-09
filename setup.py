@@ -1236,7 +1236,7 @@ class pyside_build(_build):
         # Update rpath in PySide2 libs
         for srcname in pyside_libs:
             srcpath = os.path.join(package_path, srcname)
-            if os.path.isdir(srcpath):
+            if os.path.isdir(srcpath) or os.path.islink(srcpath):
                 continue
             if not os.path.exists(srcpath):
                 continue
