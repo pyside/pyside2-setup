@@ -265,17 +265,6 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
     headerfile.replace(QLatin1String(".cpp"), QLatin1String(".h"));
     s << endl << "// main header" << endl << "#include \"" << headerfile << '"' << endl;
 
-    // PYSIDE-500: Use also includes for inherited wrapper classes, because
-    // without the protected hack, we sometimes need to cast inherited wrappers.
-    s << endl << "// inherited wrapper classes" << endl;
-    AbstractMetaClass *basis = metaClass->baseClass();
-    for (; basis; basis = basis->baseClass()) {
-        GeneratorContext basisContext(basis);
-        QString headerfile = fileNameForContext(basisContext);
-        headerfile.replace(QLatin1String(".cpp"), QLatin1String(".h"));
-        s << "#include \"" << headerfile << '"' << endl;
-    }
-
     s << endl << "// inner classes" << endl;
     const AbstractMetaClassList &innerClasses = metaClass->innerClasses();
     for (AbstractMetaClass *innerClass : innerClasses) {

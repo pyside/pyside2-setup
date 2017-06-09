@@ -43,7 +43,7 @@
 
 bool Shiboken::Buffer::checkType(PyObject* pyObj)
 {
-    return PyObject_CheckReadBuffer(pyObj);
+    return PyObject_CheckReadBuffer(pyObj) != 0;
 }
 
 void* Shiboken::Buffer::getPointer(PyObject* pyObj, Py_ssize_t* size)
