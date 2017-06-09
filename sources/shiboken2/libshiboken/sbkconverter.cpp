@@ -517,7 +517,7 @@ bool pythonTypeIsObjectType(const SbkConverter *converter)
 
 bool pythonTypeIsWrapperType(const SbkConverter *converter)
 {
-    return converter->pointerToPython;
+    return converter->pointerToPython != 0;
 }
 
 SpecificConverter::SpecificConverter(const char* typeName)

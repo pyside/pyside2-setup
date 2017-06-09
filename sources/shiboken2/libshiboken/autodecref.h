@@ -43,6 +43,11 @@
 #include "sbkpython.h"
 #include "basewrapper.h"
 
+#ifdef _MSC_VER
+__pragma(warning(push))
+__pragma(warning(disable:4522)) // warning: C4522: 'Shiboken::AutoDecRef': multiple assignment operators specified
+#endif
+
 struct SbkObject;
 namespace Shiboken
 {
@@ -75,7 +80,7 @@ public:
     inline PyObject* object() { return m_pyObj; }
     inline operator PyObject*() { return m_pyObj; }
     inline operator PyTupleObject*() { return reinterpret_cast<PyTupleObject*>(m_pyObj); }
-    inline operator bool() const { return m_pyObj; }
+    inline operator bool() const { return m_pyObj != 0; }
     inline PyObject* operator->() { return m_pyObj; }
 
     template<typename T>
@@ -110,6 +115,10 @@ private:
 };
 
 } // namespace Shiboken
+
+#ifdef _MSC_VER
+__pragma(warning(pop))
+#endif
 
 #endif // AUTODECREF_H
 

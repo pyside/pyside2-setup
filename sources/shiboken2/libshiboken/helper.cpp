@@ -53,7 +53,7 @@ bool sequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* 
 
     // Check all items
     Shiboken::AutoDecRef args(PySequence_Fast(argList, 0));
-    int numArgs = PySequence_Fast_GET_SIZE(argList);
+    int numArgs = int(PySequence_Fast_GET_SIZE(argList));
     for (int i = 0; i < numArgs; ++i) {
         PyObject* item = PySequence_Fast_GET_ITEM(args.object(), i);
         if (!PyBytes_Check(item) && !PyUnicode_Check(item))
