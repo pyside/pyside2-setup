@@ -270,9 +270,28 @@ def copyfile(src, dst, force=True, vars=None):
         log.info("**Skiping copy file %s to %s. Source does not exists." % (src, dst))
         return
 
-    log.info("Copying file %s to %s." % (src, dst))
-
-    shutil.copy2(src, dst)
+    if not os.path.islink(src):
+        log.info("Copying file %s to %s." % (src, dst))
+        shutil.copy2(src, dst)
+    else:
+        linkTargetPath = os.path.realpath(src)
+        if os.path.dirname(linkTargetPath) == os.path.dirname(src):
+            linkTarget = os.path.basename(linkTargetPath)
+            linkName = os.path.basename(src)
+            currentDirectory = os.getcwd()
+            try:
+                targetDir = dst if os.path.isdir(dst) else os.path.dirname(dst)
+                os.chdir(targetDir)
+                if os.path.exists(linkName):
+                    os.remove(linkName)
+                log.info("Symlinking %s -> %s in %s." % (linkName, linkTarget, targetDir))
+                os.symlink(linkTarget, linkName)
+            except OSError:
+                log.error("%s -> %s: Error creating symlink" % (linkName, linkTarget))
+            finally:
+                os.chdir(currentDirectory)
+        else:
+            log.error("%s -> %s: Can only create symlinks within the same directory" % (src, linkTargetPath))
 
     return dst
 
@@ -640,3 +659,21 @@ def osx_localize_libpaths(libpath, local_libs, enc_path=None):
     if need_rpath and enc_path not in osx_get_rpaths(libpath):
         back_tick('install_name_tool -add_rpath {epa} {lipa}'.format(
                   epa=enc_path, lipa=libpath ))
+
+# Add Clang to path for Windows for the shiboken ApiExtractor tests.
+# Revisit once Clang is bundled with Qt.
+def detectClang():
+    source = 'LLVM_INSTALL_DIR'
+    clangDir = os.environ.get(source, None)
+    if not clangDir:
+        source = 'CLANG_INSTALL_DIR'
+        clangDir = os.environ.get(source, None)
+        if not clangDir:
+            source = 'llvm-config'
+            try:
+                output = run_process_output([source, '--prefix'])
+                if output:
+                    clangDir = output[0]
+            except OSError:
+                pass
+    return (clangDir, source)

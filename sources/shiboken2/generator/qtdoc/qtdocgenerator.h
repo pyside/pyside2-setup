@@ -186,7 +186,7 @@ public:
         return "QtDocGenerator";
     }
 
-    QMap<QString, QString> options() const;
+    OptionDescriptions options() const;
 
     QStringList codeSnippetDirs() const
     {

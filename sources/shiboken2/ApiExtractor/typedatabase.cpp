@@ -397,9 +397,45 @@ FunctionModificationList TypeDatabase::functionModifications(const QString& sign
     return lst;
 }
 
-void TypeDatabase::addSuppressedWarning(const QString &s)
+bool TypeDatabase::addSuppressedWarning(const QString &warning, QString *errorMessage)
 {
-    m_suppressedWarnings.append(s);
+    QString pattern;
+    if (warning.startsWith(QLatin1Char('^')) && warning.endsWith(QLatin1Char('$'))) {
+        pattern = warning;
+    } else {
+        // Legacy syntax: Use wildcards '*' (unless escaped by '\')
+        QVector<int> asteriskPositions;
+        const int warningSize = warning.size();
+        for (int i = 0; i < warningSize; ++i) {
+            if (warning.at(i) == QLatin1Char('\\'))
+                ++i;
+            else if (warning.at(i) == QLatin1Char('*'))
+                asteriskPositions.append(i);
+        }
+        asteriskPositions.append(warningSize);
+
+        pattern.append(QLatin1Char('^'));
+        int lastPos = 0;
+        for (int a = 0, aSize = asteriskPositions.size(); a < aSize; ++a) {
+            if (a)
+                pattern.append(QStringLiteral(".*"));
+            const int nextPos = asteriskPositions.at(a);
+            if (nextPos > lastPos)
+                pattern.append(QRegularExpression::escape(warning.mid(lastPos, nextPos - lastPos)));
+            lastPos = nextPos + 1;
+        }
+        pattern.append(QLatin1Char('$'));
+    }
+
+    const QRegularExpression expression(pattern);
+    if (!expression.isValid()) {
+        *errorMessage = QLatin1String("Invalid message pattern \"") + warning
+            + QLatin1String("\": ") + expression.errorString();
+        return false;
+    }
+
+    m_suppressedWarnings.append(expression);
+    return true;
 }
 
 bool TypeDatabase::isSuppressedWarning(const QString& s) const
@@ -407,21 +443,9 @@ bool TypeDatabase::isSuppressedWarning(const QString& s) const
     if (!m_suppressWarnings)
         return false;
 
-    for (QString warning : m_suppressedWarnings) {
-        warning.replace(QLatin1String("\\*"), QLatin1String("&place_holder_for_asterisk;"));
-
-        QStringList segs = warning.split(QLatin1Char('*'), QString::SkipEmptyParts);
-        if (!segs.size())
-            continue;
-
-        int i = 0;
-        int pos = s.indexOf(QString(segs.at(i++)).replace(QLatin1String("&place_holder_for_asterisk;"), QLatin1String("*")));
-        //qDebug() << "s == " << s << ", warning == " << segs;
-        while (pos != -1) {
-            if (i == segs.size())
-                return true;
-            pos = s.indexOf(QString(segs.at(i++)).replace(QLatin1String("&place_holder_for_asterisk;"), QLatin1String("*")), pos);
-        }
+    for (const QRegularExpression &warning : m_suppressedWarnings) {
+        if (warning.match(s).hasMatch())
+             return true;
     }
 
     return false;

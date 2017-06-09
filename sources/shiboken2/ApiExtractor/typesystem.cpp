@@ -45,6 +45,7 @@ static QString strings_jobject = QLatin1String("jobject");
 static inline QString colonColon() { return QStringLiteral("::"); }
 static inline QString quoteAfterLineAttribute() { return QStringLiteral("quote-after-line"); }
 static inline QString quoteBeforeLineAttribute() { return QStringLiteral("quote-before-line"); }
+static inline QString textAttribute() { return QStringLiteral("text"); }
 static inline QString nameAttribute() { return QStringLiteral("name"); }
 static inline QString sinceAttribute() { return QStringLiteral("since"); }
 static inline QString flagsAttribute() { return QStringLiteral("flags"); }
@@ -1173,7 +1174,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             attributes.insert(QLatin1String("default-value"), QString());
             break;
         case StackElement::SuppressedWarning:
-            attributes.insert(QLatin1String("text"), QString());
+            attributes.insert(textAttribute(), QString());
             break;
         case StackElement::ReplaceDefaultExpression:
             attributes.insert(QLatin1String("with"), QString());
@@ -1524,11 +1525,15 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             m_contextStack.top()->functionMods.last().argument_mods.last().ownerships[lang] = owner;
         }
         break;
-        case StackElement::SuppressedWarning:
-            if (attributes[QLatin1String("text")].isEmpty())
+        case StackElement::SuppressedWarning: {
+            const QString suppressedWarning = attributes.value(textAttribute());
+            if (suppressedWarning.isEmpty()) {
                 qCWarning(lcShiboken) << "Suppressed warning with no text specified";
-            else
-                m_database->addSuppressedWarning(attributes[QLatin1String("text")]);
+            } else {
+                if (!m_database->addSuppressedWarning(suppressedWarning, &m_error))
+                    return false;
+            }
+        }
             break;
         case StackElement::ArgumentMap: {
             if (!(topElement.type & StackElement::CodeSnipMask)) {

@@ -137,6 +137,9 @@ private:
 class Generator
 {
 public:
+    typedef QPair<QString, QString> OptionDescription;
+    typedef QVector<OptionDescription> OptionDescriptions;
+
     /// Optiosn used around the generator code
     enum Option {
         NoOption                 = 0x00000000,
@@ -181,7 +184,7 @@ public:
 
     bool setup(const ApiExtractor& extractor, const QMap<QString, QString> args);
 
-    virtual QMap<QString, QString> options() const;
+    virtual OptionDescriptions options() const;
 
     /// Returns the classes used to generate the binding code.
     AbstractMetaClassList classes() const;

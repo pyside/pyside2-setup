@@ -38,6 +38,7 @@
 #############################################################################
 
 from __future__ import print_function
+from utils import detectClang
 
 """
 testrunner
@@ -99,6 +100,16 @@ script_dir = os.getcwd()
 
 LogEntry = namedtuple("LogEntry", ["log_dir", "build_dir"])
 
+def setupClang():
+    if sys.platform != "win32":
+        return
+    clangDir = detectClang()
+    if clangDir[0]:
+        clangBinDir = os.path.join(clangDir[0], 'bin')
+        path = os.environ.get('PATH')
+        if not clangBinDir in path:
+            os.environ['PATH'] = clangBinDir + os.pathsep + path
+            print("Adding %s as detected by %s to PATH" % (clangBinDir, clangDir[1]))
 
 class BuildLog(object):
     """
@@ -772,6 +783,8 @@ if __name__ == '__main__':
             os.environ[key] = value
 
     q = 5 * [0]
+
+    setupClang()
 
     # now loop over the projects and accumulate
     for project in args.projects:

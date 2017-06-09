@@ -622,7 +622,7 @@ namespace ObjectType
 
 bool checkType(PyTypeObject* type)
 {
-    return PyType_IsSubtype(type, reinterpret_cast<PyTypeObject*>(&SbkObject_Type));
+    return PyType_IsSubtype(type, reinterpret_cast<PyTypeObject*>(&SbkObject_Type)) != 0;
 }
 
 bool isUserType(PyTypeObject* type)
@@ -651,7 +651,7 @@ void* callExternalCppConversion(SbkObjectType*, PyObject*) { return 0; }        
 
 bool hasCast(SbkObjectType* type)
 {
-    return type->d->mi_specialcast;
+    return type->d->mi_specialcast != 0;
 }
 
 void* cast(SbkObjectType* sourceType, SbkObject* obj, PyTypeObject* targetType)
@@ -1011,7 +1011,7 @@ void makeValid(SbkObject* self)
 
 bool hasParentInfo(SbkObject* pyObj)
 {
-    return pyObj->d->parentInfo;
+    return pyObj->d->parentInfo != 0;
 }
 
 void* cppPointer(SbkObject* pyObj, PyTypeObject* desiredType)
@@ -1041,7 +1041,7 @@ bool setCppPointer(SbkObject* sbkObj, PyTypeObject* desiredType, void* cptr)
     if (reinterpret_cast<SbkObjectType*>(Py_TYPE(sbkObj))->d->is_multicpp)
         idx = getTypeIndexOnHierarchy(Py_TYPE(sbkObj), desiredType);
 
-    bool alreadyInitialized = sbkObj->d->cptr[idx];
+    const bool alreadyInitialized = sbkObj->d->cptr[idx] != 0;
     if (alreadyInitialized)
         PyErr_SetString(PyExc_RuntimeError, "You can't initialize an object twice!");
     else

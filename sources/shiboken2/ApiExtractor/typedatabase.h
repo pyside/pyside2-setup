@@ -35,6 +35,7 @@
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
 
+#include <QtCore/QRegularExpression>
 #include <QtCore/QStringList>
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
@@ -134,7 +135,7 @@ public:
 
     void setSuppressWarnings(bool on) { m_suppressWarnings = on; }
 
-    void addSuppressedWarning(const QString &s);
+    bool addSuppressedWarning(const QString &warning, QString *errorMessage);
 
     bool isSuppressedWarning(const QString& s) const;
 
@@ -164,7 +165,7 @@ private:
     TypeEntryHash m_entries;
     SingleTypeEntryHash m_flagsEntries;
     TemplateEntryHash m_templates;
-    QStringList m_suppressedWarnings;
+    QVector<QRegularExpression> m_suppressedWarnings;
 
     AddedFunctionList m_globalUserFunctions;
     FunctionModificationList m_functionMods;

@@ -194,9 +194,9 @@ QVector<const AbstractMetaType*> Generator::instantiatedSmartPointers() const
     return m_d->instantiatedSmartPointers;
 }
 
-QMap< QString, QString > Generator::options() const
+Generator::OptionDescriptions Generator::options() const
 {
-    return QMap<QString, QString>();
+    return OptionDescriptions();
 }
 
 AbstractMetaClassList Generator::classes() const
