@@ -3,21 +3,8 @@ project(QtWidgets)
 
 set(QtWidgets_OPTIONAL_SRC )
 set(QtWidgets_DROPPED_ENTRIES )
-## gone check_qt_class(Qt5Widgets QAbstractPageSetupDialog   QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
-## actually, all the printer stuff is in QtPrintSupport
 ## XXX check if these conditionals need to be done elsewhere
-check_qt_class(QtWidgets QAbstractPrintDialog       QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
 check_qt_class(QtWidgets QGtkStyle                  QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
-check_qt_class(QtWidgets QPageSetupDialog           QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
-check_qt_class(QtWidgets QPrintDialog               QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
-check_qt_class(QtWidgets QPrintEngine               QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
-check_qt_class(QtWidgets QPrintPreviewDialog        QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
-check_qt_class(QtWidgets QPrintPreviewWidget        QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
-check_qt_class(QtWidgets QPrinter                   QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
-check_qt_class(QtWidgets QPrinterInfo               QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
-check_qt_class(QtWidgets QSessionManager            QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
-check_qt_class(QtWidgets QSizeGrip                  QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
-check_qt_class(QtWidgets QSystemTrayIcon            QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
 check_qt_class(QtWidgets QMacStyle                  QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
 
 set(QtWidgets_SRC
