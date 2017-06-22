@@ -2,6 +2,7 @@ project(QtNetwork)
 
 set(QtNetwork_OPTIONAL_SRC )
 set(QtNetwork_DROPPED_ENTRIES )
+
 check_qt_class(QtNetwork QSslCertificate    QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
 check_qt_class(QtNetwork QSslCipher         QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
 check_qt_class(QtNetwork QSslConfiguration  QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
@@ -37,6 +38,7 @@ ${QtNetwork_GEN_DIR}/qssl_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qtcpserver_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qtcpsocket_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qudpsocket_wrapper.cpp
+${QtNetwork_OPTIONAL_SRC}
 # module is always needed
 ${QtNetwork_GEN_DIR}/qtnetwork_module_wrapper.cpp
 )

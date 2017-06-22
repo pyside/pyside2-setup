@@ -133,7 +133,8 @@ macro(check_qt_class module class optional_source_files dropped_entries)
         set (include_file ${class})
     endif ()
     string(TOLOWER ${class} _class)
-    string(TOUPPER ${module} _module)
+    # Remove the "Qt" prefix.
+    string(SUBSTRING ${module} 2 -1 _module_no_qt_prefix)
     if (_namespace)
         set(_cppfile ${CMAKE_CURRENT_BINARY_DIR}/PySide2/${module}/${_namespace}_${_class}_wrapper.cpp)
     else ()
@@ -160,9 +161,7 @@ macro(check_qt_class module class optional_source_files dropped_entries)
         try_compile(Q_WORKS ${CMAKE_BINARY_DIR}
                     ${SRC_FILE}
                     CMAKE_FLAGS
-                        "-DLINK_LIBRARIES=${QT_${_module}_LIBRARY}"
-                        "-DLINK_DIRECTORIES=${QT_LIBRARY_DIR}"
-                        "-DINCLUDE_DIRECTORIES=${QT_INCLUDE_DIR};${QT_${_module}_INCLUDE_DIR}"
+                        "-DINCLUDE_DIRECTORIES=${QT_INCLUDE_DIR};${Qt5${_module_no_qt_prefix}_INCLUDE_DIRS}"
                     OUTPUT_VARIABLE OUTPUT)
         file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCheckQtClassTest.log ${OUTPUT})
 
