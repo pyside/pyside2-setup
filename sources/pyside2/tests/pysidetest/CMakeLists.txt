@@ -3,6 +3,9 @@ project(testbinding)
 
 cmake_minimum_required(VERSION 2.6)
 
+# On Windows, don't link to qtmain.lib for executables automatically.
+cmake_policy(SET CMP0020 OLD)
+
 set(QT_USE_QTCORE 1)
 # no more supported: include(${QT_USE_FILE})
 add_definitions(${Qt5Core_DEFINITIONS})
@@ -117,7 +120,7 @@ target_link_libraries(testbinding
                       ${Qt5Widgets_LIBRARIES}
                       ${SBK_PYTHON_LIBRARIES})
 
-add_dependencies(testbinding pyside2 QtCore QtGui QtWidgets libpyside pysidetest)
+add_dependencies(testbinding pyside2 QtCore QtGui QtWidgets pysidetest)
 
 PYSIDE_TEST(decoratedslot_test.py)
 PYSIDE_TEST(delegatecreateseditor_test.py)
