@@ -3,6 +3,9 @@ include(cmake/Macros/icecc.cmake) # this must be the first line!
 cmake_minimum_required(VERSION 3.0)
 cmake_policy(VERSION 3.0)
 
+# Don't ignore targets that do not exist, inside add_dependencies calls.
+cmake_policy(SET CMP0046 NEW)
+
 project(pysidebindings)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Macros/

@@ -6,7 +6,7 @@ ${QtMacExtras_GEN_DIR}/qmactoolbar_wrapper.cpp
 ${QtMacExtras_GEN_DIR}/qmactoolbaritem_wrapper.cpp
 
 # module is always needed
-${QtMacExtras_GEN_DIR}/QtMacExtras_module_wrapper.cpp
+${QtMacExtras_GEN_DIR}/qtmacextras_module_wrapper.cpp
 )
 
 make_path(QtMacExtras_typesystem_path ${QtMacExtras_SOURCE_DIR}

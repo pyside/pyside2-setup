@@ -220,10 +220,18 @@ class TestRunner(object):
             self.teeCommand = winWhich('tee.exe')
             if self.teeCommand is None:
                 git = winWhich('git.exe')
+                if not git:
+                    # In COIN we have only git.cmd in path
+                    git = winWhich('git.cmd')
                 if 'cmd' in git:
                     # Check for a MSYS-git installation with 'cmd' in the path and grab 'tee' from usr/bin
                     index = git.index('cmd')
-                    self.teeCommand = git[0:index] + 'usr\\bin\\tee.exe'
+                    self.teeCommand = git[0:index] + 'bin\\tee.exe'
+                    if not os.path.exists(self.teeCommand):
+                        self.teeCommand = git[0:index] + 'usr\\bin\\tee.exe' # git V2.8.X
+                    if not os.path.exists(self.teeCommand):
+                        raise "Cannot locate 'tee' command"
+
         else:
             self.makeCommand = 'make'
             self.teeCommand = 'tee'
