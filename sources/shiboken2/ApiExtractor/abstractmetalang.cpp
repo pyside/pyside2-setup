@@ -147,6 +147,23 @@ AbstractMetaType *AbstractMetaType::copy() const
     return cpy;
 }
 
+AbstractMetaTypeCList AbstractMetaType::nestedArrayTypes() const
+{
+    AbstractMetaTypeCList result;
+    switch (m_pattern) {
+    case ArrayPattern:
+        for (const AbstractMetaType *t = this; t->typeUsagePattern() == ArrayPattern; ) {
+            const AbstractMetaType *elt = t->arrayElementType();
+            result.append(elt);
+            t = elt;
+        }
+        break;
+    default:
+        break;
+    }
+    return result;
+}
+
 QString AbstractMetaType::cppSignature() const
 {
     if (m_cachedCppSignature.isEmpty())
@@ -2603,6 +2620,11 @@ QString AbstractMetaType::formatSignature(bool minimal) const
 bool AbstractMetaType::hasNativeId() const
 {
     return (isQObject() || isValue() || isObject()) && typeEntry()->isNativeIdBased();
+}
+
+bool AbstractMetaType::isCppPrimitive() const
+{
+    return m_pattern == PrimitivePattern && m_typeEntry->isCppPrimitive();
 }
 
 bool AbstractMetaType::isTargetLangEnum() const

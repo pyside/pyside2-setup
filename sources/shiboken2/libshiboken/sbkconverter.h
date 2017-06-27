@@ -67,6 +67,7 @@ extern "C"
  *  using the functions provided by the converter API.
  */
 struct SbkConverter;
+struct SbkArrayConverter;
 
 /**
  *  Given a void pointer to a C++ object, this function must return
@@ -241,6 +242,8 @@ LIBSHIBOKEN_API PythonToCppFunc isPythonToCppReferenceConvertible(const SbkObjec
 
 /// This is the same as isPythonToCppValueConvertible function.
 LIBSHIBOKEN_API PythonToCppFunc isPythonToCppConvertible(const SbkConverter *converter, PyObject *pyIn);
+LIBSHIBOKEN_API PythonToCppFunc isPythonToCppConvertible(const SbkArrayConverter *converter,
+                                                         int dim1, int dim2, PyObject *pyIn);
 
 /**
  *  Returns the C++ pointer for the \p pyIn object cast to the type passed via \p desiredType.

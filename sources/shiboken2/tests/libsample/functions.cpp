@@ -28,7 +28,9 @@
 
 #include "functions.h"
 #include <string.h>
+#include <algorithm>
 #include <iostream>
+#include <numeric>
 
 using namespace std;
 
@@ -195,6 +197,16 @@ OddBool
 acceptOddBoolReference(OddBool& x)
 {
     return x;
+}
+
+int sumIntArray(int array[4])
+{
+    return std::accumulate(array, array + 4, 0);
+}
+
+double sumDoubleArray(double array[4])
+{
+    return std::accumulate(array, array + 4, double(0));
 }
 
 ClassWithFunctionPointer::ClassWithFunctionPointer()

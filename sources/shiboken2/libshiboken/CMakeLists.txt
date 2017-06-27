@@ -21,6 +21,7 @@ basewrapper.cpp
 debugfreehook.cpp
 gilstate.cpp
 helper.cpp
+sbkarrayconverter.cpp
 sbkconverter.cpp
 sbkenum.cpp
 sbkmodule.cpp
@@ -48,6 +49,7 @@ install(FILES
         conversions.h
         gilstate.h
         helper.h
+        sbkarrayconverter.h
         sbkconverter.h
         sbkenum.h
         sbkmodule.h

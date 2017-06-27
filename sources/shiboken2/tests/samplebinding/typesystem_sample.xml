@@ -501,6 +501,8 @@
     <function signature="gimmeInt()" />
     <function signature="gimmeDouble()" />
     <function signature="makeCString()" />
+    <function signature="sumIntArray(int[4])"/>
+    <function signature="sumDoubleArray(double[4])"/>
     <function signature="multiplyPair(std::pair&lt;double, double>)" />
     <function signature="returnCString()" />
     <function signature="overloadedFunc(double)" />

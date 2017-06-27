@@ -39,6 +39,7 @@
 
 #include "sbkconverter.h"
 #include "sbkconverter_p.h"
+#include "sbkarrayconverter_p.h"
 #include "basewrapper_p.h"
 #include "autodecref.h"
 #include "sbkdbg.h"
@@ -53,6 +54,8 @@ static ConvertersMap converters;
 
 namespace Shiboken {
 namespace Conversions {
+
+void initArrayConverters();
 
 void init()
 {
@@ -95,9 +98,11 @@ void init()
     converters["unsigned long"] = primitiveTypeConverters[SBK_UNSIGNEDLONG_IDX];
     converters["unsigned short"] = primitiveTypeConverters[SBK_UNSIGNEDSHORT_IDX];
     converters["void*"] = primitiveTypeConverters[SBK_VOIDPTR_IDX];
+
+    initArrayConverters();
 }
 
-static SbkConverter* createConverterObject(PyTypeObject* type,
+SbkConverter *createConverterObject(PyTypeObject *type,
                                            PythonToCppFunc toCppPointerConvFunc,
                                            IsConvertibleToCppFunc toCppPointerCheckFunc,
                                            CppToPythonFunc pointerToPythonFunc,
@@ -252,6 +257,17 @@ PythonToCppFunc isPythonToCppValueConvertible(const SbkObjectType *type, PyObjec
 PythonToCppFunc isPythonToCppConvertible(const SbkConverter *converter, PyObject *pyIn)
 {
     return IsPythonToCppConvertible(converter, pyIn);
+}
+
+PythonToCppFunc isPythonToCppConvertible(const SbkArrayConverter *converter,
+                                         int dim1, int dim2, PyObject *pyIn)
+{
+    assert(pyIn);
+    for (IsArrayConvertibleToCppFunc f : converter->toCppConversions) {
+        if (PythonToCppFunc c = f(pyIn, dim1, dim2))
+            return c;
+    }
+    return nullptr;
 }
 
 PythonToCppFunc isPythonToCppReferenceConvertible(const SbkObjectType *type, PyObject *pyIn)

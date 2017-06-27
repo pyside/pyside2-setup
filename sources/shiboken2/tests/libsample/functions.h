@@ -81,6 +81,8 @@ LIBSAMPLE_API double acceptDouble(double x);
 LIBSAMPLE_API int acceptIntReference(int& x);
 LIBSAMPLE_API OddBool acceptOddBoolReference(OddBool& x);
 
+LIBSAMPLE_API int sumIntArray(int array[4]);
+LIBSAMPLE_API double sumDoubleArray(double array[4]);
 
 class LIBSAMPLE_API ClassWithFunctionPointer
 {

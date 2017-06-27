@@ -779,6 +779,13 @@ QString ShibokenGenerator::converterObject(const AbstractMetaType* type)
         return QLatin1String("Shiboken::Conversions::PrimitiveTypeConverter<const char*>()");
     if (isVoidPointer(type))
         return QLatin1String("Shiboken::Conversions::PrimitiveTypeConverter<void*>()");
+    const AbstractMetaTypeCList nestedArrayTypes = type->nestedArrayTypes();
+    if (!nestedArrayTypes.isEmpty() && nestedArrayTypes.constLast()->isCppPrimitive()) {
+        return QStringLiteral("Shiboken::Conversions::ArrayTypeConverter<")
+            + nestedArrayTypes.constLast()->minimalSignature()
+            + QLatin1String(">(") + QString::number(nestedArrayTypes.size())
+            + QLatin1Char(')');
+    }
     if (type->typeEntry()->isContainer()) {
         return convertersVariableName(type->typeEntry()->targetLangPackage())
                + QLatin1Char('[') + getTypeIndexVariableName(type) + QLatin1Char(']');
@@ -1232,8 +1239,8 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* 
             return customCheck;
     }
 
+    QString result = QLatin1String("Shiboken::Conversions::");
     if (isWrapperType(metaType)) {
-        QString result = QLatin1String("Shiboken::Conversions::");
         if (isPointer(metaType) || isValueTypeWithCopyConstructorOnly(metaType))
             result += QLatin1String("isPythonToCppPointerConvertible");
         else if (metaType->referenceType() == LValueReference)
@@ -1244,8 +1251,18 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* 
             + cpythonTypeNameExt(metaType) + QLatin1String("), ");
         return result;
     }
-    return QStringLiteral("Shiboken::Conversions::isPythonToCppConvertible(%1, ")
-              .arg(converterObject(metaType));
+    result += QLatin1String("isPythonToCppConvertible(") + converterObject(metaType);
+    // Write out array sizes if known
+    const AbstractMetaTypeCList nestedArrayTypes = metaType->nestedArrayTypes();
+    if (!nestedArrayTypes.isEmpty() && nestedArrayTypes.constLast()->isCppPrimitive()) {
+        const int dim1 = metaType->arrayElementCount();
+        const int dim2 = nestedArrayTypes.constFirst()->isArray()
+            ? nestedArrayTypes.constFirst()->arrayElementCount() : -1;
+        result += QLatin1String(", ") + QString::number(dim1)
+            + QLatin1String(", ") + QString::number(dim2);
+    }
+    result += QLatin1String(", ");
+    return result;
 }
 
 QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaArgument *metaArg, bool genericNumberType)
