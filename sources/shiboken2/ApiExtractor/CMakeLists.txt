@@ -82,8 +82,6 @@ target_link_libraries(apiextractor
                       ${APIEXTRACTOR_EXTRA_LIBRARIES}
                       )
 
-set_property(TARGET apiextractor PROPERTY CXX_STANDARD 11)
-
 if (BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
