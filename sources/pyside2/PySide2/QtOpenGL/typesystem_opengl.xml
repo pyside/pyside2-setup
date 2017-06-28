@@ -59,6 +59,16 @@
 
   <rejection class="QGLColormap::QGLColormapData"/>
   <rejection class="QGLContext" field-name="currentCtx"/>
+  <rejection class="^QGL.*$" argument-type="^GLboolean( const)?\*$"/>
+  <rejection class="^QGL.*$" argument-type="^GLchar( const)?\*$"/>
+  <rejection class="^QGL.*$" argument-type="GLchar *const const*"/>
+  <rejection class="^QGL.*$" argument-type="^GLenum( const)?\*$"/>
+  <rejection class="^QGL.*$" argument-type="^GLfloat( const)?\*$"/>
+  <rejection class="^QGL.*$" argument-type="^GLfloat( const)?\[.*$"/>
+  <rejection class="^QGL.*$" argument-type="^GLdouble( const)?\*$"/>
+  <rejection class="^QGL.*$" argument-type="GLintptr"/>
+  <rejection class="^QGL.*$" argument-type="^GLint64( const)?\*$"/>
+  <rejection class="^QGL.*$" argument-type="^GLsizei( const)?\*$"/>
 
   <namespace-type name="QGL">
     <enum-type name="FormatOption" flags="FormatOptions" force-integer="yes"/>
@@ -681,8 +691,6 @@
     <!-- ### -->
 
     <!-- ### Use QMatrixZxY overloads -->
-    <modify-function signature="setUniformValue(int,Array)" remove="all" />
-    <modify-function signature="setUniformValue(const char*,Array)" remove="all" />
     <modify-function signature="setAttributeValue(int,const GLfloat*,int,int)" remove="all" />
     <modify-function signature="setAttributeValue(const char*,const GLfloat*,int,int)" remove="all" />
     <modify-function signature="setAttributeArray(int, GLenum, const void*, int, int)" remove="all" since="4.7" />

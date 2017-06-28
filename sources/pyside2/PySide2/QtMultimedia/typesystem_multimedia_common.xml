@@ -77,7 +77,7 @@
       </modify-function>
       -->
       <!-- TODO: PYSIDE-354, arrays are not supported -->
-      <modify-function signature="mapPlanes(QAbstractVideoBuffer::MapMode,int*,Array,Array)" remove="all"/>
+      <modify-function signature="mapPlanes(QAbstractVideoBuffer::MapMode,int*,int[4],uchar*[4])" remove="all"/>
   </object-type>
   <object-type name="QAbstractVideoSurface">
       <enum-type name="Error"/>

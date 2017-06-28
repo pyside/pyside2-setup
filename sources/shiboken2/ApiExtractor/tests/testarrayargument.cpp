@@ -58,6 +58,42 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByInteger()
     QCOMPARE(arg->type()->arrayElementType()->name(), QLatin1String("double"));
 }
 
+static QString functionMinimalSignature(const AbstractMetaClass *c, const QString &name)
+{
+    const AbstractMetaFunction *f = c->findFunction(name);
+    return f ? f->minimalSignature() : QString();
+}
+
+void TestArrayArgument::testArraySignature()
+{
+    const char cppCode[] ="\
+    struct A {\n\
+        void mi1(int arg[5]);\n\
+        void mi1c(const int arg[5]);\n\
+        void muc2(unsigned char *arg[2][3]);\n\
+        void mc2c(const char *arg[5][6]);\n\
+    };\n";
+    const char xmlCode[] = "\
+    <typesystem package='Foo'>\n\
+        <primitive-type name='char'/>\n\
+        <primitive-type name='unsigned char'/>\n\
+        <primitive-type name='int'/>\n\
+        <object-type name='A'/>\n\
+    </typesystem>\n";
+
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
+    QCOMPARE(functionMinimalSignature(classA, QLatin1String("mi1")),
+             QLatin1String("mi1(int[5])"));
+    QCOMPARE(functionMinimalSignature(classA, QLatin1String("mi1c")),
+             QLatin1String("mi1c(const int[5])"));
+    QCOMPARE(functionMinimalSignature(classA, QLatin1String("muc2")),
+             QLatin1String("muc2(unsigned char*[2][3])"));
+    QCOMPARE(functionMinimalSignature(classA, QLatin1String("mc2c")),
+             QLatin1String("mc2c(const char*[5][6])"));
+}
+
 void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()
 {
     const char* cppCode ="\

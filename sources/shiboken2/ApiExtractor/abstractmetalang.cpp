@@ -91,7 +91,7 @@ QDebug operator<<(QDebug d, const AbstractMetaVariable *av)
 
 AbstractMetaType::AbstractMetaType()
     :m_typeEntry(0),
-    m_arrayElementCount(0),
+    m_arrayElementCount(-1),
     m_arrayElementType(0),
     m_originalTemplateType(0),
     m_pattern(InvalidPattern),
@@ -2545,13 +2545,32 @@ void AbstractMetaClass::fixFunctions()
     setFunctions(funcs);
 }
 
+static inline QString formatArraySize(int e)
+{
+    QString result;
+    result += QLatin1Char('[');
+    if (e >= 0)
+        result += QString::number(e);
+    result += QLatin1Char(']');
+    return result;
+}
 
 QString AbstractMetaType::formatSignature(bool minimal) const
 {
     QString result;
     if (isConstant())
         result += QLatin1String("const ");
-    result += typeEntry()->qualifiedCppName();
+    if (isArray()) {
+        // Build nested array dimensions a[2][3] in correct order
+        result += m_arrayElementType->minimalSignature();
+        const int arrayPos = result.indexOf(QLatin1Char('['));
+        if (arrayPos != -1)
+            result.insert(arrayPos, formatArraySize(m_arrayElementCount));
+        else
+            result.append(formatArraySize(m_arrayElementCount));
+    } else {
+        result += typeEntry()->qualifiedCppName();
+    }
     if (!m_instantiations.isEmpty()) {
         result += QLatin1Char('<');
         if (minimal)

@@ -35,6 +35,7 @@ class TestArrayArgument : public QObject
     Q_OBJECT
 private slots:
     void testArrayArgumentWithSizeDefinedByInteger();
+    void testArraySignature();
     void testArrayArgumentWithSizeDefinedByEnumValue();
     void testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnum();
 };
