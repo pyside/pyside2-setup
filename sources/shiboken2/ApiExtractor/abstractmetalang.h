@@ -388,7 +388,7 @@ public:
         return hasInstantiations() && m_cppInstantiation;
     }
 
-    QString minimalSignature() const;
+    QString minimalSignature() const { return formatSignature(true); }
 
     // true when the type is a QtJambiObject subclass
     bool hasNativeId() const;
@@ -613,6 +613,7 @@ public:
 
 private:
     TypeUsagePattern determineUsagePattern() const;
+    QString formatSignature(bool minimal) const;
 
     const TypeEntry *m_typeEntry;
     AbstractMetaTypeList m_instantiations;

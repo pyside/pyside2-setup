@@ -149,39 +149,8 @@ AbstractMetaType *AbstractMetaType::copy() const
 
 QString AbstractMetaType::cppSignature() const
 {
-    if (m_cachedCppSignature.isEmpty()) {
-        if (isConstant())
-            m_cachedCppSignature += QLatin1String("const ");
-
-        m_cachedCppSignature += typeEntry()->qualifiedCppName();
-
-        if (hasInstantiationInCpp()) {
-            AbstractMetaTypeList types = instantiations();
-            m_cachedCppSignature += QLatin1Char('<');
-            for (int i = 0; i < types.count(); ++i) {
-                if (i > 0)
-                    m_cachedCppSignature += QLatin1String(", ");
-                m_cachedCppSignature += types[i]->cppSignature();
-            }
-            m_cachedCppSignature += QLatin1String(" >");
-        }
-
-        if (indirections() || m_referenceType != NoReference) {
-            m_cachedCppSignature += QLatin1Char(' ');
-            if (indirections())
-                m_cachedCppSignature += QString(indirections(), QLatin1Char('*'));
-            switch (referenceType()) {
-            case NoReference:
-                break;
-            case LValueReference:
-                m_cachedCppSignature += QLatin1Char('&');
-                break;
-            case RValueReference:
-                m_cachedCppSignature += QLatin1String("&&");
-                break;
-            }
-        }
-    }
+    if (m_cachedCppSignature.isEmpty())
+        m_cachedCppSignature = formatSignature(false);
     return m_cachedCppSignature;
 }
 
@@ -2577,37 +2546,39 @@ void AbstractMetaClass::fixFunctions()
 }
 
 
-QString AbstractMetaType::minimalSignature() const
+QString AbstractMetaType::formatSignature(bool minimal) const
 {
-    QString minimalSignature;
+    QString result;
     if (isConstant())
-        minimalSignature += QLatin1String("const ");
-    minimalSignature += typeEntry()->qualifiedCppName();
-    if (hasInstantiations()) {
-        AbstractMetaTypeList instantiations = this->instantiations();
-        minimalSignature += QLatin1String("< ");
-        for (int i = 0; i < instantiations.size(); ++i) {
+        result += QLatin1String("const ");
+    result += typeEntry()->qualifiedCppName();
+    if (!m_instantiations.isEmpty()) {
+        result += QLatin1Char('<');
+        if (minimal)
+            result += QLatin1Char(' ');
+        for (int i = 0, size = m_instantiations.size(); i < size; ++i) {
             if (i > 0)
-                minimalSignature += QLatin1Char(',');
-            minimalSignature += instantiations[i]->minimalSignature();
+                result += QLatin1Char(',');
+            result += m_instantiations.at(i)->minimalSignature();
         }
-        minimalSignature += QLatin1String(" >");
+        result += QLatin1String(" >");
     }
 
-    for (int j = 0; j < indirections(); ++j)
-        minimalSignature += QLatin1Char('*');
+    if (!minimal && (m_indirections != 0 || m_referenceType != NoReference))
+        result += QLatin1Char(' ');
+    if (m_indirections)
+        result += QString(m_indirections, QLatin1Char('*'));
     switch (referenceType()) {
     case NoReference:
         break;
     case LValueReference:
-        minimalSignature += QLatin1Char('&');
+        result += QLatin1Char('&');
         break;
     case RValueReference:
-        minimalSignature += QLatin1String("&&");
+        result += QLatin1String("&&");
         break;
     }
-
-    return minimalSignature;
+    return result;
 }
 
 bool AbstractMetaType::hasNativeId() const
