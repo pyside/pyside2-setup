@@ -639,7 +639,7 @@
         %0 = new %TYPE(QPixmap::fromImage(%1));
         </inject-code>
     </add-function>
-    <modify-function signature="QPixmap(const char **)">
+    <modify-function signature="QPixmap(const char*[])">
         <modify-argument index="1">
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -868,7 +868,7 @@
     <modify-function signature="QImage(const uchar*,int,int,QImage::Format,QImageCleanupFunction, void *)" remove="all" />
     <!-- ### -->
 
-    <modify-function signature="QImage(const char**)">
+    <modify-function signature="QImage(const char*[])">
         <modify-argument index="1">
             <replace-type modified-type="PySequence" />
         </modify-argument>

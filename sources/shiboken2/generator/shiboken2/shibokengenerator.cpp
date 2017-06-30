@@ -1330,8 +1330,12 @@ QString ShibokenGenerator::argumentString(const AbstractMetaFunction *func,
         arg = modified_type.replace(QLatin1Char('$'), QLatin1Char('.'));
 
     if (!(options & Generator::SkipName)) {
-        arg += QLatin1Char(' ');
-        arg += argument->name();
+        // "int a", "int a[]"
+        const int arrayPos = arg.indexOf(QLatin1Char('['));
+        if (arrayPos != -1)
+            arg.insert(arrayPos, QLatin1Char(' ') + argument->name());
+        else
+            arg.append(QLatin1Char(' ') + argument->name());
     }
 
     if ((options & Generator::SkipDefaultValues) != Generator::SkipDefaultValues &&

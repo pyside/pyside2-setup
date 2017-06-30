@@ -70,6 +70,7 @@ void TestArrayArgument::testArraySignature()
     struct A {\n\
         void mi1(int arg[5]);\n\
         void mi1c(const int arg[5]);\n\
+        void mi1cu(const int arg[]);\n\
         void muc2(unsigned char *arg[2][3]);\n\
         void mc2c(const char *arg[5][6]);\n\
     };\n";
@@ -88,6 +89,8 @@ void TestArrayArgument::testArraySignature()
              QLatin1String("mi1(int[5])"));
     QCOMPARE(functionMinimalSignature(classA, QLatin1String("mi1c")),
              QLatin1String("mi1c(const int[5])"));
+    QCOMPARE(functionMinimalSignature(classA, QLatin1String("mi1cu")),
+             QLatin1String("mi1cu(const int[])"));
     QCOMPARE(functionMinimalSignature(classA, QLatin1String("muc2")),
              QLatin1String("muc2(unsigned char*[2][3])"));
     QCOMPARE(functionMinimalSignature(classA, QLatin1String("mc2c")),

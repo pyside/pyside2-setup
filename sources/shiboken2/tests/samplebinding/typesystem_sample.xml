@@ -1159,7 +1159,7 @@
         <!-- change the name of this virtual method -->
         <modify-function signature="className()" rename="name"/>
 
-        <modify-function signature="sumPointArray(int, const Point*)">
+        <modify-function signature="sumPointArray(int, const Point[])">
             <modify-argument index="1">
                 <remove-argument/>
                 <conversion-rule class="native">
@@ -1950,7 +1950,7 @@
                 <define-ownership owner="c++"/>
             </modify-argument>
         </modify-function>
-        <modify-function signature="acceptSequence(const char**)">
+        <modify-function signature="acceptSequence(const char*[])">
             <modify-argument index="1">
                 <replace-type modified-type="PySequence" />
                 <conversion-rule class="native">
