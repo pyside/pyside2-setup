@@ -36,6 +36,8 @@
 #include <QtCore/QStringList>
 #include <QtCore/QVector>
 
+QT_FORWARD_DECLARE_CLASS(QDebug)
+
 class TypeParser
 {
 public:
@@ -56,5 +58,9 @@ public:
 
     static Info parse(const QString &str, QString *errorMessage = Q_NULLPTR);
 };
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const TypeParser::Info &);
+#endif
 
 #endif // TYPEPARSER_H

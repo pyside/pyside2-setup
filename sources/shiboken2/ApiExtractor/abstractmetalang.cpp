@@ -301,10 +301,26 @@ QDebug operator<<(QDebug d, const AbstractMetaType *at)
     d.noquote();
     d.nospace();
     d << "AbstractMetaType(";
-    if (at)
+    if (at) {
         d << at->name();
-    else
+        if (d.verbosity() > 2) {
+            d << ", typeEntry=" << at->typeEntry() << ", signature=\""
+                << at->cppSignature() << "\", pattern="
+                << at->typeUsagePattern();
+            if (at->indirections())
+                d << ", indirections=" << at->indirections();
+            if (at->referenceType())
+                d << ", reftype=" << at->referenceType();
+            if (at->isConstant())
+                d << ", [const]";
+            if (at->isArray()) {
+                d << ", array of \"" << at->arrayElementType()->cppSignature()
+                    << "\", arrayElementCount="  << at->arrayElementCount();
+            }
+        }
+    } else {
         d << '0';
+    }
     d << ')';
     return d;
 }

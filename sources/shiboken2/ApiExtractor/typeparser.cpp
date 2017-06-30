@@ -316,3 +316,47 @@ QString TypeParser::Info::toString() const
     }
     return s;
 }
+
+#ifndef QT_NO_DEBUG_STREAM
+
+static void formatTypeInfo(QDebug &d, const TypeParser::Info &i)
+{
+    if (i.is_busted) {
+        d << "busted";
+        return;
+    }
+
+    d << '"' << i.qualified_name << '"';
+    if (!i.arrays.isEmpty()) {
+        d << ", arrays=";
+        for (const QString &a : i.arrays)
+            d << '[' << a << ']';
+    }
+    if (!i.template_instantiations.isEmpty()) {
+        d << ", template_instantiations=[";
+        for (int t = 0, size = i.template_instantiations.size(); t < size; ++t) {
+            if (t)
+                d << ", ";
+            formatTypeInfo(d, i.template_instantiations.at(t));
+        }
+        d << ']';
+    }
+    if (i.referenceType != NoReference)
+        d << ", refType=" << i.referenceType;
+    if (i.is_constant)
+        d << ", [const]";
+    if (i.indirections > 0)
+        d << ", indirections=" << i.indirections;
+}
+
+QDebug operator<<(QDebug d, const TypeParser::Info &i)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "TypeParser::Info(";
+    formatTypeInfo(d, i);
+    d << ')';
+    return d;
+}
+#endif // !QT_NO_DEBUG_STREAM
