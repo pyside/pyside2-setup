@@ -158,6 +158,9 @@ AbstractMetaTypeCList AbstractMetaType::nestedArrayTypes() const
             t = elt;
         }
         break;
+    case NativePointerAsArrayPattern:
+        result.append(m_arrayElementType);
+        break;
     default:
         break;
     }

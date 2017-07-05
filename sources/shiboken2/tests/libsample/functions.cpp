@@ -209,6 +209,15 @@ double sumDoubleArray(double array[4])
     return std::accumulate(array, array + 4, double(0));
 }
 
+ArrayModifyTest::ArrayModifyTest()
+{
+}
+
+int ArrayModifyTest::sumIntArray(int n, int *array)
+{
+   return std::accumulate(array, array + n, 0);
+}
+
 ClassWithFunctionPointer::ClassWithFunctionPointer()
 {
     callFunctionPointer(0, &ClassWithFunctionPointer::doNothing);

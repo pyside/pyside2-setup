@@ -40,6 +40,11 @@ class ArrayTester(unittest.TestCase):
         intList = [1, 2, 3, 4]
         self.assertEqual(sample.sumIntArray(intList), 10)
 
+    def testIntArrayModified(self):
+        intList = [1, 2, 3, 4]
+        tester = sample.ArrayModifyTest()
+        self.assertEqual(tester.sumIntArray(4, intList), 10)
+
     def testDoubleArray(self):
         doubleList = [1.2, 2.3, 3.4, 4.5]
         self.assertEqual(sample.sumDoubleArray(doubleList), 11.4)

@@ -508,6 +508,12 @@
     <function signature="overloadedFunc(double)" />
     <function signature="overloadedFunc(int)" />
 
+    <value-type name="ArrayModifyTest">
+        <modify-function signature="sumIntArray(int, int*)">
+            <modify-argument index="2"><array/></modify-argument>
+        </modify-function>
+    </value-type>
+
     <value-type name="ClassWithFunctionPointer">
         <suppress-warning text="skipping function 'ClassWithFunctionPointer::callFunctionPointer', unmatched parameter type 'void (*)(void*)'" />
     </value-type>

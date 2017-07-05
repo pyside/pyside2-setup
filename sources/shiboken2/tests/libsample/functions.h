@@ -84,6 +84,13 @@ LIBSAMPLE_API OddBool acceptOddBoolReference(OddBool& x);
 LIBSAMPLE_API int sumIntArray(int array[4]);
 LIBSAMPLE_API double sumDoubleArray(double array[4]);
 
+class LIBSAMPLE_API ArrayModifyTest
+{
+public:
+    ArrayModifyTest();
+    int sumIntArray(int n, int *array);
+};
+
 class LIBSAMPLE_API ClassWithFunctionPointer
 {
 public:

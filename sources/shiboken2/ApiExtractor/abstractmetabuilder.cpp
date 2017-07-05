@@ -1990,7 +1990,8 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
     }
 
     metaFunction->setOriginalAttributes(metaFunction->attributes());
-    fixArgumentNames(metaFunction);
+    if (!metaArguments.isEmpty())
+        fixArgumentNames(metaFunction, metaFunction->modifications(m_currentClass));
 
     if (metaClass) {
         const AbstractMetaArgumentList fargs = metaFunction->arguments();
@@ -2018,11 +2019,8 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
     return metaFunction;
 }
 
-void AbstractMetaBuilderPrivate::fixArgumentNames(AbstractMetaFunction *func)
+void AbstractMetaBuilderPrivate::fixArgumentNames(AbstractMetaFunction *func, const FunctionModificationList &mods)
 {
-    if (func->arguments().isEmpty())
-        return;
-    const FunctionModificationList &mods = func->modifications(m_currentClass);
     for (const FunctionModification &mod : mods) {
         for (const ArgumentModification &argMod : mod.argument_mods) {
             if (!argMod.renamed_to.isEmpty()) {
@@ -2106,6 +2104,39 @@ static inline AbstractMetaFunction::FunctionType functionTypeFromCodeModel(CodeM
         break;
     }
     return result;
+}
+
+static inline QString msgCannotSetArrayUsage(const QString &function, int i, const QString &reason)
+{
+    return function +  QLatin1String(": Cannot use parameter ") + QString::number(i + 1)
+        + QLatin1String(" as an array: ") + reason;
+}
+
+bool AbstractMetaBuilderPrivate::setArrayArgumentType(AbstractMetaFunction *func,
+                                                      const FunctionModelItem &functionItem,
+                                                      int i)
+{
+
+    AbstractMetaType *metaType = func->arguments().at(i)->type();
+    if (metaType->indirections() == 0) {
+        qCWarning(lcShiboken).noquote()
+            << msgCannotSetArrayUsage(func->minimalSignature(), i,
+                                      QLatin1String("Type does not have indirections."));
+        return false;
+    }
+    TypeInfo elementType = functionItem->arguments().at(i)->type();
+    elementType.setIndirections(elementType.indirections() - 1);
+    bool ok;
+    AbstractMetaType *element = translateType(elementType, &ok);
+    if (element == nullptr || !ok) {
+        qCWarning(lcShiboken).noquote()
+           << msgCannotSetArrayUsage(func->minimalSignature(), i,
+                                     QLatin1String("Cannot translate element type ") + elementType.toString());
+        return false;
+    }
+    metaType->setArrayElementType(element);
+    metaType->setTypeUsagePattern(AbstractMetaType::NativePointerAsArrayPattern);
+    return true;
 }
 
 AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModelItem functionItem)
@@ -2322,7 +2353,16 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
 
     }
 
-    fixArgumentNames(metaFunction);
+    if (!metaArguments.isEmpty()) {
+        const FunctionModificationList &mods = metaFunction->modifications(m_currentClass);
+        fixArgumentNames(metaFunction, mods);
+        for (const FunctionModification &mod : mods) {
+            for (const ArgumentModification &argMod : mod.argument_mods) {
+                if (argMod.array)
+                    setArrayArgumentType(metaFunction, functionItem, argMod.index - 1);
+            }
+        }
+    }
 
     // Determine class special functions
     if (m_currentClass && metaFunction->arguments().size() == 1) {

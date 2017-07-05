@@ -155,7 +155,10 @@ public:
     void sortLists();
     AbstractMetaArgumentList reverseList(const AbstractMetaArgumentList &list);
     void setInclude(TypeEntry *te, const QString &fileName) const;
-    void fixArgumentNames(AbstractMetaFunction *func);
+    void fixArgumentNames(AbstractMetaFunction *func, const FunctionModificationList &mods);
+    bool setArrayArgumentType(AbstractMetaFunction *func,
+                              const FunctionModelItem &functionItem, int i);
+
     void fillAddedFunctions(AbstractMetaClass *metaClass);
 
     AbstractMetaBuilder *q;

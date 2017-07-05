@@ -326,6 +326,7 @@ public:
         QObjectPattern,
         ValuePointerPattern,
         NativePointerPattern,
+        NativePointerAsArrayPattern, // "int*" as "int[]"
         ContainerPattern,
         SmartPointerPattern,
         VariantPattern,
