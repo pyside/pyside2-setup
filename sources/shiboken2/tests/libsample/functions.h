@@ -83,6 +83,8 @@ LIBSAMPLE_API OddBool acceptOddBoolReference(OddBool& x);
 
 LIBSAMPLE_API int sumIntArray(int array[4]);
 LIBSAMPLE_API double sumDoubleArray(double array[4]);
+LIBSAMPLE_API int sumIntMatrix(int m[2][3]);
+LIBSAMPLE_API double sumDoubleMatrix(double m[2][3]);
 
 class LIBSAMPLE_API ArrayModifyTest
 {

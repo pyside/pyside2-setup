@@ -209,6 +209,26 @@ double sumDoubleArray(double array[4])
     return std::accumulate(array, array + 4, double(0));
 }
 
+int sumIntMatrix(int m[2][3])
+{
+    int result = 0;
+    for (int r = 0; r < 2; ++r) {
+        for (int c = 0; c < 3; ++c)
+            result += m[r][c];
+    }
+    return result;
+}
+
+double sumDoubleMatrix(double m[2][3])
+{
+    double result = 0;
+    for (int r = 0; r < 2; ++r) {
+        for (int c = 0; c < 3; ++c)
+            result += m[r][c];
+    }
+    return result;
+}
+
 ArrayModifyTest::ArrayModifyTest()
 {
 }

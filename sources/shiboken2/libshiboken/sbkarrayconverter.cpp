@@ -242,6 +242,10 @@ static PythonToCppFunc sequenceToCppDoubleArrayCheck(PyObject *pyIn, int dim1, i
     return floatArrayCheck(pyIn, dim1) ? sequenceToCppDoubleArray : nullptr;
 }
 
+#ifdef HAVE_NUMPY
+void initNumPyArrayConverters();
+#endif
+
 void initArrayConverters()
 {
     SbkArrayConverter **start = &ArrayTypeConverters[0][0];
@@ -263,6 +267,10 @@ void initArrayConverters()
         createArrayConverter(sequenceToCppLongLongArrayCheck);
     ArrayTypeConverters[SBK_UNSIGNEDLONGLONG_ARRAY_IDX][0] =
         createArrayConverter(sequenceToCppUnsignedLongLongArrayCheck);
+
+#ifdef HAVE_NUMPY
+    initNumPyArrayConverters();
+#endif
 }
 
 SbkArrayConverter *arrayTypeConverter(int index, int dimension)
