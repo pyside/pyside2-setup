@@ -11,6 +11,7 @@ ${QtQuick_GEN_DIR}/qquicktransform_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickitem_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickitem_updatepaintnodedata_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickitemgrabresult_wrapper.cpp
+${QtQuick_GEN_DIR}/qsharedpointer_qquickitemgrabresult_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickpainteditem_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickrendercontrol_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquicktextdocument_wrapper.cpp

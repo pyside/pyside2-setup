@@ -26,14 +26,19 @@
 ##
 #############################################################################
 
-from __future__ import print_function
+import unittest
+import PySide2
 
-import os
+# Note:
+# "from PySide2 import *" can only be used at module level.
+# It is also really not recommended to use. But for testing,
+# the "__all__" variable is a great feature!
 
-modname = os.path.basename(os.path.dirname(__file__))
-try:
-    exec("from PySide2 import {}".format(modname))
-    print("The module {} loads. That is the minimum test, folks :-)".format(modname))
-except ImportError:
-    print("The module {} did not load! Did you include all classes in CMake?".format(modname))
-    raise
+class AllModulesImportTest(unittest.TestCase):
+    def testAllModulesCanImport(self):
+        # would also work: exec("from PySide2 import *")
+        for name in PySide2.__all__:
+            exec("import PySide2.{}".format(name))
+
+if __name__ == '__main__':
+    unittest.main()

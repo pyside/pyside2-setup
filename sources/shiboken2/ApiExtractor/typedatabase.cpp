@@ -684,7 +684,12 @@ QDebug operator<<(QDebug d, const TypeEntry *te)
     d.nospace();
     d << "TypeEntry(";
     if (te) {
-        d << '"' << te->qualifiedCppName() << "\", type=" << te->type();
+        const QString name = te->name();
+        const QString cppName = te->qualifiedCppName();
+        d << '"' << name << '"';
+        if (name != cppName)
+            d << "\", cppName=\"" << cppName << '"';
+        d << ", type=" << te->type();
         if (te->include().isValid())
             d << ", include=" << te->include();
         const IncludeList &extraIncludes = te->extraIncludes();
