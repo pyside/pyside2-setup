@@ -152,6 +152,7 @@ import os
 import sys
 import platform
 import time
+import re
 
 import difflib # for a close match of dirname and module
 
@@ -938,7 +939,7 @@ class pyside_build(_build):
                 return self.prepare_packages_win32(vars)
             else:
                 return self.prepare_packages_posix(vars)
-        except FileNotFoundError as e:
+        except IOError as e:
             print('setup.py/prepare_packages: ', e)
             raise
 
@@ -961,9 +962,16 @@ class pyside_build(_build):
             "{dist_dir}/PySide2",
             vars=vars)
         # <install>/lib/site-packages/shiboken2.so -> <setup>/PySide2/shiboken2.so
+        shiboken_module_name = 'shiboken2.so'
+        shiboken_src_path = "{site_packages_dir}".format(**vars)
+        maybe_shiboken_names = [f for f in os.listdir(shiboken_src_path)
+                                if re.match(r'shiboken.*\.so', f)]
+        if maybe_shiboken_names:
+            shiboken_module_name = maybe_shiboken_names[0]
+        vars.update({'shiboken_module_name': shiboken_module_name})
         copyfile(
-            "{site_packages_dir}/shiboken2.so",
-            "{dist_dir}/PySide2/shiboken2.so",
+            "{site_packages_dir}/{shiboken_module_name}",
+            "{dist_dir}/PySide2/{shiboken_module_name}",
             vars=vars)
         # <install>/lib/site-packages/pyside2uic/* -> <setup>/pyside2uic
         copydir(
@@ -1078,15 +1086,23 @@ class pyside_build(_build):
             "{dist_dir}/PySide2/docs/shiboken2",
             force=False, vars=vars)
         # <install>/lib/site-packages/shiboken2.pyd -> <setup>/PySide2/shiboken2.pyd
+        shiboken_module_name = 'shiboken2.pyd'
+        shiboken_src_path = "{site_packages_dir}".format(**vars)
+        maybe_shiboken_names = [f for f in os.listdir(shiboken_src_path)
+                                if re.match(r'shiboken.*\.pyd', f)]
+        if maybe_shiboken_names:
+            shiboken_module_name = maybe_shiboken_names[0]
+        vars.update({'shiboken_module_name': shiboken_module_name})
         copyfile(
-            "{site_packages_dir}/shiboken2{dbgPostfix}.pyd",
-            "{dist_dir}/PySide2/shiboken2{dbgPostfix}.pyd",
+            "{site_packages_dir}/{shiboken_module_name}",
+            "{dist_dir}/PySide2/{shiboken_module_name}",
             vars=vars)
         if self.debug or self.build_type == 'RelWithDebInfo':
-            copyfile(
-                "{build_dir}/shiboken2/shibokenmodule/shiboken2{dbgPostfix}.pdb",
-                "{dist_dir}/PySide2/shiboken2{dbgPostfix}.pdb",
-                vars=vars)
+            copydir(
+                "{build_dir}/shiboken2/shibokenmodule",
+                "{dist_dir}/PySide2",
+                filter=pdbs,
+                recursive=False, vars=vars)
         # <install>/lib/site-packages/pyside2uic/* -> <setup>/pyside2uic
         copydir(
             "{site_packages_dir}/pyside2uic",
@@ -1200,14 +1216,21 @@ class pyside_build(_build):
         # pdb files for libshiboken and libpyside
         if self.debug or self.build_type == 'RelWithDebInfo':
             # XXX dbgPostfix gives problems - the structure in shiboken2/data should be re-written!
-            copyfile(
-                "{build_dir}/shiboken2/libshiboken/shiboken2.pdb",
-                "{dist_dir}/PySide2/shiboken2.pdb", # omitted dbgPostfix
-                vars=vars)
-            copyfile(
-                "{build_dir}/pyside2/libpyside/pyside2.pdb",
-                "{dist_dir}/PySide2/pyside2.pdb", # omitted dbgPostfix
-                vars=vars)
+            # Not sure what the above refers to, but because both the extension module
+            # (shiboken2.pyd) and the shared library (shiboken2.dll) have the same basename,
+            # the pdb file gets overwritten. This doesn't happen on Unix because the shared library
+            # has a 'lib' prefix in the basename.
+            # @TODO Change the shared library name on Windows.
+            copydir(
+                "{build_dir}/shiboken2/libshiboken",
+                "{dist_dir}/PySide2",
+                filter=pdbs,
+                recursive=False, vars=vars)
+            copydir(
+                "{build_dir}/pyside2/libpyside",
+                "{dist_dir}/PySide2",
+                filter=pdbs,
+                recursive=False, vars=vars)
 
     def update_rpath(self, package_path, executables):
         if sys.platform.startswith('linux'):

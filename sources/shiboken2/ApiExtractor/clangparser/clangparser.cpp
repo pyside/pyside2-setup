@@ -196,8 +196,14 @@ static CXTranslationUnit createTranslationUnit(CXIndex index,
         | CXTranslationUnit_Incomplete;
 
     static const QByteArrayList defaultArgs = {
+#if defined(Q_CC_MSVC) && _MSC_VER > 1900
+        "-std=c++1z", // Fixes constexpr errors in MSVC2017 library headers with Clang 4.1
+#else
         "-std=c++14", // ! otherwise, t.h is parsed as "C"
+#endif
+#ifndef Q_OS_WIN
         "-fPIC",
+#endif
         "-fno-exceptions", // Workaround for clang bug http://reviews.llvm.org/D17988
 #ifdef Q_OS_MACOS
         "-Wno-expansion-to-defined", // Workaround for warnings in Darwin stdlib, see
