@@ -11,7 +11,7 @@ get_target_property(SHIBOKEN_GENERATOR shiboken2 OUTPUT_NAME)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Shiboken2Config.cmake.in"
                "${CMAKE_CURRENT_BINARY_DIR}/Shiboken2Config.cmake" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Shiboken2Config-spec.cmake.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/Shiboken2Config${PYTHON_EXTENSION_SUFFIX}.cmake" @ONLY)
+               "${CMAKE_CURRENT_BINARY_DIR}/Shiboken2Config${PYTHON_CONFIG_SUFFIX}.cmake" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Shiboken2ConfigVersion.cmake.in"
                "${CMAKE_CURRENT_BINARY_DIR}/Shiboken2ConfigVersion.cmake" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shiboken2.pc.in"
@@ -19,7 +19,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shiboken2.pc.in"
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/Shiboken2Config.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken2-${shiboken2_VERSION}")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/Shiboken2Config${PYTHON_EXTENSION_SUFFIX}.cmake"
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/Shiboken2Config${PYTHON_CONFIG_SUFFIX}.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken2-${shiboken2_VERSION}")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/Shiboken2ConfigVersion.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/Shiboken2-${shiboken2_VERSION}")

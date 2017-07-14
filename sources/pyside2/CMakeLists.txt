@@ -21,90 +21,58 @@ else()
     find_package(PythonLibs 2.6)
 endif()
 
-# Queries the python sysconfig for the abi flags which need to be inserted into extension suffixes.
-# Only present starting with Python 3.2.
-# Corresponding configure switches to single letter flags:
-# --with-pymalloc -> m
-# --with-pydebug -> d
-# --with-unicode -> u (rare)
-macro(get_python3_abi_flags)
-  if (NOT PYTHON_ABI_FLAGS)
-    execute_process(
-      COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-          import sysconfig
-          print(sysconfig.get_config_var('abiflags'))
-          "
-      OUTPUT_VARIABLE PYTHON_ABI_FLAGS
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-  endif()
-  message("PYTHON_ABI_FLAGS: " ${PYTHON_ABI_FLAGS})
-endmacro()
+macro(get_python_extension_suffix)
+  # Result of imp.get_suffixes() depends on the platform, but generally looks something like:
+  # [('.cpython-34m-x86_64-linux-gnu.so', 'rb', 3), ('.cpython-34m.so', 'rb', 3),
+  # ('.abi3.so', 'rb', 3), ('.so', 'rb', 3), ('.py', 'r', 1), ('.pyc', 'rb', 2)]
+  # We pick the first most detailed one, strip of the file extension part.
 
-macro(get_python_multi_arch_suffix)
-  # TODO: This part needs testing to check if it is available on Windows.
-  # It is present on macOS, but is not used yet.
-  # Result is something like 'x86_64-linux-gnu'.
-  if (NOT PYTHON_MULTIARCH_SUFFIX)
-    execute_process(
-      COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-         import sysconfig
-         print(sysconfig.get_config_var('MULTIARCH'))
-         "
-      OUTPUT_VARIABLE PYTHON_MULTIARCH_SUFFIX
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-  endif()
-  message("PYTHON_MULTIARCH_SUFFIX: " ${PYTHON_MULTIARCH_SUFFIX})
-endmacro()
-
-macro(get_python2_release_suffix)
-  # Result of imp.get_suffixes() is something like:
-  # [('_d.so', 'rb', 3), ('module_d.so', 'rb', 3), ('.x86_64-linux-gnu_d.so', 'rb', 3)]
-  # or alternatively the same but withut the '_d' part.
-  # The list comprehension is used to choose which suffix to include in library names.
   execute_process(
     COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-       import imp
-       print('_d' if any([tup[0].endswith('_d.so') for tup in imp.get_suffixes()]) else '')
+       import imp, re
+       first_suffix = imp.get_suffixes()[0][0]
+       res = re.search(r'^(.+)\\.', first_suffix)
+       if res:
+           first_suffix = res.group(1)
+       else:
+           first_suffix = ''
+       print(first_suffix)
        "
-    OUTPUT_VARIABLE PYTHON_MODULE_RELEASE_SUFFIX
+    OUTPUT_VARIABLE PYTHON_EXTENSION_SUFFIX
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-  message("PYTHON_MODULE_RELEASE_SUFFIX: " ${PYTHON_MODULE_RELEASE_SUFFIX})
+  message("PYTHON_EXTENSION_SUFFIX: " ${PYTHON_EXTENSION_SUFFIX})
 endmacro()
 
-if (UNIX AND NOT APPLE)
-  if (NOT PYTHON_EXTENSION_SUFFIX)
-    get_python_multi_arch_suffix()
-    # The suffix added to .so libraries should be differenet between Python 2 and 3.
-    # The position of the multiarch suffix is different, and the way the debug flag is set
-    # computed differently.
-    # In Python 2 there is no standard way to query if the python interpeter was built in debug or
-    # release build (sysconfig.get_config_var('Py_Debug') can have a different value than you would
-    # expect if you do a custom Python build). The solution to query for the import
-    # suffixes and check if _d is present there. It is present on Linux distribution
-    # packages of Python, but not in custom built Python builds, because the distros apply their
-    # custom patches too append the '_d's.
-    # In Python 3 (starting with 3.2) there is a standard way to check if '_d' needs to be added,
-    # as well as any other letters, by querying the abiflags sysconfig variable.
-    if (PYTHON_VERSION_MAJOR EQUAL 2)
-        get_python2_release_suffix()
-        # The suffix of Python module files (e.g. QtCore.x86_64-linux-gnu_d.so) as well as library
-        # libraries (e.g. libpyside2.x86_64-linux-gnu.so).
-        if(PYTHON_MULTIARCH_SUFFIX)
-            set(PYTHON_EXTENSION_SUFFIX ".${PYTHON_MULTIARCH_SUFFIX}")
-        endif()
-        set(PYTHON_EXTENSION_SUFFIX "${PYTHON_EXTENSION_SUFFIX}${PYTHON_MODULE_RELEASE_SUFFIX}")
-    elseif (PYTHON_VERSION_MAJOR EQUAL 3)
-        get_python3_abi_flags()
-        set(PYTHON_EXTENSION_SUFFIX ".cpython-${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}${PYTHON_ABI_FLAGS}")
-        if(PYTHON_MULTIARCH_SUFFIX)
-            set(PYTHON_EXTENSION_SUFFIX "${PYTHON_EXTENSION_SUFFIX}-${PYTHON_MULTIARCH_SUFFIX}")
-        endif()
-    else()
-        message(FATAL_ERROR "Unsupported PYTHON_VERSION=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.${PYTHON_VERSION_PATCH}!")
-    endif()
+
+if (NOT PYTHON_EXTENSION_SUFFIX)
+  get_python_extension_suffix()
+endif()
+
+if (NOT PYTHON_CONFIG_SUFFIX)
+  if (PYTHON_VERSION_MAJOR EQUAL 2)
+      set(PYTHON_CONFIG_SUFFIX "-python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
+      if (PYTHON_EXTENSION_SUFFIX)
+          set(PYTHON_CONFIG_SUFFIX "${PYTHON_CONFIG_SUFFIX}${PYTHON_EXTENSION_SUFFIX}")
+      endif()
+  elseif (PYTHON_VERSION_MAJOR EQUAL 3)
+      set(PYTHON_CONFIG_SUFFIX "${PYTHON_EXTENSION_SUFFIX}")
   endif()
-  message("PYTHON_EXTENSION_SUFFIX: " ${PYTHON_EXTENSION_SUFFIX})
-endif ()
+endif()
+
+if (NOT PYTHON_SHARED_LIBRARY_SUFFIX)
+  set(PYTHON_SHARED_LIBRARY_SUFFIX "${PYTHON_CONFIG_SUFFIX}")
+
+  # Append a "v" to disambiguate the python version and the pyside version in the
+  # shared library file name.
+  if (APPLE AND PYTHON_VERSION_MAJOR EQUAL 2)
+      set(PYTHON_SHARED_LIBRARY_SUFFIX "${PYTHON_SHARED_LIBRARY_SUFFIX}v")
+  endif()
+endif()
+
+
+message(STATUS "PYTHON_EXTENSION_SUFFIX:      ${PYTHON_EXTENSION_SUFFIX}")
+message(STATUS "PYTHON_CONFIG_SUFFIX:         ${PYTHON_CONFIG_SUFFIX}")
+message(STATUS "PYTHON_SHARED_LIBRARY_SUFFIX: ${PYTHON_SHARED_LIBRARY_SUFFIX}")
 
 find_package(Shiboken2 2.0.0 REQUIRED)
 find_package(Qt5 5.6.0 REQUIRED COMPONENTS Core)

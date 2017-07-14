@@ -29,6 +29,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${libshiboken_SOURCE_DIR})
 add_library(minimal MODULE ${minimal_SRC})
 set_property(TARGET minimal PROPERTY PREFIX "")
+set_property(TARGET minimal PROPERTY OUTPUT_NAME "minimal${PYTHON_EXTENSION_SUFFIX}")
 if(WIN32)
     set_property(TARGET minimal PROPERTY SUFFIX ".pyd")
 endif()
