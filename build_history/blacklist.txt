@@ -62,3 +62,5 @@
 # Crashes with Python 2 on Windows
 [QtQml::qqmlnetwork_test]
     py2 win32
+[smart::smart_pointer]
+    win32
