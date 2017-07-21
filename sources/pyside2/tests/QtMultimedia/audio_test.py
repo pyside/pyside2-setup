@@ -30,10 +30,11 @@
 
 import unittest
 
+from helper import UsesQGuiApplication
 from PySide2.QtCore import *
 from PySide2.QtMultimedia import *
 
-class testAudioDevices(unittest.TestCase):
+class testAudioDevices(UsesQGuiApplication):
 
     def testListDevices(self):
         valid = False

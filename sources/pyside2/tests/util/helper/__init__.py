@@ -36,11 +36,18 @@ from random import randint
 from PySide2.QtCore import QCoreApplication, QTimer
 
 try:
-    from PySide2.QtWidgets import QApplication
+    from PySide2.QtGui import QGuiApplication
 except ImportError:
     has_gui = False
 else:
     has_gui = True
+
+try:
+    from PySide2.QtWidgets import QApplication
+except ImportError:
+    has_widgets = False
+else:
+    has_widgets = True
 
 def adjust_filename(filename, orig_mod_filename):
     dirpath = os.path.dirname(os.path.abspath(orig_mod_filename))
@@ -76,11 +83,23 @@ class BasicPySlotCase(object):
         else:
             raise ValueError('Invalid arguments for callback')
 
-
-_instance = None
-_timed_instance = None
-
 if has_gui:
+    class UsesQGuiApplication(unittest.TestCase):
+        '''Helper class to provide QGuiApplication instances'''
+
+        def setUp(self):
+            '''Creates the QGuiApplication instance'''
+
+            # Simple way of making instance a singleton
+            super(UsesQGuiApplication, self).setUp()
+            self.app = QGuiApplication.instance() or QGuiApplication([])
+
+        def tearDown(self):
+            '''Deletes the reference owned by self'''
+            del self.app
+            super(UsesQGuiApplication, self).tearDown()
+
+if has_widgets:
     class UsesQApplication(unittest.TestCase):
         '''Helper class to provide QApplication instances'''
 
@@ -91,11 +110,7 @@ if has_gui:
 
             # Simple way of making instance a singleton
             super(UsesQApplication, self).setUp()
-            global _instance
-            if _instance is None:
-                _instance = QApplication([])
-
-            self.app = _instance
+            self.app = QApplication.instance() or QApplication([])
 
         def tearDown(self):
             '''Deletes the reference owned by self'''
@@ -110,11 +125,7 @@ if has_gui:
             '''Setups this Application.
 
             timeout - timeout in milisseconds'''
-            global _timed_instance
-            if _timed_instance is None:
-                _timed_instance = QApplication([])
-
-            self.app = _timed_instance
+            self.app = QApplication.instance() or QApplication([])
             QTimer.singleShot(timeout, self.app.quit)
 
         def tearDown(self):
