@@ -1,8 +1,8 @@
 Include(icecc.cmake)
 project(shiboken2)
 
-cmake_minimum_required(VERSION 3.0)
-cmake_policy(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
+cmake_policy(VERSION 3.1)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/
                       ${CMAKE_MODULE_PATH})
