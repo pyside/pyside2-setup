@@ -29,8 +29,23 @@
 from PySide2.QtWidgets import *
 from PySide2.QtCore import *
 
+# Periodically check for the file dialog to appear and close it
+dialog = None
+def timerHandler():
+    global dialog
+    if dialog is not None:
+        dialog.reject()
+    else:
+        for widget in QApplication.topLevelWidgets():
+            if isinstance(widget, QDialog) and widget.isVisible():
+               dialog = widget
+
 app = QApplication([])
-QTimer.singleShot(200, app.quit)
+QTimer.singleShot(30000, app.quit) # emergency
+timer = QTimer()
+timer.setInterval(50)
+timer.timeout.connect(timerHandler)
+timer.start()
 
 # This test for a dead lock in QFileDialog.getOpenFileNames, the test fail with a timeout if the dead lock exists.
 QFileDialog.getOpenFileNames(None, "caption", QDir.homePath(), None, "", QFileDialog.DontUseNativeDialog)
