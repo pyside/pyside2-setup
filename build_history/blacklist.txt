@@ -64,3 +64,7 @@
     py2 win32
 [smart::smart_pointer]
     win32
+# PYSIDE-474
+[QtWebEngineWidgets::pyside-474-qtwebengineview]
+    py2
+    py3
