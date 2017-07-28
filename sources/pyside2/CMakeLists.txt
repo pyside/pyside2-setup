@@ -1,7 +1,7 @@
 include(cmake/Macros/icecc.cmake) # this must be the first line!
 
-cmake_minimum_required(VERSION 3.0)
-cmake_policy(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
+cmake_policy(VERSION 3.1)
 
 # Don't ignore targets that do not exist, inside add_dependencies calls.
 cmake_policy(SET CMP0046 NEW)
@@ -368,9 +368,20 @@ if (BUILD_TESTS)
     add_subdirectory(tests)
 endif ()
 
+find_program(SPHINX_BUILD sphinx-build)
 find_program(DOT_EXEC dot)
-if (QT_SRC_DIR AND DOT_EXEC)
+
+if (QT_SRC_DIR AND SPHINX_BUILD AND DOT_EXEC)
     add_subdirectory(doc)
 else ()
-    message(STATUS "QT_SRC_DIR variable not set or graphviz not found, apidoc generation targets disabled.")
+    set(DOCS_TARGET_DISABLED_MESSAGE "apidoc generation targets disabled.")
+    if (NOT QT_SRC_DIR)
+        message(STATUS "QT_SRC_DIR variable not set, ${DOCS_TARGET_DISABLED_MESSAGE}")
+    elseif (NOT SPHINX_BUILD)
+        message(STATUS "sphinx-build command not found, ${DOCS_TARGET_DISABLED_MESSAGE}")
+    elseif (NOT DOT_EXEC)
+        message(STATUS "graphviz not found, ${DOCS_TARGET_DISABLED_MESSAGE}")
+    else()
+        message(STATUS "Unknown issue occurred, ${DOCS_TARGET_DISABLED_MESSAGE}")
+    endif()
 endif()

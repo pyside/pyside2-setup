@@ -1,7 +1,7 @@
 project(pysidetest)
 project(testbinding)
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.1)
 
 # On Windows, don't link to qtmain.lib for executables automatically.
 cmake_policy(SET CMP0020 OLD)

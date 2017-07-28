@@ -1,8 +1,8 @@
 Include(icecc.cmake)
 project(shiboken2)
 
-cmake_minimum_required(VERSION 3.0)
-cmake_policy(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
+cmake_policy(VERSION 3.1)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/
                       ${CMAKE_MODULE_PATH})
@@ -64,6 +64,27 @@ if (NOT EXISTS ${CLANG_LIBRARY})
 endif()
 
 message(STATUS "CLANG: ${CLANG_DIR}, ${CLANG_LIBRARY} detected by ${CLANG_DIR_SOURCE}")
+
+# Find highest version clang builtin includes folder to pass along to shiboken.
+set(CLANG_BUILTIN_INCLUDES_DIR_PREFIX ${CLANG_DIR}/lib/clang)
+file(GLOB CLANG_BUILTIN_INCLUDES_DIR_VERSIONS "${CLANG_BUILTIN_INCLUDES_DIR_PREFIX}/*")
+
+# Sort in alphabetical order the list of version folders.
+list(SORT CLANG_BUILTIN_INCLUDES_DIR_VERSIONS)
+
+# Reverse it so the first element is the highest version.
+list(REVERSE CLANG_BUILTIN_INCLUDES_DIR_VERSIONS)
+
+message(STATUS "Found the following CLANG builtins includes directories: ${CLANG_BUILTIN_INCLUDES_DIR_VERSIONS}")
+if(CLANG_BUILTIN_INCLUDES_DIR_VERSIONS)
+    # Get highest version.
+    list(GET CLANG_BUILTIN_INCLUDES_DIR_VERSIONS 0 CLANG_BUILTIN_INCLUDES_DIR_HIGHEST_VERSION)
+    if (CLANG_BUILTIN_INCLUDES_DIR_HIGHEST_VERSION)
+        # Set the final variable to the full include path to pass along to shiboken.
+        set(CLANG_BUILTIN_INCLUDES_DIR "${CLANG_BUILTIN_INCLUDES_DIR_HIGHEST_VERSION}/include")
+    endif()
+endif()
+message(STATUS "CLANG builtins includes directory chosen: ${CLANG_BUILTIN_INCLUDES_DIR}")
 
 set(CLANG_EXTRA_INCLUDES ${CLANG_DIR}/include)
 set(CLANG_EXTRA_LIBRARIES ${CLANG_LIBRARY})
@@ -167,7 +188,11 @@ else()
 endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D QT_NO_CAST_FROM_ASCII -D QT_NO_CAST_TO_ASCII")
+
+# Force usage of the C++11 standard, without a silent fallback
+# to C++98 if the compiler does not support C++11.
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
 set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)

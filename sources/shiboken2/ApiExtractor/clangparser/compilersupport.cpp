@@ -127,7 +127,9 @@ static HeaderPaths gppInternalIncludePaths(const QString &compiler)
 // which causes std types not being found and construct -I/-F options from the
 // include paths of the host compiler.
 
+#ifdef Q_CC_CLANG
 static QByteArray noStandardIncludeOption() { return QByteArrayLiteral("-nostdinc"); }
+#endif
 
 // Returns clang options needed for emulating the host compiler
 QByteArrayList emulatedCompilerOptions()
@@ -140,8 +142,18 @@ QByteArrayList emulatedCompilerOptions()
     const HeaderPaths headerPaths = gppInternalIncludePaths(QStringLiteral("clang++"));
     result.append(noStandardIncludeOption());
 #elif defined(Q_CC_GNU)
-    const HeaderPaths headerPaths = gppInternalIncludePaths(QStringLiteral("g++"));
-    result.append(noStandardIncludeOption());
+    const HeaderPaths headerPaths;
+
+    // The clang builtin includes directory is used to find the definitions for intrinsic functions
+    // and builtin types. It is necessary to use the clang includes to prevent redefinition errors.
+    // The default toolchain includes should be picked up automatically by clang without specifying
+    // them implicitly.
+    QByteArray clangBuiltinIncludesDir(CLANG_BUILTIN_INCLUDES_DIR);
+
+    if (!clangBuiltinIncludesDir.isEmpty()) {
+        result.append(QByteArrayLiteral("-isystem"));
+        result.append(clangBuiltinIncludesDir);
+    }
 #else
     const HeaderPaths headerPaths;
 #endif
