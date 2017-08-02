@@ -383,16 +383,26 @@ struct FunctionModification: public Modification
     bool operator!=(const FunctionModification& other) const;
     bool operator==(const FunctionModification& other) const;
 
+    bool matches(const QString &functionSignature) const
+    {
+        return m_signature.isEmpty()
+            ? m_signaturePattern.match(functionSignature).hasMatch()
+            : m_signature == functionSignature;
+    }
+
+    bool setSignature(const QString &s, QString *errorMessage =  nullptr);
+    QString signature() const { return m_signature.isEmpty() ? m_signaturePattern.pattern() : m_signature; }
 
     QString toString() const;
 
-    QString signature;
     QString association;
     CodeSnipList snips;
 
     QVector<ArgumentModification> argument_mods;
 
 private:
+    QString m_signature;
+    QRegularExpression m_signaturePattern;
     bool m_thread;
     bool m_allowThread;
     double m_version;

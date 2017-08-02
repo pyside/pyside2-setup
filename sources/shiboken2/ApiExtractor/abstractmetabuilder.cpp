@@ -179,7 +179,7 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
         FunctionModificationList modifications = centry->functionModifications();
 
         for (const FunctionModification &modification : qAsConst(modifications)) {
-            QString signature = modification.signature;
+            QString signature = modification.signature();
 
             QString name = signature.trimmed();
             name.truncate(name.indexOf(QLatin1Char('(')));
@@ -192,7 +192,8 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
             bool found = false;
             QStringList possibleSignatures;
             for (AbstractMetaFunction *function : functions) {
-                if (function->minimalSignature() == signature && function->implementingClass() == clazz) {
+                if (function->implementingClass() == clazz
+                    && modification.matches(function->minimalSignature())) {
                     found = true;
                     break;
                 }
@@ -3122,7 +3123,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
         FunctionModificationList mods = function->modifications(templateClass);
         for (int i = 0; i < mods.size(); ++i) {
             FunctionModification mod = mods.at(i);
-            mod.signature = f->minimalSignature();
+            mod.setSignature(f->minimalSignature());
 
             // If we ever need it... Below is the code to do
             // substitution of the template instantation type inside
