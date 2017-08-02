@@ -1748,6 +1748,12 @@
     </modify-function>
   </value-type>
   
+  <value-type name="QTimeZone">
+    <enum-type name="TimeType"/>
+    <enum-type name="NameType"/>
+    <value-type name="OffsetData"/>
+  </value-type>
+
   <!-- FIXME QT5: Remove QUuid because cyclic dependency found on overloaddata QUuid(), 
   this lead to cyclic dependency in <<(QDataStream &, QUUid) and incorrect QDataStream code generation (Windows only)-->
   <!-- <value-type name="QUuid">
