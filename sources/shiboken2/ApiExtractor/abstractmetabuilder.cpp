@@ -2116,7 +2116,12 @@ bool AbstractMetaBuilderPrivate::setArrayArgumentType(AbstractMetaFunction *func
                                                       const FunctionModelItem &functionItem,
                                                       int i)
 {
-
+    if (i < 0 || i >= func->arguments().size()) {
+        qCWarning(lcShiboken).noquote()
+            << msgCannotSetArrayUsage(func->minimalSignature(), i,
+                                      QLatin1String("Index out of range."));
+        return false;
+    }
     AbstractMetaType *metaType = func->arguments().at(i)->type();
     if (metaType->indirections() == 0) {
         qCWarning(lcShiboken).noquote()
