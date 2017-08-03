@@ -2116,6 +2116,7 @@ static void checkTypeViability(const AbstractMetaFunction* func, const AbstractM
     if (!type
         || !type->typeEntry()->isPrimitive()
         || type->indirections() == 0
+        || (type->indirections() == 1 && type->typeUsagePattern() == AbstractMetaType::NativePointerAsArrayPattern)
         || ShibokenGenerator::isCString(type)
         || func->argumentRemoved(argIdx)
         || !func->typeReplaced(argIdx).isEmpty()
