@@ -1576,7 +1576,7 @@
     </modify-function>
 
     <!-- TODO: Support conversions on virtual function -->
-    <modify-function signature="drawItems(QPainter*, int, QGraphicsItem**, const QStyleOptionGraphicsItem*)">
+    <modify-function signature="drawItems(QPainter*, int, QGraphicsItem*[], const QStyleOptionGraphicsItem[])">
         <modify-argument index="2">
             <remove-argument/>
             <conversion-rule class="native">
@@ -1688,7 +1688,7 @@
     <enum-type name="SceneLayer" flags="SceneLayers"/>
 
     <!-- Qt5: note: this was called 'obsolete'. Is that true? -->
-    <modify-function signature="drawItems(QPainter*,int,QGraphicsItem**,const QStyleOptionGraphicsItem*,QWidget*)" remove="all" />
+    <modify-function signature="drawItems(QPainter*,int,QGraphicsItem*[],const QStyleOptionGraphicsItem[],QWidget*)" remove="all" />
 
     <modify-function signature="createItemGroup(const QList&lt;QGraphicsItem*&gt;&amp;)">
         <modify-argument index="1">

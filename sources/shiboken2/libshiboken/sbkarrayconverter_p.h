@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of PySide2.
@@ -37,25 +37,26 @@
 **
 ****************************************************************************/
 
-#ifndef SHIBOKEN_H
-#define SHIBOKEN_H
+#ifndef SBKARRAYCONVERTER_P_H
+#define SBKARRAYCONVERTER_P_H
 
-#include "sbkpython.h"
-#include "autodecref.h"
-#include "basewrapper.h"
-#include "bindingmanager.h"
-#include "conversions.h"
-#include "gilstate.h"
-#include "threadstatesaver.h"
-#include "helper.h"
-#include "sbkarrayconverter.h"
-#include "sbkconverter.h"
-#include "sbkenum.h"
-#include "sbkmodule.h"
-#include "sbkstring.h"
-#include "shibokenmacros.h"
-#include "typeresolver.h"
-#include "shibokenbuffer.h"
+#include "sbkconverter_p.h"
+#include <vector>
 
-#endif // SHIBOKEN_H
+extern "C"
+{
 
+typedef PythonToCppFunc (*IsArrayConvertibleToCppFunc)(PyObject*, int dim1, int dim2);
+/**
+ *  \internal
+ *  Private structure of SbkArrayConverter.
+ */
+
+struct SbkArrayConverter
+{
+    std::vector<IsArrayConvertibleToCppFunc> toCppConversions;
+};
+
+} // extern "C"
+
+#endif // SBKARRAYCONVERTER_P_H

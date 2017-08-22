@@ -107,6 +107,7 @@ class StackElement
             NoNullPointers              = 0x40000000,
             ReferenceCount              = 0x80000000,
             ParentOwner                 = 0x90000000,
+            Array                       = 0xA0000000,
             ArgumentModifiers           = 0xff000000
         };
 

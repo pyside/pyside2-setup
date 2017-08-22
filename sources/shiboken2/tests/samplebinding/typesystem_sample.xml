@@ -501,10 +501,20 @@
     <function signature="gimmeInt()" />
     <function signature="gimmeDouble()" />
     <function signature="makeCString()" />
+    <function signature="sumIntArray(int[4])"/>
+    <function signature="sumDoubleArray(double[4])"/>
+    <function signature="sumIntMatrix(int[2][3])"/>
+    <function signature="sumDoubleMatrix(double[2][3])"/>
     <function signature="multiplyPair(std::pair&lt;double, double>)" />
     <function signature="returnCString()" />
     <function signature="overloadedFunc(double)" />
     <function signature="overloadedFunc(int)" />
+
+    <value-type name="ArrayModifyTest">
+        <modify-function signature="sumIntArray(int, int*)">
+            <modify-argument index="2"><array/></modify-argument>
+        </modify-function>
+    </value-type>
 
     <value-type name="ClassWithFunctionPointer">
         <suppress-warning text="skipping function 'ClassWithFunctionPointer::callFunctionPointer', unmatched parameter type 'void (*)(void*)'" />
@@ -1159,7 +1169,7 @@
         <!-- change the name of this virtual method -->
         <modify-function signature="className()" rename="name"/>
 
-        <modify-function signature="sumPointArray(int, const Point*)">
+        <modify-function signature="sumPointArray(int, const Point[])">
             <modify-argument index="1">
                 <remove-argument/>
                 <conversion-rule class="native">
@@ -1950,7 +1960,7 @@
                 <define-ownership owner="c++"/>
             </modify-argument>
         </modify-function>
-        <modify-function signature="acceptSequence(const char**)">
+        <modify-function signature="acceptSequence(const char*[])">
             <modify-argument index="1">
                 <replace-type modified-type="PySequence" />
                 <conversion-rule class="native">

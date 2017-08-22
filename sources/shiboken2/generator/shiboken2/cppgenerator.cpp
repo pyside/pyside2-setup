@@ -2116,6 +2116,7 @@ static void checkTypeViability(const AbstractMetaFunction* func, const AbstractM
     if (!type
         || !type->typeEntry()->isPrimitive()
         || type->indirections() == 0
+        || (type->indirections() == 1 && type->typeUsagePattern() == AbstractMetaType::NativePointerAsArrayPattern)
         || ShibokenGenerator::isCString(type)
         || func->argumentRemoved(argIdx)
         || !func->typeReplaced(argIdx).isEmpty()
@@ -2206,6 +2207,23 @@ const AbstractMetaType* CppGenerator::getArgumentType(const AbstractMetaFunction
     return argType;
 }
 
+static inline QString arrayHandleType(const AbstractMetaTypeCList &nestedArrayTypes)
+{
+    switch (nestedArrayTypes.size()) {
+    case 1:
+        return QStringLiteral("Shiboken::Conversions::ArrayHandle<")
+            + nestedArrayTypes.constLast()->minimalSignature()
+            + QLatin1Char('>');
+    case 2:
+        return QStringLiteral("Shiboken::Conversions::Array2Handle<")
+            + nestedArrayTypes.constLast()->minimalSignature()
+            + QStringLiteral(", ")
+            + QString::number(nestedArrayTypes.constFirst()->arrayElementCount())
+            + QLatin1Char('>');
+    }
+    return QString();
+}
+
 void CppGenerator::writePythonToCppTypeConversion(QTextStream& s,
                                                   const AbstractMetaType* type,
                                                   const QString& pyIn,
@@ -2227,7 +2245,13 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream& s,
                                      && !isCppPrimitive(type)
                                      && isNotContainerEnumOrFlags
                                      && !(treatAsPointer || isPointerOrObjectType);
-    QString typeName = getFullTypeNameWithoutModifiers(type);
+
+    const AbstractMetaTypeCList nestedArrayTypes = type->nestedArrayTypes();
+    const bool isCppPrimitiveArray = !nestedArrayTypes.isEmpty()
+        && nestedArrayTypes.constLast()->isCppPrimitive();
+    QString typeName = isCppPrimitiveArray
+        ? arrayHandleType(nestedArrayTypes)
+        : getFullTypeNameWithoutModifiers(type);
 
     bool isProtectedEnum = false;
 
@@ -2244,7 +2268,9 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream& s,
     }
 
     s << INDENT << typeName;
-    if (treatAsPointer || isPointerOrObjectType) {
+    if (isCppPrimitiveArray) {
+        s << ' ' << cppOut;
+    } else if (treatAsPointer || isPointerOrObjectType) {
         s << "* " << cppOut;
         if (!defaultValue.isEmpty())
             s << " = " << defaultValue;

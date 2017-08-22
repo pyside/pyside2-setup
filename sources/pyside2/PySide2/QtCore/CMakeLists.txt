@@ -136,6 +136,8 @@ ${QtCore_GEN_DIR}/qtime_wrapper.cpp
 ${QtCore_GEN_DIR}/qtimeline_wrapper.cpp
 ${QtCore_GEN_DIR}/qtimer_wrapper.cpp
 ${QtCore_GEN_DIR}/qtimerevent_wrapper.cpp
+${QtCore_GEN_DIR}/qtimezone_wrapper.cpp
+${QtCore_GEN_DIR}/qtimezone_offsetdata_wrapper.cpp
 ${QtCore_GEN_DIR}/qtranslator_wrapper.cpp
 ${QtCore_GEN_DIR}/qurl_wrapper.cpp
 ${QtCore_GEN_DIR}/qurlquery_wrapper.cpp

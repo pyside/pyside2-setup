@@ -515,9 +515,12 @@ bool Generator::isVoidPointer(const AbstractMetaType* type)
 
 QString Generator::getFullTypeName(const TypeEntry* type) const
 {
-    return type->isCppPrimitive()
-        ? type->qualifiedCppName()
-        : (QLatin1String("::") + type->qualifiedCppName());
+    QString result = type->qualifiedCppName();
+    if (type->isArray())
+        type = static_cast<const ArrayTypeEntry *>(type)->nestedTypeEntry();
+    if (!type->isCppPrimitive())
+        result.prepend(QLatin1String("::"));
+    return result;
 }
 
 QString Generator::getFullTypeName(const AbstractMetaType* type) const

@@ -171,6 +171,52 @@ else()
         CACHE STRING "PySide version [full]" FORCE)
 endif()
 
+string(TIMESTAMP PYSIDE_BUILD_DATE "%Y-%m-%dT%H:%M:%S+00:00" UTC)
+if (PYSIDE_BUILD_DATE)
+    set(PYSIDE_BUILD_DATE "__build_date__ = '${PYSIDE_BUILD_DATE}'")
+endif()
+
+find_package(Git)
+if(GIT_FOUND)
+    # Check if current source folder is inside a git repo, so that commit information can be
+    # queried.
+    execute_process(
+      COMMAND ${GIT_EXECUTABLE} rev-parse --git-dir
+      OUTPUT_VARIABLE PYSIDE_SOURCE_IS_INSIDE_REPO
+      ERROR_QUIET
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    if(PYSIDE_SOURCE_IS_INSIDE_REPO)
+        # Force git dates to be UTC-based.
+        set(ENV{TZ} UTC)
+        execute_process(
+          COMMAND ${GIT_EXECUTABLE} --no-pager show --date=format-local:%Y-%m-%dT%H:%M:%S+00:00 -s --format=%cd HEAD
+          OUTPUT_VARIABLE PYSIDE_BUILD_COMMIT_DATE
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if(PYSIDE_BUILD_COMMIT_DATE)
+            set(PYSIDE_BUILD_COMMIT_DATE "__build_commit_date__ = '${PYSIDE_BUILD_COMMIT_DATE}'")
+        endif()
+        unset(ENV{TZ})
+
+        execute_process(
+          COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
+          OUTPUT_VARIABLE PYSIDE_BUILD_COMMIT_HASH
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if(PYSIDE_BUILD_COMMIT_HASH)
+            set(PYSIDE_BUILD_COMMIT_HASH "__build_commit_hash__ = '${PYSIDE_BUILD_COMMIT_HASH}'")
+        endif()
+
+        execute_process(
+          COMMAND ${GIT_EXECUTABLE} describe HEAD
+          OUTPUT_VARIABLE PYSIDE_BUILD_COMMIT_HASH_DESCRIBED
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if(PYSIDE_BUILD_COMMIT_HASH_DESCRIBED)
+            set(PYSIDE_BUILD_COMMIT_HASH_DESCRIBED "__build_commit_hash_described__ = '${PYSIDE_BUILD_COMMIT_HASH_DESCRIBED}'")
+        endif()
+
+    endif()
+endif()
+
 include(PySideModules)
 
 macro(COLLECT_MODULE_IF_FOUND shortname)

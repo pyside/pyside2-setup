@@ -176,6 +176,7 @@ Handler::Handler(TypeDatabase* database, bool generate)
     tagNames.insert(QLatin1String("no-null-pointer"), StackElement::NoNullPointers);
     tagNames.insert(QLatin1String("reference-count"), StackElement::ReferenceCount);
     tagNames.insert(QLatin1String("parent"), StackElement::ParentOwner);
+    tagNames.insert(QLatin1String("array"), StackElement::Array);
     tagNames.insert(QLatin1String("inject-documentation"), StackElement::InjectDocumentation);
     tagNames.insert(QLatin1String("modify-documentation"), StackElement::ModifyDocumentation);
     tagNames.insert(QLatin1String("add-function"), StackElement::AddFunction);
@@ -1283,6 +1284,9 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
         case StackElement::ParentOwner:
             attributes.insert(QLatin1String("index"), QString());
             attributes.insert(QLatin1String("action"), QString());
+            break;
+        case StackElement::Array:
+            break;
         default:
             { };
         };
@@ -1875,8 +1879,13 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             m_contextStack.top()->functionMods.last().argument_mods.last().owner = ao;
         }
         break;
-
-
+        case StackElement::Array:
+            if (topElement.type != StackElement::ModifyArgument) {
+                m_error = QLatin1String("array must be child of modify-argument");
+                return false;
+            }
+            m_contextStack.top()->functionMods.last().argument_mods.last().array = true;
+            break;
         case StackElement::InjectCode: {
             if (!(topElement.type & StackElement::ComplexTypeEntryMask)
                 && (topElement.type != StackElement::AddFunction)

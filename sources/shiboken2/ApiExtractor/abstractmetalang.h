@@ -326,6 +326,7 @@ public:
         QObjectPattern,
         ValuePointerPattern,
         NativePointerPattern,
+        NativePointerAsArrayPattern, // "int*" as "int[]"
         ContainerPattern,
         SmartPointerPattern,
         VariantPattern,
@@ -398,6 +399,8 @@ public:
     {
         return m_pattern == PrimitivePattern;
     }
+
+    bool isCppPrimitive() const;
 
     // returns true if the type is used as an enum
     bool isEnum() const
@@ -557,6 +560,8 @@ public:
     {
         m_arrayElementType = t;
     }
+
+    AbstractMetaTypeCList nestedArrayTypes() const;
 
     QString cppSignature() const;
 

@@ -571,4 +571,14 @@ struct Primitive<void*> : OnePrimitive<void*>
     }
 };
 
+namespace Shiboken {
+namespace Conversions {
+SbkConverter *createConverterObject(PyTypeObject *type,
+                                    PythonToCppFunc toCppPointerConvFunc,
+                                    IsConvertibleToCppFunc toCppPointerCheckFunc,
+                                    CppToPythonFunc pointerToPythonFunc,
+                                    CppToPythonFunc copyToPythonFunc);
+} // namespace Conversions
+} // namespace Shiboken
+
 #endif // SBK_CONVERTER_P_H

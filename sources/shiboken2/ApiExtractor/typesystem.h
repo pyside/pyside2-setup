@@ -211,16 +211,17 @@ public:
 struct ArgumentModification
 {
     ArgumentModification() : removedDefaultExpression(false), removed(false),
-        noNullPointers(false), index(-1), version(0) {}
+        noNullPointers(false), array(false), index(-1), version(0) {}
     ArgumentModification(int idx, double vr)
             : removedDefaultExpression(false), removed(false),
-              noNullPointers(false), index(idx), version(vr) {}
+              noNullPointers(false), array(false), index(idx), version(vr) {}
 
     // Should the default expression be removed?
     uint removedDefaultExpression : 1;
     uint removed : 1;
     uint noNullPointers : 1;
     uint resetAfterUse : 1;
+    uint array : 1; // consider "int*" to be "int[]"
 
     // The index of this argument
     int index;

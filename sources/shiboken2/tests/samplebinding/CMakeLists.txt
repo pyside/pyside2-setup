@@ -7,6 +7,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_sample.xml
 set(sample_SRC
 ${CMAKE_CURRENT_BINARY_DIR}/sample/abstractmodifications_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/abstract_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/arraymodifytest_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/base1_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/base2_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/base3_wrapper.cpp

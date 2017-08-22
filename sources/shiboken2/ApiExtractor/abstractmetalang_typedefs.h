@@ -46,5 +46,6 @@ typedef QVector<AbstractMetaEnumValue *> AbstractMetaEnumValueList;
 typedef QVector<AbstractMetaField *> AbstractMetaFieldList;
 typedef QVector<AbstractMetaFunction *> AbstractMetaFunctionList;
 typedef QVector<AbstractMetaType *> AbstractMetaTypeList;
+typedef QVector<const AbstractMetaType *> AbstractMetaTypeCList;
 
 #endif // ABSTRACTMETALANG_TYPEDEFS_H

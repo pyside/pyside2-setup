@@ -1990,7 +1990,8 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
     }
 
     metaFunction->setOriginalAttributes(metaFunction->attributes());
-    fixArgumentNames(metaFunction);
+    if (!metaArguments.isEmpty())
+        fixArgumentNames(metaFunction, metaFunction->modifications(m_currentClass));
 
     if (metaClass) {
         const AbstractMetaArgumentList fargs = metaFunction->arguments();
@@ -2018,11 +2019,8 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
     return metaFunction;
 }
 
-void AbstractMetaBuilderPrivate::fixArgumentNames(AbstractMetaFunction *func)
+void AbstractMetaBuilderPrivate::fixArgumentNames(AbstractMetaFunction *func, const FunctionModificationList &mods)
 {
-    if (func->arguments().isEmpty())
-        return;
-    const FunctionModificationList &mods = func->modifications(m_currentClass);
     for (const FunctionModification &mod : mods) {
         for (const ArgumentModification &argMod : mod.argument_mods) {
             if (!argMod.renamed_to.isEmpty()) {
@@ -2106,6 +2104,44 @@ static inline AbstractMetaFunction::FunctionType functionTypeFromCodeModel(CodeM
         break;
     }
     return result;
+}
+
+static inline QString msgCannotSetArrayUsage(const QString &function, int i, const QString &reason)
+{
+    return function +  QLatin1String(": Cannot use parameter ") + QString::number(i + 1)
+        + QLatin1String(" as an array: ") + reason;
+}
+
+bool AbstractMetaBuilderPrivate::setArrayArgumentType(AbstractMetaFunction *func,
+                                                      const FunctionModelItem &functionItem,
+                                                      int i)
+{
+    if (i < 0 || i >= func->arguments().size()) {
+        qCWarning(lcShiboken).noquote()
+            << msgCannotSetArrayUsage(func->minimalSignature(), i,
+                                      QLatin1String("Index out of range."));
+        return false;
+    }
+    AbstractMetaType *metaType = func->arguments().at(i)->type();
+    if (metaType->indirections() == 0) {
+        qCWarning(lcShiboken).noquote()
+            << msgCannotSetArrayUsage(func->minimalSignature(), i,
+                                      QLatin1String("Type does not have indirections."));
+        return false;
+    }
+    TypeInfo elementType = functionItem->arguments().at(i)->type();
+    elementType.setIndirections(elementType.indirections() - 1);
+    bool ok;
+    AbstractMetaType *element = translateType(elementType, &ok);
+    if (element == nullptr || !ok) {
+        qCWarning(lcShiboken).noquote()
+           << msgCannotSetArrayUsage(func->minimalSignature(), i,
+                                     QLatin1String("Cannot translate element type ") + elementType.toString());
+        return false;
+    }
+    metaType->setArrayElementType(element);
+    metaType->setTypeUsagePattern(AbstractMetaType::NativePointerAsArrayPattern);
+    return true;
 }
 
 AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModelItem functionItem)
@@ -2322,7 +2358,16 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
 
     }
 
-    fixArgumentNames(metaFunction);
+    if (!metaArguments.isEmpty()) {
+        const FunctionModificationList &mods = metaFunction->modifications(m_currentClass);
+        fixArgumentNames(metaFunction, mods);
+        for (const FunctionModification &mod : mods) {
+            for (const ArgumentModification &argMod : mod.argument_mods) {
+                if (argMod.array)
+                    setArrayArgumentType(metaFunction, functionItem, argMod.index - 1);
+            }
+        }
+    }
 
     // Determine class special functions
     if (m_currentClass && metaFunction->arguments().size() == 1) {
@@ -2474,45 +2519,36 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
         return 0;
     }
 
-    // 2. Handle pointers specified as arrays with unspecified size
-    bool arrayOfUnspecifiedSize = false;
     if (typeInfo.arrays.size() > 0) {
-        arrayOfUnspecifiedSize = true;
-        for (int i = 0; i < typeInfo.arrays.size(); ++i)
-            arrayOfUnspecifiedSize = arrayOfUnspecifiedSize && typeInfo.arrays.at(i).isEmpty();
+        TypeInfo newInfo;
+        //newInfo.setArguments(typei.arguments());
+        newInfo.setIndirections(typei.indirections());
+        newInfo.setConstant(typei.isConstant());
+        newInfo.setFunctionPointer(typei.isFunctionPointer());
+        newInfo.setQualifiedName(typei.qualifiedName());
+        newInfo.setReferenceType(typei.referenceType());
+        newInfo.setVolatile(typei.isVolatile());
 
-        if (!arrayOfUnspecifiedSize) {
-            TypeInfo newInfo;
-            //newInfo.setArguments(typei.arguments());
-            newInfo.setIndirections(typei.indirections());
-            newInfo.setConstant(typei.isConstant());
-            newInfo.setFunctionPointer(typei.isFunctionPointer());
-            newInfo.setQualifiedName(typei.qualifiedName());
-            newInfo.setReferenceType(typei.referenceType());
-            newInfo.setVolatile(typei.isVolatile());
+        AbstractMetaType* elementType = translateType(newInfo, ok);
+        if (!(*ok))
+            return 0;
 
-            AbstractMetaType* elementType = translateType(newInfo, ok);
-            if (!(*ok))
-                return 0;
-
-            for (int i = typeInfo.arrays.size() - 1; i >= 0; --i) {
-                QString s = typeInfo.arrays.at(i);
+        for (int i = typeInfo.arrays.size() - 1; i >= 0; --i) {
+            AbstractMetaType *arrayType = q->createMetaType();
+            arrayType->setArrayElementType(elementType);
+            if (!typeInfo.arrays.at(i).isEmpty()) {
                 bool _ok;
-                int elems = findOutValueFromString(s, _ok);
-
-                AbstractMetaType *arrayType = q->createMetaType();
-                arrayType->setArrayElementCount(elems);
-                arrayType->setArrayElementType(elementType);
-                arrayType->setTypeEntry(new ArrayTypeEntry(elementType->typeEntry() , elementType->typeEntry()->version()));
-                decideUsagePattern(arrayType);
-
-                elementType = arrayType;
+                const int elems = findOutValueFromString(typeInfo.arrays.at(i), _ok);
+                if (_ok)
+                    arrayType->setArrayElementCount(elems);
             }
+            arrayType->setTypeEntry(new ArrayTypeEntry(elementType->typeEntry() , elementType->typeEntry()->version()));
+            decideUsagePattern(arrayType);
 
-            return elementType;
-        }  else {
-            typeInfo.indirections += typeInfo.arrays.size();
+            elementType = arrayType;
         }
+
+        return elementType;
     }
 
     QStringList qualifierList = typeInfo.qualified_name;
