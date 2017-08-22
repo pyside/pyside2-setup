@@ -1823,6 +1823,7 @@
 
   <value-type name="QLocale">
     <enum-type name="Country" />
+    <enum-type name="DataSizeFormat" flags="DataSizeFormats" since="5.10"/>
     <enum-type name="FloatingPointPrecisionOption" since="5.7"/>
     <enum-type name="FormatType"/>
     <enum-type name="Language" />
@@ -2837,6 +2838,7 @@
   </object-type>
   <object-type name="QFileDevice" since="5.0">
     <enum-type name="FileError"/>
+    <enum-type name="FileTime" since="5.10"/>
     <enum-type name="MemoryMapFlags"/>
     <enum-type name="Permission" flags="Permissions"/>
     <enum-type name="FileHandleFlag" flags="FileHandleFlags"/>
