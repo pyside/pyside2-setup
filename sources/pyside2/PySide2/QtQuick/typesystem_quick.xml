@@ -45,7 +45,6 @@
     <load-typesystem name="typesystem_gui.xml" generate="no"/>
     <load-typesystem name="typesystem_qml.xml" generate="no"/>
 
-    <primitive-type name="GLuint"/>
     <smart-pointer-type name="QSharedPointer" type="shared" getter="data" />
 
     <extra-includes>
