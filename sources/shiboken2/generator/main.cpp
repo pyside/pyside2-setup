@@ -539,6 +539,10 @@ int main(int argc, char *argv[])
 
     QString cppFileName = argsHandler.removeArg(QLatin1String("arg-1"));
     QString typeSystemFileName = argsHandler.removeArg(QLatin1String("arg-2"));
+    QString messagePrefix = QFileInfo(typeSystemFileName).baseName();
+    if (messagePrefix.startsWith(QLatin1String("typesystem_")))
+        messagePrefix.remove(0, 11);
+    ReportHandler::setPrefix(QLatin1Char('(') + messagePrefix + QLatin1Char(')'));
 
     /* Make sure to remove the project file's arguments (if any) and
      * --project-file, also the arguments of each generator before

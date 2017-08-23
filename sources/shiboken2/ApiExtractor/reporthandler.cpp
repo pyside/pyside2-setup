@@ -52,6 +52,7 @@ static int m_suppressedCount = 0;
 static ReportHandler::DebugLevel m_debugLevel = ReportHandler::NoDebug;
 static QSet<QString> m_reportedWarnings;
 static QString m_progressBuffer;
+static QString m_prefix;
 static int m_step_size = 0;
 static int m_step = -1;
 static int m_step_warning = 0;
@@ -106,6 +107,11 @@ void ReportHandler::setSilent(bool silent)
     m_silent = silent;
 }
 
+void ReportHandler::setPrefix(const QString &p)
+{
+    m_prefix = p;
+}
+
 void ReportHandler::messageOutput(QtMsgType type, const QMessageLogContext &context, const QString &text)
 {
     if (type == QtWarningMsg) {
@@ -120,7 +126,11 @@ void ReportHandler::messageOutput(QtMsgType type, const QMessageLogContext &cont
         ++m_step_warning;
         m_reportedWarnings.insert(text);
     }
-    fprintf(stderr, "%s\n", qPrintable(qFormatLogMessage(type, context, text)));
+    QString message = m_prefix;
+    if (!message.isEmpty())
+        message.append(QLatin1Char(' '));
+    message.append(text);
+    fprintf(stderr, "%s\n", qPrintable(qFormatLogMessage(type, context, message)));
 }
 
 void ReportHandler::progress(const QString& str, ...)
