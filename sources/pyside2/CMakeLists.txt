@@ -97,19 +97,34 @@ option(ENABLE_VERSION_SUFFIX "Used to use current version in suffix to generated
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
 set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
 if(CMAKE_HOST_APPLE)
-    set(ALTERNATIVE_QT_INCLUDE_DIR "" CACHE PATH "The Alternative value to QT_INCLUDE_DIR. Necessary to fix bug on cmake 2.8 MACOS users")
+    set(ALTERNATIVE_QT_INCLUDE_DIR "" CACHE PATH "Deprecated. CMake now finds the proper include dir itself.")
     set(OSX_USE_LIBCPP "OFF" CACHE BOOL "Explicitly link the libc++ standard library (useful for osx deployment targets lower than 10.9.")
     if(OSX_USE_LIBCPP)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
     endif()
 endif()
 
-if(NOT CMAKE_HOST_APPLE)
-    # Qt5: QT_INCLUDE_DIR does no longer exist.
-    # On Windows and Linux, it can be computed from Qt5Core_INCLUDE_DIRS
-    message("Qt5Core_INCLUDE_DIRS ${Qt5Core_INCLUDE_DIRS}")
-    list(GET Qt5Core_INCLUDE_DIRS 0 QT_INCLUDE_DIR)
-    message(STATUS "*** computed QT_INCLUDE_DIR as ${QT_INCLUDE_DIR}")
+# Qt5: QT_INCLUDE_DIR does no longer exist.
+# On Windows, macOS, and Linux it can be computed from Qt5Core_INCLUDE_DIRS, which contains
+# a list of include directories. We take the first one.
+message(STATUS "*** Qt5Core_INCLUDE_DIRS = ${Qt5Core_INCLUDE_DIRS}")
+list(GET Qt5Core_INCLUDE_DIRS 0 QT_INCLUDE_DIR)
+
+# On macOS, check if Qt is a framework build. This affects how include paths should be handled.
+get_target_property(QtCore_is_framework Qt5::Core FRAMEWORK)
+
+if (QtCore_is_framework)
+    # Get the path to the framework dir.
+    get_filename_component(QT_FRAMEWORK_INCLUDE_DIR "${QT_INCLUDE_DIR}/../" ABSOLUTE)
+    message(STATUS "*** QT_FRAMEWORK_INCLUDE_DIR is ${QT_FRAMEWORK_INCLUDE_DIR}")
+
+    # QT_INCLUDE_DIR points to the QtCore.framework directory, so we need to adjust this to point
+    # to the actual include directory, which has include files for non-framework parts of Qt.
+    get_filename_component(QT_INCLUDE_DIR "${QT_INCLUDE_DIR}/../../include" ABSOLUTE)
+
+    # And then we append the framework dir, to mimic the way setup.py passed that in before to
+    # the old shiboken parser.
+    set(QT_INCLUDE_DIR "${QT_INCLUDE_DIR}:${QT_FRAMEWORK_INCLUDE_DIR}")
 endif()
 
 if(MSVC)
@@ -130,15 +145,15 @@ else()
     endif()
 
     if(CMAKE_HOST_APPLE)
-        if (NOT QT_INCLUDE_DIR)
-            set(QT_INCLUDE_DIR "/Library/Frameworks")
-        endif()
-        if(ALTERNATIVE_QT_INCLUDE_DIR)
+        # ALTERNATIVE_QT_INCLUDE_DIR is deprecated, because CMake takes care of finding the proper
+        # include folders using the qmake found in the environment. Only use it for now in case
+        # something goes wrong with the cmake process.
+        if(ALTERNATIVE_QT_INCLUDE_DIR AND NOT QT_INCLUDE_DIR)
             set(QT_INCLUDE_DIR ${ALTERNATIVE_QT_INCLUDE_DIR})
         endif()
-        string(REPLACE " " ":" QT_INCLUDE_DIR ${QT_INCLUDE_DIR})
     endif()
 endif()
+message(STATUS "*** computed QT_INCLUDE_DIR as ${QT_INCLUDE_DIR}")
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE ${SHIBOKEN_BUILD_TYPE})
