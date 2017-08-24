@@ -369,19 +369,19 @@ add_custom_target(dist
             echo "Source package created at ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2.\n"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
-if (NOT SITE_PACKAGE)
+if (NOT PYTHON_SITE_PACKAGES)
     execute_process(
         COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} -c "if True:
             from distutils import sysconfig
             from os.path import sep
             print(sysconfig.get_python_lib(1, 0, prefix='${CMAKE_INSTALL_PREFIX}').replace(sep, '/'))
             "
-        OUTPUT_VARIABLE SITE_PACKAGE
+        OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
         OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if (NOT SITE_PACKAGE)
+    if (NOT PYTHON_SITE_PACKAGES)
         message(FATAL_ERROR "Could not detect Python module installation directory.")
     elseif (APPLE)
-        message(STATUS "!!! The generated bindings will be installed on ${SITE_PACKAGE}, is it right!?")
+        message(STATUS "!!! The generated bindings will be installed on ${PYTHON_SITE_PACKAGES}, is it right!?")
     endif()
 endif()
 

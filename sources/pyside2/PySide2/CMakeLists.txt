@@ -23,9 +23,9 @@ endforeach()
 
 # install
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/__init__.py"
-        DESTINATION "${SITE_PACKAGE}/${BINDING_NAME}${pyside2_SUFFIX}")
+        DESTINATION "${PYTHON_SITE_PACKAGES}/${BINDING_NAME}${pyside2_SUFFIX}")
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/_utils.py
-        DESTINATION "${SITE_PACKAGE}/${BINDING_NAME}${pyside2_SUFFIX}")
+        DESTINATION "${PYTHON_SITE_PACKAGES}/${BINDING_NAME}${pyside2_SUFFIX}")
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_templates.xml
         DESTINATION share/PySide2${pyside_SUFFIX}/typesystems)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pyside2_global.h

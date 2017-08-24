@@ -108,7 +108,7 @@ macro(create_pyside_module
     endif()
 
     # install
-    install(TARGETS ${module_name} LIBRARY DESTINATION ${SITE_PACKAGE}/PySide2)
+    install(TARGETS ${module_name} LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}/PySide2)
     string(TOLOWER ${module_name} lower_module_name)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PySide2/${module_name}/pyside2_${lower_module_name}_python.h
             DESTINATION include/PySide2${pyside2_SUFFIX}/${module_name}/)
