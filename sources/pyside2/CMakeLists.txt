@@ -104,6 +104,11 @@ if(CMAKE_HOST_APPLE)
     endif()
 endif()
 
+# Force usage of the C++11 standard, without a silent fallback
+# to C++98 if the compiler does not support C++11.
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Qt5: QT_INCLUDE_DIR does no longer exist.
 # On Windows, macOS, and Linux it can be computed from Qt5Core_INCLUDE_DIRS, which contains
 # a list of include directories. We take the first one.
