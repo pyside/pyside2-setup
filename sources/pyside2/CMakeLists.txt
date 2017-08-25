@@ -97,7 +97,7 @@ option(ENABLE_VERSION_SUFFIX "Used to use current version in suffix to generated
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
 set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
 if(CMAKE_HOST_APPLE)
-    set(ALTERNATIVE_QT_INCLUDE_DIR "" CACHE PATH "The Alternative value to QT_INCLUDE_DIR. Necessary to fix bug on cmake 2.8 MACOS users")
+    set(ALTERNATIVE_QT_INCLUDE_DIR "" CACHE PATH "Deprecated. CMake now finds the proper include dir itself.")
     set(OSX_USE_LIBCPP "OFF" CACHE BOOL "Explicitly link the libc++ standard library (useful for osx deployment targets lower than 10.9.")
     if(OSX_USE_LIBCPP)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
@@ -119,11 +119,12 @@ list(GET Qt5Core_INCLUDE_DIRS 0 QT_INCLUDE_DIR)
 get_target_property(QtCore_is_framework Qt5::Core FRAMEWORK)
 
 if (QtCore_is_framework)
+    # Get the path to the framework dir.
     get_filename_component(QT_FRAMEWORK_INCLUDE_DIR "${QT_INCLUDE_DIR}/../" ABSOLUTE)
     message(STATUS "*** QT_FRAMEWORK_INCLUDE_DIR is ${QT_FRAMEWORK_INCLUDE_DIR}")
 
-    # QT_INCLUDE_DIR points to the QtCore.framework directory, so need to adjust this to point
-    # to the actual include directory.
+    # QT_INCLUDE_DIR points to the QtCore.framework directory, so we need to adjust this to point
+    # to the actual include directory, which has include files for non-framework parts of Qt.
     get_filename_component(QT_INCLUDE_DIR "${QT_INCLUDE_DIR}/../../include" ABSOLUTE)
 endif()
 
@@ -145,17 +146,15 @@ else()
     endif()
 
     if(CMAKE_HOST_APPLE)
-        if (NOT QT_INCLUDE_DIR)
-            set(QT_INCLUDE_DIR "/Library/Frameworks")
-        endif()
-        if(NOT QT_INCLUDE_DIR AND ALTERNATIVE_QT_INCLUDE_DIR)
+        # ALTERNATIVE_QT_INCLUDE_DIR is deprecated, because CMake takes care of finding the proper
+        # include folders using the qmake found in the environment. Only use it for now in case
+        # something goes wrong with the cmake process.
+        if(ALTERNATIVE_QT_INCLUDE_DIR AND NOT QT_INCLUDE_DIR)
             set(QT_INCLUDE_DIR ${ALTERNATIVE_QT_INCLUDE_DIR})
         endif()
-        string(REPLACE " " ":" QT_INCLUDE_DIR ${QT_INCLUDE_DIR})
     endif()
 endif()
 message(STATUS "*** computed QT_INCLUDE_DIR as ${QT_INCLUDE_DIR}")
-
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE ${SHIBOKEN_BUILD_TYPE})
@@ -291,7 +290,8 @@ ENDIF()
 COLLECT_MODULE_IF_FOUND(TextToSpeech opt)
 COLLECT_MODULE_IF_FOUND(Charts opt)
 COLLECT_MODULE_IF_FOUND(Svg opt)
-if(Qt5Designer_FOUND)
+find_package(Qt5UiTools)
+if(Qt5UiTools_FOUND)
     COLLECT_MODULE_IF_FOUND(UiTools opt)
 else()
     set(DISABLE_QtUiTools 1)
@@ -373,19 +373,19 @@ add_custom_target(dist
             echo "Source package created at ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2.\n"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
-if (NOT SITE_PACKAGE)
+if (NOT PYTHON_SITE_PACKAGES)
     execute_process(
         COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} -c "if True:
             from distutils import sysconfig
             from os.path import sep
             print(sysconfig.get_python_lib(1, 0, prefix='${CMAKE_INSTALL_PREFIX}').replace(sep, '/'))
             "
-        OUTPUT_VARIABLE SITE_PACKAGE
+        OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
         OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if (NOT SITE_PACKAGE)
+    if (NOT PYTHON_SITE_PACKAGES)
         message(FATAL_ERROR "Could not detect Python module installation directory.")
     elseif (APPLE)
-        message(STATUS "!!! The generated bindings will be installed on ${SITE_PACKAGE}, is it right!?")
+        message(STATUS "!!! The generated bindings will be installed on ${PYTHON_SITE_PACKAGES}, is it right!?")
     endif()
 endif()
 
@@ -406,7 +406,6 @@ else()
 endif()
 
 add_subdirectory(libpyside)
-find_package(Qt5UiTools)
 find_package(Qt5Designer)
 if(Qt5UiTools_FOUND AND Qt5Designer_FOUND)
     add_subdirectory(plugins)

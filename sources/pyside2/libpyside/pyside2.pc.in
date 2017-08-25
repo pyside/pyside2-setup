@@ -3,7 +3,7 @@ exec_prefix=@CMAKE_INSTALL_PREFIX@
 libdir=@LIB_INSTALL_DIR@
 includedir=@CMAKE_INSTALL_PREFIX@/include/PySide2@pyside2_SUFFIX@
 typesystemdir=@CMAKE_INSTALL_PREFIX@/share/PySide2@pyside2_SUFFIX@/typesystems
-pythonpath=@SITE_PACKAGE@
+pythonpath=@PYTHON_SITE_PACKAGES@
 
 Name: PySide2@pyside2_SUFFIX@
 Description: Support library for Python bindings of Qt5-based libraries.
