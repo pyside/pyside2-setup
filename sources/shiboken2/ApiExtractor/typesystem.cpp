@@ -33,6 +33,7 @@
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QRegularExpression>
+#include <QtCore/QSet>
 #include <QtCore/QXmlStreamAttributes>
 #include <QtCore/QXmlStreamReader>
 
@@ -2568,9 +2569,19 @@ QString ContainerTypeEntry::typeName() const
     }
 }
 
-static bool strLess(const char* a, const char* b)
+static const QSet<QString> &primitiveCppTypes()
 {
-    return ::strcmp(a, b) < 0;
+    static QSet<QString> result;
+    if (result.isEmpty()) {
+        static const char *cppTypes[] = {
+            "bool", "char", "double", "float", "int",
+            "long", "long long", "short",
+            "wchar_t"
+        };
+        for (const char *cppType : cppTypes)
+            result.insert(QLatin1String(cppType));
+    }
+    return result;
 }
 
 bool TypeEntry::isCppPrimitive() const
@@ -2578,19 +2589,13 @@ bool TypeEntry::isCppPrimitive() const
     if (!isPrimitive())
         return false;
 
+    if (m_type == VoidType)
+        return true;
+
     const PrimitiveTypeEntry *referencedType =
         static_cast<const PrimitiveTypeEntry *>(this)->basicReferencedTypeEntry();
-    QByteArray typeName = (referencedType ? referencedType->name() : m_name).toUtf8();
-
-    if (typeName.contains(' ') || m_type == VoidType)
-        return true;
-    // Keep this sorted!!
-    static const char* cppTypes[] = { "bool", "char", "double", "float", "int", "long", "long long", "short", "wchar_t" };
-    const int N = sizeof(cppTypes)/sizeof(char*);
-
-    const char** res = qBinaryFind(&cppTypes[0], &cppTypes[N], typeName.constData(), strLess);
-
-    return res != &cppTypes[N];
+    const QString &typeName = referencedType ? referencedType->name() : m_name;
+    return typeName.contains(QLatin1Char(' ')) || primitiveCppTypes().contains(typeName);
 }
 
 // Again, stuff to avoid ABI breakage.
