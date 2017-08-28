@@ -820,7 +820,6 @@ class pyside_build(_build):
         cmake_cmd = [
             OPTION_CMAKE,
             "-G", self.make_generator,
-            "-DQT_QMAKE_EXECUTABLE='%s'" % self.qtinfo.qmake_command,
             "-DBUILD_TESTS=%s" % self.build_tests,
             "-DQt5Help_DIR=%s" % self.qtinfo.docs_dir,
             "-DCMAKE_BUILD_TYPE=%s" % self.build_type,
@@ -842,18 +841,6 @@ class pyside_build(_build):
                 cmake_cmd.append("-DUSE_PYTHON_VERSION=3.3")
 
         if sys.platform == 'darwin':
-            # Shiboken supports specifying multiple include paths separated by a colon on *nix
-            # systems.
-            # In a framework build, two paths should be included:
-            # path_to_qt/lib -> which contains framework folders with headers, and
-            # path_to_qt/include -> which contains headers for static libraries.
-            # A non-framework build contains all headers in the path_to_qt/include folder.
-            path_separator = ":"
-            includes_dir = '-DALTERNATIVE_QT_INCLUDE_DIR=' + self.qtinfo.headers_dir
-            if os.path.isdir(self.qtinfo.headers_dir + "/../lib/QtCore.framework"):
-                includes_dir += path_separator + self.qtinfo.headers_dir + "/../lib/"
-            cmake_cmd.append(includes_dir)
-
             if OPTION_OSXARCH:
                 # also tell cmake which architecture to use
                 cmake_cmd.append("-DCMAKE_OSX_ARCHITECTURES:STRING={}".format(OPTION_OSXARCH))

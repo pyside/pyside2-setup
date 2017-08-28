@@ -2519,7 +2519,28 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
         return 0;
     }
 
-    if (typeInfo.arrays.size() > 0) {
+    // 2. Handle arrays.
+    // 2.1 Handle char arrays with unspecified size (aka "const char[]") as "const char*" with
+    // NativePointerPattern usage.
+    bool oneDimensionalArrayOfUnspecifiedSize =
+            typeInfo.arrays.size() == 1
+            && typeInfo.arrays[0].isEmpty();
+
+    bool isConstCharStarCase =
+            oneDimensionalArrayOfUnspecifiedSize
+            && typeInfo.qualified_name.size() == 1
+            && typeInfo.qualified_name[0] == QStringLiteral("char")
+            && typeInfo.indirections == 0
+            && typeInfo.is_constant == 1
+            && typeInfo.is_busted == 0
+            && typeInfo.referenceType == NoReference
+            && typeInfo.template_instantiations.size() == 0;
+
+    if (isConstCharStarCase)
+        typeInfo.indirections += typeInfo.arrays.size();
+
+    // 2.2 Handle regular arrays.
+    if (typeInfo.arrays.size() > 0 && !isConstCharStarCase) {
         TypeInfo newInfo;
         //newInfo.setArguments(typei.arguments());
         newInfo.setIndirections(typei.indirections());

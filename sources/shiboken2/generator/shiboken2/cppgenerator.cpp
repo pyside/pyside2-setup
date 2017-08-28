@@ -2123,14 +2123,19 @@ static void checkTypeViability(const AbstractMetaFunction* func, const AbstractM
         || !func->conversionRule(TypeSystem::All, argIdx).isEmpty()
         || func->hasInjectedCode())
         return;
-    QString prefix;
+    QString message;
+    QTextStream str(&message);
+    str << "There's no user provided way (conversion rule, argument"
+           " removal, custom code, etc) to handle the primitive ";
+    if (argIdx == 0)
+        str << "return type '" << type->cppSignature() << '\'';
+    else
+        str << "type '" << type->cppSignature() << "' of argument " << argIdx;
+    str << " in function '";
     if (func->ownerClass())
-        prefix = func->ownerClass()->qualifiedCppName() + QLatin1String("::");
-    qCWarning(lcShiboken).noquote().nospace()
-        << QString::fromLatin1("There's no user provided way (conversion rule, argument removal, custom code, etc) "
-                               "to handle the primitive %1 type '%2' in function '%3%4'.")
-                               .arg(argIdx == 0 ? QStringLiteral("return") : QStringLiteral("argument"),
-                               type->cppSignature(), prefix, func->signature());
+        str << func->ownerClass()->qualifiedCppName() << "::";
+    str << func->signature() << "'.";
+    qCWarning(lcShiboken).noquote().nospace() << message;
 }
 
 static void checkTypeViability(const AbstractMetaFunction* func)

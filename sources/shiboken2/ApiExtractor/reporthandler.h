@@ -64,6 +64,8 @@ public:
     static bool isSilent();
     static void setSilent(bool silent);
 
+    static void setPrefix(const QString &p);
+
 private:
     static void messageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 };

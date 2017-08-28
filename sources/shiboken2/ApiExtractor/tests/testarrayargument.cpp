@@ -71,8 +71,11 @@ void TestArrayArgument::testArraySignature()
         void mi1(int arg[5]);\n\
         void mi1c(const int arg[5]);\n\
         void mi1cu(const int arg[]);\n\
+        void mc1cu(const char arg[]);\n\
+        void mc1cup(const char *arg[]);\n\
         void muc2(unsigned char *arg[2][3]);\n\
         void mc2c(const char *arg[5][6]);\n\
+        void mc2cu(const char arg[][2]);\n\
     };\n";
     const char xmlCode[] = "\
     <typesystem package='Foo'>\n\
@@ -91,10 +94,16 @@ void TestArrayArgument::testArraySignature()
              QLatin1String("mi1c(const int[5])"));
     QCOMPARE(functionMinimalSignature(classA, QLatin1String("mi1cu")),
              QLatin1String("mi1cu(const int[])"));
+    QCOMPARE(functionMinimalSignature(classA, QLatin1String("mc1cu")),
+             QLatin1String("mc1cu(const char*)"));
+    QCOMPARE(functionMinimalSignature(classA, QLatin1String("mc1cup")),
+             QLatin1String("mc1cup(const char*[])"));
     QCOMPARE(functionMinimalSignature(classA, QLatin1String("muc2")),
              QLatin1String("muc2(unsigned char*[2][3])"));
     QCOMPARE(functionMinimalSignature(classA, QLatin1String("mc2c")),
              QLatin1String("mc2c(const char*[5][6])"));
+    QCOMPARE(functionMinimalSignature(classA, QLatin1String("mc2cu")),
+             QLatin1String("mc2cu(const char[][2])"));
 }
 
 void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()

@@ -113,7 +113,7 @@ macro(create_pyside_module
     endif()
 
     # install
-    install(TARGETS ${module_name} LIBRARY DESTINATION ${SITE_PACKAGE}/PySide2)
+    install(TARGETS ${module_name} LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}/PySide2)
     string(TOLOWER ${module_name} lower_module_name)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PySide2/${module_name}/pyside2_${lower_module_name}_python.h
             DESTINATION include/PySide2${pyside2_SUFFIX}/${module_name}/)
@@ -160,10 +160,17 @@ macro(check_qt_class module class optional_source_files dropped_entries)
              "${NAMESPACE_USE}\n"
              "int main() { sizeof(${class}); }\n"
         )
+
+        # Force usage of the C++11 standard. CMAKE_CXX_STANDARD does not work with try_compile
+        # but the issue has a fix in CMake 3.9. Thus we use a terrible workaround, we pass the C++
+        # standard flag the way CheckCXXSourceCompiles.cmake does it.
+        set(CUSTOM_CPP_STANDARD ${CMAKE_CXX11_EXTENSION_COMPILE_OPTION})
+
         try_compile(Q_WORKS ${CMAKE_BINARY_DIR}
                     ${SRC_FILE}
                     CMAKE_FLAGS
                         "-DINCLUDE_DIRECTORIES=${QT_INCLUDE_DIR};${Qt5${_module_no_qt_prefix}_INCLUDE_DIRS}"
+                        "-DCOMPILE_DEFINITIONS:STRING=${CUSTOM_CPP_STANDARD}"
                     OUTPUT_VARIABLE OUTPUT)
         file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCheckQtClassTest.log ${OUTPUT})
 
