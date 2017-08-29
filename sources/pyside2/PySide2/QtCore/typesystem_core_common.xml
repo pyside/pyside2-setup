@@ -214,9 +214,11 @@
 
   <!-- Among other use cases, these types are necessary for OpenGL "GLint"-like typedefs on macOS.
   -->
+  <primitive-type name="int64_t" />
   <primitive-type name="int32_t" />
   <primitive-type name="int16_t" />
   <primitive-type name="int8_t" />
+  <primitive-type name="uint64_t" />
   <primitive-type name="uint32_t" />
   <primitive-type name="uint16_t" />
   <primitive-type name="uint8_t" />
