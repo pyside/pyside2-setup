@@ -10,9 +10,6 @@ else()
     set(SPECIFIC_OS_FILES "")
 endif()
 
-# TODO: Fix cycling dependency  when generating QDataStream operator<< for QUuid
-set (QtCore_SRC_FIXED_ME ${QtCore_GEN_DIR}/quuid_wrapper.cpp)
-
 set(QtCore_SRC
 ${QtCore_GEN_DIR}/qabstractanimation_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstracteventdispatcher_timerinfo_wrapper.cpp
@@ -141,6 +138,7 @@ ${QtCore_GEN_DIR}/qtimezone_offsetdata_wrapper.cpp
 ${QtCore_GEN_DIR}/qtranslator_wrapper.cpp
 ${QtCore_GEN_DIR}/qurl_wrapper.cpp
 ${QtCore_GEN_DIR}/qurlquery_wrapper.cpp
+${QtCore_GEN_DIR}/quuid_wrapper.cpp
 ${QtCore_GEN_DIR}/qvariantanimation_wrapper.cpp
 ${QtCore_GEN_DIR}/qwaitcondition_wrapper.cpp
 ${QtCore_GEN_DIR}/qwritelocker_wrapper.cpp

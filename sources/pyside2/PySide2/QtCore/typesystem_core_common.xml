@@ -1795,9 +1795,7 @@
     <value-type name="OffsetData"/>
   </value-type>
 
-  <!-- FIXME QT5: Remove QUuid because cyclic dependency found on overloaddata QUuid(), 
-  this lead to cyclic dependency in <<(QDataStream &, QUUid) and incorrect QDataStream code generation (Windows only)-->
-  <!-- <value-type name="QUuid">
+  <value-type name="QUuid">
     <enum-type name="Variant"/>
     <enum-type name="Version"/>
     <add-function signature="__repr__" return-type="PyObject*">
@@ -1816,7 +1814,7 @@
             </insert-template>
         </inject-code>
     </add-function>
-  </value-type> -->
+  </value-type>
 
   <value-type name="QMimeType" since="5.0" />
   <object-type name="QMimeDatabase" since="5.0">
