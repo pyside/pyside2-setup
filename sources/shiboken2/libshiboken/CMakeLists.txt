@@ -35,7 +35,6 @@ sbkmodule.cpp
 sbkstring.cpp
 bindingmanager.cpp
 threadstatesaver.cpp
-typeresolver.cpp
 shibokenbuffer.cpp
 signature.cpp
 qapp_macro.cpp
@@ -56,7 +55,6 @@ install(FILES
         autodecref.h
         basewrapper.h
         bindingmanager.h
-        conversions.h
         gilstate.h
         helper.h
         sbkconverter.h
@@ -68,7 +66,6 @@ install(FILES
         shiboken.h
         shibokenmacros.h
         threadstatesaver.h
-        typeresolver.h
         shibokenbuffer.h
         sbkpython.h
         signature.h

@@ -106,9 +106,7 @@
             </inject-code>
         </add-function>
         <add-function signature="__iter__()" return-type="PyObject*">
-            <inject-code>
-                %PYARG_0 = Shiboken::createWrapper(new QScriptValueIterator(*%CPPSELF), true, true);
-            </inject-code>
+            <inject-code file="qscript_value_iterator_glue.cpp" />
         </add-function>
     </value-type>
     <object-type name="QScriptValueIterator">

@@ -40,6 +40,7 @@
 #include "sbkconverter.h"
 #include "sbkconverter_p.h"
 #include "basewrapper_p.h"
+#include "bindingmanager.h"
 #include "google/dense_hash_map"
 #include "autodecref.h"
 #include "sbkdbg.h"

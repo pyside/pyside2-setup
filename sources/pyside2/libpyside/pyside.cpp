@@ -50,14 +50,15 @@
 #include "dynamicqmetaobject.h"
 #include "destroylistener.h"
 
+#include <autodecref.h>
 #include <qapp_macro.h>
 #include <basewrapper.h>
-#include <conversions.h>
 #include <sbkconverter.h>
+#include <sbkstring.h>
 #include <gilstate.h>
-#include <typeresolver.h>
 #include <bindingmanager.h>
 #include <algorithm>
+#include <typeinfo>
 #include <cstring>
 #include <cctype>
 #include <QStack>

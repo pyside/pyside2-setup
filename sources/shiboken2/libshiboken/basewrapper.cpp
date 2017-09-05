@@ -39,10 +39,11 @@
 
 #include "basewrapper.h"
 #include "basewrapper_p.h"
+#include "bindingmanager.h"
 #include "sbkconverter.h"
 #include "sbkenum.h"
+#include "sbkstring.h"
 #include "autodecref.h"
-#include "typeresolver.h"
 #include "gilstate.h"
 #include <string>
 #include <cstring>
@@ -552,7 +553,6 @@ void init()
     Module::init();
     Conversions::init();
 
-    initTypeResolver();
     PyEval_InitThreads();
 
     //Init private data

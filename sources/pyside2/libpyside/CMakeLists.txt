@@ -120,7 +120,6 @@ set(libpyside_HEADERS
     dynamicqmetaobject.h
     globalreceiver.h
     pysideclassinfo.h
-    pysideconversions.h
     pysidemacros.h
     signalmanager.h
     pyside.h
