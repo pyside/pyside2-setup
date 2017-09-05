@@ -514,11 +514,28 @@ Builder::~Builder()
     delete d;
 }
 
+static inline bool compareHeaderName(const char *haystack, const char *needle)
+{
+    const char *lastSlash = strrchr(haystack, '/');
+#ifdef Q_OS_WIN
+    if (lastSlash == nullptr)
+        lastSlash = strrchr(haystack, '\\');
+#endif
+    if (lastSlash == nullptr)
+        lastSlash = haystack;
+    else
+        ++lastSlash;
+#ifdef Q_OS_WIN
+   return _stricmp(lastSlash, needle) == 0;
+#else
+    return strcmp(lastSlash, needle) == 0;
+#endif
+}
+
 bool Builder::visitLocation(const CXSourceLocation &location) const
 {
     if (clang_Location_isInSystemHeader(location) == 0)
         return true;
-#ifdef Q_OS_WIN
     CXFile file; // void *
     unsigned line;
     unsigned column;
@@ -528,12 +545,11 @@ bool Builder::visitLocation(const CXSourceLocation &location) const
     // Has been observed to be 0 for invalid locations
     if (const char *cFileName = clang_getCString(cxFileName)) {
         // Resolve OpenGL typedefs although the header is considered a system header.
-        const bool visitHeader = _stricmp(cFileName, "GL/gl.h") || _stricmp(cFileName, "gl.h") == 0;
+        const bool visitHeader = compareHeaderName(cFileName, "gl.h");
         clang_disposeString(cxFileName);
         if (visitHeader)
             return true;
     }
-#endif // Q_OS_WIN
     return false;
 }
 
