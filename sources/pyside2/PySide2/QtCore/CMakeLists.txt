@@ -140,6 +140,7 @@ ${QtCore_GEN_DIR}/qurl_wrapper.cpp
 ${QtCore_GEN_DIR}/qurlquery_wrapper.cpp
 ${QtCore_GEN_DIR}/quuid_wrapper.cpp
 ${QtCore_GEN_DIR}/qvariantanimation_wrapper.cpp
+${QtCore_GEN_DIR}/qversionnumber_wrapper.cpp
 ${QtCore_GEN_DIR}/qwaitcondition_wrapper.cpp
 ${QtCore_GEN_DIR}/qwritelocker_wrapper.cpp
 ${QtCore_GEN_DIR}/qxmlstreamattribute_wrapper.cpp

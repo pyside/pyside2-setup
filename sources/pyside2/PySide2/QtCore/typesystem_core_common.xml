@@ -4133,6 +4133,14 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
 
   <object-type name="QVariantAnimation" since="4.6"/>
 
+  <value-type name="QVersionNumber" since="5.6">
+    <modify-function signature="fromString(const QString &amp;,int*)">
+      <modify-argument index="2">
+        <remove-argument/>
+      </modify-argument>
+    </modify-function>
+  </value-type>
+
   <!-- From Qt4.6 ^^^ -->
 
   <add-function signature="SIGNAL(const char*)" return-type="str">
