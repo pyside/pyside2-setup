@@ -97,6 +97,9 @@ ${QtCore_GEN_DIR}/qreadwritelock_wrapper.cpp
 ${QtCore_GEN_DIR}/qrect_wrapper.cpp
 ${QtCore_GEN_DIR}/qrectf_wrapper.cpp
 ${QtCore_GEN_DIR}/qregexp_wrapper.cpp
+${QtCore_GEN_DIR}/qregularexpression_wrapper.cpp
+${QtCore_GEN_DIR}/qregularexpressionmatch_wrapper.cpp
+${QtCore_GEN_DIR}/qregularexpressionmatchiterator_wrapper.cpp
 ${QtCore_GEN_DIR}/qresource_wrapper.cpp
 ${QtCore_GEN_DIR}/qrunnable_wrapper.cpp
 ${QtCore_GEN_DIR}/qsavefile_wrapper.cpp

@@ -2467,6 +2467,15 @@
         </inject-code>
     </add-function>
   </value-type>
+
+  <value-type name="QRegularExpression">
+    <enum-type name="MatchOption" flags="MatchOptions"/>
+    <enum-type name="MatchType"/>
+    <enum-type name="PatternOption" flags="PatternOptions"/>
+  </value-type>
+  <value-type name="QRegularExpressionMatch"/>
+  <value-type name="QRegularExpressionMatchIterator"/>
+
   <value-type name="QFileInfo">
     <extra-includes>
       <include file-name="QDateTime" location="global"/>
