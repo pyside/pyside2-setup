@@ -37,6 +37,7 @@ class TestModifyFunction : public QObject
     private slots:
         void testOwnershipTransfer();
         void testWithApiVersion();
+        void testRenameArgument_data();
         void testRenameArgument();
         void invalidateAfterUse();
         void testGlobalFunctionModification();

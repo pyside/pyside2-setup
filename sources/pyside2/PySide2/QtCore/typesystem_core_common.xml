@@ -214,9 +214,11 @@
 
   <!-- Among other use cases, these types are necessary for OpenGL "GLint"-like typedefs on macOS.
   -->
+  <primitive-type name="int64_t" />
   <primitive-type name="int32_t" />
   <primitive-type name="int16_t" />
   <primitive-type name="int8_t" />
+  <primitive-type name="uint64_t" />
   <primitive-type name="uint32_t" />
   <primitive-type name="uint16_t" />
   <primitive-type name="uint8_t" />
@@ -1793,9 +1795,7 @@
     <value-type name="OffsetData"/>
   </value-type>
 
-  <!-- FIXME QT5: Remove QUuid because cyclic dependency found on overloaddata QUuid(), 
-  this lead to cyclic dependency in <<(QDataStream &, QUUid) and incorrect QDataStream code generation (Windows only)-->
-  <!-- <value-type name="QUuid">
+  <value-type name="QUuid">
     <enum-type name="Variant"/>
     <enum-type name="Version"/>
     <add-function signature="__repr__" return-type="PyObject*">
@@ -1814,7 +1814,7 @@
             </insert-template>
         </inject-code>
     </add-function>
-  </value-type> -->
+  </value-type>
 
   <value-type name="QMimeType" since="5.0" />
   <object-type name="QMimeDatabase" since="5.0">
@@ -2468,6 +2468,15 @@
         </inject-code>
     </add-function>
   </value-type>
+
+  <value-type name="QRegularExpression">
+    <enum-type name="MatchOption" flags="MatchOptions"/>
+    <enum-type name="MatchType"/>
+    <enum-type name="PatternOption" flags="PatternOptions"/>
+  </value-type>
+  <value-type name="QRegularExpressionMatch"/>
+  <value-type name="QRegularExpressionMatchIterator"/>
+
   <value-type name="QFileInfo">
     <extra-includes>
       <include file-name="QDateTime" location="global"/>
@@ -4134,6 +4143,14 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   </object-type>
 
   <object-type name="QVariantAnimation" since="4.6"/>
+
+  <value-type name="QVersionNumber" since="5.6">
+    <modify-function signature="fromString(const QString &amp;,int*)">
+      <modify-argument index="2">
+        <remove-argument/>
+      </modify-argument>
+    </modify-function>
+  </value-type>
 
   <!-- From Qt4.6 ^^^ -->
 

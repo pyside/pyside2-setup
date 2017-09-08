@@ -516,7 +516,25 @@ Builder::~Builder()
 
 bool Builder::visitLocation(const CXSourceLocation &location) const
 {
-    return !clang_Location_isInSystemHeader(location);
+    if (clang_Location_isInSystemHeader(location) == 0)
+        return true;
+#ifdef Q_OS_WIN
+    CXFile file; // void *
+    unsigned line;
+    unsigned column;
+    unsigned offset;
+    clang_getExpansionLocation(location, &file, &line, &column, &offset);
+    const CXString cxFileName = clang_getFileName(file);
+    // Has been observed to be 0 for invalid locations
+    if (const char *cFileName = clang_getCString(cxFileName)) {
+        // Resolve OpenGL typedefs although the header is considered a system header.
+        const bool visitHeader = _stricmp(cFileName, "GL/gl.h") || _stricmp(cFileName, "gl.h") == 0;
+        clang_disposeString(cxFileName);
+        if (visitHeader)
+            return true;
+    }
+#endif // Q_OS_WIN
+    return false;
 }
 
 FileModelItem Builder::dom() const

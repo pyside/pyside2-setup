@@ -33,6 +33,7 @@
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QRegularExpression>
+#include <QtCore/QSet>
 #include <QtCore/QXmlStreamAttributes>
 #include <QtCore/QXmlStreamReader>
 
@@ -811,7 +812,8 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
                     return false;
                 }
                 FunctionModification mod(since);
-                mod.signature = signature;
+                if (!mod.setSignature(signature, &m_error))
+                    return false;
                 mod.renamedToName = attributes[QLatin1String("rename")];
                 mod.modifiers |= Modification::Rename;
                 m_contextStack.top()->functionMods << mod;
@@ -1722,7 +1724,8 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             m_contextStack.top()->addedFunctions << func;
 
             FunctionModification mod(since);
-            mod.signature = m_currentSignature;
+            if (!mod.setSignature(m_currentSignature, &m_error))
+                return false;
             m_contextStack.top()->functionMods << mod;
         }
         break;
@@ -1747,7 +1750,9 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             }
 
             FunctionModification mod(since);
-            m_currentSignature = mod.signature = signature;
+            if (!mod.setSignature(signature, &m_error))
+                return false;
+            m_currentSignature = signature;
 
             QString access = attributes[QLatin1String("access")].toLower();
             if (!access.isEmpty()) {
@@ -2106,7 +2111,7 @@ FunctionModificationList ComplexTypeEntry::functionModifications(const QString &
     FunctionModificationList lst;
     for (int i = 0; i < m_functionMods.count(); ++i) {
         const FunctionModification &mod = m_functionMods.at(i);
-        if (mod.signature == signature)
+        if (mod.matches(signature))
             lst << mod;
     }
     return lst;
@@ -2271,9 +2276,26 @@ QString CodeSnipFragment::code() const
         return m_code;
 }
 
+bool FunctionModification::setSignature(const QString &s, QString *errorMessage)
+{
+    if (s.startsWith(QLatin1Char('^'))) {
+        m_signaturePattern.setPattern(s);
+        if (!m_signaturePattern.isValid()) {
+            if (errorMessage) {
+                *errorMessage = QLatin1String("Invalid signature pattern: \"")
+                    + s + QLatin1String("\": ") + m_signaturePattern.errorString();
+            }
+            return false;
+        }
+    } else {
+        m_signature = s;
+    }
+    return true;
+}
+
 QString FunctionModification::toString() const
 {
-    QString str = signature + QLatin1String("->");
+    QString str = signature() + QLatin1String("->");
     if (modifiers & AccessModifierMask) {
         switch (modifiers & AccessModifierMask) {
         case Private: str += QLatin1String("private"); break;
@@ -2312,8 +2334,14 @@ bool FunctionModification::operator!=(const FunctionModification& other) const
 
 bool FunctionModification::operator==(const FunctionModification& other) const
 {
-    if (signature != other.signature)
+    if (m_signature.isEmpty() != other.m_signature.isEmpty())
         return false;
+
+    if (m_signature.isEmpty()
+        ? m_signaturePattern != other.m_signaturePattern
+        : m_signature != other.m_signature) {
+        return false;
+    }
 
     if (association != other.association)
         return false;
@@ -2541,9 +2569,19 @@ QString ContainerTypeEntry::typeName() const
     }
 }
 
-static bool strLess(const char* a, const char* b)
+static const QSet<QString> &primitiveCppTypes()
 {
-    return ::strcmp(a, b) < 0;
+    static QSet<QString> result;
+    if (result.isEmpty()) {
+        static const char *cppTypes[] = {
+            "bool", "char", "double", "float", "int",
+            "long", "long long", "short",
+            "wchar_t"
+        };
+        for (const char *cppType : cppTypes)
+            result.insert(QLatin1String(cppType));
+    }
+    return result;
 }
 
 bool TypeEntry::isCppPrimitive() const
@@ -2551,19 +2589,13 @@ bool TypeEntry::isCppPrimitive() const
     if (!isPrimitive())
         return false;
 
+    if (m_type == VoidType)
+        return true;
+
     const PrimitiveTypeEntry *referencedType =
         static_cast<const PrimitiveTypeEntry *>(this)->basicReferencedTypeEntry();
-    QByteArray typeName = (referencedType ? referencedType->name() : m_name).toUtf8();
-
-    if (typeName.contains(' ') || m_type == VoidType)
-        return true;
-    // Keep this sorted!!
-    static const char* cppTypes[] = { "bool", "char", "double", "float", "int", "long", "long long", "short", "wchar_t" };
-    const int N = sizeof(cppTypes)/sizeof(char*);
-
-    const char** res = qBinaryFind(&cppTypes[0], &cppTypes[N], typeName.constData(), strLess);
-
-    return res != &cppTypes[N];
+    const QString &typeName = referencedType ? referencedType->name() : m_name;
+    return typeName.contains(QLatin1Char(' ')) || primitiveCppTypes().contains(typeName);
 }
 
 // Again, stuff to avoid ABI breakage.

@@ -390,7 +390,7 @@ FunctionModificationList TypeDatabase::functionModifications(const QString& sign
     FunctionModificationList lst;
     for (int i = 0; i < m_functionMods.count(); ++i) {
         const FunctionModification& mod = m_functionMods.at(i);
-        if (mod.signature == signature)
+        if (mod.matches(signature))
             lst << mod;
     }
 

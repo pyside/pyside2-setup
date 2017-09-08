@@ -32,24 +32,36 @@
 #include <abstractmetalang.h>
 #include <typesystem.h>
 
+void TestModifyFunction::testRenameArgument_data()
+{
+    QTest::addColumn<QByteArray>("pattern");
+    QTest::newRow("fixed_string") << QByteArrayLiteral("method(int)");
+    QTest::newRow("regular_expression") << QByteArrayLiteral("^method.*");
+}
+
 void TestModifyFunction::testRenameArgument()
 {
+    QFETCH(QByteArray, pattern);
+
     const char* cppCode ="\
     struct A {\n\
         void method(int=0);\n\
     };\n";
-    const char* xmlCode = "\
+    const char xmlCode1[] = "\
     <typesystem package='Foo'>\n\
         <primitive-type name='int'/>\n\
         <object-type name='A'>\n\
-        <modify-function signature='method(int)'>\n\
+        <modify-function signature='";
+   const char xmlCode2[] = "'>\n\
             <modify-argument index='1'>\n\
                 <rename to='otherArg'/>\n\
             </modify-argument>\n\
         </modify-function>\n\
         </object-type>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+
+    const QByteArray xmlCode = QByteArray(xmlCode1) + pattern + QByteArray(xmlCode2);
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode.constData(), false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));

@@ -121,36 +121,34 @@ void ShibokenGenerator::initPrimitiveTypesCorrespondences()
     // PyBool
     m_pythonPrimitiveTypeName.insert(QLatin1String("bool"), QLatin1String("PyBool"));
 
+    const char *charTypes[] = {
+        "char", "signed char", "unsigned char"
+    };
+    for (const char *charType : charTypes)
+        m_pythonPrimitiveTypeName.insert(QLatin1String(charType), QStringLiteral("SbkChar"));
+
     // PyInt
-    m_pythonPrimitiveTypeName.insert(QLatin1String("char"), QLatin1String("SbkChar"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("signed char"), QLatin1String("SbkChar"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("unsigned char"), QLatin1String("SbkChar"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("int"), QLatin1String("PyInt"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("signed int"), QLatin1String("PyInt"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("uint"), QLatin1String("PyInt"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("unsigned int"), QLatin1String("PyInt"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("short"), QLatin1String("PyInt"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("ushort"), QLatin1String("PyInt"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("signed short"), QLatin1String("PyInt"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("signed short int"), QLatin1String("PyInt"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("unsigned short"), QLatin1String("PyInt"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("unsigned short int"), QLatin1String("PyInt"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("long"), QLatin1String("PyInt"));
+    const char *intTypes[] = {
+        "int", "signed int", "uint", "unsigned int",
+        "short", "ushort", "signed short", "signed short int",
+        "unsigned short", "unsigned short", "unsigned short int",
+        "long"
+    };
+    for (const char *intType : intTypes)
+        m_pythonPrimitiveTypeName.insert(QLatin1String(intType), QStringLiteral("PyInt"));
 
     // PyFloat
     m_pythonPrimitiveTypeName.insert(QLatin1String("double"), QLatin1String("PyFloat"));
     m_pythonPrimitiveTypeName.insert(QLatin1String("float"), QLatin1String("PyFloat"));
 
     // PyLong
-    m_pythonPrimitiveTypeName.insert(QLatin1String("unsigned long"), QLatin1String("PyLong"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("signed long"), QLatin1String("PyLong"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("ulong"), QLatin1String("PyLong"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("unsigned long int"), QLatin1String("PyLong"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("long long"), QLatin1String("PyLong"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("__int64"), QLatin1String("PyLong"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("unsigned long long"), QLatin1String("PyLong"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("unsigned __int64"), QLatin1String("PyLong"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("size_t"), QLatin1String("PyLong"));
+    const char *longTypes[] = {
+        "unsigned long", "signed long", "ulong", "unsigned long int",
+        "long long", "__int64",
+        "unsigned long long", "unsigned __int64", "size_t"
+    };
+    for (const char *longType : longTypes)
+        m_pythonPrimitiveTypeName.insert(QLatin1String(longType), QStringLiteral("PyLong"));
 
     // Python operators
     m_pythonOperators.clear();
