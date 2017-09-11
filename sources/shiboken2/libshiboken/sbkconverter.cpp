@@ -45,6 +45,7 @@
 #include "autodecref.h"
 #include "sbkdbg.h"
 #include "helper.h"
+#include "voidptr.h"
 
 static SbkConverter** PrimitiveTypeConverters;
 
@@ -73,7 +74,7 @@ void init()
         Primitive<unsigned int>::createConverter(),
         Primitive<unsigned long>::createConverter(),
         Primitive<unsigned short>::createConverter(),
-        Primitive<void*>::createConverter()
+        VoidPtr::createConverter()
     };
     PrimitiveTypeConverters = primitiveTypeConverters;
 

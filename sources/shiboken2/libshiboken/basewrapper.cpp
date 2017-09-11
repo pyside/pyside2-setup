@@ -54,6 +54,7 @@
 #include "threadstatesaver.h"
 #include "signature.h"
 #include "qapp_macro.h"
+#include "voidptr.h"
 
 namespace {
     void _destroyParentInfo(SbkObject* obj, bool keepReference);
@@ -566,6 +567,8 @@ void init()
 
     if (PyType_Ready(reinterpret_cast<PyTypeObject *>(&SbkObject_Type)) < 0)
         Py_FatalError("[libshiboken] Failed to initialise Shiboken.BaseWrapper type.");
+
+    VoidPtr::init();
 
     shibokenAlreadInitialised = true;
 }

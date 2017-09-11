@@ -8,11 +8,16 @@ set(sample_SRC
 ${CMAKE_CURRENT_BINARY_DIR}/shiboken2/shiboken2_module_wrapper.cpp
 )
 
+set(shibokenmodule_TYPESYSTEM
+${CMAKE_CURRENT_SOURCE_DIR}/typesystem_shiboken.xml
+)
+
 add_custom_command(OUTPUT ${sample_SRC}
 # Note: shiboken2 is an executable target. By not specifying its explicit
 # path, CMAKE figures it out, itself!
 # This fixes an issue with Visual Studio, see https://github.com/PySide/shiboken2/pull/11
 COMMAND shiboken2 --project-file=${CMAKE_CURRENT_BINARY_DIR}/shibokenmodule.txt ${GENERATOR_EXTRA_FLAGS}
+DEPENDS ${shibokenmodule_TYPESYSTEM}
 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for 'shiboken2'..."
 )

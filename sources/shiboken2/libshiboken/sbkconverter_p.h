@@ -533,29 +533,4 @@ struct Primitive<std::string> : TwoPrimitive<std::string>
     }
 };
 
-// Void pointer ----------------------------------------------------------------------------
-
-template <>
-struct Primitive<void*> : OnePrimitive<void*>
-{
-    static PyObject* toPython(const void* cppIn)
-    {
-        SbkDbg() << cppIn;
-        if (!cppIn)
-            Py_RETURN_NONE;
-        PyObject *result = reinterpret_cast<PyObject *>(const_cast<void *>(cppIn));
-        Py_INCREF(result);
-        return result;
-    }
-    static void toCpp(PyObject* pyIn, void* cppOut)
-    {
-        SbkDbg() << pyIn;
-        *reinterpret_cast<void **>(cppOut) = pyIn;
-    }
-    static PythonToCppFunc isConvertible(PyObject *)
-    {
-        return toCpp;
-    }
-};
-
 #endif // SBK_CONVERTER_P_H

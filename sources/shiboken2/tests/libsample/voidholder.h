@@ -42,6 +42,10 @@ public:
         static void* pointerToSomething = new VoidHolder();
         return pointerToSomething;
     }
+    void *takeVoidPointer(void *item)
+    {
+        return item;
+    }
 private:
     void* m_ptr;
 };
