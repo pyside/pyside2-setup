@@ -112,7 +112,7 @@
   <rejection class="^QOpenGL.*$" argument-type="qopengl_GLsizeiptr"/>
   <rejection class="^QOpenGL.*$" argument-type="QOpenGLTextureHelper*"/>
   <rejection class="^QOpenGL.*$" argument-type="^QVector.D( const)?\*$"/>
-  <rejection class="^QOpenGL.*$" argument-type="^void( const)?\*\*?$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^void( const)?\*\*$"/>
 
   <!--
     Event classes have a lot of non-documented protected fields, those fields
