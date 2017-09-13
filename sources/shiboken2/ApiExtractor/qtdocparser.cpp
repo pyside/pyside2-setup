@@ -54,22 +54,22 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
         context = context->enclosingClass();
     }
 
-    QString filename = metaClass->qualifiedCppName().toLower();
-    filename.replace(QLatin1String("::"), QLatin1String("-"));
-    QString sourceFile = documentationDataDirectory() + QLatin1Char('/')
-                         + filename + QLatin1String(".xml");
-    if (metaClass->enclosingClass())
-        sourceFile.replace(QLatin1String("::"), QLatin1String("-"));
+    QString sourceFileRoot = documentationDataDirectory() + QLatin1Char('/')
+        + metaClass->qualifiedCppName().toLower();
+    sourceFileRoot.replace(QLatin1String("::"), QLatin1String("-"));
 
-    if (!QFile::exists(sourceFile)) {
+    QFileInfo sourceFile(sourceFileRoot + QStringLiteral(".webxml"));
+    if (!sourceFile.exists())
+        sourceFile.setFile(sourceFileRoot + QStringLiteral(".xml"));
+   if (!sourceFile.exists()) {
         qCWarning(lcShiboken).noquote().nospace()
             << "Can't find qdoc3 file for class " << metaClass->name() << ", tried: "
-            << QDir::toNativeSeparators(sourceFile);
+            << QDir::toNativeSeparators(sourceFile.absoluteFilePath());
         return;
     }
 
     QXmlQuery xquery;
-    xquery.setFocus(QUrl(sourceFile));
+    xquery.setFocus(QUrl::fromLocalFile(sourceFile.absoluteFilePath()));
 
     QString className = metaClass->name();
 
