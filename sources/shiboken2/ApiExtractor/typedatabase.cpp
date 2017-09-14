@@ -451,14 +451,14 @@ bool TypeDatabase::isSuppressedWarning(const QString& s) const
     return false;
 }
 
-QString TypeDatabase::modifiedTypesystemFilepath(const QString& tsFile) const
+QString TypeDatabase::modifiedTypesystemFilepath(const QString& tsFile, bool stripPath) const
 {
     const QFileInfo tsFi(tsFile);
     if (tsFi.isAbsolute()) // No point in further lookups
         return tsFi.absoluteFilePath();
     if (tsFi.isFile()) // Make path absolute
         return tsFi.absoluteFilePath();
-    const QString fileName = tsFi.fileName();
+    const QString fileName = stripPath ? tsFi.fileName() : tsFile;
     for (const QString &path : m_typesystemPaths) {
         const QFileInfo fi(path + QLatin1Char('/') + fileName);
         if (fi.isFile())

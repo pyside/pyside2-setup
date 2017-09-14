@@ -154,12 +154,13 @@ public:
 
     void setDropTypeEntries(QStringList dropTypeEntries);
 
+    QString modifiedTypesystemFilepath(const QString &tsFile, bool stripPath = true) const;
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;
 #endif
 private:
     TypeEntryList findTypes(const QString &name) const;
-    QString modifiedTypesystemFilepath(const QString &tsFile) const;
 
     bool m_suppressWarnings;
     TypeEntryHash m_entries;
