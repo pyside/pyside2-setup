@@ -1417,6 +1417,12 @@ public:
     Q_DECLARE_FLAGS(OperatorQueryOptions, OperatorQueryOption)
     Q_FLAG(OperatorQueryOption)
 
+    struct BaseClass
+    {
+        QString name;
+        int access = Public;
+    };
+
     AbstractMetaClass()
             : m_hasVirtuals(false),
               m_isPolymorphic(false),

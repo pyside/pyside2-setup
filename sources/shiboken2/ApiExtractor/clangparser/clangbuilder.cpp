@@ -444,10 +444,11 @@ void BuilderPrivate::addBaseClass(const CXCursor &cursor)
     QString baseClassName = getTypeName(inheritedType);       // use type.
     const CXCursor declCursor = clang_getTypeDeclaration(inheritedType);
     const CursorClassHash::const_iterator it = m_cursorClassHash.constFind(declCursor);
+    const CodeModel::AccessPolicy access = accessPolicy(clang_getCXXAccessSpecifier(cursor));
     if (it == m_cursorClassHash.constEnd()) {
         // Set unqualified name. This happens in cases like "class X : public std::list<...>"
         // "template<class T> class Foo : public T" and standard types like true_type, false_type.
-        m_currentClass->setBaseClasses(m_currentClass->baseClasses() << baseClassName);
+        m_currentClass->addBaseClass(baseClassName, access);
         return;
     }
     // Completely qualify the class name by looking it up and taking its scope
@@ -468,7 +469,7 @@ void BuilderPrivate::addBaseClass(const CXCursor &cursor)
         baseClassName.prepend(colonColon());
         baseClassName.prepend(baseScope.join(colonColon()));
     }
-    m_currentClass->setBaseClasses(m_currentClass->baseClasses() << baseClassName);
+    m_currentClass->addBaseClass(baseClassName, access);
 }
 
 static inline CXCursor definitionFromTypeRef(const CXCursor &typeRefCursor)

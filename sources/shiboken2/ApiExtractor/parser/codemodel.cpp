@@ -514,16 +514,6 @@ _ClassModelItem::~_ClassModelItem()
 {
 }
 
-QStringList _ClassModelItem::baseClasses() const
-{
-    return m_baseClasses;
-}
-
-void _ClassModelItem::setBaseClasses(const QStringList &baseClasses)
-{
-    m_baseClasses = baseClasses;
-}
-
 TemplateParameterList _ClassModelItem::templateParameters() const
 {
     return m_templateParameters;
@@ -534,14 +524,21 @@ void _ClassModelItem::setTemplateParameters(const TemplateParameterList &templat
     m_templateParameters = templateParameters;
 }
 
-void _ClassModelItem::addBaseClass(const QString &baseClass)
+void _ClassModelItem::addBaseClass(const QString &name, CodeModel::AccessPolicy accessPolicy)
 {
+    _ClassModelItem::BaseClass baseClass;
+    baseClass.name = name;
+    baseClass.accessPolicy = accessPolicy;
     m_baseClasses.append(baseClass);
 }
 
 bool _ClassModelItem::extendsClass(const QString &name) const
 {
-    return m_baseClasses.contains(name);
+    for (const BaseClass &bc : m_baseClasses) {
+        if (bc.name == name)
+            return true;
+    }
+    return false;
 }
 
 void _ClassModelItem::setClassType(CodeModel::ClassType type)
@@ -578,8 +575,14 @@ static void formatModelItemList(QDebug &d, const char *prefix, const List &l,
 void _ClassModelItem::formatDebug(QDebug &d) const
 {
     _CodeModelItem::formatDebug(d);
-    if (!m_baseClasses.isEmpty())
-        d << ", inherits=" << m_baseClasses;
+    if (!m_baseClasses.isEmpty()) {
+        d << ", inherits=";
+        for (int i = 0, size = m_baseClasses.size(); i < size; ++i) {
+            if (i)
+                d << ", ";
+            d << m_baseClasses.at(i).name << " (" << m_baseClasses.at(i).accessPolicy << ')';
+        }
+    }
     formatModelItemList(d, ", templateParameters=", m_templateParameters);
     formatScopeItemsDebug(d);
 }

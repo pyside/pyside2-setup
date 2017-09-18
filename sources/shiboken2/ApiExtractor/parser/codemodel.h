@@ -349,16 +349,21 @@ class _ClassModelItem: public _ScopeModelItem
 public:
     DECLARE_MODEL_NODE(Class)
 
+    struct BaseClass
+    {
+        QString name;
+        CodeModel::AccessPolicy accessPolicy = CodeModel::Public;
+    };
+
     explicit _ClassModelItem(CodeModel *model, int kind = __node_kind)
         : _ScopeModelItem(model, kind), m_classType(CodeModel::Class) {}
     explicit _ClassModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
         : _ScopeModelItem(model, name, kind), m_classType(CodeModel::Class) {}
     ~_ClassModelItem();
 
-    QStringList baseClasses() const;
+    QVector<BaseClass> baseClasses() const { return m_baseClasses; }
 
-    void setBaseClasses(const QStringList &baseClasses);
-    void addBaseClass(const QString &baseClass);
+    void addBaseClass(const QString &name, CodeModel::AccessPolicy accessPolicy);
 
     TemplateParameterList templateParameters() const;
     void setTemplateParameters(const TemplateParameterList &templateParameters);
@@ -376,7 +381,7 @@ public:
 #endif
 
 private:
-    QStringList m_baseClasses;
+    QVector<BaseClass> m_baseClasses;
     TemplateParameterList m_templateParameters;
     CodeModel::ClassType m_classType;
 
