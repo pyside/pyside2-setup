@@ -27,14 +27,31 @@ else()
     find_package(PythonLibs 2.6)
 endif()
 
+macro(get_python_arch)
+  execute_process(
+    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+       import sys
+       print('64' if sys.maxsize > 2**31-1 else '32')
+       "
+    OUTPUT_VARIABLE PYTHON_ARCH
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  message("PYTHON_ARCH:             " ${PYTHON_ARCH})
+endmacro()
+
+if (NOT PYTHON_ARCH)
+    get_python_arch()
+endif()
+
 set(CLANG_DIR "")
 set(CLANG_DIR_SOURCE "")
 
 if (DEFINED ENV{LLVM_INSTALL_DIR})
     set(CLANG_DIR $ENV{LLVM_INSTALL_DIR})
+    string(REPLACE "_ARCH_" "${PYTHON_ARCH}" CLANG_DIR "${CLANG_DIR}")
     set(CLANG_DIR_SOURCE "LLVM_INSTALL_DIR")
 elseif (DEFINED ENV{CLANG_INSTALL_DIR})
     set(CLANG_DIR $ENV{CLANG_INSTALL_DIR})
+    string(REPLACE "_ARCH_" "${PYTHON_ARCH}" CLANG_DIR "${CLANG_DIR}")
     set(CLANG_DIR_SOURCE "CLANG_INSTALL_DIR")
 else ()
     EXEC_PROGRAM("llvm-config" ARGS "--prefix" OUTPUT_VARIABLE CLANG_DIR)
