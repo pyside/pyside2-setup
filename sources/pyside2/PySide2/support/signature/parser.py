@@ -48,7 +48,6 @@ import functools
 from .mapping import type_map, update_mapping, __dict__ as namespace
 
 _DEBUG = False
-_BREAK_ON_ERROR = False
 
 TYPE_MAP_DOC = """
     The type_map variable is central for the signature package.
@@ -165,11 +164,7 @@ def _resolve_value(thing, valtype, line):
 
         UNRECOGNIZED:   {!r}
         OFFENDING LINE: {!r}
-
-        """.format(thing, line),
-        RuntimeWarning)
-    if _BREAK_ON_ERROR:
-        raise RuntimeError
+        """.format(thing, line), RuntimeWarning)
     return thing
 
 def _resolve_type(thing, line):
