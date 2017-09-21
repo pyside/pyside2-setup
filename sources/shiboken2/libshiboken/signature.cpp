@@ -70,7 +70,10 @@ extern "C"
  -------------------
 
  The basic idea is to create a dummy Python function and to use the inspect
- module to create a signature object. Then, this object is ge to python:
+ module to create a signature object. Then, this object is returned as the
+ result of the __signature__ attribute of the real PyCFunction.
+
+ There is one thing that really changes Python a bit:
 
      I added the __signature__ attribute to every function.
 
