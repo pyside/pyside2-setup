@@ -512,7 +512,7 @@ PySide_BuildSignatureArgs(PyObject *module, PyObject *type,
 
     if (!init_done) {
         pyside_globals = init_phase_1();
-        if (pyside_globals < 0)
+        if (pyside_globals == NULL)
             return -1;
         init_done = 1;
     }
