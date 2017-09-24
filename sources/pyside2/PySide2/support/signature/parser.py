@@ -39,49 +39,33 @@
 
 from __future__ import print_function, absolute_import
 
-"""
-signature.py
-
-This module is the python part of the PySide signature initialization.
-It is not for common use and should be called by shiboken's signature.cpp.
-It is initially written for Python 3, only.
-Meanwhile people say it works with Python 2.7, too. ;-)
-"""
-
 import sys
 import re
 import warnings
 import types
 import keyword
 import functools
-
-PY3 = sys.version_info >= (3,)
-if PY3:
-    try:
-        from importlib import reload
-    except ImportError:
-        from imp import reload
+from .mapping import type_map, update_mapping, __dict__ as namespace
 
 _DEBUG = False
 _BREAK_ON_ERROR = False
 
-class FakeMapping(object):
-    """
-    We do not import the mapping module directly:
+TYPE_MAP_DOC = """
+    The type_map variable is central for the signature package.
 
-    It is not clear from where the mapping is imported. When for instance
-    the mapping is imported by a test from the source directory, reload
-    would now reload from the PySide directory. This is weird and
-    wasteful. We fake the module instead and load it later.
-    """
-    def __init__(self):
-        self.type_map = {}
+    PySide has a new function 'CppGenerator::writeSignatureInfo()'
+    that extracts the gathered information about the function arguments
+    and defaults as good as it can. But what PySide generates is still
+    very C-ish and has many constants that Python doesn't understand.
 
-mapping = FakeMapping()
-namespace = mapping.__dict__
+    The function 'try_to_guess()' below understands a lot of PySide's
+    peculiar way to assume local context. If it is able to do the guess,
+    then the result is inserted into the dict, so the search happens
+    not again. For everything that is not covered by these automatic
+    guesses, we provide an entry in 'type_map' that resolves it.
 
-class _empty:
-    """ marks "no value found". We cannot use None here."""
+    In effect, 'type_map' maps text to real Python objects.
+"""
 
 def dprint(*args, **kw):
     if _DEBUG:
@@ -138,17 +122,17 @@ def _resolve_number(thing):
     try:
         return eval(thing, namespace)
     except Exception:
-        return _empty
+        return None
 
 def try_to_guess(thing, valtype):
     res = _resolve_number(thing)
-    if res is not _empty:
+    if res is not None:
         return res
     if "." not in thing and "(" not in thing:
         text = "{}.{}".format(valtype, thing)
         try:
             return eval(text, namespace)
-        except Exception as e:
+        except Exception:
             pass
     typewords = valtype.split(".")
     valwords = thing.split(".")
@@ -160,25 +144,23 @@ def try_to_guess(thing, valtype):
             text = ".".join(typewords[:idx] + valwords)
             try:
                 return eval(text, namespace)
-            except Exception as e:
+            except Exception:
                 pass
-    return _empty
+    return None
 
-def _resolve_value_reloaded(thing, valtype, type_map, line, maybe_redo):
+def _resolve_value(thing, valtype, line):
     if thing in type_map:
         return type_map[thing]
     try:
         res = eval(thing, namespace)
         type_map[thing] = res
         return res
-    except Exception as e:
+    except Exception:
         pass
-    res = try_to_guess(thing, valtype) if valtype else _empty
-    if res is not _empty:
+    res = try_to_guess(thing, valtype) if valtype else None
+    if res is not None:
         type_map[thing] = res
         return res
-    if maybe_redo:
-        return _empty
     warnings.warn("""pyside_type_init:
 
         UNRECOGNIZED:   {!r}
@@ -190,35 +172,10 @@ def _resolve_value_reloaded(thing, valtype, type_map, line, maybe_redo):
         raise RuntimeError
     return thing
 
-def _resolve_value(thing, valtype, type_map, line):
-    """
-    Load a value after eventually reloading.
+def _resolve_type(thing, line):
+    return _resolve_value(thing, None, line)
 
-    If an error occurs, there is maybe a new module imported that we
-    don't have, yet. Reload the mapping module and try again.
-    """
-    try:
-        val = _resolve_value_reloaded(thing, valtype, type_map, line, True)
-    except Exception:
-        val = _empty
-    if val is not _empty:
-        return val
-    global mapping, namespace
-    if type(mapping) is not types.ModuleType:
-        # lazy import
-        from . import mapping
-        namespace = mapping.__dict__
-        type_map.update(mapping.type_map)
-        return _resolve_value(thing, valtype, type_map, line)
-    reload(mapping)
-    dprint("Matrix reloaded")
-    type_map.update(mapping.type_map)
-    return _resolve_value_reloaded(thing, valtype, type_map, line, False)
-
-def _resolve_type(thing, type_map, line):
-    return _resolve_value(thing, None, type_map, line)
-
-def calculate_props(line, type_map):
+def calculate_props(line):
     line = line.strip()
     res = _parse_line(line)
     arglist = res["arglist"]
@@ -226,14 +183,14 @@ def calculate_props(line, type_map):
     _defaults = []
     for tup in arglist:
         name, ann = tup[:2]
-        annotations[name] = _resolve_type(ann, type_map, line)
+        annotations[name] = _resolve_type(ann, line)
         if len(tup) == 3:
-            default = _resolve_value(tup[2], ann, type_map, line)
+            default = _resolve_value(tup[2], ann, line)
             _defaults.append(default)
     defaults = tuple(_defaults)
     returntype = res["returntype"]
     if returntype is not None:
-        annotations["return"] = _resolve_type(returntype, type_map, line)
+        annotations["return"] = _resolve_type(returntype, line)
     props = {}
     props["defaults"] = defaults
     props["kwdefaults"] = {}
@@ -246,17 +203,18 @@ def calculate_props(line, type_map):
     props["multi"] = res["multi"]
     return props
 
-def pyside_type_init(typemod, sig_str, type_map):
+def pyside_type_init(typemod, sig_str):
     dprint()
     if type(typemod) is types.ModuleType:
         dprint("Initialization of module '{}'".format(typemod.__name__))
     else:
         dprint("Initialization of type '{}.{}'".format(typemod.__module__,
                                                        typemod.__name__))
+    update_mapping()
     ret = {}
     multi_props = []
     for line in sig_str.strip().splitlines():
-        props = calculate_props(line, type_map)
+        props = calculate_props(line)
         shortname = props["name"]
         multi = props["multi"]
         if multi is None:
@@ -272,8 +230,5 @@ def pyside_type_init(typemod, sig_str, type_map):
             dprint(multi_props)
             multi_props = []
     return ret
-
-pyside_type_init = functools.partial(pyside_type_init,
-                                     type_map=mapping.type_map)
 
 # end of file

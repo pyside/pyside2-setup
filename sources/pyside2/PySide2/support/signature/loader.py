@@ -51,40 +51,26 @@ This version does not use an embedded .zip file.
 
 import sys
 import os
-import functools
-from contextlib import contextmanager
-from distutils import sysconfig
-
-@contextmanager
-def add_path(path):
-    sys.path.insert(0, path)
-    yield
-    sys.path.pop(0)
 
 # Make sure that we always have the PySide containing package first.
 # This is crucial for the mapping during reload in the tests.
 package_dir = __file__
 for _ in "four":
     package_dir = os.path.dirname(package_dir)
-assured_site_packages = functools.partial(add_path, package_dir)
-
-with assured_site_packages():
-    if sys.version_info >= (3,):
-        from PySide2.support.signature import inspect
-        from PySide2.support.signature import typing
-    else:
-        import inspect
-        namespace = inspect.__dict__
-        from PySide2.support.signature import backport_inspect as inspect
-        inspect.__dict__.update(namespace)
-    from PySide2.support.signature import parser
-# Note also that during the tests we have a different encodind that would
-# break the Python license decorated files without an encoding line.
-
+sys.path.insert(0, package_dir)
+if sys.version_info >= (3,):
+    from PySide2.support.signature import inspect
+    from PySide2.support.signature import typing
+else:
+    import inspect
+    namespace = inspect.__dict__
+    from PySide2.support.signature import backport_inspect as inspect
+    inspect.__dict__.update(namespace)
 # name used in signature.cpp
-def pyside_type_init(*args, **kw):
-    with assured_site_packages():
-        return parser.pyside_type_init(*args, **kw)
+from PySide2.support.signature.parser import pyside_type_init
+sys.path.pop(0)
+# Note also that during the tests we have a different encoding that would
+# break the Python license decorated files without an encoding line.
 
 # name used in signature.cpp
 def create_signature(props, sig_kind):

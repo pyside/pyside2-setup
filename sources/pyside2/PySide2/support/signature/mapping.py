@@ -55,15 +55,16 @@ See _resolve_value() in singature.py
 import sys
 import collections
 import struct
+import PySide2
 
 PY3 = sys.version_info >= (3,)
 if PY3:
     from . import typing
-    exec("ellipsis = ...")
+    ellipsis = eval("...")
     Char = typing.Union[str, int]     # how do I model the limitation to 1 char?
     StringList = typing.List[str]
     Variant = typing.Union[str, int, float, Char, StringList, type(ellipsis)]
-              # much more, do we need that?
+              # Much more, do we need that? Do we better kill it?
     ModelIndexList = typing.List[int]
     QImageCleanupFunction = typing.Callable[[bytes], None]
 else:
@@ -74,8 +75,8 @@ else:
     ModelIndexList = list
     QImageCleanupFunction = object
 Pair = collections.namedtuple('Pair', ['first', 'second'])
-# ulong_max is the long size, which is only 32 bit on windows.
-ulong_max = sys.maxsize if len(struct.pack("L", 1)) != 4 else 0xffffffff
+# ulong_max is only 32 bit on windows.
+ulong_max = 2*sys.maxsize+1 if len(struct.pack("L", 1)) != 4 else 0xffffffff
 ushort_max = 0xffff
 
 GL_COLOR_BUFFER_BIT = 0x00004000
@@ -97,28 +98,27 @@ class Missing(str):
     def __repr__(self):
         return "Missing({})".format(self)
 
-TYPE_MAP_DOC = """
-    The type_map variable is central for the signature module.
+class Reloader(object):
+    def __init__(self):
+        self.sys_module_count = 0
+        self.uninitialized = PySide2.__all__[:]
 
-    PySide has a new function 'CppGenerator::writeSignatureInfo()'
-    that extracts the gathered information about the function arguments
-    and defaults as good as it can. But what PySide generates is still
-    very C-ish and has many constants that Python doesn't understand.
+    def update(self):
+        if self.sys_module_count == len(sys.modules):
+            return
+        self.sys_module_count = len(sys.modules)
+        for mod_name in self.uninitialized[:]:
+            if "PySide2." + mod_name in sys.modules:
+                self.uninitialized.remove(mod_name)
+                proc_name = "init_" + mod_name
+                if proc_name in globals():
+                    init_proc = globals()[proc_name]
+                    globals().update(init_proc())
 
-    The function 'try_to_guess()' below understands a lot of PySide's
-    peculiar way to assume local context. If it is able to do the guess,
-    then the result is inserted into the dict, so the search happens
-    not again. For everything that is not covered by these automatic
-    guesses, we provide an entry in 'type_map' that resolves it.
-
-    In effect, 'type_map' maps text to real Python objects.
-"""
+update_mapping = Reloader().update
 type_map = {}
 
-loaded_modules = sys.modules
-
-# QtCore
-if "PySide2.QtCore" in loaded_modules:
+def init_QtCore():
     import PySide2.QtCore
     from PySide2.QtCore import Qt, QUrl, QDir, QGenericArgument
     from PySide2.QtCore import QMarginsF # 5.9
@@ -169,7 +169,7 @@ if "PySide2.QtCore" in loaded_modules:
         "PyCallable": callable,
         "...": ellipsis, # no idea how this should be translated... maybe so?
         "PyTypeObject": type,
-        "PySequence": list, # could be more generic
+        "PySequence": list, # needs to be changed, QApplication for instance!
         "qptrdiff": int,
         "true": True,
         "Qt.HANDLE": int, # be more explicit with some consts?
@@ -215,7 +215,6 @@ if "PySide2.QtCore" in loaded_modules:
         "QGenericArgument((0))": None, # 5.6, RHEL 6.6. Is that ok?
         "4294967295UL": 4294967295, # 5.6, RHEL 6.6
     })
-
     try:
         type_map.update({
             "PySide2.QtCore.QMetaObject.Connection": PySide2.QtCore.Connection, # wrong!
@@ -223,9 +222,9 @@ if "PySide2.QtCore" in loaded_modules:
     except AttributeError:
         # this does not exist on 5.9 ATM.
         pass
+    return locals()
 
-# QtGui
-if "PySide2.QtGui" in loaded_modules:
+def init_QtGui():
     import PySide2.QtGui
     from PySide2.QtGui import QPageLayout, QPageSize # 5.9
     type_map.update({
@@ -244,9 +243,9 @@ if "PySide2.QtGui" in loaded_modules:
         "QList< QTouchEvent.TouchPoint >()": list,
         "QPixmap()": lambda:QPixmap(), # we cannot create this without qApp
     })
+    return locals()
 
-# QtWidgets
-if "PySide2.QtWidgets" in loaded_modules:
+def init_QtWidgets():
     import PySide2.QtWidgets
     from PySide2.QtWidgets import QWidget, QMessageBox, QStyleOption, QStyleHintReturn, QStyleOptionComplex
     type_map.update({
@@ -263,34 +262,34 @@ if "PySide2.QtWidgets" in loaded_modules:
         "SH_Default": QStyleHintReturn.SH_Default,
         "SO_Complex": QStyleOptionComplex.SO_Complex,
     })
+    return locals()
 
-# QtSql
-if "PySide2.QtSql" in loaded_modules:
+def init_QtSql():
     import PySide2.QtSql
     from PySide2.QtSql import QSqlDatabase
     type_map.update({
         "QLatin1String(defaultConnection)": QSqlDatabase.defaultConnection,
         "QVariant.Invalid": -1, # not sure what I should create, here...
     })
+    return locals()
 
-# QtNetwork
-if "PySide2.QtNetwork" in loaded_modules:
+def init_QtNetwork():
     import PySide2.QtNetwork
     type_map.update({
         "QMultiMap": typing.DefaultDict(list) if PY3 else {},
     })
+    return locals()
 
-# QtXmlPatterns
-if "PySide2.QtXmlPatterns" in loaded_modules:
+def init_QtXmlPatterns():
     import PySide2.QtXmlPatterns
     from PySide2.QtXmlPatterns import QXmlName
     type_map.update({
         "QXmlName.PrefixCode": Missing("PySide2.QtXmlPatterns.QXmlName.PrefixCode"),
         "QXmlName.NamespaceCode": Missing("PySide2.QtXmlPatterns.QXmlName.NamespaceCode")
     })
+    return locals()
 
-# QtMultimedia
-if "PySide2.QtMultimedia" in loaded_modules:
+def init_QtMultimedia():
     import PySide2.QtMultimedia
     import PySide2.QtMultimediaWidgets
     type_map.update({
@@ -298,9 +297,9 @@ if "PySide2.QtMultimedia" in loaded_modules:
         "QGraphicsVideoItem": PySide2.QtMultimediaWidgets.QGraphicsVideoItem,
         "QVideoWidget": PySide2.QtMultimediaWidgets.QVideoWidget,
     })
+    return locals()
 
-# QtOpenGL
-if "PySide2.QtOpenGL" in loaded_modules:
+def init_QtOpenGL():
     import PySide2.QtOpenGL
     type_map.update({
         "GLuint": int,
@@ -311,9 +310,9 @@ if "PySide2.QtOpenGL" in loaded_modules:
         "PySide2.QtOpenGL.GLuint": int,
         "GLfloat": float, # 5.6, MSVC 15
     })
+    return locals()
 
-# QtQml
-if "PySide2.QtQml" in loaded_modules:
+def init_QtQml():
     import PySide2.QtQml
     type_map.update({
         "QJSValueList()": [],
@@ -321,43 +320,46 @@ if "PySide2.QtQml" in loaded_modules:
         # from 5.9
         "QVariantHash()": {},
     })
+    return locals()
 
-# QtQml
-if "PySide2.QtQuick" in loaded_modules:
+def init_QtQuick():
     import PySide2.QtQuick
     type_map.update({
         "PySide2.QtQuick.QSharedPointer": int,
         "PySide2.QtCore.uint": int,
         "T": int,
     })
+    return locals()
 
-# QtScript
-if "PySide2.QtScript" in loaded_modules:
+def init_QtScript():
     import PySide2.QtScript
     type_map.update({
         "QScriptValueList()": [],
     })
+    return locals()
 
-# QtTest
-if "PySide2.QtTest" in loaded_modules:
+def init_QtTest():
     import PySide2.QtTest
     type_map.update({
         "PySide2.QtTest.QTouchEventSequence": PySide2.QtTest.QTest.QTouchEventSequence,
     })
+    return locals()
 
 # from 5.9
-if "PySide2.QtWebEngineWidgets" in loaded_modules:
+def init_QtWebEngineWidgets():
     import PySide2.QtWebEngineWidgets
     type_map.update({
         "PySide2.QtTest.QTouchEventSequence": PySide2.QtTest.QTest.QTouchEventSequence,
     })
+    return locals()
 
 # from 5.6, MSVC
-if "PySide2.QtWinExtras" in loaded_modules:
+def init_QtWinExtras():
     import PySide2.QtWinExtras
     type_map.update({
         "QList< QWinJumpListItem* >()": [],
     })
+    return locals()
 
 # Here was testbinding, actually the source of all evil.
 
