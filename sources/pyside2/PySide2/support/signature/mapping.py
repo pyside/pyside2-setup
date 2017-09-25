@@ -109,13 +109,13 @@ class Reloader(object):
         if self.sys_module_count == len(sys.modules):
             return
         self.sys_module_count = len(sys.modules)
+        g = globals()
         for mod_name in self.uninitialized[:]:
             if "PySide2." + mod_name in sys.modules:
                 self.uninitialized.remove(mod_name)
                 proc_name = "init_" + mod_name
-                if proc_name in globals():
-                    init_proc = globals()[proc_name]
-                    globals().update(init_proc())
+                if proc_name in g:
+                    g.update(g[proc_name]())
 
 update_mapping = Reloader().update
 type_map = {}
