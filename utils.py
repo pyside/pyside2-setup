@@ -46,6 +46,7 @@ import time
 import shutil
 import subprocess
 import fnmatch
+import glob
 import itertools
 import popenasync
 
@@ -660,6 +661,37 @@ def osx_localize_libpaths(libpath, local_libs, enc_path=None):
         back_tick('install_name_tool -add_rpath {epa} {lipa}'.format(
                   epa=enc_path, lipa=libpath ))
 
+# Find an executable specified by a glob pattern ('foo*') in the OS path
+def findGlobInPath(pattern):
+    result = []
+    if sys.platform == 'win32':
+        pattern += '.exe'
+
+    for path in os.environ.get('PATH', '').split(os.pathsep):
+        for match in glob.glob(os.path.join(path, pattern)):
+            result.append(match)
+    return result
+
+# Locate the most recent version of llvmConfig in the path.
+def findLlvmConfig():
+    versionRe = re.compile('(\d+)\.(\d+)\.(\d+)')
+    result = None
+    lastVersionString = '000000'
+    for llvmConfig in findGlobInPath('llvm-config*'):
+        try:
+            output = run_process_output([llvmConfig, '--version'])
+            if output:
+                match = versionRe.match(output[0])
+                if match:
+                    versionString = '%02d%02d%02d' % (int(match.group(1)),
+                                    int(match.group(2)), int(match.group(3)))
+                    if (versionString > lastVersionString):
+                        result = llvmConfig
+                        lastVersionString = versionString
+        except OSError:
+            pass
+    return result
+
 # Add Clang to path for Windows for the shiboken ApiExtractor tests.
 # Revisit once Clang is bundled with Qt.
 def detectClang():
@@ -669,7 +701,7 @@ def detectClang():
         source = 'CLANG_INSTALL_DIR'
         clangDir = os.environ.get(source, None)
         if not clangDir:
-            source = 'llvm-config'
+            source = findLlvmConfig()
             try:
                 output = run_process_output([source, '--prefix'])
                 if output:
