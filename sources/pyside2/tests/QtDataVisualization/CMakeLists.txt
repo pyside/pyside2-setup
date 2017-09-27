@@ -1,1 +1,1 @@
-PYSIDE_TEST(datavisualization_test.py.py)
+PYSIDE_TEST(datavisualization_test.py)
