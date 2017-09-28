@@ -3144,9 +3144,9 @@
       <include file-name="QStyle" location="global"/>
     </extra-includes>
     <modify-function signature="QApplication(int&amp;,char**,int)" access="private" />
-    <add-function signature="QApplication(PySequence)">
+    <add-function signature="QApplication(QStringList)">
         <inject-code>
-            QApplicationConstructor(%PYSELF, %1, &amp;%0);
+            QApplicationConstructor(%PYSELF, args, &amp;%0);
         </inject-code>
     </add-function>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>

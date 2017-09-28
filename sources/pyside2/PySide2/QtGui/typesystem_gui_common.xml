@@ -3233,9 +3233,9 @@
       <include file-name="QLocale" location="global"/>
     </extra-includes>
     <modify-function signature="QGuiApplication(int&amp;,char**,int)" access="private" />
-    <add-function signature="QGuiApplication(PySequence)">
+    <add-function signature="QGuiApplication(QStringList)">
         <inject-code>
-            QGuiApplicationConstructor(%PYSELF, %1, &amp;%0);
+            QGuiApplicationConstructor(%PYSELF, args, &amp;%0);
         </inject-code>
     </add-function>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>

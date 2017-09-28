@@ -3213,7 +3213,7 @@
     in a more convenient form by the :meth:`~QCoreApplication.arguments()`
     method.
     </inject-documentation>
-    <add-function signature="QCoreApplication(PySequence)">
+    <add-function signature="QCoreApplication(QStringList)">
         <inject-code>
             QCoreApplication_constructor(%PYSELF, args, &amp;%0);
         </inject-code>

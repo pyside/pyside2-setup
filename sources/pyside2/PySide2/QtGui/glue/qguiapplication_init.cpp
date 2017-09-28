@@ -50,7 +50,7 @@ bool QGuiApplicationConstructorStart(PyObject* argv)
         return false;
     }
 
-    return Shiboken::sequenceToArgcArgv(argv, &QGuiApplicationArgCount, &QGuiApplicationArgValues, "PySideApp");
+    return Shiboken::listToArgcArgv(argv, &QGuiApplicationArgCount, &QGuiApplicationArgValues, "PySideApp");
 }
 
 void QGuiApplicationConstructorEnd(PyObject* self)
@@ -61,8 +61,8 @@ void QGuiApplicationConstructorEnd(PyObject* self)
 
 static void QGuiApplicationConstructor(PyObject* self, PyObject* argv, QGuiApplicationWrapper** cptr)
 {
-    if (QGuiApplicationConstructorStart(argv)) {
-        // XXX do we need to support the ApplicationFlags parameter, instead of 0?
+    PyObject *stringlist = PyTuple_GET_ITEM(argv, 0);
+    if (QGuiApplicationConstructorStart(stringlist)) {
         *cptr = new QGuiApplicationWrapper(QGuiApplicationArgCount, QGuiApplicationArgValues, 0);
         Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject*>(self));
         QGuiApplicationConstructorEnd(self);

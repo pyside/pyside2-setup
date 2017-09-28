@@ -1238,9 +1238,10 @@ def getargvalues(frame):
     args, varargs, varkw = getargs(frame.f_code)
     return ArgInfo(args, varargs, varkw, frame.f_locals)
 
+# This function is changed because we use a local copy of typing
 def formatannotation(annotation, base_module=None):
-    if getattr(annotation, '__module__', None) == 'typing':
-        return repr(annotation).replace('typing.', '')
+    if getattr(annotation, '__module__', None) == 'PySide2.support.signature.typing':
+        return repr(annotation).replace('PySide2.support.signature.typing.', '')
     if isinstance(annotation, type):
         if annotation.__module__ in ('builtins', base_module):
             return annotation.__qualname__

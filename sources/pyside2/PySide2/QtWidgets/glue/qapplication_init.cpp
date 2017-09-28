@@ -51,7 +51,7 @@ bool QApplicationConstructorStart(PyObject* argv)
         return false;
     }
 
-    return Shiboken::sequenceToArgcArgv(argv, &QApplicationArgCount, &QApplicationArgValues, "PySideApp");
+    return Shiboken::listToArgcArgv(argv, &QApplicationArgCount, &QApplicationArgValues, "PySideApp");
 }
 
 void QApplicationConstructorEnd(PyObject* self)
@@ -71,8 +71,8 @@ void QApplicationConstructorEnd(PyObject* self)
 
 static void QApplicationConstructor(PyObject* self, PyObject* argv, QApplicationWrapper** cptr)
 {
-    if (QApplicationConstructorStart(argv)) {
-         // XXX do we need to support the ApplicationFlags parameter, instead of 0?
+    PyObject *stringlist = PyTuple_GET_ITEM(argv, 0);
+    if (QApplicationConstructorStart(stringlist)) {
         *cptr = new QApplicationWrapper(QApplicationArgCount, QApplicationArgValues, 0);
         Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject*>(self));
         QApplicationConstructorEnd(self);
