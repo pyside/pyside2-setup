@@ -1947,8 +1947,9 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             if (m_generate != TypeEntry::GenerateForSubclass &&
                 m_generate != TypeEntry::GenerateNothing &&
                 !file_name.isEmpty()) {
-                if (QFile::exists(file_name)) {
-                    QFile codeFile(file_name);
+                const QString resolved = m_database->modifiedTypesystemFilepath(file_name, false);
+                if (QFile::exists(resolved)) {
+                    QFile codeFile(resolved);
                     if (codeFile.open(QIODevice::Text | QIODevice::ReadOnly)) {
                         QString content = QLatin1String("// ========================================================================\n"
                                                         "// START of custom code block [file: ");

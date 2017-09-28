@@ -73,6 +73,11 @@
           <enum-type name="ChartType"/>
           <enum-type name="ChartTheme"/>
           <enum-type name="AnimationOption"/>
+          <modify-function signature="addSeries(QAbstractSeries*)">
+              <modify-argument index="1">
+                   <parent index="this" action="add"/>
+              </modify-argument>
+          </modify-function>
       </object-type>
       <object-type name="QChartView" since="5.7">
           <enum-type name="RubberBand"/>

@@ -1284,7 +1284,15 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
 
     AbstractMetaClass *metaClass = q->createMetaClass();
     metaClass->setTypeEntry(type);
-    metaClass->setBaseClassNames(classItem->baseClasses());
+
+    QStringList baseClassNames;
+    const QVector<_ClassModelItem::BaseClass> &baseClasses = classItem->baseClasses();
+    for (const _ClassModelItem::BaseClass &baseClass : baseClasses) {
+        if (baseClass.accessPolicy == CodeModel::Public)
+            baseClassNames.append(baseClass.name);
+    }
+
+    metaClass->setBaseClassNames(baseClassNames);
     *metaClass += AbstractMetaAttributes::Public;
     if (type->stream())
         metaClass->setStream(true);
@@ -2877,19 +2885,19 @@ bool AbstractMetaBuilderPrivate::isQObject(const FileModelItem &dom, const QStri
             classItem = ns->findClass(names.at(names.size() - 1));
     }
 
-    bool isqobject = classItem && classItem->extendsClass(QLatin1String("QObject"));
+    if (classItem == nullptr)
+        return false;
 
-    if (classItem && !isqobject) {
-        QStringList baseClasses = classItem->baseClasses();
-        for (int i = 0; i < baseClasses.count(); ++i) {
+    if (classItem->extendsClass(QLatin1String("QObject")))
+        return true;
 
-            isqobject = isQObject(dom, baseClasses.at(i));
-            if (isqobject)
-                break;
-        }
+    const QVector<_ClassModelItem::BaseClass> &baseClasses = classItem->baseClasses();
+    for (const _ClassModelItem::BaseClass &baseClass : baseClasses) {
+        if (isQObject(dom, baseClass.name))
+            return true;
     }
 
-    return isqobject;
+    return false;
 }
 
 

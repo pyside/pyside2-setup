@@ -676,4 +676,7 @@ def detectClang():
                     clangDir = output[0]
             except OSError:
                 pass
+    if clangDir:
+        arch = '64' if sys.maxsize > 2**31-1 else '32'
+        clangDir = clangDir.replace('_ARCH_', arch)
     return (clangDir, source)

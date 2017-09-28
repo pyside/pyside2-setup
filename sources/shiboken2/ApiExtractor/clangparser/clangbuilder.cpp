@@ -444,10 +444,11 @@ void BuilderPrivate::addBaseClass(const CXCursor &cursor)
     QString baseClassName = getTypeName(inheritedType);       // use type.
     const CXCursor declCursor = clang_getTypeDeclaration(inheritedType);
     const CursorClassHash::const_iterator it = m_cursorClassHash.constFind(declCursor);
+    const CodeModel::AccessPolicy access = accessPolicy(clang_getCXXAccessSpecifier(cursor));
     if (it == m_cursorClassHash.constEnd()) {
         // Set unqualified name. This happens in cases like "class X : public std::list<...>"
         // "template<class T> class Foo : public T" and standard types like true_type, false_type.
-        m_currentClass->setBaseClasses(m_currentClass->baseClasses() << baseClassName);
+        m_currentClass->addBaseClass(baseClassName, access);
         return;
     }
     // Completely qualify the class name by looking it up and taking its scope
@@ -468,7 +469,7 @@ void BuilderPrivate::addBaseClass(const CXCursor &cursor)
         baseClassName.prepend(colonColon());
         baseClassName.prepend(baseScope.join(colonColon()));
     }
-    m_currentClass->setBaseClasses(m_currentClass->baseClasses() << baseClassName);
+    m_currentClass->addBaseClass(baseClassName, access);
 }
 
 static inline CXCursor definitionFromTypeRef(const CXCursor &typeRefCursor)
@@ -514,11 +515,28 @@ Builder::~Builder()
     delete d;
 }
 
+static inline bool compareHeaderName(const char *haystack, const char *needle)
+{
+    const char *lastSlash = strrchr(haystack, '/');
+#ifdef Q_OS_WIN
+    if (lastSlash == nullptr)
+        lastSlash = strrchr(haystack, '\\');
+#endif
+    if (lastSlash == nullptr)
+        lastSlash = haystack;
+    else
+        ++lastSlash;
+#ifdef Q_OS_WIN
+   return _stricmp(lastSlash, needle) == 0;
+#else
+    return strcmp(lastSlash, needle) == 0;
+#endif
+}
+
 bool Builder::visitLocation(const CXSourceLocation &location) const
 {
     if (clang_Location_isInSystemHeader(location) == 0)
         return true;
-#ifdef Q_OS_WIN
     CXFile file; // void *
     unsigned line;
     unsigned column;
@@ -528,12 +546,11 @@ bool Builder::visitLocation(const CXSourceLocation &location) const
     // Has been observed to be 0 for invalid locations
     if (const char *cFileName = clang_getCString(cxFileName)) {
         // Resolve OpenGL typedefs although the header is considered a system header.
-        const bool visitHeader = _stricmp(cFileName, "GL/gl.h") || _stricmp(cFileName, "gl.h") == 0;
+        const bool visitHeader = compareHeaderName(cFileName, "gl.h");
         clang_disposeString(cxFileName);
         if (visitHeader)
             return true;
     }
-#endif // Q_OS_WIN
     return false;
 }
 

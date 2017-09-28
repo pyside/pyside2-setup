@@ -47,6 +47,7 @@ bindingmanager.cpp
 threadstatesaver.cpp
 typeresolver.cpp
 shibokenbuffer.cpp
+signature.cpp
 )
 
 get_numpy_location()
@@ -89,6 +90,7 @@ install(FILES
         typeresolver.h
         shibokenbuffer.h
         sbkpython.h
+        signature.h
         "${CMAKE_CURRENT_BINARY_DIR}/sbkversion.h"
         DESTINATION include/shiboken2${shiboken2_SUFFIX})
 install(TARGETS libshiboken EXPORT shiboken2

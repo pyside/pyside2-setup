@@ -10,6 +10,26 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_utils.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/_utils.py" @ONLY)
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/__init__.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/__init__.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/__init__.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/__init__.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/loader.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/loader.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/mapping.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/mapping.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/parser.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/parser.py" COPYONLY)
+if (PYTHON_VERSION_MAJOR EQUAL 3)
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/inspect.py"
+                   "${CMAKE_CURRENT_BINARY_DIR}/support/signature/inspect.py" COPYONLY)
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/typing.py"
+                   "${CMAKE_CURRENT_BINARY_DIR}/support/signature/typing.py" COPYONLY)
+else()
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/backport_inspect.py"
+                   "${CMAKE_CURRENT_BINARY_DIR}/support/signature/backport_inspect.py" COPYONLY)
+endif()
+
 # Add the collected includes to the global include
 file(READ   "${CMAKE_CURRENT_BINARY_DIR}/pyside2_global.h.add" GLOBAL_APPEND)
 file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/pyside2_global.h" "${GLOBAL_APPEND}")
