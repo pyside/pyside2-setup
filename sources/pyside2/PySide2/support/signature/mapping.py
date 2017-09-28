@@ -227,6 +227,7 @@ def init_QtCore():
         "PySide2.QtCore.uint32_t": int, # 5.9
         "float[][]": FloatMatrix, # 5.9
         "PySide2.QtCore.unsigned int": int, # 5.9 Ubuntu
+        "PySide2.QtCore.long long": int, # 5.9, MSVC 15
     })
     try:
         type_map.update({
