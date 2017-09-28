@@ -4360,7 +4360,6 @@ void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunction
             }
             args << arg->name() + QLatin1Char(':') + strArg;
         }
-        s << INDENT;
         // mark the multiple signatures as such, to make it easier to generate different code
         if (multiple)
             s << idx-- << ':';
@@ -4691,17 +4690,12 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     // PYSIDE-510: Create a signatures string for the introspection feature.
     s << "// The signatures string for the functions." << endl;
     s << "// Multiple signatures have their index \"n:\" in front." << endl;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 7, 0)
-    s << "const char " << initFunctionName << "_SignaturesString[] = R\"\"\"(\n"
-        << signatureStream.readAll() << ")\"\"\";" << endl << endl;
-#else
     s << "const char " << initFunctionName << "_SignaturesString[] = \"\"" << endl;
     QString line;
     while (signatureStream.readLineInto(&line)) {
-        s << '"' << line << "\\n\"" << endl;
+        s << INDENT << '"' << line << "\\n\"" << endl;
     }
     s << ';' << endl << endl;
-#endif
     s << "void init_" << initFunctionName;
     s << "(PyObject* " << enclosingObjectVariable << ")" << endl;
     s << '{' << endl;
@@ -5556,17 +5550,12 @@ bool CppGenerator::finishGeneration()
         // PYSIDE-510: Create a signatures string for the introspection feature.
         s << "// The signatures string for the global functions." << endl;
         s << "// Multiple signatures have their index \"n:\" in front." << endl;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 7, 0)
-        s << "const char " << moduleName() << "_SignaturesString[] = R\"\"\"(\n"
-            << signatureStream.readAll() << ")\"\"\";" << endl << endl;
-#else
         s << "const char " << moduleName() << "_SignaturesString[] = \"\"" << endl;
         QString line;
         while (signatureStream.readLineInto(&line)) {
-            s << '"' << line << "\\n\"" << endl;
+            s << INDENT << '"' << line << "\\n\"" << endl;
         }
         s << ';' << endl;
-#endif
         // finish the rest of __signature__ initialization.
         s << INDENT << "FinishSignatureInitialization(module, " << moduleName()
             << "_SignaturesString);" << endl << endl;
