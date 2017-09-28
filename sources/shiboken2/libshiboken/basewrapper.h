@@ -207,7 +207,9 @@ LIBSHIBOKEN_API void        initPrivateData(SbkObjectType* self);
  */
 LIBSHIBOKEN_API bool        introduceWrapperType(PyObject* enclosingObject,
                                                  const char* typeName, const char* originalName,
-                                                 SbkObjectType* type, ObjectDestructor cppObjDtor = 0,
+                                                 SbkObjectType* type,
+                                                 const char* signaturesString,
+                                                 ObjectDestructor cppObjDtor = 0,
                                                  SbkObjectType* baseType = 0, PyObject* baseTypes = 0,
                                                  bool isInnerClass = false);
 
