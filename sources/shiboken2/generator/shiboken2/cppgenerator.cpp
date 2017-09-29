@@ -4420,18 +4420,10 @@ void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunction
     int idx = overloads.length() - 1;
     bool multiple = idx > 0;
 
-// after merging, the #if may be removed!
-#if QT_VERSION >= QT_VERSION_CHECK(5, 7, 0)
     for (const AbstractMetaFunction *f : overloads) {
         QStringList args;
         const AbstractMetaArgumentList &arguments = f->arguments();
-        for (AbstractMetaArgument *arg : arguments)  {
-#else
-    foreach (const AbstractMetaFunction *f, overloads) {
-        QStringList args;
-        const AbstractMetaArgumentList &arguments = f->arguments();
-        foreach (const AbstractMetaArgument *arg, arguments) {
-#endif
+        for (const AbstractMetaArgument *arg : arguments)  {
             QString strArg = resolveRetOrArgType(arg->type());
             if (!arg->defaultValueExpression().isEmpty()) {
                 strArg += QLatin1Char('=');
@@ -4449,9 +4441,8 @@ void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunction
         // now calculate the return type.
         s << funcName << '(' << args.join(QLatin1Char(',')) << ')';
         AbstractMetaType *returnType = getTypeWithoutContainer(f->type());
-        if (returnType) {
+        if (returnType)
             s << "->" << resolveRetOrArgType(returnType);
-        }
         s << endl;
     }
 }
@@ -4778,9 +4769,8 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     s << "// Multiple signatures have their index \"n:\" in front." << endl;
     s << "const char " << initFunctionName << "_SignaturesString[] = \"\"" << endl;
     QString line;
-    while (signatureStream.readLineInto(&line)) {
+    while (signatureStream.readLineInto(&line))
         s << INDENT << '"' << line << "\\n\"" << endl;
-    }
     s << ';' << endl << endl;
     s << "void init_" << initFunctionName;
     s << "(PyObject* " << enclosingObjectVariable << ")" << endl;
@@ -5649,9 +5639,8 @@ bool CppGenerator::finishGeneration()
         s << "// Multiple signatures have their index \"n:\" in front." << endl;
         s << "const char " << moduleName() << "_SignaturesString[] = \"\"" << endl;
         QString line;
-        while (signatureStream.readLineInto(&line)) {
+        while (signatureStream.readLineInto(&line))
             s << INDENT << '"' << line << "\\n\"" << endl;
-        }
         s << ';' << endl;
         // finish the rest of __signature__ initialization.
         s << INDENT << "FinishSignatureInitialization(module, " << moduleName()

@@ -308,7 +308,7 @@ GetSignature_TypeMod(PyObject *ob)
 }
 
 
-const char *PySide_PythonCode = (const char *)
+static const char PySide_PythonCode[] =
     "from __future__ import print_function, absolute_import\n"
     "import sys, os, traceback\n"
 
