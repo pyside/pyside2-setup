@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of PySide2.
@@ -37,13 +37,17 @@
 **
 ****************************************************************************/
 
-// Init qApp macro to None.
-if (qApp) {
-    PyObject* pyApp = %CONVERTTOPYTHON[QApplication*](qApp);
-    Py_INCREF(pyApp);
-    PyModule_AddObject(module, "qApp", pyApp);
-} else {
-    Py_INCREF(Py_None);
-    PyModule_AddObject(module, "qApp", Py_None);
-}
-moduleQtWidgets = module;
+#ifndef QAPP_MACRO_H
+#define QAPP_MACRO_H
+
+#include "sbkpython.h"
+
+extern "C"
+{
+
+LIBSHIBOKEN_API PyObject *MakeSingletonQAppWrapper(PyTypeObject *type);
+LIBSHIBOKEN_API void NotifyModuleForQApp(PyObject *module);
+
+} // extern "C"
+
+#endif // QAPP_MACRO_H

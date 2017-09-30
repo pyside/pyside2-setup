@@ -3220,10 +3220,7 @@
   <!-- Qt5: not sure if this needs support, skipped for now -->
   <rejection class="QWindow" function-name="nativeEvent"/>"
 
-  <!-- Qt5: here the new QGuiApplication and related things -->
   <object-type name="QGuiApplication">
-    <!-- Qt5: gone <enum-type name="ColorSpec"/> -->
-    <!-- Qt5: gone <enum-type name="Type"/> -->
     <extra-includes>
       <include file-name="QBasicTimer" location="global"/>
       <include file-name="QFont" location="global"/>

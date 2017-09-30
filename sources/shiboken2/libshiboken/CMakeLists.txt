@@ -38,6 +38,7 @@ threadstatesaver.cpp
 typeresolver.cpp
 shibokenbuffer.cpp
 signature.cpp
+qapp_macro.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
@@ -71,6 +72,7 @@ install(FILES
         shibokenbuffer.h
         sbkpython.h
         signature.h
+        qapp_macro.h
         "${CMAKE_CURRENT_BINARY_DIR}/sbkversion.h"
         DESTINATION include/shiboken2${shiboken2_SUFFIX})
 install(TARGETS libshiboken EXPORT shiboken2

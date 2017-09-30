@@ -52,6 +52,7 @@
 #include <algorithm>
 #include "threadstatesaver.h"
 #include "signature.h"
+#include "qapp_macro.h"
 
 namespace {
     void _destroyParentInfo(SbkObject* obj, bool keepReference);
@@ -243,7 +244,9 @@ static void SbkDeallocWrapperCommon(PyObject* pyObj, bool canDelete)
     // be invoked and it trying to delete this object while it is still in
     // progress from the first time around, resulting in a double delete and a
     // crash.
-    PyObject_GC_UnTrack(pyObj);
+    // PYSIDE-571: Some objects do not use GC, so check this!
+    if (PyObject_IS_GC(pyObj))
+        PyObject_GC_UnTrack(pyObj);
 
     // Check that Python is still initialized as sometimes this is called by a static destructor
     // after Python interpeter is shutdown.
@@ -276,6 +279,13 @@ static void SbkDeallocWrapperCommon(PyObject* pyObj, bool canDelete)
 void SbkDeallocWrapper(PyObject* pyObj)
 {
     SbkDeallocWrapperCommon(pyObj, true);
+}
+
+void SbkDeallocQAppWrapper(PyObject* pyObj)
+{
+    SbkDeallocWrapper(pyObj);
+    // PYSIDE-571: make sure to create a singleton deleted qApp.
+    MakeSingletonQAppWrapper(NULL);
 }
 
 void SbkDeallocWrapperWithPrivateDtor(PyObject* self)
@@ -375,9 +385,8 @@ PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* k
     return reinterpret_cast<PyObject*>(newType);
 }
 
-PyObject* SbkObjectTpNew(PyTypeObject* subtype, PyObject*, PyObject*)
+static PyObject *_setupNew(SbkObject *self, PyTypeObject *subtype)
 {
-    SbkObject* self = PyObject_GC_New(SbkObject, subtype);
     Py_INCREF(reinterpret_cast<PyObject*>(subtype));
     SbkObjectPrivate* d = new SbkObjectPrivate;
 
@@ -394,8 +403,33 @@ PyObject* SbkObjectTpNew(PyTypeObject* subtype, PyObject*, PyObject*)
     self->ob_dict = 0;
     self->weakreflist = 0;
     self->d = d;
-    PyObject_GC_Track(reinterpret_cast<PyObject*>(self));
     return reinterpret_cast<PyObject*>(self);
+}
+
+PyObject* SbkObjectTpNew(PyTypeObject *subtype, PyObject *, PyObject *)
+{
+    SbkObject *self = PyObject_GC_New(SbkObject, subtype);
+    PyObject *res = _setupNew(self, subtype);
+    PyObject_GC_Track(reinterpret_cast<PyObject*>(self));
+    return res;
+}
+
+PyObject* SbkQAppTpNew(PyTypeObject* subtype, PyObject *, PyObject *)
+{
+    // PYSIDE-571:
+    // For qApp, we need to create a singleton Python object.
+    // We cannot track this with the GC, because it is a static variable!
+
+    // Python2 has a weird handling of flags in derived classes that Python3
+    // does not have. Observed with bug_307.py.
+    // But it could theoretically also happen with Python3.
+    // Therefore we enforce that there is no GC flag, ever!
+    if (PyType_HasFeature(subtype, Py_TPFLAGS_HAVE_GC)) {
+        subtype->tp_flags &= ~Py_TPFLAGS_HAVE_GC;
+        subtype->tp_free = PyObject_Del;
+    }
+    SbkObject* self = reinterpret_cast<SbkObject*>(MakeSingletonQAppWrapper(subtype));
+    return self == 0 ? 0 : _setupNew(self, subtype);
 }
 
 
@@ -1372,7 +1406,9 @@ void deallocData(SbkObject* self, bool cleanup)
     }
     delete self->d; // PYSIDE-205: always delete d.
     Py_XDECREF(self->ob_dict);
-    Py_TYPE(self)->tp_free(self);
+    // PYSIDE-571: qApp is no longer allocated.
+    if (PyObject_IS_GC((PyObject*)self))
+        Py_TYPE(self)->tp_free(self);
 }
 
 void setTypeUserData(SbkObject* wrapper, void* userData, DeleteUserDataFunc d_func)

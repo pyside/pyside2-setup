@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of PySide2.
@@ -37,22 +37,14 @@
 **
 ****************************************************************************/
 
-// Global variables used to store argc and argv values
-static int QCoreApplicationArgCount;
-static char** QCoreApplicationArgValues;
-
-void QCoreApplication_constructor(PyObject* self, PyObject* argv, QCoreApplicationWrapper** cptr)
+static void QCoreApplicationConstructor(PyObject *self, PyObject *pyargv, QCoreApplicationWrapper **cptr)
 {
-    if (QCoreApplication::instance()) {
-        PyErr_SetString(PyExc_RuntimeError, "A QCoreApplication instance already exists.");
-        return;
-    }
-
-    PyObject *stringlist = PyTuple_GET_ITEM(argv, 0);
-    if (Shiboken::listToArgcArgv(stringlist, &QCoreApplicationArgCount, &QCoreApplicationArgValues, "PySideApp")) {
-        *cptr = new QCoreApplicationWrapper(QCoreApplicationArgCount, QCoreApplicationArgValues);
+    static int argc;
+    static char **argv;
+    PyObject *stringlist = PyTuple_GET_ITEM(pyargv, 0);
+    if (Shiboken::listToArgcArgv(stringlist, &argc, &argv, "PySideApp")) {
+        *cptr = new QCoreApplicationWrapper(argc, argv);
         Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject*>(self));
         PySide::registerCleanupFunction(&PySide::destroyQCoreApplication);
-        Py_INCREF(self);
     }
 }

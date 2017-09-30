@@ -66,6 +66,7 @@ struct LIBSHIBOKEN_API SbkObject
 
 /// Dealloc the python object \p pyObj and the C++ object represented by it.
 LIBSHIBOKEN_API void SbkDeallocWrapper(PyObject* pyObj);
+LIBSHIBOKEN_API void SbkDeallocQAppWrapper(PyObject* pyObj);
 LIBSHIBOKEN_API void SbkDeallocWrapperWithPrivateDtor(PyObject* self);
 
 struct SbkObjectType;
@@ -105,6 +106,8 @@ struct LIBSHIBOKEN_API SbkObjectType
 };
 
 LIBSHIBOKEN_API PyObject* SbkObjectTpNew(PyTypeObject* subtype, PyObject*, PyObject*);
+// the special case of a switchable singleton
+LIBSHIBOKEN_API PyObject* SbkQAppTpNew(PyTypeObject *subtype, PyObject *args, PyObject *kwds);
 
 } // extern "C"
 
