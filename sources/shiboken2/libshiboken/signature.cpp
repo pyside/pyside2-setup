@@ -323,7 +323,7 @@ static const char PySide_PythonCode[] =
     "        print('Exception:', e)\n"
     "        traceback.print_exc(file=sys.stdout)\n"
     "    globals().update(locals())\n"
-     ;
+    "";
 
 static safe_globals_struc *
 init_phase_1(void)
