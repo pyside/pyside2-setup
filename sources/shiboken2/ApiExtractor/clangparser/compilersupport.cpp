@@ -138,6 +138,7 @@ QByteArrayList emulatedCompilerOptions()
 #if defined(Q_CC_MSVC)
     const HeaderPaths headerPaths;
     result.append(QByteArrayLiteral("-fms-compatibility-version=19"));
+    result.append(QByteArrayLiteral("-Wno-microsoft-enum-value"));
 #elif defined(Q_CC_CLANG)
     const HeaderPaths headerPaths = gppInternalIncludePaths(QStringLiteral("clang++"));
     result.append(noStandardIncludeOption());
