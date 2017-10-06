@@ -41,11 +41,6 @@ ${QtDataVisualization_GEN_DIR}/qtdatavisualization_wrapper.cpp
 ${QtDataVisualization_GEN_DIR}/qtdatavisualization_module_wrapper.cpp
 )
 
-# Sanitize windows.h as pulled by gl.h to prevent clashes with QAbstract3dAxis::min(), etc.
-if (WIN32)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOMINMAX")
-endif()
-
 make_path(QtDataVisualization_typesystem_path
     ${QtCore_SOURCE_DIR}
     ${QtCore_BINARY_DIR}
