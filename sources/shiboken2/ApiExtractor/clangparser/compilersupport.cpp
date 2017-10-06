@@ -120,6 +120,18 @@ static HeaderPaths gppInternalIncludePaths(const QString &compiler)
 }
 #endif // Q_CC_MSVC
 
+// Detect Vulkan as supported from Qt 5.10 by checking the environment variables.
+static void detectVulkan(HeaderPaths *headerPaths)
+{
+    static const char *vulkanVariables[] = {"VULKAN_SDK", "VK_SDK_PATH"};
+    for (const char *vulkanVariable : vulkanVariables) {
+        if (qEnvironmentVariableIsSet(vulkanVariable)) {
+            headerPaths->append(HeaderPath(qgetenv(vulkanVariable) + QByteArrayLiteral("/include")));
+            break;
+        }
+    }
+}
+
 // For MSVC, we set the MS compatibility version and let Clang figure out its own
 // options and include paths.
 // For the others, we pass "-nostdinc" since libclang tries to add it's own system
@@ -136,14 +148,14 @@ QByteArrayList emulatedCompilerOptions()
 {
     QByteArrayList result;
 #if defined(Q_CC_MSVC)
-    const HeaderPaths headerPaths;
+    HeaderPaths headerPaths;
     result.append(QByteArrayLiteral("-fms-compatibility-version=19"));
     result.append(QByteArrayLiteral("-Wno-microsoft-enum-value"));
 #elif defined(Q_CC_CLANG)
-    const HeaderPaths headerPaths = gppInternalIncludePaths(QStringLiteral("clang++"));
+    HeaderPaths headerPaths = gppInternalIncludePaths(QStringLiteral("clang++"));
     result.append(noStandardIncludeOption());
 #elif defined(Q_CC_GNU)
-    const HeaderPaths headerPaths;
+    HeaderPaths headerPaths;
 
     // The clang builtin includes directory is used to find the definitions for intrinsic functions
     // and builtin types. It is necessary to use the clang includes to prevent redefinition errors.
@@ -156,8 +168,9 @@ QByteArrayList emulatedCompilerOptions()
         result.append(clangBuiltinIncludesDir);
     }
 #else
-    const HeaderPaths headerPaths;
+    HeaderPaths headerPaths;
 #endif
+    detectVulkan(&headerPaths);
     std::transform(headerPaths.cbegin(), headerPaths.cend(),
                    std::back_inserter(result), [](const HeaderPath &p) {
                        return HeaderPath::includeOption(p, true);
