@@ -58,11 +58,6 @@ ${QtCharts_GEN_DIR}/qtcharts_wrapper.cpp
 ${QtCharts_GEN_DIR}/qtcharts_module_wrapper.cpp
 )
 
-# Sanitize windows.h as pulled by gl.h to prevent clashes with QValueAxis::min(), etc.
-if (WIN32)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOMINMAX")
-endif()
-
 make_path(QtCharts_typesystem_path
     ${QtCore_SOURCE_DIR}
     ${QtCore_BINARY_DIR}

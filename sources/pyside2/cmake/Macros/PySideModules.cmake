@@ -105,6 +105,8 @@ macro(create_pyside_module
                           LIBRARY_OUTPUT_DIRECTORY ${pyside2_BINARY_DIR})
     if(WIN32)
         set_target_properties(${module_name} PROPERTIES SUFFIX ".pyd")
+        # Sanitize windows.h as pulled by gl.h to prevent clashes with QAbstract3dAxis::min(), etc.
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOMINMAX")
     endif()
 
     target_link_libraries(${module_name} ${${module_libraries}})
