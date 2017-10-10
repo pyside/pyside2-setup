@@ -228,6 +228,7 @@ def init_QtCore():
         "float[][]": FloatMatrix, # 5.9
         "PySide2.QtCore.unsigned int": int, # 5.9 Ubuntu
         "PySide2.QtCore.long long": int, # 5.9, MSVC 15
+        "QGenericArgument(nullptr)": QGenericArgument(None), # 5.10
     })
     try:
         type_map.update({
