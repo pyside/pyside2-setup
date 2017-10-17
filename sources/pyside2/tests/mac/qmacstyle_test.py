@@ -34,12 +34,14 @@ import unittest
 
 from helper import UsesQApplication
 
-QMacStyle = type(QStyleFactory.create('Macintosh'))
-
 class QMacStyleTest(UsesQApplication):
+    def setUp(self):
+        UsesQApplication.setUp(self)
+        self.QMacStyle = type(QStyleFactory.create('Macintosh'))
+
     def testWidgetStyle(self):
         w = QLabel('Hello')
-        self.assertTrue(isinstance(w.style(), QMacStyle))
+        self.assertTrue(isinstance(w.style(), self.QMacStyle))
 
 if __name__ == '__main__':
     unittest.main()
