@@ -32,6 +32,7 @@
 #include <QtCore/QDebug>
 #include <QtCore/QProcess>
 #include <QtCore/QStringList>
+#include <QtCore/QVersionNumber>
 
 #include <string.h>
 #include <algorithm>
@@ -132,6 +133,16 @@ static void detectVulkan(HeaderPaths *headerPaths)
     }
 }
 
+#if defined(Q_CC_GNU)
+static inline bool isRedHat74()
+{
+    if (QSysInfo::productType() != QLatin1String("rhel"))
+        return false;
+    const QVersionNumber osVersion = QVersionNumber::fromString(QSysInfo::productVersion());
+    return osVersion.isNull() || osVersion >= QVersionNumber(7, 4);
+}
+#endif // Q_CC_GNU
+
 // For MSVC, we set the MS compatibility version and let Clang figure out its own
 // options and include paths.
 // For the others, we pass "-nostdinc" since libclang tries to add it's own system
@@ -166,6 +177,16 @@ QByteArrayList emulatedCompilerOptions()
     if (!clangBuiltinIncludesDir.isEmpty()) {
         result.append(QByteArrayLiteral("-isystem"));
         result.append(clangBuiltinIncludesDir);
+    }
+    // Append the c++ include paths since Clang is unable to find <list> etc
+    // on RHEL 7.4 with g++ 6.3. A fix for this has been added to Clang 5.0,
+    // so, the code can be removed once Clang 5.0 is the minimum version.
+    if (isRedHat74()) {
+        const HeaderPaths gppPaths = gppInternalIncludePaths(QStringLiteral("g++"));
+        for (const HeaderPath &h : gppPaths) {
+            if (h.path.contains("c++"))
+                headerPaths.append(h);
+        }
     }
 #else
     HeaderPaths headerPaths;
