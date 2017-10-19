@@ -49,7 +49,7 @@ you are changing messages (what I did, of course :-) .
 
 import os
 
-patched_modules = "inspect backport_inspect typing"
+patched_modules = "inspect backport_inspect typing27 typing36"
 
 offending_words = {
     "behavio""ur": "behavior",
