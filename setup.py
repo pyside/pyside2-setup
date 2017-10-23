@@ -49,6 +49,10 @@ to build and install into your current Python installation.
 
 On Linux you can use option --standalone, to embed Qt libraries to PySide2 distribution
 
+You can use option --rpath="your_value" to specify what rpath values should be embedded into the
+PySide2 modules and shared libraries. This overrides the automatically generated values when the
+option is not specified.
+
 You can use option --only-package, if you want to create more binary packages (bdist_wheel, bdist_egg, ...)
 without rebuilding entire PySide2 every time:
   # First time we create bdist_wheel with full PySide2 build
@@ -176,7 +180,7 @@ from utils import update_env_path
 from utils import init_msvc_env
 from utils import regenerate_qt_resources
 from utils import filter_match
-from utils import osx_localize_libpaths
+from utils import osx_fix_rpaths_for_library
 
 # guess a close folder name for extensions
 def get_extension_folder(ext):
@@ -233,6 +237,7 @@ OPTION_REUSE_BUILD = has_option("reuse-build")
 OPTION_SKIP_CMAKE = has_option("skip-cmake")
 OPTION_SKIP_MAKE_INSTALL = has_option("skip-make-install")
 OPTION_SKIP_PACKAGING = has_option("skip-packaging")
+OPTION_RPATH_VALUES = option_value("rpath")
 
 if OPTION_QT_VERSION is None:
     OPTION_QT_VERSION = "5"
@@ -1226,7 +1231,13 @@ class pyside_build(_build):
             pyside_libs = [lib for lib in os.listdir(package_path) if filter_match(
                           lib, ["*.so", "*.dylib"])]
             def rpath_cmd(srcpath):
-                osx_localize_libpaths(srcpath, pyside_libs, None)
+                final_rpath = ''
+                # Command line rpath option takes precedence over automatically added one.
+                if OPTION_RPATH_VALUES:
+                    final_rpath = OPTION_RPATH_VALUES
+                else:
+                    final_rpath = self.qtinfo.libs_dir
+                osx_fix_rpaths_for_library(srcpath, final_rpath)
 
         else:
             raise RuntimeError('Not configured for platform ' +

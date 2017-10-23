@@ -549,7 +549,7 @@ def osx_get_install_names(libpath):
 OSX_RPATH_RE = re.compile(r"path (.+) \(offset \d+\)")
 
 def osx_get_rpaths(libpath):
-    """ Get rpaths from library `libpath` using ``otool``
+    """ Get rpath load commands from library `libpath` using ``otool``
 
     Parameters
     ----------
@@ -583,40 +583,74 @@ def osx_get_rpaths(libpath):
     return rpaths
 
 
-def osx_localize_libpaths(libpath, local_libs, enc_path=None):
-    """ Set rpaths and install names to load local dynamic libs at run time
+def osx_fix_rpaths_for_library(library_path, qt_lib_dir):
+    """ Adds required rpath load commands to given library.
 
-    Use ``install_name_tool`` to set relative install names in `libpath` (as
-    named in `local_libs` to be relative to `enc_path`.  The default for
-    `enc_path` is the directory containing `libpath`.
+    This is a necessary post-installation step, to allow loading PySide modules without setting
+    DYLD_LIBRARY_PATH or DYLD_FRAMEWORK_PATH.
+    The CMake rpath commands which are added at build time  are used only for testing (make check),
+    and they are stripped once the equivalent of make install is executed (except for shiboken,
+    which currently uses CMAKE_INSTALL_RPATH_USE_LINK_PATH, which might be necessary to remove in
+    the future).
 
     Parameters
     ----------
-    libpath : str
-        path to library for which to set install names and rpaths
-    local_libs : sequence of str
-        library (install) names that should be considered relative paths
-    enc_path : str, optional
-        path that does or will contain the `libpath` library, and to which the
-        `local_libs` are relative.  Defaults to current directory containing
-        `libpath`.
+    library_path : str
+        path to library for which to set rpaths.
+    qt_lib_dir : str
+        rpath to installed Qt lib directory.
     """
-    if enc_path is None:
-        enc_path = os.path.abspath(os.path.dirname(libpath))
-    install_names = osx_get_install_names(libpath)
-    need_rpath = False
+
+    install_names = osx_get_install_names(library_path)
+    existing_rpath_commands = osx_get_rpaths(library_path)
+
+    needs_loader_path = False
     for install_name in install_names:
+        # Absolute path, skip it.
         if install_name[0] == '/':
-            # absolute path, nothing to do
             continue
-        # we possibly need to add an rpath command.
-        # note that a @rpath may be there already, but no rpath command.
-        # this happens when Qt is not linked (with qt5 this is the default)
-        need_rpath = True
-        if install_name[0] != '@':
-            # we need to change a relative path to @rpath
-            back_tick('install_name_tool -change {ina} @rpath/{ina} {lipa}'.format(
-                      ina=install_name, lipa=libpath ))
-    if need_rpath and enc_path not in osx_get_rpaths(libpath):
-        back_tick('install_name_tool -add_rpath {epa} {lipa}'.format(
-                  epa=enc_path, lipa=libpath ))
+
+        # If there are dynamic library install names that contain @rpath tokens, we will
+        # provide an rpath load command with the value of "@loader_path". This will allow loading
+        # dependent libraries from within the same directory as 'library_path'.
+        if install_name[0] == '@':
+            needs_loader_path = True
+            break
+
+    if needs_loader_path and "@loader_path" not in existing_rpath_commands:
+        back_tick('install_name_tool -add_rpath {rpath} {library_path}'.format(
+                  rpath="@loader_path", library_path=library_path))
+
+    # If the library depends on a Qt library, add an rpath load comment pointing to the Qt lib
+    # directory.
+    osx_add_qt_rpath(library_path, qt_lib_dir, existing_rpath_commands, install_names)
+
+def osx_add_qt_rpath(library_path, qt_lib_dir,
+                     existing_rpath_commands = [], library_dependencies = []):
+    """ Adds an rpath load command to the Qt lib directory if necessary
+
+    Checks if library pointed to by 'library_path' has Qt dependencies, and adds an rpath load
+    command that points to the Qt lib directory (qt_lib_dir).
+    """
+    if not existing_rpath_commands:
+        existing_rpath_commands = osx_get_rpaths(library_path)
+
+    # Return early if qt rpath is already present.
+    if qt_lib_dir in existing_rpath_commands:
+        return
+
+    # Check if any library dependencies are Qt libraries (hacky).
+    if not library_dependencies:
+        library_dependencies = osx_get_install_names(library_path)
+
+    needs_qt_rpath = False
+    for library in library_dependencies:
+        if 'Qt' in library:
+            needs_qt_rpath = True
+            break
+
+    if needs_qt_rpath:
+        back_tick('install_name_tool -add_rpath {rpath} {library_path}'.format(
+                  rpath=qt_lib_dir, library_path=library_path))
+
+
