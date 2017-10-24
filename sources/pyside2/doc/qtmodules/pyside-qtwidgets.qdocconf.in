@@ -1,0 +1,2 @@
+include(@QT_SRC_DIR@/src/widgets/doc/qtwidgets.qdocconf)
+include(../pyside-config.qdocconf)

@@ -1,0 +1,2 @@
+include(@QT_SRC_DIR@/src/network/doc/qtnetwork.qdocconf)
+include(../pyside-config.qdocconf)
