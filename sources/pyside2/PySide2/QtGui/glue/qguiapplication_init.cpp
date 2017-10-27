@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of PySide2.
@@ -37,34 +37,14 @@
 **
 ****************************************************************************/
 
-// Borrowed reference to QtGui module
-extern PyObject* moduleQtGui;
-
-static int QGuiApplicationArgCount;
-static char** QGuiApplicationArgValues;
-
-bool QGuiApplicationConstructorStart(PyObject* argv)
+static void QGuiApplicationConstructor(PyObject *self, PyObject *pyargv, QGuiApplicationWrapper **cptr)
 {
-    if (QGuiApplication::instance()) {
-        PyErr_SetString(PyExc_RuntimeError, "A QGuiApplication instance already exists.");
-        return false;
-    }
-
-    return Shiboken::sequenceToArgcArgv(argv, &QGuiApplicationArgCount, &QGuiApplicationArgValues, "PySideApp");
-}
-
-void QGuiApplicationConstructorEnd(PyObject* self)
-{
-    PySide::registerCleanupFunction(&PySide::destroyQCoreApplication);
-    Py_INCREF(self);
-}
-
-static void QGuiApplicationConstructor(PyObject* self, PyObject* argv, QGuiApplicationWrapper** cptr)
-{
-    if (QGuiApplicationConstructorStart(argv)) {
-        // XXX do we need to support the ApplicationFlags parameter, instead of 0?
-        *cptr = new QGuiApplicationWrapper(QGuiApplicationArgCount, QGuiApplicationArgValues, 0);
+    static int argc;
+    static char **argv;
+    PyObject *stringlist = PyTuple_GET_ITEM(pyargv, 0);
+    if (Shiboken::listToArgcArgv(stringlist, &argc, &argv, "PySideApp")) {
+        *cptr = new QGuiApplicationWrapper(argc, argv, 0);
         Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject*>(self));
-        QGuiApplicationConstructorEnd(self);
+        PySide::registerCleanupFunction(&PySide::destroyQCoreApplication);
     }
 }

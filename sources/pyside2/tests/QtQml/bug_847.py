@@ -66,11 +66,18 @@ class TestQML(UsesQApplication):
         # Connect first, then set the property.
         view.called.connect(self.done)
         view.setSource(QUrl.fromLocalFile(adjust_filename('bug_847.qml', __file__)))
+        while view.status() == QQuickView.Loading:
+            self.app.processEvents()
+        self.assertEqual(view.status(), QQuickView.Ready)
+        self.assertTrue(view.rootObject())
         view.rootObject().setProperty('pythonObject', view)
 
         view.show()
+        while not view.isExposed():
+            self.app.processEvents()
+
         # Essentially a timeout in case method invocation fails.
-        QTimer.singleShot(2000, QCoreApplication.instance().quit)
+        QTimer.singleShot(30000, QCoreApplication.instance().quit)
         self.app.exec_()
         self.assertTrue(self._sucess)
 

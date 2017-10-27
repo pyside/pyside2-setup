@@ -3238,10 +3238,7 @@
   <!-- Qt5: not sure if this needs support, skipped for now -->
   <rejection class="QWindow" function-name="nativeEvent"/>"
 
-  <!-- Qt5: here the new QGuiApplication and related things -->
   <object-type name="QGuiApplication">
-    <!-- Qt5: gone <enum-type name="ColorSpec"/> -->
-    <!-- Qt5: gone <enum-type name="Type"/> -->
     <extra-includes>
       <include file-name="QBasicTimer" location="global"/>
       <include file-name="QFont" location="global"/>
@@ -3251,9 +3248,9 @@
       <include file-name="QLocale" location="global"/>
     </extra-includes>
     <modify-function signature="QGuiApplication(int&amp;,char**,int)" access="private" />
-    <add-function signature="QGuiApplication(PySequence)">
+    <add-function signature="QGuiApplication(QStringList)">
         <inject-code>
-            QGuiApplicationConstructor(%PYSELF, %1, &amp;%0);
+            QGuiApplicationConstructor(%PYSELF, args, &amp;%0);
         </inject-code>
     </add-function>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>

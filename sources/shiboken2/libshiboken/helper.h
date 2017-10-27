@@ -101,7 +101,7 @@ inline PyObject* makeTuple(const A& a, const B& b, const C& c, const D& d, const
 * \note The argv array is allocated using new operator and each item is allocated using malloc.
 * \returns True on sucess, false otherwise.
 */
-LIBSHIBOKEN_API bool sequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defaultAppName = 0);
+LIBSHIBOKEN_API bool listToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defaultAppName = 0);
 
 /**
  * Convert a python sequence into a heap-allocated array of ints.

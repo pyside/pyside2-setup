@@ -50,6 +50,7 @@
 #include "dynamicqmetaobject.h"
 #include "destroylistener.h"
 
+#include <qapp_macro.h>
 #include <basewrapper.h>
 #include <conversions.h>
 #include <sbkconverter.h>
@@ -174,6 +175,8 @@ void destroyQCoreApplication()
     Py_BEGIN_ALLOW_THREADS
     delete app;
     Py_END_ALLOW_THREADS
+    // PYSIDE-571: make sure to create a singleton deleted qApp.
+    MakeSingletonQAppWrapper(NULL);
 }
 
 struct TypeUserData {
