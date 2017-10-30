@@ -245,6 +245,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
         s << "#include <pysideproperty.h>" << endl;
         s << "#include <pyside.h>" << endl;
         s << "#include <destroylistener.h>" << endl;
+        s << "#include <qapp_macro.h>" << endl;
     }
 
     s << "#include <typeresolver.h>" << endl;
@@ -3700,23 +3701,29 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
 
     bool onlyPrivCtor = !metaClass->hasNonPrivateConstructor();
 
+    const AbstractMetaClass *qCoreApp = AbstractMetaClass::findClass(classes(), QLatin1String("QCoreApplication"));
+    const bool isQApp = qCoreApp != Q_NULLPTR && metaClass->inheritsFrom(qCoreApp);
+
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
-        tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_GC");
+        tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES");
         tp_dealloc = metaClass->hasPrivateDestructor() ?
                      QLatin1String("SbkDeallocWrapperWithPrivateDtor") : QLatin1String("0");
         tp_init = QLatin1String("0");
     } else {
         if (onlyPrivCtor)
-            tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_GC");
+            tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES");
         else
-            tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_GC");
+            tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES");
 
         QString deallocClassName;
         if (shouldGenerateCppWrapper(metaClass))
             deallocClassName = wrapperName(metaClass);
         else
             deallocClassName = cppClassName;
-        tp_dealloc = QLatin1String("&SbkDeallocWrapper");
+        if (isQApp)
+            tp_dealloc = QLatin1String("&SbkDeallocQAppWrapper");
+        else
+            tp_dealloc = QLatin1String("&SbkDeallocWrapper");
         // avoid constFirst to stay Qt 5.5 compatible
         tp_init = (onlyPrivCtor || ctors.isEmpty()) ? QLatin1String("0") : cpythonFunctionName(ctors.first());
     }
@@ -3733,10 +3740,17 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
             tp_setattro = cpythonSetattroFunctionName(metaClass);
     }
 
-    if (metaClass->hasPrivateDestructor() || onlyPrivCtor)
+    if (metaClass->hasPrivateDestructor() || onlyPrivCtor) {
         tp_new = QLatin1String("0");
-    else
+        tp_flags.append(QLatin1String("|Py_TPFLAGS_HAVE_GC"));
+    }
+    else if (isQApp) {
+        tp_new = QLatin1String("SbkQAppTpNew"); // PYSIDE-571: need singleton app
+    }
+    else {
         tp_new = QLatin1String("SbkObjectTpNew");
+        tp_flags.append(QLatin1String("|Py_TPFLAGS_HAVE_GC"));
+    }
 
     QString tp_richcompare = QString(QLatin1Char('0'));
     if (metaClass->hasComparisonOperatorOverload())
@@ -5321,6 +5335,7 @@ bool CppGenerator::finishGeneration()
         s << includeQDebug;
         s << "#include <pyside.h>" << endl;
         s << "#include <signature.h>" << endl;
+        s << "#include <qapp_macro.h>" << endl;
     }
 
     s << "#include \"" << getModuleHeaderFileName() << '"' << endl << endl;
@@ -5644,7 +5659,9 @@ bool CppGenerator::finishGeneration()
         s << ';' << endl;
         // finish the rest of __signature__ initialization.
         s << INDENT << "FinishSignatureInitialization(module, " << moduleName()
-            << "_SignaturesString);" << endl << endl;
+            << "_SignaturesString);" << endl;
+        // initialize the qApp module.
+        s << INDENT << "NotifyModuleForQApp(module);" << endl << endl;
     }
 
     s << "SBK_MODULE_INIT_FUNCTION_END" << endl;

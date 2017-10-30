@@ -3127,11 +3127,6 @@
     </modify-function>
   </object-type>
 
-  <!-- qApp macro -->
-  <inject-code class="native" position="beginning">
-    PyObject* moduleQtWidgets;
-  </inject-code>
-  <inject-code class="target" file="glue/qtwidgets_qapp.cpp" position="end" />
   <object-type name="QApplication">
     <enum-type name="ColorSpec"/>
     <extra-includes>
@@ -3144,55 +3139,13 @@
       <include file-name="QStyle" location="global"/>
     </extra-includes>
     <modify-function signature="QApplication(int&amp;,char**,int)" access="private" />
-    <add-function signature="QApplication(PySequence)">
+    <add-function signature="QApplication(QStringList)">
         <inject-code>
-            QApplicationConstructor(%PYSELF, %1, &amp;%0);
+            QApplicationConstructor(%PYSELF, args, &amp;%0);
         </inject-code>
     </add-function>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
     <inject-code class="native" file="glue/qapplication_init.cpp" position="beginning" />
-
-    <!-- ownership control transfer to qApp -->
-    <modify-function signature="setStyle(QStyle*)">
-        <inject-code class="target" position="end">
-            Shiboken::Object::setParent(%CONVERTTOPYTHON[QApplication*](qApp), %PYARG_1);
-        </inject-code>
-    </modify-function>
-    <modify-function signature="style()">
-      <inject-code class="target" position="end">
-        <insert-template name="set_qapp_parent_for_orphan"/>
-      </inject-code>
-    </modify-function>
-    <modify-function signature="desktop()">
-      <inject-code class="target" position="end">
-        <insert-template name="set_qapp_parent_for_orphan"/>
-      </inject-code>
-    </modify-function>
-    <modify-function signature="focusWidget()">
-      <inject-code class="target" position="end">
-        <insert-template name="set_qapp_parent_for_orphan"/>
-      </inject-code>
-    </modify-function>
-    <modify-function signature="topLevelAt(const QPoint&amp;)">
-      <inject-code class="target" position="end">
-        <insert-template name="set_qapp_parent_for_orphan"/>
-      </inject-code>
-    </modify-function>
-    <modify-function signature="topLevelAt(int, int)">
-      <inject-code class="target" position="end">
-        <insert-template name="set_qapp_parent_for_orphan"/>
-      </inject-code>
-    </modify-function>
-    <modify-function signature="widgetAt(const QPoint&amp;)">
-      <inject-code class="target" position="end">
-        <insert-template name="set_qapp_parent_for_orphan"/>
-      </inject-code>
-    </modify-function>
-    <modify-function signature="widgetAt(int, int)">
-      <inject-code class="target" position="end">
-        <insert-template name="set_qapp_parent_for_orphan"/>
-      </inject-code>
-    </modify-function>
   </object-type>
 
   <object-type name="QCommandLinkButton"/>

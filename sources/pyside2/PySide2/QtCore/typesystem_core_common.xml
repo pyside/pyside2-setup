@@ -3264,9 +3264,9 @@
     in a more convenient form by the :meth:`~QCoreApplication.arguments()`
     method.
     </inject-documentation>
-    <add-function signature="QCoreApplication(PySequence)">
+    <add-function signature="QCoreApplication(QStringList)">
         <inject-code>
-            QCoreApplication_constructor(%PYSELF, args, &amp;%0);
+            QCoreApplicationConstructor(%PYSELF, args, &amp;%0);
         </inject-code>
     </add-function>
     <!-- blocking functions -->
@@ -3277,23 +3277,24 @@
     <modify-function signature="sendPostedEvents(QObject*, int)" allow-thread="yes"/>
     <modify-function signature="instance()">
       <inject-code class="target">
-        QCoreApplication* app = QCoreApplication::instance();
-        PyObject* pyApp = Py_None;
+        QCoreApplication *app = QCoreApplication::instance();
+        PyObject *pyApp = Py_None;
         if (app) {
-            pyApp = reinterpret_cast&lt;PyObject*&gt;(Shiboken::BindingManager::instance().retrieveWrapper(app));
+            pyApp = reinterpret_cast&lt;PyObject*&gt;(
+                Shiboken::BindingManager::instance().retrieveWrapper(app));
             if (!pyApp)
-                pyApp = %CONVERTTOPYTHON[QCoreApplication*](app); // this will keep app live after python exit (extra ref)
+                pyApp = %CONVERTTOPYTHON[QCoreApplication*](app);
+                // this will keep app live after python exit (extra ref)
         }
+        // PYSIDE-571: make sure that we return the singleton "None"
+        if (pyApp == Py_None)
+            Py_DECREF(MakeSingletonQAppWrapper(0)); // here qApp and instance() diverge
         %PYARG_0 = pyApp;
         Py_XINCREF(%PYARG_0);
       </inject-code>
     </modify-function>
 
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
-    <!-- ### Obsolete
-    <modify-function signature="argc()" remove="all"/>
-    <modify-function signature="argv()" remove="all"/>
-    -->
     <modify-function signature="notify(QObject*,QEvent*)" allow-thread="yes">
       <modify-argument index="2" invalidate-after-use="yes"/>
     </modify-function>

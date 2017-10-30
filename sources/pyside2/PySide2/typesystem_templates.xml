@@ -297,13 +297,7 @@
     PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
     PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG5_TYPE](%5));
     </template>
-    <template name="set_qapp_parent_for_orphan">
-        if (%PYARG_0 &amp;&amp; (%PYARG_0 != Py_None)) {
-            SbkObject* _pySelf = reinterpret_cast&lt;SbkObject*&gt;(%PYARG_0);
-            if (!Shiboken::Object::hasParentInfo(_pySelf))
-                Shiboken::Object::setParent(%CONVERTTOPYTHON[QApplication*](qApp), %PYARG_0);
-        }
-    </template>
+
     <!-- templates for __repr__ -->
     <template name="repr_code">
         QString format = QString().sprintf("%s(%REPR_FORMAT)", ((PyObject*)%PYSELF)->ob_type->tp_name, %REPR_ARGS);

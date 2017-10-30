@@ -43,9 +43,10 @@
 namespace Shiboken
 {
 
-bool sequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defaultAppName)
+// PySide-510: Changed from PySequence to PyList, which is correct.
+bool listToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defaultAppName)
 {
-    if (!PySequence_Check(argList))
+    if (!PyList_Check(argList))
         return false;
 
     if (!defaultAppName)
@@ -55,7 +56,7 @@ bool sequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* 
     Shiboken::AutoDecRef args(PySequence_Fast(argList, 0));
     int numArgs = int(PySequence_Fast_GET_SIZE(argList));
     for (int i = 0; i < numArgs; ++i) {
-        PyObject* item = PySequence_Fast_GET_ITEM(args.object(), i);
+        PyObject* item = PyList_GET_ITEM(args.object(), i);
         if (!PyBytes_Check(item) && !PyUnicode_Check(item))
             return false;
     }
@@ -74,7 +75,7 @@ bool sequenceToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* 
         (*argv)[0] = strdup(appName ? Shiboken::String::toCString(appName) : defaultAppName);
     } else {
         for (int i = 0; i < numArgs; ++i) {
-            PyObject* item = PySequence_Fast_GET_ITEM(args.object(), i);
+            PyObject* item = PyList_GET_ITEM(args.object(), i);
             char* string = 0;
             if (Shiboken::String::check(item)) {
                 string = strdup(Shiboken::String::toCString(item));

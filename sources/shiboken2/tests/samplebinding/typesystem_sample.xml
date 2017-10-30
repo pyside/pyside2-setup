@@ -1697,7 +1697,7 @@
             <inject-code class="target" position="beginning">
             int argc;
             char** argv;
-            if (!Shiboken::sequenceToArgcArgv(%PYARG_1, &amp;argc, &amp;argv)) {
+            if (!Shiboken::listToArgcArgv(%PYARG_1, &amp;argc, &amp;argv)) {
                 PyErr_SetString(PyExc_TypeError, "error");
                 return 0;
             }
@@ -1720,7 +1720,7 @@
             <inject-code class="target" position="beginning">
             int argc;
             char** argv;
-            if (!Shiboken::sequenceToArgcArgv(%PYARG_1, &amp;argc, &amp;argv)) {
+            if (!Shiboken::listToArgcArgv(%PYARG_1, &amp;argc, &amp;argv)) {
                 PyErr_SetString(PyExc_TypeError, "error");
                 return 0;
             }
@@ -2412,7 +2412,7 @@
     <value-type name="ValueAndVirtual" />
 
     <object-type name="ObjectTypeByValue" />
-    
+
     <object-type name="TemplatePtr">
         <modify-function signature="dummy(std::list&lt;std::pair&lt;BlackBox *, BlackBox *&gt; &gt; &amp;)" rename="dummy_method" />
     </object-type>
