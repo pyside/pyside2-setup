@@ -83,7 +83,7 @@ macro(create_pyside_module
 
     add_custom_command(OUTPUT ${${module_sources}}
                         COMMAND "${SHIBOKEN_BINARY}" ${GENERATOR_EXTRA_FLAGS}
-                        ${pyside2_BINARY_DIR}/pyside2_global.h
+                        "${pyside2_BINARY_DIR}/${module_name}_global.h"
                         --include-paths=${shiboken_include_dirs}
                         ${shiboken_framework_include_dirs_option}
                         --typesystem-paths=${pyside2_SOURCE_DIR}${PATH_SEP}${${module_typesystem_path}}

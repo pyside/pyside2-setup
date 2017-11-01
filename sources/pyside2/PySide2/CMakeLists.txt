@@ -30,15 +30,20 @@ else()
                    "${CMAKE_CURRENT_BINARY_DIR}/support/signature/backport_inspect.py" COPYONLY)
 endif()
 
-# Add the collected includes to the global include
-file(READ   "${CMAKE_CURRENT_BINARY_DIR}/pyside2_global.h.add" GLOBAL_APPEND)
-file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/pyside2_global.h" "${GLOBAL_APPEND}")
-file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/pyside2_global.h.add")
-
 # now compile all modules.
+file(READ "${CMAKE_CURRENT_BINARY_DIR}/pyside2_global.h" pyside2_global_contents)
+
 foreach(shortname IN LISTS all_module_shortnames)
     set(name "Qt5${shortname}")
     HAS_QT_MODULE(${name}_FOUND Qt${shortname})
+
+    # Create a module header consisting of pyside2_global.h and the module
+    # include. Note: The contents of pyside2_global.h must be copied instead of
+    # just #including it since shiboken will otherwise generate an
+    # #include <pyside2_global.h> for the the type entries originating from it
+    # (cf AbstractMetaBuilderPrivate::setInclude()).
+    set(module_header "${CMAKE_CURRENT_BINARY_DIR}/Qt${shortname}_global.h")
+    file(WRITE ${module_header} "${pyside2_global_contents}\n#include <Qt${shortname}/Qt${shortname}>\n")
 endforeach()
 
 # install
