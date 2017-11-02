@@ -28,8 +28,14 @@ class QtInfo(object):
     def getLibsPath(self):
         return self.getProperty("QT_INSTALL_LIBS")
 
+    def getLibsExecsPath(self):
+        return self.getProperty("QT_INSTALL_LIBEXECS")
+
     def getPluginsPath(self):
         return self.getProperty("QT_INSTALL_PLUGINS")
+
+    def getPrefixPath(self):
+        return self.getProperty("QT_INSTALL_PREFIX")
 
     def getImportsPath(self):
         return self.getProperty("QT_INSTALL_IMPORTS")
@@ -42,6 +48,9 @@ class QtInfo(object):
 
     def getDocsPath(self):
         return self.getProperty("QT_INSTALL_DOCS")
+
+    def getQmlPath(self):
+        return self.getProperty("QT_INSTALL_QML")
 
     def _getProperty(self, prop_name):
         cmd = self._qmake_command + ["-query", prop_name]
@@ -62,9 +71,12 @@ class QtInfo(object):
     version = property(getVersion)
     bins_dir = property(getBinsPath)
     libs_dir = property(getLibsPath)
+    lib_execs_dir = property(getLibsExecsPath)
     plugins_dir = property(getPluginsPath)
+    prefix_dir = property(getPrefixPath)
     qmake_command = property(getQMakeCommand)
     imports_dir = property(getImportsPath)
     translations_dir = property(getTranslationsPath)
     headers_dir = property(getHeadersPath)
     docs_dir = property(getDocsPath)
+    qml_dir = property(getQmlPath)

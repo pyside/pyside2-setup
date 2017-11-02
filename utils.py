@@ -275,8 +275,8 @@ def makefile(dst, content=None, vars=None):
     f.close()
 
 
-def copydir(src, dst, filter=None, ignore=None, force=True,
-    recursive=True, vars=None):
+def copydir(src, dst, filter=None, ignore=None, force=True, recursive=True, vars=None,
+            dir_filter_function=None):
 
     if vars is not None:
         src = src.format(**vars)
@@ -305,8 +305,12 @@ def copydir(src, dst, filter=None, ignore=None, force=True,
         dstname = os.path.join(dst, name)
         try:
             if os.path.isdir(srcname):
+                if dir_filter_function and not dir_filter_function(name, src, srcname):
+                    continue
                 if recursive:
-                    results.extend(copydir(srcname, dstname, filter, ignore, force, recursive, vars))
+                    results.extend(
+                        copydir(srcname, dstname, filter, ignore, force, recursive,
+                                vars, dir_filter_function))
             else:
                 if (filter is not None and not filter_match(name, filter)) or \
                     (ignore is not None and filter_match(name, ignore)):

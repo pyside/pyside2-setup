@@ -7,6 +7,9 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/global.h.in"
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/__init__.py" @ONLY)
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_built_modules.py.in"
+              "${CMAKE_CURRENT_BINARY_DIR}/_built_modules.py" @ONLY)
+
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_utils.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/_utils.py" @ONLY)
 
@@ -45,6 +48,8 @@ endforeach()
 
 # install
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/__init__.py"
+        DESTINATION "${PYTHON_SITE_PACKAGES}/${BINDING_NAME}${pyside2_SUFFIX}")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_built_modules.py"
         DESTINATION "${PYTHON_SITE_PACKAGES}/${BINDING_NAME}${pyside2_SUFFIX}")
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/_utils.py
         DESTINATION "${PYTHON_SITE_PACKAGES}/${BINDING_NAME}${pyside2_SUFFIX}")

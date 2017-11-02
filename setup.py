@@ -151,6 +151,7 @@ import sys
 import platform
 import time
 import re
+import fnmatch
 
 import difflib # for a close match of dirname and module
 
@@ -300,10 +301,6 @@ if OPTION_JOBS:
             OPTION_JOBS = '-j' + OPTION_JOBS
 else:
     OPTION_JOBS = ''
-
-if sys.platform == 'darwin' and OPTION_STANDALONE:
-    print("--standalone option does not yet work on OSX")
-
 
 # Show available versions
 if OPTION_LISTVERSIONS:
@@ -938,11 +935,15 @@ class pyside_build(_build):
                 "qt_bin_dir": self.qtinfo.bins_dir,
                 "qt_doc_dir": self.qtinfo.docs_dir,
                 "qt_lib_dir": self.qtinfo.libs_dir,
+                "qt_lib_execs_dir": self.qtinfo.lib_execs_dir,
                 "qt_plugins_dir": self.qtinfo.plugins_dir,
+                "qt_prefix_dir": self.qtinfo.prefix_dir,
                 "qt_translations_dir": self.qtinfo.translations_dir,
+                "qt_qml_dir": self.qtinfo.qml_dir,
                 "version": version_str,
             }
             os.chdir(self.script_dir)
+
             if sys.platform == "win32":
                 vars['dbgPostfix'] = OPTION_DEBUG and "_d" or ""
                 return self.prepare_packages_win32(vars)
@@ -1050,35 +1051,130 @@ class pyside_build(_build):
         # Copy Qt libs to package
         if OPTION_STANDALONE:
             if sys.platform == 'darwin':
-                raise RuntimeError('--standalone not yet supported for OSX')
-            # <qt>/bin/* -> <setup>/PySide2
-            executables.extend(copydir("{qt_bin_dir}", "{dist_dir}/PySide2",
-                filter=[
-                    "designer",
-                    "linguist",
-                    "lrelease",
-                    "lupdate",
-                    "lconvert",
-                ],
-                recursive=False, vars=vars))
-            # <qt>/lib/* -> <setup>/PySide2
-            copydir("{qt_lib_dir}", "{dist_dir}/PySide2",
-                filter=[
-                    "libQt*.so.?",
-                    "libphonon.so.?",
-                ],
-                recursive=False, vars=vars)
-            # <qt>/plugins/* -> <setup>/PySide2/plugins
-            copydir("{qt_plugins_dir}", "{dist_dir}/PySide2/plugins",
-                filter=["*.so"],
-                vars=vars)
-            # <qt>/translations/* -> <setup>/PySide2/translations
-            copydir("{qt_translations_dir}", "{dist_dir}/PySide2/translations",
-                filter=["*.qm"],
-                vars=vars)
+                self.prepare_standalone_package_osx(executables, vars)
+            else:
+                # <qt>/bin/* -> <setup>/PySide2
+                executables.extend(copydir("{qt_bin_dir}", "{dist_dir}/PySide2",
+                    filter=[
+                        "designer",
+                        "linguist",
+                        "lrelease",
+                        "lupdate",
+                        "lconvert",
+                    ],
+                    recursive=False, vars=vars))
+                # <qt>/lib/* -> <setup>/PySide2
+                copydir("{qt_lib_dir}", "{dist_dir}/PySide2",
+                    filter=[
+                        "libQt*.so.?",
+                        "libphonon.so.?",
+                    ],
+                    recursive=False, vars=vars)
+                # <qt>/plugins/* -> <setup>/PySide2/plugins
+                copydir("{qt_plugins_dir}", "{dist_dir}/PySide2/plugins",
+                    filter=["*.so"],
+                    vars=vars)
+                # <qt>/translations/* -> <setup>/PySide2/translations
+                copydir("{qt_translations_dir}", "{dist_dir}/PySide2/translations",
+                    filter=["*.qm"],
+                    vars=vars)
         # Update rpath to $ORIGIN
         if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
             self.update_rpath("{dist_dir}/PySide2".format(**vars), executables)
+
+    def qt_is_framework_build(self):
+        if os.path.isdir(self.qtinfo.headers_dir + "/../lib/QtCore.framework"):
+            return True
+        return False
+
+    def prepare_standalone_package_osx(self, executables, vars):
+        # Get list of built modules, so that we copy only required Qt libraries.
+        pyside_package_dir = vars['dist_dir']
+        built_modules_path = os.path.join(pyside_package_dir, "PySide2", "_built_modules.py")
+
+        with open(built_modules_path) as f:
+            scoped_locals = {}
+            code = compile(f.read(), built_modules_path, 'exec')
+            exec(code, scoped_locals, scoped_locals)
+        built_modules = scoped_locals['built_modules']
+
+        # Directory filter for skipping unnecessary files.
+        def general_dir_filter(dir_name, parent_full_path, dir_full_path):
+            if fnmatch.fnmatch(dir_name, "*.dSYM"):
+                return False
+            return True
+
+        # <qt>/lib/* -> <setup>/PySide2/Qt/lib
+        if self.qt_is_framework_build():
+            framework_built_modules = ['Qt' + name + '.framework' for name in built_modules]
+
+            def framework_dir_filter(dir_name, parent_full_path, dir_full_path):
+                if '.framework' in dir_name:
+                    if dir_name in ['QtWebEngine.framework', 'QtWebEngineCore.framework', \
+                                    'QtPositioning.framework', 'QtLocation.framework'] and \
+                       'QtWebEngineWidgets.framework' in framework_built_modules:
+                           return True
+                    if dir_name in ['QtCLucene.framework'] and \
+                       'QtHelp.framework' in framework_built_modules:
+                           return True
+                    if dir_name not in framework_built_modules:
+                        return False
+                if dir_name in ['Headers', 'fonts']:
+                    return False
+                if dir_full_path.endswith('Versions/Current'):
+                    return False
+                if dir_full_path.endswith('Versions/5/Resources'):
+                    return False
+                if dir_full_path.endswith('Versions/5/Helpers'):
+                    return False
+                return general_dir_filter(dir_name, parent_full_path, dir_full_path)
+
+            copydir("{qt_lib_dir}", "{dist_dir}/PySide2/Qt/lib",
+                recursive=True, vars=vars,
+                ignore=["*.la", "*.a", "*.cmake", "*.pc", "*.prl"],
+                dir_filter_function=framework_dir_filter)
+        else:
+            if 'WebEngineWidgets' in built_modules:
+                built_modules.extend(['WebEngine', 'WebEngineCore', 'Positioning', 'Location'])
+            if 'Help' in built_modules:
+                built_modules.extend(['CLucene'])
+            prefixed_built_modules = ['*Qt5' + name + '*.dylib' for name in built_modules]
+
+            copydir("{qt_lib_dir}", "{dist_dir}/PySide2/Qt/lib",
+                filter=prefixed_built_modules,
+                recursive=True, vars=vars)
+
+            if 'WebEngineWidgets' in built_modules:
+                copydir("{qt_lib_execs_dir}", "{dist_dir}/PySide2/Qt/libexec",
+                    filter=None,
+                    recursive=False,
+                    vars=vars)
+
+                copydir("{qt_prefix_dir}/resources", "{dist_dir}/PySide2/Qt/resources",
+                    filter=None,
+                    recursive=False,
+                    vars=vars)
+
+        # <qt>/plugins/* -> <setup>/PySide2/Qt/plugins
+        copydir("{qt_plugins_dir}", "{dist_dir}/PySide2/Qt/plugins",
+            filter=["*.dylib"],
+            recursive=True,
+            dir_filter_function=general_dir_filter,
+            vars=vars)
+
+        # <qt>/qml/* -> <setup>/PySide2/Qt/qml
+        copydir("{qt_qml_dir}", "{dist_dir}/PySide2/Qt/qml",
+            filter=None,
+            recursive=True,
+            force=False,
+            dir_filter_function=general_dir_filter,
+            vars=vars)
+
+        # <qt>/translations/* -> <setup>/PySide2/Qt/translations
+        copydir("{qt_translations_dir}", "{dist_dir}/PySide2/Qt/translations",
+            filter=["*.qm"],
+            force=False,
+            vars=vars)
 
     def prepare_packages_win32(self, vars):
         pdbs = ['*.pdb'] if self.debug or self.build_type == 'RelWithDebInfo' else []
@@ -1272,7 +1368,10 @@ class pyside_build(_build):
                 if OPTION_RPATH_VALUES:
                     final_rpath = OPTION_RPATH_VALUES
                 else:
-                    final_rpath = self.qtinfo.libs_dir
+                    if OPTION_STANDALONE:
+                        final_rpath = "@loader_path/Qt/lib"
+                    else:
+                        final_rpath = self.qtinfo.libs_dir
                 osx_fix_rpaths_for_library(srcpath, final_rpath)
 
         else:
