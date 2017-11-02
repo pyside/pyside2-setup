@@ -9,12 +9,6 @@ ${QtMacExtras_GEN_DIR}/qmactoolbaritem_wrapper.cpp
 ${QtMacExtras_GEN_DIR}/qtmacextras_module_wrapper.cpp
 )
 
-make_path(QtMacExtras_typesystem_path ${QtMacExtras_SOURCE_DIR}
-                                      ${QtCore_SOURCE_DIR}
-                                      ${QtCore_BINARY_DIR}
-                                      ${QtGui_SOURCE_DIR}
-                                      ${QtGui_BINARY_DIR})
-
 set(QtMacExtras_include_dirs ${QtMacExtras_SOURCE_DIR}
                         ${QtMacExtras_BINARY_DIR}
                         ${Qt5MacExtras_INCLUDE_DIRS}
@@ -38,6 +32,6 @@ create_pyside_module(QtMacExtras
                      QtMacExtras_include_dirs
                      QtMacExtras_libraries
                      QtMacExtras_deps
-                     QtMacExtras_typesystem_path
+                     QtMacExtras_SOURCE_DIR
                      QtMacExtras_SRC
                      "")

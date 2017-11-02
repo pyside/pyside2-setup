@@ -16,10 +16,6 @@ ${QtOpenGL_GEN_DIR}/qglwidget_wrapper.cpp
 ${QtOpenGL_GEN_DIR}/qtopengl_module_wrapper.cpp
 )
 
-make_path(QtOpenGL_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
-                                   ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR}
-                                   ${QtOpenGL_SOURCE_DIR})
-
 set(QtOpenGL_include_dirs   ${QtOpenGL_SOURCE_DIR}
                             ${Qt5Core_INCLUDE_DIRS}
                             ${Qt5Gui_INCLUDE_DIRS}
@@ -45,6 +41,6 @@ create_pyside_module(QtOpenGL
                     QtOpenGL_include_dirs
                     QtOpenGL_libraries
                     QtOpenGL_deps
-                    QtOpenGL_typesystem_path
+                    QtOpenGL_SOURCE_DIR
                     QtOpenGL_SRC
                     "")

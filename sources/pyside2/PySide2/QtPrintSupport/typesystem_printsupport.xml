@@ -40,7 +40,7 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtPrintSupport">
-    <load-typesystem name="typesystem_widgets.xml" generate="no" />
+    <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no" />
 
   <object-type name="QPageSetupDialog">
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>

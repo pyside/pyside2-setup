@@ -41,8 +41,8 @@
 -->
 
 <typesystem package="PySide2.QtUiTools">
-    <load-typesystem name="typesystem_widgets.xml" generate="no" />
-    <load-typesystem name="typesystem_xml.xml" generate="no" />
+    <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no" />
+    <load-typesystem name="QtXml/typesystem_xml.xml" generate="no" />
 
     <object-type name="QUiLoader">
       <extra-includes>

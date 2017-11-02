@@ -41,13 +41,6 @@ ${QtDataVisualization_GEN_DIR}/qtdatavisualization_wrapper.cpp
 ${QtDataVisualization_GEN_DIR}/qtdatavisualization_module_wrapper.cpp
 )
 
-make_path(QtDataVisualization_typesystem_path
-    ${QtCore_SOURCE_DIR}
-    ${QtCore_BINARY_DIR}
-    ${QtGui_SOURCE_DIR}
-    ${QtGui_BINARY_DIR}
-    ${QtDataVisualization_SOURCE_DIR})
-
 set(QtDataVisualization_include_dirs ${QtDataVisualization_SOURCE_DIR}
                           ${QtDataVisualization_BINARY_DIR}
                           ${Qt5Core_INCLUDE_DIRS}
@@ -72,6 +65,6 @@ create_pyside_module(QtDataVisualization
                      QtDataVisualization_include_dirs
                      QtDataVisualization_libraries
                      QtDataVisualization_deps
-                     QtDataVisualization_typesystem_path
+                     QtDataVisualization_SOURCE_DIR
                      QtDataVisualization_SRC
                      "")

@@ -34,10 +34,6 @@ ${QtQml_GEN_DIR}/qqmlnetworkaccessmanagerfactory_wrapper.cpp
 ${QtQml_GEN_DIR}/qtqml_module_wrapper.cpp
 )
 
-make_path(QtQml_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtNetwork_SOURCE_DIR}
-                                ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtNetwork_BINARY_DIR}
-                                ${QtQml_SOURCE_DIR})
-
 set(QtQml_include_dirs  ${QtQml_SOURCE_DIR}
                         ${Qt5Core_INCLUDE_DIRS}
                         ${Qt5Gui_INCLUDE_DIRS}
@@ -64,6 +60,6 @@ create_pyside_module(QtQml
                      QtQml_include_dirs
                      QtQml_libraries
                      QtQml_deps
-                     QtQml_typesystem_path
+                     QtQml_SOURCE_DIR
                      QtQml_SRC
                      QtQml_registerType)

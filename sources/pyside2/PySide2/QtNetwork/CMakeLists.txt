@@ -43,10 +43,6 @@ ${QtNetwork_OPTIONAL_SRC}
 ${QtNetwork_GEN_DIR}/qtnetwork_module_wrapper.cpp
 )
 
-make_path(QtNetwork_typesystem_path ${QtCore_SOURCE_DIR}
-                                    ${QtCore_BINARY_DIR}
-                                    ${QtNetwork_SOURCE_DIR})
-
 set(QtNetwork_include_dirs  ${QtNetwork_SOURCE_DIR}
                             ${QtNetwork_BINARY_DIR}
                             ${Qt5Core_INCLUDE_DIRS}
@@ -67,7 +63,7 @@ create_pyside_module(QtNetwork
                      QtNetwork_include_dirs
                      QtNetwork_libraries
                      QtNetwork_deps
-                     QtNetwork_typesystem_path
+                     QtNetwork_SOURCE_DIR
                      QtNetwork_SRC
                      ""
                      ""

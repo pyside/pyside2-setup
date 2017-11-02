@@ -6,12 +6,6 @@ ${QtQuickWidgets_GEN_DIR}/qquickwidget_wrapper.cpp
 ${QtQuickWidgets_GEN_DIR}/qtquickwidgets_module_wrapper.cpp
 )
 
-make_path(QtQuickWidgets_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
-                                         ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR}
-                                         ${QtNetwork_SOURCE_DIR} ${QtNetwork_BINARY_DIR} ${QtQuick_SOURCE_DIR}
-                                         ${QtQuick_BINARY_DIR} ${QtQml_SOURCE_DIR} ${QtQml_BINARY_DIR}
-                                         ${QtQuickWidgets_SOURCE_DIR})
-
 set(QtQuickWidgets_include_dirs  ${QtQuickWidgets_SOURCE_DIR}
                                  ${QtQml_SOURCE_DIR}
                                  ${Qt5Core_INCLUDE_DIRS}
@@ -48,6 +42,6 @@ create_pyside_module(QtQuickWidgets
                      QtQuickWidgets_include_dirs
                      QtQuickWidgets_libraries
                      QtQuickWidgets_deps
-                     QtQuickWidgets_typesystem_path
+                     QtQuickWidgets_SOURCE_DIR
                      QtQuickWidgets_SRC
                      "")

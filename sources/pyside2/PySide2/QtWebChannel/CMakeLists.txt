@@ -7,8 +7,6 @@ ${QtWebChannel_GEN_DIR}/qwebchannelabstracttransport_wrapper.cpp
 ${QtWebChannel_GEN_DIR}/qtwebchannel_module_wrapper.cpp
 )
 
-make_path(QtWebChannel_typesystem_path ${QtCore_SOURCE_DIR} ${QtCore_BINARY_DIR} ${QtWebChannel_SOURCE_DIR})
-
 set(QtWebChannel_include_dirs ${QtWebChannel_SOURCE_DIR}
                         ${QtWebChannel_BINARY_DIR}
                         ${Qt5Core_INCLUDE_DIRS}
@@ -30,6 +28,6 @@ create_pyside_module(QtWebChannel
                      QtWebChannel_include_dirs
                      QtWebChannel_libraries
                      QtWebChannel_deps
-                     QtWebChannel_typesystem_path
+                     QtWebChannel_SOURCE_DIR
                      QtWebChannel_SRC
                      "")

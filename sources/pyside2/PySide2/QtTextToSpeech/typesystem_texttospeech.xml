@@ -40,7 +40,7 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtTextToSpeech">
-  <load-typesystem name="typesystem_core.xml" generate="no" />
+  <load-typesystem name="QtCore/typesystem_core.xml" generate="no" />
 
   <object-type name="QTextToSpeech">
       <enum-type name="State"/>

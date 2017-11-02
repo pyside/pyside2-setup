@@ -20,9 +20,6 @@ ${QtXmlPatterns_GEN_DIR}/qxmlserializer_wrapper.cpp
 ${QtXmlPatterns_GEN_DIR}/qtxmlpatterns_module_wrapper.cpp
 )
 
-make_path(QtXmlPatterns_typesystem_path ${QtCore_SOURCE_DIR} ${QtCore_BINARY_DIR}
-                                        ${QtXmlPatterns_SOURCE_DIR})
-
 set(QtXmlPatterns_include_dirs  ${QtXmlPatterns_SOURCE_DIR}
                                 ${QtXmlPatterns_BINARY_DIR}
                                 ${Qt5Core_INCLUDE_DIRS}
@@ -42,7 +39,7 @@ create_pyside_module(QtXmlPatterns
                      QtXmlPatterns_include_dirs
                      QtXmlPatterns_libraries
                      QtXmlPatterns_deps
-                     QtXmlPatterns_typesystem_path
+                     QtXmlPatterns_SOURCE_DIR
                      QtXmlPatterns_SRC
                      "")
 

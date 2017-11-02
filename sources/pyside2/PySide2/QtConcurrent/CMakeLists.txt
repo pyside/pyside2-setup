@@ -6,10 +6,6 @@ ${QtConcurrent_GEN_DIR}/qtconcurrent_wrapper.cpp
 ${QtConcurrent_GEN_DIR}/qtconcurrent_module_wrapper.cpp
 )
 
-make_path(QtConcurrent_typesystem_path  ${QtCore_SOURCE_DIR}
-                                        ${QtCore_BINARY_DIR}
-                                        ${QtConcurrent_SOURCE_DIR})
-
 set(QtConcurrent_include_dirs   ${QtConcurrent_SOURCE_DIR}
                                 ${QtConcurrent_BINARY_DIR}
                                 ${Qt5Core_INCLUDE_DIRS}
@@ -30,6 +26,6 @@ create_pyside_module(QtConcurrent
                      QtConcurrent_include_dirs
                      QtConcurrent_libraries
                      QtConcurrent_deps
-                     QtConcurrent_typesystem_path
+                     QtConcurrent_SOURCE_DIR
                      QtConcurrent_SRC
                      "")

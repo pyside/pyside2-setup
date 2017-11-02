@@ -74,7 +74,7 @@
       result.append(row);
   }
   </template>
-  <load-typesystem name="typesystem_gui.xml" generate="no" />
+  <load-typesystem name="QtGui/typesystem_gui.xml" generate="no" />
   <namespace-type name="QtDataVisualization">
     <primitive-type name="QBarDataArray">
       <include file-name="qbardataproxy.h" location="global"/>

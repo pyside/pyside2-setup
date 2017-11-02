@@ -40,6 +40,6 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtCore">
-    <load-typesystem name="typesystem_core_@AUTO_OS@.xml" generate="yes"/>
-    <load-typesystem name="typesystem_core_common.xml" generate="yes"/>
+    <load-typesystem name="QtCore/typesystem_core_@AUTO_OS@.xml" generate="yes"/>
+    <load-typesystem name="QtCore/typesystem_core_common.xml" generate="yes"/>
 </typesystem>

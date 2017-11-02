@@ -40,11 +40,11 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtWebEngineWidgets">
-  <load-typesystem name="typesystem_core.xml" generate="no"/>
-  <load-typesystem name="typesystem_gui.xml" generate="no"/>
-  <load-typesystem name="typesystem_widgets.xml" generate="no"/>
-  <load-typesystem name="typesystem_network.xml" generate="no"/>
-  <load-typesystem name="typesystem_webchannel.xml" generate="no"/>
+  <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+  <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
+  <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
+  <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
+  <load-typesystem name="QtWebChannel/typesystem_webchannel.xml" generate="no"/>
 
 
   <object-type name="QWebEngineCertificateError">

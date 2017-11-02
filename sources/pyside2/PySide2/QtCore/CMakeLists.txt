@@ -164,9 +164,6 @@ ${QtCore_GEN_DIR}/qtcore_module_wrapper.cpp
 configure_file("${QtCore_SOURCE_DIR}/typesystem_core.xml.in"
                "${QtCore_BINARY_DIR}/typesystem_core.xml" @ONLY)
 
-make_path(QtCore_typesystem_path ${QtCore_SOURCE_DIR})
-
-
 set(QtCore_include_dirs ${QtCore_SOURCE_DIR}
                         ${QtCore_BINARY_DIR}
                         ${Qt5Core_INCLUDE_DIRS}
@@ -183,7 +180,7 @@ create_pyside_module(QtCore
                      QtCore_include_dirs
                      QtCore_libraries
                      ""
-                     QtCore_typesystem_path
+                     QtCore_SOURCE_DIR
                      QtCore_SRC
                      QtCore_gluecode
                      ${QtCore_BINARY_DIR}/typesystem_core.xml)

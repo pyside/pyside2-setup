@@ -58,15 +58,6 @@ ${QtCharts_GEN_DIR}/qtcharts_wrapper.cpp
 ${QtCharts_GEN_DIR}/qtcharts_module_wrapper.cpp
 )
 
-make_path(QtCharts_typesystem_path
-    ${QtCore_SOURCE_DIR}
-    ${QtCore_BINARY_DIR}
-    ${QtGui_SOURCE_DIR}
-    ${QtGui_BINARY_DIR}
-    ${QtWidgets_SOURCE_DIR}
-    ${QtWidgets_BINARY_DIR}
-    ${QtCharts_SOURCE_DIR})
-
 set(QtCharts_include_dirs ${QtCharts_SOURCE_DIR}
                           ${QtCharts_BINARY_DIR}
                           ${Qt5Core_INCLUDE_DIRS}
@@ -94,6 +85,6 @@ create_pyside_module(QtCharts
                      QtCharts_include_dirs
                      QtCharts_libraries
                      QtCharts_deps
-                     QtCharts_typesystem_path
+                     QtCharts_SOURCE_DIR
                      QtCharts_SRC
                      "")

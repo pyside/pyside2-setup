@@ -40,9 +40,9 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtTest">
-  <load-typesystem name="typesystem_core.xml" generate="no"/>
-  <load-typesystem name="typesystem_gui.xml" generate="no"/>
-  <load-typesystem name="typesystem_widgets.xml" generate="no"/>
+  <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+  <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
+  <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
 
   <rejection class="QTest" function-name="qCompare&lt;char&gt;"/>
   <rejection class="QTest" function-name="qCompare&lt;char*&gt;"/>

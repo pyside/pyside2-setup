@@ -16,10 +16,6 @@ ${QtHelp_GEN_DIR}/qhelpsearchresultwidget_wrapper.cpp
 ${QtHelp_GEN_DIR}/qthelp_module_wrapper.cpp
 )
 
-make_path(QtHelp_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
-                                 ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR}
-                                 ${QtHelp_SOURCE_DIR})
-
 set(QtHelp_include_dirs ${QtHelp_SOURCE_DIR}
                         ${QtHelp_BINARY_DIR}
                         ${Qt5Core_INCLUDE_DIRS}
@@ -46,6 +42,6 @@ create_pyside_module(QtHelp
                      QtHelp_include_dirs
                      QtHelp_libraries
                      QtHelp_deps
-                     QtHelp_typesystem_path
+                     QtHelp_SOURCE_DIR
                      QtHelp_SRC
                      "")

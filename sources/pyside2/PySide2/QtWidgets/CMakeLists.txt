@@ -212,10 +212,6 @@ ${QtWidgets_GEN_DIR}/qtwidgets_module_wrapper.cpp
 configure_file("${QtWidgets_SOURCE_DIR}/typesystem_widgets.xml.in"
                "${QtWidgets_BINARY_DIR}/typesystem_widgets.xml" @ONLY)
 
-make_path(QtWidgets_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR}
-                                    ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR}
-                                    ${QtWidgets_SOURCE_DIR})
-
 set(QtWidgets_include_dirs  ${QtWidgets_SOURCE_DIR}
                             ${QtWidgets_BINARY_DIR}
                             ${pyside2_SOURCE_DIR}
@@ -241,7 +237,7 @@ create_pyside_module(QtWidgets
                      QtWidgets_include_dirs
                      QtWidgets_libraries
                      QtWidgets_deps
-                     QtWidgets_typesystem_path
+                     QtWidgets_SOURCE_DIR
                      QtWidgets_SRC
                      ""
                      ${QtWidgets_BINARY_DIR}/typesystem_widgets.xml)

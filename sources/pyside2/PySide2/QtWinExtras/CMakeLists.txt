@@ -17,12 +17,6 @@ ${QtWinExtras_GEN_DIR}/qwinthumbnailtoolbutton_wrapper.cpp
 ${QtWinExtras_GEN_DIR}/qtwinextras_module_wrapper.cpp
 )
 
-make_path(QtWinExtras_typesystem_path ${QtWinExtras_SOURCE_DIR}
-                                      ${QtCore_SOURCE_DIR}
-                                      ${QtCore_BINARY_DIR}
-                                      ${QtGui_SOURCE_DIR}
-                                      ${QtGui_BINARY_DIR})
-
 set(QtWinExtras_include_dirs ${QtWinExtras_SOURCE_DIR}
                         ${QtWinExtras_BINARY_DIR}
                         ${Qt5WinExtras_INCLUDE_DIRS}
@@ -46,6 +40,6 @@ create_pyside_module(QtWinExtras
                      QtWinExtras_include_dirs
                      QtWinExtras_libraries
                      QtWinExtras_deps
-                     QtWinExtras_typesystem_path
+                     QtWinExtras_SOURCE_DIR
                      QtWinExtras_SRC
                      "")

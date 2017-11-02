@@ -29,13 +29,6 @@ ${QtWebKitWidgets_GEN_DIR}/qwebview_wrapper.cpp
 ${QtWebKitWidgets_GEN_DIR}/qtwebkitwidgets_module_wrapper.cpp
 )
 
-make_path(QtWebKitWidgets_typesystem_path 
-                            ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
-                            ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR}
-                            ${QtWebKit_SOURCE_DIR} ${QtPrintSupport_SOURCE_DIR} ${QtNetwork_SOURCE_DIR}
-                            ${QtWebKit_BINARY_DIR} ${QtPrintSupport_BINARY_DIR} ${QtNetwork_BINARY_DIR}
-                            ${QtWebKitWidgets_SOURCE_DIR})
-
 set(QtWebKitWidgets_include_dirs
                             ${QtWebKitWidgets_SOURCE_DIR}
                             ${QtWebKitWidgets_BINARY_DIR}
@@ -71,7 +64,7 @@ create_pyside_module(QtWebKitWidgets
                      QtWebKitWidgets_include_dirs
                      QtWebKitWidgets_libraries
                      QtWebKitWidgets_deps
-                     QtWebKitWidgets_typesystem_path
+                     QtWebKitWidgets_SOURCE_DIR
                      QtWebKitWidgets_SRC
                      "")
 
