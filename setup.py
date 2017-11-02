@@ -165,8 +165,10 @@ from distutils.command.build_ext import build_ext as _build_ext
 
 from setuptools import setup, Extension
 from setuptools.command.install import install as _install
+from setuptools.command.install_lib import install_lib as _install_lib
 from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
 from setuptools.command.develop import develop as _develop
+from setuptools.command.build_py import build_py as _build_py
 
 from qtinfo import QtInfo
 from utils import rmtree
@@ -462,6 +464,40 @@ class pyside_build_ext(_build_ext):
 
     def run(self):
         pass
+
+# pyside_build_py and pyside_install_lib are reimplemented to preserve symlinks when
+# distutils / setuptools copy files to various directories through the different build stages.
+class pyside_build_py(_build_py):
+
+    def __init__(self, *args, **kwargs):
+        _build_py.__init__(self, *args, **kwargs)
+
+    def build_package_data(self):
+        """Copies files from pyside_package into build/xxx directory"""
+
+        for package, src_dir, build_dir, filenames in self.data_files:
+            for filename in filenames:
+                target = os.path.join(build_dir, filename)
+                self.mkpath(os.path.dirname(target))
+                srcfile = os.path.abspath(os.path.join(src_dir, filename))
+                # Using our own copyfile makes sure to preserve symlinks.
+                copyfile(srcfile, target)
+
+class pyside_install_lib(_install_lib):
+
+    def __init__(self, *args, **kwargs):
+        _install_lib.__init__(self, *args, **kwargs)
+
+    def install(self):
+        """Installs files from build/xxx directory into final site-packages/PySide2 directory."""
+
+        if os.path.isdir(self.build_dir):
+            # Using our own copydir makes sure to preserve symlinks.
+            outfiles = copydir(os.path.abspath(self.build_dir), os.path.abspath(self.install_dir))
+        else:
+            self.warn("'%s' does not exist -- no Python modules to install" % self.build_dir)
+            return
+        return outfiles
 
 class pyside_build(_build):
 
@@ -1317,10 +1353,12 @@ setup(
     },
     cmdclass = {
         'build': pyside_build,
+        'build_py': pyside_build_py,
         'build_ext': pyside_build_ext,
         'bdist_egg': pyside_bdist_egg,
         'develop': pyside_develop,
-        'install': pyside_install
+        'install': pyside_install,
+        'install_lib': pyside_install_lib
     },
 
     # Add a bogus extension module (will never be built here since we are
