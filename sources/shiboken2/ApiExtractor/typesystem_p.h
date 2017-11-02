@@ -172,6 +172,7 @@ private:
 
     QHash<QString, StackElement::ElementType> tagNames;
     QString m_currentSignature;
+    QString m_currentPath;
 };
 
 #endif
