@@ -32,18 +32,14 @@ import sys
 from PySide2.QtGui import QStandardItemModel, QStandardItem
 from PySide2.QtWidgets import QWidget
 try:
-    # the normal call with installed PySide2
+    # The normal import statement when PySide2 is installed.
     from PySide2 import shiboken2 as shiboken
 except ImportError:
-    try:
-        # When running make test on macOS, shiboken2 is not part of the PySide2 module,
-        # so it needs to be imported as a standalone module.
-        import shiboken2 as shiboken
-    except ImportError:
-        # sys.path is set a bit weird during tests, so we help a little to find shiboken2.
-        sys.path.append("../../..")
-        # the special call with testrunner.py
-        from shiboken2.shibokenmodule import shiboken2 as shiboken
+    # When running make test in shiboken build dir, or when running testrunner.py,
+    # shiboken2 is not part of the PySide2 module, so it needs to be imported as a standalone
+    # module.
+    import shiboken2 as shiboken
+
 from helper import UsesQApplication
 
 
