@@ -1355,7 +1355,16 @@ class pyside_build(_build):
             patchelf_path = os.path.join(self.script_dir, "patchelf")
 
             def rpath_cmd(srcpath):
-                cmd = [patchelf_path, '--set-rpath', '$ORIGIN/', srcpath]
+                final_rpath = ''
+                # Command line rpath option takes precedence over automatically added one.
+                if OPTION_RPATH_VALUES:
+                    final_rpath = OPTION_RPATH_VALUES
+                else:
+                    # Add rpath values pointing to $ORIGIN and the installed qt lib directory.
+                    local_rpath = '$ORIGIN/'
+                    qt_lib_dir = self.qtinfo.libs_dir
+                    final_rpath = local_rpath + ':' + qt_lib_dir
+                cmd = [patchelf_path, '--set-rpath', final_rpath, srcpath]
                 if run_process(cmd) != 0:
                     raise RuntimeError("Error patching rpath in " + srcpath)
 
