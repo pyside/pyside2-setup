@@ -953,6 +953,21 @@ class pyside_build(_build):
             print('setup.py/prepare_packages: ', e)
             raise
 
+    def get_built_pyside_modules(self, vars):
+        # Get list of built modules, so that we copy only required Qt libraries.
+        pyside_package_dir = vars['dist_dir']
+        built_modules_path = os.path.join(pyside_package_dir, "PySide2", "_built_modules.py")
+
+        try:
+            with open(built_modules_path) as f:
+                scoped_locals = {}
+                code = compile(f.read(), built_modules_path, 'exec')
+                exec(code, scoped_locals, scoped_locals)
+                return scoped_locals['built_modules']
+        except IOError as e:
+            print("get_built_pyside_modules: Couldn't find file: {}.".format(built_modules_path))
+            raise
+
     def prepare_packages_posix(self, vars):
         executables = []
         if sys.platform.startswith('linux'):
@@ -1050,34 +1065,12 @@ class pyside_build(_build):
                     pyside_rcc_options)
         # Copy Qt libs to package
         if OPTION_STANDALONE:
+            vars['built_modules'] = self.get_built_pyside_modules(vars)
             if sys.platform == 'darwin':
                 self.prepare_standalone_package_osx(executables, vars)
             else:
-                # <qt>/bin/* -> <setup>/PySide2
-                executables.extend(copydir("{qt_bin_dir}", "{dist_dir}/PySide2",
-                    filter=[
-                        "designer",
-                        "linguist",
-                        "lrelease",
-                        "lupdate",
-                        "lconvert",
-                    ],
-                    recursive=False, vars=vars))
-                # <qt>/lib/* -> <setup>/PySide2
-                copydir("{qt_lib_dir}", "{dist_dir}/PySide2",
-                    filter=[
-                        "libQt*.so.?",
-                        "libphonon.so.?",
-                    ],
-                    recursive=False, vars=vars)
-                # <qt>/plugins/* -> <setup>/PySide2/plugins
-                copydir("{qt_plugins_dir}", "{dist_dir}/PySide2/plugins",
-                    filter=["*.so"],
-                    vars=vars)
-                # <qt>/translations/* -> <setup>/PySide2/translations
-                copydir("{qt_translations_dir}", "{dist_dir}/PySide2/translations",
-                    filter=["*.qm"],
-                    vars=vars)
+                self.prepare_standalone_package_linux(executables, vars)
+
         # Update rpath to $ORIGIN
         if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
             self.update_rpath("{dist_dir}/PySide2".format(**vars), executables)
@@ -1087,16 +1080,50 @@ class pyside_build(_build):
             return True
         return False
 
-    def prepare_standalone_package_osx(self, executables, vars):
-        # Get list of built modules, so that we copy only required Qt libraries.
-        pyside_package_dir = vars['dist_dir']
-        built_modules_path = os.path.join(pyside_package_dir, "PySide2", "_built_modules.py")
+    def prepare_standalone_package_linux(self, executables, vars):
+        built_modules = vars['built_modules']
 
-        with open(built_modules_path) as f:
-            scoped_locals = {}
-            code = compile(f.read(), built_modules_path, 'exec')
-            exec(code, scoped_locals, scoped_locals)
-        built_modules = scoped_locals['built_modules']
+        # <qt>/lib/* -> <setup>/PySide2/Qt/lib
+        copydir("{qt_lib_dir}", "{dist_dir}/PySide2/Qt/lib",
+            filter=[
+                "libQt5*.so.?",
+                "libicu*.so.??",
+            ],
+            recursive=False, vars=vars, force_copy_symlinks=True)
+
+        if 'WebEngineWidgets' in built_modules:
+            copydir("{qt_lib_execs_dir}", "{dist_dir}/PySide2/Qt/libexec",
+                filter=None,
+                recursive=False,
+                vars=vars)
+
+            copydir("{qt_prefix_dir}/resources", "{dist_dir}/PySide2/Qt/resources",
+                filter=None,
+                recursive=False,
+                vars=vars)
+
+        # <qt>/plugins/* -> <setup>/PySide2/Qt/plugins
+        copydir("{qt_plugins_dir}", "{dist_dir}/PySide2/Qt/plugins",
+            filter=["*.so"],
+            recursive=True,
+            vars=vars)
+
+        # <qt>/qml/* -> <setup>/PySide2/Qt/qml
+        copydir("{qt_qml_dir}", "{dist_dir}/PySide2/Qt/qml",
+            filter=None,
+            force=False,
+            recursive=True,
+            vars=vars)
+
+        # <qt>/translations/* -> <setup>/PySide2/Qt/translations
+
+        copydir("{qt_translations_dir}", "{dist_dir}/PySide2/Qt/translations",
+            filter=["*.qm"],
+            force=False,
+            vars=vars)
+
+    def prepare_standalone_package_osx(self, executables, vars):
+        built_modules = vars['built_modules']
 
         # Directory filter for skipping unnecessary files.
         def general_dir_filter(dir_name, parent_full_path, dir_full_path):
@@ -1363,7 +1390,9 @@ class pyside_build(_build):
                     # Add rpath values pointing to $ORIGIN and the installed qt lib directory.
                     local_rpath = '$ORIGIN/'
                     qt_lib_dir = self.qtinfo.libs_dir
-                    final_rpath = local_rpath + ':' + qt_lib_dir
+                    if OPTION_STANDALONE:
+                        qt_lib_dir = "$ORIGIN/Qt/lib"
+                        final_rpath = local_rpath + ':' + qt_lib_dir
                 cmd = [patchelf_path, '--set-rpath', final_rpath, srcpath]
                 if run_process(cmd) != 0:
                     raise RuntimeError("Error patching rpath in " + srcpath)

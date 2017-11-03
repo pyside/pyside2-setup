@@ -222,7 +222,7 @@ def init_msvc_env(platform_arch, build_type):
     log.info("Done initializing MSVC env")
 
 
-def copyfile(src, dst, force=True, vars=None):
+def copyfile(src, dst, force=True, vars=None, force_copy_symlink=False):
     if vars is not None:
         src = src.format(**vars)
         dst = dst.format(**vars)
@@ -231,7 +231,7 @@ def copyfile(src, dst, force=True, vars=None):
         log.info("**Skiping copy file %s to %s. Source does not exists." % (src, dst))
         return
 
-    if not os.path.islink(src):
+    if not os.path.islink(src) or force_copy_symlink:
         log.info("Copying file %s to %s." % (src, dst))
         shutil.copy2(src, dst)
     else:
@@ -276,7 +276,7 @@ def makefile(dst, content=None, vars=None):
 
 
 def copydir(src, dst, filter=None, ignore=None, force=True, recursive=True, vars=None,
-            dir_filter_function=None):
+            dir_filter_function=None, force_copy_symlinks=False):
 
     if vars is not None:
         src = src.format(**vars)
@@ -310,14 +310,14 @@ def copydir(src, dst, filter=None, ignore=None, force=True, recursive=True, vars
                 if recursive:
                     results.extend(
                         copydir(srcname, dstname, filter, ignore, force, recursive,
-                                vars, dir_filter_function))
+                                vars, dir_filter_function, force_copy_symlinks))
             else:
                 if (filter is not None and not filter_match(name, filter)) or \
                     (ignore is not None and filter_match(name, ignore)):
                     continue
                 if not os.path.exists(dst):
                     os.makedirs(dst)
-                results.append(copyfile(srcname, dstname, True, vars))
+                results.append(copyfile(srcname, dstname, True, vars, force_copy_symlinks))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
         except shutil.Error as err:
