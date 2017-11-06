@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of PySide2.
@@ -37,23 +37,29 @@
 **
 ****************************************************************************/
 
-#ifndef SHIBOKEN_H
-#define SHIBOKEN_H
+#ifndef VOIDPTR_H
+#define VOIDPTR_H
 
-#include "sbkpython.h"
-#include "autodecref.h"
-#include "basewrapper.h"
-#include "bindingmanager.h"
-#include "gilstate.h"
-#include "threadstatesaver.h"
-#include "helper.h"
-#include "sbkarrayconverter.h"
-#include "sbkconverter.h"
-#include "sbkenum.h"
-#include "sbkmodule.h"
-#include "sbkstring.h"
+#include <Python.h>
 #include "shibokenmacros.h"
-#include "shibokenbuffer.h"
+#include "sbkconverter.h"
 
-#endif // SHIBOKEN_H
+extern "C"
+{
 
+// Void pointer type declaration.
+extern LIBSHIBOKEN_API PyTypeObject SbkVoidPtrType;
+
+} // extern "C"
+
+namespace VoidPtr
+{
+
+void init();
+SbkConverter *createConverter();
+LIBSHIBOKEN_API void addVoidPtrToModule(PyObject *module);
+
+}
+
+
+#endif // VOIDPTR_H

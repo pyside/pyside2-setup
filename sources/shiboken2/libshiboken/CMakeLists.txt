@@ -45,10 +45,10 @@ sbkmodule.cpp
 sbkstring.cpp
 bindingmanager.cpp
 threadstatesaver.cpp
-typeresolver.cpp
 shibokenbuffer.cpp
 signature.cpp
 qapp_macro.cpp
+voidptr.cpp
 )
 
 get_numpy_location()
@@ -75,7 +75,6 @@ install(FILES
         autodecref.h
         basewrapper.h
         bindingmanager.h
-        conversions.h
         gilstate.h
         helper.h
         sbkarrayconverter.h
@@ -88,11 +87,11 @@ install(FILES
         shiboken.h
         shibokenmacros.h
         threadstatesaver.h
-        typeresolver.h
         shibokenbuffer.h
         sbkpython.h
         signature.h
         qapp_macro.h
+        voidptr.h
         "${CMAKE_CURRENT_BINARY_DIR}/sbkversion.h"
         DESTINATION include/shiboken2${shiboken2_SUFFIX})
 install(TARGETS libshiboken EXPORT shiboken2

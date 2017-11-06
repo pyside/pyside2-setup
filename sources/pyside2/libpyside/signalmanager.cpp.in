@@ -55,10 +55,10 @@
 #include <QDebug>
 #include <limits>
 #include <algorithm>
-#include <typeresolver.h>
 #include <basewrapper.h>
+#include <bindingmanager.h>
 #include <sbkconverter.h>
-#include <conversions.h>
+#include <sbkstring.h>
 
 // These private headers are needed to throw JavaScript exceptions
 #if @QML_PRIVATE_API_SUPPORT@
@@ -211,30 +211,6 @@ QDataStream &operator>>(QDataStream& in, PyObjectWrapper& myObj)
     myObj = PyObjectWrapper(value);
     return in;
 }
-
-};
-
-namespace Shiboken {
-
-template<>
-struct Converter<PySide::PyObjectWrapper>
-{
-    static PySide::PyObjectWrapper toCpp(PyObject* obj)
-    {
-        return PySide::PyObjectWrapper(obj);
-    }
-
-    static PyObject* toPython(void* obj)
-    {
-        return toPython(*reinterpret_cast<PySide::PyObjectWrapper*>(obj));
-    }
-
-    static PyObject* toPython(const PySide::PyObjectWrapper& obj)
-    {
-        Py_INCREF((PyObject*)obj);
-        return obj;
-    }
-};
 
 };
 

@@ -48,7 +48,6 @@
 #include <autodecref.h>
 #include <gilstate.h>
 
-#include "typeresolver.h"
 #include "signalmanager.h"
 
 #define RECEIVER_DESTROYED_SLOT_NAME "__receiverDestroyed__(QObject*)"

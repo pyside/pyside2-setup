@@ -474,7 +474,7 @@ bool HeaderGenerator::finishGeneration()
     }
 
     s << "#include <sbkpython.h>" << endl;
-    s << "#include <conversions.h>" << endl;
+    s << "#include <sbkconverter.h>" << endl;
     s << "#include <sbkenum.h>" << endl;
     s << "#include <basewrapper.h>" << endl;
     s << "#include <bindingmanager.h>" << endl;
