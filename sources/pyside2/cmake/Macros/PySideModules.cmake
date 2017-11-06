@@ -54,15 +54,14 @@ macro(create_pyside_module
     # First add the main file.
     set(total_type_system_files ${typesystem_path})
 
-    # Transform the path separator list back into a cmake list (so from a:b:c to a;b;c)
-    unmake_path(list_of_paths ${${module_typesystem_path}})
+    get_filename_component(typesystem_root "${CMAKE_CURRENT_SOURCE_DIR}" DIRECTORY)
 
-    # Collect all XML files, in each given path, and append them to the final total list.
-    foreach(type_system_files_path ${list_of_paths})
-        set(glob_expression "${type_system_files_path}/*.xml")
+    set(deps ${module_name} ${${module_deps}})
+    foreach(dep ${deps})
+        set(glob_expression "${typesystem_root}/${dep}/*.xml")
         file(GLOB type_system_files ${glob_expression})
         set(total_type_system_files ${total_type_system_files} ${type_system_files})
-    endforeach(type_system_files_path)
+    endforeach(dep)
 
     # Remove any possible duplicates.
     list(REMOVE_DUPLICATES total_type_system_files)
@@ -81,12 +80,14 @@ macro(create_pyside_module
     # Transform the path separators into something shiboken understands.
     make_path(shiboken_include_dirs ${shiboken_include_dirs})
 
+    get_filename_component(pyside_binary_dir ${CMAKE_CURRENT_BINARY_DIR} DIRECTORY)
+
     add_custom_command(OUTPUT ${${module_sources}}
                         COMMAND "${SHIBOKEN_BINARY}" ${GENERATOR_EXTRA_FLAGS}
-                        ${pyside2_BINARY_DIR}/pyside2_global.h
+                        "${pyside2_BINARY_DIR}/${module_name}_global.h"
                         --include-paths=${shiboken_include_dirs}
                         ${shiboken_framework_include_dirs_option}
-                        --typesystem-paths=${pyside2_SOURCE_DIR}${PATH_SEP}${${module_typesystem_path}}
+                        --typesystem-paths=${pyside_binary_dir}${PATH_SEP}${pyside2_SOURCE_DIR}${PATH_SEP}${${module_typesystem_path}}
                         --output-directory=${CMAKE_CURRENT_BINARY_DIR}
                         --license-file=${CMAKE_CURRENT_SOURCE_DIR}/../licensecomment.txt
                         ${typesystem_path}

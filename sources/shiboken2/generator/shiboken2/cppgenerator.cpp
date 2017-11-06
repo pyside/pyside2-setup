@@ -248,7 +248,6 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
         s << "#include <qapp_macro.h>" << endl;
     }
 
-    s << "#include <typeresolver.h>" << endl;
     s << "#include <typeinfo>" << endl;
     if (usePySideExtensions() && metaClass->isQObject()) {
         s << "#include <signalmanager.h>" << endl;
@@ -3565,7 +3564,6 @@ void CppGenerator::writeEnumConverterInitialization(QTextStream& s, const TypeEn
         }
 
         s << INDENT << "Shiboken::Enum::setTypeConverter(" << enumPythonType << ", converter);" << endl;
-        s << INDENT << "Shiboken::Enum::setTypeConverter(" << enumPythonType << ", converter);" << endl;
         QStringList cppSignature = enumType->qualifiedCppName().split(QLatin1String("::"), QString::SkipEmptyParts);
         while (!cppSignature.isEmpty()) {
             QString signature = cppSignature.join(QLatin1String("::"));
@@ -5591,27 +5589,6 @@ bool CppGenerator::finishGeneration()
             QString signature = cppSignature.join(QLatin1String("::"));
             s << INDENT << "Shiboken::Conversions::registerConverterName(" << converter << ", \"" << signature << "\");" << endl;
             cppSignature.removeFirst();
-        }
-    }
-    // Register type resolver for all containers found in signals.
-    QSet<QByteArray> typeResolvers;
-
-    for (AbstractMetaClass *metaClass : classList) {
-        if (!metaClass->isQObject() || !metaClass->typeEntry()->generateCode())
-            continue;
-        const AbstractMetaFunctionList &functions = metaClass->functions();
-        for (AbstractMetaFunction *func : functions) {
-            if (func->isSignal()) {
-                const AbstractMetaArgumentList &arguments = func->arguments();
-                for (AbstractMetaArgument *arg : arguments) {
-                    if (arg->type()->isContainer()) {
-                        QString value = translateType(arg->type(), metaClass, ExcludeConst | ExcludeReference);
-                        if (value.startsWith(QLatin1String("::")))
-                            value.remove(0, 2);
-                        typeResolvers << QMetaObject::normalizedType(value.toUtf8().constData());
-                    }
-                }
-            }
         }
     }
 

@@ -40,11 +40,11 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtWebKitWidgets">
-  <load-typesystem name="typesystem_core.xml" generate="no"/>
-  <load-typesystem name="typesystem_gui.xml" generate="no"/>
-  <load-typesystem name="typesystem_widgets.xml" generate="no"/>
-  <load-typesystem name="typesystem_webkit.xml" generate="no"/>
-  <load-typesystem name="typesystem_network.xml" generate="no"/>
+  <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+  <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
+  <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
+  <load-typesystem name="QtWebKit/typesystem_webkit.xml" generate="no"/>
+  <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
   <load-typesystem name="typesystem_printsupport.xml" generate="no"/>
 
   <value-type name="QWebDatabase"/>

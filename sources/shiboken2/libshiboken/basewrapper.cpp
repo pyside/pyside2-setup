@@ -39,10 +39,11 @@
 
 #include "basewrapper.h"
 #include "basewrapper_p.h"
+#include "bindingmanager.h"
 #include "sbkconverter.h"
 #include "sbkenum.h"
+#include "sbkstring.h"
 #include "autodecref.h"
-#include "typeresolver.h"
 #include "gilstate.h"
 #include <string>
 #include <cstring>
@@ -53,6 +54,7 @@
 #include "threadstatesaver.h"
 #include "signature.h"
 #include "qapp_macro.h"
+#include "voidptr.h"
 
 namespace {
     void _destroyParentInfo(SbkObject* obj, bool keepReference);
@@ -550,7 +552,6 @@ void init()
 
     Conversions::init();
 
-    initTypeResolver();
     PyEval_InitThreads();
 
     //Init private data
@@ -564,6 +565,8 @@ void init()
 
     if (PyType_Ready(reinterpret_cast<PyTypeObject *>(&SbkObject_Type)) < 0)
         Py_FatalError("[libshiboken] Failed to initialise Shiboken.BaseWrapper type.");
+
+    VoidPtr::init();
 
     shibokenAlreadInitialised = true;
 }

@@ -1,8 +1,6 @@
-<?xml version="1.0"?>
-<!--
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of PySide2.
@@ -38,18 +36,30 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
--->
-<typesystem package="PySide2.QtScriptTools">
-    <load-typesystem name="QtScript/typesystem_script.xml" generate="no" />
-    <load-typesystem name="QtGui/typesystem_gui.xml" generate="no" />
-    <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no" />
 
-    <object-type name="QScriptEngineDebugger">
-        <enum-type name="DebuggerAction"/>
-        <enum-type name="DebuggerState" since="4.6"/>
-        <enum-type name="DebuggerWidget"/>
-        <extra-includes>
-            <include file-name="QScriptEngine" location="global"/>
-        </extra-includes>
-    </object-type>
-</typesystem>
+#ifndef VOIDPTR_H
+#define VOIDPTR_H
+
+#include <Python.h>
+#include "shibokenmacros.h"
+#include "sbkconverter.h"
+
+extern "C"
+{
+
+// Void pointer type declaration.
+extern LIBSHIBOKEN_API PyTypeObject SbkVoidPtrType;
+
+} // extern "C"
+
+namespace VoidPtr
+{
+
+void init();
+SbkConverter *createConverter();
+LIBSHIBOKEN_API void addVoidPtrToModule(PyObject *module);
+
+}
+
+
+#endif // VOIDPTR_H

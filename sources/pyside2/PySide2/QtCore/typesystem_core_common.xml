@@ -354,7 +354,6 @@
   </primitive-type>
 
   <primitive-type name="QVariant" target-lang-api-name="PyObject">
-    <include file-name="typeresolver.h" location="global"/>
     <conversion-rule>
         <native-to-target>
         if (!%in.isValid())
@@ -797,7 +796,8 @@
 
   <container-type name="QHash" type="hash">
     <include file-name="QHash" location="global"/>
-    <include file-name="pysideconversions.h" location="global"/>
+    <!-- Include to make enum flags work. -->
+    <include file-name="pysideqflags.h" location="global"/>
     <conversion-rule>
         <native-to-target>
             <insert-template name="cppmap_to_pymap_conversion"/>

@@ -36,9 +36,6 @@ ${QtXml_GEN_DIR}/qxmlsimplereader_wrapper.cpp
 ${QtXml_GEN_DIR}/qtxml_module_wrapper.cpp
 )
 
-make_path(QtXml_typesystem_path ${QtCore_SOURCE_DIR} ${QtCore_BINARY_DIR}
-                                ${QtXml_SOURCE_DIR})
-
 set(QtXml_include_dirs      ${QtXml_SOURCE_DIR}
                             ${QtXml_BINARY_DIR}
                             ${CMAKE_SOURCE_DIR}
@@ -59,6 +56,6 @@ create_pyside_module(QtXml
                      QtXml_include_dirs
                      QtXml_libraries
                      QtXml_deps
-                     QtXml_typesystem_path
+                     QtXml_SOURCE_DIR
                      QtXml_SRC
                      "")

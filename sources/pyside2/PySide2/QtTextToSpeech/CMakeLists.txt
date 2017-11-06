@@ -8,11 +8,6 @@ ${QtTextToSpeech_GEN_DIR}/qvoice_wrapper.cpp
 ${QtTextToSpeech_GEN_DIR}/qttexttospeech_module_wrapper.cpp
 )
 
-make_path(QtTextToSpeech_typesystem_path
-    ${QtCore_SOURCE_DIR}
-    ${QtCore_BINARY_DIR}
-    ${QtTextToSpeech_SOURCE_DIR})
-
 set(QtTextToSpeech_include_dirs ${QtTextToSpeech_SOURCE_DIR}
                                 ${QtTextToSpeech_BINARY_DIR}
                                 ${Qt5Core_INCLUDE_DIRS}
@@ -35,6 +30,6 @@ create_pyside_module(QtTextToSpeech
                      QtTextToSpeech_include_dirs
                      QtTextToSpeech_libraries
                      QtTextToSpeech_deps
-                     QtTextToSpeech_typesystem_path
+                     QtTextToSpeech_SOURCE_DIR
                      QtTextToSpeech_SRC
                      "")

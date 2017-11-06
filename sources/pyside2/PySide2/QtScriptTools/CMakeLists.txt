@@ -6,11 +6,6 @@ ${QtScriptTools_GEN_DIR}/qscriptenginedebugger_wrapper.cpp
 ${QtScriptTools_GEN_DIR}/qtscripttools_module_wrapper.cpp
 )
 
-make_path(QtScriptTools_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtScript_SOURCE_DIR}
-                                        ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtScript_BINARY_DIR}
-                                        ${QtWidgets_SOURCE_DIR} ${QtWidgets_BINARY_DIR}
-                                        ${QtScriptTools_SOURCE_DIR})
-
 set(QtScriptTools_include_dirs  ${QtScriptTools_SOURCE_DIR}
                                 ${QtScriptTools_BINARY_DIR}
                                 ${Qt5Core_INCLUDE_DIRS}
@@ -41,6 +36,6 @@ create_pyside_module(QtScriptTools
                      QtScriptTools_include_dirs
                      QtScriptTools_libraries
                      QtScriptTools_deps
-                     QtScriptTools_typesystem_path
+                     QtScriptTools_SOURCE_DIR
                      QtScriptTools_SRC
                      "")

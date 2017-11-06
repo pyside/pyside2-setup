@@ -32,6 +32,7 @@
 #include "reporthandler.h"
 #include <QtCore/QDir>
 #include <QtCore/QFile>
+#include <QtCore/QFileInfo>
 #include <QtCore/QRegularExpression>
 #include <QtCore/QSet>
 #include <QtCore/QXmlStreamAttributes>
@@ -183,13 +184,20 @@ Handler::Handler(TypeDatabase* database, bool generate)
     tagNames.insert(QLatin1String("add-function"), StackElement::AddFunction);
 }
 
+static QString readerFileName(const QXmlStreamReader &reader)
+{
+    const QFile *file = qobject_cast<const QFile *>(reader.device());
+    return file != nullptr ? file->fileName() : QString();
+}
+
 static QString msgReaderError(const QXmlStreamReader &reader, const QString &what)
 {
     QString message;
     QTextStream str(&message);
     str << "Error: ";
-    if (const QFile *file = qobject_cast<const QFile *>(reader.device()))
-        str << "file=" << QDir::toNativeSeparators(file->fileName()) << ", ";
+    const QString fileName = readerFileName(reader);
+    if (!fileName.isEmpty())
+        str << "file=" << QDir::toNativeSeparators(fileName) << ", ";
     str << "line=" << reader.lineNumber() << ", column=" << reader.columnNumber()
         << ", message=" << what;
     return message;
@@ -203,6 +211,11 @@ static QString msgReaderError(const QXmlStreamReader &reader)
 bool Handler::parse(QXmlStreamReader &reader)
 {
     m_error.clear();
+    m_currentPath.clear();
+    const QString fileName = readerFileName(reader);
+    if (!fileName.isEmpty())
+        m_currentPath = QFileInfo(fileName).absolutePath();
+
     while (!reader.atEnd()) {
         switch (reader.readNext()) {
         case QXmlStreamReader::NoToken:
@@ -1325,7 +1338,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
                 return false;
             }
             bool generateChild = (convertBoolean(attributes[QLatin1String("generate")], QLatin1String("generate"), true) && (m_generate == TypeEntry::GenerateAll));
-            if (!m_database->parseFile(name, generateChild)) {
+            if (!m_database->parseFile(name, m_currentPath, generateChild)) {
                 m_error = QStringLiteral("Failed to parse: '%1'").arg(name);
                 return false;
             }
@@ -1947,7 +1960,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             if (m_generate != TypeEntry::GenerateForSubclass &&
                 m_generate != TypeEntry::GenerateNothing &&
                 !file_name.isEmpty()) {
-                const QString resolved = m_database->modifiedTypesystemFilepath(file_name, false);
+                const QString resolved = m_database->modifiedTypesystemFilepath(file_name, m_currentPath);
                 if (QFile::exists(resolved)) {
                     QFile codeFile(resolved);
                     if (codeFile.open(QIODevice::Text | QIODevice::ReadOnly)) {

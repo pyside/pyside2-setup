@@ -40,7 +40,7 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtConcurrent">
-  <load-typesystem name="typesystem_core.xml" generate="no"/>
+  <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
 
   <!-- Qt5: this is currently the minimum possible QtConcurrent support, by just extracting
         the name space from QtCore -->

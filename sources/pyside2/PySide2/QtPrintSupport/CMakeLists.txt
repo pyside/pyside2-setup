@@ -13,10 +13,6 @@ ${QtPrintSupport_GEN_DIR}/qprintpreviewwidget_wrapper.cpp
 ${QtPrintSupport_GEN_DIR}/qtprintsupport_module_wrapper.cpp
 )
 
-make_path(QtPrintSupport_typesystem_path    ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
-                                            ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR}
-                                            ${QtPrintSupport_SOURCE_DIR})
-
 set(QtPrintSupport_include_dirs ${QtPrintSupport_SOURCE_DIR}
                                 ${QtPrintSupport_BINARY_DIR}
                                 ${Qt5Core_INCLUDE_DIRS}
@@ -43,6 +39,6 @@ create_pyside_module(QtPrintSupport
                      QtPrintSupport_include_dirs
                      QtPrintSupport_libraries
                      QtPrintSupport_deps
-                     QtPrintSupport_typesystem_path
+                     QtPrintSupport_SOURCE_DIR
                      QtPrintSupport_SRC
                      "")

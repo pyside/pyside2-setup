@@ -15,13 +15,6 @@ ${QtWebEngineWidgets_GEN_DIR}/qwebengineview_wrapper.cpp
 ${QtWebEngineWidgets_GEN_DIR}/qtwebenginewidgets_module_wrapper.cpp
 )
 
-make_path(QtWebEngineWidgets_typesystem_path 
-                            ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
-                            ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR}
-                            ${QtNetwork_SOURCE_DIR} ${QtNetwork_BINARY_DIR}
-                            ${QtWebChannel_SOURCE_DIR} ${QtWebChannel_BINARY_DIR}
-                            ${QtWebEngineWidgets_SOURCE_DIR})
-
 set(QtWebEngineWidgets_include_dirs
                             ${QtWebEngineWidgets_SOURCE_DIR}
                             ${QtWebEngineWidgets_BINARY_DIR}
@@ -56,7 +49,7 @@ create_pyside_module(QtWebEngineWidgets
                      QtWebEngineWidgets_include_dirs
                      QtWebEngineWidgets_libraries
                      QtWebEngineWidgets_deps
-                     QtWebEngineWidgets_typesystem_path
+                     QtWebEngineWidgets_SOURCE_DIR
                      QtWebEngineWidgets_SRC
                      "")
 

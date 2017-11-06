@@ -44,7 +44,6 @@
 #include "autodecref.h"
 #include "basewrapper.h"
 #include "bindingmanager.h"
-#include "conversions.h"
 #include "gilstate.h"
 #include "threadstatesaver.h"
 #include "helper.h"
@@ -54,7 +53,6 @@
 #include "sbkmodule.h"
 #include "sbkstring.h"
 #include "shibokenmacros.h"
-#include "typeresolver.h"
 #include "shibokenbuffer.h"
 
 #endif // SHIBOKEN_H

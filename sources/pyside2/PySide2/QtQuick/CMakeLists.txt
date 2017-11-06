@@ -58,13 +58,6 @@ if (Qt5Quick_VERSION VERSION_GREATER 5.5.1)
        )
 endif()
 
-
-make_path(QtQuick_typesystem_path ${QtCore_SOURCE_DIR} ${QtCore_BINARY_DIR}
-                                  ${QtGui_SOURCE_DIR} ${QtGui_BINARY_DIR}
-                                  ${QtNetwork_SOURCE_DIR} ${QtNetwork_BINARY_DIR}
-                                  ${QtQml_SOURCE_DIR} ${QtQml_BINARY_DIR}
-                                  ${QtQuick_SOURCE_DIR})
-
 set(QtQuick_include_dirs  ${QtQuick_SOURCE_DIR}
                           ${QtQml_SOURCE_DIR}
                           ${Qt5Core_INCLUDE_DIRS}
@@ -95,6 +88,6 @@ create_pyside_module(QtQuick
                      QtQuick_include_dirs
                      QtQuick_libraries
                      QtQuick_deps
-                     QtQuick_typesystem_path
+                     QtQuick_SOURCE_DIR
                      QtQuick_SRC
                      QtQuick_registerType)

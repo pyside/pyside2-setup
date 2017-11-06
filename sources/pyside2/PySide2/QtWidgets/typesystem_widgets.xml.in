@@ -40,7 +40,7 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtWidgets">
-    <load-typesystem name="typesystem_gui.xml" generate="no"/>
-    <load-typesystem name="typesystem_widgets_@AUTO_OS@.xml" generate="yes"/>
-    <load-typesystem name="typesystem_widgets_common.xml" generate="yes"/>
+    <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
+    <load-typesystem name="QtWidgets/typesystem_widgets_@AUTO_OS@.xml" generate="yes"/>
+    <load-typesystem name="QtWidgets/typesystem_widgets_common.xml" generate="yes"/>
 </typesystem>

@@ -230,9 +230,6 @@ macro(COLLECT_MODULE_IF_FOUND shortname)
     if(${_name_found})
         message(STATUS "module ${name} found (${ARGN})")
 
-        # Put the module at the end of pyside2_global.h
-        file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/PySide2/pyside2_global.h.add"
-                    "#include \"Qt${shortname}/Qt${shortname}\"\n")
         # record the shortnames for the tests
         list(APPEND all_module_shortnames ${shortname})
     else()

@@ -142,6 +142,8 @@ public:
     static QString globalNamespaceClassName(const TypeEntry *te);
 
     bool parseFile(const QString &filename, bool generate = true);
+    bool parseFile(const QString &filename, const QString &currentPath, bool generate);
+
     bool parseFile(QIODevice* device, bool generate = true);
 
     bool setApiVersion(const QString& package, const QString& version);
@@ -154,7 +156,7 @@ public:
 
     void setDropTypeEntries(QStringList dropTypeEntries);
 
-    QString modifiedTypesystemFilepath(const QString &tsFile, bool stripPath = true) const;
+    QString modifiedTypesystemFilepath(const QString &tsFile, const QString &currentPath = QString()) const;
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;

@@ -40,9 +40,9 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtQml">
-    <load-typesystem name="typesystem_core.xml" generate="no"/>
-    <load-typesystem name="typesystem_network.xml" generate="no"/>
-    <load-typesystem name="typesystem_gui.xml" generate="no"/>
+    <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+    <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
+    <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
 
     <!-- This is to inform the generator that the VolatileBool python type exists -->
     <custom-type name="VolatileBool" />

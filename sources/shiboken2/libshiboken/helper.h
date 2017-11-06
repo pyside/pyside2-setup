@@ -42,53 +42,12 @@
 
 #include "sbkpython.h"
 #include "shibokenmacros.h"
-#include "conversions.h"
 #include "autodecref.h"
 
 #define SBK_UNUSED(x)   (void)x;
 
 namespace Shiboken
 {
-
-template<typename A>
-inline PyObject* makeTuple(const A& a)
-{
-    return PyTuple_Pack(1, AutoDecRef(Converter<A>::toPython(a)).object());
-}
-
-template<typename A, typename B>
-inline PyObject* makeTuple(const A& a, const B& b)
-{
-    return PyTuple_Pack(2, AutoDecRef(Converter<A>::toPython(a)).object(),
-                           AutoDecRef(Converter<B>::toPython(b)).object());
-}
-
-template<typename A, typename B, typename C>
-inline PyObject* makeTuple(const A& a, const B& b, const C& c)
-{
-    return PyTuple_Pack(3, AutoDecRef(Converter<A>::toPython(a)).object(),
-                           AutoDecRef(Converter<B>::toPython(b)).object(),
-                           AutoDecRef(Converter<C>::toPython(c)).object());
-}
-
-template<typename A, typename B, typename C, typename D>
-inline PyObject* makeTuple(const A& a, const B& b, const C& c, const D& d)
-{
-    return PyTuple_Pack(4, AutoDecRef(Converter<A>::toPython(a)).object(),
-                           AutoDecRef(Converter<B>::toPython(b)).object(),
-                           AutoDecRef(Converter<C>::toPython(c)).object(),
-                           AutoDecRef(Converter<D>::toPython(d)).object());
-}
-
-template<typename A, typename B, typename C, typename D, typename E>
-inline PyObject* makeTuple(const A& a, const B& b, const C& c, const D& d, const E& e)
-{
-    return PyTuple_Pack(5, AutoDecRef(Converter<A>::toPython(a)).object(),
-                           AutoDecRef(Converter<B>::toPython(b)).object(),
-                           AutoDecRef(Converter<C>::toPython(c)).object(),
-                           AutoDecRef(Converter<D>::toPython(d)).object(),
-                           AutoDecRef(Converter<E>::toPython(e)).object());
-}
 
 /**
 * It transforms a python sequence into two C variables, argc and argv.

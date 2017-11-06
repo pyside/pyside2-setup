@@ -192,9 +192,6 @@ ${QtGui_GEN_DIR}/qtgui_module_wrapper.cpp
 configure_file("${QtGui_SOURCE_DIR}/typesystem_gui.xml.in"
                "${QtGui_BINARY_DIR}/typesystem_gui.xml" @ONLY)
 
-make_path(QtGui_typesystem_path ${QtCore_SOURCE_DIR} ${QtCore_BINARY_DIR}
-                                ${QtGui_SOURCE_DIR})
-
 set(QtGui_include_dirs  ${QtGui_SOURCE_DIR}
                         ${QtGui_BINARY_DIR}
                         ${pyside2_SOURCE_DIR}
@@ -215,7 +212,7 @@ create_pyside_module(QtGui
                      QtGui_include_dirs
                      QtGui_libraries
                      QtGui_deps
-                     QtGui_typesystem_path
+                     QtGui_SOURCE_DIR
                      QtGui_SRC
                      QPYTEXTOBJECT_MOC
                      ${QtGui_BINARY_DIR}/typesystem_gui.xml)

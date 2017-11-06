@@ -40,7 +40,7 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtCharts">
-  <load-typesystem name="typesystem_widgets.xml" generate="no" />
+  <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no" />
   <namespace-type name="QtCharts">
       <object-type name="QAbstractAxis" since="5.7">
           <enum-type name="AxisType"/>

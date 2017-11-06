@@ -10,9 +10,6 @@ ${QtWebSockets_GEN_DIR}/qwebsocketserver_wrapper.cpp
 ${QtWebSockets_GEN_DIR}/qtwebsockets_module_wrapper.cpp
 )
 
-make_path(QtWebSockets_typesystem_path ${QtCore_SOURCE_DIR} ${QtCore_BINARY_DIR} ${QtNetwork_SOURCE_DIR}
-                                       ${QtNetwork_BINARY_DIR} ${QtWebSockets_SOURCE_DIR})
-
 set(QtWebSockets_include_dirs ${QtWebSockets_SOURCE_DIR}
                         ${QtWebSockets_BINARY_DIR}
                         ${Qt5Core_INCLUDE_DIRS}
@@ -39,6 +36,6 @@ create_pyside_module(QtWebSockets
                      QtWebSockets_include_dirs
                      QtWebSockets_libraries
                      QtWebSockets_deps
-                     QtWebSockets_typesystem_path
+                     QtWebSockets_SOURCE_DIR
                      QtWebSockets_SRC
                      "")

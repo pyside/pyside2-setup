@@ -40,7 +40,7 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtNetwork">
-  <load-typesystem name="typesystem_core.xml" generate="no"/>
+  <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
 
     <namespace-type name="QSsl">
         <enum-type name="AlternativeNameEntryType"/>

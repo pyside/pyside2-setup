@@ -6,12 +6,6 @@ ${QtX11Extras_GEN_DIR}/qx11info_wrapper.cpp
 ${QtX11Extras_GEN_DIR}/qtx11extras_module_wrapper.cpp
 )
 
-make_path(QtX11Extras_typesystem_path ${QtX11Extras_SOURCE_DIR}
-                                      ${QtCore_SOURCE_DIR}
-                                      ${QtCore_BINARY_DIR}
-                                      ${QtGui_SOURCE_DIR}
-                                      ${QtGui_BINARY_DIR})
-
 set(QtX11Extras_include_dirs ${QtX11Extras_SOURCE_DIR}
                         ${QtX11Extras_BINARY_DIR}
                         ${Qt5X11Extras_INCLUDE_DIRS}
@@ -35,6 +29,6 @@ create_pyside_module(QtX11Extras
                      QtX11Extras_include_dirs
                      QtX11Extras_libraries
                      QtX11Extras_deps
-                     QtX11Extras_typesystem_path
+                     QtX11Extras_SOURCE_DIR
                      QtX11Extras_SRC
                      "")

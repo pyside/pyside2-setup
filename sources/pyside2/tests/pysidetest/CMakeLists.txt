@@ -66,11 +66,8 @@ make_path(testbinding_include_dirs  ${pyside2_BINARY_DIR}
                                     ${Qt5Widgets_DIRECT_INCLUDE_DIR}
                                     )
 
-make_path(testbinding_typesystem_path ${CMAKE_CURRENT_SOURCE_DIR}
-                                      ${pyside2_SOURCE_DIR}
-                                      ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
-                                      ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR}
-                                      )
+make_path(testbinding_typesystem_path ${pyside2_SOURCE_DIR}
+                                      ${pyside2_BINARY_DIR})
 
 add_custom_command(OUTPUT ${testbinding_SRC}
 COMMAND ${SHIBOKEN_BINARY} ${GENERATOR_EXTRA_FLAGS}

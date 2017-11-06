@@ -40,10 +40,10 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtQuick">
-    <load-typesystem name="typesystem_core.xml" generate="no"/>
-    <load-typesystem name="typesystem_network.xml" generate="no"/>
-    <load-typesystem name="typesystem_gui.xml" generate="no"/>
-    <load-typesystem name="typesystem_qml.xml" generate="no"/>
+    <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+    <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
+    <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
+    <load-typesystem name="QtQml/typesystem_qml.xml" generate="no"/>
 
     <smart-pointer-type name="QSharedPointer" type="shared" getter="data" />
 

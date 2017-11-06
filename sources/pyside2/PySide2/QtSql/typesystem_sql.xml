@@ -40,7 +40,7 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtSql">
-  <load-typesystem name="typesystem_widgets.xml" generate="no"/>
+  <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
 
   <rejection class="QSqlDriverCreator"/>
   <rejection class="QSqlDriverPlugin"/>

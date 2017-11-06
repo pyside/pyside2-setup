@@ -215,22 +215,6 @@ struct OverFlowChecker<float, PY_LONG_LONG, true> :
 };
 
 // Basic primitive type converters ---------------------------------------------------------
-template<typename T> PyTypeObject* SbkType() { return 0; }
-template<> inline PyTypeObject* SbkType<PY_LONG_LONG>() { return &PyLong_Type; }
-template<> inline PyTypeObject* SbkType<bool>() { return &PyBool_Type; }
-template<> inline PyTypeObject* SbkType<char>() { return &PyInt_Type; }
-template<> inline PyTypeObject* SbkType<const char*>() { return &PyString_Type; }
-template<> inline PyTypeObject* SbkType<double>() { return &PyFloat_Type; }
-template<> inline PyTypeObject* SbkType<float>() { return &PyFloat_Type; }
-template<> inline PyTypeObject* SbkType<int>() { return &PyInt_Type; }
-template<> inline PyTypeObject* SbkType<long>() { return &PyLong_Type; }
-template<> inline PyTypeObject* SbkType<short>() { return &PyInt_Type; }
-template<> inline PyTypeObject* SbkType<signed char>() { return &PyInt_Type; }
-template<> inline PyTypeObject* SbkType<unsigned PY_LONG_LONG>() { return &PyLong_Type; }
-template<> inline PyTypeObject* SbkType<unsigned char>() { return &PyInt_Type; }
-template<> inline PyTypeObject* SbkType<unsigned int>() { return &PyLong_Type; }
-template<> inline PyTypeObject* SbkType<unsigned long>() { return &PyLong_Type; }
-template<> inline PyTypeObject* SbkType<unsigned short>() { return &PyInt_Type; }
 
 template <typename T> struct Primitive {};
 
@@ -242,8 +226,11 @@ struct OnePrimitive
     static void toCpp(PyObject*, void*) {}
     static SbkConverter* createConverter()
     {
-        SbkConverter* converter = Shiboken::Conversions::createConverter(SbkType<T>(), Primitive<T>::toPython);
-        Shiboken::Conversions::addPythonToCppValueConversion(converter, Primitive<T>::toCpp, Primitive<T>::isConvertible);
+        SbkConverter* converter = Shiboken::Conversions::createConverter(Shiboken::SbkType<T>(),
+                                                                         Primitive<T>::toPython);
+        Shiboken::Conversions::addPythonToCppValueConversion(converter,
+                                                             Primitive<T>::toCpp,
+                                                             Primitive<T>::isConvertible);
         return converter;
     }
 };
@@ -546,31 +533,6 @@ struct Primitive<std::string> : TwoPrimitive<std::string>
     }
 };
 
-// Void pointer ----------------------------------------------------------------------------
-
-template <>
-struct Primitive<void*> : OnePrimitive<void*>
-{
-    static PyObject* toPython(const void* cppIn)
-    {
-        SbkDbg() << cppIn;
-        if (!cppIn)
-            Py_RETURN_NONE;
-        PyObject *result = reinterpret_cast<PyObject *>(const_cast<void *>(cppIn));
-        Py_INCREF(result);
-        return result;
-    }
-    static void toCpp(PyObject* pyIn, void* cppOut)
-    {
-        SbkDbg() << pyIn;
-        *reinterpret_cast<void **>(cppOut) = pyIn;
-    }
-    static PythonToCppFunc isConvertible(PyObject *)
-    {
-        return toCpp;
-    }
-};
-
 namespace Shiboken {
 namespace Conversions {
 SbkConverter *createConverterObject(PyTypeObject *type,
@@ -580,5 +542,4 @@ SbkConverter *createConverterObject(PyTypeObject *type,
                                     CppToPythonFunc copyToPythonFunc);
 } // namespace Conversions
 } // namespace Shiboken
-
 #endif // SBK_CONVERTER_P_H

@@ -105,6 +105,7 @@
 
     <extra-includes>
         <include file-name="sbkversion.h" location="local"/>
+        <include file-name="voidptr.h" location="local"/>
     </extra-includes>
     <inject-code position="end">
         // Add __version__ and __version_info__ attributes to the module
@@ -116,5 +117,7 @@
         PyTuple_SET_ITEM(version, 4, PyInt_FromLong(SHIBOKEN_SERIAL));
         PyModule_AddObject(module, "__version_info__", version);
         PyModule_AddStringConstant(module, "__version__", SHIBOKEN_VERSION);
+
+        VoidPtr::addVoidPtrToModule(module);
     </inject-code>
 </typesystem>

@@ -20,10 +20,6 @@ ${QtSql_GEN_DIR}/qsqltablemodel_wrapper.cpp
 ${QtSql_GEN_DIR}/qtsql_module_wrapper.cpp
 )
 
-make_path(QtSql_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
-                                ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR}
-                                ${QtSql_SOURCE_DIR})
-
 set(QtSql_include_dirs  ${QtSql_SOURCE_DIR}
                         ${QtSql_BINARY_DIR}
                         ${Qt5Core_INCLUDE_DIRS}
@@ -50,6 +46,6 @@ create_pyside_module(QtSql
                      QtSql_include_dirs
                      QtSql_libraries
                      QtSql_deps
-                     QtSql_typesystem_path
+                     QtSql_SOURCE_DIR
                      QtSql_SRC
                      "")

@@ -6,10 +6,6 @@ ${QtWebKit_GEN_DIR}/webcore_wrapper.cpp
 ${QtWebKit_GEN_DIR}/qtwebkit_module_wrapper.cpp
 )
 
-make_path(QtWebKit_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtNetwork_SOURCE_DIR}
-                                   ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtNetwork_BINARY_DIR}
-                                   ${QtWebKit_SOURCE_DIR})
-
 set(QtWebKit_include_dirs   ${QtWebKit_SOURCE_DIR}
                             ${QtWebKit_BINARY_DIR}
                             ${Qt5Core_INCLUDE_DIRS}
@@ -37,7 +33,7 @@ create_pyside_module(QtWebKit
                      QtWebKit_include_dirs
                      QtWebKit_libraries
                      QtWebKit_deps
-                     QtWebKit_typesystem_path
+                     QtWebKit_SOURCE_DIR
                      QtWebKit_SRC
                      "")
 

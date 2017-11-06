@@ -9,11 +9,6 @@ ${QtMultimediaWidgets_GEN_DIR}/qvideowidgetcontrol_wrapper.cpp
 ${QtMultimediaWidgets_GEN_DIR}/qtmultimediawidgets_module_wrapper.cpp
 )
 
-make_path(QtMultimediaWidgets_typesystem_path
-    ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtNetwork_SOURCE_DIR} ${QtWidgets_SOURCE_DIR} ${QtMultimedia_SOURCE_DIR}
-    ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtNetwork_BINARY_DIR} ${QtWidgets_BINARY_DIR} ${QtMultimedia_BINARY_DIR}
-    ${QtMultimediaWidgets_SOURCE_DIR})
-
 set(QtMultimediaWidgets_include_dirs ${QtMultimediaWidgets_SOURCE_DIR}
                                      ${QtMultimediaWidgets_BINARY_DIR}
                                      ${Qt5Core_INCLUDE_DIRS}
@@ -47,6 +42,6 @@ create_pyside_module(QtMultimediaWidgets
                      QtMultimediaWidgets_include_dirs
                      QtMultimediaWidgets_libraries
                      QtMultimediaWidgets_deps
-                     QtMultimediaWidgets_typesystem_path
+                     QtMultimediaWidgets_SOURCE_DIR
                      QtMultimediaWidgets_SRC
                      "")

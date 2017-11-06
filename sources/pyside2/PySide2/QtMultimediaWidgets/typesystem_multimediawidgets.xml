@@ -40,10 +40,10 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtMultimediaWidgets">
-  <load-typesystem name="typesystem_core.xml" generate="no" />
-  <load-typesystem name="typesystem_gui.xml" generate="no" />
-  <load-typesystem name="typesystem_multimedia_common.xml" generate="no" />
-  <load-typesystem name="typesystem_widgets.xml" generate="no" />
+  <load-typesystem name="QtCore/typesystem_core.xml" generate="no" />
+  <load-typesystem name="QtGui/typesystem_gui.xml" generate="no" />
+  <load-typesystem name="QtMultimedia/typesystem_multimedia_common.xml" generate="no" />
+  <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no" />
 
   <object-type name="QCameraViewfinder"/>
   <object-type name="QGraphicsVideoItem"/>

@@ -38,6 +38,7 @@
 ****************************************************************************/
 
 #include "helper.h"
+#include "sbkstring.h"
 #include <stdarg.h>
 
 namespace Shiboken

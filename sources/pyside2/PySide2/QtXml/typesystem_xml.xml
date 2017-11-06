@@ -41,7 +41,7 @@
 -->
 <typesystem package="PySide2.QtXml">
     <load-typesystem name="typesystem_templates.xml" generate="no" />
-    <load-typesystem name="typesystem_core.xml" generate="no" />
+    <load-typesystem name="QtCore/typesystem_core.xml" generate="no" />
 
     <rejection class="QXmlAttributes::Attribute"/>
     <rejection class="QDomNode" field-name="impl"/>

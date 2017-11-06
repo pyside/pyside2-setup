@@ -18,8 +18,6 @@ ${QtScript_GEN_DIR}/qscriptvalueiterator_wrapper.cpp
 ${QtScript_GEN_DIR}/qtscript_module_wrapper.cpp
 )
 
-make_path(QtScript_typesystem_path ${QtCore_SOURCE_DIR} ${QtCore_BINARY_DIR})
-
 set(QtScript_include_dirs   ${QtScript_SOURCE_DIR}
                             ${QtScript_BINARY_DIR}
                             ${Qt5Core_INCLUDE_DIRS}
@@ -39,6 +37,6 @@ create_pyside_module(QtScript
                      QtScript_include_dirs
                      QtScript_libraries
                      QtScript_deps
-                     QtScript_typesystem_path
+                     QtScript_SOURCE_DIR
                      QtScript_SRC
                      "")

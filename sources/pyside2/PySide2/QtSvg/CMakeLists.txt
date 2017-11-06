@@ -9,10 +9,6 @@ ${QtSvg_GEN_DIR}/qsvgwidget_wrapper.cpp
 ${QtSvg_GEN_DIR}/qtsvg_module_wrapper.cpp
 )
 
-make_path(QtSvg_typesystem_path ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR}
-                                ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR}
-                                ${QtSvg_SOURCE_DIR})
-
 set(QtSvg_include_dirs  ${QtSvg_SOURCE_DIR}
                         ${QtSvg_BINARY_DIR}
                         ${Qt5Core_INCLUDE_DIRS}
@@ -40,6 +36,6 @@ create_pyside_module(QtSvg
                      QtSvg_include_dirs
                      QtSvg_libraries
                      QtSvg_deps
-                     QtSvg_typesystem_path
+                     QtSvg_SOURCE_DIR
                      QtSvg_SRC
                      "")

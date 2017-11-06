@@ -40,6 +40,6 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtMultimedia">
-    <load-typesystem name="typesystem_multimedia_common.xml" generate="yes"/>
-    <load-typesystem name="typesystem_multimedia_forward_declarations.xml" generate="yes"/>
+    <load-typesystem name="QtMultimedia/typesystem_multimedia_common.xml" generate="yes"/>
+    <load-typesystem name="QtMultimedia/typesystem_multimedia_forward_declarations.xml" generate="yes"/>
 </typesystem>

@@ -43,7 +43,6 @@
 #include "basewrapper.h"
 #include "sbkdbg.h"
 #include "autodecref.h"
-#include "typeresolver.h"
 #include "sbkpython.h"
 
 #include <string.h>
@@ -444,17 +443,12 @@ static PyTypeObject* createEnum(const char* fullName, const char* cppName, const
         enumType->tp_as_number = flagsType->tp_as_number;
     if (PyType_Ready(enumType) < 0)
         return 0;
-    Shiboken::TypeResolver::createValueTypeResolver<int>(cppName);
-    if (shortName)
-        Shiboken::TypeResolver::createValueTypeResolver<int>(shortName);
     return enumType;
 }
 
 PyTypeObject* createGlobalEnum(PyObject* module, const char* name, const char* fullName, const char* cppName, PyTypeObject* flagsType)
 {
     PyTypeObject* enumType = createEnum(fullName, cppName, name, flagsType);
-    Shiboken::TypeResolver::createValueTypeResolver<int>("Qt::WindowType");
-    Shiboken::TypeResolver::createValueTypeResolver<int>("WindowType");
     if (enumType && PyModule_AddObject(module, name, reinterpret_cast<PyObject *>(enumType)) < 0)
         return 0;
     if (flagsType && PyModule_AddObject(module, flagsType->tp_name, reinterpret_cast<PyObject *>(flagsType)) < 0)

@@ -42,6 +42,22 @@ if (NOT PYTHON_ARCH)
     get_python_arch()
 endif()
 
+macro(get_llvm_config)
+  execute_process(
+    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+       import os
+       import sys
+       sys.path.append(os.path.realpath(os.path.join('${CMAKE_CURRENT_LIST_DIR}', '..', '..')))
+       from utils import findLlvmConfig
+       llvmConfig = findLlvmConfig()
+       if llvmConfig:
+           print(llvmConfig)
+       "
+    OUTPUT_VARIABLE LLVM_CONFIG
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  message("LLMV_CONFIG:             " ${LLVM_CONFIG})
+endmacro()
+
 set(CLANG_DIR "")
 set(CLANG_DIR_SOURCE "")
 
@@ -54,12 +70,15 @@ elseif (DEFINED ENV{CLANG_INSTALL_DIR})
     string(REPLACE "_ARCH_" "${PYTHON_ARCH}" CLANG_DIR "${CLANG_DIR}")
     set(CLANG_DIR_SOURCE "CLANG_INSTALL_DIR")
 else ()
-    EXEC_PROGRAM("llvm-config" ARGS "--prefix" OUTPUT_VARIABLE CLANG_DIR)
-    set(CLANG_DIR_SOURCE "llvm-config")
+    if (NOT LLVM_CONFIG)
+        get_llvm_config()
+    endif()
+    set(CLANG_DIR_SOURCE "${LLVM_CONFIG}")
+    EXEC_PROGRAM("${LLVM_CONFIG}" ARGS "--prefix" OUTPUT_VARIABLE CLANG_DIR)
     if (NOT "${CLANG_DIR}" STREQUAL "")
-        EXEC_PROGRAM("llvm-config" ARGS "--version" OUTPUT_VARIABLE CLANG_VERSION)
+        EXEC_PROGRAM("${LLVM_CONFIG}" ARGS "--version" OUTPUT_VARIABLE CLANG_VERSION)
         if (CLANG_VERSION VERSION_LESS 3.9)
-            message(FATAL_ERROR "LLVM version 3.9 is required (llvm-config detected ${CLANG_VERSION} at ${CLANG_DIR}).")
+            message(FATAL_ERROR "LLVM version 3.9 is required (${LLVM_CONFIG} detected ${CLANG_VERSION} at ${CLANG_DIR}).")
         endif()
     endif()
 endif()

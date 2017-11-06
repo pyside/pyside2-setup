@@ -6,11 +6,6 @@ ${QtUiTools_GEN_DIR}/quiloader_wrapper.cpp
 ${QtUiTools_GEN_DIR}/qtuitools_module_wrapper.cpp
 )
 
-make_path(QtUiTools_typesystem_path 
-    ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtWidgets_SOURCE_DIR} ${QtXml_SOURCE_DIR}
-    ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtWidgets_BINARY_DIR} ${QtXml_BINARY_DIR}
-    ${QtUiTools_SOURCE_DIR})
-
 set(QtUiTools_include_dirs  ${QtUiTools_SOURCE_DIR}
                             ${QtUiTools_BINARY_DIR}
                             ${Qt5Core_INCLUDE_DIRS}
@@ -41,6 +36,6 @@ create_pyside_module(QtUiTools
                      QtUiTools_include_dirs
                      QtUiTools_libraries
                      QtUiTools_deps
-                     QtUiTools_typesystem_path
+                     QtUiTools_SOURCE_DIR
                      QtUiTools_SRC
                      "")

@@ -82,10 +82,6 @@ ${QtMultimedia_GEN_DIR}/qvideowindowcontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qtmultimedia_module_wrapper.cpp
 )
 
-make_path(QtMultimedia_typesystem_path  ${QtCore_SOURCE_DIR} ${QtGui_SOURCE_DIR} ${QtNetwork_SOURCE_DIR}
-                                        ${QtCore_BINARY_DIR} ${QtGui_BINARY_DIR} ${QtNetwork_BINARY_DIR}
-                                        ${QtMultimedia_SOURCE_DIR})
-
 set(QtMultimedia_include_dirs   ${QtMultimedia_SOURCE_DIR}
                                 ${QtMultimedia_BINARY_DIR}
                                 ${Qt5Core_INCLUDE_DIRS}
@@ -113,6 +109,6 @@ create_pyside_module(QtMultimedia
                      QtMultimedia_include_dirs
                      QtMultimedia_libraries
                      QtMultimedia_deps
-                     QtMultimedia_typesystem_path
+                     QtMultimedia_SOURCE_DIR
                      QtMultimedia_SRC
                      "")

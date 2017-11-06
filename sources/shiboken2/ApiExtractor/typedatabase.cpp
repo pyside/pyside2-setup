@@ -451,16 +451,20 @@ bool TypeDatabase::isSuppressedWarning(const QString& s) const
     return false;
 }
 
-QString TypeDatabase::modifiedTypesystemFilepath(const QString& tsFile, bool stripPath) const
+QString TypeDatabase::modifiedTypesystemFilepath(const QString& tsFile, const QString &currentPath) const
 {
     const QFileInfo tsFi(tsFile);
     if (tsFi.isAbsolute()) // No point in further lookups
         return tsFi.absoluteFilePath();
     if (tsFi.isFile()) // Make path absolute
         return tsFi.absoluteFilePath();
-    const QString fileName = stripPath ? tsFi.fileName() : tsFile;
+    if (!currentPath.isEmpty()) {
+        const QFileInfo fi(currentPath + QLatin1Char('/') + tsFile);
+        if (fi.isFile())
+            return fi.absoluteFilePath();
+    }
     for (const QString &path : m_typesystemPaths) {
-        const QFileInfo fi(path + QLatin1Char('/') + fileName);
+        const QFileInfo fi(path + QLatin1Char('/') + tsFile);
         if (fi.isFile())
             return fi.absoluteFilePath();
     }
@@ -469,7 +473,13 @@ QString TypeDatabase::modifiedTypesystemFilepath(const QString& tsFile, bool str
 
 bool TypeDatabase::parseFile(const QString &filename, bool generate)
 {
-    QString filepath = modifiedTypesystemFilepath(filename);
+    return parseFile(filename, QString(), generate);
+}
+
+bool TypeDatabase::parseFile(const QString &filename, const QString &currentPath, bool generate)
+{
+
+    QString filepath = modifiedTypesystemFilepath(filename, currentPath);
     if (m_parsedTypesystemFiles.contains(filepath))
         return m_parsedTypesystemFiles[filepath];
 
@@ -478,8 +488,11 @@ bool TypeDatabase::parseFile(const QString &filename, bool generate)
     QFile file(filepath);
     if (!file.exists()) {
         m_parsedTypesystemFiles[filepath] = false;
-        qCWarning(lcShiboken).noquote().nospace()
-            << "Can't find " << filename << ", typesystem paths: " << m_typesystemPaths.join(QLatin1String(", "));
+        QString message = QLatin1String("Can't find ") + filename;
+        if (!currentPath.isEmpty())
+            message += QLatin1String(", current path: ") + currentPath;
+        message += QLatin1String(", typesystem paths: ") + m_typesystemPaths.join(QLatin1String(", "));
+        qCWarning(lcShiboken).noquote().nospace() << message;
         return false;
     }
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
