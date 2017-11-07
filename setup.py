@@ -239,6 +239,7 @@ OPTION_REUSE_BUILD = has_option("reuse-build")
 OPTION_SKIP_CMAKE = has_option("skip-cmake")
 OPTION_SKIP_MAKE_INSTALL = has_option("skip-make-install")
 OPTION_SKIP_PACKAGING = has_option("skip-packaging")
+OPTION_MODULE_SUBSET = option_value("module-subset")
 
 if OPTION_QT_VERSION is None:
     OPTION_QT_VERSION = "5"
@@ -829,6 +830,15 @@ class pyside_build(_build):
         cmake_cmd.append("-DPYTHON_EXECUTABLE=%s" % self.py_executable)
         cmake_cmd.append("-DPYTHON_INCLUDE_DIR=%s" % self.py_include_dir)
         cmake_cmd.append("-DPYTHON_LIBRARY=%s" % self.py_library)
+        if OPTION_MODULE_SUBSET:
+            moduleSubSet = ''
+            for m in OPTION_MODULE_SUBSET.split(','):
+                if m.startswith('Qt'):
+                    m = m[2:]
+                if moduleSubSet:
+                    moduleSubSet += ';'
+                moduleSubSet += m
+            cmake_cmd.append("-DMODULES=%s" % moduleSubSet)
         # Add source location for generating documentation
         if qtSrcDir:
             cmake_cmd.append("-DQT_SRC_DIR=%s" % qtSrcDir)
