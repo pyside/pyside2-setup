@@ -43,7 +43,7 @@ else()
         set_tests_properties(${TEST_NAME} PROPERTIES
                              TIMEOUT ${CTEST_TESTING_TIMEOUT}
                              WILL_FAIL ${EXPECT_TO_FAIL}
-                             ENVIRONMENT "PYTHONPATH=${TEST_PYTHONPATH};${LIBRARY_PATH_VAR}=${TEST_LIBRARY_PATH}")
+                             ENVIRONMENT "PYTHONPATH=${TEST_PYTHONPATH};${LIBRARY_PATH_VAR}=${TEST_LIBRARY_PATH};PYSIDE_DISABLE_INTERNAL_QT_CONF=1")
     endmacro()
 
     add_subdirectory(pysidetest)

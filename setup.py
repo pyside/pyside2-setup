@@ -61,6 +61,15 @@ without rebuilding entire PySide2 every time:
   # Then we create bdist_egg reusing PySide2 build with option --only-package
   python setup.py bdist_egg --only-package --qmake=c:\Qt\4.8.5\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --opnessl=c:\libs\OpenSSL32bit\bin
 
+You can use the option --qt-conf-prefix to pass a path relative to the PySide2 installed package,
+which will be embedded into an auto-generated qt.conf registered in the Qt resource system. This
+path will serve as the PrefixPath for QLibraryInfo, thus allowing to choose where Qt plugins
+should be loaded from. This option overrides the usual prefix chosen by --standalone option, or when
+building on Windows.
+To temporarily disable registration of the internal qt.conf file, a new environment variable called
+PYSIDE_DISABLE_INTERNAL_QT_CONF is introduced. You should assign the integer "1" to disable the
+internal qt.conf, or "0" (or leave empty) to keep use the internal qt.conf file.
+
 For development purposes the following options might be of use, when using "setup.py build":
     --reuse-build option allows recompiling only the modified sources and not the whole world,
       shortening development iteration time,
@@ -241,6 +250,7 @@ OPTION_SKIP_CMAKE = has_option("skip-cmake")
 OPTION_SKIP_MAKE_INSTALL = has_option("skip-make-install")
 OPTION_SKIP_PACKAGING = has_option("skip-packaging")
 OPTION_RPATH_VALUES = option_value("rpath")
+OPTION_QT_CONF_PREFIX = option_value("qt-conf-prefix")
 
 if OPTION_QT_VERSION is None:
     OPTION_QT_VERSION = "5"
@@ -853,6 +863,17 @@ class pyside_build(_build):
             cmake_cmd.append("-DQT_SRC_DIR=%s" % qtSrcDir)
         if self.build_type.lower() == 'debug':
             cmake_cmd.append("-DPYTHON_DEBUG_LIBRARY=%s" % self.py_library)
+
+        if extension.lower() == "pyside2":
+            pyside_qt_conf_prefix = ''
+            if OPTION_QT_CONF_PREFIX:
+                pyside_qt_conf_prefix = OPTION_QT_CONF_PREFIX
+            else:
+                if OPTION_STANDALONE:
+                    pyside_qt_conf_prefix = '"Qt"'
+                if sys.platform == 'win32':
+                    pyside_qt_conf_prefix = '"."'
+            cmake_cmd.append("-DPYSIDE_QT_CONF_PREFIX=%s" % pyside_qt_conf_prefix)
 
         if extension.lower() == "shiboken2":
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")

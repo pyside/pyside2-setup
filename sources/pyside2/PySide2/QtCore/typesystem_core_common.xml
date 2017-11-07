@@ -74,6 +74,10 @@
     <function signature="qrand()" />
     <function signature="qsrand(uint)" />
 
+    <inject-code class="native" position="beginning">
+      #include &lt;pyside.h&gt;
+    </inject-code>
+
     <template name="use_stream_for_format_security">
         // Uses the stream version for security reasons
         // see gcc man page at -Wformat-security
@@ -1039,11 +1043,9 @@
     Shiboken::Conversions::registerConverterName(SbkPySide2_QtCoreTypeConverters[SBK_QSTRING_IDX], "str");
     Shiboken::Conversions::registerConverterName(SbkPySide2_QtCoreTypeConverters[SBK_QTCORE_QLIST_QVARIANT_IDX], "QVariantList");
 
+    PySide::registerInternalQtConf();
     PySide::init(module);
     Py_AtExit(QtCoreModuleExit);
-  </inject-code>
-  <inject-code class="native" position="beginning">
-    #include &lt;pyside.h&gt;
   </inject-code>
 
   <inject-code class="native" position="beginning">
