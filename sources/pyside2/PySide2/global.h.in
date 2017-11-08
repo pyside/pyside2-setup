@@ -54,20 +54,4 @@
 // Make "signals:", "slots:" visible as access specifiers
 #define QT_ANNOTATE_ACCESS_SPECIFIER(a) __attribute__((annotate(#a)))
 
-#include "qpytextobject.h"  // PySide class
-
-#if @ENABLE_X11@
-#  if @Qt5X11Extras_FOUND@
-#    include <QtX11Extras/QX11Info>
-#  endif
-#endif
-
-// QT_WIDGETS_LIB must be defined to QSqlRelationalDelegate become visible.
-// It also changes code generation in pysideqtesttouch.h
-#define QT_WIDGETS_LIB
-
-#if @Qt5Test_FOUND@
-#  include "pysideqtesttouch.h"
-#endif
-
 // Here are now all configured modules appended:

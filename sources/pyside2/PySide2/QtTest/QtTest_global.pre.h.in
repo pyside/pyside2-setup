@@ -1,0 +1,5 @@
+// QT_WIDGETS_LIB changes code generation in pysideqtesttouch.h
+
+#if @Qt5Widgets_FOUND@
+#  define QT_WIDGETS_LIB
+#endif

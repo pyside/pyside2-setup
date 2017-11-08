@@ -43,7 +43,19 @@ foreach(shortname IN LISTS all_module_shortnames)
     # #include <pyside2_global.h> for the the type entries originating from it
     # (cf AbstractMetaBuilderPrivate::setInclude()).
     set(module_header "${CMAKE_CURRENT_BINARY_DIR}/Qt${shortname}_global.h")
-    file(WRITE ${module_header} "${pyside2_global_contents}\n#include <Qt${shortname}/Qt${shortname}>\n")
+    set(module_header_content "")
+    set(pre_header "${CMAKE_CURRENT_BINARY_DIR}/Qt${shortname}/Qt${shortname}_global.pre.h")
+    if(EXISTS "${pre_header}")
+        file(READ "${pre_header}" pre_header_content)
+        set(module_header_content "${pre_header_content}")
+    endif()
+    set(module_header_content "${module_header_content}\n${pyside2_global_contents}\n#include <Qt${shortname}/Qt${shortname}>\n")
+    set(post_header "${CMAKE_CURRENT_BINARY_DIR}/Qt${shortname}/Qt${shortname}_global.post.h")
+    if(EXISTS "${post_header}")
+        file(READ "${post_header}" post_header_content)
+        set(module_header_content "${module_header_content}\n${post_header_content}")
+    endif()
+    file(WRITE ${module_header} "${module_header_content}")
 endforeach()
 
 # install
