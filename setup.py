@@ -1210,6 +1210,8 @@ class pyside_build(_build):
             "{site_packages_dir}/PySide2",
             "{dist_dir}/PySide2",
             vars=vars)
+        built_modules = self.get_built_pyside_modules(vars)
+
         if self.debug or self.build_type == 'RelWithDebInfo':
             # <build>/pyside2/PySide2/*.pdb -> <setup>/PySide2
             copydir(
@@ -1353,7 +1355,25 @@ class pyside_build(_build):
         # <qt>/translations/* -> <setup>/PySide2/translations
         copydir("{qt_translations_dir}", "{dist_dir}/PySide2/translations",
             filter=["*.qm"],
+            force=False,
             vars=vars)
+
+        # <qt>/qml/* -> <setup>/PySide2/qml
+        copydir("{qt_qml_dir}", "{dist_dir}/PySide2/qml",
+            filter=None,
+            force=False,
+            recursive=True,
+            vars=vars)
+
+        if 'WebEngineWidgets' in built_modules:
+            copydir("{qt_prefix_dir}/resources", "{dist_dir}/PySide2/resources",
+                filter=None,
+                recursive=False,
+                vars=vars)
+
+            copydir("{qt_bin_dir}", "{dist_dir}/PySide2",
+                filter=["QtWebEngineProcess*.exe"],
+                recursive=False, vars=vars)
 
         # pdb files for libshiboken and libpyside
         if self.debug or self.build_type == 'RelWithDebInfo':
