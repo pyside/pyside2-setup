@@ -47,7 +47,9 @@ or
   python setup.py install --qmake=</path/to/qt/bin/qmake> [--cmake=</path/to/cmake>] [--openssl=</path/to/openssl/bin>]
 to build and install into your current Python installation.
 
-On Linux you can use option --standalone, to embed Qt libraries to PySide2 distribution
+On Linux and macOS you can use option --standalone, to embed Qt libraries into the PySide2 package.
+The option does not affect Windows, because it is used implicitly, i.e. all relevant DLLs have to
+be copied into the PySide2 package anyway, because there is no proper rpath support on the platform.
 
 You can use option --rpath="your_value" to specify what rpath values should be embedded into the
 PySide2 modules and shared libraries. This overrides the automatically generated values when the
