@@ -37,13 +37,14 @@
 ##
 #############################################################################
 
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 
 import sys
 import os
 import unittest
 from collections import OrderedDict
 from pprint import pprint
+from util import isolate_warnings, check_warnings
 import PySide2
 
 """
@@ -116,15 +117,17 @@ def enum_all():
 
 class PySideSignatureTest(unittest.TestCase):
     def testAllSignaturesCanBuild(self):
-        # This test touches all attributes
-        result = enum_all()
-        # We omit the number of functions test. This is too vague.
-        for mod_name, count in result.items():
-            pass
-        # If an attribute could not be computed, then we will have a warning
-        # in the warningregistry.
-        if hasattr(parser, "__warningregistry__"):
-            raise RuntimeError("There are errors, see above.")
+        with isolate_warnings():
+            # This test touches all attributes
+            result = enum_all()
+            # We omit the number of functions test.
+            # That is replaced by existence_test.py .
+            for mod_name, count in result.items():
+                pass
+            # If an attribute could not be computed, then we will have a warning
+            # in the warningregistry.
+            if check_warnings():
+                raise RuntimeError("There are errors, see above.")
 
     def testSignatureExist(self):
         t1 = type(PySide2.QtCore.QObject.children.__signature__)

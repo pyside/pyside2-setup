@@ -47,6 +47,7 @@ else()
     endmacro()
 
     add_subdirectory(pysidetest)
+    add_subdirectory(registry)
     add_subdirectory(signals)
 
     foreach(shortname IN LISTS all_module_shortnames)
