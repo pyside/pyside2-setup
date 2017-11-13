@@ -283,6 +283,9 @@ if(Qt5UiTools_FOUND)
 else()
     set(DISABLE_QtUiTools 1)
 endif()
+if(WIN32)
+    list(APPEND ALL_OPTIONAL_MODULES AxContainer)
+endif()
 list(APPEND ALL_OPTIONAL_MODULES WebChannel WebEngineWidgets WebKit WebKitWidgets WebSockets)
 
 # Modules to be built unless specified by -DMODULES on command line
