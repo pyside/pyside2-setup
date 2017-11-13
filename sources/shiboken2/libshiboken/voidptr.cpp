@@ -87,7 +87,7 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
         SbkVoidPtrObject *sbkOther = reinterpret_cast<SbkVoidPtrObject *>(addressObject);
         sbkSelf->cptr = sbkOther->cptr;
         sbkSelf->size = sbkOther->size;
-        sbkSelf->isWritable = sbkOther->isWritable > 0 ? true : false;
+        sbkSelf->isWritable = sbkOther->isWritable;
     }
     // Shiboken::Object wrapper.
     else if (Shiboken::Object::checkType(addressObject)) {
