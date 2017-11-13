@@ -255,6 +255,7 @@ def init_QtCore():
         "float[][]": FloatMatrix, # 5.9
         "PySide2.QtCore.unsigned int": int, # 5.9 Ubuntu
         "PySide2.QtCore.long long": int, # 5.9, MSVC 15
+        "QGenericArgument(nullptr)": QGenericArgument(None), # 5.10
         "QModelIndex()": Invalid("PySide2.QtCore.QModelIndex"), # repr is btw. very wrong, fix it?!
         "QGenericArgument((0))": None, # 5.6, RHEL 6.6. Is that ok?
         "QGenericArgument()": None,
@@ -309,6 +310,7 @@ def init_QtGui():
         "PySide2.QtGui.QPlatformSurface": Virtual("PySide2.QtGui.QPlatformSurface"), # hmm...
         "QList< QTouchEvent.TouchPoint >()": [], # XXX improve?
         "QPixmap()": Default("PySide2.QtGui.QPixmap"), # can't create without qApp
+        "zero(uint32_t)": 0,
         "zero(PySide2.QtGui.QWindow)": None,
         "zero(PySide2.QtGui.QOpenGLContext)": None,
         "zero(PySide2.QtGui.QRegion)": None,
@@ -333,6 +335,7 @@ def init_QtWidgets():
         "static_cast<Qt.MatchFlags>(Qt.MatchExactly|Qt.MatchCaseSensitive)": Instance(
             "Qt.MatchFlags(Qt.MatchExactly | Qt.MatchCaseSensitive)"),
         "QVector< int >()": [],
+        "WId": WId,
         # from 5.9
         "Type": PySide2.QtWidgets.QListWidgetItem.Type,
         "SO_Default": QStyleOption.SO_Default,
@@ -350,6 +353,7 @@ def init_QtWidgets():
         "zero(PySide2.QtGui.QKeySequence)": None,
         "zero(PySide2.QtWidgets.QAction)": None,
         "zero(PySide2.QtWidgets.QUndoCommand)": None,
+        "zero(WId)": 0,
     })
     return locals()
 

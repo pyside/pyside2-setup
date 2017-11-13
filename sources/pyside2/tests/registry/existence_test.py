@@ -46,6 +46,7 @@ import warnings
 from init_platform import enum_all, generate_all, is_ci, outname
 from util import isolate_warnings, check_warnings
 from PySide2 import *
+from PySide2.QtCore import __version__
 
 refmodule_name = outname[:-3] # no .py
 
@@ -90,7 +91,10 @@ class TestSignaturesExists(unittest.TestCase):
                     warnings.warn("ignore different sig length: '{}'".format(key), RuntimeWarning)
             self.assertTrue(check_warnings())
 
-if not have_refmodule and is_ci:
+version = tuple(map(int, __version__.split(".")))
+tested_versions = (5, 6), (5, 9), (5, 11)
+
+if not have_refmodule and is_ci and version[:2] in tested_versions:
     class TestFor_CI_Init(unittest.TestCase):
         """
         This helper class generates the reference file for CI.
@@ -98,10 +102,12 @@ if not have_refmodule and is_ci:
         the result back in.
         """
         fname = generate_all()
+        sys.stderr.flush()
         print("BEGIN", fname, file=sys.stderr)
         with open(fname) as f:
             print(f.read(), file=sys.stderr)
         print("END", fname, file=sys.stderr)
+        sys.stderr.flush()
         raise RuntimeError("This is the initial call. You should check this file in.")
 
 if __name__ == '__main__':
