@@ -167,6 +167,14 @@
         %PYARG_0 = %CONVERTTOPYTHON[QRectF](rect_);
     </template>
 
+    <template name="glGetString_return_QString">
+        %BEGIN_ALLOW_THREADS
+        const GLubyte *us = %CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES);
+        const QString s = QString::fromLocal8Bit(reinterpret_cast&lt;const char *&gt;(us));
+        %END_ALLOW_THREADS
+        %PYARG_0 = %CONVERTTOPYTHON[QString](s);
+    </template>
+
     <template name="fix_args,QRect*">
         QRect rect_;
         %BEGIN_ALLOW_THREADS

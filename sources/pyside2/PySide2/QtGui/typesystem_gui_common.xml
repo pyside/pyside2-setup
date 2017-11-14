@@ -106,7 +106,6 @@
   <rejection class="^QOpenGL.*$" argument-type="GLsizeiptr"/>
   <rejection class="^QOpenGL.*$" argument-type="GLsync"/>
   <rejection class="^QOpenGL.*$" argument-type="^GLubyte( const)?\*$"/>
-  <rejection class="^QOpenGL.*$" return-type="^GLubyte( const)?\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^QMatrix.x.( const)?\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="qopengl_GLintptr"/>
   <rejection class="^QOpenGL.*$" argument-type="qopengl_GLsizeiptr"/>
@@ -3504,6 +3503,14 @@
       <modify-function signature="glVertexAttribI4uiv(unsigned int,const unsigned int*)">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
+      <modify-function signature="glGetStringi(unsigned int,unsigned int)">
+          <modify-argument index="return">
+              <replace-type modified-type="QString" />
+          </modify-argument>
+          <inject-code class="target" position="beginning">
+            <insert-template name="glGetString_return_QString"/>
+          </inject-code>
+      </modify-function>
   </object-type>
   <object-type name="QOpenGLFunctions" since="5.0">
       <enum-type name="OpenGLFeature" flags="OpenGLFeatures"/>
@@ -3556,6 +3563,14 @@
       </modify-function>
       <modify-function signature="^glGetVertexAttrib[fi]v\(.*$">
           <modify-argument index="3"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="glGetString(unsigned int)">
+          <modify-argument index="return">
+              <replace-type modified-type="QString" />
+          </modify-argument>
+          <inject-code class="target" position="beginning">
+            <insert-template name="glGetString_return_QString"/>
+          </inject-code>
       </modify-function>
   </object-type>
   <object-type name="QAbstractOpenGLFunctions" since="5.1"/>
