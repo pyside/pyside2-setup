@@ -20,6 +20,9 @@ ${QtSql_GEN_DIR}/qsqltablemodel_wrapper.cpp
 ${QtSql_GEN_DIR}/qtsql_module_wrapper.cpp
 )
 
+configure_file("${QtSql_SOURCE_DIR}/QtSql_global.pre.h.in"
+               "${QtSql_BINARY_DIR}/QtSql_global.pre.h" @ONLY)
+
 set(QtSql_include_dirs  ${QtSql_SOURCE_DIR}
                         ${QtSql_BINARY_DIR}
                         ${Qt5Core_INCLUDE_DIRS}
