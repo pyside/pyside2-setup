@@ -197,7 +197,7 @@ def init_QtCore():
         "QStringList()": [],
         "ULONG_MAX": ulong_max,
         "quintptr": int,
-        "PyCallable": callable,
+        "PyCallable": typing.Callable,
         "...": ellipsis, # no idea how this should be translated... maybe so?
         "PyTypeObject": type,
         "PySequence": typing.Sequence,
@@ -225,6 +225,7 @@ def init_QtCore():
         "PySide2.QtCore.quint64": int,
         "PySide2.QtCore.quint8": int,
         "PySide2.QtCore.uchar": Char,
+        "PySide2.QtCore.unsigned char": Char, # 5.9
         "PySide2.QtCore.long": int,
         "PySide2.QtCore.QUrl.ComponentFormattingOptions":
             PySide2.QtCore.QUrl.ComponentFormattingOption, # mismatch option/enum, why???
