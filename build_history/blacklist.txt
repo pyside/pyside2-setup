@@ -66,3 +66,5 @@
     darwin
 [smart::smart_pointer]
     win32
+    linux
+    darwin
