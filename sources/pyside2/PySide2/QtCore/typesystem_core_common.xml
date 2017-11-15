@@ -3008,10 +3008,18 @@
     <modify-function signature="lock()" allow-thread="yes"/>
     <modify-function signature="tryLock(int)" allow-thread="yes"/>
   </object-type>
+  <object-type name="QRandomGenerator" since="5.10">
+      <modify-function signature="global()" rename="global_" allow-thread="yes" />
+      <modify-function signature="operator()()" remove="all"/>
+  </object-type>
+  <object-type name="QRandomGenerator64" since="5.10">
+      <modify-function signature="operator()()" remove="all"/>
+  </object-type>
   <object-type name="QSemaphore">
     <modify-function signature="acquire(int)" allow-thread="yes"/>
     <modify-function signature="tryAcquire(int, int)" allow-thread="yes"/>
   </object-type>
+  <object-type name="QSemaphoreReleaser" since="5.10"/>
 
   <object-type name="QSocketNotifier">
     <enum-type name="Type"/>

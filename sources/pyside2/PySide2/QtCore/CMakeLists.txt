@@ -92,6 +92,8 @@ ${QtCore_GEN_DIR}/qpointf_wrapper.cpp
 ${QtCore_GEN_DIR}/qprocess_wrapper.cpp
 ${QtCore_GEN_DIR}/qprocessenvironment_wrapper.cpp
 ${QtCore_GEN_DIR}/qpropertyanimation_wrapper.cpp
+${QtCore_GEN_DIR}/qrandomgenerator_wrapper.cpp
+${QtCore_GEN_DIR}/qrandomgenerator64_wrapper.cpp
 ${QtCore_GEN_DIR}/qreadlocker_wrapper.cpp
 ${QtCore_GEN_DIR}/qreadwritelock_wrapper.cpp
 ${QtCore_GEN_DIR}/qrect_wrapper.cpp
@@ -104,6 +106,7 @@ ${QtCore_GEN_DIR}/qresource_wrapper.cpp
 ${QtCore_GEN_DIR}/qrunnable_wrapper.cpp
 ${QtCore_GEN_DIR}/qsavefile_wrapper.cpp
 ${QtCore_GEN_DIR}/qsemaphore_wrapper.cpp
+${QtCore_GEN_DIR}/qsemaphorereleaser_wrapper.cpp
 ${QtCore_GEN_DIR}/qsequentialanimationgroup_wrapper.cpp
 ${QtCore_GEN_DIR}/qsettings_wrapper.cpp
 ${QtCore_GEN_DIR}/qsignalmapper_wrapper.cpp
