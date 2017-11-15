@@ -3107,6 +3107,8 @@
   <object-type name="QBuffer">
     <!-- ### setData(QByteArray) do the job -->
     <modify-function signature="setData(const char*,int)" remove="all"/>
+    <!-- Disambiguate from Qt3DRender/qbuffer.h -->
+    <include file-name="QtCore/qbuffer.h" location="global"/>
   </object-type>
   <object-type name="QTimer">
     <modify-function signature="singleShot(int,const QObject*,const char*)">

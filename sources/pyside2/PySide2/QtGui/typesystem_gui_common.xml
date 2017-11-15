@@ -309,6 +309,8 @@
         }
       </inject-code>
     </add-function>
+    <!-- Disambiguate from Qt3DCore/qtransform.h -->
+    <include file-name="QtGui/qtransform.h" location="global"/>
   </value-type>
 
   <value-type name="QStaticText">
