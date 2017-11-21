@@ -442,6 +442,32 @@ static PyGetSetDef new_PyType_getsets[] = {
 // This special Type_Ready does certain initializations earlier with
 // our new version.
 //
+
+#ifndef _WIN32
+////////////////////////////////////////////////////////////////////////////
+// a stack trace for linux-like platforms
+#include <stdio.h>
+#include <execinfo.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+void handler(int sig) {
+    void *array[30];
+    size_t size;
+
+    // get void*'s for all entries on the stack
+    size = backtrace(array, 30);
+
+    // print out all the frames to stderr
+    fprintf(stderr, "Error: signal %d:\n", sig);
+    backtrace_symbols_fd(array, size, STDERR_FILENO);
+    exit(1);
+}
+
+////////////////////////////////////////////////////////////////////////////
+#endif // _WIN32
+
 static int
 PySideType_Ready(PyTypeObject *type)
 {
@@ -461,6 +487,12 @@ PySideType_Ready(PyTypeObject *type)
             || add_more_getsets(&PyStaticMethod_Type, new_PyStaticMethod_getsets) < 0
             || add_more_getsets(&PyType_Type, new_PyType_getsets) < 0)
             return -1;
+#ifndef _WIN32
+        // we enable the stack trace in CI, only.
+        const char *testEnv = getenv("QTEST_ENVIRONMENT");
+        if (testEnv && strstr(testEnv, "ci"))
+            signal(SIGSEGV, handler);   // install our handler
+#endif // _WIN32
         init_done = 1;
     }
     return PyType_Ready(type);
