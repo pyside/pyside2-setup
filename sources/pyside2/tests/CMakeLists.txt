@@ -40,10 +40,12 @@ else()
         endif()
         set(TEST_CMD ${XVFB_EXEC} ${SHIBOKEN_PYTHON_INTERPRETER} "${CMAKE_CURRENT_SOURCE_DIR}/${ARGV0}")
         add_test(${TEST_NAME} ${TEST_CMD})
+        # QT_NO_GLIB=1 is required to avoid crashes on CI RHEL 6.6 machines.
+        # See QTBUG-64716 for details.
         set_tests_properties(${TEST_NAME} PROPERTIES
                              TIMEOUT ${CTEST_TESTING_TIMEOUT}
                              WILL_FAIL ${EXPECT_TO_FAIL}
-                             ENVIRONMENT "PYTHONPATH=${TEST_PYTHONPATH};${LIBRARY_PATH_VAR}=${TEST_LIBRARY_PATH};PYSIDE_DISABLE_INTERNAL_QT_CONF=1")
+                             ENVIRONMENT "PYTHONPATH=${TEST_PYTHONPATH};${LIBRARY_PATH_VAR}=${TEST_LIBRARY_PATH};PYSIDE_DISABLE_INTERNAL_QT_CONF=1;QT_NO_GLIB=1")
     endmacro()
 
     add_subdirectory(pysidetest)
