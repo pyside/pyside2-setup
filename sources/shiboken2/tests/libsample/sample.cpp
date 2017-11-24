@@ -28,12 +28,20 @@
 
 #include "sample.h"
 
-sample::sample::sample(int value) : m_value(value)
+namespace sample
+{
+
+sample::sample(int value) : m_value(value)
 {
 }
 
-int sample::sample::value() const
+int sample::value() const
 {
     return m_value;
 }
 
+bool operator==(const sample&s1, const sample&s2)
+{
+    return s1.value() == s2.value();
+}
+} // namespace sample
