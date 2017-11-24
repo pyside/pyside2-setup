@@ -68,3 +68,7 @@
     win32
     linux
     darwin
+[QtCore::thread_signals_test]
+    win32
+    linux
+    darwin
