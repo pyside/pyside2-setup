@@ -57,7 +57,9 @@ from PySide2.QtCore import __version__
 
 version_id = __version__.replace(".", "_")
 is_ci = os.environ.get("QTEST_ENVIRONMENT", "") == "ci"
-outname = "exists_{}_{}{}.py".format(sys.platform, version_id,
+# Python2 legacy: Correct 'linux2' to 'linux', recommended way.
+platform = 'linux' if sys.platform.startswith('linux') else sys.platform
+outname = "exists_{}_{}{}.py".format(platform, version_id,
                                      "_ci" if is_ci else "")
 outfile = None
 
