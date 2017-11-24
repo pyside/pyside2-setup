@@ -127,7 +127,7 @@ def enum_module(mod_name):
             key = "{}.{}".format(class_name, "__init__")
             ret[key] = signature
             show_signature(key, signature)
-        class_members = list(klass.__dict__.items())
+        class_members = sorted(list(klass.__dict__.items()))
         for func_name, func in class_members:
             signature = getattr(func, '__signature__', None)
             if signature is not None:
@@ -164,7 +164,34 @@ def enum_all():
         ret.update(enum_module(mod_name))
     return ret
 
+# This function exists because I forgot to sort the files in the first place.
+def sort_dict(fname):
+    with open(fname) as f:
+        lines = f.readlines()
+    out = []
+    while lines:
+        line = lines.pop(0)
+        if not line.lstrip().startswith('"'):
+            out.append(line)
+            continue
+        out.append(line)
+        buf = [] # leave __init__ in place
+        line = lines.pop(0)
+        while line.lstrip().startswith('"'):
+            buf.append(line)
+            line = lines.pop(0)
+        buf.sort()
+        out.extend(buf)
+        out.append(line)
+    with open(fname, "w") as f:
+        f.writelines(out)
+
 def __main__():
+    if sys.argv[1:]:
+        fname = sys.argv[1]
+        print("we are just sorting", fname)
+        sort_dict(fname)
+        sys.exit(0)
     print("+++ generating {}. You should check this file in.".format(outname))
     generate_all()
 
