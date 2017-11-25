@@ -225,5 +225,5 @@ def main():
         # We simply check if any tests were found.
         if len(result) == 0:
             path = builds.selected.build_dir
-            project = os.path.join(path, args.project)
+            project = os.path.join(path, project)
             raise ValueError("there are no tests in %s" % project)

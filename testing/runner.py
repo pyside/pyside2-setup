@@ -45,6 +45,7 @@ import re
 import subprocess
 
 from collections import namedtuple
+from textwrap import dedent
 
 from .buildlog import builds
 from .helper import decorate, PY3, TimeoutExpired
@@ -60,73 +61,85 @@ class TestRunner(object):
         os.environ['CTEST_OUTPUT_ON_FAILURE'] = '1'
         self._setup()
 
-    def _setup(self):
-        if sys.platform == 'win32':
-            # Windows: Helper implementing 'which' command using 'where.exe'
-            def winWhich(binary):
-                cmd = ['where.exe', binary]
-                stdOut = subprocess.Popen(cmd, stdout=subprocess.PIPE).stdout
-                result = stdOut.readlines()
-                stdOut.close()
-                if len(result) > 0:
-                    return re.compile('\\s+').sub(' ', result[0].decode('utf-8'))
-                return None
-
-            self.makeCommand = 'nmake'
-            qmakeSpec = os.environ.get('QMAKESPEC')
-            if qmakeSpec is not None and 'g++' in qmakeSpec:
-                self.makeCommand = 'mingw32-make'
-            # Can 'tee' be found in the environment (MSYS-git installation with usr/bin in path)?
-            self.teeCommand = winWhich('tee.exe')
-            if self.teeCommand is None:
-                git = winWhich('git.exe')
-                if not git:
-                    # In COIN we have only git.cmd in path
-                    git = winWhich('git.cmd')
-                if 'cmd' in git:
-                    # Check for a MSYS-git installation with 'cmd' in the path and grab 'tee' from usr/bin
-                    index = git.index('cmd')
-                    self.teeCommand = git[0:index] + 'bin\\tee.exe'
-                    if not os.path.exists(self.teeCommand):
-                        self.teeCommand = git[0:index] + 'usr\\bin\\tee.exe' # git V2.8.X
-                    if not os.path.exists(self.teeCommand):
-                        raise "Cannot locate 'tee' command"
-
-        else:
-            self.makeCommand = 'make'
-            self.teeCommand = 'tee'
-
-    def run(self, timeout = 300):
+    def _find_ctest(self):
         """
-        perform a test run in a given build. The build can be stopped by a
-        keyboard interrupt for testing this script. Also, a timeout can
-        be used.
-        """
+        Find ctest in the Makefile
 
-        if sys.platform == "win32":
-            cmd = (self.makeCommand, 'test')
-            tee_cmd = (self.teeCommand, self.logfile)
-            print("running", cmd, 'in', self.test_dir, ',\n  logging to', self.logfile, 'using ', tee_cmd)
-            make = subprocess.Popen(cmd, cwd=self.test_dir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            tee = subprocess.Popen(tee_cmd, cwd=self.test_dir, stdin=make.stdout, shell=True)
-        else:
-            cmd = (self.makeCommand, 'test')
-            tee_cmd = (self.teeCommand, self.logfile)
-            print("running", cmd, 'in', self.test_dir, ',\n  logging to', self.logfile, 'using ', tee_cmd)
-            make = subprocess.Popen(cmd, cwd=self.test_dir, stdout=subprocess.PIPE)
-            tee = subprocess.Popen(tee_cmd, cwd=self.test_dir, stdin=make.stdout)
-        make.stdout.close()
-        try:
-            if PY3:
-                output = tee.communicate(timeout=timeout)[0]
+        We no longer use make, but the ctest command directly.
+        It is convenient to look for the ctest program using the Makefile.
+        This serves us two purposes:
+
+          - there is no dependency of the PATH variable,
+          - each project is checked whether ctest was configured.
+        """
+        make_path = os.path.join(self.test_dir, "Makefile")
+        look_for = "--force-new-ctest-process"
+        line = None
+        with open(make_path) as makefile:
+            for line in makefile:
+                if look_for in line:
+                    break
             else:
-                output = tee.communicate()[0]
+                # We have probably forgotten to build the tests.
+                # Give a nice error message with a shortened but exact path.
+                rel_path = os.path.relpath(make_path)
+                msg = dedent("""\n
+                    {line}
+                    **  ctest is not in '{}'.
+                    *   Did you forget to build the tests with '--build-tests' in setup.py?
+                    """).format(rel_path, line=79 * "*")
+                raise RuntimeError(msg)
+        # the ctest program is on the left to look_for
+        assert line, "Did not find {}".format(look_for)
+        ctest = re.search(r'(\S+|"([^"]+)")\s+' + look_for, line).groups()
+        return ctest[1] or ctest[0]
+
+    def _setup(self):
+        self.ctestCommand = self._find_ctest()
+
+    def _run(self, cmd_tuple, timeout):
+        """
+        Perform a test run in a given build
+
+        The build can be stopped by a keyboard interrupt for testing
+        this script. Also, a timeout can be used.
+
+        After the change to directly using ctest, we no longer use
+        "--force-new-ctest-process". Until now this han no drawbacks
+        but was a littls faster.
+        """
+
+        self.cmd = cmd_tuple
+        shell_option = sys.platform == "win32"
+        print(dedent("""\
+            running {cmd}
+                 in {test_dir}
+            """).format(**self.__dict__))
+        ctest_process = subprocess.Popen(self.cmd,
+                                         cwd=self.test_dir,
+                                         stderr=subprocess.STDOUT,
+                                         shell=shell_option)
+        try:
+            comm = ctest_process.communicate
+            output = (comm(timeout=timeout) if PY3 else comm())[0]
         except (TimeoutExpired, KeyboardInterrupt):
             print()
-            print("aborted")
-            tee.kill()
-            make.kill()
-            outs, errs = tee.communicate()
+            print("aborted, partial resut")
+            ctest_process.kill()
+            outs, errs = ctest_process.communicate()
+            # ctest lists to a temp file. Move it to the log
+            tmp_name = self.logfile + ".tmp"
+            if os.path.exists(tmp_name):
+                if os.path.exists(self.logfile):
+                    os.unlink(self.logfile)
+                os.rename(tmp_name, self.logfile)
+            self.partial = True
+        else:
+            self.partial = False
         finally:
             print("End of the test run")
-        tee.wait()
+        ctest_process.wait()
+
+    def run(self, timeout=10 * 60):
+        cmd = self.ctestCommand, "--output-log", self.logfile
+        self._run(cmd, timeout)
