@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2017 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of PySide2.
@@ -37,10 +37,8 @@
 ##
 #############################################################################
 
-from __future__ import print_function, absolute_import
+from __future__ import print_function
 
-import sys
-import testing
-import testing.blacklist # just to be sure it's us...
+from . import command
 
-testing.main()
+main = command.main

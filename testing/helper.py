@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2017 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of PySide2.
@@ -37,10 +37,36 @@
 ##
 #############################################################################
 
-from __future__ import print_function, absolute_import
+from __future__ import print_function
 
+import os
 import sys
-import testing
-import testing.blacklist # just to be sure it's us...
+from collections import namedtuple
 
-testing.main()
+PY3 = sys.version_info[0] == 3  # from the six module
+from subprocess import PIPE
+if PY3:
+    from subprocess import TimeoutExpired
+    from io import StringIO
+else:
+    class SubprocessError(Exception): pass
+    # this is a fake, just to keep the source compatible.
+    # timeout support is in python 3.3 and above.
+    class TimeoutExpired(SubprocessError): pass
+    from StringIO import StringIO
+
+
+script_dir = os.path.dirname(os.path.dirname(__file__))
+
+def decorate(mod_name):
+    """
+    Write the combination of "modulename_funcname"
+    in the Qt-like form "modulename::funcname"
+    """
+    if "_" not in mod_name:
+        return mod_name
+    if "::" in mod_name:
+        return mod_name
+    name, rest = mod_name.split("_", 1)
+    return name + "::" + rest
+
