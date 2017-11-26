@@ -70,10 +70,11 @@ into pyside2, then 'make test'.
 import os
 import sys
 import argparse
+from textwrap import dedent
 
 from .helper import script_dir, decorate
 from .buildlog import builds
-from .blacklist import BlackList, learn_blacklist
+from .blacklist import BlackList
 from .runner import TestRunner
 from .parser import TestParser
 
@@ -102,8 +103,6 @@ def main():
     group.add_argument("--blacklist", "-b", type=argparse.FileType('r'),
                        default=blacklist_default,
                        help='a Qt blacklist file (default: {})'.format(blacklist_default))
-    group.add_argument("--learn", "-l", type=create_read_write,
-                        help="add new entries to a blacklist file")
     parser_test.add_argument("--skip", action='store_true',
                         help="skip the tests if they were run before")
     parser_test.add_argument("--environ", nargs='+',
@@ -154,10 +153,6 @@ def main():
     if args.blacklist:
         args.blacklist.close()
         bl = BlackList(args.blacklist.name)
-    elif args.learn:
-        args.learn.close()
-        learn_blacklist(args.learn.name, result.result, builds.selected)
-        bl = BlackList(args.learn.name)
     else:
         bl = BlackList(None)
     if args.environ:
@@ -168,10 +163,17 @@ def main():
             key, value = things
             os.environ[key] = value
 
-    print("System:\n  Platform=%s\n  Executable=%s\n  Version=%s\n  API version=%s\n\nEnvironment:" %
-          (sys.platform, sys.executable, sys.version.replace("\n", " "), sys.api_version))
-    for v in sorted(os.environ.keys()):
-        print("  %s=%s" % (v, os.environ[v]))
+    print(dedent("""\
+        System:
+          Platform={platform}
+          Executable={executable}
+          Version={version_lf}
+          API version={api_version}
+
+        Environment:""")
+        .format(version_lf=sys.version.replace("\n", " "), **sys.__dict__))
+    for key, value in sorted(os.environ.items()):
+        print("  {}={}".format(key, value))
     print()
 
     q = 5 * [0]
