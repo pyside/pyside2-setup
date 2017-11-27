@@ -745,6 +745,11 @@ if __name__ == '__main__':
     parser_list = subparsers.add_parser("list")
     args = parser.parse_args()
 
+    print("System:\n  Platform=%s\n  Executable=%s\n  Version=%s\n  API version=%s\n\nEnvironment:" %
+          (sys.platform, sys.executable, sys.version.replace("\n", " "), sys.api_version))
+    for v in sorted(os.environ.keys()):
+        print("  %s=%s" % (v, os.environ[v]))
+
     builds = BuildLog(script_dir)
     if hasattr(args, "buildno"):
         try:

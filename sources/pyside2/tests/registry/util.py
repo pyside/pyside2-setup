@@ -40,52 +40,49 @@
 from __future__ import print_function, absolute_import
 
 """
-fix-complaints.py
+Supporting isolation of warnings
 
-This module fixes the buildbot messages of external python modules.
-Run it once after copying a new version. It is idem-potent, unless
-you are changing messages (what I did, of course :-) .
+Warnings in unittests are not isolated.
+We sometimes use warnings to conveniently accumulate error messages
+and eventually report them afterwards as error.
 """
 
-import os
+import sys
+import warnings
+import re
+from contextlib import contextmanager
 
-patched_modules = "inspect backport_inspect typing27 typing36"
+warn_name = "__warningregistry__"
+ignore_re = 'Not importing directory .*'
 
-offending_words = {
-    "behavio""ur": "behavior",
-    "at""least": "at_least",
-    "reali""sed": "realized",
-}
+@contextmanager
+def isolate_warnings():
+    save_warnings = {}
+    for name, mod in sys.modules.items():
+        if mod and hasattr(mod, warn_name):
+            save_warnings[name] = mod.__dict__[warn_name]
+            delattr(mod, warn_name)
+        else:
+            save_warnings[name] = None
+    yield
+    for name, warn in save_warnings.items():
+        mod = sys.modules[name]
+        if mod:
+            setattr(mod, warn_name, warn)
+            if warn is None:
+                delattr(mod, warn_name)
 
-utf8_line = "# This Python file uses the following encoding: utf-8\n"
-marker_line = "# It has been edited by {} .\n".format(
-                  os.path.basename(__file__))
+def check_warnings():
+    for name, mod in sys.modules.items():
+        if mod:
+            reg = getattr(mod, warn_name, None)
+            if reg:
+                # XXX We need to filter warnings for Python 2.
+                # This should be avoided by renaming the duplicate folders.
+                for k in reg:
+                    if type(k) == tuple and re.match(ignore_re, k[0]):
+                        continue
+                    return True
+    return False
 
-def patch_file(fname):
-    with open(fname) as f:
-        lines = f.readlines()
-    dup = lines[:]
-    for idx, line in enumerate(lines):
-        for word, repl in offending_words.items():
-            if word in line:
-                lines[idx] = line.replace(word, repl)
-                print("line:{!r} {!r}->{!r}".format(line, word, repl))
-    if lines[0].strip() != utf8_line.strip():
-        lines[:0] = [utf8_line, "\n"]
-    if lines[1] != marker_line:
-        lines[1:1] = marker_line
-    if lines != dup:
-        with open(fname, "w") as f:
-            f.write("".join(lines))
-
-def doit():
-    dir = os.path.dirname(__file__)
-    for name in patched_modules.split():
-        fname = os.path.join(dir, name + ".py")
-        print("Working on", fname)
-        patch_file(fname)
-
-if __name__ == "__main__":
-    doit()
-
-# end of file
+# eof

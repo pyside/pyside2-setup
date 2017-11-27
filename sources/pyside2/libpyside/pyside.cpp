@@ -61,13 +61,19 @@
 #include <typeinfo>
 #include <cstring>
 #include <cctype>
-#include <QStack>
+#include <QByteArray>
 #include <QCoreApplication>
 #include <QDebug>
+#include <QDir>
+#include <QFileInfo>
 #include <QSharedPointer>
+#include <QStack>
 
 static QStack<PySide::CleanupFunction> cleanupFunctionList;
 static void* qobjectNextAddr;
+
+extern bool qRegisterResourceData(int, const unsigned char *, const unsigned char *,
+        const unsigned char *);
 
 namespace PySide
 {
@@ -386,6 +392,128 @@ void setQuickRegisterItemFunction(QuickRegisterItemFunction function)
     quickRegisterItem = function;
 }
 #endif // PYSIDE_QML_SUPPORT
+
+// Inspired by Shiboken::String::toCString;
+QString pyStringToQString(PyObject *str) {
+    if (str == Py_None)
+        return QString();
+
+#ifdef IS_PY3K
+    if (PyUnicode_Check(str)) {
+        const char *unicodeBuffer = _PyUnicode_AsString(str);
+        if (unicodeBuffer)
+            return QString::fromUtf8(unicodeBuffer);
+    }
+#endif
+    if (PyBytes_Check(str)) {
+        const char *asciiBuffer = PyBytes_AS_STRING(str);
+        if (asciiBuffer)
+            return QString::fromLatin1(asciiBuffer);
+    }
+    return QString();
+}
+
+static const unsigned char qt_resource_name[] = {
+  // qt
+  0x0,0x2,
+  0x0,0x0,0x7,0x84,
+  0x0,0x71,
+  0x0,0x74,
+    // etc
+  0x0,0x3,
+  0x0,0x0,0x6c,0xa3,
+  0x0,0x65,
+  0x0,0x74,0x0,0x63,
+    // qt.conf
+  0x0,0x7,
+  0x8,0x74,0xa6,0xa6,
+  0x0,0x71,
+  0x0,0x74,0x0,0x2e,0x0,0x63,0x0,0x6f,0x0,0x6e,0x0,0x66
+};
+
+static const unsigned char qt_resource_struct[] = {
+  // :
+  0x0,0x0,0x0,0x0,0x0,0x2,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x1,
+  // :/qt
+  0x0,0x0,0x0,0x0,0x0,0x2,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x2,
+  // :/qt/etc
+  0x0,0x0,0x0,0xa,0x0,0x2,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x3,
+  // :/qt/etc/qt.conf
+  0x0,0x0,0x0,0x16,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0
+};
+
+bool registerInternalQtConf()
+{
+    // Guard to ensure single registration.
+#ifdef PYSIDE_QT_CONF_PREFIX
+        static bool registrationAttempted = false;
+#else
+        static bool registrationAttempted = true;
+#endif
+    static bool isRegistered = false;
+    if (registrationAttempted)
+        return isRegistered;
+    registrationAttempted = true;
+
+    // Allow disabling the usage of the internal qt.conf. This is necessary for tests to work,
+    // because tests are executed before the package is installed, and thus the Prefix specified
+    // in qt.conf would point to a not yet existing location.
+    bool disableInternalQtConf =
+            qEnvironmentVariableIntValue("PYSIDE_DISABLE_INTERNAL_QT_CONF") > 0 ? true : false;
+    if (disableInternalQtConf) {
+        registrationAttempted = true;
+        return false;
+    }
+
+    PyObject *pysideModule = PyImport_ImportModule("PySide2");
+    if (!pysideModule)
+        return false;
+
+    // Querying __file__ should be done only for modules that have finished their initialization.
+    // Thus querying for the top-level PySide2 package works for us whenever any Qt-wrapped module
+    // is loaded.
+    PyObject *pysideInitFilePath = PyObject_GetAttrString(pysideModule, "__file__");
+    Py_DECREF(pysideModule);
+    if (!pysideInitFilePath)
+        return false;
+
+    QString initPath = pyStringToQString(pysideInitFilePath);
+    Py_DECREF(pysideInitFilePath);
+    if (initPath.isEmpty())
+        return false;
+
+    // pysideDir - absolute path to the directory containing the init file, which also contains
+    // the rest of the PySide2 modules.
+    // prefixPath - absolute path to the directory containing the installed Qt (prefix).
+    QDir pysideDir = QFileInfo(QDir::fromNativeSeparators(initPath)).absoluteDir();
+    QString setupPrefix;
+#ifdef PYSIDE_QT_CONF_PREFIX
+    setupPrefix = QStringLiteral(PYSIDE_QT_CONF_PREFIX);
+#endif
+    QString prefixPath = pysideDir.absoluteFilePath(setupPrefix);
+
+    // rccData needs to be static, otherwise when it goes out of scope, the Qt resource system
+    // will point to invalid memory.
+    static QByteArray rccData = QByteArray("[Paths]\nPrefix = ") + prefixPath.toLocal8Bit();
+    rccData.append('\n');
+
+    // The RCC data structure expects a 4-byte size value representing the actual data.
+    int size = rccData.size();
+
+    for (int i = 0; i < 4; ++i) {
+        rccData.prepend((size & 0xff));
+        size >>= 8;
+    }
+
+    const int version = 0x01;
+    isRegistered = qRegisterResourceData(version, qt_resource_struct, qt_resource_name,
+                                         reinterpret_cast<const unsigned char *>(
+                                             rccData.constData()));
+
+    return isRegistered;
+}
+
+
 
 } //namespace PySide
 

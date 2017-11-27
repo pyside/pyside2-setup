@@ -117,45 +117,46 @@ def _parse_line(line):
         ret["multi"] = int(multi)
     return ret
 
-def _resolve_number(thing):
+def make_good_value(thing, valtype):
     try:
+        if thing.endswith("()"):
+            thing = 'Default("{}")'.format(thing[:-2])
+        else:
+            ret = eval(thing, namespace)
+            if valtype and repr(ret).startswith("<"):
+                thing = 'Instance("{}")'.format(thing)
         return eval(thing, namespace)
-    except Exception:
-        return None
+    except (SyntaxError, TypeError, NameError):
+        pass
 
 def try_to_guess(thing, valtype):
-    res = _resolve_number(thing)
-    if res is not None:
-        return res
     if "." not in thing and "(" not in thing:
         text = "{}.{}".format(valtype, thing)
-        try:
-            return eval(text, namespace)
-        except Exception:
-            pass
+        ret = make_good_value(text, valtype)
+        if ret is not None:
+            return ret
     typewords = valtype.split(".")
     valwords = thing.split(".")
-    braceless = valwords[0]
+    braceless = valwords[0]    # Yes, not -1. Relevant is the overlapped word.
     if "(" in braceless:
         braceless = braceless[:braceless.index("(")]
     for idx, w in enumerate(typewords):
         if w == braceless:
             text = ".".join(typewords[:idx] + valwords)
-            try:
-                return eval(text, namespace)
-            except Exception:
-                pass
+            ret = make_good_value(text, valtype)
+            if ret is not None:
+                return ret
     return None
 
 def _resolve_value(thing, valtype, line):
+    if thing in ("0", "None") and valtype:
+        thing = "zero({})".format(valtype)
     if thing in type_map:
         return type_map[thing]
-    try:
-        res = eval(thing, namespace)
+    res = make_good_value(thing, valtype)
+    if res is not None:
         type_map[thing] = res
         return res
-    except Exception:
-        pass
     res = try_to_guess(thing, valtype) if valtype else None
     if res is not None:
         type_map[thing] = res

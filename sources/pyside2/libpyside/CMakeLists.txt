@@ -111,6 +111,13 @@ if(QML_SUPPORT)
     target_compile_definitions(pyside2 PUBLIC PYSIDE_QML_SUPPORT=1)
 endif()
 
+if(PYSIDE_QT_CONF_PREFIX)
+    set_property(SOURCE pyside.cpp
+                 APPEND
+                 PROPERTY COMPILE_DEFINITIONS
+                 PYSIDE_QT_CONF_PREFIX=${PYSIDE_QT_CONF_PREFIX})
+endif()
+
 #
 # install stuff
 #

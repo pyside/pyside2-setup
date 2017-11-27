@@ -150,6 +150,19 @@ PYSIDE_API QuickRegisterItemFunction getQuickRegisterItemFunction();
 PYSIDE_API void setQuickRegisterItemFunction(QuickRegisterItemFunction function);
 #endif // PYSIDE_QML_SUPPORT
 
+/**
+ * Given A PyObject repesenting ASCII or Unicode data, returns an equivalent QString.
+ */
+PYSIDE_API QString pyStringToQString(PyObject *str);
+
+/**
+ * Registers a dynamic "qt.conf" file with the Qt resource system.
+ *
+ * This is used in a standalone build, to inform QLibraryInfo of the Qt prefix (where Qt libraries
+ * are installed) so that plugins can be successfully loaded.
+ */
+PYSIDE_API bool registerInternalQtConf();
+
 } //namespace PySide
 
 

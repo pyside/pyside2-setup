@@ -7,6 +7,9 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/global.h.in"
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/__init__.py" @ONLY)
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_built_modules.py.in"
+              "${CMAKE_CURRENT_BINARY_DIR}/_built_modules.py" @ONLY)
+
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_utils.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/_utils.py" @ONLY)
 
@@ -23,11 +26,13 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/parser.py"
 if (PYTHON_VERSION_MAJOR EQUAL 3)
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/inspect.py"
                    "${CMAKE_CURRENT_BINARY_DIR}/support/signature/inspect.py" COPYONLY)
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/typing.py"
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/typing36.py"
                    "${CMAKE_CURRENT_BINARY_DIR}/support/signature/typing.py" COPYONLY)
 else()
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/backport_inspect.py"
                    "${CMAKE_CURRENT_BINARY_DIR}/support/signature/backport_inspect.py" COPYONLY)
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/typing27.py"
+                   "${CMAKE_CURRENT_BINARY_DIR}/support/signature/typing.py" COPYONLY)
 endif()
 
 # now compile all modules.
@@ -64,6 +69,8 @@ endforeach()
 
 # install
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/__init__.py"
+        DESTINATION "${PYTHON_SITE_PACKAGES}/${BINDING_NAME}${pyside2_SUFFIX}")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_built_modules.py"
         DESTINATION "${PYTHON_SITE_PACKAGES}/${BINDING_NAME}${pyside2_SUFFIX}")
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/_utils.py
         DESTINATION "${PYTHON_SITE_PACKAGES}/${BINDING_NAME}${pyside2_SUFFIX}")
