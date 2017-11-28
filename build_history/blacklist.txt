@@ -76,3 +76,6 @@
     win32
     linux
     darwin
+# Disable signature existence test for now on dev
+[registry::existence_test]
+    qt5.11
