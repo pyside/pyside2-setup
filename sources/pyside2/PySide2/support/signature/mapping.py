@@ -310,6 +310,7 @@ def init_QtGui():
         "PySide2.QtGui.QPlatformSurface": Virtual("PySide2.QtGui.QPlatformSurface"), # hmm...
         "QList< QTouchEvent.TouchPoint >()": [], # XXX improve?
         "QPixmap()": Default("PySide2.QtGui.QPixmap"), # can't create without qApp
+        "PySide2.QtCore.uint8_t": int, # macOS 5.9
         "zero(uint32_t)": 0,
         "zero(PySide2.QtGui.QWindow)": None,
         "zero(PySide2.QtGui.QOpenGLContext)": None,
