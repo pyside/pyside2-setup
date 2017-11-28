@@ -195,6 +195,8 @@ from utils import init_msvc_env
 from utils import regenerate_qt_resources
 from utils import filter_match
 from utils import osx_fix_rpaths_for_library
+from utils import download_and_extract_7z
+from textwrap import dedent
 
 # guess a close folder name for extensions
 def get_extension_folder(ext):
@@ -253,6 +255,7 @@ OPTION_SKIP_MAKE_INSTALL = has_option("skip-make-install")
 OPTION_SKIP_PACKAGING = has_option("skip-packaging")
 OPTION_RPATH_VALUES = option_value("rpath")
 OPTION_QT_CONF_PREFIX = option_value("qt-conf-prefix")
+OPTION_ICULIB = option_value("iculib-url")
 
 if OPTION_QT_VERSION is None:
     OPTION_QT_VERSION = "5"
@@ -313,6 +316,14 @@ if OPTION_JOBS:
             OPTION_JOBS = '-j' + OPTION_JOBS
 else:
     OPTION_JOBS = ''
+
+if OPTION_ICULIB:
+    if not OPTION_STANDALONE:
+        print("--iculib-url is usable only when creating standalone wheel with --standalone switch")
+        sys.exit(1)
+    if sys.platform != "linux":
+        print("--iculib-url is usable only when creating standalone wheels in Linux")
+        sys.exit(1)
 
 # Show available versions
 if OPTION_LISTVERSIONS:
@@ -1105,6 +1116,41 @@ class pyside_build(_build):
 
     def prepare_standalone_package_linux(self, executables, vars):
         built_modules = vars['built_modules']
+
+        def _print_warn():
+            print(dedent("""\
+                  ***********************************************************
+                    If one is using Qt binaries provided by QtCompany's CI,
+                    those aren't working as expected!
+                  ***********************************************************
+                  """))
+
+        # To get working QtCompany Qt CI binaries we have to extract the ICU libs
+        # If no link provided we'll use the libs from qt-project
+        icuUrl = ""
+        if OPTION_ICULIB:
+            icuUrl = OPTION_ICULIB
+        else:
+            qt_version = self.qtinfo.version
+            url_pre = "http://master.qt.io/development_releases/prebuilt/icu/prebuilt/"
+            if qt_version.startswith("5.6"):
+                icuUrl = url_pre + "56.1/icu-linux-g++-Rhel6.6-x64.7z"
+            else:
+                icuUrl = url_pre + "56.1/icu-linux-g++-Rhel7.2-x64.7z"
+
+        if find_executable("7z"):
+            try:
+                download_and_extract_7z(icuUrl, "{qt_lib_dir}".format(**vars))
+            except RuntimeError as e:
+                # The Qt libs now requires patching to system ICU
+                # OR it is possible that Qt was built without ICU and
+                # Works as such
+                print("Failed to download and extract %s" % icuUrl)
+                print(str(e))
+                _print_warn()
+        else:
+                print("Install 7z into PATH to extract ICU libs")
+                _print_warn()
 
         # <qt>/lib/* -> <setup>/PySide2/Qt/lib
         copydir("{qt_lib_dir}", "{dist_dir}/PySide2/Qt/lib",

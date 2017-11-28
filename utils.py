@@ -9,6 +9,11 @@ import subprocess
 import fnmatch
 import itertools
 import popenasync
+# There is no urllib.request in Python2
+try:
+    import urllib.request as urllib
+except ImportError:
+    import urllib
 
 from distutils import log
 from distutils.errors import DistutilsOptionError
@@ -657,4 +662,20 @@ def osx_add_qt_rpath(library_path, qt_lib_dir,
         back_tick('install_name_tool -add_rpath {rpath} {library_path}'.format(
                   rpath=qt_lib_dir, library_path=library_path))
 
+def download_and_extract_7z(fileurl, target):
+    """ Downloads 7z file from fileurl and extract to target  """
 
+    print("Downloading fileUrl %s " % fileurl)
+    info = ""
+    try:
+        localfile, info = urllib.urlretrieve(fileurl)
+    except:
+        print("Error downloading %r : %r" % (fileurl, info))
+        raise RuntimeError(' Error downloading ' + fileurl)
+
+    try:
+        outputDir = "-o" + target
+        print("calling 7z x %s %s" % (localfile, outputDir))
+        subprocess.call(["7z", "x", "-y", localfile, outputDir])
+    except:
+        raise RuntimeError(' Error extracting ' + localfile)
