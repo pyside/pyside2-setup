@@ -1464,7 +1464,7 @@ class pyside_build(_build):
                     qt_lib_dir = self.qtinfo.libs_dir
                     if OPTION_STANDALONE:
                         qt_lib_dir = "$ORIGIN/Qt/lib"
-                        final_rpath = local_rpath + ':' + qt_lib_dir
+                    final_rpath = local_rpath + ':' + qt_lib_dir
                 cmd = [patchelf_path, '--set-rpath', final_rpath, srcpath]
                 if run_process(cmd) != 0:
                     raise RuntimeError("Error patching rpath in " + srcpath)

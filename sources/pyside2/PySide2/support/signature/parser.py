@@ -126,7 +126,7 @@ def make_good_value(thing, valtype):
             if valtype and repr(ret).startswith("<"):
                 thing = 'Instance("{}")'.format(thing)
         return eval(thing, namespace)
-    except (SyntaxError, TypeError, NameError):
+    except Exception:
         pass
 
 def try_to_guess(thing, valtype):
