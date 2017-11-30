@@ -61,6 +61,7 @@ is_ci = os.environ.get("QTEST_ENVIRONMENT", "") == "ci"
 platform = 'linux' if sys.platform.startswith('linux') else sys.platform
 outname = "exists_{}_{}{}.py".format(platform, version_id,
                                      "_ci" if is_ci else "")
+outpath = os.path.join(os.path.dirname(__file__), outname)
 outfile = None
 
 def xprint(*args, **kw):
@@ -142,9 +143,8 @@ def enum_module(mod_name):
     return ret
 
 def generate_all():
-    fname = os.path.join(os.path.dirname(__file__), outname)
     global outfile
-    with open(fname, "w") as outfile:
+    with open(outpath, "w") as outfile:
         with open(__file__) as f:
             lines = f.readlines()
         license_line = next((lno for lno, line in enumerate(lines)
@@ -156,7 +156,6 @@ def generate_all():
         for mod_name in all_modules:
             enum_module(mod_name)
         xprint("# eof")
-    return fname
 
 def enum_all():
     global outfile

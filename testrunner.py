@@ -172,21 +172,13 @@ class BuildLog(object):
         path = self.selected.build_dir
         base = os.path.basename(path)
         res.extend(base.split('-'))
-        # add the python version py2 and py3
-        # also add the keys qt5 and qt5.6 etc.
+        # add all the python and qt subkeys
         for entry in res:
-            if entry.startswith("py"):
-                key = entry[:3]
+            parts = entry.split(".")
+            for idx in range(len(parts)):
+                key = ".".join(parts[:idx])
                 if key not in res:
                     res.append(key)
-            if entry.startswith("qt"):
-                key = entry[:3]
-                if key not in res:
-                    res.append(key)
-                key = entry[:5]
-                if key not in res:
-                    res.append(key)
-            # this will become more difficult when the version has two digits
         return res
 
 
