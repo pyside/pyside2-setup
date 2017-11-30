@@ -43,12 +43,16 @@ import os
 import sys
 import unittest
 import warnings
-from init_platform import enum_all, generate_all, is_ci, outname
+from init_platform import enum_all, generate_all, is_ci, outname, outpath
 from util import isolate_warnings, check_warnings
 from PySide2 import *
 from PySide2.QtCore import __version__
 
 refmodule_name = outname[:-3] # no .py
+pyc = os.path.splitext(outpath)[0] + ".pyc"
+if os.path.exists(pyc) and not os.path.exists(outname):
+    # on Python2 the pyc file would be imported
+    os.unlink(pyc)
 
 sys.path.insert(0, os.path.dirname(__file__))
 try:
@@ -101,12 +105,12 @@ if not have_refmodule and is_ci and version[:2] in tested_versions:
         It creates an output listing that can be used to check
         the result back in.
         """
-        fname = generate_all()
+        generate_all()
         sys.stderr.flush()
-        print("BEGIN", fname, file=sys.stderr)
-        with open(fname) as f:
+        print("BEGIN", outpath, file=sys.stderr)
+        with open(outpath) as f:
             print(f.read(), file=sys.stderr)
-        print("END", fname, file=sys.stderr)
+        print("END", outpath, file=sys.stderr)
         sys.stderr.flush()
         raise RuntimeError("This is the initial call. You should check this file in.")
 
