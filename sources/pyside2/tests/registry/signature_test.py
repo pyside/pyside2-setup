@@ -37,13 +37,14 @@
 ##
 #############################################################################
 
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 
 import sys
 import os
 import unittest
 from collections import OrderedDict
 from pprint import pprint
+from util import isolate_warnings, check_warnings
 import PySide2
 
 """
@@ -55,7 +56,8 @@ all_modules = list("PySide2." + x for x in PySide2.__all__)
 
 from PySide2.support.signature import parser, inspect
 
-_do_print = True if os.isatty(sys.stdout.fileno()) else False
+_do_print = (True if os.isatty(sys.stdout.fileno()) or "-v" in sys.argv
+             else False)
 
 def dprint(*args, **kw):
     if _do_print:
@@ -84,6 +86,8 @@ def enum_module(mod_name):
             dprint("    def __init__" + str(signature))
         count += 1
         class_members = list(klass.__dict__.items())
+        have_sig = signature is not None
+        have_members = 0
         for func_name, func in class_members:
             signature = getattr(func, '__signature__', None)
             if signature is not None:
@@ -94,6 +98,10 @@ def enum_module(mod_name):
                 else:
                     dprint("    def", func_name + str(signature))
                 count += 1
+                have_members = count
+        if not have_sig and not have_members:
+            # print at least "pass"
+            dprint("    pass")
     return count
 
 def enum_all():
@@ -109,15 +117,17 @@ def enum_all():
 
 class PySideSignatureTest(unittest.TestCase):
     def testAllSignaturesCanBuild(self):
-        # This test touches all attributes
-        result = enum_all()
-        # We omit the number of functions test. This is too vague.
-        for mod_name, count in result.items():
-            pass
-        # If an attribute could not be computed, then we will have a warning
-        # in the warningregistry.
-        if hasattr(parser, "__warningregistry__"):
-            raise RuntimeError("There are errors, see above.")
+        with isolate_warnings():
+            # This test touches all attributes
+            result = enum_all()
+            # We omit the number of functions test.
+            # That is replaced by existence_test.py .
+            for mod_name, count in result.items():
+                pass
+            # If an attribute could not be computed, then we will have a warning
+            # in the warningregistry.
+            if check_warnings():
+                raise RuntimeError("There are errors, see above.")
 
     def testSignatureExist(self):
         t1 = type(PySide2.QtCore.QObject.children.__signature__)
@@ -148,6 +158,13 @@ class PySideSignatureTest(unittest.TestCase):
 
     def testModuleIsInitialized(self):
         assert PySide2.QtWidgets.QApplication.__signature__ is not None
+
+    def test_NotCalled_is_callable_and_correct(self):
+        # A signature that has a default value with some "Default(...)"
+        # wrapper is callable and creates an object of the right type.
+        sig = PySide2.QtCore.QByteArray().toPercentEncoding.__signature__
+        called_default = sig.parameters["exclude"].default()
+        self.assertEqual(type(called_default), PySide2.QtCore.QByteArray)
 
 if __name__ == "__main__":
     unittest.main()

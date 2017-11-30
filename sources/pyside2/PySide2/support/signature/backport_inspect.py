@@ -106,9 +106,10 @@ CO_NOFREE       = 0x0040
 
 # This function was changed: 'builtins' and 'qualname' don't exist.
 # We use '__builtin__' and '__name__' instead.
+# It is further changed because we use a local copy of typing
 def formatannotation(annotation, base_module=None):
-    if getattr(annotation, '__module__', None) == 'typing':
-        return repr(annotation).replace('typing.', '')
+    if getattr(annotation, '__module__', None) == 'PySide2.support.signature.typing':
+        return repr(annotation).replace('PySide2.support.signature.typing.', '')
     if isinstance(annotation, type):
         if annotation.__module__ in ('__builtin__', base_module):
             return annotation.__name__

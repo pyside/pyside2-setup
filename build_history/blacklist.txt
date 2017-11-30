@@ -66,7 +66,16 @@
     darwin
 [smart::smart_pointer]
     win32
+    linux
+    darwin
 # PYSIDE-474
 [QtWebEngineWidgets::pyside-474-qtwebengineview]
     py2
     py3
+[QtCore::thread_signals_test]
+    win32
+    linux
+    darwin
+# Disable signature existence test for now on dev
+[registry::existence_test]
+    qt5.11

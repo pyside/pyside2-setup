@@ -121,7 +121,10 @@ target_link_libraries(testbinding
 add_dependencies(testbinding pyside2 QtCore QtGui QtWidgets pysidetest)
 
 PYSIDE_TEST(decoratedslot_test.py)
-PYSIDE_TEST(delegatecreateseditor_test.py)
+# Will always crash when built against Qt 5.6, no point in running it.
+if (Qt5Core_VERSION VERSION_GREATER 5.7.0)
+    PYSIDE_TEST(delegatecreateseditor_test.py)
+endif()
 PYSIDE_TEST(enum_test.py)
 PYSIDE_TEST(homonymoussignalandmethod_test.py)
 PYSIDE_TEST(list_signal_test.py)
@@ -139,5 +142,4 @@ PYSIDE_TEST(utils_test.py)
 PYSIDE_TEST(mixin_signal_slots_test.py)
 PYSIDE_TEST(signal_slot_warning.py)
 PYSIDE_TEST(all_modules_load_test.py)
-PYSIDE_TEST(signature_test.py)
 PYSIDE_TEST(qapp_like_a_macro_test.py)

@@ -60,7 +60,6 @@ for _ in "four":
 sys.path.insert(0, package_dir)
 if sys.version_info >= (3,):
     from PySide2.support.signature import inspect
-    from PySide2.support.signature import typing
 else:
     import inspect
     namespace = inspect.__dict__

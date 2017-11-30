@@ -530,7 +530,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
         writeMappingMethods(s, metaClass, classContext);
     }
 
-    if (metaClass->hasComparisonOperatorOverload()) {
+    if (!metaClass->isNamespace() && metaClass->hasComparisonOperatorOverload()) {
         s << "// Rich comparison" << endl;
         writeRichCompareFunction(s, classContext);
     }
@@ -3751,7 +3751,7 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
     }
 
     QString tp_richcompare = QString(QLatin1Char('0'));
-    if (metaClass->hasComparisonOperatorOverload())
+    if (!metaClass->isNamespace() && metaClass->hasComparisonOperatorOverload())
         tp_richcompare = cpythonBaseName(metaClass) + QLatin1String("_richcompare");
 
     QString tp_getset = QString(QLatin1Char('0'));

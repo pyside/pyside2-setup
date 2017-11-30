@@ -37,55 +37,5 @@
 ##
 #############################################################################
 
-from __future__ import print_function, absolute_import
-
-"""
-fix-complaints.py
-
-This module fixes the buildbot messages of external python modules.
-Run it once after copying a new version. It is idem-potent, unless
-you are changing messages (what I did, of course :-) .
-"""
-
-import os
-
-patched_modules = "inspect backport_inspect typing27 typing36"
-
-offending_words = {
-    "behavio""ur": "behavior",
-    "at""least": "at_least",
-    "reali""sed": "realized",
-}
-
-utf8_line = "# This Python file uses the following encoding: utf-8\n"
-marker_line = "# It has been edited by {} .\n".format(
-                  os.path.basename(__file__))
-
-def patch_file(fname):
-    with open(fname) as f:
-        lines = f.readlines()
-    dup = lines[:]
-    for idx, line in enumerate(lines):
-        for word, repl in offending_words.items():
-            if word in line:
-                lines[idx] = line.replace(word, repl)
-                print("line:{!r} {!r}->{!r}".format(line, word, repl))
-    if lines[0].strip() != utf8_line.strip():
-        lines[:0] = [utf8_line, "\n"]
-    if lines[1] != marker_line:
-        lines[1:1] = marker_line
-    if lines != dup:
-        with open(fname, "w") as f:
-            f.write("".join(lines))
-
-def doit():
-    dir = os.path.dirname(__file__)
-    for name in patched_modules.split():
-        fname = os.path.join(dir, name + ".py")
-        print("Working on", fname)
-        patch_file(fname)
-
-if __name__ == "__main__":
-    doit()
-
-# end of file
+PYSIDE_TEST(signature_test.py)
+PYSIDE_TEST(existence_test.py)

@@ -63,7 +63,7 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
         sourceFile.setFile(sourceFileRoot + QStringLiteral(".xml"));
    if (!sourceFile.exists()) {
         qCWarning(lcShiboken).noquote().nospace()
-            << "Can't find qdoc3 file for class " << metaClass->name() << ", tried: "
+            << "Can't find qdoc file for class " << metaClass->name() << ", tried: "
             << QDir::toNativeSeparators(sourceFile.absoluteFilePath());
         return;
     }
@@ -173,9 +173,12 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
     QString sourceFile = documentationDataDirectory() + QLatin1Char('/')
                          + moduleName.toLower() + QLatin1String(".xml");
 
+    if (!QFile::exists(sourceFile))
+        sourceFile = documentationDataDirectory() + QLatin1Char('/')
+                         + moduleName.toLower() + QLatin1String("-module.webxml");
     if (!QFile::exists(sourceFile)) {
         qCWarning(lcShiboken).noquote().nospace()
-            << "Can't find qdoc3 file for module " <<  name << ", tried: "
+            << "Can't find qdoc file for module " <<  name << ", tried: "
             << QDir::toNativeSeparators(sourceFile);
         return Documentation();
     }

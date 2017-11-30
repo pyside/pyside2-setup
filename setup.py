@@ -48,7 +48,13 @@ or
   python setup.py install --qmake=</path/to/qt/bin/qmake> [--cmake=</path/to/cmake>] [--openssl=</path/to/openssl/bin>]
 to build and install into your current Python installation.
 
-On Linux you can use option --standalone, to embed Qt libraries to PySide2 distribution
+On Linux and macOS you can use option --standalone, to embed Qt libraries into the PySide2 package.
+The option does not affect Windows, because it is used implicitly, i.e. all relevant DLLs have to
+be copied into the PySide2 package anyway, because there is no proper rpath support on the platform.
+
+You can use option --rpath="your_value" to specify what rpath values should be embedded into the
+PySide2 modules and shared libraries. This overrides the automatically generated values when the
+option is not specified.
 
 You can use option --only-package, if you want to create more binary packages (bdist_wheel, bdist_egg, ...)
 without rebuilding entire PySide2 every time:
@@ -57,6 +63,15 @@ without rebuilding entire PySide2 every time:
 
   # Then we create bdist_egg reusing PySide2 build with option --only-package
   python setup.py bdist_egg --only-package --qmake=c:\Qt\4.8.5\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --opnessl=c:\libs\OpenSSL32bit\bin
+
+You can use the option --qt-conf-prefix to pass a path relative to the PySide2 installed package,
+which will be embedded into an auto-generated qt.conf registered in the Qt resource system. This
+path will serve as the PrefixPath for QLibraryInfo, thus allowing to choose where Qt plugins
+should be loaded from. This option overrides the usual prefix chosen by --standalone option, or when
+building on Windows.
+To temporarily disable registration of the internal qt.conf file, a new environment variable called
+PYSIDE_DISABLE_INTERNAL_QT_CONF is introduced. You should assign the integer "1" to disable the
+internal qt.conf, or "0" (or leave empty) to keep use the internal qt.conf file.
 
 For development purposes the following options might be of use, when using "setup.py build":
     --reuse-build option allows recompiling only the modified sources and not the whole world,
@@ -153,6 +168,7 @@ import sys
 import platform
 import time
 import re
+import fnmatch
 
 import difflib # for a close match of dirname and module
 
@@ -167,8 +183,10 @@ from distutils.command.build_ext import build_ext as _build_ext
 
 from setuptools import setup, Extension
 from setuptools.command.install import install as _install
+from setuptools.command.install_lib import install_lib as _install_lib
 from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
 from setuptools.command.develop import develop as _develop
+from setuptools.command.build_py import build_py as _build_py
 
 from qtinfo import QtInfo
 from utils import rmtree, detectClang
@@ -182,7 +200,7 @@ from utils import update_env_path
 from utils import init_msvc_env
 from utils import regenerate_qt_resources
 from utils import filter_match
-from utils import osx_localize_libpaths
+from utils import osx_fix_rpaths_for_library
 
 # guess a close folder name for extensions
 def get_extension_folder(ext):
@@ -239,6 +257,9 @@ OPTION_REUSE_BUILD = has_option("reuse-build")
 OPTION_SKIP_CMAKE = has_option("skip-cmake")
 OPTION_SKIP_MAKE_INSTALL = has_option("skip-make-install")
 OPTION_SKIP_PACKAGING = has_option("skip-packaging")
+OPTION_MODULE_SUBSET = option_value("module-subset")
+OPTION_RPATH_VALUES = option_value("rpath")
+OPTION_QT_CONF_PREFIX = option_value("qt-conf-prefix")
 
 if OPTION_QT_VERSION is None:
     OPTION_QT_VERSION = "5"
@@ -299,10 +320,6 @@ if OPTION_JOBS:
             OPTION_JOBS = '-j' + OPTION_JOBS
 else:
     OPTION_JOBS = ''
-
-if sys.platform == 'darwin' and OPTION_STANDALONE:
-    print("--standalone option does not yet work on OSX")
-
 
 # Show available versions
 if OPTION_LISTVERSIONS:
@@ -463,6 +480,40 @@ class pyside_build_ext(_build_ext):
 
     def run(self):
         pass
+
+# pyside_build_py and pyside_install_lib are reimplemented to preserve symlinks when
+# distutils / setuptools copy files to various directories through the different build stages.
+class pyside_build_py(_build_py):
+
+    def __init__(self, *args, **kwargs):
+        _build_py.__init__(self, *args, **kwargs)
+
+    def build_package_data(self):
+        """Copies files from pyside_package into build/xxx directory"""
+
+        for package, src_dir, build_dir, filenames in self.data_files:
+            for filename in filenames:
+                target = os.path.join(build_dir, filename)
+                self.mkpath(os.path.dirname(target))
+                srcfile = os.path.abspath(os.path.join(src_dir, filename))
+                # Using our own copyfile makes sure to preserve symlinks.
+                copyfile(srcfile, target)
+
+class pyside_install_lib(_install_lib):
+
+    def __init__(self, *args, **kwargs):
+        _install_lib.__init__(self, *args, **kwargs)
+
+    def install(self):
+        """Installs files from build/xxx directory into final site-packages/PySide2 directory."""
+
+        if os.path.isdir(self.build_dir):
+            # Using our own copydir makes sure to preserve symlinks.
+            outfiles = copydir(os.path.abspath(self.build_dir), os.path.abspath(self.install_dir))
+        else:
+            self.warn("'%s' does not exist -- no Python modules to install" % self.build_dir)
+            return
+        return outfiles
 
 class pyside_build(_build):
 
@@ -829,11 +880,31 @@ class pyside_build(_build):
         cmake_cmd.append("-DPYTHON_EXECUTABLE=%s" % self.py_executable)
         cmake_cmd.append("-DPYTHON_INCLUDE_DIR=%s" % self.py_include_dir)
         cmake_cmd.append("-DPYTHON_LIBRARY=%s" % self.py_library)
+        if OPTION_MODULE_SUBSET:
+            moduleSubSet = ''
+            for m in OPTION_MODULE_SUBSET.split(','):
+                if m.startswith('Qt'):
+                    m = m[2:]
+                if moduleSubSet:
+                    moduleSubSet += ';'
+                moduleSubSet += m
+            cmake_cmd.append("-DMODULES=%s" % moduleSubSet)
         # Add source location for generating documentation
         if qtSrcDir:
             cmake_cmd.append("-DQT_SRC_DIR=%s" % qtSrcDir)
         if self.build_type.lower() == 'debug':
             cmake_cmd.append("-DPYTHON_DEBUG_LIBRARY=%s" % self.py_library)
+
+        if extension.lower() == "pyside2":
+            pyside_qt_conf_prefix = ''
+            if OPTION_QT_CONF_PREFIX:
+                pyside_qt_conf_prefix = OPTION_QT_CONF_PREFIX
+            else:
+                if OPTION_STANDALONE:
+                    pyside_qt_conf_prefix = '"Qt"'
+                if sys.platform == 'win32':
+                    pyside_qt_conf_prefix = '"."'
+            cmake_cmd.append("-DPYSIDE_QT_CONF_PREFIX=%s" % pyside_qt_conf_prefix)
 
         if extension.lower() == "shiboken2":
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
@@ -916,11 +987,15 @@ class pyside_build(_build):
                 "qt_bin_dir": self.qtinfo.bins_dir,
                 "qt_doc_dir": self.qtinfo.docs_dir,
                 "qt_lib_dir": self.qtinfo.libs_dir,
+                "qt_lib_execs_dir": self.qtinfo.lib_execs_dir,
                 "qt_plugins_dir": self.qtinfo.plugins_dir,
+                "qt_prefix_dir": self.qtinfo.prefix_dir,
                 "qt_translations_dir": self.qtinfo.translations_dir,
+                "qt_qml_dir": self.qtinfo.qml_dir,
                 "version": version_str,
             }
             os.chdir(self.script_dir)
+
             if sys.platform == "win32":
                 vars['dbgPostfix'] = OPTION_DEBUG and "_d" or ""
                 return self.prepare_packages_win32(vars)
@@ -928,6 +1003,21 @@ class pyside_build(_build):
                 return self.prepare_packages_posix(vars)
         except IOError as e:
             print('setup.py/prepare_packages: ', e)
+            raise
+
+    def get_built_pyside_modules(self, vars):
+        # Get list of built modules, so that we copy only required Qt libraries.
+        pyside_package_dir = vars['dist_dir']
+        built_modules_path = os.path.join(pyside_package_dir, "PySide2", "_built_modules.py")
+
+        try:
+            with open(built_modules_path) as f:
+                scoped_locals = {}
+                code = compile(f.read(), built_modules_path, 'exec')
+                exec(code, scoped_locals, scoped_locals)
+                return scoped_locals['built_modules']
+        except IOError as e:
+            print("get_built_pyside_modules: Couldn't find file: {}.".format(built_modules_path))
             raise
 
     def prepare_packages_posix(self, vars):
@@ -1027,36 +1117,143 @@ class pyside_build(_build):
                     pyside_rcc_options)
         # Copy Qt libs to package
         if OPTION_STANDALONE:
+            vars['built_modules'] = self.get_built_pyside_modules(vars)
             if sys.platform == 'darwin':
-                raise RuntimeError('--standalone not yet supported for OSX')
-            # <qt>/bin/* -> <setup>/PySide2
-            executables.extend(copydir("{qt_bin_dir}", "{dist_dir}/PySide2",
-                filter=[
-                    "designer",
-                    "linguist",
-                    "lrelease",
-                    "lupdate",
-                    "lconvert",
-                ],
-                recursive=False, vars=vars))
-            # <qt>/lib/* -> <setup>/PySide2
-            copydir("{qt_lib_dir}", "{dist_dir}/PySide2",
-                filter=[
-                    "libQt*.so.?",
-                    "libphonon.so.?",
-                ],
-                recursive=False, vars=vars)
-            # <qt>/plugins/* -> <setup>/PySide2/plugins
-            copydir("{qt_plugins_dir}", "{dist_dir}/PySide2/plugins",
-                filter=["*.so"],
-                vars=vars)
-            # <qt>/translations/* -> <setup>/PySide2/translations
-            copydir("{qt_translations_dir}", "{dist_dir}/PySide2/translations",
-                filter=["*.qm"],
-                vars=vars)
+                self.prepare_standalone_package_osx(executables, vars)
+            else:
+                self.prepare_standalone_package_linux(executables, vars)
+
         # Update rpath to $ORIGIN
         if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
             self.update_rpath("{dist_dir}/PySide2".format(**vars), executables)
+
+    def qt_is_framework_build(self):
+        if os.path.isdir(self.qtinfo.headers_dir + "/../lib/QtCore.framework"):
+            return True
+        return False
+
+    def prepare_standalone_package_linux(self, executables, vars):
+        built_modules = vars['built_modules']
+
+        # <qt>/lib/* -> <setup>/PySide2/Qt/lib
+        copydir("{qt_lib_dir}", "{dist_dir}/PySide2/Qt/lib",
+            filter=[
+                "libQt5*.so.?",
+                "libicu*.so.??",
+            ],
+            recursive=False, vars=vars, force_copy_symlinks=True)
+
+        if 'WebEngineWidgets' in built_modules:
+            copydir("{qt_lib_execs_dir}", "{dist_dir}/PySide2/Qt/libexec",
+                filter=None,
+                recursive=False,
+                vars=vars)
+
+            copydir("{qt_prefix_dir}/resources", "{dist_dir}/PySide2/Qt/resources",
+                filter=None,
+                recursive=False,
+                vars=vars)
+
+        # <qt>/plugins/* -> <setup>/PySide2/Qt/plugins
+        copydir("{qt_plugins_dir}", "{dist_dir}/PySide2/Qt/plugins",
+            filter=["*.so"],
+            recursive=True,
+            vars=vars)
+
+        # <qt>/qml/* -> <setup>/PySide2/Qt/qml
+        copydir("{qt_qml_dir}", "{dist_dir}/PySide2/Qt/qml",
+            filter=None,
+            force=False,
+            recursive=True,
+            vars=vars)
+
+        # <qt>/translations/* -> <setup>/PySide2/Qt/translations
+
+        copydir("{qt_translations_dir}", "{dist_dir}/PySide2/Qt/translations",
+            filter=["*.qm"],
+            force=False,
+            vars=vars)
+
+    def prepare_standalone_package_osx(self, executables, vars):
+        built_modules = vars['built_modules']
+
+        # Directory filter for skipping unnecessary files.
+        def general_dir_filter(dir_name, parent_full_path, dir_full_path):
+            if fnmatch.fnmatch(dir_name, "*.dSYM"):
+                return False
+            return True
+
+        # <qt>/lib/* -> <setup>/PySide2/Qt/lib
+        if self.qt_is_framework_build():
+            framework_built_modules = ['Qt' + name + '.framework' for name in built_modules]
+
+            def framework_dir_filter(dir_name, parent_full_path, dir_full_path):
+                if '.framework' in dir_name:
+                    if dir_name in ['QtWebEngine.framework', 'QtWebEngineCore.framework', \
+                                    'QtPositioning.framework', 'QtLocation.framework'] and \
+                       'QtWebEngineWidgets.framework' in framework_built_modules:
+                           return True
+                    if dir_name in ['QtCLucene.framework'] and \
+                       'QtHelp.framework' in framework_built_modules:
+                           return True
+                    if dir_name not in framework_built_modules:
+                        return False
+                if dir_name in ['Headers', 'fonts']:
+                    return False
+                if dir_full_path.endswith('Versions/Current'):
+                    return False
+                if dir_full_path.endswith('Versions/5/Resources'):
+                    return False
+                if dir_full_path.endswith('Versions/5/Helpers'):
+                    return False
+                return general_dir_filter(dir_name, parent_full_path, dir_full_path)
+
+            copydir("{qt_lib_dir}", "{dist_dir}/PySide2/Qt/lib",
+                recursive=True, vars=vars,
+                ignore=["*.la", "*.a", "*.cmake", "*.pc", "*.prl"],
+                dir_filter_function=framework_dir_filter)
+        else:
+            if 'WebEngineWidgets' in built_modules:
+                built_modules.extend(['WebEngine', 'WebEngineCore', 'Positioning', 'Location'])
+            if 'Help' in built_modules:
+                built_modules.extend(['CLucene'])
+            prefixed_built_modules = ['*Qt5' + name + '*.dylib' for name in built_modules]
+
+            copydir("{qt_lib_dir}", "{dist_dir}/PySide2/Qt/lib",
+                filter=prefixed_built_modules,
+                recursive=True, vars=vars)
+
+            if 'WebEngineWidgets' in built_modules:
+                copydir("{qt_lib_execs_dir}", "{dist_dir}/PySide2/Qt/libexec",
+                    filter=None,
+                    recursive=False,
+                    vars=vars)
+
+                copydir("{qt_prefix_dir}/resources", "{dist_dir}/PySide2/Qt/resources",
+                    filter=None,
+                    recursive=False,
+                    vars=vars)
+
+        # <qt>/plugins/* -> <setup>/PySide2/Qt/plugins
+        copydir("{qt_plugins_dir}", "{dist_dir}/PySide2/Qt/plugins",
+            filter=["*.dylib"],
+            recursive=True,
+            dir_filter_function=general_dir_filter,
+            vars=vars)
+
+        # <qt>/qml/* -> <setup>/PySide2/Qt/qml
+        copydir("{qt_qml_dir}", "{dist_dir}/PySide2/Qt/qml",
+            filter=None,
+            recursive=True,
+            force=False,
+            dir_filter_function=general_dir_filter,
+            vars=vars)
+
+        # <qt>/translations/* -> <setup>/PySide2/Qt/translations
+        copydir("{qt_translations_dir}", "{dist_dir}/PySide2/Qt/translations",
+            filter=["*.qm"],
+            force=False,
+            vars=vars)
 
     def prepare_packages_win32(self, vars):
         pdbs = ['*.pdb'] if self.debug or self.build_type == 'RelWithDebInfo' else []
@@ -1065,6 +1262,8 @@ class pyside_build(_build):
             "{site_packages_dir}/PySide2",
             "{dist_dir}/PySide2",
             vars=vars)
+        built_modules = self.get_built_pyside_modules(vars)
+
         if self.debug or self.build_type == 'RelWithDebInfo':
             # <build>/pyside2/PySide2/*.pdb -> <setup>/PySide2
             copydir(
@@ -1208,7 +1407,25 @@ class pyside_build(_build):
         # <qt>/translations/* -> <setup>/PySide2/translations
         copydir("{qt_translations_dir}", "{dist_dir}/PySide2/translations",
             filter=["*.qm"],
+            force=False,
             vars=vars)
+
+        # <qt>/qml/* -> <setup>/PySide2/qml
+        copydir("{qt_qml_dir}", "{dist_dir}/PySide2/qml",
+            filter=None,
+            force=False,
+            recursive=True,
+            vars=vars)
+
+        if 'WebEngineWidgets' in built_modules:
+            copydir("{qt_prefix_dir}/resources", "{dist_dir}/PySide2/resources",
+                filter=None,
+                recursive=False,
+                vars=vars)
+
+            copydir("{qt_bin_dir}", "{dist_dir}/PySide2",
+                filter=["QtWebEngineProcess*.exe"],
+                recursive=False, vars=vars)
 
         # pdb files for libshiboken and libpyside
         if self.debug or self.build_type == 'RelWithDebInfo':
@@ -1237,7 +1454,18 @@ class pyside_build(_build):
             patchelf_path = os.path.join(self.script_dir, "patchelf")
 
             def rpath_cmd(srcpath):
-                cmd = [patchelf_path, '--set-rpath', '$ORIGIN/', srcpath]
+                final_rpath = ''
+                # Command line rpath option takes precedence over automatically added one.
+                if OPTION_RPATH_VALUES:
+                    final_rpath = OPTION_RPATH_VALUES
+                else:
+                    # Add rpath values pointing to $ORIGIN and the installed qt lib directory.
+                    local_rpath = '$ORIGIN/'
+                    qt_lib_dir = self.qtinfo.libs_dir
+                    if OPTION_STANDALONE:
+                        qt_lib_dir = "$ORIGIN/Qt/lib"
+                    final_rpath = local_rpath + ':' + qt_lib_dir
+                cmd = [patchelf_path, '--set-rpath', final_rpath, srcpath]
                 if run_process(cmd) != 0:
                     raise RuntimeError("Error patching rpath in " + srcpath)
 
@@ -1245,7 +1473,16 @@ class pyside_build(_build):
             pyside_libs = [lib for lib in os.listdir(package_path) if filter_match(
                           lib, ["*.so", "*.dylib"])]
             def rpath_cmd(srcpath):
-                osx_localize_libpaths(srcpath, pyside_libs, None)
+                final_rpath = ''
+                # Command line rpath option takes precedence over automatically added one.
+                if OPTION_RPATH_VALUES:
+                    final_rpath = OPTION_RPATH_VALUES
+                else:
+                    if OPTION_STANDALONE:
+                        final_rpath = "@loader_path/Qt/lib"
+                    else:
+                        final_rpath = self.qtinfo.libs_dir
+                osx_fix_rpaths_for_library(srcpath, final_rpath)
 
         else:
             raise RuntimeError('Not configured for platform ' +
@@ -1325,10 +1562,12 @@ setup(
     },
     cmdclass = {
         'build': pyside_build,
+        'build_py': pyside_build_py,
         'build_ext': pyside_build_ext,
         'bdist_egg': pyside_bdist_egg,
         'develop': pyside_develop,
-        'install': pyside_install
+        'install': pyside_install,
+        'install_lib': pyside_install_lib
     },
 
     # Add a bogus extension module (will never be built here since we are

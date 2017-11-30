@@ -1,0 +1,3 @@
+built_modules = list(name for name in
+    "@all_module_shortnames@"
+    .split(";"))

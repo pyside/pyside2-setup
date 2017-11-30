@@ -172,21 +172,13 @@ class BuildLog(object):
         path = self.selected.build_dir
         base = os.path.basename(path)
         res.extend(base.split('-'))
-        # add the python version py2 and py3
-        # also add the keys qt5 and qt5.6 etc.
+        # add all the python and qt subkeys
         for entry in res:
-            if entry.startswith("py"):
-                key = entry[:3]
+            parts = entry.split(".")
+            for idx in range(len(parts)):
+                key = ".".join(parts[:idx])
                 if key not in res:
                     res.append(key)
-            if entry.startswith("qt"):
-                key = entry[:3]
-                if key not in res:
-                    res.append(key)
-                key = entry[:5]
-                if key not in res:
-                    res.append(key)
-            # this will become more difficult when the version has two digits
         return res
 
 
@@ -744,6 +736,11 @@ if __name__ == '__main__':
                         help="use build number n (0-based), latest = -1 (default)")
     parser_list = subparsers.add_parser("list")
     args = parser.parse_args()
+
+    print("System:\n  Platform=%s\n  Executable=%s\n  Version=%s\n  API version=%s\n\nEnvironment:" %
+          (sys.platform, sys.executable, sys.version.replace("\n", " "), sys.api_version))
+    for v in sorted(os.environ.keys()):
+        print("  %s=%s" % (v, os.environ[v]))
 
     builds = BuildLog(script_dir)
     if hasattr(args, "buildno"):

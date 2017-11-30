@@ -7,6 +7,9 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/global.h.in"
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/__init__.py" @ONLY)
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_built_modules.py.in"
+              "${CMAKE_CURRENT_BINARY_DIR}/_built_modules.py" @ONLY)
+
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_utils.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/_utils.py" @ONLY)
 
@@ -23,11 +26,13 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/parser.py"
 if (PYTHON_VERSION_MAJOR EQUAL 3)
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/inspect.py"
                    "${CMAKE_CURRENT_BINARY_DIR}/support/signature/inspect.py" COPYONLY)
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/typing.py"
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/typing36.py"
                    "${CMAKE_CURRENT_BINARY_DIR}/support/signature/typing.py" COPYONLY)
 else()
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/backport_inspect.py"
                    "${CMAKE_CURRENT_BINARY_DIR}/support/signature/backport_inspect.py" COPYONLY)
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/typing27.py"
+                   "${CMAKE_CURRENT_BINARY_DIR}/support/signature/typing.py" COPYONLY)
 endif()
 
 # now compile all modules.
@@ -49,7 +54,11 @@ foreach(shortname IN LISTS all_module_shortnames)
         file(READ "${pre_header}" pre_header_content)
         set(module_header_content "${pre_header_content}")
     endif()
-    set(module_header_content "${module_header_content}\n${pyside2_global_contents}\n#include <Qt${shortname}/Qt${shortname}>\n")
+    set(module_header_content "${module_header_content}\n${pyside2_global_contents}")
+    # AxContainer/AxServer from Active Qt do not have module headers
+    if(NOT "${shortname}" STREQUAL "AxContainer")
+        set(module_header_content "${module_header_content}\n#include <Qt${shortname}/Qt${shortname}>")
+    endif()
     set(post_header "${CMAKE_CURRENT_BINARY_DIR}/Qt${shortname}/Qt${shortname}_global.post.h")
     if(EXISTS "${post_header}")
         file(READ "${post_header}" post_header_content)
@@ -60,6 +69,8 @@ endforeach()
 
 # install
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/__init__.py"
+        DESTINATION "${PYTHON_SITE_PACKAGES}/${BINDING_NAME}${pyside2_SUFFIX}")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_built_modules.py"
         DESTINATION "${PYTHON_SITE_PACKAGES}/${BINDING_NAME}${pyside2_SUFFIX}")
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/_utils.py
         DESTINATION "${PYTHON_SITE_PACKAGES}/${BINDING_NAME}${pyside2_SUFFIX}")
