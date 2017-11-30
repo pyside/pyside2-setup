@@ -471,24 +471,14 @@ int SignalManager::qt_metacall(QObject* object, QMetaObject::Call call, int id, 
 
             if (data && !data->jsWrapper.isNullOrUndefined()) {
                 QV4::ExecutionEngine *engine = data->jsWrapper.engine();
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-                QV4::Heap::ExecutionContext *ctx = engine->current;
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
-                QV4::Heap::ExecutionContext *ctx = engine->currentContext();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+                if (engine->currentStackFrame != nullptr) {
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+                if (engine->currentContext->d() != engine->rootContext()->d()) {
 #else
                 QV4::ExecutionContext *ctx = engine->currentContext();
-#endif
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
                 if (ctx->type == QV4::Heap::ExecutionContext::Type_CallContext ||
                     ctx->type == QV4::Heap::ExecutionContext::Type_SimpleCallContext) {
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
-                if (ctx->d()->type == QV4::ExecutionContext::Type_CallContext ||
-                    ctx->d()->type == QV4::ExecutionContext::Type_SimpleCallContext) {
-#else
-                if (ctx->type == QV4::ExecutionContext::Type_CallContext ||
-                    ctx->type == QV4::ExecutionContext::Type_SimpleCallContext) {
 #endif
                     PyObject *errType, *errValue, *errTraceback;
                     PyErr_Fetch(&errType, &errValue, &errTraceback);
