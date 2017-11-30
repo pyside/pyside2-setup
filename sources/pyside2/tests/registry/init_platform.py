@@ -59,10 +59,11 @@ version_id = __version__.replace(".", "_")
 is_ci = os.environ.get("QTEST_ENVIRONMENT", "") == "ci"
 # Python2 legacy: Correct 'linux2' to 'linux', recommended way.
 platform = 'linux' if sys.platform.startswith('linux') else sys.platform
-outname = "exists_{}_{}{}.py".format(platform, version_id,
+module = "exists_{}_{}{}".format(platform, version_id,
                                      "_ci" if is_ci else "")
-outpath = os.path.join(os.path.dirname(__file__), outname)
+refpath = os.path.join(os.path.dirname(__file__), module + ".py")
 outfile = None
+sourcepath = os.path.splitext(__file__)[0] + ".py"   # make sure not to get .pyc
 
 def xprint(*args, **kw):
     if outfile:
@@ -144,9 +145,8 @@ def enum_module(mod_name):
 
 def generate_all():
     global outfile
-    with open(outpath, "w") as outfile:
-        with open(__file__) as f:
-            lines = f.readlines()
+    with open(refpath, "w") as outfile, open(sourcepath) as f:
+        lines = f.readlines()
         license_line = next((lno for lno, line in enumerate(lines)
                              if "$QT_END_LICENSE$" in line))
         xprint("".join(lines[:license_line + 3]))
@@ -165,35 +165,9 @@ def enum_all():
         ret.update(enum_module(mod_name))
     return ret
 
-# This function exists because I forgot to sort the files in the first place.
-def sort_dict(fname):
-    with open(fname) as f:
-        lines = f.readlines()
-    out = []
-    while lines:
-        line = lines.pop(0)
-        if not line.lstrip().startswith('"'):
-            out.append(line)
-            continue
-        out.append(line)
-        buf = [] # leave __init__ in place
-        line = lines.pop(0)
-        while line.lstrip().startswith('"'):
-            buf.append(line)
-            line = lines.pop(0)
-        buf.sort()
-        out.extend(buf)
-        out.append(line)
-    with open(fname, "w") as f:
-        f.writelines(out)
-
 def __main__():
-    if sys.argv[1:]:
-        fname = sys.argv[1]
-        print("we are just sorting", fname)
-        sort_dict(fname)
-        sys.exit(0)
-    print("+++ generating {}. You should check this file in.".format(outname))
+    print("+++ generating {}. You should probably check this file in."
+          .format(refpath))
     generate_all()
 
 if __name__ == "__main__":

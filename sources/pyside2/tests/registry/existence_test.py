@@ -43,25 +43,37 @@ import os
 import sys
 import unittest
 import warnings
-from init_platform import enum_all, generate_all, is_ci, outname, outpath
-from util import isolate_warnings, check_warnings
+from textwrap import dedent
+from init_platform import enum_all, generate_all, is_ci, module, refpath
+from util import isolate_warnings, check_warnings, suppress_warnings
 from PySide2 import *
 from PySide2.QtCore import __version__
 
-refmodule_name = outname[:-3] # no .py
-pyc = os.path.splitext(outpath)[0] + ".pyc"
-if os.path.exists(pyc) and not os.path.exists(outname):
+pyc = os.path.splitext(refpath)[0] + ".pyc"
+if os.path.exists(pyc) and not os.path.exists(refpath):
     # on Python2 the pyc file would be imported
     os.unlink(pyc)
 
-sys.path.insert(0, os.path.dirname(__file__))
+home_dir = refpath
+for _ in "abcde":
+    home_dir = os.path.dirname(home_dir)
+shortpath = os.path.relpath(refpath, home_dir)
 try:
-    exec("import {} as sig_exists".format(refmodule_name))
-    print("found:", refmodule_name)
+    exec("import {} as sig_exists".format(module))
+    print("found:", shortpath)
     have_refmodule = True
 except ImportError:
-    print("*** not found:", refmodule_name)
+    print("*** not found:", shortpath)
     have_refmodule = False
+except SyntaxError:
+    print("*** not a python file, removed:", shortpath)
+    os.unlink(refpath)
+    have_refmodule = False
+if have_refmodule and not hasattr(sig_exists, "dict"):
+    print("*** wrong module without 'dict', removed:", shortpath)
+    os.unlink(refpath)
+    have_refmodule = False
+
 
 @unittest.skipIf(not have_refmodule,
                  "not activated for this platform or version")
@@ -87,12 +99,12 @@ class TestSignaturesExists(unittest.TestCase):
         found_sigs = enum_all()
         # make sure that errors are actually raised
         found_sigs.pop(list(found_sigs.keys())[42])
-        with isolate_warnings():
+        with isolate_warnings(), suppress_warnings():
             for key, value in sig_exists.dict.items():
                 if key not in found_sigs:
-                    warnings.warn("ignore missing key: '{}'".format(key), RuntimeWarning)
+                    warnings.warn("missing key: '{}'".format(key), RuntimeWarning)
                 elif isinstance(value, list) and len(value) != len(found_sigs[key]):
-                    warnings.warn("ignore different sig length: '{}'".format(key), RuntimeWarning)
+                    warnings.warn("different sig length: '{}'".format(key), RuntimeWarning)
             self.assertTrue(check_warnings())
 
 version = tuple(map(int, __version__.split(".")))
@@ -107,12 +119,16 @@ if not have_refmodule and is_ci and version[:2] in tested_versions:
         """
         generate_all()
         sys.stderr.flush()
-        print("BEGIN", outpath, file=sys.stderr)
-        with open(outpath) as f:
+        print("BEGIN_FILE", shortpath, file=sys.stderr)
+        with open(refpath) as f:
             print(f.read(), file=sys.stderr)
-        print("END", outpath, file=sys.stderr)
+        print("END_FILE", shortpath, file=sys.stderr)
         sys.stderr.flush()
-        raise RuntimeError("This is the initial call. You should check this file in.")
+        raise RuntimeError(dedent("""
+            {line}
+            **  This is the initial call. You should check this file in:
+            **  {}
+            **""").format(shortpath, line=79 * "*"))
 
 if __name__ == '__main__':
     unittest.main()

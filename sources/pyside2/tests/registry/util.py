@@ -72,6 +72,12 @@ def isolate_warnings():
             if warn is None:
                 delattr(mod, warn_name)
 
+@contextmanager
+def suppress_warnings():
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        yield
+
 def check_warnings():
     for name, mod in sys.modules.items():
         if mod:
