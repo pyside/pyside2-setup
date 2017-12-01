@@ -932,8 +932,6 @@ public:
     bool isBinaryOperator() const { return arityOfOperator() == 2; }
     bool isInplaceOperator() const;
 
-    // TODO: ths function *should* know if it is virtual
-    // instead of asking to your implementing class.
     bool isVirtual() const;
     bool isThread() const;
     bool allowThread() const;

@@ -1151,7 +1151,7 @@ bool AbstractMetaFunction::isInplaceOperator() const
 
 bool AbstractMetaFunction::isVirtual() const
 {
-    return !isFinal() && !isSignal() && !isStatic() && !isFinalInCpp() && !isConstructor();
+    return attributes() & AbstractMetaAttributes::VirtualCppMethod;
 }
 
 QString AbstractMetaFunction::modifiedName() const
