@@ -138,11 +138,8 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
 
         s << endl << '{' << endl << "public:" << endl;
 
-        bool hasVirtualFunction = false;
         const AbstractMetaFunctionList &funcs = filterFunctions(metaClass);
         for (AbstractMetaFunction *func : funcs) {
-            if (func->isVirtual())
-                hasVirtualFunction = true;
             if ((func->attributes() & AbstractMetaAttributes::FinalCppMethod) == 0)
                 writeFunction(s, func);
         }
@@ -164,8 +161,6 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
             if (avoidProtectedHack() && metaClass->hasPrivateDestructor())
                 s << "// C++11: need to declare (unimplemented) destructor because "
                      "the base class destructor is private." << endl;
-            if (metaClass->hasVirtualDestructor() || hasVirtualFunction)
-                s <<  "virtual ";
             s << '~' << wrapperName << "();" << endl;
         }
 
@@ -174,8 +169,8 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
         if ((!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
             && usePySideExtensions() && metaClass->isQObject()) {
             s << "public:\n";
-            s << INDENT << "virtual int qt_metacall(QMetaObject::Call call, int id, void** args);" << endl;
-            s << INDENT << "virtual void* qt_metacast(const char* _clname);" << endl;
+            s << INDENT << "int qt_metacall(QMetaObject::Call call, int id, void** args) override;" << endl;
+            s << INDENT << "void* qt_metacast(const char* _clname) override;" << endl;
         }
 
         if (m_inheritedOverloads.size()) {
@@ -259,13 +254,15 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
         s << INDENT;
         Options virtualOption = Generator::OriginalTypeDescription;
 
-        if (func->isVirtual() || func->isAbstract())
-            s << "virtual ";
-        else if (!func->hasSignatureModifications())
+        const bool virtualFunc = func->isVirtual() || func->isAbstract();
+        if (!virtualFunc && !func->hasSignatureModifications())
             virtualOption = Generator::NoOption;
 
-        s << functionSignature(func, QString(), QString(), virtualOption) << ';' << endl;
+        s << functionSignature(func, QString(), QString(), virtualOption);
 
+        if (virtualFunc)
+            s << " override";
+        s << ';' << endl;
         // Check if this method hide other methods in base classes
         const AbstractMetaFunctionList &ownerFuncs = func->ownerClass()->functions();
         for (const AbstractMetaFunction *f : ownerFuncs) {
