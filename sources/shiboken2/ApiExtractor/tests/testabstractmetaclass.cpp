@@ -88,40 +88,53 @@ void TestAbstractMetaClass::testClassNameUnderNamespace()
 
 void TestAbstractMetaClass::testVirtualMethods()
 {
-    const char* cppCode ="\
-    class A {\n\
-    public:\n\
-        virtual int pureVirtual() const = 0;\n\
-    };\n\
-    class B : public A {};\n\
-    class C : public B {\n\
-    public:\n\
-        int pureVirtual() const { return 0; }\n\
-    };\n";
-    const char* xmlCode = "\
-    <typesystem package=\"Foo\">\n\
-        <primitive-type name='int'/>\n\
-        <object-type name='A'/>\n\
-        <object-type name='B'/>\n\
-        <object-type name='C'/>\n\
-    </typesystem>\n";
+    const char cppCode[] =R"CPP(
+class A {
+public:
+    virtual int pureVirtual() const = 0;
+};
+class B : public A {};
+class C : public B {
+public:
+    int pureVirtual() const override { return 0; }
+};
+class F final : public C {
+public:
+    int pureVirtual() const final { return 1; }
+};
+)CPP";
+
+    const char xmlCode[] = R"XML(
+<typesystem package="Foo">
+    <primitive-type name='int'/>
+    <object-type name='A'/>
+    <object-type name='B'/>
+    <object-type name='C'/>
+    <object-type name='F'/>
+</typesystem>
+)XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
-    QCOMPARE(classes.count(), 3);
+    QCOMPARE(classes.count(), 4);
     AbstractMetaClass* a = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     AbstractMetaClass* b = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     AbstractMetaClass* c = AbstractMetaClass::findClass(classes, QLatin1String("C"));
+    const AbstractMetaClass *f = AbstractMetaClass::findClass(classes, QLatin1String("F"));
+    QVERIFY(f);
 
     AbstractMetaClass* no_class = 0;
 
     QCOMPARE(a->baseClass(), no_class);
     QCOMPARE(b->baseClass(), a);
     QCOMPARE(c->baseClass(), b);
+    QCOMPARE(f->baseClass(), c);
 
     QCOMPARE(a->functions().size(), 2); // default ctor + the pure virtual method
     QCOMPARE(b->functions().size(), 2);
     QCOMPARE(c->functions().size(), 2);
+    QCOMPARE(f->functions().size(), 2);
+    QVERIFY(f->attributes() & AbstractMetaAttributes::FinalCppClass);
 
     // implementing class, ownclass, declaringclass
     AbstractMetaFunction* ctorA = a->queryFunctions(AbstractMetaClass::Constructors).first();
@@ -140,14 +153,19 @@ void TestAbstractMetaClass::testVirtualMethods()
     QCOMPARE(a->virtualFunctions().size(), 1); // Add a pureVirtualMethods method !?
     QCOMPARE(b->virtualFunctions().size(), 1);
     QCOMPARE(c->virtualFunctions().size(), 1);
+    QCOMPARE(f->virtualFunctions().size(), 1);
 
     AbstractMetaFunction* funcA = a->virtualFunctions().first();
     AbstractMetaFunction* funcB = b->virtualFunctions().first();
     AbstractMetaFunction* funcC = c->virtualFunctions().first();
+    const AbstractMetaFunction* funcF = f->virtualFunctions().constFirst();
 
     QCOMPARE(funcA->ownerClass(), a);
+    QVERIFY(funcC->attributes() & AbstractMetaAttributes::VirtualCppMethod);
     QCOMPARE(funcB->ownerClass(), b);
     QCOMPARE(funcC->ownerClass(), c);
+    QVERIFY(funcC->attributes() & AbstractMetaAttributes::OverriddenCppMethod);
+    QVERIFY(funcF->attributes() & AbstractMetaAttributes::FinalCppMethod);
 
     QCOMPARE(funcA->declaringClass(), a);
     QCOMPARE(funcB->declaringClass(), a);

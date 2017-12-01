@@ -1285,6 +1285,9 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     AbstractMetaClass *metaClass = q->createMetaClass();
     metaClass->setTypeEntry(type);
 
+    if (classItem->isFinal())
+        *metaClass += AbstractMetaAttributes::FinalCppClass;
+
     QStringList baseClassNames;
     const QVector<_ClassModelItem::BaseClass> &baseClasses = classItem->baseClasses();
     for (const _ClassModelItem::BaseClass &baseClass : baseClasses) {
@@ -2224,8 +2227,15 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
     if (functionItem->isAbstract())
         *metaFunction += AbstractMetaAttributes::Abstract;
 
-    if (!functionItem->isVirtual())
+    if (functionItem->isVirtual()) {
+        *metaFunction += AbstractMetaAttributes::VirtualCppMethod;
+        if (functionItem->isOverride())
+            *metaFunction += AbstractMetaAttributes::OverriddenCppMethod;
+        if (functionItem->isFinal())
+            *metaFunction += AbstractMetaAttributes::FinalCppMethod;
+    } else {
         *metaFunction += AbstractMetaAttributes::Final;
+    }
 
     if (functionItem->isInvokable())
         *metaFunction += AbstractMetaAttributes::Invokable;

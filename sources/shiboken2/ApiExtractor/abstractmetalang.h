@@ -131,6 +131,11 @@ public:
 
         HasRejectedConstructor      = 0x00080000,
 
+        FinalCppClass               = 0x00100000,
+        VirtualCppMethod            = 0x00200000,
+        OverriddenCppMethod         = 0x00400000,
+        FinalCppMethod              = 0x00800000,
+
         Final                       = FinalInTargetLang | FinalInCpp
     };
     Q_DECLARE_FLAGS(Attributes, Attribute)
@@ -935,6 +940,7 @@ public:
     QString modifiedName() const;
 
     QString minimalSignature() const;
+    QString debugSignature() const; // including virtual/override/final, etc., for debugging only.
     QStringList possibleIntrospectionCompatibleSignatures() const;
 
     QString marshalledName() const;

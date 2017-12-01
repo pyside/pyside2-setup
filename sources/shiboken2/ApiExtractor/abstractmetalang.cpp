@@ -914,6 +914,21 @@ QString AbstractMetaFunction::minimalSignature() const
     return minimalSignature;
 }
 
+QString AbstractMetaFunction::debugSignature() const
+{
+    QString result;
+    const bool isOverride = attributes() & AbstractMetaFunction::OverriddenCppMethod;
+    const bool isFinal = attributes() & AbstractMetaFunction::FinalCppMethod;
+    if (!isOverride && !isFinal && (attributes() & AbstractMetaFunction::VirtualCppMethod))
+        result += QLatin1String("virtual ");
+    result += minimalSignature();
+    if (isOverride)
+        result += QLatin1String(" override");
+    if (isFinal)
+        result += QLatin1String(" final");
+    return result;
+}
+
 FunctionModificationList AbstractMetaFunction::modifications(const AbstractMetaClass* implementor) const
 {
     if (!implementor)
@@ -1203,7 +1218,7 @@ bool function_sorter(AbstractMetaFunction *a, AbstractMetaFunction *b)
 #ifndef QT_NO_DEBUG_STREAM
 static inline void formatMetaFunctionBrief(QDebug &d, const AbstractMetaFunction *af)
 {
-    d << '"' << af->minimalSignature() << '"';
+    d << '"' << af->debugSignature() << '"';
 }
 
 void AbstractMetaFunction::formatDebugVerbose(QDebug &d) const
@@ -2733,6 +2748,8 @@ QDebug operator<<(QDebug d, const AbstractMetaClass *ac)
     d << "AbstractMetaClass(";
     if (ac) {
         d << '"' << ac->fullName() << '"';
+        if (ac->attributes() & AbstractMetaAttributes::FinalCppClass)
+            d << " [final]";
         if (ac->m_baseClass)
             d << ", inherits \"" << ac->m_baseClass->name() << '"';
         const AbstractMetaEnumList &enums = ac->enums();
