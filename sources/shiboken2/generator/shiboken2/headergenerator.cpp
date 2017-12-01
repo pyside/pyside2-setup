@@ -143,7 +143,8 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
         for (AbstractMetaFunction *func : funcs) {
             if (func->isVirtual())
                 hasVirtualFunction = true;
-            writeFunction(s, func);
+            if ((func->attributes() & AbstractMetaAttributes::FinalCppMethod) == 0)
+                writeFunction(s, func);
         }
 
         if (avoidProtectedHack() && metaClass->hasProtectedFields()) {

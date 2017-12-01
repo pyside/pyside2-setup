@@ -344,11 +344,13 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
             if ((func->isPrivate() && !visibilityModifiedToPrivate(func))
                 || (func->isModifiedRemoved() && !func->isAbstract()))
                 continue;
-            if (func->functionType() == AbstractMetaFunction::ConstructorFunction && !func->isUserAdded())
+            if (func->functionType() == AbstractMetaFunction::ConstructorFunction && !func->isUserAdded()) {
                 writeConstructorNative(s, func);
-            else if ((!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
-                     && (func->isVirtual() || func->isAbstract()))
+            } else if ((!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
+                     && ((func->isVirtual() || func->isAbstract())
+                         && (func->attributes() & AbstractMetaAttributes::FinalCppMethod) == 0)) {
                 writeVirtualMethodNative(s, func);
+            }
         }
 
         if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor()) {
