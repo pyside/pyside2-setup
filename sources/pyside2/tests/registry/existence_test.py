@@ -42,10 +42,9 @@ from __future__ import print_function, absolute_import
 import os
 import sys
 import unittest
-import warnings
 from textwrap import dedent
 from init_platform import enum_all, generate_all, is_ci, module, refpath
-from util import isolate_warnings, check_warnings, suppress_warnings
+from util import isolate_warnings, check_warnings, suppress_warnings, warn
 from PySide2 import *
 from PySide2.QtCore import __version__
 
@@ -88,10 +87,13 @@ class TestSignaturesExists(unittest.TestCase):
         found_sigs = enum_all()
         with isolate_warnings():
             for key, value in sig_exists.dict.items():
+                name = key.rsplit(".", 1)[-1]
+                if name in ("next", "__next__"): # ignore problematic cases
+                    continue
                 if key not in found_sigs:
-                    warnings.warn("missing key: '{}'".format(key), RuntimeWarning)
+                    warn("missing key: '{}'".format(key))
                 elif isinstance(value, list) and len(value) != len(found_sigs[key]):
-                    warnings.warn("different sig length: '{}'".format(key), RuntimeWarning)
+                    warn("multi-signature count mismatch: '{}'".format(key))
             if is_ci and check_warnings():
                 raise RuntimeError("There are errors, see above.")
 
@@ -101,10 +103,13 @@ class TestSignaturesExists(unittest.TestCase):
         found_sigs.pop(list(found_sigs.keys())[42])
         with isolate_warnings(), suppress_warnings():
             for key, value in sig_exists.dict.items():
+                name = key.rsplit(".", 1)[-1]
+                if name in ("next", "__next__"): # ignore problematic cases
+                    continue
                 if key not in found_sigs:
-                    warnings.warn("missing key: '{}'".format(key), RuntimeWarning)
+                    warn("missing key: '{}'".format(key))
                 elif isinstance(value, list) and len(value) != len(found_sigs[key]):
-                    warnings.warn("different sig length: '{}'".format(key), RuntimeWarning)
+                    warn("multi-signature count mismatch: '{}'".format(key))
             self.assertTrue(check_warnings())
 
 version = tuple(map(int, __version__.split(".")))
