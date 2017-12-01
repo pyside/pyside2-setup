@@ -1843,9 +1843,7 @@ static AbstractMetaFunction *createXetter(const AbstractMetaField *g, const QStr
     f->setImplementingClass(g->enclosingClass());
     f->setDeclaringClass(g->enclosingClass());
 
-    AbstractMetaAttributes::Attributes attr = AbstractMetaAttributes::Native
-                | AbstractMetaAttributes::Final
-                | type;
+    AbstractMetaAttributes::Attributes attr = AbstractMetaAttributes::Final | type;
     if (g->isStatic())
         attr |= AbstractMetaAttributes::Static;
     if (g->isPublic())
@@ -2025,10 +2023,7 @@ void AbstractMetaClass::addDefaultConstructor()
     f->setArguments(AbstractMetaArgumentList());
     f->setDeclaringClass(this);
 
-    AbstractMetaAttributes::Attributes attr = AbstractMetaAttributes::Native;
-    attr |= AbstractMetaAttributes::Public;
-    attr |= AbstractMetaAttributes::Final;
-    f->setAttributes(attr);
+    f->setAttributes(AbstractMetaAttributes::Public | AbstractMetaAttributes::Final);
     f->setImplementingClass(this);
     f->setOriginalAttributes(f->attributes());
 
@@ -2056,8 +2051,7 @@ void AbstractMetaClass::addDefaultCopyConstructor(bool isPrivate)
     arg->setName(name());
     f->addArgument(arg);
 
-    AbstractMetaAttributes::Attributes attr = AbstractMetaAttributes::Native;
-    attr |= AbstractMetaAttributes::Final;
+    AbstractMetaAttributes::Attributes attr = AbstractMetaAttributes::Final;
     if (isPrivate)
         attr |= AbstractMetaAttributes::Private;
     else
@@ -2547,19 +2541,6 @@ void AbstractMetaClass::fixFunctions()
     if (hasPrivateConstructors && !hasPublicConstructors) {
         (*this) += AbstractMetaAttributes::Abstract;
         (*this) -= AbstractMetaAttributes::Final;
-    }
-
-    for (AbstractMetaFunction *f1 : qAsConst(funcs)) {
-        for (AbstractMetaFunction *f2 : qAsConst(funcs)) {
-            if (f1 != f2) {
-                const AbstractMetaFunction::CompareResult cmp = f1->compareTo(f2);
-                if ((cmp & AbstractMetaFunction::EqualName)
-                    && !f1->isFinalInCpp()
-                    && f2->isFinalInCpp()) {
-                    *f2 += AbstractMetaAttributes::FinalOverload;
-                }
-            }
-        }
     }
 
     setFunctions(funcs);

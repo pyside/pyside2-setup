@@ -113,7 +113,6 @@ public:
         Friendly                    = 0x00000008,
         Visibility                  = 0x0000000f,
 
-        Native                      = 0x00000010,
         Abstract                    = 0x00000020,
         Static                      = 0x00000040,
 
@@ -124,14 +123,9 @@ public:
         GetterFunction              = 0x00000400,
         SetterFunction              = 0x00000800,
 
-        FinalOverload               = 0x00001000,
-        InterfaceFunction           = 0x00002000,
-
         PropertyReader              = 0x00004000,
         PropertyWriter              = 0x00008000,
         PropertyResetter            = 0x00010000,
-
-        Fake                        = 0x00020000,
 
         Invokable                   = 0x00040000,
 
@@ -182,11 +176,6 @@ public:
         m_attributes &= ~attribute;
     }
 
-    bool isNative() const
-    {
-        return m_attributes & Native;
-    }
-
     bool isFinal() const
     {
         return (m_attributes & Final) == Final;
@@ -215,16 +204,6 @@ public:
     bool isForcedShellImplementation() const
     {
         return m_attributes & ForceShellImplementation;
-    }
-
-    bool isInterfaceFunction() const
-    {
-        return m_attributes & InterfaceFunction;
-    }
-
-    bool isFinalOverload() const
-    {
-        return m_attributes & FinalOverload;
     }
 
     bool isInvokable() const

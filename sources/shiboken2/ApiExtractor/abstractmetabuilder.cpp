@@ -2224,9 +2224,6 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
     if (functionItem->isAbstract())
         *metaFunction += AbstractMetaAttributes::Abstract;
 
-    if (!metaFunction->isAbstract())
-        *metaFunction += AbstractMetaAttributes::Native;
-
     if (!functionItem->isVirtual())
         *metaFunction += AbstractMetaAttributes::Final;
 
