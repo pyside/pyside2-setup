@@ -121,6 +121,24 @@ public:
     VirtualDaughter(Str name) : VirtualMethods(name) {}
 };
 
+class LIBSAMPLE_API VirtualDaughter2 : public VirtualMethods
+{
+public:
+    VirtualDaughter2() : VirtualMethods("VirtualDaughter2") {}
+
+    double virtualMethod0(Point pt, int val, Complex cpx, bool b) override;
+    int sum0(int a0, int a1, int a2) final;
+};
+
+class LIBSAMPLE_API VirtualFinalDaughter final : public VirtualMethods
+{
+public:
+    VirtualFinalDaughter() : VirtualMethods("VirtualFinalDaughter") {}
+
+    double virtualMethod0(Point pt, int val, Complex cpx, bool b) override;
+    int sum0(int a0, int a1, int a2) override;
+};
+
 class LIBSAMPLE_API VirtualDtor
 {
 public:

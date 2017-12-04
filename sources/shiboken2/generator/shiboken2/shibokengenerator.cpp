@@ -241,6 +241,8 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType*
 
 bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClass* metaClass) const
 {
+    if (metaClass->isNamespace() || (metaClass->attributes() & AbstractMetaAttributes::FinalCppClass))
+        return false;
     bool result = metaClass->isPolymorphic() || metaClass->hasVirtualDestructor();
     if (avoidProtectedHack()) {
         result = result || metaClass->hasProtectedFields() || metaClass->hasProtectedDestructor();
@@ -261,7 +263,7 @@ bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClass* metaCl
     } else {
         result = result && !metaClass->hasPrivateDestructor();
     }
-    return result && !metaClass->isNamespace();
+    return result;
 }
 
 void ShibokenGenerator::lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumList& enumList, const AbstractMetaClass* metaClass)

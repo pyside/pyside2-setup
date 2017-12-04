@@ -57,3 +57,22 @@ VirtualMethods::getMargins(int* left, int* top, int* right, int* bottom) const
     *bottom = m_bottom;
 }
 
+double VirtualDaughter2::virtualMethod0(Point pt, int val, Complex cpx, bool b)
+{
+    return 42 + VirtualMethods::virtualMethod0(pt, val, cpx, b);
+}
+
+int VirtualDaughter2::sum0(int a0, int a1, int a2)
+{
+    return 42 + VirtualMethods::sum0(a0, a1, a2);
+}
+
+double VirtualFinalDaughter::virtualMethod0(Point pt, int val, Complex cpx, bool b)
+{
+    return 42 + VirtualMethods::virtualMethod0(pt, val, cpx, b);
+}
+
+int VirtualFinalDaughter::sum0(int a0, int a1, int a2)
+{
+    return 42 + VirtualMethods::sum0(a0, a1, a2);
+}

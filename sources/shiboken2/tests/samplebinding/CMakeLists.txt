@@ -110,6 +110,8 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/time_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/templateptr_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/unremovednamespace_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/virtualdaughter_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/virtualdaughter2_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/virtualfinaldaughter_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/virtualdtor_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/virtualmethods_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/voidholder_wrapper.cpp
