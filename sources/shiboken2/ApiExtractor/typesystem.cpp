@@ -2080,6 +2080,23 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
     return true;
 }
 
+PrimitiveTypeEntry::PrimitiveTypeEntry(const QString &name, double vr) :
+    TypeEntry(name, PrimitiveType, vr),
+    m_preferredConversion(true),
+    m_preferredTargetLangType(true)
+{
+}
+
+QString PrimitiveTypeEntry::targetLangName() const
+{
+    return m_targetLangName;
+}
+
+QString PrimitiveTypeEntry::targetLangApiName() const
+{
+    return m_targetLangApiName;
+}
+
 PrimitiveTypeEntry *PrimitiveTypeEntry::basicReferencedTypeEntry() const
 {
     if (!m_referencedTypeEntry)
@@ -2090,6 +2107,16 @@ PrimitiveTypeEntry *PrimitiveTypeEntry::basicReferencedTypeEntry() const
         return baseReferencedTypeEntry;
     else
         return m_referencedTypeEntry;
+}
+
+bool PrimitiveTypeEntry::preferredConversion() const
+{
+    return m_preferredConversion;
+}
+
+void PrimitiveTypeEntry::setPreferredConversion(bool b)
+{
+    m_preferredConversion = b;
 }
 
 typedef QHash<const PrimitiveTypeEntry*, QString> PrimitiveTypeEntryTargetLangPackageMap;
@@ -2140,6 +2167,17 @@ FieldModification ComplexTypeEntry::fieldModification(const QString &name) const
     mod.name = name;
     mod.modifiers = FieldModification::Readable | FieldModification::Writable;
     return mod;
+}
+
+QString ComplexTypeEntry::targetLangPackage() const
+{
+    return m_package;
+}
+
+QString ComplexTypeEntry::targetLangName() const
+{
+    return m_targetLangName.isEmpty() ?
+        TypeEntry::targetLangName() : m_targetLangName;
 }
 
 // The things we do not to break the ABI...
@@ -2206,14 +2244,44 @@ QString EnumTypeEntry::targetLangQualifier() const
         return m_qualifier;
 }
 
+QString EnumTypeEntry::qualifiedTargetLangName() const
+{
+    QString qualifiedName;
+    QString pkg = targetLangPackage();
+    QString qualifier = targetLangQualifier();
+
+    if (!pkg.isEmpty())
+        qualifiedName += pkg + QLatin1Char('.');
+    if (!qualifier.isEmpty())
+        qualifiedName += qualifier + QLatin1Char('.');
+    qualifiedName += targetLangName();
+
+    return qualifiedName;
+}
+
 QString EnumTypeEntry::targetLangApiName() const
 {
     return QLatin1String("jint");
 }
 
+bool EnumTypeEntry::preferredConversion() const
+{
+    return false;
+}
+
 QString FlagsTypeEntry::targetLangApiName() const
 {
     return QLatin1String("jint");
+}
+
+bool FlagsTypeEntry::preferredConversion() const
+{
+    return false;
+}
+
+QString FlagsTypeEntry::targetLangPackage() const
+{
+    return m_enum->targetLangPackage();
 }
 
 void EnumTypeEntry::addEnumValueRedirection(const QString &rejected, const QString &usedValue)
@@ -2233,6 +2301,11 @@ QString FlagsTypeEntry::qualifiedTargetLangName() const
 {
     return targetLangPackage() + QLatin1Char('.') + m_enum->targetLangQualifier()
         + QLatin1Char('.') + targetLangName();
+}
+
+QString FlagsTypeEntry::targetLangName() const
+{
+    return m_targetLangName;
 }
 
 /*!
@@ -2513,6 +2586,25 @@ AddedFunction::TypeInfo AddedFunction::TypeInfo::fromSignature(const QString& si
     return parseType(signature);
 }
 
+ComplexTypeEntry::ComplexTypeEntry(const QString &name, TypeEntry::Type t, double vr) :
+    TypeEntry(QString(name).replace(QLatin1String(".*::"), QString()), t, vr),
+    m_qualifiedCppName(name),
+    m_qobject(false),
+    m_polymorphicBase(false),
+    m_genericClass(false)
+{
+}
+
+bool ComplexTypeEntry::isComplex() const
+{
+    return true;
+}
+
+QString ComplexTypeEntry::lookupName() const
+{
+    return m_lookupName.isEmpty() ? targetLangName() : m_lookupName;
+}
+
 QString ComplexTypeEntry::targetLangApiName() const
 {
     return strings_jobject;
@@ -2529,6 +2621,18 @@ QString StringTypeEntry::targetLangPackage() const
 {
     return QString();
 }
+
+bool StringTypeEntry::isNativeIdBased() const
+{
+    return false;
+}
+
+CharTypeEntry::CharTypeEntry(const QString &name, double vr) :
+    ValueTypeEntry(name, CharType, vr)
+{
+    setCodeGeneration(GenerateNothing);
+}
+
 QString CharTypeEntry::targetLangApiName() const
 {
     return strings_jchar;
@@ -2537,6 +2641,22 @@ QString CharTypeEntry::targetLangName() const
 {
     return strings_char;
 }
+
+QString CharTypeEntry::targetLangPackage() const
+{
+    return QString();
+}
+
+bool CharTypeEntry::isNativeIdBased() const
+{
+    return false;
+}
+
+VariantTypeEntry::VariantTypeEntry(const QString &name, double vr) :
+    ValueTypeEntry(name, VariantType, vr)
+{
+}
+
 QString VariantTypeEntry::targetLangApiName() const
 {
     return strings_jobject;
@@ -2548,6 +2668,11 @@ QString VariantTypeEntry::targetLangName() const
 QString VariantTypeEntry::targetLangPackage() const
 {
     return QString();
+}
+
+bool VariantTypeEntry::isNativeIdBased() const
+{
+    return false;
 }
 
 QString ContainerTypeEntry::typeName() const
@@ -2616,6 +2741,13 @@ bool TypeEntry::isCppPrimitive() const
 typedef QHash<const TypeEntry*, CustomConversion*> TypeEntryCustomConversionMap;
 Q_GLOBAL_STATIC(TypeEntryCustomConversionMap, typeEntryCustomConversionMap);
 
+TypeEntry::TypeEntry(const QString &name, TypeEntry::Type t, double vr) :
+    m_name(name),
+    m_type(t),
+    m_version(vr)
+{
+}
+
 TypeEntry::~TypeEntry()
 {
     if (typeEntryCustomConversionMap()->contains(this)) {
@@ -2641,6 +2773,131 @@ CustomConversion* TypeEntry::customConversion() const
     if (typeEntryCustomConversionMap()->contains(this))
         return typeEntryCustomConversionMap()->value(this);
     return 0;
+}
+
+TypeSystemTypeEntry::TypeSystemTypeEntry(const QString &name, double vr) :
+    TypeEntry(name, TypeSystemType, vr)
+{
+}
+
+VoidTypeEntry::VoidTypeEntry() :
+    TypeEntry(QLatin1String("void"), VoidType, 0)
+{
+}
+
+VarargsTypeEntry::VarargsTypeEntry() :
+    TypeEntry(QLatin1String("..."), VarargsType, 0)
+{
+}
+
+TemplateArgumentEntry::TemplateArgumentEntry(const QString &name, double vr) :
+    TypeEntry(name, TemplateArgumentType, vr)
+{
+}
+
+ArrayTypeEntry::ArrayTypeEntry(const TypeEntry *nested_type, double vr) :
+    TypeEntry(QLatin1String("Array"), ArrayType, vr),
+    m_nestedType(nested_type)
+{
+    Q_ASSERT(m_nestedType);
+}
+
+QString ArrayTypeEntry::targetLangName() const
+{
+    return m_nestedType->targetLangName() + QLatin1String("[]");
+}
+
+QString ArrayTypeEntry::targetLangApiName() const
+{
+    if (m_nestedType->isPrimitive())
+        return m_nestedType->targetLangApiName() + QLatin1String("Array");
+    else
+        return QLatin1String("jobjectArray");
+}
+
+EnumTypeEntry::EnumTypeEntry(const QString &nspace, const QString &enumName, double vr) :
+    TypeEntry(nspace.isEmpty() ? enumName : nspace + QLatin1String("::") + enumName,
+              EnumType, vr),
+    m_qualifier(nspace),
+    m_targetLangName(enumName)
+{
+}
+
+QString EnumTypeEntry::targetLangPackage() const
+{
+    return m_packageName;
+}
+
+void EnumTypeEntry::setTargetLangPackage(const QString &package)
+{
+    m_packageName = package;
+}
+
+QString EnumTypeEntry::targetLangName() const
+{
+    return m_targetLangName;
+}
+
+EnumValueTypeEntry::EnumValueTypeEntry(const QString& name, const QString& value, const EnumTypeEntry* enclosingEnum, double vr) :
+    TypeEntry(name, TypeEntry::EnumValue, vr),
+    m_value(value),
+    m_enclosingEnum(enclosingEnum)
+{
+}
+
+FlagsTypeEntry::FlagsTypeEntry(const QString &name, double vr) :
+    TypeEntry(name, FlagsType, vr)
+{
+}
+
+ContainerTypeEntry::ContainerTypeEntry(const QString &name, Type type, double vr) :
+    ComplexTypeEntry(name, ContainerType, vr),
+    m_type(type)
+{
+    setCodeGeneration(GenerateForSubclass);
+}
+
+SmartPointerTypeEntry::SmartPointerTypeEntry(const QString &name,
+                                             const QString &getterName,
+                                             const QString &smartPointerType,
+                                             const QString &refCountMethodName,
+                                             double vr) :
+    ComplexTypeEntry(name, SmartPointerType, vr),
+    m_getterName(getterName),
+    m_smartPointerType(smartPointerType),
+    m_refCountMethodName(refCountMethodName)
+{
+}
+
+NamespaceTypeEntry::NamespaceTypeEntry(const QString &name, double vr) :
+    ComplexTypeEntry(name, NamespaceType, vr)
+{
+}
+
+ValueTypeEntry::ValueTypeEntry(const QString &name, double vr) :
+    ComplexTypeEntry(name, BasicValueType, vr)
+{
+}
+
+bool ValueTypeEntry::isValue() const
+{
+    return true;
+}
+
+bool ValueTypeEntry::isNativeIdBased() const
+{
+    return true;
+}
+
+ValueTypeEntry::ValueTypeEntry(const QString &name, Type t, double vr) :
+    ComplexTypeEntry(name, t, vr)
+{
+}
+
+StringTypeEntry::StringTypeEntry(const QString &name, double vr) :
+    ValueTypeEntry(name, StringType, vr)
+{
+    setCodeGeneration(GenerateNothing);
 }
 
 /*
@@ -2794,4 +3051,42 @@ QString CustomConversion::TargetToNativeConversion::conversion() const
 void CustomConversion::TargetToNativeConversion::setConversion(const QString& conversion)
 {
     m_d->conversion = conversion;
+}
+
+InterfaceTypeEntry::InterfaceTypeEntry(const QString &name, double vr) :
+    ComplexTypeEntry(name, InterfaceType, vr)
+{
+}
+
+bool InterfaceTypeEntry::isNativeIdBased() const
+{
+    return true;
+}
+
+QString InterfaceTypeEntry::qualifiedCppName() const
+{
+    const int len = ComplexTypeEntry::qualifiedCppName().length() - interfaceName(QString()).length();
+    return ComplexTypeEntry::qualifiedCppName().left(len);
+}
+
+FunctionTypeEntry::FunctionTypeEntry(const QString &name, const QString &signature,
+                                     double vr) :
+    TypeEntry(name, FunctionType, vr)
+{
+    addSignature(signature);
+}
+
+ObjectTypeEntry::ObjectTypeEntry(const QString &name, double vr)
+    : ComplexTypeEntry(name, ObjectType, vr)
+{
+}
+
+InterfaceTypeEntry *ObjectTypeEntry::designatedInterface() const
+{
+    return m_interface;
+}
+
+bool ObjectTypeEntry::isNativeIdBased() const
+{
+    return true;
 }
