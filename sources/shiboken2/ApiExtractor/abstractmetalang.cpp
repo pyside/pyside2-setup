@@ -59,6 +59,13 @@ QDebug operator<<(QDebug d, const AbstractMetaAttributes *aa)
  * AbstractMetaVariable
  */
 
+AbstractMetaVariable::AbstractMetaVariable() = default;
+
+AbstractMetaVariable::~AbstractMetaVariable()
+{
+    delete m_type;
+}
+
 AbstractMetaVariable::AbstractMetaVariable(const AbstractMetaVariable &other)
 {
     m_originalName = other.m_originalName;
@@ -86,20 +93,21 @@ QDebug operator<<(QDebug d, const AbstractMetaVariable *av)
 #endif // !QT_NO_DEBUG_STREAM
 
 /*******************************************************************************
+ * AbstractMetaAttributes
+ */
+
+AbstractMetaAttributes::AbstractMetaAttributes() = default;
+AbstractMetaAttributes::~AbstractMetaAttributes() = default;
+
+/*******************************************************************************
  * AbstractMetaType
  */
 
-AbstractMetaType::AbstractMetaType()
-    :m_typeEntry(0),
-    m_arrayElementCount(-1),
-    m_arrayElementType(0),
-    m_originalTemplateType(0),
-    m_pattern(InvalidPattern),
+AbstractMetaType::AbstractMetaType() :
     m_constant(false),
     m_cppInstantiation(true),
     m_indirections(0),
-    m_reserved(0),
-    m_referenceType(NoReference)
+    m_reserved(0)
 {
 }
 
@@ -325,6 +333,9 @@ QDebug operator<<(QDebug d, const AbstractMetaType *at)
 /*******************************************************************************
  * AbstractMetaArgument
  */
+
+AbstractMetaArgument::AbstractMetaArgument() = default;
+
 AbstractMetaArgument *AbstractMetaArgument::copy() const
 {
     return new AbstractMetaArgument(*this);
@@ -349,6 +360,17 @@ QDebug operator<<(QDebug d, const AbstractMetaArgument *aa)
 /*******************************************************************************
  * AbstractMetaFunction
  */
+
+AbstractMetaFunction::AbstractMetaFunction()
+    : m_constant(false),
+      m_reverse(false),
+      m_userAdded(false),
+      m_explicit(false),
+      m_pointerOperator(false),
+      m_isCallOperator(false)
+{
+}
+
 AbstractMetaFunction::~AbstractMetaFunction()
 {
     qDeleteAll(m_arguments);
@@ -1285,6 +1307,26 @@ QDebug operator<<(QDebug d, const AbstractMetaFunction *af)
 /*******************************************************************************
  * AbstractMetaClass
  */
+
+AbstractMetaClass::AbstractMetaClass()
+    : m_hasVirtuals(false),
+      m_isPolymorphic(false),
+      m_hasNonpublic(false),
+      m_hasVirtualSlots(false),
+      m_hasNonPrivateConstructor(false),
+      m_functionsFixed(false),
+      m_hasPrivateDestructor(false),
+      m_hasProtectedDestructor(false),
+      m_hasVirtualDestructor(false),
+      m_forceShellClass(false),
+      m_hasHashFunction(false),
+      m_hasEqualsOperator(false),
+      m_hasCloneOperator(false),
+      m_isTypeDef(false),
+      m_hasToStringCapability(false)
+{
+}
+
 AbstractMetaClass::~AbstractMetaClass()
 {
     qDeleteAll(m_functions);
@@ -1807,9 +1849,7 @@ static bool functions_contains(const AbstractMetaFunctionList &l, const Abstract
     return false;
 }
 
-AbstractMetaField::AbstractMetaField() : m_getter(0), m_setter(0), m_class(0)
-{
-}
+AbstractMetaField::AbstractMetaField() = default;
 
 AbstractMetaField::~AbstractMetaField()
 {
@@ -2796,6 +2836,20 @@ QDebug operator<<(QDebug d, const AbstractMetaClass *ac)
     return d;
 }
 #endif // !QT_NO_DEBUG_STREAM
+
+/*******************************************************************************
+* AbstractMetaEnum
+*/
+
+AbstractMetaEnum::AbstractMetaEnum() :
+    m_hasQenumsDeclaration(false)
+{
+}
+
+AbstractMetaEnum::~AbstractMetaEnum()
+{
+    qDeleteAll(m_enumValues);
+}
 
 QString AbstractMetaEnum::name() const
 {

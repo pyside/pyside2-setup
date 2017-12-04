@@ -71,8 +71,7 @@ public:
         Target
     };
 
-    Documentation()
-            : m_format(Documentation::Native)  {}
+    Documentation() {}
 
     Documentation(const QString& value, Format fmt = Documentation::Native)
             : m_data(value), m_format(fmt) {}
@@ -94,7 +93,7 @@ public:
 
 private:
     QString m_data;
-    Format m_format;
+    Format m_format = Documentation::Native;
 
 };
 
@@ -102,7 +101,8 @@ class AbstractMetaAttributes
 {
     Q_GADGET
 public:
-    AbstractMetaAttributes() : m_attributes(0), m_originalAttributes(0) {};
+    AbstractMetaAttributes();
+    virtual ~AbstractMetaAttributes();
 
     enum Attribute {
         None                        = 0x00000000,
@@ -604,26 +604,26 @@ private:
     TypeUsagePattern determineUsagePattern() const;
     QString formatSignature(bool minimal) const;
 
-    const TypeEntry *m_typeEntry;
+    const TypeEntry *m_typeEntry = nullptr;
     AbstractMetaTypeList m_instantiations;
     QString m_package;
     mutable QString m_name;
     mutable QString m_cachedCppSignature;
     QString m_originalTypeDescription;
 
-    int m_arrayElementCount;
-    const AbstractMetaType *m_arrayElementType;
-    const AbstractMetaType *m_originalTemplateType;
+    int m_arrayElementCount = -1;
+    const AbstractMetaType *m_arrayElementType = nullptr;
+    const AbstractMetaType *m_originalTemplateType = nullptr;
 
-    TypeUsagePattern m_pattern;
+    TypeUsagePattern m_pattern = InvalidPattern;
     uint m_constant : 1;
     uint m_cppInstantiation : 1;
     int m_indirections : 4;
     uint m_reserved : 26; // unused
-    ReferenceType m_referenceType;
+    ReferenceType m_referenceType = NoReference;
     AbstractMetaTypeList m_children;
 
-    Q_DISABLE_COPY(AbstractMetaType);
+    Q_DISABLE_COPY(AbstractMetaType)
 };
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -633,13 +633,10 @@ QDebug operator<<(QDebug d, const AbstractMetaType *at);
 class AbstractMetaVariable
 {
 public:
-    AbstractMetaVariable() : m_type(0), m_hasName(false) {}
+    AbstractMetaVariable();
     AbstractMetaVariable(const AbstractMetaVariable &other);
 
-    virtual ~AbstractMetaVariable()
-    {
-        delete m_type;
-    }
+    virtual ~AbstractMetaVariable();
 
     AbstractMetaType *type() const
     {
@@ -690,8 +687,8 @@ public:
 private:
     QString m_originalName;
     QString m_name;
-    AbstractMetaType *m_type;
-    bool m_hasName;
+    AbstractMetaType *m_type = nullptr;
+    bool m_hasName = false;
 
     Documentation m_doc;
 };
@@ -703,7 +700,7 @@ QDebug operator<<(QDebug d, const AbstractMetaVariable *av);
 class AbstractMetaArgument : public AbstractMetaVariable
 {
 public:
-    AbstractMetaArgument() : m_argumentIndex(0) {};
+    AbstractMetaArgument();
 
     QString defaultValueExpression() const
     {
@@ -742,7 +739,7 @@ public:
 private:
     QString m_expression;
     QString m_originalExpression;
-    int m_argumentIndex;
+    int m_argumentIndex = 0;
 
     friend class AbstractMetaClass;
 };
@@ -779,9 +776,9 @@ public:
     AbstractMetaField *copy() const;
 
 private:
-    mutable AbstractMetaFunction *m_getter;
-    mutable AbstractMetaFunction *m_setter;
-    const AbstractMetaClass *m_class;
+    mutable AbstractMetaFunction *m_getter = nullptr;
+    mutable AbstractMetaFunction *m_setter = nullptr;
+    const AbstractMetaClass *m_class = nullptr;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -825,23 +822,7 @@ public:
     Q_DECLARE_FLAGS(CompareResult, CompareResultFlag)
     Q_FLAG(CompareResultFlag)
 
-    AbstractMetaFunction()
-            : m_typeEntry(0),
-            m_functionType(NormalFunction),
-            m_type(0),
-            m_class(0),
-            m_implementingClass(0),
-            m_declaringClass(0),
-            m_propertySpec(0),
-            m_constant(false),
-            m_reverse(false),
-            m_userAdded(false),
-            m_explicit(false),
-            m_pointerOperator(false),
-            m_isCallOperator(false)
-    {
-    }
-
+    AbstractMetaFunction();
     ~AbstractMetaFunction();
 
     QString name() const
@@ -1188,13 +1169,13 @@ private:
     mutable QString m_cachedSignature;
     mutable QString m_cachedModifiedName;
 
-    FunctionTypeEntry* m_typeEntry;
-    FunctionType m_functionType;
-    AbstractMetaType *m_type;
-    const AbstractMetaClass *m_class;
-    const AbstractMetaClass *m_implementingClass;
-    const AbstractMetaClass *m_declaringClass;
-    QPropertySpec *m_propertySpec;
+    FunctionTypeEntry* m_typeEntry = nullptr;
+    FunctionType m_functionType = NormalFunction;
+    AbstractMetaType *m_type = nullptr;
+    const AbstractMetaClass *m_class = nullptr;
+    const AbstractMetaClass *m_implementingClass = nullptr;
+    const AbstractMetaClass *m_declaringClass = nullptr;
+    QPropertySpec *m_propertySpec = nullptr;
     AbstractMetaArgumentList m_arguments;
     uint m_constant                 : 1;
     uint m_reverse                  : 1;
@@ -1213,10 +1194,7 @@ QDebug operator<<(QDebug d, const AbstractMetaFunction *af);
 class AbstractMetaEnumValue
 {
 public:
-    AbstractMetaEnumValue()
-            : m_valueSet(false), m_value(0)
-    {
-    }
+    AbstractMetaEnumValue() {}
 
     int value() const
     {
@@ -1268,8 +1246,8 @@ private:
     QString m_name;
     QString m_stringValue;
 
-    bool m_valueSet;
-    int m_value;
+    bool m_valueSet = false;
+    int m_value = 0;
 
     Documentation m_doc;
 };
@@ -1277,11 +1255,8 @@ private:
 class AbstractMetaEnum : public AbstractMetaAttributes
 {
 public:
-    AbstractMetaEnum() : m_typeEntry(0), m_class(0), m_hasQenumsDeclaration(false) {}
-    ~AbstractMetaEnum()
-    {
-        qDeleteAll(m_enumValues);
-    }
+    AbstractMetaEnum();
+    ~AbstractMetaEnum();
 
     AbstractMetaEnumValueList values() const
     {
@@ -1339,8 +1314,8 @@ public:
 
 private:
     AbstractMetaEnumValueList m_enumValues;
-    EnumTypeEntry *m_typeEntry;
-    AbstractMetaClass *m_class;
+    EnumTypeEntry *m_typeEntry = nullptr;
+    AbstractMetaClass *m_class = nullptr;
 
     uint m_hasQenumsDeclaration : 1;
 };
@@ -1406,32 +1381,8 @@ public:
         int access = Public;
     };
 
-    AbstractMetaClass()
-            : m_hasVirtuals(false),
-              m_isPolymorphic(false),
-              m_hasNonpublic(false),
-              m_hasVirtualSlots(false),
-              m_hasNonPrivateConstructor(false),
-              m_functionsFixed(false),
-              m_hasPrivateDestructor(false),
-              m_hasProtectedDestructor(false),
-              m_hasVirtualDestructor(false),
-              m_forceShellClass(false),
-              m_hasHashFunction(false),
-              m_hasEqualsOperator(false),
-              m_hasCloneOperator(false),
-              m_isTypeDef(false),
-              m_hasToStringCapability(false),
-              m_enclosingClass(0),
-              m_baseClass(0),
-              m_templateBaseClass(0),
-              m_extractedInterface(0),
-              m_typeEntry(0),
-              m_stream(false)
-    {
-    }
-
-    virtual ~AbstractMetaClass();
+    AbstractMetaClass();
+    ~AbstractMetaClass();
 
     AbstractMetaClass *extractInterface();
     void fixFunctions();
@@ -1846,14 +1797,14 @@ private:
     uint m_isTypeDef : 1;
     uint m_hasToStringCapability : 1;
 
-    const AbstractMetaClass *m_enclosingClass;
-    AbstractMetaClass *m_baseClass;
-    const AbstractMetaClass *m_templateBaseClass;
+    const AbstractMetaClass *m_enclosingClass = nullptr;
+    AbstractMetaClass *m_baseClass = nullptr;
+    const AbstractMetaClass *m_templateBaseClass = nullptr;
     AbstractMetaFunctionList m_functions;
     AbstractMetaFieldList m_fields;
     AbstractMetaEnumList m_enums;
     AbstractMetaClassList m_interfaces;
-    AbstractMetaClass *m_extractedInterface;
+    AbstractMetaClass *m_extractedInterface = nullptr;
     QVector<QPropertySpec *> m_propertySpecs;
     AbstractMetaClassList m_innerClasses;
 
@@ -1861,10 +1812,10 @@ private:
 
     QStringList m_baseClassNames;
     QVector<TypeEntry *> m_templateArgs;
-    ComplexTypeEntry *m_typeEntry;
+    ComplexTypeEntry *m_typeEntry = nullptr;
 //     FunctionModelItem m_qDebugStreamFunction;
 
-    bool m_stream;
+    bool m_stream = false;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaClass::FunctionQueryOptions)
@@ -1873,10 +1824,7 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaClass::OperatorQueryOptions)
 class QPropertySpec
 {
 public:
-    QPropertySpec(const TypeEntry *type)
-            : m_type(type),
-            m_index(-1)
-    {}
+    explicit QPropertySpec(const TypeEntry *type) : m_type(type) {}
 
     const TypeEntry *type() const
     {
@@ -1950,7 +1898,7 @@ private:
     QString m_designable;
     QString m_reset;
     const TypeEntry *m_type;
-    int m_index;
+    int m_index = -1;
 };
 
 inline AbstractMetaFunctionList AbstractMetaClass::cppSignalFunctions() const
