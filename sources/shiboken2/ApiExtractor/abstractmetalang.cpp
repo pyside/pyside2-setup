@@ -114,11 +114,18 @@ QString AbstractMetaType::package() const
     return m_typeEntry->targetLangPackage();
 }
 
+static QString lastNameSegment(QString name)
+{
+    const int index = name.lastIndexOf(QStringLiteral("::"));
+    if (index >= 0)
+        name.remove(0, index + 2);
+    return name;
+}
+
 QString AbstractMetaType::name() const
 {
     if (m_name.isNull())
-        // avoid constLast to stay Qt 5.5 compatible
-        m_name = m_typeEntry->targetLangName().split(QLatin1String("::")).last();
+        m_name = lastNameSegment(m_typeEntry->targetLangName());
     return m_name;
 }
 
@@ -1661,7 +1668,7 @@ bool AbstractMetaClass::hasSignal(const AbstractMetaFunction *other) const
 
 QString AbstractMetaClass::name() const
 {
-    return QString(m_typeEntry->targetLangName()).split(QLatin1String("::")).last();
+    return lastNameSegment(m_typeEntry->targetLangName());
 }
 
 void AbstractMetaClass::setBaseClass(AbstractMetaClass *baseClass)
