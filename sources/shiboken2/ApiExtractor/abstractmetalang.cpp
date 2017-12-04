@@ -66,7 +66,7 @@ AbstractMetaVariable::~AbstractMetaVariable()
     delete m_type;
 }
 
-AbstractMetaVariable::AbstractMetaVariable(const AbstractMetaVariable &other)
+void AbstractMetaVariable::assignMetaVariable(const AbstractMetaVariable &other)
 {
     m_originalName = other.m_originalName;
     m_name = other.m_name;
@@ -98,6 +98,13 @@ QDebug operator<<(QDebug d, const AbstractMetaVariable *av)
 
 AbstractMetaAttributes::AbstractMetaAttributes() = default;
 AbstractMetaAttributes::~AbstractMetaAttributes() = default;
+
+void AbstractMetaAttributes::assignMetaAttributes(const AbstractMetaAttributes &other)
+{
+    m_attributes = other.m_attributes;
+    m_originalAttributes = other.m_originalAttributes;
+    m_doc = other.m_doc;
+}
 
 /*******************************************************************************
  * AbstractMetaType
@@ -336,9 +343,19 @@ QDebug operator<<(QDebug d, const AbstractMetaType *at)
 
 AbstractMetaArgument::AbstractMetaArgument() = default;
 
+void AbstractMetaArgument::assignMetaArgument(const AbstractMetaArgument &other)
+{
+    assignMetaVariable(other);
+    m_expression = other.m_expression;
+    m_originalExpression = other.m_originalExpression;
+    m_argumentIndex = other.m_argumentIndex;
+}
+
 AbstractMetaArgument *AbstractMetaArgument::copy() const
 {
-    return new AbstractMetaArgument(*this);
+    AbstractMetaArgument *copy = new AbstractMetaArgument;
+    copy->assignMetaArgument(*this);
+    return copy;
 }
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -532,17 +549,16 @@ AbstractMetaFunction::CompareResult AbstractMetaFunction::compareTo(const Abstra
 AbstractMetaFunction *AbstractMetaFunction::copy() const
 {
     AbstractMetaFunction *cpy = new AbstractMetaFunction;
+    cpy->assignMetaAttributes(*this);
     cpy->setName(name());
     cpy->setOriginalName(originalName());
     cpy->setOwnerClass(ownerClass());
     cpy->setImplementingClass(implementingClass());
     cpy->setFunctionType(functionType());
-    cpy->setAttributes(attributes());
     cpy->setDeclaringClass(declaringClass());
     if (type())
         cpy->setType(type()->copy());
     cpy->setConstant(isConstant());
-    cpy->setOriginalAttributes(originalAttributes());
 
     for (AbstractMetaArgument *arg : m_arguments)
     cpy->addArgument(arg->copy());
@@ -1860,12 +1876,9 @@ AbstractMetaField::~AbstractMetaField()
 AbstractMetaField *AbstractMetaField::copy() const
 {
     AbstractMetaField *returned = new AbstractMetaField;
-    returned->setEnclosingClass(0);
-    returned->setAttributes(attributes());
-    returned->setName(name());
-    returned->setType(type()->copy());
-    returned->setOriginalAttributes(originalAttributes());
-
+    returned->assignMetaVariable(*this);
+    returned->assignMetaAttributes(*this);
+    returned->setEnclosingClass(nullptr);
     return returned;
 }
 

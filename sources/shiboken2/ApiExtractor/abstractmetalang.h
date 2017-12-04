@@ -99,6 +99,7 @@ private:
 
 class AbstractMetaAttributes
 {
+    Q_DISABLE_COPY(AbstractMetaAttributes)
     Q_GADGET
 public:
     AbstractMetaAttributes();
@@ -280,6 +281,9 @@ public:
     {
         return m_doc;
     }
+
+protected:
+    void assignMetaAttributes(const AbstractMetaAttributes &other);
 
 private:
     Attributes m_attributes;
@@ -632,9 +636,9 @@ QDebug operator<<(QDebug d, const AbstractMetaType *at);
 
 class AbstractMetaVariable
 {
+    Q_DISABLE_COPY(AbstractMetaVariable)
 public:
     AbstractMetaVariable();
-    AbstractMetaVariable(const AbstractMetaVariable &other);
 
     virtual ~AbstractMetaVariable();
 
@@ -683,6 +687,9 @@ public:
     {
         return m_doc;
     }
+
+protected:
+    void assignMetaVariable(const AbstractMetaVariable &other);
 
 private:
     QString m_originalName;
@@ -736,6 +743,10 @@ public:
     }
 
     AbstractMetaArgument *copy() const;
+
+protected:
+    void assignMetaArgument(const AbstractMetaArgument &other);
+
 private:
     QString m_expression;
     QString m_originalExpression;
