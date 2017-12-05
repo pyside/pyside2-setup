@@ -62,7 +62,6 @@ class TemplateInstance;
 
 struct ReferenceCount
 {
-    ReferenceCount()  {}
     enum Action { // 0x01 - 0xff
         Invalid     = 0x00,
         Add         = 0x01,
@@ -76,8 +75,8 @@ struct ReferenceCount
         Padding     = 0xffffffff
     };
 
-    Action action;
     QString varName;
+    Action action = Invalid;
 };
 
 struct ArgumentOwner
@@ -93,28 +92,23 @@ struct ArgumentOwner
         ReturnIndex = 0,
         FirstArgumentIndex = 1
     };
-    ArgumentOwner() : action(ArgumentOwner::Invalid), index(ArgumentOwner::InvalidIndex) {}
 
-    Action action;
-    int index;
+    Action action = Invalid;
+    int index = InvalidIndex;
 };
 
 class CodeSnipFragment
 {
-private:
-    QString m_code;
-    TemplateInstance *m_instance;
-
 public:
-    CodeSnipFragment() : m_instance(0) {}
-    CodeSnipFragment(const QString &code)
-        : m_code(code),
-          m_instance(0) {}
-
-    CodeSnipFragment(TemplateInstance *instance)
-        : m_instance(instance) {}
+    CodeSnipFragment() = default;
+    explicit CodeSnipFragment(const QString &code) : m_code(code) {}
+    explicit CodeSnipFragment(TemplateInstance *instance) : m_instance(instance) {}
 
     QString code() const;
+
+private:
+    QString m_code;
+    TemplateInstance *m_instance = nullptr;
 };
 
 class CodeSnipAbstract
@@ -136,7 +130,7 @@ public:
 class CustomFunction : public CodeSnipAbstract
 {
 public:
-    CustomFunction(const QString &n = QString()) : name(n) { }
+    explicit CustomFunction(const QString &n = QString()) : name(n) {}
 
     QString name;
     QString paramName;
@@ -145,31 +139,21 @@ public:
 class TemplateEntry : public CodeSnipAbstract
 {
 public:
-    TemplateEntry(const QString &name, double vr)
-            : m_name(name), m_version(vr)
-    {
-    };
+    explicit TemplateEntry(const QString &name) : m_name(name) {}
 
     QString name() const
     {
         return m_name;
-    };
-
-    double version() const
-    {
-        return m_version;
     }
 
 private:
     QString m_name;
-    double m_version;
 };
 
 class TemplateInstance
 {
 public:
-    TemplateInstance(const QString &name, double vr)
-            : m_name(name), m_version(vr) {}
+    explicit TemplateInstance(const QString &name) : m_name(name) {}
 
     void addReplaceRule(const QString &name, const QString &value)
     {
@@ -183,14 +167,8 @@ public:
         return m_name;
     }
 
-    double version() const
-    {
-        return m_version;
-    }
-
 private:
     const QString m_name;
-    double m_version;
     QHash<QString, QString> replaceRules;
 };
 
@@ -198,33 +176,23 @@ private:
 class CodeSnip : public CodeSnipAbstract
 {
 public:
-    CodeSnip() : language(TypeSystem::TargetLangCode), version(0) {}
-    CodeSnip(double vr) : language(TypeSystem::TargetLangCode), version(vr) { }
-    CodeSnip(double vr, TypeSystem::Language lang) : language(lang), version(vr) { }
+    CodeSnip() = default;
+    explicit CodeSnip(TypeSystem::Language lang) : language(lang) {}
 
-    TypeSystem::Language language;
-    TypeSystem::CodeSnipPosition position;
+    TypeSystem::Language language = TypeSystem::TargetLangCode;
+    TypeSystem::CodeSnipPosition position = TypeSystem::CodeSnipPositionAny;
     ArgumentMap argumentMap;
-    double version;
 };
 
 struct ArgumentModification
 {
     ArgumentModification() : removedDefaultExpression(false), removed(false),
-        noNullPointers(false), array(false), index(-1), version(0) {}
-    ArgumentModification(int idx, double vr)
-            : removedDefaultExpression(false), removed(false),
-              noNullPointers(false), array(false), index(idx), version(vr) {}
+        noNullPointers(false), array(false) {}
+    explicit ArgumentModification(int idx) : index(idx), removedDefaultExpression(false), removed(false),
+              noNullPointers(false), array(false) {}
 
     // Should the default expression be removed?
-    uint removedDefaultExpression : 1;
-    uint removed : 1;
-    uint noNullPointers : 1;
-    uint resetAfterUse : 1;
-    uint array : 1; // consider "int*" to be "int[]"
 
-    // The index of this argument
-    int index;
 
     // Reference count flags for this argument
     QVector<ReferenceCount> referenceCounts;
@@ -252,11 +220,17 @@ struct ArgumentModification
     //QObject parent(owner) of this argument
     ArgumentOwner owner;
 
-    //Api version
-    double version;
-
     //New name
     QString renamed_to;
+
+    // The index of this argument
+    int index = -1;
+
+    uint removedDefaultExpression : 1;
+    uint removed : 1;
+    uint noNullPointers : 1;
+    uint resetAfterUse : 1;
+    uint array : 1; // consider "int*" to be "int[]"
 };
 
 struct Modification
@@ -281,8 +255,6 @@ struct Modification
         ReplaceExpression =     0x8000,
         VirtualSlot =          0x10000 | NonFinal
     };
-
-    Modification() : modifiers(0), removal(TypeSystem::NoLanguage) { }
 
     bool isAccessModifier() const
     {
@@ -345,16 +317,13 @@ struct Modification
         return removal != TypeSystem::NoLanguage;
     }
 
-    uint modifiers;
     QString renamedToName;
-    TypeSystem::Language removal;
+    uint modifiers = 0;
+    TypeSystem::Language removal = TypeSystem::NoLanguage;
 };
 
 struct FunctionModification: public Modification
 {
-    FunctionModification() : m_thread(false), m_allowThread(false), m_version(0) {}
-    FunctionModification(double vr) : m_thread(false), m_allowThread(false), m_version(vr) {}
-
     bool isCodeInjection() const
     {
         return modifiers & CodeInjection;
@@ -375,13 +344,6 @@ struct FunctionModification: public Modification
     {
         m_allowThread = allow;
     }
-    double version() const
-    {
-        return m_version;
-    }
-
-    bool operator!=(const FunctionModification& other) const;
-    bool operator==(const FunctionModification& other) const;
 
     bool matches(const QString &functionSignature) const
     {
@@ -403,11 +365,8 @@ struct FunctionModification: public Modification
 private:
     QString m_signature;
     QRegularExpression m_signaturePattern;
-    bool m_thread;
-    bool m_allowThread;
-    double m_version;
-
-
+    bool m_thread = false;
+    bool m_allowThread = false;
 };
 
 struct FieldModification: public Modification
@@ -445,19 +404,19 @@ struct AddedFunction
     *   AbstractMetaType and AbstractMetaArgument for the AbstractMetaFunctions.
     */
     struct TypeInfo {
-        TypeInfo() : isConstant(false), indirections(0), isReference(false) {}
+        TypeInfo() = default;
         static TypeInfo fromSignature(const QString& signature);
 
         QString name;
-        bool isConstant;
-        int indirections;
-        bool isReference;
         QString defaultValue;
+        int indirections = 0;
+        bool isConstant = false;
+        bool isReference = false;
     };
 
     /// Creates a new AddedFunction with a signature and a return type.
-    AddedFunction(QString signature, QString returnType, double vr);
-    AddedFunction() : m_access(Protected), m_isConst(false), m_isStatic(false), m_version(0) {}
+    explicit AddedFunction(QString signature, QString returnType, double vr);
+    AddedFunction() = default;
 
     /// Returns the function name.
     QString name() const
@@ -513,12 +472,12 @@ struct AddedFunction
     }
 private:
     QString m_name;
-    Access m_access;
     QVector<TypeInfo> m_arguments;
     TypeInfo m_returnType;
-    bool m_isConst;
-    bool m_isStatic;
-    double m_version;
+    double m_version = 0;
+    Access m_access = Protected;
+    bool m_isConst = false;
+    bool m_isStatic = false;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -526,29 +485,17 @@ QDebug operator<<(QDebug d, const AddedFunction::TypeInfo &ti);
 QDebug operator<<(QDebug d, const AddedFunction &af);
 #endif
 
-struct ExpensePolicy
-{
-    ExpensePolicy() : limit(-1) {}
-    int limit;
-    QString cost;
-    bool isValid() const
-    {
-        return limit >= 0;
-    }
-};
-
 class InterfaceTypeEntry;
 class ObjectTypeEntry;
 
 class DocModification
 {
 public:
-    DocModification() : format(TypeSystem::NativeCode), m_mode(TypeSystem::DocModificationXPathReplace), m_version(0) {}
-    DocModification(const QString& xpath, const QString& signature, double vr)
-            : format(TypeSystem::NativeCode), m_mode(TypeSystem::DocModificationXPathReplace),
-              m_xpath(xpath), m_signature(signature), m_version(vr) {}
-    DocModification(TypeSystem::DocModificationMode mode, const QString& signature, double vr)
-            : m_mode(mode), m_signature(signature), m_version(vr) {}
+    DocModification() = default;
+    explicit DocModification(const QString& xpath, const QString& signature) :
+        m_xpath(xpath), m_signature(signature) {}
+    explicit DocModification(TypeSystem::DocModificationMode mode, const QString& signature) :
+        m_signature(signature), m_mode(mode) {}
 
     void setCode(const QString& code) { m_code = code; }
     void setCode(const QStringRef& code) { m_code = code.toString(); }
@@ -569,19 +516,16 @@ public:
     {
         return m_mode;
     }
-    double version() const
-    {
-        return m_version;
-    }
 
-    TypeSystem::Language format;
+    TypeSystem::Language  format() const { return m_format; }
+    void setFormat(TypeSystem::Language f) { m_format = f; }
 
 private:
-    TypeSystem::DocModificationMode m_mode;
     QString m_code;
     QString m_xpath;
     QString m_signature;
-    double m_version;
+    TypeSystem::DocModificationMode m_mode = TypeSystem::DocModificationXPathReplace;
+    TypeSystem::Language m_format = TypeSystem::NativeCode;
 };
 
 class CustomConversion;
@@ -1424,16 +1368,6 @@ public:
         return m_heldTypeValue;
     }
 
-
-    void setExpensePolicy(const ExpensePolicy &policy)
-    {
-        m_expensePolicy = policy;
-    }
-    const ExpensePolicy &expensePolicy() const
-    {
-        return m_expensePolicy;
-    }
-
     QString targetType() const
     {
         return m_targetType;
@@ -1507,7 +1441,6 @@ private:
     QString m_heldTypeValue;
     QString m_lookupName;
     QString m_targetType;
-    ExpensePolicy m_expensePolicy;
     TypeFlags m_typeFlags;
     CopyableFlag m_copyableFlag = Unknown;
     QString m_hashFunction;

@@ -728,7 +728,7 @@ QDebug operator<<(QDebug d, const TemplateEntry *te)
     d.nospace();
     d << "TemplateEntry(";
     if (te) {
-        d << '"' << te->name() << "\", version=" << te->version();
+        d << '"' << te->name() << '"';
     } else {
         d << '0';
     }

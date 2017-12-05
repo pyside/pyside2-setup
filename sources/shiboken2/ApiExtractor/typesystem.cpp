@@ -57,6 +57,7 @@ static inline QString fieldNameAttribute() { return QStringLiteral("field-name")
 static inline QString enumNameAttribute() { return QStringLiteral("enum-name"); }
 static inline QString argumentTypeAttribute() { return QStringLiteral("argument-type"); }
 static inline QString returnTypeAttribute() { return QStringLiteral("return-type"); }
+static inline QString xPathAttribute() { return QStringLiteral("xpath"); }
 
 static QVector<CustomConversion *> customConversionsForReview;
 
@@ -824,7 +825,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
                               + rename + QLatin1String("' is not a valid function name");
                     return false;
                 }
-                FunctionModification mod(since);
+                FunctionModification mod;
                 if (!mod.setSignature(signature, &m_error))
                     return false;
                 mod.renamedToName = attributes[QLatin1String("rename")];
@@ -1003,16 +1004,6 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             if (!targetLangName.isEmpty())
                 ctype->setTargetLangName(targetLangName);
 
-            // The expense policy
-            QString limit = attributes[QLatin1String("expense-limit")];
-            if (!limit.isEmpty() && limit != QLatin1String("none")) {
-                ExpensePolicy ep;
-                ep.limit = limit.toInt();
-                ep.cost = attributes[QLatin1String("expense-cost")];
-                ctype->setExpensePolicy(ep);
-            }
-
-
             ctype->setIsPolymorphicBase(convertBoolean(attributes[QLatin1String("polymorphic-base")], QLatin1String("polymorphic-base"), false));
             ctype->setPolymorphicIdValue(attributes[QLatin1String("polymorphic-id-expression")]);
             //Copyable
@@ -1096,7 +1087,6 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
         attributes.insert(sinceAttribute(), QLatin1String("0"));
 
         fetchAttributeValues(tagName, atts, &attributes);
-        double since = attributes[sinceAttribute()].toDouble();
 
         const int validParent = StackElement::TypeEntryMask
                                 | StackElement::ModifyFunction
@@ -1129,8 +1119,8 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             }
 
             QString signature = m_current->type & StackElement::TypeEntryMask ? QString() : m_currentSignature;
-            DocModification mod(mode, signature, since);
-            mod.format = lang;
+            DocModification mod(mode, signature);
+            mod.setFormat(lang);
             m_contextStack.top()->docModifications << mod;
         } else {
             m_error = QLatin1String("inject-documentation must be inside modify-function, "
@@ -1140,17 +1130,17 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
     } else if (element->type == StackElement::ModifyDocumentation) {
         // check the XML tag attributes
         QHash<QString, QString> attributes;
-        attributes.insert(QLatin1String("xpath"), QString());
+        attributes.insert(xPathAttribute(), QString());
         attributes.insert(sinceAttribute(), QLatin1String("0"));
         fetchAttributeValues(tagName, atts, &attributes);
-        double since = attributes[sinceAttribute()].toDouble();
 
         const int validParent = StackElement::TypeEntryMask
                                 | StackElement::ModifyFunction
                                 | StackElement::ModifyField;
         if (m_current->parent && m_current->parent->type & validParent) {
             QString signature = (m_current->type & StackElement::TypeEntryMask) ? QString() : m_currentSignature;
-            m_contextStack.top()->docModifications << DocModification(attributes[QLatin1String("xpath")], signature, since);
+            m_contextStack.top()->docModifications
+                << DocModification(attributes.value(xPathAttribute()), signature);
         } else {
             m_error = QLatin1String("modify-documentation must be inside modify-function, "
                       "modify-field or other tags that creates a type");
@@ -1390,7 +1380,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
                     return false;
                 }
 
-                CodeSnip snip(since);
+                CodeSnip snip;
                 snip.language = lang;
                 m_contextStack.top()->functionMods.last().argument_mods.last().conversion_rules.append(snip);
             } else {
@@ -1432,7 +1422,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
                 m_error = QLatin1String("Native to Target conversion code can only be specified for custom conversion rules.");
                 return false;
             }
-            m_contextStack.top()->codeSnips << CodeSnip(0);
+            m_contextStack.top()->codeSnips << CodeSnip();
         }
         break;
         case StackElement::TargetToNative: {
@@ -1456,7 +1446,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             }
             QString typeCheck = attributes[QLatin1String("check")];
             static_cast<TypeEntry*>(m_current->entry)->customConversion()->addTargetToNativeConversion(sourceTypeName, typeCheck);
-            m_contextStack.top()->codeSnips << CodeSnip(0);
+            m_contextStack.top()->codeSnips << CodeSnip();
         }
         break;
         case StackElement::ModifyArgument: {
@@ -1488,7 +1478,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
                 return false;
             }
 
-            ArgumentModification argumentModification = ArgumentModification(idx, since);
+            ArgumentModification argumentModification = ArgumentModification(idx);
             argumentModification.replace_value = replace_value;
             argumentModification.resetAfterUse = convertBoolean(attributes[QLatin1String("invalidate-after-use")], QLatin1String("invalidate-after-use"), false);
             m_contextStack.top()->functionMods.last().argument_mods.append(argumentModification);
@@ -1736,7 +1726,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
 
             m_contextStack.top()->addedFunctions << func;
 
-            FunctionModification mod(since);
+            FunctionModification mod;
             if (!mod.setSignature(m_currentSignature, &m_error))
                 return false;
             m_contextStack.top()->functionMods << mod;
@@ -1762,7 +1752,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
                 return false;
             }
 
-            FunctionModification mod(since);
+            FunctionModification mod;
             if (!mod.setSignature(signature, &m_error))
                 return false;
             m_currentSignature = signature;
@@ -1949,7 +1939,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
                 return false;
             }
 
-            CodeSnip snip(since);
+            CodeSnip snip;
             snip.language = languageNames[className];
             snip.position = positionNames[position];
             bool in_file = false;
@@ -2048,7 +2038,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
                 return false;
         break;
         case StackElement::Template:
-            element->value.templateEntry = new TemplateEntry(attributes[nameAttribute()], since);
+            element->value.templateEntry = new TemplateEntry(attributes.value(nameAttribute()));
             break;
         case StackElement::TemplateInstanceEnum:
             if (!(topElement.type & StackElement::CodeSnipMask) &&
@@ -2062,7 +2052,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
                           "custom-destructors, conversion-rule, native-to-target or add-conversion tags.");
                 return false;
             }
-            element->value.templateInstance = new TemplateInstance(attributes[nameAttribute()], since);
+            element->value.templateInstance = new TemplateInstance(attributes.value(nameAttribute()));
             break;
         case StackElement::Replace:
             if (topElement.type != StackElement::TemplateInstanceEnum) {
@@ -2414,43 +2404,6 @@ QString FunctionModification::toString() const
     return str;
 }
 
-bool FunctionModification::operator!=(const FunctionModification& other) const
-{
-    return !(*this == other);
-}
-
-bool FunctionModification::operator==(const FunctionModification& other) const
-{
-    if (m_signature.isEmpty() != other.m_signature.isEmpty())
-        return false;
-
-    if (m_signature.isEmpty()
-        ? m_signaturePattern != other.m_signaturePattern
-        : m_signature != other.m_signature) {
-        return false;
-    }
-
-    if (association != other.association)
-        return false;
-
-    if (modifiers != other.modifiers)
-        return false;
-
-    if (removal != other.removal)
-        return false;
-
-    if (m_thread != other.m_thread)
-        return false;
-
-    if (m_allowThread != other.m_allowThread)
-        return false;
-
-    if (m_version != other.m_version)
-        return false;
-
-    return true;
-}
-
 static AddedFunction::TypeInfo parseType(const QString& signature, int startPos = 0, int* endPos = 0)
 {
     AddedFunction::TypeInfo result;
@@ -2519,7 +2472,9 @@ static AddedFunction::TypeInfo parseType(const QString& signature, int startPos 
     return result;
 }
 
-AddedFunction::AddedFunction(QString signature, QString returnType, double vr) : m_access(Public), m_version(vr)
+AddedFunction::AddedFunction(QString signature, QString returnType, double vr) :
+    m_version(vr),
+    m_access(Public)
 {
     Q_ASSERT(!returnType.isEmpty());
     m_returnType = parseType(returnType);

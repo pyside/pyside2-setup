@@ -2354,7 +2354,7 @@ static void addConversionRuleCodeSnippet(CodeSnipList& snippetList, QString& rul
     } else {
         rule.replace(QLatin1String("%out"), outputName);
     }
-    CodeSnip snip(0, snippetLanguage);
+    CodeSnip snip(snippetLanguage);
     snip.position = (snippetLanguage == TypeSystem::NativeCode) ? TypeSystem::CodeSnipPositionAny : TypeSystem::CodeSnipPositionBeginning;
     snip.addCode(rule);
     snippetList << snip;

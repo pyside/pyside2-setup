@@ -1387,9 +1387,9 @@ bool QtDocGenerator::writeInjectDocumentation(QTextStream& s,
                 Documentation doc;
                 Documentation::Format fmt;
 
-                if (mod.format == TypeSystem::NativeCode)
+                if (mod.format() == TypeSystem::NativeCode)
                     fmt = Documentation::Native;
-                else if (mod.format == TypeSystem::TargetLangCode)
+                else if (mod.format() == TypeSystem::TargetLangCode)
                     fmt = Documentation::Target;
                 else
                     continue;
