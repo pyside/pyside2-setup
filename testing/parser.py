@@ -143,7 +143,7 @@ class TestParser(object):
                 if match:
                     res = "BFAIL"
                 else:
-                    res = "FAIL"
+                    res = "FAIL!"
             else:
                 if match:
                     res = "BPASS"

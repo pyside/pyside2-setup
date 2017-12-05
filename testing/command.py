@@ -192,7 +192,7 @@ def main():
         for test, res in result.iter_blacklist(bl):
             print("%-6s" % res, ":", decorate(test) + "()")
             r[0] += 1 if res == "PASS" else 0
-            r[1] += 1 if res == "FAIL" else 0
+            r[1] += 1 if res == "FAIL!" else 0
             r[2] += 1 if res == "SKIPPED" else 0 # not yet supported
             r[3] += 1 if res == "BFAIL" else 0
             r[4] += 1 if res == "BPASS" else 0
@@ -219,7 +219,7 @@ def main():
         runner = TestRunner(builds.selected, project)
         result = TestParser(runner.logfile)
         for test, res in result.iter_blacklist(bl):
-            if res == "FAIL":
+            if res == "FAIL!":
                 raise ValueError("At least one failure was not blacklisted")
         # the makefile does run, although it does not find any tests.
         # We simply check if any tests were found.
