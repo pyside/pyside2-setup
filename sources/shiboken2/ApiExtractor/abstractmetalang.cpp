@@ -1330,6 +1330,7 @@ AbstractMetaClass::AbstractMetaClass()
       m_hasNonpublic(false),
       m_hasVirtualSlots(false),
       m_hasNonPrivateConstructor(false),
+      m_hasPrivateConstructor(false),
       m_functionsFixed(false),
       m_hasPrivateDestructor(false),
       m_hasProtectedDestructor(false),
@@ -1801,10 +1802,8 @@ bool AbstractMetaClass::hasProtectedMembers() const
 bool AbstractMetaClass::generateShellClass() const
 {
     return m_forceShellClass ||
-           (!isFinal()
-            && (hasVirtualFunctions()
-                || hasProtectedFunctions()
-                || hasFieldAccessors()));
+           (isConstructible()
+            && (m_hasVirtuals || hasProtectedFunctions() || hasFieldAccessors()));
 }
 
 QPropertySpec *AbstractMetaClass::propertySpecForRead(const QString &name) const
@@ -2595,7 +2594,7 @@ void AbstractMetaClass::fixFunctions()
         // Make sure class is abstract if one of the functions is
         if (func->isAbstract()) {
             (*this) += AbstractMetaAttributes::Abstract;
-            (*this) -= AbstractMetaAttributes::Final;
+            (*this) -= AbstractMetaAttributes::FinalInTargetLang;
         }
 
         if (func->isConstructor()) {
@@ -2615,7 +2614,7 @@ void AbstractMetaClass::fixFunctions()
 
     if (hasPrivateConstructors && !hasPublicConstructors) {
         (*this) += AbstractMetaAttributes::Abstract;
-        (*this) -= AbstractMetaAttributes::Final;
+        (*this) -= AbstractMetaAttributes::FinalInTargetLang;
     }
 
     setFunctions(funcs);

@@ -593,7 +593,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                 << QStringLiteral("class '%1' does not have an entry in the type system")
                                   .arg(cls->name());
         } else {
-            const bool couldAddDefaultCtors = !cls->isFinalInCpp() && !cls->isInterface() && !cls->isNamespace()
+            const bool couldAddDefaultCtors = cls->isConstructible()
+                && !cls->isInterface() && !cls->isNamespace()
                 && (cls->attributes() & AbstractMetaAttributes::HasRejectedConstructor) == 0;
             if (couldAddDefaultCtors) {
                 if (!cls->hasConstructors())
@@ -1735,8 +1736,10 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
         }
 
         const bool isInvalidDestructor = metaFunction->isDestructor() && metaFunction->isPrivate();
-        const bool isInvalidConstructor = metaFunction->isConstructor()
-            && (metaFunction->isPrivate() && metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction);
+        const bool isInvalidConstructor = metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction
+            && metaFunction->isPrivate();
+        if (isInvalidConstructor)
+            metaClass->setHasPrivateConstructor(true);
         if ((isInvalidDestructor || isInvalidConstructor)
             && !metaClass->hasNonPrivateConstructor()) {
             *metaClass += AbstractMetaAttributes::Final;

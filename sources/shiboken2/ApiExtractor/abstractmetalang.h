@@ -1427,6 +1427,16 @@ public:
         m_hasNonPrivateConstructor = value;
     }
 
+    bool hasPrivateConstructor() const
+    {
+        return m_hasPrivateConstructor;
+    }
+
+    void setHasPrivateConstructor(bool value)
+    {
+        m_hasPrivateConstructor = value;
+    }
+
     bool hasPrivateDestructor() const
     {
         return m_hasPrivateDestructor;
@@ -1455,6 +1465,11 @@ public:
     void setHasVirtualDestructor(bool value)
     {
         m_hasVirtualDestructor = value;
+    }
+
+    bool isConstructible() const
+    {
+        return (hasNonPrivateConstructor() || !hasPrivateConstructor()) && !hasPrivateDestructor();
     }
 
     AbstractMetaFunctionList queryFunctionsByName(const QString &name) const;
@@ -1604,14 +1619,6 @@ public:
         return m_hasVirtualSlots;
     }
 
-    /**
-    *   Says if a class has any virtual functions of its own.
-    *   \return true if the class implements any virtual methods
-    */
-    bool hasVirtualFunctions() const
-    {
-        return !isFinal() && m_hasVirtuals;
-    }
     /**
     *   Says if the class that declares or inherits a virtual function.
     *   \return true if the class implements or inherits any virtual methods
@@ -1797,6 +1804,7 @@ private:
     uint m_hasNonpublic : 1;
     uint m_hasVirtualSlots : 1;
     uint m_hasNonPrivateConstructor : 1;
+    uint m_hasPrivateConstructor : 1;
     uint m_functionsFixed : 1;
     uint m_hasPrivateDestructor : 1;
     uint m_hasProtectedDestructor : 1;
