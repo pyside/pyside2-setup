@@ -39,6 +39,23 @@
 
 from __future__ import print_function
 
+import sys
 from . import command
 
 main = command.main
+
+# modify print so that it always flushes
+__builtins__["orig_print"] = __builtins__["print"]
+
+def print_flushed(*args, **kw):
+    orig_print(*args, **kw)
+    sys.stdout.flush()
+
+__builtins__["print"] = print_flushed
+
+print = print_flushed
+
+# We also could use "python -u" to get unbuffered output.
+# This method is better since it needs no change of the interface.
+
+# eof

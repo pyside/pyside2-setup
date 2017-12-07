@@ -114,8 +114,6 @@ def _parse_tests(test_log):
             idx, n, sharp, mod_name, much_stuff, code1, code2, tim = tup = match.groups()
             # either code1 or code2 is None
             code = code1 or code2
-            if idx != sharp:
-                raise ValueError("inconsistent log lines or program error: %s" % tup)
             idx, n, code, tim = int(idx), int(n), code.lower(), float(tim)
             res = TestResult(idx, mod_name, code == "passed", code, tim)
             result.append(res)

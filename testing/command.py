@@ -41,20 +41,14 @@ from __future__ import print_function
 
 """
 testrunner
+==========
 
 Provide an interface to the pyside tests.
+-----------------------------------------
 
-- find the latest build dir.
-  This is found by the build_history in setup.py,
-  near the end of pyside_build.run()
-
-- run 'make test' and record the output
-  (not ready)
-
-- compare the result list with the current blacklist
-
-- return the correct error status
-  (zero if expected includes observed, else 1)
+This program can only be run if PySide was build with tests enabled.
+All tests are run in a single pass, and if not blacklisted, an error
+is raised at the end of the run.
 
 Recommended build process:
 There is no need to install the project.
@@ -65,18 +59,40 @@ Building the project with something like
 is sufficient. The tests are run by changing into the latest build dir and there
 into pyside2, then 'make test'.
 
+
+New testing policy:
+-------------------
+
+The tests are now run 5 times, and errors are reported
+when they appear at least 3 times. With the variable COIN_RERUN_FAILED_ONLY it is
+possible to configure if all tests should be rerun or the failed ones, only.
+
+The full mode can be tested locally by setting
+
+    export COIN_RERUN_FAILED_ONLY=0
 """
 
 import os
 import sys
 import argparse
 from textwrap import dedent
+from collections import OrderedDict
+from timeit import default_timer as timer
 
 from .helper import script_dir, decorate
 from .buildlog import builds
 from .blacklist import BlackList
 from .runner import TestRunner
 from .parser import TestParser
+
+# Should we repeat only failed tests?
+COIN_RERUN_FAILED_ONLY = True
+COIN_THRESHOLD = 3    # report error if >=
+COIN_TESTING = 5      # number of runs
+
+if (os.environ.get("COIN_RERUN_FAILED_ONLY", "1").lower() in
+    "0 f false n no".split()):
+    COIN_RERUN_FAILED_ONLY = False
 
 def create_read_write(filename):
     if os.path.isfile(filename):
@@ -91,9 +107,63 @@ def create_read_write(filename):
         except IOError:
             raise argparse.ArgumentError(None, "cannot create file: %s" % filename)
 
+def test_project(project, args, blacklist, runs):
+    ret = []
+    for idx in range(runs):
+        index = idx + 1
+        runner = TestRunner(builds.selected, project, index)
+        print()
+        print("********* Start testing of %s *********" % project)
+        print("Config: Using", " ".join(builds.classifiers))
+        print()
+        if os.path.exists(runner.logfile) and args.skip:
+            print("Parsing existing log file:", runner.logfile)
+        else:
+            if index > 1 and COIN_RERUN_FAILED_ONLY:
+                rerun = rerun_list
+            else:
+                rerun = None
+            runner.run("RUN {}:".format(idx + 1), rerun, 10 * 60)
+        result = TestParser(runner.logfile)
+        r = 5 * [0]
+        rerun_list = []
+        print()
+        for test, res in result.iter_blacklist(blacklist):
+            print("RES {}:".format(index), end=" ")
+            print("%-6s" % res, decorate(test) + "()")
+            r[0] += 1 if res == "PASS" else 0
+            r[1] += 1 if res == "FAIL!" else 0
+            r[2] += 1 if res == "SKIPPED" else 0 # not yet supported
+            r[3] += 1 if res == "BFAIL" else 0
+            r[4] += 1 if res == "BPASS" else 0
+            if res not in ("PASS", "BPASS"):
+                rerun_list.append(test)
+        print()
+        print("Totals:", sum(r), "tests.",
+              "{} passed, {} failed, {} skipped, {} blacklisted, {} bpassed."
+              .format(*r))
+        print()
+        print("********* Finished testing of %s *********" % project)
+        print()
+        ret.append(r)
+
+    return ret
+
 def main():
     # create the top-level command parser
-    parser = argparse.ArgumentParser()
+    start_time = timer()
+    all_projects = "shiboken2 pyside2 pyside2-tools".split()
+    tested_projects = "shiboken2 pyside2".split()
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=dedent("""\
+        Run the tests for some projects, default = '{}'.
+
+        Testing is now repeated up to {rep} times, and errors are
+        only reported if they occur {thr} or more times.
+        The environment variable COIN_RERUN_FAILED_ONLY controls if errors
+        are only repeated if there are errors. The default is "1".
+        """.format("' '".join(tested_projects), thr=COIN_THRESHOLD, rep=COIN_TESTING)))
     subparsers = parser.add_subparsers(dest="subparser_name")
 
     # create the parser for the "test" command
@@ -109,12 +179,11 @@ def main():
                         help="use name=value ... to set environment variables")
     parser_test.add_argument("--buildno", default=-1, type=int,
                         help="use build number n (0-based), latest = -1 (default)")
-    all_projects = "shiboken2 pyside2 pyside2-tools".split()
-    tested_projects = "shiboken2 pyside2".split()
     parser_test.add_argument("--projects", nargs='+', type=str,
                         default=tested_projects,
                         choices=all_projects,
-                        help="use 'pyside2' (default) or other projects")
+                        help="use '{}'' (default) or other projects"
+                        .format("' '".join(tested_projects)))
     parser_getcwd = subparsers.add_parser("getcwd")
     parser_getcwd.add_argument("filename", type=argparse.FileType('w'),
                         help="write the build dir name into a file")
@@ -178,30 +247,15 @@ def main():
 
     q = 5 * [0]
 
+    runs = 1
+    fail_crit = 1
+    runs = COIN_TESTING
+    fail_crit = COIN_THRESHOLD
     # now loop over the projects and accumulate
     for project in args.projects:
-        runner = TestRunner(builds.selected, project)
-        if os.path.exists(runner.logfile) and args.skip:
-            print("Parsing existing log file:", runner.logfile)
-        else:
-            runner.run(10 * 60)
-        result = TestParser(runner.logfile)
-        r = 5 * [0]
-        print("********* Start testing of %s *********" % project)
-        print("Config: Using", " ".join(builds.classifiers))
-        for test, res in result.iter_blacklist(bl):
-            print("%-6s" % res, ":", decorate(test) + "()")
-            r[0] += 1 if res == "PASS" else 0
-            r[1] += 1 if res == "FAIL!" else 0
-            r[2] += 1 if res == "SKIPPED" else 0 # not yet supported
-            r[3] += 1 if res == "BFAIL" else 0
-            r[4] += 1 if res == "BPASS" else 0
-        print("Totals:", sum(r), "tests.",
-              "{} passed, {} failed, {} skipped, {} blacklisted, {} bpassed."
-              .format(*r))
-        print("********* Finished testing of %s *********" % project)
-        print()
-        q = list(map(lambda x, y: x+y, r, q))
+        res = test_project(project, args, bl, runs)
+        for idx, r in enumerate(res):
+            q = list(map(lambda x, y: x+y, r, q))
 
     if len(args.projects) > 1:
         print("All above projects:", sum(q), "tests.",
@@ -209,21 +263,74 @@ def main():
               .format(*q))
         print()
 
+    tot_res = OrderedDict()
+    for project in args.projects:
+        for idx in range(runs):
+            index = idx + 1
+            runner = TestRunner(builds.selected, project, index)
+            result = TestParser(runner.logfile)
+            for test, res in result.iter_blacklist(bl):
+                key = project + ":" + test
+                tot_res.setdefault(key, [])
+                tot_res[key].append(res)
+    tot_flaky = 0
+    print("*" * 79)
+    print("*")
+    print("* Summary Of All Tests")
+    print("*")
+    print()
+    for test, res in tot_res.items():
+        pass__c = res.count("PASS")
+        bpass_c = res.count("BPASS")
+        fail__c = res.count("FAIL!")
+        bfail_c = res.count("BFAIL")
+        if pass__c == len(res):
+            continue
+        elif bpass_c == runs and runs > 1:
+            msg = "Remove blacklisting; test passes"
+        elif fail__c == runs:
+            msg = "Newly detected Real test failure!"
+        elif bfail_c == runs:
+            msg = "Keep blacklisting ;-("
+        elif fail__c > 0 and fail__c < len(res):
+            msg = "Flaky test"
+            tot_flaky += 1
+        else:
+            continue
+        padding = 6 * runs
+        txt = " ".join(((piece + " ")[:5] for piece in res))
+        txt = (txt + padding * " ")[:padding]
+        testpad = 36
+        if len(test) < testpad:
+            test += (testpad - len(test)) * " "
+        print(txt, decorate(test), msg)
+    print()
+    if runs > 1:
+        print("Total flaky tests: errors but not always = {}".format(tot_flaky))
+        print()
+    else:
+        print("For info about flaky tests, we need to perform more than one run.")
+        print("Please activate the COIN mode:    'export QTEST_ENVIRONMENT=ci'")
+        print()
     # nag us about unsupported projects
     ap, tp = set(all_projects), set(tested_projects)
     if ap != tp:
         print("+++++ Note: please support", " ".join(ap-tp), "+++++")
         print()
 
-    for project in args.projects:
-        runner = TestRunner(builds.selected, project)
-        result = TestParser(runner.logfile)
-        for test, res in result.iter_blacklist(bl):
-            if res == "FAIL!":
-                raise ValueError("At least one failure was not blacklisted")
-        # the makefile does run, although it does not find any tests.
-        # We simply check if any tests were found.
-        if len(result) == 0:
-            path = builds.selected.build_dir
-            project = os.path.join(path, project)
-            raise ValueError("there are no tests in %s" % project)
+    stop_time = timer()
+    used_time = stop_time - start_time
+    # Now create an error if the criterion is met:
+    try:
+        err_crit = "'FAIL! >= {}'".format(fail_crit)
+        for res in tot_res.values():
+            if res.count("FAIL!") >= fail_crit:
+                raise ValueError("At least one failure was not blacklisted "
+                                 "and met the criterion {}"
+                                 .format(err_crit))
+        print("No test met the error criterion {}".format(err_crit))
+    finally:
+        print()
+        print("Total time of whole Python script = {:0.2f} sec".format(used_time))
+        print()
+# eof

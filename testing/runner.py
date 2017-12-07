@@ -43,6 +43,7 @@ import os
 import sys
 import re
 import subprocess
+import inspect
 
 from collections import namedtuple
 from textwrap import dedent
@@ -52,12 +53,15 @@ from .helper import decorate, PY3, TimeoutExpired
 
 
 class TestRunner(object):
-    def __init__(self, log_entry, project):
+    def __init__(self, log_entry, project, index):
         self.log_entry = log_entry
         built_path = log_entry.build_dir
         self.test_dir = os.path.join(built_path, project)
         log_dir = log_entry.log_dir
-        self.logfile = os.path.join(log_dir, project + ".log")
+        if index is not None:
+            self.logfile = os.path.join(log_dir, project + ".{}.log".format(index))
+        else:
+            self.logfile = os.path.join(log_dir, project + ".log")
         os.environ['CTEST_OUTPUT_ON_FAILURE'] = '1'
         self._setup()
 
@@ -97,7 +101,7 @@ class TestRunner(object):
     def _setup(self):
         self.ctestCommand = self._find_ctest()
 
-    def _run(self, cmd_tuple, timeout):
+    def _run(self, cmd_tuple, label, timeout):
         """
         Perform a test run in a given build
 
@@ -105,26 +109,73 @@ class TestRunner(object):
         this script. Also, a timeout can be used.
 
         After the change to directly using ctest, we no longer use
-        "--force-new-ctest-process". Until now this han no drawbacks
-        but was a littls faster.
+        "--force-new-ctest-process". Until now this has no drawbacks
+        but was a little faster.
         """
 
         self.cmd = cmd_tuple
-        shell_option = sys.platform == "win32"
+        # We no longer use the shell option. It introduces wrong handling
+        # of certain characters which are not yet correctly escaped:
+        # Especially the "^" caret char is treated as an escape, and pipe symbols
+        # without a caret are interpreted as such which leads to weirdness.
+        # Since we have all commands with explicit paths and don't use shell
+        # commands, this should work fine.
         print(dedent("""\
             running {cmd}
                  in {test_dir}
             """).format(**self.__dict__))
         ctest_process = subprocess.Popen(self.cmd,
                                          cwd=self.test_dir,
-                                         stderr=subprocess.STDOUT,
-                                         shell=shell_option)
+                                         stdout=subprocess.PIPE,
+                                         stderr=subprocess.STDOUT)
+        def py_tee(input, output, label):
+            '''
+            A simple (incomplete) tee command in Python
+
+            This script simply logs everything from input to output
+            while the output gets some decoration. The specific reason
+            to have this script at all is:
+
+            - it is necessary to have some decoration as prefix, since
+              we run commands several times
+
+            - collecting all output and then decorating is not nice if
+              you have to wait for a long time
+
+            The special escape is for the case of an embedded file in
+            the output.
+            '''
+            def xprint(*args, **kw):
+                print(*args, file=output, **kw)
+
+            while True:
+                line = input.readline()
+                if not line:
+                    break
+                labelled = True
+                if line.startswith('BEGIN_FILE'):
+                    labelled = False
+                txt = line.rstrip()
+                xprint(label, txt) if label and labelled else xprint(txt)
+                if line.startswith('END_FILE'):
+                    labelled = True
+
+        tee_src = dedent("""\
+            from __future__ import print_function
+            import sys
+            {}
+            py_tee(sys.stdin, sys.stdout, '{label}')
+            """).format(dedent(inspect.getsource(py_tee)), label=label)
+        tee_cmd = (sys.executable, "-E", "-u", "-c", tee_src)
+        tee_process = subprocess.Popen(tee_cmd,
+                                       cwd=self.test_dir,
+                                       stdin=ctest_process.stdout)
         try:
-            comm = ctest_process.communicate
+            comm = tee_process.communicate
             output = (comm(timeout=timeout) if PY3 else comm())[0]
         except (TimeoutExpired, KeyboardInterrupt):
             print()
-            print("aborted, partial resut")
+            print("aborted, partial result")
             ctest_process.kill()
             outs, errs = ctest_process.communicate()
             # ctest lists to a temp file. Move it to the log
@@ -138,8 +189,16 @@ class TestRunner(object):
             self.partial = False
         finally:
             print("End of the test run")
-        ctest_process.wait()
+            print()
+        tee_process.wait()
 
-    def run(self, timeout=10 * 60):
+    def run(self, label, rerun, timeout):
         cmd = self.ctestCommand, "--output-log", self.logfile
-        self._run(cmd, timeout)
+        if rerun is not None:
+            # cmd += ("--rerun-failed",)
+            # For some reason, this worked never in the script file.
+            # We pass instead the test names as a regex:
+            words = "^(" + "|".join(rerun) + ")$"
+            cmd += ("--tests-regex", words)
+        self._run(cmd, label, timeout)
+# eof
