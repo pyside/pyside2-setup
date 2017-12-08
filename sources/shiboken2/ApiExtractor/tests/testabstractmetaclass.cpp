@@ -86,6 +86,17 @@ void TestAbstractMetaClass::testClassNameUnderNamespace()
     // QVERIFY(classes[0]->hasNonPrivateConstructor());
 }
 
+static AbstractMetaFunctionList virtualFunctions(const AbstractMetaClass *c)
+{
+    AbstractMetaFunctionList result;
+    const AbstractMetaFunctionList &functions = c->functions();
+    for (AbstractMetaFunction *f : functions) {
+        if (f->isVirtual())
+            result.append(f);
+    }
+    return result;
+}
+
 void TestAbstractMetaClass::testVirtualMethods()
 {
     const char cppCode[] =R"CPP(
@@ -150,15 +161,19 @@ public:
     QCOMPARE(ctorA->ownerClass(), a);
     QCOMPARE(ctorA->declaringClass(), a);
 
-    QCOMPARE(a->virtualFunctions().size(), 1); // Add a pureVirtualMethods method !?
-    QCOMPARE(b->virtualFunctions().size(), 1);
-    QCOMPARE(c->virtualFunctions().size(), 1);
-    QCOMPARE(f->virtualFunctions().size(), 1);
+    const AbstractMetaFunctionList virtualFunctionsA = virtualFunctions(a);
+    const AbstractMetaFunctionList virtualFunctionsB = virtualFunctions(b);
+    const AbstractMetaFunctionList virtualFunctionsC = virtualFunctions(c);
+    const AbstractMetaFunctionList virtualFunctionsF = virtualFunctions(f);
+    QCOMPARE(virtualFunctionsA.size(), 1); // Add a pureVirtualMethods method !?
+    QCOMPARE(virtualFunctionsB.size(), 1);
+    QCOMPARE(virtualFunctionsC.size(), 1);
+    QCOMPARE(virtualFunctionsF.size(), 1);
 
-    AbstractMetaFunction* funcA = a->virtualFunctions().first();
-    AbstractMetaFunction* funcB = b->virtualFunctions().first();
-    AbstractMetaFunction* funcC = c->virtualFunctions().first();
-    const AbstractMetaFunction* funcF = f->virtualFunctions().constFirst();
+    const AbstractMetaFunction* funcA = virtualFunctionsA.constFirst();
+    const AbstractMetaFunction* funcB = virtualFunctionsB.constFirst();
+    const AbstractMetaFunction* funcC = virtualFunctionsC.constFirst();
+    const AbstractMetaFunction* funcF = virtualFunctionsF.constFirst();
 
     QCOMPARE(funcA->ownerClass(), a);
     QVERIFY(funcC->attributes() & AbstractMetaAttributes::VirtualCppMethod);

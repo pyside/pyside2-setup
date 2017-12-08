@@ -212,30 +212,6 @@ AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() con
     if (m_typeEntry->isVarargs())
         return VarargsPattern;
 
-    if (m_typeEntry->isString() && indirections() == 0
-        && (isConstant() == (m_referenceType == LValueReference)
-        || isConstant())) {
-        return StringPattern;
-    }
-
-    if (m_typeEntry->isChar()
-        && indirections() == 0
-        && isConstant() == (m_referenceType == LValueReference)) {
-        return CharPattern;
-    }
-
-    if (m_typeEntry->isJObjectWrapper()
-        && indirections() == 0
-        && isConstant() == (m_referenceType == LValueReference)) {
-        return JObjectWrapperPattern;
-    }
-
-    if (m_typeEntry->isVariant()
-        && indirections() == 0
-        && isConstant() == (m_referenceType == LValueReference)) {
-        return VariantPattern;
-    }
-
     if (m_typeEntry->isEnum() && actualIndirections() == 0)
         return EnumPattern;
 
@@ -258,11 +234,6 @@ AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() con
 
     if (m_typeEntry->isArray())
         return ArrayPattern;
-
-    if (m_typeEntry->isThread()) {
-        Q_ASSERT(indirections() == 1);
-        return ThreadPattern;
-    }
 
     if (m_typeEntry->isValue())
         return indirections() == 1 ? ValuePointerPattern : ValuePattern;
@@ -409,63 +380,6 @@ bool AbstractMetaFunction::isModifiedRemoved(int types) const
     }
 
     return false;
-}
-
-bool AbstractMetaFunction::needsCallThrough() const
-{
-    if (ownerClass()->isInterface())
-        return false;
-    if (referenceCounts(implementingClass()).size() > 0)
-        return true;
-    if (argumentsHaveNativeId() || !isStatic())
-        return true;
-
-    for (const AbstractMetaArgument *arg : m_arguments) {
-        if (arg->type()->isArray() || arg->type()->isTargetLangEnum() || arg->type()->isTargetLangFlags())
-            return true;
-    }
-
-    if (type() && (type()->isArray() || type()->isTargetLangEnum() || type()->isTargetLangFlags()))
-        return true;
-
-    for (int i = -1; i <= arguments().size(); ++i) {
-        TypeSystem::Ownership owner = this->ownership(implementingClass(), TypeSystem::TargetLangCode, i);
-        if (owner != TypeSystem::InvalidOwnership)
-            return true;
-    }
-
-    return false;
-}
-
-bool AbstractMetaFunction::needsSuppressUncheckedWarning() const
-{
-    for (int i = -1; i <= arguments().size(); ++i) {
-        const QVector<ReferenceCount> &referenceCounts = this->referenceCounts(implementingClass(), i);
-        for (const ReferenceCount &referenceCount : referenceCounts) {
-            if (referenceCount.action != ReferenceCount::Set)
-                return true;
-        }
-    }
-    return false;
-}
-
-QString AbstractMetaFunction::marshalledName() const
-{
-    QString returned = QLatin1String("__qt_") + name();
-    for (const AbstractMetaArgument *arg : m_arguments) {
-        returned += QLatin1Char('_');
-        if (arg->type()->isNativePointer()) {
-            returned += QLatin1String("nativepointer");
-        } else if (arg->type()->isIntegerEnum() || arg->type()->isIntegerFlags()) {
-            returned += QLatin1String("int");
-        } else {
-            QString a = arg->type()->name();
-            a.replace(QLatin1String("[]"), QLatin1String("_3"));
-            a.replace(QLatin1Char('.'), QLatin1Char('_'));
-            returned += a;
-        }
-    }
-    return returned;
 }
 
 bool AbstractMetaFunction::operator<(const AbstractMetaFunction &other) const
@@ -711,68 +625,6 @@ bool AbstractMetaFunction::removedDefaultExpression(const AbstractMetaClass *cls
     return false;
 }
 
-bool AbstractMetaFunction::resetObjectAfterUse(int argumentIdx) const
-{
-    const AbstractMetaClass *cls = declaringClass();
-    const FunctionModificationList &modifications = this->modifications(cls);
-    for (const FunctionModification &modification : modifications) {
-        for (const ArgumentModification &argumentModification : modification.argument_mods) {
-            if (argumentModification.index == argumentIdx && argumentModification.resetAfterUse)
-                return true;
-        }
-    }
-
-    return false;
-}
-
-QString AbstractMetaFunction::nullPointerDefaultValue(const AbstractMetaClass *mainClass, int argumentIdx) const
-{
-    Q_ASSERT(nullPointersDisabled(mainClass, argumentIdx));
-
-    const AbstractMetaClass *cls = mainClass;
-    if (!cls)
-        cls = implementingClass();
-
-    do {
-        const FunctionModificationList &modifications = this->modifications(cls);
-        for (const FunctionModification &modification : modifications) {
-            for (const ArgumentModification &argumentModification : modification.argument_mods) {
-                if (argumentModification.index == argumentIdx
-                    && argumentModification.noNullPointers) {
-                    return argumentModification.nullPointerDefaultValue;
-                }
-            }
-        }
-        cls = cls->baseClass();
-    } while (cls && !mainClass); // Once when mainClass, or once for all base classes of implementing class
-
-    return QString();
-
-}
-
-bool AbstractMetaFunction::nullPointersDisabled(const AbstractMetaClass *mainClass, int argumentIdx) const
-{
-    const AbstractMetaClass *cls = mainClass;
-    if (!cls)
-        cls = implementingClass();
-
-    do {
-        const FunctionModificationList &modifications = this->modifications(cls);
-        for (const FunctionModification &modification : modifications) {
-            for (const ArgumentModification &argumentModification : modification.argument_mods) {
-                if (argumentModification.index == argumentIdx
-                    && argumentModification.noNullPointers) {
-                    return true;
-                }
-            }
-        }
-
-        cls = cls->baseClass();
-    } while (cls && !mainClass); // Once when mainClass, or once for all base classes of implementing class
-
-    return false;
-}
-
 QString AbstractMetaFunction::conversionRule(TypeSystem::Language language, int key) const
 {
     const FunctionModificationList &modifications = this->modifications(declaringClass());
@@ -831,42 +683,11 @@ bool AbstractMetaFunction::isVirtualSlot() const
     return false;
 }
 
-bool AbstractMetaFunction::disabledGarbageCollection(const AbstractMetaClass *cls, int key) const
-{
-    typedef QHash<TypeSystem::Language, TypeSystem::Ownership>::const_iterator OwnershipMapIt;
-
-    const FunctionModificationList &modifications = this->modifications(cls);
-    for (const FunctionModification &modification : modifications) {
-        for (const ArgumentModification &argumentModification : modification.argument_mods) {
-            if (argumentModification.index != key)
-                continue;
-
-            for (OwnershipMapIt it = argumentModification.ownerships.cbegin(), end = argumentModification.ownerships.cend(); it != end; ++it) {
-                if (it.value() == TypeSystem::CppOwnership)
-                    return true;
-            }
-
-        }
-    }
-
-    return false;
-}
-
 bool AbstractMetaFunction::isDeprecated() const
 {
     const FunctionModificationList &modifications = this->modifications(declaringClass());
     for (const FunctionModification &modification : modifications) {
         if (modification.isDeprecated())
-            return true;
-    }
-    return false;
-}
-
-bool AbstractMetaFunction::isThread() const
-{
-    const FunctionModificationList &modifications = this->modifications(declaringClass());
-    for (const FunctionModification &modification : modifications) {
-        if (modification.isThread())
             return true;
     }
     return false;
@@ -994,11 +815,6 @@ FunctionModificationList AbstractMetaFunction::modifications(const AbstractMetaC
         implementor = implementor->baseClass();
     }
     return mods;
-}
-
-bool AbstractMetaFunction::hasModifications(const AbstractMetaClass *implementor) const
-{
-    return !modifications(implementor).isEmpty();
 }
 
 QString AbstractMetaFunction::argumentName(int index,
@@ -1215,46 +1031,6 @@ QString AbstractMetaFunction::modifiedName() const
     return m_cachedModifiedName;
 }
 
-QString AbstractMetaFunction::targetLangSignature(bool minimal) const
-{
-    QString s;
-
-    // Attributes...
-    if (!minimal) {
-        // Return type
-        if (type())
-            s += type()->name() + QLatin1Char(' ');
-        else
-            s += QLatin1String("void ");
-    }
-
-    s += modifiedName();
-    s += QLatin1Char('(');
-
-    int j = 0;
-    for (int i = 0; i < m_arguments.size(); ++i) {
-        if (argumentRemoved(i + 1))
-            continue;
-        if (j) {
-            s += QLatin1Char(',');
-            if (!minimal)
-                s += QLatin1Char(' ');
-        }
-        s += m_arguments.at(i)->type()->name();
-
-        if (!minimal) {
-            s += QLatin1Char(' ');
-            s += m_arguments.at(i)->name();
-        }
-        ++j;
-    }
-
-    s += QLatin1Char(')');
-
-    return s;
-}
-
-
 bool function_sorter(AbstractMetaFunction *a, AbstractMetaFunction *b)
 {
     return a->signature() < b->signature();
@@ -1459,19 +1235,6 @@ AbstractMetaFunctionList AbstractMetaClass::functionsInTargetLang() const
     return returned;
 }
 
-AbstractMetaFunctionList AbstractMetaClass::virtualFunctions() const
-{
-    const AbstractMetaFunctionList &list = functionsInShellClass();
-
-    AbstractMetaFunctionList returned;
-    for (AbstractMetaFunction *f : list) {
-        if (!f->isFinalInCpp() || f->isVirtualSlot())
-            returned += f;
-    }
-
-    return returned;
-}
-
 AbstractMetaFunctionList AbstractMetaClass::implicitConversions() const
 {
     if (!hasCloneOperator() && !hasExternalConversionOperators())
@@ -1515,15 +1278,6 @@ AbstractMetaFunctionList AbstractMetaClass::operatorOverloads(OperatorQueryOptio
     return returned;
 }
 
-bool AbstractMetaClass::hasOperatorOverload() const
-{
-    for (const AbstractMetaFunction *f : m_functions) {
-        if (f->ownerClass() == f->implementingClass() && f->isOperatorOverload() && !f->isPrivate())
-            return true;
-    }
-    return false;
-}
-
 bool AbstractMetaClass::hasArithmeticOperatorOverload() const
 {
     for (const AbstractMetaFunction *f : m_functions) {
@@ -1560,72 +1314,6 @@ bool AbstractMetaClass::hasLogicalOperatorOverload() const
     return false;
 }
 
-bool AbstractMetaClass::hasSubscriptOperatorOverload() const
-{
-    for (const AbstractMetaFunction *f : m_functions) {
-        if (f->ownerClass() == f->implementingClass() && f->isSubscriptOperator() && !f->isPrivate())
-            return true;
-    }
-    return false;
-}
-
-bool AbstractMetaClass::hasAssignmentOperatorOverload() const
-{
-    for (const AbstractMetaFunction *f : m_functions) {
-        if (f->ownerClass() == f->implementingClass() && f->isAssignmentOperator() && !f->isPrivate())
-            return true;
-    }
-    return false;
-}
-
-bool AbstractMetaClass::hasConversionOperatorOverload() const
-{
-    for (const AbstractMetaFunction *f : m_functions) {
-        if (f->ownerClass() == f->implementingClass() && f->isConversionOperator() && !f->isPrivate())
-            return true;
-    }
-    return false;
-}
-
-/*******************************************************************************
- * Returns a list of all functions that should be declared and implemented in
- * the shell class which is generated as a wrapper on top of the actual C++ class
- */
-AbstractMetaFunctionList AbstractMetaClass::functionsInShellClass() const
-{
-    // Only functions and only protected and public functions
-    FunctionQueryOptions default_flags = NormalFunctions | Visible | WasVisible | NotRemovedFromShell;
-
-    // All virtual functions
-    AbstractMetaFunctionList returned = queryFunctions(VirtualFunctions | default_flags);
-
-    // All functions explicitly set to be implemented by the shell class
-    // (mainly superclass functions that are hidden by other declarations)
-    returned += queryFunctions(ForcedShellFunctions | default_flags);
-
-    // All functions explicitly set to be virtual slots
-    returned += queryFunctions(VirtualSlots | default_flags);
-
-    return returned;
-}
-
-/*******************************************************************************
- * Returns a list of all functions that require a public override function to
- * be generated in the shell class. This includes all functions that were originally
- * protected in the superclass.
- */
-AbstractMetaFunctionList AbstractMetaClass::publicOverrideFunctions() const
-{
-    return queryFunctions(NormalFunctions | WasProtected | FinalInCppFunctions | NotRemovedFromTargetLang)
-           + queryFunctions(Signals | WasProtected | FinalInCppFunctions | NotRemovedFromTargetLang);
-}
-
-AbstractMetaFunctionList AbstractMetaClass::virtualOverrideFunctions() const
-{
-    return queryFunctions(NormalFunctions | NonEmptyFunctions | Visible | VirtualInCppFunctions | NotRemovedFromShell) +
-           queryFunctions(Signals | NonEmptyFunctions | Visible | VirtualInCppFunctions | NotRemovedFromShell);
-}
-
 void AbstractMetaClass::sortFunctions()
 {
     qSort(m_functions.begin(), m_functions.end(), function_sorter);
@@ -1639,8 +1327,6 @@ void AbstractMetaClass::setFunctions(const AbstractMetaFunctionList &functions)
     sortFunctions();
 
     QString currentName;
-    bool hasVirtuals = false;
-    AbstractMetaFunctionList finalFunctions;
     for (AbstractMetaFunction *f : qAsConst(m_functions)) {
         f->setOwnerClass(this);
 
@@ -1648,30 +1334,6 @@ void AbstractMetaClass::setFunctions(const AbstractMetaFunctionList &functions)
         m_hasVirtuals = m_hasVirtuals || f->isVirtualSlot() || hasVirtualDestructor();
         m_isPolymorphic = m_isPolymorphic || m_hasVirtuals;
         m_hasNonpublic = m_hasNonpublic || !f->isPublic();
-
-        // If we have non-virtual overloads of a virtual function, we have to implement
-        // all the overloads in the shell class to override the hiding rule
-        if (currentName == f->name()) {
-            hasVirtuals = hasVirtuals || !f->isFinal();
-            if (f->isFinal())
-                finalFunctions += f;
-        } else {
-            if (hasVirtuals && finalFunctions.size() > 0) {
-                for (AbstractMetaFunction *final_function : qAsConst(finalFunctions)) {
-                    *final_function += AbstractMetaAttributes::ForceShellImplementation;
-
-                    qCWarning(lcShiboken).noquote().nospace()
-                        << QStringLiteral("hiding of function '%1' in class '%2'")
-                                          .arg(final_function->name(), name());
-                }
-            }
-
-            hasVirtuals = !f->isFinal();
-            finalFunctions.clear();
-            if (f->isFinal())
-                finalFunctions += f;
-            currentName = f->name();
-        }
     }
 }
 
@@ -1797,13 +1459,6 @@ bool AbstractMetaClass::hasProtectedFields() const
 bool AbstractMetaClass::hasProtectedMembers() const
 {
     return hasProtectedFields() || hasProtectedFunctions();
-}
-
-bool AbstractMetaClass::generateShellClass() const
-{
-    return m_forceShellClass ||
-           (isConstructible()
-            && (m_hasVirtuals || hasProtectedFunctions() || hasFieldAccessors()));
 }
 
 QPropertySpec *AbstractMetaClass::propertySpecForRead(const QString &name) const
@@ -2151,20 +1806,10 @@ AbstractMetaFunctionList AbstractMetaClass::queryFunctions(FunctionQueryOptions 
     AbstractMetaFunctionList functions;
 
     for (AbstractMetaFunction *f : m_functions) {
-
-        if ((query & VirtualSlots) && !f->isVirtualSlot())
-            continue;
-
         if ((query & NotRemovedFromTargetLang) && f->isRemovedFrom(f->implementingClass(), TypeSystem::TargetLangCode))
             continue;
 
         if ((query & NotRemovedFromTargetLang) && !f->isFinal() && f->isRemovedFrom(f->declaringClass(), TypeSystem::TargetLangCode))
-            continue;
-
-        if ((query & NotRemovedFromShell) && f->isRemovedFrom(f->implementingClass(), TypeSystem::ShellCode))
-            continue;
-
-        if ((query & NotRemovedFromShell) && !f->isFinal() && f->isRemovedFrom(f->declaringClass(), TypeSystem::ShellCode))
             continue;
 
         if ((query & Visible) && f->isPrivate())
@@ -2182,22 +1827,10 @@ AbstractMetaFunctionList AbstractMetaClass::queryFunctions(FunctionQueryOptions 
         if ((query & WasPublic) && !f->wasPublic())
             continue;
 
-        if ((query & WasVisible) && f->wasPrivate())
-            continue;
-
-        if ((query & WasProtected) && !f->wasProtected())
-            continue;
-
         if ((query & ClassImplements) && f->ownerClass() != f->implementingClass())
             continue;
 
-        if ((query & Inconsistent) && (f->isFinalInTargetLang() || !f->isFinalInCpp() || f->isStatic()))
-            continue;
-
         if ((query & FinalInTargetLangFunctions) && !f->isFinalInTargetLang())
-            continue;
-
-        if ((query & FinalInCppFunctions) && !f->isFinalInCpp())
             continue;
 
         if ((query & VirtualInCppFunctions) && f->isFinalInCpp())
@@ -2205,11 +1838,6 @@ AbstractMetaFunctionList AbstractMetaClass::queryFunctions(FunctionQueryOptions 
 
         if ((query & Signals) && (!f->isSignal()))
             continue;
-
-        if ((query & ForcedShellFunctions) &&
-            (!f->isForcedShellImplementation() || !f->isFinal())) {
-            continue;
-        }
 
         if ((query & Constructors) && (!f->isConstructor() || f->ownerClass() != f->implementingClass()))
             continue;
@@ -2225,22 +1853,13 @@ AbstractMetaFunctionList AbstractMetaClass::queryFunctions(FunctionQueryOptions 
             continue;
         }*/
 
-        if ((query & VirtualFunctions) && (f->isFinal() || f->isSignal() || f->isStatic()))
-            continue;
-
         if ((query & StaticFunctions) && (!f->isStatic() || f->isSignal()))
             continue;
 
         if ((query & NonStaticFunctions) && (f->isStatic()))
             continue;
 
-        if ((query & NonEmptyFunctions) && (f->isEmptyFunction()))
-            continue;
-
         if ((query & NormalFunctions) && (f->isSignal()))
-            continue;
-
-        if ((query & AbstractFunctions) && !f->isAbstract())
             continue;
 
         if ((query & OperatorOverloads) && !f->isOperatorOverload())
@@ -2675,26 +2294,10 @@ QString AbstractMetaType::formatSignature(bool minimal) const
     return result;
 }
 
-bool AbstractMetaType::hasNativeId() const
-{
-    return (isQObject() || isValue() || isObject()) && typeEntry()->isNativeIdBased();
-}
-
 bool AbstractMetaType::isCppPrimitive() const
 {
     return m_pattern == PrimitivePattern && m_typeEntry->isCppPrimitive();
 }
-
-bool AbstractMetaType::isTargetLangEnum() const
-{
-    return isEnum() && !static_cast<const EnumTypeEntry *>(typeEntry())->forceInteger();
-}
-
-bool AbstractMetaType::isTargetLangFlags() const
-{
-    return isFlags() && !static_cast<const FlagsTypeEntry *>(typeEntry())->forceInteger();
-}
-
 
 /*******************************************************************************
  * Other stuff...
