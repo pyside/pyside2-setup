@@ -10,8 +10,6 @@
     linux
     darwin
     win32
-[QtCore::bug_829]
-    win32
 [QtCore::qfile_test]
     win32
     darwin py3
