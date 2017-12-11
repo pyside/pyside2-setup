@@ -118,7 +118,6 @@ public:
         Static                      = 0x00000040,
 
         FinalInTargetLang           = 0x00000080,
-        FinalInCpp                  = 0x00000100,
 
         GetterFunction              = 0x00000400,
         SetterFunction              = 0x00000800,
@@ -134,9 +133,7 @@ public:
         FinalCppClass               = 0x00100000,
         VirtualCppMethod            = 0x00200000,
         OverriddenCppMethod         = 0x00400000,
-        FinalCppMethod              = 0x00800000,
-
-        Final                       = FinalInTargetLang | FinalInCpp
+        FinalCppMethod              = 0x00800000
     };
     Q_DECLARE_FLAGS(Attributes, Attribute)
     Q_FLAG(Attribute)
@@ -181,19 +178,9 @@ public:
         m_attributes &= ~attribute;
     }
 
-    bool isFinal() const
-    {
-        return (m_attributes & Final) == Final;
-    }
-
     bool isFinalInTargetLang() const
     {
         return m_attributes & FinalInTargetLang;
-    }
-
-    bool isFinalInCpp() const
-    {
-        return m_attributes & FinalInCpp;
     }
 
     bool isAbstract() const

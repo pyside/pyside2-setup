@@ -1214,7 +1214,7 @@ AbstractMetaFunctionList AbstractMetaClass::functionsInTargetLang() const
     // Only public functions in final classes
     // default_flags |= isFinal() ? WasPublic : 0;
     FunctionQueryOptions public_flags;
-    if (isFinal())
+    if (isFinalInTargetLang())
         public_flags |= WasPublic;
 
     // Constructors
@@ -1368,7 +1368,7 @@ void AbstractMetaClass::addFunction(AbstractMetaFunction *function)
         Q_ASSERT(false); //memory leak
 
     m_hasVirtualSlots |= function->isVirtualSlot();
-    m_hasVirtuals |= !function->isFinal() || function->isVirtualSlot() || hasVirtualDestructor();
+    m_hasVirtuals |= function->isVirtual() || function->isVirtualSlot() || hasVirtualDestructor();
     m_isPolymorphic |= m_hasVirtuals;
     m_hasNonpublic |= !function->isPublic();
 }
@@ -1572,7 +1572,7 @@ static AbstractMetaFunction *createXetter(const AbstractMetaField *g, const QStr
     f->setImplementingClass(g->enclosingClass());
     f->setDeclaringClass(g->enclosingClass());
 
-    AbstractMetaAttributes::Attributes attr = AbstractMetaAttributes::Final | type;
+    AbstractMetaAttributes::Attributes attr = AbstractMetaAttributes::FinalInTargetLang | type;
     if (g->isStatic())
         attr |= AbstractMetaAttributes::Static;
     if (g->isPublic())
@@ -1752,7 +1752,7 @@ void AbstractMetaClass::addDefaultConstructor()
     f->setArguments(AbstractMetaArgumentList());
     f->setDeclaringClass(this);
 
-    f->setAttributes(AbstractMetaAttributes::Public | AbstractMetaAttributes::Final);
+    f->setAttributes(AbstractMetaAttributes::Public | AbstractMetaAttributes::FinalInTargetLang);
     f->setImplementingClass(this);
     f->setOriginalAttributes(f->attributes());
 
@@ -1780,7 +1780,7 @@ void AbstractMetaClass::addDefaultCopyConstructor(bool isPrivate)
     arg->setName(name());
     f->addArgument(arg);
 
-    AbstractMetaAttributes::Attributes attr = AbstractMetaAttributes::Final;
+    AbstractMetaAttributes::Attributes attr = AbstractMetaAttributes::FinalInTargetLang;
     if (isPrivate)
         attr |= AbstractMetaAttributes::Private;
     else
@@ -1809,7 +1809,7 @@ AbstractMetaFunctionList AbstractMetaClass::queryFunctions(FunctionQueryOptions 
         if ((query & NotRemovedFromTargetLang) && f->isRemovedFrom(f->implementingClass(), TypeSystem::TargetLangCode))
             continue;
 
-        if ((query & NotRemovedFromTargetLang) && !f->isFinal() && f->isRemovedFrom(f->declaringClass(), TypeSystem::TargetLangCode))
+        if ((query & NotRemovedFromTargetLang) && f->isVirtual() && f->isRemovedFrom(f->declaringClass(), TypeSystem::TargetLangCode))
             continue;
 
         if ((query & Visible) && f->isPrivate())
@@ -1833,7 +1833,7 @@ AbstractMetaFunctionList AbstractMetaClass::queryFunctions(FunctionQueryOptions 
         if ((query & FinalInTargetLangFunctions) && !f->isFinalInTargetLang())
             continue;
 
-        if ((query & VirtualInCppFunctions) && f->isFinalInCpp())
+        if ((query & VirtualInCppFunctions) && !f->isVirtual())
             continue;
 
         if ((query & Signals) && (!f->isSignal()))
@@ -2091,9 +2091,6 @@ void AbstractMetaClass::fixFunctions()
                         // Same function, propegate virtual...
                         if (!(cmp & AbstractMetaFunction::EqualAttributes)) {
                             if (!f->isEmptyFunction()) {
-                                if (!sf->isFinalInCpp() && f->isFinalInCpp()) {
-                                    *f -= AbstractMetaAttributes::FinalInCpp;
-                                }
                                 if (!sf->isFinalInTargetLang() && f->isFinalInTargetLang()) {
                                     *f -= AbstractMetaAttributes::FinalInTargetLang;
                                 }
@@ -2128,7 +2125,6 @@ void AbstractMetaClass::fixFunctions()
                             if (f->isPrivate()) {
                                 f->setFunctionType(AbstractMetaFunction::EmptyFunction);
                                 *f += AbstractMetaAttributes::FinalInTargetLang;
-                                *f += AbstractMetaAttributes::FinalInCpp;
                             }
                         }
 

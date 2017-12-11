@@ -374,7 +374,7 @@ void AbstractMetaBuilderPrivate::traverseStreamOperator(FunctionModelItem item)
 
                 streamFunction->setArguments(arguments);
 
-                *streamFunction += AbstractMetaAttributes::Final;
+                *streamFunction += AbstractMetaAttributes::FinalInTargetLang;
                 *streamFunction += AbstractMetaAttributes::Public;
                 streamFunction->setOriginalAttributes(streamFunction->attributes());
 
@@ -1486,11 +1486,6 @@ void AbstractMetaBuilderPrivate::setupFunctionDefaults(AbstractMetaFunction *met
 
     if (metaFunction->name() == QLatin1String("operator_equal"))
         metaClass->setHasEqualsOperator(true);
-
-    if (!metaFunction->isFinalInTargetLang()
-        && metaFunction->isRemovedFrom(metaClass, TypeSystem::TargetLangCode)) {
-        *metaFunction += AbstractMetaAttributes::FinalInCpp;
-    }
 }
 
 void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaFunction *metaFunction)
@@ -1707,16 +1702,18 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
             metaClass->setHasPrivateConstructor(true);
         if ((isInvalidDestructor || isInvalidConstructor)
             && !metaClass->hasNonPrivateConstructor()) {
-            *metaClass += AbstractMetaAttributes::Final;
+            *metaClass += AbstractMetaAttributes::FinalInTargetLang;
         } else if (metaFunction->isConstructor() && !metaFunction->isPrivate()) {
-            *metaClass -= AbstractMetaAttributes::Final;
+            *metaClass -= AbstractMetaAttributes::FinalInTargetLang;
             metaClass->setHasNonPrivateConstructor(true);
         }
 
         // Classes with virtual destructors should always have a shell class
         // (since we aren't registering the destructors, we need this extra check)
-        if (metaFunction->isDestructor() && !metaFunction->isFinal())
+        if (metaFunction->isDestructor() && metaFunction->isVirtual()
+            && metaFunction->visibility() != AbstractMetaAttributes::Private) {
             metaClass->setForceShellClass(true);
+        }
 
         if (!metaFunction->isDestructor()
             && !(metaFunction->isPrivate() && metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction)) {
@@ -1929,7 +1926,7 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
     metaFunction->setVisibility(visibility);
     metaFunction->setUserAdded(true);
     AbstractMetaAttributes::Attribute isStatic = addedFunc.isStatic() ? AbstractMetaFunction::Static : AbstractMetaFunction::None;
-    metaFunction->setAttributes(metaFunction->attributes() | AbstractMetaAttributes::Final | isStatic);
+    metaFunction->setAttributes(metaFunction->attributes() | AbstractMetaAttributes::FinalInTargetLang | isStatic);
     metaFunction->setType(translateType(addedFunc.version(), addedFunc.returnType()));
 
 
@@ -2202,7 +2199,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
         if (functionItem->isFinal())
             *metaFunction += AbstractMetaAttributes::FinalCppMethod;
     } else {
-        *metaFunction += AbstractMetaAttributes::Final;
+        *metaFunction += AbstractMetaAttributes::FinalInTargetLang;
     }
 
     if (functionItem->isInvokable())
@@ -2210,7 +2207,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
 
     if (functionItem->isStatic()) {
         *metaFunction += AbstractMetaAttributes::Static;
-        *metaFunction += AbstractMetaAttributes::Final;
+        *metaFunction += AbstractMetaAttributes::FinalInTargetLang;
     }
 
     // Access rights
