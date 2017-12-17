@@ -40,7 +40,7 @@
 #ifndef VOIDPTR_H
 #define VOIDPTR_H
 
-#include <Python.h>
+#include "sbkpython.h"
 #include "shibokenmacros.h"
 #include "sbkconverter.h"
 

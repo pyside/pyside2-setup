@@ -40,7 +40,7 @@
 #ifndef PYSIDEQMLREGISTERTYPE_H
 #define PYSIDEQMLREGISTERTYPE_H
 
-#include <Python.h>
+#include <sbkpython.h>
 
 struct SbkObjectType;
 

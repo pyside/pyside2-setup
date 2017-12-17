@@ -48,6 +48,7 @@ threadstatesaver.cpp
 shibokenbuffer.cpp
 signature.cpp
 qapp_macro.cpp
+pep384resolve.cpp
 voidptr.cpp
 )
 
@@ -89,6 +90,7 @@ install(FILES
         threadstatesaver.h
         shibokenbuffer.h
         sbkpython.h
+        pep384resolve.h
         signature.h
         qapp_macro.h
         voidptr.h

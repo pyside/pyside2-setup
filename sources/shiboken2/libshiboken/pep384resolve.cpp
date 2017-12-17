@@ -1,9 +1,9 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
-** This file is part of Qt for Python.
+** This file is part of PySide2.
 **
 ** $QT_BEGIN_LICENSE:LGPL$
 ** Commercial License Usage
@@ -37,16 +37,15 @@
 **
 ****************************************************************************/
 
-#ifndef PYSIDE_QUICK_REGISTER_TYPE_H
-#define PYSIDE_QUICK_REGISTER_TYPE_H
+#if PY_MAJOR_VERSION >= 3
 
-#include <sbkpython.h>
+#include "pep384resolve.h"
 
-struct SbkObjectType;
-
-namespace PySide
+extern "C"
 {
-void initQuickSupport(PyObject *module);
-}
 
-#endif // PYSIDE_QUICK_REGISTER_TYPE_H
+// empty for now.
+
+} // extern "C"
+
+#endif // PY_MAJOR_VERSION >= 3

@@ -37,7 +37,7 @@
 **
 ****************************************************************************/
 
-#include <Python.h>
+#include <sbkpython.h>
 #include <shiboken.h>
 #include <pysideweakref.h>
 #include <QEasingCurve>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -40,8 +40,21 @@
 #ifndef SBKPYTHON_H
 #define SBKPYTHON_H
 
+#include "sbkversion.h"
+
+#if PYTHON_VERSION_MAJOR >= 3
+// This is the variable to use directly from CMake. Others like PY_VERSION_HEX
+// are still undefined. They are introduced with Python.h .
+#  define Py_LIMITED_API 0x03050000
+#else
+#  undef Py_LIMITED_API
+#endif
+
 #include "Python.h"
+// Now we have the usual variables from Python.h .
 #include "python25compat.h"
+#include "shibokenmacros.h"
+#include "pep384resolve.h"
 
 #if PY_MAJOR_VERSION >= 3
     #define IS_PY3K

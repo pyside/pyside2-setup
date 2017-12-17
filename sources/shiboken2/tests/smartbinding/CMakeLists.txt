@@ -27,7 +27,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_SOURCE_DIR}
                     ${SBK_PYTHON_INCLUDE_DIR}
                     ${libsmart_SOURCE_DIR}
-                    ${libshiboken_SOURCE_DIR})
+                    ${libshiboken_SOURCE_DIR}
+                    ${libshiboken_BINARY_DIR})
 add_library(smart MODULE ${smart_SRC})
 set_property(TARGET smart PROPERTY PREFIX "")
 set_property(TARGET smart PROPERTY OUTPUT_NAME "smart${PYTHON_EXTENSION_SUFFIX}")
