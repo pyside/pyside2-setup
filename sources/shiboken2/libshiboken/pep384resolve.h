@@ -599,16 +599,11 @@ typedef struct {
 
 /*****************************************************************************
  *
- * From floatobject.h
+ * RESOLVED: floatobject.h
  *
  */
 #ifdef Py_LIMITED_API
-typedef struct {
-    PyObject_HEAD
-    double ob_fval;
-} PyFloatObject;
-
-#define PyFloat_AS_DOUBLE(op) (((PyFloatObject *)(op))->ob_fval)
+#define PyFloat_AS_DOUBLE(op)       PyFloat_AsDouble(op)
 #endif
 
 /*****************************************************************************
@@ -622,57 +617,24 @@ PyAPI_FUNC(PyObject *) PyMemoryView_FromBuffer(Py_buffer *info);
 
 /*****************************************************************************
  *
- * From tupleobject.h
+ * RESOLVED: tupleobject.h
  *
  */
 #ifdef Py_LIMITED_API
-typedef struct {
-    PyObject_VAR_HEAD
-    PyObject *ob_item[1];
-
-    /* ob_item contains space for 'ob_size' elements.
-     * Items must normally not be NULL, except during construction when
-     * the tuple is not yet visible outside the function that builds it.
-     */
-} PyTupleObject;
-
-/* Macro, trading safety for speed */
-#define PyTuple_GET_ITEM(op, i) (((PyTupleObject *)(op))->ob_item[i])
-#define PyTuple_GET_SIZE(op)    Py_SIZE(op)
-
-/* Macro, *only* to be used to fill in brand new tuples */
-#define PyTuple_SET_ITEM(op, i, v) (((PyTupleObject *)(op))->ob_item[i] = v)
+#define PyTuple_GET_ITEM(op, i)     PyTuple_GetItem((PyObject *)op, i)
+#define PyTuple_GET_SIZE(op)        PyTuple_Size((PyObject *)op)
+#define PyTuple_SET_ITEM(op, i, v)  PyTuple_SetItem(op, i, v)
 #endif
 
 /*****************************************************************************
  *
- * From listobject.h
+ * RESOLVED: listobject.h
  *
  */
 #ifdef Py_LIMITED_API
-typedef struct {
-    PyObject_VAR_HEAD
-    /* Vector of pointers to list elements.  list[0] is ob_item[0], etc. */
-    PyObject **ob_item;
-
-    /* ob_item contains space for 'allocated' elements.  The number
-     * currently in use is ob_size.
-     * Invariants:
-     *     0 <= ob_size <= allocated
-     *     len(list) == ob_size
-     *     ob_item == NULL implies ob_size == allocated == 0
-     * list.sort() temporarily sets allocated to -1 to detect mutations.
-     *
-     * Items must normally not be NULL, except during construction when
-     * the list is not yet visible outside the function that builds it.
-     */
-    Py_ssize_t allocated;
-} PyListObject;
-#define PyList_GET_ITEM(op, i) (((PyListObject *)(op))->ob_item[i])
-#define PyList_SET_ITEM(op, i, v) (((PyListObject *)(op))->ob_item[i] = (v))
-#define PyList_GET_SIZE(op)    Py_SIZE(op)
-#define _PyList_ITEMS(op)      (((PyListObject *)(op))->ob_item)
-#define _PyList_ITEMS(op)      (((PyListObject *)(op))->ob_item)
+#define PyList_GET_ITEM(op, i)      PyList_GetItem(op, i)
+#define PyList_SET_ITEM(op, i, v)   PyList_SetItem(op, i, v)
+#define PyList_GET_SIZE(op)         PyList_Size(op)
 #endif
 
 /*****************************************************************************

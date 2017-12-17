@@ -392,7 +392,7 @@ execute_process(
 
 set(SHIBOKEN_BUILD_TYPE "Release")
 
-# We do not want to link against the python shared / static library on Linux And macOS.
+# We do not want to link against the python shared / static library on Linux and macOS.
 # The dynamic linker will pick up the python symbols at runtime automatically.
 # On Windows we do need to link against the python.lib import library.
 
