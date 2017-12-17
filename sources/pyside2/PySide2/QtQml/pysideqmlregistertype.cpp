@@ -120,9 +120,9 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
     }
 
     PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
-    if (!PySequence_Contains(pyObjType->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
+    if (!PySequence_Contains(PepType(pyObjType)->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
         PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.",
-                     qobjectType->tp_name, pyObjType->tp_name);
+                     PepType(qobjectType)->tp_name, PepType(pyObjType)->tp_name);
         return -1;
     }
 
@@ -229,57 +229,34 @@ void propListTpFree(void* self)
     PySideProperty* pySelf = reinterpret_cast<PySideProperty*>(self);
     delete reinterpret_cast<QmlListProperty*>(PySide::Property::userData(pySelf));
     // calls base type constructor
-    Py_TYPE(pySelf)->tp_base->tp_free(self);
+    PepType(PepType(Py_TYPE(pySelf))->tp_base)->tp_free(self);
 }
 
-PyTypeObject PropertyListType = {
-    PyVarObject_HEAD_INIT(0, 0)
-    "ListProperty",            /*tp_name*/
-    sizeof(PySideProperty),    /*tp_basicsize*/
-    0,                         /*tp_itemsize*/
-    0,                         /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
-    0,                         /*tp_compare*/
-    0,                         /*tp_repr*/
-    0,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT,        /*tp_flags*/
-    0,                         /*tp_doc */
-    0,                         /*tp_traverse */
-    0,                         /*tp_clear */
-    0,                         /*tp_richcompare */
-    0,                         /*tp_weaklistoffset */
-    0,                         /*tp_iter */
-    0,                         /*tp_iternext */
-    0,                         /*tp_methods */
-    0,                         /*tp_members */
-    0,                         /*tp_getset */
-    &PySidePropertyType,       /*tp_base */
-    0,                         /*tp_dict */
-    0,                         /*tp_descr_get */
-    0,                         /*tp_descr_set */
-    0,                         /*tp_dictoffset */
-    propListTpInit,            /*tp_init */
-    0,                         /*tp_alloc */
-    0,                         /*tp_new */
-    propListTpFree,            /*tp_free */
-    0,                         /*tp_is_gc */
-    0,                         /*tp_bases */
-    0,                         /*tp_mro */
-    0,                         /*tp_cache */
-    0,                         /*tp_subclasses */
-    0,                         /*tp_weaklist */
-    0,                         /*tp_del */
+static PyType_Slot PropertyListType_slots[] = {
+    {Py_tp_init, (void *)propListTpInit},
+    {Py_tp_free, (void *)propListTpFree},
+    {Py_tp_dealloc, (void *)SbkDummyDealloc},
+    {0, 0}
 };
+static PyType_Spec PropertyListType_spec = {
+    "PySide2.QtQml.ListProperty",
+    sizeof(PySideProperty),
+    0,
+    Py_TPFLAGS_DEFAULT,
+    PropertyListType_slots,
+};
+
+
+PyTypeObject *PropertyListTypeF(void)
+{
+    static PyTypeObject *type = nullptr;
+    if (!type) {
+        PyObject *bases = Py_BuildValue("(O)", PySidePropertyTypeF());
+        type = (PyTypeObject *)PyType_FromSpecWithBases(&PropertyListType_spec, bases);
+        Py_XDECREF(bases);
+    }
+    return type;
+}
 
 } // extern "C"
 
@@ -312,7 +289,7 @@ int propListCount(QQmlListProperty<QObject> *propList)
 
     // Check return type
     int cppResult = 0;
-    PythonToCppFunc pythonToCpp;
+    PythonToCppFunc pythonToCpp = 0;
     if (PyErr_Occurred())
         PyErr_Print();
     else if ((pythonToCpp = Shiboken::Conversions::isPythonToCppConvertible(Shiboken::Conversions::PrimitiveTypeConverter<int>(), retVal)))
@@ -387,7 +364,7 @@ QtQml_VolatileBoolObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         return Q_NULLPTR;
 
     QtQml_VolatileBoolObject *self
-            = reinterpret_cast<QtQml_VolatileBoolObject *>(type->tp_alloc(type, 0));
+            = reinterpret_cast<QtQml_VolatileBoolObject *>(PepType(type)->tp_alloc(type, 0));
 
     if (self != Q_NULLPTR)
         self->flag = ok;
@@ -444,10 +421,10 @@ QtQml_VolatileBoolObject_repr(QtQml_VolatileBoolObject *self)
 
     if (self->flag)
         s = PyBytes_FromFormat("%s(True)",
-                                Py_TYPE(self)->tp_name);
+                                PepType((Py_TYPE(self)))->tp_name);
     else
         s = PyBytes_FromFormat("%s(False)",
-                                Py_TYPE(self)->tp_name);
+                                PepType((Py_TYPE(self)))->tp_name);
     Py_XINCREF(s);
     return s;
 }
@@ -459,87 +436,61 @@ QtQml_VolatileBoolObject_str(QtQml_VolatileBoolObject *self)
 
     if (self->flag)
         s = PyBytes_FromFormat("%s(True) -> %p",
-                                Py_TYPE(self)->tp_name, &(self->flag));
+                                PepType((Py_TYPE(self)))->tp_name, &(self->flag));
     else
         s = PyBytes_FromFormat("%s(False) -> %p",
-                                Py_TYPE(self)->tp_name, &(self->flag));
+                                PepType((Py_TYPE(self)))->tp_name, &(self->flag));
     Py_XINCREF(s);
     return s;
 }
 
-PyTypeObject QtQml_VolatileBoolType = {
-    PyVarObject_HEAD_INIT(Q_NULLPTR, 0)                         /*ob_size*/
-    "VolatileBool",                                             /*tp_name*/
-    sizeof(QtQml_VolatileBoolObject),                           /*tp_basicsize*/
-    0,                                                          /*tp_itemsize*/
-    0,                                                          /*tp_dealloc*/
-    0,                                                          /*tp_print*/
-    0,                                                          /*tp_getattr*/
-    0,                                                          /*tp_setattr*/
-    0,                                                          /*tp_compare*/
-    reinterpret_cast<reprfunc>(QtQml_VolatileBoolObject_repr),  /*tp_repr*/
-    0,                                                          /*tp_as_number*/
-    0,                                                          /*tp_as_sequence*/
-    0,                                                          /*tp_as_mapping*/
-    0,                                                          /*tp_hash */
-    0,                                                          /*tp_call*/
-    reinterpret_cast<reprfunc>(QtQml_VolatileBoolObject_str),   /*tp_str*/
-    0,                                                          /*tp_getattro*/
-    0,                                                          /*tp_setattro*/
-    0,                                                          /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT,                                         /*tp_flags*/
-    "VolatileBool objects contain a C++ volatile bool",         /* tp_doc */
-    0,                                                          /* tp_traverse */
-    0,                                                          /* tp_clear */
-    0,                                                          /* tp_richcompare */
-    0,                                                          /* tp_weaklistoffset */
-    0,                                                          /* tp_iter */
-    0,                                                          /* tp_iternext */
-    QtQml_VolatileBoolObject_methods,                           /* tp_methods */
-    0,                                                          /* tp_members */
-    0,                                                          /* tp_getset */
-    0,                                                          /* tp_base */
-    0,                                                          /* tp_dict */
-    0,                                                          /* tp_descr_get */
-    0,                                                          /* tp_descr_set */
-    0,                                                          /* tp_dictoffset */
-    0,                                                          /* tp_init */
-    0,                                                          /* tp_alloc */
-    QtQml_VolatileBoolObject_new,                               /* tp_new */
-    0,                                                          /* tp_free */
-    0,                                                          /* tp_is_gc */
-    0,                                                          /* tp_bases */
-    0,                                                          /* tp_mro */
-    0,                                                          /* tp_cache */
-    0,                                                          /* tp_subclasses */
-    0,                                                          /* tp_weaklist */
-    0,                                                          /* tp_del */
-    0,                                                          /* tp_version_tag */
-#if PY_MAJOR_VERSION > 3 || PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION >= 4
-    0                                                           /* tp_finalize */
-#endif
+static PyType_Slot QtQml_VolatileBoolType_slots[] = {
+    {Py_tp_repr, (void *)reinterpret_cast<reprfunc>(QtQml_VolatileBoolObject_repr)},
+    {Py_tp_str, (void *)reinterpret_cast<reprfunc>(QtQml_VolatileBoolObject_str)},
+    {Py_tp_methods, (void *)QtQml_VolatileBoolObject_methods},
+    {Py_tp_new, (void *)QtQml_VolatileBoolObject_new},
+    {Py_tp_dealloc, (void *)SbkDummyDealloc},
+    {0, 0}
 };
+static PyType_Spec QtQml_VolatileBoolType_spec = {
+    "PySide2.QtQml.VolatileBool",
+    sizeof(QtQml_VolatileBoolObject),
+    0,
+    Py_TPFLAGS_DEFAULT,
+    QtQml_VolatileBoolType_slots,
+};
+
+
+PyTypeObject *QtQml_VolatileBoolTypeF(void)
+{
+    static PyTypeObject *type = nullptr;
+    if (!type)
+        type = (PyTypeObject *)PyType_FromSpec(&QtQml_VolatileBoolType_spec);
+    return type;
+}
 
 void PySide::initQmlSupport(PyObject* module)
 {
     ElementFactory<PYSIDE_MAX_QML_TYPES - 1>::init();
 
     // Export QmlListProperty type
-    if (PyType_Ready(&PropertyListType) < 0) {
+    if (PyType_Ready(PropertyListTypeF()) < 0) {
+        PyErr_Print();
         qWarning() << "Error initializing PropertyList type.";
         return;
     }
 
-    Py_INCREF(reinterpret_cast<PyObject *>(&PropertyListType));
-    PyModule_AddObject(module, PropertyListType.tp_name,
-                       reinterpret_cast<PyObject *>(&PropertyListType));
+    Py_INCREF(reinterpret_cast<PyObject *>(PropertyListTypeF()));
+    PyModule_AddObject(module, PepType_GetNameStr(PropertyListTypeF()),
+                       reinterpret_cast<PyObject *>(PropertyListTypeF()));
 
-    if (PyType_Ready(&QtQml_VolatileBoolType) < 0) {
+    if (PyType_Ready(QtQml_VolatileBoolTypeF()) < 0) {
+        PyErr_Print();
         qWarning() << "Error initializing VolatileBool type.";
         return;
     }
 
-    Py_INCREF(&QtQml_VolatileBoolType);
-    PyModule_AddObject(module, QtQml_VolatileBoolType.tp_name,
-                       reinterpret_cast<PyObject *>(&QtQml_VolatileBoolType));
+    Py_INCREF(QtQml_VolatileBoolTypeF());
+    PyModule_AddObject(module, PepType_GetNameStr(QtQml_VolatileBoolTypeF()),
+                       reinterpret_cast<PyObject *>(QtQml_VolatileBoolTypeF()));
 }

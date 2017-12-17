@@ -400,10 +400,51 @@ else()
 endif()
 message(STATUS "Detected OS: ${AUTO_OS}")
 
+# On Windows, PYTHON_LIBRARIES can be a list. Example:
+#    optimized;C:/Python36/libs/python36.lib;debug;C:/Python36/libs/python36_d.lib
+# On other platforms, this result is not used at all.
+execute_process(
+    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+        for lib in '${PYTHON_LIBRARIES}'.split(';'):
+            if '/' in lib:
+                prefix, py = lib.rsplit( '/', 1)
+                if py.startswith('python3'):
+                    print(prefix + '/python3.lib')
+                    break
+        "
+    OUTPUT_VARIABLE PYTHON_LIMITED_LIBRARIES
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
 if (WIN32)
     set(PATH_SEP "\;")
 else()
     set(PATH_SEP ":")
+endif()
+
+option(FORCE_LIMITED_API "Enable the limited API." "no")
+
+set(PYTHON_LIMITED_API 0)
+if(FORCE_LIMITED_API STREQUAL "yes")
+    # GREATER_EQUAL is available only from cmake 3.7 on. We mean python 3.5 .
+    if (${PYTHON_VERSION_MAJOR} EQUAL 3 AND ${PYTHON_VERSION_MINOR} GREATER 4)
+        if (WIN32)
+            set(SHIBOKEN_PYTHON_LIBRARIES ${PYTHON_LIMITED_LIBRARIES})
+        endif()
+        add_definitions("-DPy_LIMITED_API=0x03050000")
+        set(PYTHON_LIMITED_API 1)
+    endif()
+    if (CMAKE_BUILD_TYPE STREQUAL "Release")
+        add_definitions("-DNDEBUG")
+    endif()
+endif()
+
+if (PYTHON_LIMITED_API)
+    if (WIN32 AND NOT EXISTS "${PYTHON_LIMITED_LIBRARIES}")
+        message(FATAL_ERROR "The Limited API was enabled, but ${PYTHON_LIMITED_LIBRARIES} was not found!")
+    endif()
+    message(STATUS "******************************************************")
+    message(STATUS "** Limited API enabled ${PYTHON_LIMITED_LIBRARIES}")
+    message(STATUS "******************************************************")
 endif()
 
 # Define supported Qt Version

@@ -32,7 +32,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${libsample_SOURCE_DIR}/..
                     ${sample_BINARY_DIR}
                     ${sample_BINARY_DIR}/sample
-                    ${libshiboken_SOURCE_DIR})
+                    ${libshiboken_SOURCE_DIR}
+                    ${libshiboken_BINARY_DIR})
 add_library(other MODULE ${other_SRC})
 set_property(TARGET other PROPERTY PREFIX "")
 set_property(TARGET other PROPERTY OUTPUT_NAME "other${PYTHON_EXTENSION_SUFFIX}")

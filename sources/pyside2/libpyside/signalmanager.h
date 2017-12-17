@@ -61,7 +61,6 @@ public:
     PyObjectWrapper& operator=(const PyObjectWrapper &other);
 private:
     PyObject* m_me;
-    void*     m_data; //future
 };
 
 PYSIDE_API QDataStream &operator<<(QDataStream& out, const PyObjectWrapper& myObj);

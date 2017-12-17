@@ -49,7 +49,7 @@
 
 extern "C"
 {
-    extern PYSIDE_API PyTypeObject PySideMetaFunctionType;
+    extern PYSIDE_API PyTypeObject *PySideMetaFunctionTypeF(void);
 
     struct PySideMetaFunctionPrivate;
     struct PYSIDE_API PySideMetaFunction

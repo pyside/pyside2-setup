@@ -83,8 +83,10 @@ public:
             SbkObjectType* node1 = i->first;
             const NodeList& nodeList = i->second;
             NodeList::const_iterator j = nodeList.begin();
-            for (; j != nodeList.end(); ++j)
-                file << '"' << (*j)->super.ht_type.tp_name << "\" -> \"" << node1->super.ht_type.tp_name << "\"\n";
+            for (; j != nodeList.end(); ++j) {
+                file << '"' << PepType(*j)->tp_name << "\" -> \""
+                    << PepType(node1)->tp_name << "\"\n";
+            }
         }
         file << "}\n";
     }
@@ -102,7 +104,10 @@ public:
                     return newType;
             }
         }
-        void* typeFound = ((type->d && type->d->type_discovery) ? type->d->type_discovery(*cptr, baseType) : 0);
+        void *typeFound = nullptr;
+        if (PepType_SOTP(type) && PepType_SOTP(type)->type_discovery) {
+            typeFound = PepType_SOTP(type)->type_discovery(*cptr, baseType);
+        }
         if (typeFound) {
             // This "typeFound != type" is needed for backwards compatibility with old modules using a newer version of
             // libshiboken because old versions of type_discovery function used to return a SbkObjectType* instead of
@@ -111,7 +116,7 @@ public:
                 *cptr = typeFound;
             return type;
         } else {
-            return 0;
+            return nullptr;
         }
     }
 };
@@ -128,7 +133,7 @@ static void showWrapperMap(const WrapperMap& wrapperMap)
             const SbkObject *sbkObj = iter->second;
             fprintf(stderr, "key: %p, value: %p (%s, refcnt: %d)\n", iter->first,
                     static_cast<const void *>(sbkObj),
-                    Py_TYPE(sbkObj)->tp_name,
+                    PepType((Py_TYPE(sbkObj)))->tp_name,
                     int(reinterpret_cast<const PyObject *>(sbkObj)->ob_refcnt));
         }
         fprintf(stderr, "-------------------------------\n");
@@ -210,7 +215,7 @@ bool BindingManager::hasWrapper(const void* cptr)
 void BindingManager::registerWrapper(SbkObject* pyObj, void* cptr)
 {
     SbkObjectType* instanceType = reinterpret_cast<SbkObjectType*>(Py_TYPE(pyObj));
-    SbkObjectTypePrivate* d = instanceType->d;
+    SbkObjectTypePrivate* d = PepType_SOTP(instanceType);
 
     if (!d)
         return;
@@ -231,7 +236,7 @@ void BindingManager::registerWrapper(SbkObject* pyObj, void* cptr)
 void BindingManager::releaseWrapper(SbkObject* sbkObj)
 {
     SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(Py_TYPE(sbkObj));
-    SbkObjectTypePrivate* d = sbkType->d;
+    SbkObjectTypePrivate* d = PepType_SOTP(sbkType);
     int numBases = ((d && d->is_multicpp) ? getNumberOfCppBaseClasses(Py_TYPE(sbkObj)) : 1);
 
     void** cptrs = reinterpret_cast<SbkObject*>(sbkObj)->d->cptr;
@@ -278,17 +283,17 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
     PyObject *method = PyObject_GetAttr(reinterpret_cast<PyObject *>(wrapper), pyMethodName);
 
     if (method && PyMethod_Check(method)
-        && reinterpret_cast<PyMethodObject*>(method)->im_self == reinterpret_cast<PyObject*>(wrapper)) {
+        && PyMethod_GET_SELF(method) == reinterpret_cast<PyObject*>(wrapper)) {
         PyObject* defaultMethod;
-        PyObject* mro = Py_TYPE(wrapper)->tp_mro;
+        PyObject* mro = PepType(Py_TYPE(wrapper))->tp_mro;
 
         // The first class in the mro (index 0) is the class being checked and it should not be tested.
         // The last class in the mro (size - 1) is the base Python object class which should not be tested also.
         for (int i = 1; i < PyTuple_GET_SIZE(mro) - 1; i++) {
             PyTypeObject* parent = reinterpret_cast<PyTypeObject*>(PyTuple_GET_ITEM(mro, i));
-            if (parent->tp_dict) {
-                defaultMethod = PyDict_GetItem(parent->tp_dict, pyMethodName);
-                if (defaultMethod && reinterpret_cast<PyMethodObject*>(method)->im_func != defaultMethod) {
+            if (PepType(parent)->tp_dict) {
+                defaultMethod = PyDict_GetItem(PepType(parent)->tp_dict, pyMethodName);
+                if (defaultMethod && PyMethod_GET_FUNCTION(method) != defaultMethod) {
                     Py_DECREF(pyMethodName);
                     return method;
                 }

@@ -44,14 +44,17 @@
 extern "C" {
     struct SbkConverter;
 
+    struct PySideQFlagsTypePrivate
+    {
+        SbkConverter** converterPtr;
+        SbkConverter* converter;
+    };
     /**
      * Type of all QFlags
      */
     struct PySideQFlagsType
     {
-        PyHeapTypeObject super;
-        SbkConverter** converterPtr;
-        SbkConverter* converter;
+        PepTypeObject type;
     };
 
     #define PYSIDE_QFLAGS(X) reinterpret_cast<PySideQFlagsObject*>(X)
@@ -131,20 +134,61 @@ namespace PySide
 {
 namespace QFlags
 {
-    PyTypeObject* create(const char* name, PyNumberMethods* numberMethods)
+    static PyType_Slot SbkNewQFlagsType_slots[] = {
+#ifdef IS_PY3K
+        {Py_nb_bool, 0},
+#else
+        {Py_nb_nonzero, 0},
+        {Py_nb_long, 0},
+#endif
+        {Py_nb_invert, 0},
+        {Py_nb_and, 0},
+        {Py_nb_xor, 0},
+        {Py_nb_or, 0},
+        {Py_nb_int, 0},
+#ifndef IS_PY3K
+        {Py_nb_long, 0},
+#endif
+        {Py_tp_new, (void *)PySideQFlagsNew},
+        {Py_tp_richcompare, (void *)PySideQFlagsRichCompare},
+        {Py_tp_dealloc, (void *)SbkDummyDealloc},
+        {0, 0}
+    };
+    static PyType_Spec SbkNewQFlagsType_spec = {
+        "missing QFlags name", // to be inserted later
+        sizeof(PySideQFlagsObject),
+        0,
+        Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES,
+        SbkNewQFlagsType_slots,
+    };
+
+    PyTypeObject *create(const char* name, PyType_Slot numberMethods[])
     {
-        PyTypeObject* type = reinterpret_cast<PyTypeObject*>(new PySideQFlagsType);
-        ::memset(type, 0, sizeof(PySideQFlagsType));
+        char qualname[200];
+        strcpy(qualname, "PySide2.libpyside.");
+        strcat(qualname, name);
+        // Careful: PyType_FromSpec does not allocate the string.
+        PyType_Spec *newspec = new PyType_Spec;
+        newspec->name = strdup(qualname);
+        newspec->basicsize = SbkNewQFlagsType_spec.basicsize;
+        newspec->itemsize = SbkNewQFlagsType_spec.itemsize;
+        newspec->flags = SbkNewQFlagsType_spec.flags;
+        int idx = -1;
+#ifdef IS_PY3K
+#  define SLOT slot
+#else
+#  define SLOT slot_
+#endif
+        while (numberMethods[++idx].SLOT) {
+            assert(SbkNewQFlagsType_slots[idx].SLOT == numberMethods[idx].SLOT);
+            SbkNewQFlagsType_slots[idx].pfunc = numberMethods[idx].pfunc;
+        }
+        newspec->slots = SbkNewQFlagsType_spec.slots;
+        PyTypeObject *type = (PyTypeObject *)PyType_FromSpec(newspec);
         Py_TYPE(type) = &PyType_Type;
-        type->tp_basicsize = sizeof(PySideQFlagsObject);
-        type->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_CHECKTYPES;
-        type->tp_name = name;
-        type->tp_new = &PySideQFlagsNew;
-        type->tp_as_number = numberMethods;
-        type->tp_richcompare = &PySideQFlagsRichCompare;
 
         PySideQFlagsType* flagsType = reinterpret_cast<PySideQFlagsType*>(type);
-        flagsType->converterPtr = &flagsType->converter;
+        PepType_PFTP(flagsType)->converterPtr = &PepType_PFTP(flagsType)->converter;
 
         if (PyType_Ready(type) < 0)
             return 0;

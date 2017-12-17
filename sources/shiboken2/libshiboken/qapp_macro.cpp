@@ -119,8 +119,8 @@ MakeSingletonQAppWrapper(PyTypeObject *type)
     if (type == NULL)
         type = Py_NONE_TYPE;
     if (!(type == Py_NONE_TYPE || Py_TYPE(qApp_content) == Py_NONE_TYPE)) {
-        const char *res_name = strrchr(Py_TYPE(qApp_content)->tp_name, '.')+1;
-        const char *type_name = strrchr(type->tp_name, '.')+1;
+        const char *res_name = PepType_GetNameStr(Py_TYPE(qApp_content));
+        const char *type_name = PepType_GetNameStr(type);
         PyErr_Format(PyExc_RuntimeError, "Please destroy the %s singleton before"
             " creating a new %s instance.", res_name, type_name);
         return NULL;

@@ -41,7 +41,7 @@
 #define SBK_CONVERTER_H
 
 #include <limits>
-#include <Python.h>
+#include "sbkpython.h"
 #include "shibokenmacros.h"
 #include "basewrapper.h"
 

@@ -291,12 +291,18 @@
         </native-to-target>
         <target-to-native>
             <add-conversion type="PyUnicode">
-            Py_UNICODE *unicode = PyUnicode_AS_UNICODE(%in);
-            #if defined(Py_UNICODE_WIDE)
+            #ifndef Py_LIMITED_API
+            Py_UNICODE* unicode = PyUnicode_AS_UNICODE(%in);
+            # if defined(Py_UNICODE_WIDE)
             // cast as Py_UNICODE can be a different type
             %out = QString::fromUcs4((const uint*)unicode);
-            #else
+            # else
             %out = QString::fromUtf16((const ushort*)unicode, PyUnicode_GET_SIZE(%in));
+            # endif
+            #else
+            wchar_t *temp = PyUnicode_AsWideCharString(%in, NULL);
+            %out = QString::fromWCharArray(temp);
+            PyMem_Free(temp);
             #endif
             </add-conversion>
             <add-conversion type="PyString" check="py2kStrCheck(%in)">
@@ -410,7 +416,7 @@
             <add-conversion type="SbkObject">
             // a class supported by QVariant?
             int typeCode;
-            const char *typeName = QVariant_resolveMetaType(%in->ob_type, &amp;typeCode);
+            const char *typeName = QVariant_resolveMetaType(Py_TYPE(%in), &amp;typeCode);
             if (!typeCode || !typeName)
                 return;
             QVariant var(typeCode, (void*)0);
@@ -435,9 +441,9 @@
     <inject-code class="native" position="beginning">
     static const char *QVariant_resolveMetaType(PyTypeObject *type, int *typeId)
     {
-        if (PyObject_TypeCheck(type, &amp;SbkObjectType_Type)) {
-            SbkObjectType *sbkType = (SbkObjectType*)type;
-            const char *typeName = Shiboken::ObjectType::getOriginalName(sbkType);
+        if (PyObject_TypeCheck(type, SbkObjectType_TypeF())) {
+            SbkObjectType* sbkType = (SbkObjectType*)type;
+            const char* typeName = Shiboken::ObjectType::getOriginalName(sbkType);
             if (!typeName)
                 return 0;
             bool valueType = '*' != typeName[qstrlen(typeName) - 1];
@@ -456,15 +462,16 @@
             // tp_base does not always point to the first base class, but rather to the first
             // that has added any python fields or slots to its object layout.
             // See https://mail.python.org/pipermail/python-list/2009-January/520733.html
-            if (type->tp_bases) {
-                for (int i = 0; i &lt; PyTuple_GET_SIZE(type->tp_bases); ++i) {
-                    const char *derivedName = QVariant_resolveMetaType((PyTypeObject*)PyTuple_GET_ITEM(type->tp_bases, i), typeId);
+            if (PepType(type)->tp_bases) {
+                for (int i = 0; i &lt; PyTuple_GET_SIZE(PepType(type)->tp_bases); ++i) {
+                    const char *derivedName = QVariant_resolveMetaType((PyTypeObject*)PyTuple_GET_ITEM(
+                                              PepType(type)->tp_bases, i), typeId);
                     if (derivedName)
                         return derivedName;
                 }
             }
-            else if (type->tp_base) {
-                return QVariant_resolveMetaType(type->tp_base, typeId);
+            else if (PepType(type)->tp_base) {
+                return QVariant_resolveMetaType(PepType(type)->tp_base, typeId);
             }
         }
         *typeId = 0;
@@ -563,16 +570,16 @@
             </add-conversion>
             <add-conversion type="PyTypeObject">
             const char *typeName;
-            if (Shiboken::String::checkType((PyTypeObject*)%in))
+            if (Shiboken::String::checkType(reinterpret_cast&lt;PyTypeObject*&gt;(%in)))
                 typeName = "QString";
             else if (%in == reinterpret_cast&lt;PyObject*&gt;(&amp;PyFloat_Type))
                 typeName = "double"; // float is a UserType in QVariant.
             else if (%in == reinterpret_cast&lt;PyObject*&gt;(&amp;PyLong_Type))
                 typeName = "int";    // long is a UserType in QVariant.
-            else if (%in->ob_type == &amp;SbkObjectType_Type)
+            else if (Py_TYPE(%in) == SbkObjectType_TypeF())
                 typeName = Shiboken::ObjectType::getOriginalName((SbkObjectType*)%in);
             else
-                typeName = (reinterpret_cast&lt;PyTypeObject*&gt;(%in))->tp_name;
+                typeName = PepType((reinterpret_cast&lt;PyTypeObject*&gt;(%in)))->tp_name;
             %out = QVariant::nameToType(typeName);
             </add-conversion>
             <add-conversion type="PyString" check="Shiboken::String::check(%in)">
@@ -2589,7 +2596,7 @@
 
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
-            QByteArray b((reinterpret_cast&lt;PyObject*&gt;(%PYSELF))->ob_type->tp_name);
+            QByteArray b(PepType(Py_TYPE(%PYSELF))->tp_name);
             PyObject *aux = Shiboken::String::fromStringAndSize(%CPPSELF.constData(), %CPPSELF.size());
             if (PyUnicode_CheckExact(aux)) {
                 PyObject *tmp = PyUnicode_AsASCIIString(aux);
@@ -3088,7 +3095,7 @@
         <inject-code>
         Py_ssize_t size;
         uchar *ptr = reinterpret_cast&lt;uchar*&gt;(Shiboken::Buffer::getPointer(%PYARG_1, &amp;size));
-        %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(const_cast&lt;const uchar*>(ptr), size);
+        %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(const_cast&lt;const uchar*&gt;(ptr), size);
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
         </inject-code>
     </modify-function>
@@ -3114,8 +3121,8 @@
         // %FUNCTION_NAME() - disable generation of c++ function call
         (void) %2; // remove warning about unused variable
         Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
-        PyObject *pyTimer = Shiboken::SbkType&lt;QTimer>()->tp_new(Shiboken::SbkType&lt;QTimer>(), emptyTuple, 0);
-        Shiboken::SbkType&lt;QTimer>()->tp_init(pyTimer, emptyTuple, 0);
+        PyObject *pyTimer = PepType(Shiboken::SbkType&lt;QTimer&gt;())->tp_new(Shiboken::SbkType&lt;QTimer&gt;(), emptyTuple, 0);
+        PepType(Shiboken::SbkType&lt;QTimer&gt;())->tp_init(pyTimer, emptyTuple, 0);
 
         QTimer* timer = %CONVERTTOCPP[QTimer*](pyTimer);
         Shiboken::AutoDecRef result(
@@ -3138,14 +3145,14 @@
         <inject-code class="target" position="beginning">
         // %FUNCTION_NAME() - disable generation of c++ function call
         Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
-        PyObject *pyTimer = Shiboken::SbkType&lt;QTimer>()->tp_new(Shiboken::SbkType&lt;QTimer>(), emptyTuple, 0);
-        Shiboken::SbkType&lt;QTimer>()->tp_init(pyTimer, emptyTuple, 0);
+        PyObject *pyTimer = PepType(Shiboken::SbkType&lt;QTimer&gt;())->tp_new(Shiboken::SbkType&lt;QTimer&gt;(), emptyTuple, 0);
+        PepType(Shiboken::SbkType&lt;QTimer&gt;())->tp_init(pyTimer, emptyTuple, 0);
         QTimer* timer = %CONVERTTOCPP[QTimer*](pyTimer);
         timer->setSingleShot(true);
 
-        if (PyObject_TypeCheck(%2, &amp;PySideSignalInstanceType)) {
+        if (PyObject_TypeCheck(%2, PySideSignalInstanceTypeF())) {
             PySideSignalInstance *signalInstance = reinterpret_cast&lt;PySideSignalInstance*&gt;(%2);
-            Shiboken::AutoDecRef signalSignature(Shiboken::String::fromFormat("2%s",PySide::Signal::getSignature(signalInstance)));
+            Shiboken::AutoDecRef signalSignature(Shiboken::String::fromFormat("2%s", PySide::Signal::getSignature(signalInstance)));
             Shiboken::AutoDecRef result(
                 PyObject_CallMethod(pyTimer,
                                     const_cast&lt;char*&gt;("connect"),
@@ -4026,7 +4033,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
             <replace-default-expression with="0" />
         </modify-argument>
         <inject-code>
-            if (PyObject_TypeCheck(%1, &amp;PySideSignalInstanceType)) {
+            if (PyObject_TypeCheck(%1, PySideSignalInstanceTypeF())) {
                 PyObject *dataSource = PySide::Signal::getObject((PySideSignalInstance*)%PYARG_1);
                 Shiboken::AutoDecRef obType(PyObject_Type(dataSource));
                 QObject* sender = %CONVERTTOCPP[QObject*](dataSource);
@@ -4082,11 +4089,11 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
       // since it refers to a name very tied to the generator implementation.
       // Check bug #362 for more information on this
       // http://bugs.openbossa.org/show_bug.cgi?id=362
-      if (!PyObject_TypeCheck(%1, &amp;PySideSignalInstanceType))
+      if (!PyObject_TypeCheck(%1, PySideSignalInstanceTypeF()))
           goto Sbk_%TYPEFunc_%FUNCTION_NAME_TypeError;
       PySideSignalInstance *signalInstance = reinterpret_cast&lt;PySideSignalInstance*&gt;(%1);
       QObject* sender = %CONVERTTOCPP[QObject*](PySide::Signal::getObject(signalInstance));
-      QSignalTransition*%0 = %CPPSELF->%FUNCTION_NAME(sender,PySide::Signal::getSignature(signalInstance),%2);
+      QSignalTransition *%0 = %CPPSELF->%FUNCTION_NAME(sender, PySide::Signal::getSignature(signalInstance),%2);
       %PYARG_0 = %CONVERTTOPYTHON[QSignalTransition*](%0);
       </inject-code>
     </add-function>

@@ -40,7 +40,7 @@
 #ifndef VOIDPTR_H
 #define VOIDPTR_H
 
-#include <Python.h>
+#include "sbkpython.h"
 #include "shibokenmacros.h"
 #include "sbkconverter.h"
 
@@ -48,7 +48,7 @@ extern "C"
 {
 
 // Void pointer type declaration.
-extern LIBSHIBOKEN_API PyTypeObject SbkVoidPtrType;
+extern LIBSHIBOKEN_API PyTypeObject *SbkVoidPtrTypeF(void);
 
 } // extern "C"
 
