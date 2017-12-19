@@ -270,11 +270,11 @@ void initNumPyArrayConverters()
     // Make sure to read about the magic defines PY_ARRAY_UNIQUE_SYMBOL etc.,
     // when changing this or spreading the code over several source files.
     if (_import_array() < 0) {
-        PyErr_Print();
-        PyErr_SetString(PyExc_ImportError, "numpy.core.multiarray failed to import");
+        if (debugNumPy)
+            PyErr_Print();
+        PyErr_Clear();
         return;
     }
-
     // Extend the converters for primitive types by NumPy ones.
     extendArrayConverter1<short, NPY_SHORT>();
     extendArrayConverter2<short, NPY_SHORT>();
