@@ -70,10 +70,6 @@
     win32
     linux
     darwin
-[QtCore::qthread_signal_test]
-    win32
-    linux
-    darwin
 [QtCore::qthread_prod_cons_test]
     win32
     linux
