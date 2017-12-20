@@ -57,16 +57,42 @@ all_modules = list("PySide2." + x for x in PySide2.__all__)
 from PySide2.support.signature import inspect
 from PySide2.QtCore import __version__
 
-version_id = __version__.replace(".", "_")
 is_py3 = sys.version_info[0] == 3
 is_ci = os.environ.get("QTEST_ENVIRONMENT", "") == "ci"
 # Python2 legacy: Correct 'linux2' to 'linux', recommended way.
 platform = 'linux' if sys.platform.startswith('linux') else sys.platform
-module = "exists_{}_{}{}".format(platform, version_id, "_ci" if is_ci else "")
-refpath = os.path.join(os.path.dirname(__file__), module + ".py")
 # Make sure not to get .pyc in Python2.
 sourcepath = os.path.splitext(__file__)[0] + ".py"
 
+def qtVersion():
+    return tuple(map(int, __version__.split(".")))
+
+# Format a registry file name for version
+def _registryFileName(version):
+    name = "exists_{}_{}_{}_{}{}.py".format(platform,
+        version[0], version[1], version[2], "_ci" if is_ci else "")
+    return os.path.join(os.path.dirname(__file__), name)
+
+# Return the expected registry file name
+def getRefPath():
+    return _registryFileName(qtVersion())
+
+# Return the registry file name, either that of the current
+# version or fall back to a previous patch release
+def getEffectiveRefPath():
+    refpath = getRefPath()
+    if os.path.exists(refpath):
+        return refpath
+    version = qtVersion()
+    majorVersion = version[0]
+    minorVersion = version[1]
+    patchVersion = version[2]
+    while patchVersion >= 0:
+        file = _registryFileName((majorVersion, minorVersion, patchVersion))
+        if os.path.exists(file):
+            return file
+        patchVersion = patchVersion - 1
+    return refpath
 
 class Formatter(object):
     """
@@ -203,7 +229,7 @@ def enum_all():
     return ret
 
 def generate_all():
-    with open(refpath, "w") as outfile, open(sourcepath) as f:
+    with open(refPath(), "w") as outfile, open(sourcepath) as f:
         fmt = Formatter(outfile)
         enu = SimplifyingEnumerator(fmt)
         lines = f.readlines()

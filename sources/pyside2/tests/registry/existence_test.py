@@ -43,20 +43,28 @@ import os
 import sys
 import unittest
 from textwrap import dedent
-from init_platform import enum_all, generate_all, is_ci, module, refpath
+from init_platform import (enum_all, generate_all, is_ci,
+   getEffectiveRefPath, getRefPath, qtVersion)
 from util import isolate_warnings, check_warnings, suppress_warnings, warn
 from PySide2 import *
-from PySide2.QtCore import __version__
 
-pyc = os.path.splitext(refpath)[0] + ".pyc"
-if os.path.exists(pyc) and not os.path.exists(refpath):
+refPath = getRefPath()
+effectiveRefPath = getEffectiveRefPath()
+effectiveRefPathRoot = os.path.splitext(effectiveRefPath)[0]
+pyc = effectiveRefPathRoot + ".pyc"
+if os.path.exists(pyc) and not os.path.exists(effectiveRefPath):
     # on Python2 the pyc file would be imported
     os.unlink(pyc)
+module = os.path.basename(effectiveRefPathRoot)
 
-home_dir = refpath
+if refPath != effectiveRefPath:
+    print("*** Falling back to ", effectiveRefPath, " since expected ",
+        refPath, " does not exist")
+
+home_dir = effectiveRefPath
 for _ in "abcde":
     home_dir = os.path.dirname(home_dir)
-shortpath = os.path.relpath(refpath, home_dir)
+shortpath = os.path.relpath(effectiveRefPath, home_dir)
 try:
     exec("import {} as sig_exists".format(module))
     print("found:", shortpath)
@@ -66,11 +74,11 @@ except ImportError:
     have_refmodule = False
 except SyntaxError:
     print("*** not a python file, removed:", shortpath)
-    os.unlink(refpath)
+    os.unlink(effectiveRefPath)
     have_refmodule = False
 if have_refmodule and not hasattr(sig_exists, "dict"):
     print("*** wrong module without 'dict', removed:", shortpath)
-    os.unlink(refpath)
+    os.unlink(effectiveRefPath)
     have_refmodule = False
 
 
@@ -112,10 +120,9 @@ class TestSignaturesExists(unittest.TestCase):
                     warn("multi-signature count mismatch: '{}'".format(key))
             self.assertTrue(check_warnings())
 
-version = tuple(map(int, __version__.split(".")))
 tested_versions = (5, 6), (5, 9), (5, 11)
 
-if not have_refmodule and is_ci and version[:2] in tested_versions:
+if not have_refmodule and is_ci and qtVersion()[:2] in tested_versions:
     class TestFor_CI_Init(unittest.TestCase):
         """
         This helper class generates the reference file for CI.
@@ -124,16 +131,16 @@ if not have_refmodule and is_ci and version[:2] in tested_versions:
         """
         generate_all()
         sys.stderr.flush()
-        print("BEGIN_FILE", shortpath, file=sys.stderr)
-        with open(refpath) as f:
+        print("BEGIN_FILE", refPath, file=sys.stderr)
+        with open(refPath) as f:
             print(f.read(), file=sys.stderr)
-        print("END_FILE", shortpath, file=sys.stderr)
+        print("END_FILE", refPath, file=sys.stderr)
         sys.stderr.flush()
         raise RuntimeError(dedent("""
             {line}
             **  This is the initial call. You should check this file in:
             **  {}
-            **""").format(shortpath, line=79 * "*"))
+            **""").format(refPath, line=79 * "*"))
 
 if __name__ == '__main__':
     unittest.main()
