@@ -42,26 +42,45 @@ from __future__ import print_function, absolute_import
 import os
 import sys
 import unittest
-import warnings
-from init_platform import enum_all, generate_all, is_ci, outname, outpath
-from util import isolate_warnings, check_warnings
+from textwrap import dedent
+from init_platform import (enum_all, generate_all, is_ci,
+   getEffectiveRefPath, getRefPath, qtVersion)
+from util import isolate_warnings, check_warnings, suppress_warnings, warn
 from PySide2 import *
-from PySide2.QtCore import __version__
 
-refmodule_name = outname[:-3] # no .py
-pyc = os.path.splitext(outpath)[0] + ".pyc"
-if os.path.exists(pyc) and not os.path.exists(outname):
+refPath = getRefPath()
+effectiveRefPath = getEffectiveRefPath()
+effectiveRefPathRoot = os.path.splitext(effectiveRefPath)[0]
+pyc = effectiveRefPathRoot + ".pyc"
+if os.path.exists(pyc) and not os.path.exists(effectiveRefPath):
     # on Python2 the pyc file would be imported
     os.unlink(pyc)
+module = os.path.basename(effectiveRefPathRoot)
 
-sys.path.insert(0, os.path.dirname(__file__))
+if refPath != effectiveRefPath:
+    print("*** Falling back to ", effectiveRefPath, " since expected ",
+        refPath, " does not exist")
+
+home_dir = effectiveRefPath
+for _ in "abcde":
+    home_dir = os.path.dirname(home_dir)
+shortpath = os.path.relpath(effectiveRefPath, home_dir)
 try:
-    exec("import {} as sig_exists".format(refmodule_name))
-    print("found:", refmodule_name)
+    exec("import {} as sig_exists".format(module))
+    print("found:", shortpath)
     have_refmodule = True
 except ImportError:
-    print("*** not found:", refmodule_name)
+    print("*** not found:", shortpath)
     have_refmodule = False
+except SyntaxError:
+    print("*** not a python file, removed:", shortpath)
+    os.unlink(effectiveRefPath)
+    have_refmodule = False
+if have_refmodule and not hasattr(sig_exists, "dict"):
+    print("*** wrong module without 'dict', removed:", shortpath)
+    os.unlink(effectiveRefPath)
+    have_refmodule = False
+
 
 @unittest.skipIf(not have_refmodule,
                  "not activated for this platform or version")
@@ -76,10 +95,13 @@ class TestSignaturesExists(unittest.TestCase):
         found_sigs = enum_all()
         with isolate_warnings():
             for key, value in sig_exists.dict.items():
+                name = key.rsplit(".", 1)[-1]
+                if name in ("next", "__next__"): # ignore problematic cases
+                    continue
                 if key not in found_sigs:
-                    warnings.warn("missing key: '{}'".format(key), RuntimeWarning)
+                    warn("missing key: '{}'".format(key))
                 elif isinstance(value, list) and len(value) != len(found_sigs[key]):
-                    warnings.warn("different sig length: '{}'".format(key), RuntimeWarning)
+                    warn("multi-signature count mismatch: '{}'".format(key))
             if is_ci and check_warnings():
                 raise RuntimeError("There are errors, see above.")
 
@@ -87,18 +109,20 @@ class TestSignaturesExists(unittest.TestCase):
         found_sigs = enum_all()
         # make sure that errors are actually raised
         found_sigs.pop(list(found_sigs.keys())[42])
-        with isolate_warnings():
+        with isolate_warnings(), suppress_warnings():
             for key, value in sig_exists.dict.items():
+                name = key.rsplit(".", 1)[-1]
+                if name in ("next", "__next__"): # ignore problematic cases
+                    continue
                 if key not in found_sigs:
-                    warnings.warn("ignore missing key: '{}'".format(key), RuntimeWarning)
+                    warn("missing key: '{}'".format(key))
                 elif isinstance(value, list) and len(value) != len(found_sigs[key]):
-                    warnings.warn("ignore different sig length: '{}'".format(key), RuntimeWarning)
+                    warn("multi-signature count mismatch: '{}'".format(key))
             self.assertTrue(check_warnings())
 
-version = tuple(map(int, __version__.split(".")))
 tested_versions = (5, 6), (5, 9), (5, 11)
 
-if not have_refmodule and is_ci and version[:2] in tested_versions:
+if not have_refmodule and is_ci and qtVersion()[:2] in tested_versions:
     class TestFor_CI_Init(unittest.TestCase):
         """
         This helper class generates the reference file for CI.
@@ -107,12 +131,16 @@ if not have_refmodule and is_ci and version[:2] in tested_versions:
         """
         generate_all()
         sys.stderr.flush()
-        print("BEGIN", outpath, file=sys.stderr)
-        with open(outpath) as f:
+        print("BEGIN_FILE", refPath, file=sys.stderr)
+        with open(refPath) as f:
             print(f.read(), file=sys.stderr)
-        print("END", outpath, file=sys.stderr)
+        print("END_FILE", refPath, file=sys.stderr)
         sys.stderr.flush()
-        raise RuntimeError("This is the initial call. You should check this file in.")
+        raise RuntimeError(dedent("""
+            {line}
+            **  This is the initial call. You should check this file in:
+            **  {}
+            **""").format(refPath, line=79 * "*"))
 
 if __name__ == '__main__':
     unittest.main()

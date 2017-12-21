@@ -85,9 +85,9 @@ def enum_module(mod_name):
         else:
             dprint("    def __init__" + str(signature))
         count += 1
-        class_members = list(klass.__dict__.items())
         have_sig = signature is not None
         have_members = 0
+        class_members = sorted(list(klass.__dict__.items()))
         for func_name, func in class_members:
             signature = getattr(func, '__signature__', None)
             if signature is not None:
@@ -110,8 +110,9 @@ def enum_all():
     for mod_name in all_modules:
         result[mod_name] = enum_module(mod_name)
         total += result[mod_name]
-    pprint(result if sys.version_info >= (3,) else list(result.items()))
-    print("Total", total)
+    pprint(result if sys.version_info >= (3,) else list(result.items()),
+           stream=sys.stderr)
+    print("Total", total, file=sys.stderr)
     return result
 
 

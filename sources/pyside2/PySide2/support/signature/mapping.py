@@ -63,7 +63,7 @@ StringList = typing.List[str]
 IntList = typing.List[int]
 Variant = typing.Any
 ModelIndexList = typing.List[int]
-QImageCleanupFunction = typing.Callable[[bytes], None]
+QImageCleanupFunction = typing.Callable
 FloatMatrix = typing.List[typing.List[float]]
 # Pair could be more specific, but we loose the info in the generator.
 Pair = typing.Tuple[typing.Any, typing.Any]

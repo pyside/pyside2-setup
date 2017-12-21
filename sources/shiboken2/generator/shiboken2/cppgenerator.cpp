@@ -456,7 +456,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
 
     if (metaClass->typeEntry()->isValue() || metaClass->typeEntry()->isSmartPointer()) {
         writeCopyFunction(s, classContext);
-        signatureStream << INDENT << metaClass->fullName() << ".__copy__()" << endl;
+        signatureStream << metaClass->fullName() << ".__copy__()" << endl;
     }
 
     // Write single method definitions

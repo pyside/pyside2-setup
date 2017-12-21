@@ -30,21 +30,36 @@
 # Test case for PySide bug 829
 
 import unittest
-from PySide2.QtCore import QSettings
-import tempfile
+from PySide2.QtCore import QDir, QSettings, QTemporaryFile
+import os
 
 class QVariantConversions(unittest.TestCase):
+
+    _confFileName = None
+
     def testDictionary(self):
-        confFile = tempfile.NamedTemporaryFile(delete=False)
-        s = QSettings(confFile.name, QSettings.IniFormat)
+        confFile = QTemporaryFile(QDir.tempPath() + '/pysidebug829_XXXXXX.ini')
+        confFile.setAutoRemove(False)
+        self.assertTrue(confFile.open())
+        confFile.close()
+        self._confFileName = confFile.fileName()
+        del confFile
+        s = QSettings(self._confFileName, QSettings.IniFormat)
+        self.assertEqual(s.status(), QSettings.NoError)
         # Save value
         s.setValue('x', {1: 'a'})
         s.sync()
+        self.assertEqual(s.status(), QSettings.NoError)
         del s
 
         # Restore value
-        s = QSettings(confFile.name, QSettings.IniFormat)
+        s = QSettings(self._confFileName, QSettings.IniFormat)
+        self.assertEqual(s.status(), QSettings.NoError)
         self.assertEqual(s.value('x'), {1: 'a'})
+
+    def __del__(self):
+        if self._confFileName is not None:
+            os.unlink(QDir.toNativeSeparators(self._confFileName))
 
 if __name__ == '__main__':
     unittest.main()

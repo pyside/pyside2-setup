@@ -10,8 +10,6 @@
     linux
     darwin
     win32
-[QtCore::bug_829]
-    win32
 [QtCore::qfile_test]
     win32
     darwin py3
@@ -73,6 +71,10 @@
     py2
     py3
 [QtCore::thread_signals_test]
+    win32
+    linux
+    darwin
+[QtCore::qthread_prod_cons_test]
     win32
     linux
     darwin

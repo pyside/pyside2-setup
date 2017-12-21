@@ -295,7 +295,7 @@ class InheritanceDiagram(Directive):
             graph = InheritanceGraph(
                 class_names, env.temp_data.get('py:module'),
                 parts=node['parts'])
-        except InheritanceException, err:
+        except InheritanceException as err:
             return [node.document.reporter.warning(err.args[0],
                                                    line=self.lineno)]
 

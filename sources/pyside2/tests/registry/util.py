@@ -72,6 +72,12 @@ def isolate_warnings():
             if warn is None:
                 delattr(mod, warn_name)
 
+@contextmanager
+def suppress_warnings():
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        yield
+
 def check_warnings():
     for name, mod in sys.modules.items():
         if mod:
@@ -84,5 +90,11 @@ def check_warnings():
                         continue
                     return True
     return False
+
+def warn(message, category=None, stacklevel=1):
+    """Issue a warning with the default 'RuntimeWarning'"""
+    if category is None:
+        category = UserWarning
+    warnings.warn(message, category, stacklevel)
 
 # eof
