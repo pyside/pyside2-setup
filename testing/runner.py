@@ -148,6 +148,7 @@ class TestRunner(object):
             def xprint(*args, **kw):
                 print(*args, file=output, **kw)
 
+            # 'for line in input:' would read into too large chunks
             while True:
                 line = input.readline()
                 if not line:

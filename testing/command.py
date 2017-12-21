@@ -94,19 +94,6 @@ if (os.environ.get("COIN_RERUN_FAILED_ONLY", "1").lower() in
     "0 f false n no".split()):
     COIN_RERUN_FAILED_ONLY = False
 
-def create_read_write(filename):
-    if os.path.isfile(filename):
-        # existing file, open for read and write
-        return open(filename, 'r+')
-    elif os.path.exists(filename):
-        # a directory?
-        raise argparse.ArgumentTypeError(None, "invalid file argument: %s" % filename)
-    else:
-        try:
-            return open(filename, 'w')
-        except IOError:
-            raise argparse.ArgumentError(None, "cannot create file: %s" % filename)
-
 def test_project(project, args, blacklist, runs):
     ret = []
     for idx in range(runs):
@@ -121,6 +108,10 @@ def test_project(project, args, blacklist, runs):
         else:
             if index > 1 and COIN_RERUN_FAILED_ONLY:
                 rerun = rerun_list
+                if not rerun:
+                    print("--- no re-runs found, stopping before test {} ---"
+                          .format(index))
+                    break
             else:
                 rerun = None
             runner.run("RUN {}:".format(idx + 1), rerun, 10 * 60)
@@ -247,8 +238,6 @@ def main():
 
     q = 5 * [0]
 
-    runs = 1
-    fail_crit = 1
     runs = COIN_TESTING
     fail_crit = COIN_THRESHOLD
     # now loop over the projects and accumulate
@@ -275,15 +264,16 @@ def main():
                 tot_res[key].append(res)
     tot_flaky = 0
     print("*" * 79)
+    print("**")
+    print("*   Summary Of All Tests")
     print("*")
-    print("* Summary Of All Tests")
-    print("*")
-    print()
+    empty = True
     for test, res in tot_res.items():
         pass__c = res.count("PASS")
         bpass_c = res.count("BPASS")
         fail__c = res.count("FAIL!")
         bfail_c = res.count("BFAIL")
+        fail2_c = fail__c + bfail_c
         if pass__c == len(res):
             continue
         elif bpass_c == runs and runs > 1:
@@ -292,18 +282,24 @@ def main():
             msg = "Newly detected Real test failure!"
         elif bfail_c == runs:
             msg = "Keep blacklisting ;-("
-        elif fail__c > 0 and fail__c < len(res):
+        elif fail2_c > 0 and fail2_c < len(res):
             msg = "Flaky test"
             tot_flaky += 1
         else:
             continue
+        empty = False
         padding = 6 * runs
-        txt = " ".join(((piece + " ")[:5] for piece in res))
+        txt = " ".join(("{:<{width}}".format(piece, width=5) for piece in res))
         txt = (txt + padding * " ")[:padding]
         testpad = 36
         if len(test) < testpad:
             test += (testpad - len(test)) * " "
         print(txt, decorate(test), msg)
+    if empty:
+        print("*   (empty)")
+    print("*")
+    print("**")
+    print("*" * 79)
     print()
     if runs > 1:
         print("Total flaky tests: errors but not always = {}".format(tot_flaky))

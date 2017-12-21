@@ -70,3 +70,4 @@ def decorate(mod_name):
     name, rest = mod_name.split("_", 1)
     return name + "::" + rest
 
+#eof
