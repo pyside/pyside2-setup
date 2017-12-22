@@ -97,7 +97,7 @@ class PySideInclude(Directive):
         if linespec is not None:
             try:
                 linelist = parselinenos(linespec, len(lines))
-            except ValueError, err:
+            except ValueError as err:
                 return [document.reporter.warning(str(err), line=self.lineno)]
             lines = [lines[i] for i in linelist]
 
