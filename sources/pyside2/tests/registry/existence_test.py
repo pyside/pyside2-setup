@@ -131,16 +131,16 @@ if not have_refmodule and is_ci and qtVersion()[:2] in tested_versions:
         """
         generate_all()
         sys.stderr.flush()
-        print("BEGIN_FILE", refPath, file=sys.stderr)
+        print("BEGIN_FILE", shortpath, file=sys.stderr)
         with open(refPath) as f:
             print(f.read(), file=sys.stderr)
-        print("END_FILE", refPath, file=sys.stderr)
+        print("END_FILE", shortpath, file=sys.stderr)
         sys.stderr.flush()
         raise RuntimeError(dedent("""
             {line}
             **  This is the initial call. You should check this file in:
             **  {}
-            **""").format(refPath, line=79 * "*"))
+            **""").format(shortpath, line=79 * "*"))
 
 if __name__ == '__main__':
     unittest.main()
