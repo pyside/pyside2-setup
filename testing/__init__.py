@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2017 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of PySide2.
@@ -37,10 +37,25 @@
 ##
 #############################################################################
 
-from __future__ import print_function, absolute_import
+from __future__ import print_function
 
 import sys
-import testing
-import testing.blacklist # just to be sure it's us...
+from . import command
 
-testing.main()
+main = command.main
+
+# modify print so that it always flushes
+__builtins__["orig_print"] = __builtins__["print"]
+
+def print_flushed(*args, **kw):
+    orig_print(*args, **kw)
+    sys.stdout.flush()
+
+__builtins__["print"] = print_flushed
+
+print = print_flushed
+
+# We also could use "python -u" to get unbuffered output.
+# This method is better since it needs no change of the interface.
+
+# eof

@@ -229,7 +229,9 @@ def enum_all():
     return ret
 
 def generate_all():
-    with open(refPath(), "w") as outfile, open(sourcepath) as f:
+    refPath = getRefPath()
+    module = os.path.basename(os.path.splitext(refPath)[0])
+    with open(refPath, "w") as outfile, open(sourcepath) as f:
         fmt = Formatter(outfile)
         enu = SimplifyingEnumerator(fmt)
         lines = f.readlines()
@@ -254,7 +256,7 @@ def generate_all():
 
 def __main__():
     print("+++ generating {}. You should probably check this file in."
-          .format(refpath))
+          .format(getRefPath()))
     generate_all()
 
 if __name__ == "__main__":
