@@ -1121,12 +1121,10 @@ class pyside_build(_build):
             "{dist_dir}/PySide2/support",
             vars=vars)
         if not OPTION_NOEXAMPLES:
-            # <sources>/pyside2-examples/examples/* -> <setup>/PySide2/examples
-            folder = get_extension_folder('pyside2-examples')
-            copydir(
-                "{sources_dir}/%s/examples" % folder,
-                "{dist_dir}/PySide2/examples",
-                force=False, vars=vars)
+            # examples/* -> <setup>/PySide2/examples
+            copydir(os.path.join(self.script_dir, "examples"),
+                    "{dist_dir}/PySide2/examples",
+                    force=False, vars=vars)
             # Re-generate examples Qt resource files for Python 3 compatibility
             if sys.version_info[0] == 3:
                 examples_path = "{dist_dir}/PySide2/examples".format(**vars)
@@ -1393,12 +1391,10 @@ class pyside_build(_build):
             "{dist_dir}/PySide2/support",
             vars=vars)
         if not OPTION_NOEXAMPLES:
-            # <sources>/pyside2-examples/examples/* -> <setup>/PySide2/examples
-            folder = get_extension_folder('pyside2-examples')
-            copydir(
-                "{sources_dir}/%s/examples" % folder,
-                "{dist_dir}/PySide2/examples",
-                force=False, vars=vars)
+            # examples/* -> <setup>/PySide2/examples
+            copydir(os.path.join(self.script_dir, "examples"),
+                    "{dist_dir}/PySide2/examples",
+                    force=False, vars=vars)
             # Re-generate examples Qt resource files for Python 3 compatibility
             if sys.version_info[0] == 3:
                 examples_path = "{dist_dir}/PySide2/examples".format(**vars)
