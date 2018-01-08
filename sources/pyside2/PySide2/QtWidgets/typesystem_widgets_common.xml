@@ -190,6 +190,9 @@
       <enum-type name="ViewItemPosition"/>
   </value-type>
 
+  <value-type name="QColormap">
+      <enum-type name="Mode"/>
+  </value-type>
   <value-type name="QSizePolicy">
       <enum-type name="ControlType" flags="ControlTypes"/>
       <enum-type name="Policy"/>
@@ -2402,7 +2405,7 @@
       </modify-argument>
     </modify-function>
   </object-type>
-  
+
   <object-type name="QMessageBox">
     <enum-type name="ButtonRole"/>
     <enum-type name="Icon"/>
@@ -2605,7 +2608,7 @@
         <insert-template name="return_for_QFileDialog"/>
       </inject-code>
     </modify-function>
-    
+
     <modify-function signature="getOpenFileUrl(QWidget*, const QString&amp;, const QUrl&amp;, const QString&amp;, QString*, QFlags&lt;QFileDialog::Option&gt;, const QStringList&amp;)" allow-thread="yes">
       <modify-argument index="return">
         <replace-type modified-type="(fileName, selectedFilter)"/>
