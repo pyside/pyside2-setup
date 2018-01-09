@@ -1,11 +1,63 @@
+cmake_minimum_required(VERSION 3.1)
+cmake_policy(VERSION 3.1)
+
 project(doc)
 
-set(DOC_DATA_DIR "${CMAKE_CURRENT_BINARY_DIR}/qdoc3-output")
+if (WIN32)
+    set(PATH_SEP "\;")
+else()
+    set(PATH_SEP ":")
+endif()
+
+set(DOC_DATA_DIR "${CMAKE_CURRENT_BINARY_DIR}/qdoc-output")
+configure_file("pyside-config.qdocconf.in" "${CMAKE_CURRENT_LIST_DIR}/pyside-config.qdocconf" @ONLY)
+
+get_filename_component(ROOT ${CMAKE_CURRENT_BINARY_DIR} DIRECTORY)
+set(TS_ROOT "${ROOT}/PySide2")
+
+file(REMOVE ${CMAKE_CURRENT_LIST_DIR}/pyside.qdocconf ${CMAKE_CURRENT_LIST_DIR}/pyside.qdocconf.in)
+
+# For Qt modules that are part of the documentation build:
+#    - Configure the module docconf file
+#    - Write shiboken header consisting of pyside2_global.h and module includes
+#    - Build include path for qdoc for shiboken
+set(QDOC_INCPATH -I "${QT_INCLUDE_DIR}")
+file(READ "${pyside2_BINARY_DIR}/pyside2_global.h" docHeaderContents)
+file(READ "typesystem_doc.xml.in" typeSystemDocXmlContents)
+
+foreach(module ${all_module_shortnames})
+    string(TOLOWER "${module}" lowerModule)
+    set(docConf "${CMAKE_CURRENT_LIST_DIR}/qtmodules/pyside-qt${lowerModule}.qdocconf.in")
+    if(EXISTS "${docConf}")
+        string(REGEX REPLACE "(^.*)\.in" "\\1" OUTFILE ${docConf})
+        get_filename_component(BASENAME ${OUTFILE} NAME)
+        configure_file(${docConf} "${CMAKE_CURRENT_LIST_DIR}/qtmodules/${BASENAME}" @ONLY)
+        file(APPEND "pyside.qdocconf.in" "\@CMAKE_CURRENT_LIST_DIR\@/qtmodules/${BASENAME}\n")
+
+        # -- @TODO fix this for macOS frameworks.
+        list(APPEND QDOC_INCPATH -I)
+        list(APPEND QDOC_INCPATH "${QT_INCLUDE_DIR}Qt${module}")
+
+        set(docHeaderContents "${docHeaderContents}\n#include <Qt${module}/Qt${module}>")
+        set(typeSystemDocXmlContents "${typeSystemDocXmlContents}\n<load-typesystem name=\"Qt${module}/typesystem_${lowerModule}.xml\" generate=\"yes\"/>")
+    endif()
+endforeach()
+
+set(typeSystemDocXmlContents "${typeSystemDocXmlContents}\n</typesystem>\n")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/typesystem_doc.xml" "${typeSystemDocXmlContents}")
+
+set(docHeader "${pyside2_BINARY_DIR}/qdoc.h")
+file(WRITE ${docHeader} "${docHeaderContents}")
+
 configure_file("pyside.qdocconf.in" "pyside.qdocconf" @ONLY)
 
-add_custom_target(qdoc3
-                COMMAND qdoc3 pyside.qdocconf
-                COMMENT "Running qdoc3 against Qt source code..."
+set(QDOC_TYPESYSTEM_PATH "${pyside2_SOURCE_DIR}${PATH_SEP}${pyside2_BINARY_DIR}")
+
+add_custom_target(qdoc
+                # Use dummy Qt version information, QDoc needs it but has no effect on WebXML output
+                COMMAND ${CMAKE_COMMAND} -E env BUILDDIR=${CMAKE_CURRENT_LIST_DIR}/src QT_INSTALL_DOCS=${QT_SRC_DIR}/doc QT_VERSION=1.0.0 QT_VER=1.0 QT_VERSION_TAG=100
+                qdoc pyside.qdocconf ${QDOC_INCPATH} -single-exec -installdir ${DOC_DATA_DIR} -outputdir ${DOC_DATA_DIR}
+                COMMENT "Running qdoc against Qt source code..."
                 SOURCE "pyside.qdocconf")
 
 add_custom_target(apidoc
@@ -15,25 +67,23 @@ add_custom_target(apidoc
 
 # create conf.py based on conf.py.in
 configure_file("conf.py.in" "rst/conf.py" @ONLY)
-configure_file(typesystem_doc.xml.in typesystem_doc.xml @ONLY)
 
 add_custom_target("docrsts"
-    COMMAND ${SHIBOKEN_BINARY} --generator-set=qtdoc
-            ${pyside2_BINARY_DIR}/pyside_global.h
-            --include-paths="${QT_INCLUDE_DIR}${PATH_SEP}${pyside2_SOURCE_DIR}"
+    COMMAND ${SHIBOKEN_BINARY} --generator-set=qtdoc ${docHeader}
+            --include-paths="${QT_INCLUDE_DIR}${PATH_SEP}${pyside2_SOURCE_DIR}${PATH_SEP}${TS_ROOT}"
             --api-version=${SUPPORTED_QT_VERSION}
-            --typesystem-paths="${pyside2_SOURCE_DIR}${PATH_SEP}${QtCore_SOURCE_DIR}${PATH_SEP}${QtGui_SOURCE_DIR}${PATH_SEP}${QtGui_BINARY_DIR}${PATH_SEP}${QtHelp_SOURCE_DIR}${PATH_SEP}${QtMultimedia_SOURCE_DIR}${PATH_SEP}${QtNetwork_SOURCE_DIR}${PATH_SEP}${QtOpenGL_SOURCE_DIR}${PATH_SEP}${QtScript_SOURCE_DIR}${PATH_SEP}${QtScriptTools_SOURCE_DIR}${PATH_SEP}${QtSql_SOURCE_DIR}${PATH_SEP}${QtSvg_SOURCE_DIR}${PATH_SEP}${QtTest_SOURCE_DIR}${PATH_SEP}${QtUiTools_SOURCE_DIR}${PATH_SEP}${QtWebKit_SOURCE_DIR}${PATH_SEP}${QtXml_SOURCE_DIR}${PATH_SEP}${QtXmlPatterns_SOURCE_DIR}"
+            --typesystem-paths="${QDOC_TYPESYSTEM_PATH}"
             --library-source-dir=${QT_SRC_DIR}
-            --documentation-data-dir=${DOC_DATA_DIR}
+            --documentation-data-dir=${DOC_DATA_DIR}/webxml
             --output-directory=${CMAKE_CURRENT_BINARY_DIR}/rst
-            --documentation-code-snippets-dir=${CMAKE_CURRENT_SOURCE_DIR}/codesnippets${PATH_SEP}${CMAKE_CURRENT_SOURCE_DIR}/codesnippets/examples
+            --documentation-code-snippets-dir=${CMAKE_CURRENT_SOURCE_DIR}/codesnippets/doc/src/snippets${PATH_SEP}${CMAKE_CURRENT_SOURCE_DIR}/codesnippets/examples
             --documentation-extra-sections-dir=${CMAKE_CURRENT_SOURCE_DIR}/extras
             ${CMAKE_CURRENT_BINARY_DIR}/typesystem_doc.xml
     WORKING_DIRECTORY ${${module}_SOURCE_DIR}
     COMMENT "Running generator to generate documentation..."
 )
 add_dependencies(apidoc docrsts)
-add_dependencies(docrsts qdoc3)
+add_dependencies(docrsts qdoc)
 
 # #create devhelp file
 # add_custom_target(apidevhelp

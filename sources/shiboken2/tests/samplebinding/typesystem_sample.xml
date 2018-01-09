@@ -1487,6 +1487,8 @@
         </modify-function>
     </value-type>
     <value-type name="VirtualDaughter" />
+    <object-type name="VirtualDaughter2" />
+    <object-type name="VirtualFinalDaughter" />
 
     <value-type name="VirtualDtor">
         <modify-function signature="create()">

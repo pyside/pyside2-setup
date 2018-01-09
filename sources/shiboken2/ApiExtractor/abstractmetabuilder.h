@@ -85,15 +85,6 @@ public:
     void formatDebug(QDebug &d) const;
 #endif
 
-protected:
-    virtual AbstractMetaClass *createMetaClass();
-    virtual AbstractMetaEnum *createMetaEnum();
-    virtual AbstractMetaEnumValue *createMetaEnumValue();
-    virtual AbstractMetaField *createMetaField();
-    virtual AbstractMetaFunction *createMetaFunction();
-    virtual AbstractMetaArgument *createMetaArgument();
-    virtual AbstractMetaType *createMetaType();
-
 private:
     friend class AbstractMetaBuilderPrivate;
     AbstractMetaBuilderPrivate *d;

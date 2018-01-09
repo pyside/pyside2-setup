@@ -344,11 +344,13 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
             if ((func->isPrivate() && !visibilityModifiedToPrivate(func))
                 || (func->isModifiedRemoved() && !func->isAbstract()))
                 continue;
-            if (func->functionType() == AbstractMetaFunction::ConstructorFunction && !func->isUserAdded())
+            if (func->functionType() == AbstractMetaFunction::ConstructorFunction && !func->isUserAdded()) {
                 writeConstructorNative(s, func);
-            else if ((!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
-                     && (func->isVirtual() || func->isAbstract()))
+            } else if ((!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
+                     && ((func->isVirtual() || func->isAbstract())
+                         && (func->attributes() & AbstractMetaAttributes::FinalCppMethod) == 0)) {
                 writeVirtualMethodNative(s, func);
+            }
         }
 
         if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor()) {
@@ -454,7 +456,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
 
     if (metaClass->typeEntry()->isValue() || metaClass->typeEntry()->isSmartPointer()) {
         writeCopyFunction(s, classContext);
-        signatureStream << INDENT << metaClass->fullName() << ".__copy__()" << endl;
+        signatureStream << metaClass->fullName() << ".__copy__()" << endl;
     }
 
     // Write single method definitions
@@ -2352,7 +2354,7 @@ static void addConversionRuleCodeSnippet(CodeSnipList& snippetList, QString& rul
     } else {
         rule.replace(QLatin1String("%out"), outputName);
     }
-    CodeSnip snip(0, snippetLanguage);
+    CodeSnip snip(snippetLanguage);
     snip.position = (snippetLanguage == TypeSystem::NativeCode) ? TypeSystem::CodeSnipPositionAny : TypeSystem::CodeSnipPositionBeginning;
     snip.addCode(rule);
     snippetList << snip;

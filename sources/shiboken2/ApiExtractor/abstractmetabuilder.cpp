@@ -247,41 +247,6 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::argumentToClass(ArgumentModelItem
     return returned;
 }
 
-AbstractMetaClass *AbstractMetaBuilder::createMetaClass()
-{
-    return new AbstractMetaClass();
-}
-
-AbstractMetaEnum *AbstractMetaBuilder::createMetaEnum()
-{
-    return new AbstractMetaEnum();
-}
-
-AbstractMetaEnumValue *AbstractMetaBuilder::createMetaEnumValue()
-{
-    return new AbstractMetaEnumValue();
-}
-
-AbstractMetaField *AbstractMetaBuilder::createMetaField()
-{
-    return new AbstractMetaField();
-}
-
-AbstractMetaFunction *AbstractMetaBuilder::createMetaFunction()
-{
-    return new AbstractMetaFunction();
-}
-
-AbstractMetaArgument *AbstractMetaBuilder::createMetaArgument()
-{
-    return new AbstractMetaArgument();
-}
-
-AbstractMetaType *AbstractMetaBuilder::createMetaType()
-{
-    return new AbstractMetaType();
-}
-
 /**
  * Checks the argument of a hash function and flags the type if it is a complex type
  */
@@ -409,7 +374,7 @@ void AbstractMetaBuilderPrivate::traverseStreamOperator(FunctionModelItem item)
 
                 streamFunction->setArguments(arguments);
 
-                *streamFunction += AbstractMetaAttributes::Final;
+                *streamFunction += AbstractMetaAttributes::FinalInTargetLang;
                 *streamFunction += AbstractMetaAttributes::Public;
                 streamFunction->setOriginalAttributes(streamFunction->attributes());
 
@@ -593,7 +558,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                 << QStringLiteral("class '%1' does not have an entry in the type system")
                                   .arg(cls->name());
         } else {
-            const bool couldAddDefaultCtors = !cls->isFinalInCpp() && !cls->isInterface() && !cls->isNamespace()
+            const bool couldAddDefaultCtors = cls->isConstructible()
+                && !cls->isInterface() && !cls->isNamespace()
                 && (cls->attributes() & AbstractMetaAttributes::HasRejectedConstructor) == 0;
             if (couldAddDefaultCtors) {
                 if (!cls->hasConstructors())
@@ -807,7 +773,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
         return 0;
     }
 
-    AbstractMetaClass* metaClass = q->createMetaClass();
+    AbstractMetaClass* metaClass = new AbstractMetaClass;
     metaClass->setTypeEntry(type);
 
     *metaClass += AbstractMetaAttributes::Public;
@@ -1121,7 +1087,7 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(EnumModelItem enumIte
         return 0;
     }
 
-    AbstractMetaEnum *metaEnum = q->createMetaEnum();
+    AbstractMetaEnum *metaEnum = new AbstractMetaEnum;
     if (enumsDeclarations.contains(qualifiedName)
         || enumsDeclarations.contains(enumName)) {
         metaEnum->setHasQEnumsDeclaration(true);
@@ -1149,7 +1115,7 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(EnumModelItem enumIte
     const EnumeratorList &enums = enumItem->enumerators();
     for (const EnumeratorModelItem &value : enums) {
 
-        AbstractMetaEnumValue *metaEnumValue = q->createMetaEnumValue();
+        AbstractMetaEnumValue *metaEnumValue = new AbstractMetaEnumValue;
         metaEnumValue->setName(value->name());
         // Deciding the enum value...
 
@@ -1223,7 +1189,7 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelIt
     if (type->isObject())
         static_cast<ObjectTypeEntry *>(type)->setQObject(isQObject(dom, stripTemplateArgs(typeDef->type().qualifiedName().join(colonColon()))));
 
-    AbstractMetaClass *metaClass = q->createMetaClass();
+    AbstractMetaClass *metaClass = new AbstractMetaClass;
     metaClass->setTypeDef(true);
     metaClass->setTypeEntry(type);
     metaClass->setBaseClassNames(QStringList() << typeDef->type().qualifiedName().join(colonColon()));
@@ -1282,8 +1248,11 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     if (type->isObject())
         ((ObjectTypeEntry*)type)->setQObject(isQObject(dom, fullClassName));
 
-    AbstractMetaClass *metaClass = q->createMetaClass();
+    AbstractMetaClass *metaClass = new AbstractMetaClass;
     metaClass->setTypeEntry(type);
+
+    if (classItem->isFinal())
+        *metaClass += AbstractMetaAttributes::FinalCppClass;
 
     QStringList baseClassNames;
     const QVector<_ClassModelItem::BaseClass> &baseClasses = classItem->baseClasses();
@@ -1455,7 +1424,7 @@ AbstractMetaField *AbstractMetaBuilderPrivate::traverseField(VariableModelItem f
     }
 
 
-    AbstractMetaField *metaField = q->createMetaField();
+    AbstractMetaField *metaField = new AbstractMetaField;
     metaField->setName(fieldName);
     metaField->setEnclosingClass(cls);
 
@@ -1517,11 +1486,6 @@ void AbstractMetaBuilderPrivate::setupFunctionDefaults(AbstractMetaFunction *met
 
     if (metaFunction->name() == QLatin1String("operator_equal"))
         metaClass->setHasEqualsOperator(true);
-
-    if (!metaFunction->isFinalInTargetLang()
-        && metaFunction->isRemovedFrom(metaClass, TypeSystem::TargetLangCode)) {
-        *metaFunction += AbstractMetaAttributes::FinalInCpp;
-    }
 }
 
 void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaFunction *metaFunction)
@@ -1543,7 +1507,7 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaF
     if (!retType)
         return;
 
-    AbstractMetaType* metaType = q->createMetaType();
+    AbstractMetaType* metaType = new AbstractMetaType;
     metaType->setTypeEntry(retType);
     metaFunction->replaceType(metaType);
 }
@@ -1732,20 +1696,24 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
         }
 
         const bool isInvalidDestructor = metaFunction->isDestructor() && metaFunction->isPrivate();
-        const bool isInvalidConstructor = metaFunction->isConstructor()
-            && (metaFunction->isPrivate() && metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction);
+        const bool isInvalidConstructor = metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction
+            && metaFunction->isPrivate();
+        if (isInvalidConstructor)
+            metaClass->setHasPrivateConstructor(true);
         if ((isInvalidDestructor || isInvalidConstructor)
             && !metaClass->hasNonPrivateConstructor()) {
-            *metaClass += AbstractMetaAttributes::Final;
+            *metaClass += AbstractMetaAttributes::FinalInTargetLang;
         } else if (metaFunction->isConstructor() && !metaFunction->isPrivate()) {
-            *metaClass -= AbstractMetaAttributes::Final;
+            *metaClass -= AbstractMetaAttributes::FinalInTargetLang;
             metaClass->setHasNonPrivateConstructor(true);
         }
 
         // Classes with virtual destructors should always have a shell class
         // (since we aren't registering the destructors, we need this extra check)
-        if (metaFunction->isDestructor() && !metaFunction->isFinal())
+        if (metaFunction->isDestructor() && metaFunction->isVirtual()
+            && metaFunction->visibility() != AbstractMetaAttributes::Private) {
             metaClass->setForceShellClass(true);
+        }
 
         if (!metaFunction->isDestructor()
             && !(metaFunction->isPrivate() && metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction)) {
@@ -1948,7 +1916,7 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
 AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFunction& addedFunc,
                                                                    AbstractMetaClass *metaClass)
 {
-    AbstractMetaFunction *metaFunction = q->createMetaFunction();
+    AbstractMetaFunction *metaFunction = new AbstractMetaFunction;
     metaFunction->setConstant(addedFunc.isConstant());
     metaFunction->setName(addedFunc.name());
     metaFunction->setOriginalName(addedFunc.name());
@@ -1958,7 +1926,7 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
     metaFunction->setVisibility(visibility);
     metaFunction->setUserAdded(true);
     AbstractMetaAttributes::Attribute isStatic = addedFunc.isStatic() ? AbstractMetaFunction::Static : AbstractMetaFunction::None;
-    metaFunction->setAttributes(metaFunction->attributes() | AbstractMetaAttributes::Final | isStatic);
+    metaFunction->setAttributes(metaFunction->attributes() | AbstractMetaAttributes::FinalInTargetLang | isStatic);
     metaFunction->setType(translateType(addedFunc.version(), addedFunc.returnType()));
 
 
@@ -1967,7 +1935,7 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
 
     for (int i = 0; i < args.count(); ++i) {
         AddedFunction::TypeInfo& typeInfo = args[i];
-        AbstractMetaArgument *metaArg = q->createMetaArgument();
+        AbstractMetaArgument *metaArg = new AbstractMetaArgument;
         AbstractMetaType* type = translateType(addedFunc.version(), typeInfo);
         decideUsagePattern(type);
         metaArg->setType(type);
@@ -2210,7 +2178,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
     if (functionItem->isFriend())
         return 0;
 
-    AbstractMetaFunction *metaFunction = q->createMetaFunction();
+    AbstractMetaFunction *metaFunction = new AbstractMetaFunction;
     // Additional check for assignment/move assignment down below
     metaFunction->setFunctionType(functionTypeFromCodeModel(functionItem->functionType()));
     metaFunction->setConstant(functionItem->isConstant());
@@ -2224,18 +2192,22 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
     if (functionItem->isAbstract())
         *metaFunction += AbstractMetaAttributes::Abstract;
 
-    if (!metaFunction->isAbstract())
-        *metaFunction += AbstractMetaAttributes::Native;
-
-    if (!functionItem->isVirtual())
-        *metaFunction += AbstractMetaAttributes::Final;
+    if (functionItem->isVirtual()) {
+        *metaFunction += AbstractMetaAttributes::VirtualCppMethod;
+        if (functionItem->isOverride())
+            *metaFunction += AbstractMetaAttributes::OverriddenCppMethod;
+        if (functionItem->isFinal())
+            *metaFunction += AbstractMetaAttributes::FinalCppMethod;
+    } else {
+        *metaFunction += AbstractMetaAttributes::FinalInTargetLang;
+    }
 
     if (functionItem->isInvokable())
         *metaFunction += AbstractMetaAttributes::Invokable;
 
     if (functionItem->isStatic()) {
         *metaFunction += AbstractMetaAttributes::Static;
-        *metaFunction += AbstractMetaAttributes::Final;
+        *metaFunction += AbstractMetaAttributes::FinalInTargetLang;
     }
 
     // Access rights
@@ -2328,7 +2300,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
             return nullptr;
         }
 
-        AbstractMetaArgument *metaArgument = q->createMetaArgument();
+        AbstractMetaArgument *metaArgument = new AbstractMetaArgument;
 
         metaArgument->setType(metaType);
         metaArgument->setName(arg->name());
@@ -2472,7 +2444,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(double vr,
         qFatal(qPrintable(msg), NULL);
     }
 
-    AbstractMetaType *metaType = q->createMetaType();
+    AbstractMetaType *metaType = new AbstractMetaType;
     metaType->setTypeEntry(type);
     metaType->setIndirections(typeInfo.indirections);
     if (typeInfo.isReference)
@@ -2585,7 +2557,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
             return 0;
 
         for (int i = typeInfo.arrays.size() - 1; i >= 0; --i) {
-            AbstractMetaType *arrayType = q->createMetaType();
+            AbstractMetaType *arrayType = new AbstractMetaType;
             arrayType->setArrayElementType(elementType);
             if (!typeInfo.arrays.at(i).isEmpty()) {
                 bool _ok;
@@ -2696,7 +2668,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
     // These are only implicit and should not appear in code...
     Q_ASSERT(!type->isInterface());
 
-    AbstractMetaType *metaType = q->createMetaType();
+    AbstractMetaType *metaType = new AbstractMetaType;
     metaType->setTypeEntry(type);
     metaType->setIndirections(typeInfo.indirections);
     metaType->setReferenceType(typeInfo.referenceType);
@@ -3069,7 +3041,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
         }
 
         if (t) {
-            AbstractMetaType *temporaryType = q->createMetaType();
+            AbstractMetaType *temporaryType = new AbstractMetaType;
             temporaryType->setTypeEntry(t);
             temporaryType->setConstant(i.is_constant);
             temporaryType->setReferenceType(i.referenceType);

@@ -376,6 +376,9 @@ public:
     void addPropertyDeclaration(const QString &propertyDeclaration);
     QStringList propertyDeclarations() const { return m_propertyDeclarations; }
 
+    bool isFinal() const { return m_final; }
+    void setFinal(bool f) { m_final = f; }
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
 #endif
@@ -386,6 +389,7 @@ private:
     CodeModel::ClassType m_classType;
 
     QStringList m_propertyDeclarations;
+    bool m_final = false;
 };
 
 class _NamespaceModelItem: public _ScopeModelItem
@@ -545,6 +549,12 @@ public:
     bool isVirtual() const;
     void setVirtual(bool isVirtual);
 
+    bool isOverride() const;
+    void setOverride(bool o);
+
+    bool isFinal() const;
+    void setFinal(bool f);
+
     bool isInline() const;
     void setInline(bool isInline);
 
@@ -572,6 +582,8 @@ private:
     union {
         struct {
             uint m_isVirtual: 1;
+            uint m_isOverride: 1;
+            uint m_isFinal: 1;
             uint m_isInline: 1;
             uint m_isAbstract: 1;
             uint m_isExplicit: 1;

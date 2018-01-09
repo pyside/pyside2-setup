@@ -260,6 +260,7 @@ OPTION_SKIP_PACKAGING = has_option("skip-packaging")
 OPTION_MODULE_SUBSET = option_value("module-subset")
 OPTION_RPATH_VALUES = option_value("rpath")
 OPTION_QT_CONF_PREFIX = option_value("qt-conf-prefix")
+OPTION_QT_SRC = option_value("qt-src-dir")
 
 if OPTION_QT_VERSION is None:
     OPTION_QT_VERSION = "5"
@@ -442,10 +443,15 @@ def prepareBuild():
         pkg_dir = os.path.join(script_dir, pkg)
         os.makedirs(pkg_dir)
     # locate Qt sources for the documentation
-    qmakeOutput = run_process_output([OPTION_QMAKE, '-query', 'QT_INSTALL_PREFIX/src'])
-    if qmakeOutput:
-        global qtSrcDir
-        qtSrcDir = qmakeOutput[0].rstrip()
+    if OPTION_QT_SRC is None:
+        qmakeOutput = run_process_output([OPTION_QMAKE, '-query', 'QT_INSTALL_PREFIX'])
+        if qmakeOutput:
+            global qtSrcDir
+            installPrefix = qmakeOutput[0].rstrip()
+            if installPrefix.endswith("qtbase"): # In-source, developer build
+                qtSrcDir = installPrefix
+            else: # SDK: Use 'Src' directory
+                qtSrcDir = os.path.join(os.path.dirname(installPrefix), 'Src', 'qtbase')
 
 class pyside_install(_install):
     def _init(self, *args, **kwargs):
@@ -890,8 +896,10 @@ class pyside_build(_build):
                 moduleSubSet += m
             cmake_cmd.append("-DMODULES=%s" % moduleSubSet)
         # Add source location for generating documentation
-        if qtSrcDir:
-            cmake_cmd.append("-DQT_SRC_DIR=%s" % qtSrcDir)
+        cmake_src_dir = OPTION_QT_SRC if OPTION_QT_SRC else qtSrcDir
+        cmake_cmd.append("-DQT_SRC_DIR=%s" % cmake_src_dir)
+        log.info("Qt Source dir: %s" % cmake_src_dir)
+
         if self.build_type.lower() == 'debug':
             cmake_cmd.append("-DPYTHON_DEBUG_LIBRARY=%s" % self.py_library)
 

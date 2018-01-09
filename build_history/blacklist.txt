@@ -10,8 +10,6 @@
     linux
     darwin
     win32
-[QtCore::bug_829]
-    win32
 [QtCore::qfile_test]
     win32
     darwin py3
@@ -76,6 +74,7 @@
     win32
     linux
     darwin
-# Disable signature existence test for now on dev
-[registry::existence_test]
-    qt5.11
+[QtCore::qthread_prod_cons_test]
+    win32
+    linux
+    darwin

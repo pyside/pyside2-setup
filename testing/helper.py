@@ -37,64 +37,37 @@
 ##
 #############################################################################
 
-from __future__ import print_function, absolute_import
+from __future__ import print_function
 
-"""
-Supporting isolation of warnings
-
-Warnings in unittests are not isolated.
-We sometimes use warnings to conveniently accumulate error messages
-and eventually report them afterwards as error.
-"""
-
+import os
 import sys
-import warnings
-import re
-from contextlib import contextmanager
+from collections import namedtuple
 
-warn_name = "__warningregistry__"
-ignore_re = 'Not importing directory .*'
+PY3 = sys.version_info[0] == 3  # from the six module
+from subprocess import PIPE
+if PY3:
+    from subprocess import TimeoutExpired
+    from io import StringIO
+else:
+    class SubprocessError(Exception): pass
+    # this is a fake, just to keep the source compatible.
+    # timeout support is in python 3.3 and above.
+    class TimeoutExpired(SubprocessError): pass
+    from StringIO import StringIO
 
-@contextmanager
-def isolate_warnings():
-    save_warnings = {}
-    for name, mod in sys.modules.items():
-        if mod and hasattr(mod, warn_name):
-            save_warnings[name] = mod.__dict__[warn_name]
-            delattr(mod, warn_name)
-        else:
-            save_warnings[name] = None
-    yield
-    for name, warn in save_warnings.items():
-        mod = sys.modules[name]
-        if mod:
-            setattr(mod, warn_name, warn)
-            if warn is None:
-                delattr(mod, warn_name)
 
-@contextmanager
-def suppress_warnings():
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        yield
+script_dir = os.path.dirname(os.path.dirname(__file__))
 
-def check_warnings():
-    for name, mod in sys.modules.items():
-        if mod:
-            reg = getattr(mod, warn_name, None)
-            if reg:
-                # XXX We need to filter warnings for Python 2.
-                # This should be avoided by renaming the duplicate folders.
-                for k in reg:
-                    if type(k) == tuple and re.match(ignore_re, k[0]):
-                        continue
-                    return True
-    return False
+def decorate(mod_name):
+    """
+    Write the combination of "modulename_funcname"
+    in the Qt-like form "modulename::funcname"
+    """
+    if "_" not in mod_name:
+        return mod_name
+    if "::" in mod_name:
+        return mod_name
+    name, rest = mod_name.split("_", 1)
+    return name + "::" + rest
 
-def warn(message, category=None, stacklevel=1):
-    """Issue a warning with the default 'RuntimeWarning'"""
-    if category is None:
-        category = UserWarning
-    warnings.warn(message, category, stacklevel)
-
-# eof
+#eof

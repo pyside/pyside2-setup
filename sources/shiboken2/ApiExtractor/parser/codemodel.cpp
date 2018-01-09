@@ -576,6 +576,9 @@ void _ClassModelItem::formatDebug(QDebug &d) const
 {
     _CodeModelItem::formatDebug(d);
     if (!m_baseClasses.isEmpty()) {
+        if (m_final)
+            d << " [final]";
+        d << ", inherits=";
         d << ", inherits=";
         for (int i = 0, size = m_baseClasses.size(); i < size; ++i) {
             if (i)
@@ -886,6 +889,26 @@ bool _FunctionModelItem::isInline() const
     return m_isInline;
 }
 
+bool _FunctionModelItem::isOverride() const
+{
+    return m_isOverride;
+}
+
+void _FunctionModelItem::setOverride(bool o)
+{
+    m_isOverride = o;
+}
+
+bool _FunctionModelItem::isFinal() const
+{
+    return m_isFinal;
+}
+
+void _FunctionModelItem::setFinal(bool f)
+{
+    m_isFinal = f;
+}
+
 void _FunctionModelItem::setInline(bool isInline)
 {
     m_isInline = isInline;
@@ -929,6 +952,12 @@ void _FunctionModelItem::formatDebug(QDebug &d) const
     d << ", type=" << m_functionType;
     if (m_isInline)
         d << " [inline]";
+    if (m_isVirtual)
+        d << " [virtual]";
+    if (m_isOverride)
+        d << " [override]";
+    if (m_isFinal)
+        d << " [final]";
     if (m_isAbstract)
         d << " [abstract]";
     if (m_isExplicit)

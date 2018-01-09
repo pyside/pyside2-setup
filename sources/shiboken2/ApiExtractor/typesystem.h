@@ -62,7 +62,6 @@ class TemplateInstance;
 
 struct ReferenceCount
 {
-    ReferenceCount()  {}
     enum Action { // 0x01 - 0xff
         Invalid     = 0x00,
         Add         = 0x01,
@@ -76,8 +75,8 @@ struct ReferenceCount
         Padding     = 0xffffffff
     };
 
-    Action action;
     QString varName;
+    Action action = Invalid;
 };
 
 struct ArgumentOwner
@@ -93,28 +92,23 @@ struct ArgumentOwner
         ReturnIndex = 0,
         FirstArgumentIndex = 1
     };
-    ArgumentOwner() : action(ArgumentOwner::Invalid), index(ArgumentOwner::InvalidIndex) {}
 
-    Action action;
-    int index;
+    Action action = Invalid;
+    int index = InvalidIndex;
 };
 
 class CodeSnipFragment
 {
-private:
-    QString m_code;
-    TemplateInstance *m_instance;
-
 public:
-    CodeSnipFragment() : m_instance(0) {}
-    CodeSnipFragment(const QString &code)
-        : m_code(code),
-          m_instance(0) {}
-
-    CodeSnipFragment(TemplateInstance *instance)
-        : m_instance(instance) {}
+    CodeSnipFragment() = default;
+    explicit CodeSnipFragment(const QString &code) : m_code(code) {}
+    explicit CodeSnipFragment(TemplateInstance *instance) : m_instance(instance) {}
 
     QString code() const;
+
+private:
+    QString m_code;
+    TemplateInstance *m_instance = nullptr;
 };
 
 class CodeSnipAbstract
@@ -136,7 +130,7 @@ public:
 class CustomFunction : public CodeSnipAbstract
 {
 public:
-    CustomFunction(const QString &n = QString()) : name(n) { }
+    explicit CustomFunction(const QString &n = QString()) : name(n) {}
 
     QString name;
     QString paramName;
@@ -145,31 +139,21 @@ public:
 class TemplateEntry : public CodeSnipAbstract
 {
 public:
-    TemplateEntry(const QString &name, double vr)
-            : m_name(name), m_version(vr)
-    {
-    };
+    explicit TemplateEntry(const QString &name) : m_name(name) {}
 
     QString name() const
     {
         return m_name;
-    };
-
-    double version() const
-    {
-        return m_version;
     }
 
 private:
     QString m_name;
-    double m_version;
 };
 
 class TemplateInstance
 {
 public:
-    TemplateInstance(const QString &name, double vr)
-            : m_name(name), m_version(vr) {}
+    explicit TemplateInstance(const QString &name) : m_name(name) {}
 
     void addReplaceRule(const QString &name, const QString &value)
     {
@@ -183,14 +167,8 @@ public:
         return m_name;
     }
 
-    double version() const
-    {
-        return m_version;
-    }
-
 private:
     const QString m_name;
-    double m_version;
     QHash<QString, QString> replaceRules;
 };
 
@@ -198,33 +176,23 @@ private:
 class CodeSnip : public CodeSnipAbstract
 {
 public:
-    CodeSnip() : language(TypeSystem::TargetLangCode), version(0) {}
-    CodeSnip(double vr) : language(TypeSystem::TargetLangCode), version(vr) { }
-    CodeSnip(double vr, TypeSystem::Language lang) : language(lang), version(vr) { }
+    CodeSnip() = default;
+    explicit CodeSnip(TypeSystem::Language lang) : language(lang) {}
 
-    TypeSystem::Language language;
-    TypeSystem::CodeSnipPosition position;
+    TypeSystem::Language language = TypeSystem::TargetLangCode;
+    TypeSystem::CodeSnipPosition position = TypeSystem::CodeSnipPositionAny;
     ArgumentMap argumentMap;
-    double version;
 };
 
 struct ArgumentModification
 {
     ArgumentModification() : removedDefaultExpression(false), removed(false),
-        noNullPointers(false), array(false), index(-1), version(0) {}
-    ArgumentModification(int idx, double vr)
-            : removedDefaultExpression(false), removed(false),
-              noNullPointers(false), array(false), index(idx), version(vr) {}
+        noNullPointers(false), array(false) {}
+    explicit ArgumentModification(int idx) : index(idx), removedDefaultExpression(false), removed(false),
+              noNullPointers(false), array(false) {}
 
     // Should the default expression be removed?
-    uint removedDefaultExpression : 1;
-    uint removed : 1;
-    uint noNullPointers : 1;
-    uint resetAfterUse : 1;
-    uint array : 1; // consider "int*" to be "int[]"
 
-    // The index of this argument
-    int index;
 
     // Reference count flags for this argument
     QVector<ReferenceCount> referenceCounts;
@@ -252,11 +220,17 @@ struct ArgumentModification
     //QObject parent(owner) of this argument
     ArgumentOwner owner;
 
-    //Api version
-    double version;
-
     //New name
     QString renamed_to;
+
+    // The index of this argument
+    int index = -1;
+
+    uint removedDefaultExpression : 1;
+    uint removed : 1;
+    uint noNullPointers : 1;
+    uint resetAfterUse : 1;
+    uint array : 1; // consider "int*" to be "int[]"
 };
 
 struct Modification
@@ -281,8 +255,6 @@ struct Modification
         ReplaceExpression =     0x8000,
         VirtualSlot =          0x10000 | NonFinal
     };
-
-    Modification() : modifiers(0), removal(TypeSystem::NoLanguage) { }
 
     bool isAccessModifier() const
     {
@@ -345,16 +317,13 @@ struct Modification
         return removal != TypeSystem::NoLanguage;
     }
 
-    uint modifiers;
     QString renamedToName;
-    TypeSystem::Language removal;
+    uint modifiers = 0;
+    TypeSystem::Language removal = TypeSystem::NoLanguage;
 };
 
 struct FunctionModification: public Modification
 {
-    FunctionModification() : m_thread(false), m_allowThread(false), m_version(0) {}
-    FunctionModification(double vr) : m_thread(false), m_allowThread(false), m_version(vr) {}
-
     bool isCodeInjection() const
     {
         return modifiers & CodeInjection;
@@ -375,13 +344,6 @@ struct FunctionModification: public Modification
     {
         m_allowThread = allow;
     }
-    double version() const
-    {
-        return m_version;
-    }
-
-    bool operator!=(const FunctionModification& other) const;
-    bool operator==(const FunctionModification& other) const;
 
     bool matches(const QString &functionSignature) const
     {
@@ -403,11 +365,8 @@ struct FunctionModification: public Modification
 private:
     QString m_signature;
     QRegularExpression m_signaturePattern;
-    bool m_thread;
-    bool m_allowThread;
-    double m_version;
-
-
+    bool m_thread = false;
+    bool m_allowThread = false;
 };
 
 struct FieldModification: public Modification
@@ -445,19 +404,19 @@ struct AddedFunction
     *   AbstractMetaType and AbstractMetaArgument for the AbstractMetaFunctions.
     */
     struct TypeInfo {
-        TypeInfo() : isConstant(false), indirections(0), isReference(false) {}
+        TypeInfo() = default;
         static TypeInfo fromSignature(const QString& signature);
 
         QString name;
-        bool isConstant;
-        int indirections;
-        bool isReference;
         QString defaultValue;
+        int indirections = 0;
+        bool isConstant = false;
+        bool isReference = false;
     };
 
     /// Creates a new AddedFunction with a signature and a return type.
-    AddedFunction(QString signature, QString returnType, double vr);
-    AddedFunction() : m_access(Protected), m_isConst(false), m_isStatic(false), m_version(0) {}
+    explicit AddedFunction(QString signature, QString returnType, double vr);
+    AddedFunction() = default;
 
     /// Returns the function name.
     QString name() const
@@ -513,12 +472,12 @@ struct AddedFunction
     }
 private:
     QString m_name;
-    Access m_access;
     QVector<TypeInfo> m_arguments;
     TypeInfo m_returnType;
-    bool m_isConst;
-    bool m_isStatic;
-    double m_version;
+    double m_version = 0;
+    Access m_access = Protected;
+    bool m_isConst = false;
+    bool m_isStatic = false;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -526,29 +485,17 @@ QDebug operator<<(QDebug d, const AddedFunction::TypeInfo &ti);
 QDebug operator<<(QDebug d, const AddedFunction &af);
 #endif
 
-struct ExpensePolicy
-{
-    ExpensePolicy() : limit(-1) {}
-    int limit;
-    QString cost;
-    bool isValid() const
-    {
-        return limit >= 0;
-    }
-};
-
 class InterfaceTypeEntry;
 class ObjectTypeEntry;
 
 class DocModification
 {
 public:
-    DocModification() : format(TypeSystem::NativeCode), m_mode(TypeSystem::DocModificationXPathReplace), m_version(0) {}
-    DocModification(const QString& xpath, const QString& signature, double vr)
-            : format(TypeSystem::NativeCode), m_mode(TypeSystem::DocModificationXPathReplace),
-              m_xpath(xpath), m_signature(signature), m_version(vr) {}
-    DocModification(TypeSystem::DocModificationMode mode, const QString& signature, double vr)
-            : m_mode(mode), m_signature(signature), m_version(vr) {}
+    DocModification() = default;
+    explicit DocModification(const QString& xpath, const QString& signature) :
+        m_xpath(xpath), m_signature(signature) {}
+    explicit DocModification(TypeSystem::DocModificationMode mode, const QString& signature) :
+        m_signature(signature), m_mode(mode) {}
 
     void setCode(const QString& code) { m_code = code; }
     void setCode(const QStringRef& code) { m_code = code.toString(); }
@@ -569,25 +516,23 @@ public:
     {
         return m_mode;
     }
-    double version() const
-    {
-        return m_version;
-    }
 
-    TypeSystem::Language format;
+    TypeSystem::Language  format() const { return m_format; }
+    void setFormat(TypeSystem::Language f) { m_format = f; }
 
 private:
-    TypeSystem::DocModificationMode m_mode;
     QString m_code;
     QString m_xpath;
     QString m_signature;
-    double m_version;
+    TypeSystem::DocModificationMode m_mode = TypeSystem::DocModificationXPathReplace;
+    TypeSystem::Language m_format = TypeSystem::NativeCode;
 };
 
 class CustomConversion;
 
 class TypeEntry
 {
+    Q_DISABLE_COPY(TypeEntry)
     Q_GADGET
 public:
     enum Type {
@@ -628,15 +573,7 @@ public:
     };
     Q_ENUM(CodeGeneration)
 
-    TypeEntry(const QString &name, Type t, double vr)
-            : m_name(name),
-              m_type(t),
-              m_codeGeneration(GenerateAll),
-              m_preferredConversion(true),
-              m_stream(false),
-              m_version(vr)
-    {
-    };
+    explicit TypeEntry(const QString &name, Type t, double vr);
 
     virtual ~TypeEntry();
 
@@ -955,48 +892,42 @@ public:
 private:
     QString m_name;
     Type m_type;
-    uint m_codeGeneration;
+    uint m_codeGeneration = GenerateAll;
     CustomFunction m_customConstructor;
     CustomFunction m_customDestructor;
-    bool m_preferredConversion;
+    bool m_preferredConversion = true;
     CodeSnipList m_codeSnips;
     DocModificationList m_docModifications;
     IncludeList m_extraIncludes;
     Include m_include;
     QHash<QString, bool> m_includesUsed;
     QString m_conversionRule;
-    bool m_stream;
+    bool m_stream = false;
     double m_version;
 };
 
 class TypeSystemTypeEntry : public TypeEntry
 {
 public:
-    TypeSystemTypeEntry(const QString &name, double vr)
-            : TypeEntry(name, TypeSystemType, vr)
-    {
-    };
+    explicit TypeSystemTypeEntry(const QString &name, double vr);
 };
 
 class VoidTypeEntry : public TypeEntry
 {
 public:
-    VoidTypeEntry() : TypeEntry(QLatin1String("void"), VoidType, 0) { }
+    VoidTypeEntry();
 };
 
 class VarargsTypeEntry : public TypeEntry
 {
 public:
-    VarargsTypeEntry() : TypeEntry(QLatin1String("..."), VarargsType, 0) { }
+    VarargsTypeEntry();
 };
 
 class TemplateArgumentEntry : public TypeEntry
 {
 public:
-    TemplateArgumentEntry(const QString &name, double vr)
-            : TypeEntry(name, TemplateArgumentType, vr), m_ordinal(0)
-    {
-    }
+    explicit TemplateArgumentEntry(const QString &name, double vr);
 
     int ordinal() const
     {
@@ -1008,17 +939,13 @@ public:
     }
 
 private:
-    int m_ordinal;
+    int m_ordinal = 0;
 };
 
 class ArrayTypeEntry : public TypeEntry
 {
 public:
-    ArrayTypeEntry(const TypeEntry *nested_type, double vr)
-            : TypeEntry(QLatin1String("Array"), ArrayType, vr), m_nestedType(nested_type)
-    {
-        Q_ASSERT(m_nestedType);
-    }
+    explicit ArrayTypeEntry(const TypeEntry *nested_type, double vr);
 
     void setNestedTypeEntry(TypeEntry *nested)
     {
@@ -1029,17 +956,8 @@ public:
         return m_nestedType;
     }
 
-    QString targetLangName() const override
-    {
-        return m_nestedType->targetLangName() + QLatin1String("[]");
-    }
-    QString targetLangApiName() const override
-    {
-        if (m_nestedType->isPrimitive())
-            return m_nestedType->targetLangApiName() + QLatin1String("Array");
-        else
-            return QLatin1String("jobjectArray");
-    }
+    QString targetLangName() const override;
+    QString targetLangApiName() const override;
 
 private:
     const TypeEntry *m_nestedType;
@@ -1049,27 +967,15 @@ private:
 class PrimitiveTypeEntry : public TypeEntry
 {
 public:
-    PrimitiveTypeEntry(const QString &name, double vr)
-            : TypeEntry(name, PrimitiveType, vr),
-              m_preferredConversion(true),
-              m_preferredTargetLangType(true),
-              m_referencedTypeEntry(0)
-    {
-    }
+    explicit PrimitiveTypeEntry(const QString &name, double vr);
 
-    QString targetLangName() const override
-    {
-        return m_targetLangName;
-    }
+    QString targetLangName() const override;
     void setTargetLangName(const QString &targetLangName)
     {
         m_targetLangName  = targetLangName;
     }
 
-    QString targetLangApiName() const override
-    {
-        return m_targetLangApiName;
-    }
+    QString targetLangApiName() const override;
     void setTargetLangApiName(const QString &targetLangApiName)
     {
         m_targetLangApiName = targetLangApiName;
@@ -1113,14 +1019,8 @@ public:
      */
     PrimitiveTypeEntry* basicReferencedTypeEntry() const;
 
-    bool preferredConversion() const override
-    {
-        return m_preferredConversion;
-    }
-    void setPreferredConversion(bool b) override
-    {
-        m_preferredConversion = b;
-    }
+    bool preferredConversion() const override;
+    void setPreferredConversion(bool b) override;
 
     bool preferredTargetLangType() const
     {
@@ -1139,7 +1039,7 @@ private:
     QString m_defaultConstructor;
     uint m_preferredConversion : 1;
     uint m_preferredTargetLangType : 1;
-    PrimitiveTypeEntry* m_referencedTypeEntry;
+    PrimitiveTypeEntry* m_referencedTypeEntry = nullptr;
 };
 
 struct EnumValueRedirection
@@ -1157,46 +1057,14 @@ struct EnumValueRedirection
 class EnumTypeEntry : public TypeEntry
 {
 public:
-    EnumTypeEntry(const QString &nspace, const QString &enumName, double vr)
-            : TypeEntry(nspace.isEmpty() ? enumName : nspace + QLatin1String("::") + enumName,
-                        EnumType, vr),
-            m_qualifier(nspace),
-            m_targetLangName(enumName),
-            m_flags(0),
-            m_extensible(false),
-            m_forceInteger(false),
-            m_anonymous(false)
-    {
-    }
+    explicit EnumTypeEntry(const QString &nspace, const QString &enumName, double vr);
 
-    QString targetLangPackage() const
-    {
-        return m_packageName;
-    }
-    void setTargetLangPackage(const QString &package)
-    {
-        m_packageName = package;
-    }
+    QString targetLangPackage() const override;
+    void setTargetLangPackage(const QString &package);
 
-    QString targetLangName() const
-    {
-        return m_targetLangName;
-    }
+    QString targetLangName() const override;
     QString targetLangQualifier() const;
-    QString qualifiedTargetLangName() const override
-    {
-        QString qualifiedName;
-        QString pkg = targetLangPackage();
-        QString qualifier = targetLangQualifier();
-
-        if (!pkg.isEmpty())
-            qualifiedName += pkg + QLatin1Char('.');
-        if (!qualifier.isEmpty())
-            qualifiedName += qualifier + QLatin1Char('.');
-        qualifiedName += targetLangName();
-
-        return qualifiedName;
-    }
+    QString qualifiedTargetLangName() const override;
 
     QString targetLangApiName() const override;
 
@@ -1209,10 +1077,7 @@ public:
         m_qualifier = q;
     }
 
-    bool preferredConversion() const override
-    {
-        return false;
-    }
+    bool preferredConversion() const override;
 
     bool isBoundsChecked() const
     {
@@ -1300,20 +1165,17 @@ private:
     QStringList m_rejectedEnums;
     QVector<EnumValueRedirection> m_enumRedirections;
 
-    FlagsTypeEntry *m_flags;
+    FlagsTypeEntry *m_flags = nullptr;
 
-    bool m_extensible;
-    bool m_forceInteger;
-    bool m_anonymous;
+    bool m_extensible = false;
+    bool m_forceInteger = false;
+    bool m_anonymous = false;
 };
 
 class EnumValueTypeEntry : public TypeEntry
 {
 public:
-    EnumValueTypeEntry(const QString& name, const QString& value, const EnumTypeEntry* enclosingEnum, double vr)
-        : TypeEntry(name, TypeEntry::EnumValue, vr), m_value(value), m_enclosingEnum(enclosingEnum)
-    {
-    }
+    explicit EnumValueTypeEntry(const QString& name, const QString& value, const EnumTypeEntry* enclosingEnum, double vr);
 
     QString value() const { return m_value; }
     const EnumTypeEntry* enclosingEnum() const { return m_enclosingEnum; }
@@ -1325,20 +1187,12 @@ private:
 class FlagsTypeEntry : public TypeEntry
 {
 public:
-    FlagsTypeEntry(const QString &name, double vr) : TypeEntry(name, FlagsType, vr), m_enum(0)
-    {
-    }
+    explicit FlagsTypeEntry(const QString &name, double vr);
 
     QString qualifiedTargetLangName() const override;
-    QString targetLangName() const override
-    {
-        return m_targetLangName;
-    }
+    QString targetLangName() const override;
     QString targetLangApiName() const override;
-    bool preferredConversion() const override
-    {
-        return false;
-    }
+    bool preferredConversion() const override;
 
     QString originalName() const
     {
@@ -1372,15 +1226,12 @@ public:
         m_enum = e;
     }
 
-    QString targetLangPackage() const override
-    {
-        return m_enum->targetLangPackage();
-    }
+    QString targetLangPackage() const override;
 
 private:
     QString m_originalName;
     QString m_targetLangName;
-    EnumTypeEntry *m_enum;
+    EnumTypeEntry *m_enum = nullptr;
 };
 
 
@@ -1400,50 +1251,16 @@ public:
         Unknown
     };
 
-    ComplexTypeEntry(const QString &name, Type t, double vr)
-            : TypeEntry(QString(name).replace(QLatin1String(".*::"), QString()), t, vr),
-            m_qualifiedCppName(name),
-            m_qobject(false),
-            m_polymorphicBase(false),
-            m_genericClass(false),
-            m_typeFlags(0),
-            m_copyableFlag(Unknown),
-            m_baseContainerType(0)
-    {
-    }
+    explicit ComplexTypeEntry(const QString &name, Type t, double vr);
 
-    bool isComplex() const
-    {
-        return true;
-    }
-
-    ComplexTypeEntry *copy() const
-    {
-        ComplexTypeEntry *centry = new ComplexTypeEntry(name(), type(), version());
-        centry->setInclude(include());
-        centry->setExtraIncludes(extraIncludes());
-        centry->setAddedFunctions(addedFunctions());
-        centry->setFunctionModifications(functionModifications());
-        centry->setFieldModifications(fieldModifications());
-        centry->setQObject(isQObject());
-        centry->setDefaultSuperclass(defaultSuperclass());
-        centry->setCodeSnips(codeSnips());
-        centry->setTargetLangPackage(targetLangPackage());
-        centry->setBaseContainerType(baseContainerType());
-        centry->setDefaultConstructor(defaultConstructor());
-
-        return centry;
-    }
+    bool isComplex() const override;
 
     void setLookupName(const QString &name)
     {
         m_lookupName = name;
     }
 
-    QString lookupName() const override
-    {
-        return m_lookupName.isEmpty() ? targetLangName() : m_lookupName;
-    }
+    QString lookupName() const override;
 
     QString targetLangApiName() const override;
 
@@ -1494,10 +1311,7 @@ public:
         return m_fieldMods;
     }
 
-    QString targetLangPackage() const
-    {
-        return m_package;
-    }
+    QString targetLangPackage() const override;
     void setTargetLangPackage(const QString &package)
     {
         m_package = package;
@@ -1554,16 +1368,6 @@ public:
         return m_heldTypeValue;
     }
 
-
-    void setExpensePolicy(const ExpensePolicy &policy)
-    {
-        m_expensePolicy = policy;
-    }
-    const ExpensePolicy &expensePolicy() const
-    {
-        return m_expensePolicy;
-    }
-
     QString targetType() const
     {
         return m_targetType;
@@ -1573,12 +1377,7 @@ public:
         m_targetType = code;
     }
 
-    QString targetLangName() const override
-    {
-        return m_targetLangName.isEmpty()
-               ? TypeEntry::targetLangName()
-               : m_targetLangName;
-    }
+    QString targetLangName() const override;
     void setTargetLangName(const QString &name)
     {
         m_targetLangName = name;
@@ -1642,12 +1441,11 @@ private:
     QString m_heldTypeValue;
     QString m_lookupName;
     QString m_targetType;
-    ExpensePolicy m_expensePolicy;
     TypeFlags m_typeFlags;
-    CopyableFlag m_copyableFlag;
+    CopyableFlag m_copyableFlag = Unknown;
     QString m_hashFunction;
 
-    const ComplexTypeEntry* m_baseContainerType;
+    const ComplexTypeEntry* m_baseContainerType = nullptr;
 };
 
 class ContainerTypeEntry : public ComplexTypeEntry
@@ -1671,11 +1469,7 @@ public:
     };
     Q_ENUM(Type)
 
-    ContainerTypeEntry(const QString &name, Type type, double vr)
-        : ComplexTypeEntry(name, ContainerType, vr), m_type(type)
-    {
-        setCodeGeneration(GenerateForSubclass);
-    }
+    explicit ContainerTypeEntry(const QString &name, Type type, double vr);
 
     Type type() const
     {
@@ -1683,9 +1477,9 @@ public:
     }
 
     QString typeName() const;
-    QString targetLangName() const;
-    QString targetLangPackage() const;
-    QString qualifiedCppName() const;
+    QString targetLangName() const override;
+    QString targetLangPackage() const override;
+    QString qualifiedCppName() const override;
 
     static Type containerTypeFromString(QString typeName)
     {
@@ -1714,17 +1508,11 @@ private:
 class SmartPointerTypeEntry : public ComplexTypeEntry
 {
 public:
-    SmartPointerTypeEntry(const QString &name,
-                          const QString &getterName,
-                          const QString &smartPointerType,
-                          const QString &refCountMethodName,
-                          double vr)
-        : ComplexTypeEntry(name, SmartPointerType, vr),
-          m_getterName(getterName),
-          m_smartPointerType(smartPointerType),
-          m_refCountMethodName(refCountMethodName)
-    {
-    }
+    explicit SmartPointerTypeEntry(const QString &name,
+                                   const QString &getterName,
+                                   const QString &smartPointerType,
+                                   const QString &refCountMethodName,
+                                   double vr);
 
     QString getter() const
     {
@@ -1745,91 +1533,65 @@ private:
 class NamespaceTypeEntry : public ComplexTypeEntry
 {
 public:
-    NamespaceTypeEntry(const QString &name, double vr) : ComplexTypeEntry(name, NamespaceType, vr) { }
+    explicit NamespaceTypeEntry(const QString &name, double vr);
 };
 
 
 class ValueTypeEntry : public ComplexTypeEntry
 {
 public:
-    ValueTypeEntry(const QString &name, double vr) : ComplexTypeEntry(name, BasicValueType, vr) { }
+    explicit ValueTypeEntry(const QString &name, double vr);
 
-    bool isValue() const override
-    {
-        return true;
-    }
+    bool isValue() const override;
 
-    bool isNativeIdBased() const override
-    {
-        return true;
-    }
+    bool isNativeIdBased() const override;
 
 protected:
-    ValueTypeEntry(const QString &name, Type t, double vr) : ComplexTypeEntry(name, t, vr) { }
+    explicit ValueTypeEntry(const QString &name, Type t, double vr);
 };
 
 
 class StringTypeEntry : public ValueTypeEntry
 {
 public:
-    StringTypeEntry(const QString &name, double vr)
-            : ValueTypeEntry(name, StringType, vr)
-    {
-        setCodeGeneration(GenerateNothing);
-    }
+    explicit StringTypeEntry(const QString &name, double vr);
 
     QString targetLangApiName() const override;
     QString targetLangName() const override;
     QString targetLangPackage() const override;
 
-    bool isNativeIdBased() const override
-    {
-        return false;
-    }
+    bool isNativeIdBased() const override;
 };
 
 class CharTypeEntry : public ValueTypeEntry
 {
 public:
-    CharTypeEntry(const QString &name, double vr) : ValueTypeEntry(name, CharType, vr)
-    {
-        setCodeGeneration(GenerateNothing);
-    }
-
-    QString targetLangApiName() const override;
-    QString targetLangName() const override;
-    QString targetLangPackage() const override
-    {
-        return QString();
-    }
-
-    bool isNativeIdBased() const override
-    {
-        return false;
-    }
-};
-
-class VariantTypeEntry: public ValueTypeEntry
-{
-public:
-    VariantTypeEntry(const QString &name, double vr) : ValueTypeEntry(name, VariantType, vr) { }
+    explicit CharTypeEntry(const QString &name, double vr);
 
     QString targetLangApiName() const override;
     QString targetLangName() const override;
     QString targetLangPackage() const override;
 
-    bool isNativeIdBased() const override
-    {
-        return false;
-    }
+    bool isNativeIdBased() const override;
+};
+
+class VariantTypeEntry: public ValueTypeEntry
+{
+public:
+    explicit VariantTypeEntry(const QString &name, double vr);
+
+    QString targetLangApiName() const override;
+    QString targetLangName() const override;
+    QString targetLangPackage() const override;
+
+    bool isNativeIdBased() const override;
 };
 
 
 class InterfaceTypeEntry : public ComplexTypeEntry
 {
 public:
-    InterfaceTypeEntry(const QString &name, double vr)
-            : ComplexTypeEntry(name, InterfaceType, vr) {}
+    explicit InterfaceTypeEntry(const QString &name, double vr);
 
     static QString interfaceName(const QString &name)
     {
@@ -1845,15 +1607,8 @@ public:
         m_origin = origin;
     }
 
-    bool isNativeIdBased() const override
-    {
-        return true;
-    }
-    QString qualifiedCppName() const override
-    {
-        const int len = ComplexTypeEntry::qualifiedCppName().length() - interfaceName(QString()).length();
-        return ComplexTypeEntry::qualifiedCppName().left(len);
-    }
+    bool isNativeIdBased() const override;
+    QString qualifiedCppName() const override;
 
 private:
     ObjectTypeEntry *m_origin;
@@ -1863,11 +1618,7 @@ private:
 class FunctionTypeEntry : public TypeEntry
 {
 public:
-    FunctionTypeEntry(const QString& name, const QString& signature, double vr)
-            : TypeEntry(name, FunctionType, vr)
-    {
-        addSignature(signature);
-    }
+    explicit FunctionTypeEntry(const QString& name, const QString& signature, double vr);
     void addSignature(const QString& signature)
     {
         m_signatures << signature;
@@ -1889,25 +1640,18 @@ private:
 class ObjectTypeEntry : public ComplexTypeEntry
 {
 public:
-    ObjectTypeEntry(const QString &name, double vr)
-            : ComplexTypeEntry(name, ObjectType, vr), m_interface(0) {}
+    explicit ObjectTypeEntry(const QString &name, double vr);
 
-    InterfaceTypeEntry *designatedInterface() const
-    {
-        return m_interface;
-    }
+    InterfaceTypeEntry *designatedInterface() const override;
     void setDesignatedInterface(InterfaceTypeEntry *entry)
     {
         m_interface = entry;
     }
 
-    bool isNativeIdBased() const override
-    {
-        return true;
-    }
+    bool isNativeIdBased() const override;
 
 private:
-    InterfaceTypeEntry *m_interface;
+    InterfaceTypeEntry *m_interface = nullptr;
 };
 
 struct TypeRejection

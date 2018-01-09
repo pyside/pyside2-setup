@@ -773,6 +773,16 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
             d->qualifyTypeDef(cursor, d->m_currentField);
         }
         break;
+    case CXCursor_CXXFinalAttr:
+         if (!d->m_currentFunction.isNull())
+             d->m_currentFunction->setFinal(true);
+         else if (!d->m_currentClass.isNull())
+             d->m_currentClass->setFinal(true);
+        break;
+    case CXCursor_CXXOverrideAttr:
+        if (!d->m_currentFunction.isNull())
+            d->m_currentFunction->setOverride(true);
+        break;
     default:
         break;
     }

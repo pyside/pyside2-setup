@@ -37,64 +37,25 @@
 ##
 #############################################################################
 
-from __future__ import print_function, absolute_import
-
-"""
-Supporting isolation of warnings
-
-Warnings in unittests are not isolated.
-We sometimes use warnings to conveniently accumulate error messages
-and eventually report them afterwards as error.
-"""
+from __future__ import print_function
 
 import sys
-import warnings
-import re
-from contextlib import contextmanager
+from . import command
 
-warn_name = "__warningregistry__"
-ignore_re = 'Not importing directory .*'
+main = command.main
 
-@contextmanager
-def isolate_warnings():
-    save_warnings = {}
-    for name, mod in sys.modules.items():
-        if mod and hasattr(mod, warn_name):
-            save_warnings[name] = mod.__dict__[warn_name]
-            delattr(mod, warn_name)
-        else:
-            save_warnings[name] = None
-    yield
-    for name, warn in save_warnings.items():
-        mod = sys.modules[name]
-        if mod:
-            setattr(mod, warn_name, warn)
-            if warn is None:
-                delattr(mod, warn_name)
+# modify print so that it always flushes
+__builtins__["orig_print"] = __builtins__["print"]
 
-@contextmanager
-def suppress_warnings():
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        yield
+def print_flushed(*args, **kw):
+    orig_print(*args, **kw)
+    sys.stdout.flush()
 
-def check_warnings():
-    for name, mod in sys.modules.items():
-        if mod:
-            reg = getattr(mod, warn_name, None)
-            if reg:
-                # XXX We need to filter warnings for Python 2.
-                # This should be avoided by renaming the duplicate folders.
-                for k in reg:
-                    if type(k) == tuple and re.match(ignore_re, k[0]):
-                        continue
-                    return True
-    return False
+__builtins__["print"] = print_flushed
 
-def warn(message, category=None, stacklevel=1):
-    """Issue a warning with the default 'RuntimeWarning'"""
-    if category is None:
-        category = UserWarning
-    warnings.warn(message, category, stacklevel)
+print = print_flushed
+
+# We also could use "python -u" to get unbuffered output.
+# This method is better since it needs no change of the interface.
 
 # eof
