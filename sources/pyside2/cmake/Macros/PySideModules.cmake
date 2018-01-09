@@ -121,7 +121,18 @@ macro(create_pyside_module
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PySide2/${module_name}/pyside2_${lower_module_name}_python.h
             DESTINATION include/PySide2${pyside2_SUFFIX}/${module_name}/)
     file(GLOB typesystem_files ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_*.xml ${typesystem_path})
-    install(FILES ${typesystem_files} DESTINATION share/PySide2${pyside2_SUFFIX}/typesystems)
+
+#   Copy typesystem files and remove module names from the <load-typesystem> element
+#   so that it works in a flat directory:
+#   <load-typesystem name="QtWidgets/typesystem_widgets.xml" ... ->
+#   <load-typesystem name="typesystem_widgets.xml"
+    foreach(typesystem_file ${typesystem_files})
+        get_filename_component(typesystem_file_name "${typesystem_file}" NAME)
+        file(READ "${typesystem_file}" typesystemXml)
+        string(REGEX REPLACE "<load-typesystem name=\"[^/\"]+/" "<load-typesystem name=\"" typesystemXml "${typesystemXml}")
+        set(typesystem_target_file "${CMAKE_INSTALL_PREFIX}/share/PySide2${pyside2_SUFFIX}/typesystems/${typesystem_file_name}")
+        file(WRITE "${typesystem_target_file}" "${typesystemXml}")
+    endforeach()
 endmacro()
 
 #macro(check_qt_class_with_namespace module namespace class optional_source_files dropped_entries [namespace] [module])
