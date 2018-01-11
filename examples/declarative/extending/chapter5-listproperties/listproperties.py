@@ -86,7 +86,7 @@ class PieSlice (QQuickPaintedItem):
         pen = QPen(self._color, 2)
         painter.setPen(pen);
         painter.setRenderHints(QPainter.Antialiasing, True);
-        painter.drawPie(self.boundingRect(), self._fromAngle * 16, self._angleSpan * 16);
+        painter.drawPie(self.boundingRect().adjusted(1,1,-1,-1), self._fromAngle * 16, self._angleSpan * 16);
 
 class PieChart (QQuickPaintedItem):
     def __init__(self, parent = None):
