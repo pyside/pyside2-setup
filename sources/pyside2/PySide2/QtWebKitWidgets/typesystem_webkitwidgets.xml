@@ -45,7 +45,7 @@
   <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
   <load-typesystem name="QtWebKit/typesystem_webkit.xml" generate="no"/>
   <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
-  <load-typesystem name="typesystem_printsupport.xml" generate="no"/>
+  <load-typesystem name="QtPrintSupport/typesystem_printsupport.xml" generate="no"/>
 
   <value-type name="QWebDatabase"/>
 
