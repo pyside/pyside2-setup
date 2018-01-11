@@ -37,7 +37,10 @@
 **
 ****************************************************************************/
 
-#include "Python.h"
+#ifndef PEP384RESOLVE_H
+#define PEP384RESOLVE_H
+
+#include "sbkpython.h"
 
 extern "C"
 {
@@ -348,11 +351,19 @@ typedef struct _heaptypeobject {
 
 /*****************************************************************************
  *
- * From pydebug.h
+ * RESOLVED: pydebug.h
  *
  */
 #ifdef Py_LIMITED_API
-PyAPI_DATA(int) Py_VerboseFlag;
+/*
+ * We have no direct access to Py_VerboseFlag because debugging is not
+ * supported. The python developers are partially a bit too rigorous.
+ * Instead, we compute the value and use a function call macro.
+ * Was before: PyAPI_DATA(int) Py_VerboseFlag;
+ */
+PyAPI_FUNC(int) Py_GetFlag(const char *name);
+PyAPI_FUNC(int) Py_GetVerboseFlag(void);
+#define Py_VerboseFlag Py_GetVerboseFlag()
 #endif
 
 /*****************************************************************************
@@ -1227,11 +1238,71 @@ typedef struct {
  *
  */
 #ifdef Py_LIMITED_API
-// The whole file needs to be included; it makes no sense to copy this here.
-#  define _hold_Py_LIMITED_API Py_LIMITED_API
-#  undef Py_LIMITED_API
-#  include <datetime.h>
-#  define Py_LIMITED_API _hold_Py_LIMITED_API
-#endif
+
+LIBSHIBOKEN_API int PyDateTime_Get(PyObject *ob, const char *name);
+
+#define PyDateTime_GetYear(o)         PyDateTime_Get(o, "year")
+#define PyDateTime_GetMonth(o)        PyDateTime_Get(o, "month")
+#define PyDateTime_GetDay(o)          PyDateTime_Get(o, "day")
+#define PyDateTime_GetHour(o)         PyDateTime_Get(o, "hour")
+#define PyDateTime_GetMinute(o)       PyDateTime_Get(o, "minute")
+#define PyDateTime_GetSecond(o)       PyDateTime_Get(o, "second")
+#define PyDateTime_GetMicrosecond(o)  PyDateTime_Get(o, "microsecond")
+#define PyDateTime_GetFold(o)         PyDateTime_Get(o, "fold")
+
+#define PyDateTime_GET_YEAR(o)              PyDateTime_GetYear(o)
+#define PyDateTime_GET_MONTH(o)             PyDateTime_GetMonth(o)
+#define PyDateTime_GET_DAY(o)               PyDateTime_GetDay(o)
+
+#define PyDateTime_DATE_GET_HOUR(o)         PyDateTime_GetHour(o)
+#define PyDateTime_DATE_GET_MINUTE(o)       PyDateTime_GetMinute(o)
+#define PyDateTime_DATE_GET_SECOND(o)       PyDateTime_GetSecond(o)
+#define PyDateTime_DATE_GET_MICROSECOND(o)  PyDateTime_GetMicrosecond(o)
+#define PyDateTime_DATE_GET_FOLD(o)         PyDateTime_GetFold(o)
+
+#define PyDateTime_TIME_GET_HOUR(o)         PyDateTime_GetHour(o)
+#define PyDateTime_TIME_GET_MINUTE(o)       PyDateTime_GetMinute(o)
+#define PyDateTime_TIME_GET_SECOND(o)       PyDateTime_GetSecond(o)
+#define PyDateTime_TIME_GET_MICROSECOND(o)  PyDateTime_GetMicrosecond(o)
+#define PyDateTime_TIME_GET_FOLD(o)         PyDateTime_GetFold(o)
+
+/* Define structure slightly similar to C API. */
+typedef struct {
+    PyObject *module;
+    /* type objects */
+    PyTypeObject *DateType;
+    PyTypeObject *DateTimeType;
+    PyTypeObject *TimeType;
+    PyTypeObject *DeltaType;
+    PyTypeObject *TZInfoType;
+} datetime_struc;
+
+LIBSHIBOKEN_API datetime_struc *init_DateTime(void);
+
+#define PyDateTime_IMPORT     PyDateTimeAPI = init_DateTime()
+
+static datetime_struc *PyDateTimeAPI = NULL;
+
+#define PyDate_Check(op)      PyObject_TypeCheck(op, PyDateTimeAPI->DateType)
+#define PyDateTime_Check(op)  PyObject_TypeCheck(op, PyDateTimeAPI->DateTimeType)
+#define PyTime_Check(op)      PyObject_TypeCheck(op, PyDateTimeAPI->TimeType)
+
+LIBSHIBOKEN_API PyObject *PyDate_FromDate(int year, int month, int day);
+LIBSHIBOKEN_API PyObject *PyDateTime_FromDateAndTime(
+    int year, int month, int day, int hour, int min, int sec, int usec);
+LIBSHIBOKEN_API PyObject *PyTime_FromTime(
+    int hour, int minute, int second, int usecond);
+
+#endif /* Py_LIMITED_API */
+
+/*****************************************************************************
+ *
+ * Module Initialization
+ *
+ */
+
+LIBSHIBOKEN_API void PEP384_Init(void);
 
 } // extern "C"
+
+#endif // PEP384RESOLVE_H
