@@ -96,6 +96,14 @@ if (os.environ.get("COIN_RERUN_FAILED_ONLY", "1").lower() in
 
 def test_project(project, args, blacklist, runs):
     ret = []
+
+    # remove files from a former run
+    for idx in range(runs):
+        index = idx + 1
+        runner = TestRunner(builds.selected, project, index)
+        if os.path.exists(runner.logfile) and not args.skip:
+            os.unlink(runner.logfile)
+    # now start the real run
     for idx in range(runs):
         index = idx + 1
         runner = TestRunner(builds.selected, project, index)
