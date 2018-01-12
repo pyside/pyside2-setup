@@ -71,8 +71,6 @@ macro(create_pyside_module
     set(shiboken_framework_include_dirs_option "")
     if(CMAKE_HOST_APPLE)
         set(shiboken_framework_include_dirs "${QT_FRAMEWORK_INCLUDE_DIR}")
-        # On macOS, provide the framework paths for OpenGL headers.
-        set(shiboken_framework_include_dirs ${shiboken_framework_include_dirs} ${CMAKE_SYSTEM_FRAMEWORK_PATH})
         make_path(shiboken_framework_include_dirs ${shiboken_framework_include_dirs})
         set(shiboken_framework_include_dirs_option "--framework-include-paths=${shiboken_framework_include_dirs}")
     endif()

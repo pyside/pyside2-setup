@@ -46,12 +46,16 @@ public:
     {
         QByteArray option;
 
-        if (p.m_isFramework)
-            option = QByteArrayLiteral("-F");
-        else if (systemInclude)
+        if (p.m_isFramework) {
+            if (systemInclude)
+                option = QByteArrayLiteral("-iframework");
+            else
+                option = QByteArrayLiteral("-F");
+        } else if (systemInclude) {
             option = QByteArrayLiteral("-isystem");
-        else
+        } else {
             option = QByteArrayLiteral("-I");
+        }
 
         return option + p.path;
     }
