@@ -130,8 +130,9 @@ macro(create_pyside_module
         get_filename_component(typesystem_file_name "${typesystem_file}" NAME)
         file(READ "${typesystem_file}" typesystemXml)
         string(REGEX REPLACE "<load-typesystem name=\"[^/\"]+/" "<load-typesystem name=\"" typesystemXml "${typesystemXml}")
-        set(typesystem_target_file "${CMAKE_INSTALL_PREFIX}/share/PySide2${pyside2_SUFFIX}/typesystems/${typesystem_file_name}")
+        set (typesystem_target_file "${CMAKE_CURRENT_BINARY_DIR}/PySide2/typesystems/${typesystem_file_name}")
         file(WRITE "${typesystem_target_file}" "${typesystemXml}")
+        install(FILES "${typesystem_target_file}" DESTINATION share/PySide2${pyside2_SUFFIX}/typesystems)
     endforeach()
 endmacro()
 
