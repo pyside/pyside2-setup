@@ -163,7 +163,7 @@ QVector<Diagnostic> getDiagnostics(CXTranslationUnit tu)
 CXDiagnosticSeverity maxSeverity(const QVector<Diagnostic> &ds)
 {
     CXDiagnosticSeverity result = CXDiagnostic_Ignored;
-    for (const Diagnostic d : ds) {
+    for (const Diagnostic& d : ds) {
         if (d.severity > result)
             result = d.severity;
     }

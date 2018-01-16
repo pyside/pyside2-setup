@@ -260,7 +260,7 @@ bool parse(const QByteArrayList  &clangArgs, unsigned clangFlags, BaseVisitor &b
         debug.nospace();
         debug << "Errors in "
             << QDir::toNativeSeparators(QFile::decodeName(clangArgs.constLast())) << ":\n";
-        for (const Diagnostic &diagnostic : diagnostics)
+        for (const Diagnostic &diagnostic : qAsConst(diagnostics))
             debug << diagnostic << '\n';
     }
 

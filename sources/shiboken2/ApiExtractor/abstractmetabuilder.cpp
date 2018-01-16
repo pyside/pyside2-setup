@@ -487,7 +487,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 
     const QSet<NamespaceModelItem> &namespaceTypeValues = dom->uniqueNamespaces();
     ReportHandler::setProgressReference(namespaceTypeValues);
-    for (NamespaceModelItem item : namespaceTypeValues) {
+    for (const NamespaceModelItem &item : namespaceTypeValues) {
         ReportHandler::progress(QLatin1String("Generating namespace model..."));
         AbstractMetaClass *metaClass = traverseNamespace(dom, item);
         if (metaClass)
@@ -1143,7 +1143,7 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(EnumModelItem enumIte
 
     // Register all enum values on Type database
     const EnumeratorList &enumerators = enumItem->enumerators();
-    for (EnumeratorModelItem e : enumItem->enumerators()) {
+    for (const EnumeratorModelItem &e : enumerators) {
         QString name;
         if (enclosing) {
             name += enclosing->name();
@@ -1645,8 +1645,8 @@ AbstractMetaFunctionList AbstractMetaBuilderPrivate::templateClassFunctionList(c
         }
     }
 
-    const AbstractMetaFunctionList::ConstIterator unchangedBegin = unchangedFunctions.begin();
-    const AbstractMetaFunctionList::ConstIterator unchangedEnd = unchangedFunctions.end();
+    const AbstractMetaFunctionList::ConstIterator unchangedBegin = unchangedFunctions.cbegin();
+    const AbstractMetaFunctionList::ConstIterator unchangedEnd = unchangedFunctions.cend();
     for (int i = result.size() - 1; i >= 0; --i) {
         AbstractMetaFunction *function = result.at(i);
         if (!unchangedFunctions.contains(function)
@@ -3034,10 +3034,8 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
         QString templateParamName;
         for (const QString &possibleName : qAsConst(possibleNames)) {
             t = typeDb->findType(possibleName);
-            if (t) {
-                QString templateParamName = possibleName;
+            if (t)
                 break;
-            }
         }
 
         if (t) {
@@ -3184,8 +3182,6 @@ void AbstractMetaBuilderPrivate::parseQ_Property(AbstractMetaClass *metaClass,
                                   .arg(l.at(0), metaClass->name());
             continue;
         }
-
-        QString typeName = scope + l.at(0);
 
         QPropertySpec* spec = new QPropertySpec(type->typeEntry());
         spec->setName(l.at(1));

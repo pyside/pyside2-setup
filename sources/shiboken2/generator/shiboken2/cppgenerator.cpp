@@ -701,7 +701,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
                             qCWarning(lcShiboken) << "The expression used in return value contains an invalid index.";
                             break;
                         }
-                        defaultReturnExpr.replace(match.captured(0), func->arguments()[argId]->name());
+                        defaultReturnExpr.replace(match.captured(0), func->arguments().at(argId)->name());
                         offset = match.capturedStart(1);
                     }
                 }
@@ -1046,7 +1046,6 @@ void CppGenerator::writeEnumConverterFunctions(QTextStream& s, const TypeEntry* 
 {
     if (!enumType)
         return;
-    QString enumFlagName = enumType->isFlags() ? QLatin1String("flag") : QLatin1String("enum");
     QString typeName = fixedCppTypeName(enumType);
     QString enumPythonType = cpythonTypeNameExt(enumType);
     QString cppTypeName = getFullTypeName(enumType).trimmed();
@@ -3872,11 +3871,7 @@ void CppGenerator::writeMappingMethods(QTextStream &s,
                                        const AbstractMetaClass *metaClass,
                                        GeneratorContext &context)
 {
-
-    QMap<QString, QString> funcs;
-
-    QHash< QString, QPair< QString, QString > >::const_iterator it = m_mappingProtocol.begin();
-    for (; it != m_mappingProtocol.end(); ++it) {
+    for (auto it = m_mappingProtocol.cbegin(), end = m_mappingProtocol.cend(); it != end; ++it) {
         const AbstractMetaFunction* func = metaClass->findFunction(it.key());
         if (!func)
             continue;
@@ -3900,12 +3895,9 @@ void CppGenerator::writeSequenceMethods(QTextStream &s,
                                         const AbstractMetaClass *metaClass,
                                         GeneratorContext &context)
 {
-
-    QMap<QString, QString> funcs;
     bool injectedCode = false;
 
-    QHash< QString, QPair< QString, QString > >::const_iterator it = m_sequenceProtocol.begin();
-    for (; it != m_sequenceProtocol.end(); ++it) {
+    for (auto it = m_sequenceProtocol.cbegin(), end = m_sequenceProtocol.cend(); it != end; ++it) {
         const AbstractMetaFunction* func = metaClass->findFunction(it.key());
         if (!func)
             continue;
@@ -3984,7 +3976,7 @@ void CppGenerator::writeTypeAsMappingDefinition(QTextStream& s, const AbstractMe
 
     QString baseName = cpythonBaseName(metaClass);
     s << INDENT << "memset(&" << baseName << "_TypeAsMapping, 0, sizeof(PyMappingMethods));" << endl;
-    for (QHash<QString, QString>::const_iterator it =  m_mpFuncs.cbegin(), end = m_mpFuncs.end(); it != end; ++it) {
+    for (auto it = m_mpFuncs.cbegin(), end = m_mpFuncs.cend(); it != end; ++it) {
         const QString &mpName = it.key();
         if (funcs[mpName].isEmpty())
             continue;
@@ -4279,7 +4271,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream &s, GeneratorContext &co
             int alternativeNumericTypes = 0;
             for (const AbstractMetaFunction *func : overloads) {
                 if (!func->isStatic() &&
-                    ShibokenGenerator::isNumber(func->arguments()[0]->type()->typeEntry()))
+                    ShibokenGenerator::isNumber(func->arguments().at(0)->type()->typeEntry()))
                     alternativeNumericTypes++;
             }
 

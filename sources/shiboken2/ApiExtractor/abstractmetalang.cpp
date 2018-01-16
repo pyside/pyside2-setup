@@ -1326,7 +1326,6 @@ void AbstractMetaClass::setFunctions(const AbstractMetaFunctionList &functions)
     // Functions must be sorted by name before next loop
     sortFunctions();
 
-    QString currentName;
     for (AbstractMetaFunction *f : qAsConst(m_functions)) {
         f->setOwnerClass(this);
 

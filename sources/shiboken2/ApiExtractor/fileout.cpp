@@ -39,15 +39,15 @@ bool FileOut::dummy = false;
 bool FileOut::diff = false;
 
 #ifdef Q_OS_LINUX
-const char* colorDelete = "\033[31m";
-const char* colorAdd = "\033[32m";
-const char* colorInfo = "\033[36m";
-const char* colorReset = "\033[0m";
+static const char colorDelete[] = "\033[31m";
+static const char colorAdd[] = "\033[32m";
+static const char colorInfo[] = "\033[36m";
+static const char colorReset[] = "\033[0m";
 #else
-const char* colorDelete = "";
-const char* colorAdd = "";
-const char* colorInfo = "";
-const char* colorReset = "";
+static const char colorDelete[] = "";
+static const char colorAdd[] = "";
+static const char colorInfo[] = "";
+static const char colorReset[] = "";
 #endif
 
 FileOut::FileOut(QString n):
