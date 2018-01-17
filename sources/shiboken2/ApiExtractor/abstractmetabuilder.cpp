@@ -1044,7 +1044,7 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(EnumModelItem enumIte
     TypeEntry* typeEntry = 0;
     if (enumItem->accessPolicy() == CodeModel::Private) {
         QStringList names = enumItem->qualifiedName();
-        QString enumName = names.last();
+        QString enumName = names.constLast();
         QString nspace;
         if (names.size() > 1)
             nspace = QStringList(names.mid(0, names.size() - 1)).join(colonColon());
@@ -1802,10 +1802,10 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
     QStringList baseClasses = metaClass->baseClassNames();
 
     // we only support our own containers and ONLY if there is only one baseclass
-    if (baseClasses.size() == 1 && baseClasses.first().contains(QLatin1Char('<'))) {
+    if (baseClasses.size() == 1 && baseClasses.constFirst().contains(QLatin1Char('<'))) {
         TypeParser::Info info;
         ComplexTypeEntry* baseContainerType;
-        AbstractMetaClass* templ = findTemplateClass(baseClasses.first(), metaClass, &info, &baseContainerType);
+        AbstractMetaClass* templ = findTemplateClass(baseClasses.constFirst(), metaClass, &info, &baseContainerType);
         if (templ) {
             setupInheritance(templ);
             inheritTemplate(metaClass, templ, info);
@@ -1827,7 +1827,7 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
 
         qCWarning(lcShiboken).noquote().nospace()
             << QStringLiteral("template baseclass '%1' of '%2' is not known")
-                              .arg(baseClasses.first(), metaClass->name());
+                              .arg(baseClasses.constFirst(), metaClass->name());
         return false;
     }
 
@@ -1998,7 +1998,7 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
         if (metaFunction->name() == metaClass->name()) {
             metaFunction->setFunctionType(AbstractMetaFunction::ConstructorFunction);
             if (fargs.size() == 1) {
-                const TypeEntry *te = fargs.first()->type()->typeEntry();
+                const TypeEntry *te = fargs.constFirst()->type()->typeEntry();
                 if (te->isCustom())
                     metaFunction->setExplicit(true);
                 if (te->name() == metaFunction->name())
@@ -2258,7 +2258,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
     if (arguments.size() == 1) {
         ArgumentModelItem arg = arguments.at(0);
         TypeInfo type = arg->type();
-        if (type.qualifiedName().first() == QLatin1String("void") && type.indirections() == 0)
+        if (type.qualifiedName().constFirst() == QLatin1String("void") && type.indirections() == 0)
             arguments.pop_front();
     }
 
@@ -2322,9 +2322,9 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
         } else {
             FunctionModificationList mods = TypeDatabase::instance()->functionModifications(metaFunction->minimalSignature());
             if (!mods.isEmpty()) {
-                QVector<ArgumentModification> argMods = mods.first().argument_mods;
+                QVector<ArgumentModification> argMods = mods.constFirst().argument_mods;
                 if (!argMods.isEmpty())
-                    replacedExpression = argMods.first().replacedDefaultExpression;
+                    replacedExpression = argMods.constFirst().replacedDefaultExpression;
             }
         }
 
@@ -2373,7 +2373,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
 
     // Determine class special functions
     if (m_currentClass && metaFunction->arguments().size() == 1) {
-        const AbstractMetaType *argType = metaFunction->arguments().first()->type();
+        const AbstractMetaType *argType = metaFunction->arguments().constFirst()->type();
         if (argType->typeEntry() == m_currentClass->typeEntry() && argType->indirections() == 0) {
             if (metaFunction->name() == QLatin1String("operator=")) {
                 switch (argType->referenceType()) {

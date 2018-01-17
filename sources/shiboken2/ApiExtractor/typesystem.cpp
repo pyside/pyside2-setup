@@ -615,11 +615,10 @@ void Handler::addFlags(const QString &name, QString flagName,
     if (QStringList(lst.mid(0, lst.size() - 1)).join(colonColon()) != m_currentEnum->targetLangQualifier()) {
         qCWarning(lcShiboken).noquote().nospace()
             << QStringLiteral("enum %1 and flags %2 differ in qualifiers")
-                              // avoid constFirst to stay Qt 5.5 compatible
-                              .arg(m_currentEnum->targetLangQualifier(), lst.first());
+                              .arg(m_currentEnum->targetLangQualifier(), lst.constFirst());
     }
 
-    ftype->setFlagsName(lst.last());
+    ftype->setFlagsName(lst.constLast());
     m_currentEnum->setFlags(ftype);
 
     m_database->addFlagsType(ftype);
@@ -933,7 +932,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
              else
                 m_currentEnum =
                     new EnumTypeEntry(QStringList(names.mid(0, names.size() - 1)).join(colonColon()),
-                                      names.last(), since);
+                                      names.constLast(), since);
             m_currentEnum->setAnonymous(!attributes[QLatin1String("identified-by-value")].isEmpty());
             element->entry = m_currentEnum;
             m_currentEnum->setCodeGeneration(m_generate);
@@ -1978,7 +1977,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             }
 
             if (topElement.type == StackElement::ModifyFunction || topElement.type == StackElement::AddFunction) {
-                FunctionModification mod = m_contextStack.top()->functionMods.last();
+                FunctionModification mod = m_contextStack.top()->functionMods.constLast();
                 if (snip.language == TypeSystem::ShellDeclaration) {
                     m_error = QLatin1String("no function implementation in shell declaration in which to inject code");
                     return false;

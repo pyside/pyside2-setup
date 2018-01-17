@@ -142,7 +142,7 @@ static QString getImplicitConversionTypeName(const AbstractMetaType* containerTy
     else if (function->isConversionOperator())
         impConv = function->ownerClass()->typeEntry()->name();
     else
-        impConv = getTypeName(function->arguments().first()->type());
+        impConv = getTypeName(function->arguments().constFirst()->type());
 
     QStringList types;
     const AbstractMetaTypeList &instantiations = containerType->instantiations();
@@ -305,7 +305,7 @@ void OverloadData::sortNextOverloads()
             if (function->isConversionOperator())
                 convertibleType = function->ownerClass()->typeEntry()->name();
             else
-                convertibleType = getTypeName(function->arguments().first()->type());
+                convertibleType = getTypeName(function->arguments().constFirst()->type());
 
             if (convertibleType == QLatin1String("int") || convertibleType == QLatin1String("unsigned int"))
                 classesWithIntegerImplicitConversion << targetTypeEntryName;
@@ -589,7 +589,7 @@ bool OverloadData::hasVarargs() const
 {
     for (const AbstractMetaFunction *func : m_overloads) {
         AbstractMetaArgumentList args = func->arguments();
-        if (args.size() > 1 && args.last()->type()->isVarargs())
+        if (args.size() > 1 && args.constLast()->type()->isVarargs())
             return true;
     }
     return false;
@@ -652,7 +652,7 @@ bool OverloadData::hasStaticAndInstanceFunctions() const
 
 const AbstractMetaFunction* OverloadData::referenceFunction() const
 {
-    return m_overloads.first();
+    return m_overloads.constFirst();
 }
 
 const AbstractMetaArgument* OverloadData::argument(const AbstractMetaFunction* func) const

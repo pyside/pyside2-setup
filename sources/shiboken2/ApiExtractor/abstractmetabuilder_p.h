@@ -56,7 +56,7 @@ public:
 
     void pushScope(ScopeModelItem item) { m_scopes << item; }
 
-    ScopeModelItem currentScope() const { return m_scopes.last(); }
+    ScopeModelItem currentScope() const { return m_scopes.constLast(); }
 
     AbstractMetaClass *argumentToClass(ArgumentModelItem);
 
