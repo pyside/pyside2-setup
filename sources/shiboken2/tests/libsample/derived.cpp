@@ -103,6 +103,8 @@ struct SecretClass : public Abstract {
     virtual void* pureVirtualReturningVoidPtr() { return 0; }
     virtual PrintFormat returnAnEnum() { return Short; }
     void hideFunction(HideType*){};
+private:
+    virtual void pureVirtualPrivate() {}
 };
 
 Abstract* Derived::triggerImpossibleTypeDiscovery()
@@ -116,4 +118,8 @@ struct AnotherSecretClass : public Derived {
 Abstract* Derived::triggerAnotherImpossibleTypeDiscovery()
 {
     return new AnotherSecretClass;
+}
+
+void Derived::pureVirtualPrivate()
+{
 }

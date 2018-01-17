@@ -87,6 +87,9 @@ public:
 protected:
     const char* getClassName() { return className(); }
     virtual const char* className() override { return "Derived"; }
+
+private:
+    void pureVirtualPrivate() override;
 };
 #endif // DERIVED_H
 

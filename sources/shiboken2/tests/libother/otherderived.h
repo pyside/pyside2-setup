@@ -60,6 +60,9 @@ public:
 protected:
     inline const char* getClassName() { return className(); }
     virtual const char* className()  override { return "OtherDerived"; }
+
+private:
+    void pureVirtualPrivate() override;
 };
 #endif // OTHERDERIVED_H
 

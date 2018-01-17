@@ -102,6 +102,7 @@ protected:
     unsigned int bitField: 1;
 
 private:
+    virtual void pureVirtualPrivate() = 0;
     int m_id;
 };
 #endif // ABSTRACT_H

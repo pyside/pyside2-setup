@@ -341,8 +341,9 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
 
         const AbstractMetaFunctionList &funcs = filterFunctions(metaClass);
         for (const AbstractMetaFunction *func : funcs) {
-            if ((func->isPrivate() && !visibilityModifiedToPrivate(func))
-                || (func->isModifiedRemoved() && !func->isAbstract()))
+            const bool notAbstract = !func->isAbstract();
+            if ((func->isPrivate() && notAbstract && !visibilityModifiedToPrivate(func))
+                || (func->isModifiedRemoved() && notAbstract))
                 continue;
             if (func->functionType() == AbstractMetaFunction::ConstructorFunction && !func->isUserAdded()) {
                 writeConstructorNative(s, func);
