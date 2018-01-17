@@ -168,8 +168,8 @@ class LIBSAMPLE_API ObjectTypeDerived: public ObjectType, public OtherBase {
 public:
     ObjectTypeDerived(): ObjectType(), OtherBase() {};
 
-    virtual bool event(Event* event);
-    virtual ~ObjectTypeDerived();
+    bool event(Event* event) override;
+    ~ObjectTypeDerived() override;
 };
 
 #endif // OBJECTTYPE_H

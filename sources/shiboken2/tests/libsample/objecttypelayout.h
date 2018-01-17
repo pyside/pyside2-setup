@@ -41,10 +41,10 @@ public:
     void addObject(ObjectType* obj);
     std::list<ObjectType*> objects() const;
 
-    virtual bool isLayoutType() { return true; }
+    bool isLayoutType() override { return true; }
     inline static ObjectTypeLayout* create() { return new ObjectTypeLayout(); }
 
-    virtual ObjectType* takeChild(const Str& name) { return ObjectType::takeChild(name); }
+    ObjectType* takeChild(const Str& name) override { return ObjectType::takeChild(name); }
 private:
     std::list<ObjectType*> m_objects;
 

@@ -84,7 +84,7 @@ public:
 
     static inline TemplateBase<CLASS_TYPE>* passPointerThrough(TemplateBase<CLASS_TYPE>* obj) { return obj; }
 
-    virtual ClassType type() const { return CLASS_TYPE; }
+    ClassType type() const override { return CLASS_TYPE; }
     static const ClassType staticType = CLASS_TYPE;
 };
 
